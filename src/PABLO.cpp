@@ -10,10 +10,13 @@
 #include <math.h> 
 #include "mpi.h" 
 #include <iostream>
+#include "Class_Octree.hpp"
+
 using namespace std;
  
 int main(int argc, char *argv[]) {
-	int n, rank, size, i;
+
+	/*int n, rank, size, i;
 	double PI25DT = 3.141592653589793238462643;
 	double mypi, pi, h, sum, x;
 
@@ -37,7 +40,14 @@ int main(int argc, char *argv[]) {
 		cout << "pi is approximately " << pi << ", Error is "
 				<< fabs(pi - PI25DT) << endl;
 
-	MPI::Finalize();
+	MPI::Finalize();*/
+
+	Class_Octant oct0;
+
+	cout << oct0.x << endl;
+	oct0.x = 0;
+	cout << oct0.x << endl;
+
 	return 0;
 }
 
