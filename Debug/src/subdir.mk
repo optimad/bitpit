@@ -4,12 +4,15 @@
 
 # Add inputs and outputs from these tool invocations to the build variables 
 CPP_SRCS += \
+../src/Class_Octree.cpp \
 ../src/PABLO.cpp 
 
 OBJS += \
+./src/Class_Octree.o \
 ./src/PABLO.o 
 
 CPP_DEPS += \
+./src/Class_Octree.d \
 ./src/PABLO.d 
 
 
