@@ -45,13 +45,6 @@ int main(int argc, char *argv[]) {
 	Class_Octant oct0(20);
 	int l = oct0.mylevel();
 	cout << l << endl;
-	cout << l << endl;
-	cout << l << endl;
-	cout << l << endl;
-	cout << l << endl;
-	cout << l << endl;
-	cout << l << endl;
-
 
 	return 0;
 }
