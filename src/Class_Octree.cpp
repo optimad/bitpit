@@ -26,8 +26,8 @@ Class_Octant::Class_Octant(const int8_t lev){
 // =================================================================================== //
 // METHODS                                                                        //
 // =================================================================================== //
-int Class_Octant::mylevel(){
+int Class_Octant::getlevel(){
 
 	return int(level);
 
-}
+};

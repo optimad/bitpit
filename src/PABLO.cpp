@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 	MPI::Finalize();*/
 
 	Class_Octant oct0(20);
-	int l = oct0.mylevel();
+	int l = oct0.getlevel();
 	cout << l << endl;
 	cout << l << endl;
 	cout << l << endl;
