@@ -48,6 +48,9 @@ int main(int argc, char *argv[]) {
 	cout << l << endl;
 	cout << l << endl;
 	cout << l << endl;
+	cout << l << endl;
+	cout << l << endl;
+	cout << l << endl;
 
 
 	return 0;
