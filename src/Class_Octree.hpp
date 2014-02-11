@@ -26,14 +26,18 @@ using namespace std;
 class Class_Octant{
 
 	// Members ======================================================================= //
-public:
+private:
 	int32_t x, y, z;
 	int8_t level;
 
 
 	// Constructors ------------------------------------------------------------------ //
+public:
 	Class_Octant();
 	Class_Octant(const int8_t lev);
+
+	// Methods ------------------------------------------------------------------ //
+	int mylevel();						// Give level of octant
 
 
 };//end Class_Octant;
