@@ -1,1 +1,4 @@
 /Debug
+/Release
+.cproject
+.project
