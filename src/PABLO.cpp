@@ -42,12 +42,24 @@ int main(int argc, char *argv[]) {
 
 	MPI::Finalize();*/
 
-	Class_Octant oct0(20);
+	uint8_t a = 10;
+	uint8_t x, y, z;
+	x = y = z = 0;
+	Class_Octant oct0(a,x,y,z);
 	int l = oct0.getlevel();
-	cout << l << endl;
-	cout << l << endl;
-	cout << l << endl;
-	cout << l << endl;
+	cout << "level oct0 : " << l << endl;
+
+	Class_Octant oct1(oct0);
+	l = oct1.getlevel();
+	cout << "level oct1 : " << l << endl;
+	int x1 = oct1.getx();
+	int y1 = oct1.gety();
+	int z1 = oct1.getz();
+	cout << "x oct1 : " << x1 << endl;
+	cout << "y oct1 : " << y1 << endl;
+	cout << "z oct1 : " << z1 << endl;
+	bool balance = oct1.getbalance();
+	cout << "balance oct1 : " << balance << endl;
 
 	return 0;
 }

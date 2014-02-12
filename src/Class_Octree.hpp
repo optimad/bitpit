@@ -12,6 +12,7 @@
 // INCLUDES                                                                            //
 // =================================================================================== //
 #include <stdint.h>
+#include <string.h>
 
 // =================================================================================== //
 // NAME SPACES                                                                         //
@@ -25,27 +26,61 @@ using namespace std;
 
 class Class_Octant{
 
-	// Members ======================================================================= //
+	// ------------------------------------------------------------------------------- //
+	// MEMBERS ----------------------------------------------------------------------- //
+
 private:
-	int32_t x, y, z;
-	int8_t level;
-	int8_t marker;
+	uint32_t x, y, z;			// Coordinates
+	uint8_t level;				// Refinement level (0=root)
+	int8_t marker;				// Set for Refinement(m>0) or Coarsening(m<0) |m|-times
+	bool info[16];				// Info[0..5] : true if 0..5 face is a boundary face [bound];
+								// Info[6..11]: true if 0..5 face is a process boundary face [pbound];
+								// Info[12/13]: true if octant is new after refinement/coarsening;
+								// Info[14]   : true if balancing is not required for this octant;
+								// Info[15]   : true if octant is ghost.
 
 
-	// Constructors ------------------------------------------------------------------ //
+	// ------------------------------------------------------------------------------- //
+	// CONSTRUCTORS ------------------------------------------------------------------ //
+
 public:
 	Class_Octant();
-	Class_Octant(const int8_t lev);
-
-	// Methods ------------------------------------------------------------------ //
-	int getlevel();						// Give level of octant
+	Class_Octant(int8_t level, int32_t x, int32_t y, int32_t z);
+	Class_Octant(Class_Octant & octant);
 
 
+	// ------------------------------------------------------------------------------- //
+	// METHODS ----------------------------------------------------------------------- //
 
+	// Get/Set methods --------------------------------------------------------------- //
 
+public:
+	uint32_t  getx() const;
+	uint32_t  gety() const;
+	uint32_t  getz() const;
+	uint8_t  getlevel() const;
+	int8_t   getmarker() const;
+	bool     getbound(uint8_t face) const;		// Get if face is boundary
+	bool     getpbound(uint8_t face) const;		// Get if face is process boundary
+	bool     getisnewR() const;					// Get if octant is new after refinement
+	bool     getisnewC() const;					// Get if octant is new after coarsening
+	bool     getbalance() const;				// Get if balancing-blocked octant
+	bool     getisghost() const;				// Get if octant is ghost
+
+	void     setmarker(int8_t marker);			// Set refinement/coarsening marker
+	void     setbalance(bool balance);			// Set if balancing-blocked octant
+
+private:
+	void     setlevel(uint8_t level);
+
+	//-------------------------------------------------------------------------------- //
+
+	// ------------------------------------------------------------------------------- //
 
 
 };//end Class_Octant;
+
+
 
 
 
