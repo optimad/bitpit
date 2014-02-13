@@ -1,2 +1,0 @@
-/usr/bin/ar cr libpablo.a  CMakeFiles/pablo.dir/Class_Octree.cpp.o CMakeFiles/pablo.dir/Class_Para_Tree.cpp.o
-/usr/bin/ranlib libpablo.a
