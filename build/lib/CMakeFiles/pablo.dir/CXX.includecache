@@ -1,0 +1,36 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../include/Class_Octree.hpp
+preprocessor_defines.dat
+../include/preprocessor_defines.dat
+math.h
+-
+stdint.h
+-
+string.h
+-
+
+../include/Class_Para_Tree.hpp
+preprocessor_defines.dat
+../include/preprocessor_defines.dat
+cstdint
+-
+
+../include/preprocessor_defines.dat
+
+/home/marco/workspace/PABLO/lib/Class_Octree.cpp
+Class_Octree.hpp
+/home/marco/workspace/PABLO/lib/Class_Octree.hpp
+
+/home/marco/workspace/PABLO/lib/Class_Para_Tree.cpp
+mpi.h
+/home/marco/workspace/PABLO/lib/mpi.h
+Class_Para_Tree.hpp
+/home/marco/workspace/PABLO/lib/Class_Para_Tree.hpp
+
