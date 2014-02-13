@@ -1,4 +1,3 @@
-/Debug
-/Release
-.cproject
-.project
+*.o
+*.d
+*.exe
