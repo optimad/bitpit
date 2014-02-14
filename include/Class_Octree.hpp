@@ -14,6 +14,7 @@
 #include "preprocessor_defines.dat"
 #include <math.h>
 #include <stdint.h>
+#include <vector>
 #include <string.h>
 
 
@@ -33,10 +34,10 @@ class Class_Octant{
 	// MEMBERS ----------------------------------------------------------------------- //
 
 private:
-	uint32_t x, y, z;			// Coordinates
-	uint8_t level;				// Refinement level (0=root)
-	int8_t marker;				// Set for Refinement(m>0) or Coarsening(m<0) |m|-times
-	bool info[16];				// Info[0..5] : true if 0..5 face is a boundary face [bound];
+	uint32_t  x, y, z;			// Coordinates
+	uint8_t   level;			// Refinement level (0=root)
+	int8_t    marker;			// Set for Refinement(m>0) or Coarsening(m<0) |m|-times
+	bool      info[16];			// Info[0..5] : true if 0..5 face is a boundary face [bound];
 								// Info[6..11]: true if 0..5 face is a process boundary face [pbound];
 								// Info[12/13]: true if octant is new after refinement/coarsening;
 								// Info[14]   : true if balancing is not required for this octant;
@@ -89,6 +90,55 @@ public:
 
 
 };//end Class_Octant;
+
+
+class Class_Local_Tree{
+
+	// ------------------------------------------------------------------------------- //
+	// MEMBERS ----------------------------------------------------------------------- //
+
+private:
+	vector<Class_Octant>  octants;			// Local vector of octants
+	vector<Class_Octant>  ghosts;			// Local vector of ghost octants
+	Class_Octant 		  first_desc;		// First (Zindex order) most refined octant possible in local partition
+	Class_Octant 		  last_desc;		// Last (Zindex order) most refined octant possible in local partition
+	uint32_t 			  sizeghosts;		// Size of vector of ghost octants
+
+	// ------------------------------------------------------------------------------- //
+	// CONSTRUCTORS ------------------------------------------------------------------ //
+
+public:
+//	Class_Local_Tree();
+//	~Class_Local_Tree();
+
+	// ------------------------------------------------------------------------------- //
+	// METHODS ----------------------------------------------------------------------- //
+
+	// Basic Get/Set methods --------------------------------------------------------- //
+
+public:
+	Class_Octant  getfirstdesc() const;
+	Class_Octant  getlastdesc() const;
+	uint32_t  	  getsizeghosts() const;
+
+private:
+
+	//-------------------------------------------------------------------------------- //
+	// Other Get/Set methods --------------------------------------------------------- //
+
+public:
+
+	//-------------------------------------------------------------------------------- //
+	// Other methods ----------------------------------------------------------------- //
+
+private:
+	void      insertoctant(Class_Octant & octant);
+	void      insertoctant(Class_Octant & octant, uint32_t index);
+
+	// ------------------------------------------------------------------------------- //
+
+
+};//end Class_Local_Tree;
 
 
 

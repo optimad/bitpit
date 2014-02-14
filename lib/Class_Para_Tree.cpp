@@ -5,7 +5,6 @@
  *      Author: Marco Cisternino
  */
 
-#include "mpi.h"
 #include "Class_Para_Tree.hpp"
 
 Class_Para_Tree::Class_Para_Tree() {

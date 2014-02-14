@@ -12,7 +12,10 @@
 // INCLUDES                                                                            //
 // =================================================================================== //
 #include "preprocessor_defines.dat"
+#include "Class_Octree.hpp"
 #include <cstdint>
+#include "mpi.h"
+
 
 // =================================================================================== //
 // NAME SPACES                                                                         //
@@ -33,8 +36,10 @@ public:
 	uint64_t global_num_octants;
 	int nproc;
 	uint8_t max_depth;
+
 	//distributed members
 	int rank;
+	Class_Local_Tree octree;
 
 	//auxiliary members
 	int error_flag;
