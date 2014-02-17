@@ -16,6 +16,7 @@ Class_Para_Tree::Class_Para_Tree() {
 	error_flag = MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 	partition_range_position = new uint64_t[nproc];
 	partition_range_globalidx = new uint64_t[nproc];
+
 }
 Class_Para_Tree::~Class_Para_Tree() {
 	// TODO Auto-generated destructor stub
