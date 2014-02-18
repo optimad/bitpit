@@ -16,6 +16,7 @@
 #include "Log_Funct.hpp"
 #include <vector>
 #include <string.h>
+#include "inlinedFunct.hpp"
 
 
 // =================================================================================== //
@@ -73,7 +74,7 @@ public:
 
 	void      setmarker(int8_t marker);			// Set refinement/coarsening marker
 	void      setbalance(bool balance);			// Set if balancing-blocked octant
-
+	uint64_t  computeMorton();					// Compute Morton index of the octant (without level)
 private:
 	void      setlevel(uint8_t level);
 

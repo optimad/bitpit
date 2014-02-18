@@ -39,9 +39,16 @@ void Class_Local_Tree::setbalance(int64_t idx, bool balance) {
 }
 
 //-------------------------------------------------------------------------------- //
+// Debug methods ----------------------------------------------------------------- //
+
+void Class_Local_Tree::addOctantToTree(Class_Octant octant){
+	octants.push_back(octant);
+}
+
+//-------------------------------------------------------------------------------- //
 // Other methods ----------------------------------------------------------------- //
 
-void Class_Local_Tree::Refine() {
+void Class_Local_Tree::refine() {
 
 
 

@@ -21,8 +21,9 @@ int main(int argc, char *argv[]) {
 	int num_octants = 11;
 	for(int i = 0; i < num_octants; ++i)
 	{
-		ptree.octree.octants.push_back(Class_Octant(0,0,0,0));
+		ptree.octree.addOctantToTree(Class_Octant(0,0,0,0));
 	}
+
 
 	MPI::Finalize();
 

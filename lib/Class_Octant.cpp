@@ -214,5 +214,10 @@ void Class_Octant::buildchildren(vector<Class_Octant>& children) {
 	}
 }
 
+uint64_t Class_Octant::computeMorton() {
+	uint64_t morton = 0;
+	morton = mortonEncode_magicbits(this->x,this->y,this->z);
+	return morton;
+}
 // =================================================================================== //
 

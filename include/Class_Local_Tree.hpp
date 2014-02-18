@@ -57,6 +57,10 @@ public:
 	void      setmarker(int64_t idx, int8_t marker);			// Set refinement/coarsening marker for idx-th octant
 	void      setbalance(int64_t idx, bool balance);			// Set if balancing-blocked idx-th octant
 
+	//-------------------------------------------------------------------------------- //
+	// Debug methods ----------------------------------------------------------------- //
+	void addOctantToTree(Class_Octant octant);
+
 private:
 
 	//-------------------------------------------------------------------------------- //
@@ -70,7 +74,7 @@ private:
 	// Other methods ----------------------------------------------------------------- //
 
 public:
-	void		Refine();
+	void		refine();
 
 private:
 
