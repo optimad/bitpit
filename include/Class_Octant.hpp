@@ -1,19 +1,18 @@
 /*
- * octree.hpp
+ * octant.hpp
  *
  *  Created on: Feb 10, 2014
  *      Author: Edoardo Lombardi
  */
 
-#ifndef OCTREE_HPP_
-#define OCTREE_HPP_
+#ifndef OCTANT_HPP_
+#define OCTANT_HPP_
 
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
 #include "preprocessor_defines.dat"
-#include <math.h>
-#include <stdint.h>
+#include "global.hpp"
 #include <vector>
 #include <string.h>
 
@@ -50,7 +49,7 @@ private:
 public:
 	Class_Octant();
 	Class_Octant(int8_t level, int32_t x, int32_t y, int32_t z);
-	Class_Octant(Class_Octant & octant);
+	Class_Octant(const Class_Octant &octant);
 
 
 	// ------------------------------------------------------------------------------- //
@@ -84,62 +83,20 @@ public:
 	uint32_t  getsize() const;					// Get the size of octant
 	uint32_t  getvolume() const;				// Get the volume of octant
 
+private:
 
+	//-------------------------------------------------------------------------------- //
+	// Other methods ----------------------------------------------------------------- //
+
+public:
+	void  buildchildren(vector<Class_Octant> & children);	// Builds children of octant and stores them in vector children[nchildren]
+
+private:
 
 	// ------------------------------------------------------------------------------- //
 
 
 };//end Class_Octant;
-
-
-class Class_Local_Tree{
-
-	// ------------------------------------------------------------------------------- //
-	// MEMBERS ----------------------------------------------------------------------- //
-
-private:
-	vector<Class_Octant>  octants;			// Local vector of octants
-	vector<Class_Octant>  ghosts;			// Local vector of ghost octants
-	Class_Octant 		  first_desc;		// First (Zindex order) most refined octant possible in local partition
-	Class_Octant 		  last_desc;		// Last (Zindex order) most refined octant possible in local partition
-	uint32_t 			  sizeghosts;		// Size of vector of ghost octants
-
-	// ------------------------------------------------------------------------------- //
-	// CONSTRUCTORS ------------------------------------------------------------------ //
-
-public:
-	Class_Local_Tree();
-	~Class_Local_Tree();
-
-	// ------------------------------------------------------------------------------- //
-	// METHODS ----------------------------------------------------------------------- //
-
-	// Basic Get/Set methods --------------------------------------------------------- //
-
-public:
-	Class_Octant  getfirstdesc() const;
-	Class_Octant  getlastdesc() const;
-	uint32_t  	  getsizeghosts() const;
-
-private:
-
-	//-------------------------------------------------------------------------------- //
-	// Other Get/Set methods --------------------------------------------------------- //
-
-public:
-
-	//-------------------------------------------------------------------------------- //
-	// Other methods ----------------------------------------------------------------- //
-
-private:
-	void      insertoctant(Class_Octant & octant);
-	void      insertoctant(Class_Octant & octant, uint32_t index);
-
-	// ------------------------------------------------------------------------------- //
-
-
-};//end Class_Local_Tree;
-
 
 
 

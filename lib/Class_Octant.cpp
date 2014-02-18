@@ -8,7 +8,7 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
-#include "Class_Octree.hpp"
+#include "Class_Octant.hpp"
 
 // =================================================================================== //
 // CONSTRUCTORS                                                                        //
@@ -31,7 +31,7 @@ Class_Octant::Class_Octant(int8_t level, int32_t x, int32_t y, int32_t z){
 	memcpy(info, dummy, 16);
 };
 
-Class_Octant::Class_Octant(Class_Octant & octant){
+Class_Octant::Class_Octant(const Class_Octant &octant){
 	x = octant.x;
 	y = octant.y;
 	z = octant.z;
@@ -118,4 +118,97 @@ uint32_t Class_Octant::getvolume() const {
 	return volume;
 }
 
+void Class_Octant::buildchildren(vector<Class_Octant>& children) {
+	extern uint8_t nchildren;
+	children.clear();
+	for (int i=0; i<nchildren; i++){
+		switch (i) {
+		case 0 :
+		{
+			Class_Octant oct(*this);
+			oct.setmarker(oct.marker-1);
+			oct.setlevel(oct.level+1);
+			children.push_back(oct);
+		}
+		break;
+		case 1 :
+		{
+			Class_Octant oct(*this);
+			oct.setmarker(oct.marker-1);
+			oct.setlevel(oct.level+1);
+			uint32_t dh = oct.getsize();
+			oct.x += dh;
+			children.push_back(oct);
+		}
+		break;
+		case 2 :
+		{
+			Class_Octant oct(*this);
+			oct.setmarker(oct.marker-1);
+			oct.setlevel(oct.level+1);
+			uint32_t dh = oct.getsize();
+			oct.y += dh;
+			children.push_back(oct);
+		}
+		break;
+		case 3 :
+		{
+			Class_Octant oct(*this);
+			oct.setmarker(oct.marker-1);
+			oct.setlevel(oct.level+1);
+			uint32_t dh = oct.getsize();
+			oct.x += dh;
+			oct.y += dh;
+			children.push_back(oct);
+		}
+		break;
+		case 4 :
+		{
+			Class_Octant oct(*this);
+			oct.setmarker(oct.marker-1);
+			oct.setlevel(oct.level+1);
+			uint32_t dh = oct.getsize();
+			oct.z += dh;
+			children.push_back(oct);
+		}
+		break;
+		case 5 :
+		{
+			Class_Octant oct(*this);
+			oct.setmarker(oct.marker-1);
+			oct.setlevel(oct.level+1);
+			uint32_t dh = oct.getsize();
+			oct.x += dh;
+			oct.z += dh;
+			children.push_back(oct);
+		}
+		break;
+		case 6 :
+		{
+			Class_Octant oct(*this);
+			oct.setmarker(oct.marker-1);
+			oct.setlevel(oct.level+1);
+			uint32_t dh = oct.getsize();
+			oct.y += dh;
+			oct.z += dh;
+			children.push_back(oct);
+		}
+		break;
+		case 7 :
+		{
+			Class_Octant oct(*this);
+			oct.setmarker(oct.marker-1);
+			oct.setlevel(oct.level+1);
+			uint32_t dh = oct.getsize();
+			oct.x += dh;
+			oct.y += dh;
+			oct.z += dh;
+			children.push_back(oct);
+		}
+		break;
+		}
+	}
+}
+
 // =================================================================================== //
+

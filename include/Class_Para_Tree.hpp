@@ -12,7 +12,8 @@
 // INCLUDES                                                                            //
 // =================================================================================== //
 #include "preprocessor_defines.dat"
-#include "Class_Octree.hpp"
+#include "Class_Octant.hpp"
+#include "Class_Local_Tree.hpp"
 #include <cstdint>
 #include "mpi.h"
 

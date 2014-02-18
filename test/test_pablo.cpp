@@ -11,7 +11,6 @@
 #include <math.h> 
 #include "mpi.h" 
 #include <iostream>
-#include "Class_Octree.hpp"
 #include "Class_Para_Tree.hpp"
 
 using namespace std;
@@ -28,6 +27,7 @@ int main(int argc, char *argv[]) {
 	Class_Octant oct1(oct0);
 	cout << oct0.getsize() << endl;
 	cout << oct1.getsize() << endl;
+	Class_Local_Tree tree;
 
 	MPI::Finalize();
 
