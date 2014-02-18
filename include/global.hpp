@@ -16,8 +16,8 @@
 // PARAMETERS DEFINITION                                                               //
 // =================================================================================== //
 
-extern uint8_t  nchildren;
-extern uint32_t maxlength;
+extern const uint8_t  nchildren;
+extern const uint32_t maxlength;
 
 
 

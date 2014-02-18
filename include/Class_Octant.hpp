@@ -13,6 +13,7 @@
 // =================================================================================== //
 #include "preprocessor_defines.dat"
 #include "global.hpp"
+#include "Log_Funct.hpp"
 #include <vector>
 #include <string.h>
 

@@ -20,14 +20,21 @@ int main(int argc, char *argv[]) {
 	MPI::Init(argc, argv);
 
 	Class_Para_Tree ptree;
-	uint8_t lev = 10;
+	uint8_t lev = 0;
 	uint32_t x, y, z;
 	x = y = z = 0;
 	Class_Octant oct0(lev,x,y,z);
-	Class_Octant oct1(oct0);
-	cout << oct0.getsize() << endl;
-	cout << oct1.getsize() << endl;
-	Class_Local_Tree tree;
+	vector<Class_Octant> child(8);
+	oct0.buildchildren(child);
+	for (int i=0; i<nchildren; i++){
+		cout << "----------" << endl;
+		cout << "ch : " << i << endl;
+		cout << "x : " << child[i].getx() << endl;
+		cout << "y : " << child[i].gety() << endl;
+		cout << "z : " << child[i].getz() << endl;
+		cout << "level : " << int(child[i].getlevel()) << endl;
+	}
+
 
 	MPI::Finalize();
 

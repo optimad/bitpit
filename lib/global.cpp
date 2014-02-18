@@ -11,7 +11,7 @@
 
 #include "global.hpp"
 
-uint8_t  nchildren = uint8_t(pow(2.0,DIM));
-uint32_t maxlength = uint8_t(pow(2.0,MAX_LEVEL));
+const uint8_t  nchildren = uint8_t(pow(2.0,DIM));
+const uint32_t maxlength = uint8_t(pow(2.0,MAX_LEVEL));
 
 
