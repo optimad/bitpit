@@ -20,6 +20,7 @@ int main(int argc, char *argv[]) {
 	MPI::Init(argc, argv);
 
 	Class_Para_Tree ptree;
+/*
 	uint8_t lev = 0;
 	uint32_t x, y, z;
 	x = y = z = 0;
@@ -34,7 +35,10 @@ int main(int argc, char *argv[]) {
 		cout << "z : " << child[i].getz() << endl;
 		cout << "level : " << int(child[i].getlevel()) << endl;
 	}
+*/
 
+	uint64_t numoctants = ptree.octree.getnumoctants();
+	ptree.octree.setmarker(1,0);
 
 	MPI::Finalize();
 

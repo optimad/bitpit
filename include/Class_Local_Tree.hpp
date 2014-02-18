@@ -52,6 +52,10 @@ public:
 	Class_Octant  getfirstdesc() const;
 	Class_Octant  getlastdesc() const;
 	uint32_t  	  getsizeghosts() const;
+	uint64_t  	  getnumoctants() const;
+
+	void      setmarker(int64_t idx, int8_t marker);			// Set refinement/coarsening marker for idx-th octant
+	void      setbalance(int64_t idx, bool balance);			// Set if balancing-blocked idx-th octant
 
 private:
 

@@ -24,10 +24,27 @@ Class_Local_Tree::~Class_Local_Tree() {
 	// TODO Auto-generated destructor stub
 }
 
+// Basic Get/Set methods --------------------------------------------------------- //
+
+uint64_t Class_Local_Tree::getnumoctants() const {
+	return octants.size();
+}
+
+void Class_Local_Tree::setmarker(int64_t idx, int8_t marker) {
+	octants[idx].setmarker(marker);
+}
+
+void Class_Local_Tree::setbalance(int64_t idx, bool balance) {
+	octants[idx].setbalance(balance);
+}
+
 //-------------------------------------------------------------------------------- //
 // Other methods ----------------------------------------------------------------- //
 
 void Class_Local_Tree::Refine() {
+
+
+
 
 
 }
