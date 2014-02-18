@@ -17,7 +17,7 @@
 // =================================================================================== //
 
 extern const uint8_t  nchildren;
-extern const uint32_t maxlength;
+extern const uint32_t max_length;
 
 
 

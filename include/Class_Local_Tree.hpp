@@ -34,7 +34,8 @@ private:
 	vector<Class_Octant>  ghosts;			// Local vector of ghost octants
 	Class_Octant 		  first_desc;		// First (Zindex order) most refined octant possible in local partition
 	Class_Octant 		  last_desc;		// Last (Zindex order) most refined octant possible in local partition
-	uint32_t 			  sizeghosts;		// Size of vector of ghost octants
+	uint32_t 			  size_ghosts;		// Size of vector of ghost octants
+	uint8_t				  local_max_depth;  // Reached max depth in local tree
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
@@ -49,13 +50,16 @@ public:
 	// Basic Get/Set methods --------------------------------------------------------- //
 
 public:
-	Class_Octant  getfirstdesc() const;
-	Class_Octant  getlastdesc() const;
-	uint32_t  	  getsizeghosts() const;
-	uint64_t  	  getnumoctants() const;
+	Class_Octant  getFirstDesc() const;
+	Class_Octant  getLastDesc() const;
+	uint32_t  	  getSizeGhost() const;
+	uint64_t  	  getNumOctants() const;
+	uint8_t       getLocalMaxDepth() const;						// Get max depth reached in local tree
+	uint8_t       getMarker(int64_t idx);						// Get refinement/coarsening marker for idx-th octant
+	bool          getBalance(int64_t idx);						// Get if balancing-blocked idx-th octant
 
-	void      setmarker(int64_t idx, int8_t marker);			// Set refinement/coarsening marker for idx-th octant
-	void      setbalance(int64_t idx, bool balance);			// Set if balancing-blocked idx-th octant
+	void      setMarker(int64_t idx, int8_t marker);			// Set refinement/coarsening marker for idx-th octant
+	void      setBalance(int64_t idx, bool balance);			// Set if balancing-blocked idx-th octant
 
 private:
 
@@ -70,7 +74,7 @@ private:
 	// Other methods ----------------------------------------------------------------- //
 
 public:
-	void		Refine();
+	void		refine();
 
 private:
 
