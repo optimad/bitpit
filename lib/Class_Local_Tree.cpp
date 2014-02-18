@@ -16,7 +16,7 @@ Class_Local_Tree::Class_Local_Tree() {
 	octants[0] = oct0;
 	first_desc = octf;
 	last_desc = octl;
-
+	sizeghosts = 0;
 
 }
 
