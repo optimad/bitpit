@@ -37,8 +37,15 @@ int main(int argc, char *argv[]) {
 	}
 */
 
-	uint64_t numoctants = ptree.octree.getnumoctants();
-	ptree.octree.setmarker(1,0);
+	uint64_t numoctants = ptree.octree.getNumOctants();
+	ptree.octree.setMarker(0,true);
+	ptree.octree.refine();
+	cout << ptree.octree.getNumOctants() << endl;
+	cout << int(ptree.octree.getLocalMaxDepth()) << endl;
+	ptree.octree.setMarker(5,true);
+	ptree.octree.refine();
+	cout << ptree.octree.getNumOctants() << endl;
+	cout << int(ptree.octree.getLocalMaxDepth()) << endl;
 
 	MPI::Finalize();
 

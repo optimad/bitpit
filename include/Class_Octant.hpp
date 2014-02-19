@@ -30,6 +30,9 @@ using namespace std;
 // =================================================================================== //
 
 class Class_Octant{
+	// ------------------------------------------------------------------------------- //
+	// FRIENDSHIPS ------------------------------------------------------------------- //
+	friend class CLass_Local_Tree;
 
 	// ------------------------------------------------------------------------------- //
 	// MEMBERS ----------------------------------------------------------------------- //
@@ -60,30 +63,30 @@ public:
 	// Basic Get/Set methods --------------------------------------------------------- //
 
 public:
-	uint32_t  getx() const;
-	uint32_t  gety() const;
-	uint32_t  getz() const;
-	uint8_t   getlevel() const;
-	int8_t    getmarker() const;
-	bool      getbound(uint8_t face) const;		// Get if face is boundary
-	bool      getpbound(uint8_t face) const;	// Get if face is process boundary
-	bool      getisnewR() const;				// Get if octant is new after refinement
-	bool      getisnewC() const;				// Get if octant is new after coarsening
-	bool      getbalance() const;				// Get if balancing-blocked octant
-	bool      getisghost() const;				// For ghostbusters : get if octant is a ghost
+	uint32_t  getX() const;
+	uint32_t  getY() const;
+	uint32_t  getZ() const;
+	uint8_t   getLevel() const;
+	int8_t    getMarker() const;
+	bool      getBound(uint8_t face) const;		// Get if face is boundary
+	bool      getPbound(uint8_t face) const;	// Get if face is process boundary
+	bool      getIsNewR() const;				// Get if octant is new after refinement
+	bool      getIsNewC() const;				// Get if octant is new after coarsening
+	bool      getBalance() const;				// Get if balancing-blocked octant
+	bool      getIsGhost() const;				// For ghostbusters : get if octant is a ghost
 
-	void      setmarker(int8_t marker);			// Set refinement/coarsening marker
-	void      setbalance(bool balance);			// Set if balancing-blocked octant
+	void      setMarker(int8_t marker);			// Set refinement/coarsening marker
+	void      setBalance(bool balance);			// Set if balancing-blocked octant
 	uint64_t  computeMorton();					// Compute Morton index of the octant (without level)
 private:
-	void      setlevel(uint8_t level);
+	void      setLevel(uint8_t level);
 
 	//-------------------------------------------------------------------------------- //
 	// Other Get/Set methods --------------------------------------------------------- //
 
 public:
-	uint32_t  getsize() const;					// Get the size of octant
-	uint32_t  getvolume() const;				// Get the volume of octant
+	uint32_t  getSize() const;					// Get the size of octant
+	uint32_t  getVolume() const;				// Get the volume of octant
 
 private:
 
@@ -91,7 +94,7 @@ private:
 	// Other methods ----------------------------------------------------------------- //
 
 public:
-	void  buildchildren(vector<Class_Octant> & children);	// Builds children of octant and stores them in vector children[nchildren]
+	void  buildChildren(vector<Class_Octant> & children);	// Builds children of octant and stores them in vector children[nchildren]
 
 private:
 
