@@ -20,9 +20,9 @@ int main(int argc, char *argv[]) {
 	Class_Para_Tree ptree;
 	int num_octants = 11;
 	for(int i = 0; i < num_octants; ++i)
-/*	{
+	{
 		ptree.octree.addOctantToTree(Class_Octant(0,0,0,0));
-	}*/
+	}
 
 
 	MPI::Finalize();
