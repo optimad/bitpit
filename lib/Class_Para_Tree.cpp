@@ -11,7 +11,7 @@ Class_Para_Tree::Class_Para_Tree() {
 	serial = true;
 	error_flag = 0;
 	max_depth = 0;
-	global_num_octants = octree.getnumoctants();
+	global_num_octants = octree.getNumOctants();
 	error_flag = MPI_Comm_size(MPI_COMM_WORLD,&nproc);
 	error_flag = MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 	partition_range_position = new uint64_t[nproc];
