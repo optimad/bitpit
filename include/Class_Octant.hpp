@@ -78,6 +78,7 @@ public:
 	void      setMarker(int8_t marker);			// Set refinement/coarsening marker
 	void      setBalance(bool balance);			// Set if balancing-blocked octant
 	uint64_t  computeMorton();					// Compute Morton index of the octant (without level)
+
 private:
 	void      setLevel(uint8_t level);
 
@@ -94,7 +95,9 @@ private:
 	// Other methods ----------------------------------------------------------------- //
 
 public:
-	void  buildChildren(vector<Class_Octant> & children);	// Builds children of octant and stores them in vector children[nchildren]
+	Class_Octant*  buildChildren();						// Builds children of octant and return a pointer to an ordered array children[nchildren]
+	uint64_t*  computeHalfSizeMorton(uint8_t iface, 	// Compute Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
+									 uint8_t & sizehf);	// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
 
 private:
 

@@ -78,7 +78,8 @@ private:
 	// Other methods ----------------------------------------------------------------- //
 
 public:
-	void		refine();
+	Class_Octant	extractOctant(uint64_t idx) const;
+	void			refine();							// Refine local tree: refine one time octants with marker >0
 
 private:
 
