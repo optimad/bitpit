@@ -32,7 +32,7 @@ class Class_Para_Tree {
 	// MEMBERS ----------------------------------------------------------------------- //
 public:
 	//undistributed members
-	uint64_t* partition_range_position; //global array containing position of the last existing octant in each processor
+	uint64_t* partition_last_desc; //global array containing position of the last existing octant in each processor
 	uint64_t* partition_range_globalidx; //global array containing global index of the last existing octant in each processor
 	uint64_t global_num_octants; // global number of octants in the parallel octree
 	int nproc;
@@ -57,7 +57,9 @@ public:
 	// METHODS ----------------------------------------------------------------------- //
 	void loadBalance();
 	void refine();
-	void update();
+	void updateRefine();
+	void updateLoadBalance();
+	void computePartition(uint64_t* partition);
 };
 
 #endif /* CLASS_PARA_TREE_H_ */

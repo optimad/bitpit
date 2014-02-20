@@ -59,6 +59,21 @@ void Class_Local_Tree::addOctantToTree(Class_Octant octant){
 	octants.push_back(octant);
 }
 
+Class_Octant Class_Local_Tree::getFirstDesc() const {
+	OctantsType::const_iterator firstOctant = octants.begin();
+	return Class_Octant(MAX_LEVEL,firstOctant->x,firstOctant->y,firstOctant->z);
+}
+
+Class_Octant Class_Local_Tree::getLastDesc() const {
+	OctantsType::const_iterator lastOctant = octants.end() - 1;
+	uint32_t x,y,z,delta;
+	delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL - lastOctant->level)) - 1;
+	x = lastOctant->x + delta;
+	y = lastOctant->y + delta;
+	z = lastOctant->z + delta;
+	return Class_Octant(MAX_LEVEL,x,y,z);
+}
+
 //-------------------------------------------------------------------------------- //
 // Other methods ----------------------------------------------------------------- //
 
