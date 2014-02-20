@@ -1,2 +1,0 @@
-SET(pablo_src *.cpp)
-add_library(pablo ${pablo_src})
