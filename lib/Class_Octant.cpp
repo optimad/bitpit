@@ -126,6 +126,27 @@ uint32_t Class_Octant::getVolume() const {
 	return volume;
 }
 
+
+uint32_t (*Class_Octant::getNodes())[DIM] {
+	uint8_t		i, cx, cy, cz;
+	uint32_t	dh;
+
+	dh = getSize();
+	uint32_t (*nodes)[DIM] = new uint32_t[nnodes][DIM];
+
+	for (i = 0; i < nnodes; i++){
+		cx = uint8_t(i%2);
+		cy = uint8_t((i-4*(i/4))/2);
+		cz = uint8_t(i/4);
+		nodes[i][0] = x + cx*dh;
+		nodes[i][1] = y + cy*dh;
+		if (DIM ==3){
+			nodes[i][2] = z + cz*dh;
+		}
+	}
+	return nodes;
+}
+
 // =================================================================================== //
 // Other methods													    			   //
 // =================================================================================== //
@@ -143,6 +164,7 @@ Class_Octant* Class_Octant::buildChildren() {
 				Class_Octant oct(*this);
 				oct.setMarker(max(0,oct.marker-1));
 				oct.setLevel(oct.level+1);
+				oct.info[12]=true;
 				// Update interior face bound and pbound
 				xf=1; yf=3; zf=5;
 				oct.info[xf] = oct.info[xf+6] = false;
@@ -156,6 +178,7 @@ Class_Octant* Class_Octant::buildChildren() {
 				Class_Octant oct(*this);
 				oct.setMarker(max(0,oct.marker-1));
 				oct.setLevel(oct.level+1);
+				oct.info[12]=true;
 				uint32_t dh = oct.getSize();
 				oct.x += dh;
 				// Update interior face bound and pbound
@@ -171,6 +194,7 @@ Class_Octant* Class_Octant::buildChildren() {
 				Class_Octant oct(*this);
 				oct.setMarker(max(0,oct.marker-1));
 				oct.setLevel(oct.level+1);
+				oct.info[12]=true;
 				uint32_t dh = oct.getSize();
 				oct.y += dh;
 				// Update interior face bound and pbound
@@ -186,6 +210,7 @@ Class_Octant* Class_Octant::buildChildren() {
 				Class_Octant oct(*this);
 				oct.setMarker(max(0,oct.marker-1));
 				oct.setLevel(oct.level+1);
+				oct.info[12]=true;
 				uint32_t dh = oct.getSize();
 				oct.x += dh;
 				oct.y += dh;
@@ -202,6 +227,7 @@ Class_Octant* Class_Octant::buildChildren() {
 				Class_Octant oct(*this);
 				oct.setMarker(max(0,oct.marker-1));
 				oct.setLevel(oct.level+1);
+				oct.info[12]=true;
 				uint32_t dh = oct.getSize();
 				oct.z += dh;
 				// Update interior face bound and pbound
@@ -217,6 +243,7 @@ Class_Octant* Class_Octant::buildChildren() {
 				Class_Octant oct(*this);
 				oct.setMarker(max(0,oct.marker-1));
 				oct.setLevel(oct.level+1);
+				oct.info[12]=true;
 				uint32_t dh = oct.getSize();
 				oct.x += dh;
 				oct.z += dh;
@@ -233,6 +260,7 @@ Class_Octant* Class_Octant::buildChildren() {
 				Class_Octant oct(*this);
 				oct.setMarker(max(0,oct.marker-1));
 				oct.setLevel(oct.level+1);
+				oct.info[12]=true;
 				uint32_t dh = oct.getSize();
 				oct.y += dh;
 				oct.z += dh;
@@ -249,6 +277,7 @@ Class_Octant* Class_Octant::buildChildren() {
 				Class_Octant oct(*this);
 				oct.setMarker(max(0,oct.marker-1));
 				oct.setLevel(oct.level+1);
+				oct.info[12]=true;
 				uint32_t dh = oct.getSize();
 				oct.x += dh;
 				oct.y += dh;
@@ -360,5 +389,6 @@ uint64_t* Class_Octant::computeHalfSizeMorton(uint8_t iface, uint8_t & sizehf) {
 	}
 
 }
+
 // =================================================================================== //
 

@@ -22,21 +22,10 @@ int main(int argc, char *argv[]) {
 	Class_Para_Tree ptree;
 
 
-	ptree.octree.setMarker(0,2);
+	ptree.octree.setMarker(0,1);
 	cout << "Bound 0-face : " << ptree.octree.extractOctant(0).getBound(0) << endl;
 	ptree.octree.refine();
 	ptree.octree.setMarker(5,1);
-	ptree.octree.refine();
-	ptree.octree.setMarker(6,2);
-	ptree.octree.refine();
-	ptree.octree.setMarker(6,1);
-	ptree.octree.refine();
-	ptree.octree.setMarker(6,1);
-	ptree.octree.refine();
-	ptree.octree.setMarker(6,1);
-	ptree.octree.refine();
-	ptree.octree.setMarker(6,2);
-	ptree.octree.refine();
 	ptree.octree.refine();
 
 	Class_Octant oct_test;
@@ -48,9 +37,23 @@ int main(int argc, char *argv[]) {
 			cout << "Morton half-size idx=6 iface " << i << " : " << hfneigh[j] << endl;
 		}
 	}
-
+	uint32_t (*nodes)[DIM] = oct_test.getNodes();
+	for(int i=0; i<nnodes; i++){
+		for (int j=0; j<DIM; j++){
+			cout << "node " << i << "  coord " << j << " : " << nodes[i][j] << endl;
+		}
+	}
 	uint64_t numoctants = ptree.octree.getNumOctants();
 	cout << "Num Octants : " << numoctants << endl;
+	ptree.octree.computeConnectivity();
+	for (int i=0; i<ptree.octree.nodes.size(); i++){
+		cout << " x " << ptree.octree.nodes[i][0] << "  y " << ptree.octree.nodes[i][1] << "  z " << ptree.octree.nodes[i][2] << " morton " << mortonEncode_magicbits(ptree.octree.nodes[i][0], ptree.octree.nodes[i][1], ptree.octree.nodes[i][2]) << endl;
+	}
+	for (int i=0; i<numoctants; i++){
+		cout << ptree.octree.connectivity[i][0] << endl;
+	}
+
+	ptree.octree.clearConnectivity();
 
 	MPI::Finalize();
 

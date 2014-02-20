@@ -63,31 +63,32 @@ public:
 	// Basic Get/Set methods --------------------------------------------------------- //
 
 public:
-	uint32_t  getX() const;
-	uint32_t  getY() const;
-	uint32_t  getZ() const;
-	uint8_t   getLevel() const;
-	int8_t    getMarker() const;
-	bool      getBound(uint8_t face) const;		// Get if face is boundary
-	bool      getPbound(uint8_t face) const;	// Get if face is process boundary
-	bool      getIsNewR() const;				// Get if octant is new after refinement
-	bool      getIsNewC() const;				// Get if octant is new after coarsening
-	bool      getBalance() const;				// Get if balancing-blocked octant
-	bool      getIsGhost() const;				// For ghostbusters : get if octant is a ghost
+	uint32_t	getX() const;
+	uint32_t	getY() const;
+	uint32_t	getZ() const;
+	uint8_t		getLevel() const;
+	int8_t		getMarker() const;
+	bool		getBound(uint8_t face) const;		// Get if face is boundary
+	bool		getPbound(uint8_t face) const;	// Get if face is process boundary
+	bool		getIsNewR() const;				// Get if octant is new after refinement
+	bool		getIsNewC() const;				// Get if octant is new after coarsening
+	bool		getBalance() const;				// Get if balancing-blocked octant
+	bool		getIsGhost() const;				// For ghostbusters : get if octant is a ghost
 
-	void      setMarker(int8_t marker);			// Set refinement/coarsening marker
-	void      setBalance(bool balance);			// Set if balancing-blocked octant
-	uint64_t  computeMorton();					// Compute Morton index of the octant (without level)
+	void		setMarker(int8_t marker);			// Set refinement/coarsening marker
+	void		setBalance(bool balance);			// Set if balancing-blocked octant
 
 private:
-	void      setLevel(uint8_t level);
+	void		setLevel(uint8_t level);
 
 	//-------------------------------------------------------------------------------- //
 	// Other Get/Set methods --------------------------------------------------------- //
 
 public:
-	uint32_t  getSize() const;					// Get the size of octant
-	uint32_t  getVolume() const;				// Get the volume of octant
+	uint32_t	getSize() const;					// Get the size of octant
+	uint32_t	getVolume() const;					// Get the volume of octant
+	uint32_t	(*getNodes())[DIM];					// Get a pointer to the array (size [nnodes][3]) with the nodes of octant
+	uint64_t	computeMorton();					// Compute Morton index of the octant (without level)
 
 private:
 
@@ -95,9 +96,9 @@ private:
 	// Other methods ----------------------------------------------------------------- //
 
 public:
-	Class_Octant*  buildChildren();						// Builds children of octant and return a pointer to an ordered array children[nchildren]
-	uint64_t*  computeHalfSizeMorton(uint8_t iface, 	// Compute Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
-									 uint8_t & sizehf);	// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
+	Class_Octant*	buildChildren();							// Builds children of octant and return a pointer to an ordered array children[nchildren]
+	uint64_t* 		computeHalfSizeMorton(uint8_t iface, 		// Compute Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
+										  uint8_t & sizehf);	// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
 
 private:
 

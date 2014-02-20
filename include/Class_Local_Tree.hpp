@@ -17,6 +17,8 @@
 #include <stdint.h>
 #include <vector>
 #include <string.h>
+#include <map>
+#include <iostream>
 
 
 // =================================================================================== //
@@ -30,12 +32,16 @@ class Class_Local_Tree{
 	// MEMBERS ----------------------------------------------------------------------- //
 
 private:
-	vector<Class_Octant>  octants;			// Local vector of octants ordered with Morton Number
-	vector<Class_Octant>  ghosts;			// Local vector of ghost octants ordered with Morton Number
-	Class_Octant 		  first_desc;		// First (Morton order) most refined octant possible in local partition
-	Class_Octant 		  last_desc;		// Last (Morton order) most refined octant possible in local partition
-	uint32_t 			  size_ghosts;		// Size of vector of ghost octants
-	uint8_t				  local_max_depth;  // Reached max depth in local tree
+	vector<Class_Octant>		octants;			// Local vector of octants ordered with Morton Number
+	vector<Class_Octant>		ghosts;				// Local vector of ghost octants ordered with Morton Number
+	Class_Octant 				first_desc;			// First (Morton order) most refined octant possible in local partition
+	Class_Octant 				last_desc;			// Last (Morton order) most refined octant possible in local partition
+	uint32_t 					size_ghosts;		// Size of vector of ghost octants
+	uint8_t						local_max_depth;	// Reached max depth in local tree
+public:
+	vector<vector<uint32_t>	>	nodes;				// Local vector of nodes (x,y,z) ordered with Morton Number
+	vector<vector<uint64_t>	>	connectivity;		// Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
+													//The nodes are stored as index of vector nodes
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
@@ -78,8 +84,10 @@ private:
 	// Other methods ----------------------------------------------------------------- //
 
 public:
-	Class_Octant	extractOctant(uint64_t idx) const;
+	Class_Octant&	extractOctant(uint64_t idx);
 	void			refine();							// Refine local tree: refine one time octants with marker >0
+	void			computeConnectivity();				// Computes nodes vector and connectivity of octants of local tree
+	void			clearConnectivity();				// Clear nodes vector and connectivity of octants of local tree
 
 private:
 

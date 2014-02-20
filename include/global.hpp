@@ -18,6 +18,7 @@
 
 extern const uint8_t  nchildren;
 extern const uint8_t  nface;
+extern const uint8_t  nnodes;
 extern const uint32_t max_length;
 
 
