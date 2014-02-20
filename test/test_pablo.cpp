@@ -20,32 +20,40 @@ int main(int argc, char *argv[]) {
 	MPI::Init(argc, argv);
 
 	Class_Para_Tree ptree;
-/*
-	uint8_t lev = 0;
-	uint32_t x, y, z;
-	x = y = z = 0;
-	Class_Octant oct0(lev,x,y,z);
-	vector<Class_Octant> child(8);
-	oct0.buildchildren(child);
-	for (int i=0; i<nchildren; i++){
-		cout << "----------" << endl;
-		cout << "ch : " << i << endl;
-		cout << "x : " << child[i].getx() << endl;
-		cout << "y : " << child[i].gety() << endl;
-		cout << "z : " << child[i].getz() << endl;
-		cout << "level : " << int(child[i].getlevel()) << endl;
-	}
-*/
 
+
+	ptree.octree.setMarker(0,1);
+	cout << "Bound 0-face : " << ptree.octree.extractOctant(0).getBound(0) << endl;
+	ptree.octree.refine();
+	ptree.octree.setMarker(5,1);
+	ptree.octree.refine();
+
+	Class_Octant oct_test;
+	uint8_t sizehf=0;
+	for (int i=0; i<nface; i++){
+		oct_test =	ptree.octree.extractOctant(6);
+		uint64_t *hfneigh = oct_test.computeHalfSizeMorton(i,sizehf);
+		for (int j=0; j<sizehf; j++){
+			cout << "Morton half-size idx=6 iface " << i << " : " << hfneigh[j] << endl;
+		}
+	}
+	uint32_t (*nodes)[DIM] = oct_test.getNodes();
+	for(int i=0; i<nnodes; i++){
+		for (int j=0; j<DIM; j++){
+			cout << "node " << i << "  coord " << j << " : " << nodes[i][j] << endl;
+		}
+	}
 	uint64_t numoctants = ptree.octree.getNumOctants();
-	ptree.octree.setMarker(0,true);
-	ptree.octree.refine();
-	cout << ptree.octree.getNumOctants() << endl;
-	cout << int(ptree.octree.getLocalMaxDepth()) << endl;
-	ptree.octree.setMarker(5,true);
-	ptree.octree.refine();
-	cout << ptree.octree.getNumOctants() << endl;
-	cout << int(ptree.octree.getLocalMaxDepth()) << endl;
+	cout << "Num Octants : " << numoctants << endl;
+	ptree.octree.computeConnectivity();
+	for (int i=0; i<ptree.octree.nodes.size(); i++){
+		cout << " x " << ptree.octree.nodes[i][0] << "  y " << ptree.octree.nodes[i][1] << "  z " << ptree.octree.nodes[i][2] << " morton " << mortonEncode_magicbits(ptree.octree.nodes[i][0], ptree.octree.nodes[i][1], ptree.octree.nodes[i][2]) << endl;
+	}
+	for (int i=0; i<numoctants; i++){
+		cout << ptree.octree.connectivity[i][0] << endl;
+	}
+
+	ptree.octree.clearConnectivity();
 
 	MPI::Finalize();
 
