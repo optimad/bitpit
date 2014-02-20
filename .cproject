@@ -39,13 +39,8 @@
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.341702068" languageId="org.eclipse.cdt.core.parser.upc.upc" languageName="UPC" sourceContentType="org.eclipse.cdt.core.parser.upc.upcSource" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
 							</tool>
 							<tool id="org.eclipse.cdt.build.core.settings.holder.1147166135" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
-<<<<<<< HEAD
 								<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.58585680" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths"/>
 								<option id="org.eclipse.cdt.build.core.settings.holder.symbols.106901676" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
-=======
-								<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.58585680" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath"/>
-								<option id="org.eclipse.cdt.build.core.settings.holder.symbols.106901676" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
->>>>>>> parent of 0f247a3... Delete .cproject
 									<listOptionValue builtIn="false" value="__GXX_EXPERIMENTAL_CXX0X__"/>
 								</option>
 								<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.1426215583" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
