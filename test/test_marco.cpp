@@ -18,11 +18,10 @@ int main(int argc, char *argv[]) {
 	MPI::Init(argc, argv);
 
 	Class_Para_Tree ptree;
-	int num_octants = 11;
-	for(int i = 0; i < num_octants; ++i)
-	{
-		ptree.octree.addOctantToTree(Class_Octant(0,0,0,0));
-	}
+	ptree.octree.setMarker(0,1);
+	cout << "Bound 0-face : " << ptree.octree.extractOctant(0).getBound(0) << endl;
+	ptree.octree.refine();
+	ptree.updateRefine();
 
 
 	MPI::Finalize();
