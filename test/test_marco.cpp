@@ -18,11 +18,19 @@ int main(int argc, char *argv[]) {
 	MPI::Init(argc, argv);
 
 	Class_Para_Tree ptree;
+
 	ptree.octree.setMarker(0,1);
-	cout << "Bound 0-face : " << ptree.octree.extractOctant(0).getBound(0) << endl;
 	ptree.octree.refine();
 	ptree.updateRefine();
+	cout << "I'm " << ptree.rank << " and max_depth is " << (int)ptree.max_depth << endl;
+	cout << "I'm " << ptree.rank << " and global_num_octants is " << ptree.global_num_octants << endl;
+	cout << "I'm " << ptree.rank << " and partition_range_globalidx";
+	for(int i = 0; i < ptree.nproc; ++i)
+		cout << " " << ptree.partition_range_globalidx[i];
+	cout << endl;
 
+	ptree.loadBalance();
+	ptree.updateLoadBalance();
 
 	MPI::Finalize();
 

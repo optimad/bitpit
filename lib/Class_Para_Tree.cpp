@@ -44,6 +44,7 @@ void Class_Para_Tree::computePartition(uint64_t* partition) {
 }
 
 void Class_Para_Tree::updateLoadBalance() {
+	octree.updateLocalMaxDepth();
 	//update partition_range_globalidx
 	int rbuff [nproc];
 	uint64_t local_num_octants = octree.getNumOctants();
@@ -71,9 +72,12 @@ void Class_Para_Tree::loadBalance(){
 		Class_Local_Tree::OctantsType::const_iterator last = first + partition[rank] - 1;
 		octree.octants.assign(first, last);
 		octree.octants.shrink_to_fit();
+		first = octree.octants.end();
+		last = octree.octants.end();
 	}
 	else
-	{}
+	{
+	}
 	delete [] partition;
 	serial = false;
 }
