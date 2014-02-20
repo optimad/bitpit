@@ -34,23 +34,25 @@ class Class_Local_Tree{
 	// ------------------------------------------------------------------------------- //
 	// TYPEDEFS ----------------------------------------------------------------------- //
 public:
-	typedef vector<Class_Octant> OctantsType;
+	typedef vector<Class_Octant> 		OctantsType;
+	typedef vector<vector<uint32_t>	>	u32vector2D;
+	typedef vector<vector<uint64_t>	>	u64vector2D;
 
 
 	// ------------------------------------------------------------------------------- //
 	// MEMBERS ----------------------------------------------------------------------- //
 
 private:
-	vector<Class_Octant>		octants;			// Local vector of octants ordered with Morton Number
-	vector<Class_Octant>		ghosts;				// Local vector of ghost octants ordered with Morton Number
+	OctantsType					octants;			// Local vector of octants ordered with Morton Number
+	OctantsType					ghosts;				// Local vector of ghost octants ordered with Morton Number
 	Class_Octant 				first_desc;			// First (Morton order) most refined octant possible in local partition
 	Class_Octant 				last_desc;			// Last (Morton order) most refined octant possible in local partition
 	uint32_t 					size_ghosts;		// Size of vector of ghost octants
 	uint8_t						local_max_depth;	// Reached max depth in local tree
 public:
-	vector<vector<uint32_t>	>	nodes;				// Local vector of nodes (x,y,z) ordered with Morton Number
-	vector<vector<uint64_t>	>	connectivity;		// Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
-													//The nodes are stored as index of vector nodes
+	u32vector2D					nodes;				// Local vector of nodes (x,y,z) ordered with Morton Number
+	u64vector2D					connectivity;		// Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
+													// The nodes are stored as index of vector nodes
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //

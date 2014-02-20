@@ -157,9 +157,9 @@ void Class_Local_Tree::computeConnectivity() {
 		iterend	= mapnodes.end();
 		counter = 0;
 		while (iter != iterend){
-			vector<uint32_t> nodecasting(iter->second.begin(), iter->second.begin()+3);
+			vector<uint32_t> nodecasting(iter->second.begin(), iter->second.begin()+DIM);
 			nodes.push_back(nodecasting);
-			for(vector<uint64_t>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
+			for(vector<uint64_t>::iterator iter2 = iter->second.begin()+DIM; iter2 != iter->second.end(); iter2++){
 				connectivity[(*iter2)].push_back(counter);
 			}
 			mapnodes.erase(iter++);
@@ -172,8 +172,8 @@ void Class_Local_Tree::computeConnectivity() {
 }
 
 void Class_Local_Tree::clearConnectivity() {
-	vector<vector<uint32_t> >().swap(nodes);
-	vector<vector<uint64_t> >().swap(connectivity);
+	u32vector2D().swap(nodes);
+	u64vector2D().swap(connectivity);
 }
 
 //-------------------------------------------------------------------------------- //
