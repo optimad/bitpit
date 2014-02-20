@@ -12,7 +12,11 @@
 // INCLUDES                                                                            //
 // =================================================================================== //
 #include "preprocessor_defines.dat"
+#include "Class_Octant.hpp"
+#include "Class_Local_Tree.hpp"
 #include <cstdint>
+#include "mpi.h"
+
 
 // =================================================================================== //
 // NAME SPACES                                                                         //
@@ -28,16 +32,19 @@ class Class_Para_Tree {
 	// MEMBERS ----------------------------------------------------------------------- //
 public:
 	//undistributed members
-	uint64_t* partition_range_position;
-	uint64_t* partition_range_globalidx;
-	uint64_t global_num_octants;
+	uint64_t* partition_last_desc; //global array containing position of the last existing octant in each processor
+	uint64_t* partition_range_globalidx; //global array containing global index of the last existing octant in each processor
+	uint64_t global_num_octants; // global number of octants in the parallel octree
 	int nproc;
-	uint8_t max_depth;
+	uint8_t max_depth;						// global max existing level in the parallel octree
+
 	//distributed members
 	int rank;
+	Class_Local_Tree octree;				// local tree in each processor
 
 	//auxiliary members
-	int error_flag;
+	int error_flag;							// MPI error flag
+	bool serial;							// 1 if the octree is the same on each processor, 0 if the octree is distributed
 
 
 
@@ -48,6 +55,11 @@ public:
 	~Class_Para_Tree();
 	// ------------------------------------------------------------------------------- //
 	// METHODS ----------------------------------------------------------------------- //
+	void loadBalance();
+	void refine();
+	void updateRefine();
+	void updateLoadBalance();
+	void computePartition(uint64_t* partition);
 };
 
 #endif /* CLASS_PARA_TREE_H_ */
