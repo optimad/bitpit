@@ -97,6 +97,7 @@ public:
 	void			refine();							// Refine local tree: refine one time octants with marker >0
 	void			computeConnectivity();				// Computes nodes vector and connectivity of octants of local tree
 	void			clearConnectivity();				// Clear nodes vector and connectivity of octants of local tree
+	void       		updateLocalMaxDepth();				// Update max depth reached in local tree
 
 private:
 

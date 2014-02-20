@@ -175,4 +175,19 @@ void Class_Local_Tree::clearConnectivity() {
 	vector<vector<uint32_t> >().swap(nodes);
 	vector<vector<uint64_t> >().swap(connectivity);
 }
+
+//-------------------------------------------------------------------------------- //
+
+void Class_Local_Tree::updateLocalMaxDepth() {
+	uint64_t noctants = getNumOctants();
+	uint64_t i;
+
+	local_max_depth = 0;
+	for(i = 0; i < noctants; i++){
+		if(octants[i].getLevel() > local_max_depth){
+			local_max_depth = octants[i].getLevel();
+		}
+	}
+}
+
 //-------------------------------------------------------------------------------- //
