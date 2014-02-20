@@ -25,8 +25,8 @@ Class_Para_Tree::Class_Para_Tree() {
 }
 
 Class_Para_Tree::~Class_Para_Tree() {
-	delete [] partition_last_desc;
-	delete [] partition_range_globalidx;
+	//delete [] partition_last_desc;
+	//delete [] partition_range_globalidx;
 }
 
 
