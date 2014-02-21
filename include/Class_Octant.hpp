@@ -13,7 +13,7 @@
 // =================================================================================== //
 #include "preprocessor_defines.dat"
 #include "global.hpp"
-#include "Log_Funct.hpp"
+#include "logFunct.hpp"
 #include <vector>
 #include <string.h>
 #include "inlinedFunct.hpp"
@@ -69,11 +69,11 @@ public:
 	uint8_t		getLevel() const;
 	int8_t		getMarker() const;
 	bool		getBound(uint8_t face) const;		// Get if face is boundary
-	bool		getPbound(uint8_t face) const;	// Get if face is process boundary
-	bool		getIsNewR() const;				// Get if octant is new after refinement
-	bool		getIsNewC() const;				// Get if octant is new after coarsening
-	bool		getBalance() const;				// Get if balancing-blocked octant
-	bool		getIsGhost() const;				// For ghostbusters : get if octant is a ghost
+	bool		getPbound(uint8_t face) const;		// Get if face is process boundary
+	bool		getIsNewR() const;					// Get if octant is new after refinement
+	bool		getIsNewC() const;					// Get if octant is new after coarsening
+	bool		getNotBalance() const;				// Get if balancing-blocked octant
+	bool		getIsGhost() const;					// For ghostbusters : get if octant is a ghost
 
 	void		setMarker(int8_t marker);			// Set refinement/coarsening marker
 	void		setBalance(bool balance);			// Set if balancing-blocked octant
@@ -97,18 +97,21 @@ private:
 	// Other methods ----------------------------------------------------------------- //
 
 public:
-	Class_Octant*	buildChildren();							// Builds children of octant and return a pointer to an ordered array children[nchildren]
-	uint64_t* 		computeHalfSizeMorton(uint8_t iface, 		// Compute Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
-										  uint8_t & sizehf);	// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
-
+	Class_Octant*	buildChildren();								// Builds children of octant and return a pointer to an ordered array children[nchildren]
+	uint64_t* 		computeHalfSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
+										  uint8_t & sizehf);		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
+	uint64_t* 		computeMinSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
+										 const uint8_t & maxdepth,	// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
+										 uint8_t & sizem);
+	uint64_t* 		computeVirtualMorton(uint8_t iface, 			// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
+										 const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
+										 uint8_t & sizeneigh);
 private:
 
 	// ------------------------------------------------------------------------------- //
 
 
 };//end Class_Octant;
-
-
 
 
 #endif /* OCTREE_HPP_ */

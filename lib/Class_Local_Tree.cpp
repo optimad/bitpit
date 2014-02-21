@@ -39,7 +39,7 @@ uint8_t Class_Local_Tree::getMarker(int64_t idx) {
 }
 
 bool Class_Local_Tree::getBalance(int64_t idx) {
-	return octants[idx].getBalance();
+	return octants[idx].getNotBalance();
 }
 
 const Class_Octant & Class_Local_Tree::getFirstDesc() const {

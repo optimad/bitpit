@@ -92,7 +92,7 @@ bool Class_Octant::getIsNewC() const{
 	return info[13];
 }
 
-bool Class_Octant::getBalance() const{
+bool Class_Octant::getNotBalance() const{
 	return info[14];
 }
 
@@ -316,7 +316,8 @@ uint64_t Class_Octant::computeMorton(){
 
 // =================================================================================== //
 
-uint64_t* Class_Octant::computeHalfSizeMorton(uint8_t iface, uint8_t & sizehf) {
+uint64_t* Class_Octant::computeHalfSizeMorton(uint8_t iface,
+											 uint8_t & sizehf) {
 	uint32_t dh,dh2;
 	uint64_t morton;
 	uint8_t nneigh;
@@ -395,5 +396,103 @@ uint64_t* Class_Octant::computeHalfSizeMorton(uint8_t iface, uint8_t & sizehf) {
 
 }
 
+// =================================================================================== //
+
+uint64_t* Class_Octant::computeMinSizeMorton(uint8_t iface,
+											const uint8_t & maxdepth,
+											uint8_t & sizem) {
+	uint32_t dh,dh2;
+	uint64_t morton;
+	uint32_t nneigh, nline;
+	uint32_t i,cx,cy,cz;
+
+	nneigh = (level < MAX_LEVEL) ? uint32_t(pow(2.0,double((DIM-1)*(maxdepth-level)))) : 1;
+	dh = (level < MAX_LEVEL) ? uint32_t(pow(2.0,double(MAX_LEVEL - maxdepth))) : getSize();
+	dh2 = getSize();
+	nline = uint32_t(pow(2.0,double((maxdepth-level))));
+
+	if (info[iface]){
+		uint64_t* Morton = new uint64_t[0];
+		sizem = 0;
+		return Morton;
+	}
+	else{
+		uint64_t* Morton = new uint64_t[nneigh];
+		switch (iface) {
+		case 0 :
+		{
+			for (i=0; i<nneigh; i++){
+				cy = (i/nline);
+				cz = (i%nline);
+				Morton[i] = mortonEncode_magicbits(this->x-dh,this->y+dh*cy,this->z+dh*cz);
+			}
+		}
+		break;
+		case 1 :
+		{
+			for (i=0; i<nneigh; i++){
+				cy = (i/nline);
+				cz = (i%nline);
+				Morton[i] = mortonEncode_magicbits(this->x+dh2,this->y+dh*cy,this->z+dh*cz);
+			}
+		}
+		break;
+		case 2 :
+		{
+			for (i=0; i<nneigh; i++){
+				cx = (i/nline);
+				cz = (i%nline);
+				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y-dh,this->z+dh*cz);
+			}
+		}
+		break;
+		case 3 :
+		{
+			for (i=0; i<nneigh; i++){
+				cx = (i/nline);
+				cz = (i%nline);
+				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2,this->z+dh*cz);
+			}
+		}
+		break;
+		case 4 :
+		{
+			for (i=0; i<nneigh; i++){
+				cx = (i/nline);
+				cy = (i%nline);
+				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z-dh);
+			}
+		}
+		break;
+		case 5 :
+		{
+			for (i=0; i<nneigh; i++){
+				cx = (i/nline);
+				cy = (i%nline);
+				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2);
+			}
+		}
+		break;
+		}
+		sizem = nneigh;
+		sort(Morton,Morton+nneigh);
+		return Morton;
+	}
+}
+
+uint64_t* Class_Octant::computeVirtualMorton(uint8_t iface,
+											const uint8_t& maxdepth,
+											uint8_t& sizeneigh) {
+
+	if (getNotBalance()){
+		return computeMinSizeMorton(iface,
+									maxdepth,
+									sizeneigh);
+	}
+	else{
+		return computeHalfSizeMorton(iface,
+									sizeneigh);
+	}
+}
 // =================================================================================== //
 
