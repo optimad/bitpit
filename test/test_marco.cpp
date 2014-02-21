@@ -9,7 +9,9 @@
 #include <math.h>
 #include "mpi.h"
 #include <iostream>
+#include <string>
 #include "Class_Para_Tree.hpp"
+#include "ioFunct.hpp"
 
 using namespace std;
 
@@ -19,7 +21,16 @@ int main(int argc, char *argv[]) {
 
 	Class_Para_Tree ptree;
 
-	ptree.octree.setMarker(0,1);
+	ptree.octree.setMarker(0,2);
+	ptree.octree.refine();
+	ptree.updateRefine();
+	ptree.octree.setMarker(4,4);
+	ptree.octree.refine();
+	ptree.updateRefine();
+	ptree.octree.refine();
+	ptree.updateRefine();
+	ptree.octree.refine();
+	ptree.updateRefine();
 	ptree.octree.refine();
 	ptree.updateRefine();
 	cout << "I'm " << ptree.rank << " and max_depth is " << (int)ptree.max_depth << endl;
@@ -42,6 +53,10 @@ int main(int argc, char *argv[]) {
 		cout << ptree.partition_last_desc[i] << " ";
 	cout << "as last descendant partition" << endl;
 
+	ptree.octree.computeConnectivity();
+	ptree.octree.computeghostsConnectivity();
+	string filename = "puppa";
+	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,filename);
 
 	MPI::Finalize();
 

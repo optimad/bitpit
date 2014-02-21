@@ -123,3 +123,9 @@ void Class_Para_Tree::refine() {
 	updateRefine();
 }
 
+void Class_Para_Tree::buildGhosts() {
+
+
+
+
+}
