@@ -259,6 +259,7 @@ void Class_Local_Tree::updateLocalMaxDepth() {
 uint64_t* Class_Local_Tree::findNeighbours(uint64_t idx, uint8_t iface,
 		uint8_t& sizeneigh, bool isghost) {
 
+/*
 //	uint64_t* NeighIdx = new uint64_t[];
 	uint64_t  noctants = getNumOctants();
 	uint64_t  Morton, Mortontry, idxtry, idxtry_old, idxtry_old_;
@@ -306,6 +307,7 @@ uint64_t* Class_Local_Tree::findNeighbours(uint64_t idx, uint8_t iface,
 
 	}
 
+*/
 
 }
 //-------------------------------------------------------------------------------- //
