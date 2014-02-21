@@ -88,7 +88,8 @@ public:
 	uint32_t	getSize() const;					// Get the size of octant
 	uint32_t	getVolume() const;					// Get the volume of octant
 	uint32_t	(*getNodes())[DIM];					// Get a pointer to the array (size [nnodes][3]) with the nodes of octant
-	uint64_t	computeMorton();					// Compute Morton index of the octant (without level)
+	uint64_t	computeMorton() const;					// Compute Morton index of the octant (without level)
+	uint64_t	computeMorton();
 
 private:
 

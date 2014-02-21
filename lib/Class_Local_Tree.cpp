@@ -11,7 +11,7 @@ Class_Local_Tree::Class_Local_Tree() {
 	// TODO Auto-generated constructor stub
 	Class_Octant oct0;
 	Class_Octant octf(0,0,0,MAX_LEVEL);
-	Class_Octant octl(max_length-1,max_length-1,max_length-1,MAX_LEVEL);
+	Class_Octant octl(MAX_LEVEL,max_length-1,max_length-1,max_length-1);
 	octants.resize(1);
 	octants[0] = oct0;
 	first_desc = octf;
@@ -44,6 +44,14 @@ bool Class_Local_Tree::getBalance(int64_t idx) {
 	return octants[idx].getBalance();
 }
 
+const Class_Octant & Class_Local_Tree::getFirstDesc() const {
+	return first_desc;
+}
+
+const Class_Octant & Class_Local_Tree::getLastDesc() const {
+	return last_desc;
+}
+
 void Class_Local_Tree::setMarker(int64_t idx, int8_t marker) {
 	octants[idx].setMarker(marker);
 }
@@ -64,19 +72,19 @@ Class_Octant& Class_Local_Tree::extractOctant(uint64_t idx) {
 	return octants[idx];
 }
 
-Class_Octant Class_Local_Tree::getFirstDesc() const {
+void Class_Local_Tree::setFirstDesc() {
 	OctantsType::const_iterator firstOctant = octants.begin();
-	return Class_Octant(MAX_LEVEL,firstOctant->x,firstOctant->y,firstOctant->z);
+	first_desc = Class_Octant(MAX_LEVEL,firstOctant->x,firstOctant->y,firstOctant->z);
 }
 
-Class_Octant Class_Local_Tree::getLastDesc() const {
+void Class_Local_Tree::setLastDesc() {
 	OctantsType::const_iterator lastOctant = octants.end() - 1;
 	uint32_t x,y,z,delta;
 	delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL - lastOctant->level)) - 1;
 	x = lastOctant->x + delta;
 	y = lastOctant->y + delta;
 	z = lastOctant->z + delta;
-	return Class_Octant(MAX_LEVEL,x,y,z);
+	last_desc =Class_Octant(MAX_LEVEL,x,y,z);
 }
 
 //-------------------------------------------------------------------------------- //
@@ -175,6 +183,7 @@ void Class_Local_Tree::clearConnectivity() {
 	vector<vector<uint32_t> >().swap(nodes);
 	vector<vector<uint64_t> >().swap(connectivity);
 }
+
 
 //-------------------------------------------------------------------------------- //
 

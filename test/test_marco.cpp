@@ -32,6 +32,17 @@ int main(int argc, char *argv[]) {
 	ptree.loadBalance();
 	ptree.updateLoadBalance();
 
+	cout << "I'm " << ptree.rank << " and I have " << ptree.octree.getNumOctants() << " octants" << endl;
+	cout << "I'm " << ptree.rank << " and I see ";
+	for(int i = 0; i < ptree.nproc; ++i)
+		cout << ptree.partition_range_globalidx[i] << " ";
+	cout << "as global partition" << endl;
+	cout << "I'm " << ptree.rank << " and I see ";
+	for(int i = 0; i < ptree.nproc; ++i)
+		cout << ptree.partition_last_desc[i] << " ";
+	cout << "as last descendant partition" << endl;
+
+
 	MPI::Finalize();
 
 	return 0;
