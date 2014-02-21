@@ -69,7 +69,7 @@ void Class_Para_Tree::loadBalance(){
 		for(int i = 0; i < rank; ++i)
 			stride += partition[i];
 		Class_Local_Tree::OctantsType::const_iterator first = octree.octants.begin() + stride;
-		Class_Local_Tree::OctantsType::const_iterator last = first + partition[rank] - 1;
+		Class_Local_Tree::OctantsType::const_iterator last = first + partition[rank];
 		octree.octants.assign(first, last);
 		octree.octants.shrink_to_fit();
 		first = octree.octants.end();
