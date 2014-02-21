@@ -101,12 +101,17 @@ private:
 
 public:
 	const Class_Octant&	extractOctant(uint64_t idx) const ;
-	void			refine();							// Refine local tree: refine one time octants with marker >0
-	void       		updateLocalMaxDepth();				// Update max depth reached in local tree
-	void			computeConnectivity();				// Computes nodes vector and connectivity of octants of local tree
-	void			clearConnectivity();				// Clear nodes vector and connectivity of octants of local tree
-	void			computeghostsConnectivity();		// Computes ghosts nodes vector and connectivity of ghosts octants of local tree
-	void			clearghostsConnectivity();			// Clear ghosts nodes vector and connectivity of ghosts octants of local tree
+	void			refine();									// Refine local tree: refine one time octants with marker >0
+	void       		updateLocalMaxDepth();						// Update max depth reached in local tree
+	void			computeConnectivity();						// Computes nodes vector and connectivity of octants of local tree
+	void			clearConnectivity();						// Clear nodes vector and connectivity of octants of local tree
+	void			computeghostsConnectivity();				// Computes ghosts nodes vector and connectivity of ghosts octants of local tree
+	void			clearghostsConnectivity();					// Clear ghosts nodes vector and connectivity of ghosts octants of local tree
+
+	uint64_t*		findNeighbours(uint64_t idx,				// Finds n=sizeneigh neighbours of idx-th octant through iface in vector octants.
+								  uint8_t iface,				// Returns a pointer to an array of size sizeneigh with the index of neighbours
+								  uint8_t & sizeneigh,			// in their structure (octants or ghosts) and sets isghost = true if the
+								  bool isghost);				// neighbours are ghost in the local tree
 
 private:
 

@@ -50,24 +50,17 @@ const Class_Octant & Class_Local_Tree::getLastDesc() const {
 	return last_desc;
 }
 
+uint32_t Class_Local_Tree::getSizeGhost() const {
+	return size_ghosts;
+}
+
+
 void Class_Local_Tree::setMarker(int64_t idx, int8_t marker) {
 	octants[idx].setMarker(marker);
 }
 
 void Class_Local_Tree::setBalance(int64_t idx, bool balance) {
 	octants[idx].setBalance(balance);
-}
-
-//-------------------------------------------------------------------------------- //
-// Debug methods ----------------------------------------------------------------- //
-
-void Class_Local_Tree::addOctantToTree(Class_Octant octant){
-	octants.push_back(octant);
-	octants.shrink_to_fit();
-}
-
-const Class_Octant& Class_Local_Tree::extractOctant(uint64_t idx) const {
-	return octants[idx];
 }
 
 void Class_Local_Tree::setFirstDesc() {
@@ -83,6 +76,18 @@ void Class_Local_Tree::setLastDesc() {
 	y = lastOctant->y + delta;
 	z = lastOctant->z + delta;
 	last_desc = Class_Octant(MAX_LEVEL,x,y,z);
+}
+
+//-------------------------------------------------------------------------------- //
+// Debug methods ----------------------------------------------------------------- //
+
+void Class_Local_Tree::addOctantToTree(Class_Octant octant){
+	octants.push_back(octant);
+	octants.shrink_to_fit();
+}
+
+const Class_Octant& Class_Local_Tree::extractOctant(uint64_t idx) const {
+	return octants[idx];
 }
 
 //-------------------------------------------------------------------------------- //
@@ -251,4 +256,56 @@ void Class_Local_Tree::updateLocalMaxDepth() {
 	}
 }
 
+uint64_t* Class_Local_Tree::findNeighbours(uint64_t idx, uint8_t iface,
+		uint8_t& sizeneigh, bool isghost) {
+
+//	uint64_t* NeighIdx = new uint64_t[];
+	uint64_t  noctants = getNumOctants();
+	uint64_t  Morton, Mortontry, idxtry, idxtry_old, idxtry_old_;
+	Class_Octant* oct = octants[idx];
+	uint32_t size = oct->getSize();
+
+	// Check if octants face is a process boundary
+	if (oct->info[nface+iface] == false){
+
+		switch (iface) {
+		case 0 :
+		{
+			//Build Morton number of virtual neigh of same size
+			Morton = mortonEncode_magicbits(oct->x-size,oct->y,oct->z);
+			//TODO make a method of this...
+			// Search morton in octants
+			// If a even face morton is lower than morton of oct, if odd higher
+			// ---> can i search only before or after idx in octants
+			int8_t direction = -1;
+			int8_t diff = 100;
+			idxtry = uint64_t((idx + (1+direction)*noctants ) / 2);
+			idxtry_old = uint64_t((1+direction)*noctants );
+			while(diff > 1){
+				Mortontry = octants[idxtry].computeMorton();
+				if (Mortontry > Morton){
+					idxtry_old_ = idxtry;
+					idxtry += (idxtry + idxtry_old)/2;
+					idxtry_old = idxtry_old_;
+					diff = abs(idxtry - idxtry_old);
+				}
+			}
+			if(octants[idxtry].computeMorton() == Morton)
+
+
+
+
+		}
+		break;
+		}
+
+
+	}
+	else{
+		// If octants face is a process boundary search in ghosts
+
+	}
+
+
+}
 //-------------------------------------------------------------------------------- //
