@@ -9,11 +9,7 @@
 
 Class_Local_Tree::Class_Local_Tree() {
 	Class_Octant oct0;
-<<<<<<< HEAD
 	Class_Octant octf(MAX_LEVEL,0,0,0);
-=======
-	Class_Octant octf(0,0,0,MAX_LEVEL);
->>>>>>> branch 'sviluppo_marco_edo' of https://github.com/optimad/PABLO.git
 	Class_Octant octl(MAX_LEVEL,max_length-1,max_length-1,max_length-1);
 	octants.resize(1);
 	octants[0] = oct0;
