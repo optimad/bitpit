@@ -27,10 +27,6 @@
 								<option id="org.eclipse.cdt.build.core.settings.holder.libpaths.1199188743" name="Library Paths" superClass="org.eclipse.cdt.build.core.settings.holder.libpaths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="/opt/openmpi/openmpi-1.6.5-gcc/lib"/>
 								</option>
-								<option id="org.eclipse.cdt.build.core.settings.holder.libfiles.152757450" name="Library Files" superClass="org.eclipse.cdt.build.core.settings.holder.libfiles" valueType="libFiles"/>
-								<option id="org.eclipse.cdt.build.core.settings.holder.libpaths.1199188743" name="Library Paths" superClass="org.eclipse.cdt.build.core.settings.holder.libpaths" valueType="libPaths">
-									<listOptionValue builtIn="false" value="/opt/openmpi/openmpi-1.6.5-gcc/lib"/>
-								</option>
 							</tool>
 							<tool id="org.eclipse.cdt.build.core.settings.holder.1710140309" name="Assembly" superClass="org.eclipse.cdt.build.core.settings.holder">
 								<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.688727044" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths"/>
@@ -43,6 +39,8 @@
 							<tool id="org.eclipse.cdt.build.core.settings.holder.1147166135" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder">
 								<option id="org.eclipse.cdt.build.core.settings.holder.incpaths.58585680" name="Include Paths" superClass="org.eclipse.cdt.build.core.settings.holder.incpaths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/opt/openmpi/openmpi-1.6.5-gcc/include"/>
+									<listOptionValue builtIn="false" value="/usr/include"/>
+									<listOptionValue builtIn="false" value="../usr/local/include"/>
 								</option>
 								<option id="org.eclipse.cdt.build.core.settings.holder.symbols.106901676" name="Symbols" superClass="org.eclipse.cdt.build.core.settings.holder.symbols" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="__GXX_EXPERIMENTAL_CXX0X__"/>

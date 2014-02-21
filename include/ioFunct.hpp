@@ -1,52 +1,44 @@
 // =================================================================================== //
-//                      Log functions                      		                       //
+// Input/Output TOOLS                                                                  //
 //                                                                                     //
-// Log functions.                        		         					           //
+// Functions for PABLO Input and Output.                                               //
 //                                                                                     //
-// LIST OF FUNCTIONS:                                                                  //
-// - Write_Log        : Write data into a .log file.                                   //
+// LIST OF FUNCTIONS                                                                   //
+// - writeLocalTree : write on .vtu file local octants and ghosts if filled            //
 // =================================================================================== //
 // INFO                                                                                //
 // =================================================================================== //
-// Author  : Alessandro Alaia                                                          //
-// Company : Optimad Engineering srl                                                   //
-// Data    : Jul 08, 2013                                                              //
-// Version : v1.0
-//
-// Modified by  : Edoardo Lombardi                                                     //
-// Company : Optimad Engineering srl                                                   //
-// Data    : Feb 18, 2014                                                              //
+// Author   : Edoardo Lombard                                                         //
+// Company  : Optimad Engineering srl                                                  //
+// Date     : Feb 21, 2014                                                              //
+// Version  : v 1.0                                                                    //
 //                                                                                     //
 // All rights reserved                                                                 //
 // =================================================================================== //
-# ifndef __LOG_FUNCT_HPP_
-# define __LOG_FUNCT_HPP_
 
 // =================================================================================== //
-// INCLUDES                                                                            //
+// PRE-COMPILATION INSTRUCTIONS                                                        //
 // =================================================================================== //
+#ifndef IOFUNCT_HPP_
+#define IOFUNCT_HPP_
 
-// Standard Template Library
-# include <vector>
-# include <string>
-# include <fstream>
-# include <sstream>
-
-// Optimad C++ Library
-# include "stringTools.hh"
+// includes
+#include<algorithm>
+#include<string>
+#include<functional>
+#include<cctype>
 
 // =================================================================================== //
 // NAMESPACES                                                                          //
 // =================================================================================== //
 using namespace std;
 
-
 // =================================================================================== //
 // PROTOTYPES                                                                          //
 // =================================================================================== //
 
 // ----------------------------------------------------------------------------------- //
-void writeLog(string);
+void writeLocalTree(Class_Local_Tree & tree);
 
 // ----------------------------------------------------------------------------------- //
 

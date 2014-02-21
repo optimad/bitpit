@@ -53,6 +53,9 @@ public:
 	u32vector2D					nodes;				// Local vector of nodes (x,y,z) ordered with Morton Number
 	u64vector2D					connectivity;		// Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
 													// The nodes are stored as index of vector nodes
+	u32vector2D					ghostsnodes;		// Local vector of ghosts nodes (x,y,z) ordered with Morton Number
+	u64vector2D					ghostsconnectivity;	// Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
+													// The nodes are stored as index of vector nodes
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
@@ -67,8 +70,8 @@ public:
 	// Basic Get/Set methods --------------------------------------------------------- //
 
 public:
-	Class_Octant  getFirstDesc() const;
-	Class_Octant  getLastDesc() const;
+	const Class_Octant&  getFirstDesc() const;
+	const Class_Octant&  getLastDesc() const;
 	uint32_t  	  getSizeGhost() const;
 	uint64_t  	  getNumOctants() const;
 	uint8_t       getLocalMaxDepth() const;						// Get max depth reached in local tree
@@ -77,6 +80,8 @@ public:
 
 	void		  setMarker(int64_t idx, int8_t marker);		// Set refinement/coarsening marker for idx-th octant
 	void		  setBalance(int64_t idx, bool balance);		// Set if balancing-blocked idx-th octant
+	void  		  setFirstDesc();
+	void  		  setLastDesc();
 
 	//-------------------------------------------------------------------------------- //
 	// Debug methods ----------------------------------------------------------------- //
@@ -95,11 +100,13 @@ private:
 	// Other methods ----------------------------------------------------------------- //
 
 public:
-	Class_Octant&	extractOctant(uint64_t idx);
+	const Class_Octant&	extractOctant(uint64_t idx) const ;
 	void			refine();							// Refine local tree: refine one time octants with marker >0
+	void       		updateLocalMaxDepth();				// Update max depth reached in local tree
 	void			computeConnectivity();				// Computes nodes vector and connectivity of octants of local tree
 	void			clearConnectivity();				// Clear nodes vector and connectivity of octants of local tree
-	void       		updateLocalMaxDepth();				// Update max depth reached in local tree
+	void			computeghostsConnectivity();		// Computes ghosts nodes vector and connectivity of ghosts octants of local tree
+	void			clearghostsConnectivity();			// Clear ghosts nodes vector and connectivity of ghosts octants of local tree
 
 private:
 
