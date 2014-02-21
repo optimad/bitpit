@@ -54,6 +54,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	ptree.octree.clearConnectivity();
+	writeLog("PABLO");
 
 	MPI::Finalize();
 
