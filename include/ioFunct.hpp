@@ -23,10 +23,11 @@
 #define IOFUNCT_HPP_
 
 // includes
-#include<algorithm>
-#include<string>
-#include<functional>
-#include<cctype>
+#include <algorithm>
+#include <string>
+#include <functional>
+#include <cctype>
+#include <Class_Para_Tree.hpp>
 
 // =================================================================================== //
 // NAMESPACES                                                                          //
@@ -37,8 +38,14 @@ using namespace std;
 // PROTOTYPES                                                                          //
 // =================================================================================== //
 
+typedef vector<vector<uint32_t>	>	u32vector2D;
+typedef vector<vector<uint64_t>	>	u64vector2D;
+
+
 // ----------------------------------------------------------------------------------- //
-void writeLocalTree(Class_Local_Tree & tree);
+void writeLocalTree(const u32vector2D & nodes, const u64vector2D & connectivity,
+		const u32vector2D & ghostNodes, const u64vector2D & ghostConnectivity,
+		const Class_Para_Tree & ptree, string filename);
 
 // ----------------------------------------------------------------------------------- //
 

@@ -13,7 +13,7 @@
 // =================================================================================== //
 #include "preprocessor_defines.dat"
 #include "global.hpp"
-#include "Log_Funct.hpp"
+#include "logFunct.hpp"
 #include <vector>
 #include <string.h>
 #include "inlinedFunct.hpp"

@@ -60,6 +60,7 @@ public:
 	void updateRefine();
 	void updateLoadBalance();
 	void computePartition(uint64_t* partition);
+	void buildGhosts();
 };
 
 #endif /* CLASS_PARA_TREE_H_ */

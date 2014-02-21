@@ -21,7 +21,8 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
-# include "Log_Funct.hpp"
+#include "logFunct.hpp"
+#include <mpi.h>
 
 // ----------------------------------------------------------------------------------- //
 void writeLog(string msg) {
@@ -54,13 +55,19 @@ void writeLog(string msg) {
 	// APPEND MESSAGE TO THE LOG FILE                                                      //
 	// =================================================================================== //
 
-	// Open the .log file
-	file_handle.open("PABLO.log", ifstream::app);
+	int rank;
+	int error_flag = MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+	if(rank == 0){
+		// Open the .log file
+		file_handle.open("PABLO.log", ifstream::app);
+		if(!file_handle.is_open())
+			exit(1);
 
-	// Append message to the .log file
-	file_handle << msg << endl;
+		// Append message to the .log file
+		file_handle << msg << endl;
 
-	// Close file
-	file_handle.close();
-
+		// Close file
+		file_handle.close();
+	}
+	error_flag = MPI_Barrier(MPI_COMM_WORLD);
 	return; };
