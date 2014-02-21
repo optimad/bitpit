@@ -308,6 +308,11 @@ uint64_t Class_Octant::computeMorton() const {
 	morton = mortonEncode_magicbits(this->x,this->y,this->z);
 	return morton;
 }
+uint64_t Class_Octant::computeMorton(){
+	uint64_t morton = 0;
+	morton = mortonEncode_magicbits(this->x,this->y,this->z);
+	return morton;
+}
 
 // =================================================================================== //
 

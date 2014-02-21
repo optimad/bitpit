@@ -25,8 +25,8 @@ Class_Para_Tree::Class_Para_Tree() {
 }
 
 Class_Para_Tree::~Class_Para_Tree() {
-	delete [] partition_last_desc;
-	delete [] partition_range_globalidx;
+	//delete [] partition_last_desc;
+	//delete [] partition_range_globalidx;
 }
 
 
@@ -44,8 +44,9 @@ void Class_Para_Tree::computePartition(uint64_t* partition) {
 }
 
 void Class_Para_Tree::updateLoadBalance() {
+	octree.updateLocalMaxDepth();
 	//update partition_range_globalidx
-	int rbuff [nproc];
+	uint64_t rbuff [nproc];
 	uint64_t local_num_octants = octree.getNumOctants();
 	error_flag = MPI_Allgather(&local_num_octants,1,MPI_UINT64_T,&rbuff,1,MPI_UINT64_T,MPI_COMM_WORLD);
 	for(int p = 0; p < nproc; ++p){
@@ -54,9 +55,14 @@ void Class_Para_Tree::updateLoadBalance() {
 			partition_range_globalidx[p] += rbuff[pp];
 		--partition_range_globalidx[p];
 	}
+	//update first last descendant
+	octree.setFirstDesc();
+	octree.setLastDesc();
 	//update partition_range_position
 	uint64_t lastDescMorton = octree.getLastDesc().computeMorton();
-	error_flag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,&partition_last_desc,1,MPI_UINT64_T,MPI_COMM_WORLD);
+	error_flag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,partition_last_desc,1,MPI_UINT64_T,MPI_COMM_WORLD);
+	//TODO aggiornare pbound serial/parallel
+	serial = false;
 }
 
 void Class_Para_Tree::loadBalance(){
@@ -68,14 +74,16 @@ void Class_Para_Tree::loadBalance(){
 		for(int i = 0; i < rank; ++i)
 			stride += partition[i];
 		Class_Local_Tree::OctantsType::const_iterator first = octree.octants.begin() + stride;
-		Class_Local_Tree::OctantsType::const_iterator last = first + partition[rank] - 1;
+		Class_Local_Tree::OctantsType::const_iterator last = first + partition[rank];
 		octree.octants.assign(first, last);
 		octree.octants.shrink_to_fit();
+		first = octree.octants.end();
+		last = octree.octants.end();
 	}
 	else
-	{}
+	{
+	}
 	delete [] partition;
-	serial = false;
 }
 
 void Class_Para_Tree::updateRefine() {

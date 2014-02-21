@@ -70,8 +70,8 @@ public:
 	// Basic Get/Set methods --------------------------------------------------------- //
 
 public:
-	const Class_Octant&  getFirstDesc() const;
-	const Class_Octant&  getLastDesc() const;
+	const Class_Octant &  getFirstDesc() const;
+	const Class_Octant &  getLastDesc() const;
 	uint32_t  	  getSizeGhost() const;
 	uint64_t  	  getNumOctants() const;
 	uint8_t       getLocalMaxDepth() const;						// Get max depth reached in local tree

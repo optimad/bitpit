@@ -9,7 +9,11 @@
 
 Class_Local_Tree::Class_Local_Tree() {
 	Class_Octant oct0;
+<<<<<<< HEAD
 	Class_Octant octf(MAX_LEVEL,0,0,0);
+=======
+	Class_Octant octf(0,0,0,MAX_LEVEL);
+>>>>>>> branch 'sviluppo_marco_edo' of https://github.com/optimad/PABLO.git
 	Class_Octant octl(MAX_LEVEL,max_length-1,max_length-1,max_length-1);
 	octants.resize(1);
 	octants[0] = oct0;
@@ -40,6 +44,14 @@ uint8_t Class_Local_Tree::getMarker(int64_t idx) {
 
 bool Class_Local_Tree::getBalance(int64_t idx) {
 	return octants[idx].getBalance();
+}
+
+const Class_Octant & Class_Local_Tree::getFirstDesc() const {
+	return first_desc;
+}
+
+const Class_Octant & Class_Local_Tree::getLastDesc() const {
+	return last_desc;
 }
 
 void Class_Local_Tree::setMarker(int64_t idx, int8_t marker) {
@@ -74,7 +86,11 @@ void Class_Local_Tree::setLastDesc() {
 	x = lastOctant->x + delta;
 	y = lastOctant->y + delta;
 	z = lastOctant->z + delta;
+<<<<<<< HEAD
 	last_desc = Class_Octant(MAX_LEVEL,x,y,z);
+=======
+	last_desc =Class_Octant(MAX_LEVEL,x,y,z);
+>>>>>>> branch 'sviluppo_marco_edo' of https://github.com/optimad/PABLO.git
 }
 
 const Class_Octant& Class_Local_Tree::getFirstDesc() const {
@@ -234,6 +250,7 @@ void Class_Local_Tree::clearghostsConnectivity() {
 	u32vector2D().swap(ghostsnodes);
 	u64vector2D().swap(ghostsconnectivity);
 }
+
 
 //-------------------------------------------------------------------------------- //
 
