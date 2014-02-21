@@ -82,20 +82,9 @@ void Class_Local_Tree::setLastDesc() {
 	x = lastOctant->x + delta;
 	y = lastOctant->y + delta;
 	z = lastOctant->z + delta;
-<<<<<<< HEAD
 	last_desc = Class_Octant(MAX_LEVEL,x,y,z);
-=======
-	last_desc =Class_Octant(MAX_LEVEL,x,y,z);
->>>>>>> branch 'sviluppo_marco_edo' of https://github.com/optimad/PABLO.git
 }
 
-const Class_Octant& Class_Local_Tree::getFirstDesc() const {
-	return first_desc;
-}
-
-const Class_Octant& Class_Local_Tree::getLastDesc() const {
-	return last_desc;
-}
 //-------------------------------------------------------------------------------- //
 // Other methods ----------------------------------------------------------------- //
 
