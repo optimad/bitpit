@@ -8,7 +8,6 @@
 #include "Class_Local_Tree.hpp"
 
 Class_Local_Tree::Class_Local_Tree() {
-	// TODO Auto-generated constructor stub
 	Class_Octant oct0;
 	Class_Octant octf(0,0,0,MAX_LEVEL);
 	Class_Octant octl(MAX_LEVEL,max_length-1,max_length-1,max_length-1);
@@ -22,7 +21,6 @@ Class_Local_Tree::Class_Local_Tree() {
 }
 
 Class_Local_Tree::~Class_Local_Tree() {
-	// TODO Auto-generated destructor stub
 }
 
 //-------------------------------------------------------------------------------- //

@@ -55,9 +55,14 @@ void Class_Para_Tree::updateLoadBalance() {
 			partition_range_globalidx[p] += rbuff[pp];
 		--partition_range_globalidx[p];
 	}
+	//update first last descendant
+	octree.setFirstDesc();
+	octree.setLastDesc();
 	//update partition_range_position
 	uint64_t lastDescMorton = octree.getLastDesc().computeMorton();
 	error_flag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,&partition_last_desc,1,MPI_UINT64_T,MPI_COMM_WORLD);
+	//TODO aggiornare pbound serial/parallel
+	serial = false;
 }
 
 void Class_Para_Tree::loadBalance(){
@@ -79,7 +84,6 @@ void Class_Para_Tree::loadBalance(){
 	{
 	}
 	delete [] partition;
-	serial = false;
 }
 
 void Class_Para_Tree::updateRefine() {
