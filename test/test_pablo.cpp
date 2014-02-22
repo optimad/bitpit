@@ -24,22 +24,28 @@ int main(int argc, char *argv[]) {
 
 	ptree.octree.setMarker(0,1);
 	ptree.octree.refine();
-	ptree.octree.setMarker(5,1);
+	ptree.octree.setMarker(2,1);
 	ptree.octree.refine();
 
 	Class_Octant oct_test;
 	uint8_t sizehf=0;
 	uint8_t sizem=0;
-	for (int i=0; i<nface; i++){
-		oct_test =	ptree.octree.extractOctant(14);
+	uint8_t sizen=0;
+	bool isghost;
+	for (int i=0; i<6; i++){//nface; i++){
+		oct_test =	ptree.octree.extractOctant(6);
 		cout << "Bound " << i << "-face : " << oct_test.getBound(i) << endl;
-		uint64_t *hfneigh = oct_test.computeHalfSizeMorton(i,sizehf);
+/*		uint64_t *hfneigh = oct_test.computeHalfSizeMorton(i,sizehf);
 		for (int j=0; j<sizehf; j++){
-			cout << "Morton half-size idx=6 iface " << i << " : " << hfneigh[j] << endl;
+			cout << "Morton half-size idx=1 iface " << i << " : " << hfneigh[j] << endl;
 		}
 		uint64_t *mneigh = oct_test.computeMinSizeMorton(i,3, sizem);
 		for (int j=0; j<sizem; j++){
-			cout << "Morton min-size idx=6 iface " << i << " : " << mneigh[j] << endl;
+			cout << "Morton min-size idx=1 iface " << i << " : " << mneigh[j] << endl;
+		}*/
+		uint64_t *idxneigh = ptree.octree.findNeighbours(6, i, sizen, isghost);
+		for (int j=0; j<sizen; j++){
+			cout << "Idx neigh idx=6 iface " << i << " : " << idxneigh[j] << endl;
 		}
 	}
 /*
