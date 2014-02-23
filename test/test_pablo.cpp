@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
 	uint8_t sizem=0;
 	uint8_t sizen=0;
 	bool isghost;
-	for (int i=0; i<6; i++){//nface; i++){
+	for (int i=0; i<nface; i++){
 		oct_test =	ptree.octree.extractOctant(6);
 		cout << "Bound " << i << "-face : " << oct_test.getBound(i) << endl;
 /*		uint64_t *hfneigh = oct_test.computeHalfSizeMorton(i,sizehf);
@@ -44,6 +44,7 @@ int main(int argc, char *argv[]) {
 			cout << "Morton min-size idx=1 iface " << i << " : " << mneigh[j] << endl;
 		}*/
 		uint64_t *idxneigh = ptree.octree.findNeighbours(6, i, sizen, isghost);
+		cout << "size neigh " << int(sizen) << endl;
 		for (int j=0; j<sizen; j++){
 			cout << "Idx neigh idx=6 iface " << i << " : " << idxneigh[j] << endl;
 		}

@@ -151,6 +151,14 @@ uint32_t (*Class_Octant::getNodes())[DIM] {
 // Other methods													    			   //
 // =================================================================================== //
 
+Class_Octant Class_Octant::buildLastDesc() {
+	uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL - level)) - 1;
+	Class_Octant last_desc(MAX_LEVEL,x+delta,y+delta,z+delta);
+	return last_desc;
+}
+
+// =================================================================================== //
+
 Class_Octant* Class_Octant::buildChildren() {
 	uint8_t xf,yf,zf;
 
@@ -493,6 +501,6 @@ uint64_t* Class_Octant::computeVirtualMorton(uint8_t iface,
 		return computeHalfSizeMorton(iface,
 									sizeneigh);
 	}
-}
+		}
+
 // =================================================================================== //
-//TODO METHODS FOR LAST AND FIRST DESCENDANTS OF AN OCTANT

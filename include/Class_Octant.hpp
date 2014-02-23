@@ -97,6 +97,7 @@ private:
 	// Other methods ----------------------------------------------------------------- //
 
 public:
+	Class_Octant	buildLastDesc();								// Build last descendant of octant and return the last descendant octant
 	Class_Octant*	buildChildren();								// Builds children of octant and return a pointer to an ordered array children[nchildren]
 	uint64_t* 		computeHalfSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
 										  uint8_t & sizehf);		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
