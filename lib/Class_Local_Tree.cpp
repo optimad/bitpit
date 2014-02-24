@@ -93,7 +93,7 @@ const Class_Octant& Class_Local_Tree::extractOctant(uint64_t idx) const {
 //-------------------------------------------------------------------------------- //
 // Other methods ----------------------------------------------------------------- //
 
-void Class_Local_Tree::refine() {
+bool Class_Local_Tree::refine() {
 
 	// Local variables
 	vector<uint64_t> last_child_index;
@@ -101,6 +101,7 @@ void Class_Local_Tree::refine() {
 	uint64_t idx, ich, nocts;
 	uint64_t offset = 0, blockidx;
 	uint8_t nchm1 = nchildren-1;
+	bool dorefine = false;
 
 	nocts = octants.size();
 	for (idx=0; idx<nocts; idx++){
@@ -129,6 +130,9 @@ void Class_Local_Tree::refine() {
 				if (children[0].getLevel() > local_max_depth){
 					local_max_depth = children[0].getLevel();
 				}
+				if (children[0].getMarker() > 0){
+					dorefine = true;
+				}
 				delete []children;
 			}
 			else {
@@ -137,51 +141,134 @@ void Class_Local_Tree::refine() {
 		}
 	}
 	octants.shrink_to_fit();
+	return dorefine;
 }
 
 //-------------------------------------------------------------------------------- //
 
-void Class_Local_Tree::recursiveRefine() {
+bool Class_Local_Tree::coarse() {
 
 	// Local variables
-	uint64_t idx, nocts;
-	bool dorefine = true;
-
-	while(dorefine){
-		dorefine = false;
-		nocts = octants.size();
-		for (idx=0; idx<nocts; idx++){
-			if(octants[idx].getMarker() && octants[idx].getLevel() < MAX_LEVEL){
-				dorefine = true;
-				break;
-			}
-		}
-		refine();
-	}
-}
-
-//-------------------------------------------------------------------------------- //
-
-void Class_Local_Tree::coarse() {
-
-	// Local variables
-	vector<uint64_t> first_child_index;
+	vector<uint32_t> first_child_index;
+	vector<uint32_t> first_child_index_for_ghosts;
+	vector<uint8_t>  nbrothers_for_ghosts;
 	Class_Octant father;
-	uint64_t idx, idx2, ich, nocts;
+	uint64_t idx, idx2, ich, nocts, nghosts;
 	uint64_t offset = 0, blockidx;
+	int8_t markerfather, nbrothers;
 	uint8_t nchm1 = nchildren-1, nmarker, iface;
 	uint32_t nidx = 0;
+	bool docoarse = false;
 
-	nocts = octants.size();
+	nocts   = octants.size();
+	nghosts = ghosts.size();
 
+
+	//TODO DA DEBUGGARE E SICURAMENTE DA FINIRE O DA CAMBIARE (TROPPO COSTOSO??) !!!
+	// Check and coarse in ghost
+	// If refined the father goes to the lower processor ...
+	for (idx=0; idx<nghosts; idx++){
+		if(ghosts[idx].getMarker() < 0 && ghosts[idx].getLevel() > 0){
+			nmarker = 0;
+			father = ghosts[idx].buildFather();
+			// Check if family is to be refined
+			for (idx2=idx; idx2<idx+nchildren; idx2++){
+				if (idx2<nghosts){
+					if(ghosts[idx2].getMarker() < 0 && ghosts[idx2].buildFather() == father){
+						nmarker++;
+					}
+				}
+			}
+			if (nmarker != nchildren){
+				bool first_child = false;
+				nbrothers = 0;
+				for (idx2=0; idx2<nchildren; idx2++){
+					if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
+						nmarker++;
+						if (!first_child){
+							first_child_index_for_ghosts.push_back(idx2);
+							first_child = true;
+							nbrothers++;
+						}
+						if (nmarker == nchildren){
+							nbrothers_for_ghosts.push_back(nbrothers);
+							nidx += nbrothers + 1;
+						}
+					}
+				}
+				first_child = false;
+				nbrothers = 0;
+				for (idx2=nocts-nchildren; idx2<nocts; idx2++){
+					if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
+						nmarker++;
+						if (!first_child){
+							first_child_index_for_ghosts.push_back(idx2);
+							first_child = true;
+							nbrothers++;
+						}
+						if (nmarker == nchildren){
+							nbrothers_for_ghosts.push_back(nbrothers);
+							nidx += nbrothers;
+						}
+					}
+				}
+			}
+		}
+	}
+	if (nidx != 0){
+		uint32_t nblock = nocts - nidx;
+		nidx = 0;
+		for (idx=0; idx<nocts; idx++){
+			for (idx=first_child_index_for_ghosts[0]; idx<nblock; idx++){
+				if (idx+offset == first_child_index_for_ghosts[nidx]){
+					markerfather = -MAX_LEVEL;
+					father = octants[idx+offset].buildFather();
+					for(idx2=0; idx2<nbrothers_for_ghosts[nidx]+1; idx2++){
+						if (markerfather < octants[idx+offset+idx2].getMarker()-1){
+							markerfather = octants[idx+offset+idx2].getMarker()-1;
+						}
+						for (iface=0; iface<nface; iface++){
+							father.info[iface] = (father.info[iface] || octants[idx+offset+idx2].info[iface]);
+							father.info[iface+nface] = (father.info[iface+nface] || octants[idx+offset+idx2].info[iface+nface]);
+						}
+						father.info[13] = true;
+						father.setMarker(markerfather);
+						if (markerfather < 0){
+							docoarse = true;
+						}
+						if(idx+offset<nchildren){
+							offset += nbrothers_for_ghosts[nidx];
+							octants[idx] = octants[idx+offset];
+							nidx++;
+						}
+						else{
+							octants[idx] = father;
+							offset += nbrothers_for_ghosts[nidx];
+							nidx++;
+						}
+					}
+				}
+				else{
+					octants[idx] = octants[idx+offset];
+				}
+			}
+		}
+	}
+	octants.resize(nocts-offset);
+	octants.shrink_to_fit();
+
+	// Check and coarse internal octants
+	offset = 0;
 	for (idx=0; idx<nocts; idx++){
 		if(octants[idx].getMarker() < 0 && octants[idx].getLevel() > 0){
 			nmarker = 0;
 			father = octants[idx].buildFather();
 			// Check if family is to be refined
-			for (idx2=idx; idx2<idx+nchildren+1; idx2++){
-				if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
-					nmarker++;
+			for (idx2=idx; idx2<idx+nchildren; idx2++){
+				if (idx2<nocts){
+					if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
+						nmarker++;
+					}
 				}
 			}
 			if (nmarker == nchildren){
@@ -201,16 +288,23 @@ void Class_Local_Tree::coarse() {
 		uint32_t nblock = nocts - nidx*nchm1;
 		nidx = 0;
 		for (idx=first_child_index[0]; idx<nblock; idx++){
-//			if (octants[idx+offset].getMarker() < 0){
 			if (idx+offset == first_child_index[nidx]){
+				markerfather = -MAX_LEVEL;
 				father = octants[idx+offset].buildFather();
 				for(idx2=0; idx2<nchildren; idx2++){
+					if (markerfather < octants[idx+offset+idx2].getMarker()-1){
+						markerfather = octants[idx+offset+idx2].getMarker()-1;
+					}
 					for (iface=0; iface<nface; iface++){
 						father.info[iface] = (father.info[iface] || octants[idx+offset+idx2].info[iface]);
 						father.info[iface+nface] = (father.info[iface+nface] || octants[idx+offset+idx2].info[iface+nface]);
 					}
 				}
 				father.info[13] = true;
+				father.setMarker(markerfather);
+				if (markerfather < 0){
+					docoarse = true;
+				}
 				octants[idx] = father;
 				offset += nchm1;
 				nidx++;
@@ -222,27 +316,8 @@ void Class_Local_Tree::coarse() {
 	}
 	octants.resize(nocts-offset);
 	octants.shrink_to_fit();
-}
+	return docoarse;
 
-//-------------------------------------------------------------------------------- //
-
-void Class_Local_Tree::recursiveCoarse() {
-
-	// Local variables
-	uint64_t idx, nocts;
-	bool docoarse = true;
-
-	while(docoarse){
-		docoarse = false;
-		nocts = octants.size();
-		for (idx=0; idx<nocts; idx++){
-			if(octants[idx].getMarker()<0 && octants[idx].getLevel() > 0){
-				docoarse = true;
-				break;
-			}
-		}
-		coarse();
-	}
 }
 
 //-------------------------------------------------------------------------------- //

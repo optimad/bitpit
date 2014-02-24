@@ -101,11 +101,9 @@ private:
 
 public:
 	const Class_Octant&	extractOctant(uint64_t idx) const ;
-	void			refine();									// Refine local tree: refine one time octants with marker >0
-	void			recursiveRefine();							// Refine recursively local tree: refine n-time octants with marker=n
-	void			coarse();									// Coarse local tree: coarse one time family of octants with marker <0
+	bool			refine();									// Refine local tree: refine one time octants with marker >0
+	bool			coarse();									// Coarse local tree: coarse one time family of octants with marker <0
 																// (if at least one octant of family has marker>=0 set marker=0 for the entire family)
-	void			recursiveCoarse();							// Coarse recursively local tree: coarse n-time octants with marker=-n
 	void       		updateLocalMaxDepth();						// Update max depth reached in local tree
 	void			computeConnectivity();						// Computes nodes vector and connectivity of octants of local tree
 	void			clearConnectivity();						// Clear nodes vector and connectivity of octants of local tree
