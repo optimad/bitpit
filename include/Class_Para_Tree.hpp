@@ -15,6 +15,8 @@
 #include "Class_Octant.hpp"
 #include "Class_Local_Tree.hpp"
 #include <cstdint>
+#include <iterator>
+#include <set>
 #include "mpi.h"
 
 
@@ -61,6 +63,8 @@ public:
 	void updateLoadBalance();
 	void computePartition(uint64_t* partition);
 	void buildGhosts();
+	int findOwner(const uint64_t & morton);
+	void setPboundGhosts(); // set pbound and build ghosts after static load balance
 };
 
 #endif /* CLASS_PARA_TREE_H_ */

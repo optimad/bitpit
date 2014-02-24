@@ -21,18 +21,18 @@ int main(int argc, char *argv[]) {
 
 	Class_Para_Tree ptree;
 
-	ptree.octree.setMarker(0,2);
+	ptree.octree.setMarker(0,1);
 	ptree.octree.refine();
 	ptree.updateRefine();
-	ptree.octree.setMarker(4,4);
-	ptree.octree.refine();
-	ptree.updateRefine();
-	ptree.octree.refine();
-	ptree.updateRefine();
-	ptree.octree.refine();
-	ptree.updateRefine();
-	ptree.octree.refine();
-	ptree.updateRefine();
+//	ptree.octree.setMarker(4,4);
+//	ptree.octree.refine();
+//	ptree.updateRefine();
+//	ptree.octree.refine();
+//	ptree.updateRefine();
+//	ptree.octree.refine();
+//	ptree.updateRefine();
+//	ptree.octree.refine();
+//	ptree.updateRefine();
 	cout << "I'm " << ptree.rank << " and max_depth is " << (int)ptree.max_depth << endl;
 	cout << "I'm " << ptree.rank << " and global_num_octants is " << ptree.global_num_octants << endl;
 	cout << "I'm " << ptree.rank << " and partition_range_globalidx";
@@ -52,6 +52,8 @@ int main(int argc, char *argv[]) {
 	for(int i = 0; i < ptree.nproc; ++i)
 		cout << ptree.partition_last_desc[i] << " ";
 	cout << "as last descendant partition" << endl;
+
+	ptree.setPboundGhosts();
 
 	ptree.octree.computeConnectivity();
 	ptree.octree.computeghostsConnectivity();

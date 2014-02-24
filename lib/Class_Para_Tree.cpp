@@ -129,3 +129,58 @@ void Class_Para_Tree::buildGhosts() {
 
 
 }
+
+int Class_Para_Tree::findOwner(const uint64_t & morton) {
+	int p = -1;
+	int length = nproc;
+	int beg = 0;
+	int end = nproc -1;
+	int seed = nproc/2;
+	while(beg != end){
+		if(morton <= partition_last_desc[seed]){
+			end = seed;
+			length = seed + 1;
+		}
+		else{
+			beg = seed + 1;
+			length = end - seed -1;
+		}
+		seed = beg + length/2;
+	}
+	p = beg;
+	return p;
+}
+
+void Class_Para_Tree::setPboundGhosts() {
+	Class_Local_Tree::OctantsType::iterator end = octree.octants.end();
+	Class_Local_Tree::OctantsType::iterator begin = octree.octants.begin();
+	map<int,vector<uint64_t> > bordersPerProc;
+	for(Class_Local_Tree::OctantsType::iterator it = begin; it != end; ++it){
+		set<int> procs;
+		for(uint8_t i = 0; i < nface; ++i){
+			if(it->getBound(i) == false){
+				uint8_t virtualNeighborsSize = 0;
+				uint64_t* virtualNeighbors = it->computeVirtualMorton(i,max_depth,virtualNeighborsSize);
+				uint8_t maxDelta = virtualNeighborsSize/2;
+				for(int j = 0; j < maxDelta; ++j){
+					int pBegin = findOwner(virtualNeighbors[j]);
+					int pEnd = findOwner(virtualNeighbors[virtualNeighborsSize - 1 - j]);
+					procs.insert(pBegin);
+					procs.insert(pEnd);
+					if(pBegin == pEnd || pBegin == pEnd - 1)
+						break;
+				}
+			}
+		}
+		set<int>::iterator pitend = procs.end();
+		for(set<int>::iterator pit = procs.begin(); pit != pitend; ++pit){
+			int p = *pit;
+			if(p != rank){
+				bordersPerProc[p].push_back(distance(begin,it));
+				vector<uint64_t> & bordersSingleProc = bordersPerProc[p];
+				if(bordersSingleProc.capacity() - bordersSingleProc.size() < 2)
+					bordersSingleProc.reserve(2*bordersSingleProc.size());
+			}
+		}
+	}
+}
