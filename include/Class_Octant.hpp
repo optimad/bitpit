@@ -49,13 +49,14 @@ private:
 
 
 	// ------------------------------------------------------------------------------- //
-	// CONSTRUCTORS ------------------------------------------------------------------ //
+	// CONSTRUCTORS AND OPERATORS----------------------------------------------------- //
 
 public:
 	Class_Octant();
 	Class_Octant(int8_t level, int32_t x, int32_t y, int32_t z);
 	Class_Octant(const Class_Octant &octant);
 
+	bool operator ==(const Class_Octant & oct2);	// Check if two octants are equal (no check on info)
 
 	// ------------------------------------------------------------------------------- //
 	// METHODS ----------------------------------------------------------------------- //
@@ -87,6 +88,7 @@ private:
 public:
 	uint32_t	getSize() const;					// Get the size of octant
 	uint32_t	getVolume() const;					// Get the volume of octant
+	double*		getCenter();						// Get a pointer to an array of DIM with the coordinates of the center of octant
 	uint32_t	(*getNodes())[DIM];					// Get a pointer to the array (size [nnodes][3]) with the nodes of octant
 	uint64_t	computeMorton() const;				// Compute Morton index of the octant (without level)
 	uint64_t	computeMorton();
@@ -97,8 +99,9 @@ private:
 	// Other methods ----------------------------------------------------------------- //
 
 public:
-	Class_Octant	buildLastDesc();								// Build last descendant of octant and return the last descendant octant
-	Class_Octant*	buildChildren();								// Builds children of octant and return a pointer to an ordered array children[nchildren]
+	Class_Octant	buildLastDesc();								// Build last descendant of octant and return the last descendant octant (no info update)
+	Class_Octant	buildFather();									// Build father of octant and return the father octant (no info update)
+	Class_Octant*	buildChildren();								// Builds children of octant and return a pointer to an ordered array children[nchildren] (info update)
 	uint64_t* 		computeHalfSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
 										  uint8_t & sizehf);		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
 	uint64_t* 		computeMinSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)

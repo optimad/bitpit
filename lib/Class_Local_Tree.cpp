@@ -141,6 +141,112 @@ void Class_Local_Tree::refine() {
 
 //-------------------------------------------------------------------------------- //
 
+void Class_Local_Tree::recursiveRefine() {
+
+	// Local variables
+	uint64_t idx, nocts;
+	bool dorefine = true;
+
+	while(dorefine){
+		dorefine = false;
+		nocts = octants.size();
+		for (idx=0; idx<nocts; idx++){
+			if(octants[idx].getMarker() && octants[idx].getLevel() < MAX_LEVEL){
+				dorefine = true;
+				break;
+			}
+		}
+		refine();
+	}
+}
+
+//-------------------------------------------------------------------------------- //
+
+void Class_Local_Tree::coarse() {
+
+	// Local variables
+	vector<uint64_t> first_child_index;
+	Class_Octant father;
+	uint64_t idx, idx2, ich, nocts;
+	uint64_t offset = 0, blockidx;
+	uint8_t nchm1 = nchildren-1, nmarker, iface;
+	uint32_t nidx = 0;
+
+	nocts = octants.size();
+
+	for (idx=0; idx<nocts; idx++){
+		if(octants[idx].getMarker() < 0 && octants[idx].getLevel() > 0){
+			nmarker = 0;
+			father = octants[idx].buildFather();
+			// Check if family is to be refined
+			for (idx2=idx; idx2<idx+nchildren+1; idx2++){
+				if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
+					nmarker++;
+				}
+			}
+			if (nmarker == nchildren){
+				nidx++;
+				first_child_index.push_back(idx);
+				idx = idx2-1;
+			}
+			else{
+				octants[idx].setMarker(0);
+			}
+		}
+		else{
+			octants[idx].info[13] = false;
+		}
+	}
+	if (nidx!=0){
+		uint32_t nblock = nocts - nidx*nchm1;
+		nidx = 0;
+		for (idx=first_child_index[0]; idx<nblock; idx++){
+//			if (octants[idx+offset].getMarker() < 0){
+			if (idx+offset == first_child_index[nidx]){
+				father = octants[idx+offset].buildFather();
+				for(idx2=0; idx2<nchildren; idx2++){
+					for (iface=0; iface<nface; iface++){
+						father.info[iface] = (father.info[iface] || octants[idx+offset+idx2].info[iface]);
+						father.info[iface+nface] = (father.info[iface+nface] || octants[idx+offset+idx2].info[iface+nface]);
+					}
+				}
+				father.info[13] = true;
+				octants[idx] = father;
+				offset += nchm1;
+				nidx++;
+			}
+			else{
+				octants[idx] = octants[idx+offset];
+			}
+		}
+	}
+	octants.resize(nocts-offset);
+	octants.shrink_to_fit();
+}
+
+//-------------------------------------------------------------------------------- //
+
+void Class_Local_Tree::recursiveCoarse() {
+
+	// Local variables
+	uint64_t idx, nocts;
+	bool docoarse = true;
+
+	while(docoarse){
+		docoarse = false;
+		nocts = octants.size();
+		for (idx=0; idx<nocts; idx++){
+			if(octants[idx].getMarker()<0 && octants[idx].getLevel() > 0){
+				docoarse = true;
+				break;
+			}
+		}
+		coarse();
+	}
+}
+
+//-------------------------------------------------------------------------------- //
+
 void Class_Local_Tree::computeConnectivity() {
 	map<uint64_t, vector<uint64_t> > mapnodes;
 	map<uint64_t, vector<uint64_t> >::iterator iter, iterend;
@@ -188,6 +294,11 @@ void Class_Local_Tree::computeConnectivity() {
 void Class_Local_Tree::clearConnectivity() {
 	u32vector2D().swap(nodes);
 	u64vector2D().swap(connectivity);
+}
+
+void Class_Local_Tree::updateConnectivity() {
+	clearConnectivity();
+	computeConnectivity();
 }
 
 //-------------------------------------------------------------------------------- //
@@ -239,6 +350,11 @@ void Class_Local_Tree::computeghostsConnectivity() {
 void Class_Local_Tree::clearghostsConnectivity() {
 	u32vector2D().swap(ghostsnodes);
 	u64vector2D().swap(ghostsconnectivity);
+}
+
+void Class_Local_Tree::updateghostsConnectivity() {
+	clearghostsConnectivity();
+	computeghostsConnectivity();
 }
 
 
