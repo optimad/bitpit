@@ -186,4 +186,12 @@ void Class_Para_Tree::setPboundGhosts() {
 			}
 		}
 	}
+	char buff[14];
+	int position;
+	MPI_Pack(&octree.octants[0].x, 1, MPI_UINT32_T, buff, 14, &position, MPI_COMM_WORLD);
+	MPI_Pack(&octree.octants[0].y, 1, MPI_UINT32_T, buff, 14, &position, MPI_COMM_WORLD);
+	MPI_Pack(&octree.octants[0].z, 1, MPI_UINT32_T, buff, 14, &position, MPI_COMM_WORLD);
+	MPI_Pack(&octree.octants[0].level, 1, MPI_UINT8_T, buff, 14, &position, MPI_COMM_WORLD);
+	MPI_Pack(&octree.octants[0].marker, 1, MPI_INT8_T, buff, 14, &position, MPI_COMM_WORLD);
+
 }
