@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
 
 	ptree.setPboundGhosts();
 
-	int buff[1000];
+	char buff[1000];
 	int position;
 	int numero = 37;
 	MPI_Pack(&numero, 1, MPI_INT, buff, 1000, &position, MPI_COMM_WORLD);
