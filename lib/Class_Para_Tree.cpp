@@ -118,7 +118,7 @@ void Class_Para_Tree::updateRefine() {
 	}
 }
 
-void Class_Para_Tree::refine() {
+void Class_Para_Tree::adapt() {
 	octree.refine();
 	updateRefine();
 }

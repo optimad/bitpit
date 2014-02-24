@@ -56,7 +56,7 @@ public:
 	// ------------------------------------------------------------------------------- //
 	// METHODS ----------------------------------------------------------------------- //
 	void loadBalance();
-	void refine();
+	void adapt();
 	void updateRefine();
 	void updateLoadBalance();
 	void computePartition(uint64_t* partition);
