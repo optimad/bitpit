@@ -165,7 +165,7 @@ void Class_Para_Tree::setPboundGhosts() {
 				uint8_t virtualNeighborsSize = 0;
 				uint64_t* virtualNeighbors = it->computeVirtualMorton(i,max_depth,virtualNeighborsSize);
 				uint8_t maxDelta = virtualNeighborsSize/2;
-				for(int j = 0; j < maxDelta; ++j){
+				for(int j = 0; j <= maxDelta; ++j){
 					int pBegin = findOwner(virtualNeighbors[j]);
 					int pEnd = findOwner(virtualNeighbors[virtualNeighborsSize - 1 - j]);
 					procs.insert(pBegin);
