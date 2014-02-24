@@ -186,10 +186,17 @@ void Class_Para_Tree::setPboundGhosts() {
 			}
 		}
 	}
-	//TODO build one buff for each proc
-	char buff[14];
+	//TODO declare a class containing the communicator buffer and its size
+	//TODO build a map with proc as label and previous class as value
+	//TODO communicate borders
+	for(){
+
+
+	}
+	int
+	char buff[];
 	int position = 0;
-	cout << "uint32_t " << sizeof(octree.octants[0].x) << endl;
+	cout << "uint32_t " << sizeof(uint64_t) << endl;
 	cout << "uint32_t " << sizeof(octree.octants[0].y) << endl;
 	MPI_Pack(&octree.octants[0].x, 1, MPI_UINT32_T, buff, 14, &position, MPI_COMM_WORLD);
 	cout << "position 1 "  << position << endl;
