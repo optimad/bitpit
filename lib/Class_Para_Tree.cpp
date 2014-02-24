@@ -139,12 +139,13 @@ int Class_Para_Tree::findOwner(const uint64_t & morton) {
 	while(beg != end){
 		if(morton <= partition_last_desc[seed]){
 			end = seed;
-			length = seed + 1;
+//			length = seed + 1;
 		}
 		else{
-			beg = seed + 1;
-			length = end - seed -1;
+			beg = seed;
+	//	length = end - seed -1;
 		}
+		length = end - beg + 1;
 		seed = beg + length/2;
 	}
 	p = beg;
