@@ -188,29 +188,47 @@ void Class_Para_Tree::setPboundGhosts() {
 		}
 	}
 	//TODO communicate borders
-	map<int,Class_Comm_Buffer> commBuffers;
+	map<int,Class_Comm_Buffer> sendBuffers;
 	map<int,vector<uint64_t> >::iterator mitend = bordersPerProc.end();
 	for(map<int,vector<uint64_t> >::iterator mit = bordersPerProc.begin(); mit != mitend; ++mit){
-		int buffSize = mit->second.size() * (int)ceil((double)octantBytes / (double)(CHAR_BIT/8));
+		int buffSize = mit->second.size() * (int)ceil((double)octantBytes / (double)(CHAR_BIT/8));// + (int)ceil((double)sizeof(int)/(double)(CHAR_BIT/8));
 		int key = mit->first;
 		const vector<uint64_t> & value = mit->second;
-		commBuffers[key] = Class_Comm_Buffer(buffSize,'\0');
+		sendBuffers[key] = Class_Comm_Buffer(buffSize,'\0');
 		int pos = 0;
 		int nofBorders = value.size();
+		//MPI_Pack(&nofBorders,1,MPI_INT,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 		for(int i = 0; i < nofBorders; ++i){
-			MPI_Pack(&octree.octants[value[i]].x,1,MPI_UINT32_T,commBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			MPI_Pack(&octree.octants[value[i]].y,1,MPI_UINT32_T,commBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			MPI_Pack(&octree.octants[value[i]].z,1,MPI_UINT32_T,commBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			MPI_Pack(&octree.octants[value[i]].level,1,MPI_UINT8_T,commBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			MPI_Pack(&octree.octants[value[i]].marker,1,MPI_UINT8_T,commBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			MPI_Pack(&octree.octants[value[i]].x,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			MPI_Pack(&octree.octants[value[i]].y,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			MPI_Pack(&octree.octants[value[i]].z,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			MPI_Pack(&octree.octants[value[i]].level,1,MPI_UINT8_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			MPI_Pack(&octree.octants[value[i]].marker,1,MPI_UINT8_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 			for(int j = 0; j < 16; ++j){
-				MPI_Pack(&octree.octants[value[i]].info[j],1,MPI::BOOL,commBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+				MPI_Pack(&octree.octants[value[i]].info[j],1,MPI::BOOL,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 			}
 		}
 	}
 
+	map<int,int> recvBufferSizePerProc;
+	map<int,Class_Comm_Buffer>::iterator citend = sendBuffers.end();
+	for(map<int,Class_Comm_Buffer>::iterator cit = sendBuffers.begin(); cit != citend; ++cit){
+		recvBufferSizePerProc[cit->first] = 0;
+		//int tag = cit->first + rank;
+		MPI_Status status;
+		error_flag = MPI_Sendrecv(&cit->second.commBufferSize,1,MPI_UINT32_T,cit->first,rank,
+				&recvBufferSizePerProc[cit->first],1,MPI_UINT32_T,cit->first,cit->first,MPI_COMM_WORLD,&status);
+	}
 
 
+
+//	int counter = 0;
+//	map<int,Class_Comm_Buffer>::iterator citend = sendBuffers.end();
+//	for(map<int,Class_Comm_Buffer>::iterator cit = sendBuffers.begin(); cit != citend; ++cit){
+//		int tag = counter + rank;
+//		//error_flag = MPI_Sendrecv(&cit->second.commBuffer,cit->second.sendBuffersize,MPI_CHAR,cit->first,tag,);
+//		++counter;
+//	}
 
 
 	char buff[2];
