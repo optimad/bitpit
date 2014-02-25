@@ -61,7 +61,6 @@ void Class_Para_Tree::updateLoadBalance() {
 	//update partition_range_position
 	uint64_t lastDescMorton = octree.getLastDesc().computeMorton();
 	error_flag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,partition_last_desc,1,MPI_UINT64_T,MPI_COMM_WORLD);
-	//TODO aggiornare pbound serial/parallel
 	serial = false;
 }
 
@@ -189,20 +188,27 @@ void Class_Para_Tree::setPboundGhosts() {
 		}
 	}
 	//TODO communicate borders
-	Class_Comm_Buffer commBuff;
-	Class_Comm_Buffer commBuff2(500,'a');
-	Class_Comm_Buffer commBuff3(commBuff2);
-	commBuff = commBuff3;
-//	Class_Comm_Buffer commBuff3(commBuff2);
 	map<int,Class_Comm_Buffer> commBuffers;
-	int counter = 0;
-	vector<bool> ciccio(1000000,true);
 	map<int,vector<uint64_t> >::iterator mitend = bordersPerProc.end();
 	for(map<int,vector<uint64_t> >::iterator mit = bordersPerProc.begin(); mit != mitend; ++mit){
 		int buffSize = mit->second.size() * (int)ceil((double)octantBytes / (double)CHAR_BIT);
-		commBuffers[mit->first] = Class_Comm_Buffer(buffSize,'\0');
+		int key = mit->first;
+		const vector<uint64_t> & value = mit->second;
+		commBuffers[key] = Class_Comm_Buffer(buffSize,'\0');
 		//TODO fill char buffer
-
+		int pos = 0;
+		int nofBorders = value.size();
+		for(int i = 0; i < nofBorders; ++i){
+			MPI_Pack(&octree.octants[value[i]].x,1,MPI_UINT32_T,commBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			MPI_Pack(&octree.octants[value[i]].y,1,MPI_UINT32_T,commBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			MPI_Pack(&octree.octants[value[i]].z,1,MPI_UINT32_T,commBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			MPI_Pack(&octree.octants[value[i]].level,1,MPI_UINT8_T,commBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			MPI_Pack(&octree.octants[value[i]].marker,1,MPI_UINT8_T,commBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			for(int j = 0; j < 16; ++j){
+				MPI_Pack(&octree.octants[value[i]].info[j],1,MPI::BOOL,commBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			}
+		}
+		cout << "Position after MPI_Pack" << pos << endl;
 	}
 	char buff[2];
 	int position = 0;

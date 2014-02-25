@@ -352,7 +352,6 @@ bool Class_Local_Tree::coarse() {
 	setLastDesc();
 
 	// Set index for start and end check for ghosts
-	// TODO UPDATE PBOUND AFTER FATHER GOES AWAY !!!
 	if (ghosts.size()){
 		idx1_gh = 0;
 		while(ghosts[idx1_gh].computeMorton() < first_desc.computeMorton()){
