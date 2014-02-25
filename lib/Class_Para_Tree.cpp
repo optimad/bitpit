@@ -204,15 +204,6 @@ void Class_Para_Tree::setPboundGhosts() {
 		//TODO fill char buffer
 
 	}
-//	char* ciccio;
-//	ciccio = NULL;
-//	delete [] ciccio;
-
-	//	for(){
-//
-//
-//	}
-//	int
 	char buff[2];
 	int position = 0;
 	cout << "uint32_t " << sizeof(uint64_t) << endl;
