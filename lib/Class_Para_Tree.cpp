@@ -191,11 +191,10 @@ void Class_Para_Tree::setPboundGhosts() {
 	map<int,Class_Comm_Buffer> commBuffers;
 	map<int,vector<uint64_t> >::iterator mitend = bordersPerProc.end();
 	for(map<int,vector<uint64_t> >::iterator mit = bordersPerProc.begin(); mit != mitend; ++mit){
-		int buffSize = mit->second.size() * (int)ceil((double)octantBytes / (double)CHAR_BIT);
+		int buffSize = mit->second.size() * (int)ceil((double)octantBytes / (double)(CHAR_BIT/8));
 		int key = mit->first;
 		const vector<uint64_t> & value = mit->second;
 		commBuffers[key] = Class_Comm_Buffer(buffSize,'\0');
-		//TODO fill char buffer
 		int pos = 0;
 		int nofBorders = value.size();
 		for(int i = 0; i < nofBorders; ++i){
@@ -208,8 +207,12 @@ void Class_Para_Tree::setPboundGhosts() {
 				MPI_Pack(&octree.octants[value[i]].info[j],1,MPI::BOOL,commBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 			}
 		}
-		cout << "Position after MPI_Pack" << pos << endl;
 	}
+
+
+
+
+
 	char buff[2];
 	int position = 0;
 	cout << "uint32_t " << sizeof(uint64_t) << endl;
