@@ -329,15 +329,22 @@ bool Class_Local_Tree::coarse() {
 	vector<uint32_t> first_child_index;
 	Class_Octant father;
 	uint32_t idx, idx2, ich, nocts, nghosts;
-	uint32_t offset = 0;
+	uint32_t offset;
 	uint32_t idx1_gh, idx2_gh;
-	uint32_t nidx = 0;
+	uint32_t nidx;
 	int8_t markerfather, marker;
 	uint8_t nbro, nstart, nend;
 	uint8_t nchm1 = nchildren-1, iface;
 	uint8_t oppface[nface];
 	bool docoarse = false;
 
+	//------------------------------------------ //
+	// Initialization
+
+	nbro = nstart = nend = 0;
+	nidx = offset = 0;
+
+	idx1_gh = idx2_gh = 0;
 	// Set matrix of opposite faces
 	for (iface=0; iface<DIM; iface++){
 		oppface[2*iface]   = 2*iface+1;
@@ -347,18 +354,18 @@ bool Class_Local_Tree::coarse() {
 	nocts   = octants.size();
 	nghosts = ghosts.size();
 
-	// Set first and last desc (even if already calculated)
+	// Init first and last desc (even if already calculated)
 	setFirstDesc();
 	setLastDesc();
 
+	//------------------------------------------ //
+
 	// Set index for start and end check for ghosts
 	if (ghosts.size()){
-		idx1_gh = 0;
 		while(ghosts[idx1_gh].computeMorton() < first_desc.computeMorton()){
 			idx1_gh++;
 		}
 		idx1_gh--;
-		idx2_gh = 0;
 		while(ghosts[idx2_gh].computeMorton() < last_desc.computeMorton()){
 			idx2_gh++;
 		}
@@ -409,6 +416,7 @@ bool Class_Local_Tree::coarse() {
 			}
 		}
 	}
+
 
 	// Check and coarse internal octants
 	for (idx=0; idx<nocts; idx++){

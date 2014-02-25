@@ -22,11 +22,11 @@ int main(int argc, char *argv[]) {
 
 	Class_Para_Tree ptree;
 
-	ptree.octree.setMarker(0,3);
+	ptree.octree.setMarker(0,1);
 	while(ptree.octree.refine());
 	uint64_t numoctants = ptree.octree.getNumOctants();
 
-	for (int l=0; l<6; l++){
+	for (int l=0; l<4; l++){
 		for (int i=0; i<numoctants; i++){
 			double* center;
 			Class_Octant oct = ptree.octree.extractOctant(i);
@@ -51,8 +51,9 @@ int main(int argc, char *argv[]) {
 	ptree.octree.clearConnectivity();
 
 
+	cout << "Coarse " << endl;
 	numoctants = ptree.octree.getNumOctants();
-	for (int l=0; l<8; l++){
+	for (int l=0; l<2; l++){
 		for (int i=0; i<numoctants; i++){
 			double* center;
 			Class_Octant oct = ptree.octree.extractOctant(i);
@@ -65,6 +66,7 @@ int main(int argc, char *argv[]) {
 				}
 			}
 		}
+		cout << "Num Octants : " << numoctants << endl;
 		ptree.octree.coarse();
 		numoctants = ptree.octree.getNumOctants();
 		cout << "Num Octants : " << numoctants << endl;
