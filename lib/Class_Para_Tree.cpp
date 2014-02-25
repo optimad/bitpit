@@ -189,9 +189,10 @@ void Class_Para_Tree::setPboundGhosts() {
 		}
 	}
 	//TODO communicate borders
-//	Class_Comm_Buffer commBuff;
+	Class_Comm_Buffer commBuff;
 	Class_Comm_Buffer commBuff2(500,'a');
 	Class_Comm_Buffer commBuff3(commBuff2);
+	commBuff = commBuff3;
 //	Class_Comm_Buffer commBuff3(commBuff2);
 	map<int,Class_Comm_Buffer> commBuffers;
 	int counter = 0;
