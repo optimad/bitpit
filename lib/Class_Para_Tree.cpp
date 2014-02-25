@@ -189,18 +189,23 @@ void Class_Para_Tree::setPboundGhosts() {
 		}
 	}
 	//TODO communicate borders
-//	Class_Comm_Buffer commBuff(1000,'\0');
-//	Class_Comm_Buffer commBuff2(500,'a');
-//	commBuff2 = commBuff;
+//	Class_Comm_Buffer commBuff;
+	Class_Comm_Buffer commBuff2(500,'a');
+	Class_Comm_Buffer commBuff3(commBuff2);
 //	Class_Comm_Buffer commBuff3(commBuff2);
 	map<int,Class_Comm_Buffer> commBuffers;
 	int counter = 0;
 	map<int,vector<uint64_t> >::iterator mitend = bordersPerProc.end();
 	for(map<int,vector<uint64_t> >::iterator mit = bordersPerProc.begin(); mit != mitend; ++mit){
-		//commBuffers[mit->first] = Class_Comm_Buffer(mit->second.size(),'\0');
-		commBuffers[mit->first] = Class_Comm_Buffer();
+		//commBuffers[mit->first];
+		//= Class_Comm_Buffer(mit->second.size(),'\0');
+
 		//TODO fill char buffer
 	}
+//	char* ciccio;
+//	ciccio = NULL;
+//	delete [] ciccio;
+
 	//	for(){
 //
 //
