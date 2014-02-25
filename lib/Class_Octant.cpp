@@ -11,7 +11,7 @@
 #include "Class_Octant.hpp"
 
 // =================================================================================== //
-// CONSTRUCTORS                                                                        //
+// CONSTRUCTORS AND OPERATORS                                                          //
 // =================================================================================== //
 Class_Octant::Class_Octant(){
 	x = y = z = 0;
@@ -47,6 +47,15 @@ Class_Octant::Class_Octant(const Class_Octant &octant){
 	marker = octant.marker;
 	memcpy(info,octant.info,16);
 };
+
+bool Class_Octant::operator ==(const Class_Octant & oct2){
+	bool check = true;
+	check = check && (x == oct2.x);
+	check = check && (y == oct2.y);
+	check = check && (z == oct2.z);
+	check = check && (level == oct2.level);
+	return check;
+}
 
 // =================================================================================== //
 // METHODS                                                                             //
@@ -147,6 +156,21 @@ uint32_t (*Class_Octant::getNodes())[DIM] {
 	return nodes;
 }
 
+double*	Class_Octant::getCenter() {
+	uint8_t		i;
+	double	dh;
+
+	dh = sqrt(double(getSize()));
+	double *center = new double[DIM];
+
+	center[0] = x + dh;
+	center[1] = y + dh;
+#if DIM == 3
+	center[2] = z + dh;
+#endif
+	return center;
+}
+
 // =================================================================================== //
 // Other methods													    			   //
 // =================================================================================== //
@@ -155,6 +179,18 @@ Class_Octant Class_Octant::buildLastDesc() {
 	uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL - level)) - 1;
 	Class_Octant last_desc(MAX_LEVEL,x+delta,y+delta,z+delta);
 	return last_desc;
+}
+
+// =================================================================================== //
+
+Class_Octant Class_Octant::buildFather() {
+	uint32_t deltax = x%(uint32_t(pow(2.0,(double)((uint8_t)MAX_LEVEL - (level-1)))));
+	uint32_t deltay = y%(uint32_t(pow(2.0,(double)((uint8_t)MAX_LEVEL - (level-1)))));
+#if DIM == 3
+	uint32_t deltaz = z%(uint32_t(pow(2.0,(double)((uint8_t)MAX_LEVEL - (level-1)))));
+#endif
+	Class_Octant father(level-1, x-deltax, y-deltay, z-deltaz);
+	return father;
 }
 
 // =================================================================================== //
@@ -336,9 +372,10 @@ uint64_t* Class_Octant::computeHalfSizeMorton(uint8_t iface,
 	dh2 = getSize();
 
 	if (info[iface]){
-		uint64_t* Morton = new uint64_t[0];
+//		uint64_t* Morton = new uint64_t[0];
 		sizehf = 0;
-		return Morton;
+//		return Morton;
+		return NULL;
 	}
 	else{
 		uint64_t* Morton = new uint64_t[nneigh];
@@ -420,9 +457,10 @@ uint64_t* Class_Octant::computeMinSizeMorton(uint8_t iface,
 	nline = uint32_t(pow(2.0,double((maxdepth-level))));
 
 	if (info[iface]){
-		uint64_t* Morton = new uint64_t[0];
+//		uint64_t* Morton = new uint64_t[0];
 		sizem = 0;
-		return Morton;
+//		return Morton;
+		return NULL;
 	}
 	else{
 		uint64_t* Morton = new uint64_t[nneigh];

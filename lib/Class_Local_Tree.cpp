@@ -93,7 +93,7 @@ const Class_Octant& Class_Local_Tree::extractOctant(uint64_t idx) const {
 //-------------------------------------------------------------------------------- //
 // Other methods ----------------------------------------------------------------- //
 
-void Class_Local_Tree::refine() {
+bool Class_Local_Tree::refine() {
 
 	// Local variables
 	vector<uint64_t> last_child_index;
@@ -101,6 +101,7 @@ void Class_Local_Tree::refine() {
 	uint64_t idx, ich, nocts;
 	uint64_t offset = 0, blockidx;
 	uint8_t nchm1 = nchildren-1;
+	bool dorefine = false;
 
 	nocts = octants.size();
 	for (idx=0; idx<nocts; idx++){
@@ -129,6 +130,9 @@ void Class_Local_Tree::refine() {
 				if (children[0].getLevel() > local_max_depth){
 					local_max_depth = children[0].getLevel();
 				}
+				if (children[0].getMarker() > 0){
+					dorefine = true;
+				}
 				delete []children;
 			}
 			else {
@@ -137,6 +141,390 @@ void Class_Local_Tree::refine() {
 		}
 	}
 	octants.shrink_to_fit();
+	return dorefine;
+}
+
+//-------------------------------------------------------------------------------- //
+
+bool Class_Local_Tree::coarse() {
+
+/*
+	{
+
+		//TODO DA TOGLIERE DOPO DEBUG CERTO DEL NUOVO ALGORITMO
+		// Local variables
+		vector<uint32_t> first_child_index;
+		vector<uint32_t> first_child_index_for_ghosts;
+		vector<uint8_t>  nbrothers_for_ghosts;
+		Class_Octant father;
+		uint64_t idx, idx2, ich, nocts, nghosts;
+		uint64_t offset = 0, blockidx;
+		int8_t markerfather, nbrothers;
+		uint8_t nchm1 = nchildren-1, nmarker, iface;
+		uint32_t nidx = 0;
+		bool docoarse = false;
+
+		nocts   = octants.size();
+		nghosts = ghosts.size();
+
+
+		// Check and coarse in ghost
+		// If refined the father goes to the lower processor ...
+		for (idx=0; idx<nghosts; idx++){
+			if(ghosts[idx].getMarker() < 0 && ghosts[idx].getLevel() > 0){
+				nmarker = 0;
+				father = ghosts[idx].buildFather();
+				// Check if family is to be refined
+				for (idx2=idx; idx2<idx+nchildren; idx2++){
+					if (idx2<nghosts){
+						if(ghosts[idx2].getMarker() < 0 && ghosts[idx2].buildFather() == father){
+							nmarker++;
+						}
+					}
+				}
+				if (nmarker != nchildren){
+					bool first_child = false;
+					nbrothers = 0;
+					for (idx2=0; idx2<nchildren; idx2++){
+						if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
+							nmarker++;
+							if (!first_child){
+								first_child_index_for_ghosts.push_back(idx2);
+								first_child = true;
+								nbrothers++;
+							}
+							if (nmarker == nchildren){
+								nbrothers_for_ghosts.push_back(nbrothers);
+								nidx += nbrothers + 1;
+							}
+						}
+					}
+					first_child = false;
+					nbrothers = 0;
+					for (idx2=nocts-nchildren; idx2<nocts; idx2++){
+						if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
+							nmarker++;
+							if (!first_child){
+								first_child_index_for_ghosts.push_back(idx2);
+								first_child = true;
+								nbrothers++;
+							}
+							if (nmarker == nchildren){
+								nbrothers_for_ghosts.push_back(nbrothers);
+								nidx += nbrothers;
+							}
+						}
+					}
+				}
+			}
+		}
+		if (nidx != 0){
+			uint32_t nblock = nocts - nidx;
+			nidx = 0;
+			for (idx=0; idx<nocts; idx++){
+				for (idx=first_child_index_for_ghosts[0]; idx<nblock; idx++){
+					if (idx+offset == first_child_index_for_ghosts[nidx]){
+						markerfather = -MAX_LEVEL;
+						father = octants[idx+offset].buildFather();
+						for(idx2=0; idx2<nbrothers_for_ghosts[nidx]+1; idx2++){
+							if (markerfather < octants[idx+offset+idx2].getMarker()-1){
+								markerfather = octants[idx+offset+idx2].getMarker()-1;
+							}
+							for (iface=0; iface<nface; iface++){
+								father.info[iface] = (father.info[iface] || octants[idx+offset+idx2].info[iface]);
+								father.info[iface+nface] = (father.info[iface+nface] || octants[idx+offset+idx2].info[iface+nface]);
+							}
+							father.info[13] = true;
+							father.setMarker(markerfather);
+							if (markerfather < 0){
+								docoarse = true;
+							}
+							if(idx+offset<nchildren){
+								offset += nbrothers_for_ghosts[nidx];
+								octants[idx] = octants[idx+offset];
+								nidx++;
+							}
+							else{
+								octants[idx] = father;
+								offset += nbrothers_for_ghosts[nidx];
+								nidx++;
+							}
+						}
+					}
+					else{
+						octants[idx] = octants[idx+offset];
+					}
+				}
+			}
+		}
+		octants.resize(nocts-offset);
+		octants.shrink_to_fit();
+
+		// Check and coarse internal octants
+		offset = 0;
+		for (idx=0; idx<nocts; idx++){
+			if(octants[idx].getMarker() < 0 && octants[idx].getLevel() > 0){
+				nmarker = 0;
+				father = octants[idx].buildFather();
+				// Check if family is to be refined
+				for (idx2=idx; idx2<idx+nchildren; idx2++){
+					if (idx2<nocts){
+						if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
+							nmarker++;
+						}
+					}
+				}
+				if (nmarker == nchildren){
+					nidx++;
+					first_child_index.push_back(idx);
+					idx = idx2-1;
+				}
+				else{
+					octants[idx].setMarker(0);
+				}
+			}
+			else{
+				octants[idx].info[13] = false;
+			}
+		}
+		if (nidx!=0){
+			uint32_t nblock = nocts - nidx*nchm1;
+			nidx = 0;
+			for (idx=first_child_index[0]; idx<nblock; idx++){
+				if (idx+offset == first_child_index[nidx]){
+					markerfather = -MAX_LEVEL;
+					father = octants[idx+offset].buildFather();
+					for(idx2=0; idx2<nchildren; idx2++){
+						if (markerfather < octants[idx+offset+idx2].getMarker()-1){
+							markerfather = octants[idx+offset+idx2].getMarker()-1;
+						}
+						for (iface=0; iface<nface; iface++){
+							father.info[iface] = (father.info[iface] || octants[idx+offset+idx2].info[iface]);
+							father.info[iface+nface] = (father.info[iface+nface] || octants[idx+offset+idx2].info[iface+nface]);
+						}
+					}
+					father.info[13] = true;
+					father.setMarker(markerfather);
+					if (markerfather < 0){
+						docoarse = true;
+					}
+					octants[idx] = father;
+					offset += nchm1;
+					nidx++;
+				}
+				else{
+					octants[idx] = octants[idx+offset];
+				}
+			}
+		}
+		octants.resize(nocts-offset);
+		octants.shrink_to_fit();
+		return docoarse;
+
+	}
+*/
+
+
+	// Local variables
+	vector<uint32_t> first_child_index;
+	Class_Octant father;
+	uint64_t idx, idx2, ich, nocts, nghosts;
+	uint64_t offset = 0;
+	uint64_t idx1_gh, idx2_gh;
+	uint32_t nidx = 0;
+	int8_t markerfather, marker;
+	uint8_t nbro, nstart, nend;
+	uint8_t nchm1 = nchildren-1, iface;
+	uint8_t oppface[nface];
+	bool docoarse = false;
+
+	// Set matrix of opposite faces
+	for (iface=0; iface<DIM; iface++){
+		oppface[2*iface]   = 2*iface+1;
+		oppface[2*iface+1] = 2*iface;
+	}
+
+	nocts   = octants.size();
+	nghosts = ghosts.size();
+
+	// Set first and last desc (even if already calculated)
+	setFirstDesc();
+	setLastDesc();
+
+	// Set index for start and end check for ghosts
+	// TODO UPDATE PBOUND AFTER FATHER GOES AWAY !!!
+	if (ghosts.size()){
+		idx1_gh = 0;
+		while(ghosts[idx1_gh].computeMorton() < first_desc.computeMorton()){
+			idx1_gh++;
+		}
+		idx1_gh--;
+		idx2_gh = 0;
+		while(ghosts[idx2_gh].computeMorton() < last_desc.computeMorton()){
+			idx2_gh++;
+		}
+
+		// Start on ghosts
+		if ((ghosts[idx1_gh].getMarker() < 0) & (octants[0].getMarker() < 0)){
+			father = ghosts[idx1_gh].buildFather();
+			nbro = 0;
+			idx = idx1_gh;
+			marker = ghosts[idx].getMarker();
+			while(marker < 0 & ghosts[idx].buildFather() == father){
+				nbro++;
+				marker = ghosts[idx].getMarker();
+				idx--;
+			}
+			nstart = 0;
+			idx = 0;
+			marker = octants[idx].getMarker();
+			while(marker<0 & octants[idx].buildFather() == father){
+				nbro++;
+				marker = octants[idx].getMarker();
+				nstart++;
+				idx++;
+			}
+			if (nbro == nchildren){
+				offset = nstart;
+				// For update pbound of neighbours only check
+				// the odd faces of new father (placed nstart-times
+				// in the first nstart positions of octants)
+				// If there is father after coarse will be the first
+				// element of local octants (lowest Morton)
+				for (int i=0; i<nstart; i++){
+					octants[i] = father;
+				}
+				uint8_t sizeneigh;
+				uint64_t* neigh;
+				bool isghost;
+				for (iface=0; iface<DIM; iface++){
+					uint8_t oddface = ((iface*2)+1);
+					neigh = findNeighbours(nstart-1, oddface, sizeneigh, isghost);
+					for(int i=0; i<(1-isghost)*sizeneigh; i++){
+						octants[neigh[i]].setPbound(oppface[oddface], true);
+					}
+				}
+			}
+			else{
+				nstart == 0;
+			}
+		}
+	}
+
+	// Check and coarse internal octants
+	for (idx=0; idx<nocts; idx++){
+		if(octants[idx].getMarker() < 0 && octants[idx].getLevel() > 0){
+			nbro = 0;
+			father = octants[idx].buildFather();
+			// Check if family is to be refined
+			for (idx2=idx; idx2<idx+nchildren; idx2++){
+				if (idx2<nocts){
+					if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
+						nbro++;
+					}
+				}
+			}
+			if (nbro == nchildren){
+				nidx++;
+				first_child_index.push_back(idx);
+				idx = idx2-1;
+			}
+			else{
+				octants[idx].setMarker(0);
+			}
+		}
+		else{
+			octants[idx].info[13] = false;
+		}
+	}
+	//TODO Da mettere dentro il primo ciclo per renderlo meno costoso
+	if (nidx!=0){
+		uint32_t nblock = nocts - nidx*nchm1 - nstart;
+		nidx = 0;
+		for (idx=0; idx<nblock; idx++){
+			if (idx+offset == first_child_index[nidx]){
+				markerfather = -MAX_LEVEL;
+				father = octants[idx+offset].buildFather();
+				for(idx2=0; idx2<nchildren; idx2++){
+					if (markerfather < octants[idx+offset+idx2].getMarker()+1){
+						markerfather = octants[idx+offset+idx2].getMarker()+1;
+					}
+					for (iface=0; iface<nface; iface++){
+						father.info[iface] = (father.info[iface] || octants[idx+offset+idx2].info[iface]);
+						father.info[iface+nface] = (father.info[iface+nface] || octants[idx+offset+idx2].info[iface+nface]);
+					}
+				}
+				father.info[13] = true;
+				father.setMarker(markerfather);
+				if (markerfather < 0){
+					docoarse = true;
+				}
+				octants[idx] = father;
+				offset += nchm1;
+				nidx++;
+			}
+			else{
+				octants[idx] = octants[idx+offset];
+			}
+		}
+	}
+	octants.resize(nocts-offset);
+	octants.shrink_to_fit();
+	nocts = octants.size();
+
+
+	// End on ghosts
+	if (ghosts.size()){
+		if ((ghosts[idx2_gh].getMarker() < 0) & (octants[nocts-1].getMarker() < 0)){
+			father = ghosts[idx2_gh].buildFather();
+			markerfather = -MAX_LEVEL;
+			nbro = 0;
+			idx = idx2_gh;
+			marker = ghosts[idx].getMarker();
+			while(marker < 0 & ghosts[idx].buildFather() == father){
+				nbro++;
+				marker = ghosts[idx].getMarker();
+				if (markerfather < octants[idx+offset+idx2].getMarker()+1){
+					markerfather = octants[idx+offset+idx2].getMarker()+1;
+				}
+				idx++;
+			}
+			nend = 0;
+			idx = nocts-1;
+			marker = octants[idx].getMarker();
+			while(marker<0 & octants[idx].buildFather() == father){
+				nbro++;
+				marker = octants[idx].getMarker();
+				if (markerfather < octants[idx+offset+idx2].getMarker()+1){
+					markerfather = octants[idx+offset+idx2].getMarker()+1;
+				}
+				nend++;
+				idx--;
+			}
+			if (nbro == nchildren){
+				offset = nend;
+			}
+			else{
+				nend == 0;
+			}
+		}
+		if (nend != 0){
+			for (idx=0; idx < nend; idx++){
+				for (iface=0; iface<nface; iface++){
+					father.info[iface] = (father.info[iface] || octants[nocts-idx].info[iface]);
+					father.info[iface+nface] = (father.info[iface+nface] || octants[nocts-idx].info[iface+nface]);
+				}
+			}
+			father.info[13] = true;
+			father.setMarker(markerfather);
+			if (markerfather < 0){
+				docoarse = true;
+			}
+			octants.resize(nocts-offset);
+			octants.push_back(father);
+		}
+	}
+	return docoarse;
 }
 
 //-------------------------------------------------------------------------------- //
@@ -190,6 +578,11 @@ void Class_Local_Tree::clearConnectivity() {
 	u64vector2D().swap(connectivity);
 }
 
+void Class_Local_Tree::updateConnectivity() {
+	clearConnectivity();
+	computeConnectivity();
+}
+
 //-------------------------------------------------------------------------------- //
 
 void Class_Local_Tree::computeghostsConnectivity() {
@@ -239,6 +632,11 @@ void Class_Local_Tree::computeghostsConnectivity() {
 void Class_Local_Tree::clearghostsConnectivity() {
 	u32vector2D().swap(ghostsnodes);
 	u64vector2D().swap(ghostsconnectivity);
+}
+
+void Class_Local_Tree::updateghostsConnectivity() {
+	clearghostsConnectivity();
+	computeghostsConnectivity();
 }
 
 
