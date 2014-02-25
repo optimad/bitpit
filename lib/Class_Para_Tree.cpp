@@ -196,12 +196,13 @@ void Class_Para_Tree::setPboundGhosts() {
 //	Class_Comm_Buffer commBuff3(commBuff2);
 	map<int,Class_Comm_Buffer> commBuffers;
 	int counter = 0;
+	vector<bool> ciccio(1000000,true);
 	map<int,vector<uint64_t> >::iterator mitend = bordersPerProc.end();
 	for(map<int,vector<uint64_t> >::iterator mit = bordersPerProc.begin(); mit != mitend; ++mit){
-		//commBuffers[mit->first];
-		//= Class_Comm_Buffer(mit->second.size(),'\0');
-
+		int buffSize = mit->second.size() * (int)ceil((double)octantBytes / (double)CHAR_BIT);
+		commBuffers[mit->first] = Class_Comm_Buffer(buffSize,'\0');
 		//TODO fill char buffer
+
 	}
 //	char* ciccio;
 //	ciccio = NULL;
