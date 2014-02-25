@@ -170,6 +170,8 @@ void Class_Para_Tree::setPboundGhosts() {
 					int pEnd = findOwner(virtualNeighbors[virtualNeighborsSize - 1 - j]);
 					procs.insert(pBegin);
 					procs.insert(pEnd);
+					if(pBegin != rank || pEnd != rank)
+						it->setPbound(i,true);
 					if(pBegin == pEnd || pBegin == pEnd - 1)
 						break;
 				}
@@ -189,12 +191,16 @@ void Class_Para_Tree::setPboundGhosts() {
 	//TODO declare a class containing the communicator buffer and its size
 	//TODO build a map with proc as label and previous class as value
 	//TODO communicate borders
-	for(){
-
-
-	}
-	int
-	char buff[];
+	Class_Comm_Buffer commBuff(1000,'\0');
+	Class_Comm_Buffer commBuff2(500,'a');
+	commBuff2 = commBuff;
+	Class_Comm_Buffer commBuff3(commBuff2);
+	//	for(){
+//
+//
+//	}
+//	int
+	char buff[2];
 	int position = 0;
 	cout << "uint32_t " << sizeof(uint64_t) << endl;
 	cout << "uint32_t " << sizeof(octree.octants[0].y) << endl;
