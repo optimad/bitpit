@@ -14,8 +14,8 @@
 
 using namespace std;
 
-void writeLocalTree(const u32vector2D& nodes, const u64vector2D& connectivity,
-		const u32vector2D& ghostNodes, const u64vector2D& ghostConnectivity,
+void writeLocalTree(const u32vector2D& nodes, const u32vector2D& connectivity,
+		const u32vector2D& ghostNodes, const u32vector2D& ghostConnectivity,
 		const Class_Para_Tree & ptree, string filename) {
 
 	stringstream name;

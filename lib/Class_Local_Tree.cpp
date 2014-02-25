@@ -26,7 +26,7 @@ Class_Local_Tree::~Class_Local_Tree() {
 //-------------------------------------------------------------------------------- //
 // Basic Get/Set methods --------------------------------------------------------- //
 
-uint64_t Class_Local_Tree::getNumOctants() const {
+uint32_t Class_Local_Tree::getNumOctants() const {
 	return octants.size();
 }
 
@@ -34,11 +34,11 @@ uint8_t Class_Local_Tree::getLocalMaxDepth() const {
 	return local_max_depth;
 }
 
-uint8_t Class_Local_Tree::getMarker(int64_t idx) {
+uint8_t Class_Local_Tree::getMarker(int32_t idx) {
 	return octants[idx].getMarker();
 }
 
-bool Class_Local_Tree::getBalance(int64_t idx) {
+bool Class_Local_Tree::getBalance(int32_t idx) {
 	return octants[idx].getNotBalance();
 }
 
@@ -55,11 +55,11 @@ uint32_t Class_Local_Tree::getSizeGhost() const {
 }
 
 
-void Class_Local_Tree::setMarker(int64_t idx, int8_t marker) {
+void Class_Local_Tree::setMarker(int32_t idx, int8_t marker) {
 	octants[idx].setMarker(marker);
 }
 
-void Class_Local_Tree::setBalance(int64_t idx, bool balance) {
+void Class_Local_Tree::setBalance(int32_t idx, bool balance) {
 	octants[idx].setBalance(balance);
 }
 
@@ -86,7 +86,7 @@ void Class_Local_Tree::addOctantToTree(Class_Octant octant){
 	octants.shrink_to_fit();
 }
 
-const Class_Octant& Class_Local_Tree::extractOctant(uint64_t idx) const {
+const Class_Octant& Class_Local_Tree::extractOctant(uint32_t idx) const {
 	return octants[idx];
 }
 
@@ -96,11 +96,11 @@ const Class_Octant& Class_Local_Tree::extractOctant(uint64_t idx) const {
 bool Class_Local_Tree::refine() {
 
 	// Local variables
-	vector<uint64_t> last_child_index;
+	vector<uint32_t> last_child_index;
 	Class_Octant* children;
-	uint64_t idx, ich, nocts;
-	uint64_t offset = 0, blockidx;
-	uint8_t nchm1 = nchildren-1;
+	uint32_t idx, nocts;
+	uint32_t offset = 0, blockidx;
+	uint8_t nchm1 = nchildren-1, ich;
 	bool dorefine = false;
 
 	nocts = octants.size();
@@ -328,9 +328,9 @@ bool Class_Local_Tree::coarse() {
 	// Local variables
 	vector<uint32_t> first_child_index;
 	Class_Octant father;
-	uint64_t idx, idx2, ich, nocts, nghosts;
-	uint64_t offset = 0;
-	uint64_t idx1_gh, idx2_gh;
+	uint32_t idx, idx2, ich, nocts, nghosts;
+	uint32_t offset = 0;
+	uint32_t idx1_gh, idx2_gh;
 	uint32_t nidx = 0;
 	int8_t markerfather, marker;
 	uint8_t nbro, nstart, nend;
@@ -352,7 +352,6 @@ bool Class_Local_Tree::coarse() {
 	setLastDesc();
 
 	// Set index for start and end check for ghosts
-	// TODO UPDATE PBOUND AFTER FATHER GOES AWAY !!!
 	if (ghosts.size()){
 		idx1_gh = 0;
 		while(ghosts[idx1_gh].computeMorton() < first_desc.computeMorton()){
@@ -395,7 +394,7 @@ bool Class_Local_Tree::coarse() {
 					octants[i] = father;
 				}
 				uint8_t sizeneigh;
-				uint64_t* neigh;
+				uint32_t* neigh;
 				bool isghost;
 				for (iface=0; iface<DIM; iface++){
 					uint8_t oddface = ((iface*2)+1);
@@ -530,10 +529,11 @@ bool Class_Local_Tree::coarse() {
 //-------------------------------------------------------------------------------- //
 
 void Class_Local_Tree::computeConnectivity() {
-	map<uint64_t, vector<uint64_t> > mapnodes;
-	map<uint64_t, vector<uint64_t> >::iterator iter, iterend;
-	uint64_t i, k, morton, counter;
-	uint64_t noctants = getNumOctants();
+	map<uint64_t, vector<uint32_t> > mapnodes;
+	map<uint64_t, vector<uint32_t> >::iterator iter, iterend;
+	uint32_t i, k, counter;
+	uint64_t morton;
+	uint32_t noctants = getNumOctants();
 	uint32_t (*octnodes)[DIM];
 	uint8_t j;
 
@@ -561,7 +561,7 @@ void Class_Local_Tree::computeConnectivity() {
 		while (iter != iterend){
 			vector<uint32_t> nodecasting(iter->second.begin(), iter->second.begin()+DIM);
 			nodes.push_back(nodecasting);
-			for(vector<uint64_t>::iterator iter2 = iter->second.begin()+DIM; iter2 != iter->second.end(); iter2++){
+			for(vector<uint32_t>::iterator iter2 = iter->second.begin()+DIM; iter2 != iter->second.end(); iter2++){
 				connectivity[(*iter2)].push_back(counter);
 			}
 			mapnodes.erase(iter++);
@@ -575,7 +575,7 @@ void Class_Local_Tree::computeConnectivity() {
 
 void Class_Local_Tree::clearConnectivity() {
 	u32vector2D().swap(nodes);
-	u64vector2D().swap(connectivity);
+	u32vector2D().swap(connectivity);
 }
 
 void Class_Local_Tree::updateConnectivity() {
@@ -586,10 +586,11 @@ void Class_Local_Tree::updateConnectivity() {
 //-------------------------------------------------------------------------------- //
 
 void Class_Local_Tree::computeghostsConnectivity() {
-	map<uint64_t, vector<uint64_t> > mapnodes;
-	map<uint64_t, vector<uint64_t> >::iterator iter, iterend;
-	uint64_t i, k, morton, counter;
-	uint64_t noctants = size_ghosts;
+	map<uint64_t, vector<uint32_t> > mapnodes;
+	map<uint64_t, vector<uint32_t> >::iterator iter, iterend;
+	uint32_t i, k, counter;
+	uint64_t morton;
+	uint32_t noctants = size_ghosts;
 	uint32_t (*octnodes)[DIM];
 	uint8_t j;
 
@@ -617,7 +618,7 @@ void Class_Local_Tree::computeghostsConnectivity() {
 		while (iter != iterend){
 			vector<uint32_t> nodecasting(iter->second.begin(), iter->second.begin()+DIM);
 			ghostsnodes.push_back(nodecasting);
-			for(vector<uint64_t>::iterator iter2 = iter->second.begin()+DIM; iter2 != iter->second.end(); iter2++){
+			for(vector<uint32_t>::iterator iter2 = iter->second.begin()+DIM; iter2 != iter->second.end(); iter2++){
 				ghostsconnectivity[(*iter2)].push_back(counter);
 			}
 			mapnodes.erase(iter++);
@@ -631,7 +632,7 @@ void Class_Local_Tree::computeghostsConnectivity() {
 
 void Class_Local_Tree::clearghostsConnectivity() {
 	u32vector2D().swap(ghostsnodes);
-	u64vector2D().swap(ghostsconnectivity);
+	u32vector2D().swap(ghostsconnectivity);
 }
 
 void Class_Local_Tree::updateghostsConnectivity() {
@@ -643,8 +644,8 @@ void Class_Local_Tree::updateghostsConnectivity() {
 //-------------------------------------------------------------------------------- //
 
 void Class_Local_Tree::updateLocalMaxDepth() {
-	uint64_t noctants = getNumOctants();
-	uint64_t i;
+	uint32_t noctants = getNumOctants();
+	uint32_t i;
 
 	local_max_depth = 0;
 	for(i = 0; i < noctants; i++){
@@ -656,11 +657,12 @@ void Class_Local_Tree::updateLocalMaxDepth() {
 
 // =================================================================================== //
 
-uint64_t* Class_Local_Tree::findNeighbours(uint64_t idx, uint8_t iface,
+uint32_t* Class_Local_Tree::findNeighbours(uint32_t idx, uint8_t iface,
 		uint8_t& sizeneigh, bool isghost) {
 
-	uint64_t  noctants = getNumOctants();
-	uint64_t  Morton, Mortontry, idxtry, idxtry_old, idxtry_old_;
+	uint64_t  Morton, Mortontry;
+	uint32_t  noctants = getNumOctants();
+	uint32_t idxtry, idxtry_old, idxtry_old_;
 	Class_Octant* oct = &octants[idx];
 	uint32_t size = oct->getSize();
 
@@ -674,7 +676,7 @@ uint64_t* Class_Local_Tree::findNeighbours(uint64_t idx, uint8_t iface,
 		writeLog("Face index out of range in find neighbours !!!");
 		isghost = false;
 		sizeneigh = 0;
-		uint64_t* NeighIdx = new uint64_t[sizeneigh];
+		uint32_t* NeighIdx = NULL;
 		return NeighIdx;
 	}
 
@@ -690,8 +692,8 @@ uint64_t* Class_Local_Tree::findNeighbours(uint64_t idx, uint8_t iface,
 			// Search morton in octants
 			// If a even face morton is lower than morton of oct, if odd higher
 			// ---> can i search only before or after idx in octants
-			int64_t jump = (oct->computeMorton() > Morton) ? int64_t(idx/2+1) : int64_t((noctants -idx)/2+1);
-			idxtry = uint64_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
+			int32_t jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
+			idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
 			//idxtry_old = uint64_t((1+direction)*noctants );
 			while(abs(jump) > 0){
 				Mortontry = octants[idxtry].computeMorton();
@@ -701,7 +703,7 @@ uint64_t* Class_Local_Tree::findNeighbours(uint64_t idx, uint8_t iface,
 			if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
 				//Found neighbour of same size
 				sizeneigh = 1;
-				uint64_t* NeighIdx = new uint64_t[1];
+				uint32_t* NeighIdx = new uint32_t[1];
 				NeighIdx[0] = idxtry;
 				return NeighIdx;
 			}
@@ -718,7 +720,7 @@ uint64_t* Class_Local_Tree::findNeighbours(uint64_t idx, uint8_t iface,
 				if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
 					//Found neighbour of same size
 					sizeneigh = 1;
-					uint64_t* NeighIdx = new uint64_t[1];
+					uint32_t* NeighIdx = new uint32_t[1];
 					NeighIdx[0] = idxtry;
 					return NeighIdx;
 				}
@@ -726,7 +728,7 @@ uint64_t* Class_Local_Tree::findNeighbours(uint64_t idx, uint8_t iface,
 				uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL - samesizeoct.level)) - 1;
 				Class_Octant last_desc = samesizeoct.buildLastDesc();
 				uint64_t Mortonlast = last_desc.computeMorton();
-				vector<uint64_t> bufferidx;
+				vector<uint32_t> bufferidx;
 				Mortontry = octants[idxtry].computeMorton();
 				int32_t Dh;
 				int32_t eqcoord;
@@ -741,7 +743,7 @@ uint64_t* Class_Local_Tree::findNeighbours(uint64_t idx, uint8_t iface,
 					Mortontry = octants[idxtry].computeMorton();
 				}
 				sizeneigh = bufferidx.size();
-				uint64_t* NeighIdx = new uint64_t[sizeneigh];
+				uint32_t* NeighIdx = new uint32_t[sizeneigh];
 				for (int i = 0; i < sizeneigh; i++){
 					NeighIdx[i] = bufferidx[i];
 				}
@@ -752,13 +754,13 @@ uint64_t* Class_Local_Tree::findNeighbours(uint64_t idx, uint8_t iface,
 			// Boundary Face
 			sizeneigh = 0;
 			isghost = false;
-			uint64_t* NeighIdx = new uint64_t[sizeneigh];
+			uint32_t* NeighIdx = NULL;
 			return NeighIdx;
 		}
 	}
 	else{
 		// IF OCTANT FACE IS A PROCESS BOUNDARY SEARCH IN GHOSTS
-		uint64_t idxghost = uint64_t(size_ghosts/2);
+		uint32_t idxghost = uint32_t(size_ghosts/2);
 		Class_Octant* octghost = &ghosts[idxghost];
 
 		//Build Morton number of virtual neigh of same size
@@ -767,8 +769,8 @@ uint64_t* Class_Local_Tree::findNeighbours(uint64_t idx, uint8_t iface,
 		// Search morton in octants
 		// If a even face morton is lower than morton of oct, if odd higher
 		// ---> can i search only before or after idx in octants
-		int64_t jump = (octghost->computeMorton() > Morton) ? int64_t(idxghost/2+1) : int64_t((size_ghosts -idxghost)/2+1);
-		idxtry = uint64_t(idxghost +((octghost->computeMorton()<Morton)-(octghost->computeMorton()>Morton))*jump);
+		int32_t jump = (octghost->computeMorton() > Morton) ? int32_t(idxghost/2+1) : int32_t((size_ghosts -idxghost)/2+1);
+		idxtry = uint32_t(idxghost +((octghost->computeMorton()<Morton)-(octghost->computeMorton()>Morton))*jump);
 		while(abs(jump) > 0){
 			Mortontry = ghosts[idxtry].computeMorton();
 			jump = ((Mortontry<Morton)-(Mortontry>Morton))*jump/2;
@@ -777,7 +779,7 @@ uint64_t* Class_Local_Tree::findNeighbours(uint64_t idx, uint8_t iface,
 		if(octants[idxtry].computeMorton() == Morton && ghosts[idxtry].level == oct->level){
 			//Found neighbour of same size
 			sizeneigh = 1;
-			uint64_t* NeighIdx = new uint64_t[1];
+			uint32_t* NeighIdx = new uint32_t[1];
 			NeighIdx[0] = idxtry;
 			return NeighIdx;
 		}
@@ -794,7 +796,7 @@ uint64_t* Class_Local_Tree::findNeighbours(uint64_t idx, uint8_t iface,
 			if(ghosts[idxtry].computeMorton() == Morton && ghosts[idxtry].level == oct->level){
 				//Found neighbour of same size
 				sizeneigh = 1;
-				uint64_t* NeighIdx = new uint64_t[1];
+				uint32_t* NeighIdx = new uint32_t[1];
 				NeighIdx[0] = idxtry;
 				return NeighIdx;
 			}
@@ -802,7 +804,7 @@ uint64_t* Class_Local_Tree::findNeighbours(uint64_t idx, uint8_t iface,
 			uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL - samesizeoct.level)) - 1;
 			Class_Octant last_desc = samesizeoct.buildLastDesc();
 			uint64_t Mortonlast = last_desc.computeMorton();
-			vector<uint64_t> bufferidx;
+			vector<uint32_t> bufferidx;
 			Mortontry = ghosts[idxtry].computeMorton();
 			int32_t Dh;
 			int32_t eqcoord;
@@ -817,7 +819,7 @@ uint64_t* Class_Local_Tree::findNeighbours(uint64_t idx, uint8_t iface,
 				Mortontry = ghosts[idxtry].computeMorton();
 			}
 			sizeneigh = bufferidx.size();
-			uint64_t* NeighIdx = new uint64_t[sizeneigh];
+			uint32_t* NeighIdx = new uint32_t[sizeneigh];
 			for (int i = 0; i < sizeneigh; i++){
 				NeighIdx[i] = bufferidx[i];
 			}

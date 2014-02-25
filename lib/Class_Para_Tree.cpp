@@ -61,7 +61,6 @@ void Class_Para_Tree::updateLoadBalance() {
 	//update partition_range_position
 	uint64_t lastDescMorton = octree.getLastDesc().computeMorton();
 	error_flag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,partition_last_desc,1,MPI_UINT64_T,MPI_COMM_WORLD);
-	//TODO aggiornare pbound serial/parallel
 	serial = false;
 }
 
