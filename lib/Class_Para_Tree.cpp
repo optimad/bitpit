@@ -194,8 +194,11 @@ void Class_Para_Tree::setPboundGhosts() {
 //	commBuff2 = commBuff;
 //	Class_Comm_Buffer commBuff3(commBuff2);
 	map<int,Class_Comm_Buffer> commBuffers;
-	for(map<int,vector<uint64_t> >::iterator mit = bordersPerProc.begin(); mit != bordersPerProc.end(); ++mit){
-		commBuffers[mit->first] = Class_Comm_Buffer(mit->second.size(),'\0');
+	int counter = 0;
+	map<int,vector<uint64_t> >::iterator mitend = bordersPerProc.end();
+	for(map<int,vector<uint64_t> >::iterator mit = bordersPerProc.begin(); mit != mitend; ++mit){
+		//commBuffers[mit->first] = Class_Comm_Buffer(mit->second.size(),'\0');
+		commBuffers[mit->first] = Class_Comm_Buffer();
 		//TODO fill char buffer
 	}
 	//	for(){
