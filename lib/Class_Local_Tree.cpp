@@ -603,14 +603,15 @@ void Class_Local_Tree::computeghostsConnectivity() {
 	uint32_t (*octnodes)[DIM];
 	uint8_t j;
 
-	if (nodes.size() == 0){
-		connectivity.resize(noctants);
+	if (ghostsnodes.size() == 0){
+		ghostsconnectivity.resize(noctants);
 		for (i = 0; i < noctants; i++){
 			octnodes = ghosts[i].getNodes();
 			for (j = 0; j < nnodes; j++){
 #if DIM == 3
 				morton = mortonEncode_magicbits(octnodes[j][0], octnodes[j][1], octnodes[j][2]);
 #else
+				puppa
 #endif
 				if (mapnodes[morton].size()==0){
 					for (k = 0; k < DIM; k++){

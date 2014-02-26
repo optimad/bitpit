@@ -311,19 +311,22 @@ void Class_Para_Tree::setPboundGhosts() {
 	map<int,Class_Comm_Buffer>::iterator rritend = recvBuffers.end();
 	for(map<int,Class_Comm_Buffer>::iterator rrit = recvBuffers.begin(); rrit != rritend; ++rrit){
 		int pos = 0;
-		error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&x,1,MPI_UINT32_T,MPI_COMM_WORLD);
-		error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&y,1,MPI_UINT32_T,MPI_COMM_WORLD);
-		error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&z,1,MPI_UINT32_T,MPI_COMM_WORLD);
-		error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&l,1,MPI_UINT8_T,MPI_COMM_WORLD);
-		octree.ghosts[ghostCounter] = Class_Octant(l,x,y,z);
-		error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&m,1,MPI_INT8_T,MPI_COMM_WORLD);
-		octree.ghosts[ghostCounter].setMarker(m);
-		for(int j = 0; j < 16; ++j){
-			error_flag = MPI_Unpack(&rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&info[j],1,MPI::BOOL,MPI_COMM_WORLD);
-			octree.ghosts[ghostCounter].info[j] = info[j];
+		int nofGhostsPerProc = int(rrit->second.commBufferSize / (uint32_t) octantBytes);
+		for(int i = 0; i < nofGhostsPerProc; ++i){
+			error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&x,1,MPI_UINT32_T,MPI_COMM_WORLD);
+			error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&y,1,MPI_UINT32_T,MPI_COMM_WORLD);
+			error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&z,1,MPI_UINT32_T,MPI_COMM_WORLD);
+			error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&l,1,MPI_UINT8_T,MPI_COMM_WORLD);
+			octree.ghosts[ghostCounter] = Class_Octant(l,x,y,z);
+			error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&m,1,MPI_INT8_T,MPI_COMM_WORLD);
+			octree.ghosts[ghostCounter].setMarker(m);
+			for(int j = 0; j < 16; ++j){
+				error_flag = MPI_Unpack(&rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&info[j],1,MPI::BOOL,MPI_COMM_WORLD);
+				octree.ghosts[ghostCounter].info[j] = info[j];
+			}
+			//cout << "x: " << (int)x << " y: "  << (int)y << " z: " << (int)z << " l: " << (int)l << " m: " << (int)m << endl;
+			++ghostCounter;
 		}
-		//cout << "x: " << (int)x << " y: "  << (int)y << " z: " << (int)z << " l: " << (int)l << " m: " << (int)m << endl;
-		++ghostCounter;
 	}
 
 
