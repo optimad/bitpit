@@ -191,11 +191,11 @@ void Class_Para_Tree::setPboundGhosts() {
 	}
 	//TODO communicate borders
 	map<int,Class_Comm_Buffer> sendBuffers;
-	map<int,vector<uint64_t> >::iterator mitend = bordersPerProc.end();
-	for(map<int,vector<uint64_t> >::iterator mit = bordersPerProc.begin(); mit != mitend; ++mit){
-		int buffSize = mit->second.size() * (int)ceil((double)octantBytes / (double)(CHAR_BIT/8));// + (int)ceil((double)sizeof(int)/(double)(CHAR_BIT/8));
-		int key = mit->first;
-		const vector<uint64_t> & value = mit->second;
+	map<int,vector<uint64_t> >::iterator bitend = bordersPerProc.end();
+	for(map<int,vector<uint64_t> >::iterator bit = bordersPerProc.begin(); bit != bitend; ++bit){
+		int buffSize = bit->second.size() * (int)ceil((double)octantBytes / (double)(CHAR_BIT/8));// + (int)ceil((double)sizeof(int)/(double)(CHAR_BIT/8));
+		int key = bit->first;
+		const vector<uint64_t> & value = bit->second;
 		sendBuffers[key] = Class_Comm_Buffer(buffSize,'\0');
 		int pos = 0;
 		int nofBorders = value.size();
@@ -211,32 +211,48 @@ void Class_Para_Tree::setPboundGhosts() {
 			}
 		}
 	}
-
+	//communicate recever buffer size
 	MPI_Request req[sendBuffers.size()*2];
-	MPI_Status stats[sendBuffers.size()];
+	MPI_Status stats[sendBuffers.size()*2];
 	int nReq = 0;
-
 	map<int,int> recvBufferSizePerProc;
-	map<int,Class_Comm_Buffer>::iterator citend = sendBuffers.end();
-	for(map<int,Class_Comm_Buffer>::iterator cit = sendBuffers.begin(); cit != citend; ++cit){
-		recvBufferSizePerProc[cit->first] = 0;
-		error_flag = MPI_Irecv(&recvBufferSizePerProc[cit->first],1,MPI_UINT32_T,cit->first,rank,MPI_COMM_WORLD,&req[nReq]);
+	map<int,Class_Comm_Buffer>::iterator sitend = sendBuffers.end();
+	for(map<int,Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
+		recvBufferSizePerProc[sit->first] = 0;
+		error_flag = MPI_Irecv(&recvBufferSizePerProc[sit->first],1,MPI_UINT32_T,sit->first,rank,MPI_COMM_WORLD,&req[nReq]);
 		++nReq;
 	}
-	map<int,Class_Comm_Buffer>::reverse_iterator rcitend = sendBuffers.rend();
-	for(map<int,Class_Comm_Buffer>::reverse_iterator rcit = sendBuffers.rbegin(); rcit != rcitend; ++rcit){
-		error_flag =  MPI_Isend(&rcit->second.commBufferSize,1,MPI_UINT32_T,rcit->first,rcit->first,MPI_COMM_WORLD,&req[nReq]);
+	map<int,Class_Comm_Buffer>::reverse_iterator rsitend = sendBuffers.rend();
+	for(map<int,Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+		error_flag =  MPI_Isend(&rsit->second.commBufferSize,1,MPI_UINT32_T,rsit->first,rsit->first,MPI_COMM_WORLD,&req[nReq]);
 		++nReq;
 	}
+	MPI_Waitall(nReq,req,stats);
 
-	MPI_Waitall(nReq-1,req,stats);
+	//communicate borders buffers
+	map<int,Class_Comm_Buffer> recvBuffers;
+	map<int,int>::iterator ritend = recvBufferSizePerProc.end();
+	for(map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
+		recvBuffers[rit->first] = Class_Comm_Buffer(rit->second,'\0');
+	}
+	nReq = 0;
+	for(map<int,Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
+		error_flag = MPI_Irecv(&recvBuffers[sit->first].commBuffer,recvBuffers[sit->first].commBufferSize,MPI_UINT32_T,sit->first,rank,MPI_COMM_WORLD,&req[nReq]);
+		++nReq;
+	}
+	for(map<int,Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+		error_flag =  MPI_Isend(&rsit->second.commBuffer,rsit->second.commBufferSize,MPI_CHAR,rsit->first,rsit->first,MPI_COMM_WORLD,&req[nReq]);
+		++nReq;
+	}
+	MPI_Waitall(nReq,req,stats);
+
 
 
 //	int counter = 0;
-//	map<int,Class_Comm_Buffer>::iterator citend = sendBuffers.end();
-//	for(map<int,Class_Comm_Buffer>::iterator cit = sendBuffers.begin(); cit != citend; ++cit){
+//	map<int,Class_Comm_Buffer>::iterator sitend = sendBuffers.end();
+//	for(map<int,Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
 //		int tag = counter + rank;
-//		//error_flag = MPI_Sendrecv(&cit->second.commBuffer,cit->second.sendBuffersize,MPI_CHAR,cit->first,tag,);
+//		//error_flag = MPI_Sendrecv(&sit->second.commBuffer,sit->second.sendBuffersize,MPI_CHAR,sit->first,tag,);
 //		++counter;
 //	}
 
