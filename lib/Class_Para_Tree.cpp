@@ -245,7 +245,7 @@ void Class_Para_Tree::setPboundGhosts() {
 	}
 	nReq = 0;
 	for(map<int,Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
-		error_flag = MPI_Irecv(&recvBuffers[sit->first].commBuffer,recvBuffers[sit->first].commBufferSize,MPI_UINT32_T,sit->first,rank,MPI_COMM_WORLD,&req[nReq]);
+		error_flag = MPI_Irecv(&recvBuffers[sit->first].commBuffer,recvBuffers[sit->first].commBufferSize,MPI_CHAR,sit->first,rank,MPI_COMM_WORLD,&req[nReq]);
 		++nReq;
 	}
 	for(map<int,Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
