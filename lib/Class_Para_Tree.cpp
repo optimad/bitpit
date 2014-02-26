@@ -210,16 +210,24 @@ void Class_Para_Tree::setPboundGhosts() {
 		}
 	}
 
+	MPI_Request req[sendBuffers.size()*2];
+	MPI_Status stats[sendBuffers.size()];
+	int nReq = 0;
+
 	map<int,int> recvBufferSizePerProc;
 	map<int,Class_Comm_Buffer>::iterator citend = sendBuffers.end();
 	for(map<int,Class_Comm_Buffer>::iterator cit = sendBuffers.begin(); cit != citend; ++cit){
 		recvBufferSizePerProc[cit->first] = 0;
-		//int tag = cit->first + rank;
-		MPI_Status status;
-		error_flag = MPI_Sendrecv(&cit->second.commBufferSize,1,MPI_UINT32_T,cit->first,rank,
-				&recvBufferSizePerProc[cit->first],1,MPI_UINT32_T,cit->first,cit->first,MPI_COMM_WORLD,&status);
+		error_flag = MPI_Irecv(&recvBufferSizePerProc[cit->first],1,MPI_UINT32_T,cit->first,rank,MPI_COMM_WORLD,&req[nReq]);
+		++nReq;
+	}
+	map<int,Class_Comm_Buffer>::reverse_iterator rcitend = sendBuffers.rend();
+	for(map<int,Class_Comm_Buffer>::reverse_iterator rcit = sendBuffers.rbegin(); rcit != rcitend; ++rcit){
+		error_flag =  MPI_Isend(&rcit->second.commBufferSize,1,MPI_UINT32_T,rcit->first,rcit->first,MPI_COMM_WORLD,&req[nReq]);
+		++nReq;
 	}
 
+	MPI_Waitall(nReq-1,req,stats);
 
 
 //	int counter = 0;

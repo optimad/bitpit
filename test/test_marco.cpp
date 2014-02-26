@@ -24,9 +24,9 @@ int main(int argc, char *argv[]) {
 	ptree.octree.setMarker(0,1);
 	ptree.octree.refine();
 	ptree.updateRefine();
-//	ptree.octree.setMarker(4,4);
-//	ptree.octree.refine();
-//	ptree.updateRefine();
+	ptree.octree.setMarker(0,1);
+	ptree.octree.refine();
+	ptree.updateRefine();
 //	ptree.octree.refine();
 //	ptree.updateRefine();
 //	ptree.octree.refine();
