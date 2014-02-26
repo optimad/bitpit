@@ -23,8 +23,8 @@ Class_Local_Tree::Class_Local_Tree() {
 Class_Local_Tree::~Class_Local_Tree() {
 }
 
-//-------------------------------------------------------------------------------- //
-// Basic Get/Set methods --------------------------------------------------------- //
+// =================================================================================== //
+// Basic Get/Set methods ============================================================= //
 
 uint32_t Class_Local_Tree::getNumOctants() const {
 	return octants.size();
@@ -78,20 +78,23 @@ void Class_Local_Tree::setLastDesc() {
 	last_desc = Class_Octant(MAX_LEVEL,x,y,z);
 }
 
-//-------------------------------------------------------------------------------- //
-// Debug methods ----------------------------------------------------------------- //
+// =================================================================================== //
+// Debug methods ===================================================================== //
 
 void Class_Local_Tree::addOctantToTree(Class_Octant octant){
 	octants.push_back(octant);
 	octants.shrink_to_fit();
 }
 
+
+// =================================================================================== //
+// Other methods ===================================================================== //
+
 const Class_Octant& Class_Local_Tree::extractOctant(uint32_t idx) const {
 	return octants[idx];
 }
 
-//-------------------------------------------------------------------------------- //
-// Other methods ----------------------------------------------------------------- //
+// =================================================================================== //
 
 bool Class_Local_Tree::refine() {
 
@@ -144,7 +147,7 @@ bool Class_Local_Tree::refine() {
 	return dorefine;
 }
 
-//-------------------------------------------------------------------------------- //
+// =================================================================================== //
 
 bool Class_Local_Tree::coarse() {
 
@@ -400,14 +403,16 @@ bool Class_Local_Tree::coarse() {
 				for (int i=0; i<nstart; i++){
 					octants[i] = father;
 				}
-				uint8_t sizeneigh;
-				uint32_t* neigh;
-				bool isghost;
+				uint32_t	 sizeneigh;
+				u32vector    neigh;
+				vector<bool> isghost;
 				for (iface=0; iface<DIM; iface++){
 					uint8_t oddface = ((iface*2)+1);
-					neigh = findNeighbours(nstart-1, oddface, sizeneigh, isghost);
-					for(int i=0; i<(1-isghost)*sizeneigh; i++){
-						octants[neigh[i]].setPbound(oppface[oddface], true);
+					findNeighbours(nstart-1, oddface, neigh, isghost);
+					sizeneigh = neigh.size();
+					for(int i=0; i<sizeneigh; i++){
+						if (!isghost[i])
+							octants[neigh[i]].setPbound(oppface[oddface], true);
 					}
 				}
 			}
@@ -534,7 +539,7 @@ bool Class_Local_Tree::coarse() {
 	return docoarse;
 }
 
-//-------------------------------------------------------------------------------- //
+// =================================================================================== //
 
 void Class_Local_Tree::computeConnectivity() {
 	map<uint64_t, vector<uint32_t> > mapnodes;
@@ -591,7 +596,7 @@ void Class_Local_Tree::updateConnectivity() {
 	computeConnectivity();
 }
 
-//-------------------------------------------------------------------------------- //
+// =================================================================================== //
 
 void Class_Local_Tree::computeghostsConnectivity() {
 	map<uint64_t, vector<uint32_t> > mapnodes;
@@ -648,8 +653,7 @@ void Class_Local_Tree::updateghostsConnectivity() {
 	computeghostsConnectivity();
 }
 
-
-//-------------------------------------------------------------------------------- //
+// =================================================================================== //
 
 void Class_Local_Tree::updateLocalMaxDepth() {
 	uint32_t noctants = getNumOctants();
@@ -665,8 +669,8 @@ void Class_Local_Tree::updateLocalMaxDepth() {
 
 // =================================================================================== //
 
-uint32_t* Class_Local_Tree::findNeighbours(uint32_t idx, uint8_t iface,
-		uint8_t& sizeneigh, bool isghost) {
+void Class_Local_Tree::findNeighbours(uint32_t idx, uint8_t iface,
+		u32vector & neighbours, vector<bool> & isghost) {
 
 	uint64_t  Morton, Mortontry;
 	uint32_t  noctants = getNumOctants();
@@ -679,13 +683,13 @@ uint32_t* Class_Local_Tree::findNeighbours(uint32_t idx, uint8_t iface,
 	int8_t cy = int8_t((iface<4)*(int8_t(iface/2))*(int8_t(2*iface-5)));
 	int8_t cz = int8_t((int8_t(iface/4))*(int8_t(2*iface-9)));
 
+	isghost.clear();
+	neighbours.clear();
+
 	// Default if iface is nface<iface<0
 	if (iface < 0 || iface > nface){
 		writeLog("Face index out of range in find neighbours !!!");
-		isghost = false;
-		sizeneigh = 0;
-		uint32_t* NeighIdx = NULL;
-		return NeighIdx;
+		return;
 	}
 
 	// Check if octants face is a process boundary
@@ -710,10 +714,9 @@ uint32_t* Class_Local_Tree::findNeighbours(uint32_t idx, uint8_t iface,
 			}
 			if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
 				//Found neighbour of same size
-				sizeneigh = 1;
-				uint32_t* NeighIdx = new uint32_t[1];
-				NeighIdx[0] = idxtry;
-				return NeighIdx;
+				isghost.push_back(false);
+				neighbours.push_back(idxtry);
+				return;
 			}
 			else{
 				// Step until the mortontry lower than morton (one idx of distance)
@@ -727,10 +730,9 @@ uint32_t* Class_Local_Tree::findNeighbours(uint32_t idx, uint8_t iface,
 				}
 				if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
 					//Found neighbour of same size
-					sizeneigh = 1;
-					uint32_t* NeighIdx = new uint32_t[1];
-					NeighIdx[0] = idxtry;
-					return NeighIdx;
+					isghost.push_back(false);
+					neighbours.push_back(idxtry);
+					return;
 				}
 				// Compute Last discendent of virtual octant of same size
 				uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL - samesizeoct.level)) - 1;
@@ -745,29 +747,96 @@ uint32_t* Class_Local_Tree::findNeighbours(uint32_t idx, uint8_t iface,
 					Dh += cy*(int32_t(oct->y) - int32_t(octants[idxtry].y));
 					Dh += cz*(int32_t(oct->z) - int32_t(octants[idxtry].z));
 					if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
-						bufferidx.push_back(idxtry);
+						neighbours.push_back(idxtry);
+						isghost.push_back(false);
 					}
 					idxtry++;
 					Mortontry = octants[idxtry].computeMorton();
 				}
-				sizeneigh = bufferidx.size();
-				uint32_t* NeighIdx = new uint32_t[sizeneigh];
-				for (int i = 0; i < sizeneigh; i++){
-					NeighIdx[i] = bufferidx[i];
-				}
-				return NeighIdx;
+				return;
 			}
 		}
 		else{
 			// Boundary Face
-			sizeneigh = 0;
-			isghost = false;
-			uint32_t* NeighIdx = NULL;
-			return NeighIdx;
+			return;
 		}
 	}
+	//--------------------------------------------------------------- //
+	//--------------------------------------------------------------- //
 	else{
-		// IF OCTANT FACE IS A PROCESS BOUNDARY SEARCH IN GHOSTS
+		// IF OCTANT FACE IS A PROCESS BOUNDARY SEARCH ALSO IN GHOSTS
+
+		// Search in octants
+
+		// Check if octants face is a boundary
+		if (oct->info[iface] == false){
+
+			//Build Morton number of virtual neigh of same size
+			Class_Octant samesizeoct(oct->level, oct->x+cx*size, oct->y+cy*size, oct->z+cz*size);
+			Morton = samesizeoct.computeMorton();
+			// Search morton in octants
+			// If a even face morton is lower than morton of oct, if odd higher
+			// ---> can i search only before or after idx in octants
+			int32_t jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
+			idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
+			//idxtry_old = uint64_t((1+direction)*noctants );
+			while(abs(jump) > 0){
+				Mortontry = octants[idxtry].computeMorton();
+				jump = ((Mortontry<Morton)-(Mortontry>Morton))*jump/2;
+				idxtry += jump;
+			}
+			if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
+				//Found neighbour of same size
+				isghost.push_back(false);
+				neighbours.push_back(idxtry);
+				writeLog("Face marked pbound but only a non-ghost neighbour found!!!");
+				return;
+			}
+			else{
+				// Step until the mortontry lower than morton (one idx of distance)
+				{
+					while(octants[idxtry].computeMorton() < Morton){
+						idxtry++;
+					}
+					while(octants[idxtry].computeMorton() > Morton){
+						idxtry--;
+					}
+				}
+				if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
+					//Found neighbour of same size
+					isghost.push_back(false);
+					neighbours.push_back(idxtry);
+					writeLog("Face marked pbound but only a non-ghost neighbour found!!!");
+					return;
+				}
+				// Compute Last discendent of virtual octant of same size
+				uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL - samesizeoct.level)) - 1;
+				Class_Octant last_desc = samesizeoct.buildLastDesc();
+				uint64_t Mortonlast = last_desc.computeMorton();
+				vector<uint32_t> bufferidx;
+				Mortontry = octants[idxtry].computeMorton();
+				int32_t Dh;
+				int32_t eqcoord;
+				while(Mortontry < Mortonlast){
+					Dh = cx*(int32_t(oct->x) - int32_t(octants[idxtry].x));
+					Dh += cy*(int32_t(oct->y) - int32_t(octants[idxtry].y));
+					Dh += cz*(int32_t(oct->z) - int32_t(octants[idxtry].z));
+					if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
+						neighbours.push_back(idxtry);
+						isghost.push_back(false);
+					}
+					idxtry++;
+					Mortontry = octants[idxtry].computeMorton();
+				}
+			}
+		}
+		else{
+			// Boundary Face
+			return;
+		}
+
+		// Search in ghosts
+
 		uint32_t idxghost = uint32_t(size_ghosts/2);
 		Class_Octant* octghost = &ghosts[idxghost];
 
@@ -786,10 +855,9 @@ uint32_t* Class_Local_Tree::findNeighbours(uint32_t idx, uint8_t iface,
 		}
 		if(octants[idxtry].computeMorton() == Morton && ghosts[idxtry].level == oct->level){
 			//Found neighbour of same size
-			sizeneigh = 1;
-			uint32_t* NeighIdx = new uint32_t[1];
-			NeighIdx[0] = idxtry;
-			return NeighIdx;
+			isghost.push_back(true);
+			neighbours.push_back(idxtry);
+			return;
 		}
 		else{
 			// Step until the mortontry lower than morton (one idx of distance)
@@ -803,10 +871,9 @@ uint32_t* Class_Local_Tree::findNeighbours(uint32_t idx, uint8_t iface,
 			}
 			if(ghosts[idxtry].computeMorton() == Morton && ghosts[idxtry].level == oct->level){
 				//Found neighbour of same size
-				sizeneigh = 1;
-				uint32_t* NeighIdx = new uint32_t[1];
-				NeighIdx[0] = idxtry;
-				return NeighIdx;
+				isghost.push_back(true);
+				neighbours.push_back(idxtry);
+				return;
 			}
 			// Compute Last discendent of virtual octant of same size
 			uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL - samesizeoct.level)) - 1;
@@ -821,18 +888,15 @@ uint32_t* Class_Local_Tree::findNeighbours(uint32_t idx, uint8_t iface,
 				Dh += cy*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
 				Dh += cz*(int32_t(oct->z) - int32_t(ghosts[idxtry].z));
 				if ((abs(Dh) == ((1-(iface%2))*ghosts[idxtry].getSize() + (iface%2)*size))){
-					bufferidx.push_back(idxtry);
+					neighbours.push_back(idxtry);
+					isghost.push_back(true);
 				}
 				idxtry++;
 				Mortontry = ghosts[idxtry].computeMorton();
 			}
-			sizeneigh = bufferidx.size();
-			uint32_t* NeighIdx = new uint32_t[sizeneigh];
-			for (int i = 0; i < sizeneigh; i++){
-				NeighIdx[i] = bufferidx[i];
-			}
-			return NeighIdx;
+			return;
 		}
 	}
 }
-//-------------------------------------------------------------------------------- //
+
+// =================================================================================== //

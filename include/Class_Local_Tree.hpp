@@ -35,6 +35,7 @@ class Class_Local_Tree{
 	// TYPEDEFS ----------------------------------------------------------------------- //
 public:
 	typedef vector<Class_Octant> 		OctantsType;
+	typedef vector<uint32_t>			u32vector;
 	typedef vector<vector<uint32_t>	>	u32vector2D;
 	typedef vector<vector<uint64_t>	>	u64vector2D;
 
@@ -112,10 +113,10 @@ public:
 	void			clearghostsConnectivity();					// Clear ghosts nodes vector and connectivity of ghosts octants of local tree
 	void			updateghostsConnectivity();					// Update ghosts nodes vector and connectivity of ghosts octants of local tree
 
-	uint32_t*		findNeighbours(uint32_t idx,				// Finds n=sizeneigh neighbours of idx-th octant through iface in vector octants.
-								  uint8_t iface,				// Returns a pointer to an array of size sizeneigh with the index of neighbours
-								  uint8_t & sizeneigh,			// in their structure (octants or ghosts) and sets isghost = true if the
-								  bool isghost);				// neighbours are ghost in the local tree
+	void		findNeighbours(uint32_t idx,					// Finds neighbours of idx-th octant through iface in vector octants.
+								  uint8_t iface,				// Returns a vector (empty if iface is a bound face) with the index of neighbours
+								  u32vector & neighbours,		// in their structure (octants or ghosts) and sets isghost[i] = true if the
+								  vector<bool> & isghost);		// i-th neighbour is ghost in the local tree
 
 private:
 
