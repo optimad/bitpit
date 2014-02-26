@@ -73,7 +73,7 @@ void writeLocalTree(const u32vector2D& nodes, const u32vector2D& connectivity,
       {
         for(int j = 0; j < nnodes; j++)
           {
-            out << ghostConnectivity[i][j] << " ";
+            out << ghostConnectivity[i][j] + nofNodes << " ";
           }
         if((i+1)%3==0 && i!=nofGhosts-1)
           out << endl << "          ";
