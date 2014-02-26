@@ -114,9 +114,15 @@ public:
 	void			updateghostsConnectivity();					// Update ghosts nodes vector and connectivity of ghosts octants of local tree
 
 	void		findNeighbours(uint32_t idx,					// Finds neighbours of idx-th octant through iface in vector octants.
-								  uint8_t iface,				// Returns a vector (empty if iface is a bound face) with the index of neighbours
-								  u32vector & neighbours,		// in their structure (octants or ghosts) and sets isghost[i] = true if the
-								  vector<bool> & isghost);		// i-th neighbour is ghost in the local tree
+								uint8_t iface,					// Returns a vector (empty if iface is a bound face) with the index of neighbours
+								u32vector & neighbours,			// in their structure (octants or ghosts) and sets isghost[i] = true if the
+								vector<bool> & isghost);		// i-th neighbour is ghost in the local tree
+
+	void		findNeighbours(Class_Octant const & oct,		// Finds neighbours of octant oct through iface in vector octants
+								uint8_t iface,					// It may be slow due to the research of oct in octants.
+								u32vector & neighbours,			// Returns a vector (empty if iface is a bound face) with the index of neighbours
+								vector<bool> & isghost);		// in their structure (octants or ghosts) and sets isghost[i] = true if the
+																// i-th neighbour is ghost in the local tree
 
 private:
 

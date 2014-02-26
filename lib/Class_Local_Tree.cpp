@@ -764,32 +764,207 @@ void Class_Local_Tree::findNeighbours(uint32_t idx, uint8_t iface,
 	//--------------------------------------------------------------- //
 	//--------------------------------------------------------------- //
 	else{
-		// IF OCTANT FACE IS A PROCESS BOUNDARY SEARCH ALSO IN GHOSTS
-
-		// Search in octants
-
 		// Check if octants face is a boundary
 		if (oct->info[iface] == false){
+			// IF OCTANT FACE IS A PROCESS BOUNDARY SEARCH ALSO IN GHOSTS
+
+			// Search in ghosts
+
+			uint32_t idxghost = uint32_t(size_ghosts/2);
+			Class_Octant* octghost = &ghosts[idxghost];
 
 			//Build Morton number of virtual neigh of same size
 			Class_Octant samesizeoct(oct->level, oct->x+cx*size, oct->y+cy*size, oct->z+cz*size);
-			Morton = samesizeoct.computeMorton();
+			Morton = samesizeoct.computeMorton(); //mortonEncode_magicbits(oct->x-size,oct->y,oct->z);
 			// Search morton in octants
 			// If a even face morton is lower than morton of oct, if odd higher
 			// ---> can i search only before or after idx in octants
-			int32_t jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
-			idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
+			int32_t jump = (octghost->computeMorton() > Morton) ? int32_t(idxghost/2+1) : int32_t((size_ghosts -idxghost)/2+1);
+			idxtry = uint32_t(idxghost +((octghost->computeMorton()<Morton)-(octghost->computeMorton()>Morton))*jump);
+			while(abs(jump) > 0){
+				Mortontry = ghosts[idxtry].computeMorton();
+				jump = ((Mortontry<Morton)-(Mortontry>Morton))*jump/2;
+				idxtry += jump;
+			}
+			if(octants[idxtry].computeMorton() == Morton && ghosts[idxtry].level == oct->level){
+				//Found neighbour of same size
+				isghost.push_back(true);
+				neighbours.push_back(idxtry);
+				return;
+			}
+			else{
+				// Step until the mortontry lower than morton (one idx of distance)
+				{
+					while(ghosts[idxtry].computeMorton() < Morton){
+						idxtry++;
+					}
+					while(ghosts[idxtry].computeMorton() > Morton){
+						idxtry--;
+					}
+				}
+				if(ghosts[idxtry].computeMorton() == Morton && ghosts[idxtry].level == oct->level){
+					//Found neighbour of same size
+					isghost.push_back(true);
+					neighbours.push_back(idxtry);
+					return;
+				}
+				// Compute Last discendent of virtual octant of same size
+				uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL - samesizeoct.level)) - 1;
+				Class_Octant last_desc = samesizeoct.buildLastDesc();
+				uint64_t Mortonlast = last_desc.computeMorton();
+				vector<uint32_t> bufferidx;
+				Mortontry = ghosts[idxtry].computeMorton();
+				int32_t Dh;
+				int32_t eqcoord;
+				while(Mortontry < Mortonlast){
+					Dh = cx*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
+					Dh += cy*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
+					Dh += cz*(int32_t(oct->z) - int32_t(ghosts[idxtry].z));
+					if ((abs(Dh) == ((1-(iface%2))*ghosts[idxtry].getSize() + (iface%2)*size))){
+						neighbours.push_back(idxtry);
+						isghost.push_back(true);
+					}
+					idxtry++;
+					Mortontry = ghosts[idxtry].computeMorton();
+				}
+			}
+			uint32_t lengthneigh = 0;
+			uint32_t sizeneigh = neighbours.size();
+			for (idx=0; idx<sizeneigh; idx++){
+				lengthneigh += ghosts[neighbours[idx]].getSize();
+			}
+			if (lengthneigh < oct->getSize()){
+				// Search in octants
+
+				// Check if octants face is a boundary
+				if (oct->info[iface] == false){
+
+					//Build Morton number of virtual neigh of same size
+					Class_Octant samesizeoct(oct->level, oct->x+cx*size, oct->y+cy*size, oct->z+cz*size);
+					Morton = samesizeoct.computeMorton();
+					// Search morton in octants
+					// If a even face morton is lower than morton of oct, if odd higher
+					// ---> can i search only before or after idx in octants
+					int32_t jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
+					idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
+					//idxtry_old = uint64_t((1+direction)*noctants );
+					while(abs(jump) > 0){
+						Mortontry = octants[idxtry].computeMorton();
+						jump = ((Mortontry<Morton)-(Mortontry>Morton))*jump/2;
+						idxtry += jump;
+					}
+					if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
+						//Found neighbour of same size
+						isghost.push_back(false);
+						neighbours.push_back(idxtry);
+						writeLog("Face marked pbound but only a non-ghost neighbour found!!!");
+						return;
+					}
+					else{
+						// Step until the mortontry lower than morton (one idx of distance)
+						{
+							while(octants[idxtry].computeMorton() < Morton){
+								idxtry++;
+							}
+							while(octants[idxtry].computeMorton() > Morton){
+								idxtry--;
+							}
+						}
+						if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
+							//Found neighbour of same size
+							isghost.push_back(false);
+							neighbours.push_back(idxtry);
+							writeLog("Face marked pbound but only a non-ghost neighbour found!!!");
+							return;
+						}
+						// Compute Last discendent of virtual octant of same size
+						uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL - samesizeoct.level)) - 1;
+						Class_Octant last_desc = samesizeoct.buildLastDesc();
+						uint64_t Mortonlast = last_desc.computeMorton();
+						vector<uint32_t> bufferidx;
+						Mortontry = octants[idxtry].computeMorton();
+						int32_t Dh;
+						int32_t eqcoord;
+						while(Mortontry < Mortonlast){
+							Dh = cx*(int32_t(oct->x) - int32_t(octants[idxtry].x));
+							Dh += cy*(int32_t(oct->y) - int32_t(octants[idxtry].y));
+							Dh += cz*(int32_t(oct->z) - int32_t(octants[idxtry].z));
+							if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
+								neighbours.push_back(idxtry);
+								isghost.push_back(false);
+							}
+							idxtry++;
+							Mortontry = octants[idxtry].computeMorton();
+						}
+					}
+				}
+			}
+			return;
+		}
+		else{
+			// Boundary Face
+			return;
+		}
+
+	}
+}
+
+// =================================================================================== //
+
+void Class_Local_Tree::findNeighbours(Class_Octant const & oct, uint8_t iface,
+		u32vector & neighbours, vector<bool> & isghost) {
+
+	uint64_t  Morton, Mortontry;
+	uint32_t  noctants = getNumOctants();
+	uint32_t idxtry, idxtry_old, idxtry_old_;
+	uint32_t size = oct.getSize();
+
+	//Alternative to switch case
+	int8_t cx = int8_t((iface<2)*(int8_t(2*iface-1)));
+	int8_t cy = int8_t((iface<4)*(int8_t(iface/2))*(int8_t(2*iface-5)));
+	int8_t cz = int8_t((int8_t(iface/4))*(int8_t(2*iface-9)));
+
+	isghost.clear();
+	neighbours.clear();
+
+	// Default if iface is nface<iface<0
+	if (iface < 0 || iface > nface){
+		writeLog("Face index out of range in find neighbours !!!");
+		return;
+	}
+
+	// Check if octants face is a process boundary
+	if (oct.info[nface+iface] == false){
+
+		// Check if octants face is a boundary
+		if (oct.info[iface] == false){
+
+			// Find octant in octants
+			uint32_t idx;
+			{
+			vector<Class_Octant>::iterator it = find(octants.begin(), octants.end(), oct);
+			idx = distance(octants.begin(), it);
+			it = octants.end();
+			}
+
+			//Build Morton number of virtual neigh of same size
+			Class_Octant samesizeoct(oct.level, oct.x+cx*size, oct.y+cy*size, oct.z+cz*size);
+			Morton = samesizeoct.computeMorton();
+			// Search morton in octants
+			// If a even face morton is lower than morton of oct, if odd higher
+			// --. can i search only before or after idx in octants
+			int32_t jump = (oct.computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
+			idxtry = uint32_t(idx +((oct.computeMorton()<Morton)-(oct.computeMorton()>Morton))*jump);
 			//idxtry_old = uint64_t((1+direction)*noctants );
 			while(abs(jump) > 0){
 				Mortontry = octants[idxtry].computeMorton();
 				jump = ((Mortontry<Morton)-(Mortontry>Morton))*jump/2;
 				idxtry += jump;
 			}
-			if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
+			if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct.level){
 				//Found neighbour of same size
 				isghost.push_back(false);
 				neighbours.push_back(idxtry);
-				writeLog("Face marked pbound but only a non-ghost neighbour found!!!");
 				return;
 			}
 			else{
@@ -802,11 +977,10 @@ void Class_Local_Tree::findNeighbours(uint32_t idx, uint8_t iface,
 						idxtry--;
 					}
 				}
-				if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
+				if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct.level){
 					//Found neighbour of same size
 					isghost.push_back(false);
 					neighbours.push_back(idxtry);
-					writeLog("Face marked pbound but only a non-ghost neighbour found!!!");
 					return;
 				}
 				// Compute Last discendent of virtual octant of same size
@@ -818,9 +992,9 @@ void Class_Local_Tree::findNeighbours(uint32_t idx, uint8_t iface,
 				int32_t Dh;
 				int32_t eqcoord;
 				while(Mortontry < Mortonlast){
-					Dh = cx*(int32_t(oct->x) - int32_t(octants[idxtry].x));
-					Dh += cy*(int32_t(oct->y) - int32_t(octants[idxtry].y));
-					Dh += cz*(int32_t(oct->z) - int32_t(octants[idxtry].z));
+					Dh = cx*(int32_t(oct.x) - int32_t(octants[idxtry].x));
+					Dh += cy*(int32_t(oct.y) - int32_t(octants[idxtry].y));
+					Dh += cz*(int32_t(oct.z) - int32_t(octants[idxtry].z));
 					if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
 						neighbours.push_back(idxtry);
 						isghost.push_back(false);
@@ -828,74 +1002,168 @@ void Class_Local_Tree::findNeighbours(uint32_t idx, uint8_t iface,
 					idxtry++;
 					Mortontry = octants[idxtry].computeMorton();
 				}
+				return;
 			}
 		}
 		else{
 			// Boundary Face
 			return;
 		}
+	}
+	//--------------------------------------------------------------- //
+	//--------------------------------------------------------------- //
+	else{
+		// Check if octants face is a boundary
+		if (oct.info[iface] == false){
 
-		// Search in ghosts
+			// IF OCTANT FACE IS A PROCESS BOUNDARY SEARCH ALSO IN GHOSTS
 
-		uint32_t idxghost = uint32_t(size_ghosts/2);
-		Class_Octant* octghost = &ghosts[idxghost];
-
-		//Build Morton number of virtual neigh of same size
-		Class_Octant samesizeoct(oct->level, oct->x+cx*size, oct->y+cy*size, oct->z+cz*size);
-		Morton = samesizeoct.computeMorton(); //mortonEncode_magicbits(oct->x-size,oct->y,oct->z);
-		// Search morton in octants
-		// If a even face morton is lower than morton of oct, if odd higher
-		// ---> can i search only before or after idx in octants
-		int32_t jump = (octghost->computeMorton() > Morton) ? int32_t(idxghost/2+1) : int32_t((size_ghosts -idxghost)/2+1);
-		idxtry = uint32_t(idxghost +((octghost->computeMorton()<Morton)-(octghost->computeMorton()>Morton))*jump);
-		while(abs(jump) > 0){
-			Mortontry = ghosts[idxtry].computeMorton();
-			jump = ((Mortontry<Morton)-(Mortontry>Morton))*jump/2;
-			idxtry += jump;
-		}
-		if(octants[idxtry].computeMorton() == Morton && ghosts[idxtry].level == oct->level){
-			//Found neighbour of same size
-			isghost.push_back(true);
-			neighbours.push_back(idxtry);
-			return;
-		}
-		else{
-			// Step until the mortontry lower than morton (one idx of distance)
+			// Find octant in octants
+			uint32_t idx;
 			{
-				while(ghosts[idxtry].computeMorton() < Morton){
-					idxtry++;
-				}
-				while(ghosts[idxtry].computeMorton() > Morton){
-					idxtry--;
-				}
+			vector<Class_Octant>::iterator it = find(octants.begin(), octants.end(), oct);
+			idx = distance(octants.begin(), it);
+			it = octants.end();
 			}
-			if(ghosts[idxtry].computeMorton() == Morton && ghosts[idxtry].level == oct->level){
+
+			// Search in ghosts
+
+			uint32_t idxghost = uint32_t(size_ghosts/2);
+			Class_Octant* octghost = &ghosts[idxghost];
+
+			//Build Morton number of virtual neigh of same size
+			Class_Octant samesizeoct(oct.level, oct.x+cx*size, oct.y+cy*size, oct.z+cz*size);
+			Morton = samesizeoct.computeMorton(); //mortonEncode_magicbits(oct.x-size,oct.y,oct.z);
+			// Search morton in octants
+			// If a even face morton is lower than morton of oct, if odd higher
+			// --. can i search only before or after idx in octants
+			int32_t jump = (octghost->computeMorton() > Morton) ? int32_t(idxghost/2+1) : int32_t((size_ghosts -idxghost)/2+1);
+			idxtry = uint32_t(idxghost +((octghost->computeMorton()<Morton)-(octghost->computeMorton()>Morton))*jump);
+			while(abs(jump) > 0){
+				Mortontry = ghosts[idxtry].computeMorton();
+				jump = ((Mortontry<Morton)-(Mortontry>Morton))*jump/2;
+				idxtry += jump;
+			}
+			if(octants[idxtry].computeMorton() == Morton && ghosts[idxtry].level == oct.level){
 				//Found neighbour of same size
 				isghost.push_back(true);
 				neighbours.push_back(idxtry);
 				return;
 			}
-			// Compute Last discendent of virtual octant of same size
-			uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL - samesizeoct.level)) - 1;
-			Class_Octant last_desc = samesizeoct.buildLastDesc();
-			uint64_t Mortonlast = last_desc.computeMorton();
-			vector<uint32_t> bufferidx;
-			Mortontry = ghosts[idxtry].computeMorton();
-			int32_t Dh;
-			int32_t eqcoord;
-			while(Mortontry < Mortonlast){
-				Dh = cx*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
-				Dh += cy*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
-				Dh += cz*(int32_t(oct->z) - int32_t(ghosts[idxtry].z));
-				if ((abs(Dh) == ((1-(iface%2))*ghosts[idxtry].getSize() + (iface%2)*size))){
-					neighbours.push_back(idxtry);
-					isghost.push_back(true);
+			else{
+				// Step until the mortontry lower than morton (one idx of distance)
+				{
+					while(ghosts[idxtry].computeMorton() < Morton){
+						idxtry++;
+					}
+					while(ghosts[idxtry].computeMorton() > Morton){
+						idxtry--;
+					}
 				}
-				idxtry++;
+				if(ghosts[idxtry].computeMorton() == Morton && ghosts[idxtry].level == oct.level){
+					//Found neighbour of same size
+					isghost.push_back(true);
+					neighbours.push_back(idxtry);
+					return;
+				}
+				// Compute Last discendent of virtual octant of same size
+				uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL - samesizeoct.level)) - 1;
+				Class_Octant last_desc = samesizeoct.buildLastDesc();
+				uint64_t Mortonlast = last_desc.computeMorton();
+				vector<uint32_t> bufferidx;
 				Mortontry = ghosts[idxtry].computeMorton();
+				int32_t Dh;
+				int32_t eqcoord;
+				while(Mortontry < Mortonlast){
+					Dh = cx*(int32_t(oct.x) - int32_t(ghosts[idxtry].x));
+					Dh += cy*(int32_t(oct.y) - int32_t(ghosts[idxtry].y));
+					Dh += cz*(int32_t(oct.z) - int32_t(ghosts[idxtry].z));
+					if ((abs(Dh) == ((1-(iface%2))*ghosts[idxtry].getSize() + (iface%2)*size))){
+						neighbours.push_back(idxtry);
+						isghost.push_back(true);
+					}
+					idxtry++;
+					Mortontry = ghosts[idxtry].computeMorton();
+				}
+			}
+			uint32_t lengthneigh = 0;
+			uint32_t sizeneigh = neighbours.size();
+			for (idx=0; idx<sizeneigh; idx++){
+				lengthneigh += ghosts[neighbours[idx]].getSize();
+			}
+			if (lengthneigh < oct.getSize()){
+				// Search in octants
+
+				// Check if octants face is a boundary
+				if (oct.info[iface] == false){
+
+					//Build Morton number of virtual neigh of same size
+					Class_Octant samesizeoct(oct.level, oct.x+cx*size, oct.y+cy*size, oct.z+cz*size);
+					Morton = samesizeoct.computeMorton();
+					// Search morton in octants
+					// If a even face morton is lower than morton of oct, if odd higher
+					// --. can i search only before or after idx in octants
+					int32_t jump = (oct.computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
+					idxtry = uint32_t(idx +((oct.computeMorton()<Morton)-(oct.computeMorton()>Morton))*jump);
+					//idxtry_old = uint64_t((1+direction)*noctants );
+					while(abs(jump) > 0){
+						Mortontry = octants[idxtry].computeMorton();
+						jump = ((Mortontry<Morton)-(Mortontry>Morton))*jump/2;
+						idxtry += jump;
+					}
+					if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct.level){
+						//Found neighbour of same size
+						isghost.push_back(false);
+						neighbours.push_back(idxtry);
+						writeLog("Face marked pbound but only a non-ghost neighbour found!!!");
+						return;
+					}
+					else{
+						// Step until the mortontry lower than morton (one idx of distance)
+						{
+							while(octants[idxtry].computeMorton() < Morton){
+								idxtry++;
+							}
+							while(octants[idxtry].computeMorton() > Morton){
+								idxtry--;
+							}
+						}
+						if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct.level){
+							//Found neighbour of same size
+							isghost.push_back(false);
+							neighbours.push_back(idxtry);
+							writeLog("Face marked pbound but only a non-ghost neighbour found!!!");
+							return;
+						}
+						// Compute Last discendent of virtual octant of same size
+						uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL - samesizeoct.level)) - 1;
+						Class_Octant last_desc = samesizeoct.buildLastDesc();
+						uint64_t Mortonlast = last_desc.computeMorton();
+						vector<uint32_t> bufferidx;
+						Mortontry = octants[idxtry].computeMorton();
+						int32_t Dh;
+						int32_t eqcoord;
+						while(Mortontry < Mortonlast){
+							Dh = cx*(int32_t(oct.x) - int32_t(octants[idxtry].x));
+							Dh += cy*(int32_t(oct.y) - int32_t(octants[idxtry].y));
+							Dh += cz*(int32_t(oct.z) - int32_t(octants[idxtry].z));
+							if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
+								neighbours.push_back(idxtry);
+								isghost.push_back(false);
+							}
+							idxtry++;
+							Mortontry = octants[idxtry].computeMorton();
+						}
+					}
+				}
 			}
 			return;
 		}
+		else{
+			// Boundary Face
+			return;
+		}
+
 	}
 }
 
