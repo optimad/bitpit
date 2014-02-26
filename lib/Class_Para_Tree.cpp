@@ -144,6 +144,8 @@ int Class_Para_Tree::findOwner(const uint64_t & morton) {
 		}
 		else{
 			beg = seed;
+			if(morton <= partition_last_desc[seed+1])
+				beg = seed + 1;
 	//	length = end - seed -1;
 		}
 		length = end - beg;
@@ -188,42 +190,151 @@ void Class_Para_Tree::setPboundGhosts() {
 		}
 	}
 	//TODO communicate borders
-	map<int,Class_Comm_Buffer> commBuffers;
-	map<int,vector<uint64_t> >::iterator mitend = bordersPerProc.end();
-	for(map<int,vector<uint64_t> >::iterator mit = bordersPerProc.begin(); mit != mitend; ++mit){
-		int buffSize = mit->second.size() * (int)ceil((double)octantBytes / (double)(CHAR_BIT/8));
-		int key = mit->first;
-		const vector<uint64_t> & value = mit->second;
-		commBuffers[key] = Class_Comm_Buffer(buffSize,'\0');
+	//pack buffers
+	map<int,Class_Comm_Buffer> sendBuffers;
+	map<int,vector<uint64_t> >::iterator bitend = bordersPerProc.end();
+	for(map<int,vector<uint64_t> >::iterator bit = bordersPerProc.begin(); bit != bitend; ++bit){
+		int buffSize = bit->second.size() * (int)ceil((double)octantBytes / (double)(CHAR_BIT/8));// + (int)ceil((double)sizeof(int)/(double)(CHAR_BIT/8));
+		int key = bit->first;
+		const vector<uint64_t> & value = bit->second;
+		sendBuffers[key] = Class_Comm_Buffer(buffSize,'a');
 		int pos = 0;
 		int nofBorders = value.size();
+		//MPI_Pack(&nofBorders,1,MPI_INT,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 		for(int i = 0; i < nofBorders; ++i){
-			MPI_Pack(&octree.octants[value[i]].x,1,MPI_UINT32_T,commBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			MPI_Pack(&octree.octants[value[i]].y,1,MPI_UINT32_T,commBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			MPI_Pack(&octree.octants[value[i]].z,1,MPI_UINT32_T,commBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			MPI_Pack(&octree.octants[value[i]].level,1,MPI_UINT8_T,commBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			MPI_Pack(&octree.octants[value[i]].marker,1,MPI_UINT8_T,commBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			uint32_t x,y,z;
+			uint8_t l;
+			int8_t m;
+			bool info[16];
+			x = octree.octants[value[i]].getX();
+			y = octree.octants[value[i]].getY();
+			z = octree.octants[value[i]].getZ();
+			l = octree.octants[value[i]].getLevel();
+			m = octree.octants[value[i]].getMarker();
+			error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			//cout << "x: " << (int)sendBuffers[key].commBuffer[pos -4] << " pos: " << pos << endl;
+			error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			//cout << "y: " << (int)sendBuffers[key].commBuffer[pos -4] << " pos: " << pos << endl;
+			error_flag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			//cout << "z: " << (int)sendBuffers[key].commBuffer[pos -4] << " pos: " << pos << endl;
+			error_flag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			//cout << "l: " << (int)sendBuffers[key].commBuffer[pos-1] << " pos: " << pos << endl;
+			error_flag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			//cout << "m: " << (int)sendBuffers[key].commBuffer[pos-1] << " pos: " << pos << endl;
 			for(int j = 0; j < 16; ++j){
-				MPI_Pack(&octree.octants[value[i]].info[j],1,MPI::BOOL,commBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+				MPI_Pack(&octree.octants[value[i]].info[j],1,MPI::BOOL,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+				//cout << "info["<< j <<"]: " << (int)sendBuffers[key].commBuffer[pos-1] << " pos: " << pos << endl;
 			}
 		}
 	}
 
+//	//DEBUG
+//	{stringstream ss;
+//	ss << "sendbuffers_" << rank;
+//	ofstream dout(ss.str().c_str());
+//	map<int,Class_Comm_Buffer>::iterator ssitend = sendBuffers.end();
+//	for(map<int,Class_Comm_Buffer>::iterator ssit = sendBuffers.begin(); ssit != ssitend; ++ssit){
+//		dout << "receiver " << ssit->first << endl;
+//		int pos = 0;
+//		for(int i = 0; i < (int)ssit->second.commBufferSize / (int)octantBytes ; ++i){
+//			uint32_t x,y,z;
+//			uint8_t l;
+//			int8_t m;
+//			bool info[16];
+//			error_flag = MPI_Unpack(ssit->second.commBuffer,(int)ssit->second.commBufferSize,&pos,&x,1,MPI_UINT32_T,MPI_COMM_WORLD);
+//			error_flag = MPI_Unpack(ssit->second.commBuffer,(int)ssit->second.commBufferSize,&pos,&y,1,MPI_UINT32_T,MPI_COMM_WORLD);
+//			error_flag = MPI_Unpack(ssit->second.commBuffer,(int)ssit->second.commBufferSize,&pos,&z,1,MPI_UINT32_T,MPI_COMM_WORLD);
+//			error_flag = MPI_Unpack(ssit->second.commBuffer,(int)ssit->second.commBufferSize,&pos,&l,1,MPI_UINT8_T,MPI_COMM_WORLD);
+//			error_flag = MPI_Unpack(ssit->second.commBuffer,(int)ssit->second.commBufferSize,&pos,&m,1,MPI_INT8_T,MPI_COMM_WORLD);
+//			for(int j = 0; j < 16; ++j)
+//				error_flag = MPI_Unpack(&ssit->second.commBuffer,ssit->second.commBufferSize,&pos,&info[j],1,MPI::BOOL,MPI_COMM_WORLD);
+//			dout << "x: " << (int)x << " y: "  << (int)y << " z: " << (int)z << " l: " << (int)l << " m: " << (int)m << endl;
+//			//		for(int i = 0; i < ssit->second.commBufferSize; ++i)
+//			//			dout << " " << ssit->second.commBuffer[i];
+//			dout << endl;
+//		}
+//	}
+//	dout.close();}
+//	//END DEBUG
+
+	cout << "Communicate sizes" << endl;
+
+	//communicate receiver buffer size
+	MPI_Request req[sendBuffers.size()*2];
+	MPI_Status stats[sendBuffers.size()*2];
+	int nReq = 0;
+	map<int,int> recvBufferSizePerProc;
+	map<int,Class_Comm_Buffer>::iterator sitend = sendBuffers.end();
+	for(map<int,Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
+		recvBufferSizePerProc[sit->first] = 0;
+		error_flag = MPI_Irecv(&recvBufferSizePerProc[sit->first],1,MPI_UINT32_T,sit->first,rank,MPI_COMM_WORLD,&req[nReq]);
+		++nReq;
+	}
+	map<int,Class_Comm_Buffer>::reverse_iterator rsitend = sendBuffers.rend();
+	for(map<int,Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+		error_flag =  MPI_Isend(&rsit->second.commBufferSize,1,MPI_UINT32_T,rsit->first,rsit->first,MPI_COMM_WORLD,&req[nReq]);
+		++nReq;
+	}
+	MPI_Waitall(nReq,req,stats);
+
+	cout << "Communicate buffers" << endl;
+
+	//communicate borders buffers
+	uint32_t nofBytesOverProc = 0;
+	map<int,Class_Comm_Buffer> recvBuffers;
+	map<int,int>::iterator ritend = recvBufferSizePerProc.end();
+	for(map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
+		recvBuffers[rit->first] = Class_Comm_Buffer(rit->second,'a');
+	}
+	nReq = 0;
+	for(map<int,Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
+		nofBytesOverProc += recvBuffers[sit->first].commBufferSize;
+		error_flag = MPI_Irecv(recvBuffers[sit->first].commBuffer,recvBuffers[sit->first].commBufferSize,MPI_PACKED,sit->first,rank,MPI_COMM_WORLD,&req[nReq]);
+		++nReq;
+	}
+	for(map<int,Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+		error_flag =  MPI_Isend(rsit->second.commBuffer,rsit->second.commBufferSize,MPI_PACKED,rsit->first,rsit->first,MPI_COMM_WORLD,&req[nReq]);
+		++nReq;
+	}
+	MPI_Waitall(nReq,req,stats);
+	uint32_t nofGhosts = nofBytesOverProc / (uint32_t)octantBytes;
+	octree.size_ghosts = nofGhosts;
+	cout << "rank: " << rank << " nofGhosts: " << nofGhosts << endl;
+	octree.ghosts.resize(nofGhosts);
+
+	//unpack buffers and build ghost
+	uint32_t x,y,z;
+	uint8_t l;
+	int8_t m;
+	bool info[16];
+	uint32_t ghostCounter = 0;
+	map<int,Class_Comm_Buffer>::iterator rritend = recvBuffers.end();
+	for(map<int,Class_Comm_Buffer>::iterator rrit = recvBuffers.begin(); rrit != rritend; ++rrit){
+		int pos = 0;
+		int nofGhostsPerProc = int(rrit->second.commBufferSize / (uint32_t) octantBytes);
+		for(int i = 0; i < nofGhostsPerProc; ++i){
+			error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&x,1,MPI_UINT32_T,MPI_COMM_WORLD);
+			error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&y,1,MPI_UINT32_T,MPI_COMM_WORLD);
+			error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&z,1,MPI_UINT32_T,MPI_COMM_WORLD);
+			error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&l,1,MPI_UINT8_T,MPI_COMM_WORLD);
+			octree.ghosts[ghostCounter] = Class_Octant(l,x,y,z);
+			error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&m,1,MPI_INT8_T,MPI_COMM_WORLD);
+			octree.ghosts[ghostCounter].setMarker(m);
+			for(int j = 0; j < 16; ++j){
+				error_flag = MPI_Unpack(&rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&info[j],1,MPI::BOOL,MPI_COMM_WORLD);
+				octree.ghosts[ghostCounter].info[j] = info[j];
+			}
+			//cout << "x: " << (int)x << " y: "  << (int)y << " z: " << (int)z << " l: " << (int)l << " m: " << (int)m << endl;
+			++ghostCounter;
+		}
+	}
 
 
+	cout << "size Ghosts " << octree.size_ghosts <<  endl;
 
+	recvBuffers.clear();
+	sendBuffers.clear();
+	recvBufferSizePerProc.clear();
 
-	char buff[2];
-	int position = 0;
-	cout << "uint32_t " << sizeof(uint64_t) << endl;
-	cout << "uint32_t " << sizeof(octree.octants[0].y) << endl;
-	MPI_Pack(&octree.octants[0].x, 1, MPI_UINT32_T, buff, 14, &position, MPI_COMM_WORLD);
-	cout << "position 1 "  << position << endl;
-	MPI_Pack(&octree.octants[0].y, 1, MPI_UINT32_T, buff, 14, &position, MPI_COMM_WORLD);
-	cout << "position 1 "  << position << endl;
-	MPI_Pack(&octree.octants[0].z, 1, MPI_UINT32_T, buff, 14, &position, MPI_COMM_WORLD);
-	MPI_Pack(&octree.octants[0].level, 1, MPI_UINT8_T, buff, 14, &position, MPI_COMM_WORLD);
-	MPI_Pack(&octree.octants[0].marker, 1, MPI_INT8_T, buff, 14, &position, MPI_COMM_WORLD);
-	cout << "position 1 "  << position << endl;
-
+	cout << "Exiting" << endl;
 }

@@ -22,6 +22,7 @@ int main(int argc, char *argv[]) {
 
 	Class_Para_Tree ptree;
 
+
 	ptree.octree.setMarker(0,2);
 	while(ptree.octree.refine());
 	uint64_t numoctants = ptree.octree.getNumOctants();

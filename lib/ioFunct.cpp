@@ -32,6 +32,7 @@ void writeLocalTree(const u32vector2D& nodes, const u32vector2D& connectivity,
 	int nofGhostNodes = ghostNodes.size();
 	int nofOctants = connectivity.size();
 	int nofGhosts = ghostConnectivity.size();
+	cout << "write nofghosts " << nofGhosts << " nodes: " << nofGhostNodes << endl;
 	int nofAll = nofGhosts + nofOctants;
 	out << "<?xml version=\"1.0\"?>" << endl
 		<< "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
@@ -72,7 +73,7 @@ void writeLocalTree(const u32vector2D& nodes, const u32vector2D& connectivity,
       {
         for(int j = 0; j < nnodes; j++)
           {
-            out << ghostConnectivity[i][j] << " ";
+            out << ghostConnectivity[i][j] + nofNodes << " ";
           }
         if((i+1)%3==0 && i!=nofGhosts-1)
           out << endl << "          ";
