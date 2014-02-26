@@ -201,11 +201,19 @@ void Class_Para_Tree::setPboundGhosts() {
 		int nofBorders = value.size();
 		//MPI_Pack(&nofBorders,1,MPI_INT,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 		for(int i = 0; i < nofBorders; ++i){
-			MPI_Pack(&octree.octants[value[i]].x,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			MPI_Pack(&octree.octants[value[i]].y,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			MPI_Pack(&octree.octants[value[i]].z,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			MPI_Pack(&octree.octants[value[i]].level,1,MPI_UINT8_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			MPI_Pack(&octree.octants[value[i]].marker,1,MPI_UINT8_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			uint32_t x,y,z;
+			uint8_t l,m;
+			bool info[16];
+			x = octree.octants[value[i]].getX();
+			y = octree.octants[value[i]].getY();
+			z = octree.octants[value[i]].getZ();
+			l = octree.octants[value[i]].getLevel();
+			m = octree.octants[value[i]].getMarker();
+			MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			MPI_Pack(&m,1,MPI_UINT8_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 			for(int j = 0; j < 16; ++j){
 				MPI_Pack(&octree.octants[value[i]].info[j],1,MPI::BOOL,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 			}
@@ -257,17 +265,17 @@ void Class_Para_Tree::setPboundGhosts() {
 //	}
 
 
-	char buff[2];
-	int position = 0;
-	cout << "uint32_t " << sizeof(uint64_t) << endl;
-	cout << "uint32_t " << sizeof(octree.octants[0].y) << endl;
-	MPI_Pack(&octree.octants[0].x, 1, MPI_UINT32_T, buff, 14, &position, MPI_COMM_WORLD);
-	cout << "position 1 "  << position << endl;
-	MPI_Pack(&octree.octants[0].y, 1, MPI_UINT32_T, buff, 14, &position, MPI_COMM_WORLD);
-	cout << "position 1 "  << position << endl;
-	MPI_Pack(&octree.octants[0].z, 1, MPI_UINT32_T, buff, 14, &position, MPI_COMM_WORLD);
-	MPI_Pack(&octree.octants[0].level, 1, MPI_UINT8_T, buff, 14, &position, MPI_COMM_WORLD);
-	MPI_Pack(&octree.octants[0].marker, 1, MPI_INT8_T, buff, 14, &position, MPI_COMM_WORLD);
-	cout << "position 1 "  << position << endl;
+//	char buff[2];
+//	int position = 0;
+//	cout << "uint32_t " << sizeof(uint64_t) << endl;
+//	cout << "uint32_t " << sizeof(octree.octants[0].y) << endl;
+//	MPI_Pack(&octree.octants[0].x, 1, MPI_UINT32_T, buff, 14, &position, MPI_COMM_WORLD);
+//	cout << "position 1 "  << position << endl;
+//	MPI_Pack(&octree.octants[0].y, 1, MPI_UINT32_T, buff, 14, &position, MPI_COMM_WORLD);
+//	cout << "position 1 "  << position << endl;
+//	MPI_Pack(&octree.octants[0].z, 1, MPI_UINT32_T, buff, 14, &position, MPI_COMM_WORLD);
+//	MPI_Pack(&octree.octants[0].level, 1, MPI_UINT8_T, buff, 14, &position, MPI_COMM_WORLD);
+//	MPI_Pack(&octree.octants[0].marker, 1, MPI_INT8_T, buff, 14, &position, MPI_COMM_WORLD);
+//	cout << "position 1 "  << position << endl;
 
 }

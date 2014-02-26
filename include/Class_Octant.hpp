@@ -38,7 +38,7 @@ class Class_Octant{
 	// ------------------------------------------------------------------------------- //
 	// MEMBERS ----------------------------------------------------------------------- //
 
-public:
+private:
 	uint32_t  x, y, z;			// Coordinates
 	uint8_t   level;			// Refinement level (0=root)
 	int8_t    marker;			// Set for Refinement(m>0) or Coarsening(m<0) |m|-times
