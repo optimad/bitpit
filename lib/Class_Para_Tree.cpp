@@ -144,6 +144,8 @@ int Class_Para_Tree::findOwner(const uint64_t & morton) {
 		}
 		else{
 			beg = seed;
+			if(morton <= partition_last_desc[seed+1])
+				beg = seed + 1;
 	//	length = end - seed -1;
 		}
 		length = end - beg;
