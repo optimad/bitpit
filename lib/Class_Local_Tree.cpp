@@ -111,6 +111,7 @@ bool Class_Local_Tree::refine() {
 		}
 		else{
 			octants[idx].info[12] = false;
+			octants[idx].marker = 0;
 		}
 	}
 	if (offset >0){
