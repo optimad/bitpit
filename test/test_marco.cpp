@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
 
 	Class_Para_Tree ptree;
 
-	ptree.octree.setMarker(0,2);
+	ptree.octree.setMarker(0,4);
 	while(ptree.octree.refine());
 	uint64_t numoctants = ptree.octree.getNumOctants();
 
@@ -42,9 +42,11 @@ int main(int argc, char *argv[]) {
 		numoctants = ptree.octree.getNumOctants();
 		cout << "Num Octants : " << numoctants << endl;
 	}
+/*
 	ptree.octree.computeConnectivity();
 	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"ciccio");
 	ptree.octree.clearConnectivity();
+*/
 //	ptree.octree.setMarker(0,1);
 //	ptree.octree.refine();
 //	ptree.updateRefine();
@@ -57,6 +59,33 @@ int main(int argc, char *argv[]) {
 //	ptree.updateRefine();
 //	ptree.octree.refine();
 	ptree.updateRefine();
+
+
+
+	cout << "Coarse " << endl;
+	numoctants = ptree.octree.getNumOctants();
+	for (int l=0; l<4; l++){
+		for (int i=0; i<numoctants; i++){
+			double* center;
+			Class_Octant oct = ptree.octree.extractOctant(i);
+			center = oct.getCenter();
+			if ((center[0] < pow(2.0,20)*0.65) && (center[0] > pow(2.0,20)*0.35)){
+				if ((center[1] < pow(2.0,20)*0.65) && (center[1] > pow(2.0,20)*0.35)){
+					if ((center[2] < pow(2.0,20)*0.65) && (center[2] > pow(2.0,20)*0.35)){
+						ptree.octree.setMarker(i,-1);
+					}
+				}
+			}
+		}
+		cout << "Num Octants : " << numoctants << endl;
+		ptree.octree.coarse();
+		numoctants = ptree.octree.getNumOctants();
+		cout << "Num Octants : " << numoctants << endl;
+		ptree.updateRefine();
+	}
+
+
+
 
 	cout << "I'm " << ptree.rank << " and max_depth is " << (int)ptree.max_depth << endl;
 	cout << "I'm " << ptree.rank << " and global_num_octants is " << ptree.global_num_octants << endl;

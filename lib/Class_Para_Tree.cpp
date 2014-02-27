@@ -321,7 +321,7 @@ void Class_Para_Tree::setPboundGhosts() {
 			error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&m,1,MPI_INT8_T,MPI_COMM_WORLD);
 			octree.ghosts[ghostCounter].setMarker(m);
 			for(int j = 0; j < 16; ++j){
-				error_flag = MPI_Unpack(&rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&info[j],1,MPI::BOOL,MPI_COMM_WORLD);
+				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&info[j],1,MPI::BOOL,MPI_COMM_WORLD);
 				octree.ghosts[ghostCounter].info[j] = info[j];
 			}
 			//cout << "x: " << (int)x << " y: "  << (int)y << " z: " << (int)z << " l: " << (int)l << " m: " << (int)m << endl;
