@@ -49,16 +49,16 @@ int main(int argc, char *argv[]) {
 */
 	ptree.octree.setMarker(0,1);
 	ptree.octree.refine();
-	ptree.updateRefine();
+	ptree.updateAdapt();
 	ptree.octree.setMarker(0,1);
 	ptree.octree.refine();
-	ptree.updateRefine();
+	ptree.updateAdapt();
 //	ptree.octree.refine();
-//	ptree.updateRefine();
+//	ptree.updateAdapt();
 //	ptree.octree.refine();
-//	ptree.updateRefine();
+//	ptree.updateAdapt();
 //	ptree.octree.refine();
-//	ptree.updateRefine();
+//	ptree.updateAdapt();
 
 
 
@@ -81,7 +81,7 @@ int main(int argc, char *argv[]) {
 //		ptree.octree.coarse();
 //		numoctants = ptree.octree.getNumOctants();
 //		cout << "Num Octants : " << numoctants << endl;
-//		ptree.updateRefine();
+//		ptree.updateAdapt();
 //	}
 
 

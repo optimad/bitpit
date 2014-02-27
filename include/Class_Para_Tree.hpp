@@ -60,7 +60,7 @@ public:
 	// METHODS ----------------------------------------------------------------------- //
 	void loadBalance();							//assign the octants to the processes following a computed partition
 	void adapt();  								//call refine and coarse on the local tree
-	void updateRefine();						//update Class_Para_Tree members after a refine
+	void updateAdapt();							//update Class_Para_Tree members after a refine and/or coarse
 	void updateLoadBalance();					//update Class_Para_Tree members after a load balance
 	void computePartition(uint64_t* partition); // compute octant partition giving the same number of octant to each process and redistributing the reminder
 	void buildGhosts();

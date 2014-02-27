@@ -85,7 +85,7 @@ void Class_Para_Tree::loadBalance(){
 	delete [] partition;
 }
 
-void Class_Para_Tree::updateRefine() {
+void Class_Para_Tree::updateAdapt() {
 	if(serial)
 	{
 		max_depth = octree.local_max_depth;
@@ -119,7 +119,7 @@ void Class_Para_Tree::updateRefine() {
 
 void Class_Para_Tree::adapt() {
 	octree.refine();
-	updateRefine();
+	updateAdapt();
 }
 
 void Class_Para_Tree::buildGhosts() {
