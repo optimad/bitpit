@@ -156,6 +156,11 @@ int Class_Para_Tree::findOwner(const uint64_t & morton) {
 }
 
 void Class_Para_Tree::setPboundGhosts() {
+	//BUILD BORDER OCTANT INDECES VECTOR (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
+	//find local octants to be sent as ghost to the right processes
+	//it visits the local octants building virtual neighbors on each octant face
+	//find the owner of these virtual neighbor and build a map (process,border octants)
+	//this map contains the local octants as ghosts for neighbor processes
 	Class_Local_Tree::OctantsType::iterator end = octree.octants.end();
 	Class_Local_Tree::OctantsType::iterator begin = octree.octants.begin();
 	map<int,vector<uint64_t> > bordersPerProc;
@@ -190,7 +195,15 @@ void Class_Para_Tree::setPboundGhosts() {
 		}
 	}
 
-	//pack buffers
+	//PACK (mpi) BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
+	//it visits every element in bordersPerProc (one for every neighbor proc)
+	//for every element it visits the border octants it contains and pack them in a new structure, sendBuffers
+	//this map has an entry Class_Comm_Buffer for every proc containing the size in bytes of the buffer and the octants
+	//to be sent to that proc packed in a char* buffer
+	uint32_t x,y,z;
+	uint8_t l;
+	int8_t m;
+	bool info[16];
 	map<int,Class_Comm_Buffer> sendBuffers;
 	map<int,vector<uint64_t> >::iterator bitend = bordersPerProc.end();
 	for(map<int,vector<uint64_t> >::iterator bit = bordersPerProc.begin(); bit != bitend; ++bit){
@@ -202,29 +215,29 @@ void Class_Para_Tree::setPboundGhosts() {
 		int nofBorders = value.size();
 		//MPI_Pack(&nofBorders,1,MPI_INT,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 		for(int i = 0; i < nofBorders; ++i){
-			uint32_t x,y,z;
-			uint8_t l;
-			int8_t m;
-			bool info[16];
-			x = octree.octants[value[i]].getX();
-			y = octree.octants[value[i]].getY();
-			z = octree.octants[value[i]].getZ();
-			l = octree.octants[value[i]].getLevel();
-			m = octree.octants[value[i]].getMarker();
+			const Class_Octant & octant = octree.octants[value[i]];
+			x = octant.getX();
+			y = octant.getY();
+			z = octant.getZ();
+			l = octant.getLevel();
+			m = octant.getMarker();
+			memcpy(info,octant.info,16);
 			error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 			error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 			error_flag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 			error_flag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 			error_flag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 			for(int j = 0; j < 16; ++j){
-				MPI_Pack(&octree.octants[value[i]].info[j],1,MPI::BOOL,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+				MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 			}
 		}
 	}
 
 	cout << "Communicate sizes" << endl;
 
-	//communicate receiver buffer size
+	//COMMUNICATE THE SIZE OF BUFFER TO THE RECEIVERS
+	//the size of every borders buffer is communicated to the right process in order to build the receive buffer
+	//and stored in the recvBufferSizePerProc structure
 	MPI_Request req[sendBuffers.size()*2];
 	MPI_Status stats[sendBuffers.size()*2];
 	int nReq = 0;
@@ -244,7 +257,10 @@ void Class_Para_Tree::setPboundGhosts() {
 
 	cout << "Communicate buffers" << endl;
 
-	//communicate borders buffers
+	//COMMUNICATE THE BUFFERS TO THE RECEIVERS
+	//recvBuffers structure is declared and each buffer is initialized to the right size
+	//then, sendBuffers are communicated by senders and stored in recvBuffers in the receivers
+	//at the same time every process compute the size in bytes of all the ghost octants
 	uint32_t nofBytesOverProc = 0;
 	map<int,Class_Comm_Buffer> recvBuffers;
 	map<int,int>::iterator ritend = recvBufferSizePerProc.end();
@@ -262,16 +278,18 @@ void Class_Para_Tree::setPboundGhosts() {
 		++nReq;
 	}
 	MPI_Waitall(nReq,req,stats);
+
+	//COMPUTE GHOSTS SIZE IN BYTES
+	//number of ghosts in every process is obtained through the size in bytes of the single octant
+	//and ghost vector in local tree is resized
 	uint32_t nofGhosts = nofBytesOverProc / (uint32_t)octantBytes;
 	octree.size_ghosts = nofGhosts;
 	cout << "rank: " << rank << " nofGhosts: " << nofGhosts << endl;
 	octree.ghosts.resize(nofGhosts);
 
-	//unpack buffers and build ghost
-	uint32_t x,y,z;
-	uint8_t l;
-	int8_t m;
-	bool info[16];
+	//UNPACK BUFFERS AND BUILD GHOSTS CONTAINER OF CLASS_LOCAL_TREE
+	//every entry in recvBuffers is visited, each buffers from neighbor processes is unpacked octant by octant.
+	//every ghost octant is built and put in the ghost vector
 	uint32_t ghostCounter = 0;
 	map<int,Class_Comm_Buffer>::iterator rritend = recvBuffers.end();
 	for(map<int,Class_Comm_Buffer>::iterator rrit = recvBuffers.begin(); rrit != rritend; ++rrit){
