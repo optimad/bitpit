@@ -189,7 +189,7 @@ void Class_Para_Tree::setPboundGhosts() {
 			}
 		}
 	}
-	//TODO communicate borders
+
 	//pack buffers
 	map<int,Class_Comm_Buffer> sendBuffers;
 	map<int,vector<uint64_t> >::iterator bitend = bordersPerProc.end();
@@ -212,50 +212,15 @@ void Class_Para_Tree::setPboundGhosts() {
 			l = octree.octants[value[i]].getLevel();
 			m = octree.octants[value[i]].getMarker();
 			error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			//cout << "x: " << (int)sendBuffers[key].commBuffer[pos -4] << " pos: " << pos << endl;
 			error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			//cout << "y: " << (int)sendBuffers[key].commBuffer[pos -4] << " pos: " << pos << endl;
 			error_flag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			//cout << "z: " << (int)sendBuffers[key].commBuffer[pos -4] << " pos: " << pos << endl;
 			error_flag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			//cout << "l: " << (int)sendBuffers[key].commBuffer[pos-1] << " pos: " << pos << endl;
 			error_flag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			//cout << "m: " << (int)sendBuffers[key].commBuffer[pos-1] << " pos: " << pos << endl;
 			for(int j = 0; j < 16; ++j){
 				MPI_Pack(&octree.octants[value[i]].info[j],1,MPI::BOOL,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-				//cout << "info["<< j <<"]: " << (int)sendBuffers[key].commBuffer[pos-1] << " pos: " << pos << endl;
 			}
 		}
 	}
-
-//	//DEBUG
-//	{stringstream ss;
-//	ss << "sendbuffers_" << rank;
-//	ofstream dout(ss.str().c_str());
-//	map<int,Class_Comm_Buffer>::iterator ssitend = sendBuffers.end();
-//	for(map<int,Class_Comm_Buffer>::iterator ssit = sendBuffers.begin(); ssit != ssitend; ++ssit){
-//		dout << "receiver " << ssit->first << endl;
-//		int pos = 0;
-//		for(int i = 0; i < (int)ssit->second.commBufferSize / (int)octantBytes ; ++i){
-//			uint32_t x,y,z;
-//			uint8_t l;
-//			int8_t m;
-//			bool info[16];
-//			error_flag = MPI_Unpack(ssit->second.commBuffer,(int)ssit->second.commBufferSize,&pos,&x,1,MPI_UINT32_T,MPI_COMM_WORLD);
-//			error_flag = MPI_Unpack(ssit->second.commBuffer,(int)ssit->second.commBufferSize,&pos,&y,1,MPI_UINT32_T,MPI_COMM_WORLD);
-//			error_flag = MPI_Unpack(ssit->second.commBuffer,(int)ssit->second.commBufferSize,&pos,&z,1,MPI_UINT32_T,MPI_COMM_WORLD);
-//			error_flag = MPI_Unpack(ssit->second.commBuffer,(int)ssit->second.commBufferSize,&pos,&l,1,MPI_UINT8_T,MPI_COMM_WORLD);
-//			error_flag = MPI_Unpack(ssit->second.commBuffer,(int)ssit->second.commBufferSize,&pos,&m,1,MPI_INT8_T,MPI_COMM_WORLD);
-//			for(int j = 0; j < 16; ++j)
-//				error_flag = MPI_Unpack(&ssit->second.commBuffer,ssit->second.commBufferSize,&pos,&info[j],1,MPI::BOOL,MPI_COMM_WORLD);
-//			dout << "x: " << (int)x << " y: "  << (int)y << " z: " << (int)z << " l: " << (int)l << " m: " << (int)m << endl;
-//			//		for(int i = 0; i < ssit->second.commBufferSize; ++i)
-//			//			dout << " " << ssit->second.commBuffer[i];
-//			dout << endl;
-//		}
-//	}
-//	dout.close();}
-//	//END DEBUG
 
 	cout << "Communicate sizes" << endl;
 
@@ -324,7 +289,6 @@ void Class_Para_Tree::setPboundGhosts() {
 				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&info[j],1,MPI::BOOL,MPI_COMM_WORLD);
 				octree.ghosts[ghostCounter].info[j] = info[j];
 			}
-			//cout << "x: " << (int)x << " y: "  << (int)y << " z: " << (int)z << " l: " << (int)l << " m: " << (int)m << endl;
 			++ghostCounter;
 		}
 	}
