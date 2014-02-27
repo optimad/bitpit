@@ -67,9 +67,9 @@ void Class_Para_Tree::updateLoadBalance() {
 void Class_Para_Tree::loadBalance(){
 	uint64_t* partition = new uint64_t [nproc];
 	computePartition(partition);
-	uint64_t stride = 0;
 	if(serial)
 	{
+		uint64_t stride = 0;
 		for(int i = 0; i < rank; ++i)
 			stride += partition[i];
 		Class_Local_Tree::OctantsType::const_iterator first = octree.octants.begin() + stride;
@@ -213,8 +213,8 @@ void Class_Para_Tree::setPboundGhosts() {
 		sendBuffers[key] = Class_Comm_Buffer(buffSize,'a');
 		int pos = 0;
 		int nofBorders = value.size();
-		//MPI_Pack(&nofBorders,1,MPI_INT,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 		for(int i = 0; i < nofBorders; ++i){
+			//the use of auxiliary variable can be avoided passing to MPI_Pack the members of octant but octant in that case cannot be const
 			const Class_Octant & octant = octree.octants[value[i]];
 			x = octant.getX();
 			y = octant.getY();
