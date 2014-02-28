@@ -324,14 +324,8 @@ void Class_Para_Tree::setPboundGhosts() {
 
 	//Build pborders
 	octree.pborders.resize(pbordersOversize);
-	uint32_t pbordersOffset = 0;
-	map<int,vector<uint64_t> >::iterator bitendm1 = bitend;
-	--bitendm1;
-	for(map<int,vector<uint64_t> >::iterator bit = bordersPerProc.begin(); bit != bitendm1; ++bit){
-		map<int,vector<uint64_t> >::iterator bitp1 = bit;
-		++bitp1;
-		set_union(bit->second.begin(),bit->second.end(),bitp1->second.begin(),bitp1->second.end(),octree.pborders.begin()+pbordersOffset);
-		pbordersOffset += bit->second.size();
+	for(map<int,vector<uint64_t> >::iterator bit = bordersPerProc.begin(); bit != bitend; ++bit){
+		set_union(bit->second.begin(),bit->second.end(),octree.pborders.begin(),octree.pborders.end(),octree.pborders.begin());
 	}
 
 

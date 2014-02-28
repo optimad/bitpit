@@ -1172,57 +1172,6 @@ void Class_Local_Tree::findNeighbours(Class_Octant const & oct, uint8_t iface,
 // =================================================================================== //
 
 void Class_Local_Tree::localBalance(){
-
-	//TODO DA FINIRE!!
-
-
-	// Local variables
-	uint32_t noctants = getNumOctants();
-	uint32_t sizeneigh;
-	vector<uint32_t> neigh;
-	vector<uint32_t> modified, newmodified, pborder;
-	uint8_t i, idx, iface;
-	vector<bool> isghost;
-
-	// First loop on the octants
-	for(idx=0 ; idx<noctants, idx++){
-		if (!octants[idx].getNotBalance()){
-			for (iface=0; iface<nface; iface++){
-				findNeighbours(idx, iface, neigh, isghost);
-				for(i=0; i<sizeneigh; i++){
-					if (!isghost[i]){
-						{
-							if(octants[neigh[i]].getMarker() > octants[idx.getMarker() + 1]){
-								octants[idx].setMarker(octants[neigh[i]].getMarker()-1);
-								modified.push_back(idx);
-							}
-							else if(octants[neigh[i]].getMarker() < octants[idx.getMarker() - 1]){
-								octants[neigh[i]].setMarker(octants[idx].getMarker()-1);
-								modified.push_back(neigh[i]);
-							}
-						};
-					}
-					else{
-						if(ghosts[neigh[i]].getMarker() > octants[idx.getMarker() + 1]){
-							octants[idx].setMarker(ghosts[neigh[i]].getMarker()-1);
-							modified.push_back(idx);
-							pborder.push_back(idx);
-						}
-						else if(ghosts[neigh[i]].getMarker() < octants[idx.getMarker() - 1]){
-							ghosts[neigh[i]].setMarker(octants[idx].getMarker()-1);
-						}
-					}
-				}
-			}
-		}
-	}
-
-
-
-
-
-
-
 }
 
 
