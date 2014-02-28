@@ -130,6 +130,11 @@ uint32_t Class_Octant::getSize() const {
 	return size;
 }
 
+uint32_t Class_Octant::getArea() const {
+	uint32_t area = uint32_t(pow(double(getSize()),2.0));
+	return area;
+}
+
 uint32_t Class_Octant::getVolume() const {
 	uint64_t volume = uint32_t(pow(double(this->getSize()),2.0));
 	return volume;

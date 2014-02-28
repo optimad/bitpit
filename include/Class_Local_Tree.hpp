@@ -124,6 +124,8 @@ public:
 								vector<bool> & isghost);		// in their structure (octants or ghosts) and sets isghost[i] = true if the
 																// i-th neighbour is ghost in the local tree
 
+	void		localBalance();									// 2:1 balancing of local tree (balance only the octants with info[14] = false) (refinement wins!)
+
 private:
 
 	// ------------------------------------------------------------------------------- //

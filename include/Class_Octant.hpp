@@ -89,6 +89,7 @@ private:
 
 public:
 	uint32_t	getSize() const;					// Get the size of octant
+	uint32_t	getArea() const;					// Get the face area of octant
 	uint32_t	getVolume() const;					// Get the volume of octant
 	double*		getCenter();						// Get a pointer to an array of DIM with the coordinates of the center of octant
 	uint32_t	(*getNodes())[DIM];					// Get a pointer to the array (size [nnodes][3]) with the nodes of octant
