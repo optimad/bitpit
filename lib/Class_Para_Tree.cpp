@@ -30,11 +30,11 @@ Class_Para_Tree::~Class_Para_Tree() {
 }
 
 
-void Class_Para_Tree::computePartition(uint64_t* partition) {
-	int division_result = 0;
-	int remind = 0;
-	division_result = global_num_octants/nproc;
-	remind = global_num_octants%nproc;
+void Class_Para_Tree::computePartition(uint32_t* partition) {
+	uint32_t division_result = 0;
+	uint32_t remind = 0;
+	division_result = uint32_t(global_num_octants/(uint64_t)nproc);
+	remind = (uint32_t)(global_num_octants%(uint64_t)nproc);
 	for(int i = 0; i < nproc; ++i)
 		if(i<remind)
 			partition[i] = division_result + 1;
@@ -65,11 +65,11 @@ void Class_Para_Tree::updateLoadBalance() {
 }
 
 void Class_Para_Tree::loadBalance(){
-	uint64_t* partition = new uint64_t [nproc];
+	uint32_t* partition = new uint32_t [nproc];
 	computePartition(partition);
-	uint64_t stride = 0;
 	if(serial)
 	{
+		uint32_t stride = 0;
 		for(int i = 0; i < rank; ++i)
 			stride += partition[i];
 		Class_Local_Tree::OctantsType::const_iterator first = octree.octants.begin() + stride;
@@ -81,11 +81,97 @@ void Class_Para_Tree::loadBalance(){
 	}
 	else
 	{
+		//compute new partition range globalidx
+		uint64_t* newPartitionRangeGlobalidx = new uint64_t[nproc];
+		for(int p = 0; p < nproc; ++p){
+			newPartitionRangeGlobalidx[p] = 0;
+			for(int pp = 0; pp <= p; ++pp)
+				newPartitionRangeGlobalidx[p] += (uint64_t)partition[pp];
+			++newPartitionRangeGlobalidx[p];
+		}
+
+		//find resident octants local offset lastHead(lh) and firstTail(ft)
+		uint32_t lh,ft;
+		if(rank == 0)
+			lh = -1;
+		else{
+			lh = (uint32_t)(newPartitionRangeGlobalidx[rank-1] + 1 - partition_range_globalidx[rank-1] - 1);
+			if(lh < 0)
+				lh = - 1;
+			else if(lh > octree.octants.size() - 1)
+				lh = octree.octants.size() - 1;
+		}
+		if(rank == nproc - 1)
+			ft = octree.octants.size();
+		else{
+			ft = (uint32_t)(newPartitionRangeGlobalidx[rank] - partition_range_globalidx[rank -1]);
+			if(ft > octree.octants.size() - 1)
+				ft = octree.octants.size();
+			else if(ft < 0)
+				ft = 0;
+		}
+
+		//compute size Head and size Tail
+		uint32_t headSize = lh + 1;
+		uint32_t tailSize = octree.octants.size() - ft;
+
+		//build send buffers
+		map<int,Class_Comm_Buffer> sendBuffers;
+
+		//build send buffers from Head
+		if(headSize != 0 && rank != 0){
+			for(int p = rank - 1; p >= 0; --p){
+				if(headSize <=partition[p]){
+					sendBuffers[p] = Class_Comm_Buffer(headSize,'a');
+					for(uint32_t i = 0; i <= lh; ++i){
+						//PACK octants from 0 to lh in sendBuffer[p]
+					}
+					break;
+				}
+				else{
+					sendBuffers[p] = Class_Comm_Buffer(partition[p],'a');
+					for(uint32_t i = lh - partition[p] + 1; i <= lh; ++i){
+						//pack octants from lh - partition[p] to lh
+					}
+					lh -= partition[p];
+					headSize = lh + 1;
+				}
+			}
+
+		}
+		//build send buffers from Tail
+		if(tailSize != 0 && rank != nproc -1){
+			for(int p = rank + 1; p < nproc; ++p){
+				if(tailSize <= partition[p]){
+					sendBuffers[p] = Class_Comm_Buffer(tailSize,'a');
+					uint32_t octantsSize = (uint32_t)octree.octants.size();
+					for(uint32_t i = ft; i < octantsSize; ++i){
+						//PACK octants from ft to octantsSize-1
+					}
+					break;
+				}
+				else{
+					sendBuffers[p] = Class_Comm_Buffer(partition[p],'a');
+					uint32_t endOctants = ft + partition[p];
+					for(uint32_t i = ft; i < endOctants; ++i ){
+						//PACK octants from ft to ft + partition[p] -1
+					}
+					ft += partition[p];
+					tailSize -= partition[p];
+				}
+			}
+		}
+
+
+
+		delete [] newPartitionRangeGlobalidx;
+		newPartitionRangeGlobalidx = NULL;
 	}
 	delete [] partition;
+	partition = NULL;
 }
 
-void Class_Para_Tree::updateRefine() {
+void Class_Para_Tree::updateAdapt() {
 	if(serial)
 	{
 		max_depth = octree.local_max_depth;
@@ -119,7 +205,7 @@ void Class_Para_Tree::updateRefine() {
 
 void Class_Para_Tree::adapt() {
 	octree.refine();
-	updateRefine();
+	updateAdapt();
 }
 
 void Class_Para_Tree::buildGhosts() {
@@ -156,6 +242,11 @@ int Class_Para_Tree::findOwner(const uint64_t & morton) {
 }
 
 void Class_Para_Tree::setPboundGhosts() {
+	//BUILD BORDER OCTANT INDECES VECTOR (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
+	//find local octants to be sent as ghost to the right processes
+	//it visits the local octants building virtual neighbors on each octant face
+	//find the owner of these virtual neighbor and build a map (process,border octants)
+	//this map contains the local octants as ghosts for neighbor processes
 	Class_Local_Tree::OctantsType::iterator end = octree.octants.end();
 	Class_Local_Tree::OctantsType::iterator begin = octree.octants.begin();
 	map<int,vector<uint64_t> > bordersPerProc;
@@ -171,8 +262,9 @@ void Class_Para_Tree::setPboundGhosts() {
 					int pEnd = findOwner(virtualNeighbors[virtualNeighborsSize - 1 - j]);
 					procs.insert(pBegin);
 					procs.insert(pEnd);
-					if(pBegin != rank || pEnd != rank)
+					if(pBegin != rank || pEnd != rank){
 						it->setPbound(i,true);
+					}
 					if(pBegin == pEnd || pBegin == pEnd - 1)
 						break;
 				}
@@ -189,77 +281,66 @@ void Class_Para_Tree::setPboundGhosts() {
 			}
 		}
 	}
-	//TODO communicate borders
-	//pack buffers
+
+	//PACK (mpi) BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
+	//it visits every element in bordersPerProc (one for every neighbor proc)
+	//for every element it visits the border octants it contains and pack them in a new structure, sendBuffers
+	//this map has an entry Class_Comm_Buffer for every proc containing the size in bytes of the buffer and the octants
+	//to be sent to that proc packed in a char* buffer
+	uint32_t x,y,z;
+	uint8_t l;
+	int8_t m;
+	bool info[16];
 	map<int,Class_Comm_Buffer> sendBuffers;
 	map<int,vector<uint64_t> >::iterator bitend = bordersPerProc.end();
+	uint32_t pbordersOversize = 0;
 	for(map<int,vector<uint64_t> >::iterator bit = bordersPerProc.begin(); bit != bitend; ++bit){
+		pbordersOversize += bit->second.size();
 		int buffSize = bit->second.size() * (int)ceil((double)octantBytes / (double)(CHAR_BIT/8));// + (int)ceil((double)sizeof(int)/(double)(CHAR_BIT/8));
 		int key = bit->first;
 		const vector<uint64_t> & value = bit->second;
 		sendBuffers[key] = Class_Comm_Buffer(buffSize,'a');
 		int pos = 0;
 		int nofBorders = value.size();
-		//MPI_Pack(&nofBorders,1,MPI_INT,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 		for(int i = 0; i < nofBorders; ++i){
-			uint32_t x,y,z;
-			uint8_t l;
-			int8_t m;
-			bool info[16];
-			x = octree.octants[value[i]].getX();
-			y = octree.octants[value[i]].getY();
-			z = octree.octants[value[i]].getZ();
-			l = octree.octants[value[i]].getLevel();
-			m = octree.octants[value[i]].getMarker();
+			//the use of auxiliary variable can be avoided passing to MPI_Pack the members of octant but octant in that case cannot be const
+			const Class_Octant & octant = octree.octants[value[i]];
+			x = octant.getX();
+			y = octant.getY();
+			z = octant.getZ();
+			l = octant.getLevel();
+			m = octant.getMarker();
+			memcpy(info,octant.info,16);
 			error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			//cout << "x: " << (int)sendBuffers[key].commBuffer[pos -4] << " pos: " << pos << endl;
 			error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			//cout << "y: " << (int)sendBuffers[key].commBuffer[pos -4] << " pos: " << pos << endl;
 			error_flag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			//cout << "z: " << (int)sendBuffers[key].commBuffer[pos -4] << " pos: " << pos << endl;
 			error_flag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			//cout << "l: " << (int)sendBuffers[key].commBuffer[pos-1] << " pos: " << pos << endl;
 			error_flag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-			//cout << "m: " << (int)sendBuffers[key].commBuffer[pos-1] << " pos: " << pos << endl;
 			for(int j = 0; j < 16; ++j){
-				MPI_Pack(&octree.octants[value[i]].info[j],1,MPI::BOOL,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
-				//cout << "info["<< j <<"]: " << (int)sendBuffers[key].commBuffer[pos-1] << " pos: " << pos << endl;
+				MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 			}
 		}
 	}
 
-//	//DEBUG
-//	{stringstream ss;
-//	ss << "sendbuffers_" << rank;
-//	ofstream dout(ss.str().c_str());
-//	map<int,Class_Comm_Buffer>::iterator ssitend = sendBuffers.end();
-//	for(map<int,Class_Comm_Buffer>::iterator ssit = sendBuffers.begin(); ssit != ssitend; ++ssit){
-//		dout << "receiver " << ssit->first << endl;
-//		int pos = 0;
-//		for(int i = 0; i < (int)ssit->second.commBufferSize / (int)octantBytes ; ++i){
-//			uint32_t x,y,z;
-//			uint8_t l;
-//			int8_t m;
-//			bool info[16];
-//			error_flag = MPI_Unpack(ssit->second.commBuffer,(int)ssit->second.commBufferSize,&pos,&x,1,MPI_UINT32_T,MPI_COMM_WORLD);
-//			error_flag = MPI_Unpack(ssit->second.commBuffer,(int)ssit->second.commBufferSize,&pos,&y,1,MPI_UINT32_T,MPI_COMM_WORLD);
-//			error_flag = MPI_Unpack(ssit->second.commBuffer,(int)ssit->second.commBufferSize,&pos,&z,1,MPI_UINT32_T,MPI_COMM_WORLD);
-//			error_flag = MPI_Unpack(ssit->second.commBuffer,(int)ssit->second.commBufferSize,&pos,&l,1,MPI_UINT8_T,MPI_COMM_WORLD);
-//			error_flag = MPI_Unpack(ssit->second.commBuffer,(int)ssit->second.commBufferSize,&pos,&m,1,MPI_INT8_T,MPI_COMM_WORLD);
-//			for(int j = 0; j < 16; ++j)
-//				error_flag = MPI_Unpack(&ssit->second.commBuffer,ssit->second.commBufferSize,&pos,&info[j],1,MPI::BOOL,MPI_COMM_WORLD);
-//			dout << "x: " << (int)x << " y: "  << (int)y << " z: " << (int)z << " l: " << (int)l << " m: " << (int)m << endl;
-//			//		for(int i = 0; i < ssit->second.commBufferSize; ++i)
-//			//			dout << " " << ssit->second.commBuffer[i];
-//			dout << endl;
-//		}
-//	}
-//	dout.close();}
-//	//END DEBUG
+	//Build pborders
+	octree.pborders.resize(pbordersOversize);
+	uint32_t pbordersOffset = 0;
+	map<int,vector<uint64_t> >::iterator bitendm1 = bitend;
+	--bitendm1;
+	for(map<int,vector<uint64_t> >::iterator bit = bordersPerProc.begin(); bit != bitendm1; ++bit){
+		map<int,vector<uint64_t> >::iterator bitp1 = bit;
+		++bitp1;
+		set_union(bit->second.begin(),bit->second.end(),bitp1->second.begin(),bitp1->second.end(),octree.pborders.begin()+pbordersOffset);
+		pbordersOffset += bit->second.size();
+	}
+
+
 
 	cout << "Communicate sizes" << endl;
 
-	//communicate receiver buffer size
+	//COMMUNICATE THE SIZE OF BUFFER TO THE RECEIVERS
+	//the size of every borders buffer is communicated to the right process in order to build the receive buffer
+	//and stored in the recvBufferSizePerProc structure
 	MPI_Request req[sendBuffers.size()*2];
 	MPI_Status stats[sendBuffers.size()*2];
 	int nReq = 0;
@@ -279,7 +360,10 @@ void Class_Para_Tree::setPboundGhosts() {
 
 	cout << "Communicate buffers" << endl;
 
-	//communicate borders buffers
+	//COMMUNICATE THE BUFFERS TO THE RECEIVERS
+	//recvBuffers structure is declared and each buffer is initialized to the right size
+	//then, sendBuffers are communicated by senders and stored in recvBuffers in the receivers
+	//at the same time every process compute the size in bytes of all the ghost octants
 	uint32_t nofBytesOverProc = 0;
 	map<int,Class_Comm_Buffer> recvBuffers;
 	map<int,int>::iterator ritend = recvBufferSizePerProc.end();
@@ -297,16 +381,18 @@ void Class_Para_Tree::setPboundGhosts() {
 		++nReq;
 	}
 	MPI_Waitall(nReq,req,stats);
+
+	//COMPUTE GHOSTS SIZE IN BYTES
+	//number of ghosts in every process is obtained through the size in bytes of the single octant
+	//and ghost vector in local tree is resized
 	uint32_t nofGhosts = nofBytesOverProc / (uint32_t)octantBytes;
 	octree.size_ghosts = nofGhosts;
 	cout << "rank: " << rank << " nofGhosts: " << nofGhosts << endl;
 	octree.ghosts.resize(nofGhosts);
 
-	//unpack buffers and build ghost
-	uint32_t x,y,z;
-	uint8_t l;
-	int8_t m;
-	bool info[16];
+	//UNPACK BUFFERS AND BUILD GHOSTS CONTAINER OF CLASS_LOCAL_TREE
+	//every entry in recvBuffers is visited, each buffers from neighbor processes is unpacked octant by octant.
+	//every ghost octant is built and put in the ghost vector
 	uint32_t ghostCounter = 0;
 	map<int,Class_Comm_Buffer>::iterator rritend = recvBuffers.end();
 	for(map<int,Class_Comm_Buffer>::iterator rrit = recvBuffers.begin(); rrit != rritend; ++rrit){
@@ -324,7 +410,6 @@ void Class_Para_Tree::setPboundGhosts() {
 				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&info[j],1,MPI::BOOL,MPI_COMM_WORLD);
 				octree.ghosts[ghostCounter].info[j] = info[j];
 			}
-			//cout << "x: " << (int)x << " y: "  << (int)y << " z: " << (int)z << " l: " << (int)l << " m: " << (int)m << endl;
 			++ghostCounter;
 		}
 	}
