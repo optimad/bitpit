@@ -30,11 +30,11 @@ Class_Para_Tree::~Class_Para_Tree() {
 }
 
 
-void Class_Para_Tree::computePartition(uint64_t* partition) {
-	int division_result = 0;
-	int remind = 0;
-	division_result = global_num_octants/nproc;
-	remind = global_num_octants%nproc;
+void Class_Para_Tree::computePartition(uint32_t* partition) {
+	uint32_t division_result = 0;
+	uint32_t remind = 0;
+	division_result = uint32_t(global_num_octants/(uint64_t)nproc);
+	remind = (uint32_t)(global_num_octants%(uint64_t)nproc);
 	for(int i = 0; i < nproc; ++i)
 		if(i<remind)
 			partition[i] = division_result + 1;
@@ -65,11 +65,11 @@ void Class_Para_Tree::updateLoadBalance() {
 }
 
 void Class_Para_Tree::loadBalance(){
-	uint64_t* partition = new uint64_t [nproc];
+	uint32_t* partition = new uint32_t [nproc];
 	computePartition(partition);
 	if(serial)
 	{
-		uint64_t stride = 0;
+		uint32_t stride = 0;
 		for(int i = 0; i < rank; ++i)
 			stride += partition[i];
 		Class_Local_Tree::OctantsType::const_iterator first = octree.octants.begin() + stride;
@@ -81,8 +81,94 @@ void Class_Para_Tree::loadBalance(){
 	}
 	else
 	{
+		//compute new partition range globalidx
+		uint64_t* newPartitionRangeGlobalidx = new uint64_t[nproc];
+		for(int p = 0; p < nproc; ++p){
+			newPartitionRangeGlobalidx[p] = 0;
+			for(int pp = 0; pp <= p; ++pp)
+				newPartitionRangeGlobalidx[p] += (uint64_t)partition[pp];
+			++newPartitionRangeGlobalidx[p];
+		}
+
+		//find resident octants local offset lastHead(lh) and firstTail(ft)
+		uint32_t lh,ft;
+		if(rank == 0)
+			lh = -1;
+		else{
+			lh = (uint32_t)(newPartitionRangeGlobalidx[rank-1] + 1 - partition_range_globalidx[rank-1] - 1);
+			if(lh < 0)
+				lh = - 1;
+			else if(lh > octree.octants.size() - 1)
+				lh = octree.octants.size() - 1;
+		}
+		if(rank == nproc - 1)
+			ft = octree.octants.size();
+		else{
+			ft = (uint32_t)(newPartitionRangeGlobalidx[rank] - partition_range_globalidx[rank -1]);
+			if(ft > octree.octants.size() - 1)
+				ft = octree.octants.size();
+			else if(ft < 0)
+				ft = 0;
+		}
+
+		//compute size Head and size Tail
+		uint32_t headSize = lh + 1;
+		uint32_t tailSize = octree.octants.size() - ft;
+
+		//build send buffers
+		map<int,Class_Comm_Buffer> sendBuffers;
+
+		//build send buffers from Head
+		if(headSize != 0 && rank != 0){
+			for(int p = rank - 1; p >= 0; --p){
+				if(headSize <=partition[p]){
+					sendBuffers[p] = Class_Comm_Buffer(headSize,'a');
+					for(uint32_t i = 0; i <= lh; ++i){
+						//PACK octants from 0 to lh in sendBuffer[p]
+					}
+					break;
+				}
+				else{
+					sendBuffers[p] = Class_Comm_Buffer(partition[p],'a');
+					for(uint32_t i = lh - partition[p] + 1; i <= lh; ++i){
+						//pack octants from lh - partition[p] to lh
+					}
+					lh -= partition[p];
+					headSize = lh + 1;
+				}
+			}
+
+		}
+		//build send buffers from Tail
+		if(tailSize != 0 && rank != nproc -1){
+			for(int p = rank + 1; p < nproc; ++p){
+				if(tailSize <= partition[p]){
+					sendBuffers[p] = Class_Comm_Buffer(tailSize,'a');
+					uint32_t octantsSize = (uint32_t)octree.octants.size();
+					for(uint32_t i = ft; i < octantsSize; ++i){
+						//PACK octants from ft to octantsSize-1
+					}
+					break;
+				}
+				else{
+					sendBuffers[p] = Class_Comm_Buffer(partition[p],'a');
+					uint32_t endOctants = ft + partition[p];
+					for(uint32_t i = ft; i < endOctants; ++i ){
+						//PACK octants from ft to ft + partition[p] -1
+					}
+					ft += partition[p];
+					tailSize -= partition[p];
+				}
+			}
+		}
+
+
+
+		delete [] newPartitionRangeGlobalidx;
+		newPartitionRangeGlobalidx = NULL;
 	}
 	delete [] partition;
+	partition = NULL;
 }
 
 void Class_Para_Tree::updateAdapt() {
@@ -176,8 +262,9 @@ void Class_Para_Tree::setPboundGhosts() {
 					int pEnd = findOwner(virtualNeighbors[virtualNeighborsSize - 1 - j]);
 					procs.insert(pBegin);
 					procs.insert(pEnd);
-					if(pBegin != rank || pEnd != rank)
+					if(pBegin != rank || pEnd != rank){
 						it->setPbound(i,true);
+					}
 					if(pBegin == pEnd || pBegin == pEnd - 1)
 						break;
 				}
@@ -206,7 +293,9 @@ void Class_Para_Tree::setPboundGhosts() {
 	bool info[16];
 	map<int,Class_Comm_Buffer> sendBuffers;
 	map<int,vector<uint64_t> >::iterator bitend = bordersPerProc.end();
+	uint32_t pbordersOversize = 0;
 	for(map<int,vector<uint64_t> >::iterator bit = bordersPerProc.begin(); bit != bitend; ++bit){
+		pbordersOversize += bit->second.size();
 		int buffSize = bit->second.size() * (int)ceil((double)octantBytes / (double)(CHAR_BIT/8));// + (int)ceil((double)sizeof(int)/(double)(CHAR_BIT/8));
 		int key = bit->first;
 		const vector<uint64_t> & value = bit->second;
@@ -232,6 +321,20 @@ void Class_Para_Tree::setPboundGhosts() {
 			}
 		}
 	}
+
+	//Build pborders
+	octree.pborders.resize(pbordersOversize);
+	uint32_t pbordersOffset = 0;
+	map<int,vector<uint64_t> >::iterator bitendm1 = bitend;
+	--bitendm1;
+	for(map<int,vector<uint64_t> >::iterator bit = bordersPerProc.begin(); bit != bitendm1; ++bit){
+		map<int,vector<uint64_t> >::iterator bitp1 = bit;
+		++bitp1;
+		set_union(bit->second.begin(),bit->second.end(),bitp1->second.begin(),bitp1->second.end(),octree.pborders.begin()+pbordersOffset);
+		pbordersOffset += bit->second.size();
+	}
+
+
 
 	cout << "Communicate sizes" << endl;
 

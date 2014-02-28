@@ -46,6 +46,7 @@ public:
 private:
 	OctantsType					octants;			// Local vector of octants ordered with Morton Number
 	OctantsType					ghosts;				// Local vector of ghost octants ordered with Morton Number
+	u32vector 					pborders;			// Local vector of pborder octants ordered with Morton Number
 	Class_Octant 				first_desc;			// First (Morton order) most refined octant possible in local partition
 	Class_Octant 				last_desc;			// Last (Morton order) most refined octant possible in local partition
 	uint32_t 					size_ghosts;		// Size of vector of ghost octants

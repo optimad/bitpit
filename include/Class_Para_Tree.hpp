@@ -62,7 +62,7 @@ public:
 	void adapt();  								//call refine and coarse on the local tree
 	void updateAdapt();							//update Class_Para_Tree members after a refine and/or coarse
 	void updateLoadBalance();					//update Class_Para_Tree members after a load balance
-	void computePartition(uint64_t* partition); // compute octant partition giving the same number of octant to each process and redistributing the reminder
+	void computePartition(uint32_t* partition); // compute octant partition giving the same number of octant to each process and redistributing the reminder
 	void buildGhosts();
 	int findOwner(const uint64_t & morton);		// given the morton of an octant it find the process owning that octant
 	void setPboundGhosts(); 			 		// set pbound and build ghosts after static load balance
