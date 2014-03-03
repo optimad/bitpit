@@ -122,15 +122,15 @@ void Class_Para_Tree::loadBalance(){
 		map<int,Class_Comm_Buffer> sendBuffers;
 
 		//Compute first predecessor and first successor to send buffers to
-		int64_t newFirstOctantGlobalIdx = 0;// offset to compute global index of each octant in every process
+		int64_t firstOctantGlobalIdx = 0;// offset to compute global index of each octant in every process
 		int64_t globalLastHead = (int64_t) lh;
 		int64_t globalFirstTail = (int64_t) ft; //lastHead and firstTail in global ordering
 		int firstPredecessor = -1;
 		int firstSuccessor = nproc;
 		if(rank != 0){
-			newFirstOctantGlobalIdx = (int64_t)(newPartitionRangeGlobalidx[rank-1] + 1);
-			globalLastHead = newFirstOctantGlobalIdx + (int64_t)lh;
-			globalFirstTail = newFirstOctantGlobalIdx + (int64_t)ft;
+			firstOctantGlobalIdx = (int64_t)(partition_range_globalidx[rank-1] + 1);
+			globalLastHead = firstOctantGlobalIdx + (int64_t)lh;
+			globalFirstTail = firstOctantGlobalIdx + (int64_t)ft;
 			for(int pre = rank - 1; pre >=0; --pre){
 				if((uint64_t)globalLastHead <= newPartitionRangeGlobalidx[pre])
 					firstPredecessor = pre;
