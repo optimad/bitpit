@@ -136,7 +136,7 @@ void Class_Para_Tree::loadBalance(){
 					firstPredecessor = pre;
 			}
 			for(int post = rank + 1; post < nproc; ++post){
-				if((uint64_t)globalFirstTail <= newPartitionRangeGlobalidx[post])
+				if((uint64_t)globalFirstTail <= newPartitionRangeGlobalidx[post] && (uint64_t)globalFirstTail > newPartitionRangeGlobalidx[post-1])
 					firstSuccessor = post;
 			}
 		}
