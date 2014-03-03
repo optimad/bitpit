@@ -91,20 +91,23 @@ void Class_Para_Tree::loadBalance(){
 		}
 
 		//find resident octants local offset lastHead(lh) and firstTail(ft)
-		uint32_t lh,ft;
+		int32_t lh,ft;
 		if(rank == 0)
 			lh = -1;
 		else{
-			lh = (uint32_t)(newPartitionRangeGlobalidx[rank-1] + 1 - partition_range_globalidx[rank-1] - 1);
+			lh = (int32_t)(newPartitionRangeGlobalidx[rank-1] + 1 - partition_range_globalidx[rank-1] - 1 - 1);
 			if(lh < 0)
 				lh = - 1;
 			else if(lh > octree.octants.size() - 1)
 				lh = octree.octants.size() - 1;
 		}
+
 		if(rank == nproc - 1)
 			ft = octree.octants.size();
+		else if(rank == 0)
+			ft = (int32_t)(newPartitionRangeGlobalidx[rank] + 1);
 		else{
-			ft = (uint32_t)(newPartitionRangeGlobalidx[rank] - partition_range_globalidx[rank -1]);
+			ft = (int32_t)(newPartitionRangeGlobalidx[rank] - partition_range_globalidx[rank -1]);
 			if(ft > octree.octants.size() - 1)
 				ft = octree.octants.size();
 			else if(ft < 0)
@@ -112,28 +115,28 @@ void Class_Para_Tree::loadBalance(){
 		}
 
 		//compute size Head and size Tail
-		uint32_t headSize = lh + 1;
-		uint32_t tailSize = octree.octants.size() - ft;
+		uint32_t headSize = (uint32_t)(lh + 1);
+		uint32_t tailSize = (uint32_t)(octree.octants.size() - ft);
 
 		//build send buffers
 		map<int,Class_Comm_Buffer> sendBuffers;
 
 		//Compute first predecessor and first successor to send buffers to
-		uint64_t newFirstOctantGlobalIdx = 0;// offset to compute global index of each octant in every process
-		uint64_t globalLastHead = (uint64_t) lh;
-		uint64_t globalFirstTail = (uint64_t) ft; //lastHead and firstTail in global ordering
+		int64_t newFirstOctantGlobalIdx = 0;// offset to compute global index of each octant in every process
+		int64_t globalLastHead = (int64_t) lh;
+		int64_t globalFirstTail = (int64_t) ft; //lastHead and firstTail in global ordering
 		int firstPredecessor = -1;
 		int firstSuccessor = nproc;
 		if(rank != 0){
-			newFirstOctantGlobalIdx = newPartitionRangeGlobalidx[rank-1] + 1;
-			globalLastHead = newFirstOctantGlobalIdx + lh;
-			globalFirstTail = newFirstOctantGlobalIdx + ft;
+			newFirstOctantGlobalIdx = (int64_t)(newPartitionRangeGlobalidx[rank-1] + 1);
+			globalLastHead = newFirstOctantGlobalIdx + (int64_t)lh;
+			globalFirstTail = newFirstOctantGlobalIdx + (int64_t)ft;
 			for(int pre = rank - 1; pre >=0; --pre){
-				if(globalLastHead <= newPartitionRangeGlobalidx[pre])
+				if((uint64_t)globalLastHead <= newPartitionRangeGlobalidx[pre])
 					firstPredecessor = pre;
 			}
 			for(int post = rank + 1; post < nproc; ++post){
-				if(globalFirstTail <= newPartitionRangeGlobalidx[post])
+				if((uint64_t)globalFirstTail <= newPartitionRangeGlobalidx[post])
 					firstSuccessor = post;
 			}
 		}
