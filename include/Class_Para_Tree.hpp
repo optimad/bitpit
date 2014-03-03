@@ -15,6 +15,7 @@
 #include "Class_Octant.hpp"
 #include "Class_Local_Tree.hpp"
 #include "Class_Comm_Buffer.hpp"
+#include "Class_Array.hpp"
 #include <cstdint>
 #include <iterator>
 #include <set>
