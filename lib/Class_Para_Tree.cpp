@@ -87,7 +87,7 @@ void Class_Para_Tree::loadBalance(){
 			newPartitionRangeGlobalidx[p] = 0;
 			for(int pp = 0; pp <= p; ++pp)
 				newPartitionRangeGlobalidx[p] += (uint64_t)partition[pp];
-			++newPartitionRangeGlobalidx[p];
+			--newPartitionRangeGlobalidx[p];
 		}
 
 		//find resident octants local offset lastHead(lh) and firstTail(ft)
