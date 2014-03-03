@@ -39,6 +39,7 @@ int main(int argc, char *argv[]) {
 					}
 				}
 			}
+			delete[] center;
 		}
 		ptree.octree.refine();
 		numoctants = ptree.octree.getNumOctants();
@@ -66,6 +67,7 @@ int main(int argc, char *argv[]) {
 					}
 				}
 			}
+			delete[] center;
 		}
 		cout << "Num Octants : " << numoctants << endl;
 		ptree.octree.coarse();
@@ -76,6 +78,7 @@ int main(int argc, char *argv[]) {
 	ptree.octree.computeConnectivity();
 	filename = "test_c";
 	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,filename);
+	ptree.octree.clearConnectivity();
 
 	cout << "Balancing " << endl;
 	bool Bdone = ptree.octree.localBalanceWithLevel();
@@ -83,7 +86,7 @@ int main(int argc, char *argv[]) {
 	cout << " refinement " << endl;
 	while(ptree.octree.refine());
 	cout << " refinement done " << endl;
-	ptree.octree.updateConnectivity();
+	ptree.octree.computeConnectivity();
 	filename = "test_bal";
 	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,filename);
 

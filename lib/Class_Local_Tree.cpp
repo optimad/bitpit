@@ -551,6 +551,8 @@ void Class_Local_Tree::computeConnectivity() {
 	uint32_t (*octnodes)[DIM];
 	uint8_t j;
 
+	//TODO Reserve for vector for 2D and 3D
+
 	if (nodes.size() == 0){
 		connectivity.resize(noctants);
 		for (i = 0; i < noctants; i++){
@@ -561,6 +563,7 @@ void Class_Local_Tree::computeConnectivity() {
 #else
 #endif
 				if (mapnodes[morton].size()==0){
+					mapnodes[morton].reserve(12);
 					for (k = 0; k < DIM; k++){
 						mapnodes[morton].push_back(octnodes[j][k]);
 					}
@@ -572,18 +575,30 @@ void Class_Local_Tree::computeConnectivity() {
 		iter	= mapnodes.begin();
 		iterend	= mapnodes.end();
 		counter = 0;
+		uint32_t numnodes = mapnodes.size();
+		nodes.resize(numnodes);
 		while (iter != iterend){
 			vector<uint32_t> nodecasting(iter->second.begin(), iter->second.begin()+DIM);
-			nodes.push_back(nodecasting);
+//			nodes.push_back(nodecasting);
+			nodes[counter] = nodecasting;
+			nodes[counter].shrink_to_fit();
 			for(vector<uint32_t>::iterator iter2 = iter->second.begin()+DIM; iter2 != iter->second.end(); iter2++){
+				if (connectivity[(*iter2)].size()==0){
+					connectivity[(*iter2)].reserve(8);
+				}
 				connectivity[(*iter2)].push_back(counter);
 			}
 			mapnodes.erase(iter++);
 			counter++;
 		}
 		nodes.shrink_to_fit();
+		//Lento. Solo per risparmiare memoria
+		for (int ii=0; ii<noctants; ii++){
+			connectivity[ii].shrink_to_fit();
+		}
 		connectivity.shrink_to_fit();
 	}
+	map<uint64_t, vector<uint32_t> >().swap(mapnodes);
 	iter = mapnodes.end();
 }
 
@@ -629,17 +644,28 @@ void Class_Local_Tree::computeghostsConnectivity() {
 		}
 		iter	= mapnodes.begin();
 		iterend	= mapnodes.end();
+		uint32_t numnodes = mapnodes.size();
+		ghostsnodes.resize(numnodes);
 		counter = 0;
 		while (iter != iterend){
 			vector<uint32_t> nodecasting(iter->second.begin(), iter->second.begin()+DIM);
-			ghostsnodes.push_back(nodecasting);
+//			ghostsnodes.push_back(nodecasting);
+			ghostsnodes[counter] = nodecasting;
+			ghostsnodes[counter].shrink_to_fit();
 			for(vector<uint32_t>::iterator iter2 = iter->second.begin()+DIM; iter2 != iter->second.end(); iter2++){
+				if (ghostsconnectivity[(*iter2)].size()==0){
+					ghostsconnectivity[(*iter2)].reserve(8);
+				}
 				ghostsconnectivity[(*iter2)].push_back(counter);
 			}
 			mapnodes.erase(iter++);
 			counter++;
 		}
 		ghostsnodes.shrink_to_fit();
+		//Lento. Solo per risparmiare memoria
+		for (int ii=0; ii<noctants; ii++){
+			ghostsconnectivity[ii].shrink_to_fit();
+		}
 		ghostsconnectivity.shrink_to_fit();
 	}
 	iter = mapnodes.end();
