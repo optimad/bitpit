@@ -108,7 +108,7 @@ void Class_Para_Tree::loadBalance(){
 			ft = (int32_t)(newPartitionRangeGlobalidx[rank] + 1);
 		else{
 			ft = (int32_t)(newPartitionRangeGlobalidx[rank] - partition_range_globalidx[rank -1]);
-			if(ft > octree.octants.size() - 1)
+			if(ft > (int32_t)(octree.octants.size() - 1))
 				ft = octree.octants.size();
 			else if(ft < 0)
 				ft = 0;
