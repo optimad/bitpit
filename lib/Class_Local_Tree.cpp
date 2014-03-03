@@ -711,7 +711,7 @@ void Class_Local_Tree::findNeighbours(uint32_t idx, uint8_t iface,
 			//idxtry_old = uint64_t((1+direction)*noctants );
 			while(abs(jump) > 0){
 				Mortontry = octants[idxtry].computeMorton();
-				jump = ((Mortontry<Morton)-(Mortontry>Morton))*jump/2;
+				jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
 				idxtry += jump;
 			}
 			if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
@@ -785,7 +785,7 @@ void Class_Local_Tree::findNeighbours(uint32_t idx, uint8_t iface,
 			idxtry = uint32_t(idxghost +((octghost->computeMorton()<Morton)-(octghost->computeMorton()>Morton))*jump);
 			while(abs(jump) > 0){
 				Mortontry = ghosts[idxtry].computeMorton();
-				jump = ((Mortontry<Morton)-(Mortontry>Morton))*jump/2;
+				jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
 				idxtry += jump;
 			}
 			if(octants[idxtry].computeMorton() == Morton && ghosts[idxtry].level == oct->level){
@@ -852,7 +852,7 @@ void Class_Local_Tree::findNeighbours(uint32_t idx, uint8_t iface,
 					//idxtry_old = uint64_t((1+direction)*noctants );
 					while(abs(jump) > 0){
 						Mortontry = octants[idxtry].computeMorton();
-						jump = ((Mortontry<Morton)-(Mortontry>Morton))*jump/2;
+						jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
 						idxtry += jump;
 					}
 					if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
@@ -1171,45 +1171,65 @@ void Class_Local_Tree::findNeighbours(Class_Octant const & oct, uint8_t iface,
 
 // =================================================================================== //
 
-void Class_Local_Tree::localBalance(){
-
-	//TODO DA FINIRE!!
+bool Class_Local_Tree::localBalance(){
 
 
 	// Local variables
-	uint32_t noctants = getNumOctants();
-	uint32_t sizeneigh;
-	vector<uint32_t> neigh;
-	vector<uint32_t> modified, newmodified, pborder;
-	uint8_t i, idx, iface;
-	vector<bool> isghost;
+	uint32_t 			noctants = getNumOctants();
+	uint32_t			sizeneigh, modsize;
+	vector<uint32_t> 	neigh;
+	vector<uint32_t> 	modified, newmodified;//, pborder;
+	uint32_t 			i, idx, imod;
+	uint8_t				iface;
+	vector<bool> 		isghost;
+	bool				Bdone = false;
 
 	// First loop on the octants
-	for(idx=0 ; idx<noctants, idx++){
+	for(idx=0 ; idx<noctants; idx++){
 		if (!octants[idx].getNotBalance()){
 			for (iface=0; iface<nface; iface++){
 				findNeighbours(idx, iface, neigh, isghost);
+				sizeneigh = neigh.size();
 				for(i=0; i<sizeneigh; i++){
 					if (!isghost[i]){
 						{
-							if(octants[neigh[i]].getMarker() > octants[idx.getMarker() + 1]){
+							if(octants[neigh[i]].getMarker() > octants[idx].getMarker() + 1){
 								octants[idx].setMarker(octants[neigh[i]].getMarker()-1);
 								modified.push_back(idx);
+								Bdone = true;
 							}
-							else if(octants[neigh[i]].getMarker() < octants[idx.getMarker() - 1]){
+							else if(octants[neigh[i]].getMarker() < octants[idx].getMarker() - 1){
 								octants[neigh[i]].setMarker(octants[idx].getMarker()-1);
 								modified.push_back(neigh[i]);
+								Bdone = true;
 							}
 						};
 					}
 					else{
-						if(ghosts[neigh[i]].getMarker() > octants[idx.getMarker() + 1]){
-							octants[idx].setMarker(ghosts[neigh[i]].getMarker()-1);
-							modified.push_back(idx);
-							pborder.push_back(idx);
+						if(size_ghosts>0){
+							if(ghosts[neigh[i]].getMarker() > octants[idx].getMarker() + 1){
+								octants[idx].setMarker(ghosts[neigh[i]].getMarker()-1);
+								modified.push_back(idx);
+								Bdone = true;
+							}
 						}
-						else if(ghosts[neigh[i]].getMarker() < octants[idx.getMarker() - 1]){
-							ghosts[neigh[i]].setMarker(octants[idx].getMarker()-1);
+					}
+				}
+			}
+		}
+	}
+
+	// Loop on ghost octants (influence over interior borders)
+	for (idx=0; idx<size_ghosts; idx++){
+		if (!ghosts[idx].getNotBalance()){
+			for (iface=0; iface<nface; iface++){
+				findNeighbours(ghosts[idx], iface, neigh, isghost);
+				for(i=0; i<sizeneigh; i++){
+					if (!isghost[i]){
+						if(octants[neigh[i]].getMarker() < ghosts[idx].getMarker() - 1){
+							octants[neigh[i]].setMarker(ghosts[idx].getMarker()-1);
+							modified.push_back(neigh[i]);
+							Bdone = true;
 						}
 					}
 				}
@@ -1218,13 +1238,155 @@ void Class_Local_Tree::localBalance(){
 	}
 
 
+	// While loop for iterative balancing
+	modsize = modified.size();
+	while(modsize!=0){
+		for (imod=0; imod<modsize; imod++){
+			idx = modified[modsize-imod-1];
+			modified.pop_back();
+			if (!octants[idx].getNotBalance()){
+				for (iface=0; iface<nface; iface++){
+					findNeighbours(idx, iface, neigh, isghost);
+					for(i=0; i<sizeneigh; i++){
+						if (!isghost[i]){
+							{
+								if(octants[neigh[i]].getMarker() > octants[idx].getMarker() + 1){
+									octants[idx].setMarker(octants[neigh[i]].getMarker()-1);
+									modified.push_back(idx);
+									Bdone = true;
+								}
+								else if(octants[neigh[i]].getMarker() < octants[idx].getMarker() - 1){
+									octants[neigh[i]].setMarker(octants[idx].getMarker()-1);
+									modified.push_back(neigh[i]);
+									Bdone = true;
+								}
+							};
+						}
+						else{
+							if(ghosts[neigh[i]].getMarker() > octants[idx].getMarker() + 1){
+								octants[idx].setMarker(ghosts[neigh[i]].getMarker()-1);
+								modified.push_back(idx);
+								Bdone = true;
+							}
+						}
+					}
+				}
+			}
+		}
+	}// end while
 
-
-
-
+	return Bdone;
 
 }
 
+// =================================================================================== //
 
+bool Class_Local_Tree::localBalanceWithLevel(){
+
+	// Local variables
+	uint32_t 			noctants = getNumOctants();
+	uint32_t			sizeneigh, modsize;
+	vector<uint32_t> 	neigh;
+	vector<uint32_t> 	modified, newmodified;
+	uint32_t 			i, idx, imod;
+	uint8_t				iface;
+	vector<bool> 		isghost;
+	bool				Bdone = false;
+
+	// First loop on the octants
+	for(idx=0 ; idx<noctants; idx++){
+		if (!octants[idx].getNotBalance()){
+			for (iface=0; iface<nface; iface++){
+				findNeighbours(idx, iface, neigh, isghost);
+				sizeneigh = neigh.size();
+				for(i=0; i<sizeneigh; i++){
+					if (!isghost[i]){
+						{
+							if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) > (octants[idx].getLevel() + octants[idx].getMarker() + 1) ){
+								octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-1-octants[idx].getLevel());
+								modified.push_back(idx);
+								Bdone = true;
+							}
+							else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (octants[idx].getLevel() + octants[idx].getMarker() - 1)){
+								octants[neigh[i]].setMarker(octants[idx].getLevel()+octants[idx].getMarker()-octants[neigh[i]].getLevel()-1);
+								modified.push_back(neigh[i]);
+								Bdone = true;
+							}
+						};
+					}
+					else{
+						if(size_ghosts>0){
+							if((ghosts[neigh[i]].getLevel() + ghosts[neigh[i]].getMarker())> (octants[idx].getLevel() + octants[idx].getMarker() + 1)){
+								octants[idx].setMarker(ghosts[neigh[i]].getLevel()+ghosts[neigh[i]].getMarker()-octants[idx].getLevel()-1);
+								modified.push_back(idx);
+								Bdone = true;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Loop on ghost octants (influence over interior borders)
+	for (idx=0; idx<size_ghosts; idx++){
+		if (!ghosts[idx].getNotBalance()){
+			for (iface=0; iface<nface; iface++){
+				findNeighbours(ghosts[idx], iface, neigh, isghost);
+				for(i=0; i<sizeneigh; i++){
+					if (!isghost[i]){
+						if((octants[neigh[i]].getLevel() + octants[idx].getMarker()) < (ghosts[idx].getLevel() + ghosts[idx].getMarker() - 1)){
+							octants[neigh[i]].setMarker(ghosts[idx].getLevel()+ghosts[idx].getMarker()-octants[neigh[i]].getLevel()-1);
+							modified.push_back(neigh[i]);
+							Bdone = true;
+						}
+					}
+				}
+			}
+		}
+	}
+
+
+	// While loop for iterative balancing
+	modsize = modified.size();
+	while(modsize!=0){
+		for (imod=0; imod<modsize; imod++){
+			idx = modified[modsize-imod-1];
+			modified.pop_back();
+			if (!octants[idx].getNotBalance()){
+				for (iface=0; iface<nface; iface++){
+					findNeighbours(idx, iface, neigh, isghost);
+					for(i=0; i<sizeneigh; i++){
+						if (!isghost[i]){
+							{
+								if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) >  (octants[idx].getLevel() + octants[idx].getMarker() + 1)){
+									octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-octants[idx].getLevel()-1);
+									modified.push_back(idx);
+									Bdone = true;
+								}
+								else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (octants[idx].getLevel() + octants[idx].getMarker() - 1)){
+									octants[neigh[i]].setMarker(octants[idx].getLevel()+octants[idx].getMarker()-octants[neigh[i]].getLevel()-1);
+									modified.push_back(neigh[i]);
+									Bdone = true;
+								}
+							};
+						}
+						else{
+							if((ghosts[neigh[i]].getMarker() + ghosts[neigh[i]].getLevel()) > (octants[idx].getLevel() + octants[idx].getMarker() + 1)){
+								octants[idx].setMarker(ghosts[neigh[i]].getMarker()+ghosts[neigh[i]].getLevel()-octants[idx].getLevel()-1);
+								modified.push_back(idx);
+								Bdone = true;
+							}
+						}
+					}
+				}
+			}
+		}
+		modsize = modified.size();
+	}// end while
+
+	return Bdone;
+
+}
 
 // =================================================================================== //

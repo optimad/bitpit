@@ -125,8 +125,10 @@ public:
 								vector<bool> & isghost);		// in their structure (octants or ghosts) and sets isghost[i] = true if the
 																// i-th neighbour is ghost in the local tree
 
-	void		localBalance();									// 2:1 balancing of local tree (balance only the octants with info[14] = false) (refinement wins!)
-
+	bool		localBalance();									// 2:1 balancing only on marker before adapting a local tree (balance only the octants with info[14] = false) (refinement wins!)
+																// Return true if balanced done with some markers modification
+	bool		localBalanceWithLevel();						// 2:1 balancing on level a local tree already adapted (balance only the octants with info[14] = false) (refinement wins!)
+																// Return true if balanced done with some markers modification
 private:
 
 	// ------------------------------------------------------------------------------- //

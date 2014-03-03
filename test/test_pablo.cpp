@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
 	while(ptree.octree.refine());
 	uint64_t numoctants = ptree.octree.getNumOctants();
 
-	for (int l=0; l<4; l++){
+	for (int l=0; l<6; l++){
 		for (int i=0; i<numoctants; i++){
 			double* center;
 			Class_Octant oct = ptree.octree.extractOctant(i);
@@ -76,8 +76,17 @@ int main(int argc, char *argv[]) {
 	ptree.octree.computeConnectivity();
 	filename = "test_c";
 	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,filename);
-	writeLog("PABLO");
 
+	cout << "Balancing " << endl;
+	bool Bdone = ptree.octree.localBalance();
+//	bool Bdone = ptree.octree.localBalanceOnLevel();
+	cout << "Bdone: " << Bdone << endl;
+	cout << " refinement " << endl;
+	while(ptree.octree.refine());
+	cout << " refinement done " << endl;
+	ptree.octree.updateConnectivity();
+	filename = "test_bal";
+	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,filename);
 
 	MPI::Finalize();
 
