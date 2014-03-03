@@ -78,8 +78,7 @@ int main(int argc, char *argv[]) {
 	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,filename);
 
 	cout << "Balancing " << endl;
-	bool Bdone = ptree.octree.localBalance();
-//	bool Bdone = ptree.octree.localBalanceOnLevel();
+	bool Bdone = ptree.octree.localBalanceWithLevel();
 	cout << "Bdone: " << Bdone << endl;
 	cout << " refinement " << endl;
 	while(ptree.octree.refine());
