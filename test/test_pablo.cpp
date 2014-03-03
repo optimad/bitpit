@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
 	while(ptree.octree.refine());
 	uint64_t numoctants = ptree.octree.getNumOctants();
 
-	for (int l=0; l<6; l++){
+	for (int l=0; l<2; l++){
 		for (int i=0; i<numoctants; i++){
 			double* center;
 			Class_Octant oct = ptree.octree.extractOctant(i);
