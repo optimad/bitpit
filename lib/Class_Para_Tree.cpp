@@ -340,7 +340,7 @@ void Class_Para_Tree::updateAdapt() {
 		error_flag = MPI_Allreduce(&local_num_octants,&global_num_octants,1,MPI_UINT64_T,MPI_SUM,MPI_COMM_WORLD);
 		//update partition_range_globalidx
 		uint64_t rbuff [nproc];
-		error_flag = MPI_Allgather(&local_num_octants,1,MPI_UINT64_T,&rbuff,1,MPI_UINT64_T,MPI_COMM_WORLD);
+		error_flag = MPI_Allgather(&local_num_octants,1,MPI_UINT64_T,rbuff,1,MPI_UINT64_T,MPI_COMM_WORLD);
 		for(int p = 0; p < nproc; ++p){
 			partition_range_globalidx[p] = 0;
 			for(int pp = 0; pp <=p; ++pp)
@@ -349,7 +349,7 @@ void Class_Para_Tree::updateAdapt() {
 		}
 		//update partition_range_position
 		uint64_t lastDescMorton = octree.getLastDesc().computeMorton();
-		error_flag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,&partition_last_desc,1,MPI_UINT64_T,MPI_COMM_WORLD);
+		error_flag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,partition_last_desc,1,MPI_UINT64_T,MPI_COMM_WORLD);
 	}
 }
 
