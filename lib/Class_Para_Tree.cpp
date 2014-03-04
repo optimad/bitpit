@@ -371,7 +371,7 @@ void Class_Para_Tree::loadBalance(){
 		for(map<int,Class_Comm_Buffer>::reverse_iterator rrit = recvBuffers.rbegin(); rrit != rritend; ++rrit){
 			uint32_t nofNewPerProc = (uint32_t)(rrit->second.commBufferSize / (uint32_t)ceil((double)octantBytes / (double)(CHAR_BIT/8)));
 			int pos = 0;
-			for(int i = 0; i < nofNewPerProc; ++i){
+			for(int i = nofNewPerProc - 1; i >= 0; --i){
 				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&x,1,MPI_UINT32_T,MPI_COMM_WORLD);
 				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&y,1,MPI_UINT32_T,MPI_COMM_WORLD);
 				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&z,1,MPI_UINT32_T,MPI_COMM_WORLD);
