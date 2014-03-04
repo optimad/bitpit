@@ -311,13 +311,6 @@ void Class_Para_Tree::loadBalance(){
 		MPI_Status stats[sendBuffers.size()+sendersPerProc[rank].size()];
 		int nReq = 0;
 		map<int,int> recvBufferSizePerProc;
-//		map<int,Class_Comm_Buffer>::iterator sitend = sendBuffers.end();
-//		for(map<int,Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
-//			recvBufferSizePerProc[sit->first] = 0;
-//			error_flag = MPI_Irecv(&recvBufferSizePerProc[sit->first],1,MPI_UINT32_T,sit->first,rank,MPI_COMM_WORLD,&req[nReq]);
-//			++nReq;
-//		}
-
 		set<int>::iterator senditend = sendersPerProc[rank].end();
 		for(set<int>::iterator sendit = sendersPerProc[rank].begin(); sendit != senditend; ++sendit){
 			recvBufferSizePerProc[*sendit] = 0;
