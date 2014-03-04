@@ -23,15 +23,16 @@ int main(int argc, char *argv[]) {
 	Class_Para_Tree ptree;
 
 
-	ptree.octree.setMarker(0,2);
+	ptree.octree.setMarker(0,4);
 	while(ptree.octree.refine());
 	uint64_t numoctants = ptree.octree.getNumOctants();
 
-	for (int l=0; l<2; l++){
+	for (int l=0; l<4; l++){
 		for (int i=0; i<numoctants; i++){
 			double* center;
 			Class_Octant oct = ptree.octree.extractOctant(i);
 			center = oct.getCenter();
+
 			if ((center[0] < pow(2.0,20)*0.75) && (center[0] > pow(2.0,20)*0.25)){
 				if ((center[1] < pow(2.0,20)*0.75) && (center[1] > pow(2.0,20)*0.25)){
 					if ((center[2] < pow(2.0,20)*0.75) && (center[2] > pow(2.0,20)*0.25)){
@@ -41,17 +42,16 @@ int main(int argc, char *argv[]) {
 			}
 			delete[] center;
 		}
-		ptree.octree.refine();
+		while(ptree.octree.refine());
 		numoctants = ptree.octree.getNumOctants();
 		cout << "Num Octants : " << numoctants << endl;
 	}
-	cout << "Connectivity " << endl;
-	ptree.octree.computeConnectivity();
-	string filename = "test_r";
-	cout << "Write " << endl;
-	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,filename);
-	ptree.octree.clearConnectivity();
-
+//	cout << "Connectivity " << endl;
+//	ptree.octree.computeConnectivity();
+//	string filename = "test_r";
+//	cout << "Write " << endl;
+//	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,filename);
+//	ptree.octree.clearConnectivity();
 
 	cout << "Coarse " << endl;
 	numoctants = ptree.octree.getNumOctants();
@@ -75,20 +75,21 @@ int main(int argc, char *argv[]) {
 		cout << "Num Octants : " << numoctants << endl;
 	}
 
-	ptree.octree.computeConnectivity();
-	filename = "test_c";
-	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,filename);
-	ptree.octree.clearConnectivity();
+//	ptree.octree.computeConnectivity();
+//	filename = "test_c";
+//	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,filename);
+//	ptree.octree.clearConnectivity();
 
 	cout << "Balancing " << endl;
-	bool Bdone = ptree.octree.localBalanceWithLevel();
+	bool Bdone = ptree.octree.localBalance(true);
 	cout << "Bdone: " << Bdone << endl;
 	cout << " refinement " << endl;
 	while(ptree.octree.refine());
 	cout << " refinement done " << endl;
 	ptree.octree.computeConnectivity();
-	filename = "test_bal";
+	string filename = "test_bal";
 	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,filename);
+	ptree.octree.clearConnectivity();
 
 	MPI::Finalize();
 
