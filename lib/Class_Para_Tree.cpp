@@ -288,12 +288,25 @@ void Class_Para_Tree::loadBalance(){
 
 		vector<set<int> > sendersPerProc(nproc);
 //		for(int pout = 0; pout < nproc; ++pout){
-			for(int pin = 0; pin < nproc; ++pin){
-				for(int k = displays[pin]+1; k < displays[pin] + nofRecvsPerProc[pin]; ++k){
-					sendersPerProc[globalRecvsBuff[k]].insert(displays[pin]);
-				}
+		for(int pin = 0; pin < nproc; ++pin){
+			for(int k = displays[pin]+1; k < displays[pin] + nofRecvsPerProc[pin]; ++k){
+				sendersPerProc[globalRecvsBuff[k]].insert(displays[pin]);
 			}
+		}
 //		}
+
+		//DEBUG
+		if(rank == 0){
+			for(int k = 0; k < nproc; ++k){
+				cout << "Rank " << k << " will receive from ";
+				for(set<int>::iterator it = sendersPerProc[k].begin(); it != sendersPerProc[k].end(); ++it){
+					cout << *it << " ";
+				}
+				cout << endl;
+
+			}
+		}
+		//DEBUG
 
 
 //		//Communicate Octants (size)
