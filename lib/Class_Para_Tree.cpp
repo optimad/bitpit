@@ -96,11 +96,11 @@ void Class_Para_Tree::loadBalance(){
 			lh = -1;
 		else{
 			lh = (int32_t)(newPartitionRangeGlobalidx[rank-1] + 1 - partition_range_globalidx[rank-1] - 1 - 1);
-			if(lh < 0)
-				lh = - 1;
-			else if(lh > octree.octants.size() - 1)
-				lh = octree.octants.size() - 1;
 		}
+		if(lh < 0)
+			lh = - 1;
+		else if(lh > octree.octants.size() - 1)
+			lh = octree.octants.size() - 1;
 
 		if(rank == nproc - 1)
 			ft = octree.octants.size();
@@ -108,11 +108,11 @@ void Class_Para_Tree::loadBalance(){
 			ft = (int32_t)(newPartitionRangeGlobalidx[rank] + 1);
 		else{
 			ft = (int32_t)(newPartitionRangeGlobalidx[rank] - partition_range_globalidx[rank -1]);
-			if(ft > (int32_t)(octree.octants.size() - 1))
-				ft = octree.octants.size();
-			else if(ft < 0)
-				ft = 0;
 		}
+		if(ft > (int32_t)(octree.octants.size() - 1))
+			ft = octree.octants.size();
+		else if(ft < 0)
+			ft = 0;
 
 		//compute size Head and size Tail
 		uint32_t headSize = (uint32_t)(lh + 1);
