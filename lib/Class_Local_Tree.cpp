@@ -152,11 +152,12 @@ bool Class_Local_Tree::refine() {
 	//Si può trovare la maniera di inserirlo nel loop precedente
 	pborders.clear();
 	nocts = octants.size();
-	pborders.reserve(int(pow(double(nocts),-3.0)*pow(double(nocts),2.0)*double(nface)));
+	pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(nface)));
 	for(idx=0; idx<nocts; idx++){
 		for(iface=0; iface<nface; iface++){
 			if (octants[idx].info[iface+nface]){
 				pborders.push_back(idx);
+				break;
 			}
 		}
 	}
@@ -561,11 +562,12 @@ bool Class_Local_Tree::coarse() {
 	//Si può trovare la maniera di inserirlo nel loop precedente
 	pborders.clear();
 	nocts = octants.size();
-	pborders.reserve(int(pow(double(nocts),-3.0)*pow(double(nocts),2.0)*double(nface)));
+	pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(nface)));
 	for(idx=0; idx<nocts; idx++){
 		for(iface=0; iface<nface; iface++){
 			if (octants[idx].info[iface+nface]){
 				pborders.push_back(idx);
+				break;
 			}
 		}
 	}

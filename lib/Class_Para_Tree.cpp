@@ -81,6 +81,9 @@ void Class_Para_Tree::loadBalance(){
 	}
 	else
 	{
+		//empty ghosts
+		octree.ghosts.clear();
+		octree.size_ghosts = 0;
 		//compute new partition range globalidx
 		uint64_t* newPartitionRangeGlobalidx = new uint64_t[nproc];
 		for(int p = 0; p < nproc; ++p){
@@ -231,7 +234,6 @@ void Class_Para_Tree::loadBalance(){
 						for(int j = 0; j < 16; ++j){
 							MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 						}
-
 					}
 					break;
 				}
@@ -395,8 +397,8 @@ void Class_Para_Tree::loadBalance(){
 				++newCounter;
 			}
 		}
-
 		octree.octants.shrink_to_fit();
+		octree.pborders.clear();
 
 		delete [] newPartitionRangeGlobalidx;
 		newPartitionRangeGlobalidx = NULL;
@@ -481,42 +483,77 @@ void Class_Para_Tree::setPboundGhosts() {
 	//it visits the local octants building virtual neighbors on each octant face
 	//find the owner of these virtual neighbor and build a map (process,border octants)
 	//this map contains the local octants as ghosts for neighbor processes
-	Class_Local_Tree::OctantsType::iterator end = octree.octants.end();
-	Class_Local_Tree::OctantsType::iterator begin = octree.octants.begin();
-	bordersPerProc.clear();
-	for(Class_Local_Tree::OctantsType::iterator it = begin; it != end; ++it){
-		set<int> procs;
-		for(uint8_t i = 0; i < nface; ++i){
-			if(it->getBound(i) == false){
+	if(octree.pborders.size() == 0){
+		Class_Local_Tree::OctantsType::iterator end = octree.octants.end();
+		Class_Local_Tree::OctantsType::iterator begin = octree.octants.begin();
+		bordersPerProc.clear();
+		for(Class_Local_Tree::OctantsType::iterator it = begin; it != end; ++it){
+			set<int> procs;
+			for(uint8_t i = 0; i < nface; ++i){
+				if(it->getBound(i) == false){
+					uint8_t virtualNeighborsSize = 0;
+					uint64_t* virtualNeighbors = it->computeVirtualMorton(i,max_depth,virtualNeighborsSize);
+					uint8_t maxDelta = virtualNeighborsSize/2;
+					for(int j = 0; j <= maxDelta; ++j){
+						int pBegin = findOwner(virtualNeighbors[j]);
+						int pEnd = findOwner(virtualNeighbors[virtualNeighborsSize - 1 - j]);
+						procs.insert(pBegin);
+						procs.insert(pEnd);
+						if(pBegin != rank || pEnd != rank){
+							it->setPbound(i,true);
+						}
+						if(pBegin == pEnd || pBegin == pEnd - 1)
+							break;
+					}
+				}
+			}
+			set<int>::iterator pitend = procs.end();
+			for(set<int>::iterator pit = procs.begin(); pit != pitend; ++pit){
+				int p = *pit;
+				if(p != rank){
+					//TODO better reserve to avoid if
+					bordersPerProc[p].push_back(distance(begin,it));
+					vector<uint32_t> & bordersSingleProc = bordersPerProc[p];
+					if(bordersSingleProc.capacity() - bordersSingleProc.size() < 2)
+						bordersSingleProc.reserve(2*bordersSingleProc.size());
+				}
+			}
+		}
+	}
+	else{
+		Class_Local_Tree::u32vector::iterator end = octree.pborders.end();
+		Class_Local_Tree::u32vector::iterator begin = octree.pborders.begin();
+		bordersPerProc.clear();
+		for(Class_Local_Tree::u32vector::iterator it = begin; it != end; ++it){
+			Class_Octant & oct = octree.octants[*it];
+			set<int> procs;
+			for(uint8_t i = 0; i < nface; ++i){
 				uint8_t virtualNeighborsSize = 0;
-				uint64_t* virtualNeighbors = it->computeVirtualMorton(i,max_depth,virtualNeighborsSize);
+				uint64_t* virtualNeighbors = oct.computeVirtualMorton(i,max_depth,virtualNeighborsSize);
 				uint8_t maxDelta = virtualNeighborsSize/2;
 				for(int j = 0; j <= maxDelta; ++j){
 					int pBegin = findOwner(virtualNeighbors[j]);
 					int pEnd = findOwner(virtualNeighbors[virtualNeighborsSize - 1 - j]);
 					procs.insert(pBegin);
 					procs.insert(pEnd);
-					if(pBegin != rank || pEnd != rank){
-						it->setPbound(i,true);
-					}
 					if(pBegin == pEnd || pBegin == pEnd - 1)
 						break;
 				}
 			}
-		}
-		set<int>::iterator pitend = procs.end();
-		for(set<int>::iterator pit = procs.begin(); pit != pitend; ++pit){
-			int p = *pit;
-			if(p != rank){
-				//TODO better reserve to avoid if
-				bordersPerProc[p].push_back(distance(begin,it));
-				vector<uint32_t> & bordersSingleProc = bordersPerProc[p];
-				if(bordersSingleProc.capacity() - bordersSingleProc.size() < 2)
-					bordersSingleProc.reserve(2*bordersSingleProc.size());
+			set<int>::iterator pitend = procs.end();
+			for(set<int>::iterator pit = procs.begin(); pit != pitend; ++pit){
+				int p = *pit;
+				if(p != rank){
+					//TODO better reserve to avoid if
+					bordersPerProc[p].push_back(*it);
+					vector<uint32_t> & bordersSingleProc = bordersPerProc[p];
+					if(bordersSingleProc.capacity() - bordersSingleProc.size() < 2)
+						bordersSingleProc.reserve(2*bordersSingleProc.size());
+				}
 			}
 		}
-	}
 
+	}
 	//PACK (mpi) BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
 	//it visits every element in bordersPerProc (one for every neighbor proc)
 	//for every element it visits the border octants it contains and pack them in a new structure, sendBuffers
@@ -559,10 +596,10 @@ void Class_Para_Tree::setPboundGhosts() {
 
 	//Build pborders
 	octree.pborders.clear();
-	octree.pborders.reserve(pbordersOversize);
-	for(map<int,vector<uint32_t> >::iterator bit = bordersPerProc.begin(); bit != bitend; ++bit){
-		set_union(bit->second.begin(),bit->second.end(),octree.pborders.begin(),octree.pborders.end(),octree.pborders.begin());
-	}
+//	octree.pborders.reserve(pbordersOversize);
+//	for(map<int,vector<uint32_t> >::iterator bit = bordersPerProc.begin(); bit != bitend; ++bit){
+//		set_union(bit->second.begin(),bit->second.end(),octree.pborders.begin(),octree.pborders.end(),octree.pborders.begin());
+//	}
 
 
 

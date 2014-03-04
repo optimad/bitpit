@@ -115,14 +115,24 @@ int main(int argc, char *argv[]) {
 	}
 	ptree.octree.refine();
 	ptree.updateAdapt();
+	ptree.setPboundGhosts();
+
+	ptree.octree.computeConnectivity();
+	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"unbalNoGhost");
+	ptree.octree.computeghostsConnectivity();
+	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"unbalGhost");
 
 
 	ptree.loadBalance();
+	ptree.updateLoadBalance();
+	ptree.setPboundGhosts();
+	ptree.octree.clearghostsConnectivity();
+	ptree.octree.updateConnectivity();
+	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"balNoGhost");
 
-	ptree.octree.computeConnectivity();
+
 	ptree.octree.computeghostsConnectivity();
-	string filename = "puppa";
-	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,filename);
+	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"balGhost");
 
 	MPI::Finalize();
 
