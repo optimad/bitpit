@@ -236,7 +236,7 @@ void Class_Para_Tree::loadBalance(){
 				else{
 					int buffSize = partition[p] * (int)ceil((double)octantBytes / (double)(CHAR_BIT/8));
 					sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
-					uint32_t endOctants = ft + partition[p];
+					uint32_t endOctants = ft + partition[p] - 1;
 					int pos = 0;
 					for(uint32_t i = ft; i < endOctants; ++i ){
 						//PACK octants from ft to ft + partition[p] -1
