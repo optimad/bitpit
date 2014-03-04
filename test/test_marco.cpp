@@ -105,11 +105,17 @@ int main(int argc, char *argv[]) {
 	ptree.setPboundGhosts();
 
 	//TEST PARALLEL LOAD BALANCE
-	if(ptree.rank == 1 || ptree.rank == 2){
+	if(ptree.rank == 2){
+		ptree.octree.setMarker(0,1);
+	}
+	ptree.octree.refine();
+//	ptree.updateAdapt();
+	if(ptree.rank == 2){
 		ptree.octree.setMarker(0,1);
 	}
 	ptree.octree.refine();
 	ptree.updateAdapt();
+
 
 	ptree.loadBalance();
 
