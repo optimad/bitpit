@@ -317,8 +317,6 @@ void Class_Para_Tree::loadBalance(){
 			error_flag = MPI_Irecv(&recvBufferSizePerProc[*sendit],1,MPI_UINT32_T,*sendit,rank,MPI_COMM_WORLD,&req[nReq]);
 			++nReq;
 		}
-
-
 		map<int,Class_Comm_Buffer>::reverse_iterator rsitend = sendBuffers.rend();
 		for(map<int,Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
 			error_flag =  MPI_Isend(&rsit->second.commBufferSize,1,MPI_UINT32_T,rsit->first,rsit->first,MPI_COMM_WORLD,&req[nReq]);
@@ -326,27 +324,26 @@ void Class_Para_Tree::loadBalance(){
 		}
 		MPI_Waitall(nReq,req,stats);
 
-//		//COMMUNICATE THE BUFFERS TO THE RECEIVERS
-//		//recvBuffers structure is declared and each buffer is initialized to the right size
-//		//then, sendBuffers are communicated by senders and stored in recvBuffers in the receivers
-//		//at the same time every process compute the size in bytes of all the new octants
-//		uint32_t nofBytesOverProc = 0;
-//		map<int,Class_Comm_Buffer> recvBuffers;
-//		map<int,int>::iterator ritend = recvBufferSizePerProc.end();
-//		for(map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
-//			recvBuffers[rit->first] = Class_Comm_Buffer(rit->second,'a');
-//		}
-//		nReq = 0;
-//		for(map<int,Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
-//			nofBytesOverProc += recvBuffers[sit->first].commBufferSize;
-//			error_flag = MPI_Irecv(recvBuffers[sit->first].commBuffer,recvBuffers[sit->first].commBufferSize,MPI_PACKED,sit->first,rank,MPI_COMM_WORLD,&req[nReq]);
-//			++nReq;
-//		}
-//		for(map<int,Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
-//			error_flag =  MPI_Isend(rsit->second.commBuffer,rsit->second.commBufferSize,MPI_PACKED,rsit->first,rsit->first,MPI_COMM_WORLD,&req[nReq]);
-//			++nReq;
-//		}
-//		MPI_Waitall(nReq,req,stats);
+		//COMMUNICATE THE BUFFERS TO THE RECEIVERS
+		//recvBuffers structure is declared and each buffer is initialized to the right size
+		//then, sendBuffers are communicated by senders and stored in recvBuffers in the receivers
+		uint32_t nofBytesOverProc = 0;
+		map<int,Class_Comm_Buffer> recvBuffers;
+		map<int,int>::iterator ritend = recvBufferSizePerProc.end();
+		for(map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
+			recvBuffers[rit->first] = Class_Comm_Buffer(rit->second,'a');
+		}
+		nReq = 0;
+		for(set<int>::iterator sendit = sendersPerProc[rank].begin(); sendit != senditend; ++sendit){
+			//nofBytesOverProc += recvBuffers[sit->first].commBufferSize;
+			error_flag = MPI_Irecv(recvBuffers[*sendit].commBuffer,recvBuffers[*sendit].commBufferSize,MPI_PACKED,*sendit,rank,MPI_COMM_WORLD,&req[nReq]);
+			++nReq;
+		}
+		for(map<int,Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+			error_flag =  MPI_Isend(rsit->second.commBuffer,rsit->second.commBufferSize,MPI_PACKED,rsit->first,rsit->first,MPI_COMM_WORLD,&req[nReq]);
+			++nReq;
+		}
+		MPI_Waitall(nReq,req,stats);
 
 
 		delete [] newPartitionRangeGlobalidx;
