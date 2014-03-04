@@ -528,16 +528,18 @@ void Class_Para_Tree::setPboundGhosts() {
 			Class_Octant & oct = octree.octants[*it];
 			set<int> procs;
 			for(uint8_t i = 0; i < nface; ++i){
-				uint8_t virtualNeighborsSize = 0;
-				uint64_t* virtualNeighbors = oct.computeVirtualMorton(i,max_depth,virtualNeighborsSize);
-				uint8_t maxDelta = virtualNeighborsSize/2;
-				for(int j = 0; j <= maxDelta; ++j){
-					int pBegin = findOwner(virtualNeighbors[j]);
-					int pEnd = findOwner(virtualNeighbors[virtualNeighborsSize - 1 - j]);
-					procs.insert(pBegin);
-					procs.insert(pEnd);
-					if(pBegin == pEnd || pBegin == pEnd - 1)
-						break;
+				if(oct.getBound(i) == false){
+					uint8_t virtualNeighborsSize = 0;
+					uint64_t* virtualNeighbors = oct.computeVirtualMorton(i,max_depth,virtualNeighborsSize);
+					uint8_t maxDelta = virtualNeighborsSize/2;
+					for(int j = 0; j <= maxDelta; ++j){
+						int pBegin = findOwner(virtualNeighbors[j]);
+						int pEnd = findOwner(virtualNeighbors[virtualNeighborsSize - 1 - j]);
+						procs.insert(pBegin);
+						procs.insert(pEnd);
+						if(pBegin == pEnd || pBegin == pEnd - 1)
+							break;
+					}
 				}
 			}
 			set<int>::iterator pitend = procs.end();
