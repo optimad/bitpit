@@ -282,7 +282,6 @@ void Class_Para_Tree::loadBalance(){
 			for(int ppp = 0; ppp < pp; ++ppp){
 				displays[pp] += nofRecvsPerProc[ppp];
 			}
-			++displays[pp];
 		}
 		int globalRecvsBuff[globalRecvsBuffSize];
 		error_flag = MPI_Allgatherv(recvs[rank].array,recvs[rank].arraySize,MPI_INT,globalRecvsBuff,nofRecvsPerProc,displays,MPI_INT,MPI_COMM_WORLD);
