@@ -270,6 +270,7 @@ void Class_Para_Tree::loadBalance(){
 		map<int,Class_Comm_Buffer>::iterator sitend = sendBuffers.end();
 		for(map<int,Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
 			recvs[rank].array[counter] = sit->first;
+			++counter;
 		}
 		int senderBuff[nproc];
 		error_flag = MPI_Allgather(&recvs[rank].array[0],1,MPI_INT,&senderBuff,1,MPI_INT,MPI_COMM_WORLD);
