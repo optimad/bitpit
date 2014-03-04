@@ -290,7 +290,7 @@ void Class_Para_Tree::loadBalance(){
 //		for(int pout = 0; pout < nproc; ++pout){
 		for(int pin = 0; pin < nproc; ++pin){
 			for(int k = displays[pin]+1; k < displays[pin] + nofRecvsPerProc[pin]; ++k){
-				sendersPerProc[globalRecvsBuff[k]].insert(displays[pin]);
+				sendersPerProc[globalRecvsBuff[k]].insert(globalRecvsBuff[displays[pin]]);
 			}
 		}
 //		}
