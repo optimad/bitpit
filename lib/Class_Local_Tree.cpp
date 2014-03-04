@@ -356,7 +356,7 @@ bool Class_Local_Tree::coarse() {
 	int8_t markerfather, marker;
 	uint8_t nbro, nstart, nend;
 	uint8_t nchm1 = nchildren-1, iface;
-	uint8_t oppface[nface];
+//	uint8_t oppface[nface];
 	bool docoarse = false;
 
 	//------------------------------------------ //
@@ -366,11 +366,11 @@ bool Class_Local_Tree::coarse() {
 	nidx = offset = 0;
 
 	idx1_gh = idx2_gh = 0;
-	// Set matrix of opposite faces
-	for (iface=0; iface<DIM; iface++){
-		oppface[2*iface]   = 2*iface+1;
-		oppface[2*iface+1] = 2*iface;
-	}
+//	// Set matrix of opposite faces
+//	for (iface=0; iface<DIM; iface++){
+//		oppface[2*iface]   = 2*iface+1;
+//		oppface[2*iface+1] = 2*iface;
+//	}
 
 	nocts   = octants.size();
 	nghosts = ghosts.size();
