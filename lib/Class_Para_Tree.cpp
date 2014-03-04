@@ -275,11 +275,17 @@ void Class_Para_Tree::loadBalance(){
 		int nofRecvsPerProc[nproc];
 		error_flag = MPI_Allgather(&recvs[rank].arraySize,1,MPI_INT,nofRecvsPerProc,1,MPI_INT,MPI_COMM_WORLD);
 		int globalRecvsBuffSize = 0;
+		int displays[nproc];
 		for(int pp = 0; pp < nproc; ++pp){
+			displays[pp] = 0;
 			globalRecvsBuffSize += nofRecvsPerProc[pp];
+			for(int ppp = 0; ppp < pp; ++ppp){
+				displays[pp] += nofRecvsPerProc[ppp];
+			}
+			++displays[pp];
 		}
 		int globalRecvsBuff[globalRecvsBuffSize];
-
+		error_flag = MPI_Allgatherv(recvs[rank].array,&recvs[rank].arraySize,MPI_INT,globalRecvsBuff,nofRecvsPerProc,,MPI_INT,MPI_COMM_WORLD);
 
 
 //		//Communicate Octants (size)
