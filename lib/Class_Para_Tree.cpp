@@ -354,47 +354,46 @@ void Class_Para_Tree::loadBalance(){
 		MPI_Waitall(nReq,req,stats);
 
 		//MOVE RESIDENT TO BEGIN IN OCTANTS
-		uint32_t headEnd = octree.getNumOctants() - tailOffset;
-		uint32_t nofResidents = headEnd - headOffset;
+		uint32_t resEnd = octree.getNumOctants() - tailOffset;
+		uint32_t nofResidents = resEnd - headOffset;
 		int octCounter = 0;
-		for(uint32_t i = headOffset; i < headEnd; ++i){
+		for(uint32_t i = headOffset; i < resEnd; ++i){
 			octree.octants[octCounter] = octree.octants[i];
 			++octCounter;
 		}
 		uint32_t newCounter = nofNewHead + nofNewTail + nofResidents;
 		octree.octants.resize(newCounter);
+		//MOVE RESIDENTS IN RIGHT POSITION
+		uint32_t resCounter = nofNewHead + nofResidents - 1;
+		for(uint32_t k = 0; k < nofResidents ; ++k){
+			octree.octants[resCounter - k] = octree.octants[nofResidents - k - 1];
+		}
 
 		//UNPACK BUFFERS AND BUILD NEW OCTANTS
-		--newCounter;
-		bool jumpResident = true;
-		map<int,Class_Comm_Buffer>::reverse_iterator rritend = recvBuffers.rend();
-		for(map<int,Class_Comm_Buffer>::reverse_iterator rrit = recvBuffers.rbegin(); rrit != rritend; ++rrit){
-			uint32_t nofNewPerProc = (uint32_t)(rrit->second.commBufferSize / (uint32_t)ceil((double)octantBytes / (double)(CHAR_BIT/8)));
+		newCounter = 0;
+		bool jumpResident = false;
+		map<int,Class_Comm_Buffer>::iterator rbitend = recvBuffers.end();
+		for(map<int,Class_Comm_Buffer>::iterator rbit = recvBuffers.begin(); rbit != rbitend; ++rbit){
+			uint32_t nofNewPerProc = (uint32_t)(rbit->second.commBufferSize / (uint32_t)ceil((double)octantBytes / (double)(CHAR_BIT/8)));
 			int pos = 0;
+			if(rbit->first > rank && !jumpResident){
+				newCounter += nofResidents ;
+				jumpResident = true;
+			}
 			for(int i = nofNewPerProc - 1; i >= 0; --i){
-				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&x,1,MPI_UINT32_T,MPI_COMM_WORLD);
-				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&y,1,MPI_UINT32_T,MPI_COMM_WORLD);
-				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&z,1,MPI_UINT32_T,MPI_COMM_WORLD);
-				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&l,1,MPI_UINT8_T,MPI_COMM_WORLD);
+				error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&pos,&x,1,MPI_UINT32_T,MPI_COMM_WORLD);
+				error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&pos,&y,1,MPI_UINT32_T,MPI_COMM_WORLD);
+				error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&pos,&z,1,MPI_UINT32_T,MPI_COMM_WORLD);
+				error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&pos,&l,1,MPI_UINT8_T,MPI_COMM_WORLD);
 				octree.octants[newCounter] = Class_Octant(l,x,y,z);
-				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&m,1,MPI_INT8_T,MPI_COMM_WORLD);
+				error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&pos,&m,1,MPI_INT8_T,MPI_COMM_WORLD);
 				octree.octants[newCounter].setMarker(m);
 				for(int j = 0; j < 16; ++j){
-					error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&info[j],1,MPI::BOOL,MPI_COMM_WORLD);
+					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&pos,&info[j],1,MPI::BOOL,MPI_COMM_WORLD);
 					octree.octants[newCounter].info[j] = info[j];
 				}
-				--newCounter;
+				++newCounter;
 			}
-			if(rrit->first < rank && jumpResident){
-				uint32_t resCounter = nofResidents - 1;
-				for(uint32_t k = newCounter; k > nofNewHead - 1; --k){
-					octree.octants[k] = octree.octants[resCounter];
-					--resCounter;
-				}
-				newCounter = nofNewHead - 1;
-				jumpResident = false;
-			}
-
 		}
 
 		octree.octants.shrink_to_fit();
