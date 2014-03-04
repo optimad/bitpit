@@ -287,45 +287,51 @@ void Class_Para_Tree::loadBalance(){
 		error_flag = MPI_Allgatherv(recvs[rank].array,recvs[rank].arraySize,MPI_INT,globalRecvsBuff,nofRecvsPerProc,displays,MPI_INT,MPI_COMM_WORLD);
 
 		vector<set<int> > sendersPerProc(nproc);
-//		for(int pout = 0; pout < nproc; ++pout){
 		for(int pin = 0; pin < nproc; ++pin){
 			for(int k = displays[pin]+1; k < displays[pin] + nofRecvsPerProc[pin]; ++k){
 				sendersPerProc[globalRecvsBuff[k]].insert(globalRecvsBuff[displays[pin]]);
 			}
 		}
+//		//DEBUG
+//		if(rank == 0){
+//			for(int k = 0; k < nproc; ++k){
+//				cout << "Rank " << k << " will receive from ";
+//				for(set<int>::iterator it = sendersPerProc[k].begin(); it != sendersPerProc[k].end(); ++it){
+//					cout << *it << " ";
+//				}
+//				cout << endl;
+//
+//			}
 //		}
-
-		//DEBUG
-		if(rank == 0){
-			for(int k = 0; k < nproc; ++k){
-				cout << "Rank " << k << " will receive from ";
-				for(set<int>::iterator it = sendersPerProc[k].begin(); it != sendersPerProc[k].end(); ++it){
-					cout << *it << " ";
-				}
-				cout << endl;
-
-			}
-		}
-		//DEBUG
+//		//DEBUG
 
 
 //		//Communicate Octants (size)
-//		MPI_Request req[sendBuffers.size()*2];
-//		MPI_Status stats[sendBuffers.size()*2];
-//		int nReq = 0;
-//		map<int,int> recvBufferSizePerProc;
+		MPI_Request req[sendBuffers.size()+sendersPerProc[rank].size()];
+		MPI_Status stats[sendBuffers.size()+sendersPerProc[rank].size()];
+		int nReq = 0;
+		map<int,int> recvBufferSizePerProc;
 //		map<int,Class_Comm_Buffer>::iterator sitend = sendBuffers.end();
 //		for(map<int,Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
 //			recvBufferSizePerProc[sit->first] = 0;
 //			error_flag = MPI_Irecv(&recvBufferSizePerProc[sit->first],1,MPI_UINT32_T,sit->first,rank,MPI_COMM_WORLD,&req[nReq]);
 //			++nReq;
 //		}
-//		map<int,Class_Comm_Buffer>::reverse_iterator rsitend = sendBuffers.rend();
-//		for(map<int,Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
-//			error_flag =  MPI_Isend(&rsit->second.commBufferSize,1,MPI_UINT32_T,rsit->first,rsit->first,MPI_COMM_WORLD,&req[nReq]);
-//			++nReq;
-//		}
-//		MPI_Waitall(nReq,req,stats);
+
+		set<int>::iterator senditend = sendersPerProc[rank].end();
+		for(set<int>::iterator sendit = sendersPerProc[rank].begin(); sendit != senditend; ++sendit){
+			recvBufferSizePerProc[*sendit] = 0;
+			error_flag = MPI_Irecv(&recvBufferSizePerProc[*sendit],1,MPI_UINT32_T,*sendit,rank,MPI_COMM_WORLD,&req[nReq]);
+			++nReq;
+		}
+
+
+		map<int,Class_Comm_Buffer>::reverse_iterator rsitend = sendBuffers.rend();
+		for(map<int,Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+			error_flag =  MPI_Isend(&rsit->second.commBufferSize,1,MPI_UINT32_T,rsit->first,rsit->first,MPI_COMM_WORLD,&req[nReq]);
+			++nReq;
+		}
+		MPI_Waitall(nReq,req,stats);
 
 //		//COMMUNICATE THE BUFFERS TO THE RECEIVERS
 //		//recvBuffers structure is declared and each buffer is initialized to the right size
@@ -435,7 +441,7 @@ void Class_Para_Tree::setPboundGhosts() {
 	//this map contains the local octants as ghosts for neighbor processes
 	Class_Local_Tree::OctantsType::iterator end = octree.octants.end();
 	Class_Local_Tree::OctantsType::iterator begin = octree.octants.begin();
-	map<int,vector<uint64_t> > bordersPerProc;
+	bordersPerProc.clear();
 	for(Class_Local_Tree::OctantsType::iterator it = begin; it != end; ++it){
 		set<int> procs;
 		for(uint8_t i = 0; i < nface; ++i){
@@ -462,7 +468,7 @@ void Class_Para_Tree::setPboundGhosts() {
 			if(p != rank){
 				//TODO better reserve to avoid if
 				bordersPerProc[p].push_back(distance(begin,it));
-				vector<uint64_t> & bordersSingleProc = bordersPerProc[p];
+				vector<uint32_t> & bordersSingleProc = bordersPerProc[p];
 				if(bordersSingleProc.capacity() - bordersSingleProc.size() < 2)
 					bordersSingleProc.reserve(2*bordersSingleProc.size());
 			}
@@ -479,13 +485,13 @@ void Class_Para_Tree::setPboundGhosts() {
 	int8_t m;
 	bool info[16];
 	map<int,Class_Comm_Buffer> sendBuffers;
-	map<int,vector<uint64_t> >::iterator bitend = bordersPerProc.end();
+	map<int,vector<uint32_t> >::iterator bitend = bordersPerProc.end();
 	uint32_t pbordersOversize = 0;
-	for(map<int,vector<uint64_t> >::iterator bit = bordersPerProc.begin(); bit != bitend; ++bit){
+	for(map<int,vector<uint32_t> >::iterator bit = bordersPerProc.begin(); bit != bitend; ++bit){
 		pbordersOversize += bit->second.size();
 		int buffSize = bit->second.size() * (int)ceil((double)octantBytes / (double)(CHAR_BIT/8));// + (int)ceil((double)sizeof(int)/(double)(CHAR_BIT/8));
 		int key = bit->first;
-		const vector<uint64_t> & value = bit->second;
+		const vector<uint32_t> & value = bit->second;
 		sendBuffers[key] = Class_Comm_Buffer(buffSize,'a');
 		int pos = 0;
 		int nofBorders = value.size();
@@ -512,7 +518,7 @@ void Class_Para_Tree::setPboundGhosts() {
 	//Build pborders
 	octree.pborders.clear();
 	octree.pborders.reserve(pbordersOversize);
-	for(map<int,vector<uint64_t> >::iterator bit = bordersPerProc.begin(); bit != bitend; ++bit){
+	for(map<int,vector<uint32_t> >::iterator bit = bordersPerProc.begin(); bit != bitend; ++bit){
 		set_union(bit->second.begin(),bit->second.end(),octree.pborders.begin(),octree.pborders.end(),octree.pborders.begin());
 	}
 

@@ -39,6 +39,7 @@ public:
 	uint64_t* partition_last_desc; 				//global array containing position of the last existing octant in each processor
 	uint64_t* partition_range_globalidx;	 	//global array containing global index of the last existing octant in each processor
 	uint64_t global_num_octants;   				// global number of octants in the parallel octree
+	map<int,vector<uint32_t> > bordersPerProc;	//local indices of border octants per process
 	int nproc;
 	uint8_t max_depth;							// global max existing level in the parallel octree
 
