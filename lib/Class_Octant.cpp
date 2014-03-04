@@ -531,9 +531,9 @@ uint64_t* Class_Octant::computeMinSizeMorton(uint8_t iface,
 	}
 }
 
-		void Class_Octant::setPbound(uint8_t face, bool flag) {
-			info[6+flag] = true;
-		}
+void Class_Octant::setPbound(uint8_t face, bool flag) {
+	info[nface+face] = flag;
+}
 
 uint64_t* Class_Octant::computeVirtualMorton(uint8_t iface,
 											const uint8_t& maxdepth,

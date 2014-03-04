@@ -134,6 +134,23 @@ int main(int argc, char *argv[]) {
 	ptree.octree.computeghostsConnectivity();
 	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"balGhost");
 
+	if(ptree.rank == 1){
+		for(int i = 0; i < 6; ++i)
+			ptree.octree.setMarker(i,-1);
+	}
+	if(ptree.rank == 2){
+		for(int i = 0; i < 2; ++i)
+			ptree.octree.setMarker(i,-1);
+	}
+	ptree.octree.coarse();
+	ptree.updateAdapt();
+	ptree.setPboundGhosts();
+	ptree.octree.clearghostsConnectivity();
+	ptree.octree.updateConnectivity();
+	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"coarseunbalNoGhost");
+	ptree.octree.computeghostsConnectivity();
+	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"coarseunbalGhost");
+
 	MPI::Finalize();
 
 	return 0;
