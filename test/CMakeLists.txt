@@ -18,3 +18,11 @@ add_executable(test_marco ${test_marco_src})
 
 target_link_libraries(test_marco mpi)
 TARGET_LINK_LIBRARIES(test_marco pablo)
+
+#Build test_edo.cpp
+SET(test_edo_src test_edo.cpp)
+
+add_executable(test_edo ${test_edo_src})
+
+target_link_libraries(test_edo mpi)
+TARGET_LINK_LIBRARIES(test_edo pablo)

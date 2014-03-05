@@ -108,23 +108,24 @@ bool Class_Local_Tree::refine() {
 
 	nocts = octants.size();
 	for (idx=0; idx<nocts; idx++){
-		if(octants[idx].getMarker() && octants[idx].getLevel() < MAX_LEVEL){
+		if(octants[idx].getMarker() > 0 && octants[idx].getLevel() < MAX_LEVEL){
 			last_child_index.push_back(idx+nchm1+offset);
 			offset += nchm1;
 		}
 		else{
 			octants[idx].info[12] = false;
-			octants[idx].marker = 0;
+			if (octants[idx].marker > 0)
+				octants[idx].marker = 0;
 		}
 	}
-	if (offset >0){
+	if (offset > 0){
 		octants.resize(octants.size()+offset);
 		blockidx = last_child_index[0]-nchm1;
 		idx = octants.size();
 		while (idx>blockidx){
 			idx--;
 			//TODO Sostituire questo if con il controllo su last_index_child
-			if(octants[idx-offset].getMarker() && octants[idx-offset].getLevel() < MAX_LEVEL){
+			if(octants[idx-offset].getMarker() > 0 && octants[idx-offset].getLevel() < MAX_LEVEL){
 				children = octants[idx-offset].buildChildren();
 				for (ich=0; ich<nchildren; ich++){
 					octants[idx-ich] = (children[nchm1-ich]);
@@ -162,6 +163,9 @@ bool Class_Local_Tree::refine() {
 		}
 	}
 	pborders.shrink_to_fit();
+
+	setFirstDesc();
+	setLastDesc();
 
 	return dorefine;
 }
@@ -350,14 +354,14 @@ bool Class_Local_Tree::coarse() {
 	// Local variables
 	vector<uint32_t> first_child_index;
 	Class_Octant father;
-	uint32_t idx, idx2, ich, nocts, nghosts;
+	uint32_t ich, nocts, nghosts;
+	int32_t idx, idx2;
 	uint32_t offset;
-	uint32_t idx1_gh, idx2_gh;
+	int32_t idx1_gh, idx2_gh;
 	uint32_t nidx;
 	int8_t markerfather, marker;
 	uint8_t nbro, nstart, nend;
 	uint8_t nchm1 = nchildren-1, iface;
-//	uint8_t oppface[nface];
 	bool docoarse = false;
 
 	//------------------------------------------ //
@@ -367,11 +371,6 @@ bool Class_Local_Tree::coarse() {
 	nidx = offset = 0;
 
 	idx1_gh = idx2_gh = 0;
-//	// Set matrix of opposite faces
-//	for (iface=0; iface<DIM; iface++){
-//		oppface[2*iface]   = 2*iface+1;
-//		oppface[2*iface+1] = 2*iface;
-//	}
 
 	nocts   = octants.size();
 	nghosts = ghosts.size();
@@ -384,13 +383,14 @@ bool Class_Local_Tree::coarse() {
 
 	// Set index for start and end check for ghosts
 	if (ghosts.size()){
-		while(ghosts[idx1_gh].computeMorton() < first_desc.computeMorton()){
+		while(ghosts[idx1_gh].computeMorton() < first_desc.computeMorton() & idx1_gh < size_ghosts){
 			idx1_gh++;
 		}
-		idx1_gh--;
-		while(ghosts[idx2_gh].computeMorton() < last_desc.computeMorton()){
+		idx1_gh = max(0, idx1_gh-1);
+		while(ghosts[idx2_gh].computeMorton() < last_desc.computeMorton() & idx2_gh < size_ghosts){
 			idx2_gh++;
 		}
+		idx2_gh = min(int(size_ghosts-1), idx2_gh);
 
 		// Start on ghosts
 		if ((ghosts[idx1_gh].getMarker() < 0) & (octants[0].getMarker() < 0)){
@@ -402,6 +402,9 @@ bool Class_Local_Tree::coarse() {
 				nbro++;
 				marker = ghosts[idx].getMarker();
 				idx--;
+				if (idx<0){
+					break;
+				}
 			}
 			nstart = 0;
 			idx = 0;
@@ -411,6 +414,9 @@ bool Class_Local_Tree::coarse() {
 				marker = octants[idx].getMarker();
 				nstart++;
 				idx++;
+				if (idx==nocts){
+					break;
+				}
 			}
 			if (nbro == nchildren){
 				offset = nstart;
@@ -436,7 +442,7 @@ bool Class_Local_Tree::coarse() {
 				}
 			}
 			else{
-				nstart == 0;
+				nstart = 0;
 			}
 		}
 	}
@@ -449,7 +455,7 @@ bool Class_Local_Tree::coarse() {
 			father = octants[idx].buildFather();
 			// Check if family is to be refined
 			for (idx2=idx; idx2<idx+nchildren; idx2++){
-				if (idx2<nocts){
+				if (idx2<nocts-1){
 					if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
 						nbro++;
 					}
@@ -461,7 +467,9 @@ bool Class_Local_Tree::coarse() {
 				idx = idx2-1;
 			}
 			else{
-				octants[idx].setMarker(0);
+				if (idx < (nocts>nchildren)*(nocts-nchildren)){
+//					octants[idx].setMarker(0);
+				}
 			}
 		}
 		else{
@@ -519,11 +527,14 @@ bool Class_Local_Tree::coarse() {
 					markerfather = octants[idx+offset+idx2].getMarker()+1;
 				}
 				idx++;
+				if(idx == size_ghosts){
+					break;
+				}
 			}
 			nend = 0;
 			idx = nocts-1;
 			marker = octants[idx].getMarker();
-			while(marker<0 & octants[idx].buildFather() == father){
+			while(marker < 0 & octants[idx].buildFather() == father & idx >= 0){
 				nbro++;
 				marker = octants[idx].getMarker();
 				if (markerfather < octants[idx+offset+idx2].getMarker()+1){
@@ -531,12 +542,18 @@ bool Class_Local_Tree::coarse() {
 				}
 				nend++;
 				idx--;
+				if (idx<0){
+					break;
+				}
 			}
 			if (nbro == nchildren){
 				offset = nend;
 			}
 			else{
-				nend == 0;
+				nend = 0;
+				for(int ii=nocts-nchildren; ii<nocts; ii++){
+					octants[ii].setMarker(0);
+				}
 			}
 		}
 		if (nend != 0){
@@ -557,7 +574,6 @@ bool Class_Local_Tree::coarse() {
 		}
 	}
 
-
 	//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
 	//Si può trovare la maniera di inserirlo nel loop precedente
 	pborders.clear();
@@ -573,9 +589,71 @@ bool Class_Local_Tree::coarse() {
 	}
 	pborders.shrink_to_fit();
 
-
+	// Set final first and last desc
+	setFirstDesc();
+	setLastDesc();
 
 	return docoarse;
+}
+
+// =================================================================================== //
+
+void Class_Local_Tree::checkCoarse(uint64_t lastDescPre,uint64_t firstDescPost){
+	int32_t idx;
+	uint32_t nocts;
+	uint64_t Morton;
+	uint8_t toDelete = 0;
+
+	nocts = getNumOctants();
+	idx = 0;
+	Morton = octants[idx].computeMorton();
+	while(Morton <= lastDescPre & idx < nocts & Morton != 0){
+		// To delete, the father is in proc before me
+		toDelete++;
+		idx++;
+		Morton = octants[idx].computeMorton();
+	}
+	for(idx=0; idx<nocts-toDelete; idx++){
+		octants[idx] = octants[idx+toDelete];
+	}
+	octants.resize(nocts-toDelete);
+	octants.shrink_to_fit();
+
+	toDelete = 0;
+	Morton = last_desc.computeMorton();
+	if(int(firstDescPost  - Morton) > 1){
+		// To insert, the father is not yet here!!
+		idx = nocts - 1;
+		Class_Octant father = octants[idx].buildFather();
+		while(octants[idx].buildFather() == father & idx >= 0){
+			toDelete++;
+			idx--;
+		}
+		father.info[nface+1] = father.info[nface+3] = true;
+		if(nface == 6)
+			father.info[nface+5] = true;
+		octants.resize(nocts-toDelete);
+		octants.push_back(father);
+		octants.shrink_to_fit();
+	}
+
+	//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
+	//Si può trovare la maniera di inserirlo nel loop precedente
+	pborders.clear();
+	nocts = octants.size();
+	pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(nface)));
+	for(idx=0; idx<nocts; idx++){
+		for(uint8_t iface=0; iface<nface; iface++){
+			if (octants[idx].info[iface+nface]){
+				pborders.push_back(idx);
+				break;
+			}
+		}
+	}
+	pborders.shrink_to_fit();
+
+	setFirstDesc();
+	setLastDesc();
 }
 
 // =================================================================================== //

@@ -36,7 +36,8 @@ class Class_Para_Tree {
 	// MEMBERS ----------------------------------------------------------------------- //
 public:
 	//undistributed members
-	uint64_t* partition_last_desc; 				//global array containing position of the last existing octant in each processor
+	uint64_t* partition_first_desc; 			//global array containing position of the first possible octant in each processor
+	uint64_t* partition_last_desc; 				//global array containing position of the last possible octant in each processor
 	uint64_t* partition_range_globalidx;	 	//global array containing global index of the last existing octant in each processor
 	uint64_t global_num_octants;   				// global number of octants in the parallel octree
 	map<int,vector<uint32_t> > bordersPerProc;	//local indices of border octants per process
@@ -63,6 +64,7 @@ public:
 	void loadBalance();							//assign the octants to the processes following a computed partition
 	void adapt();  								//call refine and coarse on the local tree
 	void updateAdapt();							//update Class_Para_Tree members after a refine and/or coarse
+	void updateAfterCoarse();					//update Class_Para_Tree members and delete overlapping octants after a coarse
 	void updateLoadBalance();					//update Class_Para_Tree members after a load balance
 	void computePartition(uint32_t* partition); // compute octant partition giving the same number of octant to each process and redistributing the reminder
 	void buildGhosts();

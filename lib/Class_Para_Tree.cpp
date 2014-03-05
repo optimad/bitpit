@@ -14,12 +14,15 @@ Class_Para_Tree::Class_Para_Tree() {
 	global_num_octants = octree.getNumOctants();
 	error_flag = MPI_Comm_size(MPI_COMM_WORLD,&nproc);
 	error_flag = MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+	partition_first_desc = new uint64_t[nproc];
 	partition_last_desc = new uint64_t[nproc];
 	partition_range_globalidx = new uint64_t[nproc];
 	uint64_t lastDescMorton = octree.getLastDesc().computeMorton();
+	uint64_t firstDescMorton = octree.getFirstDesc().computeMorton();
 	for(int p = 0; p < nproc; ++p){
 		partition_range_globalidx[p] = 0;
 		partition_last_desc[p] = lastDescMorton;
+		partition_last_desc[p] = firstDescMorton;
 	}
 
 }
@@ -61,6 +64,8 @@ void Class_Para_Tree::updateLoadBalance() {
 	//update partition_range_position
 	uint64_t lastDescMorton = octree.getLastDesc().computeMorton();
 	error_flag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,partition_last_desc,1,MPI_UINT64_T,MPI_COMM_WORLD);
+	uint64_t firstDescMorton = octree.getFirstDesc().computeMorton();
+	error_flag = MPI_Allgather(&firstDescMorton,1,MPI_UINT64_T,partition_first_desc,1,MPI_UINT64_T,MPI_COMM_WORLD);
 	serial = false;
 }
 
@@ -436,18 +441,35 @@ void Class_Para_Tree::updateAdapt() {
 		//update partition_range_position
 		uint64_t lastDescMorton = octree.getLastDesc().computeMorton();
 		error_flag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,partition_last_desc,1,MPI_UINT64_T,MPI_COMM_WORLD);
+		uint64_t firstDescMorton = octree.getFirstDesc().computeMorton();
+		error_flag = MPI_Allgather(&firstDescMorton,1,MPI_UINT64_T,partition_first_desc,1,MPI_UINT64_T,MPI_COMM_WORLD);
+	}
+}
+
+void Class_Para_Tree::updateAfterCoarse(){
+	//Only if parallel
+	if(!serial){
+		updateAdapt();
+		uint64_t lastDescMortonPre, firstDescMortonPost;
+		lastDescMortonPre = (rank!=0) * partition_last_desc[rank-1];
+		firstDescMortonPost = (rank<nproc-1)*partition_first_desc[rank+1] + (rank==nproc-1)*partition_last_desc[rank];
+		octree.checkCoarse(lastDescMortonPre, firstDescMortonPost);
+		updateAdapt();
 	}
 }
 
 void Class_Para_Tree::adapt() {
-	octree.refine();
 	updateAdapt();
+	setPboundGhosts();
+	while(octree.refine());
+	updateAdapt();
+	setPboundGhosts();
+	while(octree.coarse());
+	updateAfterCoarse();
+	setPboundGhosts();
 }
 
 void Class_Para_Tree::buildGhosts() {
-
-
-
 
 }
 
