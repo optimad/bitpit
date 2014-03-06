@@ -32,11 +32,11 @@ int main(int argc, char *argv[]) {
 	ptree.setPboundGhosts();
 
 	//TEST PARALLEL LOAD BALANCE
-	if(ptree.rank == 3){
+	if(ptree.rank == 1){
 		ptree.octree.setMarker(1,1);
 	}
 	ptree.adapt();
-	if(ptree.rank == 3){
+	if(ptree.rank == 1){
 		ptree.octree.setMarker(3,1);
 	}
 	ptree.adapt();
@@ -56,11 +56,11 @@ int main(int argc, char *argv[]) {
 	ptree.octree.computeghostsConnectivity();
 	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"balGhost");
 
-	if(ptree.rank == 1){
+	if(ptree.rank == 0){
 		for(int i = 0; i < ptree.octree.getNumOctants(); ++i)
 			ptree.octree.setMarker(i,-1);
 	}
-	if(ptree.rank == 2){
+	if(ptree.rank == 1){
 		for(int i = 0; i < ptree.octree.getNumOctants(); ++i){
 			ptree.octree.setMarker(i,-1);
 		}

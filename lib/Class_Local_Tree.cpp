@@ -373,7 +373,8 @@ bool Class_Local_Tree::coarse() {
 	idx1_gh = idx2_gh = 0;
 
 	nocts   = octants.size();
-	nghosts = ghosts.size();
+	size_ghosts = ghosts.size();
+
 
 	// Init first and last desc (even if already calculated)
 	setFirstDesc();
@@ -383,11 +384,11 @@ bool Class_Local_Tree::coarse() {
 
 	// Set index for start and end check for ghosts
 	if (ghosts.size()){
-		while(ghosts[idx1_gh].computeMorton() < first_desc.computeMorton() & idx1_gh < size_ghosts){
+		while(idx1_gh < size_ghosts && ghosts[idx1_gh].computeMorton() < first_desc.computeMorton()){
 			idx1_gh++;
 		}
 		idx1_gh = max(0, idx1_gh-1);
-		while(ghosts[idx2_gh].computeMorton() < last_desc.computeMorton() & idx2_gh < size_ghosts){
+		while(idx2_gh < size_ghosts && ghosts[idx2_gh].computeMorton() < last_desc.computeMorton()){
 			idx2_gh++;
 		}
 		idx2_gh = min(int(size_ghosts-1), idx2_gh);
@@ -419,15 +420,17 @@ bool Class_Local_Tree::coarse() {
 				}
 			}
 			if (nbro == nchildren){
-				offset = nstart;
+//				offset = nstart;
 				// For update pbound of neighbours only check
 				// the odd faces of new father (placed nstart-times
 				// in the first nstart positions of octants)
 				// If there is father after coarse will be the first
 				// element of local octants (lowest Morton)
+/*
 				for (int i=0; i<nstart; i++){
 					octants[i] = father;
 				}
+*/
 				uint32_t	 sizeneigh;
 				u32vector    neigh;
 				vector<bool> isghost;
@@ -468,7 +471,7 @@ bool Class_Local_Tree::coarse() {
 			}
 			else{
 				if (idx < (nocts>nchildren)*(nocts-nchildren)){
-//					octants[idx].setMarker(0);
+					octants[idx].setMarker(0);
 				}
 			}
 		}
@@ -513,7 +516,7 @@ bool Class_Local_Tree::coarse() {
 
 
 	// End on ghosts
-	if (ghosts.size()){
+	if (ghosts.size() && nocts > 0){
 		if ((ghosts[idx2_gh].getMarker() < 0) & (octants[nocts-1].getMarker() < 0)){
 			father = ghosts[idx2_gh].buildFather();
 			markerfather = -MAX_LEVEL;
@@ -523,8 +526,8 @@ bool Class_Local_Tree::coarse() {
 			while(marker < 0 & ghosts[idx].buildFather() == father){
 				nbro++;
 				marker = ghosts[idx].getMarker();
-				if (markerfather < octants[idx+offset+idx2].getMarker()+1){
-					markerfather = octants[idx+offset+idx2].getMarker()+1;
+				if (markerfather < ghosts[idx].getMarker()+1){
+					markerfather = ghosts[idx].getMarker()+1;
 				}
 				idx++;
 				if(idx == size_ghosts){
@@ -571,7 +574,9 @@ bool Class_Local_Tree::coarse() {
 			octants.resize(nocts-offset);
 			octants.push_back(father);
 			octants.shrink_to_fit();
+			nocts = octants.size();
 		}
+
 	}
 
 	//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
@@ -590,9 +595,10 @@ bool Class_Local_Tree::coarse() {
 	pborders.shrink_to_fit();
 
 	// Set final first and last desc
-	setFirstDesc();
-	setLastDesc();
-
+	if(nocts>0){
+		setFirstDesc();
+		setLastDesc();
+	}
 	return docoarse;
 }
 
