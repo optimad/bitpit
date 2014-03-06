@@ -24,10 +24,29 @@ Class_Para_Tree::Class_Para_Tree() {
 		partition_last_desc[p] = lastDescMorton;
 		partition_last_desc[p] = firstDescMorton;
 	}
+	// Write info log
+	if(rank==0){
+		system("rm PABLO.log");
+	}
+	MPI_Barrier(MPI_COMM_WORLD);
+	writeLog("---------------------------------------------");
+	writeLog("- PABLO PArallel Balanced Linear Octree -");
+	writeLog("---------------------------------------------");
+	writeLog(" ");
+	writeLog("---------------------------------------------");
+	writeLog(" Number of proc		:	" + to_string(nproc));
+	writeLog(" Dimension		:	" + to_string(DIM));
+	writeLog(" Max allowed level	:	" + to_string(MAX_LEVEL));
+	writeLog("---------------------------------------------");
+	writeLog(" ");
 
 }
 
 Class_Para_Tree::~Class_Para_Tree() {
+	writeLog("---------------------------------------------");
+	writeLog("--------------- R.I.P. PABLO ----------------");
+	writeLog("---------------------------------------------");
+	writeLog("---------------------------------------------");
 	//delete [] partition_last_desc;
 	//delete [] partition_range_globalidx;
 }
@@ -70,10 +89,21 @@ void Class_Para_Tree::updateLoadBalance() {
 }
 
 void Class_Para_Tree::loadBalance(){
+
+	//Write info on log
+	writeLog("---------------------------------------------");
+	writeLog(" LOAD BALANCE ");
+
 	uint32_t* partition = new uint32_t [nproc];
 	computePartition(partition);
 	if(serial)
 	{
+		writeLog(" ");
+		writeLog(" Initial Serial distribution : ");
+		for(int ii=0; ii<nproc; ii++){
+			writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]));
+		}
+
 		uint32_t stride = 0;
 		for(int i = 0; i < rank; ++i)
 			stride += partition[i];
@@ -83,9 +113,21 @@ void Class_Para_Tree::loadBalance(){
 		octree.octants.shrink_to_fit();
 		first = octree.octants.end();
 		last = octree.octants.end();
+
+		//Update and ghosts here
+		updateLoadBalance();
+		setPboundGhosts();
+
 	}
 	else
 	{
+		writeLog(" ");
+		writeLog(" Initial Parallel partition : ");
+		writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]));
+		for(int ii=1; ii<nproc; ii++){
+			writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
+		}
+
 		//empty ghosts
 		octree.ghosts.clear();
 		octree.size_ghosts = 0;
@@ -301,21 +343,8 @@ void Class_Para_Tree::loadBalance(){
 				sendersPerProc[globalRecvsBuff[k]].insert(globalRecvsBuff[displays[pin]]);
 			}
 		}
-//		//DEBUG
-//		if(rank == 0){
-//			for(int k = 0; k < nproc; ++k){
-//				cout << "Rank " << k << " will receive from ";
-//				for(set<int>::iterator it = sendersPerProc[k].begin(); it != sendersPerProc[k].end(); ++it){
-//					cout << *it << " ";
-//				}
-//				cout << endl;
-//
-//			}
-//		}
-//		//DEBUG
 
-
-//		//Communicate Octants (size)
+		//Communicate Octants (size)
 		MPI_Request req[sendBuffers.size()+sendersPerProc[rank].size()];
 		MPI_Status stats[sendBuffers.size()+sendersPerProc[rank].size()];
 		int nReq = 0;
@@ -407,9 +436,26 @@ void Class_Para_Tree::loadBalance(){
 
 		delete [] newPartitionRangeGlobalidx;
 		newPartitionRangeGlobalidx = NULL;
+
+		//Update and ghosts here
+		updateLoadBalance();
+		setPboundGhosts();
+
 	}
 	delete [] partition;
 	partition = NULL;
+
+	//Write info of final partition on log
+	writeLog(" ");
+	writeLog(" Final Parallel partition : ");
+	writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]));
+	for(int ii=1; ii<nproc; ii++){
+		writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
+	}
+	writeLog(" ");
+	writeLog("---------------------------------------------");
+
+
 }
 
 void Class_Para_Tree::updateAdapt() {
@@ -447,8 +493,11 @@ void Class_Para_Tree::updateAdapt() {
 }
 
 void Class_Para_Tree::updateAfterCoarse(){
-	//Only if parallel
-	if(!serial){
+	if(serial){
+		updateAdapt();
+	}
+	else{
+		//Only if parallel
 		updateAdapt();
 		uint64_t lastDescMortonPre, firstDescMortonPost;
 		lastDescMortonPre = (rank!=0) * partition_last_desc[rank-1];
@@ -459,14 +508,37 @@ void Class_Para_Tree::updateAfterCoarse(){
 }
 
 void Class_Para_Tree::adapt() {
-	updateAdapt();
-	setPboundGhosts();
-	while(octree.refine());
-	updateAdapt();
-	setPboundGhosts();
-	while(octree.coarse());
-	updateAfterCoarse();
-	setPboundGhosts();
+	if(serial){
+		writeLog("---------------------------------------------");
+		writeLog(" ADAPT (Refine/Coarse)");
+		writeLog(" ");
+		writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
+		while(octree.refine());
+		writeLog(" Number of octants after Refine	:	" + to_string(octree.getNumOctants()));
+		while(octree.coarse());
+		writeLog(" Number of octants after Coarse	:	" + to_string(octree.getNumOctants()));
+		updateAdapt();
+		writeLog(" ");
+		writeLog("---------------------------------------------");
+	}
+	else{
+		writeLog("---------------------------------------------");
+		writeLog(" ADAPT (Refine/Coarse)");
+		writeLog(" ");
+		writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
+		updateAdapt();
+		setPboundGhosts();
+		while(octree.refine());
+		updateAdapt();
+//		setPboundGhosts();
+		writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
+		while(octree.coarse());
+		updateAfterCoarse();
+		writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
+		writeLog(" ");
+		setPboundGhosts();
+		writeLog("---------------------------------------------");
+	}
 }
 
 void Class_Para_Tree::buildGhosts() {
@@ -625,10 +697,6 @@ void Class_Para_Tree::setPboundGhosts() {
 //		set_union(bit->second.begin(),bit->second.end(),octree.pborders.begin(),octree.pborders.end(),octree.pborders.begin());
 //	}
 
-
-
-	cout << "Communicate sizes" << endl;
-
 	//COMMUNICATE THE SIZE OF BUFFER TO THE RECEIVERS
 	//the size of every borders buffer is communicated to the right process in order to build the receive buffer
 	//and stored in the recvBufferSizePerProc structure
@@ -648,8 +716,6 @@ void Class_Para_Tree::setPboundGhosts() {
 		++nReq;
 	}
 	MPI_Waitall(nReq,req,stats);
-
-	cout << "Communicate buffers" << endl;
 
 	//COMMUNICATE THE BUFFERS TO THE RECEIVERS
 	//recvBuffers structure is declared and each buffer is initialized to the right size
@@ -678,7 +744,6 @@ void Class_Para_Tree::setPboundGhosts() {
 	//and ghost vector in local tree is resized
 	uint32_t nofGhosts = nofBytesOverProc / (uint32_t)octantBytes;
 	octree.size_ghosts = nofGhosts;
-	cout << "rank: " << rank << " nofGhosts: " << nofGhosts << endl;
 	octree.ghosts.resize(nofGhosts);
 
 	//UNPACK BUFFERS AND BUILD GHOSTS CONTAINER OF CLASS_LOCAL_TREE
@@ -704,13 +769,7 @@ void Class_Para_Tree::setPboundGhosts() {
 			++ghostCounter;
 		}
 	}
-
-
-	cout << "size Ghosts " << octree.size_ghosts <<  endl;
-
 	recvBuffers.clear();
 	sendBuffers.clear();
 	recvBufferSizePerProc.clear();
-
-	cout << "Exiting" << endl;
 }
