@@ -101,7 +101,7 @@ void Class_Para_Tree::loadBalance(){
 		writeLog(" ");
 		writeLog(" Initial Serial distribution : ");
 		for(int ii=0; ii<nproc; ii++){
-			writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]));
+			writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]+1));
 		}
 
 		uint32_t stride = 0;
@@ -123,7 +123,7 @@ void Class_Para_Tree::loadBalance(){
 	{
 		writeLog(" ");
 		writeLog(" Initial Parallel partition : ");
-		writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]));
+		writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
 		for(int ii=1; ii<nproc; ii++){
 			writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
 		}
@@ -448,7 +448,7 @@ void Class_Para_Tree::loadBalance(){
 	//Write info of final partition on log
 	writeLog(" ");
 	writeLog(" Final Parallel partition : ");
-	writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]));
+	writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
 	for(int ii=1; ii<nproc; ii++){
 		writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
 	}
