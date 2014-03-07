@@ -526,8 +526,8 @@ void Class_Para_Tree::adapt() {
 		writeLog(" ADAPT (Refine/Coarse)");
 		writeLog(" ");
 		writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
-		updateAdapt();			// Togliere se non necessario
-		setPboundGhosts();		// Togliere se non necessario
+		//updateAdapt();			// Togliere se non necessario
+		//setPboundGhosts();		// Togliere se non necessario
 		while(octree.refine());
 		updateAdapt();
 		setPboundGhosts();

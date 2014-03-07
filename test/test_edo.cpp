@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
 	{
 		Class_Para_Tree ptree;
 
-		ptree.octree.setBalance(0,false);
+		ptree.octree.setBalance(0,true);
 		ptree.octree.setMarker(0,2);
 		ptree.adapt();
 		ptree.loadBalance();
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
 				}
 				delete[] center;
 			}
-			ptree.balance21();
+			//ptree.balance21();
 			ptree.adapt();
 			nocts = ptree.octree.getNumOctants();
 		}
@@ -68,7 +68,7 @@ int main(int argc, char *argv[]) {
 				delete[] center;
 			}
 			cout << "21balance" << endl;
-			ptree.balance21();
+			//ptree.balance21();
 			ptree.adapt();
 //			cout << "loadbalance" << endl;
 //			ptree.loadBalance();
