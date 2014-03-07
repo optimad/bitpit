@@ -116,19 +116,24 @@ public:
 	void			clearghostsConnectivity();					// Clear ghosts nodes vector and connectivity of ghosts octants of local tree
 	void			updateghostsConnectivity();					// Update ghosts nodes vector and connectivity of ghosts octants of local tree
 
-	void		findNeighbours(uint32_t idx,					// Finds neighbours of idx-th octant through iface in vector octants.
+	void			findNeighbours(uint32_t idx,				// Finds neighbours of idx-th octant through iface in vector octants.
 								uint8_t iface,					// Returns a vector (empty if iface is a bound face) with the index of neighbours
 								u32vector & neighbours,			// in their structure (octants or ghosts) and sets isghost[i] = true if the
 								vector<bool> & isghost);		// i-th neighbour is ghost in the local tree
 
-	void		findNeighbours(Class_Octant const & oct,		// Finds neighbours of octant oct through iface in vector octants
-								uint8_t iface,					// It may be slow due to the research of oct in octants.
-								u32vector & neighbours,			// Returns a vector (empty if iface is a bound face) with the index of neighbours
-								vector<bool> & isghost);		// in their structure (octants or ghosts) and sets isghost[i] = true if the
-																// i-th neighbour is ghost in the local tree
+	void			findGhostNeighbours(uint32_t const idx,		// Finds neighbours of idx-th ghost octant through iface in vector octants.
+								uint8_t iface,					// Returns a vector (empty if iface is not the pbound face for ghost) with the index of neighbours
+								u32vector & neighbours);		// in the structure octants
 
-	bool		localBalance(bool doInterior);					// 2:1 balancing on level a local tree already adapted (balance only the octants with info[14] = false) (refinement wins!)
+//	void			findNeighbours(Class_Octant const & oct,	// Finds neighbours of octant oct through iface in vector octants
+//								uint8_t iface,					// It may be slow due to the research of oct in octants.
+//								u32vector & neighbours,			// Returns a vector (empty if iface is a bound face) with the index of neighbours
+//								vector<bool> & isghost);		// in their structure (octants or ghosts) and sets isghost[i] = true if the
+//																// i-th neighbour is ghost in the local tree
+
+	bool			localBalance(bool doInterior);				// 2:1 balancing on level a local tree already adapted (balance only the octants with info[14] = false) (refinement wins!)
 																// Return true if balanced done with some markers modification
+																// Seto doInterior = false if the interior octants are already balanced
 private:
 
 	// ------------------------------------------------------------------------------- //

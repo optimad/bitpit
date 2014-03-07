@@ -70,6 +70,8 @@ public:
 	void buildGhosts();
 	int findOwner(const uint64_t & morton);		// given the morton of an octant it find the process owning that octant
 	void setPboundGhosts(); 			 		// set pbound and build ghosts after static load balance
+	void commMarker();							// communicates marker of ghosts
+	void balance21();							// 2:1 balancing of parallel octree
 };
 
 #endif /* CLASS_PARA_TREE_H_ */

@@ -136,7 +136,7 @@ uint32_t Class_Octant::getArea() const {
 }
 
 uint32_t Class_Octant::getVolume() const {
-	uint64_t volume = uint32_t(pow(double(this->getSize()),2.0));
+	uint64_t volume = uint32_t(pow(double(getSize()),3.0));
 	return volume;
 }
 

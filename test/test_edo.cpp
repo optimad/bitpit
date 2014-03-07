@@ -22,20 +22,63 @@ int main(int argc, char *argv[]) {
 	{
 		Class_Para_Tree ptree;
 
-		ptree.octree.setBalance(0,1);
-		ptree.octree.setMarker(0,1);
+		ptree.octree.setBalance(0,false);
+		ptree.octree.setMarker(0,2);
 		ptree.adapt();
 		ptree.loadBalance();
+		uint64_t nocts = ptree.octree.getNumOctants();
 
-		//TEST PARALLEL LOAD BALANCE
-		if(ptree.rank == 1){
-			ptree.octree.setMarker(1,1);
+		for (int l=0; l<2; l++){
+			for (int i=0; i<nocts; i++){
+				double* center;
+				Class_Octant oct = ptree.octree.extractOctant(i);
+				center = oct.getCenter();
+				if ((center[0] <=  double(max_length)*0.8) && (center[0] >= double(max_length)*0.2)){
+					if ((center[1] <= double(max_length)*0.8) && (center[1] >=  double(max_length)*0.2)){
+						if ((center[2] <= double(max_length)*0.8) && (center[2] >=  double(max_length)*0.2)){
+							ptree.octree.setMarker(i,1);
+						}
+					}
+				}
+				delete[] center;
+			}
+			ptree.balance21();
+			ptree.adapt();
+			nocts = ptree.octree.getNumOctants();
 		}
-		ptree.adapt();
-		if(ptree.rank == 1){
-			ptree.octree.setMarker(3,1);
+
+		ptree.loadBalance();
+
+		ptree.octree.updateConnectivity();
+		writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"bbalunbalNoGhostsaa");
+
+
+		for (int l=0; l<2; l++){
+			for (int i=0; i<nocts; i++){
+				double* center;
+				Class_Octant oct = ptree.octree.extractOctant(i);
+				center = oct.getCenter();
+				if ((center[0] <=  double(max_length)*0.8) && (center[0] >= double(max_length)*0.2)){
+					if ((center[1] <= double(max_length)*0.8) && (center[1] >=  double(max_length)*0.2)){
+						if ((center[2] <= double(max_length)*0.8) && (center[2] >=  double(max_length)*0.2)){
+							ptree.octree.setMarker(i,1);
+						}
+					}
+				}
+				delete[] center;
+			}
+			cout << "21balance" << endl;
+			ptree.balance21();
+			ptree.adapt();
+//			cout << "loadbalance" << endl;
+//			ptree.loadBalance();
+			nocts = ptree.octree.getNumOctants();
 		}
-		ptree.adapt();
+
+		ptree.octree.updateConnectivity();
+		writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"bbalunbalNoGhostsbb");
+
+		/*
 		if(ptree.rank == 2){
 			ptree.octree.setMarker(1,1);
 		}
@@ -87,6 +130,7 @@ int main(int argc, char *argv[]) {
 		writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"coarsebalNoGhost");
 		ptree.octree.computeghostsConnectivity();
 		writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"coarsebalGhost");
+*/
 
 	}
 
