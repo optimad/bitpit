@@ -165,13 +165,13 @@ double*	Class_Octant::getCenter() {
 	uint8_t		i;
 	double	dh;
 
-	dh = sqrt(double(getSize()));
+	dh = double(getSize())/2.0;
 	double *center = new double[DIM];
 
-	center[0] = x + dh;
-	center[1] = y + dh;
+	center[0] = (double)x + dh;
+	center[1] = (double)y + dh;
 #if DIM == 3
-	center[2] = z + dh;
+	center[2] = (double)z + dh;
 #endif
 	return center;
 }
