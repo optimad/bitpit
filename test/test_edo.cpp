@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 		ptree.loadBalance();
 		uint64_t nocts = ptree.octree.getNumOctants();
 
-		for (int l=0; l<8; l++){
+		for (int l=0; l<2; l++){
 			for (int i=0; i<nocts; i++){
 				double* center;
 				Class_Octant oct = ptree.octree.extractOctant(i);
