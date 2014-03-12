@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
 		Class_Para_Tree ptree;
 
 		//TODO TESTARE QUANDO NON BILANCIATO (setBalance true), deadlock in pboundghosts !!!
-		ptree.octree.setBalance(0,false);
+		ptree.octree.setBalance(0,true);
 		ptree.octree.setMarker(0,3);
 		ptree.adapt();
 		ptree.loadBalance();
@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
 //				}
 				delete[] center;
 			}
-			ptree.balance21();
+//			ptree.balance21();
 			ptree.adapt();
 			ptree.loadBalance();
 			nocts = ptree.octree.getNumOctants();
