@@ -526,13 +526,14 @@ void Class_Para_Tree::adapt() {
 		writeLog(" ADAPT (Refine/Coarse)");
 		writeLog(" ");
 		writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
-		//updateAdapt();			// Togliere se non necessario
-		//setPboundGhosts();		// Togliere se non necessario
+		updateAdapt();			// Togliere se non necessario
+		setPboundGhosts();		// Togliere se non necessario
 		while(octree.refine());
 		updateAdapt();
 		setPboundGhosts();
 		writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
 		while(octree.coarse());
+		writeLog("coarse done ");
 		updateAfterCoarse();
 		writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
 		writeLog(" ");
@@ -595,6 +596,9 @@ void Class_Para_Tree::setPboundGhosts() {
 						procs.insert(pEnd);
 						if(pBegin != rank || pEnd != rank){
 							it->setPbound(i,true);
+						}
+						else{
+							it->setPbound(i,false);
 						}
 //						if(pBegin == pEnd || pBegin == pEnd - 1)
 //							break;
@@ -766,7 +770,7 @@ void Class_Para_Tree::setPboundGhosts() {
 				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&info[j],1,MPI::BOOL,MPI_COMM_WORLD);
 				octree.ghosts[ghostCounter].info[j] = info[j];
 			}
-			octree.ghosts[ghostCounter].info[15] = true;
+//			octree.ghosts[ghostCounter].info[15] = true;
 			++ghostCounter;
 		}
 	}
@@ -786,13 +790,14 @@ void Class_Para_Tree::commMarker() {
 	//this map has an entry Class_Comm_Buffer for every proc containing the size in bytes of the buffer and the octants marker
 	//to be sent to that proc packed in a char* buffer
 	int8_t marker;
-	bool info[16];
+	bool info[16], mod;
 	map<int,Class_Comm_Buffer> sendBuffers;
 	map<int,vector<uint32_t> >::iterator bitend = bordersPerProc.end();
 	uint32_t pbordersOversize = 0;
 	for(map<int,vector<uint32_t> >::iterator bit = bordersPerProc.begin(); bit != bitend; ++bit){
 		pbordersOversize += bit->second.size();
-		int buffSize = bit->second.size() * (int)ceil((double)(markerBytes) / (double)(CHAR_BIT/8));
+//		int buffSize = bit->second.size() * (int)ceil((double)(markerBytes) / (double)(CHAR_BIT/8));
+		int buffSize = bit->second.size() * (int)ceil((double)(markerBytes + boolBytes) / (double)(CHAR_BIT/8));
 		int key = bit->first;
 		const vector<uint32_t> & value = bit->second;
 		sendBuffers[key] = Class_Comm_Buffer(buffSize,'a');
@@ -802,7 +807,9 @@ void Class_Para_Tree::commMarker() {
 			//the use of auxiliary variable can be avoided passing to MPI_Pack the members of octant but octant in that case cannot be const
 			const Class_Octant & octant = octree.octants[value[i]];
 			marker = octant.getMarker();
+			mod	= octant.info[15];
 			error_flag = MPI_Pack(&marker,1,MPI_INT8_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+			error_flag = MPI_Pack(&mod,1,MPI::BOOL,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 		}
 	}
 
@@ -864,10 +871,12 @@ void Class_Para_Tree::commMarker() {
 	map<int,Class_Comm_Buffer>::iterator rritend = recvBuffers.end();
 	for(map<int,Class_Comm_Buffer>::iterator rrit = recvBuffers.begin(); rrit != rritend; ++rrit){
 		int pos = 0;
-		int nofGhostsPerProc = int(rrit->second.commBufferSize / (uint32_t) markerBytes);
+		int nofGhostsPerProc = int(rrit->second.commBufferSize / ((uint32_t) (markerBytes + boolBytes)));
 		for(int i = 0; i < nofGhostsPerProc; ++i){
 			error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&marker,1,MPI_INT8_T,MPI_COMM_WORLD);
 			octree.ghosts[ghostCounter].setMarker(marker);
+			error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&mod,1,MPI::BOOL,MPI_COMM_WORLD);
+			octree.ghosts[ghostCounter].info[15] = mod;
 			++ghostCounter;
 		}
 	}
@@ -879,23 +888,40 @@ void Class_Para_Tree::commMarker() {
 //==============================================================
 
 void Class_Para_Tree::balance21(){
-	bool globalDone = true, localDone;
+	bool globalDone = true, localDone = false;
+	int  iteration  = 0;
+
+
+	writeLog("---------------------------------------------");
+	writeLog(" 2:1 BALANCE (balancing Marker before Adapt)");
+	writeLog(" ");
+	writeLog(" Iterative procedure	");
+	writeLog(" ");
+	writeLog(" Iteration	:	" + to_string(iteration));
+
 
 	commMarker();
 	localDone = octree.localBalance(true);
 	MPI_Barrier(MPI_COMM_WORLD);
 	error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
 
-	int counterDebug = 0;
 	while(globalDone){
+		iteration++;
+		writeLog(" Iteration	:	" + to_string(iteration));
 		commMarker();
 		localDone = octree.localBalance(false);
 		error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-		counterDebug++;
-//		if (counterDebug>0){
-//			globalDone = false;
-//		}
 	}
+
+	commMarker();
+	writeLog(" Iteration	:	Finalizing ");
+	writeLog(" ");
+	localDone = octree.localBalance(false);
+	commMarker();
+
+	writeLog(" 2:1 Balancing reached ");
+	writeLog(" ");
+	writeLog("---------------------------------------------");
 
 }
 

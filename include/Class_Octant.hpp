@@ -46,7 +46,7 @@ private:
 								// Info[6..11]: true if 0..5 face is a process boundary face [pbound];
 								// Info[12/13]: true if octant is new after refinement/coarsening;
 								// Info[14]   : true if balancing is not required for this octant;
-								// Info[15]   : true if octant is a scary ghost.
+								// Info[15]   : Aux (before : true if octant is a scary ghost).
 
 
 	// ------------------------------------------------------------------------------- //

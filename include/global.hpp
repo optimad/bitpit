@@ -23,6 +23,7 @@ extern const uint8_t  nnodes;
 extern const uint8_t  octantBytes;
 extern const uint8_t  markerBytes;
 extern const uint8_t  levelBytes;
+extern const uint8_t  boolBytes;
 extern const uint8_t  oppface[2*DIM];
 
 
