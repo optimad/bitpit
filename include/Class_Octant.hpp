@@ -106,13 +106,13 @@ public:
 	Class_Octant	buildFather();									// Build father of octant and return the father octant (no info update)
 	Class_Octant*	buildChildren();								// Builds children of octant and return a pointer to an ordered array children[nchildren] (info update)
 	uint64_t* 		computeHalfSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
-										  uint8_t & sizehf);		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
+										  uint32_t & sizehf);		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
 	uint64_t* 		computeMinSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
 										 const uint8_t & maxdepth,	// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
-										 uint8_t & sizem);
+										 uint32_t & sizem);
 	uint64_t* 		computeVirtualMorton(uint8_t iface, 			// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
 										 const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
-										 uint8_t & sizeneigh);
+										 uint32_t & sizeneigh);
 private:
 
 	// ------------------------------------------------------------------------------- //

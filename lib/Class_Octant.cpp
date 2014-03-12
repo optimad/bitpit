@@ -366,10 +366,10 @@ uint64_t Class_Octant::computeMorton(){
 // =================================================================================== //
 
 uint64_t* Class_Octant::computeHalfSizeMorton(uint8_t iface,
-											 uint8_t & sizehf) {
+											 uint32_t & sizehf) {
 	uint32_t dh,dh2;
 	uint64_t morton;
-	uint8_t nneigh;
+	uint32_t nneigh;
 	uint8_t i,cx,cy,cz;
 
 	nneigh = (level < MAX_LEVEL) ? nchildren/2 : 1;
@@ -450,7 +450,7 @@ uint64_t* Class_Octant::computeHalfSizeMorton(uint8_t iface,
 
 uint64_t* Class_Octant::computeMinSizeMorton(uint8_t iface,
 											const uint8_t & maxdepth,
-											uint8_t & sizem) {
+											uint32_t & sizem) {
 	uint32_t dh,dh2;
 	uint64_t morton;
 	uint32_t nneigh, nline;
@@ -537,7 +537,7 @@ void Class_Octant::setPbound(uint8_t face, bool flag) {
 
 uint64_t* Class_Octant::computeVirtualMorton(uint8_t iface,
 											const uint8_t& maxdepth,
-											uint8_t& sizeneigh) {
+											uint32_t& sizeneigh) {
 
 	if (getNotBalance()){
 		return computeMinSizeMorton(iface,

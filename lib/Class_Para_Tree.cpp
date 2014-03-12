@@ -586,9 +586,9 @@ void Class_Para_Tree::setPboundGhosts() {
 			set<int> procs;
 			for(uint8_t i = 0; i < nface; ++i){
 				if(it->getBound(i) == false){
-					uint8_t virtualNeighborsSize = 0;
+					uint32_t virtualNeighborsSize = 0;
 					uint64_t* virtualNeighbors = it->computeVirtualMorton(i,max_depth,virtualNeighborsSize);
-					uint8_t maxDelta = virtualNeighborsSize/2;
+					uint32_t maxDelta = virtualNeighborsSize/2;
 					for(int j = 0; j <= maxDelta; ++j){
 						int pBegin = findOwner(virtualNeighbors[j]);
 						int pEnd = findOwner(virtualNeighbors[virtualNeighborsSize - 1 - j]);
@@ -627,9 +627,9 @@ void Class_Para_Tree::setPboundGhosts() {
 			set<int> procs;
 			for(uint8_t i = 0; i < nface; ++i){
 				if(oct.getBound(i) == false){
-					uint8_t virtualNeighborsSize = 0;
+					uint32_t virtualNeighborsSize = 0;
 					uint64_t* virtualNeighbors = oct.computeVirtualMorton(i,max_depth,virtualNeighborsSize);
-					uint8_t maxDelta = virtualNeighborsSize/2;
+					uint32_t maxDelta = virtualNeighborsSize/2;
 					for(int j = 0; j <= maxDelta; ++j){
 						int pBegin = findOwner(virtualNeighbors[j]);
 						int pEnd = findOwner(virtualNeighbors[virtualNeighborsSize - 1 - j]);
