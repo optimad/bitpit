@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
 //				}
 				delete[] center;
 			}
-//			ptree.balance21();
+			ptree.balance21();
 			ptree.adapt();
 			ptree.loadBalance();
 			nocts = ptree.octree.getNumOctants();
