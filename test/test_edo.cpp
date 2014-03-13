@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 		ptree.loadBalance();
 		uint64_t nocts = ptree.octree.getNumOctants();
 
-		for (int l=0; l<2; l++){
+		for (int l=0; l<3; l++){
 			for (int i=0; i<nocts; i++){
 				double* center;
 				Class_Octant oct = ptree.octree.extractOctant(i);
@@ -48,8 +48,11 @@ int main(int argc, char *argv[]) {
 			ptree.adapt();
 			ptree.loadBalance();
 			nocts = ptree.octree.getNumOctants();
+			ptree.octree.clearghostsConnectivity();
 			ptree.octree.updateConnectivity();
 			writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,("bbalunbalNoGhostsaa"+to_string(l)));
+			ptree.octree.updateghostsConnectivity();
+			writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,("bbalunbalGhostsaa"+to_string(l)));
 		}
 
 //		ptree.octree.updateConnectivity();

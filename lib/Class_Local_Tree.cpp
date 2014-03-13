@@ -382,8 +382,6 @@ bool Class_Local_Tree::coarse() {
 
 	//------------------------------------------ //
 
-	writeLog("Set index Ghosts");
-
 	// Set index for start and end check for ghosts
 	if (ghosts.size()){
 		while(idx1_gh < size_ghosts && ghosts[idx1_gh].computeMorton() < first_desc.computeMorton()){
@@ -394,8 +392,6 @@ bool Class_Local_Tree::coarse() {
 			idx2_gh++;
 		}
 		idx2_gh = min(int(size_ghosts-1), idx2_gh);
-
-		writeLog("Check Ghosts");
 
 		// Start on ghosts
 		if ((ghosts[idx1_gh].getMarker() < 0) & (octants[0].getMarker() < 0)){
@@ -454,7 +450,6 @@ bool Class_Local_Tree::coarse() {
 		}
 	}
 
-	writeLog("Check Internal");
 	// Check and coarse internal octants
 	for (idx=0; idx<nocts; idx++){
 		if(octants[idx].getMarker() < 0 && octants[idx].getLevel() > 0){
@@ -1527,6 +1522,7 @@ bool Class_Local_Tree::localBalance(bool doInterior){
 	u32vector		 	modified, newmodified;
 	uint32_t 			i, idx, imod;
 	uint8_t				iface;
+	int8_t				targetmarker;
 	vector<bool> 		isghost;
 	bool				Bdone = false;
 
@@ -1578,22 +1574,23 @@ bool Class_Local_Tree::localBalance(bool doInterior){
 		idx = 0;
 		for (it=obegin; it!=oend; it++){
 			it->info[15] = false;
-			if (!it->getNotBalance() & it->getMarker() != 0 & (it->getLevel()+it->getMarker()) <= MAX_LEVEL){
-				for (iface=1; iface<nface; iface++){
+			if (!it->getNotBalance() && it->getMarker() != 0){
+				targetmarker = min(MAX_LEVEL, (octants[idx].getLevel() + octants[idx].getMarker()));
+				for (iface=0; iface<nface; iface++){
 					if(!it->getPbound(iface)){
 						findNeighbours(idx, iface, neigh, isghost);
 						sizeneigh = neigh.size();
 						for(i=0; i<sizeneigh; i++){
 							if (!isghost[i]){
 								{
-									if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) > (octants[idx].getLevel() + octants[idx].getMarker() + 1) ){
+									if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) > (targetmarker + 1) ){
 										octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-1-octants[idx].getLevel());
 										octants[idx].info[15] = true;
 										modified.push_back(idx);
 										Bdone = true;
 									}
-									else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (octants[idx].getLevel() + octants[idx].getMarker() - 1)){
-										octants[neigh[i]].setMarker(octants[idx].getLevel()+octants[idx].getMarker()-octants[neigh[i]].getLevel()-1);
+									else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
+										octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
 										octants[neigh[i]].info[15] = true;
 										modified.push_back(neigh[i]);
 										Bdone = true;
@@ -1611,15 +1608,16 @@ bool Class_Local_Tree::localBalance(bool doInterior){
 		oend = ghosts.end();
 		idx = 0;
 		for (it=obegin; it!=oend; it++){
-			if (!it->getNotBalance() & it->getMarker() != 0 & (it->getLevel()+it->getMarker()) <= MAX_LEVEL){
+			if (!it->getNotBalance() && it->getMarker() != 0){
+				targetmarker = min(MAX_LEVEL, (it->getLevel()+it->getMarker()));
 				for (iface=0; iface<nface; iface++){
 					if(it->getPbound(iface) == true){
 						neigh.clear();
 						findGhostNeighbours(idx, iface, neigh);
 						sizeneigh = neigh.size();
 						for(i=0; i<sizeneigh; i++){
-							if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (ghosts[idx].getLevel() + ghosts[idx].getMarker() - 1)){
-								octants[neigh[i]].setMarker(ghosts[idx].getLevel()+ghosts[idx].getMarker()-octants[neigh[i]].getLevel()-1);
+							if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
+								octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
 								octants[neigh[i]].info[15] = true;
 								modified.push_back(neigh[i]);
 								Bdone = true;
@@ -1641,7 +1639,8 @@ bool Class_Local_Tree::localBalance(bool doInterior){
 			for (iit=ibegin; iit!=iend; iit++){
 				//			idx = modified[modsize-imod-1];
 				idx = *iit;
-				if (!octants[idx].getNotBalance() & (it->getLevel()+it->getMarker()) <= MAX_LEVEL){
+				if (!octants[idx].getNotBalance()){
+					targetmarker = min(MAX_LEVEL, (octants[idx].getLevel()+octants[idx].getMarker()));
 					for (iface=0; iface<nface; iface++){
 						if(!octants[idx].getPbound(iface)){
 							findNeighbours(idx, iface, neigh, isghost);
@@ -1649,14 +1648,14 @@ bool Class_Local_Tree::localBalance(bool doInterior){
 							for(i=0; i<sizeneigh; i++){
 								if (!isghost[i]){
 									{
-										if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) >  (octants[idx].getLevel() + octants[idx].getMarker() + 1)){
+										if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
 											octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-octants[idx].getLevel()-1);
 											octants[idx].info[15] = true;
 											newmodified.push_back(idx);
 											Bdone = true;
 										}
-										else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (octants[idx].getLevel() + octants[idx].getMarker() - 1)){
-											octants[neigh[i]].setMarker(octants[idx].getLevel()+octants[idx].getMarker()-octants[neigh[i]].getLevel()-1);
+										else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
+											octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
 											octants[neigh[i]].info[15] = true;
 											newmodified.push_back(neigh[i]);
 											Bdone = true;
@@ -1701,21 +1700,22 @@ bool Class_Local_Tree::localBalance(bool doInterior){
 		oend = ghosts.end();
 		idx = 0;
 		for (it=obegin; it!=oend; it++){
-			if (!it->getNotBalance() & it->info[15] & (it->getLevel()+it->getMarker()) <= MAX_LEVEL){
+			if (!it->getNotBalance() && it->info[15]){
+				targetmarker = min(MAX_LEVEL, (it->getLevel()+it->getMarker()));
 				for (iface=0; iface<nface; iface++){
 					if(it->getPbound(iface) == true){
 						neigh.clear();
 						findGhostNeighbours(idx, iface, neigh);
 						sizeneigh = neigh.size();
 						for(i=0; i<sizeneigh; i++){
-							if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (ghosts[idx].getLevel() + ghosts[idx].getMarker() - 1)){
-								octants[neigh[i]].setMarker(ghosts[idx].getLevel()+ghosts[idx].getMarker()-octants[neigh[i]].getLevel()-1);
+							if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
+								octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
 								octants[neigh[i]].info[15] = true;
 								modified.push_back(neigh[i]);
 								Bdone = true;
 							}
 							else{
-								octants[neigh[i]].info[15] = false;
+//								octants[neigh[i]].info[15] = false;
 							}
 						}
 					}
@@ -1734,7 +1734,8 @@ bool Class_Local_Tree::localBalance(bool doInterior){
 			for (iit=ibegin; iit!=iend; iit++){
 				//			idx = modified[modsize-imod-1];
 				idx = *iit;
-				if (!octants[idx].getNotBalance() & (it->getLevel()+it->getMarker()) <= MAX_LEVEL){
+				if (!octants[idx].getNotBalance()){
+					targetmarker = min(MAX_LEVEL, (octants[idx].getLevel()+octants[idx].getMarker()));
 					for (iface=0; iface<nface; iface++){
 						if(!octants[idx].getPbound(iface)){
 							findNeighbours(idx, iface, neigh, isghost);
@@ -1742,14 +1743,14 @@ bool Class_Local_Tree::localBalance(bool doInterior){
 							for(i=0; i<sizeneigh; i++){
 								if (!isghost[i]){
 									{
-										if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) >  (octants[idx].getLevel() + octants[idx].getMarker() + 1)){
+										if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
 											octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-octants[idx].getLevel()-1);
 											octants[idx].info[15] = true;
 											newmodified.push_back(idx);
 											Bdone = true;
 										}
-										else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (octants[idx].getLevel() + octants[idx].getMarker() - 1)){
-											octants[neigh[i]].setMarker(octants[idx].getLevel()+octants[idx].getMarker()-octants[neigh[i]].getLevel()-1);
+										else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
+											octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
 											octants[neigh[i]].info[15] = true;
 											newmodified.push_back(neigh[i]);
 											Bdone = true;
