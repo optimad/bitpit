@@ -25,44 +25,41 @@ int main(int argc, char *argv[]) {
 		clock_t start = clock();
 		clock_t end = clock();
 
-		//TODO TESTARE QUANDO NON BILANCIATO (setBalance true), deadlock in pboundghosts !!!
 		ptree.octree.setBalance(0,false);
 		ptree.octree.setMarker(0,3);
 		ptree.adapt();
 		ptree.loadBalance();
 		uint64_t nocts = ptree.octree.getNumOctants();
 
-//		for (int l=0; l<3; l++){
-//			for (int i=0; i<nocts; i++){
-//				double* center;
-//				Class_Octant oct = ptree.octree.extractOctant(i);
-//				center = oct.getCenter();
-////				if ((center[0] <  double(max_length)*0.8) && (center[0] > double(max_length)*0.2)){
-////					if ((center[1] < double(max_length)*0.8) && (center[1] >  double(max_length)*0.2)){
-////						if ((center[2] < double(max_length)*0.8) && (center[2] >  double(max_length)*0.2)){
-//				if (sqrt(pow((center[0]-double(max_length)*0.5),2.0)+pow((center[1]-double(max_length)*0.5),2.0)+pow((center[2]-double(max_length)*0.5),2.0)) <= double(max_length)*0.4){
-//							ptree.octree.setMarker(i,1);
-//						}
-////					}
-////				}
-//				delete[] center;
-//			}
-//			ptree.balance21();
-//			ptree.adapt();
-//			ptree.loadBalance();
-//			nocts = ptree.octree.getNumOctants();
-//		}
-
-		// RANDOM TEST
-		for (int l=0; l<9; l++){
-			for (int i=0; i<nocts/3; i++){
-				int j = rand() %nocts;
-				ptree.octree.setMarker(j,1);
+		// TORUS TEST
+		double R = double(max_length)*0.25;
+		double r = double(max_length)*0.15;
+		for (int l=0; l<5; l++){
+			for (int i=0; i<nocts; i++){
+				double* center;
+				Class_Octant oct = ptree.octree.extractOctant(i);
+				center = oct.getCenter();
+				//				if (sqrt(pow((center[0]-double(max_length)*0.5),2.0)+pow((center[1]-double(max_length)*0.5),2.0)+pow((center[2]-double(max_length)*0.5),2.0)) <= double(max_length)*0.4){
+				if ( pow(R -sqrt(pow((center[0]-double(max_length)*0.5),2.0)+pow((center[1]-double(max_length)*0.5),2.0)),2.0)+pow((center[2]-double(max_length)*0.5),2.0) <= pow(r,2.0) ){
+					ptree.octree.setMarker(i,1);
+				}
+				delete[] center;
 			}
 			ptree.balance21();
 			ptree.adapt();
 			ptree.loadBalance();
 			nocts = ptree.octree.getNumOctants();
+
+//		// RANDOM TEST
+//		for (int l=0; l<9; l++){
+//			for (int i=0; i<nocts/3; i++){
+//				int j = rand() %nocts;
+//				ptree.octree.setMarker(j,1);
+//			}
+//			ptree.balance21();
+//			ptree.adapt();
+//			ptree.loadBalance();
+//			nocts = ptree.octree.getNumOctants();
 
 			end = clock();
 			float seconds = (float)(end - start) / CLOCKS_PER_SEC;

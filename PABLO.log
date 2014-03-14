@@ -1,0 +1,212 @@
+---------------------------------------------
+- PABLO PArallel Balanced Linear Octree -
+---------------------------------------------
+ 
+---------------------------------------------
+ Number of proc		:	1
+ Dimension		:	3
+ Max allowed level	:	8
+---------------------------------------------
+ 
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+ Initial Number of octants	:	1
+ Number of octants after Refine	:	512
+ Number of octants after Coarse	:	512
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Serial distribution : 
+ Octants for proc	0	:	512
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	512
+ 
+---------------------------------------------
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+ Initial Number of octants	:	512
+ Number of octants after Refine	:	904
+coarse done 
+ Number of octants after Coarse	:	904
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	904
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	904
+ 
+---------------------------------------------
+ 
+---------------------------------------------
+ 
+ CPU time (sec)			:	0.030000
+ 
+---------------------------------------------
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	1
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+ Initial Number of octants	:	904
+ Number of octants after Refine	:	4432
+coarse done 
+ Number of octants after Coarse	:	4432
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	4432
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	4432
+ 
+---------------------------------------------
+ 
+---------------------------------------------
+ 
+ CPU time (sec)			:	0.150000
+ 
+---------------------------------------------
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	1
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+ Initial Number of octants	:	4432
+ Number of octants after Refine	:	28624
+coarse done 
+ Number of octants after Coarse	:	28624
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	28624
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	28624
+ 
+---------------------------------------------
+ 
+---------------------------------------------
+ 
+ CPU time (sec)			:	0.790000
+ 
+---------------------------------------------
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	1
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+ Initial Number of octants	:	28624
+ Number of octants after Refine	:	207376
+coarse done 
+ Number of octants after Coarse	:	207376
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	207376
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	207376
+ 
+---------------------------------------------
+ 
+---------------------------------------------
+ 
+ CPU time (sec)			:	5.320000
+ 
+---------------------------------------------
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	1
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+ Initial Number of octants	:	207376
+ Number of octants after Refine	:	1596904
+coarse done 
+ Number of octants after Coarse	:	1596904
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	1596904
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	1596904
+ 
+---------------------------------------------
+ 
+---------------------------------------------
+ 
+ CPU time (sec)			:	24.860001
+ 
+---------------------------------------------
