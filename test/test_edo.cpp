@@ -74,7 +74,6 @@ int main(int argc, char *argv[]) {
 			writeLog("---------------------------------------------");
 		}
 
-
 		ptree.octree.updateConnectivity();
 		writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,("bbalunbalNoGhostsaa"));
 		ptree.octree.updateghostsConnectivity();
