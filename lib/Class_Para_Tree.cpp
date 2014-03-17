@@ -603,6 +603,8 @@ void Class_Para_Tree::setPboundGhosts() {
 //						if(pBegin == pEnd || pBegin == pEnd - 1)
 //							break;
 					}
+					delete [] virtualNeighbors;
+					virtualNeighbors = NULL;
 				}
 			}
 			set<int>::iterator pitend = procs.end();
@@ -638,6 +640,8 @@ void Class_Para_Tree::setPboundGhosts() {
 						if(pBegin == pEnd || pBegin == pEnd - 1)
 							break;
 					}
+					delete [] virtualNeighbors;
+					virtualNeighbors = NULL;
 				}
 			}
 			set<int>::iterator pitend = procs.end();
