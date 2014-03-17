@@ -542,6 +542,49 @@ void Class_Para_Tree::adapt() {
 	}
 }
 
+
+void Class_Para_Tree::adapt(u32vector & mapidx) {
+	// mapidx init
+	mapidx.clear();
+	mapidx.resize(octree.getNumOctants());
+	mapidx.shrink_to_fit();
+	for (uint32_t i=0; i<octree.getNumOctants(); i++){
+		mapidx[i] = i;
+	}
+	if(serial){
+		writeLog("---------------------------------------------");
+		writeLog(" ADAPT (Refine/Coarse)");
+		writeLog(" ");
+		writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
+		while(octree.refine(mapidx));
+		writeLog(" Number of octants after Refine	:	" + to_string(octree.getNumOctants()));
+		while(octree.coarse(mapidx));
+		writeLog(" Number of octants after Coarse	:	" + to_string(octree.getNumOctants()));
+		updateAdapt();
+		writeLog(" ");
+		writeLog("---------------------------------------------");
+	}
+	else{
+		writeLog("---------------------------------------------");
+		writeLog(" ADAPT (Refine/Coarse)");
+		writeLog(" ");
+		writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
+		updateAdapt();			// Togliere se non necessario
+		setPboundGhosts();		// Togliere se non necessario
+		while(octree.refine(mapidx));
+		updateAdapt();
+		setPboundGhosts();
+		writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
+		while(octree.coarse(mapidx));
+		writeLog("coarse done ");
+		updateAfterCoarse();
+		writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
+		writeLog(" ");
+		setPboundGhosts();
+		writeLog("---------------------------------------------");
+	}
+}
+
 void Class_Para_Tree::buildGhosts() {
 
 }

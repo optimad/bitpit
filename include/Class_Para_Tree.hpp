@@ -32,6 +32,15 @@ using namespace std;
 // =================================================================================== //
 
 class Class_Para_Tree {
+
+	// ------------------------------------------------------------------------------- //
+	// TYPEDEFS ----------------------------------------------------------------------- //
+public:
+	typedef vector<Class_Octant> 		OctantsType;
+	typedef vector<uint32_t>			u32vector;
+	typedef vector<vector<uint32_t>	>	u32vector2D;
+	typedef vector<vector<uint64_t>	>	u64vector2D;
+
 	// ------------------------------------------------------------------------------- //
 	// MEMBERS ----------------------------------------------------------------------- //
 public:
@@ -63,6 +72,8 @@ public:
 	// METHODS ----------------------------------------------------------------------- //
 	void loadBalance();							//assign the octants to the processes following a computed partition
 	void adapt();  								//call refine and coarse on the local tree
+	void adapt(u32vector & mapidx);  			//call refine and coarse on the local tree
+												// mapidx[i] = index in old octants vector of the i-th octant (index of father or first child if octant is new after refine or coarse)
 	void updateAdapt();							//update Class_Para_Tree members after a refine and/or coarse
 	void updateAfterCoarse();					//update Class_Para_Tree members and delete overlapping octants after a coarse
 	void updateLoadBalance();					//update Class_Para_Tree members after a load balance

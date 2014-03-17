@@ -106,6 +106,11 @@ public:
 	bool			refine();									// Refine local tree: refine one time octants with marker >0
 	bool			coarse();									// Coarse local tree: coarse one time family of octants with marker <0
 																// (if at least one octant of family has marker>=0 set marker=0 for the entire family)
+	bool			refine(u32vector & mapidx);					// Refine local tree: refine one time octants with marker >0
+																// mapidx[i] = index in old octants vector of the i-th octant (index of father if octant is new after)
+	bool			coarse(u32vector & mapidx);					// Coarse local tree: coarse one time family of octants with marker <0
+																// (if at least one octant of family has marker>=0 set marker=0 for the entire family)
+																// mapidx[i] = index in old octants vector of the i-th octant (index of father if octant is new after)
 	void			checkCoarse(uint64_t lastDescPre,			// Delete overlapping octants after coarse local tree. Check first and last descendants
 								uint64_t firstDescPost);		// of process before and after the local process
 	void       		updateLocalMaxDepth();						// Update max depth reached in local tree

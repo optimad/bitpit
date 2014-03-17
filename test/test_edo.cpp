@@ -21,13 +21,14 @@ int main(int argc, char *argv[]) {
 
 	{
 		Class_Para_Tree ptree;
+		vector<uint32_t> mapidx;
 
 		clock_t start = clock();
 		clock_t end = clock();
 
 		ptree.octree.setBalance(0,false);
 		ptree.octree.setMarker(0,3);
-		ptree.adapt();
+		ptree.adapt(mapidx);
 		ptree.loadBalance();
 		uint64_t nocts = ptree.octree.getNumOctants();
 
@@ -46,7 +47,7 @@ int main(int argc, char *argv[]) {
 				delete[] center;
 			}
 			ptree.balance21();
-			ptree.adapt();
+			ptree.adapt(mapidx);
 			ptree.loadBalance();
 			nocts = ptree.octree.getNumOctants();
 
@@ -71,15 +72,12 @@ int main(int argc, char *argv[]) {
 			writeLog("---------------------------------------------");
 		}
 
-		int ciccio;
-		cin >> ciccio;
-
-		ptree.octree.updateConnectivity();
-		writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,("bbalunbalNoGhostsaa"));
-		ptree.octree.updateghostsConnectivity();
-		writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,("bbalunbalGhostsaa"));
-		ptree.octree.clearConnectivity();
-		ptree.octree.clearghostsConnectivity();
+//		ptree.octree.updateConnectivity();
+//		writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,("bbalunbalNoGhostsaa"));
+//		ptree.octree.updateghostsConnectivity();
+//		writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,("bbalunbalGhostsaa"));
+//		ptree.octree.clearConnectivity();
+//		ptree.octree.clearghostsConnectivity();
 
 	}
 
