@@ -83,6 +83,10 @@ public:
 	void setPboundGhosts(); 			 		// set pbound and build ghosts after static load balance
 	void commMarker();							// communicates marker of ghosts
 	void balance21();							// 2:1 balancing of parallel octree
+	template<class UserDataComm>
+	void communicate(UserDataComm & userData);
 };
+
+#include "Class_Para_Tree.tpp"
 
 #endif /* CLASS_PARA_TREE_H_ */

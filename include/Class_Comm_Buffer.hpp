@@ -43,6 +43,7 @@ public:
 
 	// ------------------------------------------------------------------------------- //
 	// METHODS ----------------------------------------------------------------------- //
+	//TODO routines write and read to write and read POD types in buffer
 	Class_Comm_Buffer& operator=(const Class_Comm_Buffer& rhs);
 };
 
