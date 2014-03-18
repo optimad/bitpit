@@ -20,6 +20,7 @@
 #include <iterator>
 #include <set>
 #include "mpi.h"
+#include MAP
 
 
 // =================================================================================== //
@@ -83,6 +84,22 @@ public:
 	void setPboundGhosts(); 			 		// set pbound and build ghosts after static load balance
 	void commMarker();							// communicates marker of ghosts
 	void balance21();							// 2:1 balancing of parallel octree
+
+	// --------------------------------------------------------------------------------------------- //
+	// Basic Get Methods --------------------------------------------------------------------------- //
+
+public:
+	double		getX(uint32_t const idx) const;
+	double		getY(uint32_t const idx) const;
+	double		getZ(uint32_t const idx) const;
+	double		getSize(uint32_t const idx) const;		// Get the size of octant if mapped in hypercube
+	double		getArea(uint32_t const idx) const;		// Get the face area of octant
+	double		getVolume(uint32_t const idx) const;	// Get the volume of octant
+	void		getCenter(uint32_t const idx, 			// Get a vector of DIM with the coordinates of the center of octant
+				vector<double> & center);
+	void		getNodes(uint32_t const idx, 			// Get a vector of vector (size [nnodes][3]) with the nodes of octant
+				vector<vector<double> > & nodes);
+
 };
 
 #endif /* CLASS_PARA_TREE_H_ */
