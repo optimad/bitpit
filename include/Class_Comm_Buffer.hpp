@@ -13,7 +13,9 @@
 // =================================================================================== //
 #include "preprocessor_defines.dat"
 #include <cstdint>
+#include <typeinfo>
 #include "mpi.h"
+#include "mpi_datatype_conversion.hpp"
 
 // =================================================================================== //
 // NAME SPACES                                                                         //
@@ -32,6 +34,7 @@ class Class_Comm_Buffer {
 	// MEMBERS ----------------------------------------------------------------------- //
 	uint32_t commBufferSize;
 	char* commBuffer;
+	int pos;
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
@@ -45,6 +48,13 @@ public:
 	// METHODS ----------------------------------------------------------------------- //
 	//TODO routines write and read to write and read POD types in buffer
 	Class_Comm_Buffer& operator=(const Class_Comm_Buffer& rhs);
+
+	template<class T>
+	void write(T& val);
+	template<class T>
+	void read(T& val);
 };
+
+#include "Class_Comm_Buffer.tpp"
 
 #endif /* CLASSCOMMBUFFER_HPP_ */

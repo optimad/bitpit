@@ -32,7 +32,7 @@ void Class_Para_Tree::communicate(UserDataComm & userData){
 
 		//WRITE SEND BUFFERS
 		for(size_t j = 0; j < nofPbordersPerProc; ++j){
-			userData.gather(sendBuffers[key].commBuffer,pborders[j]);
+			userData.gather(sendBuffers[key],pborders[j]);
 		}
 	}
 
@@ -79,7 +79,7 @@ void Class_Para_Tree::communicate(UserDataComm & userData){
 	for(map<int,Class_Comm_Buffer>::iterator rbit = rbitbegin; rbit != rbitend; ++rbit){
 		int ghostSize = octree.ghosts.size();
 		for(int k = 0; k < ghostSize; ++k){
-			userData.scatter(rbit->second.commBuffer, k);
+			userData.scatter(rbit->second, k);
 		}
 	}
 

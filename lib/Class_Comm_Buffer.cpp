@@ -12,6 +12,7 @@ Class_Comm_Buffer::Class_Comm_Buffer() {
 
 	commBufferSize = 0;
 	commBuffer = NULL;
+	pos = 0;
 }
 
 Class_Comm_Buffer::Class_Comm_Buffer(uint32_t size, char value) {
@@ -20,6 +21,7 @@ Class_Comm_Buffer::Class_Comm_Buffer(uint32_t size, char value) {
 	commBuffer = new char [size];
 	for(int i = 0; i < size; ++i)
 		commBuffer[i] = value;
+	pos = 0;
 }
 
 Class_Comm_Buffer::Class_Comm_Buffer(const Class_Comm_Buffer& other) {
@@ -32,6 +34,7 @@ Class_Comm_Buffer::Class_Comm_Buffer(const Class_Comm_Buffer& other) {
 	commBuffer = new char [commBufferSize];
 	for(int i = 0; i < commBufferSize; ++i)
 		commBuffer[i] = other.commBuffer[i];
+	pos = other.pos;
 }
 
 Class_Comm_Buffer::~Class_Comm_Buffer() {
@@ -49,6 +52,7 @@ Class_Comm_Buffer& Class_Comm_Buffer::operator =(const Class_Comm_Buffer& rhs) {
 
 		commBuffer = new_array;
 		commBufferSize = rhs.commBufferSize;
+		pos = rhs.pos;
 	}
 	return *this;
 

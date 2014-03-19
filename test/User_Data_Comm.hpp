@@ -14,18 +14,20 @@ template <class Data>
 class User_data_comm : public Class_Data_Comm_Interface< User_data_comm<Data> > {
 
 	Data & data;
+	Data & ghostData;
 
+public:
 	size_t fixedSize() const;
 	size_t size(const uint32_t e) const;
 
 	template<class Buffer>
-	void gather(Buffer & buff, const uint32_t);
+	void gather(Buffer & buff, const uint32_t & e);
 
 	template<class Buffer>
-	void scatter(Buffer & buff, const uint32_t);
+	void scatter(Buffer & buff, const uint32_t & e);
 
 public:
-	User_data_comm(Data & data_);
+	User_data_comm(Data & data_, Data & ghostData);
 	~User_data_comm();
 };
 
