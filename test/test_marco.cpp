@@ -86,9 +86,9 @@ int main(int argc, char *argv[]) {
 	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"ciccio");
 	ptree.octree.clearConnectivity();
 		 */
-		ptree.octree.setMarker(0,1);
-		ptree.octree.refine();
-		ptree.updateAdapt();
+//		ptree.octree.setMarker(0,1);
+//		ptree.octree.refine();
+//		ptree.updateAdapt();
 		//	ptree.octree.setMarker(0,1);
 		//	ptree.octree.refine();
 		//	ptree.updateAdapt();
