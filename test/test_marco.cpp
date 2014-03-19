@@ -12,18 +12,17 @@
 #include <string>
 #include "Class_Para_Tree.hpp"
 #include "ioFunct.hpp"
+#include "User_Data_Comm.hpp"
 
 using namespace std;
 
 int main(int argc, char *argv[]) {
 
 	MPI::Init(argc, argv);
+	{
+		Class_Para_Tree ptree;
 
-	Class_Para_Tree ptree;
-
-/*
-
- //	ptree.octree.setMarker(0,4);
+//	ptree.octree.setMarker(0,4);
 //	while(ptree.octree.refine());
 //	uint64_t numoctants = ptree.octree.getNumOctants();
 //
@@ -61,28 +60,66 @@ int main(int argc, char *argv[]) {
 //	ptree.updateAdapt();
 //	ptree.octree.refine();
 //	ptree.updateAdapt();
+		//	ptree.octree.setMarker(0,4);
+		//	while(ptree.octree.refine());
+		//	uint64_t numoctants = ptree.octree.getNumOctants();
+		//
+		//	for (int l=0; l<4; l++){
+		//		for (int i=0; i<numoctants; i++){
+		//			double* center;
+		//			Class_Octant oct = ptree.octree.extractOctant(i);
+		//			center = oct.getCenter();
+		//			if ((center[0] < pow(2.0,20)*0.75) && (center[0] > pow(2.0,20)*0.25)){
+		//				if ((center[1] < pow(2.0,20)*0.75) && (center[1] > pow(2.0,20)*0.25)){
+		//					if ((center[2] < pow(2.0,20)*0.75) && (center[2] > pow(2.0,20)*0.25)){
+		//						ptree.octree.setMarker(i,1);
+		//					}
+		//				}
+		//			}
+		//		}
+		//		ptree.octree.refine();
+		//		numoctants = ptree.octree.getNumOctants();
+		//		cout << "Num Octants : " << numoctants << endl;
+		//	}
+		/*
+	ptree.octree.computeConnectivity();
+	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"ciccio");
+	ptree.octree.clearConnectivity();
+		 */
+		ptree.octree.setMarker(0,1);
+		ptree.octree.refine();
+		ptree.updateAdapt();
+		//	ptree.octree.setMarker(0,1);
+		//	ptree.octree.refine();
+		//	ptree.updateAdapt();
+		//	ptree.octree.refine();
+		//	ptree.updateAdapt();
+		//	ptree.octree.refine();
+		//	ptree.updateAdapt();
+		//	ptree.octree.refine();
+		//	ptree.updateAdapt();
 
-//	cout << "Coarse " << endl;
-//	numoctants = ptree.octree.getNumOctants();
-//	for (int l=0; l<4; l++){
-//		for (int i=0; i<numoctants; i++){
-//			double* center;
-//			Class_Octant oct = ptree.octree.extractOctant(i);
-//			center = oct.getCenter();
-//			if ((center[0] < pow(2.0,20)*0.65) && (center[0] > pow(2.0,20)*0.35)){
-//				if ((center[1] < pow(2.0,20)*0.65) && (center[1] > pow(2.0,20)*0.35)){
-//					if ((center[2] < pow(2.0,20)*0.65) && (center[2] > pow(2.0,20)*0.35)){
-//						ptree.octree.setMarker(i,-1);
-//					}
-//				}
-//			}
-//		}
-//		cout << "Num Octants : " << numoctants << endl;
-//		ptree.octree.coarse();
-//		numoctants = ptree.octree.getNumOctants();
-//		cout << "Num Octants : " << numoctants << endl;
-//		ptree.updateAdapt();
-//	}
+		//	cout << "Coarse " << endl;
+		//	numoctants = ptree.octree.getNumOctants();
+		//	for (int l=0; l<4; l++){
+		//		for (int i=0; i<numoctants; i++){
+		//			double* center;
+		//			Class_Octant oct = ptree.octree.extractOctant(i);
+		//			center = oct.getCenter();
+		//			if ((center[0] < pow(2.0,20)*0.65) && (center[0] > pow(2.0,20)*0.35)){
+		//				if ((center[1] < pow(2.0,20)*0.65) && (center[1] > pow(2.0,20)*0.35)){
+		//					if ((center[2] < pow(2.0,20)*0.65) && (center[2] > pow(2.0,20)*0.35)){
+		//						ptree.octree.setMarker(i,-1);
+		//					}
+		//				}
+		//			}
+		//		}
+		//		cout << "Num Octants : " << numoctants << endl;
+		//		ptree.octree.coarse();
+		//		numoctants = ptree.octree.getNumOctants();
+		//		cout << "Num Octants : " << numoctants << endl;
+		//		ptree.updateAdapt();
+		//	}
 
 //	cout << "I'm " << ptree.rank << " and max_depth is " << (int)ptree.max_depth << endl;
 //	cout << "I'm " << ptree.rank << " and global_num_octants is " << ptree.global_num_octants << endl;
@@ -106,62 +143,71 @@ int main(int argc, char *argv[]) {
 
 	ptree.setPboundGhosts();
 
-	//TEST PARALLEL LOAD BALANCE
-	if(ptree.rank == 3){
-		ptree.octree.setMarker(0,1);
+		vector<double> data(ptree.octree.getNumOctants(),(double)ptree.rank);
+		vector<double> gData(ptree.octree.getSizeGhost(),-1.0);
+
+		User_data_comm<vector<double> > commHandle(data,gData);
+
+		ptree.communicate(commHandle);
+
+		for(int i = 0; i < gData.size(); ++i){
+			cout << "rank: " << ptree.rank << " ghost " << i << ": " << gData[i] << endl;
+		}
+
+		//	//TEST PARALLEL LOAD BALANCE
+		//	if(ptree.rank == 3){
+		//		ptree.octree.setMarker(0,1);
+		//	}
+		//	ptree.octree.refine();
+		////	ptree.updateAdapt();
+		//	if(ptree.rank == 3){
+		//		ptree.octree.setMarker(0,1);
+		//	}
+		//	ptree.octree.refine();
+		//	ptree.updateAdapt();
+		//	ptree.setPboundGhosts();
+		//
+		//	ptree.octree.computeConnectivity();
+		//	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"unbalNoGhost");
+		//	ptree.octree.computeghostsConnectivity();
+		//	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"unbalGhost");
+		//
+		//
+		//	ptree.loadBalance();
+		//	ptree.updateLoadBalance();
+		//	ptree.setPboundGhosts();
+		//	ptree.octree.clearghostsConnectivity();
+		//	ptree.octree.updateConnectivity();
+		//	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"balNoGhost");
+		//
+		//
+		//	ptree.octree.computeghostsConnectivity();
+		//	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"balGhost");
+		//
+		//	if(ptree.rank == 1){
+		//		for(int i = 0; i < 6; ++i)
+		//			ptree.octree.setMarker(i,-1);
+		//	}
+		//	if(ptree.rank == 2){
+		//		for(int i = 0; i < 5; ++i)
+		//			ptree.octree.setMarker(i,-1);
+		//	}
+		//	if(ptree.rank == 3){
+		//		for(int i = 0; i < 5; ++i)
+		//			ptree.octree.setMarker(i,-1);
+		//	}
+		//	ptree.updateAdapt();
+		//	ptree.setPboundGhosts();
+		//	ptree.octree.coarse();
+		////	ptree.updateAdapt();
+		////	ptree.setPboundGhosts();
+		//	ptree.octree.clearghostsConnectivity();
+		//	ptree.octree.updateConnectivity();
+		//	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"coarseunbalNoGhost");
+		//	ptree.octree.computeghostsConnectivity();
+		//	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"coarseunbalGhost");
+
 	}
-	ptree.octree.refine();
-//	ptree.updateAdapt();
-	if(ptree.rank == 3){
-		ptree.octree.setMarker(0,1);
-	}
-	ptree.octree.refine();
-	ptree.updateAdapt();
-	ptree.setPboundGhosts();
-
-	ptree.octree.computeConnectivity();
-	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"unbalNoGhost");
-	ptree.octree.computeghostsConnectivity();
-	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"unbalGhost");
-
-
-	ptree.loadBalance();
-	ptree.updateLoadBalance();
-	ptree.setPboundGhosts();
-	ptree.octree.clearghostsConnectivity();
-	ptree.octree.updateConnectivity();
-	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"balNoGhost");
-
-
-	ptree.octree.computeghostsConnectivity();
-	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"balGhost");
-
-	if(ptree.rank == 1){
-		for(int i = 0; i < 6; ++i)
-			ptree.octree.setMarker(i,-1);
-	}
-	if(ptree.rank == 2){
-		for(int i = 0; i < 5; ++i)
-			ptree.octree.setMarker(i,-1);
-	}
-	if(ptree.rank == 3){
-		for(int i = 0; i < 5; ++i)
-			ptree.octree.setMarker(i,-1);
-	}
-	ptree.updateAdapt();
-	ptree.setPboundGhosts();
-	ptree.octree.coarse();
-//	ptree.updateAdapt();
-//	ptree.setPboundGhosts();
-	ptree.octree.clearghostsConnectivity();
-	ptree.octree.updateConnectivity();
-	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"coarseunbalNoGhost");
-	ptree.octree.computeghostsConnectivity();
-	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"coarseunbalGhost");
-
-*/
-
-
 	MPI::Finalize();
 
 	return 0;
