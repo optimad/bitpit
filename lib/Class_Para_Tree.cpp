@@ -975,33 +975,33 @@ void Class_Para_Tree::balance21(){
 //==============================================================
 //== Basic Get Methods =========================================
 
-double Class_Para_Tree::getX(const uint32_t idx) const {
-	return mapX(octree.octants[idx].getX());
+double Class_Para_Tree::getX(const uint32_t idx) {
+	return trans.mapX(octree.octants[idx].getX());
 }
 
-double Class_Para_Tree::getY(const uint32_t idx) const {
-	return mapY(octree.octants[idx].getX());
+double Class_Para_Tree::getY(const uint32_t idx) {
+	return trans.mapY(octree.octants[idx].getX());
 }
 
-double Class_Para_Tree::getZ(const uint32_t idx) const {
-	return mapZ(octree.octants[idx].getX());
+double Class_Para_Tree::getZ(const uint32_t idx) {
+	return trans.mapZ(octree.octants[idx].getX());
 }
 
-double Class_Para_Tree::getSize(const uint32_t idx) const {
-	return mapSize(octree.octants[idx].getSize());
+double Class_Para_Tree::getSize(const uint32_t idx) {
+	return trans.mapSize(octree.octants[idx].getSize());
 }
 
-double Class_Para_Tree::getArea(const uint32_t idx) const {
-	return mapArea(octree.octants[idx].getArea());
+double Class_Para_Tree::getArea(const uint32_t idx) {
+	return trans.mapArea(octree.octants[idx].getArea());
 }
 
-double Class_Para_Tree::getVolume(const uint32_t idx) const {
-	return mapVolume(octree.octants[idx].getVolume());
+double Class_Para_Tree::getVolume(const uint32_t idx) {
+	return trans.mapVolume(octree.octants[idx].getVolume());
 }
 
 void Class_Para_Tree::getCenter(const uint32_t idx, vector<double>& center) {
 	double* center_ = octree.octants[idx].getCenter();
-	mapCenter(center_, center);
+	trans.mapCenter(center_, center);
 	delete [] center_;
 	center_ = NULL;
 }
@@ -1009,7 +1009,7 @@ void Class_Para_Tree::getCenter(const uint32_t idx, vector<double>& center) {
 void Class_Para_Tree::getNodes(const uint32_t idx,
 		vector<vector<double> >& nodes) {
 	uint32_t (*nodes_)[DIM] = octree.octants[idx].getNodes();
-	mapNodes(nodes_, nodes);
+	trans.mapNodes(nodes_, nodes);
 	delete [] nodes_;
 	nodes_ = NULL;
 }

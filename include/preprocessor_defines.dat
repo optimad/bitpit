@@ -4,18 +4,3 @@
 #ifndef DIM
 #define DIM 3
 #endif
-#ifndef MAP
-#define MAP "map.hpp"
-#endif
-#ifndef X0
-#define X0 0.0
-#endif
-#ifndef Y0
-#define Y0 0.0
-#endif
-#ifndef Z0
-#define Z0 0.0
-#endif
-#ifndef L
-#define L 100.0
-#endif

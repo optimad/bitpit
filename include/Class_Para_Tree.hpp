@@ -15,12 +15,12 @@
 #include "Class_Octant.hpp"
 #include "Class_Local_Tree.hpp"
 #include "Class_Comm_Buffer.hpp"
+#include "map.hpp"
 #include "Class_Array.hpp"
 #include <cstdint>
 #include <iterator>
 #include <set>
 #include "mpi.h"
-#include MAP
 
 
 // =================================================================================== //
@@ -62,7 +62,8 @@ public:
 	int error_flag;								// MPI error flag
 	bool serial;								// 1 if the octree is the same on each processor, 0 if the octree is distributed
 
-
+	//map member
+	Class_Map trans;
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
@@ -89,12 +90,12 @@ public:
 	// Basic Get Methods --------------------------------------------------------------------------- //
 
 public:
-	double		getX(uint32_t const idx) const;
-	double		getY(uint32_t const idx) const;
-	double		getZ(uint32_t const idx) const;
-	double		getSize(uint32_t const idx) const;		// Get the size of octant if mapped in hypercube
-	double		getArea(uint32_t const idx) const;		// Get the face area of octant
-	double		getVolume(uint32_t const idx) const;	// Get the volume of octant
+	double		getX(uint32_t const idx);
+	double		getY(uint32_t const idx);
+	double		getZ(uint32_t const idx);
+	double		getSize(uint32_t const idx);		// Get the size of octant if mapped in hypercube
+	double		getArea(uint32_t const idx);		// Get the face area of octant
+	double		getVolume(uint32_t const idx);	// Get the volume of octant
 	void		getCenter(uint32_t const idx, 			// Get a vector of DIM with the coordinates of the center of octant
 				vector<double> & center);
 	void		getNodes(uint32_t const idx, 			// Get a vector of vector (size [nnodes][3]) with the nodes of octant
