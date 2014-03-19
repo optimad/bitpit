@@ -78,7 +78,6 @@ public:
 	void updateAfterCoarse();					//update Class_Para_Tree members and delete overlapping octants after a coarse
 	void updateLoadBalance();					//update Class_Para_Tree members after a load balance
 	void computePartition(uint32_t* partition); // compute octant partition giving the same number of octant to each process and redistributing the reminder
-	void buildGhosts();
 	int findOwner(const uint64_t & morton);		// given the morton of an octant it find the process owning that octant
 	void setPboundGhosts(); 			 		// set pbound and build ghosts after static load balance
 	void commMarker();							// communicates marker of ghosts

@@ -106,11 +106,15 @@ int main(int argc, char *argv[]) {
 		ptree.setPboundGhosts();
 
 		vector<double> data(ptree.octree.getNumOctants(),(double)ptree.rank);
-		vector<double> gData(ptree.octree.getSizeGhost(),0.0);
+		vector<double> gData(ptree.octree.getSizeGhost(),-1.0);
 
 		User_data_comm<vector<double> > commHandle(data,gData);
 
 		ptree.communicate(commHandle);
+
+		for(int i = 0; i < gData.size(); ++i){
+			cout << "rank: " << ptree.rank << " ghost " << i << ": " << gData[i] << endl;
+		}
 
 		//	//TEST PARALLEL LOAD BALANCE
 		//	if(ptree.rank == 3){

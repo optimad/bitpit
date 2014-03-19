@@ -585,10 +585,6 @@ void Class_Para_Tree::adapt(u32vector & mapidx) {
 	}
 }
 
-void Class_Para_Tree::buildGhosts() {
-
-}
-
 int Class_Para_Tree::findOwner(const uint64_t & morton) {
 	int p = -1;
 	int length = nproc;

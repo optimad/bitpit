@@ -27,7 +27,12 @@ void Class_Para_Tree::communicate(UserDataComm & userData){
 				buffSize += userData.size(pborders[i]);
 			}
 		}
+		//enlarge buffer to store number of pborders from this proc
+		buffSize += sizeof(int);
+		//build buffer for this proc
 		sendBuffers[key] = Class_Comm_Buffer(buffSize,'a');
+		//store number of pborders from this proc at the begining
+		MPI_Pack(&nofPbordersPerProc,1,MPI_INT,sendBuffers[key].commBuffer,sendBuffers[key].commBufferSize,&sendBuffers[key].pos,MPI_COMM_WORLD);
 
 		//WRITE SEND BUFFERS
 		for(size_t j = 0; j < nofPbordersPerProc; ++j){
@@ -73,13 +78,16 @@ void Class_Para_Tree::communicate(UserDataComm & userData){
 	MPI_Waitall(nReq,req,stats);
 
 	//READ RECEIVE BUFFERS
+	int ghostOffset = 0;
 	map<int,Class_Comm_Buffer>::iterator rbitend = recvBuffers.end();
 	map<int,Class_Comm_Buffer>::iterator rbitbegin = recvBuffers.begin();
 	for(map<int,Class_Comm_Buffer>::iterator rbit = rbitbegin; rbit != rbitend; ++rbit){
-		int ghostSize = octree.ghosts.size();
-		for(int k = 0; k < ghostSize; ++k){
-			userData.scatter(rbit->second, k);
+		int nofGhostFromThisProc = 0;
+		MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&nofGhostFromThisProc,1,MPI_INT,MPI_COMM_WORLD);
+		for(int k = 0; k < nofGhostFromThisProc; ++k){
+			userData.scatter(rbit->second, k+ghostOffset);
 		}
+		ghostOffset += nofGhostFromThisProc;
 	}
 
 
