@@ -23,7 +23,6 @@ void Class_Para_Tree::communicate(UserDataComm & userData){
 			buffSize = fixedDataSize*nofPbordersPerProc;
 		}
 		else{
-			size_t buffSize = 0;
 			for(size_t i = 0; i < nofPbordersPerProc; ++i){
 				buffSize += userData.size(pborders[i]);
 			}
