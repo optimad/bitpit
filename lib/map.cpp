@@ -12,6 +12,12 @@ Class_Map::Class_Map() {
 	X0 = Y0 = Z0 = 0.0;
 	L = 1.0;
 }
+Class_Map::Class_Map(double & X, double & Y, double & Z, double & LL) {
+	X0 = X;
+	Y0 = Y;
+	Z0 = Z;
+	L = LL;
+}
 
 double Class_Map::mapX(uint32_t const & X){
 	return (X0 + L/double(max_length) * double(X));

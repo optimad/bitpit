@@ -20,14 +20,16 @@ int main(int argc, char *argv[]) {
 	MPI::Init(argc, argv);
 
 	{
-		Class_Para_Tree ptree;
+		double X, Y, Z, L;
+		X = 0.0; Y = 0.0; Z = 0.0; L = 1.0;
+		Class_Para_Tree ptree(X, Y, Z, L);
 		vector<uint32_t> mapidx;
 
 		clock_t start = clock();
 		clock_t end = clock();
 
 		ptree.octree.setBalance(0,false);
-		ptree.octree.setMarker(0,3);
+		ptree.octree.setMarker(0,2);
 		ptree.adapt(mapidx);
 		ptree.loadBalance();
 		uint64_t nocts = ptree.octree.getNumOctants();
@@ -35,7 +37,7 @@ int main(int argc, char *argv[]) {
 		// TORUS TEST
 		double R = double(max_length)*0.25;
 		double r = double(max_length)*0.15;
-		for (int l=0; l<5; l++){
+		for (int l=0; l<2; l++){
 			for (int i=0; i<nocts; i++){
 				double* center;
 				Class_Octant oct = ptree.octree.extractOctant(i);
