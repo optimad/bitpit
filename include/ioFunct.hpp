@@ -40,11 +40,18 @@ using namespace std;
 
 typedef vector<vector<uint32_t>	>	u32vector2D;
 typedef vector<vector<uint64_t>	>	u64vector2D;
+typedef vector<vector<double>	>	dvector2D;
 
 
 // ----------------------------------------------------------------------------------- //
 void writeLocalTree(const u32vector2D & nodes, const u32vector2D & connectivity,
 		const u32vector2D & ghostNodes, const u32vector2D & ghostConnectivity,
+		const Class_Para_Tree & ptree, string filename);
+
+// ----------------------------------------------------------------------------------- //
+
+void writePhysicalTree(const dvector2D & nodes, const u32vector2D & connectivity,
+		const dvector2D & ghostNodes, const u32vector2D & ghostConnectivity,
 		const Class_Para_Tree & ptree, string filename);
 
 // ----------------------------------------------------------------------------------- //

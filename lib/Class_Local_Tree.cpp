@@ -113,7 +113,7 @@ bool Class_Local_Tree::refine() {
 			offset += nchm1;
 		}
 		else{
-			octants[idx].info[12] = false;
+//			octants[idx].info[12] = false;
 			if (octants[idx].marker > 0)
 				octants[idx].marker = 0;
 		}
@@ -475,7 +475,7 @@ bool Class_Local_Tree::coarse() {
 			}
 		}
 		else{
-			octants[idx].info[13] = false;
+//			octants[idx].info[13] = false;
 		}
 	}
 	//TODO Da mettere dentro il primo ciclo per renderlo meno costoso
@@ -620,7 +620,7 @@ bool Class_Local_Tree::refine(u32vector & mapidx) {
 			offset += nchm1;
 		}
 		else{
-			octants[idx].info[12] = false;
+//			octants[idx].info[12] = false;
 			if (octants[idx].marker > 0)
 				octants[idx].marker = 0;
 		}
@@ -811,7 +811,7 @@ bool Class_Local_Tree::coarse(u32vector & mapidx) {
 			}
 		}
 		else{
-			octants[idx].info[13] = false;
+//			octants[idx].info[13] = false;
 		}
 	}
 	//TODO Da mettere dentro il primo ciclo per renderlo meno costoso

@@ -29,15 +29,15 @@ int main(int argc, char *argv[]) {
 		clock_t end = clock();
 
 		ptree.octree.setBalance(0,false);
-		ptree.octree.setMarker(0,2);
-		ptree.adapt(mapidx);
+		ptree.octree.setMarker(0,3);
+		bool done = ptree.adapt(mapidx);
 		ptree.loadBalance();
 		uint64_t nocts = ptree.octree.getNumOctants();
 
 		// TORUS TEST
 		double R = double(max_length)*0.25;
 		double r = double(max_length)*0.15;
-		for (int l=0; l<2; l++){
+		for (int l=0; l<3; l++){
 			for (int i=0; i<nocts; i++){
 				double* center;
 				Class_Octant oct = ptree.octree.extractOctant(i);
@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
 				delete[] center;
 			}
 			ptree.balance21();
-			ptree.adapt(mapidx);
+			bool done = ptree.adapt(mapidx);
 			ptree.loadBalance();
 			nocts = ptree.octree.getNumOctants();
 
@@ -75,11 +75,15 @@ int main(int argc, char *argv[]) {
 		}
 
 //		ptree.octree.updateConnectivity();
-//		writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,("bbalunbalNoGhostsaa"));
+//		writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,("local_tree"));
 //		ptree.octree.updateghostsConnectivity();
 //		writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,("bbalunbalGhostsaa"));
 //		ptree.octree.clearConnectivity();
 //		ptree.octree.clearghostsConnectivity();
+
+
+		ptree.updateConnectivity();
+		writePhysicalTree(ptree.nodes,ptree.connectivity,ptree.ghostsnodes,ptree.ghostsconnectivity,ptree,("physical_tree"));
 
 	}
 

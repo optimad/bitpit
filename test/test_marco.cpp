@@ -21,7 +21,9 @@ int main(int argc, char *argv[]) {
 
 	Class_Para_Tree ptree;
 
-//	ptree.octree.setMarker(0,4);
+/*
+
+ //	ptree.octree.setMarker(0,4);
 //	while(ptree.octree.refine());
 //	uint64_t numoctants = ptree.octree.getNumOctants();
 //
@@ -42,11 +44,11 @@ int main(int argc, char *argv[]) {
 //		numoctants = ptree.octree.getNumOctants();
 //		cout << "Num Octants : " << numoctants << endl;
 //	}
-/*
-	ptree.octree.computeConnectivity();
-	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"ciccio");
-	ptree.octree.clearConnectivity();
-*/
+
+//	ptree.octree.computeConnectivity();
+//	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"ciccio");
+//	ptree.octree.clearConnectivity();
+
 	ptree.octree.setMarker(0,1);
 	ptree.octree.refine();
 	ptree.updateAdapt();
@@ -156,6 +158,9 @@ int main(int argc, char *argv[]) {
 	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"coarseunbalNoGhost");
 	ptree.octree.computeghostsConnectivity();
 	writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"coarseunbalGhost");
+
+*/
+
 
 	MPI::Finalize();
 

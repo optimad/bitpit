@@ -546,17 +546,35 @@ void Class_Para_Tree::updateAfterCoarse(){
 	}
 }
 
-void Class_Para_Tree::adapt() {
+bool Class_Para_Tree::adapt() {
+
+	bool globalDone = false, localDone = false;
+	uint32_t nocts = octree.getNumOctants();
+	vector<Class_Octant>::iterator iter, iterend = octree.octants.end();
+
+	for (iter = octree.octants.begin(); iter != iterend; iter++){
+		iter->info[12] = false;
+		iter->info[13] = false;
+	}
 	if(serial){
 		writeLog("---------------------------------------------");
 		writeLog(" ADAPT (Refine/Coarse)");
 		writeLog(" ");
 		writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
 		while(octree.refine());
+		if (octree.getNumOctants() > nocts)
+			localDone = true;
 		writeLog(" Number of octants after Refine	:	" + to_string(octree.getNumOctants()));
-		while(octree.coarse());
-		writeLog(" Number of octants after Coarse	:	" + to_string(octree.getNumOctants()));
+		nocts = octree.getNumOctants();
 		updateAdapt();
+		setPboundGhosts();
+		while(octree.coarse());
+		if (octree.getNumOctants() < nocts)
+			localDone = true;
+		writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
+		MPI_Barrier(MPI_COMM_WORLD);
+		error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+		updateAfterCoarse();
 		writeLog(" ");
 		writeLog("---------------------------------------------");
 	}
@@ -568,26 +586,43 @@ void Class_Para_Tree::adapt() {
 		updateAdapt();			// Togliere se non necessario
 		setPboundGhosts();		// Togliere se non necessario
 		while(octree.refine());
+		if (octree.getNumOctants() > nocts)
+			localDone = true;
 		updateAdapt();
 		setPboundGhosts();
 		writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
+		nocts = octree.getNumOctants();
 		while(octree.coarse());
-		writeLog("coarse done ");
+		if (octree.getNumOctants() < nocts)
+			localDone = true;
+		MPI_Barrier(MPI_COMM_WORLD);
+		error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
 		updateAfterCoarse();
+		setPboundGhosts();
 		writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
 		writeLog(" ");
-		setPboundGhosts();
 		writeLog("---------------------------------------------");
 	}
+	return globalDone;
 }
 
 
-void Class_Para_Tree::adapt(u32vector & mapidx) {
+bool Class_Para_Tree::adapt(u32vector & mapidx) {
+
+	bool globalDone = false, localDone = false;
+	uint32_t nocts = octree.getNumOctants();
+	vector<Class_Octant>::iterator iter, iterend = octree.octants.end();
+
+	for (iter = octree.octants.begin(); iter != iterend; iter++){
+		iter->info[12] = false;
+		iter->info[13] = false;
+	}
+
 	// mapidx init
 	mapidx.clear();
-	mapidx.resize(octree.getNumOctants());
+	mapidx.resize(nocts);
 	mapidx.shrink_to_fit();
-	for (uint32_t i=0; i<octree.getNumOctants(); i++){
+	for (uint32_t i=0; i<nocts; i++){
 		mapidx[i] = i;
 	}
 	if(serial){
@@ -596,10 +631,18 @@ void Class_Para_Tree::adapt(u32vector & mapidx) {
 		writeLog(" ");
 		writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
 		while(octree.refine(mapidx));
-		writeLog(" Number of octants after Refine	:	" + to_string(octree.getNumOctants()));
+		if (octree.getNumOctants() > nocts)
+			localDone = true;
+		nocts = octree.getNumOctants();
+		writeLog(" Number of octants after Refine	:	" + to_string(nocts));
 		while(octree.coarse(mapidx));
-		writeLog(" Number of octants after Coarse	:	" + to_string(octree.getNumOctants()));
-		updateAdapt();
+		if (octree.getNumOctants() < nocts)
+			localDone = true;
+		nocts = octree.getNumOctants();
+		MPI_Barrier(MPI_COMM_WORLD);
+		error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+		writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
+		updateAfterCoarse();
 		writeLog(" ");
 		writeLog("---------------------------------------------");
 	}
@@ -611,21 +654,25 @@ void Class_Para_Tree::adapt(u32vector & mapidx) {
 		updateAdapt();			// Togliere se non necessario
 		setPboundGhosts();		// Togliere se non necessario
 		while(octree.refine(mapidx));
+		if (octree.getNumOctants() > nocts)
+			localDone = true;
+		nocts = octree.getNumOctants();
 		updateAdapt();
 		setPboundGhosts();
 		writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
 		while(octree.coarse(mapidx));
-		writeLog("coarse done ");
+		if (octree.getNumOctants() < nocts)
+			localDone = true;
+		nocts = octree.getNumOctants();
+		MPI_Barrier(MPI_COMM_WORLD);
+		error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
 		updateAfterCoarse();
+		setPboundGhosts();
 		writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
 		writeLog(" ");
-		setPboundGhosts();
 		writeLog("---------------------------------------------");
 	}
-}
-
-void Class_Para_Tree::buildGhosts() {
-
+	return globalDone;
 }
 
 int Class_Para_Tree::findOwner(const uint64_t & morton) {
@@ -1014,42 +1061,186 @@ void Class_Para_Tree::balance21(){
 //==============================================================
 //== Basic Get Methods =========================================
 
-double Class_Para_Tree::getX(const uint32_t idx) {
-	return trans.mapX(octree.octants[idx].getX());
+double Class_Para_Tree::getX(Class_Octant* const oct) {
+	return trans.mapX(oct->getX());
 }
 
-double Class_Para_Tree::getY(const uint32_t idx) {
-	return trans.mapY(octree.octants[idx].getX());
+double Class_Para_Tree::getY(Class_Octant* const oct) {
+	return trans.mapY(oct->getY());
 }
 
-double Class_Para_Tree::getZ(const uint32_t idx) {
-	return trans.mapZ(octree.octants[idx].getX());
+double Class_Para_Tree::getZ(Class_Octant* const oct) {
+	return trans.mapZ(oct->getZ());
 }
 
-double Class_Para_Tree::getSize(const uint32_t idx) {
-	return trans.mapSize(octree.octants[idx].getSize());
+double Class_Para_Tree::getSize(Class_Octant* const oct) {
+	return trans.mapSize(oct->getSize());
 }
 
-double Class_Para_Tree::getArea(const uint32_t idx) {
-	return trans.mapArea(octree.octants[idx].getArea());
+double Class_Para_Tree::getArea(Class_Octant* const oct) {
+	return trans.mapArea(oct->getArea());
 }
 
-double Class_Para_Tree::getVolume(const uint32_t idx) {
-	return trans.mapVolume(octree.octants[idx].getVolume());
+double Class_Para_Tree::getVolume(Class_Octant* const oct) {
+	return trans.mapVolume(oct->getVolume());
 }
 
-void Class_Para_Tree::getCenter(const uint32_t idx, vector<double>& center) {
-	double* center_ = octree.octants[idx].getCenter();
+void Class_Para_Tree::getCenter(Class_Octant* oct,
+								vector<double>& center) {
+	double* center_ = oct->getCenter();
 	trans.mapCenter(center_, center);
 	delete [] center_;
 	center_ = NULL;
 }
 
-void Class_Para_Tree::getNodes(const uint32_t idx,
-		vector<vector<double> >& nodes) {
-	uint32_t (*nodes_)[DIM] = octree.octants[idx].getNodes();
+void Class_Para_Tree::getNodes(Class_Octant* oct,
+								vector<vector<double> >& nodes) {
+	uint32_t (*nodes_)[DIM] = oct->getNodes();
 	trans.mapNodes(nodes_, nodes);
 	delete [] nodes_;
 	nodes_ = NULL;
 }
-//==============================================================
+
+// =================================================================================== //
+
+void Class_Para_Tree::computeConnectivity() {
+	map<uint64_t, vector<double> > mapnodes;
+	map<uint64_t, vector<double> >::iterator iter, iterend;
+	uint32_t i, k, counter;
+	uint64_t morton;
+	uint32_t noctants = octree.getNumOctants();
+	dvector2D octnodes;
+	uint8_t j;
+
+	octnodes.reserve(nnodes);
+
+	if (nodes.size() == 0){
+		connectivity.resize(noctants);
+		for (i = 0; i < noctants; i++){
+			getNodes(&octree.octants[i], octnodes);
+			for (j = 0; j < nnodes; j++){
+#if DIM == 3
+				morton = mortonEncode_magicbits(uint32_t(octnodes[j][0]/trans.L*double(max_length)), uint32_t(octnodes[j][1]/trans.L*double(max_length)), uint32_t(octnodes[j][2]/trans.L*double(max_length)));
+#else
+#endif
+				if (mapnodes[morton].size()==0){
+					mapnodes[morton].reserve(12);
+					for (k = 0; k < DIM; k++){
+						mapnodes[morton].push_back(octnodes[j][k]);
+					}
+				}
+				mapnodes[morton].push_back(double(i));
+			}
+			dvector2D().swap(octnodes);
+		}
+		iter	= mapnodes.begin();
+		iterend	= mapnodes.end();
+		counter = 0;
+		uint32_t numnodes = mapnodes.size();
+		nodes.resize(numnodes);
+		while (iter != iterend){
+			vector<double> nodecasting(iter->second.begin(), iter->second.begin()+DIM);
+//			nodes.push_back(nodecasting);
+			nodes[counter] = nodecasting;
+			nodes[counter].shrink_to_fit();
+			for(vector<double>::iterator iter2 = iter->second.begin()+DIM; iter2 != iter->second.end(); iter2++){
+				if (connectivity[int(*iter2)].size()==0){
+					connectivity[int(*iter2)].reserve(8);
+				}
+				connectivity[int(*iter2)].push_back(counter);
+			}
+			mapnodes.erase(iter++);
+			counter++;
+		}
+		nodes.shrink_to_fit();
+		//Lento. Solo per risparmiare memoria
+		for (int ii=0; ii<noctants; ii++){
+			connectivity[ii].shrink_to_fit();
+		}
+		connectivity.shrink_to_fit();
+	}
+	map<uint64_t, vector<double> >().swap(mapnodes);
+	iter = mapnodes.end();
+}
+
+void Class_Para_Tree::clearConnectivity() {
+	dvector2D().swap(nodes);
+	u32vector2D().swap(connectivity);
+}
+
+void Class_Para_Tree::updateConnectivity() {
+	clearConnectivity();
+	computeConnectivity();
+}
+
+// =================================================================================== //
+
+void Class_Para_Tree::computeghostsConnectivity() {
+	map<uint64_t, vector<double> > mapnodes;
+	map<uint64_t, vector<double> >::iterator iter, iterend;
+	uint32_t i, k, counter;
+	uint64_t morton;
+	uint32_t noctants = octree.size_ghosts;
+	dvector2D octnodes;
+	uint8_t j;
+
+	octnodes.reserve(nnodes);
+
+	if (ghostsnodes.size() == 0){
+		ghostsconnectivity.resize(noctants);
+		for (i = 0; i < noctants; i++){
+			getNodes(&octree.ghosts[i], octnodes);
+			for (j = 0; j < nnodes; j++){
+#if DIM == 3
+				morton = mortonEncode_magicbits(uint32_t(octnodes[j][0]/trans.L*double(max_length)), uint32_t(octnodes[j][1]/trans.L*double(max_length)), uint32_t(octnodes[j][2]/trans.L*double(max_length)));
+#else
+#endif
+				if (mapnodes[morton].size()==0){
+					for (k = 0; k < DIM; k++){
+						mapnodes[morton].push_back(octnodes[j][k]);
+					}
+				}
+				mapnodes[morton].push_back(i);
+			}
+			dvector2D().swap(octnodes);
+		}
+		iter	= mapnodes.begin();
+		iterend	= mapnodes.end();
+		uint32_t numnodes = mapnodes.size();
+		ghostsnodes.resize(numnodes);
+		counter = 0;
+		while (iter != iterend){
+			vector<double> nodecasting(iter->second.begin(), iter->second.begin()+DIM);
+//			ghostsnodes.push_back(nodecasting);
+			ghostsnodes[counter] = nodecasting;
+			ghostsnodes[counter].shrink_to_fit();
+			for(vector<double>::iterator iter2 = iter->second.begin()+DIM; iter2 != iter->second.end(); iter2++){
+				if (ghostsconnectivity[int(*iter2)].size()==0){
+					ghostsconnectivity[int(*iter2)].reserve(8);
+				}
+				ghostsconnectivity[int(*iter2)].push_back(counter);
+			}
+			mapnodes.erase(iter++);
+			counter++;
+		}
+		ghostsnodes.shrink_to_fit();
+		//Lento. Solo per risparmiare memoria
+		for (int ii=0; ii<noctants; ii++){
+			ghostsconnectivity[ii].shrink_to_fit();
+		}
+		ghostsconnectivity.shrink_to_fit();
+	}
+	iter = mapnodes.end();
+}
+
+void Class_Para_Tree::clearghostsConnectivity() {
+	dvector2D().swap(ghostsnodes);
+	u32vector2D().swap(ghostsconnectivity);
+}
+
+void Class_Para_Tree::updateghostsConnectivity() {
+	clearghostsConnectivity();
+	computeghostsConnectivity();
+}
+
+// =================================================================================== //
