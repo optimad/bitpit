@@ -84,6 +84,8 @@ public:
 	// ------------------------------------------------------------------------------- //
 	// METHODS ----------------------------------------------------------------------- //
 	void loadBalance();							//assign the octants to the processes following a computed partition
+	template<class UserDataComm>
+	void loadBalance(UserDataComm & userData);
 	bool adapt();  								//call refine and coarse on the local tree
 	bool adapt(u32vector & mapidx);  			//call refine and coarse on the local tree
 												// mapidx[i] = index in old octants vector of the i-th octant (index of father or first child if octant is new after refine or coarse)
