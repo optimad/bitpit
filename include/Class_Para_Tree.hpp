@@ -39,6 +39,7 @@ class Class_Para_Tree {
 public:
 	typedef vector<Class_Octant> 		OctantsType;
 	typedef vector<uint32_t>			u32vector;
+	typedef vector<double>				dvector;
 	typedef vector<vector<uint32_t>	>	u32vector2D;
 	typedef vector<vector<uint64_t>	>	u64vector2D;
 	typedef vector<vector<double>	>	dvector2D;
@@ -90,7 +91,7 @@ public:
 	void updateAfterCoarse();					//update Class_Para_Tree members and delete overlapping octants after a coarse
 	void updateLoadBalance();					//update Class_Para_Tree members after a load balance
 	void computePartition(uint32_t* partition); // compute octant partition giving the same number of octant to each process and redistributing the reminder
-	int findOwner(const uint64_t & morton);		// given the morton of an octant it find the process owning that octant
+	int findOwner(const uint64_t & morton);		// given the morton of an octant it finds the process owning that octant
 	void setPboundGhosts(); 			 		// set pbound and build ghosts after static load balance
 	void commMarker();							// communicates marker of ghosts
 	void balance21();							// 2:1 balancing of parallel octree
@@ -108,16 +109,20 @@ public:
 	// Basic Get Methods --------------------------------------------------------------------------- //
 
 public:
-	double		getX(Class_Octant* const oct);
-	double		getY(Class_Octant* const oct);
-	double		getZ(Class_Octant* const oct);
-	double		getSize(Class_Octant* const oct);		// Get the size of octant if mapped in hypercube
-	double		getArea(Class_Octant* const oct);		// Get the face area of octant
-	double		getVolume(Class_Octant* const oct);		// Get the volume of octant
-	void		getCenter(Class_Octant* oct, 			// Get a vector of DIM with the coordinates of the center of octant
-				vector<double> & center);
-	void		getNodes(Class_Octant* oct, 			// Get a vector of vector (size [nnodes][3]) with the nodes of octant
-				vector<vector<double> > & nodes);
+	double			getX(Class_Octant* const oct);
+	double			getY(Class_Octant* const oct);
+	double			getZ(Class_Octant* const oct);
+	double			getSize(Class_Octant* const oct);		// Get the size of octant if mapped in hypercube
+	double			getArea(Class_Octant* const oct);		// Get the face area of octant
+	double			getVolume(Class_Octant* const oct);		// Get the volume of octant
+	void			getCenter(Class_Octant* oct, 			// Get a vector of DIM with the coordinates of the center of octant
+					dvector & center);
+	void			getNodes(Class_Octant* oct, 			// Get a vector of vector (size [nnodes][3]) with the nodes of octant
+					dvector2D & nodes);
+
+	Class_Octant*	getPointOwner(dvector & point);			// Get the pointer to the octant owner of an input point
+															// (vector<double> with x,y,z). If the point is out of process
+															// return NULL.
 
 };
 

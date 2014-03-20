@@ -21,7 +21,7 @@ int main(int argc, char *argv[]) {
 
 	{
 		double X, Y, Z, L;
-		X = 0.0; Y = 0.0; Z = 0.0; L = 1.0;
+		X = 0.0; Y = 0.0; Z = 0.0; L = 100.0;
 		Class_Para_Tree ptree(X, Y, Z, L);
 		vector<uint32_t> mapidx;
 
@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
 		// TORUS TEST
 		double R = double(max_length)*0.25;
 		double r = double(max_length)*0.15;
-		for (int l=0; l<3; l++){
+		for (int l=0; l<4; l++){
 			for (int i=0; i<nocts; i++){
 				double* center;
 				Class_Octant oct = ptree.octree.extractOctant(i);
@@ -81,7 +81,18 @@ int main(int argc, char *argv[]) {
 //		ptree.octree.clearConnectivity();
 //		ptree.octree.clearghostsConnectivity();
 
-
+		vector<double> point;
+		point.resize(3);
+		point[0] = 25.0;
+		point[1] = 42.0;
+		point[2] = 36.0;
+		Class_Octant* oct = ptree.getPointOwner(point);
+		if(oct!=NULL){
+			cout << ptree.rank << endl;
+			cout << (ptree.getX(oct)) << endl;
+			cout << (ptree.getY(oct)) << endl;
+			cout << (ptree.getZ(oct)) << endl;
+		}
 		ptree.updateConnectivity();
 		writePhysicalTree(ptree.nodes,ptree.connectivity,ptree.ghostsnodes,ptree.ghostsconnectivity,ptree,("physical_tree"));
 
