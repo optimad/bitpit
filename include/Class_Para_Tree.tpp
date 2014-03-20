@@ -219,6 +219,7 @@ void Class_Para_Tree::loadBalance(UserDataComm & userData){
 			for(int p = firstPredecessor; p >= 0; --p){
 				if(headSize <=partition[p]){
 					int buffSize = headSize * (int)ceil((double)octantBytes / (double)(CHAR_BIT/8));
+					//TODO loop over head octants and add data size to buffer size
 					sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
 					int pos = 0;
 					for(uint32_t i = 0; i <= lh; ++i){
@@ -238,11 +239,13 @@ void Class_Para_Tree::loadBalance(UserDataComm & userData){
 						for(int j = 0; j < 16; ++j){
 							MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 						}
+						//TODO call gather to pack user data
 					}
 					break;
 				}
 				else{
 					int buffSize = partition[p] * (int)ceil((double)octantBytes / (double)(CHAR_BIT/8));
+					//TODO loop over head octants and add data size to buffer size
 					sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
 					int pos = 0;
 					for(uint32_t i = lh - partition[p] + 1; i <= lh; ++i){
@@ -262,6 +265,7 @@ void Class_Para_Tree::loadBalance(UserDataComm & userData){
 						for(int j = 0; j < 16; ++j){
 							MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 						}
+						//TODO call gather to pack user data
 					}
 					lh -= partition[p];
 					headSize = lh + 1;
@@ -274,6 +278,7 @@ void Class_Para_Tree::loadBalance(UserDataComm & userData){
 			for(int p = firstSuccessor; p < nproc; ++p){
 				if(tailSize <= partition[p]){
 					int buffSize = tailSize * (int)ceil((double)octantBytes / (double)(CHAR_BIT/8));
+					//TODO loop over head octants and add data size to buffer size
 					sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
 					int pos = 0;
 					uint32_t octantsSize = (uint32_t)octree.octants.size();
@@ -294,11 +299,13 @@ void Class_Para_Tree::loadBalance(UserDataComm & userData){
 						for(int j = 0; j < 16; ++j){
 							MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 						}
+						//TODO call gather to pack user data
 					}
 					break;
 				}
 				else{
 					int buffSize = partition[p] * (int)ceil((double)octantBytes / (double)(CHAR_BIT/8));
+					//TODO loop over head octants and add data size to buffer size
 					sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
 					uint32_t endOctants = ft + partition[p] - 1;
 					int pos = 0;
@@ -319,6 +326,7 @@ void Class_Para_Tree::loadBalance(UserDataComm & userData){
 						for(int j = 0; j < 16; ++j){
 							MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 						}
+						//TODO call gather to pack user data
 					}
 					ft += partition[p];
 					tailSize -= partition[p];
@@ -408,6 +416,7 @@ void Class_Para_Tree::loadBalance(UserDataComm & userData){
 		int octCounter = 0;
 		for(uint32_t i = headOffset; i < resEnd; ++i){
 			octree.octants[octCounter] = octree.octants[i];
+			//TODO move data
 			++octCounter;
 		}
 		uint32_t newCounter = nofNewHead + nofNewTail + nofResidents;
@@ -416,6 +425,7 @@ void Class_Para_Tree::loadBalance(UserDataComm & userData){
 		uint32_t resCounter = nofNewHead + nofResidents - 1;
 		for(uint32_t k = 0; k < nofResidents ; ++k){
 			octree.octants[resCounter - k] = octree.octants[nofResidents - k - 1];
+			//TODO move data
 		}
 
 		//UNPACK BUFFERS AND BUILD NEW OCTANTS
@@ -423,6 +433,7 @@ void Class_Para_Tree::loadBalance(UserDataComm & userData){
 		bool jumpResident = false;
 		map<int,Class_Comm_Buffer>::iterator rbitend = recvBuffers.end();
 		for(map<int,Class_Comm_Buffer>::iterator rbit = recvBuffers.begin(); rbit != rbitend; ++rbit){
+			//TODO change new octants counting, probably you have to communicate the number of news per proc
 			uint32_t nofNewPerProc = (uint32_t)(rbit->second.commBufferSize / (uint32_t)ceil((double)octantBytes / (double)(CHAR_BIT/8)));
 			int pos = 0;
 			if(rbit->first > rank && !jumpResident){
@@ -441,6 +452,7 @@ void Class_Para_Tree::loadBalance(UserDataComm & userData){
 					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&pos,&info[j],1,MPI::BOOL,MPI_COMM_WORLD);
 					octree.octants[newCounter].info[j] = info[j];
 				}
+				//TODO Unpack data
 				++newCounter;
 			}
 		}
