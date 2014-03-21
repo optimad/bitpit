@@ -12,6 +12,7 @@
 // INCLUDES                                                                            //
 // =================================================================================== //
 #include "preprocessor_defines.dat"
+#include "global.hpp"
 #include "Class_Octant.hpp"
 #include <math.h>
 #include <stdint.h>
@@ -139,6 +140,12 @@ public:
 	bool			localBalance(bool doInterior);				// 2:1 balancing on level a local tree already adapted (balance only the octants with info[14] = false) (refinement wins!)
 																// Return true if balanced done with some markers modification
 																// Seto doInterior = false if the interior octants are already balanced
+
+	void			findEdgeNeighbours(uint32_t idx,			// Finds neighbours of idx-th octant through iface in vector octants.
+									uint8_t iedge,				// Returns a vector (empty if iface is a bound face) with the index of neighbours
+									u32vector & neighbours,		// in their structure (octants or ghosts) and sets isghost[i] = true if the
+									vector<bool> & isghost);	// i-th neighbour is ghost in the local tree
+
 private:
 
 	// ------------------------------------------------------------------------------- //

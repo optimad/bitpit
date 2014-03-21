@@ -25,7 +25,10 @@ extern const uint8_t  markerBytes;
 extern const uint8_t  levelBytes;
 extern const uint8_t  boolBytes;
 extern const uint8_t  oppface[2*DIM];
-
+#if DIM == 3
+extern const uint8_t  edgeface[12][2];
+#else
+#endif
 
 
 

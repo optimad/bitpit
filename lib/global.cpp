@@ -20,3 +20,7 @@ const uint8_t   markerBytes =   uint8_t(sizeof(int8_t));
 const uint8_t   levelBytes	=   uint8_t(sizeof(uint8_t));
 const uint8_t   boolBytes	=   uint8_t(sizeof(bool));
 const uint8_t 	oppface[2*DIM] = {1,0,3,2,5,4};
+#if DIM == 3
+const uint8_t   edgeface[12][2] = {{0,4},{1,4},{2,4},{3,4},{0,2},{1,2},{0,3},{1,3},{0,5},{1,5},{2,5},{3,5}};
+#else
+#endif
