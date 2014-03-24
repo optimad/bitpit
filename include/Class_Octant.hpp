@@ -36,6 +36,14 @@ class Class_Octant{
 	friend class Class_Para_Tree;
 
 	// ------------------------------------------------------------------------------- //
+	// TYPEDEFS ----------------------------------------------------------------------- //
+public:
+	typedef vector<Class_Octant> 		OctantsType;
+	typedef vector<uint32_t>			u32vector;
+	typedef vector<vector<uint32_t>	>	u32vector2D;
+	typedef vector<vector<uint64_t>	>	u64vector2D;
+
+	// ------------------------------------------------------------------------------- //
 	// MEMBERS ----------------------------------------------------------------------- //
 
 private:
@@ -92,7 +100,11 @@ public:
 	uint32_t	getArea() const;					// Get the face area of octant
 	uint32_t	getVolume() const;					// Get the volume of octant
 	double*		getCenter();						// Get a pointer to an array of DIM with the coordinates of the center of octant
-	uint32_t	(*getNodes())[DIM];					// Get a pointer to the array (size [nnodes][3]) with the nodes of octant
+	uint32_t	(*getNodes())[DIM];					// Get a pointer to the array (size [nnodes][DIM]) with the nodes of octant
+	void		getNodes(u32vector2D & nodes);		// Get a vector (size [nnodes][DIM]) with the nodes of octant
+	uint8_t*	getNormal(uint8_t & iface);			// Get a pointer to the array (size [DIM]) with the normal of the iface
+	void		getNormal(uint8_t & iface,			// Get a vector (size [nnodes][DIM]) with the normal of the iface
+				vector<uint8_t> & normal);
 	uint64_t	computeMorton() const;				// Compute Morton index of the octant (without level)
 	uint64_t	computeMorton();
 

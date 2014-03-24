@@ -27,6 +27,8 @@ extern const uint8_t  boolBytes;
 extern const uint8_t  oppface[2*DIM];
 #if DIM == 3
 extern const uint8_t  edgeface[12][2];
+extern const uint8_t  nodeface[8][3];
+extern const uint8_t  normals[6][3];
 #else
 #endif
 

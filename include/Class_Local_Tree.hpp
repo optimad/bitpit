@@ -141,8 +141,13 @@ public:
 																// Return true if balanced done with some markers modification
 																// Seto doInterior = false if the interior octants are already balanced
 
-	void			findEdgeNeighbours(uint32_t idx,			// Finds neighbours of idx-th octant through iface in vector octants.
-									uint8_t iedge,				// Returns a vector (empty if iface is a bound face) with the index of neighbours
+	void			findEdgeNeighbours(uint32_t idx,			// Finds neighbours of idx-th octant through iedge in vector octants.
+									uint8_t iedge,				// Returns a vector (empty if iedge is a bound edge) with the index of neighbours
+									u32vector & neighbours,		// in their structure (octants or ghosts) and sets isghost[i] = true if the
+									vector<bool> & isghost);	// i-th neighbour is ghost in the local tree
+
+	void			findNodeNeighbours(uint32_t idx,			// Finds neighbours of idx-th octant through inode in vector octants.
+									uint8_t inode,				// Returns a vector (empty if inode is a bound node) with the index of neighbours
 									u32vector & neighbours,		// in their structure (octants or ghosts) and sets isghost[i] = true if the
 									vector<bool> & isghost);	// i-th neighbour is ghost in the local tree
 

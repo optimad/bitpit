@@ -1094,11 +1094,19 @@ void Class_Para_Tree::getCenter(Class_Octant* oct,
 }
 
 void Class_Para_Tree::getNodes(Class_Octant* oct,
-								vector<vector<double> >& nodes) {
+								dvector2D & nodes) {
 	uint32_t (*nodes_)[DIM] = oct->getNodes();
 	trans.mapNodes(nodes_, nodes);
 	delete [] nodes_;
 	nodes_ = NULL;
+}
+
+void Class_Para_Tree::getNormal(Class_Octant* oct,
+								uint8_t & iface,
+								dvector & normal) {
+	vector<uint8_t> normal_;
+	oct->getNormal(iface, normal_);
+	normal = vector<double>(normal_.begin(), normal_.end());
 }
 
 // =================================================================================== //

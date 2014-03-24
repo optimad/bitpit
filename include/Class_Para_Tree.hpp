@@ -119,8 +119,11 @@ public:
 	double			getVolume(Class_Octant* const oct);		// Get the volume of octant
 	void			getCenter(Class_Octant* oct, 			// Get a vector of DIM with the coordinates of the center of octant
 					dvector & center);
-	void			getNodes(Class_Octant* oct, 			// Get a vector of vector (size [nnodes][3]) with the nodes of octant
+	void			getNodes(Class_Octant* oct, 			// Get a vector of vector (size [nnodes][DIM]) with the nodes of octant
 					dvector2D & nodes);
+	void			getNormal(Class_Octant* oct, 			// Get a vector of vector (size [DIM]) with the normal of the iface
+					uint8_t & iface,
+					dvector & normal);
 
 	Class_Octant*	getPointOwner(dvector & point);			// Get the pointer to the octant owner of an input point
 															// (vector<double> with x,y,z). If the point is out of process

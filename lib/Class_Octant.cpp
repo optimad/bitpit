@@ -161,6 +161,50 @@ uint32_t (*Class_Octant::getNodes())[DIM] {
 	return nodes;
 }
 
+void Class_Octant::getNodes(u32vector2D & nodes) {
+	uint8_t		i, cx, cy, cz;
+	uint32_t	dh;
+
+	dh = getSize();
+	nodes.clear();
+	nodes.resize(nnodes);
+
+	for (i = 0; i < nnodes; i++){
+		nodes[i].resize(DIM);
+		cx = uint8_t(i%2);
+		cy = uint8_t((i-4*(i/4))/2);
+		cz = uint8_t(i/4);
+		nodes[i][0] = x + cx*dh;
+		nodes[i][1] = y + cy*dh;
+		if (DIM ==3){
+			nodes[i][2] = z + cz*dh;
+		}
+		nodes[i].shrink_to_fit();
+	}
+	nodes.shrink_to_fit();
+}
+
+uint8_t* Class_Octant::getNormal(uint8_t & iface){
+	uint8_t		i;
+	uint8_t* normal = new uint8_t[DIM];
+
+	for (i = 0; i < DIM; i++){
+		normal[i] = normals[iface][i];
+	}
+	return normal;
+}
+
+void Class_Octant::getNormal(uint8_t & iface, vector<uint8_t> & normal){
+	uint8_t		i;
+
+	normal.clear();
+	normal.resize(DIM);
+	for (i = 0; i < DIM; i++){
+		normal[i] = normals[iface][i];
+	}
+	normal.shrink_to_fit();
+}
+
 double*	Class_Octant::getCenter() {
 	uint8_t		i;
 	double	dh;
