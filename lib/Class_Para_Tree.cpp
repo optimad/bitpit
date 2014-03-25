@@ -1106,7 +1106,7 @@ void Class_Para_Tree::getNormal(Class_Octant* oct,
 								dvector & normal) {
 	vector<uint8_t> normal_;
 	oct->getNormal(iface, normal_);
-	normal = vector<double>(normal_.begin(), normal_.end());
+	trans.mapNormals(normal_, normal);
 }
 
 // =================================================================================== //

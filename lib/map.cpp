@@ -52,6 +52,7 @@ void Class_Map::mapCenter(double* & center, vector<double> & mapcenter){
 	mapcenter.shrink_to_fit();
 
 	}
+
 void Class_Map::mapNodes(uint32_t (*nodes)[DIM], vector<vector<double> > & mapnodes){
 	vector<double> orig;
 	orig.push_back(X0);
@@ -69,5 +70,11 @@ void Class_Map::mapNodes(uint32_t (*nodes)[DIM], vector<vector<double> > & mapno
 	}
 	mapnodes.shrink_to_fit();
 }
+
+void Class_Map::mapNormals(vector<uint8_t> normal_, vector<double> & mapnormal){
+	mapnormal = vector<double>(normal_.begin(), normal_.end());
+	mapnormal.shrink_to_fit();
+}
+
 // ------------------------------------------------------------------------------- //
 
