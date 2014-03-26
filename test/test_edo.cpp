@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 		clock_t end = clock();
 
 		ptree.octree.setBalance(0,false);
-		ptree.octree.setMarker(0,1);
+		ptree.octree.setMarker(0,2);
 		bool done = ptree.adapt(mapidx);
 		ptree.loadBalance();
 		uint64_t nocts = ptree.octree.getNumOctants();
@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
 		// TORUS TEST
 		double R = double(max_length)*0.25;
 		double r = double(max_length)*0.15;
-		for (int l=0; l<0; l++){
+		for (int l=0; l<2; l++){
 			for (int i=0; i<nocts; i++){
 				double* center;
 				Class_Octant oct = ptree.octree.extractOctant(i);
@@ -48,7 +48,6 @@ int main(int argc, char *argv[]) {
 				}
 				delete[] center;
 			}
-			ptree.balance21();
 			bool done = ptree.adapt(mapidx);
 			ptree.loadBalance();
 			nocts = ptree.octree.getNumOctants();
@@ -96,23 +95,21 @@ int main(int argc, char *argv[]) {
 		}
 */
 
+
 		uint32_t			sizeneigh, modsize;
 		vector<uint32_t> 	neigh;
 		vector<bool> 		isghost;
-		uint8_t 			iedge;
+		uint8_t 			inode;
 		uint8_t 			idx;
 
-		Class_Octant oct = ptree.octree.extractOctant(1);
 		for (idx=0; idx<ptree.octree.getNumOctants(); idx++){
-			for (iedge=0; iedge<12; iedge++){
-				ptree.octree.findEdgeNeighbours(idx, iedge, neigh, isghost);
-				cout << "idx " << int(idx) << "  edge " << int(iedge) << "  sizeneigh " << neigh.size() << endl;
+			for (inode=0; inode<8; inode++){
+				ptree.octree.findNodeNeighbours(idx, inode, neigh, isghost);
 				for (int i=0; i<neigh.size(); i++){
-					cout << "idx " << int(idx) << "  edge " << int(iedge) << "  neigh " << neigh[i] << "  isghost " << isghost[i] << endl;
 				}
 			}
-			cout << "   " << endl;
 		}
+
 		ptree.updateConnectivity();
 		writePhysicalTree(ptree.nodes,ptree.connectivity,ptree.ghostsnodes,ptree.ghostsconnectivity,ptree,("physical_tree"));
 

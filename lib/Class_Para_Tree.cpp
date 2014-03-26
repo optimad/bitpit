@@ -560,14 +560,24 @@ bool Class_Para_Tree::adapt() {
 		writeLog("---------------------------------------------");
 		writeLog(" ADAPT (Refine/Coarse)");
 		writeLog(" ");
+
+		// 2:1 Balance
+		balance21();
+
+		writeLog(" ");
 		writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
+
+		// Refine
 		while(octree.refine());
+
 		if (octree.getNumOctants() > nocts)
 			localDone = true;
 		writeLog(" Number of octants after Refine	:	" + to_string(octree.getNumOctants()));
 		nocts = octree.getNumOctants();
 		updateAdapt();
 		setPboundGhosts();
+
+		// Coarse
 		while(octree.coarse());
 		if (octree.getNumOctants() < nocts)
 			localDone = true;
@@ -582,17 +592,28 @@ bool Class_Para_Tree::adapt() {
 		writeLog("---------------------------------------------");
 		writeLog(" ADAPT (Refine/Coarse)");
 		writeLog(" ");
+
+		// 2:1 Balance
+		balance21();
+
+		writeLog(" ");
 		writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
 		updateAdapt();			// Togliere se non necessario
 		setPboundGhosts();		// Togliere se non necessario
+
+		// Refine
 		while(octree.refine());
+
 		if (octree.getNumOctants() > nocts)
 			localDone = true;
 		updateAdapt();
 		setPboundGhosts();
 		writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
 		nocts = octree.getNumOctants();
+
+		// Coarse
 		while(octree.coarse());
+
 		if (octree.getNumOctants() < nocts)
 			localDone = true;
 		MPI_Barrier(MPI_COMM_WORLD);
@@ -629,13 +650,24 @@ bool Class_Para_Tree::adapt(u32vector & mapidx) {
 		writeLog("---------------------------------------------");
 		writeLog(" ADAPT (Refine/Coarse)");
 		writeLog(" ");
+
+		// 2:1 Balance
+		balance21();
+
+		writeLog(" ");
 		writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
+
+		// Refine
 		while(octree.refine(mapidx));
+
 		if (octree.getNumOctants() > nocts)
 			localDone = true;
 		nocts = octree.getNumOctants();
 		writeLog(" Number of octants after Refine	:	" + to_string(nocts));
+
+		// Coarse
 		while(octree.coarse(mapidx));
+
 		if (octree.getNumOctants() < nocts)
 			localDone = true;
 		nocts = octree.getNumOctants();
@@ -650,17 +682,28 @@ bool Class_Para_Tree::adapt(u32vector & mapidx) {
 		writeLog("---------------------------------------------");
 		writeLog(" ADAPT (Refine/Coarse)");
 		writeLog(" ");
+
+		// 2:1 Balance
+		balance21();
+
+		writeLog(" ");
 		writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
 		updateAdapt();			// Togliere se non necessario
 		setPboundGhosts();		// Togliere se non necessario
+
+		// Refine
 		while(octree.refine(mapidx));
+
 		if (octree.getNumOctants() > nocts)
 			localDone = true;
 		nocts = octree.getNumOctants();
 		updateAdapt();
 		setPboundGhosts();
 		writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
+
+		// Coarse
 		while(octree.coarse(mapidx));
+
 		if (octree.getNumOctants() < nocts)
 			localDone = true;
 		nocts = octree.getNumOctants();

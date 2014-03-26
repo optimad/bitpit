@@ -2196,7 +2196,11 @@ void Class_Local_Tree::findEdgeNeighbours(uint32_t const idx, uint8_t iedge,
 					while(ghosts[idxtry].computeMorton() > Morton){
 						idxtry--;
 						if(idxtry > ghosts.size()-1){
-							idxtry = ghosts.size();
+							idxtry = ghosts.size() - 1;
+							break;
+						}
+						if(idxtry < 0){
+							idxtry = 0;
 							break;
 						}
 					}
@@ -2214,7 +2218,7 @@ void Class_Local_Tree::findEdgeNeighbours(uint32_t const idx, uint8_t iedge,
 					uint64_t Mortonlast = last_desc.computeMorton();
 					vector<uint32_t> bufferidx;
 					Mortontry = ghosts[idxtry].computeMorton();
-					while(Mortontry < Mortonlast & idxtry < size_ghosts){
+					while(Mortontry < Mortonlast & idxtry < ghosts.size()){
 						Dhx = int32_t(cx)*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
 						Dhy = int32_t(cy)*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
 						Dhz = int32_t(cz)*(int32_t(oct->z) - int32_t(ghosts[idxtry].z));
@@ -2251,10 +2255,22 @@ void Class_Local_Tree::findEdgeNeighbours(uint32_t const idx, uint8_t iedge,
 			// ---> can i search only before or after idx in octants
 			int32_t jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
 			idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
+			if (idxtry > noctants-1)
+				idxtry = noctants-1;
 			while(abs(jump) > 0){
 				Mortontry = octants[idxtry].computeMorton();
 				jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
 				idxtry += jump;
+				if (idxtry > octants.size()-1){
+					if (jump > 0){
+						idxtry = octants.size() - 1;
+						jump = 0;
+					}
+					else if (jump < 0){
+						idxtry = 0;
+						jump = 0;
+					}
+				}
 			}
 			if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
 				//Found neighbour of same size
@@ -2275,7 +2291,7 @@ void Class_Local_Tree::findEdgeNeighbours(uint32_t const idx, uint8_t iedge,
 					while(octants[idxtry].computeMorton() > Morton){
 						idxtry--;
 						if(idxtry > noctants-1){
-							idxtry = noctants;
+							idxtry = 0;
 							break;
 						}
 					}
@@ -2305,6 +2321,9 @@ void Class_Local_Tree::findEdgeNeighbours(uint32_t const idx, uint8_t iedge,
 							isghost.push_back(false);
 						}
 						idxtry++;
+						if(idxtry>noctants-1){
+							break;
+						}
 						Mortontry = octants[idxtry].computeMorton();
 					}
 				}
@@ -2374,6 +2393,8 @@ void Class_Local_Tree::findNodeNeighbours(uint32_t const idx, uint8_t inode,
 			// ---> can i search only before or after idx in octants
 			int32_t jump = (octghost->computeMorton() > Morton) ? int32_t(idxghost/2+1) : int32_t((size_ghosts -idxghost)/2+1);
 			idxtry = uint32_t(idxghost +((octghost->computeMorton()<Morton)-(octghost->computeMorton()>Morton))*jump);
+			if (idxtry > size_ghosts-1)
+				idxtry = size_ghosts-1;
 			while(abs(jump) > 0){
 				Mortontry = ghosts[idxtry].computeMorton();
 				jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
@@ -2463,6 +2484,8 @@ void Class_Local_Tree::findNodeNeighbours(uint32_t const idx, uint8_t inode,
 			// ---> can i search only before or after idx in octants
 			int32_t jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
 			idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
+			if (idxtry > noctants-1)
+				idxtry = noctants-1;
 			while(abs(jump) > 0){
 				Mortontry = octants[idxtry].computeMorton();
 				jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
