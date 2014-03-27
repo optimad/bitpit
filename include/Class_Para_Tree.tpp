@@ -497,6 +497,7 @@ void Class_Para_Tree::loadBalance(UserDataComm & userData){
 		}
 		uint32_t newCounter = nofNewHead + nofNewTail + nofResidents;
 		octree.octants.resize(newCounter);
+		userData.data.resize(newCounter);
 		//MOVE RESIDENTS IN RIGHT POSITION
 		uint32_t resCounter = nofNewHead + nofResidents - 1;
 		for(uint32_t k = 0; k < nofResidents ; ++k){
@@ -535,6 +536,7 @@ void Class_Para_Tree::loadBalance(UserDataComm & userData){
 			}
 		}
 		octree.octants.shrink_to_fit();
+		userData.data.shrink_to_fit();
 		octree.pborders.clear();
 
 		delete [] newPartitionRangeGlobalidx;
