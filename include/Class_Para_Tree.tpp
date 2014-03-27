@@ -368,7 +368,7 @@ void Class_Para_Tree::loadBalance(UserDataComm & userData){
 					//store the number of octants at the beginning of the buffer
 					MPI_Pack(&partition[p],1,MPI_UINT32_T,sendBuffers[p].commBuffer,sendBuffers[p].commBufferSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
 					//int pos = 0;
-					for(uint32_t i = ft; i < endOctants; ++i ){
+					for(uint32_t i = ft; i <= endOctants; ++i ){
 						//PACK octants from ft to ft + partition[p] -1
 						const Class_Octant & octant = octree.octants[i];
 						x = octant.getX();

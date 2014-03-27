@@ -37,15 +37,15 @@ int main(int argc, char *argv[]) {
 		ptree.updateAdapt();
 		ptree.setPboundGhosts();
 
-//		vector<double> data(ptree.octree.getNumOctants(),ptree.rank);
-//		vector<double> gData(ptree.octree.getSizeGhost(),0.0);
-//
-//		User_Data_Comm<vector<double> > commHandle(data,gData);
-//		ptree.communicate(commHandle);
+		vector<double> data(ptree.octree.getNumOctants(),ptree.rank);
+		vector<double> gData(ptree.octree.getSizeGhost(),0.0);
 
-//		User_Data_LB<vector<double> > lbHandle(data);
-//		ptree.loadBalance(lbHandle);
-		ptree.loadBalance();
+		User_Data_Comm<vector<double> > commHandle(data,gData);
+		ptree.communicate(commHandle);
+
+		User_Data_LB<vector<double> > lbHandle(data);
+		ptree.loadBalance(lbHandle);
+//		ptree.loadBalance();
 
 		ptree.octree.computeConnectivity();
 		ptree.octree.computeghostsConnectivity();

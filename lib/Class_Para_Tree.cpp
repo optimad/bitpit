@@ -328,7 +328,7 @@ void Class_Para_Tree::loadBalance(){
 					sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
 					uint32_t endOctants = ft + partition[p] - 1;
 					int pos = 0;
-					for(uint32_t i = ft; i < endOctants; ++i ){
+					for(uint32_t i = ft; i <= endOctants; ++i ){
 						//PACK octants from ft to ft + partition[p] -1
 						const Class_Octant & octant = octree.octants[i];
 						x = octant.getX();
