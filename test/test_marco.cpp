@@ -22,28 +22,21 @@ int main(int argc, char *argv[]) {
 	{
 		Class_Para_Tree ptree;
 
+		ptree.octree.setBalance(0,false);
 		ptree.octree.setMarker(0,1);
-		ptree.octree.refine();
-		ptree.updateAdapt();
+		ptree.adapt();
+		ptree.loadBalance();
 
-		vector<double> data(ptree.octree.getNumOctants(),(double)ptree.rank);
-		vector<double> gData(ptree.octree.getSizeGhost(),-1.0);
-
-		{
-			User_data_comm<vector<double> > commHandle(data,gData);
-			ptree.loadBalance(commHandle);
-			ptree.updateLoadBalance();
+		if (ptree.rank == 0){
+			ptree.octree.setMarker(0,1);
 		}
-
-//		ptree.setPboundGhosts();
+		ptree.adapt();
+		ptree.loadBalance();
 //
 //
 //
 //		ptree.communicate(commHandle);
 //
-		for(int i = 0; i < gData.size(); ++i){
-			cout << "rank: " << ptree.rank << " ghost " << i << ": " << gData[i] << endl;
-		}
 
 		//	//TEST PARALLEL LOAD BALANCE
 		//	if(ptree.rank == 3){
