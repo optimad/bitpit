@@ -11,7 +11,7 @@
 #include "Class_Data_Comm_Interface.hpp"
 
 template <class D>
-class User_data_comm : public Class_Data_Comm_Interface< User_data_comm<D> > {
+class User_Data_Comm : public Class_Data_Comm_Interface< User_Data_Comm<D> > {
 public:
 
 	typedef D Data;
@@ -23,13 +23,13 @@ public:
 	size_t size(const uint32_t e) const;
 
 	template<class Buffer>
-	void gather(Buffer & buff, const uint32_t & e);
+	void gather(Buffer & buff, const uint32_t e);
 
 	template<class Buffer>
-	void scatter(Buffer & buff, const uint32_t & e);
+	void scatter(Buffer & buff, const uint32_t e);
 
-	User_data_comm(Data & data_, Data & ghostData);
-	~User_data_comm();
+	User_Data_Comm(Data & data_, Data & ghostData);
+	~User_Data_Comm();
 };
 
 #include "User_Data_Comm.tpp"
