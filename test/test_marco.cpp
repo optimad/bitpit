@@ -13,6 +13,7 @@
 #include "Class_Para_Tree.hpp"
 #include "ioFunct.hpp"
 #include "User_Data_Comm.hpp"
+#include "User_Data_LB.hpp"
 
 using namespace std;
 
@@ -30,20 +31,24 @@ int main(int argc, char *argv[]) {
 		vector<double> gData(ptree.octree.getSizeGhost(),-1.0);
 
 		{
-			User_data_comm<vector<double> > commHandle(data,gData);
-			ptree.loadBalance(commHandle);
-			ptree.updateLoadBalance();
+			User_Data_LB<vector<double> > lbCommHandle(data);
+			ptree.loadBalance(lbCommHandle);
 		}
+		gData.resize(ptree.octree.getSizeGhost(),0.0);
 
-//		ptree.setPboundGhosts();
-//
-//
-//
-//		ptree.communicate(commHandle);
-//
-		for(int i = 0; i < gData.size(); ++i){
-			cout << "rank: " << ptree.rank << " ghost " << i << ": " << gData[i] << endl;
+		User_Data_Comm<vector<double> > commHandle(data,gData);
+		ptree.communicate(commHandle);
+
+		if(ptree.rank == 0){
+			ptree.octree.setMarker(0,1);
 		}
+		ptree.octree.refine();
+		ptree.updateAdapt();
+
+//
+//		for(int i = 0; i < gData.size(); ++i){
+//			cout << "rank: " << ptree.rank << " ghost " << i << ": " << gData[i] << endl;
+//		}
 
 		//	//TEST PARALLEL LOAD BALANCE
 		//	if(ptree.rank == 3){

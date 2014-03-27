@@ -1,20 +1,21 @@
 /*
- * Class_Data_Comm_Interface.hpp
+ * Class_Data_LB_Interface.hpp
  *
- *  Created on: 18/mar/2014
+ *  Created on: 27/mar/2014
  *      Author: Marco Cisternino
  */
 
-#ifndef CLASSDATACOMMINTERFACE_HPP_
-#define CLASSDATACOMMINTERFACE_HPP_
+#ifndef CLASS_DATA_LB_INTERFACE_HPP_
+#define CLASS_DATA_LB_INTERFACE_HPP_
 
 #include <stdint.h>
 
 template <class Impl>
-class Class_Data_Comm_Interface {
+class Class_Data_LB_Interface {
 public:
 	size_t size(const uint32_t e) const;
 	size_t fixedSize() const;
+	void move(const uint32_t from, const uint32_t to);
 
 	template<class Buffer>
 	void gather(Buffer & buff,const uint32_t e);
@@ -23,7 +24,7 @@ public:
 	void scatter(Buffer & buff,const uint32_t e);
 
 protected:
-	Class_Data_Comm_Interface();
+	Class_Data_LB_Interface();
 
 private:
 	//BartonHackman trick
@@ -31,6 +32,6 @@ private:
 	const Impl& getImpl() const;
 };
 
-#include "Class_Data_Comm_Interface.tpp"
+#include "Class_Data_LB_Interface.tpp"
 
-#endif /* CLASSDATACOMMINTERFACE_HPP_ */
+#endif /* CLASS_DATA_LB_INTERFACE_HPP_ */

@@ -9,7 +9,7 @@ template <class Impl>
 Class_Data_Comm_Interface<Impl>::Class_Data_Comm_Interface(){}
 
 template <class Impl>
-size_t Class_Data_Comm_Interface<Impl>::size(const uint32_t & e) const {
+size_t Class_Data_Comm_Interface<Impl>::size(const uint32_t e) const {
 	return getImpl().size(e);
 };
 
@@ -21,13 +21,13 @@ size_t Class_Data_Comm_Interface<Impl>::fixedSize() const {
 
 template<class Impl>
 template<class Buffer>
-void Class_Data_Comm_Interface<Impl>::gather(Buffer& buff, const uint32_t& e) {
+void Class_Data_Comm_Interface<Impl>::gather(Buffer& buff, const uint32_t e) {
 	return getImpl().gather(buff,e);
 }
 
 template<class Impl>
 template<class Buffer>
-void Class_Data_Comm_Interface<Impl>::scatter(Buffer& buff,	const uint32_t& e) {
+void Class_Data_Comm_Interface<Impl>::scatter(Buffer& buff,	const uint32_t e) {
 	return getImpl().scatter(buff,e);
 }
 
