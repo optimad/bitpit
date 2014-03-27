@@ -26,7 +26,7 @@ Class_Para_Tree::Class_Para_Tree() {
 	}
 	// Write info log
 	if(rank==0){
-		system("rm PABLO.log");
+		int sysError = system("rm PABLO.log");
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
 	writeLog("---------------------------------------------");
@@ -61,7 +61,7 @@ Class_Para_Tree::Class_Para_Tree(double & X, double & Y, double & Z, double & L)
 	}
 	// Write info log
 	if(rank==0){
-		system("rm PABLO.log");
+		int sysError = system("rm PABLO.log");
 	}
 	MPI_Barrier(MPI_COMM_WORLD);
 	writeLog("---------------------------------------------");
@@ -1147,7 +1147,7 @@ void Class_Para_Tree::getNodes(Class_Octant* oct,
 void Class_Para_Tree::getNormal(Class_Octant* oct,
 								uint8_t & iface,
 								dvector & normal) {
-	vector<uint8_t> normal_;
+	vector<int8_t> normal_;
 	oct->getNormal(iface, normal_);
 	trans.mapNormals(normal_, normal);
 }

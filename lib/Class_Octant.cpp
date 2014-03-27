@@ -189,9 +189,9 @@ void Class_Octant::getNodes(u32vector2D & nodes) {
 	nodes.shrink_to_fit();
 }
 
-uint8_t* Class_Octant::getNormal(uint8_t & iface){
+int8_t* Class_Octant::getNormal(uint8_t & iface){
 	uint8_t		i;
-	uint8_t* normal = new uint8_t[DIM];
+	int8_t* normal = new int8_t[DIM];
 
 	for (i = 0; i < DIM; i++){
 		normal[i] = normals[iface][i];
@@ -199,7 +199,7 @@ uint8_t* Class_Octant::getNormal(uint8_t & iface){
 	return normal;
 }
 
-void Class_Octant::getNormal(uint8_t & iface, vector<uint8_t> & normal){
+void Class_Octant::getNormal(uint8_t & iface, vector<int8_t> & normal){
 	uint8_t		i;
 
 	normal.clear();

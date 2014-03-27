@@ -55,7 +55,7 @@ public:
 					vector<double> & mapcenter);
 	void mapNodes(uint32_t (*nodes)[DIM],
 					vector<vector<double> > & mapnodes);
-	void mapNormals(vector<uint8_t> normal,
+	void mapNormals(vector<int8_t> normal,
 					vector<double> & mapnormal);
 	// ------------------------------------------------------------------------------- //
 

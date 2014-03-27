@@ -102,9 +102,9 @@ public:
 	double*		getCenter();						// Get a pointer to an array of DIM with the coordinates of the center of octant
 	uint32_t	(*getNodes())[DIM];					// Get a pointer to the array (size [nnodes][DIM]) with the nodes of octant
 	void		getNodes(u32vector2D & nodes);		// Get a vector (size [nnodes][DIM]) with the nodes of octant
-	uint8_t*	getNormal(uint8_t & iface);			// Get a pointer to the array (size [DIM]) with the normal of the iface
+	int8_t*		getNormal(uint8_t & iface);			// Get a pointer to the array (size [DIM]) with the normal of the iface
 	void		getNormal(uint8_t & iface,			// Get a vector (size [nnodes][DIM]) with the normal of the iface
-				vector<uint8_t> & normal);
+				vector<int8_t> & normal);
 	uint64_t	computeMorton() const;				// Compute Morton index of the octant (without level)
 	uint64_t	computeMorton();
 

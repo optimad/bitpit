@@ -71,7 +71,7 @@ void Class_Map::mapNodes(uint32_t (*nodes)[DIM], vector<vector<double> > & mapno
 	mapnodes.shrink_to_fit();
 }
 
-void Class_Map::mapNormals(vector<uint8_t> normal_, vector<double> & mapnormal){
+void Class_Map::mapNormals(vector<int8_t> normal_, vector<double> & mapnormal){
 	mapnormal = vector<double>(normal_.begin(), normal_.end());
 	mapnormal.shrink_to_fit();
 }
