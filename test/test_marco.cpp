@@ -11,6 +11,7 @@
 #include <iostream>
 #include <string>
 #include "Class_Para_Tree.hpp"
+#include "Class_Local_Tree.hpp"
 #include "ioFunct.hpp"
 #include "User_Data_Comm.hpp"
 #include "User_Data_LB.hpp"
@@ -26,24 +27,29 @@ int main(int argc, char *argv[]) {
 		ptree.octree.setMarker(0,1);
 		ptree.octree.refine();
 		ptree.updateAdapt();
-
-		vector<double> data(ptree.octree.getNumOctants(),(double)ptree.rank);
-		vector<double> gData(ptree.octree.getSizeGhost(),-1.0);
-
-		{
-			User_Data_LB<vector<double> > lbCommHandle(data);
-			ptree.loadBalance(lbCommHandle);
-		}
-		gData.resize(ptree.octree.getSizeGhost(),0.0);
-
-		User_Data_Comm<vector<double> > commHandle(data,gData);
-		ptree.communicate(commHandle);
+		ptree.loadBalance();
 
 		if(ptree.rank == 0){
 			ptree.octree.setMarker(0,1);
+//			ptree.octree.setMarker(1,1);
 		}
 		ptree.octree.refine();
 		ptree.updateAdapt();
+		ptree.setPboundGhosts();
+
+//		vector<double> data(ptree.octree.getNumOctants(),ptree.rank);
+//		vector<double> gData(ptree.octree.getSizeGhost(),0.0);
+//
+//		User_Data_Comm<vector<double> > commHandle(data,gData);
+//		ptree.communicate(commHandle);
+
+//		User_Data_LB<vector<double> > lbHandle(data);
+//		ptree.loadBalance(lbHandle);
+		ptree.loadBalance();
+
+		ptree.octree.computeConnectivity();
+		ptree.octree.computeghostsConnectivity();
+		writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,"balGhost");
 
 //
 //		for(int i = 0; i < gData.size(); ++i){
