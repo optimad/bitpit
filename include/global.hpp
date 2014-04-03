@@ -19,6 +19,7 @@
 extern const uint32_t max_length;
 extern const uint8_t  nchildren;
 extern const uint8_t  nface;
+extern const uint8_t  nedges;
 extern const uint8_t  nnodes;
 extern const uint8_t  octantBytes;
 extern const uint8_t  markerBytes;
