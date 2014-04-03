@@ -886,6 +886,8 @@ void Class_Para_Tree::setPboundGhosts() {
 		}
 
 	}
+	MPI_Barrier(MPI_COMM_WORLD);
+
 	//PACK (mpi) BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
 	//it visits every element in bordersPerProc (one for every neighbor proc)
 	//for every element it visits the border octants it contains and pack them in a new structure, sendBuffers
