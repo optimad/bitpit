@@ -604,7 +604,7 @@ uint64_t* Class_Octant::computeEdgeHalfSizeMorton(uint8_t iedge,
 	uint32_t dh,dh2;
 	uint64_t morton;
 	uint32_t nneigh;
-	uint8_t i,cx,cy,cz;
+	int8_t i,cx,cy,cz;
 	uint8_t iface1, iface2;
 
 	nneigh = (level < MAX_LEVEL) ? 2 : 1;
@@ -755,7 +755,8 @@ uint64_t* Class_Octant::computeEdgeMinSizeMorton(uint8_t iedge,
 	uint32_t dh,dh2;
 	uint64_t morton;
 	uint32_t nneigh, nline;
-	uint32_t i,cx,cy,cz;
+	uint32_t i;
+	int32_t cx,cy,cz;
 	uint8_t iface1, iface2;
 
 
@@ -924,10 +925,10 @@ uint64_t Class_Octant::computeNodeHalfSizeMorton(uint8_t inode,
 	uint32_t dh,dh2;
 	uint64_t morton;
 	uint32_t nneigh;
-	uint8_t i,cx,cy,cz;
+	uint8_t i;
+	int8_t cx,cy,cz;
 	uint8_t iface1, iface2, iface3;
-
-	nneigh = 1;
+ 	nneigh = 1;
 	dh = (level < MAX_LEVEL) ? getSize()/2 : getSize();
 	dh2 = getSize();
 	iface1 = nodeface[inode][0];
@@ -1020,7 +1021,8 @@ uint64_t Class_Octant::computeNodeMinSizeMorton(uint8_t inode,
 	uint32_t dh,dh2;
 	uint64_t morton;
 	uint32_t nneigh;
-	uint8_t i,cx,cy,cz;
+	uint8_t i;
+	int8_t cx,cy,cz;
 	uint8_t iface1, iface2, iface3;
 
 	nneigh = 1;
