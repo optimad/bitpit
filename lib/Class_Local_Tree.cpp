@@ -153,10 +153,10 @@ bool Class_Local_Tree::refine() {
 	//Si può trovare la maniera di inserirlo nel loop precedente
 	pborders.clear();
 	nocts = octants.size();
-	pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(nface)));
+	pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(nfaces)));
 	for(idx=0; idx<nocts; idx++){
-		for(iface=0; iface<nface; iface++){
-			if (octants[idx].info[iface+nface]){
+		for(iface=0; iface<nfaces; iface++){
+			if (octants[idx].info[iface+nfaces]){
 				pborders.push_back(idx);
 				break;
 			}
@@ -490,9 +490,9 @@ bool Class_Local_Tree::coarse() {
 					if (markerfather < octants[idx+offset+idx2].getMarker()+1){
 						markerfather = octants[idx+offset+idx2].getMarker()+1;
 					}
-					for (iface=0; iface<nface; iface++){
+					for (iface=0; iface<nfaces; iface++){
 						father.info[iface] = (father.info[iface] || octants[idx+offset+idx2].info[iface]);
-						father.info[iface+nface] = (father.info[iface+nface] || octants[idx+offset+idx2].info[iface+nface]);
+						father.info[iface+nfaces] = (father.info[iface+nfaces] || octants[idx+offset+idx2].info[iface+nfaces]);
 					}
 				}
 				father.info[13] = true;
@@ -560,9 +560,9 @@ bool Class_Local_Tree::coarse() {
 		}
 		if (nend != 0){
 			for (idx=0; idx < nend; idx++){
-				for (iface=0; iface<nface; iface++){
+				for (iface=0; iface<nfaces; iface++){
 					father.info[iface] = (father.info[iface] || octants[nocts-idx].info[iface]);
-					father.info[iface+nface] = (father.info[iface+nface] || octants[nocts-idx].info[iface+nface]);
+					father.info[iface+nfaces] = (father.info[iface+nfaces] || octants[nocts-idx].info[iface+nfaces]);
 				}
 			}
 			father.info[13] = true;
@@ -582,10 +582,10 @@ bool Class_Local_Tree::coarse() {
 	//Si può trovare la maniera di inserirlo nel loop precedente
 	pborders.clear();
 	nocts = octants.size();
-	pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(nface)));
+	pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(nfaces)));
 	for(idx=0; idx<nocts; idx++){
-		for(iface=0; iface<nface; iface++){
-			if (octants[idx].info[iface+nface]){
+		for(iface=0; iface<nfaces; iface++){
+			if (octants[idx].info[iface+nfaces]){
 				pborders.push_back(idx);
 				break;
 			}
@@ -666,10 +666,10 @@ bool Class_Local_Tree::refine(u32vector & mapidx) {
 	//Si può trovare la maniera di inserirlo nel loop precedente
 	pborders.clear();
 	nocts = octants.size();
-	pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(nface)));
+	pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(nfaces)));
 	for(idx=0; idx<nocts; idx++){
-		for(iface=0; iface<nface; iface++){
-			if (octants[idx].info[iface+nface]){
+		for(iface=0; iface<nfaces; iface++){
+			if (octants[idx].info[iface+nfaces]){
 				pborders.push_back(idx);
 				break;
 			}
@@ -827,9 +827,9 @@ bool Class_Local_Tree::coarse(u32vector & mapidx) {
 					if (markerfather < octants[idx+offset+idx2].getMarker()+1){
 						markerfather = octants[idx+offset+idx2].getMarker()+1;
 					}
-					for (iface=0; iface<nface; iface++){
+					for (iface=0; iface<nfaces; iface++){
 						father.info[iface] = (father.info[iface] || octants[idx+offset+idx2].info[iface]);
-						father.info[iface+nface] = (father.info[iface+nface] || octants[idx+offset+idx2].info[iface+nface]);
+						father.info[iface+nfaces] = (father.info[iface+nfaces] || octants[idx+offset+idx2].info[iface+nfaces]);
 					}
 				}
 				father.info[13] = true;
@@ -901,9 +901,9 @@ bool Class_Local_Tree::coarse(u32vector & mapidx) {
 		}
 		if (nend != 0){
 			for (idx=0; idx < nend; idx++){
-				for (iface=0; iface<nface; iface++){
+				for (iface=0; iface<nfaces; iface++){
 					father.info[iface] = (father.info[iface] || octants[nocts-idx].info[iface]);
-					father.info[iface+nface] = (father.info[iface+nface] || octants[nocts-idx].info[iface+nface]);
+					father.info[iface+nfaces] = (father.info[iface+nfaces] || octants[nocts-idx].info[iface+nfaces]);
 				}
 			}
 			father.info[13] = true;
@@ -926,10 +926,10 @@ bool Class_Local_Tree::coarse(u32vector & mapidx) {
 	//Si può trovare la maniera di inserirlo nel loop precedente
 	pborders.clear();
 	nocts = octants.size();
-	pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(nface)));
+	pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(nfaces)));
 	for(idx=0; idx<nocts; idx++){
-		for(iface=0; iface<nface; iface++){
-			if (octants[idx].info[iface+nface]){
+		for(iface=0; iface<nfaces; iface++){
+			if (octants[idx].info[iface+nfaces]){
 				pborders.push_back(idx);
 				break;
 			}
@@ -978,9 +978,9 @@ void Class_Local_Tree::checkCoarse(uint64_t lastDescPre,uint64_t firstDescPost){
 			toDelete++;
 			idx--;
 		}
-		father.info[nface+1] = father.info[nface+3] = true;
-		if(nface == 6)
-			father.info[nface+5] = true;
+		father.info[nfaces+1] = father.info[nfaces+3] = true;
+		if(nfaces == 6)
+			father.info[nfaces+5] = true;
 		octants.resize(nocts-toDelete);
 		octants.push_back(father);
 		octants.shrink_to_fit();
@@ -991,10 +991,10 @@ void Class_Local_Tree::checkCoarse(uint64_t lastDescPre,uint64_t firstDescPost){
 	uint8_t iface;
 	pborders.clear();
 	nocts = octants.size();
-	pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(nface)));
+	pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(nfaces)));
 	for(idx=0; idx<nocts; idx++){
-		for(iface=0; iface<nface; iface++){
-			if (octants[idx].info[iface+nface]){
+		for(iface=0; iface<nfaces; iface++){
+			if (octants[idx].info[iface+nfaces]){
 				pborders.push_back(idx);
 				break;
 			}
@@ -1181,13 +1181,13 @@ void Class_Local_Tree::findNeighbours(uint32_t const idx, uint8_t iface,
 	neighbours.clear();
 
 	// Default if iface is nface<iface<0
-	if (iface < 0 || iface > nface){
+	if (iface < 0 || iface > nfaces){
 		writeLog("Face index out of range in find neighbours !!!");
 		return;
 	}
 
 	// Check if octants face is a process boundary
-	if (oct->info[nface+iface] == false){
+	if (oct->info[nfaces+iface] == false){
 
 		// Check if octants face is a boundary
 		if (oct->info[iface] == false){
@@ -1762,13 +1762,13 @@ void Class_Local_Tree::findGhostNeighbours(uint32_t idx, uint8_t iface,
 	neighbours.clear();
 
 	// Default if iface is nface<iface<0
-	if (iface < 0 || iface > nface){
+	if (iface < 0 || iface > nfaces){
 		writeLog("Face index out of range in find neighbours !!!");
 		return;
 	}
 
 	// Check if octants face is a process boundary
-	if (oct->info[nface+iface] == true){
+	if (oct->info[nfaces+iface] == true){
 
 			//Build Morton number of virtual neigh of same size
 			Class_Octant samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size), int32_t(oct->z)+int32_t(cz*size));
@@ -1919,7 +1919,7 @@ bool Class_Local_Tree::localBalance(bool doInterior){
 			it->info[15] = false;
 			if (!it->getNotBalance() && it->getMarker() != 0){
 				targetmarker = min(MAX_LEVEL, (octants[idx].getLevel() + octants[idx].getMarker()));
-				for (iface=0; iface<nface; iface++){
+				for (iface=0; iface<nfaces; iface++){
 					if(!it->getPbound(iface)){
 						findNeighbours(idx, iface, neigh, isghost);
 						sizeneigh = neigh.size();
@@ -1953,7 +1953,7 @@ bool Class_Local_Tree::localBalance(bool doInterior){
 		for (it=obegin; it!=oend; it++){
 			if (!it->getNotBalance() && it->getMarker() != 0){
 				targetmarker = min(MAX_LEVEL, (it->getLevel()+it->getMarker()));
-				for (iface=0; iface<nface; iface++){
+				for (iface=0; iface<nfaces; iface++){
 					if(it->getPbound(iface) == true){
 						neigh.clear();
 						findGhostNeighbours(idx, iface, neigh);
@@ -1982,7 +1982,7 @@ bool Class_Local_Tree::localBalance(bool doInterior){
 				idx = *iit;
 				if (!octants[idx].getNotBalance()){
 					targetmarker = min(MAX_LEVEL, (octants[idx].getLevel()+octants[idx].getMarker()));
-					for (iface=0; iface<nface; iface++){
+					for (iface=0; iface<nfaces; iface++){
 						if(!octants[idx].getPbound(iface)){
 							findNeighbours(idx, iface, neigh, isghost);
 							sizeneigh = neigh.size();
@@ -2041,7 +2041,7 @@ bool Class_Local_Tree::localBalance(bool doInterior){
 		for (it=obegin; it!=oend; it++){
 			if (!it->getNotBalance() && it->info[15]){
 				targetmarker = min(MAX_LEVEL, (it->getLevel()+it->getMarker()));
-				for (iface=0; iface<nface; iface++){
+				for (iface=0; iface<nfaces; iface++){
 					if(it->getPbound(iface) == true){
 						neigh.clear();
 						findGhostNeighbours(idx, iface, neigh);
@@ -2070,7 +2070,7 @@ bool Class_Local_Tree::localBalance(bool doInterior){
 				idx = *iit;
 				if (!octants[idx].getNotBalance()){
 					targetmarker = min(MAX_LEVEL, (octants[idx].getLevel()+octants[idx].getMarker()));
-					for (iface=0; iface<nface; iface++){
+					for (iface=0; iface<nfaces; iface++){
 						if(!octants[idx].getPbound(iface)){
 							findNeighbours(idx, iface, neigh, isghost);
 							sizeneigh = neigh.size();
@@ -2133,7 +2133,7 @@ void Class_Local_Tree::findEdgeNeighbours(uint32_t const idx, uint8_t iedge,
 	neighbours.clear();
 
 	// Default if iedge is nface<iedge<0
-	if (iedge < 0 || iedge > nface*2){
+	if (iedge < 0 || iedge > nfaces*2){
 		writeLog("Edge index out of range in find neighbours !!!");
 		return;
 	}

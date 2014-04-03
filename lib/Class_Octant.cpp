@@ -19,7 +19,7 @@ Class_Octant::Class_Octant(){
 	marker = 0;
 	bool dummy[16] = {false};
 	memcpy(info, dummy, 16);
-	for (int i=0; i<nface; i++){
+	for (int i=0; i<nfaces; i++){
 		info[i] = true;
 	}
 };
@@ -33,7 +33,7 @@ Class_Octant::Class_Octant(int8_t level, int32_t x, int32_t y, int32_t z){
 	bool dummy[16] = {false};
 	memcpy(info, dummy, 16);
 	if (level==0){
-		for (int i=0; i<nface; i++){
+		for (int i=0; i<nfaces; i++){
 			info[i] = true;
 		}
 	}
@@ -123,7 +123,7 @@ void Class_Octant::setLevel(uint8_t level) {
 
 
 void Class_Octant::setPbound(uint8_t face, bool flag) {
-	info[nface+face] = flag;
+	info[nfaces+face] = flag;
 }
 
 // =================================================================================== //
@@ -265,9 +265,9 @@ Class_Octant* Class_Octant::buildChildren() {
 				oct.info[12]=true;
 				// Update interior face bound and pbound
 				xf=1; yf=3; zf=5;
-				oct.info[xf] = oct.info[xf+nface] = false;
-				oct.info[yf] = oct.info[yf+nface] = false;
-				oct.info[zf] = oct.info[zf+nface] = false;
+				oct.info[xf] = oct.info[xf+nfaces] = false;
+				oct.info[yf] = oct.info[yf+nfaces] = false;
+				oct.info[zf] = oct.info[zf+nfaces] = false;
 				children[0] = oct;
 			}
 			break;
@@ -281,9 +281,9 @@ Class_Octant* Class_Octant::buildChildren() {
 				oct.x += dh;
 				// Update interior face bound and pbound
 				xf=0; yf=3; zf=5;
-				oct.info[xf] = oct.info[xf+nface] = false;
-				oct.info[yf] = oct.info[yf+nface] = false;
-				oct.info[zf] = oct.info[zf+nface] = false;
+				oct.info[xf] = oct.info[xf+nfaces] = false;
+				oct.info[yf] = oct.info[yf+nfaces] = false;
+				oct.info[zf] = oct.info[zf+nfaces] = false;
 				children[1] = oct;
 			}
 			break;
@@ -297,9 +297,9 @@ Class_Octant* Class_Octant::buildChildren() {
 				oct.y += dh;
 				// Update interior face bound and pbound
 				xf=1; yf=2; zf=5;
-				oct.info[xf] = oct.info[xf+nface] = false;
-				oct.info[yf] = oct.info[yf+nface] = false;
-				oct.info[zf] = oct.info[zf+nface] = false;
+				oct.info[xf] = oct.info[xf+nfaces] = false;
+				oct.info[yf] = oct.info[yf+nfaces] = false;
+				oct.info[zf] = oct.info[zf+nfaces] = false;
 				children[2] = oct;
 			}
 			break;
@@ -314,9 +314,9 @@ Class_Octant* Class_Octant::buildChildren() {
 				oct.y += dh;
 				// Update interior face bound and pbound
 				xf=0; yf=2; zf=5;
-				oct.info[xf] = oct.info[xf+nface] = false;
-				oct.info[yf] = oct.info[yf+nface] = false;
-				oct.info[zf] = oct.info[zf+nface] = false;
+				oct.info[xf] = oct.info[xf+nfaces] = false;
+				oct.info[yf] = oct.info[yf+nfaces] = false;
+				oct.info[zf] = oct.info[zf+nfaces] = false;
 				children[3] = oct;
 			}
 			break;
@@ -330,9 +330,9 @@ Class_Octant* Class_Octant::buildChildren() {
 				oct.z += dh;
 				// Update interior face bound and pbound
 				xf=1; yf=3; zf=4;
-				oct.info[xf] = oct.info[xf+nface] = false;
-				oct.info[yf] = oct.info[yf+nface] = false;
-				oct.info[zf] = oct.info[zf+nface] = false;
+				oct.info[xf] = oct.info[xf+nfaces] = false;
+				oct.info[yf] = oct.info[yf+nfaces] = false;
+				oct.info[zf] = oct.info[zf+nfaces] = false;
 				children[4] = oct;
 			}
 			break;
@@ -347,9 +347,9 @@ Class_Octant* Class_Octant::buildChildren() {
 				oct.z += dh;
 				// Update interior face bound and pbound
 				xf=0; yf=3; zf=4;
-				oct.info[xf] = oct.info[xf+nface] = false;
-				oct.info[yf] = oct.info[yf+nface] = false;
-				oct.info[zf] = oct.info[zf+nface] = false;
+				oct.info[xf] = oct.info[xf+nfaces] = false;
+				oct.info[yf] = oct.info[yf+nfaces] = false;
+				oct.info[zf] = oct.info[zf+nfaces] = false;
 				children[5] = oct;
 			}
 			break;
@@ -364,9 +364,9 @@ Class_Octant* Class_Octant::buildChildren() {
 				oct.z += dh;
 				// Update interior face bound and pbound
 				xf=1; yf=2; zf=4;
-				oct.info[xf] = oct.info[xf+nface] = false;
-				oct.info[yf] = oct.info[yf+nface] = false;
-				oct.info[zf] = oct.info[zf+nface] = false;
+				oct.info[xf] = oct.info[xf+nfaces] = false;
+				oct.info[yf] = oct.info[yf+nfaces] = false;
+				oct.info[zf] = oct.info[zf+nfaces] = false;
 				children[6] = oct;
 			}
 			break;
@@ -382,9 +382,9 @@ Class_Octant* Class_Octant::buildChildren() {
 				oct.z += dh;
 				// Update interior face bound and pbound
 				xf=0; yf=2; zf=4;
-				oct.info[xf] = oct.info[xf+nface] = false;
-				oct.info[yf] = oct.info[yf+nface] = false;
-				oct.info[zf] = oct.info[zf+nface] = false;
+				oct.info[xf] = oct.info[xf+nfaces] = false;
+				oct.info[yf] = oct.info[yf+nfaces] = false;
+				oct.info[zf] = oct.info[zf+nfaces] = false;
 				children[7] = oct;
 			}
 			break;

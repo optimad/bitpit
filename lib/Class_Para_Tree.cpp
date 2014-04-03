@@ -757,12 +757,12 @@ void Class_Para_Tree::setPboundGhosts() {
 		for(Class_Local_Tree::OctantsType::iterator it = begin; it != end; ++it){
 			set<int> procs;
 			//Virtual Face Neighbors
-			for(uint8_t i = 0; i < nface; ++i){
+			for(uint8_t i = 0; i < nfaces; ++i){
 				if(it->getBound(i) == false){
 					uint32_t virtualNeighborsSize = 0;
 					uint64_t* virtualNeighbors = it->computeVirtualMorton(i,max_depth,virtualNeighborsSize);
 					uint32_t maxDelta = virtualNeighborsSize/2;
-					for(int j = 0; j < maxDelta; ++j){
+					for(int j = 0; j <= maxDelta; ++j){
 						int pBegin = findOwner(virtualNeighbors[j]);
 						int pEnd = findOwner(virtualNeighbors[virtualNeighborsSize - 1 - j]);
 						procs.insert(pBegin);
@@ -786,7 +786,7 @@ void Class_Para_Tree::setPboundGhosts() {
 				uint64_t* virtualEdgeNeighbors = it->computeEdgeVirtualMorton(e,max_depth,virtualEdgeNeighborSize);
 				uint32_t maxDelta = virtualEdgeNeighborSize/2;
 				if(virtualEdgeNeighborSize){
-					for(int ee = 0; ee < maxDelta; ++ee){
+					for(int ee = 0; ee <= maxDelta; ++ee){
 						int pBegin = findOwner(virtualEdgeNeighbors[ee]);
 						int pEnd = findOwner(virtualEdgeNeighbors[virtualEdgeNeighborSize - 1- ee]);
 						procs.insert(pBegin);
@@ -804,6 +804,7 @@ void Class_Para_Tree::setPboundGhosts() {
 				uint64_t virtualCornerNeighbor = it ->computeNodeVirtualMorton(c,max_depth,virtualCornerNeighborSize);
 				if(virtualCornerNeighborSize){
 					int proc = findOwner(virtualCornerNeighbor);
+					procs.insert(proc);
 				}
 			}
 
@@ -828,12 +829,12 @@ void Class_Para_Tree::setPboundGhosts() {
 			Class_Octant & oct = octree.octants[*it];
 			set<int> procs;
 			//Virtual Face Neighbors
-			for(uint8_t i = 0; i < nface; ++i){
+			for(uint8_t i = 0; i < nfaces; ++i){
 				if(oct.getBound(i) == false){
 					uint32_t virtualNeighborsSize = 0;
 					uint64_t* virtualNeighbors = oct.computeVirtualMorton(i,max_depth,virtualNeighborsSize);
 					uint32_t maxDelta = virtualNeighborsSize/2;
-					for(int j = 0; j < maxDelta; ++j){
+					for(int j = 0; j <= maxDelta; ++j){
 						int pBegin = findOwner(virtualNeighbors[j]);
 						int pEnd = findOwner(virtualNeighbors[virtualNeighborsSize - 1 - j]);
 						procs.insert(pBegin);
@@ -851,7 +852,7 @@ void Class_Para_Tree::setPboundGhosts() {
 				uint64_t* virtualEdgeNeighbors = oct.computeEdgeVirtualMorton(e,max_depth,virtualEdgeNeighborSize);
 				uint32_t maxDelta = virtualEdgeNeighborSize/2;
 				if(virtualEdgeNeighborSize){
-					for(int ee = 0; ee < maxDelta; ++ee){
+					for(int ee = 0; ee <= maxDelta; ++ee){
 						int pBegin = findOwner(virtualEdgeNeighbors[ee]);
 						int pEnd = findOwner(virtualEdgeNeighbors[virtualEdgeNeighborSize - 1- ee]);
 						procs.insert(pBegin);
@@ -869,6 +870,7 @@ void Class_Para_Tree::setPboundGhosts() {
 				uint64_t virtualCornerNeighbor = oct.computeNodeVirtualMorton(c,max_depth,virtualCornerNeighborSize);
 				if(virtualCornerNeighborSize){
 					int proc = findOwner(virtualCornerNeighbor);
+					procs.insert(proc);
 				}
 			}
 
