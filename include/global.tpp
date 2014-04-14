@@ -9,17 +9,15 @@
 // INCLUDES                                                                            //
 // =================================================================================== //
 
-
-template<>
-global<2>::global(){
-
-}
-
-template<>
-global<3>::global(){
-
-}
-
+//template<>
+//global<2>::global(){
+//
+//};
+//
+//template<>
+//global<3>::global(){
+//
+//};
 
 
 //const uint32_t	max_length	=	uint32_t(pow(2.0,MAX_LEVEL));
