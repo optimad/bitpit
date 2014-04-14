@@ -1,6 +1,7 @@
-#ifndef MAX_LEVEL
-#define MAX_LEVEL 2
+#ifndef MAX_LEVEL_2D
+#define MAX_LEVEL_2D 2
 #endif
-#ifndef DIM
-#define DIM 3
+
+#ifndef MAX_LEVEL_3D
+#define MAX_LEVEL_3D 2
 #endif

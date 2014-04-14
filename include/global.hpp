@@ -12,27 +12,50 @@
 #include <math.h>
 #include <stdint.h>
 
-// =================================================================================== //
-// PARAMETERS DEFINITION                                                               //
-// =================================================================================== //
-
-extern const uint32_t max_length;
-extern const uint8_t  nchildren;
-extern const uint8_t  nfaces;
-extern const uint8_t  nedges;
-extern const uint8_t  nnodes;
-extern const uint8_t  octantBytes;
-extern const uint8_t  markerBytes;
-extern const uint8_t  levelBytes;
-extern const uint8_t  boolBytes;
-extern const uint8_t  oppface[2*DIM];
-#if DIM == 3
-extern const uint8_t  edgeface[12][2];
-extern const uint8_t  nodeface[8][3];
-extern const int8_t  normals[6][3];
-#else
-#endif
+template <int dim>
+class global
 
 
+template<>
+class global<2>
+{
+	global();
+
+	const uint32_t max_length;
+	const uint8_t  nchildren;
+	const uint8_t  nfaces;
+	const uint8_t  nedges;
+	const uint8_t  nnodes;
+	const uint8_t  octantBytes;
+	const uint8_t  markerBytes;
+	const uint8_t  levelBytes;
+	const uint8_t  boolBytes;
+	const uint8_t  oppface[4];
+	const uint8_t  nodeface[nnodes][2];
+	const uint8_t  facenode[nfaces][2];
+	const int8_t   normals[nfaces][2];
+};
+
+template<>
+class global<3>
+{
+	global();
+
+	const uint32_t max_length;
+	const uint8_t  nchildren;
+	const uint8_t  nfaces;
+	const uint8_t  nedges;
+	const uint8_t  nnodes;
+	const uint8_t  octantBytes;
+	const uint8_t  markerBytes;
+	const uint8_t  levelBytes;
+	const uint8_t  boolBytes;
+	const uint8_t  oppface[6];
+	const uint8_t  nodeface[nnodes][3];
+	const uint8_t  facenode[nfaces][4];
+	const int8_t   normals[nfaces][2];
+};
+
+#include "global.tpp"
 
 #endif /* GLOBAL_HPP_ */
