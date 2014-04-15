@@ -14,7 +14,8 @@ using namespace std;
 int main(int argc, char *argv[]) {
 
 	MPI::Init(argc, argv);
-
+	global<2> globalbis;
+	globalbis.puppa();
 	cout << "global 2D nfaces = " << (int)global2D.puppa() << endl;
 	cout << "global 3D nfaces = " << (int)global3D.nfaces << endl;
 

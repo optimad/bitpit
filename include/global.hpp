@@ -2,7 +2,7 @@
  * global.hpp
  *
  *  Created on: Feb 17, 2014
- *      Author: edoardo
+ *      Author: Marco
  */
 
 #ifndef GLOBAL_HPP_
@@ -13,7 +13,7 @@
 #include <stdint.h>
 
 template <int dim>
-class global{};
+class global;
 
 template<>
 class global<2>
