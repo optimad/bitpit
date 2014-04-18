@@ -9,6 +9,7 @@
 #include <mpi.h>
 #include "global.hpp"
 #include "Class_Octant.hpp"
+#include "Class_Local_Tree.hpp"
 
 using namespace std;
 

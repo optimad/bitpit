@@ -1,5 +1,5 @@
-#ifndef CLASS_OCTANT_3D_TPP
-#define CLASS_OCTANT_3D_TPP
+//#ifndef CLASS_OCTANT_3D_TPP
+//#define CLASS_OCTANT_3D_TPP
 /*
  * Class_Octant_3D.tpp
  *
@@ -14,13 +14,13 @@ template<>
 class Class_Octant<3>{
 	// ------------------------------------------------------------------------------- //
 	// FRIENDSHIPS ------------------------------------------------------------------- //
-	friend class Class_Local_Tree;
+	friend class Class_Local_Tree<3>;
 	friend class Class_Para_Tree;
 
 	// ------------------------------------------------------------------------------- //
 	// TYPEDEFS ----------------------------------------------------------------------- //
 public:
-	typedef vector<Class_Octant> 		OctantsType;
+	typedef vector<Class_Octant<3> > 		OctantsType;
 	typedef vector<uint32_t>			u32vector;
 	typedef vector<vector<uint32_t>	>	u32vector2D;
 	typedef vector<vector<uint64_t>	>	u64vector2D;
@@ -1077,6 +1077,6 @@ public:
 
 
 };//end Class_Octant<3>
-#endif
+//#endif
 
 
