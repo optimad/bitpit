@@ -14,7 +14,7 @@ template<>
 class Class_Octant<2>{
 	// ------------------------------------------------------------------------------- //
 	// FRIENDSHIPS ------------------------------------------------------------------- //
-	friend class Class_Local_Tree<2>;
+	template<int dim> friend class Class_Local_Tree;
 	friend class Class_Para_Tree;
 
 	// ------------------------------------------------------------------------------- //
