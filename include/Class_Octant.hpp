@@ -17,7 +17,6 @@
 #include <vector>
 #include <string.h>
 #include "inlinedFunct.hpp"
-#include "Class_Local_Tree.hpp"
 
 // =================================================================================== //
 // NAME SPACES                                                                         //

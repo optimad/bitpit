@@ -4,8 +4,6 @@
  *  Created on: 18/apr/2014
  *      Author: Marco Cisternino
  */
-//#ifndef CLASS_LOCAL_TREE_3D
-//#define CLASS_LOCAL_TREE_3D
 // =================================================================================== //
 // CLASS SPECIALIZATION                                                                //
 // =================================================================================== //
@@ -19,7 +17,7 @@ class Class_Local_Tree<3>{
 	// ------------------------------------------------------------------------------- //
 	// TYPEDEFS ----------------------------------------------------------------------- //
 public:
-	typedef vector< template Class_Octant<3> > 	OctantsType;
+	typedef vector< Class_Octant<3> > 	OctantsType;
 	typedef vector<uint32_t>			u32vector;
 	typedef vector<vector<uint32_t>	>	u32vector2D;
 	typedef vector<vector<uint64_t>	>	u64vector2D;
@@ -141,7 +139,5 @@ public:
 //
 
 };//end Class_Local_Tree;
-
-//#endif
 
 
