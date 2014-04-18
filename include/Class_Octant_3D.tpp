@@ -93,8 +93,8 @@ public:
 
 public:
 	uint32_t	getX() const{return x;};
-	uint32_t	getY() const{return x;};
-	uint32_t	getZ() const{return x;};
+	uint32_t	getY() const{return y;};
+	uint32_t	getZ() const{return z;};
 	uint8_t		getLevel() const{return level;};
 	int8_t		getMarker() const{return marker;};
 	bool		getBound(uint8_t face) const{				// Get if face is boundary

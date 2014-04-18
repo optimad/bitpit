@@ -19,9 +19,12 @@ int main(int argc, char *argv[]) {
 	cout << "global 3D nfaces = " << (int)global3D.nfaces << endl;
 
 	Class_Octant<3> ottante(0,1,2,3);
+	Class_Octant<2> quadrante(0,1,2);
 
-	cout << "get x =" << ottante.getX();
+	cout << "get x =" << ottante.getX()<<endl;
 
+	cout << "puppa 2D =" << quadrante.getZ()<<endl;
+	cout << "puppa 3D =" << ottante.getZ()<<endl;
 	MPI::Finalize();
 
 }

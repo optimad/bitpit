@@ -29,7 +29,12 @@ using namespace std;
 // CLASS DEFINITION                                                                    //
 // =================================================================================== //
 template<int dim>
-class Class_Octant;
+class Class_Octant{
+
+	int puppa(){return 5;};
+
+
+};
 
 #include "Class_Octant_3D.tpp"
 #include "Class_Octant_2D.tpp"

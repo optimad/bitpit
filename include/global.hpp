@@ -30,7 +30,7 @@ public:
 	oppface{1,0,3,2},
 	nodeface{{0,2},{1,2},{0,3},{1,3}},
 	facenode{{0,2},{1,3},{0,1},{2,3}},
-	normals{{-1,0},{1,0},{0,-1},{0,1}}
+	normals{{-1,0,0},{1,0,0},{0,-1,0},{0,1,0}}
 	{};
 	uint8_t puppa() const {return nfaces;};
 	const uint32_t max_length;
@@ -44,7 +44,7 @@ public:
 	const uint8_t  oppface[4];
 	const uint8_t  nodeface[4][2];
 	const uint8_t  facenode[4][2];
-	const int8_t   normals[4][2];
+	const int8_t   normals[4][3];
 };
 
 template<>
