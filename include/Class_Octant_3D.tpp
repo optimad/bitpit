@@ -69,7 +69,7 @@ public:
 		}
 
 	};
-	Class_Octant(const Class_Octant &octant){
+	Class_Octant(const Class_Octant<3> &octant){
 		x = octant.x;
 		y = octant.y;
 		z = octant.z;
@@ -78,7 +78,7 @@ public:
 		memcpy(info,octant.info,16);
 	};
 
-	bool operator ==(const Class_Octant & oct2){	// Check if two octants are equal (no check on info)
+	bool operator ==(const Class_Octant<3> & oct2){	// Check if two octants are equal (no check on info)
 		bool check = true;
 		check = check && (x == oct2.x);
 		check = check && (y == oct2.y);
@@ -254,28 +254,28 @@ public:
 	// =================================================================================== //
 
 public:
-	Class_Octant	buildLastDesc(){								// Build last descendant of octant and return the last descendant octant (no info update)
+	Class_Octant<3>	buildLastDesc(){								// Build last descendant of octant and return the last descendant octant (no info update)
 		uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL_3D - level)) - 1;
-		Class_Octant last_desc(MAX_LEVEL_3D,x+delta,y+delta,z+delta);
+		Class_Octant<3> last_desc(MAX_LEVEL_3D,x+delta,y+delta,z+delta);
 		return last_desc;
 	};
-	Class_Octant	buildFather(){									// Build father of octant and return the father octant (no info update)
+	Class_Octant<3>	buildFather(){									// Build father of octant and return the father octant (no info update)
 		uint32_t deltax = x%(uint32_t(pow(2.0,(double)((uint8_t)MAX_LEVEL_3D - (level-1)))));
 		uint32_t deltay = y%(uint32_t(pow(2.0,(double)((uint8_t)MAX_LEVEL_3D - (level-1)))));
 		uint32_t deltaz = z%(uint32_t(pow(2.0,(double)((uint8_t)MAX_LEVEL_3D - (level-1)))));
-		Class_Octant father(level-1, x-deltax, y-deltay, z-deltaz);
+		Class_Octant<3> father(level-1, x-deltax, y-deltay, z-deltaz);
 		return father;
 	};
-	Class_Octant*	buildChildren(){								// Builds children of octant and return a pointer to an ordered array children[nchildren] (info update)
+	Class_Octant<3>*	buildChildren(){								// Builds children of octant and return a pointer to an ordered array children[nchildren] (info update)
 		uint8_t xf,yf,zf;
 
 		if (this->level < MAX_LEVEL_3D){
-			Class_Octant* children = new Class_Octant[global3D.nchildren];
+			Class_Octant<3>* children = new Class_Octant<3>[global3D.nchildren];
 			for (int i=0; i<global3D.nchildren; i++){
 				switch (i) {
 				case 0 :
 				{
-					Class_Octant oct(*this);
+					Class_Octant<3> oct(*this);
 					oct.setMarker(max(0,oct.marker-1));
 					oct.setLevel(oct.level+1);
 					oct.info[12]=true;
@@ -289,7 +289,7 @@ public:
 				break;
 				case 1 :
 				{
-					Class_Octant oct(*this);
+					Class_Octant<3> oct(*this);
 					oct.setMarker(max(0,oct.marker-1));
 					oct.setLevel(oct.level+1);
 					oct.info[12]=true;
@@ -305,7 +305,7 @@ public:
 				break;
 				case 2 :
 				{
-					Class_Octant oct(*this);
+					Class_Octant<3> oct(*this);
 					oct.setMarker(max(0,oct.marker-1));
 					oct.setLevel(oct.level+1);
 					oct.info[12]=true;
@@ -321,7 +321,7 @@ public:
 				break;
 				case 3 :
 				{
-					Class_Octant oct(*this);
+					Class_Octant<3> oct(*this);
 					oct.setMarker(max(0,oct.marker-1));
 					oct.setLevel(oct.level+1);
 					oct.info[12]=true;
@@ -338,7 +338,7 @@ public:
 				break;
 				case 4 :
 				{
-					Class_Octant oct(*this);
+					Class_Octant<3> oct(*this);
 					oct.setMarker(max(0,oct.marker-1));
 					oct.setLevel(oct.level+1);
 					oct.info[12]=true;
@@ -354,7 +354,7 @@ public:
 				break;
 				case 5 :
 				{
-					Class_Octant oct(*this);
+					Class_Octant<3> oct(*this);
 					oct.setMarker(max(0,oct.marker-1));
 					oct.setLevel(oct.level+1);
 					oct.info[12]=true;
@@ -371,7 +371,7 @@ public:
 				break;
 				case 6 :
 				{
-					Class_Octant oct(*this);
+					Class_Octant<3> oct(*this);
 					oct.setMarker(max(0,oct.marker-1));
 					oct.setLevel(oct.level+1);
 					oct.info[12]=true;
@@ -388,7 +388,7 @@ public:
 				break;
 				case 7 :
 				{
-					Class_Octant oct(*this);
+					Class_Octant<3> oct(*this);
 					oct.setMarker(max(0,oct.marker-1));
 					oct.setLevel(oct.level+1);
 					oct.info[12]=true;
@@ -409,7 +409,7 @@ public:
 			return children;
 		}
 		else{
-			Class_Octant* children = new Class_Octant[0];
+			Class_Octant<3>* children = new Class_Octant<3>[0];
 			writeLog("Max level reached ---> No Children Built");
 			return children;
 		}

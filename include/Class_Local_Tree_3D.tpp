@@ -2234,6 +2234,6 @@ public:
 
 	};
 
-};//end Class_Local_Tree<3>;
+};//end Class_Local_Tree<3> specialization;
 
 

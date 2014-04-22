@@ -66,7 +66,7 @@ public:
 		}
 
 	};
-	Class_Octant(const Class_Octant &octant){
+	Class_Octant(const Class_Octant<2> &octant){
 		x = octant.x;
 		y = octant.y;
 		level = octant.level;
@@ -75,7 +75,7 @@ public:
 	};
 
 
-	bool operator ==(const Class_Octant & oct2){	// Check if two octants are equal (no check on info)
+	bool operator ==(const Class_Octant<2> & oct2){	// Check if two octants are equal (no check on info)
 		bool check = true;
 		check = check && (x == oct2.x);
 		check = check && (y == oct2.y);
@@ -216,27 +216,27 @@ public:
 	// Other methods ----------------------------------------------------------------- //
 
 public:
-	Class_Octant	buildLastDesc(){								// Build last descendant of octant and return the last descendant octant (no info update)
+	Class_Octant<2>	buildLastDesc(){								// Build last descendant of octant and return the last descendant octant (no info update)
 		uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL_2D - level)) - 1;
-		Class_Octant last_desc(MAX_LEVEL_2D,x+delta,y+delta);
+		Class_Octant<2> last_desc(MAX_LEVEL_2D,x+delta,y+delta);
 		return last_desc;
 	};
-	Class_Octant	buildFather(){									// Build father of octant and return the father octant (no info update)
+	Class_Octant<2>	buildFather(){									// Build father of octant and return the father octant (no info update)
 		uint32_t deltax = x%(uint32_t(pow(2.0,(double)((uint8_t)MAX_LEVEL_2D - (level-1)))));
 		uint32_t deltay = y%(uint32_t(pow(2.0,(double)((uint8_t)MAX_LEVEL_2D - (level-1)))));
-		Class_Octant father(level-1, x-deltax, y-deltay);
+		Class_Octant<2> father(level-1, x-deltax, y-deltay);
 		return father;
 	};
-	Class_Octant*	buildChildren(){								// Builds children of octant and return a pointer to an ordered array children[nchildren] (info update)
+	Class_Octant<2>*	buildChildren(){								// Builds children of octant and return a pointer to an ordered array children[nchildren] (info update)
 		uint8_t xf,yf,zf;
 
 		if (this->level < MAX_LEVEL_2D){
-			Class_Octant* children = new Class_Octant[global2D.nchildren];
+			Class_Octant<2>* children = new Class_Octant<2>[global2D.nchildren];
 			for (int i=0; i<global2D.nchildren; i++){
 				switch (i) {
 				case 0 :
 				{
-					Class_Octant oct(*this);
+					Class_Octant<2> oct(*this);
 					oct.setMarker(max(0,oct.marker-1));
 					oct.setLevel(oct.level+1);
 					oct.info[8]=true;
@@ -249,7 +249,7 @@ public:
 				break;
 				case 1 :
 				{
-					Class_Octant oct(*this);
+					Class_Octant<2> oct(*this);
 					oct.setMarker(max(0,oct.marker-1));
 					oct.setLevel(oct.level+1);
 					oct.info[8]=true;
@@ -264,7 +264,7 @@ public:
 				break;
 				case 2 :
 				{
-					Class_Octant oct(*this);
+					Class_Octant<2> oct(*this);
 					oct.setMarker(max(0,oct.marker-1));
 					oct.setLevel(oct.level+1);
 					oct.info[8]=true;
@@ -279,7 +279,7 @@ public:
 				break;
 				case 3 :
 				{
-					Class_Octant oct(*this);
+					Class_Octant<2> oct(*this);
 					oct.setMarker(max(0,oct.marker-1));
 					oct.setLevel(oct.level+1);
 					oct.info[8]=true;
@@ -298,7 +298,7 @@ public:
 			return children;
 		}
 		else{
-			Class_Octant* children = new Class_Octant[0];
+			Class_Octant<2>* children = new Class_Octant<2>[0];
 			writeLog("Max level reached ---> No Children Built");
 			return children;
 		}
@@ -501,7 +501,7 @@ public:
 		uint8_t iface1, iface2;
 
 		nneigh = 1;
-		dh = (level < MAX_LEVEL_3D) ? uint32_t(pow(2.0,double(MAX_LEVEL_2D - maxdepth))) : getSize();
+		dh = (level < MAX_LEVEL_2D) ? uint32_t(pow(2.0,double(MAX_LEVEL_2D - maxdepth))) : getSize();
 		dh2 = getSize();
 		iface1 = global3D.nodeface[inode][0];
 		iface2 = global3D.nodeface[inode][1];
