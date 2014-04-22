@@ -30,7 +30,6 @@ Class_Intersection::Class_Intersection(Class_Local_Tree & tree){
 
 Class_Intersection::~Class_Intersection() {
 	octree = NULL;
-	delete owners, iface, isnew, octree;
 }
 
 Class_Intersection::Class_Intersection(const Class_Intersection & intersection){
