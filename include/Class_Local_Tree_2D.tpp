@@ -19,6 +19,7 @@ class Class_Local_Tree<2>{
 	// TYPEDEFS ----------------------------------------------------------------------- //
 public:
 	typedef vector< Class_Octant<2> > 	OctantsType;
+	typedef vector<Class_Intersection> 	IntersectionsType;
 	typedef vector<uint32_t>			u32vector;
 	typedef vector<vector<uint32_t>	>	u32vector2D;
 	typedef vector<vector<uint64_t>	>	u64vector2D;
@@ -30,6 +31,9 @@ public:
 private:
 	OctantsType					octants;			// Local vector of octants ordered with Morton Number
 	OctantsType					ghosts;				// Local vector of ghost octants ordered with Morton Number
+	IntersectionsType			intersections_int;	// Local vector of internal intersections ordered with Morton Number of first owner octant
+	IntersectionsType			intersections_ghost;// Local vector of intersections internal/ghost ordered with Morton Number of internal owner octant
+	IntersectionsType			intersections_bord;	// Local vector of border intersections (twice the sam octant is stored in an intersection)
 	u32vector 					pborders;			// Local vector of pborder octants ordered with Morton Number
 	Class_Octant<2> 			first_desc;			// First (Morton order) most refined octant possible in local partition
 	Class_Octant<2> 			last_desc;			// Last (Morton order) most refined octant possible in local partition
@@ -1994,6 +1998,265 @@ public:
 		}
 
 	};
+
+	// =================================================================================== //
+
+	void computeIntersections() {
+
+		OctantsType::iterator it, obegin, oend;
+		Class_Intersection intersection(*this);
+		u32vector neighbours;
+		vector<bool> isghost;
+		uint32_t counter_i, counter_g, counter_b, idx;
+		uint32_t i, j, k, nsize;
+		uint8_t iface, iface2;
+
+
+		intersections_int.clear();
+		intersections_ghost.clear();
+		intersections_bord.clear();
+		intersections_int.reserve(2*2*octants.size());
+		intersections_ghost.reserve(2*2*ghosts.size());
+		intersections_bord.reserve(int(sqrt(octants.size())));
+
+		counter_i = counter_g = counter_b = idx = 0;
+
+		// Loop on ghosts
+		obegin = ghosts.begin();
+		oend = ghosts.end();
+		for (it = obegin; it != oend; it++){
+			for (iface = 0; iface < 2; iface++){
+				iface2 = iface*2;
+				findGhostNeighbours(idx, iface2, neighbours);
+				nsize = neighbours.size();
+				for (i = 0; i < nsize; i++){
+					intersection.finer = (i<1);
+					intersection.owners[0]  = neighbours[i];
+					intersection.owners[1] = idx;
+					intersection.iface = global2D.oppface[iface2];
+					intersection.isnew = false;
+					intersection.isghost = true;
+					intersections_ghost.push_back(intersection);
+					counter_g++;
+				}
+			}
+			idx++;
+		}
+
+		// Loop on octants
+		obegin = octants.begin();
+		oend = octants.end();
+		for (it = obegin; it != oend; it++){
+			for (iface = 0; iface < 2; iface++){
+				iface2 = iface*2;
+				findNeighbours(idx, iface2, neighbours, isghost);
+				nsize = neighbours.size();
+				if (nsize) {
+					for (i = 0; i < nsize; i++){
+						if (isghost[i]){
+							intersection.owners[0] = idx;
+							intersection.owners[1] = neighbours[i];
+							intersection.finer = (i>=1);
+							intersection.iface = iface2;
+							intersection.isnew = false;
+							intersection.isghost = true;
+							intersections_ghost.push_back(intersection);
+							counter_g++;
+						}
+						else{
+							intersection.owners[0] = idx;
+							intersection.owners[1] = neighbours[i];
+							intersection.finer = (i>=1);
+							intersection.iface = iface2;
+							intersection.isnew = false;
+							intersection.isghost = false;
+							intersections_int.push_back(intersection);
+							counter_i++;
+						}
+					}
+				}
+				else{
+					intersection.owners[0] = idx;
+					intersection.owners[1] = idx;
+					intersection.finer = 0;
+					intersection.iface = iface2;
+					intersection.isnew = false;
+					intersection.isghost = false;
+					intersections_bord.push_back(intersection);
+					counter_b++;
+				}
+				if (it->info[iface]){
+					intersection.owners[0] = idx;
+					intersection.owners[1] = idx;
+					intersection.finer = 0;
+					intersection.iface = iface;
+					intersection.isnew = false;
+					intersection.isghost = false;
+					intersections_bord.push_back(intersection);
+					counter_b++;
+				}
+			}
+			idx++;
+		}
+		intersections_int.shrink_to_fit();
+		intersections_ghost.shrink_to_fit();
+		intersections_bord.shrink_to_fit();
+
+	}
+
+	// =================================================================================== //
+
+	void updateIntersections(u32vector & mapidx,
+							u32vector & mapinters_int,
+							u32vector & mapinters_ghost,
+							u32vector & mapinters_bord) {
+
+		map<uint32_t, uint32_t> invmapidx;
+		vector<uint32_t> newocts;
+		OctantsType::iterator it, obegin, oend;
+		Class_Intersection intersection(*this);
+		u32vector neighbours;
+		vector<bool> isghost;
+		uint32_t counter_g, idx;
+		uint32_t i, j, nsize, msize, isize, osize, offset;
+		uint8_t iface, iface2;
+
+
+		if (intersections_int.size()==0){
+			computeIntersections();
+			mapinters_int.clear();
+			mapinters_ghost.clear();
+			mapinters_bord.clear();
+		}
+		else{
+			msize = mapidx.size();
+			for (i=0; i<msize; i++){
+				invmapidx[mapidx[i]] = i;
+			}
+
+			//Internal Intersections
+			isize = intersections_int.size();
+			mapinters_int.clear();
+			mapinters_int.resize(isize);
+			offset = 0;
+			newocts.clear();
+			for (i=0; i<isize-offset; i++){
+				if (octants[invmapidx[intersections_int[i].owners[0]]].info[8] ||
+						octants[invmapidx[intersections_int[i].owners[0]]].info[9]){
+					offset++;
+					newocts.push_back(invmapidx[intersections_int[i].owners[0]]);
+				}
+				intersections_int[i] = intersections_int[i+offset];
+				intersections_int[i].owners[0] = invmapidx[intersections_int[i+offset].owners[0]];
+				intersections_int[i].owners[1] = invmapidx[intersections_int[i+offset].owners[1]];
+				mapinters_int[i] = i+offset;
+			}
+			intersections_int.resize(isize-offset);
+			isize = isize-offset;
+			mapinters_int.resize(isize);
+			osize = newocts.size();
+			for (j=0; j<osize; j++){
+				idx = newocts[j];
+				for (iface = 0; iface < 2; iface++){
+					iface2 = iface*2;
+					findNeighbours(idx, iface2, neighbours, isghost);
+					nsize = neighbours.size();
+					if (nsize) {
+						for (i = 0; i < nsize; i++){
+							if (isghost[i]){
+								intersection.owners[0] = idx;
+								intersection.owners[1] = neighbours[i];
+								intersection.finer = (i>=1);
+								intersection.iface = iface2;
+								intersection.isnew = true;
+								intersection.isghost = false;
+								intersections_int.push_back(intersection);
+							}
+						}
+					}
+				}
+			}
+
+			//Border Intersections
+			isize = intersections_bord.size();
+			mapinters_bord.clear();
+			mapinters_bord.resize(isize);
+			offset = 0;
+			newocts.clear();
+			for (i=0; i<isize-offset; i++){
+				if (octants[invmapidx[intersections_bord[i].owners[0]]].info[8] ||
+						octants[invmapidx[intersections_bord[i].owners[0]]].info[9]){
+					offset++;
+					newocts.push_back(invmapidx[intersections_bord[i].owners[0]]);
+				}
+				intersections_bord[i] = intersections_bord[i+offset];
+				intersections_bord[i].owners[0] = invmapidx[intersections_bord[i+offset].owners[0]];
+				intersections_bord[i].owners[1] = invmapidx[intersections_bord[i+offset].owners[1]];
+				mapinters_bord[i] = i+offset;
+			}
+			intersections_bord.resize(isize-offset);
+			isize = isize-offset;
+			mapinters_bord.resize(isize);
+			osize = newocts.size();
+			for (j=0; j<osize; j++){
+				idx = newocts[j];
+				for (iface = 0; iface < 2; iface++){
+					if (octants[idx].info[iface]){
+						intersection.owners[0] = idx;
+						intersection.owners[1] = idx;
+						intersection.finer = 0;
+						intersection.iface = iface;
+						intersection.isnew = true;
+						intersection.isghost = false;
+						intersections_bord.push_back(intersection);
+					}
+				}
+			}
+
+			// TODO GHOSTS INTERSECTIONS. NOW ALL ARE SET AS NEW
+			//Ghost Intersections
+			mapinters_ghost.clear();
+			intersections_ghost.clear();
+			intersections_ghost.reserve(2*3*ghosts.size());
+
+			counter_g = idx = 0;
+
+			// Loop on ghosts
+			obegin = ghosts.begin();
+			oend = ghosts.end();
+			for (it = obegin; it != oend; it++){
+				for (iface = 0; iface < 2*2; iface++){
+					findGhostNeighbours(idx, iface, neighbours);
+					nsize = neighbours.size();
+					for (i = 0; i < nsize; i++){
+						intersection.finer = (i<1);
+						intersection.owners[0]  = neighbours[i];
+						intersection.owners[1] = idx;
+						intersection.iface = global2D.oppface[iface];
+						if (octants[idx].info[8] ||
+								octants[idx].info[9] ||
+								it->info[8] || it->info[9]){
+							intersection.isnew = true;
+						}
+						else{
+							intersection.isnew = false;
+						}
+						intersection.isghost = true;
+						intersections_ghost.push_back(intersection);
+						counter_g++;
+					}
+				}
+				idx++;
+			}
+
+			intersections_int.shrink_to_fit();
+			intersections_ghost.shrink_to_fit();
+			intersections_bord.shrink_to_fit();
+		}
+
+	}
+
+	// =================================================================================== //
 
 
 };//end Class_Local_Tree<2> specialization;
