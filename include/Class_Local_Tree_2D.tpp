@@ -114,22 +114,6 @@ public:
 	};
 
 	//-------------------------------------------------------------------------------- //
-	// Debug methods ----------------------------------------------------------------- //
-	void addOctantToTree(Class_Octant<2> octant){
-		octants.push_back(octant);
-		octants.shrink_to_fit();
-	};
-
-private:
-
-	//-------------------------------------------------------------------------------- //
-	// Other Get/Set methods --------------------------------------------------------- //
-
-public:
-
-private:
-
-	//-------------------------------------------------------------------------------- //
 	// Other methods ----------------------------------------------------------------- //
 
 public:
@@ -300,7 +284,7 @@ public:
 					uint32_t	 sizeneigh;
 					u32vector    neigh;
 					vector<bool> isghost;
-					for (iface=0; iface<3; iface++){
+					for (iface=0; iface<2; iface++){
 						uint8_t oddface = ((iface*2)+1);
 						findNeighbours(nstart-1, oddface, neigh, isghost);
 						sizeneigh = neigh.size();

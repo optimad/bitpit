@@ -15,8 +15,8 @@
 #include "Class_Octant.hpp"
 #include "Class_Local_Tree.hpp"
 #include "Class_Comm_Buffer.hpp"
-#include "map.hpp"
-#include "Class_Array.hpp"
+#include "Class_Map.hpp"
+//#include "Class_Array.hpp"
 #include <cstdint>
 #include <iterator>
 #include <set>
@@ -36,7 +36,7 @@ template<int dim>
 class Class_Para_Tree{};
 
 #include "Class_Para_Tree_3D.tpp"
-//#include "Class_Para_Tree_2D.tpp"
+#include "Class_Para_Tree_2D.tpp"
 //
 //class Class_Para_Tree {
 //

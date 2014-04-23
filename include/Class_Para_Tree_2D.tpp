@@ -1,5 +1,5 @@
 /*
- * Class_Para_Tree_3D.tpp
+ * Class_Para_Tree_2D.tpp
  *
  *  Created on: 23/apr/2014
  *      Author: Marco Cisternino
@@ -10,11 +10,11 @@
 // =================================================================================== //
 
 template<>
-class Class_Para_Tree<3>{
+class Class_Para_Tree<2>{
 	// ------------------------------------------------------------------------------- //
 	// TYPEDEFS ----------------------------------------------------------------------- //
 public:
-	typedef vector<Class_Octant<3> > 		OctantsType;
+	typedef vector<Class_Octant<2> > 		OctantsType;
 	typedef vector<uint32_t>			u32vector;
 	typedef vector<double>				dvector;
 	typedef vector<vector<uint32_t>	>	u32vector2D;
@@ -35,14 +35,14 @@ public:
 
 	//distributed members
 	int rank;
-	Class_Local_Tree<3> octree;					// local tree in each processor
+	Class_Local_Tree<2> octree;					// local tree in each processor
 
 	//auxiliary members
 	int error_flag;								// MPI error flag
 	bool serial;								// 1 if the octree is the same on each processor, 0 if the octree is distributed
 
 	//map member
-	Class_Map<3> trans;
+	Class_Map<2> trans;
 
 	// connectivity
 	dvector2D					nodes;				// Local vector of nodes (x,y,z) ordered with Morton Number
@@ -58,5 +58,6 @@ public:
 
 
 };
+
 
 
