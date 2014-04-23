@@ -18,9 +18,12 @@ int main(int argc, char *argv[]) {
 
 	Class_Para_Tree<2> ptree;
 	ptree.octree.setBalance(0,false);
-	ptree.octree.setMarker(0,2);
-	bool done = ptree.adapt();
+//	ptree.octree.setMarker(0,2);
+//	bool done = ptree.adapt();
 
+//	cout << "done " << done << endl;
+//	cout << "done " << done << endl;
+//	cout << "done " << done << endl;
 
 	MPI::Finalize();
 
