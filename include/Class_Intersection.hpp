@@ -11,8 +11,9 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
-#include "Class_Local_Tree.hpp"
-#include "Class_Octant.hpp"
+
+//#include "Class_Octant.hpp"
+//#include "Class_Local_Tree.hpp"
 #include "preprocessor_defines.dat"
 #include "global.hpp"
 #include "logFunct.hpp"
