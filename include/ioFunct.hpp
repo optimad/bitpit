@@ -46,13 +46,13 @@ typedef vector<vector<double>	>	dvector2D;
 // ----------------------------------------------------------------------------------- //
 void writeLocalTree(const u32vector2D & nodes, const u32vector2D & connectivity,
 		const u32vector2D & ghostNodes, const u32vector2D & ghostConnectivity,
-		const Class_Para_Tree & ptree, string filename);
+		const Class_Para_Tree<2> & ptree, string filename);
 
 // ----------------------------------------------------------------------------------- //
 
 void writePhysicalTree(const dvector2D & nodes, const u32vector2D & connectivity,
 		const dvector2D & ghostNodes, const u32vector2D & ghostConnectivity,
-		const Class_Para_Tree & ptree, string filename);
+		const Class_Para_Tree<2> & ptree, string filename);
 
 // ----------------------------------------------------------------------------------- //
 

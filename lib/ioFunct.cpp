@@ -16,7 +16,7 @@ using namespace std;
 
 void writeLocalTree(const u32vector2D& nodes, const u32vector2D& connectivity,
 		const u32vector2D& ghostNodes, const u32vector2D& ghostConnectivity,
-		const Class_Para_Tree & ptree, string filename) {
+		const Class_Para_Tree<2> & ptree, string filename) {
 
 	stringstream name;
 	name << "s" << std::setfill('0') << std::setw(4) << ptree.nproc << "-p" << std::setfill('0') << std::setw(4) << ptree.rank << "-" << filename << ".vtu";
@@ -38,18 +38,18 @@ void writeLocalTree(const u32vector2D& nodes, const u32vector2D& connectivity,
 		<< "  <UnstructuredGrid>" << endl
 		<< "    <Piece NumberOfCells=\"" << connectivity.size() + ghostConnectivity.size() << "\" NumberOfPoints=\"" << nodes.size() + ghostNodes.size() << "\">" << endl;
     out << "      <Points>" << endl
-    	<< "        <DataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\""<< DIM <<"\" format=\"ascii\">" << endl
+    	<< "        <DataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\""<< 3 <<"\" format=\"ascii\">" << endl
     	<< "          " << std::fixed;
     for(int i = 0; i < nofNodes; i++)
     {
-    	for(int j = 0; j < DIM; ++j)
+    	for(int j = 0; j < 3; ++j)
     		out << std::setprecision(6) << nodes[i][j] << " ";
     	if((i+1)%4==0 && i!=nofNodes-1)
     		out << endl << "          ";
     }
     for(int i = 0; i < nofGhostNodes; i++)
     {
-    	for(int j = 0; j < DIM; ++j)
+    	for(int j = 0; j < 3; ++j)
     		out << std::setprecision(6) << ghostNodes[i][j] << " ";
     	if((i+1)%4==0 && i!=nofNodes-1)
     		out << endl << "          ";
@@ -61,18 +61,38 @@ void writeLocalTree(const u32vector2D& nodes, const u32vector2D& connectivity,
         << "          ";
     for(int i = 0; i < nofOctants; i++)
       {
-        for(int j = 0; j < nnodes; j++)
+        for(int j = 0; j < global2D.nnodes; j++)
           {
-            out << connectivity[i][j] << " ";
+        	int jj;
+        	if (j<2){
+        		jj = j;
+        	}
+        	else if(j==2){
+        		jj = 3;
+        	}
+        	else if(j==3){
+        		jj = 2;
+        	}
+            out << connectivity[i][jj] << " ";
           }
         if((i+1)%3==0 && i!=nofOctants-1)
           out << endl << "          ";
       }
     for(int i = 0; i < nofGhosts; i++)
       {
-        for(int j = 0; j < nnodes; j++)
+        for(int j = 0; j < global2D.nnodes; j++)
           {
-            out << ghostConnectivity[i][j] + nofNodes << " ";
+        	int jj;
+        	if (j<2){
+        		jj = j;
+        	}
+        	else if(j==2){
+        		jj = 3;
+        	}
+        	else if(j==3){
+        		jj = 2;
+        	}
+        	out << ghostConnectivity[i][jj] + nofNodes << " ";
           }
         if((i+1)%3==0 && i!=nofGhosts-1)
           out << endl << "          ";
@@ -82,7 +102,7 @@ void writeLocalTree(const u32vector2D& nodes, const u32vector2D& connectivity,
         << "          ";
     for(int i = 0; i < nofAll; i++)
       {
-        out << (i+1)*nnodes << " ";
+        out << (i+1)*global2D.nnodes << " ";
         if((i+1)%12==0 && i!=nofAll-1)
           out << endl << "          ";
       }
@@ -92,9 +112,9 @@ void writeLocalTree(const u32vector2D& nodes, const u32vector2D& connectivity,
     for(int i = 0; i < nofAll; i++)
       {
         int type;
-        if(DIM==3)
-          type = 11;
-        else if(DIM==2)
+//        if(DIM==3)
+//          type = 11;
+//        else if(DIM==2)
           type = 9;
         out << type << " ";
         if((i+1)%12==0 && i!=nofAll-1)
@@ -145,7 +165,7 @@ void writeLocalTree(const u32vector2D& nodes, const u32vector2D& connectivity,
 
 void writePhysicalTree(const dvector2D& nodes, const u32vector2D& connectivity,
 		const dvector2D& ghostNodes, const u32vector2D& ghostConnectivity,
-		const Class_Para_Tree & ptree, string filename) {
+		const Class_Para_Tree<2> & ptree, string filename) {
 
 	stringstream name;
 	name << "s" << std::setfill('0') << std::setw(4) << ptree.nproc << "-p" << std::setfill('0') << std::setw(4) << ptree.rank << "-" << filename << ".vtu";
@@ -167,18 +187,18 @@ void writePhysicalTree(const dvector2D& nodes, const u32vector2D& connectivity,
 		<< "  <UnstructuredGrid>" << endl
 		<< "    <Piece NumberOfCells=\"" << connectivity.size() + ghostConnectivity.size() << "\" NumberOfPoints=\"" << nodes.size() + ghostNodes.size() << "\">" << endl;
     out << "      <Points>" << endl
-    	<< "        <DataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\""<< DIM <<"\" format=\"ascii\">" << endl
+    	<< "        <DataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\""<< 3 <<"\" format=\"ascii\">" << endl
     	<< "          " << std::fixed;
     for(int i = 0; i < nofNodes; i++)
     {
-    	for(int j = 0; j < DIM; ++j)
+    	for(int j = 0; j < 3; ++j)
     		out << std::setprecision(6) << nodes[i][j] << " ";
     	if((i+1)%4==0 && i!=nofNodes-1)
     		out << endl << "          ";
     }
     for(int i = 0; i < nofGhostNodes; i++)
     {
-    	for(int j = 0; j < DIM; ++j)
+    	for(int j = 0; j < 3; ++j)
     		out << std::setprecision(6) << ghostNodes[i][j] << " ";
     	if((i+1)%4==0 && i!=nofNodes-1)
     		out << endl << "          ";
@@ -190,18 +210,38 @@ void writePhysicalTree(const dvector2D& nodes, const u32vector2D& connectivity,
         << "          ";
     for(int i = 0; i < nofOctants; i++)
       {
-        for(int j = 0; j < nnodes; j++)
+        for(int j = 0; j < global2D.nnodes; j++)
           {
-            out << connectivity[i][j] << " ";
+        	int jj;
+        	if (j<2){
+        		jj = j;
+        	}
+        	else if(j==2){
+        		jj = 3;
+        	}
+        	else if(j==3){
+        		jj = 2;
+        	}
+            out << connectivity[i][jj] << " ";
           }
         if((i+1)%3==0 && i!=nofOctants-1)
           out << endl << "          ";
       }
     for(int i = 0; i < nofGhosts; i++)
       {
-        for(int j = 0; j < nnodes; j++)
+        for(int j = 0; j < global2D.nnodes; j++)
           {
-            out << ghostConnectivity[i][j] + nofNodes << " ";
+        	int jj;
+        	if (j<2){
+        		jj = j;
+        	}
+        	else if(j==2){
+        		jj = 3;
+        	}
+        	else if(j==3){
+        		jj = 2;
+        	}
+            out << ghostConnectivity[i][jj] + nofNodes << " ";
           }
         if((i+1)%3==0 && i!=nofGhosts-1)
           out << endl << "          ";
@@ -211,7 +251,7 @@ void writePhysicalTree(const dvector2D& nodes, const u32vector2D& connectivity,
         << "          ";
     for(int i = 0; i < nofAll; i++)
       {
-        out << (i+1)*nnodes << " ";
+        out << (i+1)*global2D.nnodes << " ";
         if((i+1)%12==0 && i!=nofAll-1)
           out << endl << "          ";
       }
@@ -221,9 +261,9 @@ void writePhysicalTree(const dvector2D& nodes, const u32vector2D& connectivity,
     for(int i = 0; i < nofAll; i++)
       {
         int type;
-        if(DIM==3)
-          type = 11;
-        else if(DIM==2)
+//        if(DIM==3)
+//          type = 11;
+//        else if(DIM==2)
           type = 9;
         out << type << " ";
         if((i+1)%12==0 && i!=nofAll-1)
