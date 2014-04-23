@@ -26,7 +26,7 @@ using namespace std;
 
 class Class_Array {
 
-	friend class Class_Para_Tree;
+	template<int dim> friend class Class_Para_Tree;
 
 	// ------------------------------------------------------------------------------- //
 	// MEMBERS ----------------------------------------------------------------------- //

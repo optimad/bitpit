@@ -13,13 +13,13 @@
 #include <stdint.h>
 
 template <int dim>
-class global;
+class Global;
 
 #include "global_2D.tpp"
 #include "global_3D.tpp"
 
-extern const global<2> global2D;
-extern const global<3> global3D;
+extern const Global<2> global2D;
+extern const Global<3> global3D;
 
 
 #endif /* GLOBAL_HPP_ */

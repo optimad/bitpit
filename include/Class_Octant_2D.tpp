@@ -1,5 +1,3 @@
-//#ifndef CLASS_OCTANT_2D_TPP
-//#define CLASS_OCTANT_2D_TPP
 /*
  * Class_Octant_2D.tpp
  *
@@ -15,7 +13,7 @@ class Class_Octant<2>{
 	// ------------------------------------------------------------------------------- //
 	// FRIENDSHIPS ------------------------------------------------------------------- //
 	template<int dim> friend class Class_Local_Tree;
-	friend class Class_Para_Tree;
+	template<int dim> friend class Class_Para_Tree;
 
 	// ------------------------------------------------------------------------------- //
 	// TYPEDEFS ----------------------------------------------------------------------- //

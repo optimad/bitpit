@@ -5,8 +5,8 @@
  *      Author: edoardo
  */
 
-#ifndef MAP_HPP_
-#define MAP_HPP_
+#ifndef CLASS_MAP_HPP_
+#define CLASS_MAP_HPP_
 
 #include "global.hpp"
 #include "preprocessor_defines.dat"
@@ -25,9 +25,13 @@
 using namespace std;
 
 // =================================================================================== //
+// CLASS DEFINITION                                                                    //
+// =================================================================================== //
+
 
 // Class_Map allows only translation and scaling
 // Default : unit cube with origin in (0,0,0)
+template<int dim>
 class Class_Map{
 
 	// ------------------------------------------------------------------------------- //
@@ -35,6 +39,7 @@ class Class_Map{
 public:
 	double X0, Y0, Z0;
 	double L;
+	Global<dim> globals;
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
@@ -56,15 +61,18 @@ public:
 	double mapVolume(uint32_t const & Volume);
 	void mapCenter(double* & center,
 					vector<double> & mapcenter);
-	void mapNodes(uint32_t (*nodes)[DIM],
+	void mapNodes(uint32_t (*nodes)[3],
 					vector<vector<double> > & mapnodes);
-	void mapNodesIntersection(uint32_t (*nodes)[DIM],
+	void mapNodesIntersection(uint32_t (*nodes)[3],
 					vector<vector<double> > & mapnodes);
 	void mapNormals(vector<int8_t> normal,
 					vector<double> & mapnormal);
 	// ------------------------------------------------------------------------------- //
 
 };
+
+#include "Class_Map.tpp"
+
 // end class_map
 
-#endif /* MAP_HPP_ */
+#endif /* CLASS_MAP_HPP_ */

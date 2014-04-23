@@ -5,8 +5,8 @@
  *      Author: Marco Cisternino
  */
 
-#ifndef CLASS_PARA_TREE_H_
-#define CLASS_PARA_TREE_H_
+#ifndef CLASS_PARA_TREE_HPP_
+#define CLASS_PARA_TREE_HPP_
 
 // =================================================================================== //
 // INCLUDES                                                                            //
@@ -15,7 +15,7 @@
 #include "Class_Octant.hpp"
 #include "Class_Local_Tree.hpp"
 #include "Class_Comm_Buffer.hpp"
-#include "map.hpp"
+#include "Class_Map.hpp"
 #include "Class_Array.hpp"
 #include <cstdint>
 #include <iterator>
@@ -35,8 +35,8 @@ using namespace std;
 template<int dim>
 class Class_Para_Tree{};
 
-//#include "Class_Para_Tree_3D.tpp"
-//#include "Class_Para_Tree_2D.tpp"
+#include "Class_Para_Tree_3D.tpp"
+#include "Class_Para_Tree_2D.tpp"
 //
 //class Class_Para_Tree {
 //

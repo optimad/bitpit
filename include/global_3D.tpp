@@ -10,14 +10,15 @@
 // CLASS SPECIALIZATION                                                                //
 // =================================================================================== //
 template<>
-class global<3>
+class Global<3>
 {
 public:
-	global() : max_length (uint32_t(pow(2.0,MAX_LEVEL_3D))),
+	Global() : max_length (uint32_t(pow(2.0,MAX_LEVEL_3D))),
 	nchildren(8),
 	nfaces(6),
 	nnodes(8),
 	nedges(12),
+	nnodesperface(4),
 	octantBytes(uint8_t(sizeof(uint32_t)*3 + sizeof(uint8_t) + sizeof(int8_t) + (16)*sizeof(bool))),
 	markerBytes(sizeof(int8_t)),
 	levelBytes(sizeof(uint8_t)),
@@ -34,6 +35,7 @@ public:
 	const uint8_t  nfaces;
 	const uint8_t  nedges;
 	const uint8_t  nnodes;
+	const uint8_t  nnodesperface;
 	const uint8_t  octantBytes;
 	const uint8_t  markerBytes;
 	const uint8_t  levelBytes;
