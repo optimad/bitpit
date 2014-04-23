@@ -35,7 +35,7 @@ using namespace std;
 template<int dim>
 class Class_Para_Tree{};
 
-//#include "Class_Para_Tree_3D.tpp"
+#include "Class_Para_Tree_3D.tpp"
 //#include "Class_Para_Tree_2D.tpp"
 //
 //class Class_Para_Tree {
