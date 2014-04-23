@@ -5,8 +5,6 @@
  *      Author: Marco Cisternino
  */
 
-
-{
 // =================================================================================== //
 // CLASS SPECIALIZATION                                                                //
 // =================================================================================== //
@@ -15,7 +13,7 @@ template<>
 class Class_Local_Tree<2>{
 	// ------------------------------------------------------------------------------- //
 	// FRIENDSHIPS ------------------------------------------------------------------- //
-	friend class Class_Para_Tree;
+	template<int dim> friend class Class_Para_Tree;
 
 	// ------------------------------------------------------------------------------- //
 	// TYPEDEFS ----------------------------------------------------------------------- //
@@ -2006,7 +2004,7 @@ public:
 	void computeIntersections() {
 
 		OctantsType::iterator it, obegin, oend;
-		Class_Intersection<2> intersection(*this);
+		Class_Intersection<2> intersection;
 		u32vector neighbours;
 		vector<bool> isghost;
 		uint32_t counter_i, counter_g, counter_b, idx;
@@ -2116,7 +2114,7 @@ public:
 		map<uint32_t, uint32_t> invmapidx;
 		vector<uint32_t> newocts;
 		OctantsType::iterator it, obegin, oend;
-		Class_Intersection<2> intersection(*this);
+		Class_Intersection<2> intersection;
 		u32vector neighbours;
 		vector<bool> isghost;
 		uint32_t counter_g, idx;
@@ -2261,7 +2259,4 @@ public:
 	// =================================================================================== //
 
 
-};//end Class_Local_Tree<2> specialization;
-
-
-}
+};//end Class_Local_Tree<2> specialization
