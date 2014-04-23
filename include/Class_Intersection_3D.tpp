@@ -9,11 +9,6 @@
 // CLASS SPECIALIZATION                                                                //
 // =================================================================================== //
 
-class Class_Octant<3>;
-template<int dim> class Class_Local_Tree;
-class Class_Local_Tree<3>;
-
-
 template<>
 class Class_Intersection<3> {
 	// ------------------------------------------------------------------------------- //
@@ -31,28 +26,17 @@ public:
 	// ------------------------------------------------------------------------------- //
 	// MEMBERS ----------------------------------------------------------------------- //
 
+	uint64_t	size;
 	uint32_t 	owners[2];			// Owner octants of the intersection (first is the internal octant)
 	uint8_t   	iface;				// Index of the face of the first owner
 	bool		finer;				// 0/1 finer octant (if same level =0)
 	bool		isghost;			// The intersection has a member ghost
 	bool		isnew;				// The intersection is new after a mesh adapting?
 
-	Class_Local_Tree<3> *octree;
-
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS AND OPERATORS----------------------------------------------------- //
 
 public:
-	Class_Intersection(Class_Local_Tree<3> & tree){
-		owners[0] = 0;
-		owners[1] = 0;
-		iface = 0;
-		isnew = false;
-		isghost = false;
-		finer = 0;
-		octree = &tree;
-
-	};
 	Class_Intersection(){
 		owners[0] = 0;
 		owners[1] = 0;
@@ -60,11 +44,9 @@ public:
 		isnew = false;
 		isghost = false;
 		finer = 0;
-		octree = NULL;
+		size = 0;
 	};
-	~Class_Intersection(){
-		octree = NULL;
-	};
+	~Class_Intersection(){};
 	Class_Intersection(const Class_Intersection<3> & intersection){
 		owners[0] = intersection.owners[0];
 		owners[1] = intersection.owners[1];
@@ -72,7 +54,7 @@ public:
 		isnew = intersection.isnew;
 		isghost = intersection.isghost;
 		finer = intersection.finer;
-		octree = intersection.octree;
+		size = intersection.size;
 
 	};
 	Class_Intersection<3>& operator =(const Class_Intersection<3> & intersection){
@@ -82,7 +64,7 @@ public:
 		isnew = intersection.isnew;
 		isghost = intersection.isghost;
 		finer = intersection.finer;
-		octree = intersection.octree;
+		size = intersection.size;
 		return *this;
 	};
 	bool operator ==(const Class_Intersection<3> & intersection){
@@ -93,7 +75,7 @@ public:
 		check = check && (isnew == intersection.isnew);
 		check = check && (isghost == intersection.isghost);
 		check = check && (finer == intersection.finer);
-		check = check && (octree == intersection.octree);
+		check = check && (size == intersection.size);
 		return check;
 
 	};
@@ -115,10 +97,7 @@ public:
 		}
 	};
 	uint32_t getSize(){
-		const Class_Octant<3> & oct = octree<3>->
-//				->extractOctant(owners[finer]);
-				//extractOctant(owners[finer]);
-		//return oct.getSize();
+		return size;
 	};
 	uint64_t getArea(){
 

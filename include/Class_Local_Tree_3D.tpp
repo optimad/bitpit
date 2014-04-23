@@ -2244,7 +2244,7 @@ public:
 	void computeIntersections() {
 
 		OctantsType::iterator it, obegin, oend;
-		Class_Intersection<3> intersection(*this);
+		Class_Intersection<3> intersection;
 		u32vector neighbours;
 		vector<bool> isghost;
 		uint32_t counter_i, counter_g, counter_b, idx;
@@ -2354,7 +2354,7 @@ public:
 		map<uint32_t, uint32_t> invmapidx;
 		vector<uint32_t> newocts;
 		OctantsType::iterator it, obegin, oend;
-		Class_Intersection<3> intersection(*this);
+		Class_Intersection<3> intersection;
 		u32vector neighbours;
 		vector<bool> isghost;
 		uint32_t counter_g, idx;
