@@ -114,22 +114,6 @@ public:
 	};
 
 	//-------------------------------------------------------------------------------- //
-	// Debug methods ----------------------------------------------------------------- //
-	void addOctantToTree(Class_Octant<3> octant){
-		octants.push_back(octant);
-		octants.shrink_to_fit();
-	};
-
-private:
-
-	//-------------------------------------------------------------------------------- //
-	// Other Get/Set methods --------------------------------------------------------- //
-
-public:
-
-private:
-
-	//-------------------------------------------------------------------------------- //
 	// Other methods ----------------------------------------------------------------- //
 
 public:
@@ -850,8 +834,8 @@ public:
 				idx--;
 			}
 			father.info[global3D.nfaces+1] = father.info[global3D.nfaces+3] = true;
-			if(global3D.nfaces == 6)
-				father.info[global3D.nfaces+5] = true;
+//			if(global3D.nfaces == 6)
+			father.info[global3D.nfaces+5] = true;
 			octants.resize(nocts-toDelete);
 			octants.push_back(father);
 			octants.shrink_to_fit();

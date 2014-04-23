@@ -35,6 +35,6 @@ template<int dim>
 class Class_Local_Tree{};
 
 #include "Class_Local_Tree_3D.tpp"
-//#include "Class_Local_Tree_2D.tpp"
+#include "Class_Local_Tree_2D.tpp"
 
 #endif /* CLASS_LOCAL_TREE_HPP_ */
