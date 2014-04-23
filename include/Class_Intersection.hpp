@@ -31,7 +31,7 @@ template<int dim>
 class Class_Intersection{};
 
 #include "Class_Intersection_3D.tpp"
-//#include "Class_Intersection_2D.tpp"
+#include "Class_Intersection_2D.tpp"
 
 
 //
