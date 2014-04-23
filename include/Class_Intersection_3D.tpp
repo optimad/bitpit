@@ -26,7 +26,6 @@ public:
 	// ------------------------------------------------------------------------------- //
 	// MEMBERS ----------------------------------------------------------------------- //
 
-	uint64_t	size;
 	uint32_t 	owners[2];			// Owner octants of the intersection (first is the internal octant)
 	uint8_t   	iface;				// Index of the face of the first owner
 	bool		finer;				// 0/1 finer octant (if same level =0)
@@ -44,7 +43,6 @@ public:
 		isnew = false;
 		isghost = false;
 		finer = 0;
-		size = 0;
 	};
 	~Class_Intersection(){};
 	Class_Intersection(const Class_Intersection<3> & intersection){
@@ -54,8 +52,6 @@ public:
 		isnew = intersection.isnew;
 		isghost = intersection.isghost;
 		finer = intersection.finer;
-		size = intersection.size;
-
 	};
 	Class_Intersection<3>& operator =(const Class_Intersection<3> & intersection){
 		owners[0] = intersection.owners[0];
@@ -64,7 +60,6 @@ public:
 		isnew = intersection.isnew;
 		isghost = intersection.isghost;
 		finer = intersection.finer;
-		size = intersection.size;
 		return *this;
 	};
 	bool operator ==(const Class_Intersection<3> & intersection){
@@ -75,7 +70,6 @@ public:
 		check = check && (isnew == intersection.isnew);
 		check = check && (isghost == intersection.isghost);
 		check = check && (finer == intersection.finer);
-		check = check && (size == intersection.size);
 		return check;
 
 	};
@@ -96,15 +90,5 @@ public:
 			normal[i] = global3D.normals[iface][i];
 		}
 	};
-	uint32_t getSize(){
-		return size;
-	};
-	uint64_t getArea(){
 
-	};
-//	void getNodes(u32vector2D & nodes);
-//	uint32_t (*getNodes())[DIM];
-//	void getCenter(vector<double> & center);
-//	double* getCenter();
-//
 }; // end of Class_Intersection_3D.tpp
