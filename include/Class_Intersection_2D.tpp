@@ -1,24 +1,25 @@
 /*
- * Class_Intersection_3D.tpp
+ * Class_Intersection_2D.tpp
  *
  *  Created on: 22/apr/2014
  *      Author: Marco Cisternino
  */
 
+/*
 // =================================================================================== //
 // CLASS SPECIALIZATION                                                                //
 // =================================================================================== //
 
-class Class_Octant<3>;
+//class Class_Octant<2>;
 template<int dim> class Class_Local_Tree;
-class Class_Local_Tree<3>;
+class Class_Local_Tree<2>;
 
 
 template<>
-class Class_Intersection<3> {
+class Class_Intersection<2> {
 	// ------------------------------------------------------------------------------- //
 	// FRIENDSHIPS ------------------------------------------------------------------- //
-	template<int dim> friend class Class_Local_Tree;
+	//template<int dim> friend class Class_Local_Tree;
 	friend class Class_Para_Tree;
 
 	// ------------------------------------------------------------------------------- //
@@ -37,13 +38,13 @@ public:
 	bool		isghost;			// The intersection has a member ghost
 	bool		isnew;				// The intersection is new after a mesh adapting?
 
-	Class_Local_Tree<3> *octree;
+	Class_Local_Tree<2> *octree;
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS AND OPERATORS----------------------------------------------------- //
 
 public:
-	Class_Intersection(Class_Local_Tree<3> & tree){
+	Class_Intersection(Class_Local_Tree<2> & tree){
 		owners[0] = 0;
 		owners[1] = 0;
 		iface = 0;
@@ -65,7 +66,7 @@ public:
 	~Class_Intersection(){
 		octree = NULL;
 	};
-	Class_Intersection(const Class_Intersection<3> & intersection){
+	Class_Intersection(const Class_Intersection<2> & intersection){
 		owners[0] = intersection.owners[0];
 		owners[1] = intersection.owners[1];
 		iface = intersection.iface;
@@ -75,7 +76,7 @@ public:
 		octree = intersection.octree;
 
 	};
-	Class_Intersection<3>& operator =(const Class_Intersection<3> & intersection){
+	Class_Intersection<2>& operator =(const Class_Intersection<2> & intersection){
 		owners[0] = intersection.owners[0];
 		owners[1] = intersection.owners[1];
 		iface = intersection.iface;
@@ -85,7 +86,7 @@ public:
 		octree = intersection.octree;
 		return *this;
 	};
-	bool operator ==(const Class_Intersection<3> & intersection){
+	bool operator ==(const Class_Intersection<2> & intersection){
 		bool check = true;
 		check = check && (owners[0] == intersection.owners[0]);
 		check = check && (owners[1] == intersection.owners[1]);
@@ -109,16 +110,16 @@ public:
 	uint32_t getIn(){						// Get the owner with entering normal
 		return owners[1];
 	};
-	void getNormal(int8_t normal[3]){		// Get the normal of the intersection
-		for (int i=0; i<3; i++){
-			normal[i] = global3D.normals[iface][i];
+	void getNormal(int8_t normal[2]){		// Get the normal of the intersection
+		for (int i=0; i<2; i++){
+			normal[i] = global2D.normals[iface][i];
 		}
 	};
 	uint32_t getSize(){
-		const Class_Octant<3> & oct = octree<3>->
-//				->extractOctant(owners[finer]);
+		const Class_Octant<2> & oct = octree<2>->extractOctant(owners[finer]);
+				//<2>->extractOctant(10);
 				//extractOctant(owners[finer]);
-		//return oct.getSize();
+		return oct.getSize();
 	};
 	uint64_t getArea(){
 
@@ -129,3 +130,5 @@ public:
 //	double* getCenter();
 //
 }; // end of Class_Intersection_3D.tpp
+
+*/

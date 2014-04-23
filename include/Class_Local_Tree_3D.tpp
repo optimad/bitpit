@@ -17,11 +17,11 @@ class Class_Local_Tree<3>{
 	// ------------------------------------------------------------------------------- //
 	// TYPEDEFS ----------------------------------------------------------------------- //
 public:
-	typedef vector< Class_Octant<3> > 	OctantsType;
-	typedef vector<Class_Intersection> 	IntersectionsType;
-	typedef vector<uint32_t>			u32vector;
-	typedef vector<vector<uint32_t>	>	u32vector2D;
-	typedef vector<vector<uint64_t>	>	u64vector2D;
+	typedef vector<Class_Octant<3> > 		OctantsType;
+	typedef vector<Class_Intersection<3> > 	IntersectionsType;
+	typedef vector<uint32_t>				u32vector;
+	typedef vector<vector<uint32_t>	>		u32vector2D;
+	typedef vector<vector<uint64_t>	>		u64vector2D;
 
 
 	// ------------------------------------------------------------------------------- //
@@ -2244,7 +2244,7 @@ public:
 	void computeIntersections() {
 
 		OctantsType::iterator it, obegin, oend;
-		Class_Intersection intersection(*this);
+		Class_Intersection<3> intersection(*this);
 		u32vector neighbours;
 		vector<bool> isghost;
 		uint32_t counter_i, counter_g, counter_b, idx;
@@ -2354,7 +2354,7 @@ public:
 		map<uint32_t, uint32_t> invmapidx;
 		vector<uint32_t> newocts;
 		OctantsType::iterator it, obegin, oend;
-		Class_Intersection intersection(*this);
+		Class_Intersection<3> intersection(*this);
 		u32vector neighbours;
 		vector<bool> isghost;
 		uint32_t counter_g, idx;
