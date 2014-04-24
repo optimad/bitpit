@@ -14,7 +14,7 @@ class Class_Para_Tree<3>{
 	// ------------------------------------------------------------------------------- //
 	// TYPEDEFS ----------------------------------------------------------------------- //
 public:
-	typedef vector<Class_Octant<3> > 		OctantsType;
+	typedef vector<Class_Octant<3> > 	OctantsType;
 	typedef vector<uint32_t>			u32vector;
 	typedef vector<double>				dvector;
 	typedef vector<vector<uint32_t>	>	u32vector2D;
