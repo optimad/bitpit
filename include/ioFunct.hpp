@@ -56,4 +56,16 @@ void writePhysicalTree(const dvector2D & nodes, const u32vector2D & connectivity
 
 // ----------------------------------------------------------------------------------- //
 
+void writeLocalTree(const u32vector2D & nodes, const u32vector2D & connectivity,
+		const u32vector2D & ghostNodes, const u32vector2D & ghostConnectivity,
+		const Class_Para_Tree<3> & ptree, string filename);
+
+// ----------------------------------------------------------------------------------- //
+
+void writePhysicalTree(const dvector2D & nodes, const u32vector2D & connectivity,
+		const dvector2D & ghostNodes, const u32vector2D & ghostConnectivity,
+		const Class_Para_Tree<3> & ptree, string filename);
+
+// ----------------------------------------------------------------------------------- //
+
 #endif

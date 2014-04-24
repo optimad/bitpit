@@ -140,55 +140,64 @@ public:
 		writeLog("---------------------------------------------");
 	};
 
-	// --------------------------------------------------------------------------------------------- //
-	// Basic Get Methods --------------------------------------------------------------------------- //
+	// =============================================================================== //
+	// GET/SET METHODS ----------------------------------------------------------------------- //
 
 public:
-	double			getX(Class_Octant<3>* const oct){
+	double getX(Class_Octant<3>* const oct){
 		return trans.mapX(oct->getX());
 	};
-	double			getY(Class_Octant<3>* const oct){
+
+	double getY(Class_Octant<3>* const oct){
 		return trans.mapY(oct->getY());
 	};
-	double			getZ(Class_Octant<3>* const oct){
+
+	double getZ(Class_Octant<3>* const oct){
 		return trans.mapZ(oct->getZ());
 	};
-	double			getSize(Class_Octant<3>* const oct){		// Get the size of octant if mapped in hypercube
+
+	double getSize(Class_Octant<3>* const oct){		// Get the size of octant if mapped in hypercube
 		return trans.mapSize(oct->getSize());
 	};
-	double			getArea(Class_Octant<3>* const oct){		// Get the face area of octant
+
+	double getArea(Class_Octant<3>* const oct){		// Get the face area of octant
 		return trans.mapArea(oct->getArea());
 	};
-	double			getVolume(Class_Octant<3>* const oct){		// Get the volume of octant
+
+	double getVolume(Class_Octant<3>* const oct){		// Get the volume of octant
 		return trans.mapVolume(oct->getVolume());
 	};
-	void			getCenter(Class_Octant<3>* oct, 			// Get a vector of DIM with the coordinates of the center of octant
-			dvector & center){
+
+	void getCenter(Class_Octant<3>* oct, 			// Get a vector of DIM with the coordinates of the center of octant
+				dvector & center){
 		double* center_ = oct->getCenter();
 		trans.mapCenter(center_, center);
 		delete [] center_;
 		center_ = NULL;
-
 	};
-	void			getNodes(Class_Octant<3>* oct, 			// Get a vector of vector (size [nnodes][DIM]) with the nodes of octant
-			dvector2D & nodes){
+
+	void getNodes(Class_Octant<3>* oct, 			// Get a vector of vector (size [nnodes][DIM]) with the nodes of octant
+				dvector2D & nodes){
 		uint32_t (*nodes_)[3] = oct->getNodes();
 		trans.mapNodes(nodes_, nodes);
 		delete [] nodes_;
 		nodes_ = NULL;
 	};
-	void			getNormal(Class_Octant<3>* oct, 			// Get a vector of vector (size [DIM]) with the normal of the iface
-			uint8_t & iface,
-			dvector & normal){
+
+	void getNormal(Class_Octant<3>* oct, 			// Get a vector of vector (size [DIM]) with the normal of the iface
+					uint8_t & iface,
+					dvector & normal){
 		vector<int8_t> normal_;
 		oct->getNormal(iface, normal_);
 		trans.mapNormals(normal_, normal);
 
 	};
 
-	Class_Octant<3>*	getPointOwner(dvector & point){			// Get the pointer to the octant owner of an input point
-															// (vector<double> with x,y,z). If the point is out of process
-															// return NULL.
+	// =============================================================================== //
+
+	Class_Octant<3>* getPointOwner(dvector & point){			// Get the pointer to the octant owner of an input point
+																// (vector<double> with x,y,z). If the point is out of process
+																// return NULL.
 		uint32_t noctants = octree.octants.size();
 		uint32_t idxtry = noctants/2;
 		uint32_t x, y, z;
@@ -245,25 +254,55 @@ public:
 
 	};
 
-//	double			getSize(Class_Intersection* const inter){		// Get the size of intersection if mapped in hypercube
-//
-//	};
-//	double			getArea(Class_Intersection* const inter){		// Get the face area of intersection
-//
-//	};
-//	void			getCenter(Class_Intersection* const inter, 		// Get a vector of DIM with the coordinates of the center of intersection
-//			dvector & center){
-//
-//	};
-//	void			getNodes(Class_Intersection* const inter, 		// Get a vector of vector (size [nnodes][DIM]) with the nodes of intersection
-//			dvector2D & nodes){
-//
-//	};
-//	void			getNormal(Class_Intersection* const inter, 		// Get a vector of vector (size [DIM]) with the normal of the intersection
-//			dvector & normal){
-//
-//	};
-	// ------------------------------------------------------------------------------- //
+	// =============================================================================== //
+
+	double getSize(Class_Intersection<3>* const inter) {
+		uint32_t Size;
+		Size = octree.extractOctant(inter->owners[inter->finer]).getSize();
+		return trans.mapSize(Size);
+	}
+
+	double getArea(Class_Intersection<3>* const inter) {
+		uint32_t Area;
+		Area = octree.extractOctant(inter->owners[inter->finer]).getArea();
+		return trans.mapArea(Area);
+	}
+
+	void getCenter(Class_Intersection<3>* inter,
+			vector<double>& center) {
+		Class_Octant<3> oct = octree.extractOctant(inter->owners[inter->finer]);
+		double* center_ = oct.getCenter();
+		trans.mapCenter(center_, center);
+		delete [] center_;
+		center_ = NULL;
+	}
+
+	void getNodes(Class_Intersection<3>* const inter,
+			dvector2D & nodes) {
+		Class_Octant<3> oct = octree.extractOctant(inter->owners[inter->finer]);
+		uint8_t iface = inter->iface;
+		uint32_t (*nodes_all)[3] = oct.getNodes();
+		uint32_t (*nodes_)[3] = new uint32_t[global3D.nnodesperface][3];
+		for (int i=0; i<global2D.nnodesperface; i++){
+			for (int j=0; j<3; j++){
+				nodes_[i][j] = nodes_all[global3D.facenode[iface][i]][j];
+			}
+		}
+		trans.mapNodesIntersection(nodes_, nodes);
+		delete [] nodes_;
+		nodes_ = NULL;
+	}
+
+	void getNormal(Class_Intersection<3>* const inter,
+			dvector & normal) {
+		Class_Octant<3> oct = octree.extractOctant(inter->owners[inter->finer]);
+		uint8_t iface = inter->iface;
+		vector<int8_t> normal_;
+		oct.getNormal(iface, normal_);
+		trans.mapNormals(normal_, normal);
+	}
+
+	// =============================================================================== //
 	// METHODS ----------------------------------------------------------------------- //
 
 	void computePartition(uint32_t* partition){ 		// compute octant partition giving the same number of octant to each process and redistributing the reminder
@@ -1479,8 +1518,8 @@ public:
 			updateLoadBalance();
 			setPboundGhosts();
 
-	//		userData.ghostData.resize(octree.size_ghosts,0.0);
-	//		communicate(userData);
+			//		userData.ghostData.resize(octree.size_ghosts,0.0);
+			//		communicate(userData);
 
 		}
 		else
@@ -1804,11 +1843,11 @@ public:
 			map<int,int>::iterator ritend = recvBufferSizePerProc.end();
 			for(map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
 				recvBuffers[rit->first] = Class_Comm_Buffer(rit->second,'a');
-	//			uint32_t nofNewPerProc = (uint32_t)(rit->second / (uint32_t)ceil((double)octantBytes / (double)(CHAR_BIT/8)));
-	//			if(rit->first < rank)
-	//				nofNewHead += nofNewPerProc;
-	//			else if(rit->first > rank)
-	//				nofNewTail += nofNewPerProc;
+				//			uint32_t nofNewPerProc = (uint32_t)(rit->second / (uint32_t)ceil((double)octantBytes / (double)(CHAR_BIT/8)));
+				//			if(rit->first < rank)
+				//				nofNewHead += nofNewPerProc;
+				//			else if(rit->first > rank)
+				//				nofNewTail += nofNewPerProc;
 			}
 
 			nReq = 0;
@@ -1949,8 +1988,8 @@ public:
 			updateLoadBalance();
 			setPboundGhosts();
 
-	//		userData.ghostData.resize(octree.size_ghosts,0.0);
-	//		communicate(userData);
+			//		userData.ghostData.resize(octree.size_ghosts,0.0);
+			//		communicate(userData);
 
 		}
 		else
@@ -2274,11 +2313,11 @@ public:
 			map<int,int>::iterator ritend = recvBufferSizePerProc.end();
 			for(map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
 				recvBuffers[rit->first] = Class_Comm_Buffer(rit->second,'a');
-	//			uint32_t nofNewPerProc = (uint32_t)(rit->second / (uint32_t)ceil((double)octantBytes / (double)(CHAR_BIT/8)));
-	//			if(rit->first < rank)
-	//				nofNewHead += nofNewPerProc;
-	//			else if(rit->first > rank)
-	//				nofNewTail += nofNewPerProc;
+				//			uint32_t nofNewPerProc = (uint32_t)(rit->second / (uint32_t)ceil((double)octantBytes / (double)(CHAR_BIT/8)));
+				//			if(rit->first < rank)
+				//				nofNewHead += nofNewPerProc;
+				//			else if(rit->first > rank)
+				//				nofNewTail += nofNewPerProc;
 			}
 
 			nReq = 0;
@@ -2689,7 +2728,7 @@ public:
 	//=================================================================================//
 
 	bool adapt(u32vector & mapidx){  					//call refine and coarse on the local tree
-														// mapidx[i] = index in old octants vector of the i-th octant (index of father or first child if octant is new after refine or coarse)
+		// mapidx[i] = index in old octants vector of the i-th octant (index of father or first child if octant is new after refine or coarse)
 		bool globalDone = false, localDone = false;
 		uint32_t nocts = octree.getNumOctants();
 		vector<Class_Octant<3> >::iterator iter, iterend = octree.octants.end();
@@ -3106,6 +3145,7 @@ public:
 		computeghostsConnectivity();
 	};
 
-};
+	// =================================================================================== //
 
+};
 

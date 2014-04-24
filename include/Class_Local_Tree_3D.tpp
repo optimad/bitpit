@@ -1025,7 +1025,7 @@ public:
 
 	// =================================================================================== //
 
-	void computeghostsConnectivity(){				// Computes ghosts nodes vector and connectivity of ghosts octants of local tree
+	void computeGhostsConnectivity(){				// Computes ghosts nodes vector and connectivity of ghosts octants of local tree
 		map<uint64_t, vector<uint32_t> > mapnodes;
 		map<uint64_t, vector<uint32_t> >::iterator iter, iterend;
 		uint32_t i, k, counter;
@@ -1081,16 +1081,16 @@ public:
 
 	// =================================================================================== //
 
-	void clearghostsConnectivity(){					// Clear ghosts nodes vector and connectivity of ghosts octants of local tree
+	void clearGhostsConnectivity(){					// Clear ghosts nodes vector and connectivity of ghosts octants of local tree
 		u32vector2D().swap(ghostsnodes);
 		u32vector2D().swap(ghostsconnectivity);
 	};
 
 	// =================================================================================== //
 
-	void updateghostsConnectivity(){					// Update ghosts nodes vector and connectivity of ghosts octants of local tree
-		clearghostsConnectivity();
-		computeghostsConnectivity();
+	void updateGhostsConnectivity(){					// Update ghosts nodes vector and connectivity of ghosts octants of local tree
+		clearGhostsConnectivity();
+		computeGhostsConnectivity();
 	};
 
 	// =================================================================================== //

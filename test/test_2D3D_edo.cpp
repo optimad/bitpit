@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
 			clock_t start = clock();
 			clock_t end = clock();
 
-			ptree.octree.setBalance(0,true);
+			ptree.octree.setBalance(0,false);
 			ptree.octree.setMarker(0,3);
 			bool done = ptree.adapt();
 			ptree.loadBalance();
@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
 			double R4 = double(global2D.max_length)*0.025;
 			vector<double> C5 = {double(global2D.max_length)*0.675, double(global2D.max_length)*0.625, 0.0};
 			double R5 = double(global2D.max_length)*0.025;
-			for (int l=0; l<8; l++){
+			for (int l=0; l<10; l++){
 				for (int i=0; i<nocts; i++){
 					double* center;
 					Class_Octant<2> oct = ptree.octree.extractOctant(i);
@@ -101,8 +101,9 @@ int main(int argc, char *argv[]) {
 	//			ptree.loadBalance();
 	//			nocts = ptree.octree.getNumOctants();
 
-				ptree.octree.updateConnectivity();
-				writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,("Pablo_"+to_string(l+3)));
+//				ptree.octree.updateConnectivity();
+//				ptree.octree.updateGhostsConnectivity();
+//				writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,("Pablo_"+to_string(l+3)));
 
 				end = clock();
 				float seconds = (float)(end - start) / CLOCKS_PER_SEC;
