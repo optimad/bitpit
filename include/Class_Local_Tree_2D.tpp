@@ -389,8 +389,9 @@ public:
 				while(marker < 0 & octants[idx].buildFather() == father & idx >= 0){
 					nbro++;
 					marker = octants[idx].getMarker();
-					if (markerfather < octants[idx+offset+idx2].getMarker()+1){
-						markerfather = octants[idx+offset+idx2].getMarker()+1;
+					//TODO debug
+					if (markerfather < octants[idx].getMarker()+1){
+						markerfather = octants[idx].getMarker()+1;
 					}
 					nend++;
 					idx--;
