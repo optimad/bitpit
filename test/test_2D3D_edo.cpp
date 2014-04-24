@@ -26,13 +26,14 @@ int main(int argc, char *argv[]) {
 			clock_t start = clock();
 			clock_t end = clock();
 
-			ptree.octree.setBalance(0,false);
-			ptree.octree.setMarker(0,3);
+			ptree.octree.setBalance(0,true);
+			ptree.octree.setMarker(0,4);
 			bool done = ptree.adapt();
 			ptree.loadBalance();
 			uint64_t nocts = ptree.octree.getNumOctants();
 
-			// TORUS TEST
+
+			// LOGO TEST
 			vector<double> C1 = {double(global2D.max_length)*0.5, double(global2D.max_length)*0.5, 0.0};
 			double R1 = double(global2D.max_length)*0.4;
 			vector<double> C2 = {double(global2D.max_length)*0.35, double(global2D.max_length)*0.65, 0.0};
@@ -43,7 +44,8 @@ int main(int argc, char *argv[]) {
 			double R4 = double(global2D.max_length)*0.025;
 			vector<double> C5 = {double(global2D.max_length)*0.675, double(global2D.max_length)*0.625, 0.0};
 			double R5 = double(global2D.max_length)*0.025;
-			for (int l=0; l<10; l++){
+			int nref = 7;
+			for (int l=0; l<nref; l++){
 				for (int i=0; i<nocts; i++){
 					double* center;
 					Class_Octant<2> oct = ptree.octree.extractOctant(i);
@@ -90,20 +92,10 @@ int main(int argc, char *argv[]) {
 				ptree.loadBalance();
 				nocts = ptree.octree.getNumOctants();
 
-	//		// RANDOM TEST
-	//		for (int l=0; l<9; l++){
-	//			for (int i=0; i<nocts/3; i++){
-	//				int j = rand() %nocts;
-	//				ptree.octree.setMarker(j,1);
-	//			}
-	//			ptree.balance21();
-	//			ptree.adapt();
-	//			ptree.loadBalance();
-	//			nocts = ptree.octree.getNumOctants();
 
-//				ptree.octree.updateConnectivity();
+				ptree.octree.updateConnectivity();
 //				ptree.octree.updateGhostsConnectivity();
-//				writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,("Pablo_"+to_string(l+3)));
+				writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,("Pablo_"+to_string(l+3)));
 
 				end = clock();
 				float seconds = (float)(end - start) / CLOCKS_PER_SEC;
@@ -114,6 +106,49 @@ int main(int argc, char *argv[]) {
 				writeLog(" ");
 				writeLog("---------------------------------------------");
 			}
+
+			for (int l=nref+1; l<nref+8; l++){
+				for (int i=0; i<nocts; i++){
+					double* center;
+					Class_Octant<2> oct = ptree.octree.extractOctant(i);
+					center = oct.getCenter();
+					//				if (sqrt(pow((center[0]-double(global2D.max_length)*0.5),2.0)+pow((center[1]-double(global2D.max_length)*0.5),2.0)+pow((center[2]-double(global2D.max_length)*0.5),2.0)) <= double(global2D.max_length)*0.4){
+					if((pow((center[0]-C2[0]),2.0)+pow((center[1]-C2[1]),2.0)+pow((center[2]-C2[2]),2.0) <= pow(R2,2.0))){
+						ptree.octree.setMarker(i,-1);
+						ptree.octree.setBalance(i,true);
+					}
+					if((pow((center[0]-C3[0]),2.0)+pow((center[1]-C3[1]),2.0)+pow((center[2]-C3[2]),2.0) <= pow(R3,2.0))){
+						ptree.octree.setMarker(i,-1);
+						ptree.octree.setBalance(i,true);
+					}
+					if((global2D.max_length*0.1*sin(4.0*M_PI*center[0]/global2D.max_length + M_PI*0.5) + global2D.max_length*0.4 <= center[1]+5.5*oct.getSize())
+						 && (global2D.max_length*0.1*sin(4.0*M_PI*center[0]/global2D.max_length + M_PI*0.5) + global2D.max_length*0.4 >= center[1]-5.5*oct.getSize())){
+						ptree.octree.setMarker(i,-1);
+						ptree.octree.setBalance(i,true);
+					}
+					delete[] center;
+				}
+				bool done = ptree.adapt();
+				ptree.loadBalance();
+				nocts = ptree.octree.getNumOctants();
+
+
+
+				ptree.octree.updateConnectivity();
+//				ptree.octree.updateGhostsConnectivity();
+				writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,("Pablo_"+to_string(l+3)));
+
+				end = clock();
+				float seconds = (float)(end - start) / CLOCKS_PER_SEC;
+				writeLog(" ");
+				writeLog("---------------------------------------------");
+				writeLog(" ");
+				writeLog(" CPU time (sec)			:	"+to_string(seconds));
+				writeLog(" ");
+				writeLog("---------------------------------------------");
+			}
+
+
 		}
 
 	MPI::Finalize();

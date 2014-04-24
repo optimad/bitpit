@@ -307,7 +307,7 @@ public:
 				father = octants[idx].buildFather();
 				// Check if family is to be refined
 				for (idx2=idx; idx2<idx+global2D.nchildren; idx2++){
-					if (idx2<nocts-1){
+					if (idx2<nocts){
 						if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
 							nbro++;
 						}
@@ -408,6 +408,7 @@ public:
 					}
 				}
 			}
+
 			if (nend != 0){
 				for (idx=0; idx < nend; idx++){
 					for (iface=0; iface<global2D.nfaces; iface++){
@@ -646,7 +647,7 @@ public:
 				father = octants[idx].buildFather();
 				// Check if family is to be refined
 				for (idx2=idx; idx2<idx+global2D.nchildren; idx2++){
-					if (idx2<nocts-1){
+					if (idx2<nocts){
 						if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
 							nbro++;
 						}
