@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
 				writeLog("---------------------------------------------");
 			}
 
-			for (int l=nref+1; l<nref+8; l++){
+			for (int l=nref+1; l<nref+2; l++){
 				for (int i=0; i<nocts; i++){
 					double* center;
 					Class_Octant<2> oct = ptree.octree.extractOctant(i);
