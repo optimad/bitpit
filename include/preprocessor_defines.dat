@@ -1,5 +1,5 @@
 #ifndef MAX_LEVEL_2D
-#define MAX_LEVEL_2D 30
+#define MAX_LEVEL_2D 11
 #endif
 
 #ifndef MAX_LEVEL_3D
