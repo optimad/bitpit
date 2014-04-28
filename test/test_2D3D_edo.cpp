@@ -107,26 +107,28 @@ int main(int argc, char *argv[]) {
 				writeLog("---------------------------------------------");
 			}
 
-			for (int l=nref+1; l<nref+3; l++){
+			for (int l=nref+1; l<nref+2; l++){
 				for (int i=0; i<nocts; i++){
 					double* center;
 					Class_Octant<2> oct = ptree.octree.extractOctant(i);
-					center = oct.getCenter();
-					//				if (sqrt(pow((center[0]-double(global2D.max_length)*0.5),2.0)+pow((center[1]-double(global2D.max_length)*0.5),2.0)+pow((center[2]-double(global2D.max_length)*0.5),2.0)) <= double(global2D.max_length)*0.4){
-					if((pow((center[0]-C2[0]),2.0)+pow((center[1]-C2[1]),2.0)+pow((center[2]-C2[2]),2.0) <= pow(R2,2.0))){
+//					center = oct.getCenter();
+//					//				if (sqrt(pow((center[0]-double(global2D.max_length)*0.5),2.0)+pow((center[1]-double(global2D.max_length)*0.5),2.0)+pow((center[2]-double(global2D.max_length)*0.5),2.0)) <= double(global2D.max_length)*0.4){
+//					if((pow((center[0]-C2[0]),2.0)+pow((center[1]-C2[1]),2.0)+pow((center[2]-C2[2]),2.0) <= pow(R2,2.0))){
+//						ptree.octree.setMarker(i,-1);
+//						ptree.octree.setBalance(i,true);
+//					}
+//					if((pow((center[0]-C3[0]),2.0)+pow((center[1]-C3[1]),2.0)+pow((center[2]-C3[2]),2.0) <= pow(R3,2.0))){
+//						ptree.octree.setMarker(i,-1);
+//						ptree.octree.setBalance(i,true);
+//					}
+//					if((global2D.max_length*0.1*sin(4.0*M_PI*center[0]/global2D.max_length + M_PI*0.5) + global2D.max_length*0.4 <= center[1]+5.5*oct.getSize())
+//						 && (global2D.max_length*0.1*sin(4.0*M_PI*center[0]/global2D.max_length + M_PI*0.5) + global2D.max_length*0.4 >= center[1]-5.5*oct.getSize())){
+//						ptree.octree.setMarker(i,-1);
+//						ptree.octree.setBalance(i,true);
+//					}
+//					delete[] center;
+					if(oct.getLevel()==ptree.max_depth)
 						ptree.octree.setMarker(i,-1);
-						ptree.octree.setBalance(i,true);
-					}
-					if((pow((center[0]-C3[0]),2.0)+pow((center[1]-C3[1]),2.0)+pow((center[2]-C3[2]),2.0) <= pow(R3,2.0))){
-						ptree.octree.setMarker(i,-1);
-						ptree.octree.setBalance(i,true);
-					}
-					if((global2D.max_length*0.1*sin(4.0*M_PI*center[0]/global2D.max_length + M_PI*0.5) + global2D.max_length*0.4 <= center[1]+5.5*oct.getSize())
-						 && (global2D.max_length*0.1*sin(4.0*M_PI*center[0]/global2D.max_length + M_PI*0.5) + global2D.max_length*0.4 >= center[1]-5.5*oct.getSize())){
-						ptree.octree.setMarker(i,-1);
-						ptree.octree.setBalance(i,true);
-					}
-					delete[] center;
 				}
 				bool done = ptree.adapt();
 				ptree.loadBalance();
