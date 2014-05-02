@@ -17,6 +17,7 @@
 #include <vector>
 #include <string.h>
 #include "inlinedFunct.hpp"
+#include <iostream>
 
 // =================================================================================== //
 // NAME SPACES                                                                         //
