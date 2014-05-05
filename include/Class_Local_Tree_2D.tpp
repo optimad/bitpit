@@ -560,7 +560,8 @@ public:
 		octants.resize(nocts-offset);
 		octants.shrink_to_fit();
 		nocts = octants.size();
-		mapidx.resize(nocts-offset);
+		//mapidx.resize(nocts-offset);
+		mapidx.resize(nocts);
 		mapidx.shrink_to_fit();
 
 
