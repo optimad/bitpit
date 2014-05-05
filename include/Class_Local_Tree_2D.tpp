@@ -2048,6 +2048,7 @@ public:
 		}
 
 		// Loop on octants
+		idx=0;
 		obegin = octants.begin();
 		oend = octants.end();
 		for (it = obegin; it != oend; it++){
