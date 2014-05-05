@@ -128,7 +128,7 @@ public:
 		// Local variables
 		vector<uint32_t> last_child_index;
 		Class_Octant<2>* children;
-		uint32_t idx, nocts;
+		uint32_t idx, nocts, ilastch;
 		uint32_t offset = 0, blockidx;
 		uint8_t nchm1 = global2D.nchildren-1, ich, iface;
 		bool dorefine = false;
@@ -141,18 +141,21 @@ public:
 			}
 			else{
 	//			octants[idx].info[8] = false;
-				if (octants[idx].marker > 0)
+				if (octants[idx].marker > 0){
 					octants[idx].marker = 0;
+					octants[idx].info[11] = true;
+				}
 			}
 		}
 		if (offset > 0){
 			octants.resize(octants.size()+offset);
 			blockidx = last_child_index[0]-nchm1;
 			idx = octants.size();
+			ilastch = last_child_index.size()-1;
 			while (idx>blockidx){
 				idx--;
-				//TODO Sostituire questo if con il controllo su last_index_child
-				if(octants[idx-offset].getMarker() > 0 && octants[idx-offset].getLevel() < MAX_LEVEL_2D){
+				// TODO LASTINDEX FARLO ANCHE PER ALTRI REFINE E 3D
+				if(idx == last_child_index[ilastch]){
 					children = octants[idx-offset].buildChildren();
 					for (ich=0; ich<global2D.nchildren; ich++){
 						octants[idx-ich] = (children[nchm1-ich]);
@@ -168,6 +171,9 @@ public:
 						dorefine = true;
 					}
 					delete []children;
+					if (ilastch != 0){
+							ilastch--;
+					}
 				}
 				else {
 					octants[idx] = octants[idx-offset];
@@ -175,21 +181,7 @@ public:
 			}
 		}
 		octants.shrink_to_fit();
-
-		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si può trovare la maniera di inserirlo nel loop precedente
-		pborders.clear();
 		nocts = octants.size();
-		pborders.reserve(int(pow(double(nocts),1.0/2.0)*double(global2D.nfaces)));
-		for(idx=0; idx<nocts; idx++){
-			for(iface=0; iface<global2D.nfaces; iface++){
-				if (octants[idx].info[iface+global2D.nfaces]){
-					pborders.push_back(idx);
-					break;
-				}
-			}
-		}
-		pborders.shrink_to_fit();
 
 		setFirstDesc();
 		setLastDesc();
@@ -225,7 +217,6 @@ public:
 		nocts   = octants.size();
 		size_ghosts = ghosts.size();
 
-
 		// Init first and last desc (even if already calculated)
 		setFirstDesc();
 		setLastDesc();
@@ -234,70 +225,10 @@ public:
 
 		// Set index for start and end check for ghosts
 		if (ghosts.size()){
-			while(idx1_gh < size_ghosts && ghosts[idx1_gh].computeMorton() < first_desc.computeMorton()){
-				idx1_gh++;
-			}
-			idx1_gh = max(0, idx1_gh-1);
-			while(idx2_gh < size_ghosts && ghosts[idx2_gh].computeMorton() < last_desc.computeMorton()){
+			while(idx2_gh < size_ghosts && ghosts[idx2_gh].computeMorton() <= last_desc.computeMorton()){
 				idx2_gh++;
 			}
 			idx2_gh = min(int(size_ghosts-1), idx2_gh);
-
-			// Start on ghosts
-			if ((ghosts[idx1_gh].getMarker() < 0) & (octants[0].getMarker() < 0)){
-				father = ghosts[idx1_gh].buildFather();
-				nbro = 0;
-				idx = idx1_gh;
-				marker = ghosts[idx].getMarker();
-				while(marker < 0 & ghosts[idx].buildFather() == father){
-					nbro++;
-					marker = ghosts[idx].getMarker();
-					idx--;
-					if (idx<0){
-						break;
-					}
-				}
-				nstart = 0;
-				idx = 0;
-				marker = octants[idx].getMarker();
-				while(marker<0 & octants[idx].buildFather() == father){
-					nbro++;
-					marker = octants[idx].getMarker();
-					nstart++;
-					idx++;
-					if (idx==nocts){
-						break;
-					}
-				}
-				if (nbro == global2D.nchildren){
-	//				offset = nstart;
-					// For update pbound of neighbours only check
-					// the odd faces of new father (placed nstart-times
-					// in the first nstart positions of octants)
-					// If there is father after coarse will be the first
-					// element of local octants (lowest Morton)
-	/*
-					for (int i=0; i<nstart; i++){
-						octants[i] = father;
-					}
-	*/
-					uint32_t	 sizeneigh;
-					u32vector    neigh;
-					vector<bool> isghost;
-					for (iface=0; iface<2; iface++){
-						uint8_t oddface = ((iface*2)+1);
-						findNeighbours(nstart-1, oddface, neigh, isghost);
-						sizeneigh = neigh.size();
-						for(int i=0; i<sizeneigh; i++){
-							if (!isghost[i])
-								octants[neigh[i]].setPbound(global2D.oppface[oddface], true);
-						}
-					}
-				}
-				else{
-					nstart = 0;
-				}
-			}
 		}
 
 		// Check and coarse internal octants
@@ -305,7 +236,7 @@ public:
 			if(octants[idx].getMarker() < 0 && octants[idx].getLevel() > 0){
 				nbro = 0;
 				father = octants[idx].buildFather();
-				// Check if family is to be refined
+				// Check if family is to be coarsened
 				for (idx2=idx; idx2<idx+global2D.nchildren; idx2++){
 					if (idx2<nocts){
 						if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
@@ -321,12 +252,13 @@ public:
 				else{
 					if (idx < (nocts>global2D.nchildren)*(nocts-global2D.nchildren)){
 						octants[idx].setMarker(0);
+						octants[idx].info[11] = true;
 					}
 				}
 			}
-			else{
-	//			octants[idx].info[13] = false;
-			}
+//			else{
+//	//			octants[idx].info[13] = false;
+//			}
 		}
 		//TODO Da mettere dentro il primo ciclo per renderlo meno costoso
 		if (nidx!=0){
@@ -336,20 +268,22 @@ public:
 				if (idx+offset == first_child_index[nidx]){
 					markerfather = -MAX_LEVEL_2D;
 					father = octants[idx+offset].buildFather();
+					for (int iii=0; iii<12; iii++){
+						father.info[iii] = false;
+					}
 					for(idx2=0; idx2<global2D.nchildren; idx2++){
 						if (markerfather < octants[idx+offset+idx2].getMarker()+1){
 							markerfather = octants[idx+offset+idx2].getMarker()+1;
 						}
-						for (iface=0; iface<global2D.nfaces; iface++){
-							father.info[iface] = (father.info[iface] || octants[idx+offset+idx2].info[iface]);
-							father.info[iface+global2D.nfaces] = (father.info[iface+global2D.nfaces] || octants[idx+offset+idx2].info[iface+global2D.nfaces]);
+						for (int iii=0; iii<12; iii++){
+							father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
 						}
 					}
 					father.info[9] = true;
-					father.setMarker(markerfather);
 					if (markerfather < 0){
 						docoarse = true;
 					}
+					father.setMarker(markerfather);
 					octants[idx] = father;
 					offset += nchm1;
 					nidx++;
@@ -363,18 +297,17 @@ public:
 		octants.shrink_to_fit();
 		nocts = octants.size();
 
-
 		// End on ghosts
 		if (ghosts.size() && nocts > 0){
-			if ((ghosts[idx2_gh].getMarker() < 0) & (octants[nocts-1].getMarker() < 0)){
+			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
 				father = ghosts[idx2_gh].buildFather();
-				markerfather = -MAX_LEVEL_2D;
+				markerfather = ghosts[idx2_gh].getMarker()+1;//-MAX_LEVEL_2D;
 				nbro = 0;
 				idx = idx2_gh;
 				marker = ghosts[idx].getMarker();
-				while(marker < 0 & ghosts[idx].buildFather() == father){
+				while(marker < 0 && ghosts[idx].buildFather() == father){
 					nbro++;
-					marker = ghosts[idx].getMarker();
+					//TODO CAMBIATO IDX DA CAMBIARE ANCHE NELLE ALTRE COARSE!!!
 					if (markerfather < ghosts[idx].getMarker()+1){
 						markerfather = ghosts[idx].getMarker()+1;
 					}
@@ -382,19 +315,19 @@ public:
 					if(idx == size_ghosts){
 						break;
 					}
+					marker = ghosts[idx].getMarker();
 				}
 				nend = 0;
 				idx = nocts-1;
 				marker = octants[idx].getMarker();
-				while(marker < 0 & octants[idx].buildFather() == father & idx >= 0){
+				while(marker < 0 && octants[idx].buildFather() == father && idx >= 0){
 					nbro++;
-					marker = octants[idx].getMarker();
-					//TODO debug
+					nend++;
 					if (markerfather < octants[idx].getMarker()+1){
 						markerfather = octants[idx].getMarker()+1;
 					}
-					nend++;
 					idx--;
+					marker = octants[idx].getMarker();
 					if (idx<0){
 						break;
 					}
@@ -406,44 +339,31 @@ public:
 					nend = 0;
 					for(int ii=nocts-global2D.nchildren; ii<nocts; ii++){
 						octants[ii].setMarker(0);
+						octants[ii].info[11] = true;
 					}
 				}
 			}
 
 			if (nend != 0){
+				for (int iii=0; iii<12; iii++){
+					father.info[iii] = false;
+				}
 				for (idx=0; idx < nend; idx++){
-					for (iface=0; iface<global2D.nfaces; iface++){
-						father.info[iface] = (father.info[iface] || octants[nocts-idx].info[iface]);
-						father.info[iface+global2D.nfaces] = (father.info[iface+global2D.nfaces] || octants[nocts-idx].info[iface+global2D.nfaces]);
+					for (int iii=0; iii<12; iii++){
+						father.info[iii] = father.info[iii] || octants[nocts-idx-1].info[iii];
 					}
 				}
 				father.info[9] = true;
-				father.setMarker(markerfather);
 				if (markerfather < 0){
 					docoarse = true;
 				}
+				father.setMarker(markerfather);
 				octants.resize(nocts-offset);
 				octants.push_back(father);
 				octants.shrink_to_fit();
 				nocts = octants.size();
 			}
-
 		}
-
-		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si può trovare la maniera di inserirlo nel loop precedente
-		pborders.clear();
-		nocts = octants.size();
-		pborders.reserve(int(pow(double(nocts),1.0/2.0)*double(global2D.nfaces)));
-		for(idx=0; idx<nocts; idx++){
-			for(iface=0; iface<global2D.nfaces; iface++){
-				if (octants[idx].info[iface+global2D.nfaces]){
-					pborders.push_back(idx);
-					break;
-				}
-			}
-		}
-		pborders.shrink_to_fit();
 
 		// Set final first and last desc
 		if(nocts>0){
@@ -461,7 +381,7 @@ public:
 		// Local variables
 		vector<uint32_t> last_child_index;
 		Class_Octant<2>* children;
-		uint32_t idx, nocts;
+		uint32_t idx, nocts, ilastch;
 		uint32_t offset = 0, blockidx;
 		uint8_t nchm1 = global2D.nchildren-1, ich, iface;
 		bool dorefine = false;
@@ -473,9 +393,11 @@ public:
 				offset += nchm1;
 			}
 			else{
-	//			octants[idx].info[8] = false;
-				if (octants[idx].marker > 0)
+				//			octants[idx].info[8] = false;
+				if (octants[idx].marker > 0){
 					octants[idx].marker = 0;
+					octants[idx].info[11] = true;
+				}
 			}
 		}
 		if (offset > 0){
@@ -485,11 +407,11 @@ public:
 			octants.resize(octants.size()+offset);
 			blockidx = last_child_index[0]-nchm1;
 			idx = octants.size();
-			//while (idx>blockidx){
-			while (idx>0){
+			ilastch = last_child_index.size()-1;
+			while (idx>blockidx){
+//			while (idx>0){
 				idx--;
-				//TODO Sostituire questo if con il controllo su last_index_child
-				if(octants[idx-offset].getMarker() > 0 && octants[idx-offset].getLevel() < MAX_LEVEL_2D){
+				if(idx == last_child_index[ilastch]){
 					children = octants[idx-offset].buildChildren();
 					for (ich=0; ich<global2D.nchildren; ich++){
 						octants[idx-ich] = (children[nchm1-ich]);
@@ -506,6 +428,9 @@ public:
 						dorefine = true;
 					}
 					delete []children;
+					if (ilastch != 0){
+							ilastch--;
+					}
 				}
 				else {
 					octants[idx] = octants[idx-offset];
@@ -514,21 +439,7 @@ public:
 			}
 		}
 		octants.shrink_to_fit();
-
-		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si può trovare la maniera di inserirlo nel loop precedente
-		pborders.clear();
 		nocts = octants.size();
-		pborders.reserve(int(pow(double(nocts),1.0/2.0)*double(global2D.nfaces)));
-		for(idx=0; idx<nocts; idx++){
-			for(iface=0; iface<global2D.nfaces; iface++){
-				if (octants[idx].info[iface+global2D.nfaces]){
-					pborders.push_back(idx);
-					break;
-				}
-			}
-		}
-		pborders.shrink_to_fit();
 
 		setFirstDesc();
 		setLastDesc();
@@ -575,70 +486,10 @@ public:
 
 		// Set index for start and end check for ghosts
 		if (ghosts.size()){
-			while(idx1_gh < size_ghosts && ghosts[idx1_gh].computeMorton() < first_desc.computeMorton()){
-				idx1_gh++;
-			}
-			idx1_gh = max(0, idx1_gh-1);
 			while(idx2_gh < size_ghosts && ghosts[idx2_gh].computeMorton() < last_desc.computeMorton()){
 				idx2_gh++;
 			}
 			idx2_gh = min(int(size_ghosts-1), idx2_gh);
-
-			// Start on ghosts
-			if ((ghosts[idx1_gh].getMarker() < 0) & (octants[0].getMarker() < 0)){
-				father = ghosts[idx1_gh].buildFather();
-				nbro = 0;
-				idx = idx1_gh;
-				marker = ghosts[idx].getMarker();
-				while(marker < 0 & ghosts[idx].buildFather() == father){
-					nbro++;
-					marker = ghosts[idx].getMarker();
-					idx--;
-					if (idx<0){
-						break;
-					}
-				}
-				nstart = 0;
-				idx = 0;
-				marker = octants[idx].getMarker();
-				while(marker<0 & octants[idx].buildFather() == father){
-					nbro++;
-					marker = octants[idx].getMarker();
-					nstart++;
-					idx++;
-					if (idx==nocts){
-						break;
-					}
-				}
-				if (nbro == global2D.nchildren){
-	//				offset = nstart;
-					// For update pbound of neighbours only check
-					// the odd faces of new father (placed nstart-times
-					// in the first nstart positions of octants)
-					// If there is father after coarse will be the first
-					// element of local octants (lowest Morton)
-	/*
-					for (int i=0; i<nstart; i++){
-						octants[i] = father;
-					}
-	*/
-					uint32_t	 sizeneigh;
-					u32vector    neigh;
-					vector<bool> isghost;
-					for (iface=0; iface<2; iface++){
-						uint8_t oddface = ((iface*2)+1);
-						findNeighbours(nstart-1, oddface, neigh, isghost);
-						sizeneigh = neigh.size();
-						for(int i=0; i<sizeneigh; i++){
-							if (!isghost[i])
-								octants[neigh[i]].setPbound(global2D.oppface[oddface], true);
-						}
-					}
-				}
-				else{
-					nstart = 0;
-				}
-			}
 		}
 
 		// Check and coarse internal octants
@@ -662,12 +513,13 @@ public:
 				else{
 					if (idx < (nocts>global2D.nchildren)*(nocts-global2D.nchildren)){
 						octants[idx].setMarker(0);
+						octants[idx].info[11] = true;
 					}
 				}
 			}
-			else{
-	//			octants[idx].info[13] = false;
-			}
+//			else{
+//	//			octants[idx].info[13] = false;
+//			}
 		}
 		//TODO Da mettere dentro il primo ciclo per renderlo meno costoso
 		if (nidx!=0){
@@ -678,20 +530,22 @@ public:
 				if (idx+offset == first_child_index[nidx]){
 					markerfather = -MAX_LEVEL_2D;
 					father = octants[idx+offset].buildFather();
+					for (int iii=0; iii<12; iii++){
+						father.info[iii] = false;
+					}
 					for(idx2=0; idx2<global2D.nchildren; idx2++){
 						if (markerfather < octants[idx+offset+idx2].getMarker()+1){
 							markerfather = octants[idx+offset+idx2].getMarker()+1;
 						}
-						for (iface=0; iface<global2D.nfaces; iface++){
-							father.info[iface] = (father.info[iface] || octants[idx+offset+idx2].info[iface]);
-							father.info[iface+global2D.nfaces] = (father.info[iface+global2D.nfaces] || octants[idx+offset+idx2].info[iface+global2D.nfaces]);
+						for (int iii=0; iii<12; iii++){
+							father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
 						}
 					}
 					father.info[9] = true;
-					father.setMarker(markerfather);
 					if (markerfather < 0){
 						docoarse = true;
 					}
+					father.setMarker(markerfather);
 					octants[idx] = father;
 					mapidx[idx] = mapidx[idx+offset];
 					offset += nchm1;
@@ -712,15 +566,15 @@ public:
 
 		// End on ghosts
 		if (ghosts.size() && nocts > 0){
-			if ((ghosts[idx2_gh].getMarker() < 0) & (octants[nocts-1].getMarker() < 0)){
+			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
 				father = ghosts[idx2_gh].buildFather();
-				markerfather = -MAX_LEVEL_2D;
+				markerfather = ghosts[idx2_gh].getMarker()+1;//-MAX_LEVEL_2D;
 				nbro = 0;
 				idx = idx2_gh;
 				marker = ghosts[idx].getMarker();
-				while(marker < 0 & ghosts[idx].buildFather() == father){
+				while(marker < 0 && ghosts[idx].buildFather() == father){
 					nbro++;
-					marker = ghosts[idx].getMarker();
+					//TODO CAMBIATO IDX DA CAMBIARE ANCHE NELLE ALTRE COARSE!!!
 					if (markerfather < ghosts[idx].getMarker()+1){
 						markerfather = ghosts[idx].getMarker()+1;
 					}
@@ -728,18 +582,19 @@ public:
 					if(idx == size_ghosts){
 						break;
 					}
+					marker = ghosts[idx].getMarker();
 				}
 				nend = 0;
 				idx = nocts-1;
 				marker = octants[idx].getMarker();
-				while(marker < 0 & octants[idx].buildFather() == father & idx >= 0){
+				while(marker < 0 && octants[idx].buildFather() == father && idx >= 0){
 					nbro++;
-					marker = octants[idx].getMarker();
-					if (markerfather < octants[idx+offset+idx2].getMarker()+1){
-						markerfather = octants[idx+offset+idx2].getMarker()+1;
-					}
 					nend++;
+					if (markerfather < octants[idx].getMarker()+1){
+						markerfather = octants[idx].getMarker()+1;
+					}
 					idx--;
+					marker = octants[idx].getMarker();
 					if (idx<0){
 						break;
 					}
@@ -751,21 +606,25 @@ public:
 					nend = 0;
 					for(int ii=nocts-global2D.nchildren; ii<nocts; ii++){
 						octants[ii].setMarker(0);
+						octants[ii].info[11] = true;
 					}
 				}
 			}
+
 			if (nend != 0){
+				for (int iii=0; iii<12; iii++){
+					father.info[iii] = false;
+				}
 				for (idx=0; idx < nend; idx++){
-					for (iface=0; iface<global2D.nfaces; iface++){
-						father.info[iface] = (father.info[iface] || octants[nocts-idx].info[iface]);
-						father.info[iface+global2D.nfaces] = (father.info[iface+global2D.nfaces] || octants[nocts-idx].info[iface+global2D.nfaces]);
+					for (int iii=0; iii<12; iii++){
+						father.info[iii] = father.info[iii] || octants[nocts-idx-1].info[iii];
 					}
 				}
 				father.info[9] = true;
-				father.setMarker(markerfather);
 				if (markerfather < 0){
 					docoarse = true;
 				}
+				father.setMarker(markerfather);
 				octants.resize(nocts-offset);
 				octants.push_back(father);
 				octants.shrink_to_fit();
@@ -776,21 +635,6 @@ public:
 			}
 
 		}
-
-		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si può trovare la maniera di inserirlo nel loop precedente
-		pborders.clear();
-		nocts = octants.size();
-		pborders.reserve(int(pow(double(nocts),1.0/2.0)*double(global2D.nfaces)));
-		for(idx=0; idx<nocts; idx++){
-			for(iface=0; iface<global2D.nfaces; iface++){
-				if (octants[idx].info[iface+global2D.nfaces]){
-					pborders.push_back(idx);
-					break;
-				}
-			}
-		}
-		pborders.shrink_to_fit();
 
 		// Set final first and last desc
 		if(nocts>0){
@@ -813,7 +657,7 @@ public:
 		nocts = getNumOctants();
 		idx = 0;
 		Morton = octants[idx].computeMorton();
-		while(Morton <= lastDescPre & idx < nocts & Morton != 0){
+		while(Morton <= lastDescPre && idx < nocts && Morton != 0){
 			// To delete, the father is in proc before me
 			toDelete++;
 			idx++;
@@ -824,38 +668,29 @@ public:
 		}
 		octants.resize(nocts-toDelete);
 		octants.shrink_to_fit();
+		nocts = getNumOctants();
 
-		toDelete = 0;
-		Morton = last_desc.computeMorton();
-		if(int(firstDescPost  - Morton) > 1){
-			// To insert, the father is not yet here!!
-			idx = nocts - 1;
-			Class_Octant<2> father = octants[idx].buildFather();
-			while(octants[idx].buildFather() == father & idx >= 0){
-				toDelete++;
-				idx--;
-			}
-			father.info[global2D.nfaces+1] = father.info[global2D.nfaces+3] = true;
-			octants.resize(nocts-toDelete);
-			octants.push_back(father);
-			octants.shrink_to_fit();
-		}
-
-		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si può trovare la maniera di inserirlo nel loop precedente
-		uint8_t iface;
-		pborders.clear();
-		nocts = octants.size();
-		pborders.reserve(int(pow(double(nocts),1.0/2.0)*double(global2D.nfaces)));
-		for(idx=0; idx<nocts; idx++){
-			for(iface=0; iface<global2D.nfaces; iface++){
-				if (octants[idx].info[iface+global2D.nfaces]){
-					pborders.push_back(idx);
-					break;
-				}
-			}
-		}
-		pborders.shrink_to_fit();
+//		toDelete = 0;
+//		Morton = last_desc.computeMorton();
+//		if(int(firstDescPost  - Morton) > 1){
+//			// To insert, the father is not yet here!!
+//			idx = nocts - 1;
+//			Class_Octant<2> father = octants[idx].buildFather();
+//			bool info[12] = {false};
+//			while(octants[idx].buildFather() == father && idx >= 0){
+//				for (int i=0; i<12; i++){
+//					info[i] = info[i] || octants[idx].info[i];
+//				}
+//				toDelete++;
+//				idx--;
+//			}
+//			for (int i=0; i<12; i++){
+//				father.info[i] = info[i];
+//			}
+//			octants.resize(nocts-toDelete);
+//			octants.push_back(father);
+//			octants.shrink_to_fit();
+//		}
 
 		setFirstDesc();
 		setLastDesc();
@@ -888,40 +723,7 @@ public:
 		octants.shrink_to_fit();
 		mapidx.resize(nocts-toDelete);
 		mapidx.shrink_to_fit();
-
-		toDelete = 0;
-		Morton = last_desc.computeMorton();
-		if(int(firstDescPost  - Morton) > 1){
-			// To insert, the father is not yet here!!
-			idx = nocts - 1;
-			Class_Octant<2> father = octants[idx].buildFather();
-			while(octants[idx].buildFather() == father & idx >= 0){
-				toDelete++;
-				idx--;
-			}
-			father.info[global2D.nfaces+1] = father.info[global2D.nfaces+3] = true;
-			octants.resize(nocts-toDelete);
-			octants.push_back(father);
-			octants.shrink_to_fit();
-			mapidx.resize(nocts-toDelete+1);
-			mapidx.shrink_to_fit();
-		}
-
-		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si può trovare la maniera di inserirlo nel loop precedente
-		uint8_t iface;
-		pborders.clear();
-		nocts = octants.size();
-		pborders.reserve(int(pow(double(nocts),1.0/2.0)*double(global2D.nfaces)));
-		for(idx=0; idx<nocts; idx++){
-			for(iface=0; iface<global2D.nfaces; iface++){
-				if (octants[idx].info[iface+global2D.nfaces]){
-					pborders.push_back(idx);
-					break;
-				}
-			}
-		}
-		pborders.shrink_to_fit();
+		nocts = getNumOctants();
 
 		setFirstDesc();
 		setLastDesc();
@@ -1251,14 +1053,14 @@ public:
 							while(ghosts[idxtry].computeMorton() < Morton){
 								idxtry++;
 								if(idxtry > ghosts.size()-1){
-									idxtry = ghosts.size();
+									idxtry = ghosts.size()-1;
 									break;
 								}
 							}
 							while(ghosts[idxtry].computeMorton() > Morton){
 								idxtry--;
 								if(idxtry > ghosts.size()-1){
-									idxtry = ghosts.size();
+									idxtry = ghosts.size()-1;
 									break;
 								}
 							}
@@ -1380,9 +1182,7 @@ public:
 				// Boundary Face
 				return;
 			}
-
 		}
-
 	};
 //
 	// =================================================================================== //
@@ -1515,6 +1315,7 @@ public:
 		u32vector		 	neigh;
 		u32vector		 	modified, newmodified;
 		uint32_t 			i, idx, imod;
+		int32_t				idx1_gh = 0, idx2_gh = 0;
 		uint8_t				iface;
 		int8_t				targetmarker;
 		vector<bool> 		isghost;
@@ -1522,6 +1323,7 @@ public:
 
 		OctantsType::iterator 	obegin, oend, it;
 		u32vector::iterator 	ibegin, iend, iit;
+
 
 		//If interior octants have to be balanced
 		if(doInterior){
@@ -1567,11 +1369,10 @@ public:
 			oend = octants.end();
 			idx = 0;
 			for (it=obegin; it!=oend; it++){
-				it->info[11] = false;
 				if (!it->getNotBalance() && it->getMarker() != 0){
-					targetmarker = min(MAX_LEVEL_2D, (octants[idx].getLevel() + octants[idx].getMarker()));
+					targetmarker = min(MAX_LEVEL_2D, int(octants[idx].getLevel()) + int(octants[idx].getMarker()));
 					for (iface=0; iface<global2D.nfaces; iface++){
-						if(!it->getPbound(iface)){
+						if(!it->getBound(iface)){
 							findNeighbours(idx, iface, neigh, isghost);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
@@ -1590,6 +1391,17 @@ public:
 											Bdone = true;
 										}
 									};
+								}
+								else{
+									{
+										if((ghosts[neigh[i]].getLevel() + ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
+											octants[idx].setMarker(ghosts[neigh[i]].getLevel()+ghosts[neigh[i]].getMarker()-1-octants[idx].getLevel());
+											octants[idx].info[11] = true;
+											modified.push_back(idx);
+											Bdone = true;
+										}
+									};
+
 								}
 							}
 						}
@@ -1662,6 +1474,7 @@ public:
 				u32vector().swap(modified);
 				swap(modified,newmodified);
 				modsize = modified.size();
+				u32vector().swap(newmodified);
 			}// end while
 
 		}
@@ -1690,7 +1503,8 @@ public:
 			oend = ghosts.end();
 			idx = 0;
 			for (it=obegin; it!=oend; it++){
-				if (!it->getNotBalance() && it->info[11]){
+				//if (!it->getNotBalance() && (it->info[11] || it->getMarker() != 0)){
+					if (!it->getNotBalance() && (it->info[11])){
 					targetmarker = min(MAX_LEVEL_2D, (it->getLevel()+it->getMarker()));
 					for (iface=0; iface<global2D.nfaces; iface++){
 						if(it->getPbound(iface) == true){
@@ -1750,6 +1564,7 @@ public:
 				u32vector().swap(modified);
 				swap(modified,newmodified);
 				modsize = modified.size();
+				u32vector().swap(newmodified);
 			}// end while
 			obegin = oend = octants.end();
 			ibegin = iend = modified.end();
@@ -1757,6 +1572,221 @@ public:
 		return Bdone;
 		// Pay attention : info[11] may be true after local balance for some octants
 
+
+	};
+
+	// =================================================================================== //
+
+
+	bool localBalanceAll(bool doInterior){				// 2:1 balancing on level a local tree already adapted (balance only the octants with info[14] = false) (refinement wins!)
+																// Return true if balanced done with some markers modification
+																// Seto doInterior = false if the interior octants are already balanced
+		// Local variables
+		uint32_t 			noctants = getNumOctants();
+		uint32_t			sizeneigh, modsize;
+		u32vector		 	neigh;
+		u32vector		 	modified, newmodified;
+		uint32_t 			i, idx, imod;
+		int32_t				idx1_gh = 0, idx2_gh = 0;
+		uint8_t				iface;
+		int8_t				targetmarker;
+		vector<bool> 		isghost;
+		bool				Bdone = false;
+
+		OctantsType::iterator 	obegin, oend, it;
+		u32vector::iterator 	ibegin, iend, iit;
+
+
+		//If interior octants have to be balanced
+		if(doInterior){
+			// First loop on the octants
+			obegin = octants.begin();
+			oend = octants.end();
+			idx = 0;
+			for (it=obegin; it!=oend; it++){
+				if ((!it->getNotBalance()) && ((it->info[11]) || (it->getMarker()!=0) || ((it->getIsNewC()) || (it->getIsNewR())))){
+					targetmarker = min(MAX_LEVEL_2D, int(octants[idx].getLevel()) + int(octants[idx].getMarker()));
+					for (iface=0; iface<global2D.nfaces; iface++){
+						if(!it->getBound(iface)){
+							findNeighbours(idx, iface, neigh, isghost);
+							sizeneigh = neigh.size();
+							for(i=0; i<sizeneigh; i++){
+								if (!isghost[i]){
+									{
+										if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) > (targetmarker + 1) ){
+											octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-1-octants[idx].getLevel());
+											octants[idx].info[11] = true;
+											modified.push_back(idx);
+											Bdone = true;
+										}
+										else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
+											octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
+											octants[neigh[i]].info[11] = true;
+											modified.push_back(neigh[i]);
+											Bdone = true;
+										}
+									};
+								}
+								else{
+									{
+										if((ghosts[neigh[i]].getLevel() + ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
+											octants[idx].setMarker(ghosts[neigh[i]].getLevel()+ghosts[neigh[i]].getMarker()-1-octants[idx].getLevel());
+											octants[idx].info[11] = true;
+											modified.push_back(idx);
+											Bdone = true;
+										}
+									};
+
+								}
+							}
+						}
+					}
+				}
+				idx++;
+			}
+			// Loop on ghost octants (influence over interior borders)
+			obegin = ghosts.begin();
+			oend = ghosts.end();
+			idx = 0;
+			for (it=obegin; it!=oend; it++){
+				if (!it->getNotBalance() && (it->info[11] || (it->getIsNewC() || it->getIsNewR()))){
+					targetmarker = min(MAX_LEVEL_2D, (it->getLevel()+it->getMarker()));
+					for (iface=0; iface<global2D.nfaces; iface++){
+						if(it->getPbound(iface) == true){
+							neigh.clear();
+							findGhostNeighbours(idx, iface, neigh);
+							sizeneigh = neigh.size();
+							for(i=0; i<sizeneigh; i++){
+								if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
+									octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
+									octants[neigh[i]].info[11] = true;
+									modified.push_back(neigh[i]);
+									Bdone = true;
+								}
+							}
+						}
+					}
+				}
+				idx++;
+			}
+
+			// While loop for iterative balancing
+			u32vector().swap(newmodified);
+			modsize = modified.size();
+			while(modsize!=0){
+				ibegin = modified.begin();
+				iend = modified.end();
+				for (iit=ibegin; iit!=iend; iit++){
+					idx = *iit;
+					if (!octants[idx].getNotBalance()){
+						targetmarker = min(MAX_LEVEL_2D, (octants[idx].getLevel()+octants[idx].getMarker()));
+						for (iface=0; iface<global2D.nfaces; iface++){
+							if(!octants[idx].getPbound(iface)){
+								findNeighbours(idx, iface, neigh, isghost);
+								sizeneigh = neigh.size();
+								for(i=0; i<sizeneigh; i++){
+									if (!isghost[i]){
+										{
+											if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
+												octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-octants[idx].getLevel()-1);
+												octants[idx].info[11] = true;
+												newmodified.push_back(idx);
+												Bdone = true;
+											}
+											else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
+												octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
+												octants[neigh[i]].info[11] = true;
+												newmodified.push_back(neigh[i]);
+												Bdone = true;
+											}
+										};
+									}
+								}
+							}
+						}
+					}
+				}
+				u32vector().swap(modified);
+				swap(modified,newmodified);
+				modsize = modified.size();
+				u32vector().swap(newmodified);
+			}// end while
+
+		}
+		else{
+
+			// Loop on ghost octants (influence over interior borders)
+			obegin = ghosts.begin();
+			oend = ghosts.end();
+			idx = 0;
+			for (it=obegin; it!=oend; it++){
+				if (!it->getNotBalance() && (it->info[11] || (it->getIsNewC() || it->getIsNewR()))){
+					targetmarker = min(MAX_LEVEL_2D, (it->getLevel()+it->getMarker()));
+					for (iface=0; iface<global2D.nfaces; iface++){
+						if(it->getPbound(iface) == true){
+							neigh.clear();
+							findGhostNeighbours(idx, iface, neigh);
+							sizeneigh = neigh.size();
+							for(i=0; i<sizeneigh; i++){
+								if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
+									octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
+									octants[neigh[i]].info[11] = true;
+									modified.push_back(neigh[i]);
+									Bdone = true;
+								}
+							}
+						}
+					}
+				}
+				idx++;
+			}
+
+			// While loop for iterative balancing
+			u32vector().swap(newmodified);
+			modsize = modified.size();
+			while(modsize!=0){
+				ibegin = modified.begin();
+				iend = modified.end();
+				for (iit=ibegin; iit!=iend; iit++){
+					idx = *iit;
+					if (!octants[idx].getNotBalance()){
+						targetmarker = min(MAX_LEVEL_2D, (octants[idx].getLevel()+octants[idx].getMarker()));
+						for (iface=0; iface<global2D.nfaces; iface++){
+							if(!octants[idx].getPbound(iface)){
+								findNeighbours(idx, iface, neigh, isghost);
+								sizeneigh = neigh.size();
+								for(i=0; i<sizeneigh; i++){
+									if (!isghost[i]){
+										{
+											if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
+												octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-octants[idx].getLevel()-1);
+												octants[idx].info[11] = true;
+												newmodified.push_back(idx);
+												Bdone = true;
+											}
+											else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
+												octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
+												octants[neigh[i]].info[11] = true;
+												newmodified.push_back(neigh[i]);
+												Bdone = true;
+											}
+										};
+									}
+								}
+							}
+						}
+					}
+				}
+				u32vector().swap(modified);
+				swap(modified,newmodified);
+				modsize = modified.size();
+				u32vector().swap(newmodified);
+			}// end while
+			obegin = oend = octants.end();
+			ibegin = iend = modified.end();
+		}
+		return Bdone;
+		// Pay attention : info[11] may be true after local balance for some octants
 
 	};
 

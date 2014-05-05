@@ -133,6 +133,9 @@ public:
 		uint64_t volume = uint32_t(pow(double(getSize()),2.0));
 		return volume;
 	};
+
+	// ------------------------------------------------------------------------------- //
+
 	double*		getCenter(){								// Get a pointer to an array of DIM with the coordinates of the center of octant
 		uint8_t		i;
 		double	dh;
@@ -144,6 +147,9 @@ public:
 		center[1] = (double)y + dh;
 		return center;
 	};
+
+	// ------------------------------------------------------------------------------- //
+
 	uint32_t	(*getNodes())[3]{							// Get a pointer to the array (size [nnodes][DIM]) with the nodes of octant
 		uint8_t		i, cx, cy;
 		uint32_t	dh;
@@ -161,6 +167,9 @@ public:
 		}
 		return nodes;
 	};
+
+	// ------------------------------------------------------------------------------- //
+
 	void		getNodes(u32vector2D & nodes){				// Get a vector (size [nnodes][DIM]) with the nodes of octant
 		uint8_t		i, cx, cy;
 		uint32_t	dh;
@@ -200,11 +209,17 @@ public:
 		}
 		normal.shrink_to_fit();
 	};
+
+	// ------------------------------------------------------------------------------- //
+
 	uint64_t	computeMorton() const{						// Compute Morton index of the octant (without level)
 		uint64_t morton = 0;
 		morton = mortonEncode_magicbits(this->x,this->y);
 		return morton;
 	};
+
+	// ------------------------------------------------------------------------------- //
+
 	uint64_t	computeMorton(){
 		uint64_t morton = 0;
 		morton = mortonEncode_magicbits(this->x,this->y);
@@ -219,12 +234,18 @@ public:
 		Class_Octant<2> last_desc(MAX_LEVEL_2D,x+delta,y+delta);
 		return last_desc;
 	};
+
+	// ------------------------------------------------------------------------------- //
+
 	Class_Octant<2>	buildFather(){									// Build father of octant and return the father octant (no info update)
 		uint32_t deltax = x%(uint32_t(pow(2.0,(double)((uint8_t)MAX_LEVEL_2D - (level-1)))));
 		uint32_t deltay = y%(uint32_t(pow(2.0,(double)((uint8_t)MAX_LEVEL_2D - (level-1)))));
-		Class_Octant<2> father(level-1, x-deltax, y-deltay);
+		Class_Octant<2> father(level-1, (x-deltax), (y-deltay));
 		return father;
 	};
+
+	// ------------------------------------------------------------------------------- //
+
 	Class_Octant<2>*	buildChildren(){								// Builds children of octant and return a pointer to an ordered array children[nchildren] (info update)
 		uint8_t xf,yf,zf;
 
@@ -301,6 +322,9 @@ public:
 			return children;
 		}
 	};
+
+	// ------------------------------------------------------------------------------- //
+
 	uint64_t* 		computeHalfSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
 										  uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
 		uint32_t dh,dh2;
@@ -360,6 +384,9 @@ public:
 
 
 	};
+
+	// ------------------------------------------------------------------------------- //
+
 	uint64_t* 		computeMinSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
 										 const uint8_t & maxdepth,	// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
 										 uint32_t & sizem){
@@ -421,6 +448,9 @@ public:
 		}
 
 	};
+
+	// ------------------------------------------------------------------------------- //
+
 	uint64_t* 		computeVirtualMorton(uint8_t iface, 			// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
 										 const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
 										 uint32_t & sizeneigh){
@@ -434,6 +464,9 @@ public:
 					sizeneigh);
 		}
 	};
+
+	// ------------------------------------------------------------------------------- //
+
 	uint64_t 		computeNodeHalfSizeMorton(uint8_t inode, 		// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
 										  uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
 		uint32_t dh,dh2;
@@ -488,6 +521,9 @@ public:
 			return Morton;
 		}
 	};
+
+	// ------------------------------------------------------------------------------- //
+
 	uint64_t 		computeNodeMinSizeMorton(uint8_t inode, 		// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
 										 const uint8_t & maxdepth,	// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
 										 uint32_t & sizehf){
@@ -545,6 +581,9 @@ public:
 		}
 
 	};
+
+	// ------------------------------------------------------------------------------- //
+
 	uint64_t 		computeNodeVirtualMorton(uint8_t inode, 		// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
 										 const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
 										 uint32_t & sizeneigh){
