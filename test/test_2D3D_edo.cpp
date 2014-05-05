@@ -82,6 +82,7 @@ int main(int argc, char *argv[]) {
 					delete[] center;
 				}
 				typename Class_Para_Tree<2>::u32vector mapper,internal,ghosts,borders;
+				ptree.octree.computeIntersections();
 				bool done = ptree.adapt(mapper,internal,ghosts,borders);
 				ptree.loadBalance();
 				nocts = ptree.octree.getNumOctants();
@@ -126,6 +127,7 @@ int main(int argc, char *argv[]) {
 				}
 				//TEST ADAPT WITH MAPPER
 				typename Class_Para_Tree<2>::u32vector mapper,internal,ghosts,borders;
+				ptree.octree.computeIntersections();
 				bool done = ptree.adapt(mapper,internal,ghosts,borders);
 				ptree.loadBalance();
 				nocts = ptree.octree.getNumOctants();
