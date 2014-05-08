@@ -2618,10 +2618,10 @@ public:
 			while(octree.coarse());
 			if (octree.getNumOctants() < nocts){
 				localDone = true;
-				updateAfterCoarse();
-				balance21(false);
-				while(octree.refine());
 			}
+			updateAfterCoarse();
+			balance21(false);
+			while(octree.refine());
 			updateAdapt();
 			nocts = octree.getNumOctants();
 
@@ -2655,11 +2655,11 @@ public:
 			while(octree.coarse());
 			if (octree.getNumOctants() < nocts){
 				localDone = true;
-				updateAfterCoarse();
-				setPboundGhosts();
-				balance21(false);
-				while(octree.refine());
 			}
+			updateAfterCoarse();
+			setPboundGhosts();
+			balance21(false);
+			while(octree.refine());
 			updateAdapt();
 			setPboundGhosts();
 
@@ -2718,10 +2718,10 @@ public:
 			while(octree.coarse(mapidx));
 			if (octree.getNumOctants() < nocts){
 				localDone = true;
-				updateAfterCoarse(mapidx);
-				balance21(false);
-				while(octree.refine(mapidx));
 			}
+			updateAfterCoarse(mapidx);
+			balance21(false);
+			while(octree.refine(mapidx));
 			updateAdapt();
 			nocts = octree.getNumOctants();
 
@@ -2755,11 +2755,11 @@ public:
 			while(octree.coarse(mapidx));
 			if (octree.getNumOctants() < nocts){
 				localDone = true;
-				updateAfterCoarse(mapidx);
-				setPboundGhosts();
-				balance21(false);
-				while(octree.refine(mapidx));
 			}
+			updateAfterCoarse(mapidx);
+			setPboundGhosts();
+			balance21(false);
+			while(octree.refine(mapidx));
 			updateAdapt();
 			setPboundGhosts();
 
@@ -2818,10 +2818,10 @@ public:
 			while(octree.coarse(mapidx));
 			if (octree.getNumOctants() < nocts){
 				localDone = true;
-				updateAfterCoarse(mapidx);
-				balance21(false);
-				while(octree.refine(mapidx));
 			}
+			updateAfterCoarse(mapidx);
+			balance21(false);
+			while(octree.refine(mapidx));
 			updateAdapt();
 			nocts = octree.getNumOctants();
 			MPI_Barrier(MPI_COMM_WORLD);
@@ -2862,11 +2862,11 @@ public:
 			while(octree.coarse(mapidx));
 			if (octree.getNumOctants() < nocts){
 				localDone = true;
-				updateAfterCoarse(mapidx);
-				setPboundGhosts();
-				balance21(false);
-				while(octree.refine(mapidx));
 			}
+			updateAfterCoarse(mapidx);
+			setPboundGhosts();
+			balance21(false);
+			while(octree.refine(mapidx));
 			updateAdapt();
 			setPboundGhosts();
 			nocts = octree.getNumOctants();

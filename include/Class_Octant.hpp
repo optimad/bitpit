@@ -16,6 +16,7 @@
 #include "logFunct.hpp"
 #include <vector>
 #include <string.h>
+#include <algorithm>
 #include "inlinedFunct.hpp"
 #include <iostream>
 
