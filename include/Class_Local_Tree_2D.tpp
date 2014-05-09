@@ -1863,7 +1863,7 @@ public:
 						}
 					}
 				}
-				if(octants[idxtry].computeMorton() == Morton && ghosts[idxtry].level == oct->level){
+				if(ghosts[idxtry].computeMorton() == Morton && ghosts[idxtry].level == oct->level){
 					//Found neighbour of same size
 					isghost.push_back(true);
 					neighbours.push_back(idxtry);
