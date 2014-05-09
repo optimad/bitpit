@@ -11,6 +11,7 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
+#include <mpi.h>
 #include "preprocessor_defines.dat"
 #include "Class_Octant.hpp"
 #include "Class_Local_Tree.hpp"
@@ -20,7 +21,7 @@
 #include <cstdint>
 #include <iterator>
 #include <set>
-#include "mpi.h"
+
 
 
 // =================================================================================== //
