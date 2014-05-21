@@ -985,7 +985,7 @@ public:
 					Mortontry = octants[idxtry].computeMorton();
 					int32_t Dh;
 					int32_t eqcoord;
-					while(Mortontry < Mortonlast & idxtry < noctants){
+					while(Mortontry < Mortonlast && idxtry < noctants){
 						Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
 						Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
 						if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
@@ -1042,7 +1042,7 @@ public:
 							}
 						}
 					}
-					if(octants[idxtry].computeMorton() == Morton && ghosts[idxtry].level == oct->level){
+					if(ghosts[idxtry].computeMorton() == Morton && ghosts[idxtry].level == oct->level){
 						//Found neighbour of same size
 						isghost.push_back(true);
 						neighbours.push_back(idxtry);
@@ -1120,6 +1120,16 @@ public:
 								Mortontry = octants[idxtry].computeMorton();
 								jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
 								idxtry += jump;
+								if (idxtry > noctants-1){
+									if (jump > 0){
+										idxtry = noctants - 1;
+										jump = 0;
+									}
+									else if (jump < 0){
+										idxtry = 0;
+										jump = 0;
+									}
+								}
 							}
 							if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
 								//Found neighbour of same size

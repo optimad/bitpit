@@ -84,8 +84,7 @@ int main(int argc, char *argv[]) {
 				}
 				typename Class_Para_Tree<2>::u32vector mapper,internal,ghosts,borders;
 				ptree.octree.computeIntersections();
-//				bool done = ptree.adapt(mapper,internal,ghosts,borders);
-				bool done = ptree.adapt();
+				bool done = ptree.adapt(mapper,internal,ghosts,borders);
 				ptree.loadBalance();
 				nocts = ptree.octree.getNumOctants();
 
@@ -106,8 +105,7 @@ int main(int argc, char *argv[]) {
 
 
 //			int nref = 4;
-//			for (int l=nref+1; l<nref+8; l++){
-			for (int l=nref+1; l<nref+6; l++){
+			for (int l=nref+1; l<nref+8; l++){
 				for (int i=0; i<nocts; i++){
 					double* center;
 					Class_Octant<2> oct = ptree.octree.extractOctant(i);
