@@ -47,10 +47,10 @@ public:
 	// connectivity
 	dvector2D					nodes;				// Local vector of nodes (x,y,z) ordered with Morton Number
 	u32vector2D					connectivity;		// Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
-	// The nodes are stored as index of vector nodes
+													// The nodes are stored as index of vector nodes
 	dvector2D					ghostsnodes;		// Local vector of ghosts nodes (x,y,z) ordered with Morton Number
 	u32vector2D					ghostsconnectivity;	// Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
-	// The nodes are stored as index of vector nodes
+													// The nodes are stored as index of vector nodes
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
@@ -142,8 +142,9 @@ public:
 	};
 
 	// =============================================================================== //
-	// GET/SET METHODS ----------------------------------------------------------------------- //
+	// GET/SET METHODS --------------------------------------------------------------- //
 
+	// Octant get/set Methods
 	double getX(Class_Octant<2>* const oct) {
 		return trans.mapX(oct->getX());
 	}
@@ -192,7 +193,165 @@ public:
 		trans.mapNormals(normal_, normal);
 	}
 
-	// =============================================================================== //
+	uint8_t getMarker(Class_Octant<2>* oct){								// Get refinement/coarsening marker for idx-th octant
+		return oct->getMarker();
+	};
+
+	bool getBalance(Class_Octant<2>* oct){								// Get if balancing-blocked idx-th octant
+		return oct->getNotBalance();
+	};
+
+	void setMarker(Class_Octant<2>* oct, int8_t marker){					// Set refinement/coarsening marker for idx-th octant
+		oct->setMarker(marker);
+	};
+
+	void setBalance(Class_Octant<2>* oct, bool balance){					// Set if balancing-blocked idx-th octant
+		oct->setBalance(balance);
+	};
+
+	// ------------------------------------------------------------------------------- //
+	//No pointer Octants get/set Methods
+
+	double getX(Class_Octant<2> const oct) {
+		return trans.mapX(oct.getX());
+	}
+
+	double getY(Class_Octant<2> const oct) {
+		return trans.mapY(oct.getY());
+	}
+
+	double getZ(Class_Octant<2> const oct) {
+		return trans.mapZ(oct.getZ());
+	}
+
+	double getSize(Class_Octant<2> const oct) {
+		return trans.mapSize(oct.getSize());
+	}
+
+	double getArea(Class_Octant<2> const oct) {
+		return trans.mapArea(oct.getArea());
+	}
+
+	double getVolume(Class_Octant<2> const oct) {
+		return trans.mapVolume(oct.getVolume());
+	}
+
+	void getCenter(Class_Octant<2> oct,
+			vector<double>& center) {
+		double* center_ = oct.getCenter();
+		trans.mapCenter(center_, center);
+		delete [] center_;
+		center_ = NULL;
+	}
+
+	void getNodes(Class_Octant<2> oct,
+			dvector2D & nodes) {
+		uint32_t (*nodes_)[3] = oct.getNodes();
+		trans.mapNodes(nodes_, nodes);
+		delete [] nodes_;
+		nodes_ = NULL;
+	}
+
+	void getNormal(Class_Octant<2> oct,
+			uint8_t & iface,
+			dvector & normal) {
+		vector<int8_t> normal_;
+		oct.getNormal(iface, normal_);
+		trans.mapNormals(normal_, normal);
+	}
+
+	uint8_t getMarker(Class_Octant<2> oct){								// Get refinement/coarsening marker for idx-th octant
+		return oct.getMarker();
+	};
+
+	bool getBalance(Class_Octant<2> oct){								// Get if balancing-blocked idx-th octant
+		return oct.getNotBalance();
+	};
+
+	void setMarker(Class_Octant<2> oct, int8_t marker){					// Set refinement/coarsening marker for idx-th octant
+		oct.setMarker(marker);
+	};
+
+	void setBalance(Class_Octant<2> oct, bool balance){					// Set if balancing-blocked idx-th octant
+		oct.setBalance(balance);
+	};
+
+	// ------------------------------------------------------------------------------- //
+	// Local Tree get/set Methods
+	const Class_Octant<2> &  getFirstDesc() const{
+		return octree.getFirstDesc();
+	};
+
+	const Class_Octant<2> &  getLastDesc() const{
+		return octree.getLastDesc();
+	};
+
+	uint32_t getSizeGhost() const{
+		return octree.getSizeGhost();
+	};
+
+	uint32_t getNumOctants() const{
+		return octree.getNumOctants();
+	};
+
+	uint8_t getLocalMaxDepth() const{							// Get max depth reached in local tree
+		return octree.getLocalMaxDepth();
+	};
+
+	uint8_t getMarker(int32_t idx){								// Get refinement/coarsening marker for idx-th octant
+		return octree.getMarker(idx);
+	};
+
+	bool getBalance(int32_t idx){								// Get if balancing-blocked idx-th octant
+		return octree.getBalance(idx);
+	};
+
+	void setMarker(int32_t idx, int8_t marker){					// Set refinement/coarsening marker for idx-th octant
+		octree.setMarker(idx, marker);
+	};
+
+	void setBalance(int32_t idx, bool balance){					// Set if balancing-blocked idx-th octant
+		octree.setBalance(idx, balance);
+	};
+
+	void setFirstDesc(){
+		octree.setFirstDesc();
+	};
+
+	void setLastDesc(){
+		octree.setLastDesc();
+	};
+
+	const Class_Octant<2>&	extractOctant(uint32_t idx) const{
+		return octree.extractOctant(idx) ;
+	};
+
+	void findNeighbours(uint32_t idx,							// Finds neighbours of idx-th octant through iface in vector octants.
+						uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
+						u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
+						vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
+
+		octree.findNeighbours(idx, iface, neighbours, isghost);
+	};
+
+	void findNeighbours(Class_Octant<2>* oct,					// Finds neighbours of octant through iface in vector octants.
+						uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
+						u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
+						vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
+
+		octree.findNeighbours(oct, iface, neighbours, isghost);
+	};
+
+	void findNeighbours(Class_Octant<2> oct,					// Finds neighbours of octant through iface in vector octants.
+						uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
+						u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
+						vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
+
+		octree.findNeighbours(&oct, iface, neighbours, isghost);
+	};
+
+	//-------------------------------------------------------------------------------- //
+	// Intersections get Methods
 
 	double getSize(Class_Intersection<2>* const inter) {
 		uint32_t Size;
@@ -235,6 +394,55 @@ public:
 			dvector & normal) {
 		Class_Octant<2> oct = octree.extractOctant(inter->owners[inter->finer]);
 		uint8_t iface = inter->iface;
+		vector<int8_t> normal_;
+		oct.getNormal(iface, normal_);
+		trans.mapNormals(normal_, normal);
+	}
+
+	//-------------------------------------------------------------------------------- //
+	// No Pointer Intersections get Methods
+
+	double getSize(Class_Intersection<2> const inter) {
+		uint32_t Size;
+		Size = octree.extractOctant(inter.owners[inter.finer]).getSize();
+		return trans.mapSize(Size);
+	}
+
+	double getArea(Class_Intersection<2> const inter) {
+		uint32_t Area;
+		Area = octree.extractOctant(inter.owners[inter.finer]).getArea();
+		return trans.mapArea(Area);
+	}
+
+	void getCenter(Class_Intersection<2> const inter,
+			vector<double>& center) {
+		Class_Octant<2> oct = octree.extractOctant(inter.owners[inter.finer]);
+		double* center_ = oct.getCenter();
+		trans.mapCenter(center_, center);
+		delete [] center_;
+		center_ = NULL;
+	}
+
+	void getNodes(Class_Intersection<2> const inter,
+			dvector2D & nodes) {
+		Class_Octant<2> oct = octree.extractOctant(inter.owners[inter.finer]);
+		uint8_t iface = inter.iface;
+		uint32_t (*nodes_all)[3] = oct.getNodes();
+		uint32_t (*nodes_)[3] = new uint32_t[global2D.nnodesperface][3];
+		for (int i=0; i<global2D.nnodesperface; i++){
+			for (int j=0; j<3; j++){
+				nodes_[i][j] = nodes_all[global2D.facenode[iface][i]][j];
+			}
+		}
+		trans.mapNodesIntersection(nodes_, nodes);
+		delete [] nodes_;
+		nodes_ = NULL;
+	}
+
+	void getNormal(Class_Intersection<2> const inter,
+			dvector & normal) {
+		Class_Octant<2> oct = octree.extractOctant(inter.owners[inter.finer]);
+		uint8_t iface = inter.iface;
 		vector<int8_t> normal_;
 		oct.getNormal(iface, normal_);
 		trans.mapNormals(normal_, normal);
