@@ -19,7 +19,7 @@ public:
 	nfaces(4),
 	nnodes(4),
 	nnodesperface(2),
-	octantBytes(uint8_t(sizeof(uint32_t)*2 + sizeof(uint8_t) + sizeof(int8_t) + (12)*sizeof(bool))),
+	octantBytes(uint8_t(sizeof(uint32_t)*2 + sizeof(uint8_t) + sizeof(int8_t) + (12)*sizeof(bool) + sizeof(uint64_t))),
 	markerBytes(sizeof(int8_t)),
 	levelBytes(sizeof(uint8_t)),
 	boolBytes(sizeof(bool)),

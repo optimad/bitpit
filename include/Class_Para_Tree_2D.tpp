@@ -47,10 +47,10 @@ public:
 	// connectivity
 	dvector2D					nodes;				// Local vector of nodes (x,y,z) ordered with Morton Number
 	u32vector2D					connectivity;		// Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
-													// The nodes are stored as index of vector nodes
+	// The nodes are stored as index of vector nodes
 	dvector2D					ghostsnodes;		// Local vector of ghosts nodes (x,y,z) ordered with Morton Number
 	u32vector2D					ghostsconnectivity;	// Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
-													// The nodes are stored as index of vector nodes
+	// The nodes are stored as index of vector nodes
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
@@ -201,6 +201,27 @@ public:
 		return oct->getNotBalance();
 	};
 
+	bool getIsGhost(Class_Octant<2>* oct){
+		return (findOwner(oct->computeMorton()) != rank);
+	};
+
+	uint64_t getGlobalIdx(Class_Octant<2>* oct){
+		if (getIsGhost(oct)){
+			uint32_t idx = octree.findGhostMorton(oct->computeMorton());
+			return octree.globalidx_ghosts[idx];
+		}
+		else{
+			uint32_t idx = octree.findMorton(oct->computeMorton());
+			if (rank){
+				return partition_range_globalidx[rank-1] + uint64_t(idx + 1);
+			}
+			else{
+				return uint64_t(idx);
+			};
+		};
+		return global_num_octants;
+	};
+
 	void setMarker(Class_Octant<2>* oct, int8_t marker){					// Set refinement/coarsening marker for idx-th octant
 		oct->setMarker(marker);
 	};
@@ -268,6 +289,27 @@ public:
 		return oct.getNotBalance();
 	};
 
+	bool getIsGhost(Class_Octant<2> oct){
+		return (findOwner(oct.computeMorton()) != rank);
+	};
+
+	uint64_t getGlobalIdx(Class_Octant<2> oct){
+		if (getIsGhost(oct)){
+			uint32_t idx = octree.findGhostMorton(oct.computeMorton());
+			return octree.globalidx_ghosts[idx];
+		}
+		else{
+			uint32_t idx = octree.findMorton(oct.computeMorton());
+			if (rank){
+				return partition_range_globalidx[rank-1] + uint64_t(idx + 1);
+			}
+			else{
+				return uint64_t(idx);
+			};
+		};
+		return global_num_octants;
+	};
+
 	void setMarker(Class_Octant<2> oct, int8_t marker){					// Set refinement/coarsening marker for idx-th octant
 		oct.setMarker(marker);
 	};
@@ -306,6 +348,23 @@ public:
 		return octree.getBalance(idx);
 	};
 
+	uint64_t getGlobalIdx(uint32_t idx){
+		if (rank){
+			return partition_range_globalidx[rank-1] + uint64_t(idx + 1);
+		}
+		else{
+			return uint64_t(idx);
+		};
+		return global_num_octants;
+	};
+
+	uint64_t getGhostGlobalIdx(uint32_t idx){
+		if (idx<octree.size_ghosts){
+			return octree.globalidx_ghosts[idx];
+		};
+		return uint64_t(octree.size_ghosts);
+	};
+
 	void setMarker(int32_t idx, int8_t marker){					// Set refinement/coarsening marker for idx-th octant
 		octree.setMarker(idx, marker);
 	};
@@ -327,25 +386,25 @@ public:
 	};
 
 	void findNeighbours(uint32_t idx,							// Finds neighbours of idx-th octant through iface in vector octants.
-						uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
-						u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
-						vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
+			uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
+			u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
+			vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
 
 		octree.findNeighbours(idx, iface, neighbours, isghost);
 	};
 
 	void findNeighbours(Class_Octant<2>* oct,					// Finds neighbours of octant through iface in vector octants.
-						uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
-						u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
-						vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
+			uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
+			u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
+			vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
 
 		octree.findNeighbours(oct, iface, neighbours, isghost);
 	};
 
 	void findNeighbours(Class_Octant<2> oct,					// Finds neighbours of octant through iface in vector octants.
-						uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
-						u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
-						vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
+			uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
+			u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
+			vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
 
 		octree.findNeighbours(&oct, iface, neighbours, isghost);
 	};
@@ -503,6 +562,64 @@ public:
 				}
 			}
 			return &octree.octants[idxtry];
+		}
+	}
+
+	Class_Octant<2> getPointOwner2(dvector & point){
+		uint32_t noctants = octree.octants.size();
+		uint32_t idxtry = noctants/2;
+		uint32_t x, y;
+		uint64_t morton, mortontry;
+		int powner;
+
+		x = trans.mapX(point[0]);
+		y = trans.mapX(point[1]);
+		morton = mortonEncode_magicbits(x,y);
+
+		powner = findOwner(morton);
+		if (powner!=rank){
+			Class_Octant<2> oct0;
+			return oct0;
+		}
+
+		int32_t jump = idxtry;
+		while(abs(jump) > 0){
+			mortontry = octree.octants[idxtry].computeMorton();
+			jump = ((mortontry<morton)-(mortontry>morton))*abs(jump)/2;
+			idxtry += jump;
+			if (idxtry > noctants-1){
+				if (jump > 0){
+					idxtry = noctants - 1;
+					jump = 0;
+				}
+				else if (jump < 0){
+					idxtry = 0;
+					jump = 0;
+				}
+			}
+		}
+		if(octree.octants[idxtry].computeMorton() == morton){
+			return octree.octants[idxtry];
+		}
+		else{
+			// Step until the mortontry lower than morton (one idx of distance)
+			{
+				while(octree.octants[idxtry].computeMorton() < morton){
+					idxtry++;
+					if(idxtry > noctants-1){
+						idxtry = noctants-1;
+						break;
+					}
+				}
+				while(octree.octants[idxtry].computeMorton() > morton){
+					idxtry--;
+					if(idxtry > noctants-1){
+						idxtry = noctants-1;
+						break;
+					}
+				}
+			}
+			return octree.octants[idxtry];
 		}
 	}
 
@@ -677,112 +794,59 @@ public:
 		//find the owner of these virtual neighbor and build a map (process,border octants)
 		//this map contains the local octants as ghosts for neighbor processes
 
-		// TODO RIMUOVERE PBORDERS DA OVUNQUE !!!
-		octree.pborders.clear();
-		if(octree.pborders.size() == 0){
-			Class_Local_Tree<2>::OctantsType::iterator end = octree.octants.end();
-			Class_Local_Tree<2>::OctantsType::iterator begin = octree.octants.begin();
-			bordersPerProc.clear();
-			for(Class_Local_Tree<2>::OctantsType::iterator it = begin; it != end; ++it){
-				set<int> procs;
-				//Virtual Face Neighbors
-				for(uint8_t i = 0; i < global2D.nfaces; ++i){
-					if(it->getBound(i) == false){
-						uint32_t virtualNeighborsSize = 0;
-						uint64_t* virtualNeighbors = it->computeVirtualMorton(i,max_depth,virtualNeighborsSize);
-						uint32_t maxDelta = virtualNeighborsSize/2;
-						for(int j = 0; j <= maxDelta; ++j){
-							int pBegin = findOwner(virtualNeighbors[j]);
-							int pEnd = findOwner(virtualNeighbors[virtualNeighborsSize - 1 - j]);
-							procs.insert(pBegin);
-							procs.insert(pEnd);
-							if(pBegin != rank || pEnd != rank){
-								it->setPbound(i,true);
-							}
-							else{
-								it->setPbound(i,false);
-							}
+		// Non c'è più PBORDERS !!!
+		Class_Local_Tree<2>::OctantsType::iterator end = octree.octants.end();
+		Class_Local_Tree<2>::OctantsType::iterator begin = octree.octants.begin();
+		bordersPerProc.clear();
+		for(Class_Local_Tree<2>::OctantsType::iterator it = begin; it != end; ++it){
+			set<int> procs;
+			//Virtual Face Neighbors
+			for(uint8_t i = 0; i < global2D.nfaces; ++i){
+				if(it->getBound(i) == false){
+					uint32_t virtualNeighborsSize = 0;
+					uint64_t* virtualNeighbors = it->computeVirtualMorton(i,max_depth,virtualNeighborsSize);
+					uint32_t maxDelta = virtualNeighborsSize/2;
+					for(int j = 0; j <= maxDelta; ++j){
+						int pBegin = findOwner(virtualNeighbors[j]);
+						int pEnd = findOwner(virtualNeighbors[virtualNeighborsSize - 1 - j]);
+						procs.insert(pBegin);
+						procs.insert(pEnd);
+						if(pBegin != rank || pEnd != rank){
+							it->setPbound(i,true);
 						}
-						delete [] virtualNeighbors;
-						virtualNeighbors = NULL;
-					}
-				}
-				//Virtual Corner Neighbors
-				for(uint8_t c = 0; c < global2D.nnodes; ++c){
-					if(!it->getBound(global2D.nodeface[c][0]) && !it->getBound(global2D.nodeface[c][1])){
-						uint32_t virtualCornerNeighborSize = 0;
-						uint64_t virtualCornerNeighbor = it ->computeNodeVirtualMorton(c,max_depth,virtualCornerNeighborSize);
-						if(virtualCornerNeighborSize){
-							int proc = findOwner(virtualCornerNeighbor);
-							procs.insert(proc);
+						else{
+							it->setPbound(i,false);
 						}
 					}
+					delete [] virtualNeighbors;
+					virtualNeighbors = NULL;
 				}
+			}
+			//Virtual Corner Neighbors
+			for(uint8_t c = 0; c < global2D.nnodes; ++c){
+				if(!it->getBound(global2D.nodeface[c][0]) && !it->getBound(global2D.nodeface[c][1])){
+					uint32_t virtualCornerNeighborSize = 0;
+					uint64_t virtualCornerNeighbor = it ->computeNodeVirtualMorton(c,max_depth,virtualCornerNeighborSize);
+					if(virtualCornerNeighborSize){
+						int proc = findOwner(virtualCornerNeighbor);
+						procs.insert(proc);
+					}
+				}
+			}
 
-				set<int>::iterator pitend = procs.end();
-				for(set<int>::iterator pit = procs.begin(); pit != pitend; ++pit){
-					int p = *pit;
-					if(p != rank){
-						//TODO better reserve to avoid if
-						bordersPerProc[p].push_back(distance(begin,it));
-						vector<uint32_t> & bordersSingleProc = bordersPerProc[p];
-						if(bordersSingleProc.capacity() - bordersSingleProc.size() < 2)
-							bordersSingleProc.reserve(2*bordersSingleProc.size());
-					}
+			set<int>::iterator pitend = procs.end();
+			for(set<int>::iterator pit = procs.begin(); pit != pitend; ++pit){
+				int p = *pit;
+				if(p != rank){
+					//TODO better reserve to avoid if
+					bordersPerProc[p].push_back(distance(begin,it));
+					vector<uint32_t> & bordersSingleProc = bordersPerProc[p];
+					if(bordersSingleProc.capacity() - bordersSingleProc.size() < 2)
+						bordersSingleProc.reserve(2*bordersSingleProc.size());
 				}
 			}
 		}
-		/*		else{
-			Class_Local_Tree<2>::u32vector::iterator end = octree.pborders.end();
-			Class_Local_Tree<2>::u32vector::iterator begin = octree.pborders.begin();
-			bordersPerProc.clear();
-			for(Class_Local_Tree<2>::u32vector::iterator it = begin; it != end; ++it){
-				Class_Octant<2> & oct = octree.octants[*it];
-				set<int> procs;
-				//Virtual Face Neighbors
-				for(uint8_t i = 0; i < global2D.nfaces; ++i){
-					if(oct.getBound(i) == false){
-						uint32_t virtualNeighborsSize = 0;
-						uint64_t* virtualNeighbors = oct.computeVirtualMorton(i,max_depth,virtualNeighborsSize);
-						uint32_t maxDelta = virtualNeighborsSize/2;
-						for(int j = 0; j <= maxDelta; ++j){
-							int pBegin = findOwner(virtualNeighbors[j]);
-							int pEnd = findOwner(virtualNeighbors[virtualNeighborsSize - 1 - j]);
-							procs.insert(pBegin);
-							procs.insert(pEnd);
-							//if(pBegin == pEnd || pBegin == pEnd - 1)
-							//	break;
-						}
-						delete [] virtualNeighbors;
-						virtualNeighbors = NULL;
-					}
-				}
-				//Virtual Corner Neighbors
-				for(uint8_t c = 0; c < global2D.nnodes; ++c){
-					if(!oct.getBound(global2D.nodeface[c][0]) && !oct.getBound(global2D.nodeface[c][1])){
-						uint32_t virtualCornerNeighborSize = 0;
-						uint64_t virtualCornerNeighbor = oct.computeNodeVirtualMorton(c,max_depth,virtualCornerNeighborSize);
-						if(virtualCornerNeighborSize){
-							int proc = findOwner(virtualCornerNeighbor);
-							procs.insert(proc);
-						}
-					}
-				}
 
-				set<int>::iterator pitend = procs.end();
-				for(set<int>::iterator pit = procs.begin(); pit != pitend; ++pit){
-					int p = *pit;
-					if(p != rank){
-						//TODO better reserve to avoid if
-						bordersPerProc[p].push_back(*it);
-						vector<uint32_t> & bordersSingleProc = bordersPerProc[p];
-						if(bordersSingleProc.capacity() - bordersSingleProc.size() < 2)
-							bordersSingleProc.reserve(2*bordersSingleProc.size());
-					}
-				}
-			}
-
-		}*/
 		MPI_Barrier(MPI_COMM_WORLD);
 
 		//PACK (mpi) BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
@@ -790,6 +854,7 @@ public:
 		//for every element it visits the border octants it contains and pack them in a new structure, sendBuffers
 		//this map has an entry Class_Comm_Buffer for every proc containing the size in bytes of the buffer and the octants
 		//to be sent to that proc packed in a char* buffer
+		uint64_t global_index;
 		uint32_t x,y;
 		uint8_t l;
 		int8_t m;
@@ -812,6 +877,7 @@ public:
 				y = octant.getY();
 				l = octant.getLevel();
 				m = octant.getMarker();
+				global_index = getGlobalIdx(value[i]);
 				memcpy(info,octant.info,12);
 				error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 				error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
@@ -820,15 +886,9 @@ public:
 				for(int j = 0; j < 12; ++j){
 					MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 				}
+				error_flag = MPI_Pack(&global_index,1,MPI_INT64_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 			}
 		}
-
-		//Build pborders
-		octree.pborders.clear();
-		//	octree.pborders.reserve(pbordersOversize);
-		//	for(map<int,vector<uint32_t> >::iterator bit = bordersPerProc.begin(); bit != bitend; ++bit){
-		//		set_union(bit->second.begin(),bit->second.end(),octree.pborders.begin(),octree.pborders.end(),octree.pborders.begin());
-		//	}
 
 		//COMMUNICATE THE SIZE OF BUFFER TO THE RECEIVERS
 		//the size of every borders buffer is communicated to the right process in order to build the receive buffer
@@ -879,6 +939,7 @@ public:
 		octree.size_ghosts = nofGhosts;
 		octree.ghosts.clear();
 		octree.ghosts.resize(nofGhosts);
+		octree.globalidx_ghosts.resize(nofGhosts);
 
 		//UNPACK BUFFERS AND BUILD GHOSTS CONTAINER OF CLASS_LOCAL_TREE
 		//every entry in recvBuffers is visited, each buffers from neighbor processes is unpacked octant by octant.
@@ -899,6 +960,8 @@ public:
 					error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&info[j],1,MPI::BOOL,MPI_COMM_WORLD);
 					octree.ghosts[ghostCounter].info[j] = info[j];
 				}
+				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&global_index,1,MPI_INT64_T,MPI_COMM_WORLD);
+				octree.globalidx_ghosts[ghostCounter] = global_index;
 				++ghostCounter;
 			}
 		}
@@ -1244,7 +1307,6 @@ public:
 				}
 			}
 			octree.octants.shrink_to_fit();
-			octree.pborders.clear();
 
 			delete [] newPartitionRangeGlobalidx;
 			newPartitionRangeGlobalidx = NULL;
@@ -1607,7 +1669,6 @@ public:
 				}
 			}
 			octree.octants.shrink_to_fit();
-			octree.pborders.clear();
 
 			delete [] newPartitionRangeGlobalidx;
 			newPartitionRangeGlobalidx = NULL;
@@ -2066,7 +2127,6 @@ public:
 			}
 			octree.octants.shrink_to_fit();
 			userData.data.shrink_to_fit();
-			octree.pborders.clear();
 
 			delete [] newPartitionRangeGlobalidx;
 			newPartitionRangeGlobalidx = NULL;
@@ -2525,7 +2585,6 @@ public:
 			}
 			octree.octants.shrink_to_fit();
 			userData.data.shrink_to_fit();
-			octree.pborders.clear();
 
 			delete [] newPartitionRangeGlobalidx;
 			newPartitionRangeGlobalidx = NULL;

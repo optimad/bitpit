@@ -18,7 +18,7 @@ class Class_Octant<2>{
 	// ------------------------------------------------------------------------------- //
 	// TYPEDEFS ----------------------------------------------------------------------- //
 public:
-	typedef vector<Class_Octant<2> > 		OctantsType;
+	typedef vector<Class_Octant<2> > 	OctantsType;
 	typedef vector<uint32_t>			u32vector;
 	typedef vector<vector<uint32_t>	>	u32vector2D;
 	typedef vector<vector<uint64_t>	>	u64vector2D;
@@ -98,10 +98,10 @@ public:
 	bool		getPbound(uint8_t face) const{				// Get if face is process boundary
 		return info[global2D.nfaces+face];
 	};
-	bool		getIsNewR() const{return info[8];};		// Get if octant is new after refinement
-	bool		getIsNewC() const{return info[9];};		// Get if octant is new after coarsening
+	bool		getIsNewR() const{return info[8];};			// Get if octant is new after refinement
+	bool		getIsNewC() const{return info[9];};			// Get if octant is new after coarsening
 	bool		getNotBalance() const{return info[10];};	// Get if balancing-blocked octant
-	bool		getIsGhost() const{return info[11];};		// For ghostbusters : get if octant is a ghost
+	//	bool		getIsGhost() const{return info[11];};		// For ghostbusters : get if octant is a ghost
 
 	void		setMarker(int8_t marker){					// Set refinement/coarsening marker
 		this->marker = marker;
@@ -602,5 +602,3 @@ public:
 
 
 };
-
-//#endif

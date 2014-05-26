@@ -21,6 +21,7 @@ public:
 	typedef vector<Class_Octant<2> > 		OctantsType;
 	typedef vector<Class_Intersection<2> > 	IntersectionsType;
 	typedef vector<uint32_t>				u32vector;
+	typedef vector<uint64_t>				u64vector;
 	typedef vector<vector<uint32_t>	>		u32vector2D;
 	typedef vector<vector<uint64_t>	>		u64vector2D;
 
@@ -34,7 +35,7 @@ private:
 	IntersectionsType			intersections_int;	// Local vector of internal intersections ordered with Morton Number of first owner octant
 	IntersectionsType			intersections_ghost;// Local vector of intersections internal/ghost ordered with Morton Number of internal owner octant
 	IntersectionsType			intersections_bord;	// Local vector of border intersections (twice the sam octant is stored in an intersection)
-	u32vector 					pborders;			// Local vector of pborder octants ordered with Morton Number
+	u64vector 					globalidx_ghosts;	// Global index of the ghost octants (size = size_ghosts)
 	Class_Octant<2> 			first_desc;			// First (Morton order) most refined octant possible in local partition
 	Class_Octant<2> 			last_desc;			// Last (Morton order) most refined octant possible in local partition
 	uint32_t 					size_ghosts;		// Size of vector of ghost octants
@@ -2581,6 +2582,79 @@ public:
 
 	// =================================================================================== //
 
+	uint32_t findMorton(uint64_t Morton){				// Find an input Morton in octants and return the local idx
+		uint32_t nocts = octants.size();
+		uint32_t idx = nocts/2;
+		uint64_t Mortontry = octants[idx].computeMorton();
+		int32_t jump = nocts/2;
+		while(abs(jump)>0){
+			if (Mortontry == Morton){
+				return idx;
+			}
+			Mortontry = octants[idx].computeMorton();
+			jump = (Mortontry<Morton)*jump/4;
+			idx += jump;
+			if (idx > nocts){
+				return nocts;   // return nocts if not found the Morton
+			}
+		}
+		if (Mortontry<Morton){
+			for (int idx2=idx; idx2<nocts; idx2++){
+				Mortontry = octants[idx2].computeMorton();
+				if (Mortontry == Morton){
+					return idx;
+				}
+			}
+		}
+		else{
+			for(int idx2=0; idx2<idx; idx2++){
+				Mortontry = octants[idx2].computeMorton();
+				if (Mortontry == Morton){
+					return idx;
+				}
+			}
+		}
+		return nocts;
+	};
+
+	// =================================================================================== //
+
+	uint32_t findGhostMorton(uint64_t Morton){			// Find an input Morton in ghosts and return the local idx
+		uint32_t nocts = ghosts.size();
+		uint32_t idx = nocts/2;
+		uint64_t Mortontry = ghosts[idx].computeMorton();
+		int32_t jump = nocts/2;
+		while(abs(jump)>0){
+			if (Mortontry == Morton){
+				return idx;
+			}
+			Mortontry = ghosts[idx].computeMorton();
+			jump = (Mortontry<Morton)*jump/4;
+			idx += jump;
+			if (idx > nocts){
+				return nocts;   // return nocts if not found the Morton
+			}
+		}
+		if (Mortontry<Morton){
+			for (int idx2=idx; idx2<nocts; idx2++){
+				Mortontry = ghosts[idx2].computeMorton();
+				if (Mortontry == Morton){
+					return idx;
+				}
+			}
+		}
+		else{
+			for(int idx2=0; idx2<idx; idx2++){
+				Mortontry = ghosts[idx2].computeMorton();
+				if (Mortontry == Morton){
+					return idx;
+				}
+			}
+		}
+		return nocts;
+	};
+
+	// =================================================================================== //
 
 };//end Class_Local_Tree<2> specialization;
 
