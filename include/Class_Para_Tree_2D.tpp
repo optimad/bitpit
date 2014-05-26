@@ -864,7 +864,7 @@ public:
 		uint32_t pbordersOversize = 0;
 		for(map<int,vector<uint32_t> >::iterator bit = bordersPerProc.begin(); bit != bitend; ++bit){
 			pbordersOversize += bit->second.size();
-			int buffSize = bit->second.size() * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
+			int buffSize = bit->second.size() * (int)ceil((double)(global2D.octantBytes + global2D.globalIndexBytes) / (double)(CHAR_BIT/8));
 			int key = bit->first;
 			const vector<uint32_t> & value = bit->second;
 			sendBuffers[key] = Class_Comm_Buffer(buffSize,'a');
@@ -935,7 +935,7 @@ public:
 		//COMPUTE GHOSTS SIZE IN BYTES
 		//number of ghosts in every process is obtained through the size in bytes of the single octant
 		//and ghost vector in local tree is resized
-		uint32_t nofGhosts = nofBytesOverProc / (uint32_t)global2D.octantBytes;
+		uint32_t nofGhosts = nofBytesOverProc / (uint32_t)(global2D.octantBytes + global2D.globalIndexBytes);
 		octree.size_ghosts = nofGhosts;
 		octree.ghosts.clear();
 		octree.ghosts.resize(nofGhosts);
@@ -948,7 +948,7 @@ public:
 		map<int,Class_Comm_Buffer>::iterator rritend = recvBuffers.end();
 		for(map<int,Class_Comm_Buffer>::iterator rrit = recvBuffers.begin(); rrit != rritend; ++rrit){
 			int pos = 0;
-			int nofGhostsPerProc = int(rrit->second.commBufferSize / (uint32_t) global2D.octantBytes);
+			int nofGhostsPerProc = int(rrit->second.commBufferSize / (uint32_t) (global2D.octantBytes + global2D.globalIndexBytes));
 			for(int i = 0; i < nofGhostsPerProc; ++i){
 				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&x,1,MPI_UINT32_T,MPI_COMM_WORLD);
 				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&y,1,MPI_UINT32_T,MPI_COMM_WORLD);
