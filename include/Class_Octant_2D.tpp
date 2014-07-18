@@ -27,7 +27,7 @@ public:
 	// MEMBERS ----------------------------------------------------------------------- //
 
 private:
-	uint32_t  x, y;			// Coordinates
+	uint32_t  x, y;				// Coordinates
 	uint8_t   level;			// Refinement level (0=root)
 	int8_t    marker;			// Set for Refinement(m>0) or Coarsening(m<0) |m|-times
 	bool      info[12];			// Info[0..3] : true if 0..3 face is a boundary face [bound];

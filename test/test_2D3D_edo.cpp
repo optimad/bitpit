@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
 			vector<double> C5 = {double(global2D.max_length)*0.675, double(global2D.max_length)*0.625, 0.0};
 			double R5 = double(global2D.max_length)*0.025;
 
- 			int nref = 7;
+ 			int nref = 4;
 			for (int l=0; l<nref; l++){
 				for (int i=0; i<nocts; i++){
 					double* center;
@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
 					if((global2D.max_length*0.025*sin(2.0*4.0*M_PI*center[0]/global2D.max_length + M_PI*1.5) + global2D.max_length*0.75 <= center[1]+1.0*oct.getSize())
 						 && (global2D.max_length*0.025*sin(2.0*4.0*M_PI*center[0]/global2D.max_length + M_PI*1.5) + global2D.max_length*0.75 >= center[1]-1.0*oct.getSize())
 						 && (center[0] >= global2D.max_length*0.35) && (center[0] <= global2D.max_length*0.65)){
-						ptree.octree.setMarker(i,1);
+						//ptree.octree.setMarker(i,1);
 					}
 					//MexHat
 					if((center[1]-global2D.max_length*0.75 <= sin(pow(center[0],2.0)+pow(center[2],2.0))/(pow(center[0],2.0)+pow(center[2],2.0))+oct.getSize())
@@ -105,47 +105,47 @@ int main(int argc, char *argv[]) {
 
 
 //			int nref = 4;
-			for (int l=nref+1; l<nref+8; l++){
-				for (int i=0; i<nocts; i++){
-					double* center;
-					Class_Octant<2> oct = ptree.octree.extractOctant(i);
-					center = oct.getCenter();
-					//				if (sqrt(pow((center[0]-double(global2D.max_length)*0.5),2.0)+pow((center[1]-double(global2D.max_length)*0.5),2.0)+pow((center[2]-double(global2D.max_length)*0.5),2.0)) <= double(global2D.max_length)*0.4){
-					if((pow((center[0]-C2[0]),2.0)+pow((center[1]-C2[1]),2.0)+pow((center[2]-C2[2]),2.0) <= pow(R2,2.0))){
-						ptree.octree.setMarker(i,-1);
-						ptree.octree.setBalance(i,false);
-					}
-					if((pow((center[0]-C3[0]),2.0)+pow((center[1]-C3[1]),2.0) <= pow(R3,2.0))){
-						ptree.octree.setMarker(i,-1);
-						ptree.octree.setBalance(i,false);
-					}
-					if((global2D.max_length*0.1*sin(4.0*M_PI*center[0]/global2D.max_length + M_PI*0.5) + global2D.max_length*0.4 <= center[1]+6.5*oct.getSize())
-						 && (global2D.max_length*0.1*sin(4.0*M_PI*center[0]/global2D.max_length + M_PI*0.5) + global2D.max_length*0.4 >= center[1]-6.5*oct.getSize())){
-						ptree.octree.setMarker(i,-1);
-						ptree.octree.setBalance(i,false);
-					}
-					delete[] center;
-				}
-				//TEST ADAPT WITH MAPPER
-				typename Class_Para_Tree<2>::u32vector mapper,internal,ghosts,borders;
-				ptree.octree.computeIntersections();
-				bool done = ptree.adapt(mapper,internal,ghosts,borders);
-				ptree.loadBalance();
-				nocts = ptree.octree.getNumOctants();
-
-				ptree.octree.updateConnectivity();
-//				ptree.octree.updateGhostsConnectivity();
-				writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,("Pablo_"+to_string(l+3)));
-
-				end = clock();
-				float seconds = (float)(end - start) / CLOCKS_PER_SEC;
-				writeLog(" ");
-				writeLog("---------------------------------------------");
-				writeLog(" ");
-				writeLog(" CPU time (sec)			:	"+to_string(seconds));
-				writeLog(" ");
-				writeLog("---------------------------------------------");
-			}
+//			for (int l=nref+1; l<nref+8; l++){
+//				for (int i=0; i<nocts; i++){
+//					double* center;
+//					Class_Octant<2> oct = ptree.octree.extractOctant(i);
+//					center = oct.getCenter();
+//					//				if (sqrt(pow((center[0]-double(global2D.max_length)*0.5),2.0)+pow((center[1]-double(global2D.max_length)*0.5),2.0)+pow((center[2]-double(global2D.max_length)*0.5),2.0)) <= double(global2D.max_length)*0.4){
+//					if((pow((center[0]-C2[0]),2.0)+pow((center[1]-C2[1]),2.0)+pow((center[2]-C2[2]),2.0) <= pow(R2,2.0))){
+//						ptree.octree.setMarker(i,-1);
+//						ptree.octree.setBalance(i,false);
+//					}
+//					if((pow((center[0]-C3[0]),2.0)+pow((center[1]-C3[1]),2.0) <= pow(R3,2.0))){
+//						ptree.octree.setMarker(i,-1);
+//						ptree.octree.setBalance(i,false);
+//					}
+//					if((global2D.max_length*0.1*sin(4.0*M_PI*center[0]/global2D.max_length + M_PI*0.5) + global2D.max_length*0.4 <= center[1]+6.5*oct.getSize())
+//						 && (global2D.max_length*0.1*sin(4.0*M_PI*center[0]/global2D.max_length + M_PI*0.5) + global2D.max_length*0.4 >= center[1]-6.5*oct.getSize())){
+//						ptree.octree.setMarker(i,-1);
+//						ptree.octree.setBalance(i,false);
+//					}
+//					delete[] center;
+//				}
+//				//TEST ADAPT WITH MAPPER
+//				typename Class_Para_Tree<2>::u32vector mapper,internal,ghosts,borders;
+//				ptree.octree.computeIntersections();
+//				bool done = ptree.adapt(mapper,internal,ghosts,borders);
+//				ptree.loadBalance();
+//				nocts = ptree.octree.getNumOctants();
+//
+//				ptree.octree.updateConnectivity();
+////				ptree.octree.updateGhostsConnectivity();
+//				writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,("Pablo_"+to_string(l+3)));
+//
+//				end = clock();
+//				float seconds = (float)(end - start) / CLOCKS_PER_SEC;
+//				writeLog(" ");
+//				writeLog("---------------------------------------------");
+//				writeLog(" ");
+//				writeLog(" CPU time (sec)			:	"+to_string(seconds));
+//				writeLog(" ");
+//				writeLog("---------------------------------------------");
+//			}
 
 //			ptree.octree.updateConnectivity();
 ////				ptree.octree.updateGhostsConnectivity();
