@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
 			vector<double> C5 = {double(global2D.max_length)*0.675, double(global2D.max_length)*0.625, 0.0};
 			double R5 = double(global2D.max_length)*0.025;
 
- 			int nref = 4;
+ 			int nref = 5;
 			for (int l=0; l<nref; l++){
 				for (int i=0; i<nocts; i++){
 					double* center;
@@ -57,8 +57,8 @@ int main(int argc, char *argv[]) {
 							&& (pow((center[0]-C1[0]),2.0)+pow((center[1]-C1[1]),2.0)+pow((center[2]-C1[2]),2.0) >= pow(R1-oct.getSize(),2.0)) ){
 						ptree.octree.setMarker(i,1);
 					}
-					if((pow((center[0]-C2[0]),2.0)+pow((center[1]-C2[1]),2.0)+pow((center[2]-C2[2]),2.0) <= pow(R2+oct.getSize(),2.0))){
-//							&& (pow((center[0]-C2[0]),2.0)+pow((center[1]-C2[1]),2.0)+pow((center[2]-C2[2]),2.0) >= pow(R2-oct.getSize(),2.0)) ){
+					if((pow((center[0]-C2[0]),2.0)+pow((center[1]-C2[1]),2.0)+pow((center[2]-C2[2]),2.0) <= pow(R2+oct.getSize(),2.0))
+							&& (pow((center[0]-C2[0]),2.0)+pow((center[1]-C2[1]),2.0)+pow((center[2]-C2[2]),2.0) >= pow(R2-oct.getSize(),2.0)) ){
 						ptree.octree.setMarker(i,1);
 					}
 					if((pow((center[0]-C3[0]),2.0)+pow((center[1]-C3[1]),2.0)+pow((center[2]-C3[2]),2.0) <= pow(R3+oct.getSize(),2.0))
