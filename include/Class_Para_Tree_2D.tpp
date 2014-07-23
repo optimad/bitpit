@@ -222,6 +222,16 @@ public:
 		return global_num_octants;
 	};
 
+	uint32_t getIdx(Class_Octant<2>* oct){
+		if (getIsGhost(oct)){
+			return octree.findGhostMorton(oct->computeMorton());
+		}
+		else{
+			return octree.findMorton(oct->computeMorton());
+		};
+		return octree.getNumOctants();
+	};
+
 	void setMarker(Class_Octant<2>* oct, int8_t marker){					// Set refinement/coarsening marker for idx-th octant
 		oct->setMarker(marker);
 	};
@@ -385,6 +395,10 @@ public:
 		return octree.extractOctant(idx) ;
 	};
 
+	const Class_Octant<2>*	getOctant(uint32_t idx) const{
+		return &octree.extractOctant(idx) ;
+	};
+
 	void findNeighbours(uint32_t idx,							// Finds neighbours of idx-th octant through iface in vector octants.
 			uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
 			u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
@@ -411,6 +425,30 @@ public:
 
 	//-------------------------------------------------------------------------------- //
 	// Intersections get Methods
+
+	uint32_t getNumIntersectionsBord() {
+		return octree.intersections_bord.size();
+	}
+
+	uint32_t getNumIntersectionsInt() {
+		return octree.intersections_int.size();
+	}
+
+	uint32_t getNumIntersectionsGhost() {
+		return octree.intersections_ghost.size();
+	}
+
+	const Class_Intersection<2>* getIntersectionBord(uint32_t idx) {
+		return &octree.intersections_bord[idx];
+	}
+
+	const Class_Intersection<2>* getIntersectionInt(uint32_t idx) {
+		return &octree.intersections_int[idx];
+	}
+
+	const Class_Intersection<2>* getIntersectionGhost(uint32_t idx) {
+		return &octree.intersections_ghost[idx];
+	}
 
 	double getSize(Class_Intersection<2>* const inter) {
 		uint32_t Size;
@@ -794,7 +832,7 @@ public:
 		//find the owner of these virtual neighbor and build a map (process,border octants)
 		//this map contains the local octants as ghosts for neighbor processes
 
-		// Non c'è più PBORDERS !!!
+		// Eliminata PBORDERS !!!
 		Class_Local_Tree<2>::OctantsType::iterator end = octree.octants.end();
 		Class_Local_Tree<2>::OctantsType::iterator begin = octree.octants.begin();
 		bordersPerProc.clear();
