@@ -1734,9 +1734,10 @@ public:
 
 	// =============================================================================== //
 
-	template<class UserDataComm>
-	void loadBalance(UserDataComm & userData){
-
+//	template<class UserDataComm>
+//	void loadBalance(UserDataComm & userData){
+	template<class Impl>
+	void loadbalance(Class_Data_LB_Interface<Impl> & userData){
 		//Write info on log
 		writeLog("---------------------------------------------");
 		writeLog(" LOAD BALANCE ");
@@ -1756,8 +1757,10 @@ public:
 				stride += partition[i];
 			Class_Local_Tree<2>::OctantsType::const_iterator first = octree.octants.begin() + stride;
 			Class_Local_Tree<2>::OctantsType::const_iterator last = first + partition[rank];
-			typename UserDataComm::Data::iterator firstData = userData.data.begin() + stride;
-			typename UserDataComm::Data::iterator lastData = firstData + partition[rank];
+//			typename UserDataComm::Data::iterator firstData = userData.data.begin() + stride;
+//			typename UserDataComm::Data::iterator lastData = firstData + partition[rank];
+			typename Class_Data_LB_Interface<Impl>::Data::iterator firstData = userData.data.begin() + stride;
+			typename Class_Data_LB_Interface<Impl>::Data::iterator lastData = firstData + partition[rank];
 			octree.octants.assign(first, last);
 			userData.data.assign(firstData,lastData);
 			octree.octants.shrink_to_fit();
@@ -3192,9 +3195,10 @@ public:
 
 	// =============================================================================== //
 
-	template<class UserDataComm>
-	void communicate(UserDataComm & userData){
-
+//	template<class UserDataComm>
+//	void communicate(UserDataComm & userData){
+	template<class Impl>
+	void communicate(Class_Data_Comm_Interface<Impl> & userData){
 		//BUILD SEND BUFFERS
 		map<int,Class_Comm_Buffer> sendBuffers;
 		size_t fixedDataSize = userData.fixedSize();
