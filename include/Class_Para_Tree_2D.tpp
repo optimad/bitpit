@@ -177,6 +177,15 @@ public:
 		center_ = NULL;
 	}
 
+	vector<double> getCenter(Class_Octant<2>* oct) {
+		vector<double> center;
+		double* center_ = oct->getCenter();
+		trans.mapCenter(center_, center);
+		delete [] center_;
+		center_ = NULL;
+		return center;
+	}
+
 	void getNodes(Class_Octant<2>* oct,
 			dvector2D & nodes) {
 		uint32_t (*nodes_)[3] = oct->getNodes();
@@ -279,6 +288,15 @@ public:
 		center_ = NULL;
 	}
 
+	vector<double> getCenter(Class_Octant<2> oct) {
+		vector<double> center;
+		double* center_ = oct.getCenter();
+		trans.mapCenter(center_, center);
+		delete [] center_;
+		center_ = NULL;
+		return center;
+	}
+
 	void getNodes(Class_Octant<2> oct,
 			dvector2D & nodes) {
 		uint32_t (*nodes_)[3] = oct.getNodes();
@@ -287,12 +305,30 @@ public:
 		nodes_ = NULL;
 	}
 
+	dvector2D getNodes(Class_Octant<2> oct){
+		dvector2D nodes;
+		uint32_t (*nodes_)[3] = oct.getNodes();
+		trans.mapNodes(nodes_, nodes);
+		delete [] nodes_;
+		nodes_ = NULL;
+		return nodes;
+	}
+
 	void getNormal(Class_Octant<2> oct,
 			uint8_t & iface,
 			dvector & normal) {
 		vector<int8_t> normal_;
 		oct.getNormal(iface, normal_);
 		trans.mapNormals(normal_, normal);
+	}
+
+	dvector getNormal(Class_Octant<2> oct,
+			uint8_t & iface){
+		dvector normal;
+		vector<int8_t> normal_;
+		oct.getNormal(iface, normal_);
+		trans.mapNormals(normal_, normal);
+		return normal;
 	}
 
 	uint8_t getMarker(Class_Octant<2> oct){								// Get refinement/coarsening marker for idx-th octant
@@ -337,6 +373,85 @@ public:
 	};
 
 	// ------------------------------------------------------------------------------- //
+	// Index get/set Methods
+
+	double getX(uint32_t idx) {
+		return trans.mapX(octree.octants[idx].getX());
+	}
+
+	double getY(uint32_t idx) {
+		return trans.mapY(octree.octants[idx].getY());
+	}
+
+	double getZ(uint32_t idx) {
+		return trans.mapZ(octree.octants[idx].getZ());
+	}
+
+	double getSize(uint32_t idx) {
+		return trans.mapSize(octree.octants[idx].getSize());
+	}
+
+	double getArea(uint32_t idx) {
+		return trans.mapArea(octree.octants[idx].getArea());
+	}
+
+	double getVolume(uint32_t idx) {
+		return trans.mapVolume(octree.octants[idx].getVolume());
+	}
+
+	void getCenter(uint32_t idx,
+			vector<double>& center) {
+		double* center_ = octree.octants[idx].getCenter();
+		trans.mapCenter(center_, center);
+		delete [] center_;
+		center_ = NULL;
+	}
+
+	vector<double> getCenter(uint32_t idx) {
+		vector<double> center;
+		double* center_ = octree.octants[idx].getCenter();
+		trans.mapCenter(center_, center);
+		delete [] center_;
+		center_ = NULL;
+		return center;
+	}
+
+	void getNodes(uint32_t idx,
+			dvector2D & nodes) {
+		uint32_t (*nodes_)[3] = octree.octants[idx].getNodes();
+		trans.mapNodes(nodes_, nodes);
+		delete [] nodes_;
+		nodes_ = NULL;
+	}
+
+	dvector2D getNodes(uint32_t idx){
+		dvector2D nodes;
+		uint32_t (*nodes_)[3] = octree.octants[idx].getNodes();
+		trans.mapNodes(nodes_, nodes);
+		delete [] nodes_;
+		nodes_ = NULL;
+		return nodes;
+	}
+
+	void getNormal(uint32_t idx,
+			uint8_t & iface,
+			dvector & normal) {
+		vector<int8_t> normal_;
+		octree.octants[idx].getNormal(iface, normal_);
+		trans.mapNormals(normal_, normal);
+	}
+
+	dvector getNormal(uint32_t idx,
+			uint8_t & iface){
+		dvector normal;
+		vector<int8_t> normal_;
+		octree.octants[idx].getNormal(iface, normal_);
+		trans.mapNormals(normal_, normal);
+		return normal;
+	}
+
+
+	// ------------------------------------------------------------------------------- //
 	// Local Tree get/set Methods
 	const Class_Octant<2> &  getFirstDesc() const{
 		return octree.getFirstDesc();
@@ -358,15 +473,15 @@ public:
 		return octree.getLocalMaxDepth();
 	};
 
-	uint8_t getMarker(int32_t idx){								// Get refinement/coarsening marker for idx-th octant
+	uint8_t getMarker(uint32_t idx){							// Get refinement/coarsening marker for idx-th octant
 		return octree.getMarker(idx);
 	};
 
-	uint8_t getLevel(int32_t idx){								// Get refinement/coarsening marker for idx-th octant
+	uint8_t getLevel(uint32_t idx){								// Get refinement/coarsening marker for idx-th octant
 		return octree.getLevel(idx);
 	};
 
-	bool getBalance(int32_t idx){								// Get if balancing-blocked idx-th octant
+	bool getBalance(uint32_t idx){								// Get if balancing-blocked idx-th octant
 		return octree.getBalance(idx);
 	};
 
@@ -387,11 +502,11 @@ public:
 		return uint64_t(octree.size_ghosts);
 	};
 
-	void setMarker(int32_t idx, int8_t marker){					// Set refinement/coarsening marker for idx-th octant
+	void setMarker(uint32_t idx, int8_t marker){					// Set refinement/coarsening marker for idx-th octant
 		octree.setMarker(idx, marker);
 	};
 
-	void setBalance(int32_t idx, bool balance){					// Set if balancing-blocked idx-th octant
+	void setBalance(uint32_t idx, bool balance){					// Set if balancing-blocked idx-th octant
 		octree.setBalance(idx, balance);
 	};
 
