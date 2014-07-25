@@ -18,6 +18,8 @@
 #include "Class_Comm_Buffer.hpp"
 #include "Class_Map.hpp"
 #include "Class_Array.hpp"
+#include "Class_Data_Comm_Interface.hpp"
+#include "Class_Data_LB_Interface.hpp"
 #include <cstdint>
 #include <iterator>
 #include <set>
