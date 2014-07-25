@@ -90,6 +90,9 @@ public:
 	uint8_t getMarker(int32_t idx){								// Get refinement/coarsening marker for idx-th octant
 		return octants[idx].getMarker();
 	};
+	uint8_t getLevel(int32_t idx){								// Get refinement/coarsening marker for idx-th octant
+		return octants[idx].getLevel();
+	};
 	bool getBalance(int32_t idx){								// Get if balancing-blocked idx-th octant
 		return octants[idx].getNotBalance();
 	};

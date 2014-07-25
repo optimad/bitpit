@@ -197,6 +197,10 @@ public:
 		return oct->getMarker();
 	};
 
+	uint8_t getLevel(Class_Octant<2>* oct){								// Get refinement/coarsening marker for idx-th octant
+		return oct->getLevel();
+	};
+
 	bool getBalance(Class_Octant<2>* oct){								// Get if balancing-blocked idx-th octant
 		return oct->getNotBalance();
 	};
@@ -295,6 +299,10 @@ public:
 		return oct.getMarker();
 	};
 
+	uint8_t getLevel(Class_Octant<2> oct){								// Get refinement/coarsening marker for idx-th octant
+		return oct.getLevel();
+	};
+
 	bool getBalance(Class_Octant<2> oct){								// Get if balancing-blocked idx-th octant
 		return oct.getNotBalance();
 	};
@@ -352,6 +360,10 @@ public:
 
 	uint8_t getMarker(int32_t idx){								// Get refinement/coarsening marker for idx-th octant
 		return octree.getMarker(idx);
+	};
+
+	uint8_t getLevel(int32_t idx){								// Get refinement/coarsening marker for idx-th octant
+		return octree.getLevel(idx);
 	};
 
 	bool getBalance(int32_t idx){								// Get if balancing-blocked idx-th octant
