@@ -121,7 +121,12 @@ public:
 	// Other methods ----------------------------------------------------------------- //
 
 public:
-	const Class_Octant<2>&	extractOctant(uint32_t idx) const{
+
+	Class_Octant<2>& extractOctant(uint32_t idx) {
+		return octants[idx];
+	};
+
+	const Class_Octant<2>& extractOctant(uint32_t idx) const{
 		return octants[idx];
 	};
 

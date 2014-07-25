@@ -403,12 +403,16 @@ public:
 		octree.setLastDesc();
 	};
 
-	const Class_Octant<2>&	extractOctant(uint32_t idx) const{
+	 Class_Octant<2>& extractOctant(uint32_t idx) {
 		return octree.extractOctant(idx) ;
 	};
 
-	const Class_Octant<2>*	getOctant(uint32_t idx) const{
-		return &octree.extractOctant(idx) ;
+	const Class_Octant<2>& extractOctant(uint32_t idx) const{
+	 		return octree.extractOctant(idx) ;
+	};
+
+	Class_Octant<2>* getOctant(uint32_t idx) {
+		return &octree.octants[idx] ;
 	};
 
 	void findNeighbours(uint32_t idx,							// Finds neighbours of idx-th octant through iface in vector octants.
