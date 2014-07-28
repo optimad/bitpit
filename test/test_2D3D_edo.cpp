@@ -15,6 +15,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
+/*
 	MPI::Init(argc, argv);
 
 		{
@@ -154,6 +155,7 @@ int main(int argc, char *argv[]) {
 		}
 
 	MPI::Finalize();
+*/
 
 	return 0;
 

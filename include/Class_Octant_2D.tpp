@@ -17,7 +17,7 @@ class Class_Octant<2>{
 
 	// ------------------------------------------------------------------------------- //
 	// TYPEDEFS ----------------------------------------------------------------------- //
-public:
+//public:
 	typedef vector<Class_Octant<2> > 	OctantsType;
 	typedef vector<uint32_t>			u32vector;
 	typedef vector<vector<uint32_t>	>	u32vector2D;
@@ -86,7 +86,8 @@ public:
 
 	// Basic Get/Set methods --------------------------------------------------------- //
 
-public:
+//public:
+private:
 	uint32_t	getX() const{return x;};
 	uint32_t	getY() const{return y;};
 	uint32_t	getZ() const{return 0;};
@@ -120,7 +121,7 @@ private:
 	//-------------------------------------------------------------------------------- //
 	// Other Get/Set methods --------------------------------------------------------- //
 
-public:
+//public:
 	uint32_t	getSize() const{							// Get the size of octant
 		uint32_t size = uint32_t(pow(double(2),double(MAX_LEVEL_2D-level)));
 		return size;
@@ -228,7 +229,7 @@ public:
 	//-------------------------------------------------------------------------------- //
 	// Other methods ----------------------------------------------------------------- //
 
-public:
+//public:
 	Class_Octant<2>	buildLastDesc(){								// Build last descendant of octant and return the last descendant octant (no info update)
 		uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL_2D - level)) - 1;
 		Class_Octant<2> last_desc(MAX_LEVEL_2D,x+delta,y+delta);

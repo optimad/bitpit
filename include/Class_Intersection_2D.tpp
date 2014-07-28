@@ -26,7 +26,7 @@ public:
 
 	// ------------------------------------------------------------------------------- //
 	// MEMBERS ----------------------------------------------------------------------- //
-
+private:
 	uint32_t 	owners[2];			// Owner octants of the intersection (first is the internal octant)
 	uint8_t   	iface;				// Index of the face of the first owner
 	bool		finer;				// 0/1 finer octant (if same level =0)
@@ -80,7 +80,7 @@ public:
 	// METHODS ----------------------------------------------------------------------- //
 
 	// Basic Get/Set methods --------------------------------------------------------- //
-
+private:
 	uint32_t getOut(){						// Get the owner with exiting normal
 		return owners[0];
 	};

@@ -527,7 +527,16 @@ public:
 	};
 
 	Class_Octant<2>* getOctant(uint32_t idx) {
-		return &octree.octants[idx] ;
+		if (idx < octree.getNumOctants()){
+			return &octree.octants[idx] ;
+		}
+		return NULL;
+	};
+	Class_Octant<2>* getGhostOctant(uint32_t idx) {
+		if (idx < octree.getSizeGhost()){
+		return &octree.ghosts[idx] ;
+		}
+		return NULL;
 	};
 
 	void findNeighbours(uint32_t idx,							// Finds neighbours of idx-th octant through iface in vector octants.
@@ -569,41 +578,66 @@ public:
 		return octree.intersections_ghost.size();
 	}
 
-	const Class_Intersection<2>* getIntersectionBord(uint32_t idx) {
-		return &octree.intersections_bord[idx];
+	Class_Intersection<2>* getIntersectionBord(uint32_t idx) {
+		if (idx < octree.intersections_bord.size()){
+			return &octree.intersections_bord[idx];
+		}
+		return NULL;
 	}
 
-	const Class_Intersection<2>* getIntersectionInt(uint32_t idx) {
-		return &octree.intersections_int[idx];
+	Class_Intersection<2>* getIntersectionInt(uint32_t idx) {
+		if (idx < octree.intersections_int.size()){
+			return &octree.intersections_int[idx];
+		}
+		return NULL;
 	}
 
-	const Class_Intersection<2>* getIntersectionGhost(uint32_t idx) {
-		return &octree.intersections_ghost[idx];
+	Class_Intersection<2>* getIntersectionGhost(uint32_t idx) {
+		if (idx < octree.intersections_ghost.size()){
+			return &octree.intersections_ghost[idx];
+		}
+		return NULL;
 	}
 
-	double getSize(Class_Intersection<2>* const inter) {
+	uint8_t getLevel(Class_Intersection<2>* inter) {
+		return octree.extractOctant(inter->owners[inter->finer]).getLevel();
+	}
+
+	uint8_t getFace(Class_Intersection<2>* inter) {
+		return inter->iface;
+	}
+
+	u32vector getOwners(Class_Intersection<2>* inter) {
+		u32vector owners(2);
+		owners[0] = inter->owners[0];
+		owners[1] = inter->owners[1];
+		return owners;
+	}
+
+	double getSize(Class_Intersection<2>* inter) {
 		uint32_t Size;
 		Size = octree.extractOctant(inter->owners[inter->finer]).getSize();
 		return trans.mapSize(Size);
 	}
 
-	double getArea(Class_Intersection<2>* const inter) {
+	double getArea(Class_Intersection<2>* inter) {
 		uint32_t Area;
 		Area = octree.extractOctant(inter->owners[inter->finer]).getArea();
 		return trans.mapArea(Area);
 	}
 
-	void getCenter(Class_Intersection<2>* inter,
-			vector<double>& center) {
+	vector<double> getCenter(Class_Intersection<2>* inter){
+		vector<double> center;
 		Class_Octant<2> oct = octree.extractOctant(inter->owners[inter->finer]);
 		double* center_ = oct.getCenter();
 		trans.mapCenter(center_, center);
 		delete [] center_;
 		center_ = NULL;
+		return center;
 	}
 
-	void getNodes(Class_Intersection<2>* const inter,
-			dvector2D & nodes) {
+	dvector2D getNodes(Class_Intersection<2>* inter){
+		dvector2D nodes;
 		Class_Octant<2> oct = octree.extractOctant(inter->owners[inter->finer]);
 		uint8_t iface = inter->iface;
 		uint32_t (*nodes_all)[3] = oct.getNodes();
@@ -616,33 +650,35 @@ public:
 		trans.mapNodesIntersection(nodes_, nodes);
 		delete [] nodes_;
 		nodes_ = NULL;
+		return nodes;
 	}
 
-	void getNormal(Class_Intersection<2>* const inter,
-			dvector & normal) {
+	dvector getNormal(Class_Intersection<2>* inter){
+		dvector normal;
 		Class_Octant<2> oct = octree.extractOctant(inter->owners[inter->finer]);
 		uint8_t iface = inter->iface;
 		vector<int8_t> normal_;
 		oct.getNormal(iface, normal_);
 		trans.mapNormals(normal_, normal);
+		return normal;
 	}
 
 	//-------------------------------------------------------------------------------- //
 	// No Pointer Intersections get Methods
 
-	double getSize(Class_Intersection<2> const inter) {
+	double getSize(Class_Intersection<2> inter) {
 		uint32_t Size;
 		Size = octree.extractOctant(inter.owners[inter.finer]).getSize();
 		return trans.mapSize(Size);
 	}
 
-	double getArea(Class_Intersection<2> const inter) {
+	double getArea(Class_Intersection<2> inter) {
 		uint32_t Area;
 		Area = octree.extractOctant(inter.owners[inter.finer]).getArea();
 		return trans.mapArea(Area);
 	}
 
-	void getCenter(Class_Intersection<2> const inter,
+	void getCenter(Class_Intersection<2> inter,
 			vector<double>& center) {
 		Class_Octant<2> oct = octree.extractOctant(inter.owners[inter.finer]);
 		double* center_ = oct.getCenter();
@@ -651,7 +687,7 @@ public:
 		center_ = NULL;
 	}
 
-	void getNodes(Class_Intersection<2> const inter,
+	void getNodes(Class_Intersection<2> inter,
 			dvector2D & nodes) {
 		Class_Octant<2> oct = octree.extractOctant(inter.owners[inter.finer]);
 		uint8_t iface = inter.iface;
@@ -667,7 +703,7 @@ public:
 		nodes_ = NULL;
 	}
 
-	void getNormal(Class_Intersection<2> const inter,
+	void getNormal(Class_Intersection<2> inter,
 			dvector & normal) {
 		Class_Octant<2> oct = octree.extractOctant(inter.owners[inter.finer]);
 		uint8_t iface = inter.iface;
