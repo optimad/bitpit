@@ -58,6 +58,7 @@ public:
 	// CONSTRUCTORS ------------------------------------------------------------------ //
 public:
 
+	/*! Constructor of Para_Tree*/
 	Class_Para_Tree(){
 		serial = true;
 		error_flag = 0;
