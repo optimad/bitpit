@@ -61,7 +61,9 @@ public:
 	// CONSTRUCTORS ------------------------------------------------------------------ //
 public:
 
-	/*! Constructor of Para_Tree*/
+	/*! Default Constructor of Para_Tree.
+	 * It builds one octant with node 0 in the Origin (0,0,0)
+	 * and side of length 1*/
 	Class_Para_Tree(){
 		serial = true;
 		error_flag = 0;
@@ -99,6 +101,11 @@ public:
 
 	// =============================================================================== //
 
+	/*! Constructor of Para_Tree with input parameters.
+	 * It builds one octant with node 0 with coordinates defined by
+	 * \param[in] X, \param[in] Y and \param[in] Z and
+	 * side of length \param[in] L.
+	 */
 	Class_Para_Tree(double & X, double & Y, double & Z, double & L){
 		serial = true;
 		error_flag = 0;
