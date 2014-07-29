@@ -102,9 +102,11 @@ public:
 	// =============================================================================== //
 
 	/*! Constructor of Para_Tree with input parameters.
-	 * It builds one octant with node 0 with coordinates defined by
-	 * \param[in] X, \param[in] Y and \param[in] Z and
-	 * side of length \param[in] L.
+	 * It builds one octant with :
+	 * \param[in] X Coordinate X of node 0,
+	 * \param[in] Y Coordinate Y of node 0,
+	 * \param[in] Z Coordinate Z of node 0,
+	 * \param[in] L Side length of the octant.
 	 */
 	Class_Para_Tree(double & X, double & Y, double & Z, double & L){
 		serial = true;
