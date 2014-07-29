@@ -160,6 +160,9 @@ public:
 	// GET/SET METHODS --------------------------------------------------------------- //
 
 	// Octant get/set Methods
+	/*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
+	 * \return Coordinate X of node 0,
+	 */
 	double getX(Class_Octant<2>* const oct) {
 		return trans.mapX(oct->getX());
 	}
