@@ -163,29 +163,30 @@ public:
 
 	// Octant get/set Methods
 	/*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
+	 * \param[in] oct Pointer to target octant.
 	 * \return Coordinate X of node 0.
 	 */
-	double getX(Class_Octant<2>* const oct) {
+	double getX(Class_Octant<2>* oct) {
 		return trans.mapX(oct->getX());
 	}
 
-	double getY(Class_Octant<2>* const oct) {
+	double getY(Class_Octant<2>* oct) {
 		return trans.mapY(oct->getY());
 	}
 
-	double getZ(Class_Octant<2>* const oct) {
+	double getZ(Class_Octant<2>* oct) {
 		return trans.mapZ(oct->getZ());
 	}
 
-	double getSize(Class_Octant<2>* const oct) {
+	double getSize(Class_Octant<2>* oct) {
 		return trans.mapSize(oct->getSize());
 	}
 
-	double getArea(Class_Octant<2>* const oct) {
+	double getArea(Class_Octant<2>* oct) {
 		return trans.mapArea(oct->getArea());
 	}
 
-	double getVolume(Class_Octant<2>* const oct) {
+	double getVolume(Class_Octant<2>* oct) {
 		return trans.mapVolume(oct->getVolume());
 	}
 
@@ -276,27 +277,27 @@ public:
 	// ------------------------------------------------------------------------------- //
 	//No pointer Octants get/set Methods
 
-	double getX(Class_Octant<2> const oct) {
+	double getX(Class_Octant<2> oct) {
 		return trans.mapX(oct.getX());
 	}
 
-	double getY(Class_Octant<2> const oct) {
+	double getY(Class_Octant<2> oct) {
 		return trans.mapY(oct.getY());
 	}
 
-	double getZ(Class_Octant<2> const oct) {
+	double getZ(Class_Octant<2> oct) {
 		return trans.mapZ(oct.getZ());
 	}
 
-	double getSize(Class_Octant<2> const oct) {
+	double getSize(Class_Octant<2> oct) {
 		return trans.mapSize(oct.getSize());
 	}
 
-	double getArea(Class_Octant<2> const oct) {
+	double getArea(Class_Octant<2> oct) {
 		return trans.mapArea(oct.getArea());
 	}
 
-	double getVolume(Class_Octant<2> const oct) {
+	double getVolume(Class_Octant<2> oct) {
 		return trans.mapVolume(oct.getVolume());
 	}
 
@@ -481,7 +482,7 @@ public:
 		return octree.getLastDesc();
 	};
 
-	uint32_t getSizeGhost() const{
+	uint32_t getNumGhosts() const{
 		return octree.getSizeGhost();
 	};
 
@@ -559,32 +560,91 @@ public:
 		return NULL;
 	};
 
-	void findNeighbours(uint32_t idx,							// Finds neighbours of idx-th octant through iface in vector octants.
-			uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
+//	void findNeighbours(uint32_t idx,							// Finds neighbours of idx-th octant through iface in vector octants.
+//			uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
+//			u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
+//			vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
+//
+//		octree.findNeighbours(idx, iface, neighbours, isghost);
+//	};
+//
+//	/** Finds neighbours of octant through iface in vector octants.
+//	 * Returns a vector (empty if iface is a bound face) with the index of neighbours
+//	 * in their structure (octants or ghosts) and sets isghost[i] = true if the
+//	 * i-th neighbour is ghost in the local tree*/
+//	void findNeighbours(Class_Octant<2>* oct,		// Finds neighbours of octant through iface in vector octants.
+//			uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
+//			u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
+//			vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
+//
+//		octree.findNeighbours(oct, iface, neighbours, isghost);
+//	};
+//
+//	void findNeighbours(Class_Octant<2> oct,					// Finds neighbours of octant through iface in vector octants.
+//			uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
+//			u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
+//			vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
+//
+//		octree.findNeighbours(&oct, iface, neighbours, isghost);
+//	};
+
+
+	void findNeighbours(uint32_t idx,				// Finds neighbours of idx-th octant through iface in vector octants.
+			uint8_t iface,
+			uint8_t codim,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
 			u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
 			vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
-
-		octree.findNeighbours(idx, iface, neighbours, isghost);
+		if (codim == 0){
+			octree.findNeighbours(idx, iface, neighbours, isghost);
+		}
+		else if (codim == 1){
+			octree.findNodeNeighbours(idx, iface, neighbours, isghost);
+		}
+		else if (codim == 2){
+			neighbours.clear();
+			isghost.clear();
+		}
 	};
+
 
 	/** Finds neighbours of octant through iface in vector octants.
 	 * Returns a vector (empty if iface is a bound face) with the index of neighbours
 	 * in their structure (octants or ghosts) and sets isghost[i] = true if the
 	 * i-th neighbour is ghost in the local tree*/
 	void findNeighbours(Class_Octant<2>* oct,		// Finds neighbours of octant through iface in vector octants.
-			uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
+			uint8_t iface,
+			uint8_t codim,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
 			u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
 			vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
 
-		octree.findNeighbours(oct, iface, neighbours, isghost);
+		if (codim == 0){
+			octree.findNeighbours(oct, iface, neighbours, isghost);
+		}
+		else if (codim == 1){
+			octree.findNodeNeighbours(oct, iface, neighbours, isghost);
+		}
+		else if (codim == 2){
+			neighbours.clear();
+			isghost.clear();
+		}
 	};
 
 	void findNeighbours(Class_Octant<2> oct,					// Finds neighbours of octant through iface in vector octants.
-			uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
+			uint8_t iface,
+			uint8_t codim,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
 			u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
 			vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
 
-		octree.findNeighbours(&oct, iface, neighbours, isghost);
+		if (codim == 0){
+			octree.findNeighbours(&oct, iface, neighbours, isghost);
+		}
+		else if (codim == 1){
+			octree.findNodeNeighbours(&oct, iface, neighbours, isghost);
+		}
+		else if (codim == 2){
+			neighbours.clear();
+			isghost.clear();
+		}
 	};
 
 	//-------------------------------------------------------------------------------- //
