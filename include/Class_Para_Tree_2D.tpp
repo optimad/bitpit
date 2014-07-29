@@ -4,7 +4,7 @@
  *	\authors		Marco Cisternino
  *	\version		0.1
  *
- *	<Parallel Octree Manager Class>
+ *	\brief Parallel Octree Manager Class
  */
 
 // =================================================================================== //
