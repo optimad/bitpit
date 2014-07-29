@@ -8,6 +8,8 @@
  *
  *	Para Tree is the user interface class. One user should (read can...) work only
  *	with this Class and its methods.
+ *	The sizes are intended in physical domain. The transformation from the logical
+ *	domain to the physical domain is defined by Class_Map<2> trans.
  */
 
 // =================================================================================== //
@@ -161,7 +163,7 @@ public:
 
 	// Octant get/set Methods
 	/*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
-	 * \return Coordinate X of node 0,
+	 * \return Coordinate X of node 0.
 	 */
 	double getX(Class_Octant<2>* const oct) {
 		return trans.mapX(oct->getX());
