@@ -1,8 +1,8 @@
-/*
+/**
  * Class_Para_Tree_2D.tpp
  *
  *  Created on: 23/apr/2014
- *      Author: Edoardo Lombardi
+ *      Authors: Edoardo Lombardi & Marco Cisternino
  */
 
 // =================================================================================== //

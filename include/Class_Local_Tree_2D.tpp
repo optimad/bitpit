@@ -1,8 +1,8 @@
-/*
+/**
  * Class_Local_Tree_2D.tpp
  *
  *  Created on: 18/apr/2014
- *      Author: Marco Cisternino
+ *      Author: Edoardo Lombardi
  */
 
 // =================================================================================== //
