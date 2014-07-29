@@ -5,6 +5,9 @@
  *	\version		0.1
  *
  *	\brief Parallel Octree Manager Class
+ *
+ *	Para Tree is the user interface class. One user should (read can...) work only
+ *	with this Class and its methods.
  */
 
 // =================================================================================== //
