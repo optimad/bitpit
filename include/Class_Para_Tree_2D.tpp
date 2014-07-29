@@ -3259,116 +3259,117 @@ public:
 
 	// =============================================================================== //
 
-	bool adapt(u32vector & mapidx,
-			u32vector & mapinters_int,
-			u32vector & mapinters_ghost,
-			u32vector & mapinters_bord) {
-
-		bool globalDone = false, localDone = false;
-		uint32_t nocts = octree.getNumOctants();
-		vector<Class_Octant<2> >::iterator iter, iterend = octree.octants.end();
-
-		for (iter = octree.octants.begin(); iter != iterend; iter++){
-			iter->info[8] = false;
-			iter->info[9] = false;
-			iter->info[11] = false;
-		}
-
-		// mapidx init
-		mapidx.clear();
-		mapidx.resize(nocts);
-		mapidx.shrink_to_fit();
-		for (uint32_t i=0; i<nocts; i++){
-			mapidx[i] = i;
-		}
-		if(serial){
-			writeLog("---------------------------------------------");
-			writeLog(" ADAPT (Refine/Coarse)");
-			writeLog(" ");
-
-			// 2:1 Balance
-			balance21(true);
-
-			writeLog(" ");
-			writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
-
-			// Refine
-			while(octree.refine(mapidx));
-			if (octree.getNumOctants() > nocts)
-				localDone = true;
-			nocts = octree.getNumOctants();
-			writeLog(" Number of octants after Refine	:	" + to_string(nocts));
-
-			// Coarse
-			while(octree.coarse(mapidx));
-			if (octree.getNumOctants() < nocts){
-				localDone = true;
-			}
-			updateAfterCoarse(mapidx);
-			balance21(false);
-			while(octree.refine(mapidx));
-			updateAdapt();
-			nocts = octree.getNumOctants();
-			MPI_Barrier(MPI_COMM_WORLD);
-			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-			writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
-			updateAfterCoarse(mapidx);
-
-			octree.updateIntersections(mapidx,
-					mapinters_int,
-					mapinters_ghost,
-					mapinters_bord);
-
-			writeLog(" ");
-			writeLog("---------------------------------------------");
-		}
-		else{
-			writeLog("---------------------------------------------");
-			writeLog(" ADAPT (Refine/Coarse)");
-			writeLog(" ");
-
-			// 2:1 Balance
-			balance21(true);
-
-			writeLog(" ");
-			writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
-
-			// Refine
-			while(octree.refine(mapidx));
-
-			if (octree.getNumOctants() > nocts)
-				localDone = true;
-			nocts = octree.getNumOctants();
-			updateAdapt();
-			setPboundGhosts();
-			writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
-
-			// Coarse
-			while(octree.coarse(mapidx));
-			if (octree.getNumOctants() < nocts){
-				localDone = true;
-			}
-			updateAfterCoarse(mapidx);
-			setPboundGhosts();
-			balance21(false);
-			while(octree.refine(mapidx));
-			updateAdapt();
-			setPboundGhosts();
-			nocts = octree.getNumOctants();
-			MPI_Barrier(MPI_COMM_WORLD);
-			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-
-			octree.updateIntersections(mapidx,
-					mapinters_int,
-					mapinters_ghost,
-					mapinters_bord);
-
-			writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
-			writeLog(" ");
-			writeLog("---------------------------------------------");
-		}
-		return globalDone;
-	}
+	//TODO Update intersections killed
+//	bool adapt(u32vector & mapidx,
+//			u32vector & mapinters_int,
+//			u32vector & mapinters_ghost,
+//			u32vector & mapinters_bord) {
+//
+//		bool globalDone = false, localDone = false;
+//		uint32_t nocts = octree.getNumOctants();
+//		vector<Class_Octant<2> >::iterator iter, iterend = octree.octants.end();
+//
+//		for (iter = octree.octants.begin(); iter != iterend; iter++){
+//			iter->info[8] = false;
+//			iter->info[9] = false;
+//			iter->info[11] = false;
+//		}
+//
+//		// mapidx init
+//		mapidx.clear();
+//		mapidx.resize(nocts);
+//		mapidx.shrink_to_fit();
+//		for (uint32_t i=0; i<nocts; i++){
+//			mapidx[i] = i;
+//		}
+//		if(serial){
+//			writeLog("---------------------------------------------");
+//			writeLog(" ADAPT (Refine/Coarse)");
+//			writeLog(" ");
+//
+//			// 2:1 Balance
+//			balance21(true);
+//
+//			writeLog(" ");
+//			writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
+//
+//			// Refine
+//			while(octree.refine(mapidx));
+//			if (octree.getNumOctants() > nocts)
+//				localDone = true;
+//			nocts = octree.getNumOctants();
+//			writeLog(" Number of octants after Refine	:	" + to_string(nocts));
+//
+//			// Coarse
+//			while(octree.coarse(mapidx));
+//			if (octree.getNumOctants() < nocts){
+//				localDone = true;
+//			}
+//			updateAfterCoarse(mapidx);
+//			balance21(false);
+//			while(octree.refine(mapidx));
+//			updateAdapt();
+//			nocts = octree.getNumOctants();
+//			MPI_Barrier(MPI_COMM_WORLD);
+//			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+//			writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
+//			updateAfterCoarse(mapidx);
+//
+//			octree.updateIntersections(mapidx,
+//					mapinters_int,
+//					mapinters_ghost,
+//					mapinters_bord);
+//
+//			writeLog(" ");
+//			writeLog("---------------------------------------------");
+//		}
+//		else{
+//			writeLog("---------------------------------------------");
+//			writeLog(" ADAPT (Refine/Coarse)");
+//			writeLog(" ");
+//
+//			// 2:1 Balance
+//			balance21(true);
+//
+//			writeLog(" ");
+//			writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
+//
+//			// Refine
+//			while(octree.refine(mapidx));
+//
+//			if (octree.getNumOctants() > nocts)
+//				localDone = true;
+//			nocts = octree.getNumOctants();
+//			updateAdapt();
+//			setPboundGhosts();
+//			writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
+//
+//			// Coarse
+//			while(octree.coarse(mapidx));
+//			if (octree.getNumOctants() < nocts){
+//				localDone = true;
+//			}
+//			updateAfterCoarse(mapidx);
+//			setPboundGhosts();
+//			balance21(false);
+//			while(octree.refine(mapidx));
+//			updateAdapt();
+//			setPboundGhosts();
+//			nocts = octree.getNumOctants();
+//			MPI_Barrier(MPI_COMM_WORLD);
+//			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+//
+//			octree.updateIntersections(mapidx,
+//					mapinters_int,
+//					mapinters_ghost,
+//					mapinters_bord);
+//
+//			writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
+//			writeLog(" ");
+//			writeLog("---------------------------------------------");
+//		}
+//		return globalDone;
+//	}
 
 	// =============================================================================== //
 
