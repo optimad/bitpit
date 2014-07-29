@@ -593,11 +593,12 @@ public:
 	 * \param[in] codim Codimension of the iface-th entity 0=face, 1=edge, 2=node
 	 * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
 	 * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant */
-	void findNeighbours(uint32_t idx,				// Finds neighbours of idx-th octant through iface in vector octants.
+	void findNeighbours(uint32_t idx,
 			uint8_t iface,
-			uint8_t codim,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
-			u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
-			vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
+			uint8_t codim,
+			u32vector & neighbours,
+			vector<bool> & isghost){
+
 		if (codim == 0){
 			octree.findNeighbours(idx, iface, neighbours, isghost);
 		}
@@ -610,16 +611,20 @@ public:
 		}
 	};
 
-
 	/** Finds neighbours of octant through iface in vector octants.
 	 * Returns a vector (empty if iface is a bound face) with the index of neighbours
 	 * in their structure (octants or ghosts) and sets isghost[i] = true if the
-	 * i-th neighbour is ghost in the local tree*/
-	void findNeighbours(Class_Octant<2>* oct,		// Finds neighbours of octant through iface in vector octants.
+	 * i-th neighbour is ghost in the local tree.
+	 * \param[in] oct Pointer to current octant
+	 * \param[in] iface Index of face/edge/node passed through for neighbours finding
+	 * \param[in] codim Codimension of the iface-th entity 0=face, 1=edge, 2=node
+	 * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+	 * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant */
+	void findNeighbours(Class_Octant<2>* oct,
 			uint8_t iface,
-			uint8_t codim,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
-			u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
-			vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
+			uint8_t codim,
+			u32vector & neighbours,
+			vector<bool> & isghost){
 
 		if (codim == 0){
 			octree.findNeighbours(oct, iface, neighbours, isghost);
@@ -633,11 +638,20 @@ public:
 		}
 	};
 
-	void findNeighbours(Class_Octant<2> oct,					// Finds neighbours of octant through iface in vector octants.
+	/** Finds neighbours of octant through iface in vector octants.
+	 * Returns a vector (empty if iface is a bound face) with the index of neighbours
+	 * in their structure (octants or ghosts) and sets isghost[i] = true if the
+	 * i-th neighbour is ghost in the local tree.
+	 * \param[in] oct Current octant
+	 * \param[in] iface Index of face/edge/node passed through for neighbours finding
+	 * \param[in] codim Codimension of the iface-th entity 0=face, 1=edge, 2=node
+	 * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+	 * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant */
+void findNeighbours(Class_Octant<2> oct,
 			uint8_t iface,
-			uint8_t codim,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
-			u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
-			vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
+			uint8_t codim,
+			u32vector & neighbours,
+			vector<bool> & isghost){
 
 		if (codim == 0){
 			octree.findNeighbours(&oct, iface, neighbours, isghost);
