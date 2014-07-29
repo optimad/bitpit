@@ -547,7 +547,11 @@ public:
 		octree.findNeighbours(idx, iface, neighbours, isghost);
 	};
 
-	void findNeighbours(Class_Octant<2>* oct,					// Finds neighbours of octant through iface in vector octants.
+	/** Finds neighbours of octant through iface in vector octants.
+	 * Returns a vector (empty if iface is a bound face) with the index of neighbours
+	 * in their structure (octants or ghosts) and sets isghost[i] = true if the
+	 * i-th neighbour is ghost in the local tree*/
+	void findNeighbours(Class_Octant<2>* oct,		// Finds neighbours of octant through iface in vector octants.
 			uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
 			u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
 			vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
