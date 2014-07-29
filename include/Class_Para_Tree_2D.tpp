@@ -348,7 +348,7 @@ public:
 
 	/*! Set the balancing condition of an octant.
 	 * \param[in] oct Pointer to target octant.
-	 * \param[in] Has octant to be balanced?
+	 * \param[in] balance Has octant to be balanced?
 	 */
 	void setBalance(Class_Octant<2>* oct, bool balance){					// Set if balancing-blocked idx-th octant
 		oct->setBalance(!balance);
@@ -475,7 +475,7 @@ public:
 
 	/*! Set the balancing condition of an octant.
 	 * \param[in] oct Target octant.
-	 * \param[in] Has octant to be balanced?
+	 * \param[in] balance Has octant to be balanced?
 	 */
 	void setBalance(Class_Octant<2> oct, bool balance){					// Set if balancing-blocked idx-th octant
 		oct.setBalance(!balance);
@@ -621,7 +621,7 @@ public:
 
 	/*! Set the balancing condition of an octant.
 	 * \param[in] oct Index of target octant.
-	 * \param[in] Has octant to be balanced?
+	 * \param[in] balance Has octant to be balanced?
 	 */
 	void setBalance(uint32_t idx, bool balance){					// Set if balancing-blocked idx-th octant
 		octree.setBalance(idx, !balance);
