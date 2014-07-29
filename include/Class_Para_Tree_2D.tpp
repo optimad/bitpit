@@ -1,5 +1,4 @@
 /*!
- *	\file 			Class_Para_Tree_2D.tpp
  *	\date			23/apr/2014
  *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
