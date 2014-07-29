@@ -305,7 +305,7 @@ public:
 
 	/*! Get the balancing condition of an octant.
 	 * \param[in] oct Pointer to target octant.
-	 * \return Is octant to be balanced?
+	 * \return Has octant to be balanced?
 	 */
 	bool getBalance(Class_Octant<2>* oct){								// Get if balancing-blocked idx-th octant
 		return !oct->getNotBalance();
@@ -348,7 +348,7 @@ public:
 
 	/*! Set the balancing condition of an octant.
 	 * \param[in] oct Pointer to target octant.
-	 * \param[in] Is octant to be balanced?
+	 * \param[in] Has octant to be balanced?
 	 */
 	void setBalance(Class_Octant<2>* oct, bool balance){					// Set if balancing-blocked idx-th octant
 		oct->setBalance(!balance);
@@ -442,7 +442,7 @@ public:
 
 	/*! Get the balancing condition of an octant.
 	 * \param[in] oct Target octant.
-	 * \return Is octant to be balanced?
+	 * \return Has octant to be balanced?
 	 */
 	bool getBalance(Class_Octant<2> oct){								// Get if balancing-blocked idx-th octant
 		return !oct.getNotBalance();
@@ -475,7 +475,7 @@ public:
 
 	/*! Set the balancing condition of an octant.
 	 * \param[in] oct Target octant.
-	 * \param[in] Is octant to be balanced?
+	 * \param[in] Has octant to be balanced?
 	 */
 	void setBalance(Class_Octant<2> oct, bool balance){					// Set if balancing-blocked idx-th octant
 		oct.setBalance(!balance);
@@ -592,7 +592,7 @@ public:
 
 	/*! Get the balancing condition of an octant.
 	 * \param[in] oct Index of target octant.
-	 * \return Is octant to be balanced?
+	 * \return Has octant to be balanced?
 	 */
 	bool getBalance(uint32_t idx){								// Get if balancing-blocked idx-th octant
 		return !octree.getBalance(idx);
@@ -621,7 +621,7 @@ public:
 
 	/*! Set the balancing condition of an octant.
 	 * \param[in] oct Index of target octant.
-	 * \param[in] Is octant to be balanced?
+	 * \param[in] Has octant to be balanced?
 	 */
 	void setBalance(uint32_t idx, bool balance){					// Set if balancing-blocked idx-th octant
 		octree.setBalance(idx, !balance);
