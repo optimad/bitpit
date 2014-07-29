@@ -568,10 +568,6 @@ public:
 //		octree.findNeighbours(idx, iface, neighbours, isghost);
 //	};
 //
-//	/** Finds neighbours of octant through iface in vector octants.
-//	 * Returns a vector (empty if iface is a bound face) with the index of neighbours
-//	 * in their structure (octants or ghosts) and sets isghost[i] = true if the
-//	 * i-th neighbour is ghost in the local tree*/
 //	void findNeighbours(Class_Octant<2>* oct,		// Finds neighbours of octant through iface in vector octants.
 //			uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
 //			u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
@@ -588,7 +584,15 @@ public:
 //		octree.findNeighbours(&oct, iface, neighbours, isghost);
 //	};
 
-
+	/** Finds neighbours of octant through iface in vector octants.
+	 * Returns a vector (empty if iface is a bound face) with the index of neighbours
+	 * in their structure (octants or ghosts) and sets isghost[i] = true if the
+	 * i-th neighbour is ghost in the local tree.
+	 * \param[in] idx Index of current octant
+	 * \param[in] iface Index of face/edge/node passed through for neighbours finding
+	 * \param[in] codim Codimension of the iface-th entity 0=face, 1=edge, 2=node
+	 * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+	 * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant */
 	void findNeighbours(uint32_t idx,				// Finds neighbours of idx-th octant through iface in vector octants.
 			uint8_t iface,
 			uint8_t codim,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
@@ -597,10 +601,10 @@ public:
 		if (codim == 0){
 			octree.findNeighbours(idx, iface, neighbours, isghost);
 		}
-		else if (codim == 1){
+		else if (codim == 2){
 			octree.findNodeNeighbours(idx, iface, neighbours, isghost);
 		}
-		else if (codim == 2){
+		else if (codim == 1){
 			neighbours.clear();
 			isghost.clear();
 		}
@@ -620,10 +624,10 @@ public:
 		if (codim == 0){
 			octree.findNeighbours(oct, iface, neighbours, isghost);
 		}
-		else if (codim == 1){
+		else if (codim == 2){
 			octree.findNodeNeighbours(oct, iface, neighbours, isghost);
 		}
-		else if (codim == 2){
+		else if (codim == 1){
 			neighbours.clear();
 			isghost.clear();
 		}
@@ -638,10 +642,10 @@ public:
 		if (codim == 0){
 			octree.findNeighbours(&oct, iface, neighbours, isghost);
 		}
-		else if (codim == 1){
+		else if (codim == 2){
 			octree.findNodeNeighbours(&oct, iface, neighbours, isghost);
 		}
-		else if (codim == 2){
+		else if (codim == 1){
 			neighbours.clear();
 			isghost.clear();
 		}
