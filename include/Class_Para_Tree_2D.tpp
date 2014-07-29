@@ -170,26 +170,50 @@ public:
 		return trans.mapX(oct->getX());
 	}
 
+	/*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
+	 * \param[in] oct Pointer to target octant.
+	 * \return Coordinate Y of node 0.
+	 */
 	double getY(Class_Octant<2>* oct) {
 		return trans.mapY(oct->getY());
 	}
 
+	/*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
+	 * \param[in] oct Pointer to target octant.
+	 * \return Coordinate Z of node 0.
+	 */
 	double getZ(Class_Octant<2>* oct) {
 		return trans.mapZ(oct->getZ());
 	}
 
+	/*! Get the size of an octant, i.e. the side length.
+	 * \param[in] oct Pointer to target octant.
+	 * \return Size of octant.
+	 */
 	double getSize(Class_Octant<2>* oct) {
 		return trans.mapSize(oct->getSize());
 	}
 
+	/*! Get the area of an octant (for 2D case the same value of getSize).
+	 * \param[in] oct Pointer to target octant.
+	 * \return Size of octant.
+	 */
 	double getArea(Class_Octant<2>* oct) {
 		return trans.mapArea(oct->getArea());
 	}
 
+	/*! Get the volume of an octant, i.e. the coordinates of its node 0.
+	 * \param[in] oct Pointer to target octant.
+	 * \return Volume of octant.
+	 */
 	double getVolume(Class_Octant<2>* oct) {
 		return trans.mapVolume(oct->getVolume());
 	}
 
+	/*! Get the coordinates of the center of an octant.
+	 * \param[in] oct Pointer to target octant.
+	 * \param[out] center Coordinates of the center of octant.
+	 */
 	void getCenter(Class_Octant<2>* oct,
 			vector<double>& center) {
 		double* center_ = oct->getCenter();
@@ -198,6 +222,10 @@ public:
 		center_ = NULL;
 	}
 
+	/*! Get the coordinates of the center of an octant.
+	 * \param[in] oct Pointer to target octant.
+	 * \return center Coordinates of the center of octant.
+	 */
 	vector<double> getCenter(Class_Octant<2>* oct) {
 		vector<double> center;
 		double* center_ = oct->getCenter();
@@ -207,6 +235,10 @@ public:
 		return center;
 	}
 
+	/*! Get the coordinates of the nodes of an octant.
+	 * \param[in] oct Pointer to target octant.
+	 * \param[out] nodes Coordinates of the nodes of octant.
+	 */
 	void getNodes(Class_Octant<2>* oct,
 			dvector2D & nodes) {
 		uint32_t (*nodes_)[3] = oct->getNodes();
@@ -215,6 +247,24 @@ public:
 		nodes_ = NULL;
 	}
 
+	/*! Get the coordinates of the nodes of an octant.
+	 * \param[in] oct Pointer to target octant.
+	 * \return nodes Coordinates of the nodes of octant.
+	 */
+	dvector2D getNodes(Class_Octant<2>* oct){
+		dvector2D nodes;
+		uint32_t (*nodes_)[3] = oct->getNodes();
+		trans.mapNodes(nodes_, nodes);
+		delete [] nodes_;
+		nodes_ = NULL;
+		return nodes;
+	}
+
+	/*! Get the normal of a face of an octant.
+	 * \param[in] oct Pointer to target octant.
+	 * \param[in] iface Index of the face for normal computing.
+	 * \param[out] normal Coordinates of the normal of face.
+	 */
 	void getNormal(Class_Octant<2>* oct,
 			uint8_t & iface,
 			dvector & normal) {
@@ -223,16 +273,42 @@ public:
 		trans.mapNormals(normal_, normal);
 	}
 
+	/*! Get the normal of a face of an octant.
+	 * \param[in] oct Pointer to target octant.
+	 * \param[in] iface Index of the face for normal computing.
+	 * \return normal Coordinates of the normal of face.
+	 */
+	dvector getNormal(Class_Octant<2>* oct,
+			uint8_t & iface){
+		dvector normal;
+		vector<int8_t> normal_;
+		oct->getNormal(iface, normal_);
+		trans.mapNormals(normal_, normal);
+		return normal;
+	}
+
+	/*! Get the refinement marker of an octant.
+	 * \param[in] oct Pointer to target octant.
+	 * \return Marker of octant.
+	 */
 	uint8_t getMarker(Class_Octant<2>* oct){								// Get refinement/coarsening marker for idx-th octant
 		return oct->getMarker();
 	};
 
+	/*! Get the level of an octant.
+	 * \param[in] oct Pointer to target octant.
+	 * \return Level of octant.
+	 */
 	uint8_t getLevel(Class_Octant<2>* oct){								// Get refinement/coarsening marker for idx-th octant
 		return oct->getLevel();
 	};
 
+	/*! Get the balancing condition of an octant.
+	 * \param[in] oct Pointer to target octant.
+	 * \return Is octant to be balanced?
+	 */
 	bool getBalance(Class_Octant<2>* oct){								// Get if balancing-blocked idx-th octant
-		return oct->getNotBalance();
+		return !oct->getNotBalance();
 	};
 
 	bool getIsGhost(Class_Octant<2>* oct){
@@ -270,8 +346,12 @@ public:
 		oct->setMarker(marker);
 	};
 
+	/*! Set the balancing condition of an octant.
+	 * \param[in] oct Pointer to target octant.
+	 * \param[in] Is octant to be balanced?
+	 */
 	void setBalance(Class_Octant<2>* oct, bool balance){					// Set if balancing-blocked idx-th octant
-		oct->setBalance(balance);
+		oct->setBalance(!balance);
 	};
 
 	// ------------------------------------------------------------------------------- //
@@ -360,8 +440,12 @@ public:
 		return oct.getLevel();
 	};
 
+	/*! Get the balancing condition of an octant.
+	 * \param[in] oct Target octant.
+	 * \return Is octant to be balanced?
+	 */
 	bool getBalance(Class_Octant<2> oct){								// Get if balancing-blocked idx-th octant
-		return oct.getNotBalance();
+		return !oct.getNotBalance();
 	};
 
 	bool getIsGhost(Class_Octant<2> oct){
@@ -389,8 +473,12 @@ public:
 		oct.setMarker(marker);
 	};
 
+	/*! Set the balancing condition of an octant.
+	 * \param[in] oct Target octant.
+	 * \param[in] Is octant to be balanced?
+	 */
 	void setBalance(Class_Octant<2> oct, bool balance){					// Set if balancing-blocked idx-th octant
-		oct.setBalance(balance);
+		oct.setBalance(!balance);
 	};
 
 	// ------------------------------------------------------------------------------- //
@@ -502,8 +590,12 @@ public:
 		return octree.getLevel(idx);
 	};
 
+	/*! Get the balancing condition of an octant.
+	 * \param[in] oct Index of target octant.
+	 * \return Is octant to be balanced?
+	 */
 	bool getBalance(uint32_t idx){								// Get if balancing-blocked idx-th octant
-		return octree.getBalance(idx);
+		return !octree.getBalance(idx);
 	};
 
 	uint64_t getGlobalIdx(uint32_t idx){
@@ -527,8 +619,12 @@ public:
 		octree.setMarker(idx, marker);
 	};
 
+	/*! Set the balancing condition of an octant.
+	 * \param[in] oct Index of target octant.
+	 * \param[in] Is octant to be balanced?
+	 */
 	void setBalance(uint32_t idx, bool balance){					// Set if balancing-blocked idx-th octant
-		octree.setBalance(idx, balance);
+		octree.setBalance(idx, !balance);
 	};
 
 	void setFirstDesc(){
