@@ -370,6 +370,8 @@ public:
 		oct->setBalance(!balance);
 	};
 
+
+private:
 	// ------------------------------------------------------------------------------- //
 	//No pointer Octants get/set Methods
 
@@ -564,7 +566,6 @@ public:
 		};
 		return octree.getNumOctants();
 	};
-
 
 	/*! Set the refinement marker of an octant.
 	 * \param[in] oct Target octant.
@@ -783,18 +784,19 @@ public:
 		octree.setBalance(idx, !balance);
 	};
 
+public:
 	// ------------------------------------------------------------------------------- //
 	// Local Tree get/set Methods
 
-	/*! Get the global number of octants.
-	 * \return Global number of octants.
+	/*! Get the local number of octants.
+	 * \return Local number of octants.
 	 */
 	uint32_t getNumOctants() const{
 		return octree.getNumOctants();
 	};
 
-	/*! Get the global number of ghost octants.
-	 * \return Global number of ghost octants.
+	/*! Get the local number of ghost octants.
+	 * \return Local number of ghost octants.
 	 */
 	uint32_t getNumGhosts() const{
 		return octree.getSizeGhost();
@@ -807,7 +809,7 @@ public:
 		return octree.getLocalMaxDepth();
 	};
 
-
+	// --------------------------------
 private:
 
 	const Class_Octant<2> &  getFirstDesc() const{
@@ -826,7 +828,6 @@ private:
 		octree.setLastDesc();
 	};
 
-public:
 	Class_Octant<2>& extractOctant(uint32_t idx) {
 		return octree.extractOctant(idx) ;
 	};
@@ -835,15 +836,28 @@ public:
 //	 		return octree.extractOctant(idx) ;
 //	};
 
+	// --------------------------------
+
+public:
+
+	/** Get an octant as pointer to the target octant.
+	 * \param[in] idx Local index of target octant.
+	 * \return Pointer to target octant.
+	 */
 	Class_Octant<2>* getOctant(uint32_t idx) {
 		if (idx < octree.getNumOctants()){
 			return &octree.octants[idx] ;
 		}
 		return NULL;
 	};
+
+	/** Get a ghost octant as pointer to the target octant.
+	 * \param[in] idx Local index (in ghosts structure) of target ghost octant.
+	 * \return Pointer to target ghost octant.
+	 */
 	Class_Octant<2>* getGhostOctant(uint32_t idx) {
 		if (idx < octree.getSizeGhost()){
-		return &octree.ghosts[idx] ;
+			return &octree.ghosts[idx] ;
 		}
 		return NULL;
 	};
@@ -926,6 +940,7 @@ public:
 		}
 	};
 
+private:
 	/** Finds neighbours of octant through iface in vector octants.
 	 * Returns a vector (empty if iface is a bound face) with the index of neighbours
 	 * in their structure (octants or ghosts) and sets isghost[i] = true if the
@@ -935,7 +950,7 @@ public:
 	 * \param[in] codim Codimension of the iface-th entity 0=face, 1=edge, 2=node
 	 * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
 	 * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant */
-void findNeighbours(Class_Octant<2> oct,
+	void findNeighbours(Class_Octant<2> oct,
 			uint8_t iface,
 			uint8_t codim,
 			u32vector & neighbours,
@@ -953,21 +968,35 @@ void findNeighbours(Class_Octant<2> oct,
 		}
 	};
 
+public:
 	//-------------------------------------------------------------------------------- //
 	// Intersections get Methods
 
+	/*! Get the local number of intersections on the global domain bord.
+	 * \return Local number of intersections on the global domain bord.
+	 */
 	uint32_t getNumIntersectionsBord() {
 		return octree.intersections_bord.size();
 	}
 
+	/*! Get the local number of intersections inside the local domain.
+	 * \return Local number of inner intersections inside the local domain.
+	 */
 	uint32_t getNumIntersectionsInt() {
 		return octree.intersections_int.size();
 	}
 
+	/*! Get the local number of intersections between local octants and ghost octants.
+	 * \return Local number of intersections between local octants and ghost octants.
+	 */
 	uint32_t getNumIntersectionsGhost() {
 		return octree.intersections_ghost.size();
 	}
 
+	/*! Get a pointer to target intersection on domain bord.
+	 * \param[in] idx Local index of intersection on domain bord.
+	 * \return Pointer to target intersection.
+	 */
 	Class_Intersection<2>* getIntersectionBord(uint32_t idx) {
 		if (idx < octree.intersections_bord.size()){
 			return &octree.intersections_bord[idx];
@@ -975,6 +1004,10 @@ void findNeighbours(Class_Octant<2> oct,
 		return NULL;
 	}
 
+	/*! Get a pointer to target intersection inside the local domain.
+	 * \param[in] idx Local index of intersection inside the local domain.
+	 * \return Pointer to target intersection.
+	 */
 	Class_Intersection<2>* getIntersectionInt(uint32_t idx) {
 		if (idx < octree.intersections_int.size()){
 			return &octree.intersections_int[idx];
@@ -982,6 +1015,10 @@ void findNeighbours(Class_Octant<2> oct,
 		return NULL;
 	}
 
+	/*! Get a pointer to target intersection between octant and ghost.
+	 * \param[in] idx Local index of intersection between octant and ghost.
+	 * \return Pointer to target intersection.
+	 */
 	Class_Intersection<2>* getIntersectionGhost(uint32_t idx) {
 		if (idx < octree.intersections_ghost.size()){
 			return &octree.intersections_ghost[idx];
@@ -989,14 +1026,26 @@ void findNeighbours(Class_Octant<2> oct,
 		return NULL;
 	}
 
+	/*! Get the level of an intersection.
+	 * \param[in] inter Pointer to target intersection.
+	 * \return Level of intersection.
+	 */
 	uint8_t getLevel(Class_Intersection<2>* inter) {
 		return octree.extractOctant(inter->owners[inter->finer]).getLevel();
 	}
 
+	/*! Get the face index of an intersection.
+	 * \param[in] inter Pointer to target intersection.
+	 * \return Face index of the first octant owner of intersection (owners[0]).
+	 */
 	uint8_t getFace(Class_Intersection<2>* inter) {
 		return inter->iface;
 	}
 
+	/*! Get the owner octants of an intersection.
+	 * \param[in] inter Pointer to target intersection.
+	 * \return A couple of octants owners of intersection.
+	 */
 	u32vector getOwners(Class_Intersection<2>* inter) {
 		u32vector owners(2);
 		owners[0] = inter->owners[0];
@@ -1004,18 +1053,30 @@ void findNeighbours(Class_Octant<2> oct,
 		return owners;
 	}
 
+	/*! Get the size of an intersection.
+	 * \param[in] inter Pointer to target intersection.
+	 * \return Size of intersection.
+	 */
 	double getSize(Class_Intersection<2>* inter) {
 		uint32_t Size;
 		Size = octree.extractOctant(inter->owners[inter->finer]).getSize();
 		return trans.mapSize(Size);
 	}
 
+	/*! Get the area of an intersection (for 2D case the same value of getSize).
+	 * \param[in] inter Pointer to target intersection.
+	 * \return Area of intersection.
+	 */
 	double getArea(Class_Intersection<2>* inter) {
 		uint32_t Area;
 		Area = octree.extractOctant(inter->owners[inter->finer]).getArea();
 		return trans.mapArea(Area);
 	}
 
+	/*! Get the coordinates of the center of an intersection.
+	 * \param[in] inter Pointer to target intersection.
+	 * \param[out] center Coordinates of the center of intersection.
+	 */
 	vector<double> getCenter(Class_Intersection<2>* inter){
 		vector<double> center;
 		Class_Octant<2> oct = octree.extractOctant(inter->owners[inter->finer]);
@@ -1026,6 +1087,10 @@ void findNeighbours(Class_Octant<2> oct,
 		return center;
 	}
 
+	/*! Get the coordinates of the nodes of an intersection.
+	 * \param[in] oct Pointer to target intersection.
+	 * \return nodes Coordinates of the nodes of intersection.
+	 */
 	dvector2D getNodes(Class_Intersection<2>* inter){
 		dvector2D nodes;
 		Class_Octant<2> oct = octree.extractOctant(inter->owners[inter->finer]);
@@ -1043,6 +1108,10 @@ void findNeighbours(Class_Octant<2> oct,
 		return nodes;
 	}
 
+	/*! Get the normal of an intersection.
+	 * \param[in] oct Pointer to target intersection.
+	 * \param[out] normal Coordinates of the normal of intersection.
+	 */
 	dvector getNormal(Class_Intersection<2>* inter){
 		dvector normal;
 		Class_Octant<2> oct = octree.extractOctant(inter->owners[inter->finer]);
@@ -1056,6 +1125,7 @@ void findNeighbours(Class_Octant<2> oct,
 	//-------------------------------------------------------------------------------- //
 	// No Pointer Intersections get Methods
 
+private:
 	double getSize(Class_Intersection<2> inter) {
 		uint32_t Size;
 		Size = octree.extractOctant(inter.owners[inter.finer]).getSize();
@@ -1104,6 +1174,11 @@ void findNeighbours(Class_Octant<2> oct,
 
 	// =============================================================================== //
 
+public:
+	/** Get the octant owner of an input point.
+	 * \param[in] point Coordinates of target point.
+	 * \return Pointer to octant owner of target point.
+	 */
 	Class_Octant<2>* getPointOwner(dvector & point){
 		uint32_t noctants = octree.octants.size();
 		uint32_t idxtry = noctants/2;
@@ -1160,6 +1235,7 @@ void findNeighbours(Class_Octant<2> oct,
 		}
 	}
 
+private:
 	Class_Octant<2> getPointOwner2(dvector & point){
 		uint32_t noctants = octree.octants.size();
 		uint32_t idxtry = noctants/2;
@@ -1219,7 +1295,7 @@ void findNeighbours(Class_Octant<2> oct,
 	}
 
 	// =============================================================================== //
-	// METHODS ----------------------------------------------------------------------- //
+	// PARATREE METHODS ----------------------------------------------------------------------- //
 
 	void computePartition(uint32_t* partition) {
 		uint32_t division_result = 0;
@@ -1382,7 +1458,6 @@ void findNeighbours(Class_Octant<2> oct,
 
 	// =============================================================================== //
 
-private:
 	void setPboundGhosts() {
 		//BUILD BORDER OCTANT INDECES VECTOR (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
 		//find local octants to be sent as ghost to the right processes
@@ -1568,6 +1643,12 @@ private:
 
 	// =============================================================================== //
 
+public:
+	/** Load-Balancing for distributing the octants of the whole tree over
+	 * the processes of the job.
+	 * Until loadBalance is not called for the first time the mesh is serial.
+	 *
+	 */
 	void loadBalance(){
 
 		//Write info on log
@@ -2295,7 +2376,7 @@ private:
 //	template<class UserDataComm>
 //	void loadBalance(UserDataComm & userData){
 	template<class Impl>
-	void loadbalance(Class_Data_LB_Interface<Impl> & userData){
+	void loadBalance(Class_Data_LB_Interface<Impl> & userData){
 		//Write info on log
 		writeLog("---------------------------------------------");
 		writeLog(" LOAD BALANCE ");
