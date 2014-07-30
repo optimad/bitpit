@@ -785,6 +785,31 @@ public:
 
 	// ------------------------------------------------------------------------------- //
 	// Local Tree get/set Methods
+
+	/*! Get the global number of octants.
+	 * \return Global number of octants.
+	 */
+	uint32_t getNumOctants() const{
+		return octree.getNumOctants();
+	};
+
+	/*! Get the global number of ghost octants.
+	 * \return Global number of ghost octants.
+	 */
+	uint32_t getNumGhosts() const{
+		return octree.getSizeGhost();
+	};
+
+	/*! Get the local depth of octree.
+	 * \return Local depth of octree.
+	 */
+	uint8_t getLocalMaxDepth() const{							// Get max depth reached in local tree
+		return octree.getLocalMaxDepth();
+	};
+
+
+private:
+
 	const Class_Octant<2> &  getFirstDesc() const{
 		return octree.getFirstDesc();
 	};
@@ -793,20 +818,6 @@ public:
 		return octree.getLastDesc();
 	};
 
-	uint32_t getNumGhosts() const{
-		return octree.getSizeGhost();
-	};
-
-	uint32_t getNumOctants() const{
-		return octree.getNumOctants();
-	};
-
-	uint8_t getLocalMaxDepth() const{							// Get max depth reached in local tree
-		return octree.getLocalMaxDepth();
-	};
-
-
-private:
 	void setFirstDesc(){
 		octree.setFirstDesc();
 	};
@@ -820,9 +831,9 @@ public:
 		return octree.extractOctant(idx) ;
 	};
 
-	const Class_Octant<2>& extractOctant(uint32_t idx) const{
-	 		return octree.extractOctant(idx) ;
-	};
+//	const Class_Octant<2>& extractOctant(uint32_t idx) const{
+//	 		return octree.extractOctant(idx) ;
+//	};
 
 	Class_Octant<2>* getOctant(uint32_t idx) {
 		if (idx < octree.getNumOctants()){
