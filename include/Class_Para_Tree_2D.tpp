@@ -37,11 +37,11 @@ public:
 	uint64_t* partition_range_globalidx;	 	/**<Global array containing global index of the last existing octant in each processor*/
 	uint64_t global_num_octants;   				/**<Global number of octants in the parallel octree*/
 	map<int,vector<uint32_t> > bordersPerProc;	/**<Local indices of border octants per process*/
-	int nproc;
+	int nproc;									/**<Number of processes of the job*/
 	uint8_t max_depth;							/**<Global max existing level in the parallel octree*/
 
 	//distributed members
-	int rank;
+	int rank;									/**<Local rank of process*/
 	Class_Local_Tree<2> octree;					/**<Local tree in each processor*/
 
 	//auxiliary members
@@ -49,7 +49,7 @@ public:
 	bool serial;								/**<True if the octree is the same on each processor, False if the octree is distributed*/
 
 	//map member
-	Class_Map<2> trans;
+	Class_Map<2> trans;							/**<Transformation map from logical to phisycal domain*/
 
 	// connectivity
 	dvector2D					nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
