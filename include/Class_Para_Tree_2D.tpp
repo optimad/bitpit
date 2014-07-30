@@ -405,7 +405,7 @@ public:
 		return trans.mapSize(oct.getSize());
 	}
 
-	/*! Get the size of an octant, i.e. the side length.
+	/*! Get the area of an octant (for 2D case the same value of getSize).
 	 * \param[in] oct Target octant.
 	 * \return Area of octant.
 	 */
@@ -413,7 +413,7 @@ public:
 		return trans.mapArea(oct.getArea());
 	}
 
-	/*! Get the size of an octant, i.e. the side length.
+	/*! Get the volume of an octant.
 	 * \param[in] oct Target octant.
 	 * \return Volume of octant.
 	 */
@@ -585,30 +585,58 @@ public:
 	// ------------------------------------------------------------------------------- //
 	// Index get/set Methods
 
+	/*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
+	 * \param[in] idx Local index of target octant.
+	 * \return Coordinate X of node 0.
+	 */
 	double getX(uint32_t idx) {
 		return trans.mapX(octree.octants[idx].getX());
 	}
 
+	/*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
+	 * \param[in] idx Local index of target octant.
+	 * \return Coordinate Y of node 0.
+	 */
 	double getY(uint32_t idx) {
 		return trans.mapY(octree.octants[idx].getY());
 	}
 
+	/*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
+	 * \param[in] idx Local index of target octant.
+	 * \return Coordinate Z of node 0.
+	 */
 	double getZ(uint32_t idx) {
 		return trans.mapZ(octree.octants[idx].getZ());
 	}
 
+	/*! Get the size of an octant, i.e. the side length.
+	 * \param[in] idx Local index of target octant.
+	 * \return Area of octant.
+	 */
 	double getSize(uint32_t idx) {
 		return trans.mapSize(octree.octants[idx].getSize());
 	}
 
+	/*! Get the area of an octant (for 2D case the same value of getSize).
+	 * \param[in] idx Local index of target octant.
+	 * \return Area of octant.
+	 */
 	double getArea(uint32_t idx) {
 		return trans.mapArea(octree.octants[idx].getArea());
 	}
 
+	/*! Get the volume of an octant.
+	 * \param[in] idx Local index of target octant.
+	 * \return Volume of octant.
+	 */
 	double getVolume(uint32_t idx) {
 		return trans.mapVolume(octree.octants[idx].getVolume());
 	}
 
+	/*! Get the coordinates of the center of an octant.
+	 * \param[in] idx Local index of target octant.
+	 * \param[out] center Coordinates of the center of octant.
+	 */
 	void getCenter(uint32_t idx,
 			vector<double>& center) {
 		double* center_ = octree.octants[idx].getCenter();
@@ -617,6 +645,10 @@ public:
 		center_ = NULL;
 	}
 
+	/*! Get the coordinates of the center of an octant.
+	 * \param[in] idx Local index of target octant.
+	 * \return center Coordinates of the center of octant.
+	 */
 	vector<double> getCenter(uint32_t idx) {
 		vector<double> center;
 		double* center_ = octree.octants[idx].getCenter();
@@ -626,6 +658,10 @@ public:
 		return center;
 	}
 
+	/*! Get the coordinates of the nodes of an octant.
+	 * \param[in] idx Local index of target octant.
+	 * \param[out] nodes Coordinates of the nodes of octant.
+	 */
 	void getNodes(uint32_t idx,
 			dvector2D & nodes) {
 		uint32_t (*nodes_)[3] = octree.octants[idx].getNodes();
@@ -634,6 +670,10 @@ public:
 		nodes_ = NULL;
 	}
 
+	/*! Get the coordinates of the nodes of an octant.
+	 * \param[in] idx Local index of target octant.
+	 * \return nodes Coordinates of the nodes of octant.
+	 */
 	dvector2D getNodes(uint32_t idx){
 		dvector2D nodes;
 		uint32_t (*nodes_)[3] = octree.octants[idx].getNodes();
@@ -643,6 +683,11 @@ public:
 		return nodes;
 	}
 
+	/*! Get the normal of a face of an octant.
+	 * \param[in] Local index of target octant.
+	 * \param[in] iface Index of the face for normal computing.
+	 * \param[out] normal Coordinates of the normal of face.
+	 */
 	void getNormal(uint32_t idx,
 			uint8_t & iface,
 			dvector & normal) {
@@ -651,6 +696,11 @@ public:
 		trans.mapNormals(normal_, normal);
 	}
 
+	/*! Get the normal of a face of an octant.
+	 * \param[in] idx Local index of target octant.
+	 * \param[in] iface Index of the face for normal computing.
+	 * \return normal Coordinates of the normal of face.
+	 */
 	dvector getNormal(uint32_t idx,
 			uint8_t & iface){
 		dvector normal;
@@ -660,22 +710,42 @@ public:
 		return normal;
 	}
 
+	/*! Get the refinement marker of an octant.
+	 * \param[in] idx Local index of target octant.
+	 * \return Marker of octant.
+	 */
 	uint8_t getMarker(uint32_t idx){							// Get refinement/coarsening marker for idx-th octant
 		return octree.getMarker(idx);
 	};
 
+	/*! Get the level of an octant.
+	 * \param[in] idx Local index of target octant.
+	 * \return Level of octant.
+	 */
 	uint8_t getLevel(uint32_t idx){								// Get refinement/coarsening marker for idx-th octant
 		return octree.getLevel(idx);
 	};
 
 	/*! Get the balancing condition of an octant.
-	 * \param[in] oct Index of target octant.
+	 * \param[in] idx Local index of target octant.
 	 * \return Has octant to be balanced?
 	 */
 	bool getBalance(uint32_t idx){								// Get if balancing-blocked idx-th octant
 		return !octree.getBalance(idx);
 	};
 
+	/*! Get the nature of an octant.
+	 * \param[in] idx Local index of target octant.
+	 * \return Is octant ghost?
+	 */
+	bool getIsGhost(uint32_t idx){
+		return (findOwner(octree.octants[idx].computeMorton()) != rank);
+	};
+
+	/*! Get the global index of an octant.
+	 * \param[in] idx Local index of target octant.
+	 * \return Global index of octant.
+	 */
 	uint64_t getGlobalIdx(uint32_t idx){
 		if (rank){
 			return partition_range_globalidx[rank-1] + uint64_t(idx + 1);
@@ -686,6 +756,10 @@ public:
 		return global_num_octants;
 	};
 
+	/*! Get the global index of a ghost octant.
+	 * \param[in] idx Local index of target ghost octant.
+	 * \return Global index of ghost octant.
+	 */
 	uint64_t getGhostGlobalIdx(uint32_t idx){
 		if (idx<octree.size_ghosts){
 			return octree.globalidx_ghosts[idx];
@@ -693,18 +767,21 @@ public:
 		return uint64_t(octree.size_ghosts);
 	};
 
+	/*! Set the refinement marker of an octant.
+	 * \param[in] idx Local index of target octant.
+	 * \param[in] marker Refinement marker of octant (n=n refinement in adapt, -n=n coarsening in adapt, default=0).
+	 */
 	void setMarker(uint32_t idx, int8_t marker){					// Set refinement/coarsening marker for idx-th octant
 		octree.setMarker(idx, marker);
 	};
 
 	/*! Set the balancing condition of an octant.
-	 * \param[in] oct Index of target octant.
+	 * \param[in] idx Local index of target octant.
 	 * \param[in] balance Has octant to be balanced?
 	 */
 	void setBalance(uint32_t idx, bool balance){					// Set if balancing-blocked idx-th octant
 		octree.setBalance(idx, !balance);
 	};
-
 
 	// ------------------------------------------------------------------------------- //
 	// Local Tree get/set Methods
