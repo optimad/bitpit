@@ -17,7 +17,7 @@ class Class_Local_Tree<2>{
 
 	// ------------------------------------------------------------------------------- //
 	// TYPEDEFS ----------------------------------------------------------------------- //
-public:
+
 	typedef vector<Class_Octant<2> > 		OctantsType;
 	typedef vector<Class_Intersection<2> > 	IntersectionsType;
 	typedef vector<uint32_t>				u32vector;
@@ -40,7 +40,7 @@ private:
 	Class_Octant<2> 			last_desc;			// Last (Morton order) most refined octant possible in local partition
 	uint32_t 					size_ghosts;		// Size of vector of ghost octants
 	uint8_t						local_max_depth;	// Reached max depth in local tree
-public:
+//public:
 	u32vector2D					nodes;				// Local vector of nodes (x,y,z) ordered with Morton Number
 	u32vector2D					connectivity;		// Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
 													// The nodes are stored as index of vector nodes
@@ -71,7 +71,8 @@ public:
 
 	// Basic Get/Set methods --------------------------------------------------------- //
 
-public:
+private:
+//public:
 	const Class_Octant<2> &  getFirstDesc() const{
 		return first_desc;
 	};
@@ -120,7 +121,7 @@ public:
 	//-------------------------------------------------------------------------------- //
 	// Other methods ----------------------------------------------------------------- //
 
-public:
+//public:
 
 	Class_Octant<2>& extractOctant(uint32_t idx) {
 		return octants[idx];

@@ -17,7 +17,7 @@ class Class_Octant<2>{
 
 	// ------------------------------------------------------------------------------- //
 	// TYPEDEFS ----------------------------------------------------------------------- //
-//public:
+
 	typedef vector<Class_Octant<2> > 	OctantsType;
 	typedef vector<uint32_t>			u32vector;
 	typedef vector<vector<uint32_t>	>	u32vector2D;
@@ -71,8 +71,6 @@ public:
 		marker = octant.marker;
 		memcpy(info,octant.info,12);
 	};
-
-
 	bool operator ==(const Class_Octant<2> & oct2){	// Check if two octants are equal (no check on info)
 		bool check = true;
 		check = check && (x == oct2.x);
@@ -86,7 +84,6 @@ public:
 
 	// Basic Get/Set methods --------------------------------------------------------- //
 
-//public:
 private:
 	uint32_t	getX() const{return x;};
 	uint32_t	getY() const{return y;};
@@ -121,7 +118,6 @@ private:
 	//-------------------------------------------------------------------------------- //
 	// Other Get/Set methods --------------------------------------------------------- //
 
-//public:
 	uint32_t	getSize() const{							// Get the size of octant
 		uint32_t size = uint32_t(pow(double(2),double(MAX_LEVEL_2D-level)));
 		return size;
@@ -229,7 +225,6 @@ private:
 	//-------------------------------------------------------------------------------- //
 	// Other methods ----------------------------------------------------------------- //
 
-//public:
 	Class_Octant<2>	buildLastDesc(){								// Build last descendant of octant and return the last descendant octant (no info update)
 		uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL_2D - level)) - 1;
 		Class_Octant<2> last_desc(MAX_LEVEL_2D,x+delta,y+delta);
@@ -600,6 +595,5 @@ private:
 	};
 
 	// ------------------------------------------------------------------------------- //
-
 
 };
