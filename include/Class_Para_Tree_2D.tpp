@@ -3852,6 +3852,8 @@ public:
 		dvector2D octnodes;
 		uint8_t j;
 
+		clearConnectivity();
+
 		octnodes.reserve(global2D.nnodes);
 		if (nodes.size() == 0){
 			connectivity.resize(noctants);
