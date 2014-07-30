@@ -364,7 +364,7 @@ public:
 
 	/*! Set the balancing condition of an octant.
 	 * \param[in] oct Pointer to target octant.
-	 * \param[in] balance Has octant to be balanced?
+	 * \param[in] balance Has octant to be 2:1 balanced in adapting procedure?
 	 */
 	void setBalance(Class_Octant<2>* oct, bool balance){					// Set if balancing-blocked idx-th octant
 		oct->setBalance(!balance);
@@ -577,7 +577,7 @@ private:
 
 	/*! Set the balancing condition of an octant.
 	 * \param[in] oct Target octant.
-	 * \param[in] balance Has octant to be balanced?
+	 * \param[in] balance Has octant to be 2:1 balanced in adapting procedure?
 	 */
 	void setBalance(Class_Octant<2> oct, bool balance){					// Set if balancing-blocked idx-th octant
 		oct.setBalance(!balance);
@@ -778,7 +778,7 @@ private:
 
 	/*! Set the balancing condition of an octant.
 	 * \param[in] idx Local index of target octant.
-	 * \param[in] balance Has octant to be balanced?
+	 * \param[in] balance Has octant to be 2:1 balanced in adapting procedure?
 	 */
 	void setBalance(uint32_t idx, bool balance){					// Set if balancing-blocked idx-th octant
 		octree.setBalance(idx, !balance);
@@ -1644,10 +1644,9 @@ private:
 	// =============================================================================== //
 
 public:
-	/** Load-Balancing for distributing the octants of the whole tree over
-	 * the processes of the job.
+	/** Distribute Load-Balancing the octants of the whole tree over
+	 * the processes of the job following the Morton order.
 	 * Until loadBalance is not called for the first time the mesh is serial.
-	 *
 	 */
 	void loadBalance(){
 
@@ -2011,6 +2010,11 @@ public:
 
 	// =============================================================================== //
 
+	/** Distribute Load-Balanced the octants of the whole tree over
+	 * the processes of the job. Until loadBalance is not called for the first time the mesh is serial.
+	 * The families of octants of a desired level are retained compact on the same process.
+	 * \param[in] level Number of level over the max depth reached in the tree at which families of octants are fixed compact on the same process (level=0 is classic LoadBalance).
+	 */
 	void loadBalance(uint8_t & level){
 
 		//Write info on log
@@ -2373,8 +2377,10 @@ public:
 
 	// =============================================================================== //
 
-//	template<class UserDataComm>
-//	void loadBalance(UserDataComm & userData){
+	/** Distribute Load-Balancing the octants of the whole tree and data provided by the user
+	 * over the processes of the job following the Morton order.
+	 * Until loadBalance is not called for the first time the mesh is serial.
+	 */
 	template<class Impl>
 	void loadBalance(Class_Data_LB_Interface<Impl> & userData){
 		//Write info on log
@@ -2834,6 +2840,11 @@ public:
 
 	// =============================================================================== //
 
+	/** Distribute Load-Balanced the octants of the whole tree and data provided by the user
+	 * over the processes of the job. Until loadBalance is not called for the first time the mesh is serial.
+	 * The families of octants of a desired level are retained compact on the same process.
+	 * \param[in] level Number of level over the max depth reached in the tree at which families of octants are fixed compact on the same process (level=0 is classic LoadBalance).
+	 */
 	template<class UserDataComm>
 	void loadBalance(UserDataComm & userData, uint8_t & level){
 
@@ -3292,6 +3303,7 @@ public:
 
 	// =============================================================================== //
 
+private:
 	void updateAdapt() {
 		if(serial)
 		{
@@ -3530,6 +3542,8 @@ public:
 	// =============================================================================== //
 
 public:
+	/** Adapt the octree mesh with user setup for markers and 2:1 balancing conditions.
+	 */
 	bool adapt() {
 
 		bool globalDone = false, localDone = false, cDone = false;
@@ -3622,6 +3636,13 @@ public:
 
 	// =============================================================================== //
 
+	/** Adapt the octree mesh with user setup for markers and 2:1 balancing conditions.
+	 * Track the changes in structure octant by a mapper.
+	 * \param[out] mapidx Mapper from new octants to old octants.
+	 * mapidx[i] = j -> the i-th octant after adapt was in the j-th position before adapt;
+	 * if the i-th octant is new after refinement the j-th old octant was the father of the new octant;
+	 * if the i-th octant is new after coarsening the j-th old octant was the first child of the new octant.
+	 */
 	bool adapt(u32vector & mapidx) {
 
 		bool globalDone = false, localDone = false;
