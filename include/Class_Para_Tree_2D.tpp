@@ -729,6 +729,7 @@ public:
 	};
 
 
+private:
 	void setFirstDesc(){
 		octree.setFirstDesc();
 	};
@@ -737,7 +738,8 @@ public:
 		octree.setLastDesc();
 	};
 
-	 Class_Octant<2>& extractOctant(uint32_t idx) {
+public:
+	Class_Octant<2>& extractOctant(uint32_t idx) {
 		return octree.extractOctant(idx) ;
 	};
 
@@ -1292,6 +1294,7 @@ void findNeighbours(Class_Octant<2> oct,
 
 	// =============================================================================== //
 
+private:
 	void setPboundGhosts() {
 		//BUILD BORDER OCTANT INDECES VECTOR (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
 		//find local octants to be sent as ghost to the right processes
@@ -3357,6 +3360,7 @@ void findNeighbours(Class_Octant<2> oct,
 
 	// =============================================================================== //
 
+public:
 	bool adapt() {
 
 		bool globalDone = false, localDone = false, cDone = false;
