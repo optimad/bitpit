@@ -1,0 +1,782 @@
+---------------------------------------------
+- PABLO PArallel Balanced Linear Octree -
+---------------------------------------------
+ 
+---------------------------------------------
+ Number of proc		:	8
+ Dimension		:	2
+ Max allowed level	:	20
+ Domain Origin		:	0.000000
+				0.000000
+				0.000000
+ Domain Size		:	100.000000
+---------------------------------------------
+ 
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+ 
+ Initial Number of octants	:	1
+ Number of octants after Refine	:	256
+ Number of octants after Coarse	:	256
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Serial distribution : 
+ Octants for proc	0	:	256
+ Octants for proc	1	:	256
+ Octants for proc	2	:	256
+ Octants for proc	3	:	256
+ Octants for proc	4	:	256
+ Octants for proc	5	:	256
+ Octants for proc	6	:	256
+ Octants for proc	7	:	256
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	32
+ Octants for proc	1	:	32
+ Octants for proc	2	:	32
+ Octants for proc	3	:	32
+ Octants for proc	4	:	32
+ Octants for proc	5	:	32
+ Octants for proc	6	:	32
+ Octants for proc	7	:	32
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+ 
+ Initial Number of octants	:	256
+ Number of octants after Refine	:	958
+ Number of octants after Coarse	:	958
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	128
+ Octants for proc	1	:	128
+ Octants for proc	2	:	128
+ Octants for proc	3	:	128
+ Octants for proc	4	:	128
+ Octants for proc	5	:	95
+ Octants for proc	6	:	128
+ Octants for proc	7	:	95
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	120
+ Octants for proc	1	:	120
+ Octants for proc	2	:	120
+ Octants for proc	3	:	120
+ Octants for proc	4	:	120
+ Octants for proc	5	:	120
+ Octants for proc	6	:	119
+ Octants for proc	7	:	119
+ 
+---------------------------------------------
+ 
+---------------------------------------------
+ 
+ CPU time (sec)			:	0.010000
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	1
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+ 
+ Initial Number of octants	:	958
+ Number of octants after Refine	:	2878
+ Number of octants after Coarse	:	2878
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	270
+ Octants for proc	1	:	465
+ Octants for proc	2	:	294
+ Octants for proc	3	:	441
+ Octants for proc	4	:	429
+ Octants for proc	5	:	312
+ Octants for proc	6	:	398
+ Octants for proc	7	:	269
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	360
+ Octants for proc	1	:	360
+ Octants for proc	2	:	360
+ Octants for proc	3	:	360
+ Octants for proc	4	:	360
+ Octants for proc	5	:	360
+ Octants for proc	6	:	359
+ Octants for proc	7	:	359
+ 
+---------------------------------------------
+ 
+---------------------------------------------
+ 
+ CPU time (sec)			:	0.030000
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	1
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+ 
+ Initial Number of octants	:	2878
+ Number of octants after Refine	:	7345
+ Number of octants after Coarse	:	7345
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	648
+ Octants for proc	1	:	1158
+ Octants for proc	2	:	798
+ Octants for proc	3	:	1101
+ Octants for proc	4	:	930
+ Octants for proc	5	:	1083
+ Octants for proc	6	:	845
+ Octants for proc	7	:	782
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	919
+ Octants for proc	1	:	918
+ Octants for proc	2	:	918
+ Octants for proc	3	:	918
+ Octants for proc	4	:	918
+ Octants for proc	5	:	918
+ Octants for proc	6	:	918
+ Octants for proc	7	:	918
+ 
+---------------------------------------------
+ 
+---------------------------------------------
+ 
+ CPU time (sec)			:	0.090000
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	1
+ Iteration	:	2
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+ 
+ Initial Number of octants	:	7345
+ Number of octants after Refine	:	17710
+ Number of octants after Coarse	:	17710
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	1918
+ Octants for proc	1	:	2337
+ Octants for proc	2	:	1824
+ Octants for proc	3	:	2790
+ Octants for proc	4	:	1995
+ Octants for proc	5	:	2934
+ Octants for proc	6	:	1992
+ Octants for proc	7	:	1920
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	2214
+ Octants for proc	1	:	2214
+ Octants for proc	2	:	2214
+ Octants for proc	3	:	2214
+ Octants for proc	4	:	2214
+ Octants for proc	5	:	2214
+ Octants for proc	6	:	2213
+ Octants for proc	7	:	2213
+ 
+---------------------------------------------
+ 
+---------------------------------------------
+ 
+ CPU time (sec)			:	0.240000
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	1
+ Iteration	:	2
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+ 
+ Initial Number of octants	:	17710
+ Number of octants after Refine	:	41578
+ Number of octants after Coarse	:	41578
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	4593
+ Octants for proc	1	:	5091
+ Octants for proc	2	:	4647
+ Octants for proc	3	:	5340
+ Octants for proc	4	:	4563
+ Octants for proc	5	:	7794
+ Octants for proc	6	:	5162
+ Octants for proc	7	:	4388
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	5198
+ Octants for proc	1	:	5198
+ Octants for proc	2	:	5197
+ Octants for proc	3	:	5197
+ Octants for proc	4	:	5197
+ Octants for proc	5	:	5197
+ Octants for proc	6	:	5197
+ Octants for proc	7	:	5197
+ 
+---------------------------------------------
+ 
+---------------------------------------------
+ 
+ CPU time (sec)			:	0.640000
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	1
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+ 
+ Initial Number of octants	:	41578
+ Number of octants after Refine	:	102469
+ Number of octants after Coarse	:	102469
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	11114
+ Octants for proc	1	:	11084
+ Octants for proc	2	:	10759
+ Octants for proc	3	:	11452
+ Octants for proc	4	:	14053
+ Octants for proc	5	:	18805
+ Octants for proc	6	:	14911
+ Octants for proc	7	:	10291
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	12809
+ Octants for proc	1	:	12809
+ Octants for proc	2	:	12809
+ Octants for proc	3	:	12809
+ Octants for proc	4	:	12809
+ Octants for proc	5	:	12808
+ Octants for proc	6	:	12808
+ Octants for proc	7	:	12808
+ 
+---------------------------------------------
+ 
+---------------------------------------------
+ 
+ CPU time (sec)			:	1.620000
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	1
+ Iteration	:	2
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+ 
+ Initial Number of octants	:	102469
+ Number of octants after Refine	:	274777
+ Number of octants after Coarse	:	274777
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	27173
+ Octants for proc	1	:	26456
+ Octants for proc	2	:	26864
+ Octants for proc	3	:	26345
+ Octants for proc	4	:	47486
+ Octants for proc	5	:	50218
+ Octants for proc	6	:	45058
+ Octants for proc	7	:	25177
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	34348
+ Octants for proc	1	:	34347
+ Octants for proc	2	:	34347
+ Octants for proc	3	:	34347
+ Octants for proc	4	:	34347
+ Octants for proc	5	:	34347
+ Octants for proc	6	:	34347
+ Octants for proc	7	:	34347
+ 
+---------------------------------------------
+ 
+---------------------------------------------
+ 
+ CPU time (sec)			:	4.430000
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+ 
+ Initial Number of octants	:	274777
+ Number of octants after Refine	:	274777
+ Number of octants after Coarse	:	157534
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	29173
+ Octants for proc	1	:	28794
+ Octants for proc	2	:	28143
+ Octants for proc	3	:	12587
+ Octants for proc	4	:	10384
+ Octants for proc	5	:	9096
+ Octants for proc	6	:	9347
+ Octants for proc	7	:	30010
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	19692
+ Octants for proc	1	:	19692
+ Octants for proc	2	:	19692
+ Octants for proc	3	:	19692
+ Octants for proc	4	:	19929
+ Octants for proc	5	:	19455
+ Octants for proc	6	:	19691
+ Octants for proc	7	:	19691
+ 
+---------------------------------------------
+ 
+---------------------------------------------
+ 
+ CPU time (sec)			:	6.330000
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	1
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+ 
+ Initial Number of octants	:	157534
+ Number of octants after Refine	:	157534
+ Number of octants after Coarse	:	132424
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	19461
+ Octants for proc	1	:	19407
+ Octants for proc	2	:	19372
+ Octants for proc	3	:	19433
+ Octants for proc	4	:	14521
+ Octants for proc	5	:	7473
+ Octants for proc	6	:	13078
+ Octants for proc	7	:	19679
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	16553
+ Octants for proc	1	:	16553
+ Octants for proc	2	:	16553
+ Octants for proc	3	:	16553
+ Octants for proc	4	:	16553
+ Octants for proc	5	:	16553
+ Octants for proc	6	:	16553
+ Octants for proc	7	:	16553
+ 
+---------------------------------------------
+ 
+---------------------------------------------
+ 
+ CPU time (sec)			:	7.590000
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	1
+ Iteration	:	2
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+ 
+ Initial Number of octants	:	132424
+ Number of octants after Refine	:	132424
+ Number of octants after Coarse	:	126805
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	16553
+ Octants for proc	1	:	16550
+ Octants for proc	2	:	16553
+ Octants for proc	3	:	16550
+ Octants for proc	4	:	16553
+ Octants for proc	5	:	12729
+ Octants for proc	6	:	14764
+ Octants for proc	7	:	16553
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	15851
+ Octants for proc	1	:	15851
+ Octants for proc	2	:	15851
+ Octants for proc	3	:	15851
+ Octants for proc	4	:	15851
+ Octants for proc	5	:	15850
+ Octants for proc	6	:	15850
+ Octants for proc	7	:	15850
+ 
+---------------------------------------------
+ 
+---------------------------------------------
+ 
+ CPU time (sec)			:	8.570000
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	1
+ Iteration	:	2
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+ 
+ Initial Number of octants	:	126805
+ Number of octants after Refine	:	126805
+ Number of octants after Coarse	:	125572
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	15851
+ Octants for proc	1	:	15848
+ Octants for proc	2	:	15851
+ Octants for proc	3	:	15851
+ Octants for proc	4	:	15851
+ Octants for proc	5	:	15055
+ Octants for proc	6	:	15415
+ Octants for proc	7	:	15850
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	15697
+ Octants for proc	1	:	15697
+ Octants for proc	2	:	15697
+ Octants for proc	3	:	15697
+ Octants for proc	4	:	15696
+ Octants for proc	5	:	15696
+ Octants for proc	6	:	15696
+ Octants for proc	7	:	15696
+ 
+---------------------------------------------
+ 
+---------------------------------------------
+ 
+ CPU time (sec)			:	9.590000
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	1
+ Iteration	:	2
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+ 
+ Initial Number of octants	:	125572
+ Number of octants after Refine	:	125572
+ Number of octants after Coarse	:	125356
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	15697
+ Octants for proc	1	:	15697
+ Octants for proc	2	:	15697
+ Octants for proc	3	:	15697
+ Octants for proc	4	:	15699
+ Octants for proc	5	:	15549
+ Octants for proc	6	:	15624
+ Octants for proc	7	:	15696
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	15670
+ Octants for proc	1	:	15670
+ Octants for proc	2	:	15670
+ Octants for proc	3	:	15670
+ Octants for proc	4	:	15669
+ Octants for proc	5	:	15669
+ Octants for proc	6	:	15669
+ Octants for proc	7	:	15669
+ 
+---------------------------------------------
+ 
+---------------------------------------------
+ 
+ CPU time (sec)			:	10.570000
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	1
+ Iteration	:	2
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+ 
+ Initial Number of octants	:	125356
+ Number of octants after Refine	:	125356
+ Number of octants after Coarse	:	125332
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	15670
+ Octants for proc	1	:	15670
+ Octants for proc	2	:	15670
+ Octants for proc	3	:	15672
+ Octants for proc	4	:	15667
+ Octants for proc	5	:	15651
+ Octants for proc	6	:	15663
+ Octants for proc	7	:	15669
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	15667
+ Octants for proc	1	:	15667
+ Octants for proc	2	:	15667
+ Octants for proc	3	:	15667
+ Octants for proc	4	:	15666
+ Octants for proc	5	:	15666
+ Octants for proc	6	:	15666
+ Octants for proc	7	:	15666
+ 
+---------------------------------------------
+ 
+---------------------------------------------
+ 
+ CPU time (sec)			:	11.600000
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	1
+ Iteration	:	2
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+ 
+ Initial Number of octants	:	125332
+ Number of octants after Refine	:	125332
+ Number of octants after Coarse	:	125332
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	15667
+ Octants for proc	1	:	15667
+ Octants for proc	2	:	15667
+ Octants for proc	3	:	15667
+ Octants for proc	4	:	15666
+ Octants for proc	5	:	15666
+ Octants for proc	6	:	15666
+ Octants for proc	7	:	15666
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	15667
+ Octants for proc	1	:	15667
+ Octants for proc	2	:	15667
+ Octants for proc	3	:	15667
+ Octants for proc	4	:	15666
+ Octants for proc	5	:	15666
+ Octants for proc	6	:	15666
+ Octants for proc	7	:	15666
+ 
+---------------------------------------------
+ 
+---------------------------------------------
+ 
+ CPU time (sec)			:	12.590000
+ 
+---------------------------------------------
+---------------------------------------------
+--------------- R.I.P. PABLO ----------------
+---------------------------------------------
+---------------------------------------------
