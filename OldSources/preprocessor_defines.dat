@@ -1,6 +1,0 @@
-#ifndef MAX_LEVEL
-#define MAX_LEVEL 20
-#endif
-#ifndef DIM
-#define DIM 3
-#endif
