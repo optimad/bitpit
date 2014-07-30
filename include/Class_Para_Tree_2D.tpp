@@ -3859,6 +3859,8 @@ public:
 
 //	template<class UserDataComm>
 //	void communicate(UserDataComm & userData){
+	/** Communicate data provided by the user between the processes.
+	 */
 	template<class Impl>
 	void communicate(Class_Data_Comm_Interface<Impl> & userData){
 		//BUILD SEND BUFFERS
@@ -3944,7 +3946,8 @@ public:
 	};
 
 	// =============================================================================== //
-
+	/** Compute the connectivity of octants.
+	 */
 	void computeConnectivity() {
 		map<uint64_t, vector<double> > mapnodes;
 		map<uint64_t, vector<double> >::iterator iter, iterend;
@@ -4004,6 +4007,8 @@ public:
 
 	// =================================================================================== //
 
+	/** Clear the connectivity of octants.
+	 */
 	void clearConnectivity() {
 		dvector2D().swap(nodes);
 		u32vector2D().swap(connectivity);
@@ -4011,6 +4016,8 @@ public:
 
 	// =================================================================================== //
 
+	/** Update the connectivity of octants.
+	 */
 	void updateConnectivity() {
 		clearConnectivity();
 		computeConnectivity();
@@ -4018,6 +4025,8 @@ public:
 
 	// =================================================================================== //
 
+	/** Compute the connectivity of ghost octants.
+	 */
 	void computeghostsConnectivity() {
 		map<uint64_t, vector<double> > mapnodes;
 		map<uint64_t, vector<double> >::iterator iter, iterend;
@@ -4074,6 +4083,8 @@ public:
 
 	// =================================================================================== //
 
+	/** Clear the connectivity of ghost octants.
+	 */
 	void clearghostsConnectivity() {
 		dvector2D().swap(ghostsnodes);
 		u32vector2D().swap(ghostsconnectivity);
@@ -4081,6 +4092,8 @@ public:
 
 	// =================================================================================== //
 
+	/** Update the connectivity of ghost octants.
+	 */
 	void updateghostsConnectivity() {
 		clearghostsConnectivity();
 		computeghostsConnectivity();
@@ -4088,6 +4101,8 @@ public:
 
 	// =============================================================================== //
 
+	/** Compute the intersection of octants (intersections of bord, of inner domain and with ghost octants).
+	 */
 	void computeIntersections(){
 		octree.computeIntersections();
 	}
