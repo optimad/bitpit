@@ -7,7 +7,7 @@
 
 #include "preprocessor_defines.dat"
 #include <mpi.h>
-#include "global.hpp"
+#include "Class_Global.hpp"
 #include "Class_Para_Tree.hpp"
 #include "ioFunct.hpp"
 

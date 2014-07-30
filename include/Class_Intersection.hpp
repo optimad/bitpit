@@ -12,7 +12,7 @@
 // INCLUDES                                                                            //
 // =================================================================================== //
 #include "preprocessor_defines.dat"
-#include "global.hpp"
+#include "Class_Global.hpp"
 #include "logFunct.hpp"
 #include <vector>
 #include <string.h>

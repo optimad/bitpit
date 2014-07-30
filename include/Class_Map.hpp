@@ -8,7 +8,7 @@
 #ifndef CLASS_MAP_HPP_
 #define CLASS_MAP_HPP_
 
-#include "global.hpp"
+#include "Class_Global.hpp"
 #include "preprocessor_defines.dat"
 #include <math.h>
 #include <stdint.h>
@@ -39,7 +39,7 @@ class Class_Map{
 public:
 	double X0, Y0, Z0;
 	double L;
-	Global<dim> globals;
+	Class_Global<dim> globals;
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //

@@ -4,16 +4,16 @@
  *  Created on: 18/apr/2014
  *      Author: Marco Cisternino
  */
-#ifndef GLOBAL_3D_TPP
-#define GLOBAL_3D_TPP
+#ifndef CLASS_GLOBAL_3D_TPP
+#define CLASS_GLOBAL_3D_TPP
 // =================================================================================== //
 // CLASS SPECIALIZATION                                                                //
 // =================================================================================== //
 template<>
-class Global<3>
+class Class_Global<3>
 {
 public:
-	Global() : max_length (uint32_t(pow(2.0,MAX_LEVEL_3D))),
+	Class_Global() : max_length (uint32_t(pow(2.0,MAX_LEVEL_3D))),
 	nchildren(8),
 	nfaces(6),
 	nnodes(8),

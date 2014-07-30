@@ -12,7 +12,7 @@
 // INCLUDES                                                                            //
 // =================================================================================== //
 #include "preprocessor_defines.dat"
-#include "global.hpp"
+#include "Class_Global.hpp"
 #include "Class_Octant.hpp"
 #include "Class_Intersection.hpp"
 #include <math.h>

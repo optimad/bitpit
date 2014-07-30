@@ -1,20 +1,20 @@
 /*
- * global_2D.tpp
+ * Class_Global_2D.tpp
  *
  *  Created on: 18/apr/2014
  *      Author: Marco Cisternino
  */
-#ifndef GLOBAL_2D_TPP
-#define GLOBAL_2D_TPP
+#ifndef CLASS_GLOBAL_2D_TPP
+#define CLASS_GLOBAL_2D_TPP
 
 // =================================================================================== //
 // CLASS SPECIALIZATION                                                                //
 // =================================================================================== //
 template<>
-class Global<2>
+class Class_Global<2>
 {
 public:
-	Global() : max_length (uint32_t(pow(2.0,MAX_LEVEL_2D))),
+	Class_Global() : max_length (uint32_t(pow(2.0,MAX_LEVEL_2D))),
 	nchildren(4),
 	nfaces(4),
 	nnodes(4),
