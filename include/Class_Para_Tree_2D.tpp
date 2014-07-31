@@ -49,7 +49,7 @@ public:
 	bool serial;								/**<True if the octree is the same on each processor, False if the octree is distributed*/
 
 	//map member
-	Class_Map<2> trans;							/**<Transformation map from logical to phisycal domain*/
+	Class_Map<2> trans;							/**<Transformation map from logical to physical domain*/
 
 	// connectivity
 	dvector2D					nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
