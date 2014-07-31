@@ -1,17 +1,3 @@
-/*!
- *	\date			23/apr/2014
- *	\authors		Edoardo Lombardi
- *	\authors		Marco Cisternino
- *	\version		0.1
- *
- *	\brief Transformation Mapper
- *
- *	Definition of the transformation from the logical domain to the physical domain.
- *	It contains a default (temporary) implementation of a scaling and translation mapper
- *	of logical octree.
- *	Class_Map has to be implemented and customized by the user for different applications.
- */
-
 // =================================================================================== //
 // CLASS SPECIALIZATION                                                                //
 // =================================================================================== //
