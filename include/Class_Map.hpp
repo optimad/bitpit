@@ -50,7 +50,18 @@ public:
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
 public:
+	/*!Default constructor. Origin of octree in physical domain in (0,0,0)
+	 * and side length 1.
+	 */
 	Class_Map();
+
+	/*!Customized constructor with origin of octree in physical
+	 * domain side length provided by the user.
+	 * \param[in] X Coordinate X of the origin.
+	 * \param[in] Y Coordinate Y of the origin.
+	 * \param[in] Z Coordinate Z of the origin.
+	 * \param[in] LL Side length of domain.
+	 */
 	Class_Map(double & X, double & Y, double & Z, double & LL);
 
 	// ------------------------------------------------------------------------------- //

@@ -5,7 +5,6 @@
 /*!Default constructor. Origin of octree in physical domain in (0,0,0)
  * and side length 1.
  */
-
 template <int dim>
 Class_Map<dim>::Class_Map(){
 	X0 = Y0 = Z0 = 0.0;
