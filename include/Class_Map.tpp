@@ -7,7 +7,8 @@
  *	\brief Transformation Mapper
  *
  *	Definition of the transformation from the logical domain to the physical domain.
- *	It contains a default (temporary) implementation of a scaling and translation mapper.
+ *	It contains a default (temporary) implementation of a scaling and translation mapper
+ *	of logical octree.
  *	Class_Map has to be implemented and customized by the user for different applications.
  */
 
@@ -15,12 +16,23 @@
 // CLASS SPECIALIZATION                                                                //
 // =================================================================================== //
 
+/*!Default constructor. Origin of octree in physical domain in (0,0,0)
+ * and side length 1.
+ */
+
 template <int dim>
 Class_Map<dim>::Class_Map(){
 	X0 = Y0 = Z0 = 0.0;
 	L = 1.0;
 };
 
+/*!Customized constructor with origin of octree in physical
+ * domain side length provided by the user.
+ * \param[in] X Coordinate X of the origin.
+ * \param[in] Y Coordinate Y of the origin.
+ * \param[in] Z Coordinate Z of the origin.
+ * \param[in] LL Side length of domain.
+ */
 template <int dim>
 Class_Map<dim>::Class_Map(double & X, double & Y, double & Z, double & LL){
 	X0 = X;
