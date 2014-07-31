@@ -1,8 +1,15 @@
-/*
- * Class_Para_Tree_3D.tpp
+/*!
+ *	\date			23/apr/2014
+ *	\authors		Marco Cisternino
+ *	\authors		Edoardo Lombardi
+ *	\version		0.1
  *
- *  Created on: 23/apr/2014
- *      Author: Marco Cisternino
+ *	\brief Parallel 3D Octree Manager Class
+ *
+ *	Para Tree is the user interface class. One user should (read can...) work only
+ *	with this Class and its methods.
+ *	The sizes are intended in physical domain. The transformation from the logical
+ *	domain to the physical domain is defined by Class_Map<2> trans.
  */
 
 // =================================================================================== //

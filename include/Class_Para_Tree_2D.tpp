@@ -1,10 +1,10 @@
 /*!
  *	\date			23/apr/2014
- *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
+ *	\authors		Edoardo Lombardi
  *	\version		0.1
  *
- *	\brief Parallel Octree Manager Class
+ *	\brief Parallel 2D Octree Manager Class
  *
  *	Para Tree is the user interface class. One user should (read can...) work only
  *	with this Class and its methods.
@@ -832,10 +832,6 @@ private:
 		return octree.extractOctant(idx) ;
 	};
 
-//	const Class_Octant<2>& extractOctant(uint32_t idx) const{
-//	 		return octree.extractOctant(idx) ;
-//	};
-
 	// --------------------------------
 
 public:
@@ -861,30 +857,6 @@ public:
 		}
 		return NULL;
 	};
-
-//	void findNeighbours(uint32_t idx,							// Finds neighbours of idx-th octant through iface in vector octants.
-//			uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
-//			u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
-//			vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
-//
-//		octree.findNeighbours(idx, iface, neighbours, isghost);
-//	};
-//
-//	void findNeighbours(Class_Octant<2>* oct,		// Finds neighbours of octant through iface in vector octants.
-//			uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
-//			u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
-//			vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
-//
-//		octree.findNeighbours(oct, iface, neighbours, isghost);
-//	};
-//
-//	void findNeighbours(Class_Octant<2> oct,					// Finds neighbours of octant through iface in vector octants.
-//			uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
-//			u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
-//			vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
-//
-//		octree.findNeighbours(&oct, iface, neighbours, isghost);
-//	};
 
 	/** Finds neighbours of octant through iface in vector octants.
 	 * Returns a vector (empty if iface is a bound face) with the index of neighbours
@@ -1465,7 +1437,7 @@ private:
 		//find the owner of these virtual neighbor and build a map (process,border octants)
 		//this map contains the local octants as ghosts for neighbor processes
 
-		// Eliminata PBORDERS !!!
+		// NO PBORDERS !
 		Class_Local_Tree<2>::OctantsType::iterator end = octree.octants.end();
 		Class_Local_Tree<2>::OctantsType::iterator begin = octree.octants.begin();
 		bordersPerProc.clear();
@@ -2731,16 +2703,10 @@ public:
 			map<int,int>::iterator ritend = recvBufferSizePerProc.end();
 			for(map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
 				recvBuffers[rit->first] = Class_Comm_Buffer(rit->second,'a');
-				//			uint32_t nofNewPerProc = (uint32_t)(rit->second / (uint32_t)ceil((double)octantBytes / (double)(CHAR_BIT/8)));
-				//			if(rit->first < rank)
-				//				nofNewHead += nofNewPerProc;
-				//			else if(rit->first > rank)
-				//				nofNewTail += nofNewPerProc;
 			}
 
 			nReq = 0;
 			for(set<int>::iterator sendit = sendersPerProc[rank].begin(); sendit != senditend; ++sendit){
-				//nofBytesOverProc += recvBuffers[sit->first].commBufferSize;
 				error_flag = MPI_Irecv(recvBuffers[*sendit].commBuffer,recvBuffers[*sendit].commBufferSize,MPI_PACKED,*sendit,rank,MPI_COMM_WORLD,&req[nReq]);
 				++nReq;
 			}
@@ -3024,7 +2990,6 @@ public:
 						//store the number of octants at the beginning of the buffer
 						MPI_Pack(&partition[p],1,MPI_UINT32_T,sendBuffers[p].commBuffer,sendBuffers[p].commBufferSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
 						//USE BUFFER POS
-						//int pos = 0;
 						for(uint32_t i = lh - partition[p] + 1; i <= lh; ++i){
 							//pack octants from lh - partition[p] to lh
 							const Class_Octant<2> & octant = octree.octants[i];
@@ -3071,7 +3036,6 @@ public:
 						//store the number of octants at the beginning of the buffer
 						MPI_Pack(&tailSize,1,MPI_UINT32_T,sendBuffers[p].commBuffer,sendBuffers[p].commBufferSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
 						//USE BUFFER POS
-						//int pos = 0;
 						for(uint32_t i = ft; i < octantsSize; ++i){
 							//PACK octants from ft to octantsSize-1
 							const Class_Octant<2> & octant = octree.octants[i];
@@ -3110,7 +3074,6 @@ public:
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
 						//store the number of octants at the beginning of the buffer
 						MPI_Pack(&partition[p],1,MPI_UINT32_T,sendBuffers[p].commBuffer,sendBuffers[p].commBufferSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-						//int pos = 0;
 						for(uint32_t i = ft; i <= endOctants; ++i ){
 							//PACK octants from ft to ft + partition[p] -1
 							const Class_Octant<2> & octant = octree.octants[i];
@@ -3194,16 +3157,10 @@ public:
 			map<int,int>::iterator ritend = recvBufferSizePerProc.end();
 			for(map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
 				recvBuffers[rit->first] = Class_Comm_Buffer(rit->second,'a');
-				//			uint32_t nofNewPerProc = (uint32_t)(rit->second / (uint32_t)ceil((double)octantBytes / (double)(CHAR_BIT/8)));
-				//			if(rit->first < rank)
-				//				nofNewHead += nofNewPerProc;
-				//			else if(rit->first > rank)
-				//				nofNewTail += nofNewPerProc;
 			}
 
 			nReq = 0;
 			for(set<int>::iterator sendit = sendersPerProc[rank].begin(); sendit != senditend; ++sendit){
-				//nofBytesOverProc += recvBuffers[sit->first].commBufferSize;
 				error_flag = MPI_Irecv(recvBuffers[*sendit].commBuffer,recvBuffers[*sendit].commBufferSize,MPI_PACKED,*sendit,rank,MPI_COMM_WORLD,&req[nReq]);
 				++nReq;
 			}
@@ -3376,8 +3333,6 @@ private:
 	// =============================================================================== //
 
 	void commMarker() {
-		// borderPerProcs has to be built
-
 		//PACK (mpi) LEVEL AND MARKER OF BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
 		//it visits every element in bordersPerProc (one for every neighbor proc)
 		//for every element it visits the border octants it contains and pack its marker in a new structure, sendBuffers
@@ -3447,15 +3402,6 @@ private:
 			++nReq;
 		}
 		MPI_Waitall(nReq,req,stats);
-
-		/*
-		//COMPUTE GHOSTS SIZE IN BYTES
-		//number of ghosts in every process is obtained through the size in bytes of the single octant
-		//and ghost vector in local tree is resized
-		uint32_t nofGhosts = nofBytesOverProc / (uint32_t)(levelBytes+markerBytes);
-		octree.size_ghosts = nofGhosts;
-		octree.ghosts.resize(nofGhosts);
-		 */
 
 		//UNPACK BUFFERS AND BUILD GHOSTS CONTAINER OF CLASS_LOCAL_TREE
 		//every entry in recvBuffers is visited, each buffers from neighbor processes is unpacked octant by octant.
@@ -3857,8 +3803,6 @@ public:
 
 	// =============================================================================== //
 
-//	template<class UserDataComm>
-//	void communicate(UserDataComm & userData){
 	/** Communicate data provided by the user between the processes.
 	 */
 	template<class Impl>
@@ -3995,7 +3939,7 @@ public:
 				counter++;
 			}
 			nodes.shrink_to_fit();
-			//Lento. Solo per risparmiare memoria
+			//Slow. Memory saving.
 			for (int ii=0; ii<noctants; ii++){
 				connectivity[ii].shrink_to_fit();
 			}
@@ -4072,7 +4016,7 @@ public:
 				counter++;
 			}
 			ghostsnodes.shrink_to_fit();
-			//Lento. Solo per risparmiare memoria
+			//Slow. Memory saving.
 			for (int ii=0; ii<noctants; ii++){
 				ghostsconnectivity[ii].shrink_to_fit();
 			}
