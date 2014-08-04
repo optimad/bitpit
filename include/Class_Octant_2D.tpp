@@ -10,19 +10,18 @@
  *	squares with size function of their level. Each octant has 4 nodes and 4 edge (improperly called
  *	faces in this code) ordered with Z-order as shown below.
  *
- *	Nodes :		2______3 \n
- *				|......| \n
- *				|......| \n
- *				0______1 \n
+ *	Nodes :
  *
- *	Faces :		   3	 \n
- *				________ \n
- *				|......| \n
- *			  0 |......| 1 \n
- *				|______| \n
- *				   2	\n
+ *	2_3 \n
+ *	| | \n
+ *	0_1 \n
  *
  *
+ *	Faces :
+ *
+ *	 3
+ *	0||1
+ *	 2
  *
  *
  *	The main feature of each octant are:
