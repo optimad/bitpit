@@ -10,6 +10,11 @@
  *	with this Class and its methods.
  *	The sizes are intended in physical domain. The transformation from the logical
  *	domain to the physical domain is defined by Class_Map<2> trans.
+ *
+ *	The partition of the octree is performed by following the Z-curve defined by the Morton
+ *	index of the octants. By default it is a balanced partition over the number of octants for each
+ *	process.
+ *
  */
 
 // =================================================================================== //

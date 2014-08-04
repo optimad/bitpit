@@ -40,6 +40,10 @@ using namespace std;
  *	The sizes are intended in physical domain. The transformation from the logical
  *	domain to the physical domain is defined by Class_Map<2> trans.
  *
+ *	The partition of the octree is performed by following the Z-curve defined by the Morton
+ *	index of the octants. By default it is a balanced partition over the number of octants for each
+ *	process.
+ *
  *	Class Para_Tree is a templated class in dimensional parameter int dim and it accepts only two values: dim=2 and dim=3, obviously for 2D and 3D respectively.
  */
 template<int dim>
