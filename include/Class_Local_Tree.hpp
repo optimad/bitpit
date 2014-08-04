@@ -1,6 +1,3 @@
-#ifndef CLASS_LOCAL_TREE_HPP_
-#define CLASS_LOCAL_TREE_HPP_
-
 /*!
  * Class_Local_Tree.hpp
  *
@@ -23,6 +20,8 @@
  *
  */
 
+#ifndef CLASS_LOCAL_TREE_HPP_
+#define CLASS_LOCAL_TREE_HPP_
 
 
 // =================================================================================== //
