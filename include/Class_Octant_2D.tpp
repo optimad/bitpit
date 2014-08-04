@@ -12,16 +12,16 @@
  *
  *	Nodes :
  *
- *	2_3 \n
- *	| | \n
- *	0_1 \n
+ *	2...3 \n
+ *	|...| \n
+ *	0...1 \n
  *
  *
  *	Faces :
  *
- *	 3
- *	0||1
- *	 2
+ *	..3.. \n
+ *	0|.|1 \n
+ *	..2.. \n
  *
  *
  *	The main feature of each octant are:
