@@ -7,7 +7,7 @@
  *	\authors		Edoardo Lombardi
  *	\version		0.1
  *
- *	\brief Global variables used in PABLO
+ *	\brief Global variables used in PABLO - 2D specialization
  *
  *	Global variables are used in PABLO everywhere and they are public, i.e. each
  *	global variable can be used as constant by external codes.

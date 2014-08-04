@@ -1,10 +1,3 @@
-/*
- * Class_Global.hpp
- *
- *  Created on: Feb 17, 2014
- *      Author: Marco
- */
-
 #ifndef CLASS_GLOBAL_HPP_
 #define CLASS_GLOBAL_HPP_
 
@@ -12,6 +5,20 @@
 #include <math.h>
 #include <stdint.h>
 
+/*!
+ *	\date			23/apr/2014
+ *	\authors		Edoardo Lombardi
+ *	\authors		Marco Cisternino
+ *	\version		0.1
+ *
+ *	\brief Global variables used in PABLO
+ *
+ *	Global variables are used in PABLO everywhere and they are public, i.e. each
+ *	global variable can be used as constant by external codes.
+ *
+ *	Class Class_Global is a templated class in dimensional parameter int dim and it accepts only two values: dim=2 and dim=3, obviously for 2D and 3D respectively.
+ *
+ */
 template <int dim>
 class Class_Global;
 
