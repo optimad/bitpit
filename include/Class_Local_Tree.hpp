@@ -1,7 +1,7 @@
 #ifndef CLASS_LOCAL_TREE_HPP_
 #define CLASS_LOCAL_TREE_HPP_
 
-/**
+/*!
  * Class_Local_Tree_2D.tpp
  *
  *  Created on: 23/apr/2014
