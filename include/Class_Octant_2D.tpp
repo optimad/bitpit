@@ -11,7 +11,7 @@
  *	faces in this code) ordered with Z-order as shown below.
  *
  *	Nodes :		2------3 \n
- *				|      | \n
+ *				|\hspace{5}      | \n
  *				|      | \n
  *				0------1 \n
  *
