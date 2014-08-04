@@ -4,7 +4,7 @@
  *	\authors		Edoardo Lombardi
  *	\version		0.1
  *
- *	\brief Parallel 2D Octree Manager Class
+ *	\brief Parallel Octree Manager Class - 2D specialization
  *
  *	Para Tree is the user interface class. One user should (read can...) work only
  *	with this Class and its methods.
