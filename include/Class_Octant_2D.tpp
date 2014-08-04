@@ -12,18 +12,6 @@
  *
  *	\image html PabloOctant.png
  *
- *	Nodes :
- *
- *	2...3 \n
- *	|.....| \n
- *	0...1 \n
- *
- *
- *	Faces :
- *
- *	...3... \n
- *	0|...|1 \n
- *	...2... \n
  *
  *
  *	The main feature of each octant are:
