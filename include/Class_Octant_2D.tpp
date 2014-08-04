@@ -4,7 +4,7 @@
  *	\authors		Marco Cisternino
  *	\version		0.1
  *
- *	\brief Octant class definition
+ *	\brief Octant class definition - 2D specialization
  *
  *	Octants are the grid elements of PABLO. In the logical domain octants are, in 2-dimensional case,
  *	squares with size function of their level. Each octant has 4 nodes and 4 edge (improperly called
