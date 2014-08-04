@@ -38,6 +38,7 @@ public:
 	facenode{{0,2},{1,3},{0,1},{2,3}},
 	normals{{-1,0,0},{1,0,0},{0,-1,0},{0,1,0}}
 	{};
+
 	const uint32_t max_length;			/**<Length of the logical domain*/
 	const uint8_t  nchildren;			/**<Number of children of an octant */
 	const uint8_t  nfaces;				/**<Number of faces of an octant */
