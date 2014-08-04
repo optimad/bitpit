@@ -1,8 +1,37 @@
-/*
- * Class_Octant_2D.tpp
+/*!
+ *	\date			23/apr/2014
+ *	\authors		Edoardo Lombardi
+ *	\authors		Marco Cisternino
+ *	\version		0.1
  *
- *  Created on: 15/apr/2014
- *      Author: Marco Cisternino
+ *	\brief Octant class definition
+ *
+ *	Octants are the grid elements of PABLO. In the logical domain octants are, in 2-dimensional case,
+ *	squares with size function of their level. Each octant has 4 nodes and 4 edge (improperly called
+ *	faces in this code) ordered with Z-order as shown below.
+ *
+ *	Nodes :		2------3
+ *				|      |
+ *				|      |
+ *				0------1
+ *
+ *	Faces :		   3
+ *				--------
+ *				|	   |
+ *			  0 |	   | 1
+ *				--------
+ *				   2
+ *
+ *
+ *
+ *
+ *	The main feature of each octant are:
+ *	- x,y,z   : coordinates of the node 0 of the octant;
+ *	- marker  : refinement marker can assume negative, positive or zero values, wich mean
+ *	a coarsening, refinement and none adaptation respectively;
+ *	- level   : octant level in the octree, zero for the first upper level.
+ *	- balance : flag to fix the if the octant has to 2:1 balanced.
+ *
  */
 
 // =================================================================================== //
