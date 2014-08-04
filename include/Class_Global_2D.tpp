@@ -1,3 +1,6 @@
+#ifndef CLASS_GLOBAL_2D_TPP
+#define CLASS_GLOBAL_2D_TPP
+
 /*!
  *	\date			23/apr/2014
  *	\authors		Marco Cisternino
@@ -11,8 +14,6 @@
  *
  */
 
-#ifndef CLASS_GLOBAL_2D_TPP
-#define CLASS_GLOBAL_2D_TPP
 
 // =================================================================================== //
 // CLASS SPECIALIZATION                                                                //
