@@ -28,9 +28,9 @@ using namespace std;
 /*!
  * Class_Local_Tree.hpp
  *
- *  Created on: 23/apr/2014
- *      Author: Edoardo Lombardi
- *	\version		0.1
+ *  \date		23/apr/2014
+ *	\authors	Edoardo Lombardi
+ *	\version	0.1
  *
  *	\brief Local octree portion for each process
  *
@@ -45,6 +45,7 @@ using namespace std;
  *	- intersections of process bord (i.e. between octants and ghosts);
  *	- intersections completely located in the domain of the process (i.e. between actual octants).
  *
+ *	Class Local_Tree is a templated class in dimensional parameter int dim and it accepts only two values: dim=2 and dim=3, obviously for 2D and 3D respectively.
  */
 template<int dim>
 class Class_Local_Tree{};

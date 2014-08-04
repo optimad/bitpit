@@ -1,11 +1,11 @@
 /*!
  * Class_Local_Tree_2D.tpp
  *
- *  Created on: 23/apr/2014
- *      Author: Edoardo Lombardi
- *	\version		0.1
+ *  \date		23/apr/2014
+ *	\authors	Edoardo Lombardi
+ *	\version	0.1
  *
- *	\brief Local octree portion for each process
+ *	\brief Local octree portion for each process - 2D specialization
  *
  *	Local tree consists mainly of two vectors with:
  *	- actual octants stored on current process;
