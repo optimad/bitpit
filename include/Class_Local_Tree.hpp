@@ -1,25 +1,3 @@
-/*!
- * Class_Local_Tree.hpp
- *
- *  Created on: 23/apr/2014
- *      Author: Edoardo Lombardi
- *	\version		0.1
- *
- *	\brief Local octree portion for each process
- *
- *	Local tree consists mainly of two vectors with:
- *	- actual octants stored on current process;
- *	- ghost octants neighbours of the first ones.
- *
- *	The octants (and ghosts) are ordered following the Z-curve defined by the Morton index.
- *
- *	Optionally in local tree three vectors of intersections are stored:
- *	- intersections located on the physical domain of the octree;
- *	- intersections of process bord (i.e. between octants and ghosts);
- *	- intersections completely located in the domain of the process (i.e. between actual octants).
- *
- */
-
 #ifndef CLASS_LOCAL_TREE_HPP_
 #define CLASS_LOCAL_TREE_HPP_
 
@@ -47,6 +25,27 @@ using namespace std;
 // CLASS DEFINITION                                                                    //
 // =================================================================================== //
 
+/*!
+ * Class_Local_Tree.hpp
+ *
+ *  Created on: 23/apr/2014
+ *      Author: Edoardo Lombardi
+ *	\version		0.1
+ *
+ *	\brief Local octree portion for each process
+ *
+ *	Local tree consists mainly of two vectors with:
+ *	- actual octants stored on current process;
+ *	- ghost octants neighbours of the first ones.
+ *
+ *	The octants (and ghosts) are ordered following the Z-curve defined by the Morton index.
+ *
+ *	Optionally in local tree three vectors of intersections are stored:
+ *	- intersections located on the physical domain of the octree;
+ *	- intersections of process bord (i.e. between octants and ghosts);
+ *	- intersections completely located in the domain of the process (i.e. between actual octants).
+ *
+ */
 template<int dim>
 class Class_Local_Tree{};
 
