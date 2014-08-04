@@ -15,11 +15,12 @@
  *
  *
  *	The main feature of each octant are:
- *	- x,y,z   : coordinates of the node 0 of the octant;
- *	- marker  : refinement marker can assume negative, positive or zero values, wich mean
+ *	- x,y,z        : coordinates of the node 0 of the octant;
+ *	- Morton index : classical Morton index defined anly by the coordinates (info about level used additionally for equality operator);
+ *	- marker       : refinement marker can assume negative, positive or zero values, wich mean
  *	a coarsening, refinement and none adaptation respectively;
- *	- level   : octant level in the octree, zero for the first upper level.
- *	- balance : flag to fix the if the octant has to 2:1 balanced.
+ *	- level        : octant level in the octree, zero for the first upper level.
+ *	- balance      : flag to fix if the octant has to 2:1 balanced with respect to its face neighbours.
  *
  */
 

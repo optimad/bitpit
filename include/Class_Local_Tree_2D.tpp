@@ -1,8 +1,23 @@
 /**
  * Class_Local_Tree_2D.tpp
  *
- *  Created on: 18/apr/2014
+ *  Created on: 23/apr/2014
  *      Author: Edoardo Lombardi
+ *	\version		0.1
+ *
+ *	\brief Local octree portion for each process
+ *
+ *	Local tree consists mainly of two vectors with:
+ *	- actual octants stored on current process;
+ *	- ghost octants neighbours of the first ones.
+ *
+ *	The octants (and ghosts) are ordered following the Z-curve defined by the Morton index.
+ *
+ *	Optionally in local tree three vectors of intersections are stored:
+ *	- intersections located on the physical domain of the octree;
+ *	- intersections of process bord (i.e. between octants and ghosts);
+ *	- intersections completely located in the domain of the process (i.e. between actual octants).
+ *
  */
 
 // =================================================================================== //
@@ -30,23 +45,25 @@ class Class_Local_Tree<2>{
 	// MEMBERS ----------------------------------------------------------------------- //
 
 private:
-	OctantsType					octants;			// Local vector of octants ordered with Morton Number
-	OctantsType					ghosts;				// Local vector of ghost octants ordered with Morton Number
-	IntersectionsType			intersections_int;	// Local vector of internal intersections ordered with Morton Number of first owner octant
-	IntersectionsType			intersections_ghost;// Local vector of intersections internal/ghost ordered with Morton Number of internal owner octant
-	IntersectionsType			intersections_bord;	// Local vector of border intersections (twice the sam octant is stored in an intersection)
-	u64vector 					globalidx_ghosts;	// Global index of the ghost octants (size = size_ghosts)
-	Class_Octant<2> 			first_desc;			// First (Morton order) most refined octant possible in local partition
-	Class_Octant<2> 			last_desc;			// Last (Morton order) most refined octant possible in local partition
-	uint32_t 					size_ghosts;		// Size of vector of ghost octants
-	uint8_t						local_max_depth;	// Reached max depth in local tree
+	OctantsType					octants;			/**< Local vector of octants ordered with Morton Number*/
+	OctantsType					ghosts;				/**< Local vector of ghost octants ordered with Morton Number*/
+	IntersectionsType			intersections_int;	/**< Local vector of internal intersections ordered with Morton Number of first owner octant*/
+	IntersectionsType			intersections_ghost;/**< Local vector of intersections internal/ghost ordered with Morton Number of internal owner octant*/
+	IntersectionsType			intersections_bord;	/**< Local vector of border intersections (twice the sam octant is stored in an intersection)*/
+	u64vector 					globalidx_ghosts;	/**< Global index of the ghost octants (size = size_ghosts)*/
+	Class_Octant<2> 			first_desc;			/**< First (Morton order) most refined octant possible in local partition*/
+	Class_Octant<2> 			last_desc;			/**< Last (Morton order) most refined octant possible in local partition*/
+	uint32_t 					size_ghosts;		/**< Size of vector of ghost octants*/
+	uint8_t						local_max_depth;	/**< Reached max depth in local tree */
 //public:
+/*
 	u32vector2D					nodes;				// Local vector of nodes (x,y,z) ordered with Morton Number
 	u32vector2D					connectivity;		// Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
 													// The nodes are stored as index of vector nodes
 	u32vector2D					ghostsnodes;		// Local vector of ghosts nodes (x,y,z) ordered with Morton Number
 	u32vector2D					ghostsconnectivity;	// Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
 													// The nodes are stored as index of vector nodes
+*/
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
@@ -756,6 +773,7 @@ private:
 
 	};
 
+/*
 	// =================================================================================== //
 
 	void computeConnectivity(){						// Computes nodes vector and connectivity of octants of local tree
@@ -899,6 +917,7 @@ private:
 		clearGhostsConnectivity();
 		computeGhostsConnectivity();
 	};
+*/
 
 	// =================================================================================== //
 
