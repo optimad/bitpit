@@ -18,7 +18,7 @@
  *	The octants (and ghosts) are ordered following the Z-curve defined by the Morton index.
  *
  *	Optionally in local tree three vectors of intersections are stored:
- *	- intersections located on the physical domain of the octree;
+ *	- intersections located on bord of the the physical domain of the octree;
  *	- intersections of process bord (i.e. between octants and ghosts);
  *	- intersections completely located in the domain of the process (i.e. between actual octants).
  *
