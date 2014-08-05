@@ -1,8 +1,19 @@
-/*
- * Class_Intersection_2D.tpp
+/*!
+ *	\date			23/apr/2014
+ *	\authors		Edoardo Lombardi
+ *	\authors		Marco Cisternino
+ *	\version		0.1
  *
- *  Created on: 22/apr/2014
- *      Author: Marco Cisternino
+ *	\brief Intersections class definition - 2D specialization
+ *
+ *	Intersections are the edges or portion of edges shared by two octants. An intersection is defined
+ *	by :
+ *	- the owner octants, i.e. the octants sharing the intersection, identified by a couple (array[2]) of indices;
+ *	- the index of the face, that contains the intersection, of the first owner;
+ *	- an identifier of the octant in the couple with higher level of refinement (0/1) [if same level identifier =0];
+ *	- a flag stating if an owner is ghost;
+ *	- a flag to communicate if the intersection is new after a mesh refinement.
+ *
  */
 
 
@@ -27,11 +38,11 @@ public:
 	// ------------------------------------------------------------------------------- //
 	// MEMBERS ----------------------------------------------------------------------- //
 private:
-	uint32_t 	owners[2];			// Owner octants of the intersection (first is the internal octant)
-	uint8_t   	iface;				// Index of the face of the first owner
-	bool		finer;				// 0/1 finer octant (if same level =0)
-	bool		isghost;			// The intersection has a member ghost
-	bool		isnew;				// The intersection is new after a mesh adapting?
+	uint32_t 	owners[2];			/**< Owner octants of the intersection (first is the internal octant) */
+	uint8_t   	iface;				/**< Index of the face of the first owner */
+	bool		finer;				/**< 0/1 finer octant (if same level =0) */
+	bool		isghost;			/**< The intersection has a member ghost */
+	bool		isnew;				/**< The intersection is new after a mesh adapting? */
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS AND OPERATORS----------------------------------------------------- //

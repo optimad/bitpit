@@ -3,8 +3,8 @@
 
 /*!
  *	\date			23/apr/2014
- *	\authors		Marco Cisternino
  *	\authors		Edoardo Lombardi
+ *	\authors		Marco Cisternino
  *	\version		0.1
  *
  *	\brief Global variables used in PABLO - 2D specialization

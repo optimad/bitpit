@@ -1,10 +1,3 @@
-/*
- * Class_Array.hpp
- *
- *  Created on: 03/mar/2014
- *      Author: Marco Cisternino
- */
-
 #ifndef CLASS_ARRAY_HPP_
 #define CLASS_ARRAY_HPP_
 
@@ -24,6 +17,17 @@ using namespace std;
 // CLASS DEFINITION                                                                    //
 // =================================================================================== //
 
+/*!
+ *
+ *	\date		03/mar/2014
+ *  \authors	Marco Cisternino
+ *  \version		0.1
+ *
+ *  \brief Customized array definition
+ *
+ *  Casll_Array conatins a pointer to an array of integer value. Implemented here for fast using in PABLO.
+ *
+ */
 class Class_Array {
 
 	template<int dim> friend class Class_Para_Tree;
