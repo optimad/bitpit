@@ -99,20 +99,6 @@ depend:
 .PHONY : depend
 
 # Convenience name for target.
-test/CMakeFiles/test_2D3D.dir/rule:
-	cd /home/edoardo/git/PABLO/build && $(MAKE) -f CMakeFiles/Makefile2 test/CMakeFiles/test_2D3D.dir/rule
-.PHONY : test/CMakeFiles/test_2D3D.dir/rule
-
-# Convenience name for target.
-test_2D3D: test/CMakeFiles/test_2D3D.dir/rule
-.PHONY : test_2D3D
-
-# fast build rule for target.
-test_2D3D/fast:
-	cd /home/edoardo/git/PABLO/build && $(MAKE) -f test/CMakeFiles/test_2D3D.dir/build.make test/CMakeFiles/test_2D3D.dir/build
-.PHONY : test_2D3D/fast
-
-# Convenience name for target.
 test/CMakeFiles/test_2D3D_debug.dir/rule:
 	cd /home/edoardo/git/PABLO/build && $(MAKE) -f CMakeFiles/Makefile2 test/CMakeFiles/test_2D3D_debug.dir/rule
 .PHONY : test/CMakeFiles/test_2D3D_debug.dir/rule
@@ -139,30 +125,6 @@ test_2D3D_edo: test/CMakeFiles/test_2D3D_edo.dir/rule
 test_2D3D_edo/fast:
 	cd /home/edoardo/git/PABLO/build && $(MAKE) -f test/CMakeFiles/test_2D3D_edo.dir/build.make test/CMakeFiles/test_2D3D_edo.dir/build
 .PHONY : test_2D3D_edo/fast
-
-test_2D3D.o: test_2D3D.cpp.o
-.PHONY : test_2D3D.o
-
-# target to build an object file
-test_2D3D.cpp.o:
-	cd /home/edoardo/git/PABLO/build && $(MAKE) -f test/CMakeFiles/test_2D3D.dir/build.make test/CMakeFiles/test_2D3D.dir/test_2D3D.cpp.o
-.PHONY : test_2D3D.cpp.o
-
-test_2D3D.i: test_2D3D.cpp.i
-.PHONY : test_2D3D.i
-
-# target to preprocess a source file
-test_2D3D.cpp.i:
-	cd /home/edoardo/git/PABLO/build && $(MAKE) -f test/CMakeFiles/test_2D3D.dir/build.make test/CMakeFiles/test_2D3D.dir/test_2D3D.cpp.i
-.PHONY : test_2D3D.cpp.i
-
-test_2D3D.s: test_2D3D.cpp.s
-.PHONY : test_2D3D.s
-
-# target to generate assembly for a file
-test_2D3D.cpp.s:
-	cd /home/edoardo/git/PABLO/build && $(MAKE) -f test/CMakeFiles/test_2D3D.dir/build.make test/CMakeFiles/test_2D3D.dir/test_2D3D.cpp.s
-.PHONY : test_2D3D.cpp.s
 
 test_2D3D_debug.o: test_2D3D_debug.cpp.o
 .PHONY : test_2D3D_debug.o
@@ -220,12 +182,8 @@ help:
 	@echo "... depend"
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
-	@echo "... test_2D3D"
 	@echo "... test_2D3D_debug"
 	@echo "... test_2D3D_edo"
-	@echo "... test_2D3D.o"
-	@echo "... test_2D3D.i"
-	@echo "... test_2D3D.s"
 	@echo "... test_2D3D_debug.o"
 	@echo "... test_2D3D_debug.i"
 	@echo "... test_2D3D_debug.s"

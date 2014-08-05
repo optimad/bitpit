@@ -112,19 +112,6 @@ pablo/fast:
 .PHONY : pablo/fast
 
 #=============================================================================
-# Target rules for targets named test_2D3D
-
-# Build rule for target.
-test_2D3D: cmake_check_build_system
-	$(MAKE) -f CMakeFiles/Makefile2 test_2D3D
-.PHONY : test_2D3D
-
-# fast build rule for target.
-test_2D3D/fast:
-	$(MAKE) -f test/CMakeFiles/test_2D3D.dir/build.make test/CMakeFiles/test_2D3D.dir/build
-.PHONY : test_2D3D/fast
-
-#=============================================================================
 # Target rules for targets named test_2D3D_debug
 
 # Build rule for target.
@@ -159,7 +146,6 @@ help:
 	@echo "... edit_cache"
 	@echo "... rebuild_cache"
 	@echo "... pablo"
-	@echo "... test_2D3D"
 	@echo "... test_2D3D_debug"
 	@echo "... test_2D3D_edo"
 .PHONY : help
