@@ -1,10 +1,3 @@
-/*
- * ClassCommBuffer.cpp
- *
- *  Created on: 25/feb/2014
- *      Author: Marco Cisternino
- */
-
 #include "Class_Comm_Buffer.hpp"
 #include <algorithm>
 

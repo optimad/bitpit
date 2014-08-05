@@ -1,10 +1,3 @@
-/*
- * Class_Array.cpp
- *
- *  Created on: 03/mar/2014
- *      Author: Marco Cisternino
- */
-
 #include "Class_Array.hpp"
 #include <algorithm>
 

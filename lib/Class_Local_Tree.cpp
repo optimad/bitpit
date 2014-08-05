@@ -1,10 +1,3 @@
-/*
- * Class_Local_Tree.cpp
- *
- *  Created on: Feb 17, 2014
- *      Author: edoardo
- */
-
 #include "Class_Local_Tree.hpp"
 
 // =================================================================================== //

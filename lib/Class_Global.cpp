@@ -1,9 +1,3 @@
-/*
- * Class_Global.cpp
- *
- *  Created on: 14/apr/2014
- *      Author: Marco Cisternino
- */
 #include "Class_Global.hpp"
 
 //Explicit Instantiation

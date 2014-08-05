@@ -1,10 +1,3 @@
-/*
- * ioFunct.cpp
- *
- *  Created on: 21/feb/2014
- *      Author: Marco Cisternino
- */
-
 #include <ioFunct.hpp>
 #include <fstream>
 #include <iomanip>
