@@ -1,5 +1,5 @@
 /*!
- * Class_Local_Tree_2D.tpp
+ * Class_Local_Tree_3D.tpp
  *
  *  \date		23/apr/2014
  *	\authors	Edoardo Lombardi
@@ -27,11 +27,6 @@
 // =================================================================================== //
 // CLASS SPECIALIZATION                                                                //
 // =================================================================================== //
-
-//template<int dim> class Class_Para_Tree{};
-//template<> class Class_Para_Tree<3>{};
-
-
 template<>
 class Class_Local_Tree<3>{
 	// ------------------------------------------------------------------------------- //
@@ -44,6 +39,7 @@ public:
 	typedef vector<Class_Octant<3> > 		OctantsType;
 	typedef vector<Class_Intersection<3> > 	IntersectionsType;
 	typedef vector<uint32_t>				u32vector;
+	typedef vector<uint64_t>				u64vector;
 	typedef vector<vector<uint32_t>	>		u32vector2D;
 	typedef vector<vector<uint64_t>	>		u64vector2D;
 
@@ -93,7 +89,7 @@ public:
 
 	// Basic Get/Set methods --------------------------------------------------------- //
 
-public:
+private:
 	const Class_Octant<3> &  getFirstDesc() const{
 		return first_desc;
 	};
@@ -140,7 +136,10 @@ public:
 	//-------------------------------------------------------------------------------- //
 	// Other methods ----------------------------------------------------------------- //
 
-public:
+	Class_Octant<3>& extractOctant(uint32_t idx){
+		return octants[idx];
+	};
+
 	const Class_Octant<3>&	extractOctant(uint32_t idx) const{
 		return octants[idx];
 	};
@@ -167,6 +166,7 @@ public:
 	//			octants[idx].info[12] = false;
 				if (octants[idx].marker > 0)
 					octants[idx].marker = 0;
+					octants[idx].info[15] = true;
 			}
 		}
 		if (offset > 0){
@@ -201,7 +201,7 @@ public:
 		octants.shrink_to_fit();
 
 		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si pu�� trovare la maniera di inserirlo nel loop precedente
+		//Si può trovare la maniera di inserirlo nel loop precedente
 		pborders.clear();
 		nocts = octants.size();
 		pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(global3D.nfaces)));
