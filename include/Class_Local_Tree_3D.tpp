@@ -1,9 +1,29 @@
-/*
- * Class_Local_Tree_3D.tpp
+/*!
+ * Class_Local_Tree_2D.tpp
  *
- *  Created on: 18/apr/2014
- *      Author: Marco Cisternino
+ *  \date		23/apr/2014
+ *	\authors	Edoardo Lombardi
+ *	\authors	Marco Cisternino
+ *	\version	0.1
+ *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
+ *	\par			License:\n
+ *	This version of PABLO is released under the LGPL License.
+ *
+ *	\brief Local octree portion for each process - 3D specialization
+ *
+ *	Local tree consists mainly of two vectors with:
+ *	- actual octants stored on current process;
+ *	- ghost octants neighbours of the first ones.
+ *
+ *	The octants (and ghosts) are ordered following the Z-curve defined by the Morton index.
+ *
+ *	Optionally in local tree three vectors of intersections are stored:
+ *	- intersections located on the bord of the physical domain of the octree;
+ *	- intersections of process bord (i.e. between octants and ghosts);
+ *	- intersections completely located in the domain of the process (i.e. between actual octants).
+ *
  */
+
 // =================================================================================== //
 // CLASS SPECIALIZATION                                                                //
 // =================================================================================== //
@@ -181,7 +201,7 @@ public:
 		octants.shrink_to_fit();
 
 		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si può trovare la maniera di inserirlo nel loop precedente
+		//Si pu�� trovare la maniera di inserirlo nel loop precedente
 		pborders.clear();
 		nocts = octants.size();
 		pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(global3D.nfaces)));
@@ -434,7 +454,7 @@ public:
 		}
 
 		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si può trovare la maniera di inserirlo nel loop precedente
+		//Si pu�� trovare la maniera di inserirlo nel loop precedente
 		pborders.clear();
 		nocts = octants.size();
 		pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(global3D.nfaces)));
@@ -519,7 +539,7 @@ public:
 		octants.shrink_to_fit();
 
 		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si può trovare la maniera di inserirlo nel loop precedente
+		//Si pu�� trovare la maniera di inserirlo nel loop precedente
 		pborders.clear();
 		nocts = octants.size();
 		pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(global3D.nfaces)));
@@ -781,7 +801,7 @@ public:
 		}
 
 		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si può trovare la maniera di inserirlo nel loop precedente
+		//Si pu�� trovare la maniera di inserirlo nel loop precedente
 		pborders.clear();
 		nocts = octants.size();
 		pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(global3D.nfaces)));
@@ -847,7 +867,7 @@ public:
 		}
 
 		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si può trovare la maniera di inserirlo nel loop precedente
+		//Si pu�� trovare la maniera di inserirlo nel loop precedente
 		uint8_t iface;
 		pborders.clear();
 		nocts = octants.size();
@@ -915,7 +935,7 @@ public:
 		}
 
 		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si può trovare la maniera di inserirlo nel loop precedente
+		//Si pu�� trovare la maniera di inserirlo nel loop precedente
 		uint8_t iface;
 		pborders.clear();
 		nocts = octants.size();
