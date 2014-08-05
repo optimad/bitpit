@@ -3900,7 +3900,7 @@ public:
 	};
 
 	// =============================================================================== //
-	/** Compute the connectivity of octants.
+	/** Compute the connectivity of octants and store the coordinates of nodes.
 	 */
 	void computeConnectivity() {
 		map<uint64_t, vector<double> > mapnodes;
@@ -3979,7 +3979,7 @@ public:
 
 	// =================================================================================== //
 
-	/** Compute the connectivity of ghost octants.
+	/** Compute the connectivity of ghost octants and store the coordinates of nodes.
 	 */
 	void computeghostsConnectivity() {
 		map<uint64_t, vector<double> > mapnodes;
@@ -4063,7 +4063,11 @@ public:
 
 	// =============================================================================== //
 
-
+	/** Write the logical octree mesh in .vtu format in a user-defined file.
+	 * If the connectivity is not stored, the method temporary computes it.
+	 * If the connectivity of ghost octants is already computed, the method writes the ghosts on file.
+	 * \param[in] filename Seriously?....
+	 */
 	void writeLogical(string filename) {
 
 		bool clear = false;
@@ -4218,6 +4222,11 @@ public:
 
 	// ----------------------------------------------------------------------------------- //
 
+	/** Write the physical octree mesh in .vtu format in a user-defined file.
+	 * If the connectivity is not stored, the method temporary computes it.
+	 * If the connectivity of ghost octants is already computed, the method writes the ghosts on file.
+	 * \param[in] filename Seriously?....
+	 */
 	void write(string filename) {
 
 		bool clear = false;
