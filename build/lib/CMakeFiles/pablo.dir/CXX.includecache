@@ -218,18 +218,6 @@ stdint.h
 limits.h
 -
 
-../include/ioFunct.hpp
-algorithm
--
-string
--
-functional
--
-cctype
--
-Class_Para_Tree.hpp
-../include/Class_Para_Tree.hpp
-
 ../include/logFunct.hpp
 vector
 -
@@ -248,21 +236,27 @@ stdint.h
 
 ../include/preprocessor_defines.dat
 
+/home/edoardo/git/PABLO/lib/Class_Global.cpp
+Class_Global.hpp
+/home/edoardo/git/PABLO/lib/Class_Global.hpp
+
+/home/edoardo/git/PABLO/lib/Class_Intersection.cpp
+Class_Intersection.hpp
+/home/edoardo/git/PABLO/lib/Class_Intersection.hpp
+
+/home/edoardo/git/PABLO/lib/Class_Local_Tree.cpp
+Class_Local_Tree.hpp
+/home/edoardo/git/PABLO/lib/Class_Local_Tree.hpp
+
+/home/edoardo/git/PABLO/lib/Class_Map.cpp
+Class_Map.hpp
+/home/edoardo/git/PABLO/lib/Class_Map.hpp
+
+/home/edoardo/git/PABLO/lib/Class_Octant.cpp
+Class_Octant.hpp
+/home/edoardo/git/PABLO/lib/Class_Octant.hpp
+
 /home/edoardo/git/PABLO/lib/Class_Para_Tree.cpp
 Class_Para_Tree.hpp
 /home/edoardo/git/PABLO/lib/Class_Para_Tree.hpp
-
-/home/edoardo/git/PABLO/lib/ioFunct.cpp
-ioFunct.hpp
--
-fstream
--
-iomanip
--
-string
--
-Class_Para_Tree.hpp
-/home/edoardo/git/PABLO/lib/Class_Para_Tree.hpp
-logFunct.hpp
-/home/edoardo/git/PABLO/lib/logFunct.hpp
 

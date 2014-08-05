@@ -1,8 +1,28 @@
-/*
- * Class_Octant_3D.tpp
+/*!
+ *	\date			23/apr/2014
+ *	\authors		Edoardo Lombardi
+ *	\authors		Marco Cisternino
+ *	\version		0.1
+  *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
+ *	\par			License:\n
+ *	This version of PABLO is released under the LGPL License.
  *
- *  Created on: 15/apr/2014
- *      Author: Marco Cisternino
+ *	\brief Octant class definition - 3D specialization
+ *
+ *	Octants are the grid elements of PABLO. In the logical domain octants are, in 3-dimensional case,
+ *	cubes with size function of their level. Each octant has 8 nodes, 12 edge and 6 faces ordered with Z-order as shown below.
+ *
+ *	\image html PabloOctant3D.png
+ *
+ *
+ *	The main feature of each octant are:
+ *	- x,y,z        : coordinates of the node 0 of the octant;
+ *	- Morton index : classical Morton index defined anly by the coordinates (info about level used additionally for equality operator);
+ *	- marker       : refinement marker can assume negative, positive or zero values, wich mean
+ *	a coarsening, refinement and none adaptation respectively;
+ *	- level        : octant level in the octree, zero for the first upper level.
+ *	- balance      : flag to fix if the octant has to 2:1 balanced with respect to its face neighbours.
+ *
  */
 
 // =================================================================================== //
