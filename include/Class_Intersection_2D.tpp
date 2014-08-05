@@ -4,9 +4,9 @@
  *	\authors		Marco Cisternino
  *	\version		0.1
  *
- *	\brief Intersections class definition - 2D specialization
+ *	\brief Intersection class definition - 2D specialization
  *
- *	Intersections are the edges or portion of edges shared by two octants. An intersection is defined
+ *	The intersection is the edge or portion of edge shared by two octants. An intersection is defined
  *	by :
  *	- the owner octants, i.e. the octants sharing the intersection, identified by a couple (array[2]) of indices;
  *	- the index of the face, that contains the intersection, of the first owner;

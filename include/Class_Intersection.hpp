@@ -27,9 +27,9 @@ using namespace std;
  *	\authors		Marco Cisternino
  *	\version		0.1
  *
- *	\brief Intersections class definition
+ *	\brief Intersection class definition
  *
- *	Intersections are the faces (edges in 2D) or portion of faces shared by two octants. An intersection is defined
+ *	The intersection is the face (edge in 2D) or portion of face shared by two octants. An intersection is defined
  *	by :
  *	- the owner octants, i.e. the octants sharing the intersection, identified by a couple (array[2]) of indices;
  *	- the index of the face, that contains the intersection, of the first owner;
