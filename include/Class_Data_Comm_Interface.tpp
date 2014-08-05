@@ -1,10 +1,3 @@
-/*
- * Class_Data_Comm_Interface.tpp
- *
- *  Created on: 18/mar/2014
- *      Author: Marco Cisternino
- */
-
 template <class Impl>
 Class_Data_Comm_Interface<Impl>::Class_Data_Comm_Interface(){}
 

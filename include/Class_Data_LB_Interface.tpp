@@ -1,10 +1,3 @@
-/*
- * Class_Data_LB_Interface.tpp
- *
- *  Created on: 27/mar/2014
- *      Author: Marco Cisternino
- */
-
 template<class Impl>
 inline Class_Data_LB_Interface<Impl>::Class_Data_LB_Interface() {};
 

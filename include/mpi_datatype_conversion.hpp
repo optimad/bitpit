@@ -1,10 +1,3 @@
-/*
- * mpi_datatype_conversion.hpp
- *
- *  Created on: 19/mar/2014
- *      Author: Marco Cisternino
- */
-
 #ifndef MPI_DATATYPE_CONVERSION_HPP_
 #define MPI_DATATYPE_CONVERSION_HPP_
 

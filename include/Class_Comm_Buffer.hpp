@@ -1,10 +1,3 @@
-/*
- * ClassCommBuffer.hpp
- *
- *  Created on: 25/feb/2014
- *      Author: Marco Cisternino
- */
-
 #ifndef CLASSCOMMBUFFER_HPP_
 #define CLASSCOMMBUFFER_HPP_
 

@@ -1,10 +1,3 @@
-/*
- * Class_Data_LB_Interface.hpp
- *
- *  Created on: 27/mar/2014
- *      Author: Marco Cisternino
- */
-
 // Communications Class for Load Balancing
 
 #ifndef CLASS_DATA_LB_INTERFACE_HPP_

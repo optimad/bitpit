@@ -1,24 +1,3 @@
-// =================================================================================== //
-//                      Log functions                      		                       //
-//                                                                                     //
-// Log functions.                        		         					           //
-//                                                                                     //
-// LIST OF FUNCTIONS:                                                                  //
-// - Write_Log        : Write data into a .log file.                                   //
-// =================================================================================== //
-// INFO                                                                                //
-// =================================================================================== //
-// Author  : Alessandro Alaia                                                          //
-// Company : Optimad Engineering srl                                                   //
-// Data    : Jul 08, 2013                                                              //
-// Version : v1.0
-//
-// Modified by  : Edoardo Lombardi                                                     //
-// Company : Optimad Engineering srl                                                   //
-// Data    : Feb 18, 2014                                                              //
-//                                                                                     //
-// All rights reserved                                                                 //
-// =================================================================================== //
 # ifndef __LOG_FUNCT_HPP_
 # define __LOG_FUNCT_HPP_
 

@@ -1,10 +1,3 @@
-/*
- * Class_Data_Comm_Interface.hpp
- *
- *  Created on: 18/mar/2014
- *      Author: Marco Cisternino
- */
-
 // Communications Class for Ghosts Update
 
 #ifndef CLASSDATACOMMINTERFACE_HPP_

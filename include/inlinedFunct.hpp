@@ -1,10 +1,3 @@
-/*
- * inlinedFunct.hpp
- *
- *  Created on: 18/feb/2014
- *      Author: Marco Cisternino
- */
-
 #ifndef INLINEDFUNCT_HPP_
 #define INLINEDFUNCT_HPP_
 
