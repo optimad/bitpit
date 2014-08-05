@@ -32,6 +32,8 @@ using namespace std;
  *	\authors		Marco Cisternino
  *	\authors		Edoardo Lombardi
  *	\version		0.1
+ *	\copyright		Copyright 2014 Optimad engineering srl
+ *	\license		PABLO is released under the GNU Public License
  *
  *	\brief Parallel Octree Manager Class
  *
