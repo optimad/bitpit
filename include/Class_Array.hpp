@@ -21,6 +21,7 @@ using namespace std;
  *
  *	\date		03/mar/2014
  *  \authors	Marco Cisternino
+ *  \authors	Edoardo Lombardi
  *  \version		0.1
  *
  *  \brief Customized array definition

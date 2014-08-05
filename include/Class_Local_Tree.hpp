@@ -30,6 +30,7 @@ using namespace std;
  *
  *  \date		23/apr/2014
  *	\authors	Edoardo Lombardi
+ *	\authors	Marco Cisternino
  *	\version	0.1
  *
  *	\brief Local octree portion for each process
