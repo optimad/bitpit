@@ -3,6 +3,9 @@
  *	\authors		Marco Cisternino
  *	\authors		Edoardo Lombardi
  *	\version		0.1
+  *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
+ *	\par			License:\n
+ *	This version of PABLO is released under the LGPL License.
  *
  *	\brief Parallel Octree Manager Class - 2D specialization
  *
