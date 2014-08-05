@@ -191,6 +191,18 @@ iterator
 -
 set
 -
+algorithm
+-
+string
+-
+functional
+-
+cctype
+-
+fstream
+-
+iomanip
+-
 Class_Para_Tree_3D.tpp
 ../include/Class_Para_Tree_3D.tpp
 Class_Para_Tree_2D.tpp
@@ -235,14 +247,6 @@ stdint.h
 -
 
 ../include/preprocessor_defines.dat
-
-/home/edoardo/git/PABLO/lib/Class_Intersection.cpp
-Class_Intersection.hpp
-/home/edoardo/git/PABLO/lib/Class_Intersection.hpp
-
-/home/edoardo/git/PABLO/lib/Class_Local_Tree.cpp
-Class_Local_Tree.hpp
-/home/edoardo/git/PABLO/lib/Class_Local_Tree.hpp
 
 /home/edoardo/git/PABLO/lib/Class_Para_Tree.cpp
 Class_Para_Tree.hpp

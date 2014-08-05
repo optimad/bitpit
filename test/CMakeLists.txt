@@ -27,14 +27,6 @@ cmake_minimum_required(VERSION 2.8)
 #target_link_libraries(test_edo mpi)
 #TARGET_LINK_LIBRARIES(test_edo pablo)
 
-#Build test_2D3D.cpp
-SET(test_2D3D_src test_2D3D.cpp)
-
-add_executable(test_2D3D ${test_2D3D_src})
-
-target_link_libraries(test_2D3D mpi)
-TARGET_LINK_LIBRARIES(test_2D3D pablo)
-
 #Build test_2D3D_edo.cpp
 SET(test_2D3D_edo_src test_2D3D_edo.cpp)
 

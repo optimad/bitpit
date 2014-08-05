@@ -3900,7 +3900,7 @@ public:
 	};
 
 	// =============================================================================== //
-	/** Compute the connectivity of octants.
+	/** Compute the connectivity of octants and store the coordinates of nodes.
 	 */
 	void computeConnectivity() {
 		map<uint64_t, vector<double> > mapnodes;
@@ -3979,7 +3979,7 @@ public:
 
 	// =================================================================================== //
 
-	/** Compute the connectivity of ghost octants.
+	/** Compute the connectivity of ghost octants and store the coordinates of nodes.
 	 */
 	void computeghostsConnectivity() {
 		map<uint64_t, vector<double> > mapnodes;
@@ -4062,6 +4062,330 @@ public:
 	}
 
 	// =============================================================================== //
+
+	/** Write the logical octree mesh in .vtu format in a user-defined file.
+	 * If the connectivity is not stored, the method temporary computes it.
+	 * If the connectivity of ghost octants is already computed, the method writes the ghosts on file.
+	 * \param[in] filename Seriously?....
+	 */
+	void writeLogical(string filename) {
+
+		bool clear = false;
+		if (connectivity.size() == 0) {
+			computeConnectivity();
+			clear = true;
+		}
+
+		stringstream name;
+		name << "s" << std::setfill('0') << std::setw(4) << nproc << "-p" << std::setfill('0') << std::setw(4) << rank << "-" << filename << ".vtu";
+
+		ofstream out(name.str().c_str());
+		if(!out.is_open()){
+			stringstream ss;
+			ss << filename << "*.vtu cannot be opened and it won't be written.";
+			writeLog(ss.str());
+			return;
+		}
+		int nofNodes = nodes.size();
+		int nofGhostNodes = ghostsnodes.size();
+		int nofOctants = connectivity.size();
+		int nofGhosts = ghostsconnectivity.size();
+		int nofAll = nofGhosts + nofOctants;
+		out << "<?xml version=\"1.0\"?>" << endl
+			<< "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
+			<< "  <UnstructuredGrid>" << endl
+			<< "    <Piece NumberOfCells=\"" << connectivity.size() + ghostsconnectivity.size() << "\" NumberOfPoints=\"" << nodes.size() + ghostsnodes.size() << "\">" << endl;
+	    out << "      <Points>" << endl
+	    	<< "        <DataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\""<< 3 <<"\" format=\"ascii\">" << endl
+	    	<< "          " << std::fixed;
+	    for(int i = 0; i < nofNodes; i++)
+	    {
+	    	for(int j = 0; j < 3; ++j)
+	    		out << std::setprecision(6) << nodes[i][j] << " ";
+	    	if((i+1)%4==0 && i!=nofNodes-1)
+	    		out << endl << "          ";
+	    }
+	    for(int i = 0; i < nofGhostNodes; i++)
+	    {
+	    	for(int j = 0; j < 3; ++j)
+	    		out << std::setprecision(6) << ghostsnodes[i][j] << " ";
+	    	if((i+1)%4==0 && i!=nofNodes-1)
+	    		out << endl << "          ";
+	    }
+	    out << endl << "        </DataArray>" << endl
+	    	<< "      </Points>" << endl
+	        << "      <Cells>" << endl
+	        << "        <DataArray type=\"UInt64\" Name=\"connectivity\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
+	        << "          ";
+	    for(int i = 0; i < nofOctants; i++)
+	      {
+	        for(int j = 0; j < global2D.nnodes; j++)
+	          {
+	        	int jj;
+	        	if (j<2){
+	        		jj = j;
+	        	}
+	        	else if(j==2){
+	        		jj = 3;
+	        	}
+	        	else if(j==3){
+	        		jj = 2;
+	        	}
+	            out << connectivity[i][jj] << " ";
+	          }
+	        if((i+1)%3==0 && i!=nofOctants-1)
+	          out << endl << "          ";
+	      }
+	    for(int i = 0; i < nofGhosts; i++)
+	      {
+	        for(int j = 0; j < global2D.nnodes; j++)
+	          {
+	        	int jj;
+	        	if (j<2){
+	        		jj = j;
+	        	}
+	        	else if(j==2){
+	        		jj = 3;
+	        	}
+	        	else if(j==3){
+	        		jj = 2;
+	        	}
+	        	out << ghostsconnectivity[i][jj] + nofNodes << " ";
+	          }
+	        if((i+1)%3==0 && i!=nofGhosts-1)
+	          out << endl << "          ";
+	      }
+	    out << endl << "        </DataArray>" << endl
+	        << "        <DataArray type=\"UInt64\" Name=\"offsets\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
+	        << "          ";
+	    for(int i = 0; i < nofAll; i++)
+	      {
+	        out << (i+1)*global2D.nnodes << " ";
+	        if((i+1)%12==0 && i!=nofAll-1)
+	          out << endl << "          ";
+	      }
+	    out << endl << "        </DataArray>" << endl
+	        << "        <DataArray type=\"UInt8\" Name=\"types\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
+	        << "          ";
+	    for(int i = 0; i < nofAll; i++)
+	      {
+	        int type;
+	          type = 9;
+	        out << type << " ";
+	        if((i+1)%12==0 && i!=nofAll-1)
+	          out << endl << "          ";
+	      }
+	    out << endl << "        </DataArray>" << endl
+	        << "      </Cells>" << endl
+	        << "    </Piece>" << endl
+	        << "  </UnstructuredGrid>" << endl
+	        << "</VTKFile>" << endl;
+
+
+	    if(rank == 0){
+	        name.str("");
+	        name << "s" << std::setfill('0') << std::setw(4) << nproc << "-" << filename << ".pvtu";
+	        ofstream pout(name.str().c_str());
+	        if(!pout.is_open()){
+	        	stringstream ss;
+	    		ss << filename << "*.pvtu cannot be opened and it won't be written.";
+	    		writeLog(ss.str());
+	    		return;
+	        }
+
+	        pout << "<?xml version=\"1.0\"?>" << endl
+	        		<< "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
+	        		<< "  <PUnstructuredGrid GhostLevel=\"0\">" << endl
+	        		<< "    <PPointData>" << endl
+	        		<< "    </PPointData>" << endl
+	        		<< "    <PCellData Scalars=\"\">" << endl;
+	        pout << "    </PCellData>" << endl
+	        		<< "    <PPoints>" << endl
+	        		<< "      <PDataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\"3\"/>" << endl
+	        		<< "    </PPoints>" << endl;
+	        for(int i = 0; i < nproc; i++)
+	        	pout << "    <Piece Source=\"s" << std::setw(4) << std::setfill('0') << nproc << "-p" << std::setw(4) << std::setfill('0') << i << "-" << filename << ".vtu\"/>" << endl;
+	        pout << "  </PUnstructuredGrid>" << endl
+	        		<< "</VTKFile>";
+
+	        pout.close();
+
+	    }
+	    MPI_Barrier(MPI_COMM_WORLD);
+
+	    if (clear){
+	    	clearConnectivity();
+	    }
+
+
+	}
+
+	// ----------------------------------------------------------------------------------- //
+
+	/** Write the physical octree mesh in .vtu format in a user-defined file.
+	 * If the connectivity is not stored, the method temporary computes it.
+	 * If the connectivity of ghost octants is already computed, the method writes the ghosts on file.
+	 * \param[in] filename Seriously?....
+	 */
+	void write(string filename) {
+
+		bool clear = false;
+		if (connectivity.size() == 0) {
+			computeConnectivity();
+			clear = true;
+		}
+
+		stringstream name;
+		name << "s" << std::setfill('0') << std::setw(4) << nproc << "-p" << std::setfill('0') << std::setw(4) << rank << "-" << filename << ".vtu";
+
+		ofstream out(name.str().c_str());
+		if(!out.is_open()){
+			stringstream ss;
+			ss << filename << "*.vtu cannot be opened and it won't be written.";
+			writeLog(ss.str());
+			return;
+		}
+		int nofNodes = nodes.size();
+		int nofGhostNodes = ghostsnodes.size();
+		int nofOctants = connectivity.size();
+		int nofGhosts = ghostsconnectivity.size();
+		int nofAll = nofGhosts + nofOctants;
+		out << "<?xml version=\"1.0\"?>" << endl
+			<< "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
+			<< "  <UnstructuredGrid>" << endl
+			<< "    <Piece NumberOfCells=\"" << connectivity.size() + ghostsconnectivity.size() << "\" NumberOfPoints=\"" << nodes.size() + ghostsnodes.size() << "\">" << endl;
+	    out << "      <Points>" << endl
+	    	<< "        <DataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\""<< 3 <<"\" format=\"ascii\">" << endl
+	    	<< "          " << std::fixed;
+	    for(int i = 0; i < nofNodes; i++)
+	    {
+	    	for(int j = 0; j < 3; ++j){
+	    		if (j==0) trans.mapX(uint32_t(nodes[i][j]));
+	    		if (j==1) trans.mapY(uint32_t(nodes[i][j]));
+	    		if (j==2) trans.mapZ(uint32_t(nodes[i][j]));
+	    		out << std::setprecision(6) << nodes[i][j] << " ";
+	    	}
+	    	if((i+1)%4==0 && i!=nofNodes-1)
+	    		out << endl << "          ";
+	    }
+	    for(int i = 0; i < nofGhostNodes; i++)
+	    {
+	    	for(int j = 0; j < 3; ++j){
+	    		if (j==0) trans.mapX(uint32_t(ghostsnodes[i][j]));
+	    		if (j==1) trans.mapY(uint32_t(ghostsnodes[i][j]));
+	    		if (j==2) trans.mapZ(uint32_t(ghostsnodes[i][j]));
+	    		out << std::setprecision(6) << ghostsnodes[i][j] << " ";
+	    	}
+	    	if((i+1)%4==0 && i!=nofNodes-1)
+	    		out << endl << "          ";
+	    }
+	    out << endl << "        </DataArray>" << endl
+	    	<< "      </Points>" << endl
+	        << "      <Cells>" << endl
+	        << "        <DataArray type=\"UInt64\" Name=\"connectivity\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
+	        << "          ";
+	    for(int i = 0; i < nofOctants; i++)
+	      {
+	        for(int j = 0; j < global2D.nnodes; j++)
+	          {
+	        	int jj;
+	        	if (j<2){
+	        		jj = j;
+	        	}
+	        	else if(j==2){
+	        		jj = 3;
+	        	}
+	        	else if(j==3){
+	        		jj = 2;
+	        	}
+	            out << connectivity[i][jj] << " ";
+	          }
+	        if((i+1)%3==0 && i!=nofOctants-1)
+	          out << endl << "          ";
+	      }
+	    for(int i = 0; i < nofGhosts; i++)
+	      {
+	        for(int j = 0; j < global2D.nnodes; j++)
+	          {
+	        	int jj;
+	        	if (j<2){
+	        		jj = j;
+	        	}
+	        	else if(j==2){
+	        		jj = 3;
+	        	}
+	        	else if(j==3){
+	        		jj = 2;
+	        	}
+	            out << ghostsconnectivity[i][jj] + nofNodes << " ";
+	          }
+	        if((i+1)%3==0 && i!=nofGhosts-1)
+	          out << endl << "          ";
+	      }
+	    out << endl << "        </DataArray>" << endl
+	        << "        <DataArray type=\"UInt64\" Name=\"offsets\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
+	        << "          ";
+	    for(int i = 0; i < nofAll; i++)
+	      {
+	        out << (i+1)*global2D.nnodes << " ";
+	        if((i+1)%12==0 && i!=nofAll-1)
+	          out << endl << "          ";
+	      }
+	    out << endl << "        </DataArray>" << endl
+	        << "        <DataArray type=\"UInt8\" Name=\"types\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
+	        << "          ";
+	    for(int i = 0; i < nofAll; i++)
+	      {
+	        int type;
+	          type = 9;
+	        out << type << " ";
+	        if((i+1)%12==0 && i!=nofAll-1)
+	          out << endl << "          ";
+	      }
+	    out << endl << "        </DataArray>" << endl
+	        << "      </Cells>" << endl
+	        << "    </Piece>" << endl
+	        << "  </UnstructuredGrid>" << endl
+	        << "</VTKFile>" << endl;
+
+
+	    if(rank == 0){
+	        name.str("");
+	        name << "s" << std::setfill('0') << std::setw(4) << nproc << "-" << filename << ".pvtu";
+	        ofstream pout(name.str().c_str());
+	        if(!pout.is_open()){
+	        	stringstream ss;
+	    		ss << filename << "*.pvtu cannot be opened and it won't be written.";
+	    		writeLog(ss.str());
+	    		return;
+	        }
+
+	        pout << "<?xml version=\"1.0\"?>" << endl
+	        		<< "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
+	        		<< "  <PUnstructuredGrid GhostLevel=\"0\">" << endl
+	        		<< "    <PPointData>" << endl
+	        		<< "    </PPointData>" << endl
+	        		<< "    <PCellData Scalars=\"\">" << endl;
+	        pout << "    </PCellData>" << endl
+	        		<< "    <PPoints>" << endl
+	        		<< "      <PDataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\"3\"/>" << endl
+	        		<< "    </PPoints>" << endl;
+	        for(int i = 0; i < nproc; i++)
+	        	pout << "    <Piece Source=\"s" << std::setw(4) << std::setfill('0') << nproc << "-p" << std::setw(4) << std::setfill('0') << i << "-" << filename << ".vtu\"/>" << endl;
+	        pout << "  </PUnstructuredGrid>" << endl
+	        		<< "</VTKFile>";
+
+	        pout.close();
+
+	    }
+	    MPI_Barrier(MPI_COMM_WORLD);
+
+
+	}
+
+
+
+
 
 };
 

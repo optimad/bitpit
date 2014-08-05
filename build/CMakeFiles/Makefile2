@@ -106,13 +106,11 @@ clean: lib/CMakeFiles/pablo.dir/clean
 # Directory level rules for directory test
 
 # Convenience name for "all" pass in the directory.
-test/all: test/CMakeFiles/test_2D3D.dir/all
 test/all: test/CMakeFiles/test_2D3D_debug.dir/all
 test/all: test/CMakeFiles/test_2D3D_edo.dir/all
 .PHONY : test/all
 
 # Convenience name for "clean" pass in the directory.
-test/clean: test/CMakeFiles/test_2D3D.dir/clean
 test/clean: test/CMakeFiles/test_2D3D_debug.dir/clean
 test/clean: test/CMakeFiles/test_2D3D_edo.dir/clean
 .PHONY : test/clean
@@ -122,48 +120,13 @@ test/preinstall:
 .PHONY : test/preinstall
 
 #=============================================================================
-# Target rules for target test/CMakeFiles/test_2D3D.dir
-
-# All Build rule for target.
-test/CMakeFiles/test_2D3D.dir/all: lib/CMakeFiles/pablo.dir/all
-	$(MAKE) -f test/CMakeFiles/test_2D3D.dir/build.make test/CMakeFiles/test_2D3D.dir/depend
-	$(MAKE) -f test/CMakeFiles/test_2D3D.dir/build.make test/CMakeFiles/test_2D3D.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/edoardo/git/PABLO/build/CMakeFiles  11
-	@echo "Built target test_2D3D"
-.PHONY : test/CMakeFiles/test_2D3D.dir/all
-
-# Include target in all.
-all: test/CMakeFiles/test_2D3D.dir/all
-.PHONY : all
-
-# Build rule for subdir invocation for target.
-test/CMakeFiles/test_2D3D.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/edoardo/git/PABLO/build/CMakeFiles 11
-	$(MAKE) -f CMakeFiles/Makefile2 test/CMakeFiles/test_2D3D.dir/all
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/edoardo/git/PABLO/build/CMakeFiles 0
-.PHONY : test/CMakeFiles/test_2D3D.dir/rule
-
-# Convenience name for target.
-test_2D3D: test/CMakeFiles/test_2D3D.dir/rule
-.PHONY : test_2D3D
-
-# clean rule for target.
-test/CMakeFiles/test_2D3D.dir/clean:
-	$(MAKE) -f test/CMakeFiles/test_2D3D.dir/build.make test/CMakeFiles/test_2D3D.dir/clean
-.PHONY : test/CMakeFiles/test_2D3D.dir/clean
-
-# clean rule for target.
-clean: test/CMakeFiles/test_2D3D.dir/clean
-.PHONY : clean
-
-#=============================================================================
 # Target rules for target test/CMakeFiles/test_2D3D_debug.dir
 
 # All Build rule for target.
 test/CMakeFiles/test_2D3D_debug.dir/all: lib/CMakeFiles/pablo.dir/all
 	$(MAKE) -f test/CMakeFiles/test_2D3D_debug.dir/build.make test/CMakeFiles/test_2D3D_debug.dir/depend
 	$(MAKE) -f test/CMakeFiles/test_2D3D_debug.dir/build.make test/CMakeFiles/test_2D3D_debug.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/edoardo/git/PABLO/build/CMakeFiles  12
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/edoardo/git/PABLO/build/CMakeFiles  11
 	@echo "Built target test_2D3D_debug"
 .PHONY : test/CMakeFiles/test_2D3D_debug.dir/all
 
@@ -198,7 +161,7 @@ clean: test/CMakeFiles/test_2D3D_debug.dir/clean
 test/CMakeFiles/test_2D3D_edo.dir/all: lib/CMakeFiles/pablo.dir/all
 	$(MAKE) -f test/CMakeFiles/test_2D3D_edo.dir/build.make test/CMakeFiles/test_2D3D_edo.dir/depend
 	$(MAKE) -f test/CMakeFiles/test_2D3D_edo.dir/build.make test/CMakeFiles/test_2D3D_edo.dir/build
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/edoardo/git/PABLO/build/CMakeFiles  13
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/edoardo/git/PABLO/build/CMakeFiles  12
 	@echo "Built target test_2D3D_edo"
 .PHONY : test/CMakeFiles/test_2D3D_edo.dir/all
 
