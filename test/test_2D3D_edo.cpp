@@ -1,10 +1,3 @@
-/*
- * test_2D3D.cpp
- *
- *  Created on: 14/apr/2014
- *      Author: Marco Cisternino
- */
-
 #include "preprocessor_defines.dat"
 #include <mpi.h>
 #include "Class_Global.hpp"
