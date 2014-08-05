@@ -33,8 +33,7 @@ using namespace std;
  *	\authors		Edoardo Lombardi
  *	\version		0.1
  *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
- *
- *	\license{PABLO is released under the GNU Public License.}
+ *	\par			This version of PABLO is released under the LGPL License.
  *
  *	\brief Parallel Octree Manager Class
  *
