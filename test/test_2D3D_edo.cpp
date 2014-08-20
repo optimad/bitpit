@@ -8,7 +8,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
-/*
+
 	MPI::Init(argc, argv);
 
 		{
@@ -17,10 +17,15 @@ int main(int argc, char *argv[]) {
 			X = 0.0; Y = 0.0; Z = 0.0; L = 100.0;
 			Class_Para_Tree<2> ptree(X, Y, Z, L);
 
+			//uint32_t oct = 0;
+			Class_Octant<2>* oct = ptree.getOctant(0);
+			cout << " Volume : "<< ptree.getVolume(oct) << endl;
+
+
 			clock_t start = clock();
 			clock_t end = clock();
 
-			ptree.octree.setBalance(0,false);
+/*			ptree.octree.setBalance(0,false);
 			uint8_t levell = 4;
 			ptree.octree.setMarker(0, levell);
 			bool done = ptree.adapt();
@@ -144,11 +149,11 @@ int main(int argc, char *argv[]) {
 //			ptree.octree.updateConnectivity();
 ////				ptree.octree.updateGhostsConnectivity();
 //			writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,("Pablo_"+to_string(0)));
-
+*/
 		}
 
 	MPI::Finalize();
-*/
+
 
 	return 0;
 

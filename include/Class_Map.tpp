@@ -70,7 +70,7 @@ double Class_Map<dim>::mapArea(uint32_t const & Area){
 };
 
 template <int dim>
-double Class_Map<dim>::mapVolume(uint32_t const & Volume){
+double Class_Map<dim>::mapVolume(uint64_t const & Volume){
 	return ((pow(L,3.0)/pow(double(globals.max_length),3.0))*double(Volume));
 };
 

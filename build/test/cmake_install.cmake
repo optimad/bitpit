@@ -1,4 +1,4 @@
-# Install script for directory: /home/edoardo/git/PABLO/test
+# Install script for directory: /home/marco/git/PABLO/test
 
 # Set the install prefix
 IF(NOT DEFINED CMAKE_INSTALL_PREFIX)

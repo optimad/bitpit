@@ -118,7 +118,7 @@ public:
 	 * \param[in] Z Coordinate Z of node 0,
 	 * \param[in] L Side length of the octant.
 	 */
-	Class_Para_Tree(double & X, double & Y, double & Z, double & L){
+	Class_Para_Tree(double & X, double & Y, double & Z, double & L):trans(X,Y,Z,L){
 		serial = true;
 		error_flag = 0;
 		max_depth = 0;
