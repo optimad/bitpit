@@ -116,7 +116,7 @@ public:
 	 * \param[in] area Area of octant from logical domain.
 	 * \return Area of octant in physical domain.
 	 */
-	double mapArea(uint32_t const & area);
+	double mapArea(uint64_t const & area);
 
 	/*! Transformation of volume of an octant.
 	 * \param[in] volume Volume of octant from logical domain.

@@ -215,7 +215,7 @@ public:
 	 * \return Volume of octant.
 	 */
 	double getVolume(Class_Octant<2>* oct) {
-		return trans.mapVolume(oct->getVolume());
+		return trans.mapArea(oct->getVolume());
 	}
 
 	/*! Get the coordinates of the center of an octant.
