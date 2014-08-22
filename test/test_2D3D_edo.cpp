@@ -17,13 +17,16 @@ int main(int argc, char *argv[]) {
 			X = 0.0; Y = 0.0; Z = 0.0; L = 100.0;
 			Class_Para_Tree<2> ptree(X, Y, Z, L);
 
+			ptree.computeIntersections();
+
+
 			//uint32_t oct = 0;
-			Class_Octant<2>* oct = ptree.getOctant(0);
-			cout << " Volume : "<< ptree.getVolume(oct) << endl;
+//			Class_Octant<2>* oct = ptree.getOctant(0);
+//			cout << " Volume : "<< ptree.getVolume(oct) << endl;
 
 
-			clock_t start = clock();
-			clock_t end = clock();
+//			clock_t start = clock();
+//			clock_t end = clock();
 
 /*			ptree.octree.setBalance(0,false);
 			uint8_t levell = 4;
