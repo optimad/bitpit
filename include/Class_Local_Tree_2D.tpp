@@ -2452,7 +2452,7 @@ private:
 		oend = ghosts.end();
 		for (it = obegin; it != oend; it++){
 			for (iface = 0; iface < 2; iface++){
-				iface2 = iface*2;
+				iface2 = iface+2;
 				findGhostNeighbours(idx, iface2, neighbours);
 				nsize = neighbours.size();
 				for (i = 0; i < nsize; i++){
@@ -2474,7 +2474,7 @@ private:
 		oend = octants.end();
 		for (it = obegin; it != oend; it++){
 			for (iface = 0; iface < 2; iface++){
-				iface2 = iface*2;
+				iface2 = iface+2;
 				findNeighbours(idx, iface2, neighbours, isghost);
 				nsize = neighbours.size();
 				if (nsize) {
