@@ -1,1 +1,0 @@
-mpic++    -ggdb -O0 -fmessage-length=0    CMakeFiles/test_2D3D_edo.dir/test_2D3D_edo.cpp.o  -o test_2D3D_edo -rdynamic -lmpi ../lib/libpablo.a -lmpi 
