@@ -1063,6 +1063,7 @@ public:
 		vector<double> center;
 		Class_Octant<2> oct = octree.extractOctant(inter->owners[inter->finer]);
 		double* center_ = oct.getCenter();
+		center_[inter->iface/2] += ( -1 + 2*(inter->iface%2)) * oct.getSize() / 2;
 		trans.mapCenter(center_, center);
 		delete [] center_;
 		center_ = NULL;

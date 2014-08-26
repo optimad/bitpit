@@ -83,7 +83,7 @@ void Class_Map<dim>::mapCenter(double* & center,
 	orig.push_back(Z0);
 	orig.shrink_to_fit();
 	mapcenter.resize(3);
-	for (int i=0; i<3; i++){
+	for (int i=0; i<dim; i++){
 		mapcenter[i] = orig[i] + L/double(globals.max_length) * center[i];
 	}
 	mapcenter.shrink_to_fit();

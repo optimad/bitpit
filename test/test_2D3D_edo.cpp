@@ -19,7 +19,9 @@ int main(int argc, char *argv[]) {
 
 			ptree.computeIntersections();
 
-
+			Class_Intersection<2>* inter = ptree.getIntersectionBord(0);
+			vector<double> center = ptree.getCenter(inter);
+			cout << center[0] << " " << center[1] << endl;
 			//uint32_t oct = 0;
 //			Class_Octant<2>* oct = ptree.getOctant(0);
 //			cout << " Volume : "<< ptree.getVolume(oct) << endl;
