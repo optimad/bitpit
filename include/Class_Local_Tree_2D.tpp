@@ -2511,11 +2511,11 @@ private:
 					intersections_bord.push_back(intersection);
 					counter_b++;
 				}
-				if (it->info[iface]){
+				if (it->info[iface2+1]){
 					intersection.owners[0] = idx;
 					intersection.owners[1] = idx;
 					intersection.finer = 0;
-					intersection.iface = iface;
+					intersection.iface = iface2+1;
 					intersection.isnew = false;
 					intersection.isghost = false;
 					intersections_bord.push_back(intersection);

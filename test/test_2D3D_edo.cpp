@@ -18,22 +18,22 @@ int main(int argc, char *argv[]) {
 			Class_Para_Tree<2> ptree(X, Y, Z, L);
 			Class_Octant<2>* oct = ptree.getOctant(0);
 			ptree.setBalance(oct,false);
-			ptree.setMarker(oct, 4);
+			ptree.setMarker(oct, 2);
 			bool done = ptree.adapt();
 
 			ptree.computeIntersections();
 
-			uint32_t int1 = 99;
-			uint32_t int2 = 102;
-			Class_Intersection<2>* INT1 = ptree.getIntersectionInt(int1);
-			Class_Intersection<2>* INT2 = ptree.getIntersectionInt(int2);
-			vector<uint32_t> owners1 = ptree.getOwners(INT1);
-			vector<uint32_t> owners2 = ptree.getOwners(INT2);
+//			uint32_t int1 = 99;
+//			uint32_t int2 = 102;
+//			Class_Intersection<2>* INT1 = ptree.getIntersectionInt(int1);
+//			Class_Intersection<2>* INT2 = ptree.getIntersectionInt(int2);
+//			vector<uint32_t> owners1 = ptree.getOwners(INT1);
+//			vector<uint32_t> owners2 = ptree.getOwners(INT2);
 
 //			Class_Intersection<2>* inter = ptree.getIntersectionBord(0);
 //			vector<double> center = ptree.getCenter(inter);
-			cout << owners1[0] << " " << owners1[1] << endl;
-			cout << owners2[0] << " " << owners2[1] << endl;
+//			cout << owners1[0] << " " << owners1[1] << endl;
+//			cout << owners2[0] << " " << owners2[1] << endl;
 			//uint32_t oct = 0;
 //			Class_Octant<2>* oct = ptree.getOctant(0);
 //			cout << " Volume : "<< ptree.getVolume(oct) << endl;
