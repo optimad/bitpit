@@ -16,12 +16,24 @@ int main(int argc, char *argv[]) {
 			uint8_t level0 = MAX_LEVEL_2D;
 			X = 0.0; Y = 0.0; Z = 0.0; L = 100.0;
 			Class_Para_Tree<2> ptree(X, Y, Z, L);
+			Class_Octant<2>* oct = ptree.getOctant(0);
+			ptree.setBalance(oct,false);
+			ptree.setMarker(oct, 4);
+			bool done = ptree.adapt();
 
 			ptree.computeIntersections();
 
-			Class_Intersection<2>* inter = ptree.getIntersectionBord(0);
-			vector<double> center = ptree.getCenter(inter);
-			cout << center[0] << " " << center[1] << endl;
+			uint32_t int1 = 99;
+			uint32_t int2 = 102;
+			Class_Intersection<2>* INT1 = ptree.getIntersectionInt(int1);
+			Class_Intersection<2>* INT2 = ptree.getIntersectionInt(int2);
+			vector<uint32_t> owners1 = ptree.getOwners(INT1);
+			vector<uint32_t> owners2 = ptree.getOwners(INT2);
+
+//			Class_Intersection<2>* inter = ptree.getIntersectionBord(0);
+//			vector<double> center = ptree.getCenter(inter);
+			cout << owners1[0] << " " << owners1[1] << endl;
+			cout << owners2[0] << " " << owners2[1] << endl;
 			//uint32_t oct = 0;
 //			Class_Octant<2>* oct = ptree.getOctant(0);
 //			cout << " Volume : "<< ptree.getVolume(oct) << endl;
