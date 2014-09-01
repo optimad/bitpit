@@ -207,7 +207,7 @@ public:
 	 * \return Size of octant.
 	 */
 	double getArea(Class_Octant<2>* oct) {
-		return trans.mapArea(oct->getArea());
+		return trans.mapSize(oct->getArea());
 	}
 
 	/*! Get the volume of an octant, i.e. the coordinates of its node 0.
