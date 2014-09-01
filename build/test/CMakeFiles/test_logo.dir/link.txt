@@ -1,1 +1,0 @@
-mpic++    -O3    CMakeFiles/test_logo.dir/test_logo.cpp.o  -o test_logo -rdynamic -lmpi ../lib/libpablo.a -lmpi 

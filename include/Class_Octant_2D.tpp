@@ -148,8 +148,8 @@ private:
 		uint32_t area =getSize();
 		return area;
 	};
-	uint32_t	getVolume() const{							// Get the volume of octant
-		uint64_t volume = uint32_t(pow(double(getSize()),2.0));
+	uint64_t	getVolume() const{							// Get the volume of octant
+		uint64_t volume = uint64_t(pow(double(getSize()),2.0));
 		return volume;
 	};
 

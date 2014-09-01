@@ -118,7 +118,7 @@ public:
 	 * \param[in] Z Coordinate Z of node 0,
 	 * \param[in] L Side length of the octant.
 	 */
-	Class_Para_Tree(double & X, double & Y, double & Z, double & L){
+	Class_Para_Tree(double & X, double & Y, double & Z, double & L):trans(X,Y,Z,L){
 		serial = true;
 		error_flag = 0;
 		max_depth = 0;
@@ -215,7 +215,7 @@ public:
 	 * \return Volume of octant.
 	 */
 	double getVolume(Class_Octant<2>* oct) {
-		return trans.mapVolume(oct->getVolume());
+		return trans.mapArea(oct->getVolume());
 	}
 
 	/*! Get the coordinates of the center of an octant.
@@ -1063,6 +1063,9 @@ public:
 		vector<double> center;
 		Class_Octant<2> oct = octree.extractOctant(inter->owners[inter->finer]);
 		double* center_ = oct.getCenter();
+		int sign = ( int(2*((inter->iface)%2)) - 1);
+		int deplace = sign * int(oct.getSize()) / 2;
+		center_[inter->iface/2] = uint32_t(int(center_[inter->iface/2]) + deplace);
 		trans.mapCenter(center_, center);
 		delete [] center_;
 		center_ = NULL;
