@@ -55,7 +55,7 @@ using namespace std;
  *	index of the octants. By default it is a balanced partition over the number of octants for each
  *	process.
  *
- *	Class Para_Tree is a templated class in dimensional parameter int dim and it accepts only two values: dim=2 and dim=3, obviously for 2D and 3D respectively.
+ *	Class Para_Tree is a templated class in dimensional parameter int dim and it accepts only two values: dim=2 (Class_Para_Tree<2>)and dim=3 (Class_Para_Tree<3>), obviously for 2D and 3D respectively.
  */
 template<int dim>
 class Class_Para_Tree{};
