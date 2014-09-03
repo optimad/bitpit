@@ -2456,7 +2456,7 @@ private:
 				findGhostNeighbours(idx, iface2, neighbours);
 				nsize = neighbours.size();
 				for (i = 0; i < nsize; i++){
-					intersection.finer = (i<1);
+					intersection.finer = (nsize==1);
 					intersection.owners[0]  = neighbours[i];
 					intersection.owners[1] = idx;
 					intersection.iface = global2D.oppface[iface2];
@@ -2482,7 +2482,7 @@ private:
 						if (isghost[i]){
 							intersection.owners[0] = idx;
 							intersection.owners[1] = neighbours[i];
-							intersection.finer = (i>=1);
+							intersection.finer = (nsize>1);
 							intersection.iface = iface2;
 							intersection.isnew = false;
 							intersection.isghost = true;
@@ -2492,7 +2492,7 @@ private:
 						else{
 							intersection.owners[0] = idx;
 							intersection.owners[1] = neighbours[i];
-							intersection.finer = (i>=1);
+							intersection.finer = (nsize>1);
 							intersection.iface = iface2;
 							intersection.isnew = false;
 							intersection.isghost = false;

@@ -181,7 +181,7 @@ public:
 		octants.shrink_to_fit();
 
 		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si può trovare la maniera di inserirlo nel loop precedente
+		//Si pu�� trovare la maniera di inserirlo nel loop precedente
 		pborders.clear();
 		nocts = octants.size();
 		pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(global3D.nfaces)));
@@ -434,7 +434,7 @@ public:
 		}
 
 		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si può trovare la maniera di inserirlo nel loop precedente
+		//Si pu�� trovare la maniera di inserirlo nel loop precedente
 		pborders.clear();
 		nocts = octants.size();
 		pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(global3D.nfaces)));
@@ -519,7 +519,7 @@ public:
 		octants.shrink_to_fit();
 
 		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si può trovare la maniera di inserirlo nel loop precedente
+		//Si pu�� trovare la maniera di inserirlo nel loop precedente
 		pborders.clear();
 		nocts = octants.size();
 		pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(global3D.nfaces)));
@@ -781,7 +781,7 @@ public:
 		}
 
 		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si può trovare la maniera di inserirlo nel loop precedente
+		//Si pu�� trovare la maniera di inserirlo nel loop precedente
 		pborders.clear();
 		nocts = octants.size();
 		pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(global3D.nfaces)));
@@ -847,7 +847,7 @@ public:
 		}
 
 		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si può trovare la maniera di inserirlo nel loop precedente
+		//Si pu�� trovare la maniera di inserirlo nel loop precedente
 		uint8_t iface;
 		pborders.clear();
 		nocts = octants.size();
@@ -915,7 +915,7 @@ public:
 		}
 
 		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si può trovare la maniera di inserirlo nel loop precedente
+		//Si pu�� trovare la maniera di inserirlo nel loop precedente
 		uint8_t iface;
 		pborders.clear();
 		nocts = octants.size();
@@ -2259,7 +2259,7 @@ public:
 				findGhostNeighbours(idx, iface2, neighbours);
 				nsize = neighbours.size();
 				for (i = 0; i < nsize; i++){
-					intersection.finer = (i<1);
+					intersection.finer = (nsize==1);
 					intersection.owners[0]  = neighbours[i];
 					intersection.owners[1] = idx;
 					intersection.iface = global3D.oppface[iface2];
@@ -2285,7 +2285,7 @@ public:
 						if (isghost[i]){
 							intersection.owners[0] = idx;
 							intersection.owners[1] = neighbours[i];
-							intersection.finer = (i>=1);
+							intersection.finer = (nsize>1);
 							intersection.iface = iface2;
 							intersection.isnew = false;
 							intersection.isghost = true;
@@ -2295,7 +2295,7 @@ public:
 						else{
 							intersection.owners[0] = idx;
 							intersection.owners[1] = neighbours[i];
-							intersection.finer = (i>=1);
+							intersection.finer = (nsize>1);
 							intersection.iface = iface2;
 							intersection.isnew = false;
 							intersection.isghost = false;
