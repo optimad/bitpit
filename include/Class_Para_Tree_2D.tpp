@@ -1016,6 +1016,10 @@ public:
 		return octree.extractOctant(inter->owners[inter->finer]).getLevel();
 	}
 
+	bool getFiner(Class_Intersection<2>* inter) {
+		return inter->finer;
+	}
+
 	/*! Get the face index of an intersection.
 	 * \param[in] inter Pointer to target intersection.
 	 * \return Face index of the first octant owner of intersection (owners[0]).
