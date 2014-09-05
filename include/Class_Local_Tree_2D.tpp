@@ -2459,7 +2459,7 @@ private:
 					intersection.finer = (nsize==1);
 					intersection.owners[0]  = neighbours[i];
 					intersection.owners[1] = idx;
-					intersection.iface = global2D.oppface[iface2];
+					intersection.iface = global2D.oppface[iface2] - (nsize==1);
 					intersection.isnew = false;
 					intersection.isghost = true;
 					intersections_ghost.push_back(intersection);
@@ -2483,7 +2483,7 @@ private:
 							intersection.owners[0] = idx;
 							intersection.owners[1] = neighbours[i];
 							intersection.finer = (nsize>1);
-							intersection.iface = iface2;
+							intersection.iface = iface2 + (nsize>1);
 							intersection.isnew = false;
 							intersection.isghost = true;
 							intersections_ghost.push_back(intersection);
@@ -2493,7 +2493,7 @@ private:
 							intersection.owners[0] = idx;
 							intersection.owners[1] = neighbours[i];
 							intersection.finer = (nsize>1);
-							intersection.iface = iface2;
+							intersection.iface = iface2 + (nsize>1);
 							intersection.isnew = false;
 							intersection.isghost = false;
 							intersections_int.push_back(intersection);

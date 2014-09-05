@@ -1064,7 +1064,7 @@ public:
 		Class_Octant<2> oct = octree.extractOctant(inter->owners[inter->finer]);
 		double* center_ = oct.getCenter();
 		int sign = ( int(2*((inter->iface)%2)) - 1);
-		int deplace = sign * int(oct.getSize()) / 2;
+		double deplace = double (sign * int(oct.getSize())) / 2;
 		center_[inter->iface/2] = uint32_t(int(center_[inter->iface/2]) + deplace);
 		trans.mapCenter(center_, center);
 		delete [] center_;
@@ -1123,14 +1123,15 @@ private:
 		return trans.mapArea(Area);
 	}
 
-	void getCenter(Class_Intersection<2> inter,
-			vector<double>& center) {
-		Class_Octant<2> oct = octree.extractOctant(inter.owners[inter.finer]);
-		double* center_ = oct.getCenter();
-		trans.mapCenter(center_, center);
-		delete [] center_;
-		center_ = NULL;
-	}
+// TODO Fix it!
+//	void getCenter(Class_Intersection<2> inter,
+//			vector<double>& center) {
+//		Class_Octant<2> oct = octree.extractOctant(inter.owners[inter.finer]);
+//		double* center_ = oct.getCenter();
+//		trans.mapCenter(center_, center);
+//		delete [] center_;
+//		center_ = NULL;
+//	}
 
 	void getNodes(Class_Intersection<2> inter,
 			dvector2D & nodes) {
