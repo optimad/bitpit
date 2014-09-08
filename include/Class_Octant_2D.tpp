@@ -72,7 +72,7 @@ public:
 			info[i] = true;
 		}
 	};
-	Class_Octant(int8_t level, int32_t x, int32_t y){
+	Class_Octant(uint8_t level, uint32_t x, uint32_t y){
 		this->x = x;
 		this->y = y;
 		this->level = level;
@@ -114,6 +114,9 @@ private:
 	int8_t		getMarker() const{return marker;};
 	bool		getBound(uint8_t face) const{				// Get if face is boundary
 		return info[face];
+	};
+	void		setBound(uint8_t face) {					// Set if face is boundary
+		info[face] = true;
 	};
 	bool		getPbound(uint8_t face) const{				// Get if face is process boundary
 		return info[global2D.nfaces+face];

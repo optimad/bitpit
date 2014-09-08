@@ -35,6 +35,8 @@ public:
 	typedef vector<vector<uint32_t>	>	u32vector2D;
 	typedef vector<vector<uint64_t>	>	u64vector2D;
 	typedef vector<vector<double>	>	dvector2D;
+	typedef vector<int>					ivector;
+	typedef vector<vector<int>	>		ivector2D;
 
 	// ------------------------------------------------------------------------------- //
 	// MEMBERS ----------------------------------------------------------------------- //
@@ -152,6 +154,88 @@ public:
 		writeLog("				" + to_string(Y));
 		writeLog("				" + to_string(Z));
 		writeLog(" Domain Size		:	" + to_string(L));
+		writeLog("---------------------------------------------");
+		writeLog(" ");
+
+	};
+
+	// =============================================================================== //
+
+	/*! Constructor of Para_Tree for restart a simulation with input parameters.
+	 * For each process it builds a vector of octants. The input parameters are :
+	 * \param[in] X Physical Coordinate X of node 0,
+	 * \param[in] Y Physical Coordinate Y of node 0,
+	 * \param[in] Z Physical Coordinate Z of node 0,
+	 * \param[in] L Physical Side length of the domain,
+	 * \param[in] XY Coordinates of octants (node 0) in logical domain,
+	 * \param[in] levels Level of each octant.
+	 */
+	Class_Para_Tree(double & X, double & Y, double & Z, double & L, ivector2D & XY, ivector & levels):trans(X,Y,Z,L){
+
+		uint8_t lev, iface;
+		uint32_t x0, y0;
+		uint32_t NumOctants = XY.size();
+		octree.octants.resize(NumOctants);
+		for (int i=0; i<NumOctants; i++){
+			lev = uint8_t(levels[i]);
+			 x0 = uint32_t(XY[i][0]);
+			uint32_t y0 = uint32_t(XY[i][1]);
+			Class_Octant<2> oct(lev, x0, y0);
+			if (x0 == 0){
+				iface = 0;
+				oct.setBound(iface);
+			}
+			else if (x0 == global2D.max_length - oct.getSize()){
+				iface = 1;
+				oct.setBound(iface);
+			}
+			if (y0 == 0){
+				iface = 2;
+				oct.setBound(iface);
+			}
+			else if (y0 == global2D.max_length - oct.getSize()){
+				iface = 3;
+				oct.setBound(iface);
+			}
+			octree.octants[i] = oct;
+
+		}
+
+		setFirstDesc();
+		setLastDesc();
+
+		error_flag = MPI_Comm_size(MPI_COMM_WORLD,&nproc);
+		error_flag = MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+		serial = true;
+		if (nproc > 1 ) serial = false;
+
+		partition_first_desc = new uint64_t[nproc];
+		partition_last_desc = new uint64_t[nproc];
+		partition_range_globalidx = new uint64_t[nproc];
+
+		updateAdapt();
+		setPboundGhosts();
+
+		// Write info log
+		if(rank==0){
+			int sysError = system("rm PABLO.log");
+		}
+		MPI_Barrier(MPI_COMM_WORLD);
+		writeLog("---------------------------------------------");
+		writeLog("- PABLO PArallel Balanced Linear Octree -");
+		writeLog("---------------------------------------------");
+		writeLog(" ");
+		writeLog("---------------------------------------------");
+		writeLog("- PABLO restart -");
+		writeLog("---------------------------------------------");
+		writeLog(" Number of proc		:	" + to_string(nproc));
+		writeLog(" Dimension		:	" + to_string(2));
+		writeLog(" Max allowed level	:	" + to_string(MAX_LEVEL_2D));
+		writeLog(" Domain Origin		:	" + to_string(X));
+		writeLog("				" + to_string(Y));
+		writeLog("				" + to_string(Z));
+		writeLog(" Domain Size		:	" + to_string(L));
+		writeLog(" Number of octants	:	" + to_string(global_num_octants));
 		writeLog("---------------------------------------------");
 		writeLog(" ");
 

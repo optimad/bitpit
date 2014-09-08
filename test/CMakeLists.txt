@@ -42,3 +42,10 @@ add_executable(test_2D3D_debug ${test_2D3D_debug_src})
 
 target_link_libraries(test_2D3D_debug mpi)
 TARGET_LINK_LIBRARIES(test_2D3D_debug pablo)
+
+#Build test_2D_restart_debug.cpp
+SET(test_2D_restart_debug_src test_2D_restart_debug.cpp)
+add_executable(test_2D_restart_debug ${test_2D_restart_debug_src})
+
+target_link_libraries(test_2D_restart_debug mpi)
+TARGET_LINK_LIBRARIES(test_2D_restart_debug pablo)
