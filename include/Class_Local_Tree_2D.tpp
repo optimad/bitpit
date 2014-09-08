@@ -939,7 +939,7 @@ private:
 							while(ghosts[idxtry].computeMorton() > Morton){
 								idxtry--;
 								if(idxtry > ghosts.size()-1){
-									idxtry = ghosts.size()-1;
+									idxtry = 0;
 									break;
 								}
 							}
@@ -1672,7 +1672,6 @@ private:
 
 		}
 		else{
-
 			// Loop on ghost octants (influence over interior borders)
 			/*	for (idx=0; idx<size_ghosts; idx++){
 			if (!ghosts[idx].getNotBalance()){
