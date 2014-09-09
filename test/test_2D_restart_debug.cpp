@@ -218,6 +218,15 @@ int main(int argc, char *argv[]) {
 		bool done = ptree.adapt();
 		ptree.updateConnectivity();
 		ptree.writeLogical("Pablo_restart_ref");
+		if (rank == 2){
+			int nocts = ptree.getNumOctants();
+			for (int i=0; i<nocts; i++){
+				ptree.setMarker(ptree.getOctant(i),-1);
+			}
+		}
+		done = ptree.adapt();
+		ptree.updateConnectivity();
+		ptree.writeLogical("Pablo_restart_coarse");
 
 
 
