@@ -1038,56 +1038,75 @@ public:
 	//-------------------------------------------------------------------------------- //
 	// Intersections get Methods
 
-	/*! Get the local number of intersections on the global domain bord.
-	 * \return Local number of intersections on the global domain bord.
+//	/*! Get the local number of intersections on the global domain bord.
+//	 * \return Local number of intersections on the global domain bord.
+//	 */
+//	uint32_t getNumIntersectionsBord() {
+//		return octree.intersections_bord.size();
+//	}
+//
+//	/*! Get the local number of intersections inside the local domain.
+//	 * \return Local number of inner intersections inside the local domain.
+//	 */
+//	uint32_t getNumIntersectionsInt() {
+//		return octree.intersections_int.size();
+//	}
+//
+//	/*! Get the local number of intersections between local octants and ghost octants.
+//	 * \return Local number of intersections between local octants and ghost octants.
+//	 */
+//	uint32_t getNumIntersectionsGhost() {
+//		return octree.intersections_ghost.size();
+//	}
+//
+//	/*! Get a pointer to target intersection on domain bord.
+//	 * \param[in] idx Local index of intersection on domain bord.
+//	 * \return Pointer to target intersection.
+//	 */
+//	Class_Intersection<2>* getIntersectionBord(uint32_t idx) {
+//		if (idx < octree.intersections_bord.size()){
+//			return &octree.intersections_bord[idx];
+//		}
+//		return NULL;
+//	}
+//
+//	/*! Get a pointer to target intersection inside the local domain.
+//	 * \param[in] idx Local index of intersection inside the local domain.
+//	 * \return Pointer to target intersection.
+//	 */
+//	Class_Intersection<2>* getIntersectionInt(uint32_t idx) {
+//		if (idx < octree.intersections_int.size()){
+//			return &octree.intersections_int[idx];
+//		}
+//		return NULL;
+//	}
+//
+//	/*! Get a pointer to target intersection between octant and ghost.
+//	 * \param[in] idx Local index of intersection between octant and ghost.
+//	 * \return Pointer to target intersection.
+//	 */
+//	Class_Intersection<2>* getIntersectionGhost(uint32_t idx) {
+//		if (idx < octree.intersections_ghost.size()){
+//			return &octree.intersections_ghost[idx];
+//		}
+//		return NULL;
+//	}
+//
+
+	/*! Get the local number of intersections.
+	 * \return Local number of intersections.
 	 */
-	uint32_t getNumIntersectionsBord() {
-		return octree.intersections_bord.size();
+	uint32_t getNumIntersections() {
+		return octree.intersections.size();
 	}
 
-	/*! Get the local number of intersections inside the local domain.
-	 * \return Local number of inner intersections inside the local domain.
-	 */
-	uint32_t getNumIntersectionsInt() {
-		return octree.intersections_int.size();
-	}
-
-	/*! Get the local number of intersections between local octants and ghost octants.
-	 * \return Local number of intersections between local octants and ghost octants.
-	 */
-	uint32_t getNumIntersectionsGhost() {
-		return octree.intersections_ghost.size();
-	}
-
-	/*! Get a pointer to target intersection on domain bord.
-	 * \param[in] idx Local index of intersection on domain bord.
+	/*! Get a pointer to target intersection.
+	 * \param[in] idx Local index of intersection.
 	 * \return Pointer to target intersection.
 	 */
-	Class_Intersection<2>* getIntersectionBord(uint32_t idx) {
-		if (idx < octree.intersections_bord.size()){
-			return &octree.intersections_bord[idx];
-		}
-		return NULL;
-	}
-
-	/*! Get a pointer to target intersection inside the local domain.
-	 * \param[in] idx Local index of intersection inside the local domain.
-	 * \return Pointer to target intersection.
-	 */
-	Class_Intersection<2>* getIntersectionInt(uint32_t idx) {
-		if (idx < octree.intersections_int.size()){
-			return &octree.intersections_int[idx];
-		}
-		return NULL;
-	}
-
-	/*! Get a pointer to target intersection between octant and ghost.
-	 * \param[in] idx Local index of intersection between octant and ghost.
-	 * \return Pointer to target intersection.
-	 */
-	Class_Intersection<2>* getIntersectionGhost(uint32_t idx) {
-		if (idx < octree.intersections_ghost.size()){
-			return &octree.intersections_ghost[idx];
+	Class_Intersection<2>* getIntersection(uint32_t idx) {
+		if (idx < octree.intersections.size()){
+			return &octree.intersections[idx];
 		}
 		return NULL;
 	}
@@ -1100,10 +1119,29 @@ public:
 		return octree.extractOctant(inter->owners[inter->finer]).getLevel();
 	}
 
+	/*! Get the finer owner octant of an intersection.
+	 * \param[in] inter Pointer to target intersection.
+	 * \return The finer octant of the owners of intersection (false/true = 0/1).
+	 */
 	bool getFiner(Class_Intersection<2>* inter) {
 		return inter->finer;
 	}
 
+	/*! Get if an intersection is a boundary domain intersection.
+	 * \param[in] inter Pointer to target intersection.
+	 * \return Boundary or not boundary?.
+	 */
+	uint8_t getBound(Class_Intersection<2>* inter) {
+		return inter->getBound();
+	}
+
+	/*! Get if an intersection is a boundary intersection for a process.
+	 * \param[in] inter Pointer to target intersection.
+	 * \return Process boundary or not boundary?.
+	 */
+	uint8_t getPbound(Class_Intersection<2>* inter) {
+		return inter->getPbound();
+	}
 	/*! Get the face index of an intersection.
 	 * \param[in] inter Pointer to target intersection.
 	 * \return Face index of the first octant owner of intersection (owners[0]).
@@ -1194,6 +1232,8 @@ public:
 		trans.mapNormals(normal_, normal);
 		return normal;
 	}
+
+
 
 	//-------------------------------------------------------------------------------- //
 	// No Pointer Intersections get Methods

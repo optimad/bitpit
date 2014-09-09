@@ -51,9 +51,10 @@ class Class_Local_Tree<2>{
 private:
 	OctantsType					octants;			/**< Local vector of octants ordered with Morton Number */
 	OctantsType					ghosts;				/**< Local vector of ghost octants ordered with Morton Number */
-	IntersectionsType			intersections_int;	/**< Local vector of internal intersections ordered with Morton Number of first owner octant */
-	IntersectionsType			intersections_ghost;/**< Local vector of intersections internal/ghost ordered with Morton Number of internal owner octant */
-	IntersectionsType			intersections_bord;	/**< Local vector of border intersections (twice the sam octant is stored in an intersection) */
+//	IntersectionsType			intersections_int;	/**< Local vector of internal intersections ordered with Morton Number of first owner octant */
+//	IntersectionsType			intersections_ghost;/**< Local vector of intersections internal/ghost ordered with Morton Number of internal owner octant */
+//	IntersectionsType			intersections_bord;	/**< Local vector of border intersections (twice the same octant is stored in an intersection) */
+	IntersectionsType			intersections;		/**< Local vector of intersections */
 	u64vector 					globalidx_ghosts;	/**< Global index of the ghost octants (size = size_ghosts) */
 	Class_Octant<2> 			first_desc;			/**< First (Morton order) most refined octant possible in local partition */
 	Class_Octant<2> 			last_desc;			/**< Last (Morton order) most refined octant possible in local partition */
@@ -2432,19 +2433,22 @@ private:
 		Class_Intersection<2> intersection;
 		u32vector neighbours;
 		vector<bool> isghost;
-		uint32_t counter_i, counter_g, counter_b, idx;
+		uint32_t counter, counter_i, counter_g, counter_b, idx;
 		uint32_t i, j, k, nsize;
 		uint8_t iface, iface2;
 
 
-		intersections_int.clear();
-		intersections_ghost.clear();
-		intersections_bord.clear();
-		intersections_int.reserve(2*2*octants.size());
-		intersections_ghost.reserve(2*2*ghosts.size());
-		intersections_bord.reserve(int(sqrt(octants.size())));
+		intersections.clear();
+		intersections.reserve(2*2*octants.size());
+//		intersections_int.clear();
+//		intersections_ghost.clear();
+//		intersections_bord.clear();
+//		intersections_int.reserve(2*2*octants.size());
+//		intersections_ghost.reserve(2*2*ghosts.size());
+//		intersections_bord.reserve(int(sqrt(octants.size())));
 
-		counter_i = counter_g = counter_b = idx = 0;
+//		counter_i = counter_g = counter_b = idx = 0;
+		counter = idx = 0;
 
 		// Loop on ghosts
 		obegin = ghosts.begin();
@@ -2461,8 +2465,12 @@ private:
 					intersection.iface = global2D.oppface[iface2] - (nsize==1);
 					intersection.isnew = false;
 					intersection.isghost = true;
-					intersections_ghost.push_back(intersection);
-					counter_g++;
+//					intersections_ghost.push_back(intersection);
+//					counter_g++;
+					intersection.bound = false;
+					intersection.pbound = true;
+					intersections.push_back(intersection);
+					counter++;
 				}
 			}
 			idx++;
@@ -2485,8 +2493,12 @@ private:
 							intersection.iface = iface2 + (nsize>1);
 							intersection.isnew = false;
 							intersection.isghost = true;
-							intersections_ghost.push_back(intersection);
-							counter_g++;
+//							intersections_ghost.push_back(intersection);
+//							counter_g++;
+							intersection.bound = false;
+							intersection.pbound = true;
+							intersections.push_back(intersection);
+							counter++;
 						}
 						else{
 							intersection.owners[0] = idx;
@@ -2495,8 +2507,12 @@ private:
 							intersection.iface = iface2 + (nsize>1);
 							intersection.isnew = false;
 							intersection.isghost = false;
-							intersections_int.push_back(intersection);
-							counter_i++;
+//							intersections_int.push_back(intersection);
+//							counter_i++;
+							intersection.bound = false;
+							intersection.pbound = false;
+							intersections.push_back(intersection);
+							counter++;
 						}
 					}
 				}
@@ -2507,8 +2523,12 @@ private:
 					intersection.iface = iface2;
 					intersection.isnew = false;
 					intersection.isghost = false;
-					intersections_bord.push_back(intersection);
-					counter_b++;
+//					intersections_bord.push_back(intersection);
+//					counter_b++;
+					intersection.bound = true;
+					intersection.pbound = false;
+					intersections.push_back(intersection);
+					counter++;
 				}
 				if (it->info[iface2+1]){
 					intersection.owners[0] = idx;
@@ -2517,15 +2537,20 @@ private:
 					intersection.iface = iface2+1;
 					intersection.isnew = false;
 					intersection.isghost = false;
-					intersections_bord.push_back(intersection);
-					counter_b++;
+//					intersections_bord.push_back(intersection);
+//					counter_b++;
+					intersection.bound = true;
+					intersection.pbound = false;
+					intersections.push_back(intersection);
+					counter++;
 				}
 			}
 			idx++;
 		}
-		intersections_int.shrink_to_fit();
-		intersections_ghost.shrink_to_fit();
-		intersections_bord.shrink_to_fit();
+//		intersections_int.shrink_to_fit();
+//		intersections_ghost.shrink_to_fit();
+//		intersections_bord.shrink_to_fit();
+		intersections.shrink_to_fit();
 
 	}
 
