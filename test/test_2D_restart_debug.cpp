@@ -212,12 +212,27 @@ int main(int argc, char *argv[]) {
 
 		ptree.updateConnectivity();
 		ptree.writeLogical("Pablo_restart");
-		if (rank == 1){
+		if (rank == 1 || rank == 3){
 			ptree.setMarker(ptree.getOctant(0),1);
 		}
 		bool done = ptree.adapt();
+		ptree.loadBalance();
+		if (rank == 1 || rank == 3){
+			ptree.setMarker(ptree.getOctant(0),1);
+		}
+		done = ptree.adapt();
+		ptree.loadBalance();
 		ptree.updateConnectivity();
 		ptree.writeLogical("Pablo_restart_ref");
+		if (rank == 3){
+			int nocts = ptree.getNumOctants();
+			for (int i=0; i<nocts; i++){
+				ptree.setMarker(ptree.getOctant(i),-1);
+			}
+		}
+		done = ptree.adapt();
+		ptree.updateConnectivity();
+		ptree.writeLogical("Pablo_restart_coarse");
 
 
 
