@@ -1157,7 +1157,7 @@ private:
 						while(octants[idxtry].computeMorton() > Morton){
 							idxtry--;
 							if(idxtry > noctants-1){
-								idxtry = noctants-1;
+								idxtry = 0;
 								break;
 							}
 						}
@@ -1252,7 +1252,7 @@ private:
 							while(ghosts[idxtry].computeMorton() > Morton){
 								idxtry--;
 								if(idxtry > ghosts.size()-1){
-									idxtry = ghosts.size()-1;
+									idxtry = 0;
 									break;
 								}
 							}
@@ -1335,14 +1335,14 @@ private:
 									while(octants[idxtry].computeMorton() < Morton){
 										idxtry++;
 										if(idxtry > noctants-1){
-											idxtry = noctants;
+											idxtry = noctants-1;
 											break;
 										}
 									}
 									while(octants[idxtry].computeMorton() > Morton){
 										idxtry--;
 										if(idxtry > noctants-1){
-											idxtry = noctants;
+											idxtry = 0;
 											break;
 										}
 									}
@@ -2292,14 +2292,14 @@ private:
 						while(ghosts[idxtry].computeMorton() < Morton){
 							idxtry++;
 							if(idxtry > ghosts.size()-1){
-								idxtry = ghosts.size();
+								idxtry = ghosts.size()-1;
 								break;
 							}
 						}
 						while(ghosts[idxtry].computeMorton() > Morton){
 							idxtry--;
 							if(idxtry > ghosts.size()-1){
-								idxtry = ghosts.size();
+								idxtry = 0;
 								break;
 							}
 						}
@@ -2374,14 +2374,14 @@ private:
 						while(octants[idxtry].computeMorton() < Morton){
 							idxtry++;
 							if(idxtry > noctants-1){
-								idxtry = noctants;
+								idxtry = noctants-1;
 								break;
 							}
 						}
 						while(octants[idxtry].computeMorton() > Morton){
 							idxtry--;
 							if(idxtry > noctants-1){
-								idxtry = noctants;
+								idxtry = 0;
 								break;
 							}
 						}
