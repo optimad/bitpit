@@ -2067,14 +2067,14 @@ private:
 						while(ghosts[idxtry].computeMorton() < Morton){
 							idxtry++;
 							if(idxtry > ghosts.size()-1){
-								idxtry = ghosts.size();
+								idxtry = ghosts.size()-1;
 								break;
 							}
 						}
 						while(ghosts[idxtry].computeMorton() > Morton){
 							idxtry--;
 							if(idxtry > ghosts.size()-1){
-								idxtry = ghosts.size();
+								idxtry = 0;
 								break;
 							}
 						}
@@ -2092,7 +2092,7 @@ private:
 						uint64_t Mortonlast = last_desc.computeMorton();
 						vector<uint32_t> bufferidx;
 						Mortontry = ghosts[idxtry].computeMorton();
-						while(Mortontry < Mortonlast & idxtry < size_ghosts){
+						while(Mortontry < Mortonlast && idxtry < size_ghosts){
 							//Dhx = int32_t(cx)*(-int32_t(oct->x) + int32_t(ghosts[idxtry].x));
 							//Dhy = int32_t(cy)*(-int32_t(oct->y) + int32_t(ghosts[idxtry].y));
 							Dhx = (-int32_t(oct->x) + int32_t(ghosts[idxtry].x));
@@ -2149,14 +2149,14 @@ private:
 						while(octants[idxtry].computeMorton() < Morton){
 							idxtry++;
 							if(idxtry > noctants-1){
-								idxtry = noctants;
+								idxtry = noctants-1;
 								break;
 							}
 						}
 						while(octants[idxtry].computeMorton() > Morton){
 							idxtry--;
 							if(idxtry > noctants-1){
-								idxtry = noctants;
+								idxtry = 0;
 								break;
 							}
 						}
@@ -2174,7 +2174,7 @@ private:
 						uint64_t Mortonlast = last_desc.computeMorton();
 						vector<uint32_t> bufferidx;
 						Mortontry = octants[idxtry].computeMorton();
-						while(Mortontry < Mortonlast & idxtry < noctants-1){
+						while(Mortontry < Mortonlast && idxtry < noctants-1){
 							//Dhx = int32_t(cx)*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 							//Dhy = int32_t(cy)*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
 							Dhx = (-int32_t(oct->x) + int32_t(octants[idxtry].x));
@@ -2317,7 +2317,7 @@ private:
 						uint64_t Mortonlast = last_desc.computeMorton();
 						vector<uint32_t> bufferidx;
 						Mortontry = ghosts[idxtry].computeMorton();
-						while(Mortontry < Mortonlast & idxtry < size_ghosts){
+						while(Mortontry < Mortonlast && idxtry < size_ghosts){
 							//Dhx = int32_t(cx)*(-int32_t(oct->x) + int32_t(ghosts[idxtry].x));
 							//Dhy = int32_t(cy)*(-int32_t(oct->y) + int32_t(ghosts[idxtry].y));
 							Dhx = (-int32_t(oct->x) + int32_t(ghosts[idxtry].x));
@@ -2399,7 +2399,7 @@ private:
 						uint64_t Mortonlast = last_desc.computeMorton();
 						vector<uint32_t> bufferidx;
 						Mortontry = octants[idxtry].computeMorton();
-						while(Mortontry < Mortonlast & idxtry < noctants-1){
+						while(Mortontry < Mortonlast && idxtry < noctants-1){
 							//Dhx = int32_t(cx)*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 							//Dhy = int32_t(cy)*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
 							Dhx = (-int32_t(oct->x) + int32_t(octants[idxtry].x));
