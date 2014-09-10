@@ -416,6 +416,8 @@ public:
 	 * \return Is octant ghost?
 	 */
 	bool getIsGhost(Class_Octant<2>* oct){
+		if (serial)
+			return false;
 		return (findOwner(oct->computeMorton()) != rank);
 	};
 
