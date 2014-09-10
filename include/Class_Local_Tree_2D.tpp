@@ -2729,7 +2729,7 @@ private:
 				return idx;
 			}
 			Mortontry = octants[idx].computeMorton();
-			jump = ((Mortontry<Morton)-(Mortontry>Morton))*jump/2;
+			jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
 			idx += jump;
 			if (idx > nocts){
 				return nocts-1;   // return nocts if not found the Morton
