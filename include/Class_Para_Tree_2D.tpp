@@ -395,6 +395,14 @@ public:
 		return oct->getLevel();
 	};
 
+	bool getBound(Class_Octant<2>* oct, uint8_t iface){								// Get refinement/coarsening marker for idx-th octant
+		return oct->getBound(iface);
+	};
+
+	bool getPbound(Class_Octant<2>* oct, uint8_t iface){								// Get refinement/coarsening marker for idx-th octant
+		return oct->getPbound(iface);
+	};
+
 	/*! Get the balancing condition of an octant.
 	 * \param[in] oct Pointer to target octant.
 	 * \return Has octant to be balanced?
