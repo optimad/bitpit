@@ -2729,10 +2729,10 @@ private:
 				return idx;
 			}
 			Mortontry = octants[idx].computeMorton();
-			jump = (Mortontry<Morton)*jump/4;
+			jump = ((Mortontry<Morton)-(Mortontry>Morton))*jump/2;
 			idx += jump;
 			if (idx > nocts){
-				return nocts;   // return nocts if not found the Morton
+				return nocts-1;   // return nocts if not found the Morton
 			}
 		}
 		if (Mortontry<Morton){
@@ -2744,14 +2744,14 @@ private:
 			}
 		}
 		else{
-			for(int idx2=0; idx2<idx; idx2++){
+			for(int idx2=0; idx2<idx+1; idx2++){
 				Mortontry = octants[idx2].computeMorton();
 				if (Mortontry == Morton){
 					return idx;
 				}
 			}
 		}
-		return nocts;
+		return nocts-1;
 	};
 
 	// =================================================================================== //
