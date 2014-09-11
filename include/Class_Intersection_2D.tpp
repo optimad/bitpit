@@ -117,6 +117,11 @@ private:
 	bool getBound(){
 		return bound;
 	}
+
+	bool getIsGhost(){
+		return isghost;
+	}
+
 	bool getPbound(){
 		return pbound;
 	}

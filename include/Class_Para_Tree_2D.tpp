@@ -1141,15 +1141,24 @@ public:
 	 * \param[in] inter Pointer to target intersection.
 	 * \return Boundary or not boundary?.
 	 */
-	uint8_t getBound(Class_Intersection<2>* inter) {
+	bool getBound(Class_Intersection<2>* inter) {
 		return inter->getBound();
 	}
+
+	/*! Get if an intersection is an intersection between an internal and a ghost element.
+	 * \param[in] inter Pointer to target intersection.
+	 * \return Ghost or not ghost?.
+	 */
+	bool getIsGhost(Class_Intersection<2>* inter) {
+		return inter->getIsGhost();
+	}
+
 
 	/*! Get if an intersection is a boundary intersection for a process.
 	 * \param[in] inter Pointer to target intersection.
 	 * \return Process boundary or not boundary?.
 	 */
-	uint8_t getPbound(Class_Intersection<2>* inter) {
+	bool getPbound(Class_Intersection<2>* inter) {
 		return inter->getPbound();
 	}
 	/*! Get the face index of an intersection.
