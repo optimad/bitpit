@@ -44,6 +44,7 @@ private:
 	uint32_t 	owners[2];			/**< Owner octants of the intersection (first is the internal octant) */
 	uint8_t   	iface;				/**< Index of the face of the first owner */
 	bool		finer;				/**< 0/1 finer octant (if same level =0) */
+	//TODO proposta: eliminare isghost poiché contiene la stessa info in pbound
 	bool		isghost;			/**< The intersection has a member ghost */
 	bool		isnew;				/**< The intersection is new after a mesh adapting? */
 	bool		bound;				/**< The intersection is a boundary intersection of the whole domain */
