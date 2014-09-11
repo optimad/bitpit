@@ -395,12 +395,45 @@ public:
 		return oct->getLevel();
 	};
 
+	/*! Get the bound flag on an octant face.
+	 * \param[in] oct Pointer to target octant.
+	 * \param[in] iface local index of the face.
+	 * \return true if the iface face is a boundary face.
+	 */
 	bool getBound(Class_Octant<2>* oct, uint8_t iface){								// Get refinement/coarsening marker for idx-th octant
 		return oct->getBound(iface);
 	};
 
+	/*! Get the pbound flag on an octant face.
+	 * \param[in] oct Pointer to target octant.
+	 * \param[in] iface local index of the face.
+	 * \return true if the iface face is a process boundary face.
+	 */
 	bool getPbound(Class_Octant<2>* oct, uint8_t iface){								// Get refinement/coarsening marker for idx-th octant
 		return oct->getPbound(iface);
+	};
+
+
+	/*! Get the union of every bound flags on faces
+	 * \param[in] oct Pointer to target octant.
+	 * \return true if the octant has at least a boundary face.
+	 */
+	bool getBound(Class_Octant<2>* oct){
+		int temp = 0;
+		for(int i = 0; i < global2D.nfaces; ++i)
+			temp += oct->getBound(i);
+		return temp != 0;
+	};
+
+	/*! Get the union of every pbound flags on faces
+	 * \param[in] oct Pointer to target octant.
+	 * \return true if the octant has at least a process boundary face.
+	 */
+	bool getPbound(Class_Octant<2>* oct){								// Get refinement/coarsening marker for idx-th octant
+		int temp = 0;
+		for(int i = 0; i < global2D.nfaces; ++i)
+			temp += oct->getPbound(i);
+		return temp != 0;
 	};
 
 	/*! Get the balancing condition of an octant.
