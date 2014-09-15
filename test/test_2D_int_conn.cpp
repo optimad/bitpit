@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 				ptree.adapt();
 				ptree.computeIntersections();
 				int numInts;
-				cout << ptree.getNumIntersectionsInt() << endl;
+				cout << ptree.getNumIntersections() << endl;
 				ptree.computeConnectivity();
 				ptree.write("griglia");
 			}

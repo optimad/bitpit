@@ -1342,6 +1342,14 @@ private:
 	// =============================================================================== //
 
 public:
+	/** Compute the intersection of octants (intersections of bord, of inner domain and with ghost octants).
+	 */
+	void computeIntersections(){
+		octree.computeIntersections();
+	}
+
+	// =============================================================================== //
+
 	/** Get the octant owner of an input point.
 	 * \param[in] point Coordinates of target point.
 	 * \return Pointer to octant owner of target point.
@@ -4249,12 +4257,85 @@ public:
 //		computeghostsConnectivity();
 	}
 
+	// =================================================================================== //
+
+	/** Get the local number of nodes.
+	 */
+	uint32_t getLocalNumNodes() {
+		return octree.nodes.size();
+	}
+
 	// =============================================================================== //
 
-	/** Compute the intersection of octants (intersections of bord, of inner domain and with ghost octants).
+	/** Get the global number of nodes.
 	 */
-	void computeIntersections(){
-		octree.computeIntersections();
+	uint64_t getNumNodes() {
+		uint64_t global_num_nodes = 0;
+		uint64_t local_num_nodes = octree.nodes.size();
+		error_flag = MPI_Allreduce(&local_num_nodes,&global_num_nodes,1,MPI_UINT64_T,MPI_SUM,MPI_COMM_WORLD);
+		return global_num_nodes;
+	}
+
+	// =============================================================================== //
+
+	/** Get the local connectivity of an octant
+	 * \param[in] inode Local index of octant
+	 */
+	vector<uint32_t> getConnectivity(uint32_t idx){
+		return octree.connectivity[idx];
+	}
+
+	// =============================================================================== //
+
+	/** Get the local connectivity of a ghostoctant
+	 * \param[in] inode Local index of octant
+	 */
+	vector<uint32_t> getGhostConnectivity(uint32_t idx){
+		return octree.ghostsconnectivity[idx];
+	}
+
+	// =============================================================================== //
+
+	/** Get the logical coordinates of a node
+	 * \param[in] inode Local index of node
+	 */
+	vector<uint32_t> getLogicalCoordinates(uint32_t inode){
+		return octree.nodes[inode];
+	}
+
+	// =============================================================================== //
+
+	/** Get the physical coordinates of a node
+	 * \param[in] inode Local index of node
+	 */
+	vector<double> getCoordinates(uint32_t inode){
+		vector<double> coords(3,0);
+		coords[0] = trans.mapX(octree.nodes[inode][0]);
+		coords[1] = trans.mapY(octree.nodes[inode][1]);
+		coords[2] = trans.mapZ(octree.nodes[inode][2]);
+		return coords;
+	}
+
+	// =============================================================================== //
+
+	/** Get the logical coordinates of a ghost node
+	 * \param[in] inode Local index of node
+	 */
+	vector<uint32_t> getLogicalGhostCoordinates(uint32_t inode){
+		return octree.ghostsnodes[inode];
+	}
+
+	// =============================================================================== //
+
+	/** Get the physical coordinates of a ghost node
+	 * \param[in] inode Local index of node
+	 */
+	vector<double> getGhostCoordinates(uint32_t inode){
+		vector<double> coords(3,0);
+		coords[0] = trans.mapX(octree.ghostsnodes[inode][0]);
+		coords[1] = trans.mapY(octree.ghostsnodes[inode][1]);
+		coords[2] = trans.mapZ(octree.ghostsnodes[inode][2]);
+		return coords;
 	}
 
 	// =============================================================================== //
