@@ -703,6 +703,7 @@ private:
 		return octree.getNumOctants();
 	};
 
+
 	/*! Set the refinement marker of an octant.
 	 * \param[in] oct Target octant.
 	 * \param[in] marker Refinement marker of octant (n=n refinement in adapt, -n=n coarsening in adapt, default=0).
@@ -4278,20 +4279,53 @@ public:
 
 	// =============================================================================== //
 
-	/** Get the local connectivity of an octant
-	 * \param[in] inode Local index of octant
+	/** Get the connectivity the octants
 	 */
-	vector<uint32_t> getConnectivity(uint32_t idx){
-		return octree.connectivity[idx];
+	const u32vector2D & getConnectivity(){
+		return octree.connectivity;
 	}
 
 	// =============================================================================== //
 
-	/** Get the local connectivity of a ghostoctant
-	 * \param[in] inode Local index of octant
+	/** Get the local connectivity of an octant
+	 * \param[in] idx Local index of octant
 	 */
-	vector<uint32_t> getGhostConnectivity(uint32_t idx){
+	u32vector getOctantConnectivity(uint32_t idx){
+		return octree.connectivity[idx];
+	}
+
+	// =============================================================================== //
+	/** Get the local connectivity of an octant
+	 * \param[in] oct Pointer to an octant
+	 */
+	u32vector getOctantConnectivity(Class_Octant<2>* oct){
+		return octree.connectivity[getIdx(oct)];
+	}
+
+	// =============================================================================== //
+
+	/** Get the local connectivity of a ghost octant
+	 * \param[in] idx Local index of ghost octant
+	 */
+	u32vector getGhostOctantConnectivity(uint32_t idx){
 		return octree.ghostsconnectivity[idx];
+	}
+
+	// =============================================================================== //
+
+	/** Get the local connectivity of a ghost octant
+	 * \param[in] oct Pointer to a ghost octant
+	 */
+	u32vector getGhostOctantConnectivity(Class_Octant<2>* oct){
+		return octree.ghostsconnectivity[getIdx(oct)];
+	}
+
+	// =============================================================================== //
+
+	/** Get the logical coordinates of the nodes
+	 */
+	const u32vector2D & getNodes(){
+		return octree.nodes;
 	}
 
 	// =============================================================================== //
@@ -4299,7 +4333,7 @@ public:
 	/** Get the logical coordinates of a node
 	 * \param[in] inode Local index of node
 	 */
-	vector<uint32_t> getLogicalCoordinates(uint32_t inode){
+	u32vector getNodeLogicalCoordinates(uint32_t inode){
 		return octree.nodes[inode];
 	}
 
@@ -4308,7 +4342,7 @@ public:
 	/** Get the physical coordinates of a node
 	 * \param[in] inode Local index of node
 	 */
-	vector<double> getCoordinates(uint32_t inode){
+	dvector getNodeCoordinates(uint32_t inode){
 		vector<double> coords(3,0);
 		coords[0] = trans.mapX(octree.nodes[inode][0]);
 		coords[1] = trans.mapY(octree.nodes[inode][1]);
@@ -4321,7 +4355,7 @@ public:
 	/** Get the logical coordinates of a ghost node
 	 * \param[in] inode Local index of node
 	 */
-	vector<uint32_t> getLogicalGhostCoordinates(uint32_t inode){
+	u32vector getGhostNodeLogicalCoordinates(uint32_t inode){
 		return octree.ghostsnodes[inode];
 	}
 
@@ -4330,7 +4364,7 @@ public:
 	/** Get the physical coordinates of a ghost node
 	 * \param[in] inode Local index of node
 	 */
-	vector<double> getGhostCoordinates(uint32_t inode){
+	dvector getGhostNodeCoordinates(uint32_t inode){
 		vector<double> coords(3,0);
 		coords[0] = trans.mapX(octree.ghostsnodes[inode][0]);
 		coords[1] = trans.mapY(octree.ghostsnodes[inode][1]);
