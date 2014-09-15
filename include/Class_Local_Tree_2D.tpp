@@ -61,6 +61,15 @@ private:
 	uint32_t 					size_ghosts;		/**< Size of vector of ghost octants */
 	uint8_t						local_max_depth;	/**< Reached max depth in local tree */
 
+	// connectivity
+	u32vector2D					nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
+	u32vector2D					connectivity;		/**<Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
+	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
+	u32vector2D					ghostsnodes;		/**<Local vector of ghosts nodes (x,y,z) ordered with Morton Number*/
+	u32vector2D					ghostsconnectivity;	/**<Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
+	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
+
+
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
 
@@ -2792,6 +2801,162 @@ private:
 	};
 
 	// =================================================================================== //
+
+	/** Compute the connectivity of octants and store the coordinates of nodes.
+	 */
+	void computeConnectivity() {
+		map<uint64_t, vector<uint32_t> > mapnodes;
+		map<uint64_t, vector<uint32_t> >::iterator iter, iterend;
+		uint32_t i, k, counter;
+		uint64_t morton;
+		uint32_t noctants = getNumOctants();
+		u32vector2D octnodes;
+		uint8_t j;
+
+		clearConnectivity();
+
+		octnodes.reserve(global2D.nnodes);
+		if (nodes.size() == 0){
+			connectivity.resize(noctants);
+			for (i = 0; i < noctants; i++){
+				octants[i].getNodes(octnodes);
+				for (j = 0; j < global2D.nnodes; j++){
+					morton = mortonEncode_magicbits(octnodes[j][0], octnodes[j][1]);
+					if (mapnodes[morton].size()==0){
+						mapnodes[morton].reserve(8);
+						for (k = 0; k < 3; k++){
+							mapnodes[morton].push_back(octnodes[j][k]);
+						}
+					}
+					mapnodes[morton].push_back(double(i));
+				}
+				u32vector2D().swap(octnodes);
+			}
+			iter	= mapnodes.begin();
+			iterend	= mapnodes.end();
+			counter = 0;
+			uint32_t numnodes = mapnodes.size();
+			nodes.resize(numnodes);
+			while (iter != iterend){
+				vector<uint32_t> nodecasting(iter->second.begin(), iter->second.begin()+3);
+				nodes[counter] = nodecasting;
+				nodes[counter].shrink_to_fit();
+				for(vector<uint32_t>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
+					if (connectivity[int(*iter2)].size()==0){
+						connectivity[int(*iter2)].reserve(4);
+					}
+					connectivity[int(*iter2)].push_back(counter);
+				}
+				mapnodes.erase(iter++);
+				counter++;
+			}
+			nodes.shrink_to_fit();
+			//Slow. Memory saving.
+			for (int ii=0; ii<noctants; ii++){
+				connectivity[ii].shrink_to_fit();
+			}
+			connectivity.shrink_to_fit();
+		}
+		map<uint64_t, vector<uint32_t> >().swap(mapnodes);
+		iter = mapnodes.end();
+	}
+
+	// =================================================================================== //
+
+	/** Clear the connectivity of octants.
+	 */
+	void clearConnectivity() {
+		u32vector2D().swap(nodes);
+		u32vector2D().swap(connectivity);
+	}
+
+	// =================================================================================== //
+
+	/** Update the connectivity of octants.
+	 */
+	void updateConnectivity() {
+		clearConnectivity();
+		computeConnectivity();
+	}
+
+	// =================================================================================== //
+
+	/** Compute the connectivity of ghost octants and store the coordinates of nodes.
+	 */
+	void computeghostsConnectivity() {
+		map<uint64_t, vector<uint32_t> > mapnodes;
+		map<uint64_t, vector<uint32_t> >::iterator iter, iterend;
+		uint32_t i, k, counter;
+		uint64_t morton;
+		uint32_t noctants = size_ghosts;
+		u32vector2D octnodes;
+		uint8_t j;
+
+		octnodes.reserve(global2D.nnodes);
+
+		if (ghostsnodes.size() == 0){
+			ghostsconnectivity.resize(noctants);
+			for (i = 0; i < noctants; i++){
+				ghosts[i].getNodes(octnodes);
+				for (j = 0; j < global2D.nnodes; j++){
+					morton = mortonEncode_magicbits(octnodes[j][0], octnodes[j][1]);
+					if (mapnodes[morton].size()==0){
+						for (k = 0; k < 3; k++){
+							mapnodes[morton].push_back(octnodes[j][k]);
+						}
+					}
+					mapnodes[morton].push_back(i);
+				}
+				u32vector2D().swap(octnodes);
+			}
+			iter	= mapnodes.begin();
+			iterend	= mapnodes.end();
+			uint32_t numnodes = mapnodes.size();
+			ghostsnodes.resize(numnodes);
+			counter = 0;
+			while (iter != iterend){
+				vector<uint32_t> nodecasting(iter->second.begin(), iter->second.begin()+3);
+				ghostsnodes[counter] = nodecasting;
+				ghostsnodes[counter].shrink_to_fit();
+				for(vector<uint32_t>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
+					if (ghostsconnectivity[int(*iter2)].size()==0){
+						ghostsconnectivity[int(*iter2)].reserve(4);
+					}
+					ghostsconnectivity[int(*iter2)].push_back(counter);
+				}
+				mapnodes.erase(iter++);
+				counter++;
+			}
+			ghostsnodes.shrink_to_fit();
+			//Slow. Memory saving.
+			for (int ii=0; ii<noctants; ii++){
+				ghostsconnectivity[ii].shrink_to_fit();
+			}
+			ghostsconnectivity.shrink_to_fit();
+		}
+		iter = mapnodes.end();
+	}
+
+	// =================================================================================== //
+
+	/** Clear the connectivity of ghost octants.
+	 */
+	void clearghostsConnectivity() {
+		u32vector2D().swap(ghostsnodes);
+		u32vector2D().swap(ghostsconnectivity);
+	}
+
+	// =================================================================================== //
+
+	/** Update the connectivity of ghost octants.
+	 */
+	void updateghostsConnectivity() {
+		clearghostsConnectivity();
+		computeghostsConnectivity();
+	}
+
+	// =============================================================================== //
+
 
 };//end Class_Local_Tree<2> specialization;
 
