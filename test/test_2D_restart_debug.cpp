@@ -233,7 +233,9 @@ int main(int argc, char *argv[]) {
 		done = ptree.adapt();
 		ptree.updateConnectivity();
 		ptree.writeLogical("Pablo_restart_coarse");
+		ptree.write("Phys_Pablo_restart_coarse");
 
+		cout << ptree.getNumNodes() << endl;
 
 
 	}

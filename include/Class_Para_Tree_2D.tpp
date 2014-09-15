@@ -4262,7 +4262,7 @@ public:
 
 	/** Get the local number of nodes.
 	 */
-	uint32_t getLocalNumNodes() {
+	uint32_t getNumNodes() {
 		return octree.nodes.size();
 	}
 
@@ -4270,7 +4270,7 @@ public:
 
 	/** Get the global number of nodes.
 	 */
-	uint64_t getNumNodes() {
+	uint64_t getGlobalNumNodes() {
 		uint64_t global_num_nodes = 0;
 		uint64_t local_num_nodes = octree.nodes.size();
 		error_flag = MPI_Allreduce(&local_num_nodes,&global_num_nodes,1,MPI_UINT64_T,MPI_SUM,MPI_COMM_WORLD);
@@ -4571,10 +4571,10 @@ public:
 	    for(int i = 0; i < nofNodes; i++)
 	    {
 	    	for(int j = 0; j < 3; ++j){
-	    		if (j==0) trans.mapX(octree.nodes[i][j]);
-	    		if (j==1) trans.mapY(octree.nodes[i][j]);
-	    		if (j==2) trans.mapZ(octree.nodes[i][j]);
-	    		out << std::setprecision(6) << octree.nodes[i][j] << " ";
+	    		if (j==0) out << std::setprecision(6) << trans.mapX(octree.nodes[i][j]) << " ";
+	    		if (j==1) out << std::setprecision(6) << trans.mapY(octree.nodes[i][j]) << " ";
+	    		if (j==2) out << std::setprecision(6) << trans.mapZ(octree.nodes[i][j]) << " ";
+//	    		out << std::setprecision(6) << octree.nodes[i][j] << " ";
 	    	}
 	    	if((i+1)%4==0 && i!=nofNodes-1)
 	    		out << endl << "          ";
@@ -4582,10 +4582,10 @@ public:
 	    for(int i = 0; i < nofGhostNodes; i++)
 	    {
 	    	for(int j = 0; j < 3; ++j){
-	    		if (j==0) trans.mapX(octree.ghostsnodes[i][j]);
-	    		if (j==1) trans.mapY(octree.ghostsnodes[i][j]);
-	    		if (j==2) trans.mapZ(octree.ghostsnodes[i][j]);
-	    		out << std::setprecision(6) << octree.ghostsnodes[i][j] << " ";
+	    		if (j==0) out << std::setprecision(6) << trans.mapX(octree.ghostsnodes[i][j]) << " ";
+	    		if (j==1) out << std::setprecision(6) << trans.mapY(octree.ghostsnodes[i][j]) << " ";
+	    		if (j==2) out << std::setprecision(6) << trans.mapZ(octree.ghostsnodes[i][j]) << " ";
+//	    		out << std::setprecision(6) << octree.ghostsnodes[i][j] << " ";
 	    	}
 	    	if((i+1)%4==0 && i!=nofNodes-1)
 	    		out << endl << "          ";
