@@ -4262,17 +4262,6 @@ public:
 
 	// =============================================================================== //
 
-	/** Get the global number of nodes.
-	 */
-	uint64_t getGlobalNumNodes() {
-		uint64_t global_num_nodes = 0;
-		uint64_t local_num_nodes = octree.nodes.size();
-		error_flag = MPI_Allreduce(&local_num_nodes,&global_num_nodes,1,MPI_UINT64_T,MPI_SUM,MPI_COMM_WORLD);
-		return global_num_nodes;
-	}
-
-	// =============================================================================== //
-
 	/** Get the connectivity the octants
 	 */
 	const u32vector2D & getConnectivity(){
@@ -4688,9 +4677,7 @@ public:
 
 	}
 
-
-
-
+	// =============================================================================== //
 
 };
 
