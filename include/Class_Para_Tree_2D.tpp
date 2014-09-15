@@ -4163,8 +4163,6 @@ public:
 	 */
 	void clearConnectivity() {
 		octree.clearConnectivity();
-//		dvector2D().swap(nodes);
-//		u32vector2D().swap(connectivity);
 	}
 
 	// =================================================================================== //
@@ -4172,9 +4170,7 @@ public:
 	/** Update the connectivity of octants.
 	 */
 	void updateConnectivity() {
-		octree.clearConnectivity();
-//		clearConnectivity();
-//		computeConnectivity();
+		octree.updateConnectivity();
 	}
 
 	// =================================================================================== //
@@ -4254,8 +4250,6 @@ public:
 	 */
 	void updateghostsConnectivity() {
 		octree.updateghostsConnectivity();
-//		clearghostsConnectivity();
-//		computeghostsConnectivity();
 	}
 
 	// =================================================================================== //
