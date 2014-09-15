@@ -2,7 +2,7 @@
 // For Writing
 
 template< class data_T >
-void flush_ascii( fstream &str, data_T data ){
+void flush_ascii( fstream &str, const data_T data ){
 
   str << setprecision(8) << scientific ;
   str << data << " ";
@@ -12,7 +12,7 @@ void flush_ascii( fstream &str, data_T data ){
 
 // =================================================================================== //
 template< class data_T >
-void flush_ascii( fstream &str, int elements_per_line, vector<data_T> &data ){
+void flush_ascii( fstream &str, int elements_per_line, const vector<data_T> &data ){
 
   int i(0), j(0), k(0) ;
   int nr ;
@@ -48,10 +48,9 @@ void flush_ascii( fstream &str, int elements_per_line, vector<data_T> &data ){
   return ;
 };
 
-
 // =================================================================================== //
 template< class data_T, size_t d >
-void flush_ascii( fstream &str, int elements_per_line, array<data_T,d> &data ){
+void flush_ascii( fstream &str, int elements_per_line, const array<data_T,d> &data ){
 
   int i(0), j(0), k(0) ;
   int nr ;
@@ -89,7 +88,7 @@ void flush_ascii( fstream &str, int elements_per_line, array<data_T,d> &data ){
 
 // =================================================================================== //
 template< class data_T >
-void flush_ascii( fstream &str, int elements_per_line, data_T *data, int nr ){
+void flush_ascii( fstream &str, int elements_per_line, const data_T *data, int nr ){
 
   int i(0), j(0), k(0) ;
 
@@ -125,19 +124,19 @@ void flush_ascii( fstream &str, int elements_per_line, data_T *data, int nr ){
 
 // =================================================================================== //
 template< class data_T >
-void flush_binary( fstream &str, data_T data ){
+void flush_binary( fstream &str, const data_T data ){
 
   int nbytes;
   nbytes = sizeof(data_T) ;
 
-  str.write( reinterpret_cast<char*>(&data), nbytes ) ;
+  str.write( reinterpret_cast<const char*>(&data), nbytes ) ;
 
   return ;
 };
 
 // =================================================================================== //
 template< class data_T >
-void flush_binary( fstream &str, vector<data_T> &data ){
+void flush_binary( fstream &str, const vector<data_T> &data ){
 
   int i, nbytes, nr;
   nr = data.size() ;
@@ -145,7 +144,7 @@ void flush_binary( fstream &str, vector<data_T> &data ){
 
 
   for(i=0; i<nr; i++){
-    str.write( reinterpret_cast<char*>(&data[i]), nbytes ) ;
+    str.write( reinterpret_cast<const char*>(&data[i]), nbytes ) ;
   };
 
   return ;
@@ -153,25 +152,25 @@ void flush_binary( fstream &str, vector<data_T> &data ){
 
 // =================================================================================== //
 template< class data_T, size_t d >
-void flush_binary( fstream &str, array<data_T,d> &data ){
+void flush_binary( fstream &str, const array<data_T,d> &data ){
 
   int nbytes;
   array<int,8> data1 ;
   nbytes = sizeof(data_T)*d ;
 
-  str.write( reinterpret_cast<char*>(&data[0]), nbytes ) ;
+  str.write( reinterpret_cast<const char*>(&data[0]), nbytes ) ;
 
   return ;
 };
 
 // =================================================================================== //
 template< class data_T >
-void flush_binary( fstream &str, int nr, data_T *data ){
+void flush_binary( fstream &str, int nr, const data_T *data ){
 
   int i, nbytes;
   nbytes = sizeof(data_T) *nr ;
 
-  str.write( reinterpret_cast<char*>(data), nbytes ) ;
+  str.write( reinterpret_cast<const char*>(data), nbytes ) ;
 
   return ;
 };

@@ -40,28 +40,28 @@ template< class data_T, size_t d >
 void  line_stream( fstream &str, int nr, data_T *data) ;
 
 template< class data_T >
-void flush_ascii( fstream &str, data_T data  ) ;
+void flush_ascii( fstream &str, const data_T data  ) ;
 
 template< class data_T >
-void flush_ascii( fstream &str, int elements_per_line, vector<data_T> &data  ) ;
+void flush_ascii( fstream &str, int elements_per_line, const vector<data_T> &data  ) ;
 
 template< class data_T, size_t d >
-void flush_ascii( fstream &str, int elements_per_line, array<data_T,d> &data  ) ;
+void flush_ascii( fstream &str, int elements_per_line, const array<data_T,d> &data  ) ;
 
 template< class data_T >
-void flush_ascii( fstream &str, int elements_per_line, data_T *data, int nr  ) ;
+void flush_ascii( fstream &str, int elements_per_line, const data_T *data, int nr  ) ;
 
 template< class data_T >
-void flush_binary( fstream &str, data_T data  ) ;
+void flush_binary( fstream &str, const data_T data  ) ;
 
 template< class data_T >
-void flush_binary( fstream &str, vector<data_T> &data  ) ;
+void flush_binary( fstream &str, const vector<data_T> &data  ) ;
 
 template< class data_T, size_t d >
-void flush_binary( fstream &str, array<data_T,d> &data  ) ;
+void flush_binary( fstream &str, const array<data_T,d> &data  ) ;
 
 template< class data_T >
-void flush_binary( fstream &str, data_T *data, int nr  ) ;
+void flush_binary( fstream &str, const data_T *data, int nr  ) ;
 
 template< class data_T >
 void absorb_ascii( fstream &str, data_T &data  ) ;
