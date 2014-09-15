@@ -61,13 +61,14 @@ public:
 	//map member
 	Class_Map<2> trans;							/**<Transformation map from logical to physical domain*/
 
-	// connectivity
-	dvector2D					nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
-	u32vector2D					connectivity;		/**<Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
-	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
-	dvector2D					ghostsnodes;		/**<Local vector of ghosts nodes (x,y,z) ordered with Morton Number*/
-	u32vector2D					ghostsconnectivity;	/**<Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
-	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
+//	// connectivity
+//	dvector2D					nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
+//	u32vector2D					connectivity;		/**<Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
+//	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
+//	dvector2D					ghostsnodes;		/**<Local vector of ghosts nodes (x,y,z) ordered with Morton Number*/
+//	u32vector2D					ghostsconnectivity;	/**<Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
+//	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
+
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
@@ -4084,72 +4085,77 @@ public:
 	};
 
 	// =============================================================================== //
+
 	/** Compute the connectivity of octants and store the coordinates of nodes.
 	 */
 	void computeConnectivity() {
-		map<uint64_t, vector<double> > mapnodes;
-		map<uint64_t, vector<double> >::iterator iter, iterend;
-		uint32_t i, k, counter;
-		uint64_t morton;
-		uint32_t noctants = octree.getNumOctants();
-		dvector2D octnodes;
-		uint8_t j;
-
-		clearConnectivity();
-
-		octnodes.reserve(global2D.nnodes);
-		if (nodes.size() == 0){
-			connectivity.resize(noctants);
-			for (i = 0; i < noctants; i++){
-				getNodes(&octree.octants[i], octnodes);
-				for (j = 0; j < global2D.nnodes; j++){
-					morton = mortonEncode_magicbits(uint32_t(octnodes[j][0]/trans.L*double(global2D.max_length)), uint32_t(octnodes[j][1]/trans.L*double(global2D.max_length)));
-					if (mapnodes[morton].size()==0){
-						mapnodes[morton].reserve(8);
-						for (k = 0; k < 3; k++){
-							mapnodes[morton].push_back(octnodes[j][k]);
-						}
-					}
-					mapnodes[morton].push_back(double(i));
-				}
-				dvector2D().swap(octnodes);
-			}
-			iter	= mapnodes.begin();
-			iterend	= mapnodes.end();
-			counter = 0;
-			uint32_t numnodes = mapnodes.size();
-			nodes.resize(numnodes);
-			while (iter != iterend){
-				vector<double> nodecasting(iter->second.begin(), iter->second.begin()+3);
-				nodes[counter] = nodecasting;
-				nodes[counter].shrink_to_fit();
-				for(vector<double>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
-					if (connectivity[int(*iter2)].size()==0){
-						connectivity[int(*iter2)].reserve(4);
-					}
-					connectivity[int(*iter2)].push_back(counter);
-				}
-				mapnodes.erase(iter++);
-				counter++;
-			}
-			nodes.shrink_to_fit();
-			//Slow. Memory saving.
-			for (int ii=0; ii<noctants; ii++){
-				connectivity[ii].shrink_to_fit();
-			}
-			connectivity.shrink_to_fit();
-		}
-		map<uint64_t, vector<double> >().swap(mapnodes);
-		iter = mapnodes.end();
+		octree.computeConnectivity();
 	}
+//	void computeConnectivity() {
+//		map<uint64_t, vector<double> > mapnodes;
+//		map<uint64_t, vector<double> >::iterator iter, iterend;
+//		uint32_t i, k, counter;
+//		uint64_t morton;
+//		uint32_t noctants = octree.getNumOctants();
+//		dvector2D octnodes;
+//		uint8_t j;
+//
+//		clearConnectivity();
+//
+//		octnodes.reserve(global2D.nnodes);
+//		if (nodes.size() == 0){
+//			connectivity.resize(noctants);
+//			for (i = 0; i < noctants; i++){
+//				getNodes(&octree.octants[i], octnodes);
+//				for (j = 0; j < global2D.nnodes; j++){
+//					morton = mortonEncode_magicbits(uint32_t(octnodes[j][0]/trans.L*double(global2D.max_length)), uint32_t(octnodes[j][1]/trans.L*double(global2D.max_length)));
+//					if (mapnodes[morton].size()==0){
+//						mapnodes[morton].reserve(8);
+//						for (k = 0; k < 3; k++){
+//							mapnodes[morton].push_back(octnodes[j][k]);
+//						}
+//					}
+//					mapnodes[morton].push_back(double(i));
+//				}
+//				dvector2D().swap(octnodes);
+//			}
+//			iter	= mapnodes.begin();
+//			iterend	= mapnodes.end();
+//			counter = 0;
+//			uint32_t numnodes = mapnodes.size();
+//			nodes.resize(numnodes);
+//			while (iter != iterend){
+//				vector<double> nodecasting(iter->second.begin(), iter->second.begin()+3);
+//				nodes[counter] = nodecasting;
+//				nodes[counter].shrink_to_fit();
+//				for(vector<double>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
+//					if (connectivity[int(*iter2)].size()==0){
+//						connectivity[int(*iter2)].reserve(4);
+//					}
+//					connectivity[int(*iter2)].push_back(counter);
+//				}
+//				mapnodes.erase(iter++);
+//				counter++;
+//			}
+//			nodes.shrink_to_fit();
+//			//Slow. Memory saving.
+//			for (int ii=0; ii<noctants; ii++){
+//				connectivity[ii].shrink_to_fit();
+//			}
+//			connectivity.shrink_to_fit();
+//		}
+//		map<uint64_t, vector<double> >().swap(mapnodes);
+//		iter = mapnodes.end();
+//	}
 
 	// =================================================================================== //
 
 	/** Clear the connectivity of octants.
 	 */
 	void clearConnectivity() {
-		dvector2D().swap(nodes);
-		u32vector2D().swap(connectivity);
+		octree.clearConnectivity();
+//		dvector2D().swap(nodes);
+//		u32vector2D().swap(connectivity);
 	}
 
 	// =================================================================================== //
@@ -4157,8 +4163,9 @@ public:
 	/** Update the connectivity of octants.
 	 */
 	void updateConnectivity() {
-		clearConnectivity();
-		computeConnectivity();
+		octree.clearConnectivity();
+//		clearConnectivity();
+//		computeConnectivity();
 	}
 
 	// =================================================================================== //
@@ -4166,66 +4173,70 @@ public:
 	/** Compute the connectivity of ghost octants and store the coordinates of nodes.
 	 */
 	void computeghostsConnectivity() {
-		map<uint64_t, vector<double> > mapnodes;
-		map<uint64_t, vector<double> >::iterator iter, iterend;
-		uint32_t i, k, counter;
-		uint64_t morton;
-		uint32_t noctants = octree.size_ghosts;
-		dvector2D octnodes;
-		uint8_t j;
-
-		octnodes.reserve(global2D.nnodes);
-
-		if (ghostsnodes.size() == 0){
-			ghostsconnectivity.resize(noctants);
-			for (i = 0; i < noctants; i++){
-				getNodes(&octree.ghosts[i], octnodes);
-				for (j = 0; j < global2D.nnodes; j++){
-					morton = mortonEncode_magicbits(uint32_t(octnodes[j][0]/trans.L*double(global2D.max_length)), uint32_t(octnodes[j][1]/trans.L*double(global2D.max_length)));
-					if (mapnodes[morton].size()==0){
-						for (k = 0; k < 3; k++){
-							mapnodes[morton].push_back(octnodes[j][k]);
-						}
-					}
-					mapnodes[morton].push_back(i);
-				}
-				dvector2D().swap(octnodes);
-			}
-			iter	= mapnodes.begin();
-			iterend	= mapnodes.end();
-			uint32_t numnodes = mapnodes.size();
-			ghostsnodes.resize(numnodes);
-			counter = 0;
-			while (iter != iterend){
-				vector<double> nodecasting(iter->second.begin(), iter->second.begin()+3);
-				ghostsnodes[counter] = nodecasting;
-				ghostsnodes[counter].shrink_to_fit();
-				for(vector<double>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
-					if (ghostsconnectivity[int(*iter2)].size()==0){
-						ghostsconnectivity[int(*iter2)].reserve(4);
-					}
-					ghostsconnectivity[int(*iter2)].push_back(counter);
-				}
-				mapnodes.erase(iter++);
-				counter++;
-			}
-			ghostsnodes.shrink_to_fit();
-			//Slow. Memory saving.
-			for (int ii=0; ii<noctants; ii++){
-				ghostsconnectivity[ii].shrink_to_fit();
-			}
-			ghostsconnectivity.shrink_to_fit();
-		}
-		iter = mapnodes.end();
+		octree.computeghostsConnectivity();
 	}
-
+//	void computeghostsConnectivity() {
+//		map<uint64_t, vector<double> > mapnodes;
+//		map<uint64_t, vector<double> >::iterator iter, iterend;
+//		uint32_t i, k, counter;
+//		uint64_t morton;
+//		uint32_t noctants = octree.size_ghosts;
+//		dvector2D octnodes;
+//		uint8_t j;
+//
+//		octnodes.reserve(global2D.nnodes);
+//
+//		if (ghostsnodes.size() == 0){
+//			ghostsconnectivity.resize(noctants);
+//			for (i = 0; i < noctants; i++){
+//				getNodes(&octree.ghosts[i], octnodes);
+//				for (j = 0; j < global2D.nnodes; j++){
+//					morton = mortonEncode_magicbits(uint32_t(octnodes[j][0]/trans.L*double(global2D.max_length)), uint32_t(octnodes[j][1]/trans.L*double(global2D.max_length)));
+//					if (mapnodes[morton].size()==0){
+//						for (k = 0; k < 3; k++){
+//							mapnodes[morton].push_back(octnodes[j][k]);
+//						}
+//					}
+//					mapnodes[morton].push_back(i);
+//				}
+//				dvector2D().swap(octnodes);
+//			}
+//			iter	= mapnodes.begin();
+//			iterend	= mapnodes.end();
+//			uint32_t numnodes = mapnodes.size();
+//			ghostsnodes.resize(numnodes);
+//			counter = 0;
+//			while (iter != iterend){
+//				vector<double> nodecasting(iter->second.begin(), iter->second.begin()+3);
+//				ghostsnodes[counter] = nodecasting;
+//				ghostsnodes[counter].shrink_to_fit();
+//				for(vector<double>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
+//					if (ghostsconnectivity[int(*iter2)].size()==0){
+//						ghostsconnectivity[int(*iter2)].reserve(4);
+//					}
+//					ghostsconnectivity[int(*iter2)].push_back(counter);
+//				}
+//				mapnodes.erase(iter++);
+//				counter++;
+//			}
+//			ghostsnodes.shrink_to_fit();
+//			//Slow. Memory saving.
+//			for (int ii=0; ii<noctants; ii++){
+//				ghostsconnectivity[ii].shrink_to_fit();
+//			}
+//			ghostsconnectivity.shrink_to_fit();
+//		}
+//		iter = mapnodes.end();
+//	}
+//
 	// =================================================================================== //
 
 	/** Clear the connectivity of ghost octants.
 	 */
 	void clearghostsConnectivity() {
-		dvector2D().swap(ghostsnodes);
-		u32vector2D().swap(ghostsconnectivity);
+		octree.clearghostsConnectivity();
+//		dvector2D().swap(ghostsnodes);
+//		u32vector2D().swap(ghostsconnectivity);
 	}
 
 	// =================================================================================== //
@@ -4233,8 +4244,9 @@ public:
 	/** Update the connectivity of ghost octants.
 	 */
 	void updateghostsConnectivity() {
-		clearghostsConnectivity();
-		computeghostsConnectivity();
+		octree.updateghostsConnectivity();
+//		clearghostsConnectivity();
+//		computeghostsConnectivity();
 	}
 
 	// =============================================================================== //
@@ -4255,8 +4267,8 @@ public:
 	void writeLogical(string filename) {
 
 		bool clear = false;
-		if (connectivity.size() == 0) {
-			computeConnectivity();
+		if (octree.connectivity.size() == 0) {
+			octree.computeConnectivity();
 			clear = true;
 		}
 
@@ -4270,29 +4282,29 @@ public:
 			writeLog(ss.str());
 			return;
 		}
-		int nofNodes = nodes.size();
-		int nofGhostNodes = ghostsnodes.size();
-		int nofOctants = connectivity.size();
-		int nofGhosts = ghostsconnectivity.size();
+		int nofNodes = octree.nodes.size();
+		int nofGhostNodes = octree.ghostsnodes.size();
+		int nofOctants = octree.connectivity.size();
+		int nofGhosts = octree.ghostsconnectivity.size();
 		int nofAll = nofGhosts + nofOctants;
 		out << "<?xml version=\"1.0\"?>" << endl
 			<< "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
 			<< "  <UnstructuredGrid>" << endl
-			<< "    <Piece NumberOfCells=\"" << connectivity.size() + ghostsconnectivity.size() << "\" NumberOfPoints=\"" << nodes.size() + ghostsnodes.size() << "\">" << endl;
+			<< "    <Piece NumberOfCells=\"" << octree.connectivity.size() + octree.ghostsconnectivity.size() << "\" NumberOfPoints=\"" << octree.nodes.size() + octree.ghostsnodes.size() << "\">" << endl;
 	    out << "      <Points>" << endl
 	    	<< "        <DataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\""<< 3 <<"\" format=\"ascii\">" << endl
 	    	<< "          " << std::fixed;
 	    for(int i = 0; i < nofNodes; i++)
 	    {
 	    	for(int j = 0; j < 3; ++j)
-	    		out << std::setprecision(6) << nodes[i][j] << " ";
+	    		out << std::setprecision(6) << octree.nodes[i][j] << " ";
 	    	if((i+1)%4==0 && i!=nofNodes-1)
 	    		out << endl << "          ";
 	    }
 	    for(int i = 0; i < nofGhostNodes; i++)
 	    {
 	    	for(int j = 0; j < 3; ++j)
-	    		out << std::setprecision(6) << ghostsnodes[i][j] << " ";
+	    		out << std::setprecision(6) << octree.ghostsnodes[i][j] << " ";
 	    	if((i+1)%4==0 && i!=nofNodes-1)
 	    		out << endl << "          ";
 	    }
@@ -4315,7 +4327,7 @@ public:
 	        	else if(j==3){
 	        		jj = 2;
 	        	}
-	            out << connectivity[i][jj] << " ";
+	            out << octree.connectivity[i][jj] << " ";
 	          }
 	        if((i+1)%3==0 && i!=nofOctants-1)
 	          out << endl << "          ";
@@ -4334,7 +4346,7 @@ public:
 	        	else if(j==3){
 	        		jj = 2;
 	        	}
-	        	out << ghostsconnectivity[i][jj] + nofNodes << " ";
+	        	out << octree.ghostsconnectivity[i][jj] + nofNodes << " ";
 	          }
 	        if((i+1)%3==0 && i!=nofGhosts-1)
 	          out << endl << "          ";
@@ -4398,7 +4410,7 @@ public:
 	    MPI_Barrier(MPI_COMM_WORLD);
 
 	    if (clear){
-	    	clearConnectivity();
+	    	octree.clearConnectivity();
 	    }
 
 
@@ -4414,8 +4426,8 @@ public:
 	void write(string filename) {
 
 		bool clear = false;
-		if (connectivity.size() == 0) {
-			computeConnectivity();
+		if (octree.connectivity.size() == 0) {
+			octree.computeConnectivity();
 			clear = true;
 		}
 
@@ -4429,25 +4441,25 @@ public:
 			writeLog(ss.str());
 			return;
 		}
-		int nofNodes = nodes.size();
-		int nofGhostNodes = ghostsnodes.size();
-		int nofOctants = connectivity.size();
-		int nofGhosts = ghostsconnectivity.size();
+		int nofNodes = octree.nodes.size();
+		int nofGhostNodes = octree.ghostsnodes.size();
+		int nofOctants = octree.connectivity.size();
+		int nofGhosts = octree.ghostsconnectivity.size();
 		int nofAll = nofGhosts + nofOctants;
 		out << "<?xml version=\"1.0\"?>" << endl
 			<< "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
 			<< "  <UnstructuredGrid>" << endl
-			<< "    <Piece NumberOfCells=\"" << connectivity.size() + ghostsconnectivity.size() << "\" NumberOfPoints=\"" << nodes.size() + ghostsnodes.size() << "\">" << endl;
+			<< "    <Piece NumberOfCells=\"" << octree.connectivity.size() + octree.ghostsconnectivity.size() << "\" NumberOfPoints=\"" << octree.nodes.size() + octree.ghostsnodes.size() << "\">" << endl;
 	    out << "      <Points>" << endl
 	    	<< "        <DataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\""<< 3 <<"\" format=\"ascii\">" << endl
 	    	<< "          " << std::fixed;
 	    for(int i = 0; i < nofNodes; i++)
 	    {
 	    	for(int j = 0; j < 3; ++j){
-	    		if (j==0) trans.mapX(uint32_t(nodes[i][j]));
-	    		if (j==1) trans.mapY(uint32_t(nodes[i][j]));
-	    		if (j==2) trans.mapZ(uint32_t(nodes[i][j]));
-	    		out << std::setprecision(6) << nodes[i][j] << " ";
+	    		if (j==0) trans.mapX(octree.nodes[i][j]);
+	    		if (j==1) trans.mapY(octree.nodes[i][j]);
+	    		if (j==2) trans.mapZ(octree.nodes[i][j]);
+	    		out << std::setprecision(6) << octree.nodes[i][j] << " ";
 	    	}
 	    	if((i+1)%4==0 && i!=nofNodes-1)
 	    		out << endl << "          ";
@@ -4455,10 +4467,10 @@ public:
 	    for(int i = 0; i < nofGhostNodes; i++)
 	    {
 	    	for(int j = 0; j < 3; ++j){
-	    		if (j==0) trans.mapX(uint32_t(ghostsnodes[i][j]));
-	    		if (j==1) trans.mapY(uint32_t(ghostsnodes[i][j]));
-	    		if (j==2) trans.mapZ(uint32_t(ghostsnodes[i][j]));
-	    		out << std::setprecision(6) << ghostsnodes[i][j] << " ";
+	    		if (j==0) trans.mapX(octree.ghostsnodes[i][j]);
+	    		if (j==1) trans.mapY(octree.ghostsnodes[i][j]);
+	    		if (j==2) trans.mapZ(octree.ghostsnodes[i][j]);
+	    		out << std::setprecision(6) << octree.ghostsnodes[i][j] << " ";
 	    	}
 	    	if((i+1)%4==0 && i!=nofNodes-1)
 	    		out << endl << "          ";
@@ -4482,7 +4494,7 @@ public:
 	        	else if(j==3){
 	        		jj = 2;
 	        	}
-	            out << connectivity[i][jj] << " ";
+	            out << octree.connectivity[i][jj] << " ";
 	          }
 	        if((i+1)%3==0 && i!=nofOctants-1)
 	          out << endl << "          ";
@@ -4501,7 +4513,7 @@ public:
 	        	else if(j==3){
 	        		jj = 2;
 	        	}
-	            out << ghostsconnectivity[i][jj] + nofNodes << " ";
+	            out << octree.ghostsconnectivity[i][jj] + nofNodes << " ";
 	          }
 	        if((i+1)%3==0 && i!=nofGhosts-1)
 	          out << endl << "          ";
