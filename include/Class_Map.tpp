@@ -65,12 +65,12 @@ double Class_Map<dim>::mapSize(uint32_t const & size){
 };
 
 template <int dim>
-double Class_Map<dim>::mapArea(uint32_t const & Area){
+double Class_Map<dim>::mapArea(uint64_t const & Area){
 	return ((pow(L,2.0)/pow(double(globals.max_length),2.0))*double(Area));
 };
 
 template <int dim>
-double Class_Map<dim>::mapVolume(uint32_t const & Volume){
+double Class_Map<dim>::mapVolume(uint64_t const & Volume){
 	return ((pow(L,3.0)/pow(double(globals.max_length),3.0))*double(Volume));
 };
 
@@ -83,7 +83,7 @@ void Class_Map<dim>::mapCenter(double* & center,
 	orig.push_back(Z0);
 	orig.shrink_to_fit();
 	mapcenter.resize(3);
-	for (int i=0; i<3; i++){
+	for (int i=0; i<dim; i++){
 		mapcenter[i] = orig[i] + L/double(globals.max_length) * center[i];
 	}
 	mapcenter.shrink_to_fit();

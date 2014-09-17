@@ -44,8 +44,11 @@ private:
 	uint32_t 	owners[2];			/**< Owner octants of the intersection (first is the internal octant) */
 	uint8_t   	iface;				/**< Index of the face of the first owner */
 	bool		finer;				/**< 0/1 finer octant (if same level =0) */
+	//TODO proposta: eliminare isghost poiché contiene la stessa info in pbound
 	bool		isghost;			/**< The intersection has a member ghost */
 	bool		isnew;				/**< The intersection is new after a mesh adapting? */
+	bool		bound;				/**< The intersection is a boundary intersection of the whole domain */
+	bool		pbound;				/**< The intersection is a boundary intersection of a process domain */
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS AND OPERATORS----------------------------------------------------- //
@@ -58,6 +61,7 @@ public:
 		isnew = false;
 		isghost = false;
 		finer = 0;
+		bound = pbound = false;
 	};
 	~Class_Intersection(){};
 	Class_Intersection(const Class_Intersection<2> & intersection){
@@ -67,7 +71,8 @@ public:
 		isnew = intersection.isnew;
 		isghost = intersection.isghost;
 		finer = intersection.finer;
-
+		bound = intersection.bound;
+		pbound = intersection.pbound;
 	};
 	Class_Intersection<2>& operator =(const Class_Intersection<2> & intersection){
 		owners[0] = intersection.owners[0];
@@ -76,6 +81,8 @@ public:
 		isnew = intersection.isnew;
 		isghost = intersection.isghost;
 		finer = intersection.finer;
+		bound = intersection.bound;
+		pbound = intersection.pbound;
 		return *this;
 	};
 	bool operator ==(const Class_Intersection<2> & intersection){
@@ -86,6 +93,8 @@ public:
 		check = check && (isnew == intersection.isnew);
 		check = check && (isghost == intersection.isghost);
 		check = check && (finer == intersection.finer);
+		check = check && (bound == intersection.bound);
+		check = check && (pbound == intersection.pbound);
 		return check;
 
 	};
@@ -106,4 +115,15 @@ private:
 			normal[i] = global2D.normals[iface][i];
 		}
 	};
+	bool getBound(){
+		return bound;
+	}
+
+	bool getIsGhost(){
+		return isghost;
+	}
+
+	bool getPbound(){
+		return pbound;
+	}
 }; // end of Class_Intersection_2D.tpp

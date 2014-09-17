@@ -29,7 +29,7 @@ using namespace std;
  *
  *  \brief Customized array definition
  *
- *  Casll_Array conatins a pointer to an array of integer values. Implemented here for fast using in PABLO.
+ *  Class_Array contains a pointer to an array of integer values. Implemented here for fast using in PABLO.
  *
  */
 class Class_Array {

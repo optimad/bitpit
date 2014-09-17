@@ -16,34 +16,24 @@ int main(int argc, char *argv[]) {
 			uint8_t level0 = MAX_LEVEL_2D;
 			X = 0.0; Y = 0.0; Z = 0.0; L = 100.0;
 			Class_Para_Tree<2> ptree(X, Y, Z, L);
-			for (int i=0; i<ptree.getNumOctants(); i++){
-				Class_Octant<2>* oct = ptree.getOctant(i);
-				ptree.setMarker(oct, 2);
-			}
+			Class_Octant<2>* oct = ptree.getOctant(0);
+			ptree.setBalance(oct,false);
+			ptree.setMarker(oct, 1);
 			bool done = ptree.adapt();
-			ptree.loadBalance();
-			for (int i=0; i<ptree.getNumOctants(); i++){
-				vector<uint32_t> neigh;
-				vector<bool> isghost;
-				uint8_t codim = 1;
-				Class_Octant<2>* oct = ptree.getOctant(i);
-				cout << " rank: " << ptree.rank << " idx: " << ptree.getGlobalIdx(oct);
-				for (uint8_t iface=0; iface<4; iface++){
-//					cout << "   iface: " << int(iface);
-//						//cout << "   iface: " << int(iface) << " Bound: " << ptree.getBound(oct,iface) << " Pbound: " << ptree.getPbound(oct,iface);
-//					ptree.findNeighbours(oct, iface, codim, neigh, isghost);
-//					for (int j=0; j<neigh.size(); j++){
-//						cout << "   neigh_" << j << ": " << neigh[j] << " isghost: " << isghost[j];
-//					}
-					cout << "   inode: " << int(iface);
-					ptree.findNeighbours(oct, iface, codim+1, neigh, isghost);
-					for (int j=0; j<neigh.size(); j++){
-						cout << "   neigh_" << j << ": " << neigh[j] << " isghost: " << isghost[j];
-					}
+
+			for(int l = 0; l < 7; ++l){
+				uint32_t numOcts = ptree.getNumOctants();
+				for(int o = 0; o < numOcts; ++o){
+					Class_Octant<2>* oct = ptree.getOctant(o);
+					ptree.setMarker(oct,1);
 				}
-				cout << endl;
+				ptree.adapt();
+				ptree.computeIntersections();
+				int numInts;
+				cout << ptree.getNumIntersections() << endl;
+				ptree.computeConnectivity();
+				ptree.write("griglia");
 			}
-		}
 
 
 
@@ -191,6 +181,7 @@ int main(int argc, char *argv[]) {
 ////				ptree.octree.updateGhostsConnectivity();
 //			writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,("Pablo_"+to_string(0)));
 */
+		}
 
 	MPI::Finalize();
 

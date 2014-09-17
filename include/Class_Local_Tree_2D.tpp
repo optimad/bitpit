@@ -51,14 +51,24 @@ class Class_Local_Tree<2>{
 private:
 	OctantsType					octants;			/**< Local vector of octants ordered with Morton Number */
 	OctantsType					ghosts;				/**< Local vector of ghost octants ordered with Morton Number */
-	IntersectionsType			intersections_int;	/**< Local vector of internal intersections ordered with Morton Number of first owner octant */
-	IntersectionsType			intersections_ghost;/**< Local vector of intersections internal/ghost ordered with Morton Number of internal owner octant */
-	IntersectionsType			intersections_bord;	/**< Local vector of border intersections (twice the sam octant is stored in an intersection) */
+//	IntersectionsType			intersections_int;	/**< Local vector of internal intersections ordered with Morton Number of first owner octant */
+//	IntersectionsType			intersections_ghost;/**< Local vector of intersections internal/ghost ordered with Morton Number of internal owner octant */
+//	IntersectionsType			intersections_bord;	/**< Local vector of border intersections (twice the same octant is stored in an intersection) */
+	IntersectionsType			intersections;		/**< Local vector of intersections */
 	u64vector 					globalidx_ghosts;	/**< Global index of the ghost octants (size = size_ghosts) */
 	Class_Octant<2> 			first_desc;			/**< First (Morton order) most refined octant possible in local partition */
 	Class_Octant<2> 			last_desc;			/**< Last (Morton order) most refined octant possible in local partition */
 	uint32_t 					size_ghosts;		/**< Size of vector of ghost octants */
 	uint8_t						local_max_depth;	/**< Reached max depth in local tree */
+
+	// connectivity
+	u32vector2D					nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
+	u32vector2D					connectivity;		/**<Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
+	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
+	u32vector2D					ghostsnodes;		/**<Local vector of ghosts nodes (x,y,z) ordered with Morton Number*/
+	u32vector2D					ghostsconnectivity;	/**<Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
+	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
+
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
@@ -939,7 +949,7 @@ private:
 							while(ghosts[idxtry].computeMorton() > Morton){
 								idxtry--;
 								if(idxtry > ghosts.size()-1){
-									idxtry = ghosts.size()-1;
+									idxtry = 0;
 									break;
 								}
 							}
@@ -1156,7 +1166,7 @@ private:
 						while(octants[idxtry].computeMorton() > Morton){
 							idxtry--;
 							if(idxtry > noctants-1){
-								idxtry = noctants-1;
+								idxtry = 0;
 								break;
 							}
 						}
@@ -1251,7 +1261,7 @@ private:
 							while(ghosts[idxtry].computeMorton() > Morton){
 								idxtry--;
 								if(idxtry > ghosts.size()-1){
-									idxtry = ghosts.size()-1;
+									idxtry = 0;
 									break;
 								}
 							}
@@ -1334,14 +1344,14 @@ private:
 									while(octants[idxtry].computeMorton() < Morton){
 										idxtry++;
 										if(idxtry > noctants-1){
-											idxtry = noctants;
+											idxtry = noctants-1;
 											break;
 										}
 									}
 									while(octants[idxtry].computeMorton() > Morton){
 										idxtry--;
 										if(idxtry > noctants-1){
-											idxtry = noctants;
+											idxtry = 0;
 											break;
 										}
 									}
@@ -1672,7 +1682,6 @@ private:
 
 		}
 		else{
-
 			// Loop on ghost octants (influence over interior borders)
 			/*	for (idx=0; idx<size_ghosts; idx++){
 			if (!ghosts[idx].getNotBalance()){
@@ -2067,14 +2076,14 @@ private:
 						while(ghosts[idxtry].computeMorton() < Morton){
 							idxtry++;
 							if(idxtry > ghosts.size()-1){
-								idxtry = ghosts.size();
+								idxtry = ghosts.size()-1;
 								break;
 							}
 						}
 						while(ghosts[idxtry].computeMorton() > Morton){
 							idxtry--;
 							if(idxtry > ghosts.size()-1){
-								idxtry = ghosts.size();
+								idxtry = 0;
 								break;
 							}
 						}
@@ -2092,7 +2101,7 @@ private:
 						uint64_t Mortonlast = last_desc.computeMorton();
 						vector<uint32_t> bufferidx;
 						Mortontry = ghosts[idxtry].computeMorton();
-						while(Mortontry < Mortonlast & idxtry < size_ghosts){
+						while(Mortontry < Mortonlast && idxtry < size_ghosts){
 							//Dhx = int32_t(cx)*(-int32_t(oct->x) + int32_t(ghosts[idxtry].x));
 							//Dhy = int32_t(cy)*(-int32_t(oct->y) + int32_t(ghosts[idxtry].y));
 							Dhx = (-int32_t(oct->x) + int32_t(ghosts[idxtry].x));
@@ -2149,14 +2158,14 @@ private:
 						while(octants[idxtry].computeMorton() < Morton){
 							idxtry++;
 							if(idxtry > noctants-1){
-								idxtry = noctants;
+								idxtry = noctants-1;
 								break;
 							}
 						}
 						while(octants[idxtry].computeMorton() > Morton){
 							idxtry--;
 							if(idxtry > noctants-1){
-								idxtry = noctants;
+								idxtry = 0;
 								break;
 							}
 						}
@@ -2174,7 +2183,7 @@ private:
 						uint64_t Mortonlast = last_desc.computeMorton();
 						vector<uint32_t> bufferidx;
 						Mortontry = octants[idxtry].computeMorton();
-						while(Mortontry < Mortonlast & idxtry < noctants-1){
+						while(Mortontry < Mortonlast && idxtry < noctants-1){
 							//Dhx = int32_t(cx)*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 							//Dhy = int32_t(cy)*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
 							Dhx = (-int32_t(oct->x) + int32_t(octants[idxtry].x));
@@ -2292,14 +2301,14 @@ private:
 						while(ghosts[idxtry].computeMorton() < Morton){
 							idxtry++;
 							if(idxtry > ghosts.size()-1){
-								idxtry = ghosts.size();
+								idxtry = ghosts.size()-1;
 								break;
 							}
 						}
 						while(ghosts[idxtry].computeMorton() > Morton){
 							idxtry--;
 							if(idxtry > ghosts.size()-1){
-								idxtry = ghosts.size();
+								idxtry = 0;
 								break;
 							}
 						}
@@ -2317,7 +2326,7 @@ private:
 						uint64_t Mortonlast = last_desc.computeMorton();
 						vector<uint32_t> bufferidx;
 						Mortontry = ghosts[idxtry].computeMorton();
-						while(Mortontry < Mortonlast & idxtry < size_ghosts){
+						while(Mortontry < Mortonlast && idxtry < size_ghosts){
 							//Dhx = int32_t(cx)*(-int32_t(oct->x) + int32_t(ghosts[idxtry].x));
 							//Dhy = int32_t(cy)*(-int32_t(oct->y) + int32_t(ghosts[idxtry].y));
 							Dhx = (-int32_t(oct->x) + int32_t(ghosts[idxtry].x));
@@ -2374,14 +2383,14 @@ private:
 						while(octants[idxtry].computeMorton() < Morton){
 							idxtry++;
 							if(idxtry > noctants-1){
-								idxtry = noctants;
+								idxtry = noctants-1;
 								break;
 							}
 						}
 						while(octants[idxtry].computeMorton() > Morton){
 							idxtry--;
 							if(idxtry > noctants-1){
-								idxtry = noctants;
+								idxtry = 0;
 								break;
 							}
 						}
@@ -2399,7 +2408,7 @@ private:
 						uint64_t Mortonlast = last_desc.computeMorton();
 						vector<uint32_t> bufferidx;
 						Mortontry = octants[idxtry].computeMorton();
-						while(Mortontry < Mortonlast & idxtry < noctants-1){
+						while(Mortontry < Mortonlast && idxtry < noctants-1){
 							//Dhx = int32_t(cx)*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 							//Dhy = int32_t(cy)*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
 							Dhx = (-int32_t(oct->x) + int32_t(octants[idxtry].x));
@@ -2433,19 +2442,22 @@ private:
 		Class_Intersection<2> intersection;
 		u32vector neighbours;
 		vector<bool> isghost;
-		uint32_t counter_i, counter_g, counter_b, idx;
+		uint32_t counter, counter_i, counter_g, counter_b, idx;
 		uint32_t i, j, k, nsize;
 		uint8_t iface, iface2;
 
 
-		intersections_int.clear();
-		intersections_ghost.clear();
-		intersections_bord.clear();
-		intersections_int.reserve(2*2*octants.size());
-		intersections_ghost.reserve(2*2*ghosts.size());
-		intersections_bord.reserve(int(sqrt(octants.size())));
+		intersections.clear();
+		intersections.reserve(2*2*octants.size());
+//		intersections_int.clear();
+//		intersections_ghost.clear();
+//		intersections_bord.clear();
+//		intersections_int.reserve(2*2*octants.size());
+//		intersections_ghost.reserve(2*2*ghosts.size());
+//		intersections_bord.reserve(int(sqrt(octants.size())));
 
-		counter_i = counter_g = counter_b = idx = 0;
+//		counter_i = counter_g = counter_b = idx = 0;
+		counter = idx = 0;
 
 		// Loop on ghosts
 		obegin = ghosts.begin();
@@ -2456,14 +2468,18 @@ private:
 				findGhostNeighbours(idx, iface2, neighbours);
 				nsize = neighbours.size();
 				for (i = 0; i < nsize; i++){
-					intersection.finer = (nsize == 1);
+					intersection.finer = (nsize==1);
 					intersection.owners[0]  = neighbours[i];
 					intersection.owners[1] = idx;
-					intersection.iface = global2D.oppface[iface2];
+					intersection.iface = global2D.oppface[iface2] - (nsize==1);
 					intersection.isnew = false;
 					intersection.isghost = true;
-					intersections_ghost.push_back(intersection);
-					counter_g++;
+//					intersections_ghost.push_back(intersection);
+//					counter_g++;
+					intersection.bound = false;
+					intersection.pbound = true;
+					intersections.push_back(intersection);
+					counter++;
 				}
 			}
 			idx++;
@@ -2483,21 +2499,29 @@ private:
 							intersection.owners[0] = idx;
 							intersection.owners[1] = neighbours[i];
 							intersection.finer = (nsize>1);
-							intersection.iface = iface2;
+							intersection.iface = iface2 + (nsize>1);
 							intersection.isnew = false;
 							intersection.isghost = true;
-							intersections_ghost.push_back(intersection);
-							counter_g++;
+//							intersections_ghost.push_back(intersection);
+//							counter_g++;
+							intersection.bound = false;
+							intersection.pbound = true;
+							intersections.push_back(intersection);
+							counter++;
 						}
 						else{
 							intersection.owners[0] = idx;
 							intersection.owners[1] = neighbours[i];
 							intersection.finer = (nsize>1);
-							intersection.iface = iface2;
+							intersection.iface = iface2 + (nsize>1);
 							intersection.isnew = false;
 							intersection.isghost = false;
-							intersections_int.push_back(intersection);
-							counter_i++;
+//							intersections_int.push_back(intersection);
+//							counter_i++;
+							intersection.bound = false;
+							intersection.pbound = false;
+							intersections.push_back(intersection);
+							counter++;
 						}
 					}
 				}
@@ -2508,25 +2532,34 @@ private:
 					intersection.iface = iface2;
 					intersection.isnew = false;
 					intersection.isghost = false;
-					intersections_bord.push_back(intersection);
-					counter_b++;
+//					intersections_bord.push_back(intersection);
+//					counter_b++;
+					intersection.bound = true;
+					intersection.pbound = false;
+					intersections.push_back(intersection);
+					counter++;
 				}
-				if (it->info[iface]){
+				if (it->info[iface2+1]){
 					intersection.owners[0] = idx;
 					intersection.owners[1] = idx;
 					intersection.finer = 0;
-					intersection.iface = iface;
+					intersection.iface = iface2+1;
 					intersection.isnew = false;
 					intersection.isghost = false;
-					intersections_bord.push_back(intersection);
-					counter_b++;
+//					intersections_bord.push_back(intersection);
+//					counter_b++;
+					intersection.bound = true;
+					intersection.pbound = false;
+					intersections.push_back(intersection);
+					counter++;
 				}
 			}
 			idx++;
 		}
-		intersections_int.shrink_to_fit();
-		intersections_ghost.shrink_to_fit();
-		intersections_bord.shrink_to_fit();
+//		intersections_int.shrink_to_fit();
+//		intersections_ghost.shrink_to_fit();
+//		intersections_bord.shrink_to_fit();
+		intersections.shrink_to_fit();
 
 	}
 
@@ -2705,10 +2738,10 @@ private:
 				return idx;
 			}
 			Mortontry = octants[idx].computeMorton();
-			jump = (Mortontry<Morton)*jump/4;
+			jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
 			idx += jump;
 			if (idx > nocts){
-				return nocts;   // return nocts if not found the Morton
+				return nocts-1;   // return nocts if not found the Morton
 			}
 		}
 		if (Mortontry<Morton){
@@ -2720,14 +2753,14 @@ private:
 			}
 		}
 		else{
-			for(int idx2=0; idx2<idx; idx2++){
+			for(int idx2=0; idx2<idx+1; idx2++){
 				Mortontry = octants[idx2].computeMorton();
 				if (Mortontry == Morton){
-					return idx;
+					return idx2;
 				}
 			}
 		}
-		return nocts;
+		return nocts-1;
 	};
 
 	// =================================================================================== //
@@ -2768,6 +2801,162 @@ private:
 	};
 
 	// =================================================================================== //
+
+	/** Compute the connectivity of octants and store the coordinates of nodes.
+	 */
+	void computeConnectivity() {
+		map<uint64_t, vector<uint32_t> > mapnodes;
+		map<uint64_t, vector<uint32_t> >::iterator iter, iterend;
+		uint32_t i, k, counter;
+		uint64_t morton;
+		uint32_t noctants = getNumOctants();
+		u32vector2D octnodes;
+		uint8_t j;
+
+		clearConnectivity();
+
+		octnodes.reserve(global2D.nnodes);
+		if (nodes.size() == 0){
+			connectivity.resize(noctants);
+			for (i = 0; i < noctants; i++){
+				octants[i].getNodes(octnodes);
+				for (j = 0; j < global2D.nnodes; j++){
+					morton = mortonEncode_magicbits(octnodes[j][0], octnodes[j][1]);
+					if (mapnodes[morton].size()==0){
+						mapnodes[morton].reserve(8);
+						for (k = 0; k < 3; k++){
+							mapnodes[morton].push_back(octnodes[j][k]);
+						}
+					}
+					mapnodes[morton].push_back(double(i));
+				}
+				u32vector2D().swap(octnodes);
+			}
+			iter	= mapnodes.begin();
+			iterend	= mapnodes.end();
+			counter = 0;
+			uint32_t numnodes = mapnodes.size();
+			nodes.resize(numnodes);
+			while (iter != iterend){
+				vector<uint32_t> nodecasting(iter->second.begin(), iter->second.begin()+3);
+				nodes[counter] = nodecasting;
+				nodes[counter].shrink_to_fit();
+				for(vector<uint32_t>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
+					if (connectivity[int(*iter2)].size()==0){
+						connectivity[int(*iter2)].reserve(4);
+					}
+					connectivity[int(*iter2)].push_back(counter);
+				}
+				mapnodes.erase(iter++);
+				counter++;
+			}
+			nodes.shrink_to_fit();
+			//Slow. Memory saving.
+			for (int ii=0; ii<noctants; ii++){
+				connectivity[ii].shrink_to_fit();
+			}
+			connectivity.shrink_to_fit();
+		}
+		map<uint64_t, vector<uint32_t> >().swap(mapnodes);
+		iter = mapnodes.end();
+	}
+
+	// =================================================================================== //
+
+	/** Clear the connectivity of octants.
+	 */
+	void clearConnectivity() {
+		u32vector2D().swap(nodes);
+		u32vector2D().swap(connectivity);
+	}
+
+	// =================================================================================== //
+
+	/** Update the connectivity of octants.
+	 */
+	void updateConnectivity() {
+		clearConnectivity();
+		computeConnectivity();
+	}
+
+	// =================================================================================== //
+
+	/** Compute the connectivity of ghost octants and store the coordinates of nodes.
+	 */
+	void computeghostsConnectivity() {
+		map<uint64_t, vector<uint32_t> > mapnodes;
+		map<uint64_t, vector<uint32_t> >::iterator iter, iterend;
+		uint32_t i, k, counter;
+		uint64_t morton;
+		uint32_t noctants = size_ghosts;
+		u32vector2D octnodes;
+		uint8_t j;
+
+		octnodes.reserve(global2D.nnodes);
+
+		if (ghostsnodes.size() == 0){
+			ghostsconnectivity.resize(noctants);
+			for (i = 0; i < noctants; i++){
+				ghosts[i].getNodes(octnodes);
+				for (j = 0; j < global2D.nnodes; j++){
+					morton = mortonEncode_magicbits(octnodes[j][0], octnodes[j][1]);
+					if (mapnodes[morton].size()==0){
+						for (k = 0; k < 3; k++){
+							mapnodes[morton].push_back(octnodes[j][k]);
+						}
+					}
+					mapnodes[morton].push_back(i);
+				}
+				u32vector2D().swap(octnodes);
+			}
+			iter	= mapnodes.begin();
+			iterend	= mapnodes.end();
+			uint32_t numnodes = mapnodes.size();
+			ghostsnodes.resize(numnodes);
+			counter = 0;
+			while (iter != iterend){
+				vector<uint32_t> nodecasting(iter->second.begin(), iter->second.begin()+3);
+				ghostsnodes[counter] = nodecasting;
+				ghostsnodes[counter].shrink_to_fit();
+				for(vector<uint32_t>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
+					if (ghostsconnectivity[int(*iter2)].size()==0){
+						ghostsconnectivity[int(*iter2)].reserve(4);
+					}
+					ghostsconnectivity[int(*iter2)].push_back(counter);
+				}
+				mapnodes.erase(iter++);
+				counter++;
+			}
+			ghostsnodes.shrink_to_fit();
+			//Slow. Memory saving.
+			for (int ii=0; ii<noctants; ii++){
+				ghostsconnectivity[ii].shrink_to_fit();
+			}
+			ghostsconnectivity.shrink_to_fit();
+		}
+		iter = mapnodes.end();
+	}
+
+	// =================================================================================== //
+
+	/** Clear the connectivity of ghost octants.
+	 */
+	void clearghostsConnectivity() {
+		u32vector2D().swap(ghostsnodes);
+		u32vector2D().swap(ghostsconnectivity);
+	}
+
+	// =================================================================================== //
+
+	/** Update the connectivity of ghost octants.
+	 */
+	void updateghostsConnectivity() {
+		clearghostsConnectivity();
+		computeghostsConnectivity();
+	}
+
+	// =============================================================================== //
+
 
 };//end Class_Local_Tree<2> specialization;
 

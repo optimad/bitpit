@@ -35,6 +35,8 @@ public:
 	typedef vector<vector<uint32_t>	>	u32vector2D;
 	typedef vector<vector<uint64_t>	>	u64vector2D;
 	typedef vector<vector<double>	>	dvector2D;
+	typedef vector<int>					ivector;
+	typedef vector<vector<int>	>		ivector2D;
 
 	// ------------------------------------------------------------------------------- //
 	// MEMBERS ----------------------------------------------------------------------- //
@@ -59,13 +61,14 @@ public:
 	//map member
 	Class_Map<2> trans;							/**<Transformation map from logical to physical domain*/
 
-	// connectivity
-	dvector2D					nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
-	u32vector2D					connectivity;		/**<Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
-	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
-	dvector2D					ghostsnodes;		/**<Local vector of ghosts nodes (x,y,z) ordered with Morton Number*/
-	u32vector2D					ghostsconnectivity;	/**<Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
-	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
+//	// connectivity
+//	dvector2D					nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
+//	u32vector2D					connectivity;		/**<Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
+//	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
+//	dvector2D					ghostsnodes;		/**<Local vector of ghosts nodes (x,y,z) ordered with Morton Number*/
+//	u32vector2D					ghostsconnectivity;	/**<Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
+//	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
+
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
@@ -118,7 +121,7 @@ public:
 	 * \param[in] Z Coordinate Z of node 0,
 	 * \param[in] L Side length of the octant.
 	 */
-	Class_Para_Tree(double & X, double & Y, double & Z, double & L){
+	Class_Para_Tree(double & X, double & Y, double & Z, double & L):trans(X,Y,Z,L){
 		serial = true;
 		error_flag = 0;
 		max_depth = 0;
@@ -152,6 +155,88 @@ public:
 		writeLog("				" + to_string(Y));
 		writeLog("				" + to_string(Z));
 		writeLog(" Domain Size		:	" + to_string(L));
+		writeLog("---------------------------------------------");
+		writeLog(" ");
+
+	};
+
+	// =============================================================================== //
+
+	/*! Constructor of Para_Tree for restart a simulation with input parameters.
+	 * For each process it builds a vector of octants. The input parameters are :
+	 * \param[in] X Physical Coordinate X of node 0,
+	 * \param[in] Y Physical Coordinate Y of node 0,
+	 * \param[in] Z Physical Coordinate Z of node 0,
+	 * \param[in] L Physical Side length of the domain,
+	 * \param[in] XY Coordinates of octants (node 0) in logical domain,
+	 * \param[in] levels Level of each octant.
+	 */
+	Class_Para_Tree(double & X, double & Y, double & Z, double & L, ivector2D & XY, ivector & levels):trans(X,Y,Z,L){
+
+		uint8_t lev, iface;
+		uint32_t x0, y0;
+		uint32_t NumOctants = XY.size();
+		octree.octants.resize(NumOctants);
+		for (int i=0; i<NumOctants; i++){
+			lev = uint8_t(levels[i]);
+			 x0 = uint32_t(XY[i][0]);
+			uint32_t y0 = uint32_t(XY[i][1]);
+			Class_Octant<2> oct(lev, x0, y0);
+			if (x0 == 0){
+				iface = 0;
+				oct.setBound(iface);
+			}
+			else if (x0 == global2D.max_length - oct.getSize()){
+				iface = 1;
+				oct.setBound(iface);
+			}
+			if (y0 == 0){
+				iface = 2;
+				oct.setBound(iface);
+			}
+			else if (y0 == global2D.max_length - oct.getSize()){
+				iface = 3;
+				oct.setBound(iface);
+			}
+			octree.octants[i] = oct;
+
+		}
+
+		setFirstDesc();
+		setLastDesc();
+
+		error_flag = MPI_Comm_size(MPI_COMM_WORLD,&nproc);
+		error_flag = MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+		serial = true;
+		if (nproc > 1 ) serial = false;
+
+		partition_first_desc = new uint64_t[nproc];
+		partition_last_desc = new uint64_t[nproc];
+		partition_range_globalidx = new uint64_t[nproc];
+
+		updateAdapt();
+		setPboundGhosts();
+
+		// Write info log
+		if(rank==0){
+			int sysError = system("rm PABLO.log");
+		}
+		MPI_Barrier(MPI_COMM_WORLD);
+		writeLog("---------------------------------------------");
+		writeLog("- PABLO PArallel Balanced Linear Octree -");
+		writeLog("---------------------------------------------");
+		writeLog(" ");
+		writeLog("---------------------------------------------");
+		writeLog("- PABLO restart -");
+		writeLog("---------------------------------------------");
+		writeLog(" Number of proc		:	" + to_string(nproc));
+		writeLog(" Dimension		:	" + to_string(2));
+		writeLog(" Max allowed level	:	" + to_string(MAX_LEVEL_2D));
+		writeLog(" Domain Origin		:	" + to_string(X));
+		writeLog("				" + to_string(Y));
+		writeLog("				" + to_string(Z));
+		writeLog(" Domain Size		:	" + to_string(L));
+		writeLog(" Number of octants	:	" + to_string(global_num_octants));
 		writeLog("---------------------------------------------");
 		writeLog(" ");
 
@@ -207,7 +292,7 @@ public:
 	 * \return Size of octant.
 	 */
 	double getArea(Class_Octant<2>* oct) {
-		return trans.mapArea(oct->getArea());
+		return trans.mapSize(oct->getArea());
 	}
 
 	/*! Get the volume of an octant, i.e. the coordinates of its node 0.
@@ -215,7 +300,7 @@ public:
 	 * \return Volume of octant.
 	 */
 	double getVolume(Class_Octant<2>* oct) {
-		return trans.mapVolume(oct->getVolume());
+		return trans.mapArea(oct->getVolume());
 	}
 
 	/*! Get the coordinates of the center of an octant.
@@ -311,6 +396,47 @@ public:
 		return oct->getLevel();
 	};
 
+	/*! Get the bound flag on an octant face.
+	 * \param[in] oct Pointer to target octant.
+	 * \param[in] iface local index of the face.
+	 * \return true if the iface face is a boundary face.
+	 */
+	bool getBound(Class_Octant<2>* oct, uint8_t iface){								// Get refinement/coarsening marker for idx-th octant
+		return oct->getBound(iface);
+	};
+
+	/*! Get the pbound flag on an octant face.
+	 * \param[in] oct Pointer to target octant.
+	 * \param[in] iface local index of the face.
+	 * \return true if the iface face is a process boundary face.
+	 */
+	bool getPbound(Class_Octant<2>* oct, uint8_t iface){								// Get refinement/coarsening marker for idx-th octant
+		return oct->getPbound(iface);
+	};
+
+
+	/*! Get the union of every bound flags on faces
+	 * \param[in] oct Pointer to target octant.
+	 * \return true if the octant has at least a boundary face.
+	 */
+	bool getBound(Class_Octant<2>* oct){
+		int temp = 0;
+		for(int i = 0; i < global2D.nfaces; ++i)
+			temp += oct->getBound(i);
+		return temp != 0;
+	};
+
+	/*! Get the union of every pbound flags on faces
+	 * \param[in] oct Pointer to target octant.
+	 * \return true if the octant has at least a process boundary face.
+	 */
+	bool getPbound(Class_Octant<2>* oct){								// Get refinement/coarsening marker for idx-th octant
+		int temp = 0;
+		for(int i = 0; i < global2D.nfaces; ++i)
+			temp += oct->getPbound(i);
+		return temp != 0;
+	};
+
 	/*! Get the balancing condition of an octant.
 	 * \param[in] oct Pointer to target octant.
 	 * \return Has octant to be balanced?
@@ -324,6 +450,8 @@ public:
 	 * \return Is octant ghost?
 	 */
 	bool getIsGhost(Class_Octant<2>* oct){
+		if (serial)
+			return false;
 		return (findOwner(oct->computeMorton()) != rank);
 	};
 
@@ -574,6 +702,7 @@ private:
 		};
 		return octree.getNumOctants();
 	};
+
 
 	/*! Set the refinement marker of an octant.
 	 * \param[in] oct Target octant.
@@ -954,56 +1083,75 @@ public:
 	//-------------------------------------------------------------------------------- //
 	// Intersections get Methods
 
-	/*! Get the local number of intersections on the global domain bord.
-	 * \return Local number of intersections on the global domain bord.
+//	/*! Get the local number of intersections on the global domain bord.
+//	 * \return Local number of intersections on the global domain bord.
+//	 */
+//	uint32_t getNumIntersectionsBord() {
+//		return octree.intersections_bord.size();
+//	}
+//
+//	/*! Get the local number of intersections inside the local domain.
+//	 * \return Local number of inner intersections inside the local domain.
+//	 */
+//	uint32_t getNumIntersectionsInt() {
+//		return octree.intersections_int.size();
+//	}
+//
+//	/*! Get the local number of intersections between local octants and ghost octants.
+//	 * \return Local number of intersections between local octants and ghost octants.
+//	 */
+//	uint32_t getNumIntersectionsGhost() {
+//		return octree.intersections_ghost.size();
+//	}
+//
+//	/*! Get a pointer to target intersection on domain bord.
+//	 * \param[in] idx Local index of intersection on domain bord.
+//	 * \return Pointer to target intersection.
+//	 */
+//	Class_Intersection<2>* getIntersectionBord(uint32_t idx) {
+//		if (idx < octree.intersections_bord.size()){
+//			return &octree.intersections_bord[idx];
+//		}
+//		return NULL;
+//	}
+//
+//	/*! Get a pointer to target intersection inside the local domain.
+//	 * \param[in] idx Local index of intersection inside the local domain.
+//	 * \return Pointer to target intersection.
+//	 */
+//	Class_Intersection<2>* getIntersectionInt(uint32_t idx) {
+//		if (idx < octree.intersections_int.size()){
+//			return &octree.intersections_int[idx];
+//		}
+//		return NULL;
+//	}
+//
+//	/*! Get a pointer to target intersection between octant and ghost.
+//	 * \param[in] idx Local index of intersection between octant and ghost.
+//	 * \return Pointer to target intersection.
+//	 */
+//	Class_Intersection<2>* getIntersectionGhost(uint32_t idx) {
+//		if (idx < octree.intersections_ghost.size()){
+//			return &octree.intersections_ghost[idx];
+//		}
+//		return NULL;
+//	}
+//
+
+	/*! Get the local number of intersections.
+	 * \return Local number of intersections.
 	 */
-	uint32_t getNumIntersectionsBord() {
-		return octree.intersections_bord.size();
+	uint32_t getNumIntersections() {
+		return octree.intersections.size();
 	}
 
-	/*! Get the local number of intersections inside the local domain.
-	 * \return Local number of inner intersections inside the local domain.
-	 */
-	uint32_t getNumIntersectionsInt() {
-		return octree.intersections_int.size();
-	}
-
-	/*! Get the local number of intersections between local octants and ghost octants.
-	 * \return Local number of intersections between local octants and ghost octants.
-	 */
-	uint32_t getNumIntersectionsGhost() {
-		return octree.intersections_ghost.size();
-	}
-
-	/*! Get a pointer to target intersection on domain bord.
-	 * \param[in] idx Local index of intersection on domain bord.
+	/*! Get a pointer to target intersection.
+	 * \param[in] idx Local index of intersection.
 	 * \return Pointer to target intersection.
 	 */
-	Class_Intersection<2>* getIntersectionBord(uint32_t idx) {
-		if (idx < octree.intersections_bord.size()){
-			return &octree.intersections_bord[idx];
-		}
-		return NULL;
-	}
-
-	/*! Get a pointer to target intersection inside the local domain.
-	 * \param[in] idx Local index of intersection inside the local domain.
-	 * \return Pointer to target intersection.
-	 */
-	Class_Intersection<2>* getIntersectionInt(uint32_t idx) {
-		if (idx < octree.intersections_int.size()){
-			return &octree.intersections_int[idx];
-		}
-		return NULL;
-	}
-
-	/*! Get a pointer to target intersection between octant and ghost.
-	 * \param[in] idx Local index of intersection between octant and ghost.
-	 * \return Pointer to target intersection.
-	 */
-	Class_Intersection<2>* getIntersectionGhost(uint32_t idx) {
-		if (idx < octree.intersections_ghost.size()){
-			return &octree.intersections_ghost[idx];
+	Class_Intersection<2>* getIntersection(uint32_t idx) {
+		if (idx < octree.intersections.size()){
+			return &octree.intersections[idx];
 		}
 		return NULL;
 	}
@@ -1016,6 +1164,38 @@ public:
 		return octree.extractOctant(inter->owners[inter->finer]).getLevel();
 	}
 
+	/*! Get the finer owner octant of an intersection.
+	 * \param[in] inter Pointer to target intersection.
+	 * \return The finer octant of the owners of intersection (false/true = 0/1).
+	 */
+	bool getFiner(Class_Intersection<2>* inter) {
+		return inter->finer;
+	}
+
+	/*! Get if an intersection is a boundary domain intersection.
+	 * \param[in] inter Pointer to target intersection.
+	 * \return Boundary or not boundary?.
+	 */
+	bool getBound(Class_Intersection<2>* inter) {
+		return inter->getBound();
+	}
+
+	/*! Get if an intersection is an intersection between an internal and a ghost element.
+	 * \param[in] inter Pointer to target intersection.
+	 * \return Ghost or not ghost?.
+	 */
+	bool getIsGhost(Class_Intersection<2>* inter) {
+		return inter->getIsGhost();
+	}
+
+
+	/*! Get if an intersection is a boundary intersection for a process.
+	 * \param[in] inter Pointer to target intersection.
+	 * \return Process boundary or not boundary?.
+	 */
+	bool getPbound(Class_Intersection<2>* inter) {
+		return inter->getPbound();
+	}
 	/*! Get the face index of an intersection.
 	 * \param[in] inter Pointer to target intersection.
 	 * \return Face index of the first octant owner of intersection (owners[0]).
@@ -1063,6 +1243,9 @@ public:
 		vector<double> center;
 		Class_Octant<2> oct = octree.extractOctant(inter->owners[inter->finer]);
 		double* center_ = oct.getCenter();
+		int sign = ( int(2*((inter->iface)%2)) - 1);
+		double deplace = double (sign * int(oct.getSize())) / 2;
+		center_[inter->iface/2] = uint32_t(int(center_[inter->iface/2]) + deplace);
 		trans.mapCenter(center_, center);
 		delete [] center_;
 		center_ = NULL;
@@ -1104,6 +1287,8 @@ public:
 		return normal;
 	}
 
+
+
 	//-------------------------------------------------------------------------------- //
 	// No Pointer Intersections get Methods
 
@@ -1120,14 +1305,15 @@ private:
 		return trans.mapArea(Area);
 	}
 
-	void getCenter(Class_Intersection<2> inter,
-			vector<double>& center) {
-		Class_Octant<2> oct = octree.extractOctant(inter.owners[inter.finer]);
-		double* center_ = oct.getCenter();
-		trans.mapCenter(center_, center);
-		delete [] center_;
-		center_ = NULL;
-	}
+// TODO Fix it!
+//	void getCenter(Class_Intersection<2> inter,
+//			vector<double>& center) {
+//		Class_Octant<2> oct = octree.extractOctant(inter.owners[inter.finer]);
+//		double* center_ = oct.getCenter();
+//		trans.mapCenter(center_, center);
+//		delete [] center_;
+//		center_ = NULL;
+//	}
 
 	void getNodes(Class_Intersection<2> inter,
 			dvector2D & nodes) {
@@ -1157,6 +1343,14 @@ private:
 	// =============================================================================== //
 
 public:
+	/** Compute the intersection of octants (intersections of bord, of inner domain and with ghost octants).
+	 */
+	void computeIntersections(){
+		octree.computeIntersections();
+	}
+
+	// =============================================================================== //
+
 	/** Get the octant owner of an input point.
 	 * \param[in] point Coordinates of target point.
 	 * \return Pointer to octant owner of target point.
@@ -3900,72 +4094,75 @@ public:
 	};
 
 	// =============================================================================== //
+
 	/** Compute the connectivity of octants and store the coordinates of nodes.
 	 */
 	void computeConnectivity() {
-		map<uint64_t, vector<double> > mapnodes;
-		map<uint64_t, vector<double> >::iterator iter, iterend;
-		uint32_t i, k, counter;
-		uint64_t morton;
-		uint32_t noctants = octree.getNumOctants();
-		dvector2D octnodes;
-		uint8_t j;
-
-		clearConnectivity();
-
-		octnodes.reserve(global2D.nnodes);
-		if (nodes.size() == 0){
-			connectivity.resize(noctants);
-			for (i = 0; i < noctants; i++){
-				getNodes(&octree.octants[i], octnodes);
-				for (j = 0; j < global2D.nnodes; j++){
-					morton = mortonEncode_magicbits(uint32_t(octnodes[j][0]/trans.L*double(global2D.max_length)), uint32_t(octnodes[j][1]/trans.L*double(global2D.max_length)));
-					if (mapnodes[morton].size()==0){
-						mapnodes[morton].reserve(8);
-						for (k = 0; k < 3; k++){
-							mapnodes[morton].push_back(octnodes[j][k]);
-						}
-					}
-					mapnodes[morton].push_back(double(i));
-				}
-				dvector2D().swap(octnodes);
-			}
-			iter	= mapnodes.begin();
-			iterend	= mapnodes.end();
-			counter = 0;
-			uint32_t numnodes = mapnodes.size();
-			nodes.resize(numnodes);
-			while (iter != iterend){
-				vector<double> nodecasting(iter->second.begin(), iter->second.begin()+3);
-				nodes[counter] = nodecasting;
-				nodes[counter].shrink_to_fit();
-				for(vector<double>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
-					if (connectivity[int(*iter2)].size()==0){
-						connectivity[int(*iter2)].reserve(4);
-					}
-					connectivity[int(*iter2)].push_back(counter);
-				}
-				mapnodes.erase(iter++);
-				counter++;
-			}
-			nodes.shrink_to_fit();
-			//Slow. Memory saving.
-			for (int ii=0; ii<noctants; ii++){
-				connectivity[ii].shrink_to_fit();
-			}
-			connectivity.shrink_to_fit();
-		}
-		map<uint64_t, vector<double> >().swap(mapnodes);
-		iter = mapnodes.end();
+		octree.computeConnectivity();
 	}
+//	void computeConnectivity() {
+//		map<uint64_t, vector<double> > mapnodes;
+//		map<uint64_t, vector<double> >::iterator iter, iterend;
+//		uint32_t i, k, counter;
+//		uint64_t morton;
+//		uint32_t noctants = octree.getNumOctants();
+//		dvector2D octnodes;
+//		uint8_t j;
+//
+//		clearConnectivity();
+//
+//		octnodes.reserve(global2D.nnodes);
+//		if (nodes.size() == 0){
+//			connectivity.resize(noctants);
+//			for (i = 0; i < noctants; i++){
+//				getNodes(&octree.octants[i], octnodes);
+//				for (j = 0; j < global2D.nnodes; j++){
+//					morton = mortonEncode_magicbits(uint32_t(octnodes[j][0]/trans.L*double(global2D.max_length)), uint32_t(octnodes[j][1]/trans.L*double(global2D.max_length)));
+//					if (mapnodes[morton].size()==0){
+//						mapnodes[morton].reserve(8);
+//						for (k = 0; k < 3; k++){
+//							mapnodes[morton].push_back(octnodes[j][k]);
+//						}
+//					}
+//					mapnodes[morton].push_back(double(i));
+//				}
+//				dvector2D().swap(octnodes);
+//			}
+//			iter	= mapnodes.begin();
+//			iterend	= mapnodes.end();
+//			counter = 0;
+//			uint32_t numnodes = mapnodes.size();
+//			nodes.resize(numnodes);
+//			while (iter != iterend){
+//				vector<double> nodecasting(iter->second.begin(), iter->second.begin()+3);
+//				nodes[counter] = nodecasting;
+//				nodes[counter].shrink_to_fit();
+//				for(vector<double>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
+//					if (connectivity[int(*iter2)].size()==0){
+//						connectivity[int(*iter2)].reserve(4);
+//					}
+//					connectivity[int(*iter2)].push_back(counter);
+//				}
+//				mapnodes.erase(iter++);
+//				counter++;
+//			}
+//			nodes.shrink_to_fit();
+//			//Slow. Memory saving.
+//			for (int ii=0; ii<noctants; ii++){
+//				connectivity[ii].shrink_to_fit();
+//			}
+//			connectivity.shrink_to_fit();
+//		}
+//		map<uint64_t, vector<double> >().swap(mapnodes);
+//		iter = mapnodes.end();
+//	}
 
 	// =================================================================================== //
 
 	/** Clear the connectivity of octants.
 	 */
 	void clearConnectivity() {
-		dvector2D().swap(nodes);
-		u32vector2D().swap(connectivity);
+		octree.clearConnectivity();
 	}
 
 	// =================================================================================== //
@@ -3973,8 +4170,7 @@ public:
 	/** Update the connectivity of octants.
 	 */
 	void updateConnectivity() {
-		clearConnectivity();
-		computeConnectivity();
+		octree.updateConnectivity();
 	}
 
 	// =================================================================================== //
@@ -3982,66 +4178,70 @@ public:
 	/** Compute the connectivity of ghost octants and store the coordinates of nodes.
 	 */
 	void computeghostsConnectivity() {
-		map<uint64_t, vector<double> > mapnodes;
-		map<uint64_t, vector<double> >::iterator iter, iterend;
-		uint32_t i, k, counter;
-		uint64_t morton;
-		uint32_t noctants = octree.size_ghosts;
-		dvector2D octnodes;
-		uint8_t j;
-
-		octnodes.reserve(global2D.nnodes);
-
-		if (ghostsnodes.size() == 0){
-			ghostsconnectivity.resize(noctants);
-			for (i = 0; i < noctants; i++){
-				getNodes(&octree.ghosts[i], octnodes);
-				for (j = 0; j < global2D.nnodes; j++){
-					morton = mortonEncode_magicbits(uint32_t(octnodes[j][0]/trans.L*double(global2D.max_length)), uint32_t(octnodes[j][1]/trans.L*double(global2D.max_length)));
-					if (mapnodes[morton].size()==0){
-						for (k = 0; k < 3; k++){
-							mapnodes[morton].push_back(octnodes[j][k]);
-						}
-					}
-					mapnodes[morton].push_back(i);
-				}
-				dvector2D().swap(octnodes);
-			}
-			iter	= mapnodes.begin();
-			iterend	= mapnodes.end();
-			uint32_t numnodes = mapnodes.size();
-			ghostsnodes.resize(numnodes);
-			counter = 0;
-			while (iter != iterend){
-				vector<double> nodecasting(iter->second.begin(), iter->second.begin()+3);
-				ghostsnodes[counter] = nodecasting;
-				ghostsnodes[counter].shrink_to_fit();
-				for(vector<double>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
-					if (ghostsconnectivity[int(*iter2)].size()==0){
-						ghostsconnectivity[int(*iter2)].reserve(4);
-					}
-					ghostsconnectivity[int(*iter2)].push_back(counter);
-				}
-				mapnodes.erase(iter++);
-				counter++;
-			}
-			ghostsnodes.shrink_to_fit();
-			//Slow. Memory saving.
-			for (int ii=0; ii<noctants; ii++){
-				ghostsconnectivity[ii].shrink_to_fit();
-			}
-			ghostsconnectivity.shrink_to_fit();
-		}
-		iter = mapnodes.end();
+		octree.computeghostsConnectivity();
 	}
-
+//	void computeghostsConnectivity() {
+//		map<uint64_t, vector<double> > mapnodes;
+//		map<uint64_t, vector<double> >::iterator iter, iterend;
+//		uint32_t i, k, counter;
+//		uint64_t morton;
+//		uint32_t noctants = octree.size_ghosts;
+//		dvector2D octnodes;
+//		uint8_t j;
+//
+//		octnodes.reserve(global2D.nnodes);
+//
+//		if (ghostsnodes.size() == 0){
+//			ghostsconnectivity.resize(noctants);
+//			for (i = 0; i < noctants; i++){
+//				getNodes(&octree.ghosts[i], octnodes);
+//				for (j = 0; j < global2D.nnodes; j++){
+//					morton = mortonEncode_magicbits(uint32_t(octnodes[j][0]/trans.L*double(global2D.max_length)), uint32_t(octnodes[j][1]/trans.L*double(global2D.max_length)));
+//					if (mapnodes[morton].size()==0){
+//						for (k = 0; k < 3; k++){
+//							mapnodes[morton].push_back(octnodes[j][k]);
+//						}
+//					}
+//					mapnodes[morton].push_back(i);
+//				}
+//				dvector2D().swap(octnodes);
+//			}
+//			iter	= mapnodes.begin();
+//			iterend	= mapnodes.end();
+//			uint32_t numnodes = mapnodes.size();
+//			ghostsnodes.resize(numnodes);
+//			counter = 0;
+//			while (iter != iterend){
+//				vector<double> nodecasting(iter->second.begin(), iter->second.begin()+3);
+//				ghostsnodes[counter] = nodecasting;
+//				ghostsnodes[counter].shrink_to_fit();
+//				for(vector<double>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
+//					if (ghostsconnectivity[int(*iter2)].size()==0){
+//						ghostsconnectivity[int(*iter2)].reserve(4);
+//					}
+//					ghostsconnectivity[int(*iter2)].push_back(counter);
+//				}
+//				mapnodes.erase(iter++);
+//				counter++;
+//			}
+//			ghostsnodes.shrink_to_fit();
+//			//Slow. Memory saving.
+//			for (int ii=0; ii<noctants; ii++){
+//				ghostsconnectivity[ii].shrink_to_fit();
+//			}
+//			ghostsconnectivity.shrink_to_fit();
+//		}
+//		iter = mapnodes.end();
+//	}
+//
 	// =================================================================================== //
 
 	/** Clear the connectivity of ghost octants.
 	 */
 	void clearghostsConnectivity() {
-		dvector2D().swap(ghostsnodes);
-		u32vector2D().swap(ghostsconnectivity);
+		octree.clearghostsConnectivity();
+//		dvector2D().swap(ghostsnodes);
+//		u32vector2D().swap(ghostsconnectivity);
 	}
 
 	// =================================================================================== //
@@ -4049,16 +4249,110 @@ public:
 	/** Update the connectivity of ghost octants.
 	 */
 	void updateghostsConnectivity() {
-		clearghostsConnectivity();
-		computeghostsConnectivity();
+		octree.updateghostsConnectivity();
+	}
+
+	// =================================================================================== //
+
+	/** Get the local number of nodes.
+	 */
+	uint32_t getNumNodes() {
+		return octree.nodes.size();
 	}
 
 	// =============================================================================== //
 
-	/** Compute the intersection of octants (intersections of bord, of inner domain and with ghost octants).
+	/** Get the connectivity the octants
 	 */
-	void computeIntersections(){
-		octree.computeIntersections();
+	const u32vector2D & getConnectivity(){
+		return octree.connectivity;
+	}
+
+	// =============================================================================== //
+
+	/** Get the local connectivity of an octant
+	 * \param[in] idx Local index of octant
+	 */
+	u32vector getOctantConnectivity(uint32_t idx){
+		return octree.connectivity[idx];
+	}
+
+	// =============================================================================== //
+	/** Get the local connectivity of an octant
+	 * \param[in] oct Pointer to an octant
+	 */
+	u32vector getOctantConnectivity(Class_Octant<2>* oct){
+		return octree.connectivity[getIdx(oct)];
+	}
+
+	// =============================================================================== //
+
+	/** Get the local connectivity of a ghost octant
+	 * \param[in] idx Local index of ghost octant
+	 */
+	u32vector getGhostOctantConnectivity(uint32_t idx){
+		return octree.ghostsconnectivity[idx];
+	}
+
+	// =============================================================================== //
+
+	/** Get the local connectivity of a ghost octant
+	 * \param[in] oct Pointer to a ghost octant
+	 */
+	u32vector getGhostOctantConnectivity(Class_Octant<2>* oct){
+		return octree.ghostsconnectivity[getIdx(oct)];
+	}
+
+	// =============================================================================== //
+
+	/** Get the logical coordinates of the nodes
+	 */
+	const u32vector2D & getNodes(){
+		return octree.nodes;
+	}
+
+	// =============================================================================== //
+
+	/** Get the logical coordinates of a node
+	 * \param[in] inode Local index of node
+	 */
+	u32vector getNodeLogicalCoordinates(uint32_t inode){
+		return octree.nodes[inode];
+	}
+
+	// =============================================================================== //
+
+	/** Get the physical coordinates of a node
+	 * \param[in] inode Local index of node
+	 */
+	dvector getNodeCoordinates(uint32_t inode){
+		vector<double> coords(3,0);
+		coords[0] = trans.mapX(octree.nodes[inode][0]);
+		coords[1] = trans.mapY(octree.nodes[inode][1]);
+		coords[2] = trans.mapZ(octree.nodes[inode][2]);
+		return coords;
+	}
+
+	// =============================================================================== //
+
+	/** Get the logical coordinates of a ghost node
+	 * \param[in] inode Local index of node
+	 */
+	u32vector getGhostNodeLogicalCoordinates(uint32_t inode){
+		return octree.ghostsnodes[inode];
+	}
+
+	// =============================================================================== //
+
+	/** Get the physical coordinates of a ghost node
+	 * \param[in] inode Local index of node
+	 */
+	dvector getGhostNodeCoordinates(uint32_t inode){
+		vector<double> coords(3,0);
+		coords[0] = trans.mapX(octree.ghostsnodes[inode][0]);
+		coords[1] = trans.mapY(octree.ghostsnodes[inode][1]);
+		coords[2] = trans.mapZ(octree.ghostsnodes[inode][2]);
+		return coords;
 	}
 
 	// =============================================================================== //
@@ -4071,8 +4365,8 @@ public:
 	void writeLogical(string filename) {
 
 		bool clear = false;
-		if (connectivity.size() == 0) {
-			computeConnectivity();
+		if (octree.connectivity.size() == 0) {
+			octree.computeConnectivity();
 			clear = true;
 		}
 
@@ -4086,29 +4380,29 @@ public:
 			writeLog(ss.str());
 			return;
 		}
-		int nofNodes = nodes.size();
-		int nofGhostNodes = ghostsnodes.size();
-		int nofOctants = connectivity.size();
-		int nofGhosts = ghostsconnectivity.size();
+		int nofNodes = octree.nodes.size();
+		int nofGhostNodes = octree.ghostsnodes.size();
+		int nofOctants = octree.connectivity.size();
+		int nofGhosts = octree.ghostsconnectivity.size();
 		int nofAll = nofGhosts + nofOctants;
 		out << "<?xml version=\"1.0\"?>" << endl
 			<< "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
 			<< "  <UnstructuredGrid>" << endl
-			<< "    <Piece NumberOfCells=\"" << connectivity.size() + ghostsconnectivity.size() << "\" NumberOfPoints=\"" << nodes.size() + ghostsnodes.size() << "\">" << endl;
+			<< "    <Piece NumberOfCells=\"" << octree.connectivity.size() + octree.ghostsconnectivity.size() << "\" NumberOfPoints=\"" << octree.nodes.size() + octree.ghostsnodes.size() << "\">" << endl;
 	    out << "      <Points>" << endl
 	    	<< "        <DataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\""<< 3 <<"\" format=\"ascii\">" << endl
 	    	<< "          " << std::fixed;
 	    for(int i = 0; i < nofNodes; i++)
 	    {
 	    	for(int j = 0; j < 3; ++j)
-	    		out << std::setprecision(6) << nodes[i][j] << " ";
+	    		out << std::setprecision(6) << octree.nodes[i][j] << " ";
 	    	if((i+1)%4==0 && i!=nofNodes-1)
 	    		out << endl << "          ";
 	    }
 	    for(int i = 0; i < nofGhostNodes; i++)
 	    {
 	    	for(int j = 0; j < 3; ++j)
-	    		out << std::setprecision(6) << ghostsnodes[i][j] << " ";
+	    		out << std::setprecision(6) << octree.ghostsnodes[i][j] << " ";
 	    	if((i+1)%4==0 && i!=nofNodes-1)
 	    		out << endl << "          ";
 	    }
@@ -4131,7 +4425,7 @@ public:
 	        	else if(j==3){
 	        		jj = 2;
 	        	}
-	            out << connectivity[i][jj] << " ";
+	            out << octree.connectivity[i][jj] << " ";
 	          }
 	        if((i+1)%3==0 && i!=nofOctants-1)
 	          out << endl << "          ";
@@ -4150,7 +4444,7 @@ public:
 	        	else if(j==3){
 	        		jj = 2;
 	        	}
-	        	out << ghostsconnectivity[i][jj] + nofNodes << " ";
+	        	out << octree.ghostsconnectivity[i][jj] + nofNodes << " ";
 	          }
 	        if((i+1)%3==0 && i!=nofGhosts-1)
 	          out << endl << "          ";
@@ -4214,7 +4508,7 @@ public:
 	    MPI_Barrier(MPI_COMM_WORLD);
 
 	    if (clear){
-	    	clearConnectivity();
+	    	octree.clearConnectivity();
 	    }
 
 
@@ -4230,8 +4524,8 @@ public:
 	void write(string filename) {
 
 		bool clear = false;
-		if (connectivity.size() == 0) {
-			computeConnectivity();
+		if (octree.connectivity.size() == 0) {
+			octree.computeConnectivity();
 			clear = true;
 		}
 
@@ -4245,25 +4539,25 @@ public:
 			writeLog(ss.str());
 			return;
 		}
-		int nofNodes = nodes.size();
-		int nofGhostNodes = ghostsnodes.size();
-		int nofOctants = connectivity.size();
-		int nofGhosts = ghostsconnectivity.size();
+		int nofNodes = octree.nodes.size();
+		int nofGhostNodes = octree.ghostsnodes.size();
+		int nofOctants = octree.connectivity.size();
+		int nofGhosts = octree.ghostsconnectivity.size();
 		int nofAll = nofGhosts + nofOctants;
 		out << "<?xml version=\"1.0\"?>" << endl
 			<< "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
 			<< "  <UnstructuredGrid>" << endl
-			<< "    <Piece NumberOfCells=\"" << connectivity.size() + ghostsconnectivity.size() << "\" NumberOfPoints=\"" << nodes.size() + ghostsnodes.size() << "\">" << endl;
+			<< "    <Piece NumberOfCells=\"" << octree.connectivity.size() + octree.ghostsconnectivity.size() << "\" NumberOfPoints=\"" << octree.nodes.size() + octree.ghostsnodes.size() << "\">" << endl;
 	    out << "      <Points>" << endl
 	    	<< "        <DataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\""<< 3 <<"\" format=\"ascii\">" << endl
 	    	<< "          " << std::fixed;
 	    for(int i = 0; i < nofNodes; i++)
 	    {
 	    	for(int j = 0; j < 3; ++j){
-	    		if (j==0) trans.mapX(uint32_t(nodes[i][j]));
-	    		if (j==1) trans.mapY(uint32_t(nodes[i][j]));
-	    		if (j==2) trans.mapZ(uint32_t(nodes[i][j]));
-	    		out << std::setprecision(6) << nodes[i][j] << " ";
+	    		if (j==0) out << std::setprecision(6) << trans.mapX(octree.nodes[i][j]) << " ";
+	    		if (j==1) out << std::setprecision(6) << trans.mapY(octree.nodes[i][j]) << " ";
+	    		if (j==2) out << std::setprecision(6) << trans.mapZ(octree.nodes[i][j]) << " ";
+//	    		out << std::setprecision(6) << octree.nodes[i][j] << " ";
 	    	}
 	    	if((i+1)%4==0 && i!=nofNodes-1)
 	    		out << endl << "          ";
@@ -4271,10 +4565,10 @@ public:
 	    for(int i = 0; i < nofGhostNodes; i++)
 	    {
 	    	for(int j = 0; j < 3; ++j){
-	    		if (j==0) trans.mapX(uint32_t(ghostsnodes[i][j]));
-	    		if (j==1) trans.mapY(uint32_t(ghostsnodes[i][j]));
-	    		if (j==2) trans.mapZ(uint32_t(ghostsnodes[i][j]));
-	    		out << std::setprecision(6) << ghostsnodes[i][j] << " ";
+	    		if (j==0) out << std::setprecision(6) << trans.mapX(octree.ghostsnodes[i][j]) << " ";
+	    		if (j==1) out << std::setprecision(6) << trans.mapY(octree.ghostsnodes[i][j]) << " ";
+	    		if (j==2) out << std::setprecision(6) << trans.mapZ(octree.ghostsnodes[i][j]) << " ";
+//	    		out << std::setprecision(6) << octree.ghostsnodes[i][j] << " ";
 	    	}
 	    	if((i+1)%4==0 && i!=nofNodes-1)
 	    		out << endl << "          ";
@@ -4298,7 +4592,7 @@ public:
 	        	else if(j==3){
 	        		jj = 2;
 	        	}
-	            out << connectivity[i][jj] << " ";
+	            out << octree.connectivity[i][jj] << " ";
 	          }
 	        if((i+1)%3==0 && i!=nofOctants-1)
 	          out << endl << "          ";
@@ -4317,7 +4611,7 @@ public:
 	        	else if(j==3){
 	        		jj = 2;
 	        	}
-	            out << ghostsconnectivity[i][jj] + nofNodes << " ";
+	            out << octree.ghostsconnectivity[i][jj] + nofNodes << " ";
 	          }
 	        if((i+1)%3==0 && i!=nofGhosts-1)
 	          out << endl << "          ";
@@ -4383,9 +4677,7 @@ public:
 
 	}
 
-
-
-
+	// =============================================================================== //
 
 };
 
