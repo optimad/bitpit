@@ -49,10 +49,11 @@ class Class_Octant<2>{
 	// MEMBERS ----------------------------------------------------------------------- //
 
 private:
-	uint32_t  x, y;				/**< Coordinates */
-	uint8_t   level;			/**< Refinement level (0=root) */
-	int8_t    marker;			/**< Set for Refinement(m>0) or Coarsening(m<0) |m|-times */
-	bool      info[12];			/**< -Info[0..3] : true if 0..3 face is a boundary face [bound] \n
+	uint32_t  	x;				/**< Coordinate x */
+	uint32_t	y;				/**< Coordinate y */
+	uint8_t		level;			/**< Refinement level (0=root) */
+	int8_t		marker;			/**< Set for Refinement(m>0) or Coarsening(m<0) |m|-times */
+	bool		info[12];			/**< -Info[0..3] : true if 0..3 face is a boundary face [bound] \n
 								-Info[4..7]: true if 0..3 face is a process boundary face [pbound] \n
 								-Info[8/9]: true if octant is new after refinement/coarsening \n
 								-Info[10]   : true if balancing is not required for this octant \n
@@ -107,33 +108,87 @@ public:
 	// Basic Get/Set methods --------------------------------------------------------- //
 
 public:
+	/*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
+	 * \return Coordinate X of node 0.
+	 */
 	uint32_t	getX() const{return x;};
+
+	/*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
+	 * \return Coordinate Y of node 0.
+	 */
 	uint32_t	getY() const{return y;};
+
+	/*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
+	 * \return Coordinate Z of node 0.
+	 */
 	uint32_t	getZ() const{return 0;};
+
+	/*! Get the level of an octant.
+	 * \return Level of octant.
+	 */
 	uint8_t		getLevel() const{return level;};
+
+	/*! Get the refinement marker of an octant.
+	 * \return Marker of octant.
+	 */
 	int8_t		getMarker() const{return marker;};
-	bool		getBound(uint8_t face) const{				// Get if face is boundary
+
+	/*! Get the bound flag on an octant face.
+	 * \param[in] iface local index of the face.
+	 * \return true if the iface face is a boundary face.
+	 */
+	bool		getBound(uint8_t face) const{
 		return info[face];
 	};
+
 private:
 	void		setBound(uint8_t face) {					// Set if face is boundary
 		info[face] = true;
 	};
+
 public:
-	bool		getPbound(uint8_t face) const{				// Get if face is process boundary
+	/*! Get the pbound flag on an octant face.
+	 * \param[in] iface local index of the face.
+	 * \return true if the iface face is a process boundary face.
+	 */
+	bool		getPbound(uint8_t face) const{
 		return info[global2D.nfaces+face];
 	};
-	bool		getIsNewR() const{return info[8];};			// Get if octant is new after refinement
-	bool		getIsNewC() const{return info[9];};			// Get if octant is new after coarsening
-	bool		getNotBalance() const{return info[10];};	// Get if balancing-blocked octant
-	//	bool		getIsGhost() const{return info[11];};		// For ghostbusters : get if octant is a ghost
 
+	/*! Get if the octant is new after a refinement.
+	 * \return true if the the octant is new after a refinement.
+	 */
+	bool		getIsNewR() const{return info[8];};
+
+	/*! Get if the octant is new after a coarsening.
+	 * \return true if the the octant is new after a coarsening.
+	 */
+	bool		getIsNewC() const{return info[9];};
+
+	/*! Get if the octant is a balancing-blocked octant.
+		 * \return false if the octant has to be balanced.
+		 */
+	bool		getNotBalance() const{return info[10];};
+
+	/*! Get if the octant has to be balanced.
+		 * \return true if the octant has to be balanced.
+		 */
+	bool		getBalance() const{return (!info[10]);};
+
+	/*! Set the refinement marker of an octant.
+	 * \param[in] marker Refinement marker of octant (n=n refinement in adapt, -n=n coarsening in adapt, default=0).
+	 */
 	void		setMarker(int8_t marker){					// Set refinement/coarsening marker
 		this->marker = marker;
 	};
+
+	/*! Set the balancing condition of an octant.
+	 * \param[in] balance Has octant to be 2:1 balanced in adapting procedure?
+	 */
 	void		setBalance(bool balance){					// Set if balancing-blocked octant
 		info[10] = balance;
 	};
+
 private:
 	void		setLevel(uint8_t level){
 		this->level = level;
@@ -146,22 +201,38 @@ private:
 	// Other Get/Set methods --------------------------------------------------------- //
 
 public:
-	uint32_t	getSize() const{							// Get the size of octant
+
+	/*! Get the size of an octant in logical domain, i.e. the side length.
+	 * \return Size of octant.
+	 */
+	uint32_t	getSize() const{
 		uint32_t size = uint32_t(pow(double(2),double(MAX_LEVEL_2D-level)));
 		return size;
 	};
-	uint32_t	getArea() const{							// Get the face area of octant
+
+	/*! Get the area of an octant in logical domain (for 2D case the same value of getSize).
+	 * \return Area of octant.
+	 */
+	uint32_t	getArea() const{
 		uint32_t area =getSize();
 		return area;
 	};
-	uint64_t	getVolume() const{							// Get the volume of octant
+
+	/*! Get the volume of an octant in logical domain.
+	 * \return Volume of octant.
+	 */
+	uint64_t	getVolume() const{
 		uint64_t volume = uint64_t(pow(double(getSize()),2.0));
 		return volume;
 	};
 
 	// ------------------------------------------------------------------------------- //
 
-	double*		getCenter(){								// Get a pointer to an array of DIM with the coordinates of the center of octant
+
+	/*! Get the coordinates of the center of an octant in logical domain.
+	 * \return center Pointer to an array[2] with the coordinates of the center of octant.
+	 */
+	double*		getCenter(){
 		uint8_t		i;
 		double	dh;
 
@@ -175,7 +246,10 @@ public:
 
 	// ------------------------------------------------------------------------------- //
 
-	uint32_t	(*getNodes())[3]{							// Get a pointer to the array (size [nnodes][DIM]) with the nodes of octant
+	/*! Get the coordinates of the nodes of an octant in logical domain.
+	 * \return nodes Pointer to an array[4][3] with the coordinates (with z=0) of the nodes of octant.
+	 */
+	uint32_t	(*getNodes())[3]{
 		uint8_t		i, cx, cy;
 		uint32_t	dh;
 
@@ -195,7 +269,10 @@ public:
 
 	// ------------------------------------------------------------------------------- //
 
-	void		getNodes(u32vector2D & nodes){				// Get a vector (size [nnodes][DIM]) with the nodes of octant
+	/*! Get the coordinates of the nodes of an octant in logical domain.
+	 * \param[out] nodes Vector[4][3] with the coordinates (with z=0) of the nodes of octant.
+	 */
+	void		getNodes(u32vector2D & nodes){
 		uint8_t		i, cx, cy;
 		uint32_t	dh;
 
@@ -214,7 +291,12 @@ public:
 		}
 		nodes.shrink_to_fit();
 	};
-	int8_t*		getNormal(uint8_t & iface){					// Get a pointer to the array (size [DIM]) with the normal of the iface
+
+	/*! Get the normal of a face of an octant in logical domain.
+	 * \param[in] iface Index of the face for normal computing.
+	 * \return normal Pointer to an array[3] with components (with z=0) of the normal of face.
+	 */
+	int8_t*		getNormal(uint8_t & iface){
 		uint8_t		i;
 		int8_t* normal = new int8_t[3];
 
@@ -223,6 +305,11 @@ public:
 		}
 		return normal;
 	};
+
+	/*! Get the normal of a face of an octant in logical domain.
+	 * \param[in] iface Index of the face for normal computing.
+	 * \param[out] normal Pointer to an array[3] with components (with z=0) of the normal of face.
+	 */
 	void		getNormal(uint8_t & iface,					// Get a vector (size [nnodes][DIM]) with the normal of the iface
 			vector<int8_t> & normal){
 		uint8_t		i;
@@ -237,7 +324,10 @@ public:
 
 	// ------------------------------------------------------------------------------- //
 
-	uint64_t	computeMorton() const{						// Compute Morton index of the octant (without level)
+	/** Compute the Morton index of the octant (without level).
+	 * \return morton Morton index of the octant.
+	 */
+	uint64_t	computeMorton() const{
 		uint64_t morton = 0;
 		morton = mortonEncode_magicbits(this->x,this->y);
 		return morton;
@@ -245,11 +335,15 @@ public:
 
 	// ------------------------------------------------------------------------------- //
 
+	/** Compute the Morton index of the octant (without level).
+	 * \return morton Morton index of the octant.
+	 */
 	uint64_t	computeMorton(){
 		uint64_t morton = 0;
 		morton = mortonEncode_magicbits(this->x,this->y);
 		return morton;
 	};
+
 	//-------------------------------------------------------------------------------- //
 	// Other methods ----------------------------------------------------------------- //
 

@@ -295,7 +295,7 @@ public:
 		return trans.mapSize(oct->getArea());
 	}
 
-	/*! Get the volume of an octant, i.e. the coordinates of its node 0.
+	/*! Get the volume of an octant.
 	 * \param[in] oct Pointer to target octant.
 	 * \return Volume of octant.
 	 */
