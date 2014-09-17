@@ -295,7 +295,7 @@ public:
 		return trans.mapSize(oct->getArea());
 	}
 
-	/*! Get the volume of an octant, i.e. the coordinates of its node 0.
+	/*! Get the volume of an octant.
 	 * \param[in] oct Pointer to target octant.
 	 * \return Volume of octant.
 	 */
@@ -4262,7 +4262,8 @@ public:
 
 	// =============================================================================== //
 
-	/** Get the connectivity the octants
+	/** Get the connectivity of the octants
+	 * \return connectivity Matrix of noctants*4 with the connectivity of each octant (4 indices of nodes).
 	 */
 	const u32vector2D & getConnectivity(){
 		return octree.connectivity;
@@ -4270,8 +4271,17 @@ public:
 
 	// =============================================================================== //
 
+	/** Get the connectivity of the ghost octants
+	 * \return connectivity Matrix of nghostoctants*4 with the connectivity of each octant (4 indices of nodes).
+	 */
+	const u32vector2D & getGhostConnectivity(){
+		return octree.ghostsconnectivity;
+	}
+
+	// =============================================================================== //
 	/** Get the local connectivity of an octant
 	 * \param[in] idx Local index of octant
+	 * \return connectivity Connectivity of the octant (4 indices of nodes).
 	 */
 	u32vector getOctantConnectivity(uint32_t idx){
 		return octree.connectivity[idx];
@@ -4280,6 +4290,7 @@ public:
 	// =============================================================================== //
 	/** Get the local connectivity of an octant
 	 * \param[in] oct Pointer to an octant
+	 * \return connectivity Connectivity of the octant (4 indices of nodes).
 	 */
 	u32vector getOctantConnectivity(Class_Octant<2>* oct){
 		return octree.connectivity[getIdx(oct)];
@@ -4289,6 +4300,7 @@ public:
 
 	/** Get the local connectivity of a ghost octant
 	 * \param[in] idx Local index of ghost octant
+	 * \return connectivity Connectivity of the ghost octant (4 indices of nodes).
 	 */
 	u32vector getGhostOctantConnectivity(uint32_t idx){
 		return octree.ghostsconnectivity[idx];
@@ -4298,6 +4310,7 @@ public:
 
 	/** Get the local connectivity of a ghost octant
 	 * \param[in] oct Pointer to a ghost octant
+	 * \return connectivity Connectivity of the ghost octant (4 indices of nodes).
 	 */
 	u32vector getGhostOctantConnectivity(Class_Octant<2>* oct){
 		return octree.ghostsconnectivity[getIdx(oct)];
@@ -4306,6 +4319,7 @@ public:
 	// =============================================================================== //
 
 	/** Get the logical coordinates of the nodes
+	 * \return nodes Matrix of nnodes*3 with the coordinates of the nodes.
 	 */
 	const u32vector2D & getNodes(){
 		return octree.nodes;
@@ -4315,6 +4329,7 @@ public:
 
 	/** Get the logical coordinates of a node
 	 * \param[in] inode Local index of node
+	 * \return nodes Vector with the coordinates of the node.
 	 */
 	u32vector getNodeLogicalCoordinates(uint32_t inode){
 		return octree.nodes[inode];
@@ -4322,8 +4337,18 @@ public:
 
 	// =============================================================================== //
 
+	/** Get the logical coordinates of the ghost nodes
+	 * \return nodes Matrix of nghostnodes*3 with the coordinates of the nodes.
+	 */
+	const u32vector2D & getGhostNodes(){
+		return octree.ghostsnodes;
+	}
+
+	// =============================================================================== //
+
 	/** Get the physical coordinates of a node
 	 * \param[in] inode Local index of node
+	 * \return nodes Vector with the coordinates of the node.
 	 */
 	dvector getNodeCoordinates(uint32_t inode){
 		vector<double> coords(3,0);
@@ -4337,6 +4362,7 @@ public:
 
 	/** Get the logical coordinates of a ghost node
 	 * \param[in] inode Local index of node
+	 * \return nodes Vector with the coordinates of the node.
 	 */
 	u32vector getGhostNodeLogicalCoordinates(uint32_t inode){
 		return octree.ghostsnodes[inode];
@@ -4346,6 +4372,7 @@ public:
 
 	/** Get the physical coordinates of a ghost node
 	 * \param[in] inode Local index of node
+	 * \return nodes Vector with the coordinates of the node.
 	 */
 	dvector getGhostNodeCoordinates(uint32_t inode){
 		vector<double> coords(3,0);
