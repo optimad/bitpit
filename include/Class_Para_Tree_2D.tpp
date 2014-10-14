@@ -3695,7 +3695,6 @@ public:
 	/** Adapt the octree mesh with user setup for markers and 2:1 balancing conditions.
 	 */
 	bool adapt() {
-
 		bool globalDone = false, localDone = false, cDone = false;
 		uint32_t nocts = octree.getNumOctants();
 		vector<Class_Octant<2> >::iterator iter, iterend = octree.octants.end();
@@ -3833,7 +3832,6 @@ public:
 			updateAdapt();
 
 			// Coarse
-
 			while(octree.coarse(mapidx));
 			if (octree.getNumOctants() < nocts){
 				localDone = true;
