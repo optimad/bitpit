@@ -3,7 +3,7 @@
  *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
  *	\version		0.1
-  *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
+ *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
  *	\par			License:\n
  *	This version of PABLO is released under the LGPL License.
  *
@@ -47,14 +47,16 @@ public:
 	// MEMBERS ----------------------------------------------------------------------- //
 
 private:
-	uint32_t  x, y, z;			// Coordinates
-	uint8_t   level;			// Refinement level (0=root)
-	int8_t    marker;			// Set for Refinement(m>0) or Coarsening(m<0) |m|-times
-	bool      info[16];			// Info[0..5] : true if 0..5 face is a boundary face [bound];
-								// Info[6..11]: true if 0..5 face is a process boundary face [pbound];
-								// Info[12/13]: true if octant is new after refinement/coarsening;
-								// Info[14]   : true if balancing is not required for this octant;
-								// Info[15]   : Aux (before : true if octant is a scary ghost).
+	uint32_t  x;				/**<  Coordinate x */
+	uint32_t  y;				/**<  Coordinate y */
+	uint32_t  z;				/**<  Coordinate z */
+	uint8_t   level;			/**< Refinement level (0=root) */
+	int8_t    marker;			/**< Set for Refinement(m>0) or Coarsening(m<0) |m|-times */
+	bool      info[16];			/**< -Info[0..5] : true if 0..3 face is a boundary face [bound] \n
+								-Info[6..11]: true if 0..3 face is a process boundary face [pbound] \n
+								-Info[12/13]: true if octant is new after refinement/coarsening \n
+								-Info[14]   : true if balancing is not required for this octant \n
+								-Info[15]   : Aux (before : true if octant is a scary ghost) */
 
 
 	// ------------------------------------------------------------------------------- //
@@ -96,7 +98,9 @@ public:
 		memcpy(info,octant.info,16);
 	};
 
-	bool operator ==(const Class_Octant<3> & oct2){	// Check if two octants are equal (no check on info)
+	/*! Check if two octants are equal (no check on info)
+	 */
+	bool operator ==(const Class_Octant<3> & oct2){
 		bool check = true;
 		check = check && (x == oct2.x);
 		check = check && (y == oct2.y);
@@ -111,29 +115,84 @@ public:
 	// Basic Get/Set methods --------------------------------------------------------- //
 
 public:
+	/*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
+	 * \return Coordinate X of node 0.
+	 */
 	uint32_t	getX() const{return x;};
+
+	/*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
+	 * \return Coordinate Y of node 0.
+	 */
 	uint32_t	getY() const{return y;};
+
+	/*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
+	 * \return Coordinate Z of node 0.
+	 */
 	uint32_t	getZ() const{return z;};
+
+	/*! Get the level of an octant.
+	 * \return Level of octant.
+	 */
 	uint8_t		getLevel() const{return level;};
+
+	/*! Get the refinement marker of an octant.
+	 * \return Marker of octant.
+	 */
 	int8_t		getMarker() const{return marker;};
-	bool		getBound(uint8_t face) const{				// Get if face is boundary
+
+	/*! Get the bound flag on an octant face.
+	 * \param[in] iface local index of the face.
+	 * \return true if the iface face is a boundary face.
+	 */
+	bool		getBound(uint8_t face) const{
 		return info[face];
 	};
 
-	bool		getPbound(uint8_t face) const{				// Get if face is process boundary
+private:
+	void		setBound(uint8_t face) {
+		info[face] = true;
+	};
+
+public:
+	/*! Get the pbound flag on an octant face.
+	 * \param[in] iface local index of the face.
+	 * \return true if the iface face is a process boundary face.
+	 */
+	bool		getPbound(uint8_t face) const{
 		return info[global3D.nfaces+face];
 	};
 
-	bool		getIsNewR() const{return info[12];};		// Get if octant is new after refinement
-	bool		getIsNewC() const{return info[13];};		// Get if octant is new after coarsening
-	bool		getNotBalance() const{return info[14];};	// Get if balancing-blocked octant
-	bool		getIsGhost() const{return info[15];};		// For ghostbusters : get if octant is a ghost
+	/*! Get if the octant is new after a refinement.
+	 * \return true if the the octant is new after a refinement.
+	 */
+	bool		getIsNewR() const{return info[12];};
 
-	void		setMarker(int8_t marker){					// Set refinement/coarsening marker
+	/*! Get if the octant is new after a coarsening.
+	 * \return true if the the octant is new after a coarsening.
+	 */
+	bool		getIsNewC() const{return info[13];};
+
+	/*! Get if the octant is a balancing-blocked octant.
+	 * \return false if the octant has to be balanced.
+	 */
+	bool		getNotBalance() const{return info[14];};
+
+	/*! Get if the octant has to be balanced.
+	 * \return true if the octant has to be balanced.
+	 */
+	bool		getBalance() const{return (!info[10]);};
+
+	/*! Set the refinement marker of an octant.
+	 * \param[in] marker Refinement marker of octant (n=n refinement in adapt, -n=n coarsening in adapt, default=0).
+	 */
+	void		setMarker(int8_t marker){
 		this->marker = marker;
 	};
 
-	void		setBalance(bool balance){					// Set if balancing-blocked octant
+	/*! Set the balancing condition of an octant.
+	 * \param[in] balance Has octant to be 2:1 balanced in adapting procedure?
+	 */
+	void		setBalance(bool balance){
 		info[14] = balance;
 	};
 
@@ -150,28 +209,36 @@ private:
 	// Other Get/Set methods --------------------------------------------------------- //
 
 public:
-	uint32_t	getSize() const{							// Get the size of octant
+	/*! Get the size of an octant in logical domain, i.e. the side length.
+	 * \return Size of octant.
+	 */
+	uint32_t	getSize() const{
 		uint32_t size = uint32_t(pow(double(2),double(MAX_LEVEL_3D-level)));
 		return size;
 	};
 
-	// =================================================================================== //
-
-	uint32_t	getArea() const{							// Get the face area of octant
+	/*! Get the area of an octant in logical domain .
+	 * \return Area of octant.
+	 */
+	uint32_t	getArea() const{
 		uint32_t area = uint32_t(pow(double(getSize()),2.0));
 		return area;
 	};
 
-	// =================================================================================== //
-
-	uint32_t	getVolume() const{							// Get the volume of octant
+	/*! Get the volume of an octant in logical domain.
+	 * \return Volume of octant.
+	 */
+	uint32_t	getVolume() const{
 		uint64_t volume = uint32_t(pow(double(getSize()),3.0));
 		return volume;
 	};
 
 	// =================================================================================== //
 
-	double*		getCenter(){								// Get a pointer to an array of DIM with the coordinates of the center of octant
+	/*! Get the coordinates of the center of an octant in logical domain.
+	 * \return center Pointer to an array[2] with the coordinates of the center of octant.
+	 */
+	double*		getCenter(){
 		uint8_t		i;
 		double	dh;
 
@@ -184,9 +251,12 @@ public:
 		return center;
 	};
 
-	// =================================================================================== //
+	// ------------------------------------------------------------------------------- //
 
-	uint32_t	(*getNodes())[3]{							// Get a pointer to the array (size [nnodes][DIM]) with the nodes of octant
+	/*! Get the coordinates of the nodes of an octant in logical domain.
+	 * \return nodes Pointer to an array[4][3] with the coordinates (with z=0) of the nodes of octant.
+	 */
+	uint32_t	(*getNodes())[3]{
 		uint8_t		i, cx, cy, cz;
 		uint32_t	dh;
 
@@ -205,9 +275,12 @@ public:
 		return nodes;
 	};
 
-	// =================================================================================== //
+	// ------------------------------------------------------------------------------- //
 
-	void		getNodes(u32vector2D & nodes){				// Get a vector (size [nnodes][DIM]) with the nodes of octant
+	/*! Get the coordinates of the nodes of an octant in logical domain.
+	 * \param[out] nodes Vector[4][3] with the coordinates (with z=0) of the nodes of octant.
+	 */
+	void		getNodes(u32vector2D & nodes){
 		uint8_t		i, cx, cy, cz;
 		uint32_t	dh;
 
@@ -228,9 +301,11 @@ public:
 		nodes.shrink_to_fit();
 	};
 
-	// =================================================================================== //
-
-	int8_t*		getNormal(uint8_t & iface){					// Get a pointer to the array (size [DIM]) with the normal of the iface
+	/*! Get the normal of a face of an octant in logical domain.
+	 * \param[in] iface Index of the face for normal computing.
+	 * \return normal Pointer to an array[3] with components (with z=0) of the normal of face.
+	 */
+	int8_t*		getNormal(uint8_t & iface){
 		uint8_t		i;
 		int8_t* normal = new int8_t[3];
 
@@ -240,10 +315,12 @@ public:
 		return normal;
 	};
 
-	// =================================================================================== //
-
-	void		getNormal(uint8_t & iface,					// Get a vector (size [nnodes][DIM]) with the normal of the iface
-				vector<int8_t> & normal){
+	/*! Get the normal of a face of an octant in logical domain.
+	 * \param[in] iface Index of the face for normal computing.
+	 * \param[out] normal Pointer to an array[3] with components (with z=0) of the normal of face.
+	 */
+	void		getNormal(uint8_t & iface,
+			vector<int8_t> & normal){
 		uint8_t		i;
 
 		normal.clear();
@@ -254,13 +331,21 @@ public:
 		normal.shrink_to_fit();
 	};
 
-	// =================================================================================== //
+	// ------------------------------------------------------------------------------- //
 
-	uint64_t	computeMorton() const{						// Compute Morton index of the octant (without level)
-		uint64_t morton = 0;
-		morton = mortonEncode_magicbits(this->x,this->y,this->z);
-		return morton;
+	/** Compute the Morton index of the octant (without level).
+	 * \return morton Morton index of the octant.
+	 */
+	uint64_t	computeMorton() const{							uint64_t morton = 0;
+	morton = mortonEncode_magicbits(this->x,this->y,this->z);
+	return morton;
 	};
+
+	// ------------------------------------------------------------------------------- //
+
+	/** Compute the Morton index of the octant (without level).
+	 * \return morton Morton index of the octant.
+	 */
 	uint64_t	computeMorton(){
 		uint64_t morton = 0;
 		morton = mortonEncode_magicbits(this->x,this->y,this->z);
@@ -271,7 +356,7 @@ public:
 	// Other methods													    			   //
 	// =================================================================================== //
 
-public:
+private:
 	Class_Octant<3>	buildLastDesc(){								// Build last descendant of octant and return the last descendant octant (no info update)
 		uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL_3D - level)) - 1;
 		Class_Octant<3> last_desc(MAX_LEVEL_3D,x+delta,y+delta,z+delta);
@@ -439,10 +524,10 @@ public:
 		}
 	};
 
-	// =================================================================================== //
+	// ------------------------------------------------------------------------------- //
 
 	uint64_t* 		computeHalfSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
-										  uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
+			uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
 		uint32_t dh,dh2;
 		uint64_t morton;
 		uint32_t nneigh;
@@ -453,9 +538,9 @@ public:
 		dh2 = getSize();
 
 		if (info[iface]){
-	//		uint64_t* Morton = new uint64_t[0];
+			//		uint64_t* Morton = new uint64_t[0];
 			sizehf = 0;
-	//		return Morton;
+			//		return Morton;
 			return NULL;
 		}
 		else{
@@ -523,11 +608,11 @@ public:
 
 	};
 
-	// =================================================================================== //
+	// ------------------------------------------------------------------------------- //
 
 	uint64_t* 		computeMinSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
-										 const uint8_t & maxdepth,	// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
-										 uint32_t & sizem){
+			const uint8_t & maxdepth,	// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
+			uint32_t & sizem){
 		uint32_t dh,dh2;
 		uint64_t morton;
 		uint32_t nneigh, nline;
@@ -539,9 +624,9 @@ public:
 		nline = uint32_t(pow(2.0,double((maxdepth-level))));
 
 		if (info[iface]){
-	//		uint64_t* Morton = new uint64_t[0];
+			//		uint64_t* Morton = new uint64_t[0];
 			sizem = 0;
-	//		return Morton;
+			//		return Morton;
 			return NULL;
 		}
 		else{
@@ -609,11 +694,11 @@ public:
 
 	};
 
-	// =================================================================================== //
+	// ------------------------------------------------------------------------------- //
 
 	uint64_t* 		computeVirtualMorton(uint8_t iface, 			// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
-										 const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
-										 uint32_t & sizeneigh){
+			const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
+			uint32_t & sizeneigh){
 		if (getNotBalance()){
 			return computeMinSizeMorton(iface,
 					maxdepth,
@@ -625,10 +710,10 @@ public:
 		}
 	};
 
-	// =================================================================================== //
+	// ------------------------------------------------------------------------------- //
 
 	uint64_t* 		computeEdgeHalfSizeMorton(uint8_t iedge, 		// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
-										  uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
+			uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
 		uint32_t dh,dh2;
 		uint64_t morton;
 		uint32_t nneigh;
@@ -776,11 +861,11 @@ public:
 
 	};
 
-	// =================================================================================== //
+	// ------------------------------------------------------------------------------- //
 
 	uint64_t* 		computeEdgeMinSizeMorton(uint8_t iedge, 		// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
-										const uint8_t & maxdepth,	// possible neighbours of octant throught edge iedge (sizem=0 if boundary octant)
-										 uint32_t & sizem){
+			const uint8_t & maxdepth,	// possible neighbours of octant throught edge iedge (sizem=0 if boundary octant)
+			uint32_t & sizem){
 		uint32_t dh,dh2;
 		uint64_t morton;
 		uint32_t nneigh, nline;
@@ -930,11 +1015,11 @@ public:
 		}
 	};
 
-	// =================================================================================== //
+	// ------------------------------------------------------------------------------- //
 
 	uint64_t* 		computeEdgeVirtualMorton(uint8_t iedge, 		// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
-										 const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
-										 uint32_t & sizeneigh){
+			const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
+			uint32_t & sizeneigh){
 		if (getNotBalance()){
 			return computeEdgeMinSizeMorton(iedge,
 					maxdepth,
@@ -947,17 +1032,17 @@ public:
 
 	};
 
-	// =================================================================================== //
+	// ------------------------------------------------------------------------------- //
 
 	uint64_t 		computeNodeHalfSizeMorton(uint8_t inode, 		// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
-										  uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
+			uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
 		uint32_t dh,dh2;
 		uint64_t morton;
 		uint32_t nneigh;
 		uint8_t i;
 		int8_t cx,cy,cz;
 		uint8_t iface1, iface2, iface3;
-	 	nneigh = 1;
+		nneigh = 1;
 		dh = (level < MAX_LEVEL_3D) ? getSize()/2 : getSize();
 		dh2 = getSize();
 		iface1 = global3D.nodeface[inode][0];
@@ -1041,11 +1126,11 @@ public:
 		}
 	};
 
-	// =================================================================================== //
+	// ------------------------------------------------------------------------------- //
 
 	uint64_t 		computeNodeMinSizeMorton(uint8_t inode, 		// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
-										 const uint8_t & maxdepth,	// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
-										 uint32_t & sizehf){
+			const uint8_t & maxdepth,	// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
+			uint32_t & sizehf){
 		uint32_t dh,dh2;
 		uint64_t morton;
 		uint32_t nneigh;
@@ -1138,19 +1223,19 @@ public:
 
 	};
 
-	// =================================================================================== //
+	// ------------------------------------------------------------------------------- //
 
 	uint64_t 		computeNodeVirtualMorton(uint8_t inode, 		// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
-										 const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
-										 uint32_t & sizeneigh){
+			const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
+			uint32_t & sizeneigh){
 		if (getNotBalance()){
 			return computeNodeMinSizeMorton(inode,
-										maxdepth,
-										sizeneigh);
+					maxdepth,
+					sizeneigh);
 		}
 		else{
 			return computeNodeHalfSizeMorton(inode,
-										sizeneigh);
+					sizeneigh);
 		}
 	};
 

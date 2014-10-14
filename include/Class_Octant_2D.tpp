@@ -3,7 +3,7 @@
  *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
  *	\version		0.1
-  *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
+ *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
  *	\par			License:\n
  *	This version of PABLO is released under the LGPL License.
  *
@@ -53,7 +53,7 @@ private:
 	uint32_t	y;				/**< Coordinate y */
 	uint8_t		level;			/**< Refinement level (0=root) */
 	int8_t		marker;			/**< Set for Refinement(m>0) or Coarsening(m<0) |m|-times */
-	bool		info[12];			/**< -Info[0..3] : true if 0..3 face is a boundary face [bound] \n
+	bool		info[12];		/**< -Info[0..3] : true if 0..3 face is a boundary face [bound] \n
 								-Info[4..7]: true if 0..3 face is a process boundary face [pbound] \n
 								-Info[8/9]: true if octant is new after refinement/coarsening \n
 								-Info[10]   : true if balancing is not required for this octant \n
@@ -94,7 +94,9 @@ public:
 		marker = octant.marker;
 		memcpy(info,octant.info,12);
 	};
-	bool operator ==(const Class_Octant<2> & oct2){	// Check if two octants are equal (no check on info)
+	/*! Check if two octants are equal (no check on info)
+	 */
+	bool operator ==(const Class_Octant<2> & oct2){
 		bool check = true;
 		check = check && (x == oct2.x);
 		check = check && (y == oct2.y);
@@ -166,26 +168,26 @@ public:
 	bool		getIsNewC() const{return info[9];};
 
 	/*! Get if the octant is a balancing-blocked octant.
-		 * \return false if the octant has to be balanced.
-		 */
+	 * \return false if the octant has to be balanced.
+	 */
 	bool		getNotBalance() const{return info[10];};
 
 	/*! Get if the octant has to be balanced.
-		 * \return true if the octant has to be balanced.
-		 */
+	 * \return true if the octant has to be balanced.
+	 */
 	bool		getBalance() const{return (!info[10]);};
 
 	/*! Set the refinement marker of an octant.
 	 * \param[in] marker Refinement marker of octant (n=n refinement in adapt, -n=n coarsening in adapt, default=0).
 	 */
-	void		setMarker(int8_t marker){					// Set refinement/coarsening marker
+	void		setMarker(int8_t marker){
 		this->marker = marker;
 	};
 
 	/*! Set the balancing condition of an octant.
 	 * \param[in] balance Has octant to be 2:1 balanced in adapting procedure?
 	 */
-	void		setBalance(bool balance){					// Set if balancing-blocked octant
+	void		setBalance(bool balance){
 		info[10] = balance;
 	};
 
@@ -310,7 +312,7 @@ public:
 	 * \param[in] iface Index of the face for normal computing.
 	 * \param[out] normal Pointer to an array[3] with components (with z=0) of the normal of face.
 	 */
-	void		getNormal(uint8_t & iface,					// Get a vector (size [nnodes][DIM]) with the normal of the iface
+	void		getNormal(uint8_t & iface,
 			vector<int8_t> & normal){
 		uint8_t		i;
 
