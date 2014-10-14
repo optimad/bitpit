@@ -48,23 +48,22 @@ public:
 	// MEMBERS ----------------------------------------------------------------------- //
 
 private:
-	OctantsType					octants;			// Local vector of octants ordered with Morton Number
-	OctantsType					ghosts;				// Local vector of ghost octants ordered with Morton Number
-	IntersectionsType			intersections_int;	// Local vector of internal intersections ordered with Morton Number of first owner octant
-	IntersectionsType			intersections_ghost;// Local vector of intersections internal/ghost ordered with Morton Number of internal owner octant
-	IntersectionsType			intersections_bord;	// Local vector of border intersections (twice the sam octant is stored in an intersection)
-	u32vector 					pborders;			// Local vector of pborder octants ordered with Morton Number
-	Class_Octant<3> 			first_desc;			// First (Morton order) most refined octant possible in local partition
-	Class_Octant<3> 			last_desc;			// Last (Morton order) most refined octant possible in local partition
-	uint32_t 					size_ghosts;		// Size of vector of ghost octants
-	uint8_t						local_max_depth;	// Reached max depth in local tree
-public:
-	u32vector2D					nodes;				// Local vector of nodes (x,y,z) ordered with Morton Number
-	u32vector2D					connectivity;		// Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
-													// The nodes are stored as index of vector nodes
-	u32vector2D					ghostsnodes;		// Local vector of ghosts nodes (x,y,z) ordered with Morton Number
-	u32vector2D					ghostsconnectivity;	// Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
-													// The nodes are stored as index of vector nodes
+	OctantsType					octants;			/**< Local vector of octants ordered with Morton Number */
+	OctantsType					ghosts;				/**< Local vector of ghost octants ordered with Morton Number */
+	IntersectionsType			intersections;		/**< Local vector of intersections */
+	u64vector 					globalidx_ghosts;	/**< Global index of the ghost octants (size = size_ghosts) */
+	Class_Octant<3> 			first_desc;			/**< First (Morton order) most refined octant possible in local partition */
+	Class_Octant<3> 			last_desc;			/**< Last (Morton order) most refined octant possible in local partition */
+	uint32_t 					size_ghosts;		/**< Size of vector of ghost octants */
+	uint8_t						local_max_depth;	/**< Reached max depth in local tree */
+
+	// connectivity
+	u32vector2D					nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
+	u32vector2D					connectivity;		/**<Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
+	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
+	u32vector2D					ghostsnodes;		/**<Local vector of ghosts nodes (x,y,z) ordered with Morton Number*/
+	u32vector2D					ghostsconnectivity;	/**<Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
+	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
@@ -151,7 +150,7 @@ private:
 		// Local variables
 		vector<uint32_t> last_child_index;
 		Class_Octant<3>* children;
-		uint32_t idx, nocts;
+		uint32_t idx, nocts, ilastch;
 		uint32_t offset = 0, blockidx;
 		uint8_t nchm1 = global3D.nchildren-1, ich, iface;
 		bool dorefine = false;
@@ -173,10 +172,12 @@ private:
 			octants.resize(octants.size()+offset);
 			blockidx = last_child_index[0]-nchm1;
 			idx = octants.size();
+			ilastch = last_child_index.size()-1;
 			while (idx>blockidx){
 				idx--;
 				//TODO Sostituire questo if con il controllo su last_index_child
-				if(octants[idx-offset].getMarker() > 0 && octants[idx-offset].getLevel() < MAX_LEVEL_3D){
+				if(idx == last_child_index[ilastch]){
+//				if(octants[idx-offset].getMarker() > 0 && octants[idx-offset].getLevel() < MAX_LEVEL_3D){
 					children = octants[idx-offset].buildChildren();
 					for (ich=0; ich<global3D.nchildren; ich++){
 						octants[idx-ich] = (children[nchm1-ich]);
@@ -192,6 +193,9 @@ private:
 						dorefine = true;
 					}
 					delete []children;
+					if (ilastch != 0){
+							ilastch--;
+					}
 				}
 				else {
 					octants[idx] = octants[idx-offset];
@@ -199,21 +203,7 @@ private:
 			}
 		}
 		octants.shrink_to_fit();
-
-		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si pu�� trovare la maniera di inserirlo nel loop precedente
-		pborders.clear();
 		nocts = octants.size();
-		pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(global3D.nfaces)));
-		for(idx=0; idx<nocts; idx++){
-			for(iface=0; iface<global3D.nfaces; iface++){
-				if (octants[idx].info[iface+global3D.nfaces]){
-					pborders.push_back(idx);
-					break;
-				}
-			}
-		}
-		pborders.shrink_to_fit();
 
 		setFirstDesc();
 		setLastDesc();
@@ -258,70 +248,10 @@ private:
 
 		// Set index for start and end check for ghosts
 		if (ghosts.size()){
-			while(idx1_gh < size_ghosts && ghosts[idx1_gh].computeMorton() < first_desc.computeMorton()){
-				idx1_gh++;
-			}
-			idx1_gh = max(0, idx1_gh-1);
-			while(idx2_gh < size_ghosts && ghosts[idx2_gh].computeMorton() < last_desc.computeMorton()){
+			while(idx2_gh < size_ghosts && ghosts[idx2_gh].computeMorton() <= last_desc.computeMorton()){
 				idx2_gh++;
 			}
 			idx2_gh = min(int(size_ghosts-1), idx2_gh);
-
-			// Start on ghosts
-			if ((ghosts[idx1_gh].getMarker() < 0) & (octants[0].getMarker() < 0)){
-				father = ghosts[idx1_gh].buildFather();
-				nbro = 0;
-				idx = idx1_gh;
-				marker = ghosts[idx].getMarker();
-				while(marker < 0 & ghosts[idx].buildFather() == father){
-					nbro++;
-					marker = ghosts[idx].getMarker();
-					idx--;
-					if (idx<0){
-						break;
-					}
-				}
-				nstart = 0;
-				idx = 0;
-				marker = octants[idx].getMarker();
-				while(marker<0 & octants[idx].buildFather() == father){
-					nbro++;
-					marker = octants[idx].getMarker();
-					nstart++;
-					idx++;
-					if (idx==nocts){
-						break;
-					}
-				}
-				if (nbro == global3D.nchildren){
-	//				offset = nstart;
-					// For update pbound of neighbours only check
-					// the odd faces of new father (placed nstart-times
-					// in the first nstart positions of octants)
-					// If there is father after coarse will be the first
-					// element of local octants (lowest Morton)
-	/*
-					for (int i=0; i<nstart; i++){
-						octants[i] = father;
-					}
-	*/
-					uint32_t	 sizeneigh;
-					u32vector    neigh;
-					vector<bool> isghost;
-					for (iface=0; iface<3; iface++){
-						uint8_t oddface = ((iface*2)+1);
-						findNeighbours(nstart-1, oddface, neigh, isghost);
-						sizeneigh = neigh.size();
-						for(int i=0; i<sizeneigh; i++){
-							if (!isghost[i])
-								octants[neigh[i]].setPbound(global3D.oppface[oddface], true);
-						}
-					}
-				}
-				else{
-					nstart = 0;
-				}
-			}
 		}
 
 		// Check and coarse internal octants
@@ -345,12 +275,13 @@ private:
 				else{
 					if (idx < (nocts>global3D.nchildren)*(nocts-global3D.nchildren)){
 						octants[idx].setMarker(0);
+						octants[idx].info[11] = true;
 					}
 				}
 			}
-			else{
-	//			octants[idx].info[13] = false;
-			}
+//			else{
+//	//			octants[idx].info[13] = false;
+//			}
 		}
 		//TODO Da mettere dentro il primo ciclo per renderlo meno costoso
 		if (nidx!=0){
@@ -364,16 +295,15 @@ private:
 						if (markerfather < octants[idx+offset+idx2].getMarker()+1){
 							markerfather = octants[idx+offset+idx2].getMarker()+1;
 						}
-						for (iface=0; iface<global3D.nfaces; iface++){
-							father.info[iface] = (father.info[iface] || octants[idx+offset+idx2].info[iface]);
-							father.info[iface+global3D.nfaces] = (father.info[iface+global3D.nfaces] || octants[idx+offset+idx2].info[iface+global3D.nfaces]);
+						for (int iii=0; iii<15; iii++){
+							father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
 						}
 					}
 					father.info[13] = true;
-					father.setMarker(markerfather);
 					if (markerfather < 0){
 						docoarse = true;
 					}
+					father.setMarker(markerfather);
 					octants[idx] = father;
 					offset += nchm1;
 					nidx++;
@@ -387,18 +317,17 @@ private:
 		octants.shrink_to_fit();
 		nocts = octants.size();
 
-
 		// End on ghosts
 		if (ghosts.size() && nocts > 0){
-			if ((ghosts[idx2_gh].getMarker() < 0) & (octants[nocts-1].getMarker() < 0)){
+			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
 				father = ghosts[idx2_gh].buildFather();
-				markerfather = -MAX_LEVEL_3D;
+				markerfather = ghosts[idx2_gh].getMarker()+1;//-MAX_LEVEL_2D;
 				nbro = 0;
 				idx = idx2_gh;
 				marker = ghosts[idx].getMarker();
-				while(marker < 0 & ghosts[idx].buildFather() == father){
+				while(marker < 0 && ghosts[idx].buildFather() == father){
 					nbro++;
-					marker = ghosts[idx].getMarker();
+					//TODO CAMBIATO IDX DA CAMBIARE ANCHE NELLE ALTRE COARSE!!!
 					if (markerfather < ghosts[idx].getMarker()+1){
 						markerfather = ghosts[idx].getMarker()+1;
 					}
@@ -406,19 +335,19 @@ private:
 					if(idx == size_ghosts){
 						break;
 					}
+					marker = ghosts[idx].getMarker();
 				}
 				nend = 0;
 				idx = nocts-1;
 				marker = octants[idx].getMarker();
-				while(marker < 0 & octants[idx].buildFather() == father & idx >= 0){
+				while(marker < 0 && octants[idx].buildFather() == father && idx >= 0){
 					nbro++;
-					marker = octants[idx].getMarker();
-					//TODO CAMBIARE IDX ANCHE NELLE ALTRE COARSE
+					nend++;
 					if (markerfather < octants[idx].getMarker()+1){
 						markerfather = octants[idx].getMarker()+1;
 					}
-					nend++;
 					idx--;
+					marker = octants[idx].getMarker();
 					if (idx<0){
 						break;
 					}
@@ -430,21 +359,24 @@ private:
 					nend = 0;
 					for(int ii=nocts-global3D.nchildren; ii<nocts; ii++){
 						octants[ii].setMarker(0);
+						octants[ii].info[15] = true;
 					}
 				}
 			}
 			if (nend != 0){
+				for (int iii=0; iii<15; iii++){
+					father.info[iii] = false;
+				}
 				for (idx=0; idx < nend; idx++){
-					for (iface=0; iface<global3D.nfaces; iface++){
-						father.info[iface] = (father.info[iface] || octants[nocts-idx].info[iface]);
-						father.info[iface+global3D.nfaces] = (father.info[iface+global3D.nfaces] || octants[nocts-idx].info[iface+global3D.nfaces]);
+					for (int iii=0; iii<15; iii++){
+						father.info[iii] = father.info[iii] || octants[nocts-idx-1].info[iii];
 					}
 				}
 				father.info[13] = true;
-				father.setMarker(markerfather);
 				if (markerfather < 0){
 					docoarse = true;
 				}
+				father.setMarker(markerfather);
 				octants.resize(nocts-offset);
 				octants.push_back(father);
 				octants.shrink_to_fit();
@@ -452,21 +384,6 @@ private:
 			}
 
 		}
-
-		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si pu�� trovare la maniera di inserirlo nel loop precedente
-		pborders.clear();
-		nocts = octants.size();
-		pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(global3D.nfaces)));
-		for(idx=0; idx<nocts; idx++){
-			for(iface=0; iface<global3D.nfaces; iface++){
-				if (octants[idx].info[iface+global3D.nfaces]){
-					pborders.push_back(idx);
-					break;
-				}
-			}
-		}
-		pborders.shrink_to_fit();
 
 		// Set final first and last desc
 		if(nocts>0){
@@ -608,12 +525,12 @@ private:
 			idx2_gh = min(int(size_ghosts-1), idx2_gh);
 
 			// Start on ghosts
-			if ((ghosts[idx1_gh].getMarker() < 0) & (octants[0].getMarker() < 0)){
+			if ((ghosts[idx1_gh].getMarker() < 0) && (octants[0].getMarker() < 0)){
 				father = ghosts[idx1_gh].buildFather();
 				nbro = 0;
 				idx = idx1_gh;
 				marker = ghosts[idx].getMarker();
-				while(marker < 0 & ghosts[idx].buildFather() == father){
+				while(marker < 0 && ghosts[idx].buildFather() == father){
 					nbro++;
 					marker = ghosts[idx].getMarker();
 					idx--;
@@ -624,7 +541,7 @@ private:
 				nstart = 0;
 				idx = 0;
 				marker = octants[idx].getMarker();
-				while(marker<0 & octants[idx].buildFather() == father){
+				while(marker<0 && octants[idx].buildFather() == father){
 					nbro++;
 					marker = octants[idx].getMarker();
 					nstart++;
@@ -735,13 +652,13 @@ private:
 
 		// End on ghosts
 		if (ghosts.size() && nocts > 0){
-			if ((ghosts[idx2_gh].getMarker() < 0) & (octants[nocts-1].getMarker() < 0)){
+			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
 				father = ghosts[idx2_gh].buildFather();
 				markerfather = -MAX_LEVEL_3D;
 				nbro = 0;
 				idx = idx2_gh;
 				marker = ghosts[idx].getMarker();
-				while(marker < 0 & ghosts[idx].buildFather() == father){
+				while(marker < 0 && ghosts[idx].buildFather() == father){
 					nbro++;
 					marker = ghosts[idx].getMarker();
 					if (markerfather < ghosts[idx].getMarker()+1){
@@ -755,7 +672,7 @@ private:
 				nend = 0;
 				idx = nocts-1;
 				marker = octants[idx].getMarker();
-				while(marker < 0 & octants[idx].buildFather() == father & idx >= 0){
+				while(marker < 0 && octants[idx].buildFather() == father && idx >= 0){
 					nbro++;
 					marker = octants[idx].getMarker();
 					if (markerfather < octants[idx+offset+idx2].getMarker()+1){
@@ -836,7 +753,7 @@ private:
 		nocts = getNumOctants();
 		idx = 0;
 		Morton = octants[idx].computeMorton();
-		while(Morton <= lastDescPre & idx < nocts & Morton != 0){
+		while(Morton <= lastDescPre && idx < nocts && Morton != 0){
 			// To delete, the father is in proc before me
 			toDelete++;
 			idx++;
@@ -854,7 +771,7 @@ private:
 			// To insert, the father is not yet here!!
 			idx = nocts - 1;
 			Class_Octant<3> father = octants[idx].buildFather();
-			while(octants[idx].buildFather() == father & idx >= 0){
+			while(octants[idx].buildFather() == father && idx >= 0){
 				toDelete++;
 				idx--;
 			}
@@ -900,7 +817,7 @@ private:
 		nocts = getNumOctants();
 		idx = 0;
 		Morton = octants[idx].computeMorton();
-		while(Morton <= lastDescPre & idx < nocts & Morton != 0){
+		while(Morton <= lastDescPre && idx < nocts && Morton != 0){
 			// To delete, the father is in proc before me
 			toDelete++;
 			idx++;
@@ -920,7 +837,7 @@ private:
 			// To insert, the father is not yet here!!
 			idx = nocts - 1;
 			Class_Octant<3> father = octants[idx].buildFather();
-			while(octants[idx].buildFather() == father & idx >= 0){
+			while(octants[idx].buildFather() == father && idx >= 0){
 				toDelete++;
 				idx--;
 			}
@@ -1209,7 +1126,7 @@ private:
 					Mortontry = octants[idxtry].computeMorton();
 					int32_t Dh;
 					int32_t eqcoord;
-					while(Mortontry < Mortonlast & idxtry < noctants){
+					while(Mortontry < Mortonlast && idxtry < noctants){
 						Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
 						Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
 						Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
@@ -1307,7 +1224,7 @@ private:
 							Mortontry = ghosts[idxtry].computeMorton();
 							int32_t Dh;
 							int32_t eqcoord;
-							while(Mortontry < Mortonlast & idxtry < size_ghosts){
+							while(Mortontry < Mortonlast && idxtry < size_ghosts){
 								Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
 								Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
 								Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(ghosts[idxtry].z));
@@ -1391,7 +1308,7 @@ private:
 									Mortontry = octants[idxtry].computeMorton();
 									int32_t Dh;
 									int32_t eqcoord;
-									while(Mortontry < Mortonlast & idxtry < noctants-1){
+									while(Mortontry < Mortonlast && idxtry < noctants-1){
 										Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
 										Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
 										Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
@@ -1507,7 +1424,7 @@ private:
 					Mortontry = octants[idxtry].computeMorton();
 					int32_t Dh;
 					int32_t eqcoord;
-					while(Mortontry < Mortonlast & idxtry < noctants){
+					while(Mortontry < Mortonlast && idxtry < noctants){
 						Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
 						Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
 						Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
@@ -1908,7 +1825,7 @@ private:
 						uint64_t Mortonlast = last_desc.computeMorton();
 						vector<uint32_t> bufferidx;
 						Mortontry = ghosts[idxtry].computeMorton();
-						while(Mortontry < Mortonlast & idxtry < ghosts.size()){
+						while(Mortontry < Mortonlast && idxtry < ghosts.size()){
 							Dhx = int32_t(cx)*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
 							Dhy = int32_t(cy)*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
 							Dhz = int32_t(cz)*(int32_t(oct->z) - int32_t(ghosts[idxtry].z));
@@ -1999,7 +1916,7 @@ private:
 						uint64_t Mortonlast = last_desc.computeMorton();
 						vector<uint32_t> bufferidx;
 						Mortontry = octants[idxtry].computeMorton();
-						while(Mortontry < Mortonlast & idxtry < noctants-1){
+						while(Mortontry < Mortonlast && idxtry < noctants-1){
 							Dhx = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
 							Dhy = int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
 							Dhz = int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
@@ -2140,7 +2057,7 @@ private:
 						uint64_t Mortonlast = last_desc.computeMorton();
 						vector<uint32_t> bufferidx;
 						Mortontry = ghosts[idxtry].computeMorton();
-						while(Mortontry < Mortonlast & idxtry < size_ghosts){
+						while(Mortontry < Mortonlast && idxtry < size_ghosts){
 							Dhx = int32_t(cx)*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
 							Dhy = int32_t(cy)*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
 							Dhz = int32_t(cz)*(int32_t(oct->z) - int32_t(ghosts[idxtry].z));
@@ -2221,7 +2138,7 @@ private:
 						uint64_t Mortonlast = last_desc.computeMorton();
 						vector<uint32_t> bufferidx;
 						Mortontry = octants[idxtry].computeMorton();
-						while(Mortontry < Mortonlast & idxtry < noctants-1){
+						while(Mortontry < Mortonlast && idxtry < noctants-1){
 							Dhx = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
 							Dhy = int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
 							Dhz = int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
