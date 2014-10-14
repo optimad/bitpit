@@ -180,7 +180,7 @@ public:
 		for (int i=0; i<NumOctants; i++){
 			lev = uint8_t(levels[i]);
 			 x0 = uint32_t(XY[i][0]);
-			uint32_t y0 = uint32_t(XY[i][1]);
+			 y0 = uint32_t(XY[i][1]);
 			Class_Octant<2> oct(lev, x0, y0);
 			if (x0 == 0){
 				iface = 0;
@@ -1066,10 +1066,10 @@ private:
 			u32vector & neighbours,
 			vector<bool> & isghost){
 
-		if (codim == 2){
+		if (codim == 1){
 			octree.findNeighbours(&oct, iface, neighbours, isghost);
 		}
-		else if (codim == 1){
+		else if (codim == 2){
 			octree.findNodeNeighbours(&oct, iface, neighbours, isghost);
 		}
 		else {
