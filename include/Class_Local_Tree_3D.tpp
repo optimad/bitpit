@@ -60,10 +60,10 @@ private:
 	// connectivity
 	u32vector2D					nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
 	u32vector2D					connectivity;		/**<Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
-	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
+	 *The nodes are stored as index of vector nodes*/
 	u32vector2D					ghostsnodes;		/**<Local vector of ghosts nodes (x,y,z) ordered with Morton Number*/
 	u32vector2D					ghostsconnectivity;	/**<Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
-	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
+	 *The nodes are stored as index of vector nodes*/
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
@@ -162,10 +162,10 @@ private:
 				offset += nchm1;
 			}
 			else{
-	//			octants[idx].info[12] = false;
+				//			octants[idx].info[12] = false;
 				if (octants[idx].marker > 0)
 					octants[idx].marker = 0;
-					octants[idx].info[15] = true;
+				octants[idx].info[15] = true;
 			}
 		}
 		if (offset > 0){
@@ -177,7 +177,7 @@ private:
 				idx--;
 				//TODO Sostituire questo if con il controllo su last_index_child
 				if(idx == last_child_index[ilastch]){
-//				if(octants[idx-offset].getMarker() > 0 && octants[idx-offset].getLevel() < MAX_LEVEL_3D){
+					//				if(octants[idx-offset].getMarker() > 0 && octants[idx-offset].getLevel() < MAX_LEVEL_3D){
 					children = octants[idx-offset].buildChildren();
 					for (ich=0; ich<global3D.nchildren; ich++){
 						octants[idx-ich] = (children[nchm1-ich]);
@@ -194,7 +194,7 @@ private:
 					}
 					delete []children;
 					if (ilastch != 0){
-							ilastch--;
+						ilastch--;
 					}
 				}
 				else {
@@ -279,9 +279,9 @@ private:
 					}
 				}
 			}
-//			else{
-//	//			octants[idx].info[13] = false;
-//			}
+			//			else{
+			//	//			octants[idx].info[13] = false;
+			//			}
 		}
 		//TODO Da mettere dentro il primo ciclo per renderlo meno costoso
 		if (nidx!=0){
@@ -295,7 +295,7 @@ private:
 						if (markerfather < octants[idx+offset+idx2].getMarker()+1){
 							markerfather = octants[idx+offset+idx2].getMarker()+1;
 						}
-						for (int iii=0; iii<15; iii++){
+						for (int iii=0; iii<16; iii++){
 							father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
 						}
 					}
@@ -364,11 +364,11 @@ private:
 				}
 			}
 			if (nend != 0){
-				for (int iii=0; iii<15; iii++){
+				for (int iii=0; iii<16; iii++){
 					father.info[iii] = false;
 				}
 				for (idx=0; idx < nend; idx++){
-					for (int iii=0; iii<15; iii++){
+					for (int iii=0; iii<16; iii++){
 						father.info[iii] = father.info[iii] || octants[nocts-idx-1].info[iii];
 					}
 				}
@@ -397,11 +397,11 @@ private:
 	// =================================================================================== //
 
 	bool refine(u32vector & mapidx){							// Refine local tree: refine one time octants with marker >0
-																// mapidx[i] = index in old octants vector of the i-th octant (index of father if octant is new after)
+		// mapidx[i] = index in old octants vector of the i-th octant (index of father if octant is new after)
 		// Local variables
 		vector<uint32_t> last_child_index;
 		Class_Octant<3>* children;
-		uint32_t idx, nocts;
+		uint32_t idx, nocts, ilastch;
 		uint32_t offset = 0, blockidx;
 		uint8_t nchm1 = global3D.nchildren-1, ich, iface;
 		bool dorefine = false;
@@ -413,9 +413,11 @@ private:
 				offset += nchm1;
 			}
 			else{
-	//			octants[idx].info[12] = false;
-				if (octants[idx].marker > 0)
+				//			octants[idx].info[12] = false;
+				if (octants[idx].marker > 0){
 					octants[idx].marker = 0;
+					octants[idx].info[15] = false;
+				}
 			}
 		}
 		if (offset > 0){
@@ -425,11 +427,12 @@ private:
 			octants.resize(octants.size()+offset);
 			blockidx = last_child_index[0]-nchm1;
 			idx = octants.size();
-			//while (idx>blockidx){
-			while (idx>0){
+			ilastch = last_child_index.size()-1;
+			while (idx>blockidx){
+				//			while (idx>0){
 				idx--;
-				//TODO Sostituire questo if con il controllo su last_index_child
-				if(octants[idx-offset].getMarker() > 0 && octants[idx-offset].getLevel() < MAX_LEVEL_3D){
+				//				if(octants[idx-offset].getMarker() > 0 && octants[idx-offset].getLevel() < MAX_LEVEL_3D){
+				if(idx == last_child_index[ilastch]){
 					children = octants[idx-offset].buildChildren();
 					for (ich=0; ich<global3D.nchildren; ich++){
 						octants[idx-ich] = (children[nchm1-ich]);
@@ -446,6 +449,9 @@ private:
 						dorefine = true;
 					}
 					delete []children;
+					if (ilastch != 0){
+						ilastch--;
+					}
 				}
 				else {
 					octants[idx] = octants[idx-offset];
@@ -454,21 +460,7 @@ private:
 			}
 		}
 		octants.shrink_to_fit();
-
-		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si pu�� trovare la maniera di inserirlo nel loop precedente
-		pborders.clear();
 		nocts = octants.size();
-		pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(global3D.nfaces)));
-		for(idx=0; idx<nocts; idx++){
-			for(iface=0; iface<global3D.nfaces; iface++){
-				if (octants[idx].info[iface+global3D.nfaces]){
-					pborders.push_back(idx);
-					break;
-				}
-			}
-		}
-		pborders.shrink_to_fit();
 
 		setFirstDesc();
 		setLastDesc();
@@ -480,8 +472,8 @@ private:
 	// =================================================================================== //
 
 	bool coarse(u32vector & mapidx){							// Coarse local tree: coarse one time family of octants with marker <0
-																// (if at least one octant of family has marker>=0 set marker=0 for the entire family)
-																// mapidx[i] = index in old octants vector of the i-th octant (index of father if octant is new after)
+		// (if at least one octant of family has marker>=0 set marker=0 for the entire family)
+		// mapidx[i] = index in old octants vector of the i-th octant (index of father if octant is new after)
 		// Local variables
 		vector<uint32_t> first_child_index;
 		Class_Octant<3> father;
@@ -515,70 +507,10 @@ private:
 
 		// Set index for start and end check for ghosts
 		if (ghosts.size()){
-			while(idx1_gh < size_ghosts && ghosts[idx1_gh].computeMorton() < first_desc.computeMorton()){
-				idx1_gh++;
-			}
-			idx1_gh = max(0, idx1_gh-1);
 			while(idx2_gh < size_ghosts && ghosts[idx2_gh].computeMorton() < last_desc.computeMorton()){
 				idx2_gh++;
 			}
 			idx2_gh = min(int(size_ghosts-1), idx2_gh);
-
-			// Start on ghosts
-			if ((ghosts[idx1_gh].getMarker() < 0) && (octants[0].getMarker() < 0)){
-				father = ghosts[idx1_gh].buildFather();
-				nbro = 0;
-				idx = idx1_gh;
-				marker = ghosts[idx].getMarker();
-				while(marker < 0 && ghosts[idx].buildFather() == father){
-					nbro++;
-					marker = ghosts[idx].getMarker();
-					idx--;
-					if (idx<0){
-						break;
-					}
-				}
-				nstart = 0;
-				idx = 0;
-				marker = octants[idx].getMarker();
-				while(marker<0 && octants[idx].buildFather() == father){
-					nbro++;
-					marker = octants[idx].getMarker();
-					nstart++;
-					idx++;
-					if (idx==nocts){
-						break;
-					}
-				}
-				if (nbro == global3D.nchildren){
-	//				offset = nstart;
-					// For update pbound of neighbours only check
-					// the odd faces of new father (placed nstart-times
-					// in the first nstart positions of octants)
-					// If there is father after coarse will be the first
-					// element of local octants (lowest Morton)
-	/*
-					for (int i=0; i<nstart; i++){
-						octants[i] = father;
-					}
-	*/
-					uint32_t	 sizeneigh;
-					u32vector    neigh;
-					vector<bool> isghost;
-					for (iface=0; iface<3; iface++){
-						uint8_t oddface = ((iface*2)+1);
-						findNeighbours(nstart-1, oddface, neigh, isghost);
-						sizeneigh = neigh.size();
-						for(int i=0; i<sizeneigh; i++){
-							if (!isghost[i])
-								octants[neigh[i]].setPbound(global3D.oppface[oddface], true);
-						}
-					}
-				}
-				else{
-					nstart = 0;
-				}
-			}
 		}
 
 		// Check and coarse internal octants
@@ -602,12 +534,13 @@ private:
 				else{
 					if (idx < (nocts>global3D.nchildren)*(nocts-global3D.nchildren)){
 						octants[idx].setMarker(0);
+						octants[idx].info[15] = true;
 					}
 				}
 			}
-			else{
-	//			octants[idx].info[13] = false;
-			}
+			//			else{
+			//	//			octants[idx].info[13] = false;
+			//			}
 		}
 		//TODO Da mettere dentro il primo ciclo per renderlo meno costoso
 		if (nidx!=0){
@@ -618,13 +551,15 @@ private:
 				if (idx+offset == first_child_index[nidx]){
 					markerfather = -MAX_LEVEL_3D;
 					father = octants[idx+offset].buildFather();
+					for (int iii=0; iii<16; iii++){
+						father.info[iii] = false;
+					}
 					for(idx2=0; idx2<global3D.nchildren; idx2++){
 						if (markerfather < octants[idx+offset+idx2].getMarker()+1){
 							markerfather = octants[idx+offset+idx2].getMarker()+1;
 						}
-						for (iface=0; iface<global3D.nfaces; iface++){
-							father.info[iface] = (father.info[iface] || octants[idx+offset+idx2].info[iface]);
-							father.info[iface+global3D.nfaces] = (father.info[iface+global3D.nfaces] || octants[idx+offset+idx2].info[iface+global3D.nfaces]);
+						for (int iii=0; iii<16; iii++){
+							father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
 						}
 					}
 					father.info[13] = true;
@@ -646,7 +581,7 @@ private:
 		octants.resize(nocts-offset);
 		octants.shrink_to_fit();
 		nocts = octants.size();
-		mapidx.resize(nocts-offset);
+		mapidx.resize(nocts);
 		mapidx.shrink_to_fit();
 
 
@@ -654,13 +589,13 @@ private:
 		if (ghosts.size() && nocts > 0){
 			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
 				father = ghosts[idx2_gh].buildFather();
-				markerfather = -MAX_LEVEL_3D;
+				markerfather = ghosts[idx2_gh].getMarker()+1;//-MAX_LEVEL_3D;
 				nbro = 0;
 				idx = idx2_gh;
 				marker = ghosts[idx].getMarker();
 				while(marker < 0 && ghosts[idx].buildFather() == father){
 					nbro++;
-					marker = ghosts[idx].getMarker();
+					//TODO CAMBIATO IDX DA CAMBIARE ANCHE NELLE ALTRE COARSE!!!
 					if (markerfather < ghosts[idx].getMarker()+1){
 						markerfather = ghosts[idx].getMarker()+1;
 					}
@@ -668,18 +603,19 @@ private:
 					if(idx == size_ghosts){
 						break;
 					}
+					marker = ghosts[idx].getMarker();
 				}
 				nend = 0;
 				idx = nocts-1;
 				marker = octants[idx].getMarker();
 				while(marker < 0 && octants[idx].buildFather() == father && idx >= 0){
 					nbro++;
-					marker = octants[idx].getMarker();
-					if (markerfather < octants[idx+offset+idx2].getMarker()+1){
-						markerfather = octants[idx+offset+idx2].getMarker()+1;
-					}
 					nend++;
+					if (markerfather < octants[idx].getMarker()+1){
+						markerfather = octants[idx].getMarker()+1;
+					}
 					idx--;
+					marker = octants[idx].getMarker();
 					if (idx<0){
 						break;
 					}
@@ -691,21 +627,24 @@ private:
 					nend = 0;
 					for(int ii=nocts-global3D.nchildren; ii<nocts; ii++){
 						octants[ii].setMarker(0);
+						octants[ii].info[15] = true;
 					}
 				}
 			}
 			if (nend != 0){
+				for (int iii=0; iii<16; iii++){
+					father.info[iii] = false;
+				}
 				for (idx=0; idx < nend; idx++){
-					for (iface=0; iface<global3D.nfaces; iface++){
-						father.info[iface] = (father.info[iface] || octants[nocts-idx].info[iface]);
-						father.info[iface+global3D.nfaces] = (father.info[iface+global3D.nfaces] || octants[nocts-idx].info[iface+global3D.nfaces]);
+					for (int iii=0; iii<16; iii++){
+						father.info[iii] = father.info[iii] || octants[nocts-idx-1].info[iii];
 					}
 				}
 				father.info[13] = true;
-				father.setMarker(markerfather);
 				if (markerfather < 0){
 					docoarse = true;
 				}
+				father.setMarker(markerfather);
 				octants.resize(nocts-offset);
 				octants.push_back(father);
 				octants.shrink_to_fit();
@@ -717,21 +656,6 @@ private:
 
 		}
 
-		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si pu�� trovare la maniera di inserirlo nel loop precedente
-		pborders.clear();
-		nocts = octants.size();
-		pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(global3D.nfaces)));
-		for(idx=0; idx<nocts; idx++){
-			for(iface=0; iface<global3D.nfaces; iface++){
-				if (octants[idx].info[iface+global3D.nfaces]){
-					pborders.push_back(idx);
-					break;
-				}
-			}
-		}
-		pborders.shrink_to_fit();
-
 		// Set final first and last desc
 		if(nocts>0){
 			setFirstDesc();
@@ -742,6 +666,12 @@ private:
 	};
 
 	// =================================================================================== //
+	//TODO Arrivato qui!!
+	//TODO Arrivato qui!!
+	//TODO Arrivato qui!!
+	//TODO Arrivato qui!!
+
+
 
 	void checkCoarse(uint64_t lastDescPre,						// Delete overlapping octants after coarse local tree. Check first and last descendants
 								uint64_t firstDescPost){		// of process before and after the local process
