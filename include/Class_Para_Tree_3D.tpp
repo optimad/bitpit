@@ -34,7 +34,6 @@ public:
 	// MEMBERS ----------------------------------------------------------------------- //
 public:
 	//undistributed members
-	//undistributed members
 	uint64_t* partition_first_desc; 			/**<Global array containing position of the first possible octant in each processor*/
 	uint64_t* partition_last_desc; 				/**<Global array containing position of the last possible octant in each processor*/
 	uint64_t* partition_range_globalidx;	 	/**<Global array containing global index of the last existing octant in each processor*/
@@ -53,14 +52,6 @@ public:
 
 	//map member
 	Class_Map<3> trans;							/**<Transformation map from logical to physical domain*/
-
-//	// connectivity
-//	dvector2D					nodes;				// Local vector of nodes (x,y,z) ordered with Morton Number
-//	u32vector2D					connectivity;		// Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
-//	// The nodes are stored as index of vector nodes
-//	dvector2D					ghostsnodes;		// Local vector of ghosts nodes (x,y,z) ordered with Morton Number
-//	u32vector2D					ghostsconnectivity;	// Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
-//	// The nodes are stored as index of vector nodes
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
@@ -113,7 +104,7 @@ public:
 	 * \param[in] Z Coordinate Z of node 0,
 	 * \param[in] L Side length of the octant.
 	 */
-	Class_Para_Tree(double & X, double & Y, double & Z, double & L){
+	Class_Para_Tree(double & X, double & Y, double & Z, double & L):trans(X,Y,Z,L){
 		serial = true;
 		error_flag = 0;
 		max_depth = 0;
@@ -417,7 +408,6 @@ public:
 		return oct->getPbound(iface);
 	};
 
-
 	/*! Get the union of every bound flags on faces
 	 * \param[in] oct Pointer to target octant.
 	 * \return true if the octant has at least a boundary face.
@@ -508,10 +498,6 @@ public:
 	void setBalance(Class_Octant<3>* oct, bool balance){					// Set if balancing-blocked idx-th octant
 		oct->setBalance(!balance);
 	};
-
-
-
-
 
 private:
 	// ------------------------------------------------------------------------------- //
@@ -1361,10 +1347,7 @@ public:
 		octree.computeIntersections();
 	}
 
-
 	// =============================================================================== //
-
-	//TODO getPOintOwner con coordinate logiche uint32_t !!!
 
 	/** Get the octant owner of an input point.
 	 * \param[in] point Coordinates of target point.
@@ -1417,7 +1400,7 @@ public:
 				while(octree.octants[idxtry].computeMorton() > morton){
 					idxtry--;
 					if(idxtry > noctants-1){
-						idxtry = noctants-1;
+						idxtry = 0;
 						break;
 					}
 				}
@@ -1426,6 +1409,196 @@ public:
 		}
 
 	};
+
+	// =============================================================================== //
+
+	/** Get the octant owner of an input point.
+	 * \param[in] point Coordinates of target point.
+	 * \return Index of octant owner of target point.
+	 */
+	uint32_t getPointOwnerIdx(dvector & point){
+		uint32_t noctants = octree.octants.size();
+		uint32_t idxtry = noctants/2;
+		uint32_t x, y, z;
+		uint64_t morton, mortontry;
+		int powner;
+
+		x = trans.mapX(point[0]);
+		y = trans.mapX(point[1]);
+		z = trans.mapX(point[2]);
+		morton = mortonEncode_magicbits(x,y,z);
+		powner = findOwner(morton);
+		if (powner!=rank)
+			return -1;
+
+		int32_t jump = idxtry;
+		while(abs(jump) > 0){
+			mortontry = octree.octants[idxtry].computeMorton();
+			jump = ((mortontry<morton)-(mortontry>morton))*abs(jump)/2;
+			idxtry += jump;
+			if (idxtry > noctants-1){
+				if (jump > 0){
+					idxtry = noctants - 1;
+					jump = 0;
+				}
+				else if (jump < 0){
+					idxtry = 0;
+					jump = 0;
+				}
+			}
+		}
+		if(octree.octants[idxtry].computeMorton() == morton){
+			return idxtry;
+		}
+		else{
+			// Step until the mortontry lower than morton (one idx of distance)
+			{
+				while(octree.octants[idxtry].computeMorton() < morton){
+					idxtry++;
+					if(idxtry > noctants-1){
+						idxtry = noctants-1;
+						break;
+					}
+				}
+				while(octree.octants[idxtry].computeMorton() > morton){
+					idxtry--;
+					if(idxtry > noctants-1){
+						idxtry = 0;
+						break;
+					}
+				}
+			}
+			return idxtry;
+		}
+
+	};
+
+	// =============================================================================== //
+
+	/** Get the octant owner of an input point.
+	 * \param[in] point Coordinates of target point in logical domain.
+	 * \return Pointer to octant owner of target point.
+	 */
+	Class_Octant<3>* getPointOwner(u32vector & point){
+		uint32_t noctants = octree.octants.size();
+		uint32_t idxtry = noctants/2;
+		uint32_t x, y, z;
+		uint64_t morton, mortontry;
+		int powner;
+
+		x = point[0];
+		y = point[1];
+		z = point[2];
+		morton = mortonEncode_magicbits(x,y,z);
+		powner = findOwner(morton);
+		if (powner!=rank)
+			return NULL;
+
+		int32_t jump = idxtry;
+		while(abs(jump) > 0){
+			mortontry = octree.octants[idxtry].computeMorton();
+			jump = ((mortontry<morton)-(mortontry>morton))*abs(jump)/2;
+			idxtry += jump;
+			if (idxtry > noctants-1){
+				if (jump > 0){
+					idxtry = noctants - 1;
+					jump = 0;
+				}
+				else if (jump < 0){
+					idxtry = 0;
+					jump = 0;
+				}
+			}
+		}
+		if(octree.octants[idxtry].computeMorton() == morton){
+			return &octree.octants[idxtry];
+		}
+		else{
+			// Step until the mortontry lower than morton (one idx of distance)
+			{
+				while(octree.octants[idxtry].computeMorton() < morton){
+					idxtry++;
+					if(idxtry > noctants-1){
+						idxtry = noctants-1;
+						break;
+					}
+				}
+				while(octree.octants[idxtry].computeMorton() > morton){
+					idxtry--;
+					if(idxtry > noctants-1){
+						idxtry = 0;
+						break;
+					}
+				}
+			}
+			return &octree.octants[idxtry];
+		}
+
+	};
+
+	// =============================================================================== //
+
+	/** Get the octant owner of an input point.
+	 * \param[in] point Coordinates of target point in logical domain.
+	 * \return Index of octant owner of target point.
+	 */
+	uint32_t getPointOwnerIdx(u32vector & point){
+		uint32_t noctants = octree.octants.size();
+		uint32_t idxtry = noctants/2;
+		uint32_t x, y, z;
+		uint64_t morton, mortontry;
+		int powner;
+
+		x = point[0];
+		y = point[1];
+		z = point[2];
+		morton = mortonEncode_magicbits(x,y,z);
+		powner = findOwner(morton);
+		if (powner!=rank)
+			return -1;
+
+		int32_t jump = idxtry;
+		while(abs(jump) > 0){
+			mortontry = octree.octants[idxtry].computeMorton();
+			jump = ((mortontry<morton)-(mortontry>morton))*abs(jump)/2;
+			idxtry += jump;
+			if (idxtry > noctants-1){
+				if (jump > 0){
+					idxtry = noctants - 1;
+					jump = 0;
+				}
+				else if (jump < 0){
+					idxtry = 0;
+					jump = 0;
+				}
+			}
+		}
+		if(octree.octants[idxtry].computeMorton() == morton){
+			return idxtry;
+		}
+		else{
+			// Step until the mortontry lower than morton (one idx of distance)
+			{
+				while(octree.octants[idxtry].computeMorton() < morton){
+					idxtry++;
+					if(idxtry > noctants-1){
+						idxtry = noctants-1;
+						break;
+					}
+				}
+				while(octree.octants[idxtry].computeMorton() > morton){
+					idxtry--;
+					if(idxtry > noctants-1){
+						idxtry = 0;
+						break;
+					}
+				}
+			}
+			return idxtry;
+		}
+
+	};
+
 
 	// =============================================================================== //
 	// PARATREE METHODS ----------------------------------------------------------------------- //
@@ -1447,7 +1620,6 @@ public:
 private:
 	void computePartition(uint32_t* partition,	 		// compute octant partition giving almost the same number of octant to each process
 			uint8_t & level_){   						// with complete families contained in octants of n "level" over the leaf in each process
-		//	level = uint8_t(min(int(level), MAX_LEVEL));
 		uint8_t level = uint8_t(min(int(max(int(max_depth) - int(level_), int(1))) , MAX_LEVEL_3D));
 		uint32_t partition_temp[nproc];
 		uint8_t boundary_proc[nproc-1], dimcomm, glbdimcomm[nproc], indcomm, glbindcomm[nproc];
@@ -1574,7 +1746,6 @@ private:
 		while(beg != end){
 			if(morton <= partition_last_desc[seed]){
 				end = seed;
-				//			length = seed + 1;
 				if(morton > partition_last_desc[seed-1])
 					beg = seed;
 			}
@@ -1582,7 +1753,6 @@ private:
 				beg = seed;
 				if(morton <= partition_last_desc[seed+1])
 					beg = seed + 1;
-				//	length = end - seed -1;
 			}
 			length = end - beg;
 			seed = beg + length/2;
@@ -1599,7 +1769,7 @@ private:
 		//it visits the local octants building virtual neighbors on each octant face
 		//find the owner of these virtual neighbor and build a map (process,border octants)
 		//this map contains the local octants as ghosts for neighbor processes
-		if(octree.pborders.size() == 0){
+
 			Class_Local_Tree<3>::OctantsType::iterator end = octree.octants.end();
 			Class_Local_Tree<3>::OctantsType::iterator begin = octree.octants.begin();
 			bordersPerProc.clear();
@@ -1622,8 +1792,6 @@ private:
 							else{
 								it->setPbound(i,false);
 							}
-							//						if(pEnd == rank && pEnd == rank)
-							//							break;
 						}
 						delete [] virtualNeighbors;
 						virtualNeighbors = NULL;
@@ -1640,8 +1808,6 @@ private:
 							int pEnd = findOwner(virtualEdgeNeighbors[virtualEdgeNeighborSize - 1- ee]);
 							procs.insert(pBegin);
 							procs.insert(pEnd);
-							//						if(pEnd == rank && pEnd == rank)
-							//							break;
 						}
 					}
 					delete [] virtualEdgeNeighbors;
@@ -1669,74 +1835,7 @@ private:
 					}
 				}
 			}
-		}
-		else{
-			Class_Local_Tree<3>::u32vector::iterator end = octree.pborders.end();
-			Class_Local_Tree<3>::u32vector::iterator begin = octree.pborders.begin();
-			bordersPerProc.clear();
-			for(Class_Local_Tree<3>::u32vector::iterator it = begin; it != end; ++it){
-				Class_Octant<3> & oct = octree.octants[*it];
-				set<int> procs;
-				//Virtual Face Neighbors
-				for(uint8_t i = 0; i < global3D.nfaces; ++i){
-					if(oct.getBound(i) == false){
-						uint32_t virtualNeighborsSize = 0;
-						uint64_t* virtualNeighbors = oct.computeVirtualMorton(i,max_depth,virtualNeighborsSize);
-						uint32_t maxDelta = virtualNeighborsSize/2;
-						for(int j = 0; j <= maxDelta; ++j){
-							int pBegin = findOwner(virtualNeighbors[j]);
-							int pEnd = findOwner(virtualNeighbors[virtualNeighborsSize - 1 - j]);
-							procs.insert(pBegin);
-							procs.insert(pEnd);
-							if(pBegin == pEnd || pBegin == pEnd - 1)
-								break;
-						}
-						delete [] virtualNeighbors;
-						virtualNeighbors = NULL;
-					}
-				}
-				//Virtual Edge Neighbors
-				for(uint8_t e = 0; e < global3D.nedges; ++e){
-					uint32_t virtualEdgeNeighborSize = 0;
-					uint64_t* virtualEdgeNeighbors = oct.computeEdgeVirtualMorton(e,max_depth,virtualEdgeNeighborSize);
-					uint32_t maxDelta = virtualEdgeNeighborSize/2;
-					if(virtualEdgeNeighborSize){
-						for(int ee = 0; ee <= maxDelta; ++ee){
-							int pBegin = findOwner(virtualEdgeNeighbors[ee]);
-							int pEnd = findOwner(virtualEdgeNeighbors[virtualEdgeNeighborSize - 1- ee]);
-							procs.insert(pBegin);
-							procs.insert(pEnd);
-							//						if(pEnd == rank && pEnd == rank)
-							//							break;
-						}
-					}
-					delete [] virtualEdgeNeighbors;
-					virtualEdgeNeighbors = NULL;
-				}
-				//Virtual Corner Neighbors
-				for(uint8_t c = 0; c < global3D.nnodes; ++c){
-					uint32_t virtualCornerNeighborSize = 0;
-					uint64_t virtualCornerNeighbor = oct.computeNodeVirtualMorton(c,max_depth,virtualCornerNeighborSize);
-					if(virtualCornerNeighborSize){
-						int proc = findOwner(virtualCornerNeighbor);
-						procs.insert(proc);
-					}
-				}
 
-				set<int>::iterator pitend = procs.end();
-				for(set<int>::iterator pit = procs.begin(); pit != pitend; ++pit){
-					int p = *pit;
-					if(p != rank){
-						//TODO better reserve to avoid if
-						bordersPerProc[p].push_back(*it);
-						vector<uint32_t> & bordersSingleProc = bordersPerProc[p];
-						if(bordersSingleProc.capacity() - bordersSingleProc.size() < 2)
-							bordersSingleProc.reserve(2*bordersSingleProc.size());
-					}
-				}
-			}
-
-		}
 		MPI_Barrier(MPI_COMM_WORLD);
 
 		//PACK (mpi) BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
@@ -1744,6 +1843,7 @@ private:
 		//for every element it visits the border octants it contains and pack them in a new structure, sendBuffers
 		//this map has an entry Class_Comm_Buffer for every proc containing the size in bytes of the buffer and the octants
 		//to be sent to that proc packed in a char* buffer
+		uint64_t global_index;
 		uint32_t x,y,z;
 		uint8_t l;
 		int8_t m;
@@ -1753,7 +1853,7 @@ private:
 		uint32_t pbordersOversize = 0;
 		for(map<int,vector<uint32_t> >::iterator bit = bordersPerProc.begin(); bit != bitend; ++bit){
 			pbordersOversize += bit->second.size();
-			int buffSize = bit->second.size() * (int)ceil((double)global3D.octantBytes / (double)(CHAR_BIT/8));// + (int)ceil((double)sizeof(int)/(double)(CHAR_BIT/8));
+			int buffSize = bit->second.size() * (int)ceil((double)(global3D.octantBytes + global3D.globalIndexBytes)/ (double)(CHAR_BIT/8));// + (int)ceil((double)sizeof(int)/(double)(CHAR_BIT/8));
 			int key = bit->first;
 			const vector<uint32_t> & value = bit->second;
 			sendBuffers[key] = Class_Comm_Buffer(buffSize,'a');
@@ -1767,6 +1867,7 @@ private:
 				z = octant.getZ();
 				l = octant.getLevel();
 				m = octant.getMarker();
+				global_index = getGlobalIdx(value[i]);
 				memcpy(info,octant.info,16);
 				error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 				error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
@@ -1776,15 +1877,9 @@ private:
 				for(int j = 0; j < 16; ++j){
 					MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 				}
+				error_flag = MPI_Pack(&global_index,1,MPI_INT64_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 			}
 		}
-
-		//Build pborders
-		octree.pborders.clear();
-		//	octree.pborders.reserve(pbordersOversize);
-		//	for(map<int,vector<uint32_t> >::iterator bit = bordersPerProc.begin(); bit != bitend; ++bit){
-		//		set_union(bit->second.begin(),bit->second.end(),octree.pborders.begin(),octree.pborders.end(),octree.pborders.begin());
-		//	}
 
 		//COMMUNICATE THE SIZE OF BUFFER TO THE RECEIVERS
 		//the size of every borders buffer is communicated to the right process in order to build the receive buffer
@@ -1831,9 +1926,11 @@ private:
 		//COMPUTE GHOSTS SIZE IN BYTES
 		//number of ghosts in every process is obtained through the size in bytes of the single octant
 		//and ghost vector in local tree is resized
-		uint32_t nofGhosts = nofBytesOverProc / (uint32_t)global3D.octantBytes;
+		uint32_t nofGhosts = nofBytesOverProc / (uint32_t)(global3D.octantBytes + global3D.globalIndexBytes);
 		octree.size_ghosts = nofGhosts;
+		octree.ghosts.clear();
 		octree.ghosts.resize(nofGhosts);
+		octree.globalidx_ghosts.resize(nofGhosts);
 
 		//UNPACK BUFFERS AND BUILD GHOSTS CONTAINER OF CLASS_LOCAL_TREE
 		//every entry in recvBuffers is visited, each buffers from neighbor processes is unpacked octant by octant.
@@ -1842,7 +1939,7 @@ private:
 		map<int,Class_Comm_Buffer>::iterator rritend = recvBuffers.end();
 		for(map<int,Class_Comm_Buffer>::iterator rrit = recvBuffers.begin(); rrit != rritend; ++rrit){
 			int pos = 0;
-			int nofGhostsPerProc = int(rrit->second.commBufferSize / (uint32_t) global3D.octantBytes);
+			int nofGhostsPerProc = int(rrit->second.commBufferSize / (uint32_t) (global3D.octantBytes + global2D.globalIndexBytes));
 			for(int i = 0; i < nofGhostsPerProc; ++i){
 				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&x,1,MPI_UINT32_T,MPI_COMM_WORLD);
 				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&y,1,MPI_UINT32_T,MPI_COMM_WORLD);
@@ -1855,7 +1952,8 @@ private:
 					error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&info[j],1,MPI::BOOL,MPI_COMM_WORLD);
 					octree.ghosts[ghostCounter].info[j] = info[j];
 				}
-				//			octree.ghosts[ghostCounter].info[15] = true;
+				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&global_index,1,MPI_INT64_T,MPI_COMM_WORLD);
+				octree.globalidx_ghosts[ghostCounter] = global_index;
 				++ghostCounter;
 			}
 		}
@@ -2216,7 +2314,6 @@ public:
 				}
 			}
 			octree.octants.shrink_to_fit();
-			octree.pborders.clear();
 
 			delete [] newPartitionRangeGlobalidx;
 			newPartitionRangeGlobalidx = NULL;
@@ -2591,7 +2688,6 @@ public:
 				}
 			}
 			octree.octants.shrink_to_fit();
-			octree.pborders.clear();
 
 			delete [] newPartitionRangeGlobalidx;
 			newPartitionRangeGlobalidx = NULL;
@@ -3059,7 +3155,6 @@ public:
 			}
 			octree.octants.shrink_to_fit();
 			userData.data.shrink_to_fit();
-			octree.pborders.clear();
 
 			delete [] newPartitionRangeGlobalidx;
 			newPartitionRangeGlobalidx = NULL;
@@ -3529,7 +3624,6 @@ public:
 			}
 			octree.octants.shrink_to_fit();
 			userData.data.shrink_to_fit();
-			octree.pborders.clear();
 
 			delete [] newPartitionRangeGlobalidx;
 			newPartitionRangeGlobalidx = NULL;
@@ -4000,7 +4094,6 @@ public:
 			}
 			octree.octants.shrink_to_fit();
 			userData.data.shrink_to_fit();
-			octree.pborders.clear();
 
 			delete [] newPartitionRangeGlobalidx;
 			newPartitionRangeGlobalidx = NULL;
@@ -4035,7 +4128,6 @@ private:
 			global_num_octants = octree.getNumOctants();
 			for(int p = 0; p < nproc; ++p){
 				partition_range_globalidx[p] = global_num_octants - 1;
-				//partition_range_position[p] = octree.last_desc.computeMorton();
 			}
 		}
 		else
@@ -4101,7 +4193,7 @@ private:
 	//=================================================================================//
 
 	void commMarker(){									// communicates marker of ghosts
-		// borderPerProcs has to be built
+														// borderPerProcs has to be built
 
 		//PACK (mpi) LEVEL AND MARKER OF BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
 		//it visits every element in bordersPerProc (one for every neighbor proc)
@@ -4174,15 +4266,6 @@ private:
 		}
 		MPI_Waitall(nReq,req,stats);
 
-		/*
-			//COMPUTE GHOSTS SIZE IN BYTES
-			//number of ghosts in every process is obtained through the size in bytes of the single octant
-			//and ghost vector in local tree is resized
-			uint32_t nofGhosts = nofBytesOverProc / (uint32_t)(levelBytes+markerBytes);
-			octree.size_ghosts = nofGhosts;
-			octree.ghosts.resize(nofGhosts);
-		 */
-
 		//UNPACK BUFFERS AND BUILD GHOSTS CONTAINER OF CLASS_LOCAL_TREE
 		//every entry in recvBuffers is visited, each buffers from neighbor processes is unpacked octant by octant.
 		//every ghost octant is built and put in the ghost vector
@@ -4207,44 +4290,64 @@ private:
 
 	//=================================================================================//
 
-	void balance21(){									// 2:1 balancing of parallel octree
+	void balance21(bool const first){
 		bool globalDone = true, localDone = false;
 		int  iteration  = 0;
 
-
-		writeLog("---------------------------------------------");
-		writeLog(" 2:1 BALANCE (balancing Marker before Adapt)");
-		writeLog(" ");
-		writeLog(" Iterative procedure	");
-		writeLog(" ");
-		writeLog(" Iteration	:	" + to_string(iteration));
-
-
-		commMarker();
-		localDone = octree.localBalance(true);
-		MPI_Barrier(MPI_COMM_WORLD);
-		error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-
-		while(globalDone){
-			iteration++;
+		if (first){
+			writeLog("---------------------------------------------");
+			writeLog(" 2:1 BALANCE (balancing Marker before Adapt)");
+			writeLog(" ");
+			writeLog(" Iterative procedure	");
+			writeLog(" ");
 			writeLog(" Iteration	:	" + to_string(iteration));
+
+
+			commMarker();
+			localDone = octree.localBalance(true);
+			MPI_Barrier(MPI_COMM_WORLD);
+			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+
+			while(globalDone){
+				iteration++;
+				writeLog(" Iteration	:	" + to_string(iteration));
+				commMarker();
+				localDone = octree.localBalance(false);
+				error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+			}
+
+			commMarker();
+			writeLog(" Iteration	:	Finalizing ");
+			writeLog(" ");
+			localDone = octree.localBalance(false);
+			commMarker();
+
+			writeLog(" 2:1 Balancing reached ");
+			writeLog(" ");
+			writeLog("---------------------------------------------");
+
+		}
+		else{
+
+			commMarker();
+			MPI_Barrier(MPI_COMM_WORLD);
+			localDone = octree.localBalanceAll(true);
+			MPI_Barrier(MPI_COMM_WORLD);
+			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+
+			while(globalDone){
+				iteration++;
+				commMarker();
+				localDone = octree.localBalanceAll(false);
+				error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+			}
+
 			commMarker();
 			localDone = octree.localBalance(false);
-			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+			commMarker();
+
 		}
-
-		commMarker();
-		writeLog(" Iteration	:	Finalizing ");
-		writeLog(" ");
-		localDone = octree.localBalance(false);
-		commMarker();
-
-		writeLog(" 2:1 Balancing reached ");
-		writeLog(" ");
-		writeLog("---------------------------------------------");
-
-
-	};
+	}
 
 	//=================================================================================//
 
@@ -4280,7 +4383,6 @@ public:
 			writeLog(" Number of octants after Refine	:	" + to_string(octree.getNumOctants()));
 			nocts = octree.getNumOctants();
 			updateAdapt();
-			//		setPboundGhosts();
 
 			// Coarse
 			while(octree.coarse());
@@ -4296,7 +4398,6 @@ public:
 			writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-			updateAfterCoarse();
 			writeLog(" ");
 			writeLog("---------------------------------------------");
 		}
@@ -4335,8 +4436,6 @@ public:
 
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-			updateAfterCoarse();
-			setPboundGhosts();
 			writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
 			writeLog(" ");
 			writeLog("---------------------------------------------");
@@ -4823,7 +4922,7 @@ public:
 	/** Compute the connectivity of ghost octants and store the coordinates of nodes.
 	 */
 	void computeghostsConnectivity() {
-		octree.computeghostsConnectivity();
+		octree.computeGhostsConnectivity();
 	}
 //	void computeghostsConnectivity(){					// Computes ghosts nodes vector and connectivity of ghosts octants of local tree
 //		map<uint64_t, vector<double> > mapnodes;
@@ -4886,7 +4985,7 @@ public:
 	/** Clear the connectivity of ghost octants.
 	 */
 	void clearghostsConnectivity() {
-		octree.clearghostsConnectivity();
+		octree.clearGhostsConnectivity();
 //		dvector2D().swap(ghostsnodes);
 //		u32vector2D().swap(ghostsconnectivity);
 	}
@@ -4896,7 +4995,7 @@ public:
 	/** Update the connectivity of ghost octants.
 	 */
 	void updateghostsConnectivity() {
-		octree.updateghostsConnectivity();
+		octree.updateGhostsConnectivity();
 	}
 
 	// =================================================================================== //
@@ -4939,7 +5038,7 @@ public:
 	 * \param[in] oct Pointer to an octant
 	 * \return connectivity Connectivity of the octant (6 indices of nodes).
 	 */
-	u32vector getOctantConnectivity(Class_Octant<2>* oct){
+	u32vector getOctantConnectivity(Class_Octant<3>* oct){
 		return octree.connectivity[getIdx(oct)];
 	}
 
@@ -4959,7 +5058,7 @@ public:
 	 * \param[in] oct Pointer to a ghost octant
 	 * \return connectivity Connectivity of the ghost octant (6 indices of nodes).
 	 */
-	u32vector getGhostOctantConnectivity(Class_Octant<2>* oct){
+	u32vector getGhostOctantConnectivity(Class_Octant<3>* oct){
 		return octree.ghostsconnectivity[getIdx(oct)];
 	}
 

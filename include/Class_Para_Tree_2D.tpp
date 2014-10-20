@@ -1287,8 +1287,6 @@ public:
 		return normal;
 	}
 
-
-
 	//-------------------------------------------------------------------------------- //
 	// No Pointer Intersections get Methods
 
@@ -1402,7 +1400,7 @@ public:
 				while(octree.octants[idxtry].computeMorton() > morton){
 					idxtry--;
 					if(idxtry > noctants-1){
-						idxtry = noctants-1;
+						idxtry = 0;
 						break;
 					}
 				}
@@ -3965,7 +3963,6 @@ public:
 			updateAdapt();
 
 			// Coarse
-
 			while(octree.coarse());
 			if (octree.getNumOctants() < nocts){
 				localDone = true;

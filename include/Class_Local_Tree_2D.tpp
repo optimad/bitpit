@@ -1992,7 +1992,7 @@ private:
 
 	// =================================================================================== //
 
-	void			findNodeNeighbours(uint32_t idx,			// Finds neighbours of idx-th octant through inode in vector octants.
+	void findNodeNeighbours(uint32_t idx,			// Finds neighbours of idx-th octant through inode in vector octants.
 									uint8_t inode,				// Returns a vector (empty if inode is a bound node) with the index of neighbours
 									u32vector & neighbours,		// in their structure (octants or ghosts) and sets isghost[i] = true if the
 									vector<bool> & isghost){	// i-th neighbour is ghost in the local tree
@@ -2222,7 +2222,7 @@ private:
 
 	// =================================================================================== //
 
-	void			findNodeNeighbours(Class_Octant<2>* oct,			// Finds neighbours of idx-th octant through inode in vector octants.
+	void findNodeNeighbours(Class_Octant<2>* oct,			// Finds neighbours of idx-th octant through inode in vector octants.
 									uint8_t inode,				// Returns a vector (empty if inode is a bound node) with the index of neighbours
 									u32vector & neighbours,		// in their structure (octants or ghosts) and sets isghost[i] = true if the
 									vector<bool> & isghost){	// i-th neighbour is ghost in the local tree
