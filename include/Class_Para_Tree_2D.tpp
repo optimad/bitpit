@@ -3,7 +3,7 @@
  *	\authors		Marco Cisternino
  *	\authors		Edoardo Lombardi
  *	\version		0.1
-  *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
+ *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
  *	\par			License:\n
  *	This version of PABLO is released under the LGPL License.
  *
@@ -61,13 +61,13 @@ public:
 	//map member
 	Class_Map<2> trans;							/**<Transformation map from logical to physical domain*/
 
-//	// connectivity
-//	dvector2D					nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
-//	u32vector2D					connectivity;		/**<Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
-//	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
-//	dvector2D					ghostsnodes;		/**<Local vector of ghosts nodes (x,y,z) ordered with Morton Number*/
-//	u32vector2D					ghostsconnectivity;	/**<Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
-//	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
+	//	// connectivity
+	//	dvector2D					nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
+	//	u32vector2D					connectivity;		/**<Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
+	//	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
+	//	dvector2D					ghostsnodes;		/**<Local vector of ghosts nodes (x,y,z) ordered with Morton Number*/
+	//	u32vector2D					ghostsconnectivity;	/**<Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
+	//	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
 
 
 	// ------------------------------------------------------------------------------- //
@@ -179,8 +179,8 @@ public:
 		octree.octants.resize(NumOctants);
 		for (int i=0; i<NumOctants; i++){
 			lev = uint8_t(levels[i]);
-			 x0 = uint32_t(XY[i][0]);
-			 y0 = uint32_t(XY[i][1]);
+			x0 = uint32_t(XY[i][0]);
+			y0 = uint32_t(XY[i][1]);
 			Class_Octant<2> oct(lev, x0, y0);
 			if (x0 == 0){
 				iface = 0;
@@ -1083,60 +1083,60 @@ public:
 	//-------------------------------------------------------------------------------- //
 	// Intersections get Methods
 
-//	/*! Get the local number of intersections on the global domain bord.
-//	 * \return Local number of intersections on the global domain bord.
-//	 */
-//	uint32_t getNumIntersectionsBord() {
-//		return octree.intersections_bord.size();
-//	}
-//
-//	/*! Get the local number of intersections inside the local domain.
-//	 * \return Local number of inner intersections inside the local domain.
-//	 */
-//	uint32_t getNumIntersectionsInt() {
-//		return octree.intersections_int.size();
-//	}
-//
-//	/*! Get the local number of intersections between local octants and ghost octants.
-//	 * \return Local number of intersections between local octants and ghost octants.
-//	 */
-//	uint32_t getNumIntersectionsGhost() {
-//		return octree.intersections_ghost.size();
-//	}
-//
-//	/*! Get a pointer to target intersection on domain bord.
-//	 * \param[in] idx Local index of intersection on domain bord.
-//	 * \return Pointer to target intersection.
-//	 */
-//	Class_Intersection<2>* getIntersectionBord(uint32_t idx) {
-//		if (idx < octree.intersections_bord.size()){
-//			return &octree.intersections_bord[idx];
-//		}
-//		return NULL;
-//	}
-//
-//	/*! Get a pointer to target intersection inside the local domain.
-//	 * \param[in] idx Local index of intersection inside the local domain.
-//	 * \return Pointer to target intersection.
-//	 */
-//	Class_Intersection<2>* getIntersectionInt(uint32_t idx) {
-//		if (idx < octree.intersections_int.size()){
-//			return &octree.intersections_int[idx];
-//		}
-//		return NULL;
-//	}
-//
-//	/*! Get a pointer to target intersection between octant and ghost.
-//	 * \param[in] idx Local index of intersection between octant and ghost.
-//	 * \return Pointer to target intersection.
-//	 */
-//	Class_Intersection<2>* getIntersectionGhost(uint32_t idx) {
-//		if (idx < octree.intersections_ghost.size()){
-//			return &octree.intersections_ghost[idx];
-//		}
-//		return NULL;
-//	}
-//
+	//	/*! Get the local number of intersections on the global domain bord.
+	//	 * \return Local number of intersections on the global domain bord.
+	//	 */
+	//	uint32_t getNumIntersectionsBord() {
+	//		return octree.intersections_bord.size();
+	//	}
+	//
+	//	/*! Get the local number of intersections inside the local domain.
+	//	 * \return Local number of inner intersections inside the local domain.
+	//	 */
+	//	uint32_t getNumIntersectionsInt() {
+	//		return octree.intersections_int.size();
+	//	}
+	//
+	//	/*! Get the local number of intersections between local octants and ghost octants.
+	//	 * \return Local number of intersections between local octants and ghost octants.
+	//	 */
+	//	uint32_t getNumIntersectionsGhost() {
+	//		return octree.intersections_ghost.size();
+	//	}
+	//
+	//	/*! Get a pointer to target intersection on domain bord.
+	//	 * \param[in] idx Local index of intersection on domain bord.
+	//	 * \return Pointer to target intersection.
+	//	 */
+	//	Class_Intersection<2>* getIntersectionBord(uint32_t idx) {
+	//		if (idx < octree.intersections_bord.size()){
+	//			return &octree.intersections_bord[idx];
+	//		}
+	//		return NULL;
+	//	}
+	//
+	//	/*! Get a pointer to target intersection inside the local domain.
+	//	 * \param[in] idx Local index of intersection inside the local domain.
+	//	 * \return Pointer to target intersection.
+	//	 */
+	//	Class_Intersection<2>* getIntersectionInt(uint32_t idx) {
+	//		if (idx < octree.intersections_int.size()){
+	//			return &octree.intersections_int[idx];
+	//		}
+	//		return NULL;
+	//	}
+	//
+	//	/*! Get a pointer to target intersection between octant and ghost.
+	//	 * \param[in] idx Local index of intersection between octant and ghost.
+	//	 * \return Pointer to target intersection.
+	//	 */
+	//	Class_Intersection<2>* getIntersectionGhost(uint32_t idx) {
+	//		if (idx < octree.intersections_ghost.size()){
+	//			return &octree.intersections_ghost[idx];
+	//		}
+	//		return NULL;
+	//	}
+	//
 
 	/*! Get the local number of intersections.
 	 * \return Local number of intersections.
@@ -1305,15 +1305,15 @@ private:
 		return trans.mapArea(Area);
 	}
 
-// TODO Fix it!
-//	void getCenter(Class_Intersection<2> inter,
-//			vector<double>& center) {
-//		Class_Octant<2> oct = octree.extractOctant(inter.owners[inter.finer]);
-//		double* center_ = oct.getCenter();
-//		trans.mapCenter(center_, center);
-//		delete [] center_;
-//		center_ = NULL;
-//	}
+	// TODO Fix it!
+	//	void getCenter(Class_Intersection<2> inter,
+	//			vector<double>& center) {
+	//		Class_Octant<2> oct = octree.extractOctant(inter.owners[inter.finer]);
+	//		double* center_ = oct.getCenter();
+	//		trans.mapCenter(center_, center);
+	//		delete [] center_;
+	//		center_ = NULL;
+	//	}
 
 	void getNodes(Class_Intersection<2> inter,
 			dvector2D & nodes) {
@@ -2818,8 +2818,8 @@ public:
 				stride += partition[i];
 			Class_Local_Tree<2>::OctantsType::const_iterator first = octree.octants.begin() + stride;
 			Class_Local_Tree<2>::OctantsType::const_iterator last = first + partition[rank];
-//			typename UserDataComm::Data::iterator firstData = userData.data.begin() + stride;
-//			typename UserDataComm::Data::iterator lastData = firstData + partition[rank];
+			//			typename UserDataComm::Data::iterator firstData = userData.data.begin() + stride;
+			//			typename UserDataComm::Data::iterator lastData = firstData + partition[rank];
 			typename Class_Data_LB_Interface<Impl>::Data::iterator firstData = userData.data.begin() + stride;
 			typename Class_Data_LB_Interface<Impl>::Data::iterator lastData = firstData + partition[rank];
 			octree.octants.assign(first, last);
@@ -4132,116 +4132,116 @@ public:
 	// =============================================================================== //
 
 	//TODO Update intersections killed
-//	bool adapt(u32vector & mapidx,
-//			u32vector & mapinters_int,
-//			u32vector & mapinters_ghost,
-//			u32vector & mapinters_bord) {
-//
-//		bool globalDone = false, localDone = false;
-//		uint32_t nocts = octree.getNumOctants();
-//		vector<Class_Octant<2> >::iterator iter, iterend = octree.octants.end();
-//
-//		for (iter = octree.octants.begin(); iter != iterend; iter++){
-//			iter->info[8] = false;
-//			iter->info[9] = false;
-//			iter->info[11] = false;
-//		}
-//
-//		// mapidx init
-//		mapidx.clear();
-//		mapidx.resize(nocts);
-//		mapidx.shrink_to_fit();
-//		for (uint32_t i=0; i<nocts; i++){
-//			mapidx[i] = i;
-//		}
-//		if(serial){
-//			writeLog("---------------------------------------------");
-//			writeLog(" ADAPT (Refine/Coarse)");
-//			writeLog(" ");
-//
-//			// 2:1 Balance
-//			balance21(true);
-//
-//			writeLog(" ");
-//			writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
-//
-//			// Refine
-//			while(octree.refine(mapidx));
-//			if (octree.getNumOctants() > nocts)
-//				localDone = true;
-//			nocts = octree.getNumOctants();
-//			writeLog(" Number of octants after Refine	:	" + to_string(nocts));
-//
-//			// Coarse
-//			while(octree.coarse(mapidx));
-//			if (octree.getNumOctants() < nocts){
-//				localDone = true;
-//			}
-//			updateAfterCoarse(mapidx);
-//			balance21(false);
-//			while(octree.refine(mapidx));
-//			updateAdapt();
-//			nocts = octree.getNumOctants();
-//			MPI_Barrier(MPI_COMM_WORLD);
-//			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-//			writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
-//			updateAfterCoarse(mapidx);
-//
-//			octree.updateIntersections(mapidx,
-//					mapinters_int,
-//					mapinters_ghost,
-//					mapinters_bord);
-//
-//			writeLog(" ");
-//			writeLog("---------------------------------------------");
-//		}
-//		else{
-//			writeLog("---------------------------------------------");
-//			writeLog(" ADAPT (Refine/Coarse)");
-//			writeLog(" ");
-//
-//			// 2:1 Balance
-//			balance21(true);
-//
-//			writeLog(" ");
-//			writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
-//
-//			// Refine
-//			while(octree.refine(mapidx));
-//
-//			if (octree.getNumOctants() > nocts)
-//				localDone = true;
-//			nocts = octree.getNumOctants();
-//			updateAdapt();
-//			setPboundGhosts();
-//			writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
-//
-//			// Coarse
-//			while(octree.coarse(mapidx));
-//			if (octree.getNumOctants() < nocts){
-//				localDone = true;
-//			}
-//			updateAfterCoarse(mapidx);
-//			setPboundGhosts();
-//			balance21(false);
-//			while(octree.refine(mapidx));
-//			updateAdapt();
-//			setPboundGhosts();
-//			nocts = octree.getNumOctants();
-//			MPI_Barrier(MPI_COMM_WORLD);
-//			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-//
-//			octree.updateIntersections(mapidx,
-//					mapinters_int,
-//					mapinters_ghost,
-//					mapinters_bord);
-//
-//			writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
-//			writeLog(" ");
-//			writeLog("---------------------------------------------");
-//		}
-//		return globalDone;
-//	}
+	//	bool adapt(u32vector & mapidx,
+	//			u32vector & mapinters_int,
+	//			u32vector & mapinters_ghost,
+	//			u32vector & mapinters_bord) {
+	//
+	//		bool globalDone = false, localDone = false;
+	//		uint32_t nocts = octree.getNumOctants();
+	//		vector<Class_Octant<2> >::iterator iter, iterend = octree.octants.end();
+	//
+	//		for (iter = octree.octants.begin(); iter != iterend; iter++){
+	//			iter->info[8] = false;
+	//			iter->info[9] = false;
+	//			iter->info[11] = false;
+	//		}
+	//
+	//		// mapidx init
+	//		mapidx.clear();
+	//		mapidx.resize(nocts);
+	//		mapidx.shrink_to_fit();
+	//		for (uint32_t i=0; i<nocts; i++){
+	//			mapidx[i] = i;
+	//		}
+	//		if(serial){
+	//			writeLog("---------------------------------------------");
+	//			writeLog(" ADAPT (Refine/Coarse)");
+	//			writeLog(" ");
+	//
+	//			// 2:1 Balance
+	//			balance21(true);
+	//
+	//			writeLog(" ");
+	//			writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
+	//
+	//			// Refine
+	//			while(octree.refine(mapidx));
+	//			if (octree.getNumOctants() > nocts)
+	//				localDone = true;
+	//			nocts = octree.getNumOctants();
+	//			writeLog(" Number of octants after Refine	:	" + to_string(nocts));
+	//
+	//			// Coarse
+	//			while(octree.coarse(mapidx));
+	//			if (octree.getNumOctants() < nocts){
+	//				localDone = true;
+	//			}
+	//			updateAfterCoarse(mapidx);
+	//			balance21(false);
+	//			while(octree.refine(mapidx));
+	//			updateAdapt();
+	//			nocts = octree.getNumOctants();
+	//			MPI_Barrier(MPI_COMM_WORLD);
+	//			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+	//			writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
+	//			updateAfterCoarse(mapidx);
+	//
+	//			octree.updateIntersections(mapidx,
+	//					mapinters_int,
+	//					mapinters_ghost,
+	//					mapinters_bord);
+	//
+	//			writeLog(" ");
+	//			writeLog("---------------------------------------------");
+	//		}
+	//		else{
+	//			writeLog("---------------------------------------------");
+	//			writeLog(" ADAPT (Refine/Coarse)");
+	//			writeLog(" ");
+	//
+	//			// 2:1 Balance
+	//			balance21(true);
+	//
+	//			writeLog(" ");
+	//			writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
+	//
+	//			// Refine
+	//			while(octree.refine(mapidx));
+	//
+	//			if (octree.getNumOctants() > nocts)
+	//				localDone = true;
+	//			nocts = octree.getNumOctants();
+	//			updateAdapt();
+	//			setPboundGhosts();
+	//			writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
+	//
+	//			// Coarse
+	//			while(octree.coarse(mapidx));
+	//			if (octree.getNumOctants() < nocts){
+	//				localDone = true;
+	//			}
+	//			updateAfterCoarse(mapidx);
+	//			setPboundGhosts();
+	//			balance21(false);
+	//			while(octree.refine(mapidx));
+	//			updateAdapt();
+	//			setPboundGhosts();
+	//			nocts = octree.getNumOctants();
+	//			MPI_Barrier(MPI_COMM_WORLD);
+	//			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+	//
+	//			octree.updateIntersections(mapidx,
+	//					mapinters_int,
+	//					mapinters_ghost,
+	//					mapinters_bord);
+	//
+	//			writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
+	//			writeLog(" ");
+	//			writeLog("---------------------------------------------");
+	//		}
+	//		return globalDone;
+	//	}
 
 	// =============================================================================== //
 
@@ -4338,62 +4338,62 @@ public:
 	void computeConnectivity() {
 		octree.computeConnectivity();
 	}
-//	void computeConnectivity() {
-//		map<uint64_t, vector<double> > mapnodes;
-//		map<uint64_t, vector<double> >::iterator iter, iterend;
-//		uint32_t i, k, counter;
-//		uint64_t morton;
-//		uint32_t noctants = octree.getNumOctants();
-//		dvector2D octnodes;
-//		uint8_t j;
-//
-//		clearConnectivity();
-//
-//		octnodes.reserve(global2D.nnodes);
-//		if (nodes.size() == 0){
-//			connectivity.resize(noctants);
-//			for (i = 0; i < noctants; i++){
-//				getNodes(&octree.octants[i], octnodes);
-//				for (j = 0; j < global2D.nnodes; j++){
-//					morton = mortonEncode_magicbits(uint32_t(octnodes[j][0]/trans.L*double(global2D.max_length)), uint32_t(octnodes[j][1]/trans.L*double(global2D.max_length)));
-//					if (mapnodes[morton].size()==0){
-//						mapnodes[morton].reserve(8);
-//						for (k = 0; k < 3; k++){
-//							mapnodes[morton].push_back(octnodes[j][k]);
-//						}
-//					}
-//					mapnodes[morton].push_back(double(i));
-//				}
-//				dvector2D().swap(octnodes);
-//			}
-//			iter	= mapnodes.begin();
-//			iterend	= mapnodes.end();
-//			counter = 0;
-//			uint32_t numnodes = mapnodes.size();
-//			nodes.resize(numnodes);
-//			while (iter != iterend){
-//				vector<double> nodecasting(iter->second.begin(), iter->second.begin()+3);
-//				nodes[counter] = nodecasting;
-//				nodes[counter].shrink_to_fit();
-//				for(vector<double>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
-//					if (connectivity[int(*iter2)].size()==0){
-//						connectivity[int(*iter2)].reserve(4);
-//					}
-//					connectivity[int(*iter2)].push_back(counter);
-//				}
-//				mapnodes.erase(iter++);
-//				counter++;
-//			}
-//			nodes.shrink_to_fit();
-//			//Slow. Memory saving.
-//			for (int ii=0; ii<noctants; ii++){
-//				connectivity[ii].shrink_to_fit();
-//			}
-//			connectivity.shrink_to_fit();
-//		}
-//		map<uint64_t, vector<double> >().swap(mapnodes);
-//		iter = mapnodes.end();
-//	}
+	//	void computeConnectivity() {
+	//		map<uint64_t, vector<double> > mapnodes;
+	//		map<uint64_t, vector<double> >::iterator iter, iterend;
+	//		uint32_t i, k, counter;
+	//		uint64_t morton;
+	//		uint32_t noctants = octree.getNumOctants();
+	//		dvector2D octnodes;
+	//		uint8_t j;
+	//
+	//		clearConnectivity();
+	//
+	//		octnodes.reserve(global2D.nnodes);
+	//		if (nodes.size() == 0){
+	//			connectivity.resize(noctants);
+	//			for (i = 0; i < noctants; i++){
+	//				getNodes(&octree.octants[i], octnodes);
+	//				for (j = 0; j < global2D.nnodes; j++){
+	//					morton = mortonEncode_magicbits(uint32_t(octnodes[j][0]/trans.L*double(global2D.max_length)), uint32_t(octnodes[j][1]/trans.L*double(global2D.max_length)));
+	//					if (mapnodes[morton].size()==0){
+	//						mapnodes[morton].reserve(8);
+	//						for (k = 0; k < 3; k++){
+	//							mapnodes[morton].push_back(octnodes[j][k]);
+	//						}
+	//					}
+	//					mapnodes[morton].push_back(double(i));
+	//				}
+	//				dvector2D().swap(octnodes);
+	//			}
+	//			iter	= mapnodes.begin();
+	//			iterend	= mapnodes.end();
+	//			counter = 0;
+	//			uint32_t numnodes = mapnodes.size();
+	//			nodes.resize(numnodes);
+	//			while (iter != iterend){
+	//				vector<double> nodecasting(iter->second.begin(), iter->second.begin()+3);
+	//				nodes[counter] = nodecasting;
+	//				nodes[counter].shrink_to_fit();
+	//				for(vector<double>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
+	//					if (connectivity[int(*iter2)].size()==0){
+	//						connectivity[int(*iter2)].reserve(4);
+	//					}
+	//					connectivity[int(*iter2)].push_back(counter);
+	//				}
+	//				mapnodes.erase(iter++);
+	//				counter++;
+	//			}
+	//			nodes.shrink_to_fit();
+	//			//Slow. Memory saving.
+	//			for (int ii=0; ii<noctants; ii++){
+	//				connectivity[ii].shrink_to_fit();
+	//			}
+	//			connectivity.shrink_to_fit();
+	//		}
+	//		map<uint64_t, vector<double> >().swap(mapnodes);
+	//		iter = mapnodes.end();
+	//	}
 
 	// =================================================================================== //
 
@@ -4418,68 +4418,68 @@ public:
 	void computeghostsConnectivity() {
 		octree.computeghostsConnectivity();
 	}
-//	void computeghostsConnectivity() {
-//		map<uint64_t, vector<double> > mapnodes;
-//		map<uint64_t, vector<double> >::iterator iter, iterend;
-//		uint32_t i, k, counter;
-//		uint64_t morton;
-//		uint32_t noctants = octree.size_ghosts;
-//		dvector2D octnodes;
-//		uint8_t j;
-//
-//		octnodes.reserve(global2D.nnodes);
-//
-//		if (ghostsnodes.size() == 0){
-//			ghostsconnectivity.resize(noctants);
-//			for (i = 0; i < noctants; i++){
-//				getNodes(&octree.ghosts[i], octnodes);
-//				for (j = 0; j < global2D.nnodes; j++){
-//					morton = mortonEncode_magicbits(uint32_t(octnodes[j][0]/trans.L*double(global2D.max_length)), uint32_t(octnodes[j][1]/trans.L*double(global2D.max_length)));
-//					if (mapnodes[morton].size()==0){
-//						for (k = 0; k < 3; k++){
-//							mapnodes[morton].push_back(octnodes[j][k]);
-//						}
-//					}
-//					mapnodes[morton].push_back(i);
-//				}
-//				dvector2D().swap(octnodes);
-//			}
-//			iter	= mapnodes.begin();
-//			iterend	= mapnodes.end();
-//			uint32_t numnodes = mapnodes.size();
-//			ghostsnodes.resize(numnodes);
-//			counter = 0;
-//			while (iter != iterend){
-//				vector<double> nodecasting(iter->second.begin(), iter->second.begin()+3);
-//				ghostsnodes[counter] = nodecasting;
-//				ghostsnodes[counter].shrink_to_fit();
-//				for(vector<double>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
-//					if (ghostsconnectivity[int(*iter2)].size()==0){
-//						ghostsconnectivity[int(*iter2)].reserve(4);
-//					}
-//					ghostsconnectivity[int(*iter2)].push_back(counter);
-//				}
-//				mapnodes.erase(iter++);
-//				counter++;
-//			}
-//			ghostsnodes.shrink_to_fit();
-//			//Slow. Memory saving.
-//			for (int ii=0; ii<noctants; ii++){
-//				ghostsconnectivity[ii].shrink_to_fit();
-//			}
-//			ghostsconnectivity.shrink_to_fit();
-//		}
-//		iter = mapnodes.end();
-//	}
-//
+	//	void computeghostsConnectivity() {
+	//		map<uint64_t, vector<double> > mapnodes;
+	//		map<uint64_t, vector<double> >::iterator iter, iterend;
+	//		uint32_t i, k, counter;
+	//		uint64_t morton;
+	//		uint32_t noctants = octree.size_ghosts;
+	//		dvector2D octnodes;
+	//		uint8_t j;
+	//
+	//		octnodes.reserve(global2D.nnodes);
+	//
+	//		if (ghostsnodes.size() == 0){
+	//			ghostsconnectivity.resize(noctants);
+	//			for (i = 0; i < noctants; i++){
+	//				getNodes(&octree.ghosts[i], octnodes);
+	//				for (j = 0; j < global2D.nnodes; j++){
+	//					morton = mortonEncode_magicbits(uint32_t(octnodes[j][0]/trans.L*double(global2D.max_length)), uint32_t(octnodes[j][1]/trans.L*double(global2D.max_length)));
+	//					if (mapnodes[morton].size()==0){
+	//						for (k = 0; k < 3; k++){
+	//							mapnodes[morton].push_back(octnodes[j][k]);
+	//						}
+	//					}
+	//					mapnodes[morton].push_back(i);
+	//				}
+	//				dvector2D().swap(octnodes);
+	//			}
+	//			iter	= mapnodes.begin();
+	//			iterend	= mapnodes.end();
+	//			uint32_t numnodes = mapnodes.size();
+	//			ghostsnodes.resize(numnodes);
+	//			counter = 0;
+	//			while (iter != iterend){
+	//				vector<double> nodecasting(iter->second.begin(), iter->second.begin()+3);
+	//				ghostsnodes[counter] = nodecasting;
+	//				ghostsnodes[counter].shrink_to_fit();
+	//				for(vector<double>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
+	//					if (ghostsconnectivity[int(*iter2)].size()==0){
+	//						ghostsconnectivity[int(*iter2)].reserve(4);
+	//					}
+	//					ghostsconnectivity[int(*iter2)].push_back(counter);
+	//				}
+	//				mapnodes.erase(iter++);
+	//				counter++;
+	//			}
+	//			ghostsnodes.shrink_to_fit();
+	//			//Slow. Memory saving.
+	//			for (int ii=0; ii<noctants; ii++){
+	//				ghostsconnectivity[ii].shrink_to_fit();
+	//			}
+	//			ghostsconnectivity.shrink_to_fit();
+	//		}
+	//		iter = mapnodes.end();
+	//	}
+	//
 	// =================================================================================== //
 
 	/** Clear the connectivity of ghost octants.
 	 */
 	void clearghostsConnectivity() {
 		octree.clearghostsConnectivity();
-//		dvector2D().swap(ghostsnodes);
-//		u32vector2D().swap(ghostsconnectivity);
+		//		dvector2D().swap(ghostsnodes);
+		//		u32vector2D().swap(ghostsconnectivity);
 	}
 
 	// =================================================================================== //
@@ -4651,130 +4651,130 @@ public:
 		int nofGhosts = octree.ghostsconnectivity.size();
 		int nofAll = nofGhosts + nofOctants;
 		out << "<?xml version=\"1.0\"?>" << endl
-			<< "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
-			<< "  <UnstructuredGrid>" << endl
-			<< "    <Piece NumberOfCells=\"" << octree.connectivity.size() + octree.ghostsconnectivity.size() << "\" NumberOfPoints=\"" << octree.nodes.size() + octree.ghostsnodes.size() << "\">" << endl;
-	    out << "      <Points>" << endl
-	    	<< "        <DataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\""<< 3 <<"\" format=\"ascii\">" << endl
-	    	<< "          " << std::fixed;
-	    for(int i = 0; i < nofNodes; i++)
-	    {
-	    	for(int j = 0; j < 3; ++j)
-	    		out << std::setprecision(6) << octree.nodes[i][j] << " ";
-	    	if((i+1)%4==0 && i!=nofNodes-1)
-	    		out << endl << "          ";
-	    }
-	    for(int i = 0; i < nofGhostNodes; i++)
-	    {
-	    	for(int j = 0; j < 3; ++j)
-	    		out << std::setprecision(6) << octree.ghostsnodes[i][j] << " ";
-	    	if((i+1)%4==0 && i!=nofNodes-1)
-	    		out << endl << "          ";
-	    }
-	    out << endl << "        </DataArray>" << endl
-	    	<< "      </Points>" << endl
-	        << "      <Cells>" << endl
-	        << "        <DataArray type=\"UInt64\" Name=\"connectivity\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
-	        << "          ";
-	    for(int i = 0; i < nofOctants; i++)
-	      {
-	        for(int j = 0; j < global2D.nnodes; j++)
-	          {
-	        	int jj;
-	        	if (j<2){
-	        		jj = j;
-	        	}
-	        	else if(j==2){
-	        		jj = 3;
-	        	}
-	        	else if(j==3){
-	        		jj = 2;
-	        	}
-	            out << octree.connectivity[i][jj] << " ";
-	          }
-	        if((i+1)%3==0 && i!=nofOctants-1)
-	          out << endl << "          ";
-	      }
-	    for(int i = 0; i < nofGhosts; i++)
-	      {
-	        for(int j = 0; j < global2D.nnodes; j++)
-	          {
-	        	int jj;
-	        	if (j<2){
-	        		jj = j;
-	        	}
-	        	else if(j==2){
-	        		jj = 3;
-	        	}
-	        	else if(j==3){
-	        		jj = 2;
-	        	}
-	        	out << octree.ghostsconnectivity[i][jj] + nofNodes << " ";
-	          }
-	        if((i+1)%3==0 && i!=nofGhosts-1)
-	          out << endl << "          ";
-	      }
-	    out << endl << "        </DataArray>" << endl
-	        << "        <DataArray type=\"UInt64\" Name=\"offsets\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
-	        << "          ";
-	    for(int i = 0; i < nofAll; i++)
-	      {
-	        out << (i+1)*global2D.nnodes << " ";
-	        if((i+1)%12==0 && i!=nofAll-1)
-	          out << endl << "          ";
-	      }
-	    out << endl << "        </DataArray>" << endl
-	        << "        <DataArray type=\"UInt8\" Name=\"types\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
-	        << "          ";
-	    for(int i = 0; i < nofAll; i++)
-	      {
-	        int type;
-	          type = 9;
-	        out << type << " ";
-	        if((i+1)%12==0 && i!=nofAll-1)
-	          out << endl << "          ";
-	      }
-	    out << endl << "        </DataArray>" << endl
-	        << "      </Cells>" << endl
-	        << "    </Piece>" << endl
-	        << "  </UnstructuredGrid>" << endl
-	        << "</VTKFile>" << endl;
+				<< "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
+				<< "  <UnstructuredGrid>" << endl
+				<< "    <Piece NumberOfCells=\"" << octree.connectivity.size() + octree.ghostsconnectivity.size() << "\" NumberOfPoints=\"" << octree.nodes.size() + octree.ghostsnodes.size() << "\">" << endl;
+		out << "      <Points>" << endl
+				<< "        <DataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\""<< 3 <<"\" format=\"ascii\">" << endl
+				<< "          " << std::fixed;
+		for(int i = 0; i < nofNodes; i++)
+		{
+			for(int j = 0; j < 3; ++j)
+				out << std::setprecision(6) << octree.nodes[i][j] << " ";
+			if((i+1)%4==0 && i!=nofNodes-1)
+				out << endl << "          ";
+		}
+		for(int i = 0; i < nofGhostNodes; i++)
+		{
+			for(int j = 0; j < 3; ++j)
+				out << std::setprecision(6) << octree.ghostsnodes[i][j] << " ";
+			if((i+1)%4==0 && i!=nofNodes-1)
+				out << endl << "          ";
+		}
+		out << endl << "        </DataArray>" << endl
+				<< "      </Points>" << endl
+				<< "      <Cells>" << endl
+				<< "        <DataArray type=\"UInt64\" Name=\"connectivity\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
+				<< "          ";
+		for(int i = 0; i < nofOctants; i++)
+		{
+			for(int j = 0; j < global2D.nnodes; j++)
+			{
+				int jj;
+				if (j<2){
+					jj = j;
+				}
+				else if(j==2){
+					jj = 3;
+				}
+				else if(j==3){
+					jj = 2;
+				}
+				out << octree.connectivity[i][jj] << " ";
+			}
+			if((i+1)%3==0 && i!=nofOctants-1)
+				out << endl << "          ";
+		}
+		for(int i = 0; i < nofGhosts; i++)
+		{
+			for(int j = 0; j < global2D.nnodes; j++)
+			{
+				int jj;
+				if (j<2){
+					jj = j;
+				}
+				else if(j==2){
+					jj = 3;
+				}
+				else if(j==3){
+					jj = 2;
+				}
+				out << octree.ghostsconnectivity[i][jj] + nofNodes << " ";
+			}
+			if((i+1)%3==0 && i!=nofGhosts-1)
+				out << endl << "          ";
+		}
+		out << endl << "        </DataArray>" << endl
+				<< "        <DataArray type=\"UInt64\" Name=\"offsets\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
+				<< "          ";
+		for(int i = 0; i < nofAll; i++)
+		{
+			out << (i+1)*global2D.nnodes << " ";
+			if((i+1)%12==0 && i!=nofAll-1)
+				out << endl << "          ";
+		}
+		out << endl << "        </DataArray>" << endl
+				<< "        <DataArray type=\"UInt8\" Name=\"types\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
+				<< "          ";
+		for(int i = 0; i < nofAll; i++)
+		{
+			int type;
+			type = 9;
+			out << type << " ";
+			if((i+1)%12==0 && i!=nofAll-1)
+				out << endl << "          ";
+		}
+		out << endl << "        </DataArray>" << endl
+				<< "      </Cells>" << endl
+				<< "    </Piece>" << endl
+				<< "  </UnstructuredGrid>" << endl
+				<< "</VTKFile>" << endl;
 
 
-	    if(rank == 0){
-	        name.str("");
-	        name << "s" << std::setfill('0') << std::setw(4) << nproc << "-" << filename << ".pvtu";
-	        ofstream pout(name.str().c_str());
-	        if(!pout.is_open()){
-	        	stringstream ss;
-	    		ss << filename << "*.pvtu cannot be opened and it won't be written.";
-	    		writeLog(ss.str());
-	    		return;
-	        }
+		if(rank == 0){
+			name.str("");
+			name << "s" << std::setfill('0') << std::setw(4) << nproc << "-" << filename << ".pvtu";
+			ofstream pout(name.str().c_str());
+			if(!pout.is_open()){
+				stringstream ss;
+				ss << filename << "*.pvtu cannot be opened and it won't be written.";
+				writeLog(ss.str());
+				return;
+			}
 
-	        pout << "<?xml version=\"1.0\"?>" << endl
-	        		<< "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
-	        		<< "  <PUnstructuredGrid GhostLevel=\"0\">" << endl
-	        		<< "    <PPointData>" << endl
-	        		<< "    </PPointData>" << endl
-	        		<< "    <PCellData Scalars=\"\">" << endl;
-	        pout << "    </PCellData>" << endl
-	        		<< "    <PPoints>" << endl
-	        		<< "      <PDataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\"3\"/>" << endl
-	        		<< "    </PPoints>" << endl;
-	        for(int i = 0; i < nproc; i++)
-	        	pout << "    <Piece Source=\"s" << std::setw(4) << std::setfill('0') << nproc << "-p" << std::setw(4) << std::setfill('0') << i << "-" << filename << ".vtu\"/>" << endl;
-	        pout << "  </PUnstructuredGrid>" << endl
-	        		<< "</VTKFile>";
+			pout << "<?xml version=\"1.0\"?>" << endl
+					<< "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
+					<< "  <PUnstructuredGrid GhostLevel=\"0\">" << endl
+					<< "    <PPointData>" << endl
+					<< "    </PPointData>" << endl
+					<< "    <PCellData Scalars=\"\">" << endl;
+			pout << "    </PCellData>" << endl
+					<< "    <PPoints>" << endl
+					<< "      <PDataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\"3\"/>" << endl
+					<< "    </PPoints>" << endl;
+			for(int i = 0; i < nproc; i++)
+				pout << "    <Piece Source=\"s" << std::setw(4) << std::setfill('0') << nproc << "-p" << std::setw(4) << std::setfill('0') << i << "-" << filename << ".vtu\"/>" << endl;
+			pout << "  </PUnstructuredGrid>" << endl
+					<< "</VTKFile>";
 
-	        pout.close();
+			pout.close();
 
-	    }
-	    MPI_Barrier(MPI_COMM_WORLD);
+		}
+		MPI_Barrier(MPI_COMM_WORLD);
 
-	    if (clear){
-	    	octree.clearConnectivity();
-	    }
+		if (clear){
+			octree.clearConnectivity();
+		}
 
 
 	}
@@ -4810,134 +4810,134 @@ public:
 		int nofGhosts = octree.ghostsconnectivity.size();
 		int nofAll = nofGhosts + nofOctants;
 		out << "<?xml version=\"1.0\"?>" << endl
-			<< "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
-			<< "  <UnstructuredGrid>" << endl
-			<< "    <Piece NumberOfCells=\"" << octree.connectivity.size() + octree.ghostsconnectivity.size() << "\" NumberOfPoints=\"" << octree.nodes.size() + octree.ghostsnodes.size() << "\">" << endl;
-	    out << "      <Points>" << endl
-	    	<< "        <DataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\""<< 3 <<"\" format=\"ascii\">" << endl
-	    	<< "          " << std::fixed;
-	    for(int i = 0; i < nofNodes; i++)
-	    {
-	    	for(int j = 0; j < 3; ++j){
-	    		if (j==0) out << std::setprecision(6) << trans.mapX(octree.nodes[i][j]) << " ";
-	    		if (j==1) out << std::setprecision(6) << trans.mapY(octree.nodes[i][j]) << " ";
-	    		if (j==2) out << std::setprecision(6) << trans.mapZ(octree.nodes[i][j]) << " ";
-//	    		out << std::setprecision(6) << octree.nodes[i][j] << " ";
-	    	}
-	    	if((i+1)%4==0 && i!=nofNodes-1)
-	    		out << endl << "          ";
-	    }
-	    for(int i = 0; i < nofGhostNodes; i++)
-	    {
-	    	for(int j = 0; j < 3; ++j){
-	    		if (j==0) out << std::setprecision(6) << trans.mapX(octree.ghostsnodes[i][j]) << " ";
-	    		if (j==1) out << std::setprecision(6) << trans.mapY(octree.ghostsnodes[i][j]) << " ";
-	    		if (j==2) out << std::setprecision(6) << trans.mapZ(octree.ghostsnodes[i][j]) << " ";
-//	    		out << std::setprecision(6) << octree.ghostsnodes[i][j] << " ";
-	    	}
-	    	if((i+1)%4==0 && i!=nofNodes-1)
-	    		out << endl << "          ";
-	    }
-	    out << endl << "        </DataArray>" << endl
-	    	<< "      </Points>" << endl
-	        << "      <Cells>" << endl
-	        << "        <DataArray type=\"UInt64\" Name=\"connectivity\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
-	        << "          ";
-	    for(int i = 0; i < nofOctants; i++)
-	      {
-	        for(int j = 0; j < global2D.nnodes; j++)
-	          {
-	        	int jj;
-	        	if (j<2){
-	        		jj = j;
-	        	}
-	        	else if(j==2){
-	        		jj = 3;
-	        	}
-	        	else if(j==3){
-	        		jj = 2;
-	        	}
-	            out << octree.connectivity[i][jj] << " ";
-	          }
-	        if((i+1)%3==0 && i!=nofOctants-1)
-	          out << endl << "          ";
-	      }
-	    for(int i = 0; i < nofGhosts; i++)
-	      {
-	        for(int j = 0; j < global2D.nnodes; j++)
-	          {
-	        	int jj;
-	        	if (j<2){
-	        		jj = j;
-	        	}
-	        	else if(j==2){
-	        		jj = 3;
-	        	}
-	        	else if(j==3){
-	        		jj = 2;
-	        	}
-	            out << octree.ghostsconnectivity[i][jj] + nofNodes << " ";
-	          }
-	        if((i+1)%3==0 && i!=nofGhosts-1)
-	          out << endl << "          ";
-	      }
-	    out << endl << "        </DataArray>" << endl
-	        << "        <DataArray type=\"UInt64\" Name=\"offsets\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
-	        << "          ";
-	    for(int i = 0; i < nofAll; i++)
-	      {
-	        out << (i+1)*global2D.nnodes << " ";
-	        if((i+1)%12==0 && i!=nofAll-1)
-	          out << endl << "          ";
-	      }
-	    out << endl << "        </DataArray>" << endl
-	        << "        <DataArray type=\"UInt8\" Name=\"types\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
-	        << "          ";
-	    for(int i = 0; i < nofAll; i++)
-	      {
-	        int type;
-	          type = 9;
-	        out << type << " ";
-	        if((i+1)%12==0 && i!=nofAll-1)
-	          out << endl << "          ";
-	      }
-	    out << endl << "        </DataArray>" << endl
-	        << "      </Cells>" << endl
-	        << "    </Piece>" << endl
-	        << "  </UnstructuredGrid>" << endl
-	        << "</VTKFile>" << endl;
+				<< "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
+				<< "  <UnstructuredGrid>" << endl
+				<< "    <Piece NumberOfCells=\"" << octree.connectivity.size() + octree.ghostsconnectivity.size() << "\" NumberOfPoints=\"" << octree.nodes.size() + octree.ghostsnodes.size() << "\">" << endl;
+		out << "      <Points>" << endl
+				<< "        <DataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\""<< 3 <<"\" format=\"ascii\">" << endl
+				<< "          " << std::fixed;
+		for(int i = 0; i < nofNodes; i++)
+		{
+			for(int j = 0; j < 3; ++j){
+				if (j==0) out << std::setprecision(6) << trans.mapX(octree.nodes[i][j]) << " ";
+				if (j==1) out << std::setprecision(6) << trans.mapY(octree.nodes[i][j]) << " ";
+				if (j==2) out << std::setprecision(6) << trans.mapZ(octree.nodes[i][j]) << " ";
+				//	    		out << std::setprecision(6) << octree.nodes[i][j] << " ";
+			}
+			if((i+1)%4==0 && i!=nofNodes-1)
+				out << endl << "          ";
+		}
+		for(int i = 0; i < nofGhostNodes; i++)
+		{
+			for(int j = 0; j < 3; ++j){
+				if (j==0) out << std::setprecision(6) << trans.mapX(octree.ghostsnodes[i][j]) << " ";
+				if (j==1) out << std::setprecision(6) << trans.mapY(octree.ghostsnodes[i][j]) << " ";
+				if (j==2) out << std::setprecision(6) << trans.mapZ(octree.ghostsnodes[i][j]) << " ";
+				//	    		out << std::setprecision(6) << octree.ghostsnodes[i][j] << " ";
+			}
+			if((i+1)%4==0 && i!=nofNodes-1)
+				out << endl << "          ";
+		}
+		out << endl << "        </DataArray>" << endl
+				<< "      </Points>" << endl
+				<< "      <Cells>" << endl
+				<< "        <DataArray type=\"UInt64\" Name=\"connectivity\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
+				<< "          ";
+		for(int i = 0; i < nofOctants; i++)
+		{
+			for(int j = 0; j < global2D.nnodes; j++)
+			{
+				int jj;
+				if (j<2){
+					jj = j;
+				}
+				else if(j==2){
+					jj = 3;
+				}
+				else if(j==3){
+					jj = 2;
+				}
+				out << octree.connectivity[i][jj] << " ";
+			}
+			if((i+1)%3==0 && i!=nofOctants-1)
+				out << endl << "          ";
+		}
+		for(int i = 0; i < nofGhosts; i++)
+		{
+			for(int j = 0; j < global2D.nnodes; j++)
+			{
+				int jj;
+				if (j<2){
+					jj = j;
+				}
+				else if(j==2){
+					jj = 3;
+				}
+				else if(j==3){
+					jj = 2;
+				}
+				out << octree.ghostsconnectivity[i][jj] + nofNodes << " ";
+			}
+			if((i+1)%3==0 && i!=nofGhosts-1)
+				out << endl << "          ";
+		}
+		out << endl << "        </DataArray>" << endl
+				<< "        <DataArray type=\"UInt64\" Name=\"offsets\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
+				<< "          ";
+		for(int i = 0; i < nofAll; i++)
+		{
+			out << (i+1)*global2D.nnodes << " ";
+			if((i+1)%12==0 && i!=nofAll-1)
+				out << endl << "          ";
+		}
+		out << endl << "        </DataArray>" << endl
+				<< "        <DataArray type=\"UInt8\" Name=\"types\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
+				<< "          ";
+		for(int i = 0; i < nofAll; i++)
+		{
+			int type;
+			type = 9;
+			out << type << " ";
+			if((i+1)%12==0 && i!=nofAll-1)
+				out << endl << "          ";
+		}
+		out << endl << "        </DataArray>" << endl
+				<< "      </Cells>" << endl
+				<< "    </Piece>" << endl
+				<< "  </UnstructuredGrid>" << endl
+				<< "</VTKFile>" << endl;
 
 
-	    if(rank == 0){
-	        name.str("");
-	        name << "s" << std::setfill('0') << std::setw(4) << nproc << "-" << filename << ".pvtu";
-	        ofstream pout(name.str().c_str());
-	        if(!pout.is_open()){
-	        	stringstream ss;
-	    		ss << filename << "*.pvtu cannot be opened and it won't be written.";
-	    		writeLog(ss.str());
-	    		return;
-	        }
+		if(rank == 0){
+			name.str("");
+			name << "s" << std::setfill('0') << std::setw(4) << nproc << "-" << filename << ".pvtu";
+			ofstream pout(name.str().c_str());
+			if(!pout.is_open()){
+				stringstream ss;
+				ss << filename << "*.pvtu cannot be opened and it won't be written.";
+				writeLog(ss.str());
+				return;
+			}
 
-	        pout << "<?xml version=\"1.0\"?>" << endl
-	        		<< "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
-	        		<< "  <PUnstructuredGrid GhostLevel=\"0\">" << endl
-	        		<< "    <PPointData>" << endl
-	        		<< "    </PPointData>" << endl
-	        		<< "    <PCellData Scalars=\"\">" << endl;
-	        pout << "    </PCellData>" << endl
-	        		<< "    <PPoints>" << endl
-	        		<< "      <PDataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\"3\"/>" << endl
-	        		<< "    </PPoints>" << endl;
-	        for(int i = 0; i < nproc; i++)
-	        	pout << "    <Piece Source=\"s" << std::setw(4) << std::setfill('0') << nproc << "-p" << std::setw(4) << std::setfill('0') << i << "-" << filename << ".vtu\"/>" << endl;
-	        pout << "  </PUnstructuredGrid>" << endl
-	        		<< "</VTKFile>";
+			pout << "<?xml version=\"1.0\"?>" << endl
+					<< "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
+					<< "  <PUnstructuredGrid GhostLevel=\"0\">" << endl
+					<< "    <PPointData>" << endl
+					<< "    </PPointData>" << endl
+					<< "    <PCellData Scalars=\"\">" << endl;
+			pout << "    </PCellData>" << endl
+					<< "    <PPoints>" << endl
+					<< "      <PDataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\"3\"/>" << endl
+					<< "    </PPoints>" << endl;
+			for(int i = 0; i < nproc; i++)
+				pout << "    <Piece Source=\"s" << std::setw(4) << std::setfill('0') << nproc << "-p" << std::setw(4) << std::setfill('0') << i << "-" << filename << ".vtu\"/>" << endl;
+			pout << "  </PUnstructuredGrid>" << endl
+					<< "</VTKFile>";
 
-	        pout.close();
+			pout.close();
 
-	    }
-	    MPI_Barrier(MPI_COMM_WORLD);
+		}
+		MPI_Barrier(MPI_COMM_WORLD);
 
 
 	}
