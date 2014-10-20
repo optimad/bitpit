@@ -7,4 +7,4 @@
 // =================================================================================== //
 
 template class Class_Para_Tree<2>;
-//template class Class_Para_Tree<3>;
+template class Class_Para_Tree<3>;
