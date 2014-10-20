@@ -1466,7 +1466,7 @@ private:
 						while(octants[idxtry].computeMorton() > Morton){
 							idxtry--;
 							if(idxtry > noctants-1){
-								idxtry = noctants-1;
+								idxtry = 0;
 								return;
 							}
 						}
@@ -1604,7 +1604,6 @@ private:
 											Bdone = true;
 										}
 									};
-
 								}
 							}
 						}
@@ -1778,7 +1777,6 @@ private:
 	};
 
 	// =================================================================================== //
-
 
 	bool localBalanceAll(bool doInterior){				// 2:1 balancing on level a local tree already adapted (balance only the octants with info[14] = false) (refinement wins!)
 																// Return true if balanced done with some markers modification
@@ -2145,6 +2143,16 @@ private:
 					Mortontry = octants[idxtry].computeMorton();
 					jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
 					idxtry += jump;
+					if (idxtry > octants.size()-1){
+						if (jump > 0){
+							idxtry = octants.size() - 1;
+							jump = 0;
+						}
+						else if (jump < 0){
+							idxtry = 0;
+							jump = 0;
+						}
+					}
 				}
 				if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
 					//Found neighbour of same size
@@ -2195,6 +2203,9 @@ private:
 								isghost.push_back(false);
 							}
 							idxtry++;
+							if(idxtry>noctants-1){
+								break;
+							}
 							Mortontry = octants[idxtry].computeMorton();
 						}
 					}
