@@ -321,7 +321,7 @@ private:
 		if (ghosts.size() && nocts > 0){
 			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
 				father = ghosts[idx2_gh].buildFather();
-				markerfather = ghosts[idx2_gh].getMarker()+1;//-MAX_LEVEL_2D;
+				markerfather = ghosts[idx2_gh].getMarker()+1;//-MAX_LEVEL_3D;
 				nbro = 0;
 				idx = idx2_gh;
 				marker = ghosts[idx].getMarker();
@@ -666,12 +666,6 @@ private:
 	};
 
 	// =================================================================================== //
-	//TODO Arrivato qui!!
-	//TODO Arrivato qui!!
-	//TODO Arrivato qui!!
-	//TODO Arrivato qui!!
-
-
 
 	void checkCoarse(uint64_t lastDescPre,						// Delete overlapping octants after coarse local tree. Check first and last descendants
 								uint64_t firstDescPost){		// of process before and after the local process
@@ -694,40 +688,25 @@ private:
 		}
 		octants.resize(nocts-toDelete);
 		octants.shrink_to_fit();
+		nocts = getNumOctants();
 
-		toDelete = 0;
-		Morton = last_desc.computeMorton();
-		if(int(firstDescPost  - Morton) > 1){
-			// To insert, the father is not yet here!!
-			idx = nocts - 1;
-			Class_Octant<3> father = octants[idx].buildFather();
-			while(octants[idx].buildFather() == father && idx >= 0){
-				toDelete++;
-				idx--;
-			}
-			father.info[global3D.nfaces+1] = father.info[global3D.nfaces+3] = true;
-//			if(global3D.nfaces == 6)
-			father.info[global3D.nfaces+5] = true;
-			octants.resize(nocts-toDelete);
-			octants.push_back(father);
-			octants.shrink_to_fit();
-		}
-
-		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si pu�� trovare la maniera di inserirlo nel loop precedente
-		uint8_t iface;
-		pborders.clear();
-		nocts = octants.size();
-		pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(global3D.nfaces)));
-		for(idx=0; idx<nocts; idx++){
-			for(iface=0; iface<global3D.nfaces; iface++){
-				if (octants[idx].info[iface+global3D.nfaces]){
-					pborders.push_back(idx);
-					break;
-				}
-			}
-		}
-		pborders.shrink_to_fit();
+//		toDelete = 0;
+//		Morton = last_desc.computeMorton();
+//		if(int(firstDescPost  - Morton) > 1){
+//			// To insert, the father is not yet here!!
+//			idx = nocts - 1;
+//			Class_Octant<3> father = octants[idx].buildFather();
+//			while(octants[idx].buildFather() == father && idx >= 0){
+//				toDelete++;
+//				idx--;
+//			}
+//			father.info[global3D.nfaces+1] = father.info[global3D.nfaces+3] = true;
+////			if(global3D.nfaces == 6)
+//			father.info[global3D.nfaces+5] = true;
+//			octants.resize(nocts-toDelete);
+//			octants.push_back(father);
+//			octants.shrink_to_fit();
+//		}
 
 		setFirstDesc();
 		setLastDesc();
@@ -760,42 +739,7 @@ private:
 		octants.shrink_to_fit();
 		mapidx.resize(nocts-toDelete);
 		mapidx.shrink_to_fit();
-
-		toDelete = 0;
-		Morton = last_desc.computeMorton();
-		if(int(firstDescPost  - Morton) > 1){
-			// To insert, the father is not yet here!!
-			idx = nocts - 1;
-			Class_Octant<3> father = octants[idx].buildFather();
-			while(octants[idx].buildFather() == father && idx >= 0){
-				toDelete++;
-				idx--;
-			}
-			father.info[global3D.nfaces+1] = father.info[global3D.nfaces+3] = true;
-			if(global3D.nfaces == 6)
-				father.info[global3D.nfaces+5] = true;
-			octants.resize(nocts-toDelete);
-			octants.push_back(father);
-			octants.shrink_to_fit();
-			mapidx.resize(nocts-toDelete+1);
-			mapidx.shrink_to_fit();
-		}
-
-		//Update pborders (adesso inefficiente, loop di nuovo su tutti gli elementi)
-		//Si pu�� trovare la maniera di inserirlo nel loop precedente
-		uint8_t iface;
-		pborders.clear();
-		nocts = octants.size();
-		pborders.reserve(int(pow(double(nocts),2.0/3.0)*double(global3D.nfaces)));
-		for(idx=0; idx<nocts; idx++){
-			for(iface=0; iface<global3D.nfaces; iface++){
-				if (octants[idx].info[iface+global3D.nfaces]){
-					pborders.push_back(idx);
-					break;
-				}
-			}
-		}
-		pborders.shrink_to_fit();
+		nocts = getNumOctants();
 
 		setFirstDesc();
 		setLastDesc();
@@ -817,149 +761,6 @@ private:
 
 	};
 
-	// =================================================================================== //
-
-	void computeConnectivity(){						// Computes nodes vector and connectivity of octants of local tree
-		map<uint64_t, vector<uint32_t> > mapnodes;
-		map<uint64_t, vector<uint32_t> >::iterator iter, iterend;
-		uint32_t i, k, counter;
-		uint64_t morton;
-		uint32_t noctants = getNumOctants();
-		uint32_t (*octnodes)[3];
-		uint8_t j;
-
-		//TODO Reserve for vector for 2D and 3D
-
-		if (nodes.size() == 0){
-			connectivity.resize(noctants);
-			for (i = 0; i < noctants; i++){
-				octnodes = octants[i].getNodes();
-				for (j = 0; j < global3D.nnodes; j++){
-					morton = mortonEncode_magicbits(octnodes[j][0], octnodes[j][1], octnodes[j][2]);
-					if (mapnodes[morton].size()==0){
-						mapnodes[morton].reserve(12);
-						for (k = 0; k < 3; k++){
-							mapnodes[morton].push_back(octnodes[j][k]);
-						}
-					}
-					mapnodes[morton].push_back(i);
-				}
-				delete []octnodes;
-			}
-			iter	= mapnodes.begin();
-			iterend	= mapnodes.end();
-			counter = 0;
-			uint32_t numnodes = mapnodes.size();
-			nodes.resize(numnodes);
-			vector<uint32_t>::iterator iter2;
-			while (iter != iterend){
-				vector<uint32_t> nodecasting(iter->second.begin(), iter->second.begin()+3);
-				nodes[counter] = nodecasting;
-				nodes[counter].shrink_to_fit();
-				for(iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
-					if (connectivity[(*iter2)].size()==0){
-						connectivity[(*iter2)].reserve(8);
-					}
-					connectivity[(*iter2)].push_back(counter);
-				}
-				mapnodes.erase(iter++);
-				counter++;
-			}
-			nodes.shrink_to_fit();
-			//Lento. Solo per risparmiare memoria
-			for (int ii=0; ii<noctants; ii++){
-				connectivity[ii].shrink_to_fit();
-			}
-			connectivity.shrink_to_fit();
-		}
-		map<uint64_t, vector<uint32_t> >().swap(mapnodes);
-		iter = mapnodes.end();
-
-	};
-
-	// =================================================================================== //
-
-	void clearConnectivity(){						// Clear nodes vector and connectivity of octants of local tree
-		u32vector2D().swap(nodes);
-		u32vector2D().swap(connectivity);
-	};
-
-	// =================================================================================== //
-
-	void updateConnectivity(){						// Updates nodes vector and connectivity of octants of local tree
-		clearConnectivity();
-		computeConnectivity();
-	};
-
-	// =================================================================================== //
-
-	void computeGhostsConnectivity(){				// Computes ghosts nodes vector and connectivity of ghosts octants of local tree
-		map<uint64_t, vector<uint32_t> > mapnodes;
-		map<uint64_t, vector<uint32_t> >::iterator iter, iterend;
-		uint32_t i, k, counter;
-		uint64_t morton;
-		uint32_t noctants = size_ghosts;
-		uint32_t (*octnodes)[3];
-		uint8_t j;
-
-		if (ghostsnodes.size() == 0){
-			ghostsconnectivity.resize(noctants);
-			for (i = 0; i < noctants; i++){
-				octnodes = ghosts[i].getNodes();
-				for (j = 0; j < global3D.nnodes; j++){
-					morton = mortonEncode_magicbits(octnodes[j][0], octnodes[j][1], octnodes[j][2]);
-					if (mapnodes[morton].size()==0){
-						for (k = 0; k < 3; k++){
-							mapnodes[morton].push_back(octnodes[j][k]);
-						}
-					}
-					mapnodes[morton].push_back(i);
-				}
-				delete []octnodes;
-			}
-			iter	= mapnodes.begin();
-			iterend	= mapnodes.end();
-			uint32_t numnodes = mapnodes.size();
-			ghostsnodes.resize(numnodes);
-			counter = 0;
-			vector<uint32_t>::iterator iter2;
-			while (iter != iterend){
-				vector<uint32_t> nodecasting(iter->second.begin(), iter->second.begin()+3);
-				ghostsnodes[counter] = nodecasting;
-				ghostsnodes[counter].shrink_to_fit();
-				for(iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
-					if (ghostsconnectivity[(*iter2)].size()==0){
-						ghostsconnectivity[(*iter2)].reserve(8);
-					}
-					ghostsconnectivity[(*iter2)].push_back(counter);
-				}
-				mapnodes.erase(iter++);
-				counter++;
-			}
-			ghostsnodes.shrink_to_fit();
-			//Lento. Solo per risparmiare memoria
-			for (int ii=0; ii<noctants; ii++){
-				ghostsconnectivity[ii].shrink_to_fit();
-			}
-			ghostsconnectivity.shrink_to_fit();
-		}
-		iter = mapnodes.end();
-
-	};
-
-	// =================================================================================== //
-
-	void clearGhostsConnectivity(){					// Clear ghosts nodes vector and connectivity of ghosts octants of local tree
-		u32vector2D().swap(ghostsnodes);
-		u32vector2D().swap(ghostsconnectivity);
-	};
-
-	// =================================================================================== //
-
-	void updateGhostsConnectivity(){					// Update ghosts nodes vector and connectivity of ghosts octants of local tree
-		clearGhostsConnectivity();
-		computeGhostsConnectivity();
-	};
 
 	// =================================================================================== //
 
@@ -1037,7 +838,7 @@ private:
 						while(octants[idxtry].computeMorton() > Morton){
 							idxtry--;
 							if(idxtry > noctants-1){
-								idxtry = noctants-1;
+								idxtry = 0;
 								return;
 							}
 						}
@@ -1127,14 +928,14 @@ private:
 							while(ghosts[idxtry].computeMorton() < Morton){
 								idxtry++;
 								if(idxtry > ghosts.size()-1){
-									idxtry = ghosts.size();
+									idxtry = ghosts.size()-1;
 									break;
 								}
 							}
 							while(ghosts[idxtry].computeMorton() > Morton){
 								idxtry--;
 								if(idxtry > ghosts.size()-1){
-									idxtry = ghosts.size();
+									idxtry = 0;
 									break;
 								}
 							}
@@ -1194,6 +995,16 @@ private:
 								Mortontry = octants[idxtry].computeMorton();
 								jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
 								idxtry += jump;
+								if (idxtry > noctants-1){
+									if (jump > 0){
+										idxtry = noctants - 1;
+										jump = 0;
+									}
+									else if (jump < 0){
+										idxtry = 0;
+										jump = 0;
+									}
+								}
 							}
 							if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
 								//Found neighbour of same size
@@ -1209,14 +1020,14 @@ private:
 									while(octants[idxtry].computeMorton() < Morton){
 										idxtry++;
 										if(idxtry > noctants-1){
-											idxtry = noctants;
+											idxtry = noctants-1;
 											break;
 										}
 									}
 									while(octants[idxtry].computeMorton() > Morton){
 										idxtry--;
 										if(idxtry > noctants-1){
-											idxtry = noctants;
+											idxtry = 0;
 											break;
 										}
 									}
@@ -1226,7 +1037,6 @@ private:
 										//Found neighbour of same size
 										isghost.push_back(false);
 										neighbours.push_back(idxtry);
-										cout << " idx  " << idx << "   idxtry  "<<idxtry << "/" << noctants << "   face   " << int(iface) << endl;
 										writeLog("Face marked pbound but only a non-ghost neighbour found!!!");
 										return;
 									}
@@ -1266,6 +1076,323 @@ private:
 	};
 //
 	// =================================================================================== //
+
+	void findNeighbours(Class_Octant<3>* oct,					// Finds neighbours of octant through iface in vector octants.
+			uint8_t iface,					// Returns a vector (empty if iface is a bound face) with the index of neighbours
+			u32vector & neighbours,			// in their structure (octants or ghosts) and sets isghost[i] = true if the
+			vector<bool> & isghost){		// i-th neighbour is ghost in the local tree
+
+		uint64_t  Morton, Mortontry;
+		uint32_t  noctants = getNumOctants();
+		uint32_t idxtry;
+		uint32_t size = oct->getSize();
+		//Find octant in octants
+		OctantsType::iterator itoct = find(octants.begin(), octants.end(), (*oct));
+		if (itoct == octants.end()){
+			return;
+		}
+		uint32_t idx = distance(octants.begin(), itoct);
+
+		// TODO Create a global matrix
+		//Alternative to switch case
+		int8_t cx = int8_t((iface<2)*(int8_t(2*iface-1)));
+		int8_t cy = int8_t((iface<4)*(int8_t(iface/2))*(int8_t(2*iface-5)));
+		int8_t cz = int8_t((int8_t(iface/4))*(int8_t(2*iface-9)));
+
+		isghost.clear();
+		neighbours.clear();
+
+		// Default if iface is nface<iface<0
+		if (iface < 0 || iface > global3D.nfaces){
+			writeLog("Face index out of range in find neighbours !!!");
+			return;
+		}
+
+		// Check if octants face is a process boundary
+		if (oct->info[global3D.nfaces+iface] == false){
+
+			// Check if octants face is a boundary
+			if (oct->info[iface] == false){
+
+				//Build Morton number of virtual neigh of same size
+				Class_Octant<3> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size), int32_t(oct->z)+int32_t(cz*size));
+				Morton = samesizeoct.computeMorton();
+				// Search morton in octants
+				// If a even face morton is lower than morton of oct, if odd higher
+				// ---> can i search only before or after idx in octants
+				int32_t jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
+				idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
+				Mortontry = oct->computeMorton();
+				while(abs(jump) > 0){
+					Mortontry = octants[idxtry].computeMorton();
+					jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
+					idxtry += jump;
+					if (idxtry > noctants-1){
+						if (jump > 0){
+							idxtry = noctants - 1;
+							jump = 0;
+						}
+						else if (jump < 0){
+							idxtry = 0;
+							jump = 0;
+						}
+					}
+				}
+				if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
+					//Found neighbour of same size
+					isghost.push_back(false);
+					neighbours.push_back(idxtry);
+					return;
+				}
+				else{
+					// Step until the mortontry lower than morton (one idx of distance)
+					{
+						while(octants[idxtry].computeMorton() < Morton){
+							idxtry++;
+							if(idxtry > noctants-1){
+								idxtry = noctants-1;
+								break;
+							}
+						}
+						while(octants[idxtry].computeMorton() > Morton){
+							idxtry--;
+							if(idxtry > noctants-1){
+								idxtry = 0;
+								break;
+							}
+						}
+					}
+					if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
+						//Found neighbour of same size
+						isghost.push_back(false);
+						neighbours.push_back(idxtry);
+						return;
+					}
+					// Compute Last discendent of virtual octant of same size
+					uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL_3D - samesizeoct.level)) - 1;
+					Class_Octant<3> last_desc = samesizeoct.buildLastDesc();
+					uint64_t Mortonlast = last_desc.computeMorton();
+					vector<uint32_t> bufferidx;
+					Mortontry = octants[idxtry].computeMorton();
+					int32_t Dh;
+					int32_t eqcoord;
+					while(Mortontry < Mortonlast && idxtry < noctants){
+						Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
+						Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
+						Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
+						if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
+							neighbours.push_back(idxtry);
+							isghost.push_back(false);
+						}
+						idxtry++;
+						if(idxtry>noctants-1){
+							break;
+						}
+						Mortontry = octants[idxtry].computeMorton();
+					}
+					return;
+				}
+			}
+			else{
+				// Boundary Face
+				return;
+			}
+		}
+		//--------------------------------------------------------------- //
+		//--------------------------------------------------------------- //
+		else{
+			// Check if octants face is a boundary
+			if (oct->info[iface] == false){
+				// IF OCTANT FACE IS A PROCESS BOUNDARY SEARCH ALSO IN GHOSTS
+
+				if (ghosts.size()>0){
+					// Search in ghosts
+
+					uint32_t idxghost = uint32_t(size_ghosts/2);
+					Class_Octant<3>* octghost = &ghosts[idxghost];
+
+					//Build Morton number of virtual neigh of same size
+					Class_Octant<3> samesizeoct(oct->level, oct->x+cx*size, oct->y+cy*size, oct->z+cz*size);
+					Morton = samesizeoct.computeMorton(); //mortonEncode_magicbits(oct->x-size,oct->y,oct->z);
+					// Search morton in octants
+					// If a even face morton is lower than morton of oct, if odd higher
+					// ---> can i search only before or after idx in octants
+					int32_t jump = (octghost->computeMorton() > Morton) ? int32_t(idxghost/2+1) : int32_t((size_ghosts -idxghost)/2+1);
+					idxtry = uint32_t(idxghost +((octghost->computeMorton()<Morton)-(octghost->computeMorton()>Morton))*jump);
+					while(abs(jump) > 0){
+						Mortontry = ghosts[idxtry].computeMorton();
+						jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
+						idxtry += jump;
+						if (idxtry > ghosts.size()-1){
+							if (jump > 0){
+								idxtry = ghosts.size() - 1;
+								jump = 0;
+							}
+							else if (jump < 0){
+								idxtry = 0;
+								jump = 0;
+							}
+						}
+					}
+					if(ghosts[idxtry].computeMorton() == Morton && ghosts[idxtry].level == oct->level){
+						//Found neighbour of same size
+						isghost.push_back(true);
+						neighbours.push_back(idxtry);
+						return;
+					}
+					else{
+						// Step until the mortontry lower than morton (one idx of distance)
+						{
+							while(ghosts[idxtry].computeMorton() < Morton){
+								idxtry++;
+								if(idxtry > ghosts.size()-1){
+									idxtry = ghosts.size()-1;
+									break;
+								}
+							}
+							while(ghosts[idxtry].computeMorton() > Morton){
+								idxtry--;
+								if(idxtry > ghosts.size()-1){
+									idxtry = 0;
+									break;
+								}
+							}
+						}
+						if(idxtry < size_ghosts){
+							if(ghosts[idxtry].computeMorton() == Morton && ghosts[idxtry].level == oct->level){
+								//Found neighbour of same size
+								isghost.push_back(true);
+								neighbours.push_back(idxtry);
+								return;
+							}
+							// Compute Last discendent of virtual octant of same size
+							uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL_3D - samesizeoct.level)) - 1;
+							Class_Octant<3> last_desc = samesizeoct.buildLastDesc();
+							uint64_t Mortonlast = last_desc.computeMorton();
+							vector<uint32_t> bufferidx;
+							Mortontry = ghosts[idxtry].computeMorton();
+							int32_t Dh;
+							int32_t eqcoord;
+							while(Mortontry < Mortonlast & idxtry < size_ghosts){
+								Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
+								Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
+								Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
+								if ((abs(Dh) == ((1-(iface%2))*ghosts[idxtry].getSize() + (iface%2)*size))){
+									neighbours.push_back(idxtry);
+									isghost.push_back(true);
+								}
+								idxtry++;
+								if(idxtry>size_ghosts-1){
+									break;
+								}
+								Mortontry = ghosts[idxtry].computeMorton();
+							}
+						}
+					}
+
+					uint32_t lengthneigh = 0;
+					uint32_t sizeneigh = neighbours.size();
+					for (idxtry=0; idxtry<sizeneigh; idxtry++){
+						lengthneigh += ghosts[neighbours[idxtry]].getSize();
+					}
+					if (lengthneigh < oct->getSize()){
+						// Search in octants
+
+						// Check if octants face is a boundary
+						if (oct->info[iface] == false){
+
+							//Build Morton number of virtual neigh of same size
+							Class_Octant<3> samesizeoct(oct->level, oct->x+cx*size, oct->y+cy*size, oct->z+cz*size);
+							Morton = samesizeoct.computeMorton();
+							// Search morton in octants
+							// If a even face morton is lower than morton of oct, if odd higher
+							// ---> can i search only before or after idx in octants
+							int32_t jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
+							idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
+							while(abs(jump) > 0){
+								Mortontry = octants[idxtry].computeMorton();
+								jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
+								idxtry += jump;
+								if (idxtry > noctants-1){
+									if (jump > 0){
+										idxtry = noctants - 1;
+										jump = 0;
+									}
+									else if (jump < 0){
+										idxtry = 0;
+										jump = 0;
+									}
+								}
+							}
+							if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
+								//Found neighbour of same size
+								isghost.push_back(false);
+								neighbours.push_back(idxtry);
+								writeLog("Face marked pbound but only a non-ghost neighbour found!!!");
+								return;
+							}
+							else{
+								// Step until the mortontry lower than morton (one idx of distance)
+								{
+									while(octants[idxtry].computeMorton() < Morton){
+										idxtry++;
+										if(idxtry > noctants-1){
+											idxtry = noctants-1;
+											break;
+										}
+									}
+									while(octants[idxtry].computeMorton() > Morton){
+										idxtry--;
+										if(idxtry > noctants-1){
+											idxtry = 0;
+											break;
+										}
+									}
+								}
+								if (idxtry < noctants){
+									if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
+										//Found neighbour of same size
+										isghost.push_back(false);
+										neighbours.push_back(idxtry);
+										writeLog("Face marked pbound but only a non-ghost neighbour found!!!");
+										return;
+									}
+									// Compute Last discendent of virtual octant of same size
+									uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL_3D - samesizeoct.level)) - 1;
+									Class_Octant<3> last_desc = samesizeoct.buildLastDesc();
+									uint64_t Mortonlast = last_desc.computeMorton();
+									vector<uint32_t> bufferidx;
+									Mortontry = octants[idxtry].computeMorton();
+									int32_t Dh;
+									int32_t eqcoord;
+									while(Mortontry < Mortonlast & idxtry < noctants-1){
+										Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
+										Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
+										Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
+										if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
+											neighbours.push_back(idxtry);
+											isghost.push_back(false);
+										}
+										idxtry++;
+										Mortontry = octants[idxtry].computeMorton();
+									}
+								}
+							}
+						}
+					}
+					return;
+				}
+			}
+			else{
+				// Boundary Face
+				return;
+			}
+		}
+	};
+
+	// =================================================================================== //
+
+//TODO Arrivato qui
 
 	void findGhostNeighbours(uint32_t const idx,		// Finds neighbours of idx-th ghost octant through iface in vector octants.
 								uint8_t iface,					// Returns a vector (empty if iface is not the pbound face for ghost) with the index of neighbours
@@ -2351,6 +2478,150 @@ private:
 		}
 
 	}
+
+	// =================================================================================== //
+
+	void computeConnectivity(){						// Computes nodes vector and connectivity of octants of local tree
+		map<uint64_t, vector<uint32_t> > mapnodes;
+		map<uint64_t, vector<uint32_t> >::iterator iter, iterend;
+		uint32_t i, k, counter;
+		uint64_t morton;
+		uint32_t noctants = getNumOctants();
+		uint32_t (*octnodes)[3];
+		uint8_t j;
+
+		//TODO Reserve for vector for 2D and 3D
+
+		if (nodes.size() == 0){
+			connectivity.resize(noctants);
+			for (i = 0; i < noctants; i++){
+				octnodes = octants[i].getNodes();
+				for (j = 0; j < global3D.nnodes; j++){
+					morton = mortonEncode_magicbits(octnodes[j][0], octnodes[j][1], octnodes[j][2]);
+					if (mapnodes[morton].size()==0){
+						mapnodes[morton].reserve(12);
+						for (k = 0; k < 3; k++){
+							mapnodes[morton].push_back(octnodes[j][k]);
+						}
+					}
+					mapnodes[morton].push_back(i);
+				}
+				delete []octnodes;
+			}
+			iter	= mapnodes.begin();
+			iterend	= mapnodes.end();
+			counter = 0;
+			uint32_t numnodes = mapnodes.size();
+			nodes.resize(numnodes);
+			vector<uint32_t>::iterator iter2;
+			while (iter != iterend){
+				vector<uint32_t> nodecasting(iter->second.begin(), iter->second.begin()+3);
+				nodes[counter] = nodecasting;
+				nodes[counter].shrink_to_fit();
+				for(iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
+					if (connectivity[(*iter2)].size()==0){
+						connectivity[(*iter2)].reserve(8);
+					}
+					connectivity[(*iter2)].push_back(counter);
+				}
+				mapnodes.erase(iter++);
+				counter++;
+			}
+			nodes.shrink_to_fit();
+			//Lento. Solo per risparmiare memoria
+			for (int ii=0; ii<noctants; ii++){
+				connectivity[ii].shrink_to_fit();
+			}
+			connectivity.shrink_to_fit();
+		}
+		map<uint64_t, vector<uint32_t> >().swap(mapnodes);
+		iter = mapnodes.end();
+
+	};
+
+	// =================================================================================== //
+
+	void clearConnectivity(){						// Clear nodes vector and connectivity of octants of local tree
+		u32vector2D().swap(nodes);
+		u32vector2D().swap(connectivity);
+	};
+
+	// =================================================================================== //
+
+	void updateConnectivity(){						// Updates nodes vector and connectivity of octants of local tree
+		clearConnectivity();
+		computeConnectivity();
+	};
+
+	// =================================================================================== //
+
+	void computeGhostsConnectivity(){				// Computes ghosts nodes vector and connectivity of ghosts octants of local tree
+		map<uint64_t, vector<uint32_t> > mapnodes;
+		map<uint64_t, vector<uint32_t> >::iterator iter, iterend;
+		uint32_t i, k, counter;
+		uint64_t morton;
+		uint32_t noctants = size_ghosts;
+		uint32_t (*octnodes)[3];
+		uint8_t j;
+
+		if (ghostsnodes.size() == 0){
+			ghostsconnectivity.resize(noctants);
+			for (i = 0; i < noctants; i++){
+				octnodes = ghosts[i].getNodes();
+				for (j = 0; j < global3D.nnodes; j++){
+					morton = mortonEncode_magicbits(octnodes[j][0], octnodes[j][1], octnodes[j][2]);
+					if (mapnodes[morton].size()==0){
+						for (k = 0; k < 3; k++){
+							mapnodes[morton].push_back(octnodes[j][k]);
+						}
+					}
+					mapnodes[morton].push_back(i);
+				}
+				delete []octnodes;
+			}
+			iter	= mapnodes.begin();
+			iterend	= mapnodes.end();
+			uint32_t numnodes = mapnodes.size();
+			ghostsnodes.resize(numnodes);
+			counter = 0;
+			vector<uint32_t>::iterator iter2;
+			while (iter != iterend){
+				vector<uint32_t> nodecasting(iter->second.begin(), iter->second.begin()+3);
+				ghostsnodes[counter] = nodecasting;
+				ghostsnodes[counter].shrink_to_fit();
+				for(iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
+					if (ghostsconnectivity[(*iter2)].size()==0){
+						ghostsconnectivity[(*iter2)].reserve(8);
+					}
+					ghostsconnectivity[(*iter2)].push_back(counter);
+				}
+				mapnodes.erase(iter++);
+				counter++;
+			}
+			ghostsnodes.shrink_to_fit();
+			//Lento. Solo per risparmiare memoria
+			for (int ii=0; ii<noctants; ii++){
+				ghostsconnectivity[ii].shrink_to_fit();
+			}
+			ghostsconnectivity.shrink_to_fit();
+		}
+		iter = mapnodes.end();
+
+	};
+
+	// =================================================================================== //
+
+	void clearGhostsConnectivity(){					// Clear ghosts nodes vector and connectivity of ghosts octants of local tree
+		u32vector2D().swap(ghostsnodes);
+		u32vector2D().swap(ghostsconnectivity);
+	};
+
+	// =================================================================================== //
+
+	void updateGhostsConnectivity(){					// Update ghosts nodes vector and connectivity of ghosts octants of local tree
+		clearGhostsConnectivity();
+		computeGhostsConnectivity();
+	};
 
 	// =================================================================================== //
 

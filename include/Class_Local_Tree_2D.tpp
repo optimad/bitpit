@@ -854,7 +854,7 @@ private:
 						while(octants[idxtry].computeMorton() > Morton){
 							idxtry--;
 							if(idxtry > noctants-1){
-								idxtry = noctants-1;
+								idxtry = 0;
 								break;
 							}
 						}
@@ -1032,14 +1032,14 @@ private:
 									while(octants[idxtry].computeMorton() < Morton){
 										idxtry++;
 										if(idxtry > noctants-1){
-											idxtry = noctants;
+											idxtry = noctants-1;
 											break;
 										}
 									}
 									while(octants[idxtry].computeMorton() > Morton){
 										idxtry--;
 										if(idxtry > noctants-1){
-											idxtry = noctants;
+											idxtry = 0;
 											break;
 										}
 									}
@@ -1060,7 +1060,7 @@ private:
 									Mortontry = octants[idxtry].computeMorton();
 									int32_t Dh;
 									int32_t eqcoord;
-									while(Mortontry < Mortonlast & idxtry < noctants-1){
+									while(Mortontry < Mortonlast && idxtry < noctants-1){
 										Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
 										Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
 										if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
