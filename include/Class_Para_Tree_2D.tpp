@@ -1530,6 +1530,186 @@ private:
 		}
 	}
 
+public:
+	/** Get the octant owner of an input point.
+	 * \param[in] point Coordinates of target point in logical domain.
+	 * \return Pointer to octant owner of target point.
+	 */
+	Class_Octant<2>* getPointOwner(u32vector & point){
+		uint32_t noctants = octree.octants.size();
+		uint32_t idxtry = noctants/2;
+		uint32_t x, y;
+		uint64_t morton, mortontry;
+		int powner;
+
+		x = point[0];
+		y = point[1];
+		morton = mortonEncode_magicbits(x,y);
+
+		powner = findOwner(morton);
+		if (powner!=rank)
+			return NULL;
+
+		int32_t jump = idxtry;
+		while(abs(jump) > 0){
+			mortontry = octree.octants[idxtry].computeMorton();
+			jump = ((mortontry<morton)-(mortontry>morton))*abs(jump)/2;
+			idxtry += jump;
+			if (idxtry > noctants-1){
+				if (jump > 0){
+					idxtry = noctants - 1;
+					jump = 0;
+				}
+				else if (jump < 0){
+					idxtry = 0;
+					jump = 0;
+				}
+			}
+		}
+		if(octree.octants[idxtry].computeMorton() == morton){
+			return &octree.octants[idxtry];
+		}
+		else{
+			// Step until the mortontry lower than morton (one idx of distance)
+			{
+				while(octree.octants[idxtry].computeMorton() < morton){
+					idxtry++;
+					if(idxtry > noctants-1){
+						idxtry = noctants-1;
+						break;
+					}
+				}
+				while(octree.octants[idxtry].computeMorton() > morton){
+					idxtry--;
+					if(idxtry > noctants-1){
+						idxtry = noctants-1;
+						break;
+					}
+				}
+			}
+			return &octree.octants[idxtry];
+		}
+	}
+
+	/** Get the octant owner of an input point.
+	 * \param[in] point Coordinates of target point in logical domain.
+	 * \return Index of octant owner of target point.
+	 */
+	uint32_t getPointOwnerIdx(u32vector & point){
+		uint32_t noctants = octree.octants.size();
+		uint32_t idxtry = noctants/2;
+		uint32_t x, y;
+		uint64_t morton, mortontry;
+		int powner;
+
+		x = point[0];
+		y = point[1];
+		morton = mortonEncode_magicbits(x,y);
+
+		powner = findOwner(morton);
+		if (powner!=rank)
+			return -1;
+
+		int32_t jump = idxtry;
+		while(abs(jump) > 0){
+			mortontry = octree.octants[idxtry].computeMorton();
+			jump = ((mortontry<morton)-(mortontry>morton))*abs(jump)/2;
+			idxtry += jump;
+			if (idxtry > noctants-1){
+				if (jump > 0){
+					idxtry = noctants - 1;
+					jump = 0;
+				}
+				else if (jump < 0){
+					idxtry = 0;
+					jump = 0;
+				}
+			}
+		}
+		if(octree.octants[idxtry].computeMorton() == morton){
+			return idxtry;
+		}
+		else{
+			// Step until the mortontry lower than morton (one idx of distance)
+			{
+				while(octree.octants[idxtry].computeMorton() < morton){
+					idxtry++;
+					if(idxtry > noctants-1){
+						idxtry = noctants-1;
+						break;
+					}
+				}
+				while(octree.octants[idxtry].computeMorton() > morton){
+					idxtry--;
+					if(idxtry > noctants-1){
+						idxtry = noctants-1;
+						break;
+					}
+				}
+			}
+			return idxtry;
+		}
+	}
+
+private:
+	Class_Octant<2> getPointOwner2(u32vector & point){
+		uint32_t noctants = octree.octants.size();
+		uint32_t idxtry = noctants/2;
+		uint32_t x, y;
+		uint64_t morton, mortontry;
+		int powner;
+
+		x = point[0];
+		y = point[1];
+		morton = mortonEncode_magicbits(x,y);
+
+		powner = findOwner(morton);
+		if (powner!=rank){
+			Class_Octant<2> oct0;
+			return oct0;
+		}
+
+		int32_t jump = idxtry;
+		while(abs(jump) > 0){
+			mortontry = octree.octants[idxtry].computeMorton();
+			jump = ((mortontry<morton)-(mortontry>morton))*abs(jump)/2;
+			idxtry += jump;
+			if (idxtry > noctants-1){
+				if (jump > 0){
+					idxtry = noctants - 1;
+					jump = 0;
+				}
+				else if (jump < 0){
+					idxtry = 0;
+					jump = 0;
+				}
+			}
+		}
+		if(octree.octants[idxtry].computeMorton() == morton){
+			return octree.octants[idxtry];
+		}
+		else{
+			// Step until the mortontry lower than morton (one idx of distance)
+			{
+				while(octree.octants[idxtry].computeMorton() < morton){
+					idxtry++;
+					if(idxtry > noctants-1){
+						idxtry = noctants-1;
+						break;
+					}
+				}
+				while(octree.octants[idxtry].computeMorton() > morton){
+					idxtry--;
+					if(idxtry > noctants-1){
+						idxtry = noctants-1;
+						break;
+					}
+				}
+			}
+			return octree.octants[idxtry];
+		}
+	}
+
 	// =============================================================================== //
 	// PARATREE METHODS ----------------------------------------------------------------------- //
 
