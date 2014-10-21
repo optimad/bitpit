@@ -4412,7 +4412,7 @@ public:
 
 	/** Compute the connectivity of ghost octants and store the coordinates of nodes.
 	 */
-	void computeghostsConnectivity() {
+	void computeGhostsConnectivity() {
 		octree.computeghostsConnectivity();
 	}
 	//	void computeghostsConnectivity() {
@@ -4473,7 +4473,7 @@ public:
 
 	/** Clear the connectivity of ghost octants.
 	 */
-	void clearghostsConnectivity() {
+	void clearGhostsConnectivity() {
 		octree.clearghostsConnectivity();
 		//		dvector2D().swap(ghostsnodes);
 		//		u32vector2D().swap(ghostsconnectivity);
@@ -4483,7 +4483,7 @@ public:
 
 	/** Update the connectivity of ghost octants.
 	 */
-	void updateghostsConnectivity() {
+	void updateGhostsConnectivity() {
 		octree.updateghostsConnectivity();
 	}
 
