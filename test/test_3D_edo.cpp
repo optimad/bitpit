@@ -46,8 +46,6 @@ int main(int argc, char *argv[]) {
 			ptree.writeLogical("Pablo_3D");
 		}
 
-
-
 //			uint32_t int1 = 99;
 //			uint32_t int2 = 102;
 //			Class_Intersection<2>* INT1 = ptree.getIntersectionInt(int1);
