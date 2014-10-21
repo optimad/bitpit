@@ -63,6 +63,7 @@ public:
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
+
 public:
 
 	/*! Default Constructor of Para_Tree.
@@ -1373,7 +1374,7 @@ public:
 		z = trans.mapX(point[2]);
 		morton = mortonEncode_magicbits(x,y,z);
 		powner = findOwner(morton);
-		if (powner!=rank)
+		if ((powner!=rank) || (x < 0) || (x > global3D.max_length) || (y < 0) || (y > global3D.max_length) || (z < 0) || (z > global3D.max_length))
 			return NULL;
 
 		int32_t jump = idxtry;
@@ -1436,7 +1437,7 @@ public:
 		z = trans.mapX(point[2]);
 		morton = mortonEncode_magicbits(x,y,z);
 		powner = findOwner(morton);
-		if (powner!=rank)
+		if ((powner!=rank) || (x < 0) || (x > global3D.max_length) || (y < 0) || (y > global3D.max_length) || (z < 0) || (z > global3D.max_length))
 			return -1;
 
 		int32_t jump = idxtry;
@@ -1499,7 +1500,7 @@ public:
 		z = point[2];
 		morton = mortonEncode_magicbits(x,y,z);
 		powner = findOwner(morton);
-		if (powner!=rank)
+		if ((powner!=rank) || (x < 0) || (x > global3D.max_length) || (y < 0) || (y > global3D.max_length) || (z < 0) || (z > global3D.max_length))
 			return NULL;
 
 		int32_t jump = idxtry;
@@ -1562,7 +1563,7 @@ public:
 		z = point[2];
 		morton = mortonEncode_magicbits(x,y,z);
 		powner = findOwner(morton);
-		if (powner!=rank)
+		if ((powner!=rank) || (x < 0) || (x > global3D.max_length) || (y < 0) || (y > global3D.max_length) || (z < 0) || (z > global3D.max_length))
 			return -1;
 
 		int32_t jump = idxtry;
@@ -5002,7 +5003,7 @@ public:
 
 	/** Update the connectivity of ghost octants.
 	 */
-	void updateghostsConnectivity() {
+	void updateGhostsConnectivity() {
 		octree.updateGhostsConnectivity();
 	}
 
@@ -5236,7 +5237,6 @@ public:
 				<< "  </UnstructuredGrid>" << endl
 				<< "</VTKFile>" << endl;
 
-
 		if(rank == 0){
 			name.str("");
 			name << "s" << std::setfill('0') << std::setw(4) << nproc << "-" << filename << ".pvtu";
@@ -5271,8 +5271,6 @@ public:
 		if (clear){
 			octree.clearConnectivity();
 		}
-
-
 	}
 
 	// ----------------------------------------------------------------------------------- //
@@ -5414,9 +5412,6 @@ public:
 
 		}
 		MPI_Barrier(MPI_COMM_WORLD);
-
 	}
-
 	// =============================================================================== //
-
 };

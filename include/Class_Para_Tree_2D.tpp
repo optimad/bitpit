@@ -1365,7 +1365,7 @@ public:
 		morton = mortonEncode_magicbits(x,y);
 
 		powner = findOwner(morton);
-		if (powner!=rank)
+		if ((powner!=rank) || (x < 0) || (x > global2D.max_length) || (y < 0) || (y > global2D.max_length))
 			return NULL;
 
 		int32_t jump = idxtry;
@@ -1425,7 +1425,7 @@ public:
 		morton = mortonEncode_magicbits(x,y);
 
 		powner = findOwner(morton);
-		if (powner!=rank)
+		if ((powner!=rank) || (x < 0) || (x > global2D.max_length) || (y < 0) || (y > global2D.max_length))
 			return -1;
 
 		int32_t jump = idxtry;
@@ -1482,7 +1482,7 @@ private:
 		morton = mortonEncode_magicbits(x,y);
 
 		powner = findOwner(morton);
-		if (powner!=rank){
+		if ((powner!=rank) || (x < 0) || (x > global2D.max_length) || (y < 0) || (y > global2D.max_length)){
 			Class_Octant<2> oct0;
 			return oct0;
 		}
@@ -1545,7 +1545,7 @@ public:
 		morton = mortonEncode_magicbits(x,y);
 
 		powner = findOwner(morton);
-		if (powner!=rank)
+		if ((powner!=rank) || (x < 0) || (x > global2D.max_length) || (y < 0) || (y > global2D.max_length))
 			return NULL;
 
 		int32_t jump = idxtry;
@@ -1605,7 +1605,7 @@ public:
 		morton = mortonEncode_magicbits(x,y);
 
 		powner = findOwner(morton);
-		if (powner!=rank)
+		if ((powner!=rank) || (x < 0) || (x > global2D.max_length) || (y < 0) || (y > global2D.max_length))
 			return -1;
 
 		int32_t jump = idxtry;
@@ -1662,7 +1662,7 @@ private:
 		morton = mortonEncode_magicbits(x,y);
 
 		powner = findOwner(morton);
-		if (powner!=rank){
+		if ((powner!=rank) || (x < 0) || (x > global2D.max_length) || (y < 0) || (y > global2D.max_length)){
 			Class_Octant<2> oct0;
 			return oct0;
 		}

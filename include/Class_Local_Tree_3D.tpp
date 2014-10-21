@@ -885,7 +885,6 @@ private:
 		//--------------------------------------------------------------- //
 		//--------------------------------------------------------------- //
 		else{
-			cout << "idx   " << int(idx) << "  iface  " << int(iface) << " is pbound" << endl;
 			// Check if octants face is a boundary
 			if (oct->info[iface] == false){
 				// IF OCTANT FACE IS A PROCESS BOUNDARY SEARCH ALSO IN GHOSTS
@@ -1013,7 +1012,6 @@ private:
 								//Found neighbour of same size
 								isghost.push_back(false);
 								neighbours.push_back(idxtry);
-								cout << " idx  " << idx << "   idxtry  "<<idxtry << "/" << noctants << "   face   " << int(iface) << endl;
 								writeLog("Face marked pbound but only a non-ghost neighbour found!!!");
 								return;
 							}
