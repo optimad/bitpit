@@ -64,4 +64,4 @@ class Class_Para_Tree{};
 #include "Class_Para_Tree_2D.tpp"
 
 
-#endif /* CLASS_PARA_TREE_H_ */
+#endif /* CLASS_PARA_TREE_HPP_ */

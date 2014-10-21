@@ -3,13 +3,21 @@
  *	\authors		Marco Cisternino
  *	\authors		Edoardo Lombardi
  *	\version		0.1
+ *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
+ *	\par			License:\n
+ *	This version of PABLO is released under the LGPL License.
  *
- *	\brief Parallel 3D Octree Manager Class
+ *	\brief Parallel Octree Manager Class - 3D specialization
  *
  *	Para Tree is the user interface class. One user should (read can...) work only
  *	with this Class and its methods.
  *	The sizes are intended in physical domain. The transformation from the logical
  *	domain to the physical domain is defined by Class_Map<3> trans.
+ *
+ *	The partition of the octree is performed by following the Z-curve defined by the Morton
+ *	index of the octants. By default it is a balanced partition over the number of octants for each
+ *	process.
+ *
  */
 
 // =================================================================================== //
