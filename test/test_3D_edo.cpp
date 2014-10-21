@@ -28,7 +28,7 @@ int main(int argc, char *argv[]) {
 				uint8_t codim = 1;
 				Class_Octant<3>* oct = ptree.getOctant(i);
 				cout << " rank: " << ptree.rank << " idx: " << ptree.getGlobalIdx(oct);
-				for (uint8_t iface=0; iface<4; iface++){
+				for (uint8_t iface=0; iface<6; iface++){
 //					cout << "   iface: " << int(iface);
 //						//cout << "   iface: " << int(iface) << " Bound: " << ptree.getBound(oct,iface) << " Pbound: " << ptree.getPbound(oct,iface);
 //					ptree.findNeighbours(oct, iface, codim, neigh, isghost);
@@ -43,6 +43,7 @@ int main(int argc, char *argv[]) {
 				}
 				cout << endl;
 			}
+			ptree.writeLogical("Pablo_3D");
 		}
 
 
@@ -191,6 +192,7 @@ int main(int argc, char *argv[]) {
 ////				ptree.octree.updateGhostsConnectivity();
 //			writeLocalTree(ptree.octree.nodes,ptree.octree.connectivity,ptree.octree.ghostsnodes,ptree.octree.ghostsconnectivity,ptree,("Pablo_"+to_string(0)));
 */
+
 
 	MPI::Finalize();
 

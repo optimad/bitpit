@@ -5196,21 +5196,7 @@ public:
 		{
 			for(int j = 0; j < global3D.nnodes; j++)
 			{
-				int jj;
-				jj = j;
-				if(j==2){
-					jj = 3;
-				}
-				else if(j==3){
-					jj = 2;
-				}
-				else if(j==6){
-					jj = 7;
-				}
-				else if(j==7){
-					jj = 6;
-				}
-				out << octree.connectivity[i][jj] << " ";
+				out << octree.connectivity[i][j] << " ";
 			}
 			if((i+1)%3==0 && i!=nofOctants-1)
 				out << endl << "          ";
@@ -5219,21 +5205,7 @@ public:
 		{
 			for(int j = 0; j < global3D.nnodes; j++)
 			{
-				int jj;
-				jj = j;
-				if(j==2){
-					jj = 3;
-				}
-				else if(j==3){
-					jj = 2;
-				}
-				else if(j==6){
-					jj = 7;
-				}
-				else if(j==7){
-					jj = 6;
-				}
-				out << octree.ghostsconnectivity[i][jj] + nofNodes << " ";
+				out << octree.ghostsconnectivity[i][j] + nofNodes << " ";
 			}
 			if((i+1)%3==0 && i!=nofGhosts-1)
 				out << endl << "          ";
@@ -5253,7 +5225,7 @@ public:
 		for(int i = 0; i < nofAll; i++)
 		{
 			int type;
-			type = 9;
+			type = 11;
 			out << type << " ";
 			if((i+1)%12==0 && i!=nofAll-1)
 				out << endl << "          ";
@@ -5371,21 +5343,7 @@ public:
 		{
 			for(int j = 0; j < global3D.nnodes; j++)
 			{
-				int jj;
-				jj = j;
-				if(j==2){
-					jj = 3;
-				}
-				else if(j==3){
-					jj = 2;
-				}
-				else if(j==6){
-					jj = 7;
-				}
-				else if(j==7){
-					jj = 6;
-				}
-				out << octree.connectivity[i][jj] << " ";
+				out << octree.connectivity[i][j] << " ";
 			}
 			if((i+1)%3==0 && i!=nofOctants-1)
 				out << endl << "          ";
@@ -5394,21 +5352,7 @@ public:
 		{
 			for(int j = 0; j < global3D.nnodes; j++)
 			{
-				int jj;
-				jj = j;
-				if(j==2){
-					jj = 3;
-				}
-				else if(j==3){
-					jj = 2;
-				}
-				else if(j==6){
-					jj = 7;
-				}
-				else if(j==7){
-					jj = 6;
-				}
-				out << octree.ghostsconnectivity[i][jj] + nofNodes << " ";
+				out << octree.ghostsconnectivity[i][j] + nofNodes << " ";
 			}
 			if((i+1)%3==0 && i!=nofGhosts-1)
 				out << endl << "          ";
@@ -5428,7 +5372,7 @@ public:
 		for(int i = 0; i < nofAll; i++)
 		{
 			int type;
-			type = 9;
+			type = 11;
 			out << type << " ";
 			if((i+1)%12==0 && i!=nofAll-1)
 				out << endl << "          ";
