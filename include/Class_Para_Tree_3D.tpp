@@ -1,5 +1,4 @@
 /*!
- *
  *	\date			23/apr/2014
  *	\authors		Marco Cisternino
  *	\authors		Edoardo Lombardi
