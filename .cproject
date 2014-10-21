@@ -63,6 +63,11 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="0.1573741445.1089844901" name="Class_Para_Tree_3D.tpp" rcbsApplicability="disable" resourcePath="include/Class_Para_Tree_3D.tpp" toolsToInvoke="org.eclipse.cdt.build.core.settings.holder.1147166135.1976715529">
+						<tool id="org.eclipse.cdt.build.core.settings.holder.1147166135.1976715529" name="GNU C++" superClass="org.eclipse.cdt.build.core.settings.holder.1147166135">
+							<inputType id="org.eclipse.cdt.build.core.settings.holder.inType.369291804" languageId="org.eclipse.cdt.core.g++" languageName="GNU C++" sourceContentType="org.eclipse.cdt.core.cxxSource,org.eclipse.cdt.core.cxxHeader" superClass="org.eclipse.cdt.build.core.settings.holder.inType"/>
+						</tool>
+					</fileInfo>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>
