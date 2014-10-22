@@ -3659,8 +3659,8 @@ public:
 	 * The families of octants of a desired level are retained compact on the same process.
 	 * \param[in] level Number of level over the max depth reached in the tree at which families of octants are fixed compact on the same process (level=0 is classic LoadBalance).
 	 */
-	template<class UserDataComm>
-	void loadBalance(UserDataComm & userData, uint8_t & level){
+	template<class Impl>
+	void loadBalance(Class_Data_LB_Interface<Impl> & userData, uint8_t & level){
 		//Write info on log
 		writeLog("---------------------------------------------");
 		writeLog(" LOAD BALANCE ");
@@ -3680,8 +3680,8 @@ public:
 				stride += partition[i];
 			Class_Local_Tree<3>::OctantsType::const_iterator first = octree.octants.begin() + stride;
 			Class_Local_Tree<3>::OctantsType::const_iterator last = first + partition[rank];
-			typename UserDataComm::Data::iterator firstData = userData.data.begin() + stride;
-			typename UserDataComm::Data::iterator lastData = firstData + partition[rank];
+			typename Class_Data_LB_Interface<Impl>::Data::iterator firstData = userData.data.begin() + stride;
+			typename Class_Data_LB_Interface<Impl>::Data::iterator lastData = firstData + partition[rank];
 			octree.octants.assign(first, last);
 			userData.data.assign(firstData,lastData);
 			octree.octants.shrink_to_fit();
