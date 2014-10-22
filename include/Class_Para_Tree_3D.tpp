@@ -4826,6 +4826,304 @@ public:
 
 	};
 
+	// =============================================================================== //
+
+	/** Adapt the octree mesh refining all the octants by one level.
+	 */
+	bool adaptGlobalRefine() {
+		bool globalDone = false, localDone = false, cDone = false;
+		uint32_t nocts = octree.getNumOctants();
+		vector<Class_Octant<3> >::iterator iter, iterend = octree.octants.end();
+
+		for (iter = octree.octants.begin(); iter != iterend; iter++){
+			iter->info[12] = false;
+			iter->info[13] = false;
+			iter->info[15] = false;
+		}
+		if(serial){
+			writeLog("---------------------------------------------");
+			writeLog(" ADAPT (GlobalRefine)");
+			writeLog(" ");
+
+			writeLog(" ");
+			writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
+
+			// Refine
+			while(octree.globalRefine());
+
+			if (octree.getNumOctants() > nocts)
+				localDone = true;
+			writeLog(" Number of octants after Global Refine	:	" + to_string(octree.getNumOctants()));
+			nocts = octree.getNumOctants();
+			updateAdapt();
+
+			MPI_Barrier(MPI_COMM_WORLD);
+			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+			writeLog(" ");
+			writeLog("---------------------------------------------");
+		}
+		else{
+			writeLog("---------------------------------------------");
+			writeLog(" ADAPT (Global Refine)");
+			writeLog(" ");
+
+			writeLog(" ");
+			writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
+
+			// Refine
+			while(octree.globalRefine());
+			if (octree.getNumOctants() > nocts)
+				localDone = true;
+			updateAdapt();
+			setPboundGhosts();
+			writeLog(" Number of octants after Global Refine	:	" + to_string(global_num_octants));
+			nocts = octree.getNumOctants();
+
+			MPI_Barrier(MPI_COMM_WORLD);
+			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+			writeLog(" ");
+			writeLog("---------------------------------------------");
+		}
+		return globalDone;
+	}
+
+	// =============================================================================== //
+
+	/** Adapt the octree mesh refining all the octants by one level.
+	 * Track the changes in structure octant by a mapper.
+	 * \param[out] mapidx Mapper from new octants to old octants.
+	 * mapidx[i] = j -> the i-th octant after adapt was in the j-th position before adapt;
+	 * if the i-th octant is new after refinement the j-th old octant was the father of the new octant;
+	 * if the i-th octant is new after coarsening the j-th old octant was the first child of the new octant.
+	 */
+	bool adaptGlobalRefine(u32vector & mapidx) {
+
+		bool globalDone = false, localDone = false;
+		uint32_t nocts = octree.getNumOctants();
+		vector<Class_Octant<3> >::iterator iter, iterend = octree.octants.end();
+
+		for (iter = octree.octants.begin(); iter != iterend; iter++){
+			iter->info[12] = false;
+			iter->info[13] = false;
+			iter->info[15] = false;
+		}
+
+		// mapidx init
+		mapidx.clear();
+		mapidx.resize(nocts);
+		mapidx.shrink_to_fit();
+		for (uint32_t i=0; i<nocts; i++){
+			mapidx[i] = i;
+		}
+		if(serial){
+			writeLog("---------------------------------------------");
+			writeLog(" ADAPT (Global Refine)");
+			writeLog(" ");
+
+			writeLog(" ");
+			writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
+
+			// Refine
+			while(octree.globalRefine(mapidx));
+
+			if (octree.getNumOctants() > nocts)
+				localDone = true;
+			writeLog(" Number of octants after Global Refine	:	" + to_string(octree.getNumOctants()));
+			nocts = octree.getNumOctants();
+			updateAdapt();
+
+			MPI_Barrier(MPI_COMM_WORLD);
+			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+			writeLog(" ");
+			writeLog("---------------------------------------------");
+		}
+		else{
+			writeLog("---------------------------------------------");
+			writeLog(" ADAPT (Global Refine)");
+			writeLog(" ");
+
+			writeLog(" ");
+			writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
+
+			// Refine
+			while(octree.globalRefine(mapidx));
+			if (octree.getNumOctants() > nocts)
+				localDone = true;
+			updateAdapt();
+			setPboundGhosts();
+			writeLog(" Number of octants after Global Refine	:	" + to_string(global_num_octants));
+			nocts = octree.getNumOctants();
+
+			MPI_Barrier(MPI_COMM_WORLD);
+			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+			writeLog(" ");
+			writeLog("---------------------------------------------");
+		}
+		return globalDone;
+	}
+
+	// =============================================================================== //
+
+	/** Adapt the octree mesh coarsening all the octants by one level.
+	 */
+	bool adaptGlobalCoarse() {
+		bool globalDone = false, localDone = false, cDone = false;
+		uint32_t nocts = octree.getNumOctants();
+		vector<Class_Octant<3> >::iterator iter, iterend = octree.octants.end();
+
+		for (iter = octree.octants.begin(); iter != iterend; iter++){
+			iter->info[12] = false;
+			iter->info[13] = false;
+			iter->info[15] = false;
+		}
+		if(serial){
+			writeLog("---------------------------------------------");
+			writeLog(" ADAPT (Global Coarse)");
+			writeLog(" ");
+
+			// 2:1 Balance
+			balance21(true);
+
+			writeLog(" ");
+			writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
+
+			// Coarse
+			while(octree.globalCoarse());
+			if (octree.getNumOctants() < nocts){
+				localDone = true;
+			}
+			updateAfterCoarse();
+			balance21(false);
+			while(octree.refine());
+			updateAdapt();
+			nocts = octree.getNumOctants();
+
+			writeLog(" Number of octants after Global Coarse	:	" + to_string(nocts));
+			MPI_Barrier(MPI_COMM_WORLD);
+			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+			writeLog(" ");
+			writeLog("---------------------------------------------");
+		}
+		else{
+			writeLog("---------------------------------------------");
+			writeLog(" ADAPT (Global Coarse)");
+			writeLog(" ");
+
+			// 2:1 Balance
+			balance21(true);
+
+			writeLog(" ");
+			writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
+
+			// Coarse
+			while(octree.globalCoarse());
+			if (octree.getNumOctants() < nocts){
+				localDone = true;
+			}
+			updateAfterCoarse();
+			setPboundGhosts();
+			balance21(false);
+			while(octree.refine());
+			updateAdapt();
+			setPboundGhosts();
+
+			MPI_Barrier(MPI_COMM_WORLD);
+			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+			writeLog(" Number of octants after Global Coarse	:	" + to_string(global_num_octants));
+			writeLog(" ");
+			writeLog("---------------------------------------------");
+		}
+		return globalDone;
+	}
+
+	// =============================================================================== //
+
+	/** Adapt the octree mesh coarsening all the octants by one level.
+	 * Track the changes in structure octant by a mapper.
+	 * \param[out] mapidx Mapper from new octants to old octants.
+	 * mapidx[i] = j -> the i-th octant after adapt was in the j-th position before adapt;
+	 * if the i-th octant is new after refinement the j-th old octant was the father of the new octant;
+	 * if the i-th octant is new after coarsening the j-th old octant was the first child of the new octant.
+	 */
+	bool adaptGlobalCoarse(u32vector & mapidx) {
+
+		bool globalDone = false, localDone = false;
+		uint32_t nocts = octree.getNumOctants();
+		vector<Class_Octant<3> >::iterator iter, iterend = octree.octants.end();
+
+		for (iter = octree.octants.begin(); iter != iterend; iter++){
+			iter->info[12] = false;
+			iter->info[13] = false;
+			iter->info[15] = false;
+		}
+
+		// mapidx init
+		mapidx.clear();
+		mapidx.resize(nocts);
+		mapidx.shrink_to_fit();
+		for (uint32_t i=0; i<nocts; i++){
+			mapidx[i] = i;
+		}
+		if(serial){
+			writeLog("---------------------------------------------");
+			writeLog(" ADAPT (Global Coarse)");
+			writeLog(" ");
+
+			// 2:1 Balance
+			balance21(true);
+
+			writeLog(" ");
+			writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
+
+			// Coarse
+			while(octree.globalCoarse(mapidx));
+			if (octree.getNumOctants() < nocts){
+				localDone = true;
+			}
+			updateAfterCoarse(mapidx);
+			balance21(false);
+			while(octree.refine(mapidx));
+			updateAdapt();
+			nocts = octree.getNumOctants();
+
+			writeLog(" Number of octants after Global Coarse	:	" + to_string(nocts));
+			MPI_Barrier(MPI_COMM_WORLD);
+			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+			writeLog(" ");
+			writeLog("---------------------------------------------");
+		}
+		else{
+			writeLog("---------------------------------------------");
+			writeLog(" ADAPT (Global Coarse)");
+			writeLog(" ");
+
+			// 2:1 Balance
+			balance21(true);
+
+			writeLog(" ");
+			writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
+
+			// Coarse
+			while(octree.globalCoarse(mapidx));
+			if (octree.getNumOctants() < nocts){
+				localDone = true;
+			}
+			updateAfterCoarse(mapidx);
+			setPboundGhosts();
+			balance21(false);
+			while(octree.refine(mapidx));
+			updateAdapt();
+			setPboundGhosts();
+
+			MPI_Barrier(MPI_COMM_WORLD);
+			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+			writeLog(" Number of octants after Global Coarse	:	" + to_string(global_num_octants));
+			writeLog(" ");
+			writeLog("---------------------------------------------");
+		}
+		return globalDone;
+	}
+
 	//=================================================================================//
 
 	//TODO Update intersections killed

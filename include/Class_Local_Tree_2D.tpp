@@ -680,6 +680,543 @@ private:
 
 	// =================================================================================== //
 
+	// Global refine of octree (one level every element)
+	bool globalRefine(){
+
+		// Local variables
+		vector<uint32_t> last_child_index;
+		Class_Octant<2>* children;
+		uint32_t idx, nocts, ilastch;
+		uint32_t offset = 0, blockidx;
+		uint8_t nchm1 = global2D.nchildren-1, ich, iface;
+		bool dorefine = false;
+
+		nocts = octants.size();
+		for (idx=0; idx<nocts; idx++){
+			octants[idx].setMarker(1);
+			if(octants[idx].getMarker() > 0 && octants[idx].getLevel() < MAX_LEVEL_2D){
+				last_child_index.push_back(idx+nchm1+offset);
+				offset += nchm1;
+			}
+			else{
+	//			octants[idx].info[8] = false;
+				if (octants[idx].marker > 0){
+					octants[idx].marker = 0;
+					octants[idx].info[11] = true;
+				}
+			}
+		}
+		if (offset > 0){
+			octants.resize(octants.size()+offset);
+			blockidx = last_child_index[0]-nchm1;
+			idx = octants.size();
+			ilastch = last_child_index.size()-1;
+			while (idx>blockidx){
+				idx--;
+				// TODO LASTINDEX FARLO ANCHE PER ALTRI REFINE E 3D
+				if(idx == last_child_index[ilastch]){
+					children = octants[idx-offset].buildChildren();
+					for (ich=0; ich<global2D.nchildren; ich++){
+						octants[idx-ich] = (children[nchm1-ich]);
+					}
+					offset -= nchm1;
+					idx -= nchm1;
+					//Update local max depth
+					if (children[0].getLevel() > local_max_depth){
+						local_max_depth = children[0].getLevel();
+					}
+					if (children[0].getMarker() > 0){
+						//More Refinement to do
+						dorefine = true;
+					}
+					delete []children;
+					if (ilastch != 0){
+							ilastch--;
+					}
+				}
+				else {
+					octants[idx] = octants[idx-offset];
+				}
+			}
+		}
+		octants.shrink_to_fit();
+		nocts = octants.size();
+
+		setFirstDesc();
+		setLastDesc();
+
+		return dorefine;
+
+	};
+
+	// =================================================================================== //
+
+	// Global coarse of octree (every marker set =-1)
+	bool globalCoarse(){
+		vector<uint32_t> first_child_index;
+		Class_Octant<2> father;
+		uint32_t ich, nocts, nghosts;
+		int32_t idx, idx2;
+		uint32_t offset;
+		int32_t idx1_gh, idx2_gh;
+		uint32_t nidx;
+		int8_t markerfather, marker;
+		uint8_t nbro, nstart, nend;
+		uint8_t nchm1 = global2D.nchildren-1, iface;
+		bool docoarse = false;
+
+		//------------------------------------------ //
+		// Initialization
+
+		nbro = nstart = nend = 0;
+		nidx = offset = 0;
+
+		idx1_gh = idx2_gh = 0;
+
+		nocts   = octants.size();
+		size_ghosts = ghosts.size();
+
+		// Init first and last desc (even if already calculated)
+		setFirstDesc();
+		setLastDesc();
+
+		//------------------------------------------ //
+
+		// Set index for start and end check for ghosts
+		if (ghosts.size()){
+			while(idx2_gh < size_ghosts && ghosts[idx2_gh].computeMorton() <= last_desc.computeMorton()){
+				idx2_gh++;
+			}
+			idx2_gh = min(int(size_ghosts-1), idx2_gh);
+		}
+
+		// Check and coarse internal octants
+		for (idx=0; idx<nocts; idx++){
+			octants[idx].setMarker(-1);
+			if(octants[idx].getMarker() < 0 && octants[idx].getLevel() > 0){
+				nbro = 0;
+				father = octants[idx].buildFather();
+				// Check if family is to be coarsened
+				for (idx2=idx; idx2<idx+global2D.nchildren; idx2++){
+					if (idx2<nocts){
+						if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
+							nbro++;
+						}
+					}
+				}
+				if (nbro == global2D.nchildren){
+					nidx++;
+					first_child_index.push_back(idx);
+					idx = idx2-1;
+				}
+				else{
+					if (idx < (nocts>global2D.nchildren)*(nocts-global2D.nchildren)){
+						octants[idx].setMarker(0);
+						octants[idx].info[11] = true;
+					}
+				}
+			}
+//			else{
+//	//			octants[idx].info[13] = false;
+//			}
+		}
+		//TODO Da mettere dentro il primo ciclo per renderlo meno costoso
+		if (nidx!=0){
+			uint32_t nblock = nocts - nidx*nchm1 - nstart;
+			nidx = 0;
+			for (idx=0; idx<nblock; idx++){
+				if (idx+offset == first_child_index[nidx]){
+					markerfather = -MAX_LEVEL_2D;
+					father = octants[idx+offset].buildFather();
+					for (int iii=0; iii<12; iii++){
+						father.info[iii] = false;
+					}
+					for(idx2=0; idx2<global2D.nchildren; idx2++){
+						if (markerfather < octants[idx+offset+idx2].getMarker()+1){
+							markerfather = octants[idx+offset+idx2].getMarker()+1;
+						}
+						for (int iii=0; iii<12; iii++){
+							father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
+						}
+					}
+					father.info[9] = true;
+					if (markerfather < 0){
+						docoarse = true;
+					}
+					father.setMarker(markerfather);
+					octants[idx] = father;
+					offset += nchm1;
+					nidx++;
+				}
+				else{
+					octants[idx] = octants[idx+offset];
+				}
+			}
+		}
+		octants.resize(nocts-offset);
+		octants.shrink_to_fit();
+		nocts = octants.size();
+
+		// End on ghosts
+		if (ghosts.size() && nocts > 0){
+			ghosts[idx2_gh].setMarker(-1);
+			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
+				father = ghosts[idx2_gh].buildFather();
+				markerfather = ghosts[idx2_gh].getMarker()+1;//-MAX_LEVEL_2D;
+				nbro = 0;
+				idx = idx2_gh;
+				ghosts[idx].setMarker(-1);
+				marker = ghosts[idx].getMarker();
+				while(marker < 0 && ghosts[idx].buildFather() == father){
+					nbro++;
+					//TODO CAMBIATO IDX DA CAMBIARE ANCHE NELLE ALTRE COARSE!!!
+					if (markerfather < ghosts[idx].getMarker()+1){
+						markerfather = ghosts[idx].getMarker()+1;
+					}
+					idx++;
+					if(idx == size_ghosts){
+						break;
+					}
+					ghosts[idx].setMarker(-1);
+					marker = ghosts[idx].getMarker();
+				}
+				nend = 0;
+				idx = nocts-1;
+				marker = octants[idx].getMarker();
+				while(marker < 0 && octants[idx].buildFather() == father && idx >= 0){
+					nbro++;
+					nend++;
+					if (markerfather < octants[idx].getMarker()+1){
+						markerfather = octants[idx].getMarker()+1;
+					}
+					idx--;
+					marker = octants[idx].getMarker();
+					if (idx<0){
+						break;
+					}
+				}
+				if (nbro == global2D.nchildren){
+					offset = nend;
+				}
+				else{
+					nend = 0;
+					for(int ii=nocts-global2D.nchildren; ii<nocts; ii++){
+						octants[ii].setMarker(0);
+						octants[ii].info[11] = true;
+					}
+				}
+			}
+
+			if (nend != 0){
+				for (int iii=0; iii<12; iii++){
+					father.info[iii] = false;
+				}
+				for (idx=0; idx < nend; idx++){
+					for (int iii=0; iii<12; iii++){
+						father.info[iii] = father.info[iii] || octants[nocts-idx-1].info[iii];
+					}
+				}
+				father.info[9] = true;
+				if (markerfather < 0){
+					docoarse = true;
+				}
+				father.setMarker(markerfather);
+				octants.resize(nocts-offset);
+				octants.push_back(father);
+				octants.shrink_to_fit();
+				nocts = octants.size();
+			}
+		}
+
+		// Set final first and last desc
+		if(nocts>0){
+			setFirstDesc();
+			setLastDesc();
+		}
+		return docoarse;
+
+	};
+
+	// =================================================================================== //
+
+	// One level global refine with mapidx
+	bool globalRefine(u32vector & mapidx){
+
+		// Local variables
+		vector<uint32_t> last_child_index;
+		Class_Octant<2>* children;
+		uint32_t idx, nocts, ilastch;
+		uint32_t offset = 0, blockidx;
+		uint8_t nchm1 = global2D.nchildren-1, ich, iface;
+		bool dorefine = false;
+
+		nocts = octants.size();
+		for (idx=0; idx<nocts; idx++){
+			octants[idx].setMarker(1);
+			if(octants[idx].getMarker() > 0 && octants[idx].getLevel() < MAX_LEVEL_2D){
+				last_child_index.push_back(idx+nchm1+offset);
+				offset += nchm1;
+			}
+			else{
+				//			octants[idx].info[8] = false;
+				if (octants[idx].marker > 0){
+					octants[idx].marker = 0;
+					octants[idx].info[11] = true;
+				}
+			}
+		}
+		if (offset > 0){
+			mapidx.resize(octants.size()+offset);
+			mapidx.shrink_to_fit();
+
+			octants.resize(octants.size()+offset);
+			blockidx = last_child_index[0]-nchm1;
+			idx = octants.size();
+			ilastch = last_child_index.size()-1;
+			while (idx>blockidx){
+//			while (idx>0){
+				idx--;
+				if(idx == last_child_index[ilastch]){
+					children = octants[idx-offset].buildChildren();
+					for (ich=0; ich<global2D.nchildren; ich++){
+						octants[idx-ich] = (children[nchm1-ich]);
+						mapidx[idx-ich]  = mapidx[idx-offset];
+					}
+					offset -= nchm1;
+					idx -= nchm1;
+					//Update local max depth
+					if (children[0].getLevel() > local_max_depth){
+						local_max_depth = children[0].getLevel();
+					}
+					if (children[0].getMarker() > 0){
+						//More Refinement to do
+						dorefine = true;
+					}
+					delete []children;
+					if (ilastch != 0){
+							ilastch--;
+					}
+				}
+				else {
+					octants[idx] = octants[idx-offset];
+					mapidx[idx]  = mapidx[idx-offset];
+				}
+			}
+		}
+		octants.shrink_to_fit();
+		nocts = octants.size();
+
+		setFirstDesc();
+		setLastDesc();
+
+		return dorefine;
+
+	};
+
+	// =================================================================================== //
+
+	// One level global coarse with mapidx
+	bool globalCoarse(u32vector & mapidx){
+
+		// Local variables
+		vector<uint32_t> first_child_index;
+		Class_Octant<2> father;
+		uint32_t ich, nocts, nghosts, nocts0;
+		int32_t idx, idx2;
+		uint32_t offset;
+		int32_t idx1_gh, idx2_gh;
+		uint32_t nidx;
+		int8_t markerfather, marker;
+		uint8_t nbro, nstart, nend;
+		uint8_t nchm1 = global2D.nchildren-1, iface;
+		bool docoarse = false;
+
+		//------------------------------------------ //
+		// Initialization
+
+		nbro = nstart = nend = 0;
+		nidx = offset = 0;
+
+		idx1_gh = idx2_gh = 0;
+
+		nocts = nocts0 = octants.size();
+		size_ghosts = ghosts.size();
+
+
+		// Init first and last desc (even if already calculated)
+		setFirstDesc();
+		setLastDesc();
+
+		//------------------------------------------ //
+
+		// Set index for start and end check for ghosts
+		if (ghosts.size()){
+			while(idx2_gh < size_ghosts && ghosts[idx2_gh].computeMorton() < last_desc.computeMorton()){
+				idx2_gh++;
+			}
+			idx2_gh = min(int(size_ghosts-1), idx2_gh);
+		}
+
+		// Check and coarse internal octants
+		for (idx=0; idx<nocts; idx++){
+			octants[idx].setMarker(-1);
+			if(octants[idx].getMarker() < 0 && octants[idx].getLevel() > 0){
+				nbro = 0;
+				father = octants[idx].buildFather();
+				// Check if family is to be refined
+				for (idx2=idx; idx2<idx+global2D.nchildren; idx2++){
+					if (idx2<nocts){
+						if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
+							nbro++;
+						}
+					}
+				}
+				if (nbro == global2D.nchildren){
+					nidx++;
+					first_child_index.push_back(idx);
+					idx = idx2-1;
+				}
+				else{
+					if (idx < (nocts>global2D.nchildren)*(nocts-global2D.nchildren)){
+						octants[idx].setMarker(0);
+						octants[idx].info[11] = true;
+					}
+				}
+			}
+//			else{
+//	//			octants[idx].info[13] = false;
+//			}
+		}
+		//TODO Da mettere dentro il primo ciclo per renderlo meno costoso
+		if (nidx!=0){
+			uint32_t nblock = nocts - nidx*nchm1 - nstart;
+			nidx = 0;
+			//for (idx=0; idx<nblock; idx++){
+			for (idx=0; idx<nocts-offset; idx++){
+				if (idx+offset == first_child_index[nidx]){
+					markerfather = -MAX_LEVEL_2D;
+					father = octants[idx+offset].buildFather();
+					for (int iii=0; iii<12; iii++){
+						father.info[iii] = false;
+					}
+					for(idx2=0; idx2<global2D.nchildren; idx2++){
+						if (markerfather < octants[idx+offset+idx2].getMarker()+1){
+							markerfather = octants[idx+offset+idx2].getMarker()+1;
+						}
+						for (int iii=0; iii<12; iii++){
+							father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
+						}
+					}
+					father.info[9] = true;
+					if (markerfather < 0){
+						docoarse = true;
+					}
+					father.setMarker(markerfather);
+					octants[idx] = father;
+					mapidx[idx] = mapidx[idx+offset];
+					offset += nchm1;
+					nidx++;
+				}
+				else{
+					octants[idx] = octants[idx+offset];
+					mapidx[idx] = mapidx[idx+offset];
+				}
+			}
+		}
+		octants.resize(nocts-offset);
+		octants.shrink_to_fit();
+		nocts = octants.size();
+		//mapidx.resize(nocts-offset);
+		mapidx.resize(nocts);
+		mapidx.shrink_to_fit();
+
+
+		// End on ghosts
+		if (ghosts.size() && nocts > 0){
+			ghosts[idx2_gh].setMarker(-1);
+			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
+				father = ghosts[idx2_gh].buildFather();
+				markerfather = ghosts[idx2_gh].getMarker()+1;//-MAX_LEVEL_2D;
+				nbro = 0;
+				idx = idx2_gh;
+				ghosts[idx].setMarker(-1);
+				marker = ghosts[idx].getMarker();
+				while(marker < 0 && ghosts[idx].buildFather() == father){
+					nbro++;
+					//TODO CAMBIATO IDX DA CAMBIARE ANCHE NELLE ALTRE COARSE!!!
+					if (markerfather < ghosts[idx].getMarker()+1){
+						markerfather = ghosts[idx].getMarker()+1;
+					}
+					idx++;
+					if(idx == size_ghosts){
+						break;
+					}
+					ghosts[idx].setMarker(-1);
+					marker = ghosts[idx].getMarker();
+				}
+				nend = 0;
+				idx = nocts-1;
+				marker = octants[idx].getMarker();
+				while(marker < 0 && octants[idx].buildFather() == father && idx >= 0){
+					nbro++;
+					nend++;
+					if (markerfather < octants[idx].getMarker()+1){
+						markerfather = octants[idx].getMarker()+1;
+					}
+					idx--;
+					marker = octants[idx].getMarker();
+					if (idx<0){
+						break;
+					}
+				}
+				if (nbro == global2D.nchildren){
+					offset = nend;
+				}
+				else{
+					nend = 0;
+					for(int ii=nocts-global2D.nchildren; ii<nocts; ii++){
+						octants[ii].setMarker(0);
+						octants[ii].info[11] = true;
+					}
+				}
+			}
+
+			if (nend != 0){
+				for (int iii=0; iii<12; iii++){
+					father.info[iii] = false;
+				}
+				for (idx=0; idx < nend; idx++){
+					for (int iii=0; iii<12; iii++){
+						father.info[iii] = father.info[iii] || octants[nocts-idx-1].info[iii];
+					}
+				}
+				father.info[9] = true;
+				if (markerfather < 0){
+					docoarse = true;
+				}
+				father.setMarker(markerfather);
+				octants.resize(nocts-offset);
+				octants.push_back(father);
+				octants.shrink_to_fit();
+				nocts = octants.size();
+				mapidx.resize(nocts-offset);
+				mapidx.push_back(nocts0-nend);
+				mapidx.shrink_to_fit();
+			}
+
+		}
+
+		// Set final first and last desc
+		if(nocts>0){
+			setFirstDesc();
+			setLastDesc();
+		}
+		return docoarse;
+
+	};
+
+	// =================================================================================== //
+
 	void checkCoarse(uint64_t lastDescPre,						// Delete overlapping octants after coarse local tree. Check first and last descendants
 					uint64_t firstDescPost){					// of process before and after the local process
 		int32_t idx;
