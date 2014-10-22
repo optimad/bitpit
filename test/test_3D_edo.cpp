@@ -15,7 +15,7 @@ int main(int argc, char *argv[]) {
 			double X, Y, Z, L;
 			uint8_t level0 = MAX_LEVEL_3D;
 			X = 0.0; Y = 0.0; Z = 0.0; L = 1.0;
-			Class_Para_Tree<3> ptree(X, Y, Z, L);
+			Class_Para_Tree<3> ptree(X,Y,Z,L);
 			for (int i=0; i<ptree.getNumOctants(); i++){
 				Class_Octant<3>* oct = ptree.getOctant(i);
 				ptree.setMarker(oct, 2);

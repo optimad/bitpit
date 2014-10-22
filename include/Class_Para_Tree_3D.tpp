@@ -111,54 +111,6 @@ public:
 	 * \param[in] Z Coordinate Z of node 0,
 	 * \param[in] L Side length of the octant.
 	 */
-	Class_Para_Tree(double & X, double & Y, double & Z, double & L):trans(X,Y,Z,L){
-		serial = true;
-		error_flag = 0;
-		max_depth = 0;
-		global_num_octants = octree.getNumOctants();
-		error_flag = MPI_Comm_size(MPI_COMM_WORLD,&nproc);
-		error_flag = MPI_Comm_rank(MPI_COMM_WORLD,&rank);
-		partition_first_desc = new uint64_t[nproc];
-		partition_last_desc = new uint64_t[nproc];
-		partition_range_globalidx = new uint64_t[nproc];
-		uint64_t lastDescMorton = octree.getLastDesc().computeMorton();
-		uint64_t firstDescMorton = octree.getFirstDesc().computeMorton();
-		for(int p = 0; p < nproc; ++p){
-			partition_range_globalidx[p] = 0;
-			partition_last_desc[p] = lastDescMorton;
-			partition_last_desc[p] = firstDescMorton;
-		}
-		// Write info log
-		if(rank==0){
-			int sysError = system("rm PABLO.log");
-		}
-		MPI_Barrier(MPI_COMM_WORLD);
-		writeLog("---------------------------------------------");
-		writeLog("- PABLO PArallel Balanced Linear Octree -");
-		writeLog("---------------------------------------------");
-		writeLog(" ");
-		writeLog("---------------------------------------------");
-		writeLog(" Number of proc		:	" + to_string(nproc));
-		writeLog(" Dimension		:	" + to_string(3));
-		writeLog(" Max allowed level	:	" + to_string(MAX_LEVEL_3D));
-		writeLog(" Domain Origin		:	" + to_string(X));
-		writeLog("				" + to_string(Y));
-		writeLog("				" + to_string(Z));
-		writeLog(" Domain Size		:	" + to_string(L));
-		writeLog("---------------------------------------------");
-		writeLog(" ");
-
-	};
-
-	//=================================================================================//
-
-	/*! Constructor of Para_Tree with input parameters.
-	 * It builds one octant with :
-	 * \param[in] X Coordinate X of node 0,
-	 * \param[in] Y Coordinate Y of node 0,
-	 * \param[in] Z Coordinate Z of node 0,
-	 * \param[in] L Side length of the octant.
-	 */
 	Class_Para_Tree(double X, double Y, double Z, double L):trans(X,Y,Z,L){
 		serial = true;
 		error_flag = 0;
