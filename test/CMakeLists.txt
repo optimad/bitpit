@@ -3,37 +3,21 @@ cmake_minimum_required(VERSION 2.8)
 
 #Name your project here
 
-#Build test_pablo.cpp
-#SET(test_pablo_src test_pablo.cpp)
-#
-#add_executable(test_pablo ${test_pablo_src})
-#
-#target_link_libraries(test_pablo mpi)
-#TARGET_LINK_LIBRARIES(test_pablo pablo)
-#
-#Build test_marco.cpp
-#SET(test_marco_src test_marco.cpp)
-#
-#add_executable(test_marco ${test_marco_src})
-#
-#target_link_libraries(test_marco mpi)
-#TARGET_LINK_LIBRARIES(test_marco pablo)
-#
-#Build test_edo.cpp
-#SET(test_edo_src test_edo.cpp)
-#
-#add_executable(test_edo ${test_edo_src})
-#
-#target_link_libraries(test_edo mpi)
-#TARGET_LINK_LIBRARIES(test_edo pablo)
+#Build test0.cpp
+SET(test0_src test0.cpp)
 
-#Build test_2D3D_edo.cpp
-SET(test_2D3D_edo_src test_2D3D_edo.cpp)
+add_executable(test0 ${test0_src})
 
-add_executable(test_2D3D_edo ${test_2D3D_edo_src})
+target_link_libraries(test0 mpi)
+TARGET_LINK_LIBRARIES(test0 pablo)
 
-target_link_libraries(test_2D3D_edo mpi)
-TARGET_LINK_LIBRARIES(test_2D3D_edo pablo)
+#Build test1.cpp
+SET(test1_src test1.cpp)
+
+add_executable(test1 ${test1_src})
+
+target_link_libraries(test1 mpi)
+TARGET_LINK_LIBRARIES(test1 pablo)
 
 #Build test_3D_edo.cpp
 SET(test_3D_edo_src test_3D_edo.cpp)
