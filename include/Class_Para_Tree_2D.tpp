@@ -61,19 +61,9 @@ public:
 	//map member
 	Class_Map<2> trans;							/**<Transformation map from logical to physical domain*/
 
-	//	// connectivity
-	//	dvector2D					nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
-	//	u32vector2D					connectivity;		/**<Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
-	//	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
-	//	dvector2D					ghostsnodes;		/**<Local vector of ghosts nodes (x,y,z) ordered with Morton Number*/
-	//	u32vector2D					ghostsconnectivity;	/**<Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
-	//	 	 	 	 	 	 	 	 	 	 	 	 	 *The nodes are stored as index of vector nodes*/
-
-
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
 public:
-
 	/*! Default Constructor of Para_Tree.
 	 * It builds one octant with node 0 in the Origin (0,0,0)
 	 * and side of length 1*/
@@ -162,6 +152,54 @@ public:
 
 	// =============================================================================== //
 
+	/*! Constructor of Para_Tree with input parameters.
+	 * It builds one octant with :
+	 * \param[in] X Coordinate X of node 0,
+	 * \param[in] Y Coordinate Y of node 0,
+	 * \param[in] Z Coordinate Z of node 0,
+	 * \param[in] L Side length of the octant.
+	 */
+	Class_Para_Tree(double X, double Y, double Z, double L):trans(X,Y,Z,L){
+		serial = true;
+		error_flag = 0;
+		max_depth = 0;
+		global_num_octants = octree.getNumOctants();
+		error_flag = MPI_Comm_size(MPI_COMM_WORLD,&nproc);
+		error_flag = MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+		partition_first_desc = new uint64_t[nproc];
+		partition_last_desc = new uint64_t[nproc];
+		partition_range_globalidx = new uint64_t[nproc];
+		uint64_t lastDescMorton = octree.getLastDesc().computeMorton();
+		uint64_t firstDescMorton = octree.getFirstDesc().computeMorton();
+		for(int p = 0; p < nproc; ++p){
+			partition_range_globalidx[p] = 0;
+			partition_last_desc[p] = lastDescMorton;
+			partition_last_desc[p] = firstDescMorton;
+		}
+		// Write info log
+		if(rank==0){
+			int sysError = system("rm PABLO.log");
+		}
+		MPI_Barrier(MPI_COMM_WORLD);
+		writeLog("---------------------------------------------");
+		writeLog("- PABLO PArallel Balanced Linear Octree -");
+		writeLog("---------------------------------------------");
+		writeLog(" ");
+		writeLog("---------------------------------------------");
+		writeLog(" Number of proc		:	" + to_string(nproc));
+		writeLog(" Dimension		:	" + to_string(2));
+		writeLog(" Max allowed level	:	" + to_string(MAX_LEVEL_2D));
+		writeLog(" Domain Origin		:	" + to_string(X));
+		writeLog("				" + to_string(Y));
+		writeLog("				" + to_string(Z));
+		writeLog(" Domain Size		:	" + to_string(L));
+		writeLog("---------------------------------------------");
+		writeLog(" ");
+
+	};
+
+	// =============================================================================== //
+
 	/*! Constructor of Para_Tree for restart a simulation with input parameters.
 	 * For each process it builds a vector of octants. The input parameters are :
 	 * \param[in] X Physical Coordinate X of node 0,
@@ -172,6 +210,88 @@ public:
 	 * \param[in] levels Level of each octant.
 	 */
 	Class_Para_Tree(double & X, double & Y, double & Z, double & L, ivector2D & XY, ivector & levels):trans(X,Y,Z,L){
+
+		uint8_t lev, iface;
+		uint32_t x0, y0;
+		uint32_t NumOctants = XY.size();
+		octree.octants.resize(NumOctants);
+		for (int i=0; i<NumOctants; i++){
+			lev = uint8_t(levels[i]);
+			x0 = uint32_t(XY[i][0]);
+			y0 = uint32_t(XY[i][1]);
+			Class_Octant<2> oct(lev, x0, y0);
+			if (x0 == 0){
+				iface = 0;
+				oct.setBound(iface);
+			}
+			else if (x0 == global2D.max_length - oct.getSize()){
+				iface = 1;
+				oct.setBound(iface);
+			}
+			if (y0 == 0){
+				iface = 2;
+				oct.setBound(iface);
+			}
+			else if (y0 == global2D.max_length - oct.getSize()){
+				iface = 3;
+				oct.setBound(iface);
+			}
+			octree.octants[i] = oct;
+
+		}
+
+		setFirstDesc();
+		setLastDesc();
+
+		error_flag = MPI_Comm_size(MPI_COMM_WORLD,&nproc);
+		error_flag = MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+		serial = true;
+		if (nproc > 1 ) serial = false;
+
+		partition_first_desc = new uint64_t[nproc];
+		partition_last_desc = new uint64_t[nproc];
+		partition_range_globalidx = new uint64_t[nproc];
+
+		updateAdapt();
+		setPboundGhosts();
+
+		// Write info log
+		if(rank==0){
+			int sysError = system("rm PABLO.log");
+		}
+		MPI_Barrier(MPI_COMM_WORLD);
+		writeLog("---------------------------------------------");
+		writeLog("- PABLO PArallel Balanced Linear Octree -");
+		writeLog("---------------------------------------------");
+		writeLog(" ");
+		writeLog("---------------------------------------------");
+		writeLog("- PABLO restart -");
+		writeLog("---------------------------------------------");
+		writeLog(" Number of proc		:	" + to_string(nproc));
+		writeLog(" Dimension		:	" + to_string(2));
+		writeLog(" Max allowed level	:	" + to_string(MAX_LEVEL_2D));
+		writeLog(" Domain Origin		:	" + to_string(X));
+		writeLog("				" + to_string(Y));
+		writeLog("				" + to_string(Z));
+		writeLog(" Domain Size		:	" + to_string(L));
+		writeLog(" Number of octants	:	" + to_string(global_num_octants));
+		writeLog("---------------------------------------------");
+		writeLog(" ");
+
+	};
+
+	// =============================================================================== //
+
+	/*! Constructor of Para_Tree for restart a simulation with input parameters.
+	 * For each process it builds a vector of octants. The input parameters are :
+	 * \param[in] X Physical Coordinate X of node 0,
+	 * \param[in] Y Physical Coordinate Y of node 0,
+	 * \param[in] Z Physical Coordinate Z of node 0,
+	 * \param[in] L Physical Side length of the domain,
+	 * \param[in] XY Coordinates of octants (node 0) in logical domain,
+	 * \param[in] levels Level of each octant.
+	 */
+	Class_Para_Tree(double X, double Y, double Z, double L, ivector2D & XY, ivector & levels):trans(X,Y,Z,L){
 
 		uint8_t lev, iface;
 		uint32_t x0, y0;
@@ -771,6 +891,7 @@ private:
 		return trans.mapVolume(octree.octants[idx].getVolume());
 	}
 
+public:
 	/*! Get the coordinates of the center of an octant.
 	 * \param[in] idx Local index of target octant.
 	 * \param[out] center Coordinates of the center of octant.
@@ -796,6 +917,7 @@ private:
 		return center;
 	}
 
+private:
 	/*! Get the coordinates of the nodes of an octant.
 	 * \param[in] idx Local index of target octant.
 	 * \param[out] nodes Coordinates of the nodes of octant.
@@ -1606,6 +1728,126 @@ public:
 
 		powner = findOwner(morton);
 		if ((powner!=rank) || (x < 0) || (x > global2D.max_length) || (y < 0) || (y > global2D.max_length))
+			return -1;
+
+		int32_t jump = idxtry;
+		while(abs(jump) > 0){
+			mortontry = octree.octants[idxtry].computeMorton();
+			jump = ((mortontry<morton)-(mortontry>morton))*abs(jump)/2;
+			idxtry += jump;
+			if (idxtry > noctants-1){
+				if (jump > 0){
+					idxtry = noctants - 1;
+					jump = 0;
+				}
+				else if (jump < 0){
+					idxtry = 0;
+					jump = 0;
+				}
+			}
+		}
+		if(octree.octants[idxtry].computeMorton() == morton){
+			return idxtry;
+		}
+		else{
+			// Step until the mortontry lower than morton (one idx of distance)
+			{
+				while(octree.octants[idxtry].computeMorton() < morton){
+					idxtry++;
+					if(idxtry > noctants-1){
+						idxtry = noctants-1;
+						break;
+					}
+				}
+				while(octree.octants[idxtry].computeMorton() > morton){
+					idxtry--;
+					if(idxtry > noctants-1){
+						idxtry = noctants-1;
+						break;
+					}
+				}
+			}
+			return idxtry;
+		}
+	}
+
+	/** Get the octant owner of an input point.
+	 * \param[in] point Coordinates of target point in logical domain.
+	 * \return Pointer to octant owner of target point.
+	 */
+	Class_Octant<2>* getLogicalPointOwner(dvector & point){
+		uint32_t noctants = octree.octants.size();
+		uint32_t idxtry = noctants/2;
+		uint32_t x, y;
+		uint64_t morton, mortontry;
+		int powner;
+
+		x = uint32_t(point[0]);
+		y = uint32_t(point[1]);
+		morton = mortonEncode_magicbits(x,y);
+
+		powner = findOwner(morton);
+		if ((powner!=rank) || (point[0] < 0) || (point[0] > double(global2D.max_length)) || (point[1] < 0) || (point[1] > double(global2D.max_length)))
+			return NULL;
+
+		int32_t jump = idxtry;
+		while(abs(jump) > 0){
+			mortontry = octree.octants[idxtry].computeMorton();
+			jump = ((mortontry<morton)-(mortontry>morton))*abs(jump)/2;
+			idxtry += jump;
+			if (idxtry > noctants-1){
+				if (jump > 0){
+					idxtry = noctants - 1;
+					jump = 0;
+				}
+				else if (jump < 0){
+					idxtry = 0;
+					jump = 0;
+				}
+			}
+		}
+		if(octree.octants[idxtry].computeMorton() == morton){
+			return &octree.octants[idxtry];
+		}
+		else{
+			// Step until the mortontry lower than morton (one idx of distance)
+			{
+				while(octree.octants[idxtry].computeMorton() < morton){
+					idxtry++;
+					if(idxtry > noctants-1){
+						idxtry = noctants-1;
+						break;
+					}
+				}
+				while(octree.octants[idxtry].computeMorton() > morton){
+					idxtry--;
+					if(idxtry > noctants-1){
+						idxtry = noctants-1;
+						break;
+					}
+				}
+			}
+			return &octree.octants[idxtry];
+		}
+	}
+
+	/** Get the octant owner of an input point.
+	 * \param[in] point Coordinates of target point in logical domain.
+	 * \return Index of octant owner of target point.
+	 */
+	uint32_t getLogicalPointOwnerIdx(dvector & point){
+		uint32_t noctants = octree.octants.size();
+		uint32_t idxtry = noctants/2;
+		uint32_t x, y;
+		uint64_t morton, mortontry;
+		int powner;
+
+		x = uint32_t(point[0]);
+		y = uint32_t(point[1]);
+		morton = mortonEncode_magicbits(x,y);
+
+		powner = findOwner(morton);
+		if ((powner!=rank) || (point[0] < 0) || (point[0] > double(global2D.max_length)) || (point[1] < 0) || (point[1] > double(global2D.max_length)))
 			return -1;
 
 		int32_t jump = idxtry;
