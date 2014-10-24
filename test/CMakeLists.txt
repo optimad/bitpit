@@ -26,3 +26,11 @@ add_executable(test2 ${test2_src})
 
 target_link_libraries(test2 mpi)
 TARGET_LINK_LIBRARIES(test2 pablo)
+
+#Build test3.cpp
+SET(test3_src test3.cpp)
+
+add_executable(test3 ${test3_src})
+
+target_link_libraries(test3 mpi)
+TARGET_LINK_LIBRARIES(test3 pablo)

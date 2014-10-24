@@ -32,13 +32,12 @@ int main(int argc, char *argv[]) {
 		for (int iter=3; iter<9; iter++){
 			uint32_t nocts = pablo2.getNumOctants();
 			for (int i=0; i<nocts; i++){
-				Class_Octant<2> *oct = pablo2.getOctant(i);
-				dvector2D nodes = pablo2.getNodes(oct);
+				dvector2D nodes = pablo2.getNodes(i);
 				for (int j=0; j<global2D.nnodes; j++){
 					double x = nodes[j][0];
 					double y = nodes[j][1];
 					if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
-						pablo2.setMarker(oct, 1);
+						pablo2.setMarker(i, 1);
 					}
 				}
 			}

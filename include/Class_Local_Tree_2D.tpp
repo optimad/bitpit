@@ -799,6 +799,7 @@ private:
 				// Check if family is to be coarsened
 				for (idx2=idx; idx2<idx+global2D.nchildren; idx2++){
 					if (idx2<nocts){
+						octants[idx2].setMarker(-1);
 						if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
 							nbro++;
 						}
@@ -882,6 +883,7 @@ private:
 				}
 				nend = 0;
 				idx = nocts-1;
+				octants[idx].setMarker(-1);
 				marker = octants[idx].getMarker();
 				while(marker < 0 && octants[idx].buildFather() == father && idx >= 0){
 					nbro++;
@@ -890,6 +892,7 @@ private:
 						markerfather = octants[idx].getMarker()+1;
 					}
 					idx--;
+					octants[idx].setMarker(-1);
 					marker = octants[idx].getMarker();
 					if (idx<0){
 						break;
@@ -1066,6 +1069,7 @@ private:
 				// Check if family is to be refined
 				for (idx2=idx; idx2<idx+global2D.nchildren; idx2++){
 					if (idx2<nocts){
+						octants[idx2].setMarker(-1);
 						if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
 							nbro++;
 						}
@@ -1156,6 +1160,7 @@ private:
 				}
 				nend = 0;
 				idx = nocts-1;
+				octants[idx].setMarker(-1);
 				marker = octants[idx].getMarker();
 				while(marker < 0 && octants[idx].buildFather() == father && idx >= 0){
 					nbro++;
@@ -1164,6 +1169,7 @@ private:
 						markerfather = octants[idx].getMarker()+1;
 					}
 					idx--;
+					octants[idx].setMarker(-1);
 					marker = octants[idx].getMarker();
 					if (idx<0){
 						break;
