@@ -21,6 +21,8 @@ int main(int argc, char *argv[]) {
 			pablo2.write("Pablo2_iter"+to_string(iter));
 		}
 
+		pablo2.loadBalance();
+
 		double xc, yc;
 		xc = yc = 0.5;
 
@@ -40,6 +42,7 @@ int main(int argc, char *argv[]) {
 				}
 			}
 			pablo2.adapt();
+			pablo2.loadBalance();
 			pablo2.updateConnectivity();
 			pablo2.write("Pablo2_iter"+to_string(iter));
 		}

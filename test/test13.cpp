@@ -21,6 +21,8 @@ int main(int argc, char *argv[]) {
 			pablo3.write("Pablo3_iter"+to_string(iter));
 		}
 
+		pablo3.loadBalance();
+
 		double xc, yc;
 		xc = yc = 0.5;
 		double radius = 0.4;
@@ -40,6 +42,7 @@ int main(int argc, char *argv[]) {
 				}
 			}
 			pablo3.adapt();
+			pablo3.loadBalance();
 			pablo3.updateConnectivity();
 			pablo3.write("Pablo3_iter"+to_string(iter));
 		}
@@ -47,6 +50,7 @@ int main(int argc, char *argv[]) {
 		pablo3.adaptGlobalCoarse();
 		pablo3.updateConnectivity();
 		pablo3.write("Pablo3_iter"+to_string(iter));
+
 
 		xc = yc = 0.35;
 		radius = 0.15;
@@ -66,6 +70,7 @@ int main(int argc, char *argv[]) {
 				}
 			}
 			pablo3.adapt();
+			pablo3.loadBalance();
 			pablo3.updateConnectivity();
 			pablo3.write("Pablo3_iter"+to_string(iter));
 		}
@@ -73,4 +78,3 @@ int main(int argc, char *argv[]) {
 	MPI::Finalize();
 
 }
-
