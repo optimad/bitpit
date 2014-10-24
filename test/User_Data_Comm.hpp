@@ -28,7 +28,7 @@ public:
 	template<class Buffer>
 	void scatter(Buffer & buff, const uint32_t e);
 
-	User_Data_Comm(Data & data_, Data & ghostData);
+	User_Data_Comm(Data & data_, Data & ghostData_);
 	~User_Data_Comm();
 };
 

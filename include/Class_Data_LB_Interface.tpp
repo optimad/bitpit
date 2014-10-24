@@ -37,3 +37,4 @@ template<class Impl>
 inline const Impl& Class_Data_LB_Interface<Impl>::getImpl() const {
 	return static_cast<const Impl &>(*this);
 }
+
