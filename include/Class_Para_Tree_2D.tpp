@@ -445,6 +445,22 @@ public:
 		return (findOwner(oct->computeMorton()) != rank);
 	};
 
+	/*! Get if the octant is new after refinement.
+	 * \param[in] oct Pointer to target octant.
+	 * \return Is octant new?
+	 */
+	bool getIsNewR(Class_Octant<2>* oct){
+		return oct->getIsNewR();
+	};
+
+	/*! Get if the octant is new after coarsening.
+	 * \param[in] oct Pointer to target octant.
+	 * \return Is octant new?
+	 */
+	bool getIsNewC(Class_Octant<2>* oct){
+		return oct->getIsNewC();
+	};
+
 	/*! Get the global index of an octant.
 	 * \param[in] oct Pointer to target octant.
 	 * \return Global index of octant.
@@ -870,6 +886,23 @@ public:
 	bool getIsGhost(uint32_t idx){
 		return (findOwner(octree.octants[idx].computeMorton()) != rank);
 	};
+
+	/*! Get if the octant is new after refinement.
+	 * \param[in] idx Local index of target octant.
+	 * \return Is octant new?
+	 */
+	bool getIsNewR(uint32_t idx){
+		return octree.octants[idx].getIsNewR();
+	};
+
+	/*! Get if the octant is new after coarsening.
+	 * \param[in] idx Local index of target octant.
+	 * \return Is octant new?
+	 */
+	bool getIsNewC(uint32_t idx){
+		return octree.octants[idx].getIsNewC();
+	};
+
 
 	/*! Get the global index of an octant.
 	 * \param[in] idx Local index of target octant.
