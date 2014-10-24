@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
 
 		iter = 0;
 		pablo5.updateConnectivity();
-		pablo5.writeTest("Pablo4_iter"+to_string(iter), oct_data);
+		pablo5.writeTest("Pablo5_iter"+to_string(iter), oct_data);
 
 		int start = 1;
 		for (iter=start; iter<start+1; iter++){
@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
 			}
 
 			pablo5.updateConnectivity();
-			pablo5.writeTest("Pablo4_iter"+to_string(iter), oct_data_new);
+			pablo5.writeTest("Pablo5_iter"+to_string(iter), oct_data_new);
 			oct_data = oct_data_new;
 		}
 

@@ -89,7 +89,6 @@ int main(int argc, char *argv[]) {
 			pablo4.writeTest("Pablo4_iter"+to_string(iter), oct_data_smooth);
 			oct_data = oct_data_smooth;
 		}
-
 	}
 
 	MPI::Finalize();
