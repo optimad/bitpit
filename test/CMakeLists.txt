@@ -19,6 +19,14 @@ add_executable(test1 ${test1_src})
 target_link_libraries(test1 mpi)
 TARGET_LINK_LIBRARIES(test1 pablo)
 
+#Build test2.cpp
+SET(test2_src test2.cpp)
+
+add_executable(test2 ${test2_src})
+
+target_link_libraries(test2 mpi)
+TARGET_LINK_LIBRARIES(test2 pablo)
+
 #Build test_3D_edo.cpp
 SET(test_3D_edo_src test_3D_edo.cpp)
 

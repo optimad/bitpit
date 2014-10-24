@@ -713,6 +713,7 @@ private:
 	// ------------------------------------------------------------------------------- //
 	// Index get/set Methods
 
+public:
 	/*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
 	 * \param[in] idx Local index of target octant.
 	 * \return Coordinate X of node 0.
@@ -761,7 +762,6 @@ private:
 		return trans.mapVolume(octree.octants[idx].getVolume());
 	}
 
-public:
 	/*! Get the coordinates of the center of an octant.
 	 * \param[in] idx Local index of target octant.
 	 * \param[out] center Coordinates of the center of octant.
@@ -787,7 +787,6 @@ public:
 		return center;
 	}
 
-private:
 	/*! Get the coordinates of the nodes of an octant.
 	 * \param[in] idx Local index of target octant.
 	 * \param[out] nodes Coordinates of the nodes of octant.
@@ -913,7 +912,6 @@ private:
 		octree.setBalance(idx, !balance);
 	};
 
-public:
 	// ------------------------------------------------------------------------------- //
 	// Local Tree get/set Methods
 
