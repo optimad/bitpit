@@ -2,9 +2,10 @@
 #include <mpi.h>
 #include "Class_Global.hpp"
 #include "Class_Para_Tree.hpp"
-#include "ioFunct.hpp"
 
 using namespace std;
+
+// =================================================================================== //
 
 int main(int argc, char *argv[]) {
 
@@ -12,21 +13,26 @@ int main(int argc, char *argv[]) {
 
 	{
 
+		/**<Instantation of a 2D para_tree object.*/
 		Class_Para_Tree<2> pablo2;
+
+		/**<Compute the connectivity and write the para_tree.*/
 		pablo2.computeConnectivity();
 		pablo2.write("Pablo2_iter0");
+
+		/**<Refine globally three level and write the para_tree.*/
 		for (int iter=1; iter<3; iter++){
 			pablo2.adaptGlobalRefine();
 			pablo2.updateConnectivity();
 			pablo2.write("Pablo2_iter"+to_string(iter));
 		}
 
+		/**<Define a center point and a radius.*/
 		double xc, yc;
 		xc = yc = 0.5;
-
 		double radius = 0.4;
 
-		// Simple adapt() in upper area of domain
+		/**<Simple adapt() 9 times the octants with at least one node inside the circle.*/
 		for (int iter=3; iter<9; iter++){
 			uint32_t nocts = pablo2.getNumOctants();
 			for (int i=0; i<nocts; i++){
@@ -39,7 +45,10 @@ int main(int argc, char *argv[]) {
 					}
 				}
 			}
+			/**<Adapt octree.*/
 			pablo2.adapt();
+
+			/**<Update the connectivity and write the para_tree.*/
 			pablo2.updateConnectivity();
 			pablo2.write("Pablo2_iter"+to_string(iter));
 		}
