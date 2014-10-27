@@ -4317,7 +4317,8 @@ public:
 			}
 			uint32_t newCounter = nofNewHead + nofNewTail + nofResidents;
 			octree.octants.resize(newCounter);
-			userData.data.resize(newCounter);
+//			userData.data.resize(newCounter);
+			userData.resize(newCounter);
 			//MOVE RESIDENTS IN RIGHT POSITION
 			uint32_t resCounter = nofNewHead + nofResidents - 1;
 			for(uint32_t k = 0; k < nofResidents ; ++k){
@@ -4356,7 +4357,8 @@ public:
 				}
 			}
 			octree.octants.shrink_to_fit();
-			userData.data.shrink_to_fit();
+//			userData.data.shrink_to_fit();
+			userData.shrink();
 
 			delete [] newPartitionRangeGlobalidx;
 			newPartitionRangeGlobalidx = NULL;

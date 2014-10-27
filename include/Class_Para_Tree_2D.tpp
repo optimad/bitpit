@@ -3733,7 +3733,7 @@ public:
 			uint32_t newCounter = nofNewHead + nofNewTail + nofResidents;
 			octree.octants.resize(newCounter);
 			//userData.data.resize(newCounter);
-			userData.resize();
+			userData.resize(newCounter);
 			//MOVE RESIDENTS IN RIGHT POSITION
 			uint32_t resCounter = nofNewHead + nofResidents - 1;
 			for(uint32_t k = 0; k < nofResidents ; ++k){
