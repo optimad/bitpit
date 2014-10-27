@@ -33,6 +33,24 @@ inline void User_Data_LB<D>::scatter(Buffer& buff, const uint32_t e) {
 }
 
 template<class D>
+inline void User_Data_LB<D>::assign(uint32_t stride, uint32_t length) {
+	typename Data::iterator first = data.begin() + stride;
+	typename Data::iterator last = first + length;
+	data.assign(first,last);
+	data.shrink_to_fit();
+};
+
+template<class D>
+inline void User_Data_LB<D>::resize(uint32_t newSize) {
+	data.resize(newSize);
+}
+
+template<class D>
+inline void User_Data_LB<D>::shrink() {
+	data.shrink_to_fit();
+}
+
+template<class D>
 inline User_Data_LB<D>::User_Data_LB(Data& data_) : data(data_){}
 
 template<class D>

@@ -29,6 +29,22 @@ inline void Class_Data_LB_Interface<Impl>::scatter(Buffer& buff, const uint32_t 
 }
 
 template<class Impl>
+inline void Class_Data_LB_Interface<Impl>::assign(uint32_t stride, uint32_t length){
+	return getImpl().assign(stride, length);
+}
+
+template<class Impl>
+inline void Class_Data_LB_Interface<Impl>::resize(uint32_t newSize){
+	return getImpl().resize(newSize);
+}
+
+template<class Impl>
+inline void Class_Data_LB_Interface<Impl>::shrink(){
+	return getImpl().shrink();
+}
+
+
+template<class Impl>
 inline Impl& Class_Data_LB_Interface<Impl>::getImpl() {
 	return static_cast<Impl &>(*this);
 }

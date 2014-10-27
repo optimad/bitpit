@@ -92,8 +92,8 @@ int main(int argc, char *argv[]) {
 		}
 
 		//TODO LOADBLANCE WITH DATA - NOT WORKING!!!!
-//		User_Data_LB<vector<double> > data_lb(oct_data);
-//		pablo15.loadBalance(data_lb);
+		User_Data_LB<vector<double> > data_lb(oct_data);
+		pablo15.loadBalance(data_lb);
 		pablo15.updateConnectivity();
 		pablo15.writeTest("Pablo15_iter"+to_string(iter), oct_data);
 

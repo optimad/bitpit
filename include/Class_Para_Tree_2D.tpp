@@ -2907,14 +2907,16 @@ public:
 			Class_Local_Tree<2>::OctantsType::const_iterator last = first + partition[rank];
 			//			typename UserDataComm::Data::iterator firstData = userData.data.begin() + stride;
 			//			typename UserDataComm::Data::iterator lastData = firstData + partition[rank];
-			typename Class_Data_LB_Interface<Impl>::Data::iterator firstData = userData.data.begin() + stride;
-			typename Class_Data_LB_Interface<Impl>::Data::iterator lastData = firstData + partition[rank];
+//			typename Class_Data_LB_Interface<Impl>::Data::iterator firstData = userData.data.begin() + stride;
+//			typename Class_Data_LB_Interface<Impl>::Data::iterator lastData = firstData + partition[rank];
 			octree.octants.assign(first, last);
-			userData.data.assign(firstData,lastData);
+//			userData.data.assign(firstData,lastData);
 			octree.octants.shrink_to_fit();
-			userData.data.shrink_to_fit();
+//			userData.data.shrink_to_fit();
 			first = octree.octants.end();
 			last = octree.octants.end();
+
+			userData.assign(stride,partition[rank]);
 
 			//Update and build ghosts here
 			updateLoadBalance();
@@ -3272,7 +3274,8 @@ public:
 			}
 			uint32_t newCounter = nofNewHead + nofNewTail + nofResidents;
 			octree.octants.resize(newCounter);
-			userData.data.resize(newCounter);
+			//userData.data.resize(newCounter);
+			userData.resize(newCounter);
 			//MOVE RESIDENTS IN RIGHT POSITION
 			uint32_t resCounter = nofNewHead + nofResidents - 1;
 			for(uint32_t k = 0; k < nofResidents ; ++k){
@@ -3309,7 +3312,8 @@ public:
 				}
 			}
 			octree.octants.shrink_to_fit();
-			userData.data.shrink_to_fit();
+			//userData.data.shrink_to_fit();
+			userData.shrink();
 
 			delete [] newPartitionRangeGlobalidx;
 			newPartitionRangeGlobalidx = NULL;
@@ -3364,14 +3368,16 @@ public:
 				stride += partition[i];
 			Class_Local_Tree<2>::OctantsType::const_iterator first = octree.octants.begin() + stride;
 			Class_Local_Tree<2>::OctantsType::const_iterator last = first + partition[rank];
-			typename Class_Data_LB_Interface<Impl>::Data::iterator firstData = userData.data.begin() + stride;
-			typename Class_Data_LB_Interface<Impl>::Data::iterator lastData = firstData + partition[rank];
+//			typename Class_Data_LB_Interface<Impl>::Data::iterator firstData = userData.data.begin() + stride;
+//			typename Class_Data_LB_Interface<Impl>::Data::iterator lastData = firstData + partition[rank];
 			octree.octants.assign(first, last);
-			userData.data.assign(firstData,lastData);
+//			userData.data.assign(firstData,lastData);
 			octree.octants.shrink_to_fit();
-			userData.data.shrink_to_fit();
+//			userData.data.shrink_to_fit();
 			first = octree.octants.end();
 			last = octree.octants.end();
+
+			userData.assign(stride,partition[rank]);
 
 			//Update and build ghosts here
 			updateLoadBalance();
@@ -3726,7 +3732,8 @@ public:
 			}
 			uint32_t newCounter = nofNewHead + nofNewTail + nofResidents;
 			octree.octants.resize(newCounter);
-			userData.data.resize(newCounter);
+			//userData.data.resize(newCounter);
+			userData.resize();
 			//MOVE RESIDENTS IN RIGHT POSITION
 			uint32_t resCounter = nofNewHead + nofResidents - 1;
 			for(uint32_t k = 0; k < nofResidents ; ++k){
@@ -3763,7 +3770,8 @@ public:
 				}
 			}
 			octree.octants.shrink_to_fit();
-			userData.data.shrink_to_fit();
+			//userData.data.shrink_to_fit();
+			userData.shrink();
 
 			delete [] newPartitionRangeGlobalidx;
 			newPartitionRangeGlobalidx = NULL;

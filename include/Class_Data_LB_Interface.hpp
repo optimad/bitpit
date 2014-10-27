@@ -18,6 +18,10 @@ public:
 	template<class Buffer>
 	void scatter(Buffer & buff,const uint32_t e);
 
+	void assign(uint32_t stride, uint32_t length);
+	void resize(uint32_t newSize);
+	void shrink();
+
 protected:
 	Class_Data_LB_Interface();
 
