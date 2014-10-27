@@ -2907,12 +2907,12 @@ public:
 			Class_Local_Tree<2>::OctantsType::const_iterator last = first + partition[rank];
 			//			typename UserDataComm::Data::iterator firstData = userData.data.begin() + stride;
 			//			typename UserDataComm::Data::iterator lastData = firstData + partition[rank];
-//			typename Class_Data_LB_Interface<Impl>::Data::iterator firstData = userData.data.begin() + stride;
-//			typename Class_Data_LB_Interface<Impl>::Data::iterator lastData = firstData + partition[rank];
+			//			typename Class_Data_LB_Interface<Impl>::Data::iterator firstData = userData.data.begin() + stride;
+			//			typename Class_Data_LB_Interface<Impl>::Data::iterator lastData = firstData + partition[rank];
 			octree.octants.assign(first, last);
-//			userData.data.assign(firstData,lastData);
+			//			userData.data.assign(firstData,lastData);
 			octree.octants.shrink_to_fit();
-//			userData.data.shrink_to_fit();
+			//			userData.data.shrink_to_fit();
 			first = octree.octants.end();
 			last = octree.octants.end();
 
@@ -3368,12 +3368,12 @@ public:
 				stride += partition[i];
 			Class_Local_Tree<2>::OctantsType::const_iterator first = octree.octants.begin() + stride;
 			Class_Local_Tree<2>::OctantsType::const_iterator last = first + partition[rank];
-//			typename Class_Data_LB_Interface<Impl>::Data::iterator firstData = userData.data.begin() + stride;
-//			typename Class_Data_LB_Interface<Impl>::Data::iterator lastData = firstData + partition[rank];
+			//			typename Class_Data_LB_Interface<Impl>::Data::iterator firstData = userData.data.begin() + stride;
+			//			typename Class_Data_LB_Interface<Impl>::Data::iterator lastData = firstData + partition[rank];
 			octree.octants.assign(first, last);
-//			userData.data.assign(firstData,lastData);
+			//			userData.data.assign(firstData,lastData);
 			octree.octants.shrink_to_fit();
-//			userData.data.shrink_to_fit();
+			//			userData.data.shrink_to_fit();
 			first = octree.octants.end();
 			last = octree.octants.end();
 
@@ -5368,7 +5368,7 @@ public:
 				<< "    <Piece NumberOfCells=\"" << octree.connectivity.size() << "\" NumberOfPoints=\"" << octree.nodes.size() << "\">" << endl;
 		out << "      <CellData Scalars=\"Data\">" << endl;
 		out << "      <DataArray type=\"Float64\" Name=\"Data\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
-			<< "          " << std::fixed;
+				<< "          " << std::fixed;
 		int ndata = octree.connectivity.size();
 		for(int i = 0; i < ndata; i++)
 		{
@@ -5377,8 +5377,8 @@ public:
 				out << endl << "          ";
 		}
 		out << endl << "        </DataArray>" << endl
-					<< "      </CellData>" << endl
-					<< "      <Points>" << endl
+				<< "      </CellData>" << endl
+				<< "      <Points>" << endl
 				<< "        <DataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\""<< 3 <<"\" format=\"ascii\">" << endl
 				<< "          " << std::fixed;
 		for(int i = 0; i < nofNodes; i++)
@@ -5459,8 +5459,8 @@ public:
 					<< "    <PPointData>" << endl
 					<< "    </PPointData>" << endl
 					<< "    <PCellData Scalars=\"Data\">" << endl
-			<< "      <PDataArray type=\"Float64\" Name=\"Data\" NumberOfComponents=\"1\"/>" << endl
-			 << "    </PCellData>" << endl
+					<< "      <PDataArray type=\"Float64\" Name=\"Data\" NumberOfComponents=\"1\"/>" << endl
+					<< "    </PCellData>" << endl
 					<< "    <PPoints>" << endl
 					<< "      <PDataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\"3\"/>" << endl
 					<< "    </PPoints>" << endl;

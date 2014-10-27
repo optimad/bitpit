@@ -3441,469 +3441,469 @@ public:
 
 	};
 
-//	template<class UserDataComm>
-//	void loadBalance(UserDataComm & userData){
-//		//Write info on log
-//		writeLog("---------------------------------------------");
-//		writeLog(" LOAD BALANCE ");
-//
-//		uint32_t* partition = new uint32_t [nproc];
-//		computePartition(partition);
-//		if(serial)
-//		{
-//			writeLog(" ");
-//			writeLog(" Initial Serial distribution : ");
-//			for(int ii=0; ii<nproc; ii++){
-//				writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]+1));
-//			}
-//
-//			uint32_t stride = 0;
-//			for(int i = 0; i < rank; ++i)
-//				stride += partition[i];
-//			Class_Local_Tree<3>::OctantsType::const_iterator first = octree.octants.begin() + stride;
-//			Class_Local_Tree<3>::OctantsType::const_iterator last = first + partition[rank];
-//			typename UserDataComm::Data::iterator firstData = userData.data.begin() + stride;
-//			typename UserDataComm::Data::iterator lastData = firstData + partition[rank];
-//			octree.octants.assign(first, last);
-//			userData.data.assign(firstData,lastData);
-//			octree.octants.shrink_to_fit();
-//			userData.data.shrink_to_fit();
-//			first = octree.octants.end();
-//			last = octree.octants.end();
-//
-//			//Update and build ghosts here
-//			updateLoadBalance();
-//			setPboundGhosts();
-//
-//		}
-//		else
-//		{
-//			writeLog(" ");
-//			writeLog(" Initial Parallel partition : ");
-//			writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
-//			for(int ii=1; ii<nproc; ii++){
-//				writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
-//			}
-//
-//			//empty ghosts
-//			octree.ghosts.clear();
-//			octree.size_ghosts = 0;
-//			//compute new partition range globalidx
-//			uint64_t* newPartitionRangeGlobalidx = new uint64_t[nproc];
-//			for(int p = 0; p < nproc; ++p){
-//				newPartitionRangeGlobalidx[p] = 0;
-//				for(int pp = 0; pp <= p; ++pp)
-//					newPartitionRangeGlobalidx[p] += (uint64_t)partition[pp];
-//				--newPartitionRangeGlobalidx[p];
-//			}
-//
-//			//find resident octants local offset lastHead(lh) and firstTail(ft)
-//			int32_t lh,ft;
-//			if(rank == 0)
-//				lh = -1;
-//			else{
-//				lh = (int32_t)(newPartitionRangeGlobalidx[rank-1] + 1 - partition_range_globalidx[rank-1] - 1 - 1);
-//			}
-//			if(lh < 0)
-//				lh = - 1;
-//			else if(lh > octree.octants.size() - 1)
-//				lh = octree.octants.size() - 1;
-//
-//			if(rank == nproc - 1)
-//				ft = octree.octants.size();
-//			else if(rank == 0)
-//				ft = (int32_t)(newPartitionRangeGlobalidx[rank] + 1);
-//			else{
-//				ft = (int32_t)(newPartitionRangeGlobalidx[rank] - partition_range_globalidx[rank -1]);
-//			}
-//			if(ft > (int32_t)(octree.octants.size() - 1))
-//				ft = octree.octants.size();
-//			else if(ft < 0)
-//				ft = 0;
-//
-//			//compute size Head and size Tail
-//			uint32_t headSize = (uint32_t)(lh + 1);
-//			uint32_t tailSize = (uint32_t)(octree.octants.size() - ft);
-//			uint32_t headOffset = headSize;
-//			uint32_t tailOffset = tailSize;
-//
-//			//build send buffers
-//			map<int,Class_Comm_Buffer> sendBuffers;
-//
-//			//Compute first predecessor and first successor to send buffers to
-//			int64_t firstOctantGlobalIdx = 0;// offset to compute global index of each octant in every process
-//			int64_t globalLastHead = (int64_t) lh;
-//			int64_t globalFirstTail = (int64_t) ft; //lastHead and firstTail in global ordering
-//			int firstPredecessor = -1;
-//			int firstSuccessor = nproc;
-//			if(rank != 0){
-//				firstOctantGlobalIdx = (int64_t)(partition_range_globalidx[rank-1] + 1);
-//				globalLastHead = firstOctantGlobalIdx + (int64_t)lh;
-//				globalFirstTail = firstOctantGlobalIdx + (int64_t)ft;
-//				for(int pre = rank - 1; pre >=0; --pre){
-//					if((uint64_t)globalLastHead <= newPartitionRangeGlobalidx[pre])
-//						firstPredecessor = pre;
-//				}
-//				for(int post = rank + 1; post < nproc; ++post){
-//					if((uint64_t)globalFirstTail <= newPartitionRangeGlobalidx[post] && (uint64_t)globalFirstTail > newPartitionRangeGlobalidx[post-1])
-//						firstSuccessor = post;
-//				}
-//			}
-//			else if(rank == 0){
-//				firstSuccessor = 1;
-//			}
-//			MPI_Barrier(MPI_COMM_WORLD); //da spostare prima della prima comunicazione
-//
-//			uint32_t x,y,z;
-//			uint8_t l;
-//			int8_t m;
-//			bool info[16];
-//			//build send buffers from Head
-//			if(headSize != 0){
-//				for(int p = firstPredecessor; p >= 0; --p){
-//					if(headSize <=partition[p]){
-//						int buffSize = headSize * (int)ceil((double)global3D.octantBytes / (double)(CHAR_BIT/8));
-//						//TODO loop over head octants and add data size to buffer size - DONE
-//						//compute size of data in buffers
-//						if(userData.fixedSize()){
-//							buffSize +=  userData.fixedSize() * headSize;
-//						}
-//						else{
-//							for(uint32_t i = 0; i <= lh; ++i){
-//								buffSize += userData.size(i);
-//							}
-//						}
-//						//add room for int, number of octants in this buffer
-//						buffSize += sizeof(int);
-//						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
-//						//store the number of octants at the beginning of the buffer
-//						MPI_Pack(&headSize,1,MPI_UINT32_T,sendBuffers[p].commBuffer,sendBuffers[p].commBufferSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//						//USE BUFFER POS
-//						//int pos = 0;
-//						for(uint32_t i = 0; i <= lh; ++i){
-//							//PACK octants from 0 to lh in sendBuffer[p]
-//							const Class_Octant<3> & octant = octree.octants[i];
-//							x = octant.getX();
-//							y = octant.getY();
-//							z = octant.getZ();
-//							l = octant.getLevel();
-//							m = octant.getMarker();
-//							memcpy(info,octant.info,16);
-//							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							error_flag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							error_flag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							error_flag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							for(int j = 0; j < 16; ++j){
-//								MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//
-//							}
-//							//TODO call gather to pack user data - DONE
-//							userData.gather(sendBuffers[p],i);
-//						}
-//						break;
-//					}
-//					else{
-//						int buffSize = partition[p] * (int)ceil((double)global3D.octantBytes / (double)(CHAR_BIT/8));
-//						//TODO loop over head octants and add data size to buffer size - DONE
-//						//compute size of data in buffers
-//						if(userData.fixedSize()){
-//							buffSize +=  userData.fixedSize() * partition[p];
-//						}
-//						else{
-//							for(uint32_t i = lh - partition[p] + 1; i <= lh; ++i){
-//								buffSize += userData.size(i);
-//							}
-//						}
-//						//add room for int, number of octants in this buffer
-//						buffSize += sizeof(int);
-//						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
-//						//store the number of octants at the beginning of the buffer
-//						MPI_Pack(&partition[p],1,MPI_UINT32_T,sendBuffers[p].commBuffer,sendBuffers[p].commBufferSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//						//USE BUFFER POS
-//						//int pos = 0;
-//						for(uint32_t i = lh - partition[p] + 1; i <= lh; ++i){
-//							//pack octants from lh - partition[p] to lh
-//							const Class_Octant<3> & octant = octree.octants[i];
-//							x = octant.getX();
-//							y = octant.getY();
-//							z = octant.getZ();
-//							l = octant.getLevel();
-//							m = octant.getMarker();
-//							memcpy(info,octant.info,16);
-//							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							error_flag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							error_flag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							error_flag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							for(int j = 0; j < 16; ++j){
-//								MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							}
-//							//TODO call gather to pack user data - DONE
-//							userData.gather(sendBuffers[p],i);
-//						}
-//						lh -= partition[p];
-//						headSize = lh + 1;
-//					}
-//				}
-//
-//			}
-//			//build send buffers from Tail
-//			if(tailSize != 0){
-//				for(int p = firstSuccessor; p < nproc; ++p){
-//					if(tailSize <= partition[p]){
-//						uint32_t octantsSize = (uint32_t)octree.octants.size();
-//						int buffSize = tailSize * (int)ceil((double)global3D.octantBytes / (double)(CHAR_BIT/8));
-//						//TODO loop over head octants and add data size to buffer size - DONE
-//						//compute size of data in buffers
-//						if(userData.fixedSize()){
-//							buffSize +=  userData.fixedSize() * tailSize;
-//						}
-//						else{
-//							for(uint32_t i = ft; i <= octantsSize; ++i){
-//								buffSize += userData.size(i);
-//							}
-//						}
-//						//add room for int, number of octants in this buffer
-//						buffSize += sizeof(int);
-//						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
-//						//store the number of octants at the beginning of the buffer
-//						MPI_Pack(&tailSize,1,MPI_UINT32_T,sendBuffers[p].commBuffer,sendBuffers[p].commBufferSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//						//USE BUFFER POS
-//						//int pos = 0;
-//						for(uint32_t i = ft; i < octantsSize; ++i){
-//							//PACK octants from ft to octantsSize-1
-//							const Class_Octant<3> & octant = octree.octants[i];
-//							x = octant.getX();
-//							y = octant.getY();
-//							z = octant.getZ();
-//							l = octant.getLevel();
-//							m = octant.getMarker();
-//							memcpy(info,octant.info,16);
-//							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							error_flag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							error_flag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							error_flag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							for(int j = 0; j < 16; ++j){
-//								MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							}
-//							//TODO call gather to pack user data - DONE
-//							userData.gather(sendBuffers[p],i);
-//						}
-//						break;
-//					}
-//					else{
-//						uint32_t endOctants = ft + partition[p] - 1;
-//						int buffSize = partition[p] * (int)ceil((double)global3D.octantBytes / (double)(CHAR_BIT/8));
-//						//TODO loop over head octants and add data size to buffer size - DONE
-//						//compute size of data in buffers
-//						if(userData.fixedSize()){
-//							buffSize +=  userData.fixedSize() * partition[p];
-//						}
-//						else{
-//							for(uint32_t i = ft; i <= endOctants; ++i){
-//								buffSize += userData.size(i);
-//							}
-//						}
-//						//add room for int, number of octants in this buffer
-//						buffSize += sizeof(int);
-//						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
-//						//store the number of octants at the beginning of the buffer
-//						MPI_Pack(&partition[p],1,MPI_UINT32_T,sendBuffers[p].commBuffer,sendBuffers[p].commBufferSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//						//int pos = 0;
-//						for(uint32_t i = ft; i <= endOctants; ++i ){
-//							//PACK octants from ft to ft + partition[p] -1
-//							const Class_Octant<3> & octant = octree.octants[i];
-//							x = octant.getX();
-//							y = octant.getY();
-//							z = octant.getZ();
-//							l = octant.getLevel();
-//							m = octant.getMarker();
-//							memcpy(info,octant.info,16);
-//							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							error_flag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							error_flag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							error_flag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							for(int j = 0; j < 16; ++j){
-//								MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-//							}
-//							//TODO call gather to pack user data - DONE
-//							userData.gather(sendBuffers[p],i);
-//						}
-//						ft += partition[p];
-//						tailSize -= partition[p];
-//					}
-//				}
-//			}
-//
-//			//Build receiver sources
-//			vector<Class_Array> recvs(nproc);
-//			recvs[rank] = Class_Array((uint32_t)sendBuffers.size()+1,-1);
-//			recvs[rank].array[0] = rank;
-//			int counter = 1;
-//			map<int,Class_Comm_Buffer>::iterator sitend = sendBuffers.end();
-//			for(map<int,Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
-//				recvs[rank].array[counter] = sit->first;
-//				++counter;
-//			}
-//			int nofRecvsPerProc[nproc];
-//			error_flag = MPI_Allgather(&recvs[rank].arraySize,1,MPI_INT,nofRecvsPerProc,1,MPI_INT,MPI_COMM_WORLD);
-//			int globalRecvsBuffSize = 0;
-//			int displays[nproc];
-//			for(int pp = 0; pp < nproc; ++pp){
-//				displays[pp] = 0;
-//				globalRecvsBuffSize += nofRecvsPerProc[pp];
-//				for(int ppp = 0; ppp < pp; ++ppp){
-//					displays[pp] += nofRecvsPerProc[ppp];
-//				}
-//			}
-//			int globalRecvsBuff[globalRecvsBuffSize];
-//			error_flag = MPI_Allgatherv(recvs[rank].array,recvs[rank].arraySize,MPI_INT,globalRecvsBuff,nofRecvsPerProc,displays,MPI_INT,MPI_COMM_WORLD);
-//
-//			vector<set<int> > sendersPerProc(nproc);
-//			for(int pin = 0; pin < nproc; ++pin){
-//				for(int k = displays[pin]+1; k < displays[pin] + nofRecvsPerProc[pin]; ++k){
-//					sendersPerProc[globalRecvsBuff[k]].insert(globalRecvsBuff[displays[pin]]);
-//				}
-//			}
-//
-//			//Communicate Octants (size)
-//			MPI_Request req[sendBuffers.size()+sendersPerProc[rank].size()];
-//			MPI_Status stats[sendBuffers.size()+sendersPerProc[rank].size()];
-//			int nReq = 0;
-//			map<int,int> recvBufferSizePerProc;
-//			set<int>::iterator senditend = sendersPerProc[rank].end();
-//			for(set<int>::iterator sendit = sendersPerProc[rank].begin(); sendit != senditend; ++sendit){
-//				recvBufferSizePerProc[*sendit] = 0;
-//				error_flag = MPI_Irecv(&recvBufferSizePerProc[*sendit],1,MPI_UINT32_T,*sendit,rank,MPI_COMM_WORLD,&req[nReq]);
-//				++nReq;
-//			}
-//			map<int,Class_Comm_Buffer>::reverse_iterator rsitend = sendBuffers.rend();
-//			for(map<int,Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
-//				error_flag =  MPI_Isend(&rsit->second.commBufferSize,1,MPI_UINT32_T,rsit->first,rsit->first,MPI_COMM_WORLD,&req[nReq]);
-//				++nReq;
-//			}
-//			MPI_Waitall(nReq,req,stats);
-//
-//			//COMMUNICATE THE BUFFERS TO THE RECEIVERS
-//			//recvBuffers structure is declared and each buffer is initialized to the right size
-//			//then, sendBuffers are communicated by senders and stored in recvBuffers in the receivers
-//			uint32_t nofNewHead = 0;
-//			uint32_t nofNewTail = 0;
-//			map<int,Class_Comm_Buffer> recvBuffers;
-//
-//			map<int,int>::iterator ritend = recvBufferSizePerProc.end();
-//			for(map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
-//				recvBuffers[rit->first] = Class_Comm_Buffer(rit->second,'a');
-//				//			uint32_t nofNewPerProc = (uint32_t)(rit->second / (uint32_t)ceil((double)octantBytes / (double)(CHAR_BIT/8)));
-//				//			if(rit->first < rank)
-//				//				nofNewHead += nofNewPerProc;
-//				//			else if(rit->first > rank)
-//				//				nofNewTail += nofNewPerProc;
-//			}
-//
-//			nReq = 0;
-//			for(set<int>::iterator sendit = sendersPerProc[rank].begin(); sendit != senditend; ++sendit){
-//				//nofBytesOverProc += recvBuffers[sit->first].commBufferSize;
-//				error_flag = MPI_Irecv(recvBuffers[*sendit].commBuffer,recvBuffers[*sendit].commBufferSize,MPI_PACKED,*sendit,rank,MPI_COMM_WORLD,&req[nReq]);
-//				++nReq;
-//			}
-//			for(map<int,Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
-//				error_flag =  MPI_Isend(rsit->second.commBuffer,rsit->second.commBufferSize,MPI_PACKED,rsit->first,rsit->first,MPI_COMM_WORLD,&req[nReq]);
-//				++nReq;
-//			}
-//			MPI_Waitall(nReq,req,stats);
-//
-//			//Unpack number of octants per sender
-//			map<int,uint32_t> nofNewOverProcs;
-//			map<int,Class_Comm_Buffer>::iterator rbitend = recvBuffers.end();
-//			for(map<int,Class_Comm_Buffer>::iterator rbit = recvBuffers.begin(); rbit != rbitend; ++rbit){
-//				uint32_t nofNewPerProc;
-//				MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&nofNewPerProc,1,MPI_UINT32_T,MPI_COMM_WORLD);
-//				nofNewOverProcs[rbit->first] = nofNewPerProc;
-//				if(rbit->first < rank)
-//					nofNewHead += nofNewPerProc;
-//				else if(rbit->first > rank)
-//					nofNewTail += nofNewPerProc;
-//			}
-//
-//			//MOVE RESIDENT TO BEGIN IN OCTANTS
-//			uint32_t resEnd = octree.getNumOctants() - tailOffset;
-//			uint32_t nofResidents = resEnd - headOffset;
-//			uint32_t octCounter = 0;
-//			for(uint32_t i = headOffset; i < resEnd; ++i){
-//				octree.octants[octCounter] = octree.octants[i];
-//				//TODO move data - DONE
-//				userData.move(i,octCounter);
-//				++octCounter;
-//			}
-//			uint32_t newCounter = nofNewHead + nofNewTail + nofResidents;
-//			octree.octants.resize(newCounter);
-//			userData.data.resize(newCounter);
-//			//MOVE RESIDENTS IN RIGHT POSITION
-//			uint32_t resCounter = nofNewHead + nofResidents - 1;
-//			for(uint32_t k = 0; k < nofResidents ; ++k){
-//				octree.octants[resCounter - k] = octree.octants[nofResidents - k - 1];
-//				//TODO move data - DON
-//				userData.move(nofResidents - k - 1,resCounter - k);
-//			}
-//
-//			//UNPACK BUFFERS AND BUILD NEW OCTANTS
-//			newCounter = 0;
-//			bool jumpResident = false;
-//
-//			for(map<int,Class_Comm_Buffer>::iterator rbit = recvBuffers.begin(); rbit != rbitend; ++rbit){
-//				//TODO change new octants counting, probably you have to communicate the number of news per proc
-//				uint32_t nofNewPerProc = nofNewOverProcs[rbit->first];//(uint32_t)(rbit->second.commBufferSize / (uint32_t)ceil((double)octantBytes / (double)(CHAR_BIT/8)));
-//				//int pos = 0;
-//				if(rbit->first > rank && !jumpResident){
-//					newCounter += nofResidents ;
-//					jumpResident = true;
-//				}
-//				for(int i = nofNewPerProc - 1; i >= 0; --i){
-//					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&x,1,MPI_UINT32_T,MPI_COMM_WORLD);
-//					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&y,1,MPI_UINT32_T,MPI_COMM_WORLD);
-//					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&z,1,MPI_UINT32_T,MPI_COMM_WORLD);
-//					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&l,1,MPI_UINT8_T,MPI_COMM_WORLD);
-//					octree.octants[newCounter] = Class_Octant<3>(l,x,y,z);
-//					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&m,1,MPI_INT8_T,MPI_COMM_WORLD);
-//					octree.octants[newCounter].setMarker(m);
-//					for(int j = 0; j < 16; ++j){
-//						error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&info[j],1,MPI::BOOL,MPI_COMM_WORLD);
-//						octree.octants[newCounter].info[j] = info[j];
-//					}
-//					//TODO Unpack data
-//					userData.scatter(rbit->second,newCounter);
-//					++newCounter;
-//				}
-//			}
-//			octree.octants.shrink_to_fit();
-//			userData.data.shrink_to_fit();
-//
-//			delete [] newPartitionRangeGlobalidx;
-//			newPartitionRangeGlobalidx = NULL;
-//
-//			//Update and ghosts here
-//			updateLoadBalance();
-//			setPboundGhosts();
-//
-//		}
-//		delete [] partition;
-//		partition = NULL;
-//
-//		//Write info of final partition on log
-//		writeLog(" ");
-//		writeLog(" Final Parallel partition : ");
-//		writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
-//		for(int ii=1; ii<nproc; ii++){
-//			writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
-//		}
-//		writeLog(" ");
-//		writeLog("---------------------------------------------");
-//
-//	};
+	//	template<class UserDataComm>
+	//	void loadBalance(UserDataComm & userData){
+	//		//Write info on log
+	//		writeLog("---------------------------------------------");
+	//		writeLog(" LOAD BALANCE ");
+	//
+	//		uint32_t* partition = new uint32_t [nproc];
+	//		computePartition(partition);
+	//		if(serial)
+	//		{
+	//			writeLog(" ");
+	//			writeLog(" Initial Serial distribution : ");
+	//			for(int ii=0; ii<nproc; ii++){
+	//				writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]+1));
+	//			}
+	//
+	//			uint32_t stride = 0;
+	//			for(int i = 0; i < rank; ++i)
+	//				stride += partition[i];
+	//			Class_Local_Tree<3>::OctantsType::const_iterator first = octree.octants.begin() + stride;
+	//			Class_Local_Tree<3>::OctantsType::const_iterator last = first + partition[rank];
+	//			typename UserDataComm::Data::iterator firstData = userData.data.begin() + stride;
+	//			typename UserDataComm::Data::iterator lastData = firstData + partition[rank];
+	//			octree.octants.assign(first, last);
+	//			userData.data.assign(firstData,lastData);
+	//			octree.octants.shrink_to_fit();
+	//			userData.data.shrink_to_fit();
+	//			first = octree.octants.end();
+	//			last = octree.octants.end();
+	//
+	//			//Update and build ghosts here
+	//			updateLoadBalance();
+	//			setPboundGhosts();
+	//
+	//		}
+	//		else
+	//		{
+	//			writeLog(" ");
+	//			writeLog(" Initial Parallel partition : ");
+	//			writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
+	//			for(int ii=1; ii<nproc; ii++){
+	//				writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
+	//			}
+	//
+	//			//empty ghosts
+	//			octree.ghosts.clear();
+	//			octree.size_ghosts = 0;
+	//			//compute new partition range globalidx
+	//			uint64_t* newPartitionRangeGlobalidx = new uint64_t[nproc];
+	//			for(int p = 0; p < nproc; ++p){
+	//				newPartitionRangeGlobalidx[p] = 0;
+	//				for(int pp = 0; pp <= p; ++pp)
+	//					newPartitionRangeGlobalidx[p] += (uint64_t)partition[pp];
+	//				--newPartitionRangeGlobalidx[p];
+	//			}
+	//
+	//			//find resident octants local offset lastHead(lh) and firstTail(ft)
+	//			int32_t lh,ft;
+	//			if(rank == 0)
+	//				lh = -1;
+	//			else{
+	//				lh = (int32_t)(newPartitionRangeGlobalidx[rank-1] + 1 - partition_range_globalidx[rank-1] - 1 - 1);
+	//			}
+	//			if(lh < 0)
+	//				lh = - 1;
+	//			else if(lh > octree.octants.size() - 1)
+	//				lh = octree.octants.size() - 1;
+	//
+	//			if(rank == nproc - 1)
+	//				ft = octree.octants.size();
+	//			else if(rank == 0)
+	//				ft = (int32_t)(newPartitionRangeGlobalidx[rank] + 1);
+	//			else{
+	//				ft = (int32_t)(newPartitionRangeGlobalidx[rank] - partition_range_globalidx[rank -1]);
+	//			}
+	//			if(ft > (int32_t)(octree.octants.size() - 1))
+	//				ft = octree.octants.size();
+	//			else if(ft < 0)
+	//				ft = 0;
+	//
+	//			//compute size Head and size Tail
+	//			uint32_t headSize = (uint32_t)(lh + 1);
+	//			uint32_t tailSize = (uint32_t)(octree.octants.size() - ft);
+	//			uint32_t headOffset = headSize;
+	//			uint32_t tailOffset = tailSize;
+	//
+	//			//build send buffers
+	//			map<int,Class_Comm_Buffer> sendBuffers;
+	//
+	//			//Compute first predecessor and first successor to send buffers to
+	//			int64_t firstOctantGlobalIdx = 0;// offset to compute global index of each octant in every process
+	//			int64_t globalLastHead = (int64_t) lh;
+	//			int64_t globalFirstTail = (int64_t) ft; //lastHead and firstTail in global ordering
+	//			int firstPredecessor = -1;
+	//			int firstSuccessor = nproc;
+	//			if(rank != 0){
+	//				firstOctantGlobalIdx = (int64_t)(partition_range_globalidx[rank-1] + 1);
+	//				globalLastHead = firstOctantGlobalIdx + (int64_t)lh;
+	//				globalFirstTail = firstOctantGlobalIdx + (int64_t)ft;
+	//				for(int pre = rank - 1; pre >=0; --pre){
+	//					if((uint64_t)globalLastHead <= newPartitionRangeGlobalidx[pre])
+	//						firstPredecessor = pre;
+	//				}
+	//				for(int post = rank + 1; post < nproc; ++post){
+	//					if((uint64_t)globalFirstTail <= newPartitionRangeGlobalidx[post] && (uint64_t)globalFirstTail > newPartitionRangeGlobalidx[post-1])
+	//						firstSuccessor = post;
+	//				}
+	//			}
+	//			else if(rank == 0){
+	//				firstSuccessor = 1;
+	//			}
+	//			MPI_Barrier(MPI_COMM_WORLD); //da spostare prima della prima comunicazione
+	//
+	//			uint32_t x,y,z;
+	//			uint8_t l;
+	//			int8_t m;
+	//			bool info[16];
+	//			//build send buffers from Head
+	//			if(headSize != 0){
+	//				for(int p = firstPredecessor; p >= 0; --p){
+	//					if(headSize <=partition[p]){
+	//						int buffSize = headSize * (int)ceil((double)global3D.octantBytes / (double)(CHAR_BIT/8));
+	//						//TODO loop over head octants and add data size to buffer size - DONE
+	//						//compute size of data in buffers
+	//						if(userData.fixedSize()){
+	//							buffSize +=  userData.fixedSize() * headSize;
+	//						}
+	//						else{
+	//							for(uint32_t i = 0; i <= lh; ++i){
+	//								buffSize += userData.size(i);
+	//							}
+	//						}
+	//						//add room for int, number of octants in this buffer
+	//						buffSize += sizeof(int);
+	//						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
+	//						//store the number of octants at the beginning of the buffer
+	//						MPI_Pack(&headSize,1,MPI_UINT32_T,sendBuffers[p].commBuffer,sendBuffers[p].commBufferSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//						//USE BUFFER POS
+	//						//int pos = 0;
+	//						for(uint32_t i = 0; i <= lh; ++i){
+	//							//PACK octants from 0 to lh in sendBuffer[p]
+	//							const Class_Octant<3> & octant = octree.octants[i];
+	//							x = octant.getX();
+	//							y = octant.getY();
+	//							z = octant.getZ();
+	//							l = octant.getLevel();
+	//							m = octant.getMarker();
+	//							memcpy(info,octant.info,16);
+	//							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							error_flag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							error_flag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							error_flag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							for(int j = 0; j < 16; ++j){
+	//								MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//
+	//							}
+	//							//TODO call gather to pack user data - DONE
+	//							userData.gather(sendBuffers[p],i);
+	//						}
+	//						break;
+	//					}
+	//					else{
+	//						int buffSize = partition[p] * (int)ceil((double)global3D.octantBytes / (double)(CHAR_BIT/8));
+	//						//TODO loop over head octants and add data size to buffer size - DONE
+	//						//compute size of data in buffers
+	//						if(userData.fixedSize()){
+	//							buffSize +=  userData.fixedSize() * partition[p];
+	//						}
+	//						else{
+	//							for(uint32_t i = lh - partition[p] + 1; i <= lh; ++i){
+	//								buffSize += userData.size(i);
+	//							}
+	//						}
+	//						//add room for int, number of octants in this buffer
+	//						buffSize += sizeof(int);
+	//						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
+	//						//store the number of octants at the beginning of the buffer
+	//						MPI_Pack(&partition[p],1,MPI_UINT32_T,sendBuffers[p].commBuffer,sendBuffers[p].commBufferSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//						//USE BUFFER POS
+	//						//int pos = 0;
+	//						for(uint32_t i = lh - partition[p] + 1; i <= lh; ++i){
+	//							//pack octants from lh - partition[p] to lh
+	//							const Class_Octant<3> & octant = octree.octants[i];
+	//							x = octant.getX();
+	//							y = octant.getY();
+	//							z = octant.getZ();
+	//							l = octant.getLevel();
+	//							m = octant.getMarker();
+	//							memcpy(info,octant.info,16);
+	//							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							error_flag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							error_flag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							error_flag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							for(int j = 0; j < 16; ++j){
+	//								MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							}
+	//							//TODO call gather to pack user data - DONE
+	//							userData.gather(sendBuffers[p],i);
+	//						}
+	//						lh -= partition[p];
+	//						headSize = lh + 1;
+	//					}
+	//				}
+	//
+	//			}
+	//			//build send buffers from Tail
+	//			if(tailSize != 0){
+	//				for(int p = firstSuccessor; p < nproc; ++p){
+	//					if(tailSize <= partition[p]){
+	//						uint32_t octantsSize = (uint32_t)octree.octants.size();
+	//						int buffSize = tailSize * (int)ceil((double)global3D.octantBytes / (double)(CHAR_BIT/8));
+	//						//TODO loop over head octants and add data size to buffer size - DONE
+	//						//compute size of data in buffers
+	//						if(userData.fixedSize()){
+	//							buffSize +=  userData.fixedSize() * tailSize;
+	//						}
+	//						else{
+	//							for(uint32_t i = ft; i <= octantsSize; ++i){
+	//								buffSize += userData.size(i);
+	//							}
+	//						}
+	//						//add room for int, number of octants in this buffer
+	//						buffSize += sizeof(int);
+	//						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
+	//						//store the number of octants at the beginning of the buffer
+	//						MPI_Pack(&tailSize,1,MPI_UINT32_T,sendBuffers[p].commBuffer,sendBuffers[p].commBufferSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//						//USE BUFFER POS
+	//						//int pos = 0;
+	//						for(uint32_t i = ft; i < octantsSize; ++i){
+	//							//PACK octants from ft to octantsSize-1
+	//							const Class_Octant<3> & octant = octree.octants[i];
+	//							x = octant.getX();
+	//							y = octant.getY();
+	//							z = octant.getZ();
+	//							l = octant.getLevel();
+	//							m = octant.getMarker();
+	//							memcpy(info,octant.info,16);
+	//							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							error_flag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							error_flag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							error_flag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							for(int j = 0; j < 16; ++j){
+	//								MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							}
+	//							//TODO call gather to pack user data - DONE
+	//							userData.gather(sendBuffers[p],i);
+	//						}
+	//						break;
+	//					}
+	//					else{
+	//						uint32_t endOctants = ft + partition[p] - 1;
+	//						int buffSize = partition[p] * (int)ceil((double)global3D.octantBytes / (double)(CHAR_BIT/8));
+	//						//TODO loop over head octants and add data size to buffer size - DONE
+	//						//compute size of data in buffers
+	//						if(userData.fixedSize()){
+	//							buffSize +=  userData.fixedSize() * partition[p];
+	//						}
+	//						else{
+	//							for(uint32_t i = ft; i <= endOctants; ++i){
+	//								buffSize += userData.size(i);
+	//							}
+	//						}
+	//						//add room for int, number of octants in this buffer
+	//						buffSize += sizeof(int);
+	//						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
+	//						//store the number of octants at the beginning of the buffer
+	//						MPI_Pack(&partition[p],1,MPI_UINT32_T,sendBuffers[p].commBuffer,sendBuffers[p].commBufferSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//						//int pos = 0;
+	//						for(uint32_t i = ft; i <= endOctants; ++i ){
+	//							//PACK octants from ft to ft + partition[p] -1
+	//							const Class_Octant<3> & octant = octree.octants[i];
+	//							x = octant.getX();
+	//							y = octant.getY();
+	//							z = octant.getZ();
+	//							l = octant.getLevel();
+	//							m = octant.getMarker();
+	//							memcpy(info,octant.info,16);
+	//							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							error_flag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							error_flag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							error_flag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							for(int j = 0; j < 16; ++j){
+	//								MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
+	//							}
+	//							//TODO call gather to pack user data - DONE
+	//							userData.gather(sendBuffers[p],i);
+	//						}
+	//						ft += partition[p];
+	//						tailSize -= partition[p];
+	//					}
+	//				}
+	//			}
+	//
+	//			//Build receiver sources
+	//			vector<Class_Array> recvs(nproc);
+	//			recvs[rank] = Class_Array((uint32_t)sendBuffers.size()+1,-1);
+	//			recvs[rank].array[0] = rank;
+	//			int counter = 1;
+	//			map<int,Class_Comm_Buffer>::iterator sitend = sendBuffers.end();
+	//			for(map<int,Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
+	//				recvs[rank].array[counter] = sit->first;
+	//				++counter;
+	//			}
+	//			int nofRecvsPerProc[nproc];
+	//			error_flag = MPI_Allgather(&recvs[rank].arraySize,1,MPI_INT,nofRecvsPerProc,1,MPI_INT,MPI_COMM_WORLD);
+	//			int globalRecvsBuffSize = 0;
+	//			int displays[nproc];
+	//			for(int pp = 0; pp < nproc; ++pp){
+	//				displays[pp] = 0;
+	//				globalRecvsBuffSize += nofRecvsPerProc[pp];
+	//				for(int ppp = 0; ppp < pp; ++ppp){
+	//					displays[pp] += nofRecvsPerProc[ppp];
+	//				}
+	//			}
+	//			int globalRecvsBuff[globalRecvsBuffSize];
+	//			error_flag = MPI_Allgatherv(recvs[rank].array,recvs[rank].arraySize,MPI_INT,globalRecvsBuff,nofRecvsPerProc,displays,MPI_INT,MPI_COMM_WORLD);
+	//
+	//			vector<set<int> > sendersPerProc(nproc);
+	//			for(int pin = 0; pin < nproc; ++pin){
+	//				for(int k = displays[pin]+1; k < displays[pin] + nofRecvsPerProc[pin]; ++k){
+	//					sendersPerProc[globalRecvsBuff[k]].insert(globalRecvsBuff[displays[pin]]);
+	//				}
+	//			}
+	//
+	//			//Communicate Octants (size)
+	//			MPI_Request req[sendBuffers.size()+sendersPerProc[rank].size()];
+	//			MPI_Status stats[sendBuffers.size()+sendersPerProc[rank].size()];
+	//			int nReq = 0;
+	//			map<int,int> recvBufferSizePerProc;
+	//			set<int>::iterator senditend = sendersPerProc[rank].end();
+	//			for(set<int>::iterator sendit = sendersPerProc[rank].begin(); sendit != senditend; ++sendit){
+	//				recvBufferSizePerProc[*sendit] = 0;
+	//				error_flag = MPI_Irecv(&recvBufferSizePerProc[*sendit],1,MPI_UINT32_T,*sendit,rank,MPI_COMM_WORLD,&req[nReq]);
+	//				++nReq;
+	//			}
+	//			map<int,Class_Comm_Buffer>::reverse_iterator rsitend = sendBuffers.rend();
+	//			for(map<int,Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+	//				error_flag =  MPI_Isend(&rsit->second.commBufferSize,1,MPI_UINT32_T,rsit->first,rsit->first,MPI_COMM_WORLD,&req[nReq]);
+	//				++nReq;
+	//			}
+	//			MPI_Waitall(nReq,req,stats);
+	//
+	//			//COMMUNICATE THE BUFFERS TO THE RECEIVERS
+	//			//recvBuffers structure is declared and each buffer is initialized to the right size
+	//			//then, sendBuffers are communicated by senders and stored in recvBuffers in the receivers
+	//			uint32_t nofNewHead = 0;
+	//			uint32_t nofNewTail = 0;
+	//			map<int,Class_Comm_Buffer> recvBuffers;
+	//
+	//			map<int,int>::iterator ritend = recvBufferSizePerProc.end();
+	//			for(map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
+	//				recvBuffers[rit->first] = Class_Comm_Buffer(rit->second,'a');
+	//				//			uint32_t nofNewPerProc = (uint32_t)(rit->second / (uint32_t)ceil((double)octantBytes / (double)(CHAR_BIT/8)));
+	//				//			if(rit->first < rank)
+	//				//				nofNewHead += nofNewPerProc;
+	//				//			else if(rit->first > rank)
+	//				//				nofNewTail += nofNewPerProc;
+	//			}
+	//
+	//			nReq = 0;
+	//			for(set<int>::iterator sendit = sendersPerProc[rank].begin(); sendit != senditend; ++sendit){
+	//				//nofBytesOverProc += recvBuffers[sit->first].commBufferSize;
+	//				error_flag = MPI_Irecv(recvBuffers[*sendit].commBuffer,recvBuffers[*sendit].commBufferSize,MPI_PACKED,*sendit,rank,MPI_COMM_WORLD,&req[nReq]);
+	//				++nReq;
+	//			}
+	//			for(map<int,Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+	//				error_flag =  MPI_Isend(rsit->second.commBuffer,rsit->second.commBufferSize,MPI_PACKED,rsit->first,rsit->first,MPI_COMM_WORLD,&req[nReq]);
+	//				++nReq;
+	//			}
+	//			MPI_Waitall(nReq,req,stats);
+	//
+	//			//Unpack number of octants per sender
+	//			map<int,uint32_t> nofNewOverProcs;
+	//			map<int,Class_Comm_Buffer>::iterator rbitend = recvBuffers.end();
+	//			for(map<int,Class_Comm_Buffer>::iterator rbit = recvBuffers.begin(); rbit != rbitend; ++rbit){
+	//				uint32_t nofNewPerProc;
+	//				MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&nofNewPerProc,1,MPI_UINT32_T,MPI_COMM_WORLD);
+	//				nofNewOverProcs[rbit->first] = nofNewPerProc;
+	//				if(rbit->first < rank)
+	//					nofNewHead += nofNewPerProc;
+	//				else if(rbit->first > rank)
+	//					nofNewTail += nofNewPerProc;
+	//			}
+	//
+	//			//MOVE RESIDENT TO BEGIN IN OCTANTS
+	//			uint32_t resEnd = octree.getNumOctants() - tailOffset;
+	//			uint32_t nofResidents = resEnd - headOffset;
+	//			uint32_t octCounter = 0;
+	//			for(uint32_t i = headOffset; i < resEnd; ++i){
+	//				octree.octants[octCounter] = octree.octants[i];
+	//				//TODO move data - DONE
+	//				userData.move(i,octCounter);
+	//				++octCounter;
+	//			}
+	//			uint32_t newCounter = nofNewHead + nofNewTail + nofResidents;
+	//			octree.octants.resize(newCounter);
+	//			userData.data.resize(newCounter);
+	//			//MOVE RESIDENTS IN RIGHT POSITION
+	//			uint32_t resCounter = nofNewHead + nofResidents - 1;
+	//			for(uint32_t k = 0; k < nofResidents ; ++k){
+	//				octree.octants[resCounter - k] = octree.octants[nofResidents - k - 1];
+	//				//TODO move data - DON
+	//				userData.move(nofResidents - k - 1,resCounter - k);
+	//			}
+	//
+	//			//UNPACK BUFFERS AND BUILD NEW OCTANTS
+	//			newCounter = 0;
+	//			bool jumpResident = false;
+	//
+	//			for(map<int,Class_Comm_Buffer>::iterator rbit = recvBuffers.begin(); rbit != rbitend; ++rbit){
+	//				//TODO change new octants counting, probably you have to communicate the number of news per proc
+	//				uint32_t nofNewPerProc = nofNewOverProcs[rbit->first];//(uint32_t)(rbit->second.commBufferSize / (uint32_t)ceil((double)octantBytes / (double)(CHAR_BIT/8)));
+	//				//int pos = 0;
+	//				if(rbit->first > rank && !jumpResident){
+	//					newCounter += nofResidents ;
+	//					jumpResident = true;
+	//				}
+	//				for(int i = nofNewPerProc - 1; i >= 0; --i){
+	//					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&x,1,MPI_UINT32_T,MPI_COMM_WORLD);
+	//					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&y,1,MPI_UINT32_T,MPI_COMM_WORLD);
+	//					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&z,1,MPI_UINT32_T,MPI_COMM_WORLD);
+	//					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&l,1,MPI_UINT8_T,MPI_COMM_WORLD);
+	//					octree.octants[newCounter] = Class_Octant<3>(l,x,y,z);
+	//					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&m,1,MPI_INT8_T,MPI_COMM_WORLD);
+	//					octree.octants[newCounter].setMarker(m);
+	//					for(int j = 0; j < 16; ++j){
+	//						error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&info[j],1,MPI::BOOL,MPI_COMM_WORLD);
+	//						octree.octants[newCounter].info[j] = info[j];
+	//					}
+	//					//TODO Unpack data
+	//					userData.scatter(rbit->second,newCounter);
+	//					++newCounter;
+	//				}
+	//			}
+	//			octree.octants.shrink_to_fit();
+	//			userData.data.shrink_to_fit();
+	//
+	//			delete [] newPartitionRangeGlobalidx;
+	//			newPartitionRangeGlobalidx = NULL;
+	//
+	//			//Update and ghosts here
+	//			updateLoadBalance();
+	//			setPboundGhosts();
+	//
+	//		}
+	//		delete [] partition;
+	//		partition = NULL;
+	//
+	//		//Write info of final partition on log
+	//		writeLog(" ");
+	//		writeLog(" Final Parallel partition : ");
+	//		writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
+	//		for(int ii=1; ii<nproc; ii++){
+	//			writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
+	//		}
+	//		writeLog(" ");
+	//		writeLog("---------------------------------------------");
+	//
+	//	};
 
 	//=================================================================================//
 
@@ -3933,12 +3933,12 @@ public:
 				stride += partition[i];
 			Class_Local_Tree<3>::OctantsType::const_iterator first = octree.octants.begin() + stride;
 			Class_Local_Tree<3>::OctantsType::const_iterator last = first + partition[rank];
-//			typename Class_Data_LB_Interface<Impl>::Data::iterator firstData = userData.data.begin() + stride;
-//			typename Class_Data_LB_Interface<Impl>::Data::iterator lastData = firstData + partition[rank];
+			//			typename Class_Data_LB_Interface<Impl>::Data::iterator firstData = userData.data.begin() + stride;
+			//			typename Class_Data_LB_Interface<Impl>::Data::iterator lastData = firstData + partition[rank];
 			octree.octants.assign(first, last);
-//			userData.data.assign(firstData,lastData);
+			//			userData.data.assign(firstData,lastData);
 			octree.octants.shrink_to_fit();
-//			userData.data.shrink_to_fit();
+			//			userData.data.shrink_to_fit();
 			first = octree.octants.end();
 			last = octree.octants.end();
 
@@ -4317,7 +4317,7 @@ public:
 			}
 			uint32_t newCounter = nofNewHead + nofNewTail + nofResidents;
 			octree.octants.resize(newCounter);
-//			userData.data.resize(newCounter);
+			//			userData.data.resize(newCounter);
 			userData.resize(newCounter);
 			//MOVE RESIDENTS IN RIGHT POSITION
 			uint32_t resCounter = nofNewHead + nofResidents - 1;
@@ -4357,7 +4357,7 @@ public:
 				}
 			}
 			octree.octants.shrink_to_fit();
-//			userData.data.shrink_to_fit();
+			//			userData.data.shrink_to_fit();
 			userData.shrink();
 
 			delete [] newPartitionRangeGlobalidx;
@@ -5968,4 +5968,144 @@ public:
 		MPI_Barrier(MPI_COMM_WORLD);
 	}
 	// =============================================================================== //
+
+	// =============================================================================== //
+
+	/** Write the physical octree mesh in .vtu format with data for test in a user-defined file.
+	 * If the connectivity is not stored, the method temporary computes it.
+	 * The method doesn't write the ghosts on file.
+	 * \param[in] filename Seriously?....
+	 */
+	void writeTest(string filename, vector<double> data) {
+
+		bool clear = false;
+		if (octree.connectivity.size() == 0) {
+			octree.computeConnectivity();
+			clear = true;
+		}
+
+		stringstream name;
+		name << "s" << std::setfill('0') << std::setw(4) << nproc << "-p" << std::setfill('0') << std::setw(4) << rank << "-" << filename << ".vtu";
+
+		ofstream out(name.str().c_str());
+		if(!out.is_open()){
+			stringstream ss;
+			ss << filename << "*.vtu cannot be opened and it won't be written.";
+			writeLog(ss.str());
+			return;
+		}
+		int nofNodes = octree.nodes.size();
+		int nofOctants = octree.connectivity.size();
+		int nofAll = nofOctants;
+		out << "<?xml version=\"1.0\"?>" << endl
+				<< "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
+				<< "  <UnstructuredGrid>" << endl
+				<< "    <Piece NumberOfCells=\"" << octree.connectivity.size() << "\" NumberOfPoints=\"" << octree.nodes.size() << "\">" << endl;
+		out << "      <CellData Scalars=\"Data\">" << endl;
+		out << "      <DataArray type=\"Float64\" Name=\"Data\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
+				<< "          " << std::fixed;
+		int ndata = octree.connectivity.size();
+		for(int i = 0; i < ndata; i++)
+		{
+			out << std::setprecision(6) << data[i] << " ";
+			if((i+1)%4==0 && i!=ndata-1)
+				out << endl << "          ";
+		}
+		out << endl << "        </DataArray>" << endl
+				<< "      </CellData>" << endl
+				<< "      <Points>" << endl
+				<< "        <DataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\""<< 3 <<"\" format=\"ascii\">" << endl
+				<< "          " << std::fixed;
+		for(int i = 0; i < nofNodes; i++)
+		{
+			for(int j = 0; j < 3; ++j){
+				if (j==0) out << std::setprecision(6) << trans.mapX(octree.nodes[i][j]) << " ";
+				if (j==1) out << std::setprecision(6) << trans.mapY(octree.nodes[i][j]) << " ";
+				if (j==2) out << std::setprecision(6) << trans.mapZ(octree.nodes[i][j]) << " ";
+			}
+			if((i+1)%4==0 && i!=nofNodes-1)
+				out << endl << "          ";
+		}
+		out << endl << "        </DataArray>" << endl
+				<< "      </Points>" << endl
+				<< "      <Cells>" << endl
+				<< "        <DataArray type=\"UInt64\" Name=\"connectivity\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
+				<< "          ";
+		for(int i = 0; i < nofOctants; i++)
+		{
+			for(int j = 0; j < global3D.nnodes; j++)
+			{
+				out << octree.connectivity[i][j] << " ";
+			}
+			if((i+1)%3==0 && i!=nofOctants-1)
+				out << endl << "          ";
+		}
+		out << endl << "        </DataArray>" << endl
+				<< "        <DataArray type=\"UInt64\" Name=\"offsets\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
+				<< "          ";
+		for(int i = 0; i < nofAll; i++)
+		{
+			out << (i+1)*global3D.nnodes << " ";
+			if((i+1)%12==0 && i!=nofAll-1)
+				out << endl << "          ";
+		}
+		out << endl << "        </DataArray>" << endl
+				<< "        <DataArray type=\"UInt8\" Name=\"types\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
+				<< "          ";
+		for(int i = 0; i < nofAll; i++)
+		{
+			int type;
+			type = 11;
+			out << type << " ";
+			if((i+1)%12==0 && i!=nofAll-1)
+				out << endl << "          ";
+		}
+		out << endl << "        </DataArray>" << endl
+				<< "      </Cells>" << endl
+				<< "    </Piece>" << endl
+				<< "  </UnstructuredGrid>" << endl
+				<< "</VTKFile>" << endl;
+
+
+		if(rank == 0){
+			name.str("");
+			name << "s" << std::setfill('0') << std::setw(4) << nproc << "-" << filename << ".pvtu";
+			ofstream pout(name.str().c_str());
+			if(!pout.is_open()){
+				stringstream ss;
+				ss << filename << "*.pvtu cannot be opened and it won't be written.";
+				writeLog(ss.str());
+				return;
+			}
+
+			pout << "<?xml version=\"1.0\"?>" << endl
+					<< "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
+					<< "  <PUnstructuredGrid GhostLevel=\"0\">" << endl
+					<< "    <PPointData>" << endl
+					<< "    </PPointData>" << endl
+					<< "    <PCellData Scalars=\"Data\">" << endl
+					<< "      <PDataArray type=\"Float64\" Name=\"Data\" NumberOfComponents=\"1\"/>" << endl
+					<< "    </PCellData>" << endl
+					<< "    <PPoints>" << endl
+					<< "      <PDataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\"3\"/>" << endl
+					<< "    </PPoints>" << endl;
+			for(int i = 0; i < nproc; i++)
+				pout << "    <Piece Source=\"s" << std::setw(4) << std::setfill('0') << nproc << "-p" << std::setw(4) << std::setfill('0') << i << "-" << filename << ".vtu\"/>" << endl;
+			pout << "  </PUnstructuredGrid>" << endl
+					<< "</VTKFile>";
+
+			pout.close();
+
+		}
+		MPI_Barrier(MPI_COMM_WORLD);
+
+
+	}
+
+	// =============================================================================== //
+
+
+
 };
+
+
