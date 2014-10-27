@@ -6,6 +6,8 @@
 
 using namespace std;
 
+// =================================================================================== //
+
 int main(int argc, char *argv[]) {
 
 	MPI::Init(argc, argv);
@@ -19,7 +21,7 @@ int main(int argc, char *argv[]) {
 		pablo3.computeConnectivity();
 		pablo3.write("Pablo3_iter"+to_string(iter));
 
-		/**<Refine globally three level and write the para_tree.*/
+		/**<Refine globally two level and write the para_tree.*/
 		for (iter=1; iter<3; iter++){
 			pablo3.adaptGlobalRefine();
 			pablo3.updateConnectivity();
@@ -31,10 +33,11 @@ int main(int argc, char *argv[]) {
 		xc = yc = 0.5;
 		double radius = 0.4;
 
-		/**<Simple adapt() 9 times the octants with at least one node inside the circle.*/
+		/**<Simple adapt() 6 times the octants with at least one node inside the circle.*/
 		for (iter=3; iter<9; iter++){
 			uint32_t nocts = pablo3.getNumOctants();
 			for (int i=0; i<nocts; i++){
+				/**<Set NO 2:1 balance for every octant.*/
 				pablo3.setBalance(i,false);
 				dvector2D nodes = pablo3.getNodes(i);
 				for (int j=0; j<global2D.nnodes; j++){
@@ -62,7 +65,7 @@ int main(int argc, char *argv[]) {
 		xc = yc = 0.35;
 		radius = 0.15;
 
-		/**<Simple adapt() 9 times the octants with at least one node inside the circle.*/
+		/**<Simple adapt() 5 times the octants with at least one node inside the circle.*/
 		for (iter=10; iter<15; iter++){
 			uint32_t nocts = pablo3.getNumOctants();
 			for (int i=0; i<nocts; i++){

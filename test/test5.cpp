@@ -6,6 +6,8 @@
 
 using namespace std;
 
+// =================================================================================== //
+
 int main(int argc, char *argv[]) {
 
 	MPI::Init(argc, argv);
@@ -18,7 +20,8 @@ int main(int argc, char *argv[]) {
 
 		/**<Set NO 2:1 balance for the octree.*/
 		pablo5.setBalance(idx,false);
-		/**<Refine globally six level and write the para_tree.*/
+
+		/**<Refine globally five level and write the para_tree.*/
 		for (iter=1; iter<6; iter++){
 			pablo5.adaptGlobalRefine();
 		}
@@ -43,10 +46,12 @@ int main(int argc, char *argv[]) {
 				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
 					oct_data[i] = (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0));
 					if (center[0]<=xc){
+
 						/**<Set to refine to the octants in the left side of the domain.*/
 						pablo5.setMarker(i,1);
 					}
 					else{
+
 						/**<Set to coarse to the octants in the right side of the domain.*/
 						pablo5.setMarker(i,-1);
 					}
@@ -89,6 +94,7 @@ int main(int argc, char *argv[]) {
 			pablo5.adapt(mapper);
 			nocts = pablo5.getNumOctants();
 			oct_data_new.resize(nocts, 0.0);
+
 			/**<Assign to the new octant the average of the old children if it is new after a coarsening;
 			 * while assign to the new octant the data of the old father if it is new after a refinement.
 			 */
@@ -106,6 +112,7 @@ int main(int argc, char *argv[]) {
 			/**<Update the connectivity and write the para_tree.*/
 			pablo5.updateConnectivity();
 			pablo5.writeTest("Pablo5_iter"+to_string(iter), oct_data_new);
+
 			oct_data = oct_data_new;
 		}
 

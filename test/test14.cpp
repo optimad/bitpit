@@ -7,6 +7,8 @@
 
 using namespace std;
 
+// =================================================================================== //
+
 int main(int argc, char *argv[]) {
 
 	MPI::Init(argc, argv);
@@ -14,22 +16,29 @@ int main(int argc, char *argv[]) {
 	{
 		int iter = 0;
 		int dim = 2;
+
+		/**<Instantation of a 2D para_tree object.*/
 		Class_Para_Tree<2> pablo14;
-		pablo14.computeConnectivity();
+
+		/**<Refine globally four level and write the para_tree.*/
 		for (iter=1; iter<5; iter++){
 			pablo14.adaptGlobalRefine();
-			pablo14.updateConnectivity();
 		}
 
+		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
 		pablo14.loadBalance();
 
+		/**<Define a center point and a radius.*/
 		double xc, yc;
 		xc = yc = 0.5;
 		double radius = 0.25;
 
+		/**<Define vectors of data.*/
 		uint32_t nocts = pablo14.getNumOctants();
 		uint32_t nghosts = pablo14.getNumGhosts();
 		vector<double> oct_data(nocts, 0.0), ghost_data(nghosts, 0.0);
+
+		/**<Assign a data to the octants with at least one node inside the circle.*/
 		for (int i=0; i<nocts; i++){
 			dvector2D nodes = pablo14.getNodes(i);
 			for (int j=0; j<global2D.nnodes; j++){
@@ -41,6 +50,7 @@ int main(int argc, char *argv[]) {
 			}
 		}
 
+		/**<Assign a data to the ghost octants (PARALLEL TEST) with at least one node inside the circle.*/
 		for (int i=0; i<nghosts; i++){
 			Class_Octant<2> *oct = pablo14.getGhostOctant(i);
 			dvector2D nodes = pablo14.getNodes(oct);
@@ -53,10 +63,12 @@ int main(int argc, char *argv[]) {
 			}
 		}
 
+		/**<Update the connectivity and write the para_tree.*/
 		iter = 0;
 		pablo14.updateConnectivity();
 		pablo14.writeTest("Pablo14_iter"+to_string(iter), oct_data);
 
+		/**<Smoothing iterations on initial data*/
 		int start = iter + 1;
 		for (iter=start; iter<start+25; iter++){
 			vector<double> oct_data_smooth(nocts, 0.0);
@@ -66,6 +78,8 @@ int main(int argc, char *argv[]) {
 			for (int i=0; i<nocts; i++){
 				neigh.clear();
 				isghost.clear();
+
+				/**<Find neighbours through edges (codim=1) and nodes (codim=2) of the octants*/
 				for (codim=1; codim<dim+1; codim++){
 					if (codim == 1){
 						nfaces = global2D.nfaces;
@@ -79,6 +93,8 @@ int main(int argc, char *argv[]) {
 						isghost.insert(isghost.end(), isghost_t.begin(), isghost_t.end());
 					}
 				}
+
+				/**<Smoothing data with the average over the one ring neighbours of octants*/
 				oct_data_smooth[i] = oct_data[i]/(neigh.size()+1);
 				for (int j=0; j<neigh.size(); j++){
 					if (isghost[j]){
@@ -90,12 +106,14 @@ int main(int argc, char *argv[]) {
 				}
 			}
 
-
+			/**<Update the connectivity and write the para_tree.*/
 			pablo14.updateConnectivity();
 			pablo14.writeTest("Pablo14_iter"+to_string(iter), oct_data_smooth);
 
+			/**<Communicate the data of the octants and the ghost octants between the processes.*/
 			User_Data_Comm<vector<double> > data_comm(oct_data_smooth, ghost_data);
 			pablo14.communicate(data_comm);
+
 			oct_data = oct_data_smooth;
 
 		}

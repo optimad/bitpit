@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
 		pablo2.computeConnectivity();
 		pablo2.write("Pablo2_iter0");
 
-		/**<Refine globally three level and write the para_tree.*/
+		/**<Refine globally two level and write the para_tree.*/
 		for (int iter=1; iter<3; iter++){
 			pablo2.adaptGlobalRefine();
 			pablo2.updateConnectivity();

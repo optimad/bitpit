@@ -6,73 +6,98 @@
 
 using namespace std;
 
+// =================================================================================== //
+
 int main(int argc, char *argv[]) {
 
 	MPI::Init(argc, argv);
 
 	{
 		int iter = 0;
-		Class_Para_Tree<2> pablo3;
-		pablo3.computeConnectivity();
-		pablo3.write("Pablo3_iter"+to_string(iter));
+
+		/**<Instantation of a 2D para_tree object.*/
+		Class_Para_Tree<2> pablo13;
+
+		/**<Compute the connectivity and write the para_tree.*/
+		pablo13.computeConnectivity();
+		pablo13.write("Pablo13_iter"+to_string(iter));
+
+		/**<Refine globally two level and write the para_tree.*/
 		for (iter=1; iter<3; iter++){
-			pablo3.adaptGlobalRefine();
-			pablo3.updateConnectivity();
-			pablo3.write("Pablo3_iter"+to_string(iter));
+			pablo13.adaptGlobalRefine();
+			pablo13.updateConnectivity();
+			pablo13.write("Pablo13_iter"+to_string(iter));
 		}
 
-		pablo3.loadBalance();
+		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
+		pablo13.loadBalance();
 
+		/**<Define a center point and a radius.*/
 		double xc, yc;
 		xc = yc = 0.5;
 		double radius = 0.4;
 
-		// Simple adapt()
+		/**<Simple adapt() (refine) 6 times the octants with at least one node inside the circle.*/
 		for (iter=3; iter<9; iter++){
-			uint32_t nocts = pablo3.getNumOctants();
+			uint32_t nocts = pablo13.getNumOctants();
 			for (int i=0; i<nocts; i++){
-				pablo3.setBalance(i,false);
-				dvector2D nodes = pablo3.getNodes(i);
+				/**<Set NO 2:1 balance for every octant.*/
+				pablo13.setBalance(i,false);
+				dvector2D nodes = pablo13.getNodes(i);
 				for (int j=0; j<global2D.nnodes; j++){
 					double x = nodes[j][0];
 					double y = nodes[j][1];
 					if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
-						pablo3.setMarker(i, 1);
+						pablo13.setMarker(i, 1);
 					}
 				}
 			}
-			pablo3.adapt();
-			pablo3.loadBalance();
-			pablo3.updateConnectivity();
-			pablo3.write("Pablo3_iter"+to_string(iter));
+
+			/**<Adapt octree.*/
+			pablo13.adapt();
+
+			/**<(Load)Balance the octree over the processes.*/
+			pablo13.loadBalance();
+
+			/**<Update the connectivity and write the para_tree.*/
+			pablo13.updateConnectivity();
+			pablo13.write("Pablo13_iter"+to_string(iter));
 		}
 
-		pablo3.adaptGlobalCoarse();
-		pablo3.updateConnectivity();
-		pablo3.write("Pablo3_iter"+to_string(iter));
+		/**<Coarse globally one level and write the para_tree.*/
+		pablo13.adaptGlobalCoarse();
+		pablo13.updateConnectivity();
+		pablo13.write("Pablo13_iter"+to_string(iter));
 
 
+		/**<Define a center point and a radius.*/
 		xc = yc = 0.35;
 		radius = 0.15;
 
-		// Simple adapt()
+		/**<Simple adapt() 5 times the octants with at least one node inside the circle.*/
 		for (iter=10; iter<15; iter++){
-			uint32_t nocts = pablo3.getNumOctants();
+			uint32_t nocts = pablo13.getNumOctants();
 			for (int i=0; i<nocts; i++){
-				pablo3.setBalance(i,false);
-				dvector2D nodes = pablo3.getNodes(i);
+				pablo13.setBalance(i,false);
+				dvector2D nodes = pablo13.getNodes(i);
 				for (int j=0; j<global2D.nnodes; j++){
 					double x = nodes[j][0];
 					double y = nodes[j][1];
+					/**<Set refinement marker=-1 (coarse it one time) for octants inside a circle.*/
 					if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
-						pablo3.setMarker(i, -1);
+						pablo13.setMarker(i, -1);
 					}
 				}
 			}
-			pablo3.adapt();
-			pablo3.loadBalance();
-			pablo3.updateConnectivity();
-			pablo3.write("Pablo3_iter"+to_string(iter));
+			/**<Adapt octree.*/
+			pablo13.adapt();
+
+			/**<(Load)Balance the octree over the processes.*/
+			pablo13.loadBalance();
+
+			/**<Update the connectivity and write the para_tree.*/
+			pablo13.updateConnectivity();
+			pablo13.write("Pablo13_iter"+to_string(iter));
 		}
 	}
 	MPI::Finalize();

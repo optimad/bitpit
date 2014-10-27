@@ -6,45 +6,59 @@
 
 using namespace std;
 
+// =================================================================================== //
+
 int main(int argc, char *argv[]) {
 
 	MPI::Init(argc, argv);
 
 	{
 
-		Class_Para_Tree<2> pablo2;
-		pablo2.computeConnectivity();
-		pablo2.write("Pablo2_iter0");
+		/**<Instantation of a 2D para_tree object.*/
+		Class_Para_Tree<2> pablo12;
+
+		/**<Compute the connectivity and write the para_tree.*/
+		pablo12.computeConnectivity();
+		pablo12.write("Pablo12_iter0");
+
+		/**<Refine globally two level and write the para_tree.*/
 		for (int iter=1; iter<3; iter++){
-			pablo2.adaptGlobalRefine();
-			pablo2.updateConnectivity();
-			pablo2.write("Pablo2_iter"+to_string(iter));
+			pablo12.adaptGlobalRefine();
+			pablo12.updateConnectivity();
+			pablo12.write("Pablo12_iter"+to_string(iter));
 		}
 
-		pablo2.loadBalance();
 
+		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
+		pablo12.loadBalance();
+
+		/**<Define a center point and a radius.*/
 		double xc, yc;
 		xc = yc = 0.5;
-
 		double radius = 0.4;
 
-		// Simple adapt() in upper area of domain
+		/**<Simple adapt() (refine) 6 times the octants with at least one node inside the circle.*/
 		for (int iter=3; iter<9; iter++){
-			uint32_t nocts = pablo2.getNumOctants();
+			uint32_t nocts = pablo12.getNumOctants();
 			for (int i=0; i<nocts; i++){
-				dvector2D nodes = pablo2.getNodes(i);
+				dvector2D nodes = pablo12.getNodes(i);
 				for (int j=0; j<global2D.nnodes; j++){
 					double x = nodes[j][0];
 					double y = nodes[j][1];
 					if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
-						pablo2.setMarker(i, 1);
+						pablo12.setMarker(i, 1);
 					}
 				}
 			}
-			pablo2.adapt();
-			pablo2.loadBalance();
-			pablo2.updateConnectivity();
-			pablo2.write("Pablo2_iter"+to_string(iter));
+			/**<Adapt octree.*/
+			pablo12.adapt();
+
+			/**<(Load)Balance the octree over the processes.*/
+			pablo12.loadBalance();
+
+			/**<Update the connectivity and write the para_tree.*/
+			pablo12.updateConnectivity();
+			pablo12.write("Pablo12_iter"+to_string(iter));
 		}
 	}
 

@@ -6,6 +6,8 @@
 
 using namespace std;
 
+// =================================================================================== //
+
 int main(int argc, char *argv[]) {
 
 	MPI::Init(argc, argv);
@@ -16,7 +18,7 @@ int main(int argc, char *argv[]) {
 		/**<Instantation of a 2D para_tree object.*/
 		Class_Para_Tree<2> pablo4;
 
-		/**<Refine globally five level and write the para_tree.*/
+		/**<Refine globally four level and write the para_tree.*/
 		for (iter=1; iter<5; iter++){
 			pablo4.adaptGlobalRefine();
 		}
@@ -103,6 +105,7 @@ int main(int argc, char *argv[]) {
 			/**<Update the connectivity and write the para_tree.*/
 			pablo4.updateConnectivity();
 			pablo4.writeTest("Pablo4_iter"+to_string(iter), oct_data_smooth);
+
 			oct_data = oct_data_smooth;
 		}
 	}
