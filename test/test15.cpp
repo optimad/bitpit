@@ -2,7 +2,6 @@
 #include <mpi.h>
 #include "Class_Global.hpp"
 #include "Class_Para_Tree.hpp"
-#include "ioFunct.hpp"
 #include "User_Data_Comm.hpp"
 #include "User_Data_LB.hpp"
 
@@ -20,9 +19,8 @@ int main(int argc, char *argv[]) {
 		/**<Instantation of a 2D para_tree object.*/
 		Class_Para_Tree<2> pablo15;
 
-		int idx = 0;
-
 		/**<Set NO 2:1 balance for the octree.*/
+		int idx = 0;
 		pablo15.setBalance(idx,false);
 
 		/**<Refine globally five level and write the para_tree.*/
@@ -42,7 +40,7 @@ int main(int argc, char *argv[]) {
 
 		/**<Assign a data (distance from center of a circle) to the octants with at least one node inside the circle.*/
 		for (int i=0; i<nocts; i++){
-			dvector2D nodes = pablo15.getNodes(i);
+			vector<vector<double> > nodes = pablo15.getNodes(i);
 			vector<double> center = pablo15.getCenter(i);
 			for (int j=0; j<global2D.nnodes; j++){
 				double x = nodes[j][0];
@@ -63,8 +61,8 @@ int main(int argc, char *argv[]) {
 			}
 		}
 
-		iter = 0;
 		/**<Update the connectivity and write the para_tree.*/
+		iter = 0;
 		pablo15.updateConnectivity();
 		pablo15.writeTest("Pablo15_iter"+to_string(iter), oct_data);
 
@@ -72,7 +70,7 @@ int main(int argc, char *argv[]) {
 		int start = 1;
 		for (iter=start; iter<start+2; iter++){
 			for (int i=0; i<nocts; i++){
-				dvector2D nodes = pablo15.getNodes(i);
+				vector<vector<double> > nodes = pablo15.getNodes(i);
 				vector<double> center = pablo15.getCenter(i);
 				for (int j=0; j<global2D.nnodes; j++){
 					double x = nodes[j][0];

@@ -2,7 +2,6 @@
 #include <mpi.h>
 #include "Class_Global.hpp"
 #include "Class_Para_Tree.hpp"
-#include "ioFunct.hpp"
 
 using namespace std;
 
@@ -41,7 +40,7 @@ int main(int argc, char *argv[]) {
 		for (int iter=3; iter<9; iter++){
 			uint32_t nocts = pablo12.getNumOctants();
 			for (int i=0; i<nocts; i++){
-				dvector2D nodes = pablo12.getNodes(i);
+				vector<vector<double> > nodes = pablo12.getNodes(i);
 				for (int j=0; j<global2D.nnodes; j++){
 					double x = nodes[j][0];
 					double y = nodes[j][1];

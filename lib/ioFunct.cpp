@@ -157,8 +157,8 @@ void writeLocalTree(const u32vector2D& nodes, const u32vector2D& connectivity,
 
 // ----------------------------------------------------------------------------------- //
 
-void writePhysicalTree(const dvector2D& nodes, const u32vector2D& connectivity,
-		const dvector2D& ghostNodes, const u32vector2D& ghostConnectivity,
+void writePhysicalTree(const vector<vector<double> >& nodes, const u32vector2D& connectivity,
+		const vector<vector<double> >& ghostNodes, const u32vector2D& ghostConnectivity,
 		const Class_Para_Tree<2> & ptree, string filename) {
 
 	stringstream name;
@@ -429,8 +429,8 @@ void writeLocalTree(const u32vector2D& nodes, const u32vector2D& connectivity,
 
 // ----------------------------------------------------------------------------------- //
 
-void writePhysicalTree(const dvector2D& nodes, const u32vector2D& connectivity,
-		const dvector2D& ghostNodes, const u32vector2D& ghostConnectivity,
+void writePhysicalTree(const vector<vector<double> >& nodes, const u32vector2D& connectivity,
+		const vector<vector<double> >& ghostNodes, const u32vector2D& ghostConnectivity,
 		const Class_Para_Tree<3> & ptree, string filename) {
 
 	stringstream name;

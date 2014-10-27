@@ -2,7 +2,6 @@
 #include <mpi.h>
 #include "Class_Global.hpp"
 #include "Class_Para_Tree.hpp"
-#include "ioFunct.hpp"
 
 using namespace std;
 
@@ -38,7 +37,7 @@ int main(int argc, char *argv[]) {
 
 		/**<Assign a data (distance from center of a circle) to the octants with at least one node inside the circle.*/
 		for (int i=0; i<nocts; i++){
-			dvector2D nodes = pablo5.getNodes(i);
+			vector<vector<double> > nodes = pablo5.getNodes(i);
 			vector<double> center = pablo5.getCenter(i);
 			for (int j=0; j<global2D.nnodes; j++){
 				double x = nodes[j][0];
@@ -68,7 +67,7 @@ int main(int argc, char *argv[]) {
 		int start = 1;
 		for (iter=start; iter<start+2; iter++){
 			for (int i=0; i<nocts; i++){
-				dvector2D nodes = pablo5.getNodes(i);
+				vector<vector<double> > nodes = pablo5.getNodes(i);
 				vector<double> center = pablo5.getCenter(i);
 				for (int j=0; j<global2D.nnodes; j++){
 					double x = nodes[j][0];

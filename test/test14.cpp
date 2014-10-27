@@ -2,7 +2,6 @@
 #include <mpi.h>
 #include "Class_Global.hpp"
 #include "Class_Para_Tree.hpp"
-#include "ioFunct.hpp"
 #include "User_Data_Comm.hpp"
 
 using namespace std;
@@ -40,7 +39,7 @@ int main(int argc, char *argv[]) {
 
 		/**<Assign a data to the octants with at least one node inside the circle.*/
 		for (int i=0; i<nocts; i++){
-			dvector2D nodes = pablo14.getNodes(i);
+			vector<vector<double> > nodes = pablo14.getNodes(i);
 			for (int j=0; j<global2D.nnodes; j++){
 				double x = nodes[j][0];
 				double y = nodes[j][1];
@@ -53,7 +52,7 @@ int main(int argc, char *argv[]) {
 		/**<Assign a data to the ghost octants (PARALLEL TEST) with at least one node inside the circle.*/
 		for (int i=0; i<nghosts; i++){
 			Class_Octant<2> *oct = pablo14.getGhostOctant(i);
-			dvector2D nodes = pablo14.getNodes(oct);
+			vector<vector<double> > nodes = pablo14.getNodes(oct);
 			for (int j=0; j<global2D.nnodes; j++){
 				double x = nodes[j][0];
 				double y = nodes[j][1];

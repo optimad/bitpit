@@ -32,11 +32,12 @@ int main(int argc, char *argv[]) {
 		xc = yc = 0.5;
 		double radius = 0.4;
 
-		/**<Simple adapt() 9 times the octants with at least one node inside the circle.*/
+		/**<Simple adapt() 9 times the octants with at least one node inside the circle.
+		 * */
 		for (int iter=3; iter<9; iter++){
 			uint32_t nocts = pablo2.getNumOctants();
 			for (int i=0; i<nocts; i++){
-				dvector2D nodes = pablo2.getNodes(i);
+				vector<vector<double> > nodes = pablo2.getNodes(i);
 				for (int j=0; j<global2D.nnodes; j++){
 					double x = nodes[j][0];
 					double y = nodes[j][1];

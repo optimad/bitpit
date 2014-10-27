@@ -2,7 +2,6 @@
 #include <mpi.h>
 #include "Class_Global.hpp"
 #include "Class_Para_Tree.hpp"
-#include "ioFunct.hpp"
 
 using namespace std;
 
@@ -39,7 +38,7 @@ int main(int argc, char *argv[]) {
 			for (int i=0; i<nocts; i++){
 				/**<Set NO 2:1 balance for every octant.*/
 				pablo3.setBalance(i,false);
-				dvector2D nodes = pablo3.getNodes(i);
+				vector<vector<double> > nodes = pablo3.getNodes(i);
 				for (int j=0; j<global2D.nnodes; j++){
 					double x = nodes[j][0];
 					double y = nodes[j][1];
@@ -70,7 +69,7 @@ int main(int argc, char *argv[]) {
 			uint32_t nocts = pablo3.getNumOctants();
 			for (int i=0; i<nocts; i++){
 				pablo3.setBalance(i,false);
-				dvector2D nodes = pablo3.getNodes(i);
+				vector<vector<double> > nodes = pablo3.getNodes(i);
 				for (int j=0; j<global2D.nnodes; j++){
 					double x = nodes[j][0];
 					double y = nodes[j][1];
