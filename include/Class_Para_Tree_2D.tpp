@@ -1272,15 +1272,17 @@ private:
 		return trans.mapArea(Area);
 	}
 
-	// TODO Fix it!
-	//	void getCenter(Class_Intersection<2> inter,
-	//			vector<double>& center) {
-	//		Class_Octant<2> oct = octree.extractOctant(inter.owners[inter.finer]);
-	//		double* center_ = oct.getCenter();
-	//		trans.mapCenter(center_, center);
-	//		delete [] center_;
-	//		center_ = NULL;
-	//	}
+	void getCenter(Class_Intersection<2> inter,dvector & center){
+		Class_Octant<2> oct = octree.extractOctant(inter.owners[inter.finer]);
+		double* center_ = oct.getCenter();
+		int sign = ( int(2*((inter.iface)%2)) - 1);
+		double deplace = double (sign * int(oct.getSize())) / 2;
+		center_[inter.iface/2] = uint32_t(int(center_[inter.iface/2]) + deplace);
+		trans.mapCenter(center_, center);
+		delete [] center_;
+		center_ = NULL;
+	}
+
 
 	void getNodes(Class_Intersection<2> inter,
 			dvector2D & nodes) {
@@ -2508,7 +2510,6 @@ public:
 		writeLog(" ");
 		writeLog("---------------------------------------------");
 
-
 	}
 
 	// =============================================================================== //
@@ -2875,7 +2876,6 @@ public:
 		writeLog(" ");
 		writeLog("---------------------------------------------");
 
-
 	}
 
 	// =============================================================================== //
@@ -2905,14 +2905,8 @@ public:
 				stride += partition[i];
 			Class_Local_Tree<2>::OctantsType::const_iterator first = octree.octants.begin() + stride;
 			Class_Local_Tree<2>::OctantsType::const_iterator last = first + partition[rank];
-			//			typename UserDataComm::Data::iterator firstData = userData.data.begin() + stride;
-			//			typename UserDataComm::Data::iterator lastData = firstData + partition[rank];
-			//			typename Class_Data_LB_Interface<Impl>::Data::iterator firstData = userData.data.begin() + stride;
-			//			typename Class_Data_LB_Interface<Impl>::Data::iterator lastData = firstData + partition[rank];
 			octree.octants.assign(first, last);
-			//			userData.data.assign(firstData,lastData);
 			octree.octants.shrink_to_fit();
-			//			userData.data.shrink_to_fit();
 			first = octree.octants.end();
 			last = octree.octants.end();
 
@@ -2921,7 +2915,6 @@ public:
 			//Update and build ghosts here
 			updateLoadBalance();
 			setPboundGhosts();
-
 		}
 		else
 		{
@@ -3026,7 +3019,6 @@ public:
 						//store the number of octants at the beginning of the buffer
 						MPI_Pack(&headSize,1,MPI_UINT32_T,sendBuffers[p].commBuffer,sendBuffers[p].commBufferSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
 						//USE BUFFER POS
-						//int pos = 0;
 						for(uint32_t i = 0; i <= lh; ++i){
 							//PACK octants from 0 to lh in sendBuffer[p]
 							const Class_Octant<2> & octant = octree.octants[i];
@@ -3066,7 +3058,6 @@ public:
 						//store the number of octants at the beginning of the buffer
 						MPI_Pack(&partition[p],1,MPI_UINT32_T,sendBuffers[p].commBuffer,sendBuffers[p].commBufferSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
 						//USE BUFFER POS
-						//int pos = 0;
 						for(uint32_t i = lh - partition[p] + 1; i <= lh; ++i){
 							//pack octants from lh - partition[p] to lh
 							const Class_Octant<2> & octant = octree.octants[i];
@@ -3113,7 +3104,6 @@ public:
 						//store the number of octants at the beginning of the buffer
 						MPI_Pack(&tailSize,1,MPI_UINT32_T,sendBuffers[p].commBuffer,sendBuffers[p].commBufferSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
 						//USE BUFFER POS
-						//int pos = 0;
 						for(uint32_t i = ft; i < octantsSize; ++i){
 							//PACK octants from ft to octantsSize-1
 							const Class_Octant<2> & octant = octree.octants[i];
@@ -3312,7 +3302,6 @@ public:
 				}
 			}
 			octree.octants.shrink_to_fit();
-			//userData.data.shrink_to_fit();
 			userData.shrink();
 
 			delete [] newPartitionRangeGlobalidx;
@@ -3368,12 +3357,8 @@ public:
 				stride += partition[i];
 			Class_Local_Tree<2>::OctantsType::const_iterator first = octree.octants.begin() + stride;
 			Class_Local_Tree<2>::OctantsType::const_iterator last = first + partition[rank];
-			//			typename Class_Data_LB_Interface<Impl>::Data::iterator firstData = userData.data.begin() + stride;
-			//			typename Class_Data_LB_Interface<Impl>::Data::iterator lastData = firstData + partition[rank];
 			octree.octants.assign(first, last);
-			//			userData.data.assign(firstData,lastData);
 			octree.octants.shrink_to_fit();
-			//			userData.data.shrink_to_fit();
 			first = octree.octants.end();
 			last = octree.octants.end();
 
@@ -3487,7 +3472,6 @@ public:
 						//store the number of octants at the beginning of the buffer
 						MPI_Pack(&headSize,1,MPI_UINT32_T,sendBuffers[p].commBuffer,sendBuffers[p].commBufferSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
 						//USE BUFFER POS
-						//int pos = 0;
 						for(uint32_t i = 0; i <= lh; ++i){
 							//PACK octants from 0 to lh in sendBuffer[p]
 							const Class_Octant<2> & octant = octree.octants[i];
@@ -3977,7 +3961,6 @@ private:
 			writeLog(" ");
 			writeLog(" Iteration	:	" + to_string(iteration));
 
-
 			commMarker();
 			localDone = octree.localBalance(true);
 			MPI_Barrier(MPI_COMM_WORLD);
@@ -4198,7 +4181,6 @@ public:
 			if (octree.getNumOctants() > nocts)
 				localDone = true;
 			updateAdapt();
-			//setPboundGhosts();
 			writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
 			nocts = octree.getNumOctants();
 
@@ -4524,116 +4506,6 @@ public:
 	// =============================================================================== //
 
 	//TODO Update intersections killed
-	//	bool adapt(u32vector & mapidx,
-	//			u32vector & mapinters_int,
-	//			u32vector & mapinters_ghost,
-	//			u32vector & mapinters_bord) {
-	//
-	//		bool globalDone = false, localDone = false;
-	//		uint32_t nocts = octree.getNumOctants();
-	//		vector<Class_Octant<2> >::iterator iter, iterend = octree.octants.end();
-	//
-	//		for (iter = octree.octants.begin(); iter != iterend; iter++){
-	//			iter->info[8] = false;
-	//			iter->info[9] = false;
-	//			iter->info[11] = false;
-	//		}
-	//
-	//		// mapidx init
-	//		mapidx.clear();
-	//		mapidx.resize(nocts);
-	//		mapidx.shrink_to_fit();
-	//		for (uint32_t i=0; i<nocts; i++){
-	//			mapidx[i] = i;
-	//		}
-	//		if(serial){
-	//			writeLog("---------------------------------------------");
-	//			writeLog(" ADAPT (Refine/Coarse)");
-	//			writeLog(" ");
-	//
-	//			// 2:1 Balance
-	//			balance21(true);
-	//
-	//			writeLog(" ");
-	//			writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
-	//
-	//			// Refine
-	//			while(octree.refine(mapidx));
-	//			if (octree.getNumOctants() > nocts)
-	//				localDone = true;
-	//			nocts = octree.getNumOctants();
-	//			writeLog(" Number of octants after Refine	:	" + to_string(nocts));
-	//
-	//			// Coarse
-	//			while(octree.coarse(mapidx));
-	//			if (octree.getNumOctants() < nocts){
-	//				localDone = true;
-	//			}
-	//			updateAfterCoarse(mapidx);
-	//			balance21(false);
-	//			while(octree.refine(mapidx));
-	//			updateAdapt();
-	//			nocts = octree.getNumOctants();
-	//			MPI_Barrier(MPI_COMM_WORLD);
-	//			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-	//			writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
-	//			updateAfterCoarse(mapidx);
-	//
-	//			octree.updateIntersections(mapidx,
-	//					mapinters_int,
-	//					mapinters_ghost,
-	//					mapinters_bord);
-	//
-	//			writeLog(" ");
-	//			writeLog("---------------------------------------------");
-	//		}
-	//		else{
-	//			writeLog("---------------------------------------------");
-	//			writeLog(" ADAPT (Refine/Coarse)");
-	//			writeLog(" ");
-	//
-	//			// 2:1 Balance
-	//			balance21(true);
-	//
-	//			writeLog(" ");
-	//			writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
-	//
-	//			// Refine
-	//			while(octree.refine(mapidx));
-	//
-	//			if (octree.getNumOctants() > nocts)
-	//				localDone = true;
-	//			nocts = octree.getNumOctants();
-	//			updateAdapt();
-	//			setPboundGhosts();
-	//			writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
-	//
-	//			// Coarse
-	//			while(octree.coarse(mapidx));
-	//			if (octree.getNumOctants() < nocts){
-	//				localDone = true;
-	//			}
-	//			updateAfterCoarse(mapidx);
-	//			setPboundGhosts();
-	//			balance21(false);
-	//			while(octree.refine(mapidx));
-	//			updateAdapt();
-	//			setPboundGhosts();
-	//			nocts = octree.getNumOctants();
-	//			MPI_Barrier(MPI_COMM_WORLD);
-	//			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-	//
-	//			octree.updateIntersections(mapidx,
-	//					mapinters_int,
-	//					mapinters_ghost,
-	//					mapinters_bord);
-	//
-	//			writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
-	//			writeLog(" ");
-	//			writeLog("---------------------------------------------");
-	//		}
-	//		return globalDone;
-	//	}
 
 	// =============================================================================== //
 
@@ -4730,62 +4602,6 @@ public:
 	void computeConnectivity() {
 		octree.computeConnectivity();
 	}
-	//	void computeConnectivity() {
-	//		map<uint64_t, vector<double> > mapnodes;
-	//		map<uint64_t, vector<double> >::iterator iter, iterend;
-	//		uint32_t i, k, counter;
-	//		uint64_t morton;
-	//		uint32_t noctants = octree.getNumOctants();
-	//		dvector2D octnodes;
-	//		uint8_t j;
-	//
-	//		clearConnectivity();
-	//
-	//		octnodes.reserve(global2D.nnodes);
-	//		if (nodes.size() == 0){
-	//			connectivity.resize(noctants);
-	//			for (i = 0; i < noctants; i++){
-	//				getNodes(&octree.octants[i], octnodes);
-	//				for (j = 0; j < global2D.nnodes; j++){
-	//					morton = mortonEncode_magicbits(uint32_t(octnodes[j][0]/trans.L*double(global2D.max_length)), uint32_t(octnodes[j][1]/trans.L*double(global2D.max_length)));
-	//					if (mapnodes[morton].size()==0){
-	//						mapnodes[morton].reserve(8);
-	//						for (k = 0; k < 3; k++){
-	//							mapnodes[morton].push_back(octnodes[j][k]);
-	//						}
-	//					}
-	//					mapnodes[morton].push_back(double(i));
-	//				}
-	//				dvector2D().swap(octnodes);
-	//			}
-	//			iter	= mapnodes.begin();
-	//			iterend	= mapnodes.end();
-	//			counter = 0;
-	//			uint32_t numnodes = mapnodes.size();
-	//			nodes.resize(numnodes);
-	//			while (iter != iterend){
-	//				vector<double> nodecasting(iter->second.begin(), iter->second.begin()+3);
-	//				nodes[counter] = nodecasting;
-	//				nodes[counter].shrink_to_fit();
-	//				for(vector<double>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
-	//					if (connectivity[int(*iter2)].size()==0){
-	//						connectivity[int(*iter2)].reserve(4);
-	//					}
-	//					connectivity[int(*iter2)].push_back(counter);
-	//				}
-	//				mapnodes.erase(iter++);
-	//				counter++;
-	//			}
-	//			nodes.shrink_to_fit();
-	//			//Slow. Memory saving.
-	//			for (int ii=0; ii<noctants; ii++){
-	//				connectivity[ii].shrink_to_fit();
-	//			}
-	//			connectivity.shrink_to_fit();
-	//		}
-	//		map<uint64_t, vector<double> >().swap(mapnodes);
-	//		iter = mapnodes.end();
-	//	}
 
 	// =================================================================================== //
 
@@ -4810,68 +4626,13 @@ public:
 	void computeGhostsConnectivity() {
 		octree.computeghostsConnectivity();
 	}
-	//	void computeghostsConnectivity() {
-	//		map<uint64_t, vector<double> > mapnodes;
-	//		map<uint64_t, vector<double> >::iterator iter, iterend;
-	//		uint32_t i, k, counter;
-	//		uint64_t morton;
-	//		uint32_t noctants = octree.size_ghosts;
-	//		dvector2D octnodes;
-	//		uint8_t j;
-	//
-	//		octnodes.reserve(global2D.nnodes);
-	//
-	//		if (ghostsnodes.size() == 0){
-	//			ghostsconnectivity.resize(noctants);
-	//			for (i = 0; i < noctants; i++){
-	//				getNodes(&octree.ghosts[i], octnodes);
-	//				for (j = 0; j < global2D.nnodes; j++){
-	//					morton = mortonEncode_magicbits(uint32_t(octnodes[j][0]/trans.L*double(global2D.max_length)), uint32_t(octnodes[j][1]/trans.L*double(global2D.max_length)));
-	//					if (mapnodes[morton].size()==0){
-	//						for (k = 0; k < 3; k++){
-	//							mapnodes[morton].push_back(octnodes[j][k]);
-	//						}
-	//					}
-	//					mapnodes[morton].push_back(i);
-	//				}
-	//				dvector2D().swap(octnodes);
-	//			}
-	//			iter	= mapnodes.begin();
-	//			iterend	= mapnodes.end();
-	//			uint32_t numnodes = mapnodes.size();
-	//			ghostsnodes.resize(numnodes);
-	//			counter = 0;
-	//			while (iter != iterend){
-	//				vector<double> nodecasting(iter->second.begin(), iter->second.begin()+3);
-	//				ghostsnodes[counter] = nodecasting;
-	//				ghostsnodes[counter].shrink_to_fit();
-	//				for(vector<double>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
-	//					if (ghostsconnectivity[int(*iter2)].size()==0){
-	//						ghostsconnectivity[int(*iter2)].reserve(4);
-	//					}
-	//					ghostsconnectivity[int(*iter2)].push_back(counter);
-	//				}
-	//				mapnodes.erase(iter++);
-	//				counter++;
-	//			}
-	//			ghostsnodes.shrink_to_fit();
-	//			//Slow. Memory saving.
-	//			for (int ii=0; ii<noctants; ii++){
-	//				ghostsconnectivity[ii].shrink_to_fit();
-	//			}
-	//			ghostsconnectivity.shrink_to_fit();
-	//		}
-	//		iter = mapnodes.end();
-	//	}
-	//
+
 	// =================================================================================== //
 
 	/** Clear the connectivity of ghost octants.
 	 */
 	void clearGhostsConnectivity() {
 		octree.clearghostsConnectivity();
-		//		dvector2D().swap(ghostsnodes);
-		//		u32vector2D().swap(ghostsconnectivity);
 	}
 
 	// =================================================================================== //
