@@ -564,9 +564,15 @@ T Dot_Product(                                                                  
 
 // Operator Cross_Product ----------------------------------------------------------- //
 template <class T, size_t d>
-array<T, d> Cross_Product(                                                            // COMPUTE THE CROSS-PRODUCT OF TWO ARRAYS
-    array<T, d> const           &,                                                    // (input) 1st argument of cross product
-    array<T, d> const           &                                                     // (input) 2nd argument of cross product
+T Cross_Product(                                                            // COMPUTE THE CROSS-PRODUCT OF TWO ARRAYS
+    array<T, 2> const           &,                                                    // (input) 1st argument of cross product
+    array<T, 2> const           &                                                     // (input) 2nd argument of cross product
+);
+
+template <class T, size_t d>
+array<T, 3> Cross_Product(                                                            // COMPUTE THE CROSS-PRODUCT OF TWO ARRAYS
+    array<T, 3> const           &,                                                    // (input) 1st argument of cross product
+    array<T, 3> const           &                                                     // (input) 2nd argument of cross product
 );
 
 // String =========================================================================== //
