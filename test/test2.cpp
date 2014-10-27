@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
 		xc = yc = 0.5;
 		double radius = 0.4;
 
-		/**<Simple adapt() 9 times the octants with at least one node inside the circle.
+		/**<Simple adapt() 6 times the octants with at least one node inside the circle.
 		 * */
 		for (int iter=3; iter<9; iter++){
 			uint32_t nocts = pablo2.getNumOctants();
