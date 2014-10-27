@@ -1215,61 +1215,6 @@ public:
 	//-------------------------------------------------------------------------------- //
 	// Intersections get Methods
 
-	//	/*! Get the local number of intersections on the global domain bord.
-	//	 * \return Local number of intersections on the global domain bord.
-	//	 */
-	//	uint32_t getNumIntersectionsBord() {
-	//		return octree.intersections_bord.size();
-	//	}
-	//
-	//	/*! Get the local number of intersections inside the local domain.
-	//	 * \return Local number of inner intersections inside the local domain.
-	//	 */
-	//	uint32_t getNumIntersectionsInt() {
-	//		return octree.intersections_int.size();
-	//	}
-	//
-	//	/*! Get the local number of intersections between local octants and ghost octants.
-	//	 * \return Local number of intersections between local octants and ghost octants.
-	//	 */
-	//	uint32_t getNumIntersectionsGhost() {
-	//		return octree.intersections_ghost.size();
-	//	}
-	//
-	//	/*! Get a pointer to target intersection on domain bord.
-	//	 * \param[in] idx Local index of intersection on domain bord.
-	//	 * \return Pointer to target intersection.
-	//	 */
-	//	Class_Intersection<3>* getIntersectionBord(uint32_t idx) {
-	//		if (idx < octree.intersections_bord.size()){
-	//			return &octree.intersections_bord[idx];
-	//		}
-	//		return NULL;
-	//	}
-	//
-	//	/*! Get a pointer to target intersection inside the local domain.
-	//	 * \param[in] idx Local index of intersection inside the local domain.
-	//	 * \return Pointer to target intersection.
-	//	 */
-	//	Class_Intersection<3>* getIntersectionInt(uint32_t idx) {
-	//		if (idx < octree.intersections_int.size()){
-	//			return &octree.intersections_int[idx];
-	//		}
-	//		return NULL;
-	//	}
-	//
-	//	/*! Get a pointer to target intersection between octant and ghost.
-	//	 * \param[in] idx Local index of intersection between octant and ghost.
-	//	 * \return Pointer to target intersection.
-	//	 */
-	//	Class_Intersection<3>* getIntersectionGhost(uint32_t idx) {
-	//		if (idx < octree.intersections_ghost.size()){
-	//			return &octree.intersections_ghost[idx];
-	//		}
-	//		return NULL;
-	//	}
-	//
-
 	/*! Get the local number of intersections.
 	 * \return Local number of intersections.
 	 */
@@ -4365,7 +4310,7 @@ public:
 
 			if (octree.getNumOctants() > nocts)
 				localDone = true;
-			writeLog(" Number of octants after Global Refine	:	" + to_string(octree.getNumOctants()));
+			writeLog(" Number of octants after Refine	:	" + to_string(octree.getNumOctants()));
 			nocts = octree.getNumOctants();
 			updateAdapt();
 
@@ -4388,7 +4333,7 @@ public:
 				localDone = true;
 			updateAdapt();
 			setPboundGhosts();
-			writeLog(" Number of octants after Global Refine	:	" + to_string(global_num_octants));
+			writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
 			nocts = octree.getNumOctants();
 
 			MPI_Barrier(MPI_COMM_WORLD);
@@ -4440,7 +4385,7 @@ public:
 
 			if (octree.getNumOctants() > nocts)
 				localDone = true;
-			writeLog(" Number of octants after Global Refine	:	" + to_string(octree.getNumOctants()));
+			writeLog(" Number of octants after Refine	:	" + to_string(octree.getNumOctants()));
 			nocts = octree.getNumOctants();
 			updateAdapt();
 
@@ -4463,7 +4408,7 @@ public:
 				localDone = true;
 			updateAdapt();
 			setPboundGhosts();
-			writeLog(" Number of octants after Global Refine	:	" + to_string(global_num_octants));
+			writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
 			nocts = octree.getNumOctants();
 
 			MPI_Barrier(MPI_COMM_WORLD);
@@ -4510,7 +4455,7 @@ public:
 			updateAdapt();
 			nocts = octree.getNumOctants();
 
-			writeLog(" Number of octants after Global Coarse	:	" + to_string(nocts));
+			writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
 			writeLog(" ");
@@ -4541,7 +4486,7 @@ public:
 
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-			writeLog(" Number of octants after Global Coarse	:	" + to_string(global_num_octants));
+			writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
 			writeLog(" ");
 			writeLog("---------------------------------------------");
 		}
@@ -4598,7 +4543,7 @@ public:
 			updateAdapt();
 			nocts = octree.getNumOctants();
 
-			writeLog(" Number of octants after Global Coarse	:	" + to_string(nocts));
+			writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
 			writeLog(" ");
@@ -4629,7 +4574,7 @@ public:
 
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-			writeLog(" Number of octants after Global Coarse	:	" + to_string(global_num_octants));
+			writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
 			writeLog(" ");
 			writeLog("---------------------------------------------");
 		}

@@ -4232,7 +4232,7 @@ public:
 
 			if (octree.getNumOctants() > nocts)
 				localDone = true;
-			writeLog(" Number of octants after Global Refine	:	" + to_string(octree.getNumOctants()));
+			writeLog(" Number of octants after Refine	:	" + to_string(octree.getNumOctants()));
 			nocts = octree.getNumOctants();
 			updateAdapt();
 
@@ -4255,7 +4255,7 @@ public:
 				localDone = true;
 			updateAdapt();
 			setPboundGhosts();
-			writeLog(" Number of octants after Global Refine	:	" + to_string(global_num_octants));
+			writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
 			nocts = octree.getNumOctants();
 
 			MPI_Barrier(MPI_COMM_WORLD);
@@ -4307,7 +4307,7 @@ public:
 
 			if (octree.getNumOctants() > nocts)
 				localDone = true;
-			writeLog(" Number of octants after Global Refine	:	" + to_string(octree.getNumOctants()));
+			writeLog(" Number of octants after Refine	:	" + to_string(octree.getNumOctants()));
 			nocts = octree.getNumOctants();
 			updateAdapt();
 
@@ -4330,7 +4330,7 @@ public:
 				localDone = true;
 			updateAdapt();
 			setPboundGhosts();
-			writeLog(" Number of octants after Global Refine	:	" + to_string(global_num_octants));
+			writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
 			nocts = octree.getNumOctants();
 
 			MPI_Barrier(MPI_COMM_WORLD);
@@ -4377,7 +4377,7 @@ public:
 			updateAdapt();
 			nocts = octree.getNumOctants();
 
-			writeLog(" Number of octants after Global Coarse	:	" + to_string(nocts));
+			writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
 			writeLog(" ");
@@ -4408,7 +4408,7 @@ public:
 
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-			writeLog(" Number of octants after Global Coarse	:	" + to_string(global_num_octants));
+			writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
 			writeLog(" ");
 			writeLog("---------------------------------------------");
 		}
@@ -4465,7 +4465,7 @@ public:
 			updateAdapt();
 			nocts = octree.getNumOctants();
 
-			writeLog(" Number of octants after Global Coarse	:	" + to_string(nocts));
+			writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
 			writeLog(" ");
@@ -4496,7 +4496,7 @@ public:
 
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-			writeLog(" Number of octants after Global Coarse	:	" + to_string(global_num_octants));
+			writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
 			writeLog(" ");
 			writeLog("---------------------------------------------");
 		}
