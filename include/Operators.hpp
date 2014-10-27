@@ -634,6 +634,5 @@ void  convert_string(
 # include "Operators_array.tpp"
 # include "MathOperators_array.tpp"
 # include "Operators_string.tpp"
-# include "MathFunctTemp.hpp"
 
 #endif
