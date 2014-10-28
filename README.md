@@ -1,7 +1,7 @@
 PABLO
 =====
 
-PArallel BaLanced Octree
+PArallel Balanced Linear Octree
 
 =====
 
