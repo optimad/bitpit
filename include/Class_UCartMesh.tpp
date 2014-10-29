@@ -47,7 +47,7 @@ void Class_UCartMesh2D::CellData2PointData(
 // ========================================================================== //
 
 // Local variables
-int            I, J;
+int            K, J;
 int            ip, jp;
 
 // Counters
@@ -65,7 +65,7 @@ for (i = 0; i < nx; i++) {
     for (j = 0; j < ny; j++) {
 
         // Cell index
-        I = AccessCellData(i,j);
+        K = AccessCellData(i,j);
 
         for (k = 0; k < 2; k++) {
             for (m = 0; m < 2; m++) {
@@ -78,21 +78,21 @@ for (i = 0; i < nx; i++) {
                 if ((ip == 0) || (ip == nx+1)) {
                     if ((jp == 0) || (jp == ny+1)) {
                         // Corner
-                        PointData[J] = PointData[J] + CellData[I];
+                        PointData[J] = PointData[J] + CellData[K];
                     }
                     else {
                         // Face
-                        PointData[J] = PointData[J] + 0.5 * CellData[I];
+                        PointData[J] = PointData[J] + 0.5 * CellData[K];
                     }
                 }
                 else {
                     if ((jp == 0) || (jp == ny+1)) {
                         // Face
-                        PointData[J] = PointData[J] + 0.5 * CellData[I];
+                        PointData[J] = PointData[J] + 0.5 * CellData[K];
                     }
                     else {
                         // Bulk
-                        PointData[J] = PointData[J] + 0.25 * CellData[I];
+                        PointData[J] = PointData[J] + 0.25 * CellData[K];
                     }
                 }
 
@@ -188,7 +188,7 @@ void Class_UCartMesh2D::PointData2CellData(
 // ========================================================================== //
 
 // Local variables
-int     I, J;
+int     K, J;
 int     ip, jp;
 
 // Counters
@@ -204,13 +204,13 @@ CellData.resize(nx*ny, 0.0);
 // ========================================================================== //
 for (i = 0; i < nx; i++) {
     for (j = 0; j < ny; j++) {
-        I = AccessCellData(i,j);
+        K = AccessCellData(i,j);
         for (k = 0; k < 2; k++) {
             for (m = 0; m < 2; m++) {
                 ip = i + k;
                 jp = j + m;
                 J = AccessPointData(ip,jp);
-                CellData[I] = CellData[I] + 0.25 * PointData[J];
+                CellData[K] = CellData[K] + 0.25 * PointData[J];
             } //next m
         } //next k
     } //next j
@@ -680,7 +680,7 @@ void Class_UCartMesh3D::CellData2PointData(
 // ========================================================================== //
 
 // Local variables
-int            I, J;
+int            K, J;
 int            ip, jp, kp;
 
 // Counters
@@ -699,7 +699,7 @@ for (i = 0; i < nx; i++) {
         for (k = 0; k < nz; k++) {
 
             // Cell index
-            I = AccessCellData(i, j, k);
+            K = AccessCellData(i, j, k);
             for (l = 0; l < 2; l++) {
                 for (m = 0; m < 2; m++) {
                     for (n = 0; n < 2; n++) {
@@ -714,21 +714,21 @@ for (i = 0; i < nx; i++) {
                             if ((jp == 0) || (jp == ny+1)) {
                                 if ((kp == 0) || (kp == nz+1)) {
                                     // Corner
-                                    PointData[J] = PointData[J] + CellData[I];
+                                    PointData[J] = PointData[J] + CellData[K];
                                 }
                                 else {
                                     // Edge
-                                    PointData[J] = PointData[J] + 0.5 * CellData[I];
+                                    PointData[J] = PointData[J] + 0.5 * CellData[K];
                                 }
                             }
                             else {
                                 if ((kp == 0) || (kp == nz+1)) {
                                     //Edge
-                                    PointData[J] = PointData[J] + 0.5 * CellData[I];
+                                    PointData[J] = PointData[J] + 0.5 * CellData[K];
                                 }
                                 else {
                                     // Face
-                                    PointData[J] = PointData[J] + 0.25 * CellData[I];
+                                    PointData[J] = PointData[J] + 0.25 * CellData[K];
                                 }
                             }
                         }
@@ -736,21 +736,21 @@ for (i = 0; i < nx; i++) {
                             if ((jp == 0) || (jp == ny+1)) {
                                 if ((kp == 0) || (kp == nz+1)) {
                                     // Edge
-                                    PointData[J] = PointData[J] + 0.5 * CellData[I];
+                                    PointData[J] = PointData[J] + 0.5 * CellData[K];
                                 }
                                 else {
                                     // Face
-                                    PointData[J] = PointData[J] + 0.25 * CellData[I];
+                                    PointData[J] = PointData[J] + 0.25 * CellData[K];
                                 }
                             }
                             else {
                                 if ((kp == 0) || (kp == nz+1)) {
                                     // Face
-                                    PointData[J] = PointData[J] + 0.25 * CellData[I];
+                                    PointData[J] = PointData[J] + 0.25 * CellData[K];
                                 }
                                 else {
                                     // Bulk
-                                    PointData[J] = PointData[J] + 0.125 * CellData[I];
+                                    PointData[J] = PointData[J] + 0.125 * CellData[K];
                                 }
                             }
                         }
@@ -848,7 +848,7 @@ void Class_UCartMesh3D::PointData2CellData(
 // ========================================================================== //
 
 // Local variables
-int     I, J;
+int     K, J;
 int     ip, jp, kp;
 
 // Counters
@@ -865,7 +865,7 @@ CellData.resize(nx*ny*nz, 0.0);
 for (i = 0; i < nx; i++) {
     for (j = 0; j < ny; j++) {
         for (k = 0; k < nz; k++) {
-            I = AccessCellData(i,j,k);
+            K = AccessCellData(i,j,k);
             for (l = 0; l < 2; l++) {
                 for (m = 0; m < 2; m++) {
                     for (n = 0; n < 2; n++) {
@@ -873,7 +873,7 @@ for (i = 0; i < nx; i++) {
                         jp = j + m;
                         kp = k + n;
                         J = AccessPointData(ip,jp,kp);
-                        CellData[I] = CellData[I] + 0.25 * PointData[J];
+                        CellData[K] = CellData[K] + 0.25 * PointData[J];
                     } //next n
                 } //next m
             } //next l

@@ -594,14 +594,14 @@ return(index); };
 
 // -------------------------------------------------------------------------- //
 void Class_UCartMesh2D::AccessCellData(
-    int          I,
+    int          J,
     int         &i,
     int         &j
 ) {
 
 // ========================================================================== //
 // void Class_UCartMesh2D::AccessCellData(                                    //
-//     int          I,                                                        //
+//     int          J,                                                        //
 //     int         &i,                                                        //
 //     int         &j)                                                        //
 //                                                                            //
@@ -609,7 +609,7 @@ void Class_UCartMesh2D::AccessCellData(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - I        : int, cell global index                                        //
+// - J        : int, cell global index                                        //
 // - i, j     : int, cell's cartesian indices                                 //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -630,8 +630,8 @@ void Class_UCartMesh2D::AccessCellData(
 // ========================================================================== //
 // COMPUTE CARTESIAN INDICES                                                  //
 // ========================================================================== //
-j = I % ny;
-i = I / ny;
+j = J % ny;
+i = J / ny;
 
 return; };
 
@@ -676,14 +676,14 @@ return (index); };
 
 // -------------------------------------------------------------------------- //
 void Class_UCartMesh2D::AccessPointData(
-    int          I,
+    int          J,
     int         &i,
     int         &j
 ) {
 
 // ========================================================================== //
 // void Class_UCartMesh2D::AccessPointData(                                   //
-//     int          I,                                                        //
+//     int          J,                                                        //
 //     int         &i,                                                        //
 //     int         &j)                                                        //
 //                                                                            //
@@ -691,7 +691,7 @@ void Class_UCartMesh2D::AccessPointData(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - I      : int, vertex global index                                        //
+// - J      : int, vertex global index                                        //
 // - i, j   : int, cartesian indices of mesh vertex                           //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -712,8 +712,8 @@ void Class_UCartMesh2D::AccessPointData(
 // ========================================================================== //
 // COMPUTE CARTESIAN INDICES                                                  //
 // ========================================================================== //
-j = I % (ny+1);
-i = I / (ny+1);
+j = J % (ny+1);
+i = J / (ny+1);
 
 return; };
 
@@ -762,7 +762,7 @@ void Class_UCartMesh2D::Cart2SurfMesh(
 int         nv, ns;
 
 // Counters
-int         i, j, I;
+int         i, j, J;
 
 // ========================================================================== //
 // RESIZE INPUT VARIABLES                                                     //
@@ -786,10 +786,10 @@ A.resize(nS + ns, ivector2D(4, ivector1D(1, -1)));
 // ========================================================================== //
 for (i = 0; i < nx+1; i++) {
     for (j = 0; j < ny+1; j++) {
-        I = AccessPointData(i,j);
-        V[I][0] = xedge[i];
-        V[I][1] = yedge[j];
-        V[I][2] = 0.0;
+        J = AccessPointData(i,j);
+        V[J][0] = xedge[i];
+        V[J][1] = yedge[j];
+        V[J][2] = 0.0;
         nV++;
     } //next j
 } //next i
@@ -799,11 +799,11 @@ for (i = 0; i < nx+1; i++) {
 // ========================================================================== //
 for (i = 0; i < nx; i++) {
     for (j = 0; j < ny; j++) {
-        I = AccessCellData(i,j);
-        S[I][0] = AccessPointData(i,j);
-        S[I][1] = AccessPointData(i+1,j);
-        S[I][2] = AccessPointData(i+1,j+1);
-        S[I][3] = AccessPointData(i,j+1);
+        J = AccessCellData(i,j);
+        S[J][0] = AccessPointData(i,j);
+        S[J][1] = AccessPointData(i+1,j);
+        S[J][2] = AccessPointData(i+1,j+1);
+        S[J][3] = AccessPointData(i,j+1);
     } //next j
 } //next i
 
@@ -812,15 +812,15 @@ for (i = 0; i < nx; i++) {
 // ========================================================================== //
 for (i = 0; i < nx; i++) {
     for (j = 0; j < ny; j++) {
-        I = AccessCellData(i,j);
-        if (j == 0)     { A[I][0][0] = -1; }
-        else            { A[I][0][0] = AccessCellData(i,j-1); }
-        if (i == nx-1)  { A[I][1][0] = -1; }
-        else            { A[I][1][0] = AccessCellData(i+1,j); }
-        if (j == ny-1)  { A[I][2][0] = -1; }
-        else            { A[I][2][0] = AccessCellData(i,j+1); }
-        if (i == 0)     { A[I][3][0] = -1; }
-        else            { A[I][3][0] = AccessCellData(i-1,j); }
+        J = AccessCellData(i,j);
+        if (j == 0)     { A[J][0][0] = -1; }
+        else            { A[J][0][0] = AccessCellData(i,j-1); }
+        if (i == nx-1)  { A[J][1][0] = -1; }
+        else            { A[J][1][0] = AccessCellData(i+1,j); }
+        if (j == ny-1)  { A[J][2][0] = -1; }
+        else            { A[J][2][0] = AccessCellData(i,j+1); }
+        if (i == 0)     { A[J][3][0] = -1; }
+        else            { A[J][3][0] = AccessCellData(i-1,j); }
     } //next j
 } //next i
 
@@ -1503,7 +1503,7 @@ return(index); };
 
 // -------------------------------------------------------------------------- //
 void Class_UCartMesh3D::AccessCellData(
-    int          I,
+    int          J,
     int         &i,
     int         &j,
     int         &k
@@ -1511,7 +1511,7 @@ void Class_UCartMesh3D::AccessCellData(
 
 // ========================================================================== //
 // void Class_UCartMesh3D::AccessCellData(                                    //
-//     int          I,                                                        //
+//     int          J,                                                        //
 //     int         &i,                                                        //
 //     int         &j,                                                        //
 //     int         &k)                                                        //
@@ -1520,7 +1520,7 @@ void Class_UCartMesh3D::AccessCellData(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - I        : int, cell global index                                        //
+// - J        : int, cell global index                                        //
 // - i, j, k  : int, cell's cartesian indices                                 //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -1541,8 +1541,8 @@ int     index;
 // ========================================================================== //
 // COMPUTE THE CARTESIAN INDICES                                              //
 // ========================================================================== //
-k = I % nz;
-index = I / nz;
+k = J % nz;
+index = J / nz;
 j = index % ny;
 i = index / ny;
 
@@ -1591,7 +1591,7 @@ return (index); };
 
 // -------------------------------------------------------------------------- //
 void Class_UCartMesh3D::AccessPointData(
-    int          I,
+    int          J,
     int         &i,
     int         &j,
     int         &k
@@ -1599,7 +1599,7 @@ void Class_UCartMesh3D::AccessPointData(
 
 // ========================================================================== //
 // void Class_UCartMesh3D::AccessPointData(                                   //
-//     int          I,                                                        //
+//     int          J,                                                        //
 //     int         &i,                                                        //
 //     int         &j,                                                        //
 //     int         &k)                                                        //
@@ -1608,7 +1608,7 @@ void Class_UCartMesh3D::AccessPointData(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - I       : int, vertex global index                                       //
+// - J       : int, vertex global index                                       //
 // - i, j, k : int, cartesian indices of mesh vertex                          //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -1629,8 +1629,8 @@ int       index;
 // ========================================================================== //
 // COMPUTE CARTESIAN INDICES                                                  //
 // ========================================================================== //
-k = I % (nz+1);
-index = I / (nz+1);
+k = J % (nz+1);
+index = J / (nz+1);
 j = index % (ny+1);
 i = index / (ny+1);
 
