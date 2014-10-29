@@ -1,5 +1,4 @@
 build/
 debug/
 CMakeFiles/
-CMakeLists.txt
 *.swp
