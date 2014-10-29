@@ -22,18 +22,18 @@
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::invert_loc_num(
-    int          I
+    int          I_
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::invert_loc_num(                                        //
-//     int    I)                                                              //
+//     int    I_)                                                              //
 //                                                                            //
-// Invert local numbering on simplex I                                        //
+// Invert local numbering on simplex I_                                        //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - I    : int, global index of simplex                                      //
+// - I_    : int, global index of simplex                                      //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -50,7 +50,7 @@ ivector1D        idummy1D;
 ivector2D        idummy2D;
 
 // Counters
-int              i, m = Simplex[I].size();
+int              i, m = Simplex[I_].size();
 
 // ========================================================================== //
 // CHECK OPTIONAL DATA STRUCTURES                                             //
@@ -63,22 +63,22 @@ flag_a =  ((Adjacency.size() > 0) && (Adjacency.size() >= nSimplex));
 // ========================================================================== //
 
 // Adjust vertex-simplex connectivity
-idummy1D = Simplex[I];
+idummy1D = Simplex[I_];
 for (i = 0; i < m; i++) {
-    Simplex[I][i] = idummy1D[m-i-1];
+    Simplex[I_][i] = idummy1D[m-i-1];
 } //next i
 
 // Adjust simplex-simplex adjacency
 if (flag_a) {
-    idummy2D = Adjacency[I];
+    idummy2D = Adjacency[I_];
     for (i = 0; i < m; i++) {
-        Adjacency[I][i] = idummy2D[m-i-1];
+        Adjacency[I_][i] = idummy2D[m-i-1];
     } //next i
 }
 
 // Reverse normal
 if (flag_n) {
-    Normal[I] = -1.0*Normal[I];
+    Normal[I_] = -1.0*Normal[I_];
 }
 
 return; }
@@ -1181,7 +1181,7 @@ return; };
         ivector2D        S2MP(nSimplex, ivector1D(3, -1));
 
         // Counters
-        int              I, J;
+        int              I_, J;
         int              i, j, k, e, d;
 
         // =================================================================================== //
@@ -1199,9 +1199,9 @@ return; };
 
                     // Update {Simplex->MidPoint} map
                     S2MP[i][j] = Voronoi.nVertex-1;
-                    I = Adjacency[i][j][0];
-                    J = edge(I, i);
-                    S2MP[I][J] = Voronoi.nVertex-1;
+                    I_ = Adjacency[i][j][0];
+                    J = edge(I_, i);
+                    S2MP[I_][J] = Voronoi.nVertex-1;
 
                 }
             } //next j

@@ -22,28 +22,28 @@
 
 // -------------------------------------------------------------------------- //
 int Class_SurfTri::edge(
-    int          I,
+    int          I_,
     int          J
 ) {
 
 // ========================================================================== //
 // int Class_SurfTri::edge(                                                   //
-//     int          I,                                                        //
+//     int          I_,                                                        //
 //     int          J)                                                        //
 //                                                                            //
-// Return the local index (on simplex I) of the edge shared by simplicies I   //
-// and J. If no edge is found (i.e. if simplicies I and J do not share any    //
+// Return the local index (on simplex I_) of the edge shared by simplicies I_   //
+// and J. If no edge is found (i.e. if simplicies I_ and J do not share any    //
 // edge), returns -1.                                                         //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - I     : int, global index of 1st simplex                                 //
+// - I_     : int, global index of 1st simplex                                 //
 // - J     : int, global index of 2nd simplex                                 //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
-// - index : int, local index (on simplex I) of the edge shared by simplicies //
-//           I and J. If no edge is found (i.e. simplicies I and J do not     //
+// - index : int, local index (on simplex I_) of the edge shared by simplicies //
+//           I_ and J. If no edge is found (i.e. simplicies I_ and J do not     //
 //           share any edge), index = -1                                      //
 // ========================================================================== //
 
@@ -62,12 +62,12 @@ int          i, j, m, n;
 // FIND EDGE                                                                  //
 // ========================================================================== //
 i = 0;
-m = Simplex[I].size();
+m = Simplex[I_].size();
 while (flag && (i < m)) {
     j = 0;
-    n = Adjacency[I][i].size();
+    n = Adjacency[I_][i].size();
     while (flag && (j < n)) {
-        if (Adjacency[I][i][j] == J) {
+        if (Adjacency[I_][i][j] == J) {
             index = i;
             flag = false;
         }
@@ -80,23 +80,23 @@ return(index); };
 
 // -------------------------------------------------------------------------- //
 int Class_SurfTri::edge(
-    int          I,
+    int          I_,
     int          V1,
     int          V2
 ) {
 
 // ========================================================================== //
 // int Class_SurfTri::edge(                                                   //
-//     int          I,                                                        //
+//     int          I_,                                                        //
 //     int          V1,                                                       //
 //     int          V2)                                                       //
 //                                                                            //
-// Return the local index (on simplex I) of the edge having vertices V1       //
+// Return the local index (on simplex I_) of the edge having vertices V1       //
 // and V2. If no edge is found, returns -1,                                   //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - I      : int, simplex global index                                       //
+// - I_      : int, simplex global index                                       //
 // - V1, V2 : int, global indices of vertices of the edge                     //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -114,7 +114,7 @@ bool         flag = true;
 int          index = -1;
 
 // Counters
-int          i, j, m = Simplex[I].size();
+int          i, j, m = Simplex[I_].size();
 
 // ========================================================================== //
 // FIND EDGE                                                                  //
@@ -122,11 +122,11 @@ int          i, j, m = Simplex[I].size();
 i = 0;
 while (flag && (i < m)) {
     j = (i + 1) % m;
-    if ((Simplex[I][i] == V1) && (Simplex[I][j] == V2)) {
+    if ((Simplex[I_][i] == V1) && (Simplex[I_][j] == V2)) {
             index = i;
             flag = false;
     }
-    else if ((Simplex[I][i] == V2) && (Simplex[I][j] == V1)) {
+    else if ((Simplex[I_][i] == V2) && (Simplex[I_][j] == V1)) {
             index = i;
             flag = false;
     }
@@ -139,26 +139,26 @@ return(index); };
 
 // -------------------------------------------------------------------------- //
 int Class_SurfTri::vertex(
-    int          I,
+    int          I_,
     int          V1
 ) {
 
 // ========================================================================== //
 // int Class_SurfTri::vertex(                                                 //
-//     int          I,                                                        //
+//     int          I_,                                                        //
 //     int          V1)                                                       //
 //                                                                            //
-// Return the local index (on simplex I) of the vertex with global index V1.  //
+// Return the local index (on simplex I_) of the vertex with global index V1.  //
 // If no vertex is found, returns -1.                                         //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - I        : int, simplex global index                                     //
+// - I_        : int, simplex global index                                     //
 // - V1       : int, vertex global index                                      //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
-// - index    : int, local index of vertex on simplex I. If no vertex is      //
+// - index    : int, local index of vertex on simplex I_. If no vertex is      //
 //              found index = -1.                                             //
 // ========================================================================== //
 
@@ -171,14 +171,14 @@ bool     flag = false;
 int      index = -1;
 
 // Counters
-int      i, m = Simplex[I].size();
+int      i, m = Simplex[I_].size();
 
 // ========================================================================== //
 // FIND EDGE                                                                  //
 // ========================================================================== //
 i = 0;
 while (!flag && (i < m)) {
-    flag = (Simplex[I][i] == V1);
+    flag = (Simplex[I_][i] == V1);
     i++;
 } //next i
 index = i-1;
@@ -189,27 +189,27 @@ return(index); };
 
         // ----------------------------------------------------------------------------------- //
         ivector1D Class_SurfTri::Ring_1(
-            int I,
+            int I_,
             int j,
             bool &flag
         ) {
 
         // =================================================================================== //
         // ivector1D Class_SurfTri::Ring_1(                                                    //
-        //     int I,                                                                          //
+        //     int I_,                                                                          //
         //     int j,                                                                          //
         //     bool &flag)                                                                     //
         //                                                                                     //
-        // Returns the list of simplicies in the 1-ring of the j-th vertex of simplex I        //
+        // Returns the list of simplicies in the 1-ring of the j-th vertex of simplex I_        //
         // =================================================================================== //
         // INPUT                                                                               //
         // =================================================================================== //
-        // - I     : int, global index simplex which vertex belongs to.                        //
-        // - j     : int, local index (on simplex I) of vertex                                 //
+        // - I_     : int, global index simplex which vertex belongs to.                        //
+        // - j     : int, local index (on simplex I_) of vertex                                 //
         // =================================================================================== //
         // OUTPUT                                                                              //
         // =================================================================================== //
-        // - List  : ivector1D, list of simplicies in the 1-ring of vertex I[i]                //
+        // - List  : ivector1D, list of simplicies in the 1-ring of vertex I_[i]                //
         // - flag  : bool, true if the 1-ring is closed, false otherwise                       //
         // =================================================================================== //
 
@@ -230,22 +230,22 @@ return(index); };
         // Find the starting simplex in the 1-ring ------------------------------------------- //
 
         // Set seed
-        J = Adjacency[I][j][0];
-        K = I;
-        while ((J >= 0) && (J != I)) {
+        J = Adjacency[I_][j][0];
+        K = I_;
+        while ((J >= 0) && (J != I_)) {
             i = edge(J, K);
             j = (i + 1) % Simplex[J].size();
             K = J;
             J = Adjacency[J][j][0];
         } //next j
-        I = K;
+        I_ = K;
 
         // Compute 1-ring
-        List.push_back(I);
-        i = (Simplex[I].size() + j - 1) % Simplex[I].size();
-        J = Adjacency[I][i][0];
-        K = I;
-        while ((J >= 0) && (J != I)) {
+        List.push_back(I_);
+        i = (Simplex[I_].size() + j - 1) % Simplex[I_].size();
+        J = Adjacency[I_][i][0];
+        K = I_;
+        while ((J >= 0) && (J != I_)) {
             List.push_back(J);
             j = edge(J, K);
             i = (Simplex[J].size() + j - 1) % Simplex[J].size();
@@ -260,27 +260,27 @@ return(index); };
 
         // ----------------------------------------------------------------------------------- //
         ivector2D Class_SurfTri::VRing_1(
-            int I,
+            int I_,
             int j,
             bool &flag
         ) {
 
         // =================================================================================== //
         // ivector2D Class_SurfTri::VRing_1(                                                   //
-        //     int I,                                                                          //
+        //     int I_,                                                                          //
         //     int j,                                                                          //
         //     bool &flag)                                                                     //
         //                                                                                     //
-        // Returns the list of vertices in the 1-ring of the j-th vertex of simplex I.         //
+        // Returns the list of vertices in the 1-ring of the j-th vertex of simplex I_.         //
         // =================================================================================== //
         // INPUT                                                                               //
         // =================================================================================== //
-        // - I     : int, global index of simplex which the vertex belongs to.                 //
-        // - j     : int, local index (on simplex I) of vertex                                 //
+        // - I_     : int, global index of simplex which the vertex belongs to.                 //
+        // - j     : int, local index (on simplex I_) of vertex                                 //
         // =================================================================================== //
         // OUTPUT                                                                              //
         // =================================================================================== //
-        // - List  : ivector1D, list of vertices in the 1-ring of vertex I[j]                  //
+        // - List  : ivector1D, list of vertices in the 1-ring of vertex I_[j]                  //
         // - flag  : bool, true if the 1-ring is closed, false otherwise                       //
         // =================================================================================== //
 
@@ -298,14 +298,14 @@ return(index); };
         // =================================================================================== //
         // 1-RING OF SIMPLEX                                                                   //
         // =================================================================================== //
-        SList = Ring_1(I, j, flag);
+        SList = Ring_1(I_, j, flag);
 
         // =================================================================================== //
         // COLLECT VERTICES IN THE 1-RING                                                      //
         // =================================================================================== //
 
         // Vertex global index --------------------------------------------------------------- //
-        V = Simplex[I][j];
+        V = Simplex[I_][j];
 
         // Loop over simplicies -------------------------------------------------------------- //
         for (i = 0; i < SList.size(); i++) {
@@ -362,7 +362,7 @@ int         dim = Vertex[0].size();
 int         n;
 
 // Counters
-int         i, j, I;
+int         i, j, I_;
 
 // ========================================================================== //
 // COMPUTE BOUNDING BOX                                                       //
@@ -379,11 +379,11 @@ y_ext[0] = y_ext[1] = Vertex[Simplex[0][0]][1];
 for (i = 1; i < nSimplex; i++) {
     n = Simplex[i].size();
     for (j = 0; j < n; j++) {
-        I = Simplex[i][j];
-        x_ext[0] = min(x_ext[0], Vertex[I][0]);
-        x_ext[1] = max(x_ext[1], Vertex[I][0]);
-        y_ext[0] = min(y_ext[0], Vertex[I][1]);
-        y_ext[1] = max(y_ext[1], Vertex[I][1]);
+        I_ = Simplex[i][j];
+        x_ext[0] = min(x_ext[0], Vertex[I_][0]);
+        x_ext[1] = max(x_ext[1], Vertex[I_][0]);
+        y_ext[0] = min(y_ext[0], Vertex[I_][1]);
+        y_ext[1] = max(y_ext[1], Vertex[I_][1]);
     } //next j
 } //next i
 
@@ -424,7 +424,7 @@ int         dim = Vertex[0].size();
 int         n;
 
 // Counters
-int         i, j, I;
+int         i, j, I_;
 
 // ========================================================================== //
 // COMPUTE BOUNDING BOX                                                       //
@@ -442,13 +442,13 @@ z_ext[0] = z_ext[1] = Vertex[Simplex[0][0]][2];
 for (i = 1; i < nSimplex; i++) {
     n = Simplex[i].size();
     for (j = 0; j < n; j++) {
-        I = Simplex[i][j];
-        x_ext[0] = min(x_ext[0], Vertex[I][0]);
-        x_ext[1] = max(x_ext[1], Vertex[I][0]);
-        y_ext[0] = min(y_ext[0], Vertex[I][1]);
-        y_ext[1] = max(y_ext[1], Vertex[I][1]);
-        z_ext[0] = min(z_ext[0], Vertex[I][2]);
-        z_ext[1] = max(z_ext[1], Vertex[I][2]);
+        I_ = Simplex[i][j];
+        x_ext[0] = min(x_ext[0], Vertex[I_][0]);
+        x_ext[1] = max(x_ext[1], Vertex[I_][0]);
+        y_ext[0] = min(y_ext[0], Vertex[I_][1]);
+        y_ext[1] = max(y_ext[1], Vertex[I_][1]);
+        z_ext[0] = min(z_ext[0], Vertex[I_][2]);
+        z_ext[1] = max(z_ext[1], Vertex[I_][2]);
     } //next j
 } //next i
 
@@ -492,7 +492,7 @@ int         dim = V[0].size();
 int         n;
 
 // Counters
-int         i, j, I;
+int         i, j, I_;
 
 // ========================================================================== //
 // COMPUTE BOUNDING BOX                                                       //
@@ -509,11 +509,11 @@ y_ext[0] = y_ext[1] = V[Simplex[0][0]][1];
 for (i = 1; i < nSimplex; i++) {
     n = Simplex[i].size();
     for (j = 0; j < n; j++) {
-        I = Simplex[i][j];
-        x_ext[0] = min(x_ext[0], V[I][0]);
-        x_ext[1] = max(x_ext[1], V[I][0]);
-        y_ext[0] = min(y_ext[0], V[I][1]);
-        y_ext[1] = max(y_ext[1], V[I][1]);
+        I_ = Simplex[i][j];
+        x_ext[0] = min(x_ext[0], V[I_][0]);
+        x_ext[1] = max(x_ext[1], V[I_][0]);
+        y_ext[0] = min(y_ext[0], V[I_][1]);
+        y_ext[1] = max(y_ext[1], V[I_][1]);
     } //next j
 } //next i
 
@@ -559,7 +559,7 @@ int         dim = V[0].size();
 int         n;
 
 // Counters
-int         i, j, I;
+int         i, j, I_;
 
 // ========================================================================== //
 // COMPUTE BOUNDING BOX                                                       //
@@ -577,13 +577,13 @@ z_ext[0] = z_ext[1] = V[Simplex[0][0]][2];
 for (i = 1; i < nSimplex; i++) {
     n = Simplex[i].size();
     for (j = 0; j < n; j++) {
-        I = Simplex[i][j];
-        x_ext[0] = min(x_ext[0], V[I][0]);
-        x_ext[1] = max(x_ext[1], V[I][0]);
-        y_ext[0] = min(y_ext[0], V[I][1]);
-        y_ext[1] = max(y_ext[1], V[I][1]);
-        z_ext[0] = min(z_ext[0], V[I][2]);
-        z_ext[1] = max(z_ext[1], V[I][2]);
+        I_ = Simplex[i][j];
+        x_ext[0] = min(x_ext[0], V[I_][0]);
+        x_ext[1] = max(x_ext[1], V[I_][0]);
+        y_ext[0] = min(y_ext[0], V[I_][1]);
+        y_ext[1] = max(y_ext[1], V[I_][1]);
+        z_ext[0] = min(z_ext[0], V[I_][2]);
+        z_ext[1] = max(z_ext[1], V[I_][2]);
     } //next j
 } //next i
 
@@ -731,13 +731,13 @@ return; };
         // ----------------------------------------------------------------------------------- //
         int Class_SurfTri::ReturnTriangleID(
             dvector1D &P,
-            int        I
+            int        I_
         ) {
 
         // =================================================================================== //
         // int Class_SurfTri::ReturnTriangleID(                                                //
         //     dvector1D &P,                                                                   //
-        //     int        I)                                                                   //
+        //     int        I_)                                                                   //
         //                                                                                     //
         // Returns the global index of the simplex, which contains point P. The point P MUST   //
         // lie on the surface tasselation.                                                     //
@@ -750,8 +750,8 @@ return; };
         // INPUT                                                                               //
         // =================================================================================== //
         // - P          : dvector1D, with vertex coordinates                                   //
-        // - I          : int, global index of simplex used as seed in the search algorithm    //
-        //                If I < 0, seed is set to 0.                                          //
+        // - I_          : int, global index of simplex used as seed in the search algorithm    //
+        //                If I_ < 0, seed is set to 0.                                          //
         // =================================================================================== //
         // OUTPUT                                                                              //
         // =================================================================================== //
@@ -786,7 +786,7 @@ return; };
         // =================================================================================== //
 
         // Set seed -------------------------------------------------------------------------- //
-        J = max(I, 0);
+        J = max(I_, 0);
 
         // Simplex normals ------------------------------------------------------------------- //
         if (Normal.size() < nSimplex) {
@@ -971,7 +971,7 @@ return; };
  // Counters
  int          iter;
  int          i, j, k;
- int          I, J;
+ int          I_, J;
 
  // =================================================================================== //
  // BUILD ADJACENCY MATRIX IF NOT ALREADY COMPUTED                                      //
@@ -1024,54 +1024,54 @@ return; };
  while (stop == false) {
 
      // Alternative direction
-     I = e[0];
-     i = (e[1] + 1) % Simplex[I].size();
+     I_ = e[0];
+     i = (e[1] + 1) % Simplex[I_].size();
      stop1 = false;
      while (stop1 == false) {
-         T_edge = (Adjacency[I][i].size() > 1);
+         T_edge = (Adjacency[I_][i].size() > 1);
          if (!T_edge) {
-             J = Adjacency[I][i][0];
+             J = Adjacency[I_][i][0];
              free_edge = (J < 0);
              if (!free_edge) {
                  visited = !(P[J] == index0);
-                 sharp_edge = (norm_2(Normal[I] - Normal[J]) > toll);
+                 sharp_edge = (norm_2(Normal[I_] - Normal[J]) > toll);
                  if ((!visited) && (!sharp_edge)) {
-                     dummy[0] = I;
+                     dummy[0] = I_;
                      dummy[1] = i;
                      n.push_back(dummy);
                      stop1 = true;
                  }
              }
           }
-          i = (i+1) % Simplex[I].size();
+          i = (i+1) % Simplex[I_].size();
           stop1 = (stop1 || (i == e[1]));
      } //next i
 
      // Move to next element
-     I = Adjacency[e[0]][e[1]][0];
-     P[I] = index;
-     seed = I;
+     I_ = Adjacency[e[0]][e[1]][0];
+     P[I_] = index;
+     seed = I_;
 
      // Next propagation direction
-     dummy[0] = I;
+     dummy[0] = I_;
      dummy[1] = -1;
      i = 0;
      stop1 = false;
      while (stop1 == false) {
-         T_edge = (Adjacency[I][i].size() > 1);
+         T_edge = (Adjacency[I_][i].size() > 1);
          if (!T_edge) {
-             J = Adjacency[I][i][0];
+             J = Adjacency[I_][i][0];
              free_edge = (J < 0);
              if (!free_edge) {
                  visited = !(P[J] == index0);
-                 sharp_edge = (norm_2(Normal[I] - Normal[J]) > toll);
+                 sharp_edge = (norm_2(Normal[I_] - Normal[J]) > toll);
                  if ((!visited) && (!sharp_edge)) {
                      dummy[1] = i;
                      stop1 = true;
                  }
              }
          }
-         i = (i+1) % Simplex[I].size();
+         i = (i+1) % Simplex[I_].size();
          stop1 = (stop1 || (i == 0));
      } //next i
 
@@ -1317,7 +1317,7 @@ return; };
         // Counters
         int          iter;
         int          i, j, k;
-        int          I, J;
+        int          I_, J;
 
         // =================================================================================== //
         // BUILD ADJACENCY MATRIX IF NOT ALREADY COMPUTED                                      //
@@ -1362,42 +1362,42 @@ return; };
         while (stop == false) {
 
             // Alternative direction
-            I = e[0];
-            i = (e[1] + 1) % Simplex[I].size();
+            I_ = e[0];
+            i = (e[1] + 1) % Simplex[I_].size();
             stop1 = false;
             while (stop1 == false) {
-                T_edge = (Adjacency[I][i].size() > 1);
+                T_edge = (Adjacency[I_][i].size() > 1);
                 if (!T_edge) {
-                    J = Adjacency[I][i][0];
+                    J = Adjacency[I_][i][0];
                     free_edge = (J < 0);
                     if (!free_edge) {
                         visited = !(P[J] == index0);
                         if (!visited) {
-                            dummy[0] = I;
+                            dummy[0] = I_;
                             dummy[1] = i;
                             n.push_back(dummy);
                             stop1 = true;
                         }
                     }
                  }
-                 i = (i+1) % Simplex[I].size();
+                 i = (i+1) % Simplex[I_].size();
                  stop1 = (stop1 || (i == e[1]));
             } //next i
 
             // Move to next element
-            I = Adjacency[e[0]][e[1]][0];
-            P[I] = index;
-            seed = I;
+            I_ = Adjacency[e[0]][e[1]][0];
+            P[I_] = index;
+            seed = I_;
 
             // Next propagation direction
-            dummy[0] = I;
+            dummy[0] = I_;
             dummy[1] = -1;
             i = 0;
             stop1 = false;
             while (stop1 == false) {
-                T_edge = (Adjacency[I][i].size() > 1);
+                T_edge = (Adjacency[I_][i].size() > 1);
                 if (!T_edge) {
-                    J = Adjacency[I][i][0];
+                    J = Adjacency[I_][i][0];
                     free_edge = (J < 0);
                     if (!free_edge) {
                         visited = !(P[J] == index0);
@@ -1407,7 +1407,7 @@ return; };
                         }
                     }
                 }
-                i = (i+1) % Simplex[I].size();
+                i = (i+1) % Simplex[I_].size();
                 stop1 = (stop1 || (i == 0));
             } //next i
 
@@ -1480,7 +1480,7 @@ return; };
         // Counters
         int          iter;
         int          i, j, k;
-        int          I, J;
+        int          I_, J;
 
         // =================================================================================== //
         // BUILD ADJACENCY MATRIX IF NOT ALREADY COMPUTED                                      //
@@ -1528,20 +1528,20 @@ return; };
         while (stop == false) {
 
             // Alternative direction
-            I = e[0];
-            i = (e[1] + 1) % Simplex[I].size();
+            I_ = e[0];
+            i = (e[1] + 1) % Simplex[I_].size();
             stop1 = false;
             while (stop1 == false) {
-                T_edge = (Adjacency[I][i].size() > 1);
+                T_edge = (Adjacency[I_][i].size() > 1);
                 if (!T_edge) {
-                    J = Adjacency[I][i][0];
+                    J = Adjacency[I_][i][0];
                     free_edge = (J < 0);
                     if (!free_edge) {
                         visited = !(P[J] == index0);
                         if (!visited) {
-                            region = (flag[I] != flag[J]);
+                            region = (flag[I_] != flag[J]);
                             if (!region) {
-                                dummy[0] = I;
+                                dummy[0] = I_;
                                 dummy[1] = i;
                                 n.push_back(dummy);
                                 stop1 = true;
@@ -1549,29 +1549,29 @@ return; };
                         }
                     }
                  }
-                 i = (i+1) % Simplex[I].size();
+                 i = (i+1) % Simplex[I_].size();
                  stop1 = (stop1 || (i == e[1]));
             } //next i
 
             // Move to next element
-            I = Adjacency[e[0]][e[1]][0];
-            P[I] = index;
-            seed = I;
+            I_ = Adjacency[e[0]][e[1]][0];
+            P[I_] = index;
+            seed = I_;
 
             // Next propagation direction
-            dummy[0] = I;
+            dummy[0] = I_;
             dummy[1] = -1;
             i = 0;
             stop1 = false;
             while (stop1 == false) {
-                T_edge = (Adjacency[I][i].size() > 1);
+                T_edge = (Adjacency[I_][i].size() > 1);
                 if (!T_edge) {
-                    J = Adjacency[I][i][0];
+                    J = Adjacency[I_][i][0];
                     free_edge = (J < 0);
                     if (!free_edge) {
                         visited = !(P[J] == index0);
                         if (!visited) {
-                            region = (flag[I] != flag[J]);
+                            region = (flag[I_] != flag[J]);
                             if (!region) {
                                 dummy[1] = i;
                                 stop1 = true;
@@ -1579,7 +1579,7 @@ return; };
                         }
                     }
                 }
-                i = (i+1) % Simplex[I].size();
+                i = (i+1) % Simplex[I_].size();
                 stop1 = (stop1 || (i == 0));
             } //next i
 
@@ -1646,7 +1646,7 @@ return; };
         // Counters
         int                    counter;
         int                    i, j;
-        int                    I, J;
+        int                    I_, J;
 
         // =================================================================================== //
         // CHECK FOR EMPTY TRIANGULATION                                                       //
@@ -1677,15 +1677,15 @@ return; };
 
             // First seed
             J = -1;
-            I = (J + 1) % nSimplex;
+            I_ = (J + 1) % nSimplex;
             stop = true;
             counter = 0;
             while ((stop) && (counter < nSimplex)) {
-                if (Patches[I] == index0) {
-                    J = I;
+                if (Patches[I_] == index0) {
+                    J = I_;
                     stop = false;
                 }
-                I = (I + 1) % nSimplex;
+                I_ = (I_ + 1) % nSimplex;
                 counter++;
             }
 
@@ -1695,20 +1695,20 @@ return; };
         // Loop until all surface is decomposed in patches ----------------------------------- //
         while (flag) {
 
-            // Find patch for seed I
+            // Find patch for seed I_
             FindPatch(Patches, toll, index0, nPatches, J);
             nPatches += 1;
 
             // Next seed
-            I = (J + 1) % nSimplex;
+            I_ = (J + 1) % nSimplex;
             stop = true;
             counter = 0;
             while ((stop) && (counter < nSimplex)) {
-                if (Patches[I] == index0) {
-                    J = I;
+                if (Patches[I_] == index0) {
+                    J = I_;
                     stop = false;
                 }
-                I = (I + 1) % nSimplex;
+                I_ = (I_ + 1) % nSimplex;
                 counter++;
             }
 
@@ -1755,7 +1755,7 @@ return; };
         // Counters
         int                    counter;
         int                    i, j;
-        int                    I, J;
+        int                    I_, J;
 
         // =================================================================================== //
         // COMPUTE ADJACENCY MATRIX IF NOT ALREADY BUILT                                       //
@@ -1772,15 +1772,15 @@ return; };
 
             // First seed
             J = -1;
-            I = (J + 1) % nSimplex;
+            I_ = (J + 1) % nSimplex;
             stop = true;
             counter = 0;
             while ((stop) && (counter < nSimplex)) {
-                if (Patches[I] == index0) {
-                    J = I;
+                if (Patches[I_] == index0) {
+                    J = I_;
                     stop = false;
                 }
-                I = (I + 1) % nSimplex;
+                I_ = (I_ + 1) % nSimplex;
                 counter++;
             }
 
@@ -1790,20 +1790,20 @@ return; };
         // Loop until all surface is decomposed in patches ----------------------------------- //
         while (flag) {
 
-            // Find patch for seed I
+            // Find patch for seed I_
             FindClosedLoop(Patches, index0, nPatches, J);
             nPatches += 1;
 
             // Next seed
-            I = (J + 1) % nSimplex;
+            I_ = (J + 1) % nSimplex;
             stop = true;
             counter = 0;
             while ((stop) && (counter < nSimplex)) {
-                if (Patches[I] == index0) {
-                    J = I;
+                if (Patches[I_] == index0) {
+                    J = I_;
                     stop = false;
                 }
-                I = (I + 1) % nSimplex;
+                I_ = (I_ + 1) % nSimplex;
                 counter++;
             }
 
@@ -1853,7 +1853,7 @@ return; };
         // Counters
         int                    counter;
         int                    i, j;
-        int                    I, J;
+        int                    I_, J;
 
         // =================================================================================== //
         // COMPUTE ADJACENCY MATRIX IF NOT ALREADY BUILT                                       //
@@ -1870,15 +1870,15 @@ return; };
 
             // First seed
             J = -1;
-            I = (J + 1) % nSimplex;
+            I_ = (J + 1) % nSimplex;
             stop = true;
             counter = 0;
             while ((stop) && (counter < nSimplex)) {
-                if (Patches[I] == index0) {
-                    J = I;
+                if (Patches[I_] == index0) {
+                    J = I_;
                     stop = false;
                 }
-                I = (I + 1) % nSimplex;
+                I_ = (I_ + 1) % nSimplex;
                 counter++;
             }
 
@@ -1888,20 +1888,20 @@ return; };
         // Loop until all surface is decomposed in patches ----------------------------------- //
         while (flag) {
 
-            // Find patch for seed I
+            // Find patch for seed I_
             FindRegion(Patches, rflag, index0, nPatches, J);
             nPatches += 1;
 
             // Next seed
-            I = (J + 1) % nSimplex;
+            I_ = (J + 1) % nSimplex;
             stop = true;
             counter = 0;
             while ((stop) && (counter < nSimplex)) {
-                if (Patches[I] == index0) {
-                    J = I;
+                if (Patches[I_] == index0) {
+                    J = I_;
                     stop = false;
                 }
-                I = (I + 1) % nSimplex;
+                I_ = (I_ + 1) % nSimplex;
                 counter++;
             }
 
@@ -1949,7 +1949,7 @@ bool                   flag, stop;
 // Counters
 int                    counter;
 int                    i, j;
-int                    I, J;
+int                    I_, J;
 
 // ========================================================================== //
 // COMPUTE ADJACENCY MATRIX IF NOT ALREADY BUILT                              //
@@ -1966,15 +1966,15 @@ if ((Adjacency.size() == 0) || (Adjacency.size() != nSimplex)) {
 
     // First seed
     J = -1;
-    I = (J + 1) % nSimplex;
+    I_ = (J + 1) % nSimplex;
     stop = true;
     counter = 0;
     while ((stop) && (counter < nSimplex)) {
-        if (Patches[I] == index0) {
-            J = I;
+        if (Patches[I_] == index0) {
+            J = I_;
             stop = false;
         }
-        I = (I + 1) % nSimplex;
+        I_ = (I_ + 1) % nSimplex;
         counter++;
     }
 
@@ -1984,20 +1984,20 @@ if ((Adjacency.size() == 0) || (Adjacency.size() != nSimplex)) {
 // Loop until all surface is decomposed in patches -------------------------- //
 while (flag) {
 
-    // Find patch for seed I
+    // Find patch for seed I_
     FindConnectedLoop(Patches, index0, nPatches, J);
     nPatches += 1;
 
     // Next seed
-    I = (J + 1) % nSimplex;
+    I_ = (J + 1) % nSimplex;
     stop = true;
     counter = 0;
     while ((stop) && (counter < nSimplex)) {
-        if (Patches[I] == index0) {
-            J = I;
+        if (Patches[I_] == index0) {
+            J = I_;
             stop = false;
         }
-        I = (I + 1) % nSimplex;
+        I_ = (I_ + 1) % nSimplex;
         counter++;
     }
 
@@ -2048,7 +2048,7 @@ return; };
         ivector1D                 dummy(2, 0);
 
         // Counters
-        int                       I, J;
+        int                       I_, J;
         int                       i, j, k;
 
         // =================================================================================== //
@@ -2095,17 +2095,17 @@ return; };
                         if (flag) {
                             nSegments += 1;
                             Segmentation.resize(nSegments);
-                            I = nSegments - 1;
+                            I_ = nSegments - 1;
                             flag = false;
                         }
 
-                        Segmentation[I].AddVertex(Vertex[Simplex[i][j]]);
-                        Segmentation[I].AddVertex(Vertex[Simplex[i][(j+1) % Simplex[i].size()]]);
-                        dummy[0] = Segmentation[I].nVertex-2;
-                        dummy[1] = Segmentation[I].nVertex-1;
+                        Segmentation[I_].AddVertex(Vertex[Simplex[i][j]]);
+                        Segmentation[I_].AddVertex(Vertex[Simplex[i][(j+1) % Simplex[i].size()]]);
+                        dummy[0] = Segmentation[I_].nVertex-2;
+                        dummy[1] = Segmentation[I_].nVertex-1;
                         //dummy[0] = Simplex[i][j];
                         //dummy[1] = Simplex[i][(j+1) % Simplex[i].size()];
-                        Segmentation[I].AddSimplex(dummy);
+                        Segmentation[I_].AddSimplex(dummy);
 
                         // Update check
                         check[J] = true;

@@ -157,17 +157,17 @@ void Class_SurfTri::minEdge(
 double      ddummy;
 
 // Counters
-int         I, j;
+int         I_, j;
 
 // ========================================================================== //
 // FIND MINIMAL EDGE LENGTH                                                   //
 // ========================================================================== //
 T = 0;
 minEdge(T, edge, i);
-for (I = 0; I < nSimplex; I++) {
-    minEdge(I, ddummy, j);
+for (I_ = 0; I_ < nSimplex; I_++) {
+    minEdge(I_, ddummy, j);
     if (ddummy < edge) {
-        T = I;
+        T = I_;
         edge = ddummy;
         i = j;
     }
@@ -215,17 +215,17 @@ void Class_SurfTri::minEdge(
 double      ddummy;
 
 // Counters
-int         I, j;
+int         I_, j;
 
 // ========================================================================== //
 // FIND MINIMAL EDGE LENGTH                                                   //
 // ========================================================================== //
 T = 0;
 minEdge(V, T, edge, i);
-for (I = 0; I < nSimplex; I++) {
-    minEdge(V, I, ddummy, j);
+for (I_ = 0; I_ < nSimplex; I_++) {
+    minEdge(V, I_, ddummy, j);
     if (ddummy < edge) {
-        T = I;
+        T = I_;
         edge = ddummy;
         i = j;
     }
@@ -385,17 +385,17 @@ void Class_SurfTri::maxEdge(
 double      ddummy;
 
 // Counters
-int         I, j;
+int         I_, j;
 
 // ========================================================================== //
 // FIND MINIMAL EDGE LENGTH                                                   //
 // ========================================================================== //
 T = 0;
 maxEdge(T, edge, i);
-for (I = 0; I < nSimplex; I++) {
-    maxEdge(I, ddummy, j);
+for (I_ = 0; I_ < nSimplex; I_++) {
+    maxEdge(I_, ddummy, j);
     if (ddummy > edge) {
-        T = I;
+        T = I_;
         edge = ddummy;
         i = j;
     }
@@ -443,17 +443,17 @@ void Class_SurfTri::maxEdge(
 double      ddummy;
 
 // Counters
-int         I, j;
+int         I_, j;
 
 // ========================================================================== //
 // FIND MINIMAL EDGE LENGTH                                                   //
 // ========================================================================== //
 T = 0;
 maxEdge(V, T, edge, i);
-for (I = 0; I < nSimplex; I++) {
-    maxEdge(V, I, ddummy, j);
+for (I_ = 0; I_ < nSimplex; I_++) {
+    maxEdge(V, I_, ddummy, j);
     if (ddummy < edge) {
-        T = I;
+        T = I_;
         edge = ddummy;
         i = j;
     }
@@ -1131,18 +1131,18 @@ void Class_SurfTri::minAngle(
 double      value;
 
 // Counters
-int         I, i;
+int         I_, i;
 
 // ========================================================================== //
 // COMPUTE THE MIN ANGLE.                                                     //
 // ========================================================================== //
 T = 0;
 minAngle(T, angle, v);
-for (I = 1; I < nSimplex; T++) {
-    minAngle(I, value, i);
+for (I_ = 1; I_ < nSimplex; T++) {
+    minAngle(I_, value, i);
     if (value < angle) {
         angle = value;
-        T = I;
+        T = I_;
         v = i;
     }
 } //next T
@@ -1189,18 +1189,18 @@ void Class_SurfTri::minAngle(
 double      value;
 
 // Counters
-int         I, i;
+int         I_, i;
 
 // ========================================================================== //
 // COMPUTE THE MIN ANGLE.                                                     //
 // ========================================================================== //
 T = 0;
 minAngle(T, angle, v);
-for (I = 1; I < nSimplex; T++) {
-    minAngle(V, I, value, i);
+for (I_ = 1; I_ < nSimplex; T++) {
+    minAngle(V, I_, value, i);
     if (value < angle) {
         angle = value;
-        T = I;
+        T = I_;
         v = i;
     }
 } //next T
@@ -1456,18 +1456,18 @@ void Class_SurfTri::maxAngle(
 double    value;
 
 // Counters
-int       I, i;
+int       I_, i;
 
 // ========================================================================== //
 // COMPUTE THE MIN ANGLE.                                                     //
 // ========================================================================== //
 T = 0;
 maxAngle(T, angle, v);
-for (I = 1; I < nSimplex; I++) {
-    maxAngle(I, value, i);
+for (I_ = 1; I_ < nSimplex; I_++) {
+    maxAngle(I_, value, i);
     if (value > angle) {
         angle = value;
-        T = I;
+        T = I_;
         v = i;
     }
 } //next i
@@ -1515,18 +1515,18 @@ void Class_SurfTri::maxAngle(
 double    value;
 
 // Counters
-int       I, i;
+int       I_, i;
 
 // ========================================================================== //
 // COMPUTE THE MIN ANGLE.                                                     //
 // ========================================================================== //
 T = 0;
 maxAngle(V, T, angle, v);
-for (I = 1; I < nSimplex; I++) {
-    maxAngle(V, I, value, i);
+for (I_ = 1; I_ < nSimplex; I_++) {
+    maxAngle(V, I_, value, i);
     if (value > angle) {
         angle = value;
-        T = I;
+        T = I_;
         v = i;
     }
 } //next i

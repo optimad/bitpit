@@ -54,7 +54,7 @@ ivector1D     ix(dim, -1);
 dvector2D     xlim(dim, dvector1D(2, 0.0));
 
 // Counters
-int           i, j, k, I, m;
+int           i, j, k, I_, m;
 
 // ========================================================================== //
 // RESIZE INPUT VARIABLES                                                     //
@@ -96,8 +96,8 @@ if (dim == 2) {
             for (k = 0; k < dim; k++) {
                 ix[k] = (int) floor((Vertex[Simplex[i][j]][k] - xlim[k][0])/dx[k]);
             } //next k
-            I = n * ix[0] + ix[1];
-            index[Simplex[i][j]] = I;
+            I_ = n * ix[0] + ix[1];
+            index[Simplex[i][j]] = I_;
         } //next j
     } //next i
 }
@@ -108,8 +108,8 @@ else if (dim == 3) {
             for (k = 0; k < dim; k++) {
                 ix[k] = (int) floor((Vertex[Simplex[i][j]][k] - xlim[k][0])/dx[k]);
             } //next k
-            I = n * n * ix[0] + n * ix[1] + ix[2];
-            index[Simplex[i][j]] = I;
+            I_ = n * n * ix[0] + n * ix[1] + ix[2];
+            index[Simplex[i][j]] = I_;
         } //next j
     } //next i
 }
@@ -155,7 +155,7 @@ ivector1D     ix(dim, -1);
 dvector2D     xlim(dim, dvector1D(2, 0.0));
 
 // Counters
-int           i, j, k, I, m;
+int           i, j, k, I_, m;
 
 // ========================================================================== //
 // RESIZE INPUT VARIABLES                                                     //
@@ -197,8 +197,8 @@ if (dim == 2) {
             for (k = 0; k < dim; k++) {
                 ix[k] = (int) floor((X[Simplex[i][j]][k] - xlim[k][0])/dx[k]);
             } //next k
-            I = n * ix[0] + ix[1];
-            index[Simplex[i][j]] = I;
+            I_ = n * ix[0] + ix[1];
+            index[Simplex[i][j]] = I_;
         } //next j
     } //next i
 }
@@ -209,8 +209,8 @@ else if (dim == 3) {
             for (k = 0; k < dim; k++) {
                 ix[k] = (int) floor((X[Simplex[i][j]][k] - xlim[k][0])/dx[k]);
             } //next k
-            I = n * n * ix[0] + n * ix[1] + ix[2];
-            index[Simplex[i][j]] = I;
+            I_ = n * n * ix[0] + n * ix[1] + ix[2];
+            index[Simplex[i][j]] = I_;
         } //next j
     } //next i
 }
@@ -249,7 +249,7 @@ void Class_SurfTri::SetTolerance(
 double     length;
 
 // Counters
-int        i, j, m, I;
+int        i, j, m, I_;
 
 // ========================================================================== //
 // SET TOLLERANCE                                                             //
@@ -259,14 +259,14 @@ int        i, j, m, I;
 toll =  1.0e-1*norm_2(Vertex[Simplex[0][1]] - Vertex[Simplex[0][0]]);
 
 // Loop over simplicies
-for (I = 0; I < nSimplex; I++) {
-    m = Simplex[I].size();
+for (I_ = 0; I_ < nSimplex; I_++) {
+    m = Simplex[I_].size();
     for (i = 0; i < m; i++) {
-        j = ((i + 1) % Simplex[I].size());
-        length = norm_2(Vertex[Simplex[I][i]] - Vertex[Simplex[I][j]]);
+        j = ((i + 1) % Simplex[I_].size());
+        length = norm_2(Vertex[Simplex[I_][i]] - Vertex[Simplex[I_][j]]);
         toll = min(toll, 1.0e-1 * length);
     } // next i
-} // next I
+} // next I_
 
 return; };
 
@@ -300,7 +300,7 @@ void Class_SurfTri::SetTolerance(
 double     length;
 
 // Counters
-int        i, j, I, m;
+int        i, j, I_, m;
 
 // ========================================================================== //
 // SET TOLLERANCE                                                             //
@@ -310,14 +310,14 @@ int        i, j, I, m;
 toll =  1.0e-1*norm_2(X[Simplex[0][1]] - X[Simplex[0][0]]);
 
 // Loop over simplicies
-for (I = 0; I < nSimplex; I++) {
-    m = Simplex[I].size();
+for (I_ = 0; I_ < nSimplex; I_++) {
+    m = Simplex[I_].size();
     for (i = 0; i < m; i++) {
         j = ((i + 1) % m);
-        length = norm_2(X[Simplex[I][i]] - X[Simplex[I][j]]);
+        length = norm_2(X[Simplex[I_][i]] - X[Simplex[I_][j]]);
         toll = min(toll, 1.0e-1 * length);
     } // next i
-} //next I
+} //next I_
 
 return; };
 
@@ -359,7 +359,7 @@ ivector1D           idummy1D;
 ivector2D           idummy2D;
 
 // Counters
-int                 i, j, I, m;
+int                 i, j, I_, m;
 
 // ========================================================================== //
 // FLAG                                                                       //
@@ -369,10 +369,10 @@ flaga = ((Adjacency.size() > 0) && (Adjacency.size() >= nSimplex));
 // ========================================================================== //
 // FIX NODE NUMBERING                                                         //
 // ========================================================================== //
-for (I = 0; I < nSimplex; I++){
+for (I_ = 0; I_ < nSimplex; I_++){
 
     // Simplex type
-    m = Simplex[I].size();
+    m = Simplex[I_].size();
 
     if (m < 2) {
 
@@ -385,12 +385,12 @@ for (I = 0; I < nSimplex; I++){
         // Segment ---------------------------------------------------------- //
 
         // normal direction based on vertex numbering
-        z = Vertex[Simplex[I][1]] - Vertex[Simplex[I][0]];
+        z = Vertex[Simplex[I_][1]] - Vertex[Simplex[I_][0]];
         z = z/norm_2(z);
 
         // Fix node numbering
-        if (Dot_Product(z, Normal[I]) < 0.0) {
-            invert_loc_num(I);
+        if (Dot_Product(z, Normal[I_]) < 0.0) {
+            invert_loc_num(I_);
         }
     }
     else {
@@ -398,19 +398,19 @@ for (I = 0; I < nSimplex; I++){
         // Non-degenerate simplex ------------------------------------------- //
 
         // normal vector based on vertex numbering
-        x = Vertex[Simplex[I][1]] - Vertex[Simplex[I][0]];
-        y = Vertex[Simplex[I][2]] - Vertex[Simplex[I][1]];
+        x = Vertex[Simplex[I_][1]] - Vertex[Simplex[I_][0]];
+        y = Vertex[Simplex[I_][2]] - Vertex[Simplex[I_][1]];
         x = x/norm_2(x);
         y = y/norm_2(y);
         z = Cross_Product(x, y);
         z = z/norm_2(z);
 
         // Fix node numbering
-        if (Dot_Product(z, Normal[I]) < 0.0) {
-            invert_loc_num(I);
+        if (Dot_Product(z, Normal[I_]) < 0.0) {
+            invert_loc_num(I_);
         }
     }
-} //next I
+} //next I_
 
 return; };
 
@@ -450,7 +450,7 @@ ivector1D           idummy1D;
 ivector2D           idummy2D;
 
 // Counters
-int                 i, j, I, m;
+int                 i, j, I_, m;
 
 // ========================================================================== //
 // CHECK IF ADJACENCY ARE ALREADY BUILT                                       //
@@ -460,10 +460,10 @@ flaga = ((Adjacency.size() > 0) && (Adjacency.size() >= nSimplex));
 // ========================================================================== //
 // FIX NODE NUMBERING                                                         //
 // ========================================================================== //
-for (I = 0; I < nSimplex; I++){
+for (I_ = 0; I_ < nSimplex; I_++){
 
     // Simplex type
-    m = Simplex[I].size();
+    m = Simplex[I_].size();
 
     if (m < 2) {
 
@@ -476,12 +476,12 @@ for (I = 0; I < nSimplex; I++){
         // Segment ---------------------------------------------------------- //
 
         // normal direction based on vertex numbering
-        z = X[Simplex[I][1]] - X[Simplex[I][0]];
+        z = X[Simplex[I_][1]] - X[Simplex[I_][0]];
         z = z/norm_2(z);
 
         // Adjust node numbering
-        if (Dot_Product(z, Normal[I]) < 0.0) {
-            invert_loc_num(I);
+        if (Dot_Product(z, Normal[I_]) < 0.0) {
+            invert_loc_num(I_);
         }
     }
     else {
@@ -489,19 +489,19 @@ for (I = 0; I < nSimplex; I++){
         // Non-degenerate simplex ------------------------------------------- //
 
         // normal vector based on vertex numbering
-        x = X[Simplex[I][1]] - X[Simplex[I][0]];
-        y = X[Simplex[I][2]] - X[Simplex[I][1]];
+        x = X[Simplex[I_][1]] - X[Simplex[I_][0]];
+        y = X[Simplex[I_][2]] - X[Simplex[I_][1]];
         x = x/norm_2(x);
         y = y/norm_2(y);
         z = Cross_Product(x, y);
         z = z/norm_2(z);
 
         // Fix node numbering
-        if (Dot_Product(z, Normal[I]) < 0.0) {
-            invert_loc_num(I);
+        if (Dot_Product(z, Normal[I_]) < 0.0) {
+            invert_loc_num(I_);
         }
     }
-} //next I
+} //next I_
 
 return; };
 
@@ -536,7 +536,7 @@ int                   m, n, p;
 LIFOstack<int>        stack(sqrt(nSimplex));
 
 // Counters
-int                   I, i, j, e, J;
+int                   I_, i, j, e, J;
 
 // ========================================================================== //
 // BUILD ADJACENCY IF NOT ALREADY BUILT                                       //
@@ -552,21 +552,21 @@ stack.push(seed);
 while (stack.TOPSTK > 0) {
 
     // Pop item from stack
-    I = stack.pop();
-    m = Simplex[I].size();
-    flag[I] = true;
+    I_ = stack.pop();
+    m = Simplex[I_].size();
+    flag[I_] = true;
 
     // Loop over neighbor
     for (i = 0; i < m; i++) {
-        if (Adjacency[I][i][0] >= 0) {
-            n = Adjacency[I][i].size();
+        if (Adjacency[I_][i][0] >= 0) {
+            n = Adjacency[I_][i].size();
             for (j = 0; j < n; j++) {
-                J = Adjacency[I][i][j];
+                J = Adjacency[I_][i][j];
                 if (!flag[J]) {
                     p = Simplex[J].size();
-                    e = edge(I, J);
-                    if ((Simplex[J][e] == Simplex[I][i])
-                     && (Simplex[J][(e+1) % p] == Simplex[I][(i+1) % m])) {
+                    e = edge(I_, J);
+                    if ((Simplex[J][e] == Simplex[I_][i])
+                     && (Simplex[J][(e+1) % p] == Simplex[I_][(i+1) % m])) {
                         invert_loc_num(J);
                     }
                     stack.push(J);
@@ -685,7 +685,7 @@ int              dim = Vertex[0].size();
 dvector1D        x(dim,0.0), y(dim,0.0), z(dim,0.0);
 
 // Counter
-int              I, m;
+int              I_, m;
 
 // ========================================================================== //
 // GENERATE NORMALS                                                           //
@@ -697,10 +697,10 @@ if ((Normal.size() == 0) || (Normal.size() < nSimplex)) {
 }
 
 // Update normal for each simplex ------------------------------------------- //
-for (I = 0; I < nSimplex; I++) {
+for (I_ = 0; I_ < nSimplex; I_++) {
 
     // Simplex type
-    m = Simplex[I].size();
+    m = Simplex[I_].size();
 
     // Compute normal
     if (m < 2) {
@@ -712,14 +712,14 @@ for (I = 0; I < nSimplex; I++) {
     else if (m == 2) {
 
         // Segment ---------------------------------------------------------- //
-        z = Vertex[Simplex[I][1]] - Vertex[Simplex[I][0]];
+        z = Vertex[Simplex[I_][1]] - Vertex[Simplex[I_][0]];
 
     }
     else if (m == 3) {
 
         // Triangle --------------------------------------------------------- //
-        x = Vertex[Simplex[I][1]] - Vertex[Simplex[I][0]];
-        y = Vertex[Simplex[I][2]] - Vertex[Simplex[I][0]];
+        x = Vertex[Simplex[I_][1]] - Vertex[Simplex[I_][0]];
+        y = Vertex[Simplex[I_][2]] - Vertex[Simplex[I_][0]];
         x = x/norm_2(x);
         y = y/norm_2(y);
         z = Cross_Product(x, y);
@@ -742,8 +742,8 @@ for (I = 0; I < nSimplex; I++) {
         for (i = 0; i < m; i++) {
             j = (i+1) % m;
             k = (j+1) % m;
-            x = Vertex[Simplex[I][j]] - Vertex[Simplex[I][i]];
-            y = Vertex[Simplex[I][k]] - Vertex[Simplex[I][i]];
+            x = Vertex[Simplex[I_][j]] - Vertex[Simplex[I_][i]];
+            y = Vertex[Simplex[I_][k]] - Vertex[Simplex[I_][i]];
             x = x/norm_2(x);
             y = y/norm_2(y);
             t = Cross_Product(x, y);
@@ -753,9 +753,9 @@ for (I = 0; I < nSimplex; I++) {
     }
 
     // Set normal
-    Normal[I] = z/norm_2(z);
+    Normal[I_] = z/norm_2(z);
 
-} //next I
+} //next I_
 
 return; };
 
@@ -790,7 +790,7 @@ int              dim = X[0].size();
 dvector1D        x(dim,0.0), y(dim,0.0), z(dim,0.0);
 
 // Counter
-int              I, m;
+int              I_, m;
 
 // ========================================================================== //
 // GENERATE NORMALS                                                           //
@@ -802,10 +802,10 @@ if ((Normal.size() == 0) || (Normal.size() < nSimplex)) {
 }
 
 // Loop over simplicies ----------------------------------------------------- //
-for (I = 0; I < nSimplex; I++) {
+for (I_ = 0; I_ < nSimplex; I_++) {
 
     // Simplex type
-    m = Simplex[I].size();
+    m = Simplex[I_].size();
 
     // Compute normal
     if (m < 2) {
@@ -817,14 +817,14 @@ for (I = 0; I < nSimplex; I++) {
     else if (m == 2) {
 
         // Segment ---------------------------------------------------------- //
-        z = X[Simplex[I][1]] - X[Simplex[I][0]];
+        z = X[Simplex[I_][1]] - X[Simplex[I_][0]];
 
     }
     else if (m == 3) {
 
         // Triangle --------------------------------------------------------- //
-        x = X[Simplex[I][1]] - X[Simplex[I][0]];
-        y = X[Simplex[I][2]] - X[Simplex[I][1]];
+        x = X[Simplex[I_][1]] - X[Simplex[I_][0]];
+        y = X[Simplex[I_][2]] - X[Simplex[I_][1]];
         x = x/norm_2(x);
         y = y/norm_2(y);
         z = Cross_Product(x, y);
@@ -845,8 +845,8 @@ for (I = 0; I < nSimplex; I++) {
         for (i = 0; i < m; i++) {
             j = (i+1) % m;
             k = (j+1) % m;
-            x = X[Simplex[I][j]] - X[Simplex[I][i]];
-            y = X[Simplex[I][k]] - X[Simplex[I][i]];
+            x = X[Simplex[I_][j]] - X[Simplex[I_][i]];
+            y = X[Simplex[I_][k]] - X[Simplex[I_][i]];
             x = x/norm_2(x);
             y = y/norm_2(y);
             t = Cross_Product(x, y);
@@ -856,7 +856,7 @@ for (I = 0; I < nSimplex; I++) {
     }
 
     // Set normal
-    Normal[I] = z/norm_2(z);
+    Normal[I_] = z/norm_2(z);
 
 }
 
@@ -1891,7 +1891,7 @@ int                       n;
 ivector1D                 List;
 
 // Counters
-int                       i, I;
+int                       i, I_;
 
 // ========================================================================== //
 // COUNT ISOLATED VERTEXES                                                    //
@@ -2420,29 +2420,29 @@ bvector1D       flag(nVertex, true);
 ivector1D       list;
 
 // Counters
-int             i, I, m;
+int             i, I_, m;
 
 // ========================================================================== //
 // FIND ISOLATED VERTEX                                                       //
 // ========================================================================== //
 
 // Loop over simplex
-for (I = 0; I < nSimplex; I++) {
-    m = Simplex[I].size();
+for (I_ = 0; I_ < nSimplex; I_++) {
+    m = Simplex[I_].size();
     for (i = 0; i < m; i++) {
-        flag[Simplex[I][i]] = false;
+        flag[Simplex[I_][i]] = false;
     }  //next i
-} //next I
+} //next I_
 
 // Loop over vertexes
 list.resize(count(flag.begin(), flag.end(), true));
 i = 0;
-for (I = 0; I < nVertex; I++) {
-    if (flag[I]) {
-        list[i] = I;
+for (I_ = 0; I_ < nVertex; I_++) {
+    if (flag[I_]) {
+        list[i] = I_;
         i++;
     }
-} //next I
+} //next I_
 
 return(list); };
 
@@ -2478,29 +2478,29 @@ bvector1D       flag(X.size(), true);
 ivector1D       list;
 
 // Counters
-int             i, m, I;
+int             i, m, I_;
 
 // ========================================================================== //
 // FIND ISOLATED VERTEX                                                       //
 // ========================================================================== //
 
 // Loop over simplex
-for (I = 0; I < nSimplex; I++) {
-    m = Simplex[I].size();
+for (I_ = 0; I_ < nSimplex; I_++) {
+    m = Simplex[I_].size();
     for (i = 0; i < m; i++) {
-        flag[Simplex[I][i]] = false;
+        flag[Simplex[I_][i]] = false;
     }  //next i
-} //next I
+} //next I_
 
 // Loop over vertexes
 list.resize(count(flag.begin(), flag.end(), true));
 i = 0;
-for (I = 0; I < X.size(); I++) {
-    if (flag[I]) {
-        list[i] = I;
+for (I_ = 0; I_ < X.size(); I_++) {
+    if (flag[I_]) {
+        list[i] = I_;
         i++;
     }
-} //next I
+} //next I_
 
 return(list); };
 
@@ -2534,7 +2534,7 @@ bvector1D       flag(nVertex, false);
 ivector1D       list;
 
 // Counters
-int             i, j, m, I;
+int             i, j, m, I_;
 
 // ========================================================================== //
 // COMPUTE THE ADJACECNY MATRIX (IF NOT AREADY BUILT)                         //
@@ -2548,30 +2548,30 @@ if ((Adjacency.size() == 0) || (Adjacency.size() < nSimplex)) {
 // ========================================================================== //
 
 // Loop over simplex
-for (I = 0; I < nSimplex; I++) {
-    m = Simplex[I].size();
+for (I_ = 0; I_ < nSimplex; I_++) {
+    m = Simplex[I_].size();
     for (i = 0; i < m; i++) {
-        if (Simplex[I].size() == 2) {
-            if (Adjacency[I][i][0] < 0) {
-                flag[Simplex[I][i]] = true;
+        if (Simplex[I_].size() == 2) {
+            if (Adjacency[I_][i][0] < 0) {
+                flag[Simplex[I_][i]] = true;
             }
         }
         else {
-            j = (i+1) % Simplex[I].size();
-            if (Adjacency[I][i][0] < 0) {
-                flag[Simplex[I][i]] = true;
-                flag[Simplex[I][j]] = true;
+            j = (i+1) % Simplex[I_].size();
+            if (Adjacency[I_][i][0] < 0) {
+                flag[Simplex[I_][i]] = true;
+                flag[Simplex[I_][j]] = true;
             }
         }
     } //next i
-} //next I
+} //next I_
 
 // Loop over vertices
 list.resize(count(flag.begin(), flag.end(), true));
 i = 0;
-for (I = 0; I < nVertex; I++) {
-    if (flag[I]) {
-        list[i] = I;
+for (I_ = 0; I_ < nVertex; I_++) {
+    if (flag[I_]) {
+        list[i] = I_;
         i++;
     }
 }
@@ -2609,7 +2609,7 @@ bvector1D       flag(X.size(), false);
 ivector1D       list;
 
 // Counters
-int             i, j, m, I;
+int             i, j, m, I_;
 
 // ========================================================================== //
 // COMPUTE THE ADJACECNY MATRIX (IF NOT AREADY BUILT)                         //
@@ -2623,30 +2623,30 @@ if ((Adjacency.size() == 0) || (Adjacency.size() < nSimplex)) {
 // ========================================================================== //
 
 // Loop over simplicies
-for (I = 0; I < nSimplex; I++) {
-    m = Simplex[I].size();
+for (I_ = 0; I_ < nSimplex; I_++) {
+    m = Simplex[I_].size();
     for (i = 0; i < m; i++) {
-        if (Simplex[I].size() == 2) {
-            if (Adjacency[I][i][0] < 0) {
-                flag[Simplex[I][i]] = true;
+        if (Simplex[I_].size() == 2) {
+            if (Adjacency[I_][i][0] < 0) {
+                flag[Simplex[I_][i]] = true;
             }
         }
         else {
-            j = (i+1) % Simplex[I].size();
-            if (Adjacency[I][i][0] < 0) {
-                flag[Simplex[I][i]] = true;
-                flag[Simplex[I][j]] = true;
+            j = (i+1) % Simplex[I_].size();
+            if (Adjacency[I_][i][0] < 0) {
+                flag[Simplex[I_][i]] = true;
+                flag[Simplex[I_][j]] = true;
             }
         }
     } //next i
-} //next I
+} //next I_
 
 // Loop over vertices
 list.resize(count(flag.begin(), flag.end(), true));
 i = 0;
-for (I = 0; I < X.size(); I++) {
-    if (flag[I]) {
-        list[i] = I;
+for (I_ = 0; I_ < X.size(); I_++) {
+    if (flag[I_]) {
+        list[i] = I_;
             i++;
     }
 }
@@ -2688,7 +2688,7 @@ ivector1D    doublev;
 ivector3D    cell;
 
 // Counters
-int          I, C, S, V, W;
+int          I_, C, S, V, W;
 int          i;
 
 // ========================================================================== //
@@ -2710,16 +2710,16 @@ else if (dim == 3) { cell.resize(n*n*n); }
 BinSortV(index, n);
 
 // Sort simplicies ---------------------------------------------------------- //
-for (I = 0; I < nSimplex; I++) {
-    m = Simplex[I].size();
+for (I_ = 0; I_ < nSimplex; I_++) {
+    m = Simplex[I_].size();
     for (i = 0; i < m; i++) {
-        V = Simplex[I][i];
+        V = Simplex[I_][i];
         C = index[V];
-        idummy1D[0] = I;
+        idummy1D[0] = I_;
         idummy1D[1] = i;
         cell[C].push_back(idummy1D);
     } //next i
-} //next I
+} //next I_
 
 // ========================================================================== //
 // FIND DOUBLE VERTICES                                                       //
@@ -2736,9 +2736,9 @@ if (dim == 2) {
 
             // Randomize vertex insertion
             Extract_wo_Repl(m, m-1, list);
-            for (I = 0; I < m; I++) {
-                S = cell[C][list[I]][0];
-                i = cell[C][list[I]][1];
+            for (I_ = 0; I_ < m; I_++) {
+                S = cell[C][list[I_]][0];
+                i = cell[C][list[I_]][1];
                 V = Simplex[S][i];
                 if (kd.exist(&Vertex[V], W) >= 0) {
                     if (!flag[V]) {
@@ -2750,7 +2750,7 @@ if (dim == 2) {
                     flag[V] = true;
                     kd.insert(&Vertex[V], V);
                 }
-            } //next I
+            } //next I_
         }
     } //next C
 }
@@ -2765,9 +2765,9 @@ else if (dim == 3) {
 
             // Randomize vertex insertion
             Extract_wo_Repl(m, m-1, list);
-            for (I = 0; I < m; I++) {
-                S = cell[C][list[I]][0];
-                i = cell[C][list[I]][1];
+            for (I_ = 0; I_ < m; I_++) {
+                S = cell[C][list[I_]][0];
+                i = cell[C][list[I_]][1];
                 V = Simplex[S][i];
                 if (kd.exist(&Vertex[V], W) >= 0) {
                     if (!flag[V]) {
@@ -2779,7 +2779,7 @@ else if (dim == 3) {
                     flag[V] = true;
                     kd.insert(&Vertex[V], V);
                 }
-            } //next I
+            } //next I_
         }
     } //next C
 }
@@ -2826,7 +2826,7 @@ ivector1D    doublev;
 ivector3D    cell;
 
 // Counters
-int          I, C, S, V, W;
+int          I_, C, S, V, W;
 int          i;
 
 // ========================================================================== //
@@ -2848,16 +2848,16 @@ else if (dim == 3) { cell.resize(n*n*n); }
 BinSortV(index, n);
 
 // Sort simplicies ---------------------------------------------------------- //
-for (I = 0; I < nSimplex; I++) {
-    m = Simplex[I].size();
+for (I_ = 0; I_ < nSimplex; I_++) {
+    m = Simplex[I_].size();
     for (i = 0; i < m; i++) {
-        V = Simplex[I][i];
+        V = Simplex[I_][i];
         C = index[V];
-        idummy1D[0] = I;
+        idummy1D[0] = I_;
         idummy1D[1] = i;
         cell[C].push_back(idummy1D);
     } //next i
-} //next I
+} //next I_
 
 // ========================================================================== //
 // FIND DOUBLE VERTICES                                                       //
@@ -2874,9 +2874,9 @@ if (dim == 2) {
 
             // Randomize vertex insertion
             Extract_wo_Repl(m, m-1, list);
-            for (I = 0; I < m; I++) {
-                S = cell[C][list[I]][0];
-                i = cell[C][list[I]][1];
+            for (I_ = 0; I_ < m; I_++) {
+                S = cell[C][list[I_]][0];
+                i = cell[C][list[I_]][1];
                 V = Simplex[S][i];
                 if (kd.exist(&X[V], W) >= 0) {
                     if (!flag[V]) {
@@ -2888,7 +2888,7 @@ if (dim == 2) {
                     flag[V] = true;
                     kd.insert(&X[V], V);
                 }
-            } //next I
+            } //next I_
         }
     } //next C
 }
@@ -2903,9 +2903,9 @@ else if (dim == 3) {
 
             // Randomize vertex insertion
             Extract_wo_Repl(m, m-1, list);
-            for (I = 0; I < m; I++) {
-                S = cell[C][list[I]][0];
-                i = cell[C][list[I]][1];
+            for (I_ = 0; I_ < m; I_++) {
+                S = cell[C][list[I_]][0];
+                i = cell[C][list[I_]][1];
                 V = Simplex[S][i];
                 if (kd.exist(&X[V], W) >= 0) {
                     if (!flag[V]) {
@@ -2917,7 +2917,7 @@ else if (dim == 3) {
                     flag[V] = true;
                     kd.insert(&X[V], V);
                 }
-            } //next I
+            } //next I_
         }
     } //next C
 }
@@ -3802,7 +3802,7 @@ ivector1D    index(nVertex, -1), idummy1D(2, -1);
 ivector3D    cell;
 
 // Counters
-int          I, C, S, V, W;
+int          I_, C, S, V, W;
 int          i;
 
 // ========================================================================== //
@@ -3827,16 +3827,16 @@ doublev.resize(0);
 BinSortV(index, n);
 
 // Sort simplicies ---------------------------------------------------------- //
-for (I = 0; I < nSimplex; I++) {
-    m = Simplex[I].size();
+for (I_ = 0; I_ < nSimplex; I_++) {
+    m = Simplex[I_].size();
     for (i = 0; i < m; i++) {
-        V = Simplex[I][i];
+        V = Simplex[I_][i];
         C = index[V];
-        idummy1D[0] = I;
+        idummy1D[0] = I_;
         idummy1D[1] = i;
         cell[C].push_back(idummy1D);
     } //next i
-} //next I
+} //next I_
 
 // ========================================================================== //
 // COLLAPSE DOUBLE VERTICES                                                   //
@@ -3853,9 +3853,9 @@ if (dim == 2) {
 
             // Randomize vertex insertion
             Extract_wo_Repl(m, m-1, list);
-            for (I = 0; I < m; I++) {
-                S = cell[C][list[I]][0];
-                i = cell[C][list[I]][1];
+            for (I_ = 0; I_ < m; I_++) {
+                S = cell[C][list[I_]][0];
+                i = cell[C][list[I_]][1];
                 V = Simplex[S][i];
                 if (kd.exist(&Vertex[V], W) >= 0) {
                     Simplex[S][i] = W;
@@ -3868,7 +3868,7 @@ if (dim == 2) {
                     flag[V] = true;
                     kd.insert(&Vertex[V], V);
                 }
-            } //next I
+            } //next I_
         }
     } //next C
 }
@@ -3883,9 +3883,9 @@ else if (dim == 3) {
 
             // Randomize vertex insertion
             Extract_wo_Repl(m, m-1, list);
-            for (I = 0; I < m; I++) {
-                S = cell[C][list[I]][0];
-                i = cell[C][list[I]][1];
+            for (I_ = 0; I_ < m; I_++) {
+                S = cell[C][list[I_]][0];
+                i = cell[C][list[I_]][1];
                 V = Simplex[S][i];
                 if (kd.exist(&Vertex[V], W) >= 0) {
                     Simplex[S][i] = W;
@@ -3898,7 +3898,7 @@ else if (dim == 3) {
                     flag[V] = true;
                     kd.insert(&Vertex[V], V);
                 }
-            } //next I
+            } //next I_
         }
     } //next C
 }
@@ -3946,7 +3946,7 @@ ivector1D    index(nV, -1), idummy1D(2, -1);
 ivector3D    cell;
 
 // Counters
-int          I, C, S, V, W;
+int          I_, C, S, V, W;
 int          i;
 
 // ========================================================================== //
@@ -3968,16 +3968,16 @@ else if (dim == 3) { cell.resize(n*n*n); }
 BinSortV(X, index, n);
 
 // Sort simplicies ---------------------------------------------------------- //
-for (I = 0; I < nSimplex; I++) {
-    m = Simplex[I].size();
+for (I_ = 0; I_ < nSimplex; I_++) {
+    m = Simplex[I_].size();
     for (i = 0; i < m; i++) {
-        V = Simplex[I][i];
+        V = Simplex[I_][i];
         C = index[V];
-        idummy1D[0] = I;
+        idummy1D[0] = I_;
         idummy1D[1] = i;
         cell[C].push_back(idummy1D);
     } //next i
-} //next I
+} //next I_
 
 // ========================================================================== //
 // COLLAPSE DOUBLE VERTICES                                                   //
@@ -3994,9 +3994,9 @@ if (dim == 2) {
 
             // Randomize vertex insertion
             Extract_wo_Repl(m, m-1, list);
-            for (I = 0; I < m; I++) {
-                S = cell[C][list[I]][0];
-                i = cell[C][list[I]][1];
+            for (I_ = 0; I_ < m; I_++) {
+                S = cell[C][list[I_]][0];
+                i = cell[C][list[I_]][1];
                 V = Simplex[S][i];
                 if (kd.exist(&X[V], W) >= 0) {
                     Simplex[S][i] = W;
@@ -4005,7 +4005,7 @@ if (dim == 2) {
                 else {
                     kd.insert(&X[V], V);
                 }
-            } //next I
+            } //next I_
         }
     } //next C
 }
@@ -4020,9 +4020,9 @@ else if (dim == 3) {
 
             // Randomize vertex insertion
             Extract_wo_Repl(m, m-1, list);
-            for (I = 0; I < m; I++) {
-                S = cell[C][list[I]][0];
-                i = cell[C][list[I]][1];
+            for (I_ = 0; I_ < m; I_++) {
+                S = cell[C][list[I_]][0];
+                i = cell[C][list[I_]][1];
                 V = Simplex[S][i];
                 if (kd.exist(&X[V], W) >= 0) {
                     Simplex[S][i] = W;
@@ -4035,7 +4035,7 @@ else if (dim == 3) {
                     flag[V] = true;
                     kd.insert(&X[V], V);
                 }
-            } //next I
+            } //next I_
         }
     } //next C
 }
@@ -4072,7 +4072,7 @@ ivector2D    idummy2D;
 
 // Counter
 int          counter;
-int          I, J;
+int          I_, J;
 int          i, j, m;
 
 // Initialize variables ----------------------------------------------------- //
@@ -4087,79 +4087,79 @@ for (i = 0; i < list.size(); i++) {
 // Loop over simplicies ----------------------------------------------------- //
 J = 0;
 counter = 0;
-for (I = 0; I < nSimplex; I++) {
-    if (map[I] >= 0) {
+for (I_ = 0; I_ < nSimplex; I_++) {
+    if (map[I_] >= 0) {
 
         // Update counter
         counter++;
 
         // Update simplex-vertex connectivity
-        Simplex[J].resize(Simplex[I].size());
-        Simplex[J] = Simplex[I];
+        Simplex[J].resize(Simplex[I_].size());
+        Simplex[J] = Simplex[I_];
 
         // Update map
-        map[I] = J;
+        map[I_] = J;
 
         // Update counter
         J++;
 
     }
-} //next I
+} //next I_
 
 // Update Normals ----------------------------------------------------------- //
 if ((Normal.size() > 0) && (Normal.size() >= nSimplex)) {
-    for (I = 0; I < nSimplex; I++) {
-        if (map[I] >= 0) {
+    for (I_ = 0; I_ < nSimplex; I_++) {
+        if (map[I_] >= 0) {
 
             // Update normals
-            Normal[map[I]] = Normal[I];
+            Normal[map[I_]] = Normal[I_];
         }
-    } //next I
+    } //next I_
 }
 
 // Update Adjacency --------------------------------------------------------- //
 if ((Adjacency.size() > 0) && (Adjacency.size() >= nSimplex)) {
-    for (I = 0; I < nSimplex; I++) {
-        if (map[I] >= 0) {
+    for (I_ = 0; I_ < nSimplex; I_++) {
+        if (map[I_] >= 0) {
 
             // Update simplex-simplex connectivity
-            idummy2D.resize(Adjacency[I].size());
-            m = Adjacency[I].size();
+            idummy2D.resize(Adjacency[I_].size());
+            m = Adjacency[I_].size();
             for (i = 0; i < m; i++) {
-                idummy2D[i].resize(Adjacency[I][i].size());
-                idummy2D[i] = Adjacency[I][i];
+                idummy2D[i].resize(Adjacency[I_][i].size());
+                idummy2D[i] = Adjacency[I_][i];
             } //next i
 
-            Adjacency[map[I]].resize(Adjacency[I].size());
+            Adjacency[map[I_]].resize(Adjacency[I_].size());
             for (i = 0; i < idummy2D.size(); i++) {
-                Adjacency[map[I]][i].resize(idummy2D[i].size());
+                Adjacency[map[I_]][i].resize(idummy2D[i].size());
                 j = 0;
                 while (j < idummy2D[i].size()) {
                     J = idummy2D[i][j];
                     if (J >= 0) {
                         if (map[J] >= 0) {
-                            Adjacency[map[I]][i][j] = map[J];
+                            Adjacency[map[I_]][i][j] = map[J];
                             j++;
                         }
                         else {
-                            if (Adjacency[map[I]][i].size() == 1) {
-                                Adjacency[map[I]][i][j] = -1;
+                            if (Adjacency[map[I_]][i].size() == 1) {
+                                Adjacency[map[I_]][i][j] = -1;
                                 j++;
                             }
                             else {
-                                Adjacency[map[I]][i].erase(Adjacency[map[I]][i].begin() + j);
+                                Adjacency[map[I_]][i].erase(Adjacency[map[I_]][i].begin() + j);
                                 idummy2D[i].erase(idummy2D[i].begin() + j);
                             }
                         }
                     }
                     else {
-                        Adjacency[map[I]][i][j] = -1;
+                        Adjacency[map[I_]][i][j] = -1;
                         j++;
                     }
                 } //next j
             } //next i
         }
-    } // next I
+    } // next I_
 }
 
 // Update number of simplicies ---------------------------------------------- //
@@ -4201,7 +4201,7 @@ ivector2D    idummy2D;
 
 // Counter
 int          counter;
-int          I, J;
+int          I_, J;
 int          i, j, m;
 
 // Initialize variables ----------------------------------------------------- //
@@ -4217,78 +4217,78 @@ for (i = 0; i < m; i++) {
 // Loop over simplicies ----------------------------------------------------- //
 J = 0;
 counter = 0;
-for (I = 0; I < nSimplex; I++) {
-    if (map[I] >= 0) {
+for (I_ = 0; I_ < nSimplex; I_++) {
+    if (map[I_] >= 0) {
 
         // Update counter
         counter++;
 
         // Update simplex-vertex connectivity
-        Simplex[J].resize(Simplex[I].size());
-        Simplex[J] = Simplex[I];
+        Simplex[J].resize(Simplex[I_].size());
+        Simplex[J] = Simplex[I_];
 
         // Update map
-        map[I] = J;
+        map[I_] = J;
 
         // Update counter
         J++;
 
     }
-} //next I
+} //next I_
 
 // Update Normals ----------------------------------------------------------- //
 if ((Normal.size() > 0) && (Normal.size() >= nSimplex)) {
-    for (I = 0; I < nSimplex; I++) {
-        if (map[I] >= 0) {
+    for (I_ = 0; I_ < nSimplex; I_++) {
+        if (map[I_] >= 0) {
 
             // Update normals
-            Normal[map[I]] = Normal[I];
+            Normal[map[I_]] = Normal[I_];
         }
-    } //next I
+    } //next I_
 }
 
 // Update Adjacency --------------------------------------------------------- //
 if ((Adjacency.size() > 0) && (Adjacency.size() >= nSimplex)) {
-    for (I = 0; I < nSimplex; I++) {
-        if (map[I] >= 0) {
+    for (I_ = 0; I_ < nSimplex; I_++) {
+        if (map[I_] >= 0) {
 
             // Update simplex-simplex connectivity
-            idummy2D.resize(Adjacency[I].size());
-            for (i = 0; i < Adjacency[I].size(); i++) {
-                idummy2D[i].resize(Adjacency[I][i].size());
-                idummy2D[i] = Adjacency[I][i];
+            idummy2D.resize(Adjacency[I_].size());
+            for (i = 0; i < Adjacency[I_].size(); i++) {
+                idummy2D[i].resize(Adjacency[I_][i].size());
+                idummy2D[i] = Adjacency[I_][i];
             } //next i
 
-            Adjacency[map[I]].resize(Adjacency[I].size());
+            Adjacency[map[I_]].resize(Adjacency[I_].size());
             for (i = 0; i < idummy2D.size(); i++) {
-                Adjacency[map[I]][i].resize(idummy2D[i].size());
+                Adjacency[map[I_]][i].resize(idummy2D[i].size());
                 j = 0;
                 while (j < idummy2D[i].size()) {
                     J = idummy2D[i][j];
                     if (J >= 0) {
                         if (map[J] >= 0) {
-                            Adjacency[map[I]][i][j] = map[J];
+                            Adjacency[map[I_]][i][j] = map[J];
                             j++;
                         }
                         else {
-                            if (Adjacency[map[I]][i].size() == 1) {
-                                Adjacency[map[I]][i][j] = -1;
+                            if (Adjacency[map[I_]][i].size() == 1) {
+                                Adjacency[map[I_]][i][j] = -1;
                                 j++;
                             }
                             else {
-                                Adjacency[map[I]][i].erase(Adjacency[map[I]][i].begin() + j);
+                                Adjacency[map[I_]][i].erase(Adjacency[map[I_]][i].begin() + j);
                                 idummy2D[i].erase(idummy2D[i].begin() + j);
                             }
                         }
                     }
                     else {
-                        Adjacency[map[I]][i][j] = -1;
+                        Adjacency[map[I_]][i][j] = -1;
                         j++;
                     }
                 } //next j
             } //next i
         }
-    } // next I
+    } // next I_
 }
 
 // Update number of simplicies ---------------------------------------------- //
@@ -4327,84 +4327,84 @@ ivector2D    idummy2D;
 
 // Counter
 int         counter;
-int         I, J;
+int         I_, J;
 int         i, j;
 
 // Loop over simplicies ----------------------------------------------------- //
 J = 0;
 counter = 0;
-for (I = 0; I < nSimplex; I++) {
-    if (flag[I] == false) {
+for (I_ = 0; I_ < nSimplex; I_++) {
+    if (flag[I_] == false) {
 
         // Update counter
         counter += 1;
 
         // Update simplex-vertex connectivity
-        Simplex[J].resize(Simplex[I].size());
-        Simplex[J] = Simplex[I];
+        Simplex[J].resize(Simplex[I_].size());
+        Simplex[J] = Simplex[I_];
 
         // Update map
-        map[I] = J;
+        map[I_] = J;
 
         // Update counter
         J++;
 
     }
-} //next I
+} //next I_
 
 // Update Normals ----------------------------------------------------------- //
 if ((Normal.size() > 0) && (Normal.size() >= nSimplex)) {
-    for (I = 0; I < nSimplex; I++) {
-        if (flag[I] == false) {
+    for (I_ = 0; I_ < nSimplex; I_++) {
+        if (flag[I_] == false) {
 
             // Update normals
-            Normal[map[I]] = Normal[I];
+            Normal[map[I_]] = Normal[I_];
         }
-    } //next I
+    } //next I_
 }
 
 // Update Adjacency --------------------------------------------------------- //
 if ((Adjacency.size() > 0) && (Adjacency.size() >= nSimplex)) {
-    for (I = 0; I < nSimplex; I++) {
-        if (flag[I] == false) {
+    for (I_ = 0; I_ < nSimplex; I_++) {
+        if (flag[I_] == false) {
 
             // Update simplex-simplex connectivity
-            idummy2D.resize(Adjacency[I].size());
-            for (i = 0; i < Adjacency[I].size(); i++) {
-                idummy2D[i].resize(Adjacency[I][i].size());
-                idummy2D[i] = Adjacency[I][i];
+            idummy2D.resize(Adjacency[I_].size());
+            for (i = 0; i < Adjacency[I_].size(); i++) {
+                idummy2D[i].resize(Adjacency[I_][i].size());
+                idummy2D[i] = Adjacency[I_][i];
             } //next i
 
-            Adjacency[map[I]].resize(Adjacency[I].size());
+            Adjacency[map[I_]].resize(Adjacency[I_].size());
             for (i = 0; i < idummy2D.size(); i++) {
-                Adjacency[map[I]][i].resize(idummy2D[i].size());
+                Adjacency[map[I_]][i].resize(idummy2D[i].size());
                 j = 0;
                 while (j < idummy2D[i].size()) {
                     J = idummy2D[i][j];
                     if (J >= 0) {
                         if (map[J] >= 0) {
-                            Adjacency[map[I]][i][j] = map[J];
+                            Adjacency[map[I_]][i][j] = map[J];
                             j++;
                         }
                         else {
-                            if (Adjacency[map[I]][i].size() == 1) {
-                                Adjacency[map[I]][i][j] = -1;
+                            if (Adjacency[map[I_]][i].size() == 1) {
+                                Adjacency[map[I_]][i][j] = -1;
                                 j++;
                             }
                             else {
-                                Adjacency[map[I]][i].erase(Adjacency[map[I]][i].begin() + j);
+                                Adjacency[map[I_]][i].erase(Adjacency[map[I_]][i].begin() + j);
                                 idummy2D[i].erase(idummy2D[i].begin() + j);
                             }
                         }
                     }
                     else {
-                        Adjacency[map[I]][i][j] = -1;
+                        Adjacency[map[I_]][i][j] = -1;
                         j++;
                     }
                 } //next j
             } //next i
         }
-    } // next I
+    } // next I_
 }
 
 // Update number of simplicies ------------------------------------------------------- //
@@ -4447,7 +4447,7 @@ ivector2D    idummy2D;
 
 // Counter
 int         counter;
-int         I, J;
+int         I_, J;
 int         i, j;
 
 // Initialize variables ----------------------------------------------------- //
@@ -4456,78 +4456,78 @@ map.resize(nSimplex,-1);
 // Loop over simplicies ----------------------------------------------------- //
 J = 0;
 counter = 0;
-for (I = 0; I < nSimplex; I++) {
-    if (flag[I] == false) {
+for (I_ = 0; I_ < nSimplex; I_++) {
+    if (flag[I_] == false) {
 
         // Update counter
         counter += 1;
 
         // Update simplex-vertex connectivity
-        Simplex[J].resize(Simplex[I].size());
-        Simplex[J] = Simplex[I];
+        Simplex[J].resize(Simplex[I_].size());
+        Simplex[J] = Simplex[I_];
 
         // Update map
-        map[I] = J;
+        map[I_] = J;
 
         // Update counter
         J++;
 
     }
-} //next I
+} //next I_
 
 // Update Normals -------------------------------------------------------------------- //
 if ((Normal.size() > 0) && (Normal.size() >= nSimplex)) {
-    for (I = 0; I < nSimplex; I++) {
-        if (flag[I] == false) {
+    for (I_ = 0; I_ < nSimplex; I_++) {
+        if (flag[I_] == false) {
 
             // Update normals
-            Normal[map[I]] = Normal[I];
+            Normal[map[I_]] = Normal[I_];
         }
-    } //next I
+    } //next I_
 }
 
 // Update Adjacency ------------------------------------------------------------------ //
 if ((Adjacency.size() > 0) && (Adjacency.size() >= nSimplex)) {
-    for (I = 0; I < nSimplex; I++) {
-        if (flag[I] == false) {
+    for (I_ = 0; I_ < nSimplex; I_++) {
+        if (flag[I_] == false) {
 
             // Update simplex-simplex connectivity
-            idummy2D.resize(Adjacency[I].size());
-            for (i = 0; i < Adjacency[I].size(); i++) {
-                idummy2D[i].resize(Adjacency[I][i].size());
-                idummy2D[i] = Adjacency[I][i];
+            idummy2D.resize(Adjacency[I_].size());
+            for (i = 0; i < Adjacency[I_].size(); i++) {
+                idummy2D[i].resize(Adjacency[I_][i].size());
+                idummy2D[i] = Adjacency[I_][i];
             } //next i
 
-            Adjacency[map[I]].resize(Adjacency[I].size());
+            Adjacency[map[I_]].resize(Adjacency[I_].size());
             for (i = 0; i < idummy2D.size(); i++) {
-                Adjacency[map[I]][i].resize(idummy2D[i].size());
+                Adjacency[map[I_]][i].resize(idummy2D[i].size());
                 j = 0;
                 while (j < idummy2D[i].size()) {
                     J = idummy2D[i][j];
                     if (J >= 0) {
                         if (map[J] >= 0) {
-                            Adjacency[map[I]][i][j] = map[J];
+                            Adjacency[map[I_]][i][j] = map[J];
                             j++;
                         }
                         else {
-                            if (Adjacency[map[I]][i].size() == 1) {
-                                Adjacency[map[I]][i][j] = -1;
+                            if (Adjacency[map[I_]][i].size() == 1) {
+                                Adjacency[map[I_]][i][j] = -1;
                                 j++;
                             }
                             else {
-                                Adjacency[map[I]][i].erase(Adjacency[map[I]][i].begin() + j);
+                                Adjacency[map[I_]][i].erase(Adjacency[map[I_]][i].begin() + j);
                                 idummy2D[i].erase(idummy2D[i].begin() + j);
                             }
                         }
                     }
                     else {
-                        Adjacency[map[I]][i][j] = -1;
+                        Adjacency[map[I_]][i][j] = -1;
                         j++;
                     }
                 } //next j
             } //next i
         }
-    } // next I
+    } // next I_
 }
 
 // Update number of simplicies ------------------------------------------------------- //
