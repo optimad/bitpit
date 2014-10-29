@@ -1,0 +1,762 @@
+// ========================================================================== //
+//                         - Class_VolTri -                                   //
+//                                                                            //
+// Grid manager for unstructured volume meshes.                               //
+// ========================================================================== //
+// INFO                                                                       //
+// ========================================================================== //
+// Author   : Alessandro Alaia                                                //
+// Version  : v2.0                                                            //
+//                                                                            //
+// All rights reserved.                                                       //
+// ========================================================================== //
+
+// ========================================================================== //
+// INCLUDES                                                                   //
+// ========================================================================== //
+# include "Class_VolTri.hpp"
+
+// ========================================================================== //
+// IMPLEMENTATIONS                                                            //
+// ========================================================================== //
+
+// SELECTION TOOLS ========================================================== //
+
+// -------------------------------------------------------------------------- //
+int Class_VolTri::vertex(
+    int          A,
+    int          V
+) {
+
+// ========================================================================== //
+// int Class_VolTri::vertex(                                                  //
+//     int          A,                                                        //
+//     int          V)                                                        //
+//                                                                            //
+// Return the local index on simplex A of the vertex with global index V.     //
+// If such a vertex is not found, returns -1.                                 //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - A     : int, simplex global index                                        //
+// - V     : int, vertex global index                                         //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - vert  : int, local index on simplex A of vertex with global index V      //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+bool                check = true;
+int                 n, vert = -1;
+
+// Counters
+int                 j;
+
+// ========================================================================== //
+// FIND VERTEX WITH SPECIFIED GLOBAL INDEX                                    //
+// ========================================================================== //
+n = infos[e_type[A]].n_vert;
+j = 0;
+while ((j < n) && check) {
+    if (Simplex[A][j] == V) {
+        vert = j;
+        check = false;
+    }
+    j++;
+} //next j
+
+return(vert); };
+
+// -------------------------------------------------------------------------- //
+int Class_VolTri::face(
+    int          A,
+    int          B
+) {
+
+// ========================================================================== //
+// int Class_VolTri::face(                                                    //
+//     int          A,                                                        //
+//     int          B)                                                        //
+//                                                                            //
+// Returns the local index on simplex A of the face shared by simplcies A     //
+// and B. If not such face is found, returns -1.                              //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - A    : int, 1st simplex global index                                     //
+// - B    : int, 2nd simplex global index                                     //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - face : int, face local index                                             //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+bool        flag;
+int         face = -1;
+
+// Counters
+int         i;
+
+// ========================================================================== //
+// SELECT FACE                                                                //
+// ========================================================================== //
+flag = true;
+i = 0;
+while (flag && (i < Adjacency[A].size())) {
+    if (Adjacency[A][i] == B) {
+        flag = false;
+        face = i;
+    }
+    i++;
+} //next i
+
+return(face); };
+
+        // Find triangle --------------------------------------------------------------------- //
+        int Class_VolTri::ReturnTriangleID(dvector1D    &P) {
+
+        // =================================================================================== //
+        // int Class_VolTri::ReturnTriangleID(dvector1D    &P)                                 //
+        //                                                                                     //
+        // Find the index of the triangle enclosing a given point xp (Lawson's search          //
+        // algorithm, for 2D volume triangulation only).                                       //
+        // =================================================================================== //
+        // INPUT                                                                               //
+        // =================================================================================== //
+        // - P    : dvector1D, with point x, y coordinates                                     //
+        // =================================================================================== //
+        // OUTPUT                                                                              //
+        // =================================================================================== //
+        // - T     : int, global index of triangle enclosing point P                           //
+        // =================================================================================== //
+
+        // =================================================================================== //
+        // VARIABLES DECLARATION                                                               //
+        // =================================================================================== //
+
+        // Local variables
+        int        V1, V2;
+        int        T;
+        double     check;
+
+        // Counters
+        int        i;
+
+        // =================================================================================== //
+        // FIND TRIANGLE USING THE LAWSON'S SEARCH ALGORITHM                                   //
+        // =================================================================================== //
+
+        // First guess ----------------------------------------------------------------------- //
+        T = nSimplex - 1;
+
+        // Find triangle enclosing point P --------------------------------------------------- //
+label_10:
+        if (T < 0) {
+            return(-1);
+        }
+        for (i = 0; i < Simplex[T].size(); i++) {
+            V1 = Simplex[T][i];
+            V2 = Simplex[T][(i+1) % 3];
+            check = (Vertex[V1][1] - P[1])*(Vertex[V2][0] - P[0])
+                  - (Vertex[V1][0] - P[0])*(Vertex[V2][1] - P[1]);
+            if (check > 0.0) {
+                T = Adjacency[T][i];
+                goto label_10;
+            }
+        } //next i
+
+        return (T); };
+
+// -------------------------------------------------------------------------- //
+int Class_VolTri::ReturnSimplexID(
+    dvector1D   &P,
+    int          S0
+) {
+
+// ========================================================================== //
+// int Class_VolTri::ReturnSimplexID(                                         //
+//     dvector1D   &P,                                                        //
+//     int          S0)                                                       //
+//                                                                            //
+// Return the ID of the simplex enclosing point P.                            //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - P     : dvector1D, point coordinates                                     //
+// - S0    : int, seed for search procedure                                   //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - S     : int, ID of simplex enclosing point P                             //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+bool                        check = false;
+int                         n, m, p;
+int                         dim = Vertex[0].size();
+double                      max_dp, dp;
+bvector1D                   visited(nSimplex, false);
+ivector2D                   face_vlist;
+array<double, 3>            x, y, xF, xS, dir;
+vector<array<double, 3> >   face_normals;
+LIFOstack<int>              stack;
+
+// Counters
+int                         i, j, k, l, S, A;
+/*debug*/int                         n_visited = 0;
+
+// /*debug*/ofstream       log_file;
+// /*debug*/log_file.open("SEARCH.log", ifstream::app);
+
+// ========================================================================== //
+// INITIALIZE PARAMETERS                                                      //
+// ========================================================================== //
+// x.fill(0.0);
+// y.fill(0.0);
+
+// /*debug*/log_file << "point coordinates: " << P << endl;
+
+// ========================================================================== //
+// BUILD ADJACENCY IF NOT ALREADY BUILT                                       //
+// ========================================================================== //
+if ((Adjacency.size() == 0) || (Adjacency.size() < nSimplex)) {
+    // cout << "building adjacency" << endl;
+    BuildAdjacency();
+}
+
+// ========================================================================== //
+// LOOP UNTIL SIMPLEX IS FOUND                                                //
+// ========================================================================== //
+stack.push(S0);
+while ((stack.TOPSTK > 0) && (!check)) {
+
+// /*debug*/n_visited++;
+
+    // Pop item from stack -------------------------------------------------- //
+    S = stack.pop();
+    visited[S] = true;
+
+// /*debug*/log_file << "  traversing simplex: " << S << endl;
+// /*debug*/log_file << "  (visited: " << n_visited << " of " << nSimplex << endl;
+
+    // Simplex infos -------------------------------------------------------- //
+    n = infos[e_type[S]].n_vert;
+    m = infos[e_type[S]].n_faces;
+
+    // Get face vertices ---------------------------------------------------- //
+    {
+        face_vlist.resize(m);
+        for (j = 0; j < m; ++j) {
+            face_vlist[j] = FaceVertices(S, j);
+        } //next j
+    }
+
+    // Simplex baricenter --------------------------------------------------- //
+    {
+        xS.fill(0.0);
+        for (j = 0; j < n; ++j) {
+            for (l = 0; l < dim; ++l) {
+                xS[l] += Vertex[Simplex[S][j]][l];
+            } //next l
+        } //next j
+        xS = xS/((double) n);
+    }
+
+    // Compute face normals ------------------------------------------------- //
+    {
+        face_normals.resize(m);
+        for (j = 0; j < m; ++j) {
+            if (face_vlist[j].size() == 2) {
+                x[0] = Vertex[face_vlist[j][1]][0] - Vertex[face_vlist[j][0]][0];
+                x[1] = Vertex[face_vlist[j][1]][1] - Vertex[face_vlist[j][0]][1];
+                x[2] = 0.0;
+                y[0] = 0.0;
+                y[1] = 0.0;
+                y[2] = 1.0;
+                face_normals[j] = Cross_Product(x, y);
+            }
+            else {
+                x[0] = Vertex[face_vlist[j][2]][0] - Vertex[face_vlist[j][1]][0];
+                x[1] = Vertex[face_vlist[j][2]][1] - Vertex[face_vlist[j][1]][1];
+                x[2] = Vertex[face_vlist[j][2]][2] - Vertex[face_vlist[j][1]][2];
+                y[0] = Vertex[face_vlist[j][1]][0] - Vertex[face_vlist[j][0]][0];
+                y[1] = Vertex[face_vlist[j][1]][1] - Vertex[face_vlist[j][0]][1];
+                y[2] = Vertex[face_vlist[j][1]][2] - Vertex[face_vlist[j][0]][2];
+                face_normals[j] = Cross_Product(x, y);
+            }
+            face_normals[j] = face_normals[j]/max(norm_2(face_normals[j]), 2.0e-16);
+        } //next j
+    }
+    
+    // Check if Simplex S encloses point P ---------------------------------- //
+    {
+        check = true;
+        for (j = 0; j < m; ++j) {
+            n = face_vlist[j].size();
+    
+            // Compute face center
+            xF.fill(0.0);
+            for (k = 0; k < n; ++k) {
+                for (l = 0; l < dim; l++) {
+                    xF[l] += Vertex[face_vlist[j][k]][l];
+                } //next l
+            } //next k
+            xF = xF/((double) n);
+    
+            // Check if simplex encloses point
+            for (l = 0; l < dim; l++) {
+                dir[l] = P[l] - xF[l];
+            } //next l
+            dir = dir/max(norm_2(dir), 2.0e-16);
+            check = (check && (Dot_Product(dir, face_normals[j]) <= 0.0));
+        } //next j
+    }
+
+// /*debug*/log_file << "    encloses point: " << check << endl;
+
+    // Look for best direction (Euristic search of best path) --------------- //
+    // NOTES:                                                                 //
+    // - modificare il criterio euristico per la scelta del path migliore     //
+    //   * congiungente P-xS attraversa una faccia.                           //
+    //   * distanza minima dalle facce.                                       //
+    // ---------------------------------------------------------------------- //
+    if (!check) {
+
+        // local direction of searching path
+        for (l = 0; l < dim; ++l) {
+            dir[l] = P[l] - xS[l];
+        } //next l
+        dir = dir/max(norm_2(dir), 2.0e-16);
+    
+        // Loop over simplex faces
+        max_dp = -2.0;
+        i = 0;
+        j = -1;
+        while (i < m) {
+            dp = Dot_Product(face_normals[i], dir);
+            if (dp > max_dp) {
+                j = i;
+                max_dp = dp;
+            }
+            i++;
+        } //next i
+    
+        // Alternative directions
+        for (i = 0; i < m; ++i) {
+            A = Adjacency[S][i];
+            if ((i != j) && (A >= 0) && (!visited[A])) {
+                stack.push(A);
+            }
+        } //next i
+        A = Adjacency[S][j];
+        if ((A >= 0) && (!visited[A])) {
+            stack.push(A);
+        }
+    }
+
+} //next simplex
+
+// /*debug*/log_file << "  (visited: " << n_visited << " of " << nSimplex << ")" << endl;
+
+// Old algorithm ============================================================ //
+{
+    // while ((n_visited <= nSimplex) && (!check) && (S0 >= 0)) {
+    
+        // // Update simplex ID ---------------------------------------------------- //
+        // // cout << "    on simplex " << S0;
+        // S = S0;
+        // n_visited++;
+        // visited[S] = true;
+        // /*debug*/log_file << "  traversing simplex: " << S << endl;
+        // /*debug*/log_file << "  (visited: " << n_visited << " of " << nSimplex << endl;
+    
+        // // Simplex infos -------------------------------------------------------- //
+        // m = infos[e_type[S]].n_faces;
+        // p = infos[e_type[S]].n_vert;
+    
+        // // Compute simplex baricenter ------------------------------------------- //
+        // {
+            // xS.fill(0.0);
+            // for (j = 0; j < p; ++j) {
+                // for (l = 0; l < dim; ++l) {
+                    // xS[l] += Vertex[Simplex[S][j]][l];
+                // } //next l
+            // } //next j
+            // xS = xS/((double) p);
+        // }
+    
+        // // Get face vertices ---------------------------------------------------- //
+        // {
+            // face_vlist.resize(m);
+            // for (j = 0; j < m; ++j) {
+                // face_vlist[j] = FaceVertices(S, j);
+            // } //next j
+        // }
+    
+        // // Compute face normals ------------------------------------------------- //
+        // {
+            // face_normals.resize(m);
+            // for (j = 0; j < m; ++j) {
+                // if (face_vlist[j].size() == 2) {
+                    // x[0] = Vertex[face_vlist[j][1]][0] - Vertex[face_vlist[j][0]][0];
+                    // x[1] = Vertex[face_vlist[j][1]][1] - Vertex[face_vlist[j][0]][1];
+                    // x[2] = 0.0;
+                    // y[0] = 0.0;
+                    // y[1] = 0.0;
+                    // y[2] = 1.0;
+                    // face_normals[j] = Cross_Product(x, y);
+                // }
+                // else {
+                    // x[0] = Vertex[face_vlist[j][2]][0] - Vertex[face_vlist[j][1]][0];
+                    // x[1] = Vertex[face_vlist[j][2]][1] - Vertex[face_vlist[j][1]][1];
+                    // x[2] = Vertex[face_vlist[j][2]][2] - Vertex[face_vlist[j][1]][2];
+                    // y[0] = Vertex[face_vlist[j][1]][0] - Vertex[face_vlist[j][0]][0];
+                    // y[1] = Vertex[face_vlist[j][1]][1] - Vertex[face_vlist[j][0]][1];
+                    // y[2] = Vertex[face_vlist[j][1]][2] - Vertex[face_vlist[j][0]][2];
+                    // face_normals[j] = Cross_Product(x, y);
+                // }
+                // face_normals[j] = face_normals[j]/max(norm_2(face_normals[j]), 2.0e-16);
+            // } //next j
+        // }
+    
+        // // Check if P is enclosed in simplex S0 --------------------------------- //
+        // {
+            // check = true;
+            // for (j = 0; j < m; ++j) {
+                // n = face_vlist[j].size();
+        
+                // // Compute face center
+                // xF.fill(0.0);
+                // for (k = 0; k < n; ++k) {
+                    // for (l = 0; l < dim; l++) {
+                        // xF[l] += Vertex[face_vlist[j][k]][l];
+                    // } //next l
+                // } //next k
+                // xF = xF/((double) n);
+        
+                // // Check if simplex encloses point
+                // for (l = 0; l < dim; l++) {
+                    // dir[l] = P[l] - xF[l];
+                // } //next l
+                // dir = dir/max(norm_2(dir), 2.0e-16);
+                // check = (check && (Dot_Product(dir, face_normals[j]) <= 0.0));
+                // // cout << " f " << j << ", c: " << check;
+            // } //next j
+        // }
+        // // cout << ", check: " << check << endl;
+        // /*debug*/log_file << "    encloses point: " << check << endl;
+    
+        // // Look for best direction (Euristic search) ---------------------------- //
+        // if (!check) {
+        
+            // // Find face to be crossed (Euristic search of best path)
+            // {
+        
+                // // path local direction
+                // for (l = 0; l < dim; ++l) {
+                    // dir[l] = P[l] - xS[l];
+                // } //next l
+                // dir = dir/max(norm_2(dir), 2.0e-16);
+        
+                // // Loop over simplex faces
+                // // WARNING: infinite loop at corner simplicies!!
+                // max_dp = -2.0;
+                // i = -1;
+                // j = 0;
+                // while (j < m) {
+                    // dp = Dot_Product(face_normals[j], dir);
+                    // A = Adjacency[S][j];
+                    // if ((dp > max_dp) && (A >= 0)) {//&& (!visited[A])) {
+                        // i = j;
+                        // max_dp = dp;
+                    // }
+                    // j++;
+                // } //next j
+            // }
+    
+            // // Move to adjacent simplex
+            // if (i >= 0) { S0 = Adjacency[S][i]; }
+            // else        { S0 = -1;}
+        // }
+    
+        // /*debug*/log_file << "    next simplex: " << S0 << endl;
+    // } //next simplex
+}
+// /*debug*/log_file.close();
+
+return(S); };
+
+// Bounding boxes =========================================================== //
+
+// -------------------------------------------------------------------------- //
+void Class_VolTri::BoundingBox(
+    dvector1D   &x_ext,
+    dvector1D   &y_ext
+) {
+
+// ========================================================================== //
+// void Class_VolTri::BoundingBox(                                            //
+//     dvector1D   &x_ext,                                                    //
+//     dvector1D   &y_ext)                                                    //
+//                                                                            //
+// Compute limits of mesh bounding box (2D case).                             //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - x_ext   : dvector1D, extent of bounding box in the x direction           //
+// - y_ext   : dvector1D, extent of bounding box in the y direction           //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+int         dim = Vertex[0].size();
+int         n;
+
+// Counters
+int         i, j, I;
+
+// ========================================================================== //
+// COMPUTE BOUNDING BOX                                                       //
+// ========================================================================== //
+
+// Check data structure coherency ------------------------------------------- //
+if (dim < 2) {
+    return;
+}
+
+// Compute bounding box limits ---------------------------------------------- //
+x_ext[0] = x_ext[1] = Vertex[Simplex[0][0]][0];
+y_ext[0] = y_ext[1] = Vertex[Simplex[0][0]][1];
+for (i = 1; i < nSimplex; i++) {
+    n = Simplex[i].size();
+    for (j = 0; j < n; j++) {
+        I = Simplex[i][j];
+        x_ext[0] = min(x_ext[0], Vertex[I][0]);
+        x_ext[1] = max(x_ext[1], Vertex[I][0]);
+        y_ext[0] = min(y_ext[0], Vertex[I][1]);
+        y_ext[1] = max(y_ext[1], Vertex[I][1]);
+    } //next j
+} //next i
+
+return; };
+
+// -------------------------------------------------------------------------- //
+void Class_VolTri::BoundingBox(
+    dvector1D   &x_ext,
+    dvector1D   &y_ext,
+    dvector1D   &z_ext
+) {
+
+// ========================================================================== //
+// void Class_VolTri::BoundingBox(                                            //
+//     dvector1D   &x_ext,                                                    //
+//     dvector1D   &y_ext,                                                    //
+//     dvector1D   &z_ext)                                                    //
+//                                                                            //
+// Compute limits of mesh bounding box (3D case).                             //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - x_ext   : dvector1D, extent of bounding box in the x direction           //
+// - y_ext   : dvector1D, extent of bounding box in the y direction           //
+// - z_ext   : dvector1D, extent of bounding box in the z direction           //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+int         dim = Vertex[0].size();
+int         n;
+
+// Counters
+int         i, j, I;
+
+// ========================================================================== //
+// COMPUTE BOUNDING BOX                                                       //
+// ========================================================================== //
+
+// Check data structure coherency ------------------------------------------- //
+if (dim < 3) {
+    return;
+}
+
+// Compute bounding box limits ---------------------------------------------- //
+x_ext[0] = x_ext[1] = Vertex[Simplex[0][0]][0];
+y_ext[0] = y_ext[1] = Vertex[Simplex[0][0]][1];
+z_ext[0] = z_ext[1] = Vertex[Simplex[0][0]][2];
+for (i = 1; i < nSimplex; i++) {
+    n = Simplex[i].size();
+    for (j = 0; j < n; j++) {
+        I = Simplex[i][j];
+        x_ext[0] = min(x_ext[0], Vertex[I][0]);
+        x_ext[1] = max(x_ext[1], Vertex[I][0]);
+        y_ext[0] = min(y_ext[0], Vertex[I][1]);
+        y_ext[1] = max(y_ext[1], Vertex[I][1]);
+        z_ext[0] = min(z_ext[0], Vertex[I][2]);
+        z_ext[1] = max(z_ext[1], Vertex[I][2]);
+    } //next j
+} //next i
+
+return; };
+
+// -------------------------------------------------------------------------- //
+void Class_VolTri::BoundingBox(
+    dvector2D   &V,
+    dvector1D   &x_ext,
+    dvector1D   &y_ext
+) {
+
+// ========================================================================== //
+// void Class_VolTri::BoundingBox(                                            //
+//     dvector2D   &V,                                                        //
+//     dvector1D   &x_ext,                                                    //
+//     dvector1D   &y_ext)                                                    //
+//                                                                            //
+// Compute limits of tasselation bounding box (2D case). Vertex coordinate    //
+// list is provided externally).                                              //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - V       : dvector2D vertex coordinate list. V[i][0], V[i][1], ... are    //
+//             the x, y, ... coordinates of the i-th vertex.                  //
+// - x_ext   : dvector1D, extent of bounding box in the x direction           //
+// - y_ext   : dvector1D, extent of bounding box in the y direction           //
+// - z_ext   : dvector1D, extent of bounding box in the z direction           //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+int         dim = V[0].size();
+int         n;
+
+// Counters
+int         i, j, I;
+
+// ========================================================================== //
+// COMPUTE BOUNDING BOX                                                       //
+// ========================================================================== //
+
+// Check data structure coherency ------------------------------------------- //
+if (dim < 2) {
+    return;
+}
+
+// Compute bounding box limits ---------------------------------------------- //
+x_ext[0] = x_ext[1] = V[Simplex[0][0]][0];
+y_ext[0] = y_ext[1] = V[Simplex[0][0]][1];
+for (i = 1; i < nSimplex; i++) {
+    n = Simplex[i].size();
+    for (j = 0; j < n; j++) {
+        I = Simplex[i][j];
+        x_ext[0] = min(x_ext[0], V[I][0]);
+        x_ext[1] = max(x_ext[1], V[I][0]);
+        y_ext[0] = min(y_ext[0], V[I][1]);
+        y_ext[1] = max(y_ext[1], V[I][1]);
+    } //next j
+} //next i
+
+return; };
+
+// -------------------------------------------------------------------------- //
+void Class_VolTri::BoundingBox(
+    dvector2D   &V,
+    dvector1D   &x_ext,
+    dvector1D   &y_ext,
+    dvector1D   &z_ext
+) {
+
+// ========================================================================== //
+// void Class_VolTri::BoundingBox(                                            //
+//     dvector2D   &V,                                                        //
+//     dvector1D   &x_ext,                                                    //
+//     dvector1D   &y_ext,                                                    //
+//     dvector1D   &z_ext)                                                    //
+//                                                                            //
+// Compute limits of tasselation bounding box (3D case). Vertex coordinate    //
+// list is provided externally).                                              //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - V       : dvector2D vertex coordinate list. V[i][0], V[i][1], ... are    //
+//             the x, y, ... coordinates of the i-th vertex.                  //
+// - x_ext   : dvector1D, extent of bounding box in the x direction           //
+// - y_ext   : dvector1D, extent of bounding box in the y direction           //
+// - z_ext   : dvector1D, extent of bounding box in the z direction           //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+int         dim = V[0].size();
+int         n;
+
+// Counters
+int         i, j, I;
+
+// ========================================================================== //
+// COMPUTE BOUNDING BOX                                                       //
+// ========================================================================== //
+
+// Check data structure coherency ------------------------------------------- //
+if (dim < 3) {
+    return;
+}
+
+// Compute bounding box limits ---------------------------------------------- //
+x_ext[0] = x_ext[1] = V[Simplex[0][0]][0];
+y_ext[0] = y_ext[1] = V[Simplex[0][0]][1];
+z_ext[0] = z_ext[1] = V[Simplex[0][0]][2];
+for (i = 1; i < nSimplex; i++) {
+    n = Simplex[i].size();
+    for (j = 0; j < n; j++) {
+        I = Simplex[i][j];
+        x_ext[0] = min(x_ext[0], V[I][0]);
+        x_ext[1] = max(x_ext[1], V[I][0]);
+        y_ext[0] = min(y_ext[0], V[I][1]);
+        y_ext[1] = max(y_ext[1], V[I][1]);
+        z_ext[0] = min(z_ext[0], V[I][2]);
+        z_ext[1] = max(z_ext[1], V[I][2]);
+    } //next j
+} //next i
+
+return; };
