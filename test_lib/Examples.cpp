@@ -690,7 +690,7 @@ if (selection == 0) {
 
     // Extract n integers in [0, N] ----------------------------------------- //
     out = 0;
-    for (int I = 0; I < 100000; I++) {
+    for (int I_ = 0; I_ < 100000; I_++) {
         Extract_wo_Repl(1, N, list);
         out += list[0];
     } //next I
