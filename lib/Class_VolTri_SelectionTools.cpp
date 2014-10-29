@@ -534,7 +534,7 @@ int         dim = Vertex[0].size();
 int         n;
 
 // Counters
-int         i, j, I;
+int         i, j, I_;
 
 // ========================================================================== //
 // COMPUTE BOUNDING BOX                                                       //
@@ -551,11 +551,11 @@ y_ext[0] = y_ext[1] = Vertex[Simplex[0][0]][1];
 for (i = 1; i < nSimplex; i++) {
     n = Simplex[i].size();
     for (j = 0; j < n; j++) {
-        I = Simplex[i][j];
-        x_ext[0] = min(x_ext[0], Vertex[I][0]);
-        x_ext[1] = max(x_ext[1], Vertex[I][0]);
-        y_ext[0] = min(y_ext[0], Vertex[I][1]);
-        y_ext[1] = max(y_ext[1], Vertex[I][1]);
+        I_ = Simplex[i][j];
+        x_ext[0] = min(x_ext[0], Vertex[I_][0]);
+        x_ext[1] = max(x_ext[1], Vertex[I_][0]);
+        y_ext[0] = min(y_ext[0], Vertex[I_][1]);
+        y_ext[1] = max(y_ext[1], Vertex[I_][1]);
     } //next j
 } //next i
 
@@ -596,7 +596,7 @@ int         dim = Vertex[0].size();
 int         n;
 
 // Counters
-int         i, j, I;
+int         i, j, I_;
 
 // ========================================================================== //
 // COMPUTE BOUNDING BOX                                                       //
@@ -614,13 +614,13 @@ z_ext[0] = z_ext[1] = Vertex[Simplex[0][0]][2];
 for (i = 1; i < nSimplex; i++) {
     n = Simplex[i].size();
     for (j = 0; j < n; j++) {
-        I = Simplex[i][j];
-        x_ext[0] = min(x_ext[0], Vertex[I][0]);
-        x_ext[1] = max(x_ext[1], Vertex[I][0]);
-        y_ext[0] = min(y_ext[0], Vertex[I][1]);
-        y_ext[1] = max(y_ext[1], Vertex[I][1]);
-        z_ext[0] = min(z_ext[0], Vertex[I][2]);
-        z_ext[1] = max(z_ext[1], Vertex[I][2]);
+        I_ = Simplex[i][j];
+        x_ext[0] = min(x_ext[0], Vertex[I_][0]);
+        x_ext[1] = max(x_ext[1], Vertex[I_][0]);
+        y_ext[0] = min(y_ext[0], Vertex[I_][1]);
+        y_ext[1] = max(y_ext[1], Vertex[I_][1]);
+        z_ext[0] = min(z_ext[0], Vertex[I_][2]);
+        z_ext[1] = max(z_ext[1], Vertex[I_][2]);
     } //next j
 } //next i
 
@@ -664,7 +664,7 @@ int         dim = V[0].size();
 int         n;
 
 // Counters
-int         i, j, I;
+int         i, j, I_;
 
 // ========================================================================== //
 // COMPUTE BOUNDING BOX                                                       //
@@ -681,11 +681,11 @@ y_ext[0] = y_ext[1] = V[Simplex[0][0]][1];
 for (i = 1; i < nSimplex; i++) {
     n = Simplex[i].size();
     for (j = 0; j < n; j++) {
-        I = Simplex[i][j];
-        x_ext[0] = min(x_ext[0], V[I][0]);
-        x_ext[1] = max(x_ext[1], V[I][0]);
-        y_ext[0] = min(y_ext[0], V[I][1]);
-        y_ext[1] = max(y_ext[1], V[I][1]);
+        I_ = Simplex[i][j];
+        x_ext[0] = min(x_ext[0], V[I_][0]);
+        x_ext[1] = max(x_ext[1], V[I_][0]);
+        y_ext[0] = min(y_ext[0], V[I_][1]);
+        y_ext[1] = max(y_ext[1], V[I_][1]);
     } //next j
 } //next i
 
@@ -731,7 +731,7 @@ int         dim = V[0].size();
 int         n;
 
 // Counters
-int         i, j, I;
+int         i, j, I_;
 
 // ========================================================================== //
 // COMPUTE BOUNDING BOX                                                       //
@@ -749,13 +749,13 @@ z_ext[0] = z_ext[1] = V[Simplex[0][0]][2];
 for (i = 1; i < nSimplex; i++) {
     n = Simplex[i].size();
     for (j = 0; j < n; j++) {
-        I = Simplex[i][j];
-        x_ext[0] = min(x_ext[0], V[I][0]);
-        x_ext[1] = max(x_ext[1], V[I][0]);
-        y_ext[0] = min(y_ext[0], V[I][1]);
-        y_ext[1] = max(y_ext[1], V[I][1]);
-        z_ext[0] = min(z_ext[0], V[I][2]);
-        z_ext[1] = max(z_ext[1], V[I][2]);
+        I_ = Simplex[i][j];
+        x_ext[0] = min(x_ext[0], V[I_][0]);
+        x_ext[1] = max(x_ext[1], V[I_][0]);
+        y_ext[0] = min(y_ext[0], V[I_][1]);
+        y_ext[1] = max(y_ext[1], V[I_][1]);
+        z_ext[0] = min(z_ext[0], V[I_][2]);
+        z_ext[1] = max(z_ext[1], V[I_][2]);
     } //next j
 } //next i
 
