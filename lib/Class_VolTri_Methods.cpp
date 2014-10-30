@@ -62,6 +62,7 @@ int                 id;
     // General infos
     infos[id].n_vert = 0;
     infos[id].n_faces = 0;
+    infos[id].n_edges = 0;
 
 }
 
@@ -70,102 +71,158 @@ int                 id;
 {
     // element type id
     id = 5;
-    
+
     // General infos
     infos[id].n_vert = 3;
     infos[id].n_faces = 3;
+    infos[id].n_edges = 3;
     
     // Resize face data structure
     infos[id].faces.resize(infos[id].n_faces, ivector1D(2, -1));
+    infos[id].edges.resize(infos[id].n_edges, ivector1D(1, -1));
     
     // Vertex numbering on element faces
     infos[id].faces[0][0] = 0;    infos[id].faces[0][1] = 1;
     infos[id].faces[1][0] = 1;    infos[id].faces[1][1] = 2;
     infos[id].faces[2][0] = 2;    infos[id].faces[2][1] = 0;
+
+    // Vertex numbering on element edges
+    infos[id].edges[0][0] = 0;
+    infos[id].edges[1][0] = 1;
+    infos[id].edges[2][0] = 2;
 }
 
 // Quad    (element ID=9) --------------------------------------------------- //
 {
     // element type id
     id = 9;
-    
+
     // General infos
     infos[id].n_vert = 4;
     infos[id].n_faces = 4;
+    infos[id].n_edges = 4;
     
     // Resize face data structure
     infos[id].faces.resize(infos[id].n_faces, ivector1D(2, -1));
+    infos[id].edges.resize(infos[id].n_edges, ivector1D(1, -1));
     
     // Vertex numbering on element faces
     infos[id].faces[0][0] = 0;    infos[id].faces[0][1] = 1;
     infos[id].faces[1][0] = 1;    infos[id].faces[1][1] = 2;
     infos[id].faces[2][0] = 2;    infos[id].faces[2][1] = 3;
     infos[id].faces[3][0] = 3;    infos[id].faces[3][1] = 0;
+
+    // Vertex numbering on element edges
+    infos[id].edges[0][0] = 0;
+    infos[id].edges[1][0] = 1;
+    infos[id].edges[2][0] = 2;
+    infos[id].edges[3][0] = 3;
 }
 
 // Tetra   (element ID=10) -------------------------------------------------- //
 {
     // element type id
     id = 10;
-    
+
     // General infos
     infos[id].n_vert = 4;
     infos[id].n_faces = 4;
+    infos[id].n_edges = 6;
     
     // Resize face data structure
     infos[id].faces.resize(infos[id].n_faces, ivector1D(3, -1));
+    infos[id].edges.resize(infos[id].n_edges, ivector1D(2, -1));
     
     // Vertex numbering on element faces
-    // infos[id].faces[0][0] = x;    infos[id].faces[0][1] = x;    infos[id].faces[0][2] = x;
-    // infos[id].faces[1][0] = x;    infos[id].faces[1][1] = x;    infos[id].faces[1][2] = x;
-    // infos[id].faces[2][0] = x;    infos[id].faces[2][1] = x;    infos[id].faces[2][2] = x;
-    // infos[id].faces[3][0] = x;    infos[id].faces[3][1] = x;    infos[id].faces[3][2] = x;
+    infos[id].faces[0][0] = 0;    infos[id].faces[0][1] = 2;    infos[id].faces[0][2] = 1;
+    infos[id].faces[1][0] = 0;    infos[id].faces[1][1] = 1;    infos[id].faces[1][2] = 3;
+    infos[id].faces[2][0] = 1;    infos[id].faces[2][1] = 2;    infos[id].faces[2][2] = 3;
+    infos[id].faces[3][0] = 0;    infos[id].faces[3][1] = 3;    infos[id].faces[3][2] = 2;
+
+    // Vertex numbering on element edges
+    infos[id].edges[0][0] = 0;    infos[id].edges[0][1] = 2;
+    infos[id].edges[1][0] = 2;    infos[id].edges[1][1] = 1;
+    infos[id].edges[2][0] = 1;    infos[id].edges[2][1] = 0;
+    infos[id].edges[3][0] = 0;    infos[id].edges[3][1] = 3;
+    infos[id].edges[4][0] = 1;    infos[id].edges[4][1] = 3;
+    infos[id].edges[5][0] = 2;    infos[id].edges[5][1] = 3;
+
 }
 
 // Hexa    (element ID=12) -------------------------------------------------- //
 {
     // element type id
     id = 12;
-    
+
     // General infos
     infos[id].n_vert = 8;
     infos[id].n_faces = 6;
+    infos[id].n_edges = 12;
     
     // Resize face data structure
     infos[id].faces.resize(infos[id].n_faces, ivector1D(4, -1));
+    infos[id].edges.resize(infos[id].n_edges, ivector1D(2, -1));
     
     // Vertex numbering on element faces
-    // infos[id].faces[0][0] = x;    infos[id].faces[0][1] = x;    infos[id].faces[0][2] = x;    infos[id].faces[0][3] = x;
-    // infos[id].faces[1][0] = x;    infos[id].faces[1][1] = x;    infos[id].faces[1][2] = x;    infos[id].faces[1][3] = x;
-    // infos[id].faces[2][0] = x;    infos[id].faces[2][1] = x;    infos[id].faces[2][2] = x;    infos[id].faces[2][3] = x;
-    // infos[id].faces[3][0] = x;    infos[id].faces[3][1] = x;    infos[id].faces[3][2] = x;    infos[id].faces[3][3] = x;
-    // infos[id].faces[4][0] = x;    infos[id].faces[4][1] = x;    infos[id].faces[4][2] = x;    infos[id].faces[4][3] = x;
-    // infos[id].faces[5][0] = x;    infos[id].faces[5][1] = x;    infos[id].faces[5][2] = x;    infos[id].faces[5][3] = x;
+    infos[id].faces[0][0] = 0;    infos[id].faces[0][1] = 3;    infos[id].faces[0][2] = 2;    infos[id].faces[0][3] = 1;
+    infos[id].faces[1][0] = 1;    infos[id].faces[1][1] = 2;    infos[id].faces[1][2] = 6;    infos[id].faces[1][3] = 5;
+    infos[id].faces[2][0] = 2;    infos[id].faces[2][1] = 3;    infos[id].faces[2][2] = 7;    infos[id].faces[2][3] = 6;
+    infos[id].faces[3][0] = 0;    infos[id].faces[3][1] = 4;    infos[id].faces[3][2] = 7;    infos[id].faces[3][3] = 3;
+    infos[id].faces[4][0] = 0;    infos[id].faces[4][1] = 1;    infos[id].faces[4][2] = 5;    infos[id].faces[4][3] = 4;
+    infos[id].faces[5][0] = 4;    infos[id].faces[5][1] = 5;    infos[id].faces[5][2] = 6;    infos[id].faces[5][3] = 7;
+
+    // Vertex numbering on element edges
+    infos[id].edges[0][0] = 0;    infos[id].edges[0][1] = 1;
+    infos[id].edges[1][0] = 1;    infos[id].edges[1][1] = 2;
+    infos[id].edges[2][0] = 2;    infos[id].edges[2][1] = 3;
+    infos[id].edges[3][0] = 3;    infos[id].edges[3][1] = 0;
+    infos[id].edges[4][0] = 4;    infos[id].edges[4][1] = 5;
+    infos[id].edges[5][0] = 5;    infos[id].edges[5][1] = 6;
+    infos[id].edges[6][0] = 6;    infos[id].edges[6][1] = 7;
+    infos[id].edges[7][0] = 7;    infos[id].edges[7][1] = 4;
+    infos[id].edges[8][0] = 0;    infos[id].edges[8][1] = 4;
+    infos[id].edges[9][0] = 1;    infos[id].edges[9][1] = 5;
+    infos[id].edges[10][0] = 2;   infos[id].edges[10][1] = 6;
+    infos[id].edges[11][0] = 3;   infos[id].edges[11][1] = 7;
 }
 
 // Prism   (element ID=13) -------------------------------------------------- //
 {
     // element type id
-    id = 12;
-    
+    id = 13;
+
     // General infos
     infos[id].n_vert = 6;
     infos[id].n_faces = 5;
+    infos[id].n_edges = 9;
     
     // Resize face data structure
     infos[id].faces.resize(infos[id].n_faces);
     infos[id].faces[0].resize(3, -1);
     infos[id].faces[1].resize(3, -1);
     for (int i = 2; i < infos[id].n_faces; ++i) {
-        infos[id].faces[1].resize(4, -1);
+        infos[id].faces[i].resize(4, -1);
     }
+    infos[id].edges.resize(infos[id].n_edges, ivector1D(2, -1));
     
     // Vertex numbering on element faces
-    // infos[id].faces[0][0] = x;    infos[id].faces[0][1] = x;    infos[id].faces[0][2] = x;
-    // infos[id].faces[1][0] = x;    infos[id].faces[1][1] = x;    infos[id].faces[1][2] = x;
-    // infos[id].faces[2][0] = x;    infos[id].faces[2][1] = x;    infos[id].faces[2][2] = x;    infos[id].faces[2][3] = x;
-    // infos[id].faces[3][0] = x;    infos[id].faces[3][1] = x;    infos[id].faces[3][2] = x;    infos[id].faces[3][3] = x;
-    // infos[id].faces[4][0] = x;    infos[id].faces[4][1] = x;    infos[id].faces[4][2] = x;    infos[id].faces[4][3] = x;
+    infos[id].faces[0][0] = 0;    infos[id].faces[0][1] = 1;    infos[id].faces[0][2] = 2;
+    infos[id].faces[1][0] = 3;    infos[id].faces[1][1] = 5;    infos[id].faces[1][2] = 4;
+    infos[id].faces[2][0] = 0;    infos[id].faces[2][1] = 3;    infos[id].faces[2][2] = 4;    infos[id].faces[2][3] = 1;
+    infos[id].faces[3][0] = 1;    infos[id].faces[3][1] = 4;    infos[id].faces[3][2] = 5;    infos[id].faces[3][3] = 2;
+    infos[id].faces[4][0] = 0;    infos[id].faces[4][1] = 2;    infos[id].faces[4][2] = 5;    infos[id].faces[4][3] = 3;
+
+    // Vertex numbering on element edges
+    infos[id].edges[0][0] = 0;    infos[id].edges[0][1] = 1;
+    infos[id].edges[1][0] = 1;    infos[id].edges[1][1] = 2;
+    infos[id].edges[2][0] = 2;    infos[id].edges[2][1] = 0;
+    infos[id].edges[3][0] = 3;    infos[id].edges[3][1] = 5;
+    infos[id].edges[4][0] = 5;    infos[id].edges[4][1] = 4;
+    infos[id].edges[5][0] = 4;    infos[id].edges[5][1] = 3;
+    infos[id].edges[6][0] = 0;    infos[id].edges[6][1] = 3;
+    infos[id].edges[7][0] = 1;    infos[id].edges[7][1] = 4;
+    infos[id].edges[8][0] = 2;    infos[id].edges[8][1] = 5;
+
 }
 
 // Pyramid (element ID=14) -------------------------------------------------- //
@@ -176,22 +233,35 @@ int                 id;
     // General infos
     infos[id].n_vert = 5;
     infos[id].n_faces = 5;
-    
+    infos[id].n_edges = 8;
+
     // Resize face data structure
     infos[id].faces.resize(infos[id].n_faces);
     infos[id].faces[0].resize(4, -1);
     for (int i = 1; i < infos[id].n_faces; ++i) {
-        infos[id].faces[0].resize(3, -1);
+        infos[id].faces[i].resize(3, -1);
     } //next i
+    infos[id].edges.resize(infos[id].n_edges, ivector1D(2, -1));
     
     // Vertex numbering on element faces
-    // infos[id].faces[0][0] = x;    infos[id].faces[0][1] = x;    infos[id].faces[0][2] = x;    infos[id].faces[0][3] = x;
-    // infos[id].faces[1][0] = x;    infos[id].faces[1][1] = x;    infos[id].faces[1][2] = x;
-    // infos[id].faces[2][0] = x;    infos[id].faces[2][1] = x;    infos[id].faces[2][2] = x;
-    // infos[id].faces[3][0] = x;    infos[id].faces[3][1] = x;    infos[id].faces[3][2] = x;
-    // infos[id].faces[4][0] = x;    infos[id].faces[4][1] = x;    infos[id].faces[4][2] = x;
-}
+    infos[id].faces[0][0] = 0;    infos[id].faces[0][1] = 3;    infos[id].faces[0][2] = 2;    infos[id].faces[0][3] = 1;
+    infos[id].faces[1][0] = 0;    infos[id].faces[1][1] = 1;    infos[id].faces[1][2] = 4;
+    infos[id].faces[2][0] = 1;    infos[id].faces[2][1] = 2;    infos[id].faces[2][2] = 4;
+    infos[id].faces[3][0] = 2;    infos[id].faces[3][1] = 3;    infos[id].faces[3][2] = 4;
+    infos[id].faces[4][0] = 3;    infos[id].faces[4][1] = 0;    infos[id].faces[4][2] = 4;
 
+    // Vertex numbering on element edges
+    infos[id].edges[0][0] = 0;    infos[id].edges[0][1] = 3;
+    infos[id].edges[1][0] = 3;    infos[id].edges[1][1] = 2;
+    infos[id].edges[2][0] = 2;    infos[id].edges[2][1] = 1;
+    infos[id].edges[3][0] = 1;    infos[id].edges[3][1] = 0;
+    infos[id].edges[4][0] = 0;    infos[id].edges[4][1] = 4;
+    infos[id].edges[5][0] = 3;    infos[id].edges[5][1] = 4;
+    infos[id].edges[6][0] = 2;    infos[id].edges[6][1] = 4;
+    infos[id].edges[7][0] = 1;    infos[id].edges[7][1] = 4;
+    
+}
+cout << "done" << endl;
 return; };
 
 // -------------------------------------------------------------------------- //

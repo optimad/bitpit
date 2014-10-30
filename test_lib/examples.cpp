@@ -14,38 +14,22 @@
 // ========================================================================== //
 // INCLUDES                                                                   //
 // ========================================================================== //
-
-// Standard Template Library
-# include<iostream>
-
-// CC_lib
-// none
-
-// Others
 # include "examples.hpp"
 
 // ========================================================================== //
-// NAMESPACES                                                                 //
+// IMPLEMENTATIONS                                                            //
 // ========================================================================== //
-using namespace std;
 
-// ========================================================================== //
-// TYPES DEFINITIONS                                                          //
-// ========================================================================== //
-// none
-
-// ========================================================================== //
-// MAIN                                                                       //
-// ========================================================================== //
-int main(
+// -------------------------------------------------------------------------- //
+void Test_000(
     void
 ) {
 
 // ========================================================================== //
-// int main(                                                                  //
+// void Test_000(                                                             //
 //     void)                                                                  //
 //                                                                            //
-// Class_VolTri demo. Examples                                                //
+// Class_VolTri selection tools demo.                                         //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
@@ -61,7 +45,7 @@ int main(
 // ========================================================================== //
 
 // Local variables
-int         selection;
+Class_VolTri                Mesh;
 
 // Counters
 // none
@@ -74,27 +58,50 @@ int         selection;
     // none
 
     // Output message ------------------------------------------------------- //
-    cout << "|===========================================================|" << endl;
-    cout << "|                    Class_VolTri demo                      |" << endl;
-    cout << "|                                                           |" << endl;
-    cout << "| Select demo:                                              |" << endl;
-    cout << "| 0. Class_VolTri, selection tools demo.                    |" << endl;
-    cout << "|===========================================================|" << endl;
-    cin >> selection;
+    cout << "Class_VolTri selection tools demo" << endl;
 }
 
 // ========================================================================== //
-// RUN DEMO                                                                   //
+// LOAD MESH FROM DGF FILE                                                    //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    string          file_name = "./datasets/simple3D.dgf";
+    string          save_name = "mesh.vtu", save_name2 = "mesh.dgf";
+
+    // Load mesh from .dgf file --------------------------------------------- //
+    cout << "  - Loading mesh from .dgf file" << endl;
+    Mesh.Import_dgf(file_name);
+
+    // Export mesh in .vtr file --------------------------------------------- //
+    cout << "  - Exporting mesh in .vtu file" << endl;
+    Mesh.Export_vtu(save_name);
+    Mesh.Export_dgf(save_name2);
+}
+
+// ========================================================================== //
+// SELECTION TOOLS                                                            //
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
     // none
 
-    // Run demo ------------------------------------------------------------- //
-    switch(selection) {
-        case 0: { Test_000(); break; }
-    }
+    // Examples of neighbors selection -------------------------------------- //
+    Mesh.BuildAdjacency();
+    cout << "  - edge neighbors" << endl;
+    cout << "    EdgeNeigh(8, 1) = " << Mesh.EdgeNeigh(8, 1) << endl;
+    cout << "    EdgeNeigh(8, 4) = " << Mesh.EdgeNeigh(8, 4) << endl;
+    cout << "    EdgeNeigh(8, 7) = " << Mesh.EdgeNeigh(8, 7) << endl;
+    cout << "    EdgeNeigh(8, 8) = " << Mesh.EdgeNeigh(8, 8) << endl;
+    cout << "    EdgeNeigh(8, 9) = " << Mesh.EdgeNeigh(8, 9) << endl;
+    cout << "  - vertex neighbors" << endl;
+    cout << "    VertNeigh(8, 2) = " << Mesh.VertNeigh(8, 2) << endl;
+    cout << "    VertNeigh(8, 0) = " << Mesh.VertNeigh(8, 0) << endl;
+    cout << "    VertNeigh(8, 4) = " << Mesh.VertNeigh(8, 4) << endl;
+
 }
 
-return(0); }
+
+
+return; };
 

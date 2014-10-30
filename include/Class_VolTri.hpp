@@ -27,6 +27,7 @@
 // CC_lib
 # include "Operators.hpp"
 # include "VTK_IOFunct.hpp"
+# include "DGF_IOFunct.hpp"
 # include "SortAlgorithms.hpp"
 # include "LinearAlgebra.hpp"
 
@@ -79,7 +80,9 @@ class Class_VolTri {
         public:
         unsigned int         n_vert;                                          // number of vertices
         unsigned int         n_faces;                                         // number of faces
+        unsigned int         n_edges;                                         // number if edges
         ivector2D            faces;                                           // face-vertex connectivity
+        ivector2D            edges;                                           // edge-vertex connectivity
     };
 
     // Private members ====================================================== //
@@ -211,6 +214,10 @@ class Class_VolTri {
     );
     void UpdateAdjacency(                                                     // Update simplex-simplex adjacency matrix
         ivector1D           &                                                 // (input) list of simplicies to be updated
+    );
+    void BuildFaces(                                                          // Build faces' data structure
+        ivector2D           &,                                                // (input/output) simplex->face connectivity
+        ivector2D           &                                                 // (input/output) face->simplex connectivity
     );
 
     // Counters ------------------------------------------------------------- //
@@ -487,9 +494,63 @@ class Class_VolTri {
     dvector1D CircumCenter(                                                   // Compute simplex curcumcenter
         int                                                                   // (input) simplex global index
     );
-            double FaceArea(int , int );                          // Compute simplex face area
-            double minFaceArea(int , int &);                      // Compute min face area
-            double maxFaceArea(int , int &);                      // Compute max face area
+    double EdgeLength(                                                        // Compute edge length
+        int                  ,                                                // (input) simplex global index
+        int                                                                   // (input) edge local index
+    );
+    double EdgeLength(                                                        // Compute edge length using an external vertex list
+        int                  ,                                                // (input) simplex global index
+        int                  ,                                                // (input) edge local index
+        dvector2D           &                                                 // (input) external vertex list
+    );
+    double minEdgeLength(                                                     // Compute min edge length
+        int                                                                   // (input) simplex global index
+    );
+    double minEdgeLength(                                                     // Compute min edge length using an external vertex list
+        int                  ,                                                // (input) simplex global index
+        dvector2D           &                                                 // (input) external vertex list
+    );
+    double maxEdgeLength(                                                     // Compute max edge length
+        int                                                                   // (input) simplex global index
+    );
+    double maxEdgeLength(                                                     // Compute max edge length using an external vertex list
+        int                  ,                                                // (input) simplex global index
+        dvector2D           &                                                 // (input) external vertex list
+    );
+    double FaceArea(                                                          // Compute simplex face area
+        int                  ,                                                // (input) simplex global index
+        int                                                                   // (input) face local index
+    );
+    double FaceArea(                                                          // Compute simplex face area using an external vertex list
+        int                  ,                                                // (input) simplex global index
+        int                  ,                                                // (input) face local index
+        dvector2D           &                                                 // (input) external vertex list
+    );
+    double minFaceArea(                                                       // Compute min face area
+        int                                                                   // (input) simplex global index
+    );
+    double minFaceArea(                                                       // Compute min face area using an external vertex list
+        int                  ,                                                // (input) simplex global index
+        dvector2D           &                                                 // (input) external vertex list
+    );
+    double maxFaceArea(                                                       // Compute max face area
+        int                                                                   // (input) simplex global index
+    );
+    double maxFaceArea(                                                       // Compute max face area using an external vertex list
+        int                  ,                                                // (input) simplex global index
+        dvector2D           &                                                 // (input) external vertex list
+    );
+    dvector1D FaceNormal(                                                     // Compute simplex face normal
+        int                  ,                                                // (input) simplex global index
+        int                                                                   // (input) face local index
+    );
+    dvector1D FaceNormal(                                                     // Compute simplex face normal using an external vertex list
+        int                  ,                                                // (input) simplex global index
+        int                  ,                                                // (input) face local index
+        dvector2D           &                                                 // (input) external vertex list
+    );
+
+            // Aggiustare
             double Volume(int T);                                 // Simplex volume
             double Volume(dvector2D &X, int T);                   // Simplex volume
 
@@ -505,10 +566,23 @@ class Class_VolTri {
         int                  ,                                                // (input) simplex global index
         int                                                                   // (input) vertex global index
     );
+    int edge(                                                                 // Return the local index of a edge with specified vertices
+        int                  ,                                                // (input) simplex global index
+        ivector1D           &                                                 // (input) edge vertices
+    );
     int ReturnSimplexID(                                                      // Returns the ID of simplex enclosing a given point
         dvector1D           &,                                                // (input) point coordinates
         int                                                                   // (input) seed for search algorithm
     );
+    ivector1D EdgeNeigh(                                                      // Find edge neighbors
+        int                  ,                                                // (input) simplex global index
+        int                                                                   // (input) edge local index
+    );
+    ivector1D VertNeigh(                                                      // Find vertex neighbors
+        int                  ,                                                // (input) simplex global index
+        int                                                                   // (input) vertex local index
+    );    
+    
             int ReturnTriangleID(dvector1D    &);                 // Return triangle global index given a point
 
     // Refinement tools ===================================================== //
@@ -522,7 +596,15 @@ class Class_VolTri {
         int                                                                   // (input) vertex global index
     );
 
-            // I/O methods =================================================================== //
+    // I/O methods ========================================================== //
+
+    // dgf format ----------------------------------------------------------- //
+    void Import_dgf(                                                          // Import volume mesh from dgf file
+        string                                                                // (input) .dgf file name
+    );
+    void Export_dgf(                                                          // Export volume mesh into .dgf file
+        string                                                                // (input) .dgf file name
+    );
 
             // vtk format -------------------------------------------------------------------- //
             void Export_vtu(string);                              // Export volume mesh in .vtu format

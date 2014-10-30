@@ -20,7 +20,7 @@
 // IMPLEMENTATIONS                                                            //
 // ========================================================================== //
 
-// SELECTION TOOLS ========================================================== //
+// Selection tools ========================================================== //
 
 // -------------------------------------------------------------------------- //
 int Class_VolTri::vertex(
@@ -121,6 +121,286 @@ while (flag && (i < Adjacency[A].size())) {
 } //next i
 
 return(face); };
+
+// -------------------------------------------------------------------------- //
+int Class_VolTri::edge(
+    int          T,
+    ivector1D   &e
+) {
+
+// ========================================================================== //
+// int Class_VolTri::edge(                                                    //
+//     int          T,                                                        //
+//     ivector1D   &e)                                                        //
+//                                                                            //
+// Return the local index of a specified edge on simplex A.                   //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - T        : int, simplex global index                                     //
+// - e        : ivector1D, global indices of vertices of edge                 //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - j        : int, edge local index                                         //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+bool            check = false;
+int             index = -1;
+ivector1D       f, d;
+
+// Counters
+int             i, j;
+int             n, m;
+
+// ========================================================================== //
+// LOOP OVER EDGE                                                             //
+// ========================================================================== //
+f = e;
+sort(f.begin(), f.end());
+n = infos[e_type[T]].n_edges;
+j = 0;
+while (!check && (j < n)) {
+    d = infos[e_type[T]].edges[j];
+    m = d.size();
+    for (i = 0; i < m; ++i) {
+        d[i] = Simplex[T][d[i]];
+    } //next i
+    sort(d.begin(), d.end());
+    check = (d == f);
+    j++;
+} //next j
+if (check) {
+    index = j-1;
+}
+
+return(index); };
+
+// -------------------------------------------------------------------------- //
+ivector1D Class_VolTri::EdgeNeigh(
+    int          T, 
+    int          i
+) {
+
+// ========================================================================== //
+// ivector1D Class_VolTri::EdgeNeigh(                                         //
+//     int          T,                                                        //
+//     int          i)                                                        //
+//                                                                            //
+// Find neighboring simplicies of simplex T along the i-th edge.              //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - T      : int, simplex global index                                       //
+// - i      : int, edge local index                                           //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - list   : ivector1D, list of edge neighbors                               //
+// ========================================================================== //
+
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+
+// Local variables
+int                             n_faces = infos[e_type[T]].n_faces;
+LIFOstack<int>                  stack(4*n_faces), visited(4*n_faces);
+ivector1D                       e;
+ivector1D                       neigh;
+ivector1D::iterator             it_, end_;
+
+// Counters
+int                             n;
+int                             j;
+int                             S, A;
+
+// ========================================================================== //
+// BUILD ADJACENCIES IF NOT ALREADY BUILT                                     //
+// ========================================================================== //
+if ((Adjacency.size() == 0) || (Adjacency.size() < nSimplex)) {
+    BuildAdjacency();
+}
+
+// ========================================================================== //
+// ITERATIVELY ADD SIMPLICIES TO STACK                                        //
+// ========================================================================== //
+
+// Initialize stack --------------------------------------------------------- //
+stack.push(T);
+n = infos[e_type[T]].edges[i].size();
+e.resize(n, -1);
+for (j = 0; j < n; ++j) {
+    e[j] = Simplex[T][infos[e_type[T]].edges[i][j]];
+} //next i
+
+// Iterate until stack is empty --------------------------------------------- //
+
+// Initialize visited list
+for (i = 0; i < visited.STACK.size(); ++i) {
+    visited.STACK[i] = -1;
+} //next i
+visited.push(T);
+
+// Loop over items in stack
+while (stack.TOPSTK > 0) {
+
+    // Pop item from stack
+    S = stack.pop();
+
+    // Loop over S-neighbors
+    n = infos[e_type[S]].n_faces;
+    for (j = 0; j < n; ++j) {
+        A = Adjacency[S][j];
+        if (A >= 0) {
+            end_ = visited.STACK.begin() + visited.TOPSTK;
+            if (find(visited.STACK.begin(), end_, A) == end_) {
+                if (edge(A, e) >= 0) {
+                    stack.push(A);
+                    visited.push(A);
+                    neigh.push_back(A);
+                }
+            }
+        }
+    } //next j
+} //next item
+
+// Remove face adjacent simplicies ------------------------------------------ //
+for (j = 0; j < n_faces; ++j) {
+    A = Adjacency[T][j];
+    if (A >= 0) {
+        it_ = find(neigh.begin(), neigh.end(), A);
+        if (it_ != neigh.end()) {
+            neigh.erase(it_);
+        }
+    }
+} //next j
+
+return(neigh); };
+
+// -------------------------------------------------------------------------- //
+ivector1D Class_VolTri::VertNeigh(
+    int          T,
+    int          i
+) {
+
+// ========================================================================== //
+// ivector1D Class_VolTri::VertNeigh(                                         //
+//     int          T,                                                        //
+//     int          i)                                                        //
+//                                                                            //
+// Returns the indices of neighbors at the i-th vertex of simplex T.          //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - T      : int, simplex global index                                       //
+// - i      : int, vertex local index                                         //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - neigh  : ivector1D, vertex neighbors                                     //
+// ========================================================================== //
+
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+
+// Local variables
+int                             n_faces = infos[e_type[T]].n_faces;
+LIFOstack<int>                  stack(4*n_faces), visited(4*n_faces);
+ivector1D                       e;
+ivector1D                       neigh;
+ivector1D                       e_neigh;
+ivector1D::iterator             it_, end_;
+
+// Counters
+int                             n, m;
+int                             j, k;
+int                             S, A, V;
+
+// ========================================================================== //
+// BUILD ADJACENCIES IF NOT ALREADY BUILT                                     //
+// ========================================================================== //
+if ((Adjacency.size() == 0) || (Adjacency.size() < nSimplex)) {
+    BuildAdjacency();
+}
+
+// ========================================================================== //
+// ITERATIVELY ADD SIMPLICIES TO STACK                                        //
+// ========================================================================== //
+
+// Initialize stack --------------------------------------------------------- //
+stack.push(T);
+visited.push(T);
+V = Simplex[T][i];
+
+// Iterate until stack is empty --------------------------------------------- //
+while (stack.TOPSTK > 0) {
+
+    // Pop item from stack
+    S = stack.pop();
+
+    // Loop over S-neighbors
+    n = infos[e_type[S]].n_faces;
+    for (j = 0; j < n; ++j) {
+        A = Adjacency[S][j];
+        if (A >= 0) {
+            end_ = visited.STACK.begin() + visited.TOPSTK;
+            if (find(visited.STACK.begin(), end_, A) == end_) {
+                if (vertex(A, V) >= 0) {
+                    stack.push(A);
+                    visited.push(A);
+                    neigh.push_back(A);
+                }
+            }
+        }
+    } //next j
+} //next item
+
+// Remove face adjacent simplicies ------------------------------------------ //
+for (j = 0; j < n_faces; ++j) {
+    A = Adjacency[T][j];
+    if (A >= 0) {
+        it_ = find(neigh.begin(), neigh.end(), A);
+        if (it_ != neigh.end()) {
+            neigh.erase(it_);
+        }
+    }
+} //next j
+
+// Remove edge-adjacent simplicies ------------------------------------------ //
+
+// find edges incident to vertex (T, i)
+m = infos[e_type[T]].n_edges;
+for (k = 0; k < m; k++) {
+    if (find(infos[e_type[T]].edges[k].begin(),
+             infos[e_type[T]].edges[k].end(),
+             i) != infos[e_type[T]].edges[k].end()) {
+        e.push_back(k);
+    }
+} //next k
+
+// Remove edge-adjacent simplicies from neigh
+m = e.size();
+for (k = 0; k < m; ++k) {
+    e_neigh = EdgeNeigh(T, e[k]);
+    n = e_neigh.size();
+    for (j = 0; j < n; ++j) {
+        it_ = find(neigh.begin(), neigh.end(), e_neigh[j]);
+        if (it_ != neigh.end()) {
+            neigh.erase(it_);
+        }
+    } //next j
+} //next k
+
+return(neigh); };
+
+// Find tools =============================================================== //
 
         // Find triangle --------------------------------------------------------------------- //
         int Class_VolTri::ReturnTriangleID(dvector1D    &P) {
@@ -234,7 +514,6 @@ int                         i, j, k, l, S, A;
 // BUILD ADJACENCY IF NOT ALREADY BUILT                                       //
 // ========================================================================== //
 if ((Adjacency.size() == 0) || (Adjacency.size() < nSimplex)) {
-    // cout << "building adjacency" << endl;
     BuildAdjacency();
 }
 
@@ -534,7 +813,7 @@ int         dim = Vertex[0].size();
 int         n;
 
 // Counters
-int         i, j, I_;
+int         i, j, I;
 
 // ========================================================================== //
 // COMPUTE BOUNDING BOX                                                       //
@@ -551,11 +830,11 @@ y_ext[0] = y_ext[1] = Vertex[Simplex[0][0]][1];
 for (i = 1; i < nSimplex; i++) {
     n = Simplex[i].size();
     for (j = 0; j < n; j++) {
-        I_ = Simplex[i][j];
-        x_ext[0] = min(x_ext[0], Vertex[I_][0]);
-        x_ext[1] = max(x_ext[1], Vertex[I_][0]);
-        y_ext[0] = min(y_ext[0], Vertex[I_][1]);
-        y_ext[1] = max(y_ext[1], Vertex[I_][1]);
+        I = Simplex[i][j];
+        x_ext[0] = min(x_ext[0], Vertex[I][0]);
+        x_ext[1] = max(x_ext[1], Vertex[I][0]);
+        y_ext[0] = min(y_ext[0], Vertex[I][1]);
+        y_ext[1] = max(y_ext[1], Vertex[I][1]);
     } //next j
 } //next i
 
@@ -596,7 +875,7 @@ int         dim = Vertex[0].size();
 int         n;
 
 // Counters
-int         i, j, I_;
+int         i, j, I;
 
 // ========================================================================== //
 // COMPUTE BOUNDING BOX                                                       //
@@ -614,13 +893,13 @@ z_ext[0] = z_ext[1] = Vertex[Simplex[0][0]][2];
 for (i = 1; i < nSimplex; i++) {
     n = Simplex[i].size();
     for (j = 0; j < n; j++) {
-        I_ = Simplex[i][j];
-        x_ext[0] = min(x_ext[0], Vertex[I_][0]);
-        x_ext[1] = max(x_ext[1], Vertex[I_][0]);
-        y_ext[0] = min(y_ext[0], Vertex[I_][1]);
-        y_ext[1] = max(y_ext[1], Vertex[I_][1]);
-        z_ext[0] = min(z_ext[0], Vertex[I_][2]);
-        z_ext[1] = max(z_ext[1], Vertex[I_][2]);
+        I = Simplex[i][j];
+        x_ext[0] = min(x_ext[0], Vertex[I][0]);
+        x_ext[1] = max(x_ext[1], Vertex[I][0]);
+        y_ext[0] = min(y_ext[0], Vertex[I][1]);
+        y_ext[1] = max(y_ext[1], Vertex[I][1]);
+        z_ext[0] = min(z_ext[0], Vertex[I][2]);
+        z_ext[1] = max(z_ext[1], Vertex[I][2]);
     } //next j
 } //next i
 
@@ -664,7 +943,7 @@ int         dim = V[0].size();
 int         n;
 
 // Counters
-int         i, j, I_;
+int         i, j, I;
 
 // ========================================================================== //
 // COMPUTE BOUNDING BOX                                                       //
@@ -681,11 +960,11 @@ y_ext[0] = y_ext[1] = V[Simplex[0][0]][1];
 for (i = 1; i < nSimplex; i++) {
     n = Simplex[i].size();
     for (j = 0; j < n; j++) {
-        I_ = Simplex[i][j];
-        x_ext[0] = min(x_ext[0], V[I_][0]);
-        x_ext[1] = max(x_ext[1], V[I_][0]);
-        y_ext[0] = min(y_ext[0], V[I_][1]);
-        y_ext[1] = max(y_ext[1], V[I_][1]);
+        I = Simplex[i][j];
+        x_ext[0] = min(x_ext[0], V[I][0]);
+        x_ext[1] = max(x_ext[1], V[I][0]);
+        y_ext[0] = min(y_ext[0], V[I][1]);
+        y_ext[1] = max(y_ext[1], V[I][1]);
     } //next j
 } //next i
 
@@ -731,7 +1010,7 @@ int         dim = V[0].size();
 int         n;
 
 // Counters
-int         i, j, I_;
+int         i, j, I;
 
 // ========================================================================== //
 // COMPUTE BOUNDING BOX                                                       //
@@ -749,13 +1028,13 @@ z_ext[0] = z_ext[1] = V[Simplex[0][0]][2];
 for (i = 1; i < nSimplex; i++) {
     n = Simplex[i].size();
     for (j = 0; j < n; j++) {
-        I_ = Simplex[i][j];
-        x_ext[0] = min(x_ext[0], V[I_][0]);
-        x_ext[1] = max(x_ext[1], V[I_][0]);
-        y_ext[0] = min(y_ext[0], V[I_][1]);
-        y_ext[1] = max(y_ext[1], V[I_][1]);
-        z_ext[0] = min(z_ext[0], V[I_][2]);
-        z_ext[1] = max(z_ext[1], V[I_][2]);
+        I = Simplex[i][j];
+        x_ext[0] = min(x_ext[0], V[I][0]);
+        x_ext[1] = max(x_ext[1], V[I][0]);
+        y_ext[0] = min(y_ext[0], V[I][1]);
+        y_ext[1] = max(y_ext[1], V[I][1]);
+        z_ext[0] = min(z_ext[0], V[I][2]);
+        z_ext[1] = max(z_ext[1], V[I][2]);
     } //next j
 } //next i
 
