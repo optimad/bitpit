@@ -3727,7 +3727,7 @@ private:
 			for (int idx2=idx; idx2<nocts; idx2++){
 				Mortontry = octants[idx2].computeMorton();
 				if (Mortontry == Morton){
-					return idx;
+					return idx2;
 				}
 			}
 		}
@@ -3764,7 +3764,7 @@ private:
 			for (int idx2=idx; idx2<nocts; idx2++){
 				Mortontry = ghosts[idx2].computeMorton();
 				if (Mortontry == Morton){
-					return idx;
+					return idx2;
 				}
 			}
 		}
@@ -3772,7 +3772,7 @@ private:
 			for(int idx2=0; idx2<idx; idx2++){
 				Mortontry = ghosts[idx2].computeMorton();
 				if (Mortontry == Morton){
-					return idx;
+					return idx2;
 				}
 			}
 		}
