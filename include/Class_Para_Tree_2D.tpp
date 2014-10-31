@@ -470,16 +470,11 @@ public:
 			uint32_t idx = octree.findGhostMorton(oct->computeMorton());
 			return octree.globalidx_ghosts[idx];
 		}
-		else{
-			uint32_t idx = octree.findMorton(oct->computeMorton());
-			if (rank){
-				return partition_range_globalidx[rank-1] + uint64_t(idx + 1);
-			}
-			else{
-				return uint64_t(idx);
-			};
-		};
-		return global_num_octants;
+		uint32_t idx = octree.findMorton(oct->computeMorton());
+		if (rank){
+			return partition_range_globalidx[rank-1] + uint64_t(idx + 1);
+		}
+		return uint64_t(idx);
 	};
 
 	/*! Get the local index of an octant.
@@ -490,10 +485,7 @@ public:
 		if (getIsGhost(oct)){
 			return octree.findGhostMorton(oct->computeMorton());
 		}
-		else{
-			return octree.findMorton(oct->computeMorton());
-		};
-		return octree.getNumOctants();
+		return octree.findMorton(oct->computeMorton());
 	};
 
 	/*! Set the refinement marker of an octant.
