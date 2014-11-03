@@ -210,7 +210,7 @@ public:
 	uint32_t	getSize() const{
 		uint32_t size = uint32_t(pow(double(2),double(MAX_LEVEL_2D-level)));
 		return size;
-	};
+	};//TODO change pow to myPow
 
 	/*! Get the area of an octant in logical domain (for 2D case the same value of getSize).
 	 * \return Area of octant.
