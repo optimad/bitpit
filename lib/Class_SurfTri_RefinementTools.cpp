@@ -22,18 +22,18 @@
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::invert_loc_num(
-    int          I_
+    int          I
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::invert_loc_num(                                        //
-//     int    I_)                                                              //
+//     int    I)                                                              //
 //                                                                            //
-// Invert local numbering on simplex I_                                        //
+// Invert local numbering on simplex I                                        //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - I_    : int, global index of simplex                                      //
+// - I    : int, global index of simplex                                      //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -50,7 +50,7 @@ ivector1D        idummy1D;
 ivector2D        idummy2D;
 
 // Counters
-int              i, m = Simplex[I_].size();
+int              i, m = Simplex[I].size();
 
 // ========================================================================== //
 // CHECK OPTIONAL DATA STRUCTURES                                             //
@@ -63,22 +63,22 @@ flag_a =  ((Adjacency.size() > 0) && (Adjacency.size() >= nSimplex));
 // ========================================================================== //
 
 // Adjust vertex-simplex connectivity
-idummy1D = Simplex[I_];
+idummy1D = Simplex[I];
 for (i = 0; i < m; i++) {
-    Simplex[I_][i] = idummy1D[m-i-1];
+    Simplex[I][i] = idummy1D[m-i-1];
 } //next i
 
 // Adjust simplex-simplex adjacency
 if (flag_a) {
-    idummy2D = Adjacency[I_];
+    idummy2D = Adjacency[I];
     for (i = 0; i < m; i++) {
-        Adjacency[I_][i] = idummy2D[m-i-1];
+        Adjacency[I][i] = idummy2D[m-i-1];
     } //next i
 }
 
 // Reverse normal
 if (flag_n) {
-    Normal[I_] = -1.0*Normal[I_];
+    Normal[I] = -1.0*Normal[I];
 }
 
 return; }
@@ -347,7 +347,8 @@ flag_n = ((Normal.size() > 0) && (Normal.size() >= nSimplex));
             if (n == 0) {}
             else if (n == 1) {}
             else if (n == 2) {
-                split_1segm2segm(T, P, nV, V);
+                V.push_back(P);
+                split_1segm2segm(T, (int) V.size()-1, V);
                 if (0.5*A > h) {
                     dummy.first = T;
                     dummy.second = 0.5*A;
@@ -566,17 +567,15 @@ return; };
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::split_1segm2segm(
     int          T,
-    dvector1D   &P,
-    int         &nV,
-    dvector2D   &V
+    int          V,
+    dvector2D   &X
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::split_1segm2segm(                                      //
 //     int          T,                                                        //
-//     dvector1D   &P,                                                        //
-//     int         &nV,                                                       //
-//     dvector2D   &V)                                                        //
+//     int          V,                                                        //
+//     dvector2D   &X)                                                        //
 //                                                                            //
 // Split a given 2-simplex in two 2-simplicies by inserting point P.          //
 // Vertex coordinate list is provided externally.                             //
@@ -584,10 +583,9 @@ void Class_SurfTri::split_1segm2segm(
 // INPUT                                                                      //
 // ========================================================================== //
 // - T      : int, simplex global index                                       //
-// - P      : dvector1D, point coordinates                                    //
-// - nV     : int, number of vertices actually stored in V                    //
-// - V      : dvector2D, vertex coordinate list. V[i][0], V[i][1], ... are    //
-//            the , x, y, ... coordinates of the i-th vertex.                 //
+// - V      : int, global index of vertex used to split segment               //
+// - X      : dvector2D, external vertex coorindate list. X[i][0], X[i][1],   //
+//            ... are the x, y, ... coordinates of the i-th vertex            //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -600,8 +598,7 @@ void Class_SurfTri::split_1segm2segm(
 
 // Local variables
 bool                flag_n, flag_a;
-int                 s_type;
-int                 dim = P.size();
+int                 s_type, dim = X[V].size();
 ivector1D           idummy1D(2, -1);
 dvector1D           ddummy1D(dim, 0.0);
 ivector2D           idummy2D(2, ivector1D(1, -1));
@@ -627,21 +624,12 @@ flag_a = ((Adjacency.size() > 0) && (Adjacency.size() >= nSimplex));
 // SPLIT SIMPLEX                                                              //
 // ========================================================================== //
 
-// Modify vertex list ------------------------------------------------------- //
-if (nV == V.size()) {
-    V.push_back(P);
-}
-else {
-    V[nV] = P;
-}
-nV++;
-
 // Modify simplex-vertex connectivity --------------------------------------- //
-idummy1D[0] = nV-1;
+idummy1D[0] = V;
 idummy1D[1] = Simplex[T][1];
 AddSimplex(idummy1D);
 S = nSimplex-1;
-Simplex[T][1] = nV-1;
+Simplex[T][1] = V;
 
 // Modify simplex-simplex adjacencies --------------------------------------- //
 if (flag_a) {
@@ -654,10 +642,10 @@ if (flag_a) {
 
 // Generate normals for new simplex ----------------------------------------- //
 if (flag_n) {
-    ddummy1D = V[Simplex[S][1]] - V[Simplex[S][0]];
+    ddummy1D = X[Simplex[S][1]] - X[Simplex[S][0]];
     ddummy1D = ddummy1D/norm_2(ddummy1D);
     SetNormal(S, ddummy1D);
-    Normal[T] = V[Simplex[T][1]] - V[Simplex[T][0]];
+    Normal[T] = X[Simplex[T][1]] - X[Simplex[T][0]];
     Normal[T] = Normal[T]/norm_2(Normal[T]);
 }
 
@@ -1181,7 +1169,7 @@ return; };
         ivector2D        S2MP(nSimplex, ivector1D(3, -1));
 
         // Counters
-        int              I_, J;
+        int              I, J;
         int              i, j, k, e, d;
 
         // =================================================================================== //
@@ -1199,9 +1187,9 @@ return; };
 
                     // Update {Simplex->MidPoint} map
                     S2MP[i][j] = Voronoi.nVertex-1;
-                    I_ = Adjacency[i][j][0];
-                    J = edge(I_, i);
-                    S2MP[I_][J] = Voronoi.nVertex-1;
+                    I = Adjacency[i][j][0];
+                    J = edge(I, i);
+                    S2MP[I][J] = Voronoi.nVertex-1;
 
                 }
             } //next j

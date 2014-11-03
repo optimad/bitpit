@@ -807,11 +807,10 @@ class Class_SurfTri {
         int                  ,                                                // (input) simplex global index
         dvector1D           &                                                 // (input) point coordinates
     );
-    void split_1segm2segm(                                                    // Split 2-simplex into two 2-simplcies at specified point
+    void split_1segm2segm(                                                    // Split 2-simplex into two 2-simplcies at specified point using an external vertex list
         int                  ,                                                // (input) simplex global index
-        dvector1D           &,                                                // (input) point coordinates
-        int                 &,                                                // (input/output) number of vertices in the external vertex list
-        dvector2D           &                                                 // (input/output) external vertex list
+        int                  ,                                                // (input) global index of vertex used to split segment
+        dvector2D           &                                                 // (input) external vertex list
     );
             void Collapse_2Simplex(int , int);            // Collapse 2 simplex
     void Split_2Simplex(                                                      // Split a 2-simplex at mid-point
