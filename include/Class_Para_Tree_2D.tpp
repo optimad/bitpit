@@ -4767,6 +4767,38 @@ public:
 
 	// =============================================================================== //
 
+	/** Map the elements of the actual octree mesh to the elements of another one.
+	 * If the connectivity is not stored, the method temporary computes it.
+	 * If the connectivity of ghost octants is already computed, the method writes the ghosts on file.
+	 * \param[in] ptree Second octree. The map goes from the firs one to the second one.
+	 * \param[out] Map between octrees. Each i-th pair gives the first index and the last one of the elements
+	 * of the second octree which lie in the i-th element of the first octree. If the indices are equal, then
+	 * the element of the second octree is of the same level or lower (bigger size).
+	 */
+	vector<pair<uint32_t, uint32_t> > mapPablos(Class_Para_Tree & ptree){
+		vector<pair<uint32_t, uint32_t> > mapper;
+		uint32_t idx2 = 0;
+		uint64_t morton2 = 0, mortonlastdesc = 0;
+		uint32_t nocts = octree.getNumOctants();
+		mapper.resize(nocts);
+		if (serial){
+			for (int i=0; i<nocts; i++){
+				mapper[i].first = idx2;
+				mapper[i].second = idx2;
+				mortonlastdesc = octree.octants[i].buildLastDesc().computeMorton();
+				while(morton2 <= mortonlastdesc){
+					mapper[i].second = idx2;
+					idx2++;
+					morton2 = ptree.getOctant(idx2)->computeMorton();
+				}
+			}
+		}
+		//TODO PARALLEL VERSION
+		return mapper;
+	}
+
+	// =============================================================================== //
+
 	/** Write the logical octree mesh in .vtu format in a user-defined file.
 	 * If the connectivity is not stored, the method temporary computes it.
 	 * If the connectivity of ghost octants is already computed, the method writes the ghosts on file.
