@@ -51,6 +51,14 @@ add_executable(test5 ${test5_src})
 target_link_libraries(test5 mpi)
 TARGET_LINK_LIBRARIES(test5 PABLO)
 
+#Build test6.cpp
+SET(test6_src test6.cpp)
+
+add_executable(test6 ${test6_src})
+
+target_link_libraries(test6 mpi)
+TARGET_LINK_LIBRARIES(test6 PABLO)
+
 
 #Build test12.cpp
 SET(test12_src test12.cpp)
