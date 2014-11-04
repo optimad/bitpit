@@ -4792,7 +4792,7 @@ public:
 				mapper[i].second.first = rank;
 				mapper[i].second.second = rank;
 				mortonlastdesc = octree.octants[i].buildLastDesc().computeMorton();
-				while(morton2 <= mortonlastdesc && idx2<){
+				while(morton2 <= mortonlastdesc && idx2 < nocts2){
 					mapper[i].first.second = idx2;
 					idx2++;
 					morton2 = ptree.getOctant(idx2)->computeMorton();
