@@ -4775,21 +4775,80 @@ public:
 	 * of the second octree which lie in the i-th element of the first octree. If the indices are equal, then
 	 * the element of the second octree is of the same level or lower (bigger size).
 	 */
-	vector<pair<uint32_t, uint32_t> > mapPablos(Class_Para_Tree & ptree){
-		vector<pair<uint32_t, uint32_t> > mapper;
+	vector<pair<pair<uint32_t, uint32_t>, pair<int, int> > > mapPablos(Class_Para_Tree<2> & ptree){
+		vector<pair<pair<uint32_t, uint32_t>, pair<int, int> > > mapper;
+		u64vector2D FirstMortonperproc, SecondMortonperproc;
+		u32vector2D FirstLocalIndexperproc, SecondLocalIndexperproc;
+		uint64_t morton = 0, morton2 = 0, mortonlastdesc = 0;
 		uint32_t idx2 = 0;
-		uint64_t morton2 = 0, mortonlastdesc = 0;
 		uint32_t nocts = octree.getNumOctants();
+		uint32_t nocts2 = ptree.octree.getNumOctants();
+		int owner;
 		mapper.resize(nocts);
 		if (serial){
 			for (int i=0; i<nocts; i++){
-				mapper[i].first = idx2;
-				mapper[i].second = idx2;
+				mapper[i].first.first = idx2;
+				mapper[i].first.second = idx2;
+				mapper[i].second.first = rank;
+				mapper[i].second.second = rank;
 				mortonlastdesc = octree.octants[i].buildLastDesc().computeMorton();
-				while(morton2 <= mortonlastdesc){
-					mapper[i].second = idx2;
+				while(morton2 <= mortonlastdesc && idx2<){
+					mapper[i].first.second = idx2;
 					idx2++;
 					morton2 = ptree.getOctant(idx2)->computeMorton();
+				}
+			}
+		}
+		else{
+			idx2 = 0;
+			morton2 = 0;
+			for (int i=0; i<nocts; i++){
+				morton = octree.octants[i].computeMorton();
+				owner = ptree.findOwner(morton);
+				if (rank == owner){
+					mapper[i].second.first = rank;
+					while(morton2 <= morton){
+						mapper[i].first.first = idx2;
+						idx2++;
+						morton2 = ptree.getOctant(idx2)->computeMorton();
+					}
+					mortonlastdesc = octree.octants[i].buildLastDesc().computeMorton();
+					owner = ptree.findOwner(mortonlastdesc);
+					if (rank == owner){
+						mapper[i].second.second = rank;
+						mapper[i].first.second = idx2;
+						while(morton2 <= mortonlastdesc){
+							mapper[i].first.second = idx2;
+							idx2++;
+							morton2 = ptree.getOctant(idx2)->computeMorton();
+						}
+					}
+					else{
+						mapper[i].second.second = owner;
+						SecondMortonperproc[owner].push_back(morton);
+						SecondLocalIndexperproc[owner].push_back(i);
+					}
+				}
+				else{
+					mapper[i].second.first = owner;
+					FirstMortonperproc[owner].push_back(morton);
+					FirstLocalIndexperproc[owner].push_back(i);
+					mortonlastdesc = octree.octants[i].buildLastDesc().computeMorton();
+					owner = ptree.findOwner(mortonlastdesc);
+					if (rank == owner){
+						mapper[i].second.second = rank;
+						mapper[i].first.second = idx2;
+						while(morton2 <= mortonlastdesc){
+							mapper[i].first.second = idx2;
+							idx2++;
+							morton2 = ptree.getOctant(idx2)->computeMorton();
+						}
+					}
+					else{
+						mapper[i].second.second = owner;
+						SecondMortonperproc[owner].push_back(morton);
+						SecondLocalIndexperproc[owner].push_back(i);
+					}
 				}
 			}
 		}
