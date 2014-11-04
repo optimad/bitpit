@@ -4798,7 +4798,8 @@ public:
 				while(morton2 <= mortonlastdesc && idx2 < nocts2){
 					mapper[i].first.second = idx2;
 					idx2++;
-					morton2 = ptree.getOctant(idx2)->computeMorton();
+					if (idx2 < nocts2)
+						morton2 = ptree.getOctant(idx2)->computeMorton();
 				}
 			}
 		}
@@ -4813,7 +4814,8 @@ public:
 					while(morton2 <= morton && idx2 < nocts2){
 						mapper[i].first.first = idx2;
 						idx2++;
-						morton2 = ptree.getOctant(idx2)->computeMorton();
+						if (idx2 < nocts2)
+							morton2 = ptree.getOctant(idx2)->computeMorton();
 					}
 					mortonlastdesc = octree.octants[i].buildLastDesc().computeMorton();
 					owner = ptree.findOwner(mortonlastdesc);
@@ -4823,7 +4825,8 @@ public:
 						while(morton2 <= mortonlastdesc && idx2 < nocts2){
 							mapper[i].first.second = idx2;
 							idx2++;
-							morton2 = ptree.getOctant(idx2)->computeMorton();
+							if (idx2 < nocts2)
+								morton2 = ptree.getOctant(idx2)->computeMorton();
 						}
 					}
 					else{
@@ -4844,7 +4847,8 @@ public:
 						while(morton2 <= mortonlastdesc && idx2 < nocts2){
 							mapper[i].first.second = idx2;
 							idx2++;
-							morton2 = ptree.getOctant(idx2)->computeMorton();
+							if (idx2 < nocts2)
+								morton2 = ptree.getOctant(idx2)->computeMorton();
 						}
 					}
 					else{
@@ -4957,12 +4961,9 @@ public:
 				recvBuffers.clear();
 				sendBuffers.clear();
 				recvBufferSizePerProc.clear();
-
 			}
 
-
 			{
-
 				//COMM SECOND MORTON PER PROC
 				vector<Class_Comm_Buffer> sendBuffers;
 				u64vector2D::iterator bitend = SecondMortonperproc.end();
@@ -5084,7 +5085,8 @@ public:
 						idx2++;
 						FirstIndexperproc[iproc][idx] = idx2;
 						it++;
-						morton2 = it->computeMorton();
+						if (it != oend)
+							morton2 = it->computeMorton();
 					}
 				}
 			}
@@ -5106,15 +5108,13 @@ public:
 						SecondIndexperproc[iproc][idx] = idx2;
 						idx2++;
 						it++;
-						morton2 = it->computeMorton();
+						if (it != oend)
+							morton2 = it->computeMorton();
 					}
 				}
 			}
 
-
-
 			{
-
 					//COMM BACK FIRST INDEX PER PROC
 					vector<Class_Comm_Buffer> sendBuffers;
 					u32vector2D::iterator bitend = FirstIndexperproc.end();
@@ -5213,13 +5213,9 @@ public:
 					recvBuffers.clear();
 					sendBuffers.clear();
 					recvBufferSizePerProc.clear();
-
 				}
 
-
-
 			{
-
 					//COMM BACK SECOND INDEX PER PROC
 					vector<Class_Comm_Buffer> sendBuffers;
 					u32vector2D::iterator bitend = SecondIndexperproc.end();
@@ -5318,12 +5314,7 @@ public:
 					recvBuffers.clear();
 					sendBuffers.clear();
 					recvBufferSizePerProc.clear();
-
 				}
-
-
-
-
 		}
 		//TODO PARALLEL VERSION
 		return mapper;
