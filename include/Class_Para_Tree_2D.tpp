@@ -4776,9 +4776,12 @@ public:
 	 * the element of the second octree is of the same level or lower (bigger size).
 	 */
 	vector<pair<pair<uint32_t, uint32_t>, pair<int, int> > > mapPablos(Class_Para_Tree<2> & ptree){
+		//TODO DO IT WITH ITERATORS
 		vector<pair<pair<uint32_t, uint32_t>, pair<int, int> > > mapper;
 		u64vector2D FirstMortonperproc, SecondMortonperproc;
-		u32vector2D FirstLocalIndexperproc, SecondLocalIndexperproc;
+		u64vector2D FirstMortonReceived, SecondMortonReceived;
+		u32vector2D FirstIndexperproc, SecondIndexperproc;
+		u32vector2D FirstLocalIndex, SecondLocalIndex;
 		uint64_t morton = 0, morton2 = 0, mortonlastdesc = 0;
 		uint32_t idx2 = 0;
 		uint32_t nocts = octree.getNumOctants();
@@ -4807,7 +4810,7 @@ public:
 				owner = ptree.findOwner(morton);
 				if (rank == owner){
 					mapper[i].second.first = rank;
-					while(morton2 <= morton){
+					while(morton2 <= morton && idx2 < nocts2){
 						mapper[i].first.first = idx2;
 						idx2++;
 						morton2 = ptree.getOctant(idx2)->computeMorton();
@@ -4817,7 +4820,7 @@ public:
 					if (rank == owner){
 						mapper[i].second.second = rank;
 						mapper[i].first.second = idx2;
-						while(morton2 <= mortonlastdesc){
+						while(morton2 <= mortonlastdesc && idx2 < nocts2){
 							mapper[i].first.second = idx2;
 							idx2++;
 							morton2 = ptree.getOctant(idx2)->computeMorton();
@@ -4826,19 +4829,19 @@ public:
 					else{
 						mapper[i].second.second = owner;
 						SecondMortonperproc[owner].push_back(morton);
-						SecondLocalIndexperproc[owner].push_back(i);
+						SecondLocalIndex[owner].push_back(i);
 					}
 				}
 				else{
 					mapper[i].second.first = owner;
 					FirstMortonperproc[owner].push_back(morton);
-					FirstLocalIndexperproc[owner].push_back(i);
+					FirstLocalIndex[owner].push_back(i);
 					mortonlastdesc = octree.octants[i].buildLastDesc().computeMorton();
 					owner = ptree.findOwner(mortonlastdesc);
 					if (rank == owner){
 						mapper[i].second.second = rank;
 						mapper[i].first.second = idx2;
-						while(morton2 <= mortonlastdesc){
+						while(morton2 <= mortonlastdesc && idx2 < nocts2){
 							mapper[i].first.second = idx2;
 							idx2++;
 							morton2 = ptree.getOctant(idx2)->computeMorton();
@@ -4847,10 +4850,480 @@ public:
 					else{
 						mapper[i].second.second = owner;
 						SecondMortonperproc[owner].push_back(morton);
-						SecondLocalIndexperproc[owner].push_back(i);
+						SecondLocalIndex[owner].push_back(i);
 					}
 				}
 			}
+
+			{
+
+				//COMM FIRST MORTON PER PROC
+				vector<Class_Comm_Buffer> sendBuffers;
+				u64vector2D::iterator bitend = FirstMortonperproc.end();
+				uint32_t pbordersOversize = 0;
+				int iproc = 0;
+				for(u64vector2D::iterator bit = FirstMortonperproc.begin(); bit != bitend; ++bit){
+					pbordersOversize += bit->size();
+					int buffSize = bit->size() * (int)ceil((double)(sizeof(uint64_t)) / (double)(CHAR_BIT/8));
+					int key = iproc;
+					vector<uint64_t> & value = *bit;
+					sendBuffers[key] = Class_Comm_Buffer(buffSize,'a');
+					int pos = 0;
+					int nofMortons = value.size();
+					for(int i = 0; i < nofMortons; ++i){
+						//the use of auxiliary variable can be avoided passing to MPI_Pack the members of octant but octant in that case cannot be const
+						uint64_t Morton = value[i];
+						error_flag = MPI_Pack(&Morton,1,MPI_UINT64_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+					}
+					iproc++;
+				}
+
+				//COMMUNICATE THE SIZE OF BUFFER TO THE RECEIVERS
+				//the size of every borders buffer is communicated to the right process in order to build the receive buffer
+				//and stored in the recvBufferSizePerProc structure
+				MPI_Request req[sendBuffers.size()*2];
+				MPI_Status stats[sendBuffers.size()*2];
+				int nReq = 0;
+				iproc = 0;
+				map<int,int> recvBufferSizePerProc;
+				vector<Class_Comm_Buffer>::iterator sitend = sendBuffers.end();
+				for(vector<Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
+					recvBufferSizePerProc[iproc] = 0;
+					error_flag = MPI_Irecv(&recvBufferSizePerProc[iproc],1,MPI_UINT64_T,iproc,rank,MPI_COMM_WORLD,&req[nReq]);
+					++nReq;
+					iproc++;
+				}
+				iproc = 0;
+				vector<Class_Comm_Buffer>::reverse_iterator rsitend = sendBuffers.rend();
+				for(vector<Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+					error_flag =  MPI_Isend(&rsit->commBufferSize,1,MPI_UINT64_T,iproc,iproc,MPI_COMM_WORLD,&req[nReq]);
+					++nReq;
+					iproc++;
+				}
+				MPI_Waitall(nReq,req,stats);
+
+				//COMMUNICATE THE BUFFERS TO THE RECEIVERS
+				//recvBuffers structure is declared and each buffer is initialized to the right size
+				//then, sendBuffers are communicated by senders and stored in recvBuffers in the receivers
+				//at the same time every process compute the size in bytes
+				uint32_t nofBytesOverProc = 0;
+				iproc = 0;
+				vector<Class_Comm_Buffer> recvBuffers;
+				map<int,int>::iterator ritend = recvBufferSizePerProc.end();
+				for(map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
+					recvBuffers[iproc] = Class_Comm_Buffer(rit->second,'a');
+					iproc++;
+				}
+				nReq = 0;
+				iproc = 0;
+				for(vector<Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
+					nofBytesOverProc += recvBuffers[iproc].commBufferSize;
+					error_flag = MPI_Irecv(recvBuffers[iproc].commBuffer,recvBuffers[iproc].commBufferSize,MPI_PACKED,iproc,rank,MPI_COMM_WORLD,&req[nReq]);
+					++nReq;
+					iproc++;
+				}
+				iproc = 0;
+				for(vector<Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+					error_flag =  MPI_Isend(rsit->commBuffer,rsit->commBufferSize,MPI_PACKED,iproc,iproc,MPI_COMM_WORLD,&req[nReq]);
+					++nReq;
+					iproc++;
+				}
+				MPI_Waitall(nReq,req,stats);
+
+				//COMPUTE  SIZE IN BYTES
+				//number of mortons in every process is obtained through the size in bytes of the single morton
+				//and vector in local process is resized
+				uint32_t nofMortons = nofBytesOverProc / (uint32_t)(sizeof(uint64_t));
+				FirstMortonReceived.resize(nproc);
+
+				//UNPACK BUFFERS AND BUILD CONTAINER OF RECEIVED MORTON
+				//every entry in recvBuffers is visited, each buffers from neighbor processes is unpacked.
+				//every Morton is built and put in the MorontReceived vector
+				uint32_t Mortoncounter = 0;
+				uint64_t Morton = 0;
+				iproc = 0;
+				vector<Class_Comm_Buffer>::iterator rritend = recvBuffers.end();
+				for(vector<Class_Comm_Buffer>::iterator rrit = recvBuffers.begin(); rrit != rritend; ++rrit){
+					int pos = 0;
+					int nofMortonPerProc = int(rrit->commBufferSize / (uint32_t) (sizeof(uint64_t)));
+					FirstMortonReceived[iproc].resize(nofMortonPerProc);
+					for(int i = 0; i < nofMortonPerProc; ++i){
+						error_flag = MPI_Unpack(rrit->commBuffer,rrit->commBufferSize,&pos,&Morton,1,MPI_UINT64_T,MPI_COMM_WORLD);
+						FirstMortonReceived[iproc].push_back(Morton);
+						++Mortoncounter;
+					}
+					iproc++;
+				}
+				recvBuffers.clear();
+				sendBuffers.clear();
+				recvBufferSizePerProc.clear();
+
+			}
+
+
+			{
+
+				//COMM SECOND MORTON PER PROC
+				vector<Class_Comm_Buffer> sendBuffers;
+				u64vector2D::iterator bitend = SecondMortonperproc.end();
+				uint32_t pbordersOversize = 0;
+				int iproc = 0;
+				for(u64vector2D::iterator bit = SecondMortonperproc.begin(); bit != bitend; ++bit){
+					pbordersOversize += bit->size();
+					int buffSize = bit->size() * (int)ceil((double)(sizeof(uint64_t)) / (double)(CHAR_BIT/8));
+					int key = iproc;
+					vector<uint64_t> & value = *bit;
+					sendBuffers[key] = Class_Comm_Buffer(buffSize,'a');
+					int pos = 0;
+					int nofMortons = value.size();
+					for(int i = 0; i < nofMortons; ++i){
+						//the use of auxiliary variable can be avoided passing to MPI_Pack the members of octant but octant in that case cannot be const
+						uint64_t Morton = value[i];
+						error_flag = MPI_Pack(&Morton,1,MPI_UINT64_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+					}
+					iproc++;
+				}
+
+				//COMMUNICATE THE SIZE OF BUFFER TO THE RECEIVERS
+				//the size of every borders buffer is communicated to the right process in order to build the receive buffer
+				//and stored in the recvBufferSizePerProc structure
+				MPI_Request req[sendBuffers.size()*2];
+				MPI_Status stats[sendBuffers.size()*2];
+				int nReq = 0;
+				iproc = 0;
+				map<int,int> recvBufferSizePerProc;
+				vector<Class_Comm_Buffer>::iterator sitend = sendBuffers.end();
+				for(vector<Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
+					recvBufferSizePerProc[iproc] = 0;
+					error_flag = MPI_Irecv(&recvBufferSizePerProc[iproc],1,MPI_UINT64_T,iproc,rank,MPI_COMM_WORLD,&req[nReq]);
+					++nReq;
+					iproc++;
+				}
+				iproc = 0;
+				vector<Class_Comm_Buffer>::reverse_iterator rsitend = sendBuffers.rend();
+				for(vector<Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+					error_flag =  MPI_Isend(&rsit->commBufferSize,1,MPI_UINT64_T,iproc,iproc,MPI_COMM_WORLD,&req[nReq]);
+					++nReq;
+					iproc++;
+				}
+				MPI_Waitall(nReq,req,stats);
+
+				//COMMUNICATE THE BUFFERS TO THE RECEIVERS
+				//recvBuffers structure is declared and each buffer is initialized to the right size
+				//then, sendBuffers are communicated by senders and stored in recvBuffers in the receivers
+				//at the same time every process compute the size in bytes
+				uint32_t nofBytesOverProc = 0;
+				iproc = 0;
+				vector<Class_Comm_Buffer> recvBuffers;
+				map<int,int>::iterator ritend = recvBufferSizePerProc.end();
+				for(map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
+					recvBuffers[iproc] = Class_Comm_Buffer(rit->second,'a');
+					iproc++;
+				}
+				nReq = 0;
+				iproc = 0;
+				for(vector<Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
+					nofBytesOverProc += recvBuffers[iproc].commBufferSize;
+					error_flag = MPI_Irecv(recvBuffers[iproc].commBuffer,recvBuffers[iproc].commBufferSize,MPI_PACKED,iproc,rank,MPI_COMM_WORLD,&req[nReq]);
+					++nReq;
+					iproc++;
+				}
+				iproc = 0;
+				for(vector<Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+					error_flag =  MPI_Isend(rsit->commBuffer,rsit->commBufferSize,MPI_PACKED,iproc,iproc,MPI_COMM_WORLD,&req[nReq]);
+					++nReq;
+					iproc++;
+				}
+				MPI_Waitall(nReq,req,stats);
+
+				//COMPUTE  SIZE IN BYTES
+				//number of mortons in every process is obtained through the size in bytes of the single morton
+				//and vector in local process is resized
+				uint32_t nofMortons = nofBytesOverProc / (uint32_t)(sizeof(uint64_t));
+				//				SecondMortonReceived.resize(nofMortons);
+				SecondMortonReceived.resize(nproc);
+
+				//UNPACK BUFFERS AND BUILD CONTAINER OF RECEIVED MORTON
+				//every entry in recvBuffers is visited, each buffers from neighbor processes is unpacked.
+				//every Morton is built and put in the MorontReceived vector
+				uint32_t Mortoncounter = 0;
+				uint64_t Morton = 0;
+				iproc = 0;
+				vector<Class_Comm_Buffer>::iterator rritend = recvBuffers.end();
+				for(vector<Class_Comm_Buffer>::iterator rrit = recvBuffers.begin(); rrit != rritend; ++rrit){
+					int pos = 0;
+					int nofMortonPerProc = int(rrit->commBufferSize / (uint32_t) (sizeof(uint64_t)));
+					SecondMortonReceived[iproc].resize(nofMortonPerProc);
+					for(int i = 0; i < nofMortonPerProc; ++i){
+						error_flag = MPI_Unpack(rrit->commBuffer,rrit->commBufferSize,&pos,&Morton,1,MPI_UINT64_T,MPI_COMM_WORLD);
+						SecondMortonReceived[iproc].push_back(Morton);
+						++Mortoncounter;
+					}
+					iproc++;
+				}
+				recvBuffers.clear();
+				sendBuffers.clear();
+				recvBufferSizePerProc.clear();
+
+			}
+
+			//FIND FIRST INDEX FOR FIRST MORTONS IN EACH PROCESS
+			FirstIndexperproc.resize(nproc);
+			for (int iproc=0; iproc<nproc; iproc++){
+				vector<Class_Octant<2> >::iterator oend = octree.octants.end();
+				vector<Class_Octant<2> >::iterator obegin = octree.octants.begin();
+				vector<Class_Octant<2> >::iterator it = obegin;
+				int nmortons = FirstMortonReceived[iproc].size();
+				FirstIndexperproc[iproc].resize(nmortons);
+				for (int idx=0; idx<nmortons; idx++){
+					FirstIndexperproc[iproc][idx] = octree.getNumOctants()-1;
+					uint32_t idx2 = 0;
+					morton = FirstMortonReceived[iproc][idx];
+					morton2 = it->computeMorton();
+					while(morton2 <= morton && it != oend){
+						idx2++;
+						FirstIndexperproc[iproc][idx] = idx2;
+						it++;
+						morton2 = it->computeMorton();
+					}
+				}
+			}
+
+			//FIND SECOND INDEX FOR SECOND MORTONS IN EACH PROCESS
+			SecondIndexperproc.resize(nproc);
+			for (int iproc=0; iproc<nproc; iproc++){
+				vector<Class_Octant<2> >::iterator oend = octree.octants.end();
+				vector<Class_Octant<2> >::iterator obegin = octree.octants.begin();
+				vector<Class_Octant<2> >::iterator it = obegin;
+				int nmortons = SecondMortonReceived[iproc].size();
+				SecondIndexperproc[iproc].resize(nmortons);
+				for (int idx=0; idx<nmortons; idx++){
+					SecondIndexperproc[iproc][idx] = octree.getNumOctants()-1;
+					uint32_t idx2 = 0;
+					morton = SecondMortonReceived[iproc][idx];
+					morton2 = it->computeMorton();
+					while(morton2 <= morton && it != oend){
+						SecondIndexperproc[iproc][idx] = idx2;
+						idx2++;
+						it++;
+						morton2 = it->computeMorton();
+					}
+				}
+			}
+
+
+
+			{
+
+					//COMM BACK FIRST INDEX PER PROC
+					vector<Class_Comm_Buffer> sendBuffers;
+					u32vector2D::iterator bitend = FirstIndexperproc.end();
+					uint32_t pbordersOversize = 0;
+					int iproc = 0;
+					for(u32vector2D::iterator bit = FirstIndexperproc.begin(); bit != bitend; ++bit){
+						pbordersOversize += bit->size();
+						int buffSize = bit->size() * (int)ceil((double)(sizeof(uint32_t)) / (double)(CHAR_BIT/8));
+						int key = iproc;
+						vector<uint32_t> & value = *bit;
+						sendBuffers[key] = Class_Comm_Buffer(buffSize,'a');
+						int pos = 0;
+						int nofIndices = value.size();
+						for(int i = 0; i < nofIndices; ++i){
+							//the use of auxiliary variable can be avoided passing to MPI_Pack the members of octant but octant in that case cannot be const
+							uint64_t Index = value[i];
+							error_flag = MPI_Pack(&Index,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+						}
+						iproc++;
+					}
+
+					//COMMUNICATE THE SIZE OF BUFFER TO THE RECEIVERS
+					//the size of every borders buffer is communicated to the right process in order to build the receive buffer
+					//and stored in the recvBufferSizePerProc structure
+					MPI_Request req[sendBuffers.size()*2];
+					MPI_Status stats[sendBuffers.size()*2];
+					int nReq = 0;
+					iproc = 0;
+					map<int,int> recvBufferSizePerProc;
+					vector<Class_Comm_Buffer>::iterator sitend = sendBuffers.end();
+					for(vector<Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
+						recvBufferSizePerProc[iproc] = 0;
+						error_flag = MPI_Irecv(&recvBufferSizePerProc[iproc],1,MPI_UINT32_T,iproc,rank,MPI_COMM_WORLD,&req[nReq]);
+						++nReq;
+						iproc++;
+					}
+					iproc = 0;
+					vector<Class_Comm_Buffer>::reverse_iterator rsitend = sendBuffers.rend();
+					for(vector<Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+						error_flag =  MPI_Isend(&rsit->commBufferSize,1,MPI_UINT32_T,iproc,iproc,MPI_COMM_WORLD,&req[nReq]);
+						++nReq;
+						iproc++;
+					}
+					MPI_Waitall(nReq,req,stats);
+
+					//COMMUNICATE THE BUFFERS TO THE RECEIVERS
+					//recvBuffers structure is declared and each buffer is initialized to the right size
+					//then, sendBuffers are communicated by senders and stored in recvBuffers in the receivers
+					//at the same time every process compute the size in bytes
+					uint32_t nofBytesOverProc = 0;
+					iproc = 0;
+					vector<Class_Comm_Buffer> recvBuffers;
+					map<int,int>::iterator ritend = recvBufferSizePerProc.end();
+					for(map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
+						recvBuffers[iproc] = Class_Comm_Buffer(rit->second,'a');
+						iproc++;
+					}
+					nReq = 0;
+					iproc = 0;
+					for(vector<Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
+						nofBytesOverProc += recvBuffers[iproc].commBufferSize;
+						error_flag = MPI_Irecv(recvBuffers[iproc].commBuffer,recvBuffers[iproc].commBufferSize,MPI_PACKED,iproc,rank,MPI_COMM_WORLD,&req[nReq]);
+						++nReq;
+						iproc++;
+					}
+					iproc = 0;
+					for(vector<Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+						error_flag =  MPI_Isend(rsit->commBuffer,rsit->commBufferSize,MPI_PACKED,iproc,iproc,MPI_COMM_WORLD,&req[nReq]);
+						++nReq;
+						iproc++;
+					}
+					MPI_Waitall(nReq,req,stats);
+
+					//COMPUTE  SIZE IN BYTES
+					//number of indices in every process is obtained through the size in bytes of the single index
+					//and vector in local process is resized
+					uint32_t nofMortons = nofBytesOverProc / (uint32_t)(sizeof(uint32_t));
+
+					//UNPACK BUFFERS AND BUILD CONTAINER OF RECEIVED MORTON
+					//every entry in recvBuffers is visited, each buffers from neighbor processes is unpacked.
+					//every Index is built and put in the mapper
+					uint32_t Indexcounter = 0;
+					uint32_t Index = 0;
+					iproc = 0;
+					vector<Class_Comm_Buffer>::iterator rritend = recvBuffers.end();
+					for(vector<Class_Comm_Buffer>::iterator rrit = recvBuffers.begin(); rrit != rritend; ++rrit){
+						int pos = 0;
+						int nofIndexPerProc = int(rrit->commBufferSize / (uint32_t) (sizeof(uint32_t)));
+						for(int i = 0; i < nofIndexPerProc; ++i){
+							error_flag = MPI_Unpack(rrit->commBuffer,rrit->commBufferSize,&pos,&Index,1,MPI_UINT32_T,MPI_COMM_WORLD);
+							mapper[FirstLocalIndex[iproc][i]].first.first = Index;
+							++Indexcounter;
+						}
+						iproc++;
+					}
+					recvBuffers.clear();
+					sendBuffers.clear();
+					recvBufferSizePerProc.clear();
+
+				}
+
+
+
+			{
+
+					//COMM BACK SECOND INDEX PER PROC
+					vector<Class_Comm_Buffer> sendBuffers;
+					u32vector2D::iterator bitend = SecondIndexperproc.end();
+					uint32_t pbordersOversize = 0;
+					int iproc = 0;
+					for(u32vector2D::iterator bit = SecondIndexperproc.begin(); bit != bitend; ++bit){
+						pbordersOversize += bit->size();
+						int buffSize = bit->size() * (int)ceil((double)(sizeof(uint32_t)) / (double)(CHAR_BIT/8));
+						int key = iproc;
+						vector<uint32_t> & value = *bit;
+						sendBuffers[key] = Class_Comm_Buffer(buffSize,'a');
+						int pos = 0;
+						int nofIndices = value.size();
+						for(int i = 0; i < nofIndices; ++i){
+							//the use of auxiliary variable can be avoided passing to MPI_Pack the members of octant but octant in that case cannot be const
+							uint64_t Index = value[i];
+							error_flag = MPI_Pack(&Index,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+						}
+						iproc++;
+					}
+
+					//COMMUNICATE THE SIZE OF BUFFER TO THE RECEIVERS
+					//the size of every borders buffer is communicated to the right process in order to build the receive buffer
+					//and stored in the recvBufferSizePerProc structure
+					MPI_Request req[sendBuffers.size()*2];
+					MPI_Status stats[sendBuffers.size()*2];
+					int nReq = 0;
+					iproc = 0;
+					map<int,int> recvBufferSizePerProc;
+					vector<Class_Comm_Buffer>::iterator sitend = sendBuffers.end();
+					for(vector<Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
+						recvBufferSizePerProc[iproc] = 0;
+						error_flag = MPI_Irecv(&recvBufferSizePerProc[iproc],1,MPI_UINT32_T,iproc,rank,MPI_COMM_WORLD,&req[nReq]);
+						++nReq;
+						iproc++;
+					}
+					iproc = 0;
+					vector<Class_Comm_Buffer>::reverse_iterator rsitend = sendBuffers.rend();
+					for(vector<Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+						error_flag =  MPI_Isend(&rsit->commBufferSize,1,MPI_UINT32_T,iproc,iproc,MPI_COMM_WORLD,&req[nReq]);
+						++nReq;
+						iproc++;
+					}
+					MPI_Waitall(nReq,req,stats);
+
+					//COMMUNICATE THE BUFFERS TO THE RECEIVERS
+					//recvBuffers structure is declared and each buffer is initialized to the right size
+					//then, sendBuffers are communicated by senders and stored in recvBuffers in the receivers
+					//at the same time every process compute the size in bytes
+					uint32_t nofBytesOverProc = 0;
+					iproc = 0;
+					vector<Class_Comm_Buffer> recvBuffers;
+					map<int,int>::iterator ritend = recvBufferSizePerProc.end();
+					for(map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
+						recvBuffers[iproc] = Class_Comm_Buffer(rit->second,'a');
+						iproc++;
+					}
+					nReq = 0;
+					iproc = 0;
+					for(vector<Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
+						nofBytesOverProc += recvBuffers[iproc].commBufferSize;
+						error_flag = MPI_Irecv(recvBuffers[iproc].commBuffer,recvBuffers[iproc].commBufferSize,MPI_PACKED,iproc,rank,MPI_COMM_WORLD,&req[nReq]);
+						++nReq;
+						iproc++;
+					}
+					iproc = 0;
+					for(vector<Class_Comm_Buffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+						error_flag =  MPI_Isend(rsit->commBuffer,rsit->commBufferSize,MPI_PACKED,iproc,iproc,MPI_COMM_WORLD,&req[nReq]);
+						++nReq;
+						iproc++;
+					}
+					MPI_Waitall(nReq,req,stats);
+
+					//COMPUTE  SIZE IN BYTES
+					//number of indices in every process is obtained through the size in bytes of the single index
+					//and vector in local process is resized
+					uint32_t nofIndices = nofBytesOverProc / (uint32_t)(sizeof(uint32_t));
+
+					//UNPACK BUFFERS AND BUILD CONTAINER OF RECEIVED MORTON
+					//every entry in recvBuffers is visited, each buffers from neighbor processes is unpacked.
+					//every Index is built and put in the mapper
+					uint32_t Indexcounter = 0;
+					uint32_t Index = 0;
+					iproc = 0;
+					vector<Class_Comm_Buffer>::iterator rritend = recvBuffers.end();
+					for(vector<Class_Comm_Buffer>::iterator rrit = recvBuffers.begin(); rrit != rritend; ++rrit){
+						int pos = 0;
+						int nofIndexPerProc = int(rrit->commBufferSize / (uint32_t) (sizeof(uint32_t)));
+						for(int i = 0; i < nofIndexPerProc; ++i){
+							error_flag = MPI_Unpack(rrit->commBuffer,rrit->commBufferSize,&pos,&Index,1,MPI_UINT32_T,MPI_COMM_WORLD);
+							mapper[SecondLocalIndex[iproc][i]].first.first = Index;
+							++Indexcounter;
+						}
+						iproc++;
+					}
+					recvBuffers.clear();
+					sendBuffers.clear();
+					recvBufferSizePerProc.clear();
+
+				}
+
+
+
+
 		}
 		//TODO PARALLEL VERSION
 		return mapper;
