@@ -27,6 +27,8 @@ int main(int argc, char *argv[]) {
 
 		/**<Instantation and copy pablo6.*/
 		Class_Para_Tree<2> pablo60 = pablo6;
+		pablo6.loadBalance();
+		pablo60.loadBalance();
 		pablo60.write("Pablo60_iter"+to_string(iter));
 
 		/**<Define a center point and a radius.*/
@@ -103,7 +105,6 @@ int main(int argc, char *argv[]) {
 			vector<double> data(nocts);
 			for (int i=0; i<nocts; i++){
 				data[i] = (double) mapper[i].first.second;
-				cout << data[i] << endl;
 			}
 			pablo60.writeTest("Pablo60_iter"+to_string(iter+1), data);
 		}
