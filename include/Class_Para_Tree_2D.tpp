@@ -4788,7 +4788,7 @@ public:
 		uint32_t nocts2 = ptree.octree.getNumOctants();
 		int owner;
 		mapper.resize(nocts);
-		if (serial){
+		if (ptree.serial){
 			for (int i=0; i<nocts; i++){
 				mapper[i].first.first = idx2;
 				mapper[i].first.second = idx2;
