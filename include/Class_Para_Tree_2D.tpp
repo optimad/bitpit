@@ -4773,7 +4773,8 @@ public:
 	 * \param[in] ptree Second octree. The map goes from the firs one to the second one.
 	 * \param[out] Map between octrees. Each i-th pair gives the first index and the last one of the elements
 	 * of the second octree which lie in the i-th element of the first octree. If the indices are equal, then
-	 * the element of the second octree is of the same level or lower (bigger size).
+	 * the element of the second octree is of the same level or lower (bigger size).  Each second i-th pair gives
+	 * the indices of the two processes owning the two quadrants dfined by the first pair.
 	 */
 	vector<pair<pair<uint32_t, uint32_t>, pair<int, int> > > mapPablos(Class_Para_Tree<2> & ptree){
 		//TODO DO IT WITH ITERATORS
