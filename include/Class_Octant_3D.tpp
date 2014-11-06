@@ -228,8 +228,8 @@ public:
 	/*! Get the volume of an octant in logical domain.
 	 * \return Volume of octant.
 	 */
-	uint32_t	getVolume() const{
-		uint64_t volume = uint32_t(pow(double(getSize()),3.0));
+	uint64_t	getVolume() const{
+		uint64_t volume = uint64_t(pow(double(getSize()),3.0));
 		return volume;
 	};
 

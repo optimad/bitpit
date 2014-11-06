@@ -552,7 +552,7 @@ public:
 	 * \param[in] oct Pointer to target octant.
 	 * \return Is octant new?
 	 */
-	bool getIsNewR(Class_Octant<2>* oct){
+	bool getIsNewR(Class_Octant<3>* oct){
 		return oct->getIsNewR();
 	};
 
@@ -560,7 +560,7 @@ public:
 	 * \param[in] oct Pointer to target octant.
 	 * \return Is octant new?
 	 */
-	bool getIsNewC(Class_Octant<2>* oct){
+	bool getIsNewC(Class_Octant<3>* oct){
 		return oct->getIsNewC();
 	};
 
