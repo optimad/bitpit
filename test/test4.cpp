@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
 		Class_Para_Tree<2> pablo4;
 
 		/**<Refine globally four level and write the para_tree.*/
-		for (iter=1; iter<8; iter++){
+		for (iter=1; iter<5; iter++){
 			pablo4.adaptGlobalRefine();
 		}
 
@@ -74,8 +74,6 @@ int main(int argc, char *argv[]) {
 				neigh.clear();
 				isghost.clear();
 
-				Class_Octant<2> *oct = pablo4.getOctant(i);
-
 				/**<Find neighbours through edges (codim=1) and nodes (codim=2) of the octants*/
 				for (codim=1; codim<dim+1; codim++){
 					if (codim == 1){
@@ -85,8 +83,7 @@ int main(int argc, char *argv[]) {
 						nfaces = global2D.nnodes;
 					}
 					for (iface=0; iface<nfaces; iface++){
-//						pablo4.findNeighbours(i,iface,codim,neigh_t,isghost_t);
-						pablo4.findNeighbours(oct,iface,codim,neigh_t,isghost_t);
+						pablo4.findNeighbours(i,iface,codim,neigh_t,isghost_t);
 						neigh.insert(neigh.end(), neigh_t.begin(), neigh_t.end());
 						isghost.insert(isghost.end(), isghost_t.begin(), isghost_t.end());
 					}
