@@ -1629,6 +1629,7 @@ private:
 
 	// =================================================================================== //
 
+	// TODO Make it fast....too slow....
 	void findNeighbours(Class_Octant<2>* oct,					// Finds neighbours of octant through iface in vector octants.
 								uint8_t iface,					// Returns a vector (empty if iface is a bound face) with the index of neighbours
 								u32vector & neighbours,			// in their structure (octants or ghosts) and sets isghost[i] = true if the
