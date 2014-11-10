@@ -1334,6 +1334,7 @@ private:
 		Class_Octant<2>* oct = &octants[idx];
 		uint32_t size = oct->getSize();
 
+
 		// TODO Create a global matrix
 		//Alternative to switch case
 		int8_t cx = int8_t((iface<2)*(int8_t(2*iface-1)));
@@ -1512,7 +1513,7 @@ private:
 							Mortontry = ghosts[idxtry].computeMorton();
 							int32_t Dh;
 							int32_t eqcoord;
-							while(Mortontry < Mortonlast & idxtry < size_ghosts){
+							while(Mortontry < Mortonlast && idxtry < size_ghosts){
 								Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
 								Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
 								if ((abs(Dh) == ((1-(iface%2))*ghosts[idxtry].getSize() + (iface%2)*size))){
@@ -1629,8 +1630,7 @@ private:
 
 	// =================================================================================== //
 
-	// TODO Make it fast....too slow....
-	void findNeighbours(Class_Octant<2>* oct,					// Finds neighbours of octant through iface in vector octants.
+	void findNeighbours(Class_Octant<2> *oct,					// Finds neighbours of octant through iface in vector octants.
 								uint8_t iface,					// Returns a vector (empty if iface is a bound face) with the index of neighbours
 								u32vector & neighbours,			// in their structure (octants or ghosts) and sets isghost[i] = true if the
 								vector<bool> & isghost){		// i-th neighbour is ghost in the local tree
@@ -1640,12 +1640,12 @@ private:
 		uint32_t idxtry;
 		//Class_Octant<2>* oct = &octants[idx];
 		uint32_t size = oct->getSize();
-		//Find octant in octants
-		OctantsType::iterator itoct = find(octants.begin(), octants.end(), (*oct));
-		if (itoct == octants.end()){
-			return;
-		}
-		uint32_t idx = distance(octants.begin(), itoct);
+//		//Find octant in octants
+//		OctantsType::iterator itoct = find(octants.begin(), octants.end(), (*oct));
+//		if (itoct == octants.end()){
+//			return;
+//		}
+//		uint32_t idx = distance(octants.begin(), itoct);
 
 		// TODO Create a global matrix
 		//Alternative to switch case
@@ -1673,8 +1673,11 @@ private:
 				// Search morton in octants
 				// If a even face morton is lower than morton of oct, if odd higher
 				// ---> can i search only before or after idx in octants
-				int32_t jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
-				idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
+//				int32_t jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
+//				idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
+//				Mortontry = oct->computeMorton();
+				int32_t jump = int32_t((noctants)/2+1);
+				idxtry = uint32_t(jump);
 				Mortontry = oct->computeMorton();
 				while(abs(jump) > 0){
 					Mortontry = octants[idxtry].computeMorton();
@@ -1825,7 +1828,7 @@ private:
 							Mortontry = ghosts[idxtry].computeMorton();
 							int32_t Dh;
 							int32_t eqcoord;
-							while(Mortontry < Mortonlast & idxtry < size_ghosts){
+							while(Mortontry < Mortonlast && idxtry < size_ghosts){
 								Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
 								Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
 								if ((abs(Dh) == ((1-(iface%2))*ghosts[idxtry].getSize() + (iface%2)*size))){
@@ -1858,8 +1861,10 @@ private:
 							// Search morton in octants
 							// If a even face morton is lower than morton of oct, if odd higher
 							// ---> can i search only before or after idx in octants
-							int32_t jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
-							idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
+//							int32_t jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
+//							idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
+							int32_t jump = int32_t((noctants)/2+1);
+							idxtry = uint32_t(jump);
 							while(abs(jump) > 0){
 								Mortontry = octants[idxtry].computeMorton();
 								jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
@@ -2795,12 +2800,12 @@ private:
 			return;
 		}
 
-		//Find octant in octants
-		OctantsType::iterator itoct = find(octants.begin(), octants.end(), (*oct));
-		if (itoct == octants.end()){
-			return;
-		}
-		uint32_t idx = distance(octants.begin(), itoct);
+//		//Find octant in octants
+//		OctantsType::iterator itoct = find(octants.begin(), octants.end(), (*oct));
+//		if (itoct == octants.end()){
+//			return;
+//		}
+//		uint32_t idx = distance(octants.begin(), itoct);
 
 
 		// Check if octants node is a boundary
@@ -2917,8 +2922,10 @@ private:
 				// Search morton in octants
 				// If a even face morton is lower than morton of oct, if odd higher
 				// ---> can i search only before or after idx in octants
-				int32_t jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
-				idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
+//				int32_t jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
+//				idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
+				int32_t jump = int32_t((noctants)/2+1);
+				idxtry = uint32_t(jump);
 				if (idxtry > noctants-1)
 					idxtry = noctants-1;
 				while(abs(jump) > 0){

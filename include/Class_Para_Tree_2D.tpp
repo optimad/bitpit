@@ -1052,6 +1052,7 @@ public:
 			u32vector & neighbours,
 			vector<bool> & isghost){
 
+
 		if (codim == 1){
 			octree.findNeighbours(oct, iface, neighbours, isghost);
 		}
