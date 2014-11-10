@@ -30,29 +30,6 @@ int main(int argc, char *argv[]) {
 		/**<Define vectors of data.*/
 		uint32_t nocts = pablo4.getNumOctants();
 		uint32_t nghosts = pablo4.getNumGhosts();
-
-		/**<Simple adapt() 5 times the octants with at least one node inside the circle.*/
-		for (iter=1; iter<7; iter++){
-			uint32_t nocts = pablo4.getNumOctants();
-			for (int i=0; i<nocts; i++){
-				pablo4.setBalance(i,false);
-				vector<vector<double> > nodes = pablo4.getNodes(i);
-				for (int j=0; j<global2D.nnodes; j++){
-					double x = nodes[j][0];
-					double y = nodes[j][1];
-					/**<Set refinement marker=1 (refine it one time) for octants inside a circle.*/
-					if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
-						pablo4.setMarker(i, 1);
-					}
-				}
-			}
-			/**<Adapt octree, update connectivity and write.*/
-			pablo4.adapt();
-			pablo4.updateConnectivity();
-			pablo4.write("Pablo4_iter"+to_string(iter));
-		}
-
-		nocts = pablo4.getNumOctants();
 		vector<double> oct_data(nocts, 0.0), ghost_data(nghosts, 0.0);
 
 		/**<Assign a data to the octants with at least one node inside the circle.*/
@@ -81,16 +58,15 @@ int main(int argc, char *argv[]) {
 		}
 
 		/**<Update the connectivity and write the para_tree.*/
-		iter = 6;
+		iter = 0;
 		pablo4.updateConnectivity();
 		pablo4.writeTest("Pablo4_iter"+to_string(iter), oct_data);
 
 		/**<Smoothing iterations on initial data*/
-		int start = 7;
-		for (iter=start; iter<start+1; iter++){
+		int start = 1;
+		for (iter=start; iter<start+25; iter++){
 			vector<double> oct_data_smooth(nocts, 0.0);
 			vector<uint32_t> neigh, neigh_t;
-			vector<vector<uint32_t> > puppa(nocts);
 			vector<bool> isghost, isghost_t;
 			uint8_t iface, nfaces;
 			int codim;
@@ -112,7 +88,6 @@ int main(int argc, char *argv[]) {
 						isghost.insert(isghost.end(), isghost_t.begin(), isghost_t.end());
 					}
 				}
-				puppa[i] = neigh;
 
 				/**<Smoothing data with the average over the one ring neighbours of octants*/
 				oct_data_smooth[i] = oct_data[i]/(neigh.size()+1);
@@ -137,5 +112,3 @@ int main(int argc, char *argv[]) {
 	MPI::Finalize();
 
 }
-
-
