@@ -115,11 +115,3 @@ add_executable(test116 ${test116_src})
 
 target_link_libraries(test116 mpi)
 TARGET_LINK_LIBRARIES(test116 PABLO)
-
-#Build testAle.cpp
-SET(testAle_src testAle.cpp)
-
-add_executable(testAle ${testAle_src})
-
-target_link_libraries(testAle mpi)
-TARGET_LINK_LIBRARIES(testAle PABLO)
