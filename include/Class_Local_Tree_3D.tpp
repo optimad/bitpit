@@ -242,6 +242,8 @@ private:
 		nocts   = octants.size();
 		size_ghosts = ghosts.size();
 
+		first_child_index.clear();
+
 
 		// Init first and last desc (even if already calculated)
 		setFirstDesc();
@@ -278,7 +280,7 @@ private:
 				else{
 					if (idx < (nocts>global3D.nchildren)*(nocts-global3D.nchildren)){
 						octants[idx].setMarker(0);
-						octants[idx].info[11] = true;
+						octants[idx].info[15] = true;
 					}
 				}
 			}
@@ -287,11 +289,13 @@ private:
 			//			}
 		}
 		//TODO Da mettere dentro il primo ciclo per renderlo meno costoso
+		uint32_t nblock = nocts;
 		if (nidx!=0){
-			uint32_t nblock = nocts - nidx*nchm1 - nstart;
+			nblock = nocts - nidx*nchm1;
 			nidx = 0;
 			for (idx=0; idx<nblock; idx++){
-				if (idx+offset == first_child_index[nidx]){
+				//TODO CORREGGERE OVUNQUE CON LA TAGLIA DI FIRST_CHILD_INDEX
+				if (idx+offset == first_child_index[nidx] && nidx < first_child_index.size()){
 					markerfather = -MAX_LEVEL_3D;
 					father = octants[idx+offset].buildFather();
 					for(idx2=0; idx2<global3D.nchildren; idx2++){
@@ -316,7 +320,9 @@ private:
 				}
 			}
 		}
-		octants.resize(nocts-offset);
+		// TODO CORREGGERE OVUNQUE CON NBLOCK
+//		octants.resize(nocts-offset);
+		octants.resize(nblock);
 		octants.shrink_to_fit();
 		nocts = octants.size();
 
@@ -387,6 +393,7 @@ private:
 			}
 
 		}
+
 
 		// Set final first and last desc
 		if(nocts>0){
@@ -804,7 +811,7 @@ private:
 				else{
 					if (idx < (nocts>global3D.nchildren)*(nocts-global3D.nchildren)){
 						octants[idx].setMarker(0);
-						octants[idx].info[11] = true;
+						octants[idx].info[15] = true;
 					}
 				}
 			}
@@ -2128,7 +2135,7 @@ private:
 									{
 										if((ghosts[neigh[i]].getLevel() + ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
 											octants[idx].setMarker(ghosts[neigh[i]].getLevel()+ghosts[neigh[i]].getMarker()-1-octants[idx].getLevel());
-											octants[idx].info[11] = true;
+											octants[idx].info[15] = true;
 											modified.push_back(idx);
 											Bdone = true;
 										}
@@ -3783,7 +3790,7 @@ private:
 				for (j = 0; j < global3D.nnodes; j++){
 					morton = mortonEncode_magicbits(octnodes[j][0], octnodes[j][1], octnodes[j][2]);
 					if (mapnodes[morton].size()==0){
-						mapnodes[morton].reserve(12);
+						mapnodes[morton].reserve(16);
 						for (k = 0; k < 3; k++){
 							mapnodes[morton].push_back(octnodes[j][k]);
 						}
