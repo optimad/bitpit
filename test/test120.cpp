@@ -29,8 +29,8 @@ int main(int argc, char *argv[]) {
 			pablo120.adaptGlobalRefine();
 		}
 
-//		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
-//		pablo120.loadBalance();
+		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
+		pablo120.loadBalance();
 
 		/**<Define a center point and a radius.*/
 		double xc, yc, zc;
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
 
 
 		/**<Adapt itend times with data injection on new octants.*/
-		int itstart = 1;
+		int itstart = 380;
 		int itend = 460;
 
 		for (iter=itstart; iter<itend; iter++){
@@ -89,6 +89,8 @@ int main(int argc, char *argv[]) {
 				}
 			}
 
+			pablo120.commMarker();
+
 			/**<Adapt the octree and map the data in the new octants.*/
 //			vector<uint32_t> mapper;
 //			pablo120.adapt(mapper);
@@ -100,7 +102,6 @@ int main(int argc, char *argv[]) {
 			nocts = pablo120.getNumOctants();
 			nghosts = pablo120.getNumGhosts();
 			vector<double> oct_data_new(nocts, 0.0);
-			vector<double> ghost_data_new(nghosts, 0.0);
 
 			/**<Assign to the new octant the average of the old children if it is new after a coarsening;
 			 * while assign to the new octant the data of the old father if it is new after a refinement.

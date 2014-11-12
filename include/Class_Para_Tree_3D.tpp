@@ -3916,7 +3916,7 @@ private:
 	//=================================================================================//
 	////TODO Update after coarse with intersections
 	//=================================================================================//
-
+public:
 	void commMarker(){									// communicates marker of ghosts
 		// borderPerProcs has to be built
 
@@ -4014,7 +4014,7 @@ private:
 	};
 
 	//=================================================================================//
-
+private:
 	void balance21(bool const first){
 		bool globalDone = true, localDone = false;
 		int  iteration  = 0;
