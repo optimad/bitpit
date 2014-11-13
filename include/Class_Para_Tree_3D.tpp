@@ -1337,6 +1337,7 @@ public:
 			}
 		}
 		trans.mapNodesIntersection(nodes_, nodes);
+		delete [] nodes_all;
 		delete [] nodes_;
 		nodes_ = NULL;
 		return nodes;
@@ -1396,6 +1397,7 @@ private:
 			}
 		}
 		trans.mapNodesIntersection(nodes_, nodes);
+		delete [] nodes_all;
 		delete [] nodes_;
 		nodes_ = NULL;
 	}
