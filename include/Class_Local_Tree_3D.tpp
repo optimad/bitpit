@@ -330,6 +330,9 @@ private:
 		if (ghosts.size() && nocts > 0){
 			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
 				father = ghosts[idx2_gh].buildFather();
+				for (int iii=0; iii<16; iii++){
+					father.info[iii] = false;
+				}
 				markerfather = ghosts[idx2_gh].getMarker()+1;//-MAX_LEVEL_3D;
 				nbro = 0;
 				idx = idx2_gh;
@@ -345,6 +348,14 @@ private:
 						break;
 					}
 					marker = ghosts[idx].getMarker();
+
+
+					for (int iii=0; iii<16; iii++){
+						father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
+					}
+
+
+
 				}
 				nend = 0;
 				idx = nocts-1;
@@ -373,9 +384,9 @@ private:
 				}
 			}
 			if (nend != 0){
-				for (int iii=0; iii<16; iii++){
-					father.info[iii] = false;
-				}
+//				for (int iii=0; iii<16; iii++){
+//					father.info[iii] = false;
+//				}
 				for (idx=0; idx < nend; idx++){
 					for (int iii=0; iii<16; iii++){
 						father.info[iii] = father.info[iii] || octants[nocts-idx-1].info[iii];

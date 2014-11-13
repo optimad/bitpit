@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
 
 
 		/**<Adapt itend times with data injection on new octants.*/
-		int itstart = 380;
+		int itstart = 1;
 		int itend = 460;
 
 		for (iter=itstart; iter<itend; iter++){
