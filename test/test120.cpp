@@ -102,6 +102,7 @@ int main(int argc, char *argv[]) {
 
 			oct_data.resize(nocts);
 			oct_data = oct_data_new;
+			oct_data_new.clear();
 
 			/**<Update the connectivity and write the para_tree.*/
 			pablo120.updateConnectivity();
