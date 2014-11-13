@@ -1337,6 +1337,7 @@ public:
 			}
 		}
 		trans.mapNodesIntersection(nodes_, nodes);
+		delete [] nodes_all;
 		delete [] nodes_;
 		nodes_ = NULL;
 		return nodes;
@@ -1396,6 +1397,7 @@ private:
 			}
 		}
 		trans.mapNodesIntersection(nodes_, nodes);
+		delete [] nodes_all;
 		delete [] nodes_;
 		nodes_ = NULL;
 	}
@@ -3860,7 +3862,7 @@ private:
 			//update max_depth
 			error_flag = MPI_Allreduce(&octree.local_max_depth,&max_depth,1,MPI_UINT8_T,MPI_MAX,MPI_COMM_WORLD);
 			//update global_num_octants
-			uint64_t local_num_octants = octree.getNumOctants();
+			uint64_t local_num_octants = (uint64_t) octree.getNumOctants();
 			error_flag = MPI_Allreduce(&local_num_octants,&global_num_octants,1,MPI_UINT64_T,MPI_SUM,MPI_COMM_WORLD);
 			//update partition_range_globalidx
 			uint64_t rbuff [nproc];
@@ -3916,7 +3918,7 @@ private:
 	//=================================================================================//
 	////TODO Update after coarse with intersections
 	//=================================================================================//
-
+public:
 	void commMarker(){									// communicates marker of ghosts
 		// borderPerProcs has to be built
 
@@ -4014,7 +4016,7 @@ private:
 	};
 
 	//=================================================================================//
-
+private:
 	void balance21(bool const first){
 		bool globalDone = true, localDone = false;
 		int  iteration  = 0;

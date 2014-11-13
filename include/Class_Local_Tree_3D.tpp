@@ -242,6 +242,8 @@ private:
 		nocts   = octants.size();
 		size_ghosts = ghosts.size();
 
+		first_child_index.clear();
+
 
 		// Init first and last desc (even if already calculated)
 		setFirstDesc();
@@ -278,7 +280,7 @@ private:
 				else{
 					if (idx < (nocts>global3D.nchildren)*(nocts-global3D.nchildren)){
 						octants[idx].setMarker(0);
-						octants[idx].info[11] = true;
+						octants[idx].info[15] = true;
 					}
 				}
 			}
@@ -287,11 +289,12 @@ private:
 			//			}
 		}
 		//TODO Da mettere dentro il primo ciclo per renderlo meno costoso
+		uint32_t nblock = nocts;
 		if (nidx!=0){
-			uint32_t nblock = nocts - nidx*nchm1 - nstart;
+			nblock = nocts - nidx*nchm1;
 			nidx = 0;
 			for (idx=0; idx<nblock; idx++){
-				if (idx+offset == first_child_index[nidx]){
+				if (idx+offset == first_child_index[nidx] && nidx < first_child_index.size()){
 					markerfather = -MAX_LEVEL_3D;
 					father = octants[idx+offset].buildFather();
 					for(idx2=0; idx2<global3D.nchildren; idx2++){
@@ -316,7 +319,8 @@ private:
 				}
 			}
 		}
-		octants.resize(nocts-offset);
+//		octants.resize(nocts-offset);
+		octants.resize(nblock);
 		octants.shrink_to_fit();
 		nocts = octants.size();
 
@@ -324,13 +328,15 @@ private:
 		if (ghosts.size() && nocts > 0){
 			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
 				father = ghosts[idx2_gh].buildFather();
+				for (int iii=0; iii<16; iii++){
+					father.info[iii] = false;
+				}
 				markerfather = ghosts[idx2_gh].getMarker()+1;//-MAX_LEVEL_3D;
 				nbro = 0;
 				idx = idx2_gh;
 				marker = ghosts[idx].getMarker();
 				while(marker < 0 && ghosts[idx].buildFather() == father){
 					nbro++;
-					//TODO CAMBIATO IDX DA CAMBIARE ANCHE NELLE ALTRE COARSE!!!
 					if (markerfather < ghosts[idx].getMarker()+1){
 						markerfather = ghosts[idx].getMarker()+1;
 					}
@@ -339,6 +345,9 @@ private:
 						break;
 					}
 					marker = ghosts[idx].getMarker();
+					for (int iii=0; iii<16; iii++){
+						father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
+					}
 				}
 				nend = 0;
 				idx = nocts-1;
@@ -367,9 +376,9 @@ private:
 				}
 			}
 			if (nend != 0){
-				for (int iii=0; iii<16; iii++){
-					father.info[iii] = false;
-				}
+//				for (int iii=0; iii<16; iii++){
+//					father.info[iii] = false;
+//				}
 				for (idx=0; idx < nend; idx++){
 					for (int iii=0; iii<16; iii++){
 						father.info[iii] = father.info[iii] || octants[nocts-idx-1].info[iii];
@@ -387,6 +396,7 @@ private:
 			}
 
 		}
+
 
 		// Set final first and last desc
 		if(nocts>0){
@@ -546,12 +556,13 @@ private:
 			//			}
 		}
 		//TODO Da mettere dentro il primo ciclo per renderlo meno costoso
+		uint32_t nblock = nocts;
 		if (nidx!=0){
-			uint32_t nblock = nocts - nidx*nchm1 - nstart;
+			nblock = nocts - nidx*nchm1;
 			nidx = 0;
 			//for (idx=0; idx<nblock; idx++){
-			for (idx=0; idx<nocts-offset; idx++){
-				if (idx+offset == first_child_index[nidx]){
+			for (idx=0; idx<nblock; idx++){
+				if (idx+offset == first_child_index[nidx] && nidx < first_child_index.size()){
 					markerfather = -MAX_LEVEL_3D;
 					father = octants[idx+offset].buildFather();
 					for (int iii=0; iii<16; iii++){
@@ -581,7 +592,7 @@ private:
 				}
 			}
 		}
-		octants.resize(nocts-offset);
+		octants.resize(nblock);
 		octants.shrink_to_fit();
 		nocts = octants.size();
 		mapidx.resize(nocts);
@@ -592,13 +603,15 @@ private:
 		if (ghosts.size() && nocts > 0){
 			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
 				father = ghosts[idx2_gh].buildFather();
+				for (int iii=0; iii<16; iii++){
+					father.info[iii] = false;
+				}
 				markerfather = ghosts[idx2_gh].getMarker()+1;//-MAX_LEVEL_3D;
 				nbro = 0;
 				idx = idx2_gh;
 				marker = ghosts[idx].getMarker();
 				while(marker < 0 && ghosts[idx].buildFather() == father){
 					nbro++;
-					//TODO CAMBIATO IDX DA CAMBIARE ANCHE NELLE ALTRE COARSE!!!
 					if (markerfather < ghosts[idx].getMarker()+1){
 						markerfather = ghosts[idx].getMarker()+1;
 					}
@@ -607,6 +620,9 @@ private:
 						break;
 					}
 					marker = ghosts[idx].getMarker();
+					for (int iii=0; iii<16; iii++){
+						father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
+					}
 				}
 				nend = 0;
 				idx = nocts-1;
@@ -635,9 +651,6 @@ private:
 				}
 			}
 			if (nend != 0){
-				for (int iii=0; iii<16; iii++){
-					father.info[iii] = false;
-				}
 				for (idx=0; idx < nend; idx++){
 					for (int iii=0; iii<16; iii++){
 						father.info[iii] = father.info[iii] || octants[nocts-idx-1].info[iii];
@@ -804,7 +817,7 @@ private:
 				else{
 					if (idx < (nocts>global3D.nchildren)*(nocts-global3D.nchildren)){
 						octants[idx].setMarker(0);
-						octants[idx].info[11] = true;
+						octants[idx].info[15] = true;
 					}
 				}
 			}
@@ -813,11 +826,12 @@ private:
 			//			}
 		}
 		//TODO Da mettere dentro il primo ciclo per renderlo meno costoso
+		uint32_t nblock = nocts;
 		if (nidx!=0){
-			uint32_t nblock = nocts - nidx*nchm1 - nstart;
+			nblock = nocts - nidx*nchm1;
 			nidx = 0;
 			for (idx=0; idx<nblock; idx++){
-				if (idx+offset == first_child_index[nidx]){
+				if (idx+offset == first_child_index[nidx]&& nidx < first_child_index.size()){
 					markerfather = -MAX_LEVEL_3D;
 					father = octants[idx+offset].buildFather();
 					for(idx2=0; idx2<global3D.nchildren; idx2++){
@@ -842,7 +856,7 @@ private:
 				}
 			}
 		}
-		octants.resize(nocts-offset);
+		octants.resize(nblock);
 		octants.shrink_to_fit();
 		nocts = octants.size();
 
@@ -851,6 +865,9 @@ private:
 			ghosts[idx2_gh].setMarker(-1);
 			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
 				father = ghosts[idx2_gh].buildFather();
+				for (int iii=0; iii<16; iii++){
+					father.info[iii] = false;
+				}
 				markerfather = ghosts[idx2_gh].getMarker()+1;//-MAX_LEVEL_3D;
 				nbro = 0;
 				idx = idx2_gh;
@@ -858,7 +875,6 @@ private:
 				marker = ghosts[idx].getMarker();
 				while(marker < 0 && ghosts[idx].buildFather() == father){
 					nbro++;
-					//TODO CAMBIATO IDX DA CAMBIARE ANCHE NELLE ALTRE COARSE!!!
 					if (markerfather < ghosts[idx].getMarker()+1){
 						markerfather = ghosts[idx].getMarker()+1;
 					}
@@ -868,6 +884,9 @@ private:
 					}
 					ghosts[idx].setMarker(-1);
 					marker = ghosts[idx].getMarker();
+					for (int iii=0; iii<16; iii++){
+						father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
+					}
 				}
 				nend = 0;
 				idx = nocts-1;
@@ -898,9 +917,6 @@ private:
 				}
 			}
 			if (nend != 0){
-				for (int iii=0; iii<16; iii++){
-					father.info[iii] = false;
-				}
 				for (idx=0; idx < nend; idx++){
 					for (int iii=0; iii<16; iii++){
 						father.info[iii] = father.info[iii] || octants[nocts-idx-1].info[iii];
@@ -2128,7 +2144,7 @@ private:
 									{
 										if((ghosts[neigh[i]].getLevel() + ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
 											octants[idx].setMarker(ghosts[neigh[i]].getLevel()+ghosts[neigh[i]].getMarker()-1-octants[idx].getLevel());
-											octants[idx].info[11] = true;
+											octants[idx].info[15] = true;
 											modified.push_back(idx);
 											Bdone = true;
 										}
@@ -3783,7 +3799,7 @@ private:
 				for (j = 0; j < global3D.nnodes; j++){
 					morton = mortonEncode_magicbits(octnodes[j][0], octnodes[j][1], octnodes[j][2]);
 					if (mapnodes[morton].size()==0){
-						mapnodes[morton].reserve(12);
+						mapnodes[morton].reserve(16);
 						for (k = 0; k < 3; k++){
 							mapnodes[morton].push_back(octnodes[j][k]);
 						}
