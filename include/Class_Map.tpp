@@ -90,6 +90,21 @@ void Class_Map<dim>::mapCenter(double* & center,
 };
 
 template <int dim>
+void Class_Map<dim>::mapCenter(vector<double> & center,
+		vector<double> & mapcenter){
+	vector<double> orig;
+	orig.push_back(X0);
+	orig.push_back(Y0);
+	orig.push_back(Z0);
+	orig.shrink_to_fit();
+	mapcenter.resize(3);
+	for (int i=0; i<dim; i++){
+		mapcenter[i] = orig[i] + L/double(globals.max_length) * center[i];
+	}
+	mapcenter.shrink_to_fit();
+};
+
+template <int dim>
 void Class_Map<dim>::mapNodes(uint32_t (*nodes)[3],
 		vector<vector<double> > & mapnodes){
 	vector<double> orig;
@@ -110,7 +125,47 @@ void Class_Map<dim>::mapNodes(uint32_t (*nodes)[3],
 };
 
 template <int dim>
+void Class_Map<dim>::mapNodes(vector<vector<uint32_t> > nodes,
+		vector<vector<double> > & mapnodes){
+	vector<double> orig;
+	orig.push_back(X0);
+	orig.push_back(Y0);
+	orig.push_back(Z0);
+	orig.shrink_to_fit();
+	mapnodes.resize(globals.nnodes);
+	for (int i=0; i<globals.nnodes; i++){
+		mapnodes[i].resize(3);
+		for (int j=0; j<3; j++){
+			mapnodes[i][j] = orig[j] + L/double(globals.max_length) * double(nodes[i][j]);
+		}
+		mapnodes[i].shrink_to_fit();
+	}
+	mapnodes.shrink_to_fit();
+
+};
+
+template <int dim>
 void Class_Map<dim>::mapNodesIntersection(uint32_t (*nodes)[3],
+		vector<vector<double> > & mapnodes){
+	vector<double> orig;
+	orig.push_back(X0);
+	orig.push_back(Y0);
+	orig.push_back(Z0);
+	orig.shrink_to_fit();
+	mapnodes.resize(globals.nnodesperface);
+	for (int i=0; i<globals.nnodesperface; i++){
+		mapnodes[i].resize(3);
+		for (int j=0; j<3; j++){
+			mapnodes[i][j] = orig[j] + L/double(globals.max_length) * double(nodes[i][j]);
+		}
+		mapnodes[i].shrink_to_fit();
+	}
+	mapnodes.shrink_to_fit();
+
+};
+
+template <int dim>
+void Class_Map<dim>::mapNodesIntersection(vector<vector<uint32_t> > nodes,
 		vector<vector<double> > & mapnodes){
 	vector<double> orig;
 	orig.push_back(X0);

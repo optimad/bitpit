@@ -29,8 +29,8 @@ int main(int argc, char *argv[]) {
 			pablo120.adaptGlobalRefine();
 		}
 
-		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
-		pablo120.loadBalance();
+//		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
+//		pablo120.loadBalance();
 
 		/**<Define a center point and a radius.*/
 		double xc, yc, zc;
@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
 		vector<double> oct_data(nocts, 0.0), ghost_data(nghosts, 0.0);
 
 		/**<Adapt itend times with data injection on new octants.*/
-		int itstart = 1;
+		int itstart = 200;
 		int itend = 460;
 
 		for (iter=itstart; iter<itend; iter++){
@@ -87,8 +87,8 @@ int main(int argc, char *argv[]) {
 			/**<Adapt the octree.*/
 			bool adapt = pablo120.adapt();
 
-			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
-			pablo120.loadBalance();
+//			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
+//			pablo120.loadBalance();
 
 			nocts = pablo120.getNumOctants();
 			nghosts = pablo120.getNumGhosts();

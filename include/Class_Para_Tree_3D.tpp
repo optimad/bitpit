@@ -402,24 +402,38 @@ public:
 	 */
 	void getCenter(Class_Octant<3>* oct, 			// Get a vector of DIM with the coordinates of the center of octant
 			dvector & center){
-		double* center_ = oct->getCenter();
+//		double* center_ = oct->getCenter();
+//		trans.mapCenter(center_, center);
+//		delete [] center_;
+//		center_ = NULL;
+		dvector center_ = oct->getCenter();
 		trans.mapCenter(center_, center);
-		delete [] center_;
-		center_ = NULL;
 	};
 
-	/*! Get the coordinates of the center of an octant.
-	 * \param[in] oct Pointer to target octant.
-	 * \return center Coordinates of the center of octant.
-	 */
-	dvector getCenter(Class_Octant<3>* oct){
-		vector<double> center;
-		double* center_ = oct->getCenter();
-		trans.mapCenter(center_, center);
-		delete [] center_;
-		center_ = NULL;
-		return center;
-	};
+//	/*! Get the coordinates of the center of an octant.
+//	 * \param[in] oct Pointer to target octant.
+//	 * \return center Coordinates of the center of octant.
+//	 */
+//	dvector getCenter(Class_Octant<3>* oct){
+//		vector<double> center;
+//		double* center_ = oct->getCenter();
+//		trans.mapCenter(center_, center);
+//		delete [] center_;
+//		center_ = NULL;
+//		return center;
+//	};
+
+//	/*! Get the coordinates of the nodes of an octant.
+//	 * \param[in] oct Pointer to target octant.
+//	 * \param[out] nodes Coordinates of the nodes of octant.
+//	 */
+//	void getNodes(Class_Octant<3>* oct, 			// Get a vector of vector (size [nnodes][DIM]) with the nodes of octant
+//			dvector2D & nodes){
+//		uint32_t (*nodes_)[3] = oct->getNodes();
+//		trans.mapNodes(nodes_, nodes);
+//		delete [] nodes_;
+//		nodes_ = NULL;
+//	};
 
 	/*! Get the coordinates of the nodes of an octant.
 	 * \param[in] oct Pointer to target octant.
@@ -427,11 +441,11 @@ public:
 	 */
 	void getNodes(Class_Octant<3>* oct, 			// Get a vector of vector (size [nnodes][DIM]) with the nodes of octant
 			dvector2D & nodes){
-		uint32_t (*nodes_)[3] = oct->getNodes();
+		u32vector2D nodes_;
+		oct->getNodes(nodes_);
 		trans.mapNodes(nodes_, nodes);
-		delete [] nodes_;
-		nodes_ = NULL;
 	};
+
 
 	/*! Get the coordinates of the nodes of an octant.
 	 * \param[in] oct Pointer to target octant.
@@ -439,10 +453,8 @@ public:
 	 */
 	dvector2D getNodes(Class_Octant<3>* oct){
 		dvector2D nodes;
-		uint32_t (*nodes_)[3] = oct->getNodes();
-		trans.mapNodes(nodes_, nodes);
-		delete [] nodes_;
-		nodes_ = NULL;
+		u32vector2D nodes_;
+		oct->getNodes(nodes_);
 		return nodes;
 	};
 
@@ -659,17 +671,40 @@ private:
 		return trans.mapVolume(oct.getVolume());
 	}
 
+//	/*! Get the coordinates of the center of an octant.
+//	 * \param[in] oct Target octant.
+//	 * \param[out] center Coordinates of the center of octant.
+//	 */
+//	void getCenter(Class_Octant<3> oct,
+//			vector<double>& center) {
+//		double* center_ = oct.getCenter();
+//		trans.mapCenter(center_, center);
+//		delete [] center_;
+//		center_ = NULL;
+//	}
+
 	/*! Get the coordinates of the center of an octant.
 	 * \param[in] oct Target octant.
 	 * \param[out] center Coordinates of the center of octant.
 	 */
 	void getCenter(Class_Octant<3> oct,
 			vector<double>& center) {
-		double* center_ = oct.getCenter();
+		dvector center_ = oct.getCenter();
 		trans.mapCenter(center_, center);
-		delete [] center_;
-		center_ = NULL;
 	}
+
+//	/*! Get the coordinates of the center of an octant.
+//	 * \param[in] oct Target octant.
+//	 * \return center Coordinates of the center of octant.
+//	 */
+//	vector<double> getCenter(Class_Octant<3> oct) {
+//		vector<double> center;
+//		double* center_ = oct.getCenter();
+//		trans.mapCenter(center_, center);
+//		delete [] center_;
+//		center_ = NULL;
+//		return center;
+//	}
 
 	/*! Get the coordinates of the center of an octant.
 	 * \param[in] oct Target octant.
@@ -677,12 +712,22 @@ private:
 	 */
 	vector<double> getCenter(Class_Octant<3> oct) {
 		vector<double> center;
-		double* center_ = oct.getCenter();
+		dvector center_ = oct.getCenter();
 		trans.mapCenter(center_, center);
-		delete [] center_;
-		center_ = NULL;
 		return center;
 	}
+
+//	/*! Get the coordinates of the nodes of an octant.
+//	 * \param[in] oct Target octant.
+//	 * \param[out] nodes Coordinates of the nodes of octant.
+//	 */
+//	void getNodes(Class_Octant<3> oct,
+//			dvector2D & nodes) {
+//		uint32_t (*nodes_)[3] = oct.getNodes();
+//		trans.mapNodes(nodes_, nodes);
+//		delete [] nodes_;
+//		nodes_ = NULL;
+//	}
 
 	/*! Get the coordinates of the nodes of an octant.
 	 * \param[in] oct Target octant.
@@ -690,11 +735,23 @@ private:
 	 */
 	void getNodes(Class_Octant<3> oct,
 			dvector2D & nodes) {
-		uint32_t (*nodes_)[3] = oct.getNodes();
+		u32vector2D nodes_;
+		oct.getNodes(nodes_);
 		trans.mapNodes(nodes_, nodes);
-		delete [] nodes_;
-		nodes_ = NULL;
 	}
+
+//	/*! Get the coordinates of the nodes of an octant.
+//	 * \param[in] oct Target octant.
+//	 * \return nodes Coordinates of the nodes of octant.
+//	 */
+//	dvector2D getNodes(Class_Octant<3> oct){
+//		dvector2D nodes;
+//		uint32_t (*nodes_)[3] = oct.getNodes();
+//		trans.mapNodes(nodes_, nodes);
+//		delete [] nodes_;
+//		nodes_ = NULL;
+//		return nodes;
+//	}
 
 	/*! Get the coordinates of the nodes of an octant.
 	 * \param[in] oct Target octant.
@@ -702,10 +759,9 @@ private:
 	 */
 	dvector2D getNodes(Class_Octant<3> oct){
 		dvector2D nodes;
-		uint32_t (*nodes_)[3] = oct.getNodes();
+		u32vector2D nodes_;
+		oct.getNodes(nodes_);
 		trans.mapNodes(nodes_, nodes);
-		delete [] nodes_;
-		nodes_ = NULL;
 		return nodes;
 	}
 
@@ -872,16 +928,39 @@ public:
 		return trans.mapVolume(octree.octants[idx].getVolume());
 	}
 
+//	/*! Get the coordinates of the center of an octant.
+//	 * \param[in] idx Local index of target octant.
+//	 * \param[out] center Coordinates of the center of octant.
+//	 */
+//	void getCenter(uint32_t idx,
+//			vector<double>& center) {
+//		double* center_ = octree.octants[idx].getCenter();
+//		trans.mapCenter(center_, center);
+//		delete [] center_;
+//		center_ = NULL;
+//	}
+//
+//	/*! Get the coordinates of the center of an octant.
+//	 * \param[in] idx Local index of target octant.
+//	 * \return center Coordinates of the center of octant.
+//	 */
+//	vector<double> getCenter(uint32_t idx) {
+//		vector<double> center;
+//		double* center_ = octree.octants[idx].getCenter();
+//		trans.mapCenter(center_, center);
+//		delete [] center_;
+//		center_ = NULL;
+//		return center;
+//	}
+
 	/*! Get the coordinates of the center of an octant.
 	 * \param[in] idx Local index of target octant.
 	 * \param[out] center Coordinates of the center of octant.
 	 */
 	void getCenter(uint32_t idx,
 			vector<double>& center) {
-		double* center_ = octree.octants[idx].getCenter();
+		dvector center_ = octree.octants[idx].getCenter();
 		trans.mapCenter(center_, center);
-		delete [] center_;
-		center_ = NULL;
 	}
 
 	/*! Get the coordinates of the center of an octant.
@@ -890,12 +969,35 @@ public:
 	 */
 	vector<double> getCenter(uint32_t idx) {
 		vector<double> center;
-		double* center_ = octree.octants[idx].getCenter();
+		dvector center_ = octree.octants[idx].getCenter();
 		trans.mapCenter(center_, center);
-		delete [] center_;
-		center_ = NULL;
 		return center;
 	}
+
+//	/*! Get the coordinates of the nodes of an octant.
+//	 * \param[in] idx Local index of target octant.
+//	 * \param[out] nodes Coordinates of the nodes of octant.
+//	 */
+//	void getNodes(uint32_t idx,
+//			dvector2D & nodes) {
+//		uint32_t (*nodes_)[3] = octree.octants[idx].getNodes();
+//		trans.mapNodes(nodes_, nodes);
+//		delete [] nodes_;
+//		nodes_ = NULL;
+//	}
+//
+//	/*! Get the coordinates of the nodes of an octant.
+//	 * \param[in] idx Local index of target octant.
+//	 * \return nodes Coordinates of the nodes of octant.
+//	 */
+//	dvector2D getNodes(uint32_t idx){
+//		dvector2D nodes;
+//		uint32_t (*nodes_)[3] = octree.octants[idx].getNodes();
+//		trans.mapNodes(nodes_, nodes);
+//		delete [] nodes_;
+//		nodes_ = NULL;
+//		return nodes;
+//	}
 
 	/*! Get the coordinates of the nodes of an octant.
 	 * \param[in] idx Local index of target octant.
@@ -903,10 +1005,9 @@ public:
 	 */
 	void getNodes(uint32_t idx,
 			dvector2D & nodes) {
-		uint32_t (*nodes_)[3] = octree.octants[idx].getNodes();
+		u32vector2D nodes_;
+		octree.octants[idx].getNodes(nodes_);
 		trans.mapNodes(nodes_, nodes);
-		delete [] nodes_;
-		nodes_ = NULL;
 	}
 
 	/*! Get the coordinates of the nodes of an octant.
@@ -915,10 +1016,9 @@ public:
 	 */
 	dvector2D getNodes(uint32_t idx){
 		dvector2D nodes;
-		uint32_t (*nodes_)[3] = octree.octants[idx].getNodes();
+		u32vector2D nodes_;
+		octree.octants[idx].getNodes(nodes_);
 		trans.mapNodes(nodes_, nodes);
-		delete [] nodes_;
-		nodes_ = NULL;
 		return nodes;
 	}
 
@@ -1311,13 +1411,14 @@ public:
 	vector<double> getCenter(Class_Intersection<3>* inter){
 		vector<double> center;
 		Class_Octant<3> oct = octree.extractOctant(inter->owners[inter->finer]);
-		double* center_ = oct.getCenter();
+		//double* center_ = oct.getCenter();
+		dvector center_ = oct.getCenter();
 		int sign = ( int(2*((inter->iface)%2)) - 1);
 		double deplace = double (sign * int(oct.getSize())) / 2;
 		center_[inter->iface/2] = uint32_t(int(center_[inter->iface/2]) + deplace);
 		trans.mapCenter(center_, center);
-		delete [] center_;
-		center_ = NULL;
+//		delete [] center_;
+//		center_ = NULL;
 		return center;
 	}
 
@@ -1329,17 +1430,20 @@ public:
 		dvector2D nodes;
 		Class_Octant<3> oct = octree.extractOctant(inter->owners[inter->finer]);
 		uint8_t iface = inter->iface;
-		uint32_t (*nodes_all)[3] = oct.getNodes();
-		uint32_t (*nodes_)[3] = new uint32_t[global3D.nnodesperface][3];
+		//uint32_t (*nodes_all)[3] = oct.getNodes();
+		u32vector2D nodes_all;
+		oct.getNodes(nodes_all);
+		//uint32_t (*nodes_)[3] = new uint32_t[global3D.nnodesperface][3];
+		u32vector2D nodes_(global3D.nnodesperface, u32vector(3));
 		for (int i=0; i<global3D.nnodesperface; i++){
 			for (int j=0; j<3; j++){
 				nodes_[i][j] = nodes_all[global3D.facenode[iface][i]][j];
 			}
 		}
 		trans.mapNodesIntersection(nodes_, nodes);
-		delete [] nodes_all;
-		delete [] nodes_;
-		nodes_ = NULL;
+//		delete [] nodes_all;
+//		delete [] nodes_;
+//		nodes_ = NULL;
 		return nodes;
 	}
 
@@ -1376,30 +1480,34 @@ private:
 	void getCenter(Class_Intersection<3> inter,
 			vector<double> center){
 		Class_Octant<3> oct = octree.extractOctant(inter.owners[inter.finer]);
-		double* center_ = oct.getCenter();
+//		double* center_ = oct.getCenter();
+		dvector center_ = oct.getCenter();
 		int sign = ( int(2*((inter.iface)%2)) - 1);
 		double deplace = double (sign * int(oct.getSize())) / 2;
 		center_[inter.iface/2] = uint32_t(int(center_[inter.iface/2]) + deplace);
 		trans.mapCenter(center_, center);
-		delete [] center_;
-		center_ = NULL;
+//		delete [] center_;
+//		center_ = NULL;
 	}
 
 	void getNodes(Class_Intersection<3> inter,
 			dvector2D & nodes) {
 		Class_Octant<3> oct = octree.extractOctant(inter.owners[inter.finer]);
 		uint8_t iface = inter.iface;
-		uint32_t (*nodes_all)[3] = oct.getNodes();
-		uint32_t (*nodes_)[3] = new uint32_t[global3D.nnodesperface][3];
+//		uint32_t (*nodes_all)[3] = oct.getNodes();
+		u32vector2D nodes_all;
+		oct.getNodes(nodes_all);
+		//uint32_t (*nodes_)[3] = new uint32_t[global3D.nnodesperface][3];
+		u32vector2D nodes_(global3D.nnodesperface, u32vector(3));
 		for (int i=0; i<global3D.nnodesperface; i++){
 			for (int j=0; j<3; j++){
 				nodes_[i][j] = nodes_all[global3D.facenode[iface][i]][j];
 			}
 		}
 		trans.mapNodesIntersection(nodes_, nodes);
-		delete [] nodes_all;
-		delete [] nodes_;
-		nodes_ = NULL;
+//		delete [] nodes_all;
+//		delete [] nodes_;
+//		nodes_ = NULL;
 	}
 
 	void getNormal(Class_Intersection<3> inter,
@@ -1977,7 +2085,8 @@ private:
 			for(uint8_t i = 0; i < global3D.nfaces; ++i){
 				if(it->getBound(i) == false){
 					uint32_t virtualNeighborsSize = 0;
-					uint64_t* virtualNeighbors = it->computeVirtualMorton(i,max_depth,virtualNeighborsSize);
+//					uint64_t* virtualNeighbors = it->computeVirtualMorton(i,max_depth,virtualNeighborsSize);
+					vector<uint64_t> virtualNeighbors = it->computeVirtualMorton(i,max_depth,virtualNeighborsSize);
 					uint32_t maxDelta = virtualNeighborsSize/2;
 					for(int j = 0; j <= maxDelta; ++j){
 						int pBegin = findOwner(virtualNeighbors[j]);
@@ -1991,14 +2100,15 @@ private:
 							it->setPbound(i,false);
 						}
 					}
-					delete [] virtualNeighbors;
-					virtualNeighbors = NULL;
+//					delete [] virtualNeighbors;
+//					virtualNeighbors = NULL;
 				}
 			}
 			//Virtual Edge Neighbors
 			for(uint8_t e = 0; e < global3D.nedges; ++e){
 				uint32_t virtualEdgeNeighborSize = 0;
-				uint64_t* virtualEdgeNeighbors = it->computeEdgeVirtualMorton(e,max_depth,virtualEdgeNeighborSize);
+//				uint64_t* virtualEdgeNeighbors = it->computeEdgeVirtualMorton(e,max_depth,virtualEdgeNeighborSize);
+				vector<uint64_t> virtualEdgeNeighbors = it->computeEdgeVirtualMorton(e,max_depth,virtualEdgeNeighborSize);
 				uint32_t maxDelta = virtualEdgeNeighborSize/2;
 				if(virtualEdgeNeighborSize){
 					for(int ee = 0; ee <= maxDelta; ++ee){
@@ -2008,8 +2118,8 @@ private:
 						procs.insert(pEnd);
 					}
 				}
-				delete [] virtualEdgeNeighbors;
-				virtualEdgeNeighbors = NULL;
+//				delete [] virtualEdgeNeighbors;
+//				virtualEdgeNeighbors = NULL;
 			}
 			//Virtual Corner Neighbors
 			for(uint8_t c = 0; c < global3D.nnodes; ++c){

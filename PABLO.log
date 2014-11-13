@@ -1,0 +1,150 @@
+---------------------------------------------
+- PABLO PArallel Balanced Linear Octree -
+---------------------------------------------
+ 
+---------------------------------------------
+ Number of proc		:	1
+ Dimension		:	3
+ Max allowed level	:	20
+---------------------------------------------
+ 
+---------------------------------------------
+ ADAPT (GlobalRefine)
+ 
+ 
+ Initial Number of octants	:	1
+ Number of octants after Refine	:	8
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (GlobalRefine)
+ 
+ 
+ Initial Number of octants	:	8
+ Number of octants after Refine	:	64
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (GlobalRefine)
+ 
+ 
+ Initial Number of octants	:	64
+ Number of octants after Refine	:	512
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (GlobalRefine)
+ 
+ 
+ Initial Number of octants	:	512
+ Number of octants after Refine	:	4096
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (GlobalRefine)
+ 
+ 
+ Initial Number of octants	:	4096
+ Number of octants after Refine	:	32768
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Serial distribution : 
+ Octants for proc	0	:	32768
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	32768
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+ 
+ Initial Number of octants	:	32768
+ Number of octants after Refine	:	35267
+ Number of octants after Coarse	:	35267
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	35267
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	35267
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+ 
+ Initial Number of octants	:	35267
+ Number of octants after Refine	:	35750
+ Number of octants after Coarse	:	35372
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	35372
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	35372
+ 
+---------------------------------------------
+---------------------------------------------
+ ADAPT (Refine/Coarse)
+ 
+---------------------------------------------
+ 2:1 BALANCE (balancing Marker before Adapt)
+ 
+ Iterative procedure	
+ 
+ Iteration	:	0
+ Iteration	:	Finalizing 
+ 
+ 2:1 Balancing reached 
+ 
+---------------------------------------------
+ 
+ Initial Number of octants	:	35372
+ Number of octants after Refine	:	35834
+ Number of octants after Coarse	:	35414
+ 
+---------------------------------------------
+---------------------------------------------
+ LOAD BALANCE 
+ 
+ Initial Parallel partition : 
+ Octants for proc	0	:	35414
+ 
+ Final Parallel partition : 
+ Octants for proc	0	:	35414
+ 
+---------------------------------------------

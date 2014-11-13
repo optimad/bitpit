@@ -152,7 +152,8 @@ private:
 
 		// Local variables
 		vector<uint32_t> last_child_index;
-		Class_Octant<3>* children;
+		//Class_Octant<3>* children;
+		vector< Class_Octant<3> > children;
 		uint32_t idx, nocts, ilastch;
 		uint32_t offset = 0, blockidx;
 		uint8_t nchm1 = global3D.nchildren-1, ich, iface;
@@ -195,7 +196,7 @@ private:
 						//More Refinement to do
 						dorefine = true;
 					}
-					delete []children;
+					//delete []children;
 					if (ilastch != 0){
 						ilastch--;
 					}
@@ -413,7 +414,8 @@ private:
 		// mapidx[i] = index in old octants vector of the i-th octant (index of father if octant is new after)
 		// Local variables
 		vector<uint32_t> last_child_index;
-		Class_Octant<3>* children;
+		//Class_Octant<3>* children;
+		vector< Class_Octant<3> > children;
 		uint32_t idx, nocts, ilastch;
 		uint32_t offset = 0, blockidx;
 		uint8_t nchm1 = global3D.nchildren-1, ich, iface;
@@ -461,7 +463,7 @@ private:
 						//More Refinement to do
 						dorefine = true;
 					}
-					delete []children;
+					//delete []children;
 					if (ilastch != 0){
 						ilastch--;
 					}
@@ -688,7 +690,8 @@ private:
 
 		// Local variables
 		vector<uint32_t> last_child_index;
-		Class_Octant<3>* children;
+		//Class_Octant<3>* children;
+		vector< Class_Octant<3> > children;
 		uint32_t idx, nocts, ilastch;
 		uint32_t offset = 0, blockidx;
 		uint8_t nchm1 = global3D.nchildren-1, ich, iface;
@@ -731,7 +734,7 @@ private:
 						//More Refinement to do
 						dorefine = true;
 					}
-					delete []children;
+					//delete []children;
 					if (ilastch != 0){
 						ilastch--;
 					}
@@ -950,7 +953,8 @@ private:
 	bool globalRefine(u32vector & mapidx){
 
 		vector<uint32_t> last_child_index;
-		Class_Octant<3>* children;
+		//Class_Octant<3>* children;
+		vector< Class_Octant<3> > children;
 		uint32_t idx, nocts, ilastch;
 		uint32_t offset = 0, blockidx;
 		uint8_t nchm1 = global3D.nchildren-1, ich, iface;
@@ -999,7 +1003,7 @@ private:
 						//More Refinement to do
 						dorefine = true;
 					}
-					delete []children;
+					//delete []children;
 					if (ilastch != 0){
 						ilastch--;
 					}
