@@ -4811,7 +4811,7 @@ public:
 					if (idx2 < nocts2)
 						morton2 = ptree.getOctant(idx2)->computeMorton();
 				}
-				(if idx2>0) idx2--;
+				if (idx2>0) idx2--;
 			}
 		}
 		else{
