@@ -4784,25 +4784,34 @@ public:
 		u64vector2D FirstMortonReceived, SecondMortonReceived;
 		u32vector2D FirstIndexperproc, SecondIndexperproc;
 		u32vector2D FirstLocalIndex, SecondLocalIndex;
-		uint64_t morton = 0, morton2 = 0, mortonlastdesc = 0;
-		uint32_t idx2 = 0;
+		uint64_t morton = 0, morton2 = 0, morton1 = 0, mortonlastdesc = 0, mortonfirstdesc = 0;
+		uint32_t idx1 = 0, idx2 = 0;
 		uint32_t nocts = octree.getNumOctants();
 		uint32_t nocts2 = ptree.octree.getNumOctants();
 		int owner;
 		mapper.resize(nocts);
 		if (ptree.serial){
 			for (int i=0; i<nocts; i++){
-				mapper[i].first.first = idx2;
+				mapper[i].first.first = idx1;
 				mapper[i].first.second = idx2;
 				mapper[i].second.first = rank;
 				mapper[i].second.second = rank;
+				mortonfirstdesc = octree.octants[i].computeMorton();
 				mortonlastdesc = octree.octants[i].buildLastDesc().computeMorton();
+				while(morton1 <= mortonfirstdesc && idx1 < nocts2){
+					mapper[i].first.first = idx1;
+					idx1++;
+					if (idx1 < nocts2)
+						morton1 = ptree.getOctant(idx1)->computeMorton();
+				}
+				idx1--;
 				while(morton2 <= mortonlastdesc && idx2 < nocts2){
 					mapper[i].first.second = idx2;
 					idx2++;
 					if (idx2 < nocts2)
 						morton2 = ptree.getOctant(idx2)->computeMorton();
 				}
+				idx2--;
 			}
 		}
 		else{
