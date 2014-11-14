@@ -4804,14 +4804,20 @@ public:
 					if (idx1 < nocts2)
 						morton1 = ptree.getOctant(idx1)->computeMorton();
 				}
-				if(idx1>0) idx1--;
+				if(idx1 > 0){
+					idx1--;
+					morton1 = ptree.getOctant(idx1)->computeMorton();
+				}
 				while(morton2 <= mortonlastdesc && idx2 < nocts2){
 					mapper[i].first.second = idx2;
 					idx2++;
 					if (idx2 < nocts2)
 						morton2 = ptree.getOctant(idx2)->computeMorton();
 				}
-				if (idx2>0) idx2--;
+				if (idx2 > 0){
+					idx2--;
+					morton2 = ptree.getOctant(idx2)->computeMorton();
+				}
 			}
 		}
 		else{
