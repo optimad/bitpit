@@ -123,3 +123,4 @@ add_executable(test120 ${test120_src})
 
 target_link_libraries(test120 mpi)
 TARGET_LINK_LIBRARIES(test120 PABLO)
+
