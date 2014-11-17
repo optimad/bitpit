@@ -1159,7 +1159,6 @@ private:
 				marker = ghosts[idx].getMarker();
 				while(marker < 0 && ghosts[idx].buildFather() == father){
 					nbro++;
-					//TODO CAMBIATO IDX DA CAMBIARE ANCHE NELLE ALTRE COARSE!!!
 					if (markerfather < ghosts[idx].getMarker()+1){
 						markerfather = ghosts[idx].getMarker()+1;
 					}
