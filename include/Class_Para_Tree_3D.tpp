@@ -436,6 +436,30 @@ public:
 	//		nodes_ = NULL;
 	//	};
 
+
+	/*! Get the coordinates of the center of a face of an octant.
+	 * \param[in] oct Pointer to target octant.
+	 * \param[in] iface Index of the target face.
+	 * \return center Coordinates of the center of the iface-th face af octant.
+	 */
+	vector<double> getFaceCenter(Class_Octant<3>* oct, uint8_t iface) {
+		vector<double> center;
+		vector<double> center_ = oct->getFaceCenter(iface);
+		trans.mapCenter(center_, center);
+		return center;
+	}
+
+	/*! Get the coordinates of the center of a face of an octant.
+	 * \param[in] oct Pointer to target octant.
+	 * \param[in] iface Index of the target face.
+	 * \param[out] center Coordinates of the center of the iface-th face af octant.
+	 */
+	void getFaceCenter(Class_Octant<3>* oct, uint8_t iface, vector<double>& center) {
+		vector<double> center_ = oct->getFaceCenter(iface);
+		trans.mapCenter(center_, center);
+	}
+
+
 	/*! Get the coordinates of the nodes of an octant.
 	 * \param[in] oct Pointer to target octant.
 	 * \param[out] nodes Coordinates of the nodes of octant.
@@ -974,6 +998,29 @@ public:
 		trans.mapCenter(center_, center);
 		return center;
 	}
+
+	/*! Get the coordinates of the center of a face of an octant.
+	 * \param[in] idx Local index of target octant.
+	 * \param[in] iface Index of the target face.
+	 * \return center Coordinates of the center of the iface-th face af octant.
+	 */
+	vector<double> getFaceCenter(uint32_t idx, uint8_t iface) {
+		vector<double> center;
+		vector<double> center_ = octree.octants[idx].getFaceCenter(iface);
+		trans.mapCenter(center_, center);
+		return center;
+	}
+
+	/*! Get the coordinates of the center of a face of an octant.
+	 * \param[in] idx Local index of target octant.
+	 * \param[in] iface Index of the target face.
+	 * \param[out] center Coordinates of the center of the iface-th face af octant.
+	 */
+	void getFaceCenter(uint32_t idx, uint8_t iface, vector<double>& center) {
+		vector<double> center_ = octree.octants[idx].getFaceCenter(iface);
+		trans.mapCenter(center_, center);
+	}
+
 
 	//	/*! Get the coordinates of the nodes of an octant.
 	//	 * \param[in] idx Local index of target octant.

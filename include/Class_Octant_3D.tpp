@@ -236,6 +236,7 @@ public:
 
 	// =================================================================================== //
 	//TODO Temporary commented for memory leak detection
+
 	//	/*! Get the coordinates of the center of an octant in logical domain.
 	//	 * \return center Pointer to an array[2] with the coordinates of the center of octant.
 	//	 */
@@ -290,6 +291,27 @@ public:
 		center[0] = (double)x + dh;
 		center[1] = (double)y + dh;
 		center[2] = (double)z + dh;
+		return center;
+	};
+
+	// ------------------------------------------------------------------------------- //
+
+	/*! Get the coordinates of the center of a face of an octant in logical domain.
+	 * \return Vector[3] with the coordinates of the center of octant.
+	 */
+	dvector	getFaceCenter(uint8_t iface){
+		double	dh_2;
+
+		int A[6][3] = { {0,1,1} , {2,1,1} , {1,0,1} , {1,2,1} , {1,1,0} , {1,1,2} };
+
+		dh_2 = double(getSize())/2.0;
+		vector<double> center(3);
+
+		if (iface < global3D.nfaces){
+			center[0] = (double)x + (double)A[iface][0] * dh_2;
+			center[1] = (double)y + (double)A[iface][1] * dh_2;
+			center[1] = (double)z + (double)A[iface][2] * dh_2;
+		}
 		return center;
 	};
 
