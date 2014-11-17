@@ -320,7 +320,7 @@ private:
 				}
 			}
 		}
-//		octants.resize(nocts-offset);
+		//		octants.resize(nocts-offset);
 		octants.resize(nblock);
 		octants.shrink_to_fit();
 		nocts = octants.size();
@@ -377,9 +377,9 @@ private:
 				}
 			}
 			if (nend != 0){
-//				for (int iii=0; iii<16; iii++){
-//					father.info[iii] = false;
-//				}
+				//				for (int iii=0; iii<16; iii++){
+				//					father.info[iii] = false;
+				//				}
 				for (idx=0; idx < nend; idx++){
 					for (int iii=0; iii<16; iii++){
 						father.info[iii] = father.info[iii] || octants[nocts-idx-1].info[iii];
@@ -1230,7 +1230,7 @@ private:
 	// =================================================================================== //
 
 	void checkCoarse(uint64_t lastDescPre,						// Delete overlapping octants after coarse local tree. Check first and last descendants
-								uint64_t firstDescPost){		// of process before and after the local process
+			uint64_t firstDescPost){		// of process before and after the local process
 		int32_t idx;
 		uint32_t nocts;
 		uint64_t Morton;
@@ -1252,23 +1252,23 @@ private:
 		octants.shrink_to_fit();
 		nocts = getNumOctants();
 
-//		toDelete = 0;
-//		Morton = last_desc.computeMorton();
-//		if(int(firstDescPost  - Morton) > 1){
-//			// To insert, the father is not yet here!!
-//			idx = nocts - 1;
-//			Class_Octant<3> father = octants[idx].buildFather();
-//			while(octants[idx].buildFather() == father && idx >= 0){
-//				toDelete++;
-//				idx--;
-//			}
-//			father.info[global3D.nfaces+1] = father.info[global3D.nfaces+3] = true;
-////			if(global3D.nfaces == 6)
-//			father.info[global3D.nfaces+5] = true;
-//			octants.resize(nocts-toDelete);
-//			octants.push_back(father);
-//			octants.shrink_to_fit();
-//		}
+		//		toDelete = 0;
+		//		Morton = last_desc.computeMorton();
+		//		if(int(firstDescPost  - Morton) > 1){
+		//			// To insert, the father is not yet here!!
+		//			idx = nocts - 1;
+		//			Class_Octant<3> father = octants[idx].buildFather();
+		//			while(octants[idx].buildFather() == father && idx >= 0){
+		//				toDelete++;
+		//				idx--;
+		//			}
+		//			father.info[global3D.nfaces+1] = father.info[global3D.nfaces+3] = true;
+		////			if(global3D.nfaces == 6)
+		//			father.info[global3D.nfaces+5] = true;
+		//			octants.resize(nocts-toDelete);
+		//			octants.push_back(father);
+		//			octants.shrink_to_fit();
+		//		}
 
 		setFirstDesc();
 		setLastDesc();
@@ -1278,8 +1278,8 @@ private:
 	// =================================================================================== //
 
 	void checkCoarse(uint64_t lastDescPre,						// Delete overlapping octants after coarse local tree. Check first and last descendants
-					uint64_t firstDescPost,
-					u32vector & mapidx){					// of process before and after the local process
+			uint64_t firstDescPost,
+			u32vector & mapidx){					// of process before and after the local process
 		int32_t idx;
 		uint32_t nocts;
 		uint64_t Morton;
@@ -1327,9 +1327,9 @@ private:
 	// =================================================================================== //
 
 	void findNeighbours(uint32_t idx,							// Finds neighbours of idx-th octant through iface in vector octants.
-								uint8_t iface,					// Returns a vector (empty if iface is a bound face) with the index of neighbours
-								u32vector & neighbours,			// in their structure (octants or ghosts) and sets isghost[i] = true if the
-								vector<bool> & isghost){		// i-th neighbour is ghost in the local tree
+			uint8_t iface,					// Returns a vector (empty if iface is a bound face) with the index of neighbours
+			u32vector & neighbours,			// in their structure (octants or ghosts) and sets isghost[i] = true if the
+			vector<bool> & isghost){		// i-th neighbour is ghost in the local tree
 
 		uint64_t  Morton, Mortontry;
 		uint32_t  noctants = getNumOctants();
@@ -1634,7 +1634,7 @@ private:
 		}
 
 	};
-//
+	//
 	// =================================================================================== //
 
 	void findNeighbours(Class_Octant<3>* oct,					// Finds neighbours of octant through iface in vector octants.
@@ -1947,8 +1947,8 @@ private:
 	// =================================================================================== //
 
 	void findGhostNeighbours(uint32_t const idx,		// Finds neighbours of idx-th ghost octant through iface in vector octants.
-								uint8_t iface,					// Returns a vector (empty if iface is not the pbound face for ghost) with the index of neighbours
-								u32vector & neighbours){		// in the structure octants
+			uint8_t iface,					// Returns a vector (empty if iface is not the pbound face for ghost) with the index of neighbours
+			u32vector & neighbours){		// in the structure octants
 
 		uint64_t  Morton, Mortontry;
 		uint32_t  noctants = getNumOctants();
@@ -1972,28 +1972,51 @@ private:
 		// Check if octants face is a process boundary
 		if (oct->info[global3D.nfaces+iface] == true){
 
-				//Build Morton number of virtual neigh of same size
-				Class_Octant<3> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size), int32_t(oct->z)+int32_t(cz*size));
-				Morton = samesizeoct.computeMorton();
-				// Search morton in octants
-				// If a even face morton is lower than morton of oct, if odd higher
-				// ---> can i search only before or after idx in octants
-				int32_t jump;
-				idxtry = uint32_t(getNumOctants()/2);
+			//Build Morton number of virtual neigh of same size
+			Class_Octant<3> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size), int32_t(oct->z)+int32_t(cz*size));
+			Morton = samesizeoct.computeMorton();
+			// Search morton in octants
+			// If a even face morton is lower than morton of oct, if odd higher
+			// ---> can i search only before or after idx in octants
+			int32_t jump;
+			idxtry = uint32_t(getNumOctants()/2);
+			Mortontry = octants[idxtry].computeMorton();
+			jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
+			while(abs(jump) > 0){
 				Mortontry = octants[idxtry].computeMorton();
 				jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
-				while(abs(jump) > 0){
-					Mortontry = octants[idxtry].computeMorton();
-					jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
-					idxtry += jump;
-					if (idxtry > noctants-1){
-						if (jump > 0){
-							idxtry = noctants - 1;
-							jump = 0;
+				idxtry += jump;
+				if (idxtry > noctants-1){
+					if (jump > 0){
+						idxtry = noctants - 1;
+						jump = 0;
+					}
+					else if (jump < 0){
+						idxtry = 0;
+						jump = 0;
+					}
+				}
+			}
+			if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
+				//Found neighbour of same size
+				neighbours.push_back(idxtry);
+				return;
+			}
+			else{
+				// Step until the mortontry lower than morton (one idx of distance)
+				{
+					while(octants[idxtry].computeMorton() < Morton){
+						idxtry++;
+						if(idxtry > noctants-1){
+							idxtry = noctants-1;
+							return;
 						}
-						else if (jump < 0){
+					}
+					while(octants[idxtry].computeMorton() > Morton){
+						idxtry--;
+						if(idxtry > noctants-1){
 							idxtry = 0;
-							jump = 0;
+							return;
 						}
 					}
 				}
@@ -2002,52 +2025,29 @@ private:
 					neighbours.push_back(idxtry);
 					return;
 				}
-				else{
-					// Step until the mortontry lower than morton (one idx of distance)
-					{
-						while(octants[idxtry].computeMorton() < Morton){
-							idxtry++;
-							if(idxtry > noctants-1){
-								idxtry = noctants-1;
-								return;
-							}
-						}
-						while(octants[idxtry].computeMorton() > Morton){
-							idxtry--;
-							if(idxtry > noctants-1){
-								idxtry = 0;
-								return;
-							}
-						}
-					}
-					if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
-						//Found neighbour of same size
+				// Compute Last discendent of virtual octant of same size
+				uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL_3D - samesizeoct.level)) - 1;
+				Class_Octant<3> last_desc = samesizeoct.buildLastDesc();
+				uint64_t Mortonlast = last_desc.computeMorton();
+				vector<uint32_t> bufferidx;
+				Mortontry = octants[idxtry].computeMorton();
+				int32_t Dh;
+				int32_t eqcoord;
+				while(Mortontry < Mortonlast && idxtry < noctants){
+					Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
+					Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
+					Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
+					if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
 						neighbours.push_back(idxtry);
-						return;
 					}
-					// Compute Last discendent of virtual octant of same size
-					uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL_3D - samesizeoct.level)) - 1;
-					Class_Octant<3> last_desc = samesizeoct.buildLastDesc();
-					uint64_t Mortonlast = last_desc.computeMorton();
-					vector<uint32_t> bufferidx;
+					idxtry++;
+					if(idxtry>noctants-1){
+						break;
+					}
 					Mortontry = octants[idxtry].computeMorton();
-					int32_t Dh;
-					int32_t eqcoord;
-					while(Mortontry < Mortonlast && idxtry < noctants){
-						Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
-						Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
-						Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
-						if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
-							neighbours.push_back(idxtry);
-						}
-						idxtry++;
-						if(idxtry>noctants-1){
-							break;
-						}
-						Mortontry = octants[idxtry].computeMorton();
-					}
-					return;
 				}
+				return;
+			}
 		}
 		//--------------------------------------------------------------- //
 		//-----Not Pbound face------------- ----------------------------- //
@@ -2060,8 +2060,8 @@ private:
 	// =================================================================================== //
 
 	bool localBalance(bool doInterior){				// 2:1 balancing on level a local tree already adapted (balance only the octants with info[14] = false) (refinement wins!)
-																// Return true if balanced done with some markers modification
-																// Seto doInterior = false if the interior octants are already balanced
+		// Return true if balanced done with some markers modification
+		// Seto doInterior = false if the interior octants are already balanced
 		// Local variables
 		uint32_t 			noctants = getNumOctants();
 		uint32_t			sizeneigh, modsize;
@@ -2328,8 +2328,8 @@ private:
 	// =================================================================================== //
 
 	bool localBalanceAll(bool doInterior){				// 2:1 balancing on level a local tree already adapted (balance only the octants with info[14] = false) (refinement wins!)
-																// Return true if balanced done with some markers modification
-																// Seto doInterior = false if the interior octants are already balanced
+		// Return true if balanced done with some markers modification
+		// Seto doInterior = false if the interior octants are already balanced
 		// Local variables
 		uint32_t 			noctants = getNumOctants();
 		uint32_t			sizeneigh, modsize;
@@ -2542,9 +2542,9 @@ private:
 	// =================================================================================== //
 
 	void			findEdgeNeighbours(uint32_t idx,			// Finds neighbours of idx-th octant through iedge in vector octants.
-									uint8_t iedge,				// Returns a vector (empty if iedge is a bound edge) with the index of neighbours
-									u32vector & neighbours,		// in their structure (octants or ghosts) and sets isghost[i] = true if the
-									vector<bool> & isghost){	// i-th neighbour is ghost in the local tree
+			uint8_t iedge,				// Returns a vector (empty if iedge is a bound edge) with the index of neighbours
+			u32vector & neighbours,		// in their structure (octants or ghosts) and sets isghost[i] = true if the
+			vector<bool> & isghost){	// i-th neighbour is ghost in the local tree
 
 		uint64_t  Morton, Mortontry;
 		uint32_t  noctants = getNumOctants();
@@ -2673,10 +2673,10 @@ private:
 				}
 			}
 			uint32_t lengthneigh = 0;
-//			uint32_t sizeneigh = neighbours.size();
-//			for (idxtry=0; idxtry<sizeneigh; idxtry++){
-//				lengthneigh += ghosts[neighbours[idxtry]].getSize();
-//			}
+			//			uint32_t sizeneigh = neighbours.size();
+			//			for (idxtry=0; idxtry<sizeneigh; idxtry++){
+			//				lengthneigh += ghosts[neighbours[idxtry]].getSize();
+			//			}
 			if (lengthneigh < oct->getSize()){
 
 				// Search in octants
@@ -2775,9 +2775,9 @@ private:
 	// =================================================================================== //
 
 	void			findEdgeNeighbours(Class_Octant<3>* oct,			// Finds neighbours of idx-th octant through iedge in vector octants.
-									uint8_t iedge,				// Returns a vector (empty if iedge is a bound edge) with the index of neighbours
-									u32vector & neighbours,		// in their structure (octants or ghosts) and sets isghost[i] = true if the
-									vector<bool> & isghost){	// i-th neighbour is ghost in the local tree
+			uint8_t iedge,				// Returns a vector (empty if iedge is a bound edge) with the index of neighbours
+			u32vector & neighbours,		// in their structure (octants or ghosts) and sets isghost[i] = true if the
+			vector<bool> & isghost){	// i-th neighbour is ghost in the local tree
 
 		uint64_t  Morton, Mortontry;
 		uint32_t  noctants = getNumOctants();
@@ -2906,10 +2906,10 @@ private:
 				}
 			}
 			uint32_t lengthneigh = 0;
-//			uint32_t sizeneigh = neighbours.size();
-//			for (idxtry=0; idxtry<sizeneigh; idxtry++){
-//				lengthneigh += ghosts[neighbours[idxtry]].getSize();
-//			}
+			//			uint32_t sizeneigh = neighbours.size();
+			//			for (idxtry=0; idxtry<sizeneigh; idxtry++){
+			//				lengthneigh += ghosts[neighbours[idxtry]].getSize();
+			//			}
 			if (lengthneigh < oct->getSize()){
 
 				// Search in octants
@@ -3008,9 +3008,9 @@ private:
 	// =================================================================================== //
 
 	void			findNodeNeighbours(uint32_t idx,			// Finds neighbours of idx-th octant through inode in vector octants.
-									uint8_t inode,				// Returns a vector (empty if inode is a bound node) with the index of neighbours
-									u32vector & neighbours,		// in their structure (octants or ghosts) and sets isghost[i] = true if the
-									vector<bool> & isghost){	// i-th neighbour is ghost in the local tree
+			uint8_t inode,				// Returns a vector (empty if inode is a bound node) with the index of neighbours
+			u32vector & neighbours,		// in their structure (octants or ghosts) and sets isghost[i] = true if the
+			vector<bool> & isghost){	// i-th neighbour is ghost in the local tree
 
 		uint64_t  Morton, Mortontry;
 		uint32_t  noctants = getNumOctants();
@@ -3138,10 +3138,10 @@ private:
 				}
 			}
 			uint32_t lengthneigh = 0;
-//			uint32_t sizeneigh = neighbours.size();
-//			for (idxtry=0; idxtry<sizeneigh; idxtry++){
-//				lengthneigh += ghosts[neighbours[idxtry]].getSize();
-//			}
+			//			uint32_t sizeneigh = neighbours.size();
+			//			for (idxtry=0; idxtry<sizeneigh; idxtry++){
+			//				lengthneigh += ghosts[neighbours[idxtry]].getSize();
+			//			}
 			if (lengthneigh < oct->getSize()){
 
 				// Search in octants
@@ -3227,14 +3227,14 @@ private:
 	// =================================================================================== //
 
 	void			findNodeNeighbours(Class_Octant<3>* oct,			// Finds neighbours of idx-th octant through inode in vector octants.
-									uint8_t inode,				// Returns a vector (empty if inode is a bound node) with the index of neighbours
-									u32vector & neighbours,		// in their structure (octants or ghosts) and sets isghost[i] = true if the
-									vector<bool> & isghost){	// i-th neighbour is ghost in the local tree
+			uint8_t inode,				// Returns a vector (empty if inode is a bound node) with the index of neighbours
+			u32vector & neighbours,		// in their structure (octants or ghosts) and sets isghost[i] = true if the
+			vector<bool> & isghost){	// i-th neighbour is ghost in the local tree
 
 		uint64_t  Morton, Mortontry;
 		uint32_t  noctants = getNumOctants();
 		uint32_t idxtry;
-//		Class_Octant<3>* oct = &octants[idx];
+		//		Class_Octant<3>* oct = &octants[idx];
 		uint32_t size = oct->getSize();
 		uint8_t iface1, iface2, iface3;
 		int32_t Dhx, Dhy, Dhz;
@@ -3357,10 +3357,10 @@ private:
 				}
 			}
 			uint32_t lengthneigh = 0;
-//			uint32_t sizeneigh = neighbours.size();
-//			for (idxtry=0; idxtry<sizeneigh; idxtry++){
-//				lengthneigh += ghosts[neighbours[idxtry]].getSize();
-//			}
+			//			uint32_t sizeneigh = neighbours.size();
+			//			for (idxtry=0; idxtry<sizeneigh; idxtry++){
+			//				lengthneigh += ghosts[neighbours[idxtry]].getSize();
+			//			}
 			if (lengthneigh < oct->getSize()){
 
 				// Search in octants
@@ -3555,155 +3555,155 @@ private:
 	// =================================================================================== //
 
 	//TODO Update intersections killed
-//	void updateIntersections(u32vector & mapidx,
-//							u32vector & mapinters_int,
-//							u32vector & mapinters_ghost,
-//							u32vector & mapinters_bord) {
-//
-//		map<uint32_t, uint32_t> invmapidx;
-//		vector<uint32_t> newocts;
-//		OctantsType::iterator it, obegin, oend;
-//		Class_Intersection<3> intersection;
-//		u32vector neighbours;
-//		vector<bool> isghost;
-//		uint32_t counter_g, idx;
-//		uint32_t i, j, nsize, msize, isize, osize, offset;
-//		uint8_t iface, iface2;
-//
-//
-//		if (intersections_int.size()==0){
-//			computeIntersections();
-//			mapinters_int.clear();
-//			mapinters_ghost.clear();
-//			mapinters_bord.clear();
-//		}
-//		else{
-//			msize = mapidx.size();
-//			for (i=0; i<msize; i++){
-//				invmapidx[mapidx[i]] = i;
-//			}
-//
-//			//Internal Intersections
-//			isize = intersections_int.size();
-//			mapinters_int.clear();
-//			mapinters_int.resize(isize);
-//			offset = 0;
-//			newocts.clear();
-//			for (i=0; i<isize-offset; i++){
-//				if (octants[invmapidx[intersections_int[i].owners[0]]].info[12] ||
-//						octants[invmapidx[intersections_int[i].owners[0]]].info[13]){
-//					offset++;
-//					newocts.push_back(invmapidx[intersections_int[i].owners[0]]);
-//				}
-//				intersections_int[i] = intersections_int[i+offset];
-//				intersections_int[i].owners[0] = invmapidx[intersections_int[i+offset].owners[0]];
-//				intersections_int[i].owners[1] = invmapidx[intersections_int[i+offset].owners[1]];
-//				mapinters_int[i] = i+offset;
-//			}
-//			intersections_int.resize(isize-offset);
-//			isize = isize-offset;
-//			mapinters_int.resize(isize);
-//			osize = newocts.size();
-//			for (j=0; j<osize; j++){
-//				idx = newocts[j];
-//				for (iface = 0; iface < 3; iface++){
-//					iface2 = iface*2;
-//					findNeighbours(idx, iface2, neighbours, isghost);
-//					nsize = neighbours.size();
-//					if (nsize) {
-//						for (i = 0; i < nsize; i++){
-//							if (isghost[i]){
-//								intersection.owners[0] = idx;
-//								intersection.owners[1] = neighbours[i];
-//								intersection.finer = (i>=1);
-//								intersection.iface = iface2;
-//								intersection.isnew = true;
-//								intersection.isghost = false;
-//								intersections_int.push_back(intersection);
-//							}
-//						}
-//					}
-//				}
-//			}
-//
-//			//Border Intersections
-//			isize = intersections_bord.size();
-//			mapinters_bord.clear();
-//			mapinters_bord.resize(isize);
-//			offset = 0;
-//			newocts.clear();
-//			for (i=0; i<isize-offset; i++){
-//				if (octants[invmapidx[intersections_bord[i].owners[0]]].info[12] ||
-//						octants[invmapidx[intersections_bord[i].owners[0]]].info[13]){
-//					offset++;
-//					newocts.push_back(invmapidx[intersections_bord[i].owners[0]]);
-//				}
-//				intersections_bord[i] = intersections_bord[i+offset];
-//				intersections_bord[i].owners[0] = invmapidx[intersections_bord[i+offset].owners[0]];
-//				intersections_bord[i].owners[1] = invmapidx[intersections_bord[i+offset].owners[1]];
-//				mapinters_bord[i] = i+offset;
-//			}
-//			intersections_bord.resize(isize-offset);
-//			isize = isize-offset;
-//			mapinters_bord.resize(isize);
-//			osize = newocts.size();
-//			for (j=0; j<osize; j++){
-//				idx = newocts[j];
-//				for (iface = 0; iface < 3; iface++){
-//					if (octants[idx].info[iface]){
-//						intersection.owners[0] = idx;
-//						intersection.owners[1] = idx;
-//						intersection.finer = 0;
-//						intersection.iface = iface;
-//						intersection.isnew = true;
-//						intersection.isghost = false;
-//						intersections_bord.push_back(intersection);
-//					}
-//				}
-//			}
-//
-//			// TODO GHOSTS INTERSECTIONS. NOW ALL ARE SET AS NEW
-//			//Ghost Intersections
-//			mapinters_ghost.clear();
-//			intersections_ghost.clear();
-//			intersections_ghost.reserve(2*3*ghosts.size());
-//
-//			counter_g = idx = 0;
-//
-//			// Loop on ghosts
-//			obegin = ghosts.begin();
-//			oend = ghosts.end();
-//			for (it = obegin; it != oend; it++){
-//				for (iface = 0; iface < 2*3; iface++){
-//					findGhostNeighbours(idx, iface, neighbours);
-//					nsize = neighbours.size();
-//					for (i = 0; i < nsize; i++){
-//						intersection.finer = (i<1);
-//						intersection.owners[0]  = neighbours[i];
-//						intersection.owners[1] = idx;
-//						intersection.iface = global3D.oppface[iface];
-//						if (octants[idx].info[12] ||
-//								octants[idx].info[13] ||
-//								it->info[12] || it->info[13]){
-//							intersection.isnew = true;
-//						}
-//						else{
-//							intersection.isnew = false;
-//						}
-//						intersection.isghost = true;
-//						intersections_ghost.push_back(intersection);
-//						counter_g++;
-//					}
-//				}
-//				idx++;
-//			}
-//
-//			intersections_int.shrink_to_fit();
-//			intersections_ghost.shrink_to_fit();
-//			intersections_bord.shrink_to_fit();
-//		}
-//
-//	}
+	//	void updateIntersections(u32vector & mapidx,
+	//							u32vector & mapinters_int,
+	//							u32vector & mapinters_ghost,
+	//							u32vector & mapinters_bord) {
+	//
+	//		map<uint32_t, uint32_t> invmapidx;
+	//		vector<uint32_t> newocts;
+	//		OctantsType::iterator it, obegin, oend;
+	//		Class_Intersection<3> intersection;
+	//		u32vector neighbours;
+	//		vector<bool> isghost;
+	//		uint32_t counter_g, idx;
+	//		uint32_t i, j, nsize, msize, isize, osize, offset;
+	//		uint8_t iface, iface2;
+	//
+	//
+	//		if (intersections_int.size()==0){
+	//			computeIntersections();
+	//			mapinters_int.clear();
+	//			mapinters_ghost.clear();
+	//			mapinters_bord.clear();
+	//		}
+	//		else{
+	//			msize = mapidx.size();
+	//			for (i=0; i<msize; i++){
+	//				invmapidx[mapidx[i]] = i;
+	//			}
+	//
+	//			//Internal Intersections
+	//			isize = intersections_int.size();
+	//			mapinters_int.clear();
+	//			mapinters_int.resize(isize);
+	//			offset = 0;
+	//			newocts.clear();
+	//			for (i=0; i<isize-offset; i++){
+	//				if (octants[invmapidx[intersections_int[i].owners[0]]].info[12] ||
+	//						octants[invmapidx[intersections_int[i].owners[0]]].info[13]){
+	//					offset++;
+	//					newocts.push_back(invmapidx[intersections_int[i].owners[0]]);
+	//				}
+	//				intersections_int[i] = intersections_int[i+offset];
+	//				intersections_int[i].owners[0] = invmapidx[intersections_int[i+offset].owners[0]];
+	//				intersections_int[i].owners[1] = invmapidx[intersections_int[i+offset].owners[1]];
+	//				mapinters_int[i] = i+offset;
+	//			}
+	//			intersections_int.resize(isize-offset);
+	//			isize = isize-offset;
+	//			mapinters_int.resize(isize);
+	//			osize = newocts.size();
+	//			for (j=0; j<osize; j++){
+	//				idx = newocts[j];
+	//				for (iface = 0; iface < 3; iface++){
+	//					iface2 = iface*2;
+	//					findNeighbours(idx, iface2, neighbours, isghost);
+	//					nsize = neighbours.size();
+	//					if (nsize) {
+	//						for (i = 0; i < nsize; i++){
+	//							if (isghost[i]){
+	//								intersection.owners[0] = idx;
+	//								intersection.owners[1] = neighbours[i];
+	//								intersection.finer = (i>=1);
+	//								intersection.iface = iface2;
+	//								intersection.isnew = true;
+	//								intersection.isghost = false;
+	//								intersections_int.push_back(intersection);
+	//							}
+	//						}
+	//					}
+	//				}
+	//			}
+	//
+	//			//Border Intersections
+	//			isize = intersections_bord.size();
+	//			mapinters_bord.clear();
+	//			mapinters_bord.resize(isize);
+	//			offset = 0;
+	//			newocts.clear();
+	//			for (i=0; i<isize-offset; i++){
+	//				if (octants[invmapidx[intersections_bord[i].owners[0]]].info[12] ||
+	//						octants[invmapidx[intersections_bord[i].owners[0]]].info[13]){
+	//					offset++;
+	//					newocts.push_back(invmapidx[intersections_bord[i].owners[0]]);
+	//				}
+	//				intersections_bord[i] = intersections_bord[i+offset];
+	//				intersections_bord[i].owners[0] = invmapidx[intersections_bord[i+offset].owners[0]];
+	//				intersections_bord[i].owners[1] = invmapidx[intersections_bord[i+offset].owners[1]];
+	//				mapinters_bord[i] = i+offset;
+	//			}
+	//			intersections_bord.resize(isize-offset);
+	//			isize = isize-offset;
+	//			mapinters_bord.resize(isize);
+	//			osize = newocts.size();
+	//			for (j=0; j<osize; j++){
+	//				idx = newocts[j];
+	//				for (iface = 0; iface < 3; iface++){
+	//					if (octants[idx].info[iface]){
+	//						intersection.owners[0] = idx;
+	//						intersection.owners[1] = idx;
+	//						intersection.finer = 0;
+	//						intersection.iface = iface;
+	//						intersection.isnew = true;
+	//						intersection.isghost = false;
+	//						intersections_bord.push_back(intersection);
+	//					}
+	//				}
+	//			}
+	//
+	//			// TODO GHOSTS INTERSECTIONS. NOW ALL ARE SET AS NEW
+	//			//Ghost Intersections
+	//			mapinters_ghost.clear();
+	//			intersections_ghost.clear();
+	//			intersections_ghost.reserve(2*3*ghosts.size());
+	//
+	//			counter_g = idx = 0;
+	//
+	//			// Loop on ghosts
+	//			obegin = ghosts.begin();
+	//			oend = ghosts.end();
+	//			for (it = obegin; it != oend; it++){
+	//				for (iface = 0; iface < 2*3; iface++){
+	//					findGhostNeighbours(idx, iface, neighbours);
+	//					nsize = neighbours.size();
+	//					for (i = 0; i < nsize; i++){
+	//						intersection.finer = (i<1);
+	//						intersection.owners[0]  = neighbours[i];
+	//						intersection.owners[1] = idx;
+	//						intersection.iface = global3D.oppface[iface];
+	//						if (octants[idx].info[12] ||
+	//								octants[idx].info[13] ||
+	//								it->info[12] || it->info[13]){
+	//							intersection.isnew = true;
+	//						}
+	//						else{
+	//							intersection.isnew = false;
+	//						}
+	//						intersection.isghost = true;
+	//						intersections_ghost.push_back(intersection);
+	//						counter_g++;
+	//					}
+	//				}
+	//				idx++;
+	//			}
+	//
+	//			intersections_int.shrink_to_fit();
+	//			intersections_ghost.shrink_to_fit();
+	//			intersections_bord.shrink_to_fit();
+	//		}
+	//
+	//	}
 
 	// =================================================================================== //
 
@@ -3790,7 +3790,7 @@ private:
 		uint64_t morton;
 		uint32_t noctants = getNumOctants();
 		u32vector2D octnodes;
-//		uint32_t (*octnodes)[3];
+		//		uint32_t (*octnodes)[3];
 		uint8_t j;
 
 		clearConnectivity();

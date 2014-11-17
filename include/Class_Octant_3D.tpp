@@ -235,50 +235,50 @@ public:
 	};
 
 	// =================================================================================== //
-//TODO Temporary commented for memory leak detection
-//	/*! Get the coordinates of the center of an octant in logical domain.
-//	 * \return center Pointer to an array[2] with the coordinates of the center of octant.
-//	 */
-//	double*		getCenter(){
-//		uint8_t		i;
-//		double	dh;
-//
-//		dh = double(getSize())/2.0;
-//		double *center = new double[3];
-//
-//		center[0] = (double)x + dh;
-//		center[1] = (double)y + dh;
-//		center[2] = (double)z + dh;
-//		return center;
-//	};
-//
-//	// ------------------------------------------------------------------------------- //
-//
-//	/*! Get the coordinates of the nodes of an octant in logical domain.
-//	 * \return nodes Pointer to an array[4][3] with the coordinates (with z=0) of the nodes of octant.
-//	 */
-//	uint32_t	(*getNodes())[3]{
-//		uint8_t		i, cx, cy, cz;
-//		uint32_t	dh;
-//
-//		dh = getSize();
-//		uint32_t (*nodes)[3] = new uint32_t[global3D.nnodes][3];
-//
-//		for (i = 0; i < global3D.nnodes; i++){
-//			cx = uint8_t(i%2);
-//			cy = uint8_t((i-4*(i/4))/2);
-//			cz = uint8_t(i/4);
-//			nodes[i][0] = x + cx*dh;
-//			nodes[i][1] = y + cy*dh;
-//			nodes[i][2] = z + cz*dh;
-//
-//		}
-//		return nodes;
+	//TODO Temporary commented for memory leak detection
+	//	/*! Get the coordinates of the center of an octant in logical domain.
+	//	 * \return center Pointer to an array[2] with the coordinates of the center of octant.
+	//	 */
+	//	double*		getCenter(){
+	//		uint8_t		i;
+	//		double	dh;
+	//
+	//		dh = double(getSize())/2.0;
+	//		double *center = new double[3];
+	//
+	//		center[0] = (double)x + dh;
+	//		center[1] = (double)y + dh;
+	//		center[2] = (double)z + dh;
+	//		return center;
+	//	};
+	//
+	//	// ------------------------------------------------------------------------------- //
+	//
+	//	/*! Get the coordinates of the nodes of an octant in logical domain.
+	//	 * \return nodes Pointer to an array[4][3] with the coordinates (with z=0) of the nodes of octant.
+	//	 */
+	//	uint32_t	(*getNodes())[3]{
+	//		uint8_t		i, cx, cy, cz;
+	//		uint32_t	dh;
+	//
+	//		dh = getSize();
+	//		uint32_t (*nodes)[3] = new uint32_t[global3D.nnodes][3];
+	//
+	//		for (i = 0; i < global3D.nnodes; i++){
+	//			cx = uint8_t(i%2);
+	//			cy = uint8_t((i-4*(i/4))/2);
+	//			cz = uint8_t(i/4);
+	//			nodes[i][0] = x + cx*dh;
+	//			nodes[i][1] = y + cy*dh;
+	//			nodes[i][2] = z + cz*dh;
+	//
+	//		}
+	//		return nodes;
 	//	};
 	// ------------------------------------------------------------------------------- //
 
 	/*! Get the coordinates of the center of an octant in logical domain.
-	 * \return center vector[3] with the coordinates of the center of octant.
+	 * \return Vector[3] with the coordinates of the center of octant.
 	 */
 	dvector	getCenter(){
 		uint8_t		i;
@@ -319,24 +319,24 @@ public:
 		nodes.shrink_to_fit();
 	};
 
-//TODO Temporary commented for memory leak detection
-//	/*! Get the normal of a face of an octant in logical domain.
-//	 * \param[in] iface Index of the face for normal computing.
-//	 * \return normal Pointer to an array[3] with components (with z=0) of the normal of face.
-//	 */
-//	int8_t*		getNormal(uint8_t & iface){
-//		uint8_t		i;
-//		int8_t* normal = new int8_t[3];
-//
-//		for (i = 0; i < 3; i++){
-//			normal[i] = global3D.normals[iface][i];
-//		}
-//		return normal;
-//	};
+	//TODO Temporary commented for memory leak detection
+	//	/*! Get the normal of a face of an octant in logical domain.
+	//	 * \param[in] iface Index of the face for normal computing.
+	//	 * \return normal Pointer to an array[3] with components (with z=0) of the normal of face.
+	//	 */
+	//	int8_t*		getNormal(uint8_t & iface){
+	//		uint8_t		i;
+	//		int8_t* normal = new int8_t[3];
+	//
+	//		for (i = 0; i < 3; i++){
+	//			normal[i] = global3D.normals[iface][i];
+	//		}
+	//		return normal;
+	//	};
 
 	/*! Get the normal of a face of an octant in logical domain.
 	 * \param[in] iface Index of the face for normal computing.
-	 * \param[out] normal Pointer to an array[3] with components (with z=0) of the normal of face.
+	 * \param[out] normal Vector[3] with components (with z=0) of the normal of face.
 	 */
 	void		getNormal(uint8_t & iface,
 			vector<int8_t> & normal){
@@ -394,1332 +394,1333 @@ private:
 
 	// =================================================================================== //
 	//TODO Temporary commented for memory leak detection
-//	Class_Octant<3>*	buildChildren(){								// Builds children of octant and return a pointer to an ordered array children[nchildren] (info update)
-//		uint8_t xf,yf,zf;
-//
-//		if (this->level < MAX_LEVEL_3D){
-//			Class_Octant<3>* children = new Class_Octant<3>[global3D.nchildren];
-//			for (int i=0; i<global3D.nchildren; i++){
-//				switch (i) {
-//				case 0 :
-//				{
-//					Class_Octant<3> oct(*this);
-//					oct.setMarker(max(0,oct.marker-1));
-//					oct.setLevel(oct.level+1);
-//					oct.info[12]=true;
-//					// Update interior face bound and pbound
-//					xf=1; yf=3; zf=5;
-//					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
-//					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
-//					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
-//					children[0] = oct;
-//				}
-//				break;
-//				case 1 :
-//				{
-//					Class_Octant<3> oct(*this);
-//					oct.setMarker(max(0,oct.marker-1));
-//					oct.setLevel(oct.level+1);
-//					oct.info[12]=true;
-//					uint32_t dh = oct.getSize();
-//					oct.x += dh;
-//					// Update interior face bound and pbound
-//					xf=0; yf=3; zf=5;
-//					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
-//					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
-//					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
-//					children[1] = oct;
-//				}
-//				break;
-//				case 2 :
-//				{
-//					Class_Octant<3> oct(*this);
-//					oct.setMarker(max(0,oct.marker-1));
-//					oct.setLevel(oct.level+1);
-//					oct.info[12]=true;
-//					uint32_t dh = oct.getSize();
-//					oct.y += dh;
-//					// Update interior face bound and pbound
-//					xf=1; yf=2; zf=5;
-//					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
-//					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
-//					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
-//					children[2] = oct;
-//				}
-//				break;
-//				case 3 :
-//				{
-//					Class_Octant<3> oct(*this);
-//					oct.setMarker(max(0,oct.marker-1));
-//					oct.setLevel(oct.level+1);
-//					oct.info[12]=true;
-//					uint32_t dh = oct.getSize();
-//					oct.x += dh;
-//					oct.y += dh;
-//					// Update interior face bound and pbound
-//					xf=0; yf=2; zf=5;
-//					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
-//					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
-//					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
-//					children[3] = oct;
-//				}
-//				break;
-//				case 4 :
-//				{
-//					Class_Octant<3> oct(*this);
-//					oct.setMarker(max(0,oct.marker-1));
-//					oct.setLevel(oct.level+1);
-//					oct.info[12]=true;
-//					uint32_t dh = oct.getSize();
-//					oct.z += dh;
-//					// Update interior face bound and pbound
-//					xf=1; yf=3; zf=4;
-//					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
-//					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
-//					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
-//					children[4] = oct;
-//				}
-//				break;
-//				case 5 :
-//				{
-//					Class_Octant<3> oct(*this);
-//					oct.setMarker(max(0,oct.marker-1));
-//					oct.setLevel(oct.level+1);
-//					oct.info[12]=true;
-//					uint32_t dh = oct.getSize();
-//					oct.x += dh;
-//					oct.z += dh;
-//					// Update interior face bound and pbound
-//					xf=0; yf=3; zf=4;
-//					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
-//					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
-//					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
-//					children[5] = oct;
-//				}
-//				break;
-//				case 6 :
-//				{
-//					Class_Octant<3> oct(*this);
-//					oct.setMarker(max(0,oct.marker-1));
-//					oct.setLevel(oct.level+1);
-//					oct.info[12]=true;
-//					uint32_t dh = oct.getSize();
-//					oct.y += dh;
-//					oct.z += dh;
-//					// Update interior face bound and pbound
-//					xf=1; yf=2; zf=4;
-//					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
-//					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
-//					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
-//					children[6] = oct;
-//				}
-//				break;
-//				case 7 :
-//				{
-//					Class_Octant<3> oct(*this);
-//					oct.setMarker(max(0,oct.marker-1));
-//					oct.setLevel(oct.level+1);
-//					oct.info[12]=true;
-//					uint32_t dh = oct.getSize();
-//					oct.x += dh;
-//					oct.y += dh;
-//					oct.z += dh;
-//					// Update interior face bound and pbound
-//					xf=0; yf=2; zf=4;
-//					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
-//					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
-//					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
-//					children[7] = oct;
-//				}
-//				break;
-//				}
-//			}
-//			return children;
-//		}
-//		else{
-//			Class_Octant<3>* children = new Class_Octant<3>[0];
-//			writeLog("Max level reached ---> No Children Built");
-//			return children;
-//		}
-//	};
+	//	Class_Octant<3>*	buildChildren(){								// Builds children of octant and return a pointer to an ordered array children[nchildren] (info update)
+	//		uint8_t xf,yf,zf;
+	//
+	//		if (this->level < MAX_LEVEL_3D){
+	//			Class_Octant<3>* children = new Class_Octant<3>[global3D.nchildren];
+	//			for (int i=0; i<global3D.nchildren; i++){
+	//				switch (i) {
+	//				case 0 :
+	//				{
+	//					Class_Octant<3> oct(*this);
+	//					oct.setMarker(max(0,oct.marker-1));
+	//					oct.setLevel(oct.level+1);
+	//					oct.info[12]=true;
+	//					// Update interior face bound and pbound
+	//					xf=1; yf=3; zf=5;
+	//					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
+	//					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
+	//					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
+	//					children[0] = oct;
+	//				}
+	//				break;
+	//				case 1 :
+	//				{
+	//					Class_Octant<3> oct(*this);
+	//					oct.setMarker(max(0,oct.marker-1));
+	//					oct.setLevel(oct.level+1);
+	//					oct.info[12]=true;
+	//					uint32_t dh = oct.getSize();
+	//					oct.x += dh;
+	//					// Update interior face bound and pbound
+	//					xf=0; yf=3; zf=5;
+	//					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
+	//					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
+	//					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
+	//					children[1] = oct;
+	//				}
+	//				break;
+	//				case 2 :
+	//				{
+	//					Class_Octant<3> oct(*this);
+	//					oct.setMarker(max(0,oct.marker-1));
+	//					oct.setLevel(oct.level+1);
+	//					oct.info[12]=true;
+	//					uint32_t dh = oct.getSize();
+	//					oct.y += dh;
+	//					// Update interior face bound and pbound
+	//					xf=1; yf=2; zf=5;
+	//					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
+	//					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
+	//					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
+	//					children[2] = oct;
+	//				}
+	//				break;
+	//				case 3 :
+	//				{
+	//					Class_Octant<3> oct(*this);
+	//					oct.setMarker(max(0,oct.marker-1));
+	//					oct.setLevel(oct.level+1);
+	//					oct.info[12]=true;
+	//					uint32_t dh = oct.getSize();
+	//					oct.x += dh;
+	//					oct.y += dh;
+	//					// Update interior face bound and pbound
+	//					xf=0; yf=2; zf=5;
+	//					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
+	//					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
+	//					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
+	//					children[3] = oct;
+	//				}
+	//				break;
+	//				case 4 :
+	//				{
+	//					Class_Octant<3> oct(*this);
+	//					oct.setMarker(max(0,oct.marker-1));
+	//					oct.setLevel(oct.level+1);
+	//					oct.info[12]=true;
+	//					uint32_t dh = oct.getSize();
+	//					oct.z += dh;
+	//					// Update interior face bound and pbound
+	//					xf=1; yf=3; zf=4;
+	//					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
+	//					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
+	//					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
+	//					children[4] = oct;
+	//				}
+	//				break;
+	//				case 5 :
+	//				{
+	//					Class_Octant<3> oct(*this);
+	//					oct.setMarker(max(0,oct.marker-1));
+	//					oct.setLevel(oct.level+1);
+	//					oct.info[12]=true;
+	//					uint32_t dh = oct.getSize();
+	//					oct.x += dh;
+	//					oct.z += dh;
+	//					// Update interior face bound and pbound
+	//					xf=0; yf=3; zf=4;
+	//					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
+	//					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
+	//					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
+	//					children[5] = oct;
+	//				}
+	//				break;
+	//				case 6 :
+	//				{
+	//					Class_Octant<3> oct(*this);
+	//					oct.setMarker(max(0,oct.marker-1));
+	//					oct.setLevel(oct.level+1);
+	//					oct.info[12]=true;
+	//					uint32_t dh = oct.getSize();
+	//					oct.y += dh;
+	//					oct.z += dh;
+	//					// Update interior face bound and pbound
+	//					xf=1; yf=2; zf=4;
+	//					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
+	//					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
+	//					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
+	//					children[6] = oct;
+	//				}
+	//				break;
+	//				case 7 :
+	//				{
+	//					Class_Octant<3> oct(*this);
+	//					oct.setMarker(max(0,oct.marker-1));
+	//					oct.setLevel(oct.level+1);
+	//					oct.info[12]=true;
+	//					uint32_t dh = oct.getSize();
+	//					oct.x += dh;
+	//					oct.y += dh;
+	//					oct.z += dh;
+	//					// Update interior face bound and pbound
+	//					xf=0; yf=2; zf=4;
+	//					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
+	//					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
+	//					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
+	//					children[7] = oct;
+	//				}
+	//				break;
+	//				}
+	//			}
+	//			return children;
+	//		}
+	//		else{
+	//			Class_Octant<3>* children = new Class_Octant<3>[0];
+	//			writeLog("Max level reached ---> No Children Built");
+	//			return children;
+	//		}
+	//	};
 
-//	 ------------------------------------------------------------------------------- //
-		vector< Class_Octant<3> >	buildChildren(){								// Builds children of octant and return a pointer to an ordered array children[nchildren] (info update)
-			uint8_t xf,yf,zf;
+	//	 ------------------------------------------------------------------------------- //
+	/** Builds children of octant.
+	 *   \return Ordered (by Z-index) vector of children[nchildren] (info update)
+	 */
+	vector< Class_Octant<3> >	buildChildren(){
+		uint8_t xf,yf,zf;
 
-			if (this->level < MAX_LEVEL_3D){
-				vector< Class_Octant<3> > children(global3D.nchildren);
-				for (int i=0; i<global3D.nchildren; i++){
-					switch (i) {
-					case 0 :
-					{
-						Class_Octant<3> oct(*this);
-						oct.setMarker(max(0,oct.marker-1));
-						oct.setLevel(oct.level+1);
-						oct.info[12]=true;
-						// Update interior face bound and pbound
-						xf=1; yf=3; zf=5;
-						oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
-						oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
-						oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
-						children[0] = oct;
-					}
-					break;
-					case 1 :
-					{
-						Class_Octant<3> oct(*this);
-						oct.setMarker(max(0,oct.marker-1));
-						oct.setLevel(oct.level+1);
-						oct.info[12]=true;
-						uint32_t dh = oct.getSize();
-						oct.x += dh;
-						// Update interior face bound and pbound
-						xf=0; yf=3; zf=5;
-						oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
-						oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
-						oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
-						children[1] = oct;
-					}
-					break;
-					case 2 :
-					{
-						Class_Octant<3> oct(*this);
-						oct.setMarker(max(0,oct.marker-1));
-						oct.setLevel(oct.level+1);
-						oct.info[12]=true;
-						uint32_t dh = oct.getSize();
-						oct.y += dh;
-						// Update interior face bound and pbound
-						xf=1; yf=2; zf=5;
-						oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
-						oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
-						oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
-						children[2] = oct;
-					}
-					break;
-					case 3 :
-					{
-						Class_Octant<3> oct(*this);
-						oct.setMarker(max(0,oct.marker-1));
-						oct.setLevel(oct.level+1);
-						oct.info[12]=true;
-						uint32_t dh = oct.getSize();
-						oct.x += dh;
-						oct.y += dh;
-						// Update interior face bound and pbound
-						xf=0; yf=2; zf=5;
-						oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
-						oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
-						oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
-						children[3] = oct;
-					}
-					break;
-					case 4 :
-					{
-						Class_Octant<3> oct(*this);
-						oct.setMarker(max(0,oct.marker-1));
-						oct.setLevel(oct.level+1);
-						oct.info[12]=true;
-						uint32_t dh = oct.getSize();
-						oct.z += dh;
-						// Update interior face bound and pbound
-						xf=1; yf=3; zf=4;
-						oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
-						oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
-						oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
-						children[4] = oct;
-					}
-					break;
-					case 5 :
-					{
-						Class_Octant<3> oct(*this);
-						oct.setMarker(max(0,oct.marker-1));
-						oct.setLevel(oct.level+1);
-						oct.info[12]=true;
-						uint32_t dh = oct.getSize();
-						oct.x += dh;
-						oct.z += dh;
-						// Update interior face bound and pbound
-						xf=0; yf=3; zf=4;
-						oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
-						oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
-						oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
-						children[5] = oct;
-					}
-					break;
-					case 6 :
-					{
-						Class_Octant<3> oct(*this);
-						oct.setMarker(max(0,oct.marker-1));
-						oct.setLevel(oct.level+1);
-						oct.info[12]=true;
-						uint32_t dh = oct.getSize();
-						oct.y += dh;
-						oct.z += dh;
-						// Update interior face bound and pbound
-						xf=1; yf=2; zf=4;
-						oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
-						oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
-						oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
-						children[6] = oct;
-					}
-					break;
-					case 7 :
-					{
-						Class_Octant<3> oct(*this);
-						oct.setMarker(max(0,oct.marker-1));
-						oct.setLevel(oct.level+1);
-						oct.info[12]=true;
-						uint32_t dh = oct.getSize();
-						oct.x += dh;
-						oct.y += dh;
-						oct.z += dh;
-						// Update interior face bound and pbound
-						xf=0; yf=2; zf=4;
-						oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
-						oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
-						oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
-						children[7] = oct;
-					}
-					break;
-					}
+		if (this->level < MAX_LEVEL_3D){
+			vector< Class_Octant<3> > children(global3D.nchildren);
+			for (int i=0; i<global3D.nchildren; i++){
+				switch (i) {
+				case 0 :
+				{
+					Class_Octant<3> oct(*this);
+					oct.setMarker(max(0,oct.marker-1));
+					oct.setLevel(oct.level+1);
+					oct.info[12]=true;
+					// Update interior face bound and pbound
+					xf=1; yf=3; zf=5;
+					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
+					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
+					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
+					children[0] = oct;
 				}
-				return children;
+				break;
+				case 1 :
+				{
+					Class_Octant<3> oct(*this);
+					oct.setMarker(max(0,oct.marker-1));
+					oct.setLevel(oct.level+1);
+					oct.info[12]=true;
+					uint32_t dh = oct.getSize();
+					oct.x += dh;
+					// Update interior face bound and pbound
+					xf=0; yf=3; zf=5;
+					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
+					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
+					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
+					children[1] = oct;
+				}
+				break;
+				case 2 :
+				{
+					Class_Octant<3> oct(*this);
+					oct.setMarker(max(0,oct.marker-1));
+					oct.setLevel(oct.level+1);
+					oct.info[12]=true;
+					uint32_t dh = oct.getSize();
+					oct.y += dh;
+					// Update interior face bound and pbound
+					xf=1; yf=2; zf=5;
+					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
+					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
+					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
+					children[2] = oct;
+				}
+				break;
+				case 3 :
+				{
+					Class_Octant<3> oct(*this);
+					oct.setMarker(max(0,oct.marker-1));
+					oct.setLevel(oct.level+1);
+					oct.info[12]=true;
+					uint32_t dh = oct.getSize();
+					oct.x += dh;
+					oct.y += dh;
+					// Update interior face bound and pbound
+					xf=0; yf=2; zf=5;
+					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
+					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
+					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
+					children[3] = oct;
+				}
+				break;
+				case 4 :
+				{
+					Class_Octant<3> oct(*this);
+					oct.setMarker(max(0,oct.marker-1));
+					oct.setLevel(oct.level+1);
+					oct.info[12]=true;
+					uint32_t dh = oct.getSize();
+					oct.z += dh;
+					// Update interior face bound and pbound
+					xf=1; yf=3; zf=4;
+					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
+					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
+					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
+					children[4] = oct;
+				}
+				break;
+				case 5 :
+				{
+					Class_Octant<3> oct(*this);
+					oct.setMarker(max(0,oct.marker-1));
+					oct.setLevel(oct.level+1);
+					oct.info[12]=true;
+					uint32_t dh = oct.getSize();
+					oct.x += dh;
+					oct.z += dh;
+					// Update interior face bound and pbound
+					xf=0; yf=3; zf=4;
+					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
+					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
+					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
+					children[5] = oct;
+				}
+				break;
+				case 6 :
+				{
+					Class_Octant<3> oct(*this);
+					oct.setMarker(max(0,oct.marker-1));
+					oct.setLevel(oct.level+1);
+					oct.info[12]=true;
+					uint32_t dh = oct.getSize();
+					oct.y += dh;
+					oct.z += dh;
+					// Update interior face bound and pbound
+					xf=1; yf=2; zf=4;
+					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
+					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
+					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
+					children[6] = oct;
+				}
+				break;
+				case 7 :
+				{
+					Class_Octant<3> oct(*this);
+					oct.setMarker(max(0,oct.marker-1));
+					oct.setLevel(oct.level+1);
+					oct.info[12]=true;
+					uint32_t dh = oct.getSize();
+					oct.x += dh;
+					oct.y += dh;
+					oct.z += dh;
+					// Update interior face bound and pbound
+					xf=0; yf=2; zf=4;
+					oct.info[xf] = oct.info[xf+global3D.nfaces] = false;
+					oct.info[yf] = oct.info[yf+global3D.nfaces] = false;
+					oct.info[zf] = oct.info[zf+global3D.nfaces] = false;
+					children[7] = oct;
+				}
+				break;
+				}
 			}
-			else{
-				vector< Class_Octant<3> > children(0);
-				writeLog("Max level reached ---> No Children Built");
-				return children;
-			}
-		};
-
-		// ------------------------------------------------------------------------------- //
-
-		//TODO Commented for memory leak detection
-//	uint64_t* 		computeHalfSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
-//			uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
-//		uint32_t dh,dh2;
-//		uint64_t morton;
-//		uint32_t nneigh;
-//		uint8_t i,cx,cy,cz;
-//
-//		nneigh = (level < MAX_LEVEL_3D) ? global3D.nchildren/2 : 1;
-//		dh = (level < MAX_LEVEL_3D) ? getSize()/2 : getSize();
-//		dh2 = getSize();
-//
-//		if (info[iface]){
-//			//		uint64_t* Morton = new uint64_t[0];
-//			sizehf = 0;
-//			//		return Morton;
-//			return NULL;
-//		}
-//		else{
-//			uint64_t* Morton = new uint64_t[nneigh];
-//			switch (iface) {
-//			case 0 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cy = (i==1)||(i==3);
-//					cz = (i==2)||(i==3);
-//					Morton[i] = mortonEncode_magicbits(this->x-dh,this->y+dh*cy,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 1 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cy = (i==1)||(i==3);
-//					cz = (i==2)||(i==3);
-//					Morton[i] = mortonEncode_magicbits(this->x+dh2,this->y+dh*cy,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 2 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = (i==1)||(i==3);
-//					cz = (i==2)||(i==3);
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y-dh,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 3 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = (i==1)||(i==3);
-//					cz = (i==2)||(i==3);
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 4 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = (i==1)||(i==3);
-//					cy = (i==2)||(i==3);
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z-dh);
-//				}
-//			}
-//			break;
-//			case 5 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = (i==1)||(i==3);
-//					cy = (i==2)||(i==3);
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2);
-//				}
-//			}
-//			break;
-//			}
-//			sizehf = nneigh;
-//			return Morton;
-//		}
-//
-//
-//	};
-//
-//	// ------------------------------------------------------------------------------- //
-//
-//	uint64_t* 		computeMinSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
-//			const uint8_t & maxdepth,	// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
-//			uint32_t & sizem){
-//		uint32_t dh,dh2;
-//		uint64_t morton;
-//		uint32_t nneigh, nline;
-//		uint32_t i,cx,cy,cz;
-//
-//		nneigh = (level < MAX_LEVEL_3D) ? uint32_t(pow(2.0,double(2*(maxdepth-level)))) : 1;
-//		dh = (level < MAX_LEVEL_3D) ? uint32_t(pow(2.0,double(MAX_LEVEL_3D - maxdepth))) : getSize();
-//		dh2 = getSize();
-//		nline = uint32_t(pow(2.0,double((maxdepth-level))));
-//
-//		if (info[iface]){
-//			//		uint64_t* Morton = new uint64_t[0];
-//			sizem = 0;
-//			//		return Morton;
-//			return NULL;
-//		}
-//		else{
-//			uint64_t* Morton = new uint64_t[nneigh];
-//			switch (iface) {
-//			case 0 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cy = (i/nline);
-//					cz = (i%nline);
-//					Morton[i] = mortonEncode_magicbits(this->x-dh,this->y+dh*cy,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 1 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cy = (i/nline);
-//					cz = (i%nline);
-//					Morton[i] = mortonEncode_magicbits(this->x+dh2,this->y+dh*cy,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 2 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = (i/nline);
-//					cz = (i%nline);
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y-dh,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 3 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = (i/nline);
-//					cz = (i%nline);
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 4 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = (i/nline);
-//					cy = (i%nline);
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z-dh);
-//				}
-//			}
-//			break;
-//			case 5 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = (i/nline);
-//					cy = (i%nline);
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2);
-//				}
-//			}
-//			break;
-//			}
-//			sizem = nneigh;
-//			sort(Morton,Morton+nneigh);
-//			return Morton;
-//		}
-//
-//	};
-//
-//	// ------------------------------------------------------------------------------- //
-//
-//	uint64_t* 		computeVirtualMorton(uint8_t iface, 			// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
-//			const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
-//			uint32_t & sizeneigh){
-//		if (getNotBalance()){
-//			return computeMinSizeMorton(iface,
-//					maxdepth,
-//					sizeneigh);
-//		}
-//		else{
-//			return computeHalfSizeMorton(iface,
-//					sizeneigh);
-//		}
-//	};
-//
-//	// ------------------------------------------------------------------------------- //
-//
-//	uint64_t* 		computeEdgeHalfSizeMorton(uint8_t iedge, 		// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
-//			uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
-//		uint32_t dh,dh2;
-//		uint64_t morton;
-//		uint32_t nneigh;
-//		int8_t i,cx,cy,cz;
-//		uint8_t iface1, iface2;
-//
-//		nneigh = (level < MAX_LEVEL_3D) ? 2 : 1;
-//		dh = (level < MAX_LEVEL_3D) ? getSize()/2 : getSize();
-//		dh2 = getSize();
-//		iface1 = global3D.edgeface[iedge][0];
-//		iface2 = global3D.edgeface[iedge][1];
-//
-//		if (info[iface1] || info[iface2]){
-//			sizehf = 0;
-//			return NULL;
-//		}
-//		else{
-//			uint64_t* Morton = new uint64_t[nneigh];
-//			switch (iedge) {
-//			case 0 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = -1;
-//					cy = (i==1);
-//					cz = -1;
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 1 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = 1;
-//					cy = (i==1);
-//					cz = -1;
-//					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 2 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = (i==1);
-//					cy = -1;
-//					cz = -1;
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 3 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = (i==1);
-//					cy = 1;
-//					cz = -1;
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 4 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = -1;
-//					cy = -1;
-//					cz = (i==1);
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 5 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = 1;
-//					cy = -1;
-//					cz = (i==1);
-//					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 6 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = -1;
-//					cy = 1;
-//					cz = (i==1);
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 7 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = 1;
-//					cy = 1;
-//					cz = (i==1);
-//					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh2*cy,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 8 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = -1;
-//					cy = (i==1);
-//					cz = 1;
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2*cz);
-//				}
-//			}
-//			break;
-//			case 9 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = 1;
-//					cy = (i==1);
-//					cz = 1;
-//					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh2*cz);
-//				}
-//			}
-//			break;
-//			case 10 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = (i==1);
-//					cy = -1;
-//					cz = 1;
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2*cz);
-//				}
-//			}
-//			break;
-//			case 11 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = (i==1);
-//					cy = 1;
-//					cz = 1;
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh2*cz);
-//				}
-//			}
-//			break;
-//			}
-//			sizehf = nneigh;
-//			return Morton;
-//		}
-//
-//
-//	};
-//
-//	// ------------------------------------------------------------------------------- //
-//
-//	uint64_t* 		computeEdgeMinSizeMorton(uint8_t iedge, 		// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
-//			const uint8_t & maxdepth,	// possible neighbours of octant throught edge iedge (sizem=0 if boundary octant)
-//			uint32_t & sizem){
-//		uint32_t dh,dh2;
-//		uint64_t morton;
-//		uint32_t nneigh, nline;
-//		uint32_t i;
-//		int32_t cx,cy,cz;
-//		uint8_t iface1, iface2;
-//
-//
-//		nneigh = (level < MAX_LEVEL_3D) ? uint32_t(pow(2.0,double((maxdepth-level)))) : 1;
-//		dh = (level < MAX_LEVEL_3D) ? uint32_t(pow(2.0,double(MAX_LEVEL_3D - maxdepth))) : getSize();
-//		dh2 = getSize();
-//		nline = uint32_t(pow(2.0,double((maxdepth-level))));
-//		iface1 = global3D.edgeface[iedge][0];
-//		iface2 = global3D.edgeface[iedge][1];
-//
-//		if (info[iface1] || info[iface2]){
-//			sizem = 0;
-//			return NULL;
-//		}
-//		else{
-//			uint64_t* Morton = new uint64_t[nneigh];
-//			switch (iedge) {
-//			case 0 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = -1;
-//					cy = (i/nline);
-//					cz = -1;
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 1 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = 1;
-//					cy = (i/nline);
-//					cz = -1;
-//					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 2 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = (i/nline);
-//					cy = -1;
-//					cz = -1;
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 3 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = (i/nline);
-//					cy = 1;
-//					cz = -1;
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 4 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = -1;
-//					cy = -1;
-//					cz = (i/nline);
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 5 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = 1;
-//					cy = -1;
-//					cz = (i/nline);
-//					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 6 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = -1;
-//					cy = 1;
-//					cz = (i/nline);
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 7 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = 1;
-//					cy = 1;
-//					cz = (i/nline);
-//					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh2*cy,this->z+dh*cz);
-//				}
-//			}
-//			break;
-//			case 8 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = -1;
-//					cy = (i/nline);
-//					cz = 1;
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2*cz);
-//				}
-//			}
-//			break;
-//			case 9 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = 1;
-//					cy = (i/nline);
-//					cz = 1;
-//					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh2*cz);
-//				}
-//			}
-//			break;
-//			case 10 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = (i/nline);
-//					cy = -1;
-//					cz = 1;
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2*cz);
-//				}
-//			}
-//			break;
-//			case 11 :
-//			{
-//				for (i=0; i<nneigh; i++){
-//					cx = (i/nline);
-//					cy = 1;
-//					cz = 1;
-//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh2*cz);
-//				}
-//			}
-//			break;
-//			}
-//			sizem = nneigh;
-//			sort(Morton,Morton+nneigh);
-//			return Morton;
-//		}
-//	};
-//
-//	// ------------------------------------------------------------------------------- //
-//
-//	uint64_t* 		computeEdgeVirtualMorton(uint8_t iedge, 		// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
-//			const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
-//			uint32_t & sizeneigh){
-//		if (getNotBalance()){
-//			return computeEdgeMinSizeMorton(iedge,
-//					maxdepth,
-//					sizeneigh);
-//		}
-//		else{
-//			return computeEdgeHalfSizeMorton(iedge,
-//					sizeneigh);
-//		}
-//
-//	};
-//
-//	// ------------------------------------------------------------------------------- //
+			return children;
+		}
+		else{
+			vector< Class_Octant<3> > children(0);
+			writeLog("Max level reached ---> No Children Built");
+			return children;
+		}
+	};
 
 	// ------------------------------------------------------------------------------- //
 
-vector<uint64_t> 		computeHalfSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
-		uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
-	uint32_t dh,dh2;
-	uint64_t morton;
-	uint32_t nneigh;
-	uint8_t i,cx,cy,cz;
+	//TODO Commented for memory leak detection
+	//	uint64_t* 		computeHalfSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
+	//			uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
+	//		uint32_t dh,dh2;
+	//		uint64_t morton;
+	//		uint32_t nneigh;
+	//		uint8_t i,cx,cy,cz;
+	//
+	//		nneigh = (level < MAX_LEVEL_3D) ? global3D.nchildren/2 : 1;
+	//		dh = (level < MAX_LEVEL_3D) ? getSize()/2 : getSize();
+	//		dh2 = getSize();
+	//
+	//		if (info[iface]){
+	//			//		uint64_t* Morton = new uint64_t[0];
+	//			sizehf = 0;
+	//			//		return Morton;
+	//			return NULL;
+	//		}
+	//		else{
+	//			uint64_t* Morton = new uint64_t[nneigh];
+	//			switch (iface) {
+	//			case 0 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cy = (i==1)||(i==3);
+	//					cz = (i==2)||(i==3);
+	//					Morton[i] = mortonEncode_magicbits(this->x-dh,this->y+dh*cy,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 1 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cy = (i==1)||(i==3);
+	//					cz = (i==2)||(i==3);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh2,this->y+dh*cy,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 2 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = (i==1)||(i==3);
+	//					cz = (i==2)||(i==3);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y-dh,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 3 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = (i==1)||(i==3);
+	//					cz = (i==2)||(i==3);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 4 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = (i==1)||(i==3);
+	//					cy = (i==2)||(i==3);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z-dh);
+	//				}
+	//			}
+	//			break;
+	//			case 5 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = (i==1)||(i==3);
+	//					cy = (i==2)||(i==3);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2);
+	//				}
+	//			}
+	//			break;
+	//			}
+	//			sizehf = nneigh;
+	//			return Morton;
+	//		}
+	//
+	//
+	//	};
+	//
+	//	// ------------------------------------------------------------------------------- //
+	//
+	//	uint64_t* 		computeMinSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
+	//			const uint8_t & maxdepth,	// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
+	//			uint32_t & sizem){
+	//		uint32_t dh,dh2;
+	//		uint64_t morton;
+	//		uint32_t nneigh, nline;
+	//		uint32_t i,cx,cy,cz;
+	//
+	//		nneigh = (level < MAX_LEVEL_3D) ? uint32_t(pow(2.0,double(2*(maxdepth-level)))) : 1;
+	//		dh = (level < MAX_LEVEL_3D) ? uint32_t(pow(2.0,double(MAX_LEVEL_3D - maxdepth))) : getSize();
+	//		dh2 = getSize();
+	//		nline = uint32_t(pow(2.0,double((maxdepth-level))));
+	//
+	//		if (info[iface]){
+	//			//		uint64_t* Morton = new uint64_t[0];
+	//			sizem = 0;
+	//			//		return Morton;
+	//			return NULL;
+	//		}
+	//		else{
+	//			uint64_t* Morton = new uint64_t[nneigh];
+	//			switch (iface) {
+	//			case 0 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cy = (i/nline);
+	//					cz = (i%nline);
+	//					Morton[i] = mortonEncode_magicbits(this->x-dh,this->y+dh*cy,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 1 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cy = (i/nline);
+	//					cz = (i%nline);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh2,this->y+dh*cy,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 2 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = (i/nline);
+	//					cz = (i%nline);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y-dh,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 3 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = (i/nline);
+	//					cz = (i%nline);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 4 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = (i/nline);
+	//					cy = (i%nline);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z-dh);
+	//				}
+	//			}
+	//			break;
+	//			case 5 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = (i/nline);
+	//					cy = (i%nline);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2);
+	//				}
+	//			}
+	//			break;
+	//			}
+	//			sizem = nneigh;
+	//			sort(Morton,Morton+nneigh);
+	//			return Morton;
+	//		}
+	//
+	//	};
+	//
+	//	// ------------------------------------------------------------------------------- //
+	//
+	//	uint64_t* 		computeVirtualMorton(uint8_t iface, 			// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
+	//			const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
+	//			uint32_t & sizeneigh){
+	//		if (getNotBalance()){
+	//			return computeMinSizeMorton(iface,
+	//					maxdepth,
+	//					sizeneigh);
+	//		}
+	//		else{
+	//			return computeHalfSizeMorton(iface,
+	//					sizeneigh);
+	//		}
+	//	};
+	//
+	//	// ------------------------------------------------------------------------------- //
+	//
+	//	uint64_t* 		computeEdgeHalfSizeMorton(uint8_t iedge, 		// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
+	//			uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
+	//		uint32_t dh,dh2;
+	//		uint64_t morton;
+	//		uint32_t nneigh;
+	//		int8_t i,cx,cy,cz;
+	//		uint8_t iface1, iface2;
+	//
+	//		nneigh = (level < MAX_LEVEL_3D) ? 2 : 1;
+	//		dh = (level < MAX_LEVEL_3D) ? getSize()/2 : getSize();
+	//		dh2 = getSize();
+	//		iface1 = global3D.edgeface[iedge][0];
+	//		iface2 = global3D.edgeface[iedge][1];
+	//
+	//		if (info[iface1] || info[iface2]){
+	//			sizehf = 0;
+	//			return NULL;
+	//		}
+	//		else{
+	//			uint64_t* Morton = new uint64_t[nneigh];
+	//			switch (iedge) {
+	//			case 0 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = -1;
+	//					cy = (i==1);
+	//					cz = -1;
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 1 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = 1;
+	//					cy = (i==1);
+	//					cz = -1;
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 2 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = (i==1);
+	//					cy = -1;
+	//					cz = -1;
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 3 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = (i==1);
+	//					cy = 1;
+	//					cz = -1;
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 4 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = -1;
+	//					cy = -1;
+	//					cz = (i==1);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 5 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = 1;
+	//					cy = -1;
+	//					cz = (i==1);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 6 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = -1;
+	//					cy = 1;
+	//					cz = (i==1);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 7 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = 1;
+	//					cy = 1;
+	//					cz = (i==1);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh2*cy,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 8 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = -1;
+	//					cy = (i==1);
+	//					cz = 1;
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 9 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = 1;
+	//					cy = (i==1);
+	//					cz = 1;
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh2*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 10 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = (i==1);
+	//					cy = -1;
+	//					cz = 1;
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 11 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = (i==1);
+	//					cy = 1;
+	//					cz = 1;
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh2*cz);
+	//				}
+	//			}
+	//			break;
+	//			}
+	//			sizehf = nneigh;
+	//			return Morton;
+	//		}
+	//
+	//
+	//	};
+	//
+	//	// ------------------------------------------------------------------------------- //
+	//
+	//	uint64_t* 		computeEdgeMinSizeMorton(uint8_t iedge, 		// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
+	//			const uint8_t & maxdepth,	// possible neighbours of octant throught edge iedge (sizem=0 if boundary octant)
+	//			uint32_t & sizem){
+	//		uint32_t dh,dh2;
+	//		uint64_t morton;
+	//		uint32_t nneigh, nline;
+	//		uint32_t i;
+	//		int32_t cx,cy,cz;
+	//		uint8_t iface1, iface2;
+	//
+	//
+	//		nneigh = (level < MAX_LEVEL_3D) ? uint32_t(pow(2.0,double((maxdepth-level)))) : 1;
+	//		dh = (level < MAX_LEVEL_3D) ? uint32_t(pow(2.0,double(MAX_LEVEL_3D - maxdepth))) : getSize();
+	//		dh2 = getSize();
+	//		nline = uint32_t(pow(2.0,double((maxdepth-level))));
+	//		iface1 = global3D.edgeface[iedge][0];
+	//		iface2 = global3D.edgeface[iedge][1];
+	//
+	//		if (info[iface1] || info[iface2]){
+	//			sizem = 0;
+	//			return NULL;
+	//		}
+	//		else{
+	//			uint64_t* Morton = new uint64_t[nneigh];
+	//			switch (iedge) {
+	//			case 0 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = -1;
+	//					cy = (i/nline);
+	//					cz = -1;
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 1 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = 1;
+	//					cy = (i/nline);
+	//					cz = -1;
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 2 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = (i/nline);
+	//					cy = -1;
+	//					cz = -1;
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 3 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = (i/nline);
+	//					cy = 1;
+	//					cz = -1;
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 4 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = -1;
+	//					cy = -1;
+	//					cz = (i/nline);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 5 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = 1;
+	//					cy = -1;
+	//					cz = (i/nline);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 6 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = -1;
+	//					cy = 1;
+	//					cz = (i/nline);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 7 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = 1;
+	//					cy = 1;
+	//					cz = (i/nline);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh2*cy,this->z+dh*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 8 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = -1;
+	//					cy = (i/nline);
+	//					cz = 1;
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 9 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = 1;
+	//					cy = (i/nline);
+	//					cz = 1;
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh2*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 10 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = (i/nline);
+	//					cy = -1;
+	//					cz = 1;
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2*cz);
+	//				}
+	//			}
+	//			break;
+	//			case 11 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = (i/nline);
+	//					cy = 1;
+	//					cz = 1;
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh2*cz);
+	//				}
+	//			}
+	//			break;
+	//			}
+	//			sizem = nneigh;
+	//			sort(Morton,Morton+nneigh);
+	//			return Morton;
+	//		}
+	//	};
+	//
+	//	// ------------------------------------------------------------------------------- //
+	//
+	//	uint64_t* 		computeEdgeVirtualMorton(uint8_t iedge, 		// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
+	//			const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
+	//			uint32_t & sizeneigh){
+	//		if (getNotBalance()){
+	//			return computeEdgeMinSizeMorton(iedge,
+	//					maxdepth,
+	//					sizeneigh);
+	//		}
+	//		else{
+	//			return computeEdgeHalfSizeMorton(iedge,
+	//					sizeneigh);
+	//		}
+	//
+	//	};
+	//
+	//	// ------------------------------------------------------------------------------- //
 
-	nneigh = (level < MAX_LEVEL_3D) ? global3D.nchildren/2 : 1;
-	dh = (level < MAX_LEVEL_3D) ? getSize()/2 : getSize();
-	dh2 = getSize();
+	// ------------------------------------------------------------------------------- //
 
-	if (info[iface]){
-		//		uint64_t* Morton = new uint64_t[0];
-		sizehf = 0;
-		//		return Morton;
-		vector<uint64_t> Morton(0);
-		return Morton;
-	}
-	else{
-		vector<uint64_t> Morton(nneigh);
-		switch (iface) {
-		case 0 :
-		{
-			for (i=0; i<nneigh; i++){
-				cy = (i==1)||(i==3);
-				cz = (i==2)||(i==3);
-				Morton[i] = mortonEncode_magicbits(this->x-dh,this->y+dh*cy,this->z+dh*cz);
-			}
-		}
-		break;
-		case 1 :
-		{
-			for (i=0; i<nneigh; i++){
-				cy = (i==1)||(i==3);
-				cz = (i==2)||(i==3);
-				Morton[i] = mortonEncode_magicbits(this->x+dh2,this->y+dh*cy,this->z+dh*cz);
-			}
-		}
-		break;
-		case 2 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i==1)||(i==3);
-				cz = (i==2)||(i==3);
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y-dh,this->z+dh*cz);
-			}
-		}
-		break;
-		case 3 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i==1)||(i==3);
-				cz = (i==2)||(i==3);
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2,this->z+dh*cz);
-			}
-		}
-		break;
-		case 4 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i==1)||(i==3);
-				cy = (i==2)||(i==3);
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z-dh);
-			}
-		}
-		break;
-		case 5 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i==1)||(i==3);
-				cy = (i==2)||(i==3);
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2);
-			}
-		}
-		break;
-		}
-		sizehf = nneigh;
-		return Morton;
-	}
+	vector<uint64_t> 		computeHalfSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
+			uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
+		uint32_t dh,dh2;
+		uint64_t morton;
+		uint32_t nneigh;
+		uint8_t i,cx,cy,cz;
 
+		nneigh = (level < MAX_LEVEL_3D) ? global3D.nchildren/2 : 1;
+		dh = (level < MAX_LEVEL_3D) ? getSize()/2 : getSize();
+		dh2 = getSize();
 
-};
-
-// ------------------------------------------------------------------------------- //
-
-vector<uint64_t>		computeMinSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
-		const uint8_t & maxdepth,	// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
-		uint32_t & sizem){
-	uint32_t dh,dh2;
-	uint64_t morton;
-	uint32_t nneigh, nline;
-	uint32_t i,cx,cy,cz;
-
-	nneigh = (level < MAX_LEVEL_3D) ? uint32_t(pow(2.0,double(2*(maxdepth-level)))) : 1;
-	dh = (level < MAX_LEVEL_3D) ? uint32_t(pow(2.0,double(MAX_LEVEL_3D - maxdepth))) : getSize();
-	dh2 = getSize();
-	nline = uint32_t(pow(2.0,double((maxdepth-level))));
-
-	if (info[iface]){
-		//		uint64_t* Morton = new uint64_t[0];
-		sizem = 0;
-		//		return Morton;
-		vector<uint64_t> Morton(0);
-		return Morton;
-	}
-	else{
-		vector<uint64_t> Morton(nneigh);
-		switch (iface) {
-		case 0 :
-		{
-			for (i=0; i<nneigh; i++){
-				cy = (i/nline);
-				cz = (i%nline);
-				Morton[i] = mortonEncode_magicbits(this->x-dh,this->y+dh*cy,this->z+dh*cz);
+		if (info[iface]){
+			sizehf = 0;
+			vector<uint64_t> Morton(0);
+			return Morton;
+		}
+		else{
+			vector<uint64_t> Morton(nneigh);
+			switch (iface) {
+			case 0 :
+			{
+				for (i=0; i<nneigh; i++){
+					cy = (i==1)||(i==3);
+					cz = (i==2)||(i==3);
+					Morton[i] = mortonEncode_magicbits(this->x-dh,this->y+dh*cy,this->z+dh*cz);
+				}
 			}
-		}
-		break;
-		case 1 :
-		{
-			for (i=0; i<nneigh; i++){
-				cy = (i/nline);
-				cz = (i%nline);
-				Morton[i] = mortonEncode_magicbits(this->x+dh2,this->y+dh*cy,this->z+dh*cz);
+			break;
+			case 1 :
+			{
+				for (i=0; i<nneigh; i++){
+					cy = (i==1)||(i==3);
+					cz = (i==2)||(i==3);
+					Morton[i] = mortonEncode_magicbits(this->x+dh2,this->y+dh*cy,this->z+dh*cz);
+				}
 			}
-		}
-		break;
-		case 2 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i/nline);
-				cz = (i%nline);
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y-dh,this->z+dh*cz);
+			break;
+			case 2 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = (i==1)||(i==3);
+					cz = (i==2)||(i==3);
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y-dh,this->z+dh*cz);
+				}
 			}
-		}
-		break;
-		case 3 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i/nline);
-				cz = (i%nline);
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2,this->z+dh*cz);
+			break;
+			case 3 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = (i==1)||(i==3);
+					cz = (i==2)||(i==3);
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2,this->z+dh*cz);
+				}
 			}
-		}
-		break;
-		case 4 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i/nline);
-				cy = (i%nline);
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z-dh);
+			break;
+			case 4 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = (i==1)||(i==3);
+					cy = (i==2)||(i==3);
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z-dh);
+				}
 			}
-		}
-		break;
-		case 5 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i/nline);
-				cy = (i%nline);
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2);
+			break;
+			case 5 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = (i==1)||(i==3);
+					cy = (i==2)||(i==3);
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2);
+				}
 			}
-		}
-		break;
-		}
-		sizem = nneigh;
-//		sort(Morton,Morton+nneigh);
-		sort(Morton.begin(), Morton.end());
-		return Morton;
-	}
-
-};
-
-// ------------------------------------------------------------------------------- //
-
-vector<uint64_t> 		computeVirtualMorton(uint8_t iface, 			// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
-		const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
-		uint32_t & sizeneigh){
-	vector<uint64_t> Morton;
-	if (getNotBalance()){
-		return computeMinSizeMorton(iface,
-				maxdepth,
-				sizeneigh);
-	}
-	else{
-		return computeHalfSizeMorton(iface,
-				sizeneigh);
-	}
-};
-
-// ------------------------------------------------------------------------------- //
-
-vector<uint64_t> 		computeEdgeHalfSizeMorton(uint8_t iedge, 		// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
-		uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
-	uint32_t dh,dh2;
-	uint64_t morton;
-	uint32_t nneigh;
-	int8_t i,cx,cy,cz;
-	uint8_t iface1, iface2;
-
-	nneigh = (level < MAX_LEVEL_3D) ? 2 : 1;
-	dh = (level < MAX_LEVEL_3D) ? getSize()/2 : getSize();
-	dh2 = getSize();
-	iface1 = global3D.edgeface[iedge][0];
-	iface2 = global3D.edgeface[iedge][1];
-
-	if (info[iface1] || info[iface2]){
-		sizehf = 0;
-		vector<uint64_t> Morton(0);
-		return Morton;
-	}
-	else{
-		vector<uint64_t> Morton(nneigh);
-		switch (iedge) {
-		case 0 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = -1;
-				cy = (i==1);
-				cz = -1;
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
+			break;
 			}
+			sizehf = nneigh;
+			return Morton;
 		}
-		break;
-		case 1 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = 1;
-				cy = (i==1);
-				cz = -1;
-				Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh*cz);
-			}
-		}
-		break;
-		case 2 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i==1);
-				cy = -1;
-				cz = -1;
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
-			}
-		}
-		break;
-		case 3 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i==1);
-				cy = 1;
-				cz = -1;
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh*cz);
-			}
-		}
-		break;
-		case 4 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = -1;
-				cy = -1;
-				cz = (i==1);
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
-			}
-		}
-		break;
-		case 5 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = 1;
-				cy = -1;
-				cz = (i==1);
-				Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh*cz);
-			}
-		}
-		break;
-		case 6 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = -1;
-				cy = 1;
-				cz = (i==1);
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh*cz);
-			}
-		}
-		break;
-		case 7 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = 1;
-				cy = 1;
-				cz = (i==1);
-				Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh2*cy,this->z+dh*cz);
-			}
-		}
-		break;
-		case 8 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = -1;
-				cy = (i==1);
-				cz = 1;
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2*cz);
-			}
-		}
-		break;
-		case 9 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = 1;
-				cy = (i==1);
-				cz = 1;
-				Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh2*cz);
-			}
-		}
-		break;
-		case 10 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i==1);
-				cy = -1;
-				cz = 1;
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2*cz);
-			}
-		}
-		break;
-		case 11 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i==1);
-				cy = 1;
-				cz = 1;
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh2*cz);
-			}
-		}
-		break;
-		}
-		sizehf = nneigh;
-		return Morton;
-	}
 
 
-};
+	};
 
-// ------------------------------------------------------------------------------- //
+	// ------------------------------------------------------------------------------- //
 
-vector<uint64_t> 		computeEdgeMinSizeMorton(uint8_t iedge, 		// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
-		const uint8_t & maxdepth,	// possible neighbours of octant throught edge iedge (sizem=0 if boundary octant)
-		uint32_t & sizem){
-	uint32_t dh,dh2;
-	uint64_t morton;
-	uint32_t nneigh, nline;
-	uint32_t i;
-	int32_t cx,cy,cz;
-	uint8_t iface1, iface2;
+	vector<uint64_t>		computeMinSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
+			const uint8_t & maxdepth,	// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
+			uint32_t & sizem){
+		uint32_t dh,dh2;
+		uint64_t morton;
+		uint32_t nneigh, nline;
+		uint32_t i,cx,cy,cz;
+
+		nneigh = (level < MAX_LEVEL_3D) ? uint32_t(pow(2.0,double(2*(maxdepth-level)))) : 1;
+		dh = (level < MAX_LEVEL_3D) ? uint32_t(pow(2.0,double(MAX_LEVEL_3D - maxdepth))) : getSize();
+		dh2 = getSize();
+		nline = uint32_t(pow(2.0,double((maxdepth-level))));
+
+		if (info[iface]){
+			//		uint64_t* Morton = new uint64_t[0];
+			sizem = 0;
+			//		return Morton;
+			vector<uint64_t> Morton(0);
+			return Morton;
+		}
+		else{
+			vector<uint64_t> Morton(nneigh);
+			switch (iface) {
+			case 0 :
+			{
+				for (i=0; i<nneigh; i++){
+					cy = (i/nline);
+					cz = (i%nline);
+					Morton[i] = mortonEncode_magicbits(this->x-dh,this->y+dh*cy,this->z+dh*cz);
+				}
+			}
+			break;
+			case 1 :
+			{
+				for (i=0; i<nneigh; i++){
+					cy = (i/nline);
+					cz = (i%nline);
+					Morton[i] = mortonEncode_magicbits(this->x+dh2,this->y+dh*cy,this->z+dh*cz);
+				}
+			}
+			break;
+			case 2 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = (i/nline);
+					cz = (i%nline);
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y-dh,this->z+dh*cz);
+				}
+			}
+			break;
+			case 3 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = (i/nline);
+					cz = (i%nline);
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2,this->z+dh*cz);
+				}
+			}
+			break;
+			case 4 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = (i/nline);
+					cy = (i%nline);
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z-dh);
+				}
+			}
+			break;
+			case 5 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = (i/nline);
+					cy = (i%nline);
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2);
+				}
+			}
+			break;
+			}
+			sizem = nneigh;
+			//		sort(Morton,Morton+nneigh);
+			sort(Morton.begin(), Morton.end());
+			return Morton;
+		}
+
+	};
+
+	// ------------------------------------------------------------------------------- //
+
+	vector<uint64_t> 		computeVirtualMorton(uint8_t iface, 			// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
+			const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
+			uint32_t & sizeneigh){
+		vector<uint64_t> Morton;
+		if (getNotBalance()){
+			return computeMinSizeMorton(iface,
+					maxdepth,
+					sizeneigh);
+		}
+		else{
+			return computeHalfSizeMorton(iface,
+					sizeneigh);
+		}
+	};
+
+	// ------------------------------------------------------------------------------- //
+
+	vector<uint64_t> 		computeEdgeHalfSizeMorton(uint8_t iedge, 		// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
+			uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
+		uint32_t dh,dh2;
+		uint64_t morton;
+		uint32_t nneigh;
+		int8_t i,cx,cy,cz;
+		uint8_t iface1, iface2;
+
+		nneigh = (level < MAX_LEVEL_3D) ? 2 : 1;
+		dh = (level < MAX_LEVEL_3D) ? getSize()/2 : getSize();
+		dh2 = getSize();
+		iface1 = global3D.edgeface[iedge][0];
+		iface2 = global3D.edgeface[iedge][1];
+
+		if (info[iface1] || info[iface2]){
+			sizehf = 0;
+			vector<uint64_t> Morton(0);
+			return Morton;
+		}
+		else{
+			vector<uint64_t> Morton(nneigh);
+			switch (iedge) {
+			case 0 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = -1;
+					cy = (i==1);
+					cz = -1;
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
+				}
+			}
+			break;
+			case 1 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = 1;
+					cy = (i==1);
+					cz = -1;
+					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh*cz);
+				}
+			}
+			break;
+			case 2 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = (i==1);
+					cy = -1;
+					cz = -1;
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
+				}
+			}
+			break;
+			case 3 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = (i==1);
+					cy = 1;
+					cz = -1;
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh*cz);
+				}
+			}
+			break;
+			case 4 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = -1;
+					cy = -1;
+					cz = (i==1);
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
+				}
+			}
+			break;
+			case 5 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = 1;
+					cy = -1;
+					cz = (i==1);
+					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh*cz);
+				}
+			}
+			break;
+			case 6 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = -1;
+					cy = 1;
+					cz = (i==1);
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh*cz);
+				}
+			}
+			break;
+			case 7 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = 1;
+					cy = 1;
+					cz = (i==1);
+					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh2*cy,this->z+dh*cz);
+				}
+			}
+			break;
+			case 8 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = -1;
+					cy = (i==1);
+					cz = 1;
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2*cz);
+				}
+			}
+			break;
+			case 9 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = 1;
+					cy = (i==1);
+					cz = 1;
+					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh2*cz);
+				}
+			}
+			break;
+			case 10 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = (i==1);
+					cy = -1;
+					cz = 1;
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2*cz);
+				}
+			}
+			break;
+			case 11 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = (i==1);
+					cy = 1;
+					cz = 1;
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh2*cz);
+				}
+			}
+			break;
+			}
+			sizehf = nneigh;
+			return Morton;
+		}
 
 
-	nneigh = (level < MAX_LEVEL_3D) ? uint32_t(pow(2.0,double((maxdepth-level)))) : 1;
-	dh = (level < MAX_LEVEL_3D) ? uint32_t(pow(2.0,double(MAX_LEVEL_3D - maxdepth))) : getSize();
-	dh2 = getSize();
-	nline = uint32_t(pow(2.0,double((maxdepth-level))));
-	iface1 = global3D.edgeface[iedge][0];
-	iface2 = global3D.edgeface[iedge][1];
+	};
 
-	if (info[iface1] || info[iface2]){
-		sizem = 0;
-		vector<uint64_t> Morton(0);
-		return Morton;
-	}
-	else{
-		vector<uint64_t> Morton(nneigh);
-		switch (iedge) {
-		case 0 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = -1;
-				cy = (i/nline);
-				cz = -1;
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
-			}
-		}
-		break;
-		case 1 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = 1;
-				cy = (i/nline);
-				cz = -1;
-				Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh*cz);
-			}
-		}
-		break;
-		case 2 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i/nline);
-				cy = -1;
-				cz = -1;
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
-			}
-		}
-		break;
-		case 3 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i/nline);
-				cy = 1;
-				cz = -1;
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh*cz);
-			}
-		}
-		break;
-		case 4 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = -1;
-				cy = -1;
-				cz = (i/nline);
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
-			}
-		}
-		break;
-		case 5 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = 1;
-				cy = -1;
-				cz = (i/nline);
-				Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh*cz);
-			}
-		}
-		break;
-		case 6 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = -1;
-				cy = 1;
-				cz = (i/nline);
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh*cz);
-			}
-		}
-		break;
-		case 7 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = 1;
-				cy = 1;
-				cz = (i/nline);
-				Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh2*cy,this->z+dh*cz);
-			}
-		}
-		break;
-		case 8 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = -1;
-				cy = (i/nline);
-				cz = 1;
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2*cz);
-			}
-		}
-		break;
-		case 9 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = 1;
-				cy = (i/nline);
-				cz = 1;
-				Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh2*cz);
-			}
-		}
-		break;
-		case 10 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i/nline);
-				cy = -1;
-				cz = 1;
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2*cz);
-			}
-		}
-		break;
-		case 11 :
-		{
-			for (i=0; i<nneigh; i++){
-				cx = (i/nline);
-				cy = 1;
-				cz = 1;
-				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh2*cz);
-			}
-		}
-		break;
-		}
-		sizem = nneigh;
-		//sort(Morton,Morton+nneigh);
-		sort(Morton.begin(),Morton.end());
-		return Morton;
-	}
-};
+	// ------------------------------------------------------------------------------- //
 
-// ------------------------------------------------------------------------------- //
+	vector<uint64_t> 		computeEdgeMinSizeMorton(uint8_t iedge, 		// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
+			const uint8_t & maxdepth,	// possible neighbours of octant throught edge iedge (sizem=0 if boundary octant)
+			uint32_t & sizem){
+		uint32_t dh,dh2;
+		uint64_t morton;
+		uint32_t nneigh, nline;
+		uint32_t i;
+		int32_t cx,cy,cz;
+		uint8_t iface1, iface2;
 
-vector<uint64_t>		computeEdgeVirtualMorton(uint8_t iedge, 		// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
-		const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
-		uint32_t & sizeneigh){
-	if (getNotBalance()){
-		return computeEdgeMinSizeMorton(iedge,
-				maxdepth,
-				sizeneigh);
-	}
-	else{
-		return computeEdgeHalfSizeMorton(iedge,
-				sizeneigh);
-	}
 
-};
+		nneigh = (level < MAX_LEVEL_3D) ? uint32_t(pow(2.0,double((maxdepth-level)))) : 1;
+		dh = (level < MAX_LEVEL_3D) ? uint32_t(pow(2.0,double(MAX_LEVEL_3D - maxdepth))) : getSize();
+		dh2 = getSize();
+		nline = uint32_t(pow(2.0,double((maxdepth-level))));
+		iface1 = global3D.edgeface[iedge][0];
+		iface2 = global3D.edgeface[iedge][1];
 
-// ------------------------------------------------------------------------------- //
+		if (info[iface1] || info[iface2]){
+			sizem = 0;
+			vector<uint64_t> Morton(0);
+			return Morton;
+		}
+		else{
+			vector<uint64_t> Morton(nneigh);
+			switch (iedge) {
+			case 0 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = -1;
+					cy = (i/nline);
+					cz = -1;
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
+				}
+			}
+			break;
+			case 1 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = 1;
+					cy = (i/nline);
+					cz = -1;
+					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh*cz);
+				}
+			}
+			break;
+			case 2 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = (i/nline);
+					cy = -1;
+					cz = -1;
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
+				}
+			}
+			break;
+			case 3 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = (i/nline);
+					cy = 1;
+					cz = -1;
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh*cz);
+				}
+			}
+			break;
+			case 4 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = -1;
+					cy = -1;
+					cz = (i/nline);
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
+				}
+			}
+			break;
+			case 5 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = 1;
+					cy = -1;
+					cz = (i/nline);
+					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh*cz);
+				}
+			}
+			break;
+			case 6 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = -1;
+					cy = 1;
+					cz = (i/nline);
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh*cz);
+				}
+			}
+			break;
+			case 7 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = 1;
+					cy = 1;
+					cz = (i/nline);
+					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh2*cy,this->z+dh*cz);
+				}
+			}
+			break;
+			case 8 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = -1;
+					cy = (i/nline);
+					cz = 1;
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2*cz);
+				}
+			}
+			break;
+			case 9 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = 1;
+					cy = (i/nline);
+					cz = 1;
+					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh2*cz);
+				}
+			}
+			break;
+			case 10 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = (i/nline);
+					cy = -1;
+					cz = 1;
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2*cz);
+				}
+			}
+			break;
+			case 11 :
+			{
+				for (i=0; i<nneigh; i++){
+					cx = (i/nline);
+					cy = 1;
+					cz = 1;
+					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh2*cz);
+				}
+			}
+			break;
+			}
+			sizem = nneigh;
+			//sort(Morton,Morton+nneigh);
+			sort(Morton.begin(),Morton.end());
+			return Morton;
+		}
+	};
+
+	// ------------------------------------------------------------------------------- //
+
+	vector<uint64_t>		computeEdgeVirtualMorton(uint8_t iedge, 		// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
+			const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
+			uint32_t & sizeneigh){
+		if (getNotBalance()){
+			return computeEdgeMinSizeMorton(iedge,
+					maxdepth,
+					sizeneigh);
+		}
+		else{
+			return computeEdgeHalfSizeMorton(iedge,
+					sizeneigh);
+		}
+
+	};
+
+	// ------------------------------------------------------------------------------- //
 
 
 	uint64_t 		computeNodeHalfSizeMorton(uint8_t inode, 		// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
