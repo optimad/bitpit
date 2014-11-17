@@ -698,7 +698,6 @@ private:
 		return nodes;
 	}
 
-
 	/*! Get the normal of a face of an octant.
 	 * \param[in] oct Target octant.
 	 * \param[in] iface Index of the face for normal computing.
@@ -792,7 +791,6 @@ private:
 		};
 		return octree.getNumOctants();
 	};
-
 
 	/*! Set the refinement marker of an octant.
 	 * \param[in] oct Target octant.
@@ -956,7 +954,6 @@ public:
 		trans.mapNodes(nodes_, nodes);
 		return nodes;
 	}
-
 
 	/*! Get the normal of a face of an octant.
 	 * \param[in] Local index of target octant.
@@ -1287,7 +1284,6 @@ public:
 		return inter->getIsGhost();
 	}
 
-
 	/*! Get if an intersection is a boundary intersection for a process.
 	 * \param[in] inter Pointer to target intersection.
 	 * \return Process boundary or not boundary?.
@@ -1408,7 +1404,6 @@ public:
 		trans.mapNodesIntersection(nodes_, nodes);
 		return nodes;
 	}
-
 
 	/*! Get the normal of an intersection.
 	 * \param[in] oct Pointer to target intersection.

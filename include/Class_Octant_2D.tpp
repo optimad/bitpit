@@ -280,10 +280,11 @@ public:
 		double	dh;
 
 		dh = double(getSize())/2.0;
-		vector<double> center(2);
+		vector<double> center(3);
 
 		center[0] = (double)x + dh;
 		center[1] = (double)y + dh;
+		center[2] = 0.0;
 		return center;
 	};
 
@@ -329,7 +330,7 @@ public:
 
 	/*! Get the normal of a face of an octant in logical domain.
 	 * \param[in] iface Index of the face for normal computing.
-	 * \param[out] normal Pointer to an array[3] with components (with z=0) of the normal of face.
+	 * \param[out] normal Vector[3] with components (with z=0) of the normal of face.
 	 */
 	void		getNormal(uint8_t & iface,
 			vector<int8_t> & normal){
