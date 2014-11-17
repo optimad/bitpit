@@ -7,7 +7,6 @@ project(PABLO)
 ADD_DEFINITIONS(-std=c++11)
 
 include_directories(include)
-include_directories(/home/edoardo/git/opt_base/include)
 SET(CMAKE_C_COMPILER mpicc)
 SET(CMAKE_CXX_COMPILER mpic++)
 #SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb -O0 -fmessage-length=0")
