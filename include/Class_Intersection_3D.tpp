@@ -1,8 +1,22 @@
-/*
- * Class_Intersection_3D.tpp
+/*!
+ *	\date			23/apr/2014
+ *	\authors		Edoardo Lombardi
+ *	\authors		Marco Cisternino
+ *	\version		0.1
+ *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
+ *	\par			License:\n
+ *	This version of PABLO is released under the LGPL License.
  *
- *  Created on: 22/apr/2014
- *      Author: Marco Cisternino
+ *	\brief Intersection class definition - 3D specialization
+ *
+ *	The intersection is the face or portion of face shared by two octants. An intersection is defined
+ *	by :
+ *	- the owner octants, i.e. the octants sharing the intersection, identified by a couple (array[2]) of indices;
+ *	- the index of the face, that contains the intersection, of the first owner;
+ *	- an identifier of the octant with higher level of refinement (0/1) [if same level identifier =0];
+ *	- a flag stating if an owner is ghost;
+ *	- a flag to communicate if the intersection is new after a mesh refinement.
+ *
  */
 
 // =================================================================================== //
