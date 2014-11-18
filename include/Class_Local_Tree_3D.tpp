@@ -79,8 +79,8 @@ public:
 		last_desc = octl;
 		size_ghosts = 0;
 		local_max_depth = 0;
-
 	};
+
 	~Class_Local_Tree(){};
 
 	// ------------------------------------------------------------------------------- //
