@@ -18,10 +18,10 @@ Class_Array::Class_Array(uint32_t size, int value) {
 Class_Array::Class_Array(
 		const Class_Array& other) {
 	arraySize = other.arraySize;
-//	if(array != NULL){
-//		delete [] array;
-//		array = NULL;
-//	}
+	//	if(array != NULL){
+	//		delete [] array;
+	//		array = NULL;
+	//	}
 	array = new int [arraySize];
 	for(int i = 0; i < arraySize; ++i)
 		array[i] = other.array[i];

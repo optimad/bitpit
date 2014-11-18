@@ -41,6 +41,7 @@ class Class_Octant<2>{
 	// TYPEDEFS ----------------------------------------------------------------------- //
 
 	typedef vector<Class_Octant<2> > 	OctantsType;
+	typedef vector<double>				dvector;
 	typedef vector<uint32_t>			u32vector;
 	typedef vector<vector<uint32_t>	>	u32vector2D;
 	typedef vector<vector<uint64_t>	>	u64vector2D;
@@ -230,43 +231,83 @@ public:
 
 	// ------------------------------------------------------------------------------- //
 
+	//TODO Commented for memeory leak detection
+
+	//	/*! Get the coordinates of the center of an octant in logical domain.
+	//	 * \return center Pointer to an array[2] with the coordinates of the center of octant.
+	//	 */
+	//	double*		getCenter(){
+	//		uint8_t		i;
+	//		double	dh;
+	//
+	//		dh = double(getSize())/2.0;
+	//		double *center = new double[2];
+	//
+	//		center[0] = (double)x + dh;
+	//		center[1] = (double)y + dh;
+	//		return center;
+	//	};
+	//
+	//	// ------------------------------------------------------------------------------- //
+	//
+	//	/*! Get the coordinates of the nodes of an octant in logical domain.
+	//	 * \return nodes Pointer to an array[4][3] with the coordinates (with z=0) of the nodes of octant.
+	//	 */
+	//	uint32_t	(*getNodes())[3]{
+	//		uint8_t		i, cx, cy;
+	//		uint32_t	dh;
+	//
+	//		dh = getSize();
+	//		uint32_t (*nodes)[3] = new uint32_t[global2D.nnodes][3];
+	//
+	//		for (i = 0; i < global2D.nnodes; i++){
+	//			cx = uint8_t(i%2);
+	//			cy = uint8_t(i/2);
+	//			nodes[i][0] = x + cx*dh;
+	//			nodes[i][1] = y + cy*dh;
+	//			nodes[i][2] = 0;
+	//
+	//		}
+	//		return nodes;
+	//	};
+
+	// ------------------------------------------------------------------------------- //
 
 	/*! Get the coordinates of the center of an octant in logical domain.
-	 * \return center Pointer to an array[2] with the coordinates of the center of octant.
+	 * \return Vector[3] with the coordinates of the center of octant.
 	 */
-	double*		getCenter(){
+	dvector	getCenter(){
 		uint8_t		i;
 		double	dh;
 
 		dh = double(getSize())/2.0;
-		double *center = new double[2];
+		vector<double> center(3);
 
 		center[0] = (double)x + dh;
 		center[1] = (double)y + dh;
+		center[2] = 0.0;
 		return center;
 	};
 
 	// ------------------------------------------------------------------------------- //
 
-	/*! Get the coordinates of the nodes of an octant in logical domain.
-	 * \return nodes Pointer to an array[4][3] with the coordinates (with z=0) of the nodes of octant.
+	/*! Get the coordinates of the center of a face of an octant in logical domain.
+	 * \return Vector[3] with the coordinates of the center of octant.
 	 */
-	uint32_t	(*getNodes())[3]{
-		uint8_t		i, cx, cy;
-		uint32_t	dh;
+	dvector	getFaceCenter(uint8_t iface){
+		double	dh_2;
 
-		dh = getSize();
-		uint32_t (*nodes)[3] = new uint32_t[global2D.nnodes][3];
+		int A[4][2] = { {0,1} , {2,1} , {1,0} , {1,2} };
 
-		for (i = 0; i < global2D.nnodes; i++){
-			cx = uint8_t(i%2);
-			cy = uint8_t(i/2);
-			nodes[i][0] = x + cx*dh;
-			nodes[i][1] = y + cy*dh;
-			nodes[i][2] = 0;
+		dh_2 = double(getSize())/2.0;
+		vector<double> center(3);
 
+		if (iface < global2D.nfaces){
+			center[0] = (double)x + (double)A[iface][0] * dh_2;
+			center[1] = (double)y + (double)A[iface][1] * dh_2;
+			center[2] = 0.0;
 		}
-		return nodes;
+		return center;
 	};
 
 	// ------------------------------------------------------------------------------- //
@@ -294,23 +335,24 @@ public:
 		nodes.shrink_to_fit();
 	};
 
+	//TODO Temporary commented for memory leak detection
+	//	/*! Get the normal of a face of an octant in logical domain.
+	//	 * \param[in] iface Index of the face for normal computing.
+	//	 * \return normal Pointer to an array[3] with components (with z=0) of the normal of face.
+	//	 */
+	//	int8_t*		getNormal(uint8_t & iface){
+	//		uint8_t		i;
+	//		int8_t* normal = new int8_t[3];
+	//
+	//		for (i = 0; i < 3; i++){
+	//			normal[i] = global2D.normals[iface][i];
+	//		}
+	//		return normal;
+	//	};
+
 	/*! Get the normal of a face of an octant in logical domain.
 	 * \param[in] iface Index of the face for normal computing.
-	 * \return normal Pointer to an array[3] with components (with z=0) of the normal of face.
-	 */
-	int8_t*		getNormal(uint8_t & iface){
-		uint8_t		i;
-		int8_t* normal = new int8_t[3];
-
-		for (i = 0; i < 3; i++){
-			normal[i] = global2D.normals[iface][i];
-		}
-		return normal;
-	};
-
-	/*! Get the normal of a face of an octant in logical domain.
-	 * \param[in] iface Index of the face for normal computing.
-	 * \param[out] normal Pointer to an array[3] with components (with z=0) of the normal of face.
+	 * \param[out] normal Vector[3] with components (with z=0) of the normal of face.
 	 */
 	void		getNormal(uint8_t & iface,
 			vector<int8_t> & normal){
@@ -367,11 +409,94 @@ private:
 
 	// ------------------------------------------------------------------------------- //
 
-	Class_Octant<2>*	buildChildren(){								// Builds children of octant and return a pointer to an ordered array children[nchildren] (info update)
+	//TODO Temporary commented for memory leak detection
+	//	Class_Octant<2>*	buildChildren(){								// Builds children of octant and return a pointer to an ordered array children[nchildren] (info update)
+	//		uint8_t xf,yf,zf;
+	//
+	//		if (this->level < MAX_LEVEL_2D){
+	//			Class_Octant<2>* children = new Class_Octant<2>[global2D.nchildren];
+	//			for (int i=0; i<global2D.nchildren; i++){
+	//				switch (i) {
+	//				case 0 :
+	//				{
+	//					Class_Octant<2> oct(*this);
+	//					oct.setMarker(max(0,oct.marker-1));
+	//					oct.setLevel(oct.level+1);
+	//					oct.info[8]=true;
+	//					// Update interior face bound and pbound
+	//					xf=1; yf=3;
+	//					oct.info[xf] = oct.info[xf+global2D.nfaces] = false;
+	//					oct.info[yf] = oct.info[yf+global2D.nfaces] = false;
+	//					children[0] = oct;
+	//				}
+	//				break;
+	//				case 1 :
+	//				{
+	//					Class_Octant<2> oct(*this);
+	//					oct.setMarker(max(0,oct.marker-1));
+	//					oct.setLevel(oct.level+1);
+	//					oct.info[8]=true;
+	//					uint32_t dh = oct.getSize();
+	//					oct.x += dh;
+	//					// Update interior face bound and pbound
+	//					xf=0; yf=3;
+	//					oct.info[xf] = oct.info[xf+global2D.nfaces] = false;
+	//					oct.info[yf] = oct.info[yf+global2D.nfaces] = false;
+	//					children[1] = oct;
+	//				}
+	//				break;
+	//				case 2 :
+	//				{
+	//					Class_Octant<2> oct(*this);
+	//					oct.setMarker(max(0,oct.marker-1));
+	//					oct.setLevel(oct.level+1);
+	//					oct.info[8]=true;
+	//					uint32_t dh = oct.getSize();
+	//					oct.y += dh;
+	//					// Update interior face bound and pbound
+	//					xf=1; yf=2;
+	//					oct.info[xf] = oct.info[xf+global2D.nfaces] = false;
+	//					oct.info[yf] = oct.info[yf+global2D.nfaces] = false;
+	//					children[2] = oct;
+	//				}
+	//				break;
+	//				case 3 :
+	//				{
+	//					Class_Octant<2> oct(*this);
+	//					oct.setMarker(max(0,oct.marker-1));
+	//					oct.setLevel(oct.level+1);
+	//					oct.info[8]=true;
+	//					uint32_t dh = oct.getSize();
+	//					oct.x += dh;
+	//					oct.y += dh;
+	//					// Update interior face bound and pbound
+	//					xf=0; yf=2;
+	//					oct.info[xf] = oct.info[xf+global2D.nfaces] = false;
+	//					oct.info[yf] = oct.info[yf+global2D.nfaces] = false;
+	//					children[3] = oct;
+	//				}
+	//				break;
+	//				}
+	//			}
+	//			return children;
+	//		}
+	//		else{
+	//			Class_Octant<2>* children = new Class_Octant<2>[0];
+	//			writeLog("Max level reached ---> No Children Built");
+	//			return children;
+	//		}
+	//	};
+
+	// ------------------------------------------------------------------------------- //
+
+	/** Builds children of octant.
+	 *   \return Ordered (by Z-index) vector of children[nchildren] (info update)
+	 */
+	vector<Class_Octant<2> >	buildChildren(){
 		uint8_t xf,yf,zf;
 
 		if (this->level < MAX_LEVEL_2D){
-			Class_Octant<2>* children = new Class_Octant<2>[global2D.nchildren];
+			vector<Class_Octant<2> > children(global2D.nchildren);
 			for (int i=0; i<global2D.nchildren; i++){
 				switch (i) {
 				case 0 :
@@ -438,7 +563,7 @@ private:
 			return children;
 		}
 		else{
-			Class_Octant<2>* children = new Class_Octant<2>[0];
+			vector<Class_Octant<2> > children(0);
 			writeLog("Max level reached ---> No Children Built");
 			return children;
 		}
@@ -446,7 +571,150 @@ private:
 
 	// ------------------------------------------------------------------------------- //
 
-	uint64_t* 		computeHalfSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
+	//TODO Temporary commented for memory leak detection
+	//	uint64_t* 		computeHalfSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
+	//			uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
+	//		uint32_t dh,dh2;
+	//		uint64_t morton;
+	//		uint32_t nneigh;
+	//		uint8_t i,cx,cy;
+	//
+	//		nneigh = (level < MAX_LEVEL_2D) ? global2D.nchildren/2 : 1;
+	//		dh = (level < MAX_LEVEL_2D) ? getSize()/2 : getSize();
+	//		dh2 = getSize();
+	//
+	//		if (info[iface]){
+	//			//		uint64_t* Morton = new uint64_t[0];
+	//			sizehf = 0;
+	//			//		return Morton;
+	//			return NULL;
+	//		}
+	//		else{
+	//			uint64_t* Morton = new uint64_t[nneigh];
+	//			switch (iface) {
+	//			case 0 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cy = (i==1);
+	//					Morton[i] = mortonEncode_magicbits(this->x-dh,this->y+dh*cy);
+	//				}
+	//			}
+	//			break;
+	//			case 1 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cy = (i==1);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh2,this->y+dh*cy);
+	//				}
+	//			}
+	//			break;
+	//			case 2 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = (i==1);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y-dh);
+	//				}
+	//			}
+	//			break;
+	//			case 3 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = (i==1);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2);
+	//				}
+	//			}
+	//			break;
+	//			}
+	//			sizehf = nneigh;
+	//			return Morton;
+	//		}
+	//
+	//
+	//	};
+	//
+	//	// ------------------------------------------------------------------------------- //
+	//
+	//	uint64_t* 		computeMinSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
+	//			const uint8_t & maxdepth,	// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
+	//			uint32_t & sizem){
+	//		uint32_t dh,dh2;
+	//		uint64_t morton;
+	//		uint32_t nneigh, nline;
+	//		uint32_t i,cx,cy;
+	//
+	//		nneigh = (level < MAX_LEVEL_2D) ? uint32_t(pow(2.0,double(maxdepth-level))) : 1;
+	//		dh = (level < MAX_LEVEL_2D) ? uint32_t(pow(2.0,double(MAX_LEVEL_2D - maxdepth))) : getSize();
+	//		dh2 = getSize();
+	//		nline = uint32_t(pow(2.0,double((maxdepth-level))));
+	//
+	//		if (info[iface]){
+	//			//		uint64_t* Morton = new uint64_t[0];
+	//			sizem = 0;
+	//			//		return Morton;
+	//			return NULL;
+	//		}
+	//		else{
+	//			uint64_t* Morton = new uint64_t[nneigh];
+	//			switch (iface) {
+	//			case 0 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cy = (i%nline);
+	//					Morton[i] = mortonEncode_magicbits(this->x-dh,this->y+dh*cy);
+	//				}
+	//			}
+	//			break;
+	//			case 1 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cy = (i%nline);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh2,this->y+dh*cy);
+	//				}
+	//			}
+	//			break;
+	//			case 2 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = (i%nline);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y-dh);
+	//				}
+	//			}
+	//			break;
+	//			case 3 :
+	//			{
+	//				for (i=0; i<nneigh; i++){
+	//					cx = (i%nline);
+	//					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2);
+	//				}
+	//			}
+	//			break;
+	//			}
+	//			sizem = nneigh;
+	//			sort(Morton,Morton+nneigh);
+	//			return Morton;
+	//		}
+	//
+	//	};
+	//
+	//	// ------------------------------------------------------------------------------- //
+	//
+	//	uint64_t* 		computeVirtualMorton(uint8_t iface, 			// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
+	//			const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
+	//			uint32_t & sizeneigh){
+	//		if (getNotBalance()){
+	//			return computeMinSizeMorton(iface,
+	//					maxdepth,
+	//					sizeneigh);
+	//		}
+	//		else{
+	//			return computeHalfSizeMorton(iface,
+	//					sizeneigh);
+	//		}
+	//	};
+
+	// ------------------------------------------------------------------------------- //
+
+	vector<uint64_t > 		computeHalfSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
 			uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
 		uint32_t dh,dh2;
 		uint64_t morton;
@@ -458,13 +726,12 @@ private:
 		dh2 = getSize();
 
 		if (info[iface]){
-			//		uint64_t* Morton = new uint64_t[0];
 			sizehf = 0;
-			//		return Morton;
-			return NULL;
+			vector<uint64_t> Morton(0);
+			return Morton;
 		}
 		else{
-			uint64_t* Morton = new uint64_t[nneigh];
+			vector<uint64_t> Morton(nneigh);
 			switch (iface) {
 			case 0 :
 			{
@@ -508,7 +775,7 @@ private:
 
 	// ------------------------------------------------------------------------------- //
 
-	uint64_t* 		computeMinSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
+	vector<uint64_t> 		computeMinSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
 			const uint8_t & maxdepth,	// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
 			uint32_t & sizem){
 		uint32_t dh,dh2;
@@ -522,13 +789,12 @@ private:
 		nline = uint32_t(pow(2.0,double((maxdepth-level))));
 
 		if (info[iface]){
-			//		uint64_t* Morton = new uint64_t[0];
 			sizem = 0;
-			//		return Morton;
-			return NULL;
+			vector<uint64_t> Morton(0);
+			return Morton;
 		}
 		else{
-			uint64_t* Morton = new uint64_t[nneigh];
+			vector<uint64_t> Morton(nneigh);
 			switch (iface) {
 			case 0 :
 			{
@@ -564,7 +830,7 @@ private:
 			break;
 			}
 			sizem = nneigh;
-			sort(Morton,Morton+nneigh);
+			sort(Morton.begin(), Morton.end());
 			return Morton;
 		}
 
@@ -572,7 +838,7 @@ private:
 
 	// ------------------------------------------------------------------------------- //
 
-	uint64_t* 		computeVirtualMorton(uint8_t iface, 			// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
+	vector<uint64_t> 		computeVirtualMorton(uint8_t iface, 			// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
 			const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
 			uint32_t & sizeneigh){
 		if (getNotBalance()){

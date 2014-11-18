@@ -2,7 +2,6 @@
 #include <mpi.h>
 #include "Class_Global.hpp"
 #include "Class_Para_Tree.hpp"
-#include "ioFunct.hpp"
 #include "User_Data_Comm.hpp"
 #include "User_Data_LB.hpp"
 
@@ -29,8 +28,8 @@ int main(int argc, char *argv[]) {
 			pablo120.adaptGlobalRefine();
 		}
 
-//		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
-//		pablo120.loadBalance();
+		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
+		pablo120.loadBalance();
 
 		/**<Define a center point and a radius.*/
 		double xc, yc, zc;
@@ -49,14 +48,16 @@ int main(int argc, char *argv[]) {
 		vector<double> oct_data(nocts, 0.0), ghost_data(nghosts, 0.0);
 
 		/**<Adapt itend times with data injection on new octants.*/
-		int itstart = 200;
+		int itstart = 1;
 		int itend = 460;
 
 		for (iter=itstart; iter<itend; iter++){
+			cout << "iter " << iter << endl;
 
 			xc = 0.25*cos(omega* Dt* (double) iter) + 0.5 ;
 			yc = 0.25*sin(omega* Dt* (double) iter) + 0.5;
 			zc = 100*Dt*iter;
+
 
 			for (int i=0; i<nocts; i++){
 				bool inside = false;
@@ -87,8 +88,8 @@ int main(int argc, char *argv[]) {
 			/**<Adapt the octree.*/
 			bool adapt = pablo120.adapt();
 
-//			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
-//			pablo120.loadBalance();
+			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
+			pablo120.loadBalance();
 
 			nocts = pablo120.getNumOctants();
 			nghosts = pablo120.getNumGhosts();
@@ -96,8 +97,8 @@ int main(int argc, char *argv[]) {
 
 			/**<Assign to the new octant the data after an adaption.*/
 			for (int i=0; i<nocts; i++){
-					vector<double> center = pablo120.getCenter(i);
-					oct_data_new[i] = sqrt((pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0)));
+				vector<double> center = pablo120.getCenter(i);
+				oct_data_new[i] = sqrt((pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0)));
 			}
 
 			oct_data.resize(nocts);

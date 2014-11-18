@@ -129,49 +129,49 @@ public:
 	 * \param[out] mapcenter Coordinates of center in physical domain.
 	 */
 	void mapCenter(double* & center,
-					vector<double> & mapcenter);
+			vector<double> & mapcenter);
 
 	/*! Transformation of coordinates of center of an octant.
 	 * \param[in] center Vector of coordinates of center from logical domain.
 	 * \param[out] mapcenter Coordinates of center in physical domain.
 	 */
 	void mapCenter(vector<double> & center,
-					vector<double> & mapcenter);
+			vector<double> & mapcenter);
 
 	/*! Transformation of coordinates of nodes of an octant.
 	 * \param[in] nodes Pointer to coordinates of nodes from logical domain.
 	 * \param[out] mapnodes Coordinates of nodes in physical domain.
 	 */
 	void mapNodes(uint32_t (*nodes)[3],
-					vector<vector<double> > & mapnodes);
+			vector<vector<double> > & mapnodes);
 
 	/*! Transformation of coordinates of nodes of an octant.
 	 * \param[in] nodes Vector of coordinates of nodes from logical domain.
 	 * \param[out] mapnodes Coordinates of nodes in physical domain.
 	 */
 	void mapNodes(vector<vector<uint32_t> > nodes,
-					vector<vector<double> > & mapnodes);
+			vector<vector<double> > & mapnodes);
 
 	/*! Transformation of coordinates of nodes of an intersection.
 	 * \param[in] nodes Pointer to coordinates of nodes from logical domain.
 	 * \param[out] mapnodes Coordinates of nodes in physical domain.
 	 */
 	void mapNodesIntersection(uint32_t (*nodes)[3],
-					vector<vector<double> > & mapnodes);
+			vector<vector<double> > & mapnodes);
 
 	/*! Transformation of coordinates of nodes of an intersection.
 	 * \param[in] nodes Pointer to coordinates of nodes from logical domain.
 	 * \param[out] mapnodes Coordinates of nodes in physical domain.
 	 */
 	void mapNodesIntersection(vector<vector<uint32_t> > nodes,
-					vector<vector<double> > & mapnodes);
+			vector<vector<double> > & mapnodes);
 
 	/*! Transformation of components of normal of an intersection.
 	 * \param[in] nodes Pointer to components of normal from logical domain.
 	 * \param[out] mapnodes components of normal in physical domain.
 	 */
 	void mapNormals(vector<int8_t> normal,
-					vector<double> & mapnormal);
+			vector<double> & mapnormal);
 	// ------------------------------------------------------------------------------- //
 
 };
