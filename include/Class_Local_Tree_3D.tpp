@@ -2632,10 +2632,10 @@ private:
 								idxtry = 0;
 								break;
 							}
-							if(idxtry < 0){
-								idxtry = 0;
-								break;
-							}
+//							if(idxtry < 0){
+//								idxtry = 0;
+//								break;
+//							}
 						}
 					}
 					if(idxtry < size_ghosts){
@@ -2865,10 +2865,10 @@ private:
 								idxtry = 0;
 								break;
 							}
-							if(idxtry < 0){
-								idxtry = 0;
-								break;
-							}
+//							if(idxtry < 0){
+//								idxtry = 0;
+//								break;
+//							}
 						}
 					}
 					if(idxtry < size_ghosts){
