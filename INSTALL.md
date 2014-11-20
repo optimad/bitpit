@@ -22,18 +22,22 @@ Enter the `build` folder
 ```bash
 	PABLO/build$ cmake ../
 ```
- By this way, PABLO is configured for production (using compiler optimization flags, `-O3`) and the tests in `PABLO/test/` will be compiled and successively available at `PABLO/build/test/`; moreover, the default installation folder is `/usr/local/`.
+ By this way, PABLO is configured for production (using compiler optimization flags, `-O3`) and the test sources in `PABLO/test/` will be compiled and successively available at `PABLO/build/test/`; moreover, the default installation folder is `/usr/local/`.
+
 Passing some variable to cmake you can customize a bit your configuration.
+
 The `DEBUG` variable can be used to set the compiler flags `-ggdb -O0 -fmessage-length=0-ggdb -O0 -fmessage-length=0`, then you can call
 ```bash
 	PABLO/build$ cmake -DDEBUG=1 ../	
 ```
 to obtain a debug version of PABLO. `DEBUG` default value is 0.
+
 The `COMPILE_TESTS` variable can be use to avoid tests compilation, then
 ```bash
 	PABLO/build$ cmake -DCOMPILE_TESTS=0 ../	
 ```
 and the building procedure will not compile the test sources. `COMPILE_TESTS` default value is 1.
+
 Finally, you can choose the installation folder setting the cmake variable `CMAKE_INSTALL_PREFIX`
 ```bash
 	PABLO/build$ cmake -DCMAKE_INSTALL_PREFIX=/my/installation/folder/ ../	
@@ -50,7 +54,9 @@ to build and
 	PABLO/build$ make install	
 ```
 to install.
+
 If you have just built PABLO, its headers will be available at `PABLO/include/` folder and a static library `libPABLO.a` will be available at `PABLO/build/lib/` folder.
+
 If you have also installed PABLO, its headers will be available at `/my/installation/folder/PABLO/include/` folder and a static library `libPABLO.a` will be available at `/my/installation/folder/lib/` folder.
 
 ## Help
