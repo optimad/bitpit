@@ -1,6 +1,6 @@
 # PABLO installation
 
-Pablo runs on Linux and Mac OSX platforms.
+PABLO runs on Linux and Mac OSX platforms.
 
 ## Dependencies
 PABLO depends on
