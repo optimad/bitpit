@@ -1568,7 +1568,7 @@ public:
 		morton = mortonEncode_magicbits(x,y);
 
 		powner = findOwner(morton);
-		if ((powner!=rank) || (x < 0) || (x > global2D.max_length) || (y < 0) || (y > global2D.max_length))
+		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length))
 			return NULL;
 
 		if (x == global2D.max_length) x = x - 1;
@@ -1631,7 +1631,7 @@ public:
 		morton = mortonEncode_magicbits(x,y);
 
 		powner = findOwner(morton);
-		if ((powner!=rank) || (x < 0) || (x > global2D.max_length) || (y < 0) || (y > global2D.max_length))
+		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length))
 			return -1;
 
 		if (x == global2D.max_length) x = x - 1;
@@ -1694,7 +1694,7 @@ private:
 		if (y == global2D.max_length) y = y - 1;
 
 		powner = findOwner(morton);
-		if ((powner!=rank) || (x < 0) || (x > global2D.max_length) || (y < 0) || (y > global2D.max_length)){
+		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length)){
 			Class_Octant<2> oct0;
 			return oct0;
 		}
@@ -1757,7 +1757,7 @@ public:
 		morton = mortonEncode_magicbits(x,y);
 
 		powner = findOwner(morton);
-		if ((powner!=rank) || (x < 0) || (x > global2D.max_length) || (y < 0) || (y > global2D.max_length))
+		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length))
 			return NULL;
 
 		if (x == global2D.max_length) x = x - 1;
@@ -1820,7 +1820,7 @@ public:
 		morton = mortonEncode_magicbits(x,y);
 
 		powner = findOwner(morton);
-		if ((powner!=rank) || (x < 0) || (x > global2D.max_length) || (y < 0) || (y > global2D.max_length))
+		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length))
 			return -1;
 
 		if (x == global2D.max_length) x = x - 1;
@@ -2006,7 +2006,7 @@ private:
 		morton = mortonEncode_magicbits(x,y);
 
 		powner = findOwner(morton);
-		if ((powner!=rank) || (x < 0) || (x > global2D.max_length) || (y < 0) || (y > global2D.max_length)){
+		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length)){
 			Class_Octant<2> oct0;
 			return oct0;
 		}
