@@ -26,7 +26,7 @@ Enter the `build` folder
 
 Passing some variable to cmake you can customize a bit your configuration.
 
-The `DEBUG` variable can be used to set the compiler flags `-ggdb -O0 -fmessage-length=0-ggdb -O0 -fmessage-length=0`, then you can call
+The `DEBUG` variable can be used to set the compiler flags `-ggdb -O0 -fmessage-length=0`, then you can call
 ```bash
 	PABLO/build$ cmake -DDEBUG=1 ../	
 ```
