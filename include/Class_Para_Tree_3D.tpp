@@ -1594,7 +1594,7 @@ public:
 		z = trans.mapX(point[2]);
 		morton = mortonEncode_magicbits(x,y,z);
 		powner = findOwner(morton);
-		if ((powner!=rank) || (x < 0) || (x > global3D.max_length) || (y < 0) || (y > global3D.max_length) || (z < 0) || (z > global3D.max_length))
+		if ((powner!=rank) || (x > global3D.max_length) || (y > global3D.max_length) || (z > global3D.max_length))
 			return NULL;
 
 		if (x == global3D.max_length) x = x - 1;
@@ -1661,7 +1661,7 @@ public:
 		z = trans.mapX(point[2]);
 		morton = mortonEncode_magicbits(x,y,z);
 		powner = findOwner(morton);
-		if ((powner!=rank) || (x < 0) || (x > global3D.max_length) || (y < 0) || (y > global3D.max_length) || (z < 0) || (z > global3D.max_length))
+		if ((powner!=rank) || (x > global3D.max_length) || (y > global3D.max_length) || (z > global3D.max_length))
 			return -1;
 
 		if (x == global3D.max_length) x = x - 1;
@@ -1727,7 +1727,7 @@ public:
 		z = point[2];
 		morton = mortonEncode_magicbits(x,y,z);
 		powner = findOwner(morton);
-		if ((powner!=rank) || (x < 0) || (x > global3D.max_length) || (y < 0) || (y > global3D.max_length) || (z < 0) || (z > global3D.max_length))
+		if ((powner!=rank) || (x > global3D.max_length) || (y > global3D.max_length) || (z > global3D.max_length))
 			return NULL;
 
 		if (x == global3D.max_length) x = x - 1;
@@ -1794,7 +1794,7 @@ public:
 		z = point[2];
 		morton = mortonEncode_magicbits(x,y,z);
 		powner = findOwner(morton);
-		if ((powner!=rank) || (x < 0) || (x > global3D.max_length) || (y < 0) || (y > global3D.max_length) || (z < 0) || (z > global3D.max_length))
+		if ((powner!=rank) || (x > global3D.max_length) || (y > global3D.max_length) || (z > global3D.max_length))
 			return -1;
 
 		if (x == global3D.max_length) x = x - 1;
