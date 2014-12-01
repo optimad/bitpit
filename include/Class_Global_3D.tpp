@@ -1,3 +1,6 @@
+#ifndef CLASS_GLOBAL_3D_TPP
+#define CLASS_GLOBAL_3D_TPP
+
 /*!
  *	\date			23/apr/2014
  *	\authors		Edoardo Lombardi
@@ -13,8 +16,7 @@
  *	global variable can be used as constant by external codes.
  *
  */
-#ifndef CLASS_GLOBAL_3D_TPP
-#define CLASS_GLOBAL_3D_TPP
+
 // =================================================================================== //
 // CLASS SPECIALIZATION                                                                //
 // =================================================================================== //

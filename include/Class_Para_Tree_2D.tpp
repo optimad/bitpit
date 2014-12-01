@@ -1554,7 +1554,7 @@ public:
 
 	/** Get the octant owner of an input point.
 	 * \param[in] point Coordinates of target point.
-	 * \return Pointer to octant owner of target point.
+	 * \return Pointer to octant owner of target point (=NULL if point outside of the domain).
 	 */
 	Class_Octant<2>* getPointOwner(dvector & point){
 		uint32_t noctants = octree.octants.size();
@@ -1568,8 +1568,11 @@ public:
 		morton = mortonEncode_magicbits(x,y);
 
 		powner = findOwner(morton);
-		if ((powner!=rank) || (x < 0) || (x > global2D.max_length) || (y < 0) || (y > global2D.max_length))
+		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length))
 			return NULL;
+
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -1614,7 +1617,7 @@ public:
 
 	/** Get the octant owner of an input point.
 	 * \param[in] point Coordinates of target point.
-	 * \return Index of octant owner of target point.
+	 * \return Index of octant owner of target point (max uint32_t representable if point outside of the domain).
 	 */
 	uint32_t getPointOwnerIdx(dvector & point){
 		uint32_t noctants = octree.octants.size();
@@ -1628,8 +1631,11 @@ public:
 		morton = mortonEncode_magicbits(x,y);
 
 		powner = findOwner(morton);
-		if ((powner!=rank) || (x < 0) || (x > global2D.max_length) || (y < 0) || (y > global2D.max_length))
+		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length))
 			return -1;
+
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -1684,8 +1690,11 @@ private:
 		y = trans.mapY(point[1]);
 		morton = mortonEncode_magicbits(x,y);
 
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
+
 		powner = findOwner(morton);
-		if ((powner!=rank) || (x < 0) || (x > global2D.max_length) || (y < 0) || (y > global2D.max_length)){
+		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length)){
 			Class_Octant<2> oct0;
 			return oct0;
 		}
@@ -1734,7 +1743,7 @@ private:
 public:
 	/** Get the octant owner of an input point.
 	 * \param[in] point Coordinates of target point in logical domain.
-	 * \return Pointer to octant owner of target point.
+	 * \return Pointer to octant owner of target point (=NULL if point outside of the domain).
 	 */
 	Class_Octant<2>* getPointOwner(u32vector & point){
 		uint32_t noctants = octree.octants.size();
@@ -1748,8 +1757,11 @@ public:
 		morton = mortonEncode_magicbits(x,y);
 
 		powner = findOwner(morton);
-		if ((powner!=rank) || (x < 0) || (x > global2D.max_length) || (y < 0) || (y > global2D.max_length))
+		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length))
 			return NULL;
+
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -1794,7 +1806,7 @@ public:
 
 	/** Get the octant owner of an input point.
 	 * \param[in] point Coordinates of target point in logical domain.
-	 * \return Index of octant owner of target point.
+	 * \return Index of octant owner of target point (max uint32_t representable if point outside of the domain).
 	 */
 	uint32_t getPointOwnerIdx(u32vector & point){
 		uint32_t noctants = octree.octants.size();
@@ -1808,8 +1820,11 @@ public:
 		morton = mortonEncode_magicbits(x,y);
 
 		powner = findOwner(morton);
-		if ((powner!=rank) || (x < 0) || (x > global2D.max_length) || (y < 0) || (y > global2D.max_length))
+		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length))
 			return -1;
+
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -1854,7 +1869,7 @@ public:
 
 	/** Get the octant owner of an input point.
 	 * \param[in] point Coordinates of target point in logical domain.
-	 * \return Pointer to octant owner of target point.
+	 * \return Pointer to octant owner of target point (=NULL if point outside of the domain).
 	 */
 	Class_Octant<2>* getLogicalPointOwner(dvector & point){
 		uint32_t noctants = octree.octants.size();
@@ -1871,6 +1886,9 @@ public:
 		if ((powner!=rank) || (point[0] < 0) || (point[0] > double(global2D.max_length)) || (point[1] < 0) || (point[1] > double(global2D.max_length)))
 			return NULL;
 
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
+
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
 			mortontry = octree.octants[idxtry].computeMorton();
@@ -1914,7 +1932,7 @@ public:
 
 	/** Get the octant owner of an input point.
 	 * \param[in] point Coordinates of target point in logical domain.
-	 * \return Index of octant owner of target point.
+	 * \return Index of octant owner of target point (max uint32_t representable if point outside of the domain).
 	 */
 	uint32_t getLogicalPointOwnerIdx(dvector & point){
 		uint32_t noctants = octree.octants.size();
@@ -1930,6 +1948,9 @@ public:
 		powner = findOwner(morton);
 		if ((powner!=rank) || (point[0] < 0) || (point[0] > double(global2D.max_length)) || (point[1] < 0) || (point[1] > double(global2D.max_length)))
 			return -1;
+
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -1985,10 +2006,13 @@ private:
 		morton = mortonEncode_magicbits(x,y);
 
 		powner = findOwner(morton);
-		if ((powner!=rank) || (x < 0) || (x > global2D.max_length) || (y < 0) || (y > global2D.max_length)){
+		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length)){
 			Class_Octant<2> oct0;
 			return oct0;
 		}
+
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){

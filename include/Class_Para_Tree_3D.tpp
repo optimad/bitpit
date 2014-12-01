@@ -1580,7 +1580,7 @@ public:
 
 	/** Get the octant owner of an input point.
 	 * \param[in] point Coordinates of target point.
-	 * \return Pointer to octant owner of target point.
+	 * \return Pointer to octant owner of target point (=NULL if point is outside of the domain).
 	 */
 	Class_Octant<3>* getPointOwner(dvector & point){
 		uint32_t noctants = octree.octants.size();
@@ -1594,8 +1594,12 @@ public:
 		z = trans.mapX(point[2]);
 		morton = mortonEncode_magicbits(x,y,z);
 		powner = findOwner(morton);
-		if ((powner!=rank) || (x < 0) || (x > global3D.max_length) || (y < 0) || (y > global3D.max_length) || (z < 0) || (z > global3D.max_length))
+		if ((powner!=rank) || (x > global3D.max_length) || (y > global3D.max_length) || (z > global3D.max_length))
 			return NULL;
+
+		if (x == global3D.max_length) x = x - 1;
+		if (y == global3D.max_length) y = y - 1;
+		if (z == global3D.max_length) z = z - 1;
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -1643,7 +1647,7 @@ public:
 
 	/** Get the octant owner of an input point.
 	 * \param[in] point Coordinates of target point.
-	 * \return Index of octant owner of target point.
+	 * \return Index of octant owner of target point (max uint32_t representable if point outside of the domain).
 	 */
 	uint32_t getPointOwnerIdx(dvector & point){
 		uint32_t noctants = octree.octants.size();
@@ -1657,8 +1661,12 @@ public:
 		z = trans.mapX(point[2]);
 		morton = mortonEncode_magicbits(x,y,z);
 		powner = findOwner(morton);
-		if ((powner!=rank) || (x < 0) || (x > global3D.max_length) || (y < 0) || (y > global3D.max_length) || (z < 0) || (z > global3D.max_length))
+		if ((powner!=rank) || (x > global3D.max_length) || (y > global3D.max_length) || (z > global3D.max_length))
 			return -1;
+
+		if (x == global3D.max_length) x = x - 1;
+		if (y == global3D.max_length) y = y - 1;
+		if (z == global3D.max_length) z = z - 1;
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -1699,14 +1707,13 @@ public:
 			}
 			return idxtry;
 		}
-
 	};
 
 	// =============================================================================== //
 
 	/** Get the octant owner of an input point.
 	 * \param[in] point Coordinates of target point in logical domain.
-	 * \return Pointer to octant owner of target point.
+	 * \return Pointer to octant owner of target point (=NULL if point is outside of the domain).
 	 */
 	Class_Octant<3>* getPointOwner(u32vector & point){
 		uint32_t noctants = octree.octants.size();
@@ -1720,8 +1727,12 @@ public:
 		z = point[2];
 		morton = mortonEncode_magicbits(x,y,z);
 		powner = findOwner(morton);
-		if ((powner!=rank) || (x < 0) || (x > global3D.max_length) || (y < 0) || (y > global3D.max_length) || (z < 0) || (z > global3D.max_length))
+		if ((powner!=rank) || (x > global3D.max_length) || (y > global3D.max_length) || (z > global3D.max_length))
 			return NULL;
+
+		if (x == global3D.max_length) x = x - 1;
+		if (y == global3D.max_length) y = y - 1;
+		if (z == global3D.max_length) z = z - 1;
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -1769,7 +1780,7 @@ public:
 
 	/** Get the octant owner of an input point.
 	 * \param[in] point Coordinates of target point in logical domain.
-	 * \return Index of octant owner of target point.
+	 * \return Index of octant owner of target point (max uint32_t representable if point outside of the domain).
 	 */
 	uint32_t getPointOwnerIdx(u32vector & point){
 		uint32_t noctants = octree.octants.size();
@@ -1783,8 +1794,12 @@ public:
 		z = point[2];
 		morton = mortonEncode_magicbits(x,y,z);
 		powner = findOwner(morton);
-		if ((powner!=rank) || (x < 0) || (x > global3D.max_length) || (y < 0) || (y > global3D.max_length) || (z < 0) || (z > global3D.max_length))
+		if ((powner!=rank) || (x > global3D.max_length) || (y > global3D.max_length) || (z > global3D.max_length))
 			return -1;
+
+		if (x == global3D.max_length) x = x - 1;
+		if (y == global3D.max_length) y = y - 1;
+		if (z == global3D.max_length) z = z - 1;
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -1832,7 +1847,7 @@ public:
 
 	/** Get the octant owner of an input point.
 	 * \param[in] point Coordinates of target point in logical domain.
-	 * \return Pointer to octant owner of target point.
+	 * \return Pointer to octant owner of target point (=NULL if point is outside of the domain).
 	 */
 	Class_Octant<3>* getLogicalPointOwner(dvector & point){
 		uint32_t noctants = octree.octants.size();
@@ -1849,6 +1864,10 @@ public:
 		if ((powner!=rank) || (point[0] < 0) || (point[0] > double(global3D.max_length)) || (point[1] < 0) || (point[1] > double(global3D.max_length)) || (point[2] < 0) || (point[2] > double(global3D.max_length)))
 			return NULL;
 
+		if (x == global3D.max_length) x = x - 1;
+		if (y == global3D.max_length) y = y - 1;
+		if (z == global3D.max_length) z = z - 1;
+
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
 			mortontry = octree.octants[idxtry].computeMorton();
@@ -1895,7 +1914,7 @@ public:
 
 	/** Get the octant owner of an input point.
 	 * \param[in] point Coordinates of target point in logical domain.
-	 * \return Index of octant owner of target point.
+	 * \return Index of octant owner of target point (max uint32_t representable if point outside of the domain).
 	 */
 	uint32_t getLogicalPointOwnerIdx(dvector & point){
 		uint32_t noctants = octree.octants.size();
@@ -1911,6 +1930,10 @@ public:
 		powner = findOwner(morton);
 		if ((powner!=rank) || (point[0] < 0) || (point[0] > double(global3D.max_length)) || (point[1] < 0) || (point[1] > double(global3D.max_length)) || (point[2] < 0) || (point[2] > double(global3D.max_length)))
 			return -1;
+
+		if (x == global3D.max_length) x = x - 1;
+		if (y == global3D.max_length) y = y - 1;
+		if (z == global3D.max_length) z = z - 1;
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -4076,7 +4099,7 @@ private:
 	//=================================================================================//
 	////TODO Update after coarse with intersections
 	//=================================================================================//
-public:
+
 	void commMarker(){									// communicates marker of ghosts
 		// borderPerProcs has to be built
 
@@ -4174,7 +4197,7 @@ public:
 	};
 
 	//=================================================================================//
-private:
+
 	void balance21(bool const first){
 		bool globalDone = true, localDone = false;
 		int  iteration  = 0;

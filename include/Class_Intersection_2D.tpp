@@ -13,7 +13,7 @@
  *	by :
  *	- the owner octants, i.e. the octants sharing the intersection, identified by a couple (array[2]) of indices;
  *	- the index of the face, that contains the intersection, of the first owner;
- *	- an identifier of the octant in the couple with higher level of refinement (0/1) [if same level identifier =0];
+ *	- an identifier of the octant with higher level of refinement (0/1) [if same level identifier =0];
  *	- a flag stating if an owner is ghost;
  *	- a flag to communicate if the intersection is new after a mesh refinement.
  *

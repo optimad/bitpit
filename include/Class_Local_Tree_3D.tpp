@@ -1364,6 +1364,7 @@ private:
 				// ---> can i search only before or after idx in octants
 				int32_t jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
 				idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
+				if (idxtry > noctants-1) idxtry = noctants-1;
 				Mortontry = oct->computeMorton();
 				while(abs(jump) > 0){
 					Mortontry = octants[idxtry].computeMorton();
@@ -1461,6 +1462,7 @@ private:
 					// ---> can i search only before or after idx in octants
 					int32_t jump = (octghost->computeMorton() > Morton) ? int32_t(idxghost/2+1) : int32_t((size_ghosts -idxghost)/2+1);
 					idxtry = uint32_t(idxghost +((octghost->computeMorton()<Morton)-(octghost->computeMorton()>Morton))*jump);
+					if (idxtry > ghosts.size()-1) idxtry = ghosts.size()-1;
 					while(abs(jump) > 0){
 						Mortontry = ghosts[idxtry].computeMorton();
 						jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
@@ -1551,6 +1553,7 @@ private:
 							// ---> can i search only before or after idx in octants
 							int32_t jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
 							idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
+							if (idxtry > noctants-1) idxtry = noctants-1;
 							while(abs(jump) > 0){
 								Mortontry = octants[idxtry].computeMorton();
 								jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
@@ -2595,6 +2598,7 @@ private:
 				// ---> can i search only before or after idx in octants
 				int32_t jump = (octghost->computeMorton() > Morton) ? int32_t(idxghost/2+1) : int32_t((size_ghosts -idxghost)/2+1);
 				idxtry = uint32_t(idxghost +((octghost->computeMorton()<Morton)-(octghost->computeMorton()>Morton))*jump);
+				if (idxtry > ghosts.size()-1) idxtry = ghosts.size()-1;
 				while(abs(jump) > 0){
 					Mortontry = ghosts[idxtry].computeMorton();
 					jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
@@ -2632,10 +2636,10 @@ private:
 								idxtry = 0;
 								break;
 							}
-							if(idxtry < 0){
-								idxtry = 0;
-								break;
-							}
+//							if(idxtry < 0){
+//								idxtry = 0;
+//								break;
+//							}
 						}
 					}
 					if(idxtry < size_ghosts){
@@ -2865,10 +2869,10 @@ private:
 								idxtry = 0;
 								break;
 							}
-							if(idxtry < 0){
-								idxtry = 0;
-								break;
-							}
+//							if(idxtry < 0){
+//								idxtry = 0;
+//								break;
+//							}
 						}
 					}
 					if(idxtry < size_ghosts){
