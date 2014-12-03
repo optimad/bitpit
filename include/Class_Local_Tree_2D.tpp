@@ -1356,7 +1356,7 @@ private:
 
 		// Default if iface is nface<iface<0
 		if (iface < 0 || iface > global2D.nfaces){
-			writeLog("Face index out of range in find neighbours !!!");
+			//writeLog("Face index out of range in find neighbours !!!");
 			return;
 		}
 
@@ -1581,7 +1581,7 @@ private:
 								//Found neighbour of same size
 								isghost.push_back(false);
 								neighbours.push_back(idxtry);
-								writeLog("Face marked pbound but only a non-ghost neighbour found!!!");
+								//writeLog("Face marked pbound but only a non-ghost neighbour found!!!");
 								return;
 							}
 							else{
@@ -1607,7 +1607,7 @@ private:
 										//Found neighbour of same size
 										isghost.push_back(false);
 										neighbours.push_back(idxtry);
-										writeLog("Face marked pbound but only a non-ghost neighbour found!!!");
+										//writeLog("Face marked pbound but only a non-ghost neighbour found!!!");
 										return;
 									}
 									// Compute Last discendent of virtual octant of same size
@@ -1671,7 +1671,7 @@ private:
 
 		// Default if iface is nface<iface<0
 		if (iface < 0 || iface > global2D.nfaces){
-			writeLog("Face index out of range in find neighbours !!!");
+			//writeLog("Face index out of range in find neighbours !!!");
 			return;
 		}
 
@@ -1898,7 +1898,7 @@ private:
 								//Found neighbour of same size
 								isghost.push_back(false);
 								neighbours.push_back(idxtry);
-								writeLog("Face marked pbound but only a non-ghost neighbour found!!!");
+								//writeLog("Face marked pbound but only a non-ghost neighbour found!!!");
 								return;
 							}
 							else{
@@ -1924,7 +1924,7 @@ private:
 										//Found neighbour of same size
 										isghost.push_back(false);
 										neighbours.push_back(idxtry);
-										writeLog("Face marked pbound but only a non-ghost neighbour found!!!");
+										//writeLog("Face marked pbound but only a non-ghost neighbour found!!!");
 										return;
 									}
 									// Compute Last discendent of virtual octant of same size
@@ -1979,7 +1979,7 @@ private:
 
 		// Default if iface is nface<iface<0
 		if (iface < 0 || iface > global2D.nfaces){
-			writeLog("Face index out of range in find neighbours !!!");
+			//writeLog("Face index out of range in find neighbours !!!");
 			return;
 		}
 
@@ -2580,7 +2580,7 @@ private:
 
 		// Default if inode is nnodes<inode<0
 		if (inode < 0 || inode > global2D.nnodes){
-			writeLog("Node index out of range in find neighbours !!!");
+			//writeLog("Node index out of range in find neighbours !!!");
 			return;
 		}
 
@@ -2810,7 +2810,7 @@ private:
 
 		// Default if inode is nnodes<inode<0
 		if (inode < 0 || inode > global2D.nnodes){
-			writeLog("Node index out of range in find neighbours !!!");
+			//writeLog("Node index out of range in find neighbours !!!");
 			return;
 		}
 

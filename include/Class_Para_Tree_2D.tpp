@@ -61,13 +61,17 @@ public:
 	//map member
 	Class_Map<2> trans;							/**<Transformation map from logical to physical domain*/
 
+	//log member
+	Class_Log log;								/**<Log object*/
+
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
 public:
 	/*! Default Constructor of Para_Tree.
 	 * It builds one octant with node 0 in the Origin (0,0,0)
-	 * and side of length 1*/
-	Class_Para_Tree(){
+	 * and side of length 1
+	 * \param[in] logfile The file name for the log of this object. PABLO.log is the default value*/
+	Class_Para_Tree(string logfile="PABLO.log") : log(logfile){
 		serial = true;
 		error_flag = 0;
 		max_depth = 0;
@@ -85,16 +89,16 @@ public:
 			partition_last_desc[p] = firstDescMorton;
 		}
 		// Write info log
-		writeLog("---------------------------------------------");
-		writeLog("- PABLO PArallel Balanced Linear Octree -");
-		writeLog("---------------------------------------------");
-		writeLog(" ");
-		writeLog("---------------------------------------------");
-		writeLog(" Number of proc		:	" + to_string(nproc));
-		writeLog(" Dimension		:	" + to_string(2));
-		writeLog(" Max allowed level	:	" + to_string(MAX_LEVEL_2D));
-		writeLog("---------------------------------------------");
-		writeLog(" ");
+		log.writeLog("---------------------------------------------");
+		log.writeLog("- PABLO PArallel Balanced Linear Octree -");
+		log.writeLog("---------------------------------------------");
+		log.writeLog(" ");
+		log.writeLog("---------------------------------------------");
+		log.writeLog(" Number of proc		:	" + to_string(nproc));
+		log.writeLog(" Dimension		:	" + to_string(2));
+		log.writeLog(" Max allowed level	:	" + to_string(MAX_LEVEL_2D));
+		log.writeLog("---------------------------------------------");
+		log.writeLog(" ");
 		MPI_Barrier(MPI_COMM_WORLD);
 
 	};
@@ -107,8 +111,9 @@ public:
 	 * \param[in] Y Coordinate Y of node 0,
 	 * \param[in] Z Coordinate Z of node 0,
 	 * \param[in] L Side length of the octant.
+	 * \param[in] logfile The file name for the log of this object. PABLO.log is the default value
 	 */
-	Class_Para_Tree(double X, double Y, double Z, double L):trans(X,Y,Z,L){
+	Class_Para_Tree(double X, double Y, double Z, double L,string logfile="PABLO.log"):trans(X,Y,Z,L),log(logfile){
 		serial = true;
 		error_flag = 0;
 		max_depth = 0;
@@ -126,20 +131,20 @@ public:
 			partition_last_desc[p] = firstDescMorton;
 		}
 		// Write info log
-		writeLog("---------------------------------------------");
-		writeLog("- PABLO PArallel Balanced Linear Octree -");
-		writeLog("---------------------------------------------");
-		writeLog(" ");
-		writeLog("---------------------------------------------");
-		writeLog(" Number of proc		:	" + to_string(nproc));
-		writeLog(" Dimension		:	" + to_string(2));
-		writeLog(" Max allowed level	:	" + to_string(MAX_LEVEL_2D));
-		writeLog(" Domain Origin		:	" + to_string(X));
-		writeLog("				" + to_string(Y));
-		writeLog("				" + to_string(Z));
-		writeLog(" Domain Size		:	" + to_string(L));
-		writeLog("---------------------------------------------");
-		writeLog(" ");
+		log.writeLog("---------------------------------------------");
+		log.writeLog("- PABLO PArallel Balanced Linear Octree -");
+		log.writeLog("---------------------------------------------");
+		log.writeLog(" ");
+		log.writeLog("---------------------------------------------");
+		log.writeLog(" Number of proc		:	" + to_string(nproc));
+		log.writeLog(" Dimension		:	" + to_string(2));
+		log.writeLog(" Max allowed level	:	" + to_string(MAX_LEVEL_2D));
+		log.writeLog(" Domain Origin		:	" + to_string(X));
+		log.writeLog("				" + to_string(Y));
+		log.writeLog("				" + to_string(Z));
+		log.writeLog(" Domain Size		:	" + to_string(L));
+		log.writeLog("---------------------------------------------");
+		log.writeLog(" ");
 		MPI_Barrier(MPI_COMM_WORLD);
 
 	};
@@ -154,8 +159,9 @@ public:
 	 * \param[in] L Physical Side length of the domain,
 	 * \param[in] XY Coordinates of octants (node 0) in logical domain,
 	 * \param[in] levels Level of each octant.
+	 * \param[in] logfile The file name for the log of this object. PABLO.log is the default value
 	 */
-	Class_Para_Tree(double X, double Y, double Z, double L, ivector2D & XY, ivector & levels):trans(X,Y,Z,L){
+	Class_Para_Tree(double X, double Y, double Z, double L, ivector2D & XY, ivector & levels,string logfile="PABLO.log"):trans(X,Y,Z,L),log(logfile){
 
 		uint8_t lev, iface;
 		uint32_t x0, y0;
@@ -202,23 +208,23 @@ public:
 		setPboundGhosts();
 
 		// Write info log
-		writeLog("---------------------------------------------");
-		writeLog("- PABLO PArallel Balanced Linear Octree -");
-		writeLog("---------------------------------------------");
-		writeLog(" ");
-		writeLog("---------------------------------------------");
-		writeLog("- PABLO restart -");
-		writeLog("---------------------------------------------");
-		writeLog(" Number of proc		:	" + to_string(nproc));
-		writeLog(" Dimension		:	" + to_string(2));
-		writeLog(" Max allowed level	:	" + to_string(MAX_LEVEL_2D));
-		writeLog(" Domain Origin		:	" + to_string(X));
-		writeLog("				" + to_string(Y));
-		writeLog("				" + to_string(Z));
-		writeLog(" Domain Size		:	" + to_string(L));
-		writeLog(" Number of octants	:	" + to_string(global_num_octants));
-		writeLog("---------------------------------------------");
-		writeLog(" ");
+		log.writeLog("---------------------------------------------");
+		log.writeLog("- PABLO PArallel Balanced Linear Octree -");
+		log.writeLog("---------------------------------------------");
+		log.writeLog(" ");
+		log.writeLog("---------------------------------------------");
+		log.writeLog("- PABLO restart -");
+		log.writeLog("---------------------------------------------");
+		log.writeLog(" Number of proc		:	" + to_string(nproc));
+		log.writeLog(" Dimension		:	" + to_string(2));
+		log.writeLog(" Max allowed level	:	" + to_string(MAX_LEVEL_2D));
+		log.writeLog(" Domain Origin		:	" + to_string(X));
+		log.writeLog("				" + to_string(Y));
+		log.writeLog("				" + to_string(Z));
+		log.writeLog(" Domain Size		:	" + to_string(L));
+		log.writeLog(" Number of octants	:	" + to_string(global_num_octants));
+		log.writeLog("---------------------------------------------");
+		log.writeLog(" ");
 		MPI_Barrier(MPI_COMM_WORLD);
 
 	};
@@ -226,10 +232,10 @@ public:
 	// =============================================================================== //
 
 	~Class_Para_Tree(){
-		writeLog("---------------------------------------------");
-		writeLog("--------------- R.I.P. PABLO ----------------");
-		writeLog("---------------------------------------------");
-		writeLog("---------------------------------------------");
+		log.writeLog("---------------------------------------------");
+		log.writeLog("--------------- R.I.P. PABLO ----------------");
+		log.writeLog("---------------------------------------------");
+		log.writeLog("---------------------------------------------");
 	};
 
 	// =============================================================================== //
@@ -2413,17 +2419,17 @@ public:
 	void loadBalance(){
 
 		//Write info on log
-		writeLog("---------------------------------------------");
-		writeLog(" LOAD BALANCE ");
+		log.writeLog("---------------------------------------------");
+		log.writeLog(" LOAD BALANCE ");
 
 		uint32_t* partition = new uint32_t [nproc];
 		computePartition(partition);
 		if(serial)
 		{
-			writeLog(" ");
-			writeLog(" Initial Serial distribution : ");
+			log.writeLog(" ");
+			log.writeLog(" Initial Serial distribution : ");
 			for(int ii=0; ii<nproc; ii++){
-				writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]+1));
+				log.writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]+1));
 			}
 
 			uint32_t stride = 0;
@@ -2443,11 +2449,11 @@ public:
 		}
 		else
 		{
-			writeLog(" ");
-			writeLog(" Initial Parallel partition : ");
-			writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
+			log.writeLog(" ");
+			log.writeLog(" Initial Parallel partition : ");
+			log.writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
 			for(int ii=1; ii<nproc; ii++){
-				writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
+				log.writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
 			}
 
 			//empty ghosts
@@ -2758,14 +2764,14 @@ public:
 		partition = NULL;
 
 		//Write info of final partition on log
-		writeLog(" ");
-		writeLog(" Final Parallel partition : ");
-		writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
+		log.writeLog(" ");
+		log.writeLog(" Final Parallel partition : ");
+		log.writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
 		for(int ii=1; ii<nproc; ii++){
-			writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
+			log.writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
 		}
-		writeLog(" ");
-		writeLog("---------------------------------------------");
+		log.writeLog(" ");
+		log.writeLog("---------------------------------------------");
 
 	}
 
@@ -2779,17 +2785,17 @@ public:
 	void loadBalance(uint8_t & level){
 
 		//Write info on log
-		writeLog("---------------------------------------------");
-		writeLog(" LOAD BALANCE ");
+		log.writeLog("---------------------------------------------");
+		log.writeLog(" LOAD BALANCE ");
 
 		uint32_t* partition = new uint32_t [nproc];
 		computePartition(partition, level);
 		if(serial)
 		{
-			writeLog(" ");
-			writeLog(" Initial Serial distribution : ");
+			log.writeLog(" ");
+			log.writeLog(" Initial Serial distribution : ");
 			for(int ii=0; ii<nproc; ii++){
-				writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]+1));
+				log.writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]+1));
 			}
 
 			uint32_t stride = 0;
@@ -2809,11 +2815,11 @@ public:
 		}
 		else
 		{
-			writeLog(" ");
-			writeLog(" Initial Parallel partition : ");
-			writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
+			log.writeLog(" ");
+			log.writeLog(" Initial Parallel partition : ");
+			log.writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
 			for(int ii=1; ii<nproc; ii++){
-				writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
+				log.writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
 			}
 
 			//empty ghosts
@@ -3124,14 +3130,14 @@ public:
 		partition = NULL;
 
 		//Write info of final partition on log
-		writeLog(" ");
-		writeLog(" Final Parallel partition : ");
-		writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
+		log.writeLog(" ");
+		log.writeLog(" Final Parallel partition : ");
+		log.writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
 		for(int ii=1; ii<nproc; ii++){
-			writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
+			log.writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
 		}
-		writeLog(" ");
-		writeLog("---------------------------------------------");
+		log.writeLog(" ");
+		log.writeLog("---------------------------------------------");
 
 	}
 
@@ -3144,17 +3150,17 @@ public:
 	template<class Impl>
 	void loadBalance(Class_Data_LB_Interface<Impl> & userData){
 		//Write info on log
-		writeLog("---------------------------------------------");
-		writeLog(" LOAD BALANCE ");
+		log.writeLog("---------------------------------------------");
+		log.writeLog(" LOAD BALANCE ");
 
 		uint32_t* partition = new uint32_t [nproc];
 		computePartition(partition);
 		if(serial)
 		{
-			writeLog(" ");
-			writeLog(" Initial Serial distribution : ");
+			log.writeLog(" ");
+			log.writeLog(" Initial Serial distribution : ");
 			for(int ii=0; ii<nproc; ii++){
-				writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]+1));
+				log.writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]+1));
 			}
 
 			uint32_t stride = 0;
@@ -3175,11 +3181,11 @@ public:
 		}
 		else
 		{
-			writeLog(" ");
-			writeLog(" Initial Parallel partition : ");
-			writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
+			log.writeLog(" ");
+			log.writeLog(" Initial Parallel partition : ");
+			log.writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
 			for(int ii=1; ii<nproc; ii++){
-				writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
+				log.writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
 			}
 
 			//empty ghosts
@@ -3573,14 +3579,14 @@ public:
 		partition = NULL;
 
 		//Write info of final partition on log
-		writeLog(" ");
-		writeLog(" Final Parallel partition : ");
-		writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
+		log.writeLog(" ");
+		log.writeLog(" Final Parallel partition : ");
+		log.writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
 		for(int ii=1; ii<nproc; ii++){
-			writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
+			log.writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
 		}
-		writeLog(" ");
-		writeLog("---------------------------------------------");
+		log.writeLog(" ");
+		log.writeLog("---------------------------------------------");
 
 
 	}
@@ -3596,17 +3602,17 @@ public:
 	void loadBalance(Class_Data_LB_Interface<Impl> & userData, uint8_t & level){
 
 		//Write info on log
-		writeLog("---------------------------------------------");
-		writeLog(" LOAD BALANCE ");
+		log.writeLog("---------------------------------------------");
+		log.writeLog(" LOAD BALANCE ");
 
 		uint32_t* partition = new uint32_t [nproc];
 		computePartition(partition, level);
 		if(serial)
 		{
-			writeLog(" ");
-			writeLog(" Initial Serial distribution : ");
+			log.writeLog(" ");
+			log.writeLog(" Initial Serial distribution : ");
 			for(int ii=0; ii<nproc; ii++){
-				writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]+1));
+				log.writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]+1));
 			}
 
 			uint32_t stride = 0;
@@ -3628,11 +3634,11 @@ public:
 		}
 		else
 		{
-			writeLog(" ");
-			writeLog(" Initial Parallel partition : ");
-			writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
+			log.writeLog(" ");
+			log.writeLog(" Initial Parallel partition : ");
+			log.writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
 			for(int ii=1; ii<nproc; ii++){
-				writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
+				log.writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
 			}
 
 			//empty ghosts
@@ -4026,14 +4032,14 @@ public:
 		partition = NULL;
 
 		//Write info of final partition on log
-		writeLog(" ");
-		writeLog(" Final Parallel partition : ");
-		writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
+		log.writeLog(" ");
+		log.writeLog(" Final Parallel partition : ");
+		log.writeLog(" Octants for proc	"+ to_string(0)+"	:	" + to_string(partition_range_globalidx[0]+1));
 		for(int ii=1; ii<nproc; ii++){
-			writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
+			log.writeLog(" Octants for proc	"+ to_string(ii)+"	:	" + to_string(partition_range_globalidx[ii]-partition_range_globalidx[ii-1]));
 		}
-		writeLog(" ");
-		writeLog("---------------------------------------------");
+		log.writeLog(" ");
+		log.writeLog("---------------------------------------------");
 
 
 	}
@@ -4211,12 +4217,12 @@ private:
 		int  iteration  = 0;
 
 		if (first){
-			writeLog("---------------------------------------------");
-			writeLog(" 2:1 BALANCE (balancing Marker before Adapt)");
-			writeLog(" ");
-			writeLog(" Iterative procedure	");
-			writeLog(" ");
-			writeLog(" Iteration	:	" + to_string(iteration));
+			log.writeLog("---------------------------------------------");
+			log.writeLog(" 2:1 BALANCE (balancing Marker before Adapt)");
+			log.writeLog(" ");
+			log.writeLog(" Iterative procedure	");
+			log.writeLog(" ");
+			log.writeLog(" Iteration	:	" + to_string(iteration));
 
 			commMarker();
 			localDone = octree.localBalance(true);
@@ -4225,21 +4231,21 @@ private:
 
 			while(globalDone){
 				iteration++;
-				writeLog(" Iteration	:	" + to_string(iteration));
+				log.writeLog(" Iteration	:	" + to_string(iteration));
 				commMarker();
 				localDone = octree.localBalance(false);
 				error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
 			}
 
 			commMarker();
-			writeLog(" Iteration	:	Finalizing ");
-			writeLog(" ");
+			log.writeLog(" Iteration	:	Finalizing ");
+			log.writeLog(" ");
 			localDone = octree.localBalance(false);
 			commMarker();
 
-			writeLog(" 2:1 Balancing reached ");
-			writeLog(" ");
-			writeLog("---------------------------------------------");
+			log.writeLog(" 2:1 Balancing reached ");
+			log.writeLog(" ");
+			log.writeLog("---------------------------------------------");
 
 		}
 		else{
@@ -4280,22 +4286,22 @@ public:
 			iter->info[11] = false;
 		}
 		if(serial){
-			writeLog("---------------------------------------------");
-			writeLog(" ADAPT (Refine/Coarse)");
-			writeLog(" ");
+			log.writeLog("---------------------------------------------");
+			log.writeLog(" ADAPT (Refine/Coarse)");
+			log.writeLog(" ");
 
 			// 2:1 Balance
 			balance21(true);
 
-			writeLog(" ");
-			writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
+			log.writeLog(" ");
+			log.writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
 
 			// Refine
 			while(octree.refine());
 
 			if (octree.getNumOctants() > nocts)
 				localDone = true;
-			writeLog(" Number of octants after Refine	:	" + to_string(octree.getNumOctants()));
+			log.writeLog(" Number of octants after Refine	:	" + to_string(octree.getNumOctants()));
 			nocts = octree.getNumOctants();
 			updateAdapt();
 
@@ -4310,22 +4316,22 @@ public:
 			updateAdapt();
 			nocts = octree.getNumOctants();
 
-			writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
+			log.writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-			writeLog(" ");
-			writeLog("---------------------------------------------");
+			log.writeLog(" ");
+			log.writeLog("---------------------------------------------");
 		}
 		else{
-			writeLog("---------------------------------------------");
-			writeLog(" ADAPT (Refine/Coarse)");
-			writeLog(" ");
+			log.writeLog("---------------------------------------------");
+			log.writeLog(" ADAPT (Refine/Coarse)");
+			log.writeLog(" ");
 
 			// 2:1 Balance
 			balance21(true);
 
-			writeLog(" ");
-			writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
+			log.writeLog(" ");
+			log.writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
 
 			// Refine
 			while(octree.refine());
@@ -4333,7 +4339,7 @@ public:
 				localDone = true;
 			updateAdapt();
 			//setPboundGhosts();
-			writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
+			log.writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
 			nocts = octree.getNumOctants();
 
 			// Coarse
@@ -4350,9 +4356,9 @@ public:
 
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-			writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
-			writeLog(" ");
-			writeLog("---------------------------------------------");
+			log.writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
+			log.writeLog(" ");
+			log.writeLog("---------------------------------------------");
 		}
 		return globalDone;
 	}
@@ -4386,22 +4392,22 @@ public:
 			mapidx[i] = i;
 		}
 		if(serial){
-			writeLog("---------------------------------------------");
-			writeLog(" ADAPT (Refine/Coarse)");
-			writeLog(" ");
+			log.writeLog("---------------------------------------------");
+			log.writeLog(" ADAPT (Refine/Coarse)");
+			log.writeLog(" ");
 
 			// 2:1 Balance
 			balance21(true);
 
-			writeLog(" ");
-			writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
+			log.writeLog(" ");
+			log.writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
 
 			// Refine
 			while(octree.refine(mapidx));
 
 			if (octree.getNumOctants() > nocts)
 				localDone = true;
-			writeLog(" Number of octants after Refine	:	" + to_string(octree.getNumOctants()));
+			log.writeLog(" Number of octants after Refine	:	" + to_string(octree.getNumOctants()));
 			nocts = octree.getNumOctants();
 			updateAdapt();
 
@@ -4416,29 +4422,29 @@ public:
 			updateAdapt();
 			nocts = octree.getNumOctants();
 
-			writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
+			log.writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-			writeLog(" ");
-			writeLog("---------------------------------------------");
+			log.writeLog(" ");
+			log.writeLog("---------------------------------------------");
 		}
 		else{
-			writeLog("---------------------------------------------");
-			writeLog(" ADAPT (Refine/Coarse)");
-			writeLog(" ");
+			log.writeLog("---------------------------------------------");
+			log.writeLog(" ADAPT (Refine/Coarse)");
+			log.writeLog(" ");
 
 			// 2:1 Balance
 			balance21(true);
 
-			writeLog(" ");
-			writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
+			log.writeLog(" ");
+			log.writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
 
 			// Refine
 			while(octree.refine(mapidx));
 			if (octree.getNumOctants() > nocts)
 				localDone = true;
 			updateAdapt();
-			writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
+			log.writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
 			nocts = octree.getNumOctants();
 
 			// Coarse
@@ -4455,9 +4461,9 @@ public:
 
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-			writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
-			writeLog(" ");
-			writeLog("---------------------------------------------");
+			log.writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
+			log.writeLog(" ");
+			log.writeLog("---------------------------------------------");
 		}
 		return globalDone;
 	}
@@ -4477,34 +4483,34 @@ public:
 			iter->info[11] = false;
 		}
 		if(serial){
-			writeLog("---------------------------------------------");
-			writeLog(" ADAPT (GlobalRefine)");
-			writeLog(" ");
+			log.writeLog("---------------------------------------------");
+			log.writeLog(" ADAPT (GlobalRefine)");
+			log.writeLog(" ");
 
-			writeLog(" ");
-			writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
+			log.writeLog(" ");
+			log.writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
 
 			// Refine
 			while(octree.globalRefine());
 
 			if (octree.getNumOctants() > nocts)
 				localDone = true;
-			writeLog(" Number of octants after Refine	:	" + to_string(octree.getNumOctants()));
+			log.writeLog(" Number of octants after Refine	:	" + to_string(octree.getNumOctants()));
 			nocts = octree.getNumOctants();
 			updateAdapt();
 
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-			writeLog(" ");
-			writeLog("---------------------------------------------");
+			log.writeLog(" ");
+			log.writeLog("---------------------------------------------");
 		}
 		else{
-			writeLog("---------------------------------------------");
-			writeLog(" ADAPT (Global Refine)");
-			writeLog(" ");
+			log.writeLog("---------------------------------------------");
+			log.writeLog(" ADAPT (Global Refine)");
+			log.writeLog(" ");
 
-			writeLog(" ");
-			writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
+			log.writeLog(" ");
+			log.writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
 
 			// Refine
 			while(octree.globalRefine());
@@ -4512,13 +4518,13 @@ public:
 				localDone = true;
 			updateAdapt();
 			setPboundGhosts();
-			writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
+			log.writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
 			nocts = octree.getNumOctants();
 
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-			writeLog(" ");
-			writeLog("---------------------------------------------");
+			log.writeLog(" ");
+			log.writeLog("---------------------------------------------");
 		}
 		return globalDone;
 	}
@@ -4552,34 +4558,34 @@ public:
 			mapidx[i] = i;
 		}
 		if(serial){
-			writeLog("---------------------------------------------");
-			writeLog(" ADAPT (Global Refine)");
-			writeLog(" ");
+			log.writeLog("---------------------------------------------");
+			log.writeLog(" ADAPT (Global Refine)");
+			log.writeLog(" ");
 
-			writeLog(" ");
-			writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
+			log.writeLog(" ");
+			log.writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
 
 			// Refine
 			while(octree.globalRefine(mapidx));
 
 			if (octree.getNumOctants() > nocts)
 				localDone = true;
-			writeLog(" Number of octants after Refine	:	" + to_string(octree.getNumOctants()));
+			log.writeLog(" Number of octants after Refine	:	" + to_string(octree.getNumOctants()));
 			nocts = octree.getNumOctants();
 			updateAdapt();
 
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-			writeLog(" ");
-			writeLog("---------------------------------------------");
+			log.writeLog(" ");
+			log.writeLog("---------------------------------------------");
 		}
 		else{
-			writeLog("---------------------------------------------");
-			writeLog(" ADAPT (Global Refine)");
-			writeLog(" ");
+			log.writeLog("---------------------------------------------");
+			log.writeLog(" ADAPT (Global Refine)");
+			log.writeLog(" ");
 
-			writeLog(" ");
-			writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
+			log.writeLog(" ");
+			log.writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
 
 			// Refine
 			while(octree.globalRefine(mapidx));
@@ -4587,13 +4593,13 @@ public:
 				localDone = true;
 			updateAdapt();
 			setPboundGhosts();
-			writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
+			log.writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
 			nocts = octree.getNumOctants();
 
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-			writeLog(" ");
-			writeLog("---------------------------------------------");
+			log.writeLog(" ");
+			log.writeLog("---------------------------------------------");
 		}
 		return globalDone;
 	}
@@ -4613,15 +4619,15 @@ public:
 			iter->info[11] = false;
 		}
 		if(serial){
-			writeLog("---------------------------------------------");
-			writeLog(" ADAPT (Global Coarse)");
-			writeLog(" ");
+			log.writeLog("---------------------------------------------");
+			log.writeLog(" ADAPT (Global Coarse)");
+			log.writeLog(" ");
 
 			// 2:1 Balance
 			balance21(true);
 
-			writeLog(" ");
-			writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
+			log.writeLog(" ");
+			log.writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
 
 			// Coarse
 			while(octree.globalCoarse());
@@ -4634,22 +4640,22 @@ public:
 			updateAdapt();
 			nocts = octree.getNumOctants();
 
-			writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
+			log.writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-			writeLog(" ");
-			writeLog("---------------------------------------------");
+			log.writeLog(" ");
+			log.writeLog("---------------------------------------------");
 		}
 		else{
-			writeLog("---------------------------------------------");
-			writeLog(" ADAPT (Global Coarse)");
-			writeLog(" ");
+			log.writeLog("---------------------------------------------");
+			log.writeLog(" ADAPT (Global Coarse)");
+			log.writeLog(" ");
 
 			// 2:1 Balance
 			balance21(true);
 
-			writeLog(" ");
-			writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
+			log.writeLog(" ");
+			log.writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
 
 			// Coarse
 			while(octree.globalCoarse());
@@ -4665,9 +4671,9 @@ public:
 
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-			writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
-			writeLog(" ");
-			writeLog("---------------------------------------------");
+			log.writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
+			log.writeLog(" ");
+			log.writeLog("---------------------------------------------");
 		}
 		return globalDone;
 	}
@@ -4701,15 +4707,15 @@ public:
 			mapidx[i] = i;
 		}
 		if(serial){
-			writeLog("---------------------------------------------");
-			writeLog(" ADAPT (Global Coarse)");
-			writeLog(" ");
+			log.writeLog("---------------------------------------------");
+			log.writeLog(" ADAPT (Global Coarse)");
+			log.writeLog(" ");
 
 			// 2:1 Balance
 			balance21(true);
 
-			writeLog(" ");
-			writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
+			log.writeLog(" ");
+			log.writeLog(" Initial Number of octants	:	" + to_string(octree.getNumOctants()));
 
 			// Coarse
 			while(octree.globalCoarse(mapidx));
@@ -4722,22 +4728,22 @@ public:
 			updateAdapt();
 			nocts = octree.getNumOctants();
 
-			writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
+			log.writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-			writeLog(" ");
-			writeLog("---------------------------------------------");
+			log.writeLog(" ");
+			log.writeLog("---------------------------------------------");
 		}
 		else{
-			writeLog("---------------------------------------------");
-			writeLog(" ADAPT (Global Coarse)");
-			writeLog(" ");
+			log.writeLog("---------------------------------------------");
+			log.writeLog(" ADAPT (Global Coarse)");
+			log.writeLog(" ");
 
 			// 2:1 Balance
 			balance21(true);
 
-			writeLog(" ");
-			writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
+			log.writeLog(" ");
+			log.writeLog(" Initial Number of octants	:	" + to_string(global_num_octants));
 
 			// Coarse
 			while(octree.globalCoarse(mapidx));
@@ -4753,9 +4759,9 @@ public:
 
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-			writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
-			writeLog(" ");
-			writeLog("---------------------------------------------");
+			log.writeLog(" Number of octants after Coarse	:	" + to_string(global_num_octants));
+			log.writeLog(" ");
+			log.writeLog("---------------------------------------------");
 		}
 		return globalDone;
 	}
@@ -5647,7 +5653,7 @@ public:
 		if(!out.is_open()){
 			stringstream ss;
 			ss << filename << "*.vtu cannot be opened and it won't be written.";
-			writeLog(ss.str());
+			log.writeLog(ss.str());
 			return;
 		}
 		int nofNodes = octree.nodes.size();
@@ -5753,7 +5759,7 @@ public:
 			if(!pout.is_open()){
 				stringstream ss;
 				ss << filename << "*.pvtu cannot be opened and it won't be written.";
-				writeLog(ss.str());
+				log.writeLog(ss.str());
 				return;
 			}
 
@@ -5806,7 +5812,7 @@ public:
 		if(!out.is_open()){
 			stringstream ss;
 			ss << filename << "*.vtu cannot be opened and it won't be written.";
-			writeLog(ss.str());
+			log.writeLog(ss.str());
 			return;
 		}
 		int nofNodes = octree.nodes.size();
@@ -5920,7 +5926,7 @@ public:
 			if(!pout.is_open()){
 				stringstream ss;
 				ss << filename << "*.pvtu cannot be opened and it won't be written.";
-				writeLog(ss.str());
+				log.writeLog(ss.str());
 				return;
 			}
 
@@ -5969,7 +5975,7 @@ public:
 		if(!out.is_open()){
 			stringstream ss;
 			ss << filename << "*.vtu cannot be opened and it won't be written.";
-			writeLog(ss.str());
+			log.writeLog(ss.str());
 			return;
 		}
 		int nofNodes = octree.nodes.size();
@@ -6062,7 +6068,7 @@ public:
 			if(!pout.is_open()){
 				stringstream ss;
 				ss << filename << "*.pvtu cannot be opened and it won't be written.";
-				writeLog(ss.str());
+				log.writeLog(ss.str());
 				return;
 			}
 

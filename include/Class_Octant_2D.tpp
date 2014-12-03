@@ -564,7 +564,7 @@ private:
 		}
 		else{
 			vector<Class_Octant<2> > children(0);
-			writeLog("Max level reached ---> No Children Built");
+			//writeLog("Max level reached ---> No Children Built");
 			return children;
 		}
 	};

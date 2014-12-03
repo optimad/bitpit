@@ -2,7 +2,6 @@
 #include <mpi.h>
 #include "Class_Global.hpp"
 #include "Class_Para_Tree.hpp"
-#include "ioFunct.hpp"
 #include "User_Data_Comm.hpp"
 #include "User_Data_LB.hpp"
 
