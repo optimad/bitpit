@@ -6,7 +6,6 @@
 // =================================================================================== //
 #include "preprocessor_defines.dat"
 #include "Class_Global.hpp"
-#include "logFunct.hpp"
 #include <vector>
 #include <string.h>
 #include "inlinedFunct.hpp"
