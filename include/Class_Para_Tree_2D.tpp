@@ -235,7 +235,16 @@ public:
 	// =============================================================================== //
 	// GET/SET METHODS --------------------------------------------------------------- //
 
+
+
 	// Octant get/set Methods
+	/*! Get the global class object
+	 * \return A reference to the global class object.
+	 */
+	const Class_Global<2>& getGlobal(){
+		return global2D;
+	}
+
 	/*! Get the coordinates of an octant, i.e. the coordinates of its node 0.
 	 * \param[in] oct Pointer to target octant.
 	 * \return Coordinate X of node 0.
