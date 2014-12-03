@@ -85,10 +85,6 @@ public:
 			partition_last_desc[p] = firstDescMorton;
 		}
 		// Write info log
-		if(rank==0){
-			int sysError = system("rm PABLO.log");
-		}
-		MPI_Barrier(MPI_COMM_WORLD);
 		writeLog("---------------------------------------------");
 		writeLog("- PABLO PArallel Balanced Linear Octree -");
 		writeLog("---------------------------------------------");
@@ -99,6 +95,7 @@ public:
 		writeLog(" Max allowed level	:	" + to_string(MAX_LEVEL_2D));
 		writeLog("---------------------------------------------");
 		writeLog(" ");
+		MPI_Barrier(MPI_COMM_WORLD);
 
 	};
 
@@ -129,10 +126,6 @@ public:
 			partition_last_desc[p] = firstDescMorton;
 		}
 		// Write info log
-		if(rank==0){
-			int sysError = system("rm PABLO.log");
-		}
-		MPI_Barrier(MPI_COMM_WORLD);
 		writeLog("---------------------------------------------");
 		writeLog("- PABLO PArallel Balanced Linear Octree -");
 		writeLog("---------------------------------------------");
@@ -147,6 +140,7 @@ public:
 		writeLog(" Domain Size		:	" + to_string(L));
 		writeLog("---------------------------------------------");
 		writeLog(" ");
+		MPI_Barrier(MPI_COMM_WORLD);
 
 	};
 
@@ -208,10 +202,6 @@ public:
 		setPboundGhosts();
 
 		// Write info log
-		if(rank==0){
-			int sysError = system("rm PABLO.log");
-		}
-		MPI_Barrier(MPI_COMM_WORLD);
 		writeLog("---------------------------------------------");
 		writeLog("- PABLO PArallel Balanced Linear Octree -");
 		writeLog("---------------------------------------------");
@@ -229,6 +219,7 @@ public:
 		writeLog(" Number of octants	:	" + to_string(global_num_octants));
 		writeLog("---------------------------------------------");
 		writeLog(" ");
+		MPI_Barrier(MPI_COMM_WORLD);
 
 	};
 
