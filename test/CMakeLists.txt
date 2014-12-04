@@ -124,3 +124,11 @@ add_executable(test120 ${test120_src})
 target_link_libraries(test120 mpi)
 TARGET_LINK_LIBRARIES(test120 PABLO)
 
+#Build testBubbles.cpp
+SET(testBubbles_src testBubbles.cpp)
+
+add_executable(testBubbles ${testBubbles_src})
+
+target_link_libraries(testBubbles mpi)
+TARGET_LINK_LIBRARIES(testBubbles PABLO)
+

@@ -1618,7 +1618,7 @@ private:
 									Mortontry = octants[idxtry].computeMorton();
 									int32_t Dh;
 									int32_t eqcoord;
-									while(Mortontry < Mortonlast && idxtry < noctants-1){
+									while(Mortontry < Mortonlast && idxtry <= noctants-1){
 										Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
 										Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
 										if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
@@ -1935,7 +1935,7 @@ private:
 									Mortontry = octants[idxtry].computeMorton();
 									int32_t Dh;
 									int32_t eqcoord;
-									while(Mortontry < Mortonlast & idxtry < noctants-1){
+									while(Mortontry < Mortonlast & idxtry <= noctants-1){
 										Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
 										Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
 										if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
@@ -2606,10 +2606,17 @@ private:
 				// Search morton in octants
 				// If a even face morton is lower than morton of oct, if odd higher
 				// ---> can i search only before or after idx in octants
-				int32_t jump = (octghost->computeMorton() > Morton) ? int32_t(idxghost/2+1) : int32_t((size_ghosts -idxghost)/2+1);
+				int32_t jump;
+				if (inode==3 || inode ==0){
+				jump = (octghost->computeMorton() > Morton) ? int32_t(idxghost/2+1) : int32_t((size_ghosts -idxghost)/2+1);
 				idxtry = uint32_t(idxghost +((octghost->computeMorton()<Morton)-(octghost->computeMorton()>Morton))*jump);
 				if (idxtry > size_ghosts-1)
 					idxtry = size_ghosts-1;
+				}
+				else{
+					jump = idxghost;
+					idxtry = uint32_t(jump);
+				}
 				while(abs(jump) > 0){
 					Mortontry = ghosts[idxtry].computeMorton();
 					jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
@@ -2698,10 +2705,17 @@ private:
 				// Search morton in octants
 				// If a even face morton is lower than morton of oct, if odd higher
 				// ---> can i search only before or after idx in octants
-				int32_t jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
-				idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
-				if (idxtry > noctants-1)
-					idxtry = noctants-1;
+				int32_t jump;
+				if (inode==0 || inode==3){
+					jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
+					idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
+					if (idxtry > noctants-1)
+						idxtry = noctants-1;
+				}
+				else{
+					jump = noctants/2;
+					idxtry = jump;
+				}
 				while(abs(jump) > 0){
 					Mortontry = octants[idxtry].computeMorton();
 					jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
@@ -2754,7 +2768,7 @@ private:
 						uint64_t Mortonlast = last_desc.computeMorton();
 						vector<uint32_t> bufferidx;
 						Mortontry = octants[idxtry].computeMorton();
-						while(Mortontry < Mortonlast && idxtry < noctants-1){
+						while(Mortontry < Mortonlast && idxtry <= noctants-1){
 							//Dhx = int32_t(cx)*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 							//Dhy = int32_t(cy)*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
 							Dhx = (-int32_t(oct->x) + int32_t(octants[idxtry].x));
@@ -2946,6 +2960,16 @@ private:
 					Mortontry = octants[idxtry].computeMorton();
 					jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
 					idxtry += jump;
+					if (idxtry > octants.size()-1){
+						if (jump > 0){
+							idxtry = octants.size() - 1;
+							jump = 0;
+						}
+						else if (jump < 0){
+							idxtry = 0;
+							jump = 0;
+						}
+					}
 				}
 				if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
 					//Found neighbour of same size
@@ -2984,7 +3008,7 @@ private:
 						uint64_t Mortonlast = last_desc.computeMorton();
 						vector<uint32_t> bufferidx;
 						Mortontry = octants[idxtry].computeMorton();
-						while(Mortontry < Mortonlast && idxtry < noctants-1){
+						while(Mortontry < Mortonlast && idxtry <= noctants-1){
 							//Dhx = int32_t(cx)*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 							//Dhy = int32_t(cy)*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
 							Dhx = (-int32_t(oct->x) + int32_t(octants[idxtry].x));
