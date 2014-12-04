@@ -59,5 +59,13 @@ If you have just built PABLO, its headers will be available at `PABLO/include/` 
 
 If you have also installed PABLO, its headers will be available at `/my/installation/folder/PABLO/include/` folder and a static library `libPABLO.a` will be available at `/my/installation/folder/lib/` folder.
 
+## Building Documentation
+In order to build the documentation Doxygen (>=1.8.6) is needed.
+In 'doxy' folder run :
+```bash
+	PABLO/doxy$ doxygen PABLODoxyfile.txt
+```
+You can now browse the html documentation with your favorite browser by opening 'html/index.html'.
+
 ## Help
 For any problem, please join the <a href="https://groups.google.com/forum/#!forum/pablo-users" target="pablousers">PABLO Users Google Group</a> and post your requests.

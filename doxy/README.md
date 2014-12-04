@@ -19,6 +19,6 @@ One of the main feature of PABLO is the low memory consumption in the basic conf
 
 Additional features available in PABLO are: 2:1 balancing between octants and a easy way to generate and store intersections between octants.
 
-##Installation and Documentation
-Please, see [INSTALL.md](https://github.com/optimad/PABLO/blob/master/INSTALL.md) installation and building documentation instructions.
+##Installation
+Please, see INSTALL.md for installation instructions.
 
