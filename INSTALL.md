@@ -61,7 +61,7 @@ If you have also installed PABLO, its headers will be available at `/my/installa
 
 ## Building Documentation
 In order to build properly the documentation Doxygen (>=1.8.6) and Graphviz (>=2.20.2) are needed.
-In 'doxy' folder run :
+In 'doxy' folder run:
 ```bash
 	PABLO/doxy$ doxygen PABLODoxyfile.txt
 ```
