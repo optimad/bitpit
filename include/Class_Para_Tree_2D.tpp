@@ -4225,6 +4225,7 @@ private:
 			log.writeLog(" Iteration	:	" + to_string(iteration));
 
 			commMarker();
+
 			localDone = octree.localBalance(true);
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);

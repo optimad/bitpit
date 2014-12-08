@@ -23,10 +23,10 @@ int main(int argc, char *argv[]) {
 		/**<Refine globally two level and write the para_tree.*/
 		for (int iter=1; iter<3; iter++){
 			pablo12.adaptGlobalRefine();
+
 			pablo12.updateConnectivity();
 			pablo12.write("Pablo12_iter"+to_string(iter));
 		}
-
 
 		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
 		pablo12.loadBalance();
@@ -38,6 +38,7 @@ int main(int argc, char *argv[]) {
 
 		/**<Simple adapt() (refine) 6 times the octants with at least one node inside the circle.*/
 		for (int iter=3; iter<9; iter++){
+
 			uint32_t nocts = pablo12.getNumOctants();
 			for (int i=0; i<nocts; i++){
 				vector<vector<double> > nodes = pablo12.getNodes(i);
@@ -49,6 +50,7 @@ int main(int argc, char *argv[]) {
 					}
 				}
 			}
+
 			/**<Adapt octree.*/
 			pablo12.adapt();
 
