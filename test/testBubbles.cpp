@@ -88,94 +88,93 @@ int main(int argc, char *argv[]) {
 		int itstart = 1;
 		int itend = 200;
 
-		itstart = 119;
-		t = t0 + 119*Dt;
+//		itstart = 119;
+//		t = t0 + 119*Dt;
 
 		int nrefperiter = 4;
 
 		for (iter=itstart; iter<itend; iter++){
-			cout << "iter " << iter << endl;
+			if(pabloBB.rank==0) cout << "iter " << iter << endl;
 			t += Dt;
 
 			for (int i=0; i<nb; i++){
 				BB[i].c[0] = BB0[i].c[0] + AA[i]*cos(OM[i]*t);
-				if (iter == itstart){
-					BB[i].c[1] = BB[i].c[1]+ 119*Dt*DY[i] + Dt*DY[i];
-				}
-				else{
+//				if (iter == itstart){
+//					BB[i].c[1] = BB[i].c[1]+ 119*Dt*DY[i] + Dt*DY[i];
+//				}
+//				else{
 					BB[i].c[1] = BB[i].c[1]+ Dt*DY[i];
-				}
+//				}
 			}
 
 			for (int iref=0; iref<nrefperiter; iref++){
 
-			for (int i=0; i<nocts; i++){
-				bool inside = false;
-				vector<vector<double> > nodes = pabloBB.getNodes(i);
-				vector<double> center = pabloBB.getCenter(i);
-				int ib = 0;
-				while (!inside && ib<nb){
-					double xc = BB[ib].c[0];
-					double yc = BB[ib].c[1];
-					double radius = BB[ib].r;
-					//oct_data[i] = (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0));
-					oct_data[i] = 0.0;
-					for (int j=0; j<global2D.nnodes; j++){
-						double x = nodes[j][0];
-						double y = nodes[j][1];
-						if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= 1.15*pow(radius,2.0) &&
-								pow((x-xc),2.0)+pow((y-yc),2.0) >= 0.85*pow(radius,2.0)) ||
-								(pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) <= 1.15*pow(radius,2.0) &&
-										pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) >= 0.85*pow(radius,2.0))){
-							if (pabloBB.getLevel(i) < 9){
-								/**<Set to refine inside the sphere.*/
-								pabloBB.setMarker(i,1);
+				for (int i=0; i<nocts; i++){
+					bool inside = false;
+					vector<vector<double> > nodes = pabloBB.getNodes(i);
+					vector<double> center = pabloBB.getCenter(i);
+					int ib = 0;
+					while (!inside && ib<nb){
+						double xc = BB[ib].c[0];
+						double yc = BB[ib].c[1];
+						double radius = BB[ib].r;
+						//oct_data[i] = (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0));
+						oct_data[i] = 0.0;
+						for (int j=0; j<global2D.nnodes; j++){
+							double x = nodes[j][0];
+							double y = nodes[j][1];
+							if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= 1.15*pow(radius,2.0) &&
+									pow((x-xc),2.0)+pow((y-yc),2.0) >= 0.85*pow(radius,2.0)) ||
+									(pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) <= 1.15*pow(radius,2.0) &&
+											pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) >= 0.85*pow(radius,2.0))){
+								if (pabloBB.getLevel(i) < 9){
+									/**<Set to refine inside the sphere.*/
+									pabloBB.setMarker(i,1);
+								}
+								else{
+									pabloBB.setMarker(i,0);
+								}
+								inside = true;
 							}
-							else{
-								pabloBB.setMarker(i,0);
-							}
-							inside = true;
 						}
+						ib++;
 					}
-					ib++;
+					if (pabloBB.getLevel(i) > 6 && !inside){
+						/**<Set to coarse if the octant has a level higher than 5.*/
+						pabloBB.setMarker(i,-1);
+					}
 				}
-				if (pabloBB.getLevel(i) > 6 && !inside){
-					/**<Set to coarse if the octant has a level higher than 5.*/
-					pabloBB.setMarker(i,-1);
+
+				/**<Adapt the octree.*/
+				//vector<uint32_t> mapidx;
+				//bool adapt = pabloBB.adapt(mapidx);
+				bool adapt = pabloBB.adapt();
+
+				/**<Update the connectivity and write the para_tree.*/
+				pabloBB.clearGhostsConnectivity();
+				pabloBB.updateConnectivity();
+				pabloBB.write("PabloBubble_noGhosts_iter"+to_string(iter));
+				pabloBB.updateGhostsConnectivity();
+				//pabloBB.writeTest("PabloBubble_iter"+to_string(iter), oct_data);
+				pabloBB.write("PabloBubble_iter"+to_string(iter));
+
+				/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
+				pabloBB.loadBalance();
+
+				nocts = pabloBB.getNumOctants();
+				nghosts = pabloBB.getNumGhosts();
+				vector<double> oct_data_new(nocts, 0.0);
+
+				/**<Assign to the new octant the data after an adaption.*/
+				for (int i=0; i<nocts; i++){
+					vector<double> center = pabloBB.getCenter(i);
+					//oct_data_new[i] = oct_data[mapidx[i]];
+					oct_data_new[i] = 0.0;
 				}
-			}
 
-			/**<Adapt the octree.*/
-			vector<uint32_t> mapidx;
-			//bool adapt = pabloBB.adapt(mapidx);
-			bool adapt = pabloBB.adapt();
-
-			/**<Update the connectivity and write the para_tree.*/
-			pabloBB.clearGhostsConnectivity();
-			pabloBB.updateConnectivity();
-			pabloBB.write("PabloBubble_noGhosts_iter"+to_string(iter));
-			pabloBB.updateGhostsConnectivity();
-			//pabloBB.writeTest("PabloBubble_iter"+to_string(iter), oct_data);
-			pabloBB.write("PabloBubble_iter"+to_string(iter));
-
-			cout << "in loadbalance" << endl;
-			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
-			pabloBB.loadBalance();
-
-			nocts = pabloBB.getNumOctants();
-			nghosts = pabloBB.getNumGhosts();
-			vector<double> oct_data_new(nocts, 0.0);
-
-			/**<Assign to the new octant the data after an adaption.*/
-			for (int i=0; i<nocts; i++){
-				vector<double> center = pabloBB.getCenter(i);
-				//oct_data_new[i] = oct_data[mapidx[i]];
-				oct_data_new[i] = 0.0;
-			}
-
-			oct_data.resize(nocts);
-			oct_data = oct_data_new;
-			oct_data_new.clear();
+				oct_data.resize(nocts);
+				oct_data = oct_data_new;
+				oct_data_new.clear();
 
 			}
 

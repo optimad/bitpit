@@ -2329,8 +2329,6 @@ private:
 			}
 		}
 
-		cout << rank << " pack end " << endl;
-
 
 		//COMMUNICATE THE SIZE OF BUFFER TO THE RECEIVERS
 		//the size of every borders buffer is communicated to the right process in order to build the receive buffer
@@ -2351,7 +2349,6 @@ private:
 			++nReq;
 		}
 		MPI_Waitall(nReq,req,stats);
-		cout << rank << " wait end " << endl;
 
 		//COMMUNICATE THE BUFFERS TO THE RECEIVERS
 		//recvBuffers structure is declared and each buffer is initialized to the right size
@@ -2760,22 +2757,9 @@ public:
 			delete [] newPartitionRangeGlobalidx;
 			newPartitionRangeGlobalidx = NULL;
 
-			{//DEBUG
-			/**<Update the connectivity and write the para_tree.*/
-			clearGhostsConnectivity();
-			updateConnectivity();
-			write("PabloBubble_noGhosts_debug");
-			updateGhostsConnectivity();
-			write("PabloBubble_debug");
-			}
-
 			//Update and ghosts here
-			cout << rank << " in updateloadbalance " << endl;
 			updateLoadBalance();
-			cout << rank << " out updateloadbalance " << endl;
-			cout << rank << " in setpboundghosts " << endl;
 			setPboundGhosts();
-			cout << rank << " out setpboundghosts " << endl;
 
 		}
 		delete [] partition;
@@ -4234,10 +4218,7 @@ private:
 		bool globalDone = true, localDone = false;
 		int  iteration  = 0;
 
-		//TODO LOCALBALANCEALL DEPRECATED FOR THE MOMENT!!!
-		//first not used;
-
-//		if (first){
+		if (first){
 			log.writeLog("---------------------------------------------");
 			log.writeLog(" 2:1 BALANCE (balancing Marker before Adapt)");
 			log.writeLog(" ");
@@ -4269,27 +4250,27 @@ private:
 			log.writeLog(" ");
 			log.writeLog("---------------------------------------------");
 
-//		}
-//		else{
-//
-//			commMarker();
-//			MPI_Barrier(MPI_COMM_WORLD);
-//			localDone = octree.localBalanceAll(true);
-//			MPI_Barrier(MPI_COMM_WORLD);
-//			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-//
-//			while(globalDone){
-//				iteration++;
-//				commMarker();
-//				localDone = octree.localBalanceAll(false);
-//				error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-//			}
-//
-//			commMarker();
-//			localDone = octree.localBalance(false);
-//			commMarker();
-//
-//		}
+		}
+		else{
+
+			commMarker();
+			MPI_Barrier(MPI_COMM_WORLD);
+			localDone = octree.localBalanceAll(true);
+			MPI_Barrier(MPI_COMM_WORLD);
+			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+
+			while(globalDone){
+				iteration++;
+				commMarker();
+				localDone = octree.localBalanceAll(false);
+				error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+			}
+
+			commMarker();
+			localDone = octree.localBalance(false);
+			commMarker();
+
+		}
 	}
 
 	// =============================================================================== //

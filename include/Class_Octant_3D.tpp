@@ -1730,15 +1730,15 @@ private:
 	vector<uint64_t>		computeEdgeVirtualMorton(uint8_t iedge, 		// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
 			const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
 			uint32_t & sizeneigh){
-		if (getNotBalance()){
+//		if (getNotBalance()){
 			return computeEdgeMinSizeMorton(iedge,
 					maxdepth,
 					sizeneigh);
-		}
-		else{
-			return computeEdgeHalfSizeMorton(iedge,
-					sizeneigh);
-		}
+//		}
+//		else{
+//			return computeEdgeHalfSizeMorton(iedge,
+//					sizeneigh);
+//		}
 
 	};
 
@@ -1939,15 +1939,15 @@ private:
 	uint64_t 		computeNodeVirtualMorton(uint8_t inode, 		// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
 			const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
 			uint32_t & sizeneigh){
-		if (getNotBalance()){
+//		if (getNotBalance()){
 			return computeNodeMinSizeMorton(inode,
 					maxdepth,
 					sizeneigh);
-		}
-		else{
-			return computeNodeHalfSizeMorton(inode,
-					sizeneigh);
-		}
+//		}
+//		else{
+//			return computeNodeHalfSizeMorton(inode,
+//					sizeneigh);
+//		}
 	};
 
 	// ------------------------------------------------------------------------------- //
