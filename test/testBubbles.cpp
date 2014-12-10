@@ -158,6 +158,7 @@ int main(int argc, char *argv[]) {
 			//pabloBB.writeTest("PabloBubble_iter"+to_string(iter), oct_data);
 			pabloBB.write("PabloBubble_iter"+to_string(iter));
 
+			cout << "in loadbalance" << endl;
 			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
 			pabloBB.loadBalance();
 

@@ -2287,6 +2287,7 @@ private:
 		}
 		MPI_Barrier(MPI_COMM_WORLD);
 
+
 		//PACK (mpi) BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
 		//it visits every element in bordersPerProc (one for every neighbor proc)
 		//for every element it visits the border octants it contains and pack them in a new structure, sendBuffers
@@ -2324,9 +2325,12 @@ private:
 				for(int j = 0; j < 12; ++j){
 					MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 				}
-				error_flag = MPI_Pack(&global_index,1,MPI_INT64_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
+				error_flag = MPI_Pack(&global_index,1,MPI_UINT64_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
 			}
 		}
+
+		cout << rank << " pack end " << endl;
+
 
 		//COMMUNICATE THE SIZE OF BUFFER TO THE RECEIVERS
 		//the size of every borders buffer is communicated to the right process in order to build the receive buffer
@@ -2347,6 +2351,7 @@ private:
 			++nReq;
 		}
 		MPI_Waitall(nReq,req,stats);
+		cout << rank << " wait end " << endl;
 
 		//COMMUNICATE THE BUFFERS TO THE RECEIVERS
 		//recvBuffers structure is declared and each buffer is initialized to the right size
@@ -2398,7 +2403,7 @@ private:
 					error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&info[j],1,MPI::BOOL,MPI_COMM_WORLD);
 					octree.ghosts[ghostCounter].info[j] = info[j];
 				}
-				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&global_index,1,MPI_INT64_T,MPI_COMM_WORLD);
+				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&global_index,1,MPI_UINT64_T,MPI_COMM_WORLD);
 				octree.globalidx_ghosts[ghostCounter] = global_index;
 				++ghostCounter;
 			}
@@ -2755,9 +2760,22 @@ public:
 			delete [] newPartitionRangeGlobalidx;
 			newPartitionRangeGlobalidx = NULL;
 
+			{//DEBUG
+			/**<Update the connectivity and write the para_tree.*/
+			clearGhostsConnectivity();
+			updateConnectivity();
+			write("PabloBubble_noGhosts_debug");
+			updateGhostsConnectivity();
+			write("PabloBubble_debug");
+			}
+
 			//Update and ghosts here
+			cout << rank << " in updateloadbalance " << endl;
 			updateLoadBalance();
+			cout << rank << " out updateloadbalance " << endl;
+			cout << rank << " in setpboundghosts " << endl;
 			setPboundGhosts();
+			cout << rank << " out setpboundghosts " << endl;
 
 		}
 		delete [] partition;
@@ -4349,7 +4367,6 @@ public:
 			// Coarse
 			while(octree.coarse());
 			updateAfterCoarse();
-			cout << "setpboundghosts aftercoarse" << endl;
 			setPboundGhosts();
 			balance21(false);
 			while(octree.refine());
