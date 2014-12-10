@@ -4308,13 +4308,13 @@ public:
 
 			// Coarse
 			while(octree.coarse());
-			if (octree.getNumOctants() < nocts){
-				localDone = true;
-			}
 			updateAfterCoarse();
 			balance21(false);
 			while(octree.refine());
 			updateAdapt();
+			if (octree.getNumOctants() < nocts){
+				localDone = true;
+			}
 			nocts = octree.getNumOctants();
 
 			log.writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
@@ -4345,15 +4345,17 @@ public:
 
 			// Coarse
 			while(octree.coarse());
-			if (octree.getNumOctants() < nocts){
-				localDone = true;
-			}
 			updateAfterCoarse();
 			setPboundGhosts();
 			balance21(false);
 			while(octree.refine());
 			updateAdapt();
 			setPboundGhosts();
+			if (octree.getNumOctants() < nocts){
+				localDone = true;
+			}
+			nocts = octree.getNumOctants();
+
 
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
@@ -4414,13 +4416,13 @@ public:
 
 			// Coarse
 			while(octree.coarse(mapidx));
-			if (octree.getNumOctants() < nocts){
-				localDone = true;
-			}
 			updateAfterCoarse(mapidx);
 			balance21(false);
 			while(octree.refine(mapidx));
 			updateAdapt();
+			if (octree.getNumOctants() < nocts){
+				localDone = true;
+			}
 			nocts = octree.getNumOctants();
 
 			log.writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
@@ -4450,15 +4452,16 @@ public:
 
 			// Coarse
 			while(octree.coarse(mapidx));
-			if (octree.getNumOctants() < nocts){
-				localDone = true;
-			}
 			updateAfterCoarse(mapidx);
 			setPboundGhosts();
 			balance21(false);
 			while(octree.refine(mapidx));
 			updateAdapt();
 			setPboundGhosts();
+			if (octree.getNumOctants() < nocts){
+				localDone = true;
+			}
+			nocts = octree.getNumOctants();
 
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
@@ -4632,13 +4635,13 @@ public:
 
 			// Coarse
 			while(octree.globalCoarse());
-			if (octree.getNumOctants() < nocts){
-				localDone = true;
-			}
 			updateAfterCoarse();
 			balance21(false);
 			while(octree.refine());
 			updateAdapt();
+			if (octree.getNumOctants() < nocts){
+				localDone = true;
+			}
 			nocts = octree.getNumOctants();
 
 			log.writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
@@ -4660,15 +4663,16 @@ public:
 
 			// Coarse
 			while(octree.globalCoarse());
-			if (octree.getNumOctants() < nocts){
-				localDone = true;
-			}
 			updateAfterCoarse();
 			setPboundGhosts();
 			balance21(false);
 			while(octree.refine());
 			updateAdapt();
 			setPboundGhosts();
+			if (octree.getNumOctants() < nocts){
+				localDone = true;
+			}
+			nocts = octree.getNumOctants();
 
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
@@ -4720,13 +4724,13 @@ public:
 
 			// Coarse
 			while(octree.globalCoarse(mapidx));
-			if (octree.getNumOctants() < nocts){
-				localDone = true;
-			}
 			updateAfterCoarse(mapidx);
 			balance21(false);
 			while(octree.refine(mapidx));
 			updateAdapt();
+			if (octree.getNumOctants() < nocts){
+				localDone = true;
+			}
 			nocts = octree.getNumOctants();
 
 			log.writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
@@ -4748,15 +4752,16 @@ public:
 
 			// Coarse
 			while(octree.globalCoarse(mapidx));
-			if (octree.getNumOctants() < nocts){
-				localDone = true;
-			}
 			updateAfterCoarse(mapidx);
 			setPboundGhosts();
 			balance21(false);
 			while(octree.refine(mapidx));
 			updateAdapt();
 			setPboundGhosts();
+			if (octree.getNumOctants() < nocts){
+				localDone = true;
+			}
+			nocts = octree.getNumOctants();
 
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);

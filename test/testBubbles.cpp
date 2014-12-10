@@ -41,7 +41,13 @@ int main(int argc, char *argv[]) {
 		pabloBB.loadBalance();
 
 		/**<Define a set of bubbles.*/
-		srand(time(NULL));
+//		cout << time(NULL) << endl;
+//		srand(time(NULL));
+		srand(1418143772);
+
+
+		//8 proc deadlock 1418143772  at iter 51 proc
+
 		int nb = 100;
 		vector<bubble> BB;
 		vector<bubble> BB0;
@@ -136,6 +142,14 @@ int main(int argc, char *argv[]) {
 			//bool adapt = pabloBB.adapt(mapidx);
 			bool adapt = pabloBB.adapt();
 
+//			/**<Update the connectivity and write the para_tree.*/
+//			pabloBB.clearGhostsConnectivity();
+//			pabloBB.updateConnectivity();
+//			pabloBB.write("PabloBubble_noGhosts_iter"+to_string(iter));
+//			pabloBB.updateGhostsConnectivity();
+//			//pabloBB.writeTest("PabloBubble_iter"+to_string(iter), oct_data);
+//			pabloBB.write("PabloBubble_iter"+to_string(iter));
+
 			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
 			pabloBB.loadBalance();
 
@@ -156,9 +170,9 @@ int main(int argc, char *argv[]) {
 
 			}
 
-			/**<Update the connectivity and write the para_tree.*/
-			pabloBB.updateConnectivity();
-			pabloBB.writeTest("PabloBubble_iter"+to_string(iter), oct_data);
+//			/**<Update the connectivity and write the para_tree.*/
+//			pabloBB.updateConnectivity();
+//			pabloBB.writeTest("PabloBubble_iter"+to_string(iter), oct_data);
 		}
 	}
 
@@ -166,4 +180,108 @@ int main(int argc, char *argv[]) {
 
 }
 
+
+
+
+
+//#include "preprocessor_defines.dat"
+//#include <mpi.h>
+//#include "Class_Global.hpp"
+//#include "Class_Para_Tree.hpp"
+//#include "User_Data_Comm.hpp"
+//#include "User_Data_LB.hpp"
+//
+//using namespace std;
+//
+//// =================================================================================== //
+//
+//class bubble{
+//public:
+//	double c[2];
+//	double r;
+//};
+//
+//
+//int main(int argc, char *argv[]) {
+//
+//	MPI::Init(argc, argv);
+//
+//	{
+//		int iter = 0;
+//
+//		/**<Instantation of a 2D para_tree object.*/
+//		Class_Para_Tree<2> pabloBB;
+//
+//		/**<Set 2:1 balance for the octree.*/
+//		int idx = 0;
+//		pabloBB.setBalance(idx,true);
+//
+//		/**<Refine globally four level and write the para_tree.*/
+//		for (iter=1; iter<3; iter++){
+//			pabloBB.adaptGlobalRefine();
+//		}
+//
+//		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
+//		pabloBB.loadBalance();
+//
+//		/**<Define vectors of data.*/
+//		uint32_t nocts = pabloBB.getNumOctants();
+//		uint32_t nghosts = pabloBB.getNumGhosts();
+//		vector<double> oct_data(nocts, 0.0), ghost_data(nghosts, 0.0);
+//
+//		/**<Update the connectivity and write the para_tree.*/
+//		pabloBB.updateConnectivity();
+//		pabloBB.write("PabloBubble_noGhosts_iter"+to_string(iter));
+//		//			pabloBB.updateGhostsConnectivity();
+//		//			pabloBB.write("PabloBubble_iter"+to_string(iter));
+//
+//		int itend = 10;
+//
+//		while(iter<itend){
+//			cout << iter << endl;
+//			iter++;
+//
+//			if (pabloBB.rank == 0 && iter < 7){
+//				/**<Set to refine inside the sphere.*/
+//				pabloBB.setMarker(3,1);
+//				pabloBB.setMarker(4,1);
+//			}
+//
+//
+//			for (int i=0; i<nocts; i++){
+//				if (pabloBB.getLevel(i) > 3 && iter > 6){
+//					/**<Set to coarse if the octant has a level higher than 5.*/
+//					pabloBB.setMarker(i,-1);
+//				}
+//			}
+//
+//			/**<Adapt the octree.*/
+//			bool adapt = pabloBB.adapt();
+//
+//			nocts = pabloBB.getNumOctants();
+//			nghosts = pabloBB.getNumGhosts();
+//
+//			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
+//			pabloBB.loadBalance();
+//
+//			nocts = pabloBB.getNumOctants();
+//			nghosts = pabloBB.getNumGhosts();
+//
+//			/**<Update the connectivity and write the para_tree.*/
+//			pabloBB.clearGhostsConnectivity();
+//			pabloBB.updateConnectivity();
+//			pabloBB.write("PabloBubble_noGhosts_iter"+to_string(iter));
+//			//			pabloBB.updateGhostsConnectivity();
+//			//			pabloBB.write("PabloBubble_iter"+to_string(iter));
+//
+//			//		/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
+//			//		pabloBB.loadBalance();
+//
+//		}
+//	}
+//
+//	MPI::Finalize();
+//
+//}
+//
 
