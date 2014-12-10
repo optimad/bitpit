@@ -88,6 +88,9 @@ int main(int argc, char *argv[]) {
 		int itstart = 1;
 		int itend = 200;
 
+		itstart = 119;
+		t = t0 + 119*Dt;
+
 		int nrefperiter = 4;
 
 		for (iter=itstart; iter<itend; iter++){
@@ -96,7 +99,12 @@ int main(int argc, char *argv[]) {
 
 			for (int i=0; i<nb; i++){
 				BB[i].c[0] = BB0[i].c[0] + AA[i]*cos(OM[i]*t);
-				BB[i].c[1] = BB[i].c[1]+ Dt*DY[i];
+				if (iter == itstart){
+					BB[i].c[1] = BB[i].c[1]+ 119*Dt*DY[i] + Dt*DY[i];
+				}
+				else{
+					BB[i].c[1] = BB[i].c[1]+ Dt*DY[i];
+				}
 			}
 
 			for (int iref=0; iref<nrefperiter; iref++){
@@ -142,13 +150,13 @@ int main(int argc, char *argv[]) {
 			//bool adapt = pabloBB.adapt(mapidx);
 			bool adapt = pabloBB.adapt();
 
-//			/**<Update the connectivity and write the para_tree.*/
-//			pabloBB.clearGhostsConnectivity();
-//			pabloBB.updateConnectivity();
-//			pabloBB.write("PabloBubble_noGhosts_iter"+to_string(iter));
-//			pabloBB.updateGhostsConnectivity();
-//			//pabloBB.writeTest("PabloBubble_iter"+to_string(iter), oct_data);
-//			pabloBB.write("PabloBubble_iter"+to_string(iter));
+			/**<Update the connectivity and write the para_tree.*/
+			pabloBB.clearGhostsConnectivity();
+			pabloBB.updateConnectivity();
+			pabloBB.write("PabloBubble_noGhosts_iter"+to_string(iter));
+			pabloBB.updateGhostsConnectivity();
+			//pabloBB.writeTest("PabloBubble_iter"+to_string(iter), oct_data);
+			pabloBB.write("PabloBubble_iter"+to_string(iter));
 
 			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
 			pabloBB.loadBalance();

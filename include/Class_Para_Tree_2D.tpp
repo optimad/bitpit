@@ -2285,7 +2285,6 @@ private:
 				}
 			}
 		}
-
 		MPI_Barrier(MPI_COMM_WORLD);
 
 		//PACK (mpi) BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
@@ -2407,6 +2406,7 @@ private:
 		recvBuffers.clear();
 		sendBuffers.clear();
 		recvBufferSizePerProc.clear();
+
 	}
 
 	// =============================================================================== //
@@ -4216,7 +4216,10 @@ private:
 		bool globalDone = true, localDone = false;
 		int  iteration  = 0;
 
-		if (first){
+		//TODO LOCALBALANCEALL DEPRECATED FOR THE MOMENT!!!
+		//first not used;
+
+//		if (first){
 			log.writeLog("---------------------------------------------");
 			log.writeLog(" 2:1 BALANCE (balancing Marker before Adapt)");
 			log.writeLog(" ");
@@ -4248,27 +4251,27 @@ private:
 			log.writeLog(" ");
 			log.writeLog("---------------------------------------------");
 
-		}
-		else{
-
-			commMarker();
-			MPI_Barrier(MPI_COMM_WORLD);
-			localDone = octree.localBalanceAll(true);
-			MPI_Barrier(MPI_COMM_WORLD);
-			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-
-			while(globalDone){
-				iteration++;
-				commMarker();
-				localDone = octree.localBalanceAll(false);
-				error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
-			}
-
-			commMarker();
-			localDone = octree.localBalance(false);
-			commMarker();
-
-		}
+//		}
+//		else{
+//
+//			commMarker();
+//			MPI_Barrier(MPI_COMM_WORLD);
+//			localDone = octree.localBalanceAll(true);
+//			MPI_Barrier(MPI_COMM_WORLD);
+//			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+//
+//			while(globalDone){
+//				iteration++;
+//				commMarker();
+//				localDone = octree.localBalanceAll(false);
+//				error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+//			}
+//
+//			commMarker();
+//			localDone = octree.localBalance(false);
+//			commMarker();
+//
+//		}
 	}
 
 	// =============================================================================== //
@@ -4346,6 +4349,7 @@ public:
 			// Coarse
 			while(octree.coarse());
 			updateAfterCoarse();
+			cout << "setpboundghosts aftercoarse" << endl;
 			setPboundGhosts();
 			balance21(false);
 			while(octree.refine());
@@ -4355,7 +4359,6 @@ public:
 				localDone = true;
 			}
 			nocts = octree.getNumOctants();
-
 
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
