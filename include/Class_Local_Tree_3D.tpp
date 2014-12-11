@@ -1295,6 +1295,7 @@ private:
 		}
 		for(idx=0; idx<nocts-toDelete; idx++){
 			octants[idx] = octants[idx+toDelete];
+			mapidx[idx] = mapidx[idx+toDelete];
 		}
 		octants.resize(nocts-toDelete);
 		octants.shrink_to_fit();

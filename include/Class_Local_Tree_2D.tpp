@@ -1240,12 +1240,25 @@ private:
 		uint32_t nocts;
 		uint64_t Morton;
 		uint8_t toDelete = 0;
+		u32vector neigh;
+		uint32_t sizeneigh;
+		vector<bool> isghost;
 
 		nocts = getNumOctants();
 		idx = 0;
 		Morton = octants[idx].computeMorton();
 		while(Morton <= lastDescPre && idx < nocts && Morton != 0){
 			// To delete, the father is in proc before me
+//			// Update PBound of neighbours
+//			for (uint8_t iface=0; iface<global2D.nfaces; iface++){
+//				findNeighbours(idx, iface, neigh, isghost);
+//				sizeneigh = neigh.size();
+//				for (int i=0; i<sizeneigh; i++){
+//					if(!isghost[i]){
+//						octants[i].info[global2D.oppface[iface]+global2D.nfaces] = true;
+//					}
+//				}
+//			}
 			toDelete++;
 			idx++;
 			Morton = octants[idx].computeMorton();
@@ -1305,6 +1318,7 @@ private:
 		}
 		for(idx=0; idx<nocts-toDelete; idx++){
 			octants[idx] = octants[idx+toDelete];
+			mapidx[idx] = mapidx[idx+toDelete];
 		}
 		octants.resize(nocts-toDelete);
 		octants.shrink_to_fit();
