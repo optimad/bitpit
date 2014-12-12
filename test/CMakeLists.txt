@@ -132,3 +132,10 @@ add_executable(testBubbles ${testBubbles_src})
 target_link_libraries(testBubbles mpi)
 TARGET_LINK_LIBRARIES(testBubbles PABLO)
 
+#Build testBubbles3D.cpp
+SET(testBubbles3D_src testBubbles3D.cpp)
+
+add_executable(testBubbles3D ${testBubbles3D_src})
+
+target_link_libraries(testBubbles3D mpi)
+TARGET_LINK_LIBRARIES(testBubbles3D PABLO)

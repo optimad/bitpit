@@ -11,7 +11,7 @@ using namespace std;
 
 class bubble{
 public:
-	double c[2];
+	double c[3];
 	double r;
 
 
@@ -25,15 +25,15 @@ int main(int argc, char *argv[]) {
 	{
 		int iter = 0;
 
-		/**<Instantation of a 2D para_tree object.*/
-		Class_Para_Tree<2> pabloBB;
+		/**<Instantation of a 3D para_tree object.*/
+		Class_Para_Tree<3> pabloBB;
 
 		/**<Set 2:1 balance for the octree.*/
 		int idx = 0;
-		pabloBB.setBalance(idx,true);
+		pabloBB.setBalance(idx,false);
 
 		/**<Refine globally four level and write the para_tree.*/
-		for (iter=1; iter<7; iter++){
+		for (iter=1; iter<6; iter++){
 			pabloBB.adaptGlobalRefine();
 		}
 
@@ -41,6 +41,7 @@ int main(int argc, char *argv[]) {
 		pabloBB.loadBalance();
 
 		/**<Define a set of bubbles.*/
+		cout << time(NULL) << endl;
 		srand(time(NULL));
 //		srand(1418143772);
 
@@ -50,25 +51,28 @@ int main(int argc, char *argv[]) {
 		int nb = 100;
 		vector<bubble> BB;
 		vector<bubble> BB0;
-		vector<double> DY;
+		vector<double> DZ;
 		vector<double> OM;
 		vector<double> AA;
 
 		for (int i=0; i<nb; i++){
-			double randc[2];
+			double randc[3];
 			randc[0] = 0.8 * (double) (rand()) /  RAND_MAX + 0.1;
-			randc[1] = (double) (rand()) /  RAND_MAX - 0.5;
-			double randr = 0.05 * (double) (rand()) / RAND_MAX + 0.02;
-			double dy = 0.005 + 0.05 * (double) (rand()) / RAND_MAX;
+			randc[1] = 0.8 * (double) (rand()) /  RAND_MAX + 0.1;
+			randc[2] = (double) (rand()) /  RAND_MAX - 0.5;
+			double randr = (0.05 * (double) (rand()) / RAND_MAX + 0.04);
+			//double randr = 0.005 * (double) (rand()) / RAND_MAX + 0.002;
+			double dz = 0.005 + 0.05 * (double) (rand()) / RAND_MAX;
 			double omega = 0.5 * (double) (rand()) / RAND_MAX;
 			double aa = 0.15 * (double) (rand()) / RAND_MAX;
 			bubble bb;
 			bb.c[0] = randc[0];
 			bb.c[1] = randc[1];
+			bb.c[2] = randc[2];
 			bb.r = randr;
 			BB.push_back(bb);
 			BB0.push_back(bb);
-			DY.push_back(dy);
+			DZ.push_back(dz);
 			OM.push_back(omega);
 			AA.push_back(aa);
 		}
@@ -81,22 +85,23 @@ int main(int argc, char *argv[]) {
 		/**<Define vectors of data.*/
 		uint32_t nocts = pabloBB.getNumOctants();
 		uint32_t nghosts = pabloBB.getNumGhosts();
-//		vector<double> oct_data(nocts, 0.0), ghost_data(nghosts, 0.0);
+		vector<double> oct_data(nocts, 99), ghost_data(nghosts, 0.0);
 
 		/**<Adapt itend times with data injection on new octants.*/
 		int itstart = 1;
 		int itend = 200;
 
 
-		int nrefperiter = 4;
+		int nrefperiter = 3;
 
 		for (iter=itstart; iter<itend; iter++){
 			if(pabloBB.rank==0) cout << "iter " << iter << endl;
 			t += Dt;
 
 			for (int i=0; i<nb; i++){
-				BB[i].c[0] = BB0[i].c[0] + AA[i]*cos(OM[i]*t);
-				BB[i].c[1] = BB[i].c[1]+ Dt*DY[i];
+				BB[i].c[0] = BB0[i].c[0];// + AA[i]*cos(OM[i]*t);
+				BB[i].c[1] = BB0[i].c[1];// + AA[i]*cos(OM[i]*t);
+				BB[i].c[2] = BB[i].c[2]+ Dt*DZ[i];
 			}
 
 			for (int iref=0; iref<nrefperiter; iref++){
@@ -109,17 +114,19 @@ int main(int argc, char *argv[]) {
 					while (!inside && ib<nb){
 						double xc = BB[ib].c[0];
 						double yc = BB[ib].c[1];
+						double zc = BB[ib].c[2];
 						double radius = BB[ib].r;
 						//oct_data[i] = (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0));
-//						oct_data[i] = 0.0;
-						for (int j=0; j<global2D.nnodes; j++){
+						oct_data[i] = 99;
+						for (int j=0; j<global3D.nnodes; j++){
 							double x = nodes[j][0];
 							double y = nodes[j][1];
-							if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= 1.15*pow(radius,2.0) &&
-									pow((x-xc),2.0)+pow((y-yc),2.0) >= 0.85*pow(radius,2.0)) ||
-									(pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) <= 1.15*pow(radius,2.0) &&
-											pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) >= 0.85*pow(radius,2.0))){
-								if (pabloBB.getLevel(i) < 9){
+							double z = nodes[j][2];
+							if ((pow((x-xc),2.0)+pow((y-yc),2.0)+pow((z-zc),2.0) <= 1.15*pow(radius,2.0) &&
+									pow((x-xc),2.0)+pow((y-yc),2.0)+pow((z-zc),2.0) >= 0.85*pow(radius,2.0)) ||
+									(pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0) <= 1.15*pow(radius,2.0) &&
+											pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0) >= 0.85*pow(radius,2.0))){
+								if (pabloBB.getLevel(i) < 8){
 									/**<Set to refine inside the sphere.*/
 									pabloBB.setMarker(i,1);
 								}
@@ -131,7 +138,7 @@ int main(int argc, char *argv[]) {
 						}
 						ib++;
 					}
-					if (pabloBB.getLevel(i) > 6 && !inside){
+					if (pabloBB.getLevel(i) > 5 && !inside){
 						/**<Set to coarse if the octant has a level higher than 5.*/
 						pabloBB.setMarker(i,-1);
 					}
@@ -142,33 +149,50 @@ int main(int argc, char *argv[]) {
 				//bool adapt = pabloBB.adapt(mapidx);
 				bool adapt = pabloBB.adapt();
 
-				/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
-				pabloBB.loadBalance();
+//				/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
+//				pabloBB.loadBalance();
 
 				nocts = pabloBB.getNumOctants();
 				nghosts = pabloBB.getNumGhosts();
-//				vector<double> oct_data_new(nocts, 0.0);
-
-//				/**<Assign to the new octant the data after an adaption.*/
-//				for (int i=0; i<nocts; i++){
-//					vector<double> center = pabloBB.getCenter(i);
-//					//oct_data_new[i] = oct_data[mapidx[i]];
-//					oct_data_new[i] = 0.0;
-//				}
-
-//				oct_data.resize(nocts);
-//				oct_data = oct_data_new;
-//				oct_data_new.clear();
+				oct_data.resize(nocts, 99);
 
 			}
 
+			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
+			pabloBB.loadBalance();
+			nocts = pabloBB.getNumOctants();
+			nghosts = pabloBB.getNumGhosts();
+			oct_data.resize(nocts, 99);
+
+			/**<Assign to the new octant the data after an adaption.*/
+//			for (int i=0; i<nocts; i++){
+//				vector<vector<double> > nodes = pabloBB.getNodes(i);
+//				vector<double> center = pabloBB.getCenter(i);
+//				oct_data[i] = 99;
+//				int ib = 0;
+//				while (ib<nb){
+//					double xc = BB[ib].c[0];
+//					double yc = BB[ib].c[1];
+//					double zc = BB[ib].c[2];
+//					double radius = BB[ib].r;
+//					if (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0) <= pow(radius,2.0)){
+//						if (oct_data[i] == 99) oct_data[i]= -(pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0));
+//
+//					}
+//				}
+//				ib++;
+//			}
+
+
 			/**<Update the connectivity and write the para_tree.*/
 			pabloBB.updateConnectivity();
-			//pabloBB.writeTest("PabloBubble_iter"+to_string(iter), oct_data);
-			pabloBB.write("PabloBubble_iter"+to_string(iter));
+			pabloBB.writeTest("PabloBubble_iter"+to_string(iter), oct_data);
+			//pabloBB.write("PabloBubble_iter"+to_string(iter));
 		}
 	}
 
 	MPI::Finalize();
 
 }
+
+
