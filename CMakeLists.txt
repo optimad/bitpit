@@ -8,7 +8,7 @@ project(OPTIMAD_VolTri)
 SET(TargetLib voltri)
 SET(TargetTest test_voltri)
 
-SET(DepLibs opt_base opt_IO opt_SA opt_LA opt_CG  )
+SET(DepLibs surftri opt_base opt_IO opt_SA opt_LA opt_CG  )
 
 SET(BLDIR build/lib/ )
 SET(IDIR include )

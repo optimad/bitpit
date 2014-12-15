@@ -30,6 +30,7 @@
 # include "DGF_IOFunct.hpp"
 # include "SortAlgorithms.hpp"
 # include "LinearAlgebra.hpp"
+# include "Class_SurfTri.hpp"
 
 // ========================================================================== //
 // NAME SPACES                                                                //
@@ -554,8 +555,8 @@ class Class_VolTri {
             double Volume(int T);                                 // Simplex volume
             double Volume(dvector2D &X, int T);                   // Simplex volume
 
-            // Selection tools =============================================================== //
-            public:
+    // Selection tools ====================================================== //
+    public:
 
     // Selection tools ------------------------------------------------------ //
     int face(                                                                 // Returns the local index of a face shared by two simplicies
@@ -581,8 +582,11 @@ class Class_VolTri {
     ivector1D VertNeigh(                                                      // Find vertex neighbors
         int                  ,                                                // (input) simplex global index
         int                                                                   // (input) vertex local index
-    );    
-    
+    );
+    void ExtractBoundaries(                                                   // Extract mesh boundaries
+        Class_SurfTri       &,                                                // (input/output) surface tasselation
+        int                  a = -1                                           // (input/optional) boundary condition flag
+    );
             int ReturnTriangleID(dvector1D    &);                 // Return triangle global index given a point
 
     // Refinement tools ===================================================== //

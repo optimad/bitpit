@@ -1039,3 +1039,88 @@ for (i = 1; i < nSimplex; i++) {
 } //next i
 
 return; };
+
+// Extract boundaries ======================================================= //
+
+// -------------------------------------------------------------------------- //
+void Class_VolTri::ExtractBoundaries(
+    Class_SurfTri    &Bounds,
+    int               BC_flag
+) {
+
+// ========================================================================== //
+// void Class_VolTri::ExtractBoundaries(                                      //
+//     Class_SurfTri    &Bounds,                                              //
+//     int               BC_flag)                                             //
+//                                                                            //
+// Extract boundaries of volume mesh.                                         //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - Bounds     : Class_SurfTri, surface mesh                                 //
+// - BC_flag    : int, boundary condition flag                                //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+ivector1D                simplex;
+
+// Counters
+int                      nS;
+int                      i, j;
+int                      n, m;
+int                      T;
+
+// ========================================================================== //
+// BUILD ADJACENCY IF NOT ALREADY BUILT                                       //
+// ========================================================================== //
+if ((Adjacency.size() == 0) || (Adjacency.size() < nSimplex)) {
+    BuildAdjacency();
+}
+
+// ========================================================================== //
+// RESIZE DATA STRUCTURES                                                     //
+// ========================================================================== //
+Bounds.AddVertices(Vertex);
+nS = Bounds.nSimplex;
+Bounds.nSimplex += CountFreeFaces();
+Bounds.ResizeSimplex();
+Bounds.nSimplex = nS;
+
+// ========================================================================== //
+// LOOP OVER SIMPLICIES                                                       //
+// ========================================================================== //
+for (T = 0; T < nSimplex; ++T) {
+    n = infos[e_type[T]].n_faces;
+    for (i = 0; i < n; ++i) {
+        if (Adjacency[T][i] == BC_flag) {
+            m = infos[e_type[T]].faces[i].size();
+            simplex.resize(m, -1);
+            for (j = 0; j < m; ++j) {
+                simplex[j] = Simplex[T][infos[e_type[T]].faces[i][j]];
+            } //next j
+            Bounds.AddSimplex(simplex);
+        }
+    } //next i
+} //next T
+
+// ========================================================================== //
+// CLEAN SURFACE TASSELATION                                                  //
+// ========================================================================== //
+Bounds.RemoveIsolatedVertex();
+
+return; };
+
+
+
+
+
+
+
