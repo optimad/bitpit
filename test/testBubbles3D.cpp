@@ -30,10 +30,10 @@ int main(int argc, char *argv[]) {
 
 		/**<Set 2:1 balance for the octree.*/
 		int idx = 0;
-		pabloBB.setBalance(idx,false);
+		pabloBB.setBalance(idx,true);
 
 		/**<Refine globally four level and write the para_tree.*/
-		for (iter=1; iter<6; iter++){
+		for (iter=1; iter<5; iter++){
 			pabloBB.adaptGlobalRefine();
 		}
 
@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
 									pow((x-xc),2.0)+pow((y-yc),2.0)+pow((z-zc),2.0) >= 0.85*pow(radius,2.0)) ||
 									(pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0) <= 1.15*pow(radius,2.0) &&
 											pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0) >= 0.85*pow(radius,2.0))){
-								if (pabloBB.getLevel(i) < 8){
+								if (pabloBB.getLevel(i) < 7){
 									/**<Set to refine inside the sphere.*/
 									pabloBB.setMarker(i,1);
 								}
@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
 						}
 						ib++;
 					}
-					if (pabloBB.getLevel(i) > 5 && !inside){
+					if (pabloBB.getLevel(i) > 4 && !inside){
 						/**<Set to coarse if the octant has a level higher than 5.*/
 						pabloBB.setMarker(i,-1);
 					}
