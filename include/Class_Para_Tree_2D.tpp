@@ -620,7 +620,7 @@ private:
 	 * \return Area of octant.
 	 */
 	double getArea(Class_Octant<2> oct) {
-		return trans.mapArea(oct.getArea());
+		return trans.mapSize(oct.getArea());
 	}
 
 	/*! Get the volume of an octant.
@@ -628,7 +628,7 @@ private:
 	 * \return Volume of octant.
 	 */
 	double getVolume(Class_Octant<2> oct) {
-		return trans.mapVolume(oct.getVolume());
+		return trans.mapArea(oct.getVolume());
 	}
 
 	//	//TODO Temporary commented for memeory leak detection
@@ -877,7 +877,7 @@ public:
 	 * \return Area of octant.
 	 */
 	double getArea(uint32_t idx) {
-		return trans.mapArea(octree.octants[idx].getArea());
+		return trans.mapSize(octree.octants[idx].getArea());
 	}
 
 	/*! Get the volume of an octant.
@@ -885,7 +885,7 @@ public:
 	 * \return Volume of octant.
 	 */
 	double getVolume(uint32_t idx) {
-		return trans.mapVolume(octree.octants[idx].getVolume());
+		return trans.mapArea(octree.octants[idx].getVolume());
 	}
 
 	//TODO Temporary commented for memeory leak detection
@@ -1378,7 +1378,7 @@ public:
 	double getArea(Class_Intersection<2>* inter) {
 		uint32_t Area;
 		Area = octree.extractOctant(inter->owners[inter->finer]).getArea();
-		return trans.mapArea(Area);
+		return trans.mapSize(Area);
 	}
 
 	//TODO Temporary commented for memory leak detection
@@ -1482,7 +1482,7 @@ private:
 	double getArea(Class_Intersection<2> inter) {
 		uint32_t Area;
 		Area = octree.extractOctant(inter.owners[inter.finer]).getArea();
-		return trans.mapArea(Area);
+		return trans.mapSize(Area);
 	}
 
 	//TODO Temporary commented for memory leak detection
