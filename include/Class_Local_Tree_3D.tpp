@@ -2103,8 +2103,10 @@ private:
 					Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 					Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
 //					if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
-					if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
-						neighbours.push_back(idxtry);
+					if( (Mortontry < Morton && octants[idxtry].level < oct->level) || (Mortontry > Morton && octants[idxtry].level > oct->level)){
+						if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+							neighbours.push_back(idxtry);
+						}
 					}
 					idxtry++;
 					if(idxtry>noctants-1){
