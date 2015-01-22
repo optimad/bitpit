@@ -2108,15 +2108,17 @@ private:
 				int32_t Dxstar, Dystar;
 				int32_t eqcoord;
 				while(Mortontry < Mortonlast & idxtry < noctants){
-//					Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
-//					Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
+					//					Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
+					//					Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
 					Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 					Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
 					Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize()) + int32_t((cx+1)/2)*size;
 					Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
-//					if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
-					if (Dx == Dxstar && Dy == Dystar){
-						neighbours.push_back(idxtry);
+					//					if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
+					if( (Mortontry < Morton && octants[idxtry].level < oct->level) || (Mortontry > Morton && octants[idxtry].level > oct->level)){
+						if (Dx == Dxstar && Dy == Dystar){
+							neighbours.push_back(idxtry);
+						}
 					}
 					idxtry++;
 					if(idxtry>noctants-1){
@@ -2132,7 +2134,6 @@ private:
 		else{
 			return;
 		}
-
 	};
 
 	// =================================================================================== //
