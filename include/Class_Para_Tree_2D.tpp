@@ -1377,7 +1377,10 @@ public:
 	 */
 	double getArea(Class_Intersection<2>* inter) {
 		uint32_t Area;
-		Area = octree.extractOctant(inter->owners[inter->finer]).getArea();
+		if(inter->finer && inter->isghost)
+			Area = octree.extractGhostOctant(inter->owners[1]).getArea();
+		else
+			Area = octree.extractOctant(inter->owners[inter->finer]).getArea();
 		return trans.mapSize(Area);
 	}
 

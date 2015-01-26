@@ -153,6 +153,14 @@ private:
 		return octants[idx];
 	};
 
+	Class_Octant<2>& extractGhostOctant(uint32_t idx) {
+		return ghosts[idx];
+	};
+
+	const Class_Octant<2>& extractGhostOctant(uint32_t idx) const{
+		return ghosts[idx];
+	};
+
 	// =================================================================================== //
 
 	bool refine(){									// Refine local tree: refine one time octants with marker >0
