@@ -1442,9 +1442,11 @@ private:
 						Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
 //						if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
 						//TODO check if correction is needed
-						if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
-							neighbours.push_back(idxtry);
-							isghost.push_back(false);
+						if( (Mortontry < Morton && octants[idxtry].level < oct->level) || (Mortontry > Morton && octants[idxtry].level > oct->level)){
+							if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+								neighbours.push_back(idxtry);
+								isghost.push_back(false);
+							}
 						}
 						idxtry++;
 						if(idxtry>noctants-1){
@@ -1783,9 +1785,11 @@ private:
 						Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
 //						if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
 						//TODO check if correction is needed
-						if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
-							neighbours.push_back(idxtry);
-							isghost.push_back(false);
+						if( (Mortontry < Morton && octants[idxtry].level < oct->level) || (Mortontry > Morton && octants[idxtry].level > oct->level)){
+							if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+								neighbours.push_back(idxtry);
+								isghost.push_back(false);
+							}
 						}
 						idxtry++;
 						if(idxtry>noctants-1){
