@@ -1310,7 +1310,7 @@ private:
 		nocts = getNumOctants();
 		idx = 0;
 		Morton = octants[idx].computeMorton();
-		while(Morton <= lastDescPre & idx < nocts & Morton != 0){
+		while(Morton <= lastDescPre && idx < nocts && Morton != 0){
 			// To delete, the father is in proc before me
 			toDelete++;
 			idx++;
@@ -1455,6 +1455,7 @@ private:
 						Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize()) + int32_t((cx+1)/2)*size;
 						Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 //						if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
+						//TODO check if correction is needed
 						if (Dx == Dxstar && Dy == Dystar){
 							neighbours.push_back(idxtry);
 							isghost.push_back(false);
@@ -1793,6 +1794,7 @@ private:
 						Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize()) + int32_t((cx+1)/2)*size;
 						Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 //						if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
+						//TODO check if correction is needed
 						if (Dx == Dxstar && Dy == Dystar){
 							neighbours.push_back(idxtry);
 							isghost.push_back(false);
@@ -1988,7 +1990,7 @@ private:
 									int32_t Dx, Dy;
 									int32_t Dxstar, Dystar;
 									int32_t eqcoord;
-									while(Mortontry < Mortonlast & idxtry <= noctants-1){
+									while(Mortontry < Mortonlast && idxtry <= noctants-1){
 //										Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
 //										Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
 										Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
@@ -2107,7 +2109,7 @@ private:
 				int32_t Dx, Dy;
 				int32_t Dxstar, Dystar;
 				int32_t eqcoord;
-				while(Mortontry < Mortonlast & idxtry < noctants){
+				while(Mortontry < Mortonlast && idxtry < noctants){
 					//					Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
 					//					Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
 					Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));

@@ -1433,6 +1433,7 @@ private:
 						Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 						Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
 //						if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
+						//TODO check if correction is needed
 						if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
 							neighbours.push_back(idxtry);
 							isghost.push_back(false);
@@ -1773,6 +1774,7 @@ private:
 						Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 						Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
 //						if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
+						//TODO check if correction is needed
 						if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
 							neighbours.push_back(idxtry);
 							isghost.push_back(false);
@@ -1868,7 +1870,7 @@ private:
 							int32_t Dx, Dy, Dz;
 							int32_t Dxstar, Dystar, Dzstar;
 							int32_t eqcoord;
-							while(Mortontry < Mortonlast & idxtry < size_ghosts){
+							while(Mortontry < Mortonlast && idxtry < size_ghosts){
 //								Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
 //								Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
 //								Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
@@ -1969,7 +1971,7 @@ private:
 									int32_t Dx, Dy, Dz;
 									int32_t Dxstar, Dystar, Dzstar;
 									int32_t eqcoord;
-									while(Mortontry < Mortonlast & idxtry <= noctants-1){
+									while(Mortontry < Mortonlast && idxtry <= noctants-1){
 //										Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
 //										Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
 //										Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
