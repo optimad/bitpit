@@ -1469,9 +1469,9 @@ private:
 						uint32_t y0 = oct->y;
 						uint32_t y1 = y0 + size;
 						uint32_t x0try = octants[idxtry].x;
-						uint32_t x1try = x0 + octants[idxtry].getSize();
+						uint32_t x1try = x0try + octants[idxtry].getSize();
 						uint32_t y0try = octants[idxtry].y;
-						uint32_t y1try = y0 + octants[idxtry].getSize();
+						uint32_t y1try = y0try + octants[idxtry].getSize();
 						uint8_t level = oct->level;
 						uint8_t leveltry = octants[idxtry].getLevel();
 
@@ -1601,9 +1601,9 @@ private:
 								uint32_t y0 = oct->y;
 								uint32_t y1 = y0 + size;
 								uint32_t x0try = ghosts[idxtry].x;
-								uint32_t x1try = x0 + ghosts[idxtry].getSize();
+								uint32_t x1try = x0try + ghosts[idxtry].getSize();
 								uint32_t y0try = ghosts[idxtry].y;
-								uint32_t y1try = y0 + ghosts[idxtry].getSize();
+								uint32_t y1try = y0try + ghosts[idxtry].getSize();
 								uint8_t level = oct->level;
 								uint8_t leveltry = ghosts[idxtry].getLevel();
 
@@ -1723,9 +1723,9 @@ private:
 										uint32_t y0 = oct->y;
 										uint32_t y1 = y0 + size;
 										uint32_t x0try = octants[idxtry].x;
-										uint32_t x1try = x0 + octants[idxtry].getSize();
+										uint32_t x1try = x0try + octants[idxtry].getSize();
 										uint32_t y0try = octants[idxtry].y;
-										uint32_t y1try = y0 + octants[idxtry].getSize();
+										uint32_t y1try = y0try + octants[idxtry].getSize();
 										uint8_t level = oct->level;
 										uint8_t leveltry = octants[idxtry].getLevel();
 
@@ -1887,9 +1887,9 @@ private:
 						uint32_t y0 = oct->y;
 						uint32_t y1 = y0 + size;
 						uint32_t x0try = octants[idxtry].x;
-						uint32_t x1try = x0 + octants[idxtry].getSize();
+						uint32_t x1try = x0try + octants[idxtry].getSize();
 						uint32_t y0try = octants[idxtry].y;
-						uint32_t y1try = y0 + octants[idxtry].getSize();
+						uint32_t y1try = y0try + octants[idxtry].getSize();
 						uint8_t level = oct->level;
 						uint8_t leveltry = octants[idxtry].getLevel();
 
@@ -2017,9 +2017,9 @@ private:
 								uint32_t y0 = oct->y;
 								uint32_t y1 = y0 + size;
 								uint32_t x0try = ghosts[idxtry].x;
-								uint32_t x1try = x0 + ghosts[idxtry].getSize();
+								uint32_t x1try = x0try + ghosts[idxtry].getSize();
 								uint32_t y0try = ghosts[idxtry].y;
-								uint32_t y1try = y0 + ghosts[idxtry].getSize();
+								uint32_t y1try = y0try + ghosts[idxtry].getSize();
 								uint8_t level = oct->level;
 								uint8_t leveltry = ghosts[idxtry].getLevel();
 
@@ -2145,9 +2145,9 @@ private:
 										uint32_t y0 = oct->y;
 										uint32_t y1 = y0 + size;
 										uint32_t x0try = octants[idxtry].x;
-										uint32_t x1try = x0 + octants[idxtry].getSize();
+										uint32_t x1try = x0try + octants[idxtry].getSize();
 										uint32_t y0try = octants[idxtry].y;
-										uint32_t y1try = y0 + octants[idxtry].getSize();
+										uint32_t y1try = y0try + octants[idxtry].getSize();
 										uint8_t level = oct->level;
 										uint8_t leveltry = octants[idxtry].getLevel();
 
