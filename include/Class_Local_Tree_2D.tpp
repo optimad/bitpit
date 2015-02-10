@@ -1464,16 +1464,16 @@ private:
 						Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 //						if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
 
-						int32_t x0 = oct->x;
-						int32_t x1 = x0 + size;
-						int32_t y0 = oct->y;
-						int32_t y1 = y0 + size;
-						int32_t x0try = octants[idxtry].x;
-						int32_t x1try = x0 + octants[idxtry].getSize();
-						int32_t y0try = octants[idxtry].y;
-						int32_t y1try = y0 + octants[idxtry].getSize();
-						int8_t level = oct->level;
-						int8_t leveltry = octants[idxtry].getLevel();
+						uint32_t x0 = oct->x;
+						uint32_t x1 = x0 + size;
+						uint32_t y0 = oct->y;
+						uint32_t y1 = y0 + size;
+						uint32_t x0try = octants[idxtry].x;
+						uint32_t x1try = x0 + octants[idxtry].getSize();
+						uint32_t y0try = octants[idxtry].y;
+						uint32_t y1try = y0 + octants[idxtry].getSize();
+						uint8_t level = oct->level;
+						uint8_t leveltry = octants[idxtry].getLevel();
 
 						if (Dx == Dxstar && Dy == Dystar){
 							if (leveltry > level){
@@ -1596,16 +1596,16 @@ private:
 								Dystar = int32_t((cy-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 //								if ((abs(Dh) == ((1-(iface%2))*ghosts[idxtry].getSize() + (iface%2)*size))){
 
-								int32_t x0 = oct->x;
-								int32_t x1 = x0 + size;
-								int32_t y0 = oct->y;
-								int32_t y1 = y0 + size;
-								int32_t x0try = ghosts[idxtry].x;
-								int32_t x1try = x0 + ghosts[idxtry].getSize();
-								int32_t y0try = ghosts[idxtry].y;
-								int32_t y1try = y0 + ghosts[idxtry].getSize();
-								int8_t level = oct->level;
-								int8_t leveltry = ghosts[idxtry].getLevel();
+								uint32_t x0 = oct->x;
+								uint32_t x1 = x0 + size;
+								uint32_t y0 = oct->y;
+								uint32_t y1 = y0 + size;
+								uint32_t x0try = ghosts[idxtry].x;
+								uint32_t x1try = x0 + ghosts[idxtry].getSize();
+								uint32_t y0try = ghosts[idxtry].y;
+								uint32_t y1try = y0 + ghosts[idxtry].getSize();
+								uint8_t level = oct->level;
+								uint8_t leveltry = ghosts[idxtry].getLevel();
 
 								if (Dx == Dxstar && Dy == Dystar){
 									if (leveltry > level){
@@ -1718,16 +1718,16 @@ private:
 										Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 //										if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
 
-										int32_t x0 = oct->x;
-										int32_t x1 = x0 + size;
-										int32_t y0 = oct->y;
-										int32_t y1 = y0 + size;
-										int32_t x0try = octants[idxtry].x;
-										int32_t x1try = x0 + octants[idxtry].getSize();
-										int32_t y0try = octants[idxtry].y;
-										int32_t y1try = y0 + octants[idxtry].getSize();
-										int8_t level = oct->level;
-										int8_t leveltry = octants[idxtry].getLevel();
+										uint32_t x0 = oct->x;
+										uint32_t x1 = x0 + size;
+										uint32_t y0 = oct->y;
+										uint32_t y1 = y0 + size;
+										uint32_t x0try = octants[idxtry].x;
+										uint32_t x1try = x0 + octants[idxtry].getSize();
+										uint32_t y0try = octants[idxtry].y;
+										uint32_t y1try = y0 + octants[idxtry].getSize();
+										uint8_t level = oct->level;
+										uint8_t leveltry = octants[idxtry].getLevel();
 
 										if (Dx == Dxstar && Dy == Dystar){
 											if (leveltry > level){
@@ -1882,16 +1882,16 @@ private:
 						Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 //						if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
 
-						int32_t x0 = oct->x;
-						int32_t x1 = x0 + size;
-						int32_t y0 = oct->y;
-						int32_t y1 = y0 + size;
-						int32_t x0try = octants[idxtry].x;
-						int32_t x1try = x0 + octants[idxtry].getSize();
-						int32_t y0try = octants[idxtry].y;
-						int32_t y1try = y0 + octants[idxtry].getSize();
-						int8_t level = oct->level;
-						int8_t leveltry = octants[idxtry].getLevel();
+						uint32_t x0 = oct->x;
+						uint32_t x1 = x0 + size;
+						uint32_t y0 = oct->y;
+						uint32_t y1 = y0 + size;
+						uint32_t x0try = octants[idxtry].x;
+						uint32_t x1try = x0 + octants[idxtry].getSize();
+						uint32_t y0try = octants[idxtry].y;
+						uint32_t y1try = y0 + octants[idxtry].getSize();
+						uint8_t level = oct->level;
+						uint8_t leveltry = octants[idxtry].getLevel();
 
 						if (Dx == Dxstar && Dy == Dystar){
 							if (leveltry > level){
@@ -2012,16 +2012,16 @@ private:
 								Dystar = int32_t((cy-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 //								if ((abs(Dh) == ((1-(iface%2))*ghosts[idxtry].getSize() + (iface%2)*size))){
 
-								int32_t x0 = oct->x;
-								int32_t x1 = x0 + size;
-								int32_t y0 = oct->y;
-								int32_t y1 = y0 + size;
-								int32_t x0try = ghosts[idxtry].x;
-								int32_t x1try = x0 + ghosts[idxtry].getSize();
-								int32_t y0try = ghosts[idxtry].y;
-								int32_t y1try = y0 + ghosts[idxtry].getSize();
-								int8_t level = oct->level;
-								int8_t leveltry = ghosts[idxtry].getLevel();
+								uint32_t x0 = oct->x;
+								uint32_t x1 = x0 + size;
+								uint32_t y0 = oct->y;
+								uint32_t y1 = y0 + size;
+								uint32_t x0try = ghosts[idxtry].x;
+								uint32_t x1try = x0 + ghosts[idxtry].getSize();
+								uint32_t y0try = ghosts[idxtry].y;
+								uint32_t y1try = y0 + ghosts[idxtry].getSize();
+								uint8_t level = oct->level;
+								uint8_t leveltry = ghosts[idxtry].getLevel();
 
 								if (Dx == Dxstar && Dy == Dystar){
 									if (leveltry > level){
@@ -2140,16 +2140,16 @@ private:
 										Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 //										if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
 
-										int32_t x0 = oct->x;
-										int32_t x1 = x0 + size;
-										int32_t y0 = oct->y;
-										int32_t y1 = y0 + size;
-										int32_t x0try = octants[idxtry].x;
-										int32_t x1try = x0 + octants[idxtry].getSize();
-										int32_t y0try = octants[idxtry].y;
-										int32_t y1try = y0 + octants[idxtry].getSize();
-										int8_t level = oct->level;
-										int8_t leveltry = octants[idxtry].getLevel();
+										uint32_t x0 = oct->x;
+										uint32_t x1 = x0 + size;
+										uint32_t y0 = oct->y;
+										uint32_t y1 = y0 + size;
+										uint32_t x0try = octants[idxtry].x;
+										uint32_t x1try = x0 + octants[idxtry].getSize();
+										uint32_t y0try = octants[idxtry].y;
+										uint32_t y1try = y0 + octants[idxtry].getSize();
+										uint8_t level = oct->level;
+										uint8_t leveltry = octants[idxtry].getLevel();
 
 										if (Dx == Dxstar && Dy == Dystar){
 											if (leveltry > level){
