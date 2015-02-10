@@ -1479,13 +1479,13 @@ private:
 							if (leveltry > level){
 								if((abs(cx)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*((x0try>=x0)*(x0try<x1)))){
 									neighbours.push_back(idxtry);
-									isghost.push_back(true);
+									isghost.push_back(false);
 								}
 							}
 							if (leveltry < level){
 								if((abs(cx)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*((x0>=x0try)*(x0<x1try)))){
 									neighbours.push_back(idxtry);
-									isghost.push_back(true);
+									isghost.push_back(false);
 								}
 							}
 						}
@@ -1733,13 +1733,13 @@ private:
 											if (leveltry > level){
 												if((abs(cx)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*((x0try>=x0)*(x0try<x1)))){
 													neighbours.push_back(idxtry);
-													isghost.push_back(true);
+													isghost.push_back(false);
 												}
 											}
 											if (leveltry < level){
 												if((abs(cx)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*((x0>=x0try)*(x0<x1try)))){
 													neighbours.push_back(idxtry);
-													isghost.push_back(true);
+													isghost.push_back(false);
 												}
 											}
 										}
@@ -1897,13 +1897,13 @@ private:
 							if (leveltry > level){
 								if((abs(cx)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*((x0try>=x0)*(x0try<x1)))){
 									neighbours.push_back(idxtry);
-									isghost.push_back(true);
+									isghost.push_back(false);
 								}
 							}
 							if (leveltry < level){
 								if((abs(cx)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*((x0>=x0try)*(x0<x1try)))){
 									neighbours.push_back(idxtry);
-									isghost.push_back(true);
+									isghost.push_back(false);
 								}
 							}
 						}
@@ -2155,13 +2155,13 @@ private:
 											if (leveltry > level){
 												if((abs(cx)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*((x0try>=x0)*(x0try<x1)))){
 													neighbours.push_back(idxtry);
-													isghost.push_back(true);
+													isghost.push_back(false);
 												}
 											}
 											if (leveltry < level){
 												if((abs(cx)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*((x0>=x0try)*(x0<x1try)))){
 													neighbours.push_back(idxtry);
-													isghost.push_back(true);
+													isghost.push_back(false);
 												}
 											}
 										}
