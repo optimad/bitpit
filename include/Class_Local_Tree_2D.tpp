@@ -1550,7 +1550,6 @@ private:
 								return;
 							}
 							// Compute Last discendent of virtual octant of same size
-							uint32_t delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL_2D - samesizeoct.level)) - 1;
 							Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
 							uint64_t Mortonlast = last_desc.computeMorton();
 							vector<uint32_t> bufferidx;
@@ -2123,7 +2122,7 @@ private:
 					Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize()) + int32_t((cx+1)/2)*size;
 					Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 					//					if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
-					if( (Mortontry < Morton && octants[idxtry].level < oct->level) || (Mortontry > Morton && octants[idxtry].level > oct->level)){
+					if( (Mortontry <= Morton && octants[idxtry].level < oct->level) || (Mortontry >= Morton && octants[idxtry].level > oct->level)){
 						if (Dx == Dxstar && Dy == Dystar){
 							neighbours.push_back(idxtry);
 						}
