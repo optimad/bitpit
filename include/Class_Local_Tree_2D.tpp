@@ -3339,7 +3339,8 @@ private:
 					intersection.finer = getGhostLevel(idx) >= getLevel((int)neighbours[i]);
 					intersection.owners[0]  = neighbours[i];
 					intersection.owners[1] = idx;
-					intersection.iface = global2D.oppface[iface2] - (nsize==1);
+//					intersection.iface = global2D.oppface[iface2] - (nsize==1);
+					intersection.iface = global2D.oppface[iface2] - (getGhostLevel(idx) >= getLevel((int)neighbours[i]));
 					intersection.isnew = false;
 					intersection.isghost = true;
 					//					intersections_ghost.push_back(intersection);
