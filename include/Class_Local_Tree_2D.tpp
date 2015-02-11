@@ -116,6 +116,9 @@ private:
 	uint8_t getLevel(int32_t idx){								// Get refinement/coarsening marker for idx-th octant
 		return octants[idx].getLevel();
 	};
+	uint8_t getGhostLevel(int32_t idx){								// Get refinement/coarsening marker for idx-th ghost octant
+		return ghosts[idx].getLevel();
+	};
 	bool getBalance(int32_t idx){								// Get if balancing-blocked idx-th octant
 		return octants[idx].getNotBalance();
 	};
@@ -3332,7 +3335,8 @@ private:
 				findGhostNeighbours(idx, iface2, neighbours);
 				nsize = neighbours.size();
 				for (i = 0; i < nsize; i++){
-					intersection.finer = (nsize==1);
+//					intersection.finer = (nsize==1);
+					intersection.finer = getGhostLevel(idx) >= getLevel((int)neighbours[i]);
 					intersection.owners[0]  = neighbours[i];
 					intersection.owners[1] = idx;
 					intersection.iface = global2D.oppface[iface2] - (nsize==1);
