@@ -46,6 +46,7 @@ void Demo_CleaningTools(
 
 // Local variables
 Class_SurfTri           Tri;
+ivector2D		E, S2E;
 
 // Counters
 // none
@@ -72,7 +73,7 @@ Class_SurfTri           Tri;
     cout << endl << " - Loading surface tasselation" << endl << endl;
 
     // Import from dgf file ------------------------------------------------- //
-    Tri.Import_dgf("./datasets/tasselation_doubles.dgf");
+    Tri.Import_dgf("./datasets/naca0012.dgf");
 
     // Output stats --------------------------------------------------------- //
     // Tri.Stats(cout);
