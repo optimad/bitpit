@@ -1,4 +1,4 @@
-// ========================================================================== //
+G// ========================================================================== //
 //                         - Class_SurfTri -                                  //
 //                                                                            //
 // Grid manager for unstructured meshes.                                      //
@@ -2286,6 +2286,93 @@ n = List.size();
 
 return(n); };
 
+// ----------------------------------------------------------------------------------- //
+int Class_SurfTri::CountTrueDoubleSimplex(
+     void
+) {
+
+// =================================================================================== //
+// int Class_SurfTri::CountTrueDoubleSimplex(                                          //
+//     void)                                                                           //
+//                                                                                     //
+// Count duplicated simplicies in the tasselation. A duplicated simplex is a           //
+// simplex whose vertexes have coordinates coincident (within a prescribed tolerance)  //
+// with coordinates of vertexes of another simplex in the tasselation,                 //
+// without any distinction of vertex ordering. Check is meaningful on simplicies of the//
+// same kind, of course.							       //		
+// =================================================================================== //
+// INPUT                                                                               //
+// =================================================================================== //
+// - none                                                                              //
+// =================================================================================== //
+// OUTPUT                                                                              //
+// =================================================================================== //
+// - n    : int, number of true duplicated simplicies.                                 //
+// =================================================================================== //
+
+// =================================================================================== //
+// VARIABLES DECLARATION                                                               //
+// =================================================================================== //
+
+// Local variables
+int               n;
+ivector1D         List;
+
+// Counters
+// none
+
+// =================================================================================== //
+// COUNT DOUBLE SIMPLICIES                                                             //
+// =================================================================================== //
+List = FindTrueDoubleSimplex();
+n = List.size();
+
+return(n); };
+
+// ----------------------------------------------------------------------------------- //
+int Class_SurfTri::CountTrueDoubleSimplex(
+            dvector2D &X
+) {
+
+// =================================================================================== //
+// int Class_SurfTri::CountTrueDoubleSimplex(                                          //
+//     dvector2D &X)                                                                   //
+//                                                                                     //
+// Count duplicated simplicies in the tasselation. A duplicated simplex is a           //
+// simplex whose vertexes have coordinates coincident (within a prescribed tolerance)  //
+// with coordinates of vertexes of another simplex in the tasselation,                 //
+// without any distinction of vertex ordering. Check is meaningful on simplicies of the//
+// same kind, of course.																																																								       //		
+// =================================================================================== //
+// INPUT                                                                               //
+// =================================================================================== //
+// - X    : [nVertex-by-dim] dvector2D, with vertex coordinate list. X[i][0], X[i][1], //
+//          ... are the x, y, ... coordinates of the i-th node.                        //
+// =================================================================================== //
+// OUTPUT                                                                              //
+// =================================================================================== //
+// - n    : int, number of true duplicated simplicies.                                 //
+// =================================================================================== //
+
+// =================================================================================== //
+// VARIABLES DECLARATION                                                               //
+// =================================================================================== //
+
+// Local variables
+int               n;
+ivector1D         List;
+
+// Counters
+// none
+
+// =================================================================================== //
+// COUNT DOUBLE SIMPLICIES                                                             //
+// =================================================================================== //
+List = FindTrueDoubleSimplex(X);
+n = List.size();
+
+return(n); };
+
 // -------------------------------------------------------------------------- //
 int Class_SurfTri::CountEdges(
     void
@@ -3361,6 +3448,213 @@ for (T = 0; T < nSimplex; T++) {
                             ii = (ii+1) % p;
                         } //next l
                         check = (Simplex[T] == idummy1D);
+                        k++;
+                    } //next circular shifting
+                    if (check) {
+                        doubles.push_back(S);
+                        flag[S] = true;
+                    }
+                }
+            } //next j
+        } //next i
+    }
+} //next T
+
+return(doubles); };
+
+// -------------------------------------------------------------------------- //
+ivector1D Class_SurfTri::FindTrueDoubleSimplex(
+    void
+) {
+
+// ========================================================================== //
+// ivector1D Class_SurfTri::FindTrueDoubleSimplex(                            //
+//     void)                                                                  //
+//                                                                            //
+// Find douplicated simplex in the tasselation, indipendently from their      //
+// clockwise/counter-clockwise ordering                                       //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - list   : ivector1D, list of duplicated simplicies                        //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+bool                    check;
+bvector1D               flag(nSimplex, false);
+ivector1D               idummy1D,idummyC1D, doubles;
+ivector2D               index(nVertex);
+
+// Counters
+int                     V, T, S;
+int                     i, j, k, l, ii, jj;
+int                     m, n, p;
+
+// ========================================================================== //
+// 1-RING OF VERTICES                                                         //
+// ========================================================================== //
+for (T = 0; T < nSimplex; T++) {
+    m = Simplex[T].size();
+    for (i = 0; i < m; i++) {
+        V = Simplex[T][i];
+        index[V].push_back(T);
+    } //next i
+} //next T
+
+// ========================================================================== //
+// FIND DUPLICATED SIMPLICIES                                                 //
+// ========================================================================== //
+for (T = 0; T < nSimplex; T++) {
+    if (!flag[T]) {
+        flag[T] = true;
+        m = Simplex[T].size();
+        for (i = 0; i < m; i++) {
+            V = Simplex[T][i];
+            n = index[V].size();
+            for (j = 0; j < n; j++) {
+                S = index[V][j];
+                p = Simplex[S].size();
+                if ((p == m) && (!flag[S])) {
+                    check = false;
+                    idummy1D.resize(p);
+	                   idummyC1D.resize(p);
+                    k = 0;
+                    while ((!check) && (k < p)) {
+                        ii = k;
+		                      jj = k;
+                        for (l = 0; l < p; l++) {
+                        idummy1D[l]  = Simplex[S][ii];
+			                     idummyC1D[l] = Simplex[S][jj];
+                        ii = (ii+1) % p;
+			                     jj = (p+jj-1)%p;
+																								} //next l
+																								check = ((Simplex[T] == idummy1D) || (Simplex[T] == idummyC1D));
+                        k++;
+
+																							if(check) 
+																								{
+																										cout<<"printing the sick triangle"<<S<<'\t'<<T<<endl;
+																										cout<<"Adjacency[S]                  "<<endl;
+																										for(int sx=0; sx<Adjacency[S].size(); ++sx)
+                              {
+																															cout<<"found on edge "<<sx<<'\t';
+                               for(int sy=0; sy<Adjacency[S][sx].size(); ++sy)
+                                   {
+                                     cout<<Adjacency[S][sx][sy]<<'\t';
+                                   }
+			                                  cout<<endl;
+                              }
+																										cout<<"Adjacency[T]                  "<<endl;
+																										for(int sx=0; sx<Adjacency[T].size(); ++sx)
+                              {
+																															cout<<"found on edge "<<sx<<'\t';
+                               for(int sy=0; sy<Adjacency[T][sx].size(); ++sy)
+                                   {
+                                     cout<<Adjacency[T][sx][sy]<<'\t';
+                                   }
+			                                  cout<<endl;
+                              }
+																										
+																										cout<<"=================================================="<<endl;	
+																								}
+                    } //next circular shifting
+                    if (check) {
+                        doubles.push_back(S);
+                        flag[S] = true;
+                    }
+                }
+            } //next j
+        } //next i
+    }
+} //next T
+
+return(doubles); };
+
+// -------------------------------------------------------------------------- //
+ivector1D Class_SurfTri::FindTrueDoubleSimplex(
+    dvector2D   &X
+) {
+
+// ========================================================================== //
+// ivector1D Class_SurfTri::FindTrueDoubleSimplex(                            //
+//     dvector2D   &X)                                                        //
+//                                                                            //
+// Find douplicated simplex in the tasselation. indipendently from their      //
+// clockwise/counter-clockwise ordering.Vrtex list is provided       									//
+// externally.                                                                //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - X      : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are    //
+//            the x, y, ... coordinates of the i-th vertex.                   //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - list   : ivector1D, list of duplicated simplicies                        //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+bool                    check;
+bvector1D               flag(nSimplex, false);
+ivector1D               idummy1D,idummyC1D,doubles;
+ivector2D               index(X.size());
+
+// Counters
+int                     V, S, T;
+int                     i, j, k, l, ii,jj;
+int                     m, n, p;
+
+// ========================================================================== //
+// 1-RING OF VERTICES                                                         //
+// ========================================================================== //
+for (T = 0; T < nSimplex; T++) {
+    m = Simplex[T].size();
+    for (i = 0; i < m; i++) {
+        V = Simplex[T][i];
+        index[V].push_back(T);
+    } //next i
+} //next T
+
+// ========================================================================== //
+// FIND DUPLICATED SIMPLICIES                                                 //
+// ========================================================================== //
+for (T = 0; T < nSimplex; T++) {
+    if (!flag[T]) {
+        flag[T] = true;
+        m = Simplex[T].size();
+        for (i = 0; i < m; i++) {
+            V = Simplex[T][i];
+            n = index[V].size();
+            for (j = 0; j < n; j++) {
+                S = index[V][j];
+                p = Simplex[S].size();
+                if ((p == m) && (!flag[S])) {
+                    check = false;
+                    idummy1D.resize(p);
+		                  idummyC1D.resize(p);	
+                    k = 0;
+                    while ((!check) && (k < p)) {
+                        ii = k;
+			                     jj = k;
+                        for (l = 0; l < p; l++) {
+                            idummy1D[l] = Simplex[S][ii];
+		           							      	 idummyC1D[l] = Simplex[S][jj];	
+                            ii = (ii+1) % p;
+			                         jj = (p +jj-1) % p;	
+                        } //next l
+                        check = ((Simplex[T] == idummy1D) || (Simplex[T] == idummyC1D));
                         k++;
                     } //next circular shifting
                     if (check) {
@@ -4985,6 +5279,143 @@ list = FindDoubleSimplex(X);
 // Remove simplicies
 RemoveSimplex(list);
 
+return; }
+
+// ----------------------------------------------------------------------------------- //
+void Class_SurfTri::RemoveTrueDoubleSimplex(
+     void
+) {
+    
+// =================================================================================== //
+// void Class_SurfTri::RemoveTrueDoubleSimplex(                                        //
+//     void)                                                                           //
+//                                                                                     //
+// Remove duplicated simplicies from the tasselation. A duplicated simplex is a        //
+// simplex whose vertex have the same coordinates (within a prescribed tolerance) of   //
+// vertex of another simplex in the tasselation, without distinctions on vertex        //
+// ordering.																																																																				       //	
+// =================================================================================== //
+// INPUT                                                                               //
+// =================================================================================== //
+// - none                                                                              //
+// =================================================================================== //
+// OUTPUT                                                                              //
+// =================================================================================== //
+// - none                                                                              //
+// =================================================================================== //
+    
+// =================================================================================== //
+// VARIABLES DECLARATION                                                               //
+// =================================================================================== //
+    
+// Local variables
+ivector1D    list;
+    
+// Counters
+// none
+    
+// =================================================================================== //
+// REMOVE DUPLICATED SIMPLICIES                                                        //
+// =================================================================================== //
+    
+// Find double simplicies
+list = FindTrueDoubleSimplex();
+    
+// Remove simplicies
+RemoveSimplex(list);
+    
+return; }
+
+// ----------------------------------------------------------------------------------- //
+void Class_SurfTri::RemoveTrueDoubleSimplex(
+        ivector1D &map
+) {
+    
+// =================================================================================== //
+// void Class_SurfTri::RemoveTrueDoubleSimplex(                                        //
+//     ivector1D &map)                                                                 //
+//                                                                                     //
+// Remove duplicated simplicies from the tasselation, and return renumbering map.      //
+// A duplicated simplex is a simplex whose vertex have the same coordinates (within a  //
+// prescribed tolerance) of vertex of another simplex in the tasselation,              //
+// without distinctions on vertex ordering				                                         //
+// =================================================================================== //
+// INPUT                                                                               //
+// =================================================================================== //
+// - map   : [nSimplex-by-1] ivector1D, with old -> new map. map[i] contains the       //
+//           global index of the i-th vertex after renumbering                         //
+// =================================================================================== //
+// OUTPUT                                                                              //
+// =================================================================================== //
+// - none                                                                              //
+// =================================================================================== //
+    
+// =================================================================================== //
+// VARIABLES DECLARATION                                                               //
+// =================================================================================== //
+    
+// Local variables
+ivector1D    list;
+    
+// Counters
+// none
+    
+// =================================================================================== //
+// REMOVE DUPLICATED SIMPLICIES                                                        //
+// =================================================================================== //
+    
+// Find double simplicies
+list = FindTrueDoubleSimplex();
+    
+// Remove simplicies
+RemoveSimplex(list, map);
+    
+return; }
+
+// ----------------------------------------------------------------------------------- //
+void Class_SurfTri::RemoveTrueDoubleSimplex(
+        dvector2D &X
+) {
+    
+// =================================================================================== //
+// void Class_SurfTri::RemoveTrueDoubleSimplex(                                        //
+//     dvector2D &X)                                                                   //
+//                                                                                     //
+// Remove duplicated simplicies from the tasselation. A duplicated simplex is a        //
+// simplex whose vertex have the same coordinates (within a prescribed tolerance) of   //
+// vertex of another simplex in the tasselation.without distinctions on vertex	       // 
+// ordering. Vertex coordinate list is provided externally.                            //
+// =================================================================================== //
+// INPUT                                                                               //
+// =================================================================================== //
+// - X    : [nVertex-by-dim] dvector2D, with vertex coordinate list. X[i][0], X[i][1], //
+//          ... are the x, y, ... coordinates of the i-th node.                        //
+// =================================================================================== //
+// OUTPUT                                                                              //
+// =================================================================================== //
+// - none                                                                              //
+// =================================================================================== //
+    
+// =================================================================================== //
+// VARIABLES DECLARATION                                                               //
+// =================================================================================== //
+    
+// Local variables
+ivector1D    list;
+    
+// Counters
+// none
+    
+// =================================================================================== //
+// REMOVE DUPLICATED SIMPLICIES                                                        //
+// =================================================================================== //
+    
+// Find double simplicies
+list = FindTrueDoubleSimplex(X);
+    
+// Remove simplicies
+RemoveSimplex(list);
+    
 return; }
 
 // -------------------------------------------------------------------------- //

@@ -259,6 +259,96 @@ return(index); };
         return(List); };
 
         // ----------------------------------------------------------------------------------- //
+        ivector1D Class_SurfTri::Ring_1(
+            int I_,
+            int j,
+            bool &flag,
+												bool &isRing
+        ) {
+
+        // =================================================================================== //
+        // ivector1D Class_SurfTri::Ring_1(                                                    //
+        //     int I_,                                                                         //
+        //     int j,                                                                          //
+        //     bool &flag,																																																																				 //	
+								//				 bool &isRing)                                                                   //
+        //                                                                                     //
+        // Returns the list of simplicies in the 1-ring of the j-th vertex of simplex I_       //
+        // =================================================================================== //
+        // INPUT                                                                               //
+        // =================================================================================== //
+        // - I_     : int, global index simplex which vertex belongs to.                       //
+        // - j     : int, local index (on simplex I_) of vertex                                //
+        // =================================================================================== //
+        // OUTPUT                                                                              //
+        // =================================================================================== //
+        // - List  : ivector1D, list of simplicies in the 1-ring of vertex I_[i]               //
+        // - flag  : bool, true if the 1-ring is closed, false otherwise                       //
+								// - isRing: bool, true if the 1-ring comp is successfull, false otherwise             //
+        // =================================================================================== //
+
+        // =================================================================================== //
+        // VARIABLES DECLARATION                                                               //
+        // =================================================================================== //
+
+        // Local variables
+        ivector1D     List, check, check_old;
+						
+        // Counters
+        int           i, J, K,seedcheck, counter;
+
+        // =================================================================================== //
+        // CREATE 1-RING LIST                                                                  //
+        // =================================================================================== //
+
+								isRing = true;
+	        
+        // Find the starting simplex in the 1-ring ------------------------------------------- //
+
+        // Set seed
+        J = Adjacency[I_][j][0];
+        K = I_;
+								seedcheck = J;
+								counter=0;
+    
+							while ((J >= 0) && (J != I_)) {
+            i = edge(J, K);
+            j = (i + 1) % Simplex[J].size();
+            K = J;
+            J = Adjacency[J][j][0];
+												counter += (seedcheck == J );
+							
+								if(counter > 1){isRing= false; return(List);}											
+        } //next j
+        I_ = K;
+
+        // Compute 1-ring
+        List.push_back(I_);
+        i = (Simplex[I_].size() + j - 1) % Simplex[I_].size();
+        J = Adjacency[I_][i][0];
+        K = I_;
+
+							seedcheck = J;		
+							counter=0;
+        while ((J >= 0) && (J != I_)) {
+            List.push_back(J);
+            j = edge(J, K);
+            i = (Simplex[J].size() + j - 1) % Simplex[J].size();
+            K = J;
+            J = Adjacency[J][i][0];
+
+								 counter += ( seedcheck == J );
+       	if(counter > 1){isRing= false; return(List);}											
+        } //next J
+
+        // Set flag for open/closed ring
+        flag = (J >= 0);
+
+        return(List); };
+
+
+
+        // ----------------------------------------------------------------------------------- //
         ivector2D Class_SurfTri::VRing_1(
             int I_,
             int j,

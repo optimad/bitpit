@@ -306,6 +306,20 @@ class Class_SurfTri {
     int CountDoubleSimplex(                                                   // Count duplicated simplicies using an external vertex list
         dvector2D           &                                                 // (input) External vertex list
     );
+
+   /*! Count true duplicated simplicies: if two simplicies of the same kind are defined by the same
+       vertices but different vertex ordering, they are considered duplicated */ 
+   int CountTrueDoubleSimplex(    
+	void			   
+	);				    
+
+   /*! Count true duplicated simplicies using external list: if two simplicies of the same kind are
+       defined by the same vertices but different vertex ordering, they are considered duplicated. 
+       An external dvector2D vertex list is required as INPUT. */ 
+   int CountTrueDoubleSimplex(    
+	dvector2D &		    
+	);				   
+					   
     int CountEdges(                                                           // Count tasselation edges
         void                                                                  // (input) none
     );
@@ -352,6 +366,20 @@ class Class_SurfTri {
     ivector1D FindDoubleSimplex(                                              // Find duplicated simplicies using an external vertex list
         dvector2D           &                                                 // (input) External vertex list
     );
+
+    /*! Find true duplicated simplicies: if two simplicies of the same kind are defined by the same
+       vertices but different vertex ordering, they are considered duplicated */ 
+    ivector1D FindTrueDoubleSimplex( 
+	      void			
+    );
+				
+    /*! Find true duplicated simplicies using external list: if two simplicies of the same kind are
+       defined by the same vertices but different vertex ordering, they are considered duplicated. 
+       An external dvector2D vertex list is required as INPUT. */ 
+    ivector1D FindTrueDoubleSimplex( 
+              dvector2D &		
+    );				
+
     ivector1D Find0AreaSimplex(                                               // Find 0-area simplicies in the surface tasselation
         void                                                                  // (input) none
     );
@@ -428,6 +456,18 @@ class Class_SurfTri {
     );
     void RemoveDoubleSimplex(                                                 // Remove duplicated simplicies from tasselation using an external vertex list
         dvector2D           &                                                 // (input) External vertex list
+    );
+    /*! Remove true duplicated simplicies. */	
+    void RemoveTrueDoubleSimplex( 
+         void			  
+    );
+    /*! Remove true duplicated simplicies and returns a mapper ivector1D with indices of removed simplicies. */	
+    void RemoveTrueDoubleSimplex(				
+         ivector1D &      
+    );
+    /*! Remove true duplicated simplicies, providing an external vertex list dvector2D */	
+    void RemoveTrueDoubleSimplex(
+         dvector2D &             
     );
     void Remove0AreaSimplex(                                                  // Remove 0-area simplicies from tasselation
         void                                                                  // (input) none
@@ -525,8 +565,26 @@ class Class_SurfTri {
     );
 
             // Selection rings --------------------------------------------------------------- //
-            ivector1D Ring_1(int, int, bool &);                                                // Returns the 1-ring of simplicies of a given vertex
-            ivector2D VRing_1(int, int, bool &);                                               // Returns the 1-ring of vertices of a given vertex
+	    /*! Returns the 1-ring of simplicies of a given vertex. Requires:
+		int I: index of simplex INPUT
+		int j: local vertex index on simplex I INPUT
+		bool flag: check if ring is closed (true) or open (false). INPUT/OUTPUT
+	    */	 	
+            ivector1D Ring_1(int, int, bool &);
+
+	    /*! Returns the 1-ring of simplicies of a given vertex. Requires:
+		int I: index of simplex INPUT
+		int j: local vertex index on simplex I INPUT
+		bool flag: check if ring is closed (true) or open (false). INPUT/OUTPUT
+		bool isRing: check if ring computation is successfull(true) or not (false) INPUT/OUTPUT
+	    */	 	
+	    ivector1D Ring_1(int, int, bool &, bool &); 
+	    /*! Returns the 1-ring of vertices of a given vertex. Requires:
+		int I: index of simplex INPUT
+		int j: local vertex index on simplex I INPUT
+		bool flag: check if ring is closed (true) or open (false). INPUT/OUTPUT
+	    */	 	
+            ivector2D VRing_1(int, int, bool &);                                               
 
     // Bounding boxes ------------------------------------------------------- //
     public:

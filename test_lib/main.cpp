@@ -68,6 +68,7 @@ int         selection;
     cout << "'0': Cleaning tools demo 1" << endl;
     cout << "'1': Cleaning tools demo 2" << endl;
     cout << "'2': Generation tools demo" << endl;
+    cout << "'3': Cleaning tools demo 3-RA version" << endl;
     cin >> selection;
 }
 
@@ -83,6 +84,8 @@ int         selection;
         case 0: { Demo_CleaningTools();  break; }
         case 1: { Demo_CleaningTools2(); break; }
         case 2: { Demo_GenerationTools(); break; }
+								case 3: { Demo_CleaningTools3(); break;}
+	default: break;	
     }
 }
 

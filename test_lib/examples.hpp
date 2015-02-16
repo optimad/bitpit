@@ -83,6 +83,6 @@ void Demo_CleaningTools2(                                                     //
 void Demo_GenerationTools(                                                    // Class_SurfTri generation tools - demo
     void                                                                      // (input) none
 );
-
+void Demo_CleaningTools3(void);
 
 # endif
