@@ -263,15 +263,15 @@ return(index); };
             int I_,
             int j,
             bool &flag,
-												bool &isRing
+            bool &isRing
         ) {
 
         // =================================================================================== //
         // ivector1D Class_SurfTri::Ring_1(                                                    //
         //     int I_,                                                                         //
         //     int j,                                                                          //
-        //     bool &flag,																																																																				 //	
-								//				 bool &isRing)                                                                   //
+        //     bool &flag,								       //	
+	//     bool &isRing)                                                                   //
         //                                                                                     //
         // Returns the list of simplicies in the 1-ring of the j-th vertex of simplex I_       //
         // =================================================================================== //
@@ -284,7 +284,7 @@ return(index); };
         // =================================================================================== //
         // - List  : ivector1D, list of simplicies in the 1-ring of vertex I_[i]               //
         // - flag  : bool, true if the 1-ring is closed, false otherwise                       //
-								// - isRing: bool, true if the 1-ring comp is successfull, false otherwise             //
+	// - isRing: bool, true if the 1-ring comp is successfull, false otherwise             //
         // =================================================================================== //
 
         // =================================================================================== //
@@ -301,24 +301,23 @@ return(index); };
         // CREATE 1-RING LIST                                                                  //
         // =================================================================================== //
 
-								isRing = true;
-	        
+        isRing = true;
+        
         // Find the starting simplex in the 1-ring ------------------------------------------- //
 
         // Set seed
         J = Adjacency[I_][j][0];
         K = I_;
-								seedcheck = J;
-								counter=0;
+	seedcheck = J;
+	counter=0;
     
-							while ((J >= 0) && (J != I_)) {
+	while ((J >= 0) && (J != I_)) {
             i = edge(J, K);
             j = (i + 1) % Simplex[J].size();
             K = J;
             J = Adjacency[J][j][0];
-												counter += (seedcheck == J );
-							
-								if(counter > 1){isRing= false; return(List);}											
+	    counter += (seedcheck == J );
+	if(counter > 1){isRing= false; return(List);}											
         } //next j
         I_ = K;
 
@@ -328,8 +327,8 @@ return(index); };
         J = Adjacency[I_][i][0];
         K = I_;
 
-							seedcheck = J;		
-							counter=0;
+	seedcheck = J;		
+	counter=0;
         while ((J >= 0) && (J != I_)) {
             List.push_back(J);
             j = edge(J, K);
@@ -337,7 +336,7 @@ return(index); };
             K = J;
             J = Adjacency[J][i][0];
 
-								 counter += ( seedcheck == J );
+	   counter += ( seedcheck == J );
        	if(counter > 1){isRing= false; return(List);}											
         } //next J
 

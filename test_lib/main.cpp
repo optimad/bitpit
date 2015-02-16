@@ -84,7 +84,7 @@ int         selection;
         case 0: { Demo_CleaningTools();  break; }
         case 1: { Demo_CleaningTools2(); break; }
         case 2: { Demo_GenerationTools(); break; }
-								case 3: { Demo_CleaningTools3(); break;}
+	case 3: { Demo_CleaningTools3(); break;}
 	default: break;	
     }
 }

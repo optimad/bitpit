@@ -3525,46 +3525,19 @@ for (T = 0; T < nSimplex; T++) {
                 if ((p == m) && (!flag[S])) {
                     check = false;
                     idummy1D.resize(p);
-	                   idummyC1D.resize(p);
+	            idummyC1D.resize(p);
                     k = 0;
                     while ((!check) && (k < p)) {
                         ii = k;
-		                      jj = k;
+		        jj = k;
                         for (l = 0; l < p; l++) {
                         idummy1D[l]  = Simplex[S][ii];
-			                     idummyC1D[l] = Simplex[S][jj];
+		        idummyC1D[l] = Simplex[S][jj];
                         ii = (ii+1) % p;
-			                     jj = (p+jj-1)%p;
+		        jj = (p+jj-1)%p;
 																								} //next l
 																								check = ((Simplex[T] == idummy1D) || (Simplex[T] == idummyC1D));
                         k++;
-
-																							if(check) 
-																								{
-																										cout<<"printing the sick triangle"<<S<<'\t'<<T<<endl;
-																										cout<<"Adjacency[S]                  "<<endl;
-																										for(int sx=0; sx<Adjacency[S].size(); ++sx)
-                              {
-																															cout<<"found on edge "<<sx<<'\t';
-                               for(int sy=0; sy<Adjacency[S][sx].size(); ++sy)
-                                   {
-                                     cout<<Adjacency[S][sx][sy]<<'\t';
-                                   }
-			                                  cout<<endl;
-                              }
-																										cout<<"Adjacency[T]                  "<<endl;
-																										for(int sx=0; sx<Adjacency[T].size(); ++sx)
-                              {
-																															cout<<"found on edge "<<sx<<'\t';
-                               for(int sy=0; sy<Adjacency[T][sx].size(); ++sy)
-                                   {
-                                     cout<<Adjacency[T][sx][sy]<<'\t';
-                                   }
-			                                  cout<<endl;
-                              }
-																										
-																										cout<<"=================================================="<<endl;	
-																								}
                     } //next circular shifting
                     if (check) {
                         doubles.push_back(S);
@@ -3643,16 +3616,16 @@ for (T = 0; T < nSimplex; T++) {
                 if ((p == m) && (!flag[S])) {
                     check = false;
                     idummy1D.resize(p);
-		                  idummyC1D.resize(p);	
+	            idummyC1D.resize(p);	
                     k = 0;
                     while ((!check) && (k < p)) {
                         ii = k;
-			                     jj = k;
+	                jj = k;
                         for (l = 0; l < p; l++) {
                             idummy1D[l] = Simplex[S][ii];
-		           							      	 idummyC1D[l] = Simplex[S][jj];	
+	                    idummyC1D[l] = Simplex[S][jj];	
                             ii = (ii+1) % p;
-			                         jj = (p +jj-1) % p;	
+			    jj = (p +jj-1) % p;	
                         } //next l
                         check = ((Simplex[T] == idummy1D) || (Simplex[T] == idummyC1D));
                         k++;

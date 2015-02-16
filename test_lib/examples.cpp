@@ -536,7 +536,7 @@ std::string selection, tag;
     // none
 
     // Output message ------------------------------------------------------- //
-    cout << "============= Class_SurfTri: cleaning tools 3 demo ==============" << endl;
+cout << "============= Class_SurfTri: cleaning tools 3 demo ==============" << endl;
 }
 
 // ========================================================================== //
@@ -549,14 +549,14 @@ std::string selection, tag;
 				
     // Output message ------------------------------------------------------- //
     cout << " - Reading surface tasselation :" << endl << endl;
-				cout << " Enter the name of your geometry .stl/STL (absolute path needed)  :";
-				cin >> selection;
+    cout << " Enter the name of your geometry .stl/STL (absolute path needed)  :";
+    cin >> selection;
 				
 
-				tag = selection.substr(selection.size()-4,4);
-				if(tag !=".stl" && tag != ".STL") {cout<<"Geometry not supported in this demo. Now exiting...."<<endl; exit(1);}
+   tag = selection.substr(selection.size()-4,4);
+   if(tag !=".stl" && tag != ".STL") {cout<<"Geometry not supported in this demo. Now exiting...."<<endl; exit(1);}
 
-				cout<<"Going to read "<<selection<<" with tag"<< tag <<endl;
+   cout<<"Going to read "<<selection<<" with tag"<< tag <<endl;
     // Import from dgf file ------------------------------------------------- //
     Tri.Import_stl(selection, tag==".STL");
 
@@ -564,7 +564,7 @@ std::string selection, tag;
     cout<<"number of simplicies  "<<Tri.nSimplex<<endl;  
     // Output stats --------------------------------------------------------- //
    
-						Tri.SetTolerance();				
+    Tri.SetTolerance();				
 				
 }
 
@@ -579,12 +579,11 @@ std::string selection, tag;
     // Output message ------------------------------------------------------- //
     cout << endl << " - Finding duplicated vertices" << endl;
 
-					int orVert = Tri.nVertex;
-				// Output stats --------------------------------------------------------- //
-				ivector1D list = Tri.FindDoubleVertex();  
-		  Tri.RemoveDoubleVertex();
-				cout << endl << " - Going to remove  " << list.size() <<"   vertices"<<endl<<endl;				
-				Tri.BuildAdjacency();	
+    // Output stats --------------------------------------------------------- //
+    ivector1D list = Tri.FindDoubleVertex();  
+    Tri.RemoveDoubleVertex();
+    cout << endl << " - Going to remove  " << list.size() <<"   vertices"<<endl<<endl;				
+    Tri.BuildAdjacency();	
 }
 
 // ========================================================================== //
@@ -598,12 +597,12 @@ std::string selection, tag;
     // Output message ------------------------------------------------------- //
     cout << endl << " - Finding 0 area simplicies" << endl;
 
-				ivector1D list;
+    ivector1D list;
     // Output stats --------------------------------------------------------- //
     list = Tri.Find0AreaSimplex();
-				cout << endl << " - Going to remove  " << list.size() << " 0 area simplicies"<<endl<<endl;				
-				Tri.RemoveSimplex(list);
-				Tri.UpdateAdjacency(list);
+    cout << endl << " - Going to remove  " << list.size() << " 0 area simplicies"<<endl<<endl;				
+    Tri.RemoveSimplex(list);
+    Tri.UpdateAdjacency(list);
 }
 
 // ========================================================================== //
@@ -617,12 +616,12 @@ std::string selection, tag;
     // Output message ------------------------------------------------------- //
     cout << endl << " - Finding isolated simplicies" << endl;
 
-				ivector1D list;
+    ivector1D list;
     // Output stats --------------------------------------------------------- //
     list = Tri.FindIsolatedSimplex();
-				cout << endl << " - Going to remove  " << list.size() << "  simplicies"<<endl<<endl;				
-				Tri.RemoveSimplex(list);
-				Tri.UpdateAdjacency(list);
+    cout << endl << " - Going to remove  " << list.size() << "  simplicies"<<endl<<endl;				
+    Tri.RemoveSimplex(list);
+    Tri.UpdateAdjacency(list);
 }
 // ========================================================================== //
 // REMOVE ISOLATED VERTICES                                                   //
@@ -637,11 +636,10 @@ std::string selection, tag;
 
 				ivector1D list;
     // Output stats --------------------------------------------------------- //
-				Tri.RemoveIsolatedVertex();
     list = Tri.FindIsolatedVertex();
-				cout << endl << " - Going to remove  " << list.size() << "  vertices"<<endl<<endl;				
-				Tri.RemoveVertex(list);
-
+    cout << endl << " - Going to remove  " << list.size() << "  vertices"<<endl<<endl;				
+    Tri.RemoveVertex(list);
+    Tri.UpdateAdjacency(list);
 }
 
 
@@ -657,20 +655,20 @@ std::string selection, tag;
     cout << endl << " - Removing true double simplicies" << endl << endl;
 
     // Output stats --------------------------------------------------------- //
-				list = Tri.FindTrueDoubleSimplex();
-			  cout << endl << " - Going to remove  " << list.size() <<"  simplicies"<<endl<<endl;	
+    list = Tri.FindTrueDoubleSimplex();
+    cout << endl << " - Going to remove  " << list.size() <<"  simplicies"<<endl<<endl;	
     Tri.RemoveSimplex(list);
-				Tri.UpdateAdjacency(list);
+    Tri.UpdateAdjacency(list);
 }
 
-				Tri.FixNodeNumb();
+    Tri.FixNodeNumb();
     Tri.ResizeVertex();
     Tri.ResizeSimplex();
     Tri.ResizeNormal();
     Tri.ResizeAdjacency();
 
-	Tri.Stats(cout);
-	Tri.Export_vtu("cleanedgrid.vtu");
+    Tri.Stats(cout);
+    Tri.Export_vtu("cleanedgrid.vtu");
 	
 // ========================================================================== //
 // CLOSING MESSAGE                                                            //
@@ -679,33 +677,34 @@ std::string selection, tag;
     // Scope variables ------------------------------------------------------ //
     // none
 
-		ivector2D edges, edgesadj;
-		Tri.BuildEdges(edges,edgesadj);
+    ivector2D edges, edgesadj;
+    Tri.BuildEdges(edges,edgesadj);
 
-		int counter = 0;
-		cout<<"Check every 1-ring in tassellation vertices...."<<endl;
+    int counter = 0;
+    cout<<"Check every 1-ring in tassellation vertices...."<<endl;
 
-				bvector1D checkV(Tri.nVertex, false);
+    bvector1D checkV(Tri.nVertex, false);
 				
-				for(int T=0; T<Tri.nSimplex; ++T)
-							{
-								for(int j=0; j<Tri.Simplex[0].size(); ++j)
-									{
-											bool check,isRing=true;
-											if(!checkV[Tri.Simplex[T][j]])
-											{										
-											ivector1D	list = Tri.Ring_1(T,j,check, isRing);
-											if(!isRing) {	cout<<"Failed Ring Computation for vertex "<<Tri.Simplex[T][j]<<" ring size was"<<list.size()<<endl;
-											counter++;								     
-											}	
-											checkV[Tri.Simplex[T][j]] = true;
-											}	
-									}
-						}
+   for(int T=0; T<Tri.nSimplex; ++T)
+   {
+    for(int j=0; j<Tri.Simplex[0].size(); ++j)
+    {
+     bool check,isRing=true;
+     if(!checkV[Tri.Simplex[T][j]])
+	{										
+         ivector1D list = Tri.Ring_1(T,j,check, isRing);
+	 if(!isRing) {	cout<<"Failed Ring Computation for vertex "<<Tri.Simplex[T][j]<<" ring size was"<<list.size()<<endl;
+			counter++;								     
+	             }	
+     	checkV[Tri.Simplex[T][j]] = true;
+  	}	
+    }
+  }
 
-					cout<<"Total failed Rings caught:  "<<counter<<"Check your triangulation."<<endl;
-    // Output message ------------------------------------------------------- //
-    cout << "======================== DEMO: done!! =========================" << endl;
+ cout<<"Total failed Rings caught:   "<<counter; 	
+ if(counter>0) {cout<<"   Check your triangulation."<<endl;}
+ // Output message ------------------------------------------------------- //
+ cout << "======================== DEMO: done!! =========================" << endl;
 }
 
 return; };
