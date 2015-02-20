@@ -88,7 +88,7 @@ class VTK{
     public:
       VTK( );
       VTK( string dir_, string name_ );
-     ~VTK( );
+      virtual ~VTK( );
 
       void    Set_Names( string dir_ , string name_  ) ;
       void    Set_Counter( int c_ ) ;
