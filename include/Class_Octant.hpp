@@ -11,6 +11,7 @@
 #include <algorithm>
 #include "inlinedFunct.hpp"
 #include <iostream>
+#include <bitset>
 
 // =================================================================================== //
 // NAME SPACES                                                                         //
