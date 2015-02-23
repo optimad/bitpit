@@ -1448,10 +1448,13 @@ public:
 	 * \param[in] inter Pointer to target intersection.
 	 * \return Area of intersection.
 	 */
-	double getArea(Class_Intersection<3>* inter) {
+	double getArea(Class_Intersection<2>* inter) {
 		uint32_t Area;
-		Area = octree.extractOctant(inter->owners[inter->finer]).getArea();
-		return trans.mapArea(Area);
+		if(inter->finer && inter->isghost)
+			Area = octree.extractGhostOctant(inter->owners[1]).getArea();
+		else
+			Area = octree.extractOctant(inter->owners[inter->finer]).getArea();
+		return trans.mapSize(Area);
 	}
 
 	/*! Get the coordinates of the center of an intersection.

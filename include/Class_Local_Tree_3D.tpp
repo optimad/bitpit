@@ -110,6 +110,9 @@ private:
 	uint8_t getLevel(int32_t idx){								// Get refinement/coarsening marker for idx-th octant
 		return octants[idx].getLevel();
 	};
+	uint8_t getGhostLevel(int32_t idx){								// Get refinement/coarsening marker for idx-th ghost octant
+		return ghosts[idx].getLevel();
+	};
 	bool getBalance(int32_t idx){								// Get if balancing-blocked idx-th octant
 		return octants[idx].getNotBalance();
 	};
@@ -144,6 +147,14 @@ private:
 
 	const Class_Octant<3>&	extractOctant(uint32_t idx) const{
 		return octants[idx];
+	};
+
+	Class_Octant<3>& extractGhostOctant(uint32_t idx) {
+		return ghosts[idx];
+	};
+
+	const Class_Octant<3>& extractGhostOctant(uint32_t idx) const{
+		return ghosts[idx];
 	};
 
 	// =================================================================================== //
@@ -1433,10 +1444,42 @@ private:
 						Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 						Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
 //						if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
+
+						uint32_t x0 = oct->x;
+						uint32_t x1 = x0 + size;
+						uint32_t y0 = oct->y;
+						uint32_t y1 = y0 + size;
+						uint32_t z0 = oct->z;
+						uint32_t z1 = z0 + size;
+						uint32_t x0try = octants[idxtry].x;
+						uint32_t x1try = x0try + octants[idxtry].getSize();
+						uint32_t y0try = octants[idxtry].y;
+						uint32_t y1try = y0try + octants[idxtry].getSize();
+						uint32_t z0try = octants[idxtry].z;
+						uint32_t z1try = z0try + octants[idxtry].getSize();
+						uint8_t level = oct->level;
+						uint8_t leveltry = octants[idxtry].getLevel();
+
 						if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
-							neighbours.push_back(idxtry);
-							isghost.push_back(false);
+							if (leveltry > level){
+								if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
+									neighbours.push_back(idxtry);
+									isghost.push_back(false);
+								}
+							}
+							if (leveltry < level){
+								if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
+									neighbours.push_back(idxtry);
+									isghost.push_back(false);
+								}
+							}
 						}
+
+//						if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+//							neighbours.push_back(idxtry);
+//							isghost.push_back(false);
+//						}
+
 						idxtry++;
 						if(idxtry>noctants-1){
 							break;
@@ -1540,10 +1583,43 @@ private:
 								Dystar = int32_t((cy-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 								Dzstar = int32_t((cz-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cz+1)/2)*size;
 //								if ((abs(Dh) == ((1-(iface%2))*ghosts[idxtry].getSize() + (iface%2)*size))){
+
+								uint32_t x0 = oct->x;
+								uint32_t x1 = x0 + size;
+								uint32_t y0 = oct->y;
+								uint32_t y1 = y0 + size;
+								uint32_t z0 = oct->z;
+								uint32_t z1 = z0 + size;
+								uint32_t x0try = ghosts[idxtry].x;
+								uint32_t x1try = x0try + ghosts[idxtry].getSize();
+								uint32_t y0try = ghosts[idxtry].y;
+								uint32_t y1try = y0try + ghosts[idxtry].getSize();
+								uint32_t z0try = ghosts[idxtry].z;
+								uint32_t z1try = z0try + ghosts[idxtry].getSize();
+								uint8_t level = oct->level;
+								uint8_t leveltry = ghosts[idxtry].getLevel();
+
 								if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
-									neighbours.push_back(idxtry);
-									isghost.push_back(true);
+									if (leveltry > level){
+										if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
+											neighbours.push_back(idxtry);
+											isghost.push_back(true);
+										}
+									}
+									if (leveltry < level){
+										if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
+											neighbours.push_back(idxtry);
+											isghost.push_back(true);
+										}
+									}
 								}
+
+
+//								if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+//									neighbours.push_back(idxtry);
+//									isghost.push_back(true);
+//								}
+
 								idxtry++;
 								if(idxtry>size_ghosts-1){
 									break;
@@ -1642,10 +1718,42 @@ private:
 										Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 										Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
 //										if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
+
+										uint32_t x0 = oct->x;
+										uint32_t x1 = x0 + size;
+										uint32_t y0 = oct->y;
+										uint32_t y1 = y0 + size;
+										uint32_t z0 = oct->z;
+										uint32_t z1 = z0 + size;
+										uint32_t x0try = octants[idxtry].x;
+										uint32_t x1try = x0try + octants[idxtry].getSize();
+										uint32_t y0try = octants[idxtry].y;
+										uint32_t y1try = y0try + octants[idxtry].getSize();
+										uint32_t z0try = octants[idxtry].z;
+										uint32_t z1try = z0try + octants[idxtry].getSize();
+										uint8_t level = oct->level;
+										uint8_t leveltry = octants[idxtry].getLevel();
+
 										if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
-											neighbours.push_back(idxtry);
-											isghost.push_back(false);
+											if (leveltry > level){
+												if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
+													neighbours.push_back(idxtry);
+													isghost.push_back(false);
+												}
+											}
+											if (leveltry < level){
+												if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
+													neighbours.push_back(idxtry);
+													isghost.push_back(false);
+												}
+											}
 										}
+
+//										if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+//											neighbours.push_back(idxtry);
+//											isghost.push_back(false);
+//										}
+
 										idxtry++;
 										Mortontry = octants[idxtry].computeMorton();
 									}
@@ -1773,10 +1881,42 @@ private:
 						Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 						Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
 //						if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
+
+						uint32_t x0 = oct->x;
+						uint32_t x1 = x0 + size;
+						uint32_t y0 = oct->y;
+						uint32_t y1 = y0 + size;
+						uint32_t z0 = oct->z;
+						uint32_t z1 = z0 + size;
+						uint32_t x0try = octants[idxtry].x;
+						uint32_t x1try = x0try + octants[idxtry].getSize();
+						uint32_t y0try = octants[idxtry].y;
+						uint32_t y1try = y0try + octants[idxtry].getSize();
+						uint32_t z0try = octants[idxtry].z;
+						uint32_t z1try = z0try + octants[idxtry].getSize();
+						uint8_t level = oct->level;
+						uint8_t leveltry = octants[idxtry].getLevel();
+
 						if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
-							neighbours.push_back(idxtry);
-							isghost.push_back(false);
+							if (leveltry > level){
+								if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
+									neighbours.push_back(idxtry);
+									isghost.push_back(false);
+								}
+							}
+							if (leveltry < level){
+								if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
+									neighbours.push_back(idxtry);
+									isghost.push_back(false);
+								}
+							}
 						}
+
+//						if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+//							neighbours.push_back(idxtry);
+//							isghost.push_back(false);
+//						}
+
 						idxtry++;
 						if(idxtry>noctants-1){
 							break;
@@ -1868,7 +2008,7 @@ private:
 							int32_t Dx, Dy, Dz;
 							int32_t Dxstar, Dystar, Dzstar;
 							int32_t eqcoord;
-							while(Mortontry < Mortonlast & idxtry < size_ghosts){
+							while(Mortontry < Mortonlast && idxtry < size_ghosts){
 //								Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
 //								Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
 //								Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
@@ -1879,10 +2019,42 @@ private:
 								Dystar = int32_t((cy-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 								Dzstar = int32_t((cz-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cz+1)/2)*size;
 //								if ((abs(Dh) == ((1-(iface%2))*ghosts[idxtry].getSize() + (iface%2)*size))){
+
+								uint32_t x0 = oct->x;
+								uint32_t x1 = x0 + size;
+								uint32_t y0 = oct->y;
+								uint32_t y1 = y0 + size;
+								uint32_t z0 = oct->z;
+								uint32_t z1 = z0 + size;
+								uint32_t x0try = ghosts[idxtry].x;
+								uint32_t x1try = x0try + ghosts[idxtry].getSize();
+								uint32_t y0try = ghosts[idxtry].y;
+								uint32_t y1try = y0try + ghosts[idxtry].getSize();
+								uint32_t z0try = ghosts[idxtry].z;
+								uint32_t z1try = z0try + ghosts[idxtry].getSize();
+								uint8_t level = oct->level;
+								uint8_t leveltry = ghosts[idxtry].getLevel();
+
 								if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
-									neighbours.push_back(idxtry);
-									isghost.push_back(true);
+									if (leveltry > level){
+										if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
+											neighbours.push_back(idxtry);
+											isghost.push_back(true);
+										}
+									}
+									if (leveltry < level){
+										if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
+											neighbours.push_back(idxtry);
+											isghost.push_back(true);
+										}
+									}
 								}
+
+//								if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+//									neighbours.push_back(idxtry);
+//									isghost.push_back(true);
+//								}
+
 								idxtry++;
 								if(idxtry>size_ghosts-1){
 									break;
@@ -1969,7 +2141,7 @@ private:
 									int32_t Dx, Dy, Dz;
 									int32_t Dxstar, Dystar, Dzstar;
 									int32_t eqcoord;
-									while(Mortontry < Mortonlast & idxtry <= noctants-1){
+									while(Mortontry < Mortonlast && idxtry <= noctants-1){
 //										Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
 //										Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
 //										Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
@@ -1980,10 +2152,42 @@ private:
 										Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 										Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
 //										if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
+
+										uint32_t x0 = oct->x;
+										uint32_t x1 = x0 + size;
+										uint32_t y0 = oct->y;
+										uint32_t y1 = y0 + size;
+										uint32_t z0 = oct->z;
+										uint32_t z1 = z0 + size;
+										uint32_t x0try = octants[idxtry].x;
+										uint32_t x1try = x0try + octants[idxtry].getSize();
+										uint32_t y0try = octants[idxtry].y;
+										uint32_t y1try = y0try + octants[idxtry].getSize();
+										uint32_t z0try = octants[idxtry].z;
+										uint32_t z1try = z0try + octants[idxtry].getSize();
+										uint8_t level = oct->level;
+										uint8_t leveltry = octants[idxtry].getLevel();
+
 										if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
-											neighbours.push_back(idxtry);
-											isghost.push_back(false);
+											if (leveltry > level){
+												if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
+													neighbours.push_back(idxtry);
+													isghost.push_back(false);
+												}
+											}
+											if (leveltry < level){
+												if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
+													neighbours.push_back(idxtry);
+													isghost.push_back(false);
+												}
+											}
 										}
+
+//										if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+//											neighbours.push_back(idxtry);
+//											isghost.push_back(false);
+//										}
+
 										idxtry++;
 										Mortontry = octants[idxtry].computeMorton();
 									}
@@ -2103,11 +2307,42 @@ private:
 					Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 					Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
 //					if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
-					if( (Mortontry < Morton && octants[idxtry].level < oct->level) || (Mortontry > Morton && octants[idxtry].level > oct->level)){
-						if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
-							neighbours.push_back(idxtry);
+
+					uint32_t x0 = oct->x;
+					uint32_t x1 = x0 + size;
+					uint32_t y0 = oct->y;
+					uint32_t y1 = y0 + size;
+					uint32_t z0 = oct->z;
+					uint32_t z1 = z0 + size;
+					uint32_t x0try = octants[idxtry].x;
+					uint32_t x1try = x0try + octants[idxtry].getSize();
+					uint32_t y0try = octants[idxtry].y;
+					uint32_t y1try = y0try + octants[idxtry].getSize();
+					uint32_t z0try = octants[idxtry].z;
+					uint32_t z1try = z0try + octants[idxtry].getSize();
+					uint8_t level = oct->level;
+					uint8_t leveltry = octants[idxtry].getLevel();
+
+					if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+						if (leveltry > level){
+							if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
+								neighbours.push_back(idxtry);
+							}
+						}
+						if (leveltry < level){
+							if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
+								neighbours.push_back(idxtry);
+							}
 						}
 					}
+
+
+//					if( (Mortontry < Morton && octants[idxtry].level < oct->level) || (Mortontry > Morton && octants[idxtry].level > oct->level)){
+//						if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+//							neighbours.push_back(idxtry);
+//						}
+//					}
+
 					idxtry++;
 					if(idxtry>noctants-1){
 						break;
@@ -3569,10 +3804,10 @@ private:
 				findGhostNeighbours(idx, iface2, neighbours);
 				nsize = neighbours.size();
 				for (i = 0; i < nsize; i++){
-					intersection.finer = (nsize==1);
+					intersection.finer = getGhostLevel(idx) >= getLevel((int)neighbours[i]);
 					intersection.owners[0]  = neighbours[i];
 					intersection.owners[1] = idx;
-					intersection.iface = global3D.oppface[iface2] - (nsize==1);
+					intersection.iface = global3D.oppface[iface2] - (getGhostLevel(idx) >= getLevel((int)neighbours[i]));
 					intersection.isnew = false;
 					intersection.isghost = true;
 					intersection.bound = false;
