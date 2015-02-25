@@ -2632,7 +2632,7 @@ public:
 					displays[pp] += nofRecvsPerProc[ppp];
 				}
 			}
-			int globalRecvsBuff[globalRecvsBuffSize];
+			int* globalRecvsBuff = new int[globalRecvsBuffSize];
 			error_flag = MPI_Allgatherv(recvs[rank].array,recvs[rank].arraySize,MPI_INT,globalRecvsBuff,nofRecvsPerProc,displays,MPI_INT,MPI_COMM_WORLD);
 
 			vector<set<int> > sendersPerProc(nproc);
@@ -2736,7 +2736,7 @@ public:
 			delete [] displays; displays = NULL;
 			delete [] req; req = NULL;
 			delete [] stats; stats = NULL;
-
+			delete [] globalRecvsBuff; globalRecvsBuff = NULL;
 			//Update and ghosts here
 			updateLoadBalance();
 			setPboundGhosts();
@@ -3017,7 +3017,7 @@ public:
 					displays[pp] += nofRecvsPerProc[ppp];
 				}
 			}
-			int globalRecvsBuff[globalRecvsBuffSize];
+			int* globalRecvsBuff = new int[globalRecvsBuffSize];
 			error_flag = MPI_Allgatherv(recvs[rank].array,recvs[rank].arraySize,MPI_INT,globalRecvsBuff,nofRecvsPerProc,displays,MPI_INT,MPI_COMM_WORLD);
 
 			vector<set<int> > sendersPerProc(nproc);
@@ -3121,6 +3121,7 @@ public:
 			delete [] displays; displays = NULL;
 			delete [] req; req = NULL;
 			delete [] stats; stats = NULL;
+			delete [] globalRecvsBuff; globalRecvsBuff = NULL;
 
 			//Update and ghosts here
 			updateLoadBalance();
@@ -4120,7 +4121,7 @@ private:
 			uint64_t local_num_octants = (uint64_t) octree.getNumOctants();
 			error_flag = MPI_Allreduce(&local_num_octants,&global_num_octants,1,MPI_UINT64_T,MPI_SUM,MPI_COMM_WORLD);
 			//update partition_range_globalidx
-			uint64_t rbuff [nproc];
+			uint64_t* rbuff = new uint64_t[nproc];
 			error_flag = MPI_Allgather(&local_num_octants,1,MPI_UINT64_T,rbuff,1,MPI_UINT64_T,MPI_COMM_WORLD);
 			for(int p = 0; p < nproc; ++p){
 				partition_range_globalidx[p] = 0;
@@ -4133,6 +4134,7 @@ private:
 			error_flag = MPI_Allgather(&lastDescMorton,1,MPI_UINT64_T,partition_last_desc,1,MPI_UINT64_T,MPI_COMM_WORLD);
 			uint64_t firstDescMorton = octree.getFirstDesc().computeMorton();
 			error_flag = MPI_Allgather(&firstDescMorton,1,MPI_UINT64_T,partition_first_desc,1,MPI_UINT64_T,MPI_COMM_WORLD);
+			delete [] rbuff; rbuff = NULL;
 		}
 	};
 
