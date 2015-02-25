@@ -48,12 +48,12 @@ public:
 	// MEMBERS ----------------------------------------------------------------------- //
 
 private:
-	uint32_t  x;				/**<  Coordinate x */
-	uint32_t  y;				/**<  Coordinate y */
-	uint32_t  z;				/**<  Coordinate z */
-	uint8_t   level;			/**< Refinement level (0=root) */
-	int8_t    marker;			/**< Set for Refinement(m>0) or Coarsening(m<0) |m|-times */
-	bool      info[16];			/**< -Info[0..5] : true if 0..3 face is a boundary face [bound] \n
+	uint32_t  	x;				/**<  Coordinate x */
+	uint32_t  	y;				/**<  Coordinate y */
+	uint32_t  	z;				/**<  Coordinate z */
+	uint8_t   	level;			/**< Refinement level (0=root) */
+	int8_t    	marker;			/**< Set for Refinement(m>0) or Coarsening(m<0) |m|-times */
+	bitset<16>  info;			/**< -Info[0..5] : true if 0..3 face is a boundary face [bound] \n
 								-Info[6..11]: true if 0..3 face is a process boundary face [pbound] \n
 								-Info[12/13]: true if octant is new after refinement/coarsening \n
 								-Info[14]   : true if balancing is not required for this octant \n
@@ -68,8 +68,8 @@ public:
 		x = y = z = 0;
 		level = 0;
 		marker = 0;
-		bool dummy[16] = {false};
-		memcpy(info, dummy, 16);
+//		bool dummy[16] = {false};
+//		memcpy(info, dummy, 16);
 		for (int i=0; i<global3D.nfaces; i++){
 			info[i] = true;
 		}
@@ -81,8 +81,8 @@ public:
 		this->z = z;
 		this->level = level;
 		marker = 0;
-		bool dummy[16] = {false};
-		memcpy(info, dummy, 16);
+//		bool dummy[16] = {false};
+//		memcpy(info, dummy, 16);
 		if (level==0){
 			for (int i=0; i<global3D.nfaces; i++){
 				info[i] = true;
@@ -96,7 +96,8 @@ public:
 		z = octant.z;
 		level = octant.level;
 		marker = octant.marker;
-		memcpy(info,octant.info,16);
+//		memcpy(info,octant.info,16);
+		info = octant.info;
 	};
 
 	/*! Check if two octants are equal (no check on info)
