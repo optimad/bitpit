@@ -3508,7 +3508,8 @@ public:
 					displays[pp] += nofRecvsPerProc[ppp];
 				}
 			}
-			int globalRecvsBuff[globalRecvsBuffSize];
+			//int globalRecvsBuff[globalRecvsBuffSize];
+			int* globalRecvsBuff = new int[globalRecvsBuffSize];
 			error_flag = MPI_Allgatherv(recvs[rank].array,recvs[rank].arraySize,MPI_INT,globalRecvsBuff,nofRecvsPerProc,displays,MPI_INT,MPI_COMM_WORLD);
 
 			vector<set<int> > sendersPerProc(nproc);
@@ -3629,6 +3630,7 @@ public:
 			delete [] displays; displays = NULL;
 			delete [] req; req = NULL;
 			delete [] stats; stats = NULL;
+			delete [] globalRecvsBuff; globalRecvsBuff = NULL;
 
 			//Update and ghosts here
 			updateLoadBalance();
@@ -3971,7 +3973,8 @@ public:
 					displays[pp] += nofRecvsPerProc[ppp];
 				}
 			}
-			int globalRecvsBuff[globalRecvsBuffSize];
+			//int globalRecvsBuff[globalRecvsBuffSize];
+			int* globalRecvsBuff = new int[globalRecvsBuffSize];
 			error_flag = MPI_Allgatherv(recvs[rank].array,recvs[rank].arraySize,MPI_INT,globalRecvsBuff,nofRecvsPerProc,displays,MPI_INT,MPI_COMM_WORLD);
 
 			vector<set<int> > sendersPerProc(nproc);
@@ -4093,6 +4096,7 @@ public:
 			delete [] displays; displays = NULL;
 			delete [] req; req = NULL;
 			delete [] stats; stats = NULL;
+			delete [] globalRecvsBuff; globalRecvsBuff = NULL;
 
 			//Update and ghosts here
 			updateLoadBalance();
