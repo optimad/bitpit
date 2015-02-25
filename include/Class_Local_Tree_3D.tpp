@@ -1429,21 +1429,21 @@ private:
 					uint64_t Mortonlast = last_desc.computeMorton();
 					vector<uint32_t> bufferidx;
 					Mortontry = octants[idxtry].computeMorton();
-//					int32_t Dh;
+					//					int32_t Dh;
 					int32_t Dx, Dy, Dz;
 					int32_t Dxstar, Dystar, Dzstar;
 					int32_t eqcoord;
 					while(Mortontry < Mortonlast && idxtry < noctants){
-//						Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
-//						Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
-//						Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
+						//						Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
+						//						Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
+						//						Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
 						Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 						Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
-						Dz = int32_t(abs(cz))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
+						Dz = int32_t(abs(cz))*(-int32_t(oct->z) + int32_t(octants[idxtry].z));
 						Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize()) + int32_t((cx+1)/2)*size;
 						Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 						Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
-//						if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
+						//						if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
 
 						uint32_t x0 = oct->x;
 						uint32_t x1 = x0 + size;
@@ -1475,10 +1475,10 @@ private:
 							}
 						}
 
-//						if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
-//							neighbours.push_back(idxtry);
-//							isghost.push_back(false);
-//						}
+						//						if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+						//							neighbours.push_back(idxtry);
+						//							isghost.push_back(false);
+						//						}
 
 						idxtry++;
 						if(idxtry>noctants-1){
@@ -1568,21 +1568,21 @@ private:
 							uint64_t Mortonlast = last_desc.computeMorton();
 							vector<uint32_t> bufferidx;
 							Mortontry = ghosts[idxtry].computeMorton();
-//							int32_t Dh;
+							//							int32_t Dh;
 							int32_t Dx, Dy, Dz;
 							int32_t Dxstar, Dystar, Dzstar;
 							int32_t eqcoord;
 							while(Mortontry < Mortonlast && idxtry < size_ghosts){
-//								Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
-//								Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
-//								Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(ghosts[idxtry].z));
+								//								Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
+								//								Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
+								//								Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(ghosts[idxtry].z));
 								Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(ghosts[idxtry].x));
 								Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(ghosts[idxtry].y));
-								Dz = int32_t(abs(cz))*(-int32_t(oct->y) + int32_t(ghosts[idxtry].y));
+								Dz = int32_t(abs(cz))*(-int32_t(oct->z) + int32_t(ghosts[idxtry].z));
 								Dxstar = int32_t((cx-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cx+1)/2)*size;
 								Dystar = int32_t((cy-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 								Dzstar = int32_t((cz-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cz+1)/2)*size;
-//								if ((abs(Dh) == ((1-(iface%2))*ghosts[idxtry].getSize() + (iface%2)*size))){
+								//								if ((abs(Dh) == ((1-(iface%2))*ghosts[idxtry].getSize() + (iface%2)*size))){
 
 								uint32_t x0 = oct->x;
 								uint32_t x1 = x0 + size;
@@ -1615,10 +1615,10 @@ private:
 								}
 
 
-//								if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
-//									neighbours.push_back(idxtry);
-//									isghost.push_back(true);
-//								}
+								//								if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+								//									neighbours.push_back(idxtry);
+								//									isghost.push_back(true);
+								//								}
 
 								idxtry++;
 								if(idxtry>size_ghosts-1){
@@ -1703,21 +1703,21 @@ private:
 									uint64_t Mortonlast = last_desc.computeMorton();
 									vector<uint32_t> bufferidx;
 									Mortontry = octants[idxtry].computeMorton();
-//									int32_t Dh;
+									//									int32_t Dh;
 									int32_t Dx, Dy, Dz;
 									int32_t Dxstar, Dystar, Dzstar;
 									int32_t eqcoord;
 									while(Mortontry < Mortonlast && idxtry <= noctants-1){
-//										Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
-//										Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
-//										Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
+										//										Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
+										//										Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
+										//										Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
 										Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 										Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
-										Dz = int32_t(abs(cz))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
+										Dz = int32_t(abs(cz))*(-int32_t(oct->z) + int32_t(octants[idxtry].z));
 										Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize()) + int32_t((cx+1)/2)*size;
 										Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 										Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
-//										if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
+										//										if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
 
 										uint32_t x0 = oct->x;
 										uint32_t x1 = x0 + size;
@@ -1749,10 +1749,10 @@ private:
 											}
 										}
 
-//										if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
-//											neighbours.push_back(idxtry);
-//											isghost.push_back(false);
-//										}
+										//										if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+										//											neighbours.push_back(idxtry);
+										//											isghost.push_back(false);
+										//										}
 
 										idxtry++;
 										Mortontry = octants[idxtry].computeMorton();
@@ -1866,21 +1866,21 @@ private:
 					uint64_t Mortonlast = last_desc.computeMorton();
 					vector<uint32_t> bufferidx;
 					Mortontry = octants[idxtry].computeMorton();
-//					int32_t Dh;
+					//					int32_t Dh;
 					int32_t Dx, Dy, Dz;
 					int32_t Dxstar, Dystar, Dzstar;
 					int32_t eqcoord;
 					while(Mortontry < Mortonlast && idxtry < noctants){
-//						Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
-//						Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
-//						Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
+						//						Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
+						//						Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
+						//						Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
 						Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 						Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
-						Dz = int32_t(abs(cz))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
+						Dz = int32_t(abs(cz))*(-int32_t(oct->z) + int32_t(octants[idxtry].z));
 						Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize()) + int32_t((cx+1)/2)*size;
 						Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 						Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
-//						if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
+						//						if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
 
 						uint32_t x0 = oct->x;
 						uint32_t x1 = x0 + size;
@@ -1912,10 +1912,10 @@ private:
 							}
 						}
 
-//						if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
-//							neighbours.push_back(idxtry);
-//							isghost.push_back(false);
-//						}
+						//						if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+						//							neighbours.push_back(idxtry);
+						//							isghost.push_back(false);
+						//						}
 
 						idxtry++;
 						if(idxtry>noctants-1){
@@ -2004,21 +2004,21 @@ private:
 							uint64_t Mortonlast = last_desc.computeMorton();
 							vector<uint32_t> bufferidx;
 							Mortontry = ghosts[idxtry].computeMorton();
-//							int32_t Dh;
+							//							int32_t Dh;
 							int32_t Dx, Dy, Dz;
 							int32_t Dxstar, Dystar, Dzstar;
 							int32_t eqcoord;
 							while(Mortontry < Mortonlast && idxtry < size_ghosts){
-//								Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
-//								Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
-//								Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
+								//								Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
+								//								Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
+								//								Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
 								Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(ghosts[idxtry].x));
 								Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(ghosts[idxtry].y));
-								Dz = int32_t(abs(cz))*(-int32_t(oct->y) + int32_t(ghosts[idxtry].y));
+								Dz = int32_t(abs(cz))*(-int32_t(oct->z) + int32_t(ghosts[idxtry].z));
 								Dxstar = int32_t((cx-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cx+1)/2)*size;
 								Dystar = int32_t((cy-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 								Dzstar = int32_t((cz-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cz+1)/2)*size;
-//								if ((abs(Dh) == ((1-(iface%2))*ghosts[idxtry].getSize() + (iface%2)*size))){
+								//								if ((abs(Dh) == ((1-(iface%2))*ghosts[idxtry].getSize() + (iface%2)*size))){
 
 								uint32_t x0 = oct->x;
 								uint32_t x1 = x0 + size;
@@ -2050,10 +2050,10 @@ private:
 									}
 								}
 
-//								if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
-//									neighbours.push_back(idxtry);
-//									isghost.push_back(true);
-//								}
+								//								if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+								//									neighbours.push_back(idxtry);
+								//									isghost.push_back(true);
+								//								}
 
 								idxtry++;
 								if(idxtry>size_ghosts-1){
@@ -2137,21 +2137,21 @@ private:
 									uint64_t Mortonlast = last_desc.computeMorton();
 									vector<uint32_t> bufferidx;
 									Mortontry = octants[idxtry].computeMorton();
-//									int32_t Dh;
+									//									int32_t Dh;
 									int32_t Dx, Dy, Dz;
 									int32_t Dxstar, Dystar, Dzstar;
 									int32_t eqcoord;
 									while(Mortontry < Mortonlast && idxtry <= noctants-1){
-//										Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
-//										Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
-//										Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
+										//										Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
+										//										Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
+										//										Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
 										Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 										Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
-										Dz = int32_t(abs(cz))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
+										Dz = int32_t(abs(cz))*(-int32_t(oct->z) + int32_t(octants[idxtry].z));
 										Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize()) + int32_t((cx+1)/2)*size;
 										Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 										Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
-//										if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
+										//										if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
 
 										uint32_t x0 = oct->x;
 										uint32_t x1 = x0 + size;
@@ -2183,10 +2183,10 @@ private:
 											}
 										}
 
-//										if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
-//											neighbours.push_back(idxtry);
-//											isghost.push_back(false);
-//										}
+										//										if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+										//											neighbours.push_back(idxtry);
+										//											isghost.push_back(false);
+										//										}
 
 										idxtry++;
 										Mortontry = octants[idxtry].computeMorton();
@@ -2292,21 +2292,21 @@ private:
 				uint64_t Mortonlast = last_desc.computeMorton();
 				vector<uint32_t> bufferidx;
 				Mortontry = octants[idxtry].computeMorton();
-//				int32_t Dh;
+				//				int32_t Dh;
 				int32_t Dx, Dy, Dz;
 				int32_t Dxstar, Dystar, Dzstar;
 				int32_t eqcoord;
 				while(Mortontry < Mortonlast && idxtry < noctants){
-//					Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
-//					Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
-//					Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
+					//					Dh = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
+					//					Dh += int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
+					//					Dh += int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
 					Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 					Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
 					Dz = int32_t(abs(cz))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
 					Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize()) + int32_t((cx+1)/2)*size;
 					Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 					Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
-//					if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
+					//					if ((abs(Dh) == ((1-(iface%2))*octants[idxtry].getSize() + (iface%2)*size))){
 
 					uint32_t x0 = oct->x;
 					uint32_t x1 = x0 + size;
@@ -2337,11 +2337,11 @@ private:
 					}
 
 
-//					if( (Mortontry < Morton && octants[idxtry].level < oct->level) || (Mortontry > Morton && octants[idxtry].level > oct->level)){
-//						if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
-//							neighbours.push_back(idxtry);
-//						}
-//					}
+					//					if( (Mortontry < Morton && octants[idxtry].level < oct->level) || (Mortontry > Morton && octants[idxtry].level > oct->level)){
+					//						if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+					//							neighbours.push_back(idxtry);
+					//						}
+					//					}
 
 					idxtry++;
 					if(idxtry>noctants-1){
@@ -2855,8 +2855,10 @@ private:
 		Class_Octant<3>* oct = &octants[idx];
 		uint32_t size = oct->getSize();
 		uint8_t iface1, iface2;
-		int32_t Dhx, Dhy, Dhz;
-		int32_t Dhxref, Dhyref, Dhzref;
+		//		int32_t Dhx, Dhy, Dhz;
+		//		int32_t Dhxref, Dhyref, Dhzref;
+		int32_t Dx, Dy, Dz;
+		int32_t Dxstar,Dystar,Dzstar;
 
 		//Alternative to switch case
 		int8_t Cx[12] = {-1,1,0,0,-1,1,-1,1,-1,1,0,0};
@@ -2897,8 +2899,8 @@ private:
 				// Search morton in octants
 				// If a even face morton is lower than morton of oct, if odd higher
 				// ---> can i search only before or after idx in octants
-//				int32_t jump = (octghost->computeMorton() > Morton) ? int32_t(idxghost/2+1) : int32_t((size_ghosts -idxghost)/2+1);
-//				idxtry = uint32_t(idxghost +((octghost->computeMorton()<Morton)-(octghost->computeMorton()>Morton))*jump);
+				//				int32_t jump = (octghost->computeMorton() > Morton) ? int32_t(idxghost/2+1) : int32_t((size_ghosts -idxghost)/2+1);
+				//				idxtry = uint32_t(idxghost +((octghost->computeMorton()<Morton)-(octghost->computeMorton()>Morton))*jump);
 				int32_t jump = int32_t(idxghost/2);
 				idxtry = uint32_t(((octghost->computeMorton()<Morton)-(octghost->computeMorton()>Morton))*jump);
 				if (idxtry > ghosts.size()-1) idxtry = ghosts.size()-1;
@@ -2939,10 +2941,10 @@ private:
 								idxtry = 0;
 								break;
 							}
-//							if(idxtry < 0){
-//								idxtry = 0;
-//								break;
-//							}
+							//							if(idxtry < 0){
+							//								idxtry = 0;
+							//								break;
+							//							}
 						}
 					}
 					if(idxtry < size_ghosts){
@@ -2959,16 +2961,57 @@ private:
 						vector<uint32_t> bufferidx;
 						Mortontry = ghosts[idxtry].computeMorton();
 						while(Mortontry < Mortonlast && idxtry < ghosts.size()){
-							Dhx = int32_t(cx)*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
-							Dhy = int32_t(cy)*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
-							Dhz = int32_t(cz)*(int32_t(oct->z) - int32_t(ghosts[idxtry].z));
-							Dhxref = int32_t(cx<0)*ghosts[idxtry].getSize() + int32_t(cx>0)*size;
-							Dhyref = int32_t(cy<0)*ghosts[idxtry].getSize() + int32_t(cy>0)*size;
-							Dhzref = int32_t(cz<0)*ghosts[idxtry].getSize() + int32_t(cz>0)*size;
-							if ((abs(Dhx) == Dhxref) && (abs(Dhy) == Dhyref) && (abs(Dhz) == Dhzref)){
-								neighbours.push_back(idxtry);
-								isghost.push_back(true);
+
+							Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(ghosts[idxtry].x));
+							Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(ghosts[idxtry].y));
+							Dz = int32_t(abs(cz))*(-int32_t(oct->y) + int32_t(ghosts[idxtry].y));
+							Dxstar = int32_t((cx-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cx+1)/2)*size;
+							Dystar = int32_t((cy-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cy+1)/2)*size;
+							Dzstar = int32_t((cz-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cz+1)/2)*size;
+
+							uint32_t x0 = oct->x;
+							uint32_t x1 = x0 + size;
+							uint32_t y0 = oct->y;
+							uint32_t y1 = y0 + size;
+							uint32_t z0 = oct->z;
+							uint32_t z1 = z0 + size;
+							uint32_t x0try = ghosts[idxtry].x;
+							uint32_t x1try = x0try + ghosts[idxtry].getSize();
+							uint32_t y0try = ghosts[idxtry].y;
+							uint32_t y1try = y0try + ghosts[idxtry].getSize();
+							uint32_t z0try = ghosts[idxtry].z;
+							uint32_t z1try = z0try + ghosts[idxtry].getSize();
+							uint8_t level = oct->level;
+							uint8_t leveltry = ghosts[idxtry].getLevel();
+
+							if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+								if (leveltry > level){
+									if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
+										neighbours.push_back(idxtry);
+										isghost.push_back(true);
+									}
+								}
+								if (leveltry < level){
+									if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
+										neighbours.push_back(idxtry);
+										isghost.push_back(true);
+									}
+								}
 							}
+
+
+							//							Dhx = int32_t(cx)*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
+							//							Dhy = int32_t(cy)*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
+							//							Dhz = int32_t(cz)*(int32_t(oct->z) - int32_t(ghosts[idxtry].z));
+							//							Dhxref = int32_t(cx<0)*ghosts[idxtry].getSize() + int32_t(cx>0)*size;
+							//							Dhyref = int32_t(cy<0)*ghosts[idxtry].getSize() + int32_t(cy>0)*size;
+							//							Dhzref = int32_t(cz<0)*ghosts[idxtry].getSize() + int32_t(cz>0)*size;
+
+							//							if ((abs(Dhx) == Dhxref) && (abs(Dhy) == Dhyref) && (abs(Dhz) == Dhzref)){
+							//								neighbours.push_back(idxtry);
+							//								isghost.push_back(true);
+							//							}
+
 							idxtry++;
 							if(idxtry>size_ghosts-1){
 								break;
@@ -2993,8 +3036,8 @@ private:
 				// Search morton in octants
 				// If a even face morton is lower than morton of oct, if odd higher
 				// ---> can i search only before or after idx in octants
-//				int32_t jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
-//				idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
+				//				int32_t jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
+				//				idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
 				int32_t jump = int32_t(noctants/2+1);
 				idxtry = uint32_t(((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
 				if (idxtry > noctants-1)
@@ -3052,16 +3095,56 @@ private:
 						vector<uint32_t> bufferidx;
 						Mortontry = octants[idxtry].computeMorton();
 						while(Mortontry < Mortonlast && idxtry <= noctants-1){
-							Dhx = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
-							Dhy = int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
-							Dhz = int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
-							Dhxref = int32_t(cx<0)*octants[idxtry].getSize() + int32_t(cx>0)*size;
-							Dhyref = int32_t(cy<0)*octants[idxtry].getSize() + int32_t(cy>0)*size;
-							Dhzref = int32_t(cz<0)*octants[idxtry].getSize() + int32_t(cz>0)*size;
-							if ((abs(Dhx) == Dhxref) && (abs(Dhy) == Dhyref) && (abs(Dhz) == Dhzref)){
-								neighbours.push_back(idxtry);
-								isghost.push_back(false);
+
+							Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
+							Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
+							Dz = int32_t(abs(cz))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
+							Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize()) + int32_t((cx+1)/2)*size;
+							Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
+							Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
+
+							uint32_t x0 = oct->x;
+							uint32_t x1 = x0 + size;
+							uint32_t y0 = oct->y;
+							uint32_t y1 = y0 + size;
+							uint32_t z0 = oct->z;
+							uint32_t z1 = z0 + size;
+							uint32_t x0try = octants[idxtry].x;
+							uint32_t x1try = x0try + octants[idxtry].getSize();
+							uint32_t y0try = octants[idxtry].y;
+							uint32_t y1try = y0try + octants[idxtry].getSize();
+							uint32_t z0try = octants[idxtry].z;
+							uint32_t z1try = z0try + octants[idxtry].getSize();
+							uint8_t level = oct->level;
+							uint8_t leveltry = octants[idxtry].getLevel();
+
+							if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+								if (leveltry > level){
+									if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
+										neighbours.push_back(idxtry);
+										isghost.push_back(false);
+									}
+								}
+								if (leveltry < level){
+									if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
+										neighbours.push_back(idxtry);
+										isghost.push_back(false);
+									}
+								}
 							}
+
+							//							Dhx = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
+							//							Dhy = int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
+							//							Dhz = int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
+							//							Dhxref = int32_t(cx<0)*octants[idxtry].getSize() + int32_t(cx>0)*size;
+							//							Dhyref = int32_t(cy<0)*octants[idxtry].getSize() + int32_t(cy>0)*size;
+							//							Dhzref = int32_t(cz<0)*octants[idxtry].getSize() + int32_t(cz>0)*size;
+							//							if ((abs(Dhx) == Dhxref) && (abs(Dhy) == Dhyref) && (abs(Dhz) == Dhzref)){
+							//								neighbours.push_back(idxtry);
+							//								isghost.push_back(false);
+							//							}
+
+
 							idxtry++;
 							if(idxtry>noctants-1){
 								break;
@@ -3093,8 +3176,10 @@ private:
 		//Class_Octant<3>* oct = &octants[idx];
 		uint32_t size = oct->getSize();
 		uint8_t iface1, iface2;
-		int32_t Dhx, Dhy, Dhz;
-		int32_t Dhxref, Dhyref, Dhzref;
+		//		int32_t Dhx, Dhy, Dhz;
+		//		int32_t Dhxref, Dhyref, Dhzref;
+		int32_t Dx, Dy, Dz;
+		int32_t Dxstar,Dystar,Dzstar;
 
 		//Alternative to switch case
 		int8_t Cx[12] = {-1,1,0,0,-1,1,-1,1,-1,1,0,0};
@@ -3135,8 +3220,8 @@ private:
 				// Search morton in octants
 				// If a even face morton is lower than morton of oct, if odd higher
 				// ---> can i search only before or after idx in octants
-//				int32_t jump = (octghost->computeMorton() > Morton) ? int32_t(idxghost/2+1) : int32_t((size_ghosts -idxghost)/2+1);
-//				idxtry = uint32_t(idxghost +((octghost->computeMorton()<Morton)-(octghost->computeMorton()>Morton))*jump);
+				//				int32_t jump = (octghost->computeMorton() > Morton) ? int32_t(idxghost/2+1) : int32_t((size_ghosts -idxghost)/2+1);
+				//				idxtry = uint32_t(idxghost +((octghost->computeMorton()<Morton)-(octghost->computeMorton()>Morton))*jump);
 				int32_t jump = int32_t(idxghost/2+1);
 				idxtry = uint32_t(idxghost +((octghost->computeMorton()<Morton)-(octghost->computeMorton()>Morton))*jump);
 				while(abs(jump) > 0){
@@ -3176,10 +3261,10 @@ private:
 								idxtry = 0;
 								break;
 							}
-//							if(idxtry < 0){
-//								idxtry = 0;
-//								break;
-//							}
+							//							if(idxtry < 0){
+							//								idxtry = 0;
+							//								break;
+							//							}
 						}
 					}
 					if(idxtry < size_ghosts){
@@ -3196,16 +3281,55 @@ private:
 						vector<uint32_t> bufferidx;
 						Mortontry = ghosts[idxtry].computeMorton();
 						while(Mortontry < Mortonlast && idxtry < ghosts.size()){
-							Dhx = int32_t(cx)*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
-							Dhy = int32_t(cy)*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
-							Dhz = int32_t(cz)*(int32_t(oct->z) - int32_t(ghosts[idxtry].z));
-							Dhxref = int32_t(cx<0)*ghosts[idxtry].getSize() + int32_t(cx>0)*size;
-							Dhyref = int32_t(cy<0)*ghosts[idxtry].getSize() + int32_t(cy>0)*size;
-							Dhzref = int32_t(cz<0)*ghosts[idxtry].getSize() + int32_t(cz>0)*size;
-							if ((abs(Dhx) == Dhxref) && (abs(Dhy) == Dhyref) && (abs(Dhz) == Dhzref)){
-								neighbours.push_back(idxtry);
-								isghost.push_back(true);
+
+							Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(ghosts[idxtry].x));
+							Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(ghosts[idxtry].y));
+							Dz = int32_t(abs(cz))*(-int32_t(oct->y) + int32_t(ghosts[idxtry].y));
+							Dxstar = int32_t((cx-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cx+1)/2)*size;
+							Dystar = int32_t((cy-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cy+1)/2)*size;
+							Dzstar = int32_t((cz-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cz+1)/2)*size;
+
+							uint32_t x0 = oct->x;
+							uint32_t x1 = x0 + size;
+							uint32_t y0 = oct->y;
+							uint32_t y1 = y0 + size;
+							uint32_t z0 = oct->z;
+							uint32_t z1 = z0 + size;
+							uint32_t x0try = ghosts[idxtry].x;
+							uint32_t x1try = x0try + ghosts[idxtry].getSize();
+							uint32_t y0try = ghosts[idxtry].y;
+							uint32_t y1try = y0try + ghosts[idxtry].getSize();
+							uint32_t z0try = ghosts[idxtry].z;
+							uint32_t z1try = z0try + ghosts[idxtry].getSize();
+							uint8_t level = oct->level;
+							uint8_t leveltry = ghosts[idxtry].getLevel();
+
+							if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+								if (leveltry > level){
+									if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
+										neighbours.push_back(idxtry);
+										isghost.push_back(true);
+									}
+								}
+								if (leveltry < level){
+									if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
+										neighbours.push_back(idxtry);
+										isghost.push_back(true);
+									}
+								}
 							}
+
+							//							Dhx = int32_t(cx)*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
+							//							Dhy = int32_t(cy)*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
+							//							Dhz = int32_t(cz)*(int32_t(oct->z) - int32_t(ghosts[idxtry].z));
+							//							Dhxref = int32_t(cx<0)*ghosts[idxtry].getSize() + int32_t(cx>0)*size;
+							//							Dhyref = int32_t(cy<0)*ghosts[idxtry].getSize() + int32_t(cy>0)*size;
+							//							Dhzref = int32_t(cz<0)*ghosts[idxtry].getSize() + int32_t(cz>0)*size;
+							//							if ((abs(Dhx) == Dhxref) && (abs(Dhy) == Dhyref) && (abs(Dhz) == Dhzref)){
+							//								neighbours.push_back(idxtry);
+							//								isghost.push_back(true);
+							//							}
+
 							idxtry++;
 							if(idxtry>size_ghosts-1){
 								break;
@@ -3287,16 +3411,55 @@ private:
 						vector<uint32_t> bufferidx;
 						Mortontry = octants[idxtry].computeMorton();
 						while(Mortontry < Mortonlast && idxtry <= noctants-1){
-							Dhx = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
-							Dhy = int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
-							Dhz = int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
-							Dhxref = int32_t(cx<0)*octants[idxtry].getSize() + int32_t(cx>0)*size;
-							Dhyref = int32_t(cy<0)*octants[idxtry].getSize() + int32_t(cy>0)*size;
-							Dhzref = int32_t(cz<0)*octants[idxtry].getSize() + int32_t(cz>0)*size;
-							if ((abs(Dhx) == Dhxref) && (abs(Dhy) == Dhyref) && (abs(Dhz) == Dhzref)){
-								neighbours.push_back(idxtry);
-								isghost.push_back(false);
+
+							Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
+							Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
+							Dz = int32_t(abs(cz))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
+							Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize()) + int32_t((cx+1)/2)*size;
+							Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
+							Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
+
+							uint32_t x0 = oct->x;
+							uint32_t x1 = x0 + size;
+							uint32_t y0 = oct->y;
+							uint32_t y1 = y0 + size;
+							uint32_t z0 = oct->z;
+							uint32_t z1 = z0 + size;
+							uint32_t x0try = octants[idxtry].x;
+							uint32_t x1try = x0try + octants[idxtry].getSize();
+							uint32_t y0try = octants[idxtry].y;
+							uint32_t y1try = y0try + octants[idxtry].getSize();
+							uint32_t z0try = octants[idxtry].z;
+							uint32_t z1try = z0try + octants[idxtry].getSize();
+							uint8_t level = oct->level;
+							uint8_t leveltry = octants[idxtry].getLevel();
+
+							if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+								if (leveltry > level){
+									if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
+										neighbours.push_back(idxtry);
+										isghost.push_back(false);
+									}
+								}
+								if (leveltry < level){
+									if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
+										neighbours.push_back(idxtry);
+										isghost.push_back(false);
+									}
+								}
 							}
+
+							//							Dhx = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
+							//							Dhy = int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
+							//							Dhz = int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
+							//							Dhxref = int32_t(cx<0)*octants[idxtry].getSize() + int32_t(cx>0)*size;
+							//							Dhyref = int32_t(cy<0)*octants[idxtry].getSize() + int32_t(cy>0)*size;
+							//							Dhzref = int32_t(cz<0)*octants[idxtry].getSize() + int32_t(cz>0)*size;
+							//							if ((abs(Dhx) == Dhxref) && (abs(Dhy) == Dhyref) && (abs(Dhz) == Dhzref)){
+							//								neighbours.push_back(idxtry);
+							//								isghost.push_back(false);
+							//							}
+
 							idxtry++;
 							if(idxtry>noctants-1){
 								break;
