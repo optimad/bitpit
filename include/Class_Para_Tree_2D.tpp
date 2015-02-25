@@ -2085,15 +2085,23 @@ private:
 	void computePartition(uint32_t* partition, uint8_t & level_) {
 		//	level = uint8_t(min(int(level), MAX_LEVEL));
 		uint8_t level = uint8_t(min(int(max(int(max_depth) - int(level_), int(1))) , MAX_LEVEL_2D));
-		uint32_t partition_temp[nproc];
-		uint8_t boundary_proc[nproc-1], dimcomm, glbdimcomm[nproc], indcomm, glbindcomm[nproc];
+		//uint32_t partition_temp[nproc];
+		uint32_t* partition_temp = new uint32_t[nproc];
+
+		//uint8_t boundary_proc[nproc-1], dimcomm, glbdimcomm[nproc], indcomm, glbindcomm[nproc];
+		uint8_t* boundary_proc = new uint8_t[nproc-1];
+		uint8_t dimcomm, indcomm;
+		uint8_t* glbdimcomm = new uint8_t[nproc];
+		uint8_t* glbindcomm = new uint8_t[nproc];
+
 		uint32_t division_result = 0;
 		uint32_t remind = 0;
 		uint32_t Dh = uint32_t(pow(double(2),double(MAX_LEVEL_2D-level)));
 		uint32_t istart, nocts, rest, forw, backw;
 		uint32_t i = 0, iproc, j;
 		uint64_t sum;
-		int32_t deplace[nproc-1], *pointercomm;
+		int32_t* pointercomm;
+		int32_t* deplace = new int32_t[nproc-1];
 		division_result = uint32_t(global_num_octants/(uint64_t)nproc);
 		remind = (uint32_t)(global_num_octants%(uint64_t)nproc);
 		for(int i = 0; i < nproc; ++i)
@@ -2172,6 +2180,12 @@ private:
 			if (iproc !=0)
 				partition[iproc] = partition[iproc] - deplace[iproc-1];
 		}
+
+		delete [] partition_temp; partition_temp = NULL;
+		delete [] boundary_proc; boundary_proc = NULL;
+		delete [] glbdimcomm; glbdimcomm = NULL;
+		delete [] glbindcomm; glbindcomm = NULL;
+		delete [] deplace; deplace = NULL;
 	}
 
 	// =============================================================================== //
@@ -2179,7 +2193,8 @@ private:
 	void updateLoadBalance() {
 		octree.updateLocalMaxDepth();
 		//update partition_range_globalidx
-		uint64_t rbuff [nproc];
+		//uint64_t rbuff [nproc];
+		uint64_t* rbuff = new uint64_t[nproc];
 		uint64_t local_num_octants = octree.getNumOctants();
 		error_flag = MPI_Allgather(&local_num_octants,1,MPI_UINT64_T,&rbuff,1,MPI_UINT64_T,MPI_COMM_WORLD);
 		for(int p = 0; p < nproc; ++p){
@@ -2197,7 +2212,7 @@ private:
 		uint64_t firstDescMorton = octree.getFirstDesc().computeMorton();
 		error_flag = MPI_Allgather(&firstDescMorton,1,MPI_UINT64_T,partition_first_desc,1,MPI_UINT64_T,MPI_COMM_WORLD);
 		serial = false;
-
+		delete [] rbuff; rbuff = NULL;
 	}
 
 	// =============================================================================== //
@@ -2338,8 +2353,10 @@ private:
 		//COMMUNICATE THE SIZE OF BUFFER TO THE RECEIVERS
 		//the size of every borders buffer is communicated to the right process in order to build the receive buffer
 		//and stored in the recvBufferSizePerProc structure
-		MPI_Request req[sendBuffers.size()*2];
-		MPI_Status stats[sendBuffers.size()*2];
+//		MPI_Request req[sendBuffers.size()*2];
+//		MPI_Status stats[sendBuffers.size()*2];
+		MPI_Request* req = new MPI_Request[sendBuffers.size()*2];
+		MPI_Status* stats = new MPI_Status[sendBuffers.size()*2];
 		int nReq = 0;
 		map<int,int> recvBufferSizePerProc;
 		map<int,Class_Comm_Buffer>::iterator sitend = sendBuffers.end();
@@ -2413,6 +2430,9 @@ private:
 		recvBuffers.clear();
 		sendBuffers.clear();
 		recvBufferSizePerProc.clear();
+
+		delete [] req; req = NULL;
+		delete [] stats; stats = NULL;
 
 	}
 
@@ -2658,10 +2678,10 @@ public:
 				recvs[rank].array[counter] = sit->first;
 				++counter;
 			}
-			int nofRecvsPerProc[nproc];
+			int* nofRecvsPerProc = new int[nproc];
 			error_flag = MPI_Allgather(&recvs[rank].arraySize,1,MPI_INT,nofRecvsPerProc,1,MPI_INT,MPI_COMM_WORLD);
 			int globalRecvsBuffSize = 0;
-			int displays[nproc];
+			int* displays = new int[nproc];
 			for(int pp = 0; pp < nproc; ++pp){
 				displays[pp] = 0;
 				globalRecvsBuffSize += nofRecvsPerProc[pp];
@@ -2680,8 +2700,8 @@ public:
 			}
 
 			//Communicate Octants (size)
-			MPI_Request req[sendBuffers.size()+sendersPerProc[rank].size()];
-			MPI_Status stats[sendBuffers.size()+sendersPerProc[rank].size()];
+			MPI_Request* req = new MPI_Request[sendBuffers.size()+sendersPerProc[rank].size()];
+			MPI_Status* stats = new MPI_Status[sendBuffers.size()+sendersPerProc[rank].size()];
 			int nReq = 0;
 			map<int,int> recvBufferSizePerProc;
 			set<int>::iterator senditend = sendersPerProc[rank].end();
@@ -2767,8 +2787,11 @@ public:
 			}
 			octree.octants.shrink_to_fit();
 
-			delete [] newPartitionRangeGlobalidx;
-			newPartitionRangeGlobalidx = NULL;
+			delete [] newPartitionRangeGlobalidx; newPartitionRangeGlobalidx = NULL;
+			delete [] nofRecvsPerProc; nofRecvsPerProc = NULL;
+			delete [] displays; displays = NULL;
+			delete [] req; req = NULL;
+			delete [] stats; stats = NULL;
 
 			//Update and ghosts here
 			updateLoadBalance();
@@ -3032,10 +3055,10 @@ public:
 				recvs[rank].array[counter] = sit->first;
 				++counter;
 			}
-			int nofRecvsPerProc[nproc];
+			int* nofRecvsPerProc = new int[nproc];
 			error_flag = MPI_Allgather(&recvs[rank].arraySize,1,MPI_INT,nofRecvsPerProc,1,MPI_INT,MPI_COMM_WORLD);
 			int globalRecvsBuffSize = 0;
-			int displays[nproc];
+			int* displays = new int[nproc];
 			for(int pp = 0; pp < nproc; ++pp){
 				displays[pp] = 0;
 				globalRecvsBuffSize += nofRecvsPerProc[pp];
@@ -3054,8 +3077,8 @@ public:
 			}
 
 			//Communicate Octants (size)
-			MPI_Request req[sendBuffers.size()+sendersPerProc[rank].size()];
-			MPI_Status stats[sendBuffers.size()+sendersPerProc[rank].size()];
+			MPI_Request* req = new MPI_Request[sendBuffers.size()+sendersPerProc[rank].size()];
+			MPI_Status* stats = new MPI_Status[sendBuffers.size()+sendersPerProc[rank].size()];
 			int nReq = 0;
 			map<int,int> recvBufferSizePerProc;
 			set<int>::iterator senditend = sendersPerProc[rank].end();
@@ -3141,8 +3164,11 @@ public:
 			}
 			octree.octants.shrink_to_fit();
 
-			delete [] newPartitionRangeGlobalidx;
-			newPartitionRangeGlobalidx = NULL;
+			delete [] newPartitionRangeGlobalidx; newPartitionRangeGlobalidx = NULL;
+			delete [] nofRecvsPerProc; nofRecvsPerProc = NULL;
+			delete [] displays; displays = NULL;
+			delete [] req; req = NULL;
+			delete [] stats; stats = NULL;
 
 			//Update and ghosts here
 			updateLoadBalance();
@@ -3471,10 +3497,10 @@ public:
 				recvs[rank].array[counter] = sit->first;
 				++counter;
 			}
-			int nofRecvsPerProc[nproc];
+			int* nofRecvsPerProc = new int[nproc];
 			error_flag = MPI_Allgather(&recvs[rank].arraySize,1,MPI_INT,nofRecvsPerProc,1,MPI_INT,MPI_COMM_WORLD);
 			int globalRecvsBuffSize = 0;
-			int displays[nproc];
+			int* displays = new int[nproc];
 			for(int pp = 0; pp < nproc; ++pp){
 				displays[pp] = 0;
 				globalRecvsBuffSize += nofRecvsPerProc[pp];
@@ -3493,8 +3519,8 @@ public:
 			}
 
 			//Communicate Octants (size)
-			MPI_Request req[sendBuffers.size()+sendersPerProc[rank].size()];
-			MPI_Status stats[sendBuffers.size()+sendersPerProc[rank].size()];
+			MPI_Request* req = new MPI_Request[sendBuffers.size()+sendersPerProc[rank].size()];
+			MPI_Status* stats = new MPI_Status[sendBuffers.size()+sendersPerProc[rank].size()];
 			int nReq = 0;
 			map<int,int> recvBufferSizePerProc;
 			set<int>::iterator senditend = sendersPerProc[rank].end();
@@ -3598,8 +3624,11 @@ public:
 			octree.octants.shrink_to_fit();
 			userData.shrink();
 
-			delete [] newPartitionRangeGlobalidx;
-			newPartitionRangeGlobalidx = NULL;
+			delete [] newPartitionRangeGlobalidx; newPartitionRangeGlobalidx = NULL;
+			delete [] nofRecvsPerProc; nofRecvsPerProc = NULL;
+			delete [] displays; displays = NULL;
+			delete [] req; req = NULL;
+			delete [] stats; stats = NULL;
 
 			//Update and ghosts here
 			updateLoadBalance();
@@ -3931,10 +3960,10 @@ public:
 				recvs[rank].array[counter] = sit->first;
 				++counter;
 			}
-			int nofRecvsPerProc[nproc];
+			int* nofRecvsPerProc = new int[nproc];
 			error_flag = MPI_Allgather(&recvs[rank].arraySize,1,MPI_INT,nofRecvsPerProc,1,MPI_INT,MPI_COMM_WORLD);
 			int globalRecvsBuffSize = 0;
-			int displays[nproc];
+			int* displays = new int[nproc];
 			for(int pp = 0; pp < nproc; ++pp){
 				displays[pp] = 0;
 				globalRecvsBuffSize += nofRecvsPerProc[pp];
@@ -3953,8 +3982,8 @@ public:
 			}
 
 			//Communicate Octants (size)
-			MPI_Request req[sendBuffers.size()+sendersPerProc[rank].size()];
-			MPI_Status stats[sendBuffers.size()+sendersPerProc[rank].size()];
+			MPI_Request* req = new MPI_Request[sendBuffers.size()+sendersPerProc[rank].size()];
+			MPI_Status* stats = new MPI_Status[sendBuffers.size()+sendersPerProc[rank].size()];
 			int nReq = 0;
 			map<int,int> recvBufferSizePerProc;
 			set<int>::iterator senditend = sendersPerProc[rank].end();
@@ -4059,8 +4088,11 @@ public:
 			//userData.data.shrink_to_fit();
 			userData.shrink();
 
-			delete [] newPartitionRangeGlobalidx;
-			newPartitionRangeGlobalidx = NULL;
+			delete [] newPartitionRangeGlobalidx; newPartitionRangeGlobalidx = NULL;
+			delete [] nofRecvsPerProc; nofRecvsPerProc = NULL;
+			delete [] displays; displays = NULL;
+			delete [] req; req = NULL;
+			delete [] stats; stats = NULL;
 
 			//Update and ghosts here
 			updateLoadBalance();
@@ -4189,8 +4221,8 @@ private:
 		//COMMUNICATE THE SIZE OF BUFFER TO THE RECEIVERS
 		//the size of every borders buffer is communicated to the right process in order to build the receive buffer
 		//and stored in the recvBufferSizePerProc structure
-		MPI_Request req[sendBuffers.size()*2];
-		MPI_Status stats[sendBuffers.size()*2];
+		MPI_Request* req = new MPI_Request[sendBuffers.size()*2];
+		MPI_Status* stats = new MPI_Status[sendBuffers.size()*2];
 		int nReq = 0;
 		map<int,int> recvBufferSizePerProc;
 		map<int,Class_Comm_Buffer>::iterator sitend = sendBuffers.end();
@@ -4247,6 +4279,9 @@ private:
 		recvBuffers.clear();
 		sendBuffers.clear();
 		recvBufferSizePerProc.clear();
+		delete [] req; req = NULL;
+		delete [] stats; stats = NULL;
+
 	}
 
 	//==============================================================
@@ -4852,8 +4887,8 @@ public:
 		}
 
 		//Communicate Buffers Size
-		MPI_Request req[sendBuffers.size()*2];
-		MPI_Status stats[sendBuffers.size()*2];
+		MPI_Request* req = new MPI_Request[sendBuffers.size()*2];
+		MPI_Status* stats = new MPI_Status[sendBuffers.size()*2];
 		int nReq = 0;
 		map<int,int> recvBufferSizePerProc;
 		map<int,Class_Comm_Buffer>::iterator sitend = sendBuffers.end();
@@ -4900,6 +4935,9 @@ public:
 			}
 			ghostOffset += nofGhostFromThisProc;
 		}
+		delete [] req; req = NULL;
+		delete [] stats; stats = NULL;
+
 	};
 
 	// =============================================================================== //
@@ -5230,8 +5268,8 @@ public:
 				//COMMUNICATE THE SIZE OF BUFFER TO THE RECEIVERS
 				//the size of every borders buffer is communicated to the right process in order to build the receive buffer
 				//and stored in the recvBufferSizePerProc structure
-				MPI_Request req[sendBuffers.size()*2];
-				MPI_Status stats[sendBuffers.size()*2];
+				MPI_Request* req = new MPI_Request[sendBuffers.size()*2];
+				MPI_Status* stats = new MPI_Status[sendBuffers.size()*2];
 				int nReq = 0;
 				iproc = 0;
 				map<int,int> recvBufferSizePerProc;
@@ -5306,6 +5344,9 @@ public:
 				recvBuffers.clear();
 				sendBuffers.clear();
 				recvBufferSizePerProc.clear();
+				delete [] req; req = NULL;
+				delete [] stats; stats = NULL;
+
 			}
 
 			{
@@ -5333,8 +5374,8 @@ public:
 				//COMMUNICATE THE SIZE OF BUFFER TO THE RECEIVERS
 				//the size of every borders buffer is communicated to the right process in order to build the receive buffer
 				//and stored in the recvBufferSizePerProc structure
-				MPI_Request req[sendBuffers.size()*2];
-				MPI_Status stats[sendBuffers.size()*2];
+				MPI_Request* req = new MPI_Request[sendBuffers.size()*2];
+				MPI_Status* stats = new MPI_Status[sendBuffers.size()*2];
 				int nReq = 0;
 				iproc = 0;
 				map<int,int> recvBufferSizePerProc;
@@ -5410,6 +5451,8 @@ public:
 				recvBuffers.clear();
 				sendBuffers.clear();
 				recvBufferSizePerProc.clear();
+				delete [] req; req = NULL;
+				delete [] stats; stats = NULL;
 
 			}
 
@@ -5494,8 +5537,8 @@ public:
 				//COMMUNICATE THE SIZE OF BUFFER TO THE RECEIVERS
 				//the size of every borders buffer is communicated to the right process in order to build the receive buffer
 				//and stored in the recvBufferSizePerProc structure
-				MPI_Request req[sendBuffers.size()*2];
-				MPI_Status stats[sendBuffers.size()*2];
+				MPI_Request* req = new MPI_Request[sendBuffers.size()*2];
+				MPI_Status* stats = new MPI_Status[sendBuffers.size()*2];
 				int nReq = 0;
 				iproc = 0;
 				map<int,int> recvBufferSizePerProc;
@@ -5568,6 +5611,9 @@ public:
 				recvBuffers.clear();
 				sendBuffers.clear();
 				recvBufferSizePerProc.clear();
+				delete [] req; req = NULL;
+				delete [] stats; stats = NULL;
+
 			}
 
 			{
@@ -5595,8 +5641,8 @@ public:
 				//COMMUNICATE THE SIZE OF BUFFER TO THE RECEIVERS
 				//the size of every borders buffer is communicated to the right process in order to build the receive buffer
 				//and stored in the recvBufferSizePerProc structure
-				MPI_Request req[sendBuffers.size()*2];
-				MPI_Status stats[sendBuffers.size()*2];
+				MPI_Request* req = new MPI_Request[sendBuffers.size()*2];
+				MPI_Status* stats = new MPI_Status[sendBuffers.size()*2];
 				int nReq = 0;
 				iproc = 0;
 				map<int,int> recvBufferSizePerProc;
@@ -5669,6 +5715,8 @@ public:
 				recvBuffers.clear();
 				sendBuffers.clear();
 				recvBufferSizePerProc.clear();
+				delete [] req; req = NULL;
+				delete [] stats; stats = NULL;
 			}
 		}
 		//TODO PARALLEL VERSION
