@@ -223,7 +223,7 @@ public:
 	 * \return Area of octant.
 	 */
 	uint64_t	getArea() const{
-		uint64_t area = uint32_t(pow(double(getSize()),2.0));
+		uint64_t area = uint64_t(pow(double(getSize()),2.0));
 		return area;
 	};
 
