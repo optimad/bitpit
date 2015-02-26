@@ -412,6 +412,18 @@ public:
 		trans.mapCenter(center_, center);
 	};
 
+	/*! Get the coordinates of the center of an octant.
+	 * \param[in] oct Pointer to target octant.
+	 * \return center Coordinates of the center of octant.
+	 */
+	vector<double> getCenter(Class_Octant<3>* oct) {
+		vector<double> center;
+		dvector center_ = oct->getCenter();
+		trans.mapCenter(center_, center);
+		return center;
+	}
+
+
 	//TODO Temporary commented for memeory leak detection
 	//	/*! Get the coordinates of the center of an octant.
 	//	 * \param[in] oct Pointer to target octant.
@@ -1448,7 +1460,7 @@ public:
 	 * \param[in] inter Pointer to target intersection.
 	 * \return Area of intersection.
 	 */
-	double getArea(Class_Intersection<2>* inter) {
+	double getArea(Class_Intersection<3>* inter) {
 		uint32_t Area;
 		if(inter->finer && inter->isghost)
 			Area = octree.extractGhostOctant(inter->owners[1]).getArea();
