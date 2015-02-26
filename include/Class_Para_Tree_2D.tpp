@@ -2196,7 +2196,7 @@ private:
 		//uint64_t rbuff [nproc];
 		uint64_t* rbuff = new uint64_t[nproc];
 		uint64_t local_num_octants = octree.getNumOctants();
-		error_flag = MPI_Allgather(&local_num_octants,1,MPI_UINT64_T,&rbuff,1,MPI_UINT64_T,MPI_COMM_WORLD);
+		error_flag = MPI_Allgather(&local_num_octants,1,MPI_UINT64_T,rbuff,1,MPI_UINT64_T,MPI_COMM_WORLD);
 		for(int p = 0; p < nproc; ++p){
 			partition_range_globalidx[p] = 0;
 			for(int pp = 0; pp <=p; ++pp)
