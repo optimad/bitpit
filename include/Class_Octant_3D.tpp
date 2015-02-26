@@ -222,8 +222,8 @@ public:
 	/*! Get the area of an octant in logical domain .
 	 * \return Area of octant.
 	 */
-	uint32_t	getArea() const{
-		uint32_t area = uint32_t(pow(double(getSize()),2.0));
+	uint64_t	getArea() const{
+		uint64_t area = uint32_t(pow(double(getSize()),2.0));
 		return area;
 	};
 
