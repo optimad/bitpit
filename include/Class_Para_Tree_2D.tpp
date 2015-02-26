@@ -189,7 +189,6 @@ public:
 				oct.setBound(iface);
 			}
 			octree.octants[i] = oct;
-
 		}
 
 		setFirstDesc();
@@ -240,8 +239,6 @@ public:
 
 	// =============================================================================== //
 	// GET/SET METHODS --------------------------------------------------------------- //
-
-
 
 	// Octant get/set Methods
 	/*! Get the global class object
@@ -298,57 +295,6 @@ public:
 	double getVolume(Class_Octant<2>* oct) {
 		return trans.mapArea(oct->getVolume());
 	}
-
-	//TODO Temporary commented for memeory leak detection
-	//	/*! Get the coordinates of the center of an octant.
-	//	 * \param[in] oct Pointer to target octant.
-	//	 * \param[out] center Coordinates of the center of octant.
-	//	 */
-	//	void getCenter(Class_Octant<2>* oct,
-	//			vector<double>& center) {
-	//		double* center_ = oct->getCenter();
-	//		trans.mapCenter(center_, center);
-	//		delete [] center_;
-	//		center_ = NULL;
-	//	}
-	//
-	//	/*! Get the coordinates of the center of an octant.
-	//	 * \param[in] oct Pointer to target octant.
-	//	 * \return center Coordinates of the center of octant.
-	//	 */
-	//	vector<double> getCenter(Class_Octant<2>* oct) {
-	//		vector<double> center;
-	//		double* center_ = oct->getCenter();
-	//		trans.mapCenter(center_, center);
-	//		delete [] center_;
-	//		center_ = NULL;
-	//		return center;
-	//	}
-	//
-	//	/*! Get the coordinates of the nodes of an octant.
-	//	 * \param[in] oct Pointer to target octant.
-	//	 * \param[out] nodes Coordinates of the nodes of octant.
-	//	 */
-	//	void getNodes(Class_Octant<2>* oct,
-	//			dvector2D & nodes) {
-	//		uint32_t (*nodes_)[3] = oct->getNodes();
-	//		trans.mapNodes(nodes_, nodes);
-	//		delete [] nodes_;
-	//		nodes_ = NULL;
-	//	}
-	//
-	//	/*! Get the coordinates of the nodes of an octant.
-	//	 * \param[in] oct Pointer to target octant.
-	//	 * \return nodes Coordinates of the nodes of octant.
-	//	 */
-	//	dvector2D getNodes(Class_Octant<2>* oct){
-	//		dvector2D nodes;
-	//		uint32_t (*nodes_)[3] = oct->getNodes();
-	//		trans.mapNodes(nodes_, nodes);
-	//		delete [] nodes_;
-	//		nodes_ = NULL;
-	//		return nodes;
-	//	}
 
 	/*! Get the coordinates of the center of an octant.
 	 * \param[in] oct Pointer to target octant.
@@ -416,7 +362,6 @@ public:
 		return nodes;
 	}
 
-
 	/*! Get the normal of a face of an octant.
 	 * \param[in] oct Pointer to target octant.
 	 * \param[in] iface Index of the face for normal computing.
@@ -477,7 +422,6 @@ public:
 	bool getPbound(Class_Octant<2>* oct, uint8_t iface){								// Get refinement/coarsening marker for idx-th octant
 		return oct->getPbound(iface);
 	};
-
 
 	/*! Get the union of every bound flags on faces
 	 * \param[in] oct Pointer to target octant.
@@ -630,57 +574,6 @@ private:
 	double getVolume(Class_Octant<2> oct) {
 		return trans.mapArea(oct.getVolume());
 	}
-
-	//	//TODO Temporary commented for memeory leak detection
-	//	/*! Get the coordinates of the center of an octant.
-	//	 * \param[in] oct Target octant.
-	//	 * \param[out] center Coordinates of the center of octant.
-	//	 */
-	//	void getCenter(Class_Octant<2> oct,
-	//			vector<double>& center) {
-	//		double* center_ = oct.getCenter();
-	//		trans.mapCenter(center_, center);
-	//		delete [] center_;
-	//		center_ = NULL;
-	//	}
-	//
-	//	/*! Get the coordinates of the center of an octant.
-	//	 * \param[in] oct Target octant.
-	//	 * \return center Coordinates of the center of octant.
-	//	 */
-	//	vector<double> getCenter(Class_Octant<2> oct) {
-	//		vector<double> center;
-	//		double* center_ = oct.getCenter();
-	//		trans.mapCenter(center_, center);
-	//		delete [] center_;
-	//		center_ = NULL;
-	//		return center;
-	//	}
-	//
-	//	/*! Get the coordinates of the nodes of an octant.
-	//	 * \param[in] oct Target octant.
-	//	 * \param[out] nodes Coordinates of the nodes of octant.
-	//	 */
-	//	void getNodes(Class_Octant<2> oct,
-	//			dvector2D & nodes) {
-	//		uint32_t (*nodes_)[3] = oct.getNodes();
-	//		trans.mapNodes(nodes_, nodes);
-	//		delete [] nodes_;
-	//		nodes_ = NULL;
-	//	}
-	//
-	//	/*! Get the coordinates of the nodes of an octant.
-	//	 * \param[in] oct Target octant.
-	//	 * \return nodes Coordinates of the nodes of octant.
-	//	 */
-	//	dvector2D getNodes(Class_Octant<2> oct){
-	//		dvector2D nodes;
-	//		uint32_t (*nodes_)[3] = oct.getNodes();
-	//		trans.mapNodes(nodes_, nodes);
-	//		delete [] nodes_;
-	//		nodes_ = NULL;
-	//		return nodes;
-	//	}
 
 	/*! Get the coordinates of the center of an octant.
 	 * \param[in] oct Target octant.
@@ -888,57 +781,6 @@ public:
 		return trans.mapArea(octree.octants[idx].getVolume());
 	}
 
-	//TODO Temporary commented for memeory leak detection
-	//	/*! Get the coordinates of the center of an octant.
-	//	 * \param[in] idx Local index of target octant.
-	//	 * \param[out] center Coordinates of the center of octant.
-	//	 */
-	//	void getCenter(uint32_t idx,
-	//			vector<double>& center) {
-	//		double* center_ = octree.octants[idx].getCenter();
-	//		trans.mapCenter(center_, center);
-	//		delete [] center_;
-	//		center_ = NULL;
-	//	}
-	//
-	//	/*! Get the coordinates of the center of an octant.
-	//	 * \param[in] idx Local index of target octant.
-	//	 * \return center Coordinates of the center of octant.
-	//	 */
-	//	vector<double> getCenter(uint32_t idx) {
-	//		vector<double> center;
-	//		double* center_ = octree.octants[idx].getCenter();
-	//		trans.mapCenter(center_, center);
-	//		delete [] center_;
-	//		center_ = NULL;
-	//		return center;
-	//	}
-	//
-	//	/*! Get the coordinates of the nodes of an octant.
-	//	 * \param[in] idx Local index of target octant.
-	//	 * \param[out] nodes Coordinates of the nodes of octant.
-	//	 */
-	//	void getNodes(uint32_t idx,
-	//			dvector2D & nodes) {
-	//		uint32_t (*nodes_)[3] = octree.octants[idx].getNodes();
-	//		trans.mapNodes(nodes_, nodes);
-	//		delete [] nodes_;
-	//		nodes_ = NULL;
-	//	}
-	//
-	//	/*! Get the coordinates of the nodes of an octant.
-	//	 * \param[in] idx Local index of target octant.
-	//	 * \return nodes Coordinates of the nodes of octant.
-	//	 */
-	//	dvector2D getNodes(uint32_t idx){
-	//		dvector2D nodes;
-	//		uint32_t (*nodes_)[3] = octree.octants[idx].getNodes();
-	//		trans.mapNodes(nodes_, nodes);
-	//		delete [] nodes_;
-	//		nodes_ = NULL;
-	//		return nodes;
-	//	}
-
 	/*! Get the coordinates of the center of an octant.
 	 * \param[in] idx Local index of target octant.
 	 * \param[out] center Coordinates of the center of octant.
@@ -1079,7 +921,6 @@ public:
 	bool getIsNewC(uint32_t idx){
 		return octree.octants[idx].getIsNewC();
 	};
-
 
 	/*! Get the global index of an octant.
 	 * \param[in] idx Local index of target octant.
@@ -1237,7 +1078,6 @@ public:
 			u32vector & neighbours,
 			vector<bool> & isghost){
 
-
 		if (codim == 1){
 			octree.findNeighbours(oct, iface, neighbours, isghost);
 		}
@@ -1277,7 +1117,6 @@ private:
 			neighbours.clear();
 			isghost.clear();
 		}
-
 	};
 
 public:
@@ -1384,45 +1223,6 @@ public:
 		return trans.mapSize(Area);
 	}
 
-	//TODO Temporary commented for memory leak detection
-	//	/*! Get the coordinates of the center of an intersection.
-	//	 * \param[in] inter Pointer to target intersection.
-	//	 * \param[out] center Coordinates of the center of intersection.
-	//	 */
-	//	vector<double> getCenter(Class_Intersection<2>* inter){
-	//		vector<double> center;
-	//		Class_Octant<2> oct = octree.extractOctant(inter->owners[inter->finer]);
-	//		double* center_ = oct.getCenter();
-	//		int sign = ( int(2*((inter->iface)%2)) - 1);
-	//		double deplace = double (sign * int(oct.getSize())) / 2;
-	//		center_[inter->iface/2] = uint32_t(int(center_[inter->iface/2]) + deplace);
-	//		trans.mapCenter(center_, center);
-	//		delete [] center_;
-	//		center_ = NULL;
-	//		return center;
-	//	}
-	//
-	//	/*! Get the coordinates of the nodes of an intersection.
-	//	 * \param[in] oct Pointer to target intersection.
-	//	 * \return nodes Coordinates of the nodes of intersection.
-	//	 */
-	//	dvector2D getNodes(Class_Intersection<2>* inter){
-	//		dvector2D nodes;
-	//		Class_Octant<2> oct = octree.extractOctant(inter->owners[inter->finer]);
-	//		uint8_t iface = inter->iface;
-	//		uint32_t (*nodes_all)[3] = oct.getNodes();
-	//		uint32_t (*nodes_)[3] = new uint32_t[global2D.nnodesperface][3];
-	//		for (int i=0; i<global2D.nnodesperface; i++){
-	//			for (int j=0; j<3; j++){
-	//				nodes_[i][j] = nodes_all[global2D.facenode[iface][i]][j];
-	//			}
-	//		}
-	//		trans.mapNodesIntersection(nodes_, nodes);
-	//		delete [] nodes_;
-	//		nodes_ = NULL;
-	//		return nodes;
-	//	}
-
 	/*! Get the coordinates of the center of an intersection.
 	 * \param[in] inter Pointer to target intersection.
 	 * \param[out] center Coordinates of the center of intersection.
@@ -1487,35 +1287,6 @@ private:
 		Area = octree.extractOctant(inter.owners[inter.finer]).getArea();
 		return trans.mapSize(Area);
 	}
-
-	//TODO Temporary commented for memory leak detection
-	//	void getCenter(Class_Intersection<2> inter,dvector & center){
-	//		Class_Octant<2> oct = octree.extractOctant(inter.owners[inter.finer]);
-	//		double* center_ = oct.getCenter();
-	//		int sign = ( int(2*((inter.iface)%2)) - 1);
-	//		double deplace = double (sign * int(oct.getSize())) / 2;
-	//		center_[inter.iface/2] = uint32_t(int(center_[inter.iface/2]) + deplace);
-	//		trans.mapCenter(center_, center);
-	//		delete [] center_;
-	//		center_ = NULL;
-	//	}
-	//
-	//	void getNodes(Class_Intersection<2> inter,
-	//			dvector2D & nodes) {
-	//		Class_Octant<2> oct = octree.extractOctant(inter.owners[inter.finer]);
-	//		uint8_t iface = inter.iface;
-	//		uint32_t (*nodes_all)[3] = oct.getNodes();
-	//		uint32_t (*nodes_)[3] = new uint32_t[global2D.nnodesperface][3];
-	//		for (int i=0; i<global2D.nnodesperface; i++){
-	//			for (int j=0; j<3; j++){
-	//				nodes_[i][j] = nodes_all[global2D.facenode[iface][i]][j];
-	//			}
-	//		}
-	//		trans.mapNodesIntersection(nodes_, nodes);
-	//		delete [] nodes_;
-	//		nodes_ = NULL;
-	//	}
-
 
 	void getCenter(Class_Intersection<2> inter,dvector & center){
 		Class_Octant<2> oct = octree.extractOctant(inter.owners[inter.finer]);
@@ -2083,12 +1854,8 @@ private:
 	// =============================================================================== //
 
 	void computePartition(uint32_t* partition, uint8_t & level_) {
-		//	level = uint8_t(min(int(level), MAX_LEVEL));
 		uint8_t level = uint8_t(min(int(max(int(max_depth) - int(level_), int(1))) , MAX_LEVEL_2D));
-		//uint32_t partition_temp[nproc];
 		uint32_t* partition_temp = new uint32_t[nproc];
-
-		//uint8_t boundary_proc[nproc-1], dimcomm, glbdimcomm[nproc], indcomm, glbindcomm[nproc];
 		uint8_t* boundary_proc = new uint8_t[nproc-1];
 		uint8_t dimcomm, indcomm;
 		uint8_t* glbdimcomm = new uint8_t[nproc];
@@ -2192,8 +1959,6 @@ private:
 
 	void updateLoadBalance() {
 		octree.updateLocalMaxDepth();
-		//update partition_range_globalidx
-		//uint64_t rbuff [nproc];
 		uint64_t* rbuff = new uint64_t[nproc];
 		uint64_t local_num_octants = octree.getNumOctants();
 		error_flag = MPI_Allgather(&local_num_octants,1,MPI_UINT64_T,rbuff,1,MPI_UINT64_T,MPI_COMM_WORLD);
@@ -2260,7 +2025,6 @@ private:
 			for(uint8_t i = 0; i < global2D.nfaces; ++i){
 				if(it->getBound(i) == false){
 					uint32_t virtualNeighborsSize = 0;
-					//uint64_t* virtualNeighbors = it->computeVirtualMorton(i,max_depth,virtualNeighborsSize);
 					vector<uint64_t> virtualNeighbors = it->computeVirtualMorton(i,max_depth,virtualNeighborsSize);
 					uint32_t maxDelta = virtualNeighborsSize/2;
 					for(int j = 0; j <= maxDelta; ++j){
@@ -2275,8 +2039,6 @@ private:
 							it->setPbound(i,false);
 						}
 					}
-					//					delete [] virtualNeighbors;
-					//					virtualNeighbors = NULL;
 				}
 			}
 			//Virtual Corner Neighbors
@@ -2304,7 +2066,6 @@ private:
 			}
 		}
 		MPI_Barrier(MPI_COMM_WORLD);
-
 
 		//PACK (mpi) BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
 		//it visits every element in bordersPerProc (one for every neighbor proc)
@@ -2335,7 +2096,6 @@ private:
 				l = octant.getLevel();
 				m = octant.getMarker();
 				global_index = getGlobalIdx(value[i]);
-				//memcpy(info,octant.info,12);
 				for(int i = 0; i < 12; ++i)
 					info[i] = octant.info[i];
 				error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[key].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
@@ -2349,12 +2109,9 @@ private:
 			}
 		}
 
-
 		//COMMUNICATE THE SIZE OF BUFFER TO THE RECEIVERS
 		//the size of every borders buffer is communicated to the right process in order to build the receive buffer
 		//and stored in the recvBufferSizePerProc structure
-//		MPI_Request req[sendBuffers.size()*2];
-//		MPI_Status stats[sendBuffers.size()*2];
 		MPI_Request* req = new MPI_Request[sendBuffers.size()*2];
 		MPI_Status* stats = new MPI_Status[sendBuffers.size()*2];
 		int nReq = 0;
@@ -2570,7 +2327,6 @@ public:
 							y = octant.getY();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							//memcpy(info,octant.info,12);
 							for(int i = 0; i < 12; ++i)
 								info[i] = octant.info[i];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
@@ -2594,7 +2350,6 @@ public:
 							y = octant.getY();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							//memcpy(info,octant.info,12);
 							for(int i = 0; i < 12; ++i)
 								info[i] = octant.info[i];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
@@ -2626,7 +2381,6 @@ public:
 							y = octant.getY();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							//memcpy(info,octant.info,12);
 							for(int i = 0; i < 12; ++i)
 								info[i] = octant.info[i];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
@@ -2651,7 +2405,6 @@ public:
 							y = octant.getY();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							//memcpy(info,octant.info,12);
 							for(int i = 0; i < 12; ++i)
 								info[i] = octant.info[i];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
@@ -2947,7 +2700,6 @@ public:
 							y = octant.getY();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							//memcpy(info,octant.info,12);
 							for(int i = 0; i < 12; ++i)
 								info[i] = octant.info[i];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
@@ -2971,7 +2723,6 @@ public:
 							y = octant.getY();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							//memcpy(info,octant.info,12);
 							for(int i = 0; i < 12; ++i)
 								info[i] = octant.info[i];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
@@ -3003,7 +2754,6 @@ public:
 							y = octant.getY();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							//memcpy(info,octant.info,12);
 							for(int i = 0; i < 12; ++i)
 								info[i] = octant.info[i];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
@@ -3028,7 +2778,6 @@ public:
 							y = octant.getY();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							//memcpy(info,octant.info,12);
 							for(int i = 0; i < 12; ++i)
 								info[i] = octant.info[i];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&pos,MPI_COMM_WORLD);
@@ -3338,7 +3087,6 @@ public:
 							y = octant.getY();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							//memcpy(info,octant.info,12);
 							for(int i = 0; i < 12; ++i)
 								info[i] = octant.info[i];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
@@ -3379,7 +3127,6 @@ public:
 							y = octant.getY();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							//memcpy(info,octant.info,12);
 							for(int i = 0; i < 12; ++i)
 								info[i] = octant.info[i];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
@@ -3427,7 +3174,6 @@ public:
 							y = octant.getY();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							//memcpy(info,octant.info,12);
 							for(int i = 0; i < 12; ++i)
 								info[i] = octant.info[i];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
@@ -3460,7 +3206,6 @@ public:
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
 						//store the number of octants at the beginning of the buffer
 						MPI_Pack(&partition[p],1,MPI_UINT32_T,sendBuffers[p].commBuffer,sendBuffers[p].commBufferSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
-						//int pos = 0;
 						for(uint32_t i = ft; i <= endOctants; ++i ){
 							//PACK octants from ft to ft + partition[p] -1
 							const Class_Octant<2> & octant = octree.octants[i];
@@ -3468,7 +3213,6 @@ public:
 							y = octant.getY();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							//memcpy(info,octant.info,12);
 							for(int i = 0; i < 12; ++i)
 								info[i] = octant.info[i];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
@@ -3585,7 +3329,6 @@ public:
 			}
 			uint32_t newCounter = nofNewHead + nofNewTail + nofResidents;
 			octree.octants.resize(newCounter);
-			//userData.data.resize(newCounter);
 			userData.resize(newCounter);
 			//MOVE RESIDENTS IN RIGHT POSITION
 			uint32_t resCounter = nofNewHead + nofResidents - 1;
@@ -3804,7 +3547,6 @@ public:
 							y = octant.getY();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							//memcpy(info,octant.info,12);
 							for(int i = 0; i < 12; ++i)
 								info[i] = octant.info[i];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
@@ -3845,7 +3587,6 @@ public:
 							y = octant.getY();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							//memcpy(info,octant.info,12);
 							for(int i = 0; i < 12; ++i)
 								info[i] = octant.info[i];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
@@ -3893,7 +3634,6 @@ public:
 							y = octant.getY();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							//memcpy(info,octant.info,12);
 							for(int i = 0; i < 12; ++i)
 								info[i] = octant.info[i];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
@@ -3933,7 +3673,6 @@ public:
 							y = octant.getY();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							//memcpy(info,octant.info,12);
 							for(int i = 0; i < 12; ++i)
 								info[i] = octant.info[i];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,MPI_COMM_WORLD);
@@ -3973,7 +3712,6 @@ public:
 					displays[pp] += nofRecvsPerProc[ppp];
 				}
 			}
-			//int globalRecvsBuff[globalRecvsBuffSize];
 			int* globalRecvsBuff = new int[globalRecvsBuffSize];
 			error_flag = MPI_Allgatherv(recvs[rank].array,recvs[rank].arraySize,MPI_INT,globalRecvsBuff,nofRecvsPerProc,displays,MPI_INT,MPI_COMM_WORLD);
 
@@ -4050,7 +3788,6 @@ public:
 			}
 			uint32_t newCounter = nofNewHead + nofNewTail + nofResidents;
 			octree.octants.resize(newCounter);
-			//userData.data.resize(newCounter);
 			userData.resize(newCounter);
 			//MOVE RESIDENTS IN RIGHT POSITION
 			uint32_t resCounter = nofNewHead + nofResidents - 1;
@@ -4088,7 +3825,6 @@ public:
 				}
 			}
 			octree.octants.shrink_to_fit();
-			//userData.data.shrink_to_fit();
 			userData.shrink();
 
 			delete [] newPartitionRangeGlobalidx; newPartitionRangeGlobalidx = NULL;
@@ -4852,10 +4588,6 @@ public:
 
 	// =============================================================================== //
 
-	//TODO Update intersections killed
-
-	// =============================================================================== //
-
 	/** Communicate data provided by the user between the processes.
 	 */
 	template<class Impl>
@@ -4910,7 +4642,6 @@ public:
 		MPI_Waitall(nReq,req,stats);
 
 		//Communicate Buffers
-		//uint32_t nofBytesOverProc = 0;
 		map<int,Class_Comm_Buffer> recvBuffers;
 		map<int,int>::iterator ritend = recvBufferSizePerProc.end();
 		for(map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
@@ -4918,7 +4649,6 @@ public:
 		}
 		nReq = 0;
 		for(map<int,Class_Comm_Buffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
-			//nofBytesOverProc += recvBuffers[sit->first].commBufferSize;
 			error_flag = MPI_Irecv(recvBuffers[sit->first].commBuffer,recvBuffers[sit->first].commBufferSize,MPI_PACKED,sit->first,rank,MPI_COMM_WORLD,&req[nReq]);
 			++nReq;
 		}
@@ -5141,7 +4871,6 @@ public:
 		u64vector2D FirstMortonReceived, SecondMortonReceived;
 		u32vector2D FirstIndexperproc, SecondIndexperproc;
 		u32vector2D FirstLocalIndex, SecondLocalIndex;
-		//uint64_t morton = 0;
 		uint64_t morton2 = 0, morton1 = 0, mortonlastdesc = 0, mortonfirstdesc = 0;
 		uint32_t idx1 = 0, idx2 = 0;
 		uint32_t nocts = octree.getNumOctants();
@@ -5432,7 +5161,6 @@ public:
 				//number of mortons in every process is obtained through the size in bytes of the single morton
 				//and vector in local process is resized
 				uint32_t nofMortons = nofBytesOverProc / (uint32_t)(sizeof(uint64_t));
-				//				SecondMortonReceived.resize(nofMortons);
 				SecondMortonReceived.resize(nproc);
 
 				//UNPACK BUFFERS AND BUILD CONTAINER OF RECEIVED MORTON
@@ -5724,7 +5452,7 @@ public:
 				delete [] stats; stats = NULL;
 			}
 		}
-		//TODO PARALLEL VERSION
+		//TODO PARALLEL VERSION - (DONE?)
 		return mapper;
 	}
 
@@ -5930,7 +5658,6 @@ public:
 				if (j==0) out << std::setprecision(6) << trans.mapX(octree.nodes[i][j]) << " ";
 				if (j==1) out << std::setprecision(6) << trans.mapY(octree.nodes[i][j]) << " ";
 				if (j==2) out << std::setprecision(6) << trans.mapZ(octree.nodes[i][j]) << " ";
-				//	    		out << std::setprecision(6) << octree.nodes[i][j] << " ";
 			}
 			if((i+1)%4==0 && i!=nofNodes-1)
 				out << endl << "          ";
@@ -5941,7 +5668,6 @@ public:
 				if (j==0) out << std::setprecision(6) << trans.mapX(octree.ghostsnodes[i][j]) << " ";
 				if (j==1) out << std::setprecision(6) << trans.mapY(octree.ghostsnodes[i][j]) << " ";
 				if (j==2) out << std::setprecision(6) << trans.mapZ(octree.ghostsnodes[i][j]) << " ";
-				//	    		out << std::setprecision(6) << octree.ghostsnodes[i][j] << " ";
 			}
 			if((i+1)%4==0 && i!=nofNodes-1)
 				out << endl << "          ";
