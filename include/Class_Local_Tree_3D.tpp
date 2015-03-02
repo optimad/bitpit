@@ -298,29 +298,35 @@ private:
 			//			}
 		}
 		uint32_t nblock = nocts;
+		uint32_t nfchild = first_child_index.size();
 		if (nidx!=0){
 			nblock = nocts - nidx*nchm1;
 			nidx = 0;
 			for (idx=0; idx<nblock; idx++){
-				if (idx+offset == first_child_index[nidx] && nidx < first_child_index.size()){
-					markerfather = -MAX_LEVEL_3D;
-					father = octants[idx+offset].buildFather();
-					for(idx2=0; idx2<global3D.nchildren; idx2++){
-						if (markerfather < octants[idx+offset+idx2].getMarker()+1){
-							markerfather = octants[idx+offset+idx2].getMarker()+1;
+				if (nidx < nfchild){
+					if (idx+offset == first_child_index[nidx]){
+						markerfather = -MAX_LEVEL_3D;
+						father = octants[idx+offset].buildFather();
+						for(idx2=0; idx2<global3D.nchildren; idx2++){
+							if (markerfather < octants[idx+offset+idx2].getMarker()+1){
+								markerfather = octants[idx+offset+idx2].getMarker()+1;
+							}
+							for (int iii=0; iii<16; iii++){
+								father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
+							}
 						}
-						for (int iii=0; iii<16; iii++){
-							father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
+						father.info[13] = true;
+						if (markerfather < 0){
+							docoarse = true;
 						}
+						father.setMarker(markerfather);
+						octants[idx] = father;
+						offset += nchm1;
+						nidx++;
 					}
-					father.info[13] = true;
-					if (markerfather < 0){
-						docoarse = true;
+					else{
+						octants[idx] = octants[idx+offset];
 					}
-					father.setMarker(markerfather);
-					octants[idx] = father;
-					offset += nchm1;
-					nidx++;
 				}
 				else{
 					octants[idx] = octants[idx+offset];
@@ -560,34 +566,41 @@ private:
 			//			}
 		}
 		uint32_t nblock = nocts;
+		uint32_t nfchild = first_child_index.size();
 		if (nidx!=0){
 			nblock = nocts - nidx*nchm1;
 			nidx = 0;
 			//for (idx=0; idx<nblock; idx++){
 			for (idx=0; idx<nblock; idx++){
-				if (idx+offset == first_child_index[nidx] && nidx < first_child_index.size()){
-					markerfather = -MAX_LEVEL_3D;
-					father = octants[idx+offset].buildFather();
-					for (int iii=0; iii<16; iii++){
-						father.info[iii] = false;
-					}
-					for(idx2=0; idx2<global3D.nchildren; idx2++){
-						if (markerfather < octants[idx+offset+idx2].getMarker()+1){
-							markerfather = octants[idx+offset+idx2].getMarker()+1;
-						}
+				if (nidx < nfchild){
+					if (idx+offset == first_child_index[nidx]){
+						markerfather = -MAX_LEVEL_3D;
+						father = octants[idx+offset].buildFather();
 						for (int iii=0; iii<16; iii++){
-							father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
+							father.info[iii] = false;
 						}
+						for(idx2=0; idx2<global3D.nchildren; idx2++){
+							if (markerfather < octants[idx+offset+idx2].getMarker()+1){
+								markerfather = octants[idx+offset+idx2].getMarker()+1;
+							}
+							for (int iii=0; iii<16; iii++){
+								father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
+							}
+						}
+						father.info[13] = true;
+						father.setMarker(markerfather);
+						if (markerfather < 0){
+							docoarse = true;
+						}
+						octants[idx] = father;
+						mapidx[idx] = mapidx[idx+offset];
+						offset += nchm1;
+						nidx++;
 					}
-					father.info[13] = true;
-					father.setMarker(markerfather);
-					if (markerfather < 0){
-						docoarse = true;
+					else{
+						octants[idx] = octants[idx+offset];
+						mapidx[idx] = mapidx[idx+offset];
 					}
-					octants[idx] = father;
-					mapidx[idx] = mapidx[idx+offset];
-					offset += nchm1;
-					nidx++;
 				}
 				else{
 					octants[idx] = octants[idx+offset];
@@ -825,29 +838,35 @@ private:
 			//			}
 		}
 		uint32_t nblock = nocts;
+		uint32_t nfchild = first_child_index.size();
 		if (nidx!=0){
 			nblock = nocts - nidx*nchm1;
 			nidx = 0;
 			for (idx=0; idx<nblock; idx++){
-				if (idx+offset == first_child_index[nidx]&& nidx < first_child_index.size()){
-					markerfather = -MAX_LEVEL_3D;
-					father = octants[idx+offset].buildFather();
-					for(idx2=0; idx2<global3D.nchildren; idx2++){
-						if (markerfather < octants[idx+offset+idx2].getMarker()+1){
-							markerfather = octants[idx+offset+idx2].getMarker()+1;
+				if (nidx < nfchild){
+					if (idx+offset == first_child_index[nidx]){
+						markerfather = -MAX_LEVEL_3D;
+						father = octants[idx+offset].buildFather();
+						for(idx2=0; idx2<global3D.nchildren; idx2++){
+							if (markerfather < octants[idx+offset+idx2].getMarker()+1){
+								markerfather = octants[idx+offset+idx2].getMarker()+1;
+							}
+							for (int iii=0; iii<16; iii++){
+								father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
+							}
 						}
-						for (int iii=0; iii<16; iii++){
-							father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
+						father.info[13] = true;
+						if (markerfather < 0){
+							docoarse = true;
 						}
+						father.setMarker(markerfather);
+						octants[idx] = father;
+						offset += nchm1;
+						nidx++;
 					}
-					father.info[13] = true;
-					if (markerfather < 0){
-						docoarse = true;
+					else{
+						octants[idx] = octants[idx+offset];
 					}
-					father.setMarker(markerfather);
-					octants[idx] = father;
-					offset += nchm1;
-					nidx++;
 				}
 				else{
 					octants[idx] = octants[idx+offset];
@@ -1095,32 +1114,39 @@ private:
 		}
 		if (nidx!=0){
 			uint32_t nblock = nocts - nidx*nchm1 - nstart;
+			uint32_t nfchild = first_child_index.size();
 			nidx = 0;
 			//for (idx=0; idx<nblock; idx++){
 			for (idx=0; idx<nocts-offset; idx++){
-				if (idx+offset == first_child_index[nidx]){
-					markerfather = -MAX_LEVEL_3D;
-					father = octants[idx+offset].buildFather();
-					for (int iii=0; iii<16; iii++){
-						father.info[iii] = false;
-					}
-					for(idx2=0; idx2<global3D.nchildren; idx2++){
-						if (markerfather < octants[idx+offset+idx2].getMarker()+1){
-							markerfather = octants[idx+offset+idx2].getMarker()+1;
-						}
+				if (nidx < nfchild){
+					if (idx+offset == first_child_index[nidx]){
+						markerfather = -MAX_LEVEL_3D;
+						father = octants[idx+offset].buildFather();
 						for (int iii=0; iii<16; iii++){
-							father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
+							father.info[iii] = false;
 						}
+						for(idx2=0; idx2<global3D.nchildren; idx2++){
+							if (markerfather < octants[idx+offset+idx2].getMarker()+1){
+								markerfather = octants[idx+offset+idx2].getMarker()+1;
+							}
+							for (int iii=0; iii<16; iii++){
+								father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
+							}
+						}
+						father.info[13] = true;
+						father.setMarker(markerfather);
+						if (markerfather < 0){
+							docoarse = true;
+						}
+						octants[idx] = father;
+						mapidx[idx] = mapidx[idx+offset];
+						offset += nchm1;
+						nidx++;
 					}
-					father.info[13] = true;
-					father.setMarker(markerfather);
-					if (markerfather < 0){
-						docoarse = true;
+					else{
+						octants[idx] = octants[idx+offset];
+						mapidx[idx] = mapidx[idx+offset];
 					}
-					octants[idx] = father;
-					mapidx[idx] = mapidx[idx+offset];
-					offset += nchm1;
-					nidx++;
 				}
 				else{
 					octants[idx] = octants[idx+offset];

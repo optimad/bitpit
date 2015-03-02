@@ -7,5 +7,5 @@
 // EXPLICIT INSTANTIATION                                                              //
 // =================================================================================== //
 
-template class Class_Octant<2>;
-template class Class_Octant<3>;
+template<> class Class_Octant<2>;
+template<> class Class_Octant<3>;

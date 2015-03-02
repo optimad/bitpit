@@ -7,6 +7,6 @@
 // EXPLICIT INSTANTIATION                                                              //
 // =================================================================================== //
 
-template class Class_Intersection<2>;
-template class Class_Intersection<3>;
+template<> class Class_Intersection<2>;
+template<> class Class_Intersection<3>;
 

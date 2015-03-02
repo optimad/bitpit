@@ -7,8 +7,8 @@
 // EXPLICIT INSTANTIATION                                                              //
 // =================================================================================== //
 
-template class Class_Map<2>;
-template class Class_Map<3>;
+template<> class Class_Map<2>;
+template<> class Class_Map<3>;
 
 
 
