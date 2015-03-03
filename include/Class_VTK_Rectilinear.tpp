@@ -165,6 +165,7 @@ void VTK_RectilinearGrid<Derived>::Write( ){
 
   str.close() ;
 
+  fh.Increment_Counter() ;
   if( nr_procs != 0  && my_proc == 0)  Write_pvtr() ;
 
   return ;

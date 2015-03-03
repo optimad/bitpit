@@ -30,7 +30,13 @@ FileHandler_C::FileHandler_C(const FileHandler_C& other){
 };
 
 //---------------------------------------------------------------
-FileHandler_C::~FileHandler_C(){} ;
+FileHandler_C::~FileHandler_C(){
+
+    if (str.is_open()) {
+        str.close() ;
+        
+    };
+} ;
 
 //---------------------------------------------------------------
 FileHandler_C&    FileHandler_C::operator=(const FileHandler_C& other){
