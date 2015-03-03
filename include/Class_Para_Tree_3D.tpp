@@ -2246,12 +2246,13 @@ public:
 			uint32_t stride = 0;
 			for(int i = 0; i < rank; ++i)
 				stride += partition[i];
-			Class_Local_Tree<3>::OctantsType::const_iterator first = octree.octants.begin() + stride;
+			Class_Local_Tree<3>::OctantsType octantsCopy = octree.octants;
+			Class_Local_Tree<3>::OctantsType::const_iterator first = octantsCopy.begin() + stride;
 			Class_Local_Tree<3>::OctantsType::const_iterator last = first + partition[rank];
 			octree.octants.assign(first, last);
 			octree.octants.shrink_to_fit();
-			first = octree.octants.end();
-			last = octree.octants.end();
+			first = octantsCopy.end();
+			last = octantsCopy.end();
 
 			//Update and ghosts here
 			updateLoadBalance();
