@@ -132,7 +132,7 @@ void VTK_RectilinearGrid<Derived>::Write( ){
 
   Calc_Appended_Offsets();
 
-  str.open( fh.Get_Name( ), ios::out | ios::app ) ;
+  str.open( fh.Get_Name( ), ios::out ) ;
 
   //Writing XML header
   str << "<?xml version=\"1.0\"?>" << endl;
