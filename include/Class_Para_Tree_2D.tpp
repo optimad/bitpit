@@ -2344,7 +2344,7 @@ public:
 						int buffSize = partition[p] * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
 						int pos = 0;
-						for(uint32_t i = (uint32_t)(lh - partition[p] + 1); i <= lh; ++i){
+						for(uint32_t i = (uint32_t)(lh - partition[p] + 1); i <= (uint32_t)lh; ++i){
 							//pack octants from lh - partition[p] to lh
 							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
@@ -2718,7 +2718,7 @@ public:
 						int buffSize = partition[p] * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
 						int pos = 0;
-						for(uint32_t i = (uint32_t)(lh - partition[p] + 1); i <= lh; ++i){
+						for(uint32_t i = (uint32_t)(lh - partition[p] + 1); i <= (uint32_t)lh; ++i){
 							//pack octants from lh - partition[p] to lh
 							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();

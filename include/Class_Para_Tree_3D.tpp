@@ -1326,7 +1326,7 @@ public:
 	 * \return Area of intersection.
 	 */
 	double getArea(Class_Intersection<3>* inter) {
-		uint64_t Area;
+		uint32_t Area;
 		if(inter->finer && inter->isghost)
 			Area = octree.extractGhostOctant(inter->owners[1]).getArea();
 		else
@@ -1852,7 +1852,7 @@ private:
 		uint32_t remind = 0;
 		division_result = uint32_t(global_num_octants/(uint64_t)nproc);
 		remind = (uint32_t)(global_num_octants%(uint64_t)nproc);
-		for(uint32_t i = 0; i < nproc; ++i)
+		for(uint32_t i = 0; i < (uint32_t)nproc; ++i)
 			if(i<remind)
 				partition[i] = division_result + 1;
 			else
@@ -1938,7 +1938,7 @@ private:
 				if (forw<backw)
 					deplace[iproc] = forw;
 				else
-					deplace[iproc] = -backw;
+					deplace[iproc] = -(int32_t)backw;
 			}
 		}
 

@@ -2755,8 +2755,8 @@ private:
 						while(Mortontry < Mortonlast && idxtry < size_ghosts){
 							Dhx = (-int32_t(oct->x) + int32_t(ghosts[idxtry].x));
 							Dhy = (-int32_t(oct->y) + int32_t(ghosts[idxtry].y));
-							Dhxref = int32_t(cx<0)*(-ghosts[idxtry].getSize()) + int32_t(cx>0)*size;
-							Dhyref = int32_t(cy<0)*(-ghosts[idxtry].getSize()) + int32_t(cy>0)*size;
+							Dhxref = int32_t(cx<0)*(-int32_t(ghosts[idxtry].getSize())) + int32_t(cx>0)*size;
+							Dhyref = int32_t(cy<0)*(-int32_t(ghosts[idxtry].getSize())) + int32_t(cy>0)*size;
 							if ((Dhx == Dhxref) && (Dhy == Dhyref)){
 								neighbours.push_back(idxtry);
 								isghost.push_back(true);
@@ -2841,8 +2841,8 @@ private:
 					while(Mortontry < Mortonlast && idxtry <= noctants-1){
 						Dhx = (-int32_t(oct->x) + int32_t(octants[idxtry].x));
 						Dhy = (-int32_t(oct->y) + int32_t(octants[idxtry].y));
-						Dhxref = int32_t(cx<0)*(-octants[idxtry].getSize()) + int32_t(cx>0)*size;
-						Dhyref = int32_t(cy<0)*(-octants[idxtry].getSize()) + int32_t(cy>0)*size;
+						Dhxref = int32_t(cx<0)*(-int32_t(octants[idxtry].getSize())) + int32_t(cx>0)*size;
+						Dhyref = int32_t(cy<0)*(-int32_t(octants[idxtry].getSize())) + int32_t(cy>0)*size;
 						if ((Dhx == Dhxref) && (Dhy == Dhyref)){
 							neighbours.push_back(idxtry);
 							isghost.push_back(false);
@@ -2972,8 +2972,8 @@ private:
 						while(Mortontry < Mortonlast && idxtry < size_ghosts){
 							Dhx = (-int32_t(oct->x) + int32_t(ghosts[idxtry].x));
 							Dhy = (-int32_t(oct->y) + int32_t(ghosts[idxtry].y));
-							Dhxref = int32_t(cx<0)*(-ghosts[idxtry].getSize()) + int32_t(cx>0)*size;
-							Dhyref = int32_t(cy<0)*(-ghosts[idxtry].getSize()) + int32_t(cy>0)*size;
+							Dhxref = int32_t(cx<0)*(-int32_t(ghosts[idxtry].getSize())) + int32_t(cx>0)*size;
+							Dhyref = int32_t(cy<0)*(-int32_t(ghosts[idxtry].getSize())) + int32_t(cy>0)*size;
 							if ((Dhx == Dhxref) && (Dhy == Dhyref)){
 								neighbours.push_back(idxtry);
 								isghost.push_back(true);
@@ -3052,8 +3052,8 @@ private:
 					while(Mortontry < Mortonlast && idxtry <= noctants-1){
 						Dhx = (-int32_t(oct->x) + int32_t(octants[idxtry].x));
 						Dhy = (-int32_t(oct->y) + int32_t(octants[idxtry].y));
-						Dhxref = int32_t(cx<0)*(-octants[idxtry].getSize()) + int32_t(cx>0)*size;
-						Dhyref = int32_t(cy<0)*(-octants[idxtry].getSize()) + int32_t(cy>0)*size;
+						Dhxref = int32_t(cx<0)*(-int32_t(octants[idxtry].getSize())) + int32_t(cx>0)*size;
+						Dhyref = int32_t(cy<0)*(-int32_t(octants[idxtry].getSize())) + int32_t(cy>0)*size;
 						if ((Dhx == Dhxref) && (Dhy == Dhyref)){
 							neighbours.push_back(idxtry);
 							isghost.push_back(false);
