@@ -232,7 +232,6 @@ public:
 	 * \return Vector[3] with the coordinates of the center of octant.
 	 */
 	dvector	getCenter(){
-		uint8_t		i;
 		double	dh;
 
 		dh = double(getSize())/2.0;
@@ -355,7 +354,7 @@ private:
 	 *   \return Ordered (by Z-index) vector of children[nchildren] (info update)
 	 */
 	vector<Class_Octant<2> >	buildChildren(){
-		uint8_t xf,yf,zf;
+		uint8_t xf,yf;
 
 		if (this->level < MAX_LEVEL_2D){
 			vector<Class_Octant<2> > children(global2D.nchildren);
@@ -436,9 +435,8 @@ private:
 	vector<uint64_t > 		computeHalfSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
 			uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
 		uint32_t dh,dh2;
-		uint64_t morton;
 		uint32_t nneigh;
-		uint8_t i,cx,cy;
+		uint32_t i,cx,cy;
 
 		nneigh = (level < MAX_LEVEL_2D) ? global2D.nchildren/2 : 1;
 		dh = (level < MAX_LEVEL_2D) ? getSize()/2 : getSize();
@@ -498,7 +496,6 @@ private:
 			const uint8_t & maxdepth,	// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
 			uint32_t & sizem){
 		uint32_t dh,dh2;
-		uint64_t morton;
 		uint32_t nneigh, nline;
 		uint32_t i,cx,cy;
 
@@ -576,9 +573,7 @@ private:
 	uint64_t 		computeNodeHalfSizeMorton(uint8_t inode, 		// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
 			uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
 		uint32_t dh,dh2;
-		uint64_t morton;
 		uint32_t nneigh;
-		uint8_t i;
 		int8_t cx,cy;
 		uint8_t iface1, iface2;
 		nneigh = 1;
@@ -634,9 +629,7 @@ private:
 			const uint8_t & maxdepth,	// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
 			uint32_t & sizehf){
 		uint32_t dh,dh2;
-		uint64_t morton;
 		uint32_t nneigh;
-		uint8_t i;
 		int8_t cx,cy;
 		uint8_t iface1, iface2;
 

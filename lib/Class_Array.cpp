@@ -11,7 +11,7 @@ Class_Array::Class_Array(uint32_t size, int value) {
 
 	arraySize = size;
 	array = new int [size];
-	for(int i = 0; i < size; ++i)
+	for(uint32_t i = 0; i < size; ++i)
 		array[i] = value;
 }
 
@@ -23,7 +23,7 @@ Class_Array::Class_Array(
 	//		array = NULL;
 	//	}
 	array = new int [arraySize];
-	for(int i = 0; i < arraySize; ++i)
+	for(uint32_t i = 0; i < arraySize; ++i)
 		array[i] = other.array[i];
 }
 

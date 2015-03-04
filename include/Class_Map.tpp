@@ -46,17 +46,17 @@ double Class_Map<dim>::mapZ(uint32_t const & Z){
 
 template <int dim>
 uint32_t Class_Map<dim>::mapX(double const & X){
-	return (double(globals.max_length)/L * (double(X) - X0));
+	return (uint32_t)(double(globals.max_length)/L * (X - X0));
 };
 
 template <int dim>
 uint32_t Class_Map<dim>::mapY(double const & Y){
-	return (double(globals.max_length)/L * (double(Y) - Y0));
+	return (uint32_t)(double(globals.max_length)/L * (Y - Y0));
 };
 
 template <int dim>
 uint32_t Class_Map<dim>::mapZ(double const & Z){
-	return (double(globals.max_length)/L * (double(Z) - Z0));
+	return (uint32_t)(double(globals.max_length)/L * (Z - Z0));
 };
 
 template <int dim>

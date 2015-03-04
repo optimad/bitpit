@@ -236,7 +236,6 @@ public:
 	 * \return Vector[3] with the coordinates of the center of octant.
 	 */
 	dvector	getCenter(){
-		uint8_t		i;
 		double	dh;
 
 		dh = double(getSize())/2.0;
@@ -516,9 +515,8 @@ private:
 	vector<uint64_t> 		computeHalfSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
 			uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
 		uint32_t dh,dh2;
-		uint64_t morton;
 		uint32_t nneigh;
-		uint8_t i,cx,cy,cz;
+		uint32_t i,cx,cy,cz;
 
 		nneigh = (level < MAX_LEVEL_3D) ? global3D.nchildren/2 : 1;
 		dh = (level < MAX_LEVEL_3D) ? getSize()/2 : getSize();
@@ -600,7 +598,6 @@ private:
 			const uint8_t & maxdepth,	// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
 			uint32_t & sizem){
 		uint32_t dh,dh2;
-		uint64_t morton;
 		uint32_t nneigh, nline;
 		uint32_t i,cx,cy,cz;
 
@@ -704,9 +701,8 @@ private:
 	vector<uint64_t> 		computeEdgeHalfSizeMorton(uint8_t iedge, 		// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
 			uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
 		uint32_t dh,dh2;
-		uint64_t morton;
 		uint32_t nneigh;
-		int8_t i,cx,cy,cz;
+		int32_t i,cx,cy,cz;
 		uint8_t iface1, iface2;
 
 		nneigh = (level < MAX_LEVEL_3D) ? 2 : 1;
@@ -857,10 +853,8 @@ private:
 			const uint8_t & maxdepth,	// possible neighbours of octant throught edge iedge (sizem=0 if boundary octant)
 			uint32_t & sizem){
 		uint32_t dh,dh2;
-		uint64_t morton;
 		uint32_t nneigh, nline;
-		uint32_t i;
-		int32_t cx,cy,cz;
+		int32_t i,cx,cy,cz;
 		uint8_t iface1, iface2;
 
 
@@ -1030,9 +1024,7 @@ private:
 	uint64_t 		computeNodeHalfSizeMorton(uint8_t inode, 		// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
 			uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
 		uint32_t dh,dh2;
-		uint64_t morton;
 		uint32_t nneigh;
-		uint8_t i;
 		int8_t cx,cy,cz;
 		uint8_t iface1, iface2, iface3;
 		nneigh = 1;
@@ -1125,9 +1117,7 @@ private:
 			const uint8_t & maxdepth,	// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
 			uint32_t & sizehf){
 		uint32_t dh,dh2;
-		uint64_t morton;
 		uint32_t nneigh;
-		uint8_t i;
 		int8_t cx,cy,cz;
 		uint8_t iface1, iface2, iface3;
 

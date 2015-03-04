@@ -167,7 +167,7 @@ public:
 		uint32_t x0, y0;
 		uint32_t NumOctants = XY.size();
 		octree.octants.resize(NumOctants);
-		for (int i=0; i<NumOctants; i++){
+		for (uint32_t i=0; i<NumOctants; i++){
 			lev = uint8_t(levels[i]);
 			x0 = uint32_t(XY[i][0]);
 			y0 = uint32_t(XY[i][1]);
@@ -1843,7 +1843,7 @@ private:
 		uint32_t remind = 0;
 		division_result = uint32_t(global_num_octants/(uint64_t)nproc);
 		remind = (uint32_t)(global_num_octants%(uint64_t)nproc);
-		for(int i = 0; i < nproc; ++i)
+		for(uint32_t i = 0; i < (uint32_t)nproc; ++i)
 			if(i<remind)
 				partition[i] = division_result + 1;
 			else
@@ -1871,7 +1871,7 @@ private:
 		int32_t* deplace = new int32_t[nproc-1];
 		division_result = uint32_t(global_num_octants/(uint64_t)nproc);
 		remind = (uint32_t)(global_num_octants%(uint64_t)nproc);
-		for(int i = 0; i < nproc; ++i)
+		for(uint32_t i = 0; i < (uint32_t)nproc; ++i)
 			if(i<remind)
 				partition_temp[i] = division_result + 1;
 			else
@@ -1879,7 +1879,7 @@ private:
 
 		j = 0;
 		sum = 0;
-		for (iproc=0; iproc<nproc-1; iproc++){
+		for (iproc=0; iproc<(uint32_t)(nproc-1); iproc++){
 			sum += partition_temp[iproc];
 			while(sum > partition_range_globalidx[j]){
 				j++;
@@ -1890,7 +1890,7 @@ private:
 		sum = 0;
 		dimcomm = 0;
 		indcomm = 0;
-		for (iproc=0; iproc<nproc-1; iproc++){
+		for (iproc=0; iproc<(uint32_t)(nproc-1); iproc++){
 			deplace[iproc] = 1;
 			sum += partition_temp[iproc];
 			if (boundary_proc[iproc] == rank){
@@ -1928,19 +1928,19 @@ private:
 				if (forw<backw)
 					deplace[iproc] = forw;
 				else
-					deplace[iproc] = -backw;
+					deplace[iproc] = -(int32_t)backw;
 			}
 		}
 
 		error_flag = MPI_Allgather(&dimcomm,1,MPI_UINT8_T,glbdimcomm,1,MPI_UINT8_T,MPI_COMM_WORLD);
 		error_flag = MPI_Allgather(&indcomm,1,MPI_UINT8_T,glbindcomm,1,MPI_UINT8_T,MPI_COMM_WORLD);
-		for (iproc=0; iproc<nproc; iproc++){
+		for (iproc=0; iproc<(uint32_t)(nproc); iproc++){
 			pointercomm = &deplace[glbindcomm[iproc]];
 			error_flag = MPI_Bcast(pointercomm, glbdimcomm[iproc], MPI_INT32_T, iproc, MPI_COMM_WORLD);
 		}
 
-		for (iproc=0; iproc<nproc; iproc++){
-			if (iproc < nproc-1)
+		for (iproc=0; iproc<(uint32_t)(nproc); iproc++){
+			if (iproc < (uint32_t)(nproc-1))
 				partition[iproc] = partition_temp[iproc] + deplace[iproc];
 			else
 				partition[iproc] = partition_temp[iproc];
@@ -2027,7 +2027,7 @@ private:
 					uint32_t virtualNeighborsSize = 0;
 					vector<uint64_t> virtualNeighbors = it->computeVirtualMorton(i,max_depth,virtualNeighborsSize);
 					uint32_t maxDelta = virtualNeighborsSize/2;
-					for(int j = 0; j <= maxDelta; ++j){
+					for(uint32_t j = 0; j <= maxDelta; ++j){
 						int pBegin = findOwner(virtualNeighbors[j]);
 						int pEnd = findOwner(virtualNeighbors[virtualNeighborsSize - 1 - j]);
 						procs.insert(pBegin);
@@ -2262,7 +2262,7 @@ public:
 			}
 			if(lh < 0)
 				lh = - 1;
-			else if(lh > octree.octants.size() - 1)
+			else if(lh > (int32_t)(octree.octants.size() - 1))
 				lh = octree.octants.size() - 1;
 
 			if(rank == nproc - 1)
@@ -2321,7 +2321,7 @@ public:
 						int buffSize = headSize * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
 						int pos = 0;
-						for(uint32_t i = 0; i <= lh; ++i){
+						for(uint32_t i = 0; i <= (uint32_t)lh; ++i){
 							//PACK octants from 0 to lh in sendBuffer[p]
 							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
@@ -2344,7 +2344,7 @@ public:
 						int buffSize = partition[p] * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
 						int pos = 0;
-						for(uint32_t i = lh - partition[p] + 1; i <= lh; ++i){
+						for(uint32_t i = (uint32_t)(lh - partition[p] + 1); i <= lh; ++i){
 							//pack octants from lh - partition[p] to lh
 							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
@@ -2636,7 +2636,7 @@ public:
 			}
 			if(lh < 0)
 				lh = - 1;
-			else if(lh > octree.octants.size() - 1)
+			else if(lh > (int32_t)(octree.octants.size() - 1))
 				lh = octree.octants.size() - 1;
 
 			if(rank == nproc - 1)
@@ -2695,7 +2695,7 @@ public:
 						int buffSize = headSize * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
 						int pos = 0;
-						for(uint32_t i = 0; i <= lh; ++i){
+						for(uint32_t i = 0; i <= (uint32_t)lh; ++i){
 							//PACK octants from 0 to lh in sendBuffer[p]
 							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
@@ -2718,7 +2718,7 @@ public:
 						int buffSize = partition[p] * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a');
 						int pos = 0;
-						for(uint32_t i = lh - partition[p] + 1; i <= lh; ++i){
+						for(uint32_t i = (uint32_t)(lh - partition[p] + 1); i <= lh; ++i){
 							//pack octants from lh - partition[p] to lh
 							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
@@ -3941,7 +3941,7 @@ private:
 		//this map has an entry Class_Comm_Buffer for every proc containing the size in bytes of the buffer and the octants marker
 		//to be sent to that proc packed in a char* buffer
 		int8_t marker;
-		bool info[12], mod;
+		bool mod;
 		map<int,Class_Comm_Buffer> sendBuffers;
 		map<int,vector<uint32_t> >::iterator bitend = bordersPerProc.end();
 		uint32_t pbordersOversize = 0;
@@ -4882,7 +4882,7 @@ public:
 		int owner;
 		mapper.resize(nocts);
 		if (ptree.serial){
-			for (int i=0; i<nocts; i++){
+			for (uint32_t i=0; i<nocts; i++){
 				mapper[i].first.first = idx1;
 				mapper[i].first.second = idx2;
 				mapper[i].second.first = rank;
@@ -4916,7 +4916,7 @@ public:
 			morton1 = 0;
 			idx2 = 0;
 			morton2 = 0;
-			for (int i=0; i<nocts; i++){
+			for (uint32_t i=0; i<nocts; i++){
 				mortonfirstdesc = octree.octants[i].computeMorton();
 				owner = ptree.findOwner(mortonfirstdesc);
 				if (rank == owner){
