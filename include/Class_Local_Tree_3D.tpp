@@ -1715,6 +1715,9 @@ private:
 										}
 
 										idxtry++;
+										if(idxtry>noctants-1){
+											break;
+										}
 										Mortontry = octants[idxtry].computeMorton();
 									}
 								}
