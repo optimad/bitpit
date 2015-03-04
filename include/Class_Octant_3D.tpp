@@ -702,7 +702,7 @@ private:
 			uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
 		uint32_t dh,dh2;
 		uint32_t nneigh;
-		int32_t i,cx,cy,cz;
+		uint32_t i,cx,cy,cz;
 		uint8_t iface1, iface2;
 
 		nneigh = (level < MAX_LEVEL_3D) ? 2 : 1;
@@ -854,7 +854,7 @@ private:
 			uint32_t & sizem){
 		uint32_t dh,dh2;
 		uint32_t nneigh, nline;
-		int32_t i,cx,cy,cz;
+		uint32_t i,cx,cy,cz;
 		uint8_t iface1, iface2;
 
 
