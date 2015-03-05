@@ -5,6 +5,10 @@ cmake_minimum_required(VERSION 2.8)
 project(PABLO)
 
 ADD_DEFINITIONS(-std=c++11)
+SET(WITHOUT_MPI 0 CACHE STRING "Set WITHOUT_MPI to 1 if you don't have an installed implementation of MPI or you don't want to use a parallel PABLO")
+IF(${WITHOUT_MPI})
+ADD_DEFINITION(-DNOMPI=1)
+ENDIF(${WITHOUT_MPI})
 
 include_directories(include)
 SET(CMAKE_C_COMPILER mpicc)
