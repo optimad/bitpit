@@ -2157,7 +2157,7 @@ private:
 			// Search morton in octants
 			// If a even face morton is lower than morton of oct, if odd higher
 			// ---> can i search only before or after idx in octants
-			int32_t jump;
+			int32_t jump = getNumOctants()/2;
 			idxtry = uint32_t(getNumOctants()/2);
 			Mortontry = octants[idxtry].computeMorton();
 			jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
