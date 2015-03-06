@@ -34,10 +34,13 @@ inline void User_Data_LB<D>::scatter(Buffer& buff, const uint32_t e) {
 
 template<class D>
 inline void User_Data_LB<D>::assign(uint32_t stride, uint32_t length) {
-	typename Data::iterator first = data.begin() + stride;
+	Data dataCopy = data;
+	typename Data::iterator first = dataCopy.begin() + stride;
 	typename Data::iterator last = first + length;
 	data.assign(first,last);
 	data.shrink_to_fit();
+	first = dataCopy.end();
+	last = dataCopy.end();
 };
 
 template<class D>

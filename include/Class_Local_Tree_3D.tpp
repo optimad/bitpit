@@ -232,14 +232,15 @@ private:
 		vector<uint32_t> first_child_index;
 		Class_Octant<3> father;
 		uint32_t nocts;
-		int32_t idx, idx2;
+		uint32_t idx, idx2;
 		uint32_t offset;
-		int32_t idx2_gh;
+		uint32_t idx2_gh;
 		uint32_t nidx;
 		int8_t markerfather, marker;
 		uint8_t nbro, nend;
 		uint8_t nchm1 = global3D.nchildren-1;
 		bool docoarse = false;
+		bool wstop = false;
 
 		//------------------------------------------ //
 		// Initialization
@@ -265,7 +266,7 @@ private:
 			while(idx2_gh < size_ghosts && ghosts[idx2_gh].computeMorton() <= last_desc.computeMorton()){
 				idx2_gh++;
 			}
-			idx2_gh = min(int(size_ghosts-1), idx2_gh);
+			idx2_gh = min((size_ghosts-1), idx2_gh);
 		}
 
 		// Check and coarse internal octants
@@ -342,7 +343,7 @@ private:
 		if (ghosts.size() && nocts > 0){
 			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
 				father = ghosts[idx2_gh].buildFather();
-				for (int iii=0; iii<16; iii++){
+				for (uint32_t iii=0; iii<16; iii++){
 					father.info[iii] = false;
 				}
 				markerfather = ghosts[idx2_gh].getMarker()+1;
@@ -374,8 +375,11 @@ private:
 					}
 					idx--;
 					marker = octants[idx].getMarker();
-					if (idx<0){
+					if (wstop){
 						break;
+					}
+					if (idx==0){
+						wstop = true;
 					}
 				}
 				if (nbro == global3D.nchildren){
@@ -383,7 +387,7 @@ private:
 				}
 				else{
 					nend = 0;
-					for(int ii=nocts-global3D.nchildren; ii<nocts; ii++){
+					for(uint32_t ii=nocts-global3D.nchildren; ii<nocts; ii++){
 						octants[ii].setMarker(0);
 						octants[ii].info[15] = true;
 					}
@@ -501,14 +505,15 @@ private:
 		vector<uint32_t> first_child_index;
 		Class_Octant<3> father;
 		uint32_t nocts, nocts0;
-		int32_t idx, idx2;
+		uint32_t idx, idx2;
 		uint32_t offset;
-		int32_t idx2_gh;
+		uint32_t idx2_gh;
 		uint32_t nidx;
 		int8_t markerfather, marker;
 		uint8_t nbro, nend;
 		uint8_t nchm1 = global3D.nchildren-1;
 		bool docoarse = false;
+		bool wstop = false;
 
 		//------------------------------------------ //
 		// Initialization
@@ -533,7 +538,7 @@ private:
 			while(idx2_gh < size_ghosts && ghosts[idx2_gh].computeMorton() < last_desc.computeMorton()){
 				idx2_gh++;
 			}
-			idx2_gh = min(int(size_ghosts-1), idx2_gh);
+			idx2_gh = min((size_ghosts-1), idx2_gh);
 		}
 
 		// Check and coarse internal octants
@@ -576,14 +581,14 @@ private:
 					if (idx+offset == first_child_index[nidx]){
 						markerfather = -MAX_LEVEL_3D;
 						father = octants[idx+offset].buildFather();
-						for (int iii=0; iii<16; iii++){
+						for (uint32_t iii=0; iii<16; iii++){
 							father.info[iii] = false;
 						}
 						for(idx2=0; idx2<global3D.nchildren; idx2++){
 							if (markerfather < octants[idx+offset+idx2].getMarker()+1){
 								markerfather = octants[idx+offset+idx2].getMarker()+1;
 							}
-							for (int iii=0; iii<16; iii++){
+							for (uint32_t iii=0; iii<16; iii++){
 								father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
 							}
 						}
@@ -618,7 +623,7 @@ private:
 		if (ghosts.size() && nocts > 0){
 			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
 				father = ghosts[idx2_gh].buildFather();
-				for (int iii=0; iii<16; iii++){
+				for (uint32_t iii=0; iii<16; iii++){
 					father.info[iii] = false;
 				}
 				markerfather = ghosts[idx2_gh].getMarker()+1;
@@ -635,7 +640,7 @@ private:
 						break;
 					}
 					marker = ghosts[idx].getMarker();
-					for (int iii=0; iii<16; iii++){
+					for (uint32_t iii=0; iii<16; iii++){
 						father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
 					}
 				}
@@ -650,8 +655,11 @@ private:
 					}
 					idx--;
 					marker = octants[idx].getMarker();
-					if (idx<0){
+					if (wstop){
 						break;
+					}
+					if (idx==0){
+						wstop = true;
 					}
 				}
 				if (nbro == global3D.nchildren){
@@ -659,7 +667,7 @@ private:
 				}
 				else{
 					nend = 0;
-					for(int ii=nocts-global3D.nchildren; ii<nocts; ii++){
+					for(uint32_t ii=nocts-global3D.nchildren; ii<nocts; ii++){
 						octants[ii].setMarker(0);
 						octants[ii].info[15] = true;
 					}
@@ -667,7 +675,7 @@ private:
 			}
 			if (nend != 0){
 				for (idx=0; idx < nend; idx++){
-					for (int iii=0; iii<16; iii++){
+					for (uint32_t iii=0; iii<16; iii++){
 						father.info[iii] = father.info[iii] || octants[nocts-idx-1].info[iii];
 					}
 				}
@@ -772,14 +780,15 @@ private:
 		vector<uint32_t> first_child_index;
 		Class_Octant<3> father;
 		uint32_t nocts;
-		int32_t idx, idx2;
+		uint32_t idx, idx2;
 		uint32_t offset;
-		int32_t idx2_gh;
+		uint32_t idx2_gh;
 		uint32_t nidx;
 		int8_t markerfather, marker;
 		uint8_t nbro, nend;
 		uint8_t nchm1 = global3D.nchildren-1;
 		bool docoarse = false;
+		bool wstop = false;
 
 		//------------------------------------------ //
 		// Initialization
@@ -803,7 +812,7 @@ private:
 			while(idx2_gh < size_ghosts && ghosts[idx2_gh].computeMorton() <= last_desc.computeMorton()){
 				idx2_gh++;
 			}
-			idx2_gh = min(int(size_ghosts-1), idx2_gh);
+			idx2_gh = min((size_ghosts-1), idx2_gh);
 		}
 
 		// Check and coarse internal octants
@@ -851,7 +860,7 @@ private:
 							if (markerfather < octants[idx+offset+idx2].getMarker()+1){
 								markerfather = octants[idx+offset+idx2].getMarker()+1;
 							}
-							for (int iii=0; iii<16; iii++){
+							for (uint32_t iii=0; iii<16; iii++){
 								father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
 							}
 						}
@@ -882,7 +891,7 @@ private:
 			ghosts[idx2_gh].setMarker(-1);
 			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
 				father = ghosts[idx2_gh].buildFather();
-				for (int iii=0; iii<16; iii++){
+				for (uint32_t iii=0; iii<16; iii++){
 					father.info[iii] = false;
 				}
 				markerfather = ghosts[idx2_gh].getMarker()+1;
@@ -901,7 +910,7 @@ private:
 					}
 					ghosts[idx].setMarker(-1);
 					marker = ghosts[idx].getMarker();
-					for (int iii=0; iii<16; iii++){
+					for (uint32_t iii=0; iii<16; iii++){
 						father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
 					}
 				}
@@ -918,8 +927,11 @@ private:
 					idx--;
 					octants[idx].setMarker(-1);
 					marker = octants[idx].getMarker();
-					if (idx<0){
+					if (wstop){
 						break;
+					}
+					if (idx==0){
+						wstop = true;
 					}
 				}
 				if (nbro == global3D.nchildren){
@@ -927,7 +939,7 @@ private:
 				}
 				else{
 					nend = 0;
-					for(int ii=nocts-global3D.nchildren; ii<nocts; ii++){
+					for(uint32_t ii=nocts-global3D.nchildren; ii<nocts; ii++){
 						octants[ii].setMarker(0);
 						octants[ii].info[15] = true;
 					}
@@ -1046,14 +1058,15 @@ private:
 		vector<uint32_t> first_child_index;
 		Class_Octant<3> father;
 		uint32_t nocts, nocts0;
-		int32_t idx, idx2;
+		uint32_t idx, idx2;
 		uint32_t offset;
-		int32_t idx2_gh;
+		uint32_t idx2_gh;
 		uint32_t nidx;
 		int8_t markerfather, marker;
 		uint8_t nbro, nstart, nend;
 		uint8_t nchm1 = global3D.nchildren-1;
 		bool docoarse = false;
+		bool wstop = false;
 
 		//------------------------------------------ //
 		// Initialization
@@ -1078,7 +1091,7 @@ private:
 			while(idx2_gh < size_ghosts && ghosts[idx2_gh].computeMorton() < last_desc.computeMorton()){
 				idx2_gh++;
 			}
-			idx2_gh = min(int(size_ghosts-1), idx2_gh);
+			idx2_gh = min((size_ghosts-1), idx2_gh);
 		}
 
 		// Check and coarse internal octants
@@ -1122,14 +1135,14 @@ private:
 					if (idx+offset == first_child_index[nidx]){
 						markerfather = -MAX_LEVEL_3D;
 						father = octants[idx+offset].buildFather();
-						for (int iii=0; iii<16; iii++){
+						for (uint32_t iii=0; iii<16; iii++){
 							father.info[iii] = false;
 						}
 						for(idx2=0; idx2<global3D.nchildren; idx2++){
 							if (markerfather < octants[idx+offset+idx2].getMarker()+1){
 								markerfather = octants[idx+offset+idx2].getMarker()+1;
 							}
-							for (int iii=0; iii<16; iii++){
+							for (uint32_t iii=0; iii<16; iii++){
 								father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
 							}
 						}
@@ -1195,8 +1208,11 @@ private:
 					idx--;
 					octants[idx].setMarker(-1);
 					marker = octants[idx].getMarker();
-					if (idx<0){
+					if (wstop){
 						break;
+					}
+					if (idx==0){
+						wstop=true;
 					}
 				}
 				if (nbro == global3D.nchildren){
@@ -1204,18 +1220,18 @@ private:
 				}
 				else{
 					nend = 0;
-					for(int ii=nocts-global3D.nchildren; ii<nocts; ii++){
+					for(uint32_t ii=nocts-global3D.nchildren; ii<nocts; ii++){
 						octants[ii].setMarker(0);
 						octants[ii].info[15] = true;
 					}
 				}
 			}
 			if (nend != 0){
-				for (int iii=0; iii<16; iii++){
+				for (uint32_t iii=0; iii<16; iii++){
 					father.info[iii] = false;
 				}
 				for (idx=0; idx < nend; idx++){
-					for (int iii=0; iii<16; iii++){
+					for (uint32_t iii=0; iii<16; iii++){
 						father.info[iii] = father.info[iii] || octants[nocts-idx-1].info[iii];
 					}
 				}
@@ -1247,7 +1263,7 @@ private:
 
 	void checkCoarse(uint64_t lastDescPre,						// Delete overlapping octants after coarse local tree. Check first and last descendants
 			uint64_t firstDescPost){		// of process before and after the local process
-		int32_t idx;
+		uint32_t idx;
 		uint32_t nocts;
 		uint64_t Morton;
 		uint8_t toDelete = 0;
@@ -1278,7 +1294,7 @@ private:
 	void checkCoarse(uint64_t lastDescPre,						// Delete overlapping octants after coarse local tree. Check first and last descendants
 			uint64_t firstDescPost,
 			u32vector & mapidx){					// of process before and after the local process
-		int32_t idx;
+		uint32_t idx;
 		uint32_t nocts;
 		uint64_t Morton;
 		uint8_t toDelete = 0;
@@ -1699,6 +1715,9 @@ private:
 										}
 
 										idxtry++;
+										if(idxtry>noctants-1){
+											break;
+										}
 										Mortontry = octants[idxtry].computeMorton();
 									}
 								}
@@ -3757,7 +3776,7 @@ private:
 			}
 		}
 		if (Mortontry<Morton){
-			for (int idx2=idx; idx2<nocts; idx2++){
+			for (uint32_t idx2=idx; idx2<nocts; idx2++){
 				Mortontry = octants[idx2].computeMorton();
 				if (Mortontry == Morton){
 					return idx2;
@@ -3765,7 +3784,7 @@ private:
 			}
 		}
 		else{
-			for(int idx2=0; idx2<idx+1; idx2++){
+			for(uint32_t idx2=0; idx2<idx+1; idx2++){
 				Mortontry = octants[idx2].computeMorton();
 				if (Mortontry == Morton){
 					return idx2;
@@ -3794,7 +3813,7 @@ private:
 			}
 		}
 		if (Mortontry<Morton){
-			for (int idx2=idx; idx2<nocts; idx2++){
+			for (uint32_t idx2=idx; idx2<nocts; idx2++){
 				Mortontry = ghosts[idx2].computeMorton();
 				if (Mortontry == Morton){
 					return idx2;
@@ -3802,7 +3821,7 @@ private:
 			}
 		}
 		else{
-			for(int idx2=0; idx2<idx; idx2++){
+			for(uint32_t idx2=0; idx2<idx; idx2++){
 				Mortontry = ghosts[idx2].computeMorton();
 				if (Mortontry == Morton){
 					return idx2;
@@ -3840,7 +3859,7 @@ private:
 							mapnodes[morton].push_back(octnodes[j][k]);
 						}
 					}
-					mapnodes[morton].push_back(double(i));
+					mapnodes[morton].push_back(i);
 				}
 				u32vector2D().swap(octnodes);
 			}
@@ -3864,7 +3883,7 @@ private:
 			}
 			nodes.shrink_to_fit();
 			//Lento. Solo per risparmiare memoria
-			for (int ii=0; ii<noctants; ii++){
+			for (uint32_t ii=0; ii<noctants; ii++){
 				connectivity[ii].shrink_to_fit();
 			}
 			connectivity.shrink_to_fit();
@@ -3935,7 +3954,7 @@ private:
 			}
 			ghostsnodes.shrink_to_fit();
 			//Lento. Solo per risparmiare memoria
-			for (int ii=0; ii<noctants; ii++){
+			for (uint32_t ii=0; ii<noctants; ii++){
 				ghostsconnectivity[ii].shrink_to_fit();
 			}
 			ghostsconnectivity.shrink_to_fit();
