@@ -29,7 +29,10 @@ VTK_UnstructuredGrid<Derived>::VTK_UnstructuredGrid( string dir_, string name_, 
 
 //------------------------------------------------------------------
 template <class Derived>
-VTK_UnstructuredGrid<Derived>::~VTK_UnstructuredGrid( ) {};
+VTK_UnstructuredGrid<Derived>::~VTK_UnstructuredGrid( ) {
+    
+    Set_Dimensions( -1, -1, -1) ;    
+};
 
 //------------------------------------------------------------------
 template <class Derived>
@@ -187,9 +190,6 @@ void VTK_UnstructuredGrid<Derived>::Flush( fstream &str, string codex, string na
   return ;
 };
 
-
-
-
 // =================================================================================== //
 template <class Derived>
 void VTK_UnstructuredGrid<Derived>::Read( ){
@@ -247,7 +247,7 @@ void VTK_UnstructuredGrid<Derived>::Read( ){
 
   str.seekg( position) ;
   if( Seek_and_Read( str, "connectivity", geometry[3] ) ){
-    geometry[3].Set_Elements(ncells) ;
+    geometry[3].Set_Elements(nconn) ;
   }
 
   else{
@@ -261,7 +261,6 @@ void VTK_UnstructuredGrid<Derived>::Read( ){
 
   return ;
 };
-
 
 // =================================================================================== //
 template <class Derived>

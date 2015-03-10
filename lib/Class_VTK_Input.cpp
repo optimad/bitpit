@@ -61,6 +61,7 @@ void VTK::Read_FieldValues( fstream &str ){
   fstream::pos_type        position_appended;
   string                   line;
   char                     c_ ;
+  int                      nbytes ;
 
   //Read appended data
   //Go to the initial position of the appended section
@@ -83,6 +84,7 @@ void VTK::Read_FieldValues( fstream &str ){
     if( data[i].Get_Codification() == "appended"){
       str.seekg( position_appended) ;
       str.seekg( data[i].Get_Offset(), ios::cur) ;
+      absorb_binary( str, nbytes  ) ;
       Absorb( str, "binary", data[i].Get_Name() ) ;
     };
   };
@@ -92,6 +94,7 @@ void VTK::Read_FieldValues( fstream &str ){
     if( geometry[i].Get_Codification() == "appended"){
       str.seekg( position_appended) ;
       str.seekg( geometry[i].Get_Offset(), ios::cur) ;
+      absorb_binary( str, nbytes  ) ;
       Absorb( str, "binary", geometry[i].Get_Name() ) ;
     };
   };
