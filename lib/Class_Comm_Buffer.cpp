@@ -1,14 +1,22 @@
 #if NOMPI==0
 #include "Class_Comm_Buffer.hpp"
 
-Class_Comm_Buffer::Class_Comm_Buffer() {
+Class_Comm_Buffer::Class_Comm_Buffer(){
+
+	commBufferSize = 0;
+	commBuffer = NULL;
+	pos = 0;
+	comm = MPI_COMM_WORLD;
+}
+
+Class_Comm_Buffer::Class_Comm_Buffer(MPI_Comm comm_) : comm(comm_){
 
 	commBufferSize = 0;
 	commBuffer = NULL;
 	pos = 0;
 }
 
-Class_Comm_Buffer::Class_Comm_Buffer(uint32_t size, char value) {
+Class_Comm_Buffer::Class_Comm_Buffer(uint32_t size, char value, MPI_Comm comm_) : comm(comm_){
 
 	commBufferSize = size;
 	commBuffer = new char [size];
@@ -28,6 +36,7 @@ Class_Comm_Buffer::Class_Comm_Buffer(const Class_Comm_Buffer& other) {
 	for(uint32_t i = 0; i < commBufferSize; ++i)
 		commBuffer[i] = other.commBuffer[i];
 	pos = other.pos;
+	comm = other.comm;
 }
 
 Class_Comm_Buffer::~Class_Comm_Buffer() {
@@ -46,6 +55,7 @@ Class_Comm_Buffer& Class_Comm_Buffer::operator =(const Class_Comm_Buffer& rhs) {
 		commBuffer = new_array;
 		commBufferSize = rhs.commBufferSize;
 		pos = rhs.pos;
+		comm = rhs.comm;
 	}
 	return *this;
 

@@ -30,12 +30,14 @@ class Class_Comm_Buffer {
 	uint32_t commBufferSize;
 	char* commBuffer;
 	int pos;
+	MPI_Comm comm;
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
 public:
 	Class_Comm_Buffer();
-	Class_Comm_Buffer(uint32_t size, char value);
+	Class_Comm_Buffer(MPI_Comm comm_);
+	Class_Comm_Buffer(uint32_t size, char value, MPI_Comm comm_);
 	Class_Comm_Buffer(const Class_Comm_Buffer& other);
 	~Class_Comm_Buffer();
 
