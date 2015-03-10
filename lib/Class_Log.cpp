@@ -7,7 +7,11 @@
 
 #include <Class_Log.hpp>
 
+#if NOMPI==0
+Class_Log::Class_Log(string filename_,MPI_Comm comm_) : filename(filename_),comm(comm_) {};
+#else
 Class_Log::Class_Log(string filename_) : filename(filename_) {};
+#endif
 
 Class_Log::~Class_Log() {};
 
@@ -44,7 +48,7 @@ void Class_Log::writeLog(string msg) {
 
 	int rank = 0;
 #if NOMPI==0
-	int error_flag = MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+	int error_flag = MPI_Comm_rank(comm,&rank);
 #endif
 	if(rank == 0){
 		// Open the .log file
@@ -59,6 +63,6 @@ void Class_Log::writeLog(string msg) {
 		file_handle.close();
 	}
 #if NOMPI==0
-	error_flag = MPI_Barrier(MPI_COMM_WORLD);
+	error_flag = MPI_Barrier(comm);
 #endif
 	return; };

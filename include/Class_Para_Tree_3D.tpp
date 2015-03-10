@@ -77,7 +77,7 @@ public:
 	 * \param[in] logfile The file name for the log of this object. PABLO.log is the default value
 	 */
 #if NOMPI==0
-	Class_Para_Tree(string logfile="PABLO.log",MPI_Comm comm_ = MPI_COMM_WORLD) : log(logfile),comm(comm_){
+	Class_Para_Tree(string logfile="PABLO.log",MPI_Comm comm_ = MPI_COMM_WORLD) : log(logfile,comm_),comm(comm_){
 #else
 	Class_Para_Tree(string logfile="PABLO.log") : log(logfile){
 #endif
@@ -129,7 +129,7 @@ public:
 	 * \param[in] logfile The file name for the log of this object. PABLO.log is the default value
 	 */
 #if NOMPI==0
-	Class_Para_Tree(double X, double Y, double Z, double L, string logfile="PABLO.log", MPI_Comm comm_ = MPI_COMM_WORLD):trans(X,Y,Z,L),log(logfile),comm(comm_){
+	Class_Para_Tree(double X, double Y, double Z, double L, string logfile="PABLO.log", MPI_Comm comm_ = MPI_COMM_WORLD):trans(X,Y,Z,L),log(logfile,comm_),comm(comm_){
 #else
 	Class_Para_Tree(double X, double Y, double Z, double L, string logfile="PABLO.log"):trans(X,Y,Z,L),log(logfile){
 #endif
@@ -187,7 +187,7 @@ public:
 	 * \param[in] logfile The file name for the log of this object. PABLO.log is the default value
 	 */
 #if NOMPI==0
-	Class_Para_Tree(double & X, double & Y, double & Z, double & L, ivector2D & XYZ, ivector & levels, string logfile="PABLO.log", MPI_Comm comm_ = MPI_COMM_WORLD):trans(X,Y,Z,L),log(logfile),comm(comm_){
+	Class_Para_Tree(double & X, double & Y, double & Z, double & L, ivector2D & XYZ, ivector & levels, string logfile="PABLO.log", MPI_Comm comm_ = MPI_COMM_WORLD):trans(X,Y,Z,L),log(logfile,comm_),comm(comm_){
 #else
 	Class_Para_Tree(double & X, double & Y, double & Z, double & L, ivector2D & XYZ, ivector & levels, string logfile="PABLO.log"):trans(X,Y,Z,L),log(logfile){
 #endif
@@ -286,7 +286,7 @@ public:
 	 * \param[in] logfile The file name for the log of this object. PABLO.log is the default value
 	 */
 #if NOMPI==0
-	Class_Para_Tree(double X, double Y, double Z, double L, ivector2D & XYZ, ivector & levels, string logfile="PABLO.log", MPI_Comm comm_ = MPI_COMM_WORLD):trans(X,Y,Z,L),log(logfile),comm(comm_){
+	Class_Para_Tree(double X, double Y, double Z, double L, ivector2D & XYZ, ivector & levels, string logfile="PABLO.log", MPI_Comm comm_ = MPI_COMM_WORLD):trans(X,Y,Z,L),log(logfile,comm_),comm(comm_){
 #else
 	Class_Para_Tree(double X, double Y, double Z, double L, ivector2D & XYZ, ivector & levels, string logfile="PABLO.log"):trans(X,Y,Z,L),log(logfile){
 #endif
