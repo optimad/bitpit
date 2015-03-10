@@ -92,7 +92,8 @@ int main(int argc, char *argv[]) {
 		/**<Define vectors of data.*/
 		uint32_t nocts = pabloBB.getNumOctants();
 		uint32_t nghosts = pabloBB.getNumGhosts();
-		vector<double> oct_data(nocts, 99), ghost_data(nghosts, 0.0);
+		vector<double> oct_data(nocts, 0.0), ghost_data(nghosts, 0.0);
+		vector<double> oct_data_new(nocts, 0.0), ghost_data_new(nghosts, 0.0);
 
 		/**<Adapt itend times with data injection on new octants.*/
 		int itstart = 1;
@@ -124,7 +125,7 @@ int main(int argc, char *argv[]) {
 						double zc = BB[ib].c[2];
 						double radius = BB[ib].r;
 						//oct_data[i] = (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0));
-						oct_data[i] = 99;
+						oct_data[i] = (double)pabloBB.getLevel(i);
 						for (int j=0; j<global3D.nnodes; j++){
 							double x = nodes[j][0];
 							double y = nodes[j][1];
@@ -152,52 +153,40 @@ int main(int argc, char *argv[]) {
 				}
 
 				/**<Adapt the octree.*/
-				//vector<uint32_t> mapidx;
-				//bool adapt = pabloBB.adapt(mapidx);
-				bool adapt = pabloBB.adapt();
-
-//				/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
-//				pabloBB.loadBalance();
+				vector<uint32_t> mapidx;
+				bool adapt = pabloBB.adapt(mapidx);
+				//bool adapt = pabloBB.adapt();
 
 				nocts = pabloBB.getNumOctants();
 				nghosts = pabloBB.getNumGhosts();
-				oct_data.resize(nocts, 99);
+				oct_data_new.resize(nocts, 0);
+
+				/**<Assign to the new octant the data after an adaption.*/
+				for (int i=0; i<nocts; i++){
+					oct_data_new[i] = oct_data[mapidx[i]];
+				}
+				oct_data = oct_data_new;
+				vector<double>().swap(oct_data_new);
+
+
 
 			}
 
 #if NOMPI==0
 			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
-			pabloBB.loadBalance();
+			/**<Communicate the data of the octants and the ghost octants between the processes.*/
+			User_Data_LB<vector<double> > data_lb(oct_data);
+			pabloBB.loadBalance(data_lb);
 			nocts = pabloBB.getNumOctants();
 			nghosts = pabloBB.getNumGhosts();
-			oct_data.resize(nocts, 99);
+//			oct_data.resize(nocts, 99);
 #endif
-
-			/**<Assign to the new octant the data after an adaption.*/
-//			for (int i=0; i<nocts; i++){
-//				vector<vector<double> > nodes = pabloBB.getNodes(i);
-//				vector<double> center = pabloBB.getCenter(i);
-//				oct_data[i] = 99;
-//				int ib = 0;
-//				while (ib<nb){
-//					double xc = BB[ib].c[0];
-//					double yc = BB[ib].c[1];
-//					double zc = BB[ib].c[2];
-//					double radius = BB[ib].r;
-//					if (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0) <= pow(radius,2.0)){
-//						if (oct_data[i] == 99) oct_data[i]= -(pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0));
-//
-//					}
-//				}
-//				ib++;
-//			}
-
 
 			/**<Update the connectivity and write the para_tree.*/
 			pabloBB.updateConnectivity();
 			pabloBB.writeTest("PabloBubble_iter"+to_string(iter), oct_data);
-			//pabloBB.write("PabloBubble_iter"+to_string(iter));
 		}
+
 #if NOMPI==0
 	}
 
