@@ -247,7 +247,7 @@ void VTK_UnstructuredGrid<Derived>::Read( ){
 
   str.seekg( position) ;
   if( Seek_and_Read( str, "connectivity", geometry[3] ) ){
-    geometry[3].Set_Elements(nconn) ;
+    geometry[3].Set_Elements(-1) ;
   }
 
   else{
