@@ -32,7 +32,6 @@ int main(int argc, char *argv[]) {
 		pablo6.loadBalance();
 		pablo60.loadBalance();
 #endif
-		pablo60.write("Pablo60_iter"+to_string(iter));
 
 		/**<Define a center point and a radius.*/
 		double xc, yc;
@@ -68,7 +67,9 @@ int main(int argc, char *argv[]) {
 		/**<Update the connectivity and write the para_tree.*/
 		iter = 0;
 		pablo6.updateConnectivity();
+		pablo60.updateConnectivity();
 		pablo6.write("Pablo6_iter"+to_string(iter));
+		pablo60.write("Pablo60_iter"+to_string(iter));
 
 		/**<Adapt two times with data injection on new octants.*/
 		int start = 1;
@@ -109,7 +110,8 @@ int main(int argc, char *argv[]) {
 			for (int i=0; i<nocts; i++){
 				data[i] = (double) mapper[i].first.second;
 			}
-			pablo60.writeTest("Pablo60_iter"+to_string(iter+1), data);
+			pablo60.updateConnectivity();
+			pablo60.writeTest("Pablo60_iter"+to_string(iter), data);
 		}
 #if NOMPI==0
 	}
