@@ -1,8 +1,9 @@
+#if NOMPI==0
 #ifndef MPI_DATATYPE_CONVERSION_HPP_
 #define MPI_DATATYPE_CONVERSION_HPP_
 
-#include <mpi.h>
 #include <stdint.h>
+#include <mpi.h>
 
 template <class T>
 MPI_Datatype convert();
@@ -47,3 +48,4 @@ template <>
 inline MPI_Datatype convert<int8_t>(){return MPI_INT8_T;}
 
 #endif /* MPI_DATATYPE_CONVERSION_HPP_ */
+#endif /* NOMPI */

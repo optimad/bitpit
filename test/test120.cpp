@@ -1,5 +1,4 @@
 #include "preprocessor_defines.dat"
-#include <mpi.h>
 #include "Class_Global.hpp"
 #include "Class_Para_Tree.hpp"
 #include "User_Data_Comm.hpp"
@@ -11,9 +10,11 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
+#if NOMPI==0
 	MPI::Init(argc, argv);
 
 	{
+#endif
 		int iter = 0;
 
 		/**<Instantation of a 3D para_tree object.*/
@@ -28,8 +29,10 @@ int main(int argc, char *argv[]) {
 			pablo120.adaptGlobalRefine();
 		}
 
+#if NOMPI==0
 		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
 		pablo120.loadBalance();
+#endif
 
 		/**<Define a center point and a radius.*/
 		double xc, yc, zc;
@@ -88,8 +91,10 @@ int main(int argc, char *argv[]) {
 			/**<Adapt the octree.*/
 			bool adapt = pablo120.adapt();
 
+#if NOMPI==0
 			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
 			pablo120.loadBalance();
+#endif
 
 			nocts = pablo120.getNumOctants();
 			nghosts = pablo120.getNumGhosts();
@@ -109,8 +114,9 @@ int main(int argc, char *argv[]) {
 			pablo120.updateConnectivity();
 			pablo120.writeTest("Pablo120_iter"+to_string(iter), oct_data);
 		}
+#if NOMPI==0
 	}
 
 	MPI::Finalize();
-
+#endif
 }

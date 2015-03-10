@@ -1,9 +1,4 @@
 #include <ioFunct.hpp>
-#include <fstream>
-#include <iomanip>
-#include <string>
-#include "Class_Para_Tree.hpp"
-#include "logFunct.hpp"
 
 // ----------------------------------------------------------------------------------- //
 
@@ -150,8 +145,9 @@ void writeLocalTree(const u32vector2D& nodes, const u32vector2D& connectivity,
 		pout.close();
 
 	}
+#if NOMPI==0
 	MPI_Barrier(MPI_COMM_WORLD);
-
+#endif
 
 }
 
@@ -296,8 +292,9 @@ void writePhysicalTree(const vector<vector<double> >& nodes, const u32vector2D& 
 		pout.close();
 
 	}
+#if NOMPI==0
 	MPI_Barrier(MPI_COMM_WORLD);
-
+#endif
 
 }
 
@@ -422,8 +419,9 @@ void writeLocalTree(const u32vector2D& nodes, const u32vector2D& connectivity,
 		pout.close();
 
 	}
+#if NOMPI==0
 	MPI_Barrier(MPI_COMM_WORLD);
-
+#endif
 
 }
 
@@ -548,8 +546,9 @@ void writePhysicalTree(const vector<vector<double> >& nodes, const u32vector2D& 
 		pout.close();
 
 	}
+#if NOMPI==0
 	MPI_Barrier(MPI_COMM_WORLD);
-
+#endif
 	// ----------------------------------------------------------------------------------- //
 
 }

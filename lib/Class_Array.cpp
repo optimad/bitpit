@@ -1,5 +1,4 @@
 #include "Class_Array.hpp"
-#include <algorithm>
 
 Class_Array::Class_Array() {
 	// TODO Auto-generated constructor stub

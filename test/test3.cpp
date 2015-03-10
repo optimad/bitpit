@@ -1,5 +1,4 @@
 #include "preprocessor_defines.dat"
-#include <mpi.h>
 #include "Class_Global.hpp"
 #include "Class_Para_Tree.hpp"
 
@@ -9,9 +8,11 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
+#if NOMPI==0
 	MPI::Init(argc, argv);
 
 	{
+#endif
 		int iter = 0;
 		/**<Instantation of a 2D para_tree object.*/
 		Class_Para_Tree<2> pablo3;
@@ -84,8 +85,9 @@ int main(int argc, char *argv[]) {
 			pablo3.updateConnectivity();
 			pablo3.write("Pablo3_iter"+to_string(iter));
 		}
+#if NOMPI==0
 	}
 	MPI::Finalize();
-
+#endif
 }
 

@@ -4,7 +4,9 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
+#if NOMPI==0
 #include <mpi.h>
+#endif
 #include "preprocessor_defines.dat"
 #include "Class_Octant.hpp"
 #include "Class_Local_Tree.hpp"

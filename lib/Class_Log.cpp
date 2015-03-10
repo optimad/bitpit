@@ -42,8 +42,10 @@ void Class_Log::writeLog(string msg) {
 	// APPEND MESSAGE TO THE LOG FILE                                                      //
 	// =================================================================================== //
 
-	int rank;
+	int rank = 0;
+#if NOMPI==0
 	int error_flag = MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+#endif
 	if(rank == 0){
 		// Open the .log file
 		file_handle.open(filename.c_str(), ifstream::app);
@@ -56,5 +58,7 @@ void Class_Log::writeLog(string msg) {
 		// Close file
 		file_handle.close();
 	}
+#if NOMPI==0
 	error_flag = MPI_Barrier(MPI_COMM_WORLD);
+#endif
 	return; };

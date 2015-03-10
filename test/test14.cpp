@@ -1,5 +1,4 @@
 #include "preprocessor_defines.dat"
-#include <mpi.h>
 #include "Class_Global.hpp"
 #include "Class_Para_Tree.hpp"
 #include "User_Data_Comm.hpp"
@@ -10,9 +9,11 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
+#if NOMPI==0
 	MPI::Init(argc, argv);
 
 	{
+#endif
 		int iter = 0;
 		int dim = 2;
 
@@ -24,8 +25,10 @@ int main(int argc, char *argv[]) {
 			pablo14.adaptGlobalRefine();
 		}
 
+#if NOMPI==0
 		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
 		pablo14.loadBalance();
+#endif
 
 		/**<Define a center point and a radius.*/
 		double xc, yc;
@@ -109,17 +112,20 @@ int main(int argc, char *argv[]) {
 			pablo14.updateConnectivity();
 			pablo14.writeTest("Pablo14_iter"+to_string(iter), oct_data_smooth);
 
+#if NOMPI==0
 			/**<Communicate the data of the octants and the ghost octants between the processes.*/
 			User_Data_Comm<vector<double> > data_comm(oct_data_smooth, ghost_data);
 			pablo14.communicate(data_comm);
 
+#endif
 			oct_data = oct_data_smooth;
 
 		}
+#if NOMPI==0
 	}
 
 	MPI::Finalize();
-
+#endif
 }
 
 

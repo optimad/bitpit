@@ -9,7 +9,13 @@
 #include <string>
 #include <functional>
 #include <cctype>
+#include <fstream>
+#include <iomanip>
+#if NOMPI == 0
+#include <mpi.h>
+#endif
 #include "Class_Para_Tree.hpp"
+#include "logFunct.hpp"
 
 // =================================================================================== //
 // NAMESPACES                                                                          //

@@ -1,5 +1,4 @@
 #include "preprocessor_defines.dat"
-#include <mpi.h>
 #include "Class_Global.hpp"
 #include "Class_Para_Tree.hpp"
 
@@ -9,9 +8,11 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
+#if NOMPI==0
 	MPI::Init(argc, argv);
 
 	{
+#endif
 		int iter = 0;
 
 		/**<Instantation of a 2D para_tree object.*/
@@ -28,8 +29,10 @@ int main(int argc, char *argv[]) {
 			pablo13.write("Pablo13_iter"+to_string(iter));
 		}
 
+#if NOMPI==0
 		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
 		pablo13.loadBalance();
+#endif
 
 		/**<Define a center point and a radius.*/
 		double xc, yc;
@@ -55,8 +58,10 @@ int main(int argc, char *argv[]) {
 			/**<Adapt octree.*/
 			pablo13.adapt();
 
+#if NOMPI==0
 			/**<(Load)Balance the octree over the processes.*/
 			pablo13.loadBalance();
+#endif
 
 			/**<Update the connectivity and write the para_tree.*/
 			pablo13.updateConnectivity();
@@ -91,14 +96,17 @@ int main(int argc, char *argv[]) {
 			/**<Adapt octree.*/
 			pablo13.adapt();
 
+#if NOMPI==0
 			/**<(Load)Balance the octree over the processes.*/
 			pablo13.loadBalance();
+#endif
 
 			/**<Update the connectivity and write the para_tree.*/
 			pablo13.updateConnectivity();
 			pablo13.write("Pablo13_iter"+to_string(iter));
 		}
+#if NOMPI==0
 	}
 	MPI::Finalize();
-
+#endif
 }

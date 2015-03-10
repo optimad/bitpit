@@ -1,5 +1,4 @@
 #include "preprocessor_defines.dat"
-#include <mpi.h>
 #include "Class_Global.hpp"
 #include "Class_Para_Tree.hpp"
 #include "User_Data_Comm.hpp"
@@ -11,9 +10,11 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
+#if NOMPI==0
 	MPI::Init(argc, argv);
 
 	{
+#endif
 		int iter = 0;
 
 		/**<Instantation of a 2D para_tree object.*/
@@ -118,18 +119,21 @@ int main(int argc, char *argv[]) {
 			oct_data = oct_data_new;
 		}
 
+#if NOMPI==0
 		/**<(Load)Balance the octree over the processes with communicating the data.*/
 		User_Data_LB<vector<double> > data_lb(oct_data);
 		pablo15.loadBalance(data_lb);
+#endif
 
 		/**<Update the connectivity and write the para_tree.*/
 		pablo15.updateConnectivity();
 		pablo15.writeTest("Pablo15_iter"+to_string(iter), oct_data);
 
+#if NOMPI==0
 	}
 
 	MPI::Finalize();
-
+#endif
 }
 
 

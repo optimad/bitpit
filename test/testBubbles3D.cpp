@@ -1,5 +1,4 @@
 #include "preprocessor_defines.dat"
-#include <mpi.h>
 #include "Class_Global.hpp"
 #include "Class_Para_Tree.hpp"
 #include "User_Data_Comm.hpp"
@@ -20,9 +19,11 @@ public:
 
 int main(int argc, char *argv[]) {
 
+#if NOMPI==0
 	MPI::Init(argc, argv);
 
 	{
+#endif
 		int iter = 0;
 
 		/**<Instantation of a 3D para_tree object.*/
@@ -37,8 +38,10 @@ int main(int argc, char *argv[]) {
 			pabloBB.adaptGlobalRefine();
 		}
 
+#if NOMPI==0
 		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
 		pabloBB.loadBalance();
+#endif
 
 		/**<Define a set of bubbles.*/
 		cout << time(NULL) << endl;
@@ -48,7 +51,11 @@ int main(int argc, char *argv[]) {
 
 		//8 proc deadlock 1418143772  at iter 51 proc
 
+#if NOMPI==0
 		int nb = 100;
+#else
+		int nb = 10;
+#endif
 		vector<bubble> BB;
 		vector<bubble> BB0;
 		vector<double> DZ;
@@ -158,11 +165,13 @@ int main(int argc, char *argv[]) {
 
 			}
 
+#if NOMPI==0
 			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
 			pabloBB.loadBalance();
 			nocts = pabloBB.getNumOctants();
 			nghosts = pabloBB.getNumGhosts();
 			oct_data.resize(nocts, 99);
+#endif
 
 			/**<Assign to the new octant the data after an adaption.*/
 //			for (int i=0; i<nocts; i++){
@@ -189,10 +198,11 @@ int main(int argc, char *argv[]) {
 			pabloBB.writeTest("PabloBubble_iter"+to_string(iter), oct_data);
 			//pabloBB.write("PabloBubble_iter"+to_string(iter));
 		}
+#if NOMPI==0
 	}
 
 	MPI::Finalize();
-
+#endif
 }
 
 

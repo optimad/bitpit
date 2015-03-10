@@ -1,5 +1,4 @@
 #include "preprocessor_defines.dat"
-#include <mpi.h>
 #include "Class_Global.hpp"
 #include "Class_Para_Tree.hpp"
 
@@ -9,10 +8,11 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
+#if NOMPI==0
 	MPI::Init(argc, argv);
 
 	{
-
+#endif
 		/**<Instantation of a 2D para_tree object with default constructor.*/
 		Class_Para_Tree<2> ptreedefault;
 		/**<Write the para_tree in physical domain.*/
@@ -30,9 +30,10 @@ int main(int argc, char *argv[]) {
 		/**<Write the para_tree in logical domain.*/
 		ptreecustom.writeLogical("Pablo0_custom_logical");
 
+#if NOMPI==0
 	}
 
 	MPI::Finalize();
-
+#endif
 }
 

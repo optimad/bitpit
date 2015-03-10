@@ -1,5 +1,4 @@
 #include "preprocessor_defines.dat"
-#include <mpi.h>
 #include "Class_Global.hpp"
 #include "Class_Para_Tree.hpp"
 
@@ -9,9 +8,11 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
+#if NOMPI==0
 	MPI::Init(argc, argv);
 
 	{
+#endif
 		int iter = 0;
 		int dim = 3;
 
@@ -110,9 +111,10 @@ int main(int argc, char *argv[]) {
 
 			oct_data = oct_data_smooth;
 		}
+#if NOMPI==0
 	}
 
 	MPI::Finalize();
-
+#endif
 }
 

@@ -1,5 +1,5 @@
+#if NOMPI==0
 #include "Class_Comm_Buffer.hpp"
-#include <algorithm>
 
 Class_Comm_Buffer::Class_Comm_Buffer() {
 
@@ -50,3 +50,4 @@ Class_Comm_Buffer& Class_Comm_Buffer::operator =(const Class_Comm_Buffer& rhs) {
 	return *this;
 
 }
+#endif

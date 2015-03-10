@@ -76,8 +76,13 @@ public:
 		error_flag = 0;
 		max_depth = 0;
 		global_num_octants = octree.getNumOctants();
+#if NOMPI==0
 		error_flag = MPI_Comm_size(MPI_COMM_WORLD,&nproc);
 		error_flag = MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+#else
+		rank = 0;
+		nproc = 1;
+#endif
 		partition_first_desc = new uint64_t[nproc];
 		partition_last_desc = new uint64_t[nproc];
 		partition_range_globalidx = new uint64_t[nproc];
@@ -99,8 +104,9 @@ public:
 		log.writeLog(" Max allowed level	:	" + to_string(MAX_LEVEL_2D));
 		log.writeLog("---------------------------------------------");
 		log.writeLog(" ");
+#if NOMPI==0
 		MPI_Barrier(MPI_COMM_WORLD);
-
+#endif
 	};
 
 	// =============================================================================== //
@@ -118,8 +124,13 @@ public:
 		error_flag = 0;
 		max_depth = 0;
 		global_num_octants = octree.getNumOctants();
+#if NOMPI==0
 		error_flag = MPI_Comm_size(MPI_COMM_WORLD,&nproc);
 		error_flag = MPI_Comm_rank(MPI_COMM_WORLD,&rank);
+#else
+		rank = 0;
+		nproc = 1;
+#endif
 		partition_first_desc = new uint64_t[nproc];
 		partition_last_desc = new uint64_t[nproc];
 		partition_range_globalidx = new uint64_t[nproc];
@@ -145,8 +156,9 @@ public:
 		log.writeLog(" Domain Size		:	" + to_string(L));
 		log.writeLog("---------------------------------------------");
 		log.writeLog(" ");
+#if NOMPI==0
 		MPI_Barrier(MPI_COMM_WORLD);
-
+#endif
 	};
 
 	// =============================================================================== //
@@ -194,18 +206,25 @@ public:
 		setFirstDesc();
 		setLastDesc();
 
+		//ATTENTO if nompi deve aver l'else
+#if NOMPI==0
 		error_flag = MPI_Comm_size(MPI_COMM_WORLD,&nproc);
 		error_flag = MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 		serial = true;
 		if (nproc > 1 ) serial = false;
-
+#else
+		serial = true;
+		nproc = 1;
+		rank = 0;
+#endif
 		partition_first_desc = new uint64_t[nproc];
 		partition_last_desc = new uint64_t[nproc];
 		partition_range_globalidx = new uint64_t[nproc];
 
 		updateAdapt();
+#if NOMPI==0
 		setPboundGhosts();
-
+#endif
 		// Write info log
 		log.writeLog("---------------------------------------------");
 		log.writeLog("- PABLO PArallel Balanced Linear Octree -");
@@ -224,8 +243,9 @@ public:
 		log.writeLog(" Number of octants	:	" + to_string(global_num_octants));
 		log.writeLog("---------------------------------------------");
 		log.writeLog(" ");
+#if NOMPI==0
 		MPI_Barrier(MPI_COMM_WORLD);
-
+#endif
 	};
 
 	// =============================================================================== //
@@ -453,6 +473,7 @@ public:
 		return !oct->getNotBalance();
 	};
 
+#if NOMPI==0
 	/*! Get the nature of an octant.
 	 * \param[in] oct Pointer to target octant.
 	 * \return Is octant ghost?
@@ -462,6 +483,7 @@ public:
 			return false;
 		return (findOwner(oct->computeMorton()) != rank);
 	};
+#endif
 
 	/*! Get if the octant is new after refinement.
 	 * \param[in] oct Pointer to target octant.
@@ -484,10 +506,12 @@ public:
 	 * \return Global index of octant.
 	 */
 	uint64_t getGlobalIdx(Class_Octant<2>* oct){
+#if NOMPI==0
 		if (getIsGhost(oct)){
 			uint32_t idx = octree.findGhostMorton(oct->computeMorton());
 			return octree.globalidx_ghosts[idx];
 		}
+#endif
 		uint32_t idx = octree.findMorton(oct->computeMorton());
 		if (rank){
 			return partition_range_globalidx[rank-1] + uint64_t(idx + 1);
@@ -500,9 +524,11 @@ public:
 	 * \return Local index of octant.
 	 */
 	uint32_t getIdx(Class_Octant<2>* oct){
+#if NOMPI==0
 		if (getIsGhost(oct)){
 			return octree.findGhostMorton(oct->computeMorton());
 		}
+#endif
 		return octree.findMorton(oct->computeMorton());
 	};
 
@@ -670,6 +696,7 @@ private:
 		return !oct.getNotBalance();
 	};
 
+#if NOMPI==0
 	/*! Get the nature of an octant.
 	 * \param[in] oct Target octant.
 	 * \return Is octant ghost?
@@ -677,17 +704,20 @@ private:
 	bool getIsGhost(Class_Octant<2> oct){
 		return (findOwner(oct.computeMorton()) != rank);
 	};
+#endif
 
 	/*! Get the global index of an octant.
 	 * \param[in] oct Target octant.
 	 * \return Global index of octant.
 	 */
 	uint64_t getGlobalIdx(Class_Octant<2> oct){
+#if NOMPI==0
 		if (getIsGhost(oct)){
 			uint32_t idx = octree.findGhostMorton(oct.computeMorton());
 			return octree.globalidx_ghosts[idx];
 		}
 		else{
+#endif
 			uint32_t idx = octree.findMorton(oct.computeMorton());
 			if (rank){
 				return partition_range_globalidx[rank-1] + uint64_t(idx + 1);
@@ -695,7 +725,9 @@ private:
 			else{
 				return uint64_t(idx);
 			};
+#if NOMPI==0
 		};
+#endif
 		return global_num_octants;
 	};
 
@@ -704,12 +736,16 @@ private:
 	 * \return Local index of octant.
 	 */
 	uint32_t getIdx(Class_Octant<2> oct){
+#if NOMPI==0
 		if (getIsGhost(oct)){
 			return octree.findGhostMorton(oct.computeMorton());
 		}
 		else{
+#endif
 			return octree.findMorton(oct.computeMorton());
+#if NOMPI==0
 		};
+#endif
 		return octree.getNumOctants();
 	};
 
@@ -898,6 +934,7 @@ public:
 		return !octree.getBalance(idx);
 	};
 
+#if NOMPI==0
 	/*! Get the nature of an octant.
 	 * \param[in] idx Local index of target octant.
 	 * \return Is octant ghost?
@@ -905,6 +942,7 @@ public:
 	bool getIsGhost(uint32_t idx){
 		return (findOwner(octree.octants[idx].computeMorton()) != rank);
 	};
+#endif
 
 	/*! Get if the octant is new after refinement.
 	 * \param[in] idx Local index of target octant.
@@ -1044,7 +1082,7 @@ public:
 	 * \param[in] iface Index of face/edge/node passed through for neighbours finding
 	 * \param[in] codim Codimension of the iface-th entity 1=edge, 2=node
 	 * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-	 * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant */
+	 * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs. */
 	void findNeighbours(uint32_t idx,
 			uint8_t iface,
 			uint8_t codim,
@@ -1071,7 +1109,7 @@ public:
 	 * \param[in] iface Index of face/edge/node passed through for neighbours finding
 	 * \param[in] codim Codimension of the iface-th entity 1=edge, 2=node
 	 * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-	 * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant */
+	 * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs. */
 	void findNeighbours(Class_Octant<2>* oct,
 			uint8_t iface,
 			uint8_t codim,
@@ -1100,7 +1138,7 @@ private:
 	 * \param[in] iface Index of face/edge/node passed through for neighbours finding
 	 * \param[in] codim Codimension of the iface-th entity 1=edge, 2=node
 	 * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
-	 * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant */
+	 * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs. */
 	void findNeighbours(Class_Octant<2> oct,
 			uint8_t iface,
 			uint8_t codim,
@@ -1347,7 +1385,11 @@ public:
 		y = trans.mapY(point[1]);
 		morton = mortonEncode_magicbits(x,y);
 
+#if NOMPI==0
 		powner = findOwner(morton);
+#else
+		powner = 0;
+#endif
 		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length))
 			return NULL;
 
@@ -1410,7 +1452,11 @@ public:
 		y = trans.mapY(point[1]);
 		morton = mortonEncode_magicbits(x,y);
 
+#if NOMPI==0
 		powner = findOwner(morton);
+#else
+		powner = 0;
+#endif
 		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length))
 			return -1;
 
@@ -1473,7 +1519,11 @@ private:
 		if (x == global2D.max_length) x = x - 1;
 		if (y == global2D.max_length) y = y - 1;
 
+#if NOMPI==0
 		powner = findOwner(morton);
+#else
+		powner = 0;
+#endif
 		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length)){
 			Class_Octant<2> oct0;
 			return oct0;
@@ -1536,7 +1586,11 @@ public:
 		y = point[1];
 		morton = mortonEncode_magicbits(x,y);
 
+#if NOMPI==0
 		powner = findOwner(morton);
+#else
+		powner = 0;
+#endif
 		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length))
 			return NULL;
 
@@ -1599,7 +1653,11 @@ public:
 		y = point[1];
 		morton = mortonEncode_magicbits(x,y);
 
+#if NOMPI==0
 		powner = findOwner(morton);
+#else
+		powner = 0;
+#endif
 		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length))
 			return -1;
 
@@ -1662,7 +1720,11 @@ public:
 		y = uint32_t(point[1]);
 		morton = mortonEncode_magicbits(x,y);
 
+#if NOMPI==0
 		powner = findOwner(morton);
+#else
+		powner = 0;
+#endif
 		if ((powner!=rank) || (point[0] < 0) || (point[0] > double(global2D.max_length)) || (point[1] < 0) || (point[1] > double(global2D.max_length)))
 			return NULL;
 
@@ -1725,7 +1787,11 @@ public:
 		y = uint32_t(point[1]);
 		morton = mortonEncode_magicbits(x,y);
 
+#if NOMPI==0
 		powner = findOwner(morton);
+#else
+		powner = 0;
+#endif
 		if ((powner!=rank) || (point[0] < 0) || (point[0] > double(global2D.max_length)) || (point[1] < 0) || (point[1] > double(global2D.max_length)))
 			return -1;
 
@@ -1785,7 +1851,11 @@ private:
 		y = point[1];
 		morton = mortonEncode_magicbits(x,y);
 
+#if NOMPI==0
 		powner = findOwner(morton);
+#else
+		powner = 0;
+#endif
 		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length)){
 			Class_Octant<2> oct0;
 			return oct0;
@@ -1838,6 +1908,7 @@ private:
 	// =============================================================================== //
 	// PARATREE METHODS ----------------------------------------------------------------------- //
 
+#if NOMPI==0
 	void computePartition(uint32_t* partition) {
 		uint32_t division_result = 0;
 		uint32_t remind = 0;
@@ -3858,18 +3929,21 @@ public:
 
 
 	}
-
+#endif /* NOMPI */
 	// =============================================================================== //
 
 private:
 	void updateAdapt() {
+#if NOMPI==0
 		if(serial)
 		{
+#endif
 			max_depth = octree.local_max_depth;
 			global_num_octants = octree.getNumOctants();
 			for(int p = 0; p < nproc; ++p){
 				partition_range_globalidx[p] = global_num_octants - 1;
 			}
+#if NOMPI==0
 		}
 		else
 		{
@@ -3894,13 +3968,17 @@ private:
 			error_flag = MPI_Allgather(&firstDescMorton,1,MPI_UINT64_T,partition_first_desc,1,MPI_UINT64_T,MPI_COMM_WORLD);
 			delete [] rbuff; rbuff = NULL;
 		}
+#endif
 	}
 
 	// =============================================================================== //
 
 	void updateAfterCoarse(){
+#if NOMPI==0
 		if(serial){
+#endif
 			updateAdapt();
+#if NOMPI==0
 		}
 		else{
 			//Only if parallel
@@ -3911,13 +3989,17 @@ private:
 			octree.checkCoarse(lastDescMortonPre, firstDescMortonPost);
 			updateAdapt();
 		}
+#endif
 	}
 
 	// =============================================================================== //
 
 	void updateAfterCoarse(u32vector & mapidx){
+#if NOMPI==0
 		if(serial){
+#endif
 			updateAdapt();
+#if NOMPI==0
 		}
 		else{
 			//Only if parallel
@@ -3928,12 +4010,15 @@ private:
 			octree.checkCoarse(lastDescMortonPre, firstDescMortonPost, mapidx);
 			updateAdapt();
 		}
+
+#endif
 	}
 
 	//TODO Update after coarse with intersections
 
 	// =============================================================================== //
 
+#if NOMPI==0
 	void commMarker() {
 		//PACK (mpi) LEVEL AND MARKER OF BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
 		//it visits every element in bordersPerProc (one for every neighbor proc)
@@ -4028,10 +4113,12 @@ private:
 		delete [] stats; stats = NULL;
 
 	}
+#endif
 
 	//==============================================================
 
 	void balance21(bool const first){
+#if NOMPI==0
 		bool globalDone = true, localDone = false;
 		int  iteration  = 0;
 
@@ -4088,6 +4175,11 @@ private:
 			commMarker();
 
 		}
+#else
+
+		octree.localBalanceAll(true);
+
+#endif /* NOMPI */
 	}
 
 	// =============================================================================== //
@@ -4105,7 +4197,9 @@ public:
 			iter->info[9] = false;
 			iter->info[11] = false;
 		}
+#if NOMPI==0
 		if(serial){
+#endif
 			log.writeLog("---------------------------------------------");
 			log.writeLog(" ADAPT (Refine/Coarse)");
 			log.writeLog(" ");
@@ -4137,10 +4231,13 @@ public:
 			nocts = octree.getNumOctants();
 
 			log.writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
+#if NOMPI==0
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+#endif
 			log.writeLog(" ");
 			log.writeLog("---------------------------------------------");
+#if NOMPI==0
 		}
 		else{
 			log.writeLog("---------------------------------------------");
@@ -4182,6 +4279,9 @@ public:
 			log.writeLog("---------------------------------------------");
 		}
 		return globalDone;
+#else
+		return localDone;
+#endif
 	}
 
 	// =============================================================================== //
@@ -4212,7 +4312,9 @@ public:
 		for (uint32_t i=0; i<nocts; i++){
 			mapidx[i] = i;
 		}
+#if NOMPI==0
 		if(serial){
+#endif
 			log.writeLog("---------------------------------------------");
 			log.writeLog(" ADAPT (Refine/Coarse)");
 			log.writeLog(" ");
@@ -4244,10 +4346,13 @@ public:
 			nocts = octree.getNumOctants();
 
 			log.writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
+#if NOMPI==0
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+#endif
 			log.writeLog(" ");
 			log.writeLog("---------------------------------------------");
+#if NOMPI==0
 		}
 		else{
 			log.writeLog("---------------------------------------------");
@@ -4288,6 +4393,9 @@ public:
 			log.writeLog("---------------------------------------------");
 		}
 		return globalDone;
+#else
+		return localDone;
+#endif
 	}
 
 	// =============================================================================== //
@@ -4304,7 +4412,9 @@ public:
 			iter->info[9] = false;
 			iter->info[11] = false;
 		}
+#if NOMPI==0
 		if(serial){
+#endif
 			log.writeLog("---------------------------------------------");
 			log.writeLog(" ADAPT (GlobalRefine)");
 			log.writeLog(" ");
@@ -4321,10 +4431,13 @@ public:
 			nocts = octree.getNumOctants();
 			updateAdapt();
 
+#if NOMPI==0
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+#endif
 			log.writeLog(" ");
 			log.writeLog("---------------------------------------------");
+#if NOMPI==0
 		}
 		else{
 			log.writeLog("---------------------------------------------");
@@ -4349,6 +4462,9 @@ public:
 			log.writeLog("---------------------------------------------");
 		}
 		return globalDone;
+#else
+		return localDone;
+#endif
 	}
 
 	// =============================================================================== //
@@ -4379,7 +4495,9 @@ public:
 		for (uint32_t i=0; i<nocts; i++){
 			mapidx[i] = i;
 		}
+#if NOMPI==0
 		if(serial){
+#endif
 			log.writeLog("---------------------------------------------");
 			log.writeLog(" ADAPT (Global Refine)");
 			log.writeLog(" ");
@@ -4396,10 +4514,13 @@ public:
 			nocts = octree.getNumOctants();
 			updateAdapt();
 
+#if NOMPI==0
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+#endif
 			log.writeLog(" ");
 			log.writeLog("---------------------------------------------");
+#if NOMPI==0
 		}
 		else{
 			log.writeLog("---------------------------------------------");
@@ -4424,6 +4545,9 @@ public:
 			log.writeLog("---------------------------------------------");
 		}
 		return globalDone;
+#else
+		return localDone;
+#endif
 	}
 
 	// =============================================================================== //
@@ -4440,7 +4564,9 @@ public:
 			iter->info[9] = false;
 			iter->info[11] = false;
 		}
+#if NOMPI==0
 		if(serial){
+#endif
 			log.writeLog("---------------------------------------------");
 			log.writeLog(" ADAPT (Global Coarse)");
 			log.writeLog(" ");
@@ -4463,10 +4589,13 @@ public:
 			nocts = octree.getNumOctants();
 
 			log.writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
+#if NOMPI==0
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+#endif
 			log.writeLog(" ");
 			log.writeLog("---------------------------------------------");
+#if NOMPI==0
 		}
 		else{
 			log.writeLog("---------------------------------------------");
@@ -4499,6 +4628,9 @@ public:
 			log.writeLog("---------------------------------------------");
 		}
 		return globalDone;
+#else
+		return localDone;
+#endif
 	}
 
 	// =============================================================================== //
@@ -4529,7 +4661,9 @@ public:
 		for (uint32_t i=0; i<nocts; i++){
 			mapidx[i] = i;
 		}
+#if NOMPI==0
 		if(serial){
+#endif
 			log.writeLog("---------------------------------------------");
 			log.writeLog(" ADAPT (Global Coarse)");
 			log.writeLog(" ");
@@ -4552,10 +4686,13 @@ public:
 			nocts = octree.getNumOctants();
 
 			log.writeLog(" Number of octants after Coarse	:	" + to_string(nocts));
+#if NOMPI==0
 			MPI_Barrier(MPI_COMM_WORLD);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,MPI_COMM_WORLD);
+#endif
 			log.writeLog(" ");
 			log.writeLog("---------------------------------------------");
+#if NOMPI==0
 		}
 		else{
 			log.writeLog("---------------------------------------------");
@@ -4588,8 +4725,12 @@ public:
 			log.writeLog("---------------------------------------------");
 		}
 		return globalDone;
+#else
+		return localDone;
+#endif
 	}
 
+#if NOMPI==0
 	// =============================================================================== //
 
 	/** Communicate data provided by the user between the processes.
@@ -4678,7 +4819,7 @@ public:
 		delete [] stats; stats = NULL;
 
 	};
-
+#endif /* NOMPI */
 	// =============================================================================== //
 
 	/** Compute the connectivity of octants and store the coordinates of nodes.
@@ -4881,7 +5022,9 @@ public:
 		uint32_t nocts2 = ptree.octree.getNumOctants();
 		int owner;
 		mapper.resize(nocts);
+#if NOMPI==0
 		if (ptree.serial){
+#endif
 			for (uint32_t i=0; i<nocts; i++){
 				mapper[i].first.first = idx1;
 				mapper[i].first.second = idx2;
@@ -4910,6 +5053,7 @@ public:
 					morton2 = ptree.getOctant(idx2)->computeMorton();
 				}
 			}
+#if NOMPI==0
 		}
 		else{
 			idx1 = 0;
@@ -5456,6 +5600,7 @@ public:
 				delete [] stats; stats = NULL;
 			}
 		}
+#endif /* NOMPI */
 		//TODO PARALLEL VERSION - (DONE?)
 		return mapper;
 	}
@@ -5610,7 +5755,9 @@ public:
 			pout.close();
 
 		}
+#if NOMPI==0
 		MPI_Barrier(MPI_COMM_WORLD);
+#endif
 
 		if (clear){
 			octree.clearConnectivity();
@@ -5775,8 +5922,9 @@ public:
 			pout.close();
 
 		}
+#if NOMPI==0
 		MPI_Barrier(MPI_COMM_WORLD);
-
+#endif
 
 	}
 
@@ -5918,8 +6066,9 @@ public:
 			pout.close();
 
 		}
+#if NOMPI==0
 		MPI_Barrier(MPI_COMM_WORLD);
-
+#endif
 
 	}
 

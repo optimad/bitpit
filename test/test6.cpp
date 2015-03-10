@@ -1,5 +1,4 @@
 #include "preprocessor_defines.dat"
-#include <mpi.h>
 #include "Class_Global.hpp"
 #include "Class_Para_Tree.hpp"
 
@@ -9,9 +8,11 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
+#if NOMPI==0
 	MPI::Init(argc, argv);
 
 	{
+#endif
 		int iter = 0;
 		/**<Instantation of a 2D para_tree object.*/
 		Class_Para_Tree<2> pablo6;
@@ -27,8 +28,10 @@ int main(int argc, char *argv[]) {
 
 		/**<Instantation and copy pablo6.*/
 		Class_Para_Tree<2> pablo60 = pablo6;
+#if NOMPI==0
 		pablo6.loadBalance();
 		pablo60.loadBalance();
+#endif
 		pablo60.write("Pablo60_iter"+to_string(iter));
 
 		/**<Define a center point and a radius.*/
@@ -108,8 +111,9 @@ int main(int argc, char *argv[]) {
 			}
 			pablo60.writeTest("Pablo60_iter"+to_string(iter+1), data);
 		}
+#if NOMPI==0
 	}
 
 	MPI::Finalize();
-
+#endif
 }

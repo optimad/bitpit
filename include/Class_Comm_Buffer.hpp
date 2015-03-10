@@ -1,3 +1,4 @@
+#if NOMPI==0
 #ifndef CLASSCOMMBUFFER_HPP_
 #define CLASSCOMMBUFFER_HPP_
 
@@ -7,6 +8,7 @@
 #include "preprocessor_defines.dat"
 #include <cstdint>
 #include <typeinfo>
+#include <algorithm>
 #include "mpi.h"
 #include "mpi_datatype_conversion.hpp"
 
@@ -51,3 +53,4 @@ public:
 #include "Class_Comm_Buffer.tpp"
 
 #endif /* CLASSCOMMBUFFER_HPP_ */
+#endif /* NOMPI */
