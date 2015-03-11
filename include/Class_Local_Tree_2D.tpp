@@ -688,8 +688,8 @@ private:
 				octants.push_back(father);
 				octants.shrink_to_fit();
 				nocts = octants.size();
-				mapidx.resize(nocts-offset);
-				mapidx.push_back(nocts0-nend);
+// TODO			DO THIS CORRECTION IN OTHER COARSE METHODS  !!!
+				mapidx.resize(nocts);
 				mapidx.shrink_to_fit();
 			}
 
@@ -1172,7 +1172,6 @@ private:
 		octants.resize(nocts-offset);
 		octants.shrink_to_fit();
 		nocts = octants.size();
-		//mapidx.resize(nocts-offset);
 		mapidx.resize(nocts);
 		mapidx.shrink_to_fit();
 
