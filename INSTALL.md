@@ -6,7 +6,7 @@ PABLO runs on Linux and Mac OSX platforms.
 PABLO depends on
 * c++ compiler supporting `-std=c++11`. It has been tested with g++ >= 4.7.3 and clang++ >=3.5
 * cmake >= 2.8
-* MPI implementation. It has been tested with OpenMPI >= 1.6.5. 
+* (optionally) MPI implementation. It has been tested with OpenMPI >= 1.6.5. 
 
 ## Confguring PABLO
 PABLO uses cmake as building tool.
@@ -31,6 +31,12 @@ The `DEBUG` variable can be used to set the compiler flags `-ggdb -O0 -fmessage-
 	PABLO/build$ cmake -DDEBUG=1 ../	
 ```
 to obtain a debug version of PABLO. `DEBUG` default value is 0.
+
+The `WITHOUT_MPI` variable can be used to compile the serial implementation of PABLO and to avoid the dependency on MPI libraries, then you can set
+```bash
+	PABLO/build$ cmake -DWITHOUT_MPI=1 ../	
+```
+to obtain a serial version of PABLO. `WITHOUT_MPI` default value is 0.
 
 The `COMPILE_TESTS` variable can be use to avoid tests compilation, then
 ```bash

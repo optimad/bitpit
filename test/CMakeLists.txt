@@ -77,7 +77,6 @@ TARGET_LINK_LIBRARIES(test7 PABLO)
 
 #Build test12.cpp
 IF(WITHOUT_MPI EQUAL 0)
-message("test12")
 SET(test12_src test12.cpp)
 
 add_executable(test12 ${test12_src})
