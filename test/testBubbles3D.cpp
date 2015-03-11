@@ -44,11 +44,10 @@ int main(int argc, char *argv[]) {
 #endif
 
 		/**<Define a set of bubbles.*/
-//		cout << time(NULL) << endl;
-//		srand(time(NULL));
-		srand(1426006677);
+		cout << time(NULL) << endl;
+		srand(time(NULL));
+//		srand(1426006677);
 
-		//8 proc deadlock 1418143772  at iter 51 proc
 
 #if NOMPI==0
 		int nb = 100;
@@ -98,7 +97,6 @@ int main(int argc, char *argv[]) {
 		int itstart = 1;
 		int itend = 200;
 
-
 		int nrefperiter = 3;
 
 		for (iter=itstart; iter<itend; iter++){
@@ -123,7 +121,6 @@ int main(int argc, char *argv[]) {
 						double yc = BB[ib].c[1];
 						double zc = BB[ib].c[2];
 						double radius = BB[ib].r;
-						//oct_data[i] = (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0));
 						oct_data[i] = (double)pabloBB.getLevel(i);
 						for (int j=0; j<global3D.nnodes; j++){
 							double x = nodes[j][0];
@@ -136,7 +133,7 @@ int main(int argc, char *argv[]) {
 								if (pabloBB.getLevel(i) < 7){
 									/**<Set to refine inside the sphere.*/
 									pabloBB.setMarker(i,1);
-									oct_data[i] = (double)pabloBB.getLevel(i)+1;
+									oct_data[i] = pabloBB.getLevel(i)+1;
 								}
 								else{
 									pabloBB.setMarker(i,0);
@@ -149,37 +146,25 @@ int main(int argc, char *argv[]) {
 					if (pabloBB.getLevel(i) > 4 && !inside){
 						/**<Set to coarse if the octant has a level higher than 5.*/
 						pabloBB.setMarker(i,-1);
+						oct_data[i] = pabloBB.getLevel(i)-1;
 					}
 				}
-
-				cout << pabloBB.rank << "  in adapt" << endl;
 
 				/**<Adapt the octree.*/
 				vector<uint32_t> mapidx;
 				bool adapt = pabloBB.adapt(mapidx);
 				//bool adapt = pabloBB.adapt();
 
-				cout << pabloBB.rank << "  out adapt" << endl;
-
-
 				nocts = pabloBB.getNumOctants();
 				nghosts = pabloBB.getNumGhosts();
 				oct_data_new.resize(nocts, 0);
 
-				cout << pabloBB.rank << "  in mapping data" << endl;
 				/**<Assign to the new octant the data after an adaption.*/
 				for (int i=0; i<nocts; i++){
-					if (pabloBB.rank == 1){
-						cout << i << "/" << nocts << "//" << mapidx.size() << endl;
-						cout << mapidx[i] << "/" << oct_data.size() << endl;
-					}
 					oct_data_new[i] = oct_data[mapidx[i]];
 				}
 				oct_data = oct_data_new;
 				vector<double>().swap(oct_data_new);
-				cout << pabloBB.rank << "  out mapping data" << endl;
-
-
 
 			}
 
@@ -187,16 +172,14 @@ int main(int argc, char *argv[]) {
 			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
 			/**<Communicate the data of the octants and the ghost octants between the processes.*/
 			User_Data_LB<vector<double> > data_lb(oct_data);
-			cout << pabloBB.rank << "  in load balance" << endl;
 			pabloBB.loadBalance(data_lb);
-			cout << pabloBB.rank << "  out load balance" << endl;
 			nocts = pabloBB.getNumOctants();
 			nghosts = pabloBB.getNumGhosts();
 #endif
 
 			/**<Update the connectivity and write the para_tree.*/
 			pabloBB.updateConnectivity();
-			pabloBB.writeTest("PabloBubble_iter"+to_string(iter), oct_data);
+			pabloBB.writeTest("PabloBubble3D_iter"+to_string(iter), oct_data);
 		}
 
 #if NOMPI==0
@@ -205,5 +188,3 @@ int main(int argc, char *argv[]) {
 	MPI::Finalize();
 #endif
 }
-
-

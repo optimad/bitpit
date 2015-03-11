@@ -12,8 +12,6 @@ class bubble{
 public:
 	double c[2];
 	double r;
-
-
 };
 
 

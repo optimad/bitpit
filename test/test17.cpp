@@ -15,22 +15,22 @@ int main(int argc, char *argv[]) {
 #endif
 		int iter = 0;
 		/**<Instantation of a 2D para_tree object.*/
-		Class_Para_Tree<2> pablo6;
+		Class_Para_Tree<2> pablo17;
 		int idx = 0;
 
 		/**<Set NO 2:1 balance for the octree.*/
-		pablo6.setBalance(idx,false);
+		pablo17.setBalance(idx,false);
 
 		/**<Refine globally five level and write the para_tree.*/
 		for (iter=1; iter<6; iter++){
-			pablo6.adaptGlobalRefine();
+			pablo17.adaptGlobalRefine();
 		}
 
 		/**<Instantation and copy pablo6.*/
-		Class_Para_Tree<2> pablo60 = pablo6;
+		Class_Para_Tree<2> pablo170 = pablo17;
 #if NOMPI==0
-		pablo6.loadBalance();
-		pablo60.loadBalance();
+		pablo17.loadBalance();
+		pablo170.loadBalance();
 #endif
 
 		/**<Define a center point and a radius.*/
@@ -39,13 +39,13 @@ int main(int argc, char *argv[]) {
 		double radius = 0.25;
 
 		/**<Define vectors of data.*/
-		uint32_t nocts = pablo6.getNumOctants();
-		uint32_t nghosts = pablo6.getNumGhosts();
+		uint32_t nocts = pablo17.getNumOctants();
+		uint32_t nghosts = pablo17.getNumGhosts();
 
 		/**<Assign a data (distance from center of a circle) to the octants with at least one node inside the circle.*/
 		for (int i=0; i<nocts; i++){
-			vector<vector<double> > nodes = pablo6.getNodes(i);
-			vector<double> center = pablo6.getCenter(i);
+			vector<vector<double> > nodes = pablo17.getNodes(i);
+			vector<double> center = pablo17.getCenter(i);
 			for (int j=0; j<global2D.nnodes; j++){
 				double x = nodes[j][0];
 				double y = nodes[j][1];
@@ -53,12 +53,12 @@ int main(int argc, char *argv[]) {
 					if (center[0]<=xc){
 
 						/**<Set to refine to the octants in the left side of the domain.*/
-						pablo6.setMarker(i,1);
+						pablo17.setMarker(i,1);
 					}
 					else{
 
 						/**<Set to coarse to the octants in the right side of the domain.*/
-						pablo6.setMarker(i,-1);
+						pablo17.setMarker(i,-1);
 					}
 				}
 			}
@@ -66,17 +66,17 @@ int main(int argc, char *argv[]) {
 
 		/**<Update the connectivity and write the para_tree.*/
 		iter = 0;
-		pablo6.updateConnectivity();
-		pablo60.updateConnectivity();
-		pablo6.write("Pablo6_iter"+to_string(iter));
-		pablo60.write("Pablo60_iter"+to_string(iter));
+		pablo17.updateConnectivity();
+		pablo170.updateConnectivity();
+		pablo17.write("Pablo17_iter"+to_string(iter));
+		pablo170.write("Pablo170_iter"+to_string(iter));
 
 		/**<Adapt two times with data injection on new octants.*/
 		int start = 1;
 		for (iter=start; iter<start+2; iter++){
 			for (int i=0; i<nocts; i++){
-				vector<vector<double> > nodes = pablo6.getNodes(i);
-				vector<double> center = pablo6.getCenter(i);
+				vector<vector<double> > nodes = pablo17.getNodes(i);
+				vector<double> center = pablo17.getCenter(i);
 				for (int j=0; j<global2D.nnodes; j++){
 					double x = nodes[j][0];
 					double y = nodes[j][1];
@@ -84,34 +84,34 @@ int main(int argc, char *argv[]) {
 						if (center[0]<=xc){
 
 							/**<Set to refine to the octants in the left side of the domain inside a circle.*/
-							pablo6.setMarker(i,1);
+							pablo17.setMarker(i,1);
 						}
 						else{
 
 							/**<Set to coarse to the octants in the right side of the domain inside a circle.*/
-							pablo6.setMarker(i,-1);
+							pablo17.setMarker(i,-1);
 						}
 					}
 				}
 			}
 
 			/**<Adapt the octree and map the data in the new octants.*/
-			pablo6.adapt();
-			nocts = pablo6.getNumOctants();
+			pablo17.adapt();
+			nocts = pablo17.getNumOctants();
 
 			/**<Update the connectivity and write the para_tree.*/
-			pablo6.updateConnectivity();
-			pablo6.write("Pablo6_iter"+to_string(iter));
+			pablo17.updateConnectivity();
+			pablo17.write("Pablo17_iter"+to_string(iter));
 
 			vector<pair<pair<uint32_t,uint32_t>, pair<int, int> > > mapper;
-			nocts = pablo60.getNumOctants();
-			mapper = pablo60.mapPablos(pablo6);
+			nocts = pablo170.getNumOctants();
+			mapper = pablo170.mapPablos(pablo17);
 			vector<double> data(nocts);
 			for (int i=0; i<nocts; i++){
 				data[i] = (double) mapper[i].first.second;
 			}
-			pablo60.updateConnectivity();
-			pablo60.writeTest("Pablo60_iter"+to_string(iter), data);
+			pablo170.updateConnectivity();
+			pablo170.writeTest("Pablo170_iter"+to_string(iter), data);
 		}
 #if NOMPI==0
 	}

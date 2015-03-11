@@ -64,15 +64,15 @@ target_link_libraries(test5 mpi)
 ENDIF(WITHOUT_MPI EQUAL 0)
 TARGET_LINK_LIBRARIES(test5 PABLO)
 
-#Build test6.cpp
-SET(test6_src test6.cpp)
+#Build test7.cpp
+SET(test7_src test7.cpp)
 
-add_executable(test6 ${test6_src})
+add_executable(test7 ${test7_src})
 
 IF(WITHOUT_MPI EQUAL 0)
-target_link_libraries(test6 mpi)
+target_link_libraries(test7 mpi)
 ENDIF(WITHOUT_MPI EQUAL 0)
-TARGET_LINK_LIBRARIES(test6 PABLO)
+TARGET_LINK_LIBRARIES(test7 PABLO)
 
 
 #Build test12.cpp
@@ -121,6 +121,16 @@ IF(WITHOUT_MPI EQUAL 0)
 SET(test16_src test16.cpp)
 
 add_executable(test16 ${test16_src})
+
+target_link_libraries(test16 mpi)
+TARGET_LINK_LIBRARIES(test16 PABLO)
+ENDIF(WITHOUT_MPI EQUAL 0)
+
+IF(WITHOUT_MPI EQUAL 0)
+#Build test17.cpp
+SET(test17_src test17.cpp)
+
+add_executable(test17 ${test17_src})
 
 target_link_libraries(test16 mpi)
 TARGET_LINK_LIBRARIES(test16 PABLO)
