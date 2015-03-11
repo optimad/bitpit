@@ -5022,7 +5022,7 @@ public:
 	 * \param[out] Map between octrees. Each i-th pair gives the first index and the last one of the elements
 	 * of the second octree which lie in the i-th element of the first octree. If the indices are equal, then
 	 * the element of the second octree is of the same level or lower (bigger size).  Each second i-th pair gives
-	 * the indices of the two processes owning the two quadrants dfined by the first pair.
+	 * the indices of the two processes owning the two quadrants defined by the first pair.
 	 */
 	vector<pair<pair<uint32_t, uint32_t>, pair<int, int> > > mapPablos(Class_Para_Tree<2> & ptree){
 		//TODO DO IT WITH ITERATORS
@@ -5603,7 +5603,7 @@ public:
 					int nofIndexPerProc = int(rrit->commBufferSize / (uint32_t) (sizeof(uint32_t)));
 					for(int i = 0; i < nofIndexPerProc; ++i){
 						error_flag = MPI_Unpack(rrit->commBuffer,rrit->commBufferSize,&pos,&Index,1,MPI_UINT32_T,comm);
-						mapper[SecondLocalIndex[iproc][i]].first.first = Index;
+						mapper[SecondLocalIndex[iproc][i]].first.second = Index;
 						++Indexcounter;
 					}
 					iproc++;
@@ -5616,7 +5616,7 @@ public:
 			}
 		}
 #endif /* NOMPI */
-		//TODO PARALLEL VERSION - (DONE?)
+		//TODO PARALLEL VERSION - (BUGS!!!)
 		return mapper;
 	}
 

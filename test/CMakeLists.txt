@@ -125,16 +125,6 @@ target_link_libraries(test16 mpi)
 TARGET_LINK_LIBRARIES(test16 PABLO)
 ENDIF(WITHOUT_MPI EQUAL 0)
 
-IF(WITHOUT_MPI EQUAL 0)
-#Build test17.cpp
-SET(test17_src test17.cpp)
-
-add_executable(test17 ${test17_src})
-
-target_link_libraries(test17 mpi)
-TARGET_LINK_LIBRARIES(test17 PABLO)
-ENDIF(WITHOUT_MPI EQUAL 0)
-
 #Build test104.cpp
 SET(test104_src test104.cpp)
 
