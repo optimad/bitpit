@@ -250,7 +250,7 @@ public:
 	// ------------------------------------------------------------------------------- //
 
 	/*! Get the coordinates of the center of a face of an octant in logical domain.
-	 * \return Vector[3] with the coordinates of the center of octant.
+	 * \return Vector[3] with the coordinates of the center of the octant face.
 	 */
 	dvector	getFaceCenter(uint8_t iface){
 		double	dh_2;
@@ -264,6 +264,27 @@ public:
 			center[0] = (double)x + (double)A[iface][0] * dh_2;
 			center[1] = (double)y + (double)A[iface][1] * dh_2;
 			center[1] = (double)z + (double)A[iface][2] * dh_2;
+		}
+		return center;
+	};
+
+	// ------------------------------------------------------------------------------- //
+
+	/*! Get the coordinates of the center of a edge of an octant in logical domain.
+	 * \return Vector[3] with the coordinates of the center of the octant edge.
+	 */
+	dvector	getEdgeCenter(uint8_t iedge){
+		double	dh_2;
+
+		int A[12][3] = { {0,1,0},{2,1,0},{1,0,0},{1,2,0},{0,0,1},{2,0,1},{0,2,1},{2,2,1},{0,1,2},{2,1,2},{1,0,2},{1,2,2} };//{ {0,1,1} , {2,1,1} , {1,0,1} , {1,2,1} , {1,1,0} , {1,1,2} };
+
+		dh_2 = double(getSize())/2.0;
+		vector<double> center(3);
+
+		if (iedge < global3D.nedges){
+			center[0] = (double)x + (double)A[iedge][0] * dh_2;
+			center[1] = (double)y + (double)A[iedge][1] * dh_2;
+			center[1] = (double)z + (double)A[iedge][2] * dh_2;
 		}
 		return center;
 	};
