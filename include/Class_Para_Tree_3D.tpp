@@ -486,6 +486,28 @@ public:
 	}
 
 
+	/*! Get the coordinates of single node of an octant.
+	 * \param[in] idx Local index of target octant.
+	 * \param[in] inode Index of the target node.
+	 * \return center Coordinates of the center of the iface-th face af octant.
+	 */
+	vector<double> getNode(uint32_t idx, uint8_t inode) {
+		vector<double> node;
+		u32vector node_ = octree.octants[idx].getNode(inode);
+		trans.mapNode(node_, node);
+		return node;
+	}
+
+	/*! Get the coordinates of the center of a face of an octant.
+	 * \param[in] idx Local index of target octant.
+	 * \param[in] iface Index of the target face.
+	 * \param[out] center Coordinates of the center of the iface-th face af octant.
+	 */
+	void getNode(uint32_t idx, uint8_t inode, vector<double>& node) {
+		u32vector node_ = octree.octants[idx].getNode(inode);
+		trans.mapNode(node_, node);
+	}
+
 	/*! Get the coordinates of the nodes of an octant.
 	 * \param[in] oct Pointer to target octant.
 	 * \param[out] nodes Coordinates of the nodes of octant.

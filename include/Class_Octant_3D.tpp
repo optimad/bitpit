@@ -271,7 +271,7 @@ public:
 	// ------------------------------------------------------------------------------- //
 
 	/*! Get the coordinates of the nodes of an octant in logical domain.
-	 * \param[out] nodes Vector[4][3] with the coordinates (with z=0) of the nodes of octant.
+	 * \param[out] nodes Vector[4][3] with the coordinates of the nodes of octant.
 	 */
 	void		getNodes(u32vector2D & nodes){
 		uint8_t		i, cx, cy, cz;
@@ -292,6 +292,47 @@ public:
 			nodes[i].shrink_to_fit();
 		}
 		nodes.shrink_to_fit();
+	};
+
+	/*! Get the coordinates of a nodes of an octant in logical domain.
+	 * \param[in] inode Local index of the node
+	 * \param[out] node dim-vector with the logical coordinates of the node of the octant.
+	 */
+	void		getNode(u32vector & node, uint8_t inode){
+		uint8_t		i, cx, cy, cz;
+		uint32_t	dh;
+
+		dh = getSize();
+		node.clear();
+		node.resize(3);
+		cx = i%2;
+		cy = (i-4*(i/4))/2;
+		cz = i/4;
+		node[0] = x + cx*dh;
+		node[1] = y + cy*dh;
+		node[2] = z + cz*dh;
+
+	};
+
+	/*! Get the coordinates of a nodes of an octant in logical domain.
+	 * \param[in] inode Local index of the node
+	 * \param[out] node dim-vector with the logical coordinates of the node of the octant.
+	 */
+	u32vector		getNode(uint8_t inode){
+		u32vector node;
+		uint8_t		i, cx, cy, cz;
+		uint32_t	dh;
+
+		dh = getSize();
+		node.clear();
+		node.resize(3);
+		cx = i%2;
+		cy = (i-4*(i/4))/2;
+		cz = i/4;
+		node[0] = x + cx*dh;
+		node[1] = y + cy*dh;
+		node[2] = z + cz*dh;
+		return node;
 	};
 
 	// ------------------------------------------------------------------------------- //

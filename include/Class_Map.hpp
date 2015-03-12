@@ -152,6 +152,13 @@ public:
 	void mapNodes(vector<vector<uint32_t> > nodes,
 			vector<vector<double> > & mapnodes);
 
+	/*! Transformation of coordinates of a node of an octant.
+	 * \param[in] node Coordinates of  the node from logical domain.
+	 * \param[out] mapnodes Coordinates of the node in physical domain.
+	 */
+	void mapNode(vector<uint32_t> & node,
+			vector<double> & mapnode);
+
 	/*! Transformation of coordinates of nodes of an intersection.
 	 * \param[in] nodes Pointer to coordinates of nodes from logical domain.
 	 * \param[out] mapnodes Coordinates of nodes in physical domain.

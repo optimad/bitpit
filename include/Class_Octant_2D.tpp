@@ -289,6 +289,41 @@ public:
 		nodes.shrink_to_fit();
 	};
 
+	/*! Get the coordinates of a nodes of an octant in logical domain.
+	 * \param[in] inode Local index of the node
+	 * \param[out] node dim-vector with the logical coordinates (with z=0) of the node of the octant.
+	 */
+	void		getNode(u32vector & node, uint8_t inode){
+		uint8_t		i, cx, cy;
+		uint32_t	dh;
+
+		dh = getSize();
+		node.clear();
+		node.resize(2);
+		cx = uint8_t(inode%2);
+		cy = uint8_t(inode/2);
+		node[0] = x + cx*dh;
+		node[1] = y + cy*dh;
+	};
+
+	/*! Get the coordinates of a nodes of an octant in logical domain.
+	 * \param[in] inode Local index of the node
+	 * \param[out] node dim-vector with the logical coordinates (with z=0) of the node of the octant.
+	 */
+	u32vector 		getNode(uint8_t inode){
+		u32vector node(2);
+		uint8_t		i, cx, cy;
+		uint32_t	dh;
+
+		dh = getSize();
+		cx = uint8_t(inode%2);
+		cy = uint8_t(inode/2);
+		node[0] = x + cx*dh;
+		node[1] = y + cy*dh;
+		return node;
+	};
+
+
 	// ------------------------------------------------------------------------------- //
 
 	/*! Get the normal of a face of an octant in logical domain.
