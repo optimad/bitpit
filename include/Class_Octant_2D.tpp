@@ -311,7 +311,7 @@ public:
 	 * \param[out] node dim-vector with the logical coordinates (with z=0) of the node of the octant.
 	 */
 	u32vector 		getNode(uint8_t inode){
-		u32vector node(2);
+		u32vector node(3);
 		uint8_t		i, cx, cy;
 		uint32_t	dh;
 
