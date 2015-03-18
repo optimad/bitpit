@@ -152,7 +152,7 @@ void Class_Map<dim>::mapNode(vector<uint32_t> & node,
 	orig.push_back(Y0);
 	orig.push_back(Z0);
 	orig.shrink_to_fit();
-	mapnode.resize(dim);
+	mapnode.resize(3);
 	for (int j=0; j<3; j++){
 		mapnode[j] = orig[j] + L/double(globals.max_length) * double(node[j]);
 

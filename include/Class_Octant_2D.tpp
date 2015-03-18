@@ -299,7 +299,7 @@ public:
 
 		dh = getSize();
 		node.clear();
-		node.resize(2);
+		node.resize(3);
 		cx = uint8_t(inode%2);
 		cy = uint8_t(inode/2);
 		node[0] = x + cx*dh;
