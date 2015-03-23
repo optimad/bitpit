@@ -1362,7 +1362,10 @@ public:
 	 * \return Level of intersection.
 	 */
 	uint8_t getLevel(Class_Intersection<3>* inter) {
-		return octree.extractOctant(inter->owners[inter->finer]).getLevel();
+		if(inter->finer && inter->isghost)
+			return octree.extractGhostOctant(inter->owners[inter->finer]).getLevel();
+		else
+			return octree.extractOctant(inter->owners[inter->finer]).getLevel();
 	}
 
 	/*! Get the finer owner octant of an intersection.
@@ -1422,7 +1425,10 @@ public:
 	 */
 	double getSize(Class_Intersection<3>* inter) {
 		uint32_t Size;
-		Size = octree.extractOctant(inter->owners[inter->finer]).getSize();
+		if(inter->finer && inter->isghost)
+			Size = octree.extractGhostOctant(inter->owners[inter->finer]).getSize();
+		else
+			Size = octree.extractOctant(inter->owners[inter->finer]).getSize();
 		return trans.mapSize(Size);
 	}
 
@@ -1445,7 +1451,11 @@ public:
 	 */
 	vector<double> getCenter(Class_Intersection<3>* inter){
 		vector<double> center;
-		Class_Octant<3> oct = octree.extractOctant(inter->owners[inter->finer]);
+		Class_Octant<3> oct;
+		if(inter->finer && inter->isghost)
+			oct = octree.extractGhostOctant(inter->owners[inter->finer]);
+		else
+			oct = octree.extractOctant(inter->owners[inter->finer]);
 		dvector center_ = oct.getCenter();
 		int sign = ( int(2*((inter->iface)%2)) - 1);
 		double deplace = double (sign * int(oct.getSize())) / 2;
@@ -1460,7 +1470,11 @@ public:
 	 */
 	dvector2D getNodes(Class_Intersection<3>* inter){
 		dvector2D nodes;
-		Class_Octant<3> oct = octree.extractOctant(inter->owners[inter->finer]);
+		Class_Octant<3> oct;
+		if(inter->finer && inter->isghost)
+			oct = octree.extractGhostOctant(inter->owners[inter->finer]);
+		else
+			oct = octree.extractOctant(inter->owners[inter->finer]);
 		uint8_t iface = inter->iface;
 		u32vector2D nodes_all;
 		oct.getNodes(nodes_all);
@@ -1480,7 +1494,11 @@ public:
 	 */
 	dvector getNormal(Class_Intersection<3>* inter){
 		dvector normal;
-		Class_Octant<3> oct = octree.extractOctant(inter->owners[inter->finer]);
+		Class_Octant<3> oct;
+		if(inter->finer && inter->isghost)
+			oct = octree.extractGhostOctant(inter->owners[inter->finer]);
+		else
+			oct = octree.extractOctant(inter->owners[inter->finer]);
 		uint8_t iface = inter->iface;
 		vector<int8_t> normal_;
 		oct.getNormal(iface, normal_);
@@ -1494,19 +1512,29 @@ public:
 private:
 	double getSize(Class_Intersection<3> inter) {
 		uint32_t Size;
-		Size = octree.extractOctant(inter.owners[inter.finer]).getSize();
+		if(inter.finer && inter.isghost)
+			Size = octree.extractGhostOctant(inter.owners[inter.finer]).getSize();
+		else
+			Size = octree.extractOctant(inter.owners[inter.finer]).getSize();
 		return trans.mapSize(Size);
 	}
 
 	double getArea(Class_Intersection<3> inter) {
 		uint64_t Area;
-		Area = octree.extractOctant(inter.owners[inter.finer]).getArea();
+		if(inter.finer && inter.isghost)
+			Area = octree.extractGhostOctant(inter.owners[inter.finer]).getArea();
+		else
+			Area = octree.extractOctant(inter.owners[inter.finer]).getArea();
 		return trans.mapArea(Area);
 	}
 
 	void getCenter(Class_Intersection<3> inter,
 			vector<double> center){
-		Class_Octant<3> oct = octree.extractOctant(inter.owners[inter.finer]);
+		Class_Octant<3> oct;
+		if(inter.finer && inter.isghost)
+			oct = octree.extractGhostOctant(inter.owners[inter.finer]);
+		else
+			oct = octree.extractOctant(inter.owners[inter.finer]);
 		dvector center_ = oct.getCenter();
 		int sign = ( int(2*((inter.iface)%2)) - 1);
 		double deplace = double (sign * int(oct.getSize())) / 2;
@@ -1516,7 +1544,11 @@ private:
 
 	void getNodes(Class_Intersection<3> inter,
 			dvector2D & nodes) {
-		Class_Octant<3> oct = octree.extractOctant(inter.owners[inter.finer]);
+		Class_Octant<3> oct;
+		if(inter.finer && inter.isghost)
+			oct = octree.extractGhostOctant(inter.owners[inter.finer]);
+		else
+			oct = octree.extractOctant(inter.owners[inter.finer]);
 		uint8_t iface = inter.iface;
 		u32vector2D nodes_all;
 		oct.getNodes(nodes_all);
@@ -1531,7 +1563,11 @@ private:
 
 	void getNormal(Class_Intersection<3> inter,
 			dvector & normal) {
-		Class_Octant<3> oct = octree.extractOctant(inter.owners[inter.finer]);
+		Class_Octant<3> oct;
+		if(inter.finer && inter.isghost)
+			oct = octree.extractGhostOctant(inter.owners[inter.finer]);
+		else
+			oct = octree.extractOctant(inter.owners[inter.finer]);
 		uint8_t iface = inter.iface;
 		vector<int8_t> normal_;
 		oct.getNormal(iface, normal_);
