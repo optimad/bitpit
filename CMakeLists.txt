@@ -36,7 +36,7 @@ endif(${DEBUG})
 
 ADD_SUBDIRECTORY(lib)
 
-SET(COMPILE_TESTS 1 CACHE STRING "Set COMPILE_TESTS = 1 if you dont't want to compile PABLO's tests. Otherwise, PABLO's tests will be compiled")
+SET(COMPILE_TESTS 1 CACHE STRING "Set COMPILE_TESTS = 0 if you dont't want to compile PABLO's tests. Otherwise, PABLO's tests will be compiled")
 IF(${COMPILE_TESTS})
 ADD_SUBDIRECTORY(test)
 ENDIF(${COMPILE_TESTS})
