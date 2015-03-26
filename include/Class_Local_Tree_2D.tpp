@@ -3258,6 +3258,43 @@ private:
 
 	// =================================================================================== //
 
+//	//return true if node1<=node2 (for 0,1,2,3 local order)
+//	bool compareNodes(u32vector node1, u32vector node2){
+//		if (node1[1]<node2[1]){
+//			return true;
+//		}
+//		else if (node1[1]>node2[1]){
+//			return false;
+//		}
+//		else if (node1[0]<node2[0]){
+//			return true;
+//		}
+//		else if (node1[0]>node2[0]){
+//			return false;
+//		}
+//		else {
+//			return true;
+//		}
+//	};
+//
+//	// =================================================================================== //
+//
+//	void sortNodes(u32vector inodes){
+//
+//	};
+
+	// =============================================================================== //
+
+	uint64_t keyXY(uint32_t x, uint32_t y){
+		uint64_t maxsize = pow(double(2),double(MAX_LEVEL_2D));
+		uint64_t n10 = uint64_t(log10(maxsize)) + 1;
+		uint64_t key = uint64_t(pow(double(10),double(n10)))*uint64_t(y)+uint64_t(x);
+		return key;
+	}
+
+
+	// =============================================================================== //
+
 	/** Compute the connectivity of octants and store the coordinates of nodes.
 	 */
 	void computeConnectivity() {
@@ -3277,7 +3314,8 @@ private:
 			for (i = 0; i < noctants; i++){
 				octants[i].getNodes(octnodes);
 				for (j = 0; j < global2D.nnodes; j++){
-					morton = mortonEncode_magicbits(octnodes[j][0], octnodes[j][1]);
+//					morton = mortonEncode_magicbits(octnodes[j][0], octnodes[j][1]);
+					morton = keyXY(octnodes[j][0], octnodes[j][1]);
 					if (mapnodes[morton].size()==0){
 						mapnodes[morton].reserve(8);
 						for (k = 0; k < 3; k++){
@@ -3311,6 +3349,12 @@ private:
 			for (uint32_t ii=0; ii<noctants; ii++){
 				connectivity[ii].shrink_to_fit();
 			}
+
+//			//Reorder connectivity
+//			for (uint32_t ii=0; ii<noctants; ii++){
+//				sortNodes(connectivity[ii]);
+//			}
+
 			connectivity.shrink_to_fit();
 		}
 		map<uint64_t, vector<uint32_t> >().swap(mapnodes);
@@ -3355,7 +3399,8 @@ private:
 			for (i = 0; i < noctants; i++){
 				ghosts[i].getNodes(octnodes);
 				for (j = 0; j < global2D.nnodes; j++){
-					morton = mortonEncode_magicbits(octnodes[j][0], octnodes[j][1]);
+//					morton = mortonEncode_magicbits(octnodes[j][0], octnodes[j][1]);
+					morton = keyXY(octnodes[j][0], octnodes[j][1]);
 					if (mapnodes[morton].size()==0){
 						for (k = 0; k < 3; k++){
 							mapnodes[morton].push_back(octnodes[j][k]);
@@ -3388,6 +3433,12 @@ private:
 			for (uint32_t ii=0; ii<noctants; ii++){
 				ghostsconnectivity[ii].shrink_to_fit();
 			}
+
+//			//Reorder connectivity
+//			for (uint32_t ii=0; ii<noctants; ii++){
+//				sortNodes(ghostsconnectivity[ii]);
+//			}
+
 			ghostsconnectivity.shrink_to_fit();
 		}
 		iter = mapnodes.end();
