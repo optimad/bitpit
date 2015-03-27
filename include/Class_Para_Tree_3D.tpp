@@ -1031,6 +1031,28 @@ public:
 		trans.mapCenter(center_, center);
 	}
 
+	/*! Get the coordinates of the center of an edge of an octant.
+	 * \param[in] idx Local index of target octant.
+	 * \param[in] iedge Index of the target edge.
+	 * \return center Coordinates of the center of the iedge-th edge af octant.
+	 */
+	vector<double> getEdgeCenter(uint32_t idx, uint8_t iedge) {
+		vector<double> center;
+		vector<double> center_ = octree.octants[idx].getEdgeCenter(iedge);
+		trans.mapCenter(center_, center);
+		return center;
+	}
+
+	/*! Get the coordinates of the center of a edge of an octant.
+	 * \param[in] idx Local index of target octant.
+	 * \param[in] iedge Index of the target edge.
+	 * \param[out] center Coordinates of the center of the iedge-th edge af octant.
+	 */
+	void getEdgeCenter(uint32_t idx, uint8_t iedge, vector<double>& center) {
+		vector<double> center_ = octree.octants[idx].getEdgeCenter(iedge);
+		trans.mapCenter(center_, center);
+	}
+
 	/*! Get the coordinates of the nodes of an octant.
 	 * \param[in] idx Local index of target octant.
 	 * \param[out] nodes Coordinates of the nodes of octant.
