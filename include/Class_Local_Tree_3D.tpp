@@ -1350,9 +1350,12 @@ private:
 		uint32_t size = oct->getSize();
 
 		//Alternative to switch case
-		int8_t cx = int8_t((iface<2)*(int8_t(2*iface-1)));
-		int8_t cy = int8_t((iface<4)*(int8_t(iface/2))*(int8_t(2*iface-5)));
-		int8_t cz = int8_t((int8_t(iface/4))*(int8_t(2*iface-9)));
+//		int8_t cx = int8_t((iface<2)*(int8_t(2*iface-1)));
+//		int8_t cy = int8_t((iface<4)*(int8_t(iface/2))*(int8_t(2*iface-5)));
+//		int8_t cz = int8_t((int8_t(iface/4))*(int8_t(2*iface-9)));
+		int8_t cx = global3D.normals[iface][0];
+		int8_t cy = global3D.normals[iface][1];
+		int8_t cz = global3D.normals[iface][2];
 
 		isghost.clear();
 		neighbours.clear();
