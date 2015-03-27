@@ -263,7 +263,7 @@ public:
 		if (iface < global3D.nfaces){
 			center[0] = (double)x + (double)A[iface][0] * dh_2;
 			center[1] = (double)y + (double)A[iface][1] * dh_2;
-			center[1] = (double)z + (double)A[iface][2] * dh_2;
+			center[2] = (double)z + (double)A[iface][2] * dh_2;
 		}
 		return center;
 	};
@@ -284,7 +284,7 @@ public:
 		if (iedge < global3D.nedges){
 			center[0] = (double)x + (double)A[iedge][0] * dh_2;
 			center[1] = (double)y + (double)A[iedge][1] * dh_2;
-			center[1] = (double)z + (double)A[iedge][2] * dh_2;
+			center[2] = (double)z + (double)A[iedge][2] * dh_2;
 		}
 		return center;
 	};
