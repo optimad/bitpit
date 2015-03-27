@@ -2702,9 +2702,9 @@ private:
 		int32_t Dxstar,Dystar,Dzstar;
 
 		//Alternative to switch case
-//		int8_t Cx[12] = {-1,1,0,0,-1,1,-1,1,-1,1,0,0};
-//		int8_t Cy[12] = {0,0,-1,1,-1,-1,1,1,0,0,-1,1};
-//		int8_t Cz[12] = {-1,-1,-1,-1,0,0,0,0,1,1,1,1};
+		//		int8_t Cx[12] = {-1,1,0,0,-1,1,-1,1,-1,1,0,0};
+		//		int8_t Cy[12] = {0,0,-1,1,-1,-1,1,1,0,0,-1,1};
+		//		int8_t Cz[12] = {-1,-1,-1,-1,0,0,0,0,1,1,1,1};
 		int8_t cx = global3D.edgecoeffs[iedge][0];
 		int8_t cy = global3D.edgecoeffs[iedge][1];
 		int8_t cz = global3D.edgecoeffs[iedge][2];
@@ -2841,111 +2841,113 @@ private:
 
 			// Search in octants
 
-				//Build Morton number of virtual neigh of same size
-				// Search morton in octants
-				// If a even face morton is lower than morton of oct, if odd higher
-				// ---> can i search only before or after idx in octants
-				int32_t jump = int32_t(noctants/2+1);
-				idxtry = uint32_t(((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
-				if (idxtry > noctants-1)
-					idxtry = noctants-1;
-				while(abs(jump) > 0){
-					Mortontry = octants[idxtry].computeMorton();
-					jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
-					idxtry += jump;
-					if (idxtry > octants.size()-1){
-						if (jump > 0){
-							idxtry = octants.size() - 1;
-							jump = 0;
-						}
-						else if (jump < 0){
-							idxtry = 0;
-							jump = 0;
-						}
+			//Build Morton number of virtual neigh of same size
+			// Search morton in octants
+			// If a even face morton is lower than morton of oct, if odd higher
+			// ---> can i search only before or after idx in octants
+//			int32_t jump = int32_t(noctants/2+1);
+//			idxtry = uint32_t(((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
+			int32_t jump = (oct->computeMorton() > Morton) ? int32_t(idx/2+1) : int32_t((noctants -idx)/2+1);
+			idxtry = uint32_t(idx +((oct->computeMorton()<Morton)-(oct->computeMorton()>Morton))*jump);
+			if (idxtry > noctants-1)
+				idxtry = noctants-1;
+			while(abs(jump) > 0){
+				Mortontry = octants[idxtry].computeMorton();
+				jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
+				idxtry += jump;
+				if (idxtry > octants.size()-1){
+					if (jump > 0){
+						idxtry = octants.size() - 1;
+						jump = 0;
+					}
+					else if (jump < 0){
+						idxtry = 0;
+						jump = 0;
 					}
 				}
-				if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
-					//Found neighbour of same size
-					isghost.push_back(false);
-					neighbours.push_back(idxtry);
-					return;
-				}
-				else{
-					// Step until the mortontry lower than morton (one idx of distance)
-					{
-						while(octants[idxtry].computeMorton() < Morton){
-							idxtry++;
-							if(idxtry > noctants-1){
-								idxtry = noctants-1;
-								break;
-							}
-						}
-						while(octants[idxtry].computeMorton() > Morton){
-							idxtry--;
-							if(idxtry > noctants-1){
-								idxtry = 0;
-								break;
-							}
-						}
-					}
-					if (idxtry < noctants){
-						if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
-							//Found neighbour of same size
-							isghost.push_back(false);
-							neighbours.push_back(idxtry);
-							return;
-						}
-						// Compute Last discendent of virtual octant of same size
-						Class_Octant<3> last_desc = samesizeoct.buildLastDesc();
-						uint64_t Mortonlast = last_desc.computeMorton();
-						Mortontry = octants[idxtry].computeMorton();
-						while(Mortontry < Mortonlast && idxtry <= noctants-1){
-							Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
-							Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
-							Dz = int32_t(abs(cz))*(-int32_t(oct->z) + int32_t(octants[idxtry].z));
-							Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize()) + int32_t((cx+1)/2)*size;
-							Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
-							Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
-
-							uint32_t x0 = oct->x;
-							uint32_t x1 = x0 + size;
-							uint32_t y0 = oct->y;
-							uint32_t y1 = y0 + size;
-							uint32_t z0 = oct->z;
-							uint32_t z1 = z0 + size;
-							uint32_t x0try = octants[idxtry].x;
-							uint32_t x1try = x0try + octants[idxtry].getSize();
-							uint32_t y0try = octants[idxtry].y;
-							uint32_t y1try = y0try + octants[idxtry].getSize();
-							uint32_t z0try = octants[idxtry].z;
-							uint32_t z1try = z0try + octants[idxtry].getSize();
-							uint8_t level = oct->level;
-							uint8_t leveltry = octants[idxtry].getLevel();
-
-							if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
-								if (leveltry > level){
-									if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
-										neighbours.push_back(idxtry);
-										isghost.push_back(false);
-									}
-								}
-								if (leveltry < level){
-									if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
-										neighbours.push_back(idxtry);
-										isghost.push_back(false);
-									}
-								}
-							}
-
-							idxtry++;
-							if(idxtry>noctants-1){
-								break;
-							}
-							Mortontry = octants[idxtry].computeMorton();
-						}
-					}
-				}
+			}
+			if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
+				//Found neighbour of same size
+				isghost.push_back(false);
+				neighbours.push_back(idxtry);
 				return;
+			}
+			else{
+				// Step until the mortontry lower than morton (one idx of distance)
+				{
+					while(octants[idxtry].computeMorton() < Morton){
+						idxtry++;
+						if(idxtry > noctants-1){
+							idxtry = noctants-1;
+							break;
+						}
+					}
+					while(octants[idxtry].computeMorton() > Morton){
+						idxtry--;
+						if(idxtry > noctants-1){
+							idxtry = 0;
+							break;
+						}
+					}
+				}
+				if (idxtry < noctants){
+					if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
+						//Found neighbour of same size
+						isghost.push_back(false);
+						neighbours.push_back(idxtry);
+						return;
+					}
+					// Compute Last discendent of virtual octant of same size
+					Class_Octant<3> last_desc = samesizeoct.buildLastDesc();
+					uint64_t Mortonlast = last_desc.computeMorton();
+					Mortontry = octants[idxtry].computeMorton();
+					while(Mortontry < Mortonlast && idxtry <= noctants-1){
+						Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
+						Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
+						Dz = int32_t(abs(cz))*(-int32_t(oct->z) + int32_t(octants[idxtry].z));
+						Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize()) + int32_t((cx+1)/2)*size;
+						Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
+						Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
+
+						uint32_t x0 = oct->x;
+						uint32_t x1 = x0 + size;
+						uint32_t y0 = oct->y;
+						uint32_t y1 = y0 + size;
+						uint32_t z0 = oct->z;
+						uint32_t z1 = z0 + size;
+						uint32_t x0try = octants[idxtry].x;
+						uint32_t x1try = x0try + octants[idxtry].getSize();
+						uint32_t y0try = octants[idxtry].y;
+						uint32_t y1try = y0try + octants[idxtry].getSize();
+						uint32_t z0try = octants[idxtry].z;
+						uint32_t z1try = z0try + octants[idxtry].getSize();
+						uint8_t level = oct->level;
+						uint8_t leveltry = octants[idxtry].getLevel();
+
+						if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
+							if (leveltry > level){
+								if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
+									neighbours.push_back(idxtry);
+									isghost.push_back(false);
+								}
+							}
+							if (leveltry < level){
+								if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
+									neighbours.push_back(idxtry);
+									isghost.push_back(false);
+								}
+							}
+						}
+
+						idxtry++;
+						if(idxtry>noctants-1){
+							break;
+						}
+						Mortontry = octants[idxtry].computeMorton();
+					}
+				}
+			}
+			return;
 		}
 		else{
 			// Boundary Face
