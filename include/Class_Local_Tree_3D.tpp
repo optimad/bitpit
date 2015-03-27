@@ -2813,15 +2813,13 @@ private:
 
 							if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
 								if (leveltry > level){
-//									if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
-									if((abs(cx)*((y0try>=y0)*(y0try<y1))*((z0try>=z0)*(z0try<z1))) + (abs(cy)*((x0try>=x0)*(x0try<x1))*((z0try>=z0)*(z0try<z1))) + (abs(cz)*((x0try>=x0)*(x0try<x1))*((y0try>=y0)*(y0try<y1)))){
+									if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
 										neighbours.push_back(idxtry);
 										isghost.push_back(true);
 									}
 								}
 								if (leveltry < level){
-//									if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
-									if((abs(cx)*((y0>=y0try)*(y0<y1try))*((z0>=z0try)*(z0<z1try))) + (abs(cy)*((x0>=x0try)*(x0<x1try))*((z0>=z0try)*(z0<z1try))) + (abs(cz)*((x0>=x0try)*(x0<x1try))*((y0>=y0try)*(y0<y1try)))){
+									if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
 										neighbours.push_back(idxtry);
 										isghost.push_back(true);
 									}
@@ -2923,15 +2921,13 @@ private:
 
 							if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
 								if (leveltry > level){
-//									if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
-									if((abs(cx)*((y0try>=y0)*(y0try<y1))*((z0try>=z0)*(z0try<z1))) + (abs(cy)*((x0try>=x0)*(x0try<x1))*((z0try>=z0)*(z0try<z1))) + (abs(cz)*((x0try>=x0)*(x0try<x1))*((y0try>=y0)*(y0try<y1)))){
+									if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
 										neighbours.push_back(idxtry);
 										isghost.push_back(false);
 									}
 								}
 								if (leveltry < level){
-//									if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
-									if((abs(cx)*((y0>=y0try)*(y0<y1try))*((z0>=z0try)*(z0<z1try))) + (abs(cy)*((x0>=x0try)*(x0<x1try))*((z0>=z0try)*(z0<z1try))) + (abs(cz)*((x0>=x0try)*(x0<x1try))*((y0>=y0try)*(y0<y1try)))){
+									if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
 										neighbours.push_back(idxtry);
 										isghost.push_back(false);
 									}
@@ -3083,15 +3079,13 @@ private:
 
 							if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
 								if (leveltry > level){
-//									if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
-									if((abs(cx)*((y0try>=y0)*(y0try<y1))*((z0try>=z0)*(z0try<z1))) + (abs(cy)*((x0try>=x0)*(x0try<x1))*((z0try>=z0)*(z0try<z1))) + (abs(cz)*((x0try>=x0)*(x0try<x1))*((y0try>=y0)*(y0try<y1)))){
+									if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
 										neighbours.push_back(idxtry);
 										isghost.push_back(true);
 									}
 								}
 								if (leveltry < level){
-//									if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
-									if((abs(cx)*((y0>=y0try)*(y0<y1try))*((z0>=z0try)*(z0<z1try))) + (abs(cy)*((x0>=x0try)*(x0<x1try))*((z0>=z0try)*(z0<z1try))) + (abs(cz)*((x0>=x0try)*(x0<x1try))*((y0>=y0try)*(y0<y1try)))){
+									if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
 										neighbours.push_back(idxtry);
 										isghost.push_back(true);
 									}
@@ -3193,15 +3187,13 @@ private:
 
 							if (Dx == Dxstar && Dy == Dystar && Dz == Dzstar){
 								if (leveltry > level){
-//									if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
-									if((abs(cx)*((y0try>=y0)*(y0try<y1))*((z0try>=z0)*(z0try<z1))) + (abs(cy)*((x0try>=x0)*(x0try<x1))*((z0try>=z0)*(z0try<z1))) + (abs(cz)*((x0try>=x0)*(x0try<x1))*((y0try>=y0)*(y0try<y1)))){
+									if((abs(cx)*abs(cz)*((y0try>=y0)*(y0try<y1))) + (abs(cy)*abs(cz)*((x0try>=x0)*(x0try<x1))) + (abs(cx)*abs(cy)*((z0try>=z0)*(z0try<z1)))){
 										neighbours.push_back(idxtry);
 										isghost.push_back(false);
 									}
 								}
 								if (leveltry < level){
-//									if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
-									if((abs(cx)*((y0>=y0try)*(y0<y1try))*((z0>=z0try)*(z0<z1try))) + (abs(cy)*((x0>=x0try)*(x0<x1try))*((z0>=z0try)*(z0<z1try))) + (abs(cz)*((x0>=x0try)*(x0<x1try))*((y0>=y0try)*(y0<y1try)))){
+									if((abs(cx)*abs(cz)*((y0>=y0try)*(y0<y1try))) + (abs(cy)*abs(cz)*((x0>=x0try)*(x0<x1try))) + (abs(cx)*abs(cy)*((z0>=z0try)*(z0<z1try)))){
 										neighbours.push_back(idxtry);
 										isghost.push_back(false);
 									}
