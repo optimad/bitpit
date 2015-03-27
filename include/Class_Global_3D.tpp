@@ -136,6 +136,43 @@ public:
 		normals[5][0] =  0;
 		normals[5][1] =  0;
 		normals[5][2] =  1;
+
+		edgecoeffs[0][0] = -1;
+		edgecoeffs[0][1] =  0;
+		edgecoeffs[0][2] = -1;
+		edgecoeffs[1][0] =  1;
+		edgecoeffs[1][1] =  0;
+		edgecoeffs[1][2] = -1;
+		edgecoeffs[2][0] =  0;
+		edgecoeffs[2][1] = -1;
+		edgecoeffs[2][2] = -1;
+		edgecoeffs[3][0] =  0;
+		edgecoeffs[3][1] =  1;
+		edgecoeffs[3][2] = -1;
+		edgecoeffs[4][0] = -1;
+		edgecoeffs[4][1] = -1;
+		edgecoeffs[4][2] =  0;
+		edgecoeffs[5][0] =  1;
+		edgecoeffs[5][1] = -1;
+		edgecoeffs[5][2] =  0;
+		edgecoeffs[6][0] = -1;
+		edgecoeffs[6][1] =  1;
+		edgecoeffs[6][2] =  0;
+		edgecoeffs[7][0] =  1;
+		edgecoeffs[7][1] =  1;
+		edgecoeffs[7][2] =  0;
+		edgecoeffs[8][0] = -1;
+		edgecoeffs[8][1] =  0;
+		edgecoeffs[8][2] =  1;
+		edgecoeffs[9][0] =  1;
+		edgecoeffs[9][1] =  0;
+		edgecoeffs[9][2] =  1;
+		edgecoeffs[10][0] =  0;
+		edgecoeffs[10][1] = -1;
+		edgecoeffs[10][2] =  1;
+		edgecoeffs[11][0] =  0;
+		edgecoeffs[11][1] =  1;
+		edgecoeffs[11][2] =  1;
 };
 
 
@@ -155,6 +192,7 @@ public:
 	uint8_t  facenode[6][4];	/**< facenode[i][0:1] = local indices of nodes of the i-th face of an octant */
 	uint8_t  edgeface[12][2];	/**< edgeface[i][0:1] = local indices of faces sharing the i-th edge of an octant */
 	int8_t   normals[6][3];		/**< Components (x,y,z) of the normals per face */
+	int8_t   edgecoeffs[12][3];	/**< Components (x,y,z) of the "normals" per edge */
 
 };
 

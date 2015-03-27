@@ -2699,12 +2699,12 @@ private:
 		int32_t Dxstar,Dystar,Dzstar;
 
 		//Alternative to switch case
-		int8_t Cx[12] = {-1,1,0,0,-1,1,-1,1,-1,1,0,0};
-		int8_t Cy[12] = {0,0,-1,1,-1,-1,1,1,0,0,-1,1};
-		int8_t Cz[12] = {-1,-1,-1,-1,0,0,0,0,1,1,1,1};
-		int8_t cx = Cx[iedge];
-		int8_t cy = Cy[iedge];
-		int8_t cz = Cz[iedge];
+//		int8_t Cx[12] = {-1,1,0,0,-1,1,-1,1,-1,1,0,0};
+//		int8_t Cy[12] = {0,0,-1,1,-1,-1,1,1,0,0,-1,1};
+//		int8_t Cz[12] = {-1,-1,-1,-1,0,0,0,0,1,1,1,1};
+		int8_t cx = global3D.edgecoeffs[iedge][0];
+		int8_t cy = global3D.edgecoeffs[iedge][1];
+		int8_t cz = global3D.edgecoeffs[iedge][2];
 
 		isghost.clear();
 		neighbours.clear();
@@ -2966,12 +2966,12 @@ private:
 		int32_t Dxstar,Dystar,Dzstar;
 
 		//Alternative to switch case
-		int8_t Cx[12] = {-1,1,0,0,-1,1,-1,1,-1,1,0,0};
-		int8_t Cy[12] = {0,0,-1,1,-1,-1,1,1,0,0,-1,1};
-		int8_t Cz[12] = {-1,-1,-1,-1,0,0,0,0,1,1,1,1};
-		int8_t cx = Cx[iedge];
-		int8_t cy = Cy[iedge];
-		int8_t cz = Cz[iedge];
+		//		int8_t Cx[12] = {-1,1,0,0,-1,1,-1,1,-1,1,0,0};
+		//		int8_t Cy[12] = {0,0,-1,1,-1,-1,1,1,0,0,-1,1};
+		//		int8_t Cz[12] = {-1,-1,-1,-1,0,0,0,0,1,1,1,1};
+		int8_t cx = global3D.edgecoeffs[iedge][0];
+		int8_t cy = global3D.edgecoeffs[iedge][1];
+		int8_t cz = global3D.edgecoeffs[iedge][2];
 
 		isghost.clear();
 		neighbours.clear();
