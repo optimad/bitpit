@@ -3831,14 +3831,14 @@ private:
 
 	// =============================================================================== //
 
-	uint64_t keyXYZ(uint32_t x, uint32_t y, uint32_t z){
-		uint64_t maxsize = pow(double(2),double(MAX_LEVEL_3D));
-		uint64_t n10 = uint64_t(log10(maxsize)) + 1;
-		uint64_t key = uint64_t(pow(double(10),double(2*n10)))*uint64_t(z)
-		             + uint64_t(pow(double(10),double(n10)))*uint64_t(y)
-			     + uint64_t(x);
-		return key;
-	}
+//	uint64_t keyXYZ(uint32_t x, uint32_t y, uint32_t z){
+//		uint64_t maxsize = pow(double(2),double(MAX_LEVEL_3D));
+//		uint64_t n10 = uint64_t(log10(maxsize)) + 1;
+//		uint64_t key = uint64_t(pow(double(10),double(2*n10)))*uint64_t(z)
+//		             + uint64_t(pow(double(10),double(n10)))*uint64_t(y)
+//			     + uint64_t(x);
+//		return key;
+//	}
 
 	// =================================================================================== //
 

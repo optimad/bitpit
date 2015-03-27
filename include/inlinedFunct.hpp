@@ -38,4 +38,18 @@ inline uint64_t mortonEncode_magicbits(unsigned int x, unsigned int y){
 }
 
 
+
+inline uint64_t keyXY(uint64_t x, uint64_t y){
+	uint64_t answer = 0;
+	answer |= x | (y << MAX_LEVEL_2D);
+	return answer;
+}
+
+inline uint64_t keyXYZ(uint64_t x, uint64_t y, uint64_t z){
+	uint64_t answer = 0;
+	answer |= x | (y << MAX_LEVEL_3D) | (z << 2*MAX_LEVEL_3D);
+	return answer;
+}
+
+
 #endif /* INLINEDFUNCT_HPP_ */
