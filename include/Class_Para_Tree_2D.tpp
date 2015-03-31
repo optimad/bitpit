@@ -1062,6 +1062,21 @@ public:
 		return octree.getLocalMaxDepth();
 	};
 
+	/*! Get the codimension for 2:1 balancing
+	 * \return Maximum codimension of the entity through which the 2:1 balance is performed.
+	 */
+	uint8_t getBalanceCodimension() const{
+		return octree.getBalanceCodim();
+	};
+
+	/*! Set the codimension for 2:1 balancing
+	 * \param[in] Maximum codimension of the entity through which the 2:1 balance is performed.
+	 */
+	 void setBalanceCodimension(uint8_t b21codim){
+		 octree.setBalanceCodim(b21codim);
+		};
+
+
 	// --------------------------------
 private:
 

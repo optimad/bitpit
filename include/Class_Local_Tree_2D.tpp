@@ -57,6 +57,7 @@ private:
 	Class_Octant<2> 			last_desc;			/**< Last (Morton order) most refined octant possible in local partition */
 	uint32_t 					size_ghosts;		/**< Size of vector of ghost octants */
 	uint8_t						local_max_depth;	/**< Reached max depth in local tree */
+	uint8_t 					balance_codim;		/**<Maximum codimension of the entity for 2:1 balancing (1 = 2:1 balance through edges (default); 2 = 2:1 balance through nodes and edges)*/
 
 	// connectivity
 	u32vector2D					nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
@@ -81,6 +82,7 @@ public:
 		last_desc = octl;
 		size_ghosts = 0;
 		local_max_depth = 0;
+		balance_codim = 1;
 
 	};
 	~Class_Local_Tree(){};
@@ -120,13 +122,28 @@ private:
 		return octants[idx].getNotBalance();
 	};
 
+	/*! Get the codimension for 2:1 balancing
+	 * \return Maximum codimension of the entity through which the 2:1 balance is performed.
+	 */
+	uint8_t getBalanceCodim() const{
+		return balance_codim;
+	};
+
 	void setMarker(int32_t idx, int8_t marker){					// Set refinement/coarsening marker for idx-th octant
 		octants[idx].setMarker(marker);
 	};
 	void setBalance(int32_t idx, bool balance){					// Set if balancing-blocked idx-th octant
 		octants[idx].setBalance(balance);
 	};
-	void setFirstDesc(){
+
+	/*! Set the codimension for 2:1 balancing
+	 * \param[in] Maximum codimension of the entity through which the 2:1 balance is performed.
+	 */
+	void setBalanceCodim(uint8_t b21codim){
+		balance_codim = b21codim;
+	};
+
+	 void setFirstDesc(){
 		OctantsType::const_iterator firstOctant = octants.begin();
 		first_desc = Class_Octant<2>(MAX_LEVEL_2D,firstOctant->x,firstOctant->y);
 	};
@@ -3076,6 +3093,125 @@ private:
 
 	// =================================================================================== //
 
+	void findGhostNodeNeighbours(uint32_t const idx,	// Finds neighbours of idx-th ghost octant through iface in vector octants.
+			uint8_t inode,								// Returns a vector (empty if iface is not the pbound face for ghost) with the index of neighbours
+			u32vector & neighbours){					// in the structure octants
+
+		uint64_t  Morton, Mortontry;
+		uint32_t  noctants = getNumOctants();
+		uint32_t idxtry;
+		Class_Octant<2>* oct = &ghosts[idx];
+		uint32_t size = oct->getSize();
+		uint8_t iface1, iface2;
+		int32_t Dhx, Dhy;
+		int32_t Dhxref, Dhyref;
+
+		//Alternative to switch case
+		int8_t Cx[4] = {-1,1,-1,1};
+		int8_t Cy[4] = {-1,-1,1,1};
+		int8_t cx = Cx[inode];
+		int8_t cy = Cy[inode];
+
+		neighbours.clear();
+
+		// Default if inode is nnodes<inode<0
+		if (inode < 0 || inode > global2D.nnodes){
+			return;
+		}
+
+		// Check if octants node is a boundary
+		iface1 = global2D.nodeface[inode][0];
+		iface2 = global2D.nodeface[inode][1];
+
+		// Check if octants node is a boundary
+		if (oct->info[iface1] == false && oct->info[iface2] == false){
+
+			//Build Morton number of virtual neigh of same size
+			Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));
+			Morton = samesizeoct.computeMorton();
+
+			// Search in octants
+
+			// Search morton in octants
+			// If a even face morton is lower than morton of oct, if odd higher
+			// ---> can i search only before or after idx in octants
+			int32_t jump = getNumOctants()/2;
+			idxtry = uint32_t(getNumOctants()/2);
+			while(abs(jump) > 0){
+				Mortontry = octants[idxtry].computeMorton();
+				jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
+				idxtry += jump;
+				if (idxtry > octants.size()-1){
+					if (jump > 0){
+						idxtry = octants.size() - 1;
+						jump = 0;
+					}
+					else if (jump < 0){
+						idxtry = 0;
+						jump = 0;
+					}
+				}
+			}
+			if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
+				//Found neighbour of same size
+				neighbours.push_back(idxtry);
+				return;
+			}
+			else{
+				// Step until the mortontry lower than morton (one idx of distance)
+				{
+					while(octants[idxtry].computeMorton() < Morton){
+						idxtry++;
+						if(idxtry > noctants-1){
+							idxtry = noctants-1;
+							break;
+						}
+					}
+					while(octants[idxtry].computeMorton() > Morton){
+						idxtry--;
+						if(idxtry > noctants-1){
+							idxtry = 0;
+							break;
+						}
+					}
+				}
+				if (idxtry < noctants){
+					if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
+						//Found neighbour of same size
+						neighbours.push_back(idxtry);
+						return;
+					}
+					// Compute Last discendent of virtual octant of same size
+					Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+					uint64_t Mortonlast = last_desc.computeMorton();
+					Mortontry = octants[idxtry].computeMorton();
+					while(Mortontry < Mortonlast && idxtry <= noctants-1){
+						Dhx = (-int32_t(oct->x) + int32_t(octants[idxtry].x));
+						Dhy = (-int32_t(oct->y) + int32_t(octants[idxtry].y));
+						Dhxref = int32_t(cx<0)*(-int32_t(octants[idxtry].getSize())) + int32_t(cx>0)*size;
+						Dhyref = int32_t(cy<0)*(-int32_t(octants[idxtry].getSize())) + int32_t(cy>0)*size;
+						if ((Dhx == Dhxref) && (Dhy == Dhyref)){
+							neighbours.push_back(idxtry);
+						}
+						idxtry++;
+						if(idxtry>noctants-1){
+							break;
+						}
+						Mortontry = octants[idxtry].computeMorton();
+					}
+				}
+			}
+			return;
+		}
+		else{
+			// Boundary Node
+			return;
+		}
+
+	};
+
+	// =================================================================================== //
+
 	void computeIntersections() {
 
 		OctantsType::iterator it, obegin, oend;
@@ -3255,43 +3391,6 @@ private:
 		}
 		return nocts;
 	};
-
-	// =================================================================================== //
-
-//	//return true if node1<=node2 (for 0,1,2,3 local order)
-//	bool compareNodes(u32vector node1, u32vector node2){
-//		if (node1[1]<node2[1]){
-//			return true;
-//		}
-//		else if (node1[1]>node2[1]){
-//			return false;
-//		}
-//		else if (node1[0]<node2[0]){
-//			return true;
-//		}
-//		else if (node1[0]>node2[0]){
-//			return false;
-//		}
-//		else {
-//			return true;
-//		}
-//	};
-//
-//	// =================================================================================== //
-//
-//	void sortNodes(u32vector inodes){
-//
-//	};
-
-	// =============================================================================== //
-
-//	uint64_t keyXY(uint32_t x, uint32_t y){
-//		uint64_t maxsize = pow(double(2),double(MAX_LEVEL_2D));
-//		uint64_t n10 = uint64_t(log10(maxsize)) + 1;
-//		uint64_t key = uint64_t(pow(double(10),double(n10)))*uint64_t(y)+uint64_t(x);
-//		return key;
-//	}
-
 
 	// =============================================================================== //
 
