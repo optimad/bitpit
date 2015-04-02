@@ -83,8 +83,8 @@ public:
 		size_ghosts = 0;
 		local_max_depth = 0;
 		balance_codim = 1;
-
 	};
+
 	~Class_Local_Tree(){};
 
 	// ------------------------------------------------------------------------------- //
