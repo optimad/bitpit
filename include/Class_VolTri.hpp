@@ -599,6 +599,14 @@ class Class_VolTri {
         int                  ,                                                // (input) triangle global index
         int                                                                   // (input) vertex global index
     );
+    void SplitHexa5Tetra(                                                     // Split an hexedron into 5 tetrahedron
+        int                  ,                                                // (input) simplex global index
+        short int                                                             // (input) splitting configuration
+    );
+    void SplitPyra2Tetra(                                                     // Split a pyramid into 2 tetrahedron
+        int                  ,                                                // (input) simplex global index
+        short int                                                             // (input) splitting configuration
+    );
 
     // I/O methods ========================================================== //
 

@@ -118,7 +118,7 @@ if (e_type[A] == e_type[B]) {
     vlist_A = Simplex[A];
     sort(vlist_A.begin(), vlist_A.end());
     vlist_B = Simplex[B];
-    sort(vlist_A.begin(), vlist_B.end());
+    sort(vlist_B.begin(), vlist_B.end());
     check = (vlist_A == vlist_B);
     
 }
