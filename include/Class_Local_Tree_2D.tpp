@@ -2252,7 +2252,7 @@ private:
 		u32vector		 	neigh;
 		u32vector		 	modified, newmodified;
 		uint32_t 			i, idx;
-		uint8_t				iface;
+		uint8_t				iface, inode;
 		int8_t				targetmarker;
 		vector<bool> 		isghost;
 		bool				Bdone = false;
@@ -2268,6 +2268,8 @@ private:
 			for (it=obegin; it!=oend; it++){
 				if (!it->getNotBalance() && it->getMarker() != 0){
 					targetmarker = min(MAX_LEVEL_2D, int(octants[idx].getLevel()) + int(octants[idx].getMarker()));
+
+					//Balance through faces
 					for (iface=0; iface<global2D.nfaces; iface++){
 						if(!it->getBound(iface)){
 							findNeighbours(idx, iface, neigh, isghost);
@@ -2300,9 +2302,48 @@ private:
 							}
 						}
 					}
+
+					if (balance_codim>1){
+						//Balance through nodes
+						for (inode=0; inode<global2D.nnodes; inode++){
+							if(!it->getBound(global2D.nodeface[inode][0]) && !it->getBound(global2D.nodeface[inode][1])){
+								findNodeNeighbours(idx, inode, neigh, isghost);
+								sizeneigh = neigh.size();
+								for(i=0; i<sizeneigh; i++){
+									if (!isghost[i]){
+										{
+											if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) > (targetmarker + 1) ){
+												octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-1-octants[idx].getLevel());
+												octants[idx].info[11] = true;
+												modified.push_back(idx);
+												Bdone = true;
+											}
+											else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
+												octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
+												octants[neigh[i]].info[11] = true;
+												modified.push_back(neigh[i]);
+												Bdone = true;
+											}
+										};
+									}
+									else{
+										if((ghosts[neigh[i]].getLevel() + ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
+											octants[idx].setMarker(ghosts[neigh[i]].getLevel()+ghosts[neigh[i]].getMarker()-1-octants[idx].getLevel());
+											octants[idx].info[11] = true;
+											modified.push_back(idx);
+											Bdone = true;
+										}
+									}
+								}
+							}
+						}
+					}
+
+
 				}
 				idx++;
 			}
+
 			// Loop on ghost octants (influence over interior borders)
 			obegin = ghosts.begin();
 			oend = ghosts.end();
@@ -2310,6 +2351,8 @@ private:
 			for (it=obegin; it!=oend; it++){
 				if (!it->getNotBalance() && it->getMarker() != 0){
 					targetmarker = min(MAX_LEVEL_2D, (it->getLevel()+it->getMarker()));
+
+					//Balance through faces
 					for (iface=0; iface<global2D.nfaces; iface++){
 						if(it->getPbound(iface) == true){
 							neigh.clear();
@@ -2325,6 +2368,26 @@ private:
 							}
 						}
 					}
+
+					if (balance_codim>1){
+						//Balance through nodes
+						for (inode=0; inode<global2D.nnodes; inode++){
+							if(it->getPbound(global2D.nodeface[inode][0]) == true || it->getPbound(global2D.nodeface[inode][1]) == true){
+								neigh.clear();
+								findGhostNodeNeighbours(idx, inode, neigh);
+								sizeneigh = neigh.size();
+								for(i=0; i<sizeneigh; i++){
+									if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
+										octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
+										octants[neigh[i]].info[11] = true;
+										modified.push_back(neigh[i]);
+										Bdone = true;
+									}
+								}
+							}
+						}
+					}
+
 				}
 				idx++;
 			}
@@ -2339,6 +2402,8 @@ private:
 					idx = *iit;
 					if (!octants[idx].getNotBalance()){
 						targetmarker = min(MAX_LEVEL_2D, (octants[idx].getLevel()+octants[idx].getMarker()));
+
+						//Balance through faces
 						for (iface=0; iface<global2D.nfaces; iface++){
 							if(!octants[idx].getPbound(iface)){
 								findNeighbours(idx, iface, neigh, isghost);
@@ -2363,6 +2428,35 @@ private:
 								}
 							}
 						}
+
+						if (balance_codim>1){
+							//Balance through nodes
+							for (inode=0; inode<global2D.nnodes; inode++){
+								if(!octants[idx].getPbound(global2D.nodeface[inode][0]) || !octants[idx].getPbound(global2D.nodeface[inode][1])){
+									findNodeNeighbours(idx, inode, neigh, isghost);
+									sizeneigh = neigh.size();
+									for(i=0; i<sizeneigh; i++){
+										if (!isghost[i]){
+											{
+												if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
+													octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-octants[idx].getLevel()-1);
+													octants[idx].info[11] = true;
+													newmodified.push_back(idx);
+													Bdone = true;
+												}
+												else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
+													octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
+													octants[neigh[i]].info[11] = true;
+													newmodified.push_back(neigh[i]);
+													Bdone = true;
+												}
+											};
+										}
+									}
+								}
+							}
+						}
+
 					}
 				}
 				u32vector().swap(modified);
@@ -2381,6 +2475,8 @@ private:
 				//if (!it->getNotBalance() && (it->info[11] || it->getMarker() != 0)){
 				if (!it->getNotBalance() && (it->info[11])){
 					targetmarker = min(MAX_LEVEL_2D, (it->getLevel()+it->getMarker()));
+
+					//Balance through faces
 					for (iface=0; iface<global2D.nfaces; iface++){
 						if(it->getPbound(iface) == true){
 							neigh.clear();
@@ -2396,6 +2492,26 @@ private:
 							}
 						}
 					}
+
+					if (balance_codim>1){
+						//Balance through nodes
+						for (inode=0; inode<global2D.nnodes; inode++){
+							if(it->getPbound(global2D.nodeface[inode][0]) == true || it->getPbound(global2D.nodeface[inode][0]) == true){
+								neigh.clear();
+								findGhostNodeNeighbours(idx, inode, neigh);
+								sizeneigh = neigh.size();
+								for(i=0; i<sizeneigh; i++){
+									if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
+										octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
+										octants[neigh[i]].info[11] = true;
+										modified.push_back(neigh[i]);
+										Bdone = true;
+									}
+								}
+							}
+						}
+					}
+
 				}
 				idx++;
 			}
@@ -2410,6 +2526,8 @@ private:
 					idx = *iit;
 					if (!octants[idx].getNotBalance()){
 						targetmarker = min(MAX_LEVEL_2D, (octants[idx].getLevel()+octants[idx].getMarker()));
+
+						//Balance through faces
 						for (iface=0; iface<global2D.nfaces; iface++){
 							if(!octants[idx].getPbound(iface)){
 								findNeighbours(idx, iface, neigh, isghost);
@@ -2434,6 +2552,35 @@ private:
 								}
 							}
 						}
+
+						if (balance_codim>1){
+							//Balance through nodes
+							for (inode=0; inode<global2D.nnodes; inode++){
+								if(!octants[idx].getPbound(global2D.nodeface[inode][0]) || !octants[idx].getPbound(global2D.nodeface[inode][1])){
+									findNodeNeighbours(idx, inode, neigh, isghost);
+									sizeneigh = neigh.size();
+									for(i=0; i<sizeneigh; i++){
+										if (!isghost[i]){
+											{
+												if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
+													octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-octants[idx].getLevel()-1);
+													octants[idx].info[11] = true;
+													newmodified.push_back(idx);
+													Bdone = true;
+												}
+												else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
+													octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
+													octants[neigh[i]].info[11] = true;
+													newmodified.push_back(neigh[i]);
+													Bdone = true;
+												}
+											};
+										}
+									}
+								}
+							}
+						}
+
 					}
 				}
 				u32vector().swap(modified);
@@ -2458,7 +2605,7 @@ private:
 		u32vector		 	neigh;
 		u32vector		 	modified, newmodified;
 		uint32_t 			i, idx;
-		uint8_t				iface;
+		uint8_t				iface, inode;
 		int8_t				targetmarker;
 		vector<bool> 		isghost;
 		bool				Bdone = false;
@@ -2475,6 +2622,8 @@ private:
 			for (it=obegin; it!=oend; it++){
 				if ((!it->getNotBalance()) && ((it->info[11]) || (it->getMarker()!=0) || ((it->getIsNewC()) || (it->getIsNewR())))){
 					targetmarker = min(MAX_LEVEL_2D, int(octants[idx].getLevel()) + int(octants[idx].getMarker()));
+
+					//Balance through faces
 					for (iface=0; iface<global2D.nfaces; iface++){
 						if(!it->getBound(iface)){
 							findNeighbours(idx, iface, neigh, isghost);
@@ -2510,6 +2659,43 @@ private:
 							}
 						}
 					}
+
+					if (balance_codim>1){
+						//Balance through nodes
+						for (inode=0; inode<global2D.nnodes; inode++){
+							if(!it->getBound(global2D.nodeface[inode][0]) && !it->getBound(global2D.nodeface[inode][1])){
+								findNodeNeighbours(idx, inode, neigh, isghost);
+								sizeneigh = neigh.size();
+								for(i=0; i<sizeneigh; i++){
+									if (!isghost[i]){
+										{
+											if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) > (targetmarker + 1) ){
+												octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-1-octants[idx].getLevel());
+												octants[idx].info[11] = true;
+												modified.push_back(idx);
+												Bdone = true;
+											}
+											else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
+												octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
+												octants[neigh[i]].info[11] = true;
+												modified.push_back(neigh[i]);
+												Bdone = true;
+											}
+										};
+									}
+									else{
+										if((ghosts[neigh[i]].getLevel() + ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
+											octants[idx].setMarker(ghosts[neigh[i]].getLevel()+ghosts[neigh[i]].getMarker()-1-octants[idx].getLevel());
+											octants[idx].info[11] = true;
+											modified.push_back(idx);
+											Bdone = true;
+										}
+									}
+								}
+							}
+						}
+					}
+
 				}
 				idx++;
 			}
@@ -2520,6 +2706,8 @@ private:
 			for (it=obegin; it!=oend; it++){
 				if (!it->getNotBalance() && (it->info[11] || (it->getIsNewC() || it->getIsNewR()))){
 					targetmarker = min(MAX_LEVEL_2D, (it->getLevel()+it->getMarker()));
+
+					//Balance through faces
 					for (iface=0; iface<global2D.nfaces; iface++){
 						if(it->getPbound(iface) == true){
 							neigh.clear();
@@ -2535,6 +2723,26 @@ private:
 							}
 						}
 					}
+
+					if (balance_codim>1){
+						//Balance through nodes
+						for (inode=0; inode<global2D.nnodes; inode++){
+							if(it->getPbound(global2D.nodeface[inode][0]) == true || it->getPbound(global2D.nodeface[inode][1]) == true){
+								neigh.clear();
+								findGhostNodeNeighbours(idx, inode, neigh);
+								sizeneigh = neigh.size();
+								for(i=0; i<sizeneigh; i++){
+									if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
+										octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
+										octants[neigh[i]].info[11] = true;
+										modified.push_back(neigh[i]);
+										Bdone = true;
+									}
+								}
+							}
+						}
+					}
+
 				}
 				idx++;
 			}
@@ -2549,6 +2757,8 @@ private:
 					idx = *iit;
 					if (!octants[idx].getNotBalance()){
 						targetmarker = min(MAX_LEVEL_2D, (octants[idx].getLevel()+octants[idx].getMarker()));
+
+						//Balance through nodes
 						for (iface=0; iface<global2D.nfaces; iface++){
 							if(!octants[idx].getPbound(iface)){
 								findNeighbours(idx, iface, neigh, isghost);
@@ -2573,6 +2783,35 @@ private:
 								}
 							}
 						}
+
+						if (balance_codim>1){
+							//Balance through nodes
+							for (inode=0; inode<global2D.nnodes; inode++){
+								if(!octants[idx].getPbound(global2D.nodeface[inode][0]) || !octants[idx].getPbound(global2D.nodeface[inode][1])){
+									findNodeNeighbours(idx, inode, neigh, isghost);
+									sizeneigh = neigh.size();
+									for(i=0; i<sizeneigh; i++){
+										if (!isghost[i]){
+											{
+												if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
+													octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-octants[idx].getLevel()-1);
+													octants[idx].info[11] = true;
+													newmodified.push_back(idx);
+													Bdone = true;
+												}
+												else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
+													octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
+													octants[neigh[i]].info[11] = true;
+													newmodified.push_back(neigh[i]);
+													Bdone = true;
+												}
+											};
+										}
+									}
+								}
+							}
+						}
+
 					}
 				}
 				u32vector().swap(modified);
@@ -2591,6 +2830,8 @@ private:
 			for (it=obegin; it!=oend; it++){
 				if (!it->getNotBalance() && (it->info[11] || (it->getIsNewC() || it->getIsNewR()))){
 					targetmarker = min(MAX_LEVEL_2D, (it->getLevel()+it->getMarker()));
+
+					//Balance through faces
 					for (iface=0; iface<global2D.nfaces; iface++){
 						if(it->getPbound(iface) == true){
 							neigh.clear();
@@ -2606,6 +2847,26 @@ private:
 							}
 						}
 					}
+
+					if (balance_codim>1){
+						//Balance through nodes
+						for (inode=0; inode<global2D.nnodes; inode++){
+							if(it->getPbound(global2D.nodeface[inode][0]) == true || it->getPbound(global2D.nodeface[inode][0]) == true){
+								neigh.clear();
+								findGhostNodeNeighbours(idx, inode, neigh);
+								sizeneigh = neigh.size();
+								for(i=0; i<sizeneigh; i++){
+									if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
+										octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
+										octants[neigh[i]].info[11] = true;
+										modified.push_back(neigh[i]);
+										Bdone = true;
+									}
+								}
+							}
+						}
+					}
+
 				}
 				idx++;
 			}
@@ -2620,6 +2881,8 @@ private:
 					idx = *iit;
 					if (!octants[idx].getNotBalance()){
 						targetmarker = min(MAX_LEVEL_2D, (octants[idx].getLevel()+octants[idx].getMarker()));
+
+						//Balance through faces
 						for (iface=0; iface<global2D.nfaces; iface++){
 							if(!octants[idx].getPbound(iface)){
 								findNeighbours(idx, iface, neigh, isghost);
@@ -2644,6 +2907,35 @@ private:
 								}
 							}
 						}
+
+						if (balance_codim>1){
+							//Balance through nodes
+							for (inode=0; inode<global2D.nnodes; inode++){
+								if(!octants[idx].getPbound(global2D.nodeface[inode][0]) || !octants[idx].getPbound(global2D.nodeface[inode][1])){
+									findNodeNeighbours(idx, inode, neigh, isghost);
+									sizeneigh = neigh.size();
+									for(i=0; i<sizeneigh; i++){
+										if (!isghost[i]){
+											{
+												if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
+													octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-octants[idx].getLevel()-1);
+													octants[idx].info[11] = true;
+													newmodified.push_back(idx);
+													Bdone = true;
+												}
+												else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
+													octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
+													octants[neigh[i]].info[11] = true;
+													newmodified.push_back(neigh[i]);
+													Bdone = true;
+												}
+											};
+										}
+									}
+								}
+							}
+						}
+
 					}
 				}
 				u32vector().swap(modified);

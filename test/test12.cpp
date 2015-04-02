@@ -15,6 +15,10 @@ int main(int argc, char *argv[]) {
 #endif
 		/**<Instantation of a 2D para_tree object.*/
 		Class_Para_Tree<2> pablo12;
+		pablo12.setBalanceCodimension(2);
+		uint32_t idx=0;
+		pablo12.setBalance(idx,true);
+
 
 		/**<Compute the connectivity and write the para_tree.*/
 		pablo12.computeConnectivity();

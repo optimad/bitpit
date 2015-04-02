@@ -15,6 +15,9 @@ int main(int argc, char *argv[]) {
 #endif
 		/**<Instantation of a 2D para_tree object.*/
 		Class_Para_Tree<2> pablo2;
+		pablo2.setBalanceCodimension(2);
+		uint32_t idx=0;
+		pablo2.setBalance(idx,true);
 
 		/**<Compute the connectivity and write the para_tree.*/
 		pablo2.computeConnectivity();
