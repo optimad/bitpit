@@ -41,23 +41,15 @@ int main(int argc, char *argv[]) {
 
 		/**<Assign a data (distance from center of a circle) to the octants with at least one node inside the circle.*/
 		for (int i=0; i<nocts; i++){
+			/**<Compute the nodes of the octant.*/
 			vector<vector<double> > nodes = pablo15.getNodes(i);
+			/**<Compute the center of the octant.*/
 			vector<double> center = pablo15.getCenter(i);
 			for (int j=0; j<global2D.nnodes; j++){
 				double x = nodes[j][0];
 				double y = nodes[j][1];
 				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
 					oct_data[i] = (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0));
-					if (center[0]<=xc){
-
-						/**<Set to refine to the octants in the left side of the domain.*/
-						pablo15.setMarker(i,1);
-					}
-					else{
-
-						/**<Set to coarse to the octants in the right side of the domain.*/
-						pablo15.setMarker(i,-1);
-					}
 				}
 			}
 		}
@@ -71,7 +63,9 @@ int main(int argc, char *argv[]) {
 		int start = 1;
 		for (iter=start; iter<start+2; iter++){
 			for (int i=0; i<nocts; i++){
+				/**<Compute the nodes of the octant.*/
 				vector<vector<double> > nodes = pablo15.getNodes(i);
+				/**<Compute the center of the octant.*/
 				vector<double> center = pablo15.getCenter(i);
 				for (int j=0; j<global2D.nnodes; j++){
 					double x = nodes[j][0];
@@ -106,6 +100,9 @@ int main(int argc, char *argv[]) {
 					for (int j=0; j<global2D.nchildren; j++){
 						oct_data_new[i] += oct_data[mapper[i]+j]/global2D.nchildren;
 					}
+				}
+				else if (pablo15.getIsNewR(i)){
+					oct_data_new[i] += oct_data[mapper[i]];
 				}
 				else{
 					oct_data_new[i] += oct_data[mapper[i]];

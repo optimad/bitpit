@@ -18,19 +18,19 @@ int main(int argc, char *argv[]) {
 
 		/**<Compute the connectivity and write the para_tree.*/
 		pablo1.computeConnectivity();
-		pablo1.write("Pablo1_iter0");
+		pablo1.write("Pablo1b_iter0");
 
 		/**<Refine globally one level and write the para_tree.*/
 		pablo1.adaptGlobalRefine();
 		pablo1.updateConnectivity();
-		pablo1.write("Pablo1_iter1");
+		pablo1.write("Pablo1b_iter1");
 
 		/**<Define a center point.*/
 		double xc, yc;
 		xc = yc = 0.5;
 
-		/**<Set 2:1 balance only through faces.*/
-		pablo1.setBalanceCodimension(1);
+		/**<Set 2:1 balance through faces and edges.*/
+		pablo1.setBalanceCodimension(2);
 
 		/**<Set NO 2:1 balance in the right side of domain.*/
 		uint32_t nocts = pablo1.getNumOctants();
@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 		/**<Define a radius.*/
 		double radius = 0.4;
 
-		/**<Simple adapt() nref1 times in the lower area of domain.*/
+		/**<Simple adapt() nref1 times in lower area of domain.*/
 		int nref1 = 6;
 		for (int iter=0; iter<nref1; iter++){
 			nocts = pablo1.getNumOctants();
@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
 			/**<Adapt octree, update connectivity and write.*/
 			pablo1.adapt();
 			pablo1.updateConnectivity();
-			pablo1.write("Pablo1_iter"+to_string(iter+2));
+			pablo1.write("Pablo1b_iter"+to_string(iter+2));
 		}
 
 		/**<While adapt() nref2 times in the upper area of domain.
@@ -93,18 +93,17 @@ int main(int argc, char *argv[]) {
 				}
 				done = pablo1.adapt();
 				pablo1.updateConnectivity();
-				pablo1.write("Pablo1_iter"+to_string(iter+nref1+2));
+				pablo1.write("Pablo1b_iter"+to_string(iter+nref1+2));
 			}
 			iter++;
 		}
 		/**<Globally refine one level, update the connectivity and write the para_tree.*/
 		pablo1.adaptGlobalRefine();
 		pablo1.updateConnectivity();
-		pablo1.write("Pablo1_iter"+to_string(iter+nref1+3));
+		pablo1.write("Pablo1b_iter"+to_string(iter+nref1+3));
 #if NOMPI==0
 	}
 
 	MPI::Finalize();
 #endif
 }
-

@@ -20,8 +20,8 @@ int main(int argc, char *argv[]) {
 		/**<Write the para_tree in logical domain.*/
 		ptreedefault.writeLogical("Pablo0_default_logical");
 
+		/**<Set coordinates of the origin and size of a 2D custom para_tree object.*/
 		double X, Y, Z, L;
-		uint8_t level0 = MAX_LEVEL_2D;
 		X = 10.0; Y = 20.0; Z = 0.0; L = 250.0;
 		/**<Instantation of a 2D para_tree object with custom constructor.*/
 		Class_Para_Tree<2> ptreecustom(X, Y, Z, L);

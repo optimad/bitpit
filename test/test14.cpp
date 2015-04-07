@@ -54,6 +54,7 @@ int main(int argc, char *argv[]) {
 
 		/**<Assign a data to the ghost octants (PARALLEL TEST) with at least one node inside the circle.*/
 		for (int i=0; i<nghosts; i++){
+			/**<Compute the nodes of the octant (Use pointer for ghost).*/
 			Class_Octant<2> *oct = pablo14.getGhostOctant(i);
 			vector<vector<double> > nodes = pablo14.getNodes(oct);
 			for (int j=0; j<global2D.nnodes; j++){
@@ -81,7 +82,7 @@ int main(int argc, char *argv[]) {
 				neigh.clear();
 				isghost.clear();
 
-				/**<Find neighbours through edges (codim=1) and nodes (codim=2) of the octants*/
+				/**<Find neighbours through faces (codim=1) and edges (codim=2) of the octants*/
 				for (codim=1; codim<dim+1; codim++){
 					if (codim == 1){
 						nfaces = global2D.nfaces;

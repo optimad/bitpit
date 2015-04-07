@@ -34,39 +34,40 @@ int main(int argc, char *argv[]) {
 		pablo120.loadBalance();
 #endif
 
-		/**<Define a center point and a radius.*/
+		/**<Define the center point and the radius of the sphere.*/
 		double xc, yc, zc;
 		double radius = 0.15;
 		double t0 = 0;
 		double Dt = 0.000025;
 		double omega = 2.0*3.14/0.001;
 
+		/**<Define the center point and the trajectory of the sphere.*/
 		xc = 0.25*cos(omega* Dt) + 0.5 ;
 		yc = 0.25*sin(omega* Dt) + 0.5;
 		zc = 100*Dt;
 
 		/**<Define vectors of data.*/
 		uint32_t nocts = pablo120.getNumOctants();
-		uint32_t nghosts = pablo120.getNumGhosts();
-		vector<double> oct_data(nocts, 0.0), ghost_data(nghosts, 0.0);
+		vector<double> oct_data(nocts, 0.0);
 
-		/**<Adapt itend times with data injection on new octants.*/
+		/**<Adapt itend times eith data re-computing at each iteration.*/
 		int itstart = 1;
 		int itend = 460;
 
 		for (iter=itstart; iter<itend; iter++){
-			cout << "iter " << iter << endl;
 
+			/**<Update the position of the sphere on the trajectory.*/
 			xc = 0.25*cos(omega* Dt* (double) iter) + 0.5 ;
 			yc = 0.25*sin(omega* Dt* (double) iter) + 0.5;
 			zc = 100*Dt*iter;
 
-
 			for (int i=0; i<nocts; i++){
 				bool inside = false;
+				/**<Compute the nodes of the octant.*/
 				vector<vector<double> > nodes = pablo120.getNodes(i);
+				/**<Compute the center of the octant.*/
 				vector<double> center = pablo120.getCenter(i);
-				oct_data[i] = (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0));
+				oct_data[i] = sqrt((pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0)));
 				for (int j=0; j<global3D.nnodes; j++){
 					double x = nodes[j][0];
 					double y = nodes[j][1];
@@ -96,11 +97,9 @@ int main(int argc, char *argv[]) {
 			pablo120.loadBalance();
 #endif
 
+			/**<Re-Assign to the new octants the data after an adaption.*/
 			nocts = pablo120.getNumOctants();
-			nghosts = pablo120.getNumGhosts();
 			vector<double> oct_data_new(nocts, 0.0);
-
-			/**<Assign to the new octant the data after an adaption.*/
 			for (int i=0; i<nocts; i++){
 				vector<double> center = pablo120.getCenter(i);
 				oct_data_new[i] = sqrt((pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0)));

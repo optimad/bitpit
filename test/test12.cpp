@@ -15,10 +15,10 @@ int main(int argc, char *argv[]) {
 #endif
 		/**<Instantation of a 2D para_tree object.*/
 		Class_Para_Tree<2> pablo12;
-		pablo12.setBalanceCodimension(2);
-		uint32_t idx=0;
-		pablo12.setBalance(idx,true);
 
+		/**<Set NO 2:1 balance for the octree.*/
+		uint32_t idx=0;
+		pablo12.setBalance(idx,false);
 
 		/**<Compute the connectivity and write the para_tree.*/
 		pablo12.computeConnectivity();
@@ -44,9 +44,9 @@ int main(int argc, char *argv[]) {
 
 		/**<Simple adapt() (refine) 6 times the octants with at least one node inside the circle.*/
 		for (int iter=3; iter<9; iter++){
-
 			uint32_t nocts = pablo12.getNumOctants();
 			for (int i=0; i<nocts; i++){
+				/**<Compute the nodes of the octant.*/
 				vector<vector<double> > nodes = pablo12.getNodes(i);
 				for (int j=0; j<global2D.nnodes; j++){
 					double x = nodes[j][0];
