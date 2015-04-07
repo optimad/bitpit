@@ -57,7 +57,8 @@ private:
 	Class_Octant<2> 			last_desc;			/**< Last (Morton order) most refined octant possible in local partition */
 	uint32_t 					size_ghosts;		/**< Size of vector of ghost octants */
 	uint8_t						local_max_depth;	/**< Reached max depth in local tree */
-	uint8_t 					balance_codim;		/**<Maximum codimension of the entity for 2:1 balancing (1 = 2:1 balance through edges (default); 2 = 2:1 balance through nodes and edges)*/
+	uint8_t 					balance_codim;		/**<Maximum codimension of the entity for 2:1 balancing (1 = 2:1 balance through edges (default);
+														2 = 2:1 balance through nodes and edges)*/
 
 	// connectivity
 	u32vector2D					nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
@@ -2339,7 +2340,6 @@ private:
 						}
 					}
 
-
 				}
 				idx++;
 			}
@@ -3385,8 +3385,8 @@ private:
 
 	// =================================================================================== //
 
-	void findGhostNodeNeighbours(uint32_t const idx,	// Finds neighbours of idx-th ghost octant through iface in vector octants.
-			uint8_t inode,								// Returns a vector (empty if iface is not the pbound face for ghost) with the index of neighbours
+	void findGhostNodeNeighbours(uint32_t const idx,	// Finds neighbour of idx-th ghost octant through inode in vector octants.
+			uint8_t inode,								// Returns a vector (empty if inode is not a pbound node for ghost) with the index of neighbour
 			u32vector & neighbours){					// in the structure octants
 
 		uint64_t  Morton, Mortontry;
@@ -3415,8 +3415,10 @@ private:
 		iface1 = global2D.nodeface[inode][0];
 		iface2 = global2D.nodeface[inode][1];
 
-		// Check if octants node is a boundary
-		if (oct->info[iface1] == false && oct->info[iface2] == false){
+//		// Check if octants node is a boundary
+//		if (oct->info[iface1] == false && oct->info[iface2] == false){
+		// Check if octants node is a pboundary node
+		if (oct->info[iface1+global2D.nfaces] == true && oct->info[iface2+global2D.nfaces] == true){
 
 			//Build Morton number of virtual neigh of same size
 			Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));

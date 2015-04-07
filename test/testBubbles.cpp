@@ -28,6 +28,7 @@ int main(int argc, char *argv[]) {
 		Class_Para_Tree<2> pabloBB;
 
 		/**<Set 2:1 balance for the octree.*/
+		pabloBB.setBalanceCodimension(1);
 		int idx = 0;
 		pabloBB.setBalance(idx,true);
 

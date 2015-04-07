@@ -1072,9 +1072,9 @@ public:
 	/*! Set the codimension for 2:1 balancing
 	 * \param[in] Maximum codimension of the entity through which the 2:1 balance is performed (1 = 2:1 balance through edges (default); 2 = 2:1 balance through nodes and edges).
 	 */
-	 void setBalanceCodimension(uint8_t b21codim){
-		 octree.setBalanceCodim(b21codim);
-		};
+	void setBalanceCodimension(uint8_t b21codim){
+		octree.setBalanceCodim(b21codim);
+	};
 
 
 	// --------------------------------
