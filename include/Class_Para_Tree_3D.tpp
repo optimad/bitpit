@@ -4365,7 +4365,50 @@ private:
 
 		}
 #else
-		octree.localBalanceAll(true);
+		localDone = false;
+		int  iteration  = 0;
+
+
+		if (first){
+			log.writeLog("---------------------------------------------");
+			log.writeLog(" 2:1 BALANCE (balancing Marker before Adapt)");
+			log.writeLog(" ");
+			log.writeLog(" Iterative procedure	");
+			log.writeLog(" ");
+			log.writeLog(" Iteration	:	" + to_string(iteration));
+
+
+			localDone = octree.localBalance(true);
+
+			while(localDone){
+				iteration++;
+				log.writeLog(" Iteration	:	" + to_string(iteration));
+				localDone = octree.localBalance(false);
+			}
+
+			log.writeLog(" Iteration	:	Finalizing ");
+			log.writeLog(" ");
+			localDone = octree.localBalance(false);
+
+			log.writeLog(" 2:1 Balancing reached ");
+			log.writeLog(" ");
+			log.writeLog("---------------------------------------------");
+
+		}
+		else{
+
+			localDone = octree.localBalanceAll(true);
+
+			while(localDone){
+				iteration++;
+				localDone = octree.localBalanceAll(false);
+			}
+
+			localDone = octree.localBalance(false);
+
+		}
+
+		//		octree.localBalanceAll(true);
 #endif
 	}
 
