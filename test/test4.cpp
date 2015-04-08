@@ -14,7 +14,6 @@ int main(int argc, char *argv[]) {
 	{
 #endif
 		int iter = 0;
-		int dim = 2;
 		/**<Instantation of a 2D para_tree object.*/
 		Class_Para_Tree<2> pablo4;
 
@@ -30,30 +29,17 @@ int main(int argc, char *argv[]) {
 
 		/**<Define vectors of data.*/
 		uint32_t nocts = pablo4.getNumOctants();
-		uint32_t nghosts = pablo4.getNumGhosts();
-		vector<double> oct_data(nocts, 0.0), ghost_data(nghosts, 0.0);
+		vector<double> oct_data(nocts, 0.0);
 
 		/**<Assign a data to the octants with at least one node inside the circle.*/
 		for (int i=0; i<nocts; i++){
+			/**<Compute the nodes of the octant.*/
 			vector<vector<double> > nodes = pablo4.getNodes(i);
 			for (int j=0; j<global2D.nnodes; j++){
 				double x = nodes[j][0];
 				double y = nodes[j][1];
 				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
 					oct_data[i] = 1.0;
-				}
-			}
-		}
-
-		/**<Assign a data to the ghost octants (NONE IT IS A SERIAL TEST) with at least one node inside the circle.*/
-		for (int i=0; i<nghosts; i++){
-			Class_Octant<2> *oct = pablo4.getGhostOctant(i);
-			vector<vector<double> > nodes = pablo4.getNodes(oct);
-			for (int j=0; j<global2D.nnodes; j++){
-				double x = nodes[j][0];
-				double y = nodes[j][1];
-				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
-					ghost_data[i] = 1.0;
 				}
 			}
 		}
@@ -75,8 +61,8 @@ int main(int argc, char *argv[]) {
 				neigh.clear();
 				isghost.clear();
 
-				/**<Find neighbours through edges (codim=1) and nodes (codim=2) of the octants*/
-				for (codim=1; codim<dim+1; codim++){
+				/**<Find neighbours through faces (codim=1) and edges (codim=2) of the octants*/
+				for (codim=1; codim<3; codim++){
 					if (codim == 1){
 						nfaces = global2D.nfaces;
 					}
@@ -94,7 +80,7 @@ int main(int argc, char *argv[]) {
 				oct_data_smooth[i] = oct_data[i]/(neigh.size()+1);
 				for (int j=0; j<neigh.size(); j++){
 					if (isghost[j]){
-						oct_data_smooth[i] += ghost_data[neigh[j]]/(neigh.size()+1);
+						/**< Do nothing - No ghosts: is a serial test.*/
 					}
 					else{
 						oct_data_smooth[i] += oct_data[neigh[j]]/(neigh.size()+1);

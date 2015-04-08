@@ -16,9 +16,9 @@ int main(int argc, char *argv[]) {
 		int iter = 0;
 		/**<Instantation of a 2D para_tree object.*/
 		Class_Para_Tree<2> pablo5;
-		int idx = 0;
 
-		/**<Set NO 2:1 balance for the octree.*/
+		/**<Set NO 2:1 balance for the octree (ancestor octant).*/
+		int idx = 0;
 		pablo5.setBalance(idx,false);
 
 		/**<Refine globally five level and write the para_tree.*/
@@ -34,10 +34,11 @@ int main(int argc, char *argv[]) {
 		/**<Define vectors of data.*/
 		uint32_t nocts = pablo5.getNumOctants();
 		uint32_t nghosts = pablo5.getNumGhosts();
-		vector<double> oct_data(nocts, 0.0), ghost_data(nghosts, 0.0);
+		vector<double> oct_data(nocts, 0.0);
 
 		/**<Assign a data (distance from center of a circle) to the octants with at least one node inside the circle.*/
 		for (int i=0; i<nocts; i++){
+			/**<Compute the nodes of the octant.*/
 			vector<vector<double> > nodes = pablo5.getNodes(i);
 			vector<double> center = pablo5.getCenter(i);
 			for (int j=0; j<global2D.nnodes; j++){
@@ -45,16 +46,6 @@ int main(int argc, char *argv[]) {
 				double y = nodes[j][1];
 				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
 					oct_data[i] = (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0));
-					if (center[0]<=xc){
-
-						/**<Set to refine to the octants in the left side of the domain.*/
-						pablo5.setMarker(i,1);
-					}
-					else{
-
-						/**<Set to coarse to the octants in the right side of the domain.*/
-						pablo5.setMarker(i,-1);
-					}
 				}
 			}
 		}
@@ -68,6 +59,7 @@ int main(int argc, char *argv[]) {
 		int start = 1;
 		for (iter=start; iter<start+2; iter++){
 			for (int i=0; i<nocts; i++){
+				/**<Compute the nodes of the octant.*/
 				vector<vector<double> > nodes = pablo5.getNodes(i);
 				vector<double> center = pablo5.getCenter(i);
 				for (int j=0; j<global2D.nnodes; j++){
@@ -103,6 +95,9 @@ int main(int argc, char *argv[]) {
 					for (int j=0; j<global2D.nchildren; j++){
 						oct_data_new[i] += oct_data[mapper[i]+j]/global2D.nchildren;
 					}
+				}
+				else if (pablo5.getIsNewR(i)){
+					oct_data_new[i] += oct_data[mapper[i]];
 				}
 				else{
 					oct_data_new[i] += oct_data[mapper[i]];

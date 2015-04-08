@@ -17,6 +17,10 @@ int main(int argc, char *argv[]) {
 		/**<Instantation of a 2D para_tree object.*/
 		Class_Para_Tree<2> pablo3;
 
+		/**<Set NO 2:1 balance for ancestor octant.*/
+		uint32_t idx=0;
+		pablo3.setBalance(idx,false);
+
 		/**<Compute the connectivity and write the para_tree.*/
 		pablo3.computeConnectivity();
 		pablo3.write("Pablo3_iter"+to_string(iter));
@@ -37,8 +41,7 @@ int main(int argc, char *argv[]) {
 		for (iter=3; iter<9; iter++){
 			uint32_t nocts = pablo3.getNumOctants();
 			for (int i=0; i<nocts; i++){
-				/**<Set NO 2:1 balance for every octant.*/
-				pablo3.setBalance(i,false);
+				/**<Compute the nodes of the octant.*/
 				vector<vector<double> > nodes = pablo3.getNodes(i);
 				for (int j=0; j<global2D.nnodes; j++){
 					double x = nodes[j][0];
@@ -69,7 +72,7 @@ int main(int argc, char *argv[]) {
 		for (iter=10; iter<15; iter++){
 			uint32_t nocts = pablo3.getNumOctants();
 			for (int i=0; i<nocts; i++){
-				pablo3.setBalance(i,false);
+				/**<Compute the nodes of the octant.*/
 				vector<vector<double> > nodes = pablo3.getNodes(i);
 				for (int j=0; j<global2D.nnodes; j++){
 					double x = nodes[j][0];

@@ -31,30 +31,17 @@ int main(int argc, char *argv[]) {
 
 		/**<Define vectors of data.*/
 		uint32_t nocts = pablo104.getNumOctants();
-		uint32_t nghosts = pablo104.getNumGhosts();
-		vector<double> oct_data(nocts, 0.0), ghost_data(nghosts, 0.0);
+		vector<double> oct_data(nocts, 0.0);
 
 		/**<Assign a data to the octants with at least one node inside the cylinder.*/
 		for (int i=0; i<nocts; i++){
+			/**<Compute the nodes of the octant.*/
 			vector<vector<double> > nodes = pablo104.getNodes(i);
 			for (int j=0; j<global3D.nnodes; j++){
 				double x = nodes[j][0];
 				double y = nodes[j][1];
 				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
 					oct_data[i] = 1.0;
-				}
-			}
-		}
-
-		/**<Assign a data to the ghost octants (NONE IT IS A SERIAL TEST) with at least one node inside the cylinder.*/
-		for (int i=0; i<nghosts; i++){
-			Class_Octant<3> *oct = pablo104.getGhostOctant(i);
-			vector<vector<double> > nodes = pablo104.getNodes(oct);
-			for (int j=0; j<global3D.nnodes; j++){
-				double x = nodes[j][0];
-				double y = nodes[j][1];
-				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
-					ghost_data[i] = 1.0;
 				}
 			}
 		}
@@ -97,7 +84,7 @@ int main(int argc, char *argv[]) {
 				oct_data_smooth[i] = oct_data[i]/(neigh.size()+1);
 				for (int j=0; j<neigh.size(); j++){
 					if (isghost[j]){
-						oct_data_smooth[i] += ghost_data[neigh[j]]/(neigh.size()+1);
+						/**< Do nothing - No ghosts: is a serial test.*/
 					}
 					else{
 						oct_data_smooth[i] += oct_data[neigh[j]]/(neigh.size()+1);

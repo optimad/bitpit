@@ -8,6 +8,7 @@ using namespace std;
 
 // =================================================================================== //
 
+/**<Declaration of a class bubble with center and radius.*/
 class bubble{
 public:
 	double c[2];
@@ -42,12 +43,11 @@ int main(int argc, char *argv[]) {
 		pabloBB.loadBalance();
 #endif
 
-		/**<Define a set of bubbles.*/
+		/**<Update the number of local octants.*/
+		uint32_t nocts = pabloBB.getNumOctants();
+
+		/**<Define and initialize a set of bubbles and their trajectories.*/
 		srand(time(NULL));
-//		srand(1418143772);
-
-
-		//8 proc deadlock 1418143772  at iter 51 proc
 
 #if NOMPI==0
 		int nb = 100;
@@ -78,55 +78,54 @@ int main(int argc, char *argv[]) {
 			OM.push_back(omega);
 			AA.push_back(aa);
 		}
+		/**<Initialize time and timestep.*/
 		double t0 = 0;
 		double t = t0;
 		double Dt = 0.5;
-//		double Dy = 0.01;
-//		double omega = 2.0*3.14/0.001;
 
-		/**<Define vectors of data.*/
-		uint32_t nocts = pabloBB.getNumOctants();
-		uint32_t nghosts = pabloBB.getNumGhosts();
-//		vector<double> oct_data(nocts, 0.0), ghost_data(nghosts, 0.0);
-
-		/**<Adapt itend times with data injection on new octants.*/
+		/**<Adapt itend times with refinement on the interface of the bubbles.*/
 		int itstart = 1;
 		int itend = 200;
 
-
+		/**<Set the number of refinement per time iteration.*/
 		int nrefperiter = 4;
 
+		/**<Perform time iterations.*/
 		for (iter=itstart; iter<itend; iter++){
 			if(pabloBB.rank==0) cout << "iter " << iter << endl;
 			t += Dt;
 
+			/**<Update bubbles position.*/
 			for (int i=0; i<nb; i++){
 				BB[i].c[0] = BB0[i].c[0] + AA[i]*cos(OM[i]*t);
 				BB[i].c[1] = BB[i].c[1]+ Dt*DY[i];
 			}
 
+			/**<Adapting (refinement and coarsening).*/
 			for (int iref=0; iref<nrefperiter; iref++){
 
 				for (int i=0; i<nocts; i++){
 					bool inside = false;
+					/**<Compute the nodes of the octant.*/
 					vector<vector<double> > nodes = pabloBB.getNodes(i);
+					/**<Compute the center of the octant.*/
 					vector<double> center = pabloBB.getCenter(i);
 					int ib = 0;
 					while (!inside && ib<nb){
 						double xc = BB[ib].c[0];
 						double yc = BB[ib].c[1];
 						double radius = BB[ib].r;
-						//oct_data[i] = (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0));
-//						oct_data[i] = 0.0;
+						/**<Set marker with condition on center or nodes of the octant.*/
 						for (int j=0; j<global2D.nnodes; j++){
 							double x = nodes[j][0];
 							double y = nodes[j][1];
-							if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= 1.15*pow(radius,2.0) &&
-									pow((x-xc),2.0)+pow((y-yc),2.0) >= 0.85*pow(radius,2.0)) ||
-									(pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) <= 1.15*pow(radius,2.0) &&
-											pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) >= 0.85*pow(radius,2.0))){
+							if ( ((!inside) &&
+									(pow((x-xc),2.0)+pow((y-yc),2.0) <= 1.15*pow(radius,2.0) &&
+											pow((x-xc),2.0)+pow((y-yc),2.0) >= 0.85*pow(radius,2.0)))
+											|| ((!inside) && (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) <= 1.15*pow(radius,2.0) &&
+													pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) >= 0.85*pow(radius,2.0)))){
 								if (pabloBB.getLevel(i) < 9){
-									/**<Set to refine inside the sphere.*/
+									/**<Set to refine inside a band around the interface of the bubbles.*/
 									pabloBB.setMarker(i,1);
 								}
 								else{
@@ -138,14 +137,12 @@ int main(int argc, char *argv[]) {
 						ib++;
 					}
 					if (pabloBB.getLevel(i) > 6 && !inside){
-						/**<Set to coarse if the octant has a level higher than 5.*/
+						/**<Set to coarse outside the band if the octant has a level higher than 6.*/
 						pabloBB.setMarker(i,-1);
 					}
 				}
 
 				/**<Adapt the octree.*/
-				//vector<uint32_t> mapidx;
-				//bool adapt = pabloBB.adapt(mapidx);
 				bool adapt = pabloBB.adapt();
 
 #if NOMPI==0
@@ -153,26 +150,13 @@ int main(int argc, char *argv[]) {
 				pabloBB.loadBalance();
 #endif
 
+				/**<Update the number of local octants.*/
 				nocts = pabloBB.getNumOctants();
-				nghosts = pabloBB.getNumGhosts();
-//				vector<double> oct_data_new(nocts, 0.0);
-
-//				/**<Assign to the new octant the data after an adaption.*/
-//				for (int i=0; i<nocts; i++){
-//					vector<double> center = pabloBB.getCenter(i);
-//					//oct_data_new[i] = oct_data[mapidx[i]];
-//					oct_data_new[i] = 0.0;
-//				}
-
-//				oct_data.resize(nocts);
-//				oct_data = oct_data_new;
-//				oct_data_new.clear();
 
 			}
 
 			/**<Update the connectivity and write the para_tree.*/
 			pabloBB.updateConnectivity();
-			//pabloBB.writeTest("PabloBubble_iter"+to_string(iter), oct_data);
 			pabloBB.write("PabloBubble_iter"+to_string(iter));
 		}
 #if NOMPI==0

@@ -15,7 +15,9 @@ int main(int argc, char *argv[]) {
 #endif
 		/**<Instantation of a 2D para_tree object.*/
 		Class_Para_Tree<2> pablo2;
-		pablo2.setBalanceCodimension(2);
+
+		/**<Set 2:1 balance only through faces.*/
+		pablo2.setBalanceCodimension(1);
 		uint32_t idx=0;
 		pablo2.setBalance(idx,true);
 
@@ -35,11 +37,11 @@ int main(int argc, char *argv[]) {
 		xc = yc = 0.5;
 		double radius = 0.4;
 
-		/**<Simple adapt() 6 times the octants with at least one node inside the circle.
-		 * */
+		/**<Simple adapt() 6 times the octants with at least one node inside the circle.*/
 		for (int iter=3; iter<9; iter++){
 			uint32_t nocts = pablo2.getNumOctants();
 			for (int i=0; i<nocts; i++){
+				/**<Compute the nodes of the octant.*/
 				vector<vector<double> > nodes = pablo2.getNodes(i);
 				for (int j=0; j<global2D.nnodes; j++){
 					double x = nodes[j][0];
