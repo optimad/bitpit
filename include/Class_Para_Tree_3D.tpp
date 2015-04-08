@@ -4408,7 +4408,6 @@ private:
 
 		}
 
-		//		octree.localBalanceAll(true);
 #endif
 	}
 
