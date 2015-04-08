@@ -4365,7 +4365,7 @@ private:
 
 		}
 #else
-		localDone = false;
+		bool localDone = false;
 		int  iteration  = 0;
 
 
