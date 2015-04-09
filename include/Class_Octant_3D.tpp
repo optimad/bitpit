@@ -320,15 +320,15 @@ public:
 	 * \param[out] node dim-vector with the logical coordinates of the node of the octant.
 	 */
 	void		getNode(u32vector & node, uint8_t inode){
-		uint8_t		i, cx, cy, cz;
+		uint8_t		cx, cy, cz;
 		uint32_t	dh;
 
 		dh = getSize();
 		node.clear();
 		node.resize(3);
-		cx = i%2;
-		cy = (i-4*(i/4))/2;
-		cz = i/4;
+		cx = inode%2;
+		cy = (inode-4*(inode/4))/2;
+		cz = inode/4;
 		node[0] = x + cx*dh;
 		node[1] = y + cy*dh;
 		node[2] = z + cz*dh;
@@ -341,15 +341,15 @@ public:
 	 */
 	u32vector		getNode(uint8_t inode){
 		u32vector node;
-		uint8_t		i, cx, cy, cz;
+		uint8_t		cx, cy, cz;
 		uint32_t	dh;
 
 		dh = getSize();
 		node.clear();
 		node.resize(3);
-		cx = i%2;
-		cy = (i-4*(i/4))/2;
-		cz = i/4;
+		cx = inode%2;
+		cy = (inode-4*(inode/4))/2;
+		cz = inode/4;
 		node[0] = x + cx*dh;
 		node[1] = y + cy*dh;
 		node[2] = z + cz*dh;
