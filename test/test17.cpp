@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
 		pablo17a.setBalance(idx,false);
 
 		/**<Refine globally five level and write the para_tree.*/
-		for (iter=1; iter<4; iter++){
+		for (iter=1; iter<6; iter++){
 			pablo17a.adaptGlobalRefine();
 			pablo17b.adaptGlobalRefine();
 		}
@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
 
 		/**<Adapt two times with data injection on new octants.*/
 		int start = 1;
-		for (iter=start; iter<start+1; iter++){
+		for (iter=start; iter<start+2; iter++){
 			for (int i=0; i<nocts; i++){
 				/**<Compute the center of the octant.*/
 				vector<double> center = pablo17a.getCenter(i);
