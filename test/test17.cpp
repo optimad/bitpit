@@ -148,9 +148,13 @@ int main(int argc, char *argv[]) {
 		nocts = pablo17b.getNumOctants();
 		mapPablo = pablo17b.mapPablos(pablo17a);
 		vector<double> oct_data_b(nocts);
-		/**<Assign data to the new octree : process owner the first octant index in mapPablo.*/
+//		/**<Assign data to the new octree : process owner the first octant index in mapPablo.*/
+//		for (int i=0; i<nocts; i++){
+//			oct_data_b[i] = mapPablo[i].second.first;
+//		}
+		/**<Assign data to the new octree : first octant index in mapPablo.*/
 		for (int i=0; i<nocts; i++){
-			oct_data_b[i] = mapPablo[i].second.first;
+			oct_data_b[i] = mapPablo[i].first.first;
 		}
 
 		/**<Update the connectivity and write the para_tree.*/
