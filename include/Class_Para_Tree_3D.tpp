@@ -1707,8 +1707,8 @@ public:
 		int powner;
 
 		x = trans.mapX(point[0]);
-		y = trans.mapX(point[1]);
-		z = trans.mapX(point[2]);
+		y = trans.mapY(point[1]);
+		z = trans.mapZ(point[2]);
 		morton = mortonEncode_magicbits(x,y,z);
 #if NOMPI==0
 		powner = findOwner(morton);
