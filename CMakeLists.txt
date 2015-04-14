@@ -11,6 +11,12 @@ SET(TargetTest test_ucartmesh)
 SET(DepLibs opt_base opt_IO  )
 
 SET(BLDIR build/lib/ )
+
+IF(CMAKE_BUILD_TYPE MATCHES Debug)
+    message( "building debug")
+    SET(BLDIR debug/lib/ )
+ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
+
 SET(IDIR include )
 
 EXEC_PROGRAM(pwd ../../ OUTPUT_VARIABLE OptLibsDir)
