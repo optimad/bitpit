@@ -1301,7 +1301,7 @@ for (i = 0; i < nx; i++) {
 for (i = 0; i < ny; i++) {
     ynode[i] = yedge[i] + 0.5 * dy;
 } //next i
-for (i = 0; i < ny; i++) {
+for (i = 0; i < nz; i++) {
     znode[i] = zedge[i] + 0.5 * dz;
 } //next i
 
