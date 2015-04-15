@@ -620,6 +620,7 @@ class Class_VolTri {
 
             // vtk format -------------------------------------------------------------------- //
             void Export_vtu(string);                              // Export volume mesh in .vtu format
+            void Export_CellData_vtu(string, dvector1D &);        // Export cell data to .vtu format
 
 };
 
