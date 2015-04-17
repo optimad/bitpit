@@ -1710,12 +1710,20 @@ public:
 		y = trans.mapY(point[1]);
 		z = trans.mapZ(point[2]);
 		morton = mortonEncode_magicbits(x,y,z);
+
+		if ((x > global3D.max_length) || (y > global3D.max_length) || (z > global3D.max_length))
+			return -1;
+
+
 #if NOMPI==0
+//		cout << "in find owner" << endl;
 		powner = findOwner(morton);
+//		cout << "out find owner" << endl;
 #else
 		powner = 0;
 #endif
-		if ((powner!=rank) || (x > global3D.max_length) || (y > global3D.max_length) || (z > global3D.max_length))
+		//if ((powner!=rank) || (x > global3D.max_length) || (y > global3D.max_length) || (z > global3D.max_length))
+		if (powner!=rank)
 			return -1;
 
 		if (x == global3D.max_length) x = x - 1;
@@ -1724,6 +1732,8 @@ public:
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
+//			cout << "jump " << jump << endl;
+
 			mortontry = octree.octants[idxtry].computeMorton();
 			jump = ((mortontry<morton)-(mortontry>morton))*abs(jump)/2;
 			idxtry += jump;
@@ -6046,6 +6056,9 @@ public:
 #if NOMPI==0
 		MPI_Barrier(comm);
 #endif
+		if (clear){
+			octree.clearConnectivity();
+		}
 	}
 	// =============================================================================== //
 
@@ -6180,11 +6193,178 @@ public:
 #if NOMPI==0
 		MPI_Barrier(comm);
 #endif
-
+		if (clear){
+			octree.clearConnectivity();
+		}
 	}
 
 	// =============================================================================== //
 
+	/** Write the physical octree mesh in .vtu format with data for test in a user-defined file.
+	 * If the connectivity is not stored, the method temporary computes it.
+	 * The method doesn't write the ghosts on file.
+	 * \param[in] filename Seriously?....
+	 */
+	void writeTest(string filename, vector<double> data, vector<double> ghostdata) {
+
+		bool clear = false;
+		if (octree.connectivity.size() == 0) {
+			octree.computeConnectivity();
+			octree.computeGhostsConnectivity();
+			clear = true;
+		}
+
+		stringstream name;
+		name << "s" << std::setfill('0') << std::setw(4) << nproc << "-p" << std::setfill('0') << std::setw(4) << rank << "-" << filename << ".vtu";
+
+		ofstream out(name.str().c_str());
+		if(!out.is_open()){
+			stringstream ss;
+			ss << filename << "*.vtu cannot be opened and it won't be written.";
+			log.writeLog(ss.str());
+			return;
+		}
+		int nofNodes = octree.nodes.size();
+		int nofOctants = octree.connectivity.size();
+		int nofGhostNodes = octree.ghostsnodes.size();
+		int nofGhostOctants = octree.ghostsconnectivity.size();
+		int nofAll = nofOctants + nofGhostOctants;
+		out << "<?xml version=\"1.0\"?>" << endl
+				<< "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
+				<< "  <UnstructuredGrid>" << endl
+				<< "    <Piece NumberOfCells=\"" << octree.connectivity.size() + octree.ghostsconnectivity.size() << "\" NumberOfPoints=\"" << octree.nodes.size() + octree.ghostsnodes.size() << "\">" << endl;
+		out << "      <CellData Scalars=\"Data\">" << endl;
+		out << "      <DataArray type=\"Float64\" Name=\"Data\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
+				<< "          " << std::fixed;
+		int ndata = octree.connectivity.size();
+		for(int i = 0; i < ndata; i++)
+		{
+			out << std::setprecision(6) << data[i] << " ";
+			if((i+1)%4==0 && i!=ndata-1)
+				out << endl << "          ";
+		}
+		int nghostdata = octree.ghostsconnectivity.size();
+		for(int i = 0; i < nghostdata; i++)
+		{
+			out << std::setprecision(6) << ghostdata[i] << " ";
+			if((i+1)%4==0 && i!=nghostdata-1)
+				out << endl << "          ";
+		}
+		out << endl << "        </DataArray>" << endl
+				<< "      </CellData>" << endl
+				<< "      <Points>" << endl
+				<< "        <DataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\""<< 3 <<"\" format=\"ascii\">" << endl
+				<< "          " << std::fixed;
+		for(int i = 0; i < nofNodes; i++)
+		{
+			for(int j = 0; j < 3; ++j){
+				if (j==0) out << std::setprecision(6) << trans.mapX(octree.nodes[i][j]) << " ";
+				if (j==1) out << std::setprecision(6) << trans.mapY(octree.nodes[i][j]) << " ";
+				if (j==2) out << std::setprecision(6) << trans.mapZ(octree.nodes[i][j]) << " ";
+			}
+			if((i+1)%4==0 && i!=nofNodes-1)
+				out << endl << "          ";
+		}
+		for(int i = 0; i < nofGhostNodes; i++)
+		{
+			for(int j = 0; j < 3; ++j){
+				if (j==0) out << std::setprecision(6) << trans.mapX(octree.ghostsnodes[i][j]) << " ";
+				if (j==1) out << std::setprecision(6) << trans.mapY(octree.ghostsnodes[i][j]) << " ";
+				if (j==2) out << std::setprecision(6) << trans.mapZ(octree.ghostsnodes[i][j]) << " ";
+			}
+			if((i+1)%4==0 && i!=nofGhostNodes-1)
+				out << endl << "          ";
+		}
+		out << endl << "        </DataArray>" << endl
+				<< "      </Points>" << endl
+				<< "      <Cells>" << endl
+				<< "        <DataArray type=\"UInt64\" Name=\"connectivity\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
+				<< "          ";
+		for(int i = 0; i < nofOctants; i++)
+		{
+			for(int j = 0; j < global3D.nnodes; j++)
+			{
+				out << octree.connectivity[i][j] << " ";
+			}
+			if((i+1)%3==0 && i!=nofOctants-1)
+				out << endl << "          ";
+		}
+		for(int i = 0; i < nofGhostOctants; i++)
+		{
+			for(int j = 0; j < global3D.nnodes; j++)
+			{
+				out << octree.ghostsconnectivity[i][j] + nofNodes << " ";
+			}
+			if((i+1)%3==0 && i!=nofGhostOctants-1)
+				out << endl << "          ";
+		}
+		out << endl << "        </DataArray>" << endl
+				<< "        <DataArray type=\"UInt64\" Name=\"offsets\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
+				<< "          ";
+		for(int i = 0; i < nofAll; i++)
+		{
+			out << (i+1)*global3D.nnodes << " ";
+			if((i+1)%12==0 && i!=nofAll-1)
+				out << endl << "          ";
+		}
+		out << endl << "        </DataArray>" << endl
+				<< "        <DataArray type=\"UInt8\" Name=\"types\" NumberOfComponents=\"1\" format=\"ascii\">" << endl
+				<< "          ";
+		for(int i = 0; i < nofAll; i++)
+		{
+			int type;
+			type = 11;
+			out << type << " ";
+			if((i+1)%12==0 && i!=nofAll-1)
+				out << endl << "          ";
+		}
+		out << endl << "        </DataArray>" << endl
+				<< "      </Cells>" << endl
+				<< "    </Piece>" << endl
+				<< "  </UnstructuredGrid>" << endl
+				<< "</VTKFile>" << endl;
+
+
+		if(rank == 0){
+			name.str("");
+			name << "s" << std::setfill('0') << std::setw(4) << nproc << "-" << filename << ".pvtu";
+			ofstream pout(name.str().c_str());
+			if(!pout.is_open()){
+				stringstream ss;
+				ss << filename << "*.pvtu cannot be opened and it won't be written.";
+				log.writeLog(ss.str());
+				return;
+			}
+
+			pout << "<?xml version=\"1.0\"?>" << endl
+					<< "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
+					<< "  <PUnstructuredGrid GhostLevel=\"0\">" << endl
+					<< "    <PPointData>" << endl
+					<< "    </PPointData>" << endl
+					<< "    <PCellData Scalars=\"Data\">" << endl
+					<< "      <PDataArray type=\"Float64\" Name=\"Data\" NumberOfComponents=\"1\"/>" << endl
+					<< "    </PCellData>" << endl
+					<< "    <PPoints>" << endl
+					<< "      <PDataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\"3\"/>" << endl
+					<< "    </PPoints>" << endl;
+			for(int i = 0; i < nproc; i++)
+				pout << "    <Piece Source=\"s" << std::setw(4) << std::setfill('0') << nproc << "-p" << std::setw(4) << std::setfill('0') << i << "-" << filename << ".vtu\"/>" << endl;
+			pout << "  </PUnstructuredGrid>" << endl
+					<< "</VTKFile>";
+
+			pout.close();
+
+		}
+#if NOMPI==0
+		MPI_Barrier(comm);
+#endif
+		if (clear){
+			octree.clearConnectivity();
+			octree.clearGhostsConnectivity();
+		}
+	}
+
+	// =============================================================================== //
 
 
 };

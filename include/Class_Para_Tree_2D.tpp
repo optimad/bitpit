@@ -1540,12 +1540,17 @@ public:
 		y = trans.mapY(point[1]);
 		morton = mortonEncode_magicbits(x,y);
 
+		if ((x > global3D.max_length) || (y > global3D.max_length))
+			return -1;
+
+
 #if NOMPI==0
 		powner = findOwner(morton);
 #else
 		powner = 0;
 #endif
-		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length))
+		//if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length))
+		if (powner!=rank)
 			return -1;
 
 		if (x == global2D.max_length) x = x - 1;
