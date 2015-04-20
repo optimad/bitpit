@@ -1717,14 +1717,11 @@ public:
 
 
 #if NOMPI==0
-//		cout << "in find owner" << endl;
-		powner = findOwner(morton);
-//		cout << "out find owner" << endl;
+			if(!serial) powner = findOwner(morton);
 #else
 		powner = 0;
 #endif
-		//if ((powner!=rank) || (x > global3D.max_length) || (y > global3D.max_length) || (z > global3D.max_length))
-		if (powner!=rank)
+		if ((powner!=rank) && (!serial))
 			return -1;
 
 		if (x == global3D.max_length) x = x - 1;
