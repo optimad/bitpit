@@ -1709,7 +1709,6 @@ public:
 		x = trans.mapX(point[0]);
 		y = trans.mapY(point[1]);
 		z = trans.mapZ(point[2]);
-		morton = mortonEncode_magicbits(x,y,z);
 
 		if ((x > global3D.max_length) || (y > global3D.max_length) || (z > global3D.max_length)
 				|| (point[0] < trans.X0) || (point[1] < trans.Y0) || (point[2] < trans.Z0)))
@@ -1724,9 +1723,10 @@ public:
 		if ((powner!=rank) && (!serial))
 			return -1;
 
-		if (x == global3D.max_length) x = x - 1;
-		if (y == global3D.max_length) y = y - 1;
-		if (z == global3D.max_length) z = z - 1;
+		if (x >= global3D.max_length) x = x - 1;
+		if (y >= global3D.max_length) y = y - 1;
+		if (z >= global3D.max_length) z = z - 1;
+		morton = mortonEncode_magicbits(x,y,z);
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
