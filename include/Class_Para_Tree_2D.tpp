@@ -1611,8 +1611,10 @@ private:
 		y = trans.mapY(point[1]);
 
 		if ((x > global3D.max_length) || (y > global3D.max_length)
-				|| (point[0] < trans.X0) || (point[1] < trans.Y0))
-			return -1;
+				|| (point[0] < trans.X0) || (point[1] < trans.Y0)){
+			Class_Octant<2> oct0;
+			return oct0;
+		}
 
 
 		if (x == global2D.max_length) x = x - 1;
