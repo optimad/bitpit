@@ -1609,17 +1609,22 @@ private:
 
 		x = trans.mapX(point[0]);
 		y = trans.mapY(point[1]);
-		morton = mortonEncode_magicbits(x,y);
+
+		if ((x > global3D.max_length) || (y > global3D.max_length)
+				|| (point[0] < trans.X0) || (point[1] < trans.Y0))
+			return -1;
+
 
 		if (x == global2D.max_length) x = x - 1;
 		if (y == global2D.max_length) y = y - 1;
+		morton = mortonEncode_magicbits(x,y);
 
 #if NOMPI==0
-		powner = findOwner(morton);
+		if (!serial) powner = findOwner(morton);
 #else
 		powner = 0;
 #endif
-		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length)){
+		if ((powner!=rank) && (!serial)){
 			Class_Octant<2> oct0;
 			return oct0;
 		}
