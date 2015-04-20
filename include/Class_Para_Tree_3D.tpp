@@ -1633,23 +1633,27 @@ public:
 		uint32_t idxtry = noctants/2;
 		uint32_t x, y, z;
 		uint64_t morton, mortontry;
-		int powner;
+		int powner = 0;
 
 		x = trans.mapX(point[0]);
 		y = trans.mapX(point[1]);
 		z = trans.mapX(point[2]);
-		morton = mortonEncode_magicbits(x,y,z);
+		if ((x > global3D.max_length) || (y > global3D.max_length) || (z > global3D.max_length))
+			return NULL;
+
+
 #if NOMPI==0
-		powner = findOwner(morton);
+		if (!serial) powner = findOwner(morton);
 #else
 		powner = 0;
 #endif
-		if ((powner!=rank) || (x > global3D.max_length) || (y > global3D.max_length) || (z > global3D.max_length))
+		if ((powner!=rank) && (!serial))
 			return NULL;
 
 		if (x == global3D.max_length) x = x - 1;
 		if (y == global3D.max_length) y = y - 1;
 		if (z == global3D.max_length) z = z - 1;
+		morton = mortonEncode_magicbits(x,y,z);
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -1704,7 +1708,7 @@ public:
 		uint32_t idxtry = noctants/2;
 		uint32_t x, y, z;
 		uint64_t morton, mortontry;
-		int powner;
+		int powner = 0;
 
 		x = trans.mapX(point[0]);
 		y = trans.mapY(point[1]);
@@ -1782,7 +1786,7 @@ public:
 		uint32_t idxtry = noctants/2;
 		uint32_t x, y, z;
 		uint64_t morton, mortontry;
-		int powner;
+		int powner = 0;
 
 		x = point[0];
 		y = point[1];
@@ -1857,7 +1861,7 @@ public:
 		uint32_t idxtry = noctants/2;
 		uint32_t x, y, z;
 		uint64_t morton, mortontry;
-		int powner;
+		int powner = 0;
 
 		x = point[0];
 		y = point[1];
@@ -1933,23 +1937,27 @@ public:
 		uint32_t idxtry = noctants/2;
 		uint32_t x, y, z;
 		uint64_t morton, mortontry;
-		int powner;
+		int powner = 0;
 
 		x = uint32_t(point[0]);
 		y = uint32_t(point[1]);
 		z = uint32_t(point[2]);
-		morton = mortonEncode_magicbits(x,y,z);
+		if ((point[0] < 0) || (point[0] > double(global3D.max_length)) || (point[1] < 0) || (point[1] > double(global3D.max_length)) || (point[2] < 0) || (point[2] > double(global3D.max_length)))
+			return NULL;
+
+
 #if NOMPI==0
-		powner = findOwner(morton);
+		if (!serial) powner = findOwner(morton);
 #else
 		powner = 0;
 #endif
-		if ((powner!=rank) || (point[0] < 0) || (point[0] > double(global3D.max_length)) || (point[1] < 0) || (point[1] > double(global3D.max_length)) || (point[2] < 0) || (point[2] > double(global3D.max_length)))
+		if ((powner!=rank) && (!serial))
 			return NULL;
 
 		if (x == global3D.max_length) x = x - 1;
 		if (y == global3D.max_length) y = y - 1;
 		if (z == global3D.max_length) z = z - 1;
+		morton = mortonEncode_magicbits(x,y,z);
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -2004,23 +2012,26 @@ public:
 		uint32_t idxtry = noctants/2;
 		uint32_t x, y, z;
 		uint64_t morton, mortontry;
-		int powner;
+		int powner = 0;
 
 		x = uint32_t(point[0]);
 		y = uint32_t(point[1]);
 		z = uint32_t(point[2]);
-		morton = mortonEncode_magicbits(x,y,z);
+		if ((point[0] < 0) || (point[0] > double(global3D.max_length)) || (point[1] < 0) || (point[1] > double(global3D.max_length)) || (point[2] < 0) || (point[2] > double(global3D.max_length)))
+			return -1;
+
 #if NOMPI==0
-		powner = findOwner(morton);
+		if (!serial) powner = findOwner(morton);
 #else
 		powner = 0;
 #endif
-		if ((powner!=rank) || (point[0] < 0) || (point[0] > double(global3D.max_length)) || (point[1] < 0) || (point[1] > double(global3D.max_length)) || (point[2] < 0) || (point[2] > double(global3D.max_length)))
+		if ((powner!=rank) && (!serial))
 			return -1;
 
 		if (x == global3D.max_length) x = x - 1;
 		if (y == global3D.max_length) y = y - 1;
 		if (z == global3D.max_length) z = z - 1;
+		morton = mortonEncode_magicbits(x,y,z);
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
