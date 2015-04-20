@@ -1711,7 +1711,8 @@ public:
 		z = trans.mapZ(point[2]);
 		morton = mortonEncode_magicbits(x,y,z);
 
-		if ((x > global3D.max_length) || (y > global3D.max_length) || (z > global3D.max_length))
+		if ((x > global3D.max_length) || (y > global3D.max_length) || (z > global3D.max_length)
+				|| (point[0] < trans.X0) || (point[1] < trans.Y0) || (point[2] < trans.Z0)))
 			return -1;
 
 
