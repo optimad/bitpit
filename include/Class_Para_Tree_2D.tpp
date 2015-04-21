@@ -1478,6 +1478,9 @@ public:
 				|| (point[0] < trans.X0) || (point[1] < trans.Y0))
 			return NULL;
 
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
+		morton = mortonEncode_magicbits(x,y);
 
 #if NOMPI==0
 		if (!serial) powner = findOwner(morton);
@@ -1486,10 +1489,6 @@ public:
 #endif
 		if ((powner!=rank) && (!serial))
 			return NULL;
-
-		if (x == global2D.max_length) x = x - 1;
-		if (y == global2D.max_length) y = y - 1;
-		morton = mortonEncode_magicbits(x,y);
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -1550,6 +1549,9 @@ public:
 				|| (point[0] < trans.X0) || (point[1] < trans.Y0))
 			return -1;
 
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
+		morton = mortonEncode_magicbits(x,y);
 
 #if NOMPI==0
 		if(!serial) powner = findOwner(morton);
@@ -1559,10 +1561,6 @@ public:
 		//if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length))
 		if ((powner!=rank) && (!serial))
 			return -1;
-
-		if (x == global2D.max_length) x = x - 1;
-		if (y == global2D.max_length) y = y - 1;
-		morton = mortonEncode_magicbits(x,y);
 
 
 		int32_t jump = idxtry;
@@ -1622,7 +1620,6 @@ private:
 			Class_Octant<2> oct0;
 			return oct0;
 		}
-
 
 		if (x == global2D.max_length) x = x - 1;
 		if (y == global2D.max_length) y = y - 1;
@@ -1696,6 +1693,9 @@ public:
 		if ((x > global2D.max_length) || (y > global2D.max_length))
 			return NULL;
 
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
+		morton = mortonEncode_magicbits(x,y);
 
 #if NOMPI==0
 		if (!serial) powner = findOwner(morton);
@@ -1704,10 +1704,6 @@ public:
 #endif
 		if ((powner!=rank) && (!serial))
 			return NULL;
-
-		if (x == global2D.max_length) x = x - 1;
-		if (y == global2D.max_length) y = y - 1;
-		morton = mortonEncode_magicbits(x,y);
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -1766,6 +1762,9 @@ public:
 		if ((x > global2D.max_length) || (y > global2D.max_length))
 			return -1;
 
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
+		morton = mortonEncode_magicbits(x,y);
 
 #if NOMPI==0
 		if (!serial) powner = findOwner(morton);
@@ -1774,10 +1773,6 @@ public:
 #endif
 		if ((powner!=rank) && (!serial))
 				return -1;
-
-		if (x == global2D.max_length) x = x - 1;
-		if (y == global2D.max_length) y = y - 1;
-		morton = mortonEncode_magicbits(x,y);
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -1837,6 +1832,9 @@ public:
 		 if ((point[0] < 0) || (point[0] > double(global2D.max_length)) || (point[1] < 0) || (point[1] > double(global2D.max_length)))
 			 return NULL;
 
+			if (x == global2D.max_length) x = x - 1;
+			if (y == global2D.max_length) y = y - 1;
+			morton = mortonEncode_magicbits(x,y);
 
 #if NOMPI==0
 		if (!serial) powner = findOwner(morton);
@@ -1845,11 +1843,6 @@ public:
 #endif
 		if ((powner!=rank) && (!serial))
 			return NULL;
-
-		if (x == global2D.max_length) x = x - 1;
-		if (y == global2D.max_length) y = y - 1;
-		morton = mortonEncode_magicbits(x,y);
-
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -1908,6 +1901,9 @@ public:
 		if ((point[0] < 0) || (point[0] > double(global2D.max_length)) || (point[1] < 0) || (point[1] > double(global2D.max_length)))
 			return -1;
 
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
+		morton = mortonEncode_magicbits(x,y);
 
 #if NOMPI==0
 		if (!serial) powner = findOwner(morton);
@@ -1916,10 +1912,6 @@ public:
 #endif
 		if ((powner!=rank) && (!serial))
 			return -1;
-
-		if (x == global2D.max_length) x = x - 1;
-		if (y == global2D.max_length) y = y - 1;
-		morton = mortonEncode_magicbits(x,y);
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -1972,6 +1964,14 @@ private:
 
 		x = point[0];
 		y = point[1];
+
+		if ((x > global2D.max_length) || (y > global2D.max_length)){
+			Class_Octant<2> oct0;
+			return oct0;
+		}
+
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
 		morton = mortonEncode_magicbits(x,y);
 
 #if NOMPI==0
@@ -1979,13 +1979,10 @@ private:
 #else
 		powner = 0;
 #endif
-		if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length)){
+		if ((powner!=rank) && (!serial)){
 			Class_Octant<2> oct0;
 			return oct0;
 		}
-
-		if (x == global2D.max_length) x = x - 1;
-		if (y == global2D.max_length) y = y - 1;
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){

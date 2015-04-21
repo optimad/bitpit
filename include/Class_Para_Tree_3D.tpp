@@ -1641,6 +1641,10 @@ public:
 		if ((x > global3D.max_length) || (y > global3D.max_length) || (z > global3D.max_length))
 			return NULL;
 
+		if (x == global3D.max_length) x = x - 1;
+		if (y == global3D.max_length) y = y - 1;
+		if (z == global3D.max_length) z = z - 1;
+		morton = mortonEncode_magicbits(x,y,z);
 
 #if NOMPI==0
 		if (!serial) powner = findOwner(morton);
@@ -1650,10 +1654,6 @@ public:
 		if ((powner!=rank) && (!serial))
 			return NULL;
 
-		if (x == global3D.max_length) x = x - 1;
-		if (y == global3D.max_length) y = y - 1;
-		if (z == global3D.max_length) z = z - 1;
-		morton = mortonEncode_magicbits(x,y,z);
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -1715,8 +1715,14 @@ public:
 		z = trans.mapZ(point[2]);
 
 		if ((x > global3D.max_length) || (y > global3D.max_length) || (z > global3D.max_length)
-				|| (point[0] < trans.X0) || (point[1] < trans.Y0) || (point[2] < trans.Z0))
+				|| (point[0] < trans.X0) || (point[1] < trans.Y0) || (point[2] < trans.Z0)){
 			return -1;
+		}
+
+		if (x == global3D.max_length) x = x - 1;
+		if (y == global3D.max_length) y = y - 1;
+		if (z == global3D.max_length) z = z - 1;
+		morton = mortonEncode_magicbits(x,y,z);
 
 
 #if NOMPI==0
@@ -1727,10 +1733,6 @@ public:
 		if ((powner!=rank) && (!serial))
 			return -1;
 
-		if (x >= global3D.max_length) x = x - 1;
-		if (y >= global3D.max_length) y = y - 1;
-		if (z >= global3D.max_length) z = z - 1;
-		morton = mortonEncode_magicbits(x,y,z);
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -1795,6 +1797,11 @@ public:
 				|| (point[0] < trans.X0) || (point[1] < trans.Y0) || (point[2] < trans.Z0))
 		return NULL;
 
+		if (x == global3D.max_length) x = x - 1;
+		if (y == global3D.max_length) y = y - 1;
+		if (z == global3D.max_length) z = z - 1;
+		morton = mortonEncode_magicbits(x,y,z);
+
 #if NOMPI==0
 		if(!serial) powner = findOwner(morton);
 #else
@@ -1803,10 +1810,6 @@ public:
 		if ((powner!=rank) && (!serial))
 			return NULL;
 
-		if (x == global3D.max_length) x = x - 1;
-		if (y == global3D.max_length) y = y - 1;
-		if (z == global3D.max_length) z = z - 1;
-		morton = mortonEncode_magicbits(x,y,z);
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -1870,6 +1873,10 @@ public:
 		if  ((x > global3D.max_length) || (y > global3D.max_length) || (z > global3D.max_length))
 			return -1;
 
+		if (x == global3D.max_length) x = x - 1;
+		if (y == global3D.max_length) y = y - 1;
+		if (z == global3D.max_length) z = z - 1;
+		morton = mortonEncode_magicbits(x,y,z);
 
 #if NOMPI==0
 		if (!serial) powner = findOwner(morton);
@@ -1878,11 +1885,6 @@ public:
 #endif
 		if ((powner!=rank) && (!serial))
 			return -1;
-
-		if (x == global3D.max_length) x = x - 1;
-		if (y == global3D.max_length) y = y - 1;
-		if (z == global3D.max_length) z = z - 1;
-		morton = mortonEncode_magicbits(x,y,z);
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -1945,6 +1947,10 @@ public:
 		if ((point[0] < 0) || (point[0] > double(global3D.max_length)) || (point[1] < 0) || (point[1] > double(global3D.max_length)) || (point[2] < 0) || (point[2] > double(global3D.max_length)))
 			return NULL;
 
+		if (x == global3D.max_length) x = x - 1;
+		if (y == global3D.max_length) y = y - 1;
+		if (z == global3D.max_length) z = z - 1;
+		morton = mortonEncode_magicbits(x,y,z);
 
 #if NOMPI==0
 		if (!serial) powner = findOwner(morton);
@@ -1954,10 +1960,6 @@ public:
 		if ((powner!=rank) && (!serial))
 			return NULL;
 
-		if (x == global3D.max_length) x = x - 1;
-		if (y == global3D.max_length) y = y - 1;
-		if (z == global3D.max_length) z = z - 1;
-		morton = mortonEncode_magicbits(x,y,z);
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
@@ -2020,6 +2022,11 @@ public:
 		if ((point[0] < 0) || (point[0] > double(global3D.max_length)) || (point[1] < 0) || (point[1] > double(global3D.max_length)) || (point[2] < 0) || (point[2] > double(global3D.max_length)))
 			return -1;
 
+		if (x == global3D.max_length) x = x - 1;
+		if (y == global3D.max_length) y = y - 1;
+		if (z == global3D.max_length) z = z - 1;
+		morton = mortonEncode_magicbits(x,y,z);
+
 #if NOMPI==0
 		if (!serial) powner = findOwner(morton);
 #else
@@ -2028,10 +2035,6 @@ public:
 		if ((powner!=rank) && (!serial))
 			return -1;
 
-		if (x == global3D.max_length) x = x - 1;
-		if (y == global3D.max_length) y = y - 1;
-		if (z == global3D.max_length) z = z - 1;
-		morton = mortonEncode_magicbits(x,y,z);
 
 		int32_t jump = idxtry;
 		while(abs(jump) > 0){
