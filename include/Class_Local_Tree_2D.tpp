@@ -2496,7 +2496,7 @@ private:
 					if (balance_codim>1){
 						//Balance through nodes
 						for (inode=0; inode<global2D.nnodes; inode++){
-							if(it->getPbound(global2D.nodeface[inode][0]) == true || it->getPbound(global2D.nodeface[inode][0]) == true){
+							if(it->getPbound(global2D.nodeface[inode][0]) == true || it->getPbound(global2D.nodeface[inode][1]) == true){
 								neigh.clear();
 								findGhostNodeNeighbours(idx, inode, neigh);
 								sizeneigh = neigh.size();
