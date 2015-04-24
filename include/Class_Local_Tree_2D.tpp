@@ -3418,7 +3418,7 @@ private:
 //		// Check if octants node is a boundary
 //		if (oct->info[iface1] == false && oct->info[iface2] == false){
 		// Check if octants node is a pboundary node
-		if (oct->info[iface1+global2D.nfaces] == true && oct->info[iface2+global2D.nfaces] == true){
+		if (oct->info[iface1+global2D.nfaces] == true || oct->info[iface2+global2D.nfaces] == true){
 
 			//Build Morton number of virtual neigh of same size
 			Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));
