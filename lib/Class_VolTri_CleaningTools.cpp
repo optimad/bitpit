@@ -2725,6 +2725,9 @@ for (I = 0; I < nSimplex; I++) {
         Simplex[J].resize(Simplex[I].size());
         Simplex[J] = Simplex[I];
 
+        // Update element type
+        e_type[J] = e_type[I];
+
         // Update map
         map[I] = J;
 
@@ -2820,6 +2823,9 @@ for (I = 0; I < nSimplex; I++) {
         // Update simplex-vertex connectivity
         Simplex[J].resize(Simplex[I].size());
         Simplex[J] = Simplex[I];
+
+        // Update element type
+        e_type[J] = e_type[I];
 
         // Update map
         map[I] = J;
