@@ -20,7 +20,7 @@ int main(int argc, char *argv[]) {
 		Class_Para_Tree<3> pablo104;
 
 		/**<Refine globally four level and write the para_tree.*/
-		for (iter=1; iter<5; iter++){
+		for (iter=1; iter<4; iter++){
 			pablo104.adaptGlobalRefine();
 		}
 
@@ -61,7 +61,6 @@ int main(int argc, char *argv[]) {
 			for (int i=0; i<nocts; i++){
 				neigh.clear();
 				isghost.clear();
-
 				/**<Find neighbours through faces (codim=1), edges (codim=2) and nodes (codim=3) of the octants*/
 				for (codim=1; codim<dim+1; codim++){
 					if (codim == 1){

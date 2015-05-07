@@ -3981,6 +3981,7 @@ private:
 			//SEARCH IN GHOSTS
 
 			if (ghosts.size()>0){
+
 				// Search in ghosts
 				uint32_t idxghost = uint32_t(size_ghosts/2);
 				Class_Octant<3>* octghost = &ghosts[idxghost];
@@ -4059,6 +4060,7 @@ private:
 							if ((abs(Dhx) == Dhxref) && (abs(Dhy) == Dhyref) && (abs(Dhz) == Dhzref)){
 								neighbours.push_back(idxtry);
 								isghost.push_back(true);
+								return;
 							}
 							idxtry++;
 							if(idxtry>size_ghosts-1){
@@ -4070,7 +4072,7 @@ private:
 				}
 			}
 
-				// Search in octants
+			// Search in octants
 
 			//Build Morton number of virtual neigh of same size
 				// Search morton in octants
@@ -4091,6 +4093,16 @@ private:
 					Mortontry = octants[idxtry].computeMorton();
 					jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
 					idxtry += jump;
+					if (idxtry > octants.size()-1){
+						if (jump > 0){
+							idxtry = octants.size() - 1;
+							jump = 0;
+						}
+						else if (jump < 0){
+							idxtry = 0;
+							jump = 0;
+						}
+					}
 				}
 				if(octants[idxtry].computeMorton() == Morton && octants[idxtry].level == oct->level){
 					//Found neighbour of same size
@@ -4137,8 +4149,12 @@ private:
 							if ((abs(Dhx) == Dhxref) && (abs(Dhy) == Dhyref) && (abs(Dhz) == Dhzref)){
 								neighbours.push_back(idxtry);
 								isghost.push_back(false);
+								return;
 							}
 							idxtry++;
+							if(idxtry>noctants-1){
+								break;
+							}
 							Mortontry = octants[idxtry].computeMorton();
 						}
 					}
@@ -4269,6 +4285,7 @@ private:
 							if ((abs(Dhx) == Dhxref) && (abs(Dhy) == Dhyref) && (abs(Dhz) == Dhzref)){
 								neighbours.push_back(idxtry);
 								isghost.push_back(true);
+								return;
 							}
 							idxtry++;
 							if(idxtry>size_ghosts-1){
@@ -4350,6 +4367,7 @@ private:
 							if ((abs(Dhx) == Dhxref) && (abs(Dhy) == Dhyref) && (abs(Dhz) == Dhzref)){
 								neighbours.push_back(idxtry);
 								isghost.push_back(false);
+								return;
 							}
 							idxtry++;
 							Mortontry = octants[idxtry].computeMorton();

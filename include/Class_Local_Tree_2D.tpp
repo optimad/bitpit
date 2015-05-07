@@ -3157,6 +3157,7 @@ private:
 						if ((Dhx == Dhxref) && (Dhy == Dhyref)){
 							neighbours.push_back(idxtry);
 							isghost.push_back(false);
+							return;
 						}
 						idxtry++;
 						if(idxtry>noctants-1){
@@ -3368,6 +3369,7 @@ private:
 						if ((Dhx == Dhxref) && (Dhy == Dhyref)){
 							neighbours.push_back(idxtry);
 							isghost.push_back(false);
+							return;
 						}
 						idxtry++;
 						Mortontry = octants[idxtry].computeMorton();
