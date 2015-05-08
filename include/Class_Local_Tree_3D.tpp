@@ -108,7 +108,7 @@ private:
 	uint8_t getLocalMaxDepth() const{							// Get max depth reached in local tree
 		return local_max_depth;
 	};
-	uint8_t getMarker(int32_t idx){								// Get refinement/coarsening marker for idx-th octant
+	int8_t getMarker(int32_t idx){								// Get refinement/coarsening marker for idx-th octant
 		return octants[idx].getMarker();
 	};
 	uint8_t getLevel(int32_t idx){								// Get refinement/coarsening marker for idx-th octant

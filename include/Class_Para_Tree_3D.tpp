@@ -584,7 +584,7 @@ public:
 	 * \param[in] oct Pointer to target octant.
 	 * \return Marker of octant.
 	 */
-	uint8_t getMarker(Class_Octant<3>* oct){								// Get refinement/coarsening marker for idx-th octant
+	int8_t getMarker(Class_Octant<3>* oct){								// Get refinement/coarsening marker for idx-th octant
 		return oct->getMarker();
 	};
 
@@ -846,7 +846,7 @@ private:
 	 * \param[in] oct Target octant.
 	 * \return Marker of octant.
 	 */
-	uint8_t getMarker(Class_Octant<3> oct){								// Get refinement/coarsening marker for idx-th octant
+	int8_t getMarker(Class_Octant<3> oct){								// Get refinement/coarsening marker for idx-th octant
 		return oct.getMarker();
 	};
 
@@ -1107,7 +1107,7 @@ public:
 	 * \param[in] idx Local index of target octant.
 	 * \return Marker of octant.
 	 */
-	uint8_t getMarker(uint32_t idx){							// Get refinement/coarsening marker for idx-th octant
+	int8_t getMarker(uint32_t idx){							// Get refinement/coarsening marker for idx-th octant
 		return octree.getMarker(idx);
 	};
 
