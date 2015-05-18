@@ -638,7 +638,7 @@ if (flag_a) {
         n = Simplex[T].size();
         m = n/2;
         for (i = 0; i < m; ++i) {
-            j = n - i;
+            j = n - i - 1;
             swap(Adjacency[T][i], Adjacency[T][j]);
         } //next i
     } //next T
