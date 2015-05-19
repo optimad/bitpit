@@ -2486,7 +2486,10 @@ public:
 			Class_Local_Tree<3>::OctantsType::const_iterator first = octantsCopy.begin() + stride;
 			Class_Local_Tree<3>::OctantsType::const_iterator last = first + partition[rank];
 			octree.octants.assign(first, last);
+#if defined(__INTEL_COMPILER)
+#else
 			octree.octants.shrink_to_fit();
+#endif
 			first = octantsCopy.end();
 			last = octantsCopy.end();
 
@@ -2811,8 +2814,10 @@ public:
 					++newCounter;
 				}
 			}
+#if defined(__INTEL_COMPILER)
+#else
 			octree.octants.shrink_to_fit();
-
+#endif
 			delete [] newPartitionRangeGlobalidx; newPartitionRangeGlobalidx = NULL;
 			delete [] nofRecvsPerProc; nofRecvsPerProc = NULL;
 			delete [] displays; displays = NULL;
@@ -2868,7 +2873,10 @@ public:
 			Class_Local_Tree<3>::OctantsType::const_iterator first = octantsCopy.begin() + stride;
 			Class_Local_Tree<3>::OctantsType::const_iterator last = first + partition[rank];
 			octree.octants.assign(first, last);
+#if defined(__INTEL_COMPILER)
+#else
 			octree.octants.shrink_to_fit();
+#endif
 			first = octantsCopy.end();
 			last = octantsCopy.end();
 
@@ -3193,8 +3201,10 @@ public:
 					++newCounter;
 				}
 			}
+#if defined(__INTEL_COMPILER)
+#else
 			octree.octants.shrink_to_fit();
-
+#endif
 			delete [] newPartitionRangeGlobalidx; newPartitionRangeGlobalidx = NULL;
 			delete [] nofRecvsPerProc; nofRecvsPerProc = NULL;
 			delete [] displays; displays = NULL;
@@ -3253,7 +3263,10 @@ public:
 			Class_Local_Tree<3>::OctantsType::const_iterator first = octantsCopy.begin() + stride;
 			Class_Local_Tree<3>::OctantsType::const_iterator last = first + partition[rank];
 			octree.octants.assign(first, last);
+#if defined(__INTEL_COMPILER)
+#else
 			octree.octants.shrink_to_fit();
+#endif
 			first = octantsCopy.end();
 			last = octantsCopy.end();
 
@@ -3658,7 +3671,10 @@ public:
 					++newCounter;
 				}
 			}
+#if defined(__INTEL_COMPILER)
+#else
 			octree.octants.shrink_to_fit();
+#endif
 			userData.shrink();
 
 			delete [] newPartitionRangeGlobalidx;
@@ -3717,7 +3733,10 @@ public:
 			Class_Local_Tree<3>::OctantsType::const_iterator first = octantsCopy.begin() + stride;
 			Class_Local_Tree<3>::OctantsType::const_iterator last = first + partition[rank];
 			octree.octants.assign(first, last);
+#if defined(__INTEL_COMPILER)
+#else
 			octree.octants.shrink_to_fit();
+#endif
 			first = octantsCopy.end();
 			last = octantsCopy.end();
 
@@ -4121,7 +4140,10 @@ public:
 					++newCounter;
 				}
 			}
+#if defined(__INTEL_COMPILER)
+#else
 			octree.octants.shrink_to_fit();
+#endif
 			userData.shrink();
 
 			delete [] newPartitionRangeGlobalidx; newPartitionRangeGlobalidx = NULL;
@@ -4568,7 +4590,10 @@ public:
 		// mapidx init
 		mapidx.clear();
 		mapidx.resize(nocts);
+#if defined(__INTEL_COMPILER)
+#else
 		mapidx.shrink_to_fit();
+#endif
 		for (uint32_t i=0; i<nocts; i++){
 			mapidx[i] = i;
 		}
@@ -4752,7 +4777,10 @@ public:
 		// mapidx init
 		mapidx.clear();
 		mapidx.resize(nocts);
+#if defined(__INTEL_COMPILER)
+#else
 		mapidx.shrink_to_fit();
+#endif
 		for (uint32_t i=0; i<nocts; i++){
 			mapidx[i] = i;
 		}
@@ -4919,7 +4947,10 @@ public:
 		// mapidx init
 		mapidx.clear();
 		mapidx.resize(nocts);
+#if defined(__INTEL_COMPILER)
+#else
 		mapidx.shrink_to_fit();
+#endif
 		for (uint32_t i=0; i<nocts; i++){
 			mapidx[i] = i;
 		}

@@ -38,7 +38,10 @@ inline void User_Data_LB<D>::assign(uint32_t stride, uint32_t length) {
 	typename Data::iterator first = dataCopy.begin() + stride;
 	typename Data::iterator last = first + length;
 	data.assign(first,last);
+#if defined(__INTEL_COMPILER)
+#else
 	data.shrink_to_fit();
+#endif
 	first = dataCopy.end();
 	last = dataCopy.end();
 };
@@ -50,7 +53,10 @@ inline void User_Data_LB<D>::resize(uint32_t newSize) {
 
 template<class D>
 inline void User_Data_LB<D>::shrink() {
+#if defined(__INTEL_COMPILER)
+#else
 	data.shrink_to_fit();
+#endif
 }
 
 template<class D>

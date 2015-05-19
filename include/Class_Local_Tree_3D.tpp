@@ -234,7 +234,10 @@ private:
 				}
 			}
 		}
+#if defined(__INTEL_COMPILER)
+#else
 		octants.shrink_to_fit();
+#endif
 		nocts = octants.size();
 
 		setFirstDesc();
@@ -355,7 +358,10 @@ private:
 		}
 		//		octants.resize(nocts-offset);
 		octants.resize(nblock);
+#if defined(__INTEL_COMPILER)
+#else
 		octants.shrink_to_fit();
+#endif
 		nocts = octants.size();
 
 		// End on ghosts
@@ -425,7 +431,10 @@ private:
 				father.setMarker(markerfather);
 				octants.resize(nocts-offset);
 				octants.push_back(father);
+#if defined(__INTEL_COMPILER)
+#else
 				octants.shrink_to_fit();
+#endif
 				nocts = octants.size();
 			}
 
@@ -468,8 +477,10 @@ private:
 		}
 		if (offset > 0){
 			mapidx.resize(octants.size()+offset);
+#if defined(__INTEL_COMPILER)
+#else
 			mapidx.shrink_to_fit();
-
+#endif
 			octants.resize(octants.size()+offset);
 			blockidx = last_child_index[0]-nchm1;
 			idx = octants.size();
@@ -505,7 +516,10 @@ private:
 				}
 			}
 		}
+#if defined(__INTEL_COMPILER)
+#else
 		octants.shrink_to_fit();
+#endif
 		nocts = octants.size();
 
 		setFirstDesc();
@@ -633,11 +647,16 @@ private:
 			}
 		}
 		octants.resize(nblock);
+#if defined(__INTEL_COMPILER)
+#else
 		octants.shrink_to_fit();
+#endif
 		nocts = octants.size();
 		mapidx.resize(nocts);
+#if defined(__INTEL_COMPILER)
+#else
 		mapidx.shrink_to_fit();
-
+#endif
 		// End on ghosts
 		if (ghosts.size() && nocts > 0){
 			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
@@ -705,10 +724,16 @@ private:
 				father.setMarker(markerfather);
 				octants.resize(nocts-offset);
 				octants.push_back(father);
+#if defined(__INTEL_COMPILER)
+#else
 				octants.shrink_to_fit();
+#endif
 				nocts = octants.size();
 				mapidx.resize(nocts);
+#if defined(__INTEL_COMPILER)
+#else
 				mapidx.shrink_to_fit();
+#endif
 			}
 
 		}
@@ -780,7 +805,10 @@ private:
 				}
 			}
 		}
+#if defined(__INTEL_COMPILER)
+#else
 		octants.shrink_to_fit();
+#endif
 		nocts = octants.size();
 
 		setFirstDesc();
@@ -901,7 +929,10 @@ private:
 			}
 		}
 		octants.resize(nblock);
+#if defined(__INTEL_COMPILER)
+#else
 		octants.shrink_to_fit();
+#endif
 		nocts = octants.size();
 
 		// End on ghosts
@@ -976,7 +1007,10 @@ private:
 				father.setMarker(markerfather);
 				octants.resize(nocts-offset);
 				octants.push_back(father);
+#if defined(__INTEL_COMPILER)
+#else
 				octants.shrink_to_fit();
+#endif
 				nocts = octants.size();
 			}
 
@@ -1020,8 +1054,10 @@ private:
 		}
 		if (offset > 0){
 			mapidx.resize(octants.size()+offset);
+#if defined(__INTEL_COMPILER)
+#else
 			mapidx.shrink_to_fit();
-
+#endif
 			octants.resize(octants.size()+offset);
 			blockidx = last_child_index[0]-nchm1;
 			idx = octants.size();
@@ -1057,7 +1093,10 @@ private:
 				}
 			}
 		}
+#if defined(__INTEL_COMPILER)
+#else
 		octants.shrink_to_fit();
+#endif
 		nocts = octants.size();
 
 		setFirstDesc();
@@ -1186,11 +1225,16 @@ private:
 			}
 		}
 		octants.resize(nocts-offset);
+#if defined(__INTEL_COMPILER)
+#else
 		octants.shrink_to_fit();
+#endif
 		nocts = octants.size();
 		mapidx.resize(nocts);
+#if defined(__INTEL_COMPILER)
+#else
 		mapidx.shrink_to_fit();
-
+#endif
 		// End on ghosts
 		if (ghosts.size() && nocts > 0){
 			ghosts[idx2_gh].setMarker(-1);
@@ -1260,10 +1304,16 @@ private:
 				father.setMarker(markerfather);
 				octants.resize(nocts-offset);
 				octants.push_back(father);
+#if defined(__INTEL_COMPILER)
+#else
 				octants.shrink_to_fit();
+#endif
 				nocts = octants.size();
 				mapidx.resize(nocts);
+#if defined(__INTEL_COMPILER)
+#else
 				mapidx.shrink_to_fit();
+#endif
 			}
 		}
 
@@ -1298,7 +1348,10 @@ private:
 			octants[idx] = octants[idx+toDelete];
 		}
 		octants.resize(nocts-toDelete);
+#if defined(__INTEL_COMPILER)
+#else
 		octants.shrink_to_fit();
+#endif
 		nocts = getNumOctants();
 
 		setFirstDesc();
@@ -1330,9 +1383,15 @@ private:
 			mapidx[idx] = mapidx[idx+toDelete];
 		}
 		octants.resize(nocts-toDelete);
+#if defined(__INTEL_COMPILER)
+#else
 		octants.shrink_to_fit();
+#endif
 		mapidx.resize(nocts-toDelete);
+#if defined(__INTEL_COMPILER)
+#else
 		mapidx.shrink_to_fit();
+#endif
 		nocts = getNumOctants();
 
 		setFirstDesc();
@@ -4593,7 +4652,10 @@ private:
 			}
 			idx++;
 		}
+#if defined(__INTEL_COMPILER)
+#else
 		intersections.shrink_to_fit();
+#endif
 	}
 
 	// =================================================================================== //
@@ -4711,7 +4773,10 @@ private:
 			while (iter != iterend){
 				vector<uint32_t> nodecasting(iter->second.begin(), iter->second.begin()+3);
 				nodes[counter] = nodecasting;
+#if defined(__INTEL_COMPILER)
+#else
 				nodes[counter].shrink_to_fit();
+#endif
 				for(vector<uint32_t>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
 					if (connectivity[(*iter2)].size()==0){
 						connectivity[(*iter2)].reserve(8);
@@ -4721,12 +4786,21 @@ private:
 				mapnodes.erase(iter++);
 				counter++;
 			}
+#if defined(__INTEL_COMPILER)
+#else
 			nodes.shrink_to_fit();
+#endif
 			//Lento. Solo per risparmiare memoria
 			for (uint32_t ii=0; ii<noctants; ii++){
+#if defined(__INTEL_COMPILER)
+#else
 				connectivity[ii].shrink_to_fit();
+#endif
 			}
+#if defined(__INTEL_COMPILER)
+#else
 			connectivity.shrink_to_fit();
+#endif
 		}
 		map<uint64_t, vector<uint32_t> >().swap(mapnodes);
 		iter = mapnodes.end();
@@ -4783,7 +4857,10 @@ private:
 			while (iter != iterend){
 				vector<uint32_t> nodecasting(iter->second.begin(), iter->second.begin()+3);
 				ghostsnodes[counter] = nodecasting;
+#if defined(__INTEL_COMPILER)
+#else
 				ghostsnodes[counter].shrink_to_fit();
+#endif
 				for(vector<uint32_t>::iterator iter2 = iter->second.begin()+3; iter2 != iter->second.end(); iter2++){
 					if (ghostsconnectivity[(*iter2)].size()==0){
 						ghostsconnectivity[(*iter2)].reserve(8);
@@ -4793,12 +4870,21 @@ private:
 				mapnodes.erase(iter++);
 				counter++;
 			}
+#if defined(__INTEL_COMPILER)
+#else
 			ghostsnodes.shrink_to_fit();
+#endif
 			//Lento. Solo per risparmiare memoria
 			for (uint32_t ii=0; ii<noctants; ii++){
+#if defined(__INTEL_COMPILER)
+#else
 				ghostsconnectivity[ii].shrink_to_fit();
+#endif
 			}
+#if defined(__INTEL_COMPILER)
+#else
 			ghostsconnectivity.shrink_to_fit();
+#endif
 		}
 		iter = mapnodes.end();
 

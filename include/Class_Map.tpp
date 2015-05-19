@@ -81,13 +81,19 @@ void Class_Map<dim>::mapCenter(double* & center,
 	orig.push_back(X0);
 	orig.push_back(Y0);
 	orig.push_back(Z0);
+#if defined(__INTEL_COMPILER)
+#else
 	orig.shrink_to_fit();
+#endif
 	mapcenter.resize(3);
 	mapcenter = orig;
 	for (int i=0; i<dim; i++){
 		mapcenter[i] = mapcenter[i] + L/double(globals.max_length) * center[i];
 	}
+#if defined(__INTEL_COMPILER)
+#else
 	mapcenter.shrink_to_fit();
+#endif
 };
 
 template <int dim>
@@ -97,13 +103,19 @@ void Class_Map<dim>::mapCenter(vector<double> & center,
 	orig.push_back(X0);
 	orig.push_back(Y0);
 	orig.push_back(Z0);
+#if defined(__INTEL_COMPILER)
+#else
 	orig.shrink_to_fit();
+#endif
 	mapcenter.resize(3);
 	mapcenter = orig;
 	for (int i=0; i<dim; i++){
 		mapcenter[i] = mapcenter[i] + L/double(globals.max_length) * center[i];
 	}
+#if defined(__INTEL_COMPILER)
+#else
 	mapcenter.shrink_to_fit();
+#endif
 };
 
 template <int dim>
@@ -113,16 +125,25 @@ void Class_Map<dim>::mapNodes(uint32_t (*nodes)[3],
 	orig.push_back(X0);
 	orig.push_back(Y0);
 	orig.push_back(Z0);
+#if defined(__INTEL_COMPILER)
+#else
 	orig.shrink_to_fit();
+#endif
 	mapnodes.resize(globals.nnodes);
 	for (int i=0; i<globals.nnodes; i++){
 		mapnodes[i].resize(3);
 		for (int j=0; j<3; j++){
 			mapnodes[i][j] = orig[j] + L/double(globals.max_length) * double(nodes[i][j]);
 		}
+#if defined(__INTEL_COMPILER)
+#else
 		mapnodes[i].shrink_to_fit();
+#endif
 	}
+#if defined(__INTEL_COMPILER)
+#else
 	mapnodes.shrink_to_fit();
+#endif
 
 };
 
@@ -133,17 +154,25 @@ void Class_Map<dim>::mapNodes(vector<vector<uint32_t> > nodes,
 	orig.push_back(X0);
 	orig.push_back(Y0);
 	orig.push_back(Z0);
+#if defined(__INTEL_COMPILER)
+#else
 	orig.shrink_to_fit();
+#endif
 	mapnodes.resize(globals.nnodes);
 	for (int i=0; i<globals.nnodes; i++){
 		mapnodes[i].resize(3);
 		for (int j=0; j<3; j++){
 			mapnodes[i][j] = orig[j] + L/double(globals.max_length) * double(nodes[i][j]);
 		}
+#if defined(__INTEL_COMPILER)
+#else
 		mapnodes[i].shrink_to_fit();
+#endif
 	}
+#if defined(__INTEL_COMPILER)
+#else
 	mapnodes.shrink_to_fit();
-
+#endif
 };
 
 template <int dim>
@@ -153,7 +182,10 @@ void Class_Map<dim>::mapNode(vector<uint32_t> & node,
 	orig.push_back(X0);
 	orig.push_back(Y0);
 	orig.push_back(Z0);
+#if defined(__INTEL_COMPILER)
+#else
 	orig.shrink_to_fit();
+#endif
 	mapnode.resize(3);
 	for (int j=0; j<3; j++){
 		mapnode[j] = orig[j] + L/double(globals.max_length) * double(node[j]);
@@ -168,17 +200,25 @@ void Class_Map<dim>::mapNodesIntersection(uint32_t (*nodes)[3],
 	orig.push_back(X0);
 	orig.push_back(Y0);
 	orig.push_back(Z0);
+#if defined(__INTEL_COMPILER)
+#else
 	orig.shrink_to_fit();
+#endif
 	mapnodes.resize(globals.nnodesperface);
 	for (int i=0; i<globals.nnodesperface; i++){
 		mapnodes[i].resize(3);
 		for (int j=0; j<3; j++){
 			mapnodes[i][j] = orig[j] + L/double(globals.max_length) * double(nodes[i][j]);
 		}
+#if defined(__INTEL_COMPILER)
+#else
 		mapnodes[i].shrink_to_fit();
+#endif
 	}
+#if defined(__INTEL_COMPILER)
+#else
 	mapnodes.shrink_to_fit();
-
+#endif
 };
 
 template <int dim>
@@ -188,22 +228,33 @@ void Class_Map<dim>::mapNodesIntersection(vector<vector<uint32_t> > nodes,
 	orig.push_back(X0);
 	orig.push_back(Y0);
 	orig.push_back(Z0);
+#if defined(__INTEL_COMPILER)
+#else
 	orig.shrink_to_fit();
+#endif
 	mapnodes.resize(globals.nnodesperface);
 	for (int i=0; i<globals.nnodesperface; i++){
 		mapnodes[i].resize(3);
 		for (int j=0; j<3; j++){
 			mapnodes[i][j] = orig[j] + L/double(globals.max_length) * double(nodes[i][j]);
 		}
+#if defined(__INTEL_COMPILER)
+#else
 		mapnodes[i].shrink_to_fit();
+#endif
 	}
+#if defined(__INTEL_COMPILER)
+#else
 	mapnodes.shrink_to_fit();
-
+#endif
 };
 
 template <int dim>
 void Class_Map<dim>::mapNormals(vector<int8_t> normal,
 		vector<double> & mapnormal){
 	mapnormal = vector<double>(normal.begin(), normal.end());
+#if defined(__INTEL_COMPILER)
+#else
 	mapnormal.shrink_to_fit();
+#endif
 };

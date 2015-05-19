@@ -310,9 +310,15 @@ public:
 			nodes[i][0] = x + cx*dh;
 			nodes[i][1] = y + cy*dh;
 			nodes[i][2] = z + cz*dh;
+#if defined(__INTEL_COMPILER)
+#else
 			nodes[i].shrink_to_fit();
+#endif
 		}
+#if defined(__INTEL_COMPILER)
+#else
 		nodes.shrink_to_fit();
+#endif
 	};
 
 	/*! Get the coordinates of a nodes of an octant in logical domain.
@@ -371,7 +377,10 @@ public:
 		for (i = 0; i < 3; i++){
 			normal[i] = global3D.normals[iface][i];
 		}
+#if defined(__INTEL_COMPILER)
+#else
 		normal.shrink_to_fit();
+#endif
 	};
 
 	// ------------------------------------------------------------------------------- //
