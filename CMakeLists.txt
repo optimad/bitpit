@@ -20,7 +20,6 @@ include_directories(include)
 IF(WITHOUT_MPI EQUAL 0)
 
 IF(COMPILER EQUAL "intel")
-MESSAGE("Compiling with ${COMPILER}")
 SET(CMAKE_C_COMPILER mpiicc)
 SET(CMAKE_CXX_COMPILER mpicpc)
 ELSE(COMPILER EQUAL "intel")
@@ -39,6 +38,8 @@ SET(CMAKE_CXX_COMPILER g++)
 ENDIF(COMPILER EQUAL "intel")
 
 ENDIF(WITHOUT_MPI EQUAL 0)
+
+MESSAGE("Compiling with ${COMPILER}")
 
 SET(DEBUG 0 CACHE STRING "Set DEBUG = 1 if you want debug flags to be passed to the compiler. Otherwise, PABLO will be optimized")
 
