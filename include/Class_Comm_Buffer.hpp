@@ -5,11 +5,11 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
+#include "mpi.h"
 #include "preprocessor_defines.dat"
 #include <cstdint>
 #include <typeinfo>
 #include <algorithm>
-#include "mpi.h"
 #include "mpi_datatype_conversion.hpp"
 
 // =================================================================================== //

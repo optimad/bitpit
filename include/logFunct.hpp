@@ -6,15 +6,15 @@
 // =================================================================================== //
 
 // Standard Template Library
+#if NOMPI == 0
+#include <mpi.h>
+#endif
 # include <vector>
 # include <string>
 # include <fstream>
 # include <sstream>
 #include <chrono>
 #include <ctime>
-#if NOMPI == 0
-#include <mpi.h>
-#endif
 // =================================================================================== //
 // NAMESPACES                                                                          //
 // =================================================================================== //

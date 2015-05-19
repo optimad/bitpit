@@ -8,13 +8,13 @@
 #ifndef INCLUDE_CLASS_LOG_HPP_
 #define INCLUDE_CLASS_LOG_HPP_
 
+#if NOMPI==0
+#include <mpi.h>
+#endif
 #include <vector>
 #include <string>
 #include <fstream>
 #include <sstream>
-#if NOMPI==0
-#include <mpi.h>
-#endif
 using namespace std;
 
 class Class_Log {

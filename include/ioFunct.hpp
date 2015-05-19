@@ -5,15 +5,15 @@
 #define IOFUNCT_HPP_
 
 // includes
+#if NOMPI == 0
+#include <mpi.h>
+#endif
 #include <algorithm>
 #include <string>
 #include <functional>
 #include <cctype>
 #include <fstream>
 #include <iomanip>
-#if NOMPI == 0
-#include <mpi.h>
-#endif
 #include "Class_Para_Tree.hpp"
 #include "logFunct.hpp"
 

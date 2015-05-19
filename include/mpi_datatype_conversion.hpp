@@ -2,8 +2,8 @@
 #ifndef MPI_DATATYPE_CONVERSION_HPP_
 #define MPI_DATATYPE_CONVERSION_HPP_
 
-#include <stdint.h>
 #include <mpi.h>
+#include <stdint.h>
 
 template <class T>
 MPI_Datatype convert();
