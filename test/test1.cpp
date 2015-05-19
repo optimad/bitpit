@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
 			/**<Adapt octree, update connectivity and write.*/
 			pablo1.adapt();
 			pablo1.updateConnectivity();
-			pablo1.write("Pablo1_iter"+to_string(iter+2));
+			pablo1.write("Pablo1_iter"+to_string(static_cast<unsigned long long>(iter+2)));
 		}
 
 		/**<While adapt() nref2 times in the upper area of domain.
@@ -93,14 +93,14 @@ int main(int argc, char *argv[]) {
 				}
 				done = pablo1.adapt();
 				pablo1.updateConnectivity();
-				pablo1.write("Pablo1_iter"+to_string(iter+nref1+2));
+				pablo1.write("Pablo1_iter"+to_string(static_cast<unsigned long long>(iter+nref1+2)));
 			}
 			iter++;
 		}
 		/**<Globally refine one level, update the connectivity and write the para_tree.*/
 		pablo1.adaptGlobalRefine();
 		pablo1.updateConnectivity();
-		pablo1.write("Pablo1_iter"+to_string(iter+nref1+3));
+		pablo1.write("Pablo1_iter"+to_string(static_cast<unsigned long long>(iter+nref1+3)));
 #if NOMPI==0
 	}
 

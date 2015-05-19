@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 		for (int iter=1; iter<3; iter++){
 			pablo2.adaptGlobalRefine();
 			pablo2.updateConnectivity();
-			pablo2.write("Pablo2_iter"+to_string(iter));
+			pablo2.write("Pablo2_iter"+to_string(static_cast<unsigned long long>(iter)));
 		}
 
 		/**<Define a center point and a radius.*/
@@ -56,7 +56,7 @@ int main(int argc, char *argv[]) {
 
 			/**<Update the connectivity and write the para_tree.*/
 			pablo2.updateConnectivity();
-			pablo2.write("Pablo2_iter"+to_string(iter));
+			pablo2.write("Pablo2_iter"+to_string(static_cast<unsigned long long>(iter)));
 		}
 #if NOMPI==0
 	}

@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
 
 			/**<Update the connectivity and write the para_tree.*/
 			pablo120.updateConnectivity();
-			pablo120.writeTest("Pablo120_iter"+to_string(iter), oct_data);
+			pablo120.writeTest("Pablo120_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
 		}
 #if NOMPI==0
 	}

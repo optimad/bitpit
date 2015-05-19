@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 			pablo12.adaptGlobalRefine();
 
 			pablo12.updateConnectivity();
-			pablo12.write("Pablo12_iter"+to_string(iter));
+			pablo12.write("Pablo12_iter"+to_string(static_cast<unsigned long long>(iter)));
 		}
 
 #if NOMPI==0
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 
 			/**<Update the connectivity and write the para_tree.*/
 			pablo12.updateConnectivity();
-			pablo12.write("Pablo12_iter"+to_string(iter));
+			pablo12.write("Pablo12_iter"+to_string(static_cast<unsigned long long>(iter)));
 		}
 #if NOMPI==0
 	}

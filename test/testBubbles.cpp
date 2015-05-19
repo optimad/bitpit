@@ -157,7 +157,7 @@ int main(int argc, char *argv[]) {
 
 			/**<Update the connectivity and write the para_tree.*/
 			pabloBB.updateConnectivity();
-			pabloBB.write("PabloBubble_iter"+to_string(iter));
+			pabloBB.write("PabloBubble_iter"+to_string(static_cast<unsigned long long>(iter)));
 		}
 #if NOMPI==0
 	}

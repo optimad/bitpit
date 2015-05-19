@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 		/**<Update the connectivity and write the para_tree.*/
 		iter = 0;
 		pablo16.updateConnectivity();
-		pablo16.writeTest("Pablo16_iter"+to_string(iter), oct_data);
+		pablo16.writeTest("Pablo16_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
 
 		/**<Adapt two times with data injection on new octants.*/
 		int start = 1;
@@ -108,7 +108,7 @@ int main(int argc, char *argv[]) {
 
 			/**<Update the connectivity and write the para_tree.*/
 			pablo16.updateConnectivity();
-			pablo16.writeTest("Pablo16_iter"+to_string(iter), oct_data_new);
+			pablo16.writeTest("Pablo16_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data_new);
 
 			oct_data = oct_data_new;
 		}
@@ -123,7 +123,7 @@ int main(int argc, char *argv[]) {
 
 		/**<Update the connectivity and write the para_tree.*/
 		pablo16.updateConnectivity();
-		pablo16.writeTest("Pablo16_iter"+to_string(iter), oct_data);
+		pablo16.writeTest("Pablo16_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
 
 #if NOMPI==0
 	}

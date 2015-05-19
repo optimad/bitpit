@@ -69,7 +69,7 @@ int main(int argc, char *argv[]) {
 		/**<Update the connectivity and write the para_tree.*/
 		iter = 0;
 		pablo14.updateConnectivity();
-		pablo14.writeTest("Pablo14_iter"+to_string(iter), oct_data);
+		pablo14.writeTest("Pablo14_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
 
 		/**<Smoothing iterations on initial data*/
 		int start = iter + 1;
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
 
 			/**<Update the connectivity and write the para_tree.*/
 			pablo14.updateConnectivity();
-			pablo14.writeTest("Pablo14_iter"+to_string(iter), oct_data_smooth);
+			pablo14.writeTest("Pablo14_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data_smooth);
 
 #if NOMPI==0
 			/**<Communicate the data of the octants and the ghost octants between the processes.*/

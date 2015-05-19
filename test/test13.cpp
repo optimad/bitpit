@@ -24,13 +24,13 @@ int main(int argc, char *argv[]) {
 
 		/**<Compute the connectivity and write the para_tree.*/
 		pablo13.computeConnectivity();
-		pablo13.write("Pablo13_iter"+to_string(iter));
+		pablo13.write("Pablo13_iter"+to_string(static_cast<unsigned long long>(iter)));
 
 		/**<Refine globally two level and write the para_tree.*/
 		for (iter=1; iter<3; iter++){
 			pablo13.adaptGlobalRefine();
 			pablo13.updateConnectivity();
-			pablo13.write("Pablo13_iter"+to_string(iter));
+			pablo13.write("Pablo13_iter"+to_string(static_cast<unsigned long long>(iter)));
 		}
 
 #if NOMPI==0
@@ -68,13 +68,13 @@ int main(int argc, char *argv[]) {
 
 			/**<Update the connectivity and write the para_tree.*/
 			pablo13.updateConnectivity();
-			pablo13.write("Pablo13_iter"+to_string(iter));
+			pablo13.write("Pablo13_iter"+to_string(static_cast<unsigned long long>(iter)));
 		}
 
 		/**<Coarse globally one level and write the para_tree.*/
 		pablo13.adaptGlobalCoarse();
 		pablo13.updateConnectivity();
-		pablo13.write("Pablo13_iter"+to_string(iter));
+		pablo13.write("Pablo13_iter"+to_string(static_cast<unsigned long long>(iter)));
 
 
 		/**<Define a center point and a radius.*/
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
 
 			/**<Update the connectivity and write the para_tree.*/
 			pablo13.updateConnectivity();
-			pablo13.write("Pablo13_iter"+to_string(iter));
+			pablo13.write("Pablo13_iter"+to_string(static_cast<unsigned long long>(iter)));
 		}
 #if NOMPI==0
 	}

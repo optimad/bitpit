@@ -23,13 +23,13 @@ int main(int argc, char *argv[]) {
 
 		/**<Compute the connectivity and write the para_tree.*/
 		pablo3.computeConnectivity();
-		pablo3.write("Pablo3_iter"+to_string(iter));
+		pablo3.write("Pablo3_iter"+to_string(static_cast<unsigned long long>(iter)));
 
 		/**<Refine globally two level and write the para_tree.*/
 		for (iter=1; iter<3; iter++){
 			pablo3.adaptGlobalRefine();
 			pablo3.updateConnectivity();
-			pablo3.write("Pablo3_iter"+to_string(iter));
+			pablo3.write("Pablo3_iter"+to_string(static_cast<unsigned long long>(iter)));
 		}
 
 		/**<Define a center point and a radius.*/
@@ -56,13 +56,13 @@ int main(int argc, char *argv[]) {
 
 			/**<Update the connectivity and write the para_tree.*/
 			pablo3.updateConnectivity();
-			pablo3.write("Pablo3_iter"+to_string(iter));
+			pablo3.write("Pablo3_iter"+to_string(static_cast<unsigned long long>(iter)));
 		}
 
 		/**<Coarse globally one level and write the para_tree.*/
 		pablo3.adaptGlobalCoarse();
 		pablo3.updateConnectivity();
-		pablo3.write("Pablo3_iter"+to_string(iter));
+		pablo3.write("Pablo3_iter"+to_string(static_cast<unsigned long long>(iter)));
 
 		/**<Define a center point and a radius.*/
 		xc = yc = 0.35;
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 			/**<Adapt octree, update connectivity and write.*/
 			pablo3.adapt();
 			pablo3.updateConnectivity();
-			pablo3.write("Pablo3_iter"+to_string(iter));
+			pablo3.write("Pablo3_iter"+to_string(static_cast<unsigned long long>(iter)));
 		}
 #if NOMPI==0
 	}

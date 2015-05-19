@@ -68,8 +68,8 @@ int main(int argc, char *argv[]) {
 		iter = 0;
 		pablo17a.updateConnectivity();
 		pablo17b.updateConnectivity();
-		pablo17a.write("Pablo17a_iter"+to_string(iter));
-//		pablo7b.write("Pablo7b_iter"+to_string(iter));
+		pablo17a.write("Pablo17a_iter"+to_string(static_cast<unsigned long long>(iter)));
+//		pablo7b.write("Pablo7b_iter"+to_string(static_cast<unsigned long long>((iter)));
 
 		/**<Adapt two times with data injection on new octants.*/
 		int start = 1;
@@ -125,7 +125,7 @@ int main(int argc, char *argv[]) {
 
 			/**<Update the connectivity and write the para_tree.*/
 			pablo17a.updateConnectivity();
-			pablo17a.writeTest("Pablo17a_iter"+to_string(iter), oct_data);
+			pablo17a.writeTest("Pablo17a_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
 
 		}
 
@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
 
 		/**<Update the connectivity and write the para_tree.*/
 		pablo17a.updateConnectivity();
-		pablo17a.writeTest("Pablo17a_iter"+to_string(iter), oct_data);
+		pablo17a.writeTest("Pablo17a_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
 
 #endif
 
@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
 
 		/**<Update the connectivity and write the para_tree.*/
 		pablo17b.updateConnectivity();
-		pablo17b.writeTest("Pablo17b_iter"+to_string(iter), oct_data_b);
+		pablo17b.writeTest("Pablo17b_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data_b);
 
 #if NOMPI==0
 	}

@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
 		/**<Update the connectivity and write the para_tree.*/
 		iter = 0;
 		pablo4.updateConnectivity();
-		pablo4.writeTest("Pablo4_iter"+to_string(iter), oct_data);
+		pablo4.writeTest("Pablo4_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
 
 		/**<Smoothing iterations on initial data*/
 		int start = 1;
@@ -90,7 +90,7 @@ int main(int argc, char *argv[]) {
 
 			/**<Update the connectivity and write the para_tree.*/
 			pablo4.updateConnectivity();
-			pablo4.writeTest("Pablo4_iter"+to_string(iter), oct_data_smooth);
+			pablo4.writeTest("Pablo4_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data_smooth);
 
 			oct_data = oct_data_smooth;
 		}
