@@ -20,7 +20,7 @@ include_directories(include)
 IF(WITHOUT_MPI EQUAL 0)
 
 IF(COMPILER EQUAL "intel")
-MESSAGE("Compiling with ${COMPILER})
+MESSAGE("Compiling with ${COMPILER}")
 SET(CMAKE_C_COMPILER mpiicc)
 SET(CMAKE_CXX_COMPILER mpicpc)
 ELSE(COMPILER EQUAL "intel")
