@@ -39,8 +39,6 @@ ENDIF(COMPILER STREQUAL intel)
 
 ENDIF(WITHOUT_MPI EQUAL 0)
 
-MESSAGE("Compiling with ${COMPILER}")
-
 SET(DEBUG 0 CACHE STRING "Set DEBUG = 1 if you want debug flags to be passed to the compiler. Otherwise, PABLO will be optimized")
 
 IF(${DEBUG})
