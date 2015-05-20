@@ -3375,8 +3375,8 @@ public:
 							z = octant.getZ();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							for(int i = 0; i < 16; ++i)
-								info[i] = octant.info[i];
+							for(int j = 0; j < 16; ++j)
+								info[j] = octant.info[j];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
 							error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
 							error_flag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
@@ -3416,8 +3416,8 @@ public:
 							z = octant.getZ();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							for(int i = 0; i < 16; ++i)
-								info[i] = octant.info[i];
+							for(int j = 0; j < 16; ++j)
+								info[j] = octant.info[j];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
 							error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
 							error_flag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
@@ -3464,8 +3464,8 @@ public:
 							z = octant.getZ();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							for(int i = 0; i < 16; ++i)
-								info[i] = octant.info[i];
+							for(int j = 0; j < 16; ++j)
+								info[j] = octant.info[j];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
 							error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
 							error_flag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
@@ -3505,8 +3505,8 @@ public:
 							z = octant.getZ();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							for(int i = 0; i < 16; ++i)
-								info[i] = octant.info[i];
+							for(int j = 0; j < 16; ++j)
+								info[j] = octant.info[j];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
 							error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
 							error_flag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
@@ -3837,8 +3837,8 @@ public:
 							z = octant.getZ();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							for(int i = 0; i < 16; ++i)
-								info[i] = octant.info[i];
+							for(int j = 0; j < 16; ++j)
+								info[j] = octant.info[j];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
 							error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
 							error_flag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
@@ -3878,8 +3878,8 @@ public:
 							z = octant.getZ();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							for(int i = 0; i < 16; ++i)
-								info[i] = octant.info[i];
+							for(int j = 0; j < 16; ++j)
+								info[j] = octant.info[j];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
 							error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
 							error_flag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
@@ -3926,8 +3926,8 @@ public:
 							z = octant.getZ();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							for(int i = 0; i < 16; ++i)
-								info[i] = octant.info[i];
+							for(int j = 0; j < 16; ++j)
+								info[j] = octant.info[j];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
 							error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
 							error_flag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
@@ -3967,8 +3967,8 @@ public:
 							z = octant.getZ();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							for(int i = 0; i < 16; ++i)
-								info[i] = octant.info[i];
+							for(int j = 0; j < 16; ++j)
+								info[j] = octant.info[j];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
 							error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
 							error_flag = MPI_Pack(&z,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&sendBuffers[p].pos,comm);
