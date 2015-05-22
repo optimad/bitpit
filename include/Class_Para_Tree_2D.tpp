@@ -4476,6 +4476,7 @@ public:
 	 * if the i-th octant is new after coarsening the j-th old octant was the first child of the new octant.
 	 */
 	bool adapt(u32vector & mapidx) {
+		//TODO recoding for adapting with abs(marker) > 1
 
 		bool globalDone = false, localDone = false;
 		uint32_t nocts = octree.getNumOctants();
@@ -4662,7 +4663,7 @@ public:
 	 * if the i-th octant is new after coarsening the j-th old octant was the first child of the new octant.
 	 */
 	bool adaptGlobalRefine(u32vector & mapidx) {
-
+		//TODO recoding for adapting with abs(marker) > 1
 		bool globalDone = false, localDone = false;
 		uint32_t nocts = octree.getNumOctants();
 		vector<Class_Octant<2> >::iterator iter, iterend = octree.octants.end();
@@ -4831,7 +4832,7 @@ public:
 	 * if the i-th octant is new after coarsening the j-th old octant was the first child of the new octant.
 	 */
 	bool adaptGlobalCoarse(u32vector & mapidx) {
-
+		//TODO recoding for adapting with abs(marker) > 1
 		bool globalDone = false, localDone = false;
 		uint32_t nocts = octree.getNumOctants();
 		vector<Class_Octant<2> >::iterator iter, iterend = octree.octants.end();

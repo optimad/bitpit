@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8)
 #Name your project here
 project(PABLO)
 
-ADD_DEFINITIONS(-std=c++11)
+ADD_DEFINITIONS(-std=c++0x)
 SET(WITHOUT_MPI 0 CACHE BOOL "Set WITHOUT_MPI to 1 if you don't have an installed implementation of MPI or you don't want to use a parallel PABLO")
 SET(COMPILER "gcc" CACHE STRING "Set COMIPLER to 'intel' if you want to use the Intel Compiler")
 IF(WITHOUT_MPI EQUAL 1)
