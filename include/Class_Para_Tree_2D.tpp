@@ -4242,6 +4242,8 @@ private:
 		bool globalDone = true, localDone = false;
 		int  iteration  = 0;
 
+		octree.preBalance21();
+
 		if (first){
 			log.writeLog("---------------------------------------------");
 			log.writeLog(" 2:1 BALANCE (balancing Marker before Adapt)");
