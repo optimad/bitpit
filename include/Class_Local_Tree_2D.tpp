@@ -2279,8 +2279,8 @@ private:
 		father = octants[0].buildFather();
 		lastdesc = father.buildLastDesc();
 		mortonld = lastdesc.computeMorton();
+		nbro = 0;
 		for (idx=0; idx<global2D.nchildren; idx++){
-			nbro = 0;
 			// Check if family is complete or to be checked in the internal loop (some brother refined)
 			if (octants[idx].computeMorton() <= mortonld){
 				nbro++;
@@ -2342,8 +2342,8 @@ private:
 						wstop = true;
 					}
 				}
-				if (nbro != global2D.nchildren){
-					for(uint32_t ii=nocts-global2D.nchildren; ii<nocts; ii++){
+				if (nbro != global2D.nchildren && idx!=nocts-1){
+					for(uint32_t ii=idx+1; ii<nocts; ii++){
 						octants[ii].setMarker(0);
 					}
 				}
