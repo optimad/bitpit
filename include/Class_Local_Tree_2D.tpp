@@ -2247,9 +2247,10 @@ private:
 
 	void preBalance21(){
 		// Local variables
-		Class_Octant<2> father;
+		Class_Octant<2> father, lastdesc;
+		uint64_t mortonld;
 		uint32_t nocts;
-		uint32_t idx, idx2;
+		uint32_t idx, idx2, idx0;
 		uint32_t idx2_gh;
 		int8_t markerfather, marker;
 		uint8_t nbro;
@@ -2260,7 +2261,7 @@ private:
 		// Initialization
 
 		nbro = 0;
-		idx2_gh = 0;
+		idx2_gh = idx0 = 0;
 
 		nocts   = octants.size();
 		size_ghosts = ghosts.size();
@@ -2274,8 +2275,23 @@ private:
 			idx2_gh = min((size_ghosts-1), idx2_gh);
 		}
 
+		// Check first internal octants
+		father = octants[0].buildFather();
+		lastdesc = father.buildLastDesc();
+		mortonld = lastdesc.computeMorton();
+		for (idx=0; idx<global2D.nchildren; idx++){
+			nbro = 0;
+			// Check if family is complete or to be checked in the internal loop (some brother refined)
+			if (octants[idx].computeMorton() <= mortonld){
+				nbro++;
+			}
+		}
+		if (nbro != global2D.nchildren)
+			idx0 = nbro;
+
+
 		// Check and coarse internal octants
-		for (idx=0; idx<nocts; idx++){
+		for (idx=idx0; idx<nocts; idx++){
 			if(octants[idx].getMarker() < 0 && octants[idx].getLevel() > 0){
 				nbro = 0;
 				father = octants[idx].buildFather();
