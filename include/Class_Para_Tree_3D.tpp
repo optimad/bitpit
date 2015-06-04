@@ -4341,6 +4341,8 @@ private:
 		bool globalDone = true, localDone = false;
 		int  iteration  = 0;
 
+		commMarker();
+		octree.preBalance21();
 
 		if (first){
 			log.writeLog("---------------------------------------------");

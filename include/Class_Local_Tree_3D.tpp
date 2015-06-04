@@ -2283,6 +2283,116 @@ private:
 
 	};
 
+
+	// =================================================================================== //
+
+	void preBalance21(){
+		// Local variables
+		Class_Octant<3> father, lastdesc;
+		uint64_t mortonld;
+		uint32_t nocts;
+		uint32_t idx, idx2, idx0;
+		uint32_t idx2_gh;
+		int8_t markerfather, marker;
+		uint8_t nbro;
+		uint8_t nchm1 = global3D.nchildren-1;
+		bool wstop = false;
+
+		//------------------------------------------ //
+		// Initialization
+
+		nbro = 0;
+		idx2_gh = idx0 = 0;
+
+		nocts   = octants.size();
+		size_ghosts = ghosts.size();
+
+
+		// Set index for start and end check for ghosts
+		if (ghosts.size()){
+			while(idx2_gh < size_ghosts && ghosts[idx2_gh].computeMorton() <= last_desc.computeMorton()){
+				idx2_gh++;
+			}
+			idx2_gh = min((size_ghosts-1), idx2_gh);
+		}
+
+		// Check first internal octants
+		father = octants[0].buildFather();
+		lastdesc = father.buildLastDesc();
+		mortonld = lastdesc.computeMorton();
+		nbro = 0;
+		for (idx=0; idx<global3D.nchildren; idx++){
+			// Check if family is complete or to be checked in the internal loop (some brother refined)
+			if (octants[idx].computeMorton() <= mortonld){
+				nbro++;
+			}
+		}
+		if (nbro != global3D.nchildren)
+			idx0 = nbro;
+
+
+		// Check and coarse internal octants
+		for (idx=idx0; idx<nocts; idx++){
+			if(octants[idx].getMarker() < 0 && octants[idx].getLevel() > 0){
+				nbro = 0;
+				father = octants[idx].buildFather();
+				// Check if family is to be coarsened
+				for (idx2=idx; idx2<idx+global3D.nchildren; idx2++){
+					if (idx2<nocts){
+						if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
+							nbro++;
+						}
+					}
+				}
+				if (nbro == global3D.nchildren){
+					idx = idx2-1;
+				}
+				else{
+					if (idx < (nocts>global3D.nchildren)*(nocts-global3D.nchildren)){
+						octants[idx].setMarker(0);
+					}
+				}
+			}
+		}
+
+		// End on ghosts
+		if (ghosts.size() && nocts > 0){
+			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
+				father = ghosts[idx2_gh].buildFather();
+				nbro = 0;
+				idx = idx2_gh;
+				marker = ghosts[idx].getMarker();
+				while(marker < 0 && ghosts[idx].buildFather() == father){
+					nbro++;
+					idx++;
+					if(idx == size_ghosts){
+						break;
+					}
+					marker = ghosts[idx].getMarker();
+				}
+				idx = nocts-1;
+				marker = octants[idx].getMarker();
+				while(marker < 0 && octants[idx].buildFather() == father && idx >= 0){
+					nbro++;
+					idx--;
+					marker = octants[idx].getMarker();
+					if (wstop){
+						break;
+					}
+					if (idx==0){
+						wstop = true;
+					}
+				}
+				if (nbro != global3D.nchildren && idx!=nocts-1){
+					for(uint32_t ii=idx+1; ii<nocts; ii++){
+						octants[ii].setMarker(0);
+					}
+				}
+			}
+		}
+	};
+
+
 	// =================================================================================== //
 
 	bool localBalance(bool doInterior){				// 2:1 balancing on level a local tree already adapted (balance only the octants with info[14] = false) (refinement wins!)
@@ -2558,7 +2668,7 @@ private:
 						if (balance_codim>2){
 							//Balance through nodes
 							for (inode=0; inode<global3D.nnodes; inode++){
-								if(!octants[idx].getPbound(global3D.nodeface[inode][0]) || !octants[idx].getPbound(global3D.nodeface[inode][1]) || !octants[idx].getPbound(global2D.nodeface[inode][2])){
+								if(!octants[idx].getPbound(global3D.nodeface[inode][0]) || !octants[idx].getPbound(global3D.nodeface[inode][1]) || !octants[idx].getPbound(global3D.nodeface[inode][2])){
 									findNodeNeighbours(idx, inode, neigh, isghost);
 									sizeneigh = neigh.size();
 									for(i=0; i<sizeneigh; i++){
@@ -2729,7 +2839,7 @@ private:
 						if (balance_codim>2){
 							//Balance through nodes
 							for (inode=0; inode<global3D.nnodes; inode++){
-								if(!octants[idx].getPbound(global3D.nodeface[inode][0]) || !octants[idx].getPbound(global3D.nodeface[inode][1]) || !octants[idx].getPbound(global2D.nodeface[inode][2])){
+								if(!octants[idx].getPbound(global3D.nodeface[inode][0]) || !octants[idx].getPbound(global3D.nodeface[inode][1]) || !octants[idx].getPbound(global3D.nodeface[inode][2])){
 									findNodeNeighbours(idx, inode, neigh, isghost);
 									sizeneigh = neigh.size();
 									for(i=0; i<sizeneigh; i++){
@@ -3044,7 +3154,7 @@ private:
 						if (balance_codim>2){
 							//Balance through nodes
 							for (inode=0; inode<global3D.nnodes; inode++){
-								if(!octants[idx].getPbound(global3D.nodeface[inode][0]) || !octants[idx].getPbound(global3D.nodeface[inode][1]) || !octants[idx].getPbound(global2D.nodeface[inode][2])){
+								if(!octants[idx].getPbound(global3D.nodeface[inode][0]) || !octants[idx].getPbound(global3D.nodeface[inode][1]) || !octants[idx].getPbound(global3D.nodeface[inode][2])){
 									findNodeNeighbours(idx, inode, neigh, isghost);
 									sizeneigh = neigh.size();
 									for(i=0; i<sizeneigh; i++){
@@ -3215,7 +3325,7 @@ private:
 						if (balance_codim>2){
 							//Balance through nodes
 							for (inode=0; inode<global3D.nnodes; inode++){
-								if(!octants[idx].getPbound(global3D.nodeface[inode][0]) || !octants[idx].getPbound(global3D.nodeface[inode][1]) || !octants[idx].getPbound(global2D.nodeface[inode][2])){
+								if(!octants[idx].getPbound(global3D.nodeface[inode][0]) || !octants[idx].getPbound(global3D.nodeface[inode][1]) || !octants[idx].getPbound(global3D.nodeface[inode][2])){
 									findNodeNeighbours(idx, inode, neigh, isghost);
 									sizeneigh = neigh.size();
 									for(i=0; i<sizeneigh; i++){
