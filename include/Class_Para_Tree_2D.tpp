@@ -4537,6 +4537,7 @@ public:
 			log.writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
 			nocts = octree.getNumOctants();
 
+
 			// Coarse
 			while(octree.coarse(mapidx));
 			updateAfterCoarse(mapidx);
