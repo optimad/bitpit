@@ -2392,7 +2392,6 @@ private:
 		}
 	};
 
-
 	// =================================================================================== //
 
 	bool localBalance(bool doInterior){				// 2:1 balancing on level a local tree already adapted (balance only the octants with info[14] = false) (refinement wins!)

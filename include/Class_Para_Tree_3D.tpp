@@ -4401,6 +4401,7 @@ private:
 		bool localDone = false;
 		int  iteration  = 0;
 
+		octree.preBalance21();
 
 		if (first){
 			log.writeLog("---------------------------------------------");
