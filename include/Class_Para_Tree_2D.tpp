@@ -4237,13 +4237,14 @@ private:
 
 	//==============================================================
 
+
 	void balance21(bool const first){
 #if NOMPI==0
 		bool globalDone = true, localDone = false;
 		int  iteration  = 0;
 
 		commMarker();
-		octree.preBalance21();
+		octree.preBalance21(true);
 
 		if (first){
 			log.writeLog("---------------------------------------------");
@@ -4256,6 +4257,8 @@ private:
 			commMarker();
 
 			localDone = octree.localBalance(true);
+			commMarker();
+			octree.preBalance21(false);
 			MPI_Barrier(comm);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,comm);
 
@@ -4264,14 +4267,18 @@ private:
 				log.writeLog(" Iteration	:	" + to_string(iteration));
 				commMarker();
 				localDone = octree.localBalance(false);
+				commMarker();
+				octree.preBalance21(false);
 				error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,comm);
 			}
 
 			commMarker();
 			log.writeLog(" Iteration	:	Finalizing ");
 			log.writeLog(" ");
-			localDone = octree.localBalance(false);
-			commMarker();
+			//localDone = octree.localBalance(false);
+			//commMarker();
+			//octree.preBalance21(true);
+			//commMarker();
 
 			log.writeLog(" 2:1 Balancing reached ");
 			log.writeLog(" ");
@@ -4283,6 +4290,8 @@ private:
 			commMarker();
 			MPI_Barrier(comm);
 			localDone = octree.localBalanceAll(true);
+			commMarker();
+			octree.preBalance21(false);
 			MPI_Barrier(comm);
 			error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,comm);
 
@@ -4290,19 +4299,23 @@ private:
 				iteration++;
 				commMarker();
 				localDone = octree.localBalanceAll(false);
+				commMarker();
+				octree.preBalance21(false);
 				error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,comm);
 			}
 
 			commMarker();
-			localDone = octree.localBalance(false);
-			commMarker();
+//			localDone = octree.localBalance(false);
+//			commMarker();
+//			octree.preBalance21(false);
+//			commMarker();
 
 		}
 #else
 		bool localDone = false;
 		int  iteration  = 0;
 
-		octree.preBalance21();
+		octree.preBalance21(true);
 
 		if (first){
 			log.writeLog("---------------------------------------------");
@@ -4314,16 +4327,19 @@ private:
 
 
 			localDone = octree.localBalance(true);
+			octree.preBalance21(false);
 
 			while(localDone){
 				iteration++;
 				log.writeLog(" Iteration	:	" + to_string(iteration));
 				localDone = octree.localBalance(false);
+				octree.preBalance21(false);
 			}
 
 			log.writeLog(" Iteration	:	Finalizing ");
 			log.writeLog(" ");
-			localDone = octree.localBalance(false);
+//			localDone = octree.localBalance(false);
+//			octree.preBalance21(false);
 
 			log.writeLog(" 2:1 Balancing reached ");
 			log.writeLog(" ");
@@ -4333,13 +4349,16 @@ private:
 		else{
 
 			localDone = octree.localBalanceAll(true);
+			octree.preBalance21(false);
 
 			while(localDone){
 				iteration++;
 				localDone = octree.localBalanceAll(false);
+				octree.preBalance21(false);
 			}
 
-			localDone = octree.localBalance(false);
+//			localDone = octree.localBalance(false);
+//			octree.preBalance21(false);
 
 		}
 
@@ -4386,9 +4405,9 @@ public:
 			// Coarse
 			while(octree.coarse());
 			updateAfterCoarse();
-			balance21(false);
-			while(octree.refine());
-			updateAdapt();
+//			balance21(false);
+//			while(octree.refine());
+//			updateAdapt();
 			if (octree.getNumOctants() < nocts){
 				localDone = true;
 			}
@@ -4419,7 +4438,7 @@ public:
 			if (octree.getNumOctants() > nocts)
 				localDone = true;
 			updateAdapt();
-			//setPboundGhosts();
+			setPboundGhosts();
 			log.writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
 			nocts = octree.getNumOctants();
 
@@ -4427,10 +4446,10 @@ public:
 			while(octree.coarse());
 			updateAfterCoarse();
 			setPboundGhosts();
-			balance21(false);
-			while(octree.refine());
-			updateAdapt();
-			setPboundGhosts();
+//			balance21(false);
+//			while(octree.refine());
+//			updateAdapt();
+//			setPboundGhosts();
 			if (octree.getNumOctants() < nocts){
 				localDone = true;
 			}
@@ -4501,9 +4520,9 @@ public:
 			// Coarse
 			while(octree.coarse(mapidx));
 			updateAfterCoarse(mapidx);
-			balance21(false);
-			while(octree.refine(mapidx));
-			updateAdapt();
+//			balance21(false);
+//			while(octree.refine(mapidx));
+//			updateAdapt();
 			if (octree.getNumOctants() < nocts){
 				localDone = true;
 			}
@@ -4534,6 +4553,7 @@ public:
 			if (octree.getNumOctants() > nocts)
 				localDone = true;
 			updateAdapt();
+			setPboundGhosts();
 			log.writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
 			nocts = octree.getNumOctants();
 
@@ -4542,10 +4562,10 @@ public:
 			while(octree.coarse(mapidx));
 			updateAfterCoarse(mapidx);
 			setPboundGhosts();
-			balance21(false);
-			while(octree.refine(mapidx));
-			updateAdapt();
-			setPboundGhosts();
+//			balance21(false);
+//			while(octree.refine(mapidx));
+//			updateAdapt();
+//			setPboundGhosts();
 			if (octree.getNumOctants() < nocts){
 				localDone = true;
 			}

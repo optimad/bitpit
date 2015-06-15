@@ -2245,26 +2245,29 @@ private:
 
 	// =================================================================================== //
 
-	void preBalance21(){
+	void preBalance21(bool internal){
 		// Local variables
 		Class_Octant<2> father, lastdesc;
 		uint64_t mortonld;
 		uint32_t nocts;
-		uint32_t idx, idx2, idx0;
-		uint32_t idx2_gh;
+		uint32_t idx, idx2, idx0, last_idx;
+		uint32_t idx1_gh, idx2_gh;
 		int8_t markerfather, marker;
 		uint8_t nbro;
 		uint8_t nchm1 = global2D.nchildren-1;
 		bool wstop = false;
+		bool Bdone=false;
 
 		//------------------------------------------ //
 		// Initialization
 
 		nbro = 0;
 		idx2_gh = idx0 = 0;
+		idx1_gh=0;
 
 		nocts   = octants.size();
 		size_ghosts = ghosts.size();
+		last_idx=nocts-1;
 
 
 		// Set index for start and end check for ghosts
@@ -2273,9 +2276,88 @@ private:
 				idx2_gh++;
 			}
 			idx2_gh = min((size_ghosts-1), idx2_gh);
+
+			while(idx1_gh < size_ghosts && ghosts[idx1_gh].computeMorton() <= octants[0].computeMorton()){
+				idx1_gh++;
+			}
+			idx1_gh-=1;
+			if (idx1_gh==-1) idx1_gh=0;
+		}
+
+		// End on ghosts
+		if (ghosts.size() && nocts > 0){
+			if (ghosts[idx1_gh].buildFather()==octants[0].buildFather()){
+				father = ghosts[idx1_gh].buildFather();
+				nbro = 0;
+				idx = idx1_gh;
+				marker = ghosts[idx].getMarker();
+				while(marker < 0 && ghosts[idx].buildFather() == father && idx >= 0){
+					nbro++;
+					if(wstop){
+						break;
+					}
+					idx--;
+					marker = ghosts[idx].getMarker();
+					if (idx==0)
+						wstop=true;
+				}
+				idx = 0;
+				marker = octants[idx].getMarker();
+				while(marker<0 && octants[idx].buildFather() == father){
+					nbro++;
+					idx++;
+					marker = octants[idx].getMarker();
+				}
+				if (nbro != global2D.nchildren && idx!=nocts-1){
+					for(uint32_t ii=0; ii<idx; ii++){
+						octants[ii].setMarker(0);
+						octants[ii].info[11]=true;
+						Bdone=true;
+					}
+				}
+			}
+
+			wstop=false;
+			//if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
+			if (ghosts[idx2_gh].buildFather()==octants[nocts-1].buildFather()){
+				father = ghosts[idx2_gh].buildFather();
+				nbro = 0;
+				idx = idx2_gh;
+				marker = ghosts[idx].getMarker();
+				while(marker < 0 && ghosts[idx].buildFather() == father){
+					nbro++;
+					idx++;
+					if(idx == size_ghosts){
+						break;
+					}
+					marker = ghosts[idx].getMarker();
+				}
+				idx = nocts-1;
+				marker = octants[idx].getMarker();
+				while(marker<0 && octants[idx].buildFather() == father && idx >= 0){
+					nbro++;
+					if (wstop){
+						break;
+					}
+					idx--;
+					marker = octants[idx].getMarker();
+					if (idx==0){
+						wstop = true;
+					}
+				}
+				last_idx=idx;
+				if (nbro != global2D.nchildren && idx!=nocts-1){
+					for(uint32_t ii=idx+1; ii<nocts; ii++){
+						octants[ii].setMarker(0);
+						octants[ii].info[11]=true;
+						Bdone=true;
+					}
+				}
+			}
 		}
 
 		// Check first internal octants
+		if (internal){
 		father = octants[0].buildFather();
 		lastdesc = father.buildLastDesc();
 		mortonld = lastdesc.computeMorton();
@@ -2288,7 +2370,6 @@ private:
 		}
 		if (nbro != global2D.nchildren)
 			idx0 = nbro;
-
 
 		// Check and coarse internal octants
 		for (idx=idx0; idx<nocts; idx++){
@@ -2307,16 +2388,96 @@ private:
 					idx = idx2-1;
 				}
 				else{
-					if (idx < (nocts>global2D.nchildren)*(nocts-global2D.nchildren)){
+					if (idx<=last_idx){
 						octants[idx].setMarker(0);
+						octants[idx].info[11]=true;
+						Bdone=true;
 					}
 				}
 			}
 		}
+		}
+
+	};
+
+	// =================================================================================== //
+
+	void preBalance21(u32vector& newmodified){
+		// Local variables
+		Class_Octant<2> father, lastdesc;
+		uint64_t mortonld;
+		uint32_t nocts;
+		uint32_t idx, idx2, idx0, last_idx;
+		uint32_t idx1_gh, idx2_gh;
+		int8_t markerfather, marker;
+		uint8_t nbro;
+		uint8_t nchm1 = global2D.nchildren-1;
+		bool wstop = false;
+		bool Bdone=false;
+
+		//------------------------------------------ //
+		// Initialization
+
+		nbro = 0;
+		idx2_gh = idx0 = 0;
+		idx1_gh=0;
+
+		nocts   = octants.size();
+		size_ghosts = ghosts.size();
+		last_idx=nocts-1;
+
+
+		// Set index for start and end check for ghosts
+		if (ghosts.size()){
+			while(idx2_gh < size_ghosts && ghosts[idx2_gh].computeMorton() <= last_desc.computeMorton()){
+				idx2_gh++;
+			}
+			idx2_gh = min((size_ghosts-1), idx2_gh);
+
+			while(idx1_gh < size_ghosts && ghosts[idx1_gh].computeMorton() <= octants[0].computeMorton()){
+				idx1_gh++;
+			}
+			idx1_gh-=1;
+			if (idx1_gh==-1) idx1_gh=0;
+		}
 
 		// End on ghosts
 		if (ghosts.size() && nocts > 0){
-			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
+			if (ghosts[idx1_gh].buildFather()==octants[0].buildFather()){
+				father = ghosts[idx1_gh].buildFather();
+				nbro = 0;
+				idx = idx1_gh;
+				marker = ghosts[idx].getMarker();
+				while(marker < 0 && ghosts[idx].buildFather() == father && idx >= 0){
+					nbro++;
+					if(wstop){
+						break;
+					}
+					idx--;
+					marker = ghosts[idx].getMarker();
+					if (idx==0)
+						wstop=true;
+				}
+				idx = 0;
+				marker = octants[idx].getMarker();
+				while(marker<0 && octants[idx].buildFather() == father){
+					nbro++;
+					idx++;
+					marker = octants[idx].getMarker();
+				}
+				if (nbro != global2D.nchildren && idx!=nocts-1){
+					for(uint32_t ii=0; ii<idx; ii++){
+						octants[ii].setMarker(0);
+						octants[ii].info[11]=true;
+						Bdone=true;
+						newmodified.push_back(ii);
+					}
+				}
+			}
+
+			wstop=false;
+			//if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
+			if (ghosts[idx2_gh].buildFather()==octants[nocts-1].buildFather()){
 				father = ghosts[idx2_gh].buildFather();
 				nbro = 0;
 				idx = idx2_gh;
@@ -2331,25 +2492,71 @@ private:
 				}
 				idx = nocts-1;
 				marker = octants[idx].getMarker();
-				while(marker < 0 && octants[idx].buildFather() == father && idx >= 0){
+				while(marker<0 && octants[idx].buildFather() == father && idx >= 0){
 					nbro++;
-					idx--;
-					marker = octants[idx].getMarker();
 					if (wstop){
 						break;
 					}
+					idx--;
+					marker = octants[idx].getMarker();
 					if (idx==0){
 						wstop = true;
 					}
 				}
+				last_idx=idx;
 				if (nbro != global2D.nchildren && idx!=nocts-1){
 					for(uint32_t ii=idx+1; ii<nocts; ii++){
 						octants[ii].setMarker(0);
+						octants[ii].info[11]=true;
+						Bdone=true;
+						newmodified.push_back(ii);
 					}
 				}
 			}
 		}
-	};
+
+		// Check first internal octants
+		father = octants[0].buildFather();
+		lastdesc = father.buildLastDesc();
+		mortonld = lastdesc.computeMorton();
+		nbro = 0;
+		for (idx=0; idx<global2D.nchildren; idx++){
+			// Check if family is complete or to be checked in the internal loop (some brother refined)
+			if (octants[idx].computeMorton() <= mortonld){
+				nbro++;
+			}
+		}
+		if (nbro != global2D.nchildren)
+			idx0 = nbro;
+
+		// Check and coarse internal octants
+		for (idx=idx0; idx<nocts; idx++){
+			if(octants[idx].getMarker() < 0 && octants[idx].getLevel() > 0){
+				nbro = 0;
+				father = octants[idx].buildFather();
+				// Check if family is to be coarsened
+				for (idx2=idx; idx2<idx+global2D.nchildren; idx2++){
+					if (idx2<nocts){
+						if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
+							nbro++;
+						}
+					}
+				}
+				if (nbro == global2D.nchildren){
+					idx = idx2-1;
+				}
+				else{
+					if (idx<=last_idx){
+						octants[idx].setMarker(0);
+						octants[idx].info[11]=true;
+						Bdone=true;
+						newmodified.push_back(idx);
+					}
+				}
+			}
+		}
+
+}
 
 	// =================================================================================== //
 
@@ -2567,6 +2774,7 @@ private:
 
 					}
 				}
+				preBalance21(newmodified);
 				u32vector().swap(modified);
 				swap(modified,newmodified);
 				modsize = modified.size();
@@ -2691,6 +2899,7 @@ private:
 
 					}
 				}
+				preBalance21(newmodified);
 				u32vector().swap(modified);
 				swap(modified,newmodified);
 				modsize = modified.size();
@@ -2922,6 +3131,7 @@ private:
 
 					}
 				}
+				preBalance21(newmodified);
 				u32vector().swap(modified);
 				swap(modified,newmodified);
 				modsize = modified.size();
@@ -3046,6 +3256,7 @@ private:
 
 					}
 				}
+				preBalance21(newmodified);
 				u32vector().swap(modified);
 				swap(modified,newmodified);
 				modsize = modified.size();
