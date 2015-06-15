@@ -360,7 +360,8 @@ private:
 
 		// End on ghosts
 		if (ghosts.size() && nocts > 0){
-			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
+//			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
+			if (ghosts[idx2_gh].buildFather() == octants[nocts-1].buildFather()){
 				father = ghosts[idx2_gh].buildFather();
 				for (uint32_t iii=0; iii<12; iii++){
 					father.info[iii] = false;
@@ -638,7 +639,8 @@ private:
 
 		// End on ghosts
 		if (ghosts.size() && nocts > 0){
-			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
+//			if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
+			if (ghosts[idx2_gh].buildFather() == octants[nocts-1].buildFather()){
 				father = ghosts[idx2_gh].buildFather();
 				for (uint32_t iii=0; iii<12; iii++){
 					father.info[iii] = false;
