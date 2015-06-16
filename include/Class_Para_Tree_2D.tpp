@@ -4237,7 +4237,6 @@ private:
 
 	//==============================================================
 
-
 	void balance21(bool const first){
 #if NOMPI==0
 		bool globalDone = true, localDone = false;

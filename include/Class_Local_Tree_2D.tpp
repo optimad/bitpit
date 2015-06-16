@@ -304,12 +304,12 @@ private:
 					first_child_index.push_back(idx);
 					idx = idx2-1;
 				}
-				else{
-					if (idx < (nocts>global2D.nchildren)*(nocts-global2D.nchildren)){
-						octants[idx].setMarker(0);
-						octants[idx].info[11] = true;
-					}
-				}
+//				else{
+//					if (idx < (nocts>global2D.nchildren)*(nocts-global2D.nchildren)){
+//						octants[idx].setMarker(0);
+//						octants[idx].info[11] = true;
+//					}
+//				}
 			}
 			//			else{
 			//	//			octants[idx].info[13] = false;
@@ -407,10 +407,10 @@ private:
 				}
 				else{
 					nend = 0;
-					for(uint32_t ii=nocts-global2D.nchildren; ii<nocts; ii++){
-						octants[ii].setMarker(0);
-						octants[ii].info[11] = true;
-					}
+//					for(uint32_t ii=nocts-global2D.nchildren; ii<nocts; ii++){
+//						octants[ii].setMarker(0);
+//						octants[ii].info[11] = true;
+//					}
 				}
 			}
 
@@ -577,12 +577,12 @@ private:
 					first_child_index.push_back(idx);
 					idx = idx2-1;
 				}
-				else{
-					if (idx < (nocts>global2D.nchildren)*(nocts-global2D.nchildren)){
-						octants[idx].setMarker(0);
-						octants[idx].info[11] = true;
-					}
-				}
+//				else{
+//					if (idx < (nocts>global2D.nchildren)*(nocts-global2D.nchildren)){
+//						octants[idx].setMarker(0);
+//						octants[idx].info[11] = true;
+//					}
+//				}
 			}
 			//			else{
 			//	//			octants[idx].info[13] = false;
@@ -686,10 +686,10 @@ private:
 				}
 				else{
 					nend = 0;
-					for(uint32_t ii=nocts-global2D.nchildren; ii<nocts; ii++){
-						octants[ii].setMarker(0);
-						octants[ii].info[11] = true;
-					}
+//					for(uint32_t ii=nocts-global2D.nchildren; ii<nocts; ii++){
+//						octants[ii].setMarker(0);
+//						octants[ii].info[11] = true;
+//					}
 				}
 			}
 
@@ -2360,46 +2360,45 @@ private:
 
 		// Check first internal octants
 		if (internal){
-		father = octants[0].buildFather();
-		lastdesc = father.buildLastDesc();
-		mortonld = lastdesc.computeMorton();
-		nbro = 0;
-		for (idx=0; idx<global2D.nchildren; idx++){
-			// Check if family is complete or to be checked in the internal loop (some brother refined)
-			if (octants[idx].computeMorton() <= mortonld){
-				nbro++;
+			father = octants[0].buildFather();
+			lastdesc = father.buildLastDesc();
+			mortonld = lastdesc.computeMorton();
+			nbro = 0;
+			for (idx=0; idx<global2D.nchildren; idx++){
+				// Check if family is complete or to be checked in the internal loop (some brother refined)
+				if (octants[idx].computeMorton() <= mortonld){
+					nbro++;
+				}
 			}
-		}
-		if (nbro != global2D.nchildren)
-			idx0 = nbro;
+			if (nbro != global2D.nchildren)
+				idx0 = nbro;
 
-		// Check and coarse internal octants
-		for (idx=idx0; idx<nocts; idx++){
-			if(octants[idx].getMarker() < 0 && octants[idx].getLevel() > 0){
-				nbro = 0;
-				father = octants[idx].buildFather();
-				// Check if family is to be coarsened
-				for (idx2=idx; idx2<idx+global2D.nchildren; idx2++){
-					if (idx2<nocts){
-						if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
-							nbro++;
+			// Check and coarse internal octants
+			for (idx=idx0; idx<nocts; idx++){
+				if(octants[idx].getMarker() < 0 && octants[idx].getLevel() > 0){
+					nbro = 0;
+					father = octants[idx].buildFather();
+					// Check if family is to be coarsened
+					for (idx2=idx; idx2<idx+global2D.nchildren; idx2++){
+						if (idx2<nocts){
+							if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
+								nbro++;
+							}
+						}
+					}
+					if (nbro == global2D.nchildren){
+						idx = idx2-1;
+					}
+					else{
+						if (idx<=last_idx){
+							octants[idx].setMarker(0);
+							octants[idx].info[11]=true;
+							Bdone=true;
 						}
 					}
 				}
-				if (nbro == global2D.nchildren){
-					idx = idx2-1;
-				}
-				else{
-					if (idx<=last_idx){
-						octants[idx].setMarker(0);
-						octants[idx].info[11]=true;
-						Bdone=true;
-					}
-				}
 			}
 		}
-		}
-
 	};
 
 	// =================================================================================== //
@@ -2557,8 +2556,7 @@ private:
 				}
 			}
 		}
-
-}
+	};
 
 	// =================================================================================== //
 
