@@ -376,6 +376,10 @@ private:
 					if (markerfather < ghosts[idx].getMarker()+1){
 						markerfather = ghosts[idx].getMarker()+1;
 					}
+					for (uint32_t iii=0; iii<global3D.nfaces; iii++){
+						father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
+					}
+					father.info[14] = father.info[14] || ghosts[idx].info[10];
 					idx++;
 					if(idx == size_ghosts){
 						break;
@@ -384,10 +388,6 @@ private:
 //					for (int iii=0; iii<16; iii++){
 //						father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
 //					}
-					for (uint32_t iii=0; iii<global3D.nfaces; iii++){
-						father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
-					}
-					father.info[14] = father.info[14] || ghosts[idx].info[10];
 				}
 				nend = 0;
 				idx = nocts-1;
@@ -663,6 +663,10 @@ private:
 					if (markerfather < ghosts[idx].getMarker()+1){
 						markerfather = ghosts[idx].getMarker()+1;
 					}
+					for (uint32_t iii=0; iii<global3D.nfaces; iii++){
+						father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
+					}
+					father.info[14] = father.info[14] || ghosts[idx].info[10];
 					idx++;
 					if(idx == size_ghosts){
 						break;
@@ -671,10 +675,6 @@ private:
 //					for (uint32_t iii=0; iii<16; iii++){
 //						father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
 //					}
-					for (uint32_t iii=0; iii<global3D.nfaces; iii++){
-						father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
-					}
-					father.info[14] = father.info[14] || ghosts[idx].info[10];
 				}
 				nend = 0;
 				idx = nocts-1;
