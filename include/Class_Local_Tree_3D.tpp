@@ -336,6 +336,7 @@ private:
 							}
 						}
 						father.info[13] = true;
+						father.info[15] = true;
 						if (markerfather < 0){
 							docoarse = true;
 						}
@@ -380,9 +381,13 @@ private:
 						break;
 					}
 					marker = ghosts[idx].getMarker();
-					for (int iii=0; iii<16; iii++){
+//					for (int iii=0; iii<16; iii++){
+//						father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
+//					}
+					for (uint32_t iii=0; iii<global3D.nfaces; iii++){
 						father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
 					}
+					father.info[14] = father.info[14] || ghosts[idx].info[10];
 				}
 				nend = 0;
 				idx = nocts-1;
@@ -415,11 +420,12 @@ private:
 			}
 			if (nend != 0){
 				for (idx=0; idx < nend; idx++){
-					for (int iii=0; iii<16; iii++){
-						father.info[iii] = father.info[iii] || octants[nocts-idx-1].info[iii];
-					}
+//					for (int iii=0; iii<16; iii++){
+//						father.info[iii] = father.info[iii] || octants[nocts-idx-1].info[iii];
+//					}
 				}
 				father.info[13] = true;
+				father.info[15] = true;
 				if (markerfather < 0){
 					docoarse = true;
 				}
@@ -613,6 +619,7 @@ private:
 							}
 						}
 						father.info[13] = true;
+						father.info[15] = true;
 						father.setMarker(markerfather);
 						if (markerfather < 0){
 							docoarse = true;
@@ -661,9 +668,13 @@ private:
 						break;
 					}
 					marker = ghosts[idx].getMarker();
-					for (uint32_t iii=0; iii<16; iii++){
+//					for (uint32_t iii=0; iii<16; iii++){
+//						father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
+//					}
+					for (uint32_t iii=0; iii<global3D.nfaces; iii++){
 						father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
 					}
+					father.info[14] = father.info[14] || ghosts[idx].info[10];
 				}
 				nend = 0;
 				idx = nocts-1;
@@ -701,6 +712,7 @@ private:
 					}
 				}
 				father.info[13] = true;
+				father.info[15] = true;
 				if (markerfather < 0){
 					docoarse = true;
 				}
