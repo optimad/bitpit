@@ -939,7 +939,7 @@ private:
 			{
 				for (i=0; i<nneigh; i++){
 					cx = -1;
-					cy = (i/nline);
+					cy = (i%nline);
 					cz = -1;
 					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
 				}
@@ -949,7 +949,7 @@ private:
 			{
 				for (i=0; i<nneigh; i++){
 					cx = 1;
-					cy = (i/nline);
+					cy = (i%nline);
 					cz = -1;
 					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh*cz);
 				}
@@ -958,7 +958,7 @@ private:
 			case 2 :
 			{
 				for (i=0; i<nneigh; i++){
-					cx = (i/nline);
+					cx = (i%nline);
 					cy = -1;
 					cz = -1;
 					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
@@ -968,7 +968,7 @@ private:
 			case 3 :
 			{
 				for (i=0; i<nneigh; i++){
-					cx = (i/nline);
+					cx = (i%nline);
 					cy = 1;
 					cz = -1;
 					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh*cz);
@@ -980,7 +980,7 @@ private:
 				for (i=0; i<nneigh; i++){
 					cx = -1;
 					cy = -1;
-					cz = (i/nline);
+					cz = (i%nline);
 					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
 				}
 			}
@@ -990,7 +990,7 @@ private:
 				for (i=0; i<nneigh; i++){
 					cx = 1;
 					cy = -1;
-					cz = (i/nline);
+					cz = (i%nline);
 					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh*cz);
 				}
 			}
@@ -1000,7 +1000,7 @@ private:
 				for (i=0; i<nneigh; i++){
 					cx = -1;
 					cy = 1;
-					cz = (i/nline);
+					cz = (i%nline);
 					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh*cz);
 				}
 			}
@@ -1010,7 +1010,7 @@ private:
 				for (i=0; i<nneigh; i++){
 					cx = 1;
 					cy = 1;
-					cz = (i/nline);
+					cz = (i%nline);
 					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh2*cy,this->z+dh*cz);
 				}
 			}
@@ -1019,7 +1019,7 @@ private:
 			{
 				for (i=0; i<nneigh; i++){
 					cx = -1;
-					cy = (i/nline);
+					cy = (i%nline);
 					cz = 1;
 					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2*cz);
 				}
@@ -1029,7 +1029,7 @@ private:
 			{
 				for (i=0; i<nneigh; i++){
 					cx = 1;
-					cy = (i/nline);
+					cy = (i%nline);
 					cz = 1;
 					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh2*cz);
 				}
@@ -1038,7 +1038,7 @@ private:
 			case 10 :
 			{
 				for (i=0; i<nneigh; i++){
-					cx = (i/nline);
+					cx = (i%nline);
 					cy = -1;
 					cz = 1;
 					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2*cz);
@@ -1048,7 +1048,7 @@ private:
 			case 11 :
 			{
 				for (i=0; i<nneigh; i++){
-					cx = (i/nline);
+					cx = (i%nline);
 					cy = 1;
 					cz = 1;
 					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh2*cz);
