@@ -379,7 +379,7 @@ private:
 					for (uint32_t iii=0; iii<global3D.nfaces; iii++){
 						father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
 					}
-					father.info[14] = father.info[14] || ghosts[idx].info[10];
+					father.info[14] = father.info[14] || ghosts[idx].info[14];
 					idx++;
 					if(idx == size_ghosts){
 						break;
@@ -666,7 +666,7 @@ private:
 					for (uint32_t iii=0; iii<global3D.nfaces; iii++){
 						father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
 					}
-					father.info[14] = father.info[14] || ghosts[idx].info[10];
+					father.info[14] = father.info[14] || ghosts[idx].info[14];
 					idx++;
 					if(idx == size_ghosts){
 						break;

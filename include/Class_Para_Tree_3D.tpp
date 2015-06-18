@@ -2291,7 +2291,7 @@ private:
 			//Virtual Edge Neighbors
 			for(uint8_t e = 0; e < global3D.nedges; ++e){
 				uint32_t virtualEdgeNeighborSize = 0;
-				vector<uint64_t> virtualEdgeNeighbors = it->computeEdgeVirtualMorton(e,max_depth,virtualEdgeNeighborSize);
+				vector<uint64_t> virtualEdgeNeighbors = it->computeEdgeVirtualMorton(e,max_depth,virtualEdgeNeighborSize,octree.balance_codim);
 				uint32_t maxDelta = virtualEdgeNeighborSize/2;
 				if(virtualEdgeNeighborSize){
 					for(uint32_t ee = 0; ee <= maxDelta; ++ee){
