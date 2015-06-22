@@ -284,12 +284,12 @@ public:
 			nodes[i][0] = x + cx*dh;
 			nodes[i][1] = y + cy*dh;
 			nodes[i][2] = 0;
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 			nodes[i].shrink_to_fit();
 #endif
 		}
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 		nodes.shrink_to_fit();
 #endif
@@ -345,7 +345,7 @@ public:
 		for (i = 0; i < 3; i++){
 			normal[i] = global2D.normals[iface][i];
 		}
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 		normal.shrink_to_fit();
 #endif

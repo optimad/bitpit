@@ -2414,7 +2414,7 @@ public:
 			Class_Local_Tree<2>::OctantsType::const_iterator first = octantsCopy.begin() + stride;
 			Class_Local_Tree<2>::OctantsType::const_iterator last = first + partition[rank];
 			octree.octants.assign(first, last);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 			octree.octants.shrink_to_fit();
 #endif
@@ -2733,7 +2733,7 @@ public:
 					++newCounter;
 				}
 			}
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 			octree.octants.shrink_to_fit();
 #endif
@@ -2793,7 +2793,7 @@ public:
 			Class_Local_Tree<2>::OctantsType::const_iterator first = octantsCopy.begin() + stride;
 			Class_Local_Tree<2>::OctantsType::const_iterator last = first + partition[rank];
 			octree.octants.assign(first, last);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 			octree.octants.shrink_to_fit();
 #endif
@@ -3112,7 +3112,7 @@ public:
 					++newCounter;
 				}
 			}
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 			octree.octants.shrink_to_fit();
 #endif
@@ -3171,7 +3171,7 @@ public:
 			Class_Local_Tree<2>::OctantsType::const_iterator first = octantsCopy.begin() + stride;
 			Class_Local_Tree<2>::OctantsType::const_iterator last = first + partition[rank];
 			octree.octants.assign(first, last);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 			octree.octants.shrink_to_fit();
 #endif
@@ -3572,7 +3572,7 @@ public:
 					++newCounter;
 				}
 			}
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 			octree.octants.shrink_to_fit();
 #endif
@@ -3637,7 +3637,7 @@ public:
 			Class_Local_Tree<2>::OctantsType::const_iterator first = octantsCopy.begin() + stride;
 			Class_Local_Tree<2>::OctantsType::const_iterator last = first + partition[rank];
 			octree.octants.assign(first, last);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 			octree.octants.shrink_to_fit();
 #endif
@@ -4038,7 +4038,7 @@ public:
 					++newCounter;
 				}
 			}
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 			octree.octants.shrink_to_fit();
 #endif
@@ -4513,7 +4513,7 @@ public:
 		// mapidx init
 		mapidx.clear();
 		mapidx.resize(nocts);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 		mapidx.shrink_to_fit();
 #endif
@@ -4701,7 +4701,7 @@ public:
 		// mapidx init
 		mapidx.clear();
 		mapidx.resize(nocts);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 		mapidx.shrink_to_fit();
 #endif
@@ -4870,7 +4870,7 @@ public:
 		// mapidx init
 		mapidx.clear();
 		mapidx.resize(nocts);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 		mapidx.shrink_to_fit();
 #endif

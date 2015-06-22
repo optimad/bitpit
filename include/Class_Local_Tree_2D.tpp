@@ -234,7 +234,7 @@ private:
 				}
 			}
 		}
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 		octants.shrink_to_fit();
 #endif
@@ -359,7 +359,7 @@ private:
 			}
 		}
 		octants.resize(nblock);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 		octants.shrink_to_fit();
 #endif
@@ -439,7 +439,7 @@ private:
 				father.setMarker(markerfather);
 				octants.resize(nocts-offset);
 				octants.push_back(father);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 				octants.shrink_to_fit();
 #endif
@@ -484,7 +484,7 @@ private:
 		}
 		if (offset > 0){
 			mapidx.resize(octants.size()+offset);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 			mapidx.shrink_to_fit();
 #endif
@@ -521,7 +521,7 @@ private:
 				}
 			}
 		}
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 		octants.shrink_to_fit();
 #endif
@@ -652,13 +652,13 @@ private:
 			}
 		}
 		octants.resize(nblock);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 		octants.shrink_to_fit();
 #endif
 		nocts = octants.size();
 		mapidx.resize(nblock);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 		mapidx.shrink_to_fit();
 #endif
@@ -737,14 +737,14 @@ private:
 				father.setMarker(markerfather);
 				octants.resize(nocts-offset);
 				octants.push_back(father);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 				octants.shrink_to_fit();
 #endif
 				nocts = octants.size();
 // TODO			DO THIS CORRECTION IN OTHER COARSE METHODS  !!!
 				mapidx.resize(nocts);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 				mapidx.shrink_to_fit();
 #endif
@@ -820,7 +820,7 @@ private:
 				}
 			}
 		}
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 		octants.shrink_to_fit();
 #endif
@@ -946,7 +946,7 @@ private:
 			}
 		}
 		octants.resize(nblock);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 		octants.shrink_to_fit();
 #endif
@@ -1025,7 +1025,7 @@ private:
 				father.setMarker(markerfather);
 				octants.resize(nocts-offset);
 				octants.push_back(father);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 				octants.shrink_to_fit();
 #endif
@@ -1072,7 +1072,7 @@ private:
 		}
 		if (offset > 0){
 			mapidx.resize(octants.size()+offset);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 			mapidx.shrink_to_fit();
 #endif
@@ -1109,7 +1109,7 @@ private:
 				}
 			}
 		}
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 		octants.shrink_to_fit();
 #endif
@@ -1241,13 +1241,13 @@ private:
 			}
 		}
 		octants.resize(nocts-offset);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 		octants.shrink_to_fit();
 #endif
 		nocts = octants.size();
 		mapidx.resize(nocts);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 		mapidx.shrink_to_fit();
 #endif
@@ -1322,14 +1322,14 @@ private:
 				father.setMarker(markerfather);
 				octants.resize(nocts-offset);
 				octants.push_back(father);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 				octants.shrink_to_fit();
 #endif
 				nocts = octants.size();
 				mapidx.resize(nocts-offset);
 				mapidx.push_back(nocts0-nend);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 				mapidx.shrink_to_fit();
 #endif
@@ -1368,7 +1368,7 @@ private:
 			octants[idx] = octants[idx+toDelete];
 		}
 		octants.resize(nocts-toDelete);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 		octants.shrink_to_fit();
 #endif
@@ -1403,12 +1403,12 @@ private:
 			mapidx[idx] = mapidx[idx+toDelete];
 		}
 		octants.resize(nocts-toDelete);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 		octants.shrink_to_fit();
 #endif
 		mapidx.resize(nocts-toDelete);
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 		mapidx.shrink_to_fit();
 #endif
@@ -4000,7 +4000,7 @@ private:
 			}
 			idx++;
 		}
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 		intersections.shrink_to_fit();
 #endif
@@ -4121,7 +4121,7 @@ private:
 			while (iter != iterend){
 				vector<uint32_t> nodecasting(iter->second.begin(), iter->second.begin()+3);
 				nodes[counter] = nodecasting;
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 				nodes[counter].shrink_to_fit();
 #endif
@@ -4134,13 +4134,13 @@ private:
 				mapnodes.erase(iter++);
 				counter++;
 			}
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 			nodes.shrink_to_fit();
 #endif
 			//Slow. Memory saving.
 			for (uint32_t ii=0; ii<noctants; ii++){
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 				connectivity[ii].shrink_to_fit();
 #endif
@@ -4151,7 +4151,7 @@ private:
 //				sortNodes(connectivity[ii]);
 //			}
 
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 			connectivity.shrink_to_fit();
 #endif
@@ -4217,7 +4217,7 @@ private:
 			while (iter != iterend){
 				vector<uint32_t> nodecasting(iter->second.begin(), iter->second.begin()+3);
 				ghostsnodes[counter] = nodecasting;
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 				ghostsnodes[counter].shrink_to_fit();
 #endif
@@ -4230,13 +4230,13 @@ private:
 				mapnodes.erase(iter++);
 				counter++;
 			}
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 			ghostsnodes.shrink_to_fit();
 #endif
 			//Slow. Memory saving.
 			for (uint32_t ii=0; ii<noctants; ii++){
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 				ghostsconnectivity[ii].shrink_to_fit();
 #endif
@@ -4247,7 +4247,7 @@ private:
 //				sortNodes(ghostsconnectivity[ii]);
 //			}
 
-#if defined(__INTEL_COMPILER)
+#if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
 			ghostsconnectivity.shrink_to_fit();
 #endif
