@@ -948,7 +948,7 @@ private:
 			{
 				for (i=0; i<nneigh; i++){
 					cx = -1;
-					cy = (i/nline);
+					cy = i;
 					cz = -1;
 					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
 				}
@@ -958,7 +958,7 @@ private:
 			{
 				for (i=0; i<nneigh; i++){
 					cx = 1;
-					cy = (i/nline);
+					cy = i;
 					cz = -1;
 					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh*cz);
 				}
@@ -967,7 +967,7 @@ private:
 			case 2 :
 			{
 				for (i=0; i<nneigh; i++){
-					cx = (i/nline);
+					cx = i;
 					cy = -1;
 					cz = -1;
 					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
@@ -977,7 +977,7 @@ private:
 			case 3 :
 			{
 				for (i=0; i<nneigh; i++){
-					cx = (i/nline);
+					cx = i;
 					cy = 1;
 					cz = -1;
 					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh*cz);
@@ -989,7 +989,7 @@ private:
 				for (i=0; i<nneigh; i++){
 					cx = -1;
 					cy = -1;
-					cz = (i/nline);
+					cz = i;
 					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh*cz);
 				}
 			}
@@ -999,7 +999,7 @@ private:
 				for (i=0; i<nneigh; i++){
 					cx = 1;
 					cy = -1;
-					cz = (i/nline);
+					cz = i;
 					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh*cz);
 				}
 			}
@@ -1009,7 +1009,7 @@ private:
 				for (i=0; i<nneigh; i++){
 					cx = -1;
 					cy = 1;
-					cz = (i/nline);
+					cz = i;
 					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh*cz);
 				}
 			}
@@ -1019,7 +1019,7 @@ private:
 				for (i=0; i<nneigh; i++){
 					cx = 1;
 					cy = 1;
-					cz = (i/nline);
+					cz = i;
 					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh2*cy,this->z+dh*cz);
 				}
 			}
@@ -1028,7 +1028,7 @@ private:
 			{
 				for (i=0; i<nneigh; i++){
 					cx = -1;
-					cy = (i/nline);
+					cy = i;
 					cz = 1;
 					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2*cz);
 				}
@@ -1038,7 +1038,7 @@ private:
 			{
 				for (i=0; i<nneigh; i++){
 					cx = 1;
-					cy = (i/nline);
+					cy = i;
 					cz = 1;
 					Morton[i] = mortonEncode_magicbits(this->x+dh2*cx,this->y+dh*cy,this->z+dh2*cz);
 				}
@@ -1047,7 +1047,7 @@ private:
 			case 10 :
 			{
 				for (i=0; i<nneigh; i++){
-					cx = (i/nline);
+					cx = i;
 					cy = -1;
 					cz = 1;
 					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2*cz);
@@ -1057,7 +1057,7 @@ private:
 			case 11 :
 			{
 				for (i=0; i<nneigh; i++){
-					cx = (i/nline);
+					cx = i;
 					cy = 1;
 					cz = 1;
 					Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2*cy,this->z+dh2*cz);
@@ -1076,9 +1076,10 @@ private:
 
 	vector<uint64_t>		computeEdgeVirtualMorton(uint8_t iedge, 		// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
 			const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
-			uint32_t & sizeneigh){
+			uint32_t & sizeneigh,
+			uint8_t balance_codim){
 //		if (getNotBalance()){
-			return computeEdgeMinSizeMorton(iedge,
+		return computeEdgeMinSizeMorton(iedge,
 					maxdepth,
 					sizeneigh);
 //		}
@@ -1086,7 +1087,15 @@ private:
 //			return computeEdgeHalfSizeMorton(iedge,
 //					sizeneigh);
 //		}
-
+		if(!getNotBalance() && balance_codim > 1){
+			return computeEdgeHalfSizeMorton(iedge,
+					sizeneigh);
+		}
+		else{
+			return computeEdgeMinSizeMorton(iedge,
+					maxdepth,
+					sizeneigh);
+		}
 	};
 
 	// ------------------------------------------------------------------------------- //
