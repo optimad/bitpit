@@ -4460,7 +4460,7 @@ public:
 				localDone = true;
 			updateAdapt();
 			setPboundGhosts();
-			log.writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
+			log.writeLog(" Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(global_num_octants)));
 			nocts = octree.getNumOctants();
 
 			// Coarse
@@ -4579,7 +4579,7 @@ public:
 				localDone = true;
 			updateAdapt();
 			setPboundGhosts();
-			log.writeLog(" Number of octants after Refine	:	" + to_string(global_num_octants));
+			log.writeLog(" Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(global_num_octants)));
 			nocts = octree.getNumOctants();
 
 
