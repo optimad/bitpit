@@ -2376,11 +2376,10 @@ private:
 						wstop=true;
 				}
 				idx = 0;
-				marker = octants[idx].getMarker();
+				//marker = octants[idx].getMarker();
 				//while(marker<0 && octants[idx].buildFather() == father){
 				while(idx<nocts && octants[idx].buildFather() == father){
-					marker = octants[idx].getMarker();
-					if (marker<0) nbro++;
+					if (octants[idx].getMarker()<0) nbro++;
 					//nbro++;
 					idx++;
 					//if (idx==nocts) break;
@@ -2412,12 +2411,11 @@ private:
 					marker = ghosts[idx].getMarker();
 				}
 				idx = nocts-1;
-				marker = octants[idx].getMarker();
+				//marker = octants[idx].getMarker();
 				//while(marker<0 && octants[idx].buildFather() == father && idx >= 0){
 				//	nbro++;
-				while(octants[idx].buildFather() == father && idx >= 0){
-					marker = octants[idx].getMarker();
-					if (marker<0) nbro++;
+				while(idx>=0 && octants[idx].buildFather() == father){
+					if (octants[idx].getMarker()<0) nbro++;
 					if (wstop){
 						break;
 					}
@@ -2541,11 +2539,10 @@ private:
 						wstop=true;
 				}
 				idx = 0;
-				marker = octants[idx].getMarker();
+				//marker = octants[idx].getMarker();
 				//while(marker<0 && octants[idx].buildFather() == father){
 				while(idx<nocts && octants[idx].buildFather() == father){
-					marker = octants[idx].getMarker();
-					if (marker<0) nbro++;
+					if (octants[idx].getMarker()<0) nbro++;
 					//nbro++;
 					idx++;
 				//	marker = octants[idx].getMarker();
@@ -2578,11 +2575,10 @@ private:
 					marker = ghosts[idx].getMarker();
 				}
 				idx = nocts-1;
-				marker = octants[idx].getMarker();
+				//marker = octants[idx].getMarker();
 				//while(marker<0 && octants[idx].buildFather() == father && idx >= 0){
-				while(octants[idx].buildFather() == father && idx >= 0){
-					marker = octants[idx].getMarker();
-					if (marker<0) nbro++;
+				while(idx>=0 && octants[idx].buildFather() == father){
+					if (octants[idx].getMarker()<0) nbro++;
 					//nbro++;
 					if (wstop){
 						break;

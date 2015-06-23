@@ -2416,17 +2416,20 @@ private:
 						wstop=true;
 				}
 				idx = 0;
-				marker = octants[idx].getMarker();
-				while(marker<0 && octants[idx].buildFather() == father){
-					nbro++;
+				//marker = octants[idx].getMarker();
+				//while(marker<0 && octants[idx].buildFather() == father){
+				while(idx<nocts && octants[idx].buildFather() == father){
+					if(octants[idx].getMarker()<0) nbro++;
 					idx++;
-					marker = octants[idx].getMarker();
+					//marker = octants[idx].getMarker();
 				}
 				if (nbro != global3D.nchildren && idx!=nocts-1){
 					for(uint32_t ii=0; ii<idx; ii++){
-						octants[ii].setMarker(0);
-						octants[ii].info[11]=true;
-						Bdone=true;
+						if (octants[ii].getMarker()<0){
+							octants[ii].setMarker(0);
+							octants[ii].info[11]=true;
+							Bdone=true;
+						}
 					}
 				}
 			}
@@ -2447,14 +2450,16 @@ private:
 					marker = ghosts[idx].getMarker();
 				}
 				idx = nocts-1;
-				marker = octants[idx].getMarker();
-				while(marker<0 && octants[idx].buildFather() == father && idx >= 0){
-					nbro++;
+				//marker = octants[idx].getMarker();
+				//while(marker<0 && octants[idx].buildFather() == father && idx >= 0){
+				while(idx>=0 && octants[idx].buildFather() == father ){
+					if (octants[idx].getMarker()<0) nbro++;
+					//nbro++;
 					if (wstop){
 						break;
 					}
 					idx--;
-					marker = octants[idx].getMarker();
+					//marker = octants[idx].getMarker();
 					if (idx==0){
 						wstop = true;
 					}
@@ -2462,9 +2467,11 @@ private:
 				last_idx=idx;
 				if (nbro != global3D.nchildren && idx!=nocts-1){
 					for(uint32_t ii=idx+1; ii<nocts; ii++){
-						octants[ii].setMarker(0);
-						octants[ii].info[11]=true;
-						Bdone=true;
+						if (octants[ii].getMarker()<0){
+							octants[ii].setMarker(0);
+							octants[ii].info[11]=true;
+							Bdone=true;
+						}
 					}
 				}
 			}
@@ -2572,18 +2579,22 @@ private:
 						wstop=true;
 				}
 				idx = 0;
-				marker = octants[idx].getMarker();
-				while(marker<0 && octants[idx].buildFather() == father){
-					nbro++;
+				//marker = octants[idx].getMarker();
+				//while(marker<0 && octants[idx].buildFather() == father){
+				while(idx<nocts && octants[idx].buildFather() == father){
+					if (octants[idx].getMarker()<0) nbro++;
+					//nbro++;
 					idx++;
-					marker = octants[idx].getMarker();
+					//marker = octants[idx].getMarker();
 				}
 				if (nbro != global3D.nchildren && idx!=nocts-1){
 					for(uint32_t ii=0; ii<idx; ii++){
-						octants[ii].setMarker(0);
-						octants[ii].info[11]=true;
-						Bdone=true;
-						newmodified.push_back(ii);
+						if (octants[ii].getMarker()<0){
+							octants[ii].setMarker(0);
+							octants[ii].info[11]=true;
+							Bdone=true;
+							newmodified.push_back(ii);
+						}
 					}
 				}
 			}
@@ -2604,14 +2615,16 @@ private:
 					marker = ghosts[idx].getMarker();
 				}
 				idx = nocts-1;
-				marker = octants[idx].getMarker();
-				while(marker<0 && octants[idx].buildFather() == father && idx >= 0){
-					nbro++;
+				//marker = octants[idx].getMarker();
+				//while(marker<0 && octants[idx].buildFather() == father && idx >= 0){
+				while(idx>=0 && octants[idx].buildFather() == father){
+					if (octants[idx].getMarker()<0) nbro++;
+					//nbro++;
 					if (wstop){
 						break;
 					}
 					idx--;
-					marker = octants[idx].getMarker();
+					//marker = octants[idx].getMarker();
 					if (idx==0){
 						wstop = true;
 					}
@@ -2619,10 +2632,12 @@ private:
 				last_idx=idx;
 				if (nbro != global3D.nchildren && idx!=nocts-1){
 					for(uint32_t ii=idx+1; ii<nocts; ii++){
-						octants[ii].setMarker(0);
-						octants[ii].info[11]=true;
-						Bdone=true;
-						newmodified.push_back(ii);
+						if (octants[ii].getMarker()<0){
+							octants[ii].setMarker(0);
+							octants[ii].info[11]=true;
+							Bdone=true;
+							newmodified.push_back(ii);
+						}
 					}
 				}
 			}
