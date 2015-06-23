@@ -2259,6 +2259,7 @@ private:
 
 	// =================================================================================== //
 
+
 	void preBalance21(bool internal){
 		// Local variables
 		Class_Octant<2> father, lastdesc;
@@ -2317,16 +2318,21 @@ private:
 				}
 				idx = 0;
 				marker = octants[idx].getMarker();
-				while(marker<0 && octants[idx].buildFather() == father){
-					nbro++;
-					idx++;
+				//while(marker<0 && octants[idx].buildFather() == father){
+				while(idx<nocts && octants[idx].buildFather() == father){
 					marker = octants[idx].getMarker();
+					if (marker<0) nbro++;
+					//nbro++;
+					idx++;
+					//if (idx==nocts) break;
 				}
 				if (nbro != global2D.nchildren && idx!=nocts-1){
 					for(uint32_t ii=0; ii<idx; ii++){
-						octants[ii].setMarker(0);
-						octants[ii].info[11]=true;
-						Bdone=true;
+						if(octants[ii].getMarker()<0){
+							octants[ii].setMarker(0);
+							octants[ii].info[11]=true;
+							Bdone=true;
+						}
 					}
 				}
 			}
@@ -2348,13 +2354,15 @@ private:
 				}
 				idx = nocts-1;
 				marker = octants[idx].getMarker();
-				while(marker<0 && octants[idx].buildFather() == father && idx >= 0){
-					nbro++;
+				//while(marker<0 && octants[idx].buildFather() == father && idx >= 0){
+				//	nbro++;
+				while(octants[idx].buildFather() == father && idx >= 0){
+					marker = octants[idx].getMarker();
+					if (marker<0) nbro++;
 					if (wstop){
 						break;
 					}
 					idx--;
-					marker = octants[idx].getMarker();
 					if (idx==0){
 						wstop = true;
 					}
@@ -2362,9 +2370,11 @@ private:
 				last_idx=idx;
 				if (nbro != global2D.nchildren && idx!=nocts-1){
 					for(uint32_t ii=idx+1; ii<nocts; ii++){
-						octants[ii].setMarker(0);
-						octants[ii].info[11]=true;
-						Bdone=true;
+						if (octants[ii].getMarker()<0){
+							octants[ii].setMarker(0);
+							octants[ii].info[11]=true;
+							Bdone=true;
+						}
 					}
 				}
 			}
@@ -2473,17 +2483,22 @@ private:
 				}
 				idx = 0;
 				marker = octants[idx].getMarker();
-				while(marker<0 && octants[idx].buildFather() == father){
-					nbro++;
-					idx++;
+				//while(marker<0 && octants[idx].buildFather() == father){
+				while(idx<nocts && octants[idx].buildFather() == father){
 					marker = octants[idx].getMarker();
+					if (marker<0) nbro++;
+					//nbro++;
+					idx++;
+				//	marker = octants[idx].getMarker();
 				}
 				if (nbro != global2D.nchildren && idx!=nocts-1){
 					for(uint32_t ii=0; ii<idx; ii++){
-						octants[ii].setMarker(0);
-						octants[ii].info[11]=true;
-						Bdone=true;
-						newmodified.push_back(ii);
+						if (octants[ii].getMarker()<0){
+							octants[ii].setMarker(0);
+							octants[ii].info[11]=true;
+							Bdone=true;
+							newmodified.push_back(ii);
+						}
 					}
 				}
 			}
@@ -2505,13 +2520,16 @@ private:
 				}
 				idx = nocts-1;
 				marker = octants[idx].getMarker();
-				while(marker<0 && octants[idx].buildFather() == father && idx >= 0){
-					nbro++;
+				//while(marker<0 && octants[idx].buildFather() == father && idx >= 0){
+				while(octants[idx].buildFather() == father && idx >= 0){
+					marker = octants[idx].getMarker();
+					if (marker<0) nbro++;
+					//nbro++;
 					if (wstop){
 						break;
 					}
 					idx--;
-					marker = octants[idx].getMarker();
+					//marker = octants[idx].getMarker();
 					if (idx==0){
 						wstop = true;
 					}
@@ -2519,10 +2537,12 @@ private:
 				last_idx=idx;
 				if (nbro != global2D.nchildren && idx!=nocts-1){
 					for(uint32_t ii=idx+1; ii<nocts; ii++){
-						octants[ii].setMarker(0);
-						octants[ii].info[11]=true;
-						Bdone=true;
-						newmodified.push_back(ii);
+						if (octants[ii].getMarker()<0){
+							octants[ii].setMarker(0);
+							octants[ii].info[11]=true;
+							Bdone=true;
+							newmodified.push_back(ii);
+						}
 					}
 				}
 			}
@@ -2569,7 +2589,6 @@ private:
 			}
 		}
 	};
-
 	// =================================================================================== //
 
 	bool localBalance(bool doInterior){		// 2:1 balancing on level a local tree already adapted (balance only the octants with info[14] = false) (refinement wins!)
