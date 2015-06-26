@@ -2329,7 +2329,7 @@ private:
 		int8_t markerfather, marker;
 		uint8_t nbro;
 		uint8_t nchm1 = global2D.nchildren-1;
-		bool wstop = false;
+		//bool wstop = false;
 		bool Bdone=false;
 
 		//------------------------------------------ //
@@ -2365,24 +2365,22 @@ private:
 				nbro = 0;
 				idx = idx1_gh;
 				marker = ghosts[idx].getMarker();
-				while(marker < 0 && ghosts[idx].buildFather() == father && idx >= 0){
+				while(marker < 0 && ghosts[idx].buildFather() == father){
 					nbro++;
-					if(wstop){
+					if (idx==0)
 						break;
-					}
 					idx--;
 					marker = ghosts[idx].getMarker();
-					if (idx==0)
-						wstop=true;
 				}
 				idx = 0;
 				//marker = octants[idx].getMarker();
 				//while(marker<0 && octants[idx].buildFather() == father){
-				while(idx<nocts && octants[idx].buildFather() == father){
-					if (octants[idx].getMarker()<0) nbro++;
-					//nbro++;
+				while(octants[idx].buildFather() == father){
+					if (octants[idx].getMarker()<0)
+						nbro++;
 					idx++;
-					//if (idx==nocts) break;
+					if (idx==nocts)
+						break;
 				}
 				if (nbro != global2D.nchildren && idx!=nocts-1){
 					for(uint32_t ii=0; ii<idx; ii++){
@@ -2395,7 +2393,6 @@ private:
 				}
 			}
 
-			wstop=false;
 			//if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
 			if (ghosts[idx2_gh].buildFather()==octants[nocts-1].buildFather()){
 				father = ghosts[idx2_gh].buildFather();
@@ -2414,15 +2411,12 @@ private:
 				//marker = octants[idx].getMarker();
 				//while(marker<0 && octants[idx].buildFather() == father && idx >= 0){
 				//	nbro++;
-				while(idx>=0 && octants[idx].buildFather() == father){
-					if (octants[idx].getMarker()<0) nbro++;
-					if (wstop){
+				while(octants[idx].buildFather() == father){
+					if (octants[idx].getMarker()<0)
+						nbro++;
+					if (idx==0)
 						break;
-					}
 					idx--;
-					if (idx==0){
-						wstop = true;
-					}
 				}
 				last_idx=idx;
 				if (nbro != global2D.nchildren && idx!=nocts-1){
@@ -2492,7 +2486,6 @@ private:
 		int8_t markerfather, marker;
 		uint8_t nbro;
 		uint8_t nchm1 = global2D.nchildren-1;
-		bool wstop = false;
 		bool Bdone=false;
 
 		//------------------------------------------ //
@@ -2528,24 +2521,22 @@ private:
 				nbro = 0;
 				idx = idx1_gh;
 				marker = ghosts[idx].getMarker();
-				while(marker < 0 && ghosts[idx].buildFather() == father && idx >= 0){
+				while(marker < 0 && ghosts[idx].buildFather() == father){
 					nbro++;
-					if(wstop){
+					if (idx==0)
 						break;
-					}
 					idx--;
 					marker = ghosts[idx].getMarker();
-					if (idx==0)
-						wstop=true;
 				}
 				idx = 0;
 				//marker = octants[idx].getMarker();
 				//while(marker<0 && octants[idx].buildFather() == father){
 				while(idx<nocts && octants[idx].buildFather() == father){
-					if (octants[idx].getMarker()<0) nbro++;
-					//nbro++;
+					if (octants[idx].getMarker()<0)
+						nbro++;
 					idx++;
-				//	marker = octants[idx].getMarker();
+					if(idx==nocts)
+						break;
 				}
 				if (nbro != global2D.nchildren && idx!=nocts-1){
 					for(uint32_t ii=0; ii<idx; ii++){
@@ -2559,7 +2550,6 @@ private:
 				}
 			}
 
-			wstop=false;
 			//if ((ghosts[idx2_gh].getMarker() < 0) && (octants[nocts-1].getMarker() < 0)){
 			if (ghosts[idx2_gh].buildFather()==octants[nocts-1].buildFather()){
 				father = ghosts[idx2_gh].buildFather();
@@ -2577,17 +2567,12 @@ private:
 				idx = nocts-1;
 				//marker = octants[idx].getMarker();
 				//while(marker<0 && octants[idx].buildFather() == father && idx >= 0){
-				while(idx>=0 && octants[idx].buildFather() == father){
-					if (octants[idx].getMarker()<0) nbro++;
-					//nbro++;
-					if (wstop){
-						break;
-					}
+				while(octants[idx].buildFather() == father){
+					if (octants[idx].getMarker()<0)
+						nbro++;
 					idx--;
-					//marker = octants[idx].getMarker();
-					if (idx==0){
-						wstop = true;
-					}
+					if (idx==0)
+						break;
 				}
 				last_idx=idx;
 				if (nbro != global2D.nchildren && idx!=nocts-1){
