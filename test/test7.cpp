@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
 			/**<Adapt the octree and map the data in the new octants.*/
 			vector<double> oct_data_new;
 			vector<uint32_t> mapper;
-			pablo7a.adapt(mapper);
+			pablo7a.adapt(true);
 			nocts = pablo7a.getNumOctants();
 			oct_data_new.resize(nocts, 0.0);
 

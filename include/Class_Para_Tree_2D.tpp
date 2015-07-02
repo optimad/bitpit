@@ -54,6 +54,9 @@ public:
 	int rank;									/**<Local rank of process*/
 	Class_Local_Tree<2> octree;					/**<Local tree in each processor*/
 
+	//distributed adpapting memebrs
+	u32vector mapidx;							/**<Local mapper for adapting*/
+
 	//auxiliary members
 	int error_flag;								/**<MPI error flag*/
 	bool serial;								/**<True if the octree is the same on each processor, False if the octree is distributed*/
@@ -4497,7 +4500,7 @@ public:
 	 * if the i-th octant is new after refinement the j-th old octant was the father of the new octant;
 	 * if the i-th octant is new after coarsening the j-th old octant was the first child of the new octant.
 	 */
-	bool adapt(u32vector & mapidx) {
+	bool adapt_mapidx() {
 		//TODO recoding for adapting with abs(marker) > 1
 
 		bool globalDone = false, localDone = false;
@@ -4607,6 +4610,48 @@ public:
 		return localDone;
 #endif
 	}
+
+	// =============================================================================== //
+
+	bool adapt(bool mapper_flag){
+
+		if (mapper_flag){
+			return adapt_mapidx();
+		}
+		else{
+			return adapt();
+		}
+
+	};
+
+	// =============================================================================== //
+
+	void getMapping(uint32_t & idx, u32vector & mapper, vector<bool> & isghost){
+
+		uint32_t	i, nocts = getNumOctants();
+		uint32_t	nghbro;
+
+		mapper.clear();
+		isghost.clear();
+
+		mapper.push_back(mapidx[idx]);
+		isghost.push_back(false);
+		if (getIsNewC(idx)){
+			for (i=idx+1; i<nocts; i++){
+				mapper.push_back(mapidx[i]);
+				isghost.push_back(false);
+			}
+			nghbro = octree.last_ghost_bros.size();
+			if (nghbro){
+				for (i=0; i<nghbro; i++){
+					mapper.push_back(octree.last_ghost_bros[i]);
+					isghost.push_back(true);
+				}
+			}
+		}
+
+
+	};
 
 	// =============================================================================== //
 

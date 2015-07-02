@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
 			/**<Adapt the octree and map the data in the new octants.*/
 			vector<double> oct_data_new;
 			vector<uint32_t> mapper;
-			pablo15.adapt(mapper);
+			pablo15.adapt(true);
 			nocts = pablo15.getNumOctants();
 			oct_data_new.resize(nocts, 0.0);
 
