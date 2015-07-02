@@ -1481,7 +1481,7 @@ public:
 			Area = octree.extractGhostOctant(inter->owners[1]).getArea();
 		else
 			Area = octree.extractOctant(inter->owners[inter->finer]).getArea();
-		return trans.mapSize(Area);
+		return trans.mapArea(Area);
 	}
 
 	/*! Get the coordinates of the center of an intersection.
