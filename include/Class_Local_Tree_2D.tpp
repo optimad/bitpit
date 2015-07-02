@@ -2432,9 +2432,9 @@ private:
 							octants[ii].info[11]=true;
 							Bdone=true;
 						}
-						//Clean ghost index to structure for mapper in case of coarsening a broken family
-						last_ghost_bros.clear();
 					}
+					//Clean ghost index to structure for mapper in case of coarsening a broken family
+					last_ghost_bros.clear();
 				}
 			}
 		}
@@ -2560,9 +2560,9 @@ private:
 							Bdone=true;
 							newmodified.push_back(ii);
 						}
-						//Clean index of ghost brothers in case of coarsening a broken family
-						last_ghost_bros.clear();
 					}
+					//Clean index of ghost brothers in case of coarsening a broken family
+					last_ghost_bros.clear();
 				}
 			}
 

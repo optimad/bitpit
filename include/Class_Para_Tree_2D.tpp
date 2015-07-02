@@ -4612,6 +4612,15 @@ public:
 	}
 
 	// =============================================================================== //
+// TODO COMMENTI!!!
+	/** Adapt the octree mesh with user setup for markers and 2:1 balancing conditions.
+	 * Track the changes in structure octant by a mapper.
+	 * \param[in] mapper_flag True/False if you want/don't want to build the mapping structure.
+	 * \param[out] mapidx Mapper from new octants to old octants.
+	 * mapidx[i] = j -> the i-th octant after adapt was in the j-th position before adapt;
+	 * if the i-th octant is new after refinement the j-th old octant was the father of the new octant;
+	 * if the i-th octant is new after coarsening the j-th old octant was the first child of the new octant.
+	 */
 
 	bool adapt(bool mapper_flag){
 
@@ -4626,10 +4635,17 @@ public:
 
 	// =============================================================================== //
 
+	/** Adapt the octree mesh with user setup for markers and 2:1 balancing conditions.
+	 * Track the changes in structure octant by a mapper.
+	 * \param[out] mapper Mapper from new octants to old octants.
+	 * mapidx[i] = j -> the i-th octant after adapt was in the j-th position before adapt;
+	 * if the i-th octant is new after refinement the j-th old octant was the father of the new octant;
+	 * if the i-th octant is new after coarsening the j-th old octant was the first child of the new octant.
+	 */
 	void getMapping(uint32_t & idx, u32vector & mapper, vector<bool> & isghost){
 
 		uint32_t	i, nocts = getNumOctants();
-		uint32_t	nghbro;
+		uint32_t	nghbro = octree.last_ghost_bros.size();;
 
 		mapper.clear();
 		isghost.clear();
@@ -4637,19 +4653,23 @@ public:
 		mapper.push_back(mapidx[idx]);
 		isghost.push_back(false);
 		if (getIsNewC(idx)){
-			for (i=idx+1; i<nocts; i++){
-				mapper.push_back(mapidx[i]);
-				isghost.push_back(false);
+			if (idx < nocts-1 || !nghbro){
+				for (i=1; i<global2D.nchildren; i++){
+					mapper.push_back(mapidx[idx]+i);
+					isghost.push_back(false);
+				}
 			}
-			nghbro = octree.last_ghost_bros.size();
-			if (nghbro){
+			else if (idx == nocts-1 && nghbro){
+				for (i=1; i<global2D.nchildren-nghbro; i++){
+					mapper.push_back(mapidx[idx]+i);
+					isghost.push_back(false);
+				}
 				for (i=0; i<nghbro; i++){
 					mapper.push_back(octree.last_ghost_bros[i]);
 					isghost.push_back(true);
 				}
 			}
 		}
-
 
 	};
 
