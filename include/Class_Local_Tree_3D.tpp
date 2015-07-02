@@ -2426,7 +2426,7 @@ private:
 					for(uint32_t ii=0; ii<idx; ii++){
 						if (octants[ii].getMarker()<0){
 							octants[ii].setMarker(0);
-							octants[ii].info[11]=true;
+							octants[ii].info[15]=true;
 							Bdone=true;
 						}
 					}
@@ -2463,7 +2463,7 @@ private:
 					for(uint32_t ii=idx+1; ii<nocts; ii++){
 						if (octants[ii].getMarker()<0){
 							octants[ii].setMarker(0);
-							octants[ii].info[11]=true;
+							octants[ii].info[15]=true;
 							Bdone=true;
 						}
 					}
@@ -2505,7 +2505,7 @@ private:
 					else{
 						if (idx<=last_idx){
 							octants[idx].setMarker(0);
-							octants[idx].info[11]=true;
+							octants[idx].info[15]=true;
 							Bdone=true;
 						}
 					}
@@ -2582,7 +2582,7 @@ private:
 					for(uint32_t ii=0; ii<idx; ii++){
 						if (octants[ii].getMarker()<0){
 							octants[ii].setMarker(0);
-							octants[ii].info[11]=true;
+							octants[ii].info[15]=true;
 							Bdone=true;
 							newmodified.push_back(ii);
 						}
@@ -2619,7 +2619,7 @@ private:
 					for(uint32_t ii=idx+1; ii<nocts; ii++){
 						if (octants[ii].getMarker()<0){
 							octants[ii].setMarker(0);
-							octants[ii].info[11]=true;
+							octants[ii].info[15]=true;
 							Bdone=true;
 							newmodified.push_back(ii);
 						}
@@ -2661,7 +2661,7 @@ private:
 				else{
 					if (idx<=last_idx){
 						octants[idx].setMarker(0);
-						octants[idx].info[11]=true;
+						octants[idx].info[15]=true;
 						Bdone=true;
 						newmodified.push_back(idx);
 					}
