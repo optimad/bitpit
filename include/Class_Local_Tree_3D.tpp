@@ -2695,7 +2695,6 @@ private:
 			oend = octants.end();
 			idx = 0;
 			for (it=obegin; it!=oend; it++){
-				it->info[15] = false;
 				if (!it->getNotBalance() && it->getMarker() != 0){
 					targetmarker = min(MAX_LEVEL_3D, (octants[idx].getLevel() + octants[idx].getMarker()));
 
