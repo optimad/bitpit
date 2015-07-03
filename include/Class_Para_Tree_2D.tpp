@@ -55,7 +55,11 @@ public:
 	Class_Local_Tree<2> octree;					/**<Local tree in each processor*/
 
 	//distributed adpapting memebrs
-	u32vector mapidx;							/**<Local mapper for adapting*/
+	u32vector mapidx;							/**<Local mapper for adapting. Mapper from new octants to old octants.
+	 	 	 	 	 	 	 	 	 	 	 	 * mapidx[i] = j -> the i-th octant after adapt was in the j-th position before adapt;
+	 	 	 	 	 	 	 	 	 	 	 	 * if the i-th octant is new after refinement the j-th old octant was the father of the new octant;
+	 	 	 	 	 	 	 	 	 	 	 	 * if the i-th octant is new after coarsening the j-th old octant was the first child of the new octant.
+	 	 	 	 	 	 	 	 	 	 	 	 */
 
 	//auxiliary members
 	int error_flag;								/**<MPI error flag*/
@@ -4493,12 +4497,9 @@ public:
 
 	// =============================================================================== //
 
+private:
 	/** Adapt the octree mesh with user setup for markers and 2:1 balancing conditions.
 	 * Track the changes in structure octant by a mapper.
-	 * \param[out] mapidx Mapper from new octants to old octants.
-	 * mapidx[i] = j -> the i-th octant after adapt was in the j-th position before adapt;
-	 * if the i-th octant is new after refinement the j-th old octant was the father of the new octant;
-	 * if the i-th octant is new after coarsening the j-th old octant was the first child of the new octant.
 	 */
 	bool adapt_mapidx() {
 		//TODO recoding for adapting with abs(marker) > 1
@@ -4612,16 +4613,11 @@ public:
 	}
 
 	// =============================================================================== //
-// TODO COMMENTI!!!
+public:
 	/** Adapt the octree mesh with user setup for markers and 2:1 balancing conditions.
-	 * Track the changes in structure octant by a mapper.
-	 * \param[in] mapper_flag True/False if you want/don't want to build the mapping structure.
-	 * \param[out] mapidx Mapper from new octants to old octants.
-	 * mapidx[i] = j -> the i-th octant after adapt was in the j-th position before adapt;
-	 * if the i-th octant is new after refinement the j-th old octant was the father of the new octant;
-	 * if the i-th octant is new after coarsening the j-th old octant was the first child of the new octant.
+	 * \param[in] mapper_flag True/False if you want/don't want to track the changes in structure octant by a mapper.
+	 * \return Boolean if adapt has done something.
 	 */
-
 	bool adapt(bool mapper_flag){
 
 		if (mapper_flag){
@@ -4635,12 +4631,13 @@ public:
 
 	// =============================================================================== //
 
-	/** Adapt the octree mesh with user setup for markers and 2:1 balancing conditions.
-	 * Track the changes in structure octant by a mapper.
-	 * \param[out] mapper Mapper from new octants to old octants.
-	 * mapidx[i] = j -> the i-th octant after adapt was in the j-th position before adapt;
+	/** Get mapping info of an octant after an adapting with tracking changes.
+	 * \param[in] idx Index of new octant.
+	 * \param[out] mapper Mapper from new octants to old octants. I.e. mapper[i] = j -> the i-th octant after adapt was in the j-th position before adapt;
 	 * if the i-th octant is new after refinement the j-th old octant was the father of the new octant;
-	 * if the i-th octant is new after coarsening the j-th old octant was the first child of the new octant.
+	 * if the i-th octant is new after coarsening the j-th old octant was a child of the new octant (mapper size = 4).
+	 * \param[out] isghost Info on ghostness of old octants.
+	 * I.e. isghost[i] = true/false -> the mapper[i] = j-th old octant was a local/ghost octant.
 	 */
 	void getMapping(uint32_t & idx, u32vector & mapper, vector<bool> & isghost){
 

@@ -159,14 +159,16 @@ int main(int argc, char *argv[]) {
 
 				/**<Adapt the octree.*/
 				vector<uint32_t> mapidx;
-				bool adapt = pabloBB.adapt(mapidx);
+				vector<bool> isghost;
+				bool adapt = pabloBB.adapt(true);
 
 				/**<Update the number of local octants.*/
 				nocts = pabloBB.getNumOctants();
 
 				/**<Assign to the new octant the data after an adaption.*/
 				oct_data_new.resize(nocts, 0);
-				for (int i=0; i<nocts; i++){
+				for (uint32_t i=0; i<nocts; i++){
+					pabloBB.getMapping(i, mapidx, isghost);
 					oct_data_new[i] = oct_data[mapidx[i]];
 				}
 				oct_data = oct_data_new;
