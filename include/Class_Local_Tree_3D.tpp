@@ -2549,6 +2549,8 @@ private:
 		size_ghosts = ghosts.size();
 		last_idx=nocts-1;
 
+		//Clean index of ghost brothers in case of coarsening a broken family
+		last_ghost_bros.clear();
 
 		// Set index for start and end check for ghosts
 		if (ghosts.size()){
@@ -2572,6 +2574,10 @@ private:
 				idx = idx1_gh;
 				marker = ghosts[idx].getMarker();
 				while(marker < 0 && ghosts[idx].buildFather() == father){
+
+					//Add ghost index to structure for mapper in case of coarsening a broken family
+					last_ghost_bros.push_back(idx);
+
 					nbro++;
 					if (idx==0)
 						break;
@@ -2597,6 +2603,8 @@ private:
 							newmodified.push_back(ii);
 						}
 					}
+					//Clean index of ghost brothers in case of coarsening a broken family
+					last_ghost_bros.clear();
 				}
 			}
 
