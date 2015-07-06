@@ -54,6 +54,13 @@ public:
 	int rank;									/**<Local rank of process*/
 	Class_Local_Tree<2> octree;					/**<Local tree in each processor*/
 
+	//distributed adpapting memebrs
+	u32vector mapidx;							/**<Local mapper for adapting. Mapper from new octants to old octants.
+	 	 	 	 	 	 	 	 	 	 	 	 * mapidx[i] = j -> the i-th octant after adapt was in the j-th position before adapt;
+	 	 	 	 	 	 	 	 	 	 	 	 * if the i-th octant is new after refinement the j-th old octant was the father of the new octant;
+	 	 	 	 	 	 	 	 	 	 	 	 * if the i-th octant is new after coarsening the j-th old octant was the first child of the new octant.
+	 	 	 	 	 	 	 	 	 	 	 	 */
+
 	//auxiliary members
 	int error_flag;								/**<MPI error flag*/
 	bool serial;								/**<True if the octree is the same on each processor, False if the octree is distributed*/
@@ -4490,14 +4497,11 @@ public:
 
 	// =============================================================================== //
 
+private:
 	/** Adapt the octree mesh with user setup for markers and 2:1 balancing conditions.
 	 * Track the changes in structure octant by a mapper.
-	 * \param[out] mapidx Mapper from new octants to old octants.
-	 * mapidx[i] = j -> the i-th octant after adapt was in the j-th position before adapt;
-	 * if the i-th octant is new after refinement the j-th old octant was the father of the new octant;
-	 * if the i-th octant is new after coarsening the j-th old octant was the first child of the new octant.
 	 */
-	bool adapt(u32vector & mapidx) {
+	bool adapt_mapidx() {
 		//TODO recoding for adapting with abs(marker) > 1
 
 		bool globalDone = false, localDone = false;
@@ -4607,6 +4611,82 @@ public:
 		return localDone;
 #endif
 	}
+
+	// =============================================================================== //
+public:
+	/** Adapt the octree mesh with user setup for markers and 2:1 balancing conditions.
+	 * \param[in] mapper_flag True/False if you want/don't want to track the changes in structure octant by a mapper.
+	 * \return Boolean if adapt has done something.
+	 */
+	bool adapt(bool mapper_flag){
+
+		if (mapper_flag){
+			return adapt_mapidx();
+		}
+		else{
+			return adapt();
+		}
+
+	};
+
+	// =============================================================================== //
+//	TODO TEMPORARY!!!!
+	/** Adapt the octree mesh with user setup for markers and 2:1 balancing conditions.
+	 * \param[out] mapper Mapper from new octants to old octants. I.e. mapper[i] = j -> the i-th octant after adapt was in the j-th position before adapt;
+	 * if the i-th octant is new after refinement the j-th old octant was the father of the new octant;
+	 * if the i-th octant is new after coarsening the j-th old octant was a child of the new octant (mapper size = 4).
+	 * \return Boolean if adapt has done something.
+	 */
+	bool adapt(u32vector & mapper){
+
+		bool done;
+		done = adapt_mapidx();
+		mapper.clear();
+		mapper = mapidx;
+		return done;
+
+	};
+
+	// =============================================================================== //
+
+	/** Get mapping info of an octant after an adapting with tracking changes.
+	 * \param[in] idx Index of new octant.
+	 * \param[out] mapper Mapper from new octants to old octants. I.e. mapper[i] = j -> the i-th octant after adapt was in the j-th position before adapt;
+	 * if the i-th octant is new after refinement the j-th old octant was the father of the new octant;
+	 * if the i-th octant is new after coarsening the j-th old octant was a child of the new octant (mapper size = 4).
+	 * \param[out] isghost Info on ghostness of old octants.
+	 * I.e. isghost[i] = true/false -> the mapper[i] = j-th old octant was a local/ghost octant.
+	 */
+	void getMapping(uint32_t & idx, u32vector & mapper, vector<bool> & isghost){
+
+		uint32_t	i, nocts = getNumOctants();
+		uint32_t	nghbro = octree.last_ghost_bros.size();;
+
+		mapper.clear();
+		isghost.clear();
+
+		mapper.push_back(mapidx[idx]);
+		isghost.push_back(false);
+		if (getIsNewC(idx)){
+			if (idx < nocts-1 || !nghbro){
+				for (i=1; i<global2D.nchildren; i++){
+					mapper.push_back(mapidx[idx]+i);
+					isghost.push_back(false);
+				}
+			}
+			else if (idx == nocts-1 && nghbro){
+				for (i=1; i<global2D.nchildren-nghbro; i++){
+					mapper.push_back(mapidx[idx]+i);
+					isghost.push_back(false);
+				}
+				for (i=0; i<nghbro; i++){
+					mapper.push_back(octree.last_ghost_bros[i]);
+					isghost.push_back(true);
+				}
+			}
+		}
+
+	};
 
 	// =============================================================================== //
 

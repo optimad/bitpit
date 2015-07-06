@@ -99,24 +99,26 @@ int main(int argc, char *argv[]) {
 			/**<Adapt the octree and map the data in the new octants.*/
 			vector<double> oct_data_new;
 			vector<uint32_t> mapper;
-			pablo7a.adapt(mapper);
+			vector<bool> isghost;
+			pablo7a.adapt(true);
 			nocts = pablo7a.getNumOctants();
 			oct_data_new.resize(nocts, 0.0);
 
 			/**<Assign to the new octant the average of the old children if it is new after a coarsening;
 			 * while assign to the new octant the data of the old father if it is new after a refinement.
 			 */
-			for (int i=0; i<nocts; i++){
+			for (uint32_t i=0; i<nocts; i++){
+				pablo7a.getMapping(i, mapper, isghost);
 				if (pablo7a.getIsNewC(i)){
 					for (int j=0; j<global2D.nchildren; j++){
-						oct_data_new[i] += oct_data[mapper[i]+j]/global2D.nchildren;
+						oct_data_new[i] += oct_data[mapper[j]]/global2D.nchildren;
 					}
 				}
 				else if (pablo7a.getIsNewR(i)){
-					oct_data_new[i] += oct_data[mapper[i]];
+					oct_data_new[i] += oct_data[mapper[0]];
 				}
 				else{
-					oct_data_new[i] += oct_data[mapper[i]];
+					oct_data_new[i] += oct_data[mapper[0]];
 				}
 			}
 			oct_data = oct_data_new;

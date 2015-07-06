@@ -3,6 +3,18 @@ cmake_minimum_required(VERSION 2.8)
 
 #---------------------------------------
 
+#Build test_temp.cpp
+SET(test_temp_src test_temp.cpp)
+
+add_executable(test_temp ${test_temp_src})
+
+IF(WITHOUT_MPI EQUAL 0)
+target_link_libraries(test_temp mpi)
+ENDIF(WITHOUT_MPI EQUAL 0)
+TARGET_LINK_LIBRARIES(test_temp PABLO)
+
+#---------------------------------------
+
 #Build test0.cpp
 SET(test0_src test0.cpp)
 

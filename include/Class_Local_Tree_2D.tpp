@@ -59,6 +59,7 @@ private:
 	uint8_t						local_max_depth;	/**< Reached max depth in local tree */
 	uint8_t 					balance_codim;		/**<Maximum codimension of the entity for 2:1 balancing (1 = 2:1 balance through edges (default);
 														2 = 2:1 balance through nodes and edges)*/
+	u32vector 					last_ghost_bros;	/**<Index of ghost brothers in case of broken family coarsened*/
 
 	// connectivity
 	u32vector2D					nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
@@ -2342,6 +2343,8 @@ private:
 		size_ghosts = ghosts.size();
 		last_idx=nocts-1;
 
+		//Clean index of ghost brothers in case of coarsening a broken family
+		last_ghost_bros.clear();
 
 		// Set index for start and end check for ghosts
 		if (ghosts.size()){
@@ -2399,6 +2402,10 @@ private:
 				idx = idx2_gh;
 				marker = ghosts[idx].getMarker();
 				while(marker < 0 && ghosts[idx].buildFather() == father){
+
+					//Add ghost index to structure for mapper in case of coarsening a broken family
+					last_ghost_bros.push_back(idx);
+
 					nbro++;
 					idx++;
 					if(idx == size_ghosts){
@@ -2426,6 +2433,8 @@ private:
 							Bdone=true;
 						}
 					}
+					//Clean ghost index to structure for mapper in case of coarsening a broken family
+					last_ghost_bros.clear();
 				}
 			}
 		}
@@ -2498,6 +2507,8 @@ private:
 		size_ghosts = ghosts.size();
 		last_idx=nocts-1;
 
+		//Clean index of ghost brothers in case of coarsening a broken family
+		last_ghost_bros.clear();
 
 		// Set index for start and end check for ghosts
 		if (ghosts.size()){
@@ -2521,6 +2532,10 @@ private:
 				idx = idx1_gh;
 				marker = ghosts[idx].getMarker();
 				while(marker < 0 && ghosts[idx].buildFather() == father){
+
+					//Add ghost index to structure for mapper in case of coarsening a broken family
+					last_ghost_bros.push_back(idx);
+
 					nbro++;
 					if (idx==0)
 						break;
@@ -2546,6 +2561,8 @@ private:
 							newmodified.push_back(ii);
 						}
 					}
+					//Clean index of ghost brothers in case of coarsening a broken family
+					last_ghost_bros.clear();
 				}
 			}
 

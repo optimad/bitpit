@@ -37,7 +37,9 @@ int main(int argc, char *argv[]) {
 
 		/**<Define vectors of data.*/
 		uint32_t nocts = pablo17a.getNumOctants();
+		uint32_t nghosts = pablo17a.getNumGhosts();
 		vector<double> oct_data(nocts, 0.0);
+		vector<double> ghost_data(nghosts, 0.0);
 
 		/**<Assign a data (distance from center of a circle) to the octants with at least one node inside the circle.*/
 		for (int i=0; i<nocts; i++){
@@ -100,24 +102,31 @@ int main(int argc, char *argv[]) {
 			/**<Adapt the octree and map the data in the new octants.*/
 			vector<double> oct_data_new;
 			vector<uint32_t> mapper;
-			pablo17a.adapt(mapper);
+			vector<bool> isghost;
+			pablo17a.adapt(true);
 			nocts = pablo17a.getNumOctants();
 			oct_data_new.resize(nocts, 0.0);
 
 			/**<Assign to the new octant the average of the old children if it is new after a coarsening;
 			 * while assign to the new octant the data of the old father if it is new after a refinement.
 			 */
-			for (int i=0; i<nocts; i++){
+			for (uint32_t i=0; i<nocts; i++){
+				pablo17a.getMapping(i, mapper, isghost);
 				if (pablo17a.getIsNewC(i)){
 					for (int j=0; j<global2D.nchildren; j++){
-						oct_data_new[i] += oct_data[mapper[i]+j]/global2D.nchildren;
+						if (isghost[j]){
+							oct_data_new[i] += ghost_data[mapper[j]]/global3D.nchildren;
+						}
+						else{
+							oct_data_new[i] += oct_data[mapper[j]]/global3D.nchildren;
+						}
 					}
 				}
 				else if (pablo17a.getIsNewR(i)){
-					oct_data_new[i] += oct_data[mapper[i]];
+					oct_data_new[i] += oct_data[mapper[0]];
 				}
 				else{
-					oct_data_new[i] += oct_data[mapper[i]];
+					oct_data_new[i] += oct_data[mapper[0]];
 				}
 			}
 			oct_data = oct_data_new;
