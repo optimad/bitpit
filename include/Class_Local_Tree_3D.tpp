@@ -2308,7 +2308,7 @@ private:
 				while(Mortontry < Mortonlast && idxtry < noctants){
 					Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 					Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
-					Dz = int32_t(abs(cz))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
+					Dz = int32_t(abs(cz))*(-int32_t(oct->z) + int32_t(octants[idxtry].z));
 					Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize()) + int32_t((cx+1)/2)*size;
 					Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
 					Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
