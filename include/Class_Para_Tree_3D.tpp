@@ -4730,6 +4730,25 @@ public:
 
 	// =============================================================================== //
 
+	//	TODO TEMPORARY!!!!
+	/** Adapt the octree mesh with user setup for markers and 2:1 balancing conditions.
+	 * \param[out] mapper Mapper from new octants to old octants. I.e. mapper[i] = j -> the i-th octant after adapt was in the j-th position before adapt;
+	 * if the i-th octant is new after refinement the j-th old octant was the father of the new octant;
+	 * if the i-th octant is new after coarsening the j-th old octant was a child of the new octant (mapper size = 4).
+	 * \return Boolean if adapt has done something.
+	 */
+	bool adapt(u32vector & mapper){
+
+		bool done;
+		done = adapt_mapidx();
+		mapper.clear();
+		mapper = mapidx;
+		return done;
+
+	};
+
+	// =============================================================================== //
+
 	/** Get mapping info of an octant after an adapting with tracking changes.
 	 * \param[in] idx Index of new octant.
 	 * \param[out] mapper Mapper from new octants to old octants. I.e. mapper[i] = j -> the i-th octant after adapt was in the j-th position before adapt;
