@@ -69,7 +69,6 @@ private:
 	u32vector2D					ghostsconnectivity;	/**<Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
 	 *The nodes are stored as index of vector nodes*/
 
-
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
 
