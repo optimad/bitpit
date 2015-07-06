@@ -1993,6 +1993,7 @@ private:
 					// ---> can i search only before or after idx in octants
 					int32_t jump = (octghost->computeMorton() > Morton) ? int32_t(idxghost/2+1) : int32_t((size_ghosts -idxghost)/2+1);
 					idxtry = uint32_t(idxghost +((octghost->computeMorton()<Morton)-(octghost->computeMorton()>Morton))*jump);
+					if (idxtry > ghosts.size()-1) idxtry = ghosts.size()-1;
 					while(abs(jump) > 0){
 						Mortontry = ghosts[idxtry].computeMorton();
 						jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
