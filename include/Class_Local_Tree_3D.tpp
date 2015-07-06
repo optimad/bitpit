@@ -2718,7 +2718,7 @@ private:
 
 					//Balance through faces
 					for (iface=0; iface<global3D.nfaces; iface++){
-						if(!it->getPbound(iface)){
+						if(!it->getBound(iface)){
 							findNeighbours(idx, iface, neigh, isghost);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
