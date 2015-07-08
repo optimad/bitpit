@@ -1510,7 +1510,7 @@ public:
 	 * \return Area of intersection.
 	 */
 	double getArea(Class_Intersection<3>* inter) {
-		uint32_t Area;
+		uint64_t Area;
 		if(inter->finer && inter->isghost)
 			Area = octree.extractGhostOctant(inter->owners[1]).getArea();
 		else
