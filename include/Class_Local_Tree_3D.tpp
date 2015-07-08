@@ -1614,7 +1614,7 @@ private:
 							}
 						}
 					}
-					if(octants[idxtry].computeMorton() == Morton && ghosts[idxtry].level == oct->level){
+					if(ghosts[idxtry].computeMorton() == Morton && ghosts[idxtry].level == oct->level){
 						//Found neighbour of same size
 						isghost.push_back(true);
 						neighbours.push_back(idxtry);
@@ -1701,9 +1701,9 @@ private:
 					uint32_t lengthneigh = 0;
 					uint32_t sizeneigh = neighbours.size();
 					for (idxtry=0; idxtry<sizeneigh; idxtry++){
-						lengthneigh += ghosts[neighbours[idxtry]].getSize();
+						lengthneigh += ghosts[neighbours[idxtry]].getArea();
 					}
-					if (lengthneigh < oct->getSize()){
+					if (lengthneigh < oct->getArea()){
 						// Search in octants
 
 						// Check if octants face is a boundary
