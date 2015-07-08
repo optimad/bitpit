@@ -1188,6 +1188,30 @@ public:
 
 	};
 
+	/** Finds neighbours of ghost octant through iface in vector octants.
+	 * Returns a vector (empty if iface is a bound face) with the index of neighbours
+	 * in their structure ( only local octants ).
+	 * \param[in] idx Index of current octant
+	 * \param[in] iface Index of face/edge/node passed through for neighbours finding
+	 * \param[in] codim Codimension of the iface-th entity 1=edge, 2=node
+	 * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+	 */
+	void findGhostNeighbours(uint32_t idx,
+			uint8_t iface,
+			uint8_t codim,
+			u32vector & neighbours){
+
+		if (codim == 1){
+			octree.findGhostNeighbours(idx, iface, neighbours);
+		}
+		else if (codim == 2){
+			octree.findGhostNodeNeighbours(idx, iface, neighbours);
+		}
+		else {
+			neighbours.clear();
+		}
+	};
+
 private:
 	/** Finds neighbours of octant through iface in vector octants.
 	 * Returns a vector (empty if iface is a bound face) with the index of neighbours
