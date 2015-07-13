@@ -1750,10 +1750,6 @@ int             m, n;
 // BUILD ADJACENCIES IF NOT ALREADY BUILT                                     //
 // ========================================================================== //
 if ((Adjacency.size() == 0) || (Adjacency.size() < nSimplex)) {
-// 		// Debug
-//             if (E >= Edges.size()) {
-// 			cout << "error on " << T << " " << Adjacency[T] << endl;
-//             } 0) || (Adjacency.size() < nSimplex)) {
     BuildAdjacency();
 }
 
@@ -1761,6 +1757,7 @@ if ((Adjacency.size() == 0) || (Adjacency.size() < nSimplex)) {
 // RESIZE INPUT VARIABLES                                                     //
 // ========================================================================== //
 Edges.resize(CountEdges());
+cout << "found " << Edges.size() << " edges " << endl;
 EdgeAdj.resize(nSimplex);
 for (T = 0; T < nSimplex; T++) {
     EdgeAdj[T].resize(Simplex[T].size(), -1);
@@ -1778,6 +1775,7 @@ for (T = 0; T < nSimplex; T++) {
 		// Debug
             if (E >= Edges.size()) {
 			cout << "error on simplex: " << T << "of " << nSimplex << " Adj: " << Adjacency[T] << endl;
+                        cout << "trying to access edge " << E << " of " << Edges.size() << endl;
             }
 
             // Update edge-vertex connectivity
@@ -1813,7 +1811,7 @@ for (T = 0; T < nSimplex; T++) {
 // 	     }
             for (j = 0; j < m; j++) {
                 A = Adjacency[T][i][j];
-                if (A > 0) {
+                if (A >= 0) {
                     e = edge(A, T);
                     EdgeAdj[A][e] = E;
                 }
