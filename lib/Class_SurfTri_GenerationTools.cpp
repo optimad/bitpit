@@ -428,14 +428,8 @@ int        i, j, m;
 
 // Vertex offset
 v_off = nVertex;
-cout << "v_off" << v_off << endl;
-cout << "Source.nVertex" << Source.nVertex << endl;
-cout << "Source.Vertex.size()" << Source.Vertex.size() << endl;
 
 // Simplex offset
-cout << "s_off" << s_off << endl;
-cout << "Source.nSimplex" << Source.nSimplex << endl;
-cout << "Source.Simplex.size()" << Source.Simplex.size() << endl;
 s_off = nSimplex;
 
 // ========================================================================== //
@@ -468,8 +462,6 @@ if (Source.nSimplex > 0) {
 // Normals ------------------------------------------------------------------ //
 if ((Source.Normal.size() > 0) && (Source.Normal.size() >= Source.nSimplex)) {
 
-    cout << "copying normals" << endl;
-    
     // Resize normal list
     Normal.resize(nSimplex, dvector1D(Source.Vertex[0].size(), 0.0));
 
@@ -482,8 +474,6 @@ if ((Source.Normal.size() > 0) && (Source.Normal.size() >= Source.nSimplex)) {
 // Adjacencies -------------------------------------------------------------- //
 if ((Source.Adjacency.size() > 0) && (Source.Adjacency.size() >= Source.nSimplex)) {
 
-    
-    cout << "copying adjacencies" << endl;
     // Resize adjacency list
     Adjacency.resize(nSimplex);
 

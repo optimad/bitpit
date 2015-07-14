@@ -1756,9 +1756,7 @@ if ((Adjacency.size() == 0) || (Adjacency.size() < nSimplex)) {
 // ========================================================================== //
 // RESIZE INPUT VARIABLES                                                     //
 // ========================================================================== //
-cout << nSimplex << endl;
 Edges.resize(CountEdges());
-cout << "found " << Edges.size() << " edges " << endl;
 EdgeAdj.resize(nSimplex);
 for (T = 0; T < nSimplex; T++) {
     EdgeAdj[T].resize(Simplex[T].size(), -1);
