@@ -1115,6 +1115,7 @@ for (T = 0; T < nSimplex; ++T) {
 // CLEAN SURFACE TASSELATION                                                  //
 // ========================================================================== //
 Bounds.RemoveIsolatedVertex();
+Bounds.ResizeVertex();
 
 return; };
 
