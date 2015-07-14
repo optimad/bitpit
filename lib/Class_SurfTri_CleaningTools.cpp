@@ -1756,6 +1756,7 @@ if ((Adjacency.size() == 0) || (Adjacency.size() < nSimplex)) {
 // ========================================================================== //
 // RESIZE INPUT VARIABLES                                                     //
 // ========================================================================== //
+cout << nSimplex << endl;
 Edges.resize(CountEdges());
 cout << "found " << Edges.size() << " edges " << endl;
 EdgeAdj.resize(nSimplex);
