@@ -1241,9 +1241,7 @@ public:
 		octree.setBalanceCodim(b21codim);
 	};
 
-
 	// ------------------------------------------------------------------------------- //
-private:
 
 	const Class_Octant<3> &  getFirstDesc() const{
 		return octree.getFirstDesc();
@@ -1253,6 +1251,8 @@ private:
 		return octree.getLastDesc();
 	};
 
+private:
+
 	void setFirstDesc(){
 		octree.setFirstDesc();
 	};
@@ -1261,12 +1261,13 @@ private:
 		octree.setLastDesc();
 	};
 
+public:
+
 	Class_Octant<3>& extractOctant(uint32_t idx) {
 		return octree.extractOctant(idx) ;
 	};
 
 	// --------------------------------
-public:
 
 	/** Get an octant as pointer to the target octant.
 	 * \param[in] idx Local index of target octant.
