@@ -1251,6 +1251,10 @@ public:
 		return octree.getLastDesc();
 	};
 
+	uint64_t getLastDescMorton(uint32_t idx) {
+		return octree.octants[idx].buildLastDesc().computeMorton();
+	};
+
 private:
 
 	void setFirstDesc(){

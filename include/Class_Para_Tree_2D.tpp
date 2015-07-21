@@ -1085,7 +1085,6 @@ public:
 
 
 	// --------------------------------
-private:
 
 	const Class_Octant<2> &  getFirstDesc() const{
 		return octree.getFirstDesc();
@@ -1094,6 +1093,13 @@ private:
 	const Class_Octant<2> &  getLastDesc() const{
 		return octree.getLastDesc();
 	};
+
+	uint64_t getLastDescMorton(uint32_t idx) {
+		return octree.octants[idx].buildLastDesc().computeMorton();
+	};
+
+
+private:
 
 	void setFirstDesc(){
 		octree.setFirstDesc();
