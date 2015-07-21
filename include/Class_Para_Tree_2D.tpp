@@ -3396,7 +3396,7 @@ public:
 							buffSize +=  userData.fixedSize() * tailSize;
 						}
 						else{
-							for(uint32_t i = ft; i <= octantsSize; ++i){
+							for(uint32_t i = ft; i < octantsSize; ++i){
 								buffSize += userData.size(i);
 							}
 						}
@@ -3863,7 +3863,7 @@ public:
 							buffSize +=  userData.fixedSize() * tailSize;
 						}
 						else{
-							for(uint32_t i = ft; i <= octantsSize; ++i){
+							for(uint32_t i = ft; i < octantsSize; ++i){
 								buffSize += userData.size(i);
 							}
 						}
