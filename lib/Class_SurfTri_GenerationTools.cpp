@@ -482,7 +482,7 @@ if ((Source.Adjacency.size() > 0) && (Source.Adjacency.size() >= Source.nSimplex
         Adjacency[i + s_off].resize(Source.Adjacency[i].size());
         m = Source.Adjacency[i].size();
         for (j = 0; j < m; j++) {
-            if (Source.Adjacency[i][j][0] > 0) {
+            if (Source.Adjacency[i][j][0] >= 0) {
                 Adjacency[i + s_off][j] = Source.Adjacency[i][j] + s_off;
             }
             else {
