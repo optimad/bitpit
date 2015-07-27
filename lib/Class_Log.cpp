@@ -1,7 +1,7 @@
 /*
  * ClassLog.cpp
  *
- *  Created on: 3 déc. 2014
+ *  Created on: 3 dec 2014
  *      Author: marco
  */
 
