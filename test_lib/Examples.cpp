@@ -505,7 +505,7 @@ void Test004(
 
 // Local variables
 int                         N = 5120000;
-kdtree<2, double>           KD(N);
+kdtree<2, vector<double> >           KD(N);
 dvector2D                   X(N, dvector1D(2, 0.0));
 dvector1D                   x(2, -0.1);
 
@@ -598,9 +598,12 @@ dvector1D                   x(2, -0.1);
     // Create vertex list --------------------------------------------------- //
 
     // Build kd tree -------------------------------------------------------- //
-//     for (i = N-1; i >= 0; i--) {
-//         cout << "elem found: " << KD.exist(&X[i]) << endl;
-//     } //next i
+     for (i = N-1; i >= 0; i--) {
+         if( ! KD.exist(&X[i]) ){
+             cout << "error: " << i << "  " << X[i] << endl ;
+         };
+//ht         cout << "elem found: " << KD.exist(&X[i]) << endl;
+     } //next i
 
 }
 

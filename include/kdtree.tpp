@@ -195,19 +195,19 @@ return; }
 // -------------------------------------------------------------------------- //
 template<int d, class T, class T1>
 int kdtree<d, T, T1>::exist(
-    vector< T >     *P_
+    T      *P_
 ) {
 
 // ========================================================================== //
 // template<int d, class T, class T1>                                         //
 // int kdtree<d, T, T1>::exist(                                               //
-//     vector< T >     *P_)                                                   //
+//     T               *P_)                                                   //
 //                                                                            //
 // Check if a object is already included in the k-d tree.                     //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - P_        : vector<T> *, pointer to object to be checked                 //
+// - P_        : T          , pointer to object to be checked                 //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -259,21 +259,21 @@ return(index); };
 // -------------------------------------------------------------------------- //
 template<int d, class T, class T1>
 int kdtree<d, T, T1>::exist(
-    vector< T >     *P_,
+    T               *P_,
     T1              &label
 ) {
 
 // ========================================================================== //
 // template<int d, class T, class T1>                                         //
 // int kdtree<d, T, T1>::exist(                                               //
-//     vector< T >     *P_,                                                   //
+//     T               *P_,                                                   //
 //     T1              &label)                                                //
 //                                                                            //
 // Check if a object is already included in the k-d tree.                     //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - P_        : vector<T> *, pointer to object to be checked                 //
+// - P_        : T          , pointer to object to be checked                 //
 // - label     : T1, label of kd-node matching P_                             //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -325,10 +325,11 @@ if (check) {
 return(index); };
 
 // -------------------------------------------------------------------------- //
-template<int d, class T, class T1>
+template<int d, class T, class T1 >
+template< class T2>
 int kdtree<d, T, T1>::h_neighbor(
-    vector< T >     *P_,
-    T                h,
+    T               *P_,
+    T2               h,
     bool             debug,
     int              next_,
     int              lev
@@ -337,7 +338,7 @@ int kdtree<d, T, T1>::h_neighbor(
 // ========================================================================== //
 // template<int d, class T, class T1>                                         //
 // int kdtree<d, T, T1>::h_neighbor(                                          //
-//     vector< T >     *P_,                                                   //
+//     T               *P_,                                                   //
 //     T                h,                                                    //
 //     int              next_,                                                //
 //     int              lev)                                                  //
@@ -346,7 +347,7 @@ int kdtree<d, T, T1>::h_neighbor(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - P_        : vector<T> *, pointer to object to be checked                 //
+// - P_        : T            pointer to object to be checked                 //
 // - h         : T, radius of the ball centered at P_                         //
 // - next_     : int, root for binary search                                  //
 // - lev       : int, level of root on binary tree                            //
@@ -402,11 +403,12 @@ if (((*(nodes[prev_].object_))[dim] <= (*P_)[dim] + h)
 return(max(index_l, index_r)); };
 
 // -------------------------------------------------------------------------- //
-template<int d, class T, class T1>
+template<int d, class T, class T1 >
+template< class T2>
 int kdtree<d, T, T1>::h_neighbor(
-    vector< T >     *P_,
+    T               *P_,
     T1              &label,
-    T                h,
+    T2               h,
     int              next_,
     int              lev
 ) {
@@ -414,15 +416,15 @@ int kdtree<d, T, T1>::h_neighbor(
 // ========================================================================== //
 // template<int d, class T, class T1>                                         //
 // int kdtree<d, T, T1>::h_neighbor(                                          //
-//     vector< T >     *P_,                                                   //
+//     T               *P_,                                                   //
 //     T1              &label,                                                //
-//     T                h)                                                    //
+//     T2               h)                                                    //
 //                                                                            //
 // Check if a object is already included in the k-d tree.                     //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - P_        : vector<T> *, pointer to object to be checked                 //
+// - P_        : T         *, pointer to object to be checked                 //
 // - label     : T1, label of kd-node matching P_                             //
 // - h         : T, radius of the ball centered at P_                         //
 // ========================================================================== //
@@ -476,19 +478,19 @@ return(max(index_l, index_r)); };
 // -------------------------------------------------------------------------- //
 template<int d, class T, class T1>
 void kdtree<d, T, T1>::insert(
-    vector< T >     *P_
+    T               *P_
 ) {
 
 // ========================================================================== //
 // template<int d, class T, class T1>                                         //
 // void kdtree<d, T, T1>::insert(                                             //
-//     vector< T >     *P_)                                                   //
+//     T               *P_)                                                   //
 //                                                                            //
 // Insert a new element in kd-tree.                                           //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - P_         : vector< T > *, pointer to object                            //
+// - P_         : T           *, pointer to object                            //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -560,21 +562,21 @@ return; };
 // -------------------------------------------------------------------------- //
 template<int d, class T, class T1>
 void kdtree<d, T, T1>::insert(
-    vector< T >     *P_,
+    T               *P_,
     T1              &label
 ) {
 
 // ========================================================================== //
 // template<int d, class T, class T1>                                         //
 // void kdtree<d, T, T1>::insert(                                             //
-//     vector< T >     *P_,                                                   //
+//     T               *P_,                                                   //
 //     T1              &label)                                                //
 //                                                                            //
 // Insert a new element in kd-tree.                                           //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - P_         : vector< T > *, pointer to object                            //
+// - P_         : T           *, pointer to object                            //
 // - label      : T1, label of new object                                     //
 // ========================================================================== //
 // OUTPUT                                                                     //

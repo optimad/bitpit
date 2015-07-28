@@ -75,7 +75,7 @@ class kdnode {
     public:
     int        lchild_;                                                   // pointer to left child
     int        rchild_;                                                   // pointer to left child
-    vector<T> *object_;                                                   // pointer to object
+    T         *object_;                                                   // pointer to object
     T1         label;
 
     // Constructor ====================================================== //
@@ -115,31 +115,35 @@ class kdtree {
     // Methods ============================================================== //
     public:
     int exist(                                                                // Check if element exist in the kd-tree
-        vector< T > *                                                         // (input) pointer to element to be tested
+        T           *                                                         // (input) pointer to element to be tested
     );
     int exist(                                                                // Check if element exist in the kd-tree
-        vector< T > *,                                                        // (input) pointer to element to be tested
+        T           *,                                                        // (input) pointer to element to be tested
         T1          &                                                         // (input/output) label of the kd node matching test object
     );
+
+    template <class T2>
     int h_neighbor(                                                           // Check if a kd-node exists in the h-neighborhood of a given item
-        vector< T > *,                                                        // (input) pointer to element to be tested
-        T            ,                                                        // (input) radius of ball
+        T           *,                                                        // (input) pointer to element to be tested
+        T2           ,                                                        // (input) radius of ball
         bool         ,
         int         n = 0,                                                    // (input/optional) root for binary search algorithm
         int         l = 0                                                     // (input/optional) level of root on binary tree
     );
+
+    template <class T2>
     int h_neighbor(                                                           // Check if a kd-node exists in the h-neighborhood of a given item
-        vector< T > *,                                                        // (input) pointer to element to be tested
-        T1          &,                                                        // (input/output) label of the kd node matching test object
-        T            ,                                                        // (input) radius of ball
+        T           *,                                                        // (input) pointer to element to be tested
+        T1          &,                                                      // (input/output) label of the kd node matching test object
+        T2           ,                                                        // (input) radius of ball
         int         n = 0,                                                    // (input/optional) root for binary search algorithm
         int         l = 0                                                     // (input/optional) level of root on binary tree
     );
     void insert(                                                              // Insert new element in the kd-tree
-        vector< T > *                                                         // (input) pointer to element to be inserted
+        T           *                                                         // (input) pointer to element to be inserted
     );
     void insert(                                                              // Insert new element in the kd-tree
-        vector< T > *,                                                        // (input) pointer to element to be inserted
+        T           *,                                                        // (input) pointer to element to be inserted
         T1          &                                                         // (input) label of the new element
     );
     private:
