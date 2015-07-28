@@ -556,12 +556,16 @@ else if (selection.compare("sum") == 0) {
     int                nn = -5;
     double             a = 3.0, mm;
     dvector1D          x(3, 0.0);
+
+    uint32_t           su;
+    vector<uint32_t>   u(3, 0);
     ivector1D          i(3, 1);
     ivector2D          y(3, ivector1D(3, 0));
 
     // Initialize variables --------------------------------------------------------- //
     x[0] = 1.05; x[1] = 1.1; x[2] = 3.0;
-    i[0] = 1;   i[1] = 2;   i[2] = 4;
+    u[0] = 1;    u[1] = 2;   u[2] = 3  ;
+    i[0] = 1;    i[1] = 2;   i[2] = 4;
     y[0] = i;
     y[1] = 2*i;
     y[2] = 3*i;
@@ -569,6 +573,7 @@ else if (selection.compare("sum") == 0) {
     // Output message --------------------------------------------------------------- //
     cout << "a = " << a << endl;
     cout << "x = " << x << endl;
+    cout << "u = " << x << endl;
     cout << "y = " << y << endl;
 
     // Minval of double ------------------------------------------------------------- //
@@ -579,9 +584,15 @@ else if (selection.compare("sum") == 0) {
     sum(x,mm);
     cout << "sum(x) = " << mm << endl;
 
+    // Minval of 1D vector ---------------------------------------------------------- //
+    sum(u,su);
+    cout << "sum(u) = " << su << endl;
+
+
     // Minval of 2D vector ---------------------------------------------------------- //
     sum(y,nn);
     cout << "sum(y) = " << nn << endl;
+
 
 }
 

@@ -263,9 +263,14 @@ void inline sum(                                                                
     const int                   &,                                                    // (dummy input) 1st argument
     int                         &                                                     // (dummy input/output) 2nd argument
 );
-double inline sum(                                                                    // DUMMY ROUTINE FOR SUM OPERATOR
+void inline sum(                                                                    // DUMMY ROUTINE FOR SUM OPERATOR
     const double                &,                                                    // (dummy input) 1st argument
-    int                         &                                                     // (dummy input/output) 2nd argument
+    double                      &                                                     // (dummy input/output) 2nd argument
+);
+template <class T>
+void inline sum(                                                                    // DUMMY ROUTINE FOR SUM OPERATOR
+    const T                     &,                                                    // (dummy input) 1st argument
+    T                           &                                                     // (dummy input/output) 2nd argument
 );
 template <class T, class T1>
 void sum(                                                                             // RETURNS THE SUM OF ELEMENT OF A VECTOR
