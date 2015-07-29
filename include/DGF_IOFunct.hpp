@@ -64,6 +64,9 @@ typedef vector< dvector1D >            dvector2D;
 typedef vector< dvector2D >            dvector3D;
 typedef vector< dvector3D >            dvector4D;
 
+typedef array<double,3>                darray3E;
+typedef vector<darray3E>               dvecarr3E;
+
 // string vectors
 typedef vector< string >               svector1D;
 typedef vector< svector1D >            svector2D;
@@ -139,12 +142,25 @@ class DGF_obj {
         dvector2D  &,                                                         // (input/output) vertex coordinate list
         ivector2D  &                                                          // (input/output) simplex-vertex connectivity
     );
+    void load(                                                                // Load mesh data from .dgf file
+        int        &,                                                         // (input/output) number of mesh vertices
+        int        &,                                                         // (input/output) number of mesh facets
+        dvecarr3E  &,                                                         // (input/output) vertex coordinate list
+        ivector2D  &                                                          // (input/output) simplex-vertex connectivity
+    );
     void save(                                                                // Save mesh data into a .dgf file
         int        &,                                                         // (input) number of mesh vertices
         int        &,                                                         // (input) number of mesh facets
         dvector2D  &,                                                         // (input) vertex coordinate list
         ivector2D  &                                                          // (input) simplex-vertex connectivity
     );
+    void save(                                                                // Save mesh data into a .dgf file
+        int        &,                                                         // (input) number of mesh vertices
+        int        &,                                                         // (input) number of mesh facets
+        dvecarr3E  &,                                                         // (input) vertex coordinate list
+        ivector2D  &                                                          // (input) simplex-vertex connectivity
+    );
+
     template< typename T, typename ... T2 >
     void load_vdata(                                                          // Load vertex data sets from dgf file
         string      data_name,                                                // (input) dataset name
@@ -234,6 +250,13 @@ unsigned int Read_DGF_mesh(                                                   //
     dvector2D      &,                                                         // (input/output) vertex coordinate list
     ivector2D      &                                                          // (input/output) simplex-vertex connectivity
 );
+unsigned int Read_DGF_mesh(                                                   // Read mesh data from file.
+    ifstream       &,                                                         // (input) input stream to dgf file
+    int            &,                                                         // (input/output) number of mesh vertices
+    int            &,                                                         // (input/output) number of simplicies
+    dvecarr3E      &,                                                         // (input/output) vertex coordinate list
+    ivector2D      &                                                          // (input/output) simplex-vertex connectivity
+);
 template <typename T>
 unsigned int Read_DGF_VERTEXDATA(                                             // Load dgf vertex data
     ifstream       &,                                                         // (input) input stream to dgf file
@@ -263,6 +286,14 @@ unsigned int Write_DGF_mesh(                                                  //
     dvector2D      &,                                                         // (input) vertex coordinate list
     ivector2D      &                                                          // (input) simplex-vertex connectivity
 );
+unsigned int Write_DGF_mesh(                                                  // Export mesh data into dgf file
+    ofstream       &,                                                         // (input) output stream to dgf file
+    int            &,                                                         // (input) number of vertices
+    int            &,                                                         // (input) number of simplicies
+    dvecarr3E      &,                                                         // (input) vertex coordinate list
+    ivector2D      &                                                          // (input) simplex-vertex connectivity
+);
+
 template < typename T >
 unsigned int Write_DGF_VERTEXDATA(                                            // Export vertex data to dgf file
     ofstream       &,                                                         // (input) output stream to dgf file

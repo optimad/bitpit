@@ -586,6 +586,63 @@ err = Read_DGF_mesh(ifile_handle, nV, nS, V, S);
 close("in");
 
 return; };
+// -------------------------------------------------------------------------- //
+void DGF_obj::load(
+    int         &nV,
+    int         &nS,
+    dvecarr3E   &V,
+    ivector2D   &S
+) {
+
+// ========================================================================== //
+// void DGF_obj::load(                                                        //
+//     int         &nV,                                                       //
+//     int         &nS,                                                       //
+//     dvector2D   &V,                                                        //
+//     ivector2D   &S)                                                        //
+//                                                                            //
+// Load mesh data from dgf file.                                              //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - nV          : int, number of mesh vertices                               //
+// - nS          : int, number of simplicies                                  //
+// - V           : dvector2D, vertex coordinate list. V[i][0], V[i][1], ...   //
+//                 are the x, y, ... coordinates of the i-th vertex           //
+// - S           : ivector2D, simplex-vertex connectivity S[i][0], S[i][1],   //
+//                 ... are the global indices of vertices of the i-th simplex //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+// none
+
+// Counters
+// none
+
+// ========================================================================== //
+// OPEN INPUT STREAM                                                          //
+// ========================================================================== //
+open("in");
+
+// ========================================================================== //
+// READ MESH DATA FROM DGF FILE                                               //
+// ========================================================================== //
+err = Read_DGF_mesh(ifile_handle, nV, nS, V, S);
+
+// ========================================================================== //
+// CLOSE INPUT STREAM                                                         //
+// ========================================================================== //
+close("in");
+
+return; };
 
 // -------------------------------------------------------------------------- //
 void DGF_obj::save(
@@ -644,6 +701,65 @@ err = Write_DGF_mesh(ofile_handle, nV, nS, V, S);
 close("out");
 
 return; }
+
+// -------------------------------------------------------------------------- //
+void DGF_obj::save(
+    int         &nV,
+    int         &nS,
+    dvecarr3E   &V,
+    ivector2D   &S
+) {
+
+// ========================================================================== //
+// void DGF_obj::save(                                                        //
+//     int         &nV,                                                       //
+//     int         &nS,                                                       //
+//     dvector2D   &V,                                                        //
+//     ivector2D   &S)                                                        //
+//                                                                            //
+// SAve mesh data into a dgf file.                                            //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - nV          : int, number of mesh vertices                               //
+// - nS          : int, number of simplicies                                  //
+// - V           : dvector2D, vertex coordinate list. V[i][0], V[i][1], ...   //
+//                 are the x, y, ... coordinates of the i-th vertex           //
+// - S           : ivector2D, simplex-vertex connectivity S[i][0], S[i][1],   //
+//                 ... are the global indices of vertices of the i-th simplex //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+// none
+
+// Counters
+// none
+
+// ========================================================================== //
+// OPEN OUTPUT STREAM                                                         //
+// ========================================================================== //
+open("out");
+
+// ========================================================================== //
+// READ MESH DATA FROM DGF FILE                                               //
+// ========================================================================== //
+err = Write_DGF_mesh(ofile_handle, nV, nS, V, S);
+
+// ========================================================================== //
+// CLOSE OUTPUT STREAM                                                        //
+// ========================================================================== //
+close("out");
+
+return; }
+
 
 // Private methods ---------------------------------------------------------- //
 
@@ -1296,6 +1412,99 @@ file_handle.seekg(start_pos);
 
 return(err); };
 
+// -------------------------------------------------------------------------- //
+unsigned int Read_DGF_mesh(
+    ifstream    &file_handle,
+    int         &nV,
+    int         &nS,
+    dvecarr3E   &V,
+    ivector2D   &S
+) {
+
+// ========================================================================== //
+// unsigned int Read_DGF_mesh(                                                //
+//     ifstream    &file_handle,                                              //
+//     int         &nV,                                                       //
+//     int         &nS,                                                       //
+//     dvector2D   &V,                                                        //
+//     ivector2D   &S)                                                        //
+//                                                                            //
+// Read mesh data from dgf file.                                              //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - file_handle : ifstream, input stream to dgf file                         //
+// - nV          : int, number of mesh vertices                               //
+// - nS          : int, number of simplicies                                  //
+// - V           : dvector2D, vertex coordinate list. V[i][0], V[i][1], ...   //
+//                 are the x, y, ... coordinates of the i-th vertex           //
+// - S           : ivector2D, simplex-vertex connectivity S[i][0], S[i][1],   //
+//                 ... are the global indices of vertices of the i-th simplex //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - err         : unsigned int, error flag:                                  //
+//                 err = 0    --> no errors encountered                       //
+//                 err = 1    --> file is missing or cannot be accessed       //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+unsigned int    err;
+long int        start_pos;
+string          line, word;
+stringstream    sline;
+
+// Counters
+// none
+
+// ========================================================================== //
+// CHECK STREAM STATUS                                                        //
+// ========================================================================== //
+if (!file_handle.good()) { return(1); }
+
+// ========================================================================== //
+// SET CURSOR POSITION AT FILE BEGIN                                          //
+// ========================================================================== //
+file_handle.clear();
+start_pos = file_handle.tellg();
+file_handle.seekg(0);
+
+// ========================================================================== //
+// LOAD MESH DATA FROM FILE                                                   //
+// ========================================================================== //
+word = "begin";
+while (!file_handle.eof()
+    && (word.compare("#") != 0)) {
+
+    // Get current line
+    getline(file_handle, line);
+    line = trim(line);
+    sline.clear();
+    sline.str(line);
+
+    // Look for keywords
+    if (sline >> word) {
+        if (word.compare("VERTEX") == 0) {
+            err = Read_DGF_data(file_handle, nV, V);
+        }
+        else if (word.compare("SIMPLEX") == 0) {
+            err = Read_DGF_data(file_handle, nS, S);
+        }
+    }
+} //next line
+
+// ========================================================================== //
+// RESET CURSOR POSITION                                                      //
+// ========================================================================== //
+file_handle.clear();
+file_handle.seekg(start_pos);
+
+return(err); };
+
 
 // Output functions ========================================================= //
 
@@ -1305,6 +1514,71 @@ unsigned int Write_DGF_mesh(
     int         &nV,
     int         &nS,
     dvector2D   &V,
+    ivector2D   &S
+) {
+
+// ========================================================================== //
+// unsigned int Write_DGF_mesh(                                               //
+//     ofstream    &file_handle,                                              //
+//     int         &nV,                                                       //
+//     int         &nS,                                                       //
+//     dvector2D   &V,                                                        //
+//     ivector2D   &S)                                                        //
+//                                                                            //
+// Export mesh data into dgf file.                                            //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - file_handle : ofstream, output stream to dgf file                        //
+// - nV          : int, number of mesh vertices                               //
+// - nS          : int, number of simplicies                                  //
+// - V           : dvector2D, vertex coordinate list. V[i][0], V[i][1], ...   //
+//                 are the x, y, ... coordinates of the i-th vertex           //
+// - S           : ivector2D, simplex-vertex connectivity S[i][0], S[i][1],   //
+//                 ... are the global indices of vertices of the i-th simplex //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - err         : unsigned int, error flag:                                  //
+//                 err = 0    --> no errors encountered                       //
+//                 err = 1    --> file is missing or cannot be accessed       //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+unsigned int            err = 0;
+
+// Counters
+// none
+
+// ========================================================================== //
+// CHECK STREAM STATUS                                                        //
+// ========================================================================== //
+if (!file_handle.good()) { return(1); }
+
+// ========================================================================== //
+// EXPORT MESH DATA                                                           //
+// ========================================================================== //
+
+// Vertex coordinate list
+file_handle << "VERTEX" << endl;
+err = Write_DGF_data(file_handle, nV, V);
+
+// Simplex-vertex connectivity
+file_handle << "SIMPLEX" << endl;
+err = Write_DGF_data(file_handle, nS, S);
+
+return(err); }
+
+// -------------------------------------------------------------------------- //
+unsigned int Write_DGF_mesh(
+    ofstream    &file_handle,
+    int         &nV,
+    int         &nS,
+    dvecarr3E   &V,
     ivector2D   &S
 ) {
 

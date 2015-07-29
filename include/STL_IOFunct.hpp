@@ -62,6 +62,9 @@ typedef vector< dvector1D >            dvector2D;
 typedef vector< dvector2D >            dvector3D;
 typedef vector< dvector3D >            dvector4D;
 
+typedef array<double,3>                darray3E; 
+typedef vector<darray3E>               dvecarr3E;
+
 // string vectors
 typedef vector< string >               svector1D;
 typedef vector< svector1D >            svector2D;
@@ -138,6 +141,14 @@ class STL_obj {
         dvector2D           &,                                                // (input/output) unit normal to each triangle
         ivector2D           &                                                 // (input/output) triangle-vertex connectivity
     );
+    void load(                                                                // Load stl triangulation from stl file
+        int                 &,                                                // (input/output) number of stl vertices
+        int                 &,                                                // (input/output) number of stl facets
+        dvecarr3E           &,                                                // (input/output) vertex coordinate list
+        dvecarr3E           &,                                                // (input/output) unit normal to each triangle
+        ivector2D           &                                                 // (input/output) triangle-vertex connectivity
+    );
+
     template <typename ... T2>
     void load(                                                                // Load stl triangulation from stl file
         string               ,                                                // (input) solid name
@@ -145,6 +156,16 @@ class STL_obj {
         int                 &,                                                // (input/output) number of stl facets
         dvector2D           &,                                                // (input/output) vertex coordinate list
         dvector2D           &,                                                // (input/output) unit normal to each triangle
+        ivector2D           &,                                                // (input/output) triangle-vertex connectivity
+        T2              & ...                                                 // (input/optional) other stl solids
+    );
+    template <typename ... T2>
+    void load(                                                                // Load stl triangulation from stl file
+        string               ,                                                // (input) solid name
+        int                 &,                                                // (input/output) number of stl vertices
+        int                 &,                                                // (input/output) number of stl facets
+        dvecarr3E           &,                                                // (input/output) vertex coordinate list
+        dvecarr3E           &,                                                // (input/output) unit normal to each triangle
         ivector2D           &,                                                // (input/output) triangle-vertex connectivity
         T2              & ...                                                 // (input/optional) other stl solids
     );
@@ -159,12 +180,32 @@ class STL_obj {
         T2              & ...                                                 // (input/optional) other stl solids
     );
     template <typename ... T2>
+    void save(                                                                // Export stl solid to stl file
+        string               ,                                                // (input) solid name
+        int                 &,                                                // (input/output) number of stl vertices
+        int                 &,                                                // (input/output) number of stl facets
+        dvecarr3E           &,                                                // (input) vertex coordinate list
+        dvecarr3E           &,                                                // (input) unit normal to each triangle
+        ivector2D           &,                                                // (input) triangle-vertex connectivity
+        T2              & ...                                                 // (input/optional) other stl solids
+    );
+    template <typename ... T2>
     void append(                                                              // Append stl solid to stl file
         string               ,                                                // (input) solid name
         int                 &,                                                // (input/output) number of stl vertices
         int                 &,                                                // (input/output) number of stl facets
         dvector2D           &,                                                // (input) vertex coordinate list
         dvector2D           &,                                                // (input) unit normal to each triangle
+        ivector2D           &,                                                // (input) triangle-vertex connectivity
+        T2              & ...                                                 // (input/optional) other stl solids
+    );
+    template <typename ... T2>
+    void append(                                                              // Append stl solid to stl file
+        string               ,                                                // (input) solid name
+        int                 &,                                                // (input/output) number of stl vertices
+        int                 &,                                                // (input/output) number of stl facets
+        dvecarr3E           &,                                                // (input) vertex coordinate list
+        dvecarr3E           &,                                                // (input) unit normal to each triangle
         ivector2D           &,                                                // (input) triangle-vertex connectivity
         T2              & ...                                                 // (input/optional) other stl solids
     );
@@ -227,6 +268,15 @@ unsigned int Read_STLsolid_ASCII(                                             //
     ivector2D               &,                                                // (input/output) triangle-vertex connectivity
     string                   a = ""                                           // (input/optional) stl solid name
 );
+unsigned int Read_STLsolid_ASCII(                                             // Read stl solid from ASCII stl file
+    ifstream                &,                                                // (input/output) input stream to stl file
+    int                     &,                                                // (input/output) number of vertices
+    int                     &,                                                // (input/output) number of triangles
+    dvecarr3E               &,                                                // (input/output) vertex coordinate list
+    dvecarr3E               &,                                                // (input/output) triangles unit normal
+    ivector2D               &,                                                // (input/output) triangle-vertex connectivity
+    string                   a = ""                                           // (input/optional) stl solid name
+);
 unsigned int Read_STLfacet_ASCII(                                             // Read stl facet from ASCII stl file
     ifstream                &,                                                // (input/output) input stream to stl file
     int                     &,                                                // (input/output) number of vertices
@@ -235,7 +285,31 @@ unsigned int Read_STLfacet_ASCII(                                             //
     dvector2D               &,                                                // (input/output) triangles unit normal
     ivector2D               &                                                 // (input/output) triangle-vertex connectivity
 );
+unsigned int Read_STLfacet_ASCII(                                             // Read stl facet from ASCII stl file
+    ifstream                &,                                                // (input/output) input stream to stl file
+    int                     &,                                                // (input/output) number of vertices
+    int                     &,                                                // (input/output) number of triangles
+    dvecarr3E               &,                                                // (input/output) vertex coordinate list
+    dvecarr3E               &,                                                // (input/output) triangles unit normal
+    ivector2D               &                                                 // (input/output) triangle-vertex connectivity
+);
 unsigned int Read_STL_ASCII(                                                  // Load stl trianuglation data from ASCII stl file
+    ifstream                &,                                                // (input) input stream to stl file
+    int                     &,                                                // (input/output) number of stl veritces
+    int                     &,                                                // (input/output) number of stl facets
+    dvector2D               &,                                                // (input/output) vertex coordinate list
+    dvector2D               &,                                                // (input/output) triangles unit normals
+    ivector2D               &                                                 // (input/output) triangle-vertex connectivity
+);
+unsigned int Read_STL_ASCII(                                                  // Load stl trianuglation data from ASCII stl file
+    ifstream                &,                                                // (input) input stream to stl file
+    int                     &,                                                // (input/output) number of stl veritces
+    int                     &,                                                // (input/output) number of stl facets
+    dvecarr3E               &,                                                // (input/output) vertex coordinate list
+    dvecarr3E               &,                                                // (input/output) triangles unit normals
+    ivector2D               &                                                 // (input/output) triangle-vertex connectivity
+);
+unsigned int Read_STL_bin(                                                    // Read stl triangulation data from binary stl file
     ifstream                &,                                                // (input) input stream to stl file
     int                     &,                                                // (input/output) number of stl veritces
     int                     &,                                                // (input/output) number of stl facets
@@ -247,8 +321,8 @@ unsigned int Read_STL_bin(                                                    //
     ifstream                &,                                                // (input) input stream to stl file
     int                     &,                                                // (input/output) number of stl veritces
     int                     &,                                                // (input/output) number of stl facets
-    dvector2D               &,                                                // (input/output) vertex coordinate list
-    dvector2D               &,                                                // (input/output) triangles unit normals
+    dvecarr3E               &,                                                // (input/output) vertex coordinate list
+    dvecarr3E               &,                                                // (input/output) triangles unit normals
     ivector2D               &                                                 // (input/output) triangle-vertex connectivity
 );
 
@@ -262,6 +336,15 @@ unsigned int Write_STLsolid_ASCII(                                            //
     ivector2D               &,                                                // (input) triangle-vertex connectivity
     string                   a = ""                                           // (input/optional) stl solid name
 );
+unsigned int Write_STLsolid_ASCII(                                            // Write stl triangulation in a ASCII stl file
+    ofstream                &,                                                // (input) output stream
+    int                     &,                                                // (input) number of triangulation vertices
+    int                     &,                                                // (input) number of triangles
+    dvecarr3E               &,                                                // (input) vertex coordinate list
+    dvecarr3E               &,                                                // (input) triangles' unit normals
+    ivector2D               &,                                                // (input) triangle-vertex connectivity
+    string                   a = ""                                           // (input/optional) stl solid name
+);
 unsigned int Write_STLsolid_bin(                                              // Write stl triangulation in a binary stl file
     ofstream                &,                                                // (input) output stream
     int                     &,                                                // (input) number of triangulation vertices
@@ -271,6 +354,16 @@ unsigned int Write_STLsolid_bin(                                              //
     ivector2D               &,                                                // (input) triangle-vertex connectivity
     string                   a = ""                                           // (input/optional) stl solid name
 );
+unsigned int Write_STLsolid_bin(                                              // Write stl triangulation in a binary stl file
+    ofstream                &,                                                // (input) output stream
+    int                     &,                                                // (input) number of triangulation vertices
+    int                     &,                                                // (input) number of triangles
+    dvecarr3E               &,                                                // (input) vertex coordinate list
+    dvecarr3E               &,                                                // (input) triangles' unit normals
+    ivector2D               &,                                                // (input) triangle-vertex connectivity
+    string                   a = ""                                           // (input/optional) stl solid name
+);
+
 
 // =================================================================================== //
 // TEMPLATES                                                                           //

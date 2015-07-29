@@ -584,6 +584,74 @@ close("in");
 
 return; };
 
+// -------------------------------------------------------------------------- //
+void STL_obj::load(
+    int                       &nV,
+    int                       &nT,
+    dvecarr3E                 &V,
+    dvecarr3E                 &N,
+    ivector2D                 &T
+) {
+
+// ========================================================================== //
+// void STL_obj::load(                                                        //
+//     int                       &nV,                                         //
+//     int                       &nT,                                         //
+//     dvector2D                 &V,                                          //
+//     dvector2D                 &N,                                          //
+//     ivector2D                 &T)                                          //
+//                                                                            //
+// Load stl triangulation from stl file.                                      //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - nV                : int, number of stl vertices                          //
+// - nT                : int, number of stl facets                            //
+// - V                 : dvector2D, vertex coordinate list. V[i][0], V[i][1], //
+//                       and V[i][2] are the x, y, z coordinates of the i-th  //
+//                       vertex in the stl triangulation                      //
+// - N                 : dvector2D, triangles normal. N[i][1], N[i][1],       //
+//                       and N[i][2] are the x, y, z components of the normal //
+//                       unit vector to the i-th triangle                     //
+// - T                 : ivector2D, triangle-vertex connectivity. T[i][0],    //
+//                       T[i][1], and T[i][2] are the global indices of       //
+//                       vertices of the i-th triangle                        //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+// none
+
+// Counters
+// none
+
+// ========================================================================== //
+// OPEN INPUT STREAM                                                          //
+// ========================================================================== //
+open("in");
+if (err == 1) { return; }
+
+// ========================================================================== //
+// READ STL DATA                                                              //
+// ========================================================================== //
+if (stl_type)   { Read_STL_bin(ifile_handle, nV, nT, V, N, T); }
+else            { Read_STL_ASCII(ifile_handle, nV, nT, V, N, T); }
+
+// ========================================================================== //
+// CLOSE INPUT STREAM                                                         //
+// ========================================================================== //
+close("in");
+
+return; };
+
+
 // Private methods ---------------------------------------------------------- //
 
 // -------------------------------------------------------------------------- //
@@ -1474,6 +1542,121 @@ nT++;
 return(0); }
 
 // -------------------------------------------------------------------------- //
+unsigned int Read_STLfacet_ASCII(
+    ifstream                  &file_handle,
+    int                       &nV,
+    int                       &nT,
+    dvecarr3E                 &V,
+    dvecarr3E                 &N,
+    ivector2D                 &T
+) {
+
+// ========================================================================== //
+// unsigned int Read_STLfacet_ASCII(                                          //
+//     ifstream                  &file_handle,                                //
+//     int                       &nV,                                         //
+//     int                       &nT,                                         //
+//     dvector2D                 &V,                                          //
+//     dvector2D                 &N,                                          //
+//     ivector2D                 &T)                                          //
+//                                                                            //
+// Read stl facet data from ASCII stl file.                                   //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - file_handle       : ifstream, handle to stl file                         //
+// - nV                : int, number of stl vertices                          //
+// - nT                : int, number of stl facets                            //
+// - V                 : dvector2D, vertex coordinate list. V[i][0], V[i][1], //
+//                       and V[i][2] are the x, y, z coordinates of the i-th  //
+//                       vertex in the stl triangulation                      //
+// - N                 : dvector2D, triangles normal. N[i][1], N[i][1],       //
+//                       and N[i][2] are the x, y, z components of the normal //
+//                       unit vector to the i-th triangle                     //
+// - T                 : ivector2D, triangle-vertex connectivity. T[i][0],    //
+//                       T[i][1], and T[i][2] are the global indices of       //
+//                       vertices of the i-th triangle                        //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - err               : unsigned int, error flag                             //
+//                       err = 0    --> no errors encountered                 //
+//                       err = 1    --> file is missing or cannot be open     //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+long int            cursor_pos;
+string              line, word;
+stringstream        sline;
+
+// Counters
+int                 nv = 0;
+
+// ========================================================================== //
+// READ FACET DATA                                                            //
+// ========================================================================== //
+
+// Read facet data ---------------------------------------------------------- //
+
+// Get current line
+cursor_pos = file_handle.tellg();
+getline(file_handle, line);
+line = trim(line);
+sline.clear();
+sline.str(line);
+if ((!(sline >> word)) || (word.compare("facet") == 0)) { word = "begin"; }
+
+// Loop until end of facet is found
+while ((!file_handle.eof())
+    && ((word.compare("endfacet")   != 0)
+    &&  (word.compare("facet")      != 0)
+    &&  (word.compare("solid")      != 0)
+    &&  (word.compare("endsolid")   != 0))) {
+
+    // Look for keywords
+    if (word.compare("begin") == 0) {
+        if ((sline >> word) && (word.compare("normal") == 0)) {
+            sline >> N[nT];
+        }
+    }
+    else if (word.compare("vertex") == 0) {
+        sline >> V[nV+nv];
+        nv++;
+    }
+
+    // Get next line
+    cursor_pos = file_handle.tellg();
+    getline(file_handle, line);
+    line = trim(line);
+    sline.clear();
+    sline.str(line);
+    if (!(sline >> word)) { word = ""; }
+
+} //next line
+
+// Restor cursor position --------------------------------------------------- //
+if (word.compare("endfacet") != 0) {
+    file_handle.clear();
+    file_handle.seekg(cursor_pos);
+}
+
+// Update triangle-vertex connectivity -------------------------------------- //
+for (int i = 0; i < nv; i++) {
+    T[nT][i] = nV + i;
+} //next i
+
+// Update facet/vertex counters --------------------------------------------- //
+nV += 3;
+nT++;
+
+return(0); }
+
+
+// -------------------------------------------------------------------------- //
 unsigned int Read_STLsolid_ASCII(
     ifstream                  &file_handle,
     int                       &nV,
@@ -1628,12 +1811,265 @@ if (word.compare("endsolid") != 0) {
 return(0); }
 
 // -------------------------------------------------------------------------- //
+unsigned int Read_STLsolid_ASCII(
+    ifstream                  &file_handle,
+    int                       &nV,
+    int                       &nT,
+    dvecarr3E                 &V,
+    dvecarr3E                 &N,
+    ivector2D                 &T,
+    string                     solid_name
+) {
+
+// ========================================================================== //
+// unsigned int Read_STLsolid_ASCII(                                          //
+//     ifstream                  &file_handle,                                //
+//     int                       &nV,                                         //
+//     int                       &nT,                                         //
+//     dvector2D                 &V,                                          //
+//     dvector2D                 &N,                                          //
+//     ivector2D                 &T,                                          //
+//     string                     solid_name)                                 //
+//                                                                            //
+// Load stl triangulation for stl solid whose name is specified in            //
+// "solid_name". Vertex ccordinate list, triangles normals and connectivity   //
+// are stored in V, N and T respectively. If no solid is found input data     //
+// structure is unchanged.                                                    //
+// If solid_name is not specified, load the first stl solid found by circular //
+// scanning the file until the current cursor position is reached again.      //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - file_handle       : ifstream, handle to stl file                         //
+// - nV                : int, number of stl vertices                          //
+// - nT                : int, number of stl facets                            //
+// - V                 : dvector2D, vertex coordinate list. V[i][0], V[i][1], //
+//                       and V[i][2] are the x, y, z coordinates of the i-th  //
+//                       vertex in the stl triangulation                      //
+// - N                 : dvector2D, triangles normal. N[i][1], N[i][1],       //
+//                       and N[i][2] are the x, y, z components of the normal //
+//                       unit vector to the i-th triangle                     //
+// - T                 : ivector2D, triangle-vertex connectivity. T[i][0],    //
+//                       T[i][1], and T[i][2] are the global indices of       //
+//                       vertices of the i-th triangle                        //
+// - solid_name        : string (optional), stl solid name                    //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - err               : unsigned int, error flag                             //
+//                       err = 0    --> no errors encountered                 //
+//                       err = 1    --> file is missing or cannot be open     //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+bool                check = false;
+long int            start_pos = file_handle.tellg(), current_pos, end_pos;
+string              line, word;
+stringstream        sline;
+
+// Counters
+int                 nv, nt;
+
+// ========================================================================== //
+// CHECK INPUT STREAM                                                         //
+// ========================================================================== //
+if (!file_handle.good()) { return(1); }
+
+// ========================================================================== //
+// SCAN STL FILE UNTIL A SOLID IS FOUND                                       //
+// ========================================================================== //
+
+// Parameters --------------------------------------------------------------- //
+sline << "solid " << solid_name;
+line = sline.str();
+solid_name = trim(line);
+
+// Scan file until stl solid is found --------------------------------------- //
+current_pos = start_pos+1;
+while (!check && (start_pos != current_pos)) {
+
+    // Get current line
+    getline(file_handle, line);
+    line = trim(line);
+    sline.clear();
+    sline.str(line);
+
+    // Check end of file
+    if (file_handle.eof()) {
+        file_handle.clear();
+        file_handle.seekg(0);
+    }
+    current_pos = file_handle.tellg();
+
+    // Look for keyword "solid"
+    if ((sline >> word) && (word.compare("solid") == 0)) {
+        if (solid_name.compare("solid") == 0) {
+            start_pos = current_pos;
+            check = true;
+        }
+        else {
+            if (line.compare(solid_name) == 0) {
+                start_pos = current_pos;
+                check = true;
+            }
+        }
+    }
+
+} //next line
+if (!check) { return(0); }
+
+// Scan stl solid ----------------------------------------------------------- //
+file_handle.clear();
+file_handle.seekg(start_pos);
+Scan_STLsolid_ASCII(file_handle, nt);
+
+// ========================================================================== //
+// READ SOLID DATA                                                            //
+// ========================================================================== //
+
+// Resize input variables --------------------------------------------------- //
+darray3E    temp;
+temp.fill(0.) ;
+
+V.resize(nV+3*nt, temp);
+N.resize(nT+nt, temp);
+T.resize(nT+nt, ivector1D(3, -1));
+
+// Read solid data ---------------------------------------------------------- //
+file_handle.clear();
+file_handle.seekg(start_pos);
+word = "begin";
+while ((!file_handle.eof())
+    && (word.compare("endsolid") != 0)
+    && (word.compare("solid") != 0)) {
+
+    // Get current line
+    current_pos = file_handle.tellg();
+    getline(file_handle, line);
+    line = trim(line);
+    sline.clear();
+    sline.str(line);
+
+    // Look for keyword "facet"
+    if ((sline >> word) && (word.compare("facet") == 0)) {
+        file_handle.seekg(current_pos);
+        Read_STLfacet_ASCII(file_handle, nV, nT, V, N, T);
+    }
+} //next line
+if (word.compare("endsolid") != 0) {
+    file_handle.clear();
+    file_handle.seekg(current_pos);
+}
+
+return(0); }
+
+
+// -------------------------------------------------------------------------- //
 unsigned int Read_STL_ASCII(
     ifstream                  &file_handle,
     int                       &nV,
     int                       &nT,
     dvector2D                 &V,
     dvector2D                 &N,
+    ivector2D                 &T
+) {
+
+// ========================================================================== //
+// unsigned int Read_STL_ASCII(                                               //
+//     ifstream                  &file_handle,                                //
+//     int                       &nV,                                         //
+//     int                       &nT,                                         //
+//     dvector2D                 &V,                                          //
+//     dvector2D                 &N,                                          //
+//     ivector2D                 &T)                                          //
+//                                                                            //
+// Read stl solid data from binary stl file.                                  //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - file_handle       : ifstream, handle to stl file                         //
+// - nV                : int, number of stl vertices                          //
+// - nT                : int, number of stl facets                            //
+// - V                 : dvector2D, vertex coordinate list. V[i][0], V[i][1], //
+//                       and V[i][2] are the x, y, z coordinates of the i-th  //
+//                       vertex in the stl triangulation                      //
+// - N                 : dvector2D, triangles normal. N[i][1], N[i][1],       //
+//                       and N[i][2] are the x, y, z components of the normal //
+//                       unit vector to the i-th triangle                     //
+// - T                 : ivector2D, triangle-vertex connectivity. T[i][0],    //
+//                       T[i][1], and T[i][2] are the global indices of       //
+//                       vertices of the i-th triangle                        //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - err               : unsigned int, error flag                             //
+//                       err = 0    --> no errors encountered                 //
+//                       err = 1    --> file is missing or cannot be open     //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+long int        start_pos, current_pos;
+stringstream    sline;
+string          line, word;
+
+// Counters
+// none
+
+// ========================================================================== //
+// CHECK STREAM STATUS                                                        //
+// ========================================================================== //
+if (!file_handle.good()) { return(0); }
+
+// ========================================================================== //
+// SET CURSOR POSITION AT FILE BEGIN                                          //
+// ========================================================================== //
+file_handle.clear();
+start_pos = file_handle.tellg();
+file_handle.seekg(0);
+
+// ========================================================================== //
+// LOAD STL SOLIDS                                                            //
+// ========================================================================== //
+//while (!file_handle.eof()) {
+current_pos = 0;
+while (getline(file_handle, line)) {
+
+    // Get current line
+    sline.clear();
+    sline.str(line);
+    if ((sline >> word) && (word.compare("solid") == 0)) {
+        file_handle.clear();
+        file_handle.seekg(current_pos);
+        Read_STLsolid_ASCII(file_handle, nV, nT, V, N, T, "");
+    }
+    current_pos = file_handle.tellg();
+}
+//} //next solid
+
+// ========================================================================== //
+// RESET CURSOR POSITION AT FILE BEGIN                                        //
+// ========================================================================== //
+file_handle.clear();
+file_handle.seekg(start_pos);
+
+return(0); }
+
+
+// -------------------------------------------------------------------------- //
+unsigned int Read_STL_ASCII(
+    ifstream                  &file_handle,
+    int                       &nV,
+    int                       &nT,
+    dvecarr3E                 &V,
+    dvecarr3E                 &N,
     ivector2D                 &T
 ) {
 
@@ -1861,6 +2297,150 @@ file_handle.seekg(start_pos);
 
 return(0); }
 
+// -------------------------------------------------------------------------- //
+unsigned int Read_STL_bin(
+    ifstream                  &file_handle,
+    int                       &nV,
+    int                       &nT,
+    dvecarr3E                 &V,
+    dvecarr3E                 &N,
+    ivector2D                 &T
+) {
+
+// ========================================================================== //
+// unsigned int Read_STL_bin(                                                 //
+//     ifstream                  &file_handle,                                //
+//     int                       &nV,                                         //
+//     int                       &nT,                                         //
+//     dvector2D                 &V,                                          //
+//     dvector2D                 &N,                                          //
+//     ivector2D                 &T)                                          //
+//                                                                            //
+// Read stl solid data from binary stl file.                                  //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - file_handle       : ifstream, handle to stl file                         //
+// - nV                : int, number of stl vertices                          //
+// - nT                : int, number of stl facets                            //
+// - V                 : dvector2D, vertex coordinate list. V[i][0], V[i][1], //
+//                       and V[i][2] are the x, y, z coordinates of the i-th  //
+//                       vertex in the stl triangulation                      //
+// - N                 : dvector2D, triangles normal. N[i][1], N[i][1],       //
+//                       and N[i][2] are the x, y, z components of the normal //
+//                       unit vector to the i-th triangle                     //
+// - T                 : ivector2D, triangle-vertex connectivity. T[i][0],    //
+//                       T[i][1], and T[i][2] are the global indices of       //
+//                       vertices of the i-th triangle                        //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - err               : unsigned int, error flag                             //
+//                       err = 0    --> no errors encountered                 //
+//                       err = 1    --> file is missing or cannot be open     //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+long int           start_pos;
+unsigned long int  longint4byte;
+unsigned int       int2byte;
+float              float4byte;
+unsigned int      *int2byte_pointer     = &int2byte;
+unsigned long int *longint4byte_pointer = &longint4byte;
+float             *float4byte_pointer   = &float4byte;
+
+// Counters
+int                i, j, k;
+
+// ========================================================================== //
+// CHECK STREAM STATUS                                                        //
+// ========================================================================== //
+if (!file_handle.good()) {
+    file_handle.close();
+    return(1);
+}
+
+// ========================================================================== //
+// SET CURSOR POSITION AT FILE BEGIN                                          //
+// ========================================================================== //
+file_handle.clear();
+start_pos = file_handle.tellg();
+file_handle.seekg(0);
+
+// ========================================================================== //
+// SCAN BINARY STL                                                            //
+// ========================================================================== //
+
+// Title
+for (i = 0; i < 20; i++) {
+    file_handle.read(reinterpret_cast<char*>(float4byte_pointer), 4);
+} //next i
+
+// Read number of elements
+file_handle.read(reinterpret_cast<char*>(longint4byte_pointer), 4);
+nT = (int)*longint4byte_pointer;
+nV = 3*nT;
+
+// ========================================================================== //
+// RESIZE INPUT VARIABLES                                                     //
+// ========================================================================== //
+
+darray3E     temp;
+temp.fill(0.) ;
+
+// Vertex list
+V.resize(nV, temp);
+
+// Normals
+N.resize(nT, temp);
+
+// Triangle-vector connectivity
+T.resize(nT, ivector1D(3, -1));
+
+// ========================================================================== //
+// READ DATA                                                                  //
+// ========================================================================== //
+nV = 0;
+for (i = 0; i < nT; i++) {
+
+    // Read normal
+    for (j = 0; j < 3; j++) {
+        file_handle.read(reinterpret_cast<char*>(float4byte_pointer), 4);
+        N[i][j] = (double)*float4byte_pointer;
+    } //next j
+
+    // Read vertex coordinates
+    for (j = 0; j < 3; j++) {
+        for (k = 0; k < 3; k++) {
+            file_handle.read(reinterpret_cast<char*>(float4byte_pointer), 4);
+            V[nV][k] = (double)*float4byte_pointer;
+        } //next k
+        nV++;
+    } //next j
+
+    // Triangle-vertex connectivity
+    T[i][0] = nV - 3;
+    T[i][1] = nV - 2;
+    T[i][2] = nV - 1;
+
+    // Facet closing header
+    file_handle.read(reinterpret_cast<char*>(int2byte_pointer), 2);
+
+} //next i
+
+// ========================================================================== //
+// RESET CURSOR POSITION                                                      //
+// ========================================================================== //
+file_handle.clear();
+file_handle.seekg(start_pos);
+
+return(0); }
+
+
 // Output routines ========================================================== //
 
 // -------------------------------------------------------------------------- //
@@ -1989,6 +2569,133 @@ sheader.str("");
 
 return(0); };
 
+
+// -------------------------------------------------------------------------- //
+unsigned int Write_STLsolid_ASCII(
+    ofstream                  &file_handle,
+    int                       &nV,
+    int                       &nT,
+    dvecarr3E                 &V,
+    dvecarr3E                 &N,
+    ivector2D                 &T,
+    string                     solid_name
+) {
+
+// ========================================================================== //
+// unsigned int Write_STLsolid_ASCII(                                         //
+//     ofstream                  &file_handle,                                //
+//     int                       &nV,                                         //
+//     int                       &nT,                                         //
+//     dvector2D                 &V,                                          //
+//     dvector2D                 &N,                                          //
+//     ivector2D                 &T,                                          //
+//     string                     solid_name)                                 //
+//                                                                            //
+// Write a stl solid in a ASCII .stl file.                                    //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - file_handle : ofstream, output stream                                    //
+// - nV          : int, number of triangulation vertices                      //
+// - nT          : int, number of triangles in the stl triangulation          //
+// - V           : dvector2D, vertex coordinate list. V[i][0], V[i][1] and    //
+//                 V[i][2] are the x, y, z coordinates of the i-th vertex     //
+// - N           : dvector2D, triangles unit normals. N[i][0], N[i][1], and   //
+//                 N[i][2] are the x, y, z components of the normal unit      //
+//                 vector to the i-th triangle of the stl triangulation.      //
+// - T           : ivector2D, triangle-vertex connectivity. T[i][0], T[i][1]  //
+//                 and T[i][2] are the global indices of vertices of the i-th //
+//                 triangle in the stl triangulation                          //
+// - solid_name  : string (optional) stl solid name                           //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - err         : int, output flag:                                          //
+//                 err = 0      --> no errors encountered                     //
+//                 err = 1      --> file is missing or cannot be accessed     //
+//                 err = 2      --> input data are badly formatted            //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+stringstream     sheader;
+string           header;
+unsigned int     err = 0;
+
+// Counters
+int              n, m, i, j, k;
+
+// =========================================================================== //
+// CHECK INPUT COHERENCY                                                       //
+// =========================================================================== //
+if (V.size() < nV)  { return(2); };
+if (T.size() < nT)  { return(2); };
+if (N.size() < nT)  { return(2); };
+
+// =========================================================================== //
+// CHECK STREAM STATUS                                                         //
+// =========================================================================== //
+if (!file_handle.good()) { return(1); };
+
+// ============================================================================ //
+// WRITE STL SOLID                                                              //
+// ============================================================================ //
+
+// Solid header --------------------------------------------------------------- //
+sheader << "solid " << solid_name;
+header = sheader.str();
+header = trim(header);
+file_handle << header << endl;
+sheader.str("");
+
+// Loop over triangulation facet ---------------------------------------------- //
+for (i = 0; i < nT; i++) {
+
+    // facet normal
+    file_handle << "  facet";
+    n = N[i].size();
+    if (n > 0) {
+        file_handle << " normal ";
+        for (j = 0; j < n-1; j++) {
+            file_handle << scientific << N[i][j] << " ";
+        } //next j
+        file_handle << scientific << N[i][n-1];;
+    }
+    file_handle << endl;
+
+    // facet vertices
+    file_handle << "    outer loop" << endl;
+    n = T[i].size();
+    for (j = 0; j < n; j++) {
+        m = V[T[i][j]].size();
+        file_handle << "      vertex ";
+        if (m > 0) {
+            for (k = 0; k < m-1; k++) {
+                file_handle << scientific << V[T[i][j]][k] << " ";
+            } //next k
+            file_handle << scientific << V[T[i][j]][m-1];
+        }
+        file_handle << endl;
+    } //next j
+    file_handle << "    endloop"    << endl;
+
+    // facet - closing header
+    file_handle << "  endfacet" << endl;
+
+} //next i
+
+// Closing header ------------------------------------------------------------- //
+sheader << "endsolid " << solid_name;
+header = sheader.str();
+header = trim(header);
+file_handle << header << endl;
+sheader.str("");
+
+return(0); };
+
 // -------------------------------------------------------------------------- //
 unsigned int Write_STLsolid_bin(
     ofstream                  &file_handle,
@@ -1996,6 +2703,121 @@ unsigned int Write_STLsolid_bin(
     int                       &nT,
     dvector2D                 &V,
     dvector2D                 &N,
+    ivector2D                 &T,
+    string                     solid_name
+) {
+
+// ========================================================================== //
+// unsigned int Write_STLsolid_bin(                                           //
+//     ofstream                  &file_handle,                                //
+//     int                       &nV,                                         //
+//     int                       &nT,                                         //
+//     dvector2D                 &V,                                          //
+//     dvector2D                 &N,                                          //
+//     ivector2D                 &T,                                          //
+//     string                     solid_name)                                 //
+//                                                                            //
+// Export triangulation in a binary .stl file.                                //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - file_handle : ofstream, output stream to binary stl file                 //
+// - nV          : int, number of vertices in the stl triangulation           //
+// - nT          : int, number of triangles in the stl triangulation          //
+// - V           : dvector2D, vertex coordinate list. V[i][0], V[i][1], and   //
+//                 V[i][2] are the x, y, z coordinates of the i-th vertex     //
+// - N           : dvector2D, triangle unit normal. N[i][0], N[i][1], and     //
+//                 N[i][2] are the x, y, z components of the unit normal to   //
+//                 the i-th triangle in the stl triangulation                 //
+// - T           : ivector2D, triangle-vertex connectivity. T[i][0], T[i][1], //
+//                 and T[i][2] are the global indices of vertices of the i-th //
+//                 triangle in the stl triangulation                          //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - err         : int, output flag:                                          //
+//                 err = 0      --> no errors encountered                     //
+//                 err = 1      --> file is missing or cannot be accessed     //
+//                 err = 2      --> stl solid is badly defined                //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+unsigned int       int2byte;
+unsigned long int  longint4byte;
+float              float4byte;
+unsigned int      *int2byte_pointer = &int2byte;
+unsigned long int *longint4byte_pointer = &longint4byte;
+float             *float4byte_pointer = &float4byte;
+
+// Counters
+int                n, m, i, j, k;
+
+// ============================================================================ //
+// CHECK SOLID DEFINITION                                                       //
+// ============================================================================ //
+if (V.size() < nV)  { return(2); }
+if (N.size() < nT)  { return(2); }
+if (T.size() < nT)  { return(2); }
+
+// ============================================================================ //
+// CHECK STREAM STATUS                                                          //
+// ============================================================================ //
+if (!file_handle.good()) { return(1); }
+
+// ============================================================================ //
+// EXPORT DATA                                                                  //
+// ============================================================================ //
+
+// File header ---------------------------------------------------------------- //
+
+// title
+float4byte = (float)0.0;
+for (i = 0; i < 20; i++) {
+    file_handle.write(reinterpret_cast<char*>(float4byte_pointer), 4);
+} //next i
+
+// number of elements
+longint4byte = (unsigned long int) nT;
+file_handle.write(reinterpret_cast<char*>(longint4byte_pointer), 4);
+
+// Loop over triangles -------------------------------------------------------- //
+for (i = 0; i < nT; i++) {
+
+    // Normals
+    n = N[i].size();
+    for (j = 0; j < n; j++) {
+        float4byte = (float) N[i][j];
+        file_handle.write(reinterpret_cast<char*>(float4byte_pointer), 4);
+    } //next j
+
+    // Vertex
+    n = T[i].size();
+    for (j = 0; j < n; j++) {
+        m = V[T[i][j]].size();
+        for (k = 0; k < m; k++) {
+            float4byte = (float) V[T[i][j]][k];
+            file_handle.write(reinterpret_cast<char*>(float4byte_pointer), 4);
+        } //next k
+    } //next j
+
+    // Block closing header
+    int2byte = 0;
+    file_handle.write(reinterpret_cast<char*>(int2byte_pointer), 2);
+} //next i
+
+return(0); };
+
+// -------------------------------------------------------------------------- //
+unsigned int Write_STLsolid_bin(
+    ofstream                  &file_handle,
+    int                       &nV,
+    int                       &nT,
+    dvecarr3E                 &V,
+    dvecarr3E                 &N,
     ivector2D                 &T,
     string                     solid_name
 ) {
