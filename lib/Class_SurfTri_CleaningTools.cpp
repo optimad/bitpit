@@ -50,10 +50,10 @@ void Class_SurfTri::BinSortV(
 // ========================================================================== //
 
 // Local variables
-int           dim = Vertex[0].size();
-dvector1D     dx(dim, 0.0);
-ivector1D     ix(dim, -1);
-dvector2D     xlim(dim, dvector1D(2, 0.0));
+//ht int           dim = Vertex[0].size();
+dvector1D     dx(3, 0.0);
+ivector1D     ix(3, -1);
+dvector2D     xlim(3, dvector1D(2, 0.0));
 
 // Counters
 int           i, j, k, I_, m;
@@ -68,7 +68,7 @@ index.resize(nVertex);
 // ========================================================================== //
 
 // Mesh limits
-for (j = 0; j < dim; j++) {
+for (j = 0; j < 3; j++) {
     xlim[j][0] = Vertex[0][j];
     xlim[j][1] = Vertex[0][j];
     for (i = 0; i < nVertex; i++) {
@@ -82,7 +82,7 @@ for (j = 0; j < dim; j++) {
 } //next j
 
 // Mesh spacing
-for (j = 0; j < dim; j++) {
+for (j = 0; j < 3; j++) {
     dx[j] = (xlim[j][1] - xlim[j][0])/((double) n);
 } //next j
 
@@ -91,43 +91,55 @@ for (j = 0; j < dim; j++) {
 // ========================================================================== //
 
 // Loop over vertexes
-if (dim == 2) {
-    for (i = 0; i < nSimplex; i++) {
-        m = Simplex[i].size();
-        for (j = 0; j < m; j++) {
-            for (k = 0; k < dim; k++) {
-                ix[k] = (int) floor((Vertex[Simplex[i][j]][k] - xlim[k][0])/dx[k]);
-            } //next k
-            I_ = n * ix[0] + ix[1];
-            index[Simplex[i][j]] = I_;
-        } //next j
-    } //next i
-}
-else if (dim == 3) {
-    for (i = 0; i < nSimplex; i++) {
-        m = Simplex[i].size();
-        for (j = 0; j < m; j++) {
-            for (k = 0; k < dim; k++) {
-                ix[k] = (int) floor((Vertex[Simplex[i][j]][k] - xlim[k][0])/dx[k]);
-            } //next k
-            I_ = n * n * ix[0] + n * ix[1] + ix[2];
-            index[Simplex[i][j]] = I_;
-        } //next j
-    } //next i
-}
+//ht if (dim == 2) {
+//ht     for (i = 0; i < nSimplex; i++) {
+//ht         m = Simplex[i].size();
+//ht         for (j = 0; j < m; j++) {
+//ht             for (k = 0; k < dim; k++) {
+//ht                 ix[k] = (int) floor((Vertex[Simplex[i][j]][k] - xlim[k][0])/dx[k]);
+//ht             } //next k
+//ht             I_ = n * ix[0] + ix[1];
+//ht             index[Simplex[i][j]] = I_;
+//ht         } //next j
+//ht     } //next i
+//ht }
+//ht else if (dim == 3) {
+//ht     for (i = 0; i < nSimplex; i++) {
+//ht         m = Simplex[i].size();
+//ht         for (j = 0; j < m; j++) {
+//ht             for (k = 0; k < dim; k++) {
+//ht                 ix[k] = (int) floor((Vertex[Simplex[i][j]][k] - xlim[k][0])/dx[k]);
+//ht             } //next k
+//ht             I_ = n * n * ix[0] + n * ix[1] + ix[2];
+//ht             index[Simplex[i][j]] = I_;
+//ht         } //next j
+//ht     } //next i
+//ht }
+
+for (i = 0; i < nSimplex; i++) {
+    m = Simplex[i].size();
+    for (j = 0; j < m; j++) {
+        for (k = 0; k < 3; k++) {
+            ix[k] = (int) floor((Vertex[Simplex[i][j]][k] - xlim[k][0])/dx[k]);
+        } //next k
+        I_ = n * n * ix[0] + n * ix[1] + ix[2];
+        index[Simplex[i][j]] = I_;
+    } //next j
+} //next i
+
 
 return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::BinSortV(
-    dvector2D   &X,
+    dvecarr3E   &X,
     ivector1D   &index,
     int          n
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::BinSortV(                                              //
-//     dvector2D   &X,                                                        //
+//     dvecarr3E   &X,                                                        //
 //     ivector1D   &index,                                                    //
 //     int          n)                                                        //
 //                                                                            //
@@ -135,7 +147,7 @@ void Class_SurfTri::BinSortV(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X       : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are   //
+// - X       : dvecarr3E, vertex coordinate list. X[i][0], X[i][1], ... are   //
 //             the x, y, ... coordinates of the i-th vertex.                  //
 // - index   : ivector2D, map vertex->bins                                    //
 // - n       : int (optional), number of bins used for sorting.               //
@@ -151,10 +163,10 @@ void Class_SurfTri::BinSortV(
 
 // Local variables
 int           nV = X.size();
-int           dim = X[0].size();
-dvector1D     dx(dim, 0.0);
-ivector1D     ix(dim, -1);
-dvector2D     xlim(dim, dvector1D(2, 0.0));
+//ht int           dim = X[0].size();
+dvector1D     dx(3, 0.0);
+ivector1D     ix(3, -1);
+dvector2D     xlim(3, dvector1D(2, 0.0));
 
 // Counters
 int           i, j, k, I_, m;
@@ -169,7 +181,7 @@ index.resize(nV);
 // ========================================================================== //
 
 // Mesh limits
-for (j = 0; j < dim; j++) {
+for (j = 0; j < 3; j++) {
     xlim[j][0] = X[0][j];
     xlim[j][1] = X[0][j];
     for (i = 0; i < nV; i++) {
@@ -183,7 +195,7 @@ for (j = 0; j < dim; j++) {
 } //next j
 
 // Mesh spacing
-for (j = 0; j < dim; j++) {
+for (j = 0; j < 3; j++) {
     dx[j] = (xlim[j][1] - xlim[j][0])/((double) n);
 } //next j
 
@@ -192,30 +204,42 @@ for (j = 0; j < dim; j++) {
 // ========================================================================== //
 
 // Loop over vertexes
-if (dim == 2) {
-    for (i = 0; i < nSimplex; i++) {
-        m = Simplex[i].size();
-        for (j = 0; j < m; j++) {
-            for (k = 0; k < dim; k++) {
-                ix[k] = (int) floor((X[Simplex[i][j]][k] - xlim[k][0])/dx[k]);
-            } //next k
-            I_ = n * ix[0] + ix[1];
-            index[Simplex[i][j]] = I_;
-        } //next j
-    } //next i
-}
-else if (dim == 3) {
-    for (i = 0; i < nSimplex; i++) {
-        m = Simplex[i].size();
-        for (j = 0; j < m; j++) {
-            for (k = 0; k < dim; k++) {
-                ix[k] = (int) floor((X[Simplex[i][j]][k] - xlim[k][0])/dx[k]);
-            } //next k
-            I_ = n * n * ix[0] + n * ix[1] + ix[2];
-            index[Simplex[i][j]] = I_;
-        } //next j
-    } //next i
-}
+//ht if (dim == 2) {
+//ht     for (i = 0; i < nSimplex; i++) {
+//ht         m = Simplex[i].size();
+//ht         for (j = 0; j < m; j++) {
+//ht             for (k = 0; k < dim; k++) {
+//ht                 ix[k] = (int) floor((X[Simplex[i][j]][k] - xlim[k][0])/dx[k]);
+//ht             } //next k
+//ht             I_ = n * ix[0] + ix[1];
+//ht             index[Simplex[i][j]] = I_;
+//ht         } //next j
+//ht     } //next i
+//ht }
+//ht else if (dim == 3) {
+//ht     for (i = 0; i < nSimplex; i++) {
+//ht         m = Simplex[i].size();
+//ht         for (j = 0; j < m; j++) {
+//ht             for (k = 0; k < dim; k++) {
+//ht                 ix[k] = (int) floor((X[Simplex[i][j]][k] - xlim[k][0])/dx[k]);
+//ht             } //next k
+//ht             I_ = n * n * ix[0] + n * ix[1] + ix[2];
+//ht             index[Simplex[i][j]] = I_;
+//ht         } //next j
+//ht     } //next i
+//ht }
+
+for (i = 0; i < nSimplex; i++) {
+    m = Simplex[i].size();
+    for (j = 0; j < m; j++) {
+        for (k = 0; k < 3; k++) {
+            ix[k] = (int) floor((X[Simplex[i][j]][k] - xlim[k][0])/dx[k]);
+        } //next k
+        I_ = n * n * ix[0] + n * ix[1] + ix[2];
+        index[Simplex[i][j]] = I_;
+    } //next j
+} //next i
+
 
 return; };
 
@@ -274,19 +298,19 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::SetTolerance(
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::SetTolerance(                                          //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Set tolerance for distance check, (based on minimal edge length). Vertex   //
 // coordinate list is provided externally.                                    //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X   : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are the   //
+// - X   : dvecarr3E, vertex coordinate list. X[i][0], X[i][1], ... are the   //
 //         x, y, ... coordinates of the i-th vertex.                          //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -354,9 +378,9 @@ void Class_SurfTri::FixNodeNumb(
 
 // Local variables
 bool                flaga;
-int                 dim = Vertex[0].size();
+//ht int                 dim = Vertex[0].size();
 int                 idummy;
-dvector1D           x(dim,0), y(dim,0), z;
+darray3E            x, y, z;
 ivector1D           idummy1D;
 ivector2D           idummy2D;
 
@@ -418,12 +442,12 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::FixNodeNumb(
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::FixNodeNumb(                                           //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Change node numbering from clocwise <-> counter-clockwise direction on     //
 // each simplex to match normal direction (right-hand-rule). Vertex           //
@@ -431,7 +455,7 @@ void Class_SurfTri::FixNodeNumb(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X    : dvector2D, vertex coordinate list. X[i][0], X[i][1],  ... are the //
+// - X    : dvecarr3E, vertex coordinate list. X[i][0], X[i][1],  ... are the //
 //          x, y, ... coordinates of the i-th vertex.                         //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -445,9 +469,9 @@ void Class_SurfTri::FixNodeNumb(
 
 // Local variables
 bool                flaga;
-int                 dim = X[0].size();
+//ht int                 dim = X[0].size();
 int                 idummy;
-dvector1D           x(dim,0), y(dim,0), z;
+darray3E            x, y, z;
 ivector1D           idummy1D;
 ivector2D           idummy2D;
 
@@ -683,8 +707,7 @@ void Class_SurfTri::GenerateNormals(
 // ========================================================================== //
 
 // Local variables
-int              dim = Vertex[0].size();
-dvector1D        x(dim,0.0), y(dim,0.0), z(dim,0.0);
+darray3E         x, y, z;
 
 // Counter
 int              I_, m;
@@ -695,7 +718,7 @@ int              I_, m;
 
 // Reshape Normal list ------------------------------------------------------ //
 if ((Normal.size() == 0) || (Normal.size() < nSimplex)) {
-    ReshapeNormal(dim);
+    ReshapeNormal();
 }
 
 // Update normal for each simplex ------------------------------------------- //
@@ -733,12 +756,10 @@ for (I_ = 0; I_ < nSimplex; I_++) {
 
         // Scope variables
         int                 i, j, k;
-        dvector1D           t(dim, 0.0);
+        darray3E            t;
 
         // Reset normal
-        for (i = 0; i < dim; i++) {
-            z[i] = 0.0;
-        } //next i
+        z.fill(0.) ;
 
         // Compute average normal
         for (i = 0; i < m; i++) {
@@ -763,19 +784,19 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::GenerateNormals(
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::GenerateNormals(                                       //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Generate normals according to vertex local numeration. Vertex coordinate   //
 // list is provided by an external list.                                      //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X     : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are the //
+// - X     : dvecarr3E, vertex coordinate list. X[i][0], X[i][1], ... are the //
 //           x, y, ... coordinates of the i-th vertex                         //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -788,8 +809,7 @@ void Class_SurfTri::GenerateNormals(
 // ========================================================================== //
 
 // Local variables
-int              dim = X[0].size();
-dvector1D        x(dim,0.0), y(dim,0.0), z(dim,0.0);
+darray3E         x, y, z;
 
 // Counter
 int              I_, m;
@@ -800,7 +820,7 @@ int              I_, m;
 
 // Reshape normal list ------------------------------------------------------ //
 if ((Normal.size() == 0) || (Normal.size() < nSimplex)) {
-    ReshapeNormal(dim);
+    ReshapeNormal();
 }
 
 // Loop over simplicies ----------------------------------------------------- //
@@ -838,7 +858,7 @@ for (I_ = 0; I_ < nSimplex; I_++) {
 
         // Scope variables
         int                 i, j, k;
-        dvector1D           t(dim, 0.0);
+        darray3E            t;
 
         // Reset normal
         z = t;
@@ -868,14 +888,14 @@ return; };
 void Class_SurfTri::GenerateENormals(
     ivector2D   &Edges,
     ivector2D   &EdgeAdj,
-    dvector2D   &Enormals
+    dvecarr3E   &Enormals
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::GenerateENormals(
 //     ivector2D   &Edges,                                                    //
 //     ivector2D   &EdgeAdj,                                                  //
-//     dvector2D   &Enormals)                                                 //
+//     dvecarr3E   &Enormals)                                                 //
 //                                                                            //
 // Compute edge normals.                                                      //
 // ========================================================================== //
@@ -885,7 +905,7 @@ void Class_SurfTri::GenerateENormals(
 //              the global indices of the i-th tasselation edge.              //
 // - EdgeAdj  : ivector1D, simplex-edge connectivity. EdgeAdj[i][j] is the    //
 //              global indices of the j-th edge of the i-th simplex           //
-// - Enormals : dvector2D, edges normal unit vector. Enormals[i][0],          //
+// - Enormals : dvecarr3E, edges normal unit vector. Enormals[i][0],          //
 //              Enormals[i][1], ... are the x, y, ... components of the       //
 //              normal unit vector to the i-th edge                           //
 // ========================================================================== //
@@ -899,7 +919,8 @@ void Class_SurfTri::GenerateENormals(
 // ========================================================================== //
 
 // Local variables
-int         dim = Vertex[0].size();
+darray3E    temp;
+temp.fill(0.) ;
 
 // Counters
 int         T, i, j, m, nE;
@@ -922,7 +943,7 @@ if ((Normal.size() == 0) || (Normal.size() < nSimplex)) {
 // RESIZE INPUT VARIABLES                                                     //
 // ========================================================================== //
 nE = Edges.size();
-Enormals.resize(nE, dvector1D(dim, 0.0));
+Enormals.resize(nE, temp);
 
 // ========================================================================== //
 // GENERATE EDGE NORMALS                                                      //
@@ -932,9 +953,11 @@ Enormals.resize(nE, dvector1D(dim, 0.0));
 for (T = 0; T < nSimplex; T++) {
     m = Simplex[T].size();
     for (i = 0; i < m; i++) {
-        for (j = 0; j < dim; j++) {
-            Enormals[EdgeAdj[T][i]][j] += Normal[T][j];
-        } //next j
+//ht        for (j = 0; j < dim; j++) {
+//ht            Enormals[EdgeAdj[T][i]][j] += Normal[T][j];
+//ht        } //next j
+
+        Enormals[EdgeAdj[T][i]] = Enormals[EdgeAdj[T][i]] + Normal[T];
     } //next i
 } //next T
 
@@ -947,30 +970,30 @@ return; }
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::GenerateENormals(
-    dvector2D   &X,
+    dvecarr3E   &X,
     ivector2D   &Edges,
     ivector2D   &EdgeAdj,
-    dvector2D   &Enormals
+    dvecarr3E   &Enormals
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::GenerateENormals(
-//     dvector2D   &X,                                                        //
+//     dvecarr3E   &X,                                                        //
 //     ivector2D   &Edges,                                                    //
 //     ivector2D   &EdgeAdj,                                                  //
-//     dvector2D   &Enormals)                                                 //
+//     dvecarr3E   &Enormals)                                                 //
 //                                                                            //
 // Compute edge normals.                                                      //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X        : dvector2D, vertex coordinate list. X[i][0], X[i][1], ...      //
+// - X        : dvecarr3E, vertex coordinate list. X[i][0], X[i][1], ...      //
 //              the x, y, ... coordinates of the i-th vertex.                 //
 // - Edges    : ivector1D, edge-vertex connectivity. Edges[i] stores the      //
 //              the global indices of the i-th tasselation edge.              //
 // - EdgeAdj  : ivector1D, simplex-edge connectivity. EdgeAdj[i][j] is the    //
 //              global indices of the j-th edge of the i-th simplex           //
-// - Enormals : dvector2D, edges normal unit vector. Enormals[i][0],          //
+// - Enormals : dvecarr3E, edges normal unit vector. Enormals[i][0],          //
 //              Enormals[i][1], ... are the x, y, ... components of the       //
 //              normal unit vector to the i-th edge                           //
 // ========================================================================== //
@@ -984,7 +1007,8 @@ void Class_SurfTri::GenerateENormals(
 // ========================================================================== //
 
 // Local variables
-int         dim = X[0].size();
+darray3E    temp;
+temp.fill(0.) ;
 
 // Counters
 int         T, i, j, m, nE;
@@ -1007,7 +1031,7 @@ if ((Normal.size() == 0) || (Normal.size() < nSimplex)) {
 // RESIZE INPUT VARIABLES                                                     //
 // ========================================================================== //
 nE = Edges.size();
-Enormals.resize(nE, dvector1D(dim, 0.0));
+Enormals.resize(nE, temp);
 
 // ========================================================================== //
 // GENERATE EDGE NORMALS                                                      //
@@ -1017,9 +1041,11 @@ Enormals.resize(nE, dvector1D(dim, 0.0));
 for (T = 0; T < nSimplex; T++) {
     m = Simplex[T].size();
     for (i = 0; i < m; i++) {
-        for (j = 0; j < dim; j++) {
-            Enormals[EdgeAdj[T][i]][j] += Normal[T][j];
-        } //next j
+//ht        for (j = 0; j < dim; j++) {
+//ht            Enormals[EdgeAdj[T][i]][j] += Normal[T][j];
+//ht        } //next j
+
+            Enormals[EdgeAdj[T][i]] = Enormals[EdgeAdj[T][i]] + Normal[T] ;
     } //next i
 } //next T
 
@@ -1034,16 +1060,16 @@ return; }
 void Class_SurfTri::GenerateVNormals(
     ivector2D   &Edges,
     ivector2D   &EdgeAdj,
-    dvector2D   &Enormals,
-    dvector2D   &Vnormals
+    dvecarr3E   &Enormals,
+    dvecarr3E   &Vnormals
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::GenerateVNormals(                                      //
 //     ivector2D   &Edges,                                                    //
 //     ivector2D   &EdgeAdj,                                                  //
-//     dvector2D   &Enormals,                                                 //
-//     dvector2D   &Vnormals)                                                 //
+//     dvecarr3E   &Enormals,                                                 //
+//     dvecarr3E   &Vnormals)                                                 //
 //                                                                            //
 // Generate vertex normals from edge normals.                                 //
 // ========================================================================== //
@@ -1053,10 +1079,10 @@ void Class_SurfTri::GenerateVNormals(
 //              the global indices of the i-th tasselation edge.              //
 // - EdgeAdj  : ivector1D, simplex-edge connectivity. EdgeAdj[i][j] is the    //
 //              global indices of the j-th edge of the i-th simplex           //
-// - Enormals : dvector2D, edges normal unit vector. Enormals[i][0],          //
+// - Enormals : dvecarr3E, edges normal unit vector. Enormals[i][0],          //
 //              Enormals[i][1], ... are the x, y, ... components of the       //
 //              normal unit vector to the i-th edge                           //
-// - Vnormals : dvector2D, normal unit vector at vertices. Vnormals[i][0],    //
+// - Vnormals : dvecarr3E, normal unit vector at vertices. Vnormals[i][0],    //
 //              Vnormals[i][1], ... are the x, y, ... components of the       //
 //              normal unit vector to the i-th vertex of the surface          //
 //              tasselation.                                                  //
@@ -1071,7 +1097,9 @@ void Class_SurfTri::GenerateVNormals(
 // ========================================================================== //
 
 // Local variables
-int             nE, dim = Vertex[0].size();
+int             nE;
+darray3E        temp;
+temp.fill(0.) ;
 
 // Counters
 int             V, T, i, j, m;
@@ -1093,7 +1121,7 @@ if ((Enormals.size() == 0) || (Enormals.size() < Edges.size())) {
 // ========================================================================== //
 // RESIZE INPUT VARIABLES                                                     //
 // ========================================================================== //
-Vnormals.resize(nVertex, dvector1D(dim, 0.0));
+Vnormals.resize(nVertex, temp);
 
 // ========================================================================== //
 // COMPUTE VERTEX NORMALS                                                     //
@@ -1105,9 +1133,10 @@ for (T = 0; T < nE; T++) {
     m = Edges[T].size();
     for (i = 0; i < m; i++) {
         V = Edges[T][i];
-        for (j = 0; j < dim; j++) {
-            Vnormals[V][j] += Enormals[T][j];
-        } //next j
+//        for (j = 0; j < dim; j++) {
+//            Vnormals[V][j] += Enormals[T][j];
+//        } //next j
+        Vnormals[V] = Vnormals[V] + Enormals[T];
     } //next i
 } //next T
 
@@ -1120,35 +1149,35 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::GenerateVNormals(
-    dvector2D   &X,
+    dvecarr3E   &X,
     ivector2D   &Edges,
     ivector2D   &EdgeAdj,
-    dvector2D   &Enormals,
-    dvector2D   &Vnormals
+    dvecarr3E   &Enormals,
+    dvecarr3E   &Vnormals
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::GenerateVNormals(                                      //
-//     dvector2D   &X,                                                        //
+//     dvecarr3E   &X,                                                        //
 //     ivector2D   &Edges,                                                    //
 //     ivector2D   &EdgeAdj,                                                  //
-//     dvector2D   &Enormals,                                                 //
-//     dvector2D   &Vnormals)                                                 //
+//     dvecarr3E   &Enormals,                                                 //
+//     dvecarr3E   &Vnormals)                                                 //
 //                                                                            //
 // Generate vertex normals from edge normals.                                 //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X        : dvector2D, external vertex list. X[i][0], X[i][1], ... are    //
+// - X        : dvecarr3E, external vertex list. X[i][0], X[i][1], ... are    //
 //              x, y, ... coordinates of the i-th vertex.                     //
 // - Edges    : ivector1D, edge-vertex connectivity. Edges[i] stores the      //
 //              the global indices of the i-th tasselation edge.              //
 // - EdgeAdj  : ivector1D, simplex-edge connectivity. EdgeAdj[i][j] is the    //
 //              global indices of the j-th edge of the i-th simplex           //
-// - Enormals : dvector2D, edges normal unit vector. Enormals[i][0],          //
+// - Enormals : dvecarr3E, edges normal unit vector. Enormals[i][0],          //
 //              Enormals[i][1], ... are the x, y, ... components of the       //
 //              normal unit vector to the i-th edge                           //
-// - Vnormals : dvector2D, normal unit vector at vertices. Vnormals[i][0],    //
+// - Vnormals : dvecarr3E, normal unit vector at vertices. Vnormals[i][0],    //
 //              Vnormals[i][1], ... are the x, y, ... components of the       //
 //              normal unit vector to the i-th vertex of the surface          //
 //              tasselation.                                                  //
@@ -1163,7 +1192,9 @@ void Class_SurfTri::GenerateVNormals(
 // ========================================================================== //
 
 // Local variables
-int             nE, dim = X[0].size(), nV = X.size();
+int             nE, nV = X.size();
+darray3E        temp;
+temp.fill(0.) ;
 
 // Counters
 int             V, T, i, j, m;
@@ -1185,7 +1216,7 @@ if ((Enormals.size() == 0) || (Enormals.size() < Edges.size())) {
 // ========================================================================== //
 // RESIZE INPUT VARIABLES                                                     //
 // ========================================================================== //
-Vnormals.resize(nV, dvector1D(dim, 0.0));
+Vnormals.resize(nV, temp);
 
 // ========================================================================== //
 // COMPUTE VERTEX NORMALS                                                     //
@@ -1197,9 +1228,10 @@ for (T = 0; T < nE; T++) {
     m = Edges[T].size();
     for (i = 0; i < m; i++) {
         V = Edges[T][i];
-        for (j = 0; j < dim; j++) {
-            Vnormals[V][j] += Enormals[T][j];
-        } //next j
+//ht        for (j = 0; j < dim; j++) {
+//ht            Vnormals[V][j] += Enormals[T][j];
+//ht        } //next j
+        Vnormals[V] = Vnormals[V] + Enormals[T];
     } //next i
 } //next T
 
@@ -1332,18 +1364,18 @@ return; }
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::BuildAdjacency(
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::BuildAdjacency(                                        //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Build simplex-simplex adjacency. Vertex list is provided externally.       //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X      : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are    //
+// - X      : dvecarr3E, vertex coordinate list. X[i][0], X[i][1], ... are    //
 //            the x, y, ... coordinates of the i-th vertex.                   //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -1580,20 +1612,20 @@ return; }
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::UpdateAdjacency(
-    dvector2D   &X,
+    dvecarr3E   &X,
     ivector1D   &list
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::UpdateAdjacency(                                       //
-//     dvector2D   &X,                                                        //
+//     dvecarr3E   &X,                                                        //
 //     ivector1D   &list)                                                     //
 //                                                                            //
 // Update simplex-simplex adjacency. Vertex list is provided externally.      //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X         : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are //
+// - X         : dvecarr3E, vertex coordinate list. X[i][0], X[i][1], ... are //
 //               the x, y, ... coordinates of the i-th vertex.                //
 // - list      : ivector1D, list of simplicies to be updated                  //
 // ========================================================================== //
@@ -1873,12 +1905,12 @@ return (n); };
 
 // -------------------------------------------------------------------------- //
 int Class_SurfTri::CountIsolatedVertex(
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // int Class_SurfTri::CountIsolatedVertex(                                    //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Count isolated vertex in the tasselation. A node is isolated if and only   //
 // if there are no simplicies in the tassellation having a vertex in that     //
@@ -1886,7 +1918,7 @@ int Class_SurfTri::CountIsolatedVertex(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X    : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are the  //
+// - X    : dvecarr3E, vertex coordinate list. X[i][0], X[i][1], ... are the  //
 //          x, y, ... coordinates of the i-th node.                           //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -1955,19 +1987,19 @@ return(n); };
 
 // -------------------------------------------------------------------------- //
 int Class_SurfTri::CountFreeVertex(
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // int Class_SurfTri::CountFreeVertex(                                        //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Count free vertexes in the tasselation. A free vertex is a vertex          //
 // connected to a free edge. Vertex coordinate list is provided externally    //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X    : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are the  //
+// - X    : dvecarr3E, vertex coordinate list. X[i][0], X[i][1], ... are the  //
 //          x, y, ... coordinates of the i-th node.                           //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -2037,12 +2069,12 @@ return(n); };
 
 // -------------------------------------------------------------------------- //
 int Class_SurfTri::CountDoubleVertex(
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // int Class_SurfTri::CountDoubleVertex(                                      //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Count duplicated vertex in the tasselation. A vertex is duplicated if      //
 // there exists a simplex in the tasselation having a vertex with the same    //
@@ -2051,7 +2083,7 @@ int Class_SurfTri::CountDoubleVertex(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X    : dvector2D, with vertex coordinate list. X[i][0], X[i][1], ...     //
+// - X    : dvecarr3E, with vertex coordinate list. X[i][0], X[i][1], ...     //
 //          are the x, y, ... coordinates of the i-th node.                   //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -2120,12 +2152,12 @@ return(n); }
 
 // -------------------------------------------------------------------------- //
 int Class_SurfTri::CountIsolatedSimplex(
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // int Class_SurfTri::CountIsolatedSimplex(                                   //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Count isolated simplex in the tasselation. A isolated simplex is a simplex //
 // whose vertex are not shared by any of the other simplex in the tasselation //
@@ -2133,7 +2165,7 @@ int Class_SurfTri::CountIsolatedSimplex(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X    : dvector2D, vertex coordinate list. X[i][0], X[i][1],  ... are the //
+// - X    : dvecarr3E, vertex coordinate list. X[i][0], X[i][1],  ... are the //
 //          x, y, ... coordinates of the i-th node.                           //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -2244,12 +2276,12 @@ return(n); };
 
 // -------------------------------------------------------------------------- //
 int Class_SurfTri::CountDoubleSimplex(
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // int Class_SurfTri::CountDoubleSimplex(                                     //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Count duplicated simplicies in the tasselation. A duplicated simplex is a  //
 // simplex whose vertices have coordinates coincident (within a prescribed    //
@@ -2258,7 +2290,7 @@ int Class_SurfTri::CountDoubleSimplex(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X    : dvector2D, vertex coordinate list. X[i][0], X[i][1],  ... are the //
+// - X    : dvecarr3E, vertex coordinate list. X[i][0], X[i][1],  ... are the //
 //          x, y, ... coordinates of the i-th node.                           //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -2330,12 +2362,12 @@ return(n); };
 
 // ----------------------------------------------------------------------------------- //
 int Class_SurfTri::CountTrueDoubleSimplex(
-            dvector2D &X
+            dvecarr3E &X
 ) {
 
 // =================================================================================== //
 // int Class_SurfTri::CountTrueDoubleSimplex(                                          //
-//     dvector2D &X)                                                                   //
+//     dvecarr3E &X)                                                                   //
 //                                                                                     //
 // Count duplicated simplicies in the tasselation. A duplicated simplex is a           //
 // simplex whose vertexes have coordinates coincident (within a prescribed tolerance)  //
@@ -2345,7 +2377,7 @@ int Class_SurfTri::CountTrueDoubleSimplex(
 // =================================================================================== //
 // INPUT                                                                               //
 // =================================================================================== //
-// - X    : [nVertex-by-dim] dvector2D, with vertex coordinate list. X[i][0], X[i][1], //
+// - X    : [nVertex-by-dim] dvecarr3E, with vertex coordinate list. X[i][0], X[i][1], //
 //          ... are the x, y, ... coordinates of the i-th node.                        //
 // =================================================================================== //
 // OUTPUT                                                                              //
@@ -2547,12 +2579,12 @@ return(list); };
 
 // -------------------------------------------------------------------------- //
 ivector1D Class_SurfTri::FindIsolatedVertex(
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // ivector1D Class_SurfTri::FindIsolatedVertex(                               //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Find isolated vertex in the tasselation. A node is isolated if there exist //
 // no simplex in the tasselation having a vertex in that node. Vertex         //
@@ -2560,7 +2592,7 @@ ivector1D Class_SurfTri::FindIsolatedVertex(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X      : dvector2D, vertex coordinates. X[i][0], X[i][1], ... are the x, //
+// - X      : dvecarr3E, vertex coordinates. X[i][0], X[i][1], ... are the x, //
 //            y, ... coordinates of the i-th vertex.                          //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -2679,19 +2711,19 @@ return(list); };
 
 // -------------------------------------------------------------------------- //
 ivector1D Class_SurfTri::FindFreeVertex(
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // ivector1D Class_SurfTri::FindFreeVertex(                                   //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Find free vertex in the tasselation. A free vertex is a vertex on          //
 // tasselation boundaries. Vertex coordinate list is provided exteernally     //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X    : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are the  //
+// - X    : dvecarr3E, vertex coordinate list. X[i][0], X[i][1], ... are the  //
 //          x, y, ... coordinates of the i-th node.                           //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -2780,7 +2812,7 @@ ivector1D Class_SurfTri::FindDoubleVertex(
 
 // Variables declaration
 int          m, ncell;
-int          dim = Vertex[0].size();
+//ht int          dim = Vertex[0].size();
 bvector1D    flag(nVertex, false);
 ivector1D    index(nVertex, -1), idummy1D(2, -1);
 ivector1D    doublev;
@@ -2798,8 +2830,10 @@ int          i;
 srand(time(NULL));
 
 // Resize variables --------------------------------------------------------- //
-if      (dim == 2) { cell.resize(n*n); }
-else if (dim == 3) { cell.resize(n*n*n); }
+//ht if      (dim == 2) { cell.resize(n*n); }
+//ht else if (dim == 3) { cell.resize(n*n*n); }
+
+cell.resize(n*n*n);
 
 // ========================================================================== //
 // SORT VERTICES ON BINS                                                      //
@@ -2824,76 +2858,105 @@ for (I_ = 0; I_ < nSimplex; I_++) {
 // FIND DOUBLE VERTICES                                                       //
 // ========================================================================== //
 ncell = cell.size();
-if (dim == 2) {
-    for (C = 0; C < ncell; C++) {
-        m = cell[C].size();
-        if (m > 0) {
+//ht if (dim == 2) {
+//ht     for (C = 0; C < ncell; C++) {
+//ht         m = cell[C].size();
+//ht         if (m > 0) {
+//ht 
+//ht             // Scope variables
+//ht             ivector1D    list;
+//ht             kdtree<2, array<double>, int>     kd(m);
+//ht 
+//ht             // Randomize vertex insertion
+//ht             Extract_wo_Repl(m, m-1, list);
+//ht             for (I_ = 0; I_ < m; I_++) {
+//ht                 S = cell[C][list[I_]][0];
+//ht                 i = cell[C][list[I_]][1];
+//ht                 V = Simplex[S][i];
+//ht                 if (kd.exist(&Vertex[V], W) >= 0) {
+//ht                     if (!flag[V]) {
+//ht                         flag[V] = true;
+//ht                         doublev.push_back(V);
+//ht                     }
+//ht                 }
+//ht                 else {
+//ht                     flag[V] = true;
+//ht                     kd.insert(&Vertex[V], V);
+//ht                 }
+//ht             } //next I_
+//ht         }
+//ht     } //next C
+//ht }
+//ht else if (dim == 3) {
+//ht     for (C = 0; C < ncell; C++) {
+//ht         m = cell[C].size();
+//ht         if (m > 0) {
+//ht 
+//ht             // Scope variables
+//ht             ivector1D    list;
+//ht             kdtree<3, double, int>     kd(m);
+//ht 
+//ht             // Randomize vertex insertion
+//ht             Extract_wo_Repl(m, m-1, list);
+//ht             for (I_ = 0; I_ < m; I_++) {
+//ht                 S = cell[C][list[I_]][0];
+//ht                 i = cell[C][list[I_]][1];
+//ht                 V = Simplex[S][i];
+//ht                 if (kd.exist(&Vertex[V], W) >= 0) {
+//ht                     if (!flag[V]) {
+//ht                         flag[V] = true;
+//ht                         doublev.push_back(V);
+//ht                     }
+//ht                 }
+//ht                 else {
+//ht                     flag[V] = true;
+//ht                     kd.insert(&Vertex[V], V);
+//ht                 }
+//ht             } //next I_
+//ht         }
+//ht     } //next C
+//ht }
 
-            // Scope variables
-            ivector1D    list;
-            kdtree<2, double, int>     kd(m);
+for (C = 0; C < ncell; C++) {
+    m = cell[C].size();
+    if (m > 0) {
 
-            // Randomize vertex insertion
-            Extract_wo_Repl(m, m-1, list);
-            for (I_ = 0; I_ < m; I_++) {
-                S = cell[C][list[I_]][0];
-                i = cell[C][list[I_]][1];
-                V = Simplex[S][i];
-                if (kd.exist(&Vertex[V], W) >= 0) {
-                    if (!flag[V]) {
-                        flag[V] = true;
-                        doublev.push_back(V);
-                    }
-                }
-                else {
+        // Scope variables
+        ivector1D    list;
+        kdtree<3, array<double,3>, int>     kd(m);
+
+        // Randomize vertex insertion
+        Extract_wo_Repl(m, m-1, list);
+        for (I_ = 0; I_ < m; I_++) {
+            S = cell[C][list[I_]][0];
+            i = cell[C][list[I_]][1];
+            V = Simplex[S][i];
+            if (kd.exist(&Vertex[V], W) >= 0) {
+                if (!flag[V]) {
                     flag[V] = true;
-                    kd.insert(&Vertex[V], V);
+                    doublev.push_back(V);
                 }
-            } //next I_
-        }
-    } //next C
-}
-else if (dim == 3) {
-    for (C = 0; C < ncell; C++) {
-        m = cell[C].size();
-        if (m > 0) {
+            }
+            else {
+                flag[V] = true;
+                kd.insert(&Vertex[V], V);
+            }
+        } //next I_
+    }
+} //next C
 
-            // Scope variables
-            ivector1D    list;
-            kdtree<3, double, int>     kd(m);
-
-            // Randomize vertex insertion
-            Extract_wo_Repl(m, m-1, list);
-            for (I_ = 0; I_ < m; I_++) {
-                S = cell[C][list[I_]][0];
-                i = cell[C][list[I_]][1];
-                V = Simplex[S][i];
-                if (kd.exist(&Vertex[V], W) >= 0) {
-                    if (!flag[V]) {
-                        flag[V] = true;
-                        doublev.push_back(V);
-                    }
-                }
-                else {
-                    flag[V] = true;
-                    kd.insert(&Vertex[V], V);
-                }
-            } //next I_
-        }
-    } //next C
-}
 
 return (doublev); };
 
 // -------------------------------------------------------------------------- //
 ivector1D Class_SurfTri::FindDoubleVertex(
-    dvector2D   &X,
+    dvecarr3E   &X,
     int          n
 ) {
 
 // ========================================================================== //
 // ivector1D Class_SurfTri::FindDoubleVertex(                                 //
-//     dvector2D   &X,                                                        //
+//     dvecarr3E   &X,                                                        //
 //     int          n)                                                        //
 //                                                                            //
 // Find duplicated vertexes in the tasselation. A vertex is duplicated if     //
@@ -2902,7 +2965,7 @@ ivector1D Class_SurfTri::FindDoubleVertex(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X       : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are   //
+// - X       : dvecarr3E, vertex coordinate list. X[i][0], X[i][1], ... are   //
 //             the x, y, ... coordinates of the i-th vertex                   //
 // - n       : int (optional), number of bins for vertex sorting              //
 // ========================================================================== //
@@ -2918,7 +2981,7 @@ ivector1D Class_SurfTri::FindDoubleVertex(
 // Variables declaration
 int          nV = X.size();
 int          m, ncell;
-int          dim = X[0].size();
+//ht int          dim = X[0].size();
 bvector1D    flag(nV, false);
 ivector1D    index(nV, -1), idummy1D(2, -1);
 ivector1D    doublev;
@@ -2936,8 +2999,10 @@ int          i;
 srand(time(NULL));
 
 // Resize variables --------------------------------------------------------- //
-if      (dim == 2) { cell.resize(n*n); }
-else if (dim == 3) { cell.resize(n*n*n); }
+//ht if      (dim == 2) { cell.resize(n*n); }
+//ht else if (dim == 3) { cell.resize(n*n*n); }
+
+cell.resize(n*n*n); 
 
 // ========================================================================== //
 // SORT VERTICES ON BINS                                                      //
@@ -2962,64 +3027,92 @@ for (I_ = 0; I_ < nSimplex; I_++) {
 // FIND DOUBLE VERTICES                                                       //
 // ========================================================================== //
 ncell = cell.size();
-if (dim == 2) {
-    for (C = 0; C < ncell; C++) {
-        m = cell[C].size();
-        if (m > 0) {
+//ht if (dim == 2) {
+//ht     for (C = 0; C < ncell; C++) {
+//ht         m = cell[C].size();
+//ht         if (m > 0) {
+//ht 
+//ht             // Scope variables
+//ht             ivector1D    list;
+//ht             kdtree<2, double, int>     kd(m);
+//ht 
+//ht             // Randomize vertex insertion
+//ht             Extract_wo_Repl(m, m-1, list);
+//ht             for (I_ = 0; I_ < m; I_++) {
+//ht                 S = cell[C][list[I_]][0];
+//ht                 i = cell[C][list[I_]][1];
+//ht                 V = Simplex[S][i];
+//ht                 if (kd.exist(&X[V], W) >= 0) {
+//ht                     if (!flag[V]) {
+//ht                         flag[V] = true;
+//ht                         doublev.push_back(V);
+//ht                     }
+//ht                 }
+//ht                 else {
+//ht                     flag[V] = true;
+//ht                     kd.insert(&X[V], V);
+//ht                 }
+//ht             } //next I_
+//ht         }
+//ht     } //next C
+//ht }
+//ht else if (dim == 3) {
+//ht     for (C = 0; C < ncell; C++) {
+//ht         m = cell[C].size();
+//ht         if (m > 0) {
+//ht 
+//ht             // Scope variables
+//ht             ivector1D    list;
+//ht             kdtree<3, double, int>     kd(m);
+//ht 
+//ht             // Randomize vertex insertion
+//ht             Extract_wo_Repl(m, m-1, list);
+//ht             for (I_ = 0; I_ < m; I_++) {
+//ht                 S = cell[C][list[I_]][0];
+//ht                 i = cell[C][list[I_]][1];
+//ht                 V = Simplex[S][i];
+//ht                 if (kd.exist(&X[V], W) >= 0) {
+//ht                     if (!flag[V]) {
+//ht                         flag[V] = true;
+//ht                         doublev.push_back(V);
+//ht                     }
+//ht                 }
+//ht                 else {
+//ht                     flag[V] = true;
+//ht                     kd.insert(&X[V], V);
+//ht                 }
+//ht             } //next I_
+//ht         }
+//ht     } //next C
+//ht }
 
-            // Scope variables
-            ivector1D    list;
-            kdtree<2, double, int>     kd(m);
+for (C = 0; C < ncell; C++) {
+    m = cell[C].size();
+    if (m > 0) {
 
-            // Randomize vertex insertion
-            Extract_wo_Repl(m, m-1, list);
-            for (I_ = 0; I_ < m; I_++) {
-                S = cell[C][list[I_]][0];
-                i = cell[C][list[I_]][1];
-                V = Simplex[S][i];
-                if (kd.exist(&X[V], W) >= 0) {
-                    if (!flag[V]) {
-                        flag[V] = true;
-                        doublev.push_back(V);
-                    }
-                }
-                else {
+        // Scope variables
+        ivector1D    list;
+        kdtree<3, array<double,3>, int>     kd(m);
+
+        // Randomize vertex insertion
+        Extract_wo_Repl(m, m-1, list);
+        for (I_ = 0; I_ < m; I_++) {
+            S = cell[C][list[I_]][0];
+            i = cell[C][list[I_]][1];
+            V = Simplex[S][i];
+            if (kd.exist(&X[V], W) >= 0) {
+                if (!flag[V]) {
                     flag[V] = true;
-                    kd.insert(&X[V], V);
+                    doublev.push_back(V);
                 }
-            } //next I_
-        }
-    } //next C
-}
-else if (dim == 3) {
-    for (C = 0; C < ncell; C++) {
-        m = cell[C].size();
-        if (m > 0) {
-
-            // Scope variables
-            ivector1D    list;
-            kdtree<3, double, int>     kd(m);
-
-            // Randomize vertex insertion
-            Extract_wo_Repl(m, m-1, list);
-            for (I_ = 0; I_ < m; I_++) {
-                S = cell[C][list[I_]][0];
-                i = cell[C][list[I_]][1];
-                V = Simplex[S][i];
-                if (kd.exist(&X[V], W) >= 0) {
-                    if (!flag[V]) {
-                        flag[V] = true;
-                        doublev.push_back(V);
-                    }
-                }
-                else {
-                    flag[V] = true;
-                    kd.insert(&X[V], V);
-                }
-            } //next I_
-        }
-    } //next C
-}
+            }
+            else {
+                flag[V] = true;
+                kd.insert(&X[V], V);
+            }
+        } //next I_
+    }
+} //next C
 
 return (doublev); };
 
@@ -3095,12 +3188,12 @@ return(list); };
 
 // -------------------------------------------------------------------------- //
 ivector1D Class_SurfTri::FindIsolatedSimplex(
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // ivector1D Class_SurfTri::FindIsolatedSimplex(                              //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Find isolated simplicies in the tasselation. A isolated simplex is a       //
 // simplex whose vertex are not shared by any other simplex in the            //
@@ -3108,7 +3201,7 @@ ivector1D Class_SurfTri::FindIsolatedSimplex(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X    : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are the  //
+// - X    : dvecarr3E, vertex coordinate list. X[i][0], X[i][1], ... are the  //
 //          x, y, ... coordinates of the i-th node.                           //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -3229,19 +3322,19 @@ return(list); };
 
 // -------------------------------------------------------------------------- //
 ivector1D Class_SurfTri::FindFreeSimplex(
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // ivector1D Class_SurfTri::FindFreeSimplex(                                  //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Find free simplex in the tasselation. A free simplex is a simplex having   //
 // at least one free edge. Vertex list is provided externally.                //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X      : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are    //
+// - X      : dvecarr3E, vertex coordinate list. X[i][0], X[i][1], ... are    //
 //            the x, y, ... coordinates of the i-th node.                     //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -3377,19 +3470,19 @@ return(doubles); };
 
 // -------------------------------------------------------------------------- //
 ivector1D Class_SurfTri::FindDoubleSimplex(
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // ivector1D Class_SurfTri::FindDoubleSimplex(                                //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Find douplicated simplex in the tasselation. Vertex list is provided       //
 // externally.                                                                //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X      : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are    //
+// - X      : dvecarr3E, vertex coordinate list. X[i][0], X[i][1], ... are    //
 //            the x, y, ... coordinates of the i-th vertex.                   //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -3552,12 +3645,12 @@ return(doubles); };
 
 // -------------------------------------------------------------------------- //
 ivector1D Class_SurfTri::FindTrueDoubleSimplex(
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // ivector1D Class_SurfTri::FindTrueDoubleSimplex(                            //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Find douplicated simplex in the tasselation. indipendently from their      //
 // clockwise/counter-clockwise ordering.Vrtex list is provided       									//
@@ -3565,7 +3658,7 @@ ivector1D Class_SurfTri::FindTrueDoubleSimplex(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X      : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are    //
+// - X      : dvecarr3E, vertex coordinate list. X[i][0], X[i][1], ... are    //
 //            the x, y, ... coordinates of the i-th vertex.                   //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -3689,19 +3782,19 @@ return(list); };
 
  // ------------------------------------------------------------------------- //
  ivector1D Class_SurfTri::Find0AreaSimplex(
-     dvector2D  &X
+     dvecarr3E  &X
  ) {
 
  // ========================================================================= //
  // ivector1D Class_SurfTri::Find0AreaSimplex(                                //
-//      dvector2D  &X)                                                        //
+//      dvecarr3E  &X)                                                        //
  //                                                                           //
  // Find 0-area simplicies in the surface tasselation. Vertex list is         //
  // provided externally.                                                      //
  // ========================================================================= //
  // INPUT                                                                     //
  // ========================================================================= //
- // - X        : dvector2D, with vertex coordinates list. X[i][0], X[i][1],   //
+ // - X        : dvecarr3E, with vertex coordinates list. X[i][0], X[i][1],   //
  //              ... are the x, y, ... coordinates of the i-th vertex.        //
  // ========================================================================= //
  // OUTPUT                                                                    //
@@ -4075,7 +4168,7 @@ void Class_SurfTri::CollapseDoubleVertex(
 
 // Variables declaration
 int          m, ncell;
-int          dim = Vertex[0].size();
+//ht int          dim = Vertex[0].size();
 bvector1D    flag(nVertex, false);
 ivector1D    index(nVertex, -1), idummy1D(2, -1);
 ivector3D    cell;
@@ -4092,8 +4185,10 @@ int          i;
 srand(time(NULL));
 
 // Resize variables --------------------------------------------------------- //
-if      (dim == 2) { cell.resize(n*n); }
-else if (dim == 3) { cell.resize(n*n*n); }
+//ht if      (dim == 2) { cell.resize(n*n); }
+//ht else if (dim == 3) { cell.resize(n*n*n); }
+
+cell.resize(n*n*n); 
 
 // List of collapsed vertices ----------------------------------------------- //
 doublev.resize(0);
@@ -4121,79 +4216,108 @@ for (I_ = 0; I_ < nSimplex; I_++) {
 // COLLAPSE DOUBLE VERTICES                                                   //
 // ========================================================================== //
 ncell = cell.size();
-if (dim == 2) {
-    for (C = 0; C < ncell; C++) {
-        m = cell[C].size();
-        if (m > 0) {
+//ht if (dim == 2) {
+//ht     for (C = 0; C < ncell; C++) {
+//ht         m = cell[C].size();
+//ht         if (m > 0) {
+//ht 
+//ht             // Scope variables
+//ht             ivector1D    list;
+//ht             kdtree<2, double, int>     kd(m);
+//ht 
+//ht             // Randomize vertex insertion
+//ht             Extract_wo_Repl(m, m-1, list);
+//ht             for (I_ = 0; I_ < m; I_++) {
+//ht                 S = cell[C][list[I_]][0];
+//ht                 i = cell[C][list[I_]][1];
+//ht                 V = Simplex[S][i];
+//ht                 if (kd.exist(&Vertex[V], W) >= 0) {
+//ht                     Simplex[S][i] = W;
+//ht                     if (!flag[V]) {
+//ht                         flag[V] = true;
+//ht                         doublev.push_back(V);
+//ht                     }
+//ht                 }
+//ht                 else {
+//ht                     flag[V] = true;
+//ht                     kd.insert(&Vertex[V], V);
+//ht                 }
+//ht             } //next I_
+//ht         }
+//ht     } //next C
+//ht }
+//ht else if (dim == 3) {
+//ht     for (C = 0; C < ncell; C++) {
+//ht         m = cell[C].size();
+//ht         if (m > 0) {
+//ht 
+//ht             // Scope variables
+//ht             ivector1D    list;
+//ht             kdtree<3, double, int>     kd(m);
+//ht 
+//ht             // Randomize vertex insertion
+//ht             Extract_wo_Repl(m, m-1, list);
+//ht             for (I_ = 0; I_ < m; I_++) {
+//ht                 S = cell[C][list[I_]][0];
+//ht                 i = cell[C][list[I_]][1];
+//ht                 V = Simplex[S][i];
+//ht                 if (kd.exist(&Vertex[V], W) >= 0) {
+//ht                     Simplex[S][i] = W;
+//ht                     if (!flag[V]) {
+//ht                         flag[V] = true;
+//ht                         doublev.push_back(V);
+//ht                     }
+//ht                 }
+//ht                 else {
+//ht                     flag[V] = true;
+//ht                     kd.insert(&Vertex[V], V);
+//ht                 }
+//ht             } //next I_
+//ht         }
+//ht     } //next C
+//ht }
 
-            // Scope variables
-            ivector1D    list;
-            kdtree<2, double, int>     kd(m);
+for (C = 0; C < ncell; C++) {
+    m = cell[C].size();
+    if (m > 0) {
 
-            // Randomize vertex insertion
-            Extract_wo_Repl(m, m-1, list);
-            for (I_ = 0; I_ < m; I_++) {
-                S = cell[C][list[I_]][0];
-                i = cell[C][list[I_]][1];
-                V = Simplex[S][i];
-                if (kd.exist(&Vertex[V], W) >= 0) {
-                    Simplex[S][i] = W;
-                    if (!flag[V]) {
-                        flag[V] = true;
-                        doublev.push_back(V);
-                    }
-                }
-                else {
+        // Scope variables
+        ivector1D    list;
+        kdtree<3, array<double,3>, int>     kd(m);
+
+        // Randomize vertex insertion
+        Extract_wo_Repl(m, m-1, list);
+        for (I_ = 0; I_ < m; I_++) {
+            S = cell[C][list[I_]][0];
+            i = cell[C][list[I_]][1];
+            V = Simplex[S][i];
+            if (kd.exist(&Vertex[V], W) >= 0) {
+                Simplex[S][i] = W;
+                if (!flag[V]) {
                     flag[V] = true;
-                    kd.insert(&Vertex[V], V);
+                    doublev.push_back(V);
                 }
-            } //next I_
-        }
-    } //next C
-}
-else if (dim == 3) {
-    for (C = 0; C < ncell; C++) {
-        m = cell[C].size();
-        if (m > 0) {
-
-            // Scope variables
-            ivector1D    list;
-            kdtree<3, double, int>     kd(m);
-
-            // Randomize vertex insertion
-            Extract_wo_Repl(m, m-1, list);
-            for (I_ = 0; I_ < m; I_++) {
-                S = cell[C][list[I_]][0];
-                i = cell[C][list[I_]][1];
-                V = Simplex[S][i];
-                if (kd.exist(&Vertex[V], W) >= 0) {
-                    Simplex[S][i] = W;
-                    if (!flag[V]) {
-                        flag[V] = true;
-                        doublev.push_back(V);
-                    }
-                }
-                else {
-                    flag[V] = true;
-                    kd.insert(&Vertex[V], V);
-                }
-            } //next I_
-        }
-    } //next C
-}
+            }
+            else {
+                flag[V] = true;
+                kd.insert(&Vertex[V], V);
+            }
+        } //next I_
+    }
+} //next C
 
 return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::CollapseDoubleVertex(
-    dvector2D   &X,
+    dvecarr3E   &X,
     ivector1D   &doublev,
     int          n
 ) {
 
 // ========================================================================== //
 // ivector1D Class_SurfTri::CollapseDoubleVertex(                             //
-//     dvector2D   &X,                                                        //
+//     dvecarr3E   &X,                                                        //
 //     ivector1D   &doublev,                                                  //
 //     int          n)                                                        //
 //                                                                            //
@@ -4202,7 +4326,7 @@ void Class_SurfTri::CollapseDoubleVertex(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X            : dvector2D, external vertex list. X[i][0], X[i][1], ...    //
+// - X            : dvecarr3E, external vertex list. X[i][0], X[i][1], ...    //
 //                  are the x, y, ... components of the i-th vertex           //
 // - doublev      : ivector1D, list of collapsed vertices                     //
 // - n            : int (optional), number of bins for bin sorting            //
@@ -4219,7 +4343,7 @@ void Class_SurfTri::CollapseDoubleVertex(
 // Variables declaration
 int          nV = X.size();
 int          m, ncell;
-int          dim = X[0].size();
+//ht int          dim = X[0].size();
 bvector1D    flag(nV, false);
 ivector1D    index(nV, -1), idummy1D(2, -1);
 ivector3D    cell;
@@ -4236,9 +4360,10 @@ int          i;
 srand(time(NULL));
 
 // Resize variables --------------------------------------------------------- //
-if      (dim == 2) { cell.resize(n*n); }
-else if (dim == 3) { cell.resize(n*n*n); }
+//ht if      (dim == 2) { cell.resize(n*n); }
+//ht else if (dim == 3) { cell.resize(n*n*n); }
 
+ cell.resize(n*n*n);
 // ========================================================================== //
 // SORT VERTICES ON BINS                                                      //
 // ========================================================================== //
@@ -4262,62 +4387,92 @@ for (I_ = 0; I_ < nSimplex; I_++) {
 // COLLAPSE DOUBLE VERTICES                                                   //
 // ========================================================================== //
 ncell = cell.size();
-if (dim == 2) {
-    for (C = 0; C < ncell; C++) {
-        m = cell[C].size();
-        if (m > 0) {
+//ht if (dim == 2) {
+//ht     for (C = 0; C < ncell; C++) {
+//ht         m = cell[C].size();
+//ht         if (m > 0) {
+//ht 
+//ht             // Scope variables
+//ht             ivector1D    list;
+//ht             kdtree<2, double, int>     kd(m);
+//ht 
+//ht             // Randomize vertex insertion
+//ht             Extract_wo_Repl(m, m-1, list);
+//ht             for (I_ = 0; I_ < m; I_++) {
+//ht                 S = cell[C][list[I_]][0];
+//ht                 i = cell[C][list[I_]][1];
+//ht                 V = Simplex[S][i];
+//ht                 if (kd.exist(&X[V], W) >= 0) {
+//ht                     Simplex[S][i] = W;
+//ht                     doublev.push_back(V);
+//ht                 }
+//ht                 else {
+//ht                     kd.insert(&X[V], V);
+//ht                 }
+//ht             } //next I_
+//ht         }
+//ht     } //next C
+//ht }
+//ht else if (dim == 3) {
+//ht     for (C = 0; C < ncell; C++) {
+//ht         m = cell[C].size();
+//ht         if (m > 0) {
+//ht 
+//ht             // Scope variables
+//ht             ivector1D    list;
+//ht             kdtree<3, double, int>     kd(m);
+//ht 
+//ht             // Randomize vertex insertion
+//ht             Extract_wo_Repl(m, m-1, list);
+//ht             for (I_ = 0; I_ < m; I_++) {
+//ht                 S = cell[C][list[I_]][0];
+//ht                 i = cell[C][list[I_]][1];
+//ht                 V = Simplex[S][i];
+//ht                 if (kd.exist(&X[V], W) >= 0) {
+//ht                     Simplex[S][i] = W;
+//ht                     if (!flag[V]) {
+//ht                         flag[V] = true;
+//ht                         doublev.push_back(V);
+//ht                     }
+//ht                 }
+//ht                 else {
+//ht                     flag[V] = true;
+//ht                     kd.insert(&X[V], V);
+//ht                 }
+//ht             } //next I_
+//ht         }
+//ht     } //next C
+//ht }
 
-            // Scope variables
-            ivector1D    list;
-            kdtree<2, double, int>     kd(m);
+for (C = 0; C < ncell; C++) {
+    m = cell[C].size();
+    if (m > 0) {
 
-            // Randomize vertex insertion
-            Extract_wo_Repl(m, m-1, list);
-            for (I_ = 0; I_ < m; I_++) {
-                S = cell[C][list[I_]][0];
-                i = cell[C][list[I_]][1];
-                V = Simplex[S][i];
-                if (kd.exist(&X[V], W) >= 0) {
-                    Simplex[S][i] = W;
+        // Scope variables
+        ivector1D    list;
+        kdtree<3, array<double,3>, int>     kd(m);
+
+        // Randomize vertex insertion
+        Extract_wo_Repl(m, m-1, list);
+        for (I_ = 0; I_ < m; I_++) {
+            S = cell[C][list[I_]][0];
+            i = cell[C][list[I_]][1];
+            V = Simplex[S][i];
+            if (kd.exist(&X[V], W) >= 0) {
+                Simplex[S][i] = W;
+                if (!flag[V]) {
+                    flag[V] = true;
                     doublev.push_back(V);
                 }
-                else {
-                    kd.insert(&X[V], V);
-                }
-            } //next I_
-        }
-    } //next C
-}
-else if (dim == 3) {
-    for (C = 0; C < ncell; C++) {
-        m = cell[C].size();
-        if (m > 0) {
+            }
+            else {
+                flag[V] = true;
+                kd.insert(&X[V], V);
+            }
+        } //next I_
+    }
+} //next C
 
-            // Scope variables
-            ivector1D    list;
-            kdtree<3, double, int>     kd(m);
-
-            // Randomize vertex insertion
-            Extract_wo_Repl(m, m-1, list);
-            for (I_ = 0; I_ < m; I_++) {
-                S = cell[C][list[I_]][0];
-                i = cell[C][list[I_]][1];
-                V = Simplex[S][i];
-                if (kd.exist(&X[V], W) >= 0) {
-                    Simplex[S][i] = W;
-                    if (!flag[V]) {
-                        flag[V] = true;
-                        doublev.push_back(V);
-                    }
-                }
-                else {
-                    flag[V] = true;
-                    kd.insert(&X[V], V);
-                }
-            } //next I_
-        }
-    } //next C
-}
 
 return; };
 
@@ -5082,12 +5237,12 @@ return; }
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::RemoveIsolatedSimplex(
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::RemoveIsolatedSimplex(                                 //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Remove isolated simplicies from the tasselation. A isolated simplex is a   //
 // simplex whose vertex are not shared by any other simplex in the            //
@@ -5095,7 +5250,7 @@ void Class_SurfTri::RemoveIsolatedSimplex(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X    : dvector2D, vertex coordinate list. X[i][0], X[i][1],              //
+// - X    : dvecarr3E, vertex coordinate list. X[i][0], X[i][1],              //
 //          ... are the x, y, ... coordinates of the i-th node.               //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -5210,12 +5365,12 @@ return; }
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::RemoveDoubleSimplex(
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::RemoveDoubleSimplex(                                   //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Remove duplicated simplicies from tasselation using an external vertex     //
 // list. A duplicated simplex is a simplex having the same vertices of        //
@@ -5223,7 +5378,7 @@ void Class_SurfTri::RemoveDoubleSimplex(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X    : dvector2D, with vertex coordinate list. X[i][0], X[i][1], ... are //
+// - X    : dvecarr3E, with vertex coordinate list. X[i][0], X[i][1], ... are //
 //          the x, y, ... coordinates of the i-th node.                       //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -5346,12 +5501,12 @@ return; }
 
 // ----------------------------------------------------------------------------------- //
 void Class_SurfTri::RemoveTrueDoubleSimplex(
-        dvector2D &X
+        dvecarr3E &X
 ) {
     
 // =================================================================================== //
 // void Class_SurfTri::RemoveTrueDoubleSimplex(                                        //
-//     dvector2D &X)                                                                   //
+//     dvecarr3E &X)                                                                   //
 //                                                                                     //
 // Remove duplicated simplicies from the tasselation. A duplicated simplex is a        //
 // simplex whose vertex have the same coordinates (within a prescribed tolerance) of   //
@@ -5360,7 +5515,7 @@ void Class_SurfTri::RemoveTrueDoubleSimplex(
 // =================================================================================== //
 // INPUT                                                                               //
 // =================================================================================== //
-// - X    : [nVertex-by-dim] dvector2D, with vertex coordinate list. X[i][0], X[i][1], //
+// - X    : [nVertex-by-dim] dvecarr3E, with vertex coordinate list. X[i][0], X[i][1], //
 //          ... are the x, y, ... coordinates of the i-th node.                        //
 // =================================================================================== //
 // OUTPUT                                                                              //
@@ -5477,12 +5632,12 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::Remove0AreaSimplex(
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::Remove0AreaSimplex(                                    //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Remove simplex with 0-area. Vertex list is provided externally.            //
 // ========================================================================== //
@@ -5578,19 +5733,19 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::Clean(
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::Clean(                                                 //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Clean tasselation from repeated vertex and repeated simplex.               //
 // Vertex coordinate list is provided externally.                             //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X    : dvector2D, vertex coordinate list. X[i][0], X[i][1],              //
+// - X    : dvecarr3E, vertex coordinate list. X[i][0], X[i][1],              //
 //          ... are the x, y, ... coordinates of the i-th node.               //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -5709,20 +5864,20 @@ return; }
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::Stats(
     ostream     &out,
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::Stats(                                                 //
 //     ostream     &out,                                                      //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Compute tasselation stats. Vertex coordinate list is provided externally   //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
 // - out      : ostream, output stream                                        //
-// - X        : dvector2D, with vertex coordinate list. X[i][0], X[i][1], ... //
+// - X        : dvecarr3E, with vertex coordinate list. X[i][0], X[i][1], ... //
 //              are the x, y, ... coordinates of the i-th node.               //
 // ========================================================================== //
 // OUTPUT                                                                     //

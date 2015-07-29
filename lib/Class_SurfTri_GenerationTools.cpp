@@ -24,7 +24,7 @@
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::AddVertex(
-    dvector1D       &V
+    darray3E        &V
 ) {
 
 // ========================================================================== //
@@ -73,18 +73,18 @@ return; }
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::AddVertices(
-    dvector2D       &V
+    dvecarr3E       &V
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::AddVertices(                                           //
-//     dvector2D       &V)                                                    //
+//     dvecarr3E       &V)                                                    //
 //                                                                            //
 // Add multiple vertexes to the tasselation                                   //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V     : dvector2D, vertex coordinates list. V[i][0], V[i][1], ... are    //
+// - V     : dvecarr3E, vertex coordinates list. V[i][0], V[i][1], ... are    //
 //           the x, y, ... coordinates of the i-th vertex to be added.        //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -161,18 +161,18 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::AddSimplex(
-    dvector2D       &V
+    dvecarr3E       &V
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::AddSimplex(                                            //
-//     dvector2D       &V)                                                    //
+//     dvecarr3E       &V)                                                    //
 //                                                                            //
 // Add simplex to the tasselation                                             //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V     : dvector2D, vertex of simplex to be added                         //
+// - V     : dvecarr3E, vertex of simplex to be added                         //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -250,20 +250,20 @@ return; }
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::AddSimplicies(
-    dvector2D       &V,
+    dvecarr3E       &V,
     ivector2D       &E
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::AddSimplicies(                                         //
-//     dvector2D       &V,                                                    //
+//     dvecarr3E       &V,                                                    //
 //     ivector2D       &E)                                                    //
 //                                                                            //
 // Add multiple simplicies to the tasselation                                 //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V     : dvector2D, vertex coordinate list                                //
+// - V     : dvecarr3E, vertex coordinate list                                //
 // - E     : ivector2D, simplex-vertex connectivity for each simplex          //
 //           to be added                                                      //
 // ========================================================================== //
@@ -306,7 +306,7 @@ return; }
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::SetNormal(
     int              T,
-    dvector1D       &n
+    darray3E        &n
 ) {
 
 // ========================================================================== //
@@ -331,7 +331,6 @@ void Class_SurfTri::SetNormal(
 // ========================================================================== //
 
 // Local variables
-int             dim = Vertex[0].size();
 
 // Counters
 int             i;
@@ -339,12 +338,15 @@ int             i;
 // ========================================================================== //
 // SET NORMAL VALUE                                                           //
 // ========================================================================== //
+
+darray3E    temp;
+temp.fill(0.) ;
+
 if (T >= Normal.size()) {
-    Normal.resize(T, dvector1D(dim, 0.0));
+    Normal.resize(T, temp);
 }
-for (i = 0; i < dim; ++i) {
-    Normal[T][i] = n[i];
-} //next i
+
+Normal[T] = n;
 
 return; };
 
@@ -422,6 +424,9 @@ int        v_off, s_off;
 // Counters
 int        i, j, m;
 
+darray3E    temp ;
+temp.fill(0.) ;
+
 // ========================================================================== //
 // INTIIALIZE PARAMETERS                                                      //
 // ========================================================================== //
@@ -439,8 +444,9 @@ s_off = nSimplex;
 // Vertex ------------------------------------------------------------------- //
 if (Source.nVertex > 0) {
 
+
     // Resize vertex list
-    Vertex.resize(nVertex + Source.nVertex, dvector1D(Source.Vertex[0].size()));
+    Vertex.resize(nVertex + Source.nVertex, temp);
 
     // Add vertexes
     AddVertices(Source.Vertex);
@@ -463,7 +469,7 @@ if (Source.nSimplex > 0) {
 if ((Source.Normal.size() > 0) && (Source.Normal.size() >= Source.nSimplex)) {
 
     // Resize normal list
-    Normal.resize(nSimplex, dvector1D(Source.Vertex[0].size(), 0.0));
+    Normal.resize(nSimplex, temp);
 
     // Add normals
     for (i = 0; i < Source.nSimplex; i++) {

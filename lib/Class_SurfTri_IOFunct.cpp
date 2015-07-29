@@ -279,7 +279,7 @@ int                  i, j, k;
         void Class_SurfTri::ExportVPData_vtu(
             string       filename,
             string       dataname,
-            dvector2D   &Data
+            dvecarr3E   &Data
         ) {
 
         // =================================================================================== //
@@ -397,7 +397,7 @@ int                  i, j, k;
         void Class_SurfTri::ExportVCData_vtu(
             string       filename,
             string       dataname,
-            dvector2D   &Data
+            dvecarr3E   &Data
         ) {
 
         // =================================================================================== //

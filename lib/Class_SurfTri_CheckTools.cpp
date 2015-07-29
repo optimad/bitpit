@@ -26,7 +26,7 @@ double const      pi = 3.14159265358979;
 // ========================================================================== //
 
 // -------------------------------------------------------------------------- //
-dvector1D Class_SurfTri::Baricenter(
+darray3E Class_SurfTri::Baricenter(
     int          T
 ) {
 
@@ -50,44 +50,42 @@ dvector1D Class_SurfTri::Baricenter(
 // ========================================================================== //
 
 // Local variables
-int            dim = Vertex[0].size();
-dvector1D      P(dim, 0.0);
+//int            dim = Vertex[0].size();
+darray3E      P;
+P.fill(0.) ;
 
 // Counters
-int            i, j, m;
+int            i, m;
 
 // ========================================================================== //
 // COMPUTE SIMPLEX BARICENTER                                                 //
 // ========================================================================== //
 m = Simplex[T].size();
 for (i = 0; i < m; i++) {
-    for (j = 0; j < dim; j++) {
-        P[j] += Vertex[Simplex[T][i]][j];
-    } //next j
+    P = P + Vertex[Simplex[T][i]] ;
 } //next i
-for (j = 0; j < dim; j++) {
-    P[j] = P[j]/((double) m);
-} //next j
+
+P = P/((double) m);
 
 return(P); };
 
 // -------------------------------------------------------------------------- //
-dvector1D Class_SurfTri::Baricenter(
+darray3E Class_SurfTri::Baricenter(
     int          T,
-    dvector2D   &V
+    dvecarr3E   &V
 ) {
 
 // ========================================================================== //
 // dvector1D Class_SurfTri::Baricenter(                                       //
 //     int          T,                                                        //
-//     dvector2D   &V)                                                        //
+//     dvecarr3E   &V)                                                        //
 //                                                                            //
 // Compute simplex baricenter. Vertex coordinate list is provided externally  //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
 // - T     : int, simplex global index                                        //
-// - V        : dvector2D with vertex coordinate list. X[i][0], X[i][1], ...  //
+// - V        : dvecarr3E with vertex coordinate list. X[i][0], X[i][1], ...  //
 //              are the x, y, ... coordinates of the i-th vertex.             //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -100,24 +98,22 @@ dvector1D Class_SurfTri::Baricenter(
 // ========================================================================== //
 
 // Local variables
-int            dim = V[0].size();
-dvector1D      P(dim, 0.0);
+//int            dim = V[0].size();
+darray3E       P;
+P.fill(0.0) ;
 
 // Counters
-int            i, j, m; 
+int            i, m; 
 
 // ========================================================================== //
 // COMPUTE SIMPLEX BARICENTER                                                 //
 // ========================================================================== //
 m = Simplex[T].size();
 for (i = 0; i < m; i++) {
-    for (j = 0; j < dim; j++) {
-        P[j] += V[Simplex[T][i]][j];
-    } //next j
+    P = P + V[Simplex[T][i]] ;
 } //next i
-for (j = 0; j < dim; j++) {
-    P[j] = P[j]/((double) m);
-} //next j
+
+P = P/((double) m);
 
 return(P); };
 
@@ -177,7 +173,7 @@ return; }
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::minEdge(
-    dvector2D   &V,
+    dvecarr3E   &V,
     double      &edge,
     int         &T,
     int         &i
@@ -185,7 +181,7 @@ void Class_SurfTri::minEdge(
 
 // ========================================================================== //
 // void Class_SurfTri::minEdge(                                               //
-//     dvector2D   &V,                                                        //
+//     dvecarr3E   &V,                                                        //
 //     double      &edge,                                                     //
 //     int         &T,                                                        //
 //     int         &i)                                                        //
@@ -196,7 +192,7 @@ void Class_SurfTri::minEdge(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V         : dvector2D; vertex coordinate list. V[i][0], V[i][1], ...     //
+// - V         : dvecarr3E; vertex coordinate list. V[i][0], V[i][1], ...     //
 //               are the x, y, ... coordinates of the i-th vertex             //
 // - edge      : double, minimal edge length                                  //
 // - T         : int, simplex global index                                    //
@@ -264,7 +260,7 @@ void Class_SurfTri::minEdge(
 // ========================================================================== //
 
 // Local variables
-int            dim = Vertex[0].size();
+//int            dim = Vertex[0].size();
 double         length;
 
 // Counters
@@ -291,7 +287,7 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::minEdge(
-    dvector2D   &V,
+    dvecarr3E   &V,
     int          T,
     double      &edge,
     int         &i
@@ -299,7 +295,7 @@ void Class_SurfTri::minEdge(
 
 // ========================================================================== //
 // void Class_SurfTri::minEdge(                                               //
-//     dvector2D   &V,                                                        //
+//     dvecarr3E   &V,                                                        //
 //     int          T,                                                        //
 //     double      &edge,                                                     //
 //     int         &i)                                                        //
@@ -308,7 +304,7 @@ void Class_SurfTri::minEdge(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V    : dvector2D, with vertex coordinate list. V[i][0], V[i][1], ... are //
+// - V    : dvecarr3E, with vertex coordinate list. V[i][0], V[i][1], ... are //
 //          the x, y, ... coordinates of the i-th vertex                      //
 // - T    : int, simplex global index                                         //
 // - edge : double, min edge length                                           //
@@ -324,7 +320,7 @@ void Class_SurfTri::minEdge(
 // ========================================================================== //
 
 // Local variables
-int            dim = V[0].size();
+//int            dim = V[0].size();
 double         length;
 
 // Counters
@@ -405,7 +401,7 @@ return; }
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::maxEdge(
-    dvector2D   &V,
+    dvecarr3E   &V,
     double      &edge,
     int         &T,
     int         &i
@@ -413,7 +409,7 @@ void Class_SurfTri::maxEdge(
 
 // ========================================================================== //
 // void Class_SurfTri::maxEdge(                                               //
-//     dvector2D   &V,                                                        //
+//     dvecarr3E   &V,                                                        //
 //     double      &edge,                                                     //
 //     int         &T,                                                        //
 //     int         &i)                                                        //
@@ -424,7 +420,7 @@ void Class_SurfTri::maxEdge(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V         : dvector2D; vertex coordinate list. V[i][0], V[i][1], ...     //
+// - V         : dvecarr3E; vertex coordinate list. V[i][0], V[i][1], ...     //
 //               are the x, y, ... coordinates of the i-th vertex             //
 // - edge      : double, maximal edge length                                  //
 // - T         : int, simplex global index                                    //
@@ -492,7 +488,7 @@ void Class_SurfTri::maxEdge(
 // ========================================================================== //
 
 // Local variables
-int            dim = Vertex[0].size();
+//int            dim = Vertex[0].size();
 double         length;
 
 // Counters
@@ -519,7 +515,7 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::maxEdge(
-    dvector2D   &V,
+    dvecarr3E   &V,
     int          T,
     double      &edge,
     int         &i
@@ -527,7 +523,7 @@ void Class_SurfTri::maxEdge(
 
 // ========================================================================== //
 // void Class_SurfTri::maxEdge(                                               //
-//    dvector2D   &V,                                                         //
+//    dvecarr3E   &V,                                                         //
 //    int          T,                                                         //
 //    double      &edge,                                                      //
 //    int         &i)                                                         //
@@ -536,7 +532,7 @@ void Class_SurfTri::maxEdge(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V    : dvector2D, with vertex coordinate list. V[i][0], V[i][1], ... are //
+// - V    : dvecarr3E, with vertex coordinate list. V[i][0], V[i][1], ... are //
 //          the x, y, ... coordinates of the i-th vertex                      //
 // - T    : int, simplex global index                                         //
 // - edge : double, max edge length                                           //
@@ -552,7 +548,7 @@ void Class_SurfTri::maxEdge(
 // ========================================================================== //
 
 // Local variables
-int            dim = V[0].size();
+//int            dim = V[0].size();
 double         length;
 
 // Counters
@@ -618,12 +614,12 @@ return(A); }
 
 // -------------------------------------------------------------------------- //
 double Class_SurfTri::Area(
-    dvector2D   &V
+    dvecarr3E   &V
 ) {
 
 // ========================================================================== //
 // double Class_SurfTri::Area(                                                //
-//     dvector2D   &V)                                                        //
+//     dvecarr3E   &V)                                                        //
 //                                                                            //
 // Compute tasselation area. Vertex list is provided externally               //
 // ========================================================================== //
@@ -680,7 +676,7 @@ double Class_SurfTri::Area(
 // ========================================================================== //
 
 // Local variables
-int                    dim = Vertex[0].size();
+//int                    dim = Vertex[0].size();
 double                 A;
 
 // Counters
@@ -729,20 +725,20 @@ return(A); };
 // -------------------------------------------------------------------------- //
 double Class_SurfTri::Area(
     int          T,
-    dvector2D   &V
+    dvecarr3E   &V
 ) {
 
 // ========================================================================== //
 // double Class_SurfTri::Area(                                                //
 //     int          T,                                                        //
-//     dvector2D   &V)                                                        //
+//     dvecarr3E   &V)                                                        //
 //                                                                            //
 // Compute the area of a convex simplex. Vertex list is provided externally   //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
 // - T        : int, simplex index                                            //
-// - V        : dvector2D, vertex coordinate list. X[i][0], X[i][1], ...      //
+// - V        : dvecarr3E, vertex coordinate list. X[i][0], X[i][1], ...      //
 //              are the x, y, ... coordinates of the i-th vertex.             //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -755,7 +751,7 @@ double Class_SurfTri::Area(
 // ========================================================================== //
 
 // Local variables
-int                    dim = V[0].size();
+//int                    dim = V[0].size();
 double                 A;
 
 // Counters
@@ -851,13 +847,13 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::Area(
-    dvector2D   &V,
+    dvecarr3E   &V,
     dvector1D   &A
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::Area(                                                  //
-//     dvector2D   &V,                                                        //
+//     dvecarr3E   &V,                                                        //
 //     dvector1D   &A)                                                        //
 //                                                                            //
 // Compute the area of each simplex in a surface tasselation. Vertex          //
@@ -865,7 +861,7 @@ void Class_SurfTri::Area(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V     : dvector2D, vertex coordinate list. V[i][0], V[i][1], ... are     //
+// - V     : dvecarr3E, vertex coordinate list. V[i][0], V[i][1], ... are     //
 //           the x, y, ... coordinates of the i-th vertex.                    //
 // - A     ; dvector1D, storing the area value of each simplex                //
 // ========================================================================== //
@@ -926,7 +922,7 @@ double Class_SurfTri::AR(
 // ========================================================================== //
 
 // Local variables
-int          dim = Vertex[0].size();
+//int          dim = Vertex[0].size();
 double       aspect = 0.0;
 double       min_edge, max_edge, edge;
 
@@ -950,13 +946,13 @@ return (aspect); };
 // -------------------------------------------------------------------------- //
 double Class_SurfTri::AR(
     int          T,
-    dvector2D   &V
+    dvecarr3E   &V
 ) {
 
 // ========================================================================== //
 // double Class_SurfTri::AR(                                                  //
 //     int          T,                                                        //
-//     dvector2D   &V)                                                        //
+//     dvecarr3E   &V)                                                        //
 //                                                                            //
 // Compute the aspect ratio of a given simplex in the tasselation.            //
 // Aspect ratio is defined as the ratio between the longest and               //
@@ -966,7 +962,7 @@ double Class_SurfTri::AR(
 // INPUT                                                                      //
 // ========================================================================== //
 // - T      : int, simplex index.                                             //
-// - V        : dvector2D with vertex coordinate list. X[i][0], X[i][1], ...  //
+// - V        : dvecarr3E with vertex coordinate list. X[i][0], X[i][1], ...  //
 //              are the x, y, ... coordinates of the i-th vertex.             //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -979,7 +975,7 @@ double Class_SurfTri::AR(
 // ========================================================================== //
 
 // Local variables
-int          dim = V[0].size();
+//int          dim = V[0].size();
 double       aspect = 0.0;
 double       min_edge, max_edge, edge;
 
@@ -1048,13 +1044,13 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::AR(
-    dvector2D   &V,
+    dvecarr3E   &V,
     dvector1D   &aspect
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::AR(                                                    //
-//     dvector2D   &V,                                                        //
+//     dvecarr3E   &V,                                                        //
 //     dvector1D   &aspect)                                                   //
 //                                                                            //
 // Compute the aspect ratio of each simplex in the tasselation.               //
@@ -1064,7 +1060,7 @@ void Class_SurfTri::AR(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V      : dvector2D,vertex coordinate list. V[i][0], V[i][1], ... are     //
+// - V      : dvecarr3E,vertex coordinate list. V[i][0], V[i][1], ... are     //
 //            the x, y, ... coordinates of the i-th vertex.                   //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -1151,7 +1147,7 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::minAngle(
-    dvector2D   &V,
+    dvecarr3E   &V,
     double      &angle,
     int         &T,
     int         &v
@@ -1159,7 +1155,7 @@ void Class_SurfTri::minAngle(
 
 // ========================================================================== //
 // void Class_SurfTri::minAngle(                                              //
-//     dvector2D   &V,                                                        //
+//     dvecarr3E   &V,                                                        //
 //     double      &angle,                                                    //
 //     int         &T,                                                        //
 //     int         &v)                                                        //
@@ -1170,7 +1166,7 @@ void Class_SurfTri::minAngle(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V       : dvector2D, vertex coordinate list. V[i][0], V[i][1], ...are    //
+// - V       : dvecarr3E, vertex coordinate list. V[i][0], V[i][1], ...are    //
 //             the x, y, ... coordinates of the i-th vertex                   //
 // - angle   : double, min angle value                                        //
 // - T       : int, simplex global index                                      //
@@ -1239,9 +1235,9 @@ void Class_SurfTri::minAngle(
 // ========================================================================== //
 
 // Local variables
-int         dim = Vertex[0].size();
+//int         dim = Vertex[0].size();
 double      value;
-dvector1D   v1(dim, 0.0), v2(dim, 0.0);
+darray3E    v1, v2 ;
 
 // Counters
 int         i, j, k, m = Simplex[T].size();
@@ -1268,7 +1264,7 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::minAngle(
-    dvector2D   &V,
+    dvecarr3E   &V,
     int          T,
     double      &angle,
     int         &v
@@ -1277,14 +1273,14 @@ void Class_SurfTri::minAngle(
 // ========================================================================== //
 // double Class_SurfTri::minAngle(                                            //
 //     int T,                                                                 //
-//     dvector2D &V)                                                          //
+//     dvecarr3E &V)                                                          //
 //                                                                            //
 // Compute the min angle between two subsequent edges of a given simplex, and //
 // returns the min value. Vertex coordinate list is provided externally.      //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V      : dvector2D, vertex coordinate list. V[i][0], V[i][1], ... are    //
+// - V      : dvecarr3E, vertex coordinate list. V[i][0], V[i][1], ... are    //
 //            the x, y, ... coordinates of the i-th vertex.                   //
 // - T       : int, simplex global index                                      //
 // - angle   : double, min angle value                                        //
@@ -1300,9 +1296,9 @@ void Class_SurfTri::minAngle(
 // ========================================================================== //
 
 // Local variables
-int         dim = V[0].size();
+//int         dim = V[0].size();
 double      value;
-dvector1D   v1(dim, 0.0), v2(dim, 0.0);
+darray3E    v1, v2;
 
 // Counters
 int         i, j, k, m = Simplex[T].size();
@@ -1373,13 +1369,13 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::minAngle(
-    dvector2D   &V,
+    dvecarr3E   &V,
     dvector1D  &angle
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::minAngle(                                              //
-//     dvector2D   &V,                                                        //
+//     dvecarr3E   &V,                                                        //
 //     dvector1D  &angle)                                                     //
 //                                                                            //
 // Compute the min angle for each simplex in the surface tasselation.         //
@@ -1387,7 +1383,7 @@ void Class_SurfTri::minAngle(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V     : dvector2D, vertex coordinate list. V[i][0], V[i][1], ... are     //
+// - V     : dvecarr3E, vertex coordinate list. V[i][0], V[i][1], ... are     //
 //           the x, y, ... coordinates of the i-th vertex.                    //
 // - angle : dvector1D, storing the min angle value of each simplex           //
 // ========================================================================== //
@@ -1477,7 +1473,7 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::maxAngle(
-    dvector2D   &V,
+    dvecarr3E   &V,
     double      &angle,
     int         &T,
     int         &v
@@ -1485,7 +1481,7 @@ void Class_SurfTri::maxAngle(
 
 // ========================================================================== //
 // void Class_SurfTri::maxAngle(                                              //
-//     dvector2D   &V,                                                        //
+//     dvecarr3E   &V,                                                        //
 //     double      &edge,                                                     //
 //     int          T,                                                        //
 //     int         &v)                                                        //
@@ -1565,9 +1561,9 @@ void Class_SurfTri::maxAngle(
 // ========================================================================== //
 
 // Local variables
-int       dim = Vertex[0].size();
+//int       dim = Vertex[0].size();
 double    value;
-dvector1D v1(dim, 0.0), v2(dim, 0.0);
+darray3E  v1, v2;
 
 // Counters
 int       i, j, k, m = Simplex[T].size();
@@ -1595,7 +1591,7 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::maxAngle(
-    dvector2D   &V,
+    dvecarr3E   &V,
     int          T,
     double      &angle,
     int         &v
@@ -1603,7 +1599,7 @@ void Class_SurfTri::maxAngle(
 
 // ========================================================================== //
 // void Class_SurfTri::maxAngle(                                              //
-//     dvector2D   &V,                                                        //
+//     dvecarr3E   &V,                                                        //
 //     int          T,                                                        //
 //     double      &angle,                                                    //
 //     int         &v)                                                        //
@@ -1614,7 +1610,7 @@ void Class_SurfTri::maxAngle(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V      : dvector2D, vertex coordinate list. V[i][0], V[i][1], ... are    //
+// - V      : dvecarr3E, vertex coordinate list. V[i][0], V[i][1], ... are    //
 //            x, y, ... coordinates of the i-th vertex.                       //
 // - T       : int, simplex global index                                      //
 // - angle   : double, min angle value                                        //
@@ -1630,9 +1626,9 @@ void Class_SurfTri::maxAngle(
 // ========================================================================== //
 
 // Local variables
-int       dim = V[0].size();
+//int       dim = V[0].size();
 double    value;
-dvector1D v1(dim, 0.0), v2(dim, 0.0);
+darray3E  v1, v2;
 
 // Counters
 int       i, j, k, m = Simplex[T].size();
@@ -1703,13 +1699,13 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::maxAngle(
-    dvector2D   &V,
+    dvecarr3E   &V,
     dvector1D   &angle
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::maxAngle(                                              //
-//     dvector2D   &V,                                                        //
+//     dvecarr3E   &V,                                                        //
 //     dvector1D   &angle)                                                    //
 //                                                                            //
 // Compute the max angle in each simplex in a surface tasselation.            //
@@ -1717,7 +1713,7 @@ void Class_SurfTri::maxAngle(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V     : dvector2D, vertex coordinate list. V[i][0], V[i][1], ... are     //
+// - V     : dvecarr3E, vertex coordinate list. V[i][0], V[i][1], ... are     //
 //           the x, y, ... coordinates of the i-th vertex.                    //
 // - angle ; dvector1D, storing the max angle value of each simplex           //
 // ========================================================================== //
@@ -1751,7 +1747,7 @@ for (i = 0; i < nSimplex; i++) {
 return; }
 
 // -------------------------------------------------------------------------- //
-dvector1D Class_SurfTri::Edge_midPoint(
+darray3E  Class_SurfTri::Edge_midPoint(
     int          T,
     int          e
 ) {
@@ -1778,8 +1774,8 @@ dvector1D Class_SurfTri::Edge_midPoint(
 // ========================================================================== //
 
 // Local variables
-int                    n, dim = Vertex[0].size();
-dvector1D              P(dim, 0.0);
+int                    n ;
+darray3E               P;
 
 // Counters
 int                    j, k;
@@ -1804,23 +1800,21 @@ else if (n == 2) {
 // Simplex
 else {
     k = (e + 1) % n;
-    for (j = 0; j < dim; j++) {
-        P[j] = 0.5*(Vertex[Simplex[T][e]][j] + Vertex[Simplex[T][k]][j]);
-    } //next j
+    P = 0.5*(Vertex[Simplex[T][e]] + Vertex[Simplex[T][k]]);
 }
 
 return(P); };
 
 // -------------------------------------------------------------------------- //
-dvector1D Class_SurfTri::Edge_midPoint(
-    dvector2D   &V,
+darray3E  Class_SurfTri::Edge_midPoint(
+    dvecarr3E   &V,
     int          T,
     int          e
 ) {
 
 // ========================================================================== //
 // dvector1D Class_SurfTri::Edge_midPoint(                                    //
-//     dvector2D   &V,                                                        //
+//     dvecarr3E   &V,                                                        //
 //     int          T,                                                        //
 //     int          e)                                                        //
 //                                                                            //
@@ -1830,7 +1824,7 @@ dvector1D Class_SurfTri::Edge_midPoint(
 // ========================================================================== //
 // - T       : int, Simplex global index                                      //
 // - e       : int, edge local index                                          //
-// - V       : dvector2D, vertex coordinate list. V[i][0], V[i][1], ... are   //
+// - V       : dvecarr3E, vertex coordinate list. V[i][0], V[i][1], ... are   //
 //             the x, y, ... coordinates of the i-th vertex.                  //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -1843,8 +1837,8 @@ dvector1D Class_SurfTri::Edge_midPoint(
 // ========================================================================== //
 
 // Local variables
-int                    n, dim = Vertex[0].size();
-dvector1D              P(dim, 0.0);
+int                    n;
+darray3E               P;
 
 // Counters
 int                    j, k;
@@ -1869,183 +1863,153 @@ else if (n == 2) {
 // Simplex
 else {
     k = (e + 1) % n;
-    for (j = 0; j < dim; j++) {
-        P[j] = 0.5*(V[Simplex[T][e]][j] + V[Simplex[T][k]][j]);
-    } //next j
+    P = 0.5*(V[Simplex[T][e]] + V[Simplex[T][k]]);
 }
 
 return(P); };
 
-        // ----------------------------------------------------------------------------------- //
-        dvector1D Class_SurfTri::CircumCenter(
-            int T
-        ) {
+// ----------------------------------------------------------------------------------- //
+darray3E  Class_SurfTri::CircumCenter(
+    int T
+) {
 
-        // =================================================================================== //
-        // dvector1D Class_SurfTri::CircumCenter(                                              //
-        //     int T)                                                                          //
-        //                                                                                     //
-        // Compute simplex circum center. (2-simplicies only).                                 //
-        // =================================================================================== //
-        // INPUT                                                                               //
-        // =================================================================================== //
-        // - T        : int, simplex global index                                              //
-        // =================================================================================== //
-        // OUTPUT                                                                              //
-        // =================================================================================== //
-        // - P        : dvector1D, with circum center coordinates                              //
-        // =================================================================================== //
+// =================================================================================== //
+// dvector1D Class_SurfTri::CircumCenter(                                              //
+//     int T)                                                                          //
+//                                                                                     //
+// Compute simplex circum center. (2-simplicies only).                                 //
+// =================================================================================== //
+// INPUT                                                                               //
+// =================================================================================== //
+// - T        : int, simplex global index                                              //
+// =================================================================================== //
+// OUTPUT                                                                              //
+// =================================================================================== //
+// - P        : dvector1D, with circum center coordinates                              //
+// =================================================================================== //
 
-        // =================================================================================== //
-        // VARIABLES DECLARATION                                                               //
-        // =================================================================================== //
+// =================================================================================== //
+// VARIABLES DECLARATION                                                               //
+// =================================================================================== //
 
-        // Local variables
-        int                 dim = Vertex[0].size();
-        dvector1D           P(dim, 0.0);
-        array<double, 3>    Q, n, M1, n1, M2, n2;
+// Local variables
+darray3E            P;
+darray3E            Q, n, M1, n1, M2, n2;
 
-        // Counters
-        int                 i;
+// Counters
+int                 i;
 
-        // =================================================================================== //
-        // COMPUTE CIRCUMCENTER                                                                //
-        // =================================================================================== //
+// =================================================================================== //
+// COMPUTE CIRCUMCENTER                                                                //
+// =================================================================================== //
 
-        // Compute triangle normal ----------------------------------------------------------- //
+// Compute triangle normal ----------------------------------------------------------- //
 
-        // Compute bisect. for edge 0. ------------------------------------------------------- //
+// Compute bisect. for edge 0. ------------------------------------------------------- //
 
-            // Edge slope
-            for (i = 0; i < dim; i++) {
-                n1[i] = Vertex[Simplex[T][1]][i] - Vertex[Simplex[T][0]][i];
-            } //next i
-            n1 = n1/norm_2(n1);
+    // Edge slope
+    n1 = Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]];
+    n1 = n1/norm_2(n1);
 
-            // Edge mid point
-            P = Edge_midPoint(T, 0);
-            for (i = 0; i < dim; i++) {
-                M1[i] = P[i];
-            } //next i
+    // Edge mid point
+    M1 = Edge_midPoint(T, 0);
 
-        // Compute bisect. for edge 1. ------------------------------------------------------- //
+// Compute bisect. for edge 1. ------------------------------------------------------- //
 
-            // Edge slope
-            for (i = 0; i < dim; i++) {
-                n2[i] = Vertex[Simplex[T][2]][i] - Vertex[Simplex[T][1]][i];
-            } //next i
-            n2 = n2/norm_2(n2);
+    // Edge slope
+    n2 = Vertex[Simplex[T][2]] - Vertex[Simplex[T][1]];
+    n2 = n2/norm_2(n2);
 
-            // Edge mid point
-            P = Edge_midPoint(T, 1);
-            for (i = 0; i < dim; i++) {
-                M2[i] = P[i];
-            } //next i
+    // Edge mid point
+    M2 = Edge_midPoint(T, 1);
 
-        // Circumcenter coordinates ---------------------------------------------------------- //
+// Circumcenter coordinates ---------------------------------------------------------- //
 
-            // Triangle's normal
-            n = Cross_Product(n1, n2);
-            n = n/norm_2(n);
+    // Triangle's normal
+    n = Cross_Product(n1, n2);
+    n = n/norm_2(n);
 
-            // Bisect directions
-            n1 = Cross_Product(n, n1);
-            n2 = Cross_Product(n, n2);
+    // Bisect directions
+    n1 = Cross_Product(n, n1);
+    n2 = Cross_Product(n, n2);
 
-            // Intersection point
-            Q = IntersectLines(n1,M1,n2,M2);
-            for (i = 0; i < dim; i++) {
-                P[i] = Q[i];
-            } //next i
+    // Intersection point
+    P = IntersectLines(n1,M1,n2,M2);
 
-        return(P); };
+return(P); };
 
-        // ----------------------------------------------------------------------------------- //
-        dvector1D Class_SurfTri::CircumCenter(
-            int T,
-            dvector2D &V
-        ) {
+// ----------------------------------------------------------------------------------- //
+darray3E  Class_SurfTri::CircumCenter(
+    int T,
+    dvecarr3E &V
+) {
 
-        // =================================================================================== //
-        // dvector1D Class_SurfTri::CircumCenter(                                              //
-        //     int T,                                                                          //
-        //     dvector2D &V)                                                                   //
-        //                                                                                     //
-        // Compute simplex circum center. (2-simplicies only). Vertex coordnate list is        //
-        // provided externally.                                                                //
-        // =================================================================================== //
-        // INPUT                                                                               //
-        // =================================================================================== //
-        // - T        : int, simplex global index                                              //
-        // - V        : dvector2D, with vertex coordinate list. V[i][0], V[i][1], ... are the  //
-        //             x, y, ... coordinates of the i-th vertex.                               //
-        // =================================================================================== //
-        // OUTPUT                                                                              //
-        // =================================================================================== //
-        // - P        : dvector1D, with circum center coordinates                              //
-        // =================================================================================== //
+// =================================================================================== //
+// dvector1D Class_SurfTri::CircumCenter(                                              //
+//     int T,                                                                          //
+//     dvecarr3E &V)                                                                   //
+//                                                                                     //
+// Compute simplex circum center. (2-simplicies only). Vertex coordnate list is        //
+// provided externally.                                                                //
+// =================================================================================== //
+// INPUT                                                                               //
+// =================================================================================== //
+// - T        : int, simplex global index                                              //
+// - V        : dvecarr3E, with vertex coordinate list. V[i][0], V[i][1], ... are the  //
+//             x, y, ... coordinates of the i-th vertex.                               //
+// =================================================================================== //
+// OUTPUT                                                                              //
+// =================================================================================== //
+// - P        : dvector1D, with circum center coordinates                              //
+// =================================================================================== //
 
-        // =================================================================================== //
-        // VARIABLES DECLARATION                                                               //
-        // =================================================================================== //
+// =================================================================================== //
+// VARIABLES DECLARATION                                                               //
+// =================================================================================== //
 
-        // Local variables
-        int                 dim = V[0].size();
-        dvector1D           P(dim, 0.0);
-        array<double, 3>    Q, n, M1, n1, M2, n2;
+// Local variables
+darray3E            P;
+darray3E            Q, n, M1, n1, M2, n2;
 
-        // Counters
-        int                 i;
+// Counters
+int                 i;
 
-        // =================================================================================== //
-        // COMPUTE CIRCUMCENTER                                                                //
-        // =================================================================================== //
+// =================================================================================== //
+// COMPUTE CIRCUMCENTER                                                                //
+// =================================================================================== //
 
-        // Compute bisect. for edge 0. ------------------------------------------------------- //
+// Compute bisect. for edge 0. ------------------------------------------------------- //
 
-            // Slope
-            for (i = 0; i < dim; i++) {
-                n1[i] = V[Simplex[T][1]][i] - V[Simplex[T][0]][i];
-            } //next i
-            n1 = n1/norm_2(n1);
+    // Slope
+    n1 = V[Simplex[T][1]] - V[Simplex[T][0]];
+    n1 = n1/norm_2(n1);
 
-            // Point
-            P = Edge_midPoint(V, T, 0);
-            for (i = 0; i < dim; i++) {
-                M1[i] = P[i];
-            } //next i
+    // Point
+    M1 = Edge_midPoint(V, T, 0);
 
-        // Compute bisect. for edge 1. ------------------------------------------------------- //
+// Compute bisect. for edge 1. ------------------------------------------------------- //
 
-            // Slope
-            for (i = 0; i < dim; i++) {
-                n2[i] = V[Simplex[T][2]][i] - V[Simplex[T][1]][i];
-            } //next i
-            n2 = n2/norm_2(n2);
+    // Slope
+    n2 = V[Simplex[T][2]] - V[Simplex[T][1]];
+    n2 = n2/norm_2(n2);
 
-            // Point
-            P = Edge_midPoint(V, T, 1);
-            for (i = 0; i < dim; i++) {
-                M2[i] = P[i];
-            } //next i
+    // Point
+    M2 = Edge_midPoint(V, T, 1);
 
-        // Circumcenter coordinates ---------------------------------------------------------- //
+// Circumcenter coordinates ---------------------------------------------------------- //
 
-            // Triangle's normal
-            n = Cross_Product(n1, n2);
-            n = n/norm_2(n);
+    // Triangle's normal
+    n = Cross_Product(n1, n2);
+    n = n/norm_2(n);
 
-            // Bisect directions
-            n1 = Cross_Product(n, n1);
-            n2 = Cross_Product(n, n2);
+    // Bisect directions
+    n1 = Cross_Product(n, n1);
+    n2 = Cross_Product(n, n2);
 
-            // Intersection point
-            Q = IntersectLines(n1,M1,n2,M2);
-            for (i = 0; i < dim; i++) {
-                P[i] = Q[i];
-            } //next i
+    // Intersection point
+    P = IntersectLines(n1,M1,n2,M2);
 
-        return(P); };
+return(P); };
 
 // -------------------------------------------------------------------------- //
 int Class_SurfTri::VertexValence(

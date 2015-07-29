@@ -47,8 +47,8 @@
         // =================================================================================== //
 
         // Local variables
-        int             nedge, dim = Vertex[0].size();
-        dvector1D       xC(dim, 0.0), n(dim, 0.0), t(dim, 0.0);
+        int             nedge;
+        darray3E        xC, n, t;
         dvector1D       coeff(3, 0.0);
 
         // Counters
@@ -201,8 +201,8 @@
         // ----------------------------------------------------------------------------------- //
         template <class T>
         void Class_SurfTri::InterpolatePointData(
-            dvector1D        &P,
-            int               seed,
+            darray3E         &P,
+            int              seed,
             vector<T>        &PData,
             T                &data
         ) {
@@ -210,8 +210,8 @@
         // =================================================================================== //
         // template <class T>                                                                  //
         // void Class_SurfTri::InterpolatePointData(                                           //
-        //     dvector1D        &P,                                                            //
-        //     int               seed,                                                         //
+        //     array3E          &P,                                                            //
+        //     int              seed,                                                         //
         //     vector<T>        &PData,                                                        //
         //     T                &data)                                                         //
         //                                                                                     //
@@ -219,7 +219,7 @@
         // =================================================================================== //
         // INPUT                                                                               //
         // =================================================================================== //
-        // - P        : dvector1D, point coordinates                                           //
+        // - P        : darray3E, point coordinates                                            //
         // - seed     : int, seed for simplex search algorithm                                 //
         // - PData    : vector<T>, with point data                                             //
         // - data     : T, with interpolated value                                             //
@@ -261,7 +261,6 @@
         else if (n == 2) {
 
             // Scope variables
-            int     dim = Vertex[0].size();
             double  xi, eta;
 
             // Interpolation weights (local coordinate system)
@@ -277,26 +276,32 @@
         else {
 
             // Scope variables
-            int                  i, dim = Vertex[0].size();
+            int                  i;
             double               xi, eta, scale;
             array< double, 3 >   t, n, N;
 //             array< double, 3 >   coeff;
             vector<T>            coeff(3);
 
             // Local coordinate system
-            for (i = 0; i < dim; i++) {
-                t[i] = Vertex[Simplex[S][1]][i] - Vertex[Simplex[S][0]][i];
-                N[i] = Normal[S][i];
-            } //next i
+//ht            for (i = 0; i < dim; i++) {
+//ht                t[i] = Vertex[Simplex[S][1]][i] - Vertex[Simplex[S][0]][i];
+//ht                N[i] = Normal[S][i];
+//ht            } //next i
+
+            t = Vertex[Simplex[S][1]] - Vertex[Simplex[S][0]];
+            N = Normal[S];
+
             scale = norm_2(t);
             t = t/scale;
             n = Cross_Product(N, t);
             n = n/norm_2(n);
 
             // Interpolation coeff.
-            for (i = 0; i < dim; i++) {
-                N[i] = Vertex[Simplex[S][2]][i] - Vertex[Simplex[S][0]][i];
-            } //next i
+//ht            for (i = 0; i < dim; i++) {
+//ht                N[i] = Vertex[Simplex[S][2]][i] - Vertex[Simplex[S][0]][i];
+//ht            } //next i
+
+            N = Vertex[Simplex[S][2]] - Vertex[Simplex[S][0]];
             N = N/scale;
             xi  = Dot_Product(N, t);
             eta = Dot_Product(N, n);
@@ -305,9 +310,11 @@
             coeff[2] = (PData[Simplex[S][2]] - coeff[1]*xi - coeff[0])/eta;
 
             // Interpolation point
-            for (i = 0; i < dim; i++) {
-                N[i] = P[i] - Vertex[Simplex[S][0]][i];
-            } //next i
+//ht            for (i = 0; i < dim; i++) {
+//ht                N[i] = P[i] - Vertex[Simplex[S][0]][i];
+//ht            } //next i
+
+            N = P[i] - Vertex[Simplex[S][0]];
             N = N/scale;
             xi  = Dot_Product(N, t);
             eta = Dot_Product(N, n);

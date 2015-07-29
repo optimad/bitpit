@@ -388,7 +388,7 @@ void Demo_GenerationTools(
 bool                    stl_type = false;
 string                  stl_name = "./datasets/cube.stl";
 ivector2D               S2E;
-dvector2D               NV;
+dvecarr3E               NV;
 Class_SurfTri           Tri;
 Class_SurfTri           Edges;
 

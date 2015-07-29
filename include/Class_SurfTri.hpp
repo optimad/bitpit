@@ -66,6 +66,10 @@ typedef vector< dvector1D >            dvector2D;
 typedef vector< dvector2D >            dvector3D;
 typedef vector< dvector3D >            dvector4D;
 
+// double array
+typedef array< double,3 >              darray3E;  
+typedef vector< darray3E >             dvecarr3E; 
+
 // string vectors
 typedef vector< string >               svector1D;
 typedef vector< svector1D >            svector2D;
@@ -83,8 +87,8 @@ class Class_SurfTri {
     int                     nSimplex;                                         // # of simplicies
     int                     nEdge;                                            // # of edges
     double                  toll;                                             // tolerance for distance check
-    dvector2D               Vertex;                                           // vertex list
-    dvector2D               Normal;                                           // normals list
+    dvecarr3E               Vertex;                                           // vertex list
+    dvecarr3E               Normal;                                           // normals list
     ivector2D               Simplex;                                          // Simplex-vertex connectivity
     ivector3D               Adjacency;                                        // Simplex-Simplex adjacency
 
@@ -110,10 +114,10 @@ class Class_SurfTri {
     // Resize --------------------------------------------------------------- //
     public:
     void ResizeVertex(                                                        // Resize vertex list to the actual number of vertices
-        int                  dim = 3                                          // (input/optional) number of space dimensions
+        void                                                                  // (input) none
     );
     void ResizeNormal(                                                        // Resize normals' list
-        int                  dim = 3                                          // (input/optional) simplex type
+        void                                                                  // (input) none
     );
     void ResizeSimplex(                                                       // Resize simplex-vertex connectivity
         void                                                                  // (input) none
@@ -195,7 +199,7 @@ class Class_SurfTri {
         int                  a = 128                                          // (input/optional) number of bins
     );
     void BinSortV(                                                            // Sort tasselation vertices on regular bins using an external vertex list
-        dvector2D           &,                                                // (input) external vertex list
+        dvecarr3E           &,                                                // (input) external vertex list
         ivector1D           &,                                                // (input/output) map vertex->bin
         int                  a = 128                                          // (input/optional) number of bins
     );
@@ -206,7 +210,7 @@ class Class_SurfTri {
         void                                                                  // (input) none
     );
     void SetTolerance(                                                        // Set tollerance for distance check
-        dvector2D           &                                                 // (input) external vertex list
+        dvecarr3E           &                                                 // (input) external vertex list
     );
 
     // Objects builder ------------------------------------------------------ //
@@ -215,7 +219,7 @@ class Class_SurfTri {
         void                                                                  // (input) nonde
     );
     void FixNodeNumb(                                                         // Fix local node numbering according to normals using an external vertex list
-        dvector2D           &                                                 // (input) external vertex list
+        dvecarr3E           &                                                 // (input) external vertex list
     );
     void FixNodeNumb(                                                         // Fix local node numbering given a seed
         int                                                                   // (input) global index of seed simplex
@@ -227,43 +231,43 @@ class Class_SurfTri {
         void                                                                  // (input) none
     );
     void GenerateNormals(                                                     // Generate simplex normals using vertex coordinate list
-        dvector2D           &                                                 // (input) external vertex list
+        dvecarr3E           &                                                 // (input) external vertex list
     );
     void GenerateENormals(                                                    // Generate edge's normals
         ivector2D           &,                                                // (input) edge-vertex connectivity
         ivector2D           &,                                                // (input) simplex-edge connectivity
-        dvector2D           &                                                 // (input/output) edges' normals
+        dvecarr3E           &                                                 // (input/output) edges' normals
     );
     void GenerateENormals(                                                    // Generate edge's normals using an external vertex list
-        dvector2D           &,                                                // (input) external vertex list
+        dvecarr3E           &,                                                // (input) external vertex list
         ivector2D           &,                                                // (input) edge-vertex connectivity
         ivector2D           &,                                                // (input) simplex-edge connectivity
-        dvector2D           &                                                 // (input/output) edges' normals
+        dvecarr3E           &                                                 // (input/output) edges' normals
     );
     void GenerateVNormals(                                                    // Generate vertex normals
         ivector2D           &,                                                // (input) edge-vertex connectivity
         ivector2D           &,                                                // (input) simplex-edge connectivity
-        dvector2D           &,                                                // (input) edges' normals
-        dvector2D           &                                                 // (input/output) vertex normals
+        dvecarr3E           &,                                                // (input) edges' normals
+        dvecarr3E           &                                                 // (input/output) vertex normals
     );
     void GenerateVNormals(                                                    // Generate vertex normals using an external vertex list
-        dvector2D           &,                                                // (input) external vertex list
+        dvecarr3E           &,                                                // (input) external vertex list
         ivector2D           &,                                                // (input) edge-vertex connectivity
         ivector2D           &,                                                // (input) simplex-edge connectivity
-        dvector2D           &,                                                // (input) edges' normals
-        dvector2D           &                                                 // (input/output) vertex normals
+        dvecarr3E           &,                                                // (input) edges' normals
+        dvecarr3E           &                                                 // (input/output) vertex normals
     );
     void BuildAdjacency(                                                      // Build simplex-simplex adjacency matrix
         void                                                                  // (input) none
     );
     void BuildAdjacency(                                                      // Build simplex-simplex adjacency matrix using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        dvecarr3E           &                                                 // (input) External vertex list
     );
     void UpdateAdjacency(                                                     // Update simplex-simplex adjacency matrix
         ivector1D           &                                                 // (input) list of simplicies to be updated
     );
     void UpdateAdjacency(                                                     // Update simplex-simplex adjacency matrix using an external vertex list
-        dvector2D           &,                                                // (input) external vertex list
+        dvecarr3E           &,                                                // (input) external vertex list
         ivector1D           &                                                 // (input) list of simplicies to be updated
     );
     void BuildEdges(                                                          // Build edge list
@@ -277,25 +281,25 @@ class Class_SurfTri {
         void                                                                  // (input) none
     );
     int CountIsolatedVertex(                                                  // Count isolated vertex in tasselation using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        dvecarr3E           &                                                 // (input) External vertex list
     );
     int CountFreeVertex(                                                      // Count free vertices in the tasselation
         void                                                                  // (input) none
     );
     int CountFreeVertex(                                                      // Count free vertices in the tasselation using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        dvecarr3E           &                                                 // (input) External vertex list
     );
     int CountDoubleVertex(                                                    // Counte duplicated vertices
         void                                                                  // (input) none
     );
     int CountDoubleVertex(                                                    // Counte duplicated vertices using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        dvecarr3E           &                                                 // (input) External vertex list
     );
     int CountIsolatedSimplex(                                                 // Count isolated simplicies in the tasselation
         void                                                                  // (input) none
     );
     int CountIsolatedSimplex(                                                 // Count isolated simplicies in the tasselation using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        dvecarr3E           &                                                 // (input) External vertex list
     );
     int CountFreeSimplex(                                                     // Count isolated simplicies in the tasselation
         void                                                                  // (input) none
@@ -304,7 +308,7 @@ class Class_SurfTri {
         void                                                                  // (input) none
     );
     int CountDoubleSimplex(                                                   // Count duplicated simplicies using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        dvecarr3E           &                                                 // (input) External vertex list
     );
 
    /*! Count true duplicated simplicies: if two simplicies of the same kind are defined by the same
@@ -315,9 +319,9 @@ class Class_SurfTri {
 
    /*! Count true duplicated simplicies using external list: if two simplicies of the same kind are
        defined by the same vertices but different vertex ordering, they are considered duplicated. 
-       An external dvector2D vertex list is required as INPUT. */ 
+       An external dvecarr3E vertex list is required as INPUT. */ 
    int CountTrueDoubleSimplex(    
-	dvector2D &		    
+	dvecarr3E &		    
 	);				   
 					   
     int CountEdges(                                                           // Count tasselation edges
@@ -333,38 +337,38 @@ class Class_SurfTri {
         void                                                                  // (input) none
     );
     ivector1D FindIsolatedVertex(                                             // Find isolated vertices in tasselation using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        dvecarr3E           &                                                 // (input) External vertex list
     );
     ivector1D FindFreeVertex(                                                 // Find free vertices in tasselation
         void                                                                  // (input) nonde
     );
     ivector1D FindFreeVertex(                                                 // Find free vertices in tasselation using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        dvecarr3E           &                                                 // (input) External vertex list
     );
     ivector1D FindDoubleVertex(                                               // Find duplicated vertices in tasselation
         int                  a = 128                                          // (input/optional) number of bins for vertex sorting
     );
     ivector1D FindDoubleVertex(                                               // Find duplicated vertices in tasselation using an external vertex list
-        dvector2D           &,                                                // (inptu) External vertex list
+        dvecarr3E           &,                                                // (inptu) External vertex list
         int                  a = 128                                          // (input/optional) number of bins for vertex sorting
     );
     ivector1D FindIsolatedSimplex(                                            // Find isolated simplicies in the tasselation
         void                                                                  // (input) none
     );
     ivector1D FindIsolatedSimplex(                                            // Find isolated simplicies in the tasselation using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        dvecarr3E           &                                                 // (input) External vertex list
     );
     ivector1D FindFreeSimplex(                                                // Find free simplicies in the tasselation
         void                                                                  // (input) none
     );
     ivector1D FindFreeSimplex(                                                // Find free simplicies in the tasselation using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        dvecarr3E           &                                                 // (input) External vertex list
     );
     ivector1D FindDoubleSimplex(                                              // Find duplicated simplicies
         void                                                                  // (input)
     );
     ivector1D FindDoubleSimplex(                                              // Find duplicated simplicies using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        dvecarr3E           &                                                 // (input) External vertex list
     );
 
     /*! Find true duplicated simplicies: if two simplicies of the same kind are defined by the same
@@ -375,16 +379,16 @@ class Class_SurfTri {
 				
     /*! Find true duplicated simplicies using external list: if two simplicies of the same kind are
        defined by the same vertices but different vertex ordering, they are considered duplicated. 
-       An external dvector2D vertex list is required as INPUT. */ 
+       An external dvecarr3E vertex list is required as INPUT. */ 
     ivector1D FindTrueDoubleSimplex( 
-              dvector2D &		
+              dvecarr3E &		
     );				
 
     ivector1D Find0AreaSimplex(                                               // Find 0-area simplicies in the surface tasselation
         void                                                                  // (input) none
     );
     ivector1D Find0AreaSimplex(                                               // Find 0-area simplicies in the surface tasselation using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        dvecarr3E           &                                                 // (input) External vertex list
     );
 
     // Cleaning tools ------------------------------------------------------- //
@@ -408,7 +412,7 @@ class Class_SurfTri {
         int                  a = 128                                          // (input/optional) number of bins used for vertex sorting
     );
     void CollapseDoubleVertex(                                                // Remove double vertices using an external vertex list
-        dvector2D           &,                                                // (input) external vertex list
+        dvecarr3E           &,                                                // (input) external vertex list
         ivector1D           &,                                                // (input/output) list of collapsed vertices
         int                  a = 128                                          // (input/optional) number of bins used for vertex sorting
     );
@@ -446,7 +450,7 @@ class Class_SurfTri {
         ivector1D           &                                                 // (input/output) mapper between old and new numeration
     );
     void RemoveIsolatedSimplex(                                               // Remove isolated simplicies from the tasselation
-        dvector2D           &                                                 // (input) External vertex list
+        dvecarr3E           &                                                 // (input) External vertex list
     );
     void RemoveDoubleSimplex(                                                 // Remove duplicated simplicies from tasselation
         void                                                                  // (input) none
@@ -455,7 +459,7 @@ class Class_SurfTri {
         ivector1D           &                                                 // (input) map between old and new numeration
     );
     void RemoveDoubleSimplex(                                                 // Remove duplicated simplicies from tasselation using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        dvecarr3E           &                                                 // (input) External vertex list
     );
     /*! Remove true duplicated simplicies. */	
     void RemoveTrueDoubleSimplex( 
@@ -465,9 +469,9 @@ class Class_SurfTri {
     void RemoveTrueDoubleSimplex(				
          ivector1D &      
     );
-    /*! Remove true duplicated simplicies, providing an external vertex list dvector2D */	
+    /*! Remove true duplicated simplicies, providing an external vertex list dvecarr3E */	
     void RemoveTrueDoubleSimplex(
-         dvector2D &             
+         dvecarr3E &             
     );
     void Remove0AreaSimplex(                                                  // Remove 0-area simplicies from tasselation
         void                                                                  // (input) none
@@ -476,13 +480,13 @@ class Class_SurfTri {
         ivector1D           &                                                 // (input/output) mapper between new and old numbering
     );
     void Remove0AreaSimplex(                                                  // Remove 0-area simplicies from tasselation using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        dvecarr3E           &                                                 // (input) External vertex list
     );
     void Clean(                                                               // Clean surface tasselation
         void                                                                  // (input) none
     );
     void Clean(                                                               // Clean surface tasselation using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        dvecarr3E           &                                                 // (input) External vertex list
     );
 
     // Stats Tools ---------------------------------------------------------- //
@@ -492,7 +496,7 @@ class Class_SurfTri {
     );
     void Stats(                                                               // Compute tasselation stats using an external vertex list
         ostream             &,                                                // (input) output stream
-        dvector2D           &                                                 // (input) External vertex list
+        dvecarr3E           &                                                 // (input) External vertex list
     );
 
     // Generation methods =================================================== //
@@ -500,27 +504,27 @@ class Class_SurfTri {
     // Add elements --------------------------------------------------------- //
     public:
     void AddVertex(                                                           // Add a single vertex to vertex list
-        dvector1D           &                                                 // (input) vertex coordinates
+        darray3E            &                                                 // (input) vertex coordinates
     );
     void AddVertices(                                                         // Add a multiple vertices to tasselation
-        dvector2D           &                                                 // (input) vertex coordinate list
+        dvecarr3E           &                                                 // (input) vertex coordinate list
     );
     void AddSimplex(                                                          // Add simplex to tasselation
         ivector1D           &                                                 // (input) simplex vertex coordinates
     );
     void AddSimplex(                                                          // Add simplex to tasselation
-        dvector2D           &                                                 // (input) coordinates of each simplex vertex
+        dvecarr3E           &                                                 // (input) coordinates of each simplex vertex
     );
     void AddSimplicies(                                                       // Add multiple simplicies to tasselation
         ivector2D           &                                                 // (input) simplex-vertex connectivity
     );
     void AddSimplicies(                                                       // Add multiple simplicies to tasselation
-        dvector2D           &,                                                // (input) vertex coordinate list
+        dvecarr3E           &,                                                // (input) vertex coordinate list
         ivector2D           &                                                 // (input) simplex-vertex connectivity
     );
     void SetNormal(                                                           // Set normal for a given simplex
         int                  ,                                                // (input) simplex global index
-        dvector1D           &                                                 // (input) normal vector
+        darray3E            &                                                 // (input) normal vector
     );
     void SetAdjacency(                                                        // Set adjacencies for a given simplex
         int                  ,                                                // (input) simpex global index
@@ -598,26 +602,32 @@ class Class_SurfTri {
         dvector1D           &                                                 // (input/output) limits in the z-direction
     );
     void BoundingBox(                                                         // Compute limits of tasselation bounding box (2D case) using an external vertex list
-        dvector2D           &,                                                // (input) external vertex list
+        dvecarr3E           &,                                                // (input) external vertex list
         dvector1D           &,                                                // (input/output) limits in the x-direction
         dvector1D           &                                                 // (input/output) limits in the y-direction
     );
     void BoundingBox(                                                         // Compute limits of tasselation bounding box (3D case) using an external vertex list
-        dvector2D           &,                                                // (input) external vertex list
+        dvecarr3E           &,                                                // (input) external vertex list
         dvector1D           &,                                                // (input/output) limits in the x-direction
         dvector1D           &,                                                // (input/output) limits in the y-direction
         dvector1D           &                                                 // (input/output) limits in the z-direction
     );
 
-            // Boundaries -------------------------------------------------------------------- //
-            void Boundaries(Class_SurfTri &);                                                  // Returns mesh boundaries
-            void Boundaries(dvector2D &, Class_SurfTri &);                                     // Returns mesh boundaries (external vertex list)
+    // Boundaries -------------------------------------------------------------------- //
+    void Boundaries(                                                          // Returns mesh boundaries
+        Class_SurfTri       &
+    );                                              
 
-            // Searching algorithms ---------------------------------------------------------- //
-            int ReturnTriangleID(          // RETURN ID OF SIMPLEX WHICH A GIVEN POINT BELONGS TO
-                dvector1D &,               // Point coordinates                                (INPUT)
-                int                        // Global index of simplex used as seed             (INPUT)
-            );
+    void Boundaries(                                                           // Returns mesh boundaries (external vertex list)
+        dvecarr3E           &, 
+        Class_SurfTri       &
+    );                                  
+
+    // Searching algorithms ---------------------------------------------------------- //
+    int ReturnTriangleID(          // RETURN ID OF SIMPLEX WHICH A GIVEN POINT BELONGS TO
+        darray3E  &,               // Point coordinates                                (INPUT)
+        int                        // Global index of simplex used as seed             (INPUT)
+    );
 
     // Patch decomposition -------------------------------------------------- //
     void FindPatch(                                                           // Find surface patch
@@ -672,7 +682,7 @@ class Class_SurfTri {
 
             // Point data -------------------------------------------------------------------- //
             template <class T>
-            void InterpolatePointData(dvector1D &, int, vector<T> &, T &);                     // Interpolate point data
+            void InterpolatePointData(darray3E &, int, vector<T> &, T &);                     // Interpolate point data
             template <class T>
             void PointData2CellData(vector<T> &, vector<T> &);                                 // Convert point data to cell data
             template <class T>
@@ -680,12 +690,12 @@ class Class_SurfTri {
 
     // Check tools ========================================================== //
     public:
-    dvector1D Baricenter(                                                     // Compute simplex baricenter
+    darray3E Baricenter(                                                     // Compute simplex baricenter
         int                                                                   // (input) Simplex global index
     );
-    dvector1D Baricenter(                                                     // Compute simplex baricenter using an external vertex list
+    darray3E Baricenter(                                                     // Compute simplex baricenter using an external vertex list
         int                  ,                                                // (input) Simplex global index
-        dvector2D           &                                                 // (input) Exteranl vertex list
+        dvecarr3E           &                                                 // (input) Exteranl vertex list
     );
     void minEdge(                                                             // Compute lenght of minimal edge over all tasselation simplicies
         double              &,                                                // (input/output) edge length
@@ -693,7 +703,7 @@ class Class_SurfTri {
         int                 &                                                 // (input/output) edge local index
     );
     void minEdge(                                                             // Compute lenght of minimal edge over all tasselation simplicies using an external vertex list
-        dvector2D           &,                                                // (input) external vertex list
+        dvecarr3E           &,                                                // (input) external vertex list
         double              &,                                                // (input/output) edge length
         int                 &,                                                // (input/output) Simplex global index
         int                 &                                                 // (input/output) edge local index
@@ -704,7 +714,7 @@ class Class_SurfTri {
         int                 &                                                 // (input/output) edge local index
     );
     void minEdge(                                                             // Compute lenght of minimal edge for a given simplex using an external vertex list
-        dvector2D           &,                                                // (input) External vertex list
+        dvecarr3E           &,                                                // (input) External vertex list
         int                  ,                                                // (input) Simplex global index
         double              &,                                                // (input/output) edge length
         int                 &                                                 // (input/output) edge local index
@@ -715,7 +725,7 @@ class Class_SurfTri {
         int                 &                                                 // (input/output) edge local index
     );
     void maxEdge(                                                             // Compute length of maximal edge over all tasselation simplicies using an external vertex list
-        dvector2D           &,                                                // (input) external vertex list
+        dvecarr3E           &,                                                // (input) external vertex list
         double              &,                                                // (input/output) edge length
         int                 &,                                                // (input/output) Simplex global index
         int                 &                                                 // (input/output) edge local index
@@ -726,7 +736,7 @@ class Class_SurfTri {
         int                 &                                                 // (input/output) edge local index
     );
     void maxEdge(                                                             // Compute length of maximal edge for a given simplex using an external vertex list
-        dvector2D           &,                                                // (input) External vertex list
+        dvecarr3E           &,                                                // (input) External vertex list
         int                  ,                                                // (input) Simplex global index
         double              &,                                                // (input/output) edge length
         int                 &                                                 // (input/output) edge local index
@@ -735,20 +745,20 @@ class Class_SurfTri {
         void                                                                  // (input) none
     );
     double Area(                                                              // Compute tasselation area using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        dvecarr3E           &                                                 // (input) External vertex list
     );
     double Area(                                                              // Compute simplex area using an external vertex list
         int                                                                   // (input) Simplex global index
     );
     double Area(                                                              // Compute simplex area using an external vertex list
         int                  ,                                                // (input) Simplex global index
-        dvector2D           &                                                 // (input) External vertex list
+        dvecarr3E           &                                                 // (input) External vertex list
     );
     void Area(                                                                // Compute area of each simplex in the surface tasselation
         dvector1D           &                                                 // (input/output) area of each simplex
     );
     void Area(                                                                // Compute area of each simplex in the surface tasselation using an external vertex list
-        dvector2D           &,                                                // (input) External vertex list
+        dvecarr3E           &,                                                // (input) External vertex list
         dvector1D           &                                                 // (input/output) area of each simplex
     );
     double AR(                                                                // Compute simplex aspect ratio
@@ -756,13 +766,13 @@ class Class_SurfTri {
     );
     double AR(                                                                // Compute simplex aspect ratio using an external vertex list
         int                  ,                                                // (input) Simplex global index
-        dvector2D           &                                                 // (input) External vertex list
+        dvecarr3E           &                                                 // (input) External vertex list
     );
     void AR(                                                                  // Compute aspect ratio of each simplex in the tasselation
         dvector1D           &                                                 // (input/output) aspect ratio of each simplex
     );
     void AR(                                                                  // Compute aspect ratio of each simplex in the tasselation using an external vertex list
-        dvector2D           &,                                                // (input) External vertex list
+        dvecarr3E           &,                                                // (input) External vertex list
         dvector1D           &                                                 // (input/output) aspect ratio of each simplex
     );
     void minAngle(                                                            // Compute min-angle over all simplicies in the tasselation
@@ -771,7 +781,7 @@ class Class_SurfTri {
         int                 &                                                 // (input/output) vertex local index
     );
     void minAngle(                                                            // Compute min-angle over all simplicies in the tasselation using an external vertex list
-        dvector2D           &,                                                // (input) External vertex list
+        dvecarr3E           &,                                                // (input) External vertex list
         double              &,                                                // (input/output) min angle value
         int                 &,                                                // (input/output) Simplex global index
         int                 &                                                 // (input/output) vertex local index
@@ -782,7 +792,7 @@ class Class_SurfTri {
         int                 &                                                 // (input/output) vertex local index
     );
     void minAngle(                                                            // Compute simplex min-angle using an external vertex list
-        dvector2D           &,                                                // (input) External vertex list
+        dvecarr3E           &,                                                // (input) External vertex list
         int                  ,                                                // (input) Simplex global index
         double              &,                                                // (input/output) min angle value
         int                 &                                                 // (input/output) vertex local index
@@ -791,7 +801,7 @@ class Class_SurfTri {
         dvector1D           &                                                 // (input/output) min angle for each simplex
     );
     void minAngle(                                                            // Compute min angle for each simplex in the tasselation
-        dvector2D           &,                                                // (input) External vertex list
+        dvecarr3E           &,                                                // (input) External vertex list
         dvector1D           &                                                 // (input/output) min angle for each simplex
     );
     void maxAngle(                                                            // Compute max angle over all simplicies
@@ -800,7 +810,7 @@ class Class_SurfTri {
         int                 &                                                 // (input/output) vertex local index
     );
     void maxAngle(                                                            // Compute max angle over all simplicies using an external vertex list
-        dvector2D           &,                                                // (input) External vertex list
+        dvecarr3E           &,                                                // (input) External vertex list
         double              &,                                                // (input/output) simplex max angle
         int                 &,                                                // (input/output) Simplex global index
         int                 &                                                 // (input/output) vertex local index
@@ -811,7 +821,7 @@ class Class_SurfTri {
         int                 &                                                 // (input/output) vertex local index
     );
     void maxAngle(                                                            // Compute simplex max angle using an external vertex list
-        dvector2D           &,                                                // (input) External vertex list
+        dvecarr3E           &,                                                // (input) External vertex list
         int                  ,                                                // (input) Simplex global index
         double              &,                                                // (input/output) simplex max angle
         int                 &                                                 // (input/output) vertex local index
@@ -820,25 +830,25 @@ class Class_SurfTri {
         dvector1D           &                                                 // (input/output) max angle for each simplex
     );
     void maxAngle(                                                            // Compute max angle for each simplex using an external vertex list
-        dvector2D           &,                                                // (input) External vertex list
+        dvecarr3E           &,                                                // (input) External vertex list
         dvector1D           &                                                 // (input/output) max angle for each simplex
     );
-    dvector1D Edge_midPoint(                                                  // Compute midpoint of simplex edge
+    darray3E  Edge_midPoint(                                                  // Compute midpoint of simplex edge
         int                  ,                                                // (input) Simplex global index
         int                                                                   // (input) edge local index
     );
-    dvector1D Edge_midPoint(                                                  // Compute midpoint of simplex edge using an external vertex list
-        dvector2D           &,                                                // (input) External vertex list
+    darray3E   Edge_midPoint(                                                  // Compute midpoint of simplex edge using an external vertex list
+        dvecarr3E           &,                                                // (input) External vertex list
         int                  ,                                                // (input) Simplex global index
         int                                                                   // (input) edge local index
     );
-            dvector1D CircumCenter(        // COMPUTE SIMPLEX CIRCUMCENTER
-                int                        // Simplex global index                             (INPUT)
-            );
-            dvector1D CircumCenter(        // COMPUTE SIMPLEX CIRCUMCENTER USING AN EXTERNAL VERTEX LIST
-                int,                       // Simplex global index                             (INPUT)
-                dvector2D &                // vertex list                                      (INPUT)
-            );
+    darray3E  CircumCenter(                                                   // COMPUTE SIMPLEX CIRCUMCENTER
+        int                                                                   // Simplex global index                             (INPUT)
+    );
+    darray3E  CircumCenter(                                                   // COMPUTE SIMPLEX CIRCUMCENTER USING AN EXTERNAL VERTEX LIST
+        int,                                                                  // Simplex global index                             (INPUT)
+        dvecarr3E &                                                           // vertex list                                      (INPUT)
+    );
     int VertexValence(                                                        // Compute vertex valence
         int                  ,                                                // (input) Global index of simplex, which vertex belongs to
         int                                                                   // (input) local index of vertex
@@ -858,32 +868,42 @@ class Class_SurfTri {
         double                                                                // (input) threshold for binary refinement
     );
     void BinaryRefinement(                                                    // Binary refinement of tasselation using an external vertex list
-        dvector2D           &,                                                // (input/output) vertex coordinate list
+        dvecarr3E           &,                                                // (input/output) vertex coordinate list
         double                                                                // (input) threshold for binary refinement
     );
     void split_1segm2segm(                                                    // Split 2-simplex into two 2-simplcies at specified point
         int                  ,                                                // (input) simplex global index
-        dvector1D           &                                                 // (input) point coordinates
+        darray3E            &                                                 // (input) point coordinates
     );
     void split_1segm2segm(                                                    // Split 2-simplex into two 2-simplcies at specified point using an external vertex list
         int                  ,                                                // (input) simplex global index
         int                  ,                                                // (input) global index of vertex used to split segment
-        dvector2D           &                                                 // (input) external vertex list
+        dvecarr3E           &                                                 // (input) external vertex list
     );
-            void Collapse_2Simplex(int , int);            // Collapse 2 simplex
+    void Collapse_2Simplex(                                                   // Collapse 2 simplex
+        int , 
+        int
+    );                                        
     void Split_2Simplex(                                                      // Split a 2-simplex at mid-point
         int                  T                                                // (input) simplex global index
     );
     void Split_2Simplex(                                                      // Split a 2-simplex at mid-point using an external vertex list
-        dvector2D           &,                                                // (input/output) vertex coordinate list
+        dvecarr3E           &,                                                // (input/output) vertex coordinate list
         int                  T                                                // (input) simplex global index
     );
-            void SplitEdge(int , int );                   // Split edge at mid-point
-            void CollapseEdge(int , int , int);           // Collapse edge
+    void SplitEdge(                                                           // Split edge at mid-point
+        int , 
+        int 
+    );                 
+    void CollapseEdge(                                                        // Collapse edge
+        int , 
+        int , 
+        int
+    );      
 
-            // Voronoi diagrams -------------------------------------------------------------- //
-            void Voronoi(Class_SurfTri &);                // Compute approximated Voronoi tasselation
-            void Voronoi(Class_SurfTri &, dvector2D &);
+    // Voronoi diagrams -------------------------------------------------------------- //
+    void Voronoi(Class_SurfTri &);                // Compute approximated Voronoi tasselation
+    void Voronoi(Class_SurfTri &, dvector2D &);
 
     // IO functions ========================================================== //
     public:
@@ -913,11 +933,13 @@ class Class_SurfTri {
             void ExportVPData_vtu(    // EXPORT VECTOR FIELD AT TASSELATION VERTICES IN .VTU FILE
                 string,               // .vtu filename                                         (INPUT)
                 string,               // vector field name                                     (INPUT)
-                dvector2D &);         // vector field                                          (INPUT)
+                dvecarr3E &);         // vector field                                          (INPUT)
+
             void ExportVCData_vtu(    // EXPORT VECTOR FIELD AT TASSELATION SIMPLEX IN .VTU FILE
                 string,               // .vtu filename                                         (INPUT)
                 string,               // vector field name                                     (INPUT)
-                dvector2D &);         // vector field                                          (INPUT)
+                dvecarr3E &);         // vector field                                          (INPUT)
+
             template <class T>
             void ExportCellData_vtu(string,                // Export cell data
                                     svector1D &,

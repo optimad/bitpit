@@ -545,14 +545,14 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::BoundingBox(
-    dvector2D   &V,
+    dvecarr3E   &V,
     dvector1D   &x_ext,
     dvector1D   &y_ext
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::BoundingBox(                                           //
-//     dvector2D   &V,                                                        //
+//     dvecarr3E   &V,                                                        //
 //     dvector1D   &x_ext,                                                    //
 //     dvector1D   &y_ext)                                                    //
 //                                                                            //
@@ -561,7 +561,7 @@ void Class_SurfTri::BoundingBox(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V       : dvector2D vertex coordinate list. V[i][0], V[i][1], ... are    //
+// - V       : dvecarr3E vertex coordinate list. V[i][0], V[i][1], ... are    //
 //             the x, y, ... coordinates of the i-th vertex.                  //
 // - x_ext   : dvector1D, extent of bounding box in the x direction           //
 // - y_ext   : dvector1D, extent of bounding box in the y direction           //
@@ -610,7 +610,7 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::BoundingBox(
-    dvector2D   &V,
+    dvecarr3E   &V,
     dvector1D   &x_ext,
     dvector1D   &y_ext,
     dvector1D   &z_ext
@@ -618,7 +618,7 @@ void Class_SurfTri::BoundingBox(
 
 // ========================================================================== //
 // void Class_SurfTri::BoundingBox(                                           //
-//     dvector2D   &V,                                                        //
+//     dvecarr3E   &V,                                                        //
 //     dvector1D   &x_ext,                                                    //
 //     dvector1D   &y_ext,                                                    //
 //     dvector1D   &z_ext)                                                    //
@@ -628,7 +628,7 @@ void Class_SurfTri::BoundingBox(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V       : dvector2D vertex coordinate list. V[i][0], V[i][1], ... are    //
+// - V       : dvecarr3E vertex coordinate list. V[i][0], V[i][1], ... are    //
 //             the x, y, ... coordinates of the i-th vertex.                  //
 // - x_ext   : dvector1D, extent of bounding box in the x direction           //
 // - y_ext   : dvector1D, extent of bounding box in the y direction           //
@@ -678,342 +678,344 @@ for (i = 1; i < nSimplex; i++) {
 
 return; };
 
-        // ----------------------------------------------------------------------------------- //
-        void Class_SurfTri::Boundaries(
-            Class_SurfTri      &Bounds
-        ) {
+// ----------------------------------------------------------------------------------- //
+void Class_SurfTri::Boundaries(
+    Class_SurfTri      &Bounds
+) {
 
-        // =================================================================================== //
-        // void Class_SurfTri::Boundaries(                                                     //
-        //     Class_SurfTri      &Bounds)                                                     //
-        //                                                                                     //
-        // Extract tasselation boundaries. A tessalation boundary is composed of free edges.   //
-        // =================================================================================== //
-        // INPUT                                                                               //
-        // =================================================================================== //
-        // - Bounds      : Class_SurfTri, with tasselation boundaries.                         //
-        // =================================================================================== //
-        // OUTPUT                                                                              //
-        // =================================================================================== //
-        // - none                                                                              //
-        // =================================================================================== //
+// =================================================================================== //
+// void Class_SurfTri::Boundaries(                                                     //
+//     Class_SurfTri      &Bounds)                                                     //
+//                                                                                     //
+// Extract tasselation boundaries. A tessalation boundary is composed of free edges.   //
+// =================================================================================== //
+// INPUT                                                                               //
+// =================================================================================== //
+// - Bounds      : Class_SurfTri, with tasselation boundaries.                         //
+// =================================================================================== //
+// OUTPUT                                                                              //
+// =================================================================================== //
+// - none                                                                              //
+// =================================================================================== //
 
-        // =================================================================================== //
-        // VARIABLES DECLARATION                                                               //
-        // =================================================================================== //
+// =================================================================================== //
+// VARIABLES DECLARATION                                                               //
+// =================================================================================== //
 
-        // Local variables
-        ivector1D      simplex0D(1, -1);
-        ivector1D      simplex1D(2, -1);
+// Local variables
+ivector1D      simplex0D(1, -1);
+ivector1D      simplex1D(2, -1);
 
-        // Counters
-        int            n, i, j, T;
+// Counters
+int            n, i, j, T;
 
-        // =================================================================================== //
-        // EXTRACT FREE EDGES IN THE TASSELATION                                               //
-        // =================================================================================== //
-        for (T = 0; T < nSimplex; T++) {
-            n = Simplex[T].size();
-            for (i = 0; i < n; i++) {
-                if (Adjacency[T][i][0] < 0) {
-                    if (n == 1) {
-                    }
-                    else if (n == 2) {
-                        Bounds.AddVertex(Vertex[Simplex[T][i]]);
-                        simplex0D[0] = Bounds.nVertex-1;
-                        Bounds.AddSimplex(simplex0D);
-                    }
-                    else {
-                        j = (i+1) % n;
-                        Bounds.AddVertex(Vertex[Simplex[T][i]]);
-                        Bounds.AddVertex(Vertex[Simplex[T][j]]);
-                        simplex1D[0] = Bounds.nVertex-2;
-                        simplex1D[1] = Bounds.nVertex-1;
-                        Bounds.AddSimplex(simplex1D);
-                    }
-                }
-            } //next i
-        } //next T
-
-        // =================================================================================== //
-        // CLEAN BOUNDARIES                                                                    //
-        // =================================================================================== //
-        Bounds.RemoveDoubleVertex();
-
-        return; };
-
-        // ----------------------------------------------------------------------------------- //
-        void Class_SurfTri::Boundaries(
-            dvector2D          &V,
-            Class_SurfTri      &Bounds
-        ) {
-
-        // =================================================================================== //
-        // void Class_SurfTri::Boundaries(                                                     //
-        //     dvector2D          &V,                                                          //
-        //     Class_SurfTri      &Bounds)                                                     //
-        //                                                                                     //
-        // Extract tasselation boundaries. A tessalation boundary is composed of free edges.   //
-        // Vertex list is provided externally.                                                 //
-        // =================================================================================== //
-        // INPUT                                                                               //
-        // =================================================================================== //
-        // - V           : dvector2D, with vertex coordinate list. V[i][0], V[i][1], ...       //
-        //                 are the x, y, ... coordinates of the i-th vertex.                   //
-        // - Bounds      : Class_SurfTri, with tasselation boundaries.                         //
-        // =================================================================================== //
-        // OUTPUT                                                                              //
-        // =================================================================================== //
-        // - none                                                                              //
-        // =================================================================================== //
-
-        // =================================================================================== //
-        // VARIABLES DECLARATION                                                               //
-        // =================================================================================== //
-
-        // Local variables
-        ivector1D      simplex0D(1, -1);
-        ivector1D      simplex1D(2, -1);
-
-        // Counters
-        int            n, i, j, T;
-
-        // =================================================================================== //
-        // EXTRACT FREE EDGES IN THE TASSELATION                                               //
-        // =================================================================================== //
-        for (T = 0; T < nSimplex; T++) {
-            n = Simplex[T].size();
-            for (i = 0; i < n; i++) {
-                if (Adjacency[T][i][0] < 0) {
-                    if (n == 1) {
-                    }
-                    else if (n == 2) {
-                        Bounds.AddVertex(V[Simplex[T][i]]);
-                        simplex0D[0] = Bounds.nVertex-1;
-                        Bounds.AddSimplex(simplex0D);
-                    }
-                    else {
-                        j = (i+1) % n;
-                        Bounds.AddVertex(V[Simplex[T][i]]);
-                        Bounds.AddVertex(V[Simplex[T][j]]);
-                        simplex1D[0] = Bounds.nVertex-2;
-                        simplex1D[1] = Bounds.nVertex-1;
-                        Bounds.AddSimplex(simplex1D);
-                    }
-                }
-            } //next i
-        } //next T
-
-        // =================================================================================== //
-        // CLEAN BOUNDARIES                                                                    //
-        // =================================================================================== //
-        Bounds.RemoveDoubleVertex();
-
-        return; };
-
-        // Search algorithms ================================================================= //
-
-        // ----------------------------------------------------------------------------------- //
-        // NOTE:                                                                               //
-        // - da ottimizzare                                                                    //
-        // - da generalizzare per il caso non manifold ed elementi di codimensione < d-1       //
-        // ----------------------------------------------------------------------------------- //
-        int Class_SurfTri::ReturnTriangleID(
-            dvector1D &P,
-            int        I_
-        ) {
-
-        // =================================================================================== //
-        // int Class_SurfTri::ReturnTriangleID(                                                //
-        //     dvector1D &P,                                                                   //
-        //     int        I_)                                                                   //
-        //                                                                                     //
-        // Returns the global index of the simplex, which contains point P. The point P MUST   //
-        // lie on the surface tasselation.                                                     //
-        // (Lawson's search algorithm, adapted for surface tasselation).                       //
-        // If no simplex is found returns -1.                                                  //
-        // ** WARNING ****                                                                     //
-        // Under construction...                                                               //
-        // Works only on 3d manifold tasselation.                                              //
-        // =================================================================================== //
-        // INPUT                                                                               //
-        // =================================================================================== //
-        // - P          : dvector1D, with vertex coordinates                                   //
-        // - I_          : int, global index of simplex used as seed in the search algorithm    //
-        //                If I_ < 0, seed is set to 0.                                          //
-        // =================================================================================== //
-        // OUTPUT                                                                              //
-        // =================================================================================== //
-        // - index      : int, global index of the closes simplex to the seed containing       //
-        //                the projection of point P                                            //
-        // =================================================================================== //
-
-        // =================================================================================== //
-        // VARIABLES DECLARATION                                                               //
-        // =================================================================================== //
-
-        // Parameters
-        int                 max_iter = 5;
-        double              dtoll = 1.0e-4;
-
-        // Local variables
-        bool                check;
-        int                 n, dim = Vertex[0].size();
-        int                 index = -1;
-        double              n1, n2, max_theta;
-        bvector1D           visited(nSimplex, false);
-        ivector1D           i_dummy1D(2, -1);
-        ivector2D           backup;
-        dvector1D           theta(3, -1.0);
-        dvector1D           v, v1, v2;
-
-        // Counters
-        int                 i, j, k, m, J, K, iter;
-
-        // =================================================================================== //
-        // INTIALIZE SEARCH PARAMETERS                                                         //
-        // =================================================================================== //
-
-        // Set seed -------------------------------------------------------------------------- //
-        J = max(I_, 0);
-
-        // Simplex normals ------------------------------------------------------------------- //
-        if (Normal.size() < nSimplex) {
-            GenerateNormals();
-        }
-
-        // Adjacencies ----------------------------------------------------------------------- //
-        if (Adjacency.size() < nSimplex) {
-           BuildAdjacency();
-        }
-
-        // =================================================================================== //
-        // SEARCH ALGORITHM                                                                    //
-        // =================================================================================== //
-        max_theta = -2.0;
-        iter = 0;
-        while (iter < max_iter) {
-
-            // Update visited flag ----------------------------------------------------------- //
-            visited[J] = true;
-
-            // Check if P lies inside simplex J ---------------------------------------------- //
-            n = Simplex[J].size();
-            for (i = 0; i < n; i++) {
-
-                // Check direction for the i-th edge
-                j = (i+1) % n;
-                // if (dim < 2) {
-                    // e = Dot_Product(xP - Vertex[Simplex[J][i]],
-                                    // Vertex[Simplex[J][i]] - Vertex[Simplex[J][j]],
-                                    // dim);
-                    // check = (e >= 0.0);
-                // }
-                //else {
-                    v1 = P - Vertex[Simplex[J][i]];
-                    n1 = norm_2(v1);
-                    if (n1 < 1.0e-12) {
-                        return(-1);
-                    }
-                    v1 = v1/n1;
-                    v2 = Vertex[Simplex[J][j]] - Vertex[Simplex[J][i]];
-                    n2 = norm_2(v2);
-                    if (n2 < 1.0e-12) {
-                        return(-1);
-                    }
-                    v2 = v2/n2;
-                    v = Cross_Product(v1, v2);
-                    v = v/norm_2(v);
-                    theta[i] = Dot_Product(Normal[J], v);
-
-                    // Update min theta
-                    max_theta = max(max_theta, theta[i]);
-                //}
-            } //next i
-
-            // Simplex found ----------------------------------------------------------------- //
-            if (max_theta < -1.0 + dtoll) {
-
-                // Debug only (Export search path)
-                // {
-                    // dvector2D    out(nSimplex, dvector1D(1, 0.0));
-                    // svector1D    nomi(1, "s_path");
-                    // for (i = 0; i < nSimplex; i++) {
-                        // if (visited[i] == true) {
-                            // out[i][0] = 1.0;
-                        // }
-                    // }
-                    // ExportCellData_vtu("search.vtu",nomi,out);
-                // }
-                return(J);
+// =================================================================================== //
+// EXTRACT FREE EDGES IN THE TASSELATION                                               //
+// =================================================================================== //
+for (T = 0; T < nSimplex; T++) {
+    n = Simplex[T].size();
+    for (i = 0; i < n; i++) {
+        if (Adjacency[T][i][0] < 0) {
+            if (n == 1) {
             }
-
-            // Next direction ---------------------------------------------------------------- //
+            else if (n == 2) {
+                Bounds.AddVertex(Vertex[Simplex[T][i]]);
+                simplex0D[0] = Bounds.nVertex-1;
+                Bounds.AddSimplex(simplex0D);
+            }
             else {
+                j = (i+1) % n;
+                Bounds.AddVertex(Vertex[Simplex[T][i]]);
+                Bounds.AddVertex(Vertex[Simplex[T][j]]);
+                simplex1D[0] = Bounds.nVertex-2;
+                simplex1D[1] = Bounds.nVertex-1;
+                Bounds.AddSimplex(simplex1D);
+            }
+        }
+    } //next i
+} //next T
 
-                // Next candidate direction
-                check = false;
-                max_theta = -2.0;
-                for (i = 0; i < n; i++) {
-                    K = Adjacency[J][i][0];
-                    if (K >= 0) {
-                        if (!visited[K]) {
-                            if (theta[i] > max_theta) {
-                                check = true;
-                                max_theta = theta[i];
-                                j = i;
-                            }
-                        }
+// =================================================================================== //
+// CLEAN BOUNDARIES                                                                    //
+// =================================================================================== //
+Bounds.RemoveDoubleVertex();
+
+return; };
+
+// ----------------------------------------------------------------------------------- //
+void Class_SurfTri::Boundaries(
+    dvecarr3E          &V,
+    Class_SurfTri      &Bounds
+) {
+
+// =================================================================================== //
+// void Class_SurfTri::Boundaries(                                                     //
+//     dvecarr3E          &V,                                                          //
+//     Class_SurfTri      &Bounds)                                                     //
+//                                                                                     //
+// Extract tasselation boundaries. A tessalation boundary is composed of free edges.   //
+// Vertex list is provided externally.                                                 //
+// =================================================================================== //
+// INPUT                                                                               //
+// =================================================================================== //
+// - V           : dvecarr3E, with vertex coordinate list. V[i][0], V[i][1], ...       //
+//                 are the x, y, ... coordinates of the i-th vertex.                   //
+// - Bounds      : Class_SurfTri, with tasselation boundaries.                         //
+// =================================================================================== //
+// OUTPUT                                                                              //
+// =================================================================================== //
+// - none                                                                              //
+// =================================================================================== //
+
+// =================================================================================== //
+// VARIABLES DECLARATION                                                               //
+// =================================================================================== //
+
+// Local variables
+ivector1D      simplex0D(1, -1);
+ivector1D      simplex1D(2, -1);
+
+// Counters
+int            n, i, j, T;
+
+// =================================================================================== //
+// EXTRACT FREE EDGES IN THE TASSELATION                                               //
+// =================================================================================== //
+for (T = 0; T < nSimplex; T++) {
+    n = Simplex[T].size();
+    for (i = 0; i < n; i++) {
+        if (Adjacency[T][i][0] < 0) {
+            if (n == 1) {
+            }
+            else if (n == 2) {
+                Bounds.AddVertex(V[Simplex[T][i]]);
+                simplex0D[0] = Bounds.nVertex-1;
+                Bounds.AddSimplex(simplex0D);
+            }
+            else {
+                j = (i+1) % n;
+                Bounds.AddVertex(V[Simplex[T][i]]);
+                Bounds.AddVertex(V[Simplex[T][j]]);
+                simplex1D[0] = Bounds.nVertex-2;
+                simplex1D[1] = Bounds.nVertex-1;
+                Bounds.AddSimplex(simplex1D);
+            }
+        }
+    } //next i
+} //next T
+
+// =================================================================================== //
+// CLEAN BOUNDARIES                                                                    //
+// =================================================================================== //
+Bounds.RemoveDoubleVertex();
+
+return; };
+
+// Search algorithms ================================================================= //
+
+// ----------------------------------------------------------------------------------- //
+// NOTE:                                                                               //
+// - da ottimizzare                                                                    //
+// - da generalizzare per il caso non manifold ed elementi di codimensione < d-1       //
+// ----------------------------------------------------------------------------------- //
+int Class_SurfTri::ReturnTriangleID(
+    darray3E  &P,
+    int        I_
+) {
+
+// =================================================================================== //
+// int Class_SurfTri::ReturnTriangleID(                                                //
+//     dvector1D &P,                                                                   //
+//     int        I_)                                                                   //
+//                                                                                     //
+// Returns the global index of the simplex, which contains point P. The point P MUST   //
+// lie on the surface tasselation.                                                     //
+// (Lawson's search algorithm, adapted for surface tasselation).                       //
+// If no simplex is found returns -1.                                                  //
+// ** WARNING ****                                                                     //
+// Under construction...                                                               //
+// Works only on 3d manifold tasselation.                                              //
+// =================================================================================== //
+// INPUT                                                                               //
+// =================================================================================== //
+// - P          : dvector1D, with vertex coordinates                                   //
+// - I_          : int, global index of simplex used as seed in the search algorithm    //
+//                If I_ < 0, seed is set to 0.                                          //
+// =================================================================================== //
+// OUTPUT                                                                              //
+// =================================================================================== //
+// - index      : int, global index of the closes simplex to the seed containing       //
+//                the projection of point P                                            //
+// =================================================================================== //
+
+// =================================================================================== //
+// VARIABLES DECLARATION                                                               //
+// =================================================================================== //
+
+// Parameters
+int                 max_iter = 5;
+double              dtoll = 1.0e-4;
+
+// Local variables
+bool                check;
+int                 n, dim = Vertex[0].size();
+int                 index = -1;
+double              n1, n2, max_theta;
+bvector1D           visited(nSimplex, false);
+ivector1D           i_dummy1D(2, -1);
+ivector2D           backup;
+darray3E            theta;
+darray3E            v, v1, v2;
+
+theta.fill(-1.0) ;
+
+// Counters
+int                 i, j, k, m, J, K, iter;
+
+// =================================================================================== //
+// INTIALIZE SEARCH PARAMETERS                                                         //
+// =================================================================================== //
+
+// Set seed -------------------------------------------------------------------------- //
+J = max(I_, 0);
+
+// Simplex normals ------------------------------------------------------------------- //
+if (Normal.size() < nSimplex) {
+    GenerateNormals();
+}
+
+// Adjacencies ----------------------------------------------------------------------- //
+if (Adjacency.size() < nSimplex) {
+   BuildAdjacency();
+}
+
+// =================================================================================== //
+// SEARCH ALGORITHM                                                                    //
+// =================================================================================== //
+max_theta = -2.0;
+iter = 0;
+while (iter < max_iter) {
+
+    // Update visited flag ----------------------------------------------------------- //
+    visited[J] = true;
+
+    // Check if P lies inside simplex J ---------------------------------------------- //
+    n = Simplex[J].size();
+    for (i = 0; i < n; i++) {
+
+        // Check direction for the i-th edge
+        j = (i+1) % n;
+        // if (dim < 2) {
+            // e = Dot_Product(xP - Vertex[Simplex[J][i]],
+                            // Vertex[Simplex[J][i]] - Vertex[Simplex[J][j]],
+                            // dim);
+            // check = (e >= 0.0);
+        // }
+        //else {
+            v1 = P - Vertex[Simplex[J][i]];
+            n1 = norm_2(v1);
+            if (n1 < 1.0e-12) {
+                return(-1);
+            }
+            v1 = v1/n1;
+            v2 = Vertex[Simplex[J][j]] - Vertex[Simplex[J][i]];
+            n2 = norm_2(v2);
+            if (n2 < 1.0e-12) {
+                return(-1);
+            }
+            v2 = v2/n2;
+            v = Cross_Product(v1, v2);
+            v = v/norm_2(v);
+            theta[i] = Dot_Product(Normal[J], v);
+
+            // Update min theta
+            max_theta = max(max_theta, theta[i]);
+        //}
+    } //next i
+
+    // Simplex found ----------------------------------------------------------------- //
+    if (max_theta < -1.0 + dtoll) {
+
+        // Debug only (Export search path)
+        // {
+            // dvector2D    out(nSimplex, dvector1D(1, 0.0));
+            // svector1D    nomi(1, "s_path");
+            // for (i = 0; i < nSimplex; i++) {
+                // if (visited[i] == true) {
+                    // out[i][0] = 1.0;
+                // }
+            // }
+            // ExportCellData_vtu("search.vtu",nomi,out);
+        // }
+        return(J);
+    }
+
+    // Next direction ---------------------------------------------------------------- //
+    else {
+
+        // Next candidate direction
+        check = false;
+        max_theta = -2.0;
+        for (i = 0; i < n; i++) {
+            K = Adjacency[J][i][0];
+            if (K >= 0) {
+                if (!visited[K]) {
+                    if (theta[i] > max_theta) {
+                        check = true;
+                        max_theta = theta[i];
+                        j = i;
                     }
-                } // next i
-
-                // no admissible directions
-                if (!check) {
-                    J = Adjacency[backup[backup.size()-1][0]][backup[backup.size()-1][1]][0];
-                    backup.pop_back();
-                }
-                // admissible directon
-                else {
-
-                    // save next direction
-                    i = j;
-
-                    // look for back-up direction
-                    k = (j+1) % n;
-                    m = 0;
-                    check = false;
-                    max_theta = -2.0;
-                    while (m < n-1) {
-                        K = Adjacency[J][k][0];
-                        if (K >= 0) {
-                            if (!visited[K]) {
-                                if (theta[k] > max_theta) {
-                                    check = true;
-                                    max_theta = theta[k];
-                                    j = k;
-                                }
-                            }
-                        }
-                        k = (k+1) % n;
-                        m++;
-                    } //next m
-                    if (check) {
-                        i_dummy1D[0] = J;
-                        i_dummy1D[1] = j;
-                        backup.push_back(i_dummy1D);
-                    }
-
-                    
-                    J = Adjacency[J][i][0];
                 }
             }
-                
-            // Update iteration counter ------------------------------------------------------- //
-            iter++;
+        } // next i
 
-        } //next simplex;
+        // no admissible directions
+        if (!check) {
+            J = Adjacency[backup[backup.size()-1][0]][backup[backup.size()-1][1]][0];
+            backup.pop_back();
+        }
+        // admissible directon
+        else {
 
-        return(index); };
+            // save next direction
+            i = j;
+
+            // look for back-up direction
+            k = (j+1) % n;
+            m = 0;
+            check = false;
+            max_theta = -2.0;
+            while (m < n-1) {
+                K = Adjacency[J][k][0];
+                if (K >= 0) {
+                    if (!visited[K]) {
+                        if (theta[k] > max_theta) {
+                            check = true;
+                            max_theta = theta[k];
+                            j = k;
+                        }
+                    }
+                }
+                k = (k+1) % n;
+                m++;
+            } //next m
+            if (check) {
+                i_dummy1D[0] = J;
+                i_dummy1D[1] = j;
+                backup.push_back(i_dummy1D);
+            }
+
+            
+            J = Adjacency[J][i][0];
+        }
+    }
+        
+    // Update iteration counter ------------------------------------------------------- //
+    iter++;
+
+} //next simplex;
+
+return(index); };
 
 // Patch decomposition =============================================================== //
 

@@ -65,6 +65,9 @@ typedef vector< dvector1D >            dvector2D;
 typedef vector< dvector2D >            dvector3D;
 typedef vector< dvector3D >            dvector4D;
 
+typedef array< double,3 >              darray3E ;
+typedef vector<darray3E>               dvecarr3E;
+
 // string vectors
 typedef vector< string >               svector1D;
 typedef vector< svector1D >            svector2D;

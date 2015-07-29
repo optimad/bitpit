@@ -120,11 +120,13 @@ int                             dim = Vertex[0].size();
 int                             n, m;
 double                          A;
 pair<int, double>               dummy;
-dvector1D                       P(dim, 0.0);
+darray3E                        P, temp;
 
 // Counters
 int                             i;
 int                             T;
+
+P.fill(0.) ; temp.fill(0.) ;
 
 // ========================================================================== //
 // PARAMETERS                                                                 //
@@ -156,10 +158,10 @@ flag_n = ((Normal.size() > 0) && (Normal.size() >= nSimplex));
     } //next T
 
     // Resize data structure ------------------------------------------------ //
-    Vertex.resize(nVertex + nV_new, dvector1D(dim, 0.0));
+    Vertex.resize(nVertex + nV_new, temp);
     Simplex.resize(nSimplex + nS_new);
     if (flag_a) { Adjacency.resize(nSimplex + nS_new); };
-    if (flag_n) { Normal.resize(nSimplex + nS_new, dvector1D(dim, 0.0)); }
+    if (flag_n) { Normal.resize(nSimplex + nS_new, temp); }
     
 }
 
@@ -235,13 +237,13 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::BinaryRefinement(
-    dvector2D   &V,
+    dvecarr3E   &V,
     double       h
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::BinaryRefinement(                                      //
-//     dvector2D   &V,                                                        //
+//     dvecarr3E   &V,                                                        //
 //     double       h)                                                        //
 //                                                                            //
 // Refine tasselation using the mid-point rule. Each simplex is splitted      //
@@ -252,7 +254,7 @@ void Class_SurfTri::BinaryRefinement(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V      : dvector2D, vertex coordinate list. V[i][0], V[i][1] are the     //
+// - V      : dvecarr3E, vertex coordinate list. V[i][0], V[i][1] are the     //
 //            x, y, coordinates of the i-th vertex                            //
 // - h      : double, simplex area                                            //
 // ========================================================================== //
@@ -273,11 +275,13 @@ int                             dim = V[0].size();
 int                             n, m;
 double                          A;
 pair<int, double>               dummy;
-dvector1D                       P(dim, 0.0);
+darray3E                        P, temp;
 
 // Counters
 int                             i;
 int                             T;
+
+P.fill(0.) ; temp.fill(0.) ;
 
 // ========================================================================== //
 // PARAMETERS                                                                 //
@@ -310,10 +314,10 @@ flag_n = ((Normal.size() > 0) && (Normal.size() >= nSimplex));
 
     // Resize data structure ------------------------------------------------ //
     cout << "resizing" << endl;
-    V.resize(nV + nV_new, dvector1D(dim, 0.0));
+    V.resize(nV + nV_new, temp);
     Simplex.resize(nSimplex + nS_new);
     if (flag_a) { Adjacency.resize(nSimplex + nS_new); };
-    if (flag_n) { Normal.resize(nSimplex + nS_new, dvector1D(dim, 0.0)); }
+    if (flag_n) { Normal.resize(nSimplex + nS_new, temp); }
     
 }
 
@@ -380,109 +384,111 @@ flag_n = ((Normal.size() > 0) && (Normal.size() >= nSimplex));
 return; };
 
 
-        // ----------------------------------------------------------------------------------- //
-        void Class_SurfTri::Collapse_2Simplex(int T, int rule) {
+// ----------------------------------------------------------------------------------- //
+void Class_SurfTri::Collapse_2Simplex(int T, int rule) {
 
-        // =================================================================================== //
-        // void Class_SurfTri::Collapse_2Simplex(int T, int rule)                              //
-        //                                                                                     //
-        // Collapse a 2-simplex using the given rule:                                          //
-        //    rule = 0  --> vertex 1 (local index) is collapsed onto vertex 0                  //
-        //    rule = 1  --> vertex 0 (local index) is collapsed onto vertex 1                  //
-        //    rule = -1 --> vertex 0 and 1 (local index) are collapsed at midpoint             //
-        // =================================================================================== //
-        // INPUT                                                                               //
-        // =================================================================================== //
-        // - T       : int, simplex global index                                               //
-        // - rule    : int, rule used to collapse simplex.                                     //
-        // =================================================================================== //
-        // OUTPUT                                                                              //
-        // =================================================================================== //
-        // - none                                                                              //
-        // =================================================================================== //
+// =================================================================================== //
+// void Class_SurfTri::Collapse_2Simplex(int T, int rule)                              //
+//                                                                                     //
+// Collapse a 2-simplex using the given rule:                                          //
+//    rule = 0  --> vertex 1 (local index) is collapsed onto vertex 0                  //
+//    rule = 1  --> vertex 0 (local index) is collapsed onto vertex 1                  //
+//    rule = -1 --> vertex 0 and 1 (local index) are collapsed at midpoint             //
+// =================================================================================== //
+// INPUT                                                                               //
+// =================================================================================== //
+// - T       : int, simplex global index                                               //
+// - rule    : int, rule used to collapse simplex.                                     //
+// =================================================================================== //
+// OUTPUT                                                                              //
+// =================================================================================== //
+// - none                                                                              //
+// =================================================================================== //
 
-        // =================================================================================== //
-        // VARIABLES DECLARATION                                                               //
-        // =================================================================================== //
+// =================================================================================== //
+// VARIABLES DECLARATION                                                               //
+// =================================================================================== //
 
-        // Local variables
-        int                    A, B, V;
-        bvector1D              flag(2, false);
-        ivector1D              adj;
-        vector<int>::iterator  it;
-        dvector1D              P(Vertex[Simplex[T][0]].size(), 0.0);
+// Local variables
+int                    A, B, V;
+bvector1D              flag(2, false);
+ivector1D              adj;
+vector<int>::iterator  it;
 
-        // Counters
-        int                i, j, k;
+// Counters
+int                i, j, k;
 
-        // =================================================================================== //
-        // COLLAPSE SIMPLEX                                                                    //
-        // =================================================================================== //
+darray3E               P, temp;
+P.fill(0.) ; temp.fill(0.) ;
 
-        // Vertex to be retained ------------------------------------------------------------- //
-        switch (rule) {
-            case -1:
-                flag[0] = flag[1] = true;
-                P = Baricenter(T);
-                AddVertex(P);
-                V = nVertex-1;
-            break;
-            case 0:
-                flag[1] = true;
-                V = Simplex[T][0];
-            break;
-            case 1:
-                flag[0] = true;
-                V = Simplex[T][1];
-            break;
+// =================================================================================== //
+// COLLAPSE SIMPLEX                                                                    //
+// =================================================================================== //
+
+// Vertex to be retained ------------------------------------------------------------- //
+switch (rule) {
+    case -1:
+        flag[0] = flag[1] = true;
+        P = Baricenter(T);
+        AddVertex(P);
+        V = nVertex-1;
+    break;
+    case 0:
+        flag[1] = true;
+        V = Simplex[T][0];
+    break;
+    case 1:
+        flag[0] = true;
+        V = Simplex[T][1];
+    break;
+}
+
+// Update simplex-vertex connectivity ------------------------------------------------ //
+for (i = 0; i < 2; i++) {
+    if (flag[i]) {
+        for (j = 0; j < Adjacency[T][i].size(); j++) {
+            A = Adjacency[T][i][j];
+            if (A >= 0) {
+                k = vertex(A, Simplex[T][i]);
+                Simplex[A][k] = V;
+            }
+        } //next j
+    }
+} //next i
+
+// Update adjacencies ---------------------------------------------------------------- //
+
+// Update neighbors
+for (i = 0; i < 2; i++) {
+    adj.resize(0);
+    k = (i + 1) % Simplex[T].size();
+    if (Adjacency[T][k][0] >= 0) {
+        adj.resize(Adjacency[T][k].size());
+        adj = Adjacency[T][k];
+    }
+    for (j = 0; j < Adjacency[T][i].size(); j++) {
+        A = Adjacency[T][i][j];
+        if (A >= 0) {
+            k = edge(A, T);
+            it = find(Adjacency[A][k].begin(), Adjacency[A][k].end(), T);
+            Adjacency[A][k].erase(it);
+            Adjacency[A][k].insert(Adjacency[A][k].end(), adj.begin(), adj.end());
         }
+    } //next j
+} //next i
 
-        // Update simplex-vertex connectivity ------------------------------------------------ //
-        for (i = 0; i < 2; i++) {
-            if (flag[i]) {
-                for (j = 0; j < Adjacency[T][i].size(); j++) {
-                    A = Adjacency[T][i][j];
-                    if (A >= 0) {
-                        k = vertex(A, Simplex[T][i]);
-                        Simplex[A][k] = V;
-                    }
-                } //next j
-            }
-        } //next i
-
-        // Update adjacencies ---------------------------------------------------------------- //
-
-        // Update neighbors
-        for (i = 0; i < 2; i++) {
-            adj.resize(0);
-            k = (i + 1) % Simplex[T].size();
-            if (Adjacency[T][k][0] >= 0) {
-                adj.resize(Adjacency[T][k].size());
-                adj = Adjacency[T][k];
-            }
-            for (j = 0; j < Adjacency[T][i].size(); j++) {
-                A = Adjacency[T][i][j];
-                if (A >= 0) {
-                    k = edge(A, T);
-                    it = find(Adjacency[A][k].begin(), Adjacency[A][k].end(), T);
-                    Adjacency[A][k].erase(it);
-                    Adjacency[A][k].insert(Adjacency[A][k].end(), adj.begin(), adj.end());
-                }
-            } //next j
-        } //next i
-
-        // Update simplex T
-        Adjacency[T].resize(2, ivector1D(1, -1));
-        Adjacency[T][0][0] = -1;
-        Adjacency[T][1][0] = -1;
+// Update simplex T
+Adjacency[T].resize(2, ivector1D(1, -1));
+Adjacency[T][0][0] = -1;
+Adjacency[T][1][0] = -1;
 
 
-        return; };
+return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::split_1segm2segm(
     int          T,
-    dvector1D   &P
+    darray3E    &P
 ) {
 
 // ========================================================================== //
@@ -508,9 +514,9 @@ void Class_SurfTri::split_1segm2segm(
 
 // Local variables
 bool                flag_n, flag_a;
-int                 s_type, dim = P.size();
+int                 s_type ;
 ivector1D           idummy1D(2, -1);
-dvector1D           ddummy1D(dim, 0.0);
+darray3E            ddummy1D;
 ivector2D           idummy2D(2, ivector1D(1, -1));
 
 // Counters
@@ -568,14 +574,14 @@ return; };
 void Class_SurfTri::split_1segm2segm(
     int          T,
     int          V,
-    dvector2D   &X
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::split_1segm2segm(                                      //
 //     int          T,                                                        //
 //     int          V,                                                        //
-//     dvector2D   &X)                                                        //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
 // Split a given 2-simplex in two 2-simplicies by inserting point P.          //
 // Vertex coordinate list is provided externally.                             //
@@ -584,7 +590,7 @@ void Class_SurfTri::split_1segm2segm(
 // ========================================================================== //
 // - T      : int, simplex global index                                       //
 // - V      : int, global index of vertex used to split segment               //
-// - X      : dvector2D, external vertex coorindate list. X[i][0], X[i][1],   //
+// - X      : dvecarr3E, external vertex coorindate list. X[i][0], X[i][1],   //
 //            ... are the x, y, ... coordinates of the i-th vertex            //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -598,9 +604,9 @@ void Class_SurfTri::split_1segm2segm(
 
 // Local variables
 bool                flag_n, flag_a;
-int                 s_type, dim = X[V].size();
+int                 s_type;
 ivector1D           idummy1D(2, -1);
-dvector1D           ddummy1D(dim, 0.0);
+darray3E            ddummy1D;
 ivector2D           idummy2D(2, ivector1D(1, -1));
 
 // Counters
@@ -651,644 +657,638 @@ if (flag_n) {
 
 return; };
 
-    // -------------------------------------------------------------------------- //
-    void Class_SurfTri::Split_2Simplex(
-        int          T
-    ) {
+// -------------------------------------------------------------------------- //
+void Class_SurfTri::Split_2Simplex(
+    int          T
+) {
+
+// ========================================================================== //
+// void Class_SurfTri::Split_2Simplex(                                        //
+//     int T)                                                                 //
+//                                                                            //
+// Split a given 2-simplex at mid-point.                                      //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - T        : int, simplex global index.                                    //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+bool                   flag_a, flag_n;
+int                    V;
+vector<int>::iterator  it;
+ivector1D              idummy1D(2, -1);
+darray3E               P;
+
+// Counters
+int                    A;
+int                    i, j;
+
+// ========================================================================== //
+// INITIALIZE VARIABLES                                                       //
+// ========================================================================== //
+flag_a = ((Adjacency.size() > 0) && (Adjacency.size() >= nSimplex));
+flag_n = ((Simplex.size() > 0) && (Simplex.size() >= nSimplex));
+
+// ========================================================================== //
+// SPLIT SIMPLEX                                                              //
+// ========================================================================== //
+
+// Add new vertex to the tasselation ---------------------------------------- //
+P = Baricenter(T);
+AddVertex(P);
+V = nVertex - 1;
+
+// Update simplex-vertex connectivity --------------------------------------- //
+
+// Add new simplex to the tasselation
+idummy1D[0] = V;
+idummy1D[1] = Simplex[T][1];
+AddSimplex(idummy1D);
+
+// Update simplex T
+Simplex[T][1] = V;
+
+// Update adjacency --------------------------------------------------------- //
+if (flag_a) {
+
+    // Update adjacency for the newly created simplex
+    Adjacency.push_back(ivector2D(2, ivector1D(1, -1)));
+    Adjacency[nSimplex-1][0][0] = T;
+    Adjacency[nSimplex-1][1] = Adjacency[T][1];
     
-    // ========================================================================== //
-    // void Class_SurfTri::Split_2Simplex(                                        //
-    //     int T)                                                                 //
-    //                                                                            //
-    // Split a given 2-simplex at mid-point.                                      //
-    // ========================================================================== //
-    // INPUT                                                                      //
-    // ========================================================================== //
-    // - T        : int, simplex global index.                                    //
-    // ========================================================================== //
-    // OUTPUT                                                                     //
-    // ========================================================================== //
-    // - none                                                                     //
-    // ========================================================================== //
+    // Update adjacency for simplex T
+    Adjacency[T][1].resize(1);
+    Adjacency[T][1][0] = nSimplex-1;
     
-    // ========================================================================== //
-    // VARIABLES DECLARATION                                                      //
-    // ========================================================================== //
-    
-    // Local variables
-    bool                   flag_a, flag_n;
-    int                    V;
-    vector<int>::iterator  it;
-    ivector1D              idummy1D(2, -1);
-    dvector1D              P;
-    
-    // Counters
-    int                    A;
-    int                    i, j;
-    
-    // ========================================================================== //
-    // INITIALIZE VARIABLES                                                       //
-    // ========================================================================== //
-    flag_a = ((Adjacency.size() > 0) && (Adjacency.size() >= nSimplex));
-    flag_n = ((Simplex.size() > 0) && (Simplex.size() >= nSimplex));
-    
-    // ========================================================================== //
-    // SPLIT SIMPLEX                                                              //
-    // ========================================================================== //
-    
-    // Add new vertex to the tasselation ---------------------------------------- //
-    P = Baricenter(T);
-    AddVertex(P);
-    V = nVertex - 1;
-    
-    // Update simplex-vertex connectivity --------------------------------------- //
-    
-    // Add new simplex to the tasselation
-    idummy1D[0] = V;
-    idummy1D[1] = Simplex[T][1];
-    AddSimplex(idummy1D);
-    
-    // Update simplex T
-    Simplex[T][1] = V;
-    
-    // Update adjacency --------------------------------------------------------- //
-    if (flag_a) {
-    
-        // Update adjacency for the newly created simplex
-        Adjacency.push_back(ivector2D(2, ivector1D(1, -1)));
-        Adjacency[nSimplex-1][0][0] = T;
-        Adjacency[nSimplex-1][1] = Adjacency[T][1];
-        
-        // Update adjacency for simplex T
-        Adjacency[T][1].resize(1);
-        Adjacency[T][1][0] = nSimplex-1;
-        
-        // Update adjacency for neighboring simplicies
-        if (Adjacency[nSimplex-1][1][0] >= 0) {
-            for (i = 0; i < Adjacency[nSimplex-1][1].size(); i++) {
-                A = Adjacency[nSimplex-1][1][i];
-                j = vertex(A, Simplex[nSimplex-1][1]);
-                it = find(Adjacency[A][j].begin(), Adjacency[A][j].end(), T);
-                *it = nSimplex-1;
-            } //next i
-        }
-    }
-    
-    // Update normals ----------------------------------------------------------- //
-    if (flag_n) {
-        ResizeNormal();
-        Normal[nSimplex-1] = Normal[nSimplex-2];
-    }
-    
-    return; };
-    
-    // -------------------------------------------------------------------------- //
-    void Class_SurfTri::Split_2Simplex(
-        dvector2D   &X,
-        int          T
-    ) {
-    
-    // ========================================================================== //
-    // void Class_SurfTri::Split_2Simplex(                                        //
-    //     dvector2D   &X,                                                        //
-    //     int          T)                                                        //
-    //                                                                            //
-    // Split a given 2-simplex at mid-point. Vertex list is provided externally.  //
-    // ========================================================================== //
-    // INPUT                                                                      //
-    // ========================================================================== //
-    // - X        : dvector2D, vertex coordinate list. X[i][0], X[i][1], ...      //
-    //              are the x, y, ... coordinates of the i-th vertex              //
-    // - T        : int, simplex global index.                                    //
-    // ========================================================================== //
-    // OUTPUT                                                                     //
-    // ========================================================================== //
-    // - none                                                                     //
-    // ========================================================================== //
-    
-    // ========================================================================== //
-    // VARIABLES DECLARATION                                                      //
-    // ========================================================================== //
-    
-    // Local variables
-    bool                   flag_a, flag_n;
-    int                    V, nV = X.size();
-    vector<int>::iterator  it;
-    ivector1D              idummy1D(2, -1);
-    dvector1D              P;
-    
-    // Counters
-    int                    A;
-    int                    i, j;
-    
-    // ========================================================================== //
-    // INITIALIZE VARIABLES                                                       //
-    // ========================================================================== //
-    flag_a = ((Adjacency.size() > 0) && (Adjacency.size() >= nSimplex));
-    flag_n = ((Normal.size() > 0) && (Normal.size() >= nSimplex));
-    
-    // ========================================================================== //
-    // SPLIT SIMPLEX                                                              //
-    // ========================================================================== //
-    
-    // Add new vertex to the tasselation ---------------------------------------- //
-    P = Baricenter(T, X);
-    X.push_back(P);
-    V = nV;
-    
-    // Update simplex-vertex connectivity --------------------------------------- //
-    
-    // Add new simplex to the tasselation
-    idummy1D[0] = V;
-    idummy1D[1] = Simplex[T][1];
-    AddSimplex(idummy1D);
-    
-    // Update simplex T
-    Simplex[T][1] = V;
-    
-    // Update adjacency --------------------------------------------------------- //
-    if (flag_a) {
-    
-        // Update adjacency for the newly created simplex
-        Adjacency.push_back(ivector2D(2, ivector1D(1, -1)));
-        Adjacency[nSimplex-1][0][0] = T;
-        Adjacency[nSimplex-1][1] = Adjacency[T][1];
-        
-        // Update adjacency for simplex T
-        Adjacency[T][1].resize(1);
-        Adjacency[T][1][0] = nSimplex-1;
-        
-        // Update adjacency for neighboring simplicies
-        if (Adjacency[nSimplex-1][1][0] >= 0) {
-            for (i = 0; i < Adjacency[nSimplex-1][1].size(); i++) {
-                A = Adjacency[nSimplex-1][1][i];
-                j = vertex(A, Simplex[nSimplex-1][1]);
-                it = find(Adjacency[A][j].begin(), Adjacency[A][j].end(), T);
-                *it = nSimplex-1;
-            } //next i
-        }
-    }
-    
-    // Update normals ----------------------------------------------------------- //
-    if (flag_n) {
-        ResizeNormal();
-        Normal[nSimplex-1] = Normal[nSimplex-2];
-    }
-    
-    return; };
-    
-        // ----------------------------------------------------------------------------------- //
-        void Class_SurfTri::SplitEdge(int T, int i) {
-
-        // =================================================================================== //
-        // void Class_SurfTri::SplitEdge(int T, int i)                                         //
-        //                                                                                     //
-        // Split edge at mid-point. (2-SIMPLICIES ONLY)                                        //
-        // =================================================================================== //
-        // INPUT                                                                               //
-        // =================================================================================== //
-        // - T     : int, simplex global index                                                 //
-        // - i     : int, edge local index.                                                    //
-        // =================================================================================== //
-        // OUTPUT                                                                              //
-        // =================================================================================== //
-        // - none                                                                              //
-        // =================================================================================== //
-
-        // =================================================================================== //
-        // VARIABLES DECLARATION                                                               //
-        // =================================================================================== //
-
-        // Local variables
-        int              V1, V2, V3;
-        ivector1D        iummy(3, -1);
-        dvector1D        P(Vertex[0].size(), 0.0);
-
-        // Counters
-        int              A, B, C, S;
-        int              j, k;
-        int              ii;
-
-        // =================================================================================== //
-        // UPDATE VERTEX LIST                                                                  //
-        // =================================================================================== //
-
-        // Simplex vertexes ------------------------------------------------------------------ //
-
-        // Vertex local numbering
-        j = (i + 1) % 3;
-        k = (j + 1) % 3;
-
-        // Vertex global index
-        V1 = Simplex[T][i];
-        V2 = Simplex[T][j];
-        V3 = Simplex[T][k];
-
-        // Add the new vertex ---------------------------------------------------------------- //
-        for (ii = 0; ii < 3; ii++) {
-            P[ii] = 0.5 * (Vertex[Simplex[T][i]][ii] + Vertex[Simplex[T][j]][ii]);
-        } //next ii
-        AddVertex(P);
-
-        // =================================================================================== //
-        // UPDATE SIMPLEX - ADJACENCY LIST                                                     //
-        // =================================================================================== //
-
-        // Update simplex list --------------------------------------------------------------- //
-
-        // Overwrite simplex T
-        Simplex[T][0] = V1;
-        Simplex[T][1] = nVertex-1;
-        Simplex[T][2] = V3;
-
-        // Add new simplex
-        iummy[0] = nVertex-1;
-        iummy[1] = V2;
-        iummy[2] = V3;
-        AddSimplex(iummy);
-
-        // Adjust adjacencies ---------------------------------------------------------------- //
-
-        // Old adjacencies
-        A = Adjacency[T][i][0];
-        B = Adjacency[T][j][0];
-        C = Adjacency[T][k][0];
-
-        // Overwrite adjacencies for simplex T
-        Adjacency[T][0][0] = A;
-        Adjacency[T][1][0] = nSimplex-1;
-        Adjacency[T][2][0] = C;
-
-        // Adjacencies for the new simplex
-        Adjacency.push_back(ivector2D(3, ivector1D(1,-1)));
-        if (A >= 0) {
-            Adjacency[nSimplex-1][0][0] = nSimplex;
-        }
-        Adjacency[nSimplex-1][1][0] = B;
-        Adjacency[nSimplex-1][2][0] = T;
-
-        // Adjacencies for the new simplex - neighbors
-        if (B >= 0) {
-            j = edge(B, T);
-            Adjacency[B][j][0] = nSimplex - 1;
-        }
-
-        // =================================================================================== //
-        // NEIGHBOR SIMPLEX                                                                    //
-        // =================================================================================== //
-        if (A >= 0) {
-
-            // Update simplex list ----------------------------------------------------------- //
-
-            // Vertex local numbering
-            i = edge(A, T);
-            j = (i + 1) % 3;
-            k = (j + 1) % 3;
-
-            // Vertex global index
-            S = A;
-            V1 = Simplex[S][i];
-            V2 = Simplex[S][j];
-            V3 = Simplex[S][k];
-
-            // Overwrite simplex S
-            Simplex[S][0] = nVertex - 1;
-            Simplex[S][1] = V2;
-            Simplex[S][2] = V3;
-
-            // Add new simplex
-            iummy[0] = nVertex - 1;
-            iummy[1] = V3;
-            iummy[2] = V1;
-            AddSimplex(iummy);
-
-            // Adjust adjacencies ------------------------------------------------------------ //
-
-            // Old adjacencies
-            A = Adjacency[S][i][0];
-            B = Adjacency[S][j][0];
-            C = Adjacency[S][k][0];
-
-            // Overwrite adjacencies for simplex S
-            Adjacency[S][0][0] = A;
-            Adjacency[S][1][0] = B;
-            Adjacency[S][2][0] = nSimplex - 1;
-
-            // Adjacencies for the new simplex
-            Adjacency.push_back(ivector2D(3, ivector1D(1, -1)));
-            Adjacency[nSimplex-1][0][0] = S;
-            Adjacency[nSimplex-1][1][0] = C;
-            Adjacency[nSimplex-1][2][0] = nSimplex - 2;
-
-            // Adjacencies for the new simplex - neighbors
-            if (C >= 0) {
-                j = edge(C, S);
-                Adjacency[C][j][0] = nSimplex - 1;
-            }
-        }
-
-        return; };
-
-        // ----------------------------------------------------------------------------------- //
-        void Class_SurfTri::CollapseEdge(int T, int i, int m) {
-
-        // =================================================================================== //
-        // void Class_SurfTri::CollapseEdge(int T, int i, int m)                               //
-        //                                                                                     //
-        // Collapse a given edge in a simplex (2-simplicies only)                              //
-        // =================================================================================== //
-        // INPUT                                                                               //
-        // =================================================================================== //
-        // - T     : int, simplex global index                                                 //
-        // - i     : int, edge local index                                                     //
-        // - m     : int, vertex to be retained (local index)                                  //
-        // =================================================================================== //
-        // OUTPUT                                                                              //
-        // =================================================================================== //
-        // - none                                                                              //
-        // =================================================================================== //
-
-        // =================================================================================== //
-        // VARIABLES DECLARATION                                                               //
-        // =================================================================================== //
-
-        // Local variables
-        bool             flag, ring_flag = true;
-        int              retained, lost;
-        dvector1D        P(Vertex[0].size(), 0.0);
-        ivector1D        ring1;
-
-        // Counters
-        int              A, B, C;
-        int              j, k;
-        int              ii, jj;
-
-        // =================================================================================== //
-        // COLLAPSE EDGE AT MIDPOINT                                                           //
-        // =================================================================================== //
-
-        // Vertex local index ---------------------------------------------------------------- //
-        j = (i + 1) % 3;
-        k = (j + 1) % 3;
-
-        // Set coordinates for target point -------------------------------------------------- //
-        if (m == -1) {
-
-            // Edge mid_point coordinates
-            P = Edge_midPoint(T, i);
-
-            // Overwrite vertex coordinates
-            Vertex[Simplex[T][i]] = P;
-
-            // Retained point
-            retained = i;
-            lost = j;
-        }
-        else if (m == i) {
-
-            // Retained
-            retained = i;
-            lost = j;
-
-        }
-        else {
-
-            // Retained point
-            retained = j;
-            lost = i;
-
-        }
-
-        // =================================================================================== //
-        // UPDATE SIMPLEX LIST                                                                 //
-        // =================================================================================== //
-
-        // 1-ring around lost vertex
-        ring1 = Ring_1(T, lost, ring_flag);
-
-        // Update simplicies in the 1-ring of lost vertex
-        for (jj = 0; jj < ring1.size(); jj++) {
-            ii = 0;
-            flag = true;
-            while (flag && (ii < 3)) {
-                if (Simplex[ring1[jj]][ii] == Simplex[T][lost]) {
-                    Simplex[ring1[jj]][ii] = Simplex[T][retained];
-                    flag = false;
-                }
-                ii++;
-            } //next ii
-        } //next jj
-
-        // =================================================================================== //
-        // ADJUST ADJACENCY LIST FOR SIMPLEX T                                                 //
-        // =================================================================================== //
-
-        // Old adjacencies
-        A = Adjacency[T][i][0];
-        B = Adjacency[T][j][0];
-        C = Adjacency[T][k][0];
-
-        // Update adjacencies for simplex T
-        Adjacency[T][0][0] = -1;
-        Adjacency[T][1][0] = -1;
-        Adjacency[T][2][0] = -1;
-
-        // Update adjacencies for neighboring elements
-        if (C >= 0) {
-            j = edge(C, T);
-            Adjacency[C][j][0] = B;
-        }
-        if (B >= 0) {
-            j = edge(B, T);
-            Adjacency[B][j][0] = C;
-        }
-
-        // =================================================================================== //
-        // ADJUST ADJACENCY LIST FOR T-NEIGHBOR                                                //
-        // =================================================================================== //
-        if (A >= 0) {
-
-            // Vertex local index
-            i = edge(A, T);
-            j = (i + 1) % 3;
-            k = (j + 1) % 3;
-
-            // Old adjacencies
-            T = A;
-            A = Adjacency[T][i][0];
-            B = Adjacency[T][j][0];
-            C = Adjacency[T][k][0];
-
-            // Update adjacencies for simplex T
-            Adjacency[T][0][0] = -1;
-            Adjacency[T][1][0] = -1;
-            Adjacency[T][2][0] = -1;
-
-            // Update adjacencies for neighboring elements
-            if (C >= 0) {
-                j = edge(C, T);
-                Adjacency[C][j][0] = B;
-            }
-            if (B >= 0) {
-                j = edge(B, T);
-                Adjacency[B][j][0] = C;
-            }
-
-        }
-
-        return; };
-
-        // Voronoi diagrams ================================================================== //
-
-        // -----------------(Ricontrollare)--------------------------------------------------- //
-        void Class_SurfTri::Voronoi(Class_SurfTri &Voronoi) {
-
-        // =================================================================================== //
-        // void Class_SurfTri::Voronoi(Class_SurfTri &Voronoi)                                 //
-        //                                                                                     //
-        // Compute approximated Voronoi tasselation from the surface triangulation.            //
-        // =================================================================================== //
-        // INPUT                                                                               //
-        // =================================================================================== //
-        // - Voronoi   : Class_SurfTri, with Voronoi diagram                                   //
-        // =================================================================================== //
-        // OUTPUT                                                                              //
-        // =================================================================================== //
-        // - none                                                                              //
-        // =================================================================================== //
-
-        // =================================================================================== //
-        // VARIABLES DECLARATION                                                               //
-        // =================================================================================== //
-
-        // Local variables
-        bool             inside, s1, s2, s3, ring_flag = true;
-        dvector1D        P(3, 0.0);
-        array<double, 3> xP, V1, V2, V3;
-        ivector1D        S2CC(nSimplex, -1);
-        ivector2D        S2MP(nSimplex, ivector1D(3, -1));
-
-        // Counters
-        int              I, J;
-        int              i, j, k, e, d;
-
-        // =================================================================================== //
-        // COMPUTE EDGES MIDPOINTS                                                             //
-        // =================================================================================== //
-        for (i = 0; i < nSimplex; i++) {
-            for (j = 0; j < 3; j++) {
-                if (S2MP[i][j] == -1) {
-
-                    // Compute edge midpoint
-                    P = Edge_midPoint(i, j);
-
-                    // Add vertex to the Voronoi vertex list
-                    Voronoi.AddVertex(P);
-
-                    // Update {Simplex->MidPoint} map
-                    S2MP[i][j] = Voronoi.nVertex-1;
-                    I = Adjacency[i][j][0];
-                    J = edge(I, i);
-                    S2MP[I][J] = Voronoi.nVertex-1;
-
-                }
-            } //next j
+    // Update adjacency for neighboring simplicies
+    if (Adjacency[nSimplex-1][1][0] >= 0) {
+        for (i = 0; i < Adjacency[nSimplex-1][1].size(); i++) {
+            A = Adjacency[nSimplex-1][1][i];
+            j = vertex(A, Simplex[nSimplex-1][1]);
+            it = find(Adjacency[A][j].begin(), Adjacency[A][j].end(), T);
+            *it = nSimplex-1;
         } //next i
+    }
+}
 
-        // =================================================================================== //
-        // COMPUTE TRIANGLES CIRCUMCENTERS                                                     //
-        // =================================================================================== //
-        for (i = 0; i < nSimplex; i++) {
+// Update normals ----------------------------------------------------------- //
+if (flag_n) {
+    ResizeNormal();
+    Normal[nSimplex-1] = Normal[nSimplex-2];
+}
 
-            // Tringle vertexes
-            for (j = 0; j < 3; j++) {
-                V1[j] = Vertex[Simplex[i][0]][j];
-                V2[j] = Vertex[Simplex[i][1]][j];
-                V3[j] = Vertex[Simplex[i][2]][j];
-            } // next j
+return; };
 
-            // Compute triangle circumcenter
-            P = CircumCenter(i);
-            for (j = 0; j < 3; j++) {
-                xP[j] = P[j];
-            } // next j
+// -------------------------------------------------------------------------- //
+void Class_SurfTri::Split_2Simplex(
+    dvecarr3E   &X,
+    int          T
+) {
 
-            // Add circumcenter to Voronoi vertex list and update {Simplex->CircumCenters} map
-            s1 = SameSide(xP,V3,V1,V2);
-            s2 = SameSide(xP,V1,V2,V3);
-            s3 = SameSide(xP,V2,V3,V1);
-            inside = (s1 && s2 && s3);
-            if (inside) {
-                Voronoi.AddVertex(P);
-                S2CC[i] = Voronoi.nVertex - 1;
-            }
-            else {
-                if (!s1) {
-                    S2CC[i] = S2MP[i][0];
-                }
-                if (!s2) {
-                    S2CC[i] = S2MP[i][1];
-                }
-                if (!s3) {
-                    S2CC[i] = S2MP[i][2];
-                }
-            }
+// ========================================================================== //
+// void Class_SurfTri::Split_2Simplex(                                        //
+//     dvecarr3E   &X,                                                        //
+//     int          T)                                                        //
+//                                                                            //
+// Split a given 2-simplex at mid-point. Vertex list is provided externally.  //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - X        : dvecarr3E, vertex coordinate list. X[i][0], X[i][1], ...      //
+//              are the x, y, ... coordinates of the i-th vertex              //
+// - T        : int, simplex global index.                                    //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
 
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+bool                   flag_a, flag_n;
+int                    V, nV = X.size();
+vector<int>::iterator  it;
+ivector1D              idummy1D(2, -1);
+darray3E               P;
+
+// Counters
+int                    A;
+int                    i, j;
+
+// ========================================================================== //
+// INITIALIZE VARIABLES                                                       //
+// ========================================================================== //
+flag_a = ((Adjacency.size() > 0) && (Adjacency.size() >= nSimplex));
+flag_n = ((Normal.size() > 0) && (Normal.size() >= nSimplex));
+
+// ========================================================================== //
+// SPLIT SIMPLEX                                                              //
+// ========================================================================== //
+
+// Add new vertex to the tasselation ---------------------------------------- //
+P = Baricenter(T, X);
+X.push_back(P);
+V = nV;
+
+// Update simplex-vertex connectivity --------------------------------------- //
+
+// Add new simplex to the tasselation
+idummy1D[0] = V;
+idummy1D[1] = Simplex[T][1];
+AddSimplex(idummy1D);
+
+// Update simplex T
+Simplex[T][1] = V;
+
+// Update adjacency --------------------------------------------------------- //
+if (flag_a) {
+
+    // Update adjacency for the newly created simplex
+    Adjacency.push_back(ivector2D(2, ivector1D(1, -1)));
+    Adjacency[nSimplex-1][0][0] = T;
+    Adjacency[nSimplex-1][1] = Adjacency[T][1];
+    
+    // Update adjacency for simplex T
+    Adjacency[T][1].resize(1);
+    Adjacency[T][1][0] = nSimplex-1;
+    
+    // Update adjacency for neighboring simplicies
+    if (Adjacency[nSimplex-1][1][0] >= 0) {
+        for (i = 0; i < Adjacency[nSimplex-1][1].size(); i++) {
+            A = Adjacency[nSimplex-1][1][i];
+            j = vertex(A, Simplex[nSimplex-1][1]);
+            it = find(Adjacency[A][j].begin(), Adjacency[A][j].end(), T);
+            *it = nSimplex-1;
         } //next i
+    }
+}
 
-        // =================================================================================== //
-        // COMPUTE VORONOI CELLS                                                               //
-        // =================================================================================== //
+// Update normals ----------------------------------------------------------- //
+if (flag_n) {
+    ResizeNormal();
+    Normal[nSimplex-1] = Normal[nSimplex-2];
+}
 
-        // Resize data structure
-        Voronoi.Simplex.resize(nVertex);
+return; };
+    
+// ----------------------------------------------------------------------------------- //
+void Class_SurfTri::SplitEdge(int T, int i) {
 
-        // Create Voronoi cells
-        for (i = 0; i < nSimplex; i++) {
-            for (j = 0; j < 3; j++) {
-                if (Voronoi.Simplex[Simplex[i][j]].size() == 0) {
+// =================================================================================== //
+// void Class_SurfTri::SplitEdge(int T, int i)                                         //
+//                                                                                     //
+// Split edge at mid-point. (2-SIMPLICIES ONLY)                                        //
+// =================================================================================== //
+// INPUT                                                                               //
+// =================================================================================== //
+// - T     : int, simplex global index                                                 //
+// - i     : int, edge local index.                                                    //
+// =================================================================================== //
+// OUTPUT                                                                              //
+// =================================================================================== //
+// - none                                                                              //
+// =================================================================================== //
 
-                    // Scope variables
-                    bool           flag;
-                    ivector1D      Ring1, iummy;
+// =================================================================================== //
+// VARIABLES DECLARATION                                                               //
+// =================================================================================== //
 
-                    // Select triangles in the 1-ring of vertex
-                    Ring1 = Ring_1(i, j, ring_flag);
+// Local variables
+int              V1, V2, V3;
+ivector1D        iummy(3, -1);
+darray3E         P;
 
-                    // Add vertex to the Voronoi cell
-                    for (k = 0; k < Ring1.size(); k++) {
 
-                        // Add edge midpoint
-                        e = 0;
-                        d = -1;
-                        flag = true;
-                        while(flag && (e < 3)) {
-                            if (Simplex[Ring1[k]][e] == Simplex[i][j]) { 
-                                d = e;
-                                flag = false;
-                            }
-                            e++;
-                        } //next e
-                        iummy.push_back(S2MP[Ring1[k]][d]);
+// Counters
+int              A, B, C, S;
+int              j, k;
+int              ii;
 
-                        // Add simplex circumcenter
-                        if (S2CC[Ring1[k]] >= 0) {
-                            iummy.push_back(S2CC[Ring1[k]]);
-                        }
+// =================================================================================== //
+// UPDATE VERTEX LIST                                                                  //
+// =================================================================================== //
 
-                    } //next k
+// Simplex vertexes ------------------------------------------------------------------ //
 
-                    // Update Voronoi cell list
-                    Voronoi.Simplex[Simplex[i][j]] = iummy;
-                    Voronoi.nSimplex++;
+// Vertex local numbering
+j = (i + 1) % 3;
+k = (j + 1) % 3;
+
+// Vertex global index
+V1 = Simplex[T][i];
+V2 = Simplex[T][j];
+V3 = Simplex[T][k];
+
+// Add the new vertex ---------------------------------------------------------------- //
+P = 0.5 * (Vertex[Simplex[T][i]] + Vertex[Simplex[T][j]]);
+AddVertex(P);
+
+// =================================================================================== //
+// UPDATE SIMPLEX - ADJACENCY LIST                                                     //
+// =================================================================================== //
+
+// Update simplex list --------------------------------------------------------------- //
+
+// Overwrite simplex T
+Simplex[T][0] = V1;
+Simplex[T][1] = nVertex-1;
+Simplex[T][2] = V3;
+
+// Add new simplex
+iummy[0] = nVertex-1;
+iummy[1] = V2;
+iummy[2] = V3;
+AddSimplex(iummy);
+
+// Adjust adjacencies ---------------------------------------------------------------- //
+
+// Old adjacencies
+A = Adjacency[T][i][0];
+B = Adjacency[T][j][0];
+C = Adjacency[T][k][0];
+
+// Overwrite adjacencies for simplex T
+Adjacency[T][0][0] = A;
+Adjacency[T][1][0] = nSimplex-1;
+Adjacency[T][2][0] = C;
+
+// Adjacencies for the new simplex
+Adjacency.push_back(ivector2D(3, ivector1D(1,-1)));
+if (A >= 0) {
+    Adjacency[nSimplex-1][0][0] = nSimplex;
+}
+Adjacency[nSimplex-1][1][0] = B;
+Adjacency[nSimplex-1][2][0] = T;
+
+// Adjacencies for the new simplex - neighbors
+if (B >= 0) {
+    j = edge(B, T);
+    Adjacency[B][j][0] = nSimplex - 1;
+}
+
+// =================================================================================== //
+// NEIGHBOR SIMPLEX                                                                    //
+// =================================================================================== //
+if (A >= 0) {
+
+    // Update simplex list ----------------------------------------------------------- //
+
+    // Vertex local numbering
+    i = edge(A, T);
+    j = (i + 1) % 3;
+    k = (j + 1) % 3;
+
+    // Vertex global index
+    S = A;
+    V1 = Simplex[S][i];
+    V2 = Simplex[S][j];
+    V3 = Simplex[S][k];
+
+    // Overwrite simplex S
+    Simplex[S][0] = nVertex - 1;
+    Simplex[S][1] = V2;
+    Simplex[S][2] = V3;
+
+    // Add new simplex
+    iummy[0] = nVertex - 1;
+    iummy[1] = V3;
+    iummy[2] = V1;
+    AddSimplex(iummy);
+
+    // Adjust adjacencies ------------------------------------------------------------ //
+
+    // Old adjacencies
+    A = Adjacency[S][i][0];
+    B = Adjacency[S][j][0];
+    C = Adjacency[S][k][0];
+
+    // Overwrite adjacencies for simplex S
+    Adjacency[S][0][0] = A;
+    Adjacency[S][1][0] = B;
+    Adjacency[S][2][0] = nSimplex - 1;
+
+    // Adjacencies for the new simplex
+    Adjacency.push_back(ivector2D(3, ivector1D(1, -1)));
+    Adjacency[nSimplex-1][0][0] = S;
+    Adjacency[nSimplex-1][1][0] = C;
+    Adjacency[nSimplex-1][2][0] = nSimplex - 2;
+
+    // Adjacencies for the new simplex - neighbors
+    if (C >= 0) {
+        j = edge(C, S);
+        Adjacency[C][j][0] = nSimplex - 1;
+    }
+}
+
+return; };
+
+// ----------------------------------------------------------------------------------- //
+void Class_SurfTri::CollapseEdge(int T, int i, int m) {
+
+// =================================================================================== //
+// void Class_SurfTri::CollapseEdge(int T, int i, int m)                               //
+//                                                                                     //
+// Collapse a given edge in a simplex (2-simplicies only)                              //
+// =================================================================================== //
+// INPUT                                                                               //
+// =================================================================================== //
+// - T     : int, simplex global index                                                 //
+// - i     : int, edge local index                                                     //
+// - m     : int, vertex to be retained (local index)                                  //
+// =================================================================================== //
+// OUTPUT                                                                              //
+// =================================================================================== //
+// - none                                                                              //
+// =================================================================================== //
+
+// =================================================================================== //
+// VARIABLES DECLARATION                                                               //
+// =================================================================================== //
+
+// Local variables
+bool             flag, ring_flag = true;
+int              retained, lost;
+darray3E         P;
+ivector1D        ring1;
+
+// Counters
+int              A, B, C;
+int              j, k;
+int              ii, jj;
+
+// =================================================================================== //
+// COLLAPSE EDGE AT MIDPOINT                                                           //
+// =================================================================================== //
+
+// Vertex local index ---------------------------------------------------------------- //
+j = (i + 1) % 3;
+k = (j + 1) % 3;
+
+// Set coordinates for target point -------------------------------------------------- //
+if (m == -1) {
+
+    // Edge mid_point coordinates
+    P = Edge_midPoint(T, i);
+
+    // Overwrite vertex coordinates
+    Vertex[Simplex[T][i]] = P;
+
+    // Retained point
+    retained = i;
+    lost = j;
+}
+else if (m == i) {
+
+    // Retained
+    retained = i;
+    lost = j;
+
+}
+else {
+
+    // Retained point
+    retained = j;
+    lost = i;
+
+}
+
+// =================================================================================== //
+// UPDATE SIMPLEX LIST                                                                 //
+// =================================================================================== //
+
+// 1-ring around lost vertex
+ring1 = Ring_1(T, lost, ring_flag);
+
+// Update simplicies in the 1-ring of lost vertex
+for (jj = 0; jj < ring1.size(); jj++) {
+    ii = 0;
+    flag = true;
+    while (flag && (ii < 3)) {
+        if (Simplex[ring1[jj]][ii] == Simplex[T][lost]) {
+            Simplex[ring1[jj]][ii] = Simplex[T][retained];
+            flag = false;
+        }
+        ii++;
+    } //next ii
+} //next jj
+
+// =================================================================================== //
+// ADJUST ADJACENCY LIST FOR SIMPLEX T                                                 //
+// =================================================================================== //
+
+// Old adjacencies
+A = Adjacency[T][i][0];
+B = Adjacency[T][j][0];
+C = Adjacency[T][k][0];
+
+// Update adjacencies for simplex T
+Adjacency[T][0][0] = -1;
+Adjacency[T][1][0] = -1;
+Adjacency[T][2][0] = -1;
+
+// Update adjacencies for neighboring elements
+if (C >= 0) {
+    j = edge(C, T);
+    Adjacency[C][j][0] = B;
+}
+if (B >= 0) {
+    j = edge(B, T);
+    Adjacency[B][j][0] = C;
+}
+
+// =================================================================================== //
+// ADJUST ADJACENCY LIST FOR T-NEIGHBOR                                                //
+// =================================================================================== //
+if (A >= 0) {
+
+    // Vertex local index
+    i = edge(A, T);
+    j = (i + 1) % 3;
+    k = (j + 1) % 3;
+
+    // Old adjacencies
+    T = A;
+    A = Adjacency[T][i][0];
+    B = Adjacency[T][j][0];
+    C = Adjacency[T][k][0];
+
+    // Update adjacencies for simplex T
+    Adjacency[T][0][0] = -1;
+    Adjacency[T][1][0] = -1;
+    Adjacency[T][2][0] = -1;
+
+    // Update adjacencies for neighboring elements
+    if (C >= 0) {
+        j = edge(C, T);
+        Adjacency[C][j][0] = B;
+    }
+    if (B >= 0) {
+        j = edge(B, T);
+        Adjacency[B][j][0] = C;
+    }
+
+}
+
+return; };
+
+// Voronoi diagrams ================================================================== //
+
+// -----------------(Ricontrollare)--------------------------------------------------- //
+void Class_SurfTri::Voronoi(Class_SurfTri &Voronoi) {
+
+// =================================================================================== //
+// void Class_SurfTri::Voronoi(Class_SurfTri &Voronoi)                                 //
+//                                                                                     //
+// Compute approximated Voronoi tasselation from the surface triangulation.            //
+// =================================================================================== //
+// INPUT                                                                               //
+// =================================================================================== //
+// - Voronoi   : Class_SurfTri, with Voronoi diagram                                   //
+// =================================================================================== //
+// OUTPUT                                                                              //
+// =================================================================================== //
+// - none                                                                              //
+// =================================================================================== //
+
+// =================================================================================== //
+// VARIABLES DECLARATION                                                               //
+// =================================================================================== //
+
+// Local variables
+bool             inside, s1, s2, s3, ring_flag = true;
+darray3E         P;
+darray3E         xP, V1, V2, V3;
+ivector1D        S2CC(nSimplex, -1);
+ivector2D        S2MP(nSimplex, ivector1D(3, -1));
+
+// Counters
+int              I, J;
+int              i, j, k, e, d;
+
+// =================================================================================== //
+// COMPUTE EDGES MIDPOINTS                                                             //
+// =================================================================================== //
+for (i = 0; i < nSimplex; i++) {
+    for (j = 0; j < 3; j++) {
+        if (S2MP[i][j] == -1) {
+
+            // Compute edge midpoint
+            P = Edge_midPoint(i, j);
+
+            // Add vertex to the Voronoi vertex list
+            Voronoi.AddVertex(P);
+
+            // Update {Simplex->MidPoint} map
+            S2MP[i][j] = Voronoi.nVertex-1;
+            I = Adjacency[i][j][0];
+            J = edge(I, i);
+            S2MP[I][J] = Voronoi.nVertex-1;
+
+        }
+    } //next j
+} //next i
+
+// =================================================================================== //
+// COMPUTE TRIANGLES CIRCUMCENTERS                                                     //
+// =================================================================================== //
+for (i = 0; i < nSimplex; i++) {
+
+    // Tringle vertexes
+    V1 = Vertex[Simplex[i][0]];
+    V2 = Vertex[Simplex[i][1]];
+    V3 = Vertex[Simplex[i][2]];
+
+    // Compute triangle circumcenter
+    xP = CircumCenter(i);
+
+    // Add circumcenter to Voronoi vertex list and update {Simplex->CircumCenters} map
+    s1 = SameSide(xP,V3,V1,V2);
+    s2 = SameSide(xP,V1,V2,V3);
+    s3 = SameSide(xP,V2,V3,V1);
+    inside = (s1 && s2 && s3);
+    if (inside) {
+        Voronoi.AddVertex(P);
+        S2CC[i] = Voronoi.nVertex - 1;
+    }
+    else {
+        if (!s1) {
+            S2CC[i] = S2MP[i][0];
+        }
+        if (!s2) {
+            S2CC[i] = S2MP[i][1];
+        }
+        if (!s3) {
+            S2CC[i] = S2MP[i][2];
+        }
+    }
+
+} //next i
+
+// =================================================================================== //
+// COMPUTE VORONOI CELLS                                                               //
+// =================================================================================== //
+
+// Resize data structure
+Voronoi.Simplex.resize(nVertex);
+
+// Create Voronoi cells
+for (i = 0; i < nSimplex; i++) {
+    for (j = 0; j < 3; j++) {
+        if (Voronoi.Simplex[Simplex[i][j]].size() == 0) {
+
+            // Scope variables
+            bool           flag;
+            ivector1D      Ring1, iummy;
+
+            // Select triangles in the 1-ring of vertex
+            Ring1 = Ring_1(i, j, ring_flag);
+
+            // Add vertex to the Voronoi cell
+            for (k = 0; k < Ring1.size(); k++) {
+
+                // Add edge midpoint
+                e = 0;
+                d = -1;
+                flag = true;
+                while(flag && (e < 3)) {
+                    if (Simplex[Ring1[k]][e] == Simplex[i][j]) { 
+                        d = e;
+                        flag = false;
+                    }
+                    e++;
+                } //next e
+                iummy.push_back(S2MP[Ring1[k]][d]);
+
+                // Add simplex circumcenter
+                if (S2CC[Ring1[k]] >= 0) {
+                    iummy.push_back(S2CC[Ring1[k]]);
                 }
-            } //next j
-        } //next i
+
+            } //next k
+
+            // Update Voronoi cell list
+            Voronoi.Simplex[Simplex[i][j]] = iummy;
+            Voronoi.nSimplex++;
+        }
+    } //next j
+} //next i
 
 
-        return; };
+return; };
 
-        // -----------------(implementare)---------------------------------------------------- //
-        void Class_SurfTri::Voronoi(Class_SurfTri &Voronoi, dvector2D &V) {
+// -----------------(implementare)---------------------------------------------------- //
+void Class_SurfTri::Voronoi(Class_SurfTri &Voronoi, dvector2D &V) {
 
-        return; };
+return; };

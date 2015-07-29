@@ -187,12 +187,11 @@ return; }
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::ResizeVertex(
-    int d
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::ResizeVertex(                                          //
-//     int d)                                                                 //
+//     )                                                                      //
 //                                                                            //
 // Resize vertex list to nVertex rows. Each of the newly created rows will    //
 // have d entries. During resize, data previously stored in Vertex will not   //
@@ -200,7 +199,6 @@ void Class_SurfTri::ResizeVertex(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - d    : int (optional), number of space dimensions                        //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -215,22 +213,22 @@ void Class_SurfTri::ResizeVertex(
 // none
 
 // Counters
-// none
+darray3E    temp;
+temp.fill(0.) ;
 
 // ========================================================================== //
 // RESIZE VERTEX LIST                                                         //
 // ========================================================================== //
-Vertex.resize(nVertex, dvector1D(d, 0.0));
+Vertex.resize(nVertex, temp);
 
 return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::ResizeNormal(
-    int d
 ) {
 
 // ========================================================================== //
-// void Class_SurfTri::ResizeNormal(int d)                                    //
+// void Class_SurfTri::ResizeNormal(     )                                    //
 //                                                                            //
 // Resize normals list to nSimplex rows. After resize, each of the new rows   //
 // in Normal will have d entries. During resize, data previously stored in    //
@@ -238,7 +236,7 @@ void Class_SurfTri::ResizeNormal(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - d    : int (optional), number of space dimensions                        //
+// none
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -250,7 +248,8 @@ void Class_SurfTri::ResizeNormal(
 // ========================================================================== //
 
 // Local variables
-// none
+darray3E    temp;
+temp.fill(0.) ;
 
 // Counters
 // none
@@ -258,7 +257,7 @@ void Class_SurfTri::ResizeNormal(
 // ========================================================================== //
 // RESIZE NORMAL'S LIST                                                       //
 // ========================================================================== //
-Normal.resize(nSimplex, dvector1D(d, 0.0));
+Normal.resize(nSimplex, temp);
 
 return; };
 
@@ -457,13 +456,7 @@ int   i;
 // ========================================================================== //
 
 // Resize vertex list
-ResizeVertex(d);
-
-// Reshape old entries
-old_size = min(old_size, nVertex);
-for (i = 0; i < old_size; i++) {
-    Vertex[i].resize(d, 0.0);
-} //next i
+ResizeVertex();
 
 return; }
 
@@ -504,13 +497,7 @@ int   i;
 // ========================================================================== //
 
 // Resize normal
-ResizeNormal(d);
-
-// Reshape normal
-old_size = min(old_size, nSimplex);
-for (i = 0; i < old_size; i++) {
-    Normal[i].resize(d, 0.0);
-} //next i
+ResizeNormal();
 
 return; };
 
