@@ -94,11 +94,14 @@ ivector2D		E, S2E;
     // Output message ------------------------------------------------------- //
     cout << endl << " - Removing duplicated vertices" << endl << endl;
 
+
     // Output stats --------------------------------------------------------- //
     Tri.RemoveDoubleVertex();
 
+    cout << " test" << endl ;
     // Output stats --------------------------------------------------------- //
     // Tri.Stats(cout);
+
 
     // Export to vtk format ------------------------------------------------- //
     Tri.Export_vtu("tri_1.vtu");
