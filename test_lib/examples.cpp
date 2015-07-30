@@ -73,7 +73,7 @@ ivector2D		E, S2E;
     cout << endl << " - Loading surface tasselation" << endl << endl;
 
     // Import from dgf file ------------------------------------------------- //
-    Tri.Import_dgf("./datasets/naca0012.dgf");
+    Tri.Import_dgf("../../datasets/naca0012.dgf");
 
     // Output stats --------------------------------------------------------- //
     // Tri.Stats(cout);
@@ -389,7 +389,7 @@ void Demo_GenerationTools(
 
 // Local variables
 bool                    stl_type = false;
-string                  stl_name = "./datasets/cube.stl";
+string                  stl_name = "../../datasets/cube.stl";
 ivector2D               S2E;
 dvecarr3E               NV;
 Class_SurfTri           Tri;
