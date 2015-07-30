@@ -854,14 +854,12 @@ ostream& operator<< (
 // OUTPUT VECTOR CONTENT                                                              //
 // ================================================================================== //
 if (d == 0) {
-    out << "[]";
     return(out);
 }
-out << "[";
 for (int i = 0; i < d-1; i++) {
-    out << x[i] << ", ";
+    out << x[i] << " ";
 } //next i
-out << x[d-1] << "]";
+out << x[d-1] ;
 
 return(out); };
 
