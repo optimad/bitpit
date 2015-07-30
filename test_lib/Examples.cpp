@@ -599,7 +599,7 @@ dvector1D                   x(2, -0.1);
 
     // Build kd tree -------------------------------------------------------- //
      for (i = N-1; i >= 0; i--) {
-         if( ! KD.exist(&X[i]) ){
+         if( KD.exist(&X[i]) < 0 ){
              cout << "error: " << i << "  " << X[i] << endl ;
          };
 //ht         cout << "elem found: " << KD.exist(&X[i]) << endl;
