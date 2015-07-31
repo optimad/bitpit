@@ -2310,6 +2310,7 @@ private:
 			for(uint8_t i = 0; i < global3D.nfaces; ++i){
 				if(it->getBound(i) == false){
 					uint32_t virtualNeighborsSize = 0;
+					uint8_t nvirtualneigh=0;
 					vector<uint64_t> virtualNeighbors = it->computeVirtualMorton(i,max_depth,virtualNeighborsSize);
 					uint32_t maxDelta = virtualNeighborsSize/2;
 					for(uint32_t j = 0; j <= maxDelta; ++j){
@@ -2318,11 +2319,18 @@ private:
 						procs.insert(pBegin);
 						procs.insert(pEnd);
 						if(pBegin != rank || pEnd != rank){
-							it->setPbound(i,true);
+							//it->setPbound(i,true);
+							++nvirtualneigh;
 						}
-						else{
-							it->setPbound(i,false);
-						}
+						//else{
+							//  it->setPbound(i,false);
+						//}
+					}
+					if (nvirtualneigh!=0){
+						it->setPbound(i,true);
+					}
+					else{
+						it->setPbound(i,false);
 					}
 				}
 			}
