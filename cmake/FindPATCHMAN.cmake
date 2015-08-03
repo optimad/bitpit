@@ -25,7 +25,7 @@ include(FindPackageHandleStandardArgs)
 set(LIBRARY_NAME "patchman")
 
 # Reference header
-set(REFERENCE_HEADER "patchmanv.h")
+set(REFERENCE_HEADER "patchmanv.hpp")
 
 # Dependencies
 set(DEPENDENCIES "PABLO")
@@ -158,7 +158,7 @@ endif ()
 
 # Version
 if(${PACKAGE_NAME}_INCLUDE_DIR)
-	set(VERSION_HEADER_FILENAME "${LIBRARY_NAME}v.h")
+	set(VERSION_HEADER_FILENAME "${LIBRARY_NAME}v.hpp")
 	if (EXISTS "${${PACKAGE_NAME}_INCLUDE_DIR}/${VERSION_HEADER_FILENAME}")
 		libfind_version_header(${PACKAGE_NAME} "${VERSION_HEADER_FILENAME}" "VERSION")
 	endif()
