@@ -104,6 +104,13 @@ endif ()
 set(SUFFIX_DEBUG "_D")
 set(SUFFIX_MPI "_MPI")
 
+# Directory of the library
+if(NOT ${PACKAGE_NAME}_DIR)
+	set(${PACKAGE_NAME}_DIR "${OPTIMAD_LIB_PATH}/${LIBRARY_NAME}" CACHE PATH "Location of the ${PACKAGE_NAME} package." FORCE)
+endif()
+
+mark_as_advanced(${PACKAGE_NAME}_DIR)
+
 # Check if package information needs to be reloaded
 if (NOT "${${PACKAGE_NAME}_STATIC_INTERNAL}" STREQUAL "${STATIC}")
 	# Dummy string is required to avoid errors when library is not defined
@@ -123,6 +130,10 @@ if (NOT "${${PACKAGE_NAME}_WITHOUT_MPI_INTERNAL}" STREQUAL "${WITHOUT_MPI}")
 	set(${PACKAGE_NAME}_WITHOUT_MPI_INTERNAL ${WITHOUT_MPI} CACHE INTERNAL "This is the value of the last time WITHOUT_MPI was set successfully." FORCE)
 endif ()
 
+if (NOT "${${PACKAGE_NAME}_DIR_INTERNAL}" STREQUAL "${${PACKAGE_NAME}_DIR}")
+	SET (FORCE_RELOAD "FORCE")
+endif()
+
 if (FORCE_RELOAD)
 	unset(${PACKAGE_NAME}_INCLUDE_DIR CACHE)
 	unset(${PACKAGE_NAME}_LIBRARY CACHE)
@@ -133,10 +144,10 @@ endif (FORCE_RELOAD)
 # Headers
 if (DEFINED REFERENCE_HEADER AND NOT ${REFERENCE_HEADER} STREQUAL "")
 	find_path(${PACKAGE_NAME}_INCLUDE_DIR ${REFERENCE_HEADER}
-		HINTS "${OPTIMAD_LIB_PATH}/include"
-                  "${OPTIMAD_LIB_PATH}/${LIBRARY_NAME}/include"
-                  "${OPTIMAD_LIB_PATH}/${LIBRARY_NAME}/src"
-                  "${OPTIMAD_LIB_PATH}/${LIBRARY_NAME}/src_${LIBRARY_NAME}")
+		HINTS "${${PACKAGE_NAME}_DIR}/include"
+                  "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/include"
+                  "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/src"
+                  "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/src_${LIBRARY_NAME}")
 
 	mark_as_advanced(${PACKAGE_NAME}_INCLUDE_DIR)
 endif ()
@@ -170,11 +181,11 @@ endif ()
 list(APPEND LIB_PATH_SUFFIXES "${LIBRARY_NAME}/build/lib")
 
 find_library(${PACKAGE_NAME}_LIBRARY_RELEASE NAMES "${LIBRARY_FILENAME_RELEASE}" "${LIBRARY_FILENAME_FALLBACK_RELEASE}"
-        HINTS "${OPTIMAD_LIB_PATH}"
+        HINTS "${${PACKAGE_NAME}_DIR}"
         PATH_SUFFIXES ${LIB_PATH_SUFFIXES})
 
 find_library(${PACKAGE_NAME}_LIBRARY_DEBUG NAMES "${LIBRARY_FILENAME_DEBUG}" "${LIBRARY_FILENAME_FALLBACK_DEBUG}"
-        HINTS "${OPTIMAD_LIB_PATH}"
+        HINTS "${${PACKAGE_NAME}_DIR}"
         PATH_SUFFIXES ${LIB_PATH_SUFFIXES})
 
 mark_as_advanced(${PACKAGE_NAME}_LIBRARY_RELEASE)
@@ -223,6 +234,9 @@ endif ()
 # Set the include dir variables and the libraries and let libfind_process do the rest.
 # NOTE: Singular variables for this library, plural for libraries this lib depends on.
 libfind_process(${PACKAGE_NAME})
+
+# Update "last time" variables
+set(${PACKAGE_NAME}_DIR_INTERNAL ${${PACKAGE_NAME}_DIR} CACHE INTERNAL "This is the value of the last time ${PACKAGE_NAME}_DIR was set successfully." FORCE)
 
 # Cleanup
 unset(SUFFIX_DEBUG)
