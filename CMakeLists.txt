@@ -9,7 +9,7 @@ project("patchman")
 #------------------------------------------------------------------------------------#
 set(ENABLE_PROFILING 0 CACHE BOOL "Set appropriate compiler flags to enable profiling fo GLORIA")
 set(STATIC 1 CACHE BOOL "If set, the program is linked using static libraries")
-set(OPTIMAD_LIB_PATH "/opt/bitpit" CACHE PATH "Directory with the libraries provided by Optimad")
+set(BITPIT_LIB_PATH "/opt/bitpit" CACHE PATH "Directory with the BITPIT libraries")
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	set(CMAKE_INSTALL_PREFIX "/opt/bitpit/${CMAKE_PROJECT_NAME}" CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
 endif()
@@ -62,7 +62,7 @@ include_directories("src")
 #------------------------------------------------------------------------------------#
 # External dependencies
 #------------------------------------------------------------------------------------#
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${OPTIMAD_LIB_PATH}/cmake/Modules")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${BITPIT_LIB_PATH}/cmake/Modules")
 
 find_package(PABLO)
 if (PABLO_FOUND)
