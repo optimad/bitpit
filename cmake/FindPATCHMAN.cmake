@@ -146,10 +146,12 @@ if (DEFINED REFERENCE_HEADER AND NOT ${REFERENCE_HEADER} STREQUAL "")
 	find_path(${PACKAGE_NAME}_INCLUDE_DIR ${REFERENCE_HEADER}
 		HINTS "${${PACKAGE_NAME}_DIR}/include"
 			"${${PACKAGE_NAME}_DIR}/include/${LIBRARY_NAME}"
+                  "${${PACKAGE_NAME}_DIR}/../src"
+                  "${${PACKAGE_NAME}_DIR}/../src_${LIBRARY_NAME}"
                   "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/include"
                   "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/include/${LIBRARY_NAME}"
-                  "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/src"
-                  "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/src_${LIBRARY_NAME}")
+                  "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/../src"
+                  "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/../src_${LIBRARY_NAME}")
 
 	mark_as_advanced(${PACKAGE_NAME}_INCLUDE_DIR)
 endif ()
@@ -178,13 +180,21 @@ find_library(${PACKAGE_NAME}_LIBRARY_RELEASE NAMES "${LIBRARY_FILENAME_RELEASE}"
         HINTS "${${PACKAGE_NAME}_DIR}/lib"
               "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/lib"
               "${${PACKAGE_NAME}_DIR}/build/lib"
-              "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/build/lib")
+              "${${PACKAGE_NAME}_DIR}/build/src"
+              "${${PACKAGE_NAME}_DIR}/build/src_${LIBRARY_NAME}"
+              "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/build/lib"
+              "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/build/src"
+              "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/build/src_${LIBRARY_NAME}")
 
 find_library(${PACKAGE_NAME}_LIBRARY_DEBUG NAMES "${LIBRARY_FILENAME_DEBUG}" "${LIBRARY_FILENAME_FALLBACK_DEBUG}"
         HINTS "${${PACKAGE_NAME}_DIR}/lib"
               "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/lib"
               "${${PACKAGE_NAME}_DIR}/debug/lib"
-              "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/debug/lib")
+              "${${PACKAGE_NAME}_DIR}/debug/src"
+              "${${PACKAGE_NAME}_DIR}/debug/src_${LIBRARY_NAME}"
+              "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/debug/lib"
+              "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/debug/src"
+              "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/debug/src_${LIBRARY_NAME}")
 
 mark_as_advanced(${PACKAGE_NAME}_LIBRARY_RELEASE)
 mark_as_advanced(${PACKAGE_NAME}_LIBRARY_DEBUG)
