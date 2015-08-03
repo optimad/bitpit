@@ -145,7 +145,9 @@ endif (FORCE_RELOAD)
 if (DEFINED REFERENCE_HEADER AND NOT ${REFERENCE_HEADER} STREQUAL "")
 	find_path(${PACKAGE_NAME}_INCLUDE_DIR ${REFERENCE_HEADER}
 		HINTS "${${PACKAGE_NAME}_DIR}/include"
+			"${${PACKAGE_NAME}_DIR}/include/${LIBRARY_NAME}"
                   "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/include"
+                  "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/include/${LIBRARY_NAME}"
                   "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/src"
                   "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/src_${LIBRARY_NAME}")
 
