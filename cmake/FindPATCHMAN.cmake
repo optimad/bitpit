@@ -124,13 +124,13 @@ if(${PACKAGE_NAME}_INCLUDE_DIR)
 endif()
 
 # Check if variables need to be reloaded
-if (NOT "${${PACKAGE_NAME}_CURRENT_STATIC}" STREQUAL "${STATIC}")
+if (NOT "${${PACKAGE_NAME}_STATIC_INTERNAL}" STREQUAL "${STATIC}")
 	# Dummy string is required to avoid errors when library is not defined
 	get_filename_component(LIBRARY_EXTENSION "/dummy/${${PACKAGE_NAME}_LIBRARY}" EXT)
 	if (NOT ";${CMAKE_FIND_LIBRARY_SUFFIXES};" MATCHES ";${LIBRARY_EXTENSION};")
 		SET (FORCE_RELOAD "FORCE")
 	endif (NOT ";${CMAKE_FIND_LIBRARY_SUFFIXES};" MATCHES ";${LIBRARY_EXTENSION};")
-	set(${PACKAGE_NAME}_CURRENT_STATIC ${STATIC} CACHE INTERNAL "If set, the current version of the library is a static library" FORCE)
+	set(${PACKAGE_NAME}_STATIC_INTERNAL ${STATIC} CACHE INTERNAL "This is the value of the last time STATIC was set successfully." FORCE)
 endif ()
 
 if (NOT "${${PACKAGE_NAME}_CURRENT_WITHOUT_MPI}" STREQUAL "${WITHOUT_MPI}")
