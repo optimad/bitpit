@@ -133,13 +133,13 @@ if (NOT "${${PACKAGE_NAME}_STATIC_INTERNAL}" STREQUAL "${STATIC}")
 	set(${PACKAGE_NAME}_STATIC_INTERNAL ${STATIC} CACHE INTERNAL "This is the value of the last time STATIC was set successfully." FORCE)
 endif ()
 
-if (NOT "${${PACKAGE_NAME}_CURRENT_WITHOUT_MPI}" STREQUAL "${WITHOUT_MPI}")
+if (NOT "${${PACKAGE_NAME}_WITHOUT_MPI_INTERNAL}" STREQUAL "${WITHOUT_MPI}")
 	if (WITHOUT_MPI AND ${PACKAGE_NAME}_LIBRARY MATCHES "${SUFFIX_MPI}")
               SET (FORCE_RELOAD "FORCE")
         elseif (NOT WITHOUT_MPI AND NOT ${PACKAGE_NAME}_LIBRARY MATCHES "${SUFFIX_MPI}")
               SET (FORCE_RELOAD "FORCE")
 	endif (WITHOUT_MPI AND ${PACKAGE_NAME}_LIBRARY MATCHES "${SUFFIX_MPI}")
-	set(${PACKAGE_NAME}_CURRENT_WITHOUT_MPI ${WITHOUT_MPI} CACHE INTERNAL "If set, the curremt version of the library of the library is build without MPI support" FORCE)
+	set(${PACKAGE_NAME}_WITHOUT_MPI_INTERNAL ${WITHOUT_MPI} CACHE INTERNAL "This is the value of the last time WITHOUT_MPI was set successfully." FORCE)
 endif ()
 
 # Library
