@@ -1,0 +1,230 @@
+#	Cmake find for PATCHMAN Optimad Library
+#
+#	FOR FIND MODULE PURPOSES, PLEASE ALWAYS REFER TO YOUR LIBRARY NAME WITH CAPITOL LETTERS
+#
+#	Providing that PATCHMAN libraries are correctly installed and their
+#	location is present in your PATH system, the following variables as
+#	absolute path are set:
+#
+#	- PATCHMAN_FOUND: system has PATCHMAN
+#	- PATCHMAN_INCLUDE_DIRS: the PATCHMAN include directories
+#	- PATCHMAN_LIBRARIES: the libraries needed to use PATCHMAN
+#	- PATCHMAN_DEFINITIONS: compiler switches required for using patchman
+#
+#	Externally vars, specified in your root CmakeLists let the module search for the right libs, that is
+#
+#	- STATIC: true or false, search for static(*.a)/shared(*.so) version of your libs. Default is shared.
+#	- WITHOUT_MPI: true or false, search for serial compiled (opt_IO) /MPI compiled (opt_IOMPI) version of your libs. Default is parallel.
+#	- OPTIMAD_SRC_PATH: path where the optimad libraries are installed.
+#
+
+include(LibFindMacros)
+include(FindPackageHandleStandardArgs)
+
+# Library name
+set(LIBRARY_NAME "patchman")
+
+# Reference header
+set(REFERENCE_HEADER "patchmanv.h")
+
+# Dependencies
+set(DEPENDENCIES "PABLO")
+
+### DO NOT EDIT AFTER THIS LINE ###
+
+# Package name
+string(TOUPPER ${LIBRARY_NAME} PACKAGE_NAME)
+
+# Find dependencies
+#
+# When libfind_package is called to find the dependencies, current variables
+# like PACKAGE_NAME can be overwritten. It is therefore necessary to keep
+# track of current variable values.
+if (DEFINED DEPENDENCIES)
+	if (NOT "${DEPENDENCIES}" STREQUAL "")
+		set(${PACKAGE_NAME}_PARENT_DEPENDENCIES ${DEPENDENCIES})
+	endif()
+	unset(DEPENDENCIES)
+endif()
+
+if (DEFINED ${PACKAGE_NAME}_PARENT_DEPENDENCIES)
+	list(APPEND PREVIOUS_LIBRARY_NAMES ${LIBRARY_NAME})
+	list(APPEND PREVIOUS_REFERENCE_HEADERS ${REFERENCE_HEADER})
+	list(APPEND PREVIOUS_PACKAGE_NAMES ${PACKAGE_NAME})
+
+	# libfind_package add the requested package to the list
+	# of the dependencies, but we want to add also the
+	# dependencies of the requested packages
+	foreach(${PACKAGE_NAME}_dependency_entry IN LISTS ${PACKAGE_NAME}_PARENT_DEPENDENCIES)
+		string(REPLACE "@" ";" ${PACKAGE_NAME}_dependency_args ${${PACKAGE_NAME}_dependency_entry})
+		list(GET ${PACKAGE_NAME}_dependency_args 0 ${PACKAGE_NAME}_dependency_name)
+
+		libfind_package("${PACKAGE_NAME}" ${${PACKAGE_NAME}_dependency_args})
+		list(GET PREVIOUS_PACKAGE_NAMES -1 PACKAGE_NAME)
+		list(APPEND ${PACKAGE_NAME}_DEPENDENCIES ${${${PACKAGE_NAME}_dependency_name}_DEPENDENCIES})
+
+		unset(${PACKAGE_NAME}_dependency_args)
+		unset(${PACKAGE_NAME}_dependency_name)
+	endforeach()
+	unset(${PACKAGE_NAME}_dependency_entry)
+
+	list(REMOVE_DUPLICATES ${PACKAGE_NAME}_DEPENDENCIES)
+
+	list(GET PREVIOUS_LIBRARY_NAMES -1 LIBRARY_NAME)
+	list(REMOVE_AT PREVIOUS_LIBRARY_NAMES -1)
+
+	list(GET PREVIOUS_REFERENCE_HEADERS -1 REFERENCE_HEADER)
+	list(REMOVE_AT PREVIOUS_REFERENCE_HEADERS -1)
+
+	list(GET PREVIOUS_PACKAGE_NAMES -1 PACKAGE_NAME)
+	list(REMOVE_AT PREVIOUS_PACKAGE_NAMES -1)
+
+	unset(${PACKAGE_NAME}_PARENT_DEPENDENCIES)
+endif ()
+
+# Library prefixes/suffixes
+if (STATIC)
+	if (UNIX)
+		set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+	endif (UNIX)
+
+	if (WIN32)
+		set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib")
+	endif (WIN32)
+else ()
+	if (UNIX)
+		set(CMAKE_FIND_LIBRARY_SUFFIXES ".so")
+	endif (UNIX)
+
+	if (WIN32)
+		set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib")
+	endif (WIN32)
+endif ()
+
+set(SUFFIX_DEBUG "_D")
+set(SUFFIX_MPI "_MPI")
+
+# Headers
+if (DEFINED REFERENCE_HEADER AND NOT ${REFERENCE_HEADER} STREQUAL "")
+	find_path(${PACKAGE_NAME}_INCLUDE_DIR ${REFERENCE_HEADER}
+		HINTS "${OPTIMAD_LIB_PATH}/${LIBRARY_NAME}/include"
+                  "${OPTIMAD_LIB_PATH}/${LIBRARY_NAME}/src"
+                  "${OPTIMAD_LIB_PATH}/${LIBRARY_NAME}/src_${LIBRARY_NAME}")
+
+	mark_as_advanced(${PACKAGE_NAME}_INCLUDE_DIR)
+endif ()
+
+# Version
+if(${PACKAGE_NAME}_INCLUDE_DIR)
+	set(VERSION_HEADER_FILENAME "${LIBRARY_NAME}v.h")
+	if (EXISTS "${${PACKAGE_NAME}_INCLUDE_DIR}/${VERSION_HEADER_FILENAME}")
+		libfind_version_header(${PACKAGE_NAME} "${VERSION_HEADER_FILENAME}" "VERSION")
+	endif()
+endif()
+
+# Check if variables need to be reloaded
+if (NOT "${${PACKAGE_NAME}_CURRENT_STATIC}" STREQUAL "${STATIC}")
+	# Dummy string is required to avoid errors when library is not defined
+	get_filename_component(LIBRARY_EXTENSION "/dummy/${${PACKAGE_NAME}_LIBRARY}" EXT)
+	if (NOT ";${CMAKE_FIND_LIBRARY_SUFFIXES};" MATCHES ";${LIBRARY_EXTENSION};")
+		SET (FORCE_RELOAD "FORCE")
+	endif (NOT ";${CMAKE_FIND_LIBRARY_SUFFIXES};" MATCHES ";${LIBRARY_EXTENSION};")
+	set(${PACKAGE_NAME}_CURRENT_STATIC ${STATIC} CACHE INTERNAL "If set, the current version of the library is a static library" FORCE)
+endif ()
+
+if (NOT "${${PACKAGE_NAME}_CURRENT_WITHOUT_MPI}" STREQUAL "${WITHOUT_MPI}")
+	if (WITHOUT_MPI AND ${PACKAGE_NAME}_LIBRARY MATCHES "${SUFFIX_MPI}")
+              SET (FORCE_RELOAD "FORCE")
+        elseif (NOT WITHOUT_MPI AND NOT ${PACKAGE_NAME}_LIBRARY MATCHES "${SUFFIX_MPI}")
+              SET (FORCE_RELOAD "FORCE")
+	endif (WITHOUT_MPI AND ${PACKAGE_NAME}_LIBRARY MATCHES "${SUFFIX_MPI}")
+	set(${PACKAGE_NAME}_CURRENT_WITHOUT_MPI ${WITHOUT_MPI} CACHE INTERNAL "If set, the curremt version of the library of the library is build without MPI support" FORCE)
+endif ()
+
+# Library
+if (FORCE_RELOAD)
+	unset(${PACKAGE_NAME}_LIBRARY_DEBUG CACHE)
+	unset(${PACKAGE_NAME}_LIBRARY_RELEASE CACHE)
+endif (FORCE_RELOAD)
+
+set(LIBRARY_FILENAME_RELEASE ${LIBRARY_NAME})
+if (NOT WITHOUT_MPI)
+	set(LIBRARY_FILENAME_RELEASE "${LIBRARY_FILENAME_RELEASE}${SUFFIX_MPI}")
+endif (NOT WITHOUT_MPI)
+set(LIBRARY_FILENAME_DEBUG "${LIBRARY_FILENAME_RELEASE}${SUFFIX_DEBUG}")
+
+if (UNIX)
+	set(LIBRARY_FILENAME_FALLBACK_RELEASE ${LIBRARY_NAME})
+	set(LIBRARY_FILENAME_FALLBACK_DEBUG ${LIBRARY_FILENAME_FALLBACK_RELEASE}${SUFFIX_DEBUG})
+endif()
+
+set(LIB_PATH_SUFFIXES "")
+list(APPEND LIB_PATH_SUFFIXES "${LIBRARY_NAME}/lib")
+list(APPEND LIB_PATH_SUFFIXES "${LIBRARY_NAME}")
+if (CMAKE_BUILD_TYPE MATCHES Debug)
+        list(APPEND LIB_PATH_SUFFIXES "${LIBRARY_NAME}/debug/lib")
+endif ()
+list(APPEND LIB_PATH_SUFFIXES "${LIBRARY_NAME}/build/lib")
+
+find_library(${PACKAGE_NAME}_LIBRARY_RELEASE NAMES "${LIBRARY_FILENAME_RELEASE}" "${LIBRARY_FILENAME_FALLBACK_RELEASE}"
+        HINTS "${OPTIMAD_LIB_PATH}"
+        PATH_SUFFIXES ${LIB_PATH_SUFFIXES})
+
+find_library(${PACKAGE_NAME}_LIBRARY_DEBUG NAMES "${LIBRARY_FILENAME_DEBUG}" "${LIBRARY_FILENAME_FALLBACK_DEBUG}"
+        HINTS "${OPTIMAD_LIB_PATH}"
+        PATH_SUFFIXES ${LIB_PATH_SUFFIXES})
+
+mark_as_advanced(${PACKAGE_NAME}_LIBRARY_RELEASE)
+mark_as_advanced(${PACKAGE_NAME}_LIBRARY_DEBUG)
+
+unset(LIB_PATH_SUFFIXES)
+unset(LIBRARY_FILENAME_RELEASE)
+unset(LIBRARY_FILENAME_DEBUG)
+unset(LIBRARY_FILENAME_FALLBACK_RELEASE)
+unset(LIBRARY_FILENAME_FALLBACK_DEBUG)
+
+# Choose good values for PATCHMAN_LIBRARY, PATCHMAN_LIBRARIES,
+# PATCHMAN_LIBRARY_DEBUG, and PATCHMAN_LIBRARY_RELEASE depending on what
+# has been found and set.  If only PATCHMAN_LIBRARY_RELEASE is defined,
+# PATCHMAN_LIBRARY will be set to the release value, and
+# PATCHMAN_LIBRARY_DEBUG will be set to PATCHMAN_LIBRARY_DEBUG-NOTFOUND.
+# If only PATCHMAN_LIBRARY_DEBUG is defined, then PATCHMAN_LIBRARY will
+# take the debug value, and PATCHMAN_LIBRARY_RELEASE will be set to
+# PATCHMAN_LIBRARY_RELEASE-NOTFOUND.
+#
+# If the generator supports configuration types, then PATCHMAN_LIBRARY
+# and PATCHMAN_LIBRARIES will be set with debug and optimized flags
+# specifying the library to be used for the given configuration.  If no
+# build type has been set or the generator in use does not support
+# configuration types, then PATCHMAN_LIBRARY and PATCHMAN_LIBRARIES will
+# take only the release value, or the debug value if the release one is
+# not set.
+if (${PACKAGE_NAME}_LIBRARY_DEBUG AND ${PACKAGE_NAME}_LIBRARY_RELEASE AND
+       NOT ${PACKAGE_NAME}_LIBRARY_DEBUG STREQUAL ${PACKAGE_NAME}_LIBRARY_RELEASE AND
+           (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))
+	set( ${PACKAGE_NAME}_LIBRARY "" )
+	foreach( _libname IN LISTS ${PACKAGE_NAME}_LIBRARY_RELEASE )
+		list( APPEND ${PACKAGE_NAME}_LIBRARY optimized "${_libname}" )
+	endforeach()
+	foreach( _libname IN LISTS ${PACKAGE_NAME}_LIBRARY_DEBUG )
+		list( APPEND ${PACKAGE_NAME}_LIBRARY debug "${_libname}" )
+	endforeach()
+elseif (${PACKAGE_NAME}_LIBRARY_RELEASE)
+	set (${PACKAGE_NAME}_LIBRARY ${${PACKAGE_NAME}_LIBRARY_RELEASE})
+elseif (${PACKAGE_NAME}_LIBRARY_DEBUG)
+	set (${PACKAGE_NAME}_LIBRARY ${${PACKAGE_NAME}_LIBRARY_DEBUG})
+else ()
+	set( ${PACKAGE_NAME}_LIBRARY "${PACKAGE_NAME}_LIBRARY-NOTFOUND")
+endif ()
+
+# Set the include dir variables and the libraries and let libfind_process do the rest.
+# NOTE: Singular variables for this library, plural for libraries this lib depends on.
+libfind_process(${PACKAGE_NAME})
+
+# Cleanup
+unset(SUFFIX_DEBUG)
+unset(SUFFIX_MPI)
+
+unset(LIBRARY_NAME)
+unset(REFERENCE_HEADER)
+unset(DEPENDENCIES)
