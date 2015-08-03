@@ -10,6 +10,9 @@ project("patchman")
 set(ENABLE_PROFILING 0 CACHE BOOL "Set appropriate compiler flags to enable profiling fo GLORIA")
 set(STATIC 1 CACHE BOOL "If set, the program is linked using static libraries")
 set(OPTIMAD_LIB_PATH "${CMAKE_CURRENT_SOURCE_DIR}/.." CACHE PATH "Directory with the libraries provided by Optimad")
+if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+	set(CMAKE_INSTALL_PREFIX "/opt/bitpit/${CMAKE_PROJECT_NAME}" CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
+endif()
 #------------------------------------------------------------------------------------#
 
 #------------------------------------------------------------------------------------#
