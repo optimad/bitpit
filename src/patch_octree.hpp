@@ -14,6 +14,8 @@
 #include <cstddef>
 #include <vector>
 
+namespace pman {
+
 struct OctreeLevelInfo{
     int    level;
     double h;
@@ -60,6 +62,8 @@ private:
 	void import_interfaces();
 	void reload_interfaces();
 };
+
+}
 
 #endif
 #endif

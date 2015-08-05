@@ -13,6 +13,8 @@
 #include <vtkSmartPointer.h>
 #include <vtkUnstructuredGrid.h>
 
+namespace pman {
+
 class Cell;
 class Node;
 
@@ -79,5 +81,7 @@ private:
 	vtkSmartPointer<vtkPoints> m_vertexes;
 
 };
+
+}
 
 #endif

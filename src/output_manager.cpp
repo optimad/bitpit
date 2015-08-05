@@ -18,6 +18,8 @@
 #include <sstream>
 #include <vector>
 
+namespace pman {
+
 // Description:
 // Crea un nuovo oggetto
 vtkStandardNewMacro(OutputManager);
@@ -504,4 +506,6 @@ void OutputManager::writeTimeWrapper(int timeStep, double time, int reset,
 	wrapperFile << "</VTKFile>\n";
 
 	wrapperFile.close();
+}
+
 }

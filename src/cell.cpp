@@ -14,6 +14,7 @@
 
 #include<iostream>
 
+namespace pman {
 
 /*!
 	Creates a new cell.
@@ -195,4 +196,6 @@ void Cell::set_data(std::unique_ptr<CellData> data)
 CellData * Cell::get_data() const
 {
     return m_data.get();
+}
+
 }

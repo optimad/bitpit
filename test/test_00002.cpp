@@ -20,14 +20,14 @@ int main(int argc, char *argv[]) {
 
 	std::cout << "  >> 2D Mesh" << "\n";
 
-	Patch *patch_2D = new PatchOctree(0, 2, origin, length, dh);
+	pman::Patch *patch_2D = new pman::PatchOctree(0, 2, origin, length, dh);
 	patch_2D->set_name("backgorund_mesh");
 	patch_2D->update();
 	patch_2D->output_write();
 
 	std::cout << "  >> 3D Mesh" << "\n";
 
-	Patch *patch_3D = new PatchOctree(0, 2, origin, length, dh);
+	pman::Patch *patch_3D = new pman::PatchOctree(0, 2, origin, length, dh);
 	patch_3D->set_name("backgorund_mesh");
 	patch_3D->update();
 	patch_3D->output_write();

@@ -8,6 +8,8 @@
 
 #include<iostream>
 
+namespace pman {
+
 /*!
 	@brief Metafunction for generation of a collapsed array of arrays.
 
@@ -319,3 +321,5 @@ private:
 	}
 
 };
+
+}

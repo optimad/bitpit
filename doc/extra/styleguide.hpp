@@ -180,6 +180,11 @@ The name of the enumeration name should be in the CamelBack style and indicates
 the general purpose of the enumeration, so e.g. we use Interface::PositionType, not
 Interface::InterfacePositionType.
 
+No names should be added to the global namespace.  Everything should be
+in the <B>%patchman</B> namespace.  An exception can be made for names with a static
+scope declared in a .cpp file, but class member functions never have a
+static scope.
+
 Names should be kept as private as possible.  If declaring a struct or
 utility class that is used internally by some other class, consider
 defining it in the .cpp file of the main class or a separate header

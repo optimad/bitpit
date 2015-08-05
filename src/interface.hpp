@@ -10,6 +10,8 @@
 
 #include "element.hpp"
 
+namespace pman {
+
 class Cell;
 
 class InterfaceData {};
@@ -71,5 +73,7 @@ private:
 	std::unique_ptr<InterfaceData> m_data;
 
 };
+
+}
 
 #endif

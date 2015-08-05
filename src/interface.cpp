@@ -40,6 +40,8 @@
 #include "cell.hpp"
 #include "interface.hpp"
 
+namespace pman {
+
 /*!
 	Creates a new interface.
 */
@@ -207,4 +209,6 @@ void Interface::set_data(std::unique_ptr<InterfaceData> data)
 InterfaceData * Interface::get_data() const
 {
     return m_data.get();
+}
+
 }

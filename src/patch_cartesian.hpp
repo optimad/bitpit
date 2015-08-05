@@ -12,6 +12,8 @@
 #include <memory>
 #include <vector>
 
+namespace pman {
+
 class PatchCartesian : public Patch {
 
 public:
@@ -64,5 +66,7 @@ private:
 	int interface_nijk_to_id(const int &normal, const int &i, const int &j, const int &k) const;
 
 };
+
+}
 
 #endif

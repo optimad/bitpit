@@ -8,6 +8,8 @@
 
 #include <memory>
 
+namespace pman {
+
 class Node {
 
 public:
@@ -34,5 +36,7 @@ private:
 	void set_id(const int &id);
 
 };
+
+}
 
 #endif

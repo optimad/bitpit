@@ -14,6 +14,8 @@
 
 #include <math.h>
 
+namespace pman {
+
 const int PatchCartesian::SPACE_MAX_DIM = 3;
 
 /*!
@@ -542,4 +544,6 @@ int PatchCartesian::interface_nijk_to_id(const int &normal, const int &i, const 
 	}
 
 	return id;
+}
+
 }

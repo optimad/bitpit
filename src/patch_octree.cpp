@@ -15,6 +15,8 @@
 
 #include <math.h>
 
+namespace pman {
+
 /*!
 	Creates a new patch.
 */
@@ -546,6 +548,8 @@ void PatchOctree::_mark_for_refinement(Cell &cell)
 	} else {
 		m_tree_3D.setMarker(cell.get_id(), 1);
 	}
+}
+
 }
 
 #endif

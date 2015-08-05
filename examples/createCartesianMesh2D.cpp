@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 	double length = 20;
 	double dh = 0.5;
 
-	Patch *patch_2D = new PatchCartesian(0, 2, origin, length, dh);
+	pman::Patch *patch_2D = new pman::PatchCartesian(0, 2, origin, length, dh);
 	patch_2D->set_name("cartesian_2D_mesh");
 	patch_2D->update();
 	patch_2D->output_write();

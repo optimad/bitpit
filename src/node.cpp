@@ -12,6 +12,8 @@
 
 #include "node.hpp"
 
+namespace pman {
+
 /*!
 	Default constructor.
 */
@@ -66,4 +68,6 @@ void Node::set_coords(std::unique_ptr<double[]> coords)
 double * Node::get_coords() const
 {
 	return m_coords.get();
+}
+
 }

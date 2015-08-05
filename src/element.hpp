@@ -11,6 +11,8 @@
 
 #include "collapsedArrayArray.hpp"
 
+namespace pman {
+
 class Node;
 
 class Element {
@@ -63,5 +65,7 @@ private:
 	void set_id(const int &id);
 
 };
+
+}
 
 #endif

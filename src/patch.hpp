@@ -16,6 +16,8 @@
 #include <string>
 #include <vector>
 
+namespace pman {
+
 #define UNUSED(expr) do { (void)(expr); } while (0)
 
 class Patch {
@@ -83,5 +85,7 @@ private:
 	void set_dimension(int dimension);
 
 };
+
+}
 
 #endif

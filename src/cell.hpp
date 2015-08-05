@@ -11,6 +11,8 @@
 
 #include <memory>
 
+namespace pman {
+
 class CellData {};
 
 class Cell : public Element {
@@ -58,5 +60,7 @@ private:
 	std::unique_ptr<CellData> m_data;
 
 };
+
+}
 
 #endif

@@ -14,6 +14,8 @@
 
 #include "patch.hpp"
 
+namespace pman {
+
 /*!
 	Creates a new patch.
 */
@@ -321,4 +323,6 @@ int Patch::get_cell_count() const
 int Patch::get_interface_count() const
 {
 	return m_interfaces.size();
+}
+
 }

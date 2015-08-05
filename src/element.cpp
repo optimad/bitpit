@@ -49,6 +49,8 @@
 
 #include "element.hpp"
 
+namespace pman {
+
 /*!
 	Default constructor.
 */
@@ -269,4 +271,6 @@ int Element::get_vertex_count(Element::Type type)
 	}
 
 	return -1;
+}
+
 }
