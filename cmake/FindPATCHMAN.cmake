@@ -106,7 +106,7 @@ set(SUFFIX_MPI "_MPI")
 
 # Directory of the library
 if(NOT ${PACKAGE_NAME}_DIR)
-	set(${PACKAGE_NAME}_DIR "${BITPIT_LIB_PATH}/${LIBRARY_NAME}" CACHE PATH "Location of the ${PACKAGE_NAME} package." FORCE)
+	set(${PACKAGE_NAME}_DIR "${BITPIT_DIR}/${LIBRARY_NAME}" CACHE PATH "Location of the ${PACKAGE_NAME} package." FORCE)
 endif()
 
 mark_as_advanced(${PACKAGE_NAME}_DIR)
