@@ -83,9 +83,6 @@ include(${VTK_USE_FILE})
 # Main program
 add_subdirectory(src)
 
-# Docs
-add_subdirectory(doc)
-
 # CMake
 add_subdirectory(cmake)
 
@@ -94,6 +91,9 @@ add_subdirectory(test)
 
 # Examples
 add_subdirectory(examples)
+
+# Docs
+add_subdirectory(doc)
 #------------------------------------------------------------------------------------#
 
 #------------------------------------------------------------------------------------#

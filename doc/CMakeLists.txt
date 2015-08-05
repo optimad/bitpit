@@ -26,7 +26,7 @@ IF(BUILD_DOCUMENTATION)
                       # custom_command for ${doxyfile} generation
                       # but I still have to figure out how...
                       MAIN_DEPENDENCY ${doxyfile} ${doxyfile_in}
-                      DEPENDS ${PATCHMAN_SOURCES} ${PATCHMAN_HEADERS}
+                      DEPENDS ${PATCHMAN_SOURCES} ${PATCHMAN_HEADERS} ${EXAMPLES_SOURCES}
                       COMMENT "Generating HTML documentation")
 
   ADD_CUSTOM_TARGET( doc ALL DEPENDS ${doxy_html_index_file} )
