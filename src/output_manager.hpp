@@ -13,8 +13,8 @@
 #include <vtkSmartPointer.h>
 #include <vtkUnstructuredGrid.h>
 
-#include "cell.hpp"
-#include "node.hpp"
+class Cell;
+class Node;
 
 class OutputManager : public vtkUnstructuredGrid {
 

@@ -2,6 +2,8 @@
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
 
+#include "cell.hpp"
+#include "node.hpp"
 #include "output_manager.hpp"
 
 #include "vtkGenericCell.h"
