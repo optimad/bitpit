@@ -9,8 +9,9 @@
 #include <cstddef>
 #include <memory>
 
-#include "node.hpp"
 #include "collapsedArrayArray.hpp"
+
+class Node;
 
 class Element {
 
