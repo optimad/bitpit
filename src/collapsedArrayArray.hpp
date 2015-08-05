@@ -69,7 +69,7 @@ public:
 		// Fill the array
 		for (int i = 0; i < nArrays; i++) {
 			push_back(buildFrom[i].size());
-			for(int j = 0; j < buildFrom[i].size(); j++) {
+			for(unsigned int j = 0; j < buildFrom[i].size(); j++) {
 				(*this)[i][j] = buildFrom[i][j];
 			}
 		}
