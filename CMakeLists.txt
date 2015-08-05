@@ -12,7 +12,7 @@ set(STATIC 1 CACHE BOOL "If set, the program is linked using static libraries")
 set(BITPIT_LIB_PATH "/opt/bitpit" CACHE PATH "Directory with the BITPIT libraries")
 set(VTK_DIR "/opt/VTK/lib/cmake/vtk" CACHE PATH "The directory containing a CMake configuration file for VTK")
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-	set(CMAKE_INSTALL_PREFIX "/opt/bitpit/${CMAKE_PROJECT_NAME}" CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
+	set(CMAKE_INSTALL_PREFIX "${BITPIT_LIB_PATH}/${CMAKE_PROJECT_NAME}" CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
 endif()
 #------------------------------------------------------------------------------------#
 
