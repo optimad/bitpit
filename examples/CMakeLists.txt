@@ -7,7 +7,7 @@ option(BUILD_EXAMPLES "Create and install the examples" OFF)
 if(BUILD_EXAMPLES)
 	# List of examples
 	set(EXAMPLE_LIST "")
-	list(APPEND EXAMPLE_LIST "createCartesianMesh")
+	list(APPEND EXAMPLE_LIST "createCartesianMesh2D")
 
 	#Rules to build the examples
 	foreach(EXAMPLE_NAME IN LISTS EXAMPLE_LIST)
