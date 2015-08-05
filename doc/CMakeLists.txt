@@ -15,6 +15,8 @@ IF(BUILD_DOCUMENTATION)
   SET( doxy_html_index_file ${CMAKE_CURRENT_BINARY_DIR}/html/index.html )
   SET( doxy_output_root     ${CMAKE_CURRENT_BINARY_DIR}                 ) # Pasted into Doxyfile.in
   SET( doxy_input           ${PROJECT_SOURCE_DIR}/src                   ) # Pasted into Doxyfile.in
+  SET( doxy_extra_files     ${CMAKE_CURRENT_SOURCE_DIR}/extra/styleguide.hpp
+                            ${CMAKE_CURRENT_SOURCE_DIR}/extra/patchman.hpp )
 
   CONFIGURE_FILE( ${doxyfile_in} ${doxyfile} @ONLY )
 
@@ -26,7 +28,7 @@ IF(BUILD_DOCUMENTATION)
                       # custom_command for ${doxyfile} generation
                       # but I still have to figure out how...
                       MAIN_DEPENDENCY ${doxyfile} ${doxyfile_in}
-                      DEPENDS ${PATCHMAN_SOURCES} ${PATCHMAN_HEADERS} ${EXAMPLES_SOURCES}
+                      DEPENDS ${doxy_extra_files} ${doxyfile_in} ${PATCHMAN_SOURCES} ${PATCHMAN_HEADERS} ${EXAMPLES_SOURCES}
                       COMMENT "Generating HTML documentation")
 
   ADD_CUSTOM_TARGET( doc ALL DEPENDS ${doxy_html_index_file} )
