@@ -1,21 +1,20 @@
-#	Cmake find for PATCHMAN Optimad Library
+# FindPATCHMAN
+# -----------
 #
-#	FOR FIND MODULE PURPOSES, PLEASE ALWAYS REFER TO YOUR LIBRARY NAME WITH CAPITOL LETTERS
+#	The following variables are set if PATCHMAN is found. If PATCHMAN is
+#	not found, PATCHMAN_FOUND is set to false:
 #
-#	Providing that PATCHMAN libraries are correctly installed and their
-#	location is present in your PATH system, the following variables as
-#	absolute path are set:
+#	- PATCHMAN_FOUND - System has the PATCHMAN library
+#	- PATCHMAN_INCLUDE_DIRS: - The PATCHMAN include directories
+#	- PATCHMAN_LIBRARIES - The libraries needed to use PATCHMAN
+#	- PATCHMAN_DEFINITIONS - Compiler switches required for using patchman
+#       - PATCHMAN_VERSION - Version of the PATCHMAN library found
 #
-#	- PATCHMAN_FOUND: system has PATCHMAN
-#	- PATCHMAN_INCLUDE_DIRS: the PATCHMAN include directories
-#	- PATCHMAN_LIBRARIES: the libraries needed to use PATCHMAN
-#	- PATCHMAN_DEFINITIONS: compiler switches required for using patchman
+#	The following cache entries must be set by the user to locate PATCHMAN:
 #
-#	Externally vars, specified in your root CmakeLists let the module search for the right libs, that is
-#
-#	- STATIC: true or false, search for static(*.a)/shared(*.so) version of your libs. Default is shared.
-#	- WITHOUT_MPI: true or false, search for serial compiled (opt_IO) /MPI compiled (opt_IOMPI) version of your libs. Default is parallel.
-#	- OPTIMAD_SRC_PATH: path where the optimad libraries are installed.
+#	- STATIC - If set, the the static version of the library will be used
+#	- WITHOUT_MPI - If set, the the serial version of the library will be used
+#	- BITPIT_DIR - The directory containing the BITPIT libraries
 #
 
 include(LibFindMacros)
