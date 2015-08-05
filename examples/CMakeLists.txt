@@ -24,6 +24,7 @@ if(BUILD_EXAMPLES)
 	endforeach()
 
 	add_custom_target(examples DEPENDS ${EXAMPLE_LIST})
+	add_custom_target(clean-examples COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 	set (EXAMPLES_SOURCES ${EXAMPLES_SOURCES} PARENT_SCOPE)
 endif()

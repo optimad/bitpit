@@ -20,3 +20,4 @@ foreach(TEST_NAME IN LISTS TEST_LIST)
 endforeach()
 
 add_custom_target(tests DEPENDS ${TEST_LIST})
+add_custom_target(clean-tests COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})

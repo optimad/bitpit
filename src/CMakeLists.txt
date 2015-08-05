@@ -45,6 +45,7 @@ set_target_properties(${PATCHMAN_LIBRARY} PROPERTIES VERSION "${PATCHMAN_VERSION
                                                      SOVERSION  "${PATCHMAN_MAJOR_VERSION}")
 
 add_custom_target(library DEPENDS ${PATCHMAN_LIBRARY})
+add_custom_target(clean-library COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 install(TARGETS ${PATCHMAN_LIBRARY} DESTINATION lib)
 install(FILES ${PATCHMAN_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})
