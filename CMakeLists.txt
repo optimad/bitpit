@@ -9,7 +9,7 @@ project("patchman")
 #------------------------------------------------------------------------------------#
 set(ENABLE_PROFILING 0 CACHE BOOL "Set appropriate compiler flags to enable profiling fo GLORIA")
 set(STATIC 1 CACHE BOOL "If set, the program is linked using static libraries")
-set(BITPIT_DIR "/opt/bitpit" CACHE PATH "Directory with the BITPIT libraries")
+set(BITPIT_DIR "/opt/bitpit" CACHE PATH "The directory containing the BITPIT libraries")
 set(VTK_DIR "/opt/VTK/lib/cmake/vtk" CACHE PATH "The directory containing a CMake configuration file for VTK")
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	set(CMAKE_INSTALL_PREFIX "${BITPIT_DIR}/${CMAKE_PROJECT_NAME}" CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
