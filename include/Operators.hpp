@@ -27,7 +27,7 @@
 # include <iomanip>
 # include <iostream>
 # include <algorithm>
-
+# include <functional> 
 // CC_lib
 // none
 
