@@ -12,6 +12,15 @@ void flush_ascii( fstream &str, const data_T data ){
 
 // =================================================================================== //
 template< class data_T >
+void flush_ascii( fstream &str, const vector<data_T> &data ){
+
+  flush_ascii( str, data.size(), data) ;
+
+  return ;
+};
+
+// =================================================================================== //
+template< class data_T >
 void flush_ascii( fstream &str, int elements_per_line, const vector<data_T> &data ){
 
   int i(0), j(0), k(0) ;
@@ -29,9 +38,10 @@ void flush_ascii( fstream &str, int elements_per_line, const vector<data_T> &dat
   
   while( next ) {
 
-    this_line = min( elements_per_line, nr - i * elements_per_line ) ;
+    this_line = min( elements_per_line, nr - k ) ;
+
     for( j=0; j<this_line; j++){
-      str << data[k] << " ";
+      flush_ascii( str, data[k] ) ;
       k++ ;
     };
 
@@ -45,6 +55,14 @@ void flush_ascii( fstream &str, int elements_per_line, const vector<data_T> &dat
 
   };
 
+  return ;
+};
+
+// =================================================================================== //
+template< class data_T, size_t d >
+void flush_ascii( fstream &str, const array<data_T,d> &data ){
+
+  flush_ascii( str, d, data ) ;
   return ;
 };
 
@@ -67,9 +85,9 @@ void flush_ascii( fstream &str, int elements_per_line, const array<data_T,d> &da
   
   while( next ) {
 
-    this_line = min( elements_per_line, nr - i * elements_per_line ) ;
+    this_line = min( elements_per_line, nr - k ) ;
     for( j=0; j<this_line; j++){
-      str << data[k] << " ";
+      flush_ascii( str, data[k] ) ;
       k++ ;
     };
 
@@ -103,9 +121,9 @@ void flush_ascii( fstream &str, int elements_per_line, const data_T *data, int n
   
   while( next ) {
 
-    this_line = min( elements_per_line, nr - i * elements_per_line ) ;
+    this_line = min( elements_per_line, nr - k ) ;
     for( j=0; j<this_line; j++){
-      str << data[k] << " ";
+      flush_ascii( str, data[k] ) ;
       k++ ;
     };
 
@@ -134,18 +152,58 @@ void flush_binary( fstream &str, const data_T data ){
   return ;
 };
 
+// // =================================================================================== //
+// template< class data_T >
+// void flush_binary( fstream &str, const vector<data_T> &data ){
+// 
+//   int i, nbytes, nr;
+//   nr = data.size() ;
+//   nbytes = sizeof(data_T) ;
+// 
+// 
+//   for(i=0; i<nr; i++){
+//     str.write( reinterpret_cast<const char*>(&data[i]), nbytes ) ;
+//   };
+// 
+//   return ;
+// };
+
 // =================================================================================== //
 template< class data_T >
 void flush_binary( fstream &str, const vector<data_T> &data ){
 
   int i, nbytes, nr;
   nr = data.size() ;
-  nbytes = sizeof(data_T) ;
+  nbytes = sizeof(data_T) *nr ;
+
+  str.write( reinterpret_cast<const char*>(&data[0]), nbytes ) ;
+
+  return ;
+};
+
+// =================================================================================== //
+template< class data_T >
+void flush_binary( fstream &str, const vector< vector<data_T> > &data ){
+
+  int i, nr(data.size());
 
 
   for(i=0; i<nr; i++){
-    str.write( reinterpret_cast<const char*>(&data[i]), nbytes ) ;
+    flush_binary( str, data[i] ) ;
   };
+
+  return ;
+};
+
+// =================================================================================== //
+template< class data_T, size_t d >
+void flush_binary( fstream &str, const vector< array<data_T,d> > &data ){
+
+  int i, nbytes, nr;
+  nr = data.size() ;
+  nbytes = sizeof(data_T) *nr *d ;
+
+  str.write( reinterpret_cast<const char*>(&data[0]), nbytes ) ;
 
   return ;
 };
@@ -165,7 +223,7 @@ void flush_binary( fstream &str, const array<data_T,d> &data ){
 
 // =================================================================================== //
 template< class data_T >
-void flush_binary( fstream &str, int nr, const data_T *data ){
+void flush_binary( fstream &str, const data_T *data, int nr ){
 
   int i, nbytes;
   nbytes = sizeof(data_T) *nr ;
@@ -324,7 +382,6 @@ void  line_stream( fstream &str, data_T *data, int nr ){
 
 };
 
-
 // =================================================================================== //
 template< class data_T >
 void absorb_ascii( fstream &str, data_T &data ){
@@ -346,7 +403,7 @@ void absorb_ascii( fstream &str, vector<data_T> &data ){
   nr = data.size() ;
 
 
-  while( str.good() ) {
+  while( str.good() && read < nr) {
 
     line_stream( str, temp) ;
     new_ = temp.size() ; 
@@ -454,18 +511,42 @@ void absorb_binary( fstream &str, data_T &data ){
   return ;
 };
 
-
 // =================================================================================== //
 template< class data_T >
 void absorb_binary( fstream &str, vector<data_T> &data ){
 
   int i, nbytes, nr;
   nr = data.size() ;
-  nbytes = sizeof(data_T) ;
+  nbytes = sizeof(data_T) *nr ;
 
-  for(i=0; i<nr; i++){
-    str.read( reinterpret_cast<char*>(&data[i]), nbytes ) ;
+  str.read( reinterpret_cast<char*>(&data[0]), nbytes ) ;
+
+  return ;
+};
+
+// =================================================================================== //
+template< class data_T >
+void absorb_binary( fstream &str, vector< vector<data_T> > &data ){
+
+  int i, nbytes, nr;
+  nr = data.size() ;
+
+  for( i=0; i<nr; ++i){
+      absorb_binary( str, data[i] ) ;
   };
+
+  return ;
+};
+
+// =================================================================================== //
+template< class data_T, size_t d >
+void absorb_binary( fstream &str, vector< array<data_T,d> > &data ){
+
+  int i, nbytes, nr;
+  nr = data.size() ;
+  nbytes = sizeof(data_T) *nr *d ;
+
+  str.read( reinterpret_cast<char*>(&data[0]), nbytes ) ;
 
   return ;
 };

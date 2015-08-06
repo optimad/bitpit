@@ -34,16 +34,16 @@ class FileHandler_C{
     
     FileHandler_C& operator=( const FileHandler_C& other) ;
 
-    void                Set_Directory( string d_) ;
-    void                Set_Name( string n_) ;
-    void                Set_Appendix( string a_) ;
-    void                Set_Series( bool s_) ;
-    void                Set_Parallel( bool p_) ;
-    void                Set_Counter(int c_);
-    void                Set_Block( int b_) ;
+    void                SetDirectory( string d_) ;
+    void                SetName( string n_) ;
+    void                SetAppendix( string a_) ;
+    void                SetSeries( bool s_) ;
+    void                SetParallel( bool p_) ;
+    void                SetCounter(int c_);
+    void                SetBlock( int b_) ;
 
-    void                Increment_Counter();
-    string              Get_Name() ;
+    void                IncrementCounter();
+    string              GetName() ;
     bool                Exists() ;
 
 };

@@ -4,7 +4,7 @@ template <class Derived>
 VTK_RectilinearGrid<Derived>::VTK_RectilinearGrid( )
                              :VTK() {
 
-  fh.Set_Appendix( "vtr" );
+  fh.SetAppendix( "vtr" );
 
   geometry.push_back( VTK::Field_C( "x_Coord", 1, "Float64", "Point" ) ) ;
   geometry.push_back( VTK::Field_C( "y_Coord", 1, "Float64", "Point" ) ) ;
@@ -14,39 +14,13 @@ VTK_RectilinearGrid<Derived>::VTK_RectilinearGrid( )
 
 //------------------------------------------------------------------
 template <class Derived>
-VTK_RectilinearGrid<Derived>::VTK_RectilinearGrid( string dir_, string name_ )
-                             :VTK(dir_, name_ ) {
-
-  fh.Set_Appendix( "vtr" );
-
-  geometry.push_back( VTK::Field_C( "x_Coord", 1, "Float64", "Point" ) ) ;
-  geometry.push_back( VTK::Field_C( "y_Coord", 1, "Float64", "Point" ) ) ;
-  geometry.push_back( VTK::Field_C( "z_Coord", 1, "Float64", "Point" ) ) ;
-
-  return ;
-};
-
-
-//------------------------------------------------------------------
-template <class Derived>
 VTK_RectilinearGrid<Derived>::VTK_RectilinearGrid( string dir_, string name_, string codex_, int n1_, int n2_, int m1_, int m2_, int l1_, int l2_ )
-                             :VTK(dir_, name_ ) {
+                             :VTK_RectilinearGrid( ) {
 
-  fh.Set_Appendix( "vtr" );
+  SetNames( dir_, name_ ) ;
 
-  n1 = n1_ ;
-  n2 = n2_ ;
-  m1 = m1_ ;
-  m2 = m2_ ;
-  l1 = l1_ ;
-  l2 = l2_ ;
-
-  nr_cells =  (n2-n1+0)*(m2-m1+0)*(l2-l1+0) ;
-  nr_points = (n2-n1+1)*(m2-m1+1)*(l2-l1+1) ;
-
-  geometry.push_back( VTK::Field_C( "x_Coord", 1, "Float64", "Point", codex_, n2-n1+1 ) ) ;
-  geometry.push_back( VTK::Field_C( "y_Coord", 1, "Float64", "Point", codex_, m2-m1+1 ) ) ;
-  geometry.push_back( VTK::Field_C( "z_Coord", 1, "Float64", "Point", codex_, l2-l1+1 ) ) ;
+  SetDimensions( n1_, n2_, m1_, m2_, l1_, l2_) ;
+  SetGeomCodex( codex_ ) ;
 
   return ;
 };
@@ -57,7 +31,7 @@ VTK_RectilinearGrid<Derived>::~VTK_RectilinearGrid( ) {} ;
 
 // =================================================================================== //
 template <class Derived>
-void VTK_RectilinearGrid<Derived>::Read( ){
+void VTK_RectilinearGrid<Derived>::ReadMetaData( ){
 
   fstream str;
   string line;
@@ -69,7 +43,7 @@ void VTK_RectilinearGrid<Derived>::Read( ){
   array<int,6>             extensions ;
 
 
-  str.open( fh.Get_Name( ), ios::in ) ;
+  str.open( fh.GetName( ), ios::in ) ;
 
   getline( str, line);
   while( ! Keyword_In_String( line, "<Piece")){
@@ -85,39 +59,19 @@ void VTK_RectilinearGrid<Derived>::Read( ){
   l1 = extensions[4] ;
   l2 = extensions[5] ;
 
-  Read_Data_Header( str ) ;
   position = str.tellg() ;
 
-//  Read_Geometry_Header( str ) ;
-  str.seekg( position) ;
-  if( Seek_and_Read( str, "x_Coord", geometry[0] ) ) {
-    geometry[0].Set_Elements(n2-n1+1) ;
-  }
+  ReadDataHeader( str ) ;
 
-  else{
-    cout << "x_Coord DataArray not found" << endl ;
-  };
+    for( int i=0; i<geometry.size(); ++i){
+        str.seekg( position) ;
+        if( ! ReadDataArray( str, geometry[i] ) ) {
+            cout << geometry[i].GetName() << " DataArray not found" << endl ;
+        };
+    };
 
-  str.seekg( position) ;
-  if( Seek_and_Read( str, "y_Coord", geometry[1] ) ){
-    geometry[1].Set_Elements(m2-m1+1) ;
-  }
 
-  else{
-    cout << "y_Coord DataArray not found" << endl ;
-  };
-
-  str.seekg( position) ;
-  if( Seek_and_Read( str, "z_Coord", geometry[2] ) ){
-    geometry[2].Set_Elements(l2-l1+1) ;
-  }
-
-  else{
-    cout << "z_Coord DataArray not found" << endl ;
-  };
-
-  Read_FieldValues( str ) ;
-
+  SetDimensions( n1, n2, m1, m2, l1, l2 ) ;
   str.close() ; 
 
   return ;
@@ -126,13 +80,11 @@ void VTK_RectilinearGrid<Derived>::Read( ){
 
 // =================================================================================== //
 template <class Derived>
-void VTK_RectilinearGrid<Derived>::Write( ){
+void VTK_RectilinearGrid<Derived>::WriteMetaData( ){
 
   fstream str;
 
-  Calc_Appended_Offsets();
-
-  str.open( fh.Get_Name( ), ios::out ) ;
+  str.open( fh.GetName( ), ios::out ) ;
 
   //Writing XML header
   str << "<?xml version=\"1.0\"?>" << endl;
@@ -144,13 +96,13 @@ void VTK_RectilinearGrid<Derived>::Write( ){
 
 
   //Header for Data
-  Write_Data_Header( str, false ) ;
+  WriteDataHeader( str, false ) ;
 
   //Wring Geometry Information   
   str << "       <Coordinates>" << endl;
-  Write_DataArray( str, geometry[0] ) ;
-  Write_DataArray( str, geometry[1] ) ;
-  Write_DataArray( str, geometry[2] ) ;
+  WriteDataArray( str, geometry[0] ) ;
+  WriteDataArray( str, geometry[1] ) ;
+  WriteDataArray( str, geometry[2] ) ;
   str << "       </Coordinates>" << endl;
 
   //Closing Piece
@@ -158,22 +110,21 @@ void VTK_RectilinearGrid<Derived>::Write( ){
   str << "  </RectilinearGrid>" << endl;
 
   //Write Appended Section
-  Write_All_Appended( str ) ;
+  str << "  <AppendedData encoding=\"raw\">" << endl;
+  str << "_" ;
+  str << endl ;
 
   //Closing XML
   str << "</VTKFile>" << endl;
 
   str.close() ;
 
-  fh.Increment_Counter() ;
-  if( nr_procs != 0  && my_proc == 0)  Write_pvtr() ;
-
   return ;
 };
 
 // =================================================================================== //
 template <class Derived>
-void VTK_RectilinearGrid<Derived>::Write_pvtr( ){
+void VTK_RectilinearGrid<Derived>::WriteCollection( ){
 
   fstream str ;
 
@@ -182,12 +133,12 @@ void VTK_RectilinearGrid<Derived>::Write_pvtr( ){
   fhp = fh ;
   fho = fh ;
 
-  fhp.Set_Parallel(false) ;
-  fhp.Set_Appendix("pvtr") ;
+  fhp.SetParallel(false) ;
+  fhp.SetAppendix("pvtr") ;
 
-  fho.Set_Directory(".") ;
+  fho.SetDirectory(".") ;
 
-  str.open( fhp.Get_Name( ), ios::out ) ;
+  str.open( fhp.GetName( ), ios::out ) ;
 
   //Writing XML header
   str << "<?xml version=\"1.0\"?>" << endl;
@@ -203,23 +154,23 @@ void VTK_RectilinearGrid<Derived>::Write_pvtr( ){
 
 
   //Header for Data
-  Write_Data_Header( str, true );
+  WriteDataHeader( str, true );
 
   //Wring Geometry Information
   str << "      <PCoordinates>" << endl;
-  Write_PDataArray( str, geometry[0] ) ;
-  Write_PDataArray( str, geometry[1] ) ;
-  Write_PDataArray( str, geometry[2] ) ;
+  WritePDataArray( str, geometry[0] ) ;
+  WritePDataArray( str, geometry[1] ) ;
+  WritePDataArray( str, geometry[2] ) ;
   str << "      </PCoordinates>" << endl;
 
 
   for( int i=0; i<nr_procs; i++){
-    fho.Set_Block(i) ;
+    fho.SetBlock(i) ;
     str << "    <Piece Extent= \" " 
         << proc_index[i][0] << " " << proc_index[i][1] << " "
         << proc_index[i][2] << " " << proc_index[i][3] << " "
         << proc_index[i][4] << " " << proc_index[i][5] << " "
-        << "\" Source= \"" << fho.Get_Name() << "\"/>" << endl;
+        << "\" Source= \"" << fho.GetName() << "\"/>" << endl;
   };
 
   str << "  </PRectilinearGrid>"  << endl;
@@ -233,9 +184,9 @@ void VTK_RectilinearGrid<Derived>::Write_pvtr( ){
 
 // =================================================================================== //
 template <class Derived>
-void VTK_RectilinearGrid<Derived>::Set_Parallel_Index( array<int,6> glo_, vector<array<int,6>> loc_ ){
+void VTK_RectilinearGrid<Derived>::SetParallelIndex( array<int,6> glo_, vector<array<int,6>> loc_ ){
 
-  if( loc_.size() !=nr_procs ) cout << "Size of loc_ in VTK_RectilinearGrid<Derived>::Set_Parallel_Index does not fit nr_procs " << endl ;
+  if( loc_.size() !=nr_procs ) cout << "Size of loc_ in VTK_RectilinearGrid<Derived>::SetParallelIndex does not fit nr_procs " << endl ;
 
   global_index = glo_ ;
   proc_index   = loc_ ;
@@ -245,7 +196,7 @@ void VTK_RectilinearGrid<Derived>::Set_Parallel_Index( array<int,6> glo_, vector
 
 // =================================================================================== //
 template <class Derived>
-void VTK_RectilinearGrid<Derived>::Set_Dimensions( int n1_, int n2_, int m1_, int m2_, int l1_, int l2_ ){
+void VTK_RectilinearGrid<Derived>::SetDimensions( int n1_, int n2_, int m1_, int m2_, int l1_, int l2_ ){
 
   n1 = n1_ ;
   n2 = n2_ ;
@@ -254,16 +205,16 @@ void VTK_RectilinearGrid<Derived>::Set_Dimensions( int n1_, int n2_, int m1_, in
   l1 = l1_ ;
   l2 = l2_ ;
 
-  geometry[0].Set_Elements(n2-n1+1) ;
-  geometry[1].Set_Elements(m2-m1+1) ;
-  geometry[2].Set_Elements(l2-l1+1) ;
+  geometry[0].SetElements(n2-n1+1) ;
+  geometry[1].SetElements(m2-m1+1) ;
+  geometry[2].SetElements(l2-l1+1) ;
 
   nr_cells =  (n2-n1+0)*(m2-m1+0)*(l2-l1+0) ;
   nr_points = (n2-n1+1)*(m2-m1+1)*(l2-l1+1) ;
 
   for( int i=0; i< nr_data; i++){
-    if( data[i].Get_Location() == "Cell")  data[i].Set_Elements(nr_cells) ;
-    if( data[i].Get_Location() == "Point") data[i].Set_Elements(nr_points) ;
+    if( data[i].GetLocation() == "Cell")  data[i].SetElements(nr_cells) ;
+    if( data[i].GetLocation() == "Point") data[i].SetElements(nr_points) ;
   };
 
   return ;

@@ -48,27 +48,27 @@ class VTK{
         Field_C( string name_, int comp_, string type_, string loc_, string cod_, int nr_elements_);
        ~Field_C();
     
-        string                   Get_Name();
-        string                   Get_Type();
-        string                   Get_Location();
-        string                   Get_Codification();
-        int                      Get_Components();
-        int                      Get_Elements();
-        int                      Get_Size();
-        int                      Get_Offset();
-        int                      Get_Nbytes();
-        fstream::pos_type        Get_Position(); 
+        string                   GetName();
+        string                   GetType();
+        string                   GetLocation();
+        string                   GetCodification();
+        int                      GetComponents();
+        int                      GetElements();
+        int                      GetSize();
+        int                      GetOffset();
+        int                      GetNbytes();
+        fstream::pos_type        GetPosition(); 
 
-        void                     Set_Name( string name_ ) ;
-        void                     Set_Type( string type_ ) ;
-        void                     Set_Location( string loc_ ) ;
-        void                     Set_Codification( string cod_ ) ;
-        void                     Set_Components( int comp_ ) ;
-        void                     Set_Elements( int elem_ ) ;
-        void                     Set_Offset( int offs_ ) ;
-        void                     Set_Position( fstream::pos_type pos_ ) ;
+        void                     SetName( string name_ ) ;
+        void                     SetType( string type_ ) ;
+        void                     SetLocation( string loc_ ) ;
+        void                     SetCodification( string cod_ ) ;
+        void                     SetComponents( int comp_ ) ;
+        void                     SetElements( int elem_ ) ;
+        void                     SetOffset( int offs_ ) ;
+        void                     SetPosition( fstream::pos_type pos_ ) ;
     
-        int                      size_of_type( string type ) ;
+        int                      SizeOfType( string type ) ;
     };
      
     // members ---------------------------------------------------------------------- //
@@ -90,40 +90,52 @@ class VTK{
       VTK( string dir_, string name_ );
       virtual ~VTK( );
 
-      void    Set_Names( string dir_ , string name_  ) ;
-      void    Set_Counter( int c_ ) ;
-      void    Set_Parallel( int nr, int my ) ;
+      void    SetNames( string dir_ , string name_  ) ;
+      void    SetCounter( int c_ ) ;
+      void    SetParallel( int nr, int my ) ;
 
-      void    Add_Data( string name_, int comp_, string type_, string loc_, string cod_ ) ;
-      void    Remove_Data( string name_ ) ;
+      void    SetGeomCodex( string cod_ );
+      void    SetDataCodex( string cod_ );
 
-      virtual void    Write() = 0 ;
-      virtual void    Read() = 0 ;
+      void    AddData( string name_, int comp_, string type_, string loc_, string cod_ ) ;
+      void    RemoveData( string name_ ) ;
+
+      void    Read() ;
+      virtual 
+      void    ReadMetaData() = 0 ;
+      void    ReadData() ;
+
+
+      void    Write()  ;
+      virtual 
+      void    WriteMetaData() = 0 ;
+      void    WriteData() ;
+
+      virtual
+      void    WriteCollection() = 0 ;  
 
     protected:
       //General Purpose
-      VTK::Field_C*  get_field_by_name( vector<Field_C> &fields_, const string &name_ ) ;
+      bool    GetFieldByName( vector<Field_C> &fields_, const string &name_, VTK::Field_C*& the_field ) ;
+      void    CalcAppendedOffsets() ;
+
+      bool    StringToDataArray( string &str, Field_C &data_ ) ;
+      void    DataArrayToString( string &str, Field_C &data_ ) ;
+      void    PDataArrayToString( string &str, Field_C &data_ ) ;
+
 
       //For Writing
-      void    Write_Data_Header( fstream &str, bool parallel ) ;
-
-      void    Write_DataArray( fstream &str, Field_C &data_ ) ;
-      void    Write_PDataArray( fstream &str, Field_C &data_ ) ;
-
-      void    Write_All_Appended( fstream &str ) ;
-
-      void    Calc_Appended_Offsets() ;
+      void    WriteDataHeader( fstream &str, bool parallel ) ;
+      void    WriteDataArray( fstream &str, Field_C &data_ ) ;
+      void    WritePDataArray( fstream &str, Field_C &data_ ) ;
 
       virtual
       void    Flush( fstream &str, string codex_, string name  ) ; //CRTP
 
 
       //For Reading
-      void    Read_Data_Header( fstream &str ) ;
-      bool    Read_DataArray( string &str, Field_C &data_ ) ;
-      void    Read_FieldValues( fstream &str ) ;
-
-      bool    Seek_and_Read( fstream &str, const string &name_, Field_C &field_  );
+      void    ReadDataHeader( fstream &str ) ;
+      bool    ReadDataArray( fstream &str, Field_C &field_  );
 
       virtual
       void    Absorb( fstream &str, string codex_, string name  ) ; //CRTP
@@ -147,21 +159,19 @@ class VTK_UnstructuredGrid : public VTK{
     VTK_UnstructuredGrid( string dir_, string name_, string cod_, int ncell_, int npoints_, int nconn_  ) ;
    ~VTK_UnstructuredGrid();
 
-    void      Write_pvtu() ;
+    void      WriteCollection() ;  
 
-  public:
-    // For Writing
-    void      Write() ;
     void      Flush(  fstream &str, string codex_, string name  ) ; //CRTP
-
-
-    // For Reading
-    void      Read() ;
     void      Absorb( fstream &str, string codex_, string name  ) ; //CRTP
 
-    // General Purpose
-    void      Set_Dimensions( int ncells_, int npoints_, int nconn_ ) ;
-    int       numberofelements( int t) ;
+  public:
+    void      ReadMetaData() ;
+    void      WriteMetaData() ;
+
+    void      WritePMetaData() ;
+
+    void      SetDimensions( int ncells_, int npoints_, int nconn_ ) ;
+    int       NumberOfElements( int t) ;
 
 };
 
@@ -172,7 +182,7 @@ class VTK_RectilinearGrid : public VTK{
   protected:
     int                    n1, n2, m1, m2, l1, l2 ;
     array<int,6>           global_index ;
-    vector<array<int,6>>   proc_index ;
+    vector<array<int,6> >  proc_index ;
 
   protected:
     VTK_RectilinearGrid();
@@ -180,21 +190,17 @@ class VTK_RectilinearGrid : public VTK{
     VTK_RectilinearGrid( string dir_, string name_, string codex_, int n1_, int n2_, int m1_, int m2_, int l1_, int l2_ );
    ~VTK_RectilinearGrid();
 
-    void      Write_pvtr() ;
+    void      WriteCollection() ;  
 
-  public:
-    // For Writing
-    void      Write() ;
     void      Flush(  fstream &str, string codex_, string name  ) ; //CRTP
-
-    void      Set_Parallel_Index( array<int,6> glo_, vector<array<int,6>> loc_ ) ;
-
-    // For Reading
-    void      Read() ;
     void      Absorb( fstream &str, string codex_, string name  ) ; //CRTP
 
-    // General Purpose
-    void      Set_Dimensions( int n1_, int n2_, int m1_, int m2_, int l1_, int l2_ ) ;
+  public:
+    void      ReadMetaData() ;
+    void      WriteMetaData() ;
+
+    void      SetParallelIndex( array<int,6> glo_, vector<array<int,6>> loc_ ) ;
+    void      SetDimensions( int n1_, int n2_, int m1_, int m2_, int l1_, int l2_ ) ;
 
 };
 

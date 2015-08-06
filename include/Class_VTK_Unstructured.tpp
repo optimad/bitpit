@@ -3,7 +3,7 @@ template <class Derived>
 VTK_UnstructuredGrid<Derived>::VTK_UnstructuredGrid( )
                               :VTK() {
 
-  fh.Set_Appendix("vtu");
+  fh.SetAppendix("vtu");
 
   geometry.push_back( VTK::Field_C( "xyz",          3, "Float64", "Point" ) ) ;
   geometry.push_back( VTK::Field_C( "offsets",      1, "Int32"  , "Cell"  ) ) ;
@@ -17,42 +17,41 @@ template <class Derived>
 VTK_UnstructuredGrid<Derived>::VTK_UnstructuredGrid( string dir_, string name_, string cod_, int ncell_, int npoints_, int nconn_  )
                               :VTK_UnstructuredGrid( ){
 
-  Set_Names( dir_, name_ ) ; 
-  Set_Dimensions( ncell_, npoints_, nconn_ ) ; 
+  SetNames( dir_, name_ ) ; 
+  SetDimensions( ncell_, npoints_, nconn_ ) ; 
 
-  for( int i=0; i<4 ; i++) geometry[i].Set_Codification( cod_ ) ;
+  SetGeomCodex( cod_ ) ;
 
   return ;
 
 };
 
-
 //------------------------------------------------------------------
 template <class Derived>
 VTK_UnstructuredGrid<Derived>::~VTK_UnstructuredGrid( ) {
     
-    Set_Dimensions( -1, -1, -1) ;    
+    SetDimensions( -1, -1, -1) ;    
 };
 
 //------------------------------------------------------------------
 template <class Derived>
-void VTK_UnstructuredGrid<Derived>::Set_Dimensions( int ncells_, int npoints_, int nconn_ ){
+void VTK_UnstructuredGrid<Derived>::SetDimensions( int ncells_, int npoints_, int nconn_ ){
 
   ncells        = ncells_ ;
   npoints       = npoints_ ;
   nconnectivity = nconn_ ;
 
-  geometry[0].Set_Elements(npoints) ;
-  geometry[1].Set_Elements(ncells) ;
-  geometry[2].Set_Elements(ncells) ;
-  geometry[3].Set_Elements(nconnectivity) ;
+  geometry[0].SetElements(npoints) ;
+  geometry[1].SetElements(ncells) ;
+  geometry[2].SetElements(ncells) ;
+  geometry[3].SetElements(nconnectivity) ;
 
   nr_points = npoints ;
   nr_cells  = ncells ;
 
   for( int i=0; i< nr_data; i++){
-      if( data[i].Get_Location() == "Cell")  data[i].Set_Elements(nr_cells) ;
-      if( data[i].Get_Location() == "Point") data[i].Set_Elements(nr_points) ;
+      if( data[i].GetLocation() == "Cell")  data[i].SetElements(nr_cells) ;
+      if( data[i].GetLocation() == "Point") data[i].SetElements(nr_points) ;
   };
 
   return ;
@@ -60,7 +59,7 @@ void VTK_UnstructuredGrid<Derived>::Set_Dimensions( int ncells_, int npoints_, i
 
 // =================================================================================== //
 template <class Derived>
-int VTK_UnstructuredGrid<Derived>::numberofelements( int t){
+int VTK_UnstructuredGrid<Derived>::NumberOfElements( int t){
 
   int e;
 
@@ -85,13 +84,12 @@ int VTK_UnstructuredGrid<Derived>::numberofelements( int t){
 
 // =================================================================================== //
 template <class Derived>
-void VTK_UnstructuredGrid<Derived>::Write( ){
+void VTK_UnstructuredGrid<Derived>::WriteMetaData( ){
 
   fstream str ;
+  string line ; 
 
-  Calc_Appended_Offsets() ;
-
-  str.open( fh.Get_Name( ), ios::out ) ;
+  str.open( fh.GetName( ), ios::out ) ;
 
   //Writing XML header
   str << "<?xml version=\"1.0\"?>" << endl;
@@ -102,40 +100,38 @@ void VTK_UnstructuredGrid<Derived>::Write( ){
   str << "    <Piece  NumberOfPoints=\"" << npoints << "\" NumberOfCells=\"" << ncells << "\">" << endl;
 
   //Header for Data
-  Write_Data_Header( str, false );
+  WriteDataHeader( str, false );
 
   //Wring Geometry Information
   str << "      <Points>" << endl ;;
-  Write_DataArray( str, geometry[0] ) ;
+  WriteDataArray( str, geometry[0] ) ;
   str << "      </Points>" << endl;
 
   str << "      <Cells>" << endl ;;
-  Write_DataArray( str, geometry[1] ) ;
-  Write_DataArray( str, geometry[2] ) ;
-  Write_DataArray( str, geometry[3] ) ;
+  WriteDataArray( str, geometry[1] ) ;
+  WriteDataArray( str, geometry[2] ) ;
+  WriteDataArray( str, geometry[3] ) ;
   str << "      </Cells>" << endl;
 
   //Closing Piece
   str << "    </Piece>" << endl;
   str << "  </UnstructuredGrid>"  << endl;
 
-  //Write Appended Section
-  Write_All_Appended( str ) ;
+  //Appended Section
 
+  str << "  <AppendedData encoding=\"raw\">" << endl;
+  str << "_" ;
+  str << endl ;
   str << "</VTKFile>" << endl;
 
   str.close() ;
-
-  if( nr_procs != 0  && my_proc == 0)  Write_pvtu() ;
-
-  fh.Increment_Counter() ;
 
   return ;
 };
 
 // =================================================================================== //
 template <class Derived>
-void VTK_UnstructuredGrid<Derived>::Write_pvtu( ){
+void VTK_UnstructuredGrid<Derived>::WriteCollection( ){
 
   fstream str ;
 
@@ -144,12 +140,12 @@ void VTK_UnstructuredGrid<Derived>::Write_pvtu( ){
   fhp = fh ;
   fho = fh ;
 
-  fhp.Set_Parallel(false) ;
-  fhp.Set_Appendix("pvtu") ;
+  fhp.SetParallel(false) ;
+  fhp.SetAppendix("pvtu") ;
 
-  fho.Set_Directory(".") ;
+  fho.SetDirectory(".") ;
 
-  str.open( fhp.Get_Name( ), ios::out ) ;
+  str.open( fhp.GetName( ), ios::out ) ;
 
   //Writing XML header
   str << "<?xml version=\"1.0\"?>" << endl;
@@ -159,18 +155,18 @@ void VTK_UnstructuredGrid<Derived>::Write_pvtu( ){
   str << "  <PUnstructuredGrid GhostLevel=\"0\">"  << endl;;
 
   //Header for Data
-  Write_Data_Header( str, true );
+  WriteDataHeader( str, true );
 
   //Wring Geometry Information
   str << "      <PPoints>" << endl;
-  Write_PDataArray( str, geometry[0] ) ;
+  WritePDataArray( str, geometry[0] ) ;
   str << endl ;
   str << "      </PPoints>" << endl;
 
 
   for( int i=0; i<nr_procs; i++){
-    fho.Set_Block(i) ;
-    str << "    <Piece  Source=\"" << fho.Get_Name() <<  "\"/>" << endl;
+    fho.SetBlock(i) ;
+    str << "    <Piece  Source=\"" << fho.GetName() <<  "\"/>" << endl;
   };
 
   str << "  </PUnstructuredGrid>"  << endl;
@@ -192,7 +188,7 @@ void VTK_UnstructuredGrid<Derived>::Flush( fstream &str, string codex, string na
 
 // =================================================================================== //
 template <class Derived>
-void VTK_UnstructuredGrid<Derived>::Read( ){
+void VTK_UnstructuredGrid<Derived>::ReadMetaData( ){
 
   fstream str;
   string line;
@@ -202,7 +198,7 @@ void VTK_UnstructuredGrid<Derived>::Read( ){
   bool                     read ;
  
 
-  str.open( fh.Get_Name( ), ios::in ) ;
+  str.open( fh.GetName( ), ios::in ) ;
 
 //  Read_Piece( str ) ;
   getline( str, line);
@@ -214,48 +210,18 @@ void VTK_UnstructuredGrid<Derived>::Read( ){
   convert_string( Get_After_Keyword( line, "NumberOfCells", '\"') , ncells );
 
 
-  Read_Data_Header( str ) ;
   position = str.tellg() ;
+  ReadDataHeader( str ) ;
 
-//  Read_Geometry_Header( str ) ;
-  str.seekg( position) ;
-  if( Seek_and_Read( str, "xyz", geometry[0] ) ) {
-    geometry[0].Set_Elements(npoints) ;
-  }
 
-  else{
-    cout << "xyz DataArray not found" << endl ;
+  for( int i=0; i<geometry.size(); ++i){
+      str.seekg( position) ;
+      if( ! ReadDataArray( str, geometry[i] ) ) {
+        cout << geometry[i].GetName() << " DataArray not found" << endl ;
+      };
   };
 
-  str.seekg( position) ;
-  if( Seek_and_Read( str, "offsets", geometry[1] ) ){
-    geometry[1].Set_Elements(ncells) ;
-  }
-
-  else{
-    cout << "offsets DataArray not found" << endl ;
-  };
-
-  str.seekg( position) ;
-  if( Seek_and_Read( str, "types", geometry[2] ) ){
-    geometry[2].Set_Elements(ncells) ;
-  }
-
-  else{
-    cout << "types DataArray not found" << endl ;
-  };
-
-  str.seekg( position) ;
-  if( Seek_and_Read( str, "connectivity", geometry[3] ) ){
-    geometry[3].Set_Elements(-1) ;
-  }
-
-  else{
-    cout << "connectivity DataArray not found" << endl ;
-  };
-
-
-  Read_FieldValues( str ) ;
+  SetDimensions( ncells, npoints, -1 ) ;
 
   str.close() ;
 
@@ -266,6 +232,6 @@ void VTK_UnstructuredGrid<Derived>::Read( ){
 template <class Derived>
 void VTK_UnstructuredGrid<Derived>::Absorb( fstream &str, string codex, string name ){
 
-  static_cast<Derived *>(this)->Flush( str, codex, name );
+  static_cast<Derived *>(this)->Absorb( str, codex, name );
   return ;
 };

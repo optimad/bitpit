@@ -57,6 +57,12 @@ void flush_binary( fstream &str, const data_T data  ) ;
 template< class data_T >
 void flush_binary( fstream &str, const vector<data_T> &data  ) ;
 
+template< class data_T >
+void flush_binary( fstream &str, const vector< vector<data_T> > &data  ) ;
+
+template< class data_T, size_t d >
+void flush_binary( fstream &str, const vector< array<data_T,d> > &data  ) ;
+
 template< class data_T, size_t d >
 void flush_binary( fstream &str, const array<data_T,d> &data  ) ;
 
@@ -81,12 +87,19 @@ void absorb_binary( fstream &str, data_T &data  ) ;
 template< class data_T >
 void absorb_binary( fstream &str, vector<data_T> &data  ) ;
 
+template< class data_T >
+void absorb_binary( fstream &str, vector< vector<data_T> > &data  ) ;
+
+template< class data_T, size_t d >
+void absorb_binary( fstream &str, vector< array<data_T,d> > &data  ) ;
+
 template< class data_T, size_t d >
 void absorb_binary( fstream &str, array<data_T,d> &data  ) ;
 
 template< class data_T >
 void absorb_binary( fstream &str, data_T *data, int nr  ) ;
 
+void CopyUntilEOFInString( fstream &str, char*& buffer, int& length);
 
 #include "Generic_IO.tpp"
 

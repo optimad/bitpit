@@ -51,34 +51,35 @@ FileHandler_C&    FileHandler_C::operator=(const FileHandler_C& other){
 
     str.clear() ;
 
+    return *this ;
 };
 
 //---------------------------------------------------------------
-void    FileHandler_C::Set_Directory( string d_){ directory=d_; return;} ;
+void    FileHandler_C::SetDirectory( string d_){ directory=d_; return;} ;
 
 //---------------------------------------------------------------
-void    FileHandler_C::Set_Name( string n_){ name=n_; return;} ;
+void    FileHandler_C::SetName( string n_){ name=n_; return;} ;
 
 //---------------------------------------------------------------
-void    FileHandler_C::Set_Appendix( string a_){ appendix=a_; return;} ;
+void    FileHandler_C::SetAppendix( string a_){ appendix=a_; return;} ;
 
 //---------------------------------------------------------------
-void    FileHandler_C::Set_Series( bool s_){ series=s_; return;} ;
+void    FileHandler_C::SetSeries( bool s_){ series=s_; return;} ;
 
 //---------------------------------------------------------------
-void    FileHandler_C::Set_Parallel( bool p_){ parallel=p_; return;} ;
+void    FileHandler_C::SetParallel( bool p_){ parallel=p_; return;} ;
 
 //---------------------------------------------------------------
-void    FileHandler_C::Set_Counter(int c_){ counter=c_; return; };
+void    FileHandler_C::SetCounter(int c_){ counter=c_; return; };
 
 //---------------------------------------------------------------
-void    FileHandler_C::Set_Block( int b_){ block=b_; return;} ;
+void    FileHandler_C::SetBlock( int b_){ block=b_; return;} ;
 
 //---------------------------------------------------------------
-void    FileHandler_C::Increment_Counter(){ if(series) counter++; return; };
+void    FileHandler_C::IncrementCounter(){ if(series) counter++; return; };
 
 //---------------------------------------------------------------
-string  FileHandler_C::Get_Name(){
+string  FileHandler_C::GetName(){
   stringstream filename ;
 
   filename << directory << "/"<<name ;
@@ -91,6 +92,6 @@ string  FileHandler_C::Get_Name(){
 };
 //---------------------------------------------------------------
 bool   FileHandler_C::Exists() {
-    ifstream f( Get_Name() );
+    ifstream f( GetName() );
     return f.good() ;
 };

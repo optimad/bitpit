@@ -22,7 +22,7 @@ VTK::Field_C::Field_C( string name_, int comp_, string type_, string loc_, strin
 
        size   = components *nr_elements ;
 
-       nbytes = size *size_of_type( type ) ;
+       nbytes = size *SizeOfType( type ) ;
 
 };
 
@@ -30,7 +30,7 @@ VTK::Field_C::Field_C( string name_, int comp_, string type_, string loc_, strin
 VTK::Field_C::~Field_C(){};
 
 //------------------------------------------------------------------
-int VTK::Field_C::size_of_type( string type ){
+int VTK::Field_C::SizeOfType( string type ){
 
   int nbytes ;
 
@@ -62,66 +62,66 @@ int VTK::Field_C::size_of_type( string type ){
 };
 
 //------------------------------------------------------------------
-void      VTK::Field_C::Set_Name( string  name_){ name= name_; return; };
+void      VTK::Field_C::SetName( string  name_){ name= name_; return; };
 
 //------------------------------------------------------------------
-void      VTK::Field_C::Set_Type( string  type_){ type= type_; return; };
+void      VTK::Field_C::SetType( string  type_){ type= type_; return; };
 
 //------------------------------------------------------------------
-void      VTK::Field_C::Set_Location( string  loc_ ){ location= loc_; return; };
+void      VTK::Field_C::SetLocation( string  loc_ ){ location= loc_; return; };
 
 //------------------------------------------------------------------
-void      VTK::Field_C::Set_Codification( string  code_ ){ codification= code_; return; };
+void      VTK::Field_C::SetCodification( string  code_ ){ codification= code_; return; };
 
 //------------------------------------------------------------------
-void      VTK::Field_C::Set_Components( int comp_){ components= comp_; return; };
+void      VTK::Field_C::SetComponents( int comp_){ components= comp_; return; };
 
 //------------------------------------------------------------------
-void      VTK::Field_C::Set_Elements( int ele_){ 
+void      VTK::Field_C::SetElements( int ele_){ 
   nr_elements= ele_; 
   size   = components *nr_elements ;
 
-  nbytes = size *size_of_type( type ) ;
+  nbytes = size *SizeOfType( type ) ;
  
   return; 
 
 };
 
 //------------------------------------------------------------------
-void      VTK::Field_C::Set_Position( fstream::pos_type pos_ ){ position =pos_ ; return; } ;
+void      VTK::Field_C::SetPosition( fstream::pos_type pos_ ){ position =pos_ ; return; } ;
 
 //------------------------------------------------------------------
-void      VTK::Field_C::Set_Offset( int offs_){ offset= offs_; return; };
+void      VTK::Field_C::SetOffset( int offs_){ offset= offs_; return; };
 
 //------------------------------------------------------------------
-string    VTK::Field_C::Get_Name(){ return name; };
+string    VTK::Field_C::GetName(){ return name; };
 
 //------------------------------------------------------------------
-string    VTK::Field_C::Get_Type(){ return type; };
+string    VTK::Field_C::GetType(){ return type; };
 
 //------------------------------------------------------------------
-string    VTK::Field_C::Get_Location(){ return location; };
+string    VTK::Field_C::GetLocation(){ return location; };
 
 //------------------------------------------------------------------
-string    VTK::Field_C::Get_Codification(){ return codification; };
+string    VTK::Field_C::GetCodification(){ return codification; };
 
 //------------------------------------------------------------------
-int       VTK::Field_C::Get_Components(){ return components; };
+int       VTK::Field_C::GetComponents(){ return components; };
 
 //------------------------------------------------------------------
-int       VTK::Field_C::Get_Elements(){ return nr_elements; };
+int       VTK::Field_C::GetElements(){ return nr_elements; };
 
 //------------------------------------------------------------------
-int       VTK::Field_C::Get_Size(){ return size; };
+int       VTK::Field_C::GetSize(){ return size; };
 
 //------------------------------------------------------------------
-int       VTK::Field_C::Get_Offset(){ return offset; };
+int       VTK::Field_C::GetOffset(){ return offset; };
 
 //------------------------------------------------------------------
-int       VTK::Field_C::Get_Nbytes(){ return nbytes; };
+int       VTK::Field_C::GetNbytes(){ return nbytes; };
 
 //------------------------------------------------------------------
-fstream::pos_type   VTK::Field_C::Get_Position(){ return position; };
+fstream::pos_type   VTK::Field_C::GetPosition(){ return position; };
 
 
 

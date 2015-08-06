@@ -6,11 +6,25 @@ using namespace std;
 
 
 // =================================================================================== //
-void VTK::Write_Data_Header( fstream &str, bool parallel ){
+void VTK::Write( ){
 
-  string        location ;
+    CalcAppendedOffsets() ;
+
+    WriteMetaData() ;
+    WriteData() ;
+
+    if( nr_procs != 0  && my_proc == 0)  WriteCollection() ;
+
+    fh.IncrementCounter() ;
+
+    return ;
+};
+
+// =================================================================================== //
+void VTK::WriteDataHeader( fstream &str, bool parallel ){
+
+  string        location, line ;
   stringstream  scalars, vectors ;
-
 
   for( int j=0; j<2; j++){
 
@@ -29,9 +43,9 @@ void VTK::Write_Data_Header( fstream &str, bool parallel ){
 
     for( int i=0; i< nr_data; i++ ){
 
-      if( data[i].Get_Location() == location){
-        if(      data[i].Get_Components() == 1 ) scalars <<  data[i].Get_Name() << " " ;
-        else if( data[i].Get_Components() == 3 ) vectors <<  data[i].Get_Name() << " " ;
+      if( data[i].GetLocation() == location){
+        if(      data[i].GetComponents() == 1 ) scalars <<  data[i].GetName() << " " ;
+        else if( data[i].GetComponents() == 3 ) vectors <<  data[i].GetName() << " " ;
       };
 
     };
@@ -57,8 +71,8 @@ void VTK::Write_Data_Header( fstream &str, bool parallel ){
 
     //Writing DataArray
     for( int i=0; i< nr_data; i++){
-      if( data[i].Get_Location() == location && !parallel) Write_DataArray( str, data[i] ) ;
-      if( data[i].Get_Location() == location &&  parallel) Write_PDataArray( str, data[i] ); 
+      if( data[i].GetLocation() == location && !parallel) WriteDataArray( str, data[i] ) ;
+      if( data[i].GetLocation() == location &&  parallel) WritePDataArray( str, data[i] ); 
     };
 
     str << "      </" ;
@@ -74,98 +88,169 @@ void VTK::Write_Data_Header( fstream &str, bool parallel ){
 };
 
 // =================================================================================== //
-void  VTK::Write_DataArray( fstream &str, VTK::Field_C &field_ ){
+void VTK::WriteDataArray( fstream &str, VTK::Field_C &field_ ){
 
-  str << "        <DataArray "
-       << "type=\"" << field_.Get_Type() << "\" "
-       << "Name=\"" << field_.Get_Name() << "\" "
-       << "NumberOfComponents=\""<< field_.Get_Components() << "\" "
-       << "format=\"" << field_.Get_Codification() << "\" ";
+    string          line;
 
-  if( field_.Get_Codification() == "appended"){
-    str << "offset=\"" << field_.Get_Offset() << "\" " ;
-  };
-  
-  str << ">" ;
+    DataArrayToString( line, field_ ) ;
 
-  if( field_.Get_Codification() == "ascii") {
-    str << endl;
-    Flush( str, "ascii", field_.Get_Name() ) ;
-    str << "       " << endl;
-  };
+    str << line << endl ;
+    
+    str << "        </DataArray>" << endl ;
 
-  str << " </DataArray>" << endl;
-       
-       
-  return ;
-  
+    return ;
+
 };
 
 // =================================================================================== //
-void  VTK::Write_PDataArray( fstream &str, VTK::Field_C &field_ ){
+void VTK::WritePDataArray( fstream &str, VTK::Field_C &field_ ){
 
-  str << "        <PDataArray "
-      << "type=\"" << field_.Get_Type() << "\" "
-      << "Name=\"" << field_.Get_Name() << "\" "
-      << "NumberOfComponents=\""<< field_.Get_Components() << "\" " 
-      << "/>" ;
+    string          line;
 
-  str << endl ;
+    PDataArrayToString( line, field_ ) ;
 
-  return ;
-  
+    str << line << endl ;
+    str << "        </DataArray>" << endl ;
+
+    return ;
+
 };
 
 // =================================================================================== //
+void VTK::WriteData( ){
 
-void VTK::Write_All_Appended( fstream &str ){
+    fstream             str ;
+    fstream::pos_type   position_insert, position_eof ;
 
-  int nbytes ;
+    int                 length;
+    char*               buffer ;
 
-  //Start appended section
-  str << "  <AppendedData encoding=\"raw\">" << endl;
-  str << "_" ;
-  str.close();
-  str.clear();
+    str.open( fh.GetName( ), ios::in | ios::out ) ;
 
-  //Reopening in binary mode
-  str.open( fh.Get_Name( ), ios::out |ios::app| ios::binary);
+    { // Write Ascii
 
-  //Writing first point data then cell data
-  for( int i=0; i< nr_data; i++){
-    if( data[i].Get_Codification() == "appended" && data[i].Get_Location() == "Point") {
-      nbytes = data[i].Get_Nbytes() ;
-      flush_binary( str, nbytes  ) ;
-      Flush( str, "binary", data[i].Get_Name() ) ;
+        position_insert = str.tellg();
+        VTK::Field_C    temp ;
+
+        //Writing first point data then cell data
+        for( int i=0; i< nr_data; i++){
+            if( data[i].GetCodification() == "ascii" && data[i].GetLocation() == "Point") {
+            str.seekg( position_insert);
+            ReadDataArray( str, data[i] ) ;
+
+            str.seekg( data[i].GetPosition() ) ;
+            CopyUntilEOFInString( str, buffer, length );
+
+            Flush( str, "ascii", data[i].GetName() ) ;
+
+            position_insert = str.tellg();
+            str << endl ;
+            flush_binary( str, buffer, length) ;
+
+            delete [] buffer ;
+
+            };
+        }; 
+
+        for( int i=0; i< nr_data; i++){
+            if( data[i].GetCodification() == "ascii" && data[i].GetLocation() == "Cell") {
+            str.seekg( position_insert);
+            ReadDataArray( str, data[i] ) ;
+
+            str.seekg( data[i].GetPosition() ) ;
+            CopyUntilEOFInString( str, buffer, length );
+
+            Flush( str, "ascii", data[i].GetName() ) ;
+
+            position_insert = str.tellg();
+            str << endl ;
+            flush_binary( str, buffer, length) ;
+
+            delete [] buffer ;
+            };
+        }; 
+
+        for( int i=0; i< geometry.size(); i++){
+            if( geometry[i].GetCodification() == "ascii" ) {
+            str.seekg( position_insert);
+            ReadDataArray( str, geometry[i] ) ;
+
+            str.seekg( geometry[i].GetPosition() ) ;
+            CopyUntilEOFInString( str, buffer, length );
+
+            Flush( str, "ascii", geometry[i].GetName() ) ;
+
+            position_insert = str.tellg();
+            str << endl ;
+            flush_binary( str, buffer, length) ;
+
+            delete [] buffer ;
+            };
+        }; 
+
+        str.seekg( temp.GetPosition() ) ;
+
+
+    }
+    
+    { // Write Appended
+
+        char                c_;
+        int                 nbytes; 
+        string              line ;
+        fstream::pos_type   position_appended ;
+
+        //Go to the initial position of the appended section
+        while( getline(str, line) && (! Keyword_In_String( line, "<AppendedData")) ){} ;
+        
+        str >> c_;
+        while( c_ != '_') str >> c_;
+        
+        position_insert = str.tellg();
+        CopyUntilEOFInString( str, buffer, length );
+
+        str.close();
+        str.clear();
+        
+        
+        //Reopening in binary mode
+        str.open( fh.GetName( ), ios::out |ios::in| ios::binary);
+        str.seekg( position_insert) ;
+        
+        //Writing first point data then cell data
+        for( int i=0; i< nr_data; i++){
+          if( data[i].GetCodification() == "appended" && data[i].GetLocation() == "Point") {
+            nbytes = data[i].GetNbytes() ;
+            flush_binary( str, nbytes  ) ;
+            Flush( str, "binary", data[i].GetName() ) ;
+          };
+        } 
+        
+        for( int i=0; i< nr_data; i++){
+          if( data[i].GetCodification() == "appended" && data[i].GetLocation() == "Cell") {
+            nbytes = data[i].GetNbytes()  ;
+            str.write( reinterpret_cast<char*>(&nbytes), sizeof (int) ) ;
+            Flush( str, "binary", data[i].GetName() ) ;
+          };
+        } 
+        
+        //Writing Geometry Data
+        for(int i=0; i<geometry.size(); i++){
+          if( geometry[i].GetCodification() == "appended" ) {
+            nbytes = geometry[i].GetNbytes()  ;
+            flush_binary( str, nbytes) ;
+            Flush( str, "binary", geometry[i].GetName() ) ;           
+          };
+        };
+    
+        flush_binary( str, buffer, length) ;
+
+        delete [] buffer ;
     };
-  } 
-  
-
-  for( int i=0; i< nr_data; i++){
-    if( data[i].Get_Codification() == "appended" && data[i].Get_Location() == "Cell") {
-      nbytes = data[i].Get_Nbytes()  ;
-      str.write( reinterpret_cast<char*>(&nbytes), sizeof (int) ) ;
-      Flush( str, "binary", data[i].Get_Name() ) ;
-    };
-  } 
-
-  //Writing Geometry Data
-  for(int i=0; i<geometry.size(); i++){
-    if( geometry[i].Get_Codification() == "appended" ) {
-      nbytes = geometry[i].Get_Nbytes()  ;
-      str.write( reinterpret_cast<char*>(&nbytes), sizeof (int) ) ;
-      Flush( str, "binary", geometry[i].Get_Name() ) ;           
-    };
-  };
-
-  // Closing Appended Secyion
-  str.close();
-  str.clear();
-
-  str.open( fh.Get_Name( ), ios::out |ios::app) ;
-  str << endl;
-  str << "  </AppendedData>" << endl;
-
-  return ;
+    
+    // Closing Appended Secyion
+    str.close();
+    
+    return ;
 
 };
