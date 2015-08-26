@@ -34,6 +34,7 @@ public:
 	Element();
 	Element(const int &id = -1);
 
+	void set_id(const int &id);
 	int get_id() const;
 	
 	void set_local_id(int id);
@@ -61,8 +62,6 @@ private:
 	Element::Type m_type;
 	
 	std::unique_ptr<Node*[]> m_connect;
-
-	void set_id(const int &id);
 
 };
 
