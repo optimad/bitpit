@@ -34,6 +34,9 @@ public:
 	Element();
 	Element(const int &id = -1);
 
+	Element(Element&& other) = default;
+	Element& operator=(Element&& other) = default;
+
 	void set_id(const int &id);
 	int get_id() const;
 	
