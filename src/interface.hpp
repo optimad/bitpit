@@ -34,6 +34,9 @@ public:
 
 	Interface(const int &id = -1);
 
+	Interface(Interface&& other) = default;
+	Interface& operator=(Interface&& other) = default;
+
 	void set_position_type(PositionType position);
 	PositionType get_position_type() const;
 
