@@ -75,6 +75,9 @@ private:
 
 	std::unique_ptr<InterfaceData> m_data;
 
+	Interface(const Interface &other) = delete;
+	Interface& operator = (const Interface &other) = delete;
+
 };
 
 }
