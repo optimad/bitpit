@@ -62,6 +62,9 @@ private:
 
 	std::unique_ptr<CellData> m_data;
 
+	Cell(const Cell &other) = delete;
+	Cell& operator = (const Cell &other) = delete;
+
 };
 
 }
