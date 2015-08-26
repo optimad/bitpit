@@ -26,6 +26,9 @@ public:
 
 	Cell(const int &id = -1);
 
+	Cell(Cell&& other) = default;
+	Cell& operator=(Cell&& other) = default;
+
 	void set_position_type(PositionType position);
 	PositionType get_position_type() const;
 	
