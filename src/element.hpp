@@ -66,6 +66,9 @@ private:
 	
 	std::unique_ptr<Node*[]> m_connect;
 
+	Element(const Element &other) = delete;
+	Element& operator = (const Element &other) = delete;
+
 };
 
 }
