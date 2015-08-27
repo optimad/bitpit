@@ -8,6 +8,7 @@ if(BUILD_EXAMPLES)
 	# List of examples
 	set(EXAMPLE_LIST "")
 	list(APPEND EXAMPLE_LIST "createCartesianMesh2D")
+	list(APPEND EXAMPLE_LIST "manipulatePiercedVector")
 
 	#Rules to build the examples
 	foreach(EXAMPLE_NAME IN LISTS EXAMPLE_LIST)
