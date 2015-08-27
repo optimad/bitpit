@@ -208,6 +208,7 @@ public:
 			y0 = uint32_t(XYZ[i][1]);
 			z0 = uint32_t(XYZ[i][2]);
 			Class_Octant<3> oct(lev, x0, y0, z0,false);
+			oct.setBalance(false);
 			if (x0 == 0){
 				iface = 0;
 				oct.setBound(iface);
@@ -307,6 +308,7 @@ public:
 			y0 = uint32_t(XYZ[i][1]);
 			z0 = uint32_t(XYZ[i][2]);
 			Class_Octant<3> oct(lev, x0, y0, z0,false);
+			oct.setBalance(false);
 			if (x0 == 0){
 				iface = 0;
 				oct.setBound(iface);

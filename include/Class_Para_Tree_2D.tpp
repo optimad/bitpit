@@ -206,6 +206,7 @@ public:
 			x0 = uint32_t(XY[i][0]);
 			y0 = uint32_t(XY[i][1]);
 			Class_Octant<2> oct(lev, x0, y0,false);
+			oct.setBalance(false);
 			if (x0 == 0){
 				iface = 0;
 				oct.setBound(iface);
