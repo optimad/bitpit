@@ -205,7 +205,7 @@ public:
 			lev = uint8_t(levels[i]);
 			x0 = uint32_t(XY[i][0]);
 			y0 = uint32_t(XY[i][1]);
-			Class_Octant<2> oct(lev, x0, y0);
+			Class_Octant<2> oct(lev, x0, y0,false);
 			if (x0 == 0){
 				iface = 0;
 				oct.setBound(iface);
@@ -225,9 +225,6 @@ public:
 			octree.octants[i] = oct;
 		}
 
-		setFirstDesc();
-		setLastDesc();
-
 		//ATTENTO if nompi deve aver l'else
 #if NOMPI==0
 		error_flag = MPI_Comm_size(comm,&nproc);
@@ -243,6 +240,9 @@ public:
 		partition_last_desc = new uint64_t[nproc];
 		partition_range_globalidx = new uint64_t[nproc];
 
+		setFirstDesc();
+		setLastDesc();
+		octree.updateLocalMaxDepth();
 		updateAdapt();
 #if NOMPI==0
 		setPboundGhosts();

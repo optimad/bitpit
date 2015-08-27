@@ -207,7 +207,7 @@ public:
 			x0 = uint32_t(XYZ[i][0]);
 			y0 = uint32_t(XYZ[i][1]);
 			z0 = uint32_t(XYZ[i][2]);
-			Class_Octant<3> oct(lev, x0, y0, z0);
+			Class_Octant<3> oct(lev, x0, y0, z0,false);
 			if (x0 == 0){
 				iface = 0;
 				oct.setBound(iface);
@@ -236,9 +236,6 @@ public:
 
 		}
 
-		setFirstDesc();
-		setLastDesc();
-
 #if NOMPI==0
 		error_flag = MPI_Comm_size(comm,&nproc);
 		error_flag = MPI_Comm_rank(comm,&rank);
@@ -253,6 +250,9 @@ public:
 		partition_last_desc = new uint64_t[nproc];
 		partition_range_globalidx = new uint64_t[nproc];
 
+		setFirstDesc();
+		setLastDesc();
+		octree.updateLocalMaxDepth();
 		updateAdapt();
 #if NOMPI==0
 		setPboundGhosts();
@@ -306,7 +306,7 @@ public:
 			x0 = uint32_t(XYZ[i][0]);
 			y0 = uint32_t(XYZ[i][1]);
 			z0 = uint32_t(XYZ[i][2]);
-			Class_Octant<3> oct(lev, x0, y0, z0);
+			Class_Octant<3> oct(lev, x0, y0, z0,false);
 			if (x0 == 0){
 				iface = 0;
 				oct.setBound(iface);
@@ -335,9 +335,6 @@ public:
 
 		}
 
-		setFirstDesc();
-		setLastDesc();
-
 #if NOMPI==0
 		error_flag = MPI_Comm_size(comm,&nproc);
 		error_flag = MPI_Comm_rank(comm,&rank);
@@ -352,6 +349,9 @@ public:
 		partition_last_desc = new uint64_t[nproc];
 		partition_range_globalidx = new uint64_t[nproc];
 
+		setFirstDesc();
+		setLastDesc();
+		octree.updateLocalMaxDepth();
 		updateAdapt();
 #if NOMPI==0
 		setPboundGhosts();
