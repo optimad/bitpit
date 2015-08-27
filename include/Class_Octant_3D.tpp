@@ -86,6 +86,22 @@ public:
 		}
 
 	};
+
+	Class_Octant(int8_t level, int32_t x, int32_t y, int32_t z, bool bound){
+		this->x = x;
+		this->y = y;
+		this->z = z;
+		this->level = level;
+		marker = 0;
+		if (level==0){
+			for (int i=0; i<global3D.nfaces; i++){
+				info[i] = bound;
+			}
+		}
+
+	};
+
+
 	Class_Octant(const Class_Octant<3> &octant){
 		x = octant.x;
 		y = octant.y;
