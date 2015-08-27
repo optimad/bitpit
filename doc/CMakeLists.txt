@@ -10,6 +10,13 @@ IF(BUILD_DOCUMENTATION)
     MESSAGE(FATAL_ERROR "Doxygen is needed to build the documentation.")
   ENDIF()
 
+  option(DOC_EXTRACT_PRIVATE "If set, all private members are included in the documentation" OFF)
+  IF (DOC_EXTRACT_PRIVATE)
+    SET(DOXY_EXTRACT_PRIVATE "YES")
+  ELSE ()
+    SET(DOXY_EXTRACT_PRIVATE "NO")
+  ENDIF ()
+
   SET( doxyfile_in          ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in     )
   SET( doxyfile             ${PROJECT_BINARY_DIR}/Doxyfile              )
   SET( doxy_html_index_file ${CMAKE_CURRENT_BINARY_DIR}/html/index.html )
@@ -17,6 +24,13 @@ IF(BUILD_DOCUMENTATION)
   SET( doxy_input           ${PROJECT_SOURCE_DIR}/src                   ) # Pasted into Doxyfile.in
   SET( doxy_extra_files     ${CMAKE_CURRENT_SOURCE_DIR}/extra/styleguide.hpp
                             ${CMAKE_CURRENT_SOURCE_DIR}/extra/patchman.hpp )
+
+  if (NOT "${DOC_EXTRACT_PRIVATE_INTERNAL}" STREQUAL "${DOC_EXTRACT_PRIVATE}")
+    if (EXISTS ${doxy_html_index_file})
+      FILE (REMOVE ${doxy_html_index_file})
+    endif ()
+    set(DOC_EXTRACT_PRIVATE_INTERNAL ${DOC_EXTRACT_PRIVATE} CACHE INTERNAL "This is the value of the last time DOC_EXTRACT_PRIVATE was set successfully." FORCE)
+  endif ()
 
   CONFIGURE_FILE( ${doxyfile_in} ${doxyfile} @ONLY )
 
