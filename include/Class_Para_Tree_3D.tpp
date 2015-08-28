@@ -2477,7 +2477,7 @@ private:
 		map<int,Class_Comm_Buffer>::iterator rritend = recvBuffers.end();
 		for(map<int,Class_Comm_Buffer>::iterator rrit = recvBuffers.begin(); rrit != rritend; ++rrit){
 			int pos = 0;
-			int nofGhostsPerProc = int(rrit->second.commBufferSize / (uint32_t) (global3D.octantBytes + global2D.globalIndexBytes));
+			int nofGhostsPerProc = int(rrit->second.commBufferSize / (uint32_t) (global3D.octantBytes + global3D.globalIndexBytes));
 			for(int i = 0; i < nofGhostsPerProc; ++i){
 				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&x,1,MPI_UINT32_T,comm);
 				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&y,1,MPI_UINT32_T,comm);
