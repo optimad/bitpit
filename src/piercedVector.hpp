@@ -67,24 +67,24 @@ public:
 	for a pierced vector, use <tt>PiercedVector<Type>::const_iterator</tt> to
 	declare a const iterator for a pierced vector.
 
-	@tparam DataType The type of the objects stored in the vector
+	@tparam T The type of the objects stored in the vector
 */
 
-template<class DataType, class UnqualifiedDataType = typename std::remove_cv<DataType>::type>
+template<class T, class unqualified_T = typename std::remove_cv<T>::type>
 class PiercedIterator
-	: public std::iterator<std::forward_iterator_tag, UnqualifiedDataType,
-				std::ptrdiff_t, DataType*, DataType&>
+	: public std::iterator<std::forward_iterator_tag, unqualified_T,
+				std::ptrdiff_t, T*, T&>
 {
 	// PiercedIterator can work only with calsses that are identified by a
 	// unique id (i.e., classes that implements get_id)
-	static_assert(has_get_id<DataType>::value, "Provided class does not implement get_id");
+	static_assert(has_get_id<T>::value, "Provided class does not implement get_id");
 
 private:
 	/*!
 		Iterator for the internal vector that holds the elements in
 		the pierced array.
 	*/
-	typedef typename std::vector<UnqualifiedDataType>::iterator BaseIterator;
+	typedef typename std::vector<unqualified_T>::iterator BaseIterator;
 
 	/*!
 		Type id_type is the type of the ids.
@@ -92,7 +92,7 @@ private:
 		It is automatically defined as the type returned by the
 		get_id function .
 	*/
-	typedef decltype(std::declval<UnqualifiedDataType>().get_id()) id_type;
+	typedef decltype(std::declval<unqualified_T>().get_id()) id_type;
 
 	/*!
 		Special id value that identifies every dummy element past
@@ -165,8 +165,8 @@ public:
 	/*!
 		Two-way comparison.
 	*/
-	template<class OtherDataType>
-	bool operator == (const PiercedIterator<OtherDataType>& rhs) const
+	template<class other_T>
+	bool operator == (const PiercedIterator<other_T>& rhs) const
 	{
 		return m_itr == rhs.m_itr;
 	}
@@ -174,8 +174,8 @@ public:
 	/*!
 		Two-way comparison.
 	*/
-	template<class OtherDataType>
-	bool operator != (const PiercedIterator<OtherDataType>& rhs) const
+	template<class other_T>
+	bool operator != (const PiercedIterator<other_T>& rhs) const
 	{
 		return m_itr != rhs.m_itr;
 	}
@@ -186,7 +186,7 @@ public:
 		\result A reference to the element currently pointed to by the
 		        iterator.
 	*/
-	DataType& operator* () const
+	T& operator* () const
 	{
 		return *m_itr;
 	}
@@ -197,7 +197,7 @@ public:
 		\result A reference to the element currently pointed to by the
 		        iterator.
 	*/
-	DataType& operator-> () const
+	T& operator-> () const
 	{
 		return *m_itr;
 	}
@@ -219,9 +219,9 @@ public:
 	/*!
 		Converts the iterator to a const_iterator.
 	*/
-	operator PiercedIterator<const DataType>() const
+	operator PiercedIterator<const T>() const
 	{
-		return PiercedIterator<const DataType>(m_itr);
+		return PiercedIterator<const T>(m_itr);
 	}
 };
 
