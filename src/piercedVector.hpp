@@ -98,7 +98,7 @@ private:
 		Special id value that identifies every dummy element past
 		the end of the pierced vector.
 	*/
-	id_type SENTINEL_ID = std::numeric_limits<id_type>::min();
+	static const id_type SENTINEL_ID;
 
 	/*!
 		Internal iterator.
@@ -225,6 +225,11 @@ public:
 	}
 };
 
+// Definition of static constants of PiercedIterator
+template<class T, class unqualified_T>
+const typename PiercedIterator<T, unqualified_T>::id_type
+	PiercedIterator<T, unqualified_T>::SENTINEL_ID = std::numeric_limits<id_type>::min();
+
 /*!
 	@brief Metafunction for generating of a pierced vector.
 
@@ -275,14 +280,14 @@ private:
 		Special id value that identifies every dummy element past
 		the end of the pierced vector.
 	*/
-	id_type SENTINEL_ID = std::numeric_limits<id_type>::min();
+	static const id_type SENTINEL_ID;
 
 	/*!
 		Special hole value that can be used with the functions
 		that insert new element. It means to insert the element
 		at the end of the vector.
 	*/
-	size_type APPEND_TO_BACK = std::numeric_limits<size_type>::max();
+	static const size_type APPEND_TO_BACK;
 
 	/*!
 		Special hole value that can be used with the functions that
@@ -290,18 +295,18 @@ private:
 		in the first empty position, i.e., the first hole or
 		at the end of the vector if there are no hole.
 	*/
-	size_type FIRST_EMPTY_POS = std::numeric_limits<size_type>::max() - 1;
+	static const size_type FIRST_EMPTY_POS;
 
 	/*!
 		Number of reserved hole values.
 	*/
-	size_type RESERVED_HOLE_COUNT = 2;
+	static const size_type RESERVED_HOLE_COUNT;
 
 	/*!
 		At the end of the piecred vector, after all stored elements,
 		there should always be at least one sentinel dummy element.
 	*/
-	size_type REQUIRED_SENTINEL_COUNT = 1;
+	static const size_type REQUIRED_SENTINEL_COUNT;
 
 	/*!
 		Number of usable positions in the vector.
@@ -312,7 +317,7 @@ private:
 		to match the maximum number of holes that is possible to
 		store.
 	*/
-	size_type USABLE_POS_COUNT = std::numeric_limits<size_type>::max() - std::max(RESERVED_HOLE_COUNT, REQUIRED_SENTINEL_COUNT);
+	static const size_type USABLE_POS_COUNT;
 
 public:
 
@@ -1507,6 +1512,31 @@ private:
 	}
 
 };
+
+// Definition of static constants of PiercedVector
+template<class T>
+const typename PiercedVector<T>::id_type
+	PiercedVector<T>::SENTINEL_ID = std::numeric_limits<id_type>::min();
+
+template<class T>
+const typename PiercedVector<T>::size_type
+	PiercedVector<T>::APPEND_TO_BACK = std::numeric_limits<size_type>::max();
+
+template<class T>
+const typename PiercedVector<T>::size_type
+	PiercedVector<T>::FIRST_EMPTY_POS = std::numeric_limits<size_type>::max() - 1;
+
+template<class T>
+const typename PiercedVector<T>::size_type
+	PiercedVector<T>::RESERVED_HOLE_COUNT = 2;
+
+template<class T>
+const typename PiercedVector<T>::size_type
+	PiercedVector<T>::REQUIRED_SENTINEL_COUNT = 1;
+
+template<class T>
+const typename PiercedVector<T>::size_type
+	PiercedVector<T>::USABLE_POS_COUNT = std::numeric_limits<size_type>::max() - std::max(RESERVED_HOLE_COUNT, REQUIRED_SENTINEL_COUNT);
 
 }
 
