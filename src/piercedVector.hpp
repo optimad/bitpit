@@ -950,15 +950,11 @@ public:
 	*/
 	void swap(PiercedVector& x) noexcept
 	{
-		PiercedVector tmp;
-		std::swap(tmp.m_first_pos, m_first_pos);
-		std::swap(tmp.m_last_pos, m_last_pos);
-		std::swap(tmp.m_v, m_v);
-		std::swap(tmp.m_holes, m_holes);
-		std::swap(tmp.m_pos, m_pos);
-
-		x = (*this);
-		(*this) = tmp;
+		std::swap(x.m_first_pos, m_first_pos);
+		std::swap(x.m_last_pos, m_last_pos);
+		std::swap(x.m_v, m_v);
+		std::swap(x.m_holes, m_holes);
+		std::swap(x.m_pos, m_pos);
 	}
 
 	/*!
