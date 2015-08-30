@@ -22,6 +22,7 @@ public:
 	Node();
 	Node(const int &id);
 
+	void set_id(const int &id);
 	int get_id() const;
 
 	void set_coords(std::unique_ptr<double[]> coords);
@@ -33,8 +34,6 @@ protected:
 private:
 	int m_id;
 	std::unique_ptr<double[]> m_coords;
-
-	void set_id(const int &id);
 
 };
 
