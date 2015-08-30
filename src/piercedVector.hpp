@@ -880,7 +880,7 @@ public:
 
 		\result The number of elements in the container.
 	*/
-	size_type size()
+	size_type size() const
 	{
 		return m_pos.size();
 	}
