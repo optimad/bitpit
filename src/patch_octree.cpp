@@ -468,7 +468,7 @@ void PatchOctree::import_interfaces()
 		Cell &owner = m_cells[ownerId];
 		cellToInterfaceMap[ownerId].push_back(interface);
 
-		interface.set_owner(&owner, ownerFace);
+		interface.set_owner(owner, ownerFace);
 
 		// Neighbour
 		if (isBoundary) {
@@ -478,7 +478,7 @@ void PatchOctree::import_interfaces()
 			cellToInterfaceMap[neighId].push_back(interface);
 
 			int neighFace = ownerFace + 1 - 2 * (ownerFace % 2);
-			interface.set_neigh(&neigh, neighFace);
+			interface.set_neigh(neigh, neighFace);
 		}
 	}
 
@@ -501,7 +501,8 @@ void PatchOctree::import_interfaces()
 			Interface &interface = cellToInterfaceMap[n][k];
 
 			int face;
-			if (interface.get_owner() == &cell) {
+			Cell &owner = interface.get_owner();
+			if (owner.get_id() == cell.get_id()) {
 				face = interface.get_owner_face();
 			} else {
 				face = interface.get_neigh_face();

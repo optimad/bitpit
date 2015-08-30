@@ -9,6 +9,7 @@
 #include <memory>
 
 #include "element.hpp"
+#include "reference.hpp"
 
 namespace pman {
 
@@ -47,14 +48,14 @@ public:
 	void set_area(double *area);
 	double get_area() const;
 
-	void set_owner(Cell * neigh, const int &onwerFace);
+	void set_owner(Reference<Cell> neigh, const int &onwerFace);
 	void unset_owner();
-	Cell * get_owner() const;
+	Reference<Cell> get_owner() const;
 	int get_owner_face() const;
 
-	void set_neigh(Cell * neigh, const int &onwerFace);
+	void set_neigh(Reference<Cell> neigh, const int &onwerFace);
 	void unset_neigh();
-	Cell * get_neigh() const;
+	Reference<Cell> get_neigh() const;
 	int get_neigh_face() const;
 
 	void set_data(std::unique_ptr<InterfaceData> m_data);
@@ -68,10 +69,10 @@ private:
 	double *m_area;
 	double *m_normal;
 
-	Cell *m_owner;
+	Reference<Cell> m_owner;
 	int m_ownerFace;
 
-	Cell *m_neigh;
+	Reference<Cell> m_neigh;
 	int m_neighFace;
 
 	std::unique_ptr<InterfaceData> m_data;
