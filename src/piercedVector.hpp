@@ -948,9 +948,9 @@ public:
 		         Alloc) whose content is swapped with that of this
 		         container.
 	*/
-	void swap(T& x) noexcept
+	void swap(PiercedVector& x) noexcept
 	{
-		T tmp;
+		PiercedVector tmp;
 		std::swap(tmp.m_first_pos, m_first_pos);
 		std::swap(tmp.m_last_pos, m_last_pos);
 		std::swap(tmp.m_v, m_v);
