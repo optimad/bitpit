@@ -23,7 +23,7 @@ public:
 	    GHOST
 	};
 
-
+	Cell();
 	Cell(const int &id = Element::NULL_ELEMENT_ID);
 
 	Cell(Cell&& other) = default;

@@ -17,6 +17,15 @@
 namespace pman {
 
 /*!
+	Default constructor.
+*/
+Cell::Cell()
+	: Element()
+{
+
+}
+
+/*!
 	Creates a new cell.
 */
 Cell::Cell(const int &id)
