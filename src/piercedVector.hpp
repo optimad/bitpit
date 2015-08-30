@@ -963,7 +963,7 @@ public:
 
 		\param other vector with the new contents
 	*/
-	PiercedVector & operator= (PiercedVector other)
+	PiercedVector & operator= (PiercedVector&& other)
 	{
 		if (this != &other) {
 			other.swap(*this);
