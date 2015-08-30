@@ -20,7 +20,7 @@ public:
 	};
 
 	Node();
-	Node(const int &id = NULL_NODE_ID);
+	Node(const int &id);
 
 	int get_id() const;
 
