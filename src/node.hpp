@@ -20,7 +20,7 @@ public:
 	};
 
 	Node();
-	Node(const int &id);
+	Node(const int &id = NULL_NODE_ID);
 
 	int get_id() const;
 
@@ -28,6 +28,7 @@ public:
 	double * get_coords() const;
 	
 protected:
+	static const int NULL_NODE_ID;
 
 private:
 	int m_id;

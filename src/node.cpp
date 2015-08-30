@@ -12,14 +12,18 @@
 
 #include "node.hpp"
 
+#include <limits>
+
 namespace pman {
+
+const int Node::NULL_NODE_ID = std::numeric_limits<int>::min();
 
 /*!
 	Default constructor.
 */
 Node::Node()
 {
-	set_id(-1);
+	set_id(NULL_NODE_ID);
 }
 
 /*!
