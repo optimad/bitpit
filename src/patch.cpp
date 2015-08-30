@@ -98,7 +98,7 @@ void Patch::reset()
 void Patch::reset_vertices()
 {
 	m_vertices.clear();
-	std::vector<Node>().swap(m_vertices);
+	PiercedVector<Node>().swap(m_vertices);
 
 	for (unsigned int n = 0; n < m_cells.size(); n++) {
 		m_cells[n].unset_connect();
@@ -111,7 +111,7 @@ void Patch::reset_vertices()
 void Patch::reset_cells()
 {
 	m_cells.clear();
-	std::vector<Cell>().swap(m_cells);
+	PiercedVector<Cell>().swap(m_cells);
 
 	for (unsigned int n = 0; n < m_interfaces.size(); n++) {
 		m_interfaces[n].unset_neigh();
@@ -125,7 +125,7 @@ void Patch::reset_cells()
 void Patch::reset_interfaces()
 {
 	m_interfaces.clear();
-	std::vector<Interface>().swap(m_interfaces);
+	PiercedVector<Interface>().swap(m_interfaces);
 
 	for (unsigned int n = 0; n < m_cells.size(); n++) {
 		m_cells[n].unset_interfaces();

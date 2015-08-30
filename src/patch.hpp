@@ -9,6 +9,7 @@
 #include "cell.hpp"
 #include "interface.hpp"
 #include "output_manager.hpp"
+#include "piercedVector.hpp"
 #include "node.hpp"
 
 #include <cstddef>
@@ -62,9 +63,9 @@ public:
 	OutputManager & get_output_manager();
 
 protected:
-	std::vector<Node> m_vertices;
-	std::vector<Cell> m_cells;
-	std::vector<Interface> m_interfaces;
+	PiercedVector<Node> m_vertices;
+	PiercedVector<Cell> m_cells;
+	PiercedVector<Interface> m_interfaces;
 
 	virtual void _update(const std::vector<uint32_t> &cellMapping) = 0;
 	virtual void _mark_for_refinement(Cell &cell) = 0;
