@@ -670,7 +670,7 @@ public:
 		size: it can still fail to allocate storage at any point before
 		that size is reached.
 	*/
-	size_type max_size()
+	size_type max_size() const
 	{
 		return USABLE_POS_COUNT;
 	}
