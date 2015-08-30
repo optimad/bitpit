@@ -33,7 +33,7 @@ public:
 	static const int SIDE_COUNT = 2;
 
 	Interface();
-	Interface(const int &id = Element::NULL_ELEMENT_ID);
+	Interface(const int &id);
 
 	Interface(Interface&& other) = default;
 	Interface& operator=(Interface&& other) = default;
