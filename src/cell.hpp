@@ -24,7 +24,7 @@ public:
 	};
 
 
-	Cell(const int &id = -1);
+	Cell(const int &id = Element::NULL_ELEMENT_ID);
 
 	Cell(Cell&& other) = default;
 	Cell& operator=(Cell&& other) = default;

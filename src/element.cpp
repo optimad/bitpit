@@ -49,14 +49,18 @@
 
 #include "element.hpp"
 
+#include <limits>
+
 namespace pman {
+
+const int Element::NULL_ELEMENT_ID = std::numeric_limits<int>::min();
 
 /*!
 	Default constructor.
 */
 Element::Element()
 {
-	set_id(-1);
+	set_id(NULL_ELEMENT_ID);
 }
 
 

@@ -32,7 +32,7 @@ public:
 	};
 
 	Element();
-	Element(const int &id = -1);
+	Element(const int &id = NULL_ELEMENT_ID);
 
 	Element(Element&& other) = default;
 	Element& operator=(Element&& other) = default;
@@ -57,6 +57,7 @@ public:
 	static int get_vertex_count(Element::Type type);
 
 protected:
+	static const int NULL_ELEMENT_ID;
 
 private:
 	int m_id;
