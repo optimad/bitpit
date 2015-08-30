@@ -32,7 +32,7 @@ public:
 	};
 
 	Element();
-	Element(const int &id = NULL_ELEMENT_ID);
+	Element(const int &id);
 
 	Element(Element&& other) = default;
 	Element& operator=(Element&& other) = default;
