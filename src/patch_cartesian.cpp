@@ -431,18 +431,19 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 				interface.set_owner(owner, ownerFace);
 				owner.set_interface(ownerFace, 0, interface);
 
-				// Owner
+				// Neighbour
 				if (position != Interface::BOUNDARY) {
 					int neighIJK[SPACE_MAX_DIM];
 					for (int n = 0; n < SPACE_MAX_DIM; n++) {
 						neighIJK[n] = counters[n];
 					}
+
 					Cell &neigh = m_cells[cell_ijk_to_id(neighIJK)];
 
 					int neighFace = 2 * direction + 1;
 
 					interface.set_neigh(neigh, neighFace);
-					owner.set_interface(neighFace, 0, interface);
+					neigh.set_interface(neighFace, 0, interface);
 				} else {
 					interface.unset_owner();
 				}
