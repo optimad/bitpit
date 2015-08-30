@@ -43,6 +43,15 @@
 namespace pman {
 
 /*!
+	Default constructor.
+*/
+Interface::Interface()
+	: Element(), m_normal(NULL)
+{
+
+}
+
+/*!
 	Creates a new interface.
 */
 Interface::Interface(const int &id)
