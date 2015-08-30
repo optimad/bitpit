@@ -7,11 +7,12 @@
 /*! \file */
 
 #include "element.hpp"
-#include "interface.hpp"
 
 #include <memory>
 
 namespace pman {
+
+class Interface;
 
 class CellData {};
 

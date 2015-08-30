@@ -11,6 +11,7 @@
 */
 
 #include "cell.hpp"
+#include "interface.hpp"
 
 #include<iostream>
 
