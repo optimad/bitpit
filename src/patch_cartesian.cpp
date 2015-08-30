@@ -407,7 +407,7 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 
 				// Position
 				Interface::PositionType position;
-				if (counters[direction] == 0 || counters[direction] == (*interfaceCount1D)[direction] +1) {
+				if (counters[direction] == 0 || counters[direction] == (*interfaceCount1D)[direction] - 1) {
 					position = Interface::BOUNDARY;
 				} else {
 					position = Interface::INTERNAL;
