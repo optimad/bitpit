@@ -747,7 +747,7 @@ public:
 		\result A const_iterator pointing to the first element in
 		        the raw container.
 	*/
-	raw_const_iterator raw_cbegin()
+	raw_const_iterator raw_cbegin() const noexcept
 	{
 		return m_v.cbegin();
 	}
