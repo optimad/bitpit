@@ -1332,7 +1332,9 @@ private:
 	*/
 	void holes_delete_after(size_type pos)
 	{
-		if (m_holes.back() <= pos) {
+		if (m_holes.empty()) {
+			return;
+		} else if (m_holes.back() <= pos) {
 			return;
 		}
 
