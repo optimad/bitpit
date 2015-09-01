@@ -132,7 +132,7 @@ public:
 	void swap(PiercedIterator& other) noexcept
 	{
 		using std::swap;
-		swap(m_itr, other.iter);
+		swap(m_itr, other.m_itr);
 	}
 
 	/*!
