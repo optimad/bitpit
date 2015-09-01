@@ -855,7 +855,7 @@ public:
 
 		// Delete all ids of the elements beyond the updated position
 		// of the last element
-		iterator itr(raw_begin() + updated_last_pos);
+		iterator itr(raw_begin() + updated_last_pos + 1);
 		while (itr != end()) {
 			m_pos.erase((*itr).get_id());
 			itr++;
