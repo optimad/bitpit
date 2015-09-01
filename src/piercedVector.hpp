@@ -454,7 +454,7 @@ public:
 		\result A const_iterator pointing to the first element in
 		        the vector.
 	*/
-	const_iterator cbegin()
+	const_iterator cbegin() const noexcept
 	{
 		if (empty()) {
 			return cend();
