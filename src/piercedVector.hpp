@@ -470,7 +470,7 @@ public:
 		\result A const_iterator referring to the past-the-end element
 		        in the vector.
 	*/
-	const_iterator cend()
+	const_iterator cend() const noexcept
 	{
 		const_iterator itr;
 		itr.set_position(m_v.cbegin() + m_last_pos + 1);
