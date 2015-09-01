@@ -339,7 +339,7 @@ public:
 	/*!
 		Constant iterator for the pierced array raw container.
 	*/
-	typedef typename std::vector<T>::iterator raw_const_iterator;
+	typedef typename std::vector<T>::const_iterator raw_const_iterator;
 
 	/*!
 		Constructs an empty pierced vector with no elements.
