@@ -1248,7 +1248,7 @@ private:
 		\result The position in the vector of the element with the
 		        specified id.
 	*/
-	size_type get_pos_from_id(id_type id)
+	size_type get_pos_from_id(id_type id) const
 	{
 		return m_pos.at(id);
 	}
