@@ -906,6 +906,34 @@ public:
 		return m_pos.size();
 	}
 
+
+	/*!
+		Sorts the elements of the vector in ascending id order.
+	*/
+	void sort()
+	{
+		// Sort the elements of the vector
+		std::sort(m_v.begin(), m_v.begin() + m_last_pos + 2, less_than_id());
+
+		// Update positions of the ids
+		for (size_type pos = 0; pos <= m_last_pos; pos++) {
+			id_type id = m_v[pos].get_id();
+			m_pos[id] = pos;
+		}
+
+		// Reset first and last counters
+		m_first_pos = 0;
+		m_last_pos  = m_pos.size() - 1;
+
+		// There are no more holes
+		m_holes.clear();
+		std::deque<size_type>().swap(m_holes);
+
+		// Squeeze the vector
+		squeeze();
+
+	}
+
 	/*!
 		Requests the container to compact the elements and reduce
 		its capacity to fit its size.
@@ -1231,6 +1259,30 @@ private:
 		}
 	}
 
+	/*!
+		Compares the id of the specified values.
+
+		\param x first values to compare
+		\param y second values to compare
+		\result Returns true if the x has an id lower that y, false
+		        otherwise. Negative ids are special ids and are
+		        considered higher than positive ids.
+	*/
+	struct less_than_id
+	{
+	    inline bool operator() (const T &x, const T &y)
+	    {
+		    if (x.get_id() >= 0 && y.get_id() < 0) {
+			    return true;
+		    } else if (x.get_id() < 0 && y.get_id() >= 0) {
+			    return false;
+		    } else if (x.get_id() >= 0) {
+			    return (x.get_id() < y.get_id());
+		    } else {
+			    return (x.get_id() > y.get_id());
+		    }
+	    }
+	};
 
 	/*!
 		Mark the specified position as filled by the element with

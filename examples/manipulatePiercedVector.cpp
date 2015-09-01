@@ -145,6 +145,13 @@ int main(int argc, char *argv[])
 		std::cout << "    > id = " << id << std::endl;
 	}
 
+	// Sort the vector
+	std::cout << std::endl << "::: Sort cells by ids :::" << std::endl;
+
+	cells.sort();
+
+	printCellIds(cells);
+
 	// Delete all the cells
 	std::cout << std::endl << "::: Deleting all cells :::" << std::endl;
 
