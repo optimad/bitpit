@@ -103,7 +103,16 @@ private:
 	/*!
 		Internal iterator.
 	*/
-	BaseIterator m_itr;
+	T *m_itr;
+
+	/*!
+		Creates a new iterator and initializes it with the
+		specified pointer.
+	*/
+	explicit PiercedIterator(T *value)
+		: m_itr(value)
+	{
+	}
 
 public:
 
@@ -119,7 +128,9 @@ public:
 		the base iterator recevied in input.
 	*/
 	explicit PiercedIterator(BaseIterator iterator)
-		: m_itr(iterator)
+		: m_itr(&(*iterator))
+	{
+	}
 	{
 	}
 
@@ -211,7 +222,7 @@ public:
 	*/
 	PiercedIterator & operator= (BaseIterator iterator)
 	{
-		m_itr = iterator;
+		m_itr = &(*iterator);
 
 		return *this;
 	}
