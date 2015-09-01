@@ -1170,7 +1170,7 @@ private:
 
 		// Insert the element
 		if (pos == (m_v.size() - 1)) {
-			m_v.insert(pos, value);
+			m_v.insert(m_v.begin() + pos, value);
 		} else {
 			m_v[pos] = value;
 		}
