@@ -496,10 +496,7 @@ public:
 	*/
 	const_iterator cend() const noexcept
 	{
-		const_iterator itr;
-		itr.set_position(m_v.cbegin() + m_last_pos + 1);
-
-		return itr;
+		return const_iterator(m_v.cbegin() + m_last_pos + 1);
 	}
 
 	/*!
