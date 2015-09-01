@@ -546,7 +546,7 @@ public:
 
 		\result true if the container size is 0, false otherwise.
 	*/
-	bool empty()
+	bool empty() const
 	{
 		return m_pos.empty();
 	}
