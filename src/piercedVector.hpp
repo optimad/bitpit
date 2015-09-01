@@ -759,7 +759,7 @@ public:
 		\result A const_iterator referring to the past-the-end element
 		        in raw container.
 	*/
-	raw_const_iterator raw_cend()
+	raw_const_iterator raw_cend() const noexcept
 	{
 		return m_v.cend();
 	}
