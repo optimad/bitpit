@@ -87,6 +87,12 @@ private:
 	typedef typename std::vector<unqualified_T>::iterator BaseIterator;
 
 	/*!
+		Const iterator for the internal vector that holds the elements in
+		the pierced array.
+	*/
+	typedef typename std::vector<unqualified_T>::const_iterator BaseConstIterator;
+
+	/*!
 		Type id_type is the type of the ids.
 
 		It is automatically defined as the type returned by the
@@ -131,6 +137,13 @@ public:
 		: m_itr(&(*iterator))
 	{
 	}
+
+	/*!
+		Creates a new iterator and initializes it with the position of
+		the const base iterator recevied in input.
+	*/
+	explicit PiercedIterator(BaseConstIterator iterator)
+		: m_itr(&(*iterator))
 	{
 	}
 
