@@ -656,9 +656,9 @@ public:
 		\param value is the value to be copied (or moved) to the
 		            inserted elements.
 	*/
-	iterator insert(const value_type &value)
+	iterator insert(value_type &&value)
 	{
-		return _insert(FIRST_EMPTY_POS, value);
+		return _insert(FIRST_EMPTY_POS, std::move(value));
 	}
 
 	/*!
@@ -699,9 +699,9 @@ public:
 		\param value the value to be copied (or moved) to the new
 		             element
 	*/
-	void push_back(const value_type &value)
+	void push_back(value_type &&value)
 	{
-		_insert(APPEND_TO_BACK, value);
+		_insert(APPEND_TO_BACK, std::move(value));
 	}
 
 	/*!
@@ -1157,7 +1157,7 @@ private:
 		        element.
 
 	*/
-	iterator _insert(size_type hole, const value_type &value)
+	iterator _insert(size_type hole, value_type &&value)
 	{
 		// Elements muse have unique id
 		id_type id = value.get_id();
@@ -1170,9 +1170,9 @@ private:
 
 		// Insert the element
 		if (pos == (m_v.size() - 1)) {
-			m_v.insert(m_v.begin() + pos, value);
+			m_v.insert(m_v.begin() + pos, std::move(value));
 		} else {
-			m_v[pos] = value;
+			m_v[pos] = std::move(value);
 		}
 
 		// The position is now occupied by the element
