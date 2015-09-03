@@ -428,7 +428,7 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 					ownerFace++;
 				}
 
-				interface.set_owner(owner, ownerFace);
+				interface.set_owner(owner.get_id(), ownerFace);
 				owner.set_interface(ownerFace, 0, interface.get_id());
 
 				// Neighbour
@@ -442,7 +442,7 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 
 					int neighFace = 2 * direction + 1;
 
-					interface.set_neigh(neigh, neighFace);
+					interface.set_neigh(neigh.get_id(), neighFace);
 					neigh.set_interface(neighFace, 0, interface.get_id());
 				} else {
 					interface.unset_owner();

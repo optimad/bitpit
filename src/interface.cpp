@@ -125,9 +125,9 @@ Interface::PositionType Interface::get_position_type() const
 
 	\param owner the owner of the interface
 */
-void Interface::set_owner(Reference<Cell> owner, const int &onwerFace)
+void Interface::set_owner(const int &owner, const int &onwerFace)
 {
-	m_owner = owner;
+	m_owner     = owner;
 	m_ownerFace = onwerFace;
 }
 
@@ -136,7 +136,7 @@ void Interface::set_owner(Reference<Cell> owner, const int &onwerFace)
 */
 void Interface::unset_owner()
 {
-	m_owner.nullify();
+	m_owner     = Element::NULL_ELEMENT_ID;
 	m_ownerFace = -1;
 }
 
@@ -145,7 +145,7 @@ void Interface::unset_owner()
 
 	\result The owner of the nterface
 */
-Reference<Cell> Interface::get_owner() const
+int Interface::get_owner() const
 {
   return m_owner;
 }
@@ -165,9 +165,9 @@ int Interface::get_owner_face() const
 
 	\param neigh the neighbour of the interface
 */
-void Interface::set_neigh(Reference<Cell> neigh, const int &onwerFace)
+void Interface::set_neigh(const int &neigh, const int &onwerFace)
 {
-	m_neigh = neigh;
+	m_neigh     = neigh;
 	m_neighFace = onwerFace;
 }
 
@@ -176,7 +176,7 @@ void Interface::set_neigh(Reference<Cell> neigh, const int &onwerFace)
 */
 void Interface::unset_neigh()
 {
-	m_neigh.nullify();
+	m_neigh     = Element::NULL_ELEMENT_ID;
 	m_neighFace = -1;
 }
 
@@ -185,7 +185,7 @@ void Interface::unset_neigh()
 
 	\result The neighbour of the nterface
 */
-Reference<Cell> Interface::get_neigh() const
+int Interface::get_neigh() const
 {
   return m_neigh;
 }
