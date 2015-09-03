@@ -385,7 +385,7 @@ void PatchOctree::import_interfaces()
 		nInterfaces = m_tree_2D.getNumIntersections();
 	}
 
-	vector<vector<Reference<Interface>>> cellToInterfaceMap(m_cells.size(), vector<Reference<Interface>>(0));
+	vector<vector<int>> cellToInterfaceMap(m_cells.size(), vector<int>(0));
 
 	m_interfaces.reserve(nInterfaces);
 	for (int n = 0; n < nInterfaces; n++) {
@@ -466,7 +466,7 @@ void PatchOctree::import_interfaces()
 
 		// Owner
 		Cell &owner = m_cells[ownerId];
-		cellToInterfaceMap[ownerId].push_back(interface);
+		cellToInterfaceMap[ownerId].push_back(interface.get_id());
 
 		interface.set_owner(owner, ownerFace);
 
@@ -475,7 +475,7 @@ void PatchOctree::import_interfaces()
 			interface.unset_neigh();
 		} else {
 			Cell &neigh = m_cells[neighId];
-			cellToInterfaceMap[neighId].push_back(interface);
+			cellToInterfaceMap[neighId].push_back(interface.get_id());
 
 			int neighFace = ownerFace + 1 - 2 * (ownerFace % 2);
 			interface.set_neigh(neigh, neighFace);
@@ -490,7 +490,7 @@ void PatchOctree::import_interfaces()
 		nCellFaces = Element::get_face_count(Element::QUADRANGLE);
 	}
 
-	vector<vector<Reference<Interface>>> interfaceList(nCellFaces, vector<Reference<Interface>>(0));
+	vector<vector<int>> interfaceList(nCellFaces, vector<int>(0));
 	for (unsigned int n = 0; n < m_cells.size(); n++) {
 		for (int k = 0; k < nCellFaces; k++) {
 			interfaceList[k].clear();
@@ -498,7 +498,8 @@ void PatchOctree::import_interfaces()
 
 		Cell &cell = m_cells[n];
 		for (unsigned int k = 0; k < cellToInterfaceMap[n].size(); k++) {
-			Interface &interface = cellToInterfaceMap[n][k];
+			int interfaceId = cellToInterfaceMap[n][k];
+			Interface &interface = m_interfaces[interfaceId];
 
 			int face;
 			Cell &owner = interface.get_owner();
@@ -508,13 +509,13 @@ void PatchOctree::import_interfaces()
 				face = interface.get_neigh_face();
 			}
 
-			interfaceList[face].push_back(interface);
+			interfaceList[face].push_back(interface.get_id());
 		}
 
 		cell.initialize_interfaces(interfaceList);
 
 		cellToInterfaceMap[n].clear();
-		vector<Reference<Interface>>().swap(cellToInterfaceMap[n]);
+		vector<int>().swap(cellToInterfaceMap[n]);
 	}
 
 	// Clean intersections

@@ -7,7 +7,6 @@
 /*! \file */
 
 #include "element.hpp"
-#include "reference.hpp"
 
 #include <memory>
 
@@ -40,14 +39,14 @@ public:
 	void set_centroid(double * const centroid);
 	double * get_centroid() const;
 
-	void initialize_interfaces(std::vector<std::vector<Reference<Interface>>> &interfaces);
+	void initialize_interfaces(std::vector<std::vector<int>> &interfaces);
 	void initialize_empty_interfaces(const int nInterfaces[]);
-	void set_interface(const int &face, const int &index, Reference<Interface> interface);
-	void set_interfaces(const int &face, Reference<Interface> interface[]);
+	void set_interface(const int &face, const int &index, const int &interface);
+	void set_interfaces(const int &face, int interface[]);
 	void unset_interfaces();
 	int get_interface_count(const int &face) const;
-	Reference<Interface> get_interface(const int &face, const int &index = 0) const;
-	Reference<Interface> * get_interfaces(const int &face) const;
+	int get_interface(const int &face, const int &index = 0) const;
+	int * get_interfaces(const int &face) const;
 
 	void set_data(std::unique_ptr<CellData> m_data);
 	CellData * get_data() const;
@@ -60,7 +59,7 @@ private:
 	double *m_volume;
 	double *m_centroid;
 
-	std::unique_ptr<CollapsedArrayArray<Reference<Interface>> > m_interfaces;
+	std::unique_ptr<CollapsedArrayArray<int> > m_interfaces;
 
 	std::unique_ptr<CellData> m_data;
 

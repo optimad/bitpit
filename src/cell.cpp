@@ -100,10 +100,10 @@ double * Cell::get_centroid() const
 
 	\param interfaces the list of all interfaces associated to the cell
 */
-void Cell::initialize_interfaces(std::vector<std::vector<Reference<Interface>>> &interfaces)
+void Cell::initialize_interfaces(std::vector<std::vector<int>> &interfaces)
 {
 	m_interfaces.reset();
-	m_interfaces = std::unique_ptr<CollapsedArrayArray<Reference<Interface>> >(new CollapsedArrayArray<Reference<Interface>>(interfaces));
+	m_interfaces = std::unique_ptr<CollapsedArrayArray<int> >(new CollapsedArrayArray<int>(interfaces));
 }
 
 /*!
@@ -114,7 +114,7 @@ void Cell::initialize_interfaces(std::vector<std::vector<Reference<Interface>>> 
 */
 void Cell::initialize_empty_interfaces(const int nInterfaces[])
 {
-	m_interfaces = std::unique_ptr<CollapsedArrayArray<Reference<Interface>> >(new CollapsedArrayArray<Reference<Interface>>(get_face_count(), nInterfaces));
+	m_interfaces = std::unique_ptr<CollapsedArrayArray<int> >(new CollapsedArrayArray<int>(get_face_count(), nInterfaces));
 }
 
 /*!
@@ -124,7 +124,7 @@ void Cell::initialize_empty_interfaces(const int nInterfaces[])
 	\param index the index of the interface
 	\param interface A pointer to the interface
 */
-void Cell::set_interface(const int &face, const int &index, Reference<Interface> interface)
+void Cell::set_interface(const int &face, const int &index, const int &interface)
 {
 	m_interfaces->set(face, index, interface);
 }
@@ -135,7 +135,7 @@ void Cell::set_interface(const int &face, const int &index, Reference<Interface>
 	\param face the face of the cell
 	\param interface A pointer to the interface
 */
-void Cell::set_interfaces(const int &face, Reference<Interface> interfaces[])
+void Cell::set_interfaces(const int &face, int interfaces[])
 {
 	m_interfaces->set(face, interfaces);
 }
@@ -170,7 +170,7 @@ int Cell::get_interface_count(const int &face) const
 	\param index the index of the interface to retreive
 	\result The requested interface
 */
-Reference<Interface> Cell::get_interface(const int &face, const int &index) const
+int Cell::get_interface(const int &face, const int &index) const
 {
 	return m_interfaces->get(face, index);
 }
@@ -183,7 +183,7 @@ Reference<Interface> Cell::get_interface(const int &face, const int &index) cons
 	\param face the face of the cell
 	\result The requested interfaces
 */
-Reference<Interface> * Cell::get_interfaces(const int &face) const
+int * Cell::get_interfaces(const int &face) const
 {
 	return m_interfaces->get(face);
 }
