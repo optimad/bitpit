@@ -16,8 +16,8 @@
 using namespace std;
 
 
-// =================================================================================== //
-// TYPEDEFs
+uint8_t SizeOfType( string type ) ;
+
 
 // =================================================================================== //
 // VTK BASE CLASS DEFINITION                                                           //
@@ -34,55 +34,57 @@ class VTK{
         string                   type;          // type of data, options [ [U]Int8, [U]Int16, [U]Int32, [U]Int64, Float32, Float64 ]
         string                   location;      // cell or point data, [ Cell, Point ]
         string                   codification ; // Type of codification [ascii, appended]
-        int                      components;    // nr of components of field, options[ 1, 3 ]
-        int                      nr_elements;   // nr of cells or points
-        int                      size;          // total number of data element = components *nr_elements
-        int                      offset;        // offset in the appended section
-        int                      nbytes;        // size in bytes of field
+        uint8_t                  components;    // nr of components of field, options[ 1, 3 ]
+        uint64_t                 nr_elements;   // nr of cells or points
+        uint64_t                 offset;        // offset in the appended section
         fstream::pos_type        position;      // position in file
     
       //methods
       public:
         Field_C();
-        Field_C( string name_, int comp_, string type_, string loc_ );
-        Field_C( string name_, int comp_, string type_, string loc_, string cod_, int nr_elements_);
+        Field_C( string name_, uint8_t comp_, string loc_ );
+        Field_C( string name_, uint8_t comp_, string type_, string loc_ );
+        Field_C( string name_, uint8_t comp_, string type_, string loc_, string cod_, uint64_t nr_elements_);
        ~Field_C();
     
         string                   GetName();
         string                   GetType();
         string                   GetLocation();
         string                   GetCodification();
-        int                      GetComponents();
-        int                      GetElements();
-        int                      GetSize();
-        int                      GetOffset();
-        int                      GetNbytes();
+        uint8_t                  GetComponents();
+        uint64_t                 GetElements();
+        uint64_t                 GetSize();
+        uint64_t                 GetOffset();
+        uint64_t                 GetNbytes();
         fstream::pos_type        GetPosition(); 
 
         void                     SetName( string name_ ) ;
         void                     SetType( string type_ ) ;
         void                     SetLocation( string loc_ ) ;
         void                     SetCodification( string cod_ ) ;
-        void                     SetComponents( int comp_ ) ;
-        void                     SetElements( int elem_ ) ;
-        void                     SetOffset( int offs_ ) ;
+        void                     SetComponents( uint8_t comp_ ) ;
+        void                     SetElements( uint64_t elem_ ) ;
+        void                     SetOffset( uint64_t offs_ ) ;
         void                     SetPosition( fstream::pos_type pos_ ) ;
     
-        int                      SizeOfType( string type ) ;
     };
      
     // members ---------------------------------------------------------------------- //
     protected:
       FileHandler_C        fh ;                     // File_Handler for Input&Output
-      int                  nr_points ;              // Number of vertices
-      int                  nr_cells  ;              // Number of Cells
+      uint64_t             nr_points ;              // Number of vertices
+      uint64_t             nr_cells  ;              // Number of Cells
       int                  nr_procs  ;              // Number of parallel processes 
       int                  my_proc   ;              // My process id
 
+      string               HeaderType ;            // UInt32 or UInt64_t
+
       vector< Field_C >    geometry ;               // Geometry fields
+      string               GeomCodex ;
 
       int                  nr_data ;                // Nr of data fields
       vector< Field_C >    data ;                   // Data fields
+      string               DataCodex ;
 
     // methods ----------------------------------------------------------------------- //
     public:
@@ -90,17 +92,23 @@ class VTK{
       VTK( string dir_, string name_ );
       virtual ~VTK( );
 
+      void    SetHeaderType( string sg_ );
+      string  GetHeaderType(  );
+
       void    SetNames( string dir_ , string name_  ) ;
       void    SetCounter( int c_ ) ;
       void    SetParallel( int nr, int my ) ;
 
+      void    SetCodex( string cod_ );
       void    SetGeomCodex( string cod_ );
       void    SetDataCodex( string cod_ );
 
-      void    AddData( string name_, int comp_, string type_, string loc_, string cod_ ) ;
-      void    RemoveData( string name_ ) ;
+      Field_C*  AddData( string name_, int comp_, string type_, string loc_ ) ;
+      Field_C*  AddData( string name_, int comp_, string type_, string loc_, string cod_ ) ;
+      void      RemoveData( string name_ ) ;
 
       void    Read() ;
+
       virtual 
       void    ReadMetaData() = 0 ;
       void    ReadData() ;
@@ -122,6 +130,16 @@ class VTK{
       bool    StringToDataArray( string &str, Field_C &data_ ) ;
       void    DataArrayToString( string &str, Field_C &data_ ) ;
       void    PDataArrayToString( string &str, Field_C &data_ ) ;
+
+      template<class T>
+      string  WhichType( T dum_) ;
+
+      template<class T>
+      string  WhichType( vector<T> dum_) ;
+
+      template<class T, size_t d>
+      string  WhichType( array<T,d> dum_) ;
+
 
 
       //For Writing
@@ -148,21 +166,19 @@ class VTK{
 template <class Derived >
 class VTK_UnstructuredGrid : public VTK{
 
-  public:
-    typedef Derived b_t;
-
   protected:
-    int              ncells, npoints, nconnectivity ;
+    uint64_t  nconnectivity ;
 
   protected:
     VTK_UnstructuredGrid();
-    VTK_UnstructuredGrid( string dir_, string name_, string cod_, int ncell_, int npoints_, int nconn_  ) ;
+    VTK_UnstructuredGrid( string dir_, string name_  ) ;
    ~VTK_UnstructuredGrid();
 
     void      WriteCollection() ;  
 
     void      Flush(  fstream &str, string codex_, string name  ) ; //CRTP
     void      Absorb( fstream &str, string codex_, string name  ) ; //CRTP
+    uint64_t  GetNConnectivity( ) ; //CRTP
 
   public:
     void      ReadMetaData() ;
@@ -170,8 +186,11 @@ class VTK_UnstructuredGrid : public VTK{
 
     void      WritePMetaData() ;
 
-    void      SetDimensions( int ncells_, int npoints_, int nconn_ ) ;
-    int       NumberOfElements( int t) ;
+    void      SetDimensions( uint64_t ncells_, uint64_t npoints_, uint64_t nconn_ ) ;
+    void      SetGeomTypes( string Ptype, string Otype, string Ttype, string Ctype ) ;
+
+    uint8_t   NumberOfElements( uint8_t t ) ;
+    uint64_t  CalcSizeConnectivity( ) ;
 
 };
 
@@ -204,6 +223,7 @@ class VTK_RectilinearGrid : public VTK{
 
 };
 
+#include"Class_VTK.tpp"
 #include"Class_VTK_Unstructured.tpp"
 #include"Class_VTK_Rectilinear.tpp"
 

@@ -196,7 +196,6 @@ void VTK::WriteData( ){
     { // Write Appended
 
         char                c_;
-        int                 nbytes; 
         string              line ;
         fstream::pos_type   position_appended ;
 
@@ -214,35 +213,66 @@ void VTK::WriteData( ){
         
         
         //Reopening in binary mode
-        str.open( fh.GetName( ), ios::out |ios::in| ios::binary);
+        str.open( fh.GetName( ), ios::out | ios::in | ios::binary);
         str.seekg( position_insert) ;
-        
+
+        //str.open( "data.dat", ios::out | ios::binary);
+
         //Writing first point data then cell data
         for( int i=0; i< nr_data; i++){
-          if( data[i].GetCodification() == "appended" && data[i].GetLocation() == "Point") {
-            nbytes = data[i].GetNbytes() ;
-            flush_binary( str, nbytes  ) ;
-            Flush( str, "binary", data[i].GetName() ) ;
-          };
+            if( data[i].GetCodification() == "appended" && data[i].GetLocation() == "Point") {
+                if( GetHeaderType() == "UInt32"){
+                    uint32_t    nbytes = data[i].GetNbytes() ;
+                    flush_binary(str, nbytes) ;
+                }
+
+                else{
+                    uint64_t    nbytes = data[i].GetNbytes() ;
+                    flush_binary(str, nbytes) ;
+                };
+                Flush( str, "binary", data[i].GetName() ) ;
+            };
         } 
         
         for( int i=0; i< nr_data; i++){
-          if( data[i].GetCodification() == "appended" && data[i].GetLocation() == "Cell") {
-            nbytes = data[i].GetNbytes()  ;
-            str.write( reinterpret_cast<char*>(&nbytes), sizeof (int) ) ;
-            Flush( str, "binary", data[i].GetName() ) ;
-          };
+            if( data[i].GetCodification() == "appended" && data[i].GetLocation() == "Cell") {
+                if( GetHeaderType() == "UInt32"){
+                    uint32_t    nbytes = data[i].GetNbytes() ;
+                    flush_binary(str, nbytes) ;
+                }
+
+                else{
+                    uint64_t    nbytes = data[i].GetNbytes() ;
+                    flush_binary(str, nbytes) ;
+                };
+                Flush( str, "binary", data[i].GetName() ) ;
+            };
         } 
         
         //Writing Geometry Data
         for(int i=0; i<geometry.size(); i++){
-          if( geometry[i].GetCodification() == "appended" ) {
-            nbytes = geometry[i].GetNbytes()  ;
-            flush_binary( str, nbytes) ;
-            Flush( str, "binary", geometry[i].GetName() ) ;           
-          };
+        //for(int i=0; i<4; i++){
+            if( geometry[i].GetCodification() == "appended" ) {
+                if( GetHeaderType() == "UInt32"){
+                    uint32_t    nbytes = geometry[i].GetNbytes() ;
+                    flush_binary(str, nbytes) ;
+                }
+
+                else{
+                    uint64_t    nbytes = geometry[i].GetNbytes() ;
+                    flush_binary(str, nbytes) ;
+                };
+                Flush( str, "binary", geometry[i].GetName() ) ;           
+            };
         };
-    
+   
+        // { 
+        // fstream             str2 ;
+        // str2.open( "test2.dat", ios::out | ios::binary);
+        // flush_binary( str2, buffer, length) ;
+        // str2.close();
+        // }
+
         flush_binary( str, buffer, length) ;
 
         delete [] buffer ;

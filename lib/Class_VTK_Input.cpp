@@ -27,6 +27,7 @@ void VTK::ReadDataHeader( fstream &str ){
   bool                     read ;
 
   Field_C                  temp ;
+  Field_C*                 ptemp ;
 
   data.clear() ;
   nr_data = 0  ;
@@ -51,12 +52,24 @@ void VTK::ReadDataHeader( fstream &str ){
       if( StringToDataArray( line, temp  ) ) {
 
         if( temp.GetCodification() == "ascii") {
-          pos_ = str.tellg() ;
-          temp.SetPosition( pos_ ) ;
+            pos_ = str.tellg() ;
+        }
+
+        else{
+            pos_ =  0 ; 
         };
 
-        data.push_back( temp ) ;
-        nr_data++ ;
+        temp.SetPosition( pos_ ) ;
+
+        if( ! GetFieldByName( data, temp.GetName(), ptemp )) {
+            data.push_back( temp ) ;
+            nr_data++ ;
+        }
+        
+        else{
+            *ptemp = temp ;
+        };
+
       };
 
       if( ! getline( str, line) ) read = false ;
@@ -75,7 +88,8 @@ void VTK::ReadData( ){
   fstream::pos_type        position_appended;
   string                   line;
   char                     c_ ;
-  int                      nbytes ;
+  uint32_t                 nbytes32 ;
+  uint64_t                 nbytes64 ;
 
   str.open( fh.GetName( ), ios::in ) ;
 
@@ -100,7 +114,8 @@ void VTK::ReadData( ){
     if( data[i].GetCodification() == "appended"){
       str.seekg( position_appended) ;
       str.seekg( data[i].GetOffset(), ios::cur) ;
-      absorb_binary( str, nbytes  ) ;
+      if( HeaderType== "UInt32") absorb_binary( str, nbytes32 ) ;
+      if( HeaderType== "UInt64") absorb_binary( str, nbytes64 ) ;
       Absorb( str, "binary", data[i].GetName() ) ;
     };
   };
@@ -110,7 +125,8 @@ void VTK::ReadData( ){
     if( geometry[i].GetCodification() == "appended"){
       str.seekg( position_appended) ;
       str.seekg( geometry[i].GetOffset(), ios::cur) ;
-      absorb_binary( str, nbytes  ) ;
+      if( HeaderType== "UInt32") absorb_binary( str, nbytes32 ) ;
+      if( HeaderType== "UInt64") absorb_binary( str, nbytes64 ) ;
       Absorb( str, "binary", geometry[i].GetName() ) ;
     };
   };
@@ -142,7 +158,6 @@ bool  VTK::ReadDataArray( fstream &str, VTK::Field_C &field_  ){
   string              line_ ;
 
   while( getline(str, line_)  ){
-
 
     if( Keyword_In_String( line_, field_.GetName() ) ){
       if( StringToDataArray( line_, field_  ) ){

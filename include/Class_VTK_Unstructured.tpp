@@ -5,23 +5,18 @@ VTK_UnstructuredGrid<Derived>::VTK_UnstructuredGrid( )
 
   fh.SetAppendix("vtu");
 
-  geometry.push_back( VTK::Field_C( "xyz",          3, "Float64", "Point" ) ) ;
-  geometry.push_back( VTK::Field_C( "offsets",      1, "Int32"  , "Cell"  ) ) ;
-  geometry.push_back( VTK::Field_C( "types",        1, "Int32"  , "Cell"  ) ) ;
-  geometry.push_back( VTK::Field_C( "connectivity", 1, "Int32"  , "Cell"  ) ) ;
+  geometry.push_back( VTK::Field_C( "Points",       3,  "Point" ) ) ;
+  geometry.push_back( VTK::Field_C( "offsets",      1,  "Cell"  ) ) ;
+  geometry.push_back( VTK::Field_C( "types",        1,  "Cell"  ) ) ;
+  geometry.push_back( VTK::Field_C( "connectivity", 1,  "Cell"  ) ) ;
 
 };
-
 //------------------------------------------------------------------
 template <class Derived>
-VTK_UnstructuredGrid<Derived>::VTK_UnstructuredGrid( string dir_, string name_, string cod_, int ncell_, int npoints_, int nconn_  )
+VTK_UnstructuredGrid<Derived>::VTK_UnstructuredGrid( string dir_, string name_  )
                               :VTK_UnstructuredGrid( ){
 
   SetNames( dir_, name_ ) ; 
-  SetDimensions( ncell_, npoints_, nconn_ ) ; 
-
-  SetGeomCodex( cod_ ) ;
-
   return ;
 
 };
@@ -30,36 +25,43 @@ VTK_UnstructuredGrid<Derived>::VTK_UnstructuredGrid( string dir_, string name_, 
 template <class Derived>
 VTK_UnstructuredGrid<Derived>::~VTK_UnstructuredGrid( ) {
     
-    SetDimensions( -1, -1, -1) ;    
 };
 
 //------------------------------------------------------------------
 template <class Derived>
-void VTK_UnstructuredGrid<Derived>::SetDimensions( int ncells_, int npoints_, int nconn_ ){
+void VTK_UnstructuredGrid<Derived>::SetGeomTypes(string Ptype, string Otype, string Ttype, string Ctype  ){
 
-  ncells        = ncells_ ;
-  npoints       = npoints_ ;
-  nconnectivity = nconn_ ;
+    geometry[0].SetType(Ptype) ;
+    geometry[1].SetType(Otype) ;
+    geometry[2].SetType(Ttype) ;
+    geometry[3].SetType(Ctype) ;
 
-  geometry[0].SetElements(npoints) ;
-  geometry[1].SetElements(ncells) ;
-  geometry[2].SetElements(ncells) ;
-  geometry[3].SetElements(nconnectivity) ;
+    return ;
+};
 
-  nr_points = npoints ;
-  nr_cells  = ncells ;
+//------------------------------------------------------------------
+template <class Derived>
+void VTK_UnstructuredGrid<Derived>::SetDimensions( uint64_t ncells_, uint64_t npoints_, uint64_t nconn_ ){
 
-  for( int i=0; i< nr_data; i++){
-      if( data[i].GetLocation() == "Cell")  data[i].SetElements(nr_cells) ;
-      if( data[i].GetLocation() == "Point") data[i].SetElements(nr_points) ;
-  };
+    nr_cells        = ncells_ ;
+    nr_points       = npoints_ ;
 
-  return ;
+    geometry[0].SetElements(nr_points) ;
+    geometry[1].SetElements(nr_cells) ;
+    geometry[2].SetElements(nr_cells) ;
+    geometry[3].SetElements(nconn_) ;
+
+    for( int i=0; i< nr_data; i++){
+        if( data[i].GetLocation() == "Cell")  data[i].SetElements(nr_cells) ;
+        if( data[i].GetLocation() == "Point") data[i].SetElements(nr_points) ;
+    };
+
+    return ;
 };
 
 // =================================================================================== //
 template <class Derived>
-int VTK_UnstructuredGrid<Derived>::NumberOfElements( int t){
+uint8_t VTK_UnstructuredGrid<Derived>::NumberOfElements( uint8_t t){
 
   int e;
 
@@ -86,47 +88,47 @@ int VTK_UnstructuredGrid<Derived>::NumberOfElements( int t){
 template <class Derived>
 void VTK_UnstructuredGrid<Derived>::WriteMetaData( ){
 
-  fstream str ;
-  string line ; 
-
-  str.open( fh.GetName( ), ios::out ) ;
-
-  //Writing XML header
-  str << "<?xml version=\"1.0\"?>" << endl;
-
-  //Writing Piece Information
-  str << "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << endl;
-  str << "  <UnstructuredGrid>"  << endl;;
-  str << "    <Piece  NumberOfPoints=\"" << npoints << "\" NumberOfCells=\"" << ncells << "\">" << endl;
-
-  //Header for Data
-  WriteDataHeader( str, false );
-
-  //Wring Geometry Information
-  str << "      <Points>" << endl ;;
-  WriteDataArray( str, geometry[0] ) ;
-  str << "      </Points>" << endl;
-
-  str << "      <Cells>" << endl ;;
-  WriteDataArray( str, geometry[1] ) ;
-  WriteDataArray( str, geometry[2] ) ;
-  WriteDataArray( str, geometry[3] ) ;
-  str << "      </Cells>" << endl;
-
-  //Closing Piece
-  str << "    </Piece>" << endl;
-  str << "  </UnstructuredGrid>"  << endl;
-
-  //Appended Section
-
-  str << "  <AppendedData encoding=\"raw\">" << endl;
-  str << "_" ;
-  str << endl ;
-  str << "</VTKFile>" << endl;
-
-  str.close() ;
-
-  return ;
+    fstream str ;
+    string line ; 
+    
+    str.open( fh.GetName( ), ios::out ) ;
+    
+    //Writing XML header
+    str << "<?xml version=\"1.0\"?>" << endl;
+    
+    //Writing Piece Information
+    str << "<VTKFile type=\"UnstructuredGrid\" version=\"1.0\" byte_order=\"LittleEndian\" header_type=\"" << HeaderType << "\">" << endl;
+    str << "  <UnstructuredGrid>"  << endl;;
+    str << "    <Piece  NumberOfPoints=\"" << nr_points << "\" NumberOfCells=\"" << nr_cells << "\">" << endl;
+    
+    //Header for Data
+    WriteDataHeader( str, false );
+    
+    //Wring Geometry Information
+    str << "      <Points>" << endl ;;
+    WriteDataArray( str, geometry[0] ) ;
+    str << "      </Points>" << endl;
+    
+    str << "      <Cells>" << endl ;;
+    WriteDataArray( str, geometry[1] ) ;
+    WriteDataArray( str, geometry[2] ) ;
+    WriteDataArray( str, geometry[3] ) ;
+    str << "      </Cells>" << endl;
+    
+    //Closing Piece
+    str << "    </Piece>" << endl;
+    str << "  </UnstructuredGrid>"  << endl;
+    
+    //Appended Section
+    
+    str << "  <AppendedData encoding=\"raw\">" << endl;
+    str << "_" ;
+    str << endl ;
+    str << "</VTKFile>" << endl;
+    
+    str.close() ;
+    
+    return ;
 };
 
 // =================================================================================== //
@@ -190,43 +192,128 @@ void VTK_UnstructuredGrid<Derived>::Flush( fstream &str, string codex, string na
 template <class Derived>
 void VTK_UnstructuredGrid<Derived>::ReadMetaData( ){
 
-  fstream str;
-  string line;
+    fstream str;
+    string line, temp;
+    
+    fstream::pos_type        position;
+    
+    bool                     read ;
+    
+    
+    str.open( fh.GetName( ), ios::in ) ;
+    
+    getline( str, line);
+    while( ! Keyword_In_String( line, "<VTKFile")){
+        getline(str, line);
+    };
+                                              
+    if( Get_After_Keyword( line, "header_type", '\"', temp) ){
+        SetHeaderType( temp) ;
+    };
 
-  fstream::pos_type        position;
+    while( ! Keyword_In_String( line, "<Piece")){
+      getline(str, line);
+    };
+    
+    Get_After_Keyword( line, "NumberOfPoints", '\"', temp) ;
+    convert_string( temp, nr_points );
+    
+    Get_After_Keyword( line, "NumberOfCells", '\"', temp) ;
+    convert_string( temp, nr_cells );
+    
+    
+    position = str.tellg() ;
+    ReadDataHeader( str ) ;
+    
+    
+    for( int i=0; i<geometry.size(); ++i){
+        str.seekg( position) ;
+        if( ! ReadDataArray( str, geometry[i] ) ) {
+          cout << geometry[i].GetName() << " DataArray not found" << endl ;
+        };
+    };
+    
+    
+    str.close() ;
+    
+    SetDimensions( nr_cells, nr_points, CalcSizeConnectivity( )  ) ;
 
-  bool                     read ;
- 
-
-  str.open( fh.GetName( ), ios::in ) ;
-
-//  Read_Piece( str ) ;
-  getline( str, line);
-  while( ! Keyword_In_String( line, "<Piece")){
-    getline(str, line);
-  };
-
-  convert_string( Get_After_Keyword( line, "NumberOfPoints", '\"'), npoints );
-  convert_string( Get_After_Keyword( line, "NumberOfCells", '\"') , ncells );
-
-
-  position = str.tellg() ;
-  ReadDataHeader( str ) ;
-
-
-  for( int i=0; i<geometry.size(); ++i){
-      str.seekg( position) ;
-      if( ! ReadDataArray( str, geometry[i] ) ) {
-        cout << geometry[i].GetName() << " DataArray not found" << endl ;
-      };
-  };
-
-  SetDimensions( ncells, npoints, -1 ) ;
-
-  str.close() ;
-
-  return ;
+    return ;
 };
+
+// =================================================================================== //
+template <class Derived>
+uint64_t VTK_UnstructuredGrid<Derived>::CalcSizeConnectivity( ){
+
+    fstream                  str  ;
+    fstream::pos_type        position_appended;
+    string                   line;
+    char                     c_ ;
+    uint32_t                 nbytes32 ;
+    uint64_t                 nbytes64 ;
+    uint64_t                 nconn ;
+
+    str.open( fh.GetName( ), ios::in ) ;
+
+    //Read appended data
+    //Go to the initial position of the appended section
+    while( getline(str, line) && (! Keyword_In_String( line, "<AppendedData")) ){} ;
+
+    str >> c_;
+    while( c_ != '_') str >> c_;
+
+    position_appended = str.tellg();
+
+
+    str.close();
+    str.clear();
+
+    //Open in binary for read
+    str.open( fh.GetName( ), ios::in | ios::binary);
+
+    if( geometry[3].GetCodification() == "appended" ){
+        str.seekg( position_appended) ;
+        str.seekg( geometry[3].GetOffset(), ios::cur) ;
+
+        if( HeaderType== "UInt32") {
+            absorb_binary( str, nbytes32 ) ;
+            nconn = nbytes32 /SizeOfType( geometry[3].GetType() ) ;
+        }
+
+        if( HeaderType== "UInt64") {
+            absorb_binary( str, nbytes64 ) ;
+            nconn = nbytes64 /SizeOfType( geometry[3].GetType() ) ;
+        };
+    };
+
+
+    //Read geometry
+    if(  geometry[3].GetCodification() == "ascii"){
+        str.seekg( geometry[3].GetPosition() ) ;
+
+        string              line ;
+        vector<uint64_t>    temp;
+
+        nconn = 0 ;
+
+        getline( str, line) ;
+        while( ! Keyword_In_String(line,"/DataArray") ) {
+
+            temp.clear() ;
+            convert_string( line, temp) ;
+            nconn += temp.size() ;
+        };
+
+
+    };
+
+    str.close();
+
+    return nconn ;
+
+
+};
+
 
 // =================================================================================== //
 template <class Derived>

@@ -6,12 +6,18 @@ using namespace std;
 //------------------------------------------------------------------
 VTK::VTK(){
 
-  nr_data = 0;
-  nr_procs = 0;
-  my_proc  = 0;
 
-  fh.SetSeries( false ) ;
-  fh.SetParallel( false ) ;
+    nr_data = 0;
+    nr_procs = 0;
+    my_proc  = 0;
+
+    HeaderType = "UInt32" ;
+    
+    fh.SetSeries( false ) ;
+    fh.SetParallel( false ) ;
+
+    GeomCodex = "undefined" ;
+    DataCodex = "undefined" ;
 
 };
 
@@ -19,14 +25,31 @@ VTK::VTK(){
 VTK::VTK(string dir_, string name_ ):
      VTK(){
 
-  SetNames(dir_, name_) ;
+    SetNames(dir_, name_) ;
 
-  return;
 };
 
 //------------------------------------------------------------------
 VTK::~VTK(){} ;
 
+//------------------------------------------------------------------
+void  VTK::SetHeaderType( string st_){ 
+
+    if( st_ == "UInt32" || st_ == "UInt64"){
+        HeaderType = st_ ;
+    }
+
+    else{
+        cout << "Unsupported HeaderType " << st_ << endl ;
+    };
+
+    return; 
+} ;
+
+//------------------------------------------------------------------
+string  VTK::GetHeaderType( ){ 
+    return HeaderType ;
+};
 
 //-------------------------------------------------------------------
 void  VTK::SetNames( string dir_, string name_ ){
@@ -68,11 +91,29 @@ void  VTK::SetParallel( int nr, int my){
 } ;
 
 //------------------------------------------------------------------
+void  VTK::SetCodex( string cod_ ) {
+
+    SetGeomCodex( cod_) ;
+    SetDataCodex( cod_) ;
+
+    return ;
+};
+
+//------------------------------------------------------------------
 void  VTK::SetGeomCodex( string cod_ ) {
 
     int i, nf( geometry.size() ) ;
 
-    for( i=0; i<nf ; i++) geometry[i].SetCodification( cod_ ) ;
+    if( cod_ == "ascii"  || cod_ == "appended" ) {
+        GeomCodex = cod_ ;
+        for( i=0; i<nf ; i++) geometry[i].SetCodification( cod_ ) ;
+    } 
+    
+    else{
+      cout << "Codification: " << cod_ << " not supported in VTK::SetGeomCodex"  << endl ;
+    };
+
+    return;
 };
 
 //------------------------------------------------------------------
@@ -80,58 +121,138 @@ void  VTK::SetDataCodex( string cod_ ) {
 
     int i, nf( data.size() ) ;
 
-    for( i=0; i<nf ; i++) data[i].SetCodification( cod_ ) ;
+
+    if( cod_ == "ascii"  || cod_ == "appended" ) {
+        DataCodex = cod_ ;
+        for( i=0; i<nf ; i++) data[i].SetCodification( cod_ ) ;
+    } 
+    
+    else{
+      cout << "Codification: " << cod_ << " not supported in VTK::SetDataCodex"  << endl ;
+    };
+
+ 
+    return ;
 };
 
 // =================================================================================== //
-void VTK::AddData( string name_, int comp_, string type_, string loc_, string cod_ ){
+VTK::Field_C* VTK::AddData( string name_, int comp_, string type_, string loc_ ){
 
-  int          size_ ;
-  bool         allocate(true) ;
+    int          size_ ;
+    bool         allocate(true) ;
+    VTK::Field_C* ptr(NULL) ;
+    
+    if(  GetFieldByName( data, name_, ptr ) ) {
+        ptr->SetComponents(comp_) ;
+        ptr->SetType(type_) ;
+        ptr->SetLocation(loc_) ;
+    
+    }
+    
+    else{
+    
+        // Check location -------------------------------------------------------------
+        if( loc_ == "Point"){
+           size_ = nr_points ;
+        }
+        
+        else if( loc_ == "Cell" ){
+           size_ = nr_cells ;
+        }
+        
+        else{
+           cout << "Location: " << loc_ << " not supported in VTK::Add_Data"  << endl ;
+           allocate = false ;
+        };
+        
+        // Check type -----------------------------------------------------------------
+        if(      type_ == "Int8"    || type_ == "UInt8"    ||
+                 type_ == "Int16"   || type_ == "UInt16"   ||
+                 type_ == "Int32"   || type_ == "UInt32"   || 
+                 type_ == "Int64"   || type_ == "UInt64"   || 
+                 type_ == "Float32" || type_ == "Float64"  ){
+        }
+        
+        else{
+          cout << "Type: " << type_ << " not supported in VTK::Add_Data"  << endl ;
+          allocate = false ;
+        };
+        
+        // Do allocation if everything ok ---------------------------------------------
+        if( allocate) {
+          data.push_back( Field_C( name_, comp_, type_, loc_, DataCodex, size_ ) ) ;
+          ptr = &data[nr_data] ;
+          nr_data++ ;
+        };
 
-  // Check location -------------------------------------------------------------
-  if( loc_ == "Point"){
-     size_ = nr_points ;
-  }
+    };
+    
+    return ptr ;
 
-  else if( loc_ == "Cell" ){
-     size_ = nr_cells ;
-  }
+};
 
-  else{
-     cout << "Location: " << loc_ << " not supported in VTK::Add_Data"  << endl ;
-     allocate = false ;
-  };
+// =================================================================================== //
+VTK::Field_C* VTK::AddData( string name_, int comp_, string type_, string loc_, string cod_ ){
 
-  // Check type -----------------------------------------------------------------
-  if(      type_ == "Int8"    || type_ == "UInt8"    ||
-           type_ == "Int16"   || type_ == "UInt16"   ||
-           type_ == "Int32"   || type_ == "UInt32"   || 
-           type_ == "Int64"   || type_ == "UInt64"   || 
-           type_ == "Float32" || type_ == "Float64"  ){
-  }
+    int           size_ ;
+    bool          allocate(true) ;
+    VTK::Field_C* ptr(NULL) ;
+    
+    if( ! GetFieldByName( data, name_, ptr ) ){
+        ptr->SetComponents(comp_) ;
+        ptr->SetType(type_) ;
+        ptr->SetLocation(loc_) ;
+        ptr->SetCodification(cod_) ;
+    }
 
-  else{
-    cout << "Type: " << type_ << " not supported in VTK::Add_Data"  << endl ;
-    allocate = false ;
-  };
+    else{
+    
+        // Check location -------------------------------------------------------------
+        if( loc_ == "Point"){
+           size_ = nr_points ;
+        }
+        
+        else if( loc_ == "Cell" ){
+           size_ = nr_cells ;
+        }
+        
+        else{
+           cout << "Location: " << loc_ << " not supported in VTK::Add_Data"  << endl ;
+           allocate = false ;
+        };
+        
+        // Check type -----------------------------------------------------------------
+        if(      type_ == "Int8"    || type_ == "UInt8"    ||
+                 type_ == "Int16"   || type_ == "UInt16"   ||
+                 type_ == "Int32"   || type_ == "UInt32"   || 
+                 type_ == "Int64"   || type_ == "UInt64"   || 
+                 type_ == "Float32" || type_ == "Float64"  ){
+        }
+        
+        else{
+          cout << "Type: " << type_ << " not supported in VTK::Add_Data"  << endl ;
+          allocate = false ;
+        };
+        
+        // Check codification ---------------------------------------------------------
+        if( cod_ == "ascii"  || cod_ == "appended" ) {
+        } 
+        
+        else{
+          cout << "Codification: " << cod_ << " not supported in VTK::Add_Data"  << endl ;
+          allocate = false ;
+        };
+        
+        // Do allocation if everything ok ---------------------------------------------
+        if( allocate) {
+          data.push_back( Field_C( name_, comp_, type_, loc_, cod_, size_ ) ) ;
+          ptr = &data[nr_data] ;
+          nr_data++ ;
+        };
 
-  // Check codification ---------------------------------------------------------
-  if( cod_ == "ascii"  || cod_ == "appended" ) {
-  } 
-  
-  else{
-    cout << "Codification: " << cod_ << " not supported in VTK::Add_Data"  << endl ;
-    allocate = false ;
-  };
-
-  // Do allocation if everything ok ---------------------------------------------
-  if( allocate) {
-    data.push_back( Field_C( name_, comp_, type_, loc_, cod_, size_ ) ) ;
-    nr_data++ ;
-  };
-
-  return ;
+    };
+    
+    return ptr ;
 
 };
 
@@ -188,62 +309,82 @@ bool VTK::GetFieldByName( vector<VTK::Field_C> &fields_, const string &name_, VT
 // =================================================================================== //
 void VTK::CalcAppendedOffsets(){
 
-  int offset(0) ;
+    uint64_t offset(0) ;
+    uint64_t  HeaderByte ;
+    
+    if( GetHeaderType() == "UInt32"){
+        HeaderByte = sizeof(uint32_t) ;
+    }
 
-  for( int i=0; i< nr_data; i++){
-    if( data[i].GetCodification() == "appended" && data[i].GetLocation() == "Point") {
-      data[i].SetOffset( offset) ;
-      offset += sizeof(int) + data[i].GetNbytes()  ;
+    else if( GetHeaderType() == "UInt64") {
+        HeaderByte = sizeof(uint64_t) ;
     };
-  };
-
-  for( int i=0; i< nr_data; i++){
-    if( data[i].GetCodification() == "appended" && data[i].GetLocation() == "Cell") {
-      data[i].SetOffset( offset) ;
-      offset += sizeof(int) + data[i].GetNbytes()  ;
+    
+    
+    for( int i=0; i< nr_data; i++){
+        if( data[i].GetCodification() == "appended" && data[i].GetLocation() == "Point") {
+            data[i].SetOffset( offset) ;
+            offset += HeaderByte + data[i].GetNbytes()  ;
+        };
     };
-  };
-
-  for( int i=0; i< geometry.size(); i++){
-    if( geometry[i].GetCodification() == "appended" ) {
-      geometry[i].SetOffset( offset) ;
-      offset += sizeof(int) + geometry[i].GetNbytes()  ;
-    }; 
-  };
-
-
-  return ;
+    
+    for( int i=0; i< nr_data; i++){
+        if( data[i].GetCodification() == "appended" && data[i].GetLocation() == "Cell") {
+            data[i].SetOffset( offset) ;
+            offset += HeaderByte + data[i].GetNbytes()  ;
+        };
+    };
+    
+    for( int i=0; i< geometry.size(); i++){
+        if( geometry[i].GetCodification() == "appended" ) {
+            geometry[i].SetOffset( offset) ;
+            offset += HeaderByte + geometry[i].GetNbytes()  ;
+        }; 
+    };
+    
+    
+    return ;
 };
 
 // =================================================================================== //
 bool VTK::StringToDataArray( string &line_, VTK::Field_C &data_  ){
 
-  string type_, name_, code_ ;
-  int    comp_, offs_ ;
-
-
-  if( Keyword_In_String( line_, "<DataArray ") ){  
-    type_ = Get_After_Keyword( line_, "type=", '\"') ;
-    name_ = Get_After_Keyword( line_, "Name=", '\"') ;
-    code_ = Get_After_Keyword( line_, "format=", '\"') ;
-    convert_string( Get_After_Keyword( line_, "NumberOfComponents=", '\"'), comp_ ) ;
-  
-    data_.SetType(type_) ;
-    data_.SetName(name_) ;
-    data_.SetComponents(comp_) ;
-    data_.SetCodification(code_) ;
-  
-    if(code_=="appended") {
-      convert_string( Get_After_Keyword( line_, "offset=", '\"'), offs_ ) ;
-      data_.SetOffset(offs_) ;
+    string type_, name_, code_, comp_, offs_ ;
+    int    components_(1), offset_ ;
+    
+    bool  success(true) ;
+    
+    
+    if( Keyword_In_String( line_, "<DataArray ") ){  
+        success = success && Get_After_Keyword( line_, "type=", '\"', type_) ;
+        success = success && Get_After_Keyword( line_, "Name=", '\"', name_) ;
+        success = success && Get_After_Keyword( line_, "format=", '\"', code_) ;
+    
+        if( Get_After_Keyword( line_, "NumberOfComponents=", '\"', comp_)  ){
+            convert_string( comp_, components_ ) ;
+        };
+    
+        data_.SetType(type_) ;
+        data_.SetName(name_) ;
+        data_.SetComponents(components_) ;
+        data_.SetCodification(code_) ;
+    
+        if(code_=="appended") {
+            if( Get_After_Keyword( line_, "offset=", '\"', offs_) ){
+                convert_string( offs_, offset_ ) ;
+                data_.SetOffset(offset_) ;
+            }
+            else{
+                success = false ;
+            };
+        }
+    
+        return success ;
     }
-
-    return true ;
-  }
-
-  else{
-    return false ;
-  };
+    
+    else{
+        return false ;
+    };
 
  
 };
@@ -256,7 +397,7 @@ void  VTK::DataArrayToString( string &str, VTK::Field_C &field_ ){
   os << "        <DataArray "
        << "type=\"" << field_.GetType() << "\" "
        << "Name=\"" << field_.GetName() << "\" "
-       << "NumberOfComponents=\""<< field_.GetComponents() << "\" "
+       << "NumberOfComponents=\""<< unsigned(field_.GetComponents()) << "\" "
        << "format=\"" << field_.GetCodification() << "\" ";
 
   if( field_.GetCodification() == "appended"){
@@ -288,4 +429,34 @@ void  VTK::PDataArrayToString( string &str, VTK::Field_C &field_ ){
   
 };
 
+//------------------------------------------------------------------
+uint8_t SizeOfType( string type ){
 
+  uint8_t nbytes ;
+
+  if( type == "Int8" || type == "UInt8"){
+    nbytes = sizeof(int8_t) ;
+  }
+
+  if( type == "Int16" || type == "UInt16"){
+    nbytes = sizeof(int16_t) ;
+  }
+
+  else if( type == "Int32" || type == "UInt32"){
+    nbytes = sizeof(int32_t) ;
+  }
+
+  else if( type == "Int64" || type == "UInt64"){
+    nbytes = sizeof(int64_t) ;
+  }
+
+  else if( type == "Float32" ){
+    nbytes = sizeof(float) ;
+  }
+
+  else if( type == "Float64" ){
+    nbytes = sizeof(double) ;
+  };
+
+  return nbytes ;
+};

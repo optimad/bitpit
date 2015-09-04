@@ -152,22 +152,6 @@ void flush_binary( fstream &str, const data_T data ){
   return ;
 };
 
-// // =================================================================================== //
-// template< class data_T >
-// void flush_binary( fstream &str, const vector<data_T> &data ){
-// 
-//   int i, nbytes, nr;
-//   nr = data.size() ;
-//   nbytes = sizeof(data_T) ;
-// 
-// 
-//   for(i=0; i<nr; i++){
-//     str.write( reinterpret_cast<const char*>(&data[i]), nbytes ) ;
-//   };
-// 
-//   return ;
-// };
-
 // =================================================================================== //
 template< class data_T >
 void flush_binary( fstream &str, const vector<data_T> &data ){

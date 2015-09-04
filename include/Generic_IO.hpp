@@ -42,6 +42,9 @@ void  line_stream( fstream &str, int nr, data_T *data) ;
 template< class data_T >
 void flush_ascii( fstream &str, const data_T data  ) ;
 
+template<>
+void flush_ascii( fstream &str, const uint8_t data  ) ;
+
 template< class data_T >
 void flush_ascii( fstream &str, int elements_per_line, const vector<data_T> &data  ) ;
 

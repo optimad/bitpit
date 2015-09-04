@@ -4,284 +4,299 @@
 VtkUnstrVec::VtkUnstrVec()
              :VTK_UnstructuredGrid<VtkUnstrVec>(){};
 
+// //====================================================================================================
+// VtkUnstrVec::VtkUnstrVec( string dir_, string name_, string codex_, uint8_t type_, dvecarr3E &points_ext, ivector2D &connectivity_ext )
+//              :VTK_UnstructuredGrid<VtkUnstrVec>( ){ 
+// 
+// 
+//     int ncells_, npoints_, nconn_;
+// 
+//     data.reserve(50) ;
+// 
+//     SetNames( dir_, name_ );
+//     SetCodex( codex_ ) ;
+// 
+//     type = type_ ;
+// 
+//     points = &points_ext ;
+//     connectivity = &connectivity_ext ;
+// 
+//     ncells_ = connectivity_ext.size() ;
+//     npoints_ = points_ext.size() ;
+// 
+//     nconn_ = ncells_ * NumberOfElements( type ) ;
+// 
+//     geometry[0].SetType("Float64") ;
+//     geometry[1].SetType("UInt32") ;
+//     geometry[2].SetType("UInt8") ;
+//     geometry[3].SetType("UInt32") ;
+// 
+//     SetDimensions( connectivity_ext.size(), points_ext.size(), nconn_ ) ;
+// };
+
 //====================================================================================================
-VtkUnstrVec::VtkUnstrVec( string dir_, string name_, string codex_, int type_, dvecarr3E &points_ext, ivector2D &connectivity_ext )
+template< class T0, class T1>
+VtkUnstrVec::VtkUnstrVec( string dir_, string name_, string codex_, uint8_t type_, vector<T0> &points_ext, vector<T1> &connectivity_ext )
              :VTK_UnstructuredGrid<VtkUnstrVec>( ){ 
 
 
     int ncells_, npoints_, nconn_;
 
+    T0  dum0 ;
+    T1  dum1 ;
+
+
+    data.reserve(50) ;
+
     SetNames( dir_, name_ );
-    SetGeomCodex( codex_ ) ;
+    SetCodex( codex_ ) ;
 
     type = type_ ;
-    codex= codex_ ;
-
-    points = &points_ext ;
-    connectivity = &connectivity_ext ;
 
     ncells_ = connectivity_ext.size() ;
     npoints_ = points_ext.size() ;
 
     nconn_ = ncells_ * NumberOfElements( type ) ;
 
-    SetDimensions( ncells_, npoints_, nconn_ ) ;
+    geometry[0].SetType( WhichType(dum0) ) ;
+    geometry[1].SetType("UInt64") ;
+    geometry[2].SetType("UInt8") ;
+    geometry[3].SetType( WhichType(dum1) ) ;
+
+    SetDimensions( connectivity_ext.size(), points_ext.size(), nconn_ ) ;
+
+    adata.resize(4) ;
+
+    adata[0].DPtr = &points_ext ;
+    adata[1].DPtr = static_cast<vector<int32_t>*>(NULL) ;
+    adata[2].DPtr = static_cast<vector<int32_t>*>(NULL) ;
+    adata[3].DPtr = &connectivity_ext ;
+
+    adata[0].FPtr = &geometry[0] ;
+    adata[1].FPtr = &geometry[1] ;
+    adata[2].FPtr = &geometry[2] ;
+    adata[3].FPtr = &geometry[3] ;
+
 };
+
+//====================================================================================================
+VtkUnstrVec::VtkUnstrVec( string dir_, string name_, string codex_, uint8_t type_ )
+             :VTK_UnstructuredGrid<VtkUnstrVec>( ){ 
+
+    data.reserve(50) ;
+
+    SetNames( dir_, name_ );
+    SetCodex( codex_ ) ;
+
+    type = type_ ;
+
+};
+
 
 //====================================================================================================
 VtkUnstrVec::~VtkUnstrVec(){
 
-  points       = NULL;
-  connectivity = NULL;
 };
 
 //====================================================================================================
-void VtkUnstrVec::AddData( dvector1D &data_, string name_, string loc_ ){
+template<class T>
+void VtkUnstrVec::AddData( vector<T> &data_, string name_, string loc_ ){
 
-    int n = scalar_data.size() ;
+    int n = adata.size() ;
     VTK::Field_C*     f_ ;
+    T               dum_ ;
 
-    scalar_data.push_back( sfield() ) ;
+    adata.push_back( ufield() ) ;
 
-    scalar_data[n].name = name_ ;
-    scalar_data[n].data = &data_ ;
-  
-    if( ! GetFieldByName( data, name_, f_ )) {
-        VTK_UnstructuredGrid<VtkUnstrVec>::AddData( name_, 1, "Float64", loc_, codex ) ;
+    adata[n].DPtr = &data_ ;
+
+    if( name_ == "Points" ){
+        adata[n].FPtr = &geometry[0] ;
+    }
+
+    else if( name_ == "types"){
+        adata[n].FPtr = &geometry[1] ;
+    }
+
+    else if( name_ == "offsets"){
+        adata[n].FPtr = &geometry[2] ;
+    }
+
+    else if( name_ == "connectivity"){
+        adata[n].FPtr = &geometry[3] ;
+    }
+
+    else{
+        adata[n].FPtr = VTK_UnstructuredGrid<VtkUnstrVec>::AddData( name_, 1, WhichType(dum_), loc_ ) ;
     };
 
     return;
 };
 
 //====================================================================================================
-void VtkUnstrVec::AddData( dvecarr3E &data_, string name_, string loc_ ){
+template<class T>
+void VtkUnstrVec::AddData( vector< array<T,3> > &data_, string name_, string loc_ ){
 
-
-    int n = vector_data.size() ;
+    int n = adata.size() ;
     VTK::Field_C*     f_ ;
+    T               dum_ ;
 
-    vector_data.push_back( vfield() ) ;
+    adata.push_back( ufield() ) ;
 
-    vector_data[n].name = name_ ;
-    vector_data[n].data = &data_ ;
+    adata[n].DPtr = &data_ ;
 
-    if( !GetFieldByName( data, name_, f_ ) ) {
-        VTK_UnstructuredGrid<VtkUnstrVec>::AddData( name_, 3, "Float64", loc_, codex ) ;
+    if( name_ == "Points" ){
+        adata[n].FPtr = &geometry[0] ;
+    }
+
+    else if( name_ == "types"){
+        adata[n].FPtr = &geometry[1] ;
+    }
+
+    else if( name_ == "offsets"){
+        adata[n].FPtr = &geometry[2] ;
+    }
+
+    else if( name_ == "connectivity"){
+        adata[n].FPtr = &geometry[3] ;
+    }
+
+    else{
+
+        adata[n].FPtr = VTK_UnstructuredGrid<VtkUnstrVec>::AddData( name_, 3, WhichType(dum_), loc_ ) ;
     };
 
     return;
 };
 
 //====================================================================================================
-void VtkUnstrVec::Flush( fstream &str, string codex_, string name ) {
+template<class T>
+void VtkUnstrVec::AddData( vector< vector<T> > &data_, string name_, string loc_ ){
 
-  int n;
-  string indent("         ") ;
+    int n = adata.size() ;
+    VTK::Field_C*     f_ ;
+    T               dum_ ;
+
+    adata.push_back( ufield() ) ;
+
+    adata[n].DPtr = &data_ ;
+
+    if( name_ == "Points" ){
+        adata[n].FPtr = &geometry[0] ;
+    }
+
+    else if( name_ == "types"){
+        adata[n].FPtr = &geometry[1] ;
+    }
+
+    else if( name_ == "offsets"){
+        adata[n].FPtr = &geometry[2] ;
+    }
+
+    else if( name_ == "connectivity"){
+        adata[n].FPtr = &geometry[3] ;
+    }
+
+    else{
+        adata[n].FPtr = VTK_UnstructuredGrid<VtkUnstrVec>::AddData( name_, 3, WhichType(dum_), loc_ ) ;
+    };
 
 
-    if( codex_ == "ascii"){
+    return;
+};
 
-      if( name == "xyz"){
-          flush_ascii( str, 1, (*points)  ) ;
-      }
+// =================================================================================== //
+bool VtkUnstrVec::GetFieldByName( const string &name_, VtkUnstrVec::ufield *&the_field ){
 
-      else if( name == "connectivity"){
-         flush_ascii( str, 1, (*connectivity)  ) ;
-      }
 
-      else if( name == "types"){
-        for( n=0; n<ncells-1; n++) {
-          flush_ascii( str, type  ) ;
-          str << endl ;
+    vector<VtkUnstrVec::ufield>::iterator    it_ ;
+
+    for( it_=adata.begin(); it_!=adata.end(); ++it_){
+        if( (*it_).FPtr->GetName() == name_ ){
+            the_field = &(*it_) ;
+            return true ;
+        };
+    };
+
+    return false ;
+};
+
+//====================================================================================================
+void VtkUnstrVec::Flush( fstream &str, string codex, string name ) {
+
+
+    if( codex == "ascii" && name == "types"){
+        for( uint64_t n=0; n<nr_cells-1; n++) {
+            flush_ascii( str, type  ) ;
+            str << endl ;
         };
         flush_ascii( str, type  ) ;
-      }
+    }
 
-      else if( name == "offsets"){
-        int off_(0) ;
-        for( n=0; n<ncells-1; n++) {
-          off_ += NumberOfElements( type ) ; 
-          flush_ascii( str, off_  ) ;
-          str << endl ;
+    else if( codex == "binary" && name == "types"){
+        for( uint64_t n=0; n<nr_cells; n++) flush_binary( str, type  ) ;
+    }
+
+    else if( codex == "ascii" && name == "offsets"){
+        uint64_t off_(0) ;
+        for(uint64_t  n=0; n<nr_cells-1; n++) {
+            off_ += NumberOfElements( type ) ; 
+            flush_ascii( str, off_  ) ;
+            str << endl ;
         };
         off_ += NumberOfElements( type ) ;
         flush_ascii( str, off_  ) ;
-      }
+    }
 
-      else{
-
-          for( int i=0; i<scalar_data.size(); ++i ){
-              if( scalar_data[i].name == name) flush_ascii( str, 1, *(scalar_data[i].data) ) ;
-          };
-
-          for( int i=0; i<vector_data.size(); ++i ){
-              if( vector_data[i].name == name) flush_ascii( str, 1, *(vector_data[i].data) ) ;
-          };
-      };
-
+    else if( codex == "binary" && name == "offsets"){
+        uint64_t off_(0), nT( NumberOfElements( type ) ) ;
+        for( uint64_t n=0; n<nr_cells; n++) {
+            off_ += nT ; 
+            flush_binary( str, off_  ) ;
+        };
     }
 
     else{
 
-      if( name == "xyz"){
-        flush_binary( str, *points  ) ;
-      }
+        ufield  *f_ ;
+        stream_visitor  visitor;
+        visitor.SetStream( str ) ;
+        visitor.SetCodex( codex ) ;
+        visitor.SetName( name ) ;
+        visitor.SetTask( "write" ) ;
 
-      else if( name == "connectivity"){
-        flush_binary( str, *connectivity  ) ;
-      }
-
-      else if( name == "types"){
-        for( n=0; n<ncells; n++) flush_binary( str, type  ) ;
-      }
-
-      else if( name == "offsets"){
-        int off_(0) ;
-        for( n=0; n<ncells; n++) {
-          off_ += NumberOfElements( type ) ; 
-          flush_binary( str, off_  ) ;
-        };
-      }
-
-      else{
-
-          for( int i=0; i<scalar_data.size(); ++i ){
-              if( scalar_data[i].name == name) flush_binary( str, *(scalar_data[i].data) ) ;
-          };
-
-          for( int i=0; i<vector_data.size(); ++i ){
-              if( vector_data[i].name == name) flush_binary( str, *(vector_data[i].data) ) ;
-          };
-      };
+        GetFieldByName( name, f_) ;
+        boost::apply_visitor(visitor, f_->DPtr ); 
 
     };
 
-  return ;
+    return ;
 
 };
 
 //====================================================================================================
-void VtkUnstrVec::Absorb( fstream &str, string codex_, string name ) {
+void VtkUnstrVec::Absorb( fstream &str, string codex, string name ) {
 
-  int n;
+    ufield  *f_ ;
 
+    if( GetFieldByName( name, f_)){
 
+        stream_visitor  visitor;
+        visitor.SetStream( str ) ;
+        visitor.SetCodex( codex ) ;
+        visitor.SetName( name ) ;
+        visitor.SetTask( "read" ) ;
 
-    if( codex_ == "ascii"){
+        visitor.SetSize( f_->FPtr->GetElements() ) ;
+        visitor.SetComponents( f_->FPtr->GetComponents() ) ;
 
-      if( name == "xyz"){
-        (*points).resize( npoints ) ;
-         absorb_ascii( str, (*points) ) ;
-      }
+        if( name == "connectivity") visitor.SetComponents( NumberOfElements(type) ) ;
 
-      else if( name == "connectivity"){
-        (*connectivity).resize( ncells ) ;
-        for( n=0; n<ncells; n++) {
-          (*connectivity)[n].resize( NumberOfElements(type) ) ;
+        if( ! (boost::get<vector<int32_t>*>(&f_->DPtr) && boost::get<vector<int32_t>*>(f_->DPtr) == NULL ) ){
+            boost::apply_visitor(visitor, f_->DPtr ); 
         };
-          absorb_ascii( str, (*connectivity)  ) ;
-      }
-
-      else if( name == "types"){
-        for( n=0; n<ncells; n++) {
-          absorb_ascii( str, type  ) ;
-        };
-      }
-
-      else if( name == "offsets"){
-        int off_ ;
-        for( n=0; n<ncells; n++) {
-          absorb_ascii( str, off_  ) ;
-        };
-      }
-
-      else{
-          VTK::Field_C*     f_ ;
-          string            loc; 
-          for( int i=0; i<scalar_data.size(); ++i ){
-              if( scalar_data[i].name == name) {
-                  GetFieldByName( data, name, f_ );
-                  loc = f_->GetLocation() ;
-                  
-                  if( loc == "Point") (scalar_data[i].data)->resize(npoints) ;
-                  if( loc == "Cell")  (scalar_data[i].data)->resize(ncells) ;
-
-                  absorb_ascii( str, *(scalar_data[i].data) ) ;
-              };
-          };
-
-          for( int i=0; i<vector_data.size(); ++i ){
-              if( vector_data[i].name == name) {
-                  GetFieldByName( data, name, f_ );
-                  loc = f_->GetLocation() ;
-                  
-                  if( loc == "Point") (vector_data[i].data)->resize(npoints) ;
-                  if( loc == "Cell")  (vector_data[i].data)->resize(ncells) ;
-
-                  absorb_ascii( str, *(vector_data[i].data) ) ;
-              };
-
-          };
-
-
-      };
-
     }
 
-    else{
-
-      if( name == "xyz"){
-        (*points).resize( npoints ) ;
-        absorb_binary( str, (*points) ) ;
-      }
-
-      else if( name == "connectivity"){
-        (*connectivity).resize( ncells ) ;
-        for( n=0; n<ncells; n++) {
-          (*connectivity)[n].resize( NumberOfElements(type) ) ;
-        };
-        absorb_binary( str, (*connectivity)  ) ;
-      }
-
-      else if( name == "types"){
-      }
-
-      else if( name == "offsets"){
-      }
-
-      else{
-          VTK::Field_C*     f_ ;
-          string            loc; 
-          for( int i=0; i<scalar_data.size(); ++i ){
-              if( scalar_data[i].name == name) {
-                  GetFieldByName( data, name, f_ );
-                  loc = f_->GetLocation() ;
-                  
-                  if( loc == "Point") (scalar_data[i].data)->resize(npoints) ;
-                  if( loc == "Cell")  (scalar_data[i].data)->resize(ncells) ;
-
-                  absorb_binary( str, *(scalar_data[i].data) ) ;
-              };
-          };
-
-          for( int i=0; i<vector_data.size(); ++i ){
-              if( vector_data[i].name == name) {
-                  GetFieldByName( data, name, f_ );
-                  loc = f_->GetLocation() ;
-                  
-                  if( loc == "Point") (vector_data[i].data)->resize(npoints) ;
-                  if( loc == "Cell")  (vector_data[i].data)->resize(ncells) ;
-
-                  absorb_binary( str, *(vector_data[i].data) ) ;
-              };
-
-          };
-
-
-      };
-
-    };
-
-  return ;
+    return ;
 
 };

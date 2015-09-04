@@ -33,46 +33,55 @@ VTK_RectilinearGrid<Derived>::~VTK_RectilinearGrid( ) {} ;
 template <class Derived>
 void VTK_RectilinearGrid<Derived>::ReadMetaData( ){
 
-  fstream str;
-  string line;
+    fstream str;
+    string line, temp;
 
-  fstream::pos_type        position;
+    fstream::pos_type        position;
 
-  bool                     read ;
+    bool                     read ;
 
-  array<int,6>             extensions ;
+    array<int,6>             extensions ;
 
 
-  str.open( fh.GetName( ), ios::in ) ;
+    str.open( fh.GetName( ), ios::in ) ;
 
-  getline( str, line);
-  while( ! Keyword_In_String( line, "<Piece")){
-    getline(str, line);
-  };
-
-  convert_string( Get_After_Keyword( line, "Extent", '\"'), extensions );
- 
-  n1 = extensions[0] ;
-  n2 = extensions[1] ;
-  m1 = extensions[2] ;
-  m2 = extensions[3] ;
-  l1 = extensions[4] ;
-  l2 = extensions[5] ;
-
-  position = str.tellg() ;
-
-  ReadDataHeader( str ) ;
-
-    for( int i=0; i<geometry.size(); ++i){
-        str.seekg( position) ;
-        if( ! ReadDataArray( str, geometry[i] ) ) {
-            cout << geometry[i].GetName() << " DataArray not found" << endl ;
-        };
+    getline( str, line);
+    while( ! Keyword_In_String( line, "<VTKFile")){
+        getline(str, line);
+    };
+                                              
+    if( Get_After_Keyword( line, "header_type", '\"', temp) ){
+        SetHeaderType( temp) ;
     };
 
+    while( ! Keyword_In_String( line, "<Piece")){
+        getline(str, line);
+    };
 
-  SetDimensions( n1, n2, m1, m2, l1, l2 ) ;
-  str.close() ; 
+    Get_After_Keyword( line, "Extent", '\"', temp) ;
+    convert_string( temp, extensions );
+ 
+    n1 = extensions[0] ;
+    n2 = extensions[1] ;
+    m1 = extensions[2] ;
+    m2 = extensions[3] ;
+    l1 = extensions[4] ;
+    l2 = extensions[5] ;
+
+    position = str.tellg() ;
+
+    ReadDataHeader( str ) ;
+
+      for( int i=0; i<geometry.size(); ++i){
+          str.seekg( position) ;
+          if( ! ReadDataArray( str, geometry[i] ) ) {
+              cout << geometry[i].GetName() << " DataArray not found" << endl ;
+          };
+      };
+
+
+    SetDimensions( n1, n2, m1, m2, l1, l2 ) ;
+    str.close() ; 
 
   return ;
  
@@ -90,7 +99,7 @@ void VTK_RectilinearGrid<Derived>::WriteMetaData( ){
   str << "<?xml version=\"1.0\"?>" << endl;
 
   //Writing Piece Information
-  str << "<VTKFile type=\"RectilinearGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << endl;
+  str << "<VTKFile type=\"RectilinearGrid\" version=\"0.1\" byte_order=\"LittleEndian\"  header_type=\"" << HeaderType << "\">" << endl; 
   str << "  <RectilinearGrid WholeExtent= \"" <<n1<<" "<<n2<<" "<<m1<<" "<<m2<<" "<<l1<<" "<<l2<< "\" >" << endl;
   str << "    <Piece Extent= \" " <<n1<<" "<<n2<<" "<<m1<<" "<<m2<<" "<<l1<<" "<<l2<< "\" >" << endl;
 
