@@ -263,7 +263,7 @@ void PatchOctree::import_cells()
 	m_cell_to_octant.reserve(nCells);
 	m_cells.reserve(nCells);
 	for (int n = 0; n < nCells; n++) {
-		m_cells.emplace_back(n);
+		m_cells.emplace_back(n, this);
 		Cell &cell = m_cells.back();
 		m_cell_to_octant[n] = n;
 
@@ -402,7 +402,7 @@ void PatchOctree::import_interfaces()
 
 	m_interfaces.reserve(nInterfaces);
 	for (int n = 0; n < nInterfaces; n++) {
-		m_interfaces.emplace_back(n);
+		m_interfaces.emplace_back(n, this);
 		Interface &interface = m_interfaces.back();
 
 		// Info associate al tree
