@@ -600,10 +600,11 @@ static inline string ZeroPadNumber(                                             
 );
 
 // Input stream operator ------------------------------------------------------------ //
-string Get_After_Keyword( 							      // EXTRACT FIELD AFTER SPECIFIC KEYWORD
+bool Get_After_Keyword( 							      // EXTRACT FIELD AFTER SPECIFIC KEYWORD
     string line_, 								      // (input) string
     string key_, 								      // (input) keyword
-    char del_    								      // (input) field delimiter
+    char del_,   								      // (input) field delimiter
+    string& result_						                      // (output) field found
 );
 
 // returns true if key_ is present in line ------------------------------------------ //
