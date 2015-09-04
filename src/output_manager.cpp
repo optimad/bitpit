@@ -5,6 +5,7 @@
 #include "cell.hpp"
 #include "node.hpp"
 #include "output_manager.hpp"
+#include "patch.hpp"
 
 #include "vtkGenericCell.h"
 #include "vtkObjectFactory.h"
@@ -259,11 +260,12 @@ vtkIdType OutputManager::InsertNextCell(const Cell &cell)
 {
 	int vtkCellType = getVTKCellType(cell.get_type());
 
-	Node **cellconnect = cell.get_connect();
+	int *cellconnect = cell.get_connect();
 	vtkIdType nCellVerts = cell.get_vertex_count();
 	std::vector<vtkIdType> vtkCellConnect(nCellVerts);
 	for (int k = 0; k < nCellVerts; k++) {
-		vtkCellConnect[k] = cellconnect[k]->get_id();
+		Node &node = cell.get_patch()->get_vertex(cellconnect[k]);
+		vtkCellConnect[k] = node.get_id();
 	}
 
 	return vtkUnstructuredGrid::InsertNextCell(vtkCellType, nCellVerts, vtkCellConnect.data());

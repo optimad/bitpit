@@ -333,9 +333,9 @@ void PatchOctree::import_cells()
 			octantConnect = m_tree_2D.getOctantConnectivity(n) ;
 		}
 
-		std::unique_ptr<Node*[]> connect = std::unique_ptr<Node*[]>(new Node*[nCellVertices]);
+		std::unique_ptr<int[]> connect = std::unique_ptr<int[]>(new int[nCellVertices]);
 		for (int k = 0; k < nCellVertices; k++) {
-			connect[k] = &m_vertices[octantConnect[connectMap[k]]];
+			connect[k] = octantConnect[connectMap[k]];
 		}
 
 		cell.set_connect(std::move(connect));

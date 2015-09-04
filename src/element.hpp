@@ -13,7 +13,6 @@
 
 namespace pman {
 
-class Node;
 class Patch;
 
 class Element {
@@ -83,9 +82,9 @@ public:
 	void set_type(Element::Type type);
 	Element::Type get_type() const;
 	
-	void set_connect(std::unique_ptr<Node*[]> connect);
+	void set_connect(std::unique_ptr<int[]> connect);
 	void unset_connect();
-	Node ** get_connect() const;
+	int* get_connect() const;
 
 	int get_face_count() const;
 	static int get_face_count(Element::Type type);
@@ -104,7 +103,7 @@ private:
 
 	Element::Type m_type;
 	
-	std::unique_ptr<Node*[]> m_connect;
+	std::unique_ptr<int[]> m_connect;
 
 	Element(const Element &other) = delete;
 	Element& operator = (const Element &other) = delete;
