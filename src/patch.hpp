@@ -63,6 +63,7 @@ public:
 	Cell &get_cell(const int &id);
 
 	int get_interface_count() const;
+	PiercedVector<Interface> &interfaces();
 	Interface &get_interface(const int &id);
 
 	void output_write();

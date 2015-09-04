@@ -368,6 +368,16 @@ int Patch::get_interface_count() const
 }
 
 /*!
+	Gets the interfaces owned by the patch.
+
+	\return The interfaces owned by the patch.
+*/
+PiercedVector<Interface> & Patch::interfaces()
+{
+	return m_interfaces;
+}
+
+/*!
 	Gets the interface with the specified id.
 
 	\param id is the id of the requested interface
