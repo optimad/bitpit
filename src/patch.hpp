@@ -59,6 +59,7 @@ public:
 	Node &get_vertex(const int &id);
 
 	int get_cell_count() const;
+	PiercedVector<Cell> &cells();
 	Cell &get_cell(const int &id);
 
 	int get_interface_count() const;

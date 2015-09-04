@@ -337,6 +337,16 @@ int Patch::get_cell_count() const
 }
 
 /*!
+	Gets the cells owned by the patch.
+
+	\return The cells owned by the patch.
+*/
+PiercedVector<Cell> & Patch::cells()
+{
+	return m_cells;
+}
+
+/*!
 	Gets the cell with the specified id.
 
 	\param id is the id of the requested cell
