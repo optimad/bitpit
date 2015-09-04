@@ -1053,6 +1053,13 @@ public:
 	// ------------------------------------------------------------------------------- //
 	// Local Tree get/set Methods
 
+	/*! Get the status label of the octree.
+	 * 	\return Status.
+	 */
+	uint64_t getStatus(){
+		return status;
+	}
+
 	/*! Get the local number of octants.
 	 * \return Local number of octants.
 	 */
