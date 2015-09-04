@@ -76,6 +76,17 @@ PatchOctree::~PatchOctree()
 }
 
 /*!
+	Gets the octant of the cell with the specified id.
+
+	\param id the id of the cell
+	\result The octant of the specified cell
+*/
+int PatchOctree::get_cell_octant(const int &id) const
+{
+	return m_cell_to_octant.at(id);
+}
+
+/*!
 	Updates the patch.
 */
 void PatchOctree::_update(const vector<uint32_t> &cellMapping)
@@ -249,10 +260,12 @@ void PatchOctree::import_cells()
 
 	m_centroids = std::unique_ptr<double[]>(new double[get_dimension() * nCells]);
 
+	m_cell_to_octant.reserve(nCells);
 	m_cells.reserve(nCells);
 	for (int n = 0; n < nCells; n++) {
 		m_cells.emplace_back(n);
 		Cell &cell = m_cells.back();
+		m_cell_to_octant[n] = n;
 
 		// Distinguo tra celle interne e celle ghost
 		bool isInternal = (n < m_nInternalCells);

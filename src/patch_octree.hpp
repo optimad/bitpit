@@ -31,6 +31,8 @@ public:
 
 	~PatchOctree();
 
+	int get_cell_octant(const int &id) const;
+
 protected:
 	void _update(const vector<uint32_t> &cellMapping);
 	void _mark_for_refinement(Cell &cell);
@@ -38,6 +40,8 @@ protected:
 private:
 	int m_nInternalCells;
 	int m_nGhostCells;
+
+	std::unordered_map<int, int, Element::IdHasher> m_cell_to_octant;
 
 	Class_Para_Tree<2> m_tree_2D;
 	Class_Para_Tree<3> m_tree_3D;
