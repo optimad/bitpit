@@ -235,7 +235,7 @@ void PatchCartesian::create_cells()
 			cellCenter[Node::COORD_Y] = 0.5 * (m_y[j] + m_y[j+1]);
 			for (int k = 0; (is_three_dimensional()) ? (k < m_nCells1D[Node::COORD_Z]) : (k <= 0); k++) {
 				int id_cell = cell_ijk_to_id(i, j, k);
-				m_cells.emplace_back(id_cell);
+				m_cells.emplace_back(id_cell, this);
 				Cell &cell = m_cells.back();
 
 				// Tipo
@@ -399,7 +399,7 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 		for (j = 0; j < (*interfaceCount1D)[Node::COORD_Y]; j++) {
 			for (k = 0; (is_three_dimensional()) ? (k < (*interfaceCount1D)[Node::COORD_Z]) : (k <= 0); k++) {
 				int id_interface = interface_nijk_to_id(direction, i, j, k);
-				m_interfaces.emplace_back(id_interface);
+				m_interfaces.emplace_back(id_interface, this);
 				Interface &interface = m_interfaces.back();
 
 				// Area
