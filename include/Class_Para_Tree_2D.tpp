@@ -68,6 +68,10 @@ public:
 	//map member
 	Class_Map<2> trans;							/**<Transformation map from logical to physical domain*/
 
+	//info member
+	uint64_t	status;							/**<Label of actual status of octree (incremental after an adpat
+													with at least one modifyed element).*/
+
 	//log member
 	Class_Log log;								/**<Log object*/
 
@@ -4521,8 +4525,10 @@ public:
 			log.writeLog(" ");
 			log.writeLog("---------------------------------------------");
 		}
+		status += globalDone;
 		return globalDone;
 #else
+		status += localDone;
 		return localDone;
 #endif
 	}
@@ -4652,11 +4658,17 @@ public:
 	 */
 	bool adapt(bool mapper_flag){
 
+		bool done = false;
+
 		if (mapper_flag){
-			return adapt_mapidx();
+			done = adapt_mapidx();
+			status += done;
+			return done;
 		}
 		else{
-			return adapt();
+			done = adapt();
+			status += done;
+			return done;
 		}
 
 	};
@@ -4671,8 +4683,9 @@ public:
 	 */
 	bool adapt(u32vector & mapper){
 
-		bool done;
+		bool done = false;
 		done = adapt_mapidx();
+		status += done;
 		mapper.clear();
 		mapper = mapidx;
 		return done;
