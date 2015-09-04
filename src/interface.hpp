@@ -13,6 +13,7 @@
 namespace pman {
 
 class Cell;
+class Patch;
 
 class InterfaceData {};
 
@@ -34,6 +35,7 @@ public:
 
 	Interface();
 	Interface(const int &id);
+	Interface(const int &id, Patch *patch);
 
 	Interface(Interface&& other) = default;
 	Interface& operator=(Interface&& other) = default;

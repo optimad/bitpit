@@ -14,6 +14,7 @@
 namespace pman {
 
 class Node;
+class Patch;
 
 class Element {
 
@@ -65,9 +66,13 @@ public:
 
 	Element();
 	Element(const int &id);
+	Element(const int &id, Patch *patch);
 
 	Element(Element&& other) = default;
 	Element& operator=(Element&& other) = default;
+
+	Patch * get_patch() const;
+	void set_patch(Patch *patch);
 
 	void set_id(const int &id);
 	int get_id() const;
@@ -92,6 +97,8 @@ protected:
 	static const int NULL_ELEMENT_ID;
 
 private:
+	Patch *m_patch;
+
 	int m_id;
 	int m_local_id;
 

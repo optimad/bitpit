@@ -60,6 +60,7 @@ const int Element::NULL_ELEMENT_ID = std::numeric_limits<int>::min();
 */
 Element::Element()
 {
+	set_patch(NULL);
 	set_id(NULL_ELEMENT_ID);
 }
 
@@ -69,7 +70,37 @@ Element::Element()
 */
 Element::Element(const int &id)
 {
+	set_patch(NULL);
 	set_id(id);
+}
+
+/*!
+	Creates a new element.
+*/
+Element::Element(const int &id, Patch *patch)
+{
+	set_patch(patch);
+	set_id(id);
+}
+
+/*!
+	Sets the patch that owns the element.
+
+	\param patch the patch that owns the element
+*/
+void Element::set_patch(Patch *patch)
+{
+	m_patch = patch;
+}
+
+/*!
+	Gets the patch that owns the element.
+
+	\return The patch that owns the element.
+*/
+Patch * Element::get_patch() const
+{
+	return m_patch;
 }
 
 /*!

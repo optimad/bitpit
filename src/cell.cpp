@@ -36,6 +36,15 @@ Cell::Cell(const int &id)
 }
 
 /*!
+	Creates a new cell.
+*/
+Cell::Cell(const int &id, Patch *patch)
+	: Element(id, patch)
+{
+
+}
+
+/*!
 	Sets the position type of the interface.
 
 	\param position the position type of the interface

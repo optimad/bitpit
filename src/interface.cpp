@@ -61,6 +61,16 @@ Interface::Interface(const int &id)
 }
 
 /*!
+	Creates a new interface.
+*/
+Interface::Interface(const int &id, Patch *patch)
+	: Element(id, patch), m_normal(NULL)
+{
+
+}
+
+
+/*!
 	Sets the area of the interface.
 
 	\param area the area of the interface

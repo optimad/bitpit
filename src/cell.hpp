@@ -13,6 +13,7 @@
 namespace pman {
 
 class Interface;
+class Patch;
 
 class CellData {};
 
@@ -26,6 +27,7 @@ public:
 
 	Cell();
 	Cell(const int &id);
+	Cell(const int &id, Patch *patch);
 
 	Cell(Cell&& other) = default;
 	Cell& operator=(Cell&& other) = default;
