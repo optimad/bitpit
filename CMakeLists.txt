@@ -7,7 +7,7 @@ project("patchman")
 #------------------------------------------------------------------------------------#
 # Variables visible to the user
 #------------------------------------------------------------------------------------#
-set(ENABLE_PROFILING 0 CACHE BOOL "Set appropriate compiler flags to enable profiling fo GLORIA")
+set(ENABLE_PROFILING 0 CACHE BOOL "Set appropriate compiler flags to enable profiling")
 set(VERBOSE_MAKE 0 CACHE BOOL "Set appropriate compiler and cmake flags to enable verbose output from compilation")
 set(STATIC 1 CACHE BOOL "If set, the program is linked using static libraries")
 set(BITPIT_DIR "/opt/bitpit" CACHE PATH "The directory containing the BITPIT libraries")
