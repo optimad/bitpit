@@ -8,6 +8,7 @@ project("patchman")
 # Variables visible to the user
 #------------------------------------------------------------------------------------#
 set(ENABLE_PROFILING 0 CACHE BOOL "Set appropriate compiler flags to enable profiling fo GLORIA")
+set(VERBOSE_MAKE 0 CACHE BOOL "Set appropriate compiler and cmake flags to enable verbose output from compilation")
 set(STATIC 1 CACHE BOOL "If set, the program is linked using static libraries")
 set(BITPIT_DIR "/opt/bitpit" CACHE PATH "The directory containing the BITPIT libraries")
 set(VTK_DIR "/opt/VTK/lib/cmake/vtk" CACHE PATH "The directory containing a CMake configuration file for VTK")
@@ -25,6 +26,8 @@ set(WITHOUT_MPI "0" CACHE INTERNAL "If set, the program is compiled without MPI 
 #------------------------------------------------------------------------------------#
 # Compiler settings
 #------------------------------------------------------------------------------------#
+set (ENABLE_WARNINGS ${VERBOSE_MAKE})
+
 if (WITHOUT_MPI)
 	add_definitions(-DDISABLE_MPI)
 else()
@@ -41,7 +44,14 @@ endif (ENABLE_PROFILING)
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
 
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -g -O0")
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g -O0")
+
+if (ENABLE_WARNINGS)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra")
+	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra")
+endif()
 
 add_compile_options("-std=c++0x")
 #------------------------------------------------------------------------------------#
@@ -49,9 +59,9 @@ add_compile_options("-std=c++0x")
 #------------------------------------------------------------------------------------#
 # Make settings
 #------------------------------------------------------------------------------------#
-if (CMAKE_BUILD_TYPE MATCHES Debug)
+if (VERBOSE_MAKE)
 	set(CMAKE_VERBOSE_MAKEFILE ON)
-endif (CMAKE_BUILD_TYPE MATCHES Debug)
+endif()
 
 #------------------------------------------------------------------------------------#
 # Internal dependencies
