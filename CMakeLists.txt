@@ -43,7 +43,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -Wextra -g -O0")
 
-ADD_DEFINITIONS(-std=c++0x)
+add_compile_options("-std=c++0x")
 #------------------------------------------------------------------------------------#
 
 #------------------------------------------------------------------------------------#
