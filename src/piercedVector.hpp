@@ -523,6 +523,17 @@ public:
 	}
 
 	/*!
+		Returns whether the vector is contiguous (i.e. whether it contains
+		no holes).
+
+		\result true if the container is contiguous, false otherwise.
+	*/
+	bool contiguous() const
+	{
+		return m_holes.empty();
+	}
+
+	/*!
 		Returns a direct pointer to the memory array used internally
 		by the vector to store its owned elements.
 
