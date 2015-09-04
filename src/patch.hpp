@@ -58,6 +58,8 @@ public:
 	Node &get_vertex(const int &id);
 
 	int get_cell_count() const;
+	Cell &get_cell(const int &id);
+
 	int get_interface_count() const;
 
 	void output_write();

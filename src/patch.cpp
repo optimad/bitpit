@@ -327,6 +327,17 @@ int Patch::get_cell_count() const
 }
 
 /*!
+	Gets the cell with the specified id.
+
+	\param id is the id of the requested cell
+	\return The cell with the specified id.
+*/
+Cell & Patch::get_cell(const int &id)
+{
+	return m_cells[id];
+}
+
+/*!
 	Gets the number of interfaces in the patch.
 
 	\return The number of interfaces in the patch
