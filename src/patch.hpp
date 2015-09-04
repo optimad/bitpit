@@ -55,6 +55,8 @@ public:
 	void set_name(std::string name);
 
 	int get_vertex_count() const;
+	Node &get_vertex(const int &id);
+
 	int get_cell_count() const;
 	int get_interface_count() const;
 

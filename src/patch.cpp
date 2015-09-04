@@ -306,6 +306,17 @@ int Patch::get_vertex_count() const
 }
 
 /*!
+	Gets the vertex with the specified id.
+
+	\param id is the id of the requested vertex
+	\return The vertex with the specified id.
+*/
+Node & Patch::get_vertex(const int &id)
+{
+	return m_vertices[id];
+}
+
+/*!
 	Gets the number of cells in the patch.
 
 	\return The number of cells in the patch
