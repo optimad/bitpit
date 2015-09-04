@@ -55,6 +55,7 @@ public:
 	void set_name(std::string name);
 
 	int get_vertex_count() const;
+	PiercedVector<Node> &vertices();
 	Node &get_vertex(const int &id);
 
 	int get_cell_count() const;

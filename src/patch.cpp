@@ -306,6 +306,16 @@ int Patch::get_vertex_count() const
 }
 
 /*!
+	Gets the nodes owned by the patch.
+
+	\return The nodes owned by the patch.
+*/
+PiercedVector<Node> & Patch::vertices()
+{
+	return m_vertices;
+}
+
+/*!
 	Gets the vertex with the specified id.
 
 	\param id is the id of the requested vertex
