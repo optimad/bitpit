@@ -61,6 +61,7 @@ public:
 	Cell &get_cell(const int &id);
 
 	int get_interface_count() const;
+	Interface &get_interface(const int &id);
 
 	void output_write();
 	void output_write(std::string name);

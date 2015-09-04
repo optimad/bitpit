@@ -347,4 +347,15 @@ int Patch::get_interface_count() const
 	return m_interfaces.size();
 }
 
+/*!
+	Gets the interface with the specified id.
+
+	\param id is the id of the requested interface
+	\return The interface with the specified id.
+*/
+Interface & Patch::get_interface(const int &id)
+{
+	return m_interfaces[id];
+}
+
 }
