@@ -519,7 +519,7 @@ public:
 		m_last_pos  = 0;
 
 		// Add sentinel
-		append_sentinels(1);
+		append_sentinels(REQUIRED_SENTINEL_COUNT);
 	}
 
 	/*!
@@ -897,8 +897,8 @@ public:
 		holes_delete_after(updated_last_pos);
 
 		// Resize the vector
-		m_v.resize(updated_last_pos + 1);
-		append_sentinels(1);
+		m_v.resize(updated_last_pos + REQUIRED_SENTINEL_COUNT);
+		append_sentinels(REQUIRED_SENTINEL_COUNT);
 
 		// Update the position of the last element
 		m_last_pos = updated_last_pos;
@@ -989,7 +989,7 @@ public:
 		}
 
 		// Resize
-		m_v.resize(m_pos.size() + 1);
+		m_v.resize(m_pos.size() + REQUIRED_SENTINEL_COUNT);
 		m_v.shrink_to_fit();
 	}
 
