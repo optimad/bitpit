@@ -67,13 +67,9 @@ VtkUnstrVec::~VtkUnstrVec(){
 template<class T>
 void VtkUnstrVec::AddData( vector<T> &data_, string name_, string loc_ ){
 
-    int n = adata.size() ;
     T               dum_ ;
 
-    adata.push_back( ufield() ) ;
-
-    adata[n].name = name_ ;
-    adata[n].DPtr = &data_ ;
+    adata.push_back( ufield(name_,data_) ) ;
 
     VTK_UnstructuredGrid<VtkUnstrVec>::AddData( name_, 1, WhichType(dum_), loc_ ) ;
 
@@ -84,13 +80,9 @@ void VtkUnstrVec::AddData( vector<T> &data_, string name_, string loc_ ){
 template<class T>
 void VtkUnstrVec::AddData( vector< array<T,3> > &data_, string name_, string loc_ ){
 
-    int n = adata.size() ;
     T               dum_ ;
 
-    adata.push_back( ufield() ) ;
-
-    adata[n].name = name_ ;
-    adata[n].DPtr = &data_ ;
+    adata.push_back( ufield(name_,data_) ) ;
 
     VTK_UnstructuredGrid<VtkUnstrVec>::AddData( name_, 3, WhichType(dum_), loc_ ) ;
 
@@ -101,13 +93,9 @@ void VtkUnstrVec::AddData( vector< array<T,3> > &data_, string name_, string loc
 template<class T>
 void VtkUnstrVec::AddData( vector< vector<T> > &data_, string name_, string loc_ ){
 
-    int n = adata.size() ;
     T               dum_ ;
 
-    adata.push_back( ufield() ) ;
-
-    adata[n].name = name_ ;
-    adata[n].DPtr = &data_ ;
+    adata.push_back( ufield(name_,data_) ) ;
 
     VTK_UnstructuredGrid<VtkUnstrVec>::AddData( name_, 3, WhichType(dum_), loc_ ) ;
 
@@ -119,13 +107,7 @@ void VtkUnstrVec::AddData( vector< vector<T> > &data_, string name_, string loc_
 template<class T>
 void VtkUnstrVec::LinkData( vector<T> &data_, string name_ ){
 
-    int n = adata.size() ;
-
-    adata.push_back( ufield() ) ;
-
-    adata[n].name = name_ ;
-    adata[n].DPtr = &data_ ;
-
+    adata.push_back( ufield(name_,data_) ) ;
 
     return;
 };

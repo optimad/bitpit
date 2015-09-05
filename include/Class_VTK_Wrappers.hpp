@@ -185,6 +185,10 @@ class VtkUnstrVec : public VTK_UnstructuredGrid<VtkUnstrVec>{
     struct ufield{
         string          name;
         bv              DPtr ;
+
+        template<class T>
+        ufield( string name_, vector<T>& data_): name(name_), DPtr(&data_){} ;
+        ufield(){} ;
     };
 
     uint8_t         type ;    
