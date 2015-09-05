@@ -152,6 +152,19 @@ public:
 		m_capacity = -1;
 	}
 
+	/*!
+		Returns a direct pointer to the memory array used internally
+		by the container to store its elements.
+
+		\result A pointer to the first element in the array used
+		        internally by the container.
+
+	*/
+	T * data() noexcept
+	{
+		return m_v.get();
+	}
+
 	void push_back(const int &subArraySize, T * subArray = NULL)
 	{
 		int currentSize = size();
