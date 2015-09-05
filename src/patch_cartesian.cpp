@@ -539,7 +539,7 @@ int PatchCartesian::interface_nijk_to_id(const int &normal, const int &i, const 
 	id += nInterfaces[Node::COORD_X] * j;
 	if (get_dimension() == 3) {
 		id += nInterfaces[Node::COORD_Y] * nInterfaces[Node::COORD_X] * k;
-		id += nInterfaces[Node::COORD_Y] * nInterfaces[Node::COORD_X] * nInterfaces[Node::COORD_X] * normal;
+		id += nInterfaces[Node::COORD_Z] * nInterfaces[Node::COORD_Y] * nInterfaces[Node::COORD_X] * normal;
 	} else {
 		id += nInterfaces[Node::COORD_Y] * nInterfaces[Node::COORD_X] * normal;
 	}
