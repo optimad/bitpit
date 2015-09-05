@@ -115,6 +115,17 @@ int Element::get_patch_dimension() const
 }
 
 /*!
+	Returns true if the owner patch is a three-dimensional patch.
+
+	\return This method returns true if the owner patch is
+	        three-dimensional, false otherwise.
+*/
+bool Element::is_patch_three_dimensional() const
+{
+	return m_patch->is_three_dimensional();
+}
+
+/*!
 	Sets the ID of the element.
 
 	\param id the ID of the element
