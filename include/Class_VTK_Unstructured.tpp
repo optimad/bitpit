@@ -61,6 +61,79 @@ void VTK_UnstructuredGrid<Derived>::SetDimensions( uint64_t ncells_, uint64_t np
 
 // =================================================================================== //
 template <class Derived>
+uint64_t VTK_UnstructuredGrid<Derived>::CalcSizeConnectivity( ){
+
+    fstream                  str  ;
+    fstream::pos_type        position_appended;
+    string                   line;
+    char                     c_ ;
+    uint32_t                 nbytes32 ;
+    uint64_t                 nbytes64 ;
+    uint64_t                 nconn ;
+
+    str.open( fh.GetName( ), ios::in ) ;
+
+    //Read appended data
+    //Go to the initial position of the appended section
+    while( getline(str, line) && (! Keyword_In_String( line, "<AppendedData")) ){} ;
+
+    str >> c_;
+    while( c_ != '_') str >> c_;
+
+    position_appended = str.tellg();
+
+
+    str.close();
+    str.clear();
+
+    //Open in binary for read
+    str.open( fh.GetName( ), ios::in | ios::binary);
+
+    if( geometry[3].GetCodification() == "appended" ){
+        str.seekg( position_appended) ;
+        str.seekg( geometry[3].GetOffset(), ios::cur) ;
+
+        if( HeaderType== "UInt32") {
+            absorb_binary( str, nbytes32 ) ;
+            nconn = nbytes32 /SizeOfType( geometry[3].GetType() ) ;
+        }
+
+        if( HeaderType== "UInt64") {
+            absorb_binary( str, nbytes64 ) ;
+            nconn = nbytes64 /SizeOfType( geometry[3].GetType() ) ;
+        };
+    };
+
+
+    //Read geometry
+    if(  geometry[3].GetCodification() == "ascii"){
+        str.seekg( geometry[3].GetPosition() ) ;
+
+        string              line ;
+        vector<uint64_t>    temp;
+
+        nconn = 0 ;
+
+        getline( str, line) ;
+        while( ! Keyword_In_String(line,"/DataArray") ) {
+
+            temp.clear() ;
+            convert_string( line, temp) ;
+            nconn += temp.size() ;
+        };
+
+
+    };
+
+    str.close();
+
+    return nconn ;
+
+
+};
+
+// =================================================================================== //
+template <class Derived>
 uint8_t VTK_UnstructuredGrid<Derived>::NumberOfElements( uint8_t t){
 
   int e;
@@ -182,14 +255,6 @@ void VTK_UnstructuredGrid<Derived>::WriteCollection( ){
 
 // =================================================================================== //
 template <class Derived>
-void VTK_UnstructuredGrid<Derived>::Flush( fstream &str, string codex, string name ){
-
-  static_cast<Derived *>(this)->Flush( str, codex, name );
-  return ;
-};
-
-// =================================================================================== //
-template <class Derived>
 void VTK_UnstructuredGrid<Derived>::ReadMetaData( ){
 
     fstream str;
@@ -240,77 +305,18 @@ void VTK_UnstructuredGrid<Derived>::ReadMetaData( ){
 
 // =================================================================================== //
 template <class Derived>
-uint64_t VTK_UnstructuredGrid<Derived>::CalcSizeConnectivity( ){
+uint64_t VTK_UnstructuredGrid<Derived>::GetNConnectivity( ){
 
-    fstream                  str  ;
-    fstream::pos_type        position_appended;
-    string                   line;
-    char                     c_ ;
-    uint32_t                 nbytes32 ;
-    uint64_t                 nbytes64 ;
-    uint64_t                 nconn ;
-
-    str.open( fh.GetName( ), ios::in ) ;
-
-    //Read appended data
-    //Go to the initial position of the appended section
-    while( getline(str, line) && (! Keyword_In_String( line, "<AppendedData")) ){} ;
-
-    str >> c_;
-    while( c_ != '_') str >> c_;
-
-    position_appended = str.tellg();
-
-
-    str.close();
-    str.clear();
-
-    //Open in binary for read
-    str.open( fh.GetName( ), ios::in | ios::binary);
-
-    if( geometry[3].GetCodification() == "appended" ){
-        str.seekg( position_appended) ;
-        str.seekg( geometry[3].GetOffset(), ios::cur) ;
-
-        if( HeaderType== "UInt32") {
-            absorb_binary( str, nbytes32 ) ;
-            nconn = nbytes32 /SizeOfType( geometry[3].GetType() ) ;
-        }
-
-        if( HeaderType== "UInt64") {
-            absorb_binary( str, nbytes64 ) ;
-            nconn = nbytes64 /SizeOfType( geometry[3].GetType() ) ;
-        };
-    };
-
-
-    //Read geometry
-    if(  geometry[3].GetCodification() == "ascii"){
-        str.seekg( geometry[3].GetPosition() ) ;
-
-        string              line ;
-        vector<uint64_t>    temp;
-
-        nconn = 0 ;
-
-        getline( str, line) ;
-        while( ! Keyword_In_String(line,"/DataArray") ) {
-
-            temp.clear() ;
-            convert_string( line, temp) ;
-            nconn += temp.size() ;
-        };
-
-
-    };
-
-    str.close();
-
-    return nconn ;
-
-
+  return nconnectivity ;
 };
 
+// =================================================================================== //
+template <class Derived>
+void VTK_UnstructuredGrid<Derived>::Flush( fstream &str, string codex, string name ){
+
+  static_cast<Derived *>(this)->Flush( str, codex, name );
+  return ;
+};
 
 // =================================================================================== //
 template <class Derived>

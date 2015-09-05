@@ -175,7 +175,7 @@ class VTK_UnstructuredGrid : public VTK{
 
     void      Flush(  fstream &str, string codex_, string name  ) ; //CRTP
     void      Absorb( fstream &str, string codex_, string name  ) ; //CRTP
-    uint64_t  GetNConnectivity( ) ; //CRTP
+    uint64_t  CalcSizeConnectivity( ) ;
 
   public:
     void      ReadMetaData() ;
@@ -187,7 +187,7 @@ class VTK_UnstructuredGrid : public VTK{
     void      SetGeomTypes( string Ptype, string Otype, string Ttype, string Ctype ) ;
 
     uint8_t   NumberOfElements( uint8_t t ) ;
-    uint64_t  CalcSizeConnectivity( ) ;
+    uint64_t  GetNConnectivity( ) ; 
 
 };
 
