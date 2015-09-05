@@ -114,6 +114,22 @@ PatchCartesian::~PatchCartesian()
 }
 
 /*!
+	Gets a pointer to the the opposite normal.
+
+	\param normal is a pointer to the normal
+	\result A pointer to the opposite normal.
+ */
+double * PatchCartesian::_get_opposite_normal(double *normal)
+{
+	int dimension = get_dimension();
+
+	int id_current  = std::distance(m_normals->data(), normal) / dimension;
+	int id_opposite = (id_current + dimension) % (2 * dimension);
+
+	return m_normals->get(id_opposite);
+}
+
+/*!
 	Updates the patch.
 */
 void PatchCartesian::_update(const std::vector<uint32_t> &cellMapping)

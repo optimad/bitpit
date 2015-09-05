@@ -39,6 +39,17 @@ Patch::~Patch()
 }
 
 /*!
+	Gets a pointer to the the opposite normal.
+
+	\param normal is a pointer to the normal
+	\result A pointer to the opposite normal.
+ */
+double * Patch::get_opposite_normal(double *normal)
+{
+	return _get_opposite_normal(normal);
+}
+
+/*!
 	Updates the mesh
 */
 void Patch::update()
