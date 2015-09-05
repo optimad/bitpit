@@ -6,10 +6,11 @@ using namespace std;
 //------------------------------------------------------------------
 VTK::VTK(){
 
-
     nr_data = 0;
     nr_procs = 0;
     my_proc  = 0;
+
+    data.reserve(50) ;
 
     HeaderType = "UInt32" ;
     
