@@ -59,6 +59,8 @@ public:
 	int get_neigh() const;
 	int get_neigh_face() const;
 
+	void swap_owner_neigh();
+
 	void set_data(std::unique_ptr<InterfaceData> m_data);
 	InterfaceData * get_data() const;
 
