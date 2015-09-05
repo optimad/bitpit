@@ -33,25 +33,21 @@ PatchCartesian::PatchCartesian(const int &id, const int &dimension,
 	m_nCells1D   = std::vector<int>(dimension);
 	for (int n = 0; n < dimension; n++) {
 		// Dimensioni della cella
-		if (!is_three_dimensional() && n == Node::COORD_Z) {
-			m_cellSize[n] = 0.;
-		} else {
-			m_cellSize[n] = dh;
-		}
+		m_cellSize[n] = dh;
 
 		// Numero di celle
-		if (!is_three_dimensional() && n == Node::COORD_Z) {
-			m_nCells1D[n] = 0;
-		} else {
-			m_nCells1D[n] = (int) ceil(length / m_cellSize[n]);
-		}
+		m_nCells1D[n] = (int) ceil(length / m_cellSize[n]);
+
 		std::cout << "  - Cell count along direction " << n << " : " << m_nCells1D[n] << "\n";
 
 		// Minima coordinata del dominio
 		m_minCoord[n] = origin[n] - 0.5 * (m_nCells1D[n] * m_cellSize[n]);
 	}
 
-	m_cell_volume = m_cellSize[Node::COORD_X] * m_cellSize[Node::COORD_Y] * m_cellSize[Node::COORD_Z];
+	m_cell_volume = m_cellSize[Node::COORD_X] * m_cellSize[Node::COORD_Y];
+	if (is_three_dimensional()) {
+		m_cell_volume *= m_cellSize[Node::COORD_Z];
+	}
 
 	// Info sui vertici
 	m_nVertices1D = std::vector<int>(dimension);
@@ -80,24 +76,23 @@ PatchCartesian::PatchCartesian(const int &id, const int &dimension,
 		}
 	}
 
-	m_z_nInterfaces1D = std::vector<int>(dimension);
-	for (int n = 0; n < dimension; n++) {
-		if (is_three_dimensional()) {
+
+	if (is_three_dimensional()) {
+		m_z_nInterfaces1D = std::vector<int>(dimension);
+		for (int n = 0; n < dimension; n++) {
 			m_z_nInterfaces1D[n] = m_nCells1D[n];
 			if (n == Node::COORD_Z) {
 				m_z_nInterfaces1D[n]++;
 			}
-		} else {
-			m_z_nInterfaces1D[n] = 0;
 		}
 	}
 
-	m_x_interface_area = m_cellSize[Node::COORD_Y] * m_cellSize[Node::COORD_Z];
-	m_y_interface_area = m_cellSize[Node::COORD_X] * m_cellSize[Node::COORD_Z];
+	m_x_interface_area = m_cellSize[Node::COORD_Y];
+	m_y_interface_area = m_cellSize[Node::COORD_X];
 	if (is_three_dimensional()) {
-		m_z_interface_area = m_cellSize[Node::COORD_X] * m_cellSize[Node::COORD_Y];
-	} else {
-		m_z_interface_area = 0.;
+		m_x_interface_area *= m_cellSize[Node::COORD_Z];
+		m_y_interface_area *= m_cellSize[Node::COORD_Z];
+		m_z_interface_area  = m_cellSize[Node::COORD_X] * m_cellSize[Node::COORD_Y];
 	}
 
 	m_normals = std::unique_ptr<CollapsedArrayArray<double> >(new CollapsedArrayArray<double>(2 * dimension, 2 * dimension * dimension));
@@ -296,7 +291,9 @@ void PatchCartesian::create_interfaces()
 	int nTotalInterfaces = 0;
 	nTotalInterfaces += count_interfaces_direction(Node::COORD_X);
 	nTotalInterfaces += count_interfaces_direction(Node::COORD_Y);
-	nTotalInterfaces += count_interfaces_direction(Node::COORD_Z);
+	if (is_three_dimensional()) {
+		nTotalInterfaces += count_interfaces_direction(Node::COORD_Z);
+	}
 
 	std::cout << "    - Interface count: " << nTotalInterfaces << "\n";
 
@@ -320,7 +317,9 @@ void PatchCartesian::create_interfaces()
 	// Create the interfaces
 	create_interfaces_direction(Node::COORD_X);
 	create_interfaces_direction(Node::COORD_Y);
-	create_interfaces_direction(Node::COORD_Z);
+	if (is_three_dimensional()) {
+		create_interfaces_direction(Node::COORD_Z);
+	}
 }
 
 /*!
