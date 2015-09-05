@@ -58,40 +58,40 @@ void Demo_BasicVTK(){
     velocity[0][2] = 3. ;
     
     
-//    { //Write only grid to VTK in ascii format
-//        VtkUnstrVec   vtk(".", "ustr1", "ascii", 11, points, connectivity );
-//        vtk.Write() ;
-//    }
-// 
-//    { //Write grid and data to VTK in appended mode
-//        VtkUnstrVec   vtk(".", "ustr2", "appended", 11, points, connectivity );
-//        vtk.AddData( pressure, "press", "Point") ;
-//        vtk.AddData( velocity, "vel", "Cell") ;
-//        vtk.Write() ;
-//    }
+    { //Write only grid to VTK in ascii format
+        VtkUnstrVec   vtk(".", "ustr1", "ascii", 11, points, connectivity );
+        vtk.Write() ;
+    }
+ 
+    { //Write grid and data to VTK in appended mode
+        VtkUnstrVec   vtk(".", "ustr2", "appended", 11, points, connectivity );
+        vtk.AddData( pressure, "press", "Point") ;
+        vtk.AddData( velocity, "vel", "Cell") ;
+        vtk.Write() ;
+    }
 
-//    { //Read grid and data, rename and rexport
-//        dvecarr3E    Ipoints ;
-//        ivector2D    Iconnectivity ;
-//        
-//        dvector1D    Ipressure ;
-//        dvecarr3E    Ivelocity ;
-//    
-// 
-//        VtkUnstrVec   vtk(".", "ustr2", "appended", 11 );
-//
-//        vtk.AddData( Ipoints, "Points", "Point") ;
-//        vtk.AddData( Iconnectivity, "connectivity", "Cell") ;
-//        vtk.AddData( Ipressure, "press", "Point") ;
-//        vtk.AddData( Ivelocity, "vel", "Cell") ;
-//
-//        vtk.Read() ;
-//
-//        Ipressure = 2. * Ipressure ;
-//        
-//        vtk.SetNames("./", "ustr3") ;
-//        vtk.Write() ;
-//    }
+    { //Read grid and data, rename and rexport
+        dvecarr3E    Ipoints ;
+        ivector2D    Iconnectivity ;
+        
+        dvector1D    Ipressure ;
+        dvecarr3E    Ivelocity ;
+    
+ 
+        VtkUnstrVec   vtk(".", "ustr2", "appended", 11 );
+
+        vtk.LinkData( Ipoints, "Points") ;
+        vtk.LinkData( Iconnectivity, "connectivity") ;
+        vtk.LinkData( Ipressure, "press") ;
+        vtk.LinkData( Ivelocity, "vel") ;
+
+        vtk.Read() ;
+
+        Ipressure = 2. * Ipressure ;
+        
+        vtk.SetNames("./", "ustr3") ;
+        vtk.Write() ;
+    }
 
     { //Read grid and data from Paraview-generated file, rename and rexport
         vector< array<float,3>  >    Ipoints ;
@@ -102,10 +102,10 @@ void Demo_BasicVTK(){
  
         VtkUnstrVec   vtk(".", "selection", "appended", 5 );
 
-        vtk.AddData( Ipoints, "Points", "Point") ;
-        vtk.AddData( Iconnectivity, "connectivity", "Cell") ;
-        vtk.AddData( label, "STLSolidLabeling", "Cell") ;
-        vtk.AddData( ids, "vtkOriginalCellIds", "Cell") ;
+        vtk.LinkData( Ipoints, "Points") ;
+        vtk.LinkData( Iconnectivity, "connectivity") ;
+        vtk.LinkData( label, "STLSolidLabeling") ;
+        vtk.LinkData( ids, "vtkOriginalCellIds") ;
 
         vtk.Read() ;
 
