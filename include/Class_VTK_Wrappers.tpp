@@ -115,6 +115,21 @@ void VtkUnstrVec::AddData( vector< vector<T> > &data_, string name_, string loc_
     return;
 };
 
+//====================================================================================================
+template<class T>
+void VtkUnstrVec::LinkData( vector<T> &data_, string name_ ){
+
+    int n = adata.size() ;
+
+    adata.push_back( ufield() ) ;
+
+    adata[n].name = name_ ;
+    adata[n].DPtr = &data_ ;
+
+
+    return;
+};
+
 // =================================================================================== //
 bool VtkUnstrVec::GetFieldByName( const string &name_, VtkUnstrVec::ufield *&the_field ){
 
