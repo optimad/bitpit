@@ -27,7 +27,7 @@ int main(int argc, char *argv[]) {
 
 	std::cout << "  >> 3D Mesh" << "\n";
 
-	pman::Patch *patch_3D = new pman::PatchCartesian(0, 2, origin, length, dh);
+	pman::Patch *patch_3D = new pman::PatchCartesian(0, 3, origin, length, dh);
 	patch_3D->set_name("backgorund_mesh");
 	patch_3D->update();
 	patch_3D->output_write();
