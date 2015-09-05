@@ -50,7 +50,7 @@ private:
 	std::unique_ptr<double[]> m_cellCentroids;
 	std::unique_ptr<double[]> m_interfaceCentroids;
 
-	std::unique_ptr<CollapsedArrayArray<double> > m_normals;
+	std::unique_ptr<CollapsedArray2D<double> > m_normals;
 
 	void create_vertices();
 

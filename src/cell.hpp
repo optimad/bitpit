@@ -59,7 +59,7 @@ private:
 
 	double *m_volume;
 
-	std::unique_ptr<CollapsedArrayArray<int> > m_interfaces;
+	std::unique_ptr<CollapsedArray2D<int> > m_interfaces;
 
 	std::unique_ptr<CellData> m_data;
 

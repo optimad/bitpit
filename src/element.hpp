@@ -9,7 +9,7 @@
 #include <cstddef>
 #include <memory>
 
-#include "collapsedArrayArray.hpp"
+#include "collapsedArray2D.hpp"
 
 namespace pman {
 

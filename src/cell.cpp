@@ -92,7 +92,7 @@ double & Cell::get_volume() const
 void Cell::initialize_interfaces(std::vector<std::vector<int>> &interfaces)
 {
 	m_interfaces.reset();
-	m_interfaces = std::unique_ptr<CollapsedArrayArray<int> >(new CollapsedArrayArray<int>(interfaces));
+	m_interfaces = std::unique_ptr<CollapsedArray2D<int> >(new CollapsedArray2D<int>(interfaces));
 }
 
 /*!
@@ -103,7 +103,7 @@ void Cell::initialize_interfaces(std::vector<std::vector<int>> &interfaces)
 */
 void Cell::initialize_empty_interfaces(const int nInterfaces[])
 {
-	m_interfaces = std::unique_ptr<CollapsedArrayArray<int> >(new CollapsedArrayArray<int>(get_face_count(), nInterfaces));
+	m_interfaces = std::unique_ptr<CollapsedArray2D<int> >(new CollapsedArray2D<int>(get_face_count(), nInterfaces));
 }
 
 /*!

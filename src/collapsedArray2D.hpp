@@ -14,34 +14,34 @@ namespace pman {
 	@brief Metafunction for generation of a collapsed array of arrays.
 
 	@details
-	Usage: Use <tt>CollapsedArrayArray<Type></tt> to declare a
+	Usage: Use <tt>CollapsedArray2D<Type></tt> to declare a
 	collapsed array of arrays.
 
 	@tparam T The type of the objects stored in the array
 */
 
 template <class T>
-class CollapsedArrayArray
+class CollapsedArray2D
 {
 
 public:
 
-	CollapsedArrayArray()
+	CollapsedArray2D()
 		: m_capacity(-1)
 	{
 	}
 
-	~CollapsedArrayArray()
+	~CollapsedArray2D()
 	{
 		clear();
 	}
 
-	CollapsedArrayArray(const int &nArrays, const int &dataCapacity)
+	CollapsedArray2D(const int &nArrays, const int &dataCapacity)
 	{
 		initialize(nArrays, dataCapacity);
 	}
 
-	CollapsedArrayArray(const int &nArrays, const int subArraySize[])
+	CollapsedArray2D(const int &nArrays, const int subArraySize[])
 	{
 		int dataCapacity = 0;
 		for (int i = 0; i < nArrays; i++) {
@@ -55,7 +55,7 @@ public:
 		}
 	}
 
-	CollapsedArrayArray(const std::vector<std::vector<T> > &buildFrom)
+	CollapsedArray2D(const std::vector<std::vector<T> > &buildFrom)
 	{
 		// Initialize the array
 		int nArrays = buildFrom.size();
@@ -77,7 +77,7 @@ public:
 		}
 	}
 
-	CollapsedArrayArray(const CollapsedArrayArray &other)
+	CollapsedArray2D(const CollapsedArray2D &other)
 	{
 		m_capacity = other.m_capacity;
 		if (!other.initialized()) {
@@ -98,7 +98,7 @@ public:
 		m_index = new_index;
 	}
 
-	CollapsedArrayArray & operator= (CollapsedArrayArray other)
+	CollapsedArray2D & operator= (CollapsedArray2D other)
 	{
 		if (this != &other) {
 			other.swap(*this);
@@ -107,7 +107,7 @@ public:
 		return *this;
 	}
 
-	void swap(CollapsedArrayArray &other)
+	void swap(CollapsedArray2D &other)
 	{
 		std::swap(m_index.get(), other.m_index.get());
 		std::swap(m_v.get(), other.m_v.get());
@@ -126,7 +126,7 @@ public:
 		std::fill_n(m_index.get() + 1, m_capacity - 1, -1);
 	}
 
-	bool operator==(const CollapsedArrayArray& rhs) const
+	bool operator==(const CollapsedArray2D& rhs) const
 	{
 		return m_index == rhs.m_index && m_v == rhs.m_v;
 	}

@@ -56,7 +56,7 @@ PatchOctree::PatchOctree(const int &id, const int &dimension,
 	}
 
 	// Info sulle interfacce
-	m_normals = unique_ptr<CollapsedArrayArray<double> >(new CollapsedArrayArray<double>(2 * dimension, 2 * dimension * dimension));
+	m_normals = unique_ptr<CollapsedArray2D<double> >(new CollapsedArray2D<double>(2 * dimension, 2 * dimension * dimension));
 	for (int n = -1; n <= 1; n += 2) {
 		for (int i = 0; i < dimension; i++) {
 			vector<double> normal(dimension, 0);

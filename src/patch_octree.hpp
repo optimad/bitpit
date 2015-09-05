@@ -52,7 +52,7 @@ private:
 
 	std::unique_ptr<double[]> m_centroids;
 
-	std::unique_ptr<CollapsedArrayArray<double> > m_normals;
+	std::unique_ptr<CollapsedArray2D<double> > m_normals;
 
 	void update_vertices();
 	void import_vertices();
