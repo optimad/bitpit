@@ -47,7 +47,8 @@ private:
 	double m_y_interface_area;
 	double m_z_interface_area;
 
-	std::unique_ptr<double[]> m_centroids;
+	std::unique_ptr<double[]> m_cellCentroids;
+	std::unique_ptr<double[]> m_interfaceCentroids;
 
 	std::unique_ptr<CollapsedArrayArray<double> > m_normals;
 

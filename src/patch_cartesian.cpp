@@ -220,7 +220,7 @@ void PatchCartesian::create_cells()
 
 	m_cells.reserve(nTotalCells);
 
-	m_centroids = std::unique_ptr<double[]>(new double[get_dimension() * nTotalCells]);
+	m_cellCentroids = std::unique_ptr<double[]>(new double[get_dimension() * nTotalCells]);
 
 	// Create the cells
 	double cellCenter[get_dimension()];
@@ -251,7 +251,7 @@ void PatchCartesian::create_cells()
 					cellCenter[Node::COORD_Z] = 0.5 * (m_z[k] + m_z[k+1]);
 				}
 
-				double *cellCentroid = &m_centroids[id_cell * get_dimension()];
+				double *cellCentroid = &m_cellCentroids[id_cell * get_dimension()];
 				for (int k = 0; k < get_dimension(); k++) {
 					cellCentroid[k] = cellCenter[k];
 				}
@@ -313,6 +313,9 @@ void PatchCartesian::create_interfaces()
 	for (unsigned int n = 0; n < m_cells.size(); n++) {
 		m_cells[n].initialize_empty_interfaces(nInterfacesForSide);
 	}
+
+	// Allocate space for centroid information
+	m_interfaceCentroids = std::unique_ptr<double[]>(new double[get_dimension() * nTotalInterfaces]);
 
 	// Create the interfaces
 	create_interfaces_direction(Node::COORD_X);
@@ -480,6 +483,25 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 				}
 
 				interface.set_connect(std::move(connect));
+
+				// Centroid
+				double *centroid = new double[get_dimension()];
+				std::fill_n(centroid, get_dimension(), 0.0);
+
+				for (int n = 0; n < nInterfaceVertices; n++) {
+					Node &vertex = m_vertices[interface.get_vertex(n)];
+					double *vertexCoords = vertex.get_coords();
+
+					for (int k = 0; k < get_dimension(); k++) {
+						centroid[k] += vertexCoords[k];
+					}
+				}
+
+				for (int k = 0; k < get_dimension(); k++) {
+					centroid[k] /= nInterfaceVertices;
+				}
+
+				interface.set_centroid(centroid);
 
 				// Normal
 				interface.set_normal(m_normals->get(ownerFace));
