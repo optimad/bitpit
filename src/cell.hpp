@@ -46,6 +46,7 @@ public:
 	void set_interface(const int &face, const int &index, const int &interface);
 	void set_interfaces(const int &face, int interface[]);
 	void unset_interfaces();
+	int get_interface_count() const;
 	int get_interface_count(const int &face) const;
 	int get_interface(const int &face, const int &index = 0) const;
 	int * get_interfaces(const int &face) const;

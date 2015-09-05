@@ -161,6 +161,16 @@ void Cell::unset_interfaces()
 }
 
 /*!
+	Gets the total number of interfaces of the cell.
+
+	\result The total number of interfaces of the cell.
+*/
+int Cell::get_interface_count() const
+{
+	return m_interfaces->data_size();
+}
+
+/*!
 	Gets the number of interfaces of the element for the given face.
 
 	\result The number of interfaces on the face  elements
