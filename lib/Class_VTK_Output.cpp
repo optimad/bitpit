@@ -41,7 +41,7 @@ void VTK::WriteDataHeader( fstream &str, bool parallel ){
     scalars << "\"" ;
     vectors << "\"" ;
 
-    for( int i=0; i< nr_data; i++ ){
+    for( unsigned i=0; i< nr_data; i++ ){
 
       if( data[i].GetLocation() == location){
         if(      data[i].GetComponents() == 1 ) scalars <<  data[i].GetName() << " " ;
@@ -70,7 +70,7 @@ void VTK::WriteDataHeader( fstream &str, bool parallel ){
         << ">" << endl;
 
     //Writing DataArray
-    for( int i=0; i< nr_data; i++){
+    for( unsigned i=0; i< nr_data; i++){
       if( data[i].GetLocation() == location && !parallel) WriteDataArray( str, data[i] ) ;
       if( data[i].GetLocation() == location &&  parallel) WritePDataArray( str, data[i] ); 
     };
@@ -133,7 +133,7 @@ void VTK::WriteData( ){
         VTK::Field_C    temp ;
 
         //Writing first point data then cell data
-        for( int i=0; i< nr_data; i++){
+        for( unsigned i=0; i< nr_data; i++){
             if( data[i].GetCodification() == "ascii" && data[i].GetLocation() == "Point") {
             str.seekg( position_insert);
             ReadDataArray( str, data[i] ) ;
@@ -152,7 +152,7 @@ void VTK::WriteData( ){
             };
         }; 
 
-        for( int i=0; i< nr_data; i++){
+        for( unsigned i=0; i< nr_data; i++){
             if( data[i].GetCodification() == "ascii" && data[i].GetLocation() == "Cell") {
             str.seekg( position_insert);
             ReadDataArray( str, data[i] ) ;
@@ -170,7 +170,7 @@ void VTK::WriteData( ){
             };
         }; 
 
-        for( int i=0; i< geometry.size(); i++){
+        for( unsigned i=0; i< geometry.size(); i++){
             if( geometry[i].GetCodification() == "ascii" ) {
             str.seekg( position_insert);
             ReadDataArray( str, geometry[i] ) ;
@@ -219,7 +219,7 @@ void VTK::WriteData( ){
         //str.open( "data.dat", ios::out | ios::binary);
 
         //Writing first point data then cell data
-        for( int i=0; i< nr_data; i++){
+        for( unsigned i=0; i< nr_data; i++){
             if( data[i].GetCodification() == "appended" && data[i].GetLocation() == "Point") {
                 if( GetHeaderType() == "UInt32"){
                     uint32_t    nbytes = data[i].GetNbytes() ;
@@ -234,7 +234,7 @@ void VTK::WriteData( ){
             };
         } 
         
-        for( int i=0; i< nr_data; i++){
+        for( unsigned i=0; i< nr_data; i++){
             if( data[i].GetCodification() == "appended" && data[i].GetLocation() == "Cell") {
                 if( GetHeaderType() == "UInt32"){
                     uint32_t    nbytes = data[i].GetNbytes() ;
@@ -250,8 +250,7 @@ void VTK::WriteData( ){
         } 
         
         //Writing Geometry Data
-        for(int i=0; i<geometry.size(); i++){
-        //for(int i=0; i<4; i++){
+        for(unsigned i=0; i<geometry.size(); i++){
             if( geometry[i].GetCodification() == "appended" ) {
                 if( GetHeaderType() == "UInt32"){
                     uint32_t    nbytes = geometry[i].GetNbytes() ;

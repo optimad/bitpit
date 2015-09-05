@@ -324,21 +324,21 @@ void VTK::CalcAppendedOffsets(){
     };
     
     
-    for( int i=0; i< nr_data; i++){
+    for( unsigned i=0; i< nr_data; i++){
         if( data[i].GetCodification() == "appended" && data[i].GetLocation() == "Point") {
             data[i].SetOffset( offset) ;
             offset += HeaderByte + data[i].GetNbytes()  ;
         };
     };
     
-    for( int i=0; i< nr_data; i++){
+    for( unsigned i=0; i< nr_data; i++){
         if( data[i].GetCodification() == "appended" && data[i].GetLocation() == "Cell") {
             data[i].SetOffset( offset) ;
             offset += HeaderByte + data[i].GetNbytes()  ;
         };
     };
     
-    for( int i=0; i< geometry.size(); i++){
+    for( unsigned i=0; i< geometry.size(); i++){
         if( geometry[i].GetCodification() == "appended" ) {
             geometry[i].SetOffset( offset) ;
             offset += HeaderByte + geometry[i].GetNbytes()  ;

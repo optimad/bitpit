@@ -23,7 +23,6 @@ void VTK::ReadDataHeader( fstream &str ){
   string                   line, loc_;
   stringstream             ss;
 
-  int                      size ;
   bool                     read ;
 
   Field_C                  temp ;
@@ -108,7 +107,7 @@ void VTK::ReadData( ){
   str.open( fh.GetName( ), ios::in | ios::binary);
 
   //Read fields
-  for( int i=0; i< nr_data; i++){
+  for( unsigned i=0; i< nr_data; i++){
     if( data[i].GetCodification() == "appended"){
       str.seekg( position_appended) ;
       str.seekg( data[i].GetOffset(), ios::cur) ;
@@ -119,7 +118,7 @@ void VTK::ReadData( ){
   };
 
   //Read geometry
-  for(int i=0; i<geometry.size(); i++){
+  for(unsigned i=0; i<geometry.size(); i++){
     if( geometry[i].GetCodification() == "appended"){
       str.seekg( position_appended) ;
       str.seekg( geometry[i].GetOffset(), ios::cur) ;
@@ -130,7 +129,7 @@ void VTK::ReadData( ){
   };
 
   //Read ascii data
-  for( int i=0; i< nr_data; i++){
+  for( unsigned i=0; i< nr_data; i++){
     if(  data[i].GetCodification() == "ascii"){
       str.seekg( data[i].GetPosition() ) ;
       Absorb( str, "ascii", data[i].GetName() ) ;
@@ -138,7 +137,7 @@ void VTK::ReadData( ){
   };
 
   //Read geometry
-  for(int i=0; i<geometry.size(); i++){
+  for(unsigned i=0; i<geometry.size(); i++){
     if(  geometry[i].GetCodification() == "ascii"){
       str.seekg( geometry[i].GetPosition() ) ;
       Absorb( str, "ascii", geometry[i].GetName() ) ;

@@ -33,7 +33,7 @@ VtkUnstrVec::VtkUnstrVec( string dir_, string name_, string codex_, uint8_t type
     geometry[2].SetType("UInt8") ;
     geometry[3].SetType( WhichType(dum1) ) ;
 
-    SetDimensions( connectivity_ext.size(), points_ext.size(), nconn_ ) ;
+    SetDimensions( ncells_, npoints_, nconn_ ) ;
 
     adata.resize(4) ;
 
@@ -150,7 +150,6 @@ void VtkUnstrVec::Write(  ) {
 
     bool            CanWrite(true) ;
     ufield*         FPtr ; 
-    VTK::Field_C*   VPtr ;
     string          name ;
     vector<string>  TBD;
 
@@ -159,14 +158,14 @@ void VtkUnstrVec::Write(  ) {
 
     if( CanWrite){
 
-        for( int i=0; i<nr_data; ++i){
+        for( unsigned i=0; i<nr_data; ++i){
             name = data[i].GetName() ;
             if( !GetFieldByName(name,FPtr) ){
                 TBD.push_back(name) ;
             };
         };
 
-        for( int i=0; i<TBD.size(); ++i){
+        for( unsigned i=0; i<TBD.size(); ++i){
             VTK::RemoveData( TBD[i] ) ;
         };
 

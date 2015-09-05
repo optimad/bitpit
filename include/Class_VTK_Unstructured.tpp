@@ -197,9 +197,6 @@ void VTK_UnstructuredGrid<Derived>::ReadMetaData( ){
     
     fstream::pos_type        position;
     
-    bool                     read ;
-    
-    
     str.open( fh.GetName( ), ios::in ) ;
     
     getline( str, line);

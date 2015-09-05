@@ -82,7 +82,7 @@ class VTK{
       vector< Field_C >    geometry ;               // Geometry fields
       string               GeomCodex ;
 
-      int                  nr_data ;                // Nr of data fields
+      unsigned             nr_data ;                // Nr of data fields
       vector< Field_C >    data ;                   // Data fields
       string               DataCodex ;
 
