@@ -72,11 +72,6 @@ VtkUnstrVec::VtkUnstrVec( string dir_, string name_, string codex_, uint8_t type
     adata[2].DPtr = static_cast<vector<int32_t>*>(NULL) ;
     adata[3].DPtr = &connectivity_ext ;
 
-    adata[0].FPtr = &geometry[0] ;
-    adata[1].FPtr = &geometry[1] ;
-    adata[2].FPtr = &geometry[2] ;
-    adata[3].FPtr = &geometry[3] ;
-
 };
 
 //====================================================================================================
@@ -108,27 +103,10 @@ void VtkUnstrVec::AddData( vector<T> &data_, string name_, string loc_ ){
 
     adata.push_back( ufield() ) ;
 
+    adata[n].name = name_ ;
     adata[n].DPtr = &data_ ;
 
-    if( name_ == "Points" ){
-        adata[n].FPtr = &geometry[0] ;
-    }
-
-    else if( name_ == "types"){
-        adata[n].FPtr = &geometry[1] ;
-    }
-
-    else if( name_ == "offsets"){
-        adata[n].FPtr = &geometry[2] ;
-    }
-
-    else if( name_ == "connectivity"){
-        adata[n].FPtr = &geometry[3] ;
-    }
-
-    else{
-        adata[n].FPtr = VTK_UnstructuredGrid<VtkUnstrVec>::AddData( name_, 1, WhichType(dum_), loc_ ) ;
-    };
+    VTK_UnstructuredGrid<VtkUnstrVec>::AddData( name_, 1, WhichType(dum_), loc_ ) ;
 
     return;
 };
@@ -143,28 +121,10 @@ void VtkUnstrVec::AddData( vector< array<T,3> > &data_, string name_, string loc
 
     adata.push_back( ufield() ) ;
 
+    adata[n].name = name_ ;
     adata[n].DPtr = &data_ ;
 
-    if( name_ == "Points" ){
-        adata[n].FPtr = &geometry[0] ;
-    }
-
-    else if( name_ == "types"){
-        adata[n].FPtr = &geometry[1] ;
-    }
-
-    else if( name_ == "offsets"){
-        adata[n].FPtr = &geometry[2] ;
-    }
-
-    else if( name_ == "connectivity"){
-        adata[n].FPtr = &geometry[3] ;
-    }
-
-    else{
-
-        adata[n].FPtr = VTK_UnstructuredGrid<VtkUnstrVec>::AddData( name_, 3, WhichType(dum_), loc_ ) ;
-    };
+    VTK_UnstructuredGrid<VtkUnstrVec>::AddData( name_, 3, WhichType(dum_), loc_ ) ;
 
     return;
 };
@@ -179,27 +139,10 @@ void VtkUnstrVec::AddData( vector< vector<T> > &data_, string name_, string loc_
 
     adata.push_back( ufield() ) ;
 
+    adata[n].name = name_ ;
     adata[n].DPtr = &data_ ;
 
-    if( name_ == "Points" ){
-        adata[n].FPtr = &geometry[0] ;
-    }
-
-    else if( name_ == "types"){
-        adata[n].FPtr = &geometry[1] ;
-    }
-
-    else if( name_ == "offsets"){
-        adata[n].FPtr = &geometry[2] ;
-    }
-
-    else if( name_ == "connectivity"){
-        adata[n].FPtr = &geometry[3] ;
-    }
-
-    else{
-        adata[n].FPtr = VTK_UnstructuredGrid<VtkUnstrVec>::AddData( name_, 3, WhichType(dum_), loc_ ) ;
-    };
+    VTK_UnstructuredGrid<VtkUnstrVec>::AddData( name_, 3, WhichType(dum_), loc_ ) ;
 
 
     return;
@@ -208,11 +151,10 @@ void VtkUnstrVec::AddData( vector< vector<T> > &data_, string name_, string loc_
 // =================================================================================== //
 bool VtkUnstrVec::GetFieldByName( const string &name_, VtkUnstrVec::ufield *&the_field ){
 
-
     vector<VtkUnstrVec::ufield>::iterator    it_ ;
 
     for( it_=adata.begin(); it_!=adata.end(); ++it_){
-        if( (*it_).FPtr->GetName() == name_ ){
+        if( (*it_).name == name_ ){
             the_field = &(*it_) ;
             return true ;
         };
@@ -259,14 +201,16 @@ void VtkUnstrVec::Flush( fstream &str, string codex, string name ) {
     else{
 
         ufield  *f_ ;
-        stream_visitor  visitor;
-        visitor.SetStream( str ) ;
-        visitor.SetCodex( codex ) ;
-        visitor.SetName( name ) ;
-        visitor.SetTask( "write" ) ;
 
-        GetFieldByName( name, f_) ;
-        boost::apply_visitor(visitor, f_->DPtr ); 
+        if( GetFieldByName( name, f_)){
+            stream_visitor  visitor;
+            visitor.SetStream( str ) ;
+            visitor.SetCodex( codex ) ;
+            visitor.SetName( name ) ;
+            visitor.SetTask( "write" ) ;
+
+            boost::apply_visitor(visitor, f_->DPtr ); 
+        };
 
     };
 
@@ -281,19 +225,23 @@ void VtkUnstrVec::Absorb( fstream &str, string codex, string name ) {
 
     if( GetFieldByName( name, f_)){
 
-        stream_visitor  visitor;
-        visitor.SetStream( str ) ;
-        visitor.SetCodex( codex ) ;
-        visitor.SetName( name ) ;
-        visitor.SetTask( "read" ) ;
+        VTK::Field_C*   FPtr ;
+        if( VTK::GetFieldByName(name, FPtr) ){
 
-        visitor.SetSize( f_->FPtr->GetElements() ) ;
-        visitor.SetComponents( f_->FPtr->GetComponents() ) ;
+            stream_visitor  visitor;
+            visitor.SetStream( str ) ;
+            visitor.SetCodex( codex ) ;
+            visitor.SetName( name ) ;
+            visitor.SetTask( "read" ) ;
 
-        if( name == "connectivity") visitor.SetComponents( NumberOfElements(type) ) ;
+            visitor.SetSize( FPtr->GetElements() ) ;
+            visitor.SetComponents( FPtr->GetComponents() ) ;
 
-        if( ! (boost::get<vector<int32_t>*>(&f_->DPtr) && boost::get<vector<int32_t>*>(f_->DPtr) == NULL ) ){
-            boost::apply_visitor(visitor, f_->DPtr ); 
+            if( name == "connectivity") visitor.SetComponents( NumberOfElements(type) ) ;
+
+            if( ! (boost::get<vector<int32_t>*>(&f_->DPtr) && boost::get<vector<int32_t>*>(f_->DPtr) == NULL ) ){
+                boost::apply_visitor(visitor, f_->DPtr ); 
+            };
         };
     }
 

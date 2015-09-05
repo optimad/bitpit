@@ -210,7 +210,7 @@ class VtkUnstrVec : public VTK_UnstructuredGrid<VtkUnstrVec>{
     typedef  VTK_UnstructuredGrid<VtkUnstrVec> Base ;
 
     struct ufield{
-        VTK::Field_C*   FPtr;
+        string          name;
         bv              DPtr ;
     };
 
@@ -226,7 +226,6 @@ class VtkUnstrVec : public VTK_UnstructuredGrid<VtkUnstrVec>{
     template< class T0, class T1>
     VtkUnstrVec( string dir_, string name_, string codex_, uint8_t type_, vector<T0> &points_ext, vector<T1> &connectivity_external ) ;
     VtkUnstrVec( string dir_, string name_, string codex_, uint8_t type_ ) ;
-
 
    ~VtkUnstrVec( ) ;
 
