@@ -212,6 +212,21 @@ int Interface::get_neigh_face() const
 }
 
 /*!
+	Gets both the owner and the neighbour of the interface.
+
+	\result An array containing the owner and the neighbour of the
+	        interface.
+*/
+std::array<int, 2> Interface::get_owner_neigh() const
+{
+	std::array<int, 2> cells;
+	cells[0] = m_owner;
+	cells[1] = m_neigh;
+
+	return cells;
+}
+
+/*!
 	Swaps owner and neighbour cells.
 */
 void Interface::swap_owner_neigh()

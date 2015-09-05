@@ -6,6 +6,7 @@
 
 /*! \file */
 
+#include <array>
 #include <memory>
 
 #include "element.hpp"
@@ -59,6 +60,7 @@ public:
 	int get_neigh() const;
 	int get_neigh_face() const;
 
+	std::array<int, 2> get_owner_neigh() const;
 	void swap_owner_neigh();
 
 	void set_data(std::unique_ptr<InterfaceData> m_data);
