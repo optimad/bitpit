@@ -142,7 +142,7 @@ VTK::Field_C* VTK::AddData( string name_, int comp_, string type_, string loc_ )
     bool         allocate(true) ;
     VTK::Field_C* ptr(NULL) ;
     
-    if(  GetFieldByName( data, name_, ptr ) ) {
+    if(  GetFieldByName( name_, ptr ) ) {
         ptr->SetComponents(comp_) ;
         ptr->SetType(type_) ;
         ptr->SetLocation(loc_) ;
@@ -198,7 +198,7 @@ VTK::Field_C* VTK::AddData( string name_, int comp_, string type_, string loc_, 
     bool          allocate(true) ;
     VTK::Field_C* ptr(NULL) ;
     
-    if( ! GetFieldByName( data, name_, ptr ) ){
+    if( ! GetFieldByName( name_, ptr ) ){
         ptr->SetComponents(comp_) ;
         ptr->SetType(type_) ;
         ptr->SetLocation(loc_) ;
@@ -291,19 +291,26 @@ void  VTK::Flush( fstream &str, string codex_, string name  ){ ;}
 void  VTK::Absorb( fstream &str, string codex_, string name  ){ ;}
 
 // =================================================================================== //
-bool VTK::GetFieldByName( vector<VTK::Field_C> &fields_, const string &name_, VTK::Field_C *&the_field ){
+bool VTK::GetFieldByName( const string &name_, VTK::Field_C *&the_field ){
 
 
-  vector<VTK::Field_C>::iterator    it_ ;
+    vector<VTK::Field_C>::iterator    it_ ;
 
-  for( it_=fields_.begin(); it_!=fields_.end(); ++it_){
-      if( (*it_).GetName() == name_ ){
-          the_field = &(*it_) ;
-          return true ;
-      };
-  };
+    for( it_=data.begin(); it_!=data.end(); ++it_){
+        if( (*it_).GetName() == name_ ){
+            the_field = &(*it_) ;
+            return true ;
+        };
+    };
 
-  return false ;
+    for( it_=geometry.begin(); it_!=geometry.end(); ++it_){
+        if( (*it_).GetName() == name_ ){
+            the_field = &(*it_) ;
+            return true ;
+        };
+    };
+
+    return false ;
 };
 
 // =================================================================================== //

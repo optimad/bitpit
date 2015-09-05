@@ -124,7 +124,7 @@ class VTK{
 
     protected:
       //General Purpose
-      bool    GetFieldByName( vector<Field_C> &fields_, const string &name_, VTK::Field_C*& the_field ) ;
+      bool    GetFieldByName( const string &name_, VTK::Field_C*& the_field ) ;
       void    CalcAppendedOffsets() ;
 
       bool    StringToDataArray( string &str, Field_C &data_ ) ;
