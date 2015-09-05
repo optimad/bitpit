@@ -15,9 +15,6 @@ VtkUnstrVec::VtkUnstrVec( string dir_, string name_, string codex_, uint8_t type
     T0  dum0 ;
     T1  dum1 ;
 
-
-    data.reserve(50) ;
-
     SetNames( dir_, name_ );
     SetCodex( codex_ ) ;
 

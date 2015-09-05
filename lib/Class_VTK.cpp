@@ -10,8 +10,6 @@ VTK::VTK(){
     nr_procs = 0;
     my_proc  = 0;
 
-    data.reserve(50) ;
-
     HeaderType = "UInt32" ;
     
     fh.SetSeries( false ) ;
