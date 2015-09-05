@@ -259,28 +259,29 @@ VTK::Field_C* VTK::AddData( string name_, int comp_, string type_, string loc_, 
 // =================================================================================== //
 void VTK::RemoveData( string name_ ){
 
-  vector<VTK::Field_C>::iterator  i_, j_ ;
-  bool                            found ;
-
-  found     = false ;
-
-  for ( i_ = data.begin(); i_ != data.end(); i_++){
-    if( (i_)->GetName() == name_){
-       j_ = i_ ;
-       found     = true ;
+    vector<VTK::Field_C>::iterator  i_, j_ ;
+    bool                            found ;
+    
+    found     = false ;
+    
+    for ( i_ = data.begin(); i_ != data.end(); i_++){
+        if( (i_)->GetName() == name_){
+            j_ = i_ ;
+            found     = true ;
+        };
     };
-  };
-
-  if( found ){
-    data.erase(j_);
-  }
-
-  else{
-    cout << "did not find field for removing: " << name_ << endl;
-  };
-
-
-  return ;
+    
+    if( found ){
+        data.erase(j_);
+        nr_data--;
+    }
+    
+    else{
+        cout << "did not find field for removing: " << name_ << endl;
+    };
+    
+    
+    return ;
 
 };
 
