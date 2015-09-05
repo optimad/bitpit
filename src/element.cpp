@@ -193,6 +193,26 @@ int* Element::get_connect() const
 }
 
 /*!
+	Sets the centroid of the element.
+
+	\param centroid the centroid of the element.
+*/
+void Element::set_centroid(double * const centroid)
+{
+	m_centroid = centroid;
+}
+
+/*!
+	Gets the centroid of the element.
+
+	\return The centroid of the element.
+*/
+double * Element::get_centroid() const
+{
+	return m_centroid;
+}
+
+/*!
 	Gets the number of faces of the element.
 
 	\result The number of vertices of the element

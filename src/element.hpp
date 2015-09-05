@@ -86,6 +86,9 @@ public:
 	void unset_connect();
 	int* get_connect() const;
 
+	void set_centroid(double * const centroid);
+	double * get_centroid() const;
+
 	int get_face_count() const;
 	static int get_face_count(Element::Type type);
 
@@ -100,6 +103,8 @@ private:
 
 	int m_id;
 	int m_local_id;
+
+	double *m_centroid;
 
 	Element::Type m_type;
 	

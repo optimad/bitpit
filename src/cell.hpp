@@ -38,9 +38,6 @@ public:
 	void set_volume(double * const volume);
 	double & get_volume() const;
 
-	void set_centroid(double * const centroid);
-	double * get_centroid() const;
-
 	void initialize_interfaces(std::vector<std::vector<int>> &interfaces);
 	void initialize_empty_interfaces(const int nInterfaces[]);
 	void set_interface(const int &face, const int &index, const int &interface);
@@ -61,7 +58,6 @@ private:
   	PositionType m_positionType;
 
 	double *m_volume;
-	double *m_centroid;
 
 	std::unique_ptr<CollapsedArrayArray<int> > m_interfaces;
 

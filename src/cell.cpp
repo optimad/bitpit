@@ -85,26 +85,6 @@ double & Cell::get_volume() const
 }  
 
 /*!
-	Sets the centroid of the cell.
-
-	\param centroid the centroid of the cell
-*/
-void Cell::set_centroid(double * const centroid)
-{
-	m_centroid = centroid;
-}
-
-/*!
-	Gets the centroid of the cell.
-
-	\return The centroid of the cell
-*/
-double * Cell::get_centroid() const
-{
-	return m_centroid;
-}
-
-/*!
 	Initialize all the interfaces of the cell.
 
 	\param interfaces the list of all interfaces associated to the cell
