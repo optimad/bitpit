@@ -229,7 +229,6 @@ class VtkUnstrVec : public VTK_UnstructuredGrid<VtkUnstrVec>{
 
    ~VtkUnstrVec( ) ;
 
-
     template< class T>
     void    AddData( vector<T> &data, string name_, string loc_ ) ; 
         
@@ -242,12 +241,11 @@ class VtkUnstrVec : public VTK_UnstructuredGrid<VtkUnstrVec>{
     template< class T>
     void    LinkData( vector<T> &data, string name_ ) ; 
 
+    void    Write() ;
+ 
     private:
     bool    GetFieldByName( const string &name_, ufield*& the_field ) ;
 
-
-
-   
 
 };
 
