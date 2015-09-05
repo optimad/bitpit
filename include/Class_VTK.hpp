@@ -140,23 +140,20 @@ class VTK{
       template<class T, size_t d>
       string  WhichType( array<T,d> dum_) ;
 
-
-
       //For Writing
       void    WriteDataHeader( fstream &str, bool parallel ) ;
       void    WriteDataArray( fstream &str, Field_C &data_ ) ;
       void    WritePDataArray( fstream &str, Field_C &data_ ) ;
 
       virtual
-      void    Flush( fstream &str, string codex_, string name  ) ; //CRTP
-
+      void    Flush( fstream &str, string codex_, string name  ) =0 ; 
 
       //For Reading
       void    ReadDataHeader( fstream &str ) ;
       bool    ReadDataArray( fstream &str, Field_C &field_  );
 
       virtual
-      void    Absorb( fstream &str, string codex_, string name  ) ; //CRTP
+      void    Absorb( fstream &str, string codex_, string name  ) =0 ; 
        
 };
 

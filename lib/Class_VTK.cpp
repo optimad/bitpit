@@ -287,12 +287,6 @@ void VTK::RemoveData( string name_ ){
 };
 
 // =================================================================================== //
-void  VTK::Flush( fstream &str, string codex_, string name  ){ ;}
-
-// =================================================================================== //
-void  VTK::Absorb( fstream &str, string codex_, string name  ){ ;}
-
-// =================================================================================== //
 bool VTK::GetFieldByName( const string &name_, VTK::Field_C *&the_field ){
 
 
