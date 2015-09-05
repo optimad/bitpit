@@ -4,36 +4,6 @@
 VtkUnstrVec::VtkUnstrVec()
              :VTK_UnstructuredGrid<VtkUnstrVec>(){};
 
-// //====================================================================================================
-// VtkUnstrVec::VtkUnstrVec( string dir_, string name_, string codex_, uint8_t type_, dvecarr3E &points_ext, ivector2D &connectivity_ext )
-//              :VTK_UnstructuredGrid<VtkUnstrVec>( ){ 
-// 
-// 
-//     int ncells_, npoints_, nconn_;
-// 
-//     data.reserve(50) ;
-// 
-//     SetNames( dir_, name_ );
-//     SetCodex( codex_ ) ;
-// 
-//     type = type_ ;
-// 
-//     points = &points_ext ;
-//     connectivity = &connectivity_ext ;
-// 
-//     ncells_ = connectivity_ext.size() ;
-//     npoints_ = points_ext.size() ;
-// 
-//     nconn_ = ncells_ * NumberOfElements( type ) ;
-// 
-//     geometry[0].SetType("Float64") ;
-//     geometry[1].SetType("UInt32") ;
-//     geometry[2].SetType("UInt8") ;
-//     geometry[3].SetType("UInt32") ;
-// 
-//     SetDimensions( connectivity_ext.size(), points_ext.size(), nconn_ ) ;
-// };
-
 //====================================================================================================
 template< class T0, class T1>
 VtkUnstrVec::VtkUnstrVec( string dir_, string name_, string codex_, uint8_t type_, vector<T0> &points_ext, vector<T1> &connectivity_ext )
@@ -98,7 +68,6 @@ template<class T>
 void VtkUnstrVec::AddData( vector<T> &data_, string name_, string loc_ ){
 
     int n = adata.size() ;
-    VTK::Field_C*     f_ ;
     T               dum_ ;
 
     adata.push_back( ufield() ) ;
@@ -116,7 +85,6 @@ template<class T>
 void VtkUnstrVec::AddData( vector< array<T,3> > &data_, string name_, string loc_ ){
 
     int n = adata.size() ;
-    VTK::Field_C*     f_ ;
     T               dum_ ;
 
     adata.push_back( ufield() ) ;
@@ -134,7 +102,6 @@ template<class T>
 void VtkUnstrVec::AddData( vector< vector<T> > &data_, string name_, string loc_ ){
 
     int n = adata.size() ;
-    VTK::Field_C*     f_ ;
     T               dum_ ;
 
     adata.push_back( ufield() ) ;
