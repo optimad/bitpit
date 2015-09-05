@@ -29,8 +29,6 @@ void VTK::ReadDataHeader( fstream &str ){
   Field_C                  temp ;
   Field_C*                 ptemp ;
 
-  data.clear() ;
-  nr_data = 0  ;
 
   for( int i=0; i<2; i++){
 
@@ -61,7 +59,7 @@ void VTK::ReadDataHeader( fstream &str ){
 
         temp.SetPosition( pos_ ) ;
 
-        if( ! GetFieldByName( data, temp.GetName(), ptemp )) {
+        if( ! GetFieldByName( temp.GetName(), ptemp )) {
             data.push_back( temp ) ;
             nr_data++ ;
         }
