@@ -37,13 +37,23 @@ typedef boost::mpl::vector<
     vector<uint8_t>* ,
     vector<uint16_t>*, 
     vector<uint32_t>*, 
-    vector<uint64_t>*
-    > SInt ;
+    vector<uint64_t>*,
 
-typedef boost::mpl::vector<
     vector<float>*   ,
-    vector<double>*  
-    >::type SFloat;
+    vector<double>*  ,
+
+    vector< vector<int8_t> >*  , 
+    vector< vector<int16_t> >*  , 
+    vector< vector<int32_t> >*  , 
+    vector< vector<int64_t> >*  , 
+    vector< vector<uint8_t> >*  , 
+    vector< vector<uint16_t> >* ,
+    vector< vector<uint32_t> >* ,
+    vector< vector<uint64_t> >* ,
+
+    vector< vector<float> >*  , 
+    vector< vector<double> >*
+    >::type BVector;
 
 typedef boost::mpl::vector<
     vector< array<int16_t,3> >*  , 
@@ -65,52 +75,15 @@ typedef boost::mpl::vector<
     vector< array<int64_t,8> >*  ,
     vector< array<uint16_t,8> >* ,
     vector< array<uint32_t,8> >* ,
-    vector< array<uint64_t,8> >* 
-    >::type SIArray;
+    vector< array<uint64_t,8> >* ,
 
-
-typedef boost::mpl::vector<
     vector< array<float,3> >*    ,
     vector< array<double,3> >*   
-    >::type SFArray;
-
-typedef boost::mpl::vector<
-    vector< vector<int16_t> >*  , 
-    vector< vector<int32_t> >*  , 
-    vector< vector<int64_t> >*  , 
-    vector< vector<uint16_t> >* ,
-    vector< vector<uint32_t> >* ,
-    vector< vector<uint64_t> >* 
-    >::type SIVector ;
-
-typedef boost::mpl::vector<
-    vector< vector<float> >*  , 
-    vector< vector<double> >*
-    >::type SFVector ;
+    >::type BArray;
 
 typedef boost::mpl::copy<
-    SInt::type, 
-    boost::mpl::back_inserter<SFloat> 
-    >::type SSingle ;
-
-typedef boost::mpl::copy<
-    SIArray::type, 
-    boost::mpl::back_inserter<SFArray> 
-    >::type SArray ;
-
-typedef boost::mpl::copy<
-    SIVector::type, 
-    boost::mpl::back_inserter<SFVector> 
-    >::type SVector ;
-
-typedef boost::mpl::copy<
-    SVector::type, 
-    boost::mpl::back_inserter<SArray> 
-    >::type SMulti ;
-
-typedef boost::mpl::copy<
-    SSingle::type, 
-    boost::mpl::back_inserter<SMulti> 
+    BVector::type, 
+    boost::mpl::back_inserter<BArray> 
     >::type SAll ;
 
 typedef boost::make_variant_over< SAll >::type bv ;
@@ -248,7 +221,6 @@ class VtkUnstrVec : public VTK_UnstructuredGrid<VtkUnstrVec>{
 
 
 };
-
 
 #include"Class_VTK_Wrappers.tpp"
 
