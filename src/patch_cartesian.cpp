@@ -366,6 +366,13 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 	std::cout << "  >> Creating interfaces normal to direction " << direction << "\n";
 
 	// Info on the interfaces
+	int nInterfaceVertices;
+	if (is_three_dimensional()) {
+		nInterfaceVertices = Element::get_face_count(Element::QUADRANGLE);
+	} else {
+		nInterfaceVertices = Element::get_face_count(Element::LINE);
+	}
+
 	double *area;
 	std::vector<int> *interfaceCount1D;
 	switch (direction)  {
@@ -446,6 +453,33 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 				} else {
 					interface.unset_owner();
 				}
+
+				// Connectivity
+				std::unique_ptr<int[]> connect = std::unique_ptr<int[]>(new int[nInterfaceVertices]);
+				if (direction == Node::COORD_X) {
+					connect[0] = vertex_ijk_to_id(i, j,     k);
+					connect[1] = vertex_ijk_to_id(i, j + 1, k);
+					if (is_three_dimensional()) {
+						connect[2] = vertex_ijk_to_id(i, j + 1, k + 1);
+						connect[3] = vertex_ijk_to_id(i, j,     k + 1);
+					}
+				} else if (direction == Node::COORD_Y) {
+					connect[0] = vertex_ijk_to_id(i,     j,     k);
+					connect[1] = vertex_ijk_to_id(i + 1, j,     k);
+					if (is_three_dimensional()) {
+						connect[2] = vertex_ijk_to_id(i + 1, j, k + 1);
+						connect[3] = vertex_ijk_to_id(i,     j, k + 1);
+					}
+				} else if (direction == Node::COORD_Z) {
+					connect[0] = vertex_ijk_to_id(i,     j,     k);
+					connect[1] = vertex_ijk_to_id(i + 1, j,     k);
+					if (is_three_dimensional()) {
+						connect[2] = vertex_ijk_to_id(i + 1, j + 1, k);
+						connect[3] = vertex_ijk_to_id(i,     j + 1, k);
+					}
+				}
+
+				interface.set_connect(std::move(connect));
 
 				// Normal
 				interface.set_normal(m_normals->get(ownerFace));
