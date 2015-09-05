@@ -48,6 +48,7 @@
 */
 
 #include "element.hpp"
+#include "patch.hpp"
 
 #include <limits>
 
@@ -101,6 +102,16 @@ void Element::set_patch(Patch *patch)
 Patch * Element::get_patch() const
 {
 	return m_patch;
+}
+
+/*!
+	Gets the dimension of the owner patch.
+
+	\return The dimension of the owner patch.
+*/
+int Element::get_patch_dimension() const
+{
+	return m_patch->get_dimension();
 }
 
 /*!

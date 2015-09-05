@@ -72,6 +72,7 @@ public:
 
 	Patch * get_patch() const;
 	void set_patch(Patch *patch);
+	int get_patch_dimension() const;
 
 	void set_id(const int &id);
 	int get_id() const;
