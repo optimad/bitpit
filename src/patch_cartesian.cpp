@@ -253,7 +253,7 @@ void PatchCartesian::create_cells()
 
 				// Centroide
 				if (is_three_dimensional()) {
-					cellCenter[Node::COORD_Z] = 0.5 * (m_z[j] + m_z[j+1]);
+					cellCenter[Node::COORD_Z] = 0.5 * (m_z[k] + m_z[k+1]);
 				}
 
 				double *cellCentroid = &m_centroids[id_cell * get_dimension()];
