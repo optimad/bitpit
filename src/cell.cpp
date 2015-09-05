@@ -139,10 +139,10 @@ void Cell::set_interface(const int &face, const int &index, const int &interface
 }
 
 /*!
-	Sets the interfaces associated to the given face of the cell.
+	Sets the interfaces associated to the specified face of the cell.
 
 	\param face the face of the cell
-	\param interface A pointer to the interface
+	\param interface a pointer to the interfaces
 */
 void Cell::set_interfaces(const int &face, int interfaces[])
 {
@@ -151,9 +151,6 @@ void Cell::set_interfaces(const int &face, int interfaces[])
 
 /*!
 	Unsets the interfaces associated to the cell.
-
-	\param face the face of the cell
-	\param interface A pointer to the interface
 */
 void Cell::unset_interfaces()
 {
@@ -171,9 +168,10 @@ int Cell::get_interface_count() const
 }
 
 /*!
-	Gets the number of interfaces of the element for the given face.
+	Gets the number of interfaces of the specified face of the cell.
 
-	\result The number of interfaces on the face  elements
+	\param face the face of the cell
+	\result The number of interfaces of the specified face of the cell.
 */
 int Cell::get_interface_count(const int &face) const
 {
@@ -181,13 +179,11 @@ int Cell::get_interface_count(const int &face) const
 }
 
 /*!
-	Gets the i-th interface of the given face of the cell.
-
-	\as get_interfaces(const int &face)
+	Gets the i-th interface of the specified face of the cell.
 
 	\param face the face of the cell
 	\param index the index of the interface to retreive
-	\result The requested interface
+	\result The requested interface.
 */
 int Cell::get_interface(const int &face, const int &index) const
 {
