@@ -25,28 +25,22 @@ VtkUnstrVec::VtkUnstrVec( string dir_, string name_, string codex_, uint8_t type
 
     nconn_ = ncells_ * NumberOfElements( type ) ;
 
-    geometry[0].SetType( WhichType(dum0) ) ;
-    geometry[1].SetType("UInt64") ;
-    geometry[2].SetType("UInt8") ;
-    geometry[3].SetType( WhichType(dum1) ) ;
-
+    SetGeomTypes( WhichType(dum0), "UInt64", "UInt8", WhichType(dum1)  ) ;
     SetDimensions( ncells_, npoints_, nconn_ ) ;
 
-    adata.resize(4) ;
+    adata.resize(2) ;
 
     adata[0].DPtr = &points_ext ;
     adata[0].name = "Points" ;
 
-    adata[3].DPtr = &connectivity_ext ;
-    adata[3].name = "connectivity" ;
+    adata[1].DPtr = &connectivity_ext ;
+    adata[1].name = "connectivity" ;
 
 };
 
 //====================================================================================================
 VtkUnstrVec::VtkUnstrVec( string dir_, string name_, string codex_, uint8_t type_ )
              :VTK_UnstructuredGrid<VtkUnstrVec>( ){ 
-
-    data.reserve(50) ;
 
     SetNames( dir_, name_ );
     SetCodex( codex_ ) ;
