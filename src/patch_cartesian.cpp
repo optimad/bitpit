@@ -28,9 +28,9 @@ PatchCartesian::PatchCartesian(const int &id, const int &dimension,
 	std::cout << ">> Initializing cartesian mesh\n";
 
 	// Info sulle celle
-	m_cellSize = std::vector<double>(dimension);
-	m_minCoord = std::vector<double>(dimension);
-	m_nCells1D   = std::vector<int>(dimension);
+	m_cellSize.resize(dimension);
+	m_minCoord.resize(dimension);
+	m_nCells1D.resize(dimension);
 	for (int n = 0; n < dimension; n++) {
 		// Dimensioni della cella
 		m_cellSize[n] = dh;
@@ -50,7 +50,7 @@ PatchCartesian::PatchCartesian(const int &id, const int &dimension,
 	}
 
 	// Info sui vertici
-	m_nVertices1D = std::vector<int>(dimension);
+	m_nVertices1D.resize(dimension);
 	for (int n = 0; n < dimension; n++) {
 		if (!is_three_dimensional() && n == Node::COORD_Z) {
 			m_nVertices1D[n] = 0;
@@ -60,7 +60,7 @@ PatchCartesian::PatchCartesian(const int &id, const int &dimension,
 	}
 
 	// Info sulle interfacce
-	m_x_nInterfaces1D = std::vector<int>(dimension);
+	m_x_nInterfaces1D.resize(dimension);
 	for (int n = 0; n < dimension; n++) {
 		m_x_nInterfaces1D[n] = m_nCells1D[n];
 		if (n == Node::COORD_X) {
@@ -68,7 +68,7 @@ PatchCartesian::PatchCartesian(const int &id, const int &dimension,
 		}
 	}
 
-	m_y_nInterfaces1D = std::vector<int>(dimension);
+	m_y_nInterfaces1D.resize(dimension);
 	for (int n = 0; n < dimension; n++) {
 		m_y_nInterfaces1D[n] = m_nCells1D[n];
 		if (n == Node::COORD_Y) {
@@ -78,7 +78,7 @@ PatchCartesian::PatchCartesian(const int &id, const int &dimension,
 
 
 	if (is_three_dimensional()) {
-		m_z_nInterfaces1D = std::vector<int>(dimension);
+		m_z_nInterfaces1D.resize(dimension);
 		for (int n = 0; n < dimension; n++) {
 			m_z_nInterfaces1D[n] = m_nCells1D[n];
 			if (n == Node::COORD_Z) {
