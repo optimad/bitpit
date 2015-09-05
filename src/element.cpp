@@ -328,4 +328,15 @@ int Element::get_vertex_count(Element::Type type)
 	return -1;
 }
 
+/*!
+	Gets the vertex with the specified local index.
+
+	\param vertex is the local index of the vertex
+	\result The id of the specified vertex.
+*/
+int Element::get_vertex(const int &vertex) const
+{
+	return m_connect[vertex];
+}
+
 }

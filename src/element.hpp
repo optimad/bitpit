@@ -94,6 +94,7 @@ public:
 
 	int get_vertex_count() const;
 	static int get_vertex_count(Element::Type type);
+	int get_vertex(const int &vertex) const;
 
 protected:
 	static const int NULL_ELEMENT_ID;
