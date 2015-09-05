@@ -195,6 +195,16 @@ int Cell::get_interface(const int &face, const int &index) const
 }
 
 /*!
+	Gets all the interfaces of the cell.
+
+	\result The interfaces of the cell.
+*/
+int * Cell::get_interfaces() const
+{
+	return m_interfaces->get(0);
+}
+
+/*!
 	Gets the interfaces of the given face of the cell.
 
 	\as get_interface(const int &face, const int &index) const
