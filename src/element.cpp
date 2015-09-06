@@ -209,7 +209,7 @@ void Element::unset_connect()
 
 	\result A pointer to the connectivity of the element
 */
-int* Element::get_connect() const
+const int * Element::get_connect() const
 {
 	return m_connect.get();
 }

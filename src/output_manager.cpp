@@ -260,7 +260,7 @@ vtkIdType OutputManager::InsertNextCell(const Cell &cell)
 {
 	int vtkCellType = getVTKCellType(cell.get_type());
 
-	int *cellconnect = cell.get_connect();
+	const int *cellconnect = cell.get_connect();
 	vtkIdType nCellVerts = cell.get_vertex_count();
 	std::vector<vtkIdType> vtkCellConnect(nCellVerts);
 	for (int k = 0; k < nCellVerts; k++) {

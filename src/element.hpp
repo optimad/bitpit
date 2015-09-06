@@ -86,7 +86,7 @@ public:
 	
 	void set_connect(std::unique_ptr<int[]> connect);
 	void unset_connect();
-	int* get_connect() const;
+	const int * get_connect() const;
 
 	void set_centroid(std::unique_ptr<double[]> centroid);
 	const double * get_centroid() const;
