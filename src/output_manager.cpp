@@ -77,10 +77,12 @@ int OutputManager::getVTKCellType(Element::Type type)
 			return VTK_LINE;
 		case Element::TRIANGLE:
 			return VTK_TRIANGLE;
+		case Element::RECTANGLE:
 		case Element::QUADRANGLE:
 			return VTK_QUAD;
 		case Element::TETRAHEDRON:
 			return VTK_TETRA;
+		case Element::BRICK:
 		case Element::HEXAHEDRON:
 			return VTK_HEXAHEDRON;
 		case Element::PRISM:

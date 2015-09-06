@@ -25,6 +25,9 @@
 	\var Element::Type Element::TRIANGLE
 	A triangle.
 
+	\var Element::Type Element::RECTANGLE
+	A rectangle.
+
 	\var Element::Type Element::QUADRANGLE
 	A quadrangle.
 
@@ -33,6 +36,9 @@
 
 	\var Element::Type Element::TETRAHEDRON
 	A tetrahedron.
+
+	\var Element::Type Element::BRICK
+	A brick.
 
 	\var Element::Type Element::HEXAHEDRON
 	A hexahedron.
@@ -263,6 +269,7 @@ int Element::get_face_count(Element::Type type)
 	case (Type::TRIANGLE):
 	    return 3;
 
+	case (Type::RECTANGLE):
 	case (Type::QUADRANGLE):
 	    return 4;
 
@@ -272,6 +279,7 @@ int Element::get_face_count(Element::Type type)
 	case (Type::TETRAHEDRON):
 	    return 4;
 
+	case (Type::BRICK):
 	case (Type::HEXAHEDRON):
 	    return 6;
 
@@ -321,6 +329,7 @@ int Element::get_vertex_count(Element::Type type)
 	case (Type::TRIANGLE):
 	    return 3;
 
+	case (Type::RECTANGLE):
 	case (Type::QUADRANGLE):
 	    return 4;
 
@@ -330,6 +339,7 @@ int Element::get_vertex_count(Element::Type type)
 	case (Type::TETRAHEDRON):
 	    return 4;
 
+	case (Type::BRICK):
 	case (Type::HEXAHEDRON):
 	    return 8;
 
