@@ -48,9 +48,6 @@ private:
 	double m_y_interface_area;
 	double m_z_interface_area;
 
-	std::unique_ptr<double[]> m_cellCentroids;
-	std::unique_ptr<double[]> m_interfaceCentroids;
-
 	std::unique_ptr<CollapsedArray2D<double> > m_normals;
 
 	void create_vertices();

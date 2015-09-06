@@ -88,7 +88,7 @@ public:
 	void unset_connect();
 	int* get_connect() const;
 
-	void set_centroid(double * const centroid);
+	void set_centroid(std::unique_ptr<double[]> centroid);
 	double * get_centroid() const;
 
 	int get_face_count() const;
@@ -107,10 +107,9 @@ private:
 	int m_id;
 	int m_local_id;
 
-	double *m_centroid;
-
 	Element::Type m_type;
-	
+
+	std::unique_ptr<double[]> m_centroid;
 	std::unique_ptr<int[]> m_connect;
 
 	Element(const Element &other) = delete;

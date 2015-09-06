@@ -51,8 +51,6 @@ private:
 	vector<double> m_tree_area;
 	vector<double> m_tree_volume;
 
-	std::unique_ptr<double[]> m_centroids;
-
 	std::unique_ptr<CollapsedArray2D<double> > m_normals;
 
 	void update_vertices();

@@ -236,8 +236,6 @@ void PatchCartesian::create_cells()
 
 	m_cells.reserve(nTotalCells);
 
-	m_cellCentroids = std::unique_ptr<double[]>(new double[get_dimension() * nTotalCells]);
-
 	// Create the cells
 	double cellCenter[get_dimension()];
 	for (int i = 0; i < m_nCells1D[Node::COORD_X]; i++) {
@@ -267,12 +265,12 @@ void PatchCartesian::create_cells()
 					cellCenter[Node::COORD_Z] = 0.5 * (m_z[k] + m_z[k+1]);
 				}
 
-				double *cellCentroid = &m_cellCentroids[id_cell * get_dimension()];
+				std::unique_ptr<double[]> centroid = std::unique_ptr<double[]>(new double[get_dimension()]);
 				for (int k = 0; k < get_dimension(); k++) {
-					cellCentroid[k] = cellCenter[k];
+					centroid[k] = cellCenter[k];
 				}
 
-				cell.set_centroid(cellCentroid);
+				cell.set_centroid(std::move(centroid));
 
 				// Connettività
 				std::unique_ptr<int[]> connect = std::unique_ptr<int[]>(new int[nCellVertices]);
@@ -329,9 +327,6 @@ void PatchCartesian::create_interfaces()
 	for (unsigned int n = 0; n < m_cells.size(); n++) {
 		m_cells[n].initialize_empty_interfaces(nInterfacesForSide);
 	}
-
-	// Allocate space for centroid information
-	m_interfaceCentroids = std::unique_ptr<double[]>(new double[get_dimension() * nTotalInterfaces]);
 
 	// Create the interfaces
 	create_interfaces_direction(Node::COORD_X);
@@ -501,8 +496,8 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 				interface.set_connect(std::move(connect));
 
 				// Centroid
-				double *centroid = new double[get_dimension()];
-				std::fill_n(centroid, get_dimension(), 0.0);
+				std::unique_ptr<double[]> centroid = std::unique_ptr<double[]>(new double[get_dimension()]);
+				std::fill_n(centroid.get(), get_dimension(), 0.0);
 
 				for (int n = 0; n < nInterfaceVertices; n++) {
 					Node &vertex = m_vertices[interface.get_vertex(n)];
@@ -517,7 +512,7 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 					centroid[k] /= nInterfaceVertices;
 				}
 
-				interface.set_centroid(centroid);
+				interface.set_centroid(std::move(centroid));
 
 				// Normal
 				interface.set_normal(m_normals->get(ownerFace));

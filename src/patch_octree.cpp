@@ -274,8 +274,6 @@ void PatchOctree::import_cells()
 
 	int nCells = m_nInternalCells + m_nGhostsCells;
 
-	m_centroids = std::unique_ptr<double[]>(new double[get_dimension() * nCells]);
-
 	m_cell_to_octant.reserve(nCells);
 	m_cells.reserve(nCells);
 	for (int n = 0; n < nCells; n++) {
@@ -334,12 +332,12 @@ void PatchOctree::import_cells()
 		cell.set_volume(&m_tree_volume[octantLevel]);
 
 		// Centroide
-		double *cellCentroid = &m_centroids[n * get_dimension()];
+		std::unique_ptr<double[]> centroid = std::unique_ptr<double[]>(new double[get_dimension()]);
 		for (int k = 0; k < get_dimension(); k++) {
-			cellCentroid[k] = octantCentroid[k];
+			centroid[k] = octantCentroid[k];
 		}
 
-		cell.set_centroid(cellCentroid);
+		cell.set_centroid(std::move(centroid));
 
 		// Connettività
 		vector<uint32_t> octantConnect;
