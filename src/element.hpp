@@ -100,6 +100,8 @@ public:
 	static int get_vertex_count(Element::Type type);
 	int get_vertex(const int &vertex) const;
 
+	double eval_min_length() const;
+
 protected:
 	static const int NULL_ELEMENT_ID;
 
