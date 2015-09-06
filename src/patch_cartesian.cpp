@@ -221,9 +221,9 @@ void PatchCartesian::create_cells()
 	// Info on the cells
 	int nCellVertices;
 	if (is_three_dimensional()) {
-		nCellVertices = Element::get_vertex_count(Element::HEXAHEDRON);
+		nCellVertices = Element::get_vertex_count(Element::BRICK);
 	} else {
-		nCellVertices = Element::get_vertex_count(Element::QUADRANGLE);
+		nCellVertices = Element::get_vertex_count(Element::RECTANGLE);
 	}
 
 	// Count the cells
@@ -249,9 +249,9 @@ void PatchCartesian::create_cells()
 
 				// Tipo
 				if (is_three_dimensional()) {
-					cell.set_type(Element::HEXAHEDRON);
+					cell.set_type(Element::BRICK);
 				} else {
-					cell.set_type(Element::QUADRANGLE);
+					cell.set_type(Element::RECTANGLE);
 				}
 
 				// Position type
@@ -316,9 +316,9 @@ void PatchCartesian::create_interfaces()
 	// Allocate the space for interface information on the cells
 	int nCellFaces;
 	if (is_three_dimensional()) {
-		nCellFaces = Element::get_face_count(Element::HEXAHEDRON);
+		nCellFaces = Element::get_face_count(Element::BRICK);
 	} else {
-		nCellFaces = Element::get_face_count(Element::QUADRANGLE);
+		nCellFaces = Element::get_face_count(Element::RECTANGLE);
 	}
 
 	int nInterfacesForSide[nCellFaces];
@@ -382,7 +382,7 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 	// Info on the interfaces
 	int nInterfaceVertices;
 	if (is_three_dimensional()) {
-		nInterfaceVertices = Element::get_face_count(Element::QUADRANGLE);
+		nInterfaceVertices = Element::get_face_count(Element::RECTANGLE);
 	} else {
 		nInterfaceVertices = Element::get_face_count(Element::LINE);
 	}
