@@ -89,7 +89,7 @@ public:
 	int* get_connect() const;
 
 	void set_centroid(std::unique_ptr<double[]> centroid);
-	double * get_centroid() const;
+	const double * get_centroid() const;
 
 	int get_face_count() const;
 	static int get_face_count(Element::Type type);

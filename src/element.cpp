@@ -229,7 +229,7 @@ void Element::set_centroid(std::unique_ptr<double[]> centroid)
 
 	\return The centroid of the element.
 */
-double * Element::get_centroid() const
+const double * Element::get_centroid() const
 {
 	return m_centroid.get();
 }
