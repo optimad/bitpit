@@ -46,8 +46,8 @@ public:
 	int get_interface_count() const;
 	int get_interface_count(const int &face) const;
 	int get_interface(const int &face, const int &index = 0) const;
-	int * get_interfaces() const;
-	int * get_interfaces(const int &face) const;
+	const int * get_interfaces() const;
+	const int * get_interfaces(const int &face) const;
 
 	void set_data(std::unique_ptr<CellData> m_data);
 	CellData * get_data() const;

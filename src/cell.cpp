@@ -175,7 +175,7 @@ int Cell::get_interface(const int &face, const int &index) const
 
 	\result The interfaces of the cell.
 */
-int * Cell::get_interfaces() const
+const int * Cell::get_interfaces() const
 {
 	return m_interfaces->get(0);
 }
@@ -188,7 +188,7 @@ int * Cell::get_interfaces() const
 	\param face the face of the cell
 	\result The requested interfaces
 */
-int * Cell::get_interfaces(const int &face) const
+const int * Cell::get_interfaces(const int &face) const
 {
 	return m_interfaces->get(face);
 }
