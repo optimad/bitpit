@@ -238,9 +238,9 @@ void PatchOctree::import_cells()
 	// Info of the cells
 	int nCellVertices;
 	if (is_three_dimensional()) {
-		nCellVertices = Element::get_vertex_count(Element::HEXAHEDRON);
+		nCellVertices = Element::get_vertex_count(Element::BRICK);
 	} else {
-		nCellVertices = Element::get_vertex_count(Element::QUADRANGLE);
+		nCellVertices = Element::get_vertex_count(Element::RECTANGLE);
 	}
 
 	// Mapping della connettività
@@ -316,9 +316,9 @@ void PatchOctree::import_cells()
 
 		// Tipo
 		if (is_three_dimensional()) {
-			cell.set_type(Element::HEXAHEDRON);
+			cell.set_type(Element::BRICK);
 		} else {
-			cell.set_type(Element::QUADRANGLE);
+			cell.set_type(Element::RECTANGLE);
 		}
 
 		// Position
@@ -512,9 +512,9 @@ void PatchOctree::import_interfaces()
 	// Add interface information to the cells
 	int nCellFaces;
 	if (is_three_dimensional()) {
-		nCellFaces = Element::get_face_count(Element::HEXAHEDRON);
+		nCellFaces = Element::get_face_count(Element::BRICK);
 	} else {
-		nCellFaces = Element::get_face_count(Element::QUADRANGLE);
+		nCellFaces = Element::get_face_count(Element::RECTANGLE);
 	}
 
 	vector<vector<int>> interfaceList(nCellFaces, vector<int>(0));
