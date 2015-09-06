@@ -237,8 +237,7 @@ else ()
 	set( ${PACKAGE_NAME}_LIBRARY "${PACKAGE_NAME}_LIBRARY-NOTFOUND")
 endif ()
 
-# Set the include dir variables and the libraries and let libfind_process do the rest.
-# NOTE: Singular variables for this library, plural for libraries this lib depends on.
+# Let libfind_process initialize the appropriate variables
 libfind_process(${PACKAGE_NAME})
 
 # Update "last time" variables
