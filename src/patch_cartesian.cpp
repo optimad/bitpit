@@ -99,7 +99,7 @@ PatchCartesian::PatchCartesian(const int &id, const int &dimension,
 	for (int n = -1; n <= 1; n += 2) {
 		for (int i = 0; i < dimension; i++) {
 			std::vector<double> normal(dimension, 0);
-			normal[i] = 1.0;
+			normal[i] = n;
 
 			m_normals->push_back(dimension, normal.data());
 		}
