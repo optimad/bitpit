@@ -361,4 +361,56 @@ int Element::get_vertex(const int &vertex) const
 	return m_connect[vertex];
 }
 
+/*!
+	Evaluates the cross product of two arrays.
+
+	\param x the first a three-dimensional array
+	\param y the second a three-dimensional array
+	\param cross the array used to store the cross product.
+*/
+void Element::cross(double x[], double y[], double cross[])
+{
+	cross[0] = x[1] * y[2] - x[2] * y[1];
+	cross[1] = x[2] * y[0] - x[0] * y[2];
+	cross[2] = x[0] * y[1] - x[1] * y[0];
+}
+
+/*!
+	Normalizes an array.
+
+	\param x the array to be normalized
+	\param size the size of the array, if no size is specified the default
+	            size of 3 will be used
+*/
+void Element::normalize(double x[], int size)
+{
+	double module = 0.;
+	for (int k = 0; k < size; ++k) {
+		module += x[k] * x[k];
+	}
+	module = pow(module, 0.5);
+
+	for (int k = 0; k < size; ++k) {
+		x[k] /= module;
+	}
+}
+
+/*!
+	Evaluates the transpose of a matrix.
+
+	\param A the matrix
+	\param nRows the number of rows of the matrix
+	\param nCols the number of columns of the matrix
+*/
+void Element::transpose(double **A, const int &nRows, const int &nCols)
+{
+	for (int i = 1; i < nRows; i++) {
+		for (int j = i; j < nCols; j++) {
+			double tmp = A[i][j];
+			A[i][j] = A[j][i];
+			A[j][i] = tmp;
+		}
+	}
+}
+
 }

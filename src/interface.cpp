@@ -112,6 +112,150 @@ double * Interface::get_normal() const
 }
 
 /*!
+	Evaluates the rotation matrix from the Cartesian coordinate system
+	to the interface coordinate system.
+
+	\result The rotation matrix from the Cartesian coordinate system
+	to the interface coordinate system.
+*/
+double ** Interface::eval_rotation_from_cartesian()
+{
+	return eval_rotation_from_cartesian(m_normal, get_patch_dimension());
+}
+
+/*!
+	Evaluates the rotation matrix from the Cartesian coordinate system
+	to a coordinate system build starting from the specified versor.
+
+	Evaluates the rotation matrix that needs to be applied to the
+	Cartesian coordinate system to make it coincide with the
+	coordinates system defined starting from the specified versor.
+	The axes of the coordinate system are defined as follows:
+
+	  - the x axis is aligned with the versor;
+
+	  - in 2D the y axis is orthogonal to the x-axis and its direction
+	    is choosen to point left with respect to the x-axis;
+
+	                      ^ y
+	                      |
+	                      |
+	                      +-----> x
+
+	  - in 3D the y axis is normal to the plane where the axis x-versor
+	    and z-Cartesian lay, or, if this two vectors are aligned, to the
+	    plane where the axis x-versor and x-Cartesian lay;
+
+	  - the z axis is obtained evaluating the cross product of the axis
+	    x-versor and y-versor.
+
+	\param versor is the versor that defines the coordinate system
+	\param dimension is the dimension of the specified versor
+	\result The rotation matrix from the Cartesian coordinate system
+	to a coordinate system build starting from the specified versor.
+*/
+double ** Interface::eval_rotation_from_cartesian(double * versor, const int &dimension)
+{
+	// The rotation matrix has in its rows the versors that define
+	// the interface coordinate system.
+	//
+	//                | [x_int] |
+	//          R =   | [y_int] |
+	//                | [z_int] |
+	//
+	double **R = new double*[dimension];
+	for (int k = 0; k < dimension; ++k) {
+		R[k] = new double[dimension];
+	}
+
+	// x-interface axis
+	for (int k = 0; k < dimension; ++k) {
+		R[0][k] = versor[k];
+	}
+
+	// y-interface axis
+	if (dimension == 3) {
+		if (fabs(versor[2] - 1.) < 1e-8) {
+			double *x = new double[dimension];
+			x[0] = 1.0;
+
+			cross(x, R[0], R[1]);
+		} else {
+			double *z = new double[dimension];
+			z[2] = 1.0;
+
+			cross(z, R[0], R[1]);
+		}
+		normalize(R[1]);
+	} else {
+		R[1][0] = - versor[1];
+		R[1][1] =   versor[0];
+	}
+
+	// z-interface axis
+	if (dimension == 3) {
+		cross(R[0], R[1], R[2]);
+		normalize(R[2]);
+	}
+
+	return R;
+}
+
+/*!
+	Evaluates the rotation matrix from the interface coordinate system
+	to the Cartesian coordinate system.
+
+	Evaluates the rotation matrix that needs to be applied to the
+	coordinates system defined on the interface to make it coincide
+	with the Cartesian coordinates system.
+
+	\result The rotation matrix from the interface coordinate system
+	to the Cartesian coordinate system.
+*/
+double ** Interface::eval_rotation_to_cartesian()
+{
+	return eval_rotation_to_cartesian(m_normal, get_patch_dimension());
+}
+
+/*!
+	Evaluates the rotation matrix from the coordinate system build
+	starting from the specified versor to the Cartesian coordinate
+	system.
+
+	Evaluates the rotation matrix that needs to be applied to the
+	coordinates system defined starting from the specified versor
+	to make it coincide with the Cartesian coordinates system.
+	This matrix can be evaluated as the transpose of the rotation
+	matrix from the Cartesian coordinate system to the versor
+	coordinate system.
+
+	\param versor is the versor that defines the coordinate system
+	\param dimension is the dimension of the specified versor
+	\result The rotation matrix from the coordinate system build
+	starting from the specified versor to the Cartesian coordinate
+	system.
+*/
+double ** Interface::eval_rotation_to_cartesian(double * versor, const int &dimension)
+{
+	double** R = eval_rotation_from_cartesian(versor, dimension);
+	transpose(R, dimension, dimension);
+
+	return R;
+}
+
+/*!
+	Transpose the specified rotation matrix.
+
+	\param R the rotation matrix to transpose
+*/
+void Interface::transpose_rotation(double **R)
+{
+	int dimension = get_patch_dimension();
+
+	return transpose(R, dimension, dimension);
+}
+
+/*!
 	Sets the position type of the interface.
 
 	\param positionType the position type of the interface

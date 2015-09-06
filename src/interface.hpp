@@ -46,6 +46,11 @@ public:
 
 	void set_normal(double normal[]);
 	double * get_normal() const;
+	double ** eval_rotation_from_cartesian();
+	static double ** eval_rotation_from_cartesian(double * normal, const int &dimension);
+	double ** eval_rotation_to_cartesian();
+	static double ** eval_rotation_to_cartesian(double * normal, const int &dimension);
+	void transpose_rotation(double **R);
 
 	void set_area(double *area);
 	double get_area() const;

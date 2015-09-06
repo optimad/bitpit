@@ -101,6 +101,10 @@ public:
 protected:
 	static const int NULL_ELEMENT_ID;
 
+	static void cross(double x[], double y[], double cross[]);
+	static void normalize(double x[], int size = 3);
+	static void transpose(double **A, const int &nRows = 3, const int &nCols = 3);
+
 private:
 	Patch *m_patch;
 
