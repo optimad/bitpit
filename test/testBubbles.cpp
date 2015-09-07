@@ -47,7 +47,9 @@ int main(int argc, char *argv[]) {
 		uint32_t nocts = pabloBB.getNumOctants();
 
 		/**<Define and initialize a set of bubbles and their trajectories.*/
-		srand(time(NULL));
+		time_t Time = time(NULL)
+		srand(Time);
+		cout << "the seed = " << Time << endl;
 
 #if NOMPI==0
 		int nb = 100;
