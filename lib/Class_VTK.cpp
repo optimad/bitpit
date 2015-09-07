@@ -197,7 +197,7 @@ VTK::Field_C* VTK::AddData( string name_, int comp_, string type_, string loc_, 
     bool          allocate(true) ;
     VTK::Field_C* ptr(NULL) ;
     
-    if( ! GetFieldByName( name_, ptr ) ){
+    if( GetFieldByName( name_, ptr ) ){
         ptr->SetComponents(comp_) ;
         ptr->SetType(type_) ;
         ptr->SetLocation(loc_) ;
