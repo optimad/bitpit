@@ -56,7 +56,7 @@ public:
 protected:
 	double * _get_opposite_normal(double *normal);
 	bool _update(vector<uint32_t> &cellMapping);
-	void _mark_cell_for_refinement(const int &id);
+	bool _mark_cell_for_refinement(const int &id);
 
 private:
 	int m_nInternalCells;

@@ -88,9 +88,9 @@ bool Patch::update(std::vector<uint32_t> &cellMapping)
 */
 void Patch::mark_cell_for_refinement(const int &id)
 {
-	_mark_cell_for_refinement(id);
+	bool updated = _mark_cell_for_refinement(id);
 
-	set_dirty(true);
+	set_dirty(updated);
 }
 
 /*!
