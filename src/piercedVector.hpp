@@ -370,7 +370,7 @@ public:
 	*/
 	PiercedVector()
 	{
-		clear();
+		initialize_storage();
 	}
 
 	/*!
@@ -381,7 +381,7 @@ public:
 	*/
 	PiercedVector(size_type n)
 	{
-		clear();
+		initialize_storage();
 
 		m_v.reserve(n);
 	}
@@ -514,12 +514,8 @@ public:
 		m_pos.clear();
 		std::unordered_map<id_type, size_type, PiercedHasher>().swap(m_pos);
 
-		// Reset first and last counters
-		m_first_pos = 0;
-		m_last_pos  = 0;
-
-		// Add sentinel
-		append_sentinels(REQUIRED_SENTINEL_COUNT);
+		// Initialize storage
+		initialize_storage();
 	}
 
 	/*!
@@ -1445,6 +1441,19 @@ private:
 		}
 
 		return pos;
+	}
+
+	/*!
+		Initialize the vector use to store the elements.
+	*/
+	void initialize_storage()
+	{
+		// Reset first and last counters
+		m_first_pos = 0;
+		m_last_pos  = 0;
+
+		// Add sentinel
+		append_sentinels(REQUIRED_SENTINEL_COUNT);
 	}
 
 	/*!
