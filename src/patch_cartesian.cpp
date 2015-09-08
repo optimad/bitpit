@@ -132,7 +132,7 @@ double * PatchCartesian::_get_opposite_normal(double *normal)
 /*!
 	Updates the patch.
 */
-void PatchCartesian::_update(const std::vector<uint32_t> &cellMapping)
+void PatchCartesian::_update(std::vector<uint32_t> &cellMapping)
 {
 	UNUSED(cellMapping);
 

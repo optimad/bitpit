@@ -105,7 +105,7 @@ int PatchOctree::get_cell_octant(const int &id) const
 /*!
 	Updates the patch.
 */
-void PatchOctree::_update(const vector<uint32_t> &cellMapping)
+void PatchOctree::_update(vector<uint32_t> &cellMapping)
 {
 	if (!is_dirty()) {
 		return;

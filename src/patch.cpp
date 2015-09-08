@@ -62,7 +62,7 @@ void Patch::update()
 /*!
 	Updates the mesh
 */
-void Patch::update(const std::vector<uint32_t> &cellMapping)
+void Patch::update(std::vector<uint32_t> &cellMapping)
 {
 	// Update the mesh
 	_update(cellMapping);
