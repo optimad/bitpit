@@ -431,6 +431,8 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 					position = Interface::INTERNAL;
 				}
 
+				interface.set_position_type(position);
+
 				// Owner
 				int ownerIJK[SPACE_MAX_DIM];
 				for (int n = 0; n < SPACE_MAX_DIM; n++) {
