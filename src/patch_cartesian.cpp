@@ -465,7 +465,7 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 					interface.set_neigh(neigh.get_id(), neighFace);
 					neigh.set_interface(neighFace, 0, interface.get_id());
 				} else {
-					interface.unset_owner();
+					interface.unset_neigh();
 				}
 
 				// Connectivity
