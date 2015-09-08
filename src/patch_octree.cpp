@@ -597,6 +597,22 @@ bool PatchOctree::_mark_cell_for_refinement(const int &id)
 	return true;
 }
 
+/*!
+	Marks a cell for coarsening.
+
+	\param id is the id of the cell that needs to be coarsened
+*/
+bool PatchOctree::_mark_cell_for_coarsening(const int &id)
+{
+	if (is_three_dimensional()) {
+		m_tree_2D.setMarker(id, -1);
+	} else {
+		m_tree_3D.setMarker(id, -1);
+	}
+
+	return true;
+}
+
 }
 
 #endif

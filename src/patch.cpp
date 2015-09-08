@@ -94,6 +94,18 @@ void Patch::mark_cell_for_refinement(const int &id)
 }
 
 /*!
+	Marks a cell for coarsening.
+
+	\param id is the id of the cell that needs to be coarsened
+*/
+void Patch::mark_cell_for_coarsening(const int &id)
+{
+	bool updated = _mark_cell_for_coarsening(id);
+
+	set_dirty(updated);
+}
+
+/*!
 	Resest the patch.
 */
 void Patch::reset()

@@ -26,6 +26,7 @@ protected:
 	double * _get_opposite_normal(double *normal);
 	bool _update(std::vector<uint32_t> &cellMapping);
 	bool _mark_cell_for_refinement(const int &id);
+	bool _mark_cell_for_coarsening(const int &id);
 
 private:
 	static const int SPACE_MAX_DIM;

@@ -541,6 +541,21 @@ bool PatchCartesian::_mark_cell_for_refinement(const int &id)
 }
 
 /*!
+	Marks a cell for coarsening.
+
+	This is a void function since mesh coarsening is not implemented
+	for Cartesian meshes.
+
+	\param id the cell to be refined
+*/
+bool PatchCartesian::_mark_cell_for_coarsening(const int &id)
+{
+	UNUSED(id);
+
+	return false;
+}
+
+/*!
 	Converts the cell (i, j, k) notation to a single index notation
 */
 int PatchCartesian::cell_ijk_to_id(const int &i, const int &j, const int &k) const

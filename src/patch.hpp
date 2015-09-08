@@ -43,6 +43,7 @@ public:
 	bool update(std::vector<uint32_t> &cellMapping);
 
 	void mark_cell_for_refinement(const int &id);
+	void mark_cell_for_coarsening(const int &id);
 
 	bool is_dirty() const;
 
@@ -79,6 +80,7 @@ protected:
 	virtual double * _get_opposite_normal(double *normal) = 0;
 	virtual bool _update(std::vector<uint32_t> &cellMapping) = 0;
 	virtual bool _mark_cell_for_refinement(const int &id) = 0;
+	virtual bool _mark_cell_for_coarsening(const int &id) = 0;
 
 	void set_dirty(bool dirty);
 
