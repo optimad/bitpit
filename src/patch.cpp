@@ -54,7 +54,9 @@ double * Patch::get_opposite_normal(double *normal)
 */
 void Patch::update()
 {
-	update(std::vector<uint32_t>());
+	std::vector<uint32_t> mapper;
+
+	update(mapper);
 }
 
 /*!
