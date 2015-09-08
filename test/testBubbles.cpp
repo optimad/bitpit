@@ -49,7 +49,8 @@ int main(int argc, char *argv[]) {
 		/**<Define and initialize a set of bubbles and their trajectories.*/
 		time_t Time = time(NULL);
 		srand(Time);
-		cout << "the seed = " << Time << endl;
+		if(pabloBB.rank == 0)
+			cout << "the seed = " << Time << endl;
 
 #if NOMPI==0
 		int nb = 100;
