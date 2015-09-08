@@ -2559,9 +2559,10 @@ public:
 			int8_t m;
 			bool info[12];
 			//build send buffers from Head
+			int nofElementsFromSuccessiveToPrevious = 0;
 			if(headSize != 0){
 				for(int p = firstPredecessor; p >= 0; --p){
-					if(headSize <=partition[p]){
+					if(headSize < partition[p]){
 						int buffSize = headSize * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a',comm);
 						int pos = 0;
@@ -2585,10 +2586,11 @@ public:
 						break;
 					}
 					else{
-						int buffSize = partition[p] * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
+						nofElementsFromSuccessiveToPrevious = globalLastHead - (newPartitionRangeGlobalidx[p] - partition[p]);
+						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a',comm);
 						int pos = 0;
-						for(uint32_t i = (uint32_t)(lh - partition[p] + 1); i <= (uint32_t)lh; ++i){
+						for(uint32_t i = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1); i <= (uint32_t)lh; ++i){
 							//pack octants from lh - partition[p] to lh
 							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
@@ -2605,16 +2607,17 @@ public:
 								MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].commBuffer,buffSize,&pos,comm);
 							}
 						}
-						lh -= partition[p];
+						lh -= nofElementsFromSuccessiveToPrevious;
 						headSize = lh + 1;
 					}
 				}
 
 			}
+			int nofElementsFromPreviousToSuccessive = 0;
 			//build send buffers from Tail
 			if(tailSize != 0){
 				for(int p = firstSuccessor; p < nproc; ++p){
-					if(tailSize <= partition[p]){
+					if(tailSize < partition[p]){
 						int buffSize = tailSize * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a',comm);
 						int pos = 0;
@@ -2639,9 +2642,11 @@ public:
 						break;
 					}
 					else{
-						int buffSize = partition[p] * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
+						nofElementsFromPreviousToSuccessive = newPartitionRangeGlobalidx[p] - globalFirstTail + 1;
+						int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
+						//int buffSize = partition[p] * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a',comm);
-						uint32_t endOctants = ft + partition[p] - 1;
+						uint32_t endOctants = ft + nofElementsFromPreviousToSuccessive  - 1;
 						int pos = 0;
 						for(uint32_t i = ft; i <= endOctants; ++i ){
 							//PACK octants from ft to ft + partition[p] -1
@@ -2660,8 +2665,10 @@ public:
 								MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].commBuffer,buffSize,&pos,comm);
 							}
 						}
-						ft += partition[p];
-						tailSize -= partition[p];
+						//ft += partition[p];
+						//tailSize -= partition[p];
+						ft += nofElementsFromPreviousToSuccessive ;
+						tailSize -= nofElementsFromPreviousToSuccessive ;
 					}
 				}
 			}
