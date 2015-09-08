@@ -584,14 +584,14 @@ void PatchOctree::reload_interfaces()
 /*!
 	Marks a cell for refinement.
 
-	\param cell the cell to be refined
+	\param id is the id of the cell that needs to be refined
 */
-void PatchOctree::_mark_for_refinement(Cell &cell)
+void PatchOctree::_mark_for_refinement(const int &id)
 {
 	if (is_three_dimensional()) {
-		m_tree_2D.setMarker(cell.get_id(), 1);
+		m_tree_2D.setMarker(id, 1);
 	} else {
-		m_tree_3D.setMarker(cell.get_id(), 1);
+		m_tree_3D.setMarker(id, 1);
 	}
 }
 

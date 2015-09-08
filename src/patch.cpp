@@ -84,23 +84,13 @@ bool Patch::update(std::vector<uint32_t> &cellMapping)
 /*!
 	Marks a cell for refinement.
 
-	\param cell the cell to be refined
+	\param id is the id of the cell that needs to be refined
 */
-void Patch::mark_for_refinement(Cell &cell)
+void Patch::mark_for_refinement(const int &id)
 {
-	_mark_for_refinement(cell);
+	_mark_for_refinement(id);
 
 	set_dirty(true);
-}
-
-/*!
-	Marks a cell for refinement.
-
-	\param cellId index to the cell to be refined
-*/
-void Patch::mark_for_refinement(const int &cellId)
-{
-	mark_for_refinement(m_cells[cellId]);
 }
 
 /*!
