@@ -51,25 +51,34 @@ double * Patch::get_opposite_normal(double *normal)
 
 /*!
 	Updates the mesh
+
+	\result Returns true if the mesh was updated, false otherwise.
 */
-void Patch::update()
+bool Patch::update()
 {
 	std::vector<uint32_t> mapper;
 
-	update(mapper);
+	return update(mapper);
 }
 
 /*!
 	Updates the mesh
+
+	\result Returns true if the mesh was updated, false otherwise.
 */
-void Patch::update(std::vector<uint32_t> &cellMapping)
+bool Patch::update(std::vector<uint32_t> &cellMapping)
 {
 	// Update the mesh
-	_update(cellMapping);
+	bool updated = _update(cellMapping);
 	set_dirty(false);
+	if (!updated) {
+		return updated;
+	}
 
 	// Create the output data structures
 	output_initialize();
+
+	return updated;
 }
 
 /*!

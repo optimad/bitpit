@@ -131,13 +131,15 @@ double * PatchCartesian::_get_opposite_normal(double *normal)
 
 /*!
 	Updates the patch.
+
+	\result Returns true if the mesh was updated, false otherwise.
 */
-void PatchCartesian::_update(std::vector<uint32_t> &cellMapping)
+bool PatchCartesian::_update(std::vector<uint32_t> &cellMapping)
 {
 	UNUSED(cellMapping);
 
 	if (!is_dirty()) {
-		return;
+		return false;
 	}
 
 	std::cout << ">> Updating cartesian mesh\n";
@@ -146,6 +148,8 @@ void PatchCartesian::_update(std::vector<uint32_t> &cellMapping)
 	create_vertices();
 	create_cells();
 	create_interfaces();
+
+	return true;
 }
 
 /*!

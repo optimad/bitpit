@@ -24,7 +24,7 @@ public:
 
 protected:
 	double * _get_opposite_normal(double *normal);
-	void _update(std::vector<uint32_t> &cellMapping);
+	bool _update(std::vector<uint32_t> &cellMapping);
 	void _mark_for_refinement(Cell &cell);
 
 private:

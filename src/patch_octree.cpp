@@ -104,20 +104,27 @@ int PatchOctree::get_cell_octant(const int &id) const
 
 /*!
 	Updates the patch.
+
+	\result Returns true if the mesh was updated, false otherwise.
 */
-void PatchOctree::_update(vector<uint32_t> &cellMapping)
+bool PatchOctree::_update(vector<uint32_t> &cellMapping)
 {
 	if (!is_dirty()) {
-		return;
+		return false;
 	}
 
 	std::cout << ">> Updating the mesh\n";
 
 	// Updating the tree
+	bool updated;
 	if (is_three_dimensional()) {
-		m_tree_3D.adapt(cellMapping);
+		updated = m_tree_3D.adapt(cellMapping);
 	} else {
-		m_tree_2D.adapt(cellMapping);
+		updated = m_tree_2D.adapt(cellMapping);
+	}
+
+	if (!updated) {
+		return updated;
 	}
 
 	// Evaluate tree conenctivity
@@ -138,6 +145,8 @@ void PatchOctree::_update(vector<uint32_t> &cellMapping)
 	} else {
 		m_tree_2D.clearConnectivity();
 	}
+
+	return updated;
 }
 
 /*!
