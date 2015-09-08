@@ -353,9 +353,6 @@ void PatchOctree::import_cells()
 		}
 
 		cell.set_connect(std::move(connect));
-
-		// Struttura dati per le interfacce
-		// cell.initialize_interfaces(nInterfacesForSide);
 	}
 }
 
