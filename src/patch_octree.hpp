@@ -11,6 +11,7 @@
 
 #include "Class_Para_Tree.hpp"
 
+#include <assert.h>
 #include <cstddef>
 #include <vector>
 
@@ -32,6 +33,25 @@ public:
 	~PatchOctree();
 
 	int get_cell_octant(const int &id) const;
+
+	/*!
+		\brief Gets the octree associated with the patch.
+
+		\tparam dimension is the dimension of the octree. It MUST match the dimension
+		of the patch.
+		\result A pointer to the octree associated to the patch.
+	*/
+	template<int dimension>
+	Class_Para_Tree<dimension> * get_tree()
+	{
+		assert(dimension == get_dimension());
+
+		if (dimension == 2) {
+			return dynamic_cast<Class_Para_Tree<dimension> *>(&m_tree_2D);
+		} else {
+			return dynamic_cast<Class_Para_Tree<dimension> *>(&m_tree_3D);
+		}
+	}
 
 protected:
 	double * _get_opposite_normal(double *normal);
