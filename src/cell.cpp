@@ -12,6 +12,7 @@
 
 #include "cell.hpp"
 #include "interface.hpp"
+#include "patch.hpp"
 
 #include<iostream>
 
@@ -191,6 +192,63 @@ const int * Cell::get_interfaces() const
 const int * Cell::get_interfaces(const int &face) const
 {
 	return m_interfaces->get(face);
+}
+
+/*!
+	Extracts the neighbours of all faces of the cell.
+
+	\result The neighbours of all faces of the cell.
+*/
+std::vector<int> Cell::extract_face_neighs() const
+{
+	std::vector<int> neighs;
+	for (int i = 0; i < get_face_count(); ++i) {
+		// The list of neighbours is kept in ascending order and does not
+		// contain duplicates
+		std::vector<int> faceNeighs = extract_face_neighs(i);
+		for (auto &faceNeigh : faceNeighs) {
+			std::vector<int>::iterator itr = lower_bound(neighs.begin(), neighs.end(), faceNeigh);
+			if (itr == neighs.end() || *itr != faceNeigh) {
+				neighs.insert(itr, faceNeigh);
+			}
+		}
+	}
+
+	return neighs;
+}
+
+/*!
+	Extracts the neighbours of the specified face.
+
+	\param face is the face
+	\result The neighbours of the face.
+*/
+std::vector<int> Cell::extract_face_neighs(const int &face) const
+{
+	std::vector<int> neighs;
+	for (int i = 0; i < get_interface_count(face); ++i) {
+		int interfaceId = get_interface(face,i);
+		Interface &interface = get_patch()->get_interface(interfaceId);
+		if (interface.get_position_type() == Interface::BOUNDARY) {
+			continue;
+		}
+
+		int neigh;
+		if (interface.get_owner() != get_id()) {
+			neigh = interface.get_owner();
+		} else {
+			neigh = interface.get_neigh();
+		}
+
+		// The list of neighbours is kept in ascending order and does not
+		// contain duplicates
+		std::vector<int>::iterator itr = lower_bound(neighs.begin(), neighs.end(), neigh);
+		if (itr == neighs.end() || *itr != neigh) {
+			neighs.insert(itr, neigh);
+		}
+	}
+
+	return neighs;
 }
 
 /*!
