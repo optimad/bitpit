@@ -613,6 +613,23 @@ bool PatchOctree::_mark_cell_for_coarsening(const int &id)
 	return true;
 }
 
+/*!
+	Enables cell balancing.
+
+	\param id is the id of the cell
+	\param enabled defines if enable the balancing for the specified cell
+*/
+bool PatchOctree::_enable_cell_balancing(const int &id, bool enabled)
+{
+	if (is_three_dimensional()) {
+		m_tree_2D.setBalance(id, enabled);
+	} else {
+		m_tree_3D.setBalance(id, enabled);
+	}
+
+	return true;
+}
+
 }
 
 #endif

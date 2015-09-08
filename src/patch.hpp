@@ -44,6 +44,7 @@ public:
 
 	void mark_cell_for_refinement(const int &id);
 	void mark_cell_for_coarsening(const int &id);
+	void enable_cell_balancing(const int &id, bool enabled);
 
 	bool is_dirty() const;
 
@@ -81,6 +82,7 @@ protected:
 	virtual bool _update(std::vector<uint32_t> &cellMapping) = 0;
 	virtual bool _mark_cell_for_refinement(const int &id) = 0;
 	virtual bool _mark_cell_for_coarsening(const int &id) = 0;
+	virtual bool _enable_cell_balancing(const int &id, bool enabled) = 0;
 
 	void set_dirty(bool dirty);
 

@@ -106,6 +106,19 @@ void Patch::mark_cell_for_coarsening(const int &id)
 }
 
 /*!
+	Enables cell balancing.
+
+	\param id is the id of the cell
+	\param enabled defines if enable the balancing for the specified cell
+*/
+void Patch::enable_cell_balancing(const int &id, bool enabled)
+{
+	bool updated = _enable_cell_balancing(id, enabled);
+
+	set_dirty(updated);
+}
+
+/*!
 	Resest the patch.
 */
 void Patch::reset()

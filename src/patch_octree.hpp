@@ -58,6 +58,7 @@ protected:
 	bool _update(vector<uint32_t> &cellMapping);
 	bool _mark_cell_for_refinement(const int &id);
 	bool _mark_cell_for_coarsening(const int &id);
+	bool _enable_cell_balancing(const int &id, bool enabled);
 
 private:
 	int m_nInternalCells;
