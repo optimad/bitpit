@@ -505,17 +505,22 @@ public:
 	*/
 	void clear()
 	{
-		// Reset data strucutres
-		m_v.clear();
+		// Clear storage
+		if (!empty()) {
+			// Clear vector
+			m_v.clear();
 
+			// Initialize storage
+			initialize_storage();
+		}
+
+		// Clear holes
 		m_holes.clear();
 		std::deque<size_type>().swap(m_holes);
 
+		// Clear position map
 		m_pos.clear();
 		std::unordered_map<id_type, size_type, PiercedHasher>().swap(m_pos);
-
-		// Initialize storage
-		initialize_storage();
 	}
 
 	/*!
