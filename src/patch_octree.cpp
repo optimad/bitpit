@@ -423,6 +423,7 @@ void PatchOctree::import_interfaces()
 		vector<uint32_t> cells;
 		int ownerFace;
 		int ownerCell;
+		vector<double> faceCenter;
 		if (is_three_dimensional()) {
 			Class_Intersection<3> *treeInterface = m_tree_3D.getIntersection(n);
 
@@ -432,6 +433,7 @@ void PatchOctree::import_interfaces()
 			cells      = m_tree_3D.getOwners(treeInterface);
 			ownerFace  = m_tree_3D.getFace(treeInterface);
 			ownerCell  = m_tree_3D.getFiner(treeInterface) ? 0 : 1;
+			faceCenter = m_tree_3D.getCenter(treeInterface);
 		} else {
 			Class_Intersection<2> *treeInterface = m_tree_2D.getIntersection(n);
 
@@ -441,6 +443,7 @@ void PatchOctree::import_interfaces()
 			cells      = m_tree_2D.getOwners(treeInterface);
 			ownerFace  = m_tree_2D.getFace(treeInterface);
 			ownerCell  = m_tree_2D.getFiner(treeInterface) ? 0 : 1;
+			faceCenter = m_tree_2D.getCenter(treeInterface);
 		}
 
 		int ownerId = cells[ownerCell];
@@ -478,6 +481,12 @@ void PatchOctree::import_interfaces()
 		}
 
 		interface.set_normal(m_normals->get(normalIdx));
+
+		// Centroid
+		std::unique_ptr<double[]> centroid = std::unique_ptr<double[]>(new double[get_dimension()]);
+		std::copy_n(faceCenter.data(), get_dimension(), centroid.get());
+
+		interface.set_centroid(std::move(centroid));
 
 		// Position
 		if (isGhost) {
