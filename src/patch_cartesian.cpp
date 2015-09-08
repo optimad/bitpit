@@ -266,9 +266,7 @@ void PatchCartesian::create_cells()
 				}
 
 				std::unique_ptr<double[]> centroid = std::unique_ptr<double[]>(new double[get_dimension()]);
-				for (int k = 0; k < get_dimension(); k++) {
-					centroid[k] = cellCenter[k];
-				}
+				std::copy_n(cellCenter, get_dimension(), centroid.get());
 
 				cell.set_centroid(std::move(centroid));
 
