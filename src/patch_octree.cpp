@@ -115,9 +115,9 @@ void PatchOctree::_update(vector<uint32_t> &cellMapping)
 
 	// Updating the tree
 	if (is_three_dimensional()) {
-		m_tree_3D.adapt();
+		m_tree_3D.adapt(cellMapping);
 	} else {
-		m_tree_2D.adapt();
+		m_tree_2D.adapt(cellMapping);
 	}
 
 	// Evaluate tree conenctivity
