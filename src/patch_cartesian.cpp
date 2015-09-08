@@ -533,7 +533,7 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 
 	\param id is the id of the cell that needs to be refined
 */
-void PatchCartesian::_mark_for_refinement(Cell &id)
+void PatchCartesian::_mark_cell_for_refinement(const int &id)
 {
 	UNUSED(id);
 }

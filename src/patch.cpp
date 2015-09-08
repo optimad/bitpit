@@ -86,9 +86,9 @@ bool Patch::update(std::vector<uint32_t> &cellMapping)
 
 	\param id is the id of the cell that needs to be refined
 */
-void Patch::mark_for_refinement(const int &id)
+void Patch::mark_cell_for_refinement(const int &id)
 {
-	_mark_for_refinement(id);
+	_mark_cell_for_refinement(id);
 
 	set_dirty(true);
 }
