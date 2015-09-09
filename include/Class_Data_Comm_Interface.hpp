@@ -33,7 +33,7 @@ template <class Impl>
 class Class_Data_Comm_Interface {
 public:
 	/*! Its user specification computes the specific size of data for an element.
-	 * \param[in] element local index.
+	 * \param[in] e Element local index.
 	 * \return the size of the data for the e element
 	 */
 	size_t size(const uint32_t e) const;
@@ -49,8 +49,8 @@ public:
 	 * buff.write(userdatum)
 	 * where userdatum can be any MPI compatible POD variable associated to the e element.
 	 * In case of a vector of double, called userdata, to store data, buff.write(userdata[e])
-	 * \param[in] buff, template communication buffer
-	 * \param[in] e, the element local index
+	 * \param[in] buff Template communication buffer
+	 * \param[in] e The element local index
 	 */
 	template<class Buffer>
 	void gather(Buffer & buff,const uint32_t e);
@@ -61,8 +61,8 @@ public:
 	 * buff.read(userdatum)
 	 * where userdatum can be any MPI compatible POD variable associated to the e element.
 	 * In case of a vector of double, called userdata, to store data, buff.read(userdata[e])
-	 * \param[in] buff, template communication buffer
-	 * \param[in] e, the element local index
+	 * \param[in] buff Template communication buffer
+	 * \param[in] e The element local index
 	 */
 	template<class Buffer>
 	void scatter(Buffer & buff,const uint32_t e);
