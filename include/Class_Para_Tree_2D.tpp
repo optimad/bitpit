@@ -3870,6 +3870,7 @@ public:
 				}
 
 			}
+			uint32_t nofElementsFromPreviousToSuccessive = 0;
 			//build send buffers from Tail
 			if(tailSize != 0){
 				for(int p = firstSuccessor; p < nproc; ++p){
