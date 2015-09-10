@@ -2564,7 +2564,8 @@ public:
 			if(headSize != 0){
 				for(int p = firstPredecessor; p >= 0; --p){
 					if(headSize < partition[p]){
-						intBuffer = abs(newPartitionRangeGlobalidx[p] - partition[p] );
+						intBuffer = (newPartitionRangeGlobalidx[p] - partition[p] );
+						intBuffer = abs(intBuffer);
 						nofElementsFromSuccessiveToPrevious = globalLastHead - abs(newPartitionRangeGlobalidx[p] - partition[p] );
 						if(nofElementsFromSuccessiveToPrevious > headSize)
 							nofElementsFromSuccessiveToPrevious  = headSize;
