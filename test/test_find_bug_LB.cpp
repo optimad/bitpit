@@ -69,6 +69,12 @@ int main(int argc, char *argv[]) {
                 if(pablo.rank==3 || pablo.rank==4)
                         pablo.setMarker((uint32_t)0,1);
                 pablo.adapt();
+                if(pablo.rank==3)
+                        pablo.setMarker((uint32_t)0,1);
+                pablo.adapt();
+                if(pablo.rank==3)
+                        pablo.setMarker((uint32_t)0,1);
+                pablo.adapt();
                 pablo.loadBalance();
 
                 /**<Update the connectivity and write the para_tree.*/
