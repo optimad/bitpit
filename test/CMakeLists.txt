@@ -243,3 +243,15 @@ TARGET_LINK_LIBRARIES(testBubbles3D PABLO)
 
 #---------------------------------------
 
+#Build test_find_bug_LB.cpp
+SET(test_find_bug_LB_src test_find_bug_LB.cpp)
+
+add_executable(test_find_bug_LB ${test_find_bug_LB_src})
+
+IF(WITHOUT_MPI EQUAL 0)
+target_link_libraries(test_find_bug_LB mpi)
+ENDIF(WITHOUT_MPI EQUAL 0)
+TARGET_LINK_LIBRARIES(test_find_bug_LB PABLO)
+
+#---------------------------------------
+

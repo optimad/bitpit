@@ -2563,18 +2563,24 @@ public:
 			if(headSize != 0){
 				for(int p = firstPredecessor; p >= 0; --p){
 					if(headSize < partition[p]){
+
+						nofElementsFromSuccessiveToPrevious = globalLastHead - abs(newPartitionRangeGlobalidx[p] - partition[p] );
+						if(nofElementsFromSuccessiveToPrevious > headSize)
+							nofElementsFromSuccessiveToPrevious  = headSize;
+
 						int buffSize = headSize * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a',comm);
 						int pos = 0;
-						for(uint32_t i = 0; i <= (uint32_t)lh; ++i){
+						//for(uint32_t i = 0; i <= (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1); ++i){
+						for(uint32_t i = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1); i <= (uint32_t)lh; ++i){
 							//PACK octants from 0 to lh in sendBuffer[p]
 							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							for(int i = 0; i < 12; ++i)
-								info[i] = octant.info[i];
+							for(int ii = 0; ii < 12; ++ii)
+								info[ii] = octant.info[ii];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&pos,comm);
 							error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&pos,comm);
 							error_flag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].commBuffer,buffSize,&pos,comm);
@@ -2583,10 +2589,17 @@ public:
 								MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].commBuffer,buffSize,&pos,comm);
 							}
 						}
-						break;
+
+						if(nofElementsFromSuccessiveToPrevious == headSize)
+							break;
+
+						lh -= nofElementsFromSuccessiveToPrevious;
+						globalLastHead -= nofElementsFromSuccessiveToPrevious;
+						headSize = lh + 1;
+
 					}
 					else{
-						nofElementsFromSuccessiveToPrevious = globalLastHead - (newPartitionRangeGlobalidx[p] - partition[p]);
+						nofElementsFromSuccessiveToPrevious = globalLastHead - abs(newPartitionRangeGlobalidx[p] - partition[p]);
 						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a',comm);
 						int pos = 0;
