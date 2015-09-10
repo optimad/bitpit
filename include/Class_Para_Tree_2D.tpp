@@ -2649,7 +2649,7 @@ public:
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a',comm);
 						int pos = 0;
 						uint32_t octantsSize = (uint32_t)octree.octants.size();
-						for(uint32_t i = ft; i < octantsSize; ++i){
+						for(uint32_t i = ft; i < ft + nofElementsFromPreviousToSuccessive; ++i){
 							//PACK octants from ft to octantsSize-1
 							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
