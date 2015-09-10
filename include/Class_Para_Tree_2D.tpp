@@ -2628,6 +2628,8 @@ public:
 						lh -= nofElementsFromSuccessiveToPrevious;
 						globalLastHead -= nofElementsFromSuccessiveToPrevious;
 						headSize = lh + 1;
+						if(headSize == 0)
+							break;
 					}
 				}
 
@@ -2701,6 +2703,8 @@ public:
 						ft += nofElementsFromPreviousToSuccessive;
 						globalFirstTail += nofElementsFromPreviousToSuccessive;
 						tailSize -= nofElementsFromPreviousToSuccessive;
+						if(tailSize == 0)
+							break;
 					}
 				}
 			}
