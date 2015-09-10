@@ -2608,6 +2608,7 @@ public:
 							}
 						}
 						lh -= nofElementsFromSuccessiveToPrevious;
+						globalLastHead -= nofElementsFromSuccessiveToPrevious;
 						headSize = lh + 1;
 					}
 				}
@@ -2667,8 +2668,9 @@ public:
 						}
 						//ft += partition[p];
 						//tailSize -= partition[p];
-						ft += nofElementsFromPreviousToSuccessive ;
-						tailSize -= nofElementsFromPreviousToSuccessive ;
+						ft += nofElementsFromPreviousToSuccessive;
+						globalFirstTail += nofElementsFromPreviousToSuccessive;
+						tailSize -= nofElementsFromPreviousToSuccessive;
 					}
 				}
 			}
@@ -2994,6 +2996,7 @@ public:
 							}
 						}
 						lh -= nofElementsFromSuccessiveToPrevious;
+						globalLastHead -= nofElementsFromSuccessiveToPrevious;
 						headSize = lh + 1;
 					}
 				}
@@ -3051,6 +3054,7 @@ public:
 							}
 						}
 						ft += nofElementsFromPreviousToSuccessive;
+						globalFirstTail += nofElementsFromPreviousToSuccessive;
 						tailSize -= nofElementsFromPreviousToSuccessive;
 					}
 				}
@@ -3406,6 +3410,7 @@ public:
 							userData.gather(sendBuffers[p],i);
 						}
 						lh -= nofElementsFromSuccessiveToPrevious;
+						globalLastHead -= nofElementsFromSuccessiveToPrevious;
 						headSize = lh + 1;
 					}
 				}
@@ -3490,6 +3495,7 @@ public:
 							userData.gather(sendBuffers[p],i);
 						}
 						ft += nofElementsFromPreviousToSuccessive;
+						globalFirstTail += nofElementsFromPreviousToSuccessive;
 						tailSize -= nofElementsFromPreviousToSuccessive;
 					}
 				}
@@ -3865,6 +3871,7 @@ public:
 							userData.gather(sendBuffers[p],i);
 						}
 						lh -= nofElementsFromSuccessiveToPrevious;
+						globalLastHead -= nofElementsFromSuccessiveToPrevious;
 						headSize = lh + 1;
 					}
 				}
@@ -3950,6 +3957,7 @@ public:
 							userData.gather(sendBuffers[p],i);
 						}
 						ft += nofElementsFromPreviousToSuccessive;
+						globalFirstTail += nofElementsFromPreviousToSuccessive;
 						tailSize -= nofElementsFromPreviousToSuccessive;
 					}
 				}
