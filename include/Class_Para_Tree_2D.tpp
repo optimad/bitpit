@@ -2638,7 +2638,12 @@ public:
 			if(tailSize != 0){
 				for(int p = firstSuccessor; p < nproc; ++p){
 					if(tailSize < partition[p]){
-						int buffSize = tailSize * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
+
+						nofElementsFromPreviousToSuccessive = newPartitionRangeGlobalidx[p] - globalFirstTail + 1;
+						if(nofElementsFromPreviousToSuccessive > tailSize || contatore == 1)
+							nofElementsFromPreviousToSuccessive = tailSize;
+
+						int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a',comm);
 						int pos = 0;
 						uint32_t octantsSize = (uint32_t)octree.octants.size();
@@ -2649,8 +2654,8 @@ public:
 							y = octant.getY();
 							l = octant.getLevel();
 							m = octant.getMarker();
-							for(int i = 0; i < 12; ++i)
-								info[i] = octant.info[i];
+							for(int ii = 0; ii < 12; ++ii)
+								info[ii] = octant.info[ii];
 							error_flag = MPI_Pack(&x,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&pos,comm);
 							error_flag = MPI_Pack(&y,1,MPI_UINT32_T,sendBuffers[p].commBuffer,buffSize,&pos,comm);
 							error_flag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].commBuffer,buffSize,&pos,comm);
@@ -2659,7 +2664,13 @@ public:
 								MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].commBuffer,buffSize,&pos,comm);
 							}
 						}
-						break;
+
+						if(nofElementsFromPreviousToSuccessive == tailSize)
+							break;
+						ft += nofElementsFromPreviousToSuccessive;
+						globalFirstTail += nofElementsFromPreviousToSuccessive;
+						tailSize -= nofElementsFromPreviousToSuccessive;
+						++contatore;
 					}
 					else{
 						nofElementsFromPreviousToSuccessive = newPartitionRangeGlobalidx[p] - globalFirstTail + 1;
