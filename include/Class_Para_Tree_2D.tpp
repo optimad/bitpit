@@ -2558,12 +2558,13 @@ public:
 			uint8_t l;
 			int8_t m;
 			bool info[12];
+			int intBuffer = 0;
 			//build send buffers from Head
 			uint32_t nofElementsFromSuccessiveToPrevious = 0;
 			if(headSize != 0){
 				for(int p = firstPredecessor; p >= 0; --p){
 					if(headSize < partition[p]){
-
+						intBuffer = abs(newPartitionRangeGlobalidx[p] - partition[p] );
 						nofElementsFromSuccessiveToPrevious = globalLastHead - abs(newPartitionRangeGlobalidx[p] - partition[p] );
 						if(nofElementsFromSuccessiveToPrevious > headSize)
 							nofElementsFromSuccessiveToPrevious  = headSize;
