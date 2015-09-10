@@ -2604,7 +2604,7 @@ public:
 
 					}
 					else{
-						nofElementsFromSuccessiveToPrevious = globalLastHead - abs(newPartitionRangeGlobalidx[p] - partition[p]);
+						nofElementsFromSuccessiveToPrevious = globalLastHead - (newPartitionRangeGlobalidx[p] - partition[p]);
 						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a',comm);
 						int pos = 0;
