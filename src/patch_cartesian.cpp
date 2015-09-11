@@ -2,6 +2,12 @@
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
 
+#include "patch_cartesian.hpp"
+
+#include <math.h>
+
+namespace pman {
+
 /*!
 	\class PatchCartesian
 
@@ -9,12 +15,6 @@
 
 	PatchCartesian defines a Cartesian patch.
 */
-
-#include "patch_cartesian.hpp"
-
-#include <math.h>
-
-namespace pman {
 
 const int PatchCartesian::SPACE_MAX_DIM = 3;
 
