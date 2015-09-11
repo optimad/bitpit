@@ -2,6 +2,12 @@
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
 
+#include "node.hpp"
+
+#include <limits>
+
+namespace pman {
+
 /*!
 	\class Node
 
@@ -9,12 +15,6 @@
 
 	Node is class that defines the nodes.
 */
-
-#include "node.hpp"
-
-#include <limits>
-
-namespace pman {
 
 const int Node::NULL_NODE_ID = std::numeric_limits<int>::min();
 
