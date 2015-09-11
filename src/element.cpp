@@ -418,7 +418,7 @@ double Element::eval_min_length() const
 		const double *coords_A = node_A.get_coords();
 		const double *coords_B = node_B.get_coords();
 		const double *coords_C = node_C.get_coords();
-		const double *coords_D = node_C.get_coords();
+		const double *coords_D = node_D.get_coords();
 
 		double length_x = 0.0;
 		double length_y = 0.0;
