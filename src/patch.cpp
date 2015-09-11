@@ -2,6 +2,12 @@
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
 
+#include <sstream>
+
+#include "patch.hpp"
+
+namespace pman {
+
 /*!
 	\class Patch
 
@@ -9,12 +15,6 @@
 
 	Patch is the base class for defining patches like .
 */
-
-#include <sstream> 
-
-#include "patch.hpp"
-
-namespace pman {
 
 /*!
 	Creates a new patch.
