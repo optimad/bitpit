@@ -2,6 +2,13 @@
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
 
+#include "element.hpp"
+#include "patch.hpp"
+
+#include <limits>
+
+namespace pman {
+
 /*!
 	\class Element
 
@@ -52,13 +59,6 @@
 	\var Element::Type Element::POLYHEDRON
 	A polyhedron.
 */
-
-#include "element.hpp"
-#include "patch.hpp"
-
-#include <limits>
-
-namespace pman {
 
 const int Element::NULL_ELEMENT_ID = std::numeric_limits<int>::min();
 
