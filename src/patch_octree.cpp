@@ -2,6 +2,13 @@
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
 
+#ifndef DISABLE_OCTREE
+#include "patch_octree.hpp"
+
+#include <math.h>
+
+namespace pman {
+
 /*!
 	\class PatchOctree
 
@@ -9,13 +16,6 @@
 
 	PatchOctree defines a Octree patch.
 */
-
-#ifndef DISABLE_OCTREE
-#include "patch_octree.hpp"
-
-#include <math.h>
-
-namespace pman {
 
 /*!
 	Creates a new patch.
