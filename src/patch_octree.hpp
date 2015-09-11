@@ -33,6 +33,7 @@ public:
 	~PatchOctree();
 
 	int get_cell_octant(const int &id) const;
+	int get_cell_level(const int &id);
 
 	/*!
 		\brief Gets the octree associated with the patch.

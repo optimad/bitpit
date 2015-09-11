@@ -103,6 +103,22 @@ int PatchOctree::get_cell_octant(const int &id) const
 }
 
 /*!
+	Gets the refinement level of the cell with the specified id.
+
+	\param id is the id of the cell
+	\result The refinement level of the specified cell.
+*/
+int PatchOctree::get_cell_level(const int &id)
+{
+	int octant = get_cell_octant(id);
+	if (is_three_dimensional()) {
+		return m_tree_3D.getLevel(octant);
+	} else {
+		return m_tree_2D.getLevel(octant);
+	}
+}
+
+/*!
 	Updates the patch.
 
 	\result Returns true if the mesh was updated, false otherwise.
