@@ -29,7 +29,7 @@
  *	The user has to implement all the methods of the base class in his derived class.
  *	These user's methods will really do the job.
  *
- *	An example of user derived class can be found in test folder for the case of a double datum for each grid element.
+ *	An example of user derived class can be found,[here](https://github.com/optimad/PABLO/blob/master/test/User_Data_LB.hpp),in test folder for the case of a double datum for each grid element.
  *
  *	Easily speaking, only the user knows his data and through the interface specialization he states the size of element data, how to write/read and move them in a communication buffer.
  */
@@ -53,7 +53,7 @@ public:
 
 	/*!  Its user specification writes the e element data to be communicated during the load balance in the buffer.
 	 *
-	 * The user has not to care about the buffer but a char buffer is available in PABLO, Class_Comm_Buffer. This class has an important method, write.
+	 * The user has not to care about the buffer but a char buffer is available in PABLO, Class_Comm_Buffer. This class has an important method, Class_Comm_Buffer#write.
 	 * This method has to be used to allocate any single element datum in the communication buffer, as follow
 	 * ~~~~~~~~~~~~~~~~~~~{.c}
 	 * buff.write(userdatum)
@@ -71,7 +71,7 @@ public:
 
 	/*!  Its user specification reads the e element data from the communication buffer and store them in the user data container.
 	 *
-	 * The user has not to care about the buffer but a char buffer is available in PABLO, Class_Comm_Buffer. This class has an important method, Class_Comm_Buffer::read().
+	 * The user has not to care about the buffer but a char buffer is available in PABLO, Class_Comm_Buffer. This class has an important method, Class_Comm_Buffer#read().
 	 * This method has to be used to read any single element datum from the communication buffer, as follow
 	 * ~~~~~~~~~~~~~~~~~~~{.c}
 	 * buff.read(userdatum)
