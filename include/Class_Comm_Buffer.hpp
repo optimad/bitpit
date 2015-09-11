@@ -20,7 +20,23 @@ using namespace std;
 // =================================================================================== //
 // CLASS DEFINITION                                                                    //
 // =================================================================================== //
-
+/*!
+ *	\date			09/sep/2015
+ *	\authors		Edoardo Lombardi
+ *	\authors		Marco Cisternino
+ *	\version		0.1
+ *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
+ *	\par			License
+ *	This version of PABLO is released under the LGPL License.
+ *
+ *	\brief Bundle char container for communications
+ *
+ *	This calls is intended to provide the user with a basic container for data MPI communications.
+ *
+ *	The user should use this container implementing his communications interface specializations.
+ *
+ *	More precisely, he has to call read/write methods to read/write every MPI-compatible POD datum in the buffer. By this way, data communications are data independent.
+ */
 class Class_Comm_Buffer {
 
 	template<int dim> friend class Class_Para_Tree;
@@ -46,8 +62,15 @@ public:
 	//TODO routines write and read to write and read POD types in buffer
 	Class_Comm_Buffer& operator=(const Class_Comm_Buffer& rhs);
 
+	/*! This method writes a MPI-compatible POD datum of type T in commBuffer
+	 * \param[in] val The values that has to be written in the buffer.
+	 */
 	template<class T>
 	void write(T& val);
+
+	/*! This method reads from commBuffer the user MPI-compatible POD datum of type T.
+	 * \param[in] val The values that has to be read from the buffer.
+	 */
 	template<class T>
 	void read(T& val);
 };
