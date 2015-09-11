@@ -2,14 +2,6 @@
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
 
-/*!
-	\class Cell
-
-	\brief The Cell class defines the cells.
-
-	Cell is class that defines the cells.
-*/
-
 #include "cell.hpp"
 #include "interface.hpp"
 #include "patch.hpp"
@@ -17,6 +9,14 @@
 #include<iostream>
 
 namespace pman {
+
+/*!
+	\class Cell
+
+	\brief The Cell class defines the cells.
+
+	Cell is class that defines the cells.
+*/
 
 /*!
 	Default constructor.
