@@ -2,6 +2,12 @@
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
 
+#include "cell.hpp"
+#include "interface.hpp"
+#include "patch.hpp"
+
+namespace pman {
+
 /*!
 	\class Interface
 
@@ -9,6 +15,8 @@
 
 	Interface is class that defines the interfaces among cells.
 */
+
+
 
 /*!
 	\enum Interface::Position
@@ -36,12 +44,6 @@
 	\var Interface::Type Interface::RIGHT
 	Right side of the interface.
 */
-
-#include "cell.hpp"
-#include "interface.hpp"
-#include "patch.hpp"
-
-namespace pman {
 
 /*!
 	Default constructor.
