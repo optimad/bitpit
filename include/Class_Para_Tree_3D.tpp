@@ -2149,148 +2149,172 @@ private:
 
 	//=================================================================================//
 
-
 	void computePartition(uint32_t* partition, dvector* weight){ 		// compute octant partition giving the same number of octant to each process and redistributing the reminder
 
-		double division_result = 0;
-		double remind = 0;
-		dvector local_weight(nproc,0.0);
-		dvector temp_local_weight(nproc,0.0);
-		dvector2D sending_weight(nproc, dvector(nproc,0.0));
-		double* rbuff = new double[nproc];
-		double global_weight = 0.0;
-		for (int i=0; i<weight->size(); i++){
-			local_weight[rank] += (*weight)[i];
+		if(serial){
+
+			double division_result = 0;
+			double global_weight = 0.0;
+			for (int i=0; i<weight->size(); i++){
+				global_weight += (*weight)[i];
+			}
+
+			division_result = global_weight/(double)nproc;
+
+			//Estimate sending weight by each proc in initial conf (sending tail)
+			uint32_t i = 0, tot = 0;
+			int iproc = 0;
+			while (iproc < nproc-1){
+				double partial_weight = 0.0;
+				partition[iproc] = 0;
+				while(partial_weight < division_result){
+					partial_weight += (*weight)[i];
+					tot++;
+					partition[iproc]++;
+					i++;
+				}
+				iproc++;
+			}
+			partition[nproc-1] = weight->size() - tot;
+
 		}
-		error_flag = MPI_Allgather(&local_weight[rank],1,MPI_DOUBLE,rbuff,1,MPI_DOUBLE,comm);
-		for (int i=0; i<nproc; i++){
-			local_weight[i] = rbuff[i];
-			global_weight += rbuff[i];
-		}
-		delete [] rbuff; rbuff = NULL;
-		division_result = global_weight/(double)nproc;
+		else{
 
-		cout << division_result << endl;
-
-		//Estimate resulting weight distribution starting from proc 0 (sending tail)
-
-		temp_local_weight = local_weight;
-		//Estimate sending weight by each proc in initial conf (sending tail)
-
-		for (int iter = 0; iter < nproc+1; iter++){
-
+			double division_result = 0;
+			double remind = 0;
+			dvector local_weight(nproc,0.0);
+			dvector temp_local_weight(nproc,0.0);
+			dvector2D sending_weight(nproc, dvector(nproc,0.0));
+			double* rbuff = new double[nproc];
+			double global_weight = 0.0;
+			for (int i=0; i<weight->size(); i++){
+				local_weight[rank] += (*weight)[i];
+			}
+			error_flag = MPI_Allgather(&local_weight[rank],1,MPI_DOUBLE,rbuff,1,MPI_DOUBLE,comm);
 			for (int i=0; i<nproc; i++){
-
-				double post_weight = 0.0;
-				double pre_weight = 0.0;
-
-				for (int j=i+1; j<nproc; j++){
-					post_weight += temp_local_weight[j];
-				}
-				for (int j=i-1; j>=0; j--){
-					pre_weight += temp_local_weight[j];
-				}
-
-
-				if (temp_local_weight[i] > division_result){
-
-					if (post_weight < division_result*(nproc-i-1)){
-
-						int jproc = i+1;
-						remind = min(temp_local_weight[i] - division_result, local_weight[i]);
-						while (remind>0 && jproc<nproc){
-							double rec = 0.0;
-							for (int j=0; j++; j<jproc){
-								rec += sending_weight[j][jproc];
-							}
-							if (rec<division_result){
-								sending_weight[i][jproc] = min(remind-rec, min(remind,division_result));
-								temp_local_weight[jproc] += sending_weight[i][jproc];
-							}
-							remind -= sending_weight[i][jproc];
-							jproc++;
-						}
-
-					} //post
-					else if (pre_weight < division_result*(i)){
-
-						int jproc = i-1;
-						remind = min(temp_local_weight[i] - division_result, local_weight[i]);
-						while (remind>0 && jproc>=0){
-							double rec = 0.0;
-							for (int j=nproc-1; j--; j>jproc){
-								rec += sending_weight[j][jproc];
-							}
-							if (rec<division_result){
-								sending_weight[i][jproc] = min(remind-rec, min(remind,division_result));
-								temp_local_weight[jproc] += sending_weight[i][jproc];
-							}
-							remind -= sending_weight[i][jproc];
-							jproc--;
-						}
-
-					}//pre
-
-				}//weight>
-			}//iproc
-
-
-		}//iter
-
-
-
-		//Update partition locally
-		//to send
-		u32vector sending_cell(nproc,0);
-		int i = weight->size();
-		for (int jproc=nproc-1; jproc>rank; jproc--){
-			double pack_weight = 0.0;
-			while(pack_weight < sending_weight[rank][jproc]){
-				i--;
-				pack_weight += (*weight)[i];
-				sending_cell[jproc]++;
+				local_weight[i] = rbuff[i];
+				global_weight += rbuff[i];
 			}
-		}
-		partition[rank] = i;
-		i = 0;
-		for (int jproc=0; jproc<rank; jproc++){
-			double pack_weight = 0.0;
-			while(pack_weight < sending_weight[rank][jproc]){
-				i++;
-				pack_weight += (*weight)[i];
-				sending_cell[jproc]++;
+			delete [] rbuff; rbuff = NULL;
+			division_result = global_weight/(double)nproc;
+
+			//Estimate resulting weight distribution starting from proc 0 (sending tail)
+
+			temp_local_weight = local_weight;
+			//Estimate sending weight by each proc in initial conf (sending tail)
+
+			for (int iter = 0; iter < nproc+1; iter++){
+
+				for (int i=0; i<nproc; i++){
+
+					double post_weight = 0.0;
+					double pre_weight = 0.0;
+
+					for (int j=i+1; j<nproc; j++){
+						post_weight += temp_local_weight[j];
+					}
+					for (int j=i-1; j>=0; j--){
+						pre_weight += temp_local_weight[j];
+					}
+
+
+					if (temp_local_weight[i] > division_result){
+
+						if (post_weight < division_result*(nproc-i-1)){
+
+							int jproc = i+1;
+							remind = min(temp_local_weight[i] - division_result, local_weight[i]);
+							while (remind>0 && jproc<nproc){
+								double rec = 0.0;
+								for (int j=0; j++; j<jproc){
+									rec += sending_weight[j][jproc];
+								}
+								if (rec<division_result){
+									sending_weight[i][jproc] = min(remind-rec, min(remind,division_result));
+									temp_local_weight[jproc] += sending_weight[i][jproc];
+								}
+								remind -= sending_weight[i][jproc];
+								jproc++;
+							}
+
+						} //post
+						else if (pre_weight < division_result*(i)){
+
+							int jproc = i-1;
+							remind = min(temp_local_weight[i] - division_result, local_weight[i]);
+							while (remind>0 && jproc>=0){
+								double rec = 0.0;
+								for (int j=nproc-1; j--; j>jproc){
+									rec += sending_weight[j][jproc];
+								}
+								if (rec<division_result){
+									sending_weight[i][jproc] = min(remind-rec, min(remind,division_result));
+									temp_local_weight[jproc] += sending_weight[i][jproc];
+								}
+								remind -= sending_weight[i][jproc];
+								jproc--;
+							}
+
+						}//pre
+
+					}//weight>
+				}//iproc
+
+			}//iter
+
+
+			//Update partition locally
+			//to send
+			u32vector sending_cell(nproc,0);
+			int i = weight->size();
+			for (int jproc=nproc-1; jproc>rank; jproc--){
+				double pack_weight = 0.0;
+				while(pack_weight < sending_weight[rank][jproc]){
+					i--;
+					pack_weight += (*weight)[i];
+					sending_cell[jproc]++;
+				}
 			}
+			partition[rank] = i;
+			i = 0;
+			for (int jproc=0; jproc<rank; jproc++){
+				double pack_weight = 0.0;
+				while(pack_weight < sending_weight[rank][jproc]){
+					i++;
+					pack_weight += (*weight)[i];
+					sending_cell[jproc]++;
+				}
+			}
+			partition[rank] -= i;
+
+			//to receive
+			u32vector rec_cell(nproc,0);
+			MPI_Request* req = new MPI_Request[nproc*2];
+			MPI_Status* stats = new MPI_Status[nproc*2];
+			int nReq = 0;
+			for (int iproc=0; iproc<nproc; iproc++){
+				error_flag = MPI_Irecv(&rec_cell[iproc],1,MPI_UINT32_T,iproc,rank,comm,&req[nReq]);
+				++nReq;
+			}
+			for (int iproc=0; iproc<nproc; iproc++){
+				error_flag =  MPI_Isend(&sending_cell[iproc],1,MPI_UINT32_T,iproc,iproc,comm,&req[nReq]);
+				++nReq;
+			}
+			MPI_Waitall(nReq,req,stats);
+
+			delete [] req; req = NULL;
+			delete [] stats; stats = NULL;
+
+			i = 0;
+			for (int jproc=0; jproc<nproc; jproc++){
+				i+= rec_cell[jproc];
+			}
+
+			partition[rank] += i;
+
+			error_flag = MPI_Allgather(&partition[rank],1,MPI_UINT32_T,partition,1,MPI_UINT32_T,comm);
+
 		}
-		partition[rank] -= i;
-
-		//to receive
-		u32vector rec_cell(nproc,0);
-		MPI_Request* req = new MPI_Request[nproc*2];
-		MPI_Status* stats = new MPI_Status[nproc*2];
-		int nReq = 0;
-		for (int iproc=0; iproc<nproc; iproc++){
-			error_flag = MPI_Irecv(&rec_cell[iproc],1,MPI_UINT32_T,iproc,rank,comm,&req[nReq]);
-			++nReq;
-		}
-		for (int iproc=0; iproc<nproc; iproc++){
-			error_flag =  MPI_Isend(&sending_cell[iproc],1,MPI_UINT32_T,iproc,iproc,comm,&req[nReq]);
-			++nReq;
-		}
-		MPI_Waitall(nReq,req,stats);
-
-		delete [] req; req = NULL;
-		delete [] stats; stats = NULL;
-
-		i = 0;
-		for (int jproc=0; jproc<nproc; jproc++){
-			i+= rec_cell[jproc];
-		}
-
-		partition[rank] += i;
-
-		error_flag = MPI_Allgather(&partition[rank],1,MPI_UINT32_T,partition,1,MPI_UINT32_T,comm);
-
-
 	};
 
 	//=================================================================================//
@@ -3455,13 +3479,17 @@ public:
 	 * Until loadBalance is not called for the first time the mesh is serial.
 	 */
 	template<class Impl>
-	void loadBalance(Class_Data_LB_Interface<Impl> & userData){
+	void loadBalance(Class_Data_LB_Interface<Impl> & userData, dvector* weight = NULL){
 		//Write info on log
 		log.writeLog("---------------------------------------------");
 		log.writeLog(" LOAD BALANCE ");
 
 		uint32_t* partition = new uint32_t [nproc];
-		computePartition(partition);
+		if (weight == NULL)
+			computePartition(partition);
+		else
+			computePartition(partition, weight);
+
 		if(serial)
 		{
 			log.writeLog(" ");
