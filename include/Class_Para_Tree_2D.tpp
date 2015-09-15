@@ -3461,6 +3461,8 @@ public:
 		else
 			computePartition(partition, weight);
 
+		weight = NULL;
+
 		if(serial)
 		{
 			log.writeLog(" ");
