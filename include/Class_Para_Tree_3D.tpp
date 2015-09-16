@@ -2201,6 +2201,7 @@ private:
 			delete [] rbuff; rbuff = NULL;
 			division_result = global_weight/(double)nproc;
 
+			cout << "target : " << division_result << endl;
 
 			//Estimate resulting weight distribution starting from proc 0 (sending tail)
 
@@ -2258,7 +2259,7 @@ private:
 						if (pre_weight < division_result*(i)){
 
 							double pre_delta =  division_result*(i) - pre_weight;
-							double delta_sending = min(local_weight[i], min(delta[i], pre_delta));
+							double delta_sending = min(local_weight[i], min(temp_local_weight[i], min(delta[i], pre_delta)));
 							int jproc = i-1;
 							double sending = 0;
 							while (delta_sending > 0 && jproc >=0){
@@ -2280,7 +2281,8 @@ private:
 			//Update partition locally
 			//to send
 			u32vector sending_cell(nproc,0);
-			int i = (*weight).size();
+//			int i = (*weight).size();
+			int i = getNumOctants();
 			for (int jproc=nproc-1; jproc>rank; jproc--){
 				double pack_weight = 0.0;
 				while(pack_weight < sending_weight[rank][jproc] && i > 0){
@@ -2293,7 +2295,8 @@ private:
 			i = 0;
 			for (int jproc=0; jproc<rank; jproc++){
 				double pack_weight = 0.0;
-				while(pack_weight < sending_weight[rank][jproc] && i <  (*weight).size()-1){
+				//while(pack_weight < sending_weight[rank][jproc] && i <  (*weight).size()-1){
+					while(pack_weight < sending_weight[rank][jproc] && i <  getNumOctants()-1){
 					i++;
 					pack_weight += (*weight)[i];
 					sending_cell[jproc]++;
@@ -2324,7 +2327,11 @@ private:
 				i+= rec_cell[jproc];
 			}
 			partition[rank] += i;
+
+			cout << rank << " : " << partition[rank] << endl;
+
 			error_flag = MPI_Allgather(&partition[rank],1,MPI_UINT32_T,partition,1,MPI_UINT32_T,comm);
+
 		}
 	};
 
