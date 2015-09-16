@@ -2201,8 +2201,6 @@ private:
 			delete [] rbuff; rbuff = NULL;
 			division_result = global_weight/(double)nproc;
 
-			cout << "target : " << division_result << endl;
-
 			//Estimate resulting weight distribution starting from proc 0 (sending tail)
 
 			temp_local_weight = local_weight;
@@ -2327,8 +2325,6 @@ private:
 				i+= rec_cell[jproc];
 			}
 			partition[rank] += i;
-
-			cout << rank << " : " << partition[rank] << endl;
 
 			error_flag = MPI_Allgather(&partition[rank],1,MPI_UINT32_T,partition,1,MPI_UINT32_T,comm);
 
