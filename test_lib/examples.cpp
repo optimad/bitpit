@@ -364,12 +364,12 @@ Class_SurfTri           Tri;
 return; };
 
 // -------------------------------------------------------------------------- //
-void Demo_GenerationTools(
+void Demo_GenerationTools_3D(
     void
 ) {
 
 // ========================================================================== //
-// void Demo_GenerationTools(                                                 //
+// void Demo_GenerationTools_3D(                                              //
 //     void)                                                                  //
 //                                                                            //
 // Demo for generation tools.                                                 //
@@ -390,9 +390,7 @@ void Demo_GenerationTools(
 // Local variables
 bool                    stl_type = false;
 string                  stl_name = "../../datasets/cube.stl";
-ivector2D               S2E;
-dvecarr3E               NV;
-Class_SurfTri           Tri;
+Class_SurfTri           Tri, Tri2;
 Class_SurfTri           Edges;
 
 
@@ -404,7 +402,7 @@ Class_SurfTri           Edges;
     // none
 
     // Output message ------------------------------------------------------- //
-    cout << "============ Class_SurfTri: generation tools demo =============" << endl;
+    cout << "============ Class_SurfTri: generation tools demo (3D) ========" << endl;
 }
 
 // ========================================================================== //
@@ -415,7 +413,7 @@ Class_SurfTri           Edges;
     // none
 
     // Output message ------------------------------------------------------- //
-    cout << endl << " - Loading surface tasselation" << endl << endl;
+    cout << endl << " - Loading 3D surface tasselation" << endl << endl;
 
     // Import from dgf file ------------------------------------------------- //
     Tri.Import_stl(stl_name, stl_type);
@@ -442,9 +440,15 @@ Class_SurfTri           Edges;
     Tri.BuildAdjacency();
 
     // Build edges ---------------------------------------------------------- //
+
+    // Build edge-vertex and simplex-edge connectivities
+    Tri.BuildEdges();
+
+    // Copy edge network into a surf_tri class
     Edges.AddVertices(Tri.Vertex);
-    Edges.nSimplex = Tri.CountEdges();
-    Tri.BuildEdges(Edges.Simplex, S2E);
+    Edges.AddSimplicies(Tri.Edge);
+
+    // Export edge network to .vtu file
     Edges.Export_vtu("edges.vtu");
 
 }
@@ -461,10 +465,10 @@ Class_SurfTri           Edges;
     cout << endl << " - Generating edges normals" << endl << endl;
 
     // Generate edges normals ----------------------------------------------- //
-    Tri.GenerateENormals(Edges.Simplex, S2E, Edges.Normal);
+    Tri.GenerateENormals();
 
     // Export results ------------------------------------------------------- //
-    Edges.ExportVCData_vtu("Enorm.vtu", "n", Edges.Normal);
+    Edges.ExportVCData_vtu("Enormals.vtu", "n", Tri.ENormal);
 
 }
 
@@ -480,12 +484,252 @@ Class_SurfTri           Edges;
     cout << endl << " - Generating vertex normals" << endl << endl;
 
     // Generate edges normals ----------------------------------------------- //
-    Tri.GenerateVNormals(Edges.Simplex, S2E, Edges.Normal, NV);
+    Tri.GenerateVNormals();
 
     // Export results ------------------------------------------------------- //
-    Tri.ExportVPData_vtu("Vnorm.vtu", "n", NV);
+    Tri.ExportVPData_vtu("Vnormals.vtu", "n", Tri.VNormal);
 
 }
+
+// ========================================================================== //
+// TEST ASSIGNAMENT OPERATORS                                                 //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    // none
+
+    // Output message ------------------------------------------------------- //
+    cout << endl << " - Testing assignament operators" << endl << endl;
+
+    // Makes a copy --------------------------------------------------------- //
+    Tri2 = Tri;
+
+    // Export edge and vertex normals --------------------------------------- //
+    Edges.ExportVCData_vtu("Enormals_copy.vtu", "n", Tri2.ENormal);
+    Tri2.ExportVPData_vtu("Vnormals_copy.vtu", "n", Tri2.VNormal);
+    
+}
+
+// ========================================================================== //
+// TEST EDGE CONSTRUCTION WITH EXTERNAL VERTEX LIST                           //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    // none
+
+    // Output message ------------------------------------------------------- //
+    cout << endl << " - Testing edge/vertex normals construction with external vertex list" << endl << endl;
+
+    // Clean data structure ------------------------------------------------- //
+    Tri2.DestroyVertex();
+    Tri2.DestroyEdge();
+    Tri2.DestroySimplex2Edge();
+    Tri2.DestroyVNormal();
+    Tri2.DestroyENormal();
+
+    // Re-compute vertex normals -------------------------------------------- //
+    Tri2.GenerateVNormals(Tri.Vertex);
+    Tri2.AddVertices(Tri.Vertex);
+
+    // Export re-generated edge and vertex normals -------------------------- //
+    Edges.ExportVCData_vtu("Enormals_copy2.vtu", "n", Tri2.ENormal);
+    Tri2.ExportVPData_vtu("Vnormals_copy2.vtu", "n", Tri2.VNormal);
+
+}
+
+
+// ========================================================================== //
+// CLOSING MESSAGE                                                            //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    // none
+
+    // Output message ------------------------------------------------------- //
+    cout << "======================== DEMO: done!! =========================" << endl;
+}
+
+return; };
+
+// -------------------------------------------------------------------------- //
+void Demo_GenerationTools_2D(
+    void
+) {
+
+// ========================================================================== //
+// void Demo_GenerationTools_2D(                                              //
+//     void)                                                                  //
+//                                                                            //
+// Demo for generation tools.                                                 //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+string                  dgf_name = "../../datasets/naca0012.dgf";
+Class_SurfTri           Tri, Tri2;
+Class_SurfTri           Edges;
+
+
+// ========================================================================== //
+// OUTPUT MESSAGE                                                             //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    // none
+
+    // Output message ------------------------------------------------------- //
+    cout << "============ Class_SurfTri: generation tools demo (2D) ========" << endl;
+}
+
+// ========================================================================== //
+// LOAD TASSELATION FROM DGF FILE                                             //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    // none
+
+    // Output message ------------------------------------------------------- //
+    cout << endl << " - Loading 2D surface tasselation" << endl << endl;
+
+    // Import from dgf file ------------------------------------------------- //
+    Tri.Import_dgf(dgf_name);
+
+    // Export to vtk format ------------------------------------------------- //
+    Tri.Export_vtu("geom.vtu");
+
+}
+
+// ========================================================================== //
+// GENERATE EDGES                                                             //
+// ========================================================================== //
+{
+
+    // Scope variables ------------------------------------------------------ //
+    // none
+
+    // Output message ------------------------------------------------------- //
+    cout << endl << " - Cleaning input triangulation" << endl << endl;
+
+    // Clean input triangulation -------------------------------------------- //
+    Tri.RemoveDoubleVertex();
+    Tri.ResizeVertex();
+    Tri.BuildAdjacency();
+    Tri.GenerateNormals();
+    for (int i = 0; i < Tri.nSimplex; ++i) {
+        swap(Tri.Normal[i][0], Tri.Normal[i][1]);
+        Tri.Normal[i][1] = -Tri.Normal[i][1];
+    } //next i
+
+    // Build edges ---------------------------------------------------------- //
+
+    // Build edge-vertex and simplex-edge connectivities
+    Tri.BuildEdges();
+
+    // Copy edge network into a surf_tri class
+    Edges.AddVertices(Tri.Vertex);
+    Edges.AddSimplicies(Tri.Edge);
+
+    // Export edge network to .vtu file
+    Edges.Export_vtu("edges.vtu");
+
+}
+
+// ========================================================================== //
+// GENERATE EDES NORMALS                                                      //
+// ========================================================================== //
+{
+
+    // Scope variables ------------------------------------------------------ //
+    // none
+
+    // Output message ------------------------------------------------------- //
+    cout << endl << " - Generating edges normals" << endl << endl;
+
+    // Generate edges normals ----------------------------------------------- //
+    Tri.GenerateENormals();
+
+    // Export results ------------------------------------------------------- //
+    Edges.ExportVCData_vtu("Enormals.vtu", "n", Tri.ENormal);
+
+}
+
+// ========================================================================== //
+// GENERATE VERTEX NORMALS                                                    //
+// ========================================================================== //
+{
+
+    // Scope variables ------------------------------------------------------ //
+    // none
+
+    // Output message ------------------------------------------------------- //
+    cout << endl << " - Generating vertex normals" << endl << endl;
+
+    // Generate edges normals ----------------------------------------------- //
+    Tri.GenerateVNormals();
+
+    // Export results ------------------------------------------------------- //
+    Tri.ExportVPData_vtu("Vnormals.vtu", "n", Tri.VNormal);
+
+}
+
+// ========================================================================== //
+// TEST ASSIGNAMENT OPERATORS                                                 //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    // none
+
+    // Output message ------------------------------------------------------- //
+    cout << endl << " - Testing assignament operators" << endl << endl;
+
+    // Makes a copy --------------------------------------------------------- //
+    Tri2 = Tri;
+
+    // Export edge and vertex normals --------------------------------------- //
+    Edges.ExportVCData_vtu("Enormals_copy.vtu", "n", Tri2.ENormal);
+    Tri2.ExportVPData_vtu("Vnormals_copy.vtu", "n", Tri2.VNormal);
+    
+}
+
+// ========================================================================== //
+// TEST EDGE CONSTRUCTION WITH EXTERNAL VERTEX LIST                           //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    // none
+
+    // Output message ------------------------------------------------------- //
+    cout << endl << " - Testing edge/vertex normals construction with external vertex list" << endl << endl;
+
+    // Clean data structure ------------------------------------------------- //
+    Tri2.DestroyVertex();
+    Tri2.DestroyEdge();
+    Tri2.DestroySimplex2Edge();
+    Tri2.DestroyVNormal();
+    Tri2.DestroyENormal();
+
+    // Re-compute vertex normals -------------------------------------------- //
+    Tri2.GenerateVNormals(Tri.Vertex);
+    Tri2.AddVertices(Tri.Vertex);
+
+    // Export re-generated edge and vertex normals -------------------------- //
+    Edges.ExportVCData_vtu("Enormals_copy2.vtu", "n", Tri2.ENormal);
+    Tri2.ExportVPData_vtu("Vnormals_copy2.vtu", "n", Tri2.VNormal);
+
+}
+
+
 // ========================================================================== //
 // CLOSING MESSAGE                                                            //
 // ========================================================================== //
@@ -677,35 +921,35 @@ cout << "============= Class_SurfTri: cleaning tools 3 demo ==============" << e
 // CLOSING MESSAGE                                                            //
 // ========================================================================== //
 {
-    // Scope variables ------------------------------------------------------ //
-    // none
+//     // Scope variables ------------------------------------------------------ //
+//     // none
+// 
+//     ivector2D edges, edgesadj;
+//     Tri.BuildEdges(edges,edgesadj);
+// 
+//     int counter = 0;
+//     cout<<"Check every 1-ring in tassellation vertices...."<<endl;
+// 
+//     bvector1D checkV(Tri.nVertex, false);
+// 				
+//    for(int T=0; T<Tri.nSimplex; ++T)
+//    {
+//     for(int j=0; j<Tri.Simplex[0].size(); ++j)
+//     {
+//      bool check,isRing=true;
+//      if(!checkV[Tri.Simplex[T][j]])
+// 	{										
+//          ivector1D list = Tri.Ring_1(T,j,check, isRing);
+// 	 if(!isRing) {	cout<<"Failed Ring Computation for vertex "<<Tri.Simplex[T][j]<<" ring size was"<<list.size()<<endl;
+// 			counter++;								     
+// 	             }	
+//      	checkV[Tri.Simplex[T][j]] = true;
+//   	}	
+//     }
+//   }
 
-    ivector2D edges, edgesadj;
-    Tri.BuildEdges(edges,edgesadj);
-
-    int counter = 0;
-    cout<<"Check every 1-ring in tassellation vertices...."<<endl;
-
-    bvector1D checkV(Tri.nVertex, false);
-				
-   for(int T=0; T<Tri.nSimplex; ++T)
-   {
-    for(int j=0; j<Tri.Simplex[0].size(); ++j)
-    {
-     bool check,isRing=true;
-     if(!checkV[Tri.Simplex[T][j]])
-	{										
-         ivector1D list = Tri.Ring_1(T,j,check, isRing);
-	 if(!isRing) {	cout<<"Failed Ring Computation for vertex "<<Tri.Simplex[T][j]<<" ring size was"<<list.size()<<endl;
-			counter++;								     
-	             }	
-     	checkV[Tri.Simplex[T][j]] = true;
-  	}	
-    }
-  }
-
- cout<<"Total failed Rings caught:   "<<counter; 	
- if(counter>0) {cout<<"   Check your triangulation."<<endl;}
+//  cout<<"Total failed Rings caught:   "<<counter; 	
+//  if(counter>0) {cout<<"   Check your triangulation."<<endl;}
  // Output message ------------------------------------------------------- //
  cout << "======================== DEMO: done!! =========================" << endl;
 }

@@ -67,8 +67,9 @@ int         selection;
     cout << "===================== Class_SurfTri DEMO ===================== " << endl;
     cout << "'0': Cleaning tools demo 1" << endl;
     cout << "'1': Cleaning tools demo 2" << endl;
-    cout << "'2': Generation tools demo" << endl;
-    cout << "'3': Cleaning tools demo 3-RA version" << endl;
+    cout << "'2': Generation tools demo (2D)" << endl;
+    cout << "'3': Generation tools demo (3D)" << endl;
+    cout << "'4': Cleaning tools demo 3-RA version" << endl;
     cin >> selection;
 }
 
@@ -83,8 +84,9 @@ int         selection;
     switch (selection) {
         case 0: { Demo_CleaningTools();  break; }
         case 1: { Demo_CleaningTools2(); break; }
-        case 2: { Demo_GenerationTools(); break; }
-	case 3: { Demo_CleaningTools3(); break;}
+        case 2: { Demo_GenerationTools_2D(); break; }
+        case 3: { Demo_GenerationTools_3D(); break; }
+	case 4: { Demo_CleaningTools3(); break;}
 	default: break;	
     }
 }

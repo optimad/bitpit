@@ -83,7 +83,10 @@ void Demo_CleaningTools(                                                      //
 void Demo_CleaningTools2(                                                     // Class_SurfTri cleaning tools - demo 2
     void                                                                      // (input) none
 );
-void Demo_GenerationTools(                                                    // Class_SurfTri generation tools - demo
+void Demo_GenerationTools_2D(                                                 // Class_SurfTri generation tools (2D) - demo
+    void                                                                      // (input) none
+);
+void Demo_GenerationTools_3D(                                                 // Class_SurfTri generation tools (3D) - demo
     void                                                                      // (input) none
 );
 void Demo_CleaningTools3(void);

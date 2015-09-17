@@ -1422,7 +1422,7 @@ Class_SurfTri& Class_SurfTri::operator=(
 // ========================================================================== //
 
 // Local variables
-bool     flag_n, flag_a, flag_en, flag_vn;
+bool     flag_n, flag_a, flag_en, flag_vn, flag_ec, flag_sec;
 
 // Counters
 int      i, j, m;
@@ -1436,10 +1436,12 @@ if (B.Vertex.size() < B.nVertex) {
 if (B.Simplex.size() < B.nSimplex) {
     return(*this);
 }
-flag_n  = ((B.Normal.size() > 0) && (B.Normal.size() >= B.nSimplex));
-flag_en = ((B.ENormal.size() > 0) && (B.ENormal.size() >= B.nSimplex));
-flag_vn = ((B.VNormal.size() > 0) && (B.VNormal.size() >= B.nSimplex));
-flag_a  = ((B.Adjacency.size() > 0) && (B.Adjacency.size() >= B.nSimplex));
+flag_ec  = (B.Edge.size() > 0);
+flag_sec = ((B.Simplex2Edge.size() > 0) && (B.Simplex2Edge.size() >= B.nSimplex));
+flag_n   = ((B.Normal.size() > 0) && (B.Normal.size() >= B.nSimplex));
+flag_en  = ((B.ENormal.size() > 0) && (B.ENormal.size() >= 0));
+flag_vn  = ((B.VNormal.size() > 0) && (B.VNormal.size() >= B.nVertex));
+flag_a   = ((B.Adjacency.size() > 0) && (B.Adjacency.size() >= B.nSimplex));
 
 // ========================================================================== //
 // COPY SOURCE VARIABLES INTO *THIS                                           //
@@ -1461,28 +1463,29 @@ for (i = 0; i < nSimplex; i++) {
     Simplex[i] = B.Simplex[i];
 } //next i
 
+// Copy edge-vertex connectivity
+if (flag_ec) {
+    Edge = B.Edge;
+}
+
+// Copy simplex-edge connectivity
+if (flag_sec) {
+    Simplex2Edge = B.Simplex2Edge;
+}
+
 // Copy normals
 if (flag_n) {
-    ResizeNormal();
-    for (i = 0; i < nSimplex; i++) {
-        Normal[i] = B.Normal[i];
-    } //next i
+    Normal = B.Normal;
 }
 
 // Copy edge normals
 if (flag_en) {
-    ResizeENormal();
-    for (i = 0; i < nSimplex; i++) {
-        ENormal[i] = B.ENormal[i];
-    } //next i
+    ENormal = B.ENormal;
 }
 
 // Copy vertex normals
 if (flag_vn) {
-    ResizeVNormal();
-    for (i = 0; i < nSimplex; i++) {
-        VNormal[i] = B.VNormal[i];
-    } //next i
+    VNormal = B.VNormal;
 }
 
 // Copy adjacency matrix
