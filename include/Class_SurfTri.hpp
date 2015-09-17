@@ -134,12 +134,6 @@ class Class_SurfTri {
 
     // Reshape -------------------------------------------------------------- //
     public:
-    void ReshapeVertex(                                                       // Reshape vertex list
-        int                  dim = 3                                          // (input/optional) simplex type
-    );
-    void ReshapeNormal(                                                       // Reshape normals' list
-        int                  dim = 3                                          // (input/optional) simplex type
-    );
     void ReshapeSimplex(                                                      // Reshape simplex-vertex connectivity
         int                                                                   // (input/optional) simplex type
     );

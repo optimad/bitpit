@@ -718,7 +718,7 @@ int              I_, m;
 
 // Reshape Normal list ------------------------------------------------------ //
 if ((Normal.size() == 0) || (Normal.size() < nSimplex)) {
-    ReshapeNormal();
+    ResizeNormal();
 }
 
 // Update normal for each simplex ------------------------------------------- //
@@ -820,7 +820,7 @@ int              I_, m;
 
 // Reshape normal list ------------------------------------------------------ //
 if ((Normal.size() == 0) || (Normal.size() < nSimplex)) {
-    ReshapeNormal();
+    ResizeNormal();
 }
 
 // Loop over simplicies ----------------------------------------------------- //
