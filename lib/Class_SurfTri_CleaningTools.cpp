@@ -886,9 +886,7 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::GenerateENormals(
-    ivector2D   &Edges,
-    ivector2D   &EdgeAdj,
-    dvecarr3E   &Enormals
+    void
 ) {
 
 // ========================================================================== //
@@ -901,13 +899,7 @@ void Class_SurfTri::GenerateENormals(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - Edges    : ivector1D, edge-vertex connectivity. Edges[i] stores the      //
-//              the global indices of the i-th tasselation edge.              //
-// - EdgeAdj  : ivector1D, simplex-edge connectivity. EdgeAdj[i][j] is the    //
-//              global indices of the j-th edge of the i-th simplex           //
-// - Enormals : dvecarr3E, edges normal unit vector. Enormals[i][0],          //
-//              Enormals[i][1], ... are the x, y, ... components of the       //
-//              normal unit vector to the i-th edge                           //
+// - none                                                                     //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -919,8 +911,7 @@ void Class_SurfTri::GenerateENormals(
 // ========================================================================== //
 
 // Local variables
-darray3E    temp;
-temp.fill(0.) ;
+darray3E    tmp;
 
 // Counters
 int         T, i, j, m, nE;
@@ -928,8 +919,10 @@ int         T, i, j, m, nE;
 // ========================================================================== //
 // GENERATE EDGES                                                             //
 // ========================================================================== //
-if ((Edges.size() == 0) || (EdgeAdj.size() == 0) || (Edges.size() != EdgeAdj.size())) {
-    BuildEdges(Edges, EdgeAdj);
+if ((Edge.size() == 0)
+ || (Simplex2Edge.size() == 0)
+ || (Edge.size() != Simplex2Edge.size())) {
+    BuildEdges();
 }
 
 // ========================================================================== //
@@ -942,8 +935,9 @@ if ((Normal.size() == 0) || (Normal.size() < nSimplex)) {
 // ========================================================================== //
 // RESIZE INPUT VARIABLES                                                     //
 // ========================================================================== //
-nE = Edges.size();
-Enormals.resize(nE, temp);
+nE = Edge.size();
+tmp.fill(0.);
+ENormal.resize(nE, tmp);
 
 // ========================================================================== //
 // GENERATE EDGE NORMALS                                                      //
@@ -953,49 +947,32 @@ Enormals.resize(nE, temp);
 for (T = 0; T < nSimplex; T++) {
     m = Simplex[T].size();
     for (i = 0; i < m; i++) {
-//ht        for (j = 0; j < dim; j++) {
-//ht            Enormals[EdgeAdj[T][i]][j] += Normal[T][j];
-//ht        } //next j
-
-        Enormals[EdgeAdj[T][i]] = Enormals[EdgeAdj[T][i]] + Normal[T];
+        ENormal[Simplex2Edge[T][i]] = ENormal[Simplex2Edge[T][i]] + Normal[T];
     } //next i
 } //next T
 
 // Normalization
 for (T = 0; T < nE; T++) {
-    Enormals[T] = Enormals[T]/norm_2(Enormals[T]);
+    ENormal[T] = ENormal[T]/norm_2(ENormal[T]);
 }
 
 return; }
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::GenerateENormals(
-    dvecarr3E   &X,
-    ivector2D   &Edges,
-    ivector2D   &EdgeAdj,
-    dvecarr3E   &Enormals
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
-// void Class_SurfTri::GenerateENormals(
-//     dvecarr3E   &X,                                                        //
-//     ivector2D   &Edges,                                                    //
-//     ivector2D   &EdgeAdj,                                                  //
-//     dvecarr3E   &Enormals)                                                 //
+// void Class_SurfTri::GenerateENormals(                                      //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
-// Compute edge normals.                                                      //
+// Compute edge normals. Vertex coordinate list is provided externally.       //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
 // - X        : dvecarr3E, vertex coordinate list. X[i][0], X[i][1], ...      //
 //              the x, y, ... coordinates of the i-th vertex.                 //
-// - Edges    : ivector1D, edge-vertex connectivity. Edges[i] stores the      //
-//              the global indices of the i-th tasselation edge.              //
-// - EdgeAdj  : ivector1D, simplex-edge connectivity. EdgeAdj[i][j] is the    //
-//              global indices of the j-th edge of the i-th simplex           //
-// - Enormals : dvecarr3E, edges normal unit vector. Enormals[i][0],          //
-//              Enormals[i][1], ... are the x, y, ... components of the       //
-//              normal unit vector to the i-th edge                           //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -1007,8 +984,7 @@ void Class_SurfTri::GenerateENormals(
 // ========================================================================== //
 
 // Local variables
-darray3E    temp;
-temp.fill(0.) ;
+darray3E    tmp;
 
 // Counters
 int         T, i, j, m, nE;
@@ -1016,8 +992,10 @@ int         T, i, j, m, nE;
 // ========================================================================== //
 // GENERATE EDGES                                                             //
 // ========================================================================== //
-if ((Edges.size() == 0) || (EdgeAdj.size() == 0) || (Edges.size() != EdgeAdj.size())) {
-    BuildEdges(Edges, EdgeAdj);
+if ((Edge.size() == 0)
+ || (Simplex2Edge.size() == 0)
+ || (Edge.size() != Simplex2Edge.size())) {
+    BuildEdges();
 }
 
 // ========================================================================== //
@@ -1030,8 +1008,9 @@ if ((Normal.size() == 0) || (Normal.size() < nSimplex)) {
 // ========================================================================== //
 // RESIZE INPUT VARIABLES                                                     //
 // ========================================================================== //
-nE = Edges.size();
-Enormals.resize(nE, temp);
+nE = Edge.size();
+tmp.fill(0.0);
+ENormal.resize(nE, tmp);
 
 // ========================================================================== //
 // GENERATE EDGE NORMALS                                                      //
@@ -1041,51 +1020,31 @@ Enormals.resize(nE, temp);
 for (T = 0; T < nSimplex; T++) {
     m = Simplex[T].size();
     for (i = 0; i < m; i++) {
-//ht        for (j = 0; j < dim; j++) {
-//ht            Enormals[EdgeAdj[T][i]][j] += Normal[T][j];
-//ht        } //next j
-
-            Enormals[EdgeAdj[T][i]] = Enormals[EdgeAdj[T][i]] + Normal[T] ;
+            ENormal[Simplex2Edge[T][i]] = ENormal[Simplex2Edge[T][i]] + Normal[T] ;
     } //next i
 } //next T
 
 // Normalization
 for (T = 0; T < nE; T++) {
-    Enormals[T] = Enormals[T]/norm_2(Enormals[T]);
+    ENormal[T] = ENormal[T]/norm_2(ENormal[T]);
 }
 
 return; }
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::GenerateVNormals(
-    ivector2D   &Edges,
-    ivector2D   &EdgeAdj,
-    dvecarr3E   &Enormals,
-    dvecarr3E   &Vnormals
+    void
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::GenerateVNormals(                                      //
-//     ivector2D   &Edges,                                                    //
-//     ivector2D   &EdgeAdj,                                                  //
-//     dvecarr3E   &Enormals,                                                 //
-//     dvecarr3E   &Vnormals)                                                 //
+//     void)                                                                  //
 //                                                                            //
 // Generate vertex normals from edge normals.                                 //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - Edges    : ivector1D, edge-vertex connectivity. Edges[i] stores the      //
-//              the global indices of the i-th tasselation edge.              //
-// - EdgeAdj  : ivector1D, simplex-edge connectivity. EdgeAdj[i][j] is the    //
-//              global indices of the j-th edge of the i-th simplex           //
-// - Enormals : dvecarr3E, edges normal unit vector. Enormals[i][0],          //
-//              Enormals[i][1], ... are the x, y, ... components of the       //
-//              normal unit vector to the i-th edge                           //
-// - Vnormals : dvecarr3E, normal unit vector at vertices. Vnormals[i][0],    //
-//              Vnormals[i][1], ... are the x, y, ... components of the       //
-//              normal unit vector to the i-th vertex of the surface          //
-//              tasselation.                                                  //
+// - none                                                                     //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -1098,8 +1057,7 @@ void Class_SurfTri::GenerateVNormals(
 
 // Local variables
 int             nE;
-darray3E        temp;
-temp.fill(0.) ;
+darray3E        tmp;
 
 // Counters
 int             V, T, i, j, m;
@@ -1114,73 +1072,53 @@ if ((Normal.size() == 0) || (Normal.size() < nSimplex)) {
 // ========================================================================== //
 // COMPUTE EDGES NORMALS IF NOT ALREADY COMPUTED                              //
 // ========================================================================== //
-if ((Enormals.size() == 0) || (Enormals.size() < Edges.size())) {
-    GenerateENormals(Edges, EdgeAdj, Enormals);
+if ((ENormal.size() == 0) || (ENormal.size() < Edge.size())) {
+    GenerateENormals();
 }
 
 // ========================================================================== //
 // RESIZE INPUT VARIABLES                                                     //
 // ========================================================================== //
-Vnormals.resize(nVertex, temp);
+tmp.fill(0.) ;
+VNormal.resize(nVertex, tmp);
 
 // ========================================================================== //
 // COMPUTE VERTEX NORMALS                                                     //
 // ========================================================================== //
 
 // Compute vertex normals --------------------------------------------------- //
-nE = Edges.size();
+nE = Edge.size();
 for (T = 0; T < nE; T++) {
-    m = Edges[T].size();
+    m = Edge[T].size();
     for (i = 0; i < m; i++) {
-        V = Edges[T][i];
-//        for (j = 0; j < dim; j++) {
-//            Vnormals[V][j] += Enormals[T][j];
-//        } //next j
-        Vnormals[V] = Vnormals[V] + Enormals[T];
+        V = Edge[T][i];
+        VNormal[V] = VNormal[V] + ENormal[T];
     } //next i
 } //next T
 
 // Normalization ------------------------------------------------------------ //
 for (T = 0; T < nVertex; T++) {
-    Vnormals[T] = Vnormals[T]/norm_2(Vnormals[T]);
+    VNormal[T] = VNormal[T]/norm_2(VNormal[T]);
 } //next T
 
 return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::GenerateVNormals(
-    dvecarr3E   &X,
-    ivector2D   &Edges,
-    ivector2D   &EdgeAdj,
-    dvecarr3E   &Enormals,
-    dvecarr3E   &Vnormals
+    dvecarr3E   &X
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::GenerateVNormals(                                      //
-//     dvecarr3E   &X,                                                        //
-//     ivector2D   &Edges,                                                    //
-//     ivector2D   &EdgeAdj,                                                  //
-//     dvecarr3E   &Enormals,                                                 //
-//     dvecarr3E   &Vnormals)                                                 //
+//     dvecarr3E   &X)                                                        //
 //                                                                            //
-// Generate vertex normals from edge normals.                                 //
+// Generate vertex normals from edge normals. Vertex coordinate list is       //
+// provided externally.                                                       //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
 // - X        : dvecarr3E, external vertex list. X[i][0], X[i][1], ... are    //
 //              x, y, ... coordinates of the i-th vertex.                     //
-// - Edges    : ivector1D, edge-vertex connectivity. Edges[i] stores the      //
-//              the global indices of the i-th tasselation edge.              //
-// - EdgeAdj  : ivector1D, simplex-edge connectivity. EdgeAdj[i][j] is the    //
-//              global indices of the j-th edge of the i-th simplex           //
-// - Enormals : dvecarr3E, edges normal unit vector. Enormals[i][0],          //
-//              Enormals[i][1], ... are the x, y, ... components of the       //
-//              normal unit vector to the i-th edge                           //
-// - Vnormals : dvecarr3E, normal unit vector at vertices. Vnormals[i][0],    //
-//              Vnormals[i][1], ... are the x, y, ... components of the       //
-//              normal unit vector to the i-th vertex of the surface          //
-//              tasselation.                                                  //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -1193,8 +1131,7 @@ void Class_SurfTri::GenerateVNormals(
 
 // Local variables
 int             nE, nV = X.size();
-darray3E        temp;
-temp.fill(0.) ;
+darray3E        tmp;
 
 // Counters
 int             V, T, i, j, m;
@@ -1209,35 +1146,33 @@ if ((Normal.size() == 0) || (Normal.size() < nSimplex)) {
 // ========================================================================== //
 // COMPUTE EDGES NORMALS IF NOT ALREADY COMPUTED                              //
 // ========================================================================== //
-if ((Enormals.size() == 0) || (Enormals.size() < Edges.size())) {
-    GenerateENormals(X, Edges, EdgeAdj, Enormals);
+if ((ENormal.size() == 0) || (ENormal.size() < Edge.size())) {
+    GenerateENormals(X);
 }
 
 // ========================================================================== //
 // RESIZE INPUT VARIABLES                                                     //
 // ========================================================================== //
-Vnormals.resize(nV, temp);
+tmp.fill(0.);
+VNormal.resize(nV, tmp);
 
 // ========================================================================== //
 // COMPUTE VERTEX NORMALS                                                     //
 // ========================================================================== //
 
 // Compute vertex normals --------------------------------------------------- //
-nE = Edges.size();
+nE = Edge.size();
 for (T = 0; T < nE; T++) {
-    m = Edges[T].size();
+    m = Edge[T].size();
     for (i = 0; i < m; i++) {
-        V = Edges[T][i];
-//ht        for (j = 0; j < dim; j++) {
-//ht            Vnormals[V][j] += Enormals[T][j];
-//ht        } //next j
-        Vnormals[V] = Vnormals[V] + Enormals[T];
+        V = Edge[T][i];
+        VNormal[V] = VNormal[V] + ENormal[T];
     } //next i
 } //next T
 
 // Normalization ------------------------------------------------------------ //
 for (T = 0; T < nV; T++) {
-    Vnormals[T] = Vnormals[T]/norm_2(Vnormals[T]);
+    VNormal[T] = VNormal[T]/norm_2(VNormal[T]);
 } //next T
 
 return; };
@@ -1743,23 +1678,18 @@ return; }
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::BuildEdges(
-    ivector2D   &Edges,
-    ivector2D   &EdgeAdj
+    void
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::BuildEdges(                                            //
-//     ivector2D   &Edges,                                                    //
-//     ivector2D   &EdgeAdj)                                                  //
+//     void)                                                                  //
 //                                                                            //
-// Build edge list.                                                           //
+// Build edge-vertex connectivity.                                            //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - Edges    : ivector1D, edge-vertex connectivity. Edges[i] stores the      //
-//              the global indices of the i-th tasselation edge.              //
-// - EdgeAdj  : ivector1D, simplex-edge connectivity. EdgeAdj[i][j] is the    //
-//              global indices of the j-th edge of the i-th simplex           //
+// - none                                                                     //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -1786,13 +1716,10 @@ if ((Adjacency.size() == 0) || (Adjacency.size() < nSimplex)) {
 }
 
 // ========================================================================== //
-// RESIZE INPUT VARIABLES                                                     //
+// RESIZE DATA STRUCTURE FOR EDGE-VERTEX AND SIMPLEX-EDGE CONNECITIVITY       //
 // ========================================================================== //
-Edges.resize(CountEdges());
-EdgeAdj.resize(nSimplex);
-for (T = 0; T < nSimplex; T++) {
-    EdgeAdj[T].resize(Simplex[T].size(), -1);
-} //next T
+Edge.resize(CountEdges());
+ReshapeSimplex2Edge();
 
 // ========================================================================== //
 // BUILD EDGE LIST                                                            //
@@ -1801,55 +1728,28 @@ E = 0;
 for (T = 0; T < nSimplex; T++) {
     n = Simplex[T].size();
     for (i = 0; i < n; i++) {
-        if (EdgeAdj[T][i] == -1) {
-
-		// Debug
-            if (E >= Edges.size()) {
-			cout << "error on simplex: " << T << "of " << nSimplex << " Adj: " << Adjacency[T] << endl;
-                        cout << "trying to access edge " << E << " of " << Edges.size() << endl;
-            }
+        if (Simplex2Edge[T][i] == -1) {
 
             // Update edge-vertex connectivity
             if (n == 2) {
-                Edges[E].resize(1, Simplex[T][i]);
+                Edge[E].resize(1, Simplex[T][i]);
             }
             else {
-                Edges[E].resize(2);
-                Edges[E][0] = Simplex[T][i];
-                Edges[E][1] = Simplex[T][(i+1) % n];
+                Edge[E].resize(2);
+                Edge[E][0] = Simplex[T][i];
+                Edge[E][1] = Simplex[T][(i+1) % n];
             }
 
             // Update simplex-edge connectivity
-            EdgeAdj[T][i] = E;
+            Simplex2Edge[T][i] = E;
             m = Adjacency[T][i].size();
-	    if (m > 1) {
-	        cout << "T - junction found" << endl;
-	        cout << "T: " << T << " adj of T, edge " << i << ": ";
-		for (j = 0; j < m; ++j) {
-		    cout << Adjacency[T][i][j] << " ";
-		} //next j
-		cout << endl;
-		
-	    }
-//             if ((Adjacency[T][i].size() > 1)) {
-// 		cout << T << Adjacency[T] << endl;
-// 			for (int id = 0; id < Adjacency[T].size(); id++) {
-// 				for (int jd = 0; jd < Adjacency[T][id].size(); jd++) {
-// 					cout << Adjacency[T][id][jd] << ": " << Adjacency[Adjacency[T][id][jd]] << endl;
-// 				}
-// 			}
-// 			cout << EdgeAdj[T] << endl;
-// 	     }
             for (j = 0; j < m; j++) {
                 A = Adjacency[T][i][j];
                 if (A >= 0) {
                     e = edge(A, T);
-                    EdgeAdj[A][e] = E;
+                    Simplex2Edge[A][e] = E;
                 }
-//                 if ((Adjacency[T][i].size() > 1)) { cout << A << " E " << E << EdgeAdj[A] << endl; }
             } //next j
-//             if ((Adjacency[T][i].size() > 1)) { cout << " ----- " << endl; }
-//             cout << E << " " << Edges.size() << endl;
 
             // Update edge counter
             E++;

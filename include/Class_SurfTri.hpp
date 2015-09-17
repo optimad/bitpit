@@ -89,7 +89,11 @@ class Class_SurfTri {
     double                  toll;                                             // tolerance for distance check
     dvecarr3E               Vertex;                                           // vertex list
     dvecarr3E               Normal;                                           // normals list
+    dvecarr3E               ENormal;                                          // edge normals
+    dvecarr3E               VNormal;                                          // vertex normals
     ivector2D               Simplex;                                          // Simplex-vertex connectivity
+    ivector2D               Edge;                                             // Edge-vertex connectivity
+    ivector2D               Simplex2Edge;                                     // Simplex-edge connectivity
     ivector3D               Adjacency;                                        // Simplex-Simplex adjacency
 
     // Class constructors =================================================== //
@@ -118,11 +122,23 @@ class Class_SurfTri {
     void ResizeNormal(                                                        // Resize normals' list
         void                                                                  // (input) none
     );
+    void ResizeENormal(                                                       // Resize edge normals' list
+        void                                                                  // (input) none
+    );
+    void ResizeVNormal(                                                       // Resize vertex normals' list
+        void                                                                  // (input) none
+    );
     void ResizeSimplex(                                                       // Resize simplex-vertex connectivity
         void                                                                  // (input) none
     );
     void ResizeSimplex(                                                       // Resize simplex-vertex connectivity
         int                                                                   // (input) simplex type
+    );
+    void ResizeEdge(                                                          // Resize edge-vertex connectivity
+        int       d = 2                                                       // (input/optional) number of entries in the i-th row of edge-vertex connectivity
+    );
+    void ResizeSimplex2Edge(                                                  // Resize simplex-edge connectivity
+        int       d = 3                                                       // (input/optional) number of edges for each of the new row
     );
     void ResizeAdjacency(                                                     // Resize simplex-simplex adjacency
         void                                                                  // (input) none
@@ -135,6 +151,9 @@ class Class_SurfTri {
     public:
     void ReshapeSimplex(                                                      // Reshape simplex-vertex connectivity
         int                                                                   // (input/optional) simplex type
+    );
+    void ReshapeSimplex2Edge(                                                 // Reshape simplex-edge connectivity
+        void                                                                  // (input) none
     );
     void ReshapeAdjacency(                                                    // Reshape simplex-simplex adjacency
         void                                                                  // (input) none
@@ -153,7 +172,19 @@ class Class_SurfTri {
     void DestroyNormal(                                                       // Destroy normals list
         void                                                                  // (input) none
     );
+    void DestroyENormal(                                                      // Destroy edge normals list
+        void                                                                  // (input) none
+    );
+    void DestroyVNormal(                                                      // Destroy vertex normals list
+        void                                                                  // (input) none
+    );
     void DestroySimplex(                                                      // Destroy vertex-simplex connectivity matrix
+        void                                                                  // (input) none
+    );
+    void DestroyEdge(                                                         // Destroy edge-vertex connectivity matrix
+        void                                                                  // (input) none
+    );
+    void DestroySimplex2Edge(                                                 // Destroy simplex-edge connectivity matrix
         void                                                                  // (input) none
     );
     void DestroyAdjacency(                                                    // Destroy adjacency matrix
@@ -168,7 +199,19 @@ class Class_SurfTri {
     void ClearNormal(                                                         // Clear normals list
         void                                                                  // (input) none
     );
+    void ClearENormal(                                                        // Clear edge normals list
+        void                                                                  // (input) none
+    );
+    void ClearVNormal(                                                        // Clear vertex normals list
+        void                                                                  // (input) none
+    );
     void ClearSimplex(                                                        // Clear vertex-simplex connectivity matrix
+        void                                                                  // (input) none
+    );
+    void ClearEdge(                                                           // Clear edge-vertex connectivity matrix
+        void                                                                  // (input) none
+    );
+    void ClearSimplex2Edge(                                                   // Clear simplex-edge connectivity matrix
         void                                                                  // (input) none
     );
     void ClearAdjacency(                                                      // Clear adjacency matrix
@@ -227,28 +270,16 @@ class Class_SurfTri {
         dvecarr3E           &                                                 // (input) external vertex list
     );
     void GenerateENormals(                                                    // Generate edge's normals
-        ivector2D           &,                                                // (input) edge-vertex connectivity
-        ivector2D           &,                                                // (input) simplex-edge connectivity
-        dvecarr3E           &                                                 // (input/output) edges' normals
+        void                                                                  // (input) none
     );
     void GenerateENormals(                                                    // Generate edge's normals using an external vertex list
-        dvecarr3E           &,                                                // (input) external vertex list
-        ivector2D           &,                                                // (input) edge-vertex connectivity
-        ivector2D           &,                                                // (input) simplex-edge connectivity
-        dvecarr3E           &                                                 // (input/output) edges' normals
+        dvecarr3E           &                                                 // (input) external vertex list
     );
     void GenerateVNormals(                                                    // Generate vertex normals
-        ivector2D           &,                                                // (input) edge-vertex connectivity
-        ivector2D           &,                                                // (input) simplex-edge connectivity
-        dvecarr3E           &,                                                // (input) edges' normals
-        dvecarr3E           &                                                 // (input/output) vertex normals
+        void
     );
     void GenerateVNormals(                                                    // Generate vertex normals using an external vertex list
-        dvecarr3E           &,                                                // (input) external vertex list
-        ivector2D           &,                                                // (input) edge-vertex connectivity
-        ivector2D           &,                                                // (input) simplex-edge connectivity
-        dvecarr3E           &,                                                // (input) edges' normals
-        dvecarr3E           &                                                 // (input/output) vertex normals
+        dvecarr3E           &                                                 // (input) external vertex list
     );
     void BuildAdjacency(                                                      // Build simplex-simplex adjacency matrix
         void                                                                  // (input) none
@@ -264,8 +295,7 @@ class Class_SurfTri {
         ivector1D           &                                                 // (input) list of simplicies to be updated
     );
     void BuildEdges(                                                          // Build edge list
-        ivector2D           &,                                                // (input/output) edges-vertex connectivity
-        ivector2D           &                                                 // (input/output) simplex/edges connectivity
+        void                                                                  // (input) none
     );
 
     // Counters ------------------------------------------------------------- //
