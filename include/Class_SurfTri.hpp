@@ -99,8 +99,7 @@ class Class_SurfTri {
     );
     Class_SurfTri(                                                            // Custom constructor #1
         int                  ,                                                // (input) number of vertices
-        int                  ,                                                // (input) number of simplicies
-        int                  dim = 3                                          // (input/optional) number of space dimensions
+        int                                                                   // (input) number of simplicies
     );
 
     // Class destructors ==================================================== //

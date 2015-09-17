@@ -72,15 +72,13 @@ return; };
 // -------------------------------------------------------------------------- //
 Class_SurfTri::Class_SurfTri(
     int nV,
-    int nS,
-    int dim
+    int nS
 ) {
 
 // ========================================================================== //
 // Class_SurfTri::Class_SurfTri(                                              //
 //     int nV,                                                                //
-//     int nS,                                                                //
-//     int dim)                                                               //
+//     int nS)                                                                //
 //                                                                            //
 // Custom constructor #1 for Class_SurfTri variables. Initialize an empty     //
 // surface tasselation with nV vertexes and nS simplicies                     //
@@ -89,7 +87,6 @@ Class_SurfTri::Class_SurfTri(
 // ========================================================================== //
 // - nV   : int, number of vertexes                                           //
 // - nS   : int, number of simplicies                                         //
-// - dim  : int (optional), number of space dimensions                        //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
