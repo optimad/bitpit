@@ -1087,18 +1087,30 @@ VNormal.resize(nVertex, tmp);
 // ========================================================================== //
 
 // Compute vertex normals --------------------------------------------------- //
-nE = Edge.size();
-for (T = 0; T < nE; T++) {
-    m = Edge[T].size();
-    for (i = 0; i < m; i++) {
-        V = Edge[T][i];
-        VNormal[V] = VNormal[V] + ENormal[T];
+/* ========================== algorithm #1 ================================== */
+// nE = Edge.size();
+// for (T = 0; T < nE; T++) {
+//     m = Edge[T].size();
+//     for (i = 0; i < m; i++) {
+//         V = Edge[T][i];
+//         VNormal[V] = VNormal[V] + ENormal[T];
+//     } //next i
+// } //next T
+
+/* ========================== algorithm #2 ================================== */
+double          angle;
+for (T = 0; T < nSimplex; ++T) {
+    m = Simplex[T].size();
+    for (i = 0; i < m; ++i) {
+        V = Simplex[T][i];
+        Angle(T, angle, i);
+        VNormal[V] = cos(angle) * Normal[T];
     } //next i
 } //next T
 
 // Normalization ------------------------------------------------------------ //
 for (T = 0; T < nVertex; T++) {
-    VNormal[T] = VNormal[T]/norm_2(VNormal[T]);
+    VNormal[T] = VNormal[T]/max(1.0e-16, norm_2(VNormal[T]));
 } //next T
 
 return; };
