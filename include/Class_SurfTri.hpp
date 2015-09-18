@@ -276,10 +276,11 @@ class Class_SurfTri {
         dvecarr3E           &                                                 // (input) external vertex list
     );
     void GenerateVNormals(                                                    // Generate vertex normals
-        void
+        unsigned char        flag = 0                                         // (input/optional) algorithm selection flag
     );
     void GenerateVNormals(                                                    // Generate vertex normals using an external vertex list
-        dvecarr3E           &                                                 // (input) external vertex list
+        dvecarr3E           &,                                                // (input) external vertex list
+        unsigned char        flag = 0                                         // (input/optional) algorithm selection flag
     );
     void BuildAdjacency(                                                      // Build simplex-simplex adjacency matrix
         void                                                                  // (input) none

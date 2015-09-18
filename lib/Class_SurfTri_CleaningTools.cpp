@@ -1033,18 +1033,23 @@ return; }
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::GenerateVNormals(
-    void
+    unsigned char flag
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::GenerateVNormals(                                      //
-//     void)                                                                  //
+//     unsigned char flag)                                                    //
 //                                                                            //
-// Generate vertex normals from edge normals.                                 //
+// Generate vertex normals using algorithm #1 or #2 depending on the value    //
+// of the input flag:                                                         //
+// algorithm #1 (flag = 0): compute normals as the weighted average of        //
+//                          normals of incident simplicies.                   //
+// algorithm #2 (flag = 1): compute normals as the weighted average of        //
+//                          normals of incident edges.                        //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - none                                                                     //
+// - flag    : unsigend char (default 0), flag for algorithm selection        //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -1089,27 +1094,39 @@ VNormal.resize(nVertex, tmp);
 // COMPUTE VERTEX NORMALS                                                     //
 // ========================================================================== //
 
-// Compute vertex normals --------------------------------------------------- //
-/* ========================== algorithm #1 ================================== */
-// nE = Edge.size();
-// for (T = 0; T < nE; T++) {
-//     m = Edge[T].size();
-//     for (i = 0; i < m; i++) {
-//         V = Edge[T][i];
-//         VNormal[V] = VNormal[V] + ENormal[T];
-//     } //next i
-// } //next T
+// Compute vertex normals using algoritm #2 --------------------------------- //
+if (flag == 1) {
+    
+    // Scope variables
+    // none
 
-/* ========================== algorithm #2 ================================== */
-double          angle;
-for (T = 0; T < nSimplex; ++T) {
-    m = Simplex[T].size();
-    for (i = 0; i < m; ++i) {
-        V = Simplex[T][i];
-        Angle(T, angle, i);
-        VNormal[V] = VNormal[V] + 0.5 * angle * Normal[T]/pi;
-    } //next i
-} //next T
+    // Compute vertex normals
+    nE = Edge.size();
+    for (T = 0; T < nE; T++) {
+        m = Edge[T].size();
+        for (i = 0; i < m; i++) {
+            V = Edge[T][i];
+            VNormal[V] = VNormal[V] + ENormal[T];
+        } //next i
+    } //next T
+}
+
+// Compute vertex normals using algoritm #1 --------------------------------- //
+else if (flag == 0) {
+    
+    // Scope variables
+    double          angle;
+
+    // Compute vertex normals
+    for (T = 0; T < nSimplex; ++T) {
+        m = Simplex[T].size();
+        for (i = 0; i < m; ++i) {
+            V = Simplex[T][i];
+            Angle(T, angle, i);
+            VNormal[V] = VNormal[V] + 0.5 * angle * Normal[T]/pi;
+        } //next i
+    } //next T
+}
 
 // Normalization ------------------------------------------------------------ //
 for (T = 0; T < nVertex; T++) {
@@ -1120,20 +1137,28 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_SurfTri::GenerateVNormals(
-    dvecarr3E   &X
+    dvecarr3E   &X,
+    unsigned char flag
 ) {
 
 // ========================================================================== //
 // void Class_SurfTri::GenerateVNormals(                                      //
-//     dvecarr3E   &X)                                                        //
+//     dvecarr3E   &X,                                                        //
+//     unsigned char flag)                                                    //
 //                                                                            //
-// Generate vertex normals from edge normals. Vertex coordinate list is       //
-// provided externally.                                                       //
+// Generate vertex normals using algorithm #1 or #2 depending on the value    //
+// of the input flag:                                                         //
+// algorithm #1 (flag = 0): compute normals as the weighted average of        //
+//                          normals of incident simplicies.                   //
+// algorithm #2 (flag = 1): compute normals as the weighted average of        //
+//                          normals of incident edges.                        //
+// Vertex coordinate list is provided externally                              //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
 // - X        : dvecarr3E, external vertex list. X[i][0], X[i][1], ... are    //
 //              x, y, ... coordinates of the i-th vertex.                     //
+// - flag    : unsigend char (default 0), flag for algorithm selection        //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -1143,6 +1168,9 @@ void Class_SurfTri::GenerateVNormals(
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
 // ========================================================================== //
+
+// Parameters
+double const    pi = 3.1415926535897932;
 
 // Local variables
 int             nE, nV = X.size();
@@ -1175,15 +1203,41 @@ VNormal.resize(nV, tmp);
 // COMPUTE VERTEX NORMALS                                                     //
 // ========================================================================== //
 
-// Compute vertex normals --------------------------------------------------- //
-nE = Edge.size();
-for (T = 0; T < nE; T++) {
-    m = Edge[T].size();
-    for (i = 0; i < m; i++) {
-        V = Edge[T][i];
-        VNormal[V] = VNormal[V] + ENormal[T];
-    } //next i
-} //next T
+// Compute vertex normals using algorithm #1 -------------------------------- //
+if (flag == 1) {
+
+    // Scope variables
+    // none
+
+    // Compute vertex normals
+    nE = Edge.size();
+    for (T = 0; T < nE; T++) {
+        m = Edge[T].size();
+        for (i = 0; i < m; i++) {
+            V = Edge[T][i];
+            VNormal[V] = VNormal[V] + ENormal[T];
+        } //next i
+    } //next T
+}
+
+// Compute vertex normals using algorithm #2 -------------------------------- //
+else if (flag == 0) {
+
+    // Scope variables
+    double          angle;
+
+    // Compute vertex normals
+    for (T = 0; T < nSimplex; ++T) {
+        m = Simplex[T].size();
+        for (i = 0; i < m; ++i) {
+            V = Simplex[T][i];
+            Angle(T, angle, i);
+            VNormal[V] = VNormal[V] + 0.5 * angle * Normal[T]/pi;
+        } //next i
+    } //next T
+
+}
+
 
 // Normalization ------------------------------------------------------------ //
 for (T = 0; T < nV; T++) {
