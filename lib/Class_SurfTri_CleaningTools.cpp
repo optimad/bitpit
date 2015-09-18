@@ -1055,6 +1055,9 @@ void Class_SurfTri::GenerateVNormals(
 // VARIABLES DECLARATION                                                      //
 // ========================================================================== //
 
+// Parameters
+double const    pi = 3.1415926535897932;
+    
 // Local variables
 int             nE;
 darray3E        tmp;
@@ -1104,7 +1107,7 @@ for (T = 0; T < nSimplex; ++T) {
     for (i = 0; i < m; ++i) {
         V = Simplex[T][i];
         Angle(T, angle, i);
-        VNormal[V] = cos(angle) * Normal[T];
+        VNormal[V] = VNormal[V] + 0.5 * angle * Normal[T]/pi;
     } //next i
 } //next T
 
