@@ -798,6 +798,17 @@ class Class_SurfTri {
         dvecarr3E           &,                                                // (input) External vertex list
         dvector1D           &                                                 // (input/output) aspect ratio of each simplex
     );
+    void Angle(                                                               // Compute the angle between edges incident on simplex vertex
+        int                  ,                                                // (input) simplex global index
+        double              &,                                                // (input/output) angle value
+        int                                                                   // (input) vertex local index
+    );
+    void Angle(                                                               // Compute the angle between edges incident on simplex vertex using an external vertex list
+        dvecarr3E           &,                                                // (input) external vertex coordinate list
+        int                  ,                                                // (input) simplex global index
+        double              &,                                                // (input/output) angle value
+        int                                                                   // (input) vertex local index
+    );
     void minAngle(                                                            // Compute min-angle over all simplicies in the tasselation
         double              &,                                                // (input/output) min angle value
         int                 &,                                                // (input/output) Simplex global index

@@ -1093,6 +1093,111 @@ for (i = 0; i < nSimplex; i++) {
 return; };
 
 // -------------------------------------------------------------------------- //
+void Class_SurfTri::Angle(
+    int         T,
+    double     &angle,
+    int         i
+) {
+    
+// ========================================================================== //
+// void Class_SurfTri::Angle(                                                 //
+//     int         T,                                                         //
+//     double     &angle,                                                     //
+//     int         i)                                                         //
+//                                                                            //
+// Compute the angle between simplex edged incident on vertex v               //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - T     : int, simplex global index                                        //
+// - angle : double, angle value                                              //
+// - i     : int, vertex local index                                          //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+darray3E        v1, v2;
+
+// Counters
+int             m = Simplex[T].size();
+int             j, k;
+
+// ========================================================================== //
+// COMPUTE ANGLE'S VALUE                                                      //
+// ========================================================================== //
+j = (i + 1) % m;
+k = (i - 1  + m) % m;
+v1 = Vertex[Simplex[T][j]] - Vertex[Simplex[T][i]];
+v2 = Vertex[Simplex[T][k]] - Vertex[Simplex[T][i]];
+v1 = v1/norm_2(v1);
+v2 = v2/norm_2(v2);
+angle = acos(max(-1.0, min(1.0, Dot_Product(v1, v2))));
+
+return; };
+
+// -------------------------------------------------------------------------- //
+void Class_SurfTri::Angle(
+    dvecarr3E  &V,
+    int         T,
+    double     &angle,
+    int         i
+) {
+    
+// ========================================================================== //
+// void Class_SurfTri::Angle(                                                 //
+//     dvecarr3E  &V,                                                         //
+//     int         T,                                                         //
+//     double     &angle,                                                     //
+//     int         i)                                                         //
+//                                                                            //
+// Compute the angle between simplex edged incident on vertex v. Vertex       //
+// coordinate list is provided externally.                                    //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - V     : dvecarr3E, vertex coordinate list. V[i][0], V[i][1], ... are the //
+//           x, y, ... coordinates of the i-th vertex.                        //
+// - T     : int, simplex global index                                        //
+// - angle : double, angle value                                              //
+// - i     : int, vertex local index                                          //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+darray3E        v1, v2;
+
+// Counters
+int             m = Simplex[T].size();
+int             j, k;
+
+// ========================================================================== //
+// COMPUTE ANGLE'S VALUE                                                      //
+// ========================================================================== //
+j = (i + 1) % m;
+k = (i - 1  + m) % m;
+v1 = V[Simplex[T][j]] - V[Simplex[T][i]];
+v2 = V[Simplex[T][k]] - V[Simplex[T][i]];
+v1 = v1/norm_2(v1);
+v2 = v2/norm_2(v2);
+angle = acos(max(-1.0, min(1.0, Dot_Product(v1, v2))));
+
+return; };
+
+// -------------------------------------------------------------------------- //
 void Class_SurfTri::minAngle(
     double      &angle,
     int         &T,
@@ -1235,25 +1340,18 @@ void Class_SurfTri::minAngle(
 // ========================================================================== //
 
 // Local variables
-//int         dim = Vertex[0].size();
 double      value;
-darray3E    v1, v2 ;
 
 // Counters
-int         i, j, k, m = Simplex[T].size();
+int         i;
+int         m = Simplex[T].size();
 
 // ========================================================================== //
 // COMPUTE THE MIN ANGLE.                                                     //
 // ========================================================================== //
 angle = pi;
 for (i = 0; i < m; i++) {
-    j = (i + 1) % m;
-    k = (i - 1  + m) % m;
-    v1 = Vertex[Simplex[T][j]] - Vertex[Simplex[T][i]];
-    v2 = Vertex[Simplex[T][k]] - Vertex[Simplex[T][i]];
-    v1 = v1/norm_2(v1);
-    v2 = v2/norm_2(v2);
-    value = acos(max(-1.0, min(1.0, Dot_Product(v1, v2))));
+    Angle(T, value, i);
     if (value < angle) {
         angle = value;
         v = i;
@@ -1296,25 +1394,18 @@ void Class_SurfTri::minAngle(
 // ========================================================================== //
 
 // Local variables
-//int         dim = V[0].size();
 double      value;
-darray3E    v1, v2;
 
 // Counters
-int         i, j, k, m = Simplex[T].size();
+int         i;
+int         m = Simplex[T].size();
 
 // ========================================================================== //
 // COMPUTE THE MIN ANGLE.                                                     //
 // ========================================================================== //
 angle = pi;
 for (i = 0; i < m; i++) {
-    j = (i + 1) % m;
-    k = (i - 1  + m) % m;
-    v1 = V[Simplex[T][j]] - V[Simplex[T][i]];
-    v2 = V[Simplex[T][k]] - V[Simplex[T][i]];
-    v1 = v1/norm_2(v1);
-    v2 = v2/norm_2(v2);
-    value = acos(max(-1.0, min(1.0, Dot_Product(v1, v2))));
+    Angle(T, value, i);
     if (value < angle) {
         angle = value;
         v = i;
@@ -1561,25 +1652,18 @@ void Class_SurfTri::maxAngle(
 // ========================================================================== //
 
 // Local variables
-//int       dim = Vertex[0].size();
 double    value;
-darray3E  v1, v2;
 
 // Counters
-int       i, j, k, m = Simplex[T].size();
+int       m = Simplex[T].size();
+int       i;
 
 // ========================================================================== //
 // COMPUTE THE MIN ANGLE.                                                     //
 // ========================================================================== //
 angle = 0.0;
 for (i = 0; i < m; i++) {
-    j = (i + 1) % m;
-    k = (i - 1  + m) % m;
-    v1 = Vertex[Simplex[T][j]] - Vertex[Simplex[T][i]];
-    v2 = Vertex[Simplex[T][k]] - Vertex[Simplex[T][i]];
-    v1 = v1/norm_2(v1);
-    v2 = v2/norm_2(v2);
-    value = acos(max(-1.0, min(1.0, Dot_Product(v1, v2))));
+    Angle(T, value, i);
     if (value > angle) {
         angle = value;
         v = i;
@@ -1626,25 +1710,18 @@ void Class_SurfTri::maxAngle(
 // ========================================================================== //
 
 // Local variables
-//int       dim = V[0].size();
 double    value;
-darray3E  v1, v2;
 
 // Counters
-int       i, j, k, m = Simplex[T].size();
+int       i;
+int       m = Simplex[T].size();
 
 // ========================================================================== //
 // COMPUTE THE MIN ANGLE.                                                     //
 // ========================================================================== //
 angle = 0.0;
 for (i = 0; i < m; i++) {
-    j = (i + 1) & m;
-    k = (i - 1  + m) % m;
-    v1 = V[Simplex[T][j]] - V[Simplex[T][i]];
-    v2 = V[Simplex[T][k]] - V[Simplex[T][i]];
-    v1 = v1/norm_2(v1);
-    v2 = v2/norm_2(v2);
-    value = acos(max(-1.0, min(1.0, Dot_Product(v1, v2))));
+    Angle(V, T, value, i);
     if (value > angle) {
         angle = value;
         v = i;
