@@ -2326,7 +2326,8 @@ private:
 			}
 			partition[rank] += i;
 
-			error_flag = MPI_Allgather(&partition[rank],1,MPI_UINT32_T,partition,1,MPI_UINT32_T,comm);
+			uint32_t part = partition[rank];
+			error_flag = MPI_Allgather(&part,1,MPI_UINT32_T,partition,1,MPI_UINT32_T,comm);
 
 		}
 	};
