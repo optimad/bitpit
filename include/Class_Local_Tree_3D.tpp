@@ -2096,9 +2096,9 @@ private:
 					uint32_t lengthneigh = 0;
 					uint32_t sizeneigh = neighbours.size();
 					for (idxtry=0; idxtry<sizeneigh; idxtry++){
-						lengthneigh += ghosts[neighbours[idxtry]].getSize();
+						lengthneigh += ghosts[neighbours[idxtry]].getArea();
 					}
-					if (lengthneigh < oct->getSize()){
+					if (lengthneigh < oct->getArea()){
 						// Search in octants
 
 						// Check if octants face is a boundary
