@@ -4459,12 +4459,18 @@ private:
 						uint64_t Mortonlast = last_desc.computeMorton();
 						Mortontry = ghosts[idxtry].computeMorton();
 						while(Mortontry < Mortonlast && idxtry < size_ghosts){
-							Dhx = (-int32_t(oct->x) + int32_t(ghosts[idxtry].x));
-							Dhy = (-int32_t(oct->y) + int32_t(ghosts[idxtry].y));
-							Dhz = (-int32_t(oct->z) + int32_t(ghosts[idxtry].z));
-							Dhxref = int32_t(cx<0)*(-int32_t(ghosts[idxtry].getSize())) + int32_t(cx>0)*size;
-							Dhyref = int32_t(cy<0)*(-int32_t(ghosts[idxtry].getSize())) + int32_t(cy>0)*size;
-							Dhzref = int32_t(cz<0)*(-int32_t(ghosts[idxtry].getSize())) + int32_t(cz>0)*size;
+							// Dhx = (-int32_t(oct->x) + int32_t(ghosts[idxtry].x));
+							// Dhy = (-int32_t(oct->y) + int32_t(ghosts[idxtry].y));
+							// Dhz = (-int32_t(oct->z) + int32_t(ghosts[idxtry].z));
+							// Dhxref = int32_t(cx<0)*(-int32_t(ghosts[idxtry].getSize())) + int32_t(cx>0)*size;
+							// Dhyref = int32_t(cy<0)*(-int32_t(ghosts[idxtry].getSize())) + int32_t(cy>0)*size;
+							// Dhzref = int32_t(cz<0)*(-int32_t(ghosts[idxtry].getSize())) + int32_t(cz>0)*size;
+							Dhx = int32_t(cx)*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
+							Dhy = int32_t(cy)*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
+							Dhz = int32_t(cz)*(int32_t(oct->z) - int32_t(ghosts[idxtry].z));
+							Dhxref = int32_t(cx<0)*ghosts[idxtry].getSize() + int32_t(cx>0)*size;
+							Dhyref = int32_t(cy<0)*ghosts[idxtry].getSize() + int32_t(cy>0)*size;
+							Dhzref = int32_t(cz<0)*ghosts[idxtry].getSize() + int32_t(cz>0)*size;
 							if ((abs(Dhx) == Dhxref) && (abs(Dhy) == Dhyref) && (abs(Dhz) == Dhzref)){
 								neighbours.push_back(idxtry);
 								isghost.push_back(true);
@@ -4548,12 +4554,18 @@ private:
 						uint64_t Mortonlast = last_desc.computeMorton();
 						Mortontry = octants[idxtry].computeMorton();
 						while(Mortontry < Mortonlast && idxtry <= noctants-1){
-							Dhx = (-int32_t(oct->x) + int32_t(octants[idxtry].x));
-							Dhy = (-int32_t(oct->y) + int32_t(octants[idxtry].y));
-							Dhz = (-int32_t(oct->z) + int32_t(octants[idxtry].z));
-							Dhxref = int32_t(cx<0)*(-int32_t(octants[idxtry].getSize())) + int32_t(cx>0)*size;
-							Dhyref = int32_t(cy<0)*(-int32_t(octants[idxtry].getSize())) + int32_t(cy>0)*size;
-							Dhzref = int32_t(cz<0)*(-int32_t(octants[idxtry].getSize())) + int32_t(cz>0)*size;
+							// Dhx = (-int32_t(oct->x) + int32_t(octants[idxtry].x));
+							// Dhy = (-int32_t(oct->y) + int32_t(octants[idxtry].y));
+							// Dhz = (-int32_t(oct->z) + int32_t(octants[idxtry].z));
+							// Dhxref = int32_t(cx<0)*(-int32_t(octants[idxtry].getSize())) + int32_t(cx>0)*size;
+							// Dhyref = int32_t(cy<0)*(-int32_t(octants[idxtry].getSize())) + int32_t(cy>0)*size;
+							// Dhzref = int32_t(cz<0)*(-int32_t(octants[idxtry].getSize())) + int32_t(cz>0)*size;
+							Dhx = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
+							Dhy = int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
+							Dhz = int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
+							Dhxref = int32_t(cx<0)*octants[idxtry].getSize() + int32_t(cx>0)*size;
+							Dhyref = int32_t(cy<0)*octants[idxtry].getSize() + int32_t(cy>0)*size;
+							Dhzref = int32_t(cz<0)*octants[idxtry].getSize() + int32_t(cz>0)*size;
 							if ((abs(Dhx) == Dhxref) && (abs(Dhy) == Dhyref) && (abs(Dhz) == Dhzref)){
 								neighbours.push_back(idxtry);
 								isghost.push_back(false);
