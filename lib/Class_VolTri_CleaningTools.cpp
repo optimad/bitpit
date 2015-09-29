@@ -153,7 +153,7 @@ void Class_VolTri::BinSortV(
 
 // Local variables
 double                  dx, dy, dz;
-array<double, 3>        xlim, ylim, zlim;
+array<double, 2>        xlim, ylim, zlim;
 
 // Counters
 int                     i, j, k;
@@ -223,7 +223,7 @@ void Class_VolTri::BinSortV(
 // Local variables
 int                     nX = X.size();
 double                  dx, dy, dz;
-array<double, 3>        xlim, ylim, zlim;
+array<double, 2>        xlim, ylim, zlim;
 
 // Counters
 int                     i, j, k;

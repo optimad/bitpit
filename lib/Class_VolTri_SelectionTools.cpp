@@ -773,24 +773,24 @@ return(S); };
 
 // -------------------------------------------------------------------------- //
 void Class_VolTri::BoundingBox(
-    a3vector1D   &x_ext,
-    a3vector1D   &y_ext,
-    a3vector1D   &z_ext
+    array<double, 2> &x_ext,
+    array<double, 2> &y_ext,
+    array<double, 2> &z_ext
 ) {
 
 // ========================================================================== //
 // void Class_VolTri::BoundingBox(                                            //
-//     a3vector1D   &x_ext,                                                   //
-//     a3vector1D   &y_ext,                                                   //
-//     a3vector1D   &z_ext)                                                   //
+//     array<double, 2> &x_ext,                                               //
+//     array<double, 2> &y_ext,                                               //
+//     array<double, 2> &z_ext)                                               //
 //                                                                            //
 // Compute limits of mesh bounding box (3D case).                             //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - x_ext   : a3vector1D, extent of bounding box in the x direction          //
-// - y_ext   : a3vector1D, extent of bounding box in the y direction          //
-// - z_ext   : a3vector1D, extent of bounding box in the z direction          //
+// - x_ext   : array<double, 2>, extent of bounding box in the x direction    //
+// - y_ext   : array<double, 2>, extent of bounding box in the y direction    //
+// - z_ext   : array<double, 2>, extent of bounding box in the z direction    //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -832,18 +832,18 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_VolTri::BoundingBox(
-    a3vector2D   &V,
-    a3vector1D   &x_ext,
-    a3vector1D   &y_ext,
-    a3vector1D   &z_ext
+    a3vector2D         &V,
+    array<double, 2>   &x_ext,
+    array<double, 2>   &y_ext,
+    array<double, 2>   &z_ext
 ) {
 
 // ========================================================================== //
 // void Class_VolTri::BoundingBox(                                            //
-//     a3vector2D   &V,                                                       //
-//     a3vector1D   &x_ext,                                                   //
-//     a3vector1D   &y_ext,                                                   //
-//     a3vector1D   &z_ext)                                                   //
+//     a3vector2D         &V,                                                 //
+//     array<double, 2>   &x_ext,                                             //
+//     array<double, 2>   &y_ext,                                             //
+//     array<double, 2>   &z_ext)                                             //
 //                                                                            //
 // Compute limits of tasselation bounding box (3D case). Vertex coordinate    //
 // list is provided externally).                                              //
@@ -852,9 +852,9 @@ void Class_VolTri::BoundingBox(
 // ========================================================================== //
 // - V       : a3vector2D vertex coordinate list. V[i][0], V[i][1], ... are   //
 //             the x, y, ... coordinates of the i-th vertex.                  //
-// - x_ext   : a3vector1D, extent of bounding box in the x direction          //
-// - y_ext   : a3vector1D, extent of bounding box in the y direction          //
-// - z_ext   : a3vector1D, extent of bounding box in the z direction          //
+// - x_ext   : array<double, 2>, extent of bounding box in the x direction    //
+// - y_ext   : array<double, 2>, extent of bounding box in the y direction    //
+// - z_ext   : array<double, 2>, extent of bounding box in the z direction    //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //

@@ -67,9 +67,9 @@ typedef vector< dvector3D >            dvector4D;
 
 // array vectors
 typedef array<double, 3>               a3vector1D;
-typedef vector< array<double, 3> >     a3vector2D;
-typedef vector< a3vector1D >           a3vector3D;
-typedef vector< a3vector2D >           a3vector4D;
+typedef vector< a3vector1D >           a3vector2D;
+typedef vector< a3vector2D >           a3vector3D;
+typedef vector< a3vector3D >           a3vector4D;
 
 // string vectors
 typedef vector< string >               svector1D;
@@ -447,15 +447,15 @@ class Class_VolTri {
 
     // Bounding boxes ------------------------------------------------------- //
     void BoundingBox(                                                         // Compute limits of tasselation bounding box (3D case)
-        a3vector1D          &,                                                // (input/output) limits in the x-direction
-        a3vector1D          &,                                                // (input/output) limits in the y-direction
-        a3vector1D          &                                                 // (input/output) limits in the z-direction
+        array<double, 2>    &,                                                // (input/output) limits in the x-direction
+        array<double, 2>    &,                                                // (input/output) limits in the y-direction
+        array<double, 2>    &                                                 // (input/output) limits in the z-direction
     );
     void BoundingBox(                                                         // Compute limits of tasselation bounding box (3D case) using an external vertex list
         a3vector2D          &,                                                // (input) external vertex list
-        a3vector1D          &,                                                // (input/output) limits in the x-direction
-        a3vector1D          &,                                                // (input/output) limits in the y-direction
-        a3vector1D          &                                                 // (input/output) limits in the z-direction
+        array<double, 2>    &,                                                // (input/output) limits in the x-direction
+        array<double, 2>    &,                                                // (input/output) limits in the y-direction
+        array<double, 2>    &                                                 // (input/output) limits in the z-direction
     );
 
     // Check tools ========================================================== //
