@@ -402,8 +402,14 @@ class Class_VolTri {
     void AddVertex(                                                           // Add a single vertex to vertex list
         a3vector1D          &                                                 // (input) vertex coordinates
     );
+    void AddVertex(                                                           // Add a single vertex to vertex list
+        dvector1D           &                                                 // (input) vertex coordinates
+    );
     void AddVertices(                                                         // Add a multiple vertices to vertex list
         a3vector2D          &                                                 // (input) vertex coordinate list
+    );
+    void AddVertices(                                                         // Add a multiple vertices to vertex list
+        dvector2D           &                                                 // (input) vertex coordinate list
     );
     void AddSimplex(                                                          // Add simplex to simplex list
         ivector1D           &,                                                // (input) simplex vertex coordinates
