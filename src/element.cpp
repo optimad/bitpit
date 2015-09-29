@@ -349,6 +349,29 @@ int Element::get_dimension(Element::Type type)
 }
 
 /*!
+	Returns true if the element is a three-dimensional element.
+
+	\return Returns true if the element is a three-dimensional element,
+	false otherwise.
+*/
+bool Element::is_three_dimensional() const
+{
+	return (get_dimension() == 3);
+}
+
+/*!
+	Returns true if the given type of element is a three-dimensional element.
+
+	\param type the type of the element
+	\return Returns true if the element is a three-dimensional element,
+	false otherwise.
+*/
+bool Element::is_three_dimensional(Element::Type type)
+{
+	return (get_dimension(type) == 3);
+}
+
+/*!
 	Gets the number of vertices of the element.
 
 	\result The number of vertices of the element

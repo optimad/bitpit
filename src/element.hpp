@@ -88,6 +88,8 @@ public:
 
 	int get_dimension() const;
 	static int get_dimension(Element::Type type);
+	bool is_three_dimensional() const;
+	static bool is_three_dimensional(Element::Type type);
 	
 	void set_connect(std::unique_ptr<int[]> connect);
 	void unset_connect();
