@@ -301,6 +301,66 @@ int Element::get_face_count(Element::Type type)
 }
 
 /*!
+	Gets the number of edges of the element.
+
+	\result The number of edges of the element
+*/
+int Element::get_edge_count() const
+{
+	return get_edge_count(m_type);
+}
+
+/*!
+	Gets the number of edges of the given type of element.
+
+	\param type the type of the element
+	\result The number of edges of the element
+*/
+int Element::get_edge_count(Element::Type type)
+{
+	switch (type) {
+
+	case (Type::POINT):
+		return 1;
+
+	case (Type::LINE):
+		return 2;
+
+	case (Type::TRIANGLE):
+		return 3;
+
+	case (Type::RECTANGLE):
+	case (Type::QUADRANGLE):
+		return 4;
+
+	case (Type::POLYGON):
+		return -1;
+
+	case (Type::TETRAHEDRON):
+		return 6;
+
+	case (Type::BRICK):
+	case (Type::HEXAHEDRON):
+		return 12;
+
+	case (Type::PYRAMID):
+		return 8;
+
+	case (Type::PRISM):
+		return 9;
+
+	case (Type::POLYHEDRON):
+		return -1;
+
+	default:
+		return -1;
+
+	}
+
+	return -1;
+}
+
+/*!
 	Gets the dimension of the element.
 
 	\return The dimension of the element

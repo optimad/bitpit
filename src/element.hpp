@@ -101,6 +101,9 @@ public:
 	int get_face_count() const;
 	static int get_face_count(Element::Type type);
 
+	int get_edge_count() const;
+	static int get_edge_count(Element::Type type);
+
 	int get_vertex_count() const;
 	static int get_vertex_count(Element::Type type);
 	int get_vertex(const int &vertex) const;
