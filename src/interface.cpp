@@ -182,11 +182,15 @@ double ** Interface::eval_rotation_from_cartesian(double * versor, const int &di
 			x[0] = 1.0;
 
 			cross(x, R[0], R[1]);
+
+			delete[] x;
 		} else {
 			double *z = new double[dimension];
 			z[2] = 1.0;
 
 			cross(z, R[0], R[1]);
+
+			delete[] z;
 		}
 		normalize(R[1]);
 	} else {
