@@ -424,6 +424,13 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 				m_interfaces.emplace_back(id_interface, this);
 				Interface &interface = m_interfaces.back();
 
+				// Interface type
+				if (is_three_dimensional()) {
+					interface.set_type(Element::RECTANGLE);
+				} else {
+					interface.set_type(Element::LINE);
+				}
+
 				// Area
 				interface.set_area(area);
 
