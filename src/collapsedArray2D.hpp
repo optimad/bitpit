@@ -124,7 +124,7 @@ public:
 
 		m_index = std::unique_ptr<int[]>(new int[m_capacity + 1]);
 		m_index[0] = 0;
-		m_index[m_capacity] = dataCapacity;
+		m_index[m_capacity] = - dataCapacity;
 		std::fill_n(m_index.get() + 1, m_capacity - 1, -1);
 	}
 
@@ -257,8 +257,8 @@ public:
 		}
 
 		int nSubArrays = 0;
-		for (int i = 1; i < m_capacity; i++) {
-			if (m_index[i] == -1) {
+		for (int i = 1; i < m_capacity + 1; i++) {
+			if (m_index[i] < 0) {
 				break;
 			}
 
@@ -286,7 +286,7 @@ public:
 			return 0;
 		}
 
-		return (m_index[m_capacity]);
+		return abs(m_index[m_capacity]);
 	}
 
 	int sub_array_size(int i) const
