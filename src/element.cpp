@@ -301,6 +301,54 @@ int Element::get_face_count(Element::Type type)
 }
 
 /*!
+	Gets the dimension of the element.
+
+	\return The dimension of the element
+*/
+int Element::get_dimension() const
+{
+	return get_dimension(m_type);
+}
+
+/*!
+	Gets the dimension of the given type of element.
+
+	\param type the type of the element
+	\return The dimension of the element
+*/
+int Element::get_dimension(Element::Type type)
+{
+	switch (type) {
+
+	case (Type::POINT):
+	    return 0;
+
+	case (Type::LINE):
+	    return 1;
+
+	case (Type::TRIANGLE):
+	case (Type::RECTANGLE):
+	case (Type::QUADRANGLE):
+	case (Type::POLYGON):
+	    return 2;
+
+	case (Type::TETRAHEDRON):
+	case (Type::BRICK):
+	case (Type::HEXAHEDRON):
+	case (Type::PYRAMID):
+	case (Type::PRISM):
+	case (Type::POLYHEDRON):
+	    return 3;
+
+	default:
+	    return -1;
+
+	}
+
+	return -1;
+}
+
+/*!
 	Gets the number of vertices of the element.
 
 	\result The number of vertices of the element

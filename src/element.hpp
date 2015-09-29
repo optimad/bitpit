@@ -85,6 +85,9 @@ public:
 	
 	void set_type(Element::Type type);
 	Element::Type get_type() const;
+
+	int get_dimension() const;
+	static int get_dimension(Element::Type type);
 	
 	void set_connect(std::unique_ptr<int[]> connect);
 	void unset_connect();
