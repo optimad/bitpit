@@ -24,18 +24,18 @@
 
 // -------------------------------------------------------------------------- //
 void Class_VolTri::AddVertex(
-    dvector1D       &V
+    a3vector1D      &V
 ) {
 
 // ========================================================================== //
 // void Class_VolTri::AddVertex(                                              //
-//     dvector1D       &V)                                                    //
+//     a3vector1D      &V)                                                    //
 //                                                                            //
 // Add a vertex to vertex list.                                               //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V     : dvector1D, vertex coordinates. V[0], V[1], ... are               //
+// - V     : a3vector1D, vertex coordinates. V[0], V[1], ... are              //
 //           the x, y, ... coordinates of vertex to be added.                 //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -73,18 +73,18 @@ return; }
 
 // -------------------------------------------------------------------------- //
 void Class_VolTri::AddVertices(
-    dvector2D       &V
+    a3vector2D      &V
 ) {
 
 // ========================================================================== //
 // void Class_VolTri::AddVertices(                                            //
-//     dvector2D       &V)                                                    //
+//     a3vector2D      &V)                                                    //
 //                                                                            //
 // Add multiple vertexes to vertex list                                       //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V     : dvector2D, vertex coordinates list. V[i][0], V[i][1], ... are    //
+// - V     : a3vector2D, vertex coordinates list. V[i][0], V[i][1], ... are   //
 //           the x, y, ... coordinates of the i-th vertex to be added.        //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -165,20 +165,20 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_VolTri::AddSimplex(
-    dvector2D       &V,
+    a3vector2D      &V,
     int              s_type
 ) {
 
 // ========================================================================== //
 // void Class_VolTri::AddSimplex(                                             //
-//     dvector2D       &V,                                                    //
+//     a3vector2D      &V,                                                    //
 //     int              s_type)                                               //
 //                                                                            //
 // Add simplex to simplex list                                                //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V      : dvector2D, vertex of simplex to be added                        //
+// - V      : a3vector2D, vertex of simplex to be added                       //
 // - s_type : int, simplex type id.                                           //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -260,14 +260,14 @@ return; }
 
 // -------------------------------------------------------------------------- //
 void Class_VolTri::AddSimplicies(
-    dvector2D       &V,
+    a3vector2D      &V,
     ivector2D       &E,
     ivector1D       &s_type
 ) {
 
 // ========================================================================== //
 // void Class_VolTri::AddSimplicies(                                          //
-//     dvector2D       &V,                                                    //
+//     a3vector2D      &V,                                                    //
 //     ivector2D       &E,                                                    //
 //     ivector1D       &s_type)                                               //
 //                                                                            //
@@ -275,7 +275,7 @@ void Class_VolTri::AddSimplicies(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V      : dvector2D, vertex coordinate list                               //
+// - V      : a3vector2D, vertex coordinate list                              //
 // - E      : ivector2D, simplex-vertex connectivity for each simplex         //
 //            to be added                                                     //
 // - s_type : int, simplex type id.                                           //
@@ -409,7 +409,7 @@ s_off = nSimplex;
 if (Source.nVertex > 0) {
 
     // Resize vertex list
-    Vertex.resize(nVertex + Source.nVertex, dvector1D(Source.Vertex[0].size()));
+    Vertex.resize(nVertex + Source.nVertex);
 
     // Add vertexes
     AddVertices(Source.Vertex);

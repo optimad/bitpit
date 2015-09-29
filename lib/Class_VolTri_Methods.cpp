@@ -315,19 +315,17 @@ return; };
 // -------------------------------------------------------------------------- //
 Class_VolTri::Class_VolTri(
     int           nV,
-    int           nS,
-    int           d
+    int           nS
 ) {
 
 // ========================================================================== //
 // Class_VolTri::Class_VolTri(                                                //
 //     int           nV,                                                      //
-//     int           nS                                                       //
-//     int           d)                                                       //
+//     int           nS)                                                      //
 //                                                                            //
 // Custom constructor #1 for Class_VolTri variables.                          //
 // ========================================================================== //
-        // INPUT                                                              //
+// INPUT                                                                      //
 // ========================================================================== //
 // - nV   : int, number of vertexes                                           //
 // - nS   : int, number of simplicies                                         //
@@ -361,7 +359,7 @@ nFace = 0;
 nSimplex = nS;
 
 // Resize vertex list
-ResizeVertex(d);
+ResizeVertex();
 
 // Resize simplex-vertex connectivity
 ResizeSimplex();
@@ -430,12 +428,12 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_VolTri::ResizeVertex(
-    int           d
+    void
 ) {
 
 // ========================================================================== //
 // void Class_VolTri::ResizeVertex(                                           //
-//     int           d)                                                       //
+//     void)                                                                  //
 //                                                                            //
 // Resize vertex list to nVertex rows. Each of the new rows will have d       //
 // entries. Resize is not destructive, i.e. data previously stored in Vertex  //
@@ -443,7 +441,7 @@ void Class_VolTri::ResizeVertex(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - d         : int (optional), number of space dimensions                   //
+// - none                                                                     //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -455,7 +453,7 @@ void Class_VolTri::ResizeVertex(
 // ========================================================================== //
 
 // Local variables
-// none
+a3vector1D              tmp;
 
 // Counters
 // none
@@ -463,7 +461,8 @@ void Class_VolTri::ResizeVertex(
 // ========================================================================== //
 // RESIZE VERTEX LIST                                                         //
 // ========================================================================== //
-Vertex.resize(nVertex, dvector1D(d, 0.0));
+tmp.fill(0.0);
+Vertex.resize(nVertex, tmp);
 
 return;};
 
@@ -551,52 +550,6 @@ return; };
 // ========================================================================== //
 // RESHAPE OPERATORS                                                          //
 // ========================================================================== //
-
-// -------------------------------------------------------------------------- //
-void Class_VolTri::ReshapeVertex(
-    int           d
-) {
-
-// ========================================================================== //
-// void Class_VolTri::ReshapeVertex(                                          //
-//     int           d)                                                       //
-//                                                                            //
-// Reshape vertex coordinate list to nVertex rows. Each row of Vertex will    //
-// have d entries. Old data stored in vertex are not destroyed during reshape //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - d    : int (optional), number of space dimensions.                       //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-
-// ========================================================================== //
-// VARIABLES DECLARATION                                                      //
-// ========================================================================== //
-
-// Local variables
-int   old_size = Vertex.size();
-
-// Counters
-int   i;
-
-// ========================================================================== //
-// RESHAPE VERTEX LIST                                                        //
-// ========================================================================== //
-
-// Resize vertex list
-Vertex.resize(nVertex, dvector1D(d, 0.0));
-
-// Reshape old entries
-old_size = min(old_size, nVertex);
-for (i = 0; i < old_size; i++) {
-    Vertex[i].resize(d, 0.0);
-} //next i
-
-return; }
 
 // -------------------------------------------------------------------------- //
 void Class_VolTri::ReshapeSimplex(
@@ -894,10 +847,7 @@ int          i, j, d;
 // CLEAR CONTENTS IN VERTEX                                                   //
 // ========================================================================== //
 for (i = 0; i < nVertex; i++) {
-    d = Vertex[i].size();
-    for (j = 0; j < d; j++) {
-        Vertex[i][j] = 0.0;
-    } //next j
+    Vertex[i].fill(0.0);
 } //next i
 
 return; };

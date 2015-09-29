@@ -172,12 +172,12 @@ return(vlist); };
 // GEOMETRY ================================================================= //
 
 // -------------------------------------------------------------------------- //
-dvector1D Class_VolTri::Baricenter(
+a3vector1D Class_VolTri::Baricenter(
     int             T
 ) {
 
 // ========================================================================== //
-// dvector1D Class_VolTri::Baricenter(                                        //
+// a3vector1D Class_VolTri::Baricenter(                                       //
 //     int             T)                                                     //
 //                                                                            //
 // Compute simplex baricenter.                                                //
@@ -188,7 +188,7 @@ dvector1D Class_VolTri::Baricenter(
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
-// - P       : dvector1D, with simplex baricenter coordinates.                //
+// - P       : a3vector1D, with simplex baricenter coordinates.               //
 // ========================================================================== //
 
 // ========================================================================== //
@@ -196,8 +196,8 @@ dvector1D Class_VolTri::Baricenter(
 // ========================================================================== //
 
 // Local variables
-int                     dim = Vertex[0].size(), n = infos[e_type[T]].n_vert;
-dvector1D               P(dim, 0.0);
+int                     n = infos[e_type[T]].n_vert;
+a3vector1D              P;
 
 // Counters
 int                     i, j;
@@ -205,25 +205,26 @@ int                     i, j;
 // ========================================================================== //
 // FIND ISOLATED VERTEXES                                                     //
 // ========================================================================== //
+P.fill(0.0);
 for (i = 0; i < n; ++i) {
-    for (j = 0; j < dim; ++j) {
+    for (j = 0; j < 3; ++j) {
         P[j] += Vertex[Simplex[T][i]][j];
     } //next j
 } //next i
-for (j = 0; j < dim; ++j) {
+for (j = 0; j < 3; ++j) {
     P[j] = P[j]/((double) n);
 } //next j
 
 return(P); };
 
 // -------------------------------------------------------------------------- //
-dvector1D Class_VolTri::FaceCenter(
+a3vector1D Class_VolTri::FaceCenter(
     int             T,
     int             i
 ) {
 
 // ========================================================================== //
-// dvector1D Class_VolTri::FaceCenter(                                        //
+// a3vector1D Class_VolTri::FaceCenter(                                       //
 //     int             T,                                                     //
 //     int             i)                                                     //
 //                                                                            //
@@ -236,7 +237,7 @@ dvector1D Class_VolTri::FaceCenter(
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
-// - C      : dvector1D, with face center coordinates                         //
+// - C      : a3vector1D, with face center coordinates                        //
 // ========================================================================== //
 
 // ========================================================================== //
@@ -244,10 +245,9 @@ dvector1D Class_VolTri::FaceCenter(
 // ========================================================================== //
 
 // Local variables
-int              dim = Vertex[0].size();
 int              n;
 ivector1D        f_vert;
-dvector1D        C(dim, 0.0);
+a3vector1D       C;
 
 // Counters
 int              V;
@@ -258,27 +258,28 @@ int              j, k;
 // ========================================================================== //
 
 // Get face vertex list
+C.fill(0.0);
 f_vert = FaceVertices(T, i);
 n = f_vert.size();
 for (j = 0; j < n; ++j) {
     V = f_vert[j];
-    for (k = 0; k < dim; ++k) {
+    for (k = 0; k < 3; ++k) {
         C[k] += Vertex[V][k];
     } //next k
 } //next j
-for (j = 0; j < dim; ++j) {
+for (j = 0; j < 3; ++j) {
     C[j] = C[j]/((double) n);
 } //next j
 
 return(C); };
 
 // -------------------------------------------------------------------------- //
-dvector1D Class_VolTri::CircumCenter(
+a3vector1D Class_VolTri::CircumCenter(
     int             T
 ) {
 
 // ========================================================================== //
-// dvector1D Class_VolTri::CircumCenter(                                      //
+// a3vector1D Class_VolTri::CircumCenter(                                     //
 //     int             T)                                                     //
 //                                                                            //
 // Compute circum center of simplex T.                                        //
@@ -302,8 +303,8 @@ double  const   abs_toll = 1.0e-6;
 
 // Local variables
 bool            check;
-int             dim = Vertex[0].size();
-dvector1D       C(dim, 0.0), dC;
+a3vector1D      C;
+dvector1D       dC;
 dvector1D       d, r;
 dvector1D       dG;
 dvector2D       dr;
@@ -373,7 +374,9 @@ while (check && (iter < iter_max)) {
     // Update gradient of residuals
     for (i = 1; i < m; ++i) {
         V = Simplex[T][i];
-        dr[i] = (C - Vertex[V])/d[i] - (C - Vertex[U])/d[0];
+        for (j = 0; j < 3; ++j) {
+            dr[i][j] = (C[j] - Vertex[V][j])/d[i] - (C[j] - Vertex[U][j])/d[0];
+        } //next j
     } //next i
 
     // Update Hessians of residuals
@@ -473,14 +476,14 @@ return(l); };
 double Class_VolTri::EdgeLength(
     int             T,
     int             i,
-    dvector2D      &V
+    a3vector2D     &V
 ) {
 
 // ========================================================================== //
 // double Class_VolTri::EdgeLength(                                           //
 //     int             T,                                                     //
 //     int             i,                                                     //
-//     dvector2D      &V)                                                     //
+//     a3vector2D     &V)                                                     //
 //                                                                            //
 // Compute length of a specified edge on a given simplex. Vertex list is      //
 // provided externally.                                                       //
@@ -489,7 +492,7 @@ double Class_VolTri::EdgeLength(
 // ========================================================================== //
 // - T       : int, simplex global index                                      //
 // - i       : int, edge local index                                          //
-// - V       : dvector2D, external vertex list. V[i][0], V[i][1], ... are     //
+// - V       : a3vector2D, external vertex list. V[i][0], V[i][1], ... are    //
 //             the x, y, ... coordinates of the i-th vertex.                  //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -565,13 +568,13 @@ return(min_l); };
 // -------------------------------------------------------------------------- //
 double Class_VolTri::minEdgeLength(
     int             T,
-    dvector2D      &V
+    a3vector2D     &V
 ) {
 
 // ========================================================================== //
 // double Class_VolTri::minEdgeLength(                                        //
 //     int             T,                                                     //
-//     dvector2D      &V)                                                     //
+//     a3vector2D      &V)                                                    //
 //                                                                            //
 // Compute edge of minimal length for a given simplex. Vertex list is         //
 // provided externally.                                                       //
@@ -579,8 +582,8 @@ double Class_VolTri::minEdgeLength(
 // INPUT                                                                      //
 // ========================================================================== //
 // - T      : int, simplex global index                                       //
-// - V       : dvector2D, external vertex list. V[i][0], V[i][1], ... are     //
-//             the x, y, ... coordinates of the i-th vertex.                  //
+// - V      : a3vector2D, external vertex list. V[i][0], V[i][1], ... are     //
+//            the x, y, ... coordinates of the i-th vertex.                   //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -652,13 +655,13 @@ return(max_l); };
 // -------------------------------------------------------------------------- //
 double Class_VolTri::maxEdgeLength(
     int             T,
-    dvector2D      &V
+    a3vector2D     &V
 ) {
 
 // ========================================================================== //
 // double Class_VolTri::maxEdgeLength(                                        //
 //     int             T,                                                     //
-//     dvector2D      &V)                                                     //
+//     a3vector2D     &V)                                                     //
 //                                                                            //
 // Compute edge of maximal length for a given simplex. Vertex list is         //
 // provided externally.                                                       //
@@ -666,8 +669,8 @@ double Class_VolTri::maxEdgeLength(
 // INPUT                                                                      //
 // ========================================================================== //
 // - T      : int, simplex global index                                       //
-// - V       : dvector2D, external vertex list. V[i][0], V[i][1], ... are     //
-//             the x, y, ... coordinates of the i-th vertex.                  //
+// - V      : a3vector2D, external vertex list. V[i][0], V[i][1], ... are     //
+//            the x, y, ... coordinates of the i-th vertex.                   //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -723,7 +726,6 @@ double Class_VolTri::FaceArea(
 // ========================================================================== //
 
 // Local variables
-int                 dim = Vertex[0].size();
 double              a, A = 0.0;
 array<double, 3>    u, v;
 
@@ -745,13 +747,9 @@ else if (n == 3) {
     U = Simplex[T][infos[e_type[T]].faces[i][0]];
     V0 = Simplex[T][infos[e_type[T]].faces[i][1]];
     V1 = Simplex[T][infos[e_type[T]].faces[i][2]];
-    for (k = 0; k < dim; ++k) {
+    for (k = 0; k < 3; ++k) {
         u[k] = Vertex[V0][k] - Vertex[U][k];
         v[k] = Vertex[V1][k] - Vertex[U][k];
-    } //next k
-    for (k = dim; k < 3; ++k) {
-        u[k] = 0.0;
-        v[k] = 0.0;
     } //next k
     A = 0.5 * norm_2(Cross_Product(v, u));
 }
@@ -765,13 +763,9 @@ else {
         while (k < n-2) {
             V0 = Simplex[T][infos[e_type[T]].faces[i][l]];
             V1 = Simplex[T][infos[e_type[T]].faces[i][(l+1)%n]];
-            for (m = 0; m < dim; ++m) {
+            for (m = 0; m < 3; ++m) {
                 u[m] = Vertex[V0][m] - Vertex[U][m];
                 v[m] = Vertex[V1][m] - Vertex[U][m];
-            } //next m
-            for (m = dim; m < 3; ++m) {
-                u[m] = 0.0;
-                v[m] = 0.0;
             } //next m
             a += 0.5 * norm_2(Cross_Product(v, u));
             k++;
@@ -788,14 +782,14 @@ return(A); };
 double Class_VolTri::FaceArea(
     int             T,
     int             i,
-    dvector2D      &V
+    a3vector2D     &V
 ) {
 
 // ========================================================================== //
 // double Class_VolTri::FaceArea(                                             //
 //     int             T,                                                     //
 //     int             i,                                                     //
-//     dvector2D      &V)                                                     //
+//     a3vector2D     &V)                                                     //
 //                                                                            //
 // Compute area of the i-th face of the T-th simplex. Vertex list is provided //
 // externally.                                                                //
@@ -804,7 +798,7 @@ double Class_VolTri::FaceArea(
 // ========================================================================== //
 // - T    : int, simplex global index                                         //
 // - i    : int, face local index.                                            //
-// - V    : dvector2D, external vertex list. V[i][0], V[i][1], ... are        //
+// - V    : a3vector2D, external vertex list. V[i][0], V[i][1], ... are       //
 //          the x, y, ... coordinates of the i-th vertex.                     //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -817,7 +811,6 @@ double Class_VolTri::FaceArea(
 // ========================================================================== //
 
 // Local variables
-int                 dim = V[0].size();
 double              a, A = 0.0;
 array<double, 3>    u, v;
 
@@ -839,13 +832,9 @@ else if (n == 3) {
     U = Simplex[T][infos[e_type[T]].faces[i][0]];
     V0 = Simplex[T][infos[e_type[T]].faces[i][1]];
     V1 = Simplex[T][infos[e_type[T]].faces[i][2]];
-    for (k = 0; k < dim; ++k) {
+    for (k = 0; k < 3; ++k) {
         u[k] = V[V0][k] - V[U][k];
         v[k] = V[V1][k] - V[U][k];
-    } //next k
-    for (k = dim; k < 3; ++k) {
-        u[k] = 0.0;
-        v[k] = 0.0;
     } //next k
     A = 0.5 * norm_2(Cross_Product(v, u));
 }
@@ -859,13 +848,9 @@ else {
         while (k < n-2) {
             V0 = Simplex[T][infos[e_type[T]].faces[i][l]];
             V1 = Simplex[T][infos[e_type[T]].faces[i][(l+1)%n]];
-            for (m = 0; m < dim; ++m) {
+            for (m = 0; m < 3; ++m) {
                 u[k] = V[V0][m] - V[U][m];
                 v[k] = V[V1][m] - V[U][m];
-            } //next m
-            for (m = dim; m < 3; ++m) {
-                u[m] = 0.0;
-                v[m] = 0.0;
             } //next m
             a += 0.5 * norm_2(Cross_Product(v, u));
             k++;
@@ -923,13 +908,13 @@ return(A); };
 // -------------------------------------------------------------------------- //
 double Class_VolTri::minFaceArea(
     int             T,
-    dvector2D      &V
+    a3vector2D     &V
 ) {
 
 // ========================================================================== //
 // double Class_VolTri::minFaceArea(                                          //
 //     int             T,                                                     //
-//     dvector2D      &V)                                                     //
+//     a3vector2D     &V)                                                     //
 //                                                                            //
 // Compute minimal face area of a given simplex. Vertex coordinate list is    //
 // provided externally.                                                       //
@@ -937,7 +922,7 @@ double Class_VolTri::minFaceArea(
 // INPUT                                                                      //
 // ========================================================================== //
 // - T    : int, simplex globa index                                          //
-// - V    : dvector2D, external vertex list. V[i][0], V[i][1], ... are        //
+// - V    : a3vector2D, external vertex list. V[i][0], V[i][1], ... are       //
 //          the x, y, ... coordinates of the i-th vertex.                     //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -1012,13 +997,13 @@ return(A); };
 // -------------------------------------------------------------------------- //
 double Class_VolTri::maxFaceArea(
     int             T,
-    dvector2D      &V
+    a3vector2D     &V
 ) {
 
 // ========================================================================== //
 // double Class_VolTri::maxFaceArea(                                          //
 //     int             T,                                                     //
-//     dvector2D      &V)                                                     //
+//     a3vector2D     &V)                                                     //
 //                                                                            //
 // Compute maximal face area of a given simplex. Vertex coordinate list is    //
 // provided externally.                                                       //
@@ -1057,13 +1042,13 @@ for (i = 0; i < n; ++i) {
 return(A); };
 
 // -------------------------------------------------------------------------- //
-dvector1D Class_VolTri::FaceNormal(
+a3vector1D Class_VolTri::FaceNormal(
     int             T,
     int             i
 ) {
 
 // ========================================================================== //
-// dvector1D Class_VolTri::FaceNormal(                                        //
+// a3vector1D Class_VolTri::FaceNormal(                                       //
 //     int             T,                                                     //
 //     int             i)                                                     //
 //                                                                            //
@@ -1076,7 +1061,7 @@ dvector1D Class_VolTri::FaceNormal(
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
-// - N     : dvector1D, face normal                                           //
+// - N     : a3vector1D, face normal                                          //
 // ========================================================================== //
 
 // ========================================================================== //
@@ -1084,9 +1069,8 @@ dvector1D Class_VolTri::FaceNormal(
 // ========================================================================== //
 
 // Local variables
-int                 dim = Vertex[0].size();
 array<double, 3>    u, v, w, t;
-dvector1D           N;
+a3vector1D          N;
 
 // Counters
 int                 U, V0, V1;
@@ -1096,48 +1080,27 @@ int                 n;
 // ========================================================================== //
 // COMPUTE FACE NORMAL                                                        //
 // ========================================================================== //
+N.fill(0.0);
 n = infos[e_type[T]].faces[i].size();
 if (n <= 1) { return(N); }
 else if (n == 2) {
-    N.resize(dim, 0.0);
     V0 = Simplex[T][infos[e_type[T]].faces[i][0]];
     V1 = Simplex[T][infos[e_type[T]].faces[i][1]];
-    for (k = 0; k < dim; ++k) {
-        u[k] = Vertex[V1][k] - Vertex[V0][k];
-    } //next k
-    for (k = dim; k < 3; ++k) {
-        u[k] = 0.0;
-    }
+    u = Vertex[V1] - Vertex[V0];
     v[0] = 0.0;    v[1] = 0.0;    v[2] = 1.0;
     w = Cross_Product(u, v);
-    w = w/norm_2(w);
-    for (k = 0; k < dim; ++k) {
-        N[k] = w[k];
-    } //next k
-    for (k = dim; k < 3; ++k) {
-        N[k] = 0.0;
-    } //next k
+    N = w/norm_2(w);
 }
 else if (n == 3) {
-    N.resize(dim, 0.0);
     U = Simplex[T][infos[e_type[T]].faces[i][0]];
     V0 = Simplex[T][infos[e_type[T]].faces[i][1]];
     V1 = Simplex[T][infos[e_type[T]].faces[i][2]];
-    for (m = 0; m < dim; ++m) {
-        u[m] = Vertex[V0][m] - Vertex[U][m];
-        v[m] = Vertex[V1][m] - Vertex[U][m];
-    } //next k
-    for (m = dim; m < 3; ++m) {
-        u[m] = 0.0;
-        v[m] = 0.0;
-    } //next m
+    u = Vertex[V0] - Vertex[U];
+    v = Vertex[V1] - Vertex[U];
     t = Cross_Product(u, v);
-    for (k = 0; k < dim; ++k) {
-        N[k] += t[k];
-    } //next k
+    N = t/norm_2(t);
 }
 else {
-    N.resize(dim, 0.0);
     for (j = 0; j < n; ++j) {
         U = Simplex[T][infos[e_type[T]].faces[i][j]];
         t.fill(0.0);
@@ -1146,40 +1109,34 @@ else {
         while (k < n+2) {
             V0 = Simplex[T][infos[e_type[T]].faces[i][l]];
             V1 = Simplex[T][infos[e_type[T]].faces[i][(l+1)%n]];
-            for (m = 0; m < dim; ++m) {
-                u[m] = Vertex[V0][m] - Vertex[U][m];
-                v[m] = Vertex[V1][m] - Vertex[U][m];
-            } //next k
-            for (m = dim; m < 3; ++m) {
-                u[m] = 0.0;
-                v[m] = 0.0;
-            } //next m
+            u = Vertex[V0] - Vertex[U];
+            v = Vertex[V1] - Vertex[U];
             w = Cross_Product(u, v);
             t = t + w/norm_2(w);
             k++;
         } //next k
         t = t/((double) (n-2));
-        for (k = 0; k < dim; ++k) {
+        for (k = 0; k < 3; ++k) {
             N[k] += t[k];
         } //next k
     } //next j
-    N = N/((double) n);
+    N = N/norm_2(N);
 }
 
 return(N); };
 
 // -------------------------------------------------------------------------- //
-dvector1D Class_VolTri::FaceNormal(
+a3vector1D Class_VolTri::FaceNormal(
     int             T,
     int             i,
-    dvector2D      &V
+    a3vector2D     &V
 ) {
 
 // ========================================================================== //
-// dvector1D Class_VolTri::FaceNormal(                                        //
+// a3vector1D Class_VolTri::FaceNormal(                                       //
 //     int             T,                                                     //
 //     int             i,                                                     //
-//     dvector2D      &V)                                                     //
+//     a3vector2D     &V)                                                     //
 //                                                                            //
 // Compute face normal.                                                       //
 // ========================================================================== //
@@ -1187,8 +1144,8 @@ dvector1D Class_VolTri::FaceNormal(
 // ========================================================================== //
 // - T     : int, simplex global index                                        //
 // - i     : int, face local index                                            //
-// - V    : dvector2D, external vertex list. V[i][0], V[i][1], ... are        //
-//          the x, y, ... coordinates of the i-th vertex.                     //
+// - V     : a3vector2D, external vertex list. V[i][0], V[i][1], ... are      //
+//           the x, y, ... coordinates of the i-th vertex.                    //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -1200,9 +1157,8 @@ dvector1D Class_VolTri::FaceNormal(
 // ========================================================================== //
 
 // Local variables
-int                 dim = V[0].size();
 array<double, 3>    u, v, w, t;
-dvector1D           N;
+a3vector1D          N;
 
 // Counters
 int                 U, V0, V1;
@@ -1212,48 +1168,27 @@ int                 n;
 // ========================================================================== //
 // COMPUTE FACE NORMAL                                                        //
 // ========================================================================== //
+N.fill(0.0);
 n = infos[e_type[T]].faces[i].size();
 if (n <= 1) { return(N); }
 else if (n == 2) {
-    N.resize(dim, 0.0);
     V0 = Simplex[T][infos[e_type[T]].faces[i][0]];
     V1 = Simplex[T][infos[e_type[T]].faces[i][1]];
-    for (k = 0; k < dim; ++k) {
-        u[k] = V[V1][k] - V[V0][k];
-    } //next k
-    for (k = dim; k < 3; ++k) {
-        u[k] = 0.0;
-    }
+    u = V[V1] - V[V0];
     v[0] = 0.0;    v[1] = 0.0;    v[2] = 1.0;
     w = Cross_Product(u, v);
-    w = w/norm_2(w);
-    for (k = 0; k < dim; ++k) {
-        N[k] = w[k];
-    } //next k
-    for (k = dim; k < 3; ++k) {
-        N[k] = 0.0;
-    } //next k
+    N = w/norm_2(w);
 }
 else if (n == 3) {
-    N.resize(dim, 0.0);
     U = Simplex[T][infos[e_type[T]].faces[i][0]];
     V0 = Simplex[T][infos[e_type[T]].faces[i][1]];
     V1 = Simplex[T][infos[e_type[T]].faces[i][2]];
-    for (m = 0; m < dim; ++m) {
-        u[m] = V[V0][m] - V[U][m];
-        v[m] = V[V1][m] - V[U][m];
-    } //next k
-    for (m = dim; m < 3; ++m) {
-        u[m] = 0.0;
-        v[m] = 0.0;
-    } //next m
+    u = V[V0] - V[U];
+    v = V[V1] - V[U];
     t = Cross_Product(u, v);
-    for (k = 0; k < dim; ++k) {
-        N[k] += t[k];
-    } //next k
+    N = t/norm_2(t);
 }
 else {
-    N.resize(dim, 0.0);
     for (j = 0; j < n; ++j) {
         U = Simplex[T][infos[e_type[T]].faces[i][j]];
         t.fill(0.0);
@@ -1262,24 +1197,18 @@ else {
         while (k < n+2) {
             V0 = Simplex[T][infos[e_type[T]].faces[i][l]];
             V1 = Simplex[T][infos[e_type[T]].faces[i][(l+1)%n]];
-            for (m = 0; m < dim; ++m) {
-                u[m] = V[V0][m] - V[U][m];
-                v[m] = V[V1][m] - V[U][m];
-            } //next k
-            for (m = dim; m < 3; ++m) {
-                u[m] = 0.0;
-                v[m] = 0.0;
-            } //next m
+            u = V[V0] - V[U];
+            v = V[V1] - V[U];
             w = Cross_Product(u, v);
             t = t + w/norm_2(w);
             k++;
         } //next k
         t = t/((double) (n-2));
-        for (k = 0; k < dim; ++k) {
+        for (k = 0; k < 3; ++k) {
             N[k] += t[k];
         } //next k
     } //next j
-    N = N/((double) n);
+    N = N/norm_2(N);
 }
 
 return(N); };
@@ -1307,7 +1236,6 @@ return(N); };
         // =================================================================================== //
 
         // Local variables
-        int                dim = Vertex[0].size();
         double             V;
 
         // Counters
@@ -1326,7 +1254,7 @@ return(N); };
             case 24 : goto label_rhexa; break;
         };
 
-label_tria: {
+        label_tria: {
 //         if (dim == 2) {
 //             V = 0.5*abs(Cross_Product(Vertex[Simplex[T][2]] - Vertex[Simplex[T][1]],
 //                                       Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]]));
@@ -1336,7 +1264,7 @@ label_tria: {
 //                                          Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]]), dim);
 //         }
         }
-label_quad: {
+        label_quad: {
 //         if (dim == 2) {
 //             V = 0.5*abs(Cross_Product(Vertex[Simplex[T][3]] - Vertex[Simplex[T][2]],
 //                                       Vertex[Simplex[T][2]] - Vertex[Simplex[T][0]]))
@@ -1350,7 +1278,7 @@ label_quad: {
 //                                          Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]]), 3);
 //         }
         }
-label_tetra: {
+        label_tetra: {
 //         if (dim == 2) {
 //             V = 0.0;
 //         }
@@ -1360,43 +1288,23 @@ label_tetra: {
 //                                                         Vertex[Simplex[T][2]] - Vertex[Simplex[T][3]]), dim));
 //         }
         }
-label_pyram: {
-        if (dim == 2) {
+        label_pyram: {
             V = 0.0; // to be done
         }
-        else if (dim == 3) {
+        label_prism: {
             V = 0.0; // to be done
         }
-        }
-label_prism: {
-        if (dim == 2) {
+        label_dhexa: {
             V = 0.0; // to be done
         }
-        else if (dim == 3) {
+        label_rhexa: {
             V = 0.0; // to be done
-        }
-        }
-label_dhexa: {
-        if (dim == 2) {
-            V = 0.0; // to be done
-        }
-        else if (dim == 3) {
-            V = 0.0; // to be done
-        }
-        }
-label_rhexa: {
-        if (dim == 2) {
-            V = 0.0; // to be done
-        }
-        else if (dim == 3) {
-            V = 0.0; // to be done
-        }
         }
 
         return(V); };
 
-                // ----------------------------------------------------------------------------------- //
-        double Class_VolTri::Volume(dvector2D &X, int T) {
+        // ----------------------------------------------------------------------------------- //
+        double Class_VolTri::Volume(a3vector2D &X, int T) {
 
         // =================================================================================== //
         // double Class_VolTri::Volume(int T)                                                  //
@@ -1417,7 +1325,6 @@ label_rhexa: {
         // =================================================================================== //
 
         // Local variables
-        int                dim = X[0].size();
         double             V;
 
         // Counters
@@ -1436,7 +1343,7 @@ label_rhexa: {
             case 24 : goto label_rhexa; break;
         };
 
-label_tria: {
+        label_tria: {
 //         if (dim == 2) {
 //             V = 0.5*abs(Cross_Product(Vertex[Simplex[T][2]] - Vertex[Simplex[T][1]],
 //                                       Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]]));
@@ -1446,7 +1353,7 @@ label_tria: {
 //                                          Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]]), dim);
 //         }
         }
-label_quad: {
+        label_quad: {
 //         if (dim == 2) {
 //             V = 0.5*abs(Cross_Product(Vertex[Simplex[T][3]] - Vertex[Simplex[T][2]],
 //                                       Vertex[Simplex[T][2]] - Vertex[Simplex[T][0]]))
@@ -1460,7 +1367,7 @@ label_quad: {
 //                                          Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]]), 3);
 //         }
         }
-label_tetra: {
+        label_tetra: {
 //         if (dim == 2) {
 //             V = 0.0;
 //         }
@@ -1470,37 +1377,17 @@ label_tetra: {
 //                                                         Vertex[Simplex[T][2]] - Vertex[Simplex[T][3]]), dim));
 //         }
         }
-label_pyram: {
-        if (dim == 2) {
+        label_pyram: {
             V = 0.0; // to be done
         }
-        else if (dim == 3) {
+        label_prism: {
             V = 0.0; // to be done
         }
-        }
-label_prism: {
-        if (dim == 2) {
+        label_dhexa: {
             V = 0.0; // to be done
         }
-        else if (dim == 3) {
+        label_rhexa: {
             V = 0.0; // to be done
-        }
-        }
-label_dhexa: {
-        if (dim == 2) {
-            V = 0.0; // to be done
-        }
-        else if (dim == 3) {
-            V = 0.0; // to be done
-        }
-        }
-label_rhexa: {
-        if (dim == 2) {
-            V = 0.0; // to be done
-        }
-        else if (dim == 3) {
-            V = 0.0; // to be done
-        }
         }
 
         return(V); };

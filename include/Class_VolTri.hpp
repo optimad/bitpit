@@ -65,6 +65,12 @@ typedef vector< dvector1D >            dvector2D;
 typedef vector< dvector2D >            dvector3D;
 typedef vector< dvector3D >            dvector4D;
 
+// array vectors
+typedef array<double, 3>               a3vector1D;
+typedef vector< array<double, 3> >     a3vector2D;
+typedef vector< a3vector1D >           a3vector3D;
+typedef vector< a3vector2D >           a3vector4D;
+
 // string vectors
 typedef vector< string >               svector1D;
 typedef vector< svector1D >            svector2D;
@@ -97,7 +103,7 @@ class Class_VolTri {
     int                      nVertex;                                         // number of vertexes
     int                      nSimplex;                                        // number of simplicies
     int                      nFace;                                           // number of faces
-    dvector2D                Vertex;                                          // vertex coordinate list
+    a3vector2D               Vertex;                                          // vertex coordinate list
     ivector2D                Simplex;                                         // Simplex-vertex connectivity
     ivector2D                Adjacency;                                       // Simplex-Simplex adjacency
 
@@ -112,8 +118,7 @@ class Class_VolTri {
     );
     Class_VolTri(                                                             // Custom constructor #1
         int                  ,                                                // (input) number of vertices
-        int                  ,                                                // (input) number of simplicies
-        int                  dim = 3                                          // (input/optional) number of space dimensions
+        int                                                                   // (input) number of simplicies
     );
 
     // Class destructors ==================================================== //
@@ -126,7 +131,7 @@ class Class_VolTri {
 
     // Resize --------------------------------------------------------------- //
     void ResizeVertex(                                                        // Resize vertex list
-        int                  dim = 3                                          // (input/optional) number of space dimensions
+        void                                                                  // (input) none
     );
     void ResizeSimplex(                                                       // Resize simplex-vertex connectivity
         int                  dim = 0                                          // (input) element type
@@ -136,9 +141,6 @@ class Class_VolTri {
     );
 
     // Reshape -------------------------------------------------------------- //
-    void ReshapeVertex(                                                       // Reshape vertex list
-        int                  dim = 3                                          // (input/optional) number of space dimensions
-    );
     void ReshapeSimplex(                                                      // Reshape simplex-vertex connectivity
         int                  dim = 0                                          // (input/optional) element type
     );
@@ -190,7 +192,7 @@ class Class_VolTri {
         void                                                                  // (input) none
     );
     void SetTolerance(                                                        // Set tollerance for distance check
-        dvector2D           &                                                 // (input) external vertex list
+        a3vector2D          &                                                 // (input) external vertex list
     );
 
     // Sorting algorithms --------------------------------------------------- //
@@ -200,7 +202,7 @@ class Class_VolTri {
         int                  a = 128                                          // (input/optional) number of bins
     );
     void BinSortV(                                                            // Sort tasselation vertices on regular bins using an external vertex list
-        dvector2D           &,                                                // (input) external vertex list
+        a3vector2D          &,                                                // (input) external vertex list
         ivector1D           &,                                                // (input/output) map vertex->bin
         int                  a = 128                                          // (input/optional) number of bins
     );
@@ -211,7 +213,7 @@ class Class_VolTri {
         void                                                                  // (input) none
     );
     void BuildAdjacency(                                                      // Build simplex-simplex adjacency matrix using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        a3vector2D          &                                                 // (input) External vertex list
     );
     void UpdateAdjacency(                                                     // Update simplex-simplex adjacency matrix
         ivector1D           &                                                 // (input) list of simplicies to be updated
@@ -226,26 +228,26 @@ class Class_VolTri {
     int CountIsolatedVertex(                                                  // Count isolated vertex
         void                                                                  // (input) none
     );
-    int CountIsolatedVertex(                                                  // Count isolated vertex
-        dvector2D           &                                                 // (input) External vertex list
+    int CountIsolatedVertex(                                                  // Count isolated vertex using an external vertex list
+        a3vector2D          &                                                 // (input) External vertex list
     );
     int CountFreeVertex(                                                      // Count free vertices
         void                                                                  // (input) none
     );
     int CountFreeVertex(                                                      // Count free vertices using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        a3vector2D          &                                                 // (input) External vertex list
     );
     int CountDoubleVertex(                                                    // Counte duplicated vertices
         void                                                                  // (input) none
     );
     int CountDoubleVertex(                                                    // Counte duplicated vertices using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        a3vector2D          &                                                 // (input) External vertex list
     );
     int CountIsolatedSimplex(                                                 // Count isolated simplicies
         void                                                                  // (input) none
     );
     int CountIsolatedSimplex(                                                 // Count isolated simplicies using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        a3vector2D          &                                                 // (input) External vertex list
     );
     int CountFreeSimplex(                                                     // Count free simplicies
         void                                                                  // (input) none
@@ -254,7 +256,7 @@ class Class_VolTri {
         void                                                                  // (input) none
     );
     int CountDoubleSimplex(                                                   // Count duplicated simplicies using an external vertex list
-        dvector2D           &                                                 // (input) external vertex list
+        a3vector2D          &                                                 // (input) external vertex list
     );
     int CountFaces(                                                           // Count faces
         void                                                                  // (input) none
@@ -266,7 +268,7 @@ class Class_VolTri {
         void                                                                  // (input) none
     );
     int Count0VolumeSimplex(                                                  // Count 0-volume simplicies in the tasselation using an external vertex list
-        dvector2D           &                                                 // (input) vertex coordinate list
+        a3vector2D          &                                                 // (input) vertex coordinate list
     );
 
     // Finders -------------------------------------------------------------- //
@@ -275,44 +277,44 @@ class Class_VolTri {
         void                                                                  // (input) none
     );
     ivector1D FindIsolatedVertex(                                             // Find isolated vertices in tasselation using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        a3vector2D          &                                                 // (input) External vertex list
     );
     ivector1D FindFreeVertex(                                                 // Find free vertices in tasselation
         void                                                                  // (input) nonde
     );
     ivector1D FindFreeVertex(                                                 // Find free vertices in tasselation using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        a3vector2D          &                                                 // (input) External vertex list
     );
     ivector1D FindDoubleVertex(                                               // Find duplicated vertices
         int                  a = 128                                          // (input/optional) number of bins for vertex sorting
     );
     ivector1D FindDoubleVertex(                                               // Find duplicated vertices using an external vertex list
-        dvector2D           &,                                                // (input) External vertex list
+        a3vector2D          &,                                                // (input) External vertex list
         int                  a = 128                                          // (input/optional) number of bins for vertex sorting
     );
     ivector1D FindIsolatedSimplex(                                            // Find isolated simplicies
         void                                                                  // (input) none
     );
     ivector1D FindIsolatedSimplex(                                            // Find isolated simplicies using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        a3vector2D          &                                                 // (input) External vertex list
     );
     ivector1D FindFreeSimplex(                                                // Find free simplicies
         void                                                                  // (input) none
     );
     ivector1D FindFreeSimplex(                                                // Find free simplicies using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        a3vector2D          &                                                 // (input) External vertex list
     );
     ivector1D FindDoubleSimplex(                                              // Find duplicated simplicies
         void                                                                  // (input)
     );
     ivector1D FindDoubleSimplex(                                              // Find duplicated simplicies using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        a3vector2D          &                                                 // (input) External vertex list
     );
     ivector1D Find0VolumeSimplex(                                             // Find 0-volume simplicies in the tasselation
         void                                                                  // (input) none
     );
     ivector1D Find0VolumeSimplex(                                             // Find 0-volume simplicies in the tasselation using an external vertex list
-        dvector2D           &                                                 // (input) vertex coordinate list
+        a3vector2D          &                                                 // (input) vertex coordinate list
     );
 
     // Cleaning tools ------------------------------------------------------- //
@@ -329,7 +331,7 @@ class Class_VolTri {
         int                  a = 128                                          // (input/optional) number of bins used for vertex sorting
     );
     void CollapseDoubleVertex(                                                // Remove double vertices using an external vertex list
-        dvector2D           &,                                                // (input) external vertex list
+        a3vector2D          &,                                                // (input) external vertex list
         ivector1D           &,                                                // (input/output) list of collapsed vertices
         int                  a = 128                                          // (input/optional) number of bins used for vertex sorting
     );
@@ -360,7 +362,7 @@ class Class_VolTri {
         ivector1D           &                                                 // (input/output) mapper between old and new numeration
     );
     void RemoveIsolatedSimplex(                                               // Remove isolated simplicies using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        a3vector2D          &                                                 // (input) External vertex list
     );
     void RemoveDoubleSimplex(                                                 // Remove duplicated simplicies
         void                                                                  // (input) none
@@ -369,19 +371,19 @@ class Class_VolTri {
         ivector1D           &                                                 // (input) map between old and new numeration
     );
     void RemoveDoubleSimplex(                                                 // Remove duplicated simplicies using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        a3vector2D          &                                                 // (input) External vertex list
     );
     void Remove0VolumeSimplex(                                                // Remove 0-volume simplex from tasselation
         void                                                                  // (input) none
     );
     void Remove0VolumeSimplex(                                                // Remove 0-volume simplex from tasselation
-        dvector2D           &                                                 // (input) vertex coordinate list
+        a3vector2D          &                                                 // (input) vertex coordinate list
     );
     void Clean(                                                               // Clean mesh
         void                                                                  // (input) none
     );
     void Clean(                                                               // Clean mesh using an external vertex list
-        dvector2D           &                                                 // (input) External vertex list
+        a3vector2D          &                                                 // (input) External vertex list
     );
 
     // Stats Tools ---------------------------------------------------------- //
@@ -390,7 +392,7 @@ class Class_VolTri {
     );
     void Stats(                                                               // Compute tasselation stats using an external vertex list
         ostream             &,                                                // (input) output stream
-        dvector2D           &                                                 // (input) External vertex list
+        a3vector2D          &                                                 // (input) External vertex list
     );
 
     // Generation methods =================================================== //
@@ -398,17 +400,17 @@ class Class_VolTri {
 
     // Add elements --------------------------------------------------------- //
     void AddVertex(                                                           // Add a single vertex to vertex list
-        dvector1D           &                                                 // (input) vertex coordinates
+        a3vector1D          &                                                 // (input) vertex coordinates
     );
     void AddVertices(                                                         // Add a multiple vertices to vertex list
-        dvector2D           &                                                 // (input) vertex coordinate list
+        a3vector2D          &                                                 // (input) vertex coordinate list
     );
     void AddSimplex(                                                          // Add simplex to simplex list
         ivector1D           &,                                                // (input) simplex vertex coordinates
         int                                                                   // (input) simplex type
     );
     void AddSimplex(                                                          // Add simplex to simplex list
-        dvector2D           &,                                                // (input) coordinates of each simplex vertex
+        a3vector2D          &,                                                // (input) coordinates of each simplex vertex
         int                                                                   // (input) simplex type id
     );
     void AddSimplicies(                                                       // Add multiple simplicies to simplex list
@@ -416,7 +418,7 @@ class Class_VolTri {
         ivector1D           &                                                 // (input) simplex type
     );
     void AddSimplicies(                                                       // Add multiple simplicies to simplex list
-        dvector2D           &,                                                // (input) vertex coordinate list
+        a3vector2D          &,                                                // (input) vertex coordinate list
         ivector2D           &,                                                // (input) simplex-vertex connectivity
         ivector1D           &                                                 // (input) simplex type ids
     );
@@ -444,25 +446,16 @@ class Class_VolTri {
     public:
 
     // Bounding boxes ------------------------------------------------------- //
-    void BoundingBox(                                                         // Compute limits of tasselation bounding box (2D case)
-        dvector1D           &,                                                // (input/output) limits in the x-direction
-        dvector1D           &                                                 // (input/output) limits in the y-direction
-    );
     void BoundingBox(                                                         // Compute limits of tasselation bounding box (3D case)
-        dvector1D           &,                                                // (input/output) limits in the x-direction
-        dvector1D           &,                                                // (input/output) limits in the y-direction
-        dvector1D           &                                                 // (input/output) limits in the z-direction
-    );
-    void BoundingBox(                                                         // Compute limits of tasselation bounding box (2D case) using an external vertex list
-        dvector2D           &,                                                // (input) external vertex list
-        dvector1D           &,                                                // (input/output) limits in the x-direction
-        dvector1D           &                                                 // (input/output) limits in the y-direction
+        a3vector1D          &,                                                // (input/output) limits in the x-direction
+        a3vector1D          &,                                                // (input/output) limits in the y-direction
+        a3vector1D          &                                                 // (input/output) limits in the z-direction
     );
     void BoundingBox(                                                         // Compute limits of tasselation bounding box (3D case) using an external vertex list
-        dvector2D           &,                                                // (input) external vertex list
-        dvector1D           &,                                                // (input/output) limits in the x-direction
-        dvector1D           &,                                                // (input/output) limits in the y-direction
-        dvector1D           &                                                 // (input/output) limits in the z-direction
+        a3vector2D          &,                                                // (input) external vertex list
+        a3vector1D          &,                                                // (input/output) limits in the x-direction
+        a3vector1D          &,                                                // (input/output) limits in the y-direction
+        a3vector1D          &                                                 // (input/output) limits in the z-direction
     );
 
     // Check tools ========================================================== //
@@ -485,14 +478,14 @@ class Class_VolTri {
     );
 
     // Geometry ------------------------------------------------------------- //
-    dvector1D Baricenter(                                                     // Compute simplex baricenter
+    a3vector1D Baricenter(                                                    // Compute simplex baricenter
         int                                                                   // (input) simplex global index
     );
-    dvector1D FaceCenter(                                                     // Compute face center
+    a3vector1D FaceCenter(                                                    // Compute face center
         int                  ,                                                // (input) simplex global index
         int                                                                   // (input) face local index
     );
-    dvector1D CircumCenter(                                                   // Compute simplex curcumcenter
+    a3vector1D CircumCenter(                                                  // Compute simplex curcumcenter
         int                                                                   // (input) simplex global index
     );
     double EdgeLength(                                                        // Compute edge length
@@ -502,21 +495,21 @@ class Class_VolTri {
     double EdgeLength(                                                        // Compute edge length using an external vertex list
         int                  ,                                                // (input) simplex global index
         int                  ,                                                // (input) edge local index
-        dvector2D           &                                                 // (input) external vertex list
+        a3vector2D          &                                                 // (input) external vertex list
     );
     double minEdgeLength(                                                     // Compute min edge length
         int                                                                   // (input) simplex global index
     );
     double minEdgeLength(                                                     // Compute min edge length using an external vertex list
         int                  ,                                                // (input) simplex global index
-        dvector2D           &                                                 // (input) external vertex list
+        a3vector2D          &                                                 // (input) external vertex list
     );
     double maxEdgeLength(                                                     // Compute max edge length
         int                                                                   // (input) simplex global index
     );
     double maxEdgeLength(                                                     // Compute max edge length using an external vertex list
         int                  ,                                                // (input) simplex global index
-        dvector2D           &                                                 // (input) external vertex list
+        a3vector2D          &                                                 // (input) external vertex list
     );
     double FaceArea(                                                          // Compute simplex face area
         int                  ,                                                // (input) simplex global index
@@ -525,35 +518,35 @@ class Class_VolTri {
     double FaceArea(                                                          // Compute simplex face area using an external vertex list
         int                  ,                                                // (input) simplex global index
         int                  ,                                                // (input) face local index
-        dvector2D           &                                                 // (input) external vertex list
+        a3vector2D          &                                                 // (input) external vertex list
     );
     double minFaceArea(                                                       // Compute min face area
         int                                                                   // (input) simplex global index
     );
     double minFaceArea(                                                       // Compute min face area using an external vertex list
         int                  ,                                                // (input) simplex global index
-        dvector2D           &                                                 // (input) external vertex list
+        a3vector2D          &                                                 // (input) external vertex list
     );
     double maxFaceArea(                                                       // Compute max face area
         int                                                                   // (input) simplex global index
     );
     double maxFaceArea(                                                       // Compute max face area using an external vertex list
         int                  ,                                                // (input) simplex global index
-        dvector2D           &                                                 // (input) external vertex list
+        a3vector2D          &                                                 // (input) external vertex list
     );
-    dvector1D FaceNormal(                                                     // Compute simplex face normal
+    a3vector1D FaceNormal(                                                    // Compute simplex face normal
         int                  ,                                                // (input) simplex global index
         int                                                                   // (input) face local index
     );
-    dvector1D FaceNormal(                                                     // Compute simplex face normal using an external vertex list
+    a3vector1D FaceNormal(                                                    // Compute simplex face normal using an external vertex list
         int                  ,                                                // (input) simplex global index
         int                  ,                                                // (input) face local index
-        dvector2D           &                                                 // (input) external vertex list
+        a3vector2D          &                                                 // (input) external vertex list
     );
 
             // Aggiustare
             double Volume(int T);                                 // Simplex volume
-            double Volume(dvector2D &X, int T);                   // Simplex volume
+            double Volume(a3vector2D &X, int T);                  // Simplex volume
 
     // Selection tools ====================================================== //
     public:
@@ -572,7 +565,7 @@ class Class_VolTri {
         ivector1D           &                                                 // (input) edge vertices
     );
     int ReturnSimplexID(                                                      // Returns the ID of simplex enclosing a given point
-        dvector1D           &,                                                // (input) point coordinates
+        a3vector1D          &,                                                // (input) point coordinates
         int                                                                   // (input) seed for search algorithm
     );
     ivector1D EdgeNeigh(                                                      // Find edge neighbors
@@ -587,7 +580,7 @@ class Class_VolTri {
         Class_SurfTri       &,                                                // (input/output) surface tasselation
         int                  a = -1                                           // (input/optional) boundary condition flag
     );
-            int ReturnTriangleID(dvector1D    &);                 // Return triangle global index given a point
+            int ReturnTriangleID(a3vector1D    &);                 // Return triangle global index given a point
 
     // Refinement tools ===================================================== //
     public:

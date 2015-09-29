@@ -74,18 +74,18 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_VolTri::SetTolerance(
-    dvector2D               &X
+    a3vector2D              &X
 ) {
 
 // ========================================================================== //
 // void Class_VolTri::SetTolerance(                                           //
-//     dvector2D               &X)                                            //
+//     a3vector2D              &X)                                            //
 //                                                                            //
 // Set tolerance for double precisions check using an external vertex list.   //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - none                                                                     //
+// - X     : a3vector2D, external vertex list                                 //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -152,9 +152,8 @@ void Class_VolTri::BinSortV(
 // ========================================================================== //
 
 // Local variables
-int                     dim = Vertex[0].size();
 double                  dx, dy, dz;
-dvector1D               xlim(2, 0.0), ylim(2, 0.0), zlim(2, 0.0);
+array<double, 3>        xlim, ylim, zlim;
 
 // Counters
 int                     i, j, k;
@@ -169,37 +168,21 @@ bin_index.resize(nVertex, -1);
 // ASSOCIATE EACH VERTEX WITH A BIN                                           //
 // ========================================================================== //
 
-// 2D case ------------------------------------------------------------------ //
-if (dim == 2) {
-
-    // Compute bounding box extent
-    BoundingBox(xlim, ylim);
-
-    // Bin's spacing
-    dx = (xlim[1] - xlim[0])/((double) n_bins);
-    dy = (ylim[1] - ylim[0])/((double) n_bins);
-
-    // Loop over vertices
-    for (V = 0; V < nVertex; ++V) {
-        i = (Vertex[V][0] - xlim[0])/dx;
-        j = (Vertex[V][1] - ylim[0])/dx;
-        bin_index[V] = n_bins*j + i;
-    } //next V
-}
-else if (dim == 3) {
-
+// -------------------------------------------------------------------------- //
+{
     // Compute bounding box extent
     BoundingBox(xlim, ylim, zlim);
 
     // Bin's spacing
-    dx = (xlim[1] - xlim[0])/((double) n_bins);
-    dy = (ylim[1] - ylim[0])/((double) n_bins);
-    dz = (zlim[1] - zlim[0])/((double) n_bins);
+    dx = max(1.0e-12, xlim[1] - xlim[0])/((double) n_bins);
+    dy = max(1.0e-12, ylim[1] - ylim[0])/((double) n_bins);
+    dz = max(1.0e-12, zlim[1] - zlim[0])/((double) n_bins);
 
     // Loop over vertices
     for (V = 0; V < nVertex; ++V) {
         i = (Vertex[V][0] - xlim[0])/dx;
-        j = (Vertex[V][1] - ylim[0])/dx;
+        j = (Vertex[V][1] - ylim[0])/dy;
+        k = (Vertex[V][2] - zlim[0])/dz;
         bin_index[V] = n_bins*n_bins*k + n_bins*j + i;
     } //next V
 }
@@ -208,14 +191,14 @@ return; }
 
 // -------------------------------------------------------------------------- //
 void Class_VolTri::BinSortV(
-    dvector2D               &X,
+    a3vector2D              &X,
     ivector1D               &bin_index,
     int                      n_bins
 ) {
 
 // ========================================================================== //
 // void Class_VolTri::BinSortV(                                               //
-//     dvector2D               &X,                                            //
+//     a3vector2D              &X,                                            //
 //     ivector1D               &bin_index,                                    //
 //     int                      n_bins)                                       //
 //                                                                            //
@@ -223,7 +206,7 @@ void Class_VolTri::BinSortV(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X             :  dvector2D, vertex coordinate list. X[i][0], X[i][1],    //
+// - X             :  a3vector2D, vertex coordinate list. X[i][0], X[i][1],   //
 //                    ... are the x, y, ... coordinates of the i-th vertex.   //
 // - bin_index     : ivector1D, bin index associated to each vertex.          //
 // - n_bins        : int (optional), number of bins                           //
@@ -238,9 +221,9 @@ void Class_VolTri::BinSortV(
 // ========================================================================== //
 
 // Local variables
-int                     nX = X.size(), dim = X[0].size();
+int                     nX = X.size();
 double                  dx, dy, dz;
-dvector1D               xlim(2, 0.0), ylim(2, 0.0), zlim(2, 0.0);
+array<double, 3>        xlim, ylim, zlim;
 
 // Counters
 int                     i, j, k;
@@ -255,37 +238,22 @@ bin_index.resize(nX, -1);
 // ASSOCIATE EACH VERTEX WITH A BIN                                           //
 // ========================================================================== //
 
-// 2D case ------------------------------------------------------------------ //
-if (dim == 2) {
-
-    // Compute bounding box extent
-    BoundingBox(X, xlim, ylim);
-
-    // Bin's spacing
-    dx = (xlim[1] - xlim[0])/((double) n_bins);
-    dy = (ylim[1] - ylim[0])/((double) n_bins);
-
-    // Loop over vertices
-    for (V = 0; V < nVertex; ++V) {
-        i = (X[V][0] - xlim[0])/dx;
-        j = (X[V][1] - ylim[0])/dx;
-        bin_index[V] = n_bins*j + i;
-    } //next V
-}
-else if (dim == 3) {
+// -------------------------------------------------------------------------- //
+{
 
     // Compute bounding box extent
     BoundingBox(X, xlim, ylim, zlim);
 
     // Bin's spacing
-    dx = (xlim[1] - xlim[0])/((double) n_bins);
-    dy = (ylim[1] - ylim[0])/((double) n_bins);
-    dz = (zlim[1] - zlim[0])/((double) n_bins);
+    dx = max(1.0e-12, xlim[1] - xlim[0])/((double) n_bins);
+    dy = max(1.0e-12, ylim[1] - ylim[0])/((double) n_bins);
+    dz = max(1.0e-12, zlim[1] - zlim[0])/((double) n_bins);
 
     // Loop over vertices
     for (V = 0; V < nVertex; ++V) {
         i = (X[V][0] - xlim[0])/dx;
-        j = (X[V][1] - ylim[0])/dx;
+        j = (X[V][1] - ylim[0])/dy;
+        k = (X[V][2] - zlim[0])/dz;
         bin_index[V] = n_bins*n_bins*k + n_bins*j + i;
     } //next V
 }
@@ -395,18 +363,18 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_VolTri::BuildAdjacency(
-    dvector2D               &X
+    a3vector2D              &X
 ) {
 
 // ========================================================================== //
 // void Class_VolTri::BuildAdjacency(                                         //
-//     dvector2D               &X)                                            //
+//     a3vector2D              &X)                                            //
 //                                                                            //
 // Build simplex-simplex adjacency using an external vertex list.             //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X      : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are    //
+// - X      : a3vector2D, vertex coordinate list. X[i][0], X[i][1], ... are   //
 //            the x, y, ... coordinates of the i-th vertex.                   //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -619,19 +587,19 @@ return(n); };
 
 // -------------------------------------------------------------------------- //
 int Class_VolTri::CountIsolatedVertex(
-    dvector2D               &V
+    a3vector2D              &V
 ) {
 
 // ========================================================================== //
 // int Class_VolTri::CountIsolatedVertex(                                     //
-//     dvector2D               &V)                                            //
+//     a3vector2D              &V)                                            //
 //                                                                            //
 // Count isolated vertices. A vertex is isolated if there exist no simplex    //
 // having a node in that vertex. Vertex list is provided externally.          //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V        : dvector2D, vertex coordinate list. V[i][0], V[i][1], ...      //
+// - V        : a3vector2D, vertex coordinate list. V[i][0], V[i][1], ...     //
 //              are the x, y, ... coordinates of the i-th vertex.             //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -698,19 +666,19 @@ return(n); };
 
 // -------------------------------------------------------------------------- //
 int Class_VolTri::CountFreeVertex(
-    dvector2D               &V
+    a3vector2D              &V
 ) {
 
 // ========================================================================== //
 // int Class_VolTri::CountFreeVertex(                                         //
-//     dvector2D               &V)                                            //
+//     a3vector2D              &V)                                            //
 //                                                                            //
 // Count free vertexes in the tasselation. A free vertex is a vertex          //
 // connected to a free face. Vertex list is provided externally.              //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V        : dvector2D, vertex coordinate list. V[i][0], V[i][1], ...      //
+// - V        : a3vector2D, vertex coordinate list. V[i][0], V[i][1], ...     //
 //              are the x, y, ... coordinates of the i-th vertex.             //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -777,12 +745,12 @@ return(n); };
 
 // -------------------------------------------------------------------------- //
 int Class_VolTri::CountDoubleVertex(
-    dvector2D               &V
+    a3vector2D              &V
 ) {
 
 // ========================================================================== //
 // int Class_SurfTri::CountDoubleVertex(                                      //
-//     dvector2D               &V)                                            //
+//     a3vector2D              &V)                                            //
 //                                                                            //
 // Count double vertices. A vertex is double if there exist another vertex    //
 // having the same coordinates (within a prescribed tolerance).               //
@@ -790,7 +758,7 @@ int Class_VolTri::CountDoubleVertex(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V        : dvector2D, vertex coordinate list. V[i][0], V[i][1], ...      //
+// - V        : a3vector2D, vertex coordinate list. V[i][0], V[i][1], ...     //
 //              are the x, y, ... coordinates of the i-th vertex.             //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -857,19 +825,19 @@ return(n); };
 
 // -------------------------------------------------------------------------- //
 int Class_VolTri::CountIsolatedSimplex(
-    dvector2D               &V
+    a3vector2D              &V
 ) {
 
 // ========================================================================== //
 // int Class_VolTri::CountIsolatedSimplex(                                    //
-//     dvector2D               &V)                                            //
+//     a3vector2D               &V)                                           //
 //                                                                            //
 // Count isolated simplex. A isolated simplex is a simplex  whose vertex are  //
 // not shared by any of the other simplex.                                    //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - V        : dvector2D, vertex coordinate list. V[i][0], V[i][1], ...      //
+// - V        : a3vector2D, vertex coordinate list. V[i][0], V[i][1], ...     //
 //              are the x, y, ... coordinates of the i-th vertex.             //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -976,12 +944,12 @@ return(n); };
 
 // -------------------------------------------------------------------------- //
 int Class_VolTri::CountDoubleSimplex(
-    dvector2D               &X
+    a3vector2D              &X
 ) {
 
 // ========================================================================== //
 // int Class_VolTri::CountDoubleSimplex(                                      //
-//     dvector2D               &V)                                            //
+//     a3vector2D              &X)                                            //
 //                                                                            //
 // Count duplicated simplicies. A duplicated simplex is a simplex whose       //
 // vertexes have coordinates coincident (within a prescribed  tolerance)      //
@@ -990,7 +958,7 @@ int Class_VolTri::CountDoubleSimplex(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X    : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are the  //
+// - X    : a3vector2D, vertex coordinate list. X[i][0], X[i][1], ... are the //
 //          x, y, ... coordinates of the i-th node.                           //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -1171,18 +1139,18 @@ return(nS); };
 
 // -------------------------------------------------------------------------- //
 int Class_VolTri::Count0VolumeSimplex(
-    dvector2D               &X
+    a3vector2D              &X
 ) {
 
 // ========================================================================== //
 // int Class_VolTri::Count0VolumeSimplex(                                     //
-//     dvector2D               &X)                                            //
+//     a3vector2D              &X)                                            //
 //                                                                            //
 // Count 0-volume simplicies in the tasselation using an external vertex list //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X       : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are   //
+// - X       : a3vector2D, vertex coordinate list. X[i][0], X[i][1], ... are  //
 //             the x, y, ... coordinates of the i-th simplex.                 //
 // ========================================================================== //
 // OTUTPUT                                                                    //
@@ -1273,12 +1241,12 @@ return(list); };
 
 // -------------------------------------------------------------------------- //
 ivector1D Class_VolTri::FindIsolatedVertex(
-    dvector2D               &X
+    a3vector2D              &X
 ) {
 
 // ========================================================================== //
 // ivector1D Class_VolTri::FindIsolatedVertex(                                //
-//     dvector2D               &X)                                            //
+//     a3vector2D              &X)                                            //
 //                                                                            //
 // Find isolated vertex. A node is isolated if there exist no simplex         //
 // having a vertex in that node. Vertex coordinate list is provided           //
@@ -1286,8 +1254,8 @@ ivector1D Class_VolTri::FindIsolatedVertex(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X      : dvector2D, vertex coordinates. X[i][0], X[i][1], ... are the x, //
-//            y, ... coordinates of the i-th vertex.                          //
+// - X   : a3vector2D, vertex coordinates. X[i][0], X[i][1], ... are the x,   //
+//         y, ... coordinates of the i-th vertex.                             //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -1400,20 +1368,20 @@ return(list); };
 
 // -------------------------------------------------------------------------- //
 ivector1D Class_VolTri::FindFreeVertex(
-    dvector2D               &X
+    a3vector2D              &X
 ) {
 
 // ========================================================================== //
 // ivector1D Class_VolTri::FindFreeVertex(                                    //
-//     dvector2D               &X)                                            //
+//     a3vector2D              &X)                                            //
 //                                                                            //
 // Find free vertex in the tasselation. A free vertex is a vertex on          //
 // mesh boundaries. Vertex list is provided externally.                       //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X      : dvector2D, vertex coordinates. X[i][0], X[i][1], ... are the x, //
-//            y, ... coordinates of the i-th vertex.                          //
+// - X   : a3vector2D, vertex coordinates. X[i][0], X[i][1], ... are the x,   //
+//         y, ... coordinates of the i-th vertex.                             //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -1496,7 +1464,6 @@ ivector1D Class_VolTri::FindDoubleVertex(
 
 // Variables declaration
 int          m, ncell;
-int          dim = Vertex[0].size();
 bvector1D    flag(nVertex, false);
 ivector1D    index(nVertex, -1), idummy1D(2, -1);
 ivector1D    doublev;
@@ -1514,8 +1481,7 @@ int          i;
 srand(time(NULL));
 
 // Resize variables --------------------------------------------------------- //
-if      (dim == 2) { cell.resize(n*n); }
-else if (dim == 3) { cell.resize(n*n*n); }
+cell.resize(n*n*n);
 
 // ========================================================================== //
 // SORT VERTICES ON BINS                                                      //
@@ -1540,43 +1506,14 @@ for (I = 0; I < nSimplex; I++) {
 // FIND DOUBLE VERTICES                                                       //
 // ========================================================================== //
 ncell = cell.size();
-if (dim == 2) {
+{
     for (C = 0; C < ncell; C++) {
         m = cell[C].size();
         if (m > 0) {
 
             // Scope variables
             ivector1D    list;
-            kdtree<2, double, int>     kd(m);
-
-            // Randomize vertex insertion
-            Extract_wo_Repl(m, m-1, list);
-            for (I = 0; I < m; I++) {
-                S = cell[C][list[I]][0];
-                i = cell[C][list[I]][1];
-                V = Simplex[S][i];
-                if (kd.exist(&Vertex[V], W) >= 0) {
-                    if (!flag[V]) {
-                        flag[V] = true;
-                        doublev.push_back(V);
-                    }
-                }
-                else {
-                    flag[V] = true;
-                    kd.insert(&Vertex[V], V);
-                }
-            } //next I
-        }
-    } //next C
-}
-else if (dim == 3) {
-    for (C = 0; C < ncell; C++) {
-        m = cell[C].size();
-        if (m > 0) {
-
-            // Scope variables
-            ivector1D    list;
-            kdtree<3, double, int>     kd(m);
+            kdtree<3, a3vector1D, int>     kd(m);
 
             // Randomize vertex insertion
             Extract_wo_Repl(m, m-1, list);
@@ -1603,13 +1540,13 @@ return (doublev); };
 
 // -------------------------------------------------------------------------- //
 ivector1D Class_VolTri::FindDoubleVertex(
-    dvector2D               &X,
+    a3vector2D              &X,
     int                      n
 ) {
 
 // ========================================================================== //
 // ivector1D Class_VolTri::FindDoubleVertex(                                  //
-//     dvector2D               &X,                                            //
+//     a3vector2D              &X,                                            //
 //     int                      n)                                            //
 //                                                                            //
 // Find duplicated vertexes . A vertex is duplicated if there exist a simplex //
@@ -1618,7 +1555,7 @@ ivector1D Class_VolTri::FindDoubleVertex(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X       : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are   //
+// - X       : a3vector2D, vertex coordinate list. X[i][0], X[i][1], ... are  //
 //             the x, y, ... coordinates of the i-th vertex                   //
 // - n       : int (optional), number of bins for vertex sorting              //
 // ========================================================================== //
@@ -1634,7 +1571,6 @@ ivector1D Class_VolTri::FindDoubleVertex(
 // Variables declaration
 int          nV = X.size();
 int          m, ncell;
-int          dim = X[0].size();
 bvector1D    flag(nV, false);
 ivector1D    index(nV, -1), idummy1D(2, -1);
 ivector1D    doublev;
@@ -1652,8 +1588,7 @@ int          i;
 srand(time(NULL));
 
 // Resize variables --------------------------------------------------------- //
-if      (dim == 2) { cell.resize(n*n); }
-else if (dim == 3) { cell.resize(n*n*n); }
+cell.resize(n*n*n);
 
 // ========================================================================== //
 // SORT VERTICES ON BINS                                                      //
@@ -1678,43 +1613,14 @@ for (I = 0; I < nSimplex; I++) {
 // FIND DOUBLE VERTICES                                                       //
 // ========================================================================== //
 ncell = cell.size();
-if (dim == 2) {
+{
     for (C = 0; C < ncell; C++) {
         m = cell[C].size();
         if (m > 0) {
 
             // Scope variables
             ivector1D    list;
-            kdtree<2, double, int>     kd(m);
-
-            // Randomize vertex insertion
-            Extract_wo_Repl(m, m-1, list);
-            for (I = 0; I < m; I++) {
-                S = cell[C][list[I]][0];
-                i = cell[C][list[I]][1];
-                V = Simplex[S][i];
-                if (kd.exist(&X[V], W) >= 0) {
-                    if (!flag[V]) {
-                        flag[V] = true;
-                        doublev.push_back(V);
-                    }
-                }
-                else {
-                    flag[V] = true;
-                    kd.insert(&X[V], V);
-                }
-            } //next I
-        }
-    } //next C
-}
-else if (dim == 3) {
-    for (C = 0; C < ncell; C++) {
-        m = cell[C].size();
-        if (m > 0) {
-
-            // Scope variables
-            ivector1D    list;
-            kdtree<3, double, int>     kd(m);
+            kdtree<3, a3vector1D, int>     kd(m);
 
             // Randomize vertex insertion
             Extract_wo_Repl(m, m-1, list);
@@ -1810,12 +1716,12 @@ return(list); };
 
 // -------------------------------------------------------------------------- //
 ivector1D Class_VolTri::FindIsolatedSimplex(
-    dvector2D               &X
+    a3vector2D              &X
 ) {
 
 // ========================================================================== //
 // ivector1D Class_VolTri::FindIsolatedSimplex(                               //
-//     dvector2D               &X)                                            //
+//     a3vector2D              &X)                                            //
 //                                                                            //
 // Find isolated simplicies. A isolated simplex is a simplex whose vertex     //
 // are not shared by any other simplex. Vertex coordinate list is provided    //
@@ -1823,7 +1729,7 @@ ivector1D Class_VolTri::FindIsolatedSimplex(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X    : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are the  //
+// - X    : a3vector2D, vertex coordinate list. X[i][0], X[i][1], ... are the //
 //          x, y, ... coordinates of the i-th node.                           //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -1944,19 +1850,19 @@ return(list); };
 
 // -------------------------------------------------------------------------- //
 ivector1D Class_VolTri::FindFreeSimplex(
-    dvector2D               &X
+    a3vector2D              &X
 ) {
 
 // ========================================================================== //
 // ivector1D Class_VolTri::FindFreeSimplex(                                   //
-//     dvector2D               &X)                                            //
+//     a3vector2D              &X)                                            //
 //                                                                            //
 // Find free simplicies. A free simplex is a simplex having  at least one     //
 // free face.                                                                 //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X      : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are    //
+// - X      : a3vector2D, vertex coordinate list. X[i][0], X[i][1], ... are   //
 //            the x, y, ... coordinates of the i-th node.                     //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -2081,18 +1987,18 @@ return(doubles); };
 
 // -------------------------------------------------------------------------- //
 ivector1D Class_VolTri::FindDoubleSimplex(
-    dvector2D               &X
+    a3vector2D              &X
 ) {
 
 // ========================================================================== //
 // ivector1D Class_VolTri::FindDoubleSimplex(                                 //
-//     dvector2D               &X)                                            //
+//     a3vector2D              &X)                                            //
 //                                                                            //
 // Find douplicated simplex. Vertex list is provided externally.              //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X      : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are    //
+// - X      : a3vector2D, vertex coordinate list. X[i][0], X[i][1], ... are   //
 //            the x, y, ... coordinates of the i-th vertex.                   //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -2196,18 +2102,18 @@ return(list); };
 
 // -------------------------------------------------------------------------- //
 ivector1D Class_VolTri::Find0VolumeSimplex(
-    dvector2D               &X
+    a3vector2D              &X
 ) {
 
 // ========================================================================== //
 // ivector1D Class_VolTri::Find0VolumeSimplex(                                //
-//     dvector2D               &X)                                            //
+//     a3vector2D              &X)                                            //
 //                                                                            //
 // Find 0-volume simplicies in the tasselation using an external vertex list  //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X       : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are   //
+// - X       : a3vector2D, vertex coordinate list. X[i][0], X[i][1], ... are  //
 //             the x, y, ... coordinates of the i-th simplex.                 //
 // ========================================================================== //
 // OTUTPUT                                                                    //
@@ -2426,7 +2332,6 @@ void Class_VolTri::CollapseDoubleVertex(
 
 // Variables declaration
 int          m, ncell;
-int          dim = Vertex[0].size();
 bvector1D    flag(nVertex, false);
 ivector1D    index(nVertex, -1), idummy1D(2, -1);
 ivector3D    cell;
@@ -2443,8 +2348,7 @@ int          i;
 srand(time(NULL));
 
 // Resize variables --------------------------------------------------------- //
-if      (dim == 2) { cell.resize(n*n); }
-else if (dim == 3) { cell.resize(n*n*n); }
+cell.resize(n*n*n);
 
 // List of collapsed vertices ----------------------------------------------- //
 doublev.resize(0);
@@ -2472,44 +2376,14 @@ for (I = 0; I < nSimplex; I++) {
 // COLLAPSE DOUBLE VERTICES                                                   //
 // ========================================================================== //
 ncell = cell.size();
-if (dim == 2) {
+{
     for (C = 0; C < ncell; C++) {
         m = cell[C].size();
         if (m > 0) {
 
             // Scope variables
             ivector1D    list;
-            kdtree<2, double, int>     kd(m);
-
-            // Randomize vertex insertion
-            Extract_wo_Repl(m, m-1, list);
-            for (I = 0; I < m; I++) {
-                S = cell[C][list[I]][0];
-                i = cell[C][list[I]][1];
-                V = Simplex[S][i];
-                if (kd.exist(&Vertex[V], W) >= 0) {
-                    Simplex[S][i] = W;
-                    if (!flag[V]) {
-                        flag[V] = true;
-                        doublev.push_back(V);
-                    }
-                }
-                else {
-                    flag[V] = true;
-                    kd.insert(&Vertex[V], V);
-                }
-            } //next I
-        }
-    } //next C
-}
-else if (dim == 3) {
-    for (C = 0; C < ncell; C++) {
-        m = cell[C].size();
-        if (m > 0) {
-
-            // Scope variables
-            ivector1D    list;
-            kdtree<3, double, int>     kd(m);
+            kdtree<3, a3vector1D, int>     kd(m);
 
             // Randomize vertex insertion
             Extract_wo_Repl(m, m-1, list);
@@ -2537,14 +2411,14 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_VolTri::CollapseDoubleVertex(
-    dvector2D   &X,
+    a3vector2D  &X,
     ivector1D   &doublev,
     int          n
 ) {
 
 // ========================================================================== //
 // ivector1D Class_VolTri::CollapseDoubleVertex(                              //
-//     dvector2D   &X,                                                        //
+//     a3vector2D  &X,                                                        //
 //     ivector1D   &doublev,                                                  //
 //     int          n)                                                        //
 //                                                                            //
@@ -2552,7 +2426,7 @@ void Class_VolTri::CollapseDoubleVertex(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X            : dvector2D, external vertex list. X[i][0], X[i][1], ...    //
+// - X            : a3vector2D, external vertex list. X[i][0], X[i][1], ...   //
 //                  are the x, y, ... components of the i-th vertex           //
 // - doublev      : ivector1D, list of collapsed vertices                     //
 // - n            : int (optional), number of bins for bin sorting            //
@@ -2569,7 +2443,6 @@ void Class_VolTri::CollapseDoubleVertex(
 // Variables declaration
 int          nV = X.size();
 int          m, ncell;
-int          dim = X[0].size();
 bvector1D    flag(nV, false);
 ivector1D    index(nV, -1), idummy1D(2, -1);
 ivector3D    cell;
@@ -2586,8 +2459,7 @@ int          i;
 srand(time(NULL));
 
 // Resize variables --------------------------------------------------------- //
-if      (dim == 2) { cell.resize(n*n); }
-else if (dim == 3) { cell.resize(n*n*n); }
+cell.resize(n*n*n);
 
 // ========================================================================== //
 // SORT VERTICES ON BINS                                                      //
@@ -2612,40 +2484,14 @@ for (I = 0; I < nSimplex; I++) {
 // COLLAPSE DOUBLE VERTICES                                                   //
 // ========================================================================== //
 ncell = cell.size();
-if (dim == 2) {
+{
     for (C = 0; C < ncell; C++) {
         m = cell[C].size();
         if (m > 0) {
 
             // Scope variables
             ivector1D    list;
-            kdtree<2, double, int>     kd(m);
-
-            // Randomize vertex insertion
-            Extract_wo_Repl(m, m-1, list);
-            for (I = 0; I < m; I++) {
-                S = cell[C][list[I]][0];
-                i = cell[C][list[I]][1];
-                V = Simplex[S][i];
-                if (kd.exist(&X[V], W) >= 0) {
-                    Simplex[S][i] = W;
-                    doublev.push_back(V);
-                }
-                else {
-                    kd.insert(&X[V], V);
-                }
-            } //next I
-        }
-    } //next C
-}
-else if (dim == 3) {
-    for (C = 0; C < ncell; C++) {
-        m = cell[C].size();
-        if (m > 0) {
-
-            // Scope variables
-            ivector1D    list;
-            kdtree<3, double, int>     kd(m);
+            kdtree<3, a3vector1D, int>     kd(m);
 
             // Randomize vertex insertion
             Extract_wo_Repl(m, m-1, list);
@@ -3126,12 +2972,12 @@ return; }
 
 // -------------------------------------------------------------------------- //
 void Class_VolTri::RemoveIsolatedSimplex(
-    dvector2D   &X
+    a3vector2D  &X
 ) {
 
 // ========================================================================== //
 // void Class_VolTri::RemoveIsolatedSimplex(                                  //
-//     dvector2D   &X)                                                        //
+//     a3vector2D  &X)                                                        //
 //                                                                            //
 // Remove isolated simplicies. A isolated simplex is a simplex whose vertex   //
 // are not shared by any other simplex in the tasselation. Vertex coordinate  //
@@ -3139,7 +2985,7 @@ void Class_VolTri::RemoveIsolatedSimplex(
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X    : dvector2D, vertex coordinate list. X[i][0], X[i][1],              //
+// - X    : a3vector2D, vertex coordinate list. X[i][0], X[i][1],             //
 //          ... are the x, y, ... coordinates of the i-th node.               //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -3253,20 +3099,20 @@ return; }
 
 // -------------------------------------------------------------------------- //
 void Class_VolTri::RemoveDoubleSimplex(
-    dvector2D   &X
+    a3vector2D  &X
 ) {
 
 // ========================================================================== //
 // void Class_VolTri::RemoveDoubleSimplex(                                    //
-//     dvector2D   &X)                                                        //
+//     a3vector2D   &X)                                                       //
 //                                                                            //
 // Remove duplicated simplicies using an external vertex list. A duplicated   //
 // simplex is a simplex having the same vertices of another simplex.          //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X    : dvector2D, with vertex coordinate list. X[i][0], X[i][1], ... are //
-//          the x, y, ... coordinates of the i-th node.                       //
+// - X  : a3vector2D, with vertex coordinate list. X[i][0], X[i][1], ... are  //
+//        the x, y, ... coordinates of the i-th node.                         //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -3335,18 +3181,18 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_VolTri::Remove0VolumeSimplex(
-    dvector2D   &X
+    a3vector2D  &X
 ) {
 
 // ========================================================================== //
 // void Class_VolTri::Remove0VolumeSimplex(                                   //
-//     dvector2D   &X)                                                        //
+//     a3vector2D  &X)                                                        //
 //                                                                            //
 // Remove 0 volume simplicies from tasselation, using an external vertex list //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X    : dvector2D, vertex coordinate list. X[i][0], X[i][1], ... are the  //
+// - X    : a3vector2D, vertex coordinate list. X[i][0], X[i][1], ... are the //
 //          x, y, ... coordinates of the i-th simplex.                        //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -3430,19 +3276,19 @@ return; };
 
 // -------------------------------------------------------------------------- //
 void Class_VolTri::Clean(
-    dvector2D   &X
+    a3vector2D  &X
 ) {
 
 // ========================================================================== //
 // void Class_VolTri::Clean(                                                  //
-//     dvector2D   &X)                                                        //
+//     a3vector2D  &X)                                                        //
 //                                                                            //
 // Clean mesh from repeated vertex and repeated simplex.                      //
 // Vertex coordinate list is provided externally.                             //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - X    : dvector2D, vertex coordinate list. X[i][0], X[i][1],              //
+// - X    : a3vector2D, vertex coordinate list. X[i][0], X[i][1],             //
 //          ... are the x, y, ... coordinates of the i-th node.               //
 // ========================================================================== //
 // OUTPUT                                                                     //
@@ -3558,21 +3404,21 @@ return; }
 // -------------------------------------------------------------------------- //
 void Class_VolTri::Stats(
     ostream     &out,
-    dvector2D   &X
+    a3vector2D  &X
 ) {
 
 // ========================================================================== //
 // void Class_VolTri::Stats(                                                  //
 //     ostream     &out,                                                      //
-//     dvector2D   &X)                                                        //
+//     a3vector2D  &X)                                                        //
 //                                                                            //
 // Compute mesh stats. Vertex coordinate list is provided externally          //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - out      : ostream, output stream                                        //
-// - X        : dvector2D, with vertex coordinate list. X[i][0], X[i][1], ... //
-//              are the x, y, ... coordinates of the i-th node.               //
+// - out    : ostream, output stream                                          //
+// - X      : a3vector2D, with vertex coordinate list. X[i][0], X[i][1], ...  //
+//            are the x, y, ... coordinates of the i-th node.                 //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -3624,6 +3470,3 @@ out << "    # dupl. simpl. " << CountDoubleSimplex(X)   << endl;
 
 return; }
 
-// ========================================================================== //
-// BUILD ADJACENCY                                                            //
-// ========================================================================== //
