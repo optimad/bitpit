@@ -24,6 +24,7 @@ int main(int argc, char *argv[]) {
 	patch_2D->set_name("octree_backgorund_mesh_2D");
 	patch_2D->update();
 	patch_2D->output_write();
+	delete patch_2D;
 
 	std::cout << "  >> 3D Mesh" << "\n";
 
@@ -31,6 +32,7 @@ int main(int argc, char *argv[]) {
 	patch_3D->set_name("octree_backgorund_mesh_3D");
 	patch_3D->update();
 	patch_3D->output_write();
+	delete patch_3D;
 
 #ifndef DISABLE_MPI
 	MPI::Finalize();
