@@ -19,7 +19,8 @@ class Element {
 
 public:
 	enum Type {
-	    POINT = 0,
+	    UNDEFINED = -1,
+	    POINT,
 	    LINE,
 	    TRIANGLE,
 	    RECTANGLE,
