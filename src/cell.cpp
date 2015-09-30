@@ -216,9 +216,10 @@ std::vector<int> Cell::extract_face_neighs() const
 	Extracts the neighbours of the specified face.
 
 	\param face is a face of the cell
+	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the face.
 */
-std::vector<int> Cell::extract_face_neighs(const int &face) const
+std::vector<int> Cell::extract_face_neighs(const int &face, const std::vector<int> &blackList) const
 {
 	std::vector<int> neighs;
 	for (int i = 0; i < get_interface_count(face); ++i) {
@@ -231,6 +232,10 @@ std::vector<int> Cell::extract_face_neighs(const int &face) const
 		int neighId = interface.get_neigh();
 		if (neighId == get_id()) {
 			neighId = interface.get_owner();
+		}
+
+		if(std::find(blackList.begin(), blackList.end(), neighId) != blackList.end()) {
+				continue;
 		}
 
 		// Add the cell to the negihbour list

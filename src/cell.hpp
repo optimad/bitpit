@@ -50,7 +50,7 @@ public:
 	const int * get_interfaces(const int &face) const;
 
 	std::vector<int> extract_face_neighs() const;
-	std::vector<int> extract_face_neighs(const int &face) const;
+	std::vector<int> extract_face_neighs(const int &face, const std::vector<int> &blackList = std::vector<int>()) const;
 
 	void set_data(std::unique_ptr<CellData> m_data);
 	CellData * get_data() const;
