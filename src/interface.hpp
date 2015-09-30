@@ -54,7 +54,7 @@ public:
 	void transpose_rotation(std::array<std::array<double, 3>, 3> &R);
 
 	void set_area(double *area);
-	double get_area() const;
+	const double & get_area() const;
 
 	void set_owner(const int &owner, const int &onwerFace);
 	void unset_owner();

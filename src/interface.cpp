@@ -88,7 +88,7 @@ void Interface::set_area(double *area)
 
 	\result The area of the interface
 */
-double Interface::get_area() const
+const double & Interface::get_area() const
 {
     return *m_area;
 }
