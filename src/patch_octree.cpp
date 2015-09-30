@@ -46,7 +46,7 @@ PatchOctree::PatchOctree(const int &id, const int &dimension,
 	};
 
 	// Inizializzazione dell'octree
-	double initial_level = (int) log2(max(1., length / dh)) ;
+	double initial_level = ceil(log2(max(1., length / dh)));
 	if (is_three_dimensional()) {
 		m_tree_3D = Class_Para_Tree<3>(origin[0], origin[1], origin[2], length);
 		m_tree_3D.setMarker((uint32_t) 0, initial_level);
