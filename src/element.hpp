@@ -102,6 +102,9 @@ public:
 	int get_face_count() const;
 	static int get_face_count(Element::Type type);
 
+	Element::Type get_face_type(const int &face) const;
+	static Element::Type get_face_type(Element::Type type, const int &face);
+
 	int get_edge_count() const;
 	static int get_edge_count(Element::Type type);
 

@@ -301,6 +301,74 @@ int Element::get_face_count(Element::Type type)
 }
 
 /*!
+	Gets the face type of the specified face of the element.
+
+	\result The face type of specified face of the element
+*/
+Element::Type Element::get_face_type(const int &face) const
+{
+	return get_face_type(m_type, face);
+}
+
+/*!
+	Gets the face type of the specified face of the given type of element.
+
+	\param type the type of the element
+	\result The face type of specified face of the element
+*/
+Element::Type Element::get_face_type(Element::Type type, const int &face)
+{
+	switch (type) {
+
+	case (Type::POINT):
+		return Type::POINT;
+
+	case (Type::LINE):
+		return Type::POINT;
+
+	case (Type::TRIANGLE):
+	case (Type::RECTANGLE):
+	case (Type::QUADRANGLE):
+		return Type::LINE;
+
+	case (Type::POLYGON):
+		return Type::UNDEFINED;
+
+	case (Type::TETRAHEDRON):
+		return Type::TRIANGLE;
+
+	case (Type::BRICK):
+		return Type::RECTANGLE;
+
+	case (Type::HEXAHEDRON):
+		return Type::QUADRANGLE;
+
+	case (Type::PYRAMID):
+		if (face == 0) {
+			return Type::QUADRANGLE;
+		} else {
+			return Type::TRIANGLE;
+		}
+
+	case (Type::PRISM):
+		if (face == 0 || face == 1) {
+			return Type::TRIANGLE;
+		} else {
+			return Type::QUADRANGLE;
+		}
+
+	case (Type::POLYHEDRON):
+		return Type::UNDEFINED;
+
+	default:
+		return Type::UNDEFINED;
+
+	}
+
+	return Type::UNDEFINED;
+}
+
+/*!
 	Gets the number of edges of the element.
 
 	\result The number of edges of the element
