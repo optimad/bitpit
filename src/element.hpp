@@ -111,6 +111,9 @@ public:
 	int get_edge_count() const;
 	static int get_edge_count(Element::Type type);
 
+	std::vector<int> get_edge_local_connect(const int &edge) const;
+	static std::vector<int> get_edge_local_connect(Element::Type type, const int &edge);
+
 	int get_vertex_count() const;
 	static int get_vertex_count(Element::Type type);
 	int get_vertex(const int &vertex) const;

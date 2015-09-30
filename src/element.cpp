@@ -628,6 +628,185 @@ int Element::get_edge_count(Element::Type type)
 }
 
 /*!
+	Gets the local connectivity of the specified edge of the element.
+
+	\param edge is the edge for which the connectiviy is reqested
+	\result The local connectivity of the specified edge of the element.
+*/
+std::vector<int> Element::get_edge_local_connect(const int &edge) const
+{
+	return get_edge_local_connect(m_type, edge);
+}
+
+/*!
+	Gets the local connectivity of the specified edge of the given type
+	of element.
+
+	\param type the type of the element
+	\param edge is the edge for which the connectiviy is reqested
+	\result The local connectivity of the specified edge of the element.
+*/
+std::vector<int> Element::get_edge_local_connect(Element::Type type, const int &edge)
+{
+	int nEdgeVertices = std::max(get_dimension(type) - 1, 1);
+	std::vector<int> edgeConnect(nEdgeVertices);
+
+	switch (type) {
+
+	case (Type::POINT):
+	    edgeConnect[0] = 0;
+
+	    break;
+
+	case (Type::LINE):
+	case (Type::TRIANGLE):
+	case (Type::RECTANGLE):
+	case (Type::QUADRANGLE):
+	case (Type::POLYGON):
+		edgeConnect[0] = edge;
+
+		break;
+
+	case (Type::TETRAHEDRON):
+		if (edge == 0) {
+			edgeConnect[0] = 0;
+			edgeConnect[1] = 1;
+		} else if (edge == 1) {
+			edgeConnect[0] = 1;
+			edgeConnect[1] = 2;
+		} else if (edge == 2) {
+			edgeConnect[0] = 2;
+			edgeConnect[1] = 0;
+		} else if (edge == 3) {
+			edgeConnect[0] = 3;
+			edgeConnect[1] = 0;
+		} else if (edge == 2) {
+			edgeConnect[0] = 3;
+			edgeConnect[1] = 1;
+		} else if (edge == 3) {
+			edgeConnect[0] = 3;
+			edgeConnect[1] = 2;
+		}
+
+	    break;
+
+	case (Type::BRICK):
+	case (Type::HEXAHEDRON):
+		if (edge == 0) {
+			edgeConnect[0] = 1;
+			edgeConnect[1] = 0;
+		} else if (edge == 1) {
+			edgeConnect[0] = 1;
+			edgeConnect[1] = 2;
+		} else if (edge == 2) {
+			edgeConnect[0] = 2;
+			edgeConnect[1] = 3;
+		} else if (edge == 3) {
+			edgeConnect[0] = 3;
+			edgeConnect[1] = 0;
+		} else if (edge == 4) {
+			edgeConnect[0] = 4;
+			edgeConnect[1] = 5;
+		} else if (edge == 5) {
+			edgeConnect[0] = 5;
+			edgeConnect[1] = 6;
+		} else if (edge == 6) {
+			edgeConnect[0] = 6;
+			edgeConnect[1] = 7;
+		} else if (edge == 7) {
+			edgeConnect[0] = 7;
+			edgeConnect[1] = 4;
+		} else if (edge == 8) {
+			edgeConnect[0] = 0;
+			edgeConnect[1] = 4;
+		} else if (edge == 9) {
+			edgeConnect[0] = 1;
+			edgeConnect[1] = 5;
+		} else if (edge == 10) {
+			edgeConnect[0] = 2;
+			edgeConnect[1] = 6;
+		} else if (edge == 11) {
+			edgeConnect[0] = 3;
+			edgeConnect[1] = 7;
+		}
+
+	    break;
+
+	case (Type::PYRAMID):
+		if (edge == 0) {
+			edgeConnect[0] = 0;
+			edgeConnect[1] = 1;
+		} else if (edge == 1) {
+			edgeConnect[0] = 1;
+			edgeConnect[1] = 2;
+		} else if (edge == 2) {
+			edgeConnect[0] = 2;
+			edgeConnect[1] = 3;
+		} else if (edge == 3) {
+			edgeConnect[0] = 3;
+			edgeConnect[1] = 0;
+		} else if (edge == 4) {
+			edgeConnect[0] = 4;
+			edgeConnect[1] = 0;
+		} else if (edge == 5) {
+			edgeConnect[0] = 4;
+			edgeConnect[1] = 1;
+		} else if (edge == 6) {
+			edgeConnect[0] = 4;
+			edgeConnect[1] = 2;
+		} else if (edge == 7) {
+			edgeConnect[0] = 4;
+			edgeConnect[1] = 3;
+		}
+
+	    break;
+
+	case (Type::PRISM):
+		if (edge == 0) {
+			edgeConnect[0] = 1;
+			edgeConnect[1] = 0;
+		} else if (edge == 1) {
+			edgeConnect[0] = 1;
+			edgeConnect[1] = 2;
+		} else if (edge == 2) {
+			edgeConnect[0] = 2;
+			edgeConnect[1] = 0;
+		} else if (edge == 3) {
+			edgeConnect[0] = 3;
+			edgeConnect[1] = 4;
+		} else if (edge == 4) {
+			edgeConnect[0] = 4;
+			edgeConnect[1] = 5;
+		} else if (edge == 5) {
+			edgeConnect[0] = 5;
+			edgeConnect[1] = 3;
+		} else if (edge == 6) {
+			edgeConnect[0] = 3;
+			edgeConnect[1] = 0;
+		} else if (edge == 7) {
+			edgeConnect[0] = 4;
+			edgeConnect[1] = 1;
+		} else if (edge == 8) {
+			edgeConnect[0] = 5;
+			edgeConnect[1] = 2;
+		}
+
+	    break;
+
+	case (Type::POLYHEDRON):
+
+	    break;
+
+	default:
+
+	    break;
+
+	}
+
+	return edgeConnect;
+}
+
+/*!
 	Gets the dimension of the element.
 
 	\return The dimension of the element
