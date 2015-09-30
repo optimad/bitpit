@@ -49,6 +49,8 @@ public:
 	const int * get_interfaces() const;
 	const int * get_interfaces(const int &face) const;
 
+	std::vector<int> extract_neighs(int codimension, bool complete = true) const;
+
 	std::vector<int> extract_face_neighs() const;
 	std::vector<int> extract_face_neighs(const int &face, const std::vector<int> &blackList = std::vector<int>()) const;
 

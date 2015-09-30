@@ -213,6 +213,29 @@ std::vector<int> Cell::extract_face_neighs() const
 }
 
 /*!
+	Extracts all the neighbours for the specified codimension.
+
+	\param complete controls if the list of neighbours should contain
+	only the neighbours for the specified codimension, or should contain
+	also the neighbours for lower codimensions.
+	\result The neighbours for the specified codimension.
+*/
+std::vector<int> Cell::extract_neighs(int codimension, bool complete) const
+{
+	assert(codimension >= 1 && codimension <= get_dimension());
+
+	if (codimension == 1) {
+		return extract_face_neighs();
+	} else if (codimension == get_dimension()) {
+		return extract_vertex_neighs(complete);
+	} else if (codimension == 2) {
+		return extract_edge_neighs(complete);
+	} else {
+		return std::vector<int>();
+	}
+}
+
+/*!
 	Extracts the neighbours of the specified face.
 
 	\param face is a face of the cell
