@@ -127,6 +127,8 @@ protected:
 	static void normalize(double x[], int size = 3);
 	static void transpose(double **A, const int &nRows = 3, const int &nCols = 3);
 
+	static bool add_id_to_ordered_list(const int &id, std::vector<int> &list);
+
 private:
 	Patch *m_patch;
 
