@@ -55,7 +55,7 @@ public:
 	}
 
 protected:
-	double * _get_opposite_normal(double *normal);
+	std::array<double, 3> & _get_opposite_normal(std::array<double, 3> &normal);
 	bool _update(vector<uint32_t> &cellMapping);
 	bool _mark_cell_for_refinement(const int &id);
 	bool _mark_cell_for_coarsening(const int &id);
@@ -74,7 +74,7 @@ private:
 	vector<double> m_tree_area;
 	vector<double> m_tree_volume;
 
-	std::unique_ptr<CollapsedArray2D<double> > m_normals;
+	std::vector<std::array<double, 3> > m_normals;
 
 	void update_vertices();
 	void import_vertices();

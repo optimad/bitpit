@@ -95,13 +95,12 @@ PatchCartesian::PatchCartesian(const int &id, const int &dimension,
 		m_z_interface_area  = m_cellSize[Node::COORD_X] * m_cellSize[Node::COORD_Y];
 	}
 
-	m_normals = std::unique_ptr<CollapsedArray2D<double> >(new CollapsedArray2D<double>(2 * dimension, 2 * dimension * dimension));
 	for (int n = -1; n <= 1; n += 2) {
 		for (int i = 0; i < dimension; i++) {
-			std::vector<double> normal(dimension, 0);
+			std::array<double, 3> normal = {0.0, 0.0, 0.0};
 			normal[i] = n;
 
-			m_normals->push_back(dimension, normal.data());
+			m_normals.push_back(normal);
 		}
 	}
 }
@@ -119,14 +118,19 @@ PatchCartesian::~PatchCartesian()
 	\param normal is a pointer to the normal
 	\result A pointer to the opposite normal.
  */
-double * PatchCartesian::_get_opposite_normal(double *normal)
+std::array<double, 3> & PatchCartesian::_get_opposite_normal(std::array<double, 3> &normal)
 {
+	std::vector<std::array<double, 3> >::iterator itr_current = std::find(m_normals.begin(), m_normals.end(), normal);
+	if (itr_current == m_normals.end()) {
+		 throw std::out_of_range ("Input normal is not among the stored normals");
+	}
+
 	int dimension = get_dimension();
 
-	int id_current  = std::distance(m_normals->data(), normal) / dimension;
+	int id_current  = std::distance(m_normals.begin(), itr_current);
 	int id_opposite = (id_current + dimension) % (2 * dimension);
 
-	return m_normals->get(id_opposite);
+	return m_normals[id_opposite];
 }
 
 /*!
@@ -524,7 +528,7 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 				interface.set_centroid(centroid);
 
 				// Normal
-				interface.set_normal(m_normals->get(ownerFace));
+				interface.set_normal(&m_normals[ownerFace]);
 			}
 		}
 	}

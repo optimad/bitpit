@@ -44,7 +44,7 @@ Patch::~Patch()
 	\param normal is a pointer to the normal
 	\result A pointer to the opposite normal.
  */
-double * Patch::get_opposite_normal(double *normal)
+std::array<double, 3> & Patch::get_opposite_normal(std::array<double, 3> &normal)
 {
 	return _get_opposite_normal(normal);
 }

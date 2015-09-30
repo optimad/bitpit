@@ -98,7 +98,7 @@ double Interface::get_area() const
 
 	\param normal a pointer to the normal of the interface
 */
-void Interface::set_normal(double normal[])
+void Interface::set_normal(std::array<double, 3> *normal)
 {
 	m_normal = normal;
 }
@@ -108,9 +108,9 @@ void Interface::set_normal(double normal[])
 
 	\result A pointer to the normal of the interface
 */
-double * Interface::get_normal() const
+const std::array<double, 3> & Interface::get_normal() const
 {
-	return m_normal;
+	return *m_normal;
 }
 
 /*!
@@ -122,7 +122,7 @@ double * Interface::get_normal() const
 */
 double ** Interface::eval_rotation_from_cartesian()
 {
-	return eval_rotation_from_cartesian(m_normal, get_patch_dimension());
+	return eval_rotation_from_cartesian(m_normal->data(), get_patch_dimension());
 }
 
 /*!
@@ -224,7 +224,7 @@ double ** Interface::eval_rotation_from_cartesian(double * versor, const int &di
 */
 double ** Interface::eval_rotation_to_cartesian()
 {
-	return eval_rotation_to_cartesian(m_normal, get_patch_dimension());
+	return eval_rotation_to_cartesian(m_normal->data(), get_patch_dimension());
 }
 
 /*!
@@ -395,7 +395,7 @@ void Interface::swap_owner_neigh()
 	m_ownerFace = m_neighFace;
 	m_neighFace = tmp;
 
-	m_normal = get_patch()->get_opposite_normal(m_normal);
+	m_normal = &(get_patch()->get_opposite_normal(*m_normal));
 }
 
 /*!

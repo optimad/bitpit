@@ -44,8 +44,9 @@ public:
 	void set_position_type(PositionType position);
 	PositionType get_position_type() const;
 
-	void set_normal(double normal[]);
-	double * get_normal() const;
+	void set_normal(std::array<double, 3> *normal);
+	const std::array<double, 3> & get_normal() const;
+
 	double ** eval_rotation_from_cartesian();
 	static double ** eval_rotation_from_cartesian(double * normal, const int &dimension);
 	double ** eval_rotation_to_cartesian();
@@ -77,7 +78,7 @@ private:
   	PositionType m_positionType;
 
 	double *m_area;
-	double *m_normal;
+	std::array<double, 3> *m_normal;
 
 	int m_owner;
 	int m_ownerFace;

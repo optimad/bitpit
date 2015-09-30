@@ -71,14 +71,14 @@ public:
 	void output_write(std::string name);
 	OutputManager & get_output_manager();
 
-	double * get_opposite_normal(double *normal);
+	std::array<double, 3> & get_opposite_normal(std::array<double, 3> &normal);
 
 protected:
 	PiercedVector<Node> m_vertices;
 	PiercedVector<Cell> m_cells;
 	PiercedVector<Interface> m_interfaces;
 
-	virtual double * _get_opposite_normal(double *normal) = 0;
+	virtual std::array<double, 3> & _get_opposite_normal(std::array<double, 3> &normal) = 0;
 	virtual bool _update(std::vector<uint32_t> &cellMapping) = 0;
 	virtual bool _mark_cell_for_refinement(const int &id) = 0;
 	virtual bool _mark_cell_for_coarsening(const int &id) = 0;
