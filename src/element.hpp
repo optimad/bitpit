@@ -105,6 +105,9 @@ public:
 	Element::Type get_face_type(const int &face) const;
 	static Element::Type get_face_type(Element::Type type, const int &face);
 
+	std::vector<int> get_face_local_connect(const int &face) const;
+	static std::vector<int> get_face_local_connect(Element::Type type, const int &face);
+
 	int get_edge_count() const;
 	static int get_edge_count(Element::Type type);
 

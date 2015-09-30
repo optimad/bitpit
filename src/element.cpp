@@ -369,6 +369,205 @@ Element::Type Element::get_face_type(Element::Type type, const int &face)
 }
 
 /*!
+	Gets the local connectivity of the specified face of the element.
+
+	\param face is the face for which the connectiviy is reqested
+	\result The local connectivity of the specified face of the element.
+*/
+std::vector<int> Element::get_face_local_connect(const int &face) const
+{
+	return get_face_local_connect(m_type, face);
+}
+
+/*!
+	Gets the local connectivity of the specified face of the given type
+	of element.
+
+	\param type the type of the element
+	\param face is the face for which the connectiviy is reqested
+	\result The local connectivity of the specified face of the element.
+*/
+std::vector<int> Element::get_face_local_connect(Element::Type type, const int &face)
+{
+	Element::Type faceType = get_face_type(type, face);
+	std::vector<int> faceConnect(get_vertex_count(faceType));
+
+	switch (type) {
+
+	case (Type::POINT):
+	    faceConnect[0] = 0;
+
+	    break;
+
+	case (Type::LINE):
+		if (face == 0) {
+			faceConnect[0] = 0;
+		} else {
+			faceConnect[1] = 1;
+		}
+
+	    break;
+
+	case (Type::TRIANGLE):
+		if (face == 0) {
+			faceConnect[0] = 0;
+			faceConnect[1] = 1;
+		} else if (face == 1) {
+			faceConnect[0] = 1;
+			faceConnect[1] = 2;
+		} else if (face == 2) {
+			faceConnect[0] = 2;
+			faceConnect[1] = 0;
+		}
+
+	    break;
+
+	case (Type::RECTANGLE):
+	case (Type::QUADRANGLE):
+		if (face == 0) {
+			faceConnect[0] = 2;
+			faceConnect[1] = 0;
+		} else if (face == 1) {
+			faceConnect[0] = 1;
+			faceConnect[1] = 3;
+		} else if (face == 2) {
+			faceConnect[0] = 0;
+			faceConnect[1] = 1;
+		} else if (face == 3) {
+			faceConnect[0] = 3;
+			faceConnect[1] = 2;
+		}
+
+	    break;
+
+	case (Type::POLYGON):
+	    break;
+
+	case (Type::TETRAHEDRON):
+		if (face == 0) {
+			faceConnect[0] = 1;
+			faceConnect[1] = 0;
+			faceConnect[2] = 2;
+		} else if (face == 1) {
+			faceConnect[0] = 0;
+			faceConnect[1] = 3;
+			faceConnect[2] = 2;
+		} else if (face == 2) {
+			faceConnect[0] = 3;
+			faceConnect[1] = 1;
+			faceConnect[2] = 2;
+		} else if (face == 3) {
+			faceConnect[0] = 0;
+			faceConnect[1] = 1;
+			faceConnect[2] = 3;
+		}
+
+	    break;
+
+	case (Type::BRICK):
+	case (Type::HEXAHEDRON):
+		if (face == 0) {
+			faceConnect[0] = 2;
+			faceConnect[1] = 0;
+			faceConnect[2] = 4;
+			faceConnect[3] = 6;
+		} else if (face == 1) {
+			faceConnect[0] = 1;
+			faceConnect[1] = 3;
+			faceConnect[2] = 7;
+			faceConnect[3] = 5;
+		} else if (face == 2) {
+			faceConnect[0] = 0;
+			faceConnect[1] = 1;
+			faceConnect[2] = 5;
+			faceConnect[3] = 4;
+		} else if (face == 3) {
+			faceConnect[0] = 3;
+			faceConnect[1] = 2;
+			faceConnect[2] = 6;
+			faceConnect[3] = 7;
+		} else if (face == 4) {
+			faceConnect[0] = 2;
+			faceConnect[1] = 3;
+			faceConnect[2] = 1;
+			faceConnect[3] = 0;
+		} else if (face == 5) {
+			faceConnect[0] = 4;
+			faceConnect[1] = 5;
+			faceConnect[2] = 7;
+			faceConnect[3] = 6;
+		}
+
+	    break;
+
+	case (Type::PYRAMID):
+		if (face == 0) {
+			faceConnect[0] = 0;
+			faceConnect[1] = 3;
+			faceConnect[2] = 2;
+			faceConnect[3] = 1;
+		} else if (face == 1) {
+			faceConnect[0] = 3;
+			faceConnect[1] = 0;
+			faceConnect[2] = 4;
+		} else if (face == 2) {
+			faceConnect[0] = 0;
+			faceConnect[1] = 1;
+			faceConnect[2] = 4;
+		} else if (face == 3) {
+			faceConnect[0] = 1;
+			faceConnect[1] = 2;
+			faceConnect[2] = 4;
+		} else if (face == 4) {
+			faceConnect[0] = 2;
+			faceConnect[1] = 3;
+			faceConnect[2] = 4;
+		}
+
+	    break;
+
+	case (Type::PRISM):
+		if (face == 0) {
+			faceConnect[0] = 1;
+			faceConnect[1] = 0;
+			faceConnect[2] = 2;
+		} else if (face == 1) {
+			faceConnect[0] = 3;
+			faceConnect[1] = 4;
+			faceConnect[2] = 5;
+		} else if (face == 2) {
+			faceConnect[0] = 3;
+			faceConnect[1] = 0;
+			faceConnect[2] = 1;
+			faceConnect[3] = 4;
+		} else if (face == 3) {
+			faceConnect[0] = 4;
+			faceConnect[1] = 1;
+			faceConnect[2] = 2;
+			faceConnect[3] = 5;
+		} else if (face == 4) {
+			faceConnect[0] = 5;
+			faceConnect[1] = 2;
+			faceConnect[2] = 0;
+			faceConnect[3] = 3;
+		}
+
+	    break;
+
+	case (Type::POLYHEDRON):
+
+	    break;
+
+	default:
+
+	    break;
+
+	}
+
+	return faceConnect;
+}
+
+/*!
 	Gets the number of edges of the element.
 
 	\result The number of edges of the element
