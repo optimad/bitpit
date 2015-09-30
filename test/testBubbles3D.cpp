@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
 		double Dt = 0.5;
 
 		/**<Define vectors of data.*/
-		vector<double> oct_data(nocts, 0.0);
+		vector<double> oct_data(nocts, 0.0),oct_data_ghost;
 		vector<double> oct_data_new(nocts, 0.0);
 
 		/**<Adapt itend times with refinement on the interface of the bubbles.*/
@@ -179,7 +179,7 @@ int main(int argc, char *argv[]) {
 #if NOMPI==0
 			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
 			/**<Communicate the data of the octants and the ghost octants between the processes.*/
-			User_Data_LB<vector<double> > data_lb(oct_data);
+			User_Data_LB<vector<double> > data_lb(oct_data,oct_data_ghost);
 			pabloBB.loadBalance(data_lb);
 			/**<Update the number of local octants.*/
 			nocts = pabloBB.getNumOctants();

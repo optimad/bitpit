@@ -100,6 +100,12 @@ public:
 	 * \param[in] newSize The new size of the user data container
 	 */
 	void resize(uint32_t newSize);
+
+	/*!  Its user specification resizes the ghost element data container to the newSize value.
+	 * \param[in] newSize The new size of the user ghost data container
+	 */
+	void resizeGhost(uint32_t newSize);
+
 	/*!  Its user specification reduces the capacity of the container to its size for those containers which has different values for capacity and size.
 	 * 	If the user container has no capacity concept, nothing has to be done.
 	 */

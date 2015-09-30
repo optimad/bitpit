@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
 		/**<Adapt two times with data injection on new octants.*/
 		int start = 1;
 		/**<Weight.*/
-		vector<double> weight(nocts, 1.0);
+		vector<double> weight(nocts, 1.0),weightGhost;
 		for (iter=start; iter<start+2; iter++){
 			for (int i=0; i<nocts; i++){
 				/**<Compute the nodes of the octant.*/
@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
 #if NOMPI==0
 		/**<(Load)Balance the octree over the processes with communicating the data.*/
 //		User_Data_LB<vector<double> > data_lb(oct_data);
-		User_Data_LB<vector<double> > data_lb(weight);
+		User_Data_LB<vector<double> > data_lb(weight,weightGhost);
 		pablo15.loadBalance(data_lb, &weight);
 #endif
 

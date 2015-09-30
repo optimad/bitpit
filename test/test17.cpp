@@ -141,7 +141,7 @@ int main(int argc, char *argv[]) {
 #if NOMPI==0
 		/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.
 		 * Preserve the family compact up to 4 levels over the max deep reached in the octree.*/
-		User_Data_LB<vector<double> > data_lb(oct_data);
+		User_Data_LB<vector<double> > data_lb(oct_data,ghost_data);
 		pablo17a.loadBalance(data_lb);
 		pablo17b.loadBalance();
 

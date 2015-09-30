@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
 		/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.
 		 * Preserve the family compact up to 4 levels over the max deep reached in the octree.*/
 		uint8_t levels = 4;
-		User_Data_LB<vector<double> > data_lb(oct_data);
+		User_Data_LB<vector<double> > data_lb(oct_data,ghost_data);
 		pablo116.loadBalance(data_lb, levels);
 #endif
 

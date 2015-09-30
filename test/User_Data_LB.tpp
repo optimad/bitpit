@@ -52,6 +52,11 @@ inline void User_Data_LB<D>::resize(uint32_t newSize) {
 }
 
 template<class D>
+inline void User_Data_LB<D>::resizeGhost(uint32_t newSize) {
+	ghostdata.resize(newSize);
+}
+
+template<class D>
 inline void User_Data_LB<D>::shrink() {
 #if defined(__INTEL_COMPILER)
 #else
@@ -60,7 +65,7 @@ inline void User_Data_LB<D>::shrink() {
 }
 
 template<class D>
-inline User_Data_LB<D>::User_Data_LB(Data& data_) : data(data_){}
+inline User_Data_LB<D>::User_Data_LB(Data& data_, Data& ghostdata_) : data(data_), ghostdata(ghostdata_){}
 
 template<class D>
 inline User_Data_LB<D>::~User_Data_LB() {}

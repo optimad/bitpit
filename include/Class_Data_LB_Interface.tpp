@@ -39,6 +39,11 @@ inline void Class_Data_LB_Interface<Impl>::resize(uint32_t newSize){
 }
 
 template<class Impl>
+inline void Class_Data_LB_Interface<Impl>::resizeGhost(uint32_t newSize){
+	return getImpl().resizeGhost(newSize);
+}
+
+template<class Impl>
 inline void Class_Data_LB_Interface<Impl>::shrink(){
 	return getImpl().shrink();
 }

@@ -17,6 +17,7 @@ public:
 	typedef D Data;
 
 	Data& data;
+	Data& ghostdata;
 
 	size_t fixedSize() const;
 	size_t size(const uint32_t e) const;
@@ -30,9 +31,10 @@ public:
 
 	void assign(uint32_t stride, uint32_t length);
 	void resize(uint32_t newSize);
+	void resizeGhost(uint32_t newSize);
 	void shrink();
 
-	User_Data_LB(Data& data_);
+	User_Data_LB(Data& data_, Data& ghostdata_);
 	~User_Data_LB();
 };
 

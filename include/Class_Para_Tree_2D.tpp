@@ -3918,6 +3918,8 @@ public:
 			//Update and ghosts here
 			updateLoadBalance();
 			setPboundGhosts();
+			uint32_t nofGhosts = getNumGhosts();
+			userData.resizeGhost(nofGhosts);
 
 		}
 		delete [] partition;
@@ -4410,6 +4412,8 @@ public:
 			//Update and ghosts here
 			updateLoadBalance();
 			setPboundGhosts();
+			uint32_t nofGhosts = getNumGhosts();
+			userData.resizeGhost(nofGhosts);
 
 		}
 		delete [] partition;

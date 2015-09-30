@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
 
 #if NOMPI==0
 			/**<(Load)Balance the octree over the processes with communicating the data.*/
-			User_Data_LB<vector<double> > data_lb(oct_data);
+			User_Data_LB<vector<double> > data_lb(oct_data,ghost_data);
 			pablo.loadBalance(data_lb);
 #endif
 
