@@ -57,11 +57,11 @@ int Node::get_id() const
 /*!
 	Sets the coordinates of the node.
 
-	\param coords a pointer the coordinates of the node
+	\param coords are the coordinates of the node
 */
-void Node::set_coords(std::unique_ptr<double[]> coords)
+void Node::set_coords(std::array<double, 3> &coords)
 {
-	m_coords = std::move(coords);
+	m_coords = coords;
 }
 
 /*!
@@ -69,9 +69,9 @@ void Node::set_coords(std::unique_ptr<double[]> coords)
 
 	\return A pointer to the coordinates of the node
 */
-double * Node::get_coords() const
+const std::array<double, 3> & Node::get_coords() const
 {
-	return m_coords.get();
+	return m_coords;
 }
 
 }

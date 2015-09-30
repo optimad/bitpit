@@ -212,14 +212,12 @@ void PatchOctree::import_vertices()
 			nodeCoords = m_tree_2D.getNodeCoordinates(n);
 		}
 
-		std::unique_ptr<double[]> coords = std::unique_ptr<double[]>(new double[get_dimension()]);
+		std::array<double, 3> coords;
 		coords[Node::COORD_X] = nodeCoords[Node::COORD_X];
 		coords[Node::COORD_Y] = nodeCoords[Node::COORD_Y];
-		if (is_three_dimensional()) {
-			coords[Node::COORD_Z] = nodeCoords[Node::COORD_Z];
-		}
+		coords[Node::COORD_Z] = nodeCoords[Node::COORD_Z];
 
-		vertex.set_coords(std::move(coords));
+		vertex.set_coords(coords);
 	}
 }
 

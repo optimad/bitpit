@@ -199,14 +199,16 @@ void PatchCartesian::create_vertices()
 				Node &vertex = m_vertices.back();
 
 				// Coordinate
-				std::unique_ptr<double[]> coords = std::unique_ptr<double[]>(new double[get_dimension()]);
+				std::array<double, 3> coords;
 				coords[Node::COORD_X] = m_x[i];
 				coords[Node::COORD_Y] = m_y[j];
 				if (is_three_dimensional()) {
 					coords[Node::COORD_Z] = m_z[k];
+				} else {
+					coords[Node::COORD_Z] = 0.0;
 				}
 
-				vertex.set_coords(std::move(coords));
+				vertex.set_coords(coords);
 			}
 		}
 	}
@@ -512,7 +514,7 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 
 				for (int n = 0; n < nInterfaceVertices; n++) {
 					Node &vertex = m_vertices[interface.get_vertex(n)];
-					double *vertexCoords = vertex.get_coords();
+					const std::array<double, 3> vertexCoords = vertex.get_coords();
 
 					for (int k = 0; k < get_dimension(); k++) {
 						centroid[k] += vertexCoords[k];

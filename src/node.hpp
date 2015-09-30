@@ -25,15 +25,15 @@ public:
 	void set_id(const int &id);
 	int get_id() const;
 
-	void set_coords(std::unique_ptr<double[]> coords);
-	double * get_coords() const;
+	void set_coords(std::array<double, 3> &coords);
+	const std::array<double, 3> & get_coords() const;
 	
 protected:
 	static const int NULL_NODE_ID;
 
 private:
 	int m_id;
-	std::unique_ptr<double[]> m_coords;
+	std::array<double, 3> m_coords;
 
 };
 

@@ -962,8 +962,8 @@ double Element::eval_min_length() const
 		Node &node_A = m_patch->get_vertex(m_connect[0]);
 		Node &node_B = m_patch->get_vertex(m_connect[1]);
 
-		const double *coords_A = node_A.get_coords();
-		const double *coords_B = node_B.get_coords();
+		const std::array<double, 3> &coords_A = node_A.get_coords();
+		const std::array<double, 3> &coords_B = node_B.get_coords();
 
 		length = 0.;
 		for (int k = 0; k < get_patch_dimension(); ++k) {
@@ -975,9 +975,9 @@ double Element::eval_min_length() const
 		Node &node_B = m_patch->get_vertex(m_connect[1]);
 		Node &node_C = m_patch->get_vertex(m_connect[3]);
 
-		const double *coords_A = node_A.get_coords();
-		const double *coords_B = node_B.get_coords();
-		const double *coords_C = node_C.get_coords();
+		const std::array<double, 3> &coords_A = node_A.get_coords();
+		const std::array<double, 3> &coords_B = node_B.get_coords();
+		const std::array<double, 3> &coords_C = node_C.get_coords();
 
 		double length_x = 0.0;
 		double length_y = 0.0;
@@ -992,10 +992,10 @@ double Element::eval_min_length() const
 		Node &node_C = m_patch->get_vertex(m_connect[3]);
 		Node &node_D = m_patch->get_vertex(m_connect[4]);
 
-		const double *coords_A = node_A.get_coords();
-		const double *coords_B = node_B.get_coords();
-		const double *coords_C = node_C.get_coords();
-		const double *coords_D = node_D.get_coords();
+		const std::array<double, 3> &coords_A = node_A.get_coords();
+		const std::array<double, 3> &coords_B = node_B.get_coords();
+		const std::array<double, 3> &coords_C = node_C.get_coords();
+		const std::array<double, 3> &coords_D = node_D.get_coords();
 
 		double length_x = 0.0;
 		double length_y = 0.0;
