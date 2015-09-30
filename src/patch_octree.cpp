@@ -493,6 +493,13 @@ void PatchOctree::import_interfaces()
 			neighId += m_nInternalCells;
 		}
 
+		// Tipo
+		if (is_three_dimensional()) {
+			interface.set_type(Element::RECTANGLE);
+		} else {
+			interface.set_type(Element::LINE);
+		}
+
 		// Area
 		interface.set_area(&m_tree_area[level]);
 
