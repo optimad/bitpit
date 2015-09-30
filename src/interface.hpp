@@ -47,11 +47,11 @@ public:
 	void set_normal(std::array<double, 3> *normal);
 	const std::array<double, 3> & get_normal() const;
 
-	double ** eval_rotation_from_cartesian();
-	static double ** eval_rotation_from_cartesian(double * normal, const int &dimension);
-	double ** eval_rotation_to_cartesian();
-	static double ** eval_rotation_to_cartesian(double * normal, const int &dimension);
-	void transpose_rotation(double **R);
+	std::array<std::array<double, 3>, 3> eval_rotation_from_cartesian();
+	static std::array<std::array<double, 3>, 3> eval_rotation_from_cartesian(std::array<double, 3> &versor);
+	std::array<std::array<double, 3>, 3> eval_rotation_to_cartesian();
+	static std::array<std::array<double, 3>, 3> eval_rotation_to_cartesian(std::array<double, 3> &versor);
+	void transpose_rotation(std::array<std::array<double, 3>, 3> &R);
 
 	void set_area(double *area);
 	double get_area() const;

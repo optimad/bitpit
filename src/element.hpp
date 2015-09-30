@@ -123,9 +123,9 @@ public:
 protected:
 	static const int NULL_ELEMENT_ID;
 
-	static void cross(double x[], double y[], double cross[]);
-	static void normalize(double x[], int size = 3);
-	static void transpose(double **A, const int &nRows = 3, const int &nCols = 3);
+	static void cross_3D(std::array<double, 3> x, std::array<double, 3> y, std::array<double, 3> cross);
+	static void normalize_3D(std::array<double, 3> x);
+	static void transpose_3D(std::array<std::array<double, 3>, 3> A);
 
 	static bool add_id_to_ordered_list(const int &id, std::vector<int> &list);
 

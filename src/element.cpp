@@ -1020,7 +1020,7 @@ double Element::eval_min_length() const
 	\param y the second a three-dimensional array
 	\param cross the array used to store the cross product.
 */
-void Element::cross(double x[], double y[], double cross[])
+void Element::cross_3D(std::array<double, 3> x, std::array<double, 3> y, std::array<double, 3> cross)
 {
 	cross[0] = x[1] * y[2] - x[2] * y[1];
 	cross[1] = x[2] * y[0] - x[0] * y[2];
@@ -1030,19 +1030,17 @@ void Element::cross(double x[], double y[], double cross[])
 /*!
 	Normalizes an array.
 
-	\param x the array to be normalized
-	\param size the size of the array, if no size is specified the default
-	            size of 3 will be used
+	\param x the three-dimensional array to be normalized
 */
-void Element::normalize(double x[], int size)
+void Element::normalize_3D(std::array<double, 3> x)
 {
 	double module = 0.;
-	for (int k = 0; k < size; ++k) {
+	for (int k = 0; k < 3; ++k) {
 		module += x[k] * x[k];
 	}
 	module = pow(module, 0.5);
 
-	for (int k = 0; k < size; ++k) {
+	for (int k = 0; k < 3; ++k) {
 		x[k] /= module;
 	}
 }
@@ -1050,14 +1048,12 @@ void Element::normalize(double x[], int size)
 /*!
 	Evaluates the transpose of a matrix.
 
-	\param A the matrix
-	\param nRows the number of rows of the matrix
-	\param nCols the number of columns of the matrix
+	\param A the 3x3 matrix
 */
-void Element::transpose(double **A, const int &nRows, const int &nCols)
+void Element::transpose_3D(std::array<std::array<double, 3>, 3> A)
 {
-	for (int i = 1; i < nRows; i++) {
-		for (int j = i; j < nCols; j++) {
+	for (int i = 1; i < 3; i++) {
+		for (int j = i; j < 3; j++) {
 			double tmp = A[i][j];
 			A[i][j] = A[j][i];
 			A[j][i] = tmp;

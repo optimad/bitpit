@@ -120,9 +120,9 @@ const std::array<double, 3> & Interface::get_normal() const
 	\result The rotation matrix from the Cartesian coordinate system
 	to the interface coordinate system.
 */
-double ** Interface::eval_rotation_from_cartesian()
+std::array<std::array<double, 3>, 3> Interface::eval_rotation_from_cartesian()
 {
-	return eval_rotation_from_cartesian(m_normal->data(), get_patch_dimension());
+	return eval_rotation_from_cartesian(*m_normal);
 }
 
 /*!
@@ -152,11 +152,10 @@ double ** Interface::eval_rotation_from_cartesian()
 	    x-versor and y-versor.
 
 	\param versor is the versor that defines the coordinate system
-	\param dimension is the dimension of the specified versor
 	\result The rotation matrix from the Cartesian coordinate system
 	to a coordinate system build starting from the specified versor.
 */
-double ** Interface::eval_rotation_from_cartesian(double * versor, const int &dimension)
+std::array<std::array<double, 3>, 3> Interface::eval_rotation_from_cartesian(std::array<double, 3> &versor)
 {
 	// The rotation matrix has in its rows the versors that define
 	// the interface coordinate system.
@@ -165,48 +164,29 @@ double ** Interface::eval_rotation_from_cartesian(double * versor, const int &di
 	//          R =   | [y_int] |
 	//                | [z_int] |
 	//
-	double **R = new double*[dimension];
-	for (int k = 0; k < dimension; ++k) {
-		R[k] = new double[dimension];
+	std::array<std::array<double, 3>, 3> R;
+	for (int i = 0; i < 3; ++i) {
+		R[i].fill(0.0);
 	}
 
 	// x-interface axis
-	for (int k = 0; k < dimension; ++k) {
+	for (int k = 0; k < 3; ++k) {
 		R[0][k] = versor[k];
 	}
 
 	// y-interface axis
-	if (dimension == 3) {
-		if (fabs(versor[2] - 1.) < 1e-8) {
-			double *x = new double[dimension];
-			x[0] = 1.0;
-			x[1] = 0.0;
-			x[2] = 0.0;
-
-			cross(x, R[0], R[1]);
-
-			delete[] x;
-		} else {
-			double *z = new double[dimension];
-			z[0] = 0.0;
-			z[1] = 0.0;
-			z[2] = 1.0;
-
-			cross(z, R[0], R[1]);
-
-			delete[] z;
-		}
-		normalize(R[1]);
+	if (fabs(versor[2] - 1.) < 1e-8) {
+		std::array<double, 3> x = {1.0, 0.0, 0.0};
+		cross_3D(x, R[0], R[1]);
 	} else {
-		R[1][0] = - versor[1];
-		R[1][1] =   versor[0];
+		std::array<double, 3> z = {0.0, 0.0, 1.0};
+		cross_3D(z, R[0], R[1]);
 	}
+	normalize_3D(R[1]);
 
 	// z-interface axis
-	if (dimension == 3) {
-		cross(R[0], R[1], R[2]);
-		normalize(R[2]);
-	}
+	cross_3D(R[0], R[1], R[2]);
+	normalize_3D(R[2]);
 
 	return R;
 }
@@ -222,9 +202,9 @@ double ** Interface::eval_rotation_from_cartesian(double * versor, const int &di
 	\result The rotation matrix from the interface coordinate system
 	to the Cartesian coordinate system.
 */
-double ** Interface::eval_rotation_to_cartesian()
+std::array<std::array<double, 3>, 3> Interface::eval_rotation_to_cartesian()
 {
-	return eval_rotation_to_cartesian(m_normal->data(), get_patch_dimension());
+	return eval_rotation_to_cartesian(*m_normal);
 }
 
 /*!
@@ -239,16 +219,16 @@ double ** Interface::eval_rotation_to_cartesian()
 	matrix from the Cartesian coordinate system to the versor
 	coordinate system.
 
-	\param versor is the versor that defines the coordinate system
-	\param dimension is the dimension of the specified versor
+	\param versor is the three-dimensional versor that defines the
+	coordinate system
 	\result The rotation matrix from the coordinate system build
 	starting from the specified versor to the Cartesian coordinate
 	system.
 */
-double ** Interface::eval_rotation_to_cartesian(double * versor, const int &dimension)
+std::array<std::array<double, 3>, 3> Interface::eval_rotation_to_cartesian(std::array<double, 3> &versor)
 {
-	double** R = eval_rotation_from_cartesian(versor, dimension);
-	transpose(R, dimension, dimension);
+	std::array<std::array<double, 3>, 3> R = eval_rotation_from_cartesian(versor);
+	transpose_3D(R);
 
 	return R;
 }
@@ -258,11 +238,9 @@ double ** Interface::eval_rotation_to_cartesian(double * versor, const int &dime
 
 	\param R the rotation matrix to transpose
 */
-void Interface::transpose_rotation(double **R)
+void Interface::transpose_rotation(std::array<std::array<double, 3>, 3> &R)
 {
-	int dimension = get_patch_dimension();
-
-	return transpose(R, dimension, dimension);
+	return transpose_3D(R);
 }
 
 /*!
