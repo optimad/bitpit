@@ -463,7 +463,6 @@ void PatchOctree::import_interfaces()
 		bool isBoundary;
 		vector<uint32_t> cells;
 		int ownerFace;
-		int ownerCell;
 		vector<double> faceCenter;
 		if (is_three_dimensional()) {
 			Class_Intersection<3> *treeInterface = m_tree_3D.getIntersection(n);
@@ -473,7 +472,6 @@ void PatchOctree::import_interfaces()
 			isBoundary = m_tree_3D.getBound(treeInterface);
 			cells      = m_tree_3D.getOwners(treeInterface);
 			ownerFace  = m_tree_3D.getFace(treeInterface);
-			ownerCell  = m_tree_3D.getFiner(treeInterface) ? 0 : 1;
 			faceCenter = m_tree_3D.getCenter(treeInterface);
 		} else {
 			Class_Intersection<2> *treeInterface = m_tree_2D.getIntersection(n);
@@ -483,12 +481,11 @@ void PatchOctree::import_interfaces()
 			isBoundary = m_tree_2D.getBound(treeInterface);
 			cells      = m_tree_2D.getOwners(treeInterface);
 			ownerFace  = m_tree_2D.getFace(treeInterface);
-			ownerCell  = m_tree_2D.getFiner(treeInterface) ? 0 : 1;
 			faceCenter = m_tree_2D.getCenter(treeInterface);
 		}
 
-		int ownerId = cells[ownerCell];
-		int neighId = cells[(ownerCell + 1) % 2];
+		int ownerId = cells[0];
+		int neighId = cells[1];
 		if (isGhost) {
 			neighId += m_nInternalCells;
 		}
