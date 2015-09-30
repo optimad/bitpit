@@ -419,6 +419,22 @@ void PatchOctree::import_interfaces()
 	// Reset
 	reset_interfaces();
 
+	// Info of the cells
+	Element::Type cellType;
+	if (is_three_dimensional()) {
+		cellType = Element::BRICK;
+	} else {
+		cellType = Element::RECTANGLE;
+	}
+
+	// Info on the interfaces
+	int nInterfaceVertices;
+	if (is_three_dimensional()) {
+		nInterfaceVertices = Element::get_face_count(Element::RECTANGLE);
+	} else {
+		nInterfaceVertices = Element::get_face_count(Element::LINE);
+	}
+
 	// Initialize intersections
 	if (is_three_dimensional()) {
 		m_tree_3D.computeIntersections();
@@ -538,6 +554,22 @@ void PatchOctree::import_interfaces()
 			int neighFace = ownerFace + 1 - 2 * (ownerFace % 2);
 			interface.set_neigh(neigh.get_id(), neighFace);
 		}
+
+		// Connectivity
+		vector<uint32_t> octantConnect;
+		if (is_three_dimensional()) {
+			octantConnect = m_tree_3D.getOctantConnectivity(ownerId) ;
+		} else {
+			octantConnect = m_tree_2D.getOctantConnectivity(ownerId) ;
+		}
+
+		std::vector<int> localConnect = Element::get_face_local_connect(cellType, ownerFace);
+		std::unique_ptr<int[]> connect = std::unique_ptr<int[]>(new int[nInterfaceVertices]);
+		for (int i = 0; i < nInterfaceVertices; ++i) {
+			connect[i] = octantConnect[localConnect[i]];
+		}
+
+		interface.set_connect(std::move(connect));
 	}
 
 	// Add interface information to the cells
