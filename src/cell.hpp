@@ -36,7 +36,7 @@ public:
 	PositionType get_position_type() const;
 	
 	void set_volume(double * const volume);
-	double & get_volume() const;
+	const double & get_volume() const;
 
 	void initialize_interfaces(std::vector<std::vector<int>> &interfaces);
 	void initialize_empty_interfaces(const int nInterfaces[]);

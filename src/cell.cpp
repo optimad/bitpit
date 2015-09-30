@@ -80,7 +80,7 @@ void Cell::set_volume(double * const volume)
 
 	\return The volume of the cell
 */
-double & Cell::get_volume() const
+const double & Cell::get_volume() const
 {
     return *m_volume;
 }  
