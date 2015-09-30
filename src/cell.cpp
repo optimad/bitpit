@@ -228,11 +228,9 @@ std::vector<int> Cell::extract_face_neighs(const int &face) const
 			continue;
 		}
 
-		int neigh;
-		if (interface.get_owner() != get_id()) {
+		int neigh = interface.get_neigh();
+		if (neigh == get_id()) {
 			neigh = interface.get_owner();
-		} else {
-			neigh = interface.get_neigh();
 		}
 
 		// Add the cell to the negihbour list
