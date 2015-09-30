@@ -504,31 +504,7 @@ void PatchOctree::import_interfaces()
 		interface.set_area(&m_tree_area[level]);
 
 		// Normal
-		int normalIdx;
-		switch (ownerFace) {
-
-		case 0:
-		case 1:
-			normalIdx = Node::COORD_X;
-			break;
-
-		case 2:
-		case 3:
-			normalIdx = Node::COORD_Y;
-			break;
-
-		case 4:
-		case 5:
-			normalIdx = Node::COORD_Z;
-			break;
-
-		}
-
-		if (ownerId == 1) {
-			normalIdx += get_dimension();
-		}
-
-		interface.set_normal(m_normals->get(normalIdx));
+		interface.set_normal(m_normals->get(ownerFace));
 
 		// Centroid
 		std::unique_ptr<double[]> centroid = std::unique_ptr<double[]>(new double[get_dimension()]);
