@@ -234,16 +234,6 @@ std::array<std::array<double, 3>, 3> Interface::eval_rotation_to_cartesian(std::
 }
 
 /*!
-	Transpose the specified rotation matrix.
-
-	\param R the rotation matrix to transpose
-*/
-void Interface::transpose_rotation(std::array<std::array<double, 3>, 3> &R)
-{
-	return transpose_3D(R);
-}
-
-/*!
 	Evaluates the transpose of the specified rotation matrix.
 
 	\param R the rotation matrix to transpose
