@@ -244,6 +244,20 @@ void Interface::transpose_rotation(std::array<std::array<double, 3>, 3> &R)
 }
 
 /*!
+	Evaluates the transpose of the specified rotation matrix.
+
+	\param R the rotation matrix to transpose
+	\result The transposed rotation matrix.
+*/
+std::array<std::array<double, 3>, 3> Interface::eval_rotation_transpose(const std::array<std::array<double, 3>, 3> &R)
+{
+	std::array<std::array<double, 3>, 3> R_prime = R;
+	transpose_3D(R_prime);
+
+	return R_prime;
+}
+
+/*!
 	Sets the position type of the interface.
 
 	\param positionType the position type of the interface

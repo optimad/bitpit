@@ -52,6 +52,7 @@ public:
 	std::array<std::array<double, 3>, 3> eval_rotation_to_cartesian();
 	static std::array<std::array<double, 3>, 3> eval_rotation_to_cartesian(std::array<double, 3> &versor);
 	void transpose_rotation(std::array<std::array<double, 3>, 3> &R);
+	static std::array<std::array<double, 3>, 3> eval_rotation_transpose(const std::array<std::array<double, 3>, 3> &R);
 
 	void set_area(double *area);
 	const double & get_area() const;
