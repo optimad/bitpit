@@ -195,9 +195,9 @@ const int * Cell::get_interfaces(const int &face) const
 }
 
 /*!
-	Extracts the neighbours of all faces of the cell.
+	Extracts the neighbours of all the faces of the cell.
 
-	\result The neighbours of all faces of the cell.
+	\result The neighbours of all the faces of the cell.
 */
 std::vector<int> Cell::extract_face_neighs() const
 {
@@ -215,7 +215,7 @@ std::vector<int> Cell::extract_face_neighs() const
 /*!
 	Extracts the neighbours of the specified face.
 
-	\param face is the face
+	\param face is a face of the cell
 	\result The neighbours of the face.
 */
 std::vector<int> Cell::extract_face_neighs(const int &face) const
