@@ -246,6 +246,64 @@ std::vector<int> Cell::extract_face_neighs(const int &face, const std::vector<in
 }
 
 /*!
+	Extracts the neighbours of all the edges of the cell.
+
+	This function can be only used with three-dimensional cells.
+
+	\param complete controls if the list of neighbours should contain
+	only the neighbours that share just the specified edge, or should
+	contain also neighbours that share an entire face
+	\result The neighbours of all the edges of the cell.
+*/
+std::vector<int> Cell::extract_edge_neighs(bool complete) const
+{
+	assert(is_three_dimensional());
+	if (!is_three_dimensional()) {
+		return std::vector<int>();
+	}
+
+	std::vector<int> blackList;
+	if (!complete) {
+		blackList = extract_face_neighs();
+	}
+
+	std::vector<int> neighs;
+	for (int i = 0; i < get_edge_count(); ++i) {
+		for (auto &neigh : extract_edge_neighs(i, blackList)) {
+			add_id_to_ordered_list(neigh, neighs);
+		}
+	}
+
+	return neighs;
+}
+
+/*!
+	Extracts the neighbours of the specified edge.
+
+	This function can be only used with three-dimensional cells.
+
+	\param vertex is an edge of the cell
+	\param blackList is a list of cells that are excluded from the search
+	\result The neighbours of the edge.
+*/
+std::vector<int> Cell::extract_edge_neighs(const int &edge, const std::vector<int> &blackList) const
+{
+	assert(is_three_dimensional());
+	if (!is_three_dimensional()) {
+		return std::vector<int>();
+	}
+
+	std::vector<int> vertices;
+	if (is_three_dimensional()) {
+		vertices = get_edge_local_connect(edge);
+	} else {
+		vertices.push_back(edge);
+	}
+
+	return Cell::extract_vertex_neighs(vertices, blackList);
+}
+
+/*!
 	Extracts the neighbours of all the vertices of the cell.
 
 	\param complete controls if the list of neighbours should contain
