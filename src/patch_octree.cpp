@@ -355,12 +355,12 @@ void PatchOctree::import_cells()
 		cell.set_volume(&m_tree_volume[octantLevel]);
 
 		// Centroide
-		std::unique_ptr<double[]> centroid = std::unique_ptr<double[]>(new double[get_dimension()]);
+		std::array<double, 3> centroid;
 		for (int k = 0; k < get_dimension(); k++) {
 			centroid[k] = octantCentroid[k];
 		}
 
-		cell.set_centroid(std::move(centroid));
+		cell.set_centroid(centroid);
 
 		// Connettività
 		vector<uint32_t> octantConnect;
@@ -502,10 +502,12 @@ void PatchOctree::import_interfaces()
 		interface.set_normal(m_normals->get(ownerFace));
 
 		// Centroid
-		std::unique_ptr<double[]> centroid = std::unique_ptr<double[]>(new double[get_dimension()]);
-		std::copy_n(faceCenter.data(), get_dimension(), centroid.get());
+		std::array<double, 3> centroid;
+		for (int k = 0; k < get_dimension(); k++) {
+			centroid[k] = faceCenter[k];
+		}
 
-		interface.set_centroid(std::move(centroid));
+		interface.set_centroid(centroid);
 
 		// Position
 		if (isGhost) {

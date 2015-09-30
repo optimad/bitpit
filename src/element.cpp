@@ -225,9 +225,9 @@ const int * Element::get_connect() const
 
 	\param centroid the centroid of the element.
 */
-void Element::set_centroid(std::unique_ptr<double[]> centroid)
+void Element::set_centroid(std::array<double, 3> &centroid)
 {
-	m_centroid = std::move(centroid);
+	m_centroid = centroid;
 }
 
 /*!
@@ -235,9 +235,9 @@ void Element::set_centroid(std::unique_ptr<double[]> centroid)
 
 	\return The centroid of the element.
 */
-const double * Element::get_centroid() const
+const std::array<double, 3> & Element::get_centroid() const
 {
-	return m_centroid.get();
+	return m_centroid;
 }
 
 /*!

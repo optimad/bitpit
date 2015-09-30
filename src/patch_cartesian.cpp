@@ -243,11 +243,11 @@ void PatchCartesian::create_cells()
 	m_cells.reserve(nTotalCells);
 
 	// Create the cells
-	double cellCenter[get_dimension()];
+	std::array<double, 3> centroid = {0.0, 0.0, 0.0};
 	for (int i = 0; i < m_nCells1D[Node::COORD_X]; i++) {
-		cellCenter[Node::COORD_X] = 0.5 * (m_x[i] + m_x[i+1]);
+		centroid[Node::COORD_X] = 0.5 * (m_x[i] + m_x[i+1]);
 		for (int j = 0; j < m_nCells1D[Node::COORD_Y]; j++) {
-			cellCenter[Node::COORD_Y] = 0.5 * (m_y[j] + m_y[j+1]);
+			centroid[Node::COORD_Y] = 0.5 * (m_y[j] + m_y[j+1]);
 			for (int k = 0; (is_three_dimensional()) ? (k < m_nCells1D[Node::COORD_Z]) : (k <= 0); k++) {
 				int id_cell = cell_ijk_to_id(i, j, k);
 				m_cells.emplace_back(id_cell, this);
@@ -268,13 +268,10 @@ void PatchCartesian::create_cells()
 
 				// Centroide
 				if (is_three_dimensional()) {
-					cellCenter[Node::COORD_Z] = 0.5 * (m_z[k] + m_z[k+1]);
+					centroid[Node::COORD_Z] = 0.5 * (m_z[k] + m_z[k+1]);
 				}
 
-				std::unique_ptr<double[]> centroid = std::unique_ptr<double[]>(new double[get_dimension()]);
-				std::copy_n(cellCenter, get_dimension(), centroid.get());
-
-				cell.set_centroid(std::move(centroid));
+				cell.set_centroid(centroid);
 
 				// Connettività
 				std::unique_ptr<int[]> connect = std::unique_ptr<int[]>(new int[nCellVertices]);
@@ -509,8 +506,7 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 				interface.set_connect(std::move(connect));
 
 				// Centroid
-				std::unique_ptr<double[]> centroid = std::unique_ptr<double[]>(new double[get_dimension()]);
-				std::fill_n(centroid.get(), get_dimension(), 0.0);
+				std::array<double, 3> centroid = {0.0, 0.0, 0.0};
 
 				for (int n = 0; n < nInterfaceVertices; n++) {
 					Node &vertex = m_vertices[interface.get_vertex(n)];
@@ -525,7 +521,7 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 					centroid[k] /= nInterfaceVertices;
 				}
 
-				interface.set_centroid(std::move(centroid));
+				interface.set_centroid(centroid);
 
 				// Normal
 				interface.set_normal(m_normals->get(ownerFace));
