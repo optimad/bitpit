@@ -52,6 +52,10 @@ public:
 	std::vector<int> extract_face_neighs() const;
 	std::vector<int> extract_face_neighs(const int &face, const std::vector<int> &blackList = std::vector<int>()) const;
 
+	std::vector<int> extract_vertex_neighs(bool complete = true) const;
+	std::vector<int> extract_vertex_neighs(const int &vertex, const std::vector<int> &blackList = std::vector<int>()) const;
+	std::vector<int> extract_vertex_neighs(const std::vector<int> &vertices, const std::vector<int> &blackList = std::vector<int>()) const;
+
 	void set_data(std::unique_ptr<CellData> m_data);
 	CellData * get_data() const;
 
