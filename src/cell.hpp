@@ -49,6 +49,7 @@ public:
 	const long * get_interfaces() const;
 	const long * get_interfaces(const int &face) const;
 
+	std::vector<long> extract_neighs() const;
 	std::vector<long> extract_neighs(int codimension, bool complete = true) const;
 
 	std::vector<long> extract_face_neighs() const;

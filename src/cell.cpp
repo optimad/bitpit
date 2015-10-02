@@ -213,6 +213,16 @@ std::vector<long> Cell::extract_face_neighs() const
 }
 
 /*!
+	Extracts all the neighbours of the cell
+
+	\result All the neighbours of the cell.
+*/
+std::vector<long> Cell::extract_neighs() const
+{
+	return extract_vertex_neighs();
+}
+
+/*!
 	Extracts all the neighbours for the specified codimension.
 
 	\param complete controls if the list of neighbours should contain
