@@ -241,7 +241,7 @@ void OutputManager::mapConnectToVTK(Element::Type elemType, int elemMapDegree, i
 
 // Description:
 // Aggiunge il successivo vertice della mesh
-vtkIdType OutputManager::InsertNextVertex(const Node &vertex, const int &dimension)
+vtkIdType OutputManager::InsertNextVertex(const Node &vertex)
 {
 	const std::array<double, 3> &coords = vertex.get_coords();
 	double x = coords[0];

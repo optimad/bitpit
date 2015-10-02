@@ -57,7 +57,7 @@ public:
 	vtkTypeMacro(OutputManager, vtkUnstructuredGrid);
 
 	vtkIdType InsertNextCell(const Cell &cell);
-	vtkIdType InsertNextVertex(const Node &node, const int &dimension);
+	vtkIdType InsertNextVertex(const Node &node);
 
 	void resetFields();
 	void addField(int fieldType, const char* fieldName);

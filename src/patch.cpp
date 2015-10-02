@@ -191,7 +191,7 @@ void Patch::output_initialize()
 
 	// Vertices
 	for (long i = 0; i < nVertices; i++) {
-		m_output_manager->InsertNextVertex(m_vertices[i], get_dimension());
+		m_output_manager->InsertNextVertex(m_vertices[i]);
 	}
 
 	// Cells
