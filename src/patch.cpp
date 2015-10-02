@@ -150,9 +150,9 @@ void Patch::reset_cells()
 	m_cells.clear();
 	PiercedVector<Cell>().swap(m_cells);
 
-	for (unsigned long n = 0; n < m_interfaces.size(); n++) {
-		m_interfaces[n].unset_neigh();
-		m_interfaces[n].unset_owner();
+	for (auto &interface : m_interfaces) {
+		interface.unset_neigh();
+		interface.unset_owner();
 	}
 }
 
