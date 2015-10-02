@@ -101,7 +101,7 @@ std::array<double, 3> & PatchOctree::_get_opposite_normal(std::array<double, 3> 
 	\param id the id of the cell
 	\result The octant of the specified cell
 */
-int PatchOctree::get_cell_octant(const int &id) const
+long PatchOctree::get_cell_octant(const long &id) const
 {
 	return m_cell_to_octant.at(id);
 }
@@ -112,9 +112,9 @@ int PatchOctree::get_cell_octant(const int &id) const
 	\param id is the id of the cell
 	\result The refinement level of the specified cell.
 */
-int PatchOctree::get_cell_level(const int &id)
+int PatchOctree::get_cell_level(const long &id)
 {
-	int octant = get_cell_octant(id);
+	long octant = get_cell_octant(id);
 	if (is_three_dimensional()) {
 		return m_tree_3D.getLevel(octant);
 	} else {
@@ -289,8 +289,8 @@ void PatchOctree::import_cells()
 	}
 
 	// Importing the cells
-	int m_nInternalCells;
-	int m_nGhostsCells;
+	long m_nInternalCells;
+	long m_nGhostsCells;
 	if (is_three_dimensional()) {
 		m_nInternalCells = m_tree_3D.getNumOctants();
 		m_nGhostsCells   = m_tree_3D.getNumGhosts();
@@ -299,11 +299,11 @@ void PatchOctree::import_cells()
 		m_nGhostsCells   = m_tree_2D.getNumGhosts();
 	}
 
-	int nCells = m_nInternalCells + m_nGhostsCells;
+	long nCells = m_nInternalCells + m_nGhostsCells;
 
 	m_cell_to_octant.reserve(nCells);
 	m_cells.reserve(nCells);
-	for (int n = 0; n < nCells; n++) {
+	for (long n = 0; n < nCells; n++) {
 		m_cells.emplace_back(n, this);
 		Cell &cell = m_cells.back();
 		m_cell_to_octant[n] = n;
@@ -312,7 +312,7 @@ void PatchOctree::import_cells()
 		bool isInternal = (n < m_nInternalCells);
 
 		// Info associate al tree
-		int octantId = n;
+		long octantId = n;
 		if (!isInternal) {
 			octantId -= m_nInternalCells;
 		}
@@ -445,17 +445,17 @@ void PatchOctree::import_interfaces()
 	}
 
 	// Importing the interfaces
-	int nInterfaces;
+	long nInterfaces;
 	if (is_three_dimensional()) {
 		nInterfaces = m_tree_3D.getNumIntersections();
 	} else {
 		nInterfaces = m_tree_2D.getNumIntersections();
 	}
 
-	vector<vector<int>> cellToInterfaceMap(m_cells.size(), vector<int>(0));
+	vector<vector<long>> cellToInterfaceMap(m_cells.size(), vector<long>(0));
 
 	m_interfaces.reserve(nInterfaces);
-	for (int n = 0; n < nInterfaces; n++) {
+	for (long n = 0; n < nInterfaces; n++) {
 		m_interfaces.emplace_back(n, this);
 		Interface &interface = m_interfaces.back();
 
@@ -486,8 +486,8 @@ void PatchOctree::import_interfaces()
 			faceCenter = m_tree_2D.getCenter(treeInterface);
 		}
 
-		int ownerId = cells[0];
-		int neighId = cells[1];
+		long ownerId = cells[0];
+		long neighId = cells[1];
 		if (isGhost) {
 			neighId += m_nInternalCells;
 		}
@@ -564,19 +564,19 @@ void PatchOctree::import_interfaces()
 		nCellFaces = Element::get_face_count(Element::RECTANGLE);
 	}
 
-	vector<vector<int>> interfaceList(nCellFaces, vector<int>(0));
-	for (unsigned int n = 0; n < m_cells.size(); n++) {
+	vector<vector<long>> interfaceList(nCellFaces, vector<long>(0));
+	for (unsigned long n = 0; n < m_cells.size(); n++) {
 		for (int k = 0; k < nCellFaces; k++) {
 			interfaceList[k].clear();
 		}
 
 		Cell &cell = m_cells[n];
-		for (unsigned int k = 0; k < cellToInterfaceMap[n].size(); k++) {
-			int interfaceId = cellToInterfaceMap[n][k];
+		for (unsigned long k = 0; k < cellToInterfaceMap[n].size(); k++) {
+			long interfaceId = cellToInterfaceMap[n][k];
 			Interface &interface = m_interfaces[interfaceId];
 
 			int face;
-			int ownerId = interface.get_owner();
+			long ownerId = interface.get_owner();
 			Cell &owner = m_cells[ownerId];
 			if (owner.get_id() == cell.get_id()) {
 				face = interface.get_owner_face();
@@ -590,7 +590,7 @@ void PatchOctree::import_interfaces()
 		cell.initialize_interfaces(interfaceList);
 
 		cellToInterfaceMap[n].clear();
-		vector<int>().swap(cellToInterfaceMap[n]);
+		vector<long>().swap(cellToInterfaceMap[n]);
 	}
 
 	// Clean intersections
@@ -618,7 +618,7 @@ void PatchOctree::reload_interfaces()
 
 	\param id is the id of the cell that needs to be refined
 */
-bool PatchOctree::_mark_cell_for_refinement(const int &id)
+bool PatchOctree::_mark_cell_for_refinement(const long &id)
 {
 	if (is_three_dimensional()) {
 		m_tree_2D.setMarker(id, 1);
@@ -634,7 +634,7 @@ bool PatchOctree::_mark_cell_for_refinement(const int &id)
 
 	\param id is the id of the cell that needs to be coarsened
 */
-bool PatchOctree::_mark_cell_for_coarsening(const int &id)
+bool PatchOctree::_mark_cell_for_coarsening(const long &id)
 {
 	if (is_three_dimensional()) {
 		m_tree_2D.setMarker(id, -1);
@@ -651,7 +651,7 @@ bool PatchOctree::_mark_cell_for_coarsening(const int &id)
 	\param id is the id of the cell
 	\param enabled defines if enable the balancing for the specified cell
 */
-bool PatchOctree::_enable_cell_balancing(const int &id, bool enabled)
+bool PatchOctree::_enable_cell_balancing(const long &id, bool enabled)
 {
 	if (is_three_dimensional()) {
 		m_tree_2D.setBalance(id, enabled);

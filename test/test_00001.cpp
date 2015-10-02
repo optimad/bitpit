@@ -27,9 +27,9 @@ int main(int argc, char *argv[]) {
 
 	std::cout << "\n  >> 2D Mesh Neighbour test" << "\n";
 
-	std::vector<int> neighs_2D;
+	std::vector<long> neighs_2D;
 
-	int cellId_2D = 7;
+	long cellId_2D = 7;
 	std::cout << std::endl;
 	std::cout << "Cell id: " << cellId_2D << std::endl << std::endl;
 
@@ -66,9 +66,9 @@ int main(int argc, char *argv[]) {
 
 	std::cout << "\n  >> 3D Mesh Neighbour test" << "\n";
 
-	std::vector<int> neighs_3D;
+	std::vector<long> neighs_3D;
 
-	int cellId_3D = 13;
+	long cellId_3D = 13;
 	std::cout << std::endl;
 	std::cout << "Cell id: " << cellId_3D << std::endl << std::endl;
 

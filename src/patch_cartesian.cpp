@@ -237,7 +237,7 @@ void PatchCartesian::create_cells()
 	}
 
 	// Count the cells
-	int nTotalCells = 1;
+	long nTotalCells = 1;
 	for (int n = 0; n < get_dimension(); n++) {
 		nTotalCells *= m_nCells1D[n];
 	}
@@ -253,7 +253,7 @@ void PatchCartesian::create_cells()
 		for (int j = 0; j < m_nCells1D[Node::COORD_Y]; j++) {
 			centroid[Node::COORD_Y] = 0.5 * (m_y[j] + m_y[j+1]);
 			for (int k = 0; (is_three_dimensional()) ? (k < m_nCells1D[Node::COORD_Z]) : (k <= 0); k++) {
-				int id_cell = cell_ijk_to_id(i, j, k);
+				long id_cell = cell_ijk_to_id(i, j, k);
 				m_cells.emplace_back(id_cell, this);
 				Cell &cell = m_cells.back();
 
@@ -307,7 +307,7 @@ void PatchCartesian::create_interfaces()
 	reset_interfaces();
 
 	// Count the interfaces
-	int nTotalInterfaces = 0;
+	long nTotalInterfaces = 0;
 	nTotalInterfaces += count_interfaces_direction(Node::COORD_X);
 	nTotalInterfaces += count_interfaces_direction(Node::COORD_Y);
 	if (is_three_dimensional()) {
@@ -423,7 +423,7 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 	for (i = 0; i < (*interfaceCount1D)[Node::COORD_X]; i++) {
 		for (j = 0; j < (*interfaceCount1D)[Node::COORD_Y]; j++) {
 			for (k = 0; (is_three_dimensional()) ? (k < (*interfaceCount1D)[Node::COORD_Z]) : (k <= 0); k++) {
-				int id_interface = interface_nijk_to_id(direction, i, j, k);
+				long id_interface = interface_nijk_to_id(direction, i, j, k);
 				m_interfaces.emplace_back(id_interface, this);
 				Interface &interface = m_interfaces.back();
 
@@ -542,7 +542,7 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 
 	\param id is the id of the cell that needs to be refined
 */
-bool PatchCartesian::_mark_cell_for_refinement(const int &id)
+bool PatchCartesian::_mark_cell_for_refinement(const long &id)
 {
 	UNUSED(id);
 
@@ -557,7 +557,7 @@ bool PatchCartesian::_mark_cell_for_refinement(const int &id)
 
 	\param id the cell to be refined
 */
-bool PatchCartesian::_mark_cell_for_coarsening(const int &id)
+bool PatchCartesian::_mark_cell_for_coarsening(const long &id)
 {
 	UNUSED(id);
 
@@ -573,7 +573,7 @@ bool PatchCartesian::_mark_cell_for_coarsening(const int &id)
 	\param id is the id of the cell
 	\param enabled defines if enable the balancing for the specified cell
 */
-bool PatchCartesian::_enable_cell_balancing(const int &id, bool enabled)
+bool PatchCartesian::_enable_cell_balancing(const long &id, bool enabled)
 {
 	UNUSED(id);
 
@@ -583,9 +583,9 @@ bool PatchCartesian::_enable_cell_balancing(const int &id, bool enabled)
 /*!
 	Converts the cell (i, j, k) notation to a single index notation
 */
-int PatchCartesian::cell_ijk_to_id(const int &i, const int &j, const int &k) const
+long PatchCartesian::cell_ijk_to_id(const int &i, const int &j, const int &k) const
 {
-	int id = i;
+	long id = i;
 	id += m_nCells1D[Node::COORD_X] * j;
 	if (get_dimension() == 3) {
 		id += m_nCells1D[Node::COORD_Y] * m_nCells1D[Node::COORD_X] * k;
@@ -597,7 +597,7 @@ int PatchCartesian::cell_ijk_to_id(const int &i, const int &j, const int &k) con
 /*!
 	Converts the cell (i, j, k) notation to a single index notation
 */
-int PatchCartesian::cell_ijk_to_id(const int ijk[]) const
+long PatchCartesian::cell_ijk_to_id(const int ijk[]) const
 {
 	return cell_ijk_to_id(ijk[Node::COORD_X], ijk[Node::COORD_Y], ijk[Node::COORD_Z]);
 }
@@ -628,7 +628,7 @@ long PatchCartesian::vertex_ijk_to_id(const int ijk[]) const
 /*!
 	Converts the interface (normal, i, j, k) notation to a single index notation
 */
-int PatchCartesian::interface_nijk_to_id(const int &normal, const int &i, const int &j, const int &k) const
+long PatchCartesian::interface_nijk_to_id(const int &normal, const int &i, const int &j, const int &k) const
 {
 	const int *nInterfaces;
 	switch (normal) {
@@ -647,7 +647,7 @@ int PatchCartesian::interface_nijk_to_id(const int &normal, const int &i, const 
 
 	}
 
-	int id = i;
+	long id = i;
 	id += nInterfaces[Node::COORD_X] * j;
 	if (is_three_dimensional()) {
 		id += nInterfaces[Node::COORD_Y] * nInterfaces[Node::COORD_X] * k;

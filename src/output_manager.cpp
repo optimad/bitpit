@@ -44,7 +44,7 @@ OutputManager::~OutputManager()
 
 // Description:
 // Inizializza il dataset
-void OutputManager::initialize(int nGuessCells, long nGuessVerts)
+void OutputManager::initialize(long nGuessCells, long nGuessVerts)
 {
 	m_vertexes = vtkSmartPointer<vtkPoints>::New();
 	m_vertexes->SetNumberOfPoints(nGuessVerts);

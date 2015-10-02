@@ -86,7 +86,7 @@ bool Patch::update(std::vector<uint32_t> &cellMapping)
 
 	\param id is the id of the cell that needs to be refined
 */
-void Patch::mark_cell_for_refinement(const int &id)
+void Patch::mark_cell_for_refinement(const long &id)
 {
 	bool updated = _mark_cell_for_refinement(id);
 
@@ -98,7 +98,7 @@ void Patch::mark_cell_for_refinement(const int &id)
 
 	\param id is the id of the cell that needs to be coarsened
 */
-void Patch::mark_cell_for_coarsening(const int &id)
+void Patch::mark_cell_for_coarsening(const long &id)
 {
 	bool updated = _mark_cell_for_coarsening(id);
 
@@ -111,7 +111,7 @@ void Patch::mark_cell_for_coarsening(const int &id)
 	\param id is the id of the cell
 	\param enabled defines if enable the balancing for the specified cell
 */
-void Patch::enable_cell_balancing(const int &id, bool enabled)
+void Patch::enable_cell_balancing(const long &id, bool enabled)
 {
 	bool updated = _enable_cell_balancing(id, enabled);
 
@@ -137,7 +137,7 @@ void Patch::reset_vertices()
 	m_vertices.clear();
 	PiercedVector<Node>().swap(m_vertices);
 
-	for (unsigned int n = 0; n < m_cells.size(); n++) {
+	for (unsigned long n = 0; n < m_cells.size(); n++) {
 		m_cells[n].unset_connect();
 	}
 }
@@ -150,7 +150,7 @@ void Patch::reset_cells()
 	m_cells.clear();
 	PiercedVector<Cell>().swap(m_cells);
 
-	for (unsigned int n = 0; n < m_interfaces.size(); n++) {
+	for (unsigned long n = 0; n < m_interfaces.size(); n++) {
 		m_interfaces[n].unset_neigh();
 		m_interfaces[n].unset_owner();
 	}
@@ -164,7 +164,7 @@ void Patch::reset_interfaces()
 	m_interfaces.clear();
 	PiercedVector<Interface>().swap(m_interfaces);
 
-	for (unsigned int n = 0; n < m_cells.size(); n++) {
+	for (unsigned long n = 0; n < m_cells.size(); n++) {
 		m_cells[n].unset_interfaces();
 	}
 }
@@ -182,20 +182,20 @@ void Patch::reset_output()
 */
 void Patch::output_initialize()
 {
-	int nVertices = m_vertices.size();
-	int nCells = m_cells.size();
+	long nVertices = m_vertices.size();
+	long nCells = m_cells.size();
 
 	// Create object
 	m_output_manager = vtkSmartPointer<OutputManager>::New();
 	m_output_manager->initialize(nCells, nVertices);
 
 	// Vertices
-	for (int i = 0; i < nVertices; i++) {
+	for (long i = 0; i < nVertices; i++) {
 		m_output_manager->InsertNextVertex(m_vertices[i], get_dimension());
 	}
 
 	// Cells
-	for (int i = 0; i < nCells; i++) {
+	for (long i = 0; i < nCells; i++) {
 		m_output_manager->InsertNextCell(m_cells[i]);
 	}
 
@@ -337,7 +337,7 @@ std::string Patch::get_name() const
 
 	\return The number of vertices in the patch
 */
-int Patch::get_vertex_count() const
+long Patch::get_vertex_count() const
 {
 	return m_vertices.size();
 }
@@ -358,7 +358,7 @@ PiercedVector<Node> & Patch::vertices()
 	\param id is the id of the requested vertex
 	\return The vertex with the specified id.
 */
-Node & Patch::get_vertex(const int &id)
+Node & Patch::get_vertex(const long &id)
 {
 	return m_vertices[id];
 }
@@ -368,7 +368,7 @@ Node & Patch::get_vertex(const int &id)
 
 	\return The number of cells in the patch
 */
-int Patch::get_cell_count() const
+long Patch::get_cell_count() const
 {
 	return m_cells.size();
 }
@@ -389,7 +389,7 @@ PiercedVector<Cell> & Patch::cells()
 	\param id is the id of the requested cell
 	\return The cell with the specified id.
 */
-Cell & Patch::get_cell(const int &id)
+Cell & Patch::get_cell(const long &id)
 {
 	return m_cells[id];
 }
@@ -399,7 +399,7 @@ Cell & Patch::get_cell(const int &id)
 
 	\return The number of interfaces in the patch
 */
-int Patch::get_interface_count() const
+long Patch::get_interface_count() const
 {
 	return m_interfaces.size();
 }
@@ -420,7 +420,7 @@ PiercedVector<Interface> & Patch::interfaces()
 	\param id is the id of the requested interface
 	\return The interface with the specified id.
 */
-Interface & Patch::get_interface(const int &id)
+Interface & Patch::get_interface(const long &id)
 {
 	return m_interfaces[id];
 }

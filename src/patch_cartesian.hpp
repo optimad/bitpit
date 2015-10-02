@@ -25,9 +25,9 @@ public:
 protected:
 	std::array<double, 3> & _get_opposite_normal(std::array<double, 3> &normal);
 	bool _update(std::vector<uint32_t> &cellMapping);
-	bool _mark_cell_for_refinement(const int &id);
-	bool _mark_cell_for_coarsening(const int &id);
-	bool _enable_cell_balancing(const int &id, bool enabled);
+	bool _mark_cell_for_refinement(const long &id);
+	bool _mark_cell_for_coarsening(const long &id);
+	bool _enable_cell_balancing(const long &id, bool enabled);
 
 private:
 	static const int SPACE_MAX_DIM;
@@ -60,11 +60,11 @@ private:
 	int count_interfaces_direction(const Node::Coordinate &direction);
 	void create_interfaces_direction(const Node::Coordinate &direction);
 
-	int cell_ijk_to_id(const int &i, const int &j, const int &k) const;
-	int cell_ijk_to_id(const int ijk[]) const;
+	long cell_ijk_to_id(const int &i, const int &j, const int &k) const;
+	long cell_ijk_to_id(const int ijk[]) const;
 	long vertex_ijk_to_id(const int &i, const int &j, const int &k) const;
 	long vertex_ijk_to_id(const int ijk[]) const;
-	int interface_nijk_to_id(const int &normal, const int &i, const int &j, const int &k) const;
+	long interface_nijk_to_id(const int &normal, const int &i, const int &j, const int &k) const;
 
 };
 

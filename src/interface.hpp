@@ -35,8 +35,8 @@ public:
 	static const int SIDE_COUNT = 2;
 
 	Interface();
-	Interface(const int &id);
-	Interface(const int &id, Patch *patch);
+	Interface(const long &id);
+	Interface(const long &id, Patch *patch);
 
 	Interface(Interface&& other) = default;
 	Interface& operator=(Interface&& other) = default;
@@ -56,17 +56,17 @@ public:
 	void set_area(double *area);
 	const double & get_area() const;
 
-	void set_owner(const int &owner, const int &onwerFace);
+	void set_owner(const long &owner, const int &onwerFace);
 	void unset_owner();
-	int get_owner() const;
+	long get_owner() const;
 	int get_owner_face() const;
 
-	void set_neigh(const int &neigh, const int &onwerFace);
+	void set_neigh(const long &neigh, const int &onwerFace);
 	void unset_neigh();
-	int get_neigh() const;
+	long get_neigh() const;
 	int get_neigh_face() const;
 
-	std::array<int, 2> get_owner_neigh() const;
+	std::array<long, 2> get_owner_neigh() const;
 	void swap_owner_neigh();
 
 	void set_data(std::unique_ptr<InterfaceData> m_data);
@@ -80,10 +80,10 @@ private:
 	double *m_area;
 	std::array<double, 3> *m_normal;
 
-	int m_owner;
+	long m_owner;
 	int m_ownerFace;
 
-	int m_neigh;
+	long m_neigh;
 	int m_neighFace;
 
 	std::unique_ptr<InterfaceData> m_data;

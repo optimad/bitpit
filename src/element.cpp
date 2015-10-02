@@ -60,7 +60,7 @@ namespace pman {
 	A polyhedron.
 */
 
-const int Element::NULL_ELEMENT_ID = std::numeric_limits<int>::min();
+const long Element::NULL_ELEMENT_ID = std::numeric_limits<long>::min();
 
 /*!
 	Default constructor.
@@ -75,7 +75,7 @@ Element::Element()
 /*!
 	Creates a new element.
 */
-Element::Element(const int &id)
+Element::Element(const long &id)
 {
 	set_patch(NULL);
 	set_id(id);
@@ -84,7 +84,7 @@ Element::Element(const int &id)
 /*!
 	Creates a new element.
 */
-Element::Element(const int &id, Patch *patch)
+Element::Element(const long &id, Patch *patch)
 {
 	set_patch(patch);
 	set_id(id);
@@ -136,7 +136,7 @@ bool Element::is_patch_three_dimensional() const
 
 	\param id the ID of the element
 */
-void Element::set_id(const int &id)
+void Element::set_id(const long &id)
 {
 	m_id = id;
 }
@@ -146,7 +146,7 @@ void Element::set_id(const int &id)
 
 	\return The ID of the element
 */
-int Element::get_id() const
+long Element::get_id() const
 {
 	return m_id;
 }
@@ -157,7 +157,7 @@ int Element::get_id() const
 	\param id the local ID of the element
 
 */
-void Element::set_local_id(int id)
+void Element::set_local_id(long id)
 {
 	m_local_id = id;
 }
@@ -167,7 +167,7 @@ void Element::set_local_id(int id)
 
 	\return The local ID of the element
 */
-int Element::get_local_id() const
+long Element::get_local_id() const
 {
 	return m_local_id;
 }
@@ -1069,14 +1069,14 @@ void Element::transpose_3D(std::array<std::array<double, 3>, 3> A)
 	\param list is the ordered list of uniqe ids
 	\result Returns true is the id was added to the list, false otherwise.
 */
-bool Element::add_id_to_ordered_list(const int &id, std::vector<int> &list)
+bool Element::add_id_to_ordered_list(const long &id, std::vector<long> &list)
 {
 	if (list.empty()) {
 		list.push_back(id);
 		return true;
 	}
 
-	std::vector<int>::iterator itr = lower_bound(list.begin(), list.end(), id);
+	std::vector<long>::iterator itr = lower_bound(list.begin(), list.end(), id);
 	if (itr == list.end() || *itr != id) {
 		list.insert(itr, id);
 		return true;

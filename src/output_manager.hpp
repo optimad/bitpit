@@ -47,7 +47,7 @@ public:
 
 	static OutputManager *New();
 
-	void initialize(int nGuessCells, long nGuessVerts);
+	void initialize(long nGuessCells, long nGuessVerts);
 	void finalize();
 
 	static int getVTKCellType(Element::Type type);

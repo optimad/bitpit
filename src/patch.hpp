@@ -42,9 +42,9 @@ public:
 	bool update();
 	bool update(std::vector<uint32_t> &cellMapping);
 
-	void mark_cell_for_refinement(const int &id);
-	void mark_cell_for_coarsening(const int &id);
-	void enable_cell_balancing(const int &id, bool enabled);
+	void mark_cell_for_refinement(const long &id);
+	void mark_cell_for_coarsening(const long &id);
+	void enable_cell_balancing(const long &id, bool enabled);
 
 	bool is_dirty() const;
 
@@ -55,17 +55,17 @@ public:
 	std::string get_name() const;
 	void set_name(std::string name);
 
-	int get_vertex_count() const;
+	long get_vertex_count() const;
 	PiercedVector<Node> &vertices();
-	Node &get_vertex(const int &id);
+	Node &get_vertex(const long &id);
 
-	int get_cell_count() const;
+	long get_cell_count() const;
 	PiercedVector<Cell> &cells();
-	Cell &get_cell(const int &id);
+	Cell &get_cell(const long &id);
 
-	int get_interface_count() const;
+	long get_interface_count() const;
 	PiercedVector<Interface> &interfaces();
-	Interface &get_interface(const int &id);
+	Interface &get_interface(const long &id);
 
 	void output_write();
 	void output_write(std::string name);
@@ -80,9 +80,9 @@ protected:
 
 	virtual std::array<double, 3> & _get_opposite_normal(std::array<double, 3> &normal) = 0;
 	virtual bool _update(std::vector<uint32_t> &cellMapping) = 0;
-	virtual bool _mark_cell_for_refinement(const int &id) = 0;
-	virtual bool _mark_cell_for_coarsening(const int &id) = 0;
-	virtual bool _enable_cell_balancing(const int &id, bool enabled) = 0;
+	virtual bool _mark_cell_for_refinement(const long &id) = 0;
+	virtual bool _mark_cell_for_coarsening(const long &id) = 0;
+	virtual bool _enable_cell_balancing(const long &id, bool enabled) = 0;
 
 	void set_dirty(bool dirty);
 

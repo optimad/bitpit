@@ -30,7 +30,7 @@ Cell::Cell()
 /*!
 	Creates a new cell.
 */
-Cell::Cell(const int &id)
+Cell::Cell(const long &id)
 	: Element(id)
 {
 
@@ -39,7 +39,7 @@ Cell::Cell(const int &id)
 /*!
 	Creates a new cell.
 */
-Cell::Cell(const int &id, Patch *patch)
+Cell::Cell(const long &id, Patch *patch)
 	: Element(id, patch)
 {
 
@@ -90,10 +90,10 @@ const double & Cell::get_volume() const
 
 	\param interfaces the list of all interfaces associated to the cell
 */
-void Cell::initialize_interfaces(std::vector<std::vector<int>> &interfaces)
+void Cell::initialize_interfaces(std::vector<std::vector<long>> &interfaces)
 {
 	m_interfaces.reset();
-	m_interfaces = std::unique_ptr<CollapsedArray2D<int> >(new CollapsedArray2D<int>(interfaces));
+	m_interfaces = std::unique_ptr<CollapsedArray2D<long> >(new CollapsedArray2D<long>(interfaces));
 }
 
 /*!
@@ -104,7 +104,7 @@ void Cell::initialize_interfaces(std::vector<std::vector<int>> &interfaces)
 */
 void Cell::initialize_empty_interfaces(const int nInterfaces[])
 {
-	m_interfaces = std::unique_ptr<CollapsedArray2D<int> >(new CollapsedArray2D<int>(get_face_count(), nInterfaces));
+	m_interfaces = std::unique_ptr<CollapsedArray2D<long> >(new CollapsedArray2D<long>(get_face_count(), nInterfaces));
 }
 
 /*!
@@ -114,7 +114,7 @@ void Cell::initialize_empty_interfaces(const int nInterfaces[])
 	\param index the index of the interface
 	\param interface A pointer to the interface
 */
-void Cell::set_interface(const int &face, const int &index, const int &interface)
+void Cell::set_interface(const int &face, const int &index, const long &interface)
 {
 	m_interfaces->set(face, index, interface);
 }
@@ -125,7 +125,7 @@ void Cell::set_interface(const int &face, const int &index, const int &interface
 	\param face the face of the cell
 	\param interface a pointer to the interfaces
 */
-void Cell::set_interfaces(const int &face, int interfaces[])
+void Cell::set_interfaces(const int &face, long interfaces[])
 {
 	m_interfaces->set(face, interfaces);
 }
@@ -166,7 +166,7 @@ int Cell::get_interface_count(const int &face) const
 	\param index the index of the interface to retreive
 	\result The requested interface.
 */
-int Cell::get_interface(const int &face, const int &index) const
+long Cell::get_interface(const int &face, const int &index) const
 {
 	return m_interfaces->get(face, index);
 }
@@ -176,7 +176,7 @@ int Cell::get_interface(const int &face, const int &index) const
 
 	\result The interfaces of the cell.
 */
-const int * Cell::get_interfaces() const
+const long * Cell::get_interfaces() const
 {
 	return m_interfaces->get(0);
 }
@@ -189,7 +189,7 @@ const int * Cell::get_interfaces() const
 	\param face the face of the cell
 	\result The requested interfaces
 */
-const int * Cell::get_interfaces(const int &face) const
+const long * Cell::get_interfaces(const int &face) const
 {
 	return m_interfaces->get(face);
 }
@@ -199,11 +199,11 @@ const int * Cell::get_interfaces(const int &face) const
 
 	\result The neighbours of all the faces of the cell.
 */
-std::vector<int> Cell::extract_face_neighs() const
+std::vector<long> Cell::extract_face_neighs() const
 {
-	std::vector<int> neighs;
+	std::vector<long> neighs;
 	for (int i = 0; i < get_face_count(); ++i) {
-		std::vector<int> faceNeighs = extract_face_neighs(i);
+		std::vector<long> faceNeighs = extract_face_neighs(i);
 		for (auto &faceNeigh : faceNeighs) {
 			add_id_to_ordered_list(faceNeigh, neighs);
 		}
@@ -220,7 +220,7 @@ std::vector<int> Cell::extract_face_neighs() const
 	also the neighbours for lower codimensions.
 	\result The neighbours for the specified codimension.
 */
-std::vector<int> Cell::extract_neighs(int codimension, bool complete) const
+std::vector<long> Cell::extract_neighs(int codimension, bool complete) const
 {
 	assert(codimension >= 1 && codimension <= get_dimension());
 
@@ -231,7 +231,7 @@ std::vector<int> Cell::extract_neighs(int codimension, bool complete) const
 	} else if (codimension == 2) {
 		return extract_edge_neighs(complete);
 	} else {
-		return std::vector<int>();
+		return std::vector<long>();
 	}
 }
 
@@ -242,17 +242,17 @@ std::vector<int> Cell::extract_neighs(int codimension, bool complete) const
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the face.
 */
-std::vector<int> Cell::extract_face_neighs(const int &face, const std::vector<int> &blackList) const
+std::vector<long> Cell::extract_face_neighs(const int &face, const std::vector<long> &blackList) const
 {
-	std::vector<int> neighs;
+	std::vector<long> neighs;
 	for (int i = 0; i < get_interface_count(face); ++i) {
-		int interfaceId = get_interface(face,i);
+		long interfaceId = get_interface(face,i);
 		Interface &interface = get_patch()->get_interface(interfaceId);
 		if (interface.get_position_type() == Interface::BOUNDARY) {
 			continue;
 		}
 
-		int neighId = interface.get_neigh();
+		long neighId = interface.get_neigh();
 		if (neighId == get_id()) {
 			neighId = interface.get_owner();
 		}
@@ -278,19 +278,19 @@ std::vector<int> Cell::extract_face_neighs(const int &face, const std::vector<in
 	contain also neighbours that share an entire face
 	\result The neighbours of all the edges of the cell.
 */
-std::vector<int> Cell::extract_edge_neighs(bool complete) const
+std::vector<long> Cell::extract_edge_neighs(bool complete) const
 {
 	assert(is_three_dimensional());
 	if (!is_three_dimensional()) {
-		return std::vector<int>();
+		return std::vector<long>();
 	}
 
-	std::vector<int> blackList;
+	std::vector<long> blackList;
 	if (!complete) {
 		blackList = extract_face_neighs();
 	}
 
-	std::vector<int> neighs;
+	std::vector<long> neighs;
 	for (int i = 0; i < get_edge_count(); ++i) {
 		for (auto &neigh : extract_edge_neighs(i, blackList)) {
 			add_id_to_ordered_list(neigh, neighs);
@@ -309,11 +309,11 @@ std::vector<int> Cell::extract_edge_neighs(bool complete) const
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the edge.
 */
-std::vector<int> Cell::extract_edge_neighs(const int &edge, const std::vector<int> &blackList) const
+std::vector<long> Cell::extract_edge_neighs(const int &edge, const std::vector<long> &blackList) const
 {
 	assert(is_three_dimensional());
 	if (!is_three_dimensional()) {
-		return std::vector<int>();
+		return std::vector<long>();
 	}
 
 	std::vector<int> vertices;
@@ -334,9 +334,9 @@ std::vector<int> Cell::extract_edge_neighs(const int &edge, const std::vector<in
 	contain also neighbours that share an entire face or an entire edge
 	\result The neighbours of all the vertices of the cell.
 */
-std::vector<int> Cell::extract_vertex_neighs(bool complete) const
+std::vector<long> Cell::extract_vertex_neighs(bool complete) const
 {
-	std::vector<int> blackList;
+	std::vector<long> blackList;
 	if (!complete) {
 		if (is_three_dimensional()) {
 			blackList = extract_edge_neighs();
@@ -345,7 +345,7 @@ std::vector<int> Cell::extract_vertex_neighs(bool complete) const
 		}
 	}
 
-	std::vector<int> neighs;
+	std::vector<long> neighs;
 	for (int i = 0; i < get_vertex_count(); ++i) {
 		for (auto &neigh : extract_vertex_neighs(i, blackList)) {
 			add_id_to_ordered_list(neigh, neighs);
@@ -376,7 +376,7 @@ std::vector<int> Cell::extract_vertex_neighs(bool complete) const
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the vertex.
 */
-std::vector<int> Cell::extract_vertex_neighs(const int &vertex, const std::vector<int> &blackList) const
+std::vector<long> Cell::extract_vertex_neighs(const int &vertex, const std::vector<long> &blackList) const
 {
 	std::vector<int> vertices(1);
 	vertices[0] = vertex;
@@ -405,31 +405,31 @@ std::vector<int> Cell::extract_vertex_neighs(const int &vertex, const std::vecto
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours that share the specified vertices.
 */
-std::vector<int> Cell::extract_vertex_neighs(const std::vector<int> &vertices, const std::vector<int> &blackList) const
+std::vector<long> Cell::extract_vertex_neighs(const std::vector<int> &vertices, const std::vector<long> &blackList) const
 {
-	std::vector<int> neighs;
+	std::vector<long> neighs;
 
 	int nVerticesToFound = vertices.size();
 
-	std::vector<int> alreadyScanned;
-	std::vector<int> processingQueue;
+	std::vector<long> alreadyScanned;
+	std::vector<long> processingQueue;
 	processingQueue.push_back(get_id());
 	while (!processingQueue.empty()) {
 		// Get a cell to scan and remove it form the list
-		int cellId(processingQueue.back());
+		long cellId(processingQueue.back());
 		processingQueue.pop_back();
 		Cell &cell = get_patch()->get_cell(cellId);
 
 		// Scan the interfaces of the cell
-		const int *interfaces = cell.get_interfaces();
+		const long *interfaces = cell.get_interfaces();
 		for (int i = 0; i < cell.get_interface_count(); i++) {
-			int interfaceId = interfaces[i];
+			long interfaceId = interfaces[i];
 			Interface &interface = get_patch()->get_interface(interfaceId);
 
 			// Neighbour cell assocated to the interface
 			//
 			// Only consider the cells that are not
-			int neighId = interface.get_neigh();
+			long neighId = interface.get_neigh();
 			if (neighId < 0 || neighId == cell.get_id()) {
 				neighId = interface.get_owner();
 			}

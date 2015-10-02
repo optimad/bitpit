@@ -57,7 +57,7 @@ Interface::Interface()
 /*!
 	Creates a new interface.
 */
-Interface::Interface(const int &id)
+Interface::Interface(const long &id)
 	: Element(id), m_normal(NULL)
 {
 
@@ -66,7 +66,7 @@ Interface::Interface(const int &id)
 /*!
 	Creates a new interface.
 */
-Interface::Interface(const int &id, Patch *patch)
+Interface::Interface(const long &id, Patch *patch)
 	: Element(id, patch), m_normal(NULL)
 {
 
@@ -272,7 +272,7 @@ Interface::PositionType Interface::get_position_type() const
 
 	\param owner the owner of the interface
 */
-void Interface::set_owner(const int &owner, const int &onwerFace)
+void Interface::set_owner(const long &owner, const int &onwerFace)
 {
 	m_owner     = owner;
 	m_ownerFace = onwerFace;
@@ -292,7 +292,7 @@ void Interface::unset_owner()
 
 	\result The owner of the nterface
 */
-int Interface::get_owner() const
+long Interface::get_owner() const
 {
   return m_owner;
 }
@@ -312,7 +312,7 @@ int Interface::get_owner_face() const
 
 	\param neigh the neighbour of the interface
 */
-void Interface::set_neigh(const int &neigh, const int &onwerFace)
+void Interface::set_neigh(const long &neigh, const int &onwerFace)
 {
 	m_neigh     = neigh;
 	m_neighFace = onwerFace;
@@ -332,7 +332,7 @@ void Interface::unset_neigh()
 
 	\result The neighbour of the nterface
 */
-int Interface::get_neigh() const
+long Interface::get_neigh() const
 {
   return m_neigh;
 }
@@ -353,9 +353,9 @@ int Interface::get_neigh_face() const
 	\result An array containing the owner and the neighbour of the
 	        interface.
 */
-std::array<int, 2> Interface::get_owner_neigh() const
+std::array<long, 2> Interface::get_owner_neigh() const
 {
-	std::array<int, 2> cells;
+	std::array<long, 2> cells;
 	cells[0] = m_owner;
 	cells[1] = m_neigh;
 
@@ -367,7 +367,7 @@ std::array<int, 2> Interface::get_owner_neigh() const
 */
 void Interface::swap_owner_neigh()
 {
-	int tmp;
+	long tmp;
 
 	tmp     = m_owner;
 	m_owner = m_neigh;

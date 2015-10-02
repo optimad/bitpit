@@ -32,8 +32,8 @@ public:
 
 	~PatchOctree();
 
-	int get_cell_octant(const int &id) const;
-	int get_cell_level(const int &id);
+	long get_cell_octant(const long &id) const;
+	int get_cell_level(const long &id);
 
 	/*!
 		\brief Gets the octree associated with the patch.
@@ -57,15 +57,15 @@ public:
 protected:
 	std::array<double, 3> & _get_opposite_normal(std::array<double, 3> &normal);
 	bool _update(vector<uint32_t> &cellMapping);
-	bool _mark_cell_for_refinement(const int &id);
-	bool _mark_cell_for_coarsening(const int &id);
-	bool _enable_cell_balancing(const int &id, bool enabled);
+	bool _mark_cell_for_refinement(const long &id);
+	bool _mark_cell_for_coarsening(const long &id);
+	bool _enable_cell_balancing(const long &id, bool enabled);
 
 private:
-	int m_nInternalCells;
-	int m_nGhostCells;
+	long m_nInternalCells;
+	long m_nGhostCells;
 
-	std::unordered_map<int, int, Element::IdHasher> m_cell_to_octant;
+	std::unordered_map<long, long, Element::IdHasher> m_cell_to_octant;
 
 	Class_Para_Tree<2> m_tree_2D;
 	Class_Para_Tree<3> m_tree_3D;

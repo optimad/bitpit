@@ -67,8 +67,8 @@ public:
 	};
 
 	Element();
-	Element(const int &id);
-	Element(const int &id, Patch *patch);
+	Element(const long &id);
+	Element(const long &id, Patch *patch);
 
 	Element(Element&& other) = default;
 	Element& operator=(Element&& other) = default;
@@ -78,11 +78,11 @@ public:
 	int get_patch_dimension() const;
 	bool is_patch_three_dimensional() const;
 
-	void set_id(const int &id);
-	int get_id() const;
+	void set_id(const long &id);
+	long get_id() const;
 	
-	void set_local_id(int id);
-	int get_local_id() const;
+	void set_local_id(long id);
+	long get_local_id() const;
 	
 	void set_type(Element::Type type);
 	Element::Type get_type() const;
@@ -121,19 +121,19 @@ public:
 	double eval_min_length() const;
 
 protected:
-	static const int NULL_ELEMENT_ID;
+	static const long NULL_ELEMENT_ID;
 
 	static void cross_3D(std::array<double, 3> x, std::array<double, 3> y, std::array<double, 3> cross);
 	static void normalize_3D(std::array<double, 3> x);
 	static void transpose_3D(std::array<std::array<double, 3>, 3> A);
 
-	static bool add_id_to_ordered_list(const int &id, std::vector<int> &list);
+	static bool add_id_to_ordered_list(const long &id, std::vector<long> &list);
 
 private:
 	Patch *m_patch;
 
-	int m_id;
-	int m_local_id;
+	long m_id;
+	long m_local_id;
 
 	Element::Type m_type;
 
