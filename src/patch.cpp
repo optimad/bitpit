@@ -190,8 +190,8 @@ void Patch::output_initialize()
 	m_output_manager->initialize(nCells, nVertices);
 
 	// Vertices
-	for (long i = 0; i < nVertices; i++) {
-		m_output_manager->InsertNextVertex(m_vertices[i]);
+	for (auto &vertex : m_vertices) {
+		m_output_manager->InsertNextVertex(vertex);
 	}
 
 	// Cells
