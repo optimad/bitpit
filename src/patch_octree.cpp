@@ -565,14 +565,14 @@ void PatchOctree::import_interfaces()
 	}
 
 	vector<vector<long>> interfaceList(nCellFaces, vector<long>(0));
-	for (unsigned long n = 0; n < m_cells.size(); n++) {
+	for (auto &cell : m_cells) {
 		for (int k = 0; k < nCellFaces; k++) {
 			interfaceList[k].clear();
 		}
 
-		Cell &cell = m_cells[n];
-		for (unsigned long k = 0; k < cellToInterfaceMap[n].size(); k++) {
-			long interfaceId = cellToInterfaceMap[n][k];
+		int cellId = cell.get_id();
+		for (unsigned long k = 0; k < cellToInterfaceMap[cellId].size(); k++) {
+			long interfaceId = cellToInterfaceMap[cellId][k];
 			Interface &interface = m_interfaces[interfaceId];
 
 			int face;
@@ -589,8 +589,8 @@ void PatchOctree::import_interfaces()
 
 		cell.initialize_interfaces(interfaceList);
 
-		cellToInterfaceMap[n].clear();
-		vector<long>().swap(cellToInterfaceMap[n]);
+		cellToInterfaceMap[cellId].clear();
+		vector<long>().swap(cellToInterfaceMap[cellId]);
 	}
 
 	// Clean intersections
