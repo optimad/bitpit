@@ -92,9 +92,9 @@ public:
 	bool is_three_dimensional() const;
 	static bool is_three_dimensional(Element::Type type);
 	
-	void set_connect(std::unique_ptr<int[]> connect);
+	void set_connect(std::unique_ptr<long[]> connect);
 	void unset_connect();
-	const int * get_connect() const;
+	const long * get_connect() const;
 
 	void set_centroid(std::array<double, 3> &centroid);
 	const std::array<double, 3> & get_centroid() const;
@@ -138,7 +138,7 @@ private:
 	Element::Type m_type;
 
 	std::array<double, 3> m_centroid;
-	std::unique_ptr<int[]> m_connect;
+	std::unique_ptr<long[]> m_connect;
 
 	Element(const Element &other) = delete;
 	Element& operator = (const Element &other) = delete;

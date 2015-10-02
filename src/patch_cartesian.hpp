@@ -62,8 +62,8 @@ private:
 
 	int cell_ijk_to_id(const int &i, const int &j, const int &k) const;
 	int cell_ijk_to_id(const int ijk[]) const;
-	int vertex_ijk_to_id(const int &i, const int &j, const int &k) const;
-	int vertex_ijk_to_id(const int ijk[]) const;
+	long vertex_ijk_to_id(const int &i, const int &j, const int &k) const;
+	long vertex_ijk_to_id(const int ijk[]) const;
 	int interface_nijk_to_id(const int &normal, const int &i, const int &j, const int &k) const;
 
 };

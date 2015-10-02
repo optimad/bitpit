@@ -20,19 +20,19 @@ public:
 	};
 
 	Node();
-	Node(const int &id);
+	Node(const long &id);
 
-	void set_id(const int &id);
-	int get_id() const;
+	void set_id(const long &id);
+	long get_id() const;
 
 	void set_coords(std::array<double, 3> &coords);
 	const std::array<double, 3> & get_coords() const;
 	
 protected:
-	static const int NULL_NODE_ID;
+	static const long NULL_NODE_ID;
 
 private:
-	int m_id;
+	long m_id;
 	std::array<double, 3> m_coords;
 
 };

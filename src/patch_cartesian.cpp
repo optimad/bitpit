@@ -186,7 +186,7 @@ void PatchCartesian::create_vertices()
 		m_z = std::vector<double>(0);
 	}
 
-	int nTotalVertices = 1;
+	long nTotalVertices = 1;
 	for (int n = 0; n < get_dimension(); n++) {
 		nTotalVertices *= m_nVertices1D[n];
 	}
@@ -198,7 +198,7 @@ void PatchCartesian::create_vertices()
 	for (int i = 0; i < m_nVertices1D[Node::COORD_X]; i++) {
 		for (int j = 0; j < m_nVertices1D[Node::COORD_Y]; j++) {
 			for (int k = 0; (is_three_dimensional()) ? (k < m_nVertices1D[Node::COORD_Z]) : (k <= 0); k++) {
-				int id_vertex = vertex_ijk_to_id(i, j, k);
+				long id_vertex = vertex_ijk_to_id(i, j, k);
 				m_vertices.emplace_back(id_vertex);
 				Node &vertex = m_vertices.back();
 
@@ -278,7 +278,7 @@ void PatchCartesian::create_cells()
 				cell.set_centroid(centroid);
 
 				// Connettività
-				std::unique_ptr<int[]> connect = std::unique_ptr<int[]>(new int[nCellVertices]);
+				std::unique_ptr<long[]> connect = std::unique_ptr<long[]>(new long[nCellVertices]);
 				connect[0] = vertex_ijk_to_id(i,     j,     k);
 				connect[1] = vertex_ijk_to_id(i + 1, j,     k);
 				connect[2] = vertex_ijk_to_id(i + 1, j + 1, k);
@@ -483,7 +483,7 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 				}
 
 				// Connectivity
-				std::unique_ptr<int[]> connect = std::unique_ptr<int[]>(new int[nInterfaceVertices]);
+				std::unique_ptr<long[]> connect = std::unique_ptr<long[]>(new long[nInterfaceVertices]);
 				if (direction == Node::COORD_X) {
 					connect[0] = vertex_ijk_to_id(i, j,     k);
 					connect[1] = vertex_ijk_to_id(i, j + 1, k);
@@ -606,9 +606,9 @@ int PatchCartesian::cell_ijk_to_id(const int ijk[]) const
 /*!
 	Converts the vertex (i, j, k) notation to a single index notation
 */
-int PatchCartesian::vertex_ijk_to_id(const int &i, const int &j, const int &k) const
+long PatchCartesian::vertex_ijk_to_id(const int &i, const int &j, const int &k) const
 {
-	int id = i;
+	long id = i;
 	id += m_nVertices1D[Node::COORD_X] * j;
 	if (get_dimension() == 3) {
 		id += m_nVertices1D[Node::COORD_Y] * m_nVertices1D[Node::COORD_X] * k;
@@ -620,7 +620,7 @@ int PatchCartesian::vertex_ijk_to_id(const int &i, const int &j, const int &k) c
 /*!
 	Converts the vertex (i, j, k) notation to a single index notation
 */
-int PatchCartesian::vertex_ijk_to_id(const int ijk[]) const
+long PatchCartesian::vertex_ijk_to_id(const int ijk[]) const
 {
 	return vertex_ijk_to_id(ijk[Node::COORD_X], ijk[Node::COORD_Y], ijk[Node::COORD_Z]);
 }

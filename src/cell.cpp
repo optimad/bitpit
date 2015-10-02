@@ -442,7 +442,7 @@ std::vector<int> Cell::extract_vertex_neighs(const std::vector<int> &vertices, c
 
 			// Number of vertices owned by the interface
 			int nCommonVertices = 0;
-			const int *interfaceConnect = interface.get_connect();
+			const long *interfaceConnect = interface.get_connect();
 			for (int k = 0; k < interface.get_vertex_count(); ++k) {
 				for (int n = 0; n < nVerticesToFound; ++n) {
 					if (interfaceConnect[k] == get_connect()[vertices[n]]) {

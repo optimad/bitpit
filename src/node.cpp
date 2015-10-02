@@ -16,7 +16,7 @@ namespace pman {
 	Node is class that defines the nodes.
 */
 
-const int Node::NULL_NODE_ID = std::numeric_limits<int>::min();
+const long Node::NULL_NODE_ID = std::numeric_limits<long>::min();
 
 /*!
 	Default constructor.
@@ -29,7 +29,7 @@ Node::Node()
 /*!
 	Creates a new element.
 */
-Node::Node(const int &id)
+Node::Node(const long &id)
 {
 	set_id(id);
 }
@@ -39,7 +39,7 @@ Node::Node(const int &id)
 
 	\param id the ID of the node
 */
-void Node::set_id(const int &id)
+void Node::set_id(const long &id)
 {
 	m_id = id;
 }
@@ -49,7 +49,7 @@ void Node::set_id(const int &id)
 
 	\return The ID of the node
 */
-int Node::get_id() const
+long Node::get_id() const
 {
 	return m_id;
 }

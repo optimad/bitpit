@@ -44,7 +44,7 @@ OutputManager::~OutputManager()
 
 // Description:
 // Inizializza il dataset
-void OutputManager::initialize(int nGuessCells, int nGuessVerts)
+void OutputManager::initialize(int nGuessCells, long nGuessVerts)
 {
 	m_vertexes = vtkSmartPointer<vtkPoints>::New();
 	m_vertexes->SetNumberOfPoints(nGuessVerts);
@@ -225,8 +225,8 @@ void OutputManager::mapConnectToVTK(Element::Type elemType, int elemMapDegree, i
 
 	mapConnectFromVTK(elemType, elemMapDegree, rank);
 
-	int *tmpConnect;
-	tmpConnect = (int *) malloc(nElemVerts * sizeof(int));
+	long *tmpConnect;
+	tmpConnect = (long *) malloc(nElemVerts * sizeof(long));
 	for (int j = 0; j < nElemVerts; j++)
 		tmpConnect[rank[j]] = elemConnect[j];
 
@@ -257,10 +257,10 @@ vtkIdType OutputManager::InsertNextCell(const Cell &cell)
 {
 	int vtkCellType = getVTKCellType(cell.get_type());
 
-	const int *cellconnect = cell.get_connect();
+	const long *cellconnect = cell.get_connect();
 	vtkIdType nCellVerts = cell.get_vertex_count();
 	std::vector<vtkIdType> vtkCellConnect(nCellVerts);
-	for (int k = 0; k < nCellVerts; k++) {
+	for (long k = 0; k < nCellVerts; k++) {
 		Node &node = cell.get_patch()->get_vertex(cellconnect[k]);
 		vtkCellConnect[k] = node.get_id();
 	}

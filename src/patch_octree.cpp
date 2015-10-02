@@ -196,7 +196,7 @@ void PatchOctree::import_vertices()
 	reset_vertices();
 
 	// Defintion of the vertices
-	int nVertices;
+	long nVertices;
 	if (is_three_dimensional()) {
 		nVertices = m_tree_3D.getNumNodes();
 	} else {
@@ -204,7 +204,7 @@ void PatchOctree::import_vertices()
 	}
 
 	m_vertices.reserve(nVertices);
-	for (int n = 0; n < nVertices; n++) {
+	for (long n = 0; n < nVertices; n++) {
 		m_vertices.emplace_back(n);
 		Node &vertex = m_vertices.back();
 
@@ -271,7 +271,7 @@ void PatchOctree::import_cells()
 	}
 
 	// Mapping della connettività
-	vector<int> connectMap(nCellVertices);
+	vector<long> connectMap(nCellVertices);
 	if (is_three_dimensional()) {
 		connectMap[0] = 0;
 		connectMap[1] = 1;
@@ -374,7 +374,7 @@ void PatchOctree::import_cells()
 			octantConnect = m_tree_2D.getOctantConnectivity(n) ;
 		}
 
-		std::unique_ptr<int[]> connect = std::unique_ptr<int[]>(new int[nCellVertices]);
+		std::unique_ptr<long[]> connect = std::unique_ptr<long[]>(new long[nCellVertices]);
 		for (int k = 0; k < nCellVertices; k++) {
 			connect[k] = octantConnect[connectMap[k]];
 		}
@@ -548,7 +548,7 @@ void PatchOctree::import_interfaces()
 		}
 
 		std::vector<int> localConnect = Element::get_face_local_connect(cellType, ownerFace);
-		std::unique_ptr<int[]> connect = std::unique_ptr<int[]>(new int[nInterfaceVertices]);
+		std::unique_ptr<long[]> connect = std::unique_ptr<long[]>(new long[nInterfaceVertices]);
 		for (int i = 0; i < nInterfaceVertices; ++i) {
 			connect[i] = octantConnect[localConnect[i]];
 		}

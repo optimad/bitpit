@@ -197,7 +197,7 @@ Element::Type Element::get_type() const
 
 	\param connect a pointer to the connectivity of the element
 */
-void Element::set_connect(std::unique_ptr<int[]> connect)
+void Element::set_connect(std::unique_ptr<long[]> connect)
 {
 	m_connect = std::move(connect);
 }
@@ -215,7 +215,7 @@ void Element::unset_connect()
 
 	\result A pointer to the connectivity of the element
 */
-const int * Element::get_connect() const
+const long * Element::get_connect() const
 {
 	return m_connect.get();
 }
