@@ -137,8 +137,8 @@ void Patch::reset_vertices()
 	m_vertices.clear();
 	PiercedVector<Node>().swap(m_vertices);
 
-	for (unsigned long n = 0; n < m_cells.size(); n++) {
-		m_cells[n].unset_connect();
+	for (auto &cell : m_cells) {
+		cell.unset_connect();
 	}
 }
 
@@ -164,8 +164,8 @@ void Patch::reset_interfaces()
 	m_interfaces.clear();
 	PiercedVector<Interface>().swap(m_interfaces);
 
-	for (unsigned long n = 0; n < m_cells.size(); n++) {
-		m_cells[n].unset_interfaces();
+	for (auto &cell : m_cells) {
+		cell.unset_interfaces();
 	}
 }
 
@@ -195,8 +195,8 @@ void Patch::output_initialize()
 	}
 
 	// Cells
-	for (long i = 0; i < nCells; i++) {
-		m_output_manager->InsertNextCell(m_cells[i]);
+	for (auto &cell : m_cells) {
+		m_output_manager->InsertNextCell(cell);
 	}
 
 	// Fields
