@@ -329,8 +329,8 @@ void PatchCartesian::create_interfaces()
 	int nInterfacesForSide[nCellFaces];
 	std::fill_n(nInterfacesForSide, nCellFaces, 1);
 
-	for (unsigned int n = 0; n < m_cells.size(); n++) {
-		m_cells[n].initialize_empty_interfaces(nInterfacesForSide);
+	for (auto &cell : m_cells) {
+		cell.initialize_empty_interfaces(nInterfacesForSide);
 	}
 
 	// Create the interfaces
