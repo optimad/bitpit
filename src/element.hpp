@@ -8,6 +8,7 @@
 
 #include <cstddef>
 #include <memory>
+#include <vector>
 
 #include "collapsedArray2D.hpp"
 
