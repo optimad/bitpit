@@ -6,6 +6,7 @@
 
 /*! \file */
 
+#include "collapsedArray2D.hpp"
 #include "element.hpp"
 
 #include <memory>
