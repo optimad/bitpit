@@ -1311,6 +1311,13 @@ public:
 
 	//=================================================================================//
 
+	/** It finds the process owning the element definded by the Morton number passed as argument
+	 *
+	 * The Morton number can be computed using the method Class_Octant<3>#computeMorton().
+	 *
+	 * \param[in] morton is the Morton number of the element you want find the owner of
+	 * \return it returns the rank of the process owning the element
+	 */
 	int findOwner(const uint64_t & morton){				// given the morton of an octant it finds the process owning that octant
 		int p = -1;
 		int length = nproc;
