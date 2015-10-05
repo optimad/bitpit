@@ -1309,6 +1309,32 @@ public:
 		return NULL;
 	};
 
+	//=================================================================================//
+
+	int findOwner(const uint64_t & morton){				// given the morton of an octant it finds the process owning that octant
+		int p = -1;
+		int length = nproc;
+		int beg = 0;
+		int end = nproc -1;
+		int seed = nproc/2;
+		while(beg != end){
+			if(morton <= partition_last_desc[seed]){
+				end = seed;
+				if(morton > partition_last_desc[seed-1])
+					beg = seed;
+			}
+			else{
+				beg = seed;
+				if(morton <= partition_last_desc[seed+1])
+					beg = seed + 1;
+			}
+			length = end - beg;
+			seed = beg + length/2;
+		}
+		p = beg;
+		return p;
+	};
+
 	/** Finds neighbours of octant through iface in vector octants.
 	 * Returns a vector (empty if iface is a bound face) with the index of neighbours
 	 * in their structure (octants or ghosts) and sets isghost[i] = true if the
@@ -2463,32 +2489,6 @@ private:
 		error_flag = MPI_Allgather(&firstDescMorton,1,MPI_UINT64_T,partition_first_desc,1,MPI_UINT64_T,comm);
 		serial = false;
 		delete [] rbuff; rbuff = NULL;
-	};
-
-	//=================================================================================//
-
-	int findOwner(const uint64_t & morton){				// given the morton of an octant it finds the process owning that octant
-		int p = -1;
-		int length = nproc;
-		int beg = 0;
-		int end = nproc -1;
-		int seed = nproc/2;
-		while(beg != end){
-			if(morton <= partition_last_desc[seed]){
-				end = seed;
-				if(morton > partition_last_desc[seed-1])
-					beg = seed;
-			}
-			else{
-				beg = seed;
-				if(morton <= partition_last_desc[seed+1])
-					beg = seed + 1;
-			}
-			length = end - beg;
-			seed = beg + length/2;
-		}
-		p = beg;
-		return p;
 	};
 
 	//=================================================================================//

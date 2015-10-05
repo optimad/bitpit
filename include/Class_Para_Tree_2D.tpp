@@ -1230,6 +1230,39 @@ public:
 		}
 	};
 
+	// =============================================================================== //
+
+	/** It finds the process owning the element definded by the Morton number passed as argument
+	 *
+	 * The Morton number can be compute using the method Class_Octant::computeMorton().
+	 *
+	 * \param[in] morton is the Morton number of the element you want find the owner of
+	 * \param[out] it returns the rank of the process owning the element
+	 */
+	int findOwner(const uint64_t & morton) {
+		int p = -1;
+		int length = nproc;
+		int beg = 0;
+		int end = nproc -1;
+		int seed = nproc/2;
+		while(beg != end){
+			if(morton <= partition_last_desc[seed]){
+				end = seed;
+				if(morton > partition_last_desc[seed-1])
+					beg = seed;
+			}
+			else{
+				beg = seed;
+				if(morton <= partition_last_desc[seed+1])
+					beg = seed + 1;
+			}
+			length = end - beg;
+			seed = beg + length/2;
+		}
+		p = beg;
+		return p;
+	}
+
 private:
 	/** Finds neighbours of octant through iface in vector octants.
 	 * Returns a vector (empty if iface is a bound face) with the index of neighbours
@@ -2394,32 +2427,6 @@ private:
 		error_flag = MPI_Allgather(&firstDescMorton,1,MPI_UINT64_T,partition_first_desc,1,MPI_UINT64_T,comm);
 		serial = false;
 		delete [] rbuff; rbuff = NULL;
-	}
-
-	// =============================================================================== //
-
-	int findOwner(const uint64_t & morton) {
-		int p = -1;
-		int length = nproc;
-		int beg = 0;
-		int end = nproc -1;
-		int seed = nproc/2;
-		while(beg != end){
-			if(morton <= partition_last_desc[seed]){
-				end = seed;
-				if(morton > partition_last_desc[seed-1])
-					beg = seed;
-			}
-			else{
-				beg = seed;
-				if(morton <= partition_last_desc[seed+1])
-					beg = seed + 1;
-			}
-			length = end - beg;
-			seed = beg + length/2;
-		}
-		p = beg;
-		return p;
 	}
 
 	// =============================================================================== //
