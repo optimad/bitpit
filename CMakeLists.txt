@@ -1,7 +1,8 @@
-#Specify the version being used as well as the language
+#------------------------------------------------------------------------------------#
+# CMake settings
+#------------------------------------------------------------------------------------#
 cmake_minimum_required(VERSION 2.8.12)
 
-#Name your project here
 project("patchman")
 
 #------------------------------------------------------------------------------------#
@@ -30,16 +31,14 @@ set(VTK_DIR "/opt/VTK/lib/cmake/vtk" CACHE PATH "The directory containing a CMak
 if (CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	set(CMAKE_INSTALL_PREFIX "${BITPIT_DIR}/${CMAKE_PROJECT_NAME}" CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
 endif()
-#------------------------------------------------------------------------------------#
 
 #------------------------------------------------------------------------------------#
 # Internal variables
 #------------------------------------------------------------------------------------#
 set(WITHOUT_MPI "0" CACHE INTERNAL "If set, the program is compiled without MPI support")
-#------------------------------------------------------------------------------------#
 
 #------------------------------------------------------------------------------------#
-# Compiler settings
+# Compilation settings
 #------------------------------------------------------------------------------------#
 set (ENABLE_WARNINGS ${VERBOSE_MAKE})
 
@@ -69,7 +68,6 @@ if (ENABLE_WARNINGS)
 endif()
 
 add_compile_options("-std=c++0x")
-#------------------------------------------------------------------------------------#
 
 #------------------------------------------------------------------------------------#
 # Make settings
@@ -83,7 +81,6 @@ endif()
 #------------------------------------------------------------------------------------#
 include_directories("include")
 include_directories("src")
-#------------------------------------------------------------------------------------#
 
 #------------------------------------------------------------------------------------#
 # External dependencies
@@ -99,7 +96,6 @@ endif()
 
 find_package(VTK 6.0 REQUIRED COMPONENTS vtkIOXML vtkIOLegacy NO_MODULE)
 include(${VTK_USE_FILE})
-#------------------------------------------------------------------------------------#
 
 #------------------------------------------------------------------------------------#
 # Subdirectories
@@ -119,7 +115,6 @@ add_subdirectory(examples)
 
 # Docs
 add_subdirectory(doc)
-#------------------------------------------------------------------------------------#
 
 #------------------------------------------------------------------------------------#
 # Tests
@@ -131,5 +126,3 @@ foreach(TEST_NAME IN LISTS TEST_LIST)
 endforeach()
 
 add_custom_target(check DEPENDS tests COMMAND ${CMAKE_MAKE_PROGRAM} test)
-#------------------------------------------------------------------------------------#
-
