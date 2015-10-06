@@ -9,13 +9,13 @@ project("patchman")
 # Variables visible to the user
 #------------------------------------------------------------------------------------#
 if (BITPIT_DIR)
-	set(FIRST_BITPIT_DIR_INITIALIZATION "NO")
+	set(FIRST_BITPIT_DIR_INITIALIZATION 0)
 else()
-	set(FIRST_BITPIT_DIR_INITIALIZATION "YES")
+	set(FIRST_BITPIT_DIR_INITIALIZATION 1)
 endif()
 
 set(BITPIT_DIR "/opt/bitpit" CACHE PATH "The directory containing the BITPIT libraries")
-if ("${FIRST_BITPIT_DIR_INITIALIZATION}")
+if (${FIRST_BITPIT_DIR_INITIALIZATION})
 	return()
 else()
 	if (NOT EXISTS ${BITPIT_DIR})
