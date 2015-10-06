@@ -41,6 +41,9 @@ set(WITHOUT_MPI "0" CACHE INTERNAL "If set, the program is compiled without MPI 
 # Compilation settings
 #------------------------------------------------------------------------------------#
 set (ENABLE_WARNINGS ${VERBOSE_MAKE})
+if (VERBOSE_MAKE)
+	set(CMAKE_VERBOSE_MAKEFILE ON)
+endif()
 
 if (WITHOUT_MPI)
 	add_definitions(-DDISABLE_MPI)
@@ -68,13 +71,6 @@ if (ENABLE_WARNINGS)
 endif()
 
 add_compile_options("-std=c++0x")
-
-#------------------------------------------------------------------------------------#
-# Make settings
-#------------------------------------------------------------------------------------#
-if (VERBOSE_MAKE)
-	set(CMAKE_VERBOSE_MAKEFILE ON)
-endif()
 
 #------------------------------------------------------------------------------------#
 # Internal dependencies
