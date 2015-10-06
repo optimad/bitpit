@@ -44,6 +44,12 @@ inline MPI_Datatype convert<bool>(){return MPI::BOOL;}
 template <>
 inline MPI_Datatype convert<uint8_t>(){return MPI_UINT8_T;}
 
+//template <>
+//inline MPI_Datatype convert<uint64_t>(){return MPI_UINT64_T;}
+
+template <>
+inline MPI_Datatype convert<unsigned long long>(){return MPI_UINT64_T;}
+
 template <>
 inline MPI_Datatype convert<int8_t>(){return MPI_INT8_T;}
 
