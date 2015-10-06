@@ -1,10 +1,3 @@
-#Specify the version being used as well as the language
-cmake_minimum_required(VERSION 2.8)
-
-#Name your project here
-project(OPTIMAD_IO)
-
-
 SET(TargetLib opt_IO)
 SET(TargetTest test_IO)
 

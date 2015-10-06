@@ -1,10 +1,3 @@
-#Specify the version being used as well as the language
-cmake_minimum_required(VERSION 2.8)
-
-#Name your project here
-project(OPTIMAD_LinearAlgebra)
-
-
 SET(TargetLib opt_LA)
 SET(TargetTest test_LA)
 
