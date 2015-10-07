@@ -70,7 +70,7 @@ if (ENABLE_WARNINGS)
 	set(CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE} -Wall -Wextra")
 endif()
 
-add_compile_options("-std=c++0x")
+add_compile_options("-std=c++11")
 
 #------------------------------------------------------------------------------------#
 # Internal dependencies
