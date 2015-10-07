@@ -41,7 +41,11 @@ IF(BUILD_DOCUMENTATION)
                       # custom_command for ${doxyfile} generation
                       # but I still have to figure out how...
                       MAIN_DEPENDENCY ${doxyfile} ${doxyfile_in}
-                      DEPENDS ${doxy_extra_files} ${doxyfile_in} ${COMMON_HEADERS} ${BASE_SOURCES} ${BASE_HEADERS} ${EXAMPLES_SOURCES}
+                      DEPENDS ${doxy_extra_files} ${doxyfile_in}
+                              ${COMMON_HEADERS}
+                              ${BASE_SOURCES} ${BASE_HEADERS}
+                              ${IO_SOURCES} ${IO_HEADERS}
+                              ${EXAMPLES_SOURCES}
                       COMMENT "Generating HTML documentation")
 
   ADD_CUSTOM_TARGET( doc ALL DEPENDS ${doxy_html_index_file} )
