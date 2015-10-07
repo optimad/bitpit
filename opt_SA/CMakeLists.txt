@@ -26,5 +26,4 @@ FOREACH( lib ${DepLibs} )
 
 ENDFOREACH( lib ${DepLibs})
 
-ADD_SUBDIRECTORY(lib)
 ADD_SUBDIRECTORY(test_lib )

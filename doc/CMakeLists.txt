@@ -45,6 +45,7 @@ IF(BUILD_DOCUMENTATION)
                               ${COMMON_HEADERS}
                               ${BASE_SOURCES} ${BASE_HEADERS}
                               ${IO_SOURCES} ${IO_HEADERS}
+                              ${SA_SOURCES} ${SA_HEADERS}
                               ${EXAMPLES_SOURCES}
                       COMMENT "Generating HTML documentation")
 

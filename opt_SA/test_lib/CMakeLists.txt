@@ -7,6 +7,7 @@ file(GLOB test_src "*.cpp")
 add_executable( ${TargetTest} ${test_src})
 
 target_link_libraries(${TargetTest} ${BASE_LIBRARY})
+target_link_libraries(${TargetTest} ${SA_LIBRARY})
 TARGET_LINK_LIBRARIES(${TargetTest} ${TargetLib} )
 
 FOREACH( lib ${DepLibs} )
