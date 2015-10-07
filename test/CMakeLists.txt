@@ -2,10 +2,11 @@
 cmake_minimum_required(VERSION 2.8)
 
 # List of tests
-set(TEST_LIST "")
-list(APPEND TEST_LIST "test_00001")
-list(APPEND TEST_LIST "test_00002")
-set (TEST_LIST ${TEST_LIST} PARENT_SCOPE)
+set(TESTS "")
+list(APPEND TESTS "test_00001")
+list(APPEND TESTS "test_00002")
+
+set(TEST_LIST "${TESTS}" CACHE INTERNAL "List of tests" FORCE)
 
 #Rules to build the tests
 foreach(TEST_NAME IN LISTS TEST_LIST)
