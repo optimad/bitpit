@@ -1,16 +1,16 @@
-# FindPATCHMAN
+# Find@FIND_MODULE_PACKAGE@
 # -----------
 #
-#	The following variables are set if PATCHMAN is found. If PATCHMAN is
-#	not found, PATCHMAN_FOUND is set to false:
+#	The following variables are set if @FIND_MODULE_PACKAGE@ is found. If @FIND_MODULE_PACKAGE@ is
+#	not found, @FIND_MODULE_PACKAGE@_FOUND is set to false:
 #
-#	- PATCHMAN_FOUND - System has the PATCHMAN library
-#	- PATCHMAN_INCLUDE_DIRS: - The PATCHMAN include directories
-#	- PATCHMAN_LIBRARIES - The libraries needed to use PATCHMAN
-#	- PATCHMAN_DEFINITIONS - Compiler switches required for using patchman
-#       - PATCHMAN_VERSION - Version of the PATCHMAN library found
+#	- @FIND_MODULE_PACKAGE@_FOUND - System has the @FIND_MODULE_PACKAGE@ library
+#	- @FIND_MODULE_PACKAGE@_INCLUDE_DIRS: - The @FIND_MODULE_PACKAGE@ include directories
+#	- @FIND_MODULE_PACKAGE@_LIBRARIES - The libraries needed to use @FIND_MODULE_PACKAGE@
+#	- @FIND_MODULE_PACKAGE@_DEFINITIONS - Compiler switches required for using patchman
+#	- @FIND_MODULE_PACKAGE@_VERSION - Version of the @FIND_MODULE_PACKAGE@ library found
 #
-#	The following cache entries must be set by the user to locate PATCHMAN:
+#	The following cache entries must be set by the user to locate @FIND_MODULE_PACKAGE@:
 #
 #	- STATIC - If set, the the static version of the library will be used
 #	- WITHOUT_MPI - If set, the the serial version of the library will be used
@@ -21,13 +21,13 @@ include(LibFindMacros)
 include(FindPackageHandleStandardArgs)
 
 # Library name
-set(LIBRARY_NAME "patchman")
+set(LIBRARY_NAME "@FIND_MODULE_NAME@")
 
 # Reference header
-set(REFERENCE_HEADER "patchman_version.hpp")
+set(REFERENCE_HEADER "@FIND_MODULE_REFERENCE_HEADER@")
 
 # Dependencies
-set(DEPENDENCIES "PABLO")
+set(DEPENDENCIES "@FIND_MODULE_DEPENDENCIES@")
 
 ### DO NOT EDIT AFTER THIS LINE ###
 
@@ -158,7 +158,7 @@ endif ()
 # Version
 if(${PACKAGE_NAME}_INCLUDE_DIR)
 	set(VERSION_HEADER_FILENAME "${LIBRARY_NAME}_version.hpp")
-	string(TOUPPER "${LIBRARY_NAME}VERSION" VERSION_DEFINE_NAME)
+	string(TOUPPER "${LIBRARY_NAME}_VERSION" VERSION_DEFINE_NAME)
 	if (EXISTS "${${PACKAGE_NAME}_INCLUDE_DIR}/${VERSION_HEADER_FILENAME}")
 		libfind_version_header(${PACKAGE_NAME} "${VERSION_HEADER_FILENAME}" "${VERSION_DEFINE_NAME}")
 	endif()
@@ -204,20 +204,20 @@ unset(LIBRARY_FILENAME_DEBUG)
 unset(LIBRARY_FILENAME_FALLBACK_RELEASE)
 unset(LIBRARY_FILENAME_FALLBACK_DEBUG)
 
-# Choose good values for PATCHMAN_LIBRARY, PATCHMAN_LIBRARIES,
-# PATCHMAN_LIBRARY_DEBUG, and PATCHMAN_LIBRARY_RELEASE depending on what
-# has been found and set.  If only PATCHMAN_LIBRARY_RELEASE is defined,
-# PATCHMAN_LIBRARY will be set to the release value, and
-# PATCHMAN_LIBRARY_DEBUG will be set to PATCHMAN_LIBRARY_DEBUG-NOTFOUND.
-# If only PATCHMAN_LIBRARY_DEBUG is defined, then PATCHMAN_LIBRARY will
-# take the debug value, and PATCHMAN_LIBRARY_RELEASE will be set to
-# PATCHMAN_LIBRARY_RELEASE-NOTFOUND.
+# Choose good values for @FIND_MODULE_PACKAGE@_LIBRARY, @FIND_MODULE_PACKAGE@_LIBRARIES,
+# @FIND_MODULE_PACKAGE@_LIBRARY_DEBUG, and @FIND_MODULE_PACKAGE@_LIBRARY_RELEASE depending on what
+# has been found and set.  If only @FIND_MODULE_PACKAGE@_LIBRARY_RELEASE is defined,
+# @FIND_MODULE_PACKAGE@_LIBRARY will be set to the release value, and
+# @FIND_MODULE_PACKAGE@_LIBRARY_DEBUG will be set to @FIND_MODULE_PACKAGE@_LIBRARY_DEBUG-NOTFOUND.
+# If only @FIND_MODULE_PACKAGE@_LIBRARY_DEBUG is defined, then @FIND_MODULE_PACKAGE@_LIBRARY will
+# take the debug value, and @FIND_MODULE_PACKAGE@_LIBRARY_RELEASE will be set to
+# @FIND_MODULE_PACKAGE@_LIBRARY_RELEASE-NOTFOUND.
 #
-# If the generator supports configuration types, then PATCHMAN_LIBRARY
-# and PATCHMAN_LIBRARIES will be set with debug and optimized flags
+# If the generator supports configuration types, then @FIND_MODULE_PACKAGE@_LIBRARY
+# and @FIND_MODULE_PACKAGE@_LIBRARIES will be set with debug and optimized flags
 # specifying the library to be used for the given configuration.  If no
 # build type has been set or the generator in use does not support
-# configuration types, then PATCHMAN_LIBRARY and PATCHMAN_LIBRARIES will
+# configuration types, then @FIND_MODULE_PACKAGE@_LIBRARY and @FIND_MODULE_PACKAGE@_LIBRARIES will
 # take only the release value, or the debug value if the release one is
 # not set.
 if (${PACKAGE_NAME}_LIBRARY_DEBUG AND ${PACKAGE_NAME}_LIBRARY_RELEASE AND
