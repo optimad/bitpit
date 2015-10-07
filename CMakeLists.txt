@@ -78,6 +78,20 @@ add_compile_options("-std=c++11")
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${BITPIT_DIR}/cmake/Modules")
 
 #------------------------------------------------------------------------------------#
+# Library version
+#------------------------------------------------------------------------------------#
+set (VERSION_HEADER_FILENAME "${PROJECT_SOURCE_DIR}/src/common/${CMAKE_PROJECT_NAME}_version.hpp")
+string(TOUPPER "${CMAKE_PROJECT_NAME}_VERSION" VERSION_DEFINE_NAME)
+
+file(READ "${VERSION_HEADER_FILENAME}" header)
+
+string(REGEX REPLACE ".*#[ \t]*define[ \t]*${VERSION_DEFINE_NAME}[ \t]*\"([^\n]*)\".*" "\\1" match "${header}")
+set(BITP_BASE_VERSION "${match}")
+
+STRING(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" match "${BITP_BASE_VERSION}")
+set(BITP_BASE_MAJOR_VERSION "${match}")
+
+#------------------------------------------------------------------------------------#
 # Subdirectories
 #------------------------------------------------------------------------------------#
 

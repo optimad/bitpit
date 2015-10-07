@@ -2,6 +2,9 @@
 # Subdirectories
 #------------------------------------------------------------------------------------#
 
+# Common
+add_subdirectory(common)
+
 # Base
 add_subdirectory(base)
 

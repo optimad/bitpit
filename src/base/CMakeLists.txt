@@ -28,5 +28,8 @@ else()
 	set_target_properties(${BASE_LIBRARY} PROPERTIES RELEASE_POSTFIX "_MPI")
 endif()
 
+set_target_properties(${BASE_LIBRARY} PROPERTIES VERSION "${BITP_BASE_VERSION}"
+                                                 SOVERSION  "${BITP_BASE_MAJOR_VERSION}")
+
 install(TARGETS ${BASE_LIBRARY} DESTINATION lib)
 install(FILES ${BASE_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})
