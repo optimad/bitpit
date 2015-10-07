@@ -17,7 +17,7 @@ if(BUILD_EXAMPLES)
 		list(APPEND EXAMPLES_SOURCES ${EXAMPLE_SOURCES})
 
 		add_executable(${EXAMPLE_NAME} "${EXAMPLE_SOURCES}")
-		target_link_libraries(${EXAMPLE_NAME} ${BASE_LIBRARY})
+		target_link_libraries(${EXAMPLE_NAME} ${BITP_BASE_LIBRARY})
 		install(TARGETS ${EXAMPLE_NAME} DESTINATION doc/${CMAKE_PROJECT_NAME}-${BITP_BASE_VERSION}/examples)
 	endforeach()
 

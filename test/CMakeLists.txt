@@ -20,10 +20,7 @@ foreach(TEST_NAME IN LISTS TEST_LIST)
 	set(TEST_SOURCES "${TEST_NAME}.cpp")
 
 	add_executable(${TEST_NAME} "${TEST_SOURCES}")
-	target_link_libraries(${TEST_NAME} ${BASE_LIBRARY})
-	target_link_libraries(${TEST_NAME} ${IO_LIBRARY})
-	target_link_libraries(${TEST_NAME} ${SA_LIBRARY})
-	target_link_libraries(${TEST_NAME} ${LA_LIBRARY})
+	target_link_libraries(${TEST_NAME} ${BITP_BASE_LIBRARY})
 endforeach()
 
 add_custom_target(tests DEPENDS ${TEST_LIST})
