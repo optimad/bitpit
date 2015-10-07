@@ -98,6 +98,9 @@ set(BITP_BASE_MAJOR_VERSION "${match}")
 # Main library
 add_subdirectory(src)
 
+# CMake
+add_subdirectory(cmake)
+
 # Examples
 add_subdirectory(examples)
 
