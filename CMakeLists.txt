@@ -95,3 +95,17 @@ add_subdirectory(opt_SA)
 
 # opt_LA
 add_subdirectory(opt_LA)
+
+# Tests
+add_subdirectory(test)
+
+#------------------------------------------------------------------------------------#
+# Tests
+#------------------------------------------------------------------------------------#
+enable_testing()
+
+foreach(TEST_NAME IN LISTS TEST_LIST)
+	add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
+endforeach()
+
+add_custom_target(check DEPENDS tests COMMAND ${CMAKE_MAKE_PROGRAM} test)
