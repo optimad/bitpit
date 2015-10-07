@@ -98,9 +98,6 @@ set(BITP_BASE_MAJOR_VERSION "${match}")
 # Main library
 add_subdirectory(src)
 
-# opt_SA
-add_subdirectory(opt_SA)
-
 # opt_LA
 add_subdirectory(opt_LA)
 
