@@ -367,64 +367,6 @@ class LIFOstack {
     );
 };
 
-// FIFO stack --------------------------------------------------------------- //
-template <class T>
-class FIFOstack {
-
-    // Members ============================================================== //
-    public:
-    int                 MAXSTK;                                               // Stack capacity
-    int                 BEGSTK;                                               // Stack begin
-    int                 ENDSTK;                                               // Stack end
-    int                 TOPSTK;                                               // Current stack size
-    vector<T>           STACK;                                                // FIFO stack
-
-    // Constructor ========================================================== //
-    public:
-    FIFOstack(                                                                // Standard constructor for FIFO stack
-        void                                                                  // (input) none
-    );
-    FIFOstack(                                                                // Custom constructor #1 for FIFO stack
-        int                                                                   // (input) stack capacity
-    );
-    FIFOstack(                                                                // Custom constructor #2 for FIFO stack
-        vector<T>       &                                                     // (input) items to be stocked in the FIFO stack
-    );
-
-    // Destructor =========================================================== //
-    public:
-    ~FIFOstack(                                                               // Standard destructor for LIFO stack
-        void                                                                  // (input) none
-    );
-
-    // Methods ============================================================== //
-    public:
-    void IncreaseSTACK(                                                       // Increase stack size
-        void                                                                  // (input) none
-    );
-    void DecreaseSTACK(                                                       // Decrease stack size
-        void                                                                  // (input) none
-    );
-    int STACKempty(                                                           // Returns the number of empty position in the stack
-        void                                                                  // (input) none
-    );
-    T pop(                                                                    // Pop last item from stack
-        void                                                                  // (input) none
-    );
-    void push(                                                                // Push a single item into the stack
-        T                                                                     // (input) item to be pushed into the stack list
-    );
-    void push(                                                                // Pusk multiple items into the stack
-        vector<T>       &                                                     // (input) items to be pushed into the stack list
-    );
-    void clear(                                                               // Reset stack
-        void                                                                  // (input) none
-    );
-    void display(                                                             // Display FIFO infos
-        ostream         &                                                     // (input/output) output stream
-    );
-};
-
 // ========================================================================== //
 // FUNCTIONS PROTOTYPES                                                       //
 // ========================================================================== //
@@ -554,7 +496,6 @@ void Extract_wo_Repl(                                                         //
         // TEMPLATES                                                                           //
         // =================================================================================== //
         # include "LIFOstack.tpp"
-        # include "FIFOstack.tpp"
         # include "PQUEUE.tpp"
         # include "kdtree.tpp"
 
