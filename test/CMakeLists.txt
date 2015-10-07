@@ -6,6 +6,7 @@ set(TESTS "")
 list(APPEND TESTS "test_base_00001")
 list(APPEND TESTS "test_IO_00001")
 list(APPEND TESTS "test_SA_00001")
+list(APPEND TESTS "test_LA_00001")
 
 set(TEST_LIST "${TESTS}" CACHE INTERNAL "List of tests" FORCE)
 
@@ -13,6 +14,7 @@ set(TEST_LIST "${TESTS}" CACHE INTERNAL "List of tests" FORCE)
 include_directories("${PROJECT_SOURCE_DIR}/src/base")
 include_directories("${PROJECT_SOURCE_DIR}/src/IO")
 include_directories("${PROJECT_SOURCE_DIR}/src/SA")
+include_directories("${PROJECT_SOURCE_DIR}/src/LA")
 
 foreach(TEST_NAME IN LISTS TEST_LIST)
 	set(TEST_SOURCES "${TEST_NAME}.cpp")
@@ -21,6 +23,7 @@ foreach(TEST_NAME IN LISTS TEST_LIST)
 	target_link_libraries(${TEST_NAME} ${BASE_LIBRARY})
 	target_link_libraries(${TEST_NAME} ${IO_LIBRARY})
 	target_link_libraries(${TEST_NAME} ${SA_LIBRARY})
+	target_link_libraries(${TEST_NAME} ${LA_LIBRARY})
 endforeach()
 
 add_custom_target(tests DEPENDS ${TEST_LIST})
