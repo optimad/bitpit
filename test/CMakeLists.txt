@@ -5,12 +5,14 @@ cmake_minimum_required(VERSION 2.8)
 set(TESTS "")
 list(APPEND TESTS "test_base_00001")
 list(APPEND TESTS "test_IO_00001")
+list(APPEND TESTS "test_SA_00001")
 
 set(TEST_LIST "${TESTS}" CACHE INTERNAL "List of tests" FORCE)
 
 # Rules to build the tests
 include_directories("${PROJECT_SOURCE_DIR}/src/base")
 include_directories("${PROJECT_SOURCE_DIR}/src/IO")
+include_directories("${PROJECT_SOURCE_DIR}/src/SA")
 
 foreach(TEST_NAME IN LISTS TEST_LIST)
 	set(TEST_SOURCES "${TEST_NAME}.cpp")
@@ -18,6 +20,7 @@ foreach(TEST_NAME IN LISTS TEST_LIST)
 	add_executable(${TEST_NAME} "${TEST_SOURCES}")
 	target_link_libraries(${TEST_NAME} ${BASE_LIBRARY})
 	target_link_libraries(${TEST_NAME} ${IO_LIBRARY})
+	target_link_libraries(${TEST_NAME} ${SA_LIBRARY})
 endforeach()
 
 add_custom_target(tests DEPENDS ${TEST_LIST})
