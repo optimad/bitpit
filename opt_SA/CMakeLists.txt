@@ -6,10 +6,12 @@ SET(DepLibs opt_base opt_IO )
 SET(BLDIR build/lib/ )
 SET(IDIR include )
 
+EXEC_PROGRAM(pwd ../src/base OUTPUT_VARIABLE BaseLibDir)
 EXEC_PROGRAM(pwd ../../ OUTPUT_VARIABLE OptLibsDir)
 
 ADD_DEFINITIONS(-std=c++0x)
 
+include_directories( ${BaseLibDir} )
 include_directories( ${IDIR} )
 FOREACH( lib ${DepLibs} )
 

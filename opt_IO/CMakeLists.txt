@@ -13,10 +13,12 @@ ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
 
 SET(IDIR include )
 
+EXEC_PROGRAM(pwd ../src/base OUTPUT_VARIABLE BaseLibDir)
 EXEC_PROGRAM(pwd ../../ OUTPUT_VARIABLE OptLibsDir)
 
 ADD_DEFINITIONS(-std=c++0x)
 
+include_directories( ${BaseLibDir} )
 include_directories( ${IDIR} )
 FOREACH( lib ${DepLibs} )
 

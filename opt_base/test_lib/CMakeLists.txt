@@ -3,10 +3,12 @@ cmake_minimum_required(VERSION 2.8)
 
 #Name your project here
 
+include_directories( ${BaseLibDir} )
+
 file(GLOB test_src "*.cpp")
 add_executable( ${TargetTest} ${test_src})
 
-TARGET_LINK_LIBRARIES(${TargetTest} ${TargetLib} )
+target_link_libraries(${TargetTest} ${BASE_LIBRARY})
 
 FOREACH( lib ${DepLibs} )
 

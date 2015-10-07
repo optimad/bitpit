@@ -6,6 +6,7 @@ cmake_minimum_required(VERSION 2.8)
 file(GLOB test_src "*.cpp")
 add_executable( ${TargetTest} ${test_src})
 
+target_link_libraries(${TargetTest} ${BASE_LIBRARY})
 TARGET_LINK_LIBRARIES(${TargetTest} ${TargetLib} )
 
 FOREACH( lib ${DepLibs} )

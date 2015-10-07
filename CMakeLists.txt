@@ -81,6 +81,9 @@ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${
 # Subdirectories
 #------------------------------------------------------------------------------------#
 
+# Main library
+add_subdirectory(src)
+
 # opt_base
 add_subdirectory(opt_base)
 
