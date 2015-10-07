@@ -94,6 +94,20 @@ find_package(VTK 6.0 REQUIRED COMPONENTS vtkIOXML vtkIOLegacy NO_MODULE)
 include(${VTK_USE_FILE})
 
 #------------------------------------------------------------------------------------#
+# Library version
+#------------------------------------------------------------------------------------#
+set (VERSION_HEADER_FILENAME "${CMAKE_CURRENT_SOURCE_DIR}/src/${CMAKE_PROJECT_NAME}_version.hpp")
+string(TOUPPER "${CMAKE_PROJECT_NAME}_VERSION" VERSION_DEFINE_NAME)
+
+file(READ "${VERSION_HEADER_FILENAME}" header)
+
+string(REGEX REPLACE ".*#[ \t]*define[ \t]*${VERSION_DEFINE_NAME}[ \t]*\"([^\n]*)\".*" "\\1" match "${header}")
+set(PATCHMAN_VERSION "${match}")
+
+STRING(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" match "${PATCHMAN_VERSION}")
+set(PATCHMAN_MAJOR_VERSION "${match}")
+
+#------------------------------------------------------------------------------------#
 # Subdirectories
 #------------------------------------------------------------------------------------#
 
