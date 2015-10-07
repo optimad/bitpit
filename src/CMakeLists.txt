@@ -2,8 +2,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 # Name your project here
-set(PATCHMAN_LIBRARY "patchman")
-set (PATCHMAN_LIBRARY ${PATCHMAN_LIBRARY} PARENT_SCOPE)
+set(PATCHMAN_LIBRARY "patchman" CACHE INTERNAL "PatchMan Library" FORCE)
 
 # Library type
 if (STATIC)
