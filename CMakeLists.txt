@@ -107,6 +107,9 @@ add_subdirectory(opt_SA)
 # opt_LA
 add_subdirectory(opt_LA)
 
+# Examples
+add_subdirectory(examples)
+
 # Tests
 add_subdirectory(test)
 
