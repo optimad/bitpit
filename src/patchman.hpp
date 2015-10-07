@@ -4,6 +4,8 @@
 #ifndef __PATCHMAN_HPP__
 #define __PATCHMAN_HPP__
 
+#include "patchman_version.hpp"
+
 #include "piercedVector.hpp"
 
 #include "patch_cartesian.hpp"
