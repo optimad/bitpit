@@ -29,5 +29,3 @@ FOREACH( lib ${DepLibs} )
     link_directories( ${LNAME} )
 
 ENDFOREACH( lib ${DepLibs})
-
-ADD_SUBDIRECTORY(test_lib )
