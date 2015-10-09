@@ -31,10 +31,10 @@ class VTK{
       //members
       protected:
         string                   name;          // name of the field
+        uint8_t                  components;    // nr of components of field, options[ 1, 3 ]
         string                   type;          // type of data, options [ [U]Int8, [U]Int16, [U]Int32, [U]Int64, Float32, Float64 ]
         string                   location;      // cell or point data, [ Cell, Point ]
         string                   codification ; // Type of codification [ascii, appended]
-        uint8_t                  components;    // nr of components of field, options[ 1, 3 ]
         uint64_t                 nr_elements;   // nr of cells or points
         uint64_t                 offset;        // offset in the appended section
         fstream::pos_type        position;      // position in file
