@@ -1353,7 +1353,6 @@ unsigned int Check_STL_bin(
 // ========================================================================== //
 
 // Local variables
-long int           start_pos = file_handle.tellg();
 unsigned int       int2byte;
 unsigned int      *int2byte_ = &int2byte;
 unsigned long int  longint4byte;
