@@ -72,7 +72,7 @@ string          selection;
 if (selection.compare("+") == 0) {
 
     // Scope variables
-    double              a = 1, b = 2, c = 3;
+    double              a = 1, b = 2;
     dvector1D           x, y, z;
     dvector2D           X, Y, Z;
 
@@ -136,7 +136,7 @@ if (selection.compare("+") == 0) {
 else if (selection.compare("-") == 0) {
 
     // Scope variables
-    double              a = 1, b = 2, c = 3;
+    double              a = 1, b = 2;
     dvector1D           x, y, z;
     dvector2D           X, Y, Z;
 
@@ -200,7 +200,7 @@ else if (selection.compare("-") == 0) {
 else if (selection.compare("*") == 0) {
 
     // Scope variables
-    double              a = 1, b = 2, c = 3;
+    double              a = 1, b = 2;
     dvector1D           x, y, z;
     dvector2D           X, Y, Z;
 
@@ -264,7 +264,7 @@ else if (selection.compare("*") == 0) {
 else if (selection.compare("/") == 0) {
 
     // Scope variables
-    double              a = 1, b = 2, c = 3;
+    double              a = 1, b = 2;
     dvector1D           x, y, z;
     dvector2D           X, Y, Z;
 
@@ -604,8 +604,7 @@ else if (selection.compare("sum") == 0) {
 else if (selection.compare("abs") == 0) {
 
     // Scope variables -------------------------------------------------------------- //
-    int                nn = -5;
-    double             a = 3.0, mm;
+    double             a = 3.0;
     dvector1D          x(3, 0.0);
     ivector1D          i(3, 1);
     ivector2D          y(3, ivector1D(3, 0));
@@ -639,8 +638,7 @@ else if (selection.compare("abs") == 0) {
 else if (selection.compare("pow") == 0) {
 
     // Scope variables -------------------------------------------------------------- //
-    int                nn = -5;
-    double             a = 3.0, mm;
+    double             a = 3.0;
     dvector1D          x(3, 0.0);
     ivector1D          i(3, 1);
     ivector2D          y(3, ivector1D(3, 0));
@@ -816,7 +814,7 @@ string         selection;
 if (selection.compare("+") == 0) {
 
     // Scope variables
-    double                      a = 1, b = 2, c = 3;
+    double                      a = 1, b = 2;
     array<double, 2>            x, y, z;
     array<array<double, 2>, 2>  X, Y, Z;
 
@@ -878,7 +876,7 @@ if (selection.compare("+") == 0) {
 else if (selection.compare("-") == 0) {
 
     // Scope variables
-    double                      a = 1, b = 2, c = 3;
+    double                      a = 1, b = 2;
     array<double, 2>            x, y, z;
     array<array<double, 2>, 2>  X, Y, Z;
 
@@ -940,7 +938,7 @@ else if (selection.compare("-") == 0) {
 else if (selection.compare("*") == 0) {
 
     // Scope variables
-    double                      a = 1, b = 2, c = 3;
+    double                      a = 1, b = 2;
     array<double, 2>            x, y, z;
     array<array<double, 2>, 2>  X, Y, Z;
 
@@ -1002,7 +1000,7 @@ else if (selection.compare("*") == 0) {
 else if (selection.compare("/") == 0) {
 
     // Scope variables
-    double                      a = 1, b = 2, c = 3;
+    double                      a = 1, b = 2;
     array<double, 2>            x, y, z;
     array<array<double, 2>, 2>  X, Y, Z;
 
@@ -1329,8 +1327,7 @@ else if (selection.compare("sum") == 0) {
 else if (selection.compare("abs") == 0) {
 
     // Scope variables -------------------------------------------------------------- //
-    int                      nn = -5;
-    double                   a = 3.0, mm;
+    double                   a = 3.0;
     array<double, 3>         x;
     array<int, 3>            i;
     array<array<int, 3>, 3>  y;
@@ -1364,8 +1361,7 @@ else if (selection.compare("abs") == 0) {
 else if (selection.compare("pow") == 0) {
 
     // Scope variables -------------------------------------------------------------- //
-    int                      nn = -5;
-    double                   a = 3.0, mm;
+    double                   a = 3.0;
     array<double, 3>         x;
     array<int, 3>            i;
     array<array<int, 3>, 3>  y;
