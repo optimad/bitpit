@@ -56,7 +56,7 @@ void vectorOperators_Ex(
 {
 
     // Scope variables
-    double              a = 1, b = 2, c = 3;
+    double              a = 1, b = 2;
     dvector1D           x, y, z;
     dvector2D           X, Y, Z;
 
@@ -120,7 +120,7 @@ void vectorOperators_Ex(
 {
 
     // Scope variables
-    double              a = 1, b = 2, c = 3;
+    double              a = 1, b = 2;
     dvector1D           x, y, z;
     dvector2D           X, Y, Z;
 
@@ -184,7 +184,7 @@ void vectorOperators_Ex(
 {
 
     // Scope variables
-    double              a = 1, b = 2, c = 3;
+    double              a = 1, b = 2;
     dvector1D           x, y, z;
     dvector2D           X, Y, Z;
 
@@ -248,7 +248,7 @@ void vectorOperators_Ex(
 {
 
     // Scope variables
-    double              a = 1, b = 2, c = 3;
+    double              a = 1, b = 2;
     dvector1D           x, y, z;
     dvector2D           X, Y, Z;
 
@@ -560,8 +560,7 @@ void vectorMathFunct_Ex(
 {
 
     // Scope variables -------------------------------------------------------------- //
-    int                nn = -5;
-    double             a = 3.0, mm;
+    double             a = 3.0;
     dvector1D          x(3, 0.0);
     ivector1D          i(3, 1);
     ivector2D          y(3, ivector1D(3, 0));
@@ -595,8 +594,7 @@ void vectorMathFunct_Ex(
 {
 
     // Scope variables -------------------------------------------------------------- //
-    int                nn = -5;
-    double             a = 3.0, mm;
+    double             a = 3.0;
     dvector1D          x(3, 0.0);
     ivector1D          i(3, 1);
     ivector2D          y(3, ivector1D(3, 0));
@@ -751,7 +749,7 @@ void arrayOperators_Ex(
 {
 
     // Scope variables
-    double                      a = 1, b = 2, c = 3;
+    double                      a = 1, b = 2;
     array<double, 2>            x, y, z;
     array<array<double, 2>, 2>  X, Y, Z;
 
@@ -813,7 +811,7 @@ void arrayOperators_Ex(
 {
 
     // Scope variables
-    double                      a = 1, b = 2, c = 3;
+    double                      a = 1, b = 2;
     array<double, 2>            x, y, z;
     array<array<double, 2>, 2>  X, Y, Z;
 
@@ -875,7 +873,7 @@ void arrayOperators_Ex(
 {
 
     // Scope variables
-    double                      a = 1, b = 2, c = 3;
+    double                      a = 1, b = 2;
     array<double, 2>            x, y, z;
     array<array<double, 2>, 2>  X, Y, Z;
 
@@ -937,7 +935,7 @@ void arrayOperators_Ex(
 {
 
     // Scope variables
-    double                      a = 1, b = 2, c = 3;
+    double                      a = 1, b = 2;
     array<double, 2>            x, y, z;
     array<array<double, 2>, 2>  X, Y, Z;
 
@@ -1236,8 +1234,7 @@ void arrayMathFunct_Ex(
 {
 
     // Scope variables -------------------------------------------------------------- //
-    int                      nn = -5;
-    double                   a = 3.0, mm;
+    double                   a = 3.0;
     array<double, 3>         x;
     array<int, 3>            i;
     array<array<int, 3>, 3>  y;
@@ -1271,8 +1268,7 @@ void arrayMathFunct_Ex(
 {
 
     // Scope variables -------------------------------------------------------------- //
-    int                      nn = -5;
-    double                   a = 3.0, mm;
+    double                   a = 3.0;
     array<double, 3>         x;
     array<int, 3>            i;
     array<array<int, 3>, 3>  y;
