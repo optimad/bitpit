@@ -1712,12 +1712,12 @@ unsigned int Read_STLsolid_ASCII(
 
 // Local variables
 bool                check = false;
-long int            start_pos = file_handle.tellg(), current_pos, end_pos;
+long int            start_pos = file_handle.tellg(), current_pos;
 string              line, word;
 stringstream        sline;
 
 // Counters
-int                 nv, nt;
+int                 nt;
 
 // ========================================================================== //
 // CHECK INPUT STREAM                                                         //
@@ -1866,12 +1866,12 @@ unsigned int Read_STLsolid_ASCII(
 
 // Local variables
 bool                check = false;
-long int            start_pos = file_handle.tellg(), current_pos, end_pos;
+long int            start_pos = file_handle.tellg(), current_pos;
 string              line, word;
 stringstream        sline;
 
 // Counters
-int                 nv, nt;
+int                 nt;
 
 // ========================================================================== //
 // CHECK INPUT STREAM                                                         //
