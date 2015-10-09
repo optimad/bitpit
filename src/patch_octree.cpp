@@ -407,7 +407,7 @@ void PatchOctree::update_interfaces()
 	if (m_interfaces.empty()) {
 		import_interfaces();
 	} else {
-		update_interfaces();
+		reload_interfaces();
 	}
 }
 
