@@ -2089,7 +2089,7 @@ double            toll_pivot = 1.0e-8;
 // Local variables
 int                             info = 0;
 int                             pivot_row;
-double                          sum, pivot, pivot_trial;
+double                          pivot, pivot_trial;
 array<array<double, m>, m>      AA;
 
 // Counter
