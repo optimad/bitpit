@@ -621,9 +621,9 @@ void PatchOctree::reload_interfaces()
 bool PatchOctree::_mark_cell_for_refinement(const long &id)
 {
 	if (is_three_dimensional()) {
-		m_tree_2D.setMarker(id, 1);
-	} else {
 		m_tree_3D.setMarker(id, 1);
+	} else {
+		m_tree_2D.setMarker(id, 1);
 	}
 
 	return true;
