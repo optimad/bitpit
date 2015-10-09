@@ -2503,9 +2503,9 @@ int              n, m, i, j, k;
 // =========================================================================== //
 // CHECK INPUT COHERENCY                                                       //
 // =========================================================================== //
-if (V.size() < nV)  { return(2); };
-if (T.size() < nT)  { return(2); };
-if (N.size() < nT)  { return(2); };
+if (V.size() < static_cast<unsigned int>(nV))  { return(2); };
+if (T.size() < static_cast<unsigned int>(nT))  { return(2); };
+if (N.size() < static_cast<unsigned int>(nT))  { return(2); };
 
 // =========================================================================== //
 // CHECK STREAM STATUS                                                         //
@@ -2630,9 +2630,9 @@ int              n, m, i, j, k;
 // =========================================================================== //
 // CHECK INPUT COHERENCY                                                       //
 // =========================================================================== //
-if (V.size() < nV)  { return(2); };
-if (T.size() < nT)  { return(2); };
-if (N.size() < nT)  { return(2); };
+if (V.size() < static_cast<unsigned int>(nV))  { return(2); };
+if (T.size() < static_cast<unsigned int>(nT))  { return(2); };
+if (N.size() < static_cast<unsigned int>(nT))  { return(2); };
 
 // =========================================================================== //
 // CHECK STREAM STATUS                                                         //
