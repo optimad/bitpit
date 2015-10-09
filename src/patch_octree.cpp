@@ -654,9 +654,9 @@ bool PatchOctree::_mark_cell_for_coarsening(const long &id)
 bool PatchOctree::_enable_cell_balancing(const long &id, bool enabled)
 {
 	if (is_three_dimensional()) {
-		m_tree_2D.setBalance(id, enabled);
-	} else {
 		m_tree_3D.setBalance(id, enabled);
+	} else {
+		m_tree_2D.setBalance(id, enabled);
 	}
 
 	return true;
