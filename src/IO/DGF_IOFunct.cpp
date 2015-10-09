@@ -1257,7 +1257,7 @@ string          line, word;
 stringstream    sline;
 
 // Counters
-int             i;
+// none
 
 // ========================================================================== //
 // CHECK INPUT STREAM                                                         //
