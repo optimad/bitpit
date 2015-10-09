@@ -730,10 +730,9 @@ double norm_2(
 
 // Local variables
 double          z = 0.0;
-double          t, y;
 
 // Counters
-int             i, j;
+int             i;
 
 // ================================================================================== //
 // COMPUTE THE P-NORM                                                                 //
