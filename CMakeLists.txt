@@ -8,7 +8,7 @@ project("BitP_Base")
 #------------------------------------------------------------------------------------#
 # Variables visible to the user
 #------------------------------------------------------------------------------------#
-if (BITPIT_DIR)
+if (DEFINED BITPIT_DIR)
 	set(FIRST_BITPIT_DIR_INITIALIZATION 0)
 else()
 	set(FIRST_BITPIT_DIR_INITIALIZATION 1)
