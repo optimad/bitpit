@@ -82,7 +82,7 @@ if (DEFINED ${PACKAGE_NAME}_PARENT_DEPENDENCIES)
 endif ()
 
 # Library prefixes/suffixes
-if (STATIC)
+if (NOT DEFINED STATIC OR STATIC)
 	if (UNIX)
 		set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 	endif (UNIX)
