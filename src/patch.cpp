@@ -76,7 +76,7 @@ bool Patch::update(std::vector<uint32_t> &cellMapping)
 	}
 
 	// Create the output data structures
-	output_initialize();
+	initialize_output();
 
 	return updated;
 }
@@ -180,7 +180,7 @@ void Patch::reset_output()
 /*!
 	Initializes output dataset.
 */
-void Patch::output_initialize()
+void Patch::initialize_output()
 {
 	long nVertices = m_vertices.size();
 	long nCells = m_cells.size();

@@ -86,7 +86,7 @@ protected:
 
 	void set_dirty(bool dirty);
 
-	void output_initialize();
+	void initialize_output();
 
 private:
 	bool m_dirty;
