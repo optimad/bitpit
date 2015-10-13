@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
 	pman::Patch *patch_2D = new pman::PatchCartesian(0, 2, origin, length, dh);
 	patch_2D->set_name("cartesian_backgorund_mesh_2D");
 	patch_2D->update();
-	patch_2D->output_write();
+	patch_2D->write_mesh();
 
 	std::cout << "\n  >> 2D Mesh Neighbour test" << "\n";
 
@@ -62,7 +62,7 @@ int main(int argc, char *argv[]) {
 	pman::Patch *patch_3D = new pman::PatchCartesian(0, 3, origin, length, dh);
 	patch_3D->set_name("cartesian_backgorund_mesh_3D");
 	patch_3D->update();
-	patch_3D->output_write();
+	patch_3D->write_mesh();
 
 	std::cout << "\n  >> 3D Mesh Neighbour test" << "\n";
 

@@ -211,7 +211,7 @@ void Patch::initialize_output()
 
 	\param filename the filename where the mesh will be written to
 */
-void Patch::output_write(std::string filename)
+void Patch::write_mesh(std::string filename)
 {
 	m_output_manager->write(filename);
 }
@@ -219,7 +219,7 @@ void Patch::output_write(std::string filename)
 /*!
 	Writes the mesh a filename with the same name of the mesh
 */
-void Patch::output_write()
+void Patch::write_mesh()
 {
 	m_output_manager->write(get_name());
 }
