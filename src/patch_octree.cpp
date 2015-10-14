@@ -306,7 +306,6 @@ void PatchOctree::import_cells()
 	for (long n = 0; n < nCells; n++) {
 		m_cells.emplace_back(n, this);
 		Cell &cell = m_cells.back();
-		m_cell_to_octant[n] = n;
 
 		// Distinguo tra celle interne e celle ghost
 		bool isInternal = (n < m_nInternalCells);
@@ -317,6 +316,8 @@ void PatchOctree::import_cells()
 		if (!isInternal) {
 			ghostId = octantId - m_nInternalCells;
 		}
+
+		m_cell_to_octant[n] = octantId;
 
 		int octantLevel;
 		vector<double> octantCentroid;
