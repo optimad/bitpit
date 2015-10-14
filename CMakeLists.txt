@@ -39,6 +39,31 @@ set(VTK_DIR "/opt/VTK/lib/cmake/vtk" CACHE PATH "The directory containing a CMak
 set(WITHOUT_MPI "0" CACHE INTERNAL "If set, the program is compiled without MPI support")
 
 #------------------------------------------------------------------------------------#
+# Internal dependencies
+#------------------------------------------------------------------------------------#
+include_directories("include")
+include_directories("src")
+
+#------------------------------------------------------------------------------------#
+# External dependencies
+#------------------------------------------------------------------------------------#
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${BITPIT_DIR}/cmake/Modules")
+
+if (NOT WITHOUT_MPI)
+	find_package(MPI)
+endif()
+
+find_package(PABLO)
+if (PABLO_FOUND)
+	include_directories(${PABLO_INCLUDE_DIRS})
+else()
+	add_definitions(-DDISABLE_OCTREE)
+endif()
+
+find_package(VTK 6.0 REQUIRED COMPONENTS vtkIOXML vtkIOLegacy NO_MODULE)
+include(${VTK_USE_FILE})
+
+#------------------------------------------------------------------------------------#
 # Compilation settings
 #------------------------------------------------------------------------------------#
 set (ENABLE_WARNINGS ${VERBOSE_MAKE})
@@ -49,8 +74,17 @@ endif()
 if (WITHOUT_MPI)
 	add_definitions(-DDISABLE_MPI)
 else()
-	set(CMAKE_C_COMPILER mpicc)
-	set(CMAKE_CXX_COMPILER mpic++)
+	if (MPI_C_FOUND)
+		set(CMAKE_C_COMPILER ${MPI_C_COMPILER})
+	else()
+		set(CMAKE_C_COMPILER mpicc)
+	endif()
+
+	if (MPI_CXX_FOUND)
+		set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
+	else()
+		set(CMAKE_CXX_COMPILER mpic++)
+	endif()
 endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
@@ -76,27 +110,6 @@ if (ENABLE_PROFILING)
 endif (ENABLE_PROFILING)
 
 add_compile_options("-std=c++11")
-
-#------------------------------------------------------------------------------------#
-# Internal dependencies
-#------------------------------------------------------------------------------------#
-include_directories("include")
-include_directories("src")
-
-#------------------------------------------------------------------------------------#
-# External dependencies
-#------------------------------------------------------------------------------------#
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${BITPIT_DIR}/cmake/Modules")
-
-find_package(PABLO)
-if (PABLO_FOUND)
-	include_directories(${PABLO_INCLUDE_DIRS})
-else()
-	add_definitions(-DDISABLE_OCTREE)
-endif()
-
-find_package(VTK 6.0 REQUIRED COMPONENTS vtkIOXML vtkIOLegacy NO_MODULE)
-include(${VTK_USE_FILE})
 
 #------------------------------------------------------------------------------------#
 # Library version
