@@ -69,6 +69,12 @@ public:
 
 	void write_mesh();
 	void write_mesh(std::string name);
+	void write_field(std::string name, int type, std::vector<double> values);
+	void write_field(std::string filename, std::string name, int type, std::vector<double> values);
+	void write_cell_field(std::string name, std::vector<double> values);
+	void write_cell_field(std::string filename, std::string name, std::vector<double> values);
+	void write_vertex_field(std::string name, std::vector<double> values);
+	void write_vertex_field(std::string filename, std::string name, std::vector<double> values);
 	OutputManager & get_output_manager();
 
 	std::array<double, 3> & get_opposite_normal(std::array<double, 3> &normal);

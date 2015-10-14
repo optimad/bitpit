@@ -225,6 +225,96 @@ void Patch::write_mesh()
 }
 
 /*!
+	Writes a field defined on the patch.
+
+	\param name is the name of the field
+	\param type is the type of the field, a field can be defined either
+	on the vertices of on the cells
+	\param values is a vector with the values of the field
+*/
+void Patch::write_field(std::string name, int type, std::vector<double> values)
+{
+	write_field(get_name(), name, type, values);
+}
+
+/*!
+	Writes a field defined on the patch using the specified filename.
+
+	\param filename is the name of the file to write
+	\param name is the name of the field
+	\param type is the type of the field, a field can be defined either
+	on the vertices of on the cells
+	\param values is a vector with the values of the field
+*/
+void Patch::write_field(std::string filename, std::string name, int type, std::vector<double> values)
+{
+	int index = m_output_manager->addField(type, name.c_str());
+	m_output_manager->addFieldValues(type, index, values.data());
+
+	m_output_manager->write(filename);
+
+	m_output_manager->resetFields();
+}
+
+/*!
+	Writes a field defined on the cells of the patch.
+
+	\param name is the name of the field
+	\param values is a vector with the values of the field
+*/
+void Patch::write_cell_field(std::string name, std::vector<double> values)
+{
+	write_cell_field(get_name(), name, values);
+}
+
+/*!
+	Writes a field defined on the cells of the patch using the specified
+	filename.
+
+	\param filename is the name of the file to write
+	\param name is the name of the field
+	\param values is a vector with the values of the field
+*/
+void Patch::write_cell_field(std::string filename, std::string name, std::vector<double> values)
+{
+	int index = m_output_manager->addField(OutputManager::DATA_ON_CELL, name.c_str());
+	m_output_manager->addFieldValues(OutputManager::DATA_ON_CELL, index, values.data());
+
+	m_output_manager->write(filename);
+
+	m_output_manager->resetFields();
+}
+
+/*!
+	Writes a field defined on the vertices of the patch.
+
+	\param name is the name of the field
+	\param values is a vector with the values of the field
+*/
+void Patch::write_vertex_field(std::string name, std::vector<double> values)
+{
+	write_vertex_field(get_name(), name, values);
+}
+
+/*!
+	Writes a field defined on the vertices of the patch using the specified
+	filename.
+
+	\param filename is the name of the file to write
+	\param name is the name of the field
+	\param values is a vector with the values of the field
+*/
+void Patch::write_vertex_field(std::string filename, std::string name, std::vector<double> values)
+{
+	int index = m_output_manager->addField(OutputManager::DATA_ON_CELL, name.c_str());
+	m_output_manager->addFieldValues(OutputManager::DATA_ON_CELL, index, values.data());
+
+	m_output_manager->write(filename);
+
+	m_output_manager->resetFields();
+}
+
+/*!
 	Gets the output dataset.
 
 	\return A pointer to the output datase
