@@ -75,9 +75,8 @@ int main(int argc, char *argv[]) {
                 if(pablo.rank==3)
                         pablo.setMarker((uint32_t)0,1);
                 pablo.adapt();
-#if NOMPI==0
                 pablo.loadBalance();
-#endif
+
                 /**<Update the connectivity and write the para_tree.*/
                 iter = 0;
                 pablo.updateConnectivity();
