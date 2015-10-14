@@ -37,19 +37,19 @@ int main(int argc, char *argv[]) {
 
 	std::cout << "Face neighbours (complete list): " << std::endl;
 	neighs_2D = cell_2D.extract_face_neighs();
-	for (int i = 0; i < neighs_2D.size(); ++i) {
+	for (unsigned int i = 0; i < neighs_2D.size(); ++i) {
 		std::cout << " - " << neighs_2D[i] << std::endl;
 	}
 
 	std::cout << "Vertex neighbours (complete list): " << std::endl;
 	neighs_2D = cell_2D.extract_vertex_neighs(true);
-	for (int i = 0; i < neighs_2D.size(); ++i) {
+	for (unsigned int i = 0; i < neighs_2D.size(); ++i) {
 		std::cout << " - " << neighs_2D[i] << std::endl;
 	}
 
 	std::cout << "Vertex neighbours (excuding face neighbours): " << std::endl;
 	neighs_2D = cell_2D.extract_vertex_neighs(false);
-	for (int i = 0; i < neighs_2D.size(); ++i) {
+	for (unsigned int i = 0; i < neighs_2D.size(); ++i) {
 		std::cout << " - " << neighs_2D[i] << std::endl;
 	}
 
@@ -76,31 +76,31 @@ int main(int argc, char *argv[]) {
 
 	std::cout << "Face neighbours (complete list): " << std::endl;
 	neighs_3D = cell_3D.extract_face_neighs();
-	for (int i = 0; i < neighs_3D.size(); ++i) {
+	for (unsigned int i = 0; i < neighs_3D.size(); ++i) {
 		std::cout << " - " << neighs_3D[i] << std::endl;
 	}
 
 	std::cout << "Edge neighbours (complete list): " << std::endl;
 	neighs_3D = cell_3D.extract_edge_neighs(true);
-	for (int i = 0; i < neighs_3D.size(); ++i) {
+	for (unsigned int i = 0; i < neighs_3D.size(); ++i) {
 		std::cout << " - " << neighs_3D[i] << std::endl;
 	}
 
 	std::cout << "Edge neighbours (excuding face neighbours): " << std::endl;
 	neighs_3D = cell_3D.extract_edge_neighs(false);
-	for (int i = 0; i < neighs_3D.size(); ++i) {
+	for (unsigned int i = 0; i < neighs_3D.size(); ++i) {
 		std::cout << " - " << neighs_3D[i] << std::endl;
 	}
 
 	std::cout << "Vertex neighbours (complete list): " << std::endl;
 	neighs_3D = cell_3D.extract_vertex_neighs(true);
-	for (int i = 0; i < neighs_3D.size(); ++i) {
+	for (unsigned int i = 0; i < neighs_3D.size(); ++i) {
 		std::cout << " - " << neighs_3D[i] << std::endl;
 	}
 
 	std::cout << "Vertex neighbours (excuding face and edge neighbours): " << std::endl;
 	neighs_3D = cell_3D.extract_vertex_neighs(false);
-	for (int i = 0; i < neighs_3D.size(); ++i) {
+	for (unsigned int i = 0; i < neighs_3D.size(); ++i) {
 		std::cout << " - " << neighs_3D[i] << std::endl;
 	}
 
