@@ -31,7 +31,7 @@ public:
 
 	Patch(const int &id, const int &dimension);
 
-	~Patch();
+	virtual ~Patch();
 
 	void reset();
 	void reset_vertices();
