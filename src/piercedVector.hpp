@@ -810,6 +810,20 @@ public:
 	}
 
 	/*!
+		Gets the row index of the element with the specified id.
+
+		If there is no element with the specified id, an exception is
+		thrown.
+
+		\param id the id of the element for witch the raw id is requested
+		\result The row index of the element with the specified id.
+	*/
+	size_type raw_index(id_type id) const
+	{
+		return get_pos_from_id(id);
+	}
+
+	/*!
 		Requests that the vector capacity be at least enough to contain
 		n elements.
 
