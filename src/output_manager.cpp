@@ -280,16 +280,19 @@ void OutputManager::resetFields()
 
 // Description:
 // Aggiunge un campo.
-void OutputManager::addField(int fieldType, const char* fieldName)
+int OutputManager::addField(int fieldType, const char* fieldName)
 {
 	vtkSmartPointer<vtkDoubleArray> fieldArray = vtkSmartPointer<vtkDoubleArray>::New();
 	fieldArray->SetName(fieldName);
 
+	int index;
 	if (fieldType == OutputManager::DATA_ON_VERTEX) {
-		GetPointData()->AddArray(fieldArray);
+		index = GetPointData()->AddArray(fieldArray);
 	} else if (fieldType == OutputManager::DATA_ON_CELL) {
-		GetCellData()->AddArray(fieldArray);
+		index = GetCellData()->AddArray(fieldArray);
 	}
+
+	return index;
 }
 
 

@@ -60,7 +60,7 @@ public:
 	vtkIdType InsertNextVertex(const Node &node);
 
 	void resetFields();
-	void addField(int fieldType, const char* fieldName);
+	int addField(int fieldType, const char* fieldName);
 	int getFieldIndex(int fieldType, const char* fieldName);
 	void addFieldValues(int fieldType, int fieldIndex, double* field);
 	void addNextFieldValue(int fieldType, int fieldIndex, double value);
