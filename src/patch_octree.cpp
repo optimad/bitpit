@@ -313,8 +313,9 @@ void PatchOctree::import_cells()
 
 		// Info associate al tree
 		long octantId = n;
+		long ghostId  = -1;
 		if (!isInternal) {
-			octantId -= m_nInternalCells;
+			ghostId = octantId - m_nInternalCells;
 		}
 
 		int octantLevel;
@@ -324,7 +325,7 @@ void PatchOctree::import_cells()
 			if (isInternal) {
 				octant = m_tree_3D.getOctant(octantId) ;
 			} else {
-				octant = m_tree_3D.getGhostOctant(octantId) ;
+				octant = m_tree_3D.getGhostOctant(ghostId) ;
 			}
 
 			octantLevel    = m_tree_3D.getLevel(octant);
@@ -334,7 +335,7 @@ void PatchOctree::import_cells()
 			if (isInternal) {
 				octant = m_tree_2D.getOctant(octantId) ;
 			} else {
-				octant = m_tree_2D.getGhostOctant(octantId) ;
+				octant = m_tree_2D.getGhostOctant(ghostId) ;
 			}
 
 			octantLevel    = m_tree_2D.getLevel(octant);
