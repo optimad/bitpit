@@ -67,6 +67,7 @@ public:
 	PiercedVector<Interface> &interfaces();
 	Interface &get_interface(const long &id);
 
+	void sort();
 	void squeeze();
 
 	void write_mesh();

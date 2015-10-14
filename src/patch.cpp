@@ -516,6 +516,17 @@ Interface & Patch::get_interface(const long &id)
 }
 
 /*!
+	Sorts the internal storage for cells, vertices and interfaces in
+	ascending id order.
+*/
+void Patch::sort()
+{
+	m_vertices.sort();
+	m_cells.sort();
+	m_interfaces.sort();
+}
+
+/*!
 	Requests the patch to compact the data structures and reduce its capacity
 	to fit its size.
 
