@@ -35,6 +35,8 @@ public:
 	long get_cell_octant(const long &id) const;
 	int get_cell_level(const long &id);
 
+	long get_octant_id(const long &octant) const;
+
 	/*!
 		\brief Gets the octree associated with the patch.
 
@@ -66,6 +68,7 @@ private:
 	long m_nGhostCells;
 
 	std::unordered_map<long, long, Element::IdHasher> m_cell_to_octant;
+	std::vector<long> m_octant_to_cell;
 
 	Class_Para_Tree<2> m_tree_2D;
 	Class_Para_Tree<3> m_tree_3D;

@@ -107,6 +107,17 @@ long PatchOctree::get_cell_octant(const long &id) const
 }
 
 /*!
+	Gets the id of the specified octant.
+
+	\param octant the index of the octant
+	\result The id of the specified octant
+*/
+long PatchOctree::get_octant_id(const long &octant) const
+{
+	return m_octant_to_cell.at(octant);
+}
+
+/*!
 	Gets the refinement level of the cell with the specified id.
 
 	\param id is the id of the cell
@@ -302,6 +313,7 @@ void PatchOctree::import_cells()
 	long nCells = m_nInternalCells + m_nGhostsCells;
 
 	m_cell_to_octant.reserve(nCells);
+	m_octant_to_cell.resize(nCells);
 	m_cells.reserve(nCells);
 	for (long n = 0; n < nCells; n++) {
 		m_cells.emplace_back(n, this);
@@ -318,6 +330,7 @@ void PatchOctree::import_cells()
 		}
 
 		m_cell_to_octant[n] = octantId;
+		m_octant_to_cell[octantId] = n;
 
 		int octantLevel;
 		vector<double> octantCentroid;
