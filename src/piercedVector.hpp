@@ -1324,14 +1324,15 @@ private:
 	}
 
 	/*!
-		Gets the id of the element at the specified position. The
-		function returns only the ids of real elements not dummy
-		elements. If there is no element with the specified id,
-		an exception is thrown.
+		Gets the position in the storage vector of the element with the
+		specified id.
+
+		If there is no element with the specified id, an exception is
+		thrown.
 
 		\param id the id to look for
-		\result The position in the vector of the element with the
-		        specified id.
+		\result The position in the storage vector of the element with
+		the specified id.
 	*/
 	size_type get_pos_from_id(id_type id) const
 	{
