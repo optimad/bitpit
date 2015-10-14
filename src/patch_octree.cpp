@@ -501,11 +501,14 @@ void PatchOctree::import_interfaces()
 			faceCenter = m_tree_2D.getCenter(treeInterface);
 		}
 
-		long ownerId = cells[0];
-		long neighId = cells[1];
+		long ownerOctantId = cells[0];
+		long neighOctantId = cells[1];
 		if (isGhost) {
-			neighId += m_nInternalCells;
+			neighOctantId += m_nInternalCells;
 		}
+
+		long ownerId = get_octant_id(ownerOctantId);
+		long neighId = get_octant_id(neighOctantId);
 
 		// Tipo
 		if (is_three_dimensional()) {
