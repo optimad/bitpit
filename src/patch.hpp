@@ -67,6 +67,8 @@ public:
 	PiercedVector<Interface> &interfaces();
 	Interface &get_interface(const long &id);
 
+	void squeeze();
+
 	void write_mesh();
 	void write_mesh(std::string name);
 	void write_field(std::string name, int type, std::vector<double> values);

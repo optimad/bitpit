@@ -515,4 +515,18 @@ Interface & Patch::get_interface(const long &id)
 	return m_interfaces[id];
 }
 
+/*!
+	Requests the patch to compact the data structures and reduce its capacity
+	to fit its size.
+
+	The request is non-binding, and after the function call the patch can
+	still occupy more memory than it actually needs.
+*/
+void Patch::squeeze()
+{
+	m_vertices.squeeze();
+	m_cells.squeeze();
+	m_interfaces.squeeze();
+}
+
 }
