@@ -375,7 +375,7 @@ void PatchOctree::import_cells()
 
 		// Centroide
 		std::array<double, 3> centroid;
-		for (int k = 0; k < get_dimension(); k++) {
+		for (unsigned int k = 0; k < centroid.size(); k++) {
 			centroid[k] = octantCentroid[k];
 		}
 
@@ -525,7 +525,7 @@ void PatchOctree::import_interfaces()
 
 		// Centroid
 		std::array<double, 3> centroid;
-		for (int k = 0; k < get_dimension(); k++) {
+		for (unsigned int k = 0; k < centroid.size(); k++) {
 			centroid[k] = faceCenter[k];
 		}
 
