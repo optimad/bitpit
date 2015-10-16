@@ -981,7 +981,7 @@ double Element::eval_min_length() const
 
 		double length_x = 0.0;
 		double length_y = 0.0;
-		for (int k = 0; k < get_patch_dimension(); ++k) {
+		for (unsigned int k = 0; k < coords_A.size(); ++k) {
 			length_x += pow(coords_B[k] - coords_A[k], 2);
 			length_y += pow(coords_C[k] - coords_A[k], 2);
 		}
@@ -1000,7 +1000,7 @@ double Element::eval_min_length() const
 		double length_x = 0.0;
 		double length_y = 0.0;
 		double length_z = 0.0;
-		for (int k = 0; k < get_patch_dimension(); ++k) {
+		for (unsigned int k = 0; k < coords_A.size(); ++k) {
 			length_x += pow(coords_B[k] - coords_A[k], 2);
 			length_y += pow(coords_C[k] - coords_A[k], 2);
 			length_z += pow(coords_D[k] - coords_A[k], 2);
