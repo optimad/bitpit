@@ -516,12 +516,12 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 					Node &vertex = m_vertices[interface.get_vertex(n)];
 					const std::array<double, 3> vertexCoords = vertex.get_coords();
 
-					for (int k = 0; k < get_dimension(); k++) {
+					for (unsigned int k = 0; k < centroid.size(); k++) {
 						centroid[k] += vertexCoords[k];
 					}
 				}
 
-				for (int k = 0; k < get_dimension(); k++) {
+				for (unsigned int k = 0; k < centroid.size(); k++) {
 					centroid[k] /= nInterfaceVertices;
 				}
 
