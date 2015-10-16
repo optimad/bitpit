@@ -483,7 +483,7 @@ void OutputManager::writeTimeWrapper(int timeStep, double time, int reset,
 			if (time <= fileTime)
 				break;
 
-    			unsigned int startpos = line.find_first_not_of(" \t");
+			std::size_t startpos = line.find_first_not_of(" \t");
     			if (std::string::npos != startpos)
         			line = line.substr(startpos);
 
