@@ -38,6 +38,15 @@ set(WITHOUT_MPI "1" CACHE INTERNAL "If set, the program is compiled without MPI 
 set(STATIC 1 CACHE BOOL INTERNAL "If set, the program is linked using static libraries")
 
 #------------------------------------------------------------------------------------#
+# External dependencies
+#------------------------------------------------------------------------------------#
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${BITPIT_DIR}/cmake/Modules")
+
+if (NOT WITHOUT_MPI)
+	find_package(MPI)
+endif()
+
+#------------------------------------------------------------------------------------#
 # Compilation settings
 #------------------------------------------------------------------------------------#
 set (ENABLE_WARNINGS ${VERBOSE_MAKE})
@@ -48,8 +57,17 @@ endif()
 if (WITHOUT_MPI)
 	add_definitions(-DDISABLE_MPI)
 else()
-	set(CMAKE_C_COMPILER mpicc)
-	set(CMAKE_CXX_COMPILER mpic++)
+	if (MPI_C_FOUND)
+		set(CMAKE_C_COMPILER ${MPI_C_COMPILER})
+	else()
+		set(CMAKE_C_COMPILER mpicc)
+	endif()
+
+	if (MPI_CXX_FOUND)
+		set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
+	else()
+		set(CMAKE_CXX_COMPILER mpic++)
+	endif()
 endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
@@ -75,11 +93,6 @@ if (ENABLE_PROFILING)
 endif (ENABLE_PROFILING)
 
 add_compile_options("-std=c++11")
-
-#------------------------------------------------------------------------------------#
-# External dependencies
-#------------------------------------------------------------------------------------#
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${BITPIT_DIR}/cmake/Modules")
 
 #------------------------------------------------------------------------------------#
 # Library version
