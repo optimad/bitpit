@@ -502,13 +502,7 @@ void PatchOctree::import_interfaces()
 		}
 
 		long ownerOctantId = cells[0];
-		long neighOctantId = cells[1];
-		if (isGhost) {
-			neighOctantId += m_nInternalCells;
-		}
-
 		long ownerId = get_octant_id(ownerOctantId);
-		long neighId = get_octant_id(neighOctantId);
 
 		// Tipo
 		if (is_three_dimensional()) {
@@ -550,6 +544,12 @@ void PatchOctree::import_interfaces()
 		if (isBoundary) {
 			interface.unset_neigh();
 		} else {
+			long neighOctantId = cells[1];
+			if (isGhost) {
+				neighOctantId += m_nInternalCells;
+			}
+			long neighId = get_octant_id(neighOctantId);
+
 			Cell &neigh = m_cells[neighId];
 			cellToInterfaceMap[neighId].push_back(interface.get_id());
 
