@@ -177,15 +177,15 @@ std::array<std::array<double, 3>, 3> Interface::eval_rotation_from_cartesian(std
 	// y-interface axis
 	if (fabs(versor[2] - 1.) < 1e-8) {
 		std::array<double, 3> x = {1.0, 0.0, 0.0};
-		cross_3D(x, R[0], R[1]);
+		R[1] = cross_3D(x, R[0]);
 	} else {
 		std::array<double, 3> z = {0.0, 0.0, 1.0};
-		cross_3D(z, R[0], R[1]);
+		R[1] = cross_3D(z, R[0]);
 	}
 	normalize_3D(R[1]);
 
 	// z-interface axis
-	cross_3D(R[0], R[1], R[2]);
+	R[2] = cross_3D(R[0], R[1]);
 	normalize_3D(R[2]);
 
 	return R;

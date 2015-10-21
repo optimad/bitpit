@@ -1020,11 +1020,15 @@ double Element::eval_min_length() const
 	\param y the second a three-dimensional array
 	\param cross the array used to store the cross product.
 */
-void Element::cross_3D(std::array<double, 3> x, std::array<double, 3> y, std::array<double, 3> cross)
+std::array<double, 3> Element::cross_3D(std::array<double, 3> x, std::array<double, 3> y)
 {
+	std::array<double, 3> cross;
+
 	cross[0] = x[1] * y[2] - x[2] * y[1];
 	cross[1] = x[2] * y[0] - x[0] * y[2];
 	cross[2] = x[0] * y[1] - x[1] * y[0];
+
+	return cross;
 }
 
 /*!
