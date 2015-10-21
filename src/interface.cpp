@@ -136,15 +136,7 @@ std::array<std::array<double, 3>, 3> Interface::eval_rotation_from_cartesian()
 
 	  - the x axis is aligned with the versor;
 
-	  - in 2D the y axis is orthogonal to the x-axis and its direction
-	    is choosen to point left with respect to the x-axis;
-
-	                      ^ y
-	                      |
-	                      |
-	                      +-----> x
-
-	  - in 3D the y axis is normal to the plane where the axis x-versor
+	  - the y axis is normal to the plane where the axis x-versor
 	    and z-Cartesian lay, or, if this two vectors are aligned, to the
 	    plane where the axis x-versor and x-Cartesian lay;
 
@@ -175,12 +167,12 @@ std::array<std::array<double, 3>, 3> Interface::eval_rotation_from_cartesian(std
 	}
 
 	// y-interface axis
-	if (fabs(versor[2] - 1.) < 1e-8) {
-		std::array<double, 3> x = {1.0, 0.0, 0.0};
-		R[1] = cross_3D(x, R[0]);
-	} else {
+	if (fabs(versor[2] - 1.) > 1e-8) {
 		std::array<double, 3> z = {0.0, 0.0, 1.0};
 		R[1] = cross_3D(z, R[0]);
+	} else {
+		std::array<double, 3> x = {1.0, 0.0, 0.0};
+		R[1] = cross_3D(x, R[0]);
 	}
 	normalize_3D(R[1]);
 
