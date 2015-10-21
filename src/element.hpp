@@ -123,8 +123,8 @@ protected:
 	static const long NULL_ELEMENT_ID;
 
 	static void cross_3D(std::array<double, 3> x, std::array<double, 3> y, std::array<double, 3> cross);
-	static void transpose_3D(std::array<std::array<double, 3>, 3> A);
 	static void normalize_3D(std::array<double, 3> &x);
+	static void transpose_3D(std::array<std::array<double, 3>, 3> &A);
 
 	static bool add_id_to_ordered_list(const long &id, std::vector<long> &list);
 

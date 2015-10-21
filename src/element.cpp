@@ -1050,7 +1050,7 @@ void Element::normalize_3D(std::array<double, 3> &x)
 
 	\param A the 3x3 matrix
 */
-void Element::transpose_3D(std::array<std::array<double, 3>, 3> A)
+void Element::transpose_3D(std::array<std::array<double, 3>, 3> &A)
 {
 	for (int i = 1; i < 3; i++) {
 		for (int j = i; j < 3; j++) {
