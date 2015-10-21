@@ -95,8 +95,8 @@ PatchCartesian::PatchCartesian(const int &id, const int &dimension,
 		m_z_interface_area  = m_cellSize[Node::COORD_X] * m_cellSize[Node::COORD_Y];
 	}
 
-	for (int n = -1; n <= 1; n += 2) {
-		for (int i = 0; i < dimension; i++) {
+	for (int i = 0; i < dimension; i++) {
+		for (int n = -1; n <= 1; n += 2) {
 			std::array<double, 3> normal = {0.0, 0.0, 0.0};
 			normal[i] = n;
 
