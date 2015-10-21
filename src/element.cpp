@@ -1052,7 +1052,7 @@ void Element::normalize_3D(std::array<double, 3> &x)
 */
 void Element::transpose_3D(std::array<std::array<double, 3>, 3> &A)
 {
-	for (int i = 1; i < 3; i++) {
+	for (int i = 0; i < 2; i++) {
 		for (int j = i; j < 3; j++) {
 			double tmp = A[i][j];
 			A[i][j] = A[j][i];
