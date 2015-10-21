@@ -479,6 +479,7 @@ void PatchOctree::import_interfaces()
 		bool isGhost;
 		bool isBoundary;
 		vector<uint32_t> cells;
+		int ownerCell;
 		int ownerFace;
 		vector<double> faceCenter;
 		if (is_three_dimensional()) {
@@ -488,6 +489,7 @@ void PatchOctree::import_interfaces()
 			isGhost    = m_tree_3D.getPbound(treeInterface);
 			isBoundary = m_tree_3D.getBound(treeInterface);
 			cells      = m_tree_3D.getOwners(treeInterface);
+			ownerCell  = m_tree_3D.getFiner(treeInterface);
 			ownerFace  = m_tree_3D.getFace(treeInterface);
 			faceCenter = m_tree_3D.getCenter(treeInterface);
 		} else {
@@ -497,11 +499,12 @@ void PatchOctree::import_interfaces()
 			isGhost    = m_tree_2D.getPbound(treeInterface);
 			isBoundary = m_tree_2D.getBound(treeInterface);
 			cells      = m_tree_2D.getOwners(treeInterface);
+			ownerCell  = m_tree_2D.getFiner(treeInterface);
 			ownerFace  = m_tree_2D.getFace(treeInterface);
 			faceCenter = m_tree_2D.getCenter(treeInterface);
 		}
 
-		long ownerOctantId = cells[0];
+		long ownerOctantId = cells[ownerCell];
 		long ownerId = get_octant_id(ownerOctantId);
 
 		// Tipo
@@ -544,7 +547,7 @@ void PatchOctree::import_interfaces()
 		if (isBoundary) {
 			interface.unset_neigh();
 		} else {
-			long neighOctantId = cells[1];
+			long neighOctantId = cells[ownerCell ? 0 : 1];
 			if (isGhost) {
 				neighOctantId += m_nInternalCells;
 			}
