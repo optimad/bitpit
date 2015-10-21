@@ -1032,7 +1032,7 @@ void Element::cross_3D(std::array<double, 3> x, std::array<double, 3> y, std::ar
 
 	\param x the three-dimensional array to be normalized
 */
-void Element::normalize_3D(std::array<double, 3> x)
+void Element::normalize_3D(std::array<double, 3> &x)
 {
 	double module = 0.;
 	for (int k = 0; k < 3; ++k) {
