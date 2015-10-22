@@ -6,7 +6,8 @@ set(IO_ENABLE_VTK_WRAPPERS 0 CACHE BOOL "Enable VTK wrappers (requires the libra
 
 # Required libraries
 if (IO_ENABLE_VTK_WRAPPERS)
-	find_package(Boost 1.50.0 REQUIRED)
+	set(IO_REQUIRED_BOOST_VERSION "1.50.0" CACHE INTERNAL "Required version of the Boost library" FORCE)
+	find_package(Boost ${IO_REQUIRED_BOOST_VERSION} REQUIRED)
 endif()
 
 # VTK Wrappers feature
