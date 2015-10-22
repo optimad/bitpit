@@ -31,7 +31,9 @@ add_custom_target(clean-tests COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECT
 # Data files
 add_definitions(-DDATAFILE_PATH="${CMAKE_CURRENT_BINARY_DIR}/data/")
 
-add_custom_command(
-	TARGET "test_IO_00001" PRE_BUILD
-	COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/selection.vtu" "${CMAKE_CURRENT_BINARY_DIR}/data/selection.vtu"
-)
+if (IO_ENABLE_VTK_WRAPPERS)
+	add_custom_command(
+		TARGET "test_IO_00001" PRE_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/selection.vtu" "${CMAKE_CURRENT_BINARY_DIR}/data/selection.vtu"
+	)
+endif()
