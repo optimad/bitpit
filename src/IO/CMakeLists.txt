@@ -17,6 +17,9 @@ set(IO_VTK_WRAPPERS_DEFINITION "-DIO_ENABLE_VTK_WRAPPERS" CACHE INTERNAL "Prepro
 
 # Add library to targets
 include_directories("${PROJECT_SOURCE_DIR}/src/base")
+if (IO_ENABLE_VTK_WRAPPERS)
+	include_directories("${Boost_INCLUDE_DIRS}")
+endif()
 
 file(GLOB SOURCE_FILES "*.cpp")
 if (NOT IO_ENABLE_VTK_WRAPPERS)
