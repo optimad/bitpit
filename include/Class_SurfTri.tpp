@@ -360,7 +360,7 @@
         int                 dim = Vertex[0].size();
         double              theta;
         dvector1D           theta_tot(nVertex, 0.0);
-        dvector1D           u(dim, 0.0), v(dim, 0.0);
+        array<double, 3>    u, v;
 
         // Counters
         int                 i, j, n, R, V;
