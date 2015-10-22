@@ -210,7 +210,7 @@ flag_n = ((Normal.size() > 0) && (Normal.size() >= nSimplex));
                 if (A/3.0 > h) {
                 }
             }
-            else if (n = 4) {
+            else if (n == 4) {
                 //split_1quad4quad(T, P);
                 if (A/4.0 > h) {
                 }
@@ -367,7 +367,7 @@ flag_n = ((Normal.size() > 0) && (Normal.size() >= nSimplex));
                 if (A/3.0 > h) {
                 }
             }
-            else if (n = 4) {
+            else if (n == 4) {
                 //split_1quad4quad(T, P);
                 if (A/4.0 > h) {
                 }
