@@ -421,7 +421,7 @@ void  VTK::PDataArrayToString( string &str, VTK::Field_C &field_ ){
   os << "        <PDataArray "
       << "type=\"" << field_.GetType() << "\" "
       << "Name=\"" << field_.GetName() << "\" "
-      << "NumberOfComponents=\""<< field_.GetComponents() << "\" " 
+      << "NumberOfComponents=\""<< unsigned(field_.GetComponents()) << "\" " 
       << "/>" ;
 
   str = os.str() ;
