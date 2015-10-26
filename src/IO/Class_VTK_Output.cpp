@@ -110,7 +110,7 @@ void VTK::WritePDataArray( fstream &str, VTK::Field_C &field_ ){
     PDataArrayToString( line, field_ ) ;
 
     str << line << endl ;
-    str << "        </DataArray>" << endl ;
+    str << "        </PDataArray>" << endl ;
 
     return ;
 
