@@ -225,6 +225,13 @@ std::vector<long> Cell::extract_neighs() const
 /*!
 	Extracts all the neighbours for the specified codimension.
 
+	\param codimension the codimension for which the neighbours
+	are requested. For a three-dimensional cell a codimension
+	equal 1 will extract the face neighbours, a codimension equal
+	2 will extract the edge negihbours and a codimension equal
+	3 will extract the vertex neighbours. For a two-dimensional
+	cell a codimension qual 1 will extract the face neighbours,
+	and a codimension equal 2 will extract the vertex neighbours.
 	\param complete controls if the list of neighbours should contain
 	only the neighbours for the specified codimension, or should contain
 	also the neighbours for lower codimensions.
