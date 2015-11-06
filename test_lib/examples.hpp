@@ -25,6 +25,7 @@
 # include <iostream>
 
 // CC_Lib
+# include "UCartMesh.hpp"
 # include "Class_UCartMesh.hpp"
 
 // ========================================================================== //
@@ -74,9 +75,20 @@ typedef vector< svector3D >            svector4D;
 void Demo_Class_UCartMesh2D(                                                  // Examples of usage of Class_UCartMesh2D
     void                                                                      // (input) none
 );
+
 void Demo_Class_UCartMesh3D(                                                  // Examples of usage of Class_UCartMeesh3D
     void
 );
+
+void Demo2D_UCartMesh(                                                  // Examples of usage of Class_UCartMeesh3D
+    void
+);
+
+void Demo3D_UCartMesh(                                                  // Examples of usage of Class_UCartMeesh3D
+    void
+);
+
+
 
 // ========================================================================== //
 // TEMPLATES                                                                  //
