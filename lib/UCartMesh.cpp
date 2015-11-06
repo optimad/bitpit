@@ -56,6 +56,8 @@ UCartMesh::UCartMesh(
     // INITIALIZE DATA STRUCTURE                                                  //
     // ========================================================================== //
 
+    dim = 3 ;
+
     // Mesh extent
     B0.fill(0.0) ;
     B1.fill(0.0) ;
