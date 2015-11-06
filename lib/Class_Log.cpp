@@ -47,8 +47,11 @@ void Class_Log::writeLog(string msg) {
 	// =================================================================================== //
 
 	int rank = 0;
+
 #if NOMPI==0
-	int error_flag = MPI_Comm_rank(comm,&rank);
+	bool flag = MPI::Is_finalized();
+	if (!(flag))
+		int error_flag = MPI_Comm_rank(comm,&rank);
 #endif
 	if(rank == 0){
 		// Open the .log file
@@ -62,7 +65,7 @@ void Class_Log::writeLog(string msg) {
 		// Close file
 		file_handle.close();
 	}
-#if NOMPI==0
-	error_flag = MPI_Barrier(comm);
-#endif
+//#if NOMPI==0
+//	error_flag = MPI_Barrier(comm);
+//#endif
 	return; };
