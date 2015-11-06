@@ -15,6 +15,7 @@ SET(BLDIR build/lib/ )
 IF(CMAKE_BUILD_TYPE MATCHES Debug)
     message( "building debug")
     SET(BLDIR debug/lib/ )
+    ADD_DEFINITIONS(-Wall)
 ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
 
 SET(IDIR include )
