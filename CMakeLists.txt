@@ -1,70 +1,145 @@
-#Specify the version being used as well as the language
+#------------------------------------------------------------------------------------#
+# CMake settings
+#------------------------------------------------------------------------------------#
 cmake_minimum_required(VERSION 2.8)
 
-#Name your project here
-project(PABLO)
+project("PABLO")
 
-ADD_DEFINITIONS(-std=c++0x)
-SET(WITHOUT_MPI 0 CACHE BOOL "Set WITHOUT_MPI to 1 if you don't have an installed implementation of MPI or you don't want to use a parallel PABLO")
-SET(COMPILER "gcc" CACHE STRING "Set COMIPLER to 'intel' if you want to use the Intel Compiler")
-IF(WITHOUT_MPI EQUAL 1)
-message("-- PABLO Serial Version")
-ADD_DEFINITIONS(-DNOMPI=1)
-ENDIF(WITHOUT_MPI EQUAL 1)
-IF(WITHOUT_MPI EQUAL 0)
-message("-- PABLO Parallel Version")
-ENDIF(WITHOUT_MPI EQUAL 0)
+#------------------------------------------------------------------------------------#
+# Variables visible to the user
+#------------------------------------------------------------------------------------#
+if (DEFINED BITPIT_DIR)
+	set(FIRST_BITPIT_DIR_INITIALIZATION 0)
+else()
+	set(FIRST_BITPIT_DIR_INITIALIZATION 1)
+endif()
 
-include_directories(include)
+set(BITPIT_DIR "/opt/bitpit" CACHE PATH "The directory containing the BITPIT libraries")
+if (${CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT})
+	set(CMAKE_INSTALL_PREFIX "${BITPIT_DIR}/${CMAKE_PROJECT_NAME}" CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
+endif()
 
-IF(WITHOUT_MPI EQUAL 0)
+if (${FIRST_BITPIT_DIR_INITIALIZATION})
+	return()
+else()
+	if (NOT EXISTS ${BITPIT_DIR})
+		set(errorMessage "REQUIRED DIRECTORY NOT FOUND\n We could not find the BITPIT directory. You need to adjust CMake configuration in order to continue building ${CMAKE_PROJECT_NAME}.")
+		message(FATAL_ERROR "${errorMessage}")
+	endif()
+endif()
 
-IF(COMPILER STREQUAL intel)
-SET(CMAKE_C_COMPILER mpiicc)
-SET(CMAKE_CXX_COMPILER mpiicpc)
-ELSE(COMPILER STREQUAL intel)
-SET(CMAKE_C_COMPILER mpicc)
-SET(CMAKE_CXX_COMPILER mpic++)
-ENDIF(COMPILER STREQUAL intel)
+set(ENABLE_PROFILING 0 CACHE BOOL "Set appropriate compiler flags to enable profiling")
+set(VERBOSE_MAKE 0 CACHE BOOL "Set appropriate compiler and cmake flags to enable verbose output from compilation")
+set(WITHOUT_MPI 0 CACHE BOOL "If set, the program is compiled without MPI support")
 
-ELSE(WITHOUT_MPI EQUAL 0)
+#------------------------------------------------------------------------------------#
+# Internal variables
+#------------------------------------------------------------------------------------#
+set(STATIC 1 CACHE BOOL INTERNAL "If set, the program is linked using static libraries")
 
-IF(COMPILER STREQUAL intel)
-SET(CMAKE_C_COMPILER icc)
-SET(CMAKE_CXX_COMPILER icpc)
-ELSE(COMPILER STREQUAL intel)
-SET(CMAKE_C_COMPILER gcc)
-SET(CMAKE_CXX_COMPILER g++)
-ENDIF(COMPILER STREQUAL intel)
+#------------------------------------------------------------------------------------#
+# External dependencies
+#------------------------------------------------------------------------------------#
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${BITPIT_DIR}/cmake/Modules")
 
-ENDIF(WITHOUT_MPI EQUAL 0)
+if (NOT WITHOUT_MPI)
+	find_package(MPI)
+endif()
 
-SET(DEBUG 0 CACHE STRING "Set DEBUG = 1 if you want debug flags to be passed to the compiler. Otherwise, PABLO will be optimized")
+#------------------------------------------------------------------------------------#
+# Compilation settings
+#------------------------------------------------------------------------------------#
+set (ENABLE_WARNINGS ${VERBOSE_MAKE})
+if (VERBOSE_MAKE)
+	set(CMAKE_VERBOSE_MAKEFILE ON)
+endif()
 
-IF(${DEBUG})
-IF(COMPILER STREQUAL intel)
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O0")
-ELSE(COMPILER STREQUAL intel)
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ggdb -O0 -fmessage-length=0 -fno-weak")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ggdb -O0 -fmessage-length=0 -fno-weak")
-ENDIF(COMPILER STREQUAL intel)
-ELSE(${DEBUG})
-SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
-endif(${DEBUG})
+if (WITHOUT_MPI)
+	add_definitions(-DDISABLE_MPI)
+	add_definitions(-DNOMPI=1)
+else()
+	add_definitions(-DNOMPI=0)
+	if (MPI_C_FOUND)
+		set(CMAKE_C_COMPILER ${MPI_C_COMPILER})
+	else()
+		set(CMAKE_C_COMPILER mpicc)
+	endif()
 
-ADD_SUBDIRECTORY(lib)
+	if (MPI_CXX_FOUND)
+		set(CMAKE_CXX_COMPILER ${MPI_CXX_COMPILER})
+	else()
+		set(CMAKE_CXX_COMPILER mpic++)
+	endif()
+endif()
 
-SET(COMPILE_TESTS 1 CACHE STRING "Set COMPILE_TESTS = 0 if you dont't want to compile PABLO's tests. Otherwise, PABLO's tests will be compiled")
-IF(${COMPILE_TESTS})
-ADD_SUBDIRECTORY(test)
-ENDIF(${COMPILE_TESTS})
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
+set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
+set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
+set(CMAKE_C_FLAGS_RELEASE "-O2")
 
-SET(CMAKE_INSTALL_PREFIX:PATH /usr/local/)
-INSTALL(DIRECTORY include/ DESTINATION ${PROJECT_NAME}/include)
-EXEC_PROGRAM(pwd . OUTPUT_VARIABLE BUILD_DIR)
-INSTALL(FILES ${BUILD_DIR}/lib/libPABLO.a DESTINATION lib)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
+set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
+set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
+set(CMAKE_CXX_FLAGS_RELEASE "-O2")
 
-UNSET(DEBUG CACHE)
-UNSET(COMPILE_TESTS CACHE)
+if (ENABLE_WARNINGS)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -Wextra")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra")
+endif()
+
+if (ENABLE_PROFILING)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
+	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
+	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
+endif (ENABLE_PROFILING)
+
+add_compile_options("-std=c++11")
+
+#------------------------------------------------------------------------------------#
+# Library version
+#------------------------------------------------------------------------------------#
+set (VERSION_HEADER_FILENAME "${PROJECT_SOURCE_DIR}/src/${CMAKE_PROJECT_NAME}_version.hpp")
+string(TOUPPER "${CMAKE_PROJECT_NAME}_VERSION" VERSION_DEFINE_NAME)
+
+file(READ "${VERSION_HEADER_FILENAME}" header)
+
+string(REGEX REPLACE ".*#[ \t]*define[ \t]*${VERSION_DEFINE_NAME}[ \t]*\"([^\n]*)\".*" "\\1" match "${header}")
+set(PABLO_VERSION "${match}")
+
+STRING(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" match "${PABLO_VERSION}")
+set(PABLO_MAJOR_VERSION "${match}")
+
+#------------------------------------------------------------------------------------#
+# Subdirectories
+#------------------------------------------------------------------------------------#
+
+# Main library
+add_subdirectory(src)
+
+# CMake
+add_subdirectory(cmake)
+
+# Examples
+add_subdirectory(examples)
+
+# Tests
+add_subdirectory(test)
+
+# Docs
+add_subdirectory(doc)
+
+#------------------------------------------------------------------------------------#
+# Tests
+#------------------------------------------------------------------------------------#
+enable_testing()
+
+foreach(TEST_NAME IN LISTS TEST_LIST)
+	add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME} WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/test")
+endforeach()
+
+foreach(PTEST_NAME IN LISTS PTEST_LIST)
+	add_test(NAME ${PTEST_NAME} COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} ${PTEST_NAME} WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/test")
+endforeach()
+
+add_custom_target(check DEPENDS tests COMMAND ${CMAKE_MAKE_PROGRAM} test)

@@ -5,7 +5,7 @@
  *      Author: marco
  */
 
-#include <Class_Log.hpp>
+#include "Class_Log.hpp"
 
 #if NOMPI==0
 Class_Log::Class_Log(string filename_,MPI_Comm comm_) : filename(filename_),comm(comm_) {};

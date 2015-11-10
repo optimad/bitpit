@@ -1,6 +1,0 @@
-file(GLOB PABLO_src "*.cpp")
-#SET(PABLO_src {*.cpp})
-add_library(PABLO ${PABLO_src})
-IF(WITHOUT_MPI EQUAL 0)
-target_link_libraries(PABLO mpi)
-ENDIF(WITHOUT_MPI EQUAL 0)

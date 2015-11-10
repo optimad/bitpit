@@ -4,4 +4,3 @@ release/*
 .settings/*
 .project
 .cproject
-doxy/html/*
