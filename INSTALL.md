@@ -4,7 +4,7 @@ PABLO runs on Linux and Mac OSX platforms.
 
 ## Dependencies
 PABLO depends on
-* c++ compiler supporting `-std=c++11`. It has been tested with g++ >= 4.7.3 and clang++ >=3.5
+* c++ compiler supporting `-std=c++11`. It has been tested with g++ >= 4.7.3, clang++ >=3.5 and icpc >= 15.0
 * cmake >= 2.8
 * (optionally) MPI implementation. It has been tested with OpenMPI >= 1.6.5. 
 
