@@ -9,7 +9,7 @@ PABLO depends on
 * (optionally) MPI implementation. It has been tested with OpenMPI >= 1.6.5. 
 
 ## Confguring PABLO
-PABLO uses cmake as building tool.
+PABLO uses cmake as building tool. The use of curses interface ccmake is reccommended.
 In the PABLO's root folder make a building folder, e.g. build
 ```bash
 	PABLO$ mkdir build
@@ -22,33 +22,27 @@ Enter the `build` folder
 ```bash
 	PABLO/build$ cmake ../
 ```
- By this way, PABLO is configured for production (using compiler optimization flags, `-O3`) and the test sources in `PABLO/test/` will be compiled and successively available at `PABLO/build/test/`; moreover, the default installation folder is `/usr/local/`.
+ By this way, PABLO is configured for production (using compiler optimization flags for release cmake building type, `-O3`), the test sources in `PABLO/test/` will be compiled and successively available at `PABLO/build/test/` while the examples sources in `PABLO/examples/` will not. 
 
-Passing some variable to cmake you can customize a bit your configuration.
+The default installation folder is `/opt/bitpit/PABLO`. The folder `/opt/bitpit/` is the default installation folder for BitPit libraries developed by Optimad engineering and available on GitHub.
 
-The `DEBUG` variable can be used to set the compiler flags `-ggdb -O0 -fmessage-length=0`, then you can call
-```bash
-	PABLO/build$ cmake -DDEBUG=1 ../	
-```
-to obtain a debug version of PABLO. `DEBUG` default value is 0.
+Setting some variable in ccmake you can customize a bit your configuration.
 
-The `WITHOUT_MPI` variable can be used to compile the serial implementation of PABLO and to avoid the dependency on MPI libraries, then you can set
-```bash
-	PABLO/build$ cmake -DWITHOUT_MPI=1 ../	
-```
-to obtain a serial version of PABLO. `WITHOUT_MPI` default value is 0.
+You can change the `BITPIT_DIR` to choose alternatives location for BitPit libraries. Note that if you choose the default BitPit installation path or another path without write permission you will need administration privileges to install BitPit libraries in.
 
-The `COMPILE_TESTS` variable can be use to avoid tests compilation, then
-```bash
-	PABLO/build$ cmake -DCOMPILE_TESTS=0 ../	
-```
-and the building procedure will not compile the test sources. `COMPILE_TESTS` default value is 1.
-
-Finally, you can choose the installation folder setting the cmake variable `CMAKE_INSTALL_PREFIX`
-```bash
-	PABLO/build$ cmake -DCMAKE_INSTALL_PREFIX=/my/installation/folder/ ../	
-```
+You can even choose different installation folder for PABLO setting the cmake variable `CMAKE_INSTALL_PREFIX`.
 Remember that if you choose the default installation path or another path without write permission you will need administration privileges to install PABLO in.
+
+The `CMAKE_BUILD_TYPE` variable can be used to set the compiler flags for production/debugging, then you can set it to Release/Debug to obtain a desired version of PABLO. `CMAKE_BUILD_TYPE` has not a default value.
+
+The `WITHOUT_MPI` variable can be used to compile the serial implementation of PABLO and to avoid the dependency on MPI libraries, then you can set to `ON` to obtain a serial version of PABLO. `WITHOUT_MPI` default value is `OFF`.
+
+The `BUILD_EXAMPLES` variable can be use to compile examples, then set to `ON` and the building procedure will compile the examples sources. `BUILD_EXAMPLES` default value is `OFF`.
+
+You can change the `COMPILER` variable and use `gcc` or `intel` option to compile PABLO with system primary compiler or forcing intel compiler.
+
+The `ENABLE_PROFILING` variable can be use to activate `-Wall -Wextra` compilation flags.
+
 
 ## Building and Installing
 Once cmake has configured PABLO's building just do
@@ -65,13 +59,20 @@ If you have just built PABLO, its headers will be available at `PABLO/include/` 
 
 If you have also installed PABLO, its headers will be available at `/my/installation/folder/PABLO/include/` folder and a static library `libPABLO.a` will be available at `/my/installation/folder/lib/` folder.
 
+To build and run the compilation tests do
+```bash
+	PABLO/build$ make check
+```
+and the tests will start immediately after the compilation of the library.
+ 
+
 ## Building Documentation
 In order to build properly the documentation Doxygen (>=1.8.6) and Graphviz (>=2.20.2) are needed.
-In 'doxy' folder run:
-```bash
-	PABLO/doxy$ doxygen PABLODoxyfile.txt
-```
-You can now browse the html documentation with your favorite browser by opening 'html/index.html'.
+In `ccmake` setup set `BUILD_DOCUMENTATION` to `ON` to build Doxygen documentation.
+
+You can now browse the html documentation with your favorite browser by opening `build/doc/html/index.html`.
+
 
 ## Help
 For any problem, please join the <a href="https://groups.google.com/forum/#!forum/pablo-users" target="pablousers">PABLO Users Google Group</a> and post your requests.
+
