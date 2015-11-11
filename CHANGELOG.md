@@ -6,6 +6,7 @@ This project *tries* to adhere to [Semantic Versioning](http://semver.org/).
 ### Added
 - Unique Octant 2D/3D class.
 - Base ParaTree class and derived 2D/3D classes.
+- Get method for Bounding Box of local tree partition.
 
 ## v0.4.0 - 2015-11-10
 ### Added

@@ -34,6 +34,7 @@ public:
 	typedef vector<double>				dvector;
 	typedef vector<vector<uint32_t>	>	u32vector2D;
 	typedef vector<vector<uint64_t>	>	u64vector2D;
+	typedef vector<double>				dvector1D;
 	typedef vector<vector<double>	>	dvector2D;
 	typedef vector<int>					ivector;
 	typedef vector<vector<int>	>		ivector2D;
@@ -1086,6 +1087,50 @@ public:
 	 */
 	uint8_t getBalanceCodimension() const{
 		return octree.getBalanceCodim();
+	};
+
+	/*! Get the coordinates of the extreme points of a bounding box containing the local tree
+	 *  \param[out] P0 Vector with coordinates of the first point (lowest coordinates);
+	 *  \param[out] P1 Vector with coordinates of the last point (highest coordinates).
+	 */
+	void getBoundingBox(dvector & P0, dvector & P1){
+		dvector1D	cnode;
+		uint32_t 	nocts = getNumOctants();
+		P0 = getNode(0, 0);
+		P1 = getNode(nocts-1, global2D.nnodes-1);
+		for (uint32_t idx=0; idx<global2D.nnodes; idx++){
+			for (uint8_t inode=0; inode<nocts; inode++){
+				cnode = getNode(idx, inode);
+				for (uint8_t i=0; i<3; i++){
+					P0[i] = min(P0[i], cnode[i]);
+					P1[i] = max(P1[i], cnode[i]);
+				}
+			}
+		}
+	};
+
+	/*! Get the coordinates of the extreme points of a bounding box containing the local tree
+	 *  \param[out] P0 Array with coordinates of the first point (lowest coordinates);
+	 *  \param[out] P1 Array with coordinates of the last point (highest coordinates).
+	 */
+	void getBoundingBox(array<double, 3> & P0, array<double, 3> & P1){
+		dvector1D	cnode, cnode0, cnode1;
+		uint32_t 	nocts = getNumOctants();
+		cnode0 = getNode(0, 0);
+		cnode1 = getNode(nocts-1, global2D.nnodes-1);
+		for (uint8_t i=0; i<3; i++){
+			P0[i] = cnode0[i];
+			P1[i] = cnode1[i];
+		}
+		for (uint32_t idx=0; idx<global2D.nnodes; idx++){
+			for (uint8_t inode=0; inode<nocts; inode++){
+				cnode = getNode(idx, inode);
+				for (uint8_t i=0; i<3; i++){
+					P0[i] = min(P0[i], cnode[i]);
+					P1[i] = max(P1[i], cnode[i]);
+				}
+			}
+		}
 	};
 
 	/*! Set the codimension for 2:1 balancing
