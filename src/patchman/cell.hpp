@@ -42,7 +42,6 @@ public:
 	void initialize_interfaces(std::vector<std::vector<long>> &interfaces);
 	void initialize_empty_interfaces(const int nInterfaces[]);
 	void set_interface(const int &face, const int &index, const long &interface);
-	void set_interfaces(const int &face, long interface[]);
 	void unset_interfaces();
 	int get_interface_count() const;
 	int get_interface_count(const int &face) const;

@@ -120,17 +120,6 @@ void Cell::set_interface(const int &face, const int &index, const long &interfac
 }
 
 /*!
-	Sets the interfaces associated to the specified face of the cell.
-
-	\param face the face of the cell
-	\param interface a pointer to the interfaces
-*/
-void Cell::set_interfaces(const int &face, long interfaces[])
-{
-	m_interfaces->set(face, interfaces);
-}
-
-/*!
 	Unsets the interfaces associated to the cell.
 */
 void Cell::unset_interfaces()
