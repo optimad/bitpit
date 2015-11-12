@@ -121,6 +121,17 @@ void Cell::set_interface(const int &face, const int &index, const long &interfac
 }
 
 /*!
+	Add an interface to the given face of the cell.
+
+	\param face is the face of the cell
+	\param interface is the index of the interface that will be added
+*/
+void Cell::push_interface(const int &face, const long &interface)
+{
+	m_interfaces.push_back_in_sub_array(face, interface);
+}
+
+/*!
 	Unsets the interfaces associated to the cell.
 */
 void Cell::unset_interfaces()
