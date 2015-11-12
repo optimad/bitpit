@@ -43,6 +43,7 @@ public:
 	void initialize_empty_interfaces(const int nInterfaces[]);
 	void set_interface(const int &face, const int &index, const long &interface);
 	void push_interface(const int &face, const long &interface);
+	void delete_interface(const int &face, const int &i);
 	void unset_interfaces();
 	int get_interface_count() const;
 	int get_interface_count(const int &face) const;

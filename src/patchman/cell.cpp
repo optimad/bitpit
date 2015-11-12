@@ -132,6 +132,18 @@ void Cell::push_interface(const int &face, const long &interface)
 }
 
 /*!
+	Deletes the specified interface from the interfaces associate to the
+	given face of the cell.
+
+	\param face the face of the cell
+	\param i is the index of the interface to delete
+*/
+void Cell::delete_interface(const int &face, const int &i)
+{
+	m_interfaces.erase(face, i);
+}
+
+/*!
 	Unsets the interfaces associated to the cell.
 */
 void Cell::unset_interfaces()
