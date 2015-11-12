@@ -6,7 +6,7 @@
 
 /*! \file */
 
-#include "collapsedArray2D.hpp"
+#include "collapsedVector2D.hpp"
 #include "element.hpp"
 
 #include <memory>
@@ -72,7 +72,7 @@ private:
 
 	double *m_volume;
 
-	std::unique_ptr<CollapsedArray2D<long> > m_interfaces;
+	CollapsedVector2D<long> m_interfaces;
 
 	std::unique_ptr<CellData> m_data;
 

@@ -92,8 +92,7 @@ const double & Cell::get_volume() const
 */
 void Cell::initialize_interfaces(std::vector<std::vector<long>> &interfaces)
 {
-	m_interfaces.reset();
-	m_interfaces = std::unique_ptr<CollapsedArray2D<long> >(new CollapsedArray2D<long>(interfaces));
+	m_interfaces = CollapsedVector2D<long>(interfaces);
 }
 
 /*!
@@ -104,7 +103,9 @@ void Cell::initialize_interfaces(std::vector<std::vector<long>> &interfaces)
 */
 void Cell::initialize_empty_interfaces(const int nInterfaces[])
 {
-	m_interfaces = std::unique_ptr<CollapsedArray2D<long> >(new CollapsedArray2D<long>(get_face_count(), nInterfaces));
+	for (int k = 0; k < get_face_count(); ++k) {
+		m_interfaces.push_back(nInterfaces[k], 0);
+	}
 }
 
 /*!
@@ -116,7 +117,7 @@ void Cell::initialize_empty_interfaces(const int nInterfaces[])
 */
 void Cell::set_interface(const int &face, const int &index, const long &interface)
 {
-	m_interfaces->set(face, index, interface);
+	m_interfaces.set(face, index, interface);
 }
 
 /*!
@@ -124,7 +125,7 @@ void Cell::set_interface(const int &face, const int &index, const long &interfac
 */
 void Cell::unset_interfaces()
 {
-	m_interfaces.reset();
+	m_interfaces.clear();
 }
 
 /*!
@@ -134,7 +135,7 @@ void Cell::unset_interfaces()
 */
 int Cell::get_interface_count() const
 {
-	return m_interfaces->data_size();
+	return m_interfaces.size();
 }
 
 /*!
@@ -145,7 +146,7 @@ int Cell::get_interface_count() const
 */
 int Cell::get_interface_count(const int &face) const
 {
-	return m_interfaces->sub_array_size(face);
+	return m_interfaces.sub_array_size(face);
 }
 
 /*!
@@ -157,7 +158,7 @@ int Cell::get_interface_count(const int &face) const
 */
 long Cell::get_interface(const int &face, const int &index) const
 {
-	return m_interfaces->get(face, index);
+	return m_interfaces.get(face, index);
 }
 
 /*!
@@ -167,7 +168,7 @@ long Cell::get_interface(const int &face, const int &index) const
 */
 const long * Cell::get_interfaces() const
 {
-	return m_interfaces->get(0);
+	return m_interfaces.get(0);
 }
 
 /*!
@@ -180,7 +181,7 @@ const long * Cell::get_interfaces() const
 */
 const long * Cell::get_interfaces(const int &face) const
 {
-	return m_interfaces->get(face);
+	return m_interfaces.get(face);
 }
 
 /*!
