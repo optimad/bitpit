@@ -113,7 +113,7 @@ void Cell::initialize_empty_interfaces(const int nInterfaces[])
 
 	\param face the face of the cell
 	\param index the index of the interface
-	\param interface A pointer to the interface
+	\param interface is the index of the interface 
 */
 void Cell::set_interface(const int &face, const int &index, const long &interface)
 {
