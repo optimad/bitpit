@@ -162,24 +162,25 @@ class minPQUEUE {
 
     // Members ============================================================== //
     public:
-    int                 MAXSTK;                                               // Maximal stack size between resize
-    int                 heap_size;                                            // number of elements in stack
-    vector< T >         keys;                                                 // stack
-    vector< T1 >        labels;                                               // labels associated to keys
-    ivector2D          *map;                                                  // pointer to mapper
+    int                             MAXSTK;                                   // Maximal stack size between resize
+    int                             heap_size;                                // number of elements in stack
+    vector< T >                     keys;                                     // stack
+    vector< T1 >                    labels;                                   // labels associated to keys
+    vector< array<int,2> >          *map;                                     // pointer to mapper
+
     private:
-    bool                use_labels;                                           // flag for key labelling
+    bool                            use_labels;                               // flag for key labelling
 
     // Constructor ========================================================== //
     public:
     minPQUEUE(                                                                // Default constructor for min priority queue
-        bool            a = false,                                            // (input/optional) flag for key labelling
-        ivector2D      *b = NULL                                              // (input/optional) pointer to user-defined map
+        bool                        a = false,                                // (input/optional) flag for key labelling
+        vector< array<int,2> >      *b = NULL                                 // (input/optional) pointer to user-defined map
     );
     minPQUEUE(                                                                // Default constructor for min priority queue
         int              ,                                                    // (input) stack size
-        bool            a = false,                                            // (input/optional) flag for key labelling
-        ivector2D      *b = NULL                                              // (input/optional) pointer to user-defined map
+        bool                        a = false,                                // (input/optional) flag for key labelling
+        vector< array<int,2> >      *b = NULL                                 // (input/optional) pointer to user-defined map
     );
 
     // Destructor =========================================================== //
@@ -241,24 +242,24 @@ class maxPQUEUE {
 
     // Members ============================================================== //
     public:
-    int                 MAXSTK;                                               // Maximal stack size between resize
-    int                 heap_size;                                            // number of elements in stack
-    vector< T >         keys;                                                 // stack
-    vector< T1 >        labels;                                               // labels associated to keys
-    ivector2D          *map;                                                  // pointer to mapper
+    int                     MAXSTK;                                           // Maximal stack size between resize
+    int                     heap_size;                                        // number of elements in stack
+    vector< T >             keys;                                             // stack
+    vector< T1 >            labels;                                           // labels associated to keys
+    vector< array<int,2> >  *map;                                             // pointer to mapper
     private:
     bool                use_labels;                                           // flag for key labelling
 
     // Constructor ========================================================== //
     public:
     maxPQUEUE(                                                                // Default constructor for min priority queue
-        bool            a = false,                                            // (input/optional) flag for key labelling
-        ivector2D      *b = NULL                                              // (input/optional) pointer to user-defined map
+        bool                    a = false,                                    // (input/optional) flag for key labelling
+        vector< array<int,2> >  *b = NULL                                      // (input/optional) pointer to user-defined map
     );
     maxPQUEUE(                                                                // Default constructor for min priority queue
         int              ,                                                    // (input) stack size
-        bool            a = false,                                            // (input/optional) flag for key labelling
-        ivector2D      *b = NULL                                              // (input/optional) pointer to user-defined map
+        bool                    a = false,                                    // (input/optional) flag for key labelling
+        vector< array<int,2> >  *b = NULL                                     // (input/optional) pointer to user-defined map
     );
 
     // Destructor =========================================================== //
