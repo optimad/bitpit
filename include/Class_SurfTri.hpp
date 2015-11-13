@@ -26,7 +26,6 @@
 # include <unordered_map>
 
 // CC_lib
-# include "CG_Basics.hpp"
 # include "Operators.hpp"
 # include "STL_IOFunct.hpp"
 # include "VTK_IOFunct.hpp"
@@ -940,6 +939,24 @@ class Class_SurfTri {
                 int , 
                 int
                 );      
+    private:
+
+        bool PointsOnSameSide(
+                array< double, 3 > const &P1,
+                array< double, 3 > const &P2,
+                array< double, 3 > const &A,
+                array< double, 3 > const &B
+                ); 
+
+        array<double, 3> IntersectLines(
+                array<double, 3> const &n1,
+                array<double, 3> const &P1,
+                array<double, 3> const &n2,
+                array<double, 3> const &P2
+                ) ;
+
+
+    public:
 
         // Voronoi diagrams -------------------------------------------------------------- //
         void Voronoi(Class_SurfTri &);                // Compute approximated Voronoi tasselation

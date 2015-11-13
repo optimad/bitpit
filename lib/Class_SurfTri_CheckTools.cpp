@@ -2199,3 +2199,114 @@ for (T = 0; T < nSimplex; T++) {
 return; };
 
 
+// -------------------------------------------------------------------------- //
+bool Class_SurfTri::PointsOnSameSide(
+        array< double, 3 > const &P1,
+        array< double, 3 > const &P2,
+        array< double, 3 > const &A,
+        array< double, 3 > const &B
+        ) {
+
+    // ========================================================================== //
+    // bool SameSide(                                                             //
+    //     array< double, 3 > const &P1,                                          //
+    //     array< double, 3 > const &P2,                                          //
+    //     array< double, 3 > const &A,                                           //
+    //     array< double, 3 > const &B)                                           //
+    //                                                                            //
+    // Check if point P1 and P2 lie on the same side of segment (A,B)             //
+    // ========================================================================== //
+    // INPUT                                                                      //
+    // ========================================================================== //
+    // - P1     : array<double, 3> 1st argument of check                          //
+    // - P2     : array<double, 3> 2nd argument of check                          //
+    // - A      : array<double, 3> 1st vertex of the segment                      //
+    // - B      : array<double, 3> 2nd vertex of the segment                      //
+    // ========================================================================== //
+    // OUTPUT                                                                     //
+    // ========================================================================== //
+    // - flag   : bool, check result. if flag = true, then P1, and P2 lie on the  //
+    //            same side of the segment (A, B). Otherwise flag = false.        //
+    // ========================================================================== //
+
+    // ========================================================================== //
+    // VARIABLES DECLARATION                                                      //
+    // ========================================================================== //
+
+    // Local variables
+    bool                flag;
+    double              s;
+    array< double, 3 >  cp1, cp2;
+
+    // Counters
+    // none
+
+    // ========================================================================== //
+    // PERFORM CHECK                                                              //
+    // ========================================================================== //
+    cp1 = Cross_Product(P1 - A, B - A);
+    cp1 = cp1/norm(cp1, 2);
+    cp2 = Cross_Product(P2 - A, B - A);
+    cp2 = cp2/norm(cp2, 2);
+    s = Dot_Product(cp1, cp2);
+    flag = (s >= 0.0);
+
+    return(flag); };
+
+// -------------------------------------------------------------------------- //
+array<double, 3> Class_SurfTri::IntersectLines(
+        array<double, 3> const &n1,
+        array<double, 3> const &P1,
+        array<double, 3> const &n2,
+        array<double, 3> const &P2
+        ) {
+
+    // ========================================================================== //
+    // array<double, 3> IntersectLines(                                           //
+    //     array<double, 3> const &n1,                                            //
+    //     array<double, 3> const &P1,                                            //
+    //     array<double, 3> const &n2,                                            //
+    //     array<double, 3> const &P2)                                            //
+    //                                                                            //
+    // Compute the intersection point between two line in a 3D Euclidean space.   //
+    // ========================================================================== //
+    // INPUT                                                                      //
+    // ========================================================================== //
+    // - n1      : array<double, 3>, unit vector along 1st line direction         //
+    // - P1      : array<double, 3>, point which 1st line passes through          //
+    // - n2      : array<double, 3>, unit vector along 2nd line direction         //
+    // - P2      : array<double, 3>, point which 2nd line passes through          //
+    // ========================================================================== //
+    // OUTPUT                                                                     //
+    // ========================================================================== //
+    // - P       : array<double, 3>, intersection point                           //
+    // ========================================================================== //
+
+    // ========================================================================== //
+    // VARIABLES DECLARATION                                                      //
+    // ========================================================================== //
+
+    // Local variables
+    double                  xi, delta, den;
+    array<double, 3>        P;
+
+    // Counters
+    // none
+
+    // ========================================================================== //
+    // COMPUTE INTERSECTION POINT.                                                //
+    // ========================================================================== //
+    delta = Dot_Product(n1, n2);
+    if (abs((abs(delta) - 1.0)) < 1.0e-12) {
+        P[0] = P[1] = P[2] = 1.0e+12;
+    }
+    else {
+        den = (1.0 - pow(delta, 2));
+        xi = (Dot_Product(P2, n1)
+                - Dot_Product(P1, n1)
+                + delta * (Dot_Product(P1, n2) - Dot_Product(P2, n2))) / den;
+        P = P1 + xi * n1;
+    }
+
+    return(P); };
+

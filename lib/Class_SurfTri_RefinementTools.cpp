@@ -1214,9 +1214,9 @@ for (i = 0; i < nSimplex; i++) {
     xP = CircumCenter(i);
 
     // Add circumcenter to Voronoi vertex list and update {Simplex->CircumCenters} map
-    s1 = SameSide(xP,V3,V1,V2);
-    s2 = SameSide(xP,V1,V2,V3);
-    s3 = SameSide(xP,V2,V3,V1);
+    s1 = PointsOnSameSide(xP,V3,V1,V2);
+    s2 = PointsOnSameSide(xP,V1,V2,V3);
+    s3 = PointsOnSameSide(xP,V2,V3,V1);
     inside = (s1 && s2 && s3);
     if (inside) {
         Voronoi.AddVertex(P);
