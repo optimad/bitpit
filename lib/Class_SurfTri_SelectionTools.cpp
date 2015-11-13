@@ -678,6 +678,44 @@ for (i = 1; i < nSimplex; i++) {
 
 return; };
 
+// -------------------------------------------------------------------------- //
+void Class_SurfTri::BoundingBox(
+    darray3E   &B1,
+    darray3E   &B2
+) {
+
+
+// Local variables
+int         n;
+darray3E    P;
+
+// Counters
+int         i, j, d, I_;
+
+// ========================================================================== //
+// COMPUTE BOUNDING BOX                                                       //
+// ========================================================================== //
+
+// Compute bounding box points ---------------------------------------------- //
+B1 = B2 = Vertex[Simplex[0][0]];
+
+for (i = 1; i < nSimplex; i++) {
+    n = Simplex[i].size();
+    for (j = 0; j < n; j++) {
+        I_ = Simplex[i][j];
+
+        P = Vertex[I_] ;
+
+        for( d=0; d<3; ++d){
+            B1[d] = min( B1[d], P[d] ) ;
+            B2[d] = max( B2[d], P[d] ) ;
+        };
+
+    } //next j
+} //next i
+
+return; };
+
 // ----------------------------------------------------------------------------------- //
 void Class_SurfTri::Boundaries(
     Class_SurfTri      &Bounds
