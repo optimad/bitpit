@@ -20,6 +20,7 @@ list(APPEND TESTS "pablo_003")
 list(APPEND TESTS "pablo_004")
 list(APPEND TESTS "patchman_001")
 list(APPEND TESTS "patchman_002")
+list(APPEND TESTS "patchman_003")
 
 if (NOT WITHOUT_MPI)
     set(PARALLEL_TEST "")
