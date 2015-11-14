@@ -158,7 +158,7 @@ void Cell::unset_interfaces()
 */
 int Cell::get_interface_count() const
 {
-	return m_interfaces.size();
+	return m_interfaces.sub_arrays_total_size();
 }
 
 /*!
