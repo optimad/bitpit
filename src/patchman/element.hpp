@@ -119,9 +119,9 @@ public:
 
 	double eval_min_length() const;
 
-protected:
 	static const long NULL_ELEMENT_ID;
 
+protected:
 	static std::array<double, 3> cross_3D(std::array<double, 3> &x, std::array<double, 3> &y);
 	static void normalize_3D(std::array<double, 3> &x);
 	static void transpose_3D(std::array<std::array<double, 3>, 3> &A);
