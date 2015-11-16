@@ -124,7 +124,7 @@ void Test001(
 // ========================================================================== //
 
 // Local variables
-ivector2D                    map(20, ivector1D(2, -1)), *map_ = &map;
+vector< array<int,2> >       map(20), *map_ = &map;
 minPQUEUE<double, string>    heap(2, true, map_);
 
 // Counters
@@ -140,16 +140,24 @@ minPQUEUE<double, string>    heap(2, true, map_);
     // Output message ------------------------------------------------------- //
     cout << "=================== TEST 001: min heap queue ==================" << endl;
 }
+
+
+
 // ========================================================================== //
 // BUILD MIN-HEAP                                                             //
 // ========================================================================== //
 {
+
 
     // Scope variables ------------------------------------------------------ //
     int            i, N = 10;
     double         dummy_key;
     stringstream   sdummy;
     string         dummy_label;
+
+    for(i=0; i<20; ++i){
+        map[i].fill(-1) ;
+    };
 
     // Display min heap ----------------------------------------------------- //
     heap.display(cout);
@@ -257,7 +265,7 @@ void Test002(
 // ========================================================================== //
 
 // Local variables
-ivector2D                    map(20, ivector1D(2, -1)), *map_ = &map;
+vector< array<int,2> >       map(20), *map_ = &map;
 maxPQUEUE<double, string>    heap(2, true, map_);
 
 // Counters
@@ -284,6 +292,11 @@ maxPQUEUE<double, string>    heap(2, true, map_);
     double         dummy_key;
     stringstream   sdummy;
     string         dummy_label;
+    
+
+    for( i=0; i<20; ++i){
+        map[i].fill(-1) ;
+    };
 
     // Display min heap ----------------------------------------------------- //
     heap.display(cout);
