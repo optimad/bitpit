@@ -2,39 +2,17 @@
 cmake_minimum_required(VERSION 2.8)
 
 #Name your project here
-project(OPTIMAD_UCartMesh)
 
+file(GLOB lib_src "*.cpp")
 
-SET(TargetLib ucartmesh)
-SET(TargetTest test_ucartmesh)
+add_library( ${TargetLib} STATIC ${lib_src})
 
-SET(DepLibs opt_base opt_IO  )
-
-SET(BLDIR build/lib/ )
-
-IF(CMAKE_BUILD_TYPE MATCHES Debug)
-    message( "building debug")
-    SET(BLDIR debug/lib/ )
-    ADD_DEFINITIONS(-Wall)
-ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
-
-SET(IDIR include )
-
-EXEC_PROGRAM(pwd ../../ OUTPUT_VARIABLE OptLibsDir)
-
-ADD_DEFINITIONS(-std=c++0x)
-
-include_directories( ${IDIR} )
 FOREACH( lib ${DepLibs} )
 
-    set(INAME "${OptLibsDir}/${lib}/${IDIR}")
-    set(LNAME "${OptLibsDir}/${lib}/${BLDIR}")
+    set(LNAME "${OptLibsDir}/${lib}/${BLDIR}/lib${lib}.a")
 
-    message( ${INAME} )
-    include_directories( ${INAME} )
-    link_directories( ${LNAME} )
+    if(EXISTS  ${LNAME})
+        TARGET_LINK_LIBRARIES(${TargetLib} ${lib} )
+    endif(EXISTS  ${LNAME})
 
 ENDFOREACH( lib ${DepLibs})
-
-ADD_SUBDIRECTORY(lib)
-ADD_SUBDIRECTORY(test_lib )
