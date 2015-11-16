@@ -1,39 +1,17 @@
-#Specify the version being used as well as the language
+# CMake settings
 cmake_minimum_required(VERSION 2.8)
 
-#Name your project here
-project(OPTIMAD_SurfTri)
+# Add library to targets
+include_directories("${PROJECT_SOURCE_DIR}/src/surftri")
 
+file(GLOB SOURCE_FILES "*.cpp")
+set(SURFTRI_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Sources of SurfTri Library" FORCE)
+unset(SOURCE_FILES)
 
-SET(TargetLib surftri)
-SET(TargetTest test_surftri)
+file(GLOB HEADER_FILES "*.hpp" "*.tpp")
+set(SURFTRI_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of SurfTri Library" FORCE)
+unset(HEADER_FILES)
 
-SET(DepLibs opt_base opt_IO opt_SA opt_LA opt_CG  )
+add_library(SURFTRI_TARGET_OBJECT OBJECT ${SURFTRI_SOURCES})
 
-SET(BLDIR build/lib/ )
-
-IF(CMAKE_BUILD_TYPE MATCHES Debug)
-    message( "building debug")
-    SET(BLDIR debug/lib/ )
-ENDIF(CMAKE_BUILD_TYPE MATCHES Debug)
-
-SET(IDIR include )
-
-EXEC_PROGRAM(pwd ../../ OUTPUT_VARIABLE OptLibsDir)
-
-ADD_DEFINITIONS(-std=c++0x)
-
-include_directories( ${IDIR} )
-FOREACH( lib ${DepLibs} )
-
-    set(INAME "${OptLibsDir}/${lib}/${IDIR}")
-    set(LNAME "${OptLibsDir}/${lib}/${BLDIR}")
-
-    message( ${INAME} )
-    include_directories( ${INAME} )
-    link_directories( ${LNAME} )
-
-ENDFOREACH( lib ${DepLibs})
-
-ADD_SUBDIRECTORY(lib)
-ADD_SUBDIRECTORY(test_lib )
+install(FILES ${SURFTRI_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})

@@ -1,33 +1,17 @@
-#Specify the version being used as well as the language
+# CMake settings
 cmake_minimum_required(VERSION 2.8)
 
-#Name your project here
-project(OPTIMAD_VolTri)
+# Add library to targets
+include_directories("${PROJECT_SOURCE_DIR}/src/voltri")
 
+file(GLOB SOURCE_FILES "*.cpp")
+set(VOLTRI_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Sources of VolTri Library" FORCE)
+unset(SOURCE_FILES)
 
-SET(TargetLib voltri)
-SET(TargetTest test_voltri)
+file(GLOB HEADER_FILES "*.hpp" "*.tpp")
+set(VOLTRI_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of VolTri Library" FORCE)
+unset(HEADER_FILES)
 
-SET(DepLibs surftri opt_base opt_IO opt_SA opt_LA opt_CG  )
+add_library(VOLTRI_TARGET_OBJECT OBJECT ${VOLTRI_SOURCES})
 
-SET(BLDIR build/lib/ )
-SET(IDIR include )
-
-EXEC_PROGRAM(pwd ../../ OUTPUT_VARIABLE OptLibsDir)
-
-ADD_DEFINITIONS(-std=c++0x)
-
-include_directories( ${IDIR} )
-FOREACH( lib ${DepLibs} )
-
-    set(INAME "${OptLibsDir}/${lib}/${IDIR}")
-    set(LNAME "${OptLibsDir}/${lib}/${BLDIR}")
-
-    message( ${INAME} )
-    include_directories( ${INAME} )
-    link_directories( ${LNAME} )
-
-ENDFOREACH( lib ${DepLibs})
-
-ADD_SUBDIRECTORY(lib)
-ADD_SUBDIRECTORY(test_lib )
+install(FILES ${VOLTRI_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})
