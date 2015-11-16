@@ -3,3 +3,5 @@ debug/
 CMakeFiles/
 *.swp
 *~
+.cproject
+.project
