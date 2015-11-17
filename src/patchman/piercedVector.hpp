@@ -631,6 +631,10 @@ public:
 		If the id does not exists the function throws an
 		exception.
 
+		Element is not deleted from the internal vector, instead its
+		id is changed to mark the position as empty and allow the
+		container to reuse that position.
+
 		\param id the id of the element to erase
 		\result An iterator pointing to the new location of the
 		        element that followed the element erased by the
@@ -712,7 +716,9 @@ public:
 		Removes the last element in the vector, effectively reducing
 		the container size by one.
 
-		This destroys the removed element.
+		Element is not deleted from the internal vector, instead its
+		id is changed to mark the position as empty and allow the
+		container to reuse that position.
 	*/
 	void pop_back()
 	{
@@ -1185,6 +1191,10 @@ private:
 	/*!
 		Removes from the vector the element at the specified position.
 
+		Element is not deleted from the internal vector, instead its
+		id is changed to mark the position as empty and allow the
+		container to reuse that position.
+
 		\param pos the position of the element to erase
 		\result An iterator pointing to the new location of the
 		        element that followed the element erased by the
@@ -1195,9 +1205,6 @@ private:
 	{
 		// Id of the element
 		id_type id = m_v[pos].get_id();
-
-		// Delete the element
-		m_v[pos] = T();
 
 		// Pierce the position
 		pierce_pos(pos, id);
