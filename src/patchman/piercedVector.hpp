@@ -1332,8 +1332,8 @@ private:
 		}
 
 		// If previos element is a hole, its id need to be udated
-		if (pos > 0) {
-			update_pos_id(pos - 1);
+		if (pos > 0 && is_pos_empty(pos - 1)) {
+			update_empty_pos_id(pos - 1);
 		}
 	}
 
@@ -1542,8 +1542,8 @@ private:
 			}
 		}
 
-		// Update id of the dummy element
-		update_pos_id(pos);
+		// Update id of the empty element
+		update_empty_pos_id(pos);
 
 		// Hole
 		//
@@ -1585,40 +1585,41 @@ private:
 	}
 
 	/*!
-		If the specified position is empty, updates the id of the
-		dummy element in that position and, if needed, also of the
-		dummy element before the specified position.
+		Updates the id of the element in the specified position to make
+		it an empty element. If needed, updates also of the id of the
+		element before the specified position.
 
-		The id of the element in an empty position contains the
-		distance, measured in number of elements, between the
-		dummy element and the next non-empty element (the distance
-		is negative). The id of a dummy element past the last
-		non-empty position is set to the special value SENTINEL_ID.
+		The id of an empty element contains the distance, measured in
+		number of elements, between the current element the next
+		non-empty element (the distance is negative). The id of an
+		element past the last non-empty position is set to the special
+		value SENTINEL_ID.
 
 		\param pos the specified position
 	*/
-	void update_pos_id(size_type pos)
+	void update_empty_pos_id(size_type pos)
 	{
-		// Only the ids of the holes need to be updated
-		if (!is_pos_empty(pos)) {
-			return;
-		}
-
-		// Id associated to the position
-		id_type id;
+		// Position of the next non-empty element
+		id_type distanceFromNonEmpty;
 		if (empty() || pos > m_last_pos) {
-			id = SENTINEL_ID;
+			distanceFromNonEmpty = SENTINEL_ID;
 		} else if (is_pos_empty(pos + 1)) {
-			id = m_v[pos + 1].get_id() - 1;
+			distanceFromNonEmpty = m_v[pos + 1].get_id() - 1;
 		} else {
-			id = - 1;
+			distanceFromNonEmpty = - 1;
 		}
 
-		m_v[pos].set_id(id);
+		// Update the id of the element in the current position
+		m_v[pos].set_id(distanceFromNonEmpty);
 
-		// Update the id of the previous position
-		if (pos > 0) {
-			update_pos_id(pos - 1);
+		// Update the id of the elements the previous positions
+		if (pos > m_first_pos) {
+			size_type prevPos = pos - 1;
+			while (prevPos >= m_first_pos && is_pos_empty(prevPos)) {
+				m_v[prevPos].set_id(distanceFromNonEmpty - (pos - prevPos));
+
+				--prevPos;
+			}
 		}
 	}
 
