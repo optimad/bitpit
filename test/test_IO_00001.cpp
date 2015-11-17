@@ -113,7 +113,7 @@ int main()
         vector<float>   label ;
         vector<int64_t> ids ;
 
-        VtkUnstrVec   vtk(DATAFILE_PATH, "selection", "appended", 5 );
+        VtkUnstrVec   vtk("./data", "selection", "appended", 5 );
 
         vtk.LinkData( Ipoints, "Points") ;
         vtk.LinkData( Iconnectivity, "connectivity") ;
