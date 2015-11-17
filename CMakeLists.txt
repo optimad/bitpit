@@ -125,7 +125,7 @@ set(BITP_MESH_MAJOR_VERSION "${match}")
 add_subdirectory(src)
 
 # CMake
-#ht add_subdirectory(cmake)
+add_subdirectory(cmake)
 
 # Examples
 #ht add_subdirectory(examples)
