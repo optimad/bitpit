@@ -31,10 +31,11 @@ endif()
 set(ENABLE_PROFILING 0 CACHE BOOL "Set appropriate compiler flags to enable profiling")
 set(VERBOSE_MAKE 0 CACHE BOOL "Set appropriate compiler and cmake flags to enable verbose output from compilation")
 set(VTK_DIR "/opt/VTK/lib/cmake/vtk" CACHE PATH "The directory containing a CMake configuration file for VTK")
+
 #------------------------------------------------------------------------------------#
 # Internal variables
 #------------------------------------------------------------------------------------#
-set(WITHOUT_MPI "1" CACHE INTERNAL "If set, the program is compiled without MPI support")
+set(WITHOUT_MPI "0" CACHE INTERNAL "If set, the program is compiled without MPI support")
 set(STATIC 1 CACHE BOOL INTERNAL "If set, the program is linked using static libraries")
 
 #------------------------------------------------------------------------------------#
@@ -138,10 +139,14 @@ add_subdirectory(test)
 #------------------------------------------------------------------------------------#
 # Tests
 #------------------------------------------------------------------------------------#
-#ht enable_testing()
-#ht 
-#ht foreach(TEST_NAME IN LISTS TEST_LIST)
-#ht 	add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME})
-#ht endforeach()
-#ht 
-#ht add_custom_target(check DEPENDS tests COMMAND ${CMAKE_MAKE_PROGRAM} test)
+enable_testing()
+
+foreach(TEST_NAME IN LISTS TEST_LIST)
+    add_test( NAME ${TEST_NAME} COMMAND ${TEST_NAME} WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/test" )
+endforeach()
+
+foreach(PTEST_NAME IN LISTS PARALLELTEST_LIST)
+    add_test(NAME ${PTEST_NAME} COMMAND ${MPIEXEC} ${MPIEXEC_PREFLAGS} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_POSTFLAGS} ${PTEST_NAME} WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/test")
+endforeach()
+
+add_custom_target(check DEPENDS tests COMMAND ${CMAKE_MAKE_PROGRAM} test)
