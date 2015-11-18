@@ -8,7 +8,7 @@ file(GLOB SOURCE_FILES "*.cpp")
 set(PABLO_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Sources of Pablo Library" FORCE)
 unset(SOURCE_FILES)
 
-file(GLOB HEADER_FILES "*.hpp" "*.tpp")
+file(GLOB HEADER_FILES "*.hpp" "*.tpp" "*.dat")
 set(PABLO_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of Pablo Library" FORCE)
 unset(HEADER_FILES)
 
