@@ -2,6 +2,9 @@
 #define CLASS_GLOBAL_2D_TPP
 
 /*!
+ *  \ingroup        PABLO
+ *  @{
+ *
  *	\date			23/apr/2014
  *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
@@ -91,4 +94,5 @@ public:
 	int8_t   normals[4][3];			/**< Components (x,y,z) of the normals per face (z=0 in 2D) */
 };
 
+/*  @} */
 #endif

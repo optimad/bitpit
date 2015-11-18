@@ -23,6 +23,8 @@ using namespace std;
 
 
 /*!
+ *  \ingroup        PABLO
+ *  @{
  *	\date			23/apr/2014
  *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
@@ -185,6 +187,6 @@ public:
 
 #include "Class_Map.tpp"
 
-// end class_map
+/* @} */
 
 #endif /* CLASS_MAP_HPP_ */

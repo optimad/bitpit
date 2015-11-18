@@ -21,6 +21,9 @@ using namespace std;
 // CLASS DEFINITION                                                                    //
 // =================================================================================== //
 /*!
+ * \ingroup PABLO
+ * @{
+ *
  *	\date			09/sep/2015
  *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
@@ -74,6 +77,8 @@ public:
 	template<class T>
 	void read(T& val);
 };
+
+/* @} */
 
 #include "Class_Comm_Buffer.tpp"
 

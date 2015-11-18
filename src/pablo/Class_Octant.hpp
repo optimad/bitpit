@@ -23,6 +23,8 @@ using namespace std;
 // CLASS DEFINITION                                                                    //
 // =================================================================================== //
 /*!
+ *  \ingroup        PABLO
+ *  @{
  *	\date			23/apr/2014
  *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
@@ -51,5 +53,7 @@ class Class_Octant{};
 
 #include "Class_Octant_3D.tpp"
 #include "Class_Octant_2D.tpp"
+
+/*  @} */
 
 #endif /* OCTREE_HPP_ */
