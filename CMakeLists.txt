@@ -128,7 +128,7 @@ add_subdirectory(src)
 add_subdirectory(cmake)
 
 # Examples
-#ht add_subdirectory(examples)
+add_subdirectory(examples)
 
 # Tests
 add_subdirectory(test)
