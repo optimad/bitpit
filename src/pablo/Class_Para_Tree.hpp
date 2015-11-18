@@ -39,17 +39,15 @@ using namespace std;
 // =================================================================================== //
 
 /*!
+ *  \ingroup        PABLO
+ *  @{
  *	\date			12/feb/2014
  *	\authors		Marco Cisternino
  *	\authors		Edoardo Lombardi
- *	\version		0.1
- *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
- *	\par			License:\n
- *	This version of PABLO is released under the LGPL License.
  *
- *	\brief Parallel Octree Manager Class
+ *	\brief Para Tree is the user interface class
  *
- *	Para Tree is the user interface class. One user should (read can...) work only
+ *	The user should (read can...) work only
  *	with this Class and its methods.
  *	The sizes are intended in physical domain. The transformation from the logical
  *	domain to the physical domain is defined by Class_Map<2> trans.
@@ -66,5 +64,6 @@ class Class_Para_Tree{};
 #include "Class_Para_Tree_3D.tpp"
 #include "Class_Para_Tree_2D.tpp"
 
+/*  @}  */
 
 #endif /* CLASS_PARA_TREE_HPP_ */

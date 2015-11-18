@@ -9,6 +9,8 @@
 namespace pman {
 
 /*!
+    \ingroup    PatchMan
+    @{
 	\class Node
 
 	\brief The Node class defines the nodes.
@@ -75,3 +77,5 @@ const std::array<double, 3> & Node::get_coords() const
 }
 
 }
+
+/*! @} */

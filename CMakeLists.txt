@@ -134,7 +134,7 @@ add_subdirectory(cmake)
 add_subdirectory(test)
 
 # Docs
-#ht add_subdirectory(doc)
+add_subdirectory(doc)
 
 #------------------------------------------------------------------------------------#
 # Tests

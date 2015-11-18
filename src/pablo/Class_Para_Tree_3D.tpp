@@ -1,4 +1,7 @@
+
 /*!
+ *  \ingroup PABLO
+ *  @{
  *	\date			23/apr/2014
  *	\authors		Marco Cisternino
  *	\authors		Edoardo Lombardi
@@ -7,7 +10,7 @@
  *	\par			License:\n
  *	This version of PABLO is released under the LGPL License.
  *
- *	\brief Parallel Octree Manager Class - 3D specialization
+ *	\brief 3D PABLO User Interface
  *
  *	Para Tree is the user interface class. One user should (read can...) work only
  *	with this Class and its methods.
@@ -6954,3 +6957,4 @@ public:
 };
 
 
+/* @} */

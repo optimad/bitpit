@@ -19,7 +19,8 @@ using namespace std;
 // CLASS DEFINITION                                                                    //
 // =================================================================================== //
 
-/*!
+/*! @ingroup PABLO 
+ * @{ 
  *
  *	\date		03/mar/2014
  *  \authors	Marco Cisternino
@@ -55,5 +56,7 @@ public:
 	// METHODS ----------------------------------------------------------------------- //
 	Class_Array& operator=(const Class_Array& rhs);
 };
+
+/* @} */
 
 #endif /* CLASS_ARRAY_HPP_ */

@@ -10,9 +10,10 @@
 namespace pman {
 
 /*!
-	\class PatchOctree
-
-	\brief The PatchOctree defines a Octree patch.
+    \ingroup    PatchMan
+    @{
+	\class      PatchOctree
+	\brief      The PatchOctree defines a Octree patch.
 
 	PatchOctree defines a Octree patch.
 */
@@ -684,5 +685,7 @@ bool PatchOctree::_enable_cell_balancing(const long &id, bool enabled)
 }
 
 }
+
+/*  @} */
 
 #endif

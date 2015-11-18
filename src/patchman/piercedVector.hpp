@@ -20,6 +20,7 @@
 
 namespace pman {
 
+
 // To check if the provided template argument implements the needed methods,
 // the following Stackoverflow questions are used:
 //
@@ -53,6 +54,8 @@ public:
 };
 
 /*!
+    @ingroup    PatchMan
+    @{
 	@brief Iterator for the class PiercedVector
 
 	@details
@@ -247,6 +250,8 @@ public:
 	{
 		return PiercedIterator<const T>(m_itr);
 	}
+
+/*!  @} */
 };
 
 // Definition of static constants of PiercedIterator
@@ -255,6 +260,9 @@ const typename PiercedIterator<T, unqualified_T>::id_type
 	PiercedIterator<T, unqualified_T>::SENTINEL_ID = std::numeric_limits<id_type>::min();
 
 /*!
+    @ingroup    PatchMan
+    @{
+
 	@brief Metafunction for generating of a pierced vector.
 
 	@details
@@ -1621,7 +1629,7 @@ private:
 			update_pos_id(pos - 1);
 		}
 	}
-
+/*! @}  */
 };
 
 // Definition of static constants of PiercedVector
@@ -1650,5 +1658,6 @@ const typename PiercedVector<T>::size_type
 	PiercedVector<T>::USABLE_POS_COUNT = std::numeric_limits<size_type>::max() - std::max(RESERVED_HOLE_COUNT, REQUIRED_SENTINEL_COUNT);
 
 }
+
 
 #endif

@@ -9,6 +9,8 @@
 namespace pman {
 
 /*!
+    \ingroup    PatchMan
+    @{
 	\class Interface
 
 	\brief The Interface class defines the interfaces among cells.
@@ -393,3 +395,5 @@ InterfaceData * Interface::get_data() const
 }
 
 }
+
+/*! @} */

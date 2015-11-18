@@ -6,6 +6,9 @@
 #include <stdint.h>
 
 /*!
+ *  \ingroup        PABLO
+ *  @{
+ *
  *	\date			09/sep/2015
  *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
@@ -120,6 +123,7 @@ private:
 	const Impl& getImpl() const;
 };
 
+/*  @{ */
 #include "Class_Data_LB_Interface.tpp"
 
 #endif /* CLASS_DATA_LB_INTERFACE_HPP_ */

@@ -1,6 +1,8 @@
 /*!
  * Class_Local_Tree_2D.tpp
  *
+ *  \ingroup    PABLO
+ *  @{
  *  \date		23/apr/2014
  *	\authors	Edoardo Lombardi
  *	\authors	Marco Cisternino
@@ -4294,3 +4296,4 @@ private:
 
 };//end Class_Local_Tree<2> specialization;
 
+/*  @} */
