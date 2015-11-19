@@ -12,8 +12,10 @@
 #include "Class_Para_Tree.hpp"
 
 #include <assert.h>
+#include <deque>
 #include <cstddef>
 #include <vector>
+#include <unordered_set>
 
 namespace pman {
 
@@ -124,13 +126,14 @@ private:
 	long create_vertex(uint32_t treeId);
 	void delete_vertex(long id);
 
-	void update_cells();
-	void import_cells();
-	void reload_cells();
+	long create_interface(uint32_t treeId,
+                            std::unique_ptr<long[]> &vertices,
+                            std::array<FaceInfo, 2> &faces);
 
-	void update_interfaces();
-	void import_interfaces();
-	void reload_interfaces();
+	long create_cell(uint32_t treeId, bool internal,
+	                 std::unique_ptr<long[]> &vertices,
+	                 std::vector<std::vector<long>> &interfaces,
+	                 std::vector<std::vector<bool>> &ownerFlags);
 };
 
 }
