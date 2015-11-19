@@ -398,6 +398,11 @@ void PatchOctree::import_octants(std::vector<OctantInfo> &octantInfoList,
 		nCellVertices = Element::get_vertex_count(Element::RECTANGLE);
 	}
 
+	std::vector<std::vector<int>> cellLocalFaceConnect(nCellFaces);
+	for (int k = 0; k < nCellFaces; ++k) {
+		cellLocalFaceConnect[k] = Element::get_face_local_connect(cellType, k);
+	}
+
 	// Info on the interfaces
 	int nInterfaceVertices;
 	if (is_three_dimensional()) {
@@ -449,7 +454,7 @@ void PatchOctree::import_octants(std::vector<OctantInfo> &octantInfoList,
 			const std::vector<uint32_t> &octantTreeConnect = get_octant_connect(octantInfo);
 
 			// List of vertices
-			std::vector<int> localConnect = Element::get_face_local_connect(cellType, vertexSource.face);
+			std::vector<int> &localConnect = cellLocalFaceConnect[vertexSource.face];
 			for (int k = 0; k < nInterfaceVertices; ++k) {
 				long vertexId = cellConnect[localConnect[k]];
 				uint32_t vertexTreeId = octantTreeConnect[localConnect[k]];
@@ -555,7 +560,7 @@ void PatchOctree::import_octants(std::vector<OctantInfo> &octantInfoList,
 
 		// Interface connectivity
 		const std::vector<uint32_t> &octantTreeConnect = get_octant_connect(ownerOctantInfo);
-		std::vector<int> localConnect = Element::get_face_local_connect(cellType, ownerFace);
+		std::vector<int> &localConnect = cellLocalFaceConnect[ownerFace];
 		std::unique_ptr<long[]> interfaceConnect = std::unique_ptr<long[]>(new long[nInterfaceVertices]);
 		for (int k = 0; k < nInterfaceVertices; ++k) {
 			interfaceConnect[k] = vertexMap.at(octantTreeConnect[localConnect[k]]);
