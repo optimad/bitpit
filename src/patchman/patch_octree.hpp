@@ -44,6 +44,7 @@ public:
 	int get_cell_level(const long &id);
 
 	long get_octant_id(const OctantInfo &octantInfo) const;
+	const std::vector<uint32_t> & get_octant_connect(const OctantInfo &octantInfo);
 
 	/*!
 		\brief Gets the octree associated with the patch.

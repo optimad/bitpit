@@ -151,6 +151,31 @@ long PatchOctree::get_octant_id(const OctantInfo &octantInfo) const
 }
 
 /*!
+	Gets the connectivity of the specified octant.
+
+	\param octantInfo the data of the octant
+	\result A reference to the octant's connectivity
+*/
+const std::vector<uint32_t> & PatchOctree::get_octant_connect(const OctantInfo &octantInfo)
+{
+	if (is_three_dimensional()) {
+		bool isGhost = m_tree_3D.getIsGhost(octantInfo.id);
+		if (!isGhost) {
+			return m_tree_3D.getConnectivity()[octantInfo.id];
+		} else {
+			return m_tree_3D.getGhostConnectivity()[octantInfo.id];
+		}
+	} else {
+		bool isGhost = m_tree_2D.getIsGhost(octantInfo.id);
+		if (!isGhost) {
+			return m_tree_2D.getConnectivity()[octantInfo.id];
+		} else {
+			return m_tree_2D.getGhostConnectivity()[octantInfo.id];
+		}
+	}
+}
+
+/*!
 	Gets the refinement level of the cell with the specified id.
 
 	\param id is the id of the cell
