@@ -126,8 +126,6 @@ protected:
 	static void normalize_3D(std::array<double, 3> &x);
 	static void transpose_3D(std::array<std::array<double, 3>, 3> &A);
 
-	static bool add_id_to_ordered_list(const long &id, std::vector<long> &list);
-
 private:
 	Patch *m_patch;
 

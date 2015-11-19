@@ -1065,28 +1065,4 @@ void Element::transpose_3D(std::array<std::array<double, 3>, 3> &A)
 	}
 }
 
-
-/*!
-	Adds an id to an ordered list of unique ids.
-
-	\param id is the id to be added
-	\param list is the ordered list of uniqe ids
-	\result Returns true is the id was added to the list, false otherwise.
-*/
-bool Element::add_id_to_ordered_list(const long &id, std::vector<long> &list)
-{
-	if (list.empty()) {
-		list.push_back(id);
-		return true;
-	}
-
-	std::vector<long>::iterator itr = lower_bound(list.begin(), list.end(), id);
-	if (itr == list.end() || *itr != id) {
-		list.insert(itr, id);
-		return true;
-	} else {
-		return false;
-	}
-}
-
 }
