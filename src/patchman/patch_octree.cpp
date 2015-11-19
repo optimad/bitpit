@@ -99,22 +99,55 @@ std::array<double, 3> & PatchOctree::_get_opposite_normal(std::array<double, 3> 
 	Gets the octant of the cell with the specified id.
 
 	\param id the id of the cell
-	\result The octant of the specified cell
+	\result The octant info of the specified cell
 */
-long PatchOctree::get_cell_octant(const long &id) const
+PatchOctree::OctantInfo PatchOctree::get_cell_octant(const long &id) const
 {
-	return m_cell_to_octant.at(id);
+	bool internal = (m_cells[id].get_position_type() == Cell::INTERNAL);
+
+	OctantInfo octantInfo;
+	octantInfo.internal = internal;
+	if (internal) {
+		const std::unordered_map<long, uint32_t, Element::IdHasher>::const_iterator cellItr = m_cell_to_octant.find(id);
+		if (cellItr == m_cell_to_octant.end()) {
+			octantInfo.exists = false;
+			return octantInfo;
+		}
+		octantInfo.id = cellItr->second;
+	} else {
+		const std::unordered_map<long, uint32_t, Element::IdHasher>::const_iterator cellItr = m_cell_to_ghost.find(id);
+		if (cellItr == m_cell_to_ghost.end()) {
+			octantInfo.exists = false;
+			return octantInfo;
+		}
+		octantInfo.id = cellItr->second;
+	}
+
+	return octantInfo;
 }
 
 /*!
 	Gets the id of the specified octant.
 
-	\param octant the index of the octant
+	\param octantInfo the data of the octant
 	\result The id of the specified octant
 */
-long PatchOctree::get_octant_id(const long &octant) const
+long PatchOctree::get_octant_id(const OctantInfo &octantInfo) const
 {
-	return m_octant_to_cell.at(octant);
+	std::unordered_map<uint32_t, long>::const_iterator octantItr;
+	if (octantInfo.internal) {
+		octantItr = m_octant_to_cell.find(octantInfo.id);
+		if (octantItr == m_octant_to_cell.end()) {
+			return Element::NULL_ELEMENT_ID;
+		}
+	} else {
+		octantItr = m_ghost_to_cell.find(octantInfo.id);
+		if (octantItr == m_ghost_to_cell.end()) {
+			return Element::NULL_ELEMENT_ID;
+		}
+	}
+
+	return octantItr->second;
 }
 
 /*!
@@ -125,10 +158,22 @@ long PatchOctree::get_octant_id(const long &octant) const
 */
 int PatchOctree::get_cell_level(const long &id)
 {
-	long octant = get_cell_octant(id);
+	OctantInfo octantInfo = get_cell_octant(id);
 	if (is_three_dimensional()) {
+		Class_Octant<3> *octant;
+		if (m_tree_3D.getIsGhost(octantInfo.id)) {
+			octant = m_tree_3D.getGhostOctant(octantInfo.id);
+		} else {
+			octant = m_tree_3D.getOctant(octantInfo.id);
+		}
 		return m_tree_3D.getLevel(octant);
 	} else {
+		Class_Octant<2> *octant;
+		if (m_tree_2D.getIsGhost(octantInfo.id)) {
+			octant = m_tree_2D.getGhostOctant(octantInfo.id);
+		} else {
+			octant = m_tree_2D.getOctant(octantInfo.id);
+		}
 		return m_tree_2D.getLevel(octant);
 	}
 }
@@ -294,8 +339,10 @@ void PatchOctree::import_cells()
 
 	long nCells = m_nInternalCells + m_nGhostsCells;
 
-	m_cell_to_octant.reserve(nCells);
-	m_octant_to_cell.resize(nCells);
+	m_cell_to_octant.reserve(m_nInternalCells);
+	m_cell_to_ghost.reserve(m_nGhostsCells);
+	m_octant_to_cell.reserve(m_nInternalCells);
+	m_ghost_to_cell.reserve(m_nGhostsCells);
 	m_cells.reserve(nCells);
 	for (long n = 0; n < nCells; n++) {
 		m_cells.emplace_back(n, this);
@@ -311,8 +358,13 @@ void PatchOctree::import_cells()
 			ghostId = octantId - m_nInternalCells;
 		}
 
-		m_cell_to_octant[n] = octantId;
-		m_octant_to_cell[octantId] = n;
+		if (isInternal) {
+			m_octant_to_cell[octantId] = n;
+			m_cell_to_octant[n] = octantId;
+		} else {
+			m_ghost_to_cell[ghostId] = n;
+			m_cell_to_ghost[n] = ghostId;
+		}
 
 		int octantLevel;
 		vector<double> octantCentroid;
@@ -486,8 +538,10 @@ void PatchOctree::import_interfaces()
 			faceCenter = m_tree_2D.getCenter(treeInterface);
 		}
 
-		long ownerOctantId = cells[ownerCell];
-		long ownerId = get_octant_id(ownerOctantId);
+		OctantInfo ownerOctantInfo;
+		ownerOctantInfo.id = cells[ownerCell];
+		ownerOctantInfo.internal = !isGhost;
+		long ownerId = get_octant_id(ownerOctantInfo);
 
 		// Tipo
 		if (is_three_dimensional()) {
@@ -529,11 +583,10 @@ void PatchOctree::import_interfaces()
 		if (isBoundary) {
 			interface.unset_neigh();
 		} else {
-			long neighOctantId = cells[ownerCell ? 0 : 1];
-			if (isGhost) {
-				neighOctantId += m_nInternalCells;
-			}
-			long neighId = get_octant_id(neighOctantId);
+			OctantInfo neighOctantInfo;
+			neighOctantInfo.id = cells[ownerCell ? 0 : 1];
+			neighOctantInfo.internal = !isGhost;
+			long neighId = get_octant_id(neighOctantInfo);
 
 			Cell &neigh = m_cells[neighId];
 			cellToInterfaceMap[neighId].push_back(interface.get_id());
@@ -623,13 +676,7 @@ void PatchOctree::reload_interfaces()
 */
 bool PatchOctree::_mark_cell_for_refinement(const long &id)
 {
-	if (is_three_dimensional()) {
-		m_tree_3D.setMarker(id, 1);
-	} else {
-		m_tree_2D.setMarker(id, 1);
-	}
-
-	return true;
+	return set_marker(id, 1);
 }
 
 /*!
@@ -639,10 +686,26 @@ bool PatchOctree::_mark_cell_for_refinement(const long &id)
 */
 bool PatchOctree::_mark_cell_for_coarsening(const long &id)
 {
+	return set_marker(id, -1);
+}
+
+/*!
+	Set the marker on a cell.
+
+	\param id is the id of the cell
+	\param value is the value of the marker
+*/
+bool PatchOctree::set_marker(const long &id, const int8_t &value)
+{
+	OctantInfo octantInfo = get_cell_octant(id);
+	if (!octantInfo.internal) {
+		return false;
+	}
+
 	if (is_three_dimensional()) {
-		m_tree_3D.setMarker(id, -1);
+		m_tree_3D.setMarker(octantInfo.id, value);
 	} else {
-		m_tree_2D.setMarker(id, -1);
+		m_tree_2D.setMarker(octantInfo.id, value);
 	}
 
 	return true;
@@ -656,10 +719,15 @@ bool PatchOctree::_mark_cell_for_coarsening(const long &id)
 */
 bool PatchOctree::_enable_cell_balancing(const long &id, bool enabled)
 {
+	OctantInfo octantInfo = get_cell_octant(id);
+	if (!octantInfo.internal) {
+		return false;
+	}
+
 	if (is_three_dimensional()) {
-		m_tree_3D.setBalance(id, enabled);
+		m_tree_3D.setBalance(octantInfo.id, enabled);
 	} else {
-		m_tree_2D.setBalance(id, enabled);
+		m_tree_2D.setBalance(octantInfo.id, enabled);
 	}
 
 	return true;

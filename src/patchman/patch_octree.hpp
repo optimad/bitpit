@@ -27,15 +27,23 @@ struct OctreeLevelInfo{
 class PatchOctree : public Patch {
 
 public:
+	struct OctantInfo {
+		OctantInfo() : exists(true) {};
+
+		bool exists;
+		uint32_t id;
+		bool internal;
+	};
+
 	PatchOctree(const int &id, const int &dimension, std::array<double, 3> origin,
 			double length, double dh);
 
 	~PatchOctree();
 
-	long get_cell_octant(const long &id) const;
+	OctantInfo get_cell_octant(const long &id) const;
 	int get_cell_level(const long &id);
 
-	long get_octant_id(const long &octant) const;
+	long get_octant_id(const OctantInfo &octantInfo) const;
 
 	/*!
 		\brief Gets the octree associated with the patch.
@@ -67,8 +75,10 @@ private:
 	long m_nInternalCells;
 	long m_nGhostCells;
 
-	std::unordered_map<long, long, Element::IdHasher> m_cell_to_octant;
-	std::vector<long> m_octant_to_cell;
+	std::unordered_map<long, uint32_t, Element::IdHasher> m_cell_to_octant;
+	std::unordered_map<long, uint32_t, Element::IdHasher> m_cell_to_ghost;
+	std::unordered_map<uint32_t, long> m_octant_to_cell;
+	std::unordered_map<uint32_t, long> m_ghost_to_cell;
 
 	Class_Para_Tree<2> m_tree_2D;
 	Class_Para_Tree<3> m_tree_3D;
@@ -78,6 +88,8 @@ private:
 	vector<double> m_tree_volume;
 
 	std::vector<std::array<double, 3> > m_normals;
+
+	bool set_marker(const long &id, const int8_t &value);
 
 	void update_vertices();
 	void import_vertices();
