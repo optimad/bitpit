@@ -253,7 +253,7 @@ vtkIdType OutputManager::InsertNextVertex(const Node &vertex)
 
 // Description:
 // Aggiunge una cella alla mesh
-vtkIdType OutputManager::InsertNextCell(const Cell &cell)
+vtkIdType OutputManager::InsertNextCell(const Cell &cell, std::unordered_map<long, vtkIdType> &vertexMap)
 {
 	int vtkCellType = getVTKCellType(cell.get_type());
 
@@ -262,7 +262,7 @@ vtkIdType OutputManager::InsertNextCell(const Cell &cell)
 	std::vector<vtkIdType> vtkCellConnect(nCellVerts);
 	for (long k = 0; k < nCellVerts; k++) {
 		Node &node = cell.get_patch()->get_vertex(cellconnect[k]);
-		vtkCellConnect[k] = node.get_id();
+		vtkCellConnect[k] = vertexMap.at(node.get_id());
 	}
 
 	return vtkUnstructuredGrid::InsertNextCell(vtkCellType, nCellVerts, vtkCellConnect.data());

@@ -3,6 +3,7 @@
 //
 
 #include <sstream>
+#include <unordered_map>
 
 #include "patch.hpp"
 
@@ -190,13 +191,14 @@ void Patch::initialize_output()
 	m_output_manager->initialize(nCells, nVertices);
 
 	// Vertices
+	std::unordered_map<long, vtkIdType> vertexMap;
 	for (auto &vertex : m_vertices) {
-		m_output_manager->InsertNextVertex(vertex);
+		vertexMap[vertex.get_id()] = m_output_manager->InsertNextVertex(vertex);
 	}
 
 	// Cells
 	for (auto &cell : m_cells) {
-		m_output_manager->InsertNextCell(cell);
+		m_output_manager->InsertNextCell(cell, vertexMap);
 	}
 
 	// Fields

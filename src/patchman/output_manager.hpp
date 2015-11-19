@@ -12,6 +12,7 @@
 #include <vtkCellData.h>
 #include <vtkSmartPointer.h>
 #include <vtkUnstructuredGrid.h>
+#include <unordered_map>
 
 namespace pman {
 
@@ -56,7 +57,7 @@ public:
 
 	vtkTypeMacro(OutputManager, vtkUnstructuredGrid);
 
-	vtkIdType InsertNextCell(const Cell &cell);
+	vtkIdType InsertNextCell(const Cell &cell, std::unordered_map<long, vtkIdType> &vertexMap);
 	vtkIdType InsertNextVertex(const Node &node);
 
 	void resetFields();
