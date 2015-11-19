@@ -47,6 +47,7 @@ public:
 	void enable_cell_balancing(const long &id, bool enabled);
 
 	bool is_dirty() const;
+	bool is_output_dirty() const;
 
 	int get_id() const;
 	int get_dimension() const;
@@ -95,10 +96,12 @@ protected:
 
 	void set_dirty(bool dirty);
 
-	void initialize_output();
+	void update_output_manager();
 
 private:
 	bool m_dirty;
+	bool m_dirty_output;
+
 	int m_id;
 	int m_dimension;
 	std::string m_name;

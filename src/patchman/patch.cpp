@@ -21,7 +21,7 @@ namespace pman {
 	Creates a new patch.
 */
 Patch::Patch(const int &id, const int &dimension)
-	: m_dirty(true)
+	: m_dirty(true), m_dirty_output(true), m_output_manager(nullptr)
 {
 	set_id(id) ;
 	set_dimension(dimension);
@@ -69,15 +69,8 @@ bool Patch::update()
 */
 bool Patch::update(std::vector<uint32_t> &cellMapping)
 {
-	// Update the mesh
 	bool updated = _update(cellMapping);
 	set_dirty(false);
-	if (!updated) {
-		return updated;
-	}
-
-	// Create the output data structures
-	initialize_output();
 
 	return updated;
 }
@@ -175,13 +168,17 @@ void Patch::reset_interfaces()
 */
 void Patch::reset_output()
 {
-	m_output_manager->Delete();
+	if (m_output_manager == nullptr) {
+		return;
+	}
+
+	get_output_manager().Delete();
 }
 
 /*!
 	Initializes output dataset.
 */
-void Patch::initialize_output()
+void Patch::update_output_manager()
 {
 	long nVertices = m_vertices.size();
 	long nCells = m_cells.size();
@@ -206,6 +203,9 @@ void Patch::initialize_output()
 
 	// Finalize
 	m_output_manager->finalize();
+
+	// The output is not dirty anymore
+	m_dirty_output = false;
 }
 
 /*!
@@ -215,7 +215,7 @@ void Patch::initialize_output()
 */
 void Patch::write_mesh(std::string filename)
 {
-	m_output_manager->write(filename);
+	get_output_manager().write(filename);
 }
 
 /*!
@@ -223,7 +223,7 @@ void Patch::write_mesh(std::string filename)
 */
 void Patch::write_mesh()
 {
-	m_output_manager->write(get_name());
+	get_output_manager().write(get_name());
 }
 
 /*!
@@ -250,12 +250,14 @@ void Patch::write_field(std::string name, int type, std::vector<double> values)
 */
 void Patch::write_field(std::string filename, std::string name, int type, std::vector<double> values)
 {
-	int index = m_output_manager->addField(type, name.c_str());
-	m_output_manager->addFieldValues(type, index, values.data());
+	OutputManager &outputManager = get_output_manager();
 
-	m_output_manager->write(filename);
+	int index = outputManager.addField(type, name.c_str());
+	outputManager.addFieldValues(type, index, values.data());
 
-	m_output_manager->resetFields();
+	outputManager.write(filename);
+
+	outputManager.resetFields();
 }
 
 /*!
@@ -279,12 +281,14 @@ void Patch::write_cell_field(std::string name, std::vector<double> values)
 */
 void Patch::write_cell_field(std::string filename, std::string name, std::vector<double> values)
 {
-	int index = m_output_manager->addField(OutputManager::DATA_ON_CELL, name.c_str());
-	m_output_manager->addFieldValues(OutputManager::DATA_ON_CELL, index, values.data());
+	OutputManager &outputManager = get_output_manager();
 
-	m_output_manager->write(filename);
+	int index = outputManager.addField(OutputManager::DATA_ON_CELL, name.c_str());
+	outputManager.addFieldValues(OutputManager::DATA_ON_CELL, index, values.data());
 
-	m_output_manager->resetFields();
+	outputManager.write(filename);
+
+	outputManager.resetFields();
 }
 
 /*!
@@ -308,12 +312,14 @@ void Patch::write_vertex_field(std::string name, std::vector<double> values)
 */
 void Patch::write_vertex_field(std::string filename, std::string name, std::vector<double> values)
 {
-	int index = m_output_manager->addField(OutputManager::DATA_ON_CELL, name.c_str());
-	m_output_manager->addFieldValues(OutputManager::DATA_ON_CELL, index, values.data());
+	OutputManager &outputManager = get_output_manager();
 
-	m_output_manager->write(filename);
+	int index = outputManager.addField(OutputManager::DATA_ON_CELL, name.c_str());
+	outputManager.addFieldValues(OutputManager::DATA_ON_CELL, index, values.data());
 
-	m_output_manager->resetFields();
+	outputManager.write(filename);
+
+	outputManager.resetFields();
 }
 
 /*!
@@ -323,6 +329,10 @@ void Patch::write_vertex_field(std::string filename, std::string name, std::vect
 */
 OutputManager & Patch::get_output_manager()
 {
+	if (is_output_dirty()) {
+		update_output_manager();
+	}
+
 	return *m_output_manager;
 
 }
@@ -341,6 +351,9 @@ void Patch::set_dirty(bool dirty)
 	}
 
 	m_dirty = dirty;
+	if (m_dirty) {
+		m_dirty_output = true;
+	}
 }
 
 /*!
@@ -352,6 +365,17 @@ void Patch::set_dirty(bool dirty)
 bool Patch::is_dirty() const
 {
 	return m_dirty;
+}
+
+/*!
+	Returns true if the the output needs to update its data strucutres.
+
+	\return This method returns true to indicate the output needs to update
+	its data strucutres. Otherwise, it returns false.
+*/
+bool Patch::is_output_dirty() const
+{
+	return m_dirty_output;
 }
 
 /*!
