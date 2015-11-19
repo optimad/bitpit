@@ -73,8 +73,30 @@ protected:
 	bool _enable_cell_balancing(const long &id, bool enabled);
 
 private:
-	long m_nInternalCells;
-	long m_nGhostCells;
+	typedef std::bitset<72> OctantHash;
+
+	struct FaceInfo {
+		long id;
+		int face;
+
+		bool operator==(const FaceInfo &other) const
+		{
+			return (id == other.id && face == other.face);
+		}
+	};
+
+	struct FaceInfoHasher
+	{
+		std::size_t operator()(const FaceInfo& k) const
+		{
+			using std::hash;
+			using std::string;
+
+			return ((hash<long>()(k.id) ^ (hash<int>()(k.face) << 1)) >> 1);
+		}
+	};
+
+	typedef std::unordered_set<FaceInfo, FaceInfoHasher> FaceInfoSet;
 
 	std::unordered_map<long, uint32_t, Element::IdHasher> m_cell_to_octant;
 	std::unordered_map<long, uint32_t, Element::IdHasher> m_cell_to_ghost;
@@ -92,9 +114,15 @@ private:
 
 	bool set_marker(const long &id, const int8_t &value);
 
-	void update_vertices();
-	void import_vertices();
-	void reload_vertices();
+	OctantHash evaluate_octant_hash(const OctantInfo &octantInfo);
+
+	void import_octants(std::vector<OctantInfo> &octantTreeIds);
+	void import_octants(std::vector<OctantInfo> &octantTreeIds, FaceInfoSet &danglingInfoSet);
+
+	FaceInfoSet remove_cells(std::vector<long> &cellIds);
+
+	long create_vertex(uint32_t treeId);
+	void delete_vertex(long id);
 
 	void update_cells();
 	void import_cells();

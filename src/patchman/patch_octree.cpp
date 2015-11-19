@@ -176,6 +176,34 @@ const std::vector<uint32_t> & PatchOctree::get_octant_connect(const OctantInfo &
 }
 
 /*!
+	Evaluates a unique hash for the octant.
+
+	\param octantInfo the data of the octant
+	\result A unique hash for the octant.
+*/
+PatchOctree::OctantHash PatchOctree::evaluate_octant_hash(const OctantInfo &octantInfo)
+{
+	uint8_t level;
+	uint64_t morton;
+	if (is_three_dimensional()) {
+		Class_Octant<3> *octant = m_tree_3D.getOctant(octantInfo.id);
+		level  = octant->getLevel();
+		morton = octant->computeMorton();
+	} else {
+		Class_Octant<2> *octant = m_tree_2D.getOctant(octantInfo.id);
+		level  = octant->getLevel();
+		morton = octant->computeMorton();
+	}
+
+	OctantHash octantHash;
+	octantHash |= morton;
+	octantHash <<= 8;
+	octantHash |= level;
+
+	return octantHash;
+}
+
+/*!
 	Gets the refinement level of the cell with the specified id.
 
 	\param id is the id of the cell
