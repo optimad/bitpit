@@ -1085,6 +1085,42 @@ public:
 		return m_v[pos];
 	}
 
+	/*!
+		Functional for compare the position of two elements
+	*/
+	struct position_less
+	{
+		position_less(PiercedVector<T> &vector)
+		{
+			m_vector = &vector;
+		}
+
+		bool operator()(const id_type &id_1, const id_type &id_2) const
+		{
+			return m_vector->get_pos_from_id(id_1) < m_vector->get_pos_from_id(id_2);
+		}
+
+		PiercedVector<T> *m_vector;
+	};
+
+
+	/*!
+		Functional for compare the position of two elements
+	*/
+	struct position_greater
+	{
+		position_greater(PiercedVector<T> &vector)
+		{
+			m_vector = &vector;
+		}
+
+		bool operator()(const id_type &id_1, const id_type &id_2) const
+		{
+			return m_vector->get_pos_from_id(id_1) > m_vector->get_pos_from_id(id_2);
+		}
+
+		PiercedVector<T> *m_vector;
+	};
 
 private:
 	/*!
