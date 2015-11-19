@@ -5,6 +5,7 @@
 #include "cell.hpp"
 #include "interface.hpp"
 #include "patch.hpp"
+#include "utils.hpp"
 
 #include<iostream>
 
@@ -218,7 +219,7 @@ std::vector<long> Cell::extract_face_neighs() const
 	for (int i = 0; i < get_face_count(); ++i) {
 		std::vector<long> faceNeighs = extract_face_neighs(i);
 		for (auto &faceNeigh : faceNeighs) {
-			add_id_to_ordered_list(faceNeigh, neighs);
+			utils::add_to_ordered_vector<long>(faceNeigh, neighs);
 		}
 	}
 
@@ -292,7 +293,7 @@ std::vector<long> Cell::extract_face_neighs(const int &face, const std::vector<l
 		}
 
 		// Add the cell to the negihbour list
-		add_id_to_ordered_list(neighId, neighs);
+		utils::add_to_ordered_vector<long>(neighId, neighs);
 	}
 
 	return neighs;
@@ -323,7 +324,7 @@ std::vector<long> Cell::extract_edge_neighs(bool complete) const
 	std::vector<long> neighs;
 	for (int i = 0; i < get_edge_count(); ++i) {
 		for (auto &neigh : extract_edge_neighs(i, blackList)) {
-			add_id_to_ordered_list(neigh, neighs);
+			utils::add_to_ordered_vector<long>(neigh, neighs);
 		}
 	}
 
@@ -378,7 +379,7 @@ std::vector<long> Cell::extract_vertex_neighs(bool complete) const
 	std::vector<long> neighs;
 	for (int i = 0; i < get_vertex_count(); ++i) {
 		for (auto &neigh : extract_vertex_neighs(i, blackList)) {
-			add_id_to_ordered_list(neigh, neighs);
+			utils::add_to_ordered_vector<long>(neigh, neighs);
 		}
 	}
 
@@ -491,7 +492,7 @@ std::vector<long> Cell::extract_vertex_neighs(const std::vector<int> &vertices, 
 			// of cells neighbours.
 			if (nCommonVertices == nVerticesToFound) {
 				if(std::find(blackList.begin(), blackList.end(), neighId) == blackList.end()) {
-					add_id_to_ordered_list(neighId, neighs);
+					utils::add_to_ordered_vector<long>(neighId, neighs);
 				}
 				processingQueue.push_back(neighId);
 			}
