@@ -240,6 +240,64 @@ void OutputManager::mapConnectToVTK(Element::Type elemType, int elemMapDegree, i
 }
 
 // Description:
+// Extract the connectivity in the VTK format and order.
+std::vector<vtkIdType> OutputManager::extractVTKCellConnect(const Cell &cell, std::unordered_map<long, vtkIdType> &vertexMap)
+{
+	int nCellVertices = cell.get_vertex_count();
+
+	bool remap;
+	std::vector<int> mapper(nCellVertices);
+	switch (cell.get_type())  {
+
+	case Element::RECTANGLE:
+	case Element::QUADRANGLE:
+		remap = true;
+
+		mapper[0] = 0;
+		mapper[1] = 1;
+		mapper[2] = 3;
+		mapper[3] = 2;
+		break;
+
+	case Element::BRICK:
+	case Element::HEXAHEDRON:
+		remap = true;
+
+		mapper[0] = 0;
+		mapper[1] = 1;
+		mapper[2] = 3;
+		mapper[3] = 2;
+		mapper[4] = 4;
+		mapper[5] = 5;
+		mapper[6] = 7;
+		mapper[7] = 6;
+		break;
+
+	default:
+		remap = false;
+		break;
+
+	}
+
+	const long *cellconnect = cell.get_connect();
+	std::vector<vtkIdType> vtkCellConnect;
+	for (long k = 0; k < nCellVertices; k++) {
+		int localVertexId;
+		if (remap) {
+			localVertexId = mapper[k];
+		} else {
+			localVertexId = k;
+		}
+
+		long vertexId = cellconnect[localVertexId];
+		vtkIdType VTKVertexId = vertexMap.at(vertexId);
+		vtkCellConnect.push_back(VTKVertexId);
+	}
+
+	return vtkCellConnect;
+}
+
+// Description:
 // Aggiunge il successivo vertice della mesh
 vtkIdType OutputManager::InsertNextVertex(const Node &vertex)
 {
@@ -255,15 +313,9 @@ vtkIdType OutputManager::InsertNextVertex(const Node &vertex)
 // Aggiunge una cella alla mesh
 vtkIdType OutputManager::InsertNextCell(const Cell &cell, std::unordered_map<long, vtkIdType> &vertexMap)
 {
-	int vtkCellType = getVTKCellType(cell.get_type());
-
-	const long *cellconnect = cell.get_connect();
 	vtkIdType nCellVerts = cell.get_vertex_count();
-	std::vector<vtkIdType> vtkCellConnect(nCellVerts);
-	for (long k = 0; k < nCellVerts; k++) {
-		Node &node = cell.get_patch()->get_vertex(cellconnect[k]);
-		vtkCellConnect[k] = vertexMap.at(node.get_id());
-	}
+	int vtkCellType = getVTKCellType(cell.get_type());
+	std::vector<vtkIdType> vtkCellConnect = extractVTKCellConnect(cell, vertexMap);
 
 	return vtkUnstructuredGrid::InsertNextCell(vtkCellType, nCellVerts, vtkCellConnect.data());
 }

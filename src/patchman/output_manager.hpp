@@ -81,6 +81,8 @@ private:
 
 	vtkSmartPointer<vtkPoints> m_vertexes;
 
+	std::vector<vtkIdType> extractVTKCellConnect(const Cell &cell, std::unordered_map<long, vtkIdType> &vertexMap);
+
 };
 
 }

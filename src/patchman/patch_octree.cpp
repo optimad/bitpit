@@ -281,24 +281,6 @@ void PatchOctree::import_cells()
 		nCellVertices = Element::get_vertex_count(Element::RECTANGLE);
 	}
 
-	// Mapping della connettività
-	vector<long> connectMap(nCellVertices);
-	if (is_three_dimensional()) {
-		connectMap[0] = 0;
-		connectMap[1] = 1;
-		connectMap[2] = 3;
-		connectMap[3] = 2;
-		connectMap[4] = 4;
-		connectMap[5] = 5;
-		connectMap[6] = 7;
-		connectMap[7] = 6;
-	} else {
-		connectMap[0] = 0;
-		connectMap[1] = 1;
-		connectMap[2] = 3;
-		connectMap[3] = 2;
-	}
-
 	// Importing the cells
 	long m_nInternalCells;
 	long m_nGhostsCells;
@@ -391,7 +373,7 @@ void PatchOctree::import_cells()
 
 		std::unique_ptr<long[]> connect = std::unique_ptr<long[]>(new long[nCellVertices]);
 		for (int k = 0; k < nCellVertices; k++) {
-			connect[k] = octantConnect[connectMap[k]];
+			connect[k] = octantConnect[k];
 		}
 
 		cell.set_connect(std::move(connect));

@@ -281,13 +281,13 @@ void PatchCartesian::create_cells()
 				std::unique_ptr<long[]> connect = std::unique_ptr<long[]>(new long[nCellVertices]);
 				connect[0] = vertex_ijk_to_id(i,     j,     k);
 				connect[1] = vertex_ijk_to_id(i + 1, j,     k);
-				connect[2] = vertex_ijk_to_id(i + 1, j + 1, k);
-				connect[3] = vertex_ijk_to_id(i    , j + 1, k);
+				connect[2] = vertex_ijk_to_id(i,     j + 1, k);
+				connect[3] = vertex_ijk_to_id(i + 1, j + 1, k);
 				if (is_three_dimensional()) {
 					connect[4] = vertex_ijk_to_id(i,     j,     k + 1);
 					connect[5] = vertex_ijk_to_id(i + 1, j,     k + 1);
-					connect[6] = vertex_ijk_to_id(i + 1, j + 1, k + 1);
-					connect[7] = vertex_ijk_to_id(i    , j + 1, k + 1);
+					connect[6] = vertex_ijk_to_id(i,     j + 1, k + 1);
+					connect[7] = vertex_ijk_to_id(i + 1, j + 1, k + 1);
 				}
 
 				cell.set_connect(std::move(connect));
