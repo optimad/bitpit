@@ -982,8 +982,9 @@ public:
 		if (!m_holes.empty()) {
 			// Move the elements
 			size_type offset = 0;
+			size_type nHoles = m_holes.size();
 			for (size_type pos = 0; pos <= m_last_pos; pos++) {
-				if (m_holes[offset] == pos) {
+				if (offset < nHoles && m_holes[offset] == pos) {
 					offset++;
 					continue;
 				}
