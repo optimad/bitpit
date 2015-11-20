@@ -108,10 +108,6 @@ private:
 	Class_Para_Tree<2> m_tree_2D;
 	Class_Para_Tree<3> m_tree_3D;
 
-	std::deque<long> m_unusedVertexIds;
-	std::deque<long> m_unusedInterfaceIds;
-	std::deque<long> m_unusedCellIds;
-
 	vector<double> m_tree_dh;
 	vector<double> m_tree_area;
 	vector<double> m_tree_volume;
@@ -128,12 +124,10 @@ private:
 	FaceInfoSet remove_cells(std::vector<long> &cellIds);
 
 	long create_vertex(uint32_t treeId);
-	void delete_vertex(long id);
 
 	long create_interface(uint32_t treeId,
                             std::unique_ptr<long[]> &vertices,
                             std::array<FaceInfo, 2> &faces);
-	void delete_interface(long id);
 
 	long create_cell(uint32_t treeId, bool internal,
 	                 std::unique_ptr<long[]> &vertices,

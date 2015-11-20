@@ -1049,12 +1049,12 @@ PatchOctree::FaceInfoSet PatchOctree::remove_cells(std::vector<long> &cellIds)
 		}
 
 		// Add the interface to the list of interfaces to delete
-		delete_interface(interfaceId);
+		Patch::delete_interface(interfaceId);
 	}
 
 	// Delete vertices
 	for (auto it = deadVertices.begin(); it != deadVertices.end(); ++it) {
-		delete_vertex(*it);
+		Patch::delete_vertex(*it);
 	}
 
 	// Done
@@ -1068,16 +1068,8 @@ PatchOctree::FaceInfoSet PatchOctree::remove_cells(std::vector<long> &cellIds)
 */
 long PatchOctree::create_vertex(uint32_t treeId)
 {
-	long id;
-	if (m_unusedVertexIds.empty()) {
-		id = m_vertices.size();
-	} else {
-		id = m_unusedVertexIds.front();
-		m_unusedVertexIds.pop_front();
-	}
-
 	// Create the vertex
-	m_vertices.emplace(id);
+	long id = Patch::create_vertex();
 	Node &vertex = m_vertices[id];
 
 	// Coordinate
@@ -1097,17 +1089,6 @@ long PatchOctree::create_vertex(uint32_t treeId)
 }
 
 /*!
-	Deletes a vertex from the patch.
-
-	\param id is the id of the vertex
-*/
-void PatchOctree::delete_vertex(long id)
-{
-	m_vertices.erase(id);
-	m_unusedVertexIds.push_back(id);
-}
-
-/*!
 	Creates a new patch interface from the specified tree intersection.
 
 	\param treeId is the id of the intersection in the tree
@@ -1116,16 +1097,8 @@ long PatchOctree::create_interface(uint32_t treeId,
                                    std::unique_ptr<long[]> &vertices,
                                    std::array<FaceInfo, 2> &faces)
 {
-	long id;
-	if (m_unusedInterfaceIds.empty()) {
-		id = m_interfaces.size();
-	} else {
-		id = m_unusedInterfaceIds.front();
-		m_unusedInterfaceIds.pop_front();
-	}
-
 	// Create the interface
-	m_interfaces.emplace(id, this);
+	long id = Patch::create_interface();
 	Interface &interface = m_interfaces[id];
 
 	// Info associate al tree
@@ -1194,17 +1167,6 @@ long PatchOctree::create_interface(uint32_t treeId,
 }
 
 /*!
-	Deletes an interface from the patch.
-
-	\param id is the id of the interface
-*/
-void PatchOctree::delete_interface(long id)
-{
-	m_interfaces.erase(id);
-	m_unusedInterfaceIds.push_back(id);
-}
-
-/*!
 	Creates a new patch cell from the specified tree octant.
 
 	\param treeId is the id of the octant in the tree
@@ -1214,20 +1176,8 @@ long PatchOctree::create_cell(uint32_t treeId, bool internal,
                               std::vector<std::vector<long>> &interfaces,
                               std::vector<std::vector<bool>> &ownerFlags)
 {
-	long id;
-	if (m_unusedCellIds.empty()) {
-		id = m_cells.size();
-	} else {
-		id = m_unusedCellIds.front();
-		m_unusedCellIds.pop_front();
-	}
-
 	// Create the cell
-	if (internal) {
-		m_cells.emplace(id, this);
-	} else {
-		m_cells.emplace_back(id, this);
-	}
+	long id = Patch::create_cell(internal);
 	Cell &cell = m_cells[id];
 
 	// Octant info
@@ -1350,8 +1300,7 @@ void PatchOctree::delete_cell(long id)
 	}
 
 	// Delete the cell
-	m_cells.erase(id);
-	m_unusedCellIds.push_back(id);
+	Patch::delete_cell(id);
 }
 
 /*!

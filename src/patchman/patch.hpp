@@ -81,6 +81,22 @@ protected:
 	PiercedVector<Cell> m_cells;
 	PiercedVector<Interface> m_interfaces;
 
+	std::deque<long> m_unusedVertexIds;
+	std::deque<long> m_unusedInterfaceIds;
+	std::deque<long> m_unusedCellIds;
+
+	long create_vertex();
+	long create_vertex(const long &id);
+	void delete_vertex(const long &id);
+
+	long create_interface();
+	long create_interface(const long &id);
+	void delete_interface(const long &id);
+
+	long create_cell(bool internal = true);
+	long create_cell(const long &id, bool internal = true);
+	void delete_cell(const long &id);
+
 	virtual std::array<double, 3> & _get_opposite_normal(std::array<double, 3> &normal) = 0;
 	virtual const std::vector<Adaption::Info> _update(bool trackAdaption) = 0;
 	virtual bool _mark_cell_for_refinement(const long &id) = 0;

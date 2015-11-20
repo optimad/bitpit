@@ -470,6 +470,45 @@ Node & Patch::get_vertex(const long &id)
 }
 
 /*!
+	Creates a new vertex with the specified id.
+
+	\param id is the id of the new vertex
+*/
+long Patch::create_vertex(const long &id)
+{
+	m_vertices.emplace(id);
+
+	return id;
+}
+
+/*!
+	Creates a new vertex.
+*/
+long Patch::create_vertex()
+{
+	long id;
+	if (m_unusedVertexIds.empty()) {
+		id = m_vertices.size();
+	} else {
+		id = m_unusedVertexIds.front();
+		m_unusedVertexIds.pop_front();
+	}
+
+	return create_vertex(id);
+}
+
+/*!
+	Deletes a vertex.
+
+	\param id is the id of the vertex
+*/
+void Patch::delete_vertex(const long &id)
+{
+	m_vertices.erase(id);
+	m_unusedVertexIds.push_back(id);
+}
+
+/*!
 	Gets the number of cells in the patch.
 
 	\return The number of cells in the patch
@@ -501,6 +540,52 @@ Cell & Patch::get_cell(const long &id)
 }
 
 /*!
+	Creates a new cell with the specified id.
+
+	\param id is the id of the new cell
+	\param internal is true if the cell is an internal cell, false otherwise
+*/
+long Patch::create_cell(const long &id, bool internal)
+{
+	if (internal) {
+		m_cells.emplace(id, this);
+	} else {
+		m_cells.emplace_back(id, this);
+	}
+
+	return id;
+}
+
+/*!
+	Creates a new cell.
+
+	\param internal is true if the cell is an internal cell, false otherwise
+*/
+long Patch::create_cell(bool internal)
+{
+	long id;
+	if (m_unusedCellIds.empty()) {
+		id = m_cells.size();
+	} else {
+		id = m_unusedCellIds.front();
+		m_unusedCellIds.pop_front();
+	}
+
+	return create_cell(id, internal);
+}
+
+/*!
+	Deletes a cell.
+
+	\param id is the id of the cell
+*/
+void Patch::delete_cell(const long &id)
+{
+	m_cells.erase(id);
+	m_unusedCellIds.push_back(id);
+}
+
+/*!
 	Gets the number of interfaces in the patch.
 
 	\return The number of interfaces in the patch
@@ -529,6 +614,45 @@ PiercedVector<Interface> & Patch::interfaces()
 Interface & Patch::get_interface(const long &id)
 {
 	return m_interfaces[id];
+}
+
+/*!
+	Creates a new interface with the specified id.
+
+	\param id is the id of the new interface
+*/
+long Patch::create_interface(const long &id)
+{
+	m_interfaces.emplace(id, this);
+
+	return id;
+}
+
+/*!
+	Creates a new interface.
+*/
+long Patch::create_interface()
+{
+	long id;
+	if (m_unusedInterfaceIds.empty()) {
+		id = m_interfaces.size();
+	} else {
+		id = m_unusedInterfaceIds.front();
+		m_unusedInterfaceIds.pop_front();
+	}
+
+	return create_interface(id);
+}
+
+/*!
+	Deletes an interface.
+
+	\param id is the id of the interface
+*/
+void Patch::delete_interface(const long &id)
+{
+	m_interfaces.erase(id);
+	m_unusedInterfaceIds.push_back(id);
 }
 
 /*!
