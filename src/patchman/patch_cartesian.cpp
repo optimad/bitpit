@@ -227,8 +227,8 @@ void PatchCartesian::create_vertices()
 		for (int j = 0; j < m_nVertices1D[Node::COORD_Y]; j++) {
 			for (int k = 0; (is_three_dimensional()) ? (k < m_nVertices1D[Node::COORD_Z]) : (k <= 0); k++) {
 				long id_vertex = vertex_ijk_to_id(i, j, k);
-				m_vertices.emplace_back(id_vertex);
-				Node &vertex = m_vertices.back();
+				Patch::create_vertex(id_vertex);
+				Node &vertex = m_vertices[id_vertex];
 
 				// Coordinate
 				std::array<double, 3> coords;
@@ -282,8 +282,8 @@ void PatchCartesian::create_cells()
 			centroid[Node::COORD_Y] = 0.5 * (m_y[j] + m_y[j+1]);
 			for (int k = 0; (is_three_dimensional()) ? (k < m_nCells1D[Node::COORD_Z]) : (k <= 0); k++) {
 				long id_cell = cell_ijk_to_id(i, j, k);
-				m_cells.emplace_back(id_cell, this);
-				Cell &cell = m_cells.back();
+				Patch::create_cell(id_cell);
+				Cell &cell = m_cells[id_cell];
 
 				// Tipo
 				if (is_three_dimensional()) {
@@ -452,8 +452,8 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 		for (j = 0; j < (*interfaceCount1D)[Node::COORD_Y]; j++) {
 			for (k = 0; (is_three_dimensional()) ? (k < (*interfaceCount1D)[Node::COORD_Z]) : (k <= 0); k++) {
 				long id_interface = interface_nijk_to_id(direction, i, j, k);
-				m_interfaces.emplace_back(id_interface, this);
-				Interface &interface = m_interfaces.back();
+				Patch::create_interface(id_interface);
+				Interface &interface = m_interfaces[id_interface];
 
 				// Interface type
 				if (is_three_dimensional()) {
