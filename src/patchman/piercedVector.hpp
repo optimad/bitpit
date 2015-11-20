@@ -1073,9 +1073,9 @@ public:
 		m_holes.clear();
 		std::deque<size_type>().swap(m_holes);
 
-		// Squeeze the vector
-		squeeze();
-
+		// Resize
+		m_v.resize(size() + REQUIRED_SENTINEL_COUNT);
+		m_v.shrink_to_fit();
 	}
 
 	/*!
