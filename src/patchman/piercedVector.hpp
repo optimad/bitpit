@@ -374,6 +374,13 @@ public:
 	}
 
 	/*!
+		Move constructor.
+
+		\param other vector with the new contents
+	*/
+	PiercedVector(PiercedVector&& other) = default;
+
+	/*!
 		Constructs a pierced vector with a capacity at least enough
 		to contain n elements.
 
