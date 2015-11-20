@@ -1055,15 +1055,7 @@ public:
 
 		\param other vector with the new contents
 	*/
-	PiercedVector & operator= (PiercedVector&& other)
-	{
-		if (this != &other) {
-			other.swap(*this);
-		}
-
-		return *this;
-	}
-
+	PiercedVector& operator=(PiercedVector&& other) = default;
 
 	/*!
 		Returns a constant reference to the element with the
