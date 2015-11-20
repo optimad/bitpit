@@ -442,6 +442,8 @@ std::vector<long> Cell::extract_vertex_neighs(const std::vector<int> &vertices, 
 
 	int nVerticesToFound = vertices.size();
 
+	const long *connectivity = get_connect();
+
 	std::vector<long> alreadyScanned;
 	std::vector<long> processingQueue;
 	processingQueue.push_back(get_id());
@@ -476,7 +478,7 @@ std::vector<long> Cell::extract_vertex_neighs(const std::vector<int> &vertices, 
 			const long *interfaceConnect = interface.get_connect();
 			for (int k = 0; k < interface.get_vertex_count(); ++k) {
 				for (int n = 0; n < nVerticesToFound; ++n) {
-					if (interfaceConnect[k] == get_connect()[vertices[n]]) {
+					if (interfaceConnect[k] == connectivity[vertices[n]]) {
 						nCommonVertices++;
 						break;
 					}
