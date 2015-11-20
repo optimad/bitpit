@@ -9,6 +9,8 @@
 #include <functional>
 #include <vector>
 
+#define UNUSED(expr) do { (void)(expr); } while (0)
+
 namespace pman {
 
 namespace utils {

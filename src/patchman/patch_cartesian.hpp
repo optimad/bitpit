@@ -7,6 +7,7 @@
 /*! \file */
 
 #include "patch.hpp"
+#include "utils.hpp"
 
 #include <cstddef>
 #include <memory>

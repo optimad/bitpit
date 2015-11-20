@@ -19,8 +19,6 @@
 
 namespace pman {
 
-#define UNUSED(expr) do { (void)(expr); } while (0)
-
 class Patch {
 
 public:
