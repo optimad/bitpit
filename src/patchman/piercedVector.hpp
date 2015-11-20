@@ -567,11 +567,13 @@ public:
 		arguments for its construction.
 
 		\param args the arguments forwarded to construct the new element
+		\result An iterator that points to the the newly inserted
+		        element.
 	*/
 	template <class... Args>
-	void emplace(Args&&... args)
+	iterator emplace(Args&&... args)
 	{
-		_emplace(FIRST_EMPTY_POS, std::forward<Args>(args)...);
+		return _emplace(FIRST_EMPTY_POS, std::forward<Args>(args)...);
 	}
 
 	/*!
@@ -1317,9 +1319,10 @@ private:
 		            latter means that the element should be inserted
 		            at the end of the vector.
 		\param args the arguments forwarded to construct the new element
+		\result An iterator that points to the newly inserted element.
 	*/
 	template <class... Args>
-	size_type _emplace(size_type hole, Args&&... args)
+	iterator _emplace(size_type hole, Args&&... args)
 	{
 		// Position of the element
 		size_type pos = get_pos_to_fill(hole);
@@ -1342,8 +1345,11 @@ private:
 			fill_pos(pos);
 		}
 
-		// Return the position of the element
-		return pos;
+		// Return the iterator that points to the element
+		iterator itr;
+		itr = raw_begin() + pos;
+
+		return itr;
 	}
 
 	/*!
