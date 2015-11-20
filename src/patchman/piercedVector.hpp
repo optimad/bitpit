@@ -999,7 +999,11 @@ public:
 				m_v[updatedPos] = std::move(m_v[pos]);
 				m_pos[id] = updatedPos;
 			}
-			m_v[m_pos.size()] = std::move(m_v[m_last_pos + 1]);
+
+			// Move the sentinels
+			for (int k = 0; k < REQUIRED_SENTINEL_COUNT; ++k) {
+				m_v[m_pos.size() + k] = std::move(m_v[m_last_pos + k + 1]);
+			}
 
 			// Reset first and last counters
 			m_first_pos = 0;
