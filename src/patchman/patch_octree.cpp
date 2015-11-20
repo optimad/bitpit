@@ -766,8 +766,7 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 		const std::vector<uint32_t> &octantTreeConnect = get_octant_connect(octantInfo);
 		for (int k = 0; k < nCellVertices; ++k) {
 			uint32_t vertexTreeId = octantTreeConnect[k];
-			std::unordered_map<uint32_t, long>::const_iterator vertexItr = vertexMap.find(vertexTreeId);
-			if (vertexItr == vertexMap.end()) {
+			if (vertexMap.count(vertexTreeId) == 0) {
 				vertexMap[vertexTreeId] = create_vertex(vertexTreeId);
 			}
 		}
@@ -779,8 +778,7 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 	std::unordered_map<uint32_t, std::vector<uint32_t>> octantTreeInterfaces;
 	for (uint32_t interfaceTreeId = 0; interfaceTreeId < nIntersections; ++interfaceTreeId) {
 		// Skip the interface is already inserted in the patch
-		std::unordered_map<uint32_t, long>::const_iterator interfaceItr = interfaceMap.find(interfaceTreeId);
-		if (interfaceItr != interfaceMap.end()) {
+		if (interfaceMap.count(interfaceTreeId) != 0) {
 			continue;
 		}
 
@@ -876,8 +874,7 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 				guessDanglingInfo = interfaceFaces[0];
 			}
 
-			FaceInfoSet::const_iterator guessItr = danglingFaces.find(guessDanglingInfo);
-			if (guessItr != danglingFaces.end()) {
+			if (danglingFaces.count(guessDanglingInfo) != 0) {
 				Cell &danglingCell = m_cells[guessDanglingInfo.id];
 				danglingCell.push_interface(guessDanglingInfo.face, interfaceId);
 			}
@@ -988,8 +985,7 @@ PatchOctree::FaceInfoSet PatchOctree::remove_cells(std::vector<long> &cellIds)
 			long interfaceId = interfaces[k];
 
 			int danglingSide = -1;
-			InterfaceOrderedMap::const_iterator deadInterfaceItr = deadInterfaces.find(interfaceId);
-			if (deadInterfaceItr == deadInterfaces.end()) {
+			if (deadInterfaces.count(interfaceId) == 0) {
 				Interface &interface = m_interfaces[interfaceId];
 				if (interface.get_position_type() != Interface::BOUNDARY) {
 					if (interface.get_owner() == cellId) {
