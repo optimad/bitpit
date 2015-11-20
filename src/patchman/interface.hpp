@@ -16,8 +16,6 @@ namespace pman {
 class Cell;
 class Patch;
 
-class InterfaceData {};
-
 class Interface : public Element {
 
 public:
@@ -69,9 +67,6 @@ public:
 	std::array<long, 2> get_owner_neigh() const;
 	void swap_owner_neigh();
 
-	void set_data(std::unique_ptr<InterfaceData> m_data);
-	InterfaceData * get_data() const;
-
 protected:
 
 private:
@@ -85,8 +80,6 @@ private:
 
 	long m_neigh;
 	int m_neighFace;
-
-	std::unique_ptr<InterfaceData> m_data;
 
 	Interface(const Interface &other) = delete;
 	Interface& operator = (const Interface &other) = delete;

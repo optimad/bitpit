@@ -16,8 +16,6 @@ namespace pman {
 class Interface;
 class Patch;
 
-class CellData {};
-
 class Cell : public Element {
 
 public:
@@ -64,9 +62,6 @@ public:
 	std::vector<long> extract_vertex_neighs(const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
 	std::vector<long> extract_vertex_neighs(const std::vector<int> &vertices, const std::vector<long> &blackList = std::vector<long>()) const;
 
-	void set_data(std::unique_ptr<CellData> m_data);
-	CellData * get_data() const;
-
 protected:
 
 private:
@@ -75,8 +70,6 @@ private:
 	double *m_volume;
 
 	CollapsedVector2D<long> m_interfaces;
-
-	std::unique_ptr<CellData> m_data;
 
 	Cell(const Cell &other) = delete;
 	Cell& operator = (const Cell &other) = delete;

@@ -372,24 +372,4 @@ void Interface::swap_owner_neigh()
 	m_normal = &(get_patch()->get_opposite_normal(*m_normal));
 }
 
-/*!
-	Sets the data of the interface.
-
-	\param data a pointer to the data of the interface
-*/
-void Interface::set_data(std::unique_ptr<InterfaceData> data)
-{
-	m_data = std::move(data);
-}
-
-/*!
-	Gets the data of the interface.
-
-	\return A pointer to the data of the interface
-*/
-InterfaceData * Interface::get_data() const
-{
-    return m_data.get();
-}
-
 }

@@ -507,24 +507,4 @@ std::vector<long> Cell::extract_vertex_neighs(const std::vector<int> &vertices, 
 	return neighs;
 }
 
-/*!
-	Sets the data of the cell.
-
-	\param data a pointer to the data of the cell
-*/
-void Cell::set_data(std::unique_ptr<CellData> data)
-{
-	m_data = std::move(data);
-}
-
-/*!
-	Gets the data of the cell.
-
-	\return A pointer to the data of the cell
-*/
-CellData * Cell::get_data() const
-{
-    return m_data.get();
-}
-
 }

@@ -22,11 +22,6 @@ namespace pman {
 class Patch {
 
 public:
-	enum DataLocation {
-		DATA_ON_CELL=0,
-		DATA_ON_VERTEX
-	};
-
 	Patch(const int &id, const int &dimension);
 
 	virtual ~Patch();
