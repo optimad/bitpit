@@ -6,7 +6,7 @@
 
 #include "patchman_version.hpp"
 
-#include "piercedVector.hpp"
+#include "patchman_piercedVector.hpp"
 
 #include "patch_cartesian.hpp"
 #ifndef DISABLE_OCTREE

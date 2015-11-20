@@ -1,8 +1,8 @@
 //
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
-#ifndef __PATCHMAN_PIERCED_ARRAY_HPP__
-#define __PATCHMAN_PIERCED_ARRAY_HPP__
+#ifndef __PATCHMAN_PIERCED_VECTOR_TPP__
+#define __PATCHMAN_PIERCED_VECTOR_TPP__
 
 #include <algorithm>
 #include <cassert>

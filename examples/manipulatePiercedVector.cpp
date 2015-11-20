@@ -13,8 +13,7 @@
 	<b>To run</b>: ./manipulatePiercedVector \n
 */
 
-#include "piercedVector.hpp"
-#include "cell.hpp"
+#include "patchman.hpp"
 
 void printCellIds(pman::PiercedVector<pman::Cell> &cells)
 {

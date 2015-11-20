@@ -9,6 +9,11 @@
 
 namespace pman {
 
+// Explicit instantiation of the PiercedVectors
+template class PiercedVector<Cell>;
+template class PiercedVector<Interface>;
+template class PiercedVector<Node>;
+
 /*!
 	\class Patch
 
