@@ -1129,7 +1129,7 @@ public:
 		}
 
 		// Resize
-		m_v.resize(m_pos.size() + REQUIRED_SENTINEL_COUNT);
+		m_v.resize(size() + REQUIRED_SENTINEL_COUNT);
 		m_v.shrink_to_fit();
 	}
 
