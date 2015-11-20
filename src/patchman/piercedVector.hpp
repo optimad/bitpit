@@ -1010,7 +1010,6 @@ public:
 			m_last_pos  = m_pos.size() - 1;
 
 			// There are no more holes
-			m_holes.clear();
 			std::deque<size_type>().swap(m_holes);
 		}
 
