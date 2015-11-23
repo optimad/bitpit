@@ -136,14 +136,13 @@ std::array<double, 3> & PatchCartesian::_get_opposite_normal(std::array<double, 
 /*!
 	Updates the patch.
 
-	\result Returns true if the mesh was updated, false otherwise.
+	\result Returns a vector of Adaption::Info that can be used to track
+	the changes done during the update.
 */
-bool PatchCartesian::_update(std::vector<uint32_t> &cellMapping)
+const std::vector<Adaption::Info> PatchCartesian::_update(bool trackAdaption)
 {
-	UNUSED(cellMapping);
-
 	if (!is_dirty()) {
-		return false;
+		return std::vector<Adaption::Info>();
 	}
 
 	std::cout << ">> Updating cartesian mesh\n";
@@ -153,7 +152,36 @@ bool PatchCartesian::_update(std::vector<uint32_t> &cellMapping)
 	create_cells();
 	create_interfaces();
 
-	return true;
+	// Adaption info
+	std::vector<Adaption::Info> adaptionData;
+	if (trackAdaption) {
+		adaptionData.emplace_back();
+		Adaption::Info &adaptionCellInfo = adaptionData.back();
+		adaptionCellInfo.type   = Adaption::TYPE_CREATION;
+		adaptionCellInfo.entity = Adaption::ENTITY_CELL;
+		adaptionCellInfo.current.reserve(m_cells.size());
+		for (auto &cell : m_cells) {
+			adaptionCellInfo.current.emplace_back();
+			unsigned long &cellId = adaptionCellInfo.current.back();
+			cellId = cell.get_id();
+		}
+
+		adaptionData.emplace_back();
+		Adaption::Info &adaptionInterfaceInfo = adaptionData.back();
+		adaptionInterfaceInfo.type   = Adaption::TYPE_CREATION;
+		adaptionInterfaceInfo.entity = Adaption::ENTITY_INTERFACE;
+		adaptionInterfaceInfo.current.reserve(m_interfaces.size());
+		for (auto &interface : m_interfaces) {
+			adaptionInterfaceInfo.current.emplace_back();
+			unsigned long &interfaceId = adaptionInterfaceInfo.current.back();
+			interfaceId = interface.get_id();
+		}
+	} else {
+		adaptionData.emplace_back();
+	}
+
+	// Done
+	return adaptionData;
 }
 
 /*!

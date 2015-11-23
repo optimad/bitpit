@@ -53,26 +53,16 @@ std::array<double, 3> & Patch::get_opposite_normal(std::array<double, 3> &normal
 /*!
 	Updates the mesh
 
-	\result Returns true if the mesh was updated, false otherwise.
+	\result Returns a vector of Adaption::Info that can be used to track
+	the changes done during the update.
 */
-bool Patch::update()
+const std::vector<Adaption::Info> Patch::update(bool trackAdaption)
 {
-	std::vector<uint32_t> mapper;
+	const std::vector<Adaption::Info> adaptionInfo = _update(trackAdaption);
 
-	return update(mapper);
-}
-
-/*!
-	Updates the mesh
-
-	\result Returns true if the mesh was updated, false otherwise.
-*/
-bool Patch::update(std::vector<uint32_t> &cellMapping)
-{
-	bool updated = _update(cellMapping);
 	set_dirty(false);
 
-	return updated;
+	return adaptionInfo;
 }
 
 /*!

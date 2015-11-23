@@ -25,7 +25,7 @@ public:
 
 protected:
 	std::array<double, 3> & _get_opposite_normal(std::array<double, 3> &normal);
-	bool _update(std::vector<uint32_t> &cellMapping);
+	const std::vector<Adaption::Info> _update(bool trackAdaption);
 	bool _mark_cell_for_refinement(const long &id);
 	bool _mark_cell_for_coarsening(const long &id);
 	bool _enable_cell_balancing(const long &id, bool enabled);

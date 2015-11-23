@@ -69,7 +69,7 @@ public:
 
 protected:
 	std::array<double, 3> & _get_opposite_normal(std::array<double, 3> &normal);
-	bool _update(vector<uint32_t> &cellMapping);
+	const std::vector<Adaption::Info> _update(bool trackAdaption);
 	bool _mark_cell_for_refinement(const long &id);
 	bool _mark_cell_for_coarsening(const long &id);
 	bool _enable_cell_balancing(const long &id, bool enabled);
@@ -108,6 +108,10 @@ private:
 	Class_Para_Tree<2> m_tree_2D;
 	Class_Para_Tree<3> m_tree_3D;
 
+	std::deque<long> m_unusedVertexIds;
+	std::deque<long> m_unusedInterfaceIds;
+	std::deque<long> m_unusedCellIds;
+
 	vector<double> m_tree_dh;
 	vector<double> m_tree_area;
 	vector<double> m_tree_volume;
@@ -118,8 +122,8 @@ private:
 
 	OctantHash evaluate_octant_hash(const OctantInfo &octantInfo);
 
-	void import_octants(std::vector<OctantInfo> &octantTreeIds);
-	void import_octants(std::vector<OctantInfo> &octantTreeIds, FaceInfoSet &danglingInfoSet);
+	std::vector<unsigned long> import_octants(std::vector<OctantInfo> &octantTreeIds);
+	std::vector<unsigned long> import_octants(std::vector<OctantInfo> &octantTreeIds, FaceInfoSet &danglingInfoSet);
 
 	FaceInfoSet remove_cells(std::vector<long> &cellIds);
 
@@ -129,11 +133,13 @@ private:
 	long create_interface(uint32_t treeId,
                             std::unique_ptr<long[]> &vertices,
                             std::array<FaceInfo, 2> &faces);
+	void delete_interface(long id);
 
 	long create_cell(uint32_t treeId, bool internal,
 	                 std::unique_ptr<long[]> &vertices,
 	                 std::vector<std::vector<long>> &interfaces,
 	                 std::vector<std::vector<bool>> &ownerFlags);
+	void delete_cell(long id);
 };
 
 }

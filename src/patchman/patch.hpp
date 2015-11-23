@@ -6,6 +6,7 @@
 
 /*! \file */
 
+#include "adaption.hpp"
 #include "cell.hpp"
 #include "interface.hpp"
 #include "output_manager.hpp"
@@ -32,8 +33,7 @@ public:
 	void reset_interfaces();
 	void reset_output();
 
-	bool update();
-	bool update(std::vector<uint32_t> &cellMapping);
+	const std::vector<Adaption::Info> update(bool trackAdaption = true);
 
 	void mark_cell_for_refinement(const long &id);
 	void mark_cell_for_coarsening(const long &id);
@@ -82,7 +82,7 @@ protected:
 	PiercedVector<Interface> m_interfaces;
 
 	virtual std::array<double, 3> & _get_opposite_normal(std::array<double, 3> &normal) = 0;
-	virtual bool _update(std::vector<uint32_t> &cellMapping) = 0;
+	virtual const std::vector<Adaption::Info> _update(bool trackAdaption) = 0;
 	virtual bool _mark_cell_for_refinement(const long &id) = 0;
 	virtual bool _mark_cell_for_coarsening(const long &id) = 0;
 	virtual bool _enable_cell_balancing(const long &id, bool enabled) = 0;
