@@ -1280,10 +1280,7 @@ void PatchOctree::delete_cell(long id)
 
 	std::unordered_map<long, uint32_t, Element::IdHasher>::const_iterator cellItr = cellMap->find(id);
 	if (cellItr != cellMap->end()) {
-		uint32_t treeId = cellItr->second;
-		cellMap->erase(cellItr->second);
-
-		// Delete tree to cell data too
+		// Delete octant-to-cell entry
 		std::unordered_map<uint32_t, long> *octantMap;
 		if (internal) {
 			octantMap = &m_octant_to_cell;
@@ -1291,11 +1288,11 @@ void PatchOctree::delete_cell(long id)
 			octantMap = &m_ghost_to_cell;
 		}
 
-		std::unordered_map<uint32_t, long>::const_iterator octantItr = octantMap->find(treeId);
-		if (octantItr != octantMap->end()) {
-			octantMap->erase(octantItr->second);
-		}
+		uint32_t treeId = cellItr->second;
+		octantMap->erase(treeId);
 
+		// Delete cell-to-octant entry
+		cellMap->erase(cellItr);
 	}
 
 	// Delete the cell
