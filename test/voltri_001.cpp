@@ -81,7 +81,6 @@ void Test_000(
         Mesh.Import_dgf(file_name);
 
         // Export mesh in .vtr file --------------------------------------------- //
-        cout << "  - Exporting mesh in .vtu file" << endl;
         Mesh.Export_vtu(save_name);
         Mesh.Export_dgf(save_name2);
     }
@@ -95,16 +94,17 @@ void Test_000(
 
         // Examples of neighbors selection -------------------------------------- //
         Mesh.BuildAdjacency();
+        cout << Mesh.Vertex << endl;
+        cout << Mesh.Simplex << endl;
+        cout << Mesh.Adjacency << endl;
         cout << "  - edge neighbors" << endl;
-        cout << "    EdgeNeigh(8, 1) = " << Mesh.EdgeNeigh(8, 1) << endl;
-        cout << "    EdgeNeigh(8, 4) = " << Mesh.EdgeNeigh(8, 4) << endl;
-        cout << "    EdgeNeigh(8, 7) = " << Mesh.EdgeNeigh(8, 7) << endl;
-        cout << "    EdgeNeigh(8, 8) = " << Mesh.EdgeNeigh(8, 8) << endl;
-        cout << "    EdgeNeigh(8, 9) = " << Mesh.EdgeNeigh(8, 9) << endl;
+        cout << "    EdgeNeigh(5, 0) = " << Mesh.EdgeNeigh(5, 6) << endl;
+        cout << "    EdgeNeigh(5, 1) = " << Mesh.EdgeNeigh(5, 1) << endl;
+        cout << "    EdgeNeigh(5, 2) = " << Mesh.EdgeNeigh(5, 2) << endl;
         cout << "  - vertex neighbors" << endl;
-        cout << "    VertNeigh(8, 2) = " << Mesh.VertNeigh(8, 2) << endl;
-        cout << "    VertNeigh(8, 0) = " << Mesh.VertNeigh(8, 0) << endl;
-        cout << "    VertNeigh(8, 4) = " << Mesh.VertNeigh(8, 4) << endl;
+        cout << "    VertNeigh(5, 0) = " << Mesh.VertNeigh(5, 0) << endl;
+        cout << "    VertNeigh(5, 1) = " << Mesh.VertNeigh(5, 1) << endl;
+        cout << "    VertNeigh(5, 2) = " << Mesh.VertNeigh(5, 2) << endl;
 
     }
 
@@ -147,8 +147,8 @@ int main(
     // none
 
     // Run demo ------------------------------------------------------------- //
-    cout << "  Voltri Test is commented in voltri_001.cpp                |" << endl;
-//    Test_000(); 
+//     cout << "  Voltri Test is commented in voltri_001.cpp                |" << endl;
+    Test_000(); 
 
     return(0); 
 };
