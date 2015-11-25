@@ -290,7 +290,6 @@ T sign(                                                                         
         const  T                    &                                                     // (input) input value
       );
 
-
 // Operator "pow" ------------------------------------------------------------------- //
 template <class T>
 vector< T > pow(                                                                      // RETURNS THE ELEMENTWISE POWER OF VECTOR
