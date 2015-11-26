@@ -36,7 +36,7 @@ PatchOctree::PatchOctree(const int &id, const int &dimension,
 		maxLevels = 32;
 	}
 
-	m_tree_dh.resize(maxLevels);
+	m_tree_dh.reserve(maxLevels);
 	m_tree_area.reserve(maxLevels);
 	m_tree_volume.reserve(maxLevels);
 	for(int i = 0; i < maxLevels; i++) {
