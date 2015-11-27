@@ -506,10 +506,7 @@ void PatchOctree::import_octants(std::vector<OctantInfo> &octantInfoList,
 		// Decide if we need to build the interface
 		bool createInterface = false;
 
-		OctantInfo ownerOctantInfo;
-		ownerOctantInfo.id       = cells[owner];
-		ownerOctantInfo.internal = true;
-
+		OctantInfo ownerOctantInfo(cells[owner], true);
 		long ownerId = get_octant_id(ownerOctantInfo);
 		if (ownerId == Element::NULL_ELEMENT_ID) {
 			octantTreeInterfaces[ownerOctantInfo.id].push_back(interfaceTreeId);
@@ -518,10 +515,7 @@ void PatchOctree::import_octants(std::vector<OctantInfo> &octantInfoList,
 
 		long neighId = Element::NULL_ELEMENT_ID;
 		if (!isBoundary) {
-			OctantInfo neighOctantInfo;
-			neighOctantInfo.id       = cells[owner ? 0 : 1];
-			neighOctantInfo.internal = !isGhost;
-
+			OctantInfo neighOctantInfo(cells[!owner], !isGhost);
 			neighId = get_octant_id(neighOctantInfo);
 			if (neighId == Element::NULL_ELEMENT_ID) {
 				octantTreeInterfaces[neighOctantInfo.id].push_back(interfaceTreeId);
