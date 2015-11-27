@@ -152,27 +152,6 @@ long Element::get_id() const
 }
 
 /*!
-	Sets the local ID of the element.
-
-	\param id the local ID of the element
-
-*/
-void Element::set_local_id(long id)
-{
-	m_local_id = id;
-}
-
-/*!
-	Gets the local ID of the element.
-
-	\return The local ID of the element
-*/
-long Element::get_local_id() const
-{
-	return m_local_id;
-}
-
-/*!
 	Sets the element type.
 
 	\param type the element type

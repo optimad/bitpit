@@ -80,9 +80,6 @@ public:
 	void set_id(const long &id);
 	long get_id() const;
 	
-	void set_local_id(long id);
-	long get_local_id() const;
-	
 	void set_type(Element::Type type);
 	Element::Type get_type() const;
 
@@ -130,7 +127,6 @@ private:
 	Patch *m_patch;
 
 	long m_id;
-	long m_local_id;
 
 	Element::Type m_type;
 
