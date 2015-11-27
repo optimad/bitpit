@@ -99,7 +99,7 @@ public:
 	{
 		// Copy the elements
 		std::vector<T> new_v(other.m_v);
-		std::vector<int> new_index(other.m_index);
+		std::vector<std::size_t> new_index(other.m_index);
 
 		// Assign the new memory to the object
 		m_v.swap(new_v);
@@ -528,7 +528,7 @@ public:
 
 private:
 	std::vector<T> m_v;
-	std::vector<int> m_index;
+	std::vector<std::size_t> m_index;
 
 	/*!
 		Returns a constant pointer to the first element of the specified
