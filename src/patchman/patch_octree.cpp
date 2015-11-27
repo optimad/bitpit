@@ -110,19 +110,9 @@ PatchOctree::OctantInfo PatchOctree::get_cell_octant(const long &id) const
 	OctantInfo octantInfo;
 	octantInfo.internal = internal;
 	if (internal) {
-		const std::unordered_map<long, uint32_t, Element::IdHasher>::const_iterator cellItr = m_cell_to_octant.find(id);
-		if (cellItr == m_cell_to_octant.end()) {
-			octantInfo.exists = false;
-			return octantInfo;
-		}
-		octantInfo.id = cellItr->second;
+		octantInfo.id = m_cell_to_octant.at(id);
 	} else {
-		const std::unordered_map<long, uint32_t, Element::IdHasher>::const_iterator cellItr = m_cell_to_ghost.find(id);
-		if (cellItr == m_cell_to_ghost.end()) {
-			octantInfo.exists = false;
-			return octantInfo;
-		}
-		octantInfo.id = cellItr->second;
+		octantInfo.id = m_cell_to_ghost.at(id);
 	}
 
 	return octantInfo;

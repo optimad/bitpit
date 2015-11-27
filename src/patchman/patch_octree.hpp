@@ -30,9 +30,7 @@ class PatchOctree : public Patch {
 
 public:
 	struct OctantInfo {
-		OctantInfo() : exists(true) {};
 
-		bool exists;
 		uint32_t id;
 		bool internal;
 	};
