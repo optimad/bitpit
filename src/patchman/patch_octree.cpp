@@ -722,9 +722,10 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 		Cell &danglingCell = m_cells[danglingId];
 		int danglingFace = danglingFaceInfo.face;
 
-		std::vector<FaceInfo> vertexSourceList;
-		vertexSourceList.push_back(danglingFaceInfo);
-		for (int k = 0; k < danglingCell.get_interface_count(danglingFace); ++k) {
+		int nInterfaces = danglingCell.get_interface_count(danglingFace);
+		std::vector<FaceInfo> vertexSourceList(1 + nInterfaces);
+		vertexSourceList[0] = danglingFaceInfo;
+		for (int k = 0; k < nInterfaces; ++k) {
 			FaceInfo vertexSource;
 			long interfaceId = danglingCell.get_interface(danglingFace, k);
 
@@ -736,7 +737,7 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 				vertexSource.id   = interface.get_neigh();
 				vertexSource.face = interface.get_neigh_face();
 			}
-			vertexSourceList.push_back(vertexSource);
+			vertexSourceList[1 + k] = vertexSource;
 		}
 
 		// Add the vertices to the map
@@ -827,7 +828,6 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 				octantTreeInterfaces[neighOctantInfo.id].push_back(interfaceTreeId);
 				createInterface = true;
 			}
-
 		}
 
 		if (!createInterface) {
@@ -932,7 +932,10 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 				cellFace = interface.get_neigh_face();
 			}
 
-			cellInterfaces[cellFace].push_back(interfaceId);
+			cellInterfaces[cellFace].emplace_back();
+			long &cellInterfaceId = cellInterfaces[cellFace].back();
+			cellInterfaceId = interfaceId;
+
 			interfaceOwnerFlags[cellFace].push_back(ownerFlag);
 		}
 
