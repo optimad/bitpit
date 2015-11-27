@@ -726,18 +726,14 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 		std::vector<FaceInfo> vertexSourceList(1 + nInterfaces);
 		vertexSourceList[0] = danglingFaceInfo;
 		for (int k = 0; k < nInterfaces; ++k) {
-			FaceInfo vertexSource;
 			long interfaceId = danglingCell.get_interface(danglingFace, k);
 
 			Interface &interface = m_interfaces[interfaceId];
 			if (interface.get_owner() != danglingId) {
-				vertexSource.id   = interface.get_owner();
-				vertexSource.face = interface.get_owner_face();
+				vertexSourceList[1 + k] = FaceInfo(interface.get_owner(), interface.get_owner_face());
 			} else {
-				vertexSource.id   = interface.get_neigh();
-				vertexSource.face = interface.get_neigh_face();
+				vertexSourceList[1 + k] = FaceInfo(interface.get_neigh(), interface.get_neigh_face());
 			}
-			vertexSourceList[1 + k] = vertexSource;
 		}
 
 		// Add the vertices to the map
@@ -839,12 +835,8 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 		// the unknown cells because they are needed when finding
 		// the interfaces associated to a cell.
 		std::array<FaceInfo, 2> interfaceFaces;
-
-		interfaceFaces[0].id = ownerId;
-		interfaceFaces[0].face = ownerFace;
-
-		interfaceFaces[1].id = neighId;
-		interfaceFaces[1].face = ownerFace + 1 - 2 * (ownerFace % 2);
+		interfaceFaces[0] = FaceInfo(ownerId, ownerFace);
+		interfaceFaces[1] = FaceInfo(neighId, ownerFace + 1 - 2 * (ownerFace % 2));
 
 		// Interface connectivity
 		const std::vector<uint32_t> &octantTreeConnect = get_octant_connect(ownerOctantInfo);
@@ -1040,10 +1032,7 @@ PatchOctree::FaceInfoSet PatchOctree::remove_cells(std::vector<long> &cellIds)
 			danglingCell.delete_interface(danglingCellFace, j);
 
 			// Add the associated cell face to the dangling faces list
-			FaceInfo danglingFace;
-			danglingFace.id   = danglingCellId;
-			danglingFace.face = danglingCellFace;
-
+			FaceInfo danglingFace(danglingCellId, danglingCellFace);
 			danglingFaces.insert(danglingFace);
 		}
 
