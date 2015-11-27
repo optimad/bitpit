@@ -30,6 +30,8 @@ class PatchOctree : public Patch {
 
 public:
 	struct OctantInfo {
+		OctantInfo() : id(0), internal(true) {};
+		OctantInfo(uint32_t _id, bool _internal) : id(_id), internal(_internal) {};
 
 		uint32_t id;
 		bool internal;
