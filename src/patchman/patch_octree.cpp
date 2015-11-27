@@ -859,16 +859,16 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 		//
 		// A boundary interface cannnot be on a dangling face.
 		if (!isBoundary) {
-			FaceInfo guessDanglingInfo;
+			FaceInfo *guessDanglingInfo;
 			if (ownerId == Element::NULL_ELEMENT_ID) {
-				guessDanglingInfo = interfaceFaces[1];
+				guessDanglingInfo = &interfaceFaces[1];
 			} else {
-				guessDanglingInfo = interfaceFaces[0];
+				guessDanglingInfo = &interfaceFaces[0];
 			}
 
-			if (danglingFaces.count(guessDanglingInfo) != 0) {
-				Cell &danglingCell = m_cells[guessDanglingInfo.id];
-				danglingCell.push_interface(guessDanglingInfo.face, interfaceId);
+			if (danglingFaces.count(*guessDanglingInfo) != 0) {
+				Cell &danglingCell = m_cells[guessDanglingInfo->id];
+				danglingCell.push_interface(guessDanglingInfo->face, interfaceId);
 			}
 		}
 	}
