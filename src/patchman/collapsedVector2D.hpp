@@ -278,6 +278,8 @@ public:
 		m_index.emplace_back();
 		std::size_t &lastIndex = m_index.back();
 		lastIndex = previousLastIndex + subArraySize;
+
+		m_v.reserve(m_v.size() + subArraySize);
 		for (int j = 0; j < subArraySize; j++) {
 			m_v.emplace_back();
 			T &storedValue = m_v.back();
