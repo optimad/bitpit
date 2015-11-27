@@ -78,13 +78,16 @@ private:
 	typedef std::bitset<72> OctantHash;
 
 	struct FaceInfo {
-		long id;
-		int face;
+		FaceInfo() : id(Element::NULL_ELEMENT_ID), face(-1) {};
+		FaceInfo(long _id, int _face) : id(_id), face(_face) {};
 
 		bool operator==(const FaceInfo &other) const
 		{
 			return (id == other.id && face == other.face);
 		}
+
+		long id;
+		int face;
 	};
 
 	struct FaceInfoHasher
