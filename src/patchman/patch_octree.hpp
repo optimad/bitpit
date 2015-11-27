@@ -132,7 +132,7 @@ private:
                             std::unique_ptr<long[]> &vertices,
                             std::array<FaceInfo, 2> &faces);
 
-	long create_cell(uint32_t treeId, bool internal,
+	long create_cell(uint32_t treeId, bool interior,
 	                 std::unique_ptr<long[]> &vertices,
 	                 std::vector<std::vector<long>> &interfaces,
 	                 std::vector<std::vector<bool>> &ownerFlags);

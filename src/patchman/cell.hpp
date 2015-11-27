@@ -19,11 +19,6 @@ class Patch;
 class Cell : public Element {
 
 public:
-	enum PositionType {
-	    INTERNAL = 0,
-	    GHOST
-	};
-
 	Cell();
 	Cell(const long &id);
 	Cell(const long &id, Patch *patch);
@@ -31,8 +26,8 @@ public:
 	Cell(Cell&& other) = default;
 	Cell& operator=(Cell&& other) = default;
 
-	void set_position_type(PositionType position);
-	PositionType get_position_type() const;
+	void set_interior(bool interior);
+	bool is_interior() const;
 	
 	void set_volume(double * const volume);
 	const double & get_volume() const;
@@ -65,7 +60,7 @@ public:
 protected:
 
 private:
-  	PositionType m_positionType;
+	bool m_interior;
 
 	double *m_volume;
 

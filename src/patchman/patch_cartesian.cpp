@@ -292,8 +292,8 @@ void PatchCartesian::create_cells()
 					cell.set_type(Element::RECTANGLE);
 				}
 
-				// Position type
-				cell.set_position_type(Cell::INTERNAL);
+				// Interior flag
+				cell.set_interior(true);
 
 				// Volume
 				cell.set_volume(&m_cell_volume);

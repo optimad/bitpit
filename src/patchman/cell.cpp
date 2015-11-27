@@ -47,23 +47,24 @@ Cell::Cell(const long &id, Patch *patch)
 }
 
 /*!
-	Sets the position type of the interface.
+	Sets if the cells belongs to the the interior domain.
 
-	\param position the position type of the interface
+	\param interior defines if the cells belongs to the the interior domain
 */
-void Cell::set_position_type(PositionType positionType)
+void Cell::set_interior(bool interior)
 {
-	m_positionType = positionType;
+	m_interior = interior;
 }
 
 /*!
-	Gets the position type of the interface.
+	Gets if the cells belongs to the the interior domain.
 
-	\result The position type of the nterface
+	\result Returns true if the cells belongs to the the interior domain,
+	otherwise it returns false.
 */
-Cell::PositionType Cell::get_position_type() const
+bool Cell::is_interior() const
 {
-  return m_positionType;
+	return m_interior;
 }
 
 /*!

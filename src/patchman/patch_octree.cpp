@@ -105,11 +105,9 @@ std::array<double, 3> & PatchOctree::_get_opposite_normal(std::array<double, 3> 
 */
 PatchOctree::OctantInfo PatchOctree::get_cell_octant(const long &id) const
 {
-	bool internal = (m_cells[id].get_position_type() == Cell::INTERNAL);
-
 	OctantInfo octantInfo;
-	octantInfo.internal = internal;
-	if (internal) {
+	octantInfo.internal = m_cells[id].is_interior();
+	if (octantInfo.internal) {
 		octantInfo.id = m_cell_to_octant.at(id);
 	} else {
 		octantInfo.id = m_cell_to_ghost.at(id);
@@ -1159,13 +1157,13 @@ long PatchOctree::create_interface(uint32_t treeId,
 
 	\param treeId is the id of the octant in the tree
 */
-long PatchOctree::create_cell(uint32_t treeId, bool internal,
+long PatchOctree::create_cell(uint32_t treeId, bool interior,
                               std::unique_ptr<long[]> &vertices,
                               std::vector<std::vector<long>> &interfaces,
                               std::vector<std::vector<bool>> &ownerFlags)
 {
 	// Create the cell
-	long id = Patch::create_cell(internal);
+	long id = Patch::create_cell(interior);
 	Cell &cell = m_cells[id];
 
 	// Octant info
@@ -1173,7 +1171,7 @@ long PatchOctree::create_cell(uint32_t treeId, bool internal,
 	vector<double> octantCentroid;
 	if (is_three_dimensional()) {
 		Class_Octant<3> *octant;
-		if (internal) {
+		if (interior) {
 			octant = m_tree_3D.getOctant(treeId);
 		} else {
 			octant = m_tree_3D.getGhostOctant(treeId);
@@ -1182,7 +1180,7 @@ long PatchOctree::create_cell(uint32_t treeId, bool internal,
 		octantCentroid = m_tree_3D.getCenter(octant);
 	} else {
 		Class_Octant<2> *octant;
-		if (internal) {
+		if (interior) {
 			octant = m_tree_2D.getOctant(treeId);
 		} else {
 			octant = m_tree_2D.getGhostOctant(treeId);
@@ -1198,12 +1196,8 @@ long PatchOctree::create_cell(uint32_t treeId, bool internal,
 		cell.set_type(Element::RECTANGLE);
 	}
 
-	// Position
-	if (internal) {
-		cell.set_position_type(Cell::INTERNAL);
-	} else {
-		cell.set_position_type(Cell::GHOST);
-	}
+	// Interior flag
+	cell.set_interior(interior);
 
 	// Volume
 	cell.set_volume(&m_tree_volume[octantLevel]);
@@ -1258,10 +1252,10 @@ long PatchOctree::create_cell(uint32_t treeId, bool internal,
 void PatchOctree::delete_cell(long id)
 {
 	// Remove the information that link the cell to the octant
-	bool internal = (m_cells[id].get_position_type() == Cell::INTERNAL);
+	bool interior = m_cells[id].is_interior();
 
 	std::unordered_map<long, uint32_t, Element::IdHasher> *cellMap;
-	if (internal) {
+	if (interior) {
 		cellMap = &m_cell_to_octant;
 	} else {
 		cellMap = &m_cell_to_ghost;
@@ -1271,7 +1265,7 @@ void PatchOctree::delete_cell(long id)
 	if (cellItr != cellMap->end()) {
 		// Delete octant-to-cell entry
 		std::unordered_map<uint32_t, long> *octantMap;
-		if (internal) {
+		if (interior) {
 			octantMap = &m_octant_to_cell;
 		} else {
 			octantMap = &m_ghost_to_cell;
