@@ -1214,14 +1214,8 @@ private:
 			m_v[pos] = T(std::forward<Args>(args)...);
 		}
 
-		// Elements must have unique id
-		id_type id = m_v[pos].get_id();
-		if (exists(id)) {
-			throw std::out_of_range ("Duplicate id");
-		}
-
 		// The position is now occupied by the element
-		fill_pos(pos, id);
+		fill_pos(pos, m_v[pos].get_id());
 
 		// Return the position of the element
 		return pos;
@@ -1280,12 +1274,6 @@ private:
 	*/
 	iterator _insert(size_type hole, value_type &&value)
 	{
-		// Elements muse have unique id
-		id_type id = value.get_id();
-		if (m_pos.count(id) != 0) {
-			throw std::out_of_range ("Duplicate id");
-		}
-
 		// Position of the element
 		size_type pos = get_pos_to_fill(hole);
 
@@ -1366,7 +1354,7 @@ private:
 	void fill_pos(size_type pos, id_type id)
 	{
 		// Add the id to the map
-		m_pos[id] = pos;
+		link_id(id, pos);
 
 		// Update first and last counters
 		if (m_last_pos < pos) {
@@ -1537,6 +1525,25 @@ private:
 	}
 
 	/*!
+		Adds the specified id from to the map and link it to the
+		give position.
+
+		\param id is the id that will be added to the list
+		\param pos is the position that will be associated with
+		the id
+	*/
+	void link_id(const id_type id, const size_t pos)
+	{
+		// Elements must have unique id
+		if (exists(id)) {
+			throw std::out_of_range ("Duplicate id");
+		}
+
+		// Add id to the map
+		m_pos[id] = pos;
+	}
+
+	/*!
 		Returns the first non-empty position after the specified
 		starting position.
 
@@ -1572,7 +1579,7 @@ private:
 	void pierce_pos(size_type pos, id_type id)
 	{
 		// Delete id from map
-		m_pos.erase(id);
+		unlink_id(id);
 
 		// Update first and last counters
 		if (empty()) {
@@ -1601,6 +1608,16 @@ private:
 		} else {
 			holes_delete_after(m_last_pos);
 		}
+	}
+
+	/*!
+		Removes the specified id from the map.
+
+		\param id is the id that will be removed from the list
+	*/
+	void unlink_id(const id_type id)
+	{
+		m_pos.erase(id);
 	}
 
 	/*!
