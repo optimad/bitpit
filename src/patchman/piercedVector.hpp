@@ -872,6 +872,71 @@ public:
 	}
 
 	/*!
+		The element with the specified id is replaced with a new element.
+		This new element is constructed in place using args as the
+		arguments for its construction.
+
+		\param id is the id of the element that will be replaced
+		\param args the arguments forwarded to construct the new element
+		\result An iterator that points to the newly inserted element.
+	*/
+	template <class... Args>
+	iterator emreplace(id_type id, Args&&... args)
+	{
+		// Position
+		size_t pos = m_pos.at(id);
+
+		// Id of the element that is currently occuping the position
+		id_type id_prev = m_v[pos].get_id();
+
+		// Replace the element
+		m_v[pos] = T(std::forward<Args>(args)...);
+
+		// Update the map
+		if (id != id_prev) {
+			unlink_id(id_prev);
+			link_id(id, pos);
+		}
+
+		// Return the iterator that points to the element
+		iterator itr;
+		itr = raw_begin() + pos;
+
+		return itr;
+	}
+
+	/*!
+		The element with the specified id is replaced with a new element.
+
+		\param id is the id of the element that will be replaced
+		\param value is the value to be moved to the inserted elements.
+		\result An iterator that points to the newly inserted element.
+	*/
+	iterator replace(id_type id, value_type &&value)
+	{
+		// Position
+		size_t pos = m_pos.at(id);
+
+		// Id of the element that is currently occuping the position
+		id_type id_prev = m_v[pos].get_id();
+
+		// Replace the element
+		m_v[pos] = std::move(value);
+
+		// Update the map
+		if (id != id_prev) {
+			unlink_id(id_prev);
+			link_id(id, pos);
+		}
+
+		// Return the iterator that points to the element
+		iterator itr;
+		itr = raw_begin() + pos;
+
+		return itr;
+	}
+
+	/*!
 		Requests that the vector capacity be at least enough to contain
 		n elements.
 
