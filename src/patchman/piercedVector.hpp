@@ -525,9 +525,16 @@ public:
 		m_holes.clear();
 		std::deque<size_type>().swap(m_holes);
 
+		// Clear pending changes
+		m_pending_deletes.clear();
+		std::deque<size_type>().swap(m_pending_deletes);
+
 		// Clear position map
 		m_pos.clear();
 		std::unordered_map<id_type, size_type, PiercedHasher>().swap(m_pos);
+
+		// Clear dirty flag
+		m_dirty = false;
 	}
 
 	/*!
@@ -604,6 +611,27 @@ public:
 	}
 
 	/*!
+		Flush all pending changes.
+	*/
+	void flush()
+	{
+		if (!m_dirty) {
+			return;
+		}
+
+		// Flush pending deletes
+		auto pendingIter = m_pending_deletes.rbegin();
+		while (pendingIter != m_pending_deletes.rend()) {
+			pierce_pos(*pendingIter);
+			++pendingIter;
+		}
+		std::deque<size_type>().swap(m_pending_deletes);
+
+		// Done
+		m_dirty = false;
+	}
+
+	/*!
 		Returns a reference to the first element of the vector. If
 		the vector is empty, an exception is thrown.
 
@@ -643,14 +671,16 @@ public:
 		container to reuse that position.
 
 		\param id the id of the element to erase
+		\param delayed if true the deletion of the element will
+		be delayed until a flush is called
 		\result An iterator pointing to the new location of the
 		        element that followed the element erased by the
 		        function call. This is the container end if the
 		        operation erased the last element in the sequence.
 	*/
-	iterator erase(id_type id)
+	iterator erase(id_type id, bool delayed = false)
 	{
-		return _erase(get_pos_from_id(id));
+		return _erase(get_pos_from_id(id), delayed);
 	}
 
 	/*!
@@ -733,7 +763,12 @@ public:
 			throw std::out_of_range ("Vector is empty");
 		}
 
-		_erase(m_last_pos);
+		while (m_pending_deletes.back() >= m_last_pos) {
+			size_type pos = pending_deletes_pop_back();
+			_erase(pos, false);
+		}
+
+		_erase(m_last_pos, false);
 	}
 
 	/*!
@@ -951,6 +986,9 @@ public:
 	*/
 	void sort()
 	{
+		// Flush changes
+		flush();
+
 		// Sort the elements of the vector
 		std::sort(m_v.begin(), m_v.begin() + m_last_pos + 2, less_than_id());
 
@@ -985,6 +1023,9 @@ public:
 	*/
 	void squeeze()
 	{
+		// Flush changes
+		flush();
+
 		// Compact the vector
 		if (!m_holes.empty()) {
 			// Move the elements
@@ -1046,6 +1087,7 @@ public:
 		std::swap(x.m_last_pos, m_last_pos);
 		std::swap(x.m_v, m_v);
 		std::swap(x.m_holes, m_holes);
+		std::swap(x.m_pending_deletes, m_pending_deletes);
 		std::swap(x.m_pos, m_pos);
 	}
 
@@ -1170,6 +1212,16 @@ private:
 	std::deque<size_type> m_holes;
 
 	/*!
+		Tracks if the container in a dirty status.
+	*/
+	bool m_dirty;
+
+	/*!
+		Container that will hold a list of the pending deletes.
+	*/
+	std::deque<size_type> m_pending_deletes;
+
+	/*!
 		Map that links the id of the elements and their position
 		inside the internal vector.
 	*/
@@ -1207,6 +1259,9 @@ private:
 		// Position of the element
 		size_type pos = get_pos_to_fill(hole);
 
+		// Check if the position is empty
+		bool previouslyEmpty = is_pos_empty(pos);
+
 		// Insert the element
 		if (pos == (m_v.size() - 1)) {
 			m_v.emplace(raw_begin() + pos, std::forward<Args>(args)...);
@@ -1217,8 +1272,10 @@ private:
 		// Add the id to the map
 		link_id(m_v[pos].get_id(), pos);
 
-		// The position is now occupied by the element
-		fill_pos(pos);
+		// Mark the position as filled
+		if (previouslyEmpty) {
+			fill_pos(pos);
+		}
 
 		// Return the position of the element
 		return pos;
@@ -1237,17 +1294,21 @@ private:
 		        function call. This is the container end if the
 		        operation erased the last element in the sequence.
 	*/
-	iterator _erase(size_type pos)
+	iterator _erase(size_type pos, bool delayed = false)
 	{
 		// Delete id from map
 		unlink_id(m_v[pos].get_id());
 
-		// Pierce the position
-		pierce_pos(pos);
+		// Free the position
+		if (delayed) {
+			pending_deletes_add(pos);
+		} else {
+			pierce_pos(pos);
+		}
 
 		// Return the iterator to the element following the one erased
 		iterator itr;
-		if (empty() || pos > m_last_pos) {
+		if (empty() || pos >= m_last_pos) {
 			itr = end();
 		} else {
 			itr = raw_begin() + next_used_pos(pos);
@@ -1280,6 +1341,12 @@ private:
 		// Position of the element
 		size_type pos = get_pos_to_fill(hole);
 
+		// Check if the position is empty
+		bool previouslyEmpty = is_pos_empty(pos);
+
+		// Id of the element that is currently occuping the position
+		id_type id_prev = m_v[pos].get_id();
+
 		// Insert the element
 		if (pos == (m_v.size() - 1)) {
 			m_v.insert(m_v.begin() + pos, std::move(value));
@@ -1290,8 +1357,10 @@ private:
 		// Add the id to the map
 		link_id(m_v[pos].get_id(), pos);
 
-		// The position is now occupied by the element
-		fill_pos(pos);
+		// Mark the position as filled
+		if (previouslyEmpty) {
+			fill_pos(pos);
+		}
 
 		// Return the iterator that points to the element
 		iterator itr;
@@ -1407,7 +1476,7 @@ private:
 	{
 		// If there are no hole the first avilable position is the
 		// end of the vector.
-		if (hole == FIRST_EMPTY_POS && m_holes.empty()) {
+		if (hole == FIRST_EMPTY_POS && m_holes.empty() && m_pending_deletes.empty()) {
 			hole = APPEND_TO_BACK;
 		}
 
@@ -1425,7 +1494,11 @@ private:
 			assert(!m_v.empty());
 
 			if (hole == FIRST_EMPTY_POS) {
-				pos = holes_pop();
+				if (m_pending_deletes.empty()) {
+					pos = holes_pop();
+				} else {
+					pos = pending_deletes_pop_back();
+				}
 			} else {
 				pos = holes_pop(hole);
 			}
@@ -1509,6 +1582,9 @@ private:
 
 		// Add sentinel
 		append_sentinels(REQUIRED_SENTINEL_COUNT);
+
+		// Reset dirty flag
+		m_dirty = false;
 	}
 
 	/*!
@@ -1568,6 +1644,50 @@ private:
 		} else {
 			return next_pos - next_id;
 		}
+	}
+
+	/*!
+		Add a position to the pending deletes list.
+
+		The container that hold the pending deletes has to be always
+		kept in ascending order.
+
+		\param pos the position to be added to the pending deletes list
+	*/
+	void pending_deletes_add(size_type pos)
+	{
+		m_dirty = true;
+
+		std::deque<size_type>::iterator itr = lower_bound(m_pending_deletes.begin(), m_pending_deletes.end(), pos);
+		m_pending_deletes.insert(itr, pos);
+	}
+
+	/*!
+		Gets the position associated with the first pending delete
+                and deletes that pending delete from the list.
+
+		\result The position associated with the first pending delete.
+	*/
+	size_t pending_deletes_pop_front()
+	{
+		size_t pos = m_pending_deletes.front();
+		m_pending_deletes.pop_front();
+
+		return pos;
+	}
+
+	/*!
+		Gets the position associated with the first pending delete
+                and deletes that pending delete from the list.
+
+		\result The position associated with the first pending delete.
+	*/
+	size_t pending_deletes_pop_back()
+	{
+		size_t pos = m_pending_deletes.back();
+		m_pending_deletes.pop_back();
+
+		return pos;
 	}
 
 	/*!
