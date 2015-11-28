@@ -254,7 +254,11 @@ public:
 	*/
 	void push_back(const int &subArraySize, const T &value)
 	{
-		m_index.push_back(m_index.back() + subArraySize);
+		std::size_t previousLastIndex = m_index.back();
+		m_index.emplace_back();
+		std::size_t &lastIndex = m_index.back();
+		lastIndex = previousLastIndex + subArraySize;
+
 		m_v.resize(m_v.size() + subArraySize, value);
 	}
 
@@ -270,9 +274,14 @@ public:
 	{
 		int subArraySize = subArray.size();
 
-		m_index.push_back(m_index.back() + subArraySize);
+		std::size_t previousLastIndex = m_index.back();
+		m_index.emplace_back();
+		std::size_t &lastIndex = m_index.back();
+		lastIndex = previousLastIndex + subArraySize;
 		for (int j = 0; j < subArraySize; j++) {
-			m_v.push_back(subArray[j]);
+			m_v.emplace_back();
+			T &storedValue = m_v.back();
+			storedValue = subArray[j];
 		}
 	}
 
@@ -286,7 +295,10 @@ public:
 	void push_back_in_sub_array(const T& value)
 	{
 		m_index.back()++;
-		m_v.push_back(value);
+
+		m_v.emplace_back();
+		T &storedValue = m_v.back();
+		storedValue = value;
 	}
 
 	/*!
