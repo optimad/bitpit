@@ -51,9 +51,9 @@ public:
 	void initialize(long nGuessCells, long nGuessVerts);
 	void finalize();
 
-	static int getVTKCellType(Element::Type type);
-	static void mapConnectFromVTK(Element::Type elemType, int elemMapDegree, int *elemConnect);
-	static void mapConnectToVTK(Element::Type elemType, int elemMapDegree, int *elemConnect);
+	static int getVTKCellType(ElementInfo::Type type);
+	static void mapConnectFromVTK(ElementInfo::Type elemType, int elemMapDegree, int *elemConnect);
+	static void mapConnectToVTK(ElementInfo::Type elemType, int elemMapDegree, int *elemConnect);
 
 	vtkTypeMacro(OutputManager, vtkUnstructuredGrid);
 

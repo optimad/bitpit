@@ -68,26 +68,26 @@ void OutputManager::finalize()
 
 // Description:
 // Restituisce il tipo di elemento VTK
-int OutputManager::getVTKCellType(Element::Type type)
+int OutputManager::getVTKCellType(ElementInfo::Type type)
 {
 	switch (type)  {
-		case Element::POINT:
+		case ElementInfo::POINT:
 			return VTK_VERTEX;
-		case Element::LINE:
+		case ElementInfo::LINE:
 			return VTK_LINE;
-		case Element::TRIANGLE:
+		case ElementInfo::TRIANGLE:
 			return VTK_TRIANGLE;
-		case Element::RECTANGLE:
-		case Element::QUADRANGLE:
+		case ElementInfo::RECTANGLE:
+		case ElementInfo::QUADRANGLE:
 			return VTK_QUAD;
-		case Element::TETRAHEDRON:
+		case ElementInfo::TETRAHEDRON:
 			return VTK_TETRA;
-		case Element::BRICK:
-		case Element::HEXAHEDRON:
+		case ElementInfo::BRICK:
+		case ElementInfo::HEXAHEDRON:
 			return VTK_HEXAHEDRON;
-		case Element::PRISM:
+		case ElementInfo::PRISM:
 			return VTK_WEDGE;
-		case Element::PYRAMID:
+		case ElementInfo::PYRAMID:
 			return VTK_PYRAMID;
 		default:
 			return VTK_EMPTY_CELL;
@@ -102,7 +102,7 @@ int OutputManager::getVTKCellType(Element::Type type)
 // infine quelli interni allo elemento. Rinumero la connettività locale
 // in modo da numerare per primi i nodi sulle facce (indipendentemente
 // che siano vertici oppure no) e poi quelli interni.
-void OutputManager::mapConnectFromVTK(Element::Type elemType, int elemMapDegree, int *elemConnect)
+void OutputManager::mapConnectFromVTK(ElementInfo::Type elemType, int elemMapDegree, int *elemConnect)
 {
 
 // 	int s, j_s, j;
@@ -204,7 +204,7 @@ void OutputManager::mapConnectFromVTK(Element::Type elemType, int elemMapDegree,
 //
 // VTK numera prima i nodi sui vertici, poi quelli interni alle facce e
 // infine quelli interni allo elemento.
-void OutputManager::mapConnectToVTK(Element::Type elemType, int elemMapDegree, int *elemConnect)
+void OutputManager::mapConnectToVTK(ElementInfo::Type elemType, int elemMapDegree, int *elemConnect)
 {
 	// Devo rinumerare i nodi solo per elementi con grado di mapping
 	// maggiore di 1
@@ -249,8 +249,8 @@ std::vector<vtkIdType> OutputManager::extractVTKCellConnect(const Cell &cell, st
 	std::vector<int> mapper(nCellVertices);
 	switch (cell.get_type())  {
 
-	case Element::RECTANGLE:
-	case Element::QUADRANGLE:
+	case ElementInfo::RECTANGLE:
+	case ElementInfo::QUADRANGLE:
 		remap = true;
 
 		mapper[0] = 0;
@@ -259,8 +259,8 @@ std::vector<vtkIdType> OutputManager::extractVTKCellConnect(const Cell &cell, st
 		mapper[3] = 2;
 		break;
 
-	case Element::BRICK:
-	case Element::HEXAHEDRON:
+	case ElementInfo::BRICK:
+	case ElementInfo::HEXAHEDRON:
 		remap = true;
 
 		mapper[0] = 0;

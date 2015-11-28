@@ -257,12 +257,15 @@ void PatchCartesian::create_cells()
 	reset_cells();
 
 	// Info on the cells
-	int nCellVertices;
+	ElementInfo::Type cellType;
 	if (is_three_dimensional()) {
-		nCellVertices = Element::get_vertex_count(Element::BRICK);
+		cellType = ElementInfo::BRICK;
 	} else {
-		nCellVertices = Element::get_vertex_count(Element::RECTANGLE);
+		cellType = ElementInfo::RECTANGLE;
 	}
+
+	const ElementInfo &cellTypeInfo = ElementInfo::get_element_info(cellType);
+	const int &nCellVertices = cellTypeInfo.nVertices;
 
 	// Count the cells
 	long nTotalCells = 1;
@@ -287,9 +290,9 @@ void PatchCartesian::create_cells()
 
 				// Tipo
 				if (is_three_dimensional()) {
-					cell.set_type(Element::BRICK);
+					cell.set_type(ElementInfo::BRICK);
 				} else {
-					cell.set_type(Element::RECTANGLE);
+					cell.set_type(ElementInfo::RECTANGLE);
 				}
 
 				// Interior flag
@@ -347,12 +350,15 @@ void PatchCartesian::create_interfaces()
 	m_interfaces.reserve(nTotalInterfaces);
 
 	// Allocate the space for interface information on the cells
-	int nCellFaces;
+	ElementInfo::Type cellType;
 	if (is_three_dimensional()) {
-		nCellFaces = Element::get_face_count(Element::BRICK);
+		cellType = ElementInfo::BRICK;
 	} else {
-		nCellFaces = Element::get_face_count(Element::RECTANGLE);
+		cellType = ElementInfo::RECTANGLE;
 	}
+
+	const ElementInfo &cellTypeInfo = ElementInfo::get_element_info(cellType);
+	const int &nCellFaces = cellTypeInfo.nFaces;
 
 	int nInterfacesForSide[nCellFaces];
 	std::fill_n(nInterfacesForSide, nCellFaces, 1);
@@ -413,12 +419,15 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 	std::cout << "  >> Creating interfaces normal to direction " << direction << "\n";
 
 	// Info on the interfaces
-	int nInterfaceVertices;
+	ElementInfo::Type interfaceType;
 	if (is_three_dimensional()) {
-		nInterfaceVertices = Element::get_face_count(Element::RECTANGLE);
+		interfaceType = ElementInfo::RECTANGLE;
 	} else {
-		nInterfaceVertices = Element::get_face_count(Element::LINE);
+		interfaceType = ElementInfo::LINE;
 	}
+
+	const ElementInfo &interfaceTypeInfo = ElementInfo::get_element_info(interfaceType);
+	const int nInterfaceVertices = interfaceTypeInfo.nVertices;
 
 	double *area;
 	std::vector<int> *interfaceCount1D;
@@ -457,9 +466,9 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 
 				// Interface type
 				if (is_three_dimensional()) {
-					interface.set_type(Element::RECTANGLE);
+					interface.set_type(ElementInfo::RECTANGLE);
 				} else {
-					interface.set_type(Element::LINE);
+					interface.set_type(ElementInfo::LINE);
 				}
 
 				// Area

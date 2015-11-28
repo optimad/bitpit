@@ -668,39 +668,28 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
                                  FaceInfoSet &danglingFaces)
 {
 	// Info of the cells
-	Element::Type cellType;
+	ElementInfo::Type cellType;
 	if (is_three_dimensional()) {
-		cellType = Element::BRICK;
+		cellType = ElementInfo::BRICK;
 	} else {
-		cellType = Element::RECTANGLE;
+		cellType = ElementInfo::RECTANGLE;
 	}
 
-	int nCellFaces;
-	if (is_three_dimensional()) {
-		nCellFaces = Element::get_face_count(Element::BRICK);
-	} else {
-		nCellFaces = Element::get_face_count(Element::RECTANGLE);
-	}
-
-	int nCellVertices;
-	if (is_three_dimensional()) {
-		nCellVertices = Element::get_vertex_count(Element::BRICK);
-	} else {
-		nCellVertices = Element::get_vertex_count(Element::RECTANGLE);
-	}
-
-	std::vector<std::vector<int>> cellLocalFaceConnect(nCellFaces);
-	for (int k = 0; k < nCellFaces; ++k) {
-		cellLocalFaceConnect[k] = Element::get_face_local_connect(cellType, k);
-	}
+	const ElementInfo &cellTypeInfo = ElementInfo::get_element_info(cellType);
+	const int &nCellFaces = cellTypeInfo.nFaces;
+	const int &nCellVertices = cellTypeInfo.nVertices;
+	const std::vector<std::vector<int>> &cellLocalFaceConnect = cellTypeInfo.face_connect;
 
 	// Info on the interfaces
-	int nInterfaceVertices;
+	ElementInfo::Type interfaceType;
 	if (is_three_dimensional()) {
-		nInterfaceVertices = Element::get_face_count(Element::RECTANGLE);
+		interfaceType = ElementInfo::RECTANGLE;
 	} else {
-		nInterfaceVertices = Element::get_face_count(Element::LINE);
+		interfaceType = ElementInfo::LINE;
 	}
+
+	const ElementInfo &interfaceTypeInfo = ElementInfo::get_element_info(interfaceType);
+	const int &nInterfaceVertices = interfaceTypeInfo.nVertices;
 
 	uint32_t nIntersections;
 	if (is_three_dimensional()) {
@@ -745,7 +734,7 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 			const std::vector<uint32_t> &octantTreeConnect = get_octant_connect(octantInfo);
 
 			// List of vertices
-			std::vector<int> &localConnect = cellLocalFaceConnect[vertexSource.face];
+			const std::vector<int> &localConnect = cellLocalFaceConnect[vertexSource.face];
 			for (int k = 0; k < nInterfaceVertices; ++k) {
 				long vertexId = cellConnect[localConnect[k]];
 				uint32_t vertexTreeId = octantTreeConnect[localConnect[k]];
@@ -838,7 +827,7 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 
 		// Interface connectivity
 		const std::vector<uint32_t> &octantTreeConnect = get_octant_connect(ownerOctantInfo);
-		std::vector<int> &localConnect = cellLocalFaceConnect[ownerFace];
+		const std::vector<int> &localConnect = cellLocalFaceConnect[ownerFace];
 		std::unique_ptr<long[]> interfaceConnect = std::unique_ptr<long[]>(new long[nInterfaceVertices]);
 		for (int k = 0; k < nInterfaceVertices; ++k) {
 			interfaceConnect[k] = vertexMap.at(octantTreeConnect[localConnect[k]]);
@@ -1113,9 +1102,9 @@ long PatchOctree::create_interface(uint32_t treeId,
 
 	// Tipo
 	if (is_three_dimensional()) {
-		interface.set_type(Element::RECTANGLE);
+		interface.set_type(ElementInfo::RECTANGLE);
 	} else {
-		interface.set_type(Element::LINE);
+		interface.set_type(ElementInfo::LINE);
 	}
 
 	// Area
@@ -1191,9 +1180,9 @@ long PatchOctree::create_cell(uint32_t treeId, bool interior,
 
 	// Tipo
 	if (is_three_dimensional()) {
-		cell.set_type(Element::BRICK);
+		cell.set_type(ElementInfo::BRICK);
 	} else {
-		cell.set_type(Element::RECTANGLE);
+		cell.set_type(ElementInfo::RECTANGLE);
 	}
 
 	// Interior flag

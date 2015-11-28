@@ -14,25 +14,73 @@ namespace pman {
 
 class Patch;
 
-class Element {
+class ElementInfo {
 
 public:
 	enum Type {
-	    UNDEFINED = -1,
-	    POINT,
-	    LINE,
-	    TRIANGLE,
-	    RECTANGLE,
-	    QUADRANGLE,
-	    POLYGON,
-	    TETRAHEDRON,
-	    BRICK,
-	    HEXAHEDRON,
-	    PYRAMID,
-	    PRISM,
-	    POLYHEDRON
+		UNDEFINED = -1,
+		POINT,
+		LINE,
+		TRIANGLE,
+		RECTANGLE,
+		QUADRANGLE,
+		POLYGON,
+		TETRAHEDRON,
+		BRICK,
+		HEXAHEDRON,
+		PYRAMID,
+		PRISM,
+		POLYHEDRON
 	};
 
+	Type type;
+	int dimension;
+
+	int nVertices;
+	int nEdges;
+	int nFaces;
+
+	static const ElementInfo undefinedInfo;
+	static const ElementInfo pointInfo;
+	static const ElementInfo lineInfo;
+	static const ElementInfo triangleInfo;
+	static const ElementInfo rectangleInfo;
+	static const ElementInfo quadrangleInfo;
+	static const ElementInfo tetrahedronInfo;
+	static const ElementInfo brickInfo;
+	static const ElementInfo hexahedronInfo;
+	static const ElementInfo pyramidInfo;
+	static const ElementInfo prismInfo;
+
+	std::vector<Type> face_type;
+	std::vector<std::vector<int>> face_connect;
+
+	std::vector<Type> edge_type;
+	std::vector<std::vector<int>> edge_connect;
+
+	ElementInfo();
+	ElementInfo(ElementInfo::Type type);
+
+	static const ElementInfo & get_element_info(ElementInfo::Type type);
+
+private:
+	void initializeUndefinedInfo();
+	void initializePointInfo();
+	void initializeLineInfo();
+	void initializeTriangleInfo();
+	void initializeRectangleInfo();
+	void initializeQuadrangleInfo();
+	void initializeTetrahedronInfo();
+	void initializeBrickInfo();
+	void initializeHexahedronInfo();
+	void initializePyramidInfo();
+	void initializePrismInfo();
+
+};
+
+class Element {
+
+public:
 	/*!
 		Hasher for the ids.
 
@@ -80,13 +128,11 @@ public:
 	void set_id(const long &id);
 	long get_id() const;
 	
-	void set_type(Element::Type type);
-	Element::Type get_type() const;
+	void set_type(ElementInfo::Type type);
+	ElementInfo::Type get_type() const;
 
 	int get_dimension() const;
-	static int get_dimension(Element::Type type);
 	bool is_three_dimensional() const;
-	static bool is_three_dimensional(Element::Type type);
 	
 	void set_connect(std::unique_ptr<long[]> connect);
 	void unset_connect();
@@ -96,22 +142,13 @@ public:
 	const std::array<double, 3> & get_centroid() const;
 
 	int get_face_count() const;
-	static int get_face_count(Element::Type type);
-
-	Element::Type get_face_type(const int &face) const;
-	static Element::Type get_face_type(Element::Type type, const int &face);
-
+	ElementInfo::Type get_face_type(const int &face) const;
 	std::vector<int> get_face_local_connect(const int &face) const;
-	static std::vector<int> get_face_local_connect(Element::Type type, const int &face);
 
 	int get_edge_count() const;
-	static int get_edge_count(Element::Type type);
-
 	std::vector<int> get_edge_local_connect(const int &edge) const;
-	static std::vector<int> get_edge_local_connect(Element::Type type, const int &edge);
 
 	int get_vertex_count() const;
-	static int get_vertex_count(Element::Type type);
 	int get_vertex(const int &vertex) const;
 
 	double eval_length() const;
@@ -128,7 +165,7 @@ private:
 
 	long m_id;
 
-	Element::Type m_type;
+	ElementInfo::Type m_type;
 
 	std::array<double, 3> m_centroid;
 	std::unique_ptr<long[]> m_connect;
