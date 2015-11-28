@@ -604,6 +604,7 @@ bool PatchCartesian::_mark_cell_for_coarsening(const long &id)
 bool PatchCartesian::_enable_cell_balancing(const long &id, bool enabled)
 {
 	UNUSED(id);
+	UNUSED(enabled);
 
 	return false;
 }
