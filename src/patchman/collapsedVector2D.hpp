@@ -600,7 +600,7 @@ private:
 			return false;
 		}
 
-		return (j >= 0 && j < (m_index[i+1] - m_index[i]));
+		return (j >= 0 && j < (int) (m_index[i+1] - m_index[i]));
 	}
 
 };
