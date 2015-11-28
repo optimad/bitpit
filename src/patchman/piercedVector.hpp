@@ -1694,7 +1694,9 @@ const typename PiercedVector<T>::size_type
 
 template<class T>
 const typename PiercedVector<T>::size_type
-	PiercedVector<T>::USABLE_POS_COUNT = std::numeric_limits<size_type>::max() - std::max(RESERVED_HOLE_COUNT, REQUIRED_SENTINEL_COUNT);
+	PiercedVector<T>::USABLE_POS_COUNT = std::numeric_limits<size_type>::max() -
+		(RESERVED_HOLE_COUNT > REQUIRED_SENTINEL_COUNT ?
+			RESERVED_HOLE_COUNT : REQUIRED_SENTINEL_COUNT);
 
 }
 
