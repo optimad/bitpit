@@ -1008,7 +1008,7 @@ public:
 			}
 
 			// Move the sentinels
-			for (int k = 0; k < REQUIRED_SENTINEL_COUNT; ++k) {
+			for (size_type k = 0; k < REQUIRED_SENTINEL_COUNT; ++k) {
 				m_v[m_pos.size() + k] = std::move(m_v[m_last_pos + k + 1]);
 			}
 
