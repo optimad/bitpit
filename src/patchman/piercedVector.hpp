@@ -1214,8 +1214,11 @@ private:
 			m_v[pos] = T(std::forward<Args>(args)...);
 		}
 
+		// Add the id to the map
+		link_id(m_v[pos].get_id(), pos);
+
 		// The position is now occupied by the element
-		fill_pos(pos, m_v[pos].get_id());
+		fill_pos(pos);
 
 		// Return the position of the element
 		return pos;
@@ -1236,11 +1239,11 @@ private:
 	*/
 	iterator _erase(size_type pos)
 	{
-		// Id of the element
-		id_type id = m_v[pos].get_id();
+		// Delete id from map
+		unlink_id(m_v[pos].get_id());
 
 		// Pierce the position
-		pierce_pos(pos, id);
+		pierce_pos(pos);
 
 		// Return the iterator to the element following the one erased
 		iterator itr;
@@ -1284,8 +1287,11 @@ private:
 			m_v[pos] = std::move(value);
 		}
 
+		// Add the id to the map
+		link_id(m_v[pos].get_id(), pos);
+
 		// The position is now occupied by the element
-		fill_pos(pos, m_v[pos].get_id());
+		fill_pos(pos);
 
 		// Return the iterator that points to the element
 		iterator itr;
@@ -1345,17 +1351,12 @@ private:
 	};
 
 	/*!
-		Mark the specified position as filled by the element with
-		the given id
+		Mark the specified position as filled.
 
 		\param pos the position to be marked as filled
-		\param id the id of the element that occupies the position
 	*/
-	void fill_pos(size_type pos, id_type id)
+	void fill_pos(size_type pos)
 	{
-		// Add the id to the map
-		link_id(id, pos);
-
 		// Update first and last counters
 		if (m_last_pos < pos) {
 			m_last_pos = pos;
@@ -1570,17 +1571,12 @@ private:
 	}
 
 	/*!
-		Mark the position previously occupied the the specified id,
-		as empty.
+		Mark the position as empty.
 
 		\param pos the position to be marked as empty
-		\param id the id of the element that was occuping the position
 	*/
-	void pierce_pos(size_type pos, id_type id)
+	void pierce_pos(size_type pos)
 	{
-		// Delete id from map
-		unlink_id(id);
-
 		// Update first and last counters
 		if (empty()) {
 			m_last_pos  = 0;
