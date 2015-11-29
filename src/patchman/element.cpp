@@ -631,35 +631,35 @@ void ElementInfo::initializeHexahedronInfo()
 		face_connect[k] = std::vector<int>(quadrangleInfo.nVertices);
 	}
 
-	face_connect[0][0] = 2;
+	face_connect[0][0] = 1;
 	face_connect[0][1] = 0;
-	face_connect[0][2] = 4;
-	face_connect[0][3] = 6;
+	face_connect[0][2] = 3;
+	face_connect[0][3] = 2;
 
-	face_connect[1][0] = 1;
-	face_connect[1][1] = 3;
-	face_connect[1][2] = 7;
-	face_connect[1][3] = 5;
+	face_connect[1][0] = 4;
+	face_connect[1][1] = 5;
+	face_connect[1][2] = 6;
+	face_connect[1][3] = 7;
 
-	face_connect[2][0] = 0;
-	face_connect[2][1] = 1;
-	face_connect[2][2] = 5;
+	face_connect[2][0] = 7;
+	face_connect[2][1] = 3;
+	face_connect[2][2] = 0;
 	face_connect[2][3] = 4;
 
-	face_connect[3][0] = 3;
-	face_connect[3][1] = 2;
-	face_connect[3][2] = 6;
-	face_connect[3][3] = 7;
+	face_connect[3][0] = 5;
+	face_connect[3][1] = 1;
+	face_connect[3][2] = 2;
+	face_connect[3][3] = 6;
 
-	face_connect[4][0] = 2;
-	face_connect[4][1] = 3;
+	face_connect[4][0] = 4;
+	face_connect[4][1] = 0;
 	face_connect[4][2] = 1;
-	face_connect[4][3] = 0;
+	face_connect[4][3] = 5;
 
-	face_connect[5][0] = 4;
-	face_connect[5][1] = 5;
-	face_connect[5][2] = 7;
-	face_connect[5][3] = 6;
+	face_connect[5][0] = 6;
+	face_connect[5][1] = 2;
+	face_connect[5][2] = 3;
+	face_connect[5][3] = 7;
 }
 
 /*!
