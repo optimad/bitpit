@@ -41,6 +41,43 @@ struct Adaption
 	};
 };
 
+class Patch;
+
+class FlatMapping
+{
+
+public:
+	FlatMapping();
+	FlatMapping(Patch *patch);
+
+	virtual ~FlatMapping();
+
+	virtual void update(const std::vector<Adaption::Info> adaptionData) = 0;
+
+	const std::vector<long> & get_numbering() const;
+	const std::vector<long> & get_mapping() const;
+
+protected:
+	Patch *m_patch;
+	std::vector<long> m_numbering;
+	std::vector<long> m_mapping;
+
+};
+
+
+class CellFlatMapping : public FlatMapping
+{
+
+public:
+	CellFlatMapping();
+	CellFlatMapping(Patch *patch);
+
+	~CellFlatMapping();
+
+	void update(const std::vector<Adaption::Info> adaptionData);
+
+};
+
 }
 
 #endif
