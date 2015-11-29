@@ -189,7 +189,7 @@ public:
 	/*!
 		Two-way comparison.
 	*/
-	template<class other_T>
+	template<class other_T, class unqualified_other_T = typename std::remove_cv<other_T>::type>
 	bool operator == (const PiercedIterator<other_T>& rhs) const
 	{
 		return m_itr == rhs.m_itr;
@@ -198,7 +198,7 @@ public:
 	/*!
 		Two-way comparison.
 	*/
-	template<class other_T>
+	template<class other_T, class unqualified_other_T = typename std::remove_cv<other_T>::type>
 	bool operator != (const PiercedIterator<other_T>& rhs) const
 	{
 		return m_itr != rhs.m_itr;
