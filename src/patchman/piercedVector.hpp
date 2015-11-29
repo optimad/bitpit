@@ -221,9 +221,9 @@ public:
 		\result A reference to the element currently pointed to by the
 		        iterator.
 	*/
-	T& operator-> () const
+	T* operator-> () const
 	{
-		return *m_itr;
+		return m_itr;
 	}
 
 	/*!
