@@ -103,28 +103,10 @@ std::vector<vtkIdType> OutputManager::extractVTKCellConnect(const Cell &cell, st
 {
 	int nCellVertices = cell.get_vertex_count();
 
-	bool remap;
-	std::vector<int> mapper(nCellVertices);
-	switch (cell.get_type())  {
-
-	default:
-		remap = false;
-		break;
-
-	}
-
 	const long *cellconnect = cell.get_connect();
 	std::vector<vtkIdType> vtkCellConnect;
 	for (long k = 0; k < nCellVertices; k++) {
-		int localVertexId;
-		if (remap) {
-			localVertexId = mapper[k];
-		} else {
-			localVertexId = k;
-		}
-
-		long vertexId = cellconnect[localVertexId];
-		vtkIdType VTKVertexId = vertexMap.at(vertexId);
+		vtkIdType VTKVertexId = vertexMap.at(cellconnect[k]);
 		vtkCellConnect.push_back(VTKVertexId);
 	}
 
