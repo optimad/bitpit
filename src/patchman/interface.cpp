@@ -5,6 +5,7 @@
 #include "cell.hpp"
 #include "interface.hpp"
 #include "patch.hpp"
+#include "utils.hpp"
 
 namespace pman {
 
@@ -169,16 +170,16 @@ std::array<std::array<double, 3>, 3> Interface::eval_rotation_from_cartesian(std
 	// y-interface axis
 	if (fabs(versor[2] - 1.) > 1e-8) {
 		std::array<double, 3> z = {0.0, 0.0, 1.0};
-		R[1] = cross_3D(z, R[0]);
+		R[1] = utils::cross_3D(z, R[0]);
 	} else {
 		std::array<double, 3> x = {1.0, 0.0, 0.0};
-		R[1] = cross_3D(x, R[0]);
+		R[1] = utils::cross_3D(x, R[0]);
 	}
-	normalize_3D(R[1]);
+	utils::normalize_3D(R[1]);
 
 	// z-interface axis
-	R[2] = cross_3D(R[0], R[1]);
-	normalize_3D(R[2]);
+	R[2] = utils::cross_3D(R[0], R[1]);
+	utils::normalize_3D(R[2]);
 
 	return R;
 }
@@ -220,7 +221,7 @@ std::array<std::array<double, 3>, 3> Interface::eval_rotation_to_cartesian()
 std::array<std::array<double, 3>, 3> Interface::eval_rotation_to_cartesian(std::array<double, 3> &versor)
 {
 	std::array<std::array<double, 3>, 3> R = eval_rotation_from_cartesian(versor);
-	transpose_3D(R);
+	utils::transpose_3D(R);
 
 	return R;
 }
@@ -234,7 +235,7 @@ std::array<std::array<double, 3>, 3> Interface::eval_rotation_to_cartesian(std::
 std::array<std::array<double, 3>, 3> Interface::eval_rotation_transpose(const std::array<std::array<double, 3>, 3> &R)
 {
 	std::array<std::array<double, 3>, 3> R_prime = R;
-	transpose_3D(R_prime);
+	utils::transpose_3D(R_prime);
 
 	return R_prime;
 }
