@@ -107,15 +107,6 @@ std::vector<vtkIdType> OutputManager::extractVTKCellConnect(const Cell &cell, st
 	std::vector<int> mapper(nCellVertices);
 	switch (cell.get_type())  {
 
-	case ElementInfo::QUADRANGLE:
-		remap = true;
-
-		mapper[0] = 0;
-		mapper[1] = 1;
-		mapper[2] = 3;
-		mapper[3] = 2;
-		break;
-
 	case ElementInfo::HEXAHEDRON:
 		remap = true;
 

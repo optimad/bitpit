@@ -384,21 +384,11 @@ void ElementInfo::initializeQuadrangleInfo()
 	face_type = std::vector<Type>(nFaces);
 	face_connect = std::vector<std::vector<int>>(nFaces);
 	for (int k = 0; k < nFaces; ++k) {
-		face_type[k]    = LINE;
-		face_connect[k] = std::vector<int>(lineInfo.nVertices);
+		face_type[k]       = LINE;
+		face_connect[k]    = std::vector<int>(lineInfo.nVertices);
+		face_connect[k][0] = k;
+		face_connect[k][1] = (k + 1) % lineInfo.nVertices;
 	}
-
-	face_connect[0][0] = 2;
-	face_connect[0][1] = 0;
-
-	face_connect[1][0] = 1;
-	face_connect[1][1] = 3;
-
-	face_connect[2][0] = 0;
-	face_connect[2][1] = 1;
-
-	face_connect[3][0] = 3;
-	face_connect[3][1] = 2;
 }
 
 /*!
