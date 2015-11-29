@@ -312,7 +312,7 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 
 	uint32_t treeId = 0;
 	bool allNew = (get_cell_count() == 0);
-	while (treeId < nOctants) {
+	while (treeId < (uint32_t) nOctants) {
 		// Octant mapping
 		std::vector<uint32_t> mapper_octantMap;
 		std::vector<bool> mapper_ghostFlag;
@@ -503,7 +503,7 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 	removedCells.shrink_to_fit();
 
 	// New ghost octants need to be added
-	for (uint32_t treeId = 0; treeId < nGhostsOctants; ++treeId) {
+	for (uint32_t treeId = 0; treeId < (uint32_t) nGhostsOctants; ++treeId) {
 		newOctants.emplace_back(treeId, false);
 	}
 	newOctants.shrink_to_fit();
