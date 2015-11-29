@@ -928,11 +928,11 @@ int Element::get_vertex(const int &vertex) const
 }
 
 /*!
-	Evaluates the minimum length of the element.
+	Evaluates the characteristic length of the element.
 
-	\result The minimum length of the element.
+	\result The characteristic of the element.
 */
-double Element::eval_min_length() const
+double Element::eval_length() const
 {
 	double length;
 	if (m_type == Type::POINT) {
