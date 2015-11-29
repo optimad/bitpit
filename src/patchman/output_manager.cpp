@@ -78,11 +78,13 @@ int OutputManager::getVTKCellType(ElementInfo::Type type)
 		case ElementInfo::TRIANGLE:
 			return VTK_TRIANGLE;
 		case ElementInfo::RECTANGLE:
+			return VTK_PIXEL;
 		case ElementInfo::QUADRANGLE:
 			return VTK_QUAD;
 		case ElementInfo::TETRAHEDRON:
 			return VTK_TETRA;
 		case ElementInfo::BRICK:
+			return VTK_VOXEL;
 		case ElementInfo::HEXAHEDRON:
 			return VTK_HEXAHEDRON;
 		case ElementInfo::PRISM:
@@ -105,7 +107,6 @@ std::vector<vtkIdType> OutputManager::extractVTKCellConnect(const Cell &cell, st
 	std::vector<int> mapper(nCellVertices);
 	switch (cell.get_type())  {
 
-	case ElementInfo::RECTANGLE:
 	case ElementInfo::QUADRANGLE:
 		remap = true;
 
@@ -115,7 +116,6 @@ std::vector<vtkIdType> OutputManager::extractVTKCellConnect(const Cell &cell, st
 		mapper[3] = 2;
 		break;
 
-	case ElementInfo::BRICK:
 	case ElementInfo::HEXAHEDRON:
 		remap = true;
 
