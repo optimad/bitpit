@@ -52,8 +52,6 @@ public:
 	void finalize();
 
 	static int getVTKCellType(ElementInfo::Type type);
-	static void mapConnectFromVTK(ElementInfo::Type elemType, int elemMapDegree, int *elemConnect);
-	static void mapConnectToVTK(ElementInfo::Type elemType, int elemMapDegree, int *elemConnect);
 
 	vtkTypeMacro(OutputManager, vtkUnstructuredGrid);
 
