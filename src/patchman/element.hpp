@@ -150,6 +150,7 @@ public:
 	int get_edge_count() const;
 	std::vector<int> get_edge_local_connect(const int &edge) const;
 
+	void set_vertex(const int &index, const long &vertex);
 	int get_vertex_count() const;
 	int get_vertex(const int &vertex) const;
 

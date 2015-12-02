@@ -1190,6 +1190,17 @@ int Element::get_vertex_count() const
 }
 
 /*!
+	Sets the vertex with the specified local index.
+
+	\param index is the local index of the vertex
+	\param vertex is the id of the vertex.
+*/
+void Element::set_vertex(const int &index, const long &vertex)
+{
+	m_connect[index] = vertex;
+}
+
+/*!
 	Gets the vertex with the specified local index.
 
 	\param vertex is the local index of the vertex
