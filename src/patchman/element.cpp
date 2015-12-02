@@ -1002,9 +1002,19 @@ void Element::unset_connect()
 /*!
 	Gets the vertex connectivity of the element.
 
-	\result A pointer to the connectivity of the element
+	\result A constant pointer to the connectivity of the element
 */
 const long * Element::get_connect() const
+{
+	return m_connect.get();
+}
+
+/*!
+	Gets the vertex connectivity of the element.
+
+	\result A pointer to the connectivity of the element
+*/
+long * Element::get_connect()
 {
 	return m_connect.get();
 }

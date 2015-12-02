@@ -140,6 +140,7 @@ public:
 	void set_connect(std::unique_ptr<long[]> connect);
 	void unset_connect();
 	const long * get_connect() const;
+	long * get_connect();
 
 	void set_centroid(std::array<double, 3> &centroid);
 	const std::array<double, 3> & get_centroid() const;
