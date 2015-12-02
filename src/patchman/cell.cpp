@@ -31,8 +31,8 @@ Cell::Cell()
 /*!
 	Creates a new cell.
 */
-Cell::Cell(const long &id, Patch *patch)
-	: Element(id, patch)
+Cell::Cell(const long &id, ElementInfo::Type type, Patch *patch)
+	: Element(id, type, patch)
 {
 
 }

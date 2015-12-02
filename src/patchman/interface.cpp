@@ -58,8 +58,8 @@ Interface::Interface()
 /*!
 	Creates a new interface.
 */
-Interface::Interface(const long &id, Patch *patch)
-	: Element(id, patch), m_normal(NULL)
+Interface::Interface(const long &id, ElementInfo::Type type, Patch *patch)
+	: Element(id, type, patch), m_normal(NULL)
 {
 
 }

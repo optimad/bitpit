@@ -865,9 +865,9 @@ Element::Element()
 /*!
 	Creates a new element.
 */
-Element::Element(const long &id, Patch *patch)
+Element::Element(const long &id, ElementInfo::Type type, Patch *patch)
 {
-	initialize(ElementInfo::UNDEFINED);
+	initialize(type);
 
 	set_patch(patch);
 	set_id(id);

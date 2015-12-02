@@ -554,12 +554,12 @@ Cell & Patch::get_cell(const long &id)
 	\param id is the id of the new cell
 	\param internal is true if the cell is an internal cell, false otherwise
 */
-long Patch::create_cell(const long &id, bool internal)
+long Patch::create_cell(const long &id, bool internal, ElementInfo::Type type)
 {
 	if (internal) {
-		m_cells.emplace(id, this);
+		m_cells.emplace(id, type, this);
 	} else {
-		m_cells.emplace_back(id, this);
+		m_cells.emplace_back(id, type, this);
 	}
 
 	return id;
@@ -570,7 +570,7 @@ long Patch::create_cell(const long &id, bool internal)
 
 	\param internal is true if the cell is an internal cell, false otherwise
 */
-long Patch::create_cell(bool internal)
+long Patch::create_cell(bool internal, ElementInfo::Type type)
 {
 	long id;
 	if (m_unusedCellIds.empty()) {
@@ -580,7 +580,7 @@ long Patch::create_cell(bool internal)
 		m_unusedCellIds.pop_front();
 	}
 
-	return create_cell(id, internal);
+	return create_cell(id, internal, type);
 }
 
 /*!
@@ -630,9 +630,9 @@ Interface & Patch::get_interface(const long &id)
 
 	\param id is the id of the new interface
 */
-long Patch::create_interface(const long &id)
+long Patch::create_interface(const long &id, ElementInfo::Type type)
 {
-	m_interfaces.emplace(id, this);
+	m_interfaces.emplace(id, type, this);
 
 	return id;
 }
@@ -640,7 +640,7 @@ long Patch::create_interface(const long &id)
 /*!
 	Creates a new interface.
 */
-long Patch::create_interface()
+long Patch::create_interface(ElementInfo::Type type)
 {
 	long id;
 	if (m_unusedInterfaceIds.empty()) {
@@ -650,7 +650,7 @@ long Patch::create_interface()
 		m_unusedInterfaceIds.pop_front();
 	}
 
-	return create_interface(id);
+	return create_interface(id, type);
 }
 
 /*!

@@ -114,7 +114,7 @@ public:
 	};
 
 	Element();
-	Element(const long &id, Patch *patch = nullptr);
+	Element(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED, Patch *patch = nullptr);
 
 	Element(Element&& other) = default;
 	Element& operator=(Element&& other) = default;

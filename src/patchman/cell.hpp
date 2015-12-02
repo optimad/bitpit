@@ -20,7 +20,7 @@ class Cell : public Element {
 
 public:
 	Cell();
-	Cell(const long &id, Patch *patch = nullptr);
+	Cell(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED, Patch *patch = nullptr);
 
 	Cell(Cell&& other) = default;
 	Cell& operator=(Cell&& other) = default;
