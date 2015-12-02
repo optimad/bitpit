@@ -33,8 +33,7 @@ public:
 	static const int SIDE_COUNT = 2;
 
 	Interface();
-	Interface(const long &id);
-	Interface(const long &id, Patch *patch);
+	Interface(const long &id, Patch *patch = nullptr);
 
 	Interface(Interface&& other) = default;
 	Interface& operator=(Interface&& other) = default;
