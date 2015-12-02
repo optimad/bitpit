@@ -941,6 +941,16 @@ long Element::get_id() const
 }
 
 /*!
+	Gets the basic information of the element.
+
+	\result A constant reference to the basic information of the element.
+*/
+const ElementInfo & Element::get_info() const
+{
+	return ElementInfo::get_element_info(m_type);
+}
+
+/*!
 	Sets the element type.
 
 	\param type the element type

@@ -120,6 +120,8 @@ public:
 	Element(Element&& other) = default;
 	Element& operator=(Element&& other) = default;
 
+	const ElementInfo & get_info() const;
+
 	Patch * get_patch() const;
 	void set_patch(Patch *patch);
 	int get_patch_dimension() const;
