@@ -87,15 +87,15 @@ protected:
 
 	long create_vertex();
 	long create_vertex(const long &id);
-	void delete_vertex(const long &id);
+	void delete_vertex(const long &id, bool delayed = false);
 
 	long create_interface();
 	long create_interface(const long &id);
-	void delete_interface(const long &id);
+	void delete_interface(const long &id, bool delayed = false);
 
 	long create_cell(bool internal = true);
 	long create_cell(const long &id, bool internal = true);
-	void delete_cell(const long &id);
+	void delete_cell(const long &id, bool delayed = false);
 
 	virtual std::array<double, 3> & _get_opposite_normal(std::array<double, 3> &normal) = 0;
 	virtual const std::vector<Adaption::Info> _update(bool trackAdaption) = 0;

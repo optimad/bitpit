@@ -60,6 +60,10 @@ const std::vector<Adaption::Info> Patch::update(bool trackAdaption)
 {
 	const std::vector<Adaption::Info> adaptionInfo = _update(trackAdaption);
 
+	m_cells.flush();
+	m_interfaces.flush();
+	m_vertices.flush();
+
 	set_dirty(false);
 
 	return adaptionInfo;
@@ -502,9 +506,9 @@ long Patch::create_vertex()
 
 	\param id is the id of the vertex
 */
-void Patch::delete_vertex(const long &id)
+void Patch::delete_vertex(const long &id, bool delayed)
 {
-	m_vertices.erase(id);
+	m_vertices.erase(id, delayed);
 	m_unusedVertexIds.push_back(id);
 }
 
@@ -579,9 +583,9 @@ long Patch::create_cell(bool internal)
 
 	\param id is the id of the cell
 */
-void Patch::delete_cell(const long &id)
+void Patch::delete_cell(const long &id, bool delayed)
 {
-	m_cells.erase(id);
+	m_cells.erase(id, delayed);
 	m_unusedCellIds.push_back(id);
 }
 
@@ -649,9 +653,9 @@ long Patch::create_interface()
 
 	\param id is the id of the interface
 */
-void Patch::delete_interface(const long &id)
+void Patch::delete_interface(const long &id, bool delayed)
 {
-	m_interfaces.erase(id);
+	m_interfaces.erase(id, delayed);
 	m_unusedInterfaceIds.push_back(id);
 }
 

@@ -1049,12 +1049,12 @@ PatchOctree::FaceInfoSet PatchOctree::remove_cells(std::vector<long> &cellIds)
 		}
 
 		// Add the interface to the list of interfaces to delete
-		Patch::delete_interface(interfaceId);
+		Patch::delete_interface(interfaceId, true);
 	}
 
 	// Delete vertices
 	for (auto it = deadVertices.begin(); it != deadVertices.end(); ++it) {
-		Patch::delete_vertex(*it);
+		Patch::delete_vertex(*it, true);
 	}
 
 	// Done
@@ -1300,7 +1300,7 @@ void PatchOctree::delete_cell(long id)
 	}
 
 	// Delete the cell
-	Patch::delete_cell(id);
+	Patch::delete_cell(id, true);
 }
 
 /*!
