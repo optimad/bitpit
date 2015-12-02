@@ -856,6 +856,8 @@ const long Element::NULL_ELEMENT_ID = std::numeric_limits<long>::min();
 */
 Element::Element()
 {
+	initialize(ElementInfo::UNDEFINED);
+
 	set_patch(NULL);
 	set_id(NULL_ELEMENT_ID);
 }
@@ -866,6 +868,8 @@ Element::Element()
 */
 Element::Element(const long &id)
 {
+	initialize(ElementInfo::UNDEFINED);
+
 	set_patch(NULL);
 	set_id(id);
 }
@@ -875,8 +879,27 @@ Element::Element(const long &id)
 */
 Element::Element(const long &id, Patch *patch)
 {
+	initialize(ElementInfo::UNDEFINED);
+
 	set_patch(patch);
 	set_id(id);
+}
+
+/*!
+	Initializes the data structures of the element.
+
+	\param type the type of the element
+*/
+void Element::initialize(ElementInfo::Type type)
+{
+	set_type(type);
+
+	if (get_type() != ElementInfo::UNDEFINED) {
+		const int &nVertices = get_info().nVertices;
+		set_connect(std::unique_ptr<long[]>(new long[nVertices]));
+	} else {
+		unset_connect();
+	}
 }
 
 /*!

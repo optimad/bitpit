@@ -120,6 +120,8 @@ public:
 	Element(Element&& other) = default;
 	Element& operator=(Element&& other) = default;
 
+	void initialize(ElementInfo::Type type);
+
 	const ElementInfo & get_info() const;
 
 	Patch * get_patch() const;
