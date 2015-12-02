@@ -874,6 +874,36 @@ public:
 	}
 
 	/*!
+		Gets the flat index of the element with the specified id.
+
+		A flat id is the id associated to a numbering scheme that starts
+		from the element in the first position of the container and is
+		incremented by one for each element in the container. The first
+		element will have a flat id equal to 0, the last element will
+		have a flat id equal to (nElements - 1).
+
+		If there is no element with the specified id, an exception is
+		thrown.
+
+		\param id the id of the element for witch the flat id is requested
+		\result The flat index of the element with the specified id.
+	*/
+	size_type extract_flat_index(id_type id) const
+	{
+		size_t pos = get_pos_from_id(id);
+		size_t flat = pos - m_first_pos;
+		if (m_holes.size() > 0) {
+			auto holeBound = lower_bound(m_holes.cbegin(), m_holes.cend(), pos);
+			size_t nHolesBefore = std::distance(m_holes.cbegin(), holeBound);
+
+			flat -= nHolesBefore;
+		}
+
+		return flat;
+	}
+
+
+	/*!
 		The element with the specified id is replaced with a new element.
 		This new element is constructed in place using args as the
 		arguments for its construction.
