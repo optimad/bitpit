@@ -31,15 +31,6 @@ Cell::Cell()
 /*!
 	Creates a new cell.
 */
-Cell::Cell(const long &id)
-	: Element(id)
-{
-
-}
-
-/*!
-	Creates a new cell.
-*/
 Cell::Cell(const long &id, Patch *patch)
 	: Element(id, patch)
 {
