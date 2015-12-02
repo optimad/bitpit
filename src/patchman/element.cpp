@@ -862,18 +862,6 @@ Element::Element()
 	set_id(NULL_ELEMENT_ID);
 }
 
-
-/*!
-	Creates a new element.
-*/
-Element::Element(const long &id)
-{
-	initialize(ElementInfo::UNDEFINED);
-
-	set_patch(NULL);
-	set_id(id);
-}
-
 /*!
 	Creates a new element.
 */

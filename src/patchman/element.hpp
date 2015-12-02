@@ -114,8 +114,7 @@ public:
 	};
 
 	Element();
-	Element(const long &id);
-	Element(const long &id, Patch *patch);
+	Element(const long &id, Patch *patch = nullptr);
 
 	Element(Element&& other) = default;
 	Element& operator=(Element&& other) = default;
