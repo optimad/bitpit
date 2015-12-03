@@ -13,8 +13,6 @@
 
 namespace pman {
 
-class Interface;
-
 class Cell : public Element {
 
 public:
