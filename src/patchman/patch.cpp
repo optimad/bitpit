@@ -560,12 +560,23 @@ PiercedVector<Cell> & Patch::cells()
 }
 
 /*!
-	Gets the cell with the specified id.
+	Gets a reference to the cell with the specified id.
 
 	\param id is the id of the requested cell
-	\return The cell with the specified id.
+	\return A reference to the cell with the specified id.
 */
 Cell & Patch::get_cell(const long &id)
+{
+	return m_cells[id];
+}
+
+/*!
+	Gets a constant reference to the cell with the specified id.
+
+	\param id is the id of the requested cell
+	\return A constant reference to the cell with the specified id.
+*/
+const Cell & Patch::get_cell(const long &id) const
 {
 	return m_cells[id];
 }

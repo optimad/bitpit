@@ -58,6 +58,7 @@ public:
 	long get_cell_count() const;
 	PiercedVector<Cell> &cells();
 	Cell &get_cell(const long &id);
+	const Cell &get_cell(const long &id) const;
 	virtual double eval_cell_volume(const long &id) = 0;
 	virtual double eval_cell_size(const long &id) = 0;
 
