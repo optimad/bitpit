@@ -253,6 +253,16 @@ Interface::PositionType Interface::get_position_type() const
 }
 
 /*!
+	Checks whether the interface is a border.
+
+	\result Returns true if the interface is a border, false otherwise.
+*/
+bool Interface::is_border() const
+{
+	return (m_neigh < 0);
+}
+
+/*!
 	Sets the owner of the interface.
 
 	\param owner the owner of the interface

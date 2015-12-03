@@ -37,6 +37,7 @@ public:
 
 	void set_position_type(PositionType position);
 	PositionType get_position_type() const;
+	bool is_border() const;
 
 	void set_normal(const std::array<double, 3> &normal);
 	const std::array<double, 3> & get_normal() const;
