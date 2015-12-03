@@ -16,13 +16,6 @@ namespace pman {
 class Interface : public Element {
 
 public:
-	enum Side {
-	    LEFT = 0,
-	    RIGHT
-	};
-
-	static const int SIDE_COUNT = 2;
-
 	Interface();
 	Interface(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED);
 
