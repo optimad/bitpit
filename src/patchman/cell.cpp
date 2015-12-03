@@ -62,7 +62,7 @@ bool Cell::is_interior() const
 
 	\param volume the volume of the cell
 */
-void Cell::set_volume(double * const volume)
+void Cell::set_volume(const double &volume)
 {
 	m_volume = volume;
 }
@@ -74,7 +74,7 @@ void Cell::set_volume(double * const volume)
 */
 const double & Cell::get_volume() const
 {
-    return *m_volume;
+    return m_volume;
 }  
 
 /*!

@@ -360,7 +360,7 @@ void PatchCartesian::create_cells()
 				cell.set_interior(true);
 
 				// Volume
-				cell.set_volume(&m_cell_volume);
+				cell.set_volume(m_cell_volume);
 
 				// Centroide
 				if (is_three_dimensional()) {

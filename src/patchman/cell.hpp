@@ -25,7 +25,7 @@ public:
 	void set_interior(bool interior);
 	bool is_interior() const;
 	
-	void set_volume(double * const volume);
+	void set_volume(const double &volume);
 	const double & get_volume() const;
 
 	void initialize_interfaces(std::vector<std::vector<long>> &interfaces);
@@ -45,7 +45,7 @@ protected:
 private:
 	bool m_interior;
 
-	double *m_volume;
+	double m_volume;
 
 	CollapsedVector2D<long> m_interfaces;
 

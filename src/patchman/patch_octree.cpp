@@ -1230,7 +1230,7 @@ long PatchOctree::create_cell(uint32_t treeId, bool interior,
 	cell.set_interior(interior);
 
 	// Volume
-	cell.set_volume(&m_tree_volume[octantLevel]);
+	cell.set_volume(m_tree_volume[octantLevel]);
 
 	// Centroid
 	std::array<double, 3> centroid;
