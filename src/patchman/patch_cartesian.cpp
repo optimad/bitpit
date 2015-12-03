@@ -685,13 +685,26 @@ long PatchCartesian::interface_nijk_to_id(const int &normal, const int &i, const
 
 	}
 
-	long id = i;
+	long offset = 0;
+	if (normal <=  Vertex::COORD_Y) {
+		long offset_y = 1;
+		for (int i = 0; i < get_dimension(); ++i) {
+			offset_y *= m_y_nInterfaces1D[i];
+		}
+		offset += offset_y;
+	}
+	if (normal <=  Vertex::COORD_X) {
+		long offset_x = 1;
+		for (int i = 0; i < get_dimension(); ++i) {
+			offset_x *= m_x_nInterfaces1D[i];
+		}
+		offset += offset_x;
+	}
+
+	long id = offset + i;
 	id += nInterfaces[Vertex::COORD_X] * j;
 	if (is_three_dimensional()) {
 		id += nInterfaces[Vertex::COORD_Y] * nInterfaces[Vertex::COORD_X] * k;
-		id += nInterfaces[Vertex::COORD_Z] * nInterfaces[Vertex::COORD_Y] * nInterfaces[Vertex::COORD_X] * normal;
-	} else {
-		id += nInterfaces[Vertex::COORD_Y] * nInterfaces[Vertex::COORD_X] * normal;
 	}
 
 	return id;
