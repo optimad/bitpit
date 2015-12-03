@@ -2,9 +2,10 @@
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
 
+#include <math.h>
+
 #include "cell.hpp"
 #include "interface.hpp"
-#include "patch.hpp"
 #include "utils.hpp"
 
 namespace pman {
@@ -58,8 +59,8 @@ Interface::Interface()
 /*!
 	Creates a new interface.
 */
-Interface::Interface(const long &id, ElementInfo::Type type, Patch *patch)
-	: Element(id, type, patch), m_normal(NULL)
+Interface::Interface(const long &id, ElementInfo::Type type)
+	: Element(id, type), m_normal(NULL)
 {
 
 }

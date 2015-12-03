@@ -591,9 +591,9 @@ const Cell & Patch::get_cell(const long &id) const
 long Patch::create_cell(const long &id, bool internal, ElementInfo::Type type)
 {
 	if (internal) {
-		m_cells.emplace(id, type, this);
+		m_cells.emplace(id, type);
 	} else {
-		m_cells.emplace_back(id, type, this);
+		m_cells.emplace_back(id, type);
 	}
 
 	return id;

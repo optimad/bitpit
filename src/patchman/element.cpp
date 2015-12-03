@@ -3,8 +3,8 @@
 //
 
 #include "element.hpp"
-#include "patch.hpp"
 
+#include <assert.h>
 #include <limits>
 
 namespace pman {
@@ -862,18 +862,16 @@ Element::Element()
 {
 	initialize(ElementInfo::UNDEFINED);
 
-	set_patch(NULL);
 	set_id(NULL_ELEMENT_ID);
 }
 
 /*!
 	Creates a new element.
 */
-Element::Element(const long &id, ElementInfo::Type type, Patch *patch)
+Element::Element(const long &id, ElementInfo::Type type)
 {
 	initialize(type);
 
-	set_patch(patch);
 	set_id(id);
 }
 
@@ -892,47 +890,6 @@ void Element::initialize(ElementInfo::Type type)
 	} else {
 		unset_connect();
 	}
-}
-
-/*!
-	Sets the patch that owns the element.
-
-	\param patch the patch that owns the element
-*/
-void Element::set_patch(Patch *patch)
-{
-	m_patch = patch;
-}
-
-/*!
-	Gets the patch that owns the element.
-
-	\return The patch that owns the element.
-*/
-Patch * Element::get_patch() const
-{
-	return m_patch;
-}
-
-/*!
-	Gets the dimension of the owner patch.
-
-	\return The dimension of the owner patch.
-*/
-int Element::get_patch_dimension() const
-{
-	return m_patch->get_dimension();
-}
-
-/*!
-	Returns true if the owner patch is a three-dimensional patch.
-
-	\return This method returns true if the owner patch is
-	        three-dimensional, false otherwise.
-*/
-bool Element::is_patch_three_dimensional() const
-{
-	return m_patch->is_three_dimensional();
 }
 
 /*!

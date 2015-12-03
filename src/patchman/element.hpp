@@ -12,8 +12,6 @@
 
 namespace pman {
 
-class Patch;
-
 class ElementInfo {
 
 public:
@@ -114,7 +112,7 @@ public:
 	};
 
 	Element();
-	Element(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED, Patch *patch = nullptr);
+	Element(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED);
 
 	Element(Element&& other) = default;
 	Element& operator=(Element&& other) = default;
@@ -122,11 +120,6 @@ public:
 	void initialize(ElementInfo::Type type);
 
 	const ElementInfo & get_info() const;
-
-	Patch * get_patch() const;
-	void set_patch(Patch *patch);
-	int get_patch_dimension() const;
-	bool is_patch_three_dimensional() const;
 
 	void set_id(const long &id);
 	long get_id() const;
@@ -159,8 +152,6 @@ public:
 	static const long NULL_ELEMENT_ID;
 
 private:
-	Patch *m_patch;
-
 	long m_id;
 
 	ElementInfo::Type m_type;

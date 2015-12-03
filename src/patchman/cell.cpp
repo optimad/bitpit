@@ -4,7 +4,6 @@
 
 #include "cell.hpp"
 #include "interface.hpp"
-#include "patch.hpp"
 #include "utils.hpp"
 
 #include<iostream>
@@ -31,8 +30,8 @@ Cell::Cell()
 /*!
 	Creates a new cell.
 */
-Cell::Cell(const long &id, ElementInfo::Type type, Patch *patch)
-	: Element(id, type, patch)
+Cell::Cell(const long &id, ElementInfo::Type type)
+	: Element(id, type)
 {
 
 }
