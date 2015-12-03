@@ -43,10 +43,8 @@ int main(int argc, char *argv[]) {
 				continue;
 			}
 
-			pman::Cell &cell = patch_2D->get_cell(cellId);
-			for (auto neighId : cell.extract_neighs()) {
-				pman::Cell &neigh = patch_2D->get_cell(neighId);
-				for (auto coarseId : neigh.extract_neighs()) {
+			for (auto neighId : patch_2D->extract_cell_neighs(cellId)) {
+				for (auto coarseId : patch_2D->extract_cell_neighs(neighId)) {
 					patch_2D->mark_cell_for_coarsening(coarseId);
 				}
 			}
@@ -58,8 +56,7 @@ int main(int argc, char *argv[]) {
 				continue;
 			}
 
-			pman::Cell &cell = patch_2D->get_cell(cellId);
-			for (auto neighId : cell.extract_neighs()) {
+			for (auto neighId : patch_2D->extract_cell_neighs(cellId)) {
 				patch_2D->mark_cell_for_refinement(neighId);
 			}
 		}
@@ -99,10 +96,8 @@ int main(int argc, char *argv[]) {
 				continue;
 			}
 
-			pman::Cell &cell = patch_3D->get_cell(cellId);
-			for (auto neighId : cell.extract_neighs()) {
-				pman::Cell &neigh = patch_3D->get_cell(neighId);
-				for (auto coarseId : neigh.extract_neighs()) {
+			for (auto neighId : patch_3D->extract_cell_neighs(cellId)) {
+				for (auto coarseId : patch_3D->extract_cell_neighs(neighId)) {
 					patch_3D->mark_cell_for_coarsening(coarseId);
 				}
 			}
@@ -114,8 +109,7 @@ int main(int argc, char *argv[]) {
 				continue;
 			}
 
-			pman::Cell &cell = patch_3D->get_cell(cellId);
-			for (auto neighId : cell.extract_neighs()) {
+			for (auto neighId : patch_3D->extract_cell_neighs(cellId)) {
 				patch_3D->mark_cell_for_refinement(neighId);
 			}
 		}

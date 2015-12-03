@@ -61,6 +61,15 @@ public:
 	const Cell &get_cell(const long &id) const;
 	virtual double eval_cell_volume(const long &id) = 0;
 	virtual double eval_cell_size(const long &id) = 0;
+	std::vector<long> extract_cell_neighs(const long &id) const;
+	std::vector<long> extract_cell_neighs(const long &id, int codimension, bool complete = true) const;
+	std::vector<long> extract_cell_face_neighs(const long &id) const;
+	std::vector<long> extract_cell_face_neighs(const long &id, const int &face, const std::vector<long> &blackList = std::vector<long>()) const;
+	std::vector<long> extract_cell_edge_neighs(const long &id, bool complete = true) const;
+	std::vector<long> extract_cell_edge_neighs(const long &id, const int &edge, const std::vector<long> &blackList = std::vector<long>()) const;
+	std::vector<long> extract_cell_vertex_neighs(const long &id, bool complete = true) const;
+	std::vector<long> extract_cell_vertex_neighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
+	std::vector<long> extract_cell_vertex_neighs(const long &id, const std::vector<int> &vertices, const std::vector<long> &blackList = std::vector<long>()) const;
 
 	long get_interface_count() const;
 	PiercedVector<Interface> &interfaces();

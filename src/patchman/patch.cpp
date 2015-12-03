@@ -6,6 +6,7 @@
 #include <unordered_map>
 
 #include "patch.hpp"
+#include "utils.hpp"
 
 namespace pman {
 
@@ -625,6 +626,316 @@ void Patch::delete_cell(const long &id, bool delayed)
 {
 	m_cells.erase(id, delayed);
 	m_unusedCellIds.push_back(id);
+}
+
+/*!
+	Extracts the neighbours of all the faces of the specified cell.
+
+	\param id is the id of the cell
+	\result The neighbours of all the faces of the specified cell.
+*/
+std::vector<long> Patch::extract_cell_face_neighs(const long &id) const
+{
+	std::vector<long> neighs;
+	const Cell &cell = get_cell(id);
+	for (int i = 0; i < cell.get_face_count(); ++i) {
+		std::vector<long> faceNeighs = extract_cell_face_neighs(id, i);
+		for (auto &neighId : faceNeighs) {
+			utils::add_to_ordered_vector<long>(neighId, neighs);
+		}
+	}
+
+	return neighs;
+}
+
+/*!
+	Extracts all the neighbours of the specified cell
+
+	\param id is the id of the cell
+	\result All the neighbours of the specified cell.
+*/
+std::vector<long> Patch::extract_cell_neighs(const long &id) const
+{
+	return extract_cell_vertex_neighs(id);
+}
+
+/*!
+	Extracts all the neighbours of the specified cell for the given
+	codimension.
+
+	\param id is the id of the cell
+	\param codimension the codimension for which the neighbours
+	are requested. For a three-dimensional cell a codimension
+	equal 1 will extract the face neighbours, a codimension equal
+	2 will extract the edge negihbours and a codimension equal
+	3 will extract the vertex neighbours. For a two-dimensional
+	cell a codimension qual 1 will extract the face neighbours,
+	and a codimension equal 2 will extract the vertex neighbours.
+	\param complete controls if the list of neighbours should contain
+	only the neighbours for the specified codimension, or should contain
+	also the neighbours for lower codimensions.
+	\result The neighbours for the specified codimension.
+*/
+std::vector<long> Patch::extract_cell_neighs(const long &id, int codimension, bool complete) const
+{
+	assert(codimension >= 1 && codimension <= get_dimension());
+
+	if (codimension == 1) {
+		return extract_cell_face_neighs(id);
+	} else if (codimension == get_dimension()) {
+		return extract_cell_vertex_neighs(id, complete);
+	} else if (codimension == 2) {
+		return extract_cell_edge_neighs(id, complete);
+	} else {
+		return std::vector<long>();
+	}
+}
+
+/*!
+	Extracts the neighbours of the specified cell for the given face.
+
+	\param id is the id of the cell
+	\param face is a face of the cell
+	\param blackList is a list of cells that are excluded from the search
+	\result The neighbours of the specified cell for the given face.
+*/
+std::vector<long> Patch::extract_cell_face_neighs(const long &id, const int &face, const std::vector<long> &blackList) const
+{
+	std::vector<long> neighs;
+	const Cell &cell = get_cell(id);
+	for (int i = 0; i < cell.get_interface_count(face); ++i) {
+		long interfaceId = cell.get_interface(face, i);
+		const Interface &interface = get_interface(interfaceId);
+		if (interface.get_position_type() == Interface::BOUNDARY) {
+			continue;
+		}
+
+		long neighId = interface.get_neigh();
+		if (neighId == cell.get_id()) {
+			neighId = interface.get_owner();
+		}
+
+		if (std::find(blackList.begin(), blackList.end(), neighId) != blackList.end()) {
+			continue;
+		}
+
+		// Add the cell to the negihbour list
+		utils::add_to_ordered_vector<long>(neighId, neighs);
+	}
+
+	return neighs;
+}
+
+/*!
+	Extracts the neighbours of all the edges of the specified cell.
+
+	This function can be only used with three-dimensional cells.
+
+	\param id is the id of the cell
+	\param complete controls if the list of neighbours should contain
+	only the neighbours that share just the specified edge, or should
+	contain also neighbours that share an entire face
+	\result The neighbours of all the edges of the specified cell.
+*/
+std::vector<long> Patch::extract_cell_edge_neighs(const long &id, bool complete) const
+{
+	assert(is_three_dimensional());
+	if (!is_three_dimensional()) {
+		return std::vector<long>();
+	}
+
+	std::vector<long> blackList;
+	if (!complete) {
+		blackList = extract_cell_face_neighs(id);
+	}
+
+	std::vector<long> neighs;
+	const Cell &cell = get_cell(id);
+	for (int i = 0; i < cell.get_edge_count(); ++i) {
+		for (auto &neigh : extract_cell_edge_neighs(id, i, blackList)) {
+			utils::add_to_ordered_vector<long>(neigh, neighs);
+		}
+	}
+
+	return neighs;
+}
+
+/*!
+	Extracts the neighbours of the specified cell for the given edge.
+
+	This function can be only used with three-dimensional cells.
+
+	\param id is the id of the cell
+	\param vertex is an edge of the cell
+	\param blackList is a list of cells that are excluded from the search
+	\result The neighbours of the specified cell for the given edge.
+*/
+std::vector<long> Patch::extract_cell_edge_neighs(const long &id, const int &edge, const std::vector<long> &blackList) const
+{
+	assert(is_three_dimensional());
+	if (!is_three_dimensional()) {
+		return std::vector<long>();
+	}
+
+	const Cell &cell = get_cell(id);
+	std::vector<int> vertices = cell.get_edge_local_connect(edge);
+
+	return extract_cell_vertex_neighs(id, vertices, blackList);
+}
+
+/*!
+	Extracts the neighbours of all the vertices of the specified cell.
+
+	\param id is the id of the cell
+	\param complete controls if the list of neighbours should contain
+	only the neighbours that share just the specified vertex, or should
+	contain also neighbours that share an entire face or an entire edge
+	\result The neighbours of all the vertices of the specified cell.
+*/
+std::vector<long> Patch::extract_cell_vertex_neighs(const long &id, bool complete) const
+{
+	std::vector<long> blackList;
+	if (!complete) {
+		if (is_three_dimensional()) {
+			blackList = extract_cell_edge_neighs(id);
+		} else {
+			blackList = extract_cell_face_neighs(id);
+		}
+	}
+
+	std::vector<long> neighs;
+	const Cell &cell = get_cell(id);
+	for (int i = 0; i < cell.get_vertex_count(); ++i) {
+		for (auto &neigh : extract_cell_vertex_neighs(id, i, blackList)) {
+			utils::add_to_ordered_vector<long>(neigh, neighs);
+		}
+	}
+
+	return neighs;
+}
+
+/*!
+	Extracts the neighbours of the specified cell for the given vertex.
+
+	Cells that has only a vertex in common are considered neighbours only
+	if there are other cells "connecting" them.
+
+	                  .-----.                   .-----.
+	                  |     |                   |     |
+	                V | A1  |                 V | A2  |
+	            .-----+-----.             .-----+-----.
+	            |     |                   |     |     |
+	            | B1  |                   | B2  | C2  |
+	            .-----.                   .-----.-----.
+
+	For example, A1 and B1 are not neighbours (although they share the
+	vertex V), whereas A2 and B2 are neighbours.
+
+	\param id is the id of the cell
+	\param vertex is a vertex of the cell
+	\param blackList is a list of cells that are excluded from the search
+	\result The neighbours of the specified cell for the given vertex.
+*/
+std::vector<long> Patch::extract_cell_vertex_neighs(const long &id, const int &vertex, const std::vector<long> &blackList) const
+{
+	std::vector<int> vertexList(1);
+	vertexList[0] = vertex;
+
+	return extract_cell_vertex_neighs(id, vertexList, blackList);
+}
+
+/*!
+	Extracts the neighbours of the specified cell for the given vertices.
+
+	Cells that has only a vertex in common are considered neighbours only
+	if there are other cells "connecting" them.
+
+	                  .-----.                   .-----.
+	                  |     |                   |     |
+	                V | A1  |                 V | A2  |
+	            .-----+-----.             .-----+-----.
+	            |     |                   |     |     |
+	            | B1  |                   | B2  | C2  |
+	            .-----.                   .-----.-----.
+
+	For example, A1 and B1 are not neighbours (although they share the
+	vertex V), whereas A2 and B2 are neighbours.
+
+	\param id is the id of the cell
+	\param vertices is the list of vertices of the cell
+	\param blackList is a list of cells that are excluded from the search
+	\result The neighbours of the specified cell for the given vertices.
+*/
+std::vector<long> Patch::extract_cell_vertex_neighs(const long &id, const std::vector<int> &vertices, const std::vector<long> &blackList) const
+{
+	std::vector<long> neighs;
+
+	int nVerticesToFound = vertices.size();
+
+	const Cell &cell = get_cell(id);
+	const long *cellConnect = cell.get_connect();
+
+	std::vector<long> alreadyScanned;
+	std::vector<long> processingQueue;
+	processingQueue.push_back(cell.get_id());
+	while (!processingQueue.empty()) {
+		// Get a cell to scan and remove it form the list
+		long scanId(processingQueue.back());
+		processingQueue.pop_back();
+		const Cell &scanCell = get_cell(scanId);
+
+		// Scan the interfaces of the cell
+		const long *interfaces = scanCell.get_interfaces();
+		for (int i = 0; i < scanCell.get_interface_count(); i++) {
+			long interfaceId = interfaces[i];
+			const Interface &interface = get_interface(interfaceId);
+
+			// Neighbour cell assocated to the interface
+			//
+			// Only consider the cells that are not
+			long neighId = interface.get_neigh();
+			if (neighId < 0 || neighId == scanId) {
+				neighId = interface.get_owner();
+			}
+
+			if (neighId == id) {
+				continue;
+			} else if (std::find(alreadyScanned.begin(), alreadyScanned.end(), neighId) != alreadyScanned.end()) {
+				continue;
+			}
+
+			// Number of vertices owned by the interface
+			int nCommonVertices = 0;
+			const long *interfaceConnect = interface.get_connect();
+			for (int k = 0; k < interface.get_vertex_count(); ++k) {
+				for (int n = 0; n < nVerticesToFound; ++n) {
+					if (interfaceConnect[k] == cellConnect[vertices[n]]) {
+						nCommonVertices++;
+						break;
+					}
+				}
+
+				if (nCommonVertices == nVerticesToFound) {
+					break;
+				}
+			}
+
+			// If the interface contains all the requested vertices,
+			// add the neighbour cell of the interface to the list
+			// of cells neighbours.
+			if (nCommonVertices == nVerticesToFound) {
+				if (std::find(blackList.begin(), blackList.end(), neighId) == blackList.end()) {
+					utils::add_to_ordered_vector<long>(neighId, neighs);
+				}
+				processingQueue.push_back(neighId);
+			}
+
+			// The cell has been scanned
+			alreadyScanned.push_back(neighId);
+		}
+	}
+
+	return neighs;
 }
 
 /*!

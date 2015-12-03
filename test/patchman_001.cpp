@@ -29,22 +29,20 @@ void test0() {
 	std::cout << std::endl;
 	std::cout << "Cell id: " << cellId_2D << std::endl << std::endl;
 
-	pman::Cell &cell_2D = patch_2D->get_cell(cellId_2D);
-
 	std::cout << "Face neighbours (complete list): " << std::endl;
-	neighs_2D = cell_2D.extract_face_neighs();
+	neighs_2D = patch_2D->extract_cell_face_neighs(cellId_2D);
 	for (unsigned int i = 0; i < neighs_2D.size(); ++i) {
 		std::cout << " - " << neighs_2D[i] << std::endl;
 	}
 
 	std::cout << "Vertex neighbours (complete list): " << std::endl;
-	neighs_2D = cell_2D.extract_vertex_neighs(true);
+	neighs_2D = patch_2D->extract_cell_vertex_neighs(cellId_2D, true);
 	for (unsigned int i = 0; i < neighs_2D.size(); ++i) {
 		std::cout << " - " << neighs_2D[i] << std::endl;
 	}
 
 	std::cout << "Vertex neighbours (excuding face neighbours): " << std::endl;
-	neighs_2D = cell_2D.extract_vertex_neighs(false);
+	neighs_2D = patch_2D->extract_cell_vertex_neighs(cellId_2D, false);
 	for (unsigned int i = 0; i < neighs_2D.size(); ++i) {
 		std::cout << " - " << neighs_2D[i] << std::endl;
 	}
@@ -68,34 +66,32 @@ void test0() {
 	std::cout << std::endl;
 	std::cout << "Cell id: " << cellId_3D << std::endl << std::endl;
 
-	pman::Cell &cell_3D = patch_3D->get_cell(cellId_3D);
-
 	std::cout << "Face neighbours (complete list): " << std::endl;
-	neighs_3D = cell_3D.extract_face_neighs();
+	neighs_3D = patch_3D->extract_cell_face_neighs(cellId_3D);
 	for (unsigned int i = 0; i < neighs_3D.size(); ++i) {
 		std::cout << " - " << neighs_3D[i] << std::endl;
 	}
 
 	std::cout << "Edge neighbours (complete list): " << std::endl;
-	neighs_3D = cell_3D.extract_edge_neighs(true);
+	neighs_3D = patch_3D->extract_cell_edge_neighs(cellId_3D, true);
 	for (unsigned int i = 0; i < neighs_3D.size(); ++i) {
 		std::cout << " - " << neighs_3D[i] << std::endl;
 	}
 
 	std::cout << "Edge neighbours (excuding face neighbours): " << std::endl;
-	neighs_3D = cell_3D.extract_edge_neighs(false);
+	neighs_3D = patch_3D->extract_cell_edge_neighs(cellId_3D, false);
 	for (unsigned int i = 0; i < neighs_3D.size(); ++i) {
 		std::cout << " - " << neighs_3D[i] << std::endl;
 	}
 
 	std::cout << "Vertex neighbours (complete list): " << std::endl;
-	neighs_3D = cell_3D.extract_vertex_neighs(true);
+	neighs_3D = patch_3D->extract_cell_vertex_neighs(cellId_3D, true);
 	for (unsigned int i = 0; i < neighs_3D.size(); ++i) {
 		std::cout << " - " << neighs_3D[i] << std::endl;
 	}
 
 	std::cout << "Vertex neighbours (excuding face and edge neighbours): " << std::endl;
-	neighs_3D = cell_3D.extract_vertex_neighs(false);
+	neighs_3D = patch_3D->extract_cell_vertex_neighs(cellId_3D, false);
 	for (unsigned int i = 0; i < neighs_3D.size(); ++i) {
 		std::cout << " - " << neighs_3D[i] << std::endl;
 	}
