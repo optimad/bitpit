@@ -346,22 +346,4 @@ std::array<long, 2> Interface::get_owner_neigh() const
 	return cells;
 }
 
-/*!
-	Swaps owner and neighbour cells.
-*/
-void Interface::swap_owner_neigh()
-{
-	long tmp;
-
-	tmp     = m_owner;
-	m_owner = m_neigh;
-	m_neigh = tmp;
-
-	tmp         = m_ownerFace;
-	m_ownerFace = m_neighFace;
-	m_neighFace = tmp;
-
-	m_normal = &(get_patch()->get_opposite_normal(*m_normal));
-}
-
 }

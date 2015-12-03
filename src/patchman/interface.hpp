@@ -64,7 +64,6 @@ public:
 	int get_neigh_face() const;
 
 	std::array<long, 2> get_owner_neigh() const;
-	void swap_owner_neigh();
 
 protected:
 
