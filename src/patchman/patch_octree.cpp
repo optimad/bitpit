@@ -986,7 +986,7 @@ PatchOctree::FaceInfoSet PatchOctree::remove_cells(std::vector<long> &cellIds)
 			int danglingSide = -1;
 			if (deadInterfaces.count(interfaceId) == 0) {
 				Interface &interface = m_interfaces[interfaceId];
-				if (interface.get_position_type() != Interface::BOUNDARY) {
+				if (!interface.is_border()) {
 					if (interface.get_owner() == cellId) {
 						danglingSide = 1;
 					} else {
@@ -1098,24 +1098,18 @@ long PatchOctree::create_interface(uint32_t treeId,
 
 	// Info associate al tree
 	int level;
-	bool isGhost;
-	bool isBoundary;
 	int ownerFace;
 	vector<double> faceCenter;
 	if (is_three_dimensional()) {
 		Class_Intersection<3> *treeInterface = m_tree_3D.getIntersection(treeId);
 
 		level      = m_tree_3D.getLevel(treeInterface);
-		isGhost    = m_tree_3D.getPbound(treeInterface);
-		isBoundary = m_tree_3D.getBound(treeInterface);
 		ownerFace  = m_tree_3D.getFace(treeInterface);
 		faceCenter = m_tree_3D.getCenter(treeInterface);
 	} else {
 		Class_Intersection<2> *treeInterface = m_tree_2D.getIntersection(treeId);
 
 		level      = m_tree_2D.getLevel(treeInterface);
-		isGhost    = m_tree_2D.getPbound(treeInterface);
-		isBoundary = m_tree_2D.getBound(treeInterface);
 		ownerFace  = m_tree_2D.getFace(treeInterface);
 		faceCenter = m_tree_2D.getCenter(treeInterface);
 	}
@@ -1140,15 +1134,6 @@ long PatchOctree::create_interface(uint32_t treeId,
 	}
 
 	interface.set_centroid(centroid);
-
-	// Position
-	if (isGhost) {
-		interface.set_position_type(Interface::GHOST);
-	} else if (isBoundary) {
-		interface.set_position_type(Interface::BOUNDARY);
-	} else {
-		interface.set_position_type(Interface::INTERNAL);
-	}
 
 	// Connectivity
 	interface.set_connect(std::move(vertices));

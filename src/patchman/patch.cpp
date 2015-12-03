@@ -695,7 +695,7 @@ std::vector<long> Patch::extract_cell_face_neighs(const long &id, const int &fac
 	for (int i = 0; i < cell.get_interface_count(face); ++i) {
 		long interfaceId = cell.get_interface(face, i);
 		const Interface &interface = get_interface(interfaceId);
-		if (interface.get_position_type() == Interface::BOUNDARY) {
+		if (interface.is_border()) {
 			continue;
 		}
 

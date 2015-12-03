@@ -514,16 +514,6 @@ void PatchCartesian::create_interfaces_direction(const Vertex::Coordinate &direc
 				// Area
 				interface.set_area(*area);
 
-				// Position
-				Interface::PositionType position;
-				if (counters[direction] == 0 || counters[direction] == (*interfaceCount1D)[direction] - 1) {
-					position = Interface::BOUNDARY;
-				} else {
-					position = Interface::INTERNAL;
-				}
-
-				interface.set_position_type(position);
-
 				// Owner
 				int ownerIJK[SPACE_MAX_DIM];
 				for (int n = 0; n < SPACE_MAX_DIM; n++) {
@@ -543,7 +533,7 @@ void PatchCartesian::create_interfaces_direction(const Vertex::Coordinate &direc
 				owner.set_interface(ownerFace, 0, interface.get_id());
 
 				// Neighbour
-				if (position != Interface::BOUNDARY) {
+				if (counters[direction] != 0 && counters[direction] != (*interfaceCount1D)[direction] - 1) {
 					int neighIJK[SPACE_MAX_DIM];
 					for (int n = 0; n < SPACE_MAX_DIM; n++) {
 						neighIJK[n] = counters[n];

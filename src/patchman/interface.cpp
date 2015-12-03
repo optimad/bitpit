@@ -233,26 +233,6 @@ std::array<std::array<double, 3>, 3> Interface::eval_rotation_transpose(const st
 }
 
 /*!
-	Sets the position type of the interface.
-
-	\param positionType the position type of the interface
-*/
-void Interface::set_position_type(PositionType positionType)
-{
-	m_positionType = positionType;
-}
-
-/*!
-	Gets the position type of the interface.
-
-	\result The position type of the nterface
-*/
-Interface::PositionType Interface::get_position_type() const
-{
-	return m_positionType;
-}
-
-/*!
 	Checks whether the interface is a border.
 
 	\result Returns true if the interface is a border, false otherwise.

@@ -16,12 +16,6 @@ namespace pman {
 class Interface : public Element {
 
 public:
-	enum PositionType {
-	    INTERNAL = 0,
-	    BOUNDARY,
-	    GHOST
-	};
-
 	enum Side {
 	    LEFT = 0,
 	    RIGHT
@@ -35,8 +29,6 @@ public:
 	Interface(Interface&& other) = default;
 	Interface& operator=(Interface&& other) = default;
 
-	void set_position_type(PositionType position);
-	PositionType get_position_type() const;
 	bool is_border() const;
 
 	void set_normal(const std::array<double, 3> &normal);
@@ -66,8 +58,6 @@ public:
 protected:
 
 private:
-  	PositionType m_positionType;
-
 	double m_area;
 	std::array<double, 3> m_normal;
 
