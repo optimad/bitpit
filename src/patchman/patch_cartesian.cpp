@@ -145,6 +145,35 @@ double PatchCartesian::eval_cell_size(const long &id)
 }
 
 /*!
+	Evaluates the area of the specified interface.
+
+	\param id is the id of the interface
+	\result The area of the specified interface.
+*/
+double PatchCartesian::eval_interface_area(const long &id)
+{
+	long offset_x = 1;
+	for (int i = 0; i < get_dimension(); ++i) {
+		offset_x *= m_x_nInterfaces1D[i];
+	}
+
+	if (id < offset_x) {
+		return m_x_interface_area;
+	}
+
+	long offset_y = 1;
+	for (int i = 0; i < get_dimension(); ++i) {
+		offset_y *= m_y_nInterfaces1D[i];
+	}
+
+	if (id < (offset_x + offset_y)) {
+		return m_y_interface_area;
+	}
+
+	return m_z_interface_area;
+}
+
+/*!
 	Gets a pointer to the the opposite normal.
 
 	\param normal is a pointer to the normal

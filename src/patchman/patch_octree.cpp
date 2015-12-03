@@ -103,6 +103,21 @@ double PatchOctree::eval_cell_size(const long &id)
 }
 
 /*!
+	Evaluates the area of the specified interface.
+
+	\param id is the id of the interface
+	\result The area of the specified interface.
+*/
+double PatchOctree::eval_interface_area(const long &id)
+{
+	const Interface &interface = get_interface(id);
+	int owner = interface.get_owner();
+	int level = get_cell_level(owner);
+
+	return m_tree_area[level];
+}
+
+/*!
 	Gets a pointer to the the opposite normal.
 
 	\param normal is a pointer to the normal

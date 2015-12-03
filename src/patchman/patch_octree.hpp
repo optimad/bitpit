@@ -45,6 +45,8 @@ public:
 	double eval_cell_volume(const long &id);
 	double eval_cell_size(const long &id);
 
+	double eval_interface_area(const long &id);
+
 	OctantInfo get_cell_octant(const long &id) const;
 	int get_cell_level(const long &id);
 

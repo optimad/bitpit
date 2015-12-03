@@ -26,6 +26,8 @@ public:
 	double eval_cell_volume(const long &id);
 	double eval_cell_size(const long &id);
 
+	double eval_interface_area(const long &id);
+
 protected:
 	std::array<double, 3> & _get_opposite_normal(std::array<double, 3> &normal);
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
