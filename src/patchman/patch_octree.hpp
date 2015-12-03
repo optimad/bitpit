@@ -42,6 +42,8 @@ public:
 
 	~PatchOctree();
 
+	double eval_cell_volume(const long &id);
+
 	OctantInfo get_cell_octant(const long &id) const;
 	int get_cell_level(const long &id);
 

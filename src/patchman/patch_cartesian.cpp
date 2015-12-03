@@ -113,6 +113,19 @@ PatchCartesian::~PatchCartesian()
 }
 
 /*!
+	Evaluates the volume of the specified cell.
+
+	\param id is the id of the cell
+	\result The volume of the specified cell.
+*/
+double PatchCartesian::eval_cell_volume(const long &id)
+{
+	UNUSED(id);
+
+	return m_cell_volume;
+}
+
+/*!
 	Gets a pointer to the the opposite normal.
 
 	\param normal is a pointer to the normal

@@ -58,6 +58,7 @@ public:
 	long get_cell_count() const;
 	PiercedVector<Cell> &cells();
 	Cell &get_cell(const long &id);
+	virtual double eval_cell_volume(const long &id) = 0;
 
 	long get_interface_count() const;
 	PiercedVector<Interface> &interfaces();
