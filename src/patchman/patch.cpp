@@ -46,17 +46,6 @@ Patch::~Patch()
 }
 
 /*!
-	Gets a pointer to the the opposite normal.
-
-	\param normal is a pointer to the normal
-	\result A pointer to the opposite normal.
- */
-std::array<double, 3> & Patch::get_opposite_normal(std::array<double, 3> &normal)
-{
-	return _get_opposite_normal(normal);
-}
-
-/*!
 	Updates the mesh
 
 	\result Returns a vector of Adaption::Info that can be used to track

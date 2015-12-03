@@ -51,7 +51,7 @@ namespace pman {
 	Default constructor.
 */
 Interface::Interface()
-	: Element(), m_normal(NULL)
+	: Element()
 {
 
 }
@@ -60,7 +60,7 @@ Interface::Interface()
 	Creates a new interface.
 */
 Interface::Interface(const long &id, ElementInfo::Type type)
-	: Element(id, type), m_normal(NULL)
+	: Element(id, type)
 {
 
 }
@@ -71,9 +71,9 @@ Interface::Interface(const long &id, ElementInfo::Type type)
 
 	\param area the area of the interface
 */
-void Interface::set_area(double *area)
+void Interface::set_area(const double &area)
 {
-    m_area = area;
+	m_area = area;
 }
 
 /*!
@@ -83,7 +83,7 @@ void Interface::set_area(double *area)
 */
 const double & Interface::get_area() const
 {
-    return *m_area;
+	return m_area;
 }
 
 /*!
@@ -91,7 +91,7 @@ const double & Interface::get_area() const
 
 	\param normal a pointer to the normal of the interface
 */
-void Interface::set_normal(std::array<double, 3> *normal)
+void Interface::set_normal(const std::array<double, 3> &normal)
 {
 	m_normal = normal;
 }
@@ -103,7 +103,7 @@ void Interface::set_normal(std::array<double, 3> *normal)
 */
 const std::array<double, 3> & Interface::get_normal() const
 {
-	return *m_normal;
+	return m_normal;
 }
 
 /*!
@@ -115,7 +115,7 @@ const std::array<double, 3> & Interface::get_normal() const
 */
 std::array<std::array<double, 3>, 3> Interface::eval_rotation_from_cartesian()
 {
-	return eval_rotation_from_cartesian(*m_normal);
+	return eval_rotation_from_cartesian(m_normal);
 }
 
 /*!
@@ -189,7 +189,7 @@ std::array<std::array<double, 3>, 3> Interface::eval_rotation_from_cartesian(std
 */
 std::array<std::array<double, 3>, 3> Interface::eval_rotation_to_cartesian()
 {
-	return eval_rotation_to_cartesian(*m_normal);
+	return eval_rotation_to_cartesian(m_normal);
 }
 
 /*!

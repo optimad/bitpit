@@ -118,27 +118,6 @@ double PatchOctree::eval_interface_area(const long &id)
 }
 
 /*!
-	Gets a pointer to the the opposite normal.
-
-	\param normal is a pointer to the normal
-	\result A pointer to the opposite normal.
- */
-std::array<double, 3> & PatchOctree::_get_opposite_normal(std::array<double, 3> &normal)
-{
-	std::vector<std::array<double, 3> >::iterator itr_current = std::find(m_normals.begin(), m_normals.end(), normal);
-	if (itr_current == m_normals.end()) {
-		 throw std::out_of_range ("Input normal is not among the stored normals");
-	}
-
-	int dimension = get_dimension();
-
-	int id_current  = std::distance(m_normals.begin(), itr_current);
-	int id_opposite = (id_current + dimension) % (2 * dimension);
-
-	return m_normals[id_opposite];
-}
-
-/*!
 	Gets the octant of the cell with the specified id.
 
 	\param id the id of the cell
@@ -1149,10 +1128,10 @@ long PatchOctree::create_interface(uint32_t treeId,
 	}
 
 	// Area
-	interface.set_area(&m_tree_area[level]);
+	interface.set_area(m_tree_area[level]);
 
 	// Normal
-	interface.set_normal(&m_normals[ownerFace]);
+	interface.set_normal(m_normals[ownerFace]);
 
 	// Centroid
 	std::array<double, 3> centroid;

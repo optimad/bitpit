@@ -29,7 +29,6 @@ public:
 	double eval_interface_area(const long &id);
 
 protected:
-	std::array<double, 3> & _get_opposite_normal(std::array<double, 3> &normal);
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
 	bool _mark_cell_for_refinement(const long &id);
 	bool _mark_cell_for_coarsening(const long &id);

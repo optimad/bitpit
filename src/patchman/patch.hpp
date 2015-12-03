@@ -90,8 +90,6 @@ public:
 	void write_vertex_field(std::string filename, std::string name, std::vector<double> values);
 	OutputManager & get_output_manager();
 
-	std::array<double, 3> & get_opposite_normal(std::array<double, 3> &normal);
-
 protected:
 	PiercedVector<Vertex> m_vertices;
 	PiercedVector<Cell> m_cells;
@@ -113,7 +111,6 @@ protected:
 	long create_cell(const long &id, bool internal = true, ElementInfo::Type type = ElementInfo::UNDEFINED);
 	void delete_cell(const long &id, bool delayed = false);
 
-	virtual std::array<double, 3> & _get_opposite_normal(std::array<double, 3> &normal) = 0;
 	virtual const std::vector<Adaption::Info> _update(bool trackAdaption) = 0;
 	virtual bool _mark_cell_for_refinement(const long &id) = 0;
 	virtual bool _mark_cell_for_coarsening(const long &id) = 0;

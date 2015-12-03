@@ -174,27 +174,6 @@ double PatchCartesian::eval_interface_area(const long &id)
 }
 
 /*!
-	Gets a pointer to the the opposite normal.
-
-	\param normal is a pointer to the normal
-	\result A pointer to the opposite normal.
- */
-std::array<double, 3> & PatchCartesian::_get_opposite_normal(std::array<double, 3> &normal)
-{
-	std::vector<std::array<double, 3> >::iterator itr_current = std::find(m_normals.begin(), m_normals.end(), normal);
-	if (itr_current == m_normals.end()) {
-		 throw std::out_of_range ("Input normal is not among the stored normals");
-	}
-
-	int dimension = get_dimension();
-
-	int id_current  = std::distance(m_normals.begin(), itr_current);
-	int id_opposite = (id_current + dimension) % (2 * dimension);
-
-	return m_normals[id_opposite];
-}
-
-/*!
 	Updates the patch.
 
 	\result Returns a vector of Adaption::Info that can be used to track
@@ -533,7 +512,7 @@ void PatchCartesian::create_interfaces_direction(const Vertex::Coordinate &direc
 				}
 
 				// Area
-				interface.set_area(area);
+				interface.set_area(*area);
 
 				// Position
 				Interface::PositionType position;
@@ -626,7 +605,7 @@ void PatchCartesian::create_interfaces_direction(const Vertex::Coordinate &direc
 				interface.set_centroid(centroid);
 
 				// Normal
-				interface.set_normal(&m_normals[ownerFace]);
+				interface.set_normal(m_normals[ownerFace]);
 			}
 		}
 	}
