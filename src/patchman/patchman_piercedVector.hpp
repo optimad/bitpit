@@ -6,7 +6,7 @@
 
 #include "cell.hpp"
 #include "interface.hpp"
-#include "node.hpp"
+#include "vertex.hpp"
 
 #include "piercedVector.tpp"
 
@@ -14,7 +14,7 @@ namespace pman {
 
 extern template class PiercedVector<Cell>;
 extern template class PiercedVector<Interface>;
-extern template class PiercedVector<Node>;
+extern template class PiercedVector<Vertex>;
 
 }
 

@@ -1247,11 +1247,11 @@ double Element::eval_length() const
 	if (m_type == ElementInfo::VERTEX) {
 		length = 0.;
 	} else if (m_type == ElementInfo::LINE) {
-		Node &node_A = m_patch->get_vertex(m_connect[0]);
-		Node &node_B = m_patch->get_vertex(m_connect[1]);
+		Vertex &vertex_A = m_patch->get_vertex(m_connect[0]);
+		Vertex &vertex_B = m_patch->get_vertex(m_connect[1]);
 
-		const std::array<double, 3> &coords_A = node_A.get_coords();
-		const std::array<double, 3> &coords_B = node_B.get_coords();
+		const std::array<double, 3> &coords_A = vertex_A.get_coords();
+		const std::array<double, 3> &coords_B = vertex_B.get_coords();
 
 		length = 0.;
 		for (int k = 0; k < get_patch_dimension(); ++k) {
@@ -1259,13 +1259,13 @@ double Element::eval_length() const
 		}
 		length = pow(length, 0.5);
 	} else if (m_type == ElementInfo::PIXEL) {
-		Node &node_A = m_patch->get_vertex(m_connect[0]);
-		Node &node_B = m_patch->get_vertex(m_connect[1]);
-		Node &node_C = m_patch->get_vertex(m_connect[3]);
+		Vertex &vertex_A = m_patch->get_vertex(m_connect[0]);
+		Vertex &vertex_B = m_patch->get_vertex(m_connect[1]);
+		Vertex &vertex_C = m_patch->get_vertex(m_connect[3]);
 
-		const std::array<double, 3> &coords_A = node_A.get_coords();
-		const std::array<double, 3> &coords_B = node_B.get_coords();
-		const std::array<double, 3> &coords_C = node_C.get_coords();
+		const std::array<double, 3> &coords_A = vertex_A.get_coords();
+		const std::array<double, 3> &coords_B = vertex_B.get_coords();
+		const std::array<double, 3> &coords_C = vertex_C.get_coords();
 
 		double length_x = 0.0;
 		double length_y = 0.0;
@@ -1275,15 +1275,15 @@ double Element::eval_length() const
 		}
 		length = pow(std::min({length_x, length_y}), 0.5);
 	} else if (m_type == ElementInfo::VOXEL) {
-		Node &node_A = m_patch->get_vertex(m_connect[0]);
-		Node &node_B = m_patch->get_vertex(m_connect[1]);
-		Node &node_C = m_patch->get_vertex(m_connect[3]);
-		Node &node_D = m_patch->get_vertex(m_connect[4]);
+		Vertex &vertex_A = m_patch->get_vertex(m_connect[0]);
+		Vertex &vertex_B = m_patch->get_vertex(m_connect[1]);
+		Vertex &vertex_C = m_patch->get_vertex(m_connect[3]);
+		Vertex &vertex_D = m_patch->get_vertex(m_connect[4]);
 
-		const std::array<double, 3> &coords_A = node_A.get_coords();
-		const std::array<double, 3> &coords_B = node_B.get_coords();
-		const std::array<double, 3> &coords_C = node_C.get_coords();
-		const std::array<double, 3> &coords_D = node_D.get_coords();
+		const std::array<double, 3> &coords_A = vertex_A.get_coords();
+		const std::array<double, 3> &coords_B = vertex_B.get_coords();
+		const std::array<double, 3> &coords_C = vertex_C.get_coords();
+		const std::array<double, 3> &coords_D = vertex_D.get_coords();
 
 		double length_x = 0.0;
 		double length_y = 0.0;

@@ -12,7 +12,7 @@ namespace pman {
 // Explicit instantiation of the PiercedVectors
 template class PiercedVector<Cell>;
 template class PiercedVector<Interface>;
-template class PiercedVector<Node>;
+template class PiercedVector<Vertex>;
 
 /*!
 	\class Patch
@@ -128,7 +128,7 @@ void Patch::reset()
 void Patch::reset_vertices()
 {
 	m_vertices.clear();
-	PiercedVector<Node>().swap(m_vertices);
+	PiercedVector<Vertex>().swap(m_vertices);
 
 	for (auto &cell : m_cells) {
 		cell.unset_connect();
@@ -462,7 +462,7 @@ long Patch::get_vertex_count() const
 
 	\return The nodes owned by the patch.
 */
-PiercedVector<Node> & Patch::vertices()
+PiercedVector<Vertex> & Patch::vertices()
 {
 	return m_vertices;
 }
@@ -473,7 +473,7 @@ PiercedVector<Node> & Patch::vertices()
 	\param id is the id of the requested vertex
 	\return The vertex with the specified id.
 */
-Node & Patch::get_vertex(const long &id)
+Vertex & Patch::get_vertex(const long &id)
 {
 	return m_vertices[id];
 }

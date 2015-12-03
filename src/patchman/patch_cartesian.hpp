@@ -58,8 +58,8 @@ private:
 	void create_cells();
 
 	void create_interfaces();
-	int count_interfaces_direction(const Node::Coordinate &direction);
-	void create_interfaces_direction(const Node::Coordinate &direction);
+	int count_interfaces_direction(const Vertex::Coordinate &direction);
+	void create_interfaces_direction(const Vertex::Coordinate &direction);
 
 	long cell_ijk_to_id(const int &i, const int &j, const int &k) const;
 	long cell_ijk_to_id(const int ijk[]) const;

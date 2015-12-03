@@ -17,7 +17,7 @@
 namespace pman {
 
 class Cell;
-class Node;
+class Vertex;
 
 class OutputManager : public vtkUnstructuredGrid {
 
@@ -56,7 +56,7 @@ public:
 	vtkTypeMacro(OutputManager, vtkUnstructuredGrid);
 
 	vtkIdType InsertNextCell(const Cell &cell, std::unordered_map<long, vtkIdType> &vertexMap);
-	vtkIdType InsertNextVertex(const Node &node);
+	vtkIdType InsertNextVertex(const pman::Vertex &vertex);
 
 	void resetFields();
 	int addField(int fieldType, const char* fieldName);

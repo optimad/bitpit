@@ -1045,7 +1045,7 @@ long PatchOctree::create_vertex(uint32_t treeId)
 {
 	// Create the vertex
 	long id = Patch::create_vertex();
-	Node &vertex = m_vertices[id];
+	Vertex &vertex = m_vertices[id];
 
 	// Coordinate
 	vector<double> nodeCoords;

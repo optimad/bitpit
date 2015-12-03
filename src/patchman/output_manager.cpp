@@ -3,7 +3,7 @@
 //
 
 #include "cell.hpp"
-#include "node.hpp"
+#include "vertex.hpp"
 #include "output_manager.hpp"
 #include "patch.hpp"
 
@@ -115,7 +115,7 @@ std::vector<vtkIdType> OutputManager::extractVTKCellConnect(const Cell &cell, st
 
 // Description:
 // Aggiunge il successivo vertice della mesh
-vtkIdType OutputManager::InsertNextVertex(const Node &vertex)
+vtkIdType OutputManager::InsertNextVertex(const pman::Vertex &vertex)
 {
 	const std::array<double, 3> &coords = vertex.get_coords();
 	double x = coords[0];

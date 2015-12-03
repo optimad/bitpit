@@ -44,15 +44,15 @@ PatchCartesian::PatchCartesian(const int &id, const int &dimension,
 		m_minCoord[n] = origin[n] - 0.5 * (m_nCells1D[n] * m_cellSize[n]);
 	}
 
-	m_cell_volume = m_cellSize[Node::COORD_X] * m_cellSize[Node::COORD_Y];
+	m_cell_volume = m_cellSize[Vertex::COORD_X] * m_cellSize[Vertex::COORD_Y];
 	if (is_three_dimensional()) {
-		m_cell_volume *= m_cellSize[Node::COORD_Z];
+		m_cell_volume *= m_cellSize[Vertex::COORD_Z];
 	}
 
 	// Info sui vertici
 	m_nVertices1D.resize(dimension);
 	for (int n = 0; n < dimension; n++) {
-		if (!is_three_dimensional() && n == Node::COORD_Z) {
+		if (!is_three_dimensional() && n == Vertex::COORD_Z) {
 			m_nVertices1D[n] = 0;
 		} else {
 			m_nVertices1D[n] = m_nCells1D[n] + 1;
@@ -63,7 +63,7 @@ PatchCartesian::PatchCartesian(const int &id, const int &dimension,
 	m_x_nInterfaces1D.resize(dimension);
 	for (int n = 0; n < dimension; n++) {
 		m_x_nInterfaces1D[n] = m_nCells1D[n];
-		if (n == Node::COORD_X) {
+		if (n == Vertex::COORD_X) {
 			m_x_nInterfaces1D[n]++;
 		}
 	}
@@ -71,7 +71,7 @@ PatchCartesian::PatchCartesian(const int &id, const int &dimension,
 	m_y_nInterfaces1D.resize(dimension);
 	for (int n = 0; n < dimension; n++) {
 		m_y_nInterfaces1D[n] = m_nCells1D[n];
-		if (n == Node::COORD_Y) {
+		if (n == Vertex::COORD_Y) {
 			m_y_nInterfaces1D[n]++;
 		}
 	}
@@ -81,18 +81,18 @@ PatchCartesian::PatchCartesian(const int &id, const int &dimension,
 		m_z_nInterfaces1D.resize(dimension);
 		for (int n = 0; n < dimension; n++) {
 			m_z_nInterfaces1D[n] = m_nCells1D[n];
-			if (n == Node::COORD_Z) {
+			if (n == Vertex::COORD_Z) {
 				m_z_nInterfaces1D[n]++;
 			}
 		}
 	}
 
-	m_x_interface_area = m_cellSize[Node::COORD_Y];
-	m_y_interface_area = m_cellSize[Node::COORD_X];
+	m_x_interface_area = m_cellSize[Vertex::COORD_Y];
+	m_y_interface_area = m_cellSize[Vertex::COORD_X];
 	if (is_three_dimensional()) {
-		m_x_interface_area *= m_cellSize[Node::COORD_Z];
-		m_y_interface_area *= m_cellSize[Node::COORD_Z];
-		m_z_interface_area  = m_cellSize[Node::COORD_X] * m_cellSize[Node::COORD_Y];
+		m_x_interface_area *= m_cellSize[Vertex::COORD_Z];
+		m_y_interface_area *= m_cellSize[Vertex::COORD_Z];
+		m_z_interface_area  = m_cellSize[Vertex::COORD_X] * m_cellSize[Vertex::COORD_Y];
 	}
 
 	for (int i = 0; i < dimension; i++) {
@@ -195,20 +195,20 @@ void PatchCartesian::create_vertices()
 	reset_vertices();
 
 	// Definition of the vertices
-	m_x = std::vector<double>(m_nVertices1D[Node::COORD_X]);
-	for (int i = 0; i < m_nVertices1D[Node::COORD_X]; i++) {
-		m_x[i] = m_minCoord[Node::COORD_X] + i * m_cellSize[Node::COORD_X];
+	m_x = std::vector<double>(m_nVertices1D[Vertex::COORD_X]);
+	for (int i = 0; i < m_nVertices1D[Vertex::COORD_X]; i++) {
+		m_x[i] = m_minCoord[Vertex::COORD_X] + i * m_cellSize[Vertex::COORD_X];
 	}
 
-	m_y = std::vector<double>(m_nVertices1D[Node::COORD_Y]);
-	for (int j = 0; j < m_nVertices1D[Node::COORD_Y]; j++) {
-		m_y[j] = m_minCoord[Node::COORD_Y] + j * m_cellSize[Node::COORD_Y];
+	m_y = std::vector<double>(m_nVertices1D[Vertex::COORD_Y]);
+	for (int j = 0; j < m_nVertices1D[Vertex::COORD_Y]; j++) {
+		m_y[j] = m_minCoord[Vertex::COORD_Y] + j * m_cellSize[Vertex::COORD_Y];
 	}
 
 	if (is_three_dimensional()) {
-		m_z = std::vector<double>(m_nVertices1D[Node::COORD_Z]);
-		for (int k = 0; k < m_nVertices1D[Node::COORD_Z]; k++) {
-			m_z[k] = m_minCoord[Node::COORD_Z] + k * m_cellSize[Node::COORD_Z];
+		m_z = std::vector<double>(m_nVertices1D[Vertex::COORD_Z]);
+		for (int k = 0; k < m_nVertices1D[Vertex::COORD_Z]; k++) {
+			m_z[k] = m_minCoord[Vertex::COORD_Z] + k * m_cellSize[Vertex::COORD_Z];
 		}
 	} else {
 		m_z = std::vector<double>(0);
@@ -223,21 +223,21 @@ void PatchCartesian::create_vertices()
 
 	m_vertices.reserve(nTotalVertices);
 
-	for (int i = 0; i < m_nVertices1D[Node::COORD_X]; i++) {
-		for (int j = 0; j < m_nVertices1D[Node::COORD_Y]; j++) {
-			for (int k = 0; (is_three_dimensional()) ? (k < m_nVertices1D[Node::COORD_Z]) : (k <= 0); k++) {
+	for (int i = 0; i < m_nVertices1D[Vertex::COORD_X]; i++) {
+		for (int j = 0; j < m_nVertices1D[Vertex::COORD_Y]; j++) {
+			for (int k = 0; (is_three_dimensional()) ? (k < m_nVertices1D[Vertex::COORD_Z]) : (k <= 0); k++) {
 				long id_vertex = vertex_ijk_to_id(i, j, k);
 				Patch::create_vertex(id_vertex);
-				Node &vertex = m_vertices[id_vertex];
+				Vertex &vertex = m_vertices[id_vertex];
 
 				// Coordinate
 				std::array<double, 3> coords;
-				coords[Node::COORD_X] = m_x[i];
-				coords[Node::COORD_Y] = m_y[j];
+				coords[Vertex::COORD_X] = m_x[i];
+				coords[Vertex::COORD_Y] = m_y[j];
 				if (is_three_dimensional()) {
-					coords[Node::COORD_Z] = m_z[k];
+					coords[Vertex::COORD_Z] = m_z[k];
 				} else {
-					coords[Node::COORD_Z] = 0.0;
+					coords[Vertex::COORD_Z] = 0.0;
 				}
 
 				vertex.set_coords(coords);
@@ -279,11 +279,11 @@ void PatchCartesian::create_cells()
 
 	// Create the cells
 	std::array<double, 3> centroid = {0.0, 0.0, 0.0};
-	for (int i = 0; i < m_nCells1D[Node::COORD_X]; i++) {
-		centroid[Node::COORD_X] = 0.5 * (m_x[i] + m_x[i+1]);
-		for (int j = 0; j < m_nCells1D[Node::COORD_Y]; j++) {
-			centroid[Node::COORD_Y] = 0.5 * (m_y[j] + m_y[j+1]);
-			for (int k = 0; (is_three_dimensional()) ? (k < m_nCells1D[Node::COORD_Z]) : (k <= 0); k++) {
+	for (int i = 0; i < m_nCells1D[Vertex::COORD_X]; i++) {
+		centroid[Vertex::COORD_X] = 0.5 * (m_x[i] + m_x[i+1]);
+		for (int j = 0; j < m_nCells1D[Vertex::COORD_Y]; j++) {
+			centroid[Vertex::COORD_Y] = 0.5 * (m_y[j] + m_y[j+1]);
+			for (int k = 0; (is_three_dimensional()) ? (k < m_nCells1D[Vertex::COORD_Z]) : (k <= 0); k++) {
 				long id_cell = cell_ijk_to_id(i, j, k);
 				Patch::create_cell(id_cell);
 				Cell &cell = m_cells[id_cell];
@@ -303,7 +303,7 @@ void PatchCartesian::create_cells()
 
 				// Centroide
 				if (is_three_dimensional()) {
-					centroid[Node::COORD_Z] = 0.5 * (m_z[k] + m_z[k+1]);
+					centroid[Vertex::COORD_Z] = 0.5 * (m_z[k] + m_z[k+1]);
 				}
 
 				cell.set_centroid(centroid);
@@ -339,10 +339,10 @@ void PatchCartesian::create_interfaces()
 
 	// Count the interfaces
 	long nTotalInterfaces = 0;
-	nTotalInterfaces += count_interfaces_direction(Node::COORD_X);
-	nTotalInterfaces += count_interfaces_direction(Node::COORD_Y);
+	nTotalInterfaces += count_interfaces_direction(Vertex::COORD_X);
+	nTotalInterfaces += count_interfaces_direction(Vertex::COORD_Y);
 	if (is_three_dimensional()) {
-		nTotalInterfaces += count_interfaces_direction(Node::COORD_Z);
+		nTotalInterfaces += count_interfaces_direction(Vertex::COORD_Z);
 	}
 
 	std::cout << "    - Interface count: " << nTotalInterfaces << "\n";
@@ -368,10 +368,10 @@ void PatchCartesian::create_interfaces()
 	}
 
 	// Create the interfaces
-	create_interfaces_direction(Node::COORD_X);
-	create_interfaces_direction(Node::COORD_Y);
+	create_interfaces_direction(Vertex::COORD_X);
+	create_interfaces_direction(Vertex::COORD_Y);
 	if (is_three_dimensional()) {
-		create_interfaces_direction(Node::COORD_Z);
+		create_interfaces_direction(Vertex::COORD_Z);
 	}
 }
 
@@ -381,20 +381,20 @@ void PatchCartesian::create_interfaces()
 	\param direction the method will count the interfaces normal to this
 	                 direction
 */
-int PatchCartesian::count_interfaces_direction(const Node::Coordinate &direction)
+int PatchCartesian::count_interfaces_direction(const Vertex::Coordinate &direction)
 {
 	std::vector<int> *interfaceCount1D;
 	switch (direction)  {
 
-	case Node::COORD_X:
+	case Vertex::COORD_X:
 		interfaceCount1D = &m_x_nInterfaces1D;
 		break;
 
-	case Node::COORD_Y:
+	case Vertex::COORD_Y:
 		interfaceCount1D = &m_y_nInterfaces1D;
 		break;
 
-	case Node::COORD_Z:
+	case Vertex::COORD_Z:
 		interfaceCount1D = &m_z_nInterfaces1D;
 		break;
 
@@ -414,7 +414,7 @@ int PatchCartesian::count_interfaces_direction(const Node::Coordinate &direction
 	\param direction the method will creat the interfaces normal to this
 	                 direction
 */
-void PatchCartesian::create_interfaces_direction(const Node::Coordinate &direction)
+void PatchCartesian::create_interfaces_direction(const Vertex::Coordinate &direction)
 {
 	std::cout << "  >> Creating interfaces normal to direction " << direction << "\n";
 
@@ -433,17 +433,17 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 	std::vector<int> *interfaceCount1D;
 	switch (direction)  {
 
-	case Node::COORD_X:
+	case Vertex::COORD_X:
 		area = &m_x_interface_area;
 		interfaceCount1D = &m_x_nInterfaces1D;
 		break;
 
-	case Node::COORD_Y:
+	case Vertex::COORD_Y:
 		area = &m_y_interface_area;
 		interfaceCount1D = &m_y_nInterfaces1D;
 		break;
 
-	case Node::COORD_Z:
+	case Vertex::COORD_Z:
 		area = &m_z_interface_area;
 		interfaceCount1D = &m_z_nInterfaces1D;
 		break;
@@ -452,14 +452,14 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 
 	// Counters
 	int counters[SPACE_MAX_DIM] = {0, 0, 0};
-	int &i = counters[Node::COORD_X];
-	int &j = counters[Node::COORD_Y];
-	int &k = counters[Node::COORD_Z];
+	int &i = counters[Vertex::COORD_X];
+	int &j = counters[Vertex::COORD_Y];
+	int &k = counters[Vertex::COORD_Z];
 
 	// Creation of the interfaces
-	for (i = 0; i < (*interfaceCount1D)[Node::COORD_X]; i++) {
-		for (j = 0; j < (*interfaceCount1D)[Node::COORD_Y]; j++) {
-			for (k = 0; (is_three_dimensional()) ? (k < (*interfaceCount1D)[Node::COORD_Z]) : (k <= 0); k++) {
+	for (i = 0; i < (*interfaceCount1D)[Vertex::COORD_X]; i++) {
+		for (j = 0; j < (*interfaceCount1D)[Vertex::COORD_Y]; j++) {
+			for (k = 0; (is_three_dimensional()) ? (k < (*interfaceCount1D)[Vertex::COORD_Z]) : (k <= 0); k++) {
 				long id_interface = interface_nijk_to_id(direction, i, j, k);
 				Patch::create_interface(id_interface);
 				Interface &interface = m_interfaces[id_interface];
@@ -521,21 +521,21 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 
 				// Connectivity
 				std::unique_ptr<long[]> connect = std::unique_ptr<long[]>(new long[nInterfaceVertices]);
-				if (direction == Node::COORD_X) {
+				if (direction == Vertex::COORD_X) {
 					connect[0] = vertex_ijk_to_id(i, j,     k);
 					connect[1] = vertex_ijk_to_id(i, j + 1, k);
 					if (is_three_dimensional()) {
 						connect[2] = vertex_ijk_to_id(i, j + 1, k + 1);
 						connect[3] = vertex_ijk_to_id(i, j,     k + 1);
 					}
-				} else if (direction == Node::COORD_Y) {
+				} else if (direction == Vertex::COORD_Y) {
 					connect[0] = vertex_ijk_to_id(i,     j,     k);
 					connect[1] = vertex_ijk_to_id(i + 1, j,     k);
 					if (is_three_dimensional()) {
 						connect[2] = vertex_ijk_to_id(i + 1, j, k + 1);
 						connect[3] = vertex_ijk_to_id(i,     j, k + 1);
 					}
-				} else if (direction == Node::COORD_Z) {
+				} else if (direction == Vertex::COORD_Z) {
 					connect[0] = vertex_ijk_to_id(i,     j,     k);
 					connect[1] = vertex_ijk_to_id(i + 1, j,     k);
 					if (is_three_dimensional()) {
@@ -550,7 +550,7 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 				std::array<double, 3> centroid = {0.0, 0.0, 0.0};
 
 				for (int n = 0; n < nInterfaceVertices; n++) {
-					Node &vertex = m_vertices[interface.get_vertex(n)];
+					Vertex &vertex = m_vertices[interface.get_vertex(n)];
 					const std::array<double, 3> vertexCoords = vertex.get_coords();
 
 					for (unsigned int k = 0; k < centroid.size(); k++) {
@@ -624,9 +624,9 @@ bool PatchCartesian::_enable_cell_balancing(const long &id, bool enabled)
 long PatchCartesian::cell_ijk_to_id(const int &i, const int &j, const int &k) const
 {
 	long id = i;
-	id += m_nCells1D[Node::COORD_X] * j;
+	id += m_nCells1D[Vertex::COORD_X] * j;
 	if (get_dimension() == 3) {
-		id += m_nCells1D[Node::COORD_Y] * m_nCells1D[Node::COORD_X] * k;
+		id += m_nCells1D[Vertex::COORD_Y] * m_nCells1D[Vertex::COORD_X] * k;
 	}
 
 	return id;
@@ -637,7 +637,7 @@ long PatchCartesian::cell_ijk_to_id(const int &i, const int &j, const int &k) co
 */
 long PatchCartesian::cell_ijk_to_id(const int ijk[]) const
 {
-	return cell_ijk_to_id(ijk[Node::COORD_X], ijk[Node::COORD_Y], ijk[Node::COORD_Z]);
+	return cell_ijk_to_id(ijk[Vertex::COORD_X], ijk[Vertex::COORD_Y], ijk[Vertex::COORD_Z]);
 }
 
 
@@ -647,9 +647,9 @@ long PatchCartesian::cell_ijk_to_id(const int ijk[]) const
 long PatchCartesian::vertex_ijk_to_id(const int &i, const int &j, const int &k) const
 {
 	long id = i;
-	id += m_nVertices1D[Node::COORD_X] * j;
+	id += m_nVertices1D[Vertex::COORD_X] * j;
 	if (get_dimension() == 3) {
-		id += m_nVertices1D[Node::COORD_Y] * m_nVertices1D[Node::COORD_X] * k;
+		id += m_nVertices1D[Vertex::COORD_Y] * m_nVertices1D[Vertex::COORD_X] * k;
 	}
 
 	return id;
@@ -660,7 +660,7 @@ long PatchCartesian::vertex_ijk_to_id(const int &i, const int &j, const int &k) 
 */
 long PatchCartesian::vertex_ijk_to_id(const int ijk[]) const
 {
-	return vertex_ijk_to_id(ijk[Node::COORD_X], ijk[Node::COORD_Y], ijk[Node::COORD_Z]);
+	return vertex_ijk_to_id(ijk[Vertex::COORD_X], ijk[Vertex::COORD_Y], ijk[Vertex::COORD_Z]);
 }
 
 /*!
@@ -671,27 +671,27 @@ long PatchCartesian::interface_nijk_to_id(const int &normal, const int &i, const
 	const int *nInterfaces;
 	switch (normal) {
 
-	case Node::COORD_X:
+	case Vertex::COORD_X:
 		nInterfaces = m_x_nInterfaces1D.data();
 		break;
 
-	case Node::COORD_Y:
+	case Vertex::COORD_Y:
 		nInterfaces = m_y_nInterfaces1D.data();
 		break;
 
-	case Node::COORD_Z:
+	case Vertex::COORD_Z:
 		nInterfaces = m_z_nInterfaces1D.data();
 		break;
 
 	}
 
 	long id = i;
-	id += nInterfaces[Node::COORD_X] * j;
+	id += nInterfaces[Vertex::COORD_X] * j;
 	if (is_three_dimensional()) {
-		id += nInterfaces[Node::COORD_Y] * nInterfaces[Node::COORD_X] * k;
-		id += nInterfaces[Node::COORD_Z] * nInterfaces[Node::COORD_Y] * nInterfaces[Node::COORD_X] * normal;
+		id += nInterfaces[Vertex::COORD_Y] * nInterfaces[Vertex::COORD_X] * k;
+		id += nInterfaces[Vertex::COORD_Z] * nInterfaces[Vertex::COORD_Y] * nInterfaces[Vertex::COORD_X] * normal;
 	} else {
-		id += nInterfaces[Node::COORD_Y] * nInterfaces[Node::COORD_X] * normal;
+		id += nInterfaces[Vertex::COORD_Y] * nInterfaces[Vertex::COORD_X] * normal;
 	}
 
 	return id;

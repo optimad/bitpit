@@ -11,7 +11,7 @@
 #include "interface.hpp"
 #include "output_manager.hpp"
 #include "patchman_piercedVector.hpp"
-#include "node.hpp"
+#include "vertex.hpp"
 
 #include <cstddef>
 #include <memory>
@@ -50,8 +50,8 @@ public:
 	void set_name(std::string name);
 
 	long get_vertex_count() const;
-	PiercedVector<Node> &vertices();
-	Node &get_vertex(const long &id);
+	PiercedVector<Vertex> &vertices();
+	Vertex &get_vertex(const long &id);
 
 	long get_cell_count() const;
 	PiercedVector<Cell> &cells();
@@ -77,7 +77,7 @@ public:
 	std::array<double, 3> & get_opposite_normal(std::array<double, 3> &normal);
 
 protected:
-	PiercedVector<Node> m_vertices;
+	PiercedVector<Vertex> m_vertices;
 	PiercedVector<Cell> m_cells;
 	PiercedVector<Interface> m_interfaces;
 
