@@ -156,8 +156,6 @@ public:
 	int get_vertex_count() const;
 	int get_vertex(const int &vertex) const;
 
-	double eval_length() const;
-
 	static const long NULL_ELEMENT_ID;
 
 private:
