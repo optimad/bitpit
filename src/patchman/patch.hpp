@@ -52,6 +52,7 @@ public:
 	long get_vertex_count() const;
 	PiercedVector<Vertex> &vertices();
 	Vertex &get_vertex(const long &id);
+	const Vertex & get_vertex(const long &id) const
 
 	long get_cell_count() const;
 	PiercedVector<Cell> &cells();

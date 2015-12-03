@@ -468,12 +468,23 @@ PiercedVector<Vertex> & Patch::vertices()
 }
 
 /*!
-	Gets the vertex with the specified id.
+	Gets a reference to the vertex with the specified id.
 
 	\param id is the id of the requested vertex
-	\return The vertex with the specified id.
+	\return A reference to the vertex with the specified id.
 */
 Vertex & Patch::get_vertex(const long &id)
+{
+	return m_vertices[id];
+}
+
+/*!
+	Gets a constant reference to the vertex with the specified id.
+
+	\param id is the id of the requested vertex
+	\return A constant reference to the vertex with the specified id.
+*/
+const Vertex & Patch::get_vertex(const long &id) const
 {
 	return m_vertices[id];
 }
