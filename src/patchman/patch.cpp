@@ -648,12 +648,23 @@ PiercedVector<Interface> & Patch::interfaces()
 }
 
 /*!
-	Gets the interface with the specified id.
+	Gets a reference to the interface with the specified id.
 
 	\param id is the id of the requested interface
-	\return The interface with the specified id.
+	\return A reference to the interface with the specified id.
 */
 Interface & Patch::get_interface(const long &id)
+{
+	return m_interfaces[id];
+}
+
+/*!
+	Gets a constant reference to the interface with the specified id.
+
+	\param id is the id of the requested interface
+	\return A constant reference to the interface with the specified id.
+*/
+const Interface & Patch::get_interface(const long &id) const
 {
 	return m_interfaces[id];
 }
@@ -665,7 +676,7 @@ Interface & Patch::get_interface(const long &id)
 */
 long Patch::create_interface(const long &id, ElementInfo::Type type)
 {
-	m_interfaces.emplace(id, type, this);
+	m_interfaces.emplace(id, type);
 
 	return id;
 }

@@ -65,6 +65,7 @@ public:
 	long get_interface_count() const;
 	PiercedVector<Interface> &interfaces();
 	Interface &get_interface(const long &id);
+	const Interface &get_interface(const long &id) const;
 	virtual double eval_interface_area(const long &id) = 0;
 
 	void sort();
