@@ -26,7 +26,7 @@ namespace pman {
 	\var ElementInfo::Type ElementInfo::UNDEFINED
 	An undefined element.
 
-	\var ElementInfo::Type ElementInfo::POINT
+	\var ElementInfo::Type ElementInfo::VERTEX
 	A point.
 
 	\var ElementInfo::Type ElementInfo::LINE
@@ -35,19 +35,19 @@ namespace pman {
 	\var ElementInfo::Type ElementInfo::TRIANGLE
 	A triangle.
 
-	\var ElementInfo::Type ElementInfo::RECTANGLE
+	\var ElementInfo::Type ElementInfo::PIXEL
 	A rectangle.
 
-	\var ElementInfo::Type ElementInfo::QUADRANGLE
+	\var ElementInfo::Type ElementInfo::QUAD
 	A quadrangle.
 
 	\var ElementInfo::Type ElementInfo::POLYGON
 	A polygon.
 
-	\var ElementInfo::Type ElementInfo::TETRAHEDRON
+	\var ElementInfo::Type ElementInfo::TETRA
 	A tetrahedron.
 
-	\var ElementInfo::Type ElementInfo::BRICK
+	\var ElementInfo::Type ElementInfo::VOXEL
 	A brick.
 
 	\var ElementInfo::Type ElementInfo::HEXAHEDRON
@@ -56,24 +56,24 @@ namespace pman {
 	\var ElementInfo::Type ElementInfo::PYRAMID
 	A pyramid.
 
-	\var ElementInfo::Type ElementInfo::PRISM
-	A prism.
+	\var ElementInfo::Type ElementInfo::WEDGE
+	A wedge (triangular prism).
 
 	\var ElementInfo::Type ElementInfo::POLYHEDRON
 	A polyhedron.
 */
 
-const ElementInfo ElementInfo::undefinedInfo   = ElementInfo(ElementInfo::UNDEFINED);
-const ElementInfo ElementInfo::pointInfo       = ElementInfo(ElementInfo::POINT);
-const ElementInfo ElementInfo::lineInfo        = ElementInfo(ElementInfo::LINE);
-const ElementInfo ElementInfo::triangleInfo    = ElementInfo(ElementInfo::TRIANGLE);
-const ElementInfo ElementInfo::rectangleInfo   = ElementInfo(ElementInfo::RECTANGLE);
-const ElementInfo ElementInfo::quadrangleInfo  = ElementInfo(ElementInfo::QUADRANGLE);
-const ElementInfo ElementInfo::tetrahedronInfo = ElementInfo(ElementInfo::TETRAHEDRON);
-const ElementInfo ElementInfo::brickInfo       = ElementInfo(ElementInfo::BRICK);
-const ElementInfo ElementInfo::hexahedronInfo  = ElementInfo(ElementInfo::HEXAHEDRON);
-const ElementInfo ElementInfo::pyramidInfo     = ElementInfo(ElementInfo::PYRAMID);
-const ElementInfo ElementInfo::prismInfo       = ElementInfo(ElementInfo::PRISM);
+const ElementInfo ElementInfo::undefinedInfo  = ElementInfo(ElementInfo::UNDEFINED);
+const ElementInfo ElementInfo::vertexInfo     = ElementInfo(ElementInfo::VERTEX);
+const ElementInfo ElementInfo::lineInfo       = ElementInfo(ElementInfo::LINE);
+const ElementInfo ElementInfo::triangleInfo   = ElementInfo(ElementInfo::TRIANGLE);
+const ElementInfo ElementInfo::pixelInfo      = ElementInfo(ElementInfo::PIXEL);
+const ElementInfo ElementInfo::quadInfo       = ElementInfo(ElementInfo::QUAD);
+const ElementInfo ElementInfo::tetraInfo      = ElementInfo(ElementInfo::TETRA);
+const ElementInfo ElementInfo::voxelInfo      = ElementInfo(ElementInfo::VOXEL);
+const ElementInfo ElementInfo::hexahedronInfo = ElementInfo(ElementInfo::HEXAHEDRON);
+const ElementInfo ElementInfo::pyramidInfo    = ElementInfo(ElementInfo::PYRAMID);
+const ElementInfo ElementInfo::wedgeInfo      = ElementInfo(ElementInfo::WEDGE);
 
 /*!
 	Default constructor
@@ -92,8 +92,8 @@ ElementInfo::ElementInfo(ElementInfo::Type type)
 {
 	switch (type) {
 
-	case (POINT):
-		initializePointInfo();
+	case (VERTEX):
+		initializeVertexInfo();
 		break;
 
 	case (LINE):
@@ -104,20 +104,20 @@ ElementInfo::ElementInfo(ElementInfo::Type type)
 		initializeTriangleInfo();
 		break;
 
-	case (RECTANGLE):
-		initializeRectangleInfo();
+	case (PIXEL):
+		initializePixelInfo();
 		break;
 
-	case (QUADRANGLE):
-		initializeQuadrangleInfo();
+	case (QUAD):
+		initializeQuadInfo();
 		break;
 
-	case (TETRAHEDRON):
-		initializeTetrahedronInfo();
+	case (TETRA):
+		initializeTetraInfo();
 		break;
 
-	case (BRICK):
-		initializeBrickInfo();
+	case (VOXEL):
+		initializeVoxelInfo();
 		break;
 
 	case (HEXAHEDRON):
@@ -128,8 +128,8 @@ ElementInfo::ElementInfo(ElementInfo::Type type)
 		initializePyramidInfo();
 		break;
 
-	case (PRISM):
-		initializePrismInfo();
+	case (WEDGE):
+		initializeWedgeInfo();
 		break;
 
 	default:
@@ -149,8 +149,8 @@ const ElementInfo & ElementInfo::get_element_info(ElementInfo::Type type)
 {
 	switch (type) {
 
-	case (POINT):
-		return pointInfo;
+	case (VERTEX):
+		return vertexInfo;
 
 	case (LINE):
 		return lineInfo;
@@ -158,17 +158,17 @@ const ElementInfo & ElementInfo::get_element_info(ElementInfo::Type type)
 	case (TRIANGLE):
 		return triangleInfo;
 
-	case (RECTANGLE):
-		return rectangleInfo;
+	case (PIXEL):
+		return pixelInfo;
 
-	case (QUADRANGLE):
-		return quadrangleInfo;
+	case (QUAD):
+		return quadInfo;
 
-	case (TETRAHEDRON):
-		return tetrahedronInfo;
+	case (TETRA):
+		return tetraInfo;
 
-	case (BRICK):
-		return brickInfo;
+	case (VOXEL):
+		return voxelInfo;
 
 	case (HEXAHEDRON):
 		return hexahedronInfo;
@@ -176,8 +176,8 @@ const ElementInfo & ElementInfo::get_element_info(ElementInfo::Type type)
 	case (PYRAMID):
 		return pyramidInfo;
 
-	case (PRISM):
-		return prismInfo;
+	case (WEDGE):
+		return wedgeInfo;
 
 	default:
 		assert(false);
@@ -202,9 +202,9 @@ void ElementInfo::initializeUndefinedInfo()
 /*!
 	Initializes the information for the point element.
 */
-void ElementInfo::initializePointInfo()
+void ElementInfo::initializeVertexInfo()
 {
-	type      = POINT;
+	type      = VERTEX;
 	dimension = 0;
 
 	// Vertices data
@@ -214,7 +214,7 @@ void ElementInfo::initializePointInfo()
 	nEdges = 1;
 
 	edge_type = std::vector<Type>(nEdges);
-	edge_type[0] = POINT;
+	edge_type[0] = VERTEX;
 
 	edge_connect = std::vector<std::vector<int>>(nEdges);
 	edge_connect[0] = std::vector<int>(nVertices);
@@ -224,7 +224,7 @@ void ElementInfo::initializePointInfo()
 	nFaces = 1;
 
 	face_type = std::vector<Type>(nFaces);
-	face_type[0] = POINT;
+	face_type[0] = VERTEX;
 
 	face_connect = std::vector<std::vector<int>>(nFaces);
 	face_connect[0] = std::vector<int>(nVertices);
@@ -236,7 +236,7 @@ void ElementInfo::initializePointInfo()
 */
 void ElementInfo::initializeLineInfo()
 {
-	ElementInfo pointInfo(POINT);
+	ElementInfo vertexInfo(VERTEX);
 
 	type      = LINE;
 	dimension = 1;
@@ -250,8 +250,8 @@ void ElementInfo::initializeLineInfo()
 	edge_type = std::vector<Type>(nEdges);
 	edge_connect = std::vector<std::vector<int>>(nEdges);
 	for (int k = 0; k < nEdges; ++k) {
-		edge_type[k]       = POINT;
-		edge_connect[k]    = std::vector<int>(pointInfo.nVertices);
+		edge_type[k]       = VERTEX;
+		edge_connect[k]    = std::vector<int>(vertexInfo.nVertices);
 		edge_connect[k][0] = k;
 	}
 
@@ -261,8 +261,8 @@ void ElementInfo::initializeLineInfo()
 	face_type = std::vector<Type>(nFaces);
 	face_connect = std::vector<std::vector<int>>(nFaces);
 	for (int k = 0; k < nFaces; ++k) {
-		face_type[k]       = POINT;
-		face_connect[k]    = std::vector<int>(pointInfo.nVertices);
+		face_type[k]       = VERTEX;
+		face_connect[k]    = std::vector<int>(vertexInfo.nVertices);
 		face_connect[k][0] = k;
 	}
 }
@@ -272,7 +272,7 @@ void ElementInfo::initializeLineInfo()
 */
 void ElementInfo::initializeTriangleInfo()
 {
-	ElementInfo pointInfo(POINT);
+	ElementInfo vertexInfo(VERTEX);
 	ElementInfo lineInfo(LINE);
 
 	type      = TRIANGLE;
@@ -287,8 +287,8 @@ void ElementInfo::initializeTriangleInfo()
 	edge_type = std::vector<Type>(nEdges);
 	edge_connect = std::vector<std::vector<int>>(nEdges);
 	for (int k = 0; k < nEdges; ++k) {
-		edge_type[k]       = POINT;
-		edge_connect[k]    = std::vector<int>(pointInfo.nVertices);
+		edge_type[k]       = VERTEX;
+		edge_connect[k]    = std::vector<int>(vertexInfo.nVertices);
 		edge_connect[k][0] = k;
 	}
 
@@ -308,12 +308,12 @@ void ElementInfo::initializeTriangleInfo()
 /*!
 	Initializes the information for the quadrangle element.
 */
-void ElementInfo::initializeRectangleInfo()
+void ElementInfo::initializePixelInfo()
 {
-	ElementInfo pointInfo(POINT);
+	ElementInfo vertexInfo(VERTEX);
 	ElementInfo lineInfo(LINE);
 
-	type      = QUADRANGLE;
+	type      = QUAD;
 	dimension = 2;
 
 	// Vertices data
@@ -325,8 +325,8 @@ void ElementInfo::initializeRectangleInfo()
 	edge_type = std::vector<Type>(nEdges);
 	edge_connect = std::vector<std::vector<int>>(nEdges);
 	for (int k = 0; k < nEdges; ++k) {
-		edge_type[k]       = POINT;
-		edge_connect[k]    = std::vector<int>(pointInfo.nVertices);
+		edge_type[k]       = VERTEX;
+		edge_connect[k]    = std::vector<int>(vertexInfo.nVertices);
 		edge_connect[k][0] = k;
 	}
 
@@ -356,12 +356,12 @@ void ElementInfo::initializeRectangleInfo()
 /*!
 	Initializes the information for the quadrangle element.
 */
-void ElementInfo::initializeQuadrangleInfo()
+void ElementInfo::initializeQuadInfo()
 {
-	ElementInfo pointInfo(POINT);
+	ElementInfo vertexInfo(VERTEX);
 	ElementInfo lineInfo(LINE);
 
-	type      = QUADRANGLE;
+	type      = QUAD;
 	dimension = 2;
 
 	// Vertices data
@@ -373,8 +373,8 @@ void ElementInfo::initializeQuadrangleInfo()
 	edge_type = std::vector<Type>(nEdges);
 	edge_connect = std::vector<std::vector<int>>(nEdges);
 	for (int k = 0; k < nEdges; ++k) {
-		edge_type[k]       = POINT;
-		edge_connect[k]    = std::vector<int>(pointInfo.nVertices);
+		edge_type[k]       = VERTEX;
+		edge_connect[k]    = std::vector<int>(vertexInfo.nVertices);
 		edge_connect[k][0] = k;
 	}
 
@@ -394,12 +394,12 @@ void ElementInfo::initializeQuadrangleInfo()
 /*!
 	Initializes the information for the tetrahedron element.
 */
-void ElementInfo::initializeTetrahedronInfo()
+void ElementInfo::initializeTetraInfo()
 {
 	ElementInfo lineInfo(LINE);
 	ElementInfo triangleInfo(TRIANGLE);
 
-	type      = TETRAHEDRON;
+	type      = TETRA;
 	dimension = 3;
 
 	// Vertices data
@@ -463,12 +463,12 @@ void ElementInfo::initializeTetrahedronInfo()
 /*!
 	Initializes the information for the brick element.
 */
-void ElementInfo::initializeBrickInfo()
+void ElementInfo::initializeVoxelInfo()
 {
 	ElementInfo lineInfo(LINE);
-	ElementInfo rectangleInfo(RECTANGLE);
+	ElementInfo pixelInfo(PIXEL);
 
-	type      = BRICK;
+	type      = VOXEL;
 	dimension = 3;
 
 	// Vertices data
@@ -526,8 +526,8 @@ void ElementInfo::initializeBrickInfo()
 	face_type = std::vector<Type>(nFaces);
 	face_connect = std::vector<std::vector<int>>(nFaces);
 	for (int k = 0; k < nFaces; ++k) {
-		face_type[k]    = RECTANGLE;
-		face_connect[k] = std::vector<int>(rectangleInfo.nVertices);
+		face_type[k]    = PIXEL;
+		face_connect[k] = std::vector<int>(pixelInfo.nVertices);
 	}
 
 	face_connect[0][0] = 2;
@@ -567,7 +567,7 @@ void ElementInfo::initializeBrickInfo()
 void ElementInfo::initializeHexahedronInfo()
 {
 	ElementInfo lineInfo(LINE);
-	ElementInfo quadrangleInfo(QUADRANGLE);
+	ElementInfo quadInfo(QUAD);
 
 	type      = HEXAHEDRON;
 	dimension = 3;
@@ -627,8 +627,8 @@ void ElementInfo::initializeHexahedronInfo()
 	face_type = std::vector<Type>(nFaces);
 	face_connect = std::vector<std::vector<int>>(nFaces);
 	for (int k = 0; k < nFaces; ++k) {
-		face_type[k]    = QUADRANGLE;
-		face_connect[k] = std::vector<int>(quadrangleInfo.nVertices);
+		face_type[k]    = QUAD;
+		face_connect[k] = std::vector<int>(quadInfo.nVertices);
 	}
 
 	face_connect[0][0] = 1;
@@ -669,7 +669,7 @@ void ElementInfo::initializePyramidInfo()
 {
 	ElementInfo lineInfo(LINE);
 	ElementInfo triangleInfo(TRIANGLE);
-	ElementInfo quadrangleInfo(QUADRANGLE);
+	ElementInfo quadInfo(QUAD);
 
 	type      = PYRAMID;
 	dimension = 3;
@@ -718,8 +718,8 @@ void ElementInfo::initializePyramidInfo()
 	face_connect = std::vector<std::vector<int>>(nFaces);
 	for (int k = 0; k < nFaces; ++k) {
 		if (k == 0) {
-			face_type[k]    = QUADRANGLE;
-			face_connect[k] = std::vector<int>(quadrangleInfo.nVertices);
+			face_type[k]    = QUAD;
+			face_connect[k] = std::vector<int>(quadInfo.nVertices);
 		} else {
 			face_type[k]    = TRIANGLE;
 			face_connect[k] = std::vector<int>(triangleInfo.nVertices);
@@ -749,15 +749,15 @@ void ElementInfo::initializePyramidInfo()
 }
 
 /*!
-	Initializes the information for the prism element.
+	Initializes the information for the wedge (triangular prism) element.
 */
-void ElementInfo::initializePrismInfo()
+void ElementInfo::initializeWedgeInfo()
 {
 	ElementInfo lineInfo(LINE);
 	ElementInfo triangleInfo(TRIANGLE);
-	ElementInfo quadrangleInfo(QUADRANGLE);
+	ElementInfo quadInfo(QUAD);
 
-	type      = PRISM;
+	type      = WEDGE;
 	dimension = 3;
 
 	// Vertices data
@@ -810,8 +810,8 @@ void ElementInfo::initializePrismInfo()
 			face_type[k]    = TRIANGLE;
 			face_connect[k] = std::vector<int>(triangleInfo.nVertices);
 		} else {
-			face_type[k]    = QUADRANGLE;
-			face_connect[k] = std::vector<int>(quadrangleInfo.nVertices);
+			face_type[k]    = QUAD;
+			face_connect[k] = std::vector<int>(quadInfo.nVertices);
 		}
 	}
 
@@ -1240,7 +1240,7 @@ int Element::get_vertex(const int &vertex) const
 double Element::eval_length() const
 {
 	double length;
-	if (m_type == ElementInfo::POINT) {
+	if (m_type == ElementInfo::VERTEX) {
 		length = 0.;
 	} else if (m_type == ElementInfo::LINE) {
 		Node &node_A = m_patch->get_vertex(m_connect[0]);
@@ -1254,7 +1254,7 @@ double Element::eval_length() const
 			length += pow(coords_B[k] - coords_A[k], 2);
 		}
 		length = pow(length, 0.5);
-	} else if (m_type == ElementInfo::RECTANGLE) {
+	} else if (m_type == ElementInfo::PIXEL) {
 		Node &node_A = m_patch->get_vertex(m_connect[0]);
 		Node &node_B = m_patch->get_vertex(m_connect[1]);
 		Node &node_C = m_patch->get_vertex(m_connect[3]);
@@ -1270,7 +1270,7 @@ double Element::eval_length() const
 			length_y += pow(coords_C[k] - coords_A[k], 2);
 		}
 		length = pow(std::min({length_x, length_y}), 0.5);
-	} else if (m_type == ElementInfo::BRICK) {
+	} else if (m_type == ElementInfo::VOXEL) {
 		Node &node_A = m_patch->get_vertex(m_connect[0]);
 		Node &node_B = m_patch->get_vertex(m_connect[1]);
 		Node &node_C = m_patch->get_vertex(m_connect[3]);

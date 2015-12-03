@@ -259,9 +259,9 @@ void PatchCartesian::create_cells()
 	// Info on the cells
 	ElementInfo::Type cellType;
 	if (is_three_dimensional()) {
-		cellType = ElementInfo::BRICK;
+		cellType = ElementInfo::VOXEL;
 	} else {
-		cellType = ElementInfo::RECTANGLE;
+		cellType = ElementInfo::PIXEL;
 	}
 
 	const ElementInfo &cellTypeInfo = ElementInfo::get_element_info(cellType);
@@ -290,9 +290,9 @@ void PatchCartesian::create_cells()
 
 				// Tipo
 				if (is_three_dimensional()) {
-					cell.set_type(ElementInfo::BRICK);
+					cell.set_type(ElementInfo::VOXEL);
 				} else {
-					cell.set_type(ElementInfo::RECTANGLE);
+					cell.set_type(ElementInfo::PIXEL);
 				}
 
 				// Interior flag
@@ -352,9 +352,9 @@ void PatchCartesian::create_interfaces()
 	// Allocate the space for interface information on the cells
 	ElementInfo::Type cellType;
 	if (is_three_dimensional()) {
-		cellType = ElementInfo::BRICK;
+		cellType = ElementInfo::VOXEL;
 	} else {
-		cellType = ElementInfo::RECTANGLE;
+		cellType = ElementInfo::PIXEL;
 	}
 
 	const ElementInfo &cellTypeInfo = ElementInfo::get_element_info(cellType);
@@ -421,7 +421,7 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 	// Info on the interfaces
 	ElementInfo::Type interfaceType;
 	if (is_three_dimensional()) {
-		interfaceType = ElementInfo::RECTANGLE;
+		interfaceType = ElementInfo::PIXEL;
 	} else {
 		interfaceType = ElementInfo::LINE;
 	}
@@ -466,7 +466,7 @@ void PatchCartesian::create_interfaces_direction(const Node::Coordinate &directi
 
 				// Interface type
 				if (is_three_dimensional()) {
-					interface.set_type(ElementInfo::RECTANGLE);
+					interface.set_type(ElementInfo::PIXEL);
 				} else {
 					interface.set_type(ElementInfo::LINE);
 				}

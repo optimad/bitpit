@@ -18,19 +18,19 @@ class ElementInfo {
 
 public:
 	enum Type {
-		UNDEFINED = -1,
-		POINT,
-		LINE,
-		TRIANGLE,
-		RECTANGLE,
-		QUADRANGLE,
-		POLYGON,
-		TETRAHEDRON,
-		BRICK,
-		HEXAHEDRON,
-		PYRAMID,
-		PRISM,
-		POLYHEDRON
+		UNDEFINED  = -1,
+		VERTEX     = 1,
+		LINE       = 3,
+		TRIANGLE   = 5,
+		POLYGON    = 7,
+		PIXEL      = 8,
+		QUAD       = 9,
+		TETRA      = 10,
+		VOXEL      = 11,
+		HEXAHEDRON = 12,
+		WEDGE      = 13,
+		PYRAMID    = 14,
+		POLYHEDRON = 42
 	};
 
 	Type type;
@@ -41,16 +41,16 @@ public:
 	int nFaces;
 
 	static const ElementInfo undefinedInfo;
-	static const ElementInfo pointInfo;
+	static const ElementInfo vertexInfo;
 	static const ElementInfo lineInfo;
 	static const ElementInfo triangleInfo;
-	static const ElementInfo rectangleInfo;
-	static const ElementInfo quadrangleInfo;
-	static const ElementInfo tetrahedronInfo;
-	static const ElementInfo brickInfo;
+	static const ElementInfo pixelInfo;
+	static const ElementInfo quadInfo;
+	static const ElementInfo tetraInfo;
+	static const ElementInfo voxelInfo;
 	static const ElementInfo hexahedronInfo;
 	static const ElementInfo pyramidInfo;
-	static const ElementInfo prismInfo;
+	static const ElementInfo wedgeInfo;
 
 	std::vector<Type> face_type;
 	std::vector<std::vector<int>> face_connect;
@@ -65,16 +65,16 @@ public:
 
 private:
 	void initializeUndefinedInfo();
-	void initializePointInfo();
+	void initializeVertexInfo();
 	void initializeLineInfo();
 	void initializeTriangleInfo();
-	void initializeRectangleInfo();
-	void initializeQuadrangleInfo();
-	void initializeTetrahedronInfo();
-	void initializeBrickInfo();
+	void initializePixelInfo();
+	void initializeQuadInfo();
+	void initializeTetraInfo();
+	void initializeVoxelInfo();
 	void initializeHexahedronInfo();
 	void initializePyramidInfo();
-	void initializePrismInfo();
+	void initializeWedgeInfo();
 
 };
 

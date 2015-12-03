@@ -36,7 +36,7 @@ public:
 
 	// Tipo di elemento
 	enum {
-		ELEM_POINT = 1,
+		ELEM_VERTEX = 1,
 		ELEM_LINE,
 		ELEM_TRIA,
 		ELEM_QUAD,

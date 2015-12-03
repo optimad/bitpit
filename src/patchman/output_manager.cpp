@@ -71,23 +71,23 @@ void OutputManager::finalize()
 int OutputManager::getVTKCellType(ElementInfo::Type type)
 {
 	switch (type)  {
-		case ElementInfo::POINT:
+		case ElementInfo::VERTEX:
 			return VTK_VERTEX;
 		case ElementInfo::LINE:
 			return VTK_LINE;
 		case ElementInfo::TRIANGLE:
 			return VTK_TRIANGLE;
-		case ElementInfo::RECTANGLE:
+		case ElementInfo::PIXEL:
 			return VTK_PIXEL;
-		case ElementInfo::QUADRANGLE:
+		case ElementInfo::QUAD:
 			return VTK_QUAD;
-		case ElementInfo::TETRAHEDRON:
+		case ElementInfo::TETRA:
 			return VTK_TETRA;
-		case ElementInfo::BRICK:
+		case ElementInfo::VOXEL:
 			return VTK_VOXEL;
 		case ElementInfo::HEXAHEDRON:
 			return VTK_HEXAHEDRON;
-		case ElementInfo::PRISM:
+		case ElementInfo::WEDGE:
 			return VTK_WEDGE;
 		case ElementInfo::PYRAMID:
 			return VTK_PYRAMID;
