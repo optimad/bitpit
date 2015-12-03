@@ -1,4 +1,5 @@
 build/
+release/
 debug/
 CMakeFiles/
 *.swp
