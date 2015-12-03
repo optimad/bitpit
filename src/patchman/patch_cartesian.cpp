@@ -126,6 +126,25 @@ double PatchCartesian::eval_cell_volume(const long &id)
 }
 
 /*!
+	Evaluates the characteristic size of the specified cell.
+
+	\param id is the id of the cell
+	\result The characteristic size of the specified cell.
+*/
+double PatchCartesian::eval_cell_size(const long &id)
+{
+	UNUSED(id);
+
+	double cellSize = 0;
+	for(int i = 0; i < get_dimension(); ++i) {
+		cellSize *= m_cellSize[i];
+	}
+	cellSize = pow(cellSize, 1. / get_dimension());
+
+	return cellSize;
+}
+
+/*!
 	Gets a pointer to the the opposite normal.
 
 	\param normal is a pointer to the normal

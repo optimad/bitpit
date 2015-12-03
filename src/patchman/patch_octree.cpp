@@ -90,6 +90,19 @@ double PatchOctree::eval_cell_volume(const long &id)
 }
 
 /*!
+	Evaluates the characteristic size of the specified cell.
+
+	\param id is the id of the cell
+	\result The characteristic size of the specified cell.
+*/
+double PatchOctree::eval_cell_size(const long &id)
+{
+	int level = get_cell_level(id);
+
+	return m_tree_dh[level];
+}
+
+/*!
 	Gets a pointer to the the opposite normal.
 
 	\param normal is a pointer to the normal

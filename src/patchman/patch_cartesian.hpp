@@ -24,6 +24,7 @@ public:
 	~PatchCartesian();
 
 	double eval_cell_volume(const long &id);
+	double eval_cell_size(const long &id);
 
 protected:
 	std::array<double, 3> & _get_opposite_normal(std::array<double, 3> &normal);
