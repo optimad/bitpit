@@ -529,6 +529,17 @@ void Patch::delete_vertex(const long &id, bool delayed)
 }
 
 /*!
+	Gets the coordinates of the specified vertex.
+
+	\param is is the id of the vertex
+	\result The coordinates of the specified vertex.
+*/
+const std::array<double, 3> & Patch::get_vertex_coords(const long &id) const
+{
+	return get_vertex(id).get_coords();
+}
+
+/*!
 	Gets the number of cells in the patch.
 
 	\return The number of cells in the patch
