@@ -355,7 +355,7 @@ public:
 	*/
 	PiercedVector()
 	{
-		initialize_storage();
+		clear();
 	}
 
 	/*!
@@ -373,7 +373,7 @@ public:
 	*/
 	PiercedVector(size_type n)
 	{
-		initialize_storage();
+		clear();
 
 		m_v.reserve(n);
 	}
@@ -498,13 +498,13 @@ public:
 	void clear()
 	{
 		// Clear storage
-		if (!empty()) {
-			// Clear vector
-			m_v.clear();
+		m_v.clear();
+		std::vector<value_type>().swap(m_v);
+		storage_resize(0);
 
-			// Initialize storage
-			initialize_storage();
-		}
+		// Reset first and last counters
+		m_first_pos = 0;
+		m_last_pos  = 0;
 
 		// Clear holes
 		m_holes.clear();
@@ -1440,31 +1440,6 @@ private:
 	}
 
 	/*!
-		Append to the end of the vector the specified number of
-		sentinel elements.
-
-		A sentinel element is a dummy element with the special id
-		SENTINEL_ID. All elements after the last non-empty position
-		are sentinel elements.
-
-		The sentinel element allows the iterator to correctly
-		identify the last non-empty position.
-
-		\param n is the number of sentinel elements to append
-	*/
-	void append_sentinels(size_t n)
-	{
-		size_type previousSize = m_v.size();
-		size_type updatedSize  = previousSize + n;
-
-		m_v.resize(updatedSize);
-
-		for (size_type pos = previousSize; pos < updatedSize; pos++) {
-			m_v[pos].set_id(SENTINEL_ID);
-		}
-	}
-
-	/*!
 		Compares the id of the specified values.
 
 		\param x first values to compare
@@ -1610,22 +1585,6 @@ private:
 		m_holes.pop_front();
 
 		return pos;
-	}
-
-	/*!
-		Initialize the vector use to store the elements.
-	*/
-	void initialize_storage()
-	{
-		// Reset first and last counters
-		m_first_pos = 0;
-		m_last_pos  = 0;
-
-		// Add sentinel
-		append_sentinels(REQUIRED_SENTINEL_COUNT);
-
-		// Reset dirty flag
-		m_dirty = false;
 	}
 
 	/*!
