@@ -1000,11 +1000,15 @@ public:
 			return;
 		}
 
-		// If the requested size is greater that the current size
-		// we need to add as many sentinel elements as needed
-		// to reach a size of n.
+		// If the requested size is greater that the current size we
+		// may need to resize the storage to reach the requested size.
 		if (n > size()) {
-			append_sentinels(n - size());
+			size_t previousStorageSize = storage_size();
+			if (n < previousStorageSize) {
+				return;
+			}
+
+			storage_resize(n);
 			return;
 		}
 
@@ -1042,8 +1046,7 @@ public:
 		holes_delete_after(updated_last_pos);
 
 		// Resize the vector
-		m_v.resize(updated_last_pos + REQUIRED_SENTINEL_COUNT);
-		append_sentinels(REQUIRED_SENTINEL_COUNT);
+		storage_resize(updated_last_pos + 1);
 
 		// Update the position of the last element
 		m_last_pos = updated_last_pos;
@@ -1089,7 +1092,7 @@ public:
 		std::deque<size_type>().swap(m_holes);
 
 		// Resize
-		m_v.resize(size() + REQUIRED_SENTINEL_COUNT);
+		storage_resize(size());
 		m_v.shrink_to_fit();
 	}
 
@@ -1130,11 +1133,6 @@ public:
 				m_pos[id] = updatedPos;
 			}
 
-			// Move the sentinels
-			for (size_type k = 0; k < REQUIRED_SENTINEL_COUNT; ++k) {
-				m_v[m_pos.size() + k] = std::move(m_v[m_last_pos + k + 1]);
-			}
-
 			// Reset first and last counters
 			m_first_pos = 0;
 			m_last_pos  = m_pos.size() - 1;
@@ -1144,7 +1142,7 @@ public:
 		}
 
 		// Resize
-		m_v.resize(size() + REQUIRED_SENTINEL_COUNT);
+		storage_resize(size());
 		m_v.shrink_to_fit();
 	}
 
@@ -1815,6 +1813,29 @@ private:
 	size_type storage_size() const
 	{
 		return m_v.size() - REQUIRED_SENTINEL_COUNT;
+	}
+
+	/*!
+		Resize the storage.
+
+		In order for the iterator to correctly identify the last
+		non-empty position, the container needs to store, after all
+		the elements, at least one sentinel. A sentinel element is a
+		dummy element with the special id SENTINEL_ID. All elements
+		after the last non-empty position are sentinel elements.
+
+		\param n is the new container size, expressed in number of
+		elements.
+	*/
+	void storage_resize(size_t n)
+	{
+		size_t previous_raw_size = m_v.size();
+		m_v.resize(n + REQUIRED_SENTINEL_COUNT);
+
+		size_t current_raw_size = m_v.size();
+		for (size_t k = std::min(n, previous_raw_size); k < current_raw_size; ++k) {
+			m_v[k].set_id(SENTINEL_ID);
+		}
 	}
 
 	/*!
