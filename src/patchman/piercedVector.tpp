@@ -375,7 +375,7 @@ public:
 	{
 		clear();
 
-		m_v.reserve(n);
+		reserve(n);
 	}
 
 	/*!
