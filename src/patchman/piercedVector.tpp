@@ -1000,6 +1000,12 @@ public:
 			return;
 		}
 
+		// A request for a size equal to 0 is equivalent to a clear.
+		if (n == 0) {
+			clear();
+			return;
+		}
+
 		// If the requested size is greater that the current size we
 		// may need to resize the storage to reach the requested size.
 		if (n > size()) {
