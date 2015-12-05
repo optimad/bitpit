@@ -280,6 +280,11 @@ class PiercedVector
 	static_assert(has_set_id<T>::value, "Provided class does not implement set_id");
 
 private:
+	enum FillType {
+		FILL_APPEND,
+		FILL_FIRST
+	};
+
 	/*!
 		Type size_type is an unsigned integral type.
 	*/
@@ -305,26 +310,6 @@ private:
 		the end of the pierced vector.
 	*/
 	static const id_type SENTINEL_ID;
-
-	/*!
-		Special hole value that can be used with the functions
-		that insert new element. It means to insert the element
-		at the end of the vector.
-	*/
-	static const size_type APPEND_TO_BACK;
-
-	/*!
-		Special hole value that can be used with the functions that
-		insert new element. It means to insert the element
-		in the first empty position, i.e., the first hole or
-		at the end of the vector if there are no hole.
-	*/
-	static const size_type FIRST_EMPTY_POS;
-
-	/*!
-		Number of reserved hole values.
-	*/
-	static const size_type RESERVED_HOLE_COUNT;
 
 	/*!
 		At the end of the piecred vector, after all stored elements,
@@ -573,7 +558,7 @@ public:
 	template <class... Args>
 	iterator emplace(Args&&... args)
 	{
-		return _emplace(FIRST_EMPTY_POS, std::forward<Args>(args)...);
+		return _emplace(FILL_FIRST, std::forward<Args>(args)...);
 	}
 
 	/*!
@@ -586,7 +571,7 @@ public:
 	template <class... Args>
 	void emplace_back(Args&&... args)
 	{
-		_emplace(APPEND_TO_BACK, std::forward<Args>(args)...);
+		_emplace(FILL_APPEND, std::forward<Args>(args)...);
 	}
 
 	/*!
@@ -734,7 +719,7 @@ public:
 	*/
 	iterator insert(value_type &&value)
 	{
-		return _insert(FIRST_EMPTY_POS, std::move(value));
+		return _insert(FILL_FIRST, std::move(value));
 	}
 
 	/*!
@@ -784,7 +769,7 @@ public:
 	*/
 	void push_back(value_type &&value)
 	{
-		_insert(APPEND_TO_BACK, std::move(value));
+		_insert(FILL_APPEND, std::move(value));
 	}
 
 	/*!
@@ -1339,23 +1324,16 @@ private:
 		the specified hole. This new element is constructed in
 		place using args as the arguments for its construction.
 
-		\param hole is the hole where the new element should be
-		            inserted in. There are two special values
-		            for this parameter: FIRST_EMPTY_POS and
-		            APPEND_TO_BACK. The first meas that the
-		            element should be inserted in the first empty
-		            position (which means in the first hole or at the
-		            end of the vectpr if there are no holes). The
-		            latter means that the element should be inserted
-		            at the end of the vector.
+		\param fillType is the fill-pattern that will be used to
+		identify the position
 		\param args the arguments forwarded to construct the new element
 		\result An iterator that points to the newly inserted element.
 	*/
 	template <class... Args>
-	iterator _emplace(size_type hole, Args&&... args)
+	iterator _emplace(FillType fillType, Args&&... args)
 	{
 		// Position of the element
-		size_type pos = get_pos_to_fill(hole);
+		size_type pos = get_pos_to_fill(fillType);
 
 		// Check if the position is empty
 		bool previouslyEmpty = is_pos_empty(pos);
@@ -1422,25 +1400,18 @@ private:
 		The container is extended by inserting a new element in
 		the specified hole.
 
-		\param hole is the hole where the new element should be
-		            inserted in. There are two special values
-		            for this parameter: FIRST_EMPTY_POS and
-		            APPEND_TO_BACK. The first meas that the
-		            element should be inserted in the first empty
-		            position (which means in the first hole or at the
-		            end of the vectpr if there are no holes). The
-		            latter means that the element should be inserted
-		            at the end of the vector.
+		\param fillType is the fill-pattern that will be used to
+		identify the position
 		\param value is the value to be copied (or moved) to the
 		            inserted elements.
 		\result An iterator that points to the the newly inserted
 		        element.
 
 	*/
-	iterator _insert(size_type hole, value_type &&value)
+	iterator _insert(FillType fillType, value_type &&value)
 	{
 		// Position of the element
-		size_type pos = get_pos_to_fill(hole);
+		size_type pos = get_pos_to_fill(fillType);
 
 		// Check if the position is empty
 		bool previouslyEmpty = is_pos_empty(pos);
@@ -1559,31 +1530,22 @@ private:
 	}
 
 	/*!
-		Given a hole, the function returns an empty position that
-		can be used to store an element.
+		Gets a position in which store an element.
 
-		\param hole the hole that should be used to get the empty
-		            position. There are two special values
-		            for this parameter: FIRST_EMPTY_POS and
-		            APPEND_TO_BACK. The first means that the
-		            the function should return the first empty
-		            position (which means the position of the first
-		            hole or the position following the end of the
-		            vector). The latter means that the function should
-		            return the position following the end of the
-		            vector.
+		\param fillType is the fill-pattern that will be used to
+		identify the position
 	*/
-	size_type get_pos_to_fill(size_type hole)
+	size_type get_pos_to_fill(FillType fillType)
 	{
 		// If there are no hole the first avilable position is the
 		// end of the vector.
-		if (hole == FIRST_EMPTY_POS && m_holes.empty() && m_pending_deletes.empty()) {
-			hole = APPEND_TO_BACK;
+		if (fillType == FILL_FIRST && m_holes.empty() && m_pending_deletes.empty()) {
+			fillType = FILL_APPEND;
 		}
 
 		// Find the position
 		size_type pos;
-		if (hole == APPEND_TO_BACK) {
+		if (fillType == FILL_APPEND) {
 			if (empty()) {
 				pos = 0;
 			} else {
@@ -1591,29 +1553,16 @@ private:
 			}
 
 			assert(pos < m_v.size());
-		} else {
+		} else if (fillType == FILL_FIRST) {
 			assert(!m_v.empty());
 
-			if (hole == FIRST_EMPTY_POS) {
-				if (m_pending_deletes.empty()) {
-					pos = holes_pop();
-				} else {
-					pos = pending_deletes_pop_back();
-				}
+			if (m_pending_deletes.empty()) {
+				pos = holes_pop();
 			} else {
-				pos = holes_pop(hole);
+				pos = pending_deletes_pop_back();
 			}
 
 			assert(pos < m_v.size() - 1);
-		}
-
-		// Some positions are reserved
-		if (pos >= USABLE_POS_COUNT) {
-			std::stringstream messageStream;
-			messageStream << "Positions above " << (USABLE_POS_COUNT - 1) << " are reserved";
-			std::string message = messageStream.str();
-
-			throw std::out_of_range(message);
 		}
 
 		return pos;
@@ -1652,22 +1601,15 @@ private:
 	}
 
 	/*!
-		Gets the position in the vector associated with the
-		specified hole.
+		Gets the position associated with the first hole and deletes
+		that hole from the list.
 
-		\param hole the hole to pop
-		\result The position of the requested hole.
+		\result The position associated with the first hole.
 	*/
-	size_type holes_pop(size_type hole = 0)
+	size_type holes_pop()
 	{
-		size_type pos;
-		if (hole == 0) {
-			pos = m_holes.front();
-			m_holes.pop_front();
-		} else {
-			pos = m_holes[hole];
-			m_holes.erase(m_holes.begin() + hole);
-		}
+		size_type pos = m_holes.front();
+		m_holes.pop_front();
 
 		return pos;
 	}
@@ -1912,25 +1854,11 @@ const typename PiercedVector<T>::id_type
 
 template<class T>
 const typename PiercedVector<T>::size_type
-	PiercedVector<T>::APPEND_TO_BACK = std::numeric_limits<size_type>::max();
-
-template<class T>
-const typename PiercedVector<T>::size_type
-	PiercedVector<T>::FIRST_EMPTY_POS = std::numeric_limits<size_type>::max() - 1;
-
-template<class T>
-const typename PiercedVector<T>::size_type
-	PiercedVector<T>::RESERVED_HOLE_COUNT = 2;
-
-template<class T>
-const typename PiercedVector<T>::size_type
 	PiercedVector<T>::REQUIRED_SENTINEL_COUNT = 1;
 
 template<class T>
 const typename PiercedVector<T>::size_type
-	PiercedVector<T>::USABLE_POS_COUNT = std::numeric_limits<size_type>::max() -
-		(RESERVED_HOLE_COUNT > REQUIRED_SENTINEL_COUNT ?
-			RESERVED_HOLE_COUNT : REQUIRED_SENTINEL_COUNT);
+	PiercedVector<T>::USABLE_POS_COUNT = std::numeric_limits<size_type>::max() - REQUIRED_SENTINEL_COUNT;
 
 }
 
