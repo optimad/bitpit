@@ -750,9 +750,15 @@ public:
 			throw std::out_of_range ("Vector is empty");
 		}
 
-		while (m_pending_deletes.back() >= m_last_pos) {
+		while (!m_pending_deletes.empty()) {
+			if (m_pending_deletes.back() < m_last_pos) {
+				break;
+			}
+
 			size_type pos = pending_deletes_pop_back();
-			_erase(pos, false);
+			if (pos != m_last_pos) {
+				_erase(pos, false);
+			}
 		}
 
 		_erase(m_last_pos, false);
