@@ -1343,25 +1343,13 @@ private:
 	iterator _emplace(FillType fillType, Args&&... args)
 	{
 		// Position of the element
-		size_type pos = get_pos_to_fill(fillType);
-
-		// Check if the position is empty
-		bool previouslyEmpty = is_pos_empty(pos);
+		size_type pos = fill_pos(fillType);
 
 		// Insert the element
-		if (pos == (m_v.size() - 1)) {
-			m_v.emplace(raw_begin() + pos, std::forward<Args>(args)...);
-		} else {
-			m_v[pos] = T(std::forward<Args>(args)...);
-		}
+		m_v[pos] = T(std::forward<Args>(args)...);
 
 		// Add the id to the map
 		link_id(m_v[pos].get_id(), pos);
-
-		// Mark the position as filled
-		if (previouslyEmpty) {
-			fill_pos(pos);
-		}
 
 		// Return the iterator that points to the element
 		iterator itr;
@@ -1421,28 +1409,13 @@ private:
 	iterator _insert(FillType fillType, value_type &&value)
 	{
 		// Position of the element
-		size_type pos = get_pos_to_fill(fillType);
-
-		// Check if the position is empty
-		bool previouslyEmpty = is_pos_empty(pos);
-
-		// Id of the element that is currently occuping the position
-		id_type id_prev = m_v[pos].get_id();
+		size_type pos = fill_pos(fillType);
 
 		// Insert the element
-		if (pos == (m_v.size() - 1)) {
-			m_v.insert(m_v.begin() + pos, std::move(value));
-		} else {
-			m_v[pos] = std::move(value);
-		}
+		m_v[pos] = std::move(value);
 
 		// Add the id to the map
 		link_id(m_v[pos].get_id(), pos);
-
-		// Mark the position as filled
-		if (previouslyEmpty) {
-			fill_pos(pos);
-		}
 
 		// Return the iterator that points to the element
 		iterator itr;
@@ -1477,28 +1450,6 @@ private:
 	};
 
 	/*!
-		Mark the specified position as filled.
-
-		\param pos the position to be marked as filled
-	*/
-	void fill_pos(size_type pos)
-	{
-		// Update first and last counters
-		if (m_last_pos < pos) {
-			m_last_pos = pos;
-		}
-
-		if (m_first_pos > pos) {
-			m_first_pos = pos;
-		}
-
-		// If previos element is a hole, its id need to be udated
-		if (pos > 0 && is_pos_empty(pos - 1)) {
-			update_empty_pos_id(pos - 1);
-		}
-	}
-
-	/*!
 		Gets the position in the storage vector of the element with the
 		specified id.
 
@@ -1520,33 +1471,47 @@ private:
 		\param fillType is the fill-pattern that will be used to
 		identify the position
 	*/
-	size_type get_pos_to_fill(FillType fillType)
+	size_type fill_pos(FillType fillType)
 	{
-		// If there are no hole the first avilable position is the
+		// If the container is empty or if there are no holes nor
+		// pending deletes, elements can only be appened at the
 		// end of the vector.
-		if (fillType == FILL_FIRST && m_holes.empty() && m_pending_deletes.empty()) {
-			fillType = FILL_APPEND;
+		if (fillType == FILL_FIRST) {
+			if (empty() || (m_holes.empty() && m_pending_deletes.empty())) {
+				fillType = FILL_APPEND;
+			}
 		}
 
 		// Find the position
 		size_type pos;
 		if (fillType == FILL_APPEND) {
-			if (empty()) {
-				pos = 0;
-			} else {
-				pos = m_last_pos + 1;
+			if (!empty()) {
+				m_last_pos++;
 			}
+			storage_resize(m_last_pos + 1);
 
+			pos = m_last_pos;
 			if (!m_pending_deletes.empty()) {
 				pending_deletes_delete(pos);
 			}
-
-			assert(pos < m_v.size());
 		} else if (fillType == FILL_FIRST) {
-			assert(!m_v.empty());
-
 			if (m_pending_deletes.empty()) {
+				// Get first hole
 				pos = holes_pop();
+
+				// Update first and last counters
+				if (m_last_pos < pos) {
+					m_last_pos = pos;
+				}
+
+				if (m_first_pos > pos) {
+					m_first_pos = pos;
+				}
+
+				// If previos element is a hole, its id need to be udated
+				if (pos > 0 && is_pos_empty(pos - 1)) {
+					update_empty_pos_id(pos - 1);
+				}
 			} else {
 				pos = pending_deletes_pop_back();
 			}
