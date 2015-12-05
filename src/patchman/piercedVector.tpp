@@ -1568,6 +1568,24 @@ private:
 	}
 
 	/*!
+		Removes a hole.
+
+		\param hole is the hole to be removed
+		\result Returns true if the hole was found and successfuly
+		removed, otherwise it returns false.
+	*/
+	bool holes_delete(size_type hole)
+	{
+		std::deque<size_type>::iterator itr = lower_bound(m_holes.begin(), m_holes.end(), hole);
+		if (itr == m_holes.end()) {
+			return false;
+		}
+
+		m_holes.erase(itr);
+		return true;
+	}
+
+	/*!
 		Deletes all holes after a specified position.
 
 		\param pos the position after wich all holes have to be
