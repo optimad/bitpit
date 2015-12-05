@@ -1537,6 +1537,10 @@ private:
 				pos = m_last_pos + 1;
 			}
 
+			if (!m_pending_deletes.empty()) {
+				pending_deletes_delete(pos);
+			}
+
 			assert(pos < m_v.size());
 		} else if (fillType == FILL_FIRST) {
 			assert(!m_v.empty());
