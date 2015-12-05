@@ -1807,6 +1807,17 @@ private:
 	}
 
 	/*!
+		Returns the size of the storage expressed in terms of
+		elements that the storage contains (including the holes).
+
+		\result The size of the storage.
+	*/
+	size_type storage_size() const
+	{
+		return m_v.size() - REQUIRED_SENTINEL_COUNT;
+	}
+
+	/*!
 		Updates the id of the element in the specified position to make
 		it an empty element. If needed, updates also of the id of the
 		element before the specified position.
