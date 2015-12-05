@@ -1721,6 +1721,24 @@ private:
 	}
 
 	/*!
+		Removes a pending delete.
+
+		\param pending_delete is the pending delete to be removed
+		\result Returns true if the pending delete was found and
+		successfuly removed, false otherwise.
+	*/
+	bool pending_deletes_delete(size_type pending_delete)
+	{
+		std::deque<size_type>::iterator itr = lower_bound(m_pending_deletes.begin(), m_pending_deletes.end(), pending_delete);
+		if (itr == m_pending_deletes.end()) {
+			return false;
+		}
+
+		m_pending_deletes.erase(itr);
+		return true;
+	}
+
+	/*!
 		Mark the position as empty.
 
 		\param pos the position to be marked as empty
