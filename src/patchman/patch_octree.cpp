@@ -90,6 +90,43 @@ double PatchOctree::eval_cell_volume(const long &id)
 }
 
 /*!
+	Evaluates the centroid of the specified cell.
+
+	\param id is the id of the cell
+	\result The centroid of the specified cell.
+*/
+std::array<double, 3> PatchOctree::eval_cell_centroid(const long &id)
+{
+	OctantInfo octantInfo = get_cell_octant(id);
+
+	vector<double> octantCentroid;
+	if (is_three_dimensional()) {
+		Class_Octant<3> *octant;
+		if (octantInfo.internal) {
+			octant = m_tree_3D.getOctant(octantInfo.id);
+		} else {
+			octant = m_tree_3D.getGhostOctant(octantInfo.id);
+		}
+		octantCentroid = m_tree_3D.getCenter(octant);
+	} else {
+		Class_Octant<2> *octant;
+		if (octantInfo.internal) {
+			octant = m_tree_2D.getOctant(octantInfo.id);
+		} else {
+			octant = m_tree_2D.getGhostOctant(octantInfo.id);
+		}
+		octantCentroid = m_tree_2D.getCenter(octant);
+	}
+
+	std::array<double, 3> centroid;
+	for (unsigned int k = 0; k < centroid.size(); k++) {
+		centroid[k] = octantCentroid[k];
+	}
+
+	return centroid;
+}
+
+/*!
 	Evaluates the characteristic size of the specified cell.
 
 	\param id is the id of the cell

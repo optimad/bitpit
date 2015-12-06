@@ -1033,4 +1033,46 @@ void Patch::squeeze()
 	m_interfaces.squeeze();
 }
 
+/*!
+	Evaluates the centroid of the specified cell.
+
+	\param id is the id of the cell
+	\result The centroid of the specified cell.
+*/
+std::array<double, 3> Patch::eval_cell_centroid(const long &id)
+{
+	Cell &cell = get_cell(id);
+
+	return eval_element_centroid(cell);
+}
+
+/*!
+	Evaluates the centroid of the specified element.
+
+	\param element is the element
+	\result The centroid of the specified element.
+*/
+std::array<double, 3> Patch::eval_element_centroid(const Element &element)
+{
+	const int nDimensions = 3;
+
+	const long *elementConnect = element.get_connect();
+	const ElementInfo &elementInfo = element.get_info();
+
+	std::array<double, nDimensions> centroid = {{0., 0., 0.}};
+	for (int i = 0; i < elementInfo.nVertices; ++i) {
+		Vertex &vertex = get_vertex(elementConnect[i]);
+		const std::array<double, nDimensions> &vertexCoords = vertex.get_coords();
+		for (int k = 0; k < nDimensions; ++k) {
+			centroid[k] += vertexCoords[k];
+		}
+	}
+
+	for (int k = 0; k < nDimensions; ++k) {
+		centroid[k] /= elementInfo.nVertices;
+	}
+
+	return centroid;
+}
+
 }

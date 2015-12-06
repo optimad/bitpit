@@ -44,6 +44,7 @@ public:
 
 	double eval_cell_volume(const long &id);
 	double eval_cell_size(const long &id);
+	std::array<double, 3> eval_cell_centroid(const long &id);
 
 	double eval_interface_area(const long &id);
 

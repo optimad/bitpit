@@ -61,6 +61,7 @@ public:
 	const Cell &get_cell(const long &id) const;
 	virtual double eval_cell_volume(const long &id) = 0;
 	virtual double eval_cell_size(const long &id) = 0;
+	virtual std::array<double, 3> eval_cell_centroid(const long &id);
 	std::vector<long> extract_cell_neighs(const long &id) const;
 	std::vector<long> extract_cell_neighs(const long &id, int codimension, bool complete = true) const;
 	std::vector<long> extract_cell_face_neighs(const long &id) const;
@@ -133,6 +134,7 @@ private:
 	void set_id(int id);
 	void set_dimension(int dimension);
 
+	std::array<double, 3> eval_element_centroid(const Element &element);
 };
 
 }
