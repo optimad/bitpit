@@ -1047,6 +1047,19 @@ std::array<double, 3> Patch::eval_cell_centroid(const long &id)
 }
 
 /*!
+	Evaluates the centroid of the specified interface.
+
+	\param id is the id of the interface
+	\result The centroid of the specified interface.
+*/
+std::array<double, 3> Patch::eval_interface_centroid(const long &id)
+{
+	Interface &interface = get_interface(id);
+
+	return eval_element_centroid(interface);
+}
+
+/*!
 	Evaluates the centroid of the specified element.
 
 	\param element is the element
