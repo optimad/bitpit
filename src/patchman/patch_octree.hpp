@@ -47,6 +47,7 @@ public:
 	std::array<double, 3> eval_cell_centroid(const long &id);
 
 	double eval_interface_area(const long &id);
+	std::array<double, 3> eval_interface_normal(const long &id);
 
 	OctantInfo get_cell_octant(const long &id) const;
 	int get_cell_level(const long &id);

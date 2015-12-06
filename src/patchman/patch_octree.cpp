@@ -155,6 +155,20 @@ double PatchOctree::eval_interface_area(const long &id)
 }
 
 /*!
+	Evaluates the normal of the specified interface.
+
+	\param id is the id of the interface
+	\result The normal of the specified interface.
+*/
+std::array<double, 3> PatchOctree::eval_interface_normal(const long &id)
+{
+	const Interface &interface = get_interface(id);
+	int ownerFace = interface.get_owner_face();
+
+	return m_normals[ownerFace];
+}
+
+/*!
 	Gets the octant of the cell with the specified id.
 
 	\param id the id of the cell

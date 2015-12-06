@@ -78,6 +78,7 @@ public:
 	const Interface &get_interface(const long &id) const;
 	virtual double eval_interface_area(const long &id) = 0;
 	virtual std::array<double, 3> eval_interface_centroid(const long &id);
+	virtual std::array<double, 3> eval_interface_normal(const long &id) = 0;
 
 	void sort();
 	void squeeze();

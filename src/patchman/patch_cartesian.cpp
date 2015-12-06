@@ -174,6 +174,20 @@ double PatchCartesian::eval_interface_area(const long &id)
 }
 
 /*!
+	Evaluates the normal of the specified interface.
+
+	\param id is the id of the interface
+	\result The normal of the specified interface.
+*/
+std::array<double, 3> PatchCartesian::eval_interface_normal(const long &id)
+{
+	const Interface &interface = get_interface(id);
+	int ownerFace = interface.get_owner_face();
+
+	return m_normals[ownerFace];
+}
+
+/*!
 	Updates the patch.
 
 	\result Returns a vector of Adaption::Info that can be used to track

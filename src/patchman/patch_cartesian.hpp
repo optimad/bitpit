@@ -27,6 +27,7 @@ public:
 	double eval_cell_size(const long &id);
 
 	double eval_interface_area(const long &id);
+	std::array<double, 3> eval_interface_normal(const long &id);
 
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
