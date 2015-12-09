@@ -2,6 +2,9 @@
 #define CLASS_GLOBAL_3D_TPP
 
 /*!
+ *  \ingroup        PABLO
+ *  @{
+ *
  *	\date			23/apr/2014
  *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
@@ -195,6 +198,8 @@ public:
 	int8_t   edgecoeffs[12][3];	/**< Components (x,y,z) of the "normals" per edge */
 
 };
+
+/*  @} */
 
 #endif
 

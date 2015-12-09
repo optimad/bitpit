@@ -10,6 +10,7 @@
 
 #include "Class_Data_LB_Interface.hpp"
 
+/*!  \cond  EXAMPLE_CLASSES */
 template <class D>
 class User_Data_LB : public Class_Data_LB_Interface<User_Data_LB<D> >{
 public:
@@ -37,6 +38,7 @@ public:
 	User_Data_LB(Data& data_, Data& ghostdata_);
 	~User_Data_LB();
 };
+/*!  \endcond  */
 
 #include "User_Data_LB.tpp"
 

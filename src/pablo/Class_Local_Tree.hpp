@@ -28,6 +28,8 @@ using namespace std;
 /*!
  * Class_Local_Tree.hpp
  *
+ *  \ingroup    PABLO
+ *  @{
  *  \date		23/apr/2014
  *	\authors	Edoardo Lombardi
  *	\authors	Marco Cisternino
@@ -56,5 +58,7 @@ class Class_Local_Tree{};
 
 #include "Class_Local_Tree_3D.tpp"
 #include "Class_Local_Tree_2D.tpp"
+
+/*  @} */
 
 #endif /* CLASS_LOCAL_TREE_HPP_ */

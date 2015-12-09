@@ -7,8 +7,20 @@
 using namespace std;
 
 // =================================================================================== //
+/*!
+	\example bubbles3D.cpp
+
+	\brief 3D dynamic adaptive mesh refinement using PABLO 
+
+	This example creates a 2D Cartesian mesh on the square domain [-10,10]x[-10,10].
+	The domain is discretized with a cell size of 0.5 both in x and y directions.
+
+	<b>To run</b>: ./createCartesianMesh2D \n
+*/
 
 /**<Declaration of a class bubble with center and radius.*/
+
+/*!  \cond  EXAMPLE_CLASSES */
 class bubble{
 public:
 	double c[3];
@@ -16,6 +28,7 @@ public:
 
 
 };
+/*!  \endcond  */
 
 
 int main(int argc, char *argv[]) {

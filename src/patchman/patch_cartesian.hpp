@@ -4,7 +4,10 @@
 #ifndef __PATCHMAN_PATCH_CARTESIAN_HPP__
 #define __PATCHMAN_PATCH_CARTESIAN_HPP__
 
-/*! \file */
+/*! \ingroup    PatchMan
+ *  @{
+ *        
+*/
 
 #include "patch.hpp"
 
@@ -69,5 +72,7 @@ private:
 };
 
 }
+
+/*  @}  */
 
 #endif

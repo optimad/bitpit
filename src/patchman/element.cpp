@@ -10,9 +10,10 @@
 namespace pman {
 
 /*!
-	\class Element
-
-	\brief The Element class provides an interface for defining elements.
+    \ingroup    PatchMan 
+    @{
+	\class      Element
+	\brief      The Element class provides an interface for defining elements.
 
 	Element is the base class for defining elements like cells and
 	intefaces.
@@ -1090,3 +1091,5 @@ bool Element::add_id_to_ordered_list(const long &id, std::vector<long> &list)
 }
 
 }
+
+/*! @} */

@@ -10,6 +10,7 @@
 
 #include "Class_Data_Comm_Interface.hpp"
 
+/*!  \cond  EXAMPLE_CLASSES */
 template <class D>
 class User_Data_Comm : public Class_Data_Comm_Interface< User_Data_Comm<D> > {
 public:
@@ -31,6 +32,7 @@ public:
 	User_Data_Comm(Data & data_, Data & ghostData_);
 	~User_Data_Comm();
 };
+/*!  \endcond  */
 
 #include "User_Data_Comm.tpp"
 

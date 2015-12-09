@@ -6,6 +6,8 @@
 #include <stdint.h>
 
 /*!
+ *  \ingroup        PABLO
+ *  @{
  *	\date			23/apr/2014
  *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
@@ -32,4 +34,6 @@ extern const Class_Global<2> global2D;
 extern const Class_Global<3> global3D;
 
 
+/*  @} */
+ 
 #endif /* CLASS_GLOBAL_HPP_ */
