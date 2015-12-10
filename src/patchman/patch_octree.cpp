@@ -987,7 +987,7 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 		}
 
 		// Add cell
-		create_cell(octantInfo.id, octantInfo.internal, cellConnect, cellInterfaces, interfaceOwnerFlags);
+		create_cell(octantInfo, cellConnect, cellInterfaces, interfaceOwnerFlags);
 	}
 
 	// Done
@@ -1170,13 +1170,13 @@ long PatchOctree::create_interface(uint32_t treeId,
 
 	\param treeId is the id of the octant in the tree
 */
-long PatchOctree::create_cell(uint32_t treeId, bool interior,
+long PatchOctree::create_cell(OctantInfo octantInfo,
                               std::unique_ptr<long[]> &vertices,
                               std::vector<std::vector<long>> &interfaces,
                               std::vector<std::vector<bool>> &ownerFlags)
 {
 	// Create the cell
-	long id = Patch::create_cell(interior);
+	long id = Patch::create_cell(octantInfo.internal);
 	Cell &cell = m_cells[id];
 
 	// Tipo
@@ -1187,7 +1187,7 @@ long PatchOctree::create_cell(uint32_t treeId, bool interior,
 	}
 
 	// Interior flag
-	cell.set_interior(interior);
+	cell.set_interior(octantInfo.internal);
 
 	// Connectivity
 	cell.set_connect(std::move(vertices));
@@ -1212,11 +1212,11 @@ long PatchOctree::create_cell(uint32_t treeId, bool interior,
 
 	// Update cell to octant mapping
 	if (internal) {
-		m_cell_to_octant.insert({{id,treeId}});
-		m_octant_to_cell.insert({{treeId,id}});
+		m_cell_to_octant.insert({{id, octantInfo.id}});
+		m_octant_to_cell.insert({{octantInfo.id, id}});
 	} else {
-		m_cell_to_ghost.insert({{id,treeId}});
-		m_ghost_to_cell.insert({{treeId,id}});
+		m_cell_to_ghost.insert({{id, octantInfo.id}});
+		m_ghost_to_cell.insert({{octantInfo.id, id}});
 	}
 
 	// Done
