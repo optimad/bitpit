@@ -391,7 +391,7 @@ void ElementInfo::initializeQuadInfo()
 		face_type[k]       = LINE;
 		face_connect[k]    = std::vector<int>(lineInfo.nVertices);
 		face_connect[k][0] = k;
-		face_connect[k][1] = (k + 1) % lineInfo.nVertices;
+		face_connect[k][1] = (k + 1) % nVertices;
 	}
 }
 
