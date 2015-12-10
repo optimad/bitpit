@@ -109,7 +109,6 @@ void Patch::reset()
 	reset_vertices();
 	reset_cells();
 	reset_interfaces();
-	reset_interfaces();
 }
 
 /*!
