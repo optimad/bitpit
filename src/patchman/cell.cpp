@@ -52,7 +52,7 @@ void Cell::initialize(ElementInfo::Type type, int nInterfacesPerFace)
 	if (nInterfacesPerFace >= 0) {
 		const ElementInfo &elementInfo = get_info();
 		std::vector<int> interfaceCount(elementInfo.nFaces, nInterfacesPerFace);
-		m_interfaces = CollapsedVector2D<long>(interfaceCount, NULL_ELEMENT_ID);
+		initialize_empty_interfaces(interfaceCount);
 	}
 }
 
