@@ -22,6 +22,8 @@ public:
 	Cell(Cell&& other) = default;
 	Cell& operator=(Cell&& other) = default;
 
+	void initialize(ElementInfo::Type type, int nInterfacesPerFace = 0);
+
 	void set_interior(bool interior);
 	bool is_interior() const;
 	

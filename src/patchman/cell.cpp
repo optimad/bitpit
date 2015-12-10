@@ -37,6 +37,26 @@ Cell::Cell(const long &id, ElementInfo::Type type)
 }
 
 /*!
+	Initializes the data structures of the cell.
+
+	\param type is the type of the element
+	\param nInterfacesPerFace is the number of interfaces per face that
+	will be used to initialize the interface's data structure. If this
+	parameter is less or equal to zero, the interface's data structure
+	will not be initialized.
+*/
+void Cell::initialize(ElementInfo::Type type, int nInterfacesPerFace)
+{
+	Element::initialize(type);
+
+	if (nInterfacesPerFace >= 0) {
+		const ElementInfo &elementInfo = get_info();
+		std::vector<int> interfaceCount(elementInfo.nFaces, nInterfacesPerFace);
+		m_interfaces = CollapsedVector2D<long>(interfaceCount, NULL_ELEMENT_ID);
+	}
+}
+
+/*!
 	Sets if the cells belongs to the the interior domain.
 
 	\param interior defines if the cells belongs to the the interior domain
