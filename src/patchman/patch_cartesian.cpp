@@ -201,6 +201,9 @@ const std::vector<Adaption::Info> PatchCartesian::_update(bool trackAdaption)
 
 	std::cout << ">> Updating cartesian mesh\n";
 
+	// Reset the mesh
+	reset();
+
 	// Definition of the mesh
 	create_vertices();
 	create_cells();
@@ -244,9 +247,6 @@ const std::vector<Adaption::Info> PatchCartesian::_update(bool trackAdaption)
 void PatchCartesian::create_vertices()
 {
 	std::cout << "  >> Creating vertices\n";
-
-	// Reset
-	reset_vertices();
 
 	// Definition of the vertices
 	m_x = std::vector<double>(m_nVertices1D[Vertex::COORD_X]);
@@ -306,9 +306,6 @@ void PatchCartesian::create_vertices()
 void PatchCartesian::create_cells()
 {
 	std::cout << "  >> Creating cells\n";
-
-	// Reset
-	reset_cells();
 
 	// Info on the cells
 	ElementInfo::Type cellType;
@@ -377,9 +374,6 @@ void PatchCartesian::create_cells()
 void PatchCartesian::create_interfaces()
 {
 	std::cout << "  >> Creating interfaces\n";
-
-	// Reset
-	reset_interfaces();
 
 	// Count the interfaces
 	long nTotalInterfaces = 0;
