@@ -91,13 +91,11 @@ void Cell::initialize_interfaces(std::vector<std::vector<long>> &interfaces)
 	Initialize the data structure that holds the information about the
 	interfaces.
 
-	\param nInterfaces An array with the numbero of interfaces for each face
+	\param nInterfaces An array with the number of interfaces for each face
 */
-void Cell::initialize_empty_interfaces(const int nInterfaces[])
+void Cell::initialize_empty_interfaces(const std::vector<int> interfaceCount)
 {
-	for (int k = 0; k < get_face_count(); ++k) {
-		m_interfaces.push_back(nInterfaces[k], 0);
-	}
+	m_interfaces = CollapsedVector2D<long>(interfaceCount, NULL_ELEMENT_ID);
 }
 
 /*!

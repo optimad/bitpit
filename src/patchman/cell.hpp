@@ -28,7 +28,7 @@ public:
 	bool is_interior() const;
 	
 	void initialize_interfaces(std::vector<std::vector<long>> &interfaces);
-	void initialize_empty_interfaces(const int nInterfaces[]);
+	void initialize_empty_interfaces(const std::vector<int> interfaceCount);
 	void set_interface(const int &face, const int &index, const long &interface);
 	void push_interface(const int &face, const long &interface);
 	void delete_interface(const int &face, const int &i);
