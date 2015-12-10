@@ -44,7 +44,7 @@ public:
 		\param value is the value that will be use to initialize the
 		element of the sub-arrays
 	*/
-	CollapsedVector2D(std::vector<int> &subArraySizes, const T &value = T())
+	CollapsedVector2D(const std::vector<int> &subArraySizes, const T &value = T())
 	{
 		// Initialize the vector
 		clear();
