@@ -339,30 +339,23 @@ void PatchCartesian::create_cells()
 				Patch::create_cell(id_cell);
 				Cell &cell = m_cells[id_cell];
 
-				// Tipo
-				if (is_three_dimensional()) {
-					cell.set_type(ElementInfo::VOXEL);
-				} else {
-					cell.set_type(ElementInfo::PIXEL);
-				}
+				// Initialize the cell
+				cell.initialize(cellType, 1);
 
 				// Interior flag
 				cell.set_interior(true);
 
 				// Connettività
-				std::unique_ptr<long[]> connect = std::unique_ptr<long[]>(new long[nCellVertices]);
-				connect[0] = vertex_ijk_to_id(i,     j,     k);
-				connect[1] = vertex_ijk_to_id(i + 1, j,     k);
-				connect[2] = vertex_ijk_to_id(i,     j + 1, k);
-				connect[3] = vertex_ijk_to_id(i + 1, j + 1, k);
+				cell.set_vertex(0, vertex_ijk_to_id(i,     j,     k));
+				cell.set_vertex(1, vertex_ijk_to_id(i + 1, j,     k));
+				cell.set_vertex(2, vertex_ijk_to_id(i,     j + 1, k));
+				cell.set_vertex(3, vertex_ijk_to_id(i + 1, j + 1, k));
 				if (is_three_dimensional()) {
-					connect[4] = vertex_ijk_to_id(i,     j,     k + 1);
-					connect[5] = vertex_ijk_to_id(i + 1, j,     k + 1);
-					connect[6] = vertex_ijk_to_id(i,     j + 1, k + 1);
-					connect[7] = vertex_ijk_to_id(i + 1, j + 1, k + 1);
+					cell.set_vertex(4, vertex_ijk_to_id(i,     j,     k + 1));
+					cell.set_vertex(5, vertex_ijk_to_id(i + 1, j,     k + 1));
+					cell.set_vertex(6, vertex_ijk_to_id(i,     j + 1, k + 1));
+					cell.set_vertex(7, vertex_ijk_to_id(i + 1, j + 1, k + 1));
 				}
-
-				cell.set_connect(std::move(connect));
 			}
 		}
 	}
@@ -385,27 +378,9 @@ void PatchCartesian::create_interfaces()
 
 	std::cout << "    - Interface count: " << nTotalInterfaces << "\n";
 
+	// Create the interfaces
 	m_interfaces.reserve(nTotalInterfaces);
 
-	// Allocate the space for interface information on the cells
-	ElementInfo::Type cellType;
-	if (is_three_dimensional()) {
-		cellType = ElementInfo::VOXEL;
-	} else {
-		cellType = ElementInfo::PIXEL;
-	}
-
-	const ElementInfo &cellTypeInfo = ElementInfo::get_element_info(cellType);
-	const int &nCellFaces = cellTypeInfo.nFaces;
-
-	int nInterfacesForSide[nCellFaces];
-	std::fill_n(nInterfacesForSide, nCellFaces, 1);
-
-	for (auto &cell : m_cells) {
-		cell.initialize_empty_interfaces(nInterfacesForSide);
-	}
-
-	// Create the interfaces
 	create_interfaces_direction(Vertex::COORD_X);
 	create_interfaces_direction(Vertex::COORD_Y);
 	if (is_three_dimensional()) {
