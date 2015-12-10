@@ -28,7 +28,6 @@ public:
 	void set_coords(std::array<double, 3> &coords);
 	const std::array<double, 3> & get_coords() const;
 
-protected:
 	static const long NULL_VERTEX_ID;
 
 private:
