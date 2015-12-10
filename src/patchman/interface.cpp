@@ -65,47 +65,6 @@ Interface::Interface(const long &id, ElementInfo::Type type)
 
 }
 
-
-/*!
-	Sets the area of the interface.
-
-	\param area the area of the interface
-*/
-void Interface::set_area(const double &area)
-{
-	m_area = area;
-}
-
-/*!
-	Gets the area of the interface.
-
-	\result The area of the interface
-*/
-const double & Interface::get_area() const
-{
-	return m_area;
-}
-
-/*!
-	Sets the normal of the interface.
-
-	\param normal a pointer to the normal of the interface
-*/
-void Interface::set_normal(const std::array<double, 3> &normal)
-{
-	m_normal = normal;
-}
-
-/*!
-	Gets the normal of the interface.
-
-	\result A pointer to the normal of the interface
-*/
-const std::array<double, 3> & Interface::get_normal() const
-{
-	return m_normal;
-}
-
 /*!
 	Evaluates the rotation matrix from the Cartesian coordinate system
 	to the interface coordinate system.

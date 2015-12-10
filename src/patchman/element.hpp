@@ -135,9 +135,6 @@ public:
 	const long * get_connect() const;
 	long * get_connect();
 
-	void set_centroid(std::array<double, 3> &centroid);
-	const std::array<double, 3> & get_centroid() const;
-
 	int get_face_count() const;
 	ElementInfo::Type get_face_type(const int &face) const;
 	std::vector<int> get_face_local_connect(const int &face) const;

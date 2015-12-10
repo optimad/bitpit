@@ -25,9 +25,6 @@ public:
 	void set_interior(bool interior);
 	bool is_interior() const;
 	
-	void set_volume(const double &volume);
-	const double & get_volume() const;
-
 	void initialize_interfaces(std::vector<std::vector<long>> &interfaces);
 	void initialize_empty_interfaces(const int nInterfaces[]);
 	void set_interface(const int &face, const int &index, const long &interface);

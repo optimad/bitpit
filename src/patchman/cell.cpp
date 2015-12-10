@@ -58,26 +58,6 @@ bool Cell::is_interior() const
 }
 
 /*!
-	Sets the volume of the cell.
-
-	\param volume the volume of the cell
-*/
-void Cell::set_volume(const double &volume)
-{
-	m_volume = volume;
-}
-
-/*!
-	Gets the volume of the cell.
-
-	\return The volume of the cell
-*/
-const double & Cell::get_volume() const
-{
-    return m_volume;
-}  
-
-/*!
 	Initialize all the interfaces of the cell.
 
 	\param interfaces the list of all interfaces associated to the cell

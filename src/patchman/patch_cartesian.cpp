@@ -352,16 +352,6 @@ void PatchCartesian::create_cells()
 				// Interior flag
 				cell.set_interior(true);
 
-				// Volume
-				cell.set_volume(m_cell_volume);
-
-				// Centroide
-				if (is_three_dimensional()) {
-					centroid[Vertex::COORD_Z] = 0.5 * (m_z[k] + m_z[k+1]);
-				}
-
-				cell.set_centroid(centroid);
-
 				// Connettività
 				std::unique_ptr<long[]> connect = std::unique_ptr<long[]>(new long[nCellVertices]);
 				connect[0] = vertex_ijk_to_id(i,     j,     k);
@@ -525,9 +515,6 @@ void PatchCartesian::create_interfaces_direction(const Vertex::Coordinate &direc
 					interface.set_type(ElementInfo::LINE);
 				}
 
-				// Area
-				interface.set_area(*area);
-
 				// Owner
 				int ownerIJK[SPACE_MAX_DIM];
 				for (int n = 0; n < SPACE_MAX_DIM; n++) {
@@ -589,27 +576,6 @@ void PatchCartesian::create_interfaces_direction(const Vertex::Coordinate &direc
 				}
 
 				interface.set_connect(std::move(connect));
-
-				// Centroid
-				std::array<double, 3> centroid = {0.0, 0.0, 0.0};
-
-				for (int n = 0; n < nInterfaceVertices; n++) {
-					Vertex &vertex = m_vertices[interface.get_vertex(n)];
-					const std::array<double, 3> vertexCoords = vertex.get_coords();
-
-					for (unsigned int k = 0; k < centroid.size(); k++) {
-						centroid[k] += vertexCoords[k];
-					}
-				}
-
-				for (unsigned int k = 0; k < centroid.size(); k++) {
-					centroid[k] /= nInterfaceVertices;
-				}
-
-				interface.set_centroid(centroid);
-
-				// Normal
-				interface.set_normal(m_normals[ownerFace]);
 			}
 		}
 	}

@@ -24,17 +24,11 @@ public:
 
 	bool is_border() const;
 
-	void set_normal(const std::array<double, 3> &normal);
-	const std::array<double, 3> & get_normal() const;
-
 	std::array<std::array<double, 3>, 3> eval_rotation_from_cartesian();
 	static std::array<std::array<double, 3>, 3> eval_rotation_from_cartesian(std::array<double, 3> &versor);
 	std::array<std::array<double, 3>, 3> eval_rotation_to_cartesian();
 	static std::array<std::array<double, 3>, 3> eval_rotation_to_cartesian(std::array<double, 3> &versor);
 	static std::array<std::array<double, 3>, 3> eval_rotation_transpose(const std::array<std::array<double, 3>, 3> &R);
-
-	void set_area(const double &area);
-	const double & get_area() const;
 
 	void set_owner(const long &owner, const int &onwerFace);
 	void unset_owner();

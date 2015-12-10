@@ -1147,44 +1147,12 @@ long PatchOctree::create_interface(uint32_t treeId,
 	long id = Patch::create_interface();
 	Interface &interface = m_interfaces[id];
 
-	// Info associate al tree
-	int level;
-	int ownerFace;
-	vector<double> faceCenter;
-	if (is_three_dimensional()) {
-		Class_Intersection<3> *treeInterface = m_tree_3D.getIntersection(treeId);
-
-		level      = m_tree_3D.getLevel(treeInterface);
-		ownerFace  = m_tree_3D.getFace(treeInterface);
-		faceCenter = m_tree_3D.getCenter(treeInterface);
-	} else {
-		Class_Intersection<2> *treeInterface = m_tree_2D.getIntersection(treeId);
-
-		level      = m_tree_2D.getLevel(treeInterface);
-		ownerFace  = m_tree_2D.getFace(treeInterface);
-		faceCenter = m_tree_2D.getCenter(treeInterface);
-	}
-
 	// Tipo
 	if (is_three_dimensional()) {
 		interface.set_type(ElementInfo::PIXEL);
 	} else {
 		interface.set_type(ElementInfo::LINE);
 	}
-
-	// Area
-	interface.set_area(m_tree_area[level]);
-
-	// Normal
-	interface.set_normal(m_normals[ownerFace]);
-
-	// Centroid
-	std::array<double, 3> centroid;
-	for (unsigned int k = 0; k < centroid.size(); k++) {
-		centroid[k] = faceCenter[k];
-	}
-
-	interface.set_centroid(centroid);
 
 	// Connectivity
 	interface.set_connect(std::move(vertices));
@@ -1213,7 +1181,6 @@ long PatchOctree::create_cell(uint32_t treeId, bool interior,
 
 	// Octant info
 	int octantLevel;
-	vector<double> octantCentroid;
 	if (is_three_dimensional()) {
 		Class_Octant<3> *octant;
 		if (interior) {
@@ -1222,7 +1189,6 @@ long PatchOctree::create_cell(uint32_t treeId, bool interior,
 			octant = m_tree_3D.getGhostOctant(treeId);
 		}
 		octantLevel    = m_tree_3D.getLevel(octant);
-		octantCentroid = m_tree_3D.getCenter(octant);
 	} else {
 		Class_Octant<2> *octant;
 		if (interior) {
@@ -1231,7 +1197,6 @@ long PatchOctree::create_cell(uint32_t treeId, bool interior,
 			octant = m_tree_2D.getGhostOctant(treeId);
 		}
 		octantLevel    = m_tree_2D.getLevel(octant);
-		octantCentroid = m_tree_2D.getCenter(octant);
 	}
 
 	// Tipo
@@ -1243,17 +1208,6 @@ long PatchOctree::create_cell(uint32_t treeId, bool interior,
 
 	// Interior flag
 	cell.set_interior(interior);
-
-	// Volume
-	cell.set_volume(m_tree_volume[octantLevel]);
-
-	// Centroid
-	std::array<double, 3> centroid;
-	for (unsigned int k = 0; k < centroid.size(); k++) {
-		centroid[k] = octantCentroid[k];
-	}
-
-	cell.set_centroid(centroid);
 
 	// Connectivity
 	cell.set_connect(std::move(vertices));
