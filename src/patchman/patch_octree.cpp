@@ -1179,26 +1179,6 @@ long PatchOctree::create_cell(uint32_t treeId, bool interior,
 	long id = Patch::create_cell(interior);
 	Cell &cell = m_cells[id];
 
-	// Octant info
-	int octantLevel;
-	if (is_three_dimensional()) {
-		Class_Octant<3> *octant;
-		if (interior) {
-			octant = m_tree_3D.getOctant(treeId);
-		} else {
-			octant = m_tree_3D.getGhostOctant(treeId);
-		}
-		octantLevel    = m_tree_3D.getLevel(octant);
-	} else {
-		Class_Octant<2> *octant;
-		if (interior) {
-			octant = m_tree_2D.getOctant(treeId);
-		} else {
-			octant = m_tree_2D.getGhostOctant(treeId);
-		}
-		octantLevel    = m_tree_2D.getLevel(octant);
-	}
-
 	// Tipo
 	if (is_three_dimensional()) {
 		cell.set_type(ElementInfo::VOXEL);
