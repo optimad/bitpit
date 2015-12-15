@@ -870,7 +870,7 @@ public:
 		Gets an element from a the first position marked as empty and
 		assignes to it the specified id. Except for setting the id,
 		the element is not modified. Therefore it will still contain
-		the data of the element that was previously occuping the
+		the data of the element that was previously occupying the
 		position or it will be empty if there was no empty position
 		and a new element has been created.
 
@@ -886,7 +886,7 @@ public:
 		past the last element assignes to it the specified id.
 		Except for setting the id, the element is not modified.
 		Therefore it will still contain the data of the element
-		that was previously occuping the position or it will be
+		that was previously occupying the position or it will be
 		empty if there was no empty position and a new element
 		has been created.
 
@@ -942,7 +942,7 @@ public:
 		// Position
 		size_t pos = m_pos.at(id);
 
-		// Id of the element that is currently occuping the position
+		// Id of the element that is currently occupying the position
 		id_type id_prev = m_v[pos].get_id();
 
 		// Replace the element
@@ -973,7 +973,7 @@ public:
 		// Position
 		size_t pos = m_pos.at(id);
 
-		// Id of the element that is currently occuping the position
+		// Id of the element that is currently occupying the position
 		id_type id_prev = m_v[pos].get_id();
 
 		// Replace the element
@@ -1461,7 +1461,7 @@ private:
 		Gets an element from a position marked as empty and assignes
 		to it the specified id. Except for setting the id, the element
 		is not modified. Therefore it will still contain
-		the data of the element that was previously occuping the
+		the data of the element that was previously occupying the
 		position or it will be empty if there was no empty position
 		and a new element has been created.
 
