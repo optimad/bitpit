@@ -716,6 +716,7 @@ public:
 
 		\param value is the value to be copied (or moved) to the
 		            inserted elements.
+		\result An iterator that points to the newly inserted element.
 	*/
 	iterator insert(value_type &&value)
 	{
