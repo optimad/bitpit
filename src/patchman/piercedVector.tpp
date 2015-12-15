@@ -867,6 +867,37 @@ public:
 	}
 
 	/*!
+		Gets an element from a the first position marked as empty and
+		assignes to it the specified id. Except for setting the id,
+		the element is not modified. Therefore it will still contain
+		the data of the element that was previously occuping the
+		position or it will be empty if there was no empty position
+		and a new element has been created.
+
+		\param id is the id that will be assigned to the element
+	*/
+	iterator reclaim(const id_type &id)
+	{
+		return _reclaim(FILL_FIRST, id);
+	}
+
+	/*!
+		Gets an element from the first position marked as empty
+		past the last element assignes to it the specified id.
+		Except for setting the id, the element is not modified.
+		Therefore it will still contain the data of the element
+		that was previously occuping the position or it will be
+		empty if there was no empty position and a new element
+		has been created.
+
+		\param id is the id that will be assigned to the element
+	*/
+	iterator reclaim_back(const id_type &id)
+	{
+		return _reclaim(FILL_APPEND, id);
+	}
+
+	/*!
 		Gets the flat index of the element with the specified id.
 
 		A flat id is the id associated to a numbering scheme that starts
@@ -1415,6 +1446,37 @@ private:
 
 		// Insert the element
 		m_v[pos] = std::move(value);
+
+		// Add the id to the map
+		link_id(m_v[pos].get_id(), pos);
+
+		// Return the iterator that points to the element
+		iterator itr;
+		itr = raw_begin() + pos;
+
+		return itr;
+	}
+
+	/*!
+		Gets an element from a position marked as empty and assignes
+		to it the specified id. Except for setting the id, the element
+		is not modified. Therefore it will still contain
+		the data of the element that was previously occuping the
+		position or it will be empty if there was no empty position
+		and a new element has been created.
+
+		\param fillType is the fill-pattern that will be used to
+		identify the position
+		\param id is the id that will be assigned to the element
+		\result An iterator that points to the the reclaimed element.
+	*/
+	iterator _reclaim(FillType fillType, const id_type &id)
+	{
+		// Position of the element
+		size_type pos = fill_pos(fillType);
+
+		// Set the id of the element
+		m_v[pos].set_id(id);
 
 		// Add the id to the map
 		link_id(m_v[pos].get_id(), pos);
