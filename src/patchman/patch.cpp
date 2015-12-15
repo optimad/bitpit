@@ -979,7 +979,10 @@ const Interface & Patch::get_interface(const long &id) const
 */
 long Patch::create_interface(const long &id, ElementInfo::Type type)
 {
-	m_interfaces.emplace(id, type);
+	PiercedVector<Interface>::iterator iterator = m_interfaces.reclaim(id);
+
+	Interface &interface = *iterator;
+	interface.initialize(type);
 
 	return id;
 }
