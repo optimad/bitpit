@@ -695,7 +695,7 @@ public:
 	std::vector<id_type> get_ids(bool ordered = true)
 	{
 		std::vector<id_type> ids;
-		ids.reserve(m_pos.size());
+		ids.reserve(size());
 
 		if (ordered) {
 			for(auto item : m_pos) {
@@ -1097,7 +1097,7 @@ public:
 
 		// Reset first and last counters
 		m_first_pos = 0;
-		m_last_pos  = m_pos.size() - 1;
+		m_last_pos  = size() - 1;
 
 		// There are no more holes
 		m_holes.clear();
@@ -1147,7 +1147,7 @@ public:
 
 			// Reset first and last counters
 			m_first_pos = 0;
-			m_last_pos  = m_pos.size() - 1;
+			m_last_pos  = size() - 1;
 
 			// There are no more holes
 			std::deque<size_type>().swap(m_holes);
