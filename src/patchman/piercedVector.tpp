@@ -772,10 +772,11 @@ public:
 
 		\param value the value to be copied (or moved) to the new
 		             element
+		\result An iterator that points to the newly inserted element.
 	*/
-	void push_back(value_type &&value)
+	iterator push_back(value_type &&value)
 	{
-		_insert(FILL_APPEND, std::move(value));
+		return _insert(FILL_APPEND, std::move(value));
 	}
 
 	/*!
