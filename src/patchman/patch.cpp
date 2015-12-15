@@ -578,11 +578,15 @@ const Cell & Patch::get_cell(const long &id) const
 */
 long Patch::create_cell(const long &id, bool internal, ElementInfo::Type type)
 {
+	PiercedVector<Cell>::iterator iterator;
 	if (internal) {
-		m_cells.emplace(id, type);
+		iterator = m_cells.reclaim(id);
 	} else {
-		m_cells.emplace_back(id, type);
+		iterator = m_cells.reclaim_back(id);
 	}
+
+	Cell &cell = *iterator;
+	cell.initialize(type);
 
 	return id;
 }
