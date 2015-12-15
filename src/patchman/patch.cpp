@@ -485,7 +485,7 @@ const Vertex & Patch::get_vertex(const long &id) const
 */
 long Patch::create_vertex(const long &id)
 {
-	m_vertices.emplace(id);
+	m_vertices.reclaim(id);
 
 	return id;
 }
