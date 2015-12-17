@@ -49,7 +49,7 @@ void Cell::initialize(ElementInfo::Type type, int nInterfacesPerFace)
 {
 	Element::initialize(type);
 
-	if (nInterfacesPerFace >= 0) {
+	if (type != ElementInfo::UNDEFINED && nInterfacesPerFace >= 1) {
 		const ElementInfo &elementInfo = get_info();
 		std::vector<int> interfaceCount(elementInfo.nFaces, nInterfacesPerFace);
 		initialize_empty_interfaces(interfaceCount);
