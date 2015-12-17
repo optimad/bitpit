@@ -22,6 +22,9 @@ public:
 	Vertex();
 	Vertex(const long &id);
 
+	Vertex(Vertex &&other) = default;
+	Vertex& operator=(Vertex &&other) = default;
+
 	double & operator[](int coord_id);
 	const double & operator[](int coord_id) const;
 
