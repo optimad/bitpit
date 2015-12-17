@@ -131,6 +131,14 @@ public:
 	}
 
 	/*!
+		Move assignment operator
+
+		The move assignment operator "steals" the resources held by the
+		argument.
+	*/
+	CollapsedVector2D & operator= (CollapsedVector2D &&other) = default;
+
+	/*!
 		Requests a change in capacity
 
 		Requests that the collpased-vector capacity be at least enough
