@@ -35,6 +35,18 @@ Vertex::Vertex(const long &id)
 }
 
 /*!
+	Create vertex from input coordinates
+
+	\param[in] id is the id of the vertex
+	\param[in] coords are the vertex coordinates
+*/
+Vertex::Vertex(const long &id, std::array<double, 3> &coords)
+{
+	set_id(id);
+	set_coords(coords);
+}
+
+/*!
 	Get a reference to the specified coordinate
 
 	\param coord_id is the index of the requested coordinate

@@ -21,6 +21,7 @@ public:
 
 	Vertex();
 	Vertex(const long &id);
+	Vertex(const long &id, std::array<double, 3> &coords);
 
 	Vertex(Vertex &&other) = default;
 	Vertex& operator=(Vertex &&other) = default;
