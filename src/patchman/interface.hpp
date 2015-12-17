@@ -45,7 +45,6 @@ public:
 protected:
 
 private:
-	double m_area;
 	std::array<double, 3> m_normal;
 
 	long m_owner;
