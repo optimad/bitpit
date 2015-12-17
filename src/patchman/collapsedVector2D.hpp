@@ -115,15 +115,16 @@ public:
 	}
 
 	/*!
-		Assigns content
+		Copy assignment operator
 
 		Assigns new contents to the container, replacing its current
 		contents, and modifying its size accordingly.
 	*/
-	CollapsedVector2D & operator= (CollapsedVector2D other)
+	CollapsedVector2D & operator= (const CollapsedVector2D &other)
 	{
 		if (this != &other) {
-			other.swap(*this);
+			CollapsedVector2D temporary(other);
+			temporary.swap(*this);
 		}
 
 		return *this;
