@@ -22,6 +22,9 @@ public:
 	Vertex();
 	Vertex(const long &id);
 
+	double & operator[](int coord_id);
+	const double & operator[](int coord_id) const;
+
 	void set_id(const long &id);
 	long get_id() const;
 

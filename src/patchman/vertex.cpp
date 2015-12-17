@@ -35,6 +35,28 @@ Vertex::Vertex(const long &id)
 }
 
 /*!
+	Get a reference to the specified coordinate
+
+	\param coord_id is the index of the requested coordinate
+	\result Returns a reference to requested coordinate
+*/
+double & Vertex::operator[](int coord_id)
+{
+	return m_coords[coord_id];
+}
+
+/*!
+	Get a constants reference to the specified coordinate
+
+	\param coord_id is the index of the requested coordinate
+	\result Returns a constant reference to requested coordinate
+*/
+const double & Vertex::operator[](int coord_id) const
+{
+	return m_coords[coord_id];
+}
+
+/*!
 	Sets the ID of the vertex.
 
 	\param id the ID of the vertex
