@@ -8,9 +8,19 @@
 
 #include <memory>
 
+#include "binary_stream.hpp"
+
 namespace pman {
 
+class Vertex;
+
+obinarystream& operator<<(obinarystream &out, const Vertex &vertex);
+ibinarystream& operator>>(ibinarystream &in, Vertex &vertex);
+
 class Vertex {
+
+friend obinarystream& operator<<(obinarystream&, const Vertex &);
+friend ibinarystream& operator>>(ibinarystream&, Vertex &);
 
 public:
 	enum Coordinate {

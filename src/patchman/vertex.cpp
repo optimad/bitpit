@@ -108,4 +108,38 @@ const std::array<double, 3> & Vertex::get_coords() const
 	return m_coords;
 }
 
+/*!
+	Output stream operator for class Vertex. Stream vertex coordinates from
+	object to communication buffer.
+
+	\param[in] out_stream is the output memory stream
+	\param[in] vertex is the vertex to be streamed
+	\result updated output stream
+*/
+obinarystream& operator<<(obinarystream &out_stream, const Vertex &vertex)
+{
+	out_stream << vertex[0]
+		     << vertex[1]
+		     << vertex[2];
+
+	return out_stream;
+}
+
+/*!
+	Input stream operator fro class Vertex. Stream vertex coordinates from
+	communication buffer to object
+
+	\param[in] in_stream is the input memory stream
+	\param[in] vertex is the vertex to be streamed
+	\result updated output stream
+*/
+ibinarystream& operator>>(ibinarystream &in_stream, Vertex &vertex)
+{
+	in_stream >> vertex[0];
+	in_stream >> vertex[1];
+	in_stream >> vertex[2];
+
+	return in_stream;
+}
+
 }
