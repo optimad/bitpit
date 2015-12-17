@@ -45,8 +45,6 @@ public:
 protected:
 
 private:
-	std::array<double, 3> m_normal;
-
 	long m_owner;
 	int m_ownerFace;
 
