@@ -44,8 +44,6 @@ protected:
 private:
 	bool m_interior;
 
-	double m_volume;
-
 	CollapsedVector2D<long> m_interfaces;
 
 	Cell(const Cell &other) = delete;
