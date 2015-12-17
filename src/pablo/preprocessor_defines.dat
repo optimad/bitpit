@@ -1,16 +1,16 @@
 #ifndef MAX_LEVEL_INPUT_2D
-#define MAX_LEVEL_INPUT_2D 32
+#define MAX_LEVEL_INPUT_2D 20
 #endif
 
 #ifndef MAX_LEVEL_INPUT_3D
-#define MAX_LEVEL_INPUT_3D 21
+#define MAX_LEVEL_INPUT_3D 20
 #endif
 
 //Please, do not edit below this point
 
 #ifndef MAX_LEVEL_2D
-#if MAX_LEVEL_INPUT_2D > 30
-#define MAX_LEVEL_2D 30
+#if MAX_LEVEL_INPUT_2D > 20
+#define MAX_LEVEL_2D 20
 #else
 #define MAX_LEVEL_2D MAX_LEVEL_INPUT_2D
 #endif

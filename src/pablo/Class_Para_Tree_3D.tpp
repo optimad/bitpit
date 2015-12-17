@@ -83,6 +83,16 @@ public:
 	MPI_Comm comm;								/**<MPI communicator*/
 #endif
 
+	//static members
+	static uint8_t nnodes;
+	static uint8_t nfaces;
+	static uint8_t nedges;
+	static uint8_t nchildren;
+	static int8_t  normals[6][3];
+	static uint8_t  edgeface[12][2];
+	static uint8_t  nodeface[8][3];
+
+
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
 public:
@@ -96,6 +106,7 @@ public:
 #else
 	Class_Para_Tree(string logfile="PABLO.log") : log(logfile){
 #endif
+//		setStatic();
 		serial = true;
 		error_flag = 0;
 		max_depth = 0;
@@ -148,6 +159,7 @@ public:
 #else
 	Class_Para_Tree(double X, double Y, double Z, double L, string logfile="PABLO.log"):trans(X,Y,Z,L),log(logfile){
 #endif
+//		setStatic();
 		serial = true;
 		error_flag = 0;
 		max_depth = 0;
@@ -209,6 +221,7 @@ public:
 		uint8_t lev, iface;
 		uint32_t x0, y0, z0;
 		uint32_t NumOctants = XYZ.size();
+//		setStatic();
 		octree.octants.resize(NumOctants);
 		for (uint32_t i=0; i<NumOctants; i++){
 			lev = uint8_t(levels[i]);
@@ -309,6 +322,7 @@ public:
 		uint8_t lev, iface;
 		uint32_t x0, y0, z0;
 		uint32_t NumOctants = XYZ.size();
+//		setStatic();
 		octree.octants.resize(NumOctants);
 		for (uint32_t i=0; i<NumOctants; i++){
 			lev = uint8_t(levels[i]);
@@ -1294,8 +1308,8 @@ public:
 	};
 
 	/*! Set the codimension for 2:1 balancing
-	 * \param[in] Maximum codimension of the entity through which the 2:1 balance is performed (1 = 2:1 balance through edges (default);
-	 * 				2 = 2:1 balance through nodes and edges;
+	 * \param[in] Maximum codimension of the entity through which the 2:1 balance is performed (1 = 2:1 balance through faces (default);
+	 * 				2 = 2:1 balance through edges and faces;
 	 * 				3 = 2:1 balance through nodes, edges and faces)
 	 */
 	void setBalanceCodimension(uint8_t b21codim){
@@ -1320,6 +1334,82 @@ public:
 	};
 
 private:
+//	void setStatic(){
+//		nnodes = 8;
+//		nfaces = 6;
+//		nedges = 12;
+//		nchildren = 8;
+//
+//		normals[0][0] = -1;
+//		normals[0][1] =  0;
+//		normals[0][2] =  0;
+//		normals[1][0] =  1;
+//		normals[1][1] =  0;
+//		normals[1][2] =  0;
+//		normals[2][0] =  0;
+//		normals[2][1] = -1;
+//		normals[2][2] =  0;
+//		normals[3][0] =  0;
+//		normals[3][1] =  1;
+//		normals[3][2] =  0;
+//		normals[4][0] =  0;
+//		normals[4][1] =  0;
+//		normals[4][2] = -1;
+//		normals[5][0] =  0;
+//		normals[5][1] =  0;
+//		normals[5][2] =  1;
+//
+//		edgeface[0][0] = 0;
+//		edgeface[0][1] = 4;
+//		edgeface[1][0] = 1;
+//		edgeface[1][1] = 4;
+//		edgeface[2][0] = 2;
+//		edgeface[2][1] = 4;
+//		edgeface[3][0] = 3;
+//		edgeface[3][1] = 4;
+//		edgeface[4][0] = 0;
+//		edgeface[4][1] = 2;
+//		edgeface[5][0] = 1;
+//		edgeface[5][1] = 2;
+//		edgeface[6][0] = 0;
+//		edgeface[6][1] = 3;
+//		edgeface[7][0] = 1;
+//		edgeface[7][1] = 3;
+//		edgeface[8][0] = 0;
+//		edgeface[8][1] = 5;
+//		edgeface[9][0] = 1;
+//		edgeface[9][1] = 5;
+//		edgeface[10][0] = 2;
+//		edgeface[10][1] = 5;
+//		edgeface[11][0] = 3;
+//		edgeface[11][1] = 5;
+//
+//		nodeface[0][0] = 0;
+//		nodeface[0][1] = 2;
+//		nodeface[0][2] = 4;
+//		nodeface[1][0] = 1;
+//		nodeface[1][1] = 2;
+//		nodeface[1][2] = 4;
+//		nodeface[2][0] = 0;
+//		nodeface[2][1] = 3;
+//		nodeface[2][2] = 4;
+//		nodeface[3][0] = 1;
+//		nodeface[3][1] = 3;
+//		nodeface[3][2] = 4;
+//		nodeface[4][0] = 0;
+//		nodeface[4][1] = 2;
+//		nodeface[4][2] = 5;
+//		nodeface[5][0] = 1;
+//		nodeface[5][1] = 2;
+//		nodeface[5][2] = 5;
+//		nodeface[6][0] = 0;
+//		nodeface[6][1] = 3;
+//		nodeface[6][2] = 5;
+//		nodeface[7][0] = 1;
+//		nodeface[7][1] = 3;
+//		nodeface[7][2] = 5;
+//
+//	}
 
 	void setFirstDesc(){
 		octree.setFirstDesc();

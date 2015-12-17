@@ -2857,7 +2857,7 @@ private:
 					if (balance_codim>1){
 						//Balance through edges
 						for (iedge=0; iedge<global3D.nedges; iedge++){
-							if(it->getPbound(global3D.nodeface[iedge][0]) == true || it->getPbound(global3D.nodeface[iedge][1]) == true){
+							if(it->getPbound(global3D.edgeface[iedge][0]) == true || it->getPbound(global3D.edgeface[iedge][1]) == true){
 								neigh.clear();
 								findGhostEdgeNeighbours(idx, iedge, neigh);
 								sizeneigh = neigh.size();
@@ -3029,7 +3029,7 @@ private:
 					if (balance_codim>1){
 						//Balance through edges
 						for (iedge=0; iedge<global3D.nedges; iedge++){
-							if(it->getPbound(global3D.nodeface[iedge][0]) == true || it->getPbound(global3D.nodeface[iedge][1]) == true){
+							if(it->getPbound(global3D.edgeface[iedge][0]) == true || it->getPbound(global3D.edgeface[iedge][1]) == true){
 								neigh.clear();
 								findGhostEdgeNeighbours(idx, iedge, neigh);
 								sizeneigh = neigh.size();
@@ -3345,7 +3345,7 @@ private:
 					if (balance_codim>1){
 						//Balance through edges
 						for (iedge=0; iedge<global3D.nedges; iedge++){
-							if(it->getPbound(global3D.nodeface[iedge][0]) == true || it->getPbound(global3D.nodeface[iedge][1]) == true){
+							if(it->getPbound(global3D.edgeface[iedge][0]) == true || it->getPbound(global3D.edgeface[iedge][1]) == true){
 								neigh.clear();
 								findGhostEdgeNeighbours(idx, iedge, neigh);
 								sizeneigh = neigh.size();
@@ -3517,7 +3517,7 @@ private:
 					if (balance_codim>1){
 						//Balance through edges
 						for (iedge=0; iedge<global3D.nedges; iedge++){
-							if(it->getPbound(global3D.nodeface[iedge][0]) == true || it->getPbound(global3D.nodeface[iedge][1]) == true){
+							if(it->getPbound(global3D.edgeface[iedge][0]) == true || it->getPbound(global3D.edgeface[iedge][1]) == true){
 								neigh.clear();
 								findGhostEdgeNeighbours(idx, iedge, neigh);
 								sizeneigh = neigh.size();

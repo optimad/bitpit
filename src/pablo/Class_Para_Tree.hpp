@@ -8,8 +8,10 @@
 #include <mpi.h>
 #endif
 #include "preprocessor_defines.dat"
+#include "classGlobal.hpp"
 #include "Class_Octant.hpp"
 #include "Class_Local_Tree.hpp"
+#include "classLocalTree.hpp"
 #include "Class_Comm_Buffer.hpp"
 #include "Class_Map.hpp"
 #include "Class_Array.hpp"

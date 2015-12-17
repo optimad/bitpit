@@ -6,11 +6,13 @@ option(BUILD_EXAMPLES "Create and install the examples" OFF)
 
 if(BUILD_EXAMPLES)
     include_directories("${PROJECT_SOURCE_DIR}/src/common")
-    include_directories("${PROJECT_SOURCE_DIR}/src/ucartmesh")
-    include_directories("${PROJECT_SOURCE_DIR}/src/surftri")
-    include_directories("${PROJECT_SOURCE_DIR}/src/voltri")
     include_directories("${PROJECT_SOURCE_DIR}/src/pablo")
-    include_directories("${PROJECT_SOURCE_DIR}/src/patchman")
+    if (NOT ONLY_PABLO)
+        include_directories("${PROJECT_SOURCE_DIR}/src/ucartmesh")
+        include_directories("${PROJECT_SOURCE_DIR}/src/surftri")
+        include_directories("${PROJECT_SOURCE_DIR}/src/voltri")
+        include_directories("${PROJECT_SOURCE_DIR}/src/patchman")
+    endif()
 
 	# List of examples
 	set(EXAMPLE_LIST "")
@@ -29,9 +31,10 @@ if(BUILD_EXAMPLES)
 	list(APPEND EXAMPLE_LIST "bubbles")
 	list(APPEND EXAMPLE_LIST "bubbles3D")
 
-    list(APPEND EXAMPLE_LIST "createCartesianMesh2D")
-    list(APPEND EXAMPLE_LIST "manipulatePiercedVector")
-
+      if (NOT ONLY_PABLO)
+          list(APPEND EXAMPLE_LIST "createCartesianMesh2D")
+          list(APPEND EXAMPLE_LIST "manipulatePiercedVector")
+      endif()
 
 	#Rules to build the examples
 	foreach(EXAMPLE_NAME IN LISTS EXAMPLE_LIST)

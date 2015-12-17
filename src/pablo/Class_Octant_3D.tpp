@@ -195,7 +195,7 @@ public:
 	/*! Get if the octant has to be balanced.
 	 * \return true if the octant has to be balanced.
 	 */
-	bool		getBalance() const{return (!info[10]);};
+	bool		getBalance() const{return (!info[14]);};
 
 	/*! Set the refinement marker of an octant.
 	 * \param[in] marker Refinement marker of octant (n=n refinement in adapt, -n=n coarsening in adapt, default=0).

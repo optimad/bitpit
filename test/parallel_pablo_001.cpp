@@ -21,7 +21,6 @@ void test12() {
     /**<Refine globally two level and write the para_tree.*/
     for (int iter=1; iter<3; iter++){
         pablo12.adaptGlobalRefine();
-
         pablo12.updateConnectivity();
         pablo12.write("Pablo12_iter"+to_string(static_cast<unsigned long long>(iter)));
     }

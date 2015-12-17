@@ -55,7 +55,8 @@ int main(int argc, char *argv[]) {
 		/**<Assign a data to the ghost octants (PARALLEL TEST) with at least one node inside the circle.*/
 		for (int i=0; i<nghosts; i++){
 			/**<Compute the nodes of the octant (Use pointer for ghost).*/
-			Class_Octant<2> *oct = pablo14.getGhostOctant(i);
+//			Class_Octant<2> *oct = pablo14.getGhostOctant(i);
+			classOctant *oct = pablo14.getGhostOctant(i);
 			vector<vector<double> > nodes = pablo14.getNodes(oct);
 			for (int j=0; j<global2D.nnodes; j++){
 				double x = nodes[j][0];

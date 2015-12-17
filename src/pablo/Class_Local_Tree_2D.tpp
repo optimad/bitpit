@@ -39,12 +39,13 @@ class Class_Local_Tree<2>{
 	// ------------------------------------------------------------------------------- //
 	// TYPEDEFS ----------------------------------------------------------------------- //
 
-	typedef vector<Class_Octant<2> > 		OctantsType;
+	//typedef vector<Class_Octant<2> > 		OctantsType;
+	typedef vector<classOctant > 			OctantsType;
 	typedef vector<Class_Intersection<2> > 	IntersectionsType;
-	typedef vector<uint32_t>				u32vector;
+//	typedef vector<uint32_t>				u32vector;
 	typedef vector<uint64_t>				u64vector;
-	typedef vector<vector<uint32_t>	>		u32vector2D;
-	typedef vector<vector<uint64_t>	>		u64vector2D;
+//	typedef vector<vector<uint32_t>	>		u32vector2D;
+//	typedef vector<vector<uint64_t>	>		u64vector2D;
 
 
 	// ------------------------------------------------------------------------------- //
@@ -55,8 +56,10 @@ private:
 	OctantsType					ghosts;				/**< Local vector of ghost octants ordered with Morton Number */
 	IntersectionsType			intersections;		/**< Local vector of intersections */
 	u64vector 					globalidx_ghosts;	/**< Global index of the ghost octants (size = size_ghosts) */
-	Class_Octant<2> 			first_desc;			/**< First (Morton order) most refined octant possible in local partition */
-	Class_Octant<2> 			last_desc;			/**< Last (Morton order) most refined octant possible in local partition */
+	//Class_Octant<2> 			first_desc;			/**< First (Morton order) most refined octant possible in local partition */
+	//Class_Octant<2> 			last_desc;			/**< Last (Morton order) most refined octant possible in local partition */
+	classOctant	 				first_desc;			/**< First (Morton order) most refined octant possible in local partition */
+	classOctant 				last_desc;			/**< Last (Morton order) most refined octant possible in local partition */
 	uint32_t 					size_ghosts;		/**< Size of vector of ghost octants */
 	uint8_t						local_max_depth;	/**< Reached max depth in local tree */
 	uint8_t 					balance_codim;		/**<Maximum codimension of the entity for 2:1 balancing (1 = 2:1 balance through edges (default);
@@ -76,9 +79,12 @@ private:
 
 public:
 	Class_Local_Tree(){
-		Class_Octant<2> oct0;
-		Class_Octant<2> octf(MAX_LEVEL_2D,0,0);
-		Class_Octant<2> octl(MAX_LEVEL_2D,global2D.max_length-1,global2D.max_length-1);
+//		Class_Octant<2> oct0;
+//		Class_Octant<2> octf(MAX_LEVEL_2D,0,0);
+//		Class_Octant<2> octl(MAX_LEVEL_2D,global2D.max_length-1,global2D.max_length-1);
+		classOctant oct0(2);
+		classOctant octf(2,MAX_LEVEL_2D,0,0);
+		classOctant octl(2,MAX_LEVEL_2D,global2D.max_length-1,global2D.max_length-1);
 		octants.resize(1);
 		octants[0] = oct0;
 		first_desc = octf;
@@ -97,10 +103,12 @@ public:
 
 private:
 	//public:
-	const Class_Octant<2> &  getFirstDesc() const{
+//	const Class_Octant<2> &  getFirstDesc() const{
+	const classOctant&  getFirstDesc() const{
 		return first_desc;
 	};
-	const Class_Octant<2> &  getLastDesc() const{
+//	const Class_Octant<2> &  getLastDesc() const{
+	const classOctant&  getLastDesc() const{
 		return last_desc;
 	};
 	uint32_t getSizeGhost() const{
@@ -148,7 +156,8 @@ private:
 
 	 void setFirstDesc(){
 		OctantsType::const_iterator firstOctant = octants.begin();
-		first_desc = Class_Octant<2>(MAX_LEVEL_2D,firstOctant->x,firstOctant->y);
+		//first_desc = Class_Octant<2>(MAX_LEVEL_2D,firstOctant->x,firstOctant->y);
+		first_desc = classOctant(2,CG::MAX_LEVEL,firstOctant->x,firstOctant->y);
 	};
 	void setLastDesc(){
 		OctantsType::const_iterator lastOctant = octants.end() - 1;
@@ -156,26 +165,31 @@ private:
 		delta = (uint32_t)pow(2.0,(double)((uint8_t)MAX_LEVEL_2D - lastOctant->level)) - 1;
 		x = lastOctant->x + delta;
 		y = lastOctant->y + delta;
-		last_desc = Class_Octant<2>(MAX_LEVEL_2D,x,y);
+		//last_desc = Class_Octant<2>(MAX_LEVEL_2D,x,y);
+		last_desc = classOctant(2,MAX_LEVEL_2D,x,y);
 
 	};
 
 	//-------------------------------------------------------------------------------- //
 	// Other methods ----------------------------------------------------------------- //
 
-	Class_Octant<2>& extractOctant(uint32_t idx) {
+//	Class_Octant<2>& extractOctant(uint32_t idx) {
+	classOctant& extractOctant(uint32_t idx) {
 		return octants[idx];
 	};
 
-	const Class_Octant<2>& extractOctant(uint32_t idx) const{
+//	const Class_Octant<2>& extractOctant(uint32_t idx) const{
+	const classOctant& extractOctant(uint32_t idx) const{
 		return octants[idx];
 	};
 
-	Class_Octant<2>& extractGhostOctant(uint32_t idx) {
+//	Class_Octant<2>& extractGhostOctant(uint32_t idx) {
+	classOctant& extractGhostOctant(uint32_t idx) {
 		return ghosts[idx];
 	};
 
-	const Class_Octant<2>& extractGhostOctant(uint32_t idx) const{
+//	const Class_Octant<2>& extractGhostOctant(uint32_t idx) const{
+	const classOctant& extractGhostOctant(uint32_t idx) const{
 		return ghosts[idx];
 	};
 
@@ -185,7 +199,8 @@ private:
 
 		// Local variables
 		vector<uint32_t> last_child_index;
-		vector<Class_Octant<2> > children;
+		//vector<Class_Octant<2> > children;
+		vector<classOctant > children;
 		uint32_t idx, nocts, ilastch;
 		uint32_t offset = 0, blockidx;
 		uint8_t nchm1 = global2D.nchildren-1, ich;
@@ -201,7 +216,8 @@ private:
 				//			octants[idx].info[8] = false;
 				if (octants[idx].marker > 0){
 					octants[idx].marker = 0;
-					octants[idx].info[11] = true;
+					//octants[idx].info[11] = true;
+					octants[idx].info[15] = true;
 				}
 			}
 		}
@@ -254,7 +270,8 @@ private:
 	bool coarse(){												// Coarse local tree: coarse one time family of octants with marker <0
 		// Local variables										// (if at least one octant of family has marker>=0 set marker=0 for the entire family)
 		vector<uint32_t> first_child_index;
-		Class_Octant<2> father;
+//		Class_Octant<2> father;
+		classOctant father;
 		uint32_t nocts;
 		uint32_t idx, idx2;
 		uint32_t offset;
@@ -387,7 +404,8 @@ private:
 					for (uint32_t iii=0; iii<global2D.nfaces; iii++){
 						father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
 					}
-					father.info[10] = father.info[10] || ghosts[idx].info[10];
+					//father.info[10] = father.info[10] || ghosts[idx].info[10];
+					father.info[14] = father.info[14] || ghosts[idx].info[14];
 					idx++;
 					if(idx == size_ghosts){
 						break;
@@ -433,8 +451,10 @@ private:
 						father.info[iii] = father.info[iii] || octants[nocts-idx-1].info[iii];
 					}
 				}
-				father.info[9] = true;
-				father.info[11] = true;
+//				father.info[9] = true;
+//				father.info[11] = true;
+				father.info[13] = true;
+				father.info[15] = true;
 				if (markerfather < 0){
 					docoarse = true;
 				}
@@ -464,7 +484,8 @@ private:
 		// mapidx[i] = index in old octants vector of the i-th octant (index of father if octant is new after)
 		// Local variables
 		vector<uint32_t> last_child_index;
-		vector<Class_Octant<2> > children;
+		//vector<Class_Octant<2> > children;
+		vector<classOctant > children;
 		uint32_t idx, nocts, ilastch;
 		uint32_t offset = 0, blockidx;
 		uint8_t nchm1 = global2D.nchildren-1, ich;
@@ -480,7 +501,8 @@ private:
 				//			octants[idx].info[8] = false;
 				if (octants[idx].marker > 0){
 					octants[idx].marker = 0;
-					octants[idx].info[11] = true;
+					//octants[idx].info[11] = true;
+					octants[idx].info[15] = true;
 				}
 			}
 		}
@@ -543,7 +565,8 @@ private:
 		// mapidx[i] = index in old octants vector of the i-th octant (index of father if octant is new after)
 		// Local variables
 		vector<uint32_t> first_child_index;
-		Class_Octant<2> father;
+		//Class_Octant<2> father;
+		classOctant father;
 		uint32_t nocts, nocts0;
 		uint32_t idx, idx2;
 		uint32_t offset;
@@ -631,8 +654,10 @@ private:
 								father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
 							}
 						}
-						father.info[9] = true;
-						father.info[11] = true;
+//						father.info[9] = true;
+//						father.info[11] = true;
+						father.info[13] = true;
+						father.info[15] = true;
 						if (markerfather < 0){
 							docoarse = true;
 						}
@@ -685,7 +710,8 @@ private:
 					for (uint32_t iii=0; iii<global2D.nfaces; iii++){
 						father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
 					}
-					father.info[10] = father.info[10] || ghosts[idx].info[10];
+//					father.info[10] = father.info[10] || ghosts[idx].info[10];
+					father.info[14] = father.info[14] || ghosts[idx].info[14];
 					idx++;
 					if(idx == size_ghosts){
 						break;
@@ -731,8 +757,10 @@ private:
 						father.info[iii] = father.info[iii] || octants[nocts-idx-1].info[iii];
 					}
 				}
-				father.info[9] = true;
-				father.info[11] = true;
+//				father.info[9] = true;
+//				father.info[11] = true;
+				father.info[13] = true;
+				father.info[15] = true;
 				if (markerfather < 0){
 					docoarse = true;
 				}
@@ -770,7 +798,8 @@ private:
 
 		// Local variables
 		vector<uint32_t> last_child_index;
-		vector<Class_Octant<2> > children;
+		//vector<Class_Octant<2> > children;
+		vector<classOctant > children;
 		uint32_t idx, nocts, ilastch;
 		uint32_t offset = 0, blockidx;
 		uint8_t nchm1 = global2D.nchildren-1, ich;
@@ -787,7 +816,8 @@ private:
 				//			octants[idx].info[8] = false;
 				if (octants[idx].marker > 0){
 					octants[idx].marker = 0;
-					octants[idx].info[11] = true;
+					//octants[idx].info[11] = true;
+					octants[idx].info[15] = true;
 				}
 			}
 		}
@@ -840,7 +870,8 @@ private:
 	// Global coarse of octree (every marker set =-1)
 	bool globalCoarse(){
 		vector<uint32_t> first_child_index;
-		Class_Octant<2> father;
+		//Class_Octant<2> father;
+		classOctant father;
 		uint32_t nocts;
 		uint32_t idx, idx2;
 		uint32_t offset;
@@ -900,7 +931,8 @@ private:
 				else{
 					if (idx < (nocts>global2D.nchildren)*(nocts-global2D.nchildren)){
 						octants[idx].setMarker(0);
-						octants[idx].info[11] = true;
+//						octants[idx].info[11] = true;
+						octants[idx].info[15] = true;
 					}
 				}
 			}
@@ -929,7 +961,8 @@ private:
 								father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
 							}
 						}
-						father.info[9] = true;
+//						father.info[9] = true;
+						father.info[13] = true;
 						if (markerfather < 0){
 							docoarse = true;
 						}
@@ -1020,7 +1053,8 @@ private:
 						father.info[iii] = father.info[iii] || octants[nocts-idx-1].info[iii];
 					}
 				}
-				father.info[9] = true;
+//				father.info[9] = true;
+				father.info[13] = true;
 				if (markerfather < 0){
 					docoarse = true;
 				}
@@ -1051,7 +1085,8 @@ private:
 
 		// Local variables
 		vector<uint32_t> last_child_index;
-		vector<Class_Octant<2> > children;
+		//vector<Class_Octant<2> > children;
+		vector<classOctant > children;
 		uint32_t idx, nocts, ilastch;
 		uint32_t offset = 0, blockidx;
 		uint8_t nchm1 = global2D.nchildren-1, ich;
@@ -1068,7 +1103,8 @@ private:
 				//			octants[idx].info[8] = false;
 				if (octants[idx].marker > 0){
 					octants[idx].marker = 0;
-					octants[idx].info[11] = true;
+//					octants[idx].info[11] = true;
+					octants[idx].info[15] = true;
 				}
 			}
 		}
@@ -1131,7 +1167,8 @@ private:
 
 		// Local variables
 		vector<uint32_t> first_child_index;
-		Class_Octant<2> father;
+		//Class_Octant<2> father;
+		classOctant father;
 		uint32_t nocts, nocts0;
 		uint32_t idx, idx2;
 		uint32_t offset;
@@ -1192,7 +1229,8 @@ private:
 				else{
 					if (idx < (nocts>global2D.nchildren)*(nocts-global2D.nchildren)){
 						octants[idx].setMarker(0);
-						octants[idx].info[11] = true;
+//						octants[idx].info[11] = true;
+						octants[idx].info[15] = true;
 					}
 				}
 			}
@@ -1221,7 +1259,8 @@ private:
 								father.info[iii] = father.info[iii] || octants[idx+offset+idx2].info[iii];
 							}
 						}
-						father.info[9] = true;
+//						father.info[9] = true;
+						father.info[13] = true;
 						if (markerfather < 0){
 							docoarse = true;
 						}
@@ -1303,7 +1342,8 @@ private:
 					nend = 0;
 					for(uint32_t ii=nocts-global2D.nchildren; ii<nocts; ii++){
 						octants[ii].setMarker(0);
-						octants[ii].info[11] = true;
+//						octants[ii].info[11] = true;
+						octants[ii].info[15] = true;
 					}
 				}
 			}
@@ -1317,7 +1357,8 @@ private:
 						father.info[iii] = father.info[iii] || octants[nocts-idx-1].info[iii];
 					}
 				}
-				father.info[9] = true;
+//				father.info[9] = true;
+				father.info[13] = true;
 				if (markerfather < 0){
 					docoarse = true;
 				}
@@ -1446,7 +1487,8 @@ private:
 		uint64_t  Morton, Mortontry;
 		uint32_t  noctants = getNumOctants();
 		uint32_t idxtry;
-		Class_Octant<2>* oct = &octants[idx];
+		//Class_Octant<2>* oct = &octants[idx];
+		classOctant* oct = &octants[idx];
 		uint32_t size = oct->getSize();
 
 
@@ -1464,13 +1506,15 @@ private:
 		}
 
 		// Check if octants face is a process boundary
-		if (oct->info[global2D.nfaces+iface] == false){
+//		if (oct->info[global2D.nfaces+iface] == false){
+		if (oct->info[6+iface] == false){
 
 			// Check if octants face is a boundary
 			if (oct->info[iface] == false){
 
 				//Build Morton number of virtual neigh of same size
-				Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size));
+//				Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size));
+				classOctant samesizeoct(2, oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size));
 				Morton = samesizeoct.computeMorton();
 				// Search morton in octants
 				// If a even face morton is lower than morton of oct, if odd higher
@@ -1525,7 +1569,8 @@ private:
 						return;
 					}
 					// Compute Last discendent of virtual octant of same size
-					Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+//					Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+					classOctant last_desc = samesizeoct.buildLastDesc();
 					uint64_t Mortonlast = last_desc.computeMorton();
 					Mortontry = octants[idxtry].computeMorton();
 					int32_t Dx, Dy;
@@ -1587,10 +1632,12 @@ private:
 					// Search in ghosts
 
 					uint32_t idxghost = uint32_t(size_ghosts/2);
-					Class_Octant<2>* octghost = &ghosts[idxghost];
+					//Class_Octant<2>* octghost = &ghosts[idxghost];
+					classOctant* octghost = &ghosts[idxghost];
 
 					//Build Morton number of virtual neigh of same size
-					Class_Octant<2> samesizeoct(oct->level, oct->x+cx*size, oct->y+cy*size);
+					//Class_Octant<2> samesizeoct(oct->level, oct->x+cx*size, oct->y+cy*size);
+					classOctant samesizeoct(2, oct->level, oct->x+cx*size, oct->y+cy*size);
 					Morton = samesizeoct.computeMorton(); //mortonEncode_magicbits(oct->x-size,oct->y,oct->z);
 					// Search morton in octants
 					// If a even face morton is lower than morton of oct, if odd higher
@@ -1645,7 +1692,8 @@ private:
 								return;
 							}
 							// Compute Last discendent of virtual octant of same size
-							Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+							//Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+							classOctant last_desc = samesizeoct.buildLastDesc();
 							uint64_t Mortonlast = last_desc.computeMorton();
 							Mortontry = ghosts[idxtry].computeMorton();
 							int32_t Dx, Dy;
@@ -1703,7 +1751,8 @@ private:
 						if (oct->info[iface] == false){
 
 							//Build Morton number of virtual neigh of same size
-							Class_Octant<2> samesizeoct(oct->level, oct->x+cx*size, oct->y+cy*size);
+//							Class_Octant<2> samesizeoct(oct->level, oct->x+cx*size, oct->y+cy*size);
+							classOctant samesizeoct(2, oct->level, oct->x+cx*size, oct->y+cy*size);
 							Morton = samesizeoct.computeMorton();
 							// Search morton in octants
 							// If a even face morton is lower than morton of oct, if odd higher
@@ -1758,7 +1807,8 @@ private:
 										return;
 									}
 									// Compute Last discendent of virtual octant of same size
-									Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+//									Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+									classOctant last_desc = samesizeoct.buildLastDesc();
 									uint64_t Mortonlast = last_desc.computeMorton();
 									Mortontry = octants[idxtry].computeMorton();
 									int32_t Dx, Dy;
@@ -1817,7 +1867,8 @@ private:
 
 	// =================================================================================== //
 
-	void findNeighbours(Class_Octant<2> *oct,		// Finds neighbours of octant through iface in vector octants.
+//	void findNeighbours(Class_Octant<2> *oct,		// Finds neighbours of octant through iface in vector octants.
+	void findNeighbours(classOctant *oct,			// Finds neighbours of octant through iface in vector octants.
 			uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
 			u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
 			vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
@@ -1847,7 +1898,8 @@ private:
 			if (oct->info[iface] == false){
 
 				//Build Morton number of virtual neigh of same size
-				Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size));
+				//Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size));
+				classOctant samesizeoct(2, oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size));
 				Morton = samesizeoct.computeMorton();
 				// Search morton in octants
 				// If a even face morton is lower than morton of oct, if odd higher
@@ -1901,7 +1953,8 @@ private:
 						return;
 					}
 					// Compute Last discendent of virtual octant of same size
-					Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+					//Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+					classOctant last_desc = samesizeoct.buildLastDesc();
 					uint64_t Mortonlast = last_desc.computeMorton();
 					Mortontry = octants[idxtry].computeMorton();
 					int32_t Dx, Dy;
@@ -1963,10 +2016,12 @@ private:
 					// Search in ghosts
 
 					uint32_t idxghost = uint32_t(size_ghosts/2);
-					Class_Octant<2>* octghost = &ghosts[idxghost];
+					//Class_Octant<2>* octghost = &ghosts[idxghost];
+					classOctant* octghost = &ghosts[idxghost];
 
 					//Build Morton number of virtual neigh of same size
-					Class_Octant<2> samesizeoct(oct->level, oct->x+cx*size, oct->y+cy*size);
+					//Class_Octant<2> samesizeoct(oct->level, oct->x+cx*size, oct->y+cy*size);
+					classOctant samesizeoct(2, oct->level, oct->x+cx*size, oct->y+cy*size);
 					Morton = samesizeoct.computeMorton(); //mortonEncode_magicbits(oct->x-size,oct->y,oct->z);
 					// Search morton in octants
 					// If a even face morton is lower than morton of oct, if odd higher
@@ -2020,7 +2075,8 @@ private:
 								return;
 							}
 							// Compute Last discendent of virtual octant of same size
-							Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+							//Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+							classOctant last_desc = samesizeoct.buildLastDesc();
 							uint64_t Mortonlast = last_desc.computeMorton();
 							Mortontry = ghosts[idxtry].computeMorton();
 							int32_t Dx, Dy;
@@ -2079,7 +2135,8 @@ private:
 						if (oct->info[iface] == false){
 
 							//Build Morton number of virtual neigh of same size
-							Class_Octant<2> samesizeoct(oct->level, oct->x+cx*size, oct->y+cy*size);
+							//Class_Octant<2> samesizeoct(oct->level, oct->x+cx*size, oct->y+cy*size);
+							classOctant samesizeoct(2, oct->level, oct->x+cx*size, oct->y+cy*size);
 							Morton = samesizeoct.computeMorton();
 							// Search morton in octants
 							// If a even face morton is lower than morton of oct, if odd higher
@@ -2133,7 +2190,8 @@ private:
 										return;
 									}
 									// Compute Last discendent of virtual octant of same size
-									Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+									//Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+									classOctant last_desc = samesizeoct.buildLastDesc();
 									uint64_t Mortonlast = last_desc.computeMorton();
 									Mortontry = octants[idxtry].computeMorton();
 									int32_t Dx, Dy;
@@ -2196,7 +2254,8 @@ private:
 		uint64_t  Morton, Mortontry;
 		uint32_t  noctants = getNumOctants();
 		uint32_t idxtry;
-		Class_Octant<2>* oct = &ghosts[idx];
+		//Class_Octant<2>* oct = &ghosts[idx];
+		classOctant* oct = &ghosts[idx];
 		uint32_t size = oct->getSize();
 
 		//Alternative to switch case
@@ -2214,7 +2273,8 @@ private:
 		if (oct->info[global2D.nfaces+iface] == true){
 
 			//Build Morton number of virtual neigh of same size
-			Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size));
+			//Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size));
+			classOctant samesizeoct(2, oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size));
 			Morton = samesizeoct.computeMorton();
 			// Search morton in octants
 			// If a even face morton is lower than morton of oct, if odd higher
@@ -2267,7 +2327,8 @@ private:
 					return;
 				}
 				// Compute Last discendent of virtual octant of same size
-				Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+				//Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+				classOctant last_desc = samesizeoct.buildLastDesc();
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = octants[idxtry].computeMorton();
 				int32_t Dx, Dy;
@@ -2322,7 +2383,8 @@ private:
 
 	void preBalance21(bool internal){
 		// Local variables
-		Class_Octant<2> father, lastdesc;
+		//Class_Octant<2> father, lastdesc;
+		classOctant father, lastdesc;
 		uint64_t mortonld;
 		uint32_t nocts;
 		uint32_t idx, idx2, idx0, last_idx;
@@ -2389,7 +2451,8 @@ private:
 					for(uint32_t ii=0; ii<idx; ii++){
 						if(octants[ii].getMarker()<0){
 							octants[ii].setMarker(0);
-							octants[ii].info[11]=true;
+//							octants[ii].info[11]=true;
+							octants[ii].info[15]=true;
 							Bdone=true;
 						}
 					}
@@ -2430,7 +2493,8 @@ private:
 					for(uint32_t ii=idx+1; ii<nocts; ii++){
 						if (octants[ii].getMarker()<0){
 							octants[ii].setMarker(0);
-							octants[ii].info[11]=true;
+//							octants[ii].info[11]=true;
+							octants[ii].info[15]=true;
 							Bdone=true;
 						}
 					}
@@ -2474,7 +2538,8 @@ private:
 					else{
 						if (idx<=last_idx){
 							octants[idx].setMarker(0);
-							octants[idx].info[11]=true;
+//							octants[idx].info[11]=true;
+							octants[idx].info[15]=true;
 							Bdone=true;
 						}
 					}
@@ -2487,7 +2552,8 @@ private:
 
 	void preBalance21(u32vector& newmodified){
 		// Local variables
-		Class_Octant<2> father, lastdesc;
+		//Class_Octant<2> father, lastdesc;
+		classOctant father, lastdesc;
 		uint64_t mortonld;
 		uint32_t nocts;
 		uint32_t idx, idx2, idx0, last_idx;
@@ -2557,7 +2623,8 @@ private:
 					for(uint32_t ii=0; ii<idx; ii++){
 						if (octants[ii].getMarker()<0){
 							octants[ii].setMarker(0);
-							octants[ii].info[11]=true;
+//							octants[ii].info[11]=true;
+							octants[ii].info[15]=true;
 							Bdone=true;
 							newmodified.push_back(ii);
 						}
@@ -2596,7 +2663,8 @@ private:
 					for(uint32_t ii=idx+1; ii<nocts; ii++){
 						if (octants[ii].getMarker()<0){
 							octants[ii].setMarker(0);
-							octants[ii].info[11]=true;
+//							octants[ii].info[11]=true;
+							octants[ii].info[15]=true;
 							Bdone=true;
 							newmodified.push_back(ii);
 						}
@@ -2638,7 +2706,8 @@ private:
 				else{
 					if (idx<=last_idx){
 						octants[idx].setMarker(0);
-						octants[idx].info[11]=true;
+//						octants[idx].info[11]=true;
+						octants[idx].info[15]=true;
 						Bdone=true;
 						newmodified.push_back(idx);
 					}
@@ -2684,13 +2753,15 @@ private:
 									{
 										if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) > (targetmarker + 1) ){
 											octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-1-octants[idx].getLevel());
-											octants[idx].info[11] = true;
+//											octants[idx].info[11] = true;
+											octants[idx].info[15] = true;
 											modified.push_back(idx);
 											Bdone = true;
 										}
 										else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 											octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
-											octants[neigh[i]].info[11] = true;
+//											octants[neigh[i]].info[11] = true;
+											octants[neigh[i]].info[15] = true;
 											modified.push_back(neigh[i]);
 											Bdone = true;
 										}
@@ -2699,7 +2770,8 @@ private:
 								else{
 									if((ghosts[neigh[i]].getLevel() + ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
 										octants[idx].setMarker(ghosts[neigh[i]].getLevel()+ghosts[neigh[i]].getMarker()-1-octants[idx].getLevel());
-										octants[idx].info[11] = true;
+//										octants[idx].info[11] = true;
+										octants[idx].info[15] = true;
 										modified.push_back(idx);
 										Bdone = true;
 									}
@@ -2719,13 +2791,15 @@ private:
 										{
 											if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) > (targetmarker + 1) ){
 												octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-1-octants[idx].getLevel());
-												octants[idx].info[11] = true;
+//												octants[idx].info[11] = true;
+												octants[idx].info[15] = true;
 												modified.push_back(idx);
 												Bdone = true;
 											}
 											else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 												octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
-												octants[neigh[i]].info[11] = true;
+//												octants[neigh[i]].info[11] = true;
+												octants[neigh[i]].info[15] = true;
 												modified.push_back(neigh[i]);
 												Bdone = true;
 											}
@@ -2734,7 +2808,8 @@ private:
 									else{
 										if((ghosts[neigh[i]].getLevel() + ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
 											octants[idx].setMarker(ghosts[neigh[i]].getLevel()+ghosts[neigh[i]].getMarker()-1-octants[idx].getLevel());
-											octants[idx].info[11] = true;
+//											octants[idx].info[11] = true;
+											octants[idx].info[15] = true;
 											modified.push_back(idx);
 											Bdone = true;
 										}
@@ -2765,7 +2840,8 @@ private:
 							for(i=0; i<sizeneigh; i++){
 								if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 									octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
-									octants[neigh[i]].info[11] = true;
+//									octants[neigh[i]].info[11] = true;
+									octants[neigh[i]].info[15] = true;
 									modified.push_back(neigh[i]);
 									Bdone = true;
 								}
@@ -2783,7 +2859,8 @@ private:
 								for(i=0; i<sizeneigh; i++){
 									if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 										octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
-										octants[neigh[i]].info[11] = true;
+//										octants[neigh[i]].info[11] = true;
+										octants[neigh[i]].info[15] = true;
 										modified.push_back(neigh[i]);
 										Bdone = true;
 									}
@@ -2817,13 +2894,15 @@ private:
 										{
 											if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
 												octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-octants[idx].getLevel()-1);
-												octants[idx].info[11] = true;
+//												octants[idx].info[11] = true;
+												octants[idx].info[15] = true;
 												newmodified.push_back(idx);
 												Bdone = true;
 											}
 											else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 												octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
-												octants[neigh[i]].info[11] = true;
+//												octants[neigh[i]].info[11] = true;
+												octants[neigh[i]].info[15] = true;
 												newmodified.push_back(neigh[i]);
 												Bdone = true;
 											}
@@ -2844,13 +2923,15 @@ private:
 											{
 												if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
 													octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-octants[idx].getLevel()-1);
-													octants[idx].info[11] = true;
+//													octants[idx].info[11] = true;
+													octants[idx].info[15] = true;
 													newmodified.push_back(idx);
 													Bdone = true;
 												}
 												else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 													octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
-													octants[neigh[i]].info[11] = true;
+//													octants[neigh[i]].info[11] = true;
+													octants[neigh[i]].info[15] = true;
 													newmodified.push_back(neigh[i]);
 													Bdone = true;
 												}
@@ -2878,7 +2959,8 @@ private:
 			idx = 0;
 			for (it=obegin; it!=oend; it++){
 				//if (!it->getNotBalance() && (it->info[11] || it->getMarker() != 0)){
-				if (!it->getNotBalance() && (it->info[11])){
+//				if (!it->getNotBalance() && (it->info[11])){
+				if (!it->getNotBalance() && (it->info[15])){
 					targetmarker = min(MAX_LEVEL_2D, (it->getLevel()+it->getMarker()));
 
 					//Balance through faces
@@ -2890,7 +2972,8 @@ private:
 							for(i=0; i<sizeneigh; i++){
 								if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 									octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
-									octants[neigh[i]].info[11] = true;
+//									octants[neigh[i]].info[11] = true;
+									octants[neigh[i]].info[15] = true;
 									modified.push_back(neigh[i]);
 									Bdone = true;
 								}
@@ -2908,7 +2991,8 @@ private:
 								for(i=0; i<sizeneigh; i++){
 									if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 										octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
-										octants[neigh[i]].info[11] = true;
+//										octants[neigh[i]].info[11] = true;
+										octants[neigh[i]].info[15] = true;
 										modified.push_back(neigh[i]);
 										Bdone = true;
 									}
@@ -2942,13 +3026,15 @@ private:
 										{
 											if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
 												octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-octants[idx].getLevel()-1);
-												octants[idx].info[11] = true;
+//												octants[idx].info[11] = true;
+												octants[idx].info[15] = true;
 												newmodified.push_back(idx);
 												Bdone = true;
 											}
 											else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 												octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
-												octants[neigh[i]].info[11] = true;
+//												octants[neigh[i]].info[11] = true;
+												octants[neigh[i]].info[15] = true;
 												newmodified.push_back(neigh[i]);
 												Bdone = true;
 											}
@@ -2969,13 +3055,15 @@ private:
 											{
 												if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
 													octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-octants[idx].getLevel()-1);
-													octants[idx].info[11] = true;
+//													octants[idx].info[11] = true;
+													octants[idx].info[15] = true;
 													newmodified.push_back(idx);
 													Bdone = true;
 												}
 												else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 													octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
-													octants[neigh[i]].info[11] = true;
+//													octants[neigh[i]].info[11] = true;
+													octants[neigh[i]].info[15] = true;
 													newmodified.push_back(neigh[i]);
 													Bdone = true;
 												}
@@ -3026,7 +3114,8 @@ private:
 			oend = octants.end();
 			idx = 0;
 			for (it=obegin; it!=oend; it++){
-				if ((!it->getNotBalance()) && ((it->info[11]) || (it->getMarker()!=0) || ((it->getIsNewC()) || (it->getIsNewR())))){
+//				if ((!it->getNotBalance()) && ((it->info[11]) || (it->getMarker()!=0) || ((it->getIsNewC()) || (it->getIsNewR())))){
+				if ((!it->getNotBalance()) && ((it->info[15]) || (it->getMarker()!=0) || ((it->getIsNewC()) || (it->getIsNewR())))){
 					targetmarker = min(MAX_LEVEL_2D, int(octants[idx].getLevel()) + int(octants[idx].getMarker()));
 
 					//Balance through faces
@@ -3039,13 +3128,15 @@ private:
 									{
 										if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) > (targetmarker + 1) ){
 											octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-1-octants[idx].getLevel());
-											octants[idx].info[11] = true;
+//											octants[idx].info[11] = true;
+											octants[idx].info[15] = true;
 											modified.push_back(idx);
 											Bdone = true;
 										}
 										else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 											octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
-											octants[neigh[i]].info[11] = true;
+//											octants[neigh[i]].info[11] = true;
+											octants[neigh[i]].info[15] = true;
 											modified.push_back(neigh[i]);
 											Bdone = true;
 										}
@@ -3055,7 +3146,8 @@ private:
 									{
 										if((ghosts[neigh[i]].getLevel() + ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
 											octants[idx].setMarker(ghosts[neigh[i]].getLevel()+ghosts[neigh[i]].getMarker()-1-octants[idx].getLevel());
-											octants[idx].info[11] = true;
+//											octants[idx].info[11] = true;
+											octants[idx].info[15] = true;
 											modified.push_back(idx);
 											Bdone = true;
 										}
@@ -3077,13 +3169,15 @@ private:
 										{
 											if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) > (targetmarker + 1) ){
 												octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-1-octants[idx].getLevel());
-												octants[idx].info[11] = true;
+//												octants[idx].info[11] = true;
+												octants[idx].info[15] = true;
 												modified.push_back(idx);
 												Bdone = true;
 											}
 											else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 												octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
-												octants[neigh[i]].info[11] = true;
+//												octants[neigh[i]].info[11] = true;
+												octants[neigh[i]].info[15] = true;
 												modified.push_back(neigh[i]);
 												Bdone = true;
 											}
@@ -3092,7 +3186,8 @@ private:
 									else{
 										if((ghosts[neigh[i]].getLevel() + ghosts[neigh[i]].getMarker()) > (targetmarker + 1) ){
 											octants[idx].setMarker(ghosts[neigh[i]].getLevel()+ghosts[neigh[i]].getMarker()-1-octants[idx].getLevel());
-											octants[idx].info[11] = true;
+//											octants[idx].info[11] = true;
+											octants[idx].info[15] = true;
 											modified.push_back(idx);
 											Bdone = true;
 										}
@@ -3110,7 +3205,8 @@ private:
 			oend = ghosts.end();
 			idx = 0;
 			for (it=obegin; it!=oend; it++){
-				if (!it->getNotBalance() && (it->info[11] || (it->getIsNewC() || it->getIsNewR()))){
+//				if (!it->getNotBalance() && (it->info[11] || (it->getIsNewC() || it->getIsNewR()))){
+				if (!it->getNotBalance() && (it->info[15] || (it->getIsNewC() || it->getIsNewR()))){
 					targetmarker = min(MAX_LEVEL_2D, (it->getLevel()+it->getMarker()));
 
 					//Balance through faces
@@ -3122,7 +3218,8 @@ private:
 							for(i=0; i<sizeneigh; i++){
 								if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 									octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
-									octants[neigh[i]].info[11] = true;
+//									octants[neigh[i]].info[11] = true;
+									octants[neigh[i]].info[15] = true;
 									modified.push_back(neigh[i]);
 									Bdone = true;
 								}
@@ -3140,7 +3237,8 @@ private:
 								for(i=0; i<sizeneigh; i++){
 									if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 										octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
-										octants[neigh[i]].info[11] = true;
+//										octants[neigh[i]].info[11] = true;
+										octants[neigh[i]].info[15] = true;
 										modified.push_back(neigh[i]);
 										Bdone = true;
 									}
@@ -3174,13 +3272,15 @@ private:
 										{
 											if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
 												octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-octants[idx].getLevel()-1);
-												octants[idx].info[11] = true;
+//												octants[idx].info[11] = true;
+												octants[idx].info[15] = true;
 												newmodified.push_back(idx);
 												Bdone = true;
 											}
 											else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 												octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
-												octants[neigh[i]].info[11] = true;
+//												octants[neigh[i]].info[11] = true;
+												octants[neigh[i]].info[15] = true;
 												newmodified.push_back(neigh[i]);
 												Bdone = true;
 											}
@@ -3201,13 +3301,15 @@ private:
 											{
 												if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
 													octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-octants[idx].getLevel()-1);
-													octants[idx].info[11] = true;
+//													octants[idx].info[11] = true;
+													octants[idx].info[15] = true;
 													newmodified.push_back(idx);
 													Bdone = true;
 												}
 												else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 													octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
-													octants[neigh[i]].info[11] = true;
+//													octants[neigh[i]].info[11] = true;
+													octants[neigh[i]].info[15] = true;
 													newmodified.push_back(neigh[i]);
 													Bdone = true;
 												}
@@ -3235,7 +3337,8 @@ private:
 			oend = ghosts.end();
 			idx = 0;
 			for (it=obegin; it!=oend; it++){
-				if (!it->getNotBalance() && (it->info[11] || (it->getIsNewC() || it->getIsNewR()))){
+//				if (!it->getNotBalance() && (it->info[11] || (it->getIsNewC() || it->getIsNewR()))){
+				if (!it->getNotBalance() && (it->info[15] || (it->getIsNewC() || it->getIsNewR()))){
 					targetmarker = min(MAX_LEVEL_2D, (it->getLevel()+it->getMarker()));
 
 					//Balance through faces
@@ -3247,7 +3350,8 @@ private:
 							for(i=0; i<sizeneigh; i++){
 								if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 									octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
-									octants[neigh[i]].info[11] = true;
+//									octants[neigh[i]].info[11] = true;
+									octants[neigh[i]].info[15] = true;
 									modified.push_back(neigh[i]);
 									Bdone = true;
 								}
@@ -3265,7 +3369,8 @@ private:
 								for(i=0; i<sizeneigh; i++){
 									if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 										octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
-										octants[neigh[i]].info[11] = true;
+//										octants[neigh[i]].info[11] = true;
+										octants[neigh[i]].info[15] = true;
 										modified.push_back(neigh[i]);
 										Bdone = true;
 									}
@@ -3299,13 +3404,15 @@ private:
 										{
 											if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
 												octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-octants[idx].getLevel()-1);
-												octants[idx].info[11] = true;
+//												octants[idx].info[11] = true;
+												octants[idx].info[15] = true;
 												newmodified.push_back(idx);
 												Bdone = true;
 											}
 											else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 												octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
-												octants[neigh[i]].info[11] = true;
+//												octants[neigh[i]].info[11] = true;
+												octants[neigh[i]].info[15] = true;
 												newmodified.push_back(neigh[i]);
 												Bdone = true;
 											}
@@ -3326,13 +3433,15 @@ private:
 											{
 												if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) >  (targetmarker + 1)){
 													octants[idx].setMarker(octants[neigh[i]].getLevel()+octants[neigh[i]].getMarker()-octants[idx].getLevel()-1);
-													octants[idx].info[11] = true;
+//													octants[idx].info[11] = true;
+													octants[idx].info[15] = true;
 													newmodified.push_back(idx);
 													Bdone = true;
 												}
 												else if((octants[neigh[i]].getLevel() + octants[neigh[i]].getMarker()) < (targetmarker - 1)){
 													octants[neigh[i]].setMarker(targetmarker-octants[neigh[i]].getLevel()-1);
-													octants[neigh[i]].info[11] = true;
+//													octants[neigh[i]].info[11] = true;
+													octants[neigh[i]].info[15] = true;
 													newmodified.push_back(neigh[i]);
 													Bdone = true;
 												}
@@ -3368,7 +3477,8 @@ private:
 		uint64_t  Morton, Mortontry;
 		uint32_t  noctants = getNumOctants();
 		uint32_t idxtry;
-		Class_Octant<2>* oct = &octants[idx];
+		//Class_Octant<2>* oct = &octants[idx];
+		classOctant* oct = &octants[idx];
 		uint32_t size = oct->getSize();
 		uint8_t iface1, iface2;
 		int32_t Dhx, Dhy;
@@ -3396,7 +3506,8 @@ private:
 		if (oct->info[iface1] == false && oct->info[iface2] == false){
 
 			//Build Morton number of virtual neigh of same size
-			Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));
+			//Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));
+			classOctant samesizeoct(2, oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));
 			Morton = samesizeoct.computeMorton();
 
 			//SEARCH IN GHOSTS
@@ -3405,7 +3516,8 @@ private:
 				// Search in ghosts
 
 				uint32_t idxghost = uint32_t(size_ghosts/2);
-				Class_Octant<2>* octghost = &ghosts[idxghost];
+				//Class_Octant<2>* octghost = &ghosts[idxghost];
+				classOctant* octghost = &ghosts[idxghost];
 
 				// Search morton in octants
 				// If a even face morton is lower than morton of oct, if odd higher
@@ -3468,7 +3580,8 @@ private:
 							return;
 						}
 						// Compute Last discendent of virtual octant of same size
-						Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+						//Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+						classOctant last_desc = samesizeoct.buildLastDesc();
 						uint64_t Mortonlast = last_desc.computeMorton();
 						Mortontry = ghosts[idxtry].computeMorton();
 						while(Mortontry < Mortonlast && idxtry < size_ghosts){
@@ -3554,7 +3667,8 @@ private:
 						return;
 					}
 					// Compute Last discendent of virtual octant of same size
-					Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+					//Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+					classOctant last_desc = samesizeoct.buildLastDesc();
 					uint64_t Mortonlast = last_desc.computeMorton();
 					Mortontry = octants[idxtry].computeMorton();
 					while(Mortontry < Mortonlast && idxtry <= noctants-1){
@@ -3586,7 +3700,8 @@ private:
 
 	// =================================================================================== //
 
-	void findNodeNeighbours(Class_Octant<2>* oct,			// Finds neighbours of idx-th octant through inode in vector octants.
+//	void findNodeNeighbours(Class_Octant<2>* oct,			// Finds neighbours of idx-th octant through inode in vector octants.
+	void findNodeNeighbours(classOctant* oct,			// Finds neighbours of idx-th octant through inode in vector octants.
 			uint8_t inode,				// Returns a vector (empty if inode is a bound node) with the index of neighbours
 			u32vector & neighbours,		// in their structure (octants or ghosts) and sets isghost[i] = true if the
 			vector<bool> & isghost){	// i-th neighbour is ghost in the local tree
@@ -3621,7 +3736,8 @@ private:
 		if (oct->info[iface1] == false && oct->info[iface2] == false){
 
 			//Build Morton number of virtual neigh of same size
-			Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));
+			//Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));
+			classOctant samesizeoct(2, oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));
 			Morton = samesizeoct.computeMorton();
 
 			//SEARCH IN GHOSTS
@@ -3630,7 +3746,8 @@ private:
 				// Search in ghosts
 
 				uint32_t idxghost = uint32_t(size_ghosts/2);
-				Class_Octant<2>* octghost = &ghosts[idxghost];
+				//Class_Octant<2>* octghost = &ghosts[idxghost];
+				classOctant* octghost = &ghosts[idxghost];
 
 				// Search morton in octants
 				// If a even face morton is lower than morton of oct, if odd higher
@@ -3686,7 +3803,8 @@ private:
 							return;
 						}
 						// Compute Last discendent of virtual octant of same size
-						Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+						//Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+						classOctant last_desc = samesizeoct.buildLastDesc();
 						uint64_t Mortonlast = last_desc.computeMorton();
 						Mortontry = ghosts[idxtry].computeMorton();
 						while(Mortontry < Mortonlast && idxtry < size_ghosts){
@@ -3766,7 +3884,8 @@ private:
 						return;
 					}
 					// Compute Last discendent of virtual octant of same size
-					Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+//					Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+					classOctant last_desc = samesizeoct.buildLastDesc();
 					uint64_t Mortonlast = last_desc.computeMorton();
 					Mortontry = octants[idxtry].computeMorton();
 					while(Mortontry < Mortonlast && idxtry <= noctants-1){
@@ -3802,7 +3921,8 @@ private:
 		uint64_t  Morton, Mortontry;
 		uint32_t  noctants = getNumOctants();
 		uint32_t idxtry;
-		Class_Octant<2>* oct = &ghosts[idx];
+		//Class_Octant<2>* oct = &ghosts[idx];
+		classOctant* oct = &ghosts[idx];
 		uint32_t size = oct->getSize();
 		uint8_t iface1, iface2;
 		int32_t Dhx, Dhy;
@@ -3831,7 +3951,8 @@ private:
 		if (oct->info[iface1+global2D.nfaces] == true || oct->info[iface2+global2D.nfaces] == true){
 
 			//Build Morton number of virtual neigh of same size
-			Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));
+			//Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));
+			classOctant samesizeoct(2, oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));
 			Morton = samesizeoct.computeMorton();
 
 			// Search in octants
@@ -3886,7 +4007,8 @@ private:
 						return;
 					}
 					// Compute Last discendent of virtual octant of same size
-					Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+					//Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
+					classOctant last_desc = samesizeoct.buildLastDesc();
 					uint64_t Mortonlast = last_desc.computeMorton();
 					Mortontry = octants[idxtry].computeMorton();
 					while(Mortontry < Mortonlast && idxtry <= noctants-1){

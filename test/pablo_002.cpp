@@ -48,12 +48,11 @@ void test1() {
         nocts = pablo1.getNumOctants();
         for (int i=0; i<nocts; i++){
             /**<Extract Octant (pointer use).*/
-            Class_Octant<2> *oct = pablo1.getOctant(i);
+            classOctant *oct = pablo1.getOctant(i);
             /**<Compute center of the octant.*/
             vector<double> center = pablo1.getCenter(oct);
             double x = center[0];
             double y = center[1];
-
             /**<Set refinement marker=1 for octants inside a circle.*/
             if ((pow((x-xc),2.0)+pow((y-yc),2.0) < pow(radius,2.0)) &&
                     (y<yc)){

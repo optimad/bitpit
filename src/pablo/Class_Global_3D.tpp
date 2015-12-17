@@ -33,7 +33,7 @@ public:
 	nnodes(8),
 	nedges(12),
 	nnodesperface(4),
-	octantBytes(uint8_t(sizeof(uint32_t)*3 + sizeof(uint8_t) + sizeof(int8_t) + (16)*sizeof(bool))),
+	octantBytes(uint8_t(sizeof(uint32_t)*3 + sizeof(uint8_t) + sizeof(int8_t) + (17)*sizeof(bool))),
 	globalIndexBytes(uint8_t(sizeof(uint64_t))),
 	markerBytes(sizeof(int8_t)),
 	levelBytes(sizeof(uint8_t)),

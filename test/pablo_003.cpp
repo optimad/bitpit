@@ -32,7 +32,7 @@ void test2() {
     xc = yc = 0.5;
     double radius = 0.4;
 
-    /**<Simple adapt() 6 times the octants with at least one node inside the circle.*/
+    /**<Simple adapt() [refine] 6 times the octants with at least one node inside the circle.*/
     for (int iter=3; iter<9; iter++){
         uint32_t nocts = pablo2.getNumOctants();
         for (int i=0; i<nocts; i++){
@@ -43,6 +43,32 @@ void test2() {
                 double y = nodes[j][1];
                 if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
                     pablo2.setMarker(i, 1);
+                }
+            }
+        }
+        /**<Adapt octree.*/
+        pablo2.adapt();
+
+        /**<Update the connectivity and write the para_tree.*/
+        pablo2.updateConnectivity();
+        pablo2.write("Pablo2_iter"+to_string(static_cast<unsigned long long>(iter)));
+    }
+
+    /**<Simple adapt() [coarse] 3 times the octants with at least one node inside the 2nd circle.*/
+    /**<Define a center point and a radius.*/
+    double xc2, yc2;
+    xc2 = yc2 = 0.5;
+    double radius2 = 0.2;
+    for (int iter=9; iter<12; iter++){
+        uint32_t nocts = pablo2.getNumOctants();
+        for (int i=0; i<nocts; i++){
+            /**<Compute the nodes of the octant.*/
+            vector<vector<double> > nodes = pablo2.getNodes(i);
+            for (int j=0; j<global2D.nnodes; j++){
+                double x = nodes[j][0];
+                double y = nodes[j][1];
+                if ((pow((x-xc2),2.0)+pow((y-yc2),2.0) <= pow(radius2,2.0))){
+                    pablo2.setMarker(i, -1);
                 }
             }
         }
