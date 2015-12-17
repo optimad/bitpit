@@ -67,18 +67,6 @@ Interface::Interface(const long &id, ElementInfo::Type type)
 
 /*!
 	Evaluates the rotation matrix from the Cartesian coordinate system
-	to the interface coordinate system.
-
-	\result The rotation matrix from the Cartesian coordinate system
-	to the interface coordinate system.
-*/
-std::array<std::array<double, 3>, 3> Interface::eval_rotation_from_cartesian()
-{
-	return eval_rotation_from_cartesian(m_normal);
-}
-
-/*!
-	Evaluates the rotation matrix from the Cartesian coordinate system
 	to a coordinate system build starting from the specified versor.
 
 	Evaluates the rotation matrix that needs to be applied to the
@@ -133,22 +121,6 @@ std::array<std::array<double, 3>, 3> Interface::eval_rotation_from_cartesian(std
 	utils::normalize_3D(R[2]);
 
 	return R;
-}
-
-/*!
-	Evaluates the rotation matrix from the interface coordinate system
-	to the Cartesian coordinate system.
-
-	Evaluates the rotation matrix that needs to be applied to the
-	coordinates system defined on the interface to make it coincide
-	with the Cartesian coordinates system.
-
-	\result The rotation matrix from the interface coordinate system
-	to the Cartesian coordinate system.
-*/
-std::array<std::array<double, 3>, 3> Interface::eval_rotation_to_cartesian()
-{
-	return eval_rotation_to_cartesian(m_normal);
 }
 
 /*!
