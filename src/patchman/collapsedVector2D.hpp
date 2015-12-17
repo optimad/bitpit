@@ -6,9 +6,10 @@
 
 #include <vector>
 #include <cassert>
+#include <iostream>
 #include <memory>
 
-#include<iostream>
+#include "binary_stream.hpp"
 
 namespace pman {
 
@@ -22,9 +23,73 @@ namespace pman {
 	@tparam T The type of the objects stored in the vector
 */
 
+template<class T>
+class CollapsedVector2D;
+
+/*!
+	Stream operator from class CollapsedVector2D to communication buffer.
+	Stream data from vector to communication buffer
+
+	\param[in] buffer is the output memory stream
+	\param[in] vetor is the container to be streamed
+	\result Returns the same output stream received in input.
+*/
+template<class T>
+obinarystream& operator<<(obinarystream &buffer, const CollapsedVector2D<T> &vector)
+{
+	typename std::vector<T>::const_iterator           it;
+	typename std::vector<size_t>::const_iterator      jt;
+
+	buffer << vector.m_index.size() << vector.m_v.size();
+	for (jt = vector.m_index.begin(); jt != vector.m_index.end(); ++jt) {
+	    buffer << *(jt);
+	}
+	for (it = vector.m_v.begin(); it != vector.m_v.end(); ++it) {
+	    buffer << *(it);
+	}
+
+	return buffer;
+}
+
+/*!
+	Input stream operator from Communication buffer for class CollapsedVector2D.
+	Stream data from communication buffer to vector.
+
+	\param[in] buffer is the input memory stream
+	\param[in] vector is the container to be streamed
+	\result Returns the same input stream received in input.
+*/
+template<class T>
+ibinarystream& operator>>(ibinarystream &buffer, CollapsedVector2D<T> &vector)
+{
+    size_t                      size_m_v, size_m_index;
+    size_t                      i;
+
+    buffer >> size_m_index;
+    buffer >> size_m_v;
+
+    vector.m_index.resize(size_m_index, 0);
+    vector.m_v.resize(size_m_v);
+
+    for (i = 0; i < size_m_index; ++i) {
+        buffer >> vector.m_index[i];
+    }
+
+    for (i = 0; i < size_m_v; ++i) {
+        buffer >> vector.m_v[i];
+    }
+
+    return buffer;
+}
+
 template <class T>
 class CollapsedVector2D
 {
+
+template<class U>
+friend obinarystream& operator<<(obinarystream& buffer, const CollapsedVector2D<U>& vector);
+template<class U>
+friend ibinarystream& operator>>(ibinarystream& buffer, CollapsedVector2D<U>& vector);
 
 public:
 
@@ -547,6 +612,16 @@ public:
 	int sub_array_capacity() const
 	{
 		return m_v.capacity();
+	}
+
+	/*!
+	    Returns the buffer size (in bytes) required to store the container.
+
+	    \result The buffer size (in bytes) required to store the container.
+	*/
+	size_t get_binary_size()
+	{
+	     return ((2 + m_index.size())*sizeof(size_t) + m_v.size() * sizeof(T));
 	}
 
 private:
