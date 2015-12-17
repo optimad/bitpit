@@ -153,7 +153,6 @@ private:
 
 	ElementInfo::Type m_type;
 
-	std::array<double, 3> m_centroid;
 	std::unique_ptr<long[]> m_connect;
 
 	Element(const Element &other) = delete;
