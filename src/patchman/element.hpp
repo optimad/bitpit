@@ -10,6 +10,8 @@
 #include <memory>
 #include <vector>
 
+#include "binary_stream.hpp"
+
 namespace pman {
 
 class ElementInfo {
@@ -76,7 +78,15 @@ private:
 
 };
 
+class Element;
+
+ibinarystream& operator>>(ibinarystream &buf, Element& element);
+obinarystream& operator<<(obinarystream &buf, const Element& element);
+
 class Element {
+
+friend obinarystream& operator<<(obinarystream& buf, const Element& element);
+friend ibinarystream& operator>>(ibinarystream& buf, Element& element);
 
 public:
 	/*!
@@ -147,6 +157,8 @@ public:
 	int get_vertex(const int &vertex) const;
 
 	static const long NULL_ELEMENT_ID;
+
+	unsigned int get_binary_size();
 
 private:
 	long m_id;

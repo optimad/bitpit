@@ -1173,4 +1173,51 @@ int Element::get_vertex(const int &vertex) const
 	return m_connect[vertex];
 }
 
+/*!
+        Returns the buffer size required to communicate cell data
+
+        \result buffer size (in bytes)
+*/
+unsigned int Element::get_binary_size()
+{
+    return (sizeof(ElementInfo::Type) + get_vertex_count() * sizeof(long));
+}
+
+/*!
+	Input stream operator for class Element
+
+	\param[in] buffer is the input stream
+	\param[in] element is the element to be streamed
+	\result Returns the same input stream received in input.
+*/
+ibinarystream& operator>>(ibinarystream &buffer, Element &element)
+{
+	buffer >> element.m_type;
+	element.initialize(element.m_type);
+	int nVertices = element.get_vertex_count();
+	for (int i = 0; i < nVertices; ++i) {
+	    buffer >> element.m_connect[i];
+	}
+
+	return buffer;
+}
+
+/*!
+	Output stream operator for element
+
+	\param[in] buffer is the output stream
+	\param[in] element is the element to be streamed
+	\result Returns the same output stream received in input.
+*/
+obinarystream& operator<<(obinarystream  &buffer, const Element &element)
+{
+	int nVertices = element.get_vertex_count();
+	buffer << element.get_type();
+	for (int i = 0; i < nVertices; ++i) {
+	    buffer << element.m_connect[i];
+	}
+
+	return buffer;
+}
+
 }
