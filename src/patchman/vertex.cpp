@@ -9,6 +9,11 @@
 namespace pman {
 
 /*!
+	\ingroup PatchMan
+	@{
+*/
+
+/*!
 	\class Vertex
 
 	\brief The Vertex class defines the vertexs.
@@ -153,5 +158,9 @@ ibinarystream& operator>>(ibinarystream &in_stream, Vertex &vertex)
 
 	return in_stream;
 }
+
+/*!
+	@}
+*/
 
 }

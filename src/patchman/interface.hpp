@@ -13,6 +13,11 @@
 
 namespace pman {
 
+/*!
+	\ingroup PatchMan
+	@{
+*/
+
 class Interface : public Element {
 
 public:
@@ -55,6 +60,10 @@ private:
 	Interface& operator = (const Interface &other) = delete;
 
 };
+
+/*!
+	@}
+*/
 
 }
 

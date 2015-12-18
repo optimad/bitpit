@@ -20,6 +20,11 @@
 
 namespace pman {
 
+/*!
+	\ingroup PatchMan
+	@{
+*/
+
 class Patch {
 
 public:
@@ -138,6 +143,10 @@ private:
 
 	std::array<double, 3> eval_element_centroid(const Element &element);
 };
+
+/*!
+	@}
+*/
 
 }
 

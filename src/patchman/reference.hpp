@@ -8,6 +8,10 @@
 
 namespace pman {
 
+/*!
+	\ingroup PatchMan
+	@{
+*/
 
 /*!
 	@brief Class that emulates a reference to an element of type T.
@@ -92,6 +96,10 @@ private:
 
 template<class T>
 T Reference<T>::m_null = T();
+
+/*!
+	@}
+*/
 
 }
 

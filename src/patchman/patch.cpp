@@ -10,6 +10,11 @@
 
 namespace pman {
 
+/*!
+	\ingroup PatchMan
+	@{
+*/
+
 // Explicit instantiation of the PiercedVectors
 template class PiercedVector<Cell>;
 template class PiercedVector<Interface>;
@@ -1093,5 +1098,9 @@ std::array<double, 3> Patch::eval_element_centroid(const Element &element)
 
 	return centroid;
 }
+
+/*!
+	@}
+*/
 
 }

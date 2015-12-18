@@ -9,6 +9,11 @@
 namespace pman {
 
 /*!
+	\ingroup PatchMan
+	@{
+*/
+
+/*!
 	\class PatchCartesian
 
 	\brief The PatchCartesian defines a Cartesian patch.
@@ -688,5 +693,9 @@ long PatchCartesian::interface_nijk_to_id(const int &normal, const int &i, const
 
 	return id;
 }
+
+/*!
+	@}
+*/
 
 }

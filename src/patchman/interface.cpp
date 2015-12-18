@@ -11,6 +11,11 @@
 namespace pman {
 
 /*!
+	\ingroup PatchMan
+	@{
+*/
+
+/*!
 	\class Interface
 
 	\brief The Interface class defines the interfaces among cells.
@@ -267,5 +272,9 @@ std::array<long, 2> Interface::get_owner_neigh() const
 
 	return cells;
 }
+
+/*!
+	@}
+*/
 
 }

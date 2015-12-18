@@ -16,6 +16,11 @@
 
 namespace pman {
 
+/*!
+	\ingroup PatchMan
+	@{
+*/
+
 class Cell;
 class Vertex;
 
@@ -82,6 +87,10 @@ private:
 	std::vector<vtkIdType> extractVTKCellConnect(const Cell &cell, std::unordered_map<long, vtkIdType> &vertexMap);
 
 };
+
+/*!
+	@}
+*/
 
 }
 

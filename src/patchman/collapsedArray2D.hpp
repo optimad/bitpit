@@ -13,6 +13,11 @@
 namespace pman {
 
 /*!
+	\ingroup PatchMan
+	@{
+*/
+
+/*!
 	@brief Metafunction for generation of a collapsed array of arrays.
 
 	@details
@@ -336,6 +341,10 @@ private:
 	}
 
 };
+
+/*!
+	@}
+*/
 
 }
 

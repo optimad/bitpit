@@ -21,6 +21,11 @@
 
 namespace pman {
 
+/*!
+	\ingroup PatchMan
+	@{
+*/
+
 // Description:
 // Crea un nuovo oggetto
 vtkStandardNewMacro(OutputManager);
@@ -377,5 +382,9 @@ void OutputManager::writeTimeWrapper(int timeStep, double time, int reset,
 
 	wrapperFile.close();
 }
+
+/*!
+	@}
+*/
 
 }

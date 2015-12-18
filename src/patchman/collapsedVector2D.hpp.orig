@@ -6,17 +6,11 @@
 
 #include <vector>
 #include <cassert>
-#include <iostream>
 #include <memory>
 
-#include "binary_stream.hpp"
+#include<iostream>
 
 namespace pman {
-
-/*!
-	\ingroup PatchMan
-	@{
-*/
 
 /*!
 	@brief Metafunction for generation of a collapsed vector of arrays.
@@ -28,73 +22,9 @@ namespace pman {
 	@tparam T The type of the objects stored in the vector
 */
 
-template<class T>
-class CollapsedVector2D;
-
-/*!
-	Stream operator from class CollapsedVector2D to communication buffer.
-	Stream data from vector to communication buffer
-
-	\param[in] buffer is the output memory stream
-	\param[in] vetor is the container to be streamed
-	\result Returns the same output stream received in input.
-*/
-template<class T>
-obinarystream& operator<<(obinarystream &buffer, const CollapsedVector2D<T> &vector)
-{
-	typename std::vector<T>::const_iterator           it;
-	typename std::vector<size_t>::const_iterator      jt;
-
-	buffer << vector.m_index.size() << vector.m_v.size();
-	for (jt = vector.m_index.begin(); jt != vector.m_index.end(); ++jt) {
-	    buffer << *(jt);
-	}
-	for (it = vector.m_v.begin(); it != vector.m_v.end(); ++it) {
-	    buffer << *(it);
-	}
-
-	return buffer;
-}
-
-/*!
-	Input stream operator from Communication buffer for class CollapsedVector2D.
-	Stream data from communication buffer to vector.
-
-	\param[in] buffer is the input memory stream
-	\param[in] vector is the container to be streamed
-	\result Returns the same input stream received in input.
-*/
-template<class T>
-ibinarystream& operator>>(ibinarystream &buffer, CollapsedVector2D<T> &vector)
-{
-    size_t                      size_m_v, size_m_index;
-    size_t                      i;
-
-    buffer >> size_m_index;
-    buffer >> size_m_v;
-
-    vector.m_index.resize(size_m_index, 0);
-    vector.m_v.resize(size_m_v);
-
-    for (i = 0; i < size_m_index; ++i) {
-        buffer >> vector.m_index[i];
-    }
-
-    for (i = 0; i < size_m_v; ++i) {
-        buffer >> vector.m_v[i];
-    }
-
-    return buffer;
-}
-
 template <class T>
 class CollapsedVector2D
 {
-
-template<class U>
-friend obinarystream& operator<<(obinarystream& buffer, const CollapsedVector2D<U>& vector);
-template<class U>
-friend ibinarystream& operator>>(ibinarystream& buffer, CollapsedVector2D<U>& vector);
 
 public:
 
@@ -114,7 +44,7 @@ public:
 		\param value is the value that will be use to initialize the
 		element of the sub-arrays
 	*/
-	CollapsedVector2D(const std::vector<int> &subArraySizes, const T &value = T())
+	CollapsedVector2D(std::vector<int> &subArraySizes, T &value = T())
 	{
 		// Initialize the vector
 		clear();
@@ -185,28 +115,19 @@ public:
 	}
 
 	/*!
-		Copy assignment operator
+		Assigns content
 
 		Assigns new contents to the container, replacing its current
 		contents, and modifying its size accordingly.
 	*/
-	CollapsedVector2D & operator= (const CollapsedVector2D &other)
+	CollapsedVector2D & operator= (CollapsedVector2D other)
 	{
 		if (this != &other) {
-			CollapsedVector2D temporary(other);
-			temporary.swap(*this);
+			other.swap(*this);
 		}
 
 		return *this;
 	}
-
-	/*!
-		Move assignment operator
-
-		The move assignment operator "steals" the resources held by the
-		argument.
-	*/
-	CollapsedVector2D & operator= (CollapsedVector2D &&other) = default;
 
 	/*!
 		Requests a change in capacity
@@ -619,16 +540,6 @@ public:
 		return m_v.capacity();
 	}
 
-	/*!
-	    Returns the buffer size (in bytes) required to store the container.
-
-	    \result The buffer size (in bytes) required to store the container.
-	*/
-	size_t get_binary_size()
-	{
-	     return ((2 + m_index.size())*sizeof(size_t) + m_v.size() * sizeof(T));
-	}
-
 private:
 	std::vector<T> m_v;
 	std::vector<std::size_t> m_index;
@@ -689,14 +600,10 @@ private:
 			return false;
 		}
 
-		return (j >= 0 && j < (int) (m_index[i+1] - m_index[i]));
+		return (j >= 0 && j < (m_index[i+1] - m_index[i]));
 	}
 
 };
-
-/*!
-	@}
-*/
 
 }
 

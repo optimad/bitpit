@@ -19,6 +19,11 @@
 
 namespace pman {
 
+/*!
+	\ingroup PatchMan
+	@{
+*/
+
 struct OctreeLevelInfo{
     int    level;
     double h;
@@ -144,6 +149,10 @@ private:
 	                 std::vector<std::vector<bool>> &ownerFlags);
 	void delete_cell(long id);
 };
+
+/*!
+	@}
+*/
 
 }
 

@@ -12,6 +12,11 @@
 
 namespace pman {
 
+/*!
+	\ingroup PatchMan
+	@{
+*/
+
 class Vertex;
 
 obinarystream& operator<<(obinarystream &out, const Vertex &vertex);
@@ -54,6 +59,10 @@ private:
 	std::array<double, 3> m_coords;
 
 };
+
+/*!
+	@}
+*/
 
 }
 

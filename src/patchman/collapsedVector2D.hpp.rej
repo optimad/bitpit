@@ -1,0 +1,11 @@
+--- src/patchman/collapsedVector2D.hpp
++++ src/patchman/collapsedVector2D.hpp
+@@ -600,7 +600,7 @@ private:
+ 			return false;
+ 		}
+ 
+-		return (j >= 0 && j < (m_index[i+1] PatchMan: - m_index[i]));
++		return (j >= 0 && j < (int) (m_index[i+1] PatchMan: - m_index[i]));
+ 	}
+ 
+ };

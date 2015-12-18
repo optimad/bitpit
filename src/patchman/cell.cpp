@@ -11,6 +11,11 @@
 namespace pman {
 
 /*!
+	\ingroup PatchMan
+	@{
+*/
+
+/*!
 	\class Cell
 
 	\brief The Cell class defines the cells.
@@ -312,5 +317,9 @@ unsigned int Cell::get_binary_size()
 {
     return (Element::get_binary_size() + m_interfaces.get_binary_size());
 }
+
+/*!
+	@}
+*/
 
 }

@@ -15,6 +15,11 @@
 
 namespace pman {
 
+/*!
+	\ingroup PatchMan
+	@{
+*/
+
 class PatchCartesian : public Patch {
 
 public:
@@ -73,6 +78,10 @@ private:
 	long interface_nijk_to_id(const int &normal, const int &i, const int &j, const int &k) const;
 
 };
+
+/*!
+	@}
+*/
 
 }
 

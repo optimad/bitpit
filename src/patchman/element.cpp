@@ -10,6 +10,11 @@
 namespace pman {
 
 /*!
+	\ingroup PatchMan
+	@{
+*/
+
+/*!
 	\class ElementInfo
 
 	\brief The ElementInfo class allow to define elements information.
@@ -1219,5 +1224,9 @@ obinarystream& operator<<(obinarystream  &buffer, const Element &element)
 
 	return buffer;
 }
+
+/*!
+	@}
+*/
 
 }

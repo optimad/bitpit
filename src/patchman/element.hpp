@@ -14,6 +14,11 @@
 
 namespace pman {
 
+/*!
+	\ingroup PatchMan
+	@{
+*/
+
 class ElementInfo {
 
 public:
@@ -171,6 +176,10 @@ private:
 	Element& operator = (const Element &other) = delete;
 
 };
+
+/*!
+	@}
+*/
 
 }
 

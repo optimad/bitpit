@@ -13,6 +13,11 @@
 
 namespace pman {
 
+/*!
+	\ingroup PatchMan
+	@{
+*/
+
 class Cell;
 
 ibinarystream& operator>>(ibinarystream &buf, Cell& cell);
@@ -62,6 +67,10 @@ private:
 	Cell& operator = (const Cell &other) = delete;
 
 };
+
+/*!
+	@}
+*/
 
 }
 
