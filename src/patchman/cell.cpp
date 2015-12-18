@@ -197,4 +197,70 @@ const long * Cell::get_interfaces(const int &face) const
 	return m_interfaces.get(face);
 }
 
+/*!
+	Displays the cell information to an output stream
+
+	\param[in] out is the output stream
+	\param[in] indent is the number of trailing spaces to prepend when
+	writing the information
+*/
+void Cell::display(std::ostream &out, unsigned short int indent)
+{
+	// ====================================================================== //
+	// VARIABLES DECLARATION                                                  //
+	// ====================================================================== //
+
+	// Local variables
+	std::string                 t_s(indent, ' ');
+
+	// Counters
+	int                         i, j;
+	int                         nn;
+
+	// ====================================================================== //
+	// DISPLAY INFOS                                                          //
+	// ====================================================================== //
+	if (get_type() != ElementInfo::UNDEFINED) {
+	    out << t_s << "cell type:    (unknown)" << std::endl;
+	    return;
+	}
+
+	// Scope variables -------------------------------------------------- //
+	int                         nv = get_vertex_count();
+	int                         nf = get_face_count();
+
+	// General info ----------------------------------------------------- //
+	out << t_s << "cell type:    " << get_type() << std::endl;
+	out << t_s << "ID:           " << get_id() << std::endl;
+	out << t_s << "is ghost:     ";
+	if (m_interior)     { out << "(false)"; }
+	else                { out << "(true)"; }
+	out << std::endl;
+
+	// Connectivity infos --------------------------------------------------- //
+	out << t_s << "connectivity: [ ";
+	for (i = 0; i < nv-1; ++i) {
+		out << get_vertex(i) << ", ";
+	} //next i
+	out << get_vertex(nv-1) << " ]" << std::endl;
+
+	// neighbors infos ------------------------------------------------------ //
+	out << t_s << "neighbors:   [ ";
+	for (i = 0; i < nf-1; ++i) {
+		nn = get_interface_count(i);
+		out << "[ ";
+		for (j = 0; j < nn-1; ++j) {
+			out << get_interface(i, j) << ", ";
+		} //next j
+		out << get_interface(i, nn-1) << " ], ";
+	} //next i
+	nn = get_interface_count(nf-1);
+	out << "[ ";
+	for (j = 0; j < nn-1; ++j) {
+		out << get_interface(nf-1, j) << ", ";
+	} //next j
+	out << get_interface(nf-1, nn-1) << " ]";
+	out << " ]" << std::endl;
+}
+
 }

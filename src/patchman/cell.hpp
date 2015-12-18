@@ -39,6 +39,8 @@ public:
 	const long * get_interfaces() const;
 	const long * get_interfaces(const int &face) const;
 
+	void display(std::ostream &out, unsigned short int indent);
+
 protected:
 
 private:
