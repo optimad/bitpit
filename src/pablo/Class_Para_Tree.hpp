@@ -35,6 +35,16 @@
 using namespace std;
 
 // =================================================================================== //
+// BASE CLASS DEFINITION                                                               //
+// =================================================================================== //
+class Class_Para_Tree_Base {
+
+public:
+	virtual ~Class_Para_Tree_Base() {};
+
+};
+
+// =================================================================================== //
 // CLASS DEFINITION                                                                    //
 // =================================================================================== //
 
@@ -59,7 +69,12 @@ using namespace std;
  *	Class Para_Tree is a templated class in dimensional parameter int dim and it accepts only two values: dim=2 (Class_Para_Tree<2>)and dim=3 (Class_Para_Tree<3>), obviously for 2D and 3D respectively.
  */
 template<int dim>
-class Class_Para_Tree{};
+class Class_Para_Tree : public Class_Para_Tree_Base {
+
+public:
+	~Class_Para_Tree() {};
+
+};
 
 #include "Class_Para_Tree_3D.tpp"
 #include "Class_Para_Tree_2D.tpp"
