@@ -22,6 +22,8 @@ IF(BUILD_DOCUMENTATION)
   SET( doxy_html_index_file ${CMAKE_CURRENT_BINARY_DIR}/html/index.html )
   SET( doxy_output_root     ${CMAKE_CURRENT_BINARY_DIR}                 ) # Pasted into Doxyfile.in
   SET( doxy_input           ${PROJECT_SOURCE_DIR}/src                   ) # Pasted into Doxyfile.in
+  SET( doxy_extra_files     ${CMAKE_CURRENT_SOURCE_DIR}/extra/BitP_Mesh.hpp
+                            ${CMAKE_CURRENT_SOURCE_DIR}/extra/patchman_styleguide.hpp )
 
   if (NOT "${DOC_EXTRACT_PRIVATE_INTERNAL}" STREQUAL "${DOC_EXTRACT_PRIVATE}")
     if (EXISTS ${doxy_html_index_file})
@@ -42,9 +44,11 @@ IF(BUILD_DOCUMENTATION)
                       MAIN_DEPENDENCY ${doxyfile} ${doxyfile_in}
                       DEPENDS ${doxy_extra_files} ${doxyfile_in}
                               ${COMMON_HEADERS}
-                              ${BASE_SOURCES} ${BASE_HEADERS}
-                              ${IO_SOURCES} ${IO_HEADERS}
-                              ${SA_SOURCES} ${SA_HEADERS}
+                              ${PABLO_SOURCES} ${PABLO_HEADERS}
+                              ${PATCHMAN_SOURCES} ${PATCHMAN_HEADERS}
+                              ${SURFTRI_SOURCES} ${SURFTRI_HEADERS}
+                              ${UCARTMESH_SOURCES} ${UCARTMESH_HEADERS}
+                              ${VOLTRI_SOURCES} ${VOLTRI_HEADERS}
                               ${EXAMPLES_SOURCES}
                       COMMENT "Generating HTML documentation")
 
