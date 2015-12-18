@@ -1,4 +1,5 @@
 /*!
+\ingroup PatchMan
 
 \page styleguide Coding Style Guide
 
