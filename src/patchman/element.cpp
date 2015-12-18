@@ -16,6 +16,10 @@ namespace pman {
 
 	Element is a struct that hold the basic geometrical information of
 	an element.
+
+	The local numbering scheme of element vertices is shown below.
+
+	\image html patchman_elements.png
 */
 
 /*!
