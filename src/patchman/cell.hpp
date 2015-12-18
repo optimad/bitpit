@@ -13,7 +13,15 @@
 
 namespace pman {
 
+class Cell;
+
+ibinarystream& operator>>(ibinarystream &buf, Cell& cell);
+obinarystream& operator<<(obinarystream &buf, const Cell& cell);
+
 class Cell : public Element {
+
+friend obinarystream& operator<<(obinarystream& buf, const Cell& cell);
+friend ibinarystream& operator>>(ibinarystream& buf, Cell& cell);
 
 public:
 	Cell();
@@ -40,6 +48,8 @@ public:
 	const long * get_interfaces(const int &face) const;
 
 	void display(std::ostream &out, unsigned short int indent);
+
+	unsigned int get_binary_size( );
 
 protected:
 
