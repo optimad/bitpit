@@ -47,6 +47,18 @@ Vertex::Vertex(const long &id, std::array<double, 3> &coords)
 }
 
 /*!
+	Comparison operator
+
+	\param[in] other is the object to be compared with
+	\result Returns the boolean result of comparison of the values of the
+	arguments, which are not modified.
+*/
+bool Vertex::operator==(const Vertex &other)
+{
+	return (m_coords == other.m_coords);
+}
+
+/*!
 	Get a reference to the specified coordinate
 
 	\param coord_id is the index of the requested coordinate

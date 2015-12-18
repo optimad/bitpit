@@ -36,6 +36,8 @@ public:
 	Vertex(Vertex &&other) = default;
 	Vertex& operator=(Vertex &&other) = default;
 
+	bool operator==(const Vertex &other);
+
 	double & operator[](int coord_id);
 	const double & operator[](int coord_id) const;
 
