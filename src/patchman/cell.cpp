@@ -11,9 +11,8 @@
 namespace pman {
 
 /*!
-    \ingroup    PatchMan
-	\class      Cell
-    @{
+	\class Cell
+
 	\brief The Cell class defines the cells.
 
 	Cell is class that defines the cells.
@@ -506,5 +505,3 @@ CellData * Cell::get_data() const
 }
 
 }
-
-/*!  @} */

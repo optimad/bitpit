@@ -4,7 +4,7 @@
 #ifndef __PATCHMAN_PATCH_HPP__
 #define __PATCHMAN_PATCH_HPP__
 
-//asc /*! \file */
+/*! \file */
 
 #include "cell.hpp"
 #include "interface.hpp"

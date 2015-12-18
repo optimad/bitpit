@@ -9,10 +9,9 @@
 namespace pman {
 
 /*!
-    \ingroup    PatchMan
-    @{
-	\class      Patch
-	\brief      The Patch class provides an interface for defining patches.
+	\class Patch
+
+	\brief The Patch class provides an interface for defining patches.
 
 	Patch is the base class for defining patches like .
 */
@@ -542,5 +541,3 @@ void Patch::squeeze()
 }
 
 }
-
-/*! @} */

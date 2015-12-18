@@ -13,9 +13,6 @@
 namespace pman {
 
 /*!
-    @group PatchMan
-    @{
-
 	@brief Metafunction for generation of a collapsed array of arrays.
 
 	@details
@@ -337,8 +334,6 @@ private:
 
 		return j < (m_index[i+1] - m_index[i]);
 	}
-
-/*! @}  */
 
 };
 

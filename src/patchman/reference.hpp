@@ -10,12 +10,9 @@ namespace pman {
 
 
 /*!
- 
-    \ingroup    PatchMan
-    @{
-	\brief Class that emulates a reference to an element of type T.
+	@brief Class that emulates a reference to an element of type T.
 
-	\details
+	@details
 	Reference is a class that emulates a reference to an element of type T.
 	Unlike a classic reference, a Reference object can be copied (it is
 	both copy-constructible and copy-assignable) and can referece to a
@@ -97,7 +94,5 @@ template<class T>
 T Reference<T>::m_null = T();
 
 }
-
-/*  @}  */
 
 #endif

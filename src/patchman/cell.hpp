@@ -4,10 +4,7 @@
 #ifndef __PATCHMAN_CELL_HPP__
 #define __PATCHMAN_CELL_HPP__
 
-/*!       
- *  \ingroup    PatchMan
- *  @{
- */
+/*! \file */
 
 #include "collapsedArray2D.hpp"
 #include "element.hpp"
@@ -87,5 +84,4 @@ private:
 
 }
 
-/*! @}  */
 #endif
