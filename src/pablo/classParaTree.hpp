@@ -12,7 +12,6 @@
 #include "classLocalTree.hpp"
 #include "Class_Comm_Buffer.hpp"
 #include "classMap.hpp"
-#include "Class_Array.hpp"
 #include "Class_Data_Comm_Interface.hpp"
 #include "Class_Data_LB_Interface.hpp"
 #include "Class_Log.hpp"

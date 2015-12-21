@@ -8,7 +8,6 @@
 #include "classIntersection.hpp"
 #include <math.h>
 #include <stdint.h>
-#include <vector>
 #include <string.h>
 #include <map>
 #include <iostream>

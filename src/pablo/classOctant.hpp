@@ -2,11 +2,13 @@
 #define CLASSOCTANT_HPP_
 
 // INCLUDES                                                                            //
-#include <algorithm>
-#include <bitset>
 #include "classGlobal.hpp"
 #include "inlinedFunct.hpp"
+#include "Class_Array.hpp"
+#include <algorithm>
 #include <iostream>
+#include <vector>
+#include <bitset>
 
 // =================================================================================== //
 // NAME SPACES                                                                         //
