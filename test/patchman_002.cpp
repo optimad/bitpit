@@ -3,7 +3,8 @@
 //
 
 #include <array>
-#include "patchman.hpp"
+
+#include "BitP_Mesh_PATCHMAN.hpp"
 
 //-------------------------------------------------------------------------------
 void test1() {
