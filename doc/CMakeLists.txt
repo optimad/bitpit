@@ -43,7 +43,7 @@ IF(BUILD_DOCUMENTATION)
                       # but I still have to figure out how...
                       MAIN_DEPENDENCY ${doxyfile} ${doxyfile_in}
                       DEPENDS ${doxy_extra_files} ${doxyfile_in}
-                              ${COMMON_HEADERS}
+                              ${COMMON_SOURCES} ${COMMON_HEADERS}
                               ${PABLO_SOURCES} ${PABLO_HEADERS}
                               ${PATCHMAN_SOURCES} ${PATCHMAN_HEADERS}
                               ${SURFTRI_SOURCES} ${SURFTRI_HEADERS}
