@@ -53,10 +53,9 @@ if (NOT WITHOUT_MPI)
 	find_package(MPI)
 endif()
 
+if (NOT ONLY_PABLO)
 find_package(BITP_BASE REQUIRED)
 include_directories(${BITP_BASE_INCLUDE_DIRS})
-
-if (NOT ONLY_PABLO)
 find_package(VTK 6.0 REQUIRED COMPONENTS vtkIOXML vtkIOLegacy NO_MODULE)
 include(${VTK_USE_FILE})
 endif()
