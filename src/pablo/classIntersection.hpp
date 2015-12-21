@@ -22,10 +22,9 @@ using namespace std;
 /*!
  *  \ingroup        PABLO
  *  @{
- *	\date			23/apr/2014
+ *	\date			16/dec/2015
  *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
- *	\version		0.1
  *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
  *	\par			License:\n
  *	This version of PABLO is released under the LGPL License.
@@ -97,7 +96,7 @@ public:
 	/*!Get the owner with entering normal;
 	 */
 	uint32_t getIn();
-	void getNormal(int8_t normal[3]);
+	void getNormal(int8_t normal[3], int8_t normals[6][3]);
 	bool getBound();
 	bool getIsGhost();
 	bool getPbound();

@@ -8,7 +8,7 @@
 #include "preprocessor_defines.dat"
 #include "Class_Global.hpp"
 #include "Class_Octant.hpp"
-#include "classOctant.hpp"
+//#include "classOctant.hpp"
 #include "Class_Intersection.hpp"
 #include <math.h>
 #include <stdint.h>

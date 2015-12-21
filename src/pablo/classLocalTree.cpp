@@ -8,13 +8,14 @@
 // =================================================================================== //
 
 /*!Dimensional and default constructor.
- * \param[in] dim_ Space dimension of octree (optional).
+ * \param[in] dim_ Space dimension of octree.
  */
-classLocalTree::classLocalTree(uint8_t dim_){
+classLocalTree::classLocalTree(int8_t maxlevel, uint8_t dim_){
 	dim = dim_;
+	global.setGlobal(maxlevel, dim);
 	classOctant oct0(dim);
-	classOctant octf(dim,CG::MAX_LEVEL,0,0,0);
-	classOctant octl(dim,CG::MAX_LEVEL,CG::max_length-1,CG::max_length-1,(dim-2)*(CG::max_length-1));
+	classOctant octf(dim,global.MAX_LEVEL,0,0,0);
+	classOctant octl(dim,global.MAX_LEVEL,global.max_length-1,global.max_length-1,(dim-2)*(global.max_length-1));
 	octants.resize(1);
 	octants[0] = oct0;
 	first_desc = octf;
@@ -87,18 +88,18 @@ void classLocalTree::setBalanceCodim(uint8_t b21codim){
 
 void classLocalTree::setFirstDesc(){
 	octvector::const_iterator firstOctant = octants.begin();
-	first_desc = classOctant(dim, CG::MAX_LEVEL, firstOctant->x, firstOctant->y, firstOctant->z);
+	first_desc = classOctant(dim, global.MAX_LEVEL, firstOctant->x, firstOctant->y, firstOctant->z);
 };
 
 void classLocalTree::setLastDesc(){
 	octvector::const_iterator lastOctant = octants.end() - 1;
 	uint32_t x,y,z,delta;
-	//delta = (uint32_t)pow(2.0,(double)((uint8_t)CG::MAX_LEVEL - lastOctant->level)) - 1;
-	delta = (uint32_t)(1<<((uint8_t)CG::MAX_LEVEL - lastOctant->level)) - 1;
+	//delta = (uint32_t)pow(2.0,(double)((uint8_t)global.MAX_LEVEL - lastOctant->level)) - 1;
+	delta = (uint32_t)(1<<((uint8_t)global.MAX_LEVEL - lastOctant->level)) - 1;
 	x = lastOctant->x + delta;
 	y = lastOctant->y + delta;
 	z = lastOctant->z + (dim-2)*delta;
-	last_desc = classOctant(dim, CG::MAX_LEVEL,x,y,z);
+	last_desc = classOctant(dim, global.MAX_LEVEL,x,y,z);
 };
 
 
@@ -138,12 +139,12 @@ bool classLocalTree::refine(u32vector* mapidx){
 	octvector 		children;
 	uint32_t 		idx, nocts, ilastch;
 	uint32_t 		offset = 0, blockidx;
-	uint8_t 		nchm1 = CG::nchildren-1, ich;
+	uint8_t 		nchm1 = global.nchildren-1, ich;
 	bool 			dorefine = false;
 
 	nocts = octants.size();
 	for (idx=0; idx<nocts; idx++){
-		if(octants[idx].getMarker() > 0 && octants[idx].getLevel() < CG::MAX_LEVEL){
+		if(octants[idx].getMarker() > 0 && octants[idx].getLevel() < global.MAX_LEVEL){
 			last_child_index.push_back(idx+nchm1+offset);
 			offset += nchm1;
 		}
@@ -166,8 +167,8 @@ bool classLocalTree::refine(u32vector* mapidx){
 		while (idx>blockidx){
 			idx--;
 			if(idx == last_child_index[ilastch]){
-				children = octants[idx-offset].buildChildren();
-				for (ich=0; ich<CG::nchildren; ich++){
+				children = octants[idx-offset].buildChildren(global.MAX_LEVEL);
+				for (ich=0; ich<global.nchildren; ich++){
 					octants[idx-ich] = (children[nchm1-ich]);
 					if(mapidx != NULL) mapidx[idx-ich]  = mapidx[idx-offset];
 				}
@@ -223,7 +224,7 @@ bool classLocalTree::coarse(u32vector* mapidx){
 	uint32_t 		nidx;
 	int8_t 			markerfather, marker;
 	uint8_t 		nbro, nend;
-	uint8_t 		nchm1 = CG::nchildren-1;
+	uint8_t 		nchm1 = global.nchildren-1;
 	bool 			docoarse = false;
 	bool 			wstop = false;
 
@@ -257,16 +258,16 @@ bool classLocalTree::coarse(u32vector* mapidx){
 	for (idx=0; idx<nocts; idx++){
 		if(octants[idx].getMarker() < 0 && octants[idx].getLevel() > 0){
 			nbro = 0;
-			father = octants[idx].buildFather();
+			father = octants[idx].buildFather(global.MAX_LEVEL);
 			// Check if family is to be refined
-			for (idx2=idx; idx2<idx+CG::nchildren; idx2++){
+			for (idx2=idx; idx2<idx+global.nchildren; idx2++){
 				if (idx2<nocts){
-					if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
+					if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather(global.MAX_LEVEL) == father){
 						nbro++;
 					}
 				}
 			}
-			if (nbro == CG::nchildren){
+			if (nbro == global.nchildren){
 				nidx++;
 				first_child_index.push_back(idx);
 				idx = idx2-1;
@@ -281,12 +282,12 @@ bool classLocalTree::coarse(u32vector* mapidx){
 		for (idx=0; idx<nblock; idx++){
 			if (nidx < nfchild){
 				if (idx+offset == first_child_index[nidx]){
-					markerfather = -CG::MAX_LEVEL;
-					father = octants[idx+offset].buildFather();
+					markerfather = -global.MAX_LEVEL;
+					father = octants[idx+offset].buildFather(global.MAX_LEVEL);
 					for (uint32_t iii=0; iii<17; iii++){
 						father.info[iii] = false;
 					}
-					for(idx2=0; idx2<CG::nchildren; idx2++){
+					for(idx2=0; idx2<global.nchildren; idx2++){
 						if (markerfather < octants[idx+offset+idx2].getMarker()+1){
 							markerfather = octants[idx+offset+idx2].getMarker()+1;
 						}
@@ -326,21 +327,21 @@ bool classLocalTree::coarse(u32vector* mapidx){
 
 	// End on ghosts
 	if (ghosts.size() && nocts > 0){
-		if (ghosts[idx2_gh].buildFather() == octants[nocts-1].buildFather()){
-			father = ghosts[idx2_gh].buildFather();
-			for (uint32_t iii=0; iii<16; iii++){
+		if (ghosts[idx2_gh].buildFather(global.MAX_LEVEL) == octants[nocts-1].buildFather(global.MAX_LEVEL)){
+			father = ghosts[idx2_gh].buildFather(global.MAX_LEVEL);
+			for (uint32_t iii=0; iii<17; iii++){
 				father.info[iii] = false;
 			}
 			markerfather = ghosts[idx2_gh].getMarker()+1;
 			nbro = 0;
 			idx = idx2_gh;
 			marker = ghosts[idx].getMarker();
-			while(marker < 0 && ghosts[idx].buildFather() == father){
+			while(marker < 0 && ghosts[idx].buildFather(global.MAX_LEVEL) == father){
 				nbro++;
 				if (markerfather < ghosts[idx].getMarker()+1){
 					markerfather = ghosts[idx].getMarker()+1;
 				}
-				for (uint32_t iii=0; iii<CG::nfaces; iii++){
+				for (uint32_t iii=0; iii<global.nfaces; iii++){
 					father.info[iii] = father.info[iii] || ghosts[idx].info[iii];
 				}
 				father.info[14] = father.info[14] || ghosts[idx].info[14];
@@ -353,7 +354,7 @@ bool classLocalTree::coarse(u32vector* mapidx){
 			nend = 0;
 			idx = nocts-1;
 			marker = octants[idx].getMarker();
-			while(marker < 0 && octants[idx].buildFather() == father && idx >= 0){
+			while(marker < 0 && octants[idx].buildFather(global.MAX_LEVEL) == father && idx >= 0){
 				nbro++;
 				nend++;
 				if (markerfather < octants[idx].getMarker()+1){
@@ -368,7 +369,7 @@ bool classLocalTree::coarse(u32vector* mapidx){
 					wstop = true;
 				}
 			}
-			if (nbro == CG::nchildren){
+			if (nbro == global.nchildren){
 				offset = nend;
 			}
 			else{
@@ -521,21 +522,21 @@ void classLocalTree::findNeighbours(uint32_t idx, uint8_t iface,
 	uint32_t 		noctants = getNumOctants();
 	uint32_t 		idxtry;
 	classOctant* 	oct = &octants[idx];
-	uint32_t 		size = oct->getSize();
+	uint32_t 		size = oct->getSize(global.MAX_LEVEL);
 
-	//	int8_t 			cx = CG::normals[iface][0];
-	//	int8_t 			cy = CG::normals[iface][1];
-	//	int8_t 			cz = CG::normals[iface][2];
+	//	int8_t 			cx = global.normals[iface][0];
+	//	int8_t 			cy = global.normals[iface][1];
+	//	int8_t 			cz = global.normals[iface][2];
 	int8_t 			cxyz[3] = {0,0,0};
 	for (int idim=0; idim<dim; idim++){
-		cxyz[idim] = CG::normals[iface][idim];
+		cxyz[idim] = global.normals[iface][idim];
 	}
 
 	isghost.clear();
 	neighbours.clear();
 
 	// Default if iface is nface<iface<0
-	if (iface < 0 || iface > CG::nfaces){
+	if (iface < 0 || iface > global.nfaces){
 		return;
 	}
 
@@ -606,7 +607,7 @@ void classLocalTree::findNeighbours(uint32_t idx, uint8_t iface,
 					return;
 				}
 				// Compute Last discendent of virtual octant of same size
-				classOctant last_desc = samesizeoct.buildLastDesc();
+				classOctant last_desc = samesizeoct.buildLastDesc(global.MAX_LEVEL);
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = octants[idxtry].computeMorton();
 				//				int32_t Dx, Dy, Dz;
@@ -623,14 +624,14 @@ void classLocalTree::findNeighbours(uint32_t idx, uint8_t iface,
 					//					Dx = int32_t(abs(cxyz[0]))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 					//					Dy = int32_t(abs(cxyz[1]))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
 					//					Dz = int32_t(abs(cxyz[2]))*(-int32_t(oct->z) + int32_t(octants[idxtry].z));
-					//					Dxstar = int32_t((cxyz[0]-1)/2)*(octants[idxtry].getSize()) + int32_t((cxyz[0]+1)/2)*size;
-					//					Dystar = int32_t((cxyz[1]-1)/2)*(octants[idxtry].getSize()) + int32_t((cxyz[1]+1)/2)*size;
-					//					Dzstar = int32_t((cxyz[2]-1)/2)*(octants[idxtry].getSize()) + int32_t((cxyz[2]+1)/2)*size;
+					//					Dxstar = int32_t((cxyz[0]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[0]+1)/2)*size;
+					//					Dystar = int32_t((cxyz[1]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[1]+1)/2)*size;
+					//					Dzstar = int32_t((cxyz[2]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[2]+1)/2)*size;
 					for (int idim=0; idim<dim; idim++){
 						Dx[idim] 		= int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]);
-						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
+						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[idim]+1)/2)*size;
 						coord1[idim] 	= coord[idim] + size;
-						coordtry1[idim] = coordtry[idim] + octants[idxtry].getSize();
+						coordtry1[idim] = coordtry[idim] + octants[idxtry].getSize(global.MAX_LEVEL);
 					}
 
 					//					uint32_t x0 = oct->x;
@@ -640,11 +641,11 @@ void classLocalTree::findNeighbours(uint32_t idx, uint8_t iface,
 					//					uint32_t z0 = oct->z;
 					//					uint32_t z1 = z0 + size;
 					//					uint32_t x0try = octants[idxtry].x;
-					//					uint32_t x1try = x0try + octants[idxtry].getSize();
+					//					uint32_t x1try = x0try + octants[idxtry].getSize(global.MAX_LEVEL);
 					//					uint32_t y0try = octants[idxtry].y;
-					//					uint32_t y1try = y0try + octants[idxtry].getSize();
+					//					uint32_t y1try = y0try + octants[idxtry].getSize(global.MAX_LEVEL);
 					//					uint32_t z0try = octants[idxtry].z;
-					//					uint32_t z1try = z0try + octants[idxtry].getSize();
+					//					uint32_t z1try = z0try + octants[idxtry].getSize(global.MAX_LEVEL);
 					leveltry = octants[idxtry].getLevel();
 
 
@@ -758,7 +759,7 @@ void classLocalTree::findNeighbours(uint32_t idx, uint8_t iface,
 							return;
 						}
 						// Compute Last discendent of virtual octant of same size
-						classOctant last_desc = samesizeoct.buildLastDesc();
+						classOctant last_desc = samesizeoct.buildLastDesc(global.MAX_LEVEL);
 						uint64_t Mortonlast = last_desc.computeMorton();
 						Mortontry = ghosts[idxtry].computeMorton();
 						//						int32_t Dx, Dy, Dz;
@@ -775,14 +776,14 @@ void classLocalTree::findNeighbours(uint32_t idx, uint8_t iface,
 							//							Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(ghosts[idxtry].x));
 							//							Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(ghosts[idxtry].y));
 							//							Dz = int32_t(abs(cz))*(-int32_t(oct->z) + int32_t(ghosts[idxtry].z));
-							//							Dxstar = int32_t((cx-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cx+1)/2)*size;
-							//							Dystar = int32_t((cy-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cy+1)/2)*size;
-							//							Dzstar = int32_t((cz-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cz+1)/2)*size;
+							//							Dxstar = int32_t((cx-1)/2)*(ghosts[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cx+1)/2)*size;
+							//							Dystar = int32_t((cy-1)/2)*(ghosts[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cy+1)/2)*size;
+							//							Dzstar = int32_t((cz-1)/2)*(ghosts[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cz+1)/2)*size;
 							for (int idim=0; idim<dim; idim++){
 								Dx[idim] 		= int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]);
-								Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
+								Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(ghosts[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[idim]+1)/2)*size;
 								coord1[idim] 	= coord[idim] + size;
-								coordtry1[idim] = coordtry[idim] + ghosts[idxtry].getSize();
+								coordtry1[idim] = coordtry[idim] + ghosts[idxtry].getSize(global.MAX_LEVEL);
 							}
 
 							//							uint32_t x0 = oct->x;
@@ -792,11 +793,11 @@ void classLocalTree::findNeighbours(uint32_t idx, uint8_t iface,
 							//							uint32_t z0 = oct->z;
 							//							uint32_t z1 = z0 + size;
 							//							uint32_t x0try = ghosts[idxtry].x;
-							//							uint32_t x1try = x0try + ghosts[idxtry].getSize();
+							//							uint32_t x1try = x0try + ghosts[idxtry].getSize(global.MAX_LEVEL);
 							//							uint32_t y0try = ghosts[idxtry].y;
-							//							uint32_t y1try = y0try + ghosts[idxtry].getSize();
+							//							uint32_t y1try = y0try + ghosts[idxtry].getSize(global.MAX_LEVEL);
 							//							uint32_t z0try = ghosts[idxtry].z;
-							//							uint32_t z1try = z0try + ghosts[idxtry].getSize();
+							//							uint32_t z1try = z0try + ghosts[idxtry].getSize(global.MAX_LEVEL);
 							//							uint8_t level = oct->level;
 							leveltry = ghosts[idxtry].getLevel();
 
@@ -830,9 +831,9 @@ void classLocalTree::findNeighbours(uint32_t idx, uint8_t iface,
 				uint32_t lengthneigh = 0;
 				uint32_t sizeneigh = neighbours.size();
 				for (idxtry=0; idxtry<sizeneigh; idxtry++){
-					lengthneigh += ghosts[neighbours[idxtry]].getArea();
+					lengthneigh += ghosts[neighbours[idxtry]].getArea(global.MAX_LEVEL);
 				}
-				if (lengthneigh < oct->getArea()){
+				if (lengthneigh < oct->getArea(global.MAX_LEVEL)){
 					// Search in octants
 
 					// Check if octants face is a boundary
@@ -899,7 +900,7 @@ void classLocalTree::findNeighbours(uint32_t idx, uint8_t iface,
 								return;
 							}
 							// Compute Last discendent of virtual octant of same size
-							classOctant last_desc = samesizeoct.buildLastDesc();
+							classOctant last_desc = samesizeoct.buildLastDesc(global.MAX_LEVEL);
 							uint64_t Mortonlast = last_desc.computeMorton();
 							Mortontry = octants[idxtry].computeMorton();
 							//				int32_t Dx, Dy, Dz;
@@ -916,14 +917,14 @@ void classLocalTree::findNeighbours(uint32_t idx, uint8_t iface,
 								//					Dx = int32_t(abs(cxyz[0]))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 								//					Dy = int32_t(abs(cxyz[1]))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
 								//					Dz = int32_t(abs(cxyz[2]))*(-int32_t(oct->z) + int32_t(octants[idxtry].z));
-								//					Dxstar = int32_t((cxyz[0]-1)/2)*(octants[idxtry].getSize()) + int32_t((cxyz[0]+1)/2)*size;
-								//					Dystar = int32_t((cxyz[1]-1)/2)*(octants[idxtry].getSize()) + int32_t((cxyz[1]+1)/2)*size;
-								//					Dzstar = int32_t((cxyz[2]-1)/2)*(octants[idxtry].getSize()) + int32_t((cxyz[2]+1)/2)*size;
+								//					Dxstar = int32_t((cxyz[0]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[0]+1)/2)*size;
+								//					Dystar = int32_t((cxyz[1]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[1]+1)/2)*size;
+								//					Dzstar = int32_t((cxyz[2]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[2]+1)/2)*size;
 								for (int idim=0; idim<dim; idim++){
 									Dx[idim] 		= int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]);
-									Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
+									Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[idim]+1)/2)*size;
 									coord1[idim] 	= coord[idim] + size;
-									coordtry1[idim] = coordtry[idim] + octants[idxtry].getSize();
+									coordtry1[idim] = coordtry[idim] + octants[idxtry].getSize(global.MAX_LEVEL);
 								}
 
 								//					uint32_t x0 = oct->x;
@@ -933,11 +934,11 @@ void classLocalTree::findNeighbours(uint32_t idx, uint8_t iface,
 								//					uint32_t z0 = oct->z;
 								//					uint32_t z1 = z0 + size;
 								//					uint32_t x0try = octants[idxtry].x;
-								//					uint32_t x1try = x0try + octants[idxtry].getSize();
+								//					uint32_t x1try = x0try + octants[idxtry].getSize(global.MAX_LEVEL);
 								//					uint32_t y0try = octants[idxtry].y;
-								//					uint32_t y1try = y0try + octants[idxtry].getSize();
+								//					uint32_t y1try = y0try + octants[idxtry].getSize(global.MAX_LEVEL);
 								//					uint32_t z0try = octants[idxtry].z;
-								//					uint32_t z1try = z0try + octants[idxtry].getSize();
+								//					uint32_t z1try = z0try + octants[idxtry].getSize(global.MAX_LEVEL);
 								leveltry = octants[idxtry].getLevel();
 
 
@@ -994,21 +995,21 @@ void classLocalTree::findNeighbours(classOctant* oct,
 	uint64_t  Morton, Mortontry;
 	uint32_t  noctants = getNumOctants();
 	uint32_t idxtry;
-	uint32_t size = oct->getSize();
+	uint32_t size = oct->getSize(global.MAX_LEVEL);
 
 	//	int8_t cx = int8_t((iface<2)*(int8_t(2*iface-1)));
 	//	int8_t cy = int8_t((iface<4)*(int8_t(iface/2))*(int8_t(2*iface-5)));
 	//	int8_t cz = int8_t((int8_t(iface/4))*(int8_t(2*iface-9)));
 	int8_t 			cxyz[3] = {0,0,0};
 	for (int idim=0; idim<dim; idim++){
-		cxyz[idim] = CG::normals[iface][idim];
+		cxyz[idim] = global.normals[iface][idim];
 	}
 
 	isghost.clear();
 	neighbours.clear();
 
 	// Default if iface is nface<iface<0
-	if (iface < 0 || iface > CG::nfaces){
+	if (iface < 0 || iface > global.nfaces){
 		return;
 	}
 
@@ -1079,7 +1080,7 @@ void classLocalTree::findNeighbours(classOctant* oct,
 					return;
 				}
 				// Compute Last discendent of virtual octant of same size
-				classOctant last_desc = samesizeoct.buildLastDesc();
+				classOctant last_desc = samesizeoct.buildLastDesc(global.MAX_LEVEL);
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = octants[idxtry].computeMorton();
 				//				int32_t Dx, Dy, Dz;
@@ -1096,14 +1097,14 @@ void classLocalTree::findNeighbours(classOctant* oct,
 					//					Dx = int32_t(abs(cxyz[0]))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 					//					Dy = int32_t(abs(cxyz[1]))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
 					//					Dz = int32_t(abs(cxyz[2]))*(-int32_t(oct->z) + int32_t(octants[idxtry].z));
-					//					Dxstar = int32_t((cxyz[0]-1)/2)*(octants[idxtry].getSize()) + int32_t((cxyz[0]+1)/2)*size;
-					//					Dystar = int32_t((cxyz[1]-1)/2)*(octants[idxtry].getSize()) + int32_t((cxyz[1]+1)/2)*size;
-					//					Dzstar = int32_t((cxyz[2]-1)/2)*(octants[idxtry].getSize()) + int32_t((cxyz[2]+1)/2)*size;
+					//					Dxstar = int32_t((cxyz[0]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[0]+1)/2)*size;
+					//					Dystar = int32_t((cxyz[1]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[1]+1)/2)*size;
+					//					Dzstar = int32_t((cxyz[2]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[2]+1)/2)*size;
 					for (int idim=0; idim<dim; idim++){
 						Dx[idim] 		= int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]);
-						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
+						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[idim]+1)/2)*size;
 						coord1[idim] 	= coord[idim] + size;
-						coordtry1[idim] = coordtry[idim] + octants[idxtry].getSize();
+						coordtry1[idim] = coordtry[idim] + octants[idxtry].getSize(global.MAX_LEVEL);
 					}
 
 					//					uint32_t x0 = oct->x;
@@ -1113,11 +1114,11 @@ void classLocalTree::findNeighbours(classOctant* oct,
 					//					uint32_t z0 = oct->z;
 					//					uint32_t z1 = z0 + size;
 					//					uint32_t x0try = octants[idxtry].x;
-					//					uint32_t x1try = x0try + octants[idxtry].getSize();
+					//					uint32_t x1try = x0try + octants[idxtry].getSize(global.MAX_LEVEL);
 					//					uint32_t y0try = octants[idxtry].y;
-					//					uint32_t y1try = y0try + octants[idxtry].getSize();
+					//					uint32_t y1try = y0try + octants[idxtry].getSize(global.MAX_LEVEL);
 					//					uint32_t z0try = octants[idxtry].z;
-					//					uint32_t z1try = z0try + octants[idxtry].getSize();
+					//					uint32_t z1try = z0try + octants[idxtry].getSize(global.MAX_LEVEL);
 					leveltry = octants[idxtry].getLevel();
 
 
@@ -1231,7 +1232,7 @@ void classLocalTree::findNeighbours(classOctant* oct,
 							return;
 						}
 						// Compute Last discendent of virtual octant of same size
-						classOctant last_desc = samesizeoct.buildLastDesc();
+						classOctant last_desc = samesizeoct.buildLastDesc(global.MAX_LEVEL);
 						uint64_t Mortonlast = last_desc.computeMorton();
 						Mortontry = ghosts[idxtry].computeMorton();
 						//						int32_t Dx, Dy, Dz;
@@ -1248,14 +1249,14 @@ void classLocalTree::findNeighbours(classOctant* oct,
 							//							Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(ghosts[idxtry].x));
 							//							Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(ghosts[idxtry].y));
 							//							Dz = int32_t(abs(cz))*(-int32_t(oct->z) + int32_t(ghosts[idxtry].z));
-							//							Dxstar = int32_t((cx-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cx+1)/2)*size;
-							//							Dystar = int32_t((cy-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cy+1)/2)*size;
-							//							Dzstar = int32_t((cz-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cz+1)/2)*size;
+							//							Dxstar = int32_t((cx-1)/2)*(ghosts[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cx+1)/2)*size;
+							//							Dystar = int32_t((cy-1)/2)*(ghosts[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cy+1)/2)*size;
+							//							Dzstar = int32_t((cz-1)/2)*(ghosts[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cz+1)/2)*size;
 							for (int idim=0; idim<dim; idim++){
 								Dx[idim] 		= int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]);
-								Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
+								Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(ghosts[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[idim]+1)/2)*size;
 								coord1[idim] 	= coord[idim] + size;
-								coordtry1[idim] = coordtry[idim] + ghosts[idxtry].getSize();
+								coordtry1[idim] = coordtry[idim] + ghosts[idxtry].getSize(global.MAX_LEVEL);
 							}
 
 							//							uint32_t x0 = oct->x;
@@ -1265,11 +1266,11 @@ void classLocalTree::findNeighbours(classOctant* oct,
 							//							uint32_t z0 = oct->z;
 							//							uint32_t z1 = z0 + size;
 							//							uint32_t x0try = ghosts[idxtry].x;
-							//							uint32_t x1try = x0try + ghosts[idxtry].getSize();
+							//							uint32_t x1try = x0try + ghosts[idxtry].getSize(global.MAX_LEVEL);
 							//							uint32_t y0try = ghosts[idxtry].y;
-							//							uint32_t y1try = y0try + ghosts[idxtry].getSize();
+							//							uint32_t y1try = y0try + ghosts[idxtry].getSize(global.MAX_LEVEL);
 							//							uint32_t z0try = ghosts[idxtry].z;
-							//							uint32_t z1try = z0try + ghosts[idxtry].getSize();
+							//							uint32_t z1try = z0try + ghosts[idxtry].getSize(global.MAX_LEVEL);
 							//							uint8_t level = oct->level;
 							leveltry = ghosts[idxtry].getLevel();
 
@@ -1303,9 +1304,9 @@ void classLocalTree::findNeighbours(classOctant* oct,
 				uint32_t lengthneigh = 0;
 				uint32_t sizeneigh = neighbours.size();
 				for (idxtry=0; idxtry<sizeneigh; idxtry++){
-					lengthneigh += ghosts[neighbours[idxtry]].getArea();
+					lengthneigh += ghosts[neighbours[idxtry]].getArea(global.MAX_LEVEL);
 				}
-				if (lengthneigh < oct->getArea()){
+				if (lengthneigh < oct->getArea(global.MAX_LEVEL)){
 					// Search in octants
 
 					// Check if octants face is a boundary
@@ -1371,7 +1372,7 @@ void classLocalTree::findNeighbours(classOctant* oct,
 								return;
 							}
 							// Compute Last discendent of virtual octant of same size
-							classOctant last_desc = samesizeoct.buildLastDesc();
+							classOctant last_desc = samesizeoct.buildLastDesc(global.MAX_LEVEL);
 							uint64_t Mortonlast = last_desc.computeMorton();
 							Mortontry = octants[idxtry].computeMorton();
 							//				int32_t Dx, Dy, Dz;
@@ -1388,14 +1389,14 @@ void classLocalTree::findNeighbours(classOctant* oct,
 								//					Dx = int32_t(abs(cxyz[0]))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 								//					Dy = int32_t(abs(cxyz[1]))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
 								//					Dz = int32_t(abs(cxyz[2]))*(-int32_t(oct->z) + int32_t(octants[idxtry].z));
-								//					Dxstar = int32_t((cxyz[0]-1)/2)*(octants[idxtry].getSize()) + int32_t((cxyz[0]+1)/2)*size;
-								//					Dystar = int32_t((cxyz[1]-1)/2)*(octants[idxtry].getSize()) + int32_t((cxyz[1]+1)/2)*size;
-								//					Dzstar = int32_t((cxyz[2]-1)/2)*(octants[idxtry].getSize()) + int32_t((cxyz[2]+1)/2)*size;
+								//					Dxstar = int32_t((cxyz[0]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[0]+1)/2)*size;
+								//					Dystar = int32_t((cxyz[1]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[1]+1)/2)*size;
+								//					Dzstar = int32_t((cxyz[2]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[2]+1)/2)*size;
 								for (int idim=0; idim<dim; idim++){
 									Dx[idim] 		= int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]);
-									Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
+									Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[idim]+1)/2)*size;
 									coord1[idim] 	= coord[idim] + size;
-									coordtry1[idim] = coordtry[idim] + octants[idxtry].getSize();
+									coordtry1[idim] = coordtry[idim] + octants[idxtry].getSize(global.MAX_LEVEL);
 								}
 
 								//					uint32_t x0 = oct->x;
@@ -1405,11 +1406,11 @@ void classLocalTree::findNeighbours(classOctant* oct,
 								//					uint32_t z0 = oct->z;
 								//					uint32_t z1 = z0 + size;
 								//					uint32_t x0try = octants[idxtry].x;
-								//					uint32_t x1try = x0try + octants[idxtry].getSize();
+								//					uint32_t x1try = x0try + octants[idxtry].getSize(global.MAX_LEVEL);
 								//					uint32_t y0try = octants[idxtry].y;
-								//					uint32_t y1try = y0try + octants[idxtry].getSize();
+								//					uint32_t y1try = y0try + octants[idxtry].getSize(global.MAX_LEVEL);
 								//					uint32_t z0try = octants[idxtry].z;
-								//					uint32_t z1try = z0try + octants[idxtry].getSize();
+								//					uint32_t z1try = z0try + octants[idxtry].getSize(global.MAX_LEVEL);
 								leveltry = octants[idxtry].getLevel();
 
 
@@ -1465,20 +1466,20 @@ void classLocalTree::findGhostNeighbours(uint32_t const idx,
 	uint32_t  noctants = getNumOctants();
 	uint32_t idxtry;
 	classOctant* oct = &ghosts[idx];
-	uint32_t size = oct->getSize();
+	uint32_t size = oct->getSize(global.MAX_LEVEL);
 
 	//	int8_t cx = int8_t((iface<2)*(int8_t(2*iface-1)));
 	//	int8_t cy = int8_t((iface<4)*(int8_t(iface/2))*(int8_t(2*iface-5)));
 	//	int8_t cz = int8_t((int8_t(iface/4))*(int8_t(2*iface-9)));
 	int8_t 			cxyz[3] = {0,0,0};
 	for (int idim=0; idim<dim; idim++){
-		cxyz[idim] = CG::normals[iface][idim];
+		cxyz[idim] = global.normals[iface][idim];
 	}
 
 	neighbours.clear();
 
 	// Default if iface is nface<iface<0
-	if (iface < 0 || iface > CG::nfaces){
+	if (iface < 0 || iface > global.nfaces){
 		return;
 	}
 
@@ -1547,7 +1548,7 @@ void classLocalTree::findGhostNeighbours(uint32_t const idx,
 				return;
 			}
 			// Compute Last discendent of virtual octant of same size
-			classOctant last_desc = samesizeoct.buildLastDesc();
+			classOctant last_desc = samesizeoct.buildLastDesc(global.MAX_LEVEL);
 			uint64_t Mortonlast = last_desc.computeMorton();
 			Mortontry = octants[idxtry].computeMorton();
 			//			int32_t Dx, Dy, Dz;
@@ -1564,14 +1565,14 @@ void classLocalTree::findGhostNeighbours(uint32_t const idx,
 				//				Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 				//				Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
 				//				Dz = int32_t(abs(cz))*(-int32_t(oct->z) + int32_t(octants[idxtry].z));
-				//				Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize()) + int32_t((cx+1)/2)*size;
-				//				Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
-				//				Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
+				//				Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cx+1)/2)*size;
+				//				Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cy+1)/2)*size;
+				//				Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cz+1)/2)*size;
 				for (int idim=0; idim<dim; idim++){
 					Dx[idim] 		= int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]);
-					Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
+					Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[idim]+1)/2)*size;
 					coord1[idim] 	= coord[idim] + size;
-					coordtry1[idim] = coordtry[idim] + octants[idxtry].getSize();
+					coordtry1[idim] = coordtry[idim] + octants[idxtry].getSize(global.MAX_LEVEL);
 				}
 
 				//				uint32_t x0 = oct->x;
@@ -1581,11 +1582,11 @@ void classLocalTree::findGhostNeighbours(uint32_t const idx,
 				//				uint32_t z0 = oct->z;
 				//				uint32_t z1 = z0 + size;
 				//				uint32_t x0try = octants[idxtry].x;
-				//				uint32_t x1try = x0try + octants[idxtry].getSize();
+				//				uint32_t x1try = x0try + octants[idxtry].getSize(global.MAX_LEVEL);
 				//				uint32_t y0try = octants[idxtry].y;
-				//				uint32_t y1try = y0try + octants[idxtry].getSize();
+				//				uint32_t y1try = y0try + octants[idxtry].getSize(global.MAX_LEVEL);
 				//				uint32_t z0try = octants[idxtry].z;
-				//				uint32_t z1try = z0try + octants[idxtry].getSize();
+				//				uint32_t z1try = z0try + octants[idxtry].getSize(global.MAX_LEVEL);
 				//				uint8_t level = oct->level;
 				uint8_t leveltry = octants[idxtry].getLevel();
 
@@ -1633,7 +1634,7 @@ void classLocalTree::preBalance21(bool internal){
 	uint32_t 		idx1_gh, idx2_gh;
 	int8_t 			markerfather, marker;
 	uint8_t 		nbro;
-	uint8_t 		nchm1 = CG::nchildren-1;
+	uint8_t 		nchm1 = global.nchildren-1;
 	bool 			Bdone = false;
 
 	//------------------------------------------ //
@@ -1667,12 +1668,12 @@ void classLocalTree::preBalance21(bool internal){
 
 	// End on ghosts
 	if (ghosts.size() && nocts > 0){
-		if (ghosts[idx1_gh].buildFather()==octants[0].buildFather()){
-			father = ghosts[idx1_gh].buildFather();
+		if (ghosts[idx1_gh].buildFather(global.MAX_LEVEL)==octants[0].buildFather(global.MAX_LEVEL)){
+			father = ghosts[idx1_gh].buildFather(global.MAX_LEVEL);
 			nbro = 0;
 			idx = idx1_gh;
 			marker = ghosts[idx].getMarker();
-			while(marker < 0 && ghosts[idx].buildFather() == father){
+			while(marker < 0 && ghosts[idx].buildFather(global.MAX_LEVEL) == father){
 				nbro++;
 				if (idx==0)
 					break;
@@ -1680,14 +1681,14 @@ void classLocalTree::preBalance21(bool internal){
 				marker = ghosts[idx].getMarker();
 			}
 			idx = 0;
-			while(idx<nocts && octants[idx].buildFather() == father){
+			while(idx<nocts && octants[idx].buildFather(global.MAX_LEVEL) == father){
 				if(octants[idx].getMarker()<0)
 					nbro++;
 				idx++;
 				if(idx==nocts)
 					break;
 			}
-			if (nbro != CG::nchildren && idx!=nocts-1){
+			if (nbro != global.nchildren && idx!=nocts-1){
 				for(uint32_t ii=0; ii<idx; ii++){
 					if (octants[ii].getMarker()<0){
 						octants[ii].setMarker(0);
@@ -1698,12 +1699,12 @@ void classLocalTree::preBalance21(bool internal){
 			}
 		}
 
-		if (ghosts[idx2_gh].buildFather()==octants[nocts-1].buildFather()){
-			father = ghosts[idx2_gh].buildFather();
+		if (ghosts[idx2_gh].buildFather(global.MAX_LEVEL)==octants[nocts-1].buildFather(global.MAX_LEVEL)){
+			father = ghosts[idx2_gh].buildFather(global.MAX_LEVEL);
 			nbro = 0;
 			idx = idx2_gh;
 			marker = ghosts[idx].getMarker();
-			while(marker < 0 && ghosts[idx].buildFather() == father){
+			while(marker < 0 && ghosts[idx].buildFather(global.MAX_LEVEL) == father){
 
 				//Add ghost index to structure for mapper in case of coarsening a broken family
 				last_ghost_bros.push_back(idx);
@@ -1716,7 +1717,7 @@ void classLocalTree::preBalance21(bool internal){
 				marker = ghosts[idx].getMarker();
 			}
 			idx = nocts-1;
-			while(octants[idx].buildFather() == father ){
+			while(octants[idx].buildFather(global.MAX_LEVEL) == father ){
 				if (octants[idx].getMarker()<0)
 					nbro++;
 				if (idx==0)
@@ -1724,7 +1725,7 @@ void classLocalTree::preBalance21(bool internal){
 				idx--;
 			}
 			last_idx=idx;
-			if (nbro != CG::nchildren && idx!=nocts-1){
+			if (nbro != global.nchildren && idx!=nocts-1){
 				for(uint32_t ii=idx+1; ii<nocts; ii++){
 					if (octants[ii].getMarker()<0){
 						octants[ii].setMarker(0);
@@ -1740,33 +1741,33 @@ void classLocalTree::preBalance21(bool internal){
 
 	// Check first internal octants
 	if (internal){
-		father = octants[0].buildFather();
-		lastdesc = father.buildLastDesc();
+		father = octants[0].buildFather(global.MAX_LEVEL);
+		lastdesc = father.buildLastDesc(global.MAX_LEVEL);
 		mortonld = lastdesc.computeMorton();
 		nbro = 0;
-		for (idx=0; idx<CG::nchildren; idx++){
+		for (idx=0; idx<global.nchildren; idx++){
 			// Check if family is complete or to be checked in the internal loop (some brother refined)
 			if (octants[idx].computeMorton() <= mortonld){
 				nbro++;
 			}
 		}
-		if (nbro != CG::nchildren)
+		if (nbro != global.nchildren)
 			idx0 = nbro;
 
 		// Check and coarse internal octants
 		for (idx=idx0; idx<nocts; idx++){
 			if(octants[idx].getMarker() < 0 && octants[idx].getLevel() > 0){
 				nbro = 0;
-				father = octants[idx].buildFather();
+				father = octants[idx].buildFather(global.MAX_LEVEL);
 				// Check if family is to be coarsened
-				for (idx2=idx; idx2<idx+CG::nchildren; idx2++){
+				for (idx2=idx; idx2<idx+global.nchildren; idx2++){
 					if (idx2<nocts){
-						if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
+						if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather(global.MAX_LEVEL) == father){
 							nbro++;
 						}
 					}
 				}
-				if (nbro == CG::nchildren){
+				if (nbro == global.nchildren){
 					idx = idx2-1;
 				}
 				else{
@@ -1792,7 +1793,7 @@ void classLocalTree::preBalance21(u32vector& newmodified){
 	uint32_t 			idx1_gh, idx2_gh;
 	int8_t 				markerfather, marker;
 	uint8_t 			nbro;
-	uint8_t 			nchm1 = CG::nchildren-1;
+	uint8_t 			nchm1 = global.nchildren-1;
 	bool 				Bdone = false;
 
 	//------------------------------------------ //
@@ -1825,12 +1826,12 @@ void classLocalTree::preBalance21(u32vector& newmodified){
 
 	// End on ghosts
 	if (ghosts.size() && nocts > 0){
-		if (ghosts[idx1_gh].buildFather()==octants[0].buildFather()){
-			father = ghosts[idx1_gh].buildFather();
+		if (ghosts[idx1_gh].buildFather(global.MAX_LEVEL)==octants[0].buildFather(global.MAX_LEVEL)){
+			father = ghosts[idx1_gh].buildFather(global.MAX_LEVEL);
 			nbro = 0;
 			idx = idx1_gh;
 			marker = ghosts[idx].getMarker();
-			while(marker < 0 && ghosts[idx].buildFather() == father){
+			while(marker < 0 && ghosts[idx].buildFather(global.MAX_LEVEL) == father){
 
 				//Add ghost index to structure for mapper in case of coarsening a broken family
 				last_ghost_bros.push_back(idx);
@@ -1842,14 +1843,14 @@ void classLocalTree::preBalance21(u32vector& newmodified){
 				marker = ghosts[idx].getMarker();
 			}
 			idx = 0;
-			while(idx<nocts && octants[idx].buildFather() == father){
+			while(idx<nocts && octants[idx].buildFather(global.MAX_LEVEL) == father){
 				if (octants[idx].getMarker()<0)
 					nbro++;
 				idx++;
 				if(idx==nocts)
 					break;
 			}
-			if (nbro != CG::nchildren && idx!=nocts-1){
+			if (nbro != global.nchildren && idx!=nocts-1){
 				for(uint32_t ii=0; ii<idx; ii++){
 					if (octants[ii].getMarker()<0){
 						octants[ii].setMarker(0);
@@ -1863,12 +1864,12 @@ void classLocalTree::preBalance21(u32vector& newmodified){
 			}
 		}
 
-		if (ghosts[idx2_gh].buildFather()==octants[nocts-1].buildFather()){
-			father = ghosts[idx2_gh].buildFather();
+		if (ghosts[idx2_gh].buildFather(global.MAX_LEVEL)==octants[nocts-1].buildFather(global.MAX_LEVEL)){
+			father = ghosts[idx2_gh].buildFather(global.MAX_LEVEL);
 			nbro = 0;
 			idx = idx2_gh;
 			marker = ghosts[idx].getMarker();
-			while(marker < 0 && ghosts[idx].buildFather() == father){
+			while(marker < 0 && ghosts[idx].buildFather(global.MAX_LEVEL) == father){
 				nbro++;
 				idx++;
 				if(idx == size_ghosts){
@@ -1877,7 +1878,7 @@ void classLocalTree::preBalance21(u32vector& newmodified){
 				marker = ghosts[idx].getMarker();
 			}
 			idx = nocts-1;
-			while(octants[idx].buildFather() == father){
+			while(octants[idx].buildFather(global.MAX_LEVEL) == father){
 				if (octants[idx].getMarker()<0)
 					nbro++;
 				idx--;
@@ -1885,7 +1886,7 @@ void classLocalTree::preBalance21(u32vector& newmodified){
 					break;
 			}
 			last_idx=idx;
-			if (nbro != CG::nchildren && idx!=nocts-1){
+			if (nbro != global.nchildren && idx!=nocts-1){
 				for(uint32_t ii=idx+1; ii<nocts; ii++){
 					if (octants[ii].getMarker()<0){
 						octants[ii].setMarker(0);
@@ -1899,33 +1900,33 @@ void classLocalTree::preBalance21(u32vector& newmodified){
 	}
 
 	// Check first internal octants
-	father = octants[0].buildFather();
-	lastdesc = father.buildLastDesc();
+	father = octants[0].buildFather(global.MAX_LEVEL);
+	lastdesc = father.buildLastDesc(global.MAX_LEVEL);
 	mortonld = lastdesc.computeMorton();
 	nbro = 0;
-	for (idx=0; idx<CG::nchildren; idx++){
+	for (idx=0; idx<global.nchildren; idx++){
 		// Check if family is complete or to be checked in the internal loop (some brother refined)
 		if (octants[idx].computeMorton() <= mortonld){
 			nbro++;
 		}
 	}
-	if (nbro != CG::nchildren)
+	if (nbro != global.nchildren)
 		idx0 = nbro;
 
 	// Check and coarse internal octants
 	for (idx=idx0; idx<nocts; idx++){
 		if(octants[idx].getMarker() < 0 && octants[idx].getLevel() > 0){
 			nbro = 0;
-			father = octants[idx].buildFather();
+			father = octants[idx].buildFather(global.MAX_LEVEL);
 			// Check if family is to be coarsened
-			for (idx2=idx; idx2<idx+CG::nchildren; idx2++){
+			for (idx2=idx; idx2<idx+global.nchildren; idx2++){
 				if (idx2<nocts){
-					if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather() == father){
+					if(octants[idx2].getMarker() < 0 && octants[idx2].buildFather(global.MAX_LEVEL) == father){
 						nbro++;
 					}
 				}
 			}
-			if (nbro == CG::nchildren){
+			if (nbro == global.nchildren){
 				idx = idx2-1;
 			}
 			else{
@@ -1970,10 +1971,10 @@ bool classLocalTree::localBalance(bool doInterior){
 		idx = 0;
 		for (it=obegin; it!=oend; it++){
 			if (!it->getNotBalance() && it->getMarker() != 0){
-				targetmarker = min(CG::MAX_LEVEL, int8_t(octants[idx].getLevel() + octants[idx].getMarker()));
+				targetmarker = min(global.MAX_LEVEL, int8_t(octants[idx].getLevel() + octants[idx].getMarker()));
 
 				//Balance through faces
-				for (iface=0; iface<CG::nfaces; iface++){
+				for (iface=0; iface<global.nfaces; iface++){
 					if(!it->getBound(iface)){
 						findNeighbours(idx, iface, neigh, isghost);
 						sizeneigh = neigh.size();
@@ -2010,8 +2011,8 @@ bool classLocalTree::localBalance(bool doInterior){
 
 				if (Bedge){
 					//Balance through edges
-					for (iedge=0; iedge<CG::nedges; iedge++){
-						//if(!it->getBound(CG::edgeface[iedge][0]) && !it->getBound(CG::edgeface[iedge][1])){
+					for (iedge=0; iedge<global.nedges; iedge++){
+						//if(!it->getBound(global.edgeface[iedge][0]) && !it->getBound(global.edgeface[iedge][1])){
 							findEdgeNeighbours(idx, iedge, neigh, isghost);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
@@ -2046,8 +2047,8 @@ bool classLocalTree::localBalance(bool doInterior){
 
 				if (Bnode){
 					//Balance through nodes
-					for (inode=0; inode<CG::nnodes; inode++){
-						//if(!it->getBound(CG::nodeface[inode][0]) && !it->getBound(CG::nodeface[inode][1]) && !it->getBound(CG::nodeface[inode][dim-1])){
+					for (inode=0; inode<global.nnodes; inode++){
+						//if(!it->getBound(global.nodeface[inode][0]) && !it->getBound(global.nodeface[inode][1]) && !it->getBound(global.nodeface[inode][dim-1])){
 							findNodeNeighbours(idx, inode, neigh, isghost);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
@@ -2089,10 +2090,10 @@ bool classLocalTree::localBalance(bool doInterior){
 		idx = 0;
 		for (it=obegin; it!=oend; it++){
 			if (!it->getNotBalance() && it->getMarker() != 0){
-				targetmarker = min(CG::MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
+				targetmarker = min(global.MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
 
 				//Balance through faces
-				for (iface=0; iface<CG::nfaces; iface++){
+				for (iface=0; iface<global.nfaces; iface++){
 					if(it->getPbound(iface) == true){
 						neigh.clear();
 						findGhostNeighbours(idx, iface, neigh);
@@ -2110,8 +2111,8 @@ bool classLocalTree::localBalance(bool doInterior){
 
 				if (Bedge){
 					//Balance through edges
-					for (iedge=0; iedge<CG::nedges; iedge++){
-						//if(it->getPbound(CG::edgeface[iedge][0]) == true || it->getPbound(CG::edgeface[iedge][1]) == true){
+					for (iedge=0; iedge<global.nedges; iedge++){
+						//if(it->getPbound(global.edgeface[iedge][0]) == true || it->getPbound(global.edgeface[iedge][1]) == true){
 							neigh.clear();
 							findGhostEdgeNeighbours(idx, iedge, neigh);
 							sizeneigh = neigh.size();
@@ -2129,8 +2130,8 @@ bool classLocalTree::localBalance(bool doInterior){
 
 				if (Bnode){
 					//Balance through nodes
-					for (inode=0; inode<CG::nnodes; inode++){
-						//if(it->getPbound(CG::nodeface[inode][0]) == true || it->getPbound(CG::nodeface[inode][1]) == true || it->getPbound(CG::nodeface[inode][dim-1]) == true){
+					for (inode=0; inode<global.nnodes; inode++){
+						//if(it->getPbound(global.nodeface[inode][0]) == true || it->getPbound(global.nodeface[inode][1]) == true || it->getPbound(global.nodeface[inode][dim-1]) == true){
 							neigh.clear();
 							findGhostNodeNeighbours(idx, inode, neigh);
 							sizeneigh = neigh.size();
@@ -2159,10 +2160,10 @@ bool classLocalTree::localBalance(bool doInterior){
 			for (iit=ibegin; iit!=iend; iit++){
 				idx = *iit;
 				if (!octants[idx].getNotBalance()){
-					targetmarker = min(CG::MAX_LEVEL, int8_t(octants[idx].getLevel()+octants[idx].getMarker()));
+					targetmarker = min(global.MAX_LEVEL, int8_t(octants[idx].getLevel()+octants[idx].getMarker()));
 
 					//Balance through faces
-					for (iface=0; iface<CG::nfaces; iface++){
+					for (iface=0; iface<global.nfaces; iface++){
 						if(!octants[idx].getPbound(iface)){
 							findNeighbours(idx, iface, neigh, isghost);
 							sizeneigh = neigh.size();
@@ -2189,8 +2190,8 @@ bool classLocalTree::localBalance(bool doInterior){
 
 					if (Bedge){
 						//Balance through edges
-						for (iedge=0; iedge<CG::nedges; iedge++){
-							//if(!octants[idx].getPbound(CG::edgeface[iedge][0]) || !octants[idx].getPbound(CG::edgeface[iedge][1])){
+						for (iedge=0; iedge<global.nedges; iedge++){
+							//if(!octants[idx].getPbound(global.edgeface[iedge][0]) || !octants[idx].getPbound(global.edgeface[iedge][1])){
 								findEdgeNeighbours(idx, iedge, neigh, isghost);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
@@ -2217,8 +2218,8 @@ bool classLocalTree::localBalance(bool doInterior){
 
 					if (Bnode){
 						//Balance through nodes
-						for (inode=0; inode<CG::nnodes; inode++){
-							//if(!octants[idx].getPbound(CG::nodeface[inode][0]) || !octants[idx].getPbound(CG::nodeface[inode][1]) || !octants[idx].getPbound(CG::nodeface[inode][dim-1])){
+						for (inode=0; inode<global.nnodes; inode++){
+							//if(!octants[idx].getPbound(global.nodeface[inode][0]) || !octants[idx].getPbound(global.nodeface[inode][1]) || !octants[idx].getPbound(global.nodeface[inode][dim-1])){
 								findNodeNeighbours(idx, inode, neigh, isghost);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
@@ -2261,10 +2262,10 @@ bool classLocalTree::localBalance(bool doInterior){
 		idx = 0;
 		for (it=obegin; it!=oend; it++){
 			if (!it->getNotBalance() && it->info[15]){
-				targetmarker = min(CG::MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
+				targetmarker = min(global.MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
 
 				//Balance through faces
-				for (iface=0; iface<CG::nfaces; iface++){
+				for (iface=0; iface<global.nfaces; iface++){
 					if(it->getPbound(iface) == true){
 						neigh.clear();
 						findGhostNeighbours(idx, iface, neigh);
@@ -2282,8 +2283,8 @@ bool classLocalTree::localBalance(bool doInterior){
 
 				if (Bedge){
 					//Balance through edges
-					for (iedge=0; iedge<CG::nedges; iedge++){
-						//if(it->getPbound(CG::edgeface[iedge][0]) == true || it->getPbound(CG::edgeface[iedge][1]) == true){
+					for (iedge=0; iedge<global.nedges; iedge++){
+						//if(it->getPbound(global.edgeface[iedge][0]) == true || it->getPbound(global.edgeface[iedge][1]) == true){
 							neigh.clear();
 							findGhostEdgeNeighbours(idx, iedge, neigh);
 							sizeneigh = neigh.size();
@@ -2301,8 +2302,8 @@ bool classLocalTree::localBalance(bool doInterior){
 
 				if (Bnode){
 					//Balance through nodes
-					for (inode=0; inode<CG::nnodes; inode++){
-						//if(it->getPbound(CG::nodeface[inode][0]) == true || it->getPbound(CG::nodeface[inode][1]) == true || it->getPbound(CG::nodeface[inode][dim-1]) == true){
+					for (inode=0; inode<global.nnodes; inode++){
+						//if(it->getPbound(global.nodeface[inode][0]) == true || it->getPbound(global.nodeface[inode][1]) == true || it->getPbound(global.nodeface[inode][dim-1]) == true){
 							neigh.clear();
 							findGhostNodeNeighbours(idx, inode, neigh);
 							sizeneigh = neigh.size();
@@ -2331,10 +2332,10 @@ bool classLocalTree::localBalance(bool doInterior){
 			for (iit=ibegin; iit!=iend; iit++){
 				idx = *iit;
 				if (!octants[idx].getNotBalance()){
-					targetmarker = min(CG::MAX_LEVEL, int8_t(octants[idx].getLevel()+octants[idx].getMarker()));
+					targetmarker = min(global.MAX_LEVEL, int8_t(octants[idx].getLevel()+octants[idx].getMarker()));
 
 					//Balance through faces
-					for (iface=0; iface<CG::nfaces; iface++){
+					for (iface=0; iface<global.nfaces; iface++){
 						if(!octants[idx].getPbound(iface)){
 							findNeighbours(idx, iface, neigh, isghost);
 							sizeneigh = neigh.size();
@@ -2361,8 +2362,8 @@ bool classLocalTree::localBalance(bool doInterior){
 
 					if (Bedge){
 						//Balance through edges
-						for (iedge=0; iedge<CG::nedges; iedge++){
-							//if(!octants[idx].getPbound(CG::edgeface[iedge][0]) || !octants[idx].getPbound(CG::edgeface[iedge][1])){
+						for (iedge=0; iedge<global.nedges; iedge++){
+							//if(!octants[idx].getPbound(global.edgeface[iedge][0]) || !octants[idx].getPbound(global.edgeface[iedge][1])){
 								findEdgeNeighbours(idx, iedge, neigh, isghost);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
@@ -2389,8 +2390,8 @@ bool classLocalTree::localBalance(bool doInterior){
 
 					if (Bnode){
 						//Balance through nodes
-						for (inode=0; inode<CG::nnodes; inode++){
-							//if(!octants[idx].getPbound(CG::nodeface[inode][0]) || !octants[idx].getPbound(CG::nodeface[inode][1]) || !octants[idx].getPbound(CG::nodeface[inode][dim-1])){
+						for (inode=0; inode<global.nnodes; inode++){
+							//if(!octants[idx].getPbound(global.nodeface[inode][0]) || !octants[idx].getPbound(global.nodeface[inode][1]) || !octants[idx].getPbound(global.nodeface[inode][dim-1])){
 								findNodeNeighbours(idx, inode, neigh, isghost);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
@@ -2461,10 +2462,10 @@ bool classLocalTree::localBalanceAll(bool doInterior){
 		idx = 0;
 		for (it=obegin; it!=oend; it++){
 			if ((!it->getNotBalance()) && ((it->info[15]) || (it->getMarker()!=0) || ((it->getIsNewC()) || (it->getIsNewR())))){
-				targetmarker = min(CG::MAX_LEVEL, int8_t(octants[idx].getLevel() + octants[idx].getMarker()));
+				targetmarker = min(global.MAX_LEVEL, int8_t(octants[idx].getLevel() + octants[idx].getMarker()));
 
 				//Balance through faces
-				for (iface=0; iface<CG::nfaces; iface++){
+				for (iface=0; iface<global.nfaces; iface++){
 					if(!it->getBound(iface)){
 						findNeighbours(idx, iface, neigh, isghost);
 						sizeneigh = neigh.size();
@@ -2502,8 +2503,8 @@ bool classLocalTree::localBalanceAll(bool doInterior){
 
 				if (Bedge){
 					//Balance through edges
-					for (iedge=0; iedge<CG::nedges; iedge++){
-						//if(!it->getBound(CG::edgeface[iedge][0]) && !it->getBound(CG::edgeface[iedge][1])){
+					for (iedge=0; iedge<global.nedges; iedge++){
+						//if(!it->getBound(global.edgeface[iedge][0]) && !it->getBound(global.edgeface[iedge][1])){
 							findEdgeNeighbours(idx, iedge, neigh, isghost);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
@@ -2538,8 +2539,8 @@ bool classLocalTree::localBalanceAll(bool doInterior){
 
 				if (Bnode){
 					//Balance through nodes
-					for (inode=0; inode<CG::nnodes; inode++){
-						//if(!it->getBound(CG::nodeface[inode][0]) && !it->getBound(CG::nodeface[inode][1]) && !it->getBound(CG::nodeface[inode][dim-1])){
+					for (inode=0; inode<global.nnodes; inode++){
+						//if(!it->getBound(global.nodeface[inode][0]) && !it->getBound(global.nodeface[inode][1]) && !it->getBound(global.nodeface[inode][dim-1])){
 							findNodeNeighbours(idx, inode, neigh, isghost);
 							sizeneigh = neigh.size();
 							for(i=0; i<sizeneigh; i++){
@@ -2581,10 +2582,10 @@ bool classLocalTree::localBalanceAll(bool doInterior){
 		idx = 0;
 		for (it=obegin; it!=oend; it++){
 			if (!it->getNotBalance() && (it->info[15] || (it->getIsNewC() || it->getIsNewR()))){
-				targetmarker = min(CG::MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
+				targetmarker = min(global.MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
 
 				//Balance through faces
-				for (iface=0; iface<CG::nfaces; iface++){
+				for (iface=0; iface<global.nfaces; iface++){
 					if(it->getPbound(iface) == true){
 						neigh.clear();
 						findGhostNeighbours(idx, iface, neigh);
@@ -2602,8 +2603,8 @@ bool classLocalTree::localBalanceAll(bool doInterior){
 
 				if (Bedge){
 					//Balance through edges
-					for (iedge=0; iedge<CG::nedges; iedge++){
-						//if(it->getPbound(CG::edgeface[iedge][0]) == true || it->getPbound(CG::edgeface[iedge][1]) == true){
+					for (iedge=0; iedge<global.nedges; iedge++){
+						//if(it->getPbound(global.edgeface[iedge][0]) == true || it->getPbound(global.edgeface[iedge][1]) == true){
 							neigh.clear();
 							findGhostEdgeNeighbours(idx, iedge, neigh);
 							sizeneigh = neigh.size();
@@ -2621,8 +2622,8 @@ bool classLocalTree::localBalanceAll(bool doInterior){
 
 				if (Bnode){
 					//Balance through nodes
-					for (inode=0; inode<CG::nnodes; inode++){
-						//if(it->getPbound(CG::nodeface[inode][0]) == true || it->getPbound(CG::nodeface[inode][1]) == true || it->getPbound(CG::nodeface[inode][dim-1]) == true){
+					for (inode=0; inode<global.nnodes; inode++){
+						//if(it->getPbound(global.nodeface[inode][0]) == true || it->getPbound(global.nodeface[inode][1]) == true || it->getPbound(global.nodeface[inode][dim-1]) == true){
 							neigh.clear();
 							findGhostNodeNeighbours(idx, inode, neigh);
 							sizeneigh = neigh.size();
@@ -2651,10 +2652,10 @@ bool classLocalTree::localBalanceAll(bool doInterior){
 			for (iit=ibegin; iit!=iend; iit++){
 				idx = *iit;
 				if (!octants[idx].getNotBalance()){
-					targetmarker = min(CG::MAX_LEVEL, int8_t(octants[idx].getLevel()+octants[idx].getMarker()));
+					targetmarker = min(global.MAX_LEVEL, int8_t(octants[idx].getLevel()+octants[idx].getMarker()));
 
 					//Balance through faces
-					for (iface=0; iface<CG::nfaces; iface++){
+					for (iface=0; iface<global.nfaces; iface++){
 						if(!octants[idx].getPbound(iface)){
 							findNeighbours(idx, iface, neigh, isghost);
 							sizeneigh = neigh.size();
@@ -2681,8 +2682,8 @@ bool classLocalTree::localBalanceAll(bool doInterior){
 
 					if (Bedge){
 						//Balance through edges
-						for (iedge=0; iedge<CG::nedges; iedge++){
-							//if(!octants[idx].getPbound(CG::edgeface[iedge][0]) || !octants[idx].getPbound(CG::edgeface[iedge][1])){
+						for (iedge=0; iedge<global.nedges; iedge++){
+							//if(!octants[idx].getPbound(global.edgeface[iedge][0]) || !octants[idx].getPbound(global.edgeface[iedge][1])){
 								findEdgeNeighbours(idx, iedge, neigh, isghost);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
@@ -2709,8 +2710,8 @@ bool classLocalTree::localBalanceAll(bool doInterior){
 
 					if (Bnode){
 						//Balance through nodes
-						for (inode=0; inode<CG::nnodes; inode++){
-							//if(!octants[idx].getPbound(CG::nodeface[inode][0]) || !octants[idx].getPbound(CG::nodeface[inode][1]) || !octants[idx].getPbound(CG::nodeface[inode][dim-1])){
+						for (inode=0; inode<global.nnodes; inode++){
+							//if(!octants[idx].getPbound(global.nodeface[inode][0]) || !octants[idx].getPbound(global.nodeface[inode][1]) || !octants[idx].getPbound(global.nodeface[inode][dim-1])){
 								findNodeNeighbours(idx, inode, neigh, isghost);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
@@ -2753,10 +2754,10 @@ bool classLocalTree::localBalanceAll(bool doInterior){
 		idx = 0;
 		for (it=obegin; it!=oend; it++){
 			if (!it->getNotBalance() && (it->info[15] || (it->getIsNewC() || it->getIsNewR()))){
-				targetmarker = min(CG::MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
+				targetmarker = min(global.MAX_LEVEL, int8_t(it->getLevel()+it->getMarker()));
 
 				//Balance through faces
-				for (iface=0; iface<CG::nfaces; iface++){
+				for (iface=0; iface<global.nfaces; iface++){
 					if(it->getPbound(iface) == true){
 						neigh.clear();
 						findGhostNeighbours(idx, iface, neigh);
@@ -2774,8 +2775,8 @@ bool classLocalTree::localBalanceAll(bool doInterior){
 
 				if (Bedge){
 					//Balance through edges
-					for (iedge=0; iedge<CG::nedges; iedge++){
-						//if(it->getPbound(CG::edgeface[iedge][0]) == true || it->getPbound(CG::edgeface[iedge][1]) == true){
+					for (iedge=0; iedge<global.nedges; iedge++){
+						//if(it->getPbound(global.edgeface[iedge][0]) == true || it->getPbound(global.edgeface[iedge][1]) == true){
 							neigh.clear();
 							findGhostEdgeNeighbours(idx, iedge, neigh);
 							sizeneigh = neigh.size();
@@ -2793,8 +2794,8 @@ bool classLocalTree::localBalanceAll(bool doInterior){
 
 				if (Bnode){
 					//Balance through nodes
-					for (inode=0; inode<CG::nnodes; inode++){
-						//if(it->getPbound(CG::nodeface[inode][0]) == true || it->getPbound(CG::nodeface[inode][1]) == true || it->getPbound(CG::nodeface[inode][dim-1]) == true){
+					for (inode=0; inode<global.nnodes; inode++){
+						//if(it->getPbound(global.nodeface[inode][0]) == true || it->getPbound(global.nodeface[inode][1]) == true || it->getPbound(global.nodeface[inode][dim-1]) == true){
 							neigh.clear();
 							findGhostNodeNeighbours(idx, inode, neigh);
 							sizeneigh = neigh.size();
@@ -2823,10 +2824,10 @@ bool classLocalTree::localBalanceAll(bool doInterior){
 			for (iit=ibegin; iit!=iend; iit++){
 				idx = *iit;
 				if (!octants[idx].getNotBalance()){
-					targetmarker = min(CG::MAX_LEVEL, int8_t(octants[idx].getLevel()+octants[idx].getMarker()));
+					targetmarker = min(global.MAX_LEVEL, int8_t(octants[idx].getLevel()+octants[idx].getMarker()));
 
 					//Balance through faces
-					for (iface=0; iface<CG::nfaces; iface++){
+					for (iface=0; iface<global.nfaces; iface++){
 						if(!octants[idx].getPbound(iface)){
 							findNeighbours(idx, iface, neigh, isghost);
 							sizeneigh = neigh.size();
@@ -2853,8 +2854,8 @@ bool classLocalTree::localBalanceAll(bool doInterior){
 
 					if (Bedge){
 						//Balance through edges
-						for (iedge=0; iedge<CG::nedges; iedge++){
-							//if(!octants[idx].getPbound(CG::edgeface[iedge][0]) || !octants[idx].getPbound(CG::edgeface[iedge][1])){
+						for (iedge=0; iedge<global.nedges; iedge++){
+							//if(!octants[idx].getPbound(global.edgeface[iedge][0]) || !octants[idx].getPbound(global.edgeface[iedge][1])){
 								findEdgeNeighbours(idx, iedge, neigh, isghost);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
@@ -2881,8 +2882,8 @@ bool classLocalTree::localBalanceAll(bool doInterior){
 
 					if (Bnode){
 						//Balance through nodes
-						for (inode=0; inode<CG::nnodes; inode++){
-							//if(!octants[idx].getPbound(CG::nodeface[inode][0]) || !octants[idx].getPbound(CG::nodeface[inode][1]) || !octants[idx].getPbound(CG::nodeface[inode][dim-1])){
+						for (inode=0; inode<global.nnodes; inode++){
+							//if(!octants[idx].getPbound(global.nodeface[inode][0]) || !octants[idx].getPbound(global.nodeface[inode][1]) || !octants[idx].getPbound(global.nodeface[inode][dim-1])){
 								findNodeNeighbours(idx, inode, neigh, isghost);
 								sizeneigh = neigh.size();
 								for(i=0; i<sizeneigh; i++){
@@ -2938,27 +2939,27 @@ void classLocalTree::findEdgeNeighbours(uint32_t idx,
 	uint32_t  		noctants = getNumOctants();
 	uint32_t 		idxtry;
 	classOctant* 	oct = &octants[idx];
-	uint32_t 		size = oct->getSize();
+	uint32_t 		size = oct->getSize(global.MAX_LEVEL);
 	uint8_t 		iface1, iface2;
 	int32_t 		Dx, Dy, Dz;
 	int32_t 		Dxstar,Dystar,Dzstar;
 
 	//Alternative to switch case
-	int8_t cx = CG::edgecoeffs[iedge][0];
-	int8_t cy = CG::edgecoeffs[iedge][1];
-	int8_t cz = CG::edgecoeffs[iedge][2];
+	int8_t cx = global.edgecoeffs[iedge][0];
+	int8_t cy = global.edgecoeffs[iedge][1];
+	int8_t cz = global.edgecoeffs[iedge][2];
 
 	isghost.clear();
 	neighbours.clear();
 
 	// Default if iedge is nface<iedge<0
-	if (iedge < 0 || iedge > CG::nfaces*2){
+	if (iedge < 0 || iedge > global.nfaces*2){
 		return;
 	}
 
 	// Check if octants edge is a process boundary
-	iface1 = CG::edgeface[iedge][0];
-	iface2 = CG::edgeface[iedge][1];
+	iface1 = global.edgeface[iedge][0];
+	iface2 = global.edgeface[iedge][1];
 
 	// Check if octants edge is a boundary
 	if (oct->info[iface1] == false && oct->info[iface2] == false){
@@ -3027,16 +3028,16 @@ void classLocalTree::findEdgeNeighbours(uint32_t idx,
 						return;
 					}
 					// Compute Last discendent of virtual octant of same size
-					classOctant last_desc = samesizeoct.buildLastDesc();
+					classOctant last_desc = samesizeoct.buildLastDesc(global.MAX_LEVEL);
 					uint64_t Mortonlast = last_desc.computeMorton();
 					Mortontry = ghosts[idxtry].computeMorton();
 					while(Mortontry < Mortonlast && idxtry < ghosts.size()){
 						Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(ghosts[idxtry].x));
 						Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(ghosts[idxtry].y));
 						Dz = int32_t(abs(cz))*(-int32_t(oct->z) + int32_t(ghosts[idxtry].z));
-						Dxstar = int32_t((cx-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cx+1)/2)*size;
-						Dystar = int32_t((cy-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cy+1)/2)*size;
-						Dzstar = int32_t((cz-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cz+1)/2)*size;
+						Dxstar = int32_t((cx-1)/2)*(ghosts[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cx+1)/2)*size;
+						Dystar = int32_t((cy-1)/2)*(ghosts[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cy+1)/2)*size;
+						Dzstar = int32_t((cz-1)/2)*(ghosts[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cz+1)/2)*size;
 
 						uint32_t x0 = oct->x;
 						uint32_t x1 = x0 + size;
@@ -3045,11 +3046,11 @@ void classLocalTree::findEdgeNeighbours(uint32_t idx,
 						uint32_t z0 = oct->z;
 						uint32_t z1 = z0 + size;
 						uint32_t x0try = ghosts[idxtry].x;
-						uint32_t x1try = x0try + ghosts[idxtry].getSize();
+						uint32_t x1try = x0try + ghosts[idxtry].getSize(global.MAX_LEVEL);
 						uint32_t y0try = ghosts[idxtry].y;
-						uint32_t y1try = y0try + ghosts[idxtry].getSize();
+						uint32_t y1try = y0try + ghosts[idxtry].getSize(global.MAX_LEVEL);
 						uint32_t z0try = ghosts[idxtry].z;
-						uint32_t z1try = z0try + ghosts[idxtry].getSize();
+						uint32_t z1try = z0try + ghosts[idxtry].getSize(global.MAX_LEVEL);
 						uint8_t level = oct->level;
 						uint8_t leveltry = ghosts[idxtry].getLevel();
 
@@ -3136,16 +3137,16 @@ void classLocalTree::findEdgeNeighbours(uint32_t idx,
 					return;
 				}
 				// Compute Last discendent of virtual octant of same size
-				classOctant last_desc = samesizeoct.buildLastDesc();
+				classOctant last_desc = samesizeoct.buildLastDesc(global.MAX_LEVEL);
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = octants[idxtry].computeMorton();
 				while(Mortontry < Mortonlast && idxtry <= noctants-1){
 					Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 					Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
 					Dz = int32_t(abs(cz))*(-int32_t(oct->z) + int32_t(octants[idxtry].z));
-					Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize()) + int32_t((cx+1)/2)*size;
-					Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
-					Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
+					Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cx+1)/2)*size;
+					Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cy+1)/2)*size;
+					Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cz+1)/2)*size;
 
 					uint32_t x0 = oct->x;
 					uint32_t x1 = x0 + size;
@@ -3154,11 +3155,11 @@ void classLocalTree::findEdgeNeighbours(uint32_t idx,
 					uint32_t z0 = oct->z;
 					uint32_t z1 = z0 + size;
 					uint32_t x0try = octants[idxtry].x;
-					uint32_t x1try = x0try + octants[idxtry].getSize();
+					uint32_t x1try = x0try + octants[idxtry].getSize(global.MAX_LEVEL);
 					uint32_t y0try = octants[idxtry].y;
-					uint32_t y1try = y0try + octants[idxtry].getSize();
+					uint32_t y1try = y0try + octants[idxtry].getSize(global.MAX_LEVEL);
 					uint32_t z0try = octants[idxtry].z;
-					uint32_t z1try = z0try + octants[idxtry].getSize();
+					uint32_t z1try = z0try + octants[idxtry].getSize(global.MAX_LEVEL);
 					uint8_t level = oct->level;
 					uint8_t leveltry = octants[idxtry].getLevel();
 
@@ -3208,27 +3209,27 @@ void classLocalTree::findEdgeNeighbours(classOctant* oct,
 	uint64_t  		Morton, Mortontry;
 	uint32_t  		noctants = getNumOctants();
 	uint32_t 		idxtry;
-	uint32_t 		size = oct->getSize();
+	uint32_t 		size = oct->getSize(global.MAX_LEVEL);
 	uint8_t 		iface1, iface2;
 	int32_t 		Dx, Dy, Dz;
 	int32_t 		Dxstar,Dystar,Dzstar;
 
 	//Alternative to switch case
-	int8_t cx = CG::edgecoeffs[iedge][0];
-	int8_t cy = CG::edgecoeffs[iedge][1];
-	int8_t cz = CG::edgecoeffs[iedge][2];
+	int8_t cx = global.edgecoeffs[iedge][0];
+	int8_t cy = global.edgecoeffs[iedge][1];
+	int8_t cz = global.edgecoeffs[iedge][2];
 
 	isghost.clear();
 	neighbours.clear();
 
 	// Default if iedge is nface<iedge<0
-	if (iedge < 0 || iedge > CG::nfaces*2){
+	if (iedge < 0 || iedge > global.nfaces*2){
 		return;
 	}
 
 	// Check if octants edge is a process boundary
-	iface1 = CG::edgeface[iedge][0];
-	iface2 = CG::edgeface[iedge][1];
+	iface1 = global.edgeface[iedge][0];
+	iface2 = global.edgeface[iedge][1];
 
 	// Check if octants edge is a boundary
 	if (oct->info[iface1] == false && oct->info[iface2] == false){
@@ -3297,16 +3298,16 @@ void classLocalTree::findEdgeNeighbours(classOctant* oct,
 						return;
 					}
 					// Compute Last discendent of virtual octant of same size
-					classOctant last_desc = samesizeoct.buildLastDesc();
+					classOctant last_desc = samesizeoct.buildLastDesc(global.MAX_LEVEL);
 					uint64_t Mortonlast = last_desc.computeMorton();
 					Mortontry = ghosts[idxtry].computeMorton();
 					while(Mortontry < Mortonlast && idxtry < ghosts.size()){
 						Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(ghosts[idxtry].x));
 						Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(ghosts[idxtry].y));
 						Dz = int32_t(abs(cz))*(-int32_t(oct->z) + int32_t(ghosts[idxtry].z));
-						Dxstar = int32_t((cx-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cx+1)/2)*size;
-						Dystar = int32_t((cy-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cy+1)/2)*size;
-						Dzstar = int32_t((cz-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cz+1)/2)*size;
+						Dxstar = int32_t((cx-1)/2)*(ghosts[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cx+1)/2)*size;
+						Dystar = int32_t((cy-1)/2)*(ghosts[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cy+1)/2)*size;
+						Dzstar = int32_t((cz-1)/2)*(ghosts[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cz+1)/2)*size;
 
 						uint32_t x0 = oct->x;
 						uint32_t x1 = x0 + size;
@@ -3315,11 +3316,11 @@ void classLocalTree::findEdgeNeighbours(classOctant* oct,
 						uint32_t z0 = oct->z;
 						uint32_t z1 = z0 + size;
 						uint32_t x0try = ghosts[idxtry].x;
-						uint32_t x1try = x0try + ghosts[idxtry].getSize();
+						uint32_t x1try = x0try + ghosts[idxtry].getSize(global.MAX_LEVEL);
 						uint32_t y0try = ghosts[idxtry].y;
-						uint32_t y1try = y0try + ghosts[idxtry].getSize();
+						uint32_t y1try = y0try + ghosts[idxtry].getSize(global.MAX_LEVEL);
 						uint32_t z0try = ghosts[idxtry].z;
-						uint32_t z1try = z0try + ghosts[idxtry].getSize();
+						uint32_t z1try = z0try + ghosts[idxtry].getSize(global.MAX_LEVEL);
 						uint8_t level = oct->level;
 						uint8_t leveltry = ghosts[idxtry].getLevel();
 
@@ -3405,16 +3406,16 @@ void classLocalTree::findEdgeNeighbours(classOctant* oct,
 					return;
 				}
 				// Compute Last discendent of virtual octant of same size
-				classOctant last_desc = samesizeoct.buildLastDesc();
+				classOctant last_desc = samesizeoct.buildLastDesc(global.MAX_LEVEL);
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = octants[idxtry].computeMorton();
 				while(Mortontry < Mortonlast && idxtry <= noctants-1){
 					Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 					Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
 					Dz = int32_t(abs(cz))*(-int32_t(oct->z) + int32_t(octants[idxtry].z));
-					Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize()) + int32_t((cx+1)/2)*size;
-					Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
-					Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
+					Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cx+1)/2)*size;
+					Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cy+1)/2)*size;
+					Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cz+1)/2)*size;
 
 					uint32_t x0 = oct->x;
 					uint32_t x1 = x0 + size;
@@ -3423,11 +3424,11 @@ void classLocalTree::findEdgeNeighbours(classOctant* oct,
 					uint32_t z0 = oct->z;
 					uint32_t z1 = z0 + size;
 					uint32_t x0try = octants[idxtry].x;
-					uint32_t x1try = x0try + octants[idxtry].getSize();
+					uint32_t x1try = x0try + octants[idxtry].getSize(global.MAX_LEVEL);
 					uint32_t y0try = octants[idxtry].y;
-					uint32_t y1try = y0try + octants[idxtry].getSize();
+					uint32_t y1try = y0try + octants[idxtry].getSize(global.MAX_LEVEL);
 					uint32_t z0try = octants[idxtry].z;
-					uint32_t z1try = z0try + octants[idxtry].getSize();
+					uint32_t z1try = z0try + octants[idxtry].getSize(global.MAX_LEVEL);
 					uint8_t level = oct->level;
 					uint8_t leveltry = octants[idxtry].getLevel();
 
@@ -3477,29 +3478,29 @@ void classLocalTree::findGhostEdgeNeighbours(uint32_t idx,
 	uint32_t  		noctants = getNumOctants();
 	uint32_t 		idxtry;
 	classOctant* 	oct = &ghosts[idx];
-	uint32_t 		size = oct->getSize();
+	uint32_t 		size = oct->getSize(global.MAX_LEVEL);
 	uint8_t 		iface1, iface2;
 	int32_t 		Dx, Dy, Dz;
 	int32_t 		Dxstar,Dystar,Dzstar;
 
 	//Alternative to switch case
-	int8_t cx = CG::edgecoeffs[iedge][0];
-	int8_t cy = CG::edgecoeffs[iedge][1];
-	int8_t cz = CG::edgecoeffs[iedge][2];
+	int8_t cx = global.edgecoeffs[iedge][0];
+	int8_t cy = global.edgecoeffs[iedge][1];
+	int8_t cz = global.edgecoeffs[iedge][2];
 
 	neighbours.clear();
 
 	// Default if iedge is nface<iedge<0
-	if (iedge < 0 || iedge > CG::nfaces*2){
+	if (iedge < 0 || iedge > global.nfaces*2){
 		return;
 	}
 
 	// Check if octants edge is a process boundary
-	iface1 = CG::edgeface[iedge][0];
-	iface2 = CG::edgeface[iedge][1];
+	iface1 = global.edgeface[iedge][0];
+	iface2 = global.edgeface[iedge][1];
 
 	// Check if octants edge is a pboundary edge
-	if (oct->info[iface1+CG::nfaces] == true || oct->info[iface2+CG::nfaces] == true){
+	if (oct->info[iface1+6] == true || oct->info[iface2+6] == true){
 
 		//Build Morton number of virtual neigh of same size
 		classOctant samesizeoct(dim, oct->level, oct->x+cx*size, oct->y+cy*size, oct->z+cz*size);
@@ -3556,16 +3557,16 @@ void classLocalTree::findGhostEdgeNeighbours(uint32_t idx,
 					return;
 				}
 				// Compute Last discendent of virtual octant of same size
-				classOctant last_desc = samesizeoct.buildLastDesc();
+				classOctant last_desc = samesizeoct.buildLastDesc(global.MAX_LEVEL);
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = octants[idxtry].computeMorton();
 				while(Mortontry < Mortonlast && idxtry <= noctants-1){
 					Dx = int32_t(abs(cx))*(-int32_t(oct->x) + int32_t(octants[idxtry].x));
 					Dy = int32_t(abs(cy))*(-int32_t(oct->y) + int32_t(octants[idxtry].y));
 					Dz = int32_t(abs(cz))*(-int32_t(oct->z) + int32_t(octants[idxtry].z));
-					Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize()) + int32_t((cx+1)/2)*size;
-					Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize()) + int32_t((cy+1)/2)*size;
-					Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize()) + int32_t((cz+1)/2)*size;
+					Dxstar = int32_t((cx-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cx+1)/2)*size;
+					Dystar = int32_t((cy-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cy+1)/2)*size;
+					Dzstar = int32_t((cz-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cz+1)/2)*size;
 
 					uint32_t x0 = oct->x;
 					uint32_t x1 = x0 + size;
@@ -3574,11 +3575,11 @@ void classLocalTree::findGhostEdgeNeighbours(uint32_t idx,
 					uint32_t z0 = oct->z;
 					uint32_t z1 = z0 + size;
 					uint32_t x0try = octants[idxtry].x;
-					uint32_t x1try = x0try + octants[idxtry].getSize();
+					uint32_t x1try = x0try + octants[idxtry].getSize(global.MAX_LEVEL);
 					uint32_t y0try = octants[idxtry].y;
-					uint32_t y1try = y0try + octants[idxtry].getSize();
+					uint32_t y1try = y0try + octants[idxtry].getSize(global.MAX_LEVEL);
 					uint32_t z0try = octants[idxtry].z;
-					uint32_t z1try = z0try + octants[idxtry].getSize();
+					uint32_t z1try = z0try + octants[idxtry].getSize(global.MAX_LEVEL);
 					uint8_t level = oct->level;
 					uint8_t leveltry = octants[idxtry].getLevel();
 
@@ -3625,7 +3626,7 @@ void classLocalTree::findNodeNeighbours(classOctant* oct,
 	uint64_t  	Morton, Mortontry;
 	uint32_t  	noctants = getNumOctants();
 	uint32_t 	idxtry;
-	uint32_t 	size = oct->getSize();
+	uint32_t 	size = oct->getSize(global.MAX_LEVEL);
 	uint8_t 	iface1, iface2, iface3;
 	//	int32_t 	Dhx, Dhy, Dhz;
 	//	int32_t 	Dhxref, Dhyref, Dhzref;
@@ -3639,21 +3640,21 @@ void classLocalTree::findNodeNeighbours(classOctant* oct,
 	//	int8_t cz = Cz[inode];
 	int8_t 			cxyz[3] = {0,0,0};
 	for (int idim=0; idim<dim; idim++){
-		cxyz[idim] = CG::nodecoeffs[inode][idim];
+		cxyz[idim] = global.nodecoeffs[inode][idim];
 	}
 
 	isghost.clear();
 	neighbours.clear();
 
 	// Default if inode is nnodes<inode<0
-	if (inode < 0 || inode > CG::nnodes){
+	if (inode < 0 || inode > global.nnodes){
 		return;
 	}
 
 	// Check if octants node is a boundary
-	iface1 = CG::nodeface[inode][0];
-	iface2 = CG::nodeface[inode][1];
-	iface3 = CG::nodeface[inode][dim-1];
+	iface1 = global.nodeface[inode][0];
+	iface2 = global.nodeface[inode][1];
+	iface3 = global.nodeface[inode][dim-1];
 
 	// Check if octants node is a boundary
 	if (oct->info[iface1] == false && oct->info[iface2] == false && oct->info[iface3] == false){
@@ -3724,7 +3725,7 @@ void classLocalTree::findNodeNeighbours(classOctant* oct,
 						return;
 					}
 					// Compute Last discendent of virtual octant of same size
-					classOctant last_desc = samesizeoct.buildLastDesc();
+					classOctant last_desc = samesizeoct.buildLastDesc(global.MAX_LEVEL);
 					uint64_t Mortonlast = last_desc.computeMorton();
 					Mortontry = ghosts[idxtry].computeMorton();
 					int32_t Dx[3] = {0,0,0};
@@ -3737,14 +3738,14 @@ void classLocalTree::findNodeNeighbours(classOctant* oct,
 						//						Dhx = int32_t(cx)*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
 						//						Dhy = int32_t(cy)*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
 						//						Dhz = int32_t(cz)*(int32_t(oct->z) - int32_t(ghosts[idxtry].z));
-						//						Dhxref = int32_t(cx<0)*ghosts[idxtry].getSize() + int32_t(cx>0)*size;
-						//						Dhyref = int32_t(cy<0)*ghosts[idxtry].getSize() + int32_t(cy>0)*size;
-						//						Dhzref = int32_t(cz<0)*ghosts[idxtry].getSize() + int32_t(cz>0)*size;
+						//						Dhxref = int32_t(cx<0)*ghosts[idxtry].getSize(global.MAX_LEVEL) + int32_t(cx>0)*size;
+						//						Dhyref = int32_t(cy<0)*ghosts[idxtry].getSize(global.MAX_LEVEL) + int32_t(cy>0)*size;
+						//						Dhzref = int32_t(cz<0)*ghosts[idxtry].getSize(global.MAX_LEVEL) + int32_t(cz>0)*size;
 						for (int idim=0; idim<dim; idim++){
 							Dx[idim] 		= abs(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
-							Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
+							Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(ghosts[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[idim]+1)/2)*size;
 							coord1[idim] 	= coord[idim] + size;
-							coordtry1[idim] = coordtry[idim] + ghosts[idxtry].getSize();
+							coordtry1[idim] = coordtry[idim] + ghosts[idxtry].getSize(global.MAX_LEVEL);
 						}
 						if (Dx[0] == Dxstar[0] && Dx[1] == Dxstar[1] && Dx[dim-1] == Dxstar[dim-1]){
 							neighbours.push_back(idxtry);
@@ -3818,7 +3819,7 @@ void classLocalTree::findNodeNeighbours(classOctant* oct,
 					return;
 				}
 				// Compute Last discendent of virtual octant of same size
-				classOctant last_desc = samesizeoct.buildLastDesc();
+				classOctant last_desc = samesizeoct.buildLastDesc(global.MAX_LEVEL);
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = octants[idxtry].computeMorton();
 				int32_t Dx[3] = {0,0,0};
@@ -3831,14 +3832,14 @@ void classLocalTree::findNodeNeighbours(classOctant* oct,
 					//					Dhx = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
 					//					Dhy = int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
 					//					Dhz = int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
-					//					Dhxref = int32_t(cx<0)*octants[idxtry].getSize() + int32_t(cx>0)*size;
-					//					Dhyref = int32_t(cy<0)*octants[idxtry].getSize() + int32_t(cy>0)*size;
-					//					Dhzref = int32_t(cz<0)*octants[idxtry].getSize() + int32_t(cz>0)*size;
+					//					Dhxref = int32_t(cx<0)*octants[idxtry].getSize(global.MAX_LEVEL) + int32_t(cx>0)*size;
+					//					Dhyref = int32_t(cy<0)*octants[idxtry].getSize(global.MAX_LEVEL) + int32_t(cy>0)*size;
+					//					Dhzref = int32_t(cz<0)*octants[idxtry].getSize(global.MAX_LEVEL) + int32_t(cz>0)*size;
 					for (int idim=0; idim<dim; idim++){
 						Dx[idim] 		= abs(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
-						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
+						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[idim]+1)/2)*size;
 						coord1[idim] 	= coord[idim] + size;
-						coordtry1[idim] = coordtry[idim] + octants[idxtry].getSize();
+						coordtry1[idim] = coordtry[idim] + octants[idxtry].getSize(global.MAX_LEVEL);
 					}
 					if (Dx[0] == Dxstar[0] && Dx[1] == Dxstar[1] && Dx[dim-1] == Dxstar[dim-1]){
 						neighbours.push_back(idxtry);
@@ -3877,7 +3878,7 @@ void classLocalTree::findNodeNeighbours(uint32_t idx,
 	uint32_t  		noctants = getNumOctants();
 	uint32_t 		idxtry;
 	classOctant* 	oct = &octants[idx];
-	uint32_t 		size = oct->getSize();
+	uint32_t 		size = oct->getSize(global.MAX_LEVEL);
 	uint8_t 		iface1, iface2, iface3;
 	//	int32_t Dhx, Dhy, Dhz;
 	//	int32_t Dhxref, Dhyref, Dhzref;
@@ -3891,21 +3892,21 @@ void classLocalTree::findNodeNeighbours(uint32_t idx,
 	//	int8_t cz = Cz[inode];
 	int8_t 			cxyz[3] = {0,0,0};
 	for (int idim=0; idim<dim; idim++){
-		cxyz[idim] = CG::nodecoeffs[inode][idim];
+		cxyz[idim] = global.nodecoeffs[inode][idim];
 	}
 
 	isghost.clear();
 	neighbours.clear();
 
 	// Default if inode is nnodes<inode<0
-	if (inode < 0 || inode > CG::nnodes){
+	if (inode < 0 || inode > global.nnodes){
 		return;
 	}
 
 	// Check if octants node is a boundary
-	iface1 = CG::nodeface[inode][0];
-	iface2 = CG::nodeface[inode][1];
-	iface3 = CG::nodeface[inode][dim-1];
+	iface1 = global.nodeface[inode][0];
+	iface2 = global.nodeface[inode][1];
+	iface3 = global.nodeface[inode][dim-1];
 
 	// Check if octants node is a boundary
 	if (oct->info[iface1] == false && oct->info[iface2] == false && oct->info[iface3] == false){
@@ -3976,7 +3977,7 @@ void classLocalTree::findNodeNeighbours(uint32_t idx,
 						return;
 					}
 					// Compute Last discendent of virtual octant of same size
-					classOctant last_desc = samesizeoct.buildLastDesc();
+					classOctant last_desc = samesizeoct.buildLastDesc(global.MAX_LEVEL);
 					uint64_t Mortonlast = last_desc.computeMorton();
 					Mortontry = ghosts[idxtry].computeMorton();
 					int32_t Dx[3] = {0,0,0};
@@ -3989,14 +3990,14 @@ void classLocalTree::findNodeNeighbours(uint32_t idx,
 						//						Dhx = int32_t(cx)*(int32_t(oct->x) - int32_t(ghosts[idxtry].x));
 						//						Dhy = int32_t(cy)*(int32_t(oct->y) - int32_t(ghosts[idxtry].y));
 						//						Dhz = int32_t(cz)*(int32_t(oct->z) - int32_t(ghosts[idxtry].z));
-						//						Dhxref = int32_t(cx<0)*ghosts[idxtry].getSize() + int32_t(cx>0)*size;
-						//						Dhyref = int32_t(cy<0)*ghosts[idxtry].getSize() + int32_t(cy>0)*size;
-						//						Dhzref = int32_t(cz<0)*ghosts[idxtry].getSize() + int32_t(cz>0)*size;
+						//						Dhxref = int32_t(cx<0)*ghosts[idxtry].getSize(global.MAX_LEVEL) + int32_t(cx>0)*size;
+						//						Dhyref = int32_t(cy<0)*ghosts[idxtry].getSize(global.MAX_LEVEL) + int32_t(cy>0)*size;
+						//						Dhzref = int32_t(cz<0)*ghosts[idxtry].getSize(global.MAX_LEVEL) + int32_t(cz>0)*size;
 						for (int idim=0; idim<dim; idim++){
 							Dx[idim] 		= abs(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
-							Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(ghosts[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
+							Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(ghosts[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[idim]+1)/2)*size;
 							coord1[idim] 	= coord[idim] + size;
-							coordtry1[idim] = coordtry[idim] + ghosts[idxtry].getSize();
+							coordtry1[idim] = coordtry[idim] + ghosts[idxtry].getSize(global.MAX_LEVEL);
 						}
 						if (Dx[0] == Dxstar[0] && Dx[1] == Dxstar[1] && Dx[dim-1] == Dxstar[dim-1]){
 							neighbours.push_back(idxtry);
@@ -4070,7 +4071,7 @@ void classLocalTree::findNodeNeighbours(uint32_t idx,
 					return;
 				}
 				// Compute Last discendent of virtual octant of same size
-				classOctant last_desc = samesizeoct.buildLastDesc();
+				classOctant last_desc = samesizeoct.buildLastDesc(global.MAX_LEVEL);
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = octants[idxtry].computeMorton();
 				int32_t Dx[3] = {0,0,0};
@@ -4083,14 +4084,14 @@ void classLocalTree::findNodeNeighbours(uint32_t idx,
 					//					Dhx = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
 					//					Dhy = int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
 					//					Dhz = int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
-					//					Dhxref = int32_t(cx<0)*octants[idxtry].getSize() + int32_t(cx>0)*size;
-					//					Dhyref = int32_t(cy<0)*octants[idxtry].getSize() + int32_t(cy>0)*size;
-					//					Dhzref = int32_t(cz<0)*octants[idxtry].getSize() + int32_t(cz>0)*size;
+					//					Dhxref = int32_t(cx<0)*octants[idxtry].getSize(global.MAX_LEVEL) + int32_t(cx>0)*size;
+					//					Dhyref = int32_t(cy<0)*octants[idxtry].getSize(global.MAX_LEVEL) + int32_t(cy>0)*size;
+					//					Dhzref = int32_t(cz<0)*octants[idxtry].getSize(global.MAX_LEVEL) + int32_t(cz>0)*size;
 					for (int idim=0; idim<dim; idim++){
 						Dx[idim] 		= abs(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
-						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
+						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[idim]+1)/2)*size;
 						coord1[idim] 	= coord[idim] + size;
-						coordtry1[idim] = coordtry[idim] + octants[idxtry].getSize();
+						coordtry1[idim] = coordtry[idim] + octants[idxtry].getSize(global.MAX_LEVEL);
 					}
 					if (Dx[0] == Dxstar[0] && Dx[1] == Dxstar[1] && Dx[dim-1] == Dxstar[dim-1]){
 						neighbours.push_back(idxtry);
@@ -4127,7 +4128,7 @@ void classLocalTree::findGhostNodeNeighbours(uint32_t idx,
 	uint32_t  		noctants = getNumOctants();
 	uint32_t 		idxtry;
 	classOctant* 	oct = &ghosts[idx];
-	uint32_t 		size = oct->getSize();
+	uint32_t 		size = oct->getSize(global.MAX_LEVEL);
 	uint8_t 		iface1, iface2, iface3;
 	//int32_t Dhx, Dhy, Dhz;
 	//int32_t Dhxref, Dhyref, Dhzref;
@@ -4141,20 +4142,20 @@ void classLocalTree::findGhostNodeNeighbours(uint32_t idx,
 	//int8_t cz = Cz[inode];
 	int8_t 			cxyz[3] = {0,0,0};
 	for (int idim=0; idim<dim; idim++){
-		cxyz[idim] = CG::nodecoeffs[inode][idim];
+		cxyz[idim] = global.nodecoeffs[inode][idim];
 	}
 
 	neighbours.clear();
 
 	// Default if inode is nnodes<inode<0
-	if (inode < 0 || inode > CG::nnodes){
+	if (inode < 0 || inode > global.nnodes){
 		return;
 	}
 
 	// Check if octants node is a boundary
-	iface1 = CG::nodeface[inode][0];
-	iface2 = CG::nodeface[inode][1];
-	iface3 = CG::nodeface[inode][dim-1];
+	iface1 = global.nodeface[inode][0];
+	iface2 = global.nodeface[inode][1];
+	iface3 = global.nodeface[inode][dim-1];
 
 	//		// Check if octants node is a boundary
 	//		if (oct->info[iface1] == false && oct->info[iface2] == false && oct->info[iface3] == false){
@@ -4201,7 +4202,7 @@ void classLocalTree::findGhostNodeNeighbours(uint32_t idx,
 					return;
 				}
 				// Compute Last discendent of virtual octant of same size
-				classOctant last_desc = samesizeoct.buildLastDesc();
+				classOctant last_desc = samesizeoct.buildLastDesc(global.MAX_LEVEL);
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = octants[idxtry].computeMorton();
 				int32_t Dx[3] = {0,0,0};
@@ -4214,14 +4215,14 @@ void classLocalTree::findGhostNodeNeighbours(uint32_t idx,
 					//				Dhx = int32_t(cx)*(int32_t(oct->x) - int32_t(octants[idxtry].x));
 					//				Dhy = int32_t(cy)*(int32_t(oct->y) - int32_t(octants[idxtry].y));
 					//				Dhz = int32_t(cz)*(int32_t(oct->z) - int32_t(octants[idxtry].z));
-					//				Dhxref = int32_t(cx<0)*octants[idxtry].getSize() + int32_t(cx>0)*size;
-					//				Dhyref = int32_t(cy<0)*octants[idxtry].getSize() + int32_t(cy>0)*size;
-					//				Dhzref = int32_t(cz<0)*octants[idxtry].getSize() + int32_t(cz>0)*size;
+					//				Dhxref = int32_t(cx<0)*octants[idxtry].getSize(global.MAX_LEVEL) + int32_t(cx>0)*size;
+					//				Dhyref = int32_t(cy<0)*octants[idxtry].getSize(global.MAX_LEVEL) + int32_t(cy>0)*size;
+					//				Dhzref = int32_t(cz<0)*octants[idxtry].getSize(global.MAX_LEVEL) + int32_t(cz>0)*size;
 					for (int idim=0; idim<dim; idim++){
 						Dx[idim] 		= abs(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
-						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
+						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[idim]+1)/2)*size;
 						coord1[idim] 	= coord[idim] + size;
-						coordtry1[idim] = coordtry[idim] + octants[idxtry].getSize();
+						coordtry1[idim] = coordtry[idim] + octants[idxtry].getSize(global.MAX_LEVEL);
 					}
 					if (Dx[0] == Dxstar[0] && Dx[1] == Dxstar[1] && Dx[dim-1] == Dxstar[dim-1]){
 						neighbours.push_back(idxtry);
@@ -4269,7 +4270,7 @@ void classLocalTree::computeIntersections() {
 					intersection.finer = getGhostLevel(idx) >= getLevel((int)neighbours[i]);
 					intersection.owners[0]  = neighbours[i];
 					intersection.owners[1] = idx;
-					intersection.iface = CG::oppface[iface2] - (getGhostLevel(idx) >= getLevel((int)neighbours[i]));
+					intersection.iface = global.oppface[iface2] - (getGhostLevel(idx) >= getLevel((int)neighbours[i]));
 					intersection.isnew = false;
 					intersection.isghost = true;
 					intersection.bound = false;
@@ -4448,13 +4449,13 @@ void classLocalTree::computeConnectivity(){
 	uint8_t 									j;
 
 	clearConnectivity();
-	octnodes.reserve(CG::nnodes);
+	octnodes.reserve(global.nnodes);
 
 	if (nodes.size() == 0){
 		connectivity.resize(noctants);
 		for (i = 0; i < noctants; i++){
-			octants[i].getNodes(octnodes);
-			for (j = 0; j < CG::nnodes; j++){
+			octants[i].getNodes(octnodes, global.MAX_LEVEL);
+			for (j = 0; j < global.nnodes; j++){
 // 					morton = mortonEncode_magicbits(octnodes[j][0], octnodes[j][1], octnodes[j][2]);
 /*debug version*/			morton = keyXYZ(octnodes[j][0], octnodes[j][1], octnodes[j][2]);
 				if (mapnodes[morton].size()==0){
@@ -4530,12 +4531,12 @@ void classLocalTree::computeGhostsConnectivity(){
 	u32vector2D									octnodes;
 	uint8_t 									j;
 
-	octnodes.reserve(CG::nnodes);
+	octnodes.reserve(global.nnodes);
 	if (ghostsnodes.size() == 0){
 		ghostsconnectivity.resize(noctants);
 		for (i = 0; i < noctants; i++){
-			ghosts[i].getNodes(octnodes);
-			for (j = 0; j < CG::nnodes; j++){
+			ghosts[i].getNodes(octnodes, global.MAX_LEVEL);
+			for (j = 0; j < global.nnodes; j++){
 // 					morton = mortonEncode_magicbits(octnodes[j][0], octnodes[j][1], octnodes[j][2]);
 /*debug version*/			morton = keyXYZ(octnodes[j][0], octnodes[j][1], octnodes[j][2]);
 				if (mapnodes[morton].size()==0){

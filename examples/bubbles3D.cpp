@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
 		pabloBB.setBalance(idx,true);
 
 		/**<Refine globally four level and write the para_tree.*/
-		for (iter=1; iter<5; iter++){
+		for (iter=1; iter<4; iter++){
 			pabloBB.adaptGlobalRefine();
 		}
 
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 		srand(time(NULL));
 
 #if NOMPI==0
-		int nb = 100;
+		int nb = 50;
 #else
 		int nb = 10;
 #endif
@@ -109,8 +109,8 @@ int main(int argc, char *argv[]) {
 		int itstart = 1;
 		int itend = 200;
 
-		/**<Set the number of refinement per time iteration.*/
-		int nrefperiter = 3;
+//		/**<Set the number of refinement per time iteration.*/
+//		int nrefperiter = 3;
 
 		/**<Perform time iterations.*/
 		for (iter=itstart; iter<itend; iter++){
@@ -125,9 +125,12 @@ int main(int argc, char *argv[]) {
 			}
 
 			/**<Adapting (refinement and coarsening).*/
-			for (int iref=0; iref<nrefperiter; iref++){
+//			for (int iref=0; iref<nrefperiter; iref++){
+			bool adapt = true;
+			while (adapt){
 
 				for (int i=0; i<nocts; i++){
+
 					bool inside = false;
 					/**<Compute the nodes of the octant.*/
 					vector<vector<double> > nodes = pabloBB.getNodes(i);
@@ -141,14 +144,9 @@ int main(int argc, char *argv[]) {
 						double radius = BB[ib].r;
 //						oct_data[i] = 0.0;
 						/**<Set marker with condition on center or nodes of the octant.*/
-						for (int j=0; j<global3D.nnodes; j++){
-							double x = nodes[j][0];
-							double y = nodes[j][1];
-							double z = nodes[j][2];
-							if (((!inside) && (pow((x-xc),2.0)+pow((y-yc),2.0)+pow((z-zc),2.0) <= 1.15*pow(radius,2.0) &&
-									pow((x-xc),2.0)+pow((y-yc),2.0)+pow((z-zc),2.0) >= 0.85*pow(radius,2.0))) ||
-									((!inside) && (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0) <= 1.15*pow(radius,2.0) &&
-											pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0) >= 0.85*pow(radius,2.0)))){
+						if (((!inside))){
+							if (((pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0) <= 1.25*pow(radius,2.0) &&
+											pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0) >= 0.75*pow(radius,2.0)))){
 								if (pabloBB.getLevel(i) < 7){
 									/**<Set to refine inside a band around the interface of the bubbles.*/
 									pabloBB.setMarker(i,1);
@@ -161,19 +159,41 @@ int main(int argc, char *argv[]) {
 								inside = true;
 							}
 						}
+						for (int j=0; j<global3D.nnodes; j++){
+							double x = nodes[j][0];
+							double y = nodes[j][1];
+							double z = nodes[j][2];
+							if (((!inside))){
+								if (((pow((x-xc),2.0)+pow((y-yc),2.0)+pow((z-zc),2.0) <= 1.25*pow(radius,2.0) &&
+										pow((x-xc),2.0)+pow((y-yc),2.0)+pow((z-zc),2.0) >= 0.75*pow(radius,2.0)))){
+									if (pabloBB.getLevel(i) < 7){
+										/**<Set to refine inside a band around the interface of the bubbles.*/
+										pabloBB.setMarker(i,1);
+										oct_data[i] = 1.0;
+									}
+									else{
+										pabloBB.setMarker(i,0);
+										oct_data[i] = 1.0;
+									}
+									inside = true;
+								}
+							}
+						}
 						ib++;
 					}
-					if (pabloBB.getLevel(i) > 4 && !inside){
-						/**<Set to coarse outside the band if the octant has a level higher than 4.*/
-						pabloBB.setMarker(i,-1);
+					if (!inside){
 						oct_data[i] = 0.0;
+						if (pabloBB.getLevel(i) > 3){
+							/**<Set to coarse outside the band if the octant has a level higher than 4.*/
+							pabloBB.setMarker(i,-1);
+						}
 					}
 				}
 
 				/**<Adapt the octree.*/
 				vector<uint32_t> mapidx;
 				vector<bool> isghost;
-				bool adapt = pabloBB.adapt(true);
+				adapt = pabloBB.adapt(true);
 
 				/**<Update the number of local octants.*/
 				nocts = pabloBB.getNumOctants();
@@ -182,10 +202,11 @@ int main(int argc, char *argv[]) {
 				oct_data_new.resize(nocts, 0);
 				for (uint32_t i=0; i<nocts; i++){
 					pabloBB.getMapping(i, mapidx, isghost);
-					oct_data_new[i] = oct_data[mapidx[i]];
+					oct_data_new[i] = oct_data[mapidx[0]];
 				}
 				oct_data = oct_data_new;
 				vector<double>().swap(oct_data_new);
+
 
 			}
 

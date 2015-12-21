@@ -2,32 +2,34 @@
 
 // =================================================================================== //
 
-uint32_t classGlobal::max_length;
-uint8_t  classGlobal::nchildren;
-uint8_t  classGlobal::nfaces;
-uint8_t  classGlobal::nnodes;
-uint8_t  classGlobal::nedges;
-uint8_t  classGlobal::nnodesperface;
-uint8_t  classGlobal::octantBytes;
-uint8_t  classGlobal::globalIndexBytes;
-uint8_t  classGlobal::markerBytes;
-uint8_t  classGlobal::levelBytes;
-uint8_t  classGlobal::boolBytes;
-uint8_t  classGlobal::oppface[4];
-uint8_t  classGlobal::nodeface[8][3];
-uint8_t  classGlobal::facenode[6][3];
-uint8_t  classGlobal::edgeface[12][2];
-int8_t   classGlobal::normals[6][3];
-int8_t   classGlobal::edgecoeffs[12][3];
-int8_t   classGlobal::nodecoeffs[8][3];
-int8_t  classGlobal::MAX_LEVEL;
+//uint32_t classGlobal::max_length;
+//uint8_t  classGlobal::nchildren;
+//uint8_t  classGlobal::nfaces;
+//uint8_t  classGlobal::nnodes;
+//uint8_t  classGlobal::nedges;
+//uint8_t  classGlobal::nnodesperface;
+//uint8_t  classGlobal::octantBytes;
+//uint8_t  classGlobal::globalIndexBytes;
+//uint8_t  classGlobal::markerBytes;
+//uint8_t  classGlobal::levelBytes;
+//uint8_t  classGlobal::boolBytes;
+//uint8_t  classGlobal::oppface[4];
+//uint8_t  classGlobal::nodeface[8][3];
+//uint8_t  classGlobal::facenode[6][3];
+//uint8_t  classGlobal::edgeface[12][2];
+//int8_t   classGlobal::normals[6][3];
+//int8_t   classGlobal::edgecoeffs[12][3];
+//int8_t   classGlobal::nodecoeffs[8][3];
+//int8_t  classGlobal::MAX_LEVEL;
 
 // =================================================================================== //
 
-void classGlobal::setGlobal(uint8_t dim){
+void classGlobal::setGlobal(int8_t maxlevel, uint8_t dim){
 
 	if (dim>3) dim = 3;
 	if (dim<2) dim = 2;
+
+	MAX_LEVEL = maxlevel;
 
 	max_length 			= uint32_t(1<<MAX_LEVEL);
 	nchildren 			= 1<<dim;
@@ -203,8 +205,6 @@ void classGlobal::setGlobal(uint8_t dim){
 	nodecoeffs[7][0] =  1;
 	nodecoeffs[7][1] =  1;
 	nodecoeffs[7][2] =  1;
-
-	MAX_LEVEL = 20;
 
 }
 

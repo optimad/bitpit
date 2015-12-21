@@ -39,13 +39,12 @@ class Class_Local_Tree<2>{
 	// ------------------------------------------------------------------------------- //
 	// TYPEDEFS ----------------------------------------------------------------------- //
 
-	//typedef vector<Class_Octant<2> > 		OctantsType;
-	typedef vector<classOctant > 			OctantsType;
+	typedef vector<Class_Octant<2> > 		OctantsType;
 	typedef vector<Class_Intersection<2> > 	IntersectionsType;
-//	typedef vector<uint32_t>				u32vector;
+	typedef vector<uint32_t>				u32vector;
 	typedef vector<uint64_t>				u64vector;
-//	typedef vector<vector<uint32_t>	>		u32vector2D;
-//	typedef vector<vector<uint64_t>	>		u64vector2D;
+	typedef vector<vector<uint32_t>	>		u32vector2D;
+	typedef vector<vector<uint64_t>	>		u64vector2D;
 
 
 	// ------------------------------------------------------------------------------- //
@@ -58,8 +57,8 @@ private:
 	u64vector 					globalidx_ghosts;	/**< Global index of the ghost octants (size = size_ghosts) */
 	//Class_Octant<2> 			first_desc;			/**< First (Morton order) most refined octant possible in local partition */
 	//Class_Octant<2> 			last_desc;			/**< Last (Morton order) most refined octant possible in local partition */
-	classOctant	 				first_desc;			/**< First (Morton order) most refined octant possible in local partition */
-	classOctant 				last_desc;			/**< Last (Morton order) most refined octant possible in local partition */
+	Class_Octant<2>	 				first_desc;			/**< First (Morton order) most refined octant possible in local partition */
+	Class_Octant<2> 				last_desc;			/**< Last (Morton order) most refined octant possible in local partition */
 	uint32_t 					size_ghosts;		/**< Size of vector of ghost octants */
 	uint8_t						local_max_depth;	/**< Reached max depth in local tree */
 	uint8_t 					balance_codim;		/**<Maximum codimension of the entity for 2:1 balancing (1 = 2:1 balance through edges (default);
@@ -79,12 +78,12 @@ private:
 
 public:
 	Class_Local_Tree(){
-//		Class_Octant<2> oct0;
-//		Class_Octant<2> octf(MAX_LEVEL_2D,0,0);
-//		Class_Octant<2> octl(MAX_LEVEL_2D,global2D.max_length-1,global2D.max_length-1);
-		classOctant oct0(2);
-		classOctant octf(2,MAX_LEVEL_2D,0,0);
-		classOctant octl(2,MAX_LEVEL_2D,global2D.max_length-1,global2D.max_length-1);
+		Class_Octant<2> oct0;
+		Class_Octant<2> octf(MAX_LEVEL_2D,0,0);
+		Class_Octant<2> octl(MAX_LEVEL_2D,global2D.max_length-1,global2D.max_length-1);
+//		Class_Octant<2> oct0(2);
+//		Class_Octant<2> octf(2,MAX_LEVEL_2D,0,0);
+//		Class_Octant<2> octl(2,MAX_LEVEL_2D,global2D.max_length-1,global2D.max_length-1);
 		octants.resize(1);
 		octants[0] = oct0;
 		first_desc = octf;
@@ -104,11 +103,11 @@ public:
 private:
 	//public:
 //	const Class_Octant<2> &  getFirstDesc() const{
-	const classOctant&  getFirstDesc() const{
+	const Class_Octant<2>&  getFirstDesc() const{
 		return first_desc;
 	};
 //	const Class_Octant<2> &  getLastDesc() const{
-	const classOctant&  getLastDesc() const{
+	const Class_Octant<2>&  getLastDesc() const{
 		return last_desc;
 	};
 	uint32_t getSizeGhost() const{
@@ -157,7 +156,7 @@ private:
 	 void setFirstDesc(){
 		OctantsType::const_iterator firstOctant = octants.begin();
 		//first_desc = Class_Octant<2>(MAX_LEVEL_2D,firstOctant->x,firstOctant->y);
-		first_desc = classOctant(2,CG::MAX_LEVEL,firstOctant->x,firstOctant->y);
+		first_desc = Class_Octant<2>(2,MAX_LEVEL_2D,firstOctant->x,firstOctant->y);
 	};
 	void setLastDesc(){
 		OctantsType::const_iterator lastOctant = octants.end() - 1;
@@ -166,7 +165,7 @@ private:
 		x = lastOctant->x + delta;
 		y = lastOctant->y + delta;
 		//last_desc = Class_Octant<2>(MAX_LEVEL_2D,x,y);
-		last_desc = classOctant(2,MAX_LEVEL_2D,x,y);
+		last_desc = Class_Octant<2>(2,MAX_LEVEL_2D,x,y);
 
 	};
 
@@ -174,22 +173,22 @@ private:
 	// Other methods ----------------------------------------------------------------- //
 
 //	Class_Octant<2>& extractOctant(uint32_t idx) {
-	classOctant& extractOctant(uint32_t idx) {
+	Class_Octant<2>& extractOctant(uint32_t idx) {
 		return octants[idx];
 	};
 
 //	const Class_Octant<2>& extractOctant(uint32_t idx) const{
-	const classOctant& extractOctant(uint32_t idx) const{
+	const Class_Octant<2>& extractOctant(uint32_t idx) const{
 		return octants[idx];
 	};
 
 //	Class_Octant<2>& extractGhostOctant(uint32_t idx) {
-	classOctant& extractGhostOctant(uint32_t idx) {
+	Class_Octant<2>& extractGhostOctant(uint32_t idx) {
 		return ghosts[idx];
 	};
 
 //	const Class_Octant<2>& extractGhostOctant(uint32_t idx) const{
-	const classOctant& extractGhostOctant(uint32_t idx) const{
+	const Class_Octant<2>& extractGhostOctant(uint32_t idx) const{
 		return ghosts[idx];
 	};
 
@@ -200,7 +199,7 @@ private:
 		// Local variables
 		vector<uint32_t> last_child_index;
 		//vector<Class_Octant<2> > children;
-		vector<classOctant > children;
+		vector<Class_Octant<2> > children;
 		uint32_t idx, nocts, ilastch;
 		uint32_t offset = 0, blockidx;
 		uint8_t nchm1 = global2D.nchildren-1, ich;
@@ -271,7 +270,7 @@ private:
 		// Local variables										// (if at least one octant of family has marker>=0 set marker=0 for the entire family)
 		vector<uint32_t> first_child_index;
 //		Class_Octant<2> father;
-		classOctant father;
+		Class_Octant<2> father;
 		uint32_t nocts;
 		uint32_t idx, idx2;
 		uint32_t offset;
@@ -485,7 +484,7 @@ private:
 		// Local variables
 		vector<uint32_t> last_child_index;
 		//vector<Class_Octant<2> > children;
-		vector<classOctant > children;
+		vector<Class_Octant<2> > children;
 		uint32_t idx, nocts, ilastch;
 		uint32_t offset = 0, blockidx;
 		uint8_t nchm1 = global2D.nchildren-1, ich;
@@ -566,7 +565,7 @@ private:
 		// Local variables
 		vector<uint32_t> first_child_index;
 		//Class_Octant<2> father;
-		classOctant father;
+		Class_Octant<2> father;
 		uint32_t nocts, nocts0;
 		uint32_t idx, idx2;
 		uint32_t offset;
@@ -799,7 +798,7 @@ private:
 		// Local variables
 		vector<uint32_t> last_child_index;
 		//vector<Class_Octant<2> > children;
-		vector<classOctant > children;
+		vector<Class_Octant<2> > children;
 		uint32_t idx, nocts, ilastch;
 		uint32_t offset = 0, blockidx;
 		uint8_t nchm1 = global2D.nchildren-1, ich;
@@ -871,7 +870,7 @@ private:
 	bool globalCoarse(){
 		vector<uint32_t> first_child_index;
 		//Class_Octant<2> father;
-		classOctant father;
+		Class_Octant<2> father;
 		uint32_t nocts;
 		uint32_t idx, idx2;
 		uint32_t offset;
@@ -1086,7 +1085,7 @@ private:
 		// Local variables
 		vector<uint32_t> last_child_index;
 		//vector<Class_Octant<2> > children;
-		vector<classOctant > children;
+		vector<Class_Octant<2> > children;
 		uint32_t idx, nocts, ilastch;
 		uint32_t offset = 0, blockidx;
 		uint8_t nchm1 = global2D.nchildren-1, ich;
@@ -1168,7 +1167,7 @@ private:
 		// Local variables
 		vector<uint32_t> first_child_index;
 		//Class_Octant<2> father;
-		classOctant father;
+		Class_Octant<2> father;
 		uint32_t nocts, nocts0;
 		uint32_t idx, idx2;
 		uint32_t offset;
@@ -1488,7 +1487,7 @@ private:
 		uint32_t  noctants = getNumOctants();
 		uint32_t idxtry;
 		//Class_Octant<2>* oct = &octants[idx];
-		classOctant* oct = &octants[idx];
+		Class_Octant<2>* oct = &octants[idx];
 		uint32_t size = oct->getSize();
 
 
@@ -1514,7 +1513,7 @@ private:
 
 				//Build Morton number of virtual neigh of same size
 //				Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size));
-				classOctant samesizeoct(2, oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size));
+				Class_Octant<2> samesizeoct(2, oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size));
 				Morton = samesizeoct.computeMorton();
 				// Search morton in octants
 				// If a even face morton is lower than morton of oct, if odd higher
@@ -1570,7 +1569,7 @@ private:
 					}
 					// Compute Last discendent of virtual octant of same size
 //					Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
-					classOctant last_desc = samesizeoct.buildLastDesc();
+					Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
 					uint64_t Mortonlast = last_desc.computeMorton();
 					Mortontry = octants[idxtry].computeMorton();
 					int32_t Dx, Dy;
@@ -1633,11 +1632,11 @@ private:
 
 					uint32_t idxghost = uint32_t(size_ghosts/2);
 					//Class_Octant<2>* octghost = &ghosts[idxghost];
-					classOctant* octghost = &ghosts[idxghost];
+					Class_Octant<2>* octghost = &ghosts[idxghost];
 
 					//Build Morton number of virtual neigh of same size
 					//Class_Octant<2> samesizeoct(oct->level, oct->x+cx*size, oct->y+cy*size);
-					classOctant samesizeoct(2, oct->level, oct->x+cx*size, oct->y+cy*size);
+					Class_Octant<2> samesizeoct(2, oct->level, oct->x+cx*size, oct->y+cy*size);
 					Morton = samesizeoct.computeMorton(); //mortonEncode_magicbits(oct->x-size,oct->y,oct->z);
 					// Search morton in octants
 					// If a even face morton is lower than morton of oct, if odd higher
@@ -1693,7 +1692,7 @@ private:
 							}
 							// Compute Last discendent of virtual octant of same size
 							//Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
-							classOctant last_desc = samesizeoct.buildLastDesc();
+							Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
 							uint64_t Mortonlast = last_desc.computeMorton();
 							Mortontry = ghosts[idxtry].computeMorton();
 							int32_t Dx, Dy;
@@ -1752,7 +1751,7 @@ private:
 
 							//Build Morton number of virtual neigh of same size
 //							Class_Octant<2> samesizeoct(oct->level, oct->x+cx*size, oct->y+cy*size);
-							classOctant samesizeoct(2, oct->level, oct->x+cx*size, oct->y+cy*size);
+							Class_Octant<2> samesizeoct(2, oct->level, oct->x+cx*size, oct->y+cy*size);
 							Morton = samesizeoct.computeMorton();
 							// Search morton in octants
 							// If a even face morton is lower than morton of oct, if odd higher
@@ -1808,7 +1807,7 @@ private:
 									}
 									// Compute Last discendent of virtual octant of same size
 //									Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
-									classOctant last_desc = samesizeoct.buildLastDesc();
+									Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
 									uint64_t Mortonlast = last_desc.computeMorton();
 									Mortontry = octants[idxtry].computeMorton();
 									int32_t Dx, Dy;
@@ -1868,7 +1867,7 @@ private:
 	// =================================================================================== //
 
 //	void findNeighbours(Class_Octant<2> *oct,		// Finds neighbours of octant through iface in vector octants.
-	void findNeighbours(classOctant *oct,			// Finds neighbours of octant through iface in vector octants.
+	void findNeighbours(Class_Octant<2> *oct,			// Finds neighbours of octant through iface in vector octants.
 			uint8_t iface,							// Returns a vector (empty if iface is a bound face) with the index of neighbours
 			u32vector & neighbours,					// in their structure (octants or ghosts) and sets isghost[i] = true if the
 			vector<bool> & isghost){				// i-th neighbour is ghost in the local tree
@@ -1899,7 +1898,7 @@ private:
 
 				//Build Morton number of virtual neigh of same size
 				//Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size));
-				classOctant samesizeoct(2, oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size));
+				Class_Octant<2> samesizeoct(2, oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size));
 				Morton = samesizeoct.computeMorton();
 				// Search morton in octants
 				// If a even face morton is lower than morton of oct, if odd higher
@@ -1954,7 +1953,7 @@ private:
 					}
 					// Compute Last discendent of virtual octant of same size
 					//Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
-					classOctant last_desc = samesizeoct.buildLastDesc();
+					Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
 					uint64_t Mortonlast = last_desc.computeMorton();
 					Mortontry = octants[idxtry].computeMorton();
 					int32_t Dx, Dy;
@@ -2017,11 +2016,11 @@ private:
 
 					uint32_t idxghost = uint32_t(size_ghosts/2);
 					//Class_Octant<2>* octghost = &ghosts[idxghost];
-					classOctant* octghost = &ghosts[idxghost];
+					Class_Octant<2>* octghost = &ghosts[idxghost];
 
 					//Build Morton number of virtual neigh of same size
 					//Class_Octant<2> samesizeoct(oct->level, oct->x+cx*size, oct->y+cy*size);
-					classOctant samesizeoct(2, oct->level, oct->x+cx*size, oct->y+cy*size);
+					Class_Octant<2> samesizeoct(2, oct->level, oct->x+cx*size, oct->y+cy*size);
 					Morton = samesizeoct.computeMorton(); //mortonEncode_magicbits(oct->x-size,oct->y,oct->z);
 					// Search morton in octants
 					// If a even face morton is lower than morton of oct, if odd higher
@@ -2076,7 +2075,7 @@ private:
 							}
 							// Compute Last discendent of virtual octant of same size
 							//Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
-							classOctant last_desc = samesizeoct.buildLastDesc();
+							Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
 							uint64_t Mortonlast = last_desc.computeMorton();
 							Mortontry = ghosts[idxtry].computeMorton();
 							int32_t Dx, Dy;
@@ -2136,7 +2135,7 @@ private:
 
 							//Build Morton number of virtual neigh of same size
 							//Class_Octant<2> samesizeoct(oct->level, oct->x+cx*size, oct->y+cy*size);
-							classOctant samesizeoct(2, oct->level, oct->x+cx*size, oct->y+cy*size);
+							Class_Octant<2> samesizeoct(2, oct->level, oct->x+cx*size, oct->y+cy*size);
 							Morton = samesizeoct.computeMorton();
 							// Search morton in octants
 							// If a even face morton is lower than morton of oct, if odd higher
@@ -2191,7 +2190,7 @@ private:
 									}
 									// Compute Last discendent of virtual octant of same size
 									//Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
-									classOctant last_desc = samesizeoct.buildLastDesc();
+									Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
 									uint64_t Mortonlast = last_desc.computeMorton();
 									Mortontry = octants[idxtry].computeMorton();
 									int32_t Dx, Dy;
@@ -2255,7 +2254,7 @@ private:
 		uint32_t  noctants = getNumOctants();
 		uint32_t idxtry;
 		//Class_Octant<2>* oct = &ghosts[idx];
-		classOctant* oct = &ghosts[idx];
+		Class_Octant<2>* oct = &ghosts[idx];
 		uint32_t size = oct->getSize();
 
 		//Alternative to switch case
@@ -2274,7 +2273,7 @@ private:
 
 			//Build Morton number of virtual neigh of same size
 			//Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size));
-			classOctant samesizeoct(2, oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size));
+			Class_Octant<2> samesizeoct(2, oct->level, int32_t(oct->x)+int32_t(cx*size), int32_t(oct->y)+int32_t(cy*size));
 			Morton = samesizeoct.computeMorton();
 			// Search morton in octants
 			// If a even face morton is lower than morton of oct, if odd higher
@@ -2328,7 +2327,7 @@ private:
 				}
 				// Compute Last discendent of virtual octant of same size
 				//Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
-				classOctant last_desc = samesizeoct.buildLastDesc();
+				Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = octants[idxtry].computeMorton();
 				int32_t Dx, Dy;
@@ -2384,7 +2383,7 @@ private:
 	void preBalance21(bool internal){
 		// Local variables
 		//Class_Octant<2> father, lastdesc;
-		classOctant father, lastdesc;
+		Class_Octant<2> father, lastdesc;
 		uint64_t mortonld;
 		uint32_t nocts;
 		uint32_t idx, idx2, idx0, last_idx;
@@ -2553,7 +2552,7 @@ private:
 	void preBalance21(u32vector& newmodified){
 		// Local variables
 		//Class_Octant<2> father, lastdesc;
-		classOctant father, lastdesc;
+		Class_Octant<2> father, lastdesc;
 		uint64_t mortonld;
 		uint32_t nocts;
 		uint32_t idx, idx2, idx0, last_idx;
@@ -3478,7 +3477,7 @@ private:
 		uint32_t  noctants = getNumOctants();
 		uint32_t idxtry;
 		//Class_Octant<2>* oct = &octants[idx];
-		classOctant* oct = &octants[idx];
+		Class_Octant<2>* oct = &octants[idx];
 		uint32_t size = oct->getSize();
 		uint8_t iface1, iface2;
 		int32_t Dhx, Dhy;
@@ -3507,7 +3506,7 @@ private:
 
 			//Build Morton number of virtual neigh of same size
 			//Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));
-			classOctant samesizeoct(2, oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));
+			Class_Octant<2> samesizeoct(2, oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));
 			Morton = samesizeoct.computeMorton();
 
 			//SEARCH IN GHOSTS
@@ -3517,7 +3516,7 @@ private:
 
 				uint32_t idxghost = uint32_t(size_ghosts/2);
 				//Class_Octant<2>* octghost = &ghosts[idxghost];
-				classOctant* octghost = &ghosts[idxghost];
+				Class_Octant<2>* octghost = &ghosts[idxghost];
 
 				// Search morton in octants
 				// If a even face morton is lower than morton of oct, if odd higher
@@ -3581,7 +3580,7 @@ private:
 						}
 						// Compute Last discendent of virtual octant of same size
 						//Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
-						classOctant last_desc = samesizeoct.buildLastDesc();
+						Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
 						uint64_t Mortonlast = last_desc.computeMorton();
 						Mortontry = ghosts[idxtry].computeMorton();
 						while(Mortontry < Mortonlast && idxtry < size_ghosts){
@@ -3668,7 +3667,7 @@ private:
 					}
 					// Compute Last discendent of virtual octant of same size
 					//Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
-					classOctant last_desc = samesizeoct.buildLastDesc();
+					Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
 					uint64_t Mortonlast = last_desc.computeMorton();
 					Mortontry = octants[idxtry].computeMorton();
 					while(Mortontry < Mortonlast && idxtry <= noctants-1){
@@ -3701,7 +3700,7 @@ private:
 	// =================================================================================== //
 
 //	void findNodeNeighbours(Class_Octant<2>* oct,			// Finds neighbours of idx-th octant through inode in vector octants.
-	void findNodeNeighbours(classOctant* oct,			// Finds neighbours of idx-th octant through inode in vector octants.
+	void findNodeNeighbours(Class_Octant<2>* oct,			// Finds neighbours of idx-th octant through inode in vector octants.
 			uint8_t inode,				// Returns a vector (empty if inode is a bound node) with the index of neighbours
 			u32vector & neighbours,		// in their structure (octants or ghosts) and sets isghost[i] = true if the
 			vector<bool> & isghost){	// i-th neighbour is ghost in the local tree
@@ -3737,7 +3736,7 @@ private:
 
 			//Build Morton number of virtual neigh of same size
 			//Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));
-			classOctant samesizeoct(2, oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));
+			Class_Octant<2> samesizeoct(2, oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));
 			Morton = samesizeoct.computeMorton();
 
 			//SEARCH IN GHOSTS
@@ -3747,7 +3746,7 @@ private:
 
 				uint32_t idxghost = uint32_t(size_ghosts/2);
 				//Class_Octant<2>* octghost = &ghosts[idxghost];
-				classOctant* octghost = &ghosts[idxghost];
+				Class_Octant<2>* octghost = &ghosts[idxghost];
 
 				// Search morton in octants
 				// If a even face morton is lower than morton of oct, if odd higher
@@ -3804,7 +3803,7 @@ private:
 						}
 						// Compute Last discendent of virtual octant of same size
 						//Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
-						classOctant last_desc = samesizeoct.buildLastDesc();
+						Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
 						uint64_t Mortonlast = last_desc.computeMorton();
 						Mortontry = ghosts[idxtry].computeMorton();
 						while(Mortontry < Mortonlast && idxtry < size_ghosts){
@@ -3885,7 +3884,7 @@ private:
 					}
 					// Compute Last discendent of virtual octant of same size
 //					Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
-					classOctant last_desc = samesizeoct.buildLastDesc();
+					Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
 					uint64_t Mortonlast = last_desc.computeMorton();
 					Mortontry = octants[idxtry].computeMorton();
 					while(Mortontry < Mortonlast && idxtry <= noctants-1){
@@ -3922,7 +3921,7 @@ private:
 		uint32_t  noctants = getNumOctants();
 		uint32_t idxtry;
 		//Class_Octant<2>* oct = &ghosts[idx];
-		classOctant* oct = &ghosts[idx];
+		Class_Octant<2>* oct = &ghosts[idx];
 		uint32_t size = oct->getSize();
 		uint8_t iface1, iface2;
 		int32_t Dhx, Dhy;
@@ -3952,7 +3951,7 @@ private:
 
 			//Build Morton number of virtual neigh of same size
 			//Class_Octant<2> samesizeoct(oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));
-			classOctant samesizeoct(2, oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));
+			Class_Octant<2> samesizeoct(2, oct->level, int32_t(oct->x)+int32_t(cx)*int32_t(size), int32_t(oct->y)+int32_t(cy)*int32_t(size));
 			Morton = samesizeoct.computeMorton();
 
 			// Search in octants
@@ -4008,7 +4007,7 @@ private:
 					}
 					// Compute Last discendent of virtual octant of same size
 					//Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
-					classOctant last_desc = samesizeoct.buildLastDesc();
+					Class_Octant<2> last_desc = samesizeoct.buildLastDesc();
 					uint64_t Mortonlast = last_desc.computeMorton();
 					Mortontry = octants[idxtry].computeMorton();
 					while(Mortontry < Mortonlast && idxtry <= noctants-1){

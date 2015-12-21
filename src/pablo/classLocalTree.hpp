@@ -19,6 +19,13 @@
 using namespace std;
 
 // =================================================================================== //
+// TYPEDEFS
+// =================================================================================== //
+
+typedef vector<classOctant>		 		octvector;
+typedef vector<classIntersection>	 	intervector;
+
+// =================================================================================== //
 // CLASS DEFINITION                                                                    //
 // =================================================================================== //
 
@@ -55,7 +62,7 @@ class classLocalTree{
 	// FRIENDSHIPS
 	// =================================================================================== //
 
-	template<int dim> friend class Class_Para_Tree;
+	friend class classParaTree;
 
 	// =================================================================================== //
 	// TYPEDEFS
@@ -63,6 +70,8 @@ class classLocalTree{
 public:
 	typedef vector<classOctant>		 		octvector;
 	typedef vector<classIntersection>	 	intervector;
+	typedef vector<uint8_t>					u8vector;
+	typedef vector<uint32_t>				u32vector;
 	typedef vector<uint64_t>				u64vector;
 	typedef vector<u32array3>				u32arr3vector;
 
@@ -85,16 +94,17 @@ private:
 	u32vector 					last_ghost_bros;	/**<Index of ghost brothers in case of broken family coarsened*/
 
 	// connectivity
-//	u32vector2D					nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
+	//	u32vector2D					nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
 	u32vector2D					connectivity;		/**<Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
 	 	 	 	 	 	 	 	 	 	 	 	 	 The nodes are stored as index of vector nodes*/
-//	u32vector2D					ghostsnodes;		/**<Local vector of ghosts nodes (x,y,z) ordered with Morton Number*/
+	//	u32vector2D					ghostsnodes;		/**<Local vector of ghosts nodes (x,y,z) ordered with Morton Number*/
 	u32vector2D					ghostsconnectivity;	/**<Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
 	 	 	 	 	 	 	 	 	 	 	 	 	 The nodes are stored as index of vector nodes*/
 	u32arr3vector				nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
 	u32arr3vector				ghostsnodes;		/**<Local vector of ghosts nodes (x,y,z) ordered with Morton Number*/
 
 	uint8_t						dim;				/**<Space dimension. Only 2D or 3D space accepted*/
+	classGlobal					global;				/**<Global variables*/
 
 	// =================================================================================== //
 	// CONSTRUCTORS
@@ -103,7 +113,7 @@ private:
 public:
 	/*!Dimensional and default constructor.
 	 */
-	classLocalTree(uint8_t dim_ = 2);
+	classLocalTree(int8_t maxlevel, uint8_t dim_);
 
 	/*!Default destructor.
 	 */

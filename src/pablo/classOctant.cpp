@@ -12,47 +12,50 @@ classOctant::classOctant(){
 	x = y = z = 0;
 	level = 0;
 	marker = 0;
-	for (int i=0; i<CG::nfaces; i++){
+	for (uint8_t i=0; i<4; i++){
 		info[i] = true;
 	}
 	info[14] = false;
 };
 
-classOctant::classOctant(uint8_t dim){
-	this->dim = dim;
+classOctant::classOctant(uint8_t dim_){
+	dim = dim_;
 	x = y = z = 0;
 	level = 0;
 	marker = 0;
-	for (int i=0; i<CG::nfaces; i++){
+	uint8_t nf = dim*2;
+	for (uint8_t i=0; i<nf; i++){
 		info[i] = true;
 	}
 	info[14] = false;
 };
 
-classOctant::classOctant(uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z){
-	this->dim = dim;
-	this->x = x;
-	this->y = y;
-	this->z = (dim-2)*z;
-	this->level = level;
+classOctant::classOctant(uint8_t dim_, uint8_t level_, int32_t x_, int32_t y_, int32_t z_){
+	dim = dim_;
+	x = x_;
+	y = y_;
+	z = (dim-2)*z_;
+	level = level_;
 	marker = 0;
 	if (level==0){
-		for (int i=0; i<CG::nfaces; i++){
+		uint8_t nf = dim*2;
+		for (uint8_t i=0; i<nf; i++){
 			info[i] = true;
 		}
 	}
 	info[14] = false;
 };
 
-classOctant::classOctant(bool bound, uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z){
-	this->dim = dim;
-	this->x = x;
-	this->y = y;
-	this->z = (dim-2)*z;
-	this->level = level;
+classOctant::classOctant(bool bound, uint8_t dim_, uint8_t level_, int32_t x_, int32_t y_, int32_t z_){
+	dim = dim_;
+	x = x_;
+	y = y_;
+	z = (dim-2)*z_;
+	level = level_;
 	marker = 0;
 	if (level==0){
-		for (int i=0; i<CG::nfaces; i++){
+		uint8_t nf = dim*2;
+		for (uint8_t i=0; i<nf; i++){
 			info[i] = bound;
 		}
 	}
@@ -207,28 +210,27 @@ void 		classOctant::setPbound(uint8_t face, bool flag){
 // OTHER GET/SET METHODS
 // =================================================================================== //
 
-//public:
 /*! Get the size of an octant in logical domain, i.e. the side length.
  * \return Size of octant.
  */
-uint32_t	classOctant::getSize() const{
-	uint32_t size = uint32_t(1<<(CG::MAX_LEVEL-level));
+uint32_t	classOctant::getSize(int8_t maxlevel) const{
+	uint32_t size = uint32_t(1<<(maxlevel-level));
 	return size;
 };
 
 /*! Get the area of an octant in logical domain .
  * \return Area of octant.
  */
-uint64_t	classOctant::getArea() const{
-	uint64_t area = uint64_t(pow(double(getSize()),double(dim-1)));
+uint64_t	classOctant::getArea(int8_t maxlevel) const{
+	uint64_t area = uint64_t(pow(double(getSize(maxlevel)),double(dim-1)));
 	return area;
 };
 
 /*! Get the volume of an octant in logical domain.
  * \return Volume of octant.
  */
-uint64_t	classOctant::getVolume() const{
-	uint64_t volume = uint64_t(pow(double(getSize()),double(dim)));
+uint64_t	classOctant::getVolume(int8_t maxlevel) const{
+	uint64_t volume = uint64_t(pow(double(getSize(maxlevel)),double(dim)));
 	return volume;
 };
 
@@ -237,10 +239,10 @@ uint64_t	classOctant::getVolume() const{
 /*! Get the coordinates of the center of an octant in logical domain.
  * \return Array[3] with the coordinates of the center of octant.
  */
-vector<double>	classOctant::getCenter() const{
+vector<double>	classOctant::getCenter(int8_t maxlevel) const{
 	double	dh;
 
-	dh = double(getSize())/2.0;
+	dh = double(getSize(maxlevel))/2.0;
 	vector<double> center(3);
 
 	center[0] = (double)x + dh;
@@ -254,15 +256,15 @@ vector<double>	classOctant::getCenter() const{
 /*! Get the coordinates of the center of a face of an octant in logical domain.
  * \return Array[3] with the coordinates of the center of the octant face.
  */
-vector<double>	classOctant::getFaceCenter(uint8_t iface) const{
+vector<double>	classOctant::getFaceCenter(uint8_t iface, int8_t maxlevel) const{
 	double	dh_2;
 
 	int A[6][3] = { {0,1,1} , {2,1,1} , {1,0,1} , {1,2,1} , {1,1,0} , {1,1,2} };
 
-	dh_2 = double(getSize())/2.0;
+	dh_2 = double(getSize(maxlevel))/2.0;
 	vector<double> center(3);
-
-	if (iface < CG::nfaces){
+	uint8_t nf = dim*2;
+	if (iface < nf){
 		center[0] = (double)x + (double)A[iface][0] * dh_2;
 		center[1] = (double)y + (double)A[iface][1] * dh_2;
 		center[2] = (double)z + (double)A[iface][2] * dh_2;
@@ -275,19 +277,17 @@ vector<double>	classOctant::getFaceCenter(uint8_t iface) const{
 /*! Get the coordinates of the center of a edge of an octant in logical domain.
  * \return Array[3] with the coordinates of the center of the octant edge.
  */
-vector<double>	classOctant::getEdgeCenter(uint8_t iedge) const{
+vector<double>	classOctant::getEdgeCenter(uint8_t iedge, int8_t maxlevel) const{
 	double	dh_2;
 
 	int A[12][3] = { {0,1,0},{2,1,0},{1,0,0},{1,2,0},{0,0,1},{2,0,1},{0,2,1},{2,2,1},{0,1,2},{2,1,2},{1,0,2},{1,2,2} };//{ {0,1,1} , {2,1,1} , {1,0,1} , {1,2,1} , {1,1,0} , {1,1,2} };
 
-	dh_2 = double(getSize())/2.0;
+	dh_2 = double(getSize(maxlevel))/2.0;
 	vector<double> center(3);
 
-	if (iedge < CG::nedges){
-		center[0] = (double)x + (double)A[iedge][0] * dh_2;
-		center[1] = (double)y + (double)A[iedge][1] * dh_2;
-		center[2] = (double)z + (double)A[iedge][2] * dh_2;
-	}
+	center[0] = (double)x + (double)A[iedge][0] * dh_2;
+	center[1] = (double)y + (double)A[iedge][1] * dh_2;
+	center[2] = (double)z + (double)A[iedge][2] * dh_2;
 	return center;
 };
 
@@ -296,15 +296,16 @@ vector<double>	classOctant::getEdgeCenter(uint8_t iedge) const{
 /*! Get the coordinates of the nodes of an octant in logical domain.
  * \param[out] nodes Vector[nnodes][3] with the coordinates of the nodes of octant.
  */
-void		classOctant::getNodes(u32vector2D & nodes) const{
+void		classOctant::getNodes(u32vector2D & nodes, int8_t maxlevel) const{
 	uint8_t		i, cx, cy, cz;
 	uint32_t	dh;
 
-	dh = getSize();
+	dh = getSize(maxlevel);
 	nodes.clear();
-	nodes.resize(CG::nnodes);
+	nodes.resize(1<<dim);
 
-	for (i = 0; i < CG::nnodes; i++){
+	uint8_t nn = 1<<dim;
+	for (i = 0; i < nn; i++){
 		nodes[i].resize(3);
 		cx = uint8_t(i%2);
 		cy = uint8_t((i-4*(i/4))/2);
@@ -321,11 +322,11 @@ void		classOctant::getNodes(u32vector2D & nodes) const{
  * \param[in] inode Local index of the node
  * \param[out] node dim-vector with the logical coordinates of the node of the octant.
  */
-void		classOctant::getNode(u32vector & node, uint8_t inode) const{
+void		classOctant::getNode(u32vector & node, uint8_t inode, int8_t maxlevel) const{
 	uint8_t		cx, cy, cz;
 	uint32_t	dh;
 
-	dh = getSize();
+	dh = getSize(maxlevel);
 	node.clear();
 	node.resize(3);
 	cx = inode%2;
@@ -341,12 +342,12 @@ void		classOctant::getNode(u32vector & node, uint8_t inode) const{
  * \param[in] inode Local index of the node
  * \param[out] node dim-vector with the logical coordinates of the node of the octant.
  */
-u32vector		classOctant::getNode(uint8_t inode) const{
+u32vector		classOctant::getNode(uint8_t inode, int8_t maxlevel) const{
 	u32vector node;
 	uint8_t		cx, cy, cz;
 	uint32_t	dh;
 
-	dh = getSize();
+	dh = getSize(maxlevel);
 	node.clear();
 	node.resize(3);
 	cx = inode%2;
@@ -358,19 +359,19 @@ u32vector		classOctant::getNode(uint8_t inode) const{
 	return node;
 };
 
-
+//TODO getNormal in localtree
 /*! Get the normal of a face of an octant in logical domain.
  * \param[in] iface Index of the face for normal computing.
  * \param[out] normal Vector[3] with components (with z=0) of the normal of face.
  */
 void		classOctant::getNormal(uint8_t & iface,
-		vector<int8_t> & normal) const{
+		vector<int8_t> & normal, int8_t (&normals)[6][3], int8_t maxlevel) const{
 	uint8_t		i;
 
 	normal.clear();
 	normal.resize(3);
 	for (i = 0; i < 3; i++){
-		normal[i] = CG::normals[iface][i];
+		normal[i] = normals[iface][i];
 	}
 	vector<int8_t>(normal).swap(normal);
 };
@@ -399,23 +400,23 @@ uint64_t	classOctant::computeMorton(){
 // OTHER METHODS
 // =================================================================================== //
 
-classOctant	classOctant::buildLastDesc(){
+classOctant	classOctant::buildLastDesc(int8_t & maxlevel){
 	uint32_t delta[3] = {0,0,0};
 	for (int i=0; i<dim; i++){
-		delta[i] = (uint32_t)(1 << (CG::MAX_LEVEL - level)) - 1;
+		delta[i] = (uint32_t)(1 << (maxlevel - level)) - 1;
 	}
 
-	classOctant last_desc(dim, CG::MAX_LEVEL, x+delta[0], y+delta[1], z+delta[2]);
+	classOctant last_desc(dim, maxlevel, x+delta[0], y+delta[1], z+delta[2]);
 	return last_desc;
 };
 
 // =================================================================================== //
 
-classOctant	classOctant::buildFather(){
+classOctant	classOctant::buildFather(int8_t & maxlevel){
 	uint32_t delta[3] = {0,0,0};
 	uint32_t xx[3] = {x, y, z};
 	for (int i=0; i<dim; i++){
-		delta[i] = xx[i]%(uint32_t(1 << (CG::MAX_LEVEL - (level-1))));
+		delta[i] = xx[i]%(uint32_t(1 << (maxlevel - (level-1))));
 	}
 	classOctant father(dim, level-1, x-delta[0], y-delta[1], z-delta[2]);
 	return father;
@@ -426,12 +427,12 @@ classOctant	classOctant::buildFather(){
 /** Builds children of octant.
  *   \return Ordered (by Z-index) vector of children[nchildren] (info update)
  */
-vector< classOctant >	classOctant::buildChildren(){
+vector< classOctant >	classOctant::buildChildren(int8_t & maxlevel){
 	uint8_t xf,yf,zf;
-	int nchildren = CG::nchildren;
-	int nfaces = CG::nfaces;
+	int nchildren = 1<<dim;
+//	int nfaces = 2*dim;
 
-	if (this->level < CG::MAX_LEVEL){
+	if (this->level < maxlevel){
 		vector< classOctant > children(nchildren);
 		for (int i=0; i<nchildren; i++){
 			switch (i) {
@@ -443,9 +444,9 @@ vector< classOctant >	classOctant::buildChildren(){
 				oct.info[12]=true;
 				// Update interior face bound and pbound
 				xf=1; yf=3; zf=5;
-				oct.info[xf] = oct.info[xf+nfaces] = false;
-				oct.info[yf] = oct.info[yf+nfaces] = false;
-				oct.info[zf] = oct.info[zf+nfaces] = false;
+				oct.info[xf] = oct.info[xf+6] = false;
+				oct.info[yf] = oct.info[yf+6] = false;
+				oct.info[zf] = oct.info[zf+6] = false;
 				children[0] = oct;
 			}
 			break;
@@ -455,13 +456,13 @@ vector< classOctant >	classOctant::buildChildren(){
 				oct.setMarker(max(0,oct.marker-1));
 				oct.setLevel(oct.level+1);
 				oct.info[12]=true;
-				uint32_t dh = oct.getSize();
+				uint32_t dh = oct.getSize(maxlevel);
 				oct.x += dh;
 				// Update interior face bound and pbound
 				xf=0; yf=3; zf=5;
-				oct.info[xf] = oct.info[xf+nfaces] = false;
-				oct.info[yf] = oct.info[yf+nfaces] = false;
-				oct.info[zf] = oct.info[zf+nfaces] = false;
+				oct.info[xf] = oct.info[xf+6] = false;
+				oct.info[yf] = oct.info[yf+6] = false;
+				oct.info[zf] = oct.info[zf+6] = false;
 				children[1] = oct;
 			}
 			break;
@@ -471,13 +472,13 @@ vector< classOctant >	classOctant::buildChildren(){
 				oct.setMarker(max(0,oct.marker-1));
 				oct.setLevel(oct.level+1);
 				oct.info[12]=true;
-				uint32_t dh = oct.getSize();
+				uint32_t dh = oct.getSize(maxlevel);
 				oct.y += dh;
 				// Update interior face bound and pbound
 				xf=1; yf=2; zf=5;
-				oct.info[xf] = oct.info[xf+nfaces] = false;
-				oct.info[yf] = oct.info[yf+nfaces] = false;
-				oct.info[zf] = oct.info[zf+nfaces] = false;
+				oct.info[xf] = oct.info[xf+6] = false;
+				oct.info[yf] = oct.info[yf+6] = false;
+				oct.info[zf] = oct.info[zf+6] = false;
 				children[2] = oct;
 			}
 			break;
@@ -487,14 +488,14 @@ vector< classOctant >	classOctant::buildChildren(){
 				oct.setMarker(max(0,oct.marker-1));
 				oct.setLevel(oct.level+1);
 				oct.info[12]=true;
-				uint32_t dh = oct.getSize();
+				uint32_t dh = oct.getSize(maxlevel);
 				oct.x += dh;
 				oct.y += dh;
 				// Update interior face bound and pbound
 				xf=0; yf=2; zf=5;
-				oct.info[xf] = oct.info[xf+nfaces] = false;
-				oct.info[yf] = oct.info[yf+nfaces] = false;
-				oct.info[zf] = oct.info[zf+nfaces] = false;
+				oct.info[xf] = oct.info[xf+6] = false;
+				oct.info[yf] = oct.info[yf+6] = false;
+				oct.info[zf] = oct.info[zf+6] = false;
 				children[3] = oct;
 			}
 			break;
@@ -504,13 +505,13 @@ vector< classOctant >	classOctant::buildChildren(){
 				oct.setMarker(max(0,oct.marker-1));
 				oct.setLevel(oct.level+1);
 				oct.info[12]=true;
-				uint32_t dh = oct.getSize();
+				uint32_t dh = oct.getSize(maxlevel);
 				oct.z += dh;
 				// Update interior face bound and pbound
 				xf=1; yf=3; zf=4;
-				oct.info[xf] = oct.info[xf+nfaces] = false;
-				oct.info[yf] = oct.info[yf+nfaces] = false;
-				oct.info[zf] = oct.info[zf+nfaces] = false;
+				oct.info[xf] = oct.info[xf+6] = false;
+				oct.info[yf] = oct.info[yf+6] = false;
+				oct.info[zf] = oct.info[zf+6] = false;
 				children[4] = oct;
 			}
 			break;
@@ -520,14 +521,14 @@ vector< classOctant >	classOctant::buildChildren(){
 				oct.setMarker(max(0,oct.marker-1));
 				oct.setLevel(oct.level+1);
 				oct.info[12]=true;
-				uint32_t dh = oct.getSize();
+				uint32_t dh = oct.getSize(maxlevel);
 				oct.x += dh;
 				oct.z += dh;
 				// Update interior face bound and pbound
 				xf=0; yf=3; zf=4;
-				oct.info[xf] = oct.info[xf+nfaces] = false;
-				oct.info[yf] = oct.info[yf+nfaces] = false;
-				oct.info[zf] = oct.info[zf+nfaces] = false;
+				oct.info[xf] = oct.info[xf+6] = false;
+				oct.info[yf] = oct.info[yf+6] = false;
+				oct.info[zf] = oct.info[zf+6] = false;
 				children[5] = oct;
 			}
 			break;
@@ -537,14 +538,14 @@ vector< classOctant >	classOctant::buildChildren(){
 				oct.setMarker(max(0,oct.marker-1));
 				oct.setLevel(oct.level+1);
 				oct.info[12]=true;
-				uint32_t dh = oct.getSize();
+				uint32_t dh = oct.getSize(maxlevel);
 				oct.y += dh;
 				oct.z += dh;
 				// Update interior face bound and pbound
 				xf=1; yf=2; zf=4;
-				oct.info[xf] = oct.info[xf+nfaces] = false;
-				oct.info[yf] = oct.info[yf+nfaces] = false;
-				oct.info[zf] = oct.info[zf+nfaces] = false;
+				oct.info[xf] = oct.info[xf+6] = false;
+				oct.info[yf] = oct.info[yf+6] = false;
+				oct.info[zf] = oct.info[zf+6] = false;
 				children[6] = oct;
 			}
 			break;
@@ -554,15 +555,15 @@ vector< classOctant >	classOctant::buildChildren(){
 				oct.setMarker(max(0,oct.marker-1));
 				oct.setLevel(oct.level+1);
 				oct.info[12]=true;
-				uint32_t dh = oct.getSize();
+				uint32_t dh = oct.getSize(maxlevel);
 				oct.x += dh;
 				oct.y += dh;
 				oct.z += dh;
 				// Update interior face bound and pbound
 				xf=0; yf=2; zf=4;
-				oct.info[xf] = oct.info[xf+nfaces] = false;
-				oct.info[yf] = oct.info[yf+nfaces] = false;
-				oct.info[zf] = oct.info[zf+nfaces] = false;
+				oct.info[xf] = oct.info[xf+6] = false;
+				oct.info[yf] = oct.info[yf+6] = false;
+				oct.info[zf] = oct.info[zf+6] = false;
 				children[7] = oct;
 			}
 			break;
@@ -578,15 +579,15 @@ vector< classOctant >	classOctant::buildChildren(){
 };
 
 vector<uint64_t> 		classOctant::computeHalfSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
-		uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
+		uint32_t & sizehf, int8_t & maxlevel){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
 	uint32_t dh,dh2;
 	uint32_t nneigh;
 	uint32_t i,cx,cy,cz;
-	int nchildren = CG::nchildren;
+	int nchildren = 1<<dim;
 
-	nneigh = (level < CG::MAX_LEVEL) ? nchildren/2 : 1;
-	dh = (level < CG::MAX_LEVEL) ? getSize()/2 : getSize();
-	dh2 = getSize();
+	nneigh = (level < maxlevel) ? nchildren/2 : 1;
+	dh = (level < maxlevel) ? getSize(maxlevel)/2 : getSize(maxlevel);
+	dh2 = getSize(maxlevel);
 
 	if (info[iface]){
 		sizehf = 0;
@@ -600,7 +601,7 @@ vector<uint64_t> 		classOctant::computeHalfSizeMorton(uint8_t iface, 			// Compu
 		{
 			for (i=0; i<nneigh; i++){
 				cy = (i==1)||(i==3);
-				cz = (i==2)||(i==3);
+				cz = (dim == 3) && ((i==2)||(i==3));
 				Morton[i] = mortonEncode_magicbits(this->x-dh,this->y+dh*cy,this->z+dh*cz);
 			}
 		}
@@ -609,7 +610,7 @@ vector<uint64_t> 		classOctant::computeHalfSizeMorton(uint8_t iface, 			// Compu
 		{
 			for (i=0; i<nneigh; i++){
 				cy = (i==1)||(i==3);
-				cz = (i==2)||(i==3);
+				cz = (dim == 3) && ((i==2)||(i==3));
 				Morton[i] = mortonEncode_magicbits(this->x+dh2,this->y+dh*cy,this->z+dh*cz);
 			}
 		}
@@ -618,7 +619,7 @@ vector<uint64_t> 		classOctant::computeHalfSizeMorton(uint8_t iface, 			// Compu
 		{
 			for (i=0; i<nneigh; i++){
 				cx = (i==1)||(i==3);
-				cz = (i==2)||(i==3);
+				cz = (dim == 3) && ((i==2)||(i==3));
 				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y-dh,this->z+dh*cz);
 			}
 		}
@@ -627,7 +628,7 @@ vector<uint64_t> 		classOctant::computeHalfSizeMorton(uint8_t iface, 			// Compu
 		{
 			for (i=0; i<nneigh; i++){
 				cx = (i==1)||(i==3);
-				cz = (i==2)||(i==3);
+				cz = (dim == 3) && ((i==2)||(i==3));
 				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2,this->z+dh*cz);
 			}
 		}
@@ -660,18 +661,18 @@ vector<uint64_t> 		classOctant::computeHalfSizeMorton(uint8_t iface, 			// Compu
 
 vector<uint64_t>		classOctant::computeMinSizeMorton(uint8_t iface, 			// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
 		const uint8_t & maxdepth,	// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
-		uint32_t & sizem){
+		uint32_t & sizem, int8_t & maxlevel){
 	uint32_t dh,dh2;
 	uint32_t nneigh, nline;
 	uint32_t i,cx,cy,cz;
 
 	//		nneigh = (level < CG::MAX_LEVEL) ? uint32_t(pow(2.0,double((dim-1)*(maxdepth-level)))) : 1;
-	//		dh = (level < CG::MAX_LEVEL) ? uint32_t(pow(2.0,double(CG::MAX_LEVEL - maxdepth))) : getSize();
-	//		dh2 = getSize();
+	//		dh = (level < CG::MAX_LEVEL) ? uint32_t(pow(2.0,double(CG::MAX_LEVEL - maxdepth))) : getSize(maxlevel);
+	//		dh2 = getSize(maxlevel);
 	//		nline = uint32_t(pow(2.0,double((maxdepth-level))));
-	nneigh = (level < CG::MAX_LEVEL) ? uint32_t(1<<((dim-1)*(maxdepth-level))) : 1;
-	dh = (level < CG::MAX_LEVEL) ? uint32_t(1<<(CG::MAX_LEVEL - maxdepth)) : getSize();
-	dh2 = getSize();
+	nneigh = (level < maxlevel) ? uint32_t(1<<((dim-1)*(maxdepth-level))) : 1;
+	dh = (level < maxlevel) ? uint32_t(1<<(maxlevel - maxdepth)) : getSize(maxlevel);
+	dh2 = getSize(maxlevel);
 	nline = uint32_t(1<<(maxdepth-level));
 
 	if (info[iface]){
@@ -747,31 +748,31 @@ vector<uint64_t>		classOctant::computeMinSizeMorton(uint8_t iface, 			// Compute
 
 vector<uint64_t> 		classOctant::computeVirtualMorton(uint8_t iface, 			// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
 		const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
-		uint32_t & sizeneigh){
+		uint32_t & sizeneigh, int8_t & maxlevel){
 	vector<uint64_t> Morton;
 	if (getNotBalance()){
 		return computeMinSizeMorton(iface,
 				maxdepth,
-				sizeneigh);
+				sizeneigh, maxlevel);
 	}
 	else{
 		return computeHalfSizeMorton(iface,
-				sizeneigh);
+				sizeneigh, maxlevel);
 	}
 };
 
 vector<uint64_t> 		classOctant::computeEdgeHalfSizeMorton(uint8_t iedge, 		// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
-		uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
+		uint32_t & sizehf, int8_t & maxlevel, uint8_t (&edgeface)[12][2]){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
 	uint32_t dh,dh2;
 	uint32_t nneigh;
 	uint32_t i,cx,cy,cz;
 	uint8_t iface1, iface2;
 
-	nneigh = (level < CG::MAX_LEVEL) ? 2 : 1;
-	dh = (level < CG::MAX_LEVEL) ? getSize()/2 : getSize();
-	dh2 = getSize();
-	iface1 = CG::edgeface[iedge][0];
-	iface2 = CG::edgeface[iedge][1];
+	nneigh = (level < maxlevel) ? 2 : 1;
+	dh = (level < maxlevel) ? getSize(maxlevel)/2 : getSize(maxlevel);
+	dh2 = getSize(maxlevel);
+	iface1 = edgeface[iedge][0];
+	iface2 = edgeface[iedge][1];
 
 	if (info[iface1] || info[iface2]){
 		sizehf = 0;
@@ -911,19 +912,19 @@ vector<uint64_t> 		classOctant::computeEdgeHalfSizeMorton(uint8_t iedge, 		// Co
 
 vector<uint64_t> 		classOctant::computeEdgeMinSizeMorton(uint8_t iedge, 		// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
 		const uint8_t & maxdepth,	// possible neighbours of octant throught edge iedge (sizem=0 if boundary octant)
-		uint32_t & sizem){
+		uint32_t & sizem, int8_t & maxlevel, uint8_t (&edgeface)[12][2]){
 	uint32_t dh,dh2;
 	uint32_t nneigh, nline;
 	uint32_t i,cx,cy,cz;
 	uint8_t iface1, iface2;
 
 
-	nneigh = (level < CG::MAX_LEVEL) ? uint32_t(1<<(maxdepth-level)) : 1;
-	dh = (level < CG::MAX_LEVEL) ? uint32_t(1<<(CG::MAX_LEVEL - maxdepth)) : getSize();
-	dh2 = getSize();
+	nneigh = (level < maxlevel) ? uint32_t(1<<(maxdepth-level)) : 1;
+	dh = (level < maxlevel) ? uint32_t(1<<(maxlevel - maxdepth)) : getSize(maxlevel);
+	dh2 = getSize(maxlevel);
 	nline = uint32_t(1<<(maxdepth-level));
-	iface1 = CG::edgeface[iedge][0];
-	iface2 = CG::edgeface[iedge][1];
+	iface1 = edgeface[iedge][0];
+	iface2 = edgeface[iedge][1];
 
 	if (info[iface1] || info[iface2]){
 		sizem = 0;
@@ -1063,35 +1064,33 @@ vector<uint64_t> 		classOctant::computeEdgeMinSizeMorton(uint8_t iedge, 		// Com
 vector<uint64_t>		classOctant::computeEdgeVirtualMorton(uint8_t iedge, 		// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
 		const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
 		uint32_t & sizeneigh,
-		uint8_t balance_codim){
+		uint8_t balance_codim, int8_t & maxlevel, uint8_t (&edgeface)[12][2]){
 
-	return computeEdgeMinSizeMorton(iedge,
-			maxdepth,
-			sizeneigh);
+	//	return computeEdgeMinSizeMorton(iedge,
+	//			maxdepth, sizeneigh, maxlevel, edgeface);
 
 	if(!getNotBalance() && balance_codim > 1){
 		return computeEdgeHalfSizeMorton(iedge,
-				sizeneigh);
+				sizeneigh, maxlevel, edgeface);
 	}
 	else{
 		return computeEdgeMinSizeMorton(iedge,
-				maxdepth,
-				sizeneigh);
+				maxdepth, sizeneigh, maxlevel, edgeface);
 	}
 };
 
 uint64_t 		classOctant::computeNodeHalfSizeMorton(uint8_t inode, 		// Computes Morton index (without level) of "n=sizehf" half-size (or same size if level=maxlevel)
-		uint32_t & sizehf){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
+		uint32_t & sizehf, int8_t & maxlevel, uint8_t (&nodeface)[8][3]){		// possible neighbours of octant throught face iface (sizehf=0 if boundary octant)
 	uint32_t dh,dh2;
 	uint32_t nneigh;
 	int8_t cx,cy,cz;
 	uint8_t iface[3];
 	nneigh = 1;
-	dh = (level < CG::MAX_LEVEL) ? getSize()/2 : getSize();
-	dh2 = getSize();
+	dh = (level < maxlevel) ? getSize(maxlevel)/2 : getSize(maxlevel);
+	dh2 = getSize(maxlevel);
 
 	for (int i=0; i<dim; i++){
-		iface[i] = CG::nodeface[inode][i];
+		iface[i] = nodeface[inode][i];
 	}
 
 	if (info[iface[0]] || info[iface[1]] || info[iface[2]]){
@@ -1171,9 +1170,11 @@ uint64_t 		classOctant::computeNodeHalfSizeMorton(uint8_t inode, 		// Computes M
 	}
 };
 
-uint64_t 		classOctant::computeNodeMinSizeMorton(uint8_t inode, 		// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
-		const uint8_t & maxdepth,	// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
-		uint32_t & sizehf){
+// Computes Morton index (without level) of "n=sizem" min-size (or same size if level=maxlevel)
+// possible neighbours of octant throught face iface (sizem=0 if boundary octant)
+uint64_t 		classOctant::computeNodeMinSizeMorton(uint8_t inode,
+		const uint8_t & maxdepth,uint32_t & sizehf,
+		int8_t & maxlevel, uint8_t (&nodeface)[8][3]){
 
 	uint32_t dh,dh2;
 	uint32_t nneigh;
@@ -1181,10 +1182,10 @@ uint64_t 		classOctant::computeNodeMinSizeMorton(uint8_t inode, 		// Computes Mo
 	uint8_t iface[3];
 
 	nneigh = 1;
-	dh = (level < CG::MAX_LEVEL) ? uint32_t(1<<(CG::MAX_LEVEL - maxdepth)) : getSize();
-	dh2 = getSize();
+	dh = (level < maxlevel) ? uint32_t(1<<(maxlevel - maxdepth)) : getSize(maxlevel);
+	dh2 = getSize(maxlevel);
 	for (int i=0; i<dim; i++){
-		iface[i] = CG::nodeface[inode][i];
+		iface[i] = nodeface[inode][i];
 	}
 
 	if (info[iface[0]] || info[iface[1]] || info[iface[dim-1]]){
@@ -1265,13 +1266,15 @@ uint64_t 		classOctant::computeNodeMinSizeMorton(uint8_t inode, 		// Computes Mo
 
 };
 
-uint64_t 		classOctant::computeNodeVirtualMorton(uint8_t inode, 		// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
-		const uint8_t & maxdepth,	// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
-		uint32_t & sizeneigh){
+// Computes Morton index (without level) of possible (virtual) neighbours of octant throught iface
+// Checks if balanced or not and uses half-size or min-size method (sizeneigh=0 if boundary octant)
+uint64_t 		classOctant::computeNodeVirtualMorton(uint8_t inode,
+		const uint8_t & maxdepth, uint32_t & sizeneigh, int8_t & maxlevel,
+		uint8_t (&nodeface)[8][3]){
+
 	//		if (getNotBalance()){
-	return computeNodeMinSizeMorton(inode,
-			maxdepth,
-			sizeneigh);
+	return computeNodeMinSizeMorton(inode, maxdepth,
+			sizeneigh, maxlevel, nodeface);
 	//		}
 	//		else{
 	//			return computeNodeHalfSizeMorton(inode,

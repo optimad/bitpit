@@ -90,9 +90,9 @@ uint32_t classIntersection::getIn(){
 	return owners[!finer];
 };
 
-void classIntersection::getNormal(int8_t normal[3]){
+void classIntersection::getNormal(int8_t normal[3], int8_t normals[6][3]){
 	for (int i=0; i<dim; i++){
-		normal[i] = CG::normals[iface][i];
+		normal[i] = normals[iface][i];
 	}
 };
 

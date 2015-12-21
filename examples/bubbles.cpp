@@ -1,6 +1,8 @@
-#include "preprocessor_defines.dat"
-#include "Class_Global.hpp"
-#include "Class_Para_Tree.hpp"
+//#include "preprocessor_defines.dat"
+//#include "Class_Global.hpp"
+//#include "Class_Para_Tree.hpp"
+#include "classGlobal.hpp"
+#include "classParaTree.hpp"
 #include "User_Data_Comm.hpp"
 #include "User_Data_LB.hpp"
 
@@ -39,7 +41,7 @@ int main(int argc, char *argv[]) {
 		int iter = 0;
 
 		/**<Instantation of a 2D para_tree object.*/
-		Class_Para_Tree<2> pabloBB;
+		classParaTree pabloBB;
 
 		/**<Set 2:1 balance for the octree.*/
 		pabloBB.setBalanceCodimension(1);
@@ -62,7 +64,8 @@ int main(int argc, char *argv[]) {
 		/**<Define and initialize a set of bubbles and their trajectories.*/
 		time_t Time = time(NULL);
 		srand(Time);
-		if(pabloBB.rank == 0)
+//		srand(1450623971);
+		if(pabloBB.getRank() == 0)
 			cout << "the seed = " << Time << endl;
 
 #if NOMPI==0
@@ -102,13 +105,14 @@ int main(int argc, char *argv[]) {
 		/**<Adapt itend times with refinement on the interface of the bubbles.*/
 		int itstart = 1;
 		int itend = 200;
+//		int itend = 11;
 
 		/**<Set the number of refinement per time iteration.*/
 		int nrefperiter = 4;
 
 		/**<Perform time iterations.*/
 		for (iter=itstart; iter<itend; iter++){
-			if(pabloBB.rank==0) cout << "iter " << iter << endl;
+			if(pabloBB.getRank()==0) cout << "iter " << iter << endl;
 			t += Dt;
 
 			/**<Update bubbles position.*/
@@ -118,7 +122,10 @@ int main(int argc, char *argv[]) {
 			}
 
 			/**<Adapting (refinement and coarsening).*/
-			for (int iref=0; iref<nrefperiter; iref++){
+//			for (int iref=0; iref<nrefperiter; iref++){
+
+			bool adapt = true;
+			while (adapt){
 
 				for (int i=0; i<nocts; i++){
 					bool inside = false;
@@ -126,13 +133,15 @@ int main(int argc, char *argv[]) {
 					vector<vector<double> > nodes = pabloBB.getNodes(i);
 					/**<Compute the center of the octant.*/
 					vector<double> center = pabloBB.getCenter(i);
+//					if(pabloBB.getRank()==0) cout << "oct " << i << " center : " << center[0] <<
+//							" , " << center[1] << " , " << center[2] << endl;
 					int ib = 0;
 					while (!inside && ib<nb){
 						double xc = BB[ib].c[0];
 						double yc = BB[ib].c[1];
 						double radius = BB[ib].r;
 						/**<Set marker with condition on center or nodes of the octant.*/
-						for (int j=0; j<global2D.nnodes; j++){
+						for (int j=0; j<4; j++){
 							double x = nodes[j][0];
 							double y = nodes[j][1];
 							if ( ((!inside) &&
@@ -159,7 +168,15 @@ int main(int argc, char *argv[]) {
 				}
 
 				/**<Adapt the octree.*/
-				bool adapt = pabloBB.adapt();
+//				cout << "in adapt" << endl;
+				adapt = pabloBB.adapt();
+//				cout << "out adapt" << endl;
+
+
+				/**<Update the number of local octants.*/
+				nocts = pabloBB.getNumOctants();
+
+			}
 
 #if NOMPI==0
 				/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
@@ -168,8 +185,6 @@ int main(int argc, char *argv[]) {
 
 				/**<Update the number of local octants.*/
 				nocts = pabloBB.getNumOctants();
-
-			}
 
 			/**<Update the connectivity and write the para_tree.*/
 			pabloBB.updateConnectivity();

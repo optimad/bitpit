@@ -28,7 +28,7 @@ class Class_Para_Tree<2> : public Class_Para_Tree_Base {
 	// ------------------------------------------------------------------------------- //
 	// TYPEDEFS ----------------------------------------------------------------------- //
 public:
-	typedef vector<classOctant>			octvector;
+	typedef vector<Class_Octant<2> >	octvector;
 	typedef vector<uint32_t>			u32vector;
 	typedef vector<double>				dvector;
 	typedef vector<vector<uint32_t>	>	u32vector2D;
@@ -54,8 +54,7 @@ public:
 
 	//distributed members
 	int rank;									/**<Local rank of process*/
-	//classLocalTree octree;					/**<Local tree in each processor*/
-	classLocalTree octree;						/**<Local tree in each processor*/
+	Class_Local_Tree<2> octree;					/**<Local tree in each processor*/
 
 	//distributed adpapting memebrs
 	u32vector mapidx;							/**<Local mapper for adapting. Mapper from new octants to old octants.
@@ -74,9 +73,6 @@ public:
 	//info member
 	uint64_t	status;							/**<Label of actual status of octree (incremental after an adpat
 													with at least one modifyed element).*/
-
-	uint8_t	dim;
-
 	//log member
 	Class_Log log;								/**<Log object*/
 
@@ -96,12 +92,6 @@ public:
 #else
 	Class_Para_Tree(string logfile="PABLO.log") : log(logfile){
 #endif
-		uint8_t dim = 2;
-		classGlobal::setGlobal(dim);
-		{
-			classLocalTree tree(dim);
-			octree = tree;
-		}
 		serial = true;
 		error_flag = 0;
 		max_depth = 0;
@@ -131,7 +121,7 @@ public:
 		log.writeLog("---------------------------------------------");
 		log.writeLog(" Number of proc		:	" + to_string(static_cast<unsigned long long>(nproc)));
 		log.writeLog(" Dimension		:	" + to_string(static_cast<unsigned long long>(2)));
-		log.writeLog(" Max allowed level	:	" + to_string(static_cast<unsigned long long>(CG::MAX_LEVEL)));
+		log.writeLog(" Max allowed level	:	" + to_string(static_cast<unsigned long long>(MAX_LEVEL_2D)));
 		log.writeLog("---------------------------------------------");
 		log.writeLog(" ");
 #if NOMPI==0
@@ -152,10 +142,8 @@ public:
 #if NOMPI==0
 	Class_Para_Tree(double X, double Y, double Z, double L,string logfile="PABLO.log", MPI_Comm comm_ = MPI_COMM_WORLD):trans(X,Y,Z,L),log(logfile,comm_),comm(comm_){
 #else
-	Class_Para_Tree(double X, double Y, double Z, double L,string logfile="PABLO.log"):trans(X,Y,Z,L),log(logfile){
+	Class_Para_Tree(double X, double Y, double Z, double L,string logfile="PABLO.log")::trans(X,Y,Z,L),log(logfile){
 #endif
-		dim = 2;
-		classGlobal::setGlobal(dim);
 		serial = true;
 		error_flag = 0;
 		max_depth = 0;
@@ -185,7 +173,7 @@ public:
 		log.writeLog("---------------------------------------------");
 		log.writeLog(" Number of proc		:	" + to_string(static_cast<unsigned long long>(nproc)));
 		log.writeLog(" Dimension		:	" + to_string(static_cast<unsigned long long>(2)));
-		log.writeLog(" Max allowed level	:	" + to_string(static_cast<unsigned long long>(CG::MAX_LEVEL)));
+		log.writeLog(" Max allowed level	:	" + to_string(static_cast<unsigned long long>(MAX_LEVEL_2D)));
 		log.writeLog(" Domain Origin		:	" + to_string(static_cast<unsigned long long>(X)));
 		log.writeLog("				" + to_string(static_cast<unsigned long long>(Y)));
 		log.writeLog("				" + to_string(static_cast<unsigned long long>(Z)));
@@ -217,21 +205,19 @@ public:
 		uint8_t lev, iface;
 		uint32_t x0, y0;
 		uint32_t NumOctants = XY.size();
-		dim = 2;
-		classGlobal::setGlobal(dim);
 		octree.octants.resize(NumOctants);
 		for (uint32_t i=0; i<NumOctants; i++){
 			lev = uint8_t(levels[i]);
 			x0 = uint32_t(XY[i][0]);
 			y0 = uint32_t(XY[i][1]);
 			//Class_Octant<2> oct(lev, x0, y0,false);
-			classOctant oct(lev, x0, y0,false);
+			Class_Octant<2> oct(lev, x0, y0,false);
 			oct.setBalance(false);
 			if (x0 == 0){
 				iface = 0;
 				oct.setBound(iface);
 			}
-			else if (x0 == CG::max_length - oct.getSize()){
+			else if (x0 == global2D.max_length - oct.getSize()){
 				iface = 1;
 				oct.setBound(iface);
 			}
@@ -239,7 +225,7 @@ public:
 				iface = 2;
 				oct.setBound(iface);
 			}
-			else if (y0 == CG::max_length - oct.getSize()){
+			else if (y0 == global2D.max_length - oct.getSize()){
 				iface = 3;
 				oct.setBound(iface);
 			}
@@ -278,7 +264,7 @@ public:
 		log.writeLog("---------------------------------------------");
 		log.writeLog(" Number of proc		:	" + to_string(static_cast<unsigned long long>(nproc)));
 		log.writeLog(" Dimension		:	" + to_string(static_cast<unsigned long long>(2)));
-		log.writeLog(" Max allowed level	:	" + to_string(static_cast<unsigned long long>(CG::MAX_LEVEL)));
+		log.writeLog(" Max allowed level	:	" + to_string(static_cast<unsigned long long>(MAX_LEVEL_2D)));
 		log.writeLog(" Domain Origin		:	" + to_string(static_cast<unsigned long long>(X)));
 		log.writeLog("				" + to_string(static_cast<unsigned long long>(Y)));
 		log.writeLog("				" + to_string(static_cast<unsigned long long>(Z)));
@@ -316,7 +302,7 @@ public:
 	 * \return Coordinate X of node 0.
 	 */
 //	double getX(Class_Octant<2>* oct) {
-	double getX(classOctant* oct) {
+	double getX(Class_Octant<2>* oct) {
 		return trans.mapX(oct->getX());
 	}
 
@@ -325,7 +311,7 @@ public:
 	 * \return Coordinate Y of node 0.
 	 */
 //	double getY(Class_Octant<2>* oct) {
-	double getY(classOctant* oct) {
+	double getY(Class_Octant<2>* oct) {
 		return trans.mapY(oct->getY());
 	}
 
@@ -334,7 +320,7 @@ public:
 	 * \return Coordinate Z of node 0.
 	 */
 //	double getZ(Class_Octant<2>* oct) {
-	double getZ(classOctant* oct) {
+	double getZ(Class_Octant<2>* oct) {
 		return trans.mapZ(oct->getZ());
 	}
 
@@ -343,7 +329,7 @@ public:
 	 * \return Size of octant.
 	 */
 //	double getSize(Class_Octant<2>* oct) {
-	double getSize(classOctant* oct) {
+	double getSize(Class_Octant<2>* oct) {
 		return trans.mapSize(oct->getSize());
 	}
 
@@ -352,7 +338,7 @@ public:
 	 * \return Size of octant.
 	 */
 //	double getArea(Class_Octant<2>* oct) {
-	double getArea(classOctant* oct) {
+	double getArea(Class_Octant<2>* oct) {
 		return trans.mapSize(oct->getArea());
 	}
 
@@ -361,7 +347,7 @@ public:
 	 * \return Volume of octant.
 	 */
 //	double getVolume(Class_Octant<2>* oct) {
-	double getVolume(classOctant* oct) {
+	double getVolume(Class_Octant<2>* oct) {
 		return trans.mapArea(oct->getVolume());
 	}
 
@@ -370,7 +356,7 @@ public:
 	 * \param[out] center Coordinates of the center of octant.
 	 */
 //	void getCenter(Class_Octant<2>* oct,
-	void getCenter(classOctant* oct,
+	void getCenter(Class_Octant<2>* oct,
 			vector<double>& center) {
 		vector<double> center_ = oct->getCenter();
 		trans.mapCenter(center_, center);
@@ -381,7 +367,7 @@ public:
 	 * \return center Coordinates of the center of octant.
 	 */
 //	vector<double> getCenter(Class_Octant<2>* oct) {
-	vector<double> getCenter(classOctant* oct) {
+	vector<double> getCenter(Class_Octant<2>* oct) {
 		vector<double> center;
 		vector<double> center_ = oct->getCenter();
 		trans.mapCenter(center_, center);
@@ -394,7 +380,7 @@ public:
 	 * \return center Coordinates of the center of the iface-th face af octant.
 	 */
 //	vector<double> getFaceCenter(Class_Octant<2>* oct, uint8_t iface) {
-	vector<double> getFaceCenter(classOctant* oct, uint8_t iface) {
+	vector<double> getFaceCenter(Class_Octant<2>* oct, uint8_t iface) {
 		vector<double> center;
 		vector<double> center_ = oct->getFaceCenter(iface);
 		trans.mapCenter(center_, center);
@@ -407,7 +393,7 @@ public:
 	 * \param[out] center Coordinates of the center of the iface-th face af octant.
 	 */
 //	void getFaceCenter(Class_Octant<2>* oct, uint8_t iface, vector<double>& center) {
-	void getFaceCenter(classOctant* oct, uint8_t iface, vector<double>& center) {
+	void getFaceCenter(Class_Octant<2>* oct, uint8_t iface, vector<double>& center) {
 		vector<double> center_ = oct->getFaceCenter(iface);
 		trans.mapCenter(center_, center);
 	}
@@ -417,7 +403,7 @@ public:
 	 * \param[out] nodes Coordinates of the nodes of octant.
 	 */
 //	void getNodes(Class_Octant<2>* oct,
-	void getNodes(classOctant* oct,
+	void getNodes(Class_Octant<2>* oct,
 			dvector2D & nodes) {
 		u32vector2D nodes_;
 		oct->getNodes(nodes_);
@@ -429,7 +415,7 @@ public:
 	 * \return nodes Coordinates of the nodes of octant.
 	 */
 //	dvector2D getNodes(Class_Octant<2>* oct){
-	dvector2D getNodes(classOctant* oct){
+	dvector2D getNodes(Class_Octant<2>* oct){
 		dvector2D nodes;
 		u32vector2D nodes_;
 		oct->getNodes(nodes_);
@@ -443,7 +429,7 @@ public:
 	 * \param[out] normal Coordinates of the normal of face.
 	 */
 //	void getNormal(Class_Octant<2>* oct,
-	void getNormal(classOctant* oct,
+	void getNormal(Class_Octant<2>* oct,
 			uint8_t & iface,
 			dvector & normal) {
 		vector<int8_t> normal_;
@@ -457,7 +443,7 @@ public:
 	 * \return normal Coordinates of the normal of face.
 	 */
 //	dvector getNormal(Class_Octant<2>* oct,
-	dvector getNormal(classOctant* oct,
+	dvector getNormal(Class_Octant<2>* oct,
 			uint8_t & iface){
 		dvector normal;
 		vector<int8_t> normal_;
@@ -471,7 +457,7 @@ public:
 	 * \return Marker of octant.
 	 */
 //	int8_t getMarker(Class_Octant<2>* oct){								// Get refinement/coarsening marker for idx-th octant
-	int8_t getMarker(classOctant* oct){								// Get refinement/coarsening marker for idx-th octant
+	int8_t getMarker(Class_Octant<2>* oct){								// Get refinement/coarsening marker for idx-th octant
 		return oct->getMarker();
 	};
 
@@ -480,7 +466,7 @@ public:
 	 * \return Level of octant.
 	 */
 //	uint8_t getLevel(Class_Octant<2>* oct){								// Get refinement/coarsening marker for idx-th octant
-	uint8_t getLevel(classOctant* oct){								// Get refinement/coarsening marker for idx-th octant
+	uint8_t getLevel(Class_Octant<2>* oct){								// Get refinement/coarsening marker for idx-th octant
 		return oct->getLevel();
 	};
 
@@ -490,7 +476,7 @@ public:
 	 * \return true if the iface face is a boundary face.
 	 */
 //	bool getBound(Class_Octant<2>* oct, uint8_t iface){								// Get refinement/coarsening marker for idx-th octant
-	bool getBound(classOctant* oct, uint8_t iface){								// Get refinement/coarsening marker for idx-th octant
+	bool getBound(Class_Octant<2>* oct, uint8_t iface){								// Get refinement/coarsening marker for idx-th octant
 		return oct->getBound(iface);
 	};
 
@@ -500,7 +486,7 @@ public:
 	 * \return true if the iface face is a process boundary face.
 	 */
 //	bool getPbound(Class_Octant<2>* oct, uint8_t iface){								// Get refinement/coarsening marker for idx-th octant
-	bool getPbound(classOctant* oct, uint8_t iface){								// Get refinement/coarsening marker for idx-th octant
+	bool getPbound(Class_Octant<2>* oct, uint8_t iface){								// Get refinement/coarsening marker for idx-th octant
 		return oct->getPbound(iface);
 	};
 
@@ -509,9 +495,9 @@ public:
 	 * \return true if the octant has at least a boundary face.
 	 */
 //	bool getBound(Class_Octant<2>* oct){
-	bool getBound(classOctant* oct){
+	bool getBound(Class_Octant<2>* oct){
 		int temp = 0;
-		for(int i = 0; i < CG::nfaces; ++i)
+		for(int i = 0; i < global2D.nfaces; ++i)
 			temp += oct->getBound(i);
 		return temp != 0;
 	};
@@ -521,9 +507,9 @@ public:
 	 * \return true if the octant has at least a process boundary face.
 	 */
 //	bool getPbound(Class_Octant<2>* oct){								// Get refinement/coarsening marker for idx-th octant
-	bool getPbound(classOctant* oct){								// Get refinement/coarsening marker for idx-th octant
+	bool getPbound(Class_Octant<2>* oct){								// Get refinement/coarsening marker for idx-th octant
 		int temp = 0;
-		for(int i = 0; i < CG::nfaces; ++i)
+		for(int i = 0; i < global2D.nfaces; ++i)
 			temp += oct->getPbound(i);
 		return temp != 0;
 	};
@@ -533,7 +519,7 @@ public:
 	 * \return Has octant to be balanced?
 	 */
 //	bool getBalance(Class_Octant<2>* oct){								// Get if balancing-blocked idx-th octant
-	bool getBalance(classOctant* oct){								// Get if balancing-blocked idx-th octant
+	bool getBalance(Class_Octant<2>* oct){								// Get if balancing-blocked idx-th octant
 		return !oct->getNotBalance();
 	};
 
@@ -543,7 +529,7 @@ public:
 	 * \return Is octant ghost?
 	 */
 //	bool getIsGhost(Class_Octant<2>* oct){
-	bool getIsGhost(classOctant* oct){
+	bool getIsGhost(Class_Octant<2>* oct){
 		if (serial)
 			return false;
 		return (findOwner(oct->computeMorton()) != rank);
@@ -555,7 +541,7 @@ public:
 	 * \return Is octant new?
 	 */
 //	bool getIsNewR(Class_Octant<2>* oct){
-	bool getIsNewR(classOctant* oct){
+	bool getIsNewR(Class_Octant<2>* oct){
 		return oct->getIsNewR();
 	};
 
@@ -564,7 +550,7 @@ public:
 	 * \return Is octant new?
 	 */
 //	bool getIsNewC(Class_Octant<2>* oct){
-	bool getIsNewC(classOctant* oct){
+	bool getIsNewC(Class_Octant<2>* oct){
 		return oct->getIsNewC();
 	};
 
@@ -573,7 +559,7 @@ public:
 	 * \return Global index of octant.
 	 */
 //	uint64_t getGlobalIdx(Class_Octant<2>* oct){
-	uint64_t getGlobalIdx(classOctant* oct){
+	uint64_t getGlobalIdx(Class_Octant<2>* oct){
 #if NOMPI==0
 		if (getIsGhost(oct)){
 			uint32_t idx = octree.findGhostMorton(oct->computeMorton());
@@ -592,7 +578,7 @@ public:
 	 * \return Local index of octant.
 	 */
 //	uint32_t getIdx(Class_Octant<2>* oct){
-	uint32_t getIdx(classOctant* oct){
+	uint32_t getIdx(Class_Octant<2>* oct){
 #if NOMPI==0
 		if (getIsGhost(oct)){
 			return octree.findGhostMorton(oct->computeMorton());
@@ -606,7 +592,7 @@ public:
 	 * \param[in] marker Refinement marker of octant (n=n refinement in adapt, -n=n coarsening in adapt, default=0).
 	 */
 //	void setMarker(Class_Octant<2>* oct, int8_t marker){					// Set refinement/coarsening marker for idx-th octant
-	void setMarker(classOctant* oct, int8_t marker){					// Set refinement/coarsening marker for idx-th octant
+	void setMarker(Class_Octant<2>* oct, int8_t marker){					// Set refinement/coarsening marker for idx-th octant
 		oct->setMarker(marker);
 	};
 
@@ -615,7 +601,7 @@ public:
 	 * \param[in] balance Has octant to be 2:1 balanced in adapting procedure?
 	 */
 //	void setBalance(Class_Octant<2>* oct, bool balance){					// Set if balancing-blocked idx-th octant
-	void setBalance(classOctant* oct, bool balance){					// Set if balancing-blocked idx-th octant
+	void setBalance(Class_Octant<2>* oct, bool balance){					// Set if balancing-blocked idx-th octant
 		oct->setBalance(!balance);
 	};
 
@@ -629,7 +615,7 @@ private:
 	 * \return Coordinate X of node 0.
 	 */
 //	double getX(Class_Octant<2> oct) {
-	double getX(classOctant oct) {
+	double getX(Class_Octant<2> oct) {
 		return trans.mapX(oct.getX());
 	}
 
@@ -638,7 +624,7 @@ private:
 	 * \return Coordinate Y of node 0.
 	 */
 //	double getY(Class_Octant<2> oct) {
-	double getY(classOctant oct) {
+	double getY(Class_Octant<2> oct) {
 		return trans.mapY(oct.getY());
 	}
 
@@ -647,7 +633,7 @@ private:
 	 * \return Coordinate Z of node 0.
 	 */
 //	double getZ(Class_Octant<2> oct) {
-	double getZ(classOctant oct) {
+	double getZ(Class_Octant<2> oct) {
 		return trans.mapZ(oct.getZ());
 	}
 
@@ -656,7 +642,7 @@ private:
 	 * \return Size of octant.
 	 */
 //	double getSize(Class_Octant<2> oct) {
-	double getSize(classOctant oct) {
+	double getSize(Class_Octant<2> oct) {
 		return trans.mapSize(oct.getSize());
 	}
 
@@ -665,7 +651,7 @@ private:
 	 * \return Area of octant.
 	 */
 //	double getArea(Class_Octant<2> oct) {
-	double getArea(classOctant oct) {
+	double getArea(Class_Octant<2> oct) {
 		return trans.mapSize(oct.getArea());
 	}
 
@@ -674,7 +660,7 @@ private:
 	 * \return Volume of octant.
 	 */
 //	double getVolume(Class_Octant<2> oct) {
-	double getVolume(classOctant oct) {
+	double getVolume(Class_Octant<2> oct) {
 		return trans.mapArea(oct.getVolume());
 	}
 
@@ -683,7 +669,7 @@ private:
 	 * \param[out] center Coordinates of the center of octant.
 	 */
 //	void getCenter(Class_Octant<2> oct,
-	void getCenter(classOctant oct,
+	void getCenter(Class_Octant<2> oct,
 			vector<double>& center) {
 		vector<double> center_ = oct.getCenter();
 		trans.mapCenter(center_, center);
@@ -694,7 +680,7 @@ private:
 	 * \return center Coordinates of the center of octant.
 	 */
 //	vector<double> getCenter(Class_Octant<2> oct) {
-	vector<double> getCenter(classOctant oct) {
+	vector<double> getCenter(Class_Octant<2> oct) {
 		vector<double> center;
 		vector<double> center_ = oct.getCenter();
 		trans.mapCenter(center_, center);
@@ -706,7 +692,7 @@ private:
 	 * \param[out] nodes Coordinates of the nodes of octant.
 	 */
 //	void getNodes(Class_Octant<2> oct,
-	void getNodes(classOctant oct,
+	void getNodes(Class_Octant<2> oct,
 			dvector2D & nodes) {
 		u32vector2D nodes_;
 		oct.getNodes(nodes_);
@@ -718,7 +704,7 @@ private:
 	 * \return nodes Coordinates of the nodes of octant.
 	 */
 //	dvector2D getNodes(Class_Octant<2> oct){
-	dvector2D getNodes(classOctant oct){
+	dvector2D getNodes(Class_Octant<2> oct){
 		dvector2D nodes;
 		u32vector2D nodes_;
 		oct.getNodes(nodes_);
@@ -732,7 +718,7 @@ private:
 	 * \param[out] normal Coordinates of the normal of face.
 	 */
 //	void getNormal(Class_Octant<2> oct,
-	void getNormal(classOctant oct,
+	void getNormal(Class_Octant<2> oct,
 			uint8_t & iface,
 			dvector & normal) {
 		vector<int8_t> normal_;
@@ -746,7 +732,7 @@ private:
 	 * \return normal Coordinates of the normal of face.
 	 */
 //	dvector getNormal(Class_Octant<2> oct,
-	dvector getNormal(classOctant oct,
+	dvector getNormal(Class_Octant<2> oct,
 			uint8_t & iface){
 		dvector normal;
 		vector<int8_t> normal_;
@@ -760,7 +746,7 @@ private:
 	 * \return Marker of octant.
 	 */
 //	int8_t getMarker(Class_Octant<2> oct){								// Get refinement/coarsening marker for idx-th octant
-	int8_t getMarker(classOctant oct){								// Get refinement/coarsening marker for idx-th octant
+	int8_t getMarker(Class_Octant<2> oct){								// Get refinement/coarsening marker for idx-th octant
 		return oct.getMarker();
 	};
 
@@ -769,7 +755,7 @@ private:
 	 * \return Level of octant.
 	 */
 //	uint8_t getLevel(Class_Octant<2> oct){								// Get refinement/coarsening marker for idx-th octant
-	uint8_t getLevel(classOctant oct){								// Get refinement/coarsening marker for idx-th octant
+	uint8_t getLevel(Class_Octant<2> oct){								// Get refinement/coarsening marker for idx-th octant
 		return oct.getLevel();
 	};
 
@@ -778,7 +764,7 @@ private:
 	 * \return Has octant to be balanced?
 	 */
 //	bool getBalance(Class_Octant<2> oct){								// Get if balancing-blocked idx-th octant
-	bool getBalance(classOctant oct){								// Get if balancing-blocked idx-th octant
+	bool getBalance(Class_Octant<2> oct){								// Get if balancing-blocked idx-th octant
 		return !oct.getNotBalance();
 	};
 
@@ -788,7 +774,7 @@ private:
 	 * \return Is octant ghost?
 	 */
 //	bool getIsGhost(Class_Octant<2> oct){
-	bool getIsGhost(classOctant oct){
+	bool getIsGhost(Class_Octant<2> oct){
 		return (findOwner(oct.computeMorton()) != rank);
 	};
 #endif
@@ -798,7 +784,7 @@ private:
 	 * \return Global index of octant.
 	 */
 //	uint64_t getGlobalIdx(Class_Octant<2> oct){
-	uint64_t getGlobalIdx(classOctant oct){
+	uint64_t getGlobalIdx(Class_Octant<2> oct){
 #if NOMPI==0
 		if (getIsGhost(oct)){
 			uint32_t idx = octree.findGhostMorton(oct.computeMorton());
@@ -824,7 +810,7 @@ private:
 	 * \return Local index of octant.
 	 */
 //	uint32_t getIdx(Class_Octant<2> oct){
-	uint32_t getIdx(classOctant oct){
+	uint32_t getIdx(Class_Octant<2> oct){
 #if NOMPI==0
 		if (getIsGhost(oct)){
 			return octree.findGhostMorton(oct.computeMorton());
@@ -843,7 +829,7 @@ private:
 	 * \param[in] marker Refinement marker of octant (n=n refinement in adapt, -n=n coarsening in adapt, default=0).
 	 */
 //	void setMarker(Class_Octant<2> oct, int8_t marker){					// Set refinement/coarsening marker for idx-th octant
-	void setMarker(classOctant oct, int8_t marker){					// Set refinement/coarsening marker for idx-th octant
+	void setMarker(Class_Octant<2> oct, int8_t marker){					// Set refinement/coarsening marker for idx-th octant
 		oct.setMarker(marker);
 	};
 
@@ -852,7 +838,7 @@ private:
 	 * \param[in] balance Has octant to be 2:1 balanced in adapting procedure?
 	 */
 //	void setBalance(Class_Octant<2> oct, bool balance){					// Set if balancing-blocked idx-th octant
-	void setBalance(classOctant oct, bool balance){					// Set if balancing-blocked idx-th octant
+	void setBalance(Class_Octant<2> oct, bool balance){					// Set if balancing-blocked idx-th octant
 		oct.setBalance(!balance);
 	};
 
@@ -1160,8 +1146,8 @@ public:
 		dvector1D	cnode;
 		uint32_t 	nocts = getNumOctants();
 		P0 = getNode(0, 0);
-		P1 = getNode(nocts-1, CG::nnodes-1);
-		for (uint32_t idx=0; idx<CG::nnodes; idx++){
+		P1 = getNode(nocts-1, global2D.nnodes-1);
+		for (uint32_t idx=0; idx<global2D.nnodes; idx++){
 			for (uint8_t inode=0; inode<nocts; inode++){
 				cnode = getNode(idx, inode);
 				for (uint8_t i=0; i<3; i++){
@@ -1180,12 +1166,12 @@ public:
 		dvector1D	cnode, cnode0, cnode1;
 		uint32_t 	nocts = getNumOctants();
 		cnode0 = getNode(0, 0);
-		cnode1 = getNode(nocts-1, CG::nnodes-1);
+		cnode1 = getNode(nocts-1, global2D.nnodes-1);
 		for (uint8_t i=0; i<3; i++){
 			P0[i] = cnode0[i];
 			P1[i] = cnode1[i];
 		}
-		for (uint32_t idx=0; idx<CG::nnodes; idx++){
+		for (uint32_t idx=0; idx<global2D.nnodes; idx++){
 			for (uint8_t inode=0; inode<nocts; inode++){
 				cnode = getNode(idx, inode);
 				for (uint8_t i=0; i<3; i++){
@@ -1207,12 +1193,12 @@ public:
 	// --------------------------------
 
 //	const Class_Octant<2> &  getFirstDesc() const{
-	const classOctant &  getFirstDesc() const{
+	const Class_Octant<2> &  getFirstDesc() const{
 		return octree.getFirstDesc();
 	};
 
 //	const Class_Octant<2> &  getLastDesc() const{
-	const classOctant &  getLastDesc() const{
+	const Class_Octant<2> &  getLastDesc() const{
 		return octree.getLastDesc();
 	};
 
@@ -1232,7 +1218,7 @@ private:
 	};
 
 //	Class_Octant<2>& extractOctant(uint32_t idx) {
-	classOctant& extractOctant(uint32_t idx) {
+	Class_Octant<2>& extractOctant(uint32_t idx) {
 		return octree.extractOctant(idx) ;
 	};
 
@@ -1245,7 +1231,7 @@ public:
 	 * \return Pointer to target octant.
 	 */
 //	Class_Octant<2>* getOctant(uint32_t idx) {
-	classOctant* getOctant(uint32_t idx) {
+	Class_Octant<2>* getOctant(uint32_t idx) {
 		if (idx < octree.getNumOctants()){
 			return &octree.octants[idx] ;
 		}
@@ -1257,7 +1243,7 @@ public:
 	 * \return Pointer to target ghost octant.
 	 */
 //	Class_Octant<2>* getGhostOctant(uint32_t idx) {
-	classOctant* getGhostOctant(uint32_t idx) {
+	Class_Octant<2>* getGhostOctant(uint32_t idx) {
 		if (idx < octree.getSizeGhost()){
 			return &octree.ghosts[idx] ;
 		}
@@ -1301,7 +1287,7 @@ public:
 	 * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
 	 * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs. */
 //	void findNeighbours(Class_Octant<2>* oct,
-	void findNeighbours(classOctant* oct,
+	void findNeighbours(Class_Octant<2>* oct,
 			uint8_t iface,
 			uint8_t codim,
 			u32vector & neighbours,
@@ -1347,9 +1333,7 @@ public:
 	// =============================================================================== //
 
 	/** It finds the process owning the element definded by the Morton number passed as argument
-	 *
 	 * The Morton number can be computed using the method Class_Octant<2>#computeMorton().
-	 *
 	 * \param[in] morton is the Morton number of the element you want find the owner of
 	 * \return it returns the rank of the process owning the element
 	 */
@@ -1388,7 +1372,7 @@ private:
 	 * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
 	 * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs. */
 //	void findNeighbours(Class_Octant<2> oct,
-	void findNeighbours(classOctant oct,
+	void findNeighbours(Class_Octant<2> oct,
 			uint8_t iface,
 			uint8_t codim,
 			u32vector & neighbours,
@@ -1421,7 +1405,7 @@ public:
 	 * \param[in] idx Local index of intersection.
 	 * \return Pointer to target intersection.
 	 */
-	classIntersection* getIntersection(uint32_t idx) {
+	Class_Intersection<2>* getIntersection(uint32_t idx) {
 		if (idx < octree.intersections.size()){
 			return &octree.intersections[idx];
 		}
@@ -1432,7 +1416,7 @@ public:
 	 * \param[in] inter Pointer to target intersection.
 	 * \return Level of intersection.
 	 */
-	uint8_t getLevel(classIntersection* inter) {
+	uint8_t getLevel(Class_Intersection<2>* inter) {
 		if(inter->finer && inter->isghost)
 			return octree.extractGhostOctant(inter->owners[inter->finer]).getLevel();
 		else
@@ -1443,7 +1427,7 @@ public:
 	 * \param[in] inter Pointer to target intersection.
 	 * \return The finer octant of the owners of intersection (false/true = 0/1).
 	 */
-	bool getFiner(classIntersection* inter) {
+	bool getFiner(Class_Intersection<2>* inter) {
 		return inter->finer;
 	}
 
@@ -1451,7 +1435,7 @@ public:
 	 * \param[in] inter Pointer to target intersection.
 	 * \return Boundary or not boundary?.
 	 */
-	bool getBound(classIntersection* inter) {
+	bool getBound(Class_Intersection<2>* inter) {
 		return inter->getBound();
 	}
 
@@ -1459,7 +1443,7 @@ public:
 	 * \param[in] inter Pointer to target intersection.
 	 * \return Ghost or not ghost?.
 	 */
-	bool getIsGhost(classIntersection* inter) {
+	bool getIsGhost(Class_Intersection<2>* inter) {
 		return inter->getIsGhost();
 	}
 
@@ -1467,7 +1451,7 @@ public:
 	 * \param[in] inter Pointer to target intersection.
 	 * \return Process boundary or not boundary?.
 	 */
-	bool getPbound(classIntersection* inter) {
+	bool getPbound(Class_Intersection<2>* inter) {
 		return inter->getPbound();
 	}
 
@@ -1475,7 +1459,7 @@ public:
 	 * \param[in] inter Pointer to target intersection.
 	 * \return Face index of the first octant owner of intersection (owners[0]).
 	 */
-	uint8_t getFace(classIntersection* inter) {
+	uint8_t getFace(Class_Intersection<2>* inter) {
 		return inter->iface;
 	}
 
@@ -1483,7 +1467,7 @@ public:
 	 * \param[in] inter Pointer to target intersection.
 	 * \return A couple of octants owners of intersection.
 	 */
-	u32vector getOwners(classIntersection* inter) {
+	u32vector getOwners(Class_Intersection<2>* inter) {
 		u32vector owners(2);
 		owners[0] = inter->owners[0];
 		owners[1] = inter->owners[1];
@@ -1494,7 +1478,7 @@ public:
 	 * \param[in] inter Pointer to target intersection.
 	 * \return Size of intersection.
 	 */
-	double getSize(classIntersection* inter) {
+	double getSize(Class_Intersection<2>* inter) {
 		uint32_t Size;
 		if(inter->finer && inter->isghost)
 			Size = octree.extractGhostOctant(inter->owners[inter->finer]).getSize();
@@ -1507,7 +1491,7 @@ public:
 	 * \param[in] inter Pointer to target intersection.
 	 * \return Area of intersection.
 	 */
-	double getArea(classIntersection* inter) {
+	double getArea(Class_Intersection<2>* inter) {
 		uint32_t Area;
 		if(inter->finer && inter->isghost)
 			Area = octree.extractGhostOctant(inter->owners[1]).getArea();
@@ -1520,10 +1504,10 @@ public:
 	 * \param[in] inter Pointer to target intersection.
 	 * \param[out] center Coordinates of the center of intersection.
 	 */
-	vector<double> getCenter(classIntersection* inter){
+	vector<double> getCenter(Class_Intersection<2>* inter){
 		vector<double> center;
 		//Class_Octant<2> oct;
-		classOctant oct;
+		Class_Octant<2> oct;
 		if(inter->finer && inter->isghost)
 			oct = octree.extractGhostOctant(inter->owners[inter->finer]);
 		else
@@ -1540,10 +1524,10 @@ public:
 	 * \param[in] oct Pointer to target intersection.
 	 * \return nodes Coordinates of the nodes of intersection.
 	 */
-	dvector2D getNodes(classIntersection* inter){
+	dvector2D getNodes(Class_Intersection<2>* inter){
 		dvector2D nodes;
 		//Class_Octant<2> oct;
-		classOctant oct;
+		Class_Octant<2> oct;
 		if(inter->finer && inter->isghost)
 			oct = octree.extractGhostOctant(inter->owners[inter->finer]);
 		else
@@ -1551,10 +1535,10 @@ public:
 		uint8_t iface = inter->iface;
 		u32vector2D nodes_all;
 		oct.getNodes(nodes_all);
-		u32vector2D nodes_(CG::nnodesperface, u32vector(3));
-		for (int i=0; i<CG::nnodesperface; i++){
+		u32vector2D nodes_(global2D.nnodesperface, u32vector(3));
+		for (int i=0; i<global2D.nnodesperface; i++){
 			for (int j=0; j<3; j++){
-				nodes_[i][j] = nodes_all[CG::facenode[iface][i]][j];
+				nodes_[i][j] = nodes_all[global2D.facenode[iface][i]][j];
 			}
 		}
 		trans.mapNodesIntersection(nodes_, nodes);
@@ -1565,10 +1549,10 @@ public:
 	 * \param[in] oct Pointer to target intersection.
 	 * \param[out] normal Coordinates of the normal of intersection.
 	 */
-	dvector getNormal(classIntersection* inter){
+	dvector getNormal(Class_Intersection<2>* inter){
 		dvector normal;
 		//Class_Octant<2> oct;
-		classOctant oct;
+		Class_Octant<2> oct;
 		if(inter->finer && inter->isghost)
 			oct = octree.extractGhostOctant(inter->owners[inter->finer]);
 		else
@@ -1584,7 +1568,7 @@ public:
 	// No Pointer Intersections get Methods
 
 private:
-	double getSize(classIntersection inter) {
+	double getSize(Class_Intersection<2> inter) {
 		uint32_t Size;
 		if(inter.finer && inter.isghost)
 			Size = octree.extractGhostOctant(inter.owners[inter.finer]).getSize();
@@ -1593,7 +1577,7 @@ private:
 		return trans.mapSize(Size);
 	}
 
-	double getArea(classIntersection inter) {
+	double getArea(Class_Intersection<2> inter) {
 		uint32_t Area;
 		if(inter.finer && inter.isghost)
 			Area = octree.extractGhostOctant(inter.owners[inter.finer]).getArea();
@@ -1602,9 +1586,9 @@ private:
 		return trans.mapSize(Area);
 	}
 
-	void getCenter(classIntersection inter,dvector & center){
+	void getCenter(Class_Intersection<2> inter,dvector & center){
 		//Class_Octant<2> oct;
-		classOctant oct;
+		Class_Octant<2> oct;
 		if(inter.finer && inter.isghost)
 			oct = octree.extractGhostOctant(inter.owners[inter.finer]);
 		else
@@ -1616,10 +1600,10 @@ private:
 		trans.mapCenter(center_, center);
 	}
 
-	void getNodes(classIntersection inter,
+	void getNodes(Class_Intersection<2> inter,
 			dvector2D & nodes) {
 		//Class_Octant<2> oct;
-		classOctant oct;
+		Class_Octant<2> oct;
 		if(inter.finer && inter.isghost)
 			oct = octree.extractGhostOctant(inter.owners[inter.finer]);
 		else
@@ -1627,19 +1611,19 @@ private:
 		uint8_t iface = inter.iface;
 		u32vector2D nodes_all;
 		oct.getNodes(nodes_all);
-		u32vector2D nodes_(CG::nnodesperface, u32vector(3));
-		for (int i=0; i<CG::nnodesperface; i++){
+		u32vector2D nodes_(global2D.nnodesperface, u32vector(3));
+		for (int i=0; i<global2D.nnodesperface; i++){
 			for (int j=0; j<3; j++){
-				nodes_[i][j] = nodes_all[CG::facenode[iface][i]][j];
+				nodes_[i][j] = nodes_all[global2D.facenode[iface][i]][j];
 			}
 		}
 		trans.mapNodesIntersection(nodes_, nodes);
 	}
 
-	void getNormal(classIntersection inter,
+	void getNormal(Class_Intersection<2> inter,
 			dvector & normal) {
 //		Class_Octant<2> oct;
-		classOctant oct;
+		Class_Octant<2> oct;
 		if(inter.finer && inter.isghost)
 			oct = octree.extractGhostOctant(inter.owners[inter.finer]);
 		else
@@ -1668,7 +1652,7 @@ public:
 	 * \return Pointer to octant owner of target point (=NULL if point outside of the domain).
 	 */
 //	Class_Octant<2>* getPointOwner(dvector & point){
-	classOctant* getPointOwner(dvector & point){
+	Class_Octant<2>* getPointOwner(dvector & point){
 		uint32_t noctants = octree.octants.size();
 		uint32_t idxtry = noctants/2;
 		uint32_t x, y;
@@ -1678,12 +1662,12 @@ public:
 		x = trans.mapX(point[0]);
 		y = trans.mapY(point[1]);
 
-		if ((x > CG::max_length) || (y > CG::max_length)
+		if ((x > global2D.max_length) || (y > global2D.max_length)
 				|| (point[0] < trans.X0) || (point[1] < trans.Y0))
 			return NULL;
 
-		if (x == CG::max_length) x = x - 1;
-		if (y == CG::max_length) y = y - 1;
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
 		morton = mortonEncode_magicbits(x,y);
 
 #if NOMPI==0
@@ -1749,12 +1733,12 @@ public:
 		x = trans.mapX(point[0]);
 		y = trans.mapY(point[1]);
 
-		if ((x > CG::max_length) || (y > CG::max_length)
+		if ((x > global2D.max_length) || (y > global2D.max_length)
 				|| (point[0] < trans.X0) || (point[1] < trans.Y0))
 			return -1;
 
-		if (x == CG::max_length) x = x - 1;
-		if (y == CG::max_length) y = y - 1;
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
 		morton = mortonEncode_magicbits(x,y);
 
 #if NOMPI==0
@@ -1762,7 +1746,7 @@ public:
 #else
 		powner = 0;
 #endif
-		//if ((powner!=rank) || (x > CG::max_length) || (y > CG::max_length))
+		//if ((powner!=rank) || (x > global2D.max_length) || (y > global2D.max_length))
 		if ((powner!=rank) && (!serial))
 			return -1;
 
@@ -1811,7 +1795,7 @@ public:
 
 private:
 //	Class_Octant<2> getPointOwner2(dvector & point){
-	classOctant getPointOwner2(dvector & point){
+	Class_Octant<2> getPointOwner2(dvector & point){
 		uint32_t noctants = octree.octants.size();
 		uint32_t idxtry = noctants/2;
 		uint32_t x, y;
@@ -1821,15 +1805,15 @@ private:
 		x = trans.mapX(point[0]);
 		y = trans.mapY(point[1]);
 
-		if ((x > CG::max_length) || (y > CG::max_length)
+		if ((x > global2D.max_length) || (y > global2D.max_length)
 				|| (point[0] < trans.X0) || (point[1] < trans.Y0)){
 //			Class_Octant<2> oct0;
-			classOctant oct0;
+			Class_Octant<2> oct0;
 			return oct0;
 		}
 
-		if (x == CG::max_length) x = x - 1;
-		if (y == CG::max_length) y = y - 1;
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
 		morton = mortonEncode_magicbits(x,y);
 
 #if NOMPI==0
@@ -1839,7 +1823,7 @@ private:
 #endif
 		if ((powner!=rank) && (!serial)){
 //			Class_Octant<2> oct0;
-			classOctant oct0;
+			Class_Octant<2> oct0;
 			return oct0;
 		}
 
@@ -1890,7 +1874,7 @@ public:
 	 * \return Pointer to octant owner of target point (=NULL if point outside of the domain).
 	 */
 //	Class_Octant<2>* getPointOwner(u32vector & point){
-	classOctant* getPointOwner(u32vector & point){
+	Class_Octant<2>* getPointOwner(u32vector & point){
 		uint32_t noctants = octree.octants.size();
 		uint32_t idxtry = noctants/2;
 		uint32_t x, y;
@@ -1899,11 +1883,11 @@ public:
 
 		x = point[0];
 		y = point[1];
-		if ((x > CG::max_length) || (y > CG::max_length))
+		if ((x > global2D.max_length) || (y > global2D.max_length))
 			return NULL;
 
-		if (x == CG::max_length) x = x - 1;
-		if (y == CG::max_length) y = y - 1;
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
 		morton = mortonEncode_magicbits(x,y);
 
 #if NOMPI==0
@@ -1968,11 +1952,11 @@ public:
 
 		x = point[0];
 		y = point[1];
-		if ((x > CG::max_length) || (y > CG::max_length))
+		if ((x > global2D.max_length) || (y > global2D.max_length))
 			return -1;
 
-		if (x == CG::max_length) x = x - 1;
-		if (y == CG::max_length) y = y - 1;
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
 		morton = mortonEncode_magicbits(x,y);
 
 #if NOMPI==0
@@ -2029,7 +2013,7 @@ public:
 	 * \return Pointer to octant owner of target point (=NULL if point outside of the domain).
 	 */
 //	Class_Octant<2>* getLogicalPointOwner(dvector & point){
-	classOctant* getLogicalPointOwner(dvector & point){
+	Class_Octant<2>* getLogicalPointOwner(dvector & point){
 		uint32_t noctants = octree.octants.size();
 		uint32_t idxtry = noctants/2;
 		uint32_t x, y;
@@ -2039,11 +2023,11 @@ public:
 		x = uint32_t(point[0]);
 		y = uint32_t(point[1]);
 
-		 if ((point[0] < 0) || (point[0] > double(CG::max_length)) || (point[1] < 0) || (point[1] > double(CG::max_length)))
+		 if ((point[0] < 0) || (point[0] > double(global2D.max_length)) || (point[1] < 0) || (point[1] > double(global2D.max_length)))
 			 return NULL;
 
-			if (x == CG::max_length) x = x - 1;
-			if (y == CG::max_length) y = y - 1;
+			if (x == global2D.max_length) x = x - 1;
+			if (y == global2D.max_length) y = y - 1;
 			morton = mortonEncode_magicbits(x,y);
 
 #if NOMPI==0
@@ -2108,11 +2092,11 @@ public:
 
 		x = uint32_t(point[0]);
 		y = uint32_t(point[1]);
-		if ((point[0] < 0) || (point[0] > double(CG::max_length)) || (point[1] < 0) || (point[1] > double(CG::max_length)))
+		if ((point[0] < 0) || (point[0] > double(global2D.max_length)) || (point[1] < 0) || (point[1] > double(global2D.max_length)))
 			return -1;
 
-		if (x == CG::max_length) x = x - 1;
-		if (y == CG::max_length) y = y - 1;
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
 		morton = mortonEncode_magicbits(x,y);
 
 #if NOMPI==0
@@ -2166,7 +2150,7 @@ public:
 
 private:
 //	Class_Octant<2> getPointOwner2(u32vector & point){
-	classOctant getPointOwner2(u32vector & point){
+	Class_Octant<2> getPointOwner2(u32vector & point){
 		uint32_t noctants = octree.octants.size();
 		uint32_t idxtry = noctants/2;
 		uint32_t x, y;
@@ -2176,14 +2160,14 @@ private:
 		x = point[0];
 		y = point[1];
 
-		if ((x > CG::max_length) || (y > CG::max_length)){
+		if ((x > global2D.max_length) || (y > global2D.max_length)){
 			//Class_Octant<2> oct0;
-			classOctant oct0;
+			Class_Octant<2> oct0;
 			return oct0;
 		}
 
-		if (x == CG::max_length) x = x - 1;
-		if (y == CG::max_length) y = y - 1;
+		if (x == global2D.max_length) x = x - 1;
+		if (y == global2D.max_length) y = y - 1;
 		morton = mortonEncode_magicbits(x,y);
 
 #if NOMPI==0
@@ -2193,7 +2177,7 @@ private:
 #endif
 		if ((powner!=rank) && (!serial)){
 			//Class_Octant<2> oct0;
-			classOctant oct0;
+			Class_Octant<2> oct0;
 			return oct0;
 		}
 
@@ -2433,7 +2417,7 @@ private:
 	//=================================================================================//
 
 	void computePartition(uint32_t* partition, uint8_t & level_) {
-		uint8_t level = uint8_t(min(int(max(int(max_depth) - int(level_), int(1))) , int(CG::MAX_LEVEL)));
+		uint8_t level = uint8_t(min(int(max(int(max_depth) - int(level_), int(1))) , int(MAX_LEVEL_2D)));
 		uint32_t* partition_temp = new uint32_t[nproc];
 		uint8_t* boundary_proc = new uint8_t[nproc-1];
 		uint8_t dimcomm, indcomm;
@@ -2442,7 +2426,7 @@ private:
 
 		uint32_t division_result = 0;
 		uint32_t remind = 0;
-		uint32_t Dh = uint32_t(pow(double(2),double(CG::MAX_LEVEL-level)));
+		uint32_t Dh = uint32_t(pow(double(2),double(MAX_LEVEL_2D-level)));
 		uint32_t istart, nocts, rest, forw, backw;
 		uint32_t i = 0, iproc, j;
 		uint64_t sum;
@@ -2569,14 +2553,14 @@ private:
 		//this map contains the local octants as ghosts for neighbor processes
 
 		// NO PBORDERS !
-		classLocalTree::octvector::iterator end = octree.octants.end();
-		classLocalTree::octvector::iterator begin = octree.octants.begin();
+		vector<Class_Octant<2> >::iterator end = octree.octants.end();
+		vector<Class_Octant<2> >::iterator begin = octree.octants.begin();
 		bordersPerProc.clear();
 		int count = 0;
-		for(classLocalTree::octvector::iterator it = begin; it != end; ++it){
+		for(octvector::iterator it = begin; it != end; ++it){
 			set<int> procs;
 			//Virtual Face Neighbors
-			for(uint8_t i = 0; i < CG::nfaces; ++i){
+			for(uint8_t i = 0; i < global2D.nfaces; ++i){
 				if(it->getBound(i) == false){
 					uint32_t virtualNeighborsSize = 0;
 					vector<uint64_t> virtualNeighbors = it->computeVirtualMorton(i,max_depth,virtualNeighborsSize);
@@ -2596,8 +2580,8 @@ private:
 				}
 			}
 			//Virtual Corner Neighbors
-			for(uint8_t c = 0; c < CG::nnodes; ++c){
-				if(!it->getBound(CG::nodeface[c][0]) && !it->getBound(CG::nodeface[c][1])){
+			for(uint8_t c = 0; c < global2D.nnodes; ++c){
+				if(!it->getBound(global2D.nodeface[c][0]) && !it->getBound(global2D.nodeface[c][1])){
 					uint32_t virtualCornerNeighborSize = 0;
 					uint64_t virtualCornerNeighbor = it ->computeNodeVirtualMorton(c,max_depth,virtualCornerNeighborSize);
 					if(virtualCornerNeighborSize){
@@ -2638,8 +2622,8 @@ private:
 		uint32_t pbordersOversize = 0;
 		for(map<int,vector<uint32_t> >::iterator bit = bordersPerProc.begin(); bit != bitend; ++bit){
 			pbordersOversize += bit->second.size();
-			//int buffSize = bit->second.size() * (int)ceil((double)(CG::octantBytes + CG::globalIndexBytes) / (double)(CHAR_BIT/8));
-			int buffSize = bit->second.size() * (int)ceil((double)(CG::octantBytes + CG::globalIndexBytes) / (double)(CHAR_BIT/8));
+			//int buffSize = bit->second.size() * (int)ceil((double)(global2D.octantBytes + global2D.globalIndexBytes) / (double)(CHAR_BIT/8));
+			int buffSize = bit->second.size() * (int)ceil((double)(global2D.octantBytes + global2D.globalIndexBytes) / (double)(CHAR_BIT/8));
 			int key = bit->first;
 			const vector<uint32_t> & value = bit->second;
 			sendBuffers[key] = Class_Comm_Buffer(buffSize,'a',comm);
@@ -2648,7 +2632,7 @@ private:
 			for(int i = 0; i < nofBorders; ++i){
 				//the use of auxiliary variable can be avoided passing to MPI_Pack the members of octant but octant in that case cannot be const
 				//const Class_Octant<2> & octant = octree.octants[value[i]];
-				const classOctant & octant = octree.octants[value[i]];
+				const Class_Octant<2> & octant = octree.octants[value[i]];
 				x = octant.getX();
 				y = octant.getY();
 				z = octant.getZ();
@@ -2714,8 +2698,8 @@ private:
 		//COMPUTE GHOSTS SIZE IN BYTES
 		//number of ghosts in every process is obtained through the size in bytes of the single octant
 		//and ghost vector in local tree is resized
-		//uint32_t nofGhosts = nofBytesOverProc / (uint32_t)(CG::octantBytes + CG::globalIndexBytes);
-		uint32_t nofGhosts = nofBytesOverProc / (uint32_t)(CG::octantBytes + CG::globalIndexBytes);
+		//uint32_t nofGhosts = nofBytesOverProc / (uint32_t)(global2D.octantBytes + global2D.globalIndexBytes);
+		uint32_t nofGhosts = nofBytesOverProc / (uint32_t)(global2D.octantBytes + global2D.globalIndexBytes);
 		octree.size_ghosts = nofGhosts;
 		octree.ghosts.clear();
 		octree.ghosts.resize(nofGhosts);
@@ -2728,15 +2712,15 @@ private:
 		map<int,Class_Comm_Buffer>::iterator rritend = recvBuffers.end();
 		for(map<int,Class_Comm_Buffer>::iterator rrit = recvBuffers.begin(); rrit != rritend; ++rrit){
 			int pos = 0;
-//			int nofGhostsPerProc = int(rrit->second.commBufferSize / (uint32_t) (CG::octantBytes + CG::globalIndexBytes));
-			int nofGhostsPerProc = int(rrit->second.commBufferSize / (uint32_t) (CG::octantBytes + CG::globalIndexBytes));
+//			int nofGhostsPerProc = int(rrit->second.commBufferSize / (uint32_t) (global2D.octantBytes + global2D.globalIndexBytes));
+			int nofGhostsPerProc = int(rrit->second.commBufferSize / (uint32_t) (global2D.octantBytes + global2D.globalIndexBytes));
 			for(int i = 0; i < nofGhostsPerProc; ++i){
 				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&x,1,MPI_UINT32_T,comm);
 				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&y,1,MPI_UINT32_T,comm);
 				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&z,1,MPI_UINT32_T,comm);
 				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&l,1,MPI_UINT8_T,comm);
 				//octree.ghosts[ghostCounter] = Class_Octant<2>(l,x,y);
-				octree.ghosts[ghostCounter] = classOctant(2,l,x,y);
+				octree.ghosts[ghostCounter] = Class_Octant<2>(2,l,x,y);
 				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&m,1,MPI_INT8_T,comm);
 				octree.ghosts[ghostCounter].setMarker(m);
 				for(int j = 0; j < 17; ++j){
@@ -2783,9 +2767,9 @@ public:
 			uint32_t stride = 0;
 			for(int i = 0; i < rank; ++i)
 				stride += partition[i];
-			classLocalTree::octvector octantsCopy = octree.octants;
-			classLocalTree::octvector::const_iterator first = octantsCopy.begin() + stride;
-			classLocalTree::octvector::const_iterator last = first + partition[rank];
+			octvector octantsCopy = octree.octants;
+			octvector::const_iterator first = octantsCopy.begin() + stride;
+			octvector::const_iterator last = first + partition[rank];
 			octree.octants.assign(first, last);
 #if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
@@ -2895,15 +2879,15 @@ public:
 						if(nofElementsFromSuccessiveToPrevious > headSize || contatore == 1)
 							nofElementsFromSuccessiveToPrevious  = headSize;
 
-//						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8));
-						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8));
+//						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
+						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a',comm);
 						int pos = 0;
 						//for(uint32_t i = 0; i <= (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1); ++i){
 						for(uint32_t i = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1); i <= (uint32_t)lh; ++i){
 							//PACK octants from 0 to lh in sendBuffer[p]
 							//const Class_Octant<2> & octant = octree.octants[i];
-							const classOctant & octant = octree.octants[i];
+							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -2932,13 +2916,13 @@ public:
 					}
 					else{
 						nofElementsFromSuccessiveToPrevious = globalLastHead - (newPartitionRangeGlobalidx[p] - partition[p]);
-						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8));
+						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a',comm);
 						int pos = 0;
 						for(uint32_t i = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1); i <= (uint32_t)lh; ++i){
 							//pack octants from lh - partition[p] to lh
 							//const Class_Octant<2> & octant = octree.octants[i];
-							const classOctant & octant = octree.octants[i];
+							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -2975,14 +2959,14 @@ public:
 						if(nofElementsFromPreviousToSuccessive > tailSize || contatore == 1)
 							nofElementsFromPreviousToSuccessive = tailSize;
 
-						int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8));
+						int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a',comm);
 						int pos = 0;
 						uint32_t octantsSize = (uint32_t)octree.octants.size();
 						for(uint32_t i = ft; i < ft + nofElementsFromPreviousToSuccessive; ++i){
 							//PACK octants from ft to octantsSize-1
 							//const Class_Octant<2> & octant = octree.octants[i];
-							const classOctant & octant = octree.octants[i];
+							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -3009,16 +2993,16 @@ public:
 					}
 					else{
 						nofElementsFromPreviousToSuccessive = newPartitionRangeGlobalidx[p] - globalFirstTail + 1;
-//						int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8));
-						int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8));
-						//int buffSize = partition[p] * (int)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8));
+//						int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
+						int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
+						//int buffSize = partition[p] * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a',comm);
 						uint32_t endOctants = ft + nofElementsFromPreviousToSuccessive  - 1;
 						int pos = 0;
 						for(uint32_t i = ft; i <= endOctants; ++i ){
 							//PACK octants from ft to ft + partition[p] -1
 							//const Class_Octant<2> & octant = octree.octants[i];
-							const classOctant & octant = octree.octants[i];
+							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -3104,7 +3088,7 @@ public:
 			map<int,int>::iterator ritend = recvBufferSizePerProc.end();
 			for(map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
 				recvBuffers[rit->first] = Class_Comm_Buffer(rit->second,'a',comm);
-				uint32_t nofNewPerProc = (uint32_t)(rit->second / (uint32_t)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8)));
+				uint32_t nofNewPerProc = (uint32_t)(rit->second / (uint32_t)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8)));
 				if(rit->first < rank)
 					nofNewHead += nofNewPerProc;
 				else if(rit->first > rank)
@@ -3143,7 +3127,7 @@ public:
 			bool jumpResident = false;
 			map<int,Class_Comm_Buffer>::iterator rbitend = recvBuffers.end();
 			for(map<int,Class_Comm_Buffer>::iterator rbit = recvBuffers.begin(); rbit != rbitend; ++rbit){
-				uint32_t nofNewPerProc = (uint32_t)(rbit->second.commBufferSize / (uint32_t)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8)));
+				uint32_t nofNewPerProc = (uint32_t)(rbit->second.commBufferSize / (uint32_t)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8)));
 				int pos = 0;
 				if(rbit->first > rank && !jumpResident){
 					newCounter += nofResidents ;
@@ -3155,7 +3139,7 @@ public:
 					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&pos,&z,1,MPI_UINT32_T,comm);
 					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&pos,&l,1,MPI_UINT8_T,comm);
 					//octree.octants[newCounter] = Class_Octant<2>(l,x,y);
-					octree.octants[newCounter] = classOctant(2,l,x,y);
+					octree.octants[newCounter] = Class_Octant<2>(2,l,x,y);
 					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&pos,&m,1,MPI_INT8_T,comm);
 					octree.octants[newCounter].setMarker(m);
 					for(int j = 0; j < 17; ++j){
@@ -3221,9 +3205,9 @@ public:
 			uint32_t stride = 0;
 			for(int i = 0; i < rank; ++i)
 				stride += partition[i];
-			classLocalTree::octvector octantsCopy = octree.octants;
-			classLocalTree::octvector::const_iterator first = octantsCopy.begin() + stride;
-			classLocalTree::octvector::const_iterator last = first + partition[rank];
+			octvector octantsCopy = octree.octants;
+			octvector::const_iterator first = octantsCopy.begin() + stride;
+			octvector::const_iterator last = first + partition[rank];
 			octree.octants.assign(first, last);
 #if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
@@ -3332,13 +3316,13 @@ public:
 						if(nofElementsFromSuccessiveToPrevious > headSize || contatore == 1)
 							nofElementsFromSuccessiveToPrevious  = headSize;
 
-						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8));
+						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a',comm);
 						int pos = 0;
 						for(uint32_t i = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1); i <= (uint32_t)lh; ++i){
 							//PACK octants from 0 to lh in sendBuffer[p]
 							//const Class_Octant<2> & octant = octree.octants[i];
-							const classOctant & octant = octree.octants[i];
+							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -3365,13 +3349,13 @@ public:
 					}
 					else{
 						nofElementsFromSuccessiveToPrevious = globalLastHead - (newPartitionRangeGlobalidx[p] - partition[p]);
-						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8));
+						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a',comm);
 						int pos = 0;
 						for(uint32_t i = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1); i <= (uint32_t)lh; ++i){
 							//pack octants from lh - partition[p] to lh
 							//const Class_Octant<2> & octant = octree.octants[i];
-							const classOctant & octant = octree.octants[i];
+							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -3407,14 +3391,14 @@ public:
 						if(nofElementsFromPreviousToSuccessive > tailSize || contatore == 1)
 							nofElementsFromPreviousToSuccessive = tailSize;
 
-						int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8));
+						int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a',comm);
 						int pos = 0;
 						uint32_t octantsSize = (uint32_t)octree.octants.size();
 						for(uint32_t i = ft; i < ft + nofElementsFromPreviousToSuccessive; ++i){
 							//PACK octants from ft to octantsSize-1
 							//const Class_Octant<2> & octant = octree.octants[i];
-							const classOctant & octant = octree.octants[i];
+							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -3440,14 +3424,14 @@ public:
 					}
 					else{
 						nofElementsFromPreviousToSuccessive = newPartitionRangeGlobalidx[p] - globalFirstTail + 1;
-						int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8));
+						int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						sendBuffers[p] = Class_Comm_Buffer(buffSize,'a',comm);
 						uint32_t endOctants = ft + nofElementsFromPreviousToSuccessive - 1;
 						int pos = 0;
 						for(uint32_t i = ft; i <= endOctants; ++i ){
 							//PACK octants from ft to ft + partition[p] -1
 							//const Class_Octant<2> & octant = octree.octants[i];
-							const classOctant & octant = octree.octants[i];
+							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -3531,7 +3515,7 @@ public:
 			map<int,int>::iterator ritend = recvBufferSizePerProc.end();
 			for(map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
 				recvBuffers[rit->first] = Class_Comm_Buffer(rit->second,'a',comm);
-				uint32_t nofNewPerProc = (uint32_t)(rit->second / (uint32_t)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8)));
+				uint32_t nofNewPerProc = (uint32_t)(rit->second / (uint32_t)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8)));
 				if(rit->first < rank)
 					nofNewHead += nofNewPerProc;
 				else if(rit->first > rank)
@@ -3570,7 +3554,7 @@ public:
 			bool jumpResident = false;
 			map<int,Class_Comm_Buffer>::iterator rbitend = recvBuffers.end();
 			for(map<int,Class_Comm_Buffer>::iterator rbit = recvBuffers.begin(); rbit != rbitend; ++rbit){
-				uint32_t nofNewPerProc = (uint32_t)(rbit->second.commBufferSize / (uint32_t)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8)));
+				uint32_t nofNewPerProc = (uint32_t)(rbit->second.commBufferSize / (uint32_t)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8)));
 				int pos = 0;
 				if(rbit->first > rank && !jumpResident){
 					newCounter += nofResidents ;
@@ -3582,7 +3566,7 @@ public:
 					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&pos,&z,1,MPI_UINT32_T,comm);
 					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&pos,&l,1,MPI_UINT8_T,comm);
 					//octree.octants[newCounter] = Class_Octant<2>(l,x,y);
-					octree.octants[newCounter] = classOctant(2,l,x,y);
+					octree.octants[newCounter] = Class_Octant<2>(2,l,x,y);
 					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&pos,&m,1,MPI_INT8_T,comm);
 					octree.octants[newCounter].setMarker(m);
 					for(int j = 0; j < 17; ++j){
@@ -3653,9 +3637,9 @@ public:
 			uint32_t stride = 0;
 			for(int i = 0; i < rank; ++i)
 				stride += partition[i];
-			classLocalTree::octvector octantsCopy = octree.octants;
-			classLocalTree::octvector::const_iterator first = octantsCopy.begin() + stride;
-			classLocalTree::octvector::const_iterator last = first + partition[rank];
+			octvector octantsCopy = octree.octants;
+			octvector::const_iterator first = octantsCopy.begin() + stride;
+			octvector::const_iterator last = first + partition[rank];
 			octree.octants.assign(first, last);
 #if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
@@ -3765,7 +3749,7 @@ public:
 						if(nofElementsFromSuccessiveToPrevious > headSize || contatore == 1)
 							nofElementsFromSuccessiveToPrevious  = headSize;
 
-						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8));
+						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						//compute size of data in buffers
 						if(userData.fixedSize()){
 							buffSize +=  userData.fixedSize() * nofElementsFromSuccessiveToPrevious;
@@ -3784,7 +3768,7 @@ public:
 						for(uint32_t i = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1); i <= (uint32_t)lh; ++i){
 							//PACK octants from 0 to lh in sendBuffer[p]
 							//const Class_Octant<2> & octant = octree.octants[i];
-							const classOctant & octant = octree.octants[i];
+							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -3813,7 +3797,7 @@ public:
 					}
 					else{
 						nofElementsFromSuccessiveToPrevious = globalLastHead - (newPartitionRangeGlobalidx[p] - partition[p]);
-						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8));
+						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						//compute size of data in buffers
 						if(userData.fixedSize()){
 							buffSize +=  userData.fixedSize() * nofElementsFromSuccessiveToPrevious;
@@ -3832,7 +3816,7 @@ public:
 						for(uint32_t i = lh - nofElementsFromSuccessiveToPrevious + 1; i <= lh; ++i){
 							//pack octants from lh - partition[p] to lh
 							//const Class_Octant<2> & octant = octree.octants[i];
-							const classOctant & octant = octree.octants[i];
+							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -3870,7 +3854,7 @@ public:
 							nofElementsFromPreviousToSuccessive = tailSize;
 
 						uint32_t octantsSize = (uint32_t)octree.octants.size();
-						int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8));
+						int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						//compute size of data in buffers
 						if(userData.fixedSize()){
 							buffSize +=  userData.fixedSize() * nofElementsFromPreviousToSuccessive;
@@ -3889,7 +3873,7 @@ public:
 						for(uint32_t i = ft; i < ft + nofElementsFromPreviousToSuccessive; ++i){
 							//PACK octants from ft to octantsSize-1
 							//const Class_Octant<2> & octant = octree.octants[i];
-							const classOctant & octant = octree.octants[i];
+							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -3917,7 +3901,7 @@ public:
 					else{
 						nofElementsFromPreviousToSuccessive = newPartitionRangeGlobalidx[p] - globalFirstTail + 1;
 						uint32_t endOctants = ft + nofElementsFromPreviousToSuccessive - 1;
-						int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8));
+						int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						//compute size of data in buffers
 						if(userData.fixedSize()){
 							buffSize +=  userData.fixedSize() * nofElementsFromPreviousToSuccessive;
@@ -3935,7 +3919,7 @@ public:
 						for(uint32_t i = ft; i <= endOctants; ++i ){
 							//PACK octants from ft to ft + partition[p] -1
 							//const Class_Octant<2> & octant = octree.octants[i];
-							const classOctant & octant = octree.octants[i];
+							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -4083,7 +4067,7 @@ public:
 					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&z,1,MPI_UINT32_T,comm);
 					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&l,1,MPI_UINT8_T,comm);
 					//octree.octants[newCounter] = Class_Octant<2>(l,x,y);
-					octree.octants[newCounter] = classOctant(2,l,x,y);
+					octree.octants[newCounter] = Class_Octant<2>(2,l,x,y);
 					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&m,1,MPI_INT8_T,comm);
 					octree.octants[newCounter].setMarker(m);
 					for(int j = 0; j < 17; ++j){
@@ -4157,9 +4141,9 @@ public:
 			uint32_t stride = 0;
 			for(int i = 0; i < rank; ++i)
 				stride += partition[i];
-			classLocalTree::octvector octantsCopy = octree.octants;
-			classLocalTree::octvector::const_iterator first = octantsCopy.begin() + stride;
-			classLocalTree::octvector::const_iterator last = first + partition[rank];
+			octvector octantsCopy = octree.octants;
+			octvector::const_iterator first = octantsCopy.begin() + stride;
+			octvector::const_iterator last = first + partition[rank];
 			octree.octants.assign(first, last);
 #if defined(__INTEL_COMPILER) || defined(__ICC)
 #else
@@ -4270,7 +4254,7 @@ public:
 						if(nofElementsFromSuccessiveToPrevious > headSize || contatore == 1)
 							nofElementsFromSuccessiveToPrevious  = headSize;
 
-						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8));
+						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						//compute size of data in buffers
 						if(userData.fixedSize()){
 							buffSize +=  userData.fixedSize() * nofElementsFromSuccessiveToPrevious;
@@ -4289,7 +4273,7 @@ public:
 						for(uint32_t i = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1); i <= (uint32_t)lh; ++i){
 							//PACK octants from 0 to lh in sendBuffer[p]
 							//const Class_Octant<2> & octant = octree.octants[i];
-							const classOctant & octant = octree.octants[i];
+							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -4318,7 +4302,7 @@ public:
 					}
 					else{
 						nofElementsFromSuccessiveToPrevious = globalLastHead - (newPartitionRangeGlobalidx[p] - partition[p]);
-						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8));
+						int buffSize = nofElementsFromSuccessiveToPrevious * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						//compute size of data in buffers
 						if(userData.fixedSize()){
 							buffSize +=  userData.fixedSize() * nofElementsFromSuccessiveToPrevious;
@@ -4337,7 +4321,7 @@ public:
 						for(uint32_t i = lh - nofElementsFromSuccessiveToPrevious + 1; i <= lh; ++i){
 							//pack octants from lh - partition[p] to lh
 							//const Class_Octant<2> & octant = octree.octants[i];
-							const classOctant & octant = octree.octants[i];
+							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -4375,7 +4359,7 @@ public:
 							nofElementsFromPreviousToSuccessive = tailSize;
 
 						uint32_t octantsSize = (uint32_t)octree.octants.size();
-						int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8));
+						int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						//compute size of data in buffers
 						if(userData.fixedSize()){
 							buffSize +=  userData.fixedSize() * nofElementsFromPreviousToSuccessive;
@@ -4394,7 +4378,7 @@ public:
 						for(uint32_t i = ft; i < ft + nofElementsFromPreviousToSuccessive; ++i){
 							//PACK octants from ft to octantsSize-1
 							//const Class_Octant<2> & octant = octree.octants[i];
-							const classOctant & octant = octree.octants[i];
+							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -4422,7 +4406,7 @@ public:
 					else{
 						nofElementsFromPreviousToSuccessive = newPartitionRangeGlobalidx[p] - globalFirstTail + 1;
 						uint32_t endOctants = ft + nofElementsFromPreviousToSuccessive - 1;
-						int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)CG::octantBytes / (double)(CHAR_BIT/8));
+						int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)global2D.octantBytes / (double)(CHAR_BIT/8));
 						//compute size of data in buffers
 						if(userData.fixedSize()){
 							buffSize +=  userData.fixedSize() * nofElementsFromPreviousToSuccessive;
@@ -4440,7 +4424,7 @@ public:
 						for(uint32_t i = ft; i <= endOctants; ++i ){
 							//PACK octants from ft to ft + partition[p] -1
 							//const Class_Octant<2> & octant = octree.octants[i];
-							const classOctant & octant = octree.octants[i];
+							const Class_Octant<2> & octant = octree.octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -4590,7 +4574,7 @@ public:
 					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&z,1,MPI_UINT32_T,comm);
 					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&l,1,MPI_UINT8_T,comm);
 					//octree.octants[newCounter] = Class_Octant<2>(l,x,y);
-					octree.octants[newCounter] = classOctant(2,l,x,y);
+					octree.octants[newCounter] = Class_Octant<2>(2,l,x,y);
 					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&m,1,MPI_INT8_T,comm);
 					octree.octants[newCounter].setMarker(m);
 					for(int j = 0; j < 17; ++j){
@@ -4715,7 +4699,7 @@ private:
 			uint64_t lastDescMortonPre, firstDescMortonPost;
 			lastDescMortonPre = (rank!=0) * partition_last_desc[rank-1];
 			firstDescMortonPost = (rank<nproc-1)*partition_first_desc[rank+1] + (rank==nproc-1)*partition_last_desc[rank];
-			octree.checkCoarse(lastDescMortonPre, firstDescMortonPost, &mapidx);
+			octree.checkCoarse(lastDescMortonPre, firstDescMortonPost);
 			updateAdapt();
 		}
 
@@ -4740,8 +4724,8 @@ private:
 		uint32_t pbordersOversize = 0;
 		for(map<int,vector<uint32_t> >::iterator bit = bordersPerProc.begin(); bit != bitend; ++bit){
 			pbordersOversize += bit->second.size();
-//			int buffSize = bit->second.size() * (int)ceil((double)(CG::markerBytes + CG::boolBytes) / (double)(CHAR_BIT/8));
-			int buffSize = bit->second.size() * (int)ceil((double)(CG::markerBytes + CG::boolBytes) / (double)(CHAR_BIT/8));
+//			int buffSize = bit->second.size() * (int)ceil((double)(global2D.markerBytes + global2D.boolBytes) / (double)(CHAR_BIT/8));
+			int buffSize = bit->second.size() * (int)ceil((double)(global2D.markerBytes + global2D.boolBytes) / (double)(CHAR_BIT/8));
 			int key = bit->first;
 			const vector<uint32_t> & value = bit->second;
 			sendBuffers[key] = Class_Comm_Buffer(buffSize,'a',comm);
@@ -4750,7 +4734,7 @@ private:
 			for(int i = 0; i < nofBorders; ++i){
 				//the use of auxiliary variable can be avoided passing to MPI_Pack the members of octant but octant in that case cannot be const
 				//const Class_Octant<2> & octant = octree.octants[value[i]];
-				const classOctant & octant = octree.octants[value[i]];
+				const Class_Octant<2> & octant = octree.octants[value[i]];
 				marker = octant.getMarker();
 //				mod	= octant.info[11];
 				mod	= octant.info[15];
@@ -4808,8 +4792,8 @@ private:
 		map<int,Class_Comm_Buffer>::iterator rritend = recvBuffers.end();
 		for(map<int,Class_Comm_Buffer>::iterator rrit = recvBuffers.begin(); rrit != rritend; ++rrit){
 			int pos = 0;
-//			int nofGhostsPerProc = int(rrit->second.commBufferSize / ((uint32_t) (CG::markerBytes + CG::boolBytes)));
-			int nofGhostsPerProc = int(rrit->second.commBufferSize / ((uint32_t) (CG::markerBytes + CG::boolBytes)));
+//			int nofGhostsPerProc = int(rrit->second.commBufferSize / ((uint32_t) (global2D.markerBytes + global2D.boolBytes)));
+			int nofGhostsPerProc = int(rrit->second.commBufferSize / ((uint32_t) (global2D.markerBytes + global2D.boolBytes)));
 			for(int i = 0; i < nofGhostsPerProc; ++i){
 				error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&marker,1,MPI_INT8_T,comm);
 				octree.ghosts[ghostCounter].setMarker(marker);
@@ -4966,7 +4950,7 @@ public:
 		bool globalDone = false, localDone = false, cDone = false;
 		uint32_t nocts = octree.getNumOctants();
 		//vector<Class_Octant<2> >::iterator iter, iterend = octree.octants.end();
-		vector<classOctant >::iterator iter, iterend = octree.octants.end();
+		vector<Class_Octant<2> >::iterator iter, iterend = octree.octants.end();
 
 		for (iter = octree.octants.begin(); iter != iterend; iter++){
 			iter->info[8] = false;
@@ -5074,7 +5058,7 @@ private:
 		bool globalDone = false, localDone = false;
 		uint32_t nocts = octree.getNumOctants();
 		//vector<Class_Octant<2> >::iterator iter, iterend = octree.octants.end();
-		vector<classOctant >::iterator iter, iterend = octree.octants.end();
+		vector<Class_Octant<2> >::iterator iter, iterend = octree.octants.end();
 
 		for (iter = octree.octants.begin(); iter != iterend; iter++){
 //			iter->info[8] = false;
@@ -5109,7 +5093,7 @@ private:
 			log.writeLog(" Initial Number of octants	:	" + to_string(static_cast<unsigned long long>(octree.getNumOctants())));
 
 			// Refine
-			while(octree.refine(&mapidx));
+			while(octree.refine(mapidx));
 
 			if (octree.getNumOctants() > nocts)
 				localDone = true;
@@ -5118,7 +5102,7 @@ private:
 			updateAdapt();
 
 			// Coarse
-			while(octree.coarse(&mapidx));
+			while(octree.coarse(mapidx));
 			updateAfterCoarse(mapidx);
 //			balance21(false);
 //			while(octree.refine(mapidx));
@@ -5149,7 +5133,7 @@ private:
 			log.writeLog(" Initial Number of octants	:	" + to_string(static_cast<unsigned long long>(global_num_octants)));
 
 			// Refine
-			while(octree.refine(&mapidx));
+			while(octree.refine(mapidx));
 			if (octree.getNumOctants() > nocts)
 				localDone = true;
 			updateAdapt();
@@ -5159,7 +5143,7 @@ private:
 
 
 			// Coarse
-			while(octree.coarse(&mapidx));
+			while(octree.coarse(mapidx));
 			updateAfterCoarse(mapidx);
 			setPboundGhosts();
 //			balance21(false);
@@ -5247,13 +5231,13 @@ public:
 		isghost.push_back(false);
 		if (getIsNewC(idx)){
 			if (idx < nocts-1 || !nghbro){
-				for (i=1; i<CG::nchildren; i++){
+				for (i=1; i<global2D.nchildren; i++){
 					mapper.push_back(mapidx[idx]+i);
 					isghost.push_back(false);
 				}
 			}
 			else if (idx == nocts-1 && nghbro){
-				for (i=1; i<CG::nchildren-nghbro; i++){
+				for (i=1; i<global2D.nchildren-nghbro; i++){
 					mapper.push_back(mapidx[idx]+i);
 					isghost.push_back(false);
 				}
@@ -5274,7 +5258,7 @@ public:
 		bool globalDone = false, localDone = false, cDone = false;
 		uint32_t nocts = octree.getNumOctants();
 //		vector<Class_Octant<2> >::iterator iter, iterend = octree.octants.end();
-		vector<classOctant>::iterator iter, iterend = octree.octants.end();
+		vector<Class_Octant<2>>::iterator iter, iterend = octree.octants.end();
 
 		for (iter = octree.octants.begin(); iter != iterend; iter++){
 //			iter->info[8] = false;
@@ -5353,7 +5337,7 @@ public:
 		bool globalDone = false, localDone = false;
 		uint32_t nocts = octree.getNumOctants();
 		//vector<Class_Octant<2> >::iterator iter, iterend = octree.octants.end();
-		vector<classOctant>::iterator iter, iterend = octree.octants.end();
+		vector<Class_Octant<2>>::iterator iter, iterend = octree.octants.end();
 
 		for (iter = octree.octants.begin(); iter != iterend; iter++){
 //			iter->info[8] = false;
@@ -5385,7 +5369,7 @@ public:
 			log.writeLog(" Initial Number of octants	:	" + to_string(static_cast<unsigned long long>(octree.getNumOctants())));
 
 			// Refine
-			while(octree.globalRefine(&mapidx));
+			while(octree.globalRefine(mapidx));
 
 			if (octree.getNumOctants() > nocts)
 				localDone = true;
@@ -5410,7 +5394,7 @@ public:
 			log.writeLog(" Initial Number of octants	:	" + to_string(static_cast<unsigned long long>(global_num_octants)));
 
 			// Refine
-			while(octree.globalRefine(&mapidx));
+			while(octree.globalRefine(mapidx));
 			if (octree.getNumOctants() > nocts)
 				localDone = true;
 			updateAdapt();
@@ -5437,7 +5421,7 @@ public:
 		bool globalDone = false, localDone = false, cDone = false;
 		uint32_t nocts = octree.getNumOctants();
 		//vector<Class_Octant<2> >::iterator iter, iterend = octree.octants.end();
-		vector<classOctant>::iterator iter, iterend = octree.octants.end();
+		vector<Class_Octant<2>>::iterator iter, iterend = octree.octants.end();
 
 		for (iter = octree.octants.begin(); iter != iterend; iter++){
 //			iter->info[8] = false;
@@ -5530,7 +5514,7 @@ public:
 		bool globalDone = false, localDone = false;
 		uint32_t nocts = octree.getNumOctants();
 		//vector<Class_Octant<2> >::iterator iter, iterend = octree.octants.end();
-		vector<classOctant>::iterator iter, iterend = octree.octants.end();
+		vector<Class_Octant<2>>::iterator iter, iterend = octree.octants.end();
 
 		for (iter = octree.octants.begin(); iter != iterend; iter++){
 //			iter->info[8] = false;
@@ -5565,10 +5549,10 @@ public:
 			log.writeLog(" Initial Number of octants	:	" + to_string(static_cast<unsigned long long>(octree.getNumOctants())));
 
 			// Coarse
-			while(octree.globalCoarse(&mapidx));
+			while(octree.globalCoarse(mapidx));
 			updateAfterCoarse(mapidx);
 			balance21(false);
-			while(octree.refine(&mapidx));
+			while(octree.refine(mapidx));
 			updateAdapt();
 			if (octree.getNumOctants() < nocts){
 				localDone = true;
@@ -5596,11 +5580,11 @@ public:
 			log.writeLog(" Initial Number of octants	:	" + to_string(static_cast<unsigned long long>(global_num_octants)));
 
 			// Coarse
-			while(octree.globalCoarse(&mapidx));
+			while(octree.globalCoarse(mapidx));
 			updateAfterCoarse(mapidx);
 			setPboundGhosts();
 			balance21(false);
-			while(octree.refine(&mapidx));
+			while(octree.refine(mapidx));
 			updateAdapt();
 			setPboundGhosts();
 			if (octree.getNumOctants() < nocts){
@@ -5739,7 +5723,7 @@ public:
 	/** Compute the connectivity of ghost octants and store the coordinates of nodes.
 	 */
 	void computeGhostsConnectivity() {
-		octree.computeGhostsConnectivity();
+		octree.computeghostsConnectivity();
 	}
 
 	// =================================================================================== //
@@ -5747,7 +5731,7 @@ public:
 	/** Clear the connectivity of ghost octants.
 	 */
 	void clearGhostsConnectivity() {
-		octree.clearGhostsConnectivity();
+		octree.clearghostsConnectivity();
 	}
 
 	// =================================================================================== //
@@ -5755,7 +5739,7 @@ public:
 	/** Update the connectivity of ghost octants.
 	 */
 	void updateGhostsConnectivity() {
-		octree.updateGhostsConnectivity();
+		octree.updateghostsConnectivity();
 	}
 
 	// =================================================================================== //
@@ -5799,7 +5783,7 @@ public:
 	 * \return connectivity Connectivity of the octant (4 indices of nodes).
 	 */
 //	u32vector getOctantConnectivity(Class_Octant<2>* oct){
-	u32vector getOctantConnectivity(classOctant* oct){
+	u32vector getOctantConnectivity(Class_Octant<2>* oct){
 		return octree.connectivity[getIdx(oct)];
 	}
 
@@ -5820,7 +5804,7 @@ public:
 	 * \return connectivity Connectivity of the ghost octant (4 indices of nodes).
 	 */
 //	u32vector getGhostOctantConnectivity(Class_Octant<2>* oct){
-	u32vector getGhostOctantConnectivity(classOctant* oct){
+	u32vector getGhostOctantConnectivity(Class_Octant<2>* oct){
 		return octree.ghostsconnectivity[getIdx(oct)];
 	}
 
@@ -5829,7 +5813,7 @@ public:
 	/** Get the logical coordinates of the nodes
 	 * \return nodes Matrix of nnodes*3 with the coordinates of the nodes.
 	 */
-	const u32arr3vector & getNodes(){
+	const u32vector2D & getNodes(){
 		return octree.nodes;
 	}
 
@@ -5839,7 +5823,7 @@ public:
 	 * \param[in] inode Local index of node
 	 * \return nodes Vector with the coordinates of the node.
 	 */
-	u32array3 getNodeLogicalCoordinates(uint32_t inode){
+	u32vector getNodeLogicalCoordinates(uint32_t inode){
 		return octree.nodes[inode];
 	}
 
@@ -5848,7 +5832,7 @@ public:
 	/** Get the logical coordinates of the ghost nodes
 	 * \return nodes Matrix of nghostnodes*3 with the coordinates of the nodes.
 	 */
-	const u32arr3vector & getGhostNodes(){
+	const u32vector2D & getGhostNodes(){
 		return octree.ghostsnodes;
 	}
 
@@ -5872,7 +5856,7 @@ public:
 	 * \param[in] inode Local index of node
 	 * \return nodes Vector with the coordinates of the node.
 	 */
-	u32array3 getGhostNodeLogicalCoordinates(uint32_t inode){
+	u32vector getGhostNodeLogicalCoordinates(uint32_t inode){
 		return octree.ghostsnodes[inode];
 	}
 
@@ -6199,9 +6183,9 @@ public:
 //				vector<Class_Octant<2> >::iterator oend = octree.octants.end();
 //				vector<Class_Octant<2> >::iterator obegin = octree.octants.begin();
 //				vector<Class_Octant<2> >::iterator it = obegin;
-				vector<classOctant>::iterator oend = octree.octants.end();
-				vector<classOctant>::iterator obegin = octree.octants.begin();
-				vector<classOctant>::iterator it = obegin;
+				vector<Class_Octant<2>>::iterator oend = octree.octants.end();
+				vector<Class_Octant<2>>::iterator obegin = octree.octants.begin();
+				vector<Class_Octant<2>>::iterator it = obegin;
 				int nmortons = FirstMortonReceived[iproc].size();
 				FirstIndexperproc[iproc].resize(nmortons);
 				for (int idx=0; idx<nmortons; idx++){
@@ -6226,12 +6210,9 @@ public:
 
 			//FIND SECOND INDEX FOR SECOND MORTONS IN EACH PROCESS
 			for (int iproc=0; iproc<nproc; iproc++){
-//				vector<Class_Octant<2> >::iterator oend = octree.octants.end();
-//				vector<Class_Octant<2> >::iterator obegin = octree.octants.begin();
-//				vector<Class_Octant<2> >::iterator it = obegin;
-				vector<classOctant>::iterator oend = octree.octants.end();
-				vector<classOctant>::iterator obegin = octree.octants.begin();
-				vector<classOctant>::iterator it = obegin;
+				vector<Class_Octant<2>>::iterator oend = octree.octants.end();
+				vector<Class_Octant<2>>::iterator obegin = octree.octants.begin();
+				vector<Class_Octant<2>>::iterator it = obegin;
 				int nmortons = SecondMortonReceived[iproc].size();
 				SecondIndexperproc[iproc].resize(nmortons);
 				for (int idx=0; idx<nmortons; idx++){
@@ -6490,7 +6471,7 @@ public:
 				<< "          ";
 		for(int i = 0; i < nofOctants; i++)
 		{
-			for(int j = 0; j < CG::nnodes; j++)
+			for(int j = 0; j < global2D.nnodes; j++)
 			{
 				int jj;
 				if (j<2){
@@ -6509,7 +6490,7 @@ public:
 		}
 		for(int i = 0; i < nofGhosts; i++)
 		{
-			for(int j = 0; j < CG::nnodes; j++)
+			for(int j = 0; j < global2D.nnodes; j++)
 			{
 				int jj;
 				if (j<2){
@@ -6531,7 +6512,7 @@ public:
 				<< "          ";
 		for(int i = 0; i < nofAll; i++)
 		{
-			out << (i+1)*CG::nnodes << " ";
+			out << (i+1)*global2D.nnodes << " ";
 			if((i+1)%12==0 && i!=nofAll-1)
 				out << endl << "          ";
 		}
@@ -6657,7 +6638,7 @@ public:
 				<< "          ";
 		for(int i = 0; i < nofOctants; i++)
 		{
-			for(int j = 0; j < CG::nnodes; j++)
+			for(int j = 0; j < global2D.nnodes; j++)
 			{
 				int jj;
 				if (j<2){
@@ -6676,7 +6657,7 @@ public:
 		}
 		for(int i = 0; i < nofGhosts; i++)
 		{
-			for(int j = 0; j < CG::nnodes; j++)
+			for(int j = 0; j < global2D.nnodes; j++)
 			{
 				int jj;
 				if (j<2){
@@ -6698,7 +6679,7 @@ public:
 				<< "          ";
 		for(int i = 0; i < nofAll; i++)
 		{
-			out << (i+1)*CG::nnodes << " ";
+			out << (i+1)*global2D.nnodes << " ";
 			if((i+1)%12==0 && i!=nofAll-1)
 				out << endl << "          ";
 		}
@@ -6819,7 +6800,7 @@ public:
 				<< "          ";
 		for(int i = 0; i < nofOctants; i++)
 		{
-			for(int j = 0; j < CG::nnodes; j++)
+			for(int j = 0; j < global2D.nnodes; j++)
 			{
 				int jj;
 				if (j<2){
@@ -6841,7 +6822,7 @@ public:
 				<< "          ";
 		for(int i = 0; i < nofAll; i++)
 		{
-			out << (i+1)*CG::nnodes << " ";
+			out << (i+1)*global2D.nnodes << " ";
 			if((i+1)%12==0 && i!=nofAll-1)
 				out << endl << "          ";
 		}
