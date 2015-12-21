@@ -1,6 +1,4 @@
-#include "preprocessor_defines.dat"
-#include "Class_Global.hpp"
-#include "Class_Para_Tree.hpp"
+#include "classParaTree.hpp"
 
 using namespace std;
 
@@ -11,7 +9,7 @@ using namespace std;
 void test1() {
 
     /**<Instantation of a 2D para_tree object.*/
-    Class_Para_Tree<2> pablo1;
+    classParaTree pablo1;
 
     /**<Compute the connectivity and write the para_tree.*/
     pablo1.computeConnectivity();

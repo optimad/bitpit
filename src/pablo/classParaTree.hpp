@@ -112,13 +112,13 @@ private:
 public:
 
 #if NOMPI==0
-	classParaTree(string logfile="PABLO.log", MPI_Comm comm_ = MPI_COMM_WORLD, int8_t maxlevel = 20, uint8_t dim_ = 2);// : log(logfile,comm_),comm(comm_);
-	classParaTree(double X, double Y, double Z, double L,string logfile="PABLO.log", MPI_Comm comm_ = MPI_COMM_WORLD, int8_t maxlevel = 20, uint8_t dim_ = 2);//:dim(2),trans(X,Y,Z,L),log(logfile,comm_),comm(comm_);
-	classParaTree(double X, double Y, double Z, double L, u32vector2D & XY, u8vector & levels,string logfile="PABLO.log", MPI_Comm comm_ = MPI_COMM_WORLD, int8_t maxlevel = 20, uint8_t dim_ = 2);//:trans(X,Y,Z,L),log(logfile,comm_),comm(comm_);
+	classParaTree(uint8_t dim_ = 2, int8_t maxlevel = 20, string logfile="PABLO.log", MPI_Comm comm_ = MPI_COMM_WORLD);// : log(logfile,comm_),comm(comm_);
+	classParaTree(double X, double Y, double Z, double L, uint8_t dim_ = 2, int8_t maxlevel = 20, string logfile="PABLO.log", MPI_Comm comm_ = MPI_COMM_WORLD);//:dim(2),trans(X,Y,Z,L),log(logfile,comm_),comm(comm_);
+	classParaTree(double X, double Y, double Z, double L, u32vector2D & XY, u8vector & levels, uint8_t dim_ = 2, int8_t maxlevel = 20, string logfile="PABLO.log", MPI_Comm comm_ = MPI_COMM_WORLD);//:trans(X,Y,Z,L),log(logfile,comm_),comm(comm_);
 #else
-	classParaTree(string logfile="PABLO.log");// : log(logfile);
-	classParaTree(double X, double Y, double Z, double L,string logfile="PABLO.log", int8_t maxlevel = 20, dim_ = 2);//:dim(2),trans(X,Y,Z,L),log(logfile);
-	classParaTree(double X, double Y, double Z, double L, u32vector2D & XY, u8vector & levels,string logfile="PABLO.log", int8_t maxlevel = 20, uint8_t dim_ = 2);//:trans(X,Y,Z,L),log(logfile);
+	classParaTree(uint8_t dim_ = 2, int8_t maxlevel = 20, string logfile="PABLO.log");// : log(logfile);
+	classParaTree(double X, double Y, double Z, double L, uint8_t dim_ = 2, int8_t maxlevel = 20, string logfile="PABLO.log");//:dim(2),trans(X,Y,Z,L),log(logfile);
+	classParaTree(double X, double Y, double Z, double L, u32vector2D & XY, u8vector & levels, uint8_t dim_ = 2, int8_t maxlevel = 20, string logfile="PABLO.log");//:trans(X,Y,Z,L),log(logfile);
 #endif
 
 	~classParaTree();
@@ -170,6 +170,35 @@ public:
 	void setBalance(uint32_t idx, bool balance);
 
 	// =================================================================================== //
+	// POINTER BASED METHODS
+	// =================================================================================== //
+
+	double getX(classOctant* oct);
+	double getY(classOctant* oct);
+	double getZ(classOctant* oct);
+	double getSize(classOctant* oct);
+	double getArea(classOctant* oct);
+	double getVolume(classOctant* oct);
+	void getCenter(classOctant* oct, dvector& center);
+	dvector getCenter(classOctant* oct);
+	dvector getFaceCenter(classOctant* oct, uint8_t iface);
+	void getFaceCenter(classOctant* oct, uint8_t iface, dvector& center);
+	dvector getNode(classOctant* oct, uint8_t inode);
+	void getNode(classOctant* oct, uint8_t inode, dvector& node);
+	void getNodes(classOctant* oct, dvector2D & nodes);
+	dvector2D getNodes(classOctant* oct);
+	void getNormal(classOctant* oct, uint8_t & iface, dvector & normal);
+	dvector getNormal(classOctant* oct, uint8_t & iface);
+	int8_t getMarker(classOctant* oct);
+	uint8_t getLevel(classOctant* oct);
+	bool getBalance(classOctant* oct);
+	bool getIsNewR(classOctant* oct);
+	bool getIsNewC(classOctant* oct);
+	void setMarker(classOctant* oct, int8_t marker);
+	void setBalance(classOctant* oct, bool balance);
+
+
+	// =================================================================================== //
 	// LOCAL TREE GET/SET METHODS
 	// =================================================================================== //
 
@@ -182,8 +211,8 @@ public:
 	void getBoundingBox(dvector & P0, dvector & P1);
 	void getBoundingBox(darray3 & P0, darray3 & P1);
 	void setBalanceCodimension(uint8_t b21codim);
-	const classOctant &  getFirstDesc() const;
-	const classOctant &  getLastDesc() const;
+	const classOctant & getFirstDesc() const;
+	const classOctant & getLastDesc() const;
 	uint64_t getLastDescMorton(uint32_t idx);
 
 	// =================================================================================== //
@@ -213,6 +242,7 @@ public:
 
 	classOctant* getOctant(uint32_t idx);
 	classOctant* getGhostOctant(uint32_t idx);
+	uint64_t getGlobalIdx(classOctant* oct);
 	uint32_t getIdx(classOctant* oct);
 	uint32_t getIdx(classOctant oct);
 #if NOMPI==0

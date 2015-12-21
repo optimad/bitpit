@@ -1,6 +1,4 @@
-#include "preprocessor_defines.dat"
-#include "Class_Global.hpp"
-#include "Class_Para_Tree.hpp"
+#include "classParaTree.hpp"
 #include "User_Data_Comm.hpp"
 #include "User_Data_LB.hpp"
 
@@ -18,7 +16,7 @@ int main(int argc, char *argv[]) {
 		int iter = 0;
 
 		/**<Instantation of a 3D para_tree object.*/
-		Class_Para_Tree<3> pablo116;
+		classParaTree pablo116;
 
 		/**<Set NO 2:1 balance for the octree.*/
 		int idx = 0;
@@ -50,7 +48,7 @@ int main(int argc, char *argv[]) {
 			vector<vector<double> > nodes = pablo116.getNodes(i);
 			/**<Compute the center of the octant.*/
 			vector<double> center = pablo116.getCenter(i);
-			for (int j=0; j<global3D.nnodes; j++){
+			for (int j=0; j<8; j++){
 				double x = nodes[j][0];
 				double y = nodes[j][1];
 				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
@@ -72,7 +70,7 @@ int main(int argc, char *argv[]) {
 				vector<vector<double> > nodes = pablo116.getNodes(i);
 				/**<Compute the center of the octant.*/
 				vector<double> center = pablo116.getCenter(i);
-				for (int j=0; j<global3D.nnodes; j++){
+				for (int j=0; j<8; j++){
 					double x = nodes[j][0];
 					double y = nodes[j][1];
 					if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
@@ -104,12 +102,12 @@ int main(int argc, char *argv[]) {
 			for (uint32_t i=0; i<nocts; i++){
 				pablo116.getMapping(i, mapper, isghost);
 				if (pablo116.getIsNewC(i)){
-					for (int j=0; j<global3D.nchildren; j++){
+					for (int j=0; j<8; j++){
 						if (isghost[j]){
-							oct_data_new[i] += ghost_data[mapper[j]]/global3D.nchildren;
+							oct_data_new[i] += ghost_data[mapper[j]]/8;
 						}
 						else{
-							oct_data_new[i] += oct_data[mapper[j]]/global3D.nchildren;
+							oct_data_new[i] += oct_data[mapper[j]]/8;
 						}
 					}
 				}

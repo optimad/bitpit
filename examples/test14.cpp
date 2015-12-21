@@ -1,6 +1,4 @@
-#include "preprocessor_defines.dat"
-#include "Class_Global.hpp"
-#include "Class_Para_Tree.hpp"
+#include "classParaTree.hpp"
 #include "User_Data_Comm.hpp"
 
 using namespace std;
@@ -18,7 +16,7 @@ int main(int argc, char *argv[]) {
 		int dim = 2;
 
 		/**<Instantation of a 2D para_tree object.*/
-		Class_Para_Tree<2> pablo14;
+		classParaTree pablo14;
 
 		/**<Refine globally four level and write the para_tree.*/
 		for (iter=1; iter<5; iter++){
@@ -43,7 +41,7 @@ int main(int argc, char *argv[]) {
 		/**<Assign a data to the octants with at least one node inside the circle.*/
 		for (int i=0; i<nocts; i++){
 			vector<vector<double> > nodes = pablo14.getNodes(i);
-			for (int j=0; j<global2D.nnodes; j++){
+			for (int j=0; j<4; j++){
 				double x = nodes[j][0];
 				double y = nodes[j][1];
 				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
@@ -58,7 +56,7 @@ int main(int argc, char *argv[]) {
 //			Class_Octant<2> *oct = pablo14.getGhostOctant(i);
 			classOctant *oct = pablo14.getGhostOctant(i);
 			vector<vector<double> > nodes = pablo14.getNodes(oct);
-			for (int j=0; j<global2D.nnodes; j++){
+			for (int j=0; j<4; j++){
 				double x = nodes[j][0];
 				double y = nodes[j][1];
 				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
@@ -86,10 +84,10 @@ int main(int argc, char *argv[]) {
 				/**<Find neighbours through faces (codim=1) and edges (codim=2) of the octants*/
 				for (codim=1; codim<dim+1; codim++){
 					if (codim == 1){
-						nfaces = global2D.nfaces;
+						nfaces = 4;
 					}
 					else if (codim == 2){
-						nfaces = global2D.nnodes;
+						nfaces = 4;
 					}
 					for (iface=0; iface<nfaces; iface++){
 						pablo14.findNeighbours(i,iface,codim,neigh_t,isghost_t);

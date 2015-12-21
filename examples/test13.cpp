@@ -1,6 +1,4 @@
-#include "preprocessor_defines.dat"
-#include "Class_Global.hpp"
-#include "Class_Para_Tree.hpp"
+#include "classParaTree.hpp"
 
 using namespace std;
 
@@ -16,7 +14,7 @@ int main(int argc, char *argv[]) {
 		int iter = 0;
 
 		/**<Instantation of a 2D para_tree object.*/
-		Class_Para_Tree<2> pablo13;
+		classParaTree pablo13;
 
 		/**<Set NO 2:1 balance for the octree.*/
 		uint32_t idx=0;
@@ -49,7 +47,7 @@ int main(int argc, char *argv[]) {
 			for (int i=0; i<nocts; i++){
 				/**<Compute the nodes of the octant.*/
 				vector<vector<double> > nodes = pablo13.getNodes(i);
-				for (int j=0; j<global2D.nnodes; j++){
+				for (int j=0; j<4; j++){
 					double x = nodes[j][0];
 					double y = nodes[j][1];
 					if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
@@ -87,7 +85,7 @@ int main(int argc, char *argv[]) {
 			for (int i=0; i<nocts; i++){
 				/**<Compute the nodes of the octant.*/
 				vector<vector<double> > nodes = pablo13.getNodes(i);
-				for (int j=0; j<global2D.nnodes; j++){
+				for (int j=0; j<4; j++){
 					double x = nodes[j][0];
 					double y = nodes[j][1];
 					/**<Set refinement marker=-1 (coarse it one time) for octants inside a circle.*/

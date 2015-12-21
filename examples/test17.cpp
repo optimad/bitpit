@@ -1,6 +1,4 @@
-#include "preprocessor_defines.dat"
-#include "Class_Global.hpp"
-#include "Class_Para_Tree.hpp"
+#include "classParaTree.hpp"
 #include "User_Data_Comm.hpp"
 #include "User_Data_LB.hpp"
 
@@ -17,8 +15,8 @@ int main(int argc, char *argv[]) {
 #endif
 		int iter = 0;
 		/**<Instantation of a 2D para_tree object.*/
-		Class_Para_Tree<2> pablo17a;
-		Class_Para_Tree<2> pablo17b;
+		classParaTree pablo17a;
+		classParaTree pablo17b;
 
 		/**<Set NO 2:1 balance for the octree.*/
 		int idx = 0;
@@ -48,7 +46,7 @@ int main(int argc, char *argv[]) {
 			oct_data[i] = (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0));
 			/**<Compute the nodes of the octant.*/
 			vector<vector<double> > nodes = pablo17a.getNodes(i);
-			for (int j=0; j<global2D.nnodes; j++){
+			for (int j=0; j<4; j++){
 				double x = nodes[j][0];
 				double y = nodes[j][1];
 				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
@@ -81,7 +79,7 @@ int main(int argc, char *argv[]) {
 				vector<double> center = pablo17a.getCenter(i);
 				/**<Compute the nodes of the octant.*/
 				vector<vector<double> > nodes = pablo17a.getNodes(i);
-				for (int j=0; j<global2D.nnodes; j++){
+				for (int j=0; j<4; j++){
 					double x = nodes[j][0];
 					double y = nodes[j][1];
 					if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
@@ -113,12 +111,12 @@ int main(int argc, char *argv[]) {
 			for (uint32_t i=0; i<nocts; i++){
 				pablo17a.getMapping(i, mapper, isghost);
 				if (pablo17a.getIsNewC(i)){
-					for (int j=0; j<global2D.nchildren; j++){
+					for (int j=0; j<4; j++){
 						if (isghost[j]){
-							oct_data_new[i] += ghost_data[mapper[j]]/global3D.nchildren;
+							oct_data_new[i] += ghost_data[mapper[j]]/4;
 						}
 						else{
-							oct_data_new[i] += oct_data[mapper[j]]/global3D.nchildren;
+							oct_data_new[i] += oct_data[mapper[j]]/4;
 						}
 					}
 				}
@@ -152,23 +150,28 @@ int main(int argc, char *argv[]) {
 #endif
 
 
-		/**<Define a mapper for two PABLO objects.*/
-		vector<pair<pair<uint32_t,uint32_t>, pair<int, int> > > mapPablo;
-		nocts = pablo17b.getNumOctants();
-		mapPablo = pablo17b.mapPablos(pablo17a);
-		vector<double> oct_data_b(nocts);
-//		/**<Assign data to the new octree : process owner the first octant index in mapPablo.*/
-//		for (int i=0; i<nocts; i++){
-//			oct_data_b[i] = mapPablo[i].second.first;
-//		}
-		/**<Assign data to the new octree : first octant index in mapPablo.*/
-		for (int i=0; i<nocts; i++){
-			oct_data_b[i] = mapPablo[i].first.first;
-		}
+//TODO implement mapPablos
 
-		/**<Update the connectivity and write the para_tree.*/
-		pablo17b.updateConnectivity();
-		pablo17b.writeTest("Pablo17b_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data_b);
+//
+//		/**<Define a mapper for two PABLO objects.*/
+//		vector<pair<pair<uint32_t,uint32_t>, pair<int, int> > > mapPablo;
+//		nocts = pablo17b.getNumOctants();
+//		mapPablo = pablo17b.mapPablos(pablo17a);
+//		vector<double> oct_data_b(nocts);
+////		/**<Assign data to the new octree : process owner the first octant index in mapPablo.*/
+////		for (int i=0; i<nocts; i++){
+////			oct_data_b[i] = mapPablo[i].second.first;
+////		}
+//		/**<Assign data to the new octree : first octant index in mapPablo.*/
+//		for (int i=0; i<nocts; i++){
+//			oct_data_b[i] = mapPablo[i].first.first;
+//		}
+//
+//		/**<Update the connectivity and write the para_tree.*/
+//		pablo17b.updateConnectivity();
+//		pablo17b.writeTest("Pablo17b_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data_b);
+
+
 
 #if NOMPI==0
 	}

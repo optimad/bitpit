@@ -1,31 +1,27 @@
-#include "preprocessor_defines.dat"
-#include "Class_Global.hpp"
-#include "Class_Para_Tree.hpp"
+#include "classParaTree.hpp"
 
 using namespace std;
-
-
 
 // =================================================================================== //
 
 void test0() {
 
     /**<Instantation of a 2D para_tree object with default constructor.*/
-    Class_Para_Tree<2> ptreedefault;
+    classParaTree ptreedefault;
     /**<Write the para_tree in physical domain.*/
     ptreedefault.write("Pablo0_default");
-    /**<Write the para_tree in logical domain.*/
-    ptreedefault.writeLogical("Pablo0_default_logical");
+//    /**<Write the para_tree in logical domain.*/
+//    ptreedefault.writeLogical("Pablo0_default_logical");
 
     /**<Set coordinates of the origin and size of a 2D custom para_tree object.*/
     double X, Y, Z, L;
     X = 10.0; Y = 20.0; Z = 0.0; L = 250.0;
     /**<Instantation of a 2D para_tree object with custom constructor.*/
-    Class_Para_Tree<2> ptreecustom(X, Y, Z, L);
+    classParaTree ptreecustom(X, Y, Z, L);
     /**<Write the para_tree in physical domain.*/
     ptreecustom.write("Pablo0_custom");
-    /**<Write the para_tree in logical domain.*/
-    ptreecustom.writeLogical("Pablo0_custom_logical");
+//    /**<Write the para_tree in logical domain.*/
+//    ptreecustom.writeLogical("Pablo0_custom_logical");
 
     return ;
 

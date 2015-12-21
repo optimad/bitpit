@@ -1,6 +1,4 @@
-#include "preprocessor_defines.dat"
-#include "Class_Global.hpp"
-#include "Class_Para_Tree.hpp"
+#include "classParaTree.hpp"
 
 using namespace std;
 
@@ -15,7 +13,7 @@ int main(int argc, char *argv[]) {
 #endif
 		int iter = 0;
 		/**<Instantation of a 2D para_tree object.*/
-		Class_Para_Tree<2> pablo7a;
+		classParaTree pablo7a;
 
 		/**<Set NO 2:1 balance for the octree.*/
 		int idx = 0;
@@ -27,7 +25,7 @@ int main(int argc, char *argv[]) {
 		}
 
 		/**<Instantation and copy pablo7a.*/
-		Class_Para_Tree<2> pablo7b = pablo7a;
+		classParaTree pablo7b = pablo7a;
 
 		/**<Define a center point and a radius.*/
 		double xc, yc;
@@ -45,7 +43,7 @@ int main(int argc, char *argv[]) {
 			oct_data[i] = (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0));
 			/**<Compute the nodes of the octant.*/
 			vector<vector<double> > nodes = pablo7a.getNodes(i);
-			for (int j=0; j<global2D.nnodes; j++){
+			for (int j=0; j<4; j++){
 				double x = nodes[j][0];
 				double y = nodes[j][1];
 				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
@@ -78,7 +76,7 @@ int main(int argc, char *argv[]) {
 				vector<double> center = pablo7a.getCenter(i);
 				/**<Compute the nodes of the octant.*/
 				vector<vector<double> > nodes = pablo7a.getNodes(i);
-				for (int j=0; j<global2D.nnodes; j++){
+				for (int j=0; j<4; j++){
 					double x = nodes[j][0];
 					double y = nodes[j][1];
 					if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
@@ -110,8 +108,8 @@ int main(int argc, char *argv[]) {
 			for (uint32_t i=0; i<nocts; i++){
 				pablo7a.getMapping(i, mapper, isghost);
 				if (pablo7a.getIsNewC(i)){
-					for (int j=0; j<global2D.nchildren; j++){
-						oct_data_new[i] += oct_data[mapper[j]]/global2D.nchildren;
+					for (int j=0; j<4; j++){
+						oct_data_new[i] += oct_data[mapper[j]]/4;
 					}
 				}
 				else if (pablo7a.getIsNewR(i)){
@@ -131,19 +129,21 @@ int main(int argc, char *argv[]) {
 		}
 
 
-			/**<Define a mapper for two PABLO objects.*/
-			vector<pair<pair<uint32_t,uint32_t>, pair<int, int> > > mapPablo;
-			nocts = pablo7b.getNumOctants();
-			mapPablo = pablo7b.mapPablos(pablo7a);
-			vector<double> oct_data_b(nocts);
-			/**<Assign data to the new octree using the second octant index in mapPablo*/
-			for (int i=0; i<nocts; i++){
-				oct_data_b[i] = oct_data[mapPablo[i].first.second];
-			}
-
-			/**<Update the connectivity and write the para_tree.*/
-			pablo7b.updateConnectivity();
-			pablo7b.writeTest("Pablo7b_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data_b);
+//TODO Implement mapPablos
+//
+//			/**<Define a mapper for two PABLO objects.*/
+//			vector<pair<pair<uint32_t,uint32_t>, pair<int, int> > > mapPablo;
+//			nocts = pablo7b.getNumOctants();
+//			mapPablo = pablo7b.mapPablos(pablo7a);
+//			vector<double> oct_data_b(nocts);
+//			/**<Assign data to the new octree using the second octant index in mapPablo*/
+//			for (int i=0; i<nocts; i++){
+//				oct_data_b[i] = oct_data[mapPablo[i].first.second];
+//			}
+//
+//			/**<Update the connectivity and write the para_tree.*/
+//			pablo7b.updateConnectivity();
+//			pablo7b.writeTest("Pablo7b_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data_b);
 
 #if NOMPI==0
 	}

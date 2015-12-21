@@ -390,7 +390,7 @@ bool classLocalTree::coarse(u32vector* mapidx){
 			father.setMarker(markerfather);
 			octants.resize(nocts-offset);
 			octants.push_back(father);
-			octants.shrink_to_fit();
+			octvector(octants).swap(octants);
 			nocts = octants.size();
 			if(mapidx != NULL){
 				mapidx->resize(nocts);
@@ -4456,8 +4456,7 @@ void classLocalTree::computeConnectivity(){
 		for (i = 0; i < noctants; i++){
 			octants[i].getNodes(octnodes, global.MAX_LEVEL);
 			for (j = 0; j < global.nnodes; j++){
-// 					morton = mortonEncode_magicbits(octnodes[j][0], octnodes[j][1], octnodes[j][2]);
-/*debug version*/			morton = keyXYZ(octnodes[j][0], octnodes[j][1], octnodes[j][2]);
+				morton = keyXYZ(octnodes[j][0], octnodes[j][1], octnodes[j][2]);
 				if (mapnodes[morton].size()==0){
 					mapnodes[morton].reserve(16);
 					for (k = 0; k < 3; k++){
@@ -4491,12 +4490,10 @@ void classLocalTree::computeConnectivity(){
 		}
 		u32arr3vector(nodes).swap(nodes);
 
-//		//Lento. Solo per risparmiare memoria
-//		for (uint32_t ii=0; ii<noctants; ii++){
-//			connectivity[ii].shrink_to_fit();
-//		}
-//		connectivity.shrink_to_fit();
+		u32vector2D(connectivity).swap(connectivity);
+
 	}
+
 	map<uint64_t, vector<uint32_t> >().swap(mapnodes);
 	iter = mapnodes.end();
 
@@ -4537,8 +4534,7 @@ void classLocalTree::computeGhostsConnectivity(){
 		for (i = 0; i < noctants; i++){
 			ghosts[i].getNodes(octnodes, global.MAX_LEVEL);
 			for (j = 0; j < global.nnodes; j++){
-// 					morton = mortonEncode_magicbits(octnodes[j][0], octnodes[j][1], octnodes[j][2]);
-/*debug version*/			morton = keyXYZ(octnodes[j][0], octnodes[j][1], octnodes[j][2]);
+				morton = keyXYZ(octnodes[j][0], octnodes[j][1], octnodes[j][2]);
 				if (mapnodes[morton].size()==0){
 					mapnodes[morton].reserve(16);
 					for (k = 0; k < 3; k++){
@@ -4570,11 +4566,9 @@ void classLocalTree::computeGhostsConnectivity(){
 			counter++;
 		}
 		u32arr3vector(ghostsnodes).swap(ghostsnodes);
-//		//Lento. Solo per risparmiare memoria
-//		for (uint32_t ii=0; ii<noctants; ii++){
-//			ghostsconnectivity[ii].shrink_to_fit();
-//		}
-//		ghostsconnectivity.shrink_to_fit();
+
+		u32vector2D(ghostsconnectivity).swap(ghostsconnectivity);
+
 	}
 	iter = mapnodes.end();
 

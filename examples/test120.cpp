@@ -1,6 +1,4 @@
-#include "preprocessor_defines.dat"
-#include "Class_Global.hpp"
-#include "Class_Para_Tree.hpp"
+#include "classParaTree.hpp"
 #include "User_Data_Comm.hpp"
 #include "User_Data_LB.hpp"
 
@@ -18,7 +16,7 @@ int main(int argc, char *argv[]) {
 		int iter = 0;
 
 		/**<Instantation of a 3D para_tree object.*/
-		Class_Para_Tree<3> pablo120;
+		classParaTree pablo120;
 
 		/**<Set NO 2:1 balance for the octree.*/
 		int idx = 0;
@@ -68,7 +66,7 @@ int main(int argc, char *argv[]) {
 				/**<Compute the center of the octant.*/
 				vector<double> center = pablo120.getCenter(i);
 				oct_data[i] = sqrt((pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0)));
-				for (int j=0; j<global3D.nnodes; j++){
+				for (int j=0; j<8; j++){
 					double x = nodes[j][0];
 					double y = nodes[j][1];
 					double z = nodes[j][2];

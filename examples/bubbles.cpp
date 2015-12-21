@@ -1,7 +1,3 @@
-//#include "preprocessor_defines.dat"
-//#include "Class_Global.hpp"
-//#include "Class_Para_Tree.hpp"
-#include "classGlobal.hpp"
 #include "classParaTree.hpp"
 #include "User_Data_Comm.hpp"
 #include "User_Data_LB.hpp"

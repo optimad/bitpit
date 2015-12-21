@@ -1,6 +1,4 @@
-#include "preprocessor_defines.dat"
-#include "Class_Global.hpp"
-#include "Class_Para_Tree.hpp"
+#include "classParaTree.hpp"
 #include "User_Data_Comm.hpp"
 #include "User_Data_LB.hpp"
 
@@ -41,7 +39,7 @@ int main(int argc, char *argv[]) {
 		int iter = 0;
 
 		/**<Instantation of a 3D para_tree object.*/
-		Class_Para_Tree<3> pabloBB;
+		classParaTree pabloBB;
 
 		/**<Set 2:1 balance for the octree.*/
 		pabloBB.setBalanceCodimension(1);
@@ -114,7 +112,7 @@ int main(int argc, char *argv[]) {
 
 		/**<Perform time iterations.*/
 		for (iter=itstart; iter<itend; iter++){
-			if(pabloBB.rank==0) cout << "iter " << iter << endl;
+			if(pabloBB.getRank()==0) cout << "iter " << iter << endl;
 			t += Dt;
 
 			/**<Update bubbles position.*/
@@ -159,7 +157,7 @@ int main(int argc, char *argv[]) {
 								inside = true;
 							}
 						}
-						for (int j=0; j<global3D.nnodes; j++){
+						for (int j=0; j<8; j++){
 							double x = nodes[j][0];
 							double y = nodes[j][1];
 							double z = nodes[j][2];

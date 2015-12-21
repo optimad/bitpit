@@ -1,6 +1,4 @@
-#include "preprocessor_defines.dat"
-#include "Class_Global.hpp"
-#include "Class_Para_Tree.hpp"
+#include "classParaTree.hpp"
 
 using namespace std;
 
@@ -8,7 +6,7 @@ using namespace std;
 void test12() {
 
     /**<Instantation of a 2D para_tree object.*/
-    Class_Para_Tree<2> pablo12;
+    classParaTree pablo12;
 
     /**<Set NO 2:1 balance for the octree.*/
     uint32_t idx=0;

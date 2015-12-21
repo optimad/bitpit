@@ -28,11 +28,16 @@ else()
 	endif()
 endif()
 
+set(ONLY_PABLO 1 CACHE BOOL "If set, pablo is compiled stand alone")
+
 set(ENABLE_PROFILING 0 CACHE BOOL "Set appropriate compiler flags to enable profiling")
 set(VERBOSE_MAKE 0 CACHE BOOL "Set appropriate compiler and cmake flags to enable verbose output from compilation")
-set(VTK_DIR "/opt/VTK/lib/cmake/vtk" CACHE PATH "The directory containing a CMake configuration file for VTK")
-set(WITHOUT_MPI "0" CACHE BOOL "If set, the program is compiled without MPI support")
-set(ONLY_PABLO "1" CACHE BOOL "If set, pablo is compiled stand alone")
+
+if (NOT ONLY_PABLO)
+	set(VTK_DIR "/opt/VTK/lib/cmake/vtk" CACHE PATH "The directory containing a CMake configuration file for VTK")
+endif()
+
+set(WITHOUT_MPI 1 CACHE BOOL "If set, the program is compiled without MPI support")
 
 #------------------------------------------------------------------------------------#
 # Internal variables
@@ -51,8 +56,10 @@ endif()
 find_package(BITP_BASE REQUIRED)
 include_directories(${BITP_BASE_INCLUDE_DIRS})
 
+if (NOT ONLY_PABLO)
 find_package(VTK 6.0 REQUIRED COMPONENTS vtkIOXML vtkIOLegacy NO_MODULE)
 include(${VTK_USE_FILE})
+endif()
 
 #------------------------------------------------------------------------------------#
 # Compilation settings

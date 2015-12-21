@@ -1,6 +1,4 @@
-#include "preprocessor_defines.dat"
-#include "Class_Global.hpp"
-#include "Class_Para_Tree.hpp"
+#include "classParaTree.hpp"
 #include "User_Data_Comm.hpp"
 #include "User_Data_LB.hpp"
 
@@ -18,7 +16,7 @@ int main(int argc, char *argv[]) {
 		int iter = 0;
 
 		/**<Instantation of a 2D para_tree object.*/
-		Class_Para_Tree<2> pablo15;
+		classParaTree pablo15;
 
 		/**<Set NO 2:1 balance for the octree.*/
 		int idx = 0;
@@ -45,7 +43,7 @@ int main(int argc, char *argv[]) {
 			vector<vector<double> > nodes = pablo15.getNodes(i);
 			/**<Compute the center of the octant.*/
 			vector<double> center = pablo15.getCenter(i);
-			for (int j=0; j<global2D.nnodes; j++){
+			for (int j=0; j<4; j++){
 				double x = nodes[j][0];
 				double y = nodes[j][1];
 				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
@@ -69,7 +67,7 @@ int main(int argc, char *argv[]) {
 				vector<vector<double> > nodes = pablo15.getNodes(i);
 				/**<Compute the center of the octant.*/
 				vector<double> center = pablo15.getCenter(i);
-				for (int j=0; j<global2D.nnodes; j++){
+				for (int j=0; j<4; j++){
 					weight[i] = 2.0;
 					double x = nodes[j][0];
 					double y = nodes[j][1];
@@ -106,8 +104,8 @@ int main(int argc, char *argv[]) {
 			for (uint32_t i=0; i<nocts; i++){
 				pablo15.getMapping(i, mapper, isghost);
 				if (pablo15.getIsNewC(i)){
-					for (int j=0; j<global2D.nchildren; j++){
-						oct_data_new[i] += oct_data[mapper[j]]/global2D.nchildren;
+					for (int j=0; j<4; j++){
+						oct_data_new[i] += oct_data[mapper[j]]/4;
 						weight_new[i] += weight[mapper[j]];
 					}
 				}
@@ -140,8 +138,8 @@ int main(int argc, char *argv[]) {
 		for (int i=0; i<weight.size(); i++){
 			tot += weight[i];
 		}
-		cout << pablo15.rank << " weight : " << tot << endl;
-		cout << pablo15.rank << " size : " << weight.size() << endl;
+		cout << pablo15.getRank() << " weight : " << tot << endl;
+		cout << pablo15.getRank() << " size : " << weight.size() << endl;
 
 		/**<Update the connectivity and write the para_tree.*/
 		pablo15.updateConnectivity();
