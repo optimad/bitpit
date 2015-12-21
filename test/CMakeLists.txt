@@ -40,8 +40,6 @@ add_custom_target(tests DEPENDS ${TEST_LIST})
 add_custom_target(clean-tests COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 # Data files
-add_definitions(-DDATAFILE_PATH="${CMAKE_CURRENT_BINARY_DIR}/data/")
-
 if (IO_ENABLE_VTK_WRAPPERS)
 	add_custom_command(
 		TARGET "test_IO_00001" PRE_BUILD
