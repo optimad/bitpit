@@ -130,15 +130,16 @@ const classOctant& classLocalTree::extractGhostOctant(uint32_t idx) const{
 // =================================================================================== //
 
 /*! Refine local tree: refine one time octants with marker >0
- * \param[in] mapidx mpaidx[i] = index in old octants vector of the new i-th octant (index of father if octant is new after refinement)
+ * \param[in] mapidx mapidx[i] = index in old octants vector of the new i-th octant (index of father if octant is new after refinement)
  * \return	true if refinement done
  */
-bool classLocalTree::refine(u32vector* mapidx){
+bool classLocalTree::refine(u32vector & mapidx){
 
 	u32vector		last_child_index;
 	octvector 		children;
 	uint32_t 		idx, nocts, ilastch;
 	uint32_t 		offset = 0, blockidx;
+	uint32_t		mapsize = mapidx.size();
 	uint8_t 		nchm1 = global.nchildren-1, ich;
 	bool 			dorefine = false;
 
@@ -156,21 +157,22 @@ bool classLocalTree::refine(u32vector* mapidx){
 		}
 	}
 	if (offset > 0){
-		if(mapidx != NULL){
-			mapidx->resize(octants.size()+offset);
-			u32vector((*mapidx)).swap((*mapidx));
+		if(mapsize > 0){
+			mapidx.resize(octants.size()+offset);
+//			u32vector((*mapidx)).swap((*mapidx));
 		}
 		octants.resize(octants.size()+offset);
 		blockidx = last_child_index[0]-nchm1;
 		idx = octants.size();
 		ilastch = last_child_index.size()-1;
+
 		while (idx>blockidx){
 			idx--;
 			if(idx == last_child_index[ilastch]){
 				children = octants[idx-offset].buildChildren(global.MAX_LEVEL);
 				for (ich=0; ich<global.nchildren; ich++){
 					octants[idx-ich] = (children[nchm1-ich]);
-					if(mapidx != NULL) mapidx[idx-ich]  = mapidx[idx-offset];
+					if(mapsize>0) mapidx[idx-ich]  = mapidx[idx-offset];
 				}
 				offset -= nchm1;
 				idx -= nchm1;
@@ -189,15 +191,16 @@ bool classLocalTree::refine(u32vector* mapidx){
 			}
 			else {
 				octants[idx] = octants[idx-offset];
-				if(mapidx != NULL) mapidx[idx]  = mapidx[idx-offset];
+				if(mapsize>0) mapidx[idx]  = mapidx[idx-offset];
 			}
 		}
 	}
+
 	octvector(octants).swap(octants);
 	nocts = octants.size();
-	if(mapidx != NULL) {
-		mapidx->resize(nocts);
-		u32vector((*mapidx)).swap((*mapidx));
+	if(mapsize>0) {
+		mapidx.resize(nocts);
+//		u32vector((*mapidx)).swap((*mapidx));
 	}
 
 	setFirstDesc();
@@ -213,7 +216,7 @@ bool classLocalTree::refine(u32vector* mapidx){
  * \param[in] mapidx mpaidx[i] = index in old octants vector of the new i-th octant (index of first child if octant is new after coarsening)
  * \return	true is coarsening done
  */
-bool classLocalTree::coarse(u32vector* mapidx){
+bool classLocalTree::coarse(u32vector & mapidx){
 
 	u32vector		first_child_index;
 	classOctant		father;
@@ -222,6 +225,7 @@ bool classLocalTree::coarse(u32vector* mapidx){
 	uint32_t 		offset;
 	uint32_t 		idx2_gh;
 	uint32_t 		nidx;
+	uint32_t		mapsize = mapidx.size();
 	int8_t 			markerfather, marker;
 	uint8_t 		nbro, nend;
 	uint8_t 		nchm1 = global.nchildren-1;
@@ -302,36 +306,36 @@ bool classLocalTree::coarse(u32vector* mapidx){
 						docoarse = true;
 					}
 					octants[idx] = father;
-					if(mapidx != NULL) mapidx[idx] = mapidx[idx+offset];
+					if(mapsize > 0) mapidx[idx] = mapidx[idx+offset];
 					offset += nchm1;
 					nidx++;
 				}
 				else{
 					octants[idx] = octants[idx+offset];
-					if(mapidx != NULL) mapidx[idx] = mapidx[idx+offset];
+					if(mapsize > 0) mapidx[idx] = mapidx[idx+offset];
 				}
 			}
 			else{
 				octants[idx] = octants[idx+offset];
-				if(mapidx != NULL) mapidx[idx] = mapidx[idx+offset];
+				if(mapsize > 0) mapidx[idx] = mapidx[idx+offset];
 			}
 		}
 	}
 	octants.resize(nblock);
 	octvector(octants).swap(octants);
 	nocts = octants.size();
-	if(mapidx != NULL){
-		mapidx->resize(nocts);
-		u32vector((*mapidx)).swap((*mapidx));
+	if(mapsize > 0){
+		mapidx.resize(nocts);
+//		u32vector((*mapidx)).swap((*mapidx));
 	}
 
 	// End on ghosts
 	if (ghosts.size() && nocts > 0){
 		if (ghosts[idx2_gh].buildFather(global.MAX_LEVEL) == octants[nocts-1].buildFather(global.MAX_LEVEL)){
 			father = ghosts[idx2_gh].buildFather(global.MAX_LEVEL);
-			for (uint32_t iii=0; iii<17; iii++){
-				father.info[iii] = false;
-			}
+//			for (uint32_t iii=0; iii<17; iii++){
+//				father.info[iii] = false;
+//			}
 			markerfather = ghosts[idx2_gh].getMarker()+1;
 			nbro = 0;
 			idx = idx2_gh;
@@ -392,9 +396,9 @@ bool classLocalTree::coarse(u32vector* mapidx){
 			octants.push_back(father);
 			octvector(octants).swap(octants);
 			nocts = octants.size();
-			if(mapidx != NULL){
-				mapidx->resize(nocts);
-				u32vector((*mapidx)).swap((*mapidx));
+			if(mapsize > 0){
+				mapidx.resize(nocts);
+//				u32vector((*mapidx)).swap((*mapidx));
 			}
 		}
 
@@ -415,7 +419,7 @@ bool classLocalTree::coarse(u32vector* mapidx){
  * \param[in] mapidx mpaidx[i] = index in old octants vector of the new i-th octant (index of father if octant is new after refinement)
  * \return	true if refinement done
  */
-bool classLocalTree::globalRefine(u32vector* mapidx){
+bool classLocalTree::globalRefine(u32vector & mapidx){
 
 	uint32_t 	idx, nocts;
 	bool 		dorefine = false;
@@ -437,7 +441,7 @@ bool classLocalTree::globalRefine(u32vector* mapidx){
  * \param[in] mapidx mpaidx[i] = index in old octants vector of the new i-th octant (index of father if octant is new after refinement)
  * \return	true if refinement done
  */
-bool classLocalTree::globalCoarse(u32vector* mapidx){
+bool classLocalTree::globalCoarse(u32vector & mapidx){
 
 	uint32_t 	idx, nocts;
 	bool 		dorefine = false;
@@ -459,10 +463,11 @@ bool classLocalTree::globalCoarse(u32vector* mapidx){
  */
 void classLocalTree::checkCoarse(uint64_t lastDescPre,
 		uint64_t firstDescPost,
-		u32vector* mapidx){
+		u32vector & mapidx){
 
 	uint32_t		idx;
 	uint32_t 		nocts;
+	uint32_t 		mapsize = mapidx.size();
 	uint64_t 		Morton;
 	uint8_t 		toDelete = 0;
 
@@ -477,13 +482,13 @@ void classLocalTree::checkCoarse(uint64_t lastDescPre,
 	}
 	for(idx=0; idx<nocts-toDelete; idx++){
 		octants[idx] = octants[idx+toDelete];
-		if (mapidx != NULL) mapidx[idx] = mapidx[idx+toDelete];
+		if (mapsize>0) mapidx[idx] = mapidx[idx+toDelete];
 	}
 	octants.resize(nocts-toDelete);
 	octvector(octants).swap(octants);
-	if (mapidx != NULL){
-		mapidx->resize(nocts-toDelete);
-		u32vector((*mapidx)).swap((*mapidx));
+	if (mapsize>0){
+		mapidx.resize(nocts-toDelete);
+//		u32vector((*mapidx)).swap((*mapidx));
 	}
 	nocts = getNumOctants();
 

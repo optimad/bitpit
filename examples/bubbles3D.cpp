@@ -39,7 +39,7 @@ int main(int argc, char *argv[]) {
 		int iter = 0;
 
 		/**<Instantation of a 3D para_tree object.*/
-		classParaTree pabloBB;
+		classParaTree pabloBB(3);
 
 		/**<Set 2:1 balance for the octree.*/
 		pabloBB.setBalanceCodimension(1);
@@ -129,6 +129,8 @@ int main(int argc, char *argv[]) {
 
 				for (int i=0; i<nocts; i++){
 
+//					cout << pabloBB.getRank()  << " " << i << "/" << nocts-1 << endl;
+
 					bool inside = false;
 					/**<Compute the nodes of the octant.*/
 					vector<vector<double> > nodes = pabloBB.getNodes(i);
@@ -209,6 +211,7 @@ int main(int argc, char *argv[]) {
 			}
 
 #if NOMPI==0
+			cout << "in loadbalance " << endl;
 			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
 			/**<Communicate the data of the octants and the ghost octants between the processes.*/
 			User_Data_LB<vector<double> > data_lb(oct_data,oct_data_ghost);

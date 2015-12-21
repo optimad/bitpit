@@ -9,6 +9,7 @@
 #include <iostream>
 #include <vector>
 #include <bitset>
+#include <array>
 
 // =================================================================================== //
 // NAME SPACES                                                                         //
@@ -27,7 +28,6 @@ typedef array<uint32_t, 3>			u32array3;
 typedef vector<vector<uint32_t>	>	u32vector2D;
 typedef vector<vector<uint64_t>	>	u64vector2D;
 typedef vector<u32array3>			u32arr3vector;
-typedef classGlobal					CG;
 
 // =================================================================================== //
 // CLASS DEFINITION                                                                    //

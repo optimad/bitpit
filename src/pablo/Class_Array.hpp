@@ -37,7 +37,6 @@ using namespace std;
  */
 class Class_Array {
 
-	template<int dim> friend class Class_Para_Tree;
 	friend class classParaTree;
 
 	// ------------------------------------------------------------------------------- //

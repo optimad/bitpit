@@ -39,7 +39,7 @@ void test12() {
         for (int i=0; i<nocts; i++){
             /**<Compute the nodes of the octant.*/
             vector<vector<double> > nodes = pablo12.getNodes(i);
-            for (int j=0; j<global2D.nnodes; j++){
+            for (int j=0; j<4; j++){
                 double x = nodes[j][0];
                 double y = nodes[j][1];
                 if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){

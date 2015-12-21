@@ -686,8 +686,8 @@ vector<uint64_t>		classOctant::computeMinSizeMorton(uint8_t iface, 			// Compute
 		case 0 :
 		{
 			for (i=0; i<nneigh; i++){
-				cz = (i/nline);
-				cy = (i%nline);
+				cz = (dim-2)*(i%nline);
+				cy = (dim==2)*(i%nline) + (dim-2)*(i/nline);
 				Morton[i] = mortonEncode_magicbits(this->x-dh,this->y+dh*cy,this->z+dh*cz);
 			}
 		}
@@ -695,8 +695,8 @@ vector<uint64_t>		classOctant::computeMinSizeMorton(uint8_t iface, 			// Compute
 		case 1 :
 		{
 			for (i=0; i<nneigh; i++){
-				cz = (i/nline);
-				cy = (i%nline);
+				cz = (dim-2)*(i%nline);
+				cy = (dim==2)*(i%nline) + (dim-2)*(i/nline);
 				Morton[i] = mortonEncode_magicbits(this->x+dh2,this->y+dh*cy,this->z+dh*cz);
 			}
 		}
@@ -704,8 +704,8 @@ vector<uint64_t>		classOctant::computeMinSizeMorton(uint8_t iface, 			// Compute
 		case 2 :
 		{
 			for (i=0; i<nneigh; i++){
-				cz = (i/nline);
-				cx = (i%nline);
+				cz = (dim-2)*(i%nline);
+				cx = (dim==2)*(i%nline) + (dim-2)*(i/nline);
 				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y-dh,this->z+dh*cz);
 			}
 		}
@@ -713,8 +713,8 @@ vector<uint64_t>		classOctant::computeMinSizeMorton(uint8_t iface, 			// Compute
 		case 3 :
 		{
 			for (i=0; i<nneigh; i++){
-				cz = (i/nline);
-				cx = (i%nline);
+				cz = (dim-2)*(i%nline);
+				cx = (dim==2)*(i%nline) + (dim-2)*(i/nline);
 				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh2,this->z+dh*cz);
 			}
 		}
@@ -722,8 +722,8 @@ vector<uint64_t>		classOctant::computeMinSizeMorton(uint8_t iface, 			// Compute
 		case 4 :
 		{
 			for (i=0; i<nneigh; i++){
-				cy = (i/nline);
-				cx = (i%nline);
+				cx = (i/nline);
+				cy = (i%nline);
 				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z-dh);
 			}
 		}
@@ -731,8 +731,8 @@ vector<uint64_t>		classOctant::computeMinSizeMorton(uint8_t iface, 			// Compute
 		case 5 :
 		{
 			for (i=0; i<nneigh; i++){
-				cy = (i/nline);
-				cx = (i%nline);
+				cx = (i/nline);
+				cy = (i%nline);
 				Morton[i] = mortonEncode_magicbits(this->x+dh*cx,this->y+dh*cy,this->z+dh2);
 			}
 		}

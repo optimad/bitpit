@@ -11,6 +11,11 @@
 #include <string.h>
 #include <map>
 #include <iostream>
+#include <algorithm>
+#include <iostream>
+#include <vector>
+#include <bitset>
+#include <array>
 
 // =================================================================================== //
 // NAME SPACES                                                                         //
@@ -162,11 +167,11 @@ private:
 	const classOctant& extractGhostOctant(uint32_t idx) const;
 
 
-	bool refine(u32vector* mapidx = NULL);
-	bool coarse(u32vector* mapidx = NULL);
-	bool globalRefine(u32vector* mapidx = NULL);
-	bool globalCoarse(u32vector* mapidx = NULL);
-	void checkCoarse(uint64_t lastDescPre, uint64_t firstDescPost, u32vector* mapidx = NULL);
+	bool refine(u32vector & mapidx);
+	bool coarse(u32vector & mapidx);
+	bool globalRefine(u32vector & mapidx);
+	bool globalCoarse(u32vector & mapidx);
+	void checkCoarse(uint64_t lastDescPre, uint64_t firstDescPost, u32vector & mapidx);
 	void updateLocalMaxDepth();
 
 
