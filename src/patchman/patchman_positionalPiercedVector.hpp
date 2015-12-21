@@ -10,12 +10,8 @@
 
 #include "positionalPiercedVector.tpp"
 
-namespace pman {
-
 extern template class PositionalPiercedVector<Cell>;
 extern template class PositionalPiercedVector<Interface>;
 extern template class PositionalPiercedVector<Vertex>;
-
-}
 
 #endif

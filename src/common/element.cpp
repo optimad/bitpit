@@ -7,10 +7,8 @@
 #include <assert.h>
 #include <limits>
 
-namespace pman {
-
 /*!
-	\ingroup PatchMan
+	\ingroup Common
 	@{
 */
 
@@ -24,7 +22,7 @@ namespace pman {
 
 	The local numbering scheme of element vertices is shown below.
 
-	\image html patchman_elements.png
+	\image html common_elements.png
 */
 
 /*!
@@ -1228,5 +1226,3 @@ obinarystream& operator<<(obinarystream  &buffer, const Element &element)
 /*!
 	@}
 */
-
-}

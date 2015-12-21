@@ -1,8 +1,8 @@
 //
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
-#ifndef __PATCHMAN_COLLAPSED_VECTOR_2D_HPP__
-#define __PATCHMAN_COLLAPSED_VECTOR_2D_HPP__
+#ifndef __BITP_MESH_COLLAPSED_VECTOR_2D_HPP__
+#define __BITP_MESH_COLLAPSED_VECTOR_2D_HPP__
 
 #include <vector>
 #include <cassert>
@@ -11,10 +11,8 @@
 
 #include "binary_stream.hpp"
 
-namespace pman {
-
 /*!
-	\ingroup PatchMan
+	\ingroup Common
 	@{
 */
 
@@ -697,7 +695,5 @@ private:
 /*!
 	@}
 */
-
-}
 
 #endif

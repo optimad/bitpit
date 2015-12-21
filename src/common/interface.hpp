@@ -1,8 +1,8 @@
 //
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
-#ifndef __PATCHMAN_INTERFACE_HPP__
-#define __PATCHMAN_INTERFACE_HPP__
+#ifndef __BITP_MESH_INTERFACE_HPP__
+#define __BITP_MESH_INTERFACE_HPP__
 
 /*! \file */
 
@@ -11,10 +11,8 @@
 
 #include "element.hpp"
 
-namespace pman {
-
 /*!
-	\ingroup PatchMan
+	\ingroup Common
 	@{
 */
 
@@ -64,7 +62,5 @@ private:
 /*!
 	@}
 */
-
-}
 
 #endif

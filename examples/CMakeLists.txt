@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 2.8)
 option(BUILD_EXAMPLES "Create and install the examples" OFF)
 
 if(BUILD_EXAMPLES)
-
+    include_directories("${PROJECT_SOURCE_DIR}/src/common")
     include_directories("${PROJECT_SOURCE_DIR}/src/ucartmesh")
     include_directories("${PROJECT_SOURCE_DIR}/src/surftri")
     include_directories("${PROJECT_SOURCE_DIR}/src/voltri")

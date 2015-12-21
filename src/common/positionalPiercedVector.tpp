@@ -1,8 +1,8 @@
 //
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
-#ifndef __PATCHMAN_PIERCED_VECTOR_TPP__
-#define __PATCHMAN_PIERCED_VECTOR_TPP__
+#ifndef __BITP_MESH_POSITIONAL_PIERCED_VECTOR_TPP__
+#define __BITP_MESH_POSITIONAL_PIERCED_VECTOR_TPP__
 
 #include <algorithm>
 #include <cassert>
@@ -18,64 +18,32 @@
 #include <utility>
 #include <vector>
 
-namespace pman {
-
-// To check if the provided template argument implements the needed methods,
-// the following Stackoverflow questions are used:
-//
-// http://stackoverflow.com/questions/257288/is-it-possible-to-write-a-c-template-to-check-for-a-functions-existence
-// http://stackoverflow.com/questions/16976720/how-to-i-restrict-a-template-class-to-certain-types
-
-template <typename T>
-class has_get_id
-{
-    typedef char true_type;
-    typedef long false_type;
-
-    template <typename C> static true_type test(decltype(&C::get_id));
-    template <typename C> static false_type test(...);
-
-public:
-    enum { value = (sizeof(test<T>(0)) == sizeof(true_type)) };
-};
-
-template <typename T>
-class has_set_id
-{
-    typedef char true_type;
-    typedef long false_type;
-
-    template <typename C> static true_type test(decltype(&C::set_id));
-    template <typename C> static false_type test(...);
-
-public:
-    enum { value = (sizeof(test<T>(0)) == sizeof(true_type)) };
-};
+#include "piercedVector.tpp"
 
 /*!
-	@brief Iterator for the class PiercedVector
+	@brief Iterator for the class PositionalPiercedVector
 
 	@details
-	PiercedIterator can work only with objects that are identified by a
+	PositionalPiercedIterator can work only with objects that are identified by a
 	unique id. The objects must implement a function, called get_id,
 	that returns the id of the object. The ids have to be positive, but
 	the type that defines the id must be a signed integer (negative
-	id are used by PiercedVector to store special information in the
+	id are used by PositionalPiercedVector to store special information in the
 	elements).
 
-	Usage: Use <tt>PiercedVector<T>::iterator</tt> to declare an iterator
-	for a pierced vector, use <tt>PiercedVector<Type>::const_iterator</tt> to
+	Usage: Use <tt>PositionalPiercedVector<T>::iterator</tt> to declare an iterator
+	for a pierced vector, use <tt>PositionalPiercedVector<Type>::const_iterator</tt> to
 	declare a const iterator for a pierced vector.
 
 	@tparam T The type of the objects stored in the vector
 */
 
 template<class T, class unqualified_T = typename std::remove_cv<T>::type>
-class PiercedIterator
+class PositionalPiercedIterator
 	: public std::iterator<std::forward_iterator_tag, unqualified_T,
 				std::ptrdiff_t, T*, T&>
 {
-	// PiercedIterator can work only with calsses that are identified by a
+	// PositionalPiercedIterator can work only with calsses that are identified by a
 	// unique id (i.e., classes that implements get_id)
 	static_assert(has_get_id<T>::value, "Provided class does not implement get_id");
 
@@ -115,7 +83,7 @@ private:
 		Creates a new iterator and initializes it with the
 		specified pointer.
 	*/
-	explicit PiercedIterator(T *value)
+	explicit PositionalPiercedIterator(T *value)
 		: m_itr(value)
 	{
 	}
@@ -125,7 +93,7 @@ public:
 	/*!
 		Creates a new uninitialized iterator
 	*/
-	PiercedIterator()
+	PositionalPiercedIterator()
 	{
 	}
 
@@ -133,7 +101,7 @@ public:
 		Creates a new iterator and initializes it with the position of
 		the base iterator recevied in input.
 	*/
-	explicit PiercedIterator(BaseIterator iterator)
+	explicit PositionalPiercedIterator(BaseIterator iterator)
 		: m_itr(&(*iterator))
 	{
 	}
@@ -142,7 +110,7 @@ public:
 		Creates a new iterator and initializes it with the position of
 		the const base iterator recevied in input.
 	*/
-	explicit PiercedIterator(BaseConstIterator iterator)
+	explicit PositionalPiercedIterator(BaseConstIterator iterator)
 		: m_itr(&(*iterator))
 	{
 	}
@@ -153,7 +121,7 @@ public:
 
 		\param other the iterator to exchange values with
 	*/
-	void swap(PiercedIterator& other) noexcept
+	void swap(PositionalPiercedIterator& other) noexcept
 	{
 		using std::swap;
 		swap(m_itr, other.m_itr);
@@ -162,7 +130,7 @@ public:
 	/*!
 		Pre-increment operator.
 	*/
-	PiercedIterator& operator++ ()
+	PositionalPiercedIterator& operator++ ()
 	{
 		m_itr++;
 
@@ -177,9 +145,9 @@ public:
 	/*!
 		Post-increment operator.
 	*/
-	PiercedIterator operator++ (int)
+	PositionalPiercedIterator operator++ (int)
 	{
-		PiercedIterator tmp(m_itr);
+		PositionalPiercedIterator tmp(m_itr);
 
 		++(*this);
 
@@ -190,7 +158,7 @@ public:
 		Two-way comparison.
 	*/
 	template<class other_T, class unqualified_other_T = typename std::remove_cv<other_T>::type>
-	bool operator == (const PiercedIterator<other_T>& rhs) const
+	bool operator == (const PositionalPiercedIterator<other_T>& rhs) const
 	{
 		return m_itr == rhs.m_itr;
 	}
@@ -199,7 +167,7 @@ public:
 		Two-way comparison.
 	*/
 	template<class other_T, class unqualified_other_T = typename std::remove_cv<other_T>::type>
-	bool operator != (const PiercedIterator<other_T>& rhs) const
+	bool operator != (const PositionalPiercedIterator<other_T>& rhs) const
 	{
 		return m_itr != rhs.m_itr;
 	}
@@ -233,7 +201,7 @@ public:
 		                position to be set
 		\result The updated iterator.
 	*/
-	PiercedIterator & operator= (BaseIterator iterator)
+	PositionalPiercedIterator & operator= (BaseIterator iterator)
 	{
 		m_itr = &(*iterator);
 
@@ -243,38 +211,41 @@ public:
 	/*!
 		Converts the iterator to a const_iterator.
 	*/
-	operator PiercedIterator<const T>() const
+	operator PositionalPiercedIterator<const T>() const
 	{
-		return PiercedIterator<const T>(m_itr);
+		return PositionalPiercedIterator<const T>(m_itr);
 	}
 };
 
-// Definition of static constants of PiercedIterator
+// Definition of static constants of PositionalPiercedIterator
 template<class T, class unqualified_T>
-const typename PiercedIterator<T, unqualified_T>::id_type
-	PiercedIterator<T, unqualified_T>::SENTINEL_ID = std::numeric_limits<id_type>::min();
+const typename PositionalPiercedIterator<T, unqualified_T>::id_type
+	PositionalPiercedIterator<T, unqualified_T>::SENTINEL_ID = std::numeric_limits<id_type>::min();
 
 /*!
 	@brief Metafunction for generating of a pierced vector.
 
 	@details
-	Usage: Use <tt>PiercedVector<T></tt> to declare a pierced vector.
+	Usage: Use <tt>PositionalPiercedVector<T></tt> to declare a positional
+	pierced vector. This is a vector that can handle holes and that
+	automatically assigns to the contained elements an id which is
+	the position of the element in the container.
 
-	PiercedVector can work only with objects that are identified by a
+	PositionalPiercedVector can work only with objects that are identified by a
 	unique id. The objects must implement a function, called get_id,
 	that returns the id of the object and a function, called set_id,
 	that sets the id of the objects. The ids have to be positive, but
 	the type that defines the id must be a signed integer (negative
-	id are used by PiercedVector to store special information in the
+	id are used by PositionalPiercedVector to store special information in the
 	elements).
 
 	@tparam T The type of the objects stored in the vector
 */
 
 template <class T>
-class PiercedVector
+class PositionalPiercedVector
 {
-	// PiercedVector can work only with calsses that are identified by a
+	// PositionalPiercedVector can work only with calsses that are identified by a
 	// unique id (i.e., classes that implements set_id and get_id)
 	static_assert(has_get_id<T>::value, "Provided class does not implement get_id");
 	static_assert(has_set_id<T>::value, "Provided class does not implement set_id");
@@ -333,12 +304,12 @@ public:
 	/*!
 		Iterator for the pierced array.
 	*/
-	typedef PiercedIterator<value_type> iterator;
+	typedef PositionalPiercedIterator<value_type> iterator;
 
 	/*!
 		Constant iterator for the pierced array.
 	*/
-	typedef PiercedIterator<const value_type> const_iterator;
+	typedef PositionalPiercedIterator<const value_type> const_iterator;
 
 	/*!
 		Iterator for the pierced array raw container.
@@ -353,7 +324,7 @@ public:
 	/*!
 		Constructs an empty pierced vector with no elements.
 	*/
-	PiercedVector()
+	PositionalPiercedVector()
 	{
 		clear();
 	}
@@ -363,7 +334,7 @@ public:
 
 		\param other vector with the new contents
 	*/
-	PiercedVector(PiercedVector&& other) = default;
+	PositionalPiercedVector(PositionalPiercedVector&& other) = default;
 
 	/*!
 		Constructs a pierced vector with a capacity at least enough
@@ -371,7 +342,7 @@ public:
 
 		\param n the minimum capacity requested for the vector
 	*/
-	PiercedVector(size_type n)
+	PositionalPiercedVector(size_type n)
 	{
 		clear();
 
@@ -514,10 +485,6 @@ public:
 		m_pending_deletes.clear();
 		std::deque<size_type>().swap(m_pending_deletes);
 
-		// Clear position map
-		m_pos.clear();
-		std::unordered_map<id_type, size_type, PiercedHasher>().swap(m_pos);
-
 		// Clear dirty flag
 		m_dirty = false;
 	}
@@ -582,7 +549,7 @@ public:
 	*/
 	bool empty() const
 	{
-		return m_pos.empty();
+		return (size() == 0);
 	}
 
 	/*!
@@ -667,7 +634,7 @@ public:
 	*/
 	iterator erase(id_type id, bool delayed = false)
 	{
-		return _erase(get_pos_from_id(id), delayed);
+		return _erase(id, delayed);
 	}
 
 	/*!
@@ -679,7 +646,7 @@ public:
 	*/
 	bool exists(id_type id)
 	{
-		return (m_pos.count(id) != 0);
+		return !holes_find(id);
 	}
 
 	/*!
@@ -698,12 +665,13 @@ public:
 		ids.reserve(size());
 
 		if (ordered) {
-			for(auto item : m_pos) {
-				typename std::vector<id_type>::iterator itr = lower_bound(ids.begin(), ids.end(), item.first);
-				ids.insert(itr, item.first);
+			for (auto const &value : *this) {
+				const id_type id = value.get_id();
+				typename std::vector<id_type>::iterator itr = lower_bound(ids.begin(), ids.end(), id);
+				ids.insert(itr, id);
 			}
 		} else {
-			for(auto const &value : *this) {
+			for (auto const &value : *this) {
 				ids.push_back(value.get_id());
 			}
 		}
@@ -716,7 +684,6 @@ public:
 
 		\param value is the value to be copied (or moved) to the
 		            inserted elements.
-		\result An iterator that points to the newly inserted element.
 	*/
 	iterator insert(value_type &&value)
 	{
@@ -863,28 +830,24 @@ public:
 	*/
 	size_type raw_index(id_type id) const
 	{
-		return get_pos_from_id(id);
+		return id;
 	}
 
 	/*!
-		Gets an element from a the first position marked as empty and
-		assignes to it the specified id. Except for setting the id,
-		the element is not modified. Therefore it will still contain
+		Gets an element from a the first position marked as empty.
+		The element is not modified. Therefore it will still contain
 		the data of the element that was previously occupying the
 		position or it will be empty if there was no empty position
 		and a new element has been created.
-
-		\param id is the id that will be assigned to the element
 	*/
-	iterator reclaim(const id_type &id)
+	iterator reclaim()
 	{
-		return _reclaim(FILL_FIRST, id);
+		return _reclaim(FILL_FIRST);
 	}
 
 	/*!
 		Gets an element from the first position marked as empty
-		past the last element assignes to it the specified id.
-		Except for setting the id, the element is not modified.
+		past the last element. The element is not modified.
 		Therefore it will still contain the data of the element
 		that was previously occupying the position or it will be
 		empty if there was no empty position and a new element
@@ -892,9 +855,9 @@ public:
 
 		\param id is the id that will be assigned to the element
 	*/
-	iterator reclaim_back(const id_type &id)
+	iterator reclaim_back()
 	{
-		return _reclaim(FILL_APPEND, id);
+		return _reclaim(FILL_APPEND);
 	}
 
 	/*!
@@ -914,7 +877,7 @@ public:
 	*/
 	size_type extract_flat_index(id_type id) const
 	{
-		size_t pos = get_pos_from_id(id);
+		size_t pos = id;
 		size_t flat = pos - m_first_pos;
 		if (m_holes.size() > 0) {
 			auto holeBound = lower_bound(m_holes.cbegin(), m_holes.cend(), pos);
@@ -940,19 +903,13 @@ public:
 	iterator emreplace(id_type id, Args&&... args)
 	{
 		// Position
-		size_t pos = m_pos.at(id);
-
-		// Id of the element that is currently occupying the position
-		id_type id_prev = m_v[pos].get_id();
+		size_t pos = id;
 
 		// Replace the element
 		m_v[pos] = T(std::forward<Args>(args)...);
 
-		// Update the map
-		if (id != id_prev) {
-			unlink_id(id_prev);
-			link_id(id, pos);
-		}
+		// Set the id
+		m_v[pos].set_id(pos);
 
 		// Return the iterator that points to the element
 		iterator itr;
@@ -971,19 +928,13 @@ public:
 	iterator replace(id_type id, value_type &&value)
 	{
 		// Position
-		size_t pos = m_pos.at(id);
-
-		// Id of the element that is currently occupying the position
-		id_type id_prev = m_v[pos].get_id();
+		size_t pos = id;
 
 		// Replace the element
 		m_v[pos] = std::move(value);
 
-		// Update the map
-		if (id != id_prev) {
-			unlink_id(id_prev);
-			link_id(id, pos);
-		}
+		// Set the id
+		m_v[pos].set_id(pos);
 
 		// Return the iterator that points to the element
 		iterator itr;
@@ -1079,14 +1030,6 @@ public:
 			}
 		}
 
-		// Delete all ids of the elements beyond the updated position
-		// of the last element
-		iterator itr(raw_begin() + updated_last_pos + 1);
-		while (itr != end()) {
-			m_pos.erase((*itr).get_id());
-			itr++;
-		}
-
 		// Delete all holes above the updated last position
 		holes_delete_after(updated_last_pos);
 
@@ -1107,38 +1050,7 @@ public:
 	*/
 	size_type size() const
 	{
-		return m_pos.size();
-	}
-
-
-	/*!
-		Sorts the elements of the vector in ascending id order.
-	*/
-	void sort()
-	{
-		// Flush changes
-		flush();
-
-		// Sort the elements of the vector
-		std::sort(m_v.begin(), m_v.begin() + m_last_pos + 2, less_than_id());
-
-		// Update positions of the ids
-		for (size_type pos = 0; pos <= m_last_pos; pos++) {
-			id_type id = m_v[pos].get_id();
-			m_pos[id] = pos;
-		}
-
-		// Reset first and last counters
-		m_first_pos = 0;
-		m_last_pos  = size() - 1;
-
-		// There are no more holes
-		m_holes.clear();
-		std::deque<size_type>().swap(m_holes);
-
-		// Resize
-		storage_resize(size());
-		m_v.shrink_to_fit();
+		return m_last_pos - m_first_pos + 1 - m_holes.size();
 	}
 
 	/*!
@@ -1150,24 +1062,32 @@ public:
 
 		This may cause a reallocation, but has no effect on the vector
 		size and cannot alter its elements.
+
+		\return A mapper between the old and the new element ids.
 	*/
-	void squeeze()
+	std::vector<id_type> squeeze()
 	{
 		// Flush changes
 		flush();
 
+		// Get the number of the elements
+		size_type nElements = size();
+
 		// Compact the vector
+		std::vector<id_type> mapper(nElements);
 		if (!m_holes.empty()) {
 			// Move the elements
 			size_type offset = 0;
 			size_type nHoles = m_holes.size();
 			for (size_type pos = 0; pos <= m_last_pos; pos++) {
 				if (offset < nHoles && m_holes[offset] == pos) {
+					mapper[pos] = SENTINEL_ID;
 					offset++;
 					continue;
 				}
 
 				if (offset == 0) {
+					mapper[pos] = pos;
 					continue;
 				}
 
@@ -1175,20 +1095,28 @@ public:
 				size_type updatedPos = pos - offset;
 
 				m_v[updatedPos] = std::move(m_v[pos]);
-				m_pos[id] = updatedPos;
+				m_v[updatedPos].set_id(updatedPos);
+
+				mapper[pos] = updatedPos;
 			}
 
 			// Reset first and last counters
 			m_first_pos = 0;
-			m_last_pos  = size() - 1;
+			m_last_pos  = nElements - 1;
 
 			// There are no more holes
 			std::deque<size_type>().swap(m_holes);
+		} else {
+			for (size_type pos = 0; pos <= nElements; pos++) {
+				mapper[pos] = pos;
+			}
 		}
 
 		// Resize
 		storage_resize(size());
 		m_v.shrink_to_fit();
+
+		return mapper;
 	}
 
 	/*!
@@ -1206,14 +1134,13 @@ public:
 		         Alloc) whose content is swapped with that of this
 		         container.
 	*/
-	void swap(PiercedVector& x) noexcept
+	void swap(PositionalPiercedVector& x) noexcept
 	{
 		std::swap(x.m_first_pos, m_first_pos);
 		std::swap(x.m_last_pos, m_last_pos);
 		std::swap(x.m_v, m_v);
 		std::swap(x.m_holes, m_holes);
 		std::swap(x.m_pending_deletes, m_pending_deletes);
-		std::swap(x.m_pos, m_pos);
 	}
 
 	/*!
@@ -1222,7 +1149,7 @@ public:
 
 		\param other vector with the new contents
 	*/
-	PiercedVector& operator=(PiercedVector&& other) = default;
+	PositionalPiercedVector& operator=(PositionalPiercedVector&& other) = default;
 
 	/*!
 		Returns a constant reference to the element with the
@@ -1235,7 +1162,7 @@ public:
 	*/
 	const value_type & operator[](const id_type &id) const
 	{
-		size_type pos = get_pos_from_id(id);
+		size_type pos = id;
 
 		return m_v[pos];
 	}
@@ -1250,7 +1177,7 @@ public:
 	*/
 	value_type & operator[](const id_type &id)
 	{
-		size_type pos = get_pos_from_id(id);
+		size_type pos = id;
 
 		return m_v[pos];
 	}
@@ -1260,17 +1187,17 @@ public:
 	*/
 	struct position_less
 	{
-		position_less(PiercedVector<T> &vector)
+		position_less(PositionalPiercedVector<T> &vector)
 		{
 			m_vector = &vector;
 		}
 
 		bool operator()(const id_type &id_1, const id_type &id_2) const
 		{
-			return m_vector->get_pos_from_id(id_1) < m_vector->get_pos_from_id(id_2);
+			return id_1 < id_2;
 		}
 
-		PiercedVector<T> *m_vector;
+		PositionalPiercedVector<T> *m_vector;
 	};
 
 
@@ -1279,17 +1206,17 @@ public:
 	*/
 	struct position_greater
 	{
-		position_greater(PiercedVector<T> &vector)
+		position_greater(PositionalPiercedVector<T> &vector)
 		{
 			m_vector = &vector;
 		}
 
 		bool operator()(const id_type &id_1, const id_type &id_2) const
 		{
-			return m_vector->get_pos_from_id(id_1) > m_vector->get_pos_from_id(id_2);
+			return id_1 > id_2;
 		}
 
-		PiercedVector<T> *m_vector;
+		PositionalPiercedVector<T> *m_vector;
 	};
 
 private:
@@ -1347,12 +1274,6 @@ private:
 	std::deque<size_type> m_pending_deletes;
 
 	/*!
-		Map that links the id of the elements and their position
-		inside the internal vector.
-	*/
-	std::unordered_map<id_type, size_type, PiercedHasher> m_pos;
-
-	/*!
 		Position of the first element in the internal vector.
 	*/
 	size_type m_first_pos;
@@ -1381,8 +1302,8 @@ private:
 		// Insert the element
 		m_v[pos] = T(std::forward<Args>(args)...);
 
-		// Add the id to the map
-		link_id(m_v[pos].get_id(), pos);
+		// Set the id
+		m_v[pos].set_id(pos);
 
 		// Return the iterator that points to the element
 		iterator itr;
@@ -1406,9 +1327,6 @@ private:
 	*/
 	iterator _erase(size_type pos, bool delayed = false)
 	{
-		// Delete id from map
-		unlink_id(m_v[pos].get_id());
-
 		// Free the position
 		if (delayed) {
 			pending_deletes_add(pos);
@@ -1447,8 +1365,8 @@ private:
 		// Insert the element
 		m_v[pos] = std::move(value);
 
-		// Add the id to the map
-		link_id(m_v[pos].get_id(), pos);
+		// Set the id
+		m_v[pos].set_id(pos);
 
 		// Return the iterator that points to the element
 		iterator itr;
@@ -1458,8 +1376,7 @@ private:
 	}
 
 	/*!
-		Gets an element from a position marked as empty and assignes
-		to it the specified id. Except for setting the id, the element
+		Gets an element from a position marked as empty. The element
 		is not modified. Therefore it will still contain
 		the data of the element that was previously occupying the
 		position or it will be empty if there was no empty position
@@ -1467,19 +1384,15 @@ private:
 
 		\param fillType is the fill-pattern that will be used to
 		identify the position
-		\param id is the id that will be assigned to the element
 		\result An iterator that points to the the reclaimed element.
 	*/
-	iterator _reclaim(FillType fillType, const id_type &id)
+	iterator _reclaim(FillType fillType)
 	{
 		// Position of the element
 		size_type pos = fill_pos(fillType);
 
 		// Set the id of the element
-		m_v[pos].set_id(id);
-
-		// Add the id to the map
-		link_id(m_v[pos].get_id(), pos);
+		m_v[pos].set_id(pos);
 
 		// Return the iterator that points to the element
 		iterator itr;
@@ -1512,22 +1425,6 @@ private:
 		    }
 	    }
 	};
-
-	/*!
-		Gets the position in the storage vector of the element with the
-		specified id.
-
-		If there is no element with the specified id, an exception is
-		thrown.
-
-		\param id the id to look for
-		\result The position in the storage vector of the element with
-		the specified id.
-	*/
-	size_type get_pos_from_id(id_type id) const
-	{
-		return m_pos.at(id);
-	}
 
 	/*!
 		Gets a position in which store an element.
@@ -1665,25 +1562,6 @@ private:
 	}
 
 	/*!
-		Adds the specified id from to the map and link it to the
-		give position.
-
-		\param id is the id that will be added to the list
-		\param pos is the position that will be associated with
-		the id
-	*/
-	void link_id(const id_type id, const size_t pos)
-	{
-		// Elements must have unique id
-		if (exists(id)) {
-			throw std::out_of_range ("Duplicate id");
-		}
-
-		// Add id to the map
-		m_pos[id] = pos;
-	}
-
-	/*!
 		Returns the first non-empty position after the specified
 		starting position.
 
@@ -1808,16 +1686,6 @@ private:
 	}
 
 	/*!
-		Removes the specified id from the map.
-
-		\param id is the id that will be removed from the list
-	*/
-	void unlink_id(const id_type id)
-	{
-		m_pos.erase(id);
-	}
-
-	/*!
 		Returns the first non-empty position before the specified
 		starting position.
 
@@ -1919,19 +1787,17 @@ private:
 
 };
 
-// Definition of static constants of PiercedVector
+// Definition of static constants of PositionalPiercedVector
 template<class T>
-const typename PiercedVector<T>::id_type
-	PiercedVector<T>::SENTINEL_ID = std::numeric_limits<id_type>::min();
+const typename PositionalPiercedVector<T>::id_type
+	PositionalPiercedVector<T>::SENTINEL_ID = std::numeric_limits<id_type>::min();
 
 template<class T>
-const typename PiercedVector<T>::size_type
-	PiercedVector<T>::REQUIRED_SENTINEL_COUNT = 1;
+const typename PositionalPiercedVector<T>::size_type
+	PositionalPiercedVector<T>::REQUIRED_SENTINEL_COUNT = 1;
 
 template<class T>
-const typename PiercedVector<T>::size_type
-	PiercedVector<T>::USABLE_POS_COUNT = std::numeric_limits<size_type>::max() - REQUIRED_SENTINEL_COUNT;
-
-}
+const typename PositionalPiercedVector<T>::size_type
+	PositionalPiercedVector<T>::USABLE_POS_COUNT = std::numeric_limits<size_type>::max() - REQUIRED_SENTINEL_COUNT;
 
 #endif

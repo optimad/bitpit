@@ -1,15 +1,13 @@
 //
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
-#ifndef __PATCHMAN_UTILS_TPP__
-#define __PATCHMAN_UTILS_TPP__
+#ifndef __BITP_MESH_UTILS_TPP__
+#define __BITP_MESH_UTILS_TPP__
 
 /*! \file */
 
 #include <algorithm>
 #include <vector>
-
-namespace pman {
 
 namespace utils {
 
@@ -46,8 +44,6 @@ bool add_to_ordered_vector(const T &value, std::vector<T> &list, Comparator comp
 		return false;
 	}
 };
-
-}
 
 }
 

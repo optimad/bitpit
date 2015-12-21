@@ -1,8 +1,8 @@
 //
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
-#ifndef __PATCHMAN_ELEMENT_HPP__
-#define __PATCHMAN_ELEMENT_HPP__
+#ifndef __BITP_MESH_ELEMENT_HPP__
+#define __BITP_MESH_ELEMENT_HPP__
 
 /*! \file */
 
@@ -12,10 +12,8 @@
 
 #include "binary_stream.hpp"
 
-namespace pman {
-
 /*!
-	\ingroup PatchMan
+	\ingroup Common
 	@{
 */
 
@@ -180,7 +178,5 @@ private:
 /*!
 	@}
 */
-
-}
 
 #endif

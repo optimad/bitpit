@@ -14,15 +14,15 @@
 #include <vtkUnstructuredGrid.h>
 #include <unordered_map>
 
+class Cell;
+class Vertex;
+
 namespace pman {
 
 /*!
 	\ingroup PatchMan
 	@{
 */
-
-class Cell;
-class Vertex;
 
 class OutputManager : public vtkUnstructuredGrid {
 
@@ -61,7 +61,7 @@ public:
 	vtkTypeMacro(OutputManager, vtkUnstructuredGrid);
 
 	vtkIdType InsertNextCell(const Cell &cell, std::unordered_map<long, vtkIdType> &vertexMap);
-	vtkIdType InsertNextVertex(const pman::Vertex &vertex);
+	vtkIdType InsertNextVertex(const ::Vertex &vertex);
 
 	void resetFields();
 	int addField(int fieldType, const char* fieldName);

@@ -2,12 +2,10 @@
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
 
-#define __PATCHMAN_UTILS_SRC__
+#define __BITP_MESH_UTILS_SRC__
 
 #include "utils.hpp"
 #include "utils.tpp"
-
-namespace pman {
 
 namespace utils {
 
@@ -64,8 +62,6 @@ void transpose_3D(std::array<std::array<double, 3>, 3> &A)
 			A[j][i] = tmp;
 		}
 	}
-}
-
 }
 
 }

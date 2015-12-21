@@ -6,10 +6,8 @@
 
 #include <limits>
 
-namespace pman {
-
 /*!
-	\ingroup PatchMan
+	\ingroup Common
 	@{
 */
 
@@ -162,5 +160,3 @@ ibinarystream& operator>>(ibinarystream &in_stream, Vertex &vertex)
 /*!
 	@}
 */
-
-}

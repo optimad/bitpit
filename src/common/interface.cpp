@@ -8,10 +8,8 @@
 #include "interface.hpp"
 #include "utils.hpp"
 
-namespace pman {
-
 /*!
-	\ingroup PatchMan
+	\ingroup Common
 	@{
 */
 
@@ -276,5 +274,3 @@ std::array<long, 2> Interface::get_owner_neigh() const
 /*!
 	@}
 */
-
-}

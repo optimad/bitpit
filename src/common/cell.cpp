@@ -8,10 +8,8 @@
 
 #include<iostream>
 
-namespace pman {
-
 /*!
-	\ingroup PatchMan
+	\ingroup Common
 	@{
 */
 
@@ -321,5 +319,3 @@ unsigned int Cell::get_binary_size()
 /*!
 	@}
 */
-
-}

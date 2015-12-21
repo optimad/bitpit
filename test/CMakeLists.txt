@@ -30,6 +30,7 @@ endif()
 set(TEST_LIST "${TESTS}" CACHE INTERNAL "List of serial tests" FORCE)
 set(PARALLELTEST_LIST "${PARALLEL_TESTS}" CACHE INTERNAL "List of parallel tests" FORCE)
 
+include_directories("${PROJECT_SOURCE_DIR}/src/common")
 include_directories("${PROJECT_SOURCE_DIR}/src/ucartmesh")
 include_directories("${PROJECT_SOURCE_DIR}/src/surftri")
 include_directories("${PROJECT_SOURCE_DIR}/src/voltri")

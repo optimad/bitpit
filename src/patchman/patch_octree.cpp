@@ -1205,7 +1205,7 @@ long PatchOctree::create_cell(OctantInfo octantInfo,
 			long interfaceId   = interfaces[face][k];
 			bool ownsInterface = ownerFlags[face][k];
 
-			pman::Interface &interface = m_interfaces[interfaceId];
+			Interface &interface = m_interfaces[interfaceId];
 			if (ownsInterface) {
 				interface.set_owner(id, face);
 			} else {

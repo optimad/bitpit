@@ -1,5 +1,5 @@
-#ifndef __PATCHMAN_BINARY_STREAM_HPP__
-#define __PATCHMAN_BINARY_STREAM_HPP__
+#ifndef __BITP_MESH_BINARY_STREAM_HPP__
+#define __BITP_MESH_BINARY_STREAM_HPP__
 
 // ========================================================================== //
 // INCLUDES                                                                   //

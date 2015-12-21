@@ -8,17 +8,17 @@
 #include "patch.hpp"
 #include "utils.hpp"
 
+// Explicit instantiation of the PiercedVectors
+template class PiercedVector<Cell>;
+template class PiercedVector<Interface>;
+template class PiercedVector<Vertex>;
+
 namespace pman {
 
 /*!
 	\ingroup PatchMan
 	@{
 */
-
-// Explicit instantiation of the PiercedVectors
-template class PiercedVector<Cell>;
-template class PiercedVector<Interface>;
-template class PiercedVector<Vertex>;
 
 /*!
 	\class Patch
