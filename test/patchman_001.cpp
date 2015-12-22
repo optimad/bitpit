@@ -6,8 +6,11 @@
 
 #include "BitP_Mesh_PATCHMAN.hpp"
 
-//-------------------------------------------------------------------------------
-void test0() {
+int main(int argc, char *argv[]) {
+
+#ifndef DISABLE_MPI
+	MPI::Init(argc,argv);
+#endif
 
 	std::cout << "Testing Cartesian mesh" << "\n";
 
@@ -101,27 +104,8 @@ void test0() {
 
 	delete patch_3D;
 
-    return ;
-
-}
-
-
-//-------------------------------------------------------------------------------
-int main(int argc, char *argv[]) {
-
-	std::cout << "Testing Cartesian mesh" << "\n";
-
-#ifndef DISABLE_MPI
-	MPI::Init(argc,argv);
-#endif
-
-    test0() ;
-
 #ifndef DISABLE_MPI
 	MPI::Finalize();
 #endif
 
 }
-
-
-
