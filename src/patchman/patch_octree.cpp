@@ -36,16 +36,11 @@ PatchOctree::PatchOctree(const int &id, const int &dimension,
 	// Inizializzazione dell'octree
 	double initial_level = ceil(log2(std::max(1., length / dh)));
 
-	m_tree = classParaTree(origin[0], origin[1], origin[2], length, get_dimension());
+	m_tree = ClassParaTree(origin[0], origin[1], origin[2], length, get_dimension());
 	m_tree.setMarker((uint32_t) 0, initial_level);
 
 	// Info sull'octree
-	int maxLevels;
-	if (is_three_dimensional()) {
-		maxLevels = 32;
-	} else {
-		maxLevels = 32;
-	}
+	int maxLevels = m_tree.getMaxLevel();
 
 	m_tree_dh.reserve(maxLevels);
 	m_tree_area.reserve(maxLevels);
@@ -57,16 +52,6 @@ PatchOctree::PatchOctree(const int &id, const int &dimension,
 	    m_tree_area.push_back(pow(levelLength, (double) (get_dimension() - 1)));
 	    m_tree_volume.push_back(pow(levelLength, (double) (get_dimension())));
 	};
-
-	// Inizializzazione dell'octree
-	double initial_level = ceil(log2(max(1., length / dh)));
-	if (is_three_dimensional()) {
-		m_tree_3D = Class_Para_Tree<3>(origin[0], origin[1], origin[2], length);
-		m_tree_3D.setMarker((uint32_t) 0, initial_level);
-	} else {
-		m_tree_2D = Class_Para_Tree<2>(origin[0], origin[1], origin[2], length);
-		m_tree_2D.setMarker((uint32_t) 0, initial_level);
-	}
 
 	// Info sulle interfacce
 	for (int i = 0; i < dimension; i++) {
@@ -110,31 +95,14 @@ std::array<double, 3> PatchOctree::eval_cell_centroid(const long &id)
 {
 	OctantInfo octantInfo = get_cell_octant(id);
 
-	vector<double> octantCentroid;
-	if (is_three_dimensional()) {
-		Class_Octant<3> *octant;
-		if (octantInfo.internal) {
-			octant = m_tree_3D.getOctant(octantInfo.id);
-		} else {
-			octant = m_tree_3D.getGhostOctant(octantInfo.id);
-		}
-		octantCentroid = m_tree_3D.getCenter(octant);
+	ClassOctant *octant;
+	if (octantInfo.internal) {
+		octant = m_tree.getOctant(octantInfo.id);
 	} else {
-		Class_Octant<2> *octant;
-		if (octantInfo.internal) {
-			octant = m_tree_2D.getOctant(octantInfo.id);
-		} else {
-			octant = m_tree_2D.getGhostOctant(octantInfo.id);
-		}
-		octantCentroid = m_tree_2D.getCenter(octant);
+		octant = m_tree.getGhostOctant(octantInfo.id);
 	}
 
-	std::array<double, 3> centroid;
-	for (unsigned int k = 0; k < centroid.size(); k++) {
-		centroid[k] = octantCentroid[k];
-	}
-
-	return centroid;
+	return m_tree.getCenter(octant);
 }
 
 /*!
@@ -199,6 +167,16 @@ PatchOctree::OctantInfo PatchOctree::get_cell_octant(const long &id) const
 }
 
 /*!
+	\brief Gets a reference to the octree associated with the patch.
+
+	\result A reference to the octree associated to the patch.
+*/
+ClassParaTree & PatchOctree::get_tree()
+{
+	return m_tree;
+}
+
+/*!
 	Gets the id of the specified octant.
 
 	\param octantInfo the data of the octant
@@ -230,20 +208,11 @@ long PatchOctree::get_octant_id(const OctantInfo &octantInfo) const
 */
 const std::vector<uint32_t> & PatchOctree::get_octant_connect(const OctantInfo &octantInfo)
 {
-	if (is_three_dimensional()) {
-		bool isGhost = m_tree_3D.getIsGhost(octantInfo.id);
-		if (!isGhost) {
-			return m_tree_3D.getConnectivity()[octantInfo.id];
-		} else {
-			return m_tree_3D.getGhostConnectivity()[octantInfo.id];
-		}
+	bool isGhost = m_tree.getIsGhost(octantInfo.id);
+	if (!isGhost) {
+		return m_tree.getConnectivity()[octantInfo.id];
 	} else {
-		bool isGhost = m_tree_2D.getIsGhost(octantInfo.id);
-		if (!isGhost) {
-			return m_tree_2D.getConnectivity()[octantInfo.id];
-		} else {
-			return m_tree_2D.getGhostConnectivity()[octantInfo.id];
-		}
+		return m_tree.getGhostConnectivity()[octantInfo.id];
 	}
 }
 
@@ -255,17 +224,8 @@ const std::vector<uint32_t> & PatchOctree::get_octant_connect(const OctantInfo &
 */
 PatchOctree::OctantHash PatchOctree::evaluate_octant_hash(const OctantInfo &octantInfo)
 {
-	uint8_t level;
-	uint64_t morton;
-	if (is_three_dimensional()) {
-		Class_Octant<3> *octant = m_tree_3D.getOctant(octantInfo.id);
-		level  = octant->getLevel();
-		morton = octant->computeMorton();
-	} else {
-		Class_Octant<2> *octant = m_tree_2D.getOctant(octantInfo.id);
-		level  = octant->getLevel();
-		morton = octant->computeMorton();
-	}
+	uint8_t level   = m_tree.getLevel(octantInfo.id);
+	uint64_t morton = m_tree.computeMorton(octantInfo.id);
 
 	OctantHash octantHash;
 	octantHash |= morton;
@@ -284,23 +244,14 @@ PatchOctree::OctantHash PatchOctree::evaluate_octant_hash(const OctantInfo &octa
 int PatchOctree::get_cell_level(const long &id)
 {
 	OctantInfo octantInfo = get_cell_octant(id);
-	if (is_three_dimensional()) {
-		Class_Octant<3> *octant;
-		if (m_tree_3D.getIsGhost(octantInfo.id)) {
-			octant = m_tree_3D.getGhostOctant(octantInfo.id);
-		} else {
-			octant = m_tree_3D.getOctant(octantInfo.id);
-		}
-		return m_tree_3D.getLevel(octant);
+
+	ClassOctant *octant;
+	if (m_tree.getIsGhost(octantInfo.id)) {
+		octant = m_tree.getGhostOctant(octantInfo.id);
 	} else {
-		Class_Octant<2> *octant;
-		if (m_tree_2D.getIsGhost(octantInfo.id)) {
-			octant = m_tree_2D.getGhostOctant(octantInfo.id);
-		} else {
-			octant = m_tree_2D.getOctant(octantInfo.id);
-		}
-		return m_tree_2D.getLevel(octant);
+		octant = m_tree.getOctant(octantInfo.id);
 	}
+	return m_tree.getLevel(octant);
 }
 
 /*!
@@ -314,16 +265,13 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 		return std::vector<Adaption::Info>();
 	}
 
+	// Check if the mesh is currently empty
+	bool initiallyEmpty = (get_cell_count() == 0);
+
 	// Updating the tree
 	std::cout << ">> Adapting tree...";
 
-	bool updated;
-	if (is_three_dimensional()) {
-		updated = m_tree_3D.adapt(true);
-	} else {
-		updated = m_tree_2D.adapt(true);
-	}
-
+	bool updated = m_tree.adapt(!initiallyEmpty);
 	if (!updated) {
 		std::cout << " Already updated" << std::endl;
 
@@ -333,44 +281,26 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 	std::cout << " Done" << std::endl;
 
 	// Info on the tree
-	long nOctants;
-	if (is_three_dimensional()) {
-		nOctants = m_tree_3D.getNumOctants();
-	} else {
-		nOctants = m_tree_2D.getNumOctants();
-	}
+	long nOctants = m_tree.getNumOctants();
 	long nPreviousOctants = m_octant_to_cell.size();
 
 	std::cout << ">> Number of octants : " << nOctants << std::endl;
 
 	// Info on the tree
-	long nGhostsOctants;
-	if (is_three_dimensional()) {
-		nGhostsOctants = m_tree_3D.getNumGhosts();
-	} else {
-		nGhostsOctants = m_tree_2D.getNumGhosts();
-	}
+	long nGhostsOctants = m_tree.getNumGhosts();
 	long nPreviousGhosts = m_ghost_to_cell.size();
 
 	// Evaluate tree conenctivity
 	std::cout << ">> Evaluating Octree connectivity...";
 
-	if (is_three_dimensional()) {
-		m_tree_3D.computeConnectivity();
-	} else {
-		m_tree_2D.computeConnectivity();
-	}
+	m_tree.computeConnectivity();
 
 	std::cout << " Done" << std::endl;
 
 	// Initialize intersections
 	std::cout << ">> Evaluating Octree intersections...";
 
-	if (is_three_dimensional()) {
-		m_tree_3D.computeIntersections();
-	} else {
-		m_tree_2D.computeIntersections();
-	}
+	m_tree.computeIntersections();
 
 	std::cout << " Done" << std::endl;
 
@@ -393,39 +323,24 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 	removedCells.reserve(nPreviousOctants + nPreviousGhosts);
 
 	uint32_t treeId = 0;
-	bool allNew = (get_cell_count() == 0);
 	while (treeId < (uint32_t) nOctants) {
 		// Octant mapping
 		std::vector<uint32_t> mapper_octantMap;
 		std::vector<bool> mapper_ghostFlag;
-		if (is_three_dimensional()) {
-			m_tree_3D.getMapping(treeId, mapper_octantMap, mapper_ghostFlag);
-		} else {
-			m_tree_2D.getMapping(treeId, mapper_octantMap, mapper_ghostFlag);
+		if (!initiallyEmpty) {
+			m_tree.getMapping(treeId, mapper_octantMap, mapper_ghostFlag);
 		}
 
 		// Adaption type
 		Adaption::Type adaptionType;
-		if (allNew) {
+		if (initiallyEmpty) {
 			adaptionType = Adaption::TYPE_CREATION;
 		} else {
-			bool isNewR;
-			if (is_three_dimensional()) {
-				isNewR = m_tree_3D.getIsNewR(treeId);
-			} else {
-				isNewR = m_tree_2D.getIsNewR(treeId);
-			}
-
+			bool isNewR = m_tree.getIsNewR(treeId);
 			if (isNewR) {
 				adaptionType = Adaption::TYPE_REFINEMENT;
 			} else {
-				bool isNewC;
-				if (is_three_dimensional()) {
-					isNewC = m_tree_3D.getIsNewC(treeId);
-				} else {
-					isNewC = m_tree_2D.getIsNewC(treeId);
-				}
-
+				bool isNewC = m_tree.getIsNewC(treeId);
 				if (isNewC) {
 					adaptionType = Adaption::TYPE_COARSENING;
 				} else if (treeId != mapper_octantMap.front()) {
@@ -463,7 +378,7 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 
 		// Current tree ids that will be imported
 		long nCurrentTreeIds;
-		if (allNew) {
+		if (initiallyEmpty) {
 			nCurrentTreeIds = nOctants - treeId;
 		} else if (adaptionType == Adaption::TYPE_REFINEMENT) {
 			nCurrentTreeIds = pow(2, get_dimension());
@@ -719,11 +634,7 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 	}
 
 	// Delete tree conenctivity
-	if (is_three_dimensional()) {
-		m_tree_3D.clearConnectivity();
-	} else {
-		m_tree_2D.clearConnectivity();
-	}
+	m_tree.clearConnectivity();
 
 	// Done
 	return adaptionData;
@@ -773,12 +684,7 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 	const ElementInfo &interfaceTypeInfo = ElementInfo::get_element_info(interfaceType);
 	const int &nInterfaceVertices = interfaceTypeInfo.nVertices;
 
-	uint32_t nIntersections;
-	if (is_three_dimensional()) {
-		nIntersections = m_tree_3D.getNumIntersections();
-	} else {
-		nIntersections = m_tree_2D.getNumIntersections();
-	}
+	uint32_t nIntersections = m_tree.getNumIntersections();
 
 	std::vector<unsigned long> createdInterfaces;
 	createdInterfaces.reserve(nCellFaces * octantInfoList.size());
@@ -848,35 +754,18 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 		}
 
 		// Info on the interface
-		vector<uint32_t> cells;
-		int owner;
-		int ownerFace;
-		bool isBoundary;
-		bool isGhost;
-		Class_Intersection<2> *treeInterface_2D;
-		Class_Intersection<3> *treeInterface_3D;
-		if (is_three_dimensional()) {
-			treeInterface_3D = m_tree_3D.getIntersection(interfaceTreeId);
+		ClassIntersection *treeInterface = m_tree.getIntersection(interfaceTreeId);
 
-			cells      = m_tree_3D.getOwners(treeInterface_3D);
-			owner      = m_tree_3D.getFiner(treeInterface_3D);
-			ownerFace  = m_tree_3D.getFace(treeInterface_3D);
-			isBoundary = m_tree_3D.getBound(treeInterface_3D);
-			isGhost    = m_tree_3D.getIsGhost(treeInterface_3D);
-		} else {
-			treeInterface_2D = m_tree_2D.getIntersection(interfaceTreeId);
-
-			cells      = m_tree_2D.getOwners(treeInterface_2D);
-			owner      = m_tree_2D.getFiner(treeInterface_2D);
-			ownerFace  = m_tree_2D.getFace(treeInterface_2D);
-			isBoundary = m_tree_2D.getBound(treeInterface_2D);
-			isGhost    = m_tree_2D.getIsGhost(treeInterface_2D);
-		}
+		int owner       = m_tree.getOut(treeInterface);
+		int ownerFace   = m_tree.getFace(treeInterface);
+		int neigh       = m_tree.getIn(treeInterface);
+		bool isBoundary = m_tree.getBound(treeInterface);
+		bool isGhost    = m_tree.getIsGhost(treeInterface);
 
 		// Decide if we need to build the interface
 		bool createInterface = false;
 
-		OctantInfo ownerOctantInfo(cells[owner], true);
+		OctantInfo ownerOctantInfo(owner, true);
 		long ownerId = get_octant_id(ownerOctantInfo);
 		if (ownerId == Element::NULL_ELEMENT_ID) {
 			octantTreeInterfaces[ownerOctantInfo.id].push_back(interfaceTreeId);
@@ -885,7 +774,7 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 
 		long neighId = Element::NULL_ELEMENT_ID;
 		if (!isBoundary) {
-			OctantInfo neighOctantInfo(cells[!owner], !isGhost);
+			OctantInfo neighOctantInfo(neigh, !isGhost);
 			neighId = get_octant_id(neighOctantInfo);
 			if (neighId == Element::NULL_ELEMENT_ID) {
 				octantTreeInterfaces[neighOctantInfo.id].push_back(interfaceTreeId);
@@ -966,22 +855,9 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 			const long &interfaceId = interfaceMap.at(interfaceTreeId);
 			const Interface &interface = m_interfaces[interfaceId];
 
-			vector<uint32_t> cells;
-			int owner;
-			Class_Intersection<2> *treeInterface_2D;
-			Class_Intersection<3> *treeInterface_3D;
-			if (is_three_dimensional()) {
-				treeInterface_3D = m_tree_3D.getIntersection(interfaceTreeId);
-
-				cells      = m_tree_3D.getOwners(treeInterface_3D);
-				owner      = m_tree_3D.getFiner(treeInterface_3D);
-			} else {
-				treeInterface_2D = m_tree_2D.getIntersection(interfaceTreeId);
-
-				cells      = m_tree_2D.getOwners(treeInterface_2D);
-				owner      = m_tree_2D.getFiner(treeInterface_2D);
-			}
-			bool ownerFlag = (cells[owner] == octantInfo.id);
+			ClassIntersection *treeInterface = m_tree.getIntersection(interfaceTreeId);
+			int owner = m_tree.getOut(treeInterface);
+			bool ownerFlag = (owner == octantInfo.id);
 
 			int cellFace;
 			if (ownerFlag) {
@@ -1130,16 +1006,8 @@ long PatchOctree::create_vertex(uint32_t treeId)
 	Vertex &vertex = m_vertices[id];
 
 	// Coordinate
-	vector<double> nodeCoords;
-	if (is_three_dimensional()) {
-		nodeCoords = m_tree_3D.getNodeCoordinates(treeId);
-	} else {
-		nodeCoords = m_tree_2D.getNodeCoordinates(treeId);
-	}
-
-	std::array<double, 3> coords;
-	std::copy_n(nodeCoords.data(), coords.size(), coords.data());
-	vertex.set_coords(coords);
+	std::array<double, 3> nodeCoords = m_tree.getNodeCoordinates(treeId);
+	vertex.set_coords(nodeCoords);
 
 	// Done
 	return id;
@@ -1222,7 +1090,7 @@ long PatchOctree::create_cell(OctantInfo octantInfo,
 	cell.initialize_interfaces(interfaces);
 
 	// Update cell to octant mapping
-	if (internal) {
+	if (octantInfo.internal) {
 		m_cell_to_octant.insert({{id, octantInfo.id}});
 		m_octant_to_cell.insert({{octantInfo.id, id}});
 	} else {
@@ -1305,11 +1173,7 @@ bool PatchOctree::set_marker(const long &id, const int8_t &value)
 		return false;
 	}
 
-	if (is_three_dimensional()) {
-		m_tree_3D.setMarker(octantInfo.id, value);
-	} else {
-		m_tree_2D.setMarker(octantInfo.id, value);
-	}
+	m_tree.setMarker(octantInfo.id, value);
 
 	return true;
 }
@@ -1327,11 +1191,7 @@ bool PatchOctree::_enable_cell_balancing(const long &id, bool enabled)
 		return false;
 	}
 
-	if (is_three_dimensional()) {
-		m_tree_3D.setBalance(octantInfo.id, enabled);
-	} else {
-		m_tree_2D.setBalance(octantInfo.id, enabled);
-	}
+	m_tree.setBalance(octantInfo.id, enabled);
 
 	return true;
 }

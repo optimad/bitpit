@@ -9,7 +9,7 @@
 
 #include "patch.hpp"
 
-#include "Class_Para_Tree.hpp"
+#include "ClassParaTree.hpp"
 
 #include <assert.h>
 #include <deque>
@@ -60,24 +60,7 @@ public:
 	long get_octant_id(const OctantInfo &octantInfo) const;
 	const std::vector<uint32_t> & get_octant_connect(const OctantInfo &octantInfo);
 
-	/*!
-		\brief Gets the octree associated with the patch.
-
-		\tparam dimension is the dimension of the octree. It MUST match the dimension
-		of the patch.
-		\result A pointer to the octree associated to the patch.
-	*/
-	template<int dimension>
-	Class_Para_Tree<dimension> * get_tree()
-	{
-		assert(dimension == get_dimension());
-
-		if (dimension == 2) {
-			return dynamic_cast<Class_Para_Tree<dimension> *>(&m_tree_2D);
-		} else {
-			return dynamic_cast<Class_Para_Tree<dimension> *>(&m_tree_3D);
-		}
-	}
+	ClassParaTree & get_tree();
 
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
@@ -119,8 +102,7 @@ private:
 	std::unordered_map<uint32_t, long> m_octant_to_cell;
 	std::unordered_map<uint32_t, long> m_ghost_to_cell;
 
-	Class_Para_Tree<2> m_tree_2D;
-	Class_Para_Tree<3> m_tree_3D;
+	ClassParaTree m_tree;
 
 	std::vector<double> m_tree_dh;
 	std::vector<double> m_tree_area;
