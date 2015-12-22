@@ -3747,7 +3747,7 @@ void classLocalTree::findNodeNeighbours(classOctant* oct,
 						//						Dhyref = int32_t(cy<0)*ghosts[idxtry].getSize(global.MAX_LEVEL) + int32_t(cy>0)*size;
 						//						Dhzref = int32_t(cz<0)*ghosts[idxtry].getSize(global.MAX_LEVEL) + int32_t(cz>0)*size;
 						for (int idim=0; idim<dim; idim++){
-							Dx[idim] 		= abs(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
+							Dx[idim] 		= abs(int((abs(cxyz[idim]))*(-coord[idim] + coordtry[idim])));
 							Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(ghosts[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[idim]+1)/2)*size;
 							coord1[idim] 	= coord[idim] + size;
 							coordtry1[idim] = coordtry[idim] + ghosts[idxtry].getSize(global.MAX_LEVEL);
@@ -3841,7 +3841,7 @@ void classLocalTree::findNodeNeighbours(classOctant* oct,
 					//					Dhyref = int32_t(cy<0)*octants[idxtry].getSize(global.MAX_LEVEL) + int32_t(cy>0)*size;
 					//					Dhzref = int32_t(cz<0)*octants[idxtry].getSize(global.MAX_LEVEL) + int32_t(cz>0)*size;
 					for (int idim=0; idim<dim; idim++){
-						Dx[idim] 		= abs(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
+						Dx[idim] 		= abs(int((abs(cxyz[idim]))*(-coord[idim] + coordtry[idim])));
 						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[idim]+1)/2)*size;
 						coord1[idim] 	= coord[idim] + size;
 						coordtry1[idim] = coordtry[idim] + octants[idxtry].getSize(global.MAX_LEVEL);
@@ -3999,7 +3999,7 @@ void classLocalTree::findNodeNeighbours(uint32_t idx,
 						//						Dhyref = int32_t(cy<0)*ghosts[idxtry].getSize(global.MAX_LEVEL) + int32_t(cy>0)*size;
 						//						Dhzref = int32_t(cz<0)*ghosts[idxtry].getSize(global.MAX_LEVEL) + int32_t(cz>0)*size;
 						for (int idim=0; idim<dim; idim++){
-							Dx[idim] 		= abs(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
+							Dx[idim] 		= abs(int((abs(cxyz[idim]))*(-coord[idim] + coordtry[idim])));
 							Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(ghosts[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[idim]+1)/2)*size;
 							coord1[idim] 	= coord[idim] + size;
 							coordtry1[idim] = coordtry[idim] + ghosts[idxtry].getSize(global.MAX_LEVEL);
@@ -4093,7 +4093,7 @@ void classLocalTree::findNodeNeighbours(uint32_t idx,
 					//					Dhyref = int32_t(cy<0)*octants[idxtry].getSize(global.MAX_LEVEL) + int32_t(cy>0)*size;
 					//					Dhzref = int32_t(cz<0)*octants[idxtry].getSize(global.MAX_LEVEL) + int32_t(cz>0)*size;
 					for (int idim=0; idim<dim; idim++){
-						Dx[idim] 		= abs(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
+						Dx[idim] 		= abs(int((abs(cxyz[idim]))*(-coord[idim] + coordtry[idim])));
 						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[idim]+1)/2)*size;
 						coord1[idim] 	= coord[idim] + size;
 						coordtry1[idim] = coordtry[idim] + octants[idxtry].getSize(global.MAX_LEVEL);
@@ -4224,7 +4224,7 @@ void classLocalTree::findGhostNodeNeighbours(uint32_t idx,
 					//				Dhyref = int32_t(cy<0)*octants[idxtry].getSize(global.MAX_LEVEL) + int32_t(cy>0)*size;
 					//				Dhzref = int32_t(cz<0)*octants[idxtry].getSize(global.MAX_LEVEL) + int32_t(cz>0)*size;
 					for (int idim=0; idim<dim; idim++){
-						Dx[idim] 		= abs(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
+						Dx[idim] 		= abs(int((abs(cxyz[idim]))*(-coord[idim] + coordtry[idim])));
 						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(octants[idxtry].getSize(global.MAX_LEVEL)) + int32_t((cxyz[idim]+1)/2)*size;
 						coord1[idim] 	= coord[idim] + size;
 						coordtry1[idim] = coordtry[idim] + octants[idxtry].getSize(global.MAX_LEVEL);

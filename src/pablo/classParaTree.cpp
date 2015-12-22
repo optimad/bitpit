@@ -124,22 +124,23 @@ classParaTree::classParaTree(double X, double Y, double Z, double L, uint8_t dim
  * \param[in] logfile The file name for the log of this object. PABLO.log is the default value
  */
 #if NOMPI==0
-classParaTree::classParaTree(double X, double Y, double Z, double L, u32vector2D & XY, u8vector & levels, uint8_t dim_, int8_t maxlevel, string logfile, MPI_Comm comm_):trans(X,Y,Z,L,maxlevel,dim_),log(logfile,comm_),comm(comm_),octree(maxlevel,dim_){
+classParaTree::classParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim_, int8_t maxlevel, string logfile, MPI_Comm comm_):trans(X,Y,Z,L,maxlevel,dim_),log(logfile,comm_),comm(comm_),octree(maxlevel,dim_){
 #else
-classParaTree::classParaTree(double X, double Y, double Z, double L, u32vector2D & XY, u8vector & levels, uint8_t dim_, int8_t maxlevel, string logfile):trans(X,Y,Z,L,maxlevel,dim_),log(logfile),octree(maxlevel,dim_){
+classParaTree::classParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim_, int8_t maxlevel, string logfile):trans(X,Y,Z,L,maxlevel,dim_),log(logfile),octree(maxlevel,dim_){
 #endif
 	uint8_t lev, iface;
-	uint32_t x0, y0;
-	uint32_t NumOctants = XY.size();
+	uint32_t x0, y0, z0;
+	uint32_t NumOctants = XYZ.size();
 	dim = dim_;
 	global.setGlobal(maxlevel, dim);
 	octree.octants.resize(NumOctants);
 	for (uint32_t i=0; i<NumOctants; i++){
 		lev = uint8_t(levels[i]);
-		x0 = uint32_t(XY[i][0]);
-		y0 = uint32_t(XY[i][1]);
+		x0 = uint32_t(XYZ[i][0]);
+        y0 = uint32_t(XYZ[i][1]);
+        z0 = uint32_t(XYZ[i][2]);
 		//Class_Octant<2> oct(lev, x0, y0,false);
-		classOctant oct(false, dim, lev, x0, y0);
+		classOctant oct(false, dim, lev, x0, y0, z0);
 		oct.setBalance(false);
 		if (x0 == 0){
 			iface = 0;
@@ -149,14 +150,22 @@ classParaTree::classParaTree(double X, double Y, double Z, double L, u32vector2D
 			iface = 1;
 			oct.setBound(iface);
 		}
-		if (y0 == 0){
-			iface = 2;
-			oct.setBound(iface);
-		}
-		else if (y0 == global.max_length - oct.getSize(global.MAX_LEVEL)){
-			iface = 3;
-			oct.setBound(iface);
-		}
+        if (y0 == 0){
+            iface = 2;
+            oct.setBound(iface);
+        }
+        else if (y0 == global.max_length - oct.getSize(global.MAX_LEVEL)){
+            iface = 3;
+            oct.setBound(iface);
+        }
+        if (z0 == 0){
+            iface = 4;
+            oct.setBound(iface);
+        }
+        else if (z0 == global.max_length - oct.getSize(global.MAX_LEVEL)){
+            iface = 5;
+            oct.setBound(iface);
+        }
 		octree.octants[i] = oct;
 	}
 
@@ -2211,7 +2220,7 @@ void classParaTree::loadBalance(){
 				error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&pos,&z,1,MPI_UINT32_T,comm);
 				error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&pos,&l,1,MPI_UINT8_T,comm);
 				//octree.octants[newCounter] = Class_Octant<2>(l,x,y);
-				octree.octants[newCounter] = classOctant(dim,l,x,y);
+				octree.octants[newCounter] = classOctant(dim,l,x,y,z);
 				error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&pos,&m,1,MPI_INT8_T,comm);
 				octree.octants[newCounter].setMarker(m);
 				for(int j = 0; j < 17; ++j){
@@ -2632,7 +2641,7 @@ void classParaTree::loadBalance(uint8_t & level){
 				error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&pos,&z,1,MPI_UINT32_T,comm);
 				error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&pos,&l,1,MPI_UINT8_T,comm);
 				//octree.octants[newCounter] = Class_Octant<2>(l,x,y);
-				octree.octants[newCounter] = classOctant(dim,l,x,y);
+				octree.octants[newCounter] = classOctant(dim,l,x,y,z);
 				error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&pos,&m,1,MPI_INT8_T,comm);
 				octree.octants[newCounter].setMarker(m);
 				for(int j = 0; j < 17; ++j){
@@ -3285,16 +3294,17 @@ void classParaTree::setPboundGhosts() {
 	for(classLocalTree::octvector::iterator it = begin; it != end; ++it){
 		set<int> procs;
 		//if (rank!=0) cout << rank << " border face " << endl;
-		//if (rank!=0) cout << "oct " << count << " info " << it->info << endl;
+        //if (rank!=0 && it->getZ()==0) cout << "oct " << count << " info " << it->info << endl;
+        //if (rank!=0 && it->getZ()==0) cout << it->getX() << " " << it->getY() << "  " << it->getZ() << endl;
 		//Virtual Face Neighbors
 		for(uint8_t i = 0; i < global.nfaces; ++i){
 			if(it->getBound(i) == false){
-				//if (rank!=0) cout << "oct " << count << " face " << int(i) << " bound " << it->getBound(i) << endl;
+				//if (rank!=0 && it->getZ()==0) cout << "oct " << count << " face " << int(i) << " bound " << it->getBound(i) << endl;
 				uint32_t virtualNeighborsSize = 0;
 				vector<uint64_t> virtualNeighbors = it->computeVirtualMorton(i,max_depth,virtualNeighborsSize,global.MAX_LEVEL);
 				uint32_t maxDelta = virtualNeighborsSize/2;
 				for(uint32_t j = 0; j <= maxDelta; ++j){
-					//if (rank!=0) cout << "oct " << count << " j " << j << " face " << int(i) << " searching for pBegin " << virtualNeighbors[j] << endl;
+					//if (rank!=0 && it->getZ()==0) cout << "oct " << count << " j " << j << " face " << int(i) << " searching for pBegin " << virtualNeighbors[j] << endl;
 					int pBegin = findOwner(virtualNeighbors[j]);
 					//if (rank!=0) cout << j << " pBegin " << pBegin << endl;
 					//if (rank!=0) cout << j << " searching for pEnd " << virtualNeighbors[virtualNeighborsSize - 1 - j] << endl;
@@ -3311,7 +3321,7 @@ void classParaTree::setPboundGhosts() {
 				}
 			}
 		}
-		 if (rank!=0) cout << rank << " border edge " << endl;
+		// if (rank!=0) cout << rank << " border edge " << endl;
 		//Virtual Edge Neighbors
 		for(uint8_t e = 0; e < global.nedges; ++e){
 			uint32_t virtualEdgeNeighborSize = 0;
@@ -3326,7 +3336,7 @@ void classParaTree::setPboundGhosts() {
 				}
 			}
 		}
-		if (rank!=0) cout << rank << " border corner " << endl;
+		//if (rank!=0) cout << rank << " border corner " << endl;
 		//Virtual Corner Neighbors
 		for(uint8_t c = 0; c < global.nnodes; ++c){
 			if(!it->getBound(global.nodeface[c][0]) && !it->getBound(global.nodeface[c][1])){
@@ -3353,11 +3363,11 @@ void classParaTree::setPboundGhosts() {
 		count++;
 	}
 
-	cout << rank << " border end " << endl;
+	//cout << rank << " border end " << endl;
 
 	MPI_Barrier(comm);
 
-		cout << rank << " pack " << endl;
+	//	cout << rank << " pack " << endl;
 	//PACK (mpi) BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
 	//it visits every element in bordersPerProc (one for every neighbor proc)
 	//for every element it visits the border octants it contains and pack them in a new structure, sendBuffers
@@ -3471,7 +3481,7 @@ void classParaTree::setPboundGhosts() {
 			error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&z,1,MPI_UINT32_T,comm);
 			error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&l,1,MPI_UINT8_T,comm);
 			//octree.ghosts[ghostCounter] = Class_Octant<2>(l,x,y);
-			octree.ghosts[ghostCounter] = classOctant(dim,l,x,y);
+			octree.ghosts[ghostCounter] = classOctant(dim,l,x,y,z);
 			error_flag = MPI_Unpack(rrit->second.commBuffer,rrit->second.commBufferSize,&pos,&m,1,MPI_INT8_T,comm);
 			octree.ghosts[ghostCounter].setMarker(m);
 			for(int j = 0; j < 17; ++j){

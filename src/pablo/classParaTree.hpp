@@ -116,11 +116,11 @@ public:
 #if NOMPI==0
 	classParaTree(uint8_t dim_ = 2, int8_t maxlevel = 20, string logfile="PABLO.log", MPI_Comm comm_ = MPI_COMM_WORLD);// : log(logfile,comm_),comm(comm_);
 	classParaTree(double X, double Y, double Z, double L, uint8_t dim_ = 2, int8_t maxlevel = 20, string logfile="PABLO.log", MPI_Comm comm_ = MPI_COMM_WORLD);//:dim(2),trans(X,Y,Z,L),log(logfile,comm_),comm(comm_);
-	classParaTree(double X, double Y, double Z, double L, u32vector2D & XY, u8vector & levels, uint8_t dim_ = 2, int8_t maxlevel = 20, string logfile="PABLO.log", MPI_Comm comm_ = MPI_COMM_WORLD);//:trans(X,Y,Z,L),log(logfile,comm_),comm(comm_);
+	classParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim_ = 2, int8_t maxlevel = 20, string logfile="PABLO.log", MPI_Comm comm_ = MPI_COMM_WORLD);//:trans(X,Y,Z,L),log(logfile,comm_),comm(comm_);
 #else
 	classParaTree(uint8_t dim_ = 2, int8_t maxlevel = 20, string logfile="PABLO.log");// : log(logfile);
 	classParaTree(double X, double Y, double Z, double L, uint8_t dim_ = 2, int8_t maxlevel = 20, string logfile="PABLO.log");//:dim(2),trans(X,Y,Z,L),log(logfile);
-	classParaTree(double X, double Y, double Z, double L, u32vector2D & XY, u8vector & levels, uint8_t dim_ = 2, int8_t maxlevel = 20, string logfile="PABLO.log");//:trans(X,Y,Z,L),log(logfile);
+	classParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim_ = 2, int8_t maxlevel = 20, string logfile="PABLO.log");//:trans(X,Y,Z,L),log(logfile);
 #endif
 
 	~classParaTree();
@@ -668,7 +668,7 @@ public:
 				}
 
 			}
-			cout << "first" << endl;
+//			cout << "first" << endl;
 			uint32_t nofElementsFromPreviousToSuccessive = 0;
 			contatore = 0;
 			//build send buffers from Tail
@@ -771,7 +771,7 @@ public:
 					}
 				}
 			}
-			cout << "second" << endl;
+//			cout << "second" << endl;
 
 			//Build receiver sources
 			vector<Class_Array> recvs(nproc);
@@ -894,7 +894,7 @@ public:
 					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&z,1,MPI_UINT32_T,comm);
 					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&l,1,MPI_UINT8_T,comm);
 					//octree.octants[newCounter] = Class_Octant<2>(l,x,y);
-					octree.octants[newCounter] = classOctant(dim,l,x,y);
+					octree.octants[newCounter] = classOctant(dim,l,x,y,z);
 					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&m,1,MPI_INT8_T,comm);
 					octree.octants[newCounter].setMarker(m);
 					for(int j = 0; j < 17; ++j){
@@ -906,7 +906,7 @@ public:
 				}
 			}
 			octvector(octree.octants).swap(octree.octants);
-			cout << "third" << endl;
+//			cout << "third" << endl;
 
 			userData.shrink();
 
@@ -918,13 +918,13 @@ public:
 			delete [] globalRecvsBuff; globalRecvsBuff = NULL;
 
 			//Update and ghosts here
-			cout << "in update" << endl;
+	//		cout << "in update" << endl;
 			updateLoadBalance();
-			cout << "in setpbound" << endl;
+	//		cout << "in setpbound" << endl;
 			setPboundGhosts();
 			uint32_t nofGhosts = getNumGhosts();
 			userData.resizeGhost(nofGhosts);
-			cout << "fourth" << endl;
+	//		cout << "fourth" << endl;
 
 		}
 		delete [] partition;
@@ -1399,7 +1399,7 @@ public:
 					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&z,1,MPI_UINT32_T,comm);
 					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&l,1,MPI_UINT8_T,comm);
 					//octree.octants[newCounter] = Class_Octant<2>(l,x,y);
-					octree.octants[newCounter] = classOctant(dim,l,x,y);
+					octree.octants[newCounter] = classOctant(dim,l,x,y,z);
 					error_flag = MPI_Unpack(rbit->second.commBuffer,rbit->second.commBufferSize,&rbit->second.pos,&m,1,MPI_INT8_T,comm);
 					octree.octants[newCounter].setMarker(m);
 					for(int j = 0; j < 17; ++j){

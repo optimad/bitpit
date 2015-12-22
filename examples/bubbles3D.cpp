@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
 		pabloBB.setBalance(idx,true);
 
 		/**<Refine globally four level and write the para_tree.*/
-		for (iter=1; iter<4; iter++){
+        for (iter=1; iter<4; iter++){
 			pabloBB.adaptGlobalRefine();
 		}
 
@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
 		srand(time(NULL));
 
 #if NOMPI==0
-		int nb = 50;
+        int nb = 50;
 #else
 		int nb = 10;
 #endif
@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
 						if (((!inside))){
 							if (((pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0) <= 1.25*pow(radius,2.0) &&
 											pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0) >= 0.75*pow(radius,2.0)))){
-								if (pabloBB.getLevel(i) < 7){
+                                if (pabloBB.getLevel(i) < 7){
 									/**<Set to refine inside a band around the interface of the bubbles.*/
 									pabloBB.setMarker(i,1);
 									oct_data[i] = 1.0;
@@ -183,9 +183,9 @@ int main(int argc, char *argv[]) {
 					}
 					if (!inside){
 						oct_data[i] = 0.0;
-						if (pabloBB.getLevel(i) > 3){
+                        if (pabloBB.getLevel(i) > 3){
 							/**<Set to coarse outside the band if the octant has a level higher than 4.*/
-							pabloBB.setMarker(i,-1);
+							pabloBB.setMarker(i,0);
 						}
 					}
 				}
@@ -211,7 +211,6 @@ int main(int argc, char *argv[]) {
 			}
 
 #if NOMPI==0
-			cout << "in loadbalance " << endl;
 			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
 			/**<Communicate the data of the octants and the ghost octants between the processes.*/
 			User_Data_LB<vector<double> > data_lb(oct_data,oct_data_ghost);
