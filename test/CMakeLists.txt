@@ -39,6 +39,8 @@ include_directories("${PROJECT_SOURCE_DIR}/src/patchman")
 
 include_directories(${BITP_BASE_INCLUDE_DIRS})
 
+include_directories("${PROJECT_SOURCE_DIR}/src/pablo")
+
 #Rules to build the tests
 foreach(TEST_NAME IN LISTS TEST_LIST PARALLELTEST_LIST)
     set(TEST_SOURCES "${TEST_NAME}.cpp")

@@ -31,11 +31,11 @@ endif()
 set(ENABLE_PROFILING 0 CACHE BOOL "Set appropriate compiler flags to enable profiling")
 set(VERBOSE_MAKE 0 CACHE BOOL "Set appropriate compiler and cmake flags to enable verbose output from compilation")
 set(VTK_DIR "/opt/VTK/lib/cmake/vtk" CACHE PATH "The directory containing a CMake configuration file for VTK")
+set(WITHOUT_MPI "0" CACHE BOOL "If set, the program is compiled without MPI support")
 
 #------------------------------------------------------------------------------------#
 # Internal variables
 #------------------------------------------------------------------------------------#
-set(WITHOUT_MPI "0" CACHE INTERNAL "If set, the program is compiled without MPI support")
 set(STATIC 1 CACHE BOOL INTERNAL "If set, the program is linked using static libraries")
 
 #------------------------------------------------------------------------------------#
@@ -79,12 +79,16 @@ else()
 	endif()
 endif()
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
+if (CMAKE_COMPILER_IS_GNUCC)
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
+endif()
 set(CMAKE_C_FLAGS_RELWITHDEBINFO "-O2 -g")
 set(CMAKE_C_FLAGS_DEBUG "-O0 -g")
 set(CMAKE_C_FLAGS_RELEASE "-O2")
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
+if(CMAKE_COMPILER_IS_GNUXX)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fmessage-length=0")
+endif()
 set(CMAKE_CXX_FLAGS_RELWITHDEBINFO "-O2 -g")
 set(CMAKE_CXX_FLAGS_DEBUG "-O0 -g")
 set(CMAKE_CXX_FLAGS_RELEASE "-O2")
@@ -101,7 +105,7 @@ if (ENABLE_PROFILING)
 	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
 endif (ENABLE_PROFILING)
 
-add_compile_options("-std=c++11")
+add_definitions("-std=c++11")
 
 #------------------------------------------------------------------------------------#
 # Library version
