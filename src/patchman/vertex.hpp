@@ -6,6 +6,7 @@
 
 /*! \file */
 
+#include <array>
 #include <memory>
 
 #include "binary_stream.hpp"
