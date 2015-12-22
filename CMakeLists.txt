@@ -37,7 +37,7 @@ if (NOT ONLY_PABLO)
 	set(VTK_DIR "/opt/VTK/lib/cmake/vtk" CACHE PATH "The directory containing a CMake configuration file for VTK")
 endif()
 
-set(WITHOUT_MPI 1 CACHE BOOL "If set, the program is compiled without MPI support")
+set(WITHOUT_MPI 0 CACHE BOOL "If set, the program is compiled without MPI support")
 
 #------------------------------------------------------------------------------------#
 # Internal variables
