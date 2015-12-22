@@ -28,7 +28,7 @@ else()
 	endif()
 endif()
 
-set(ONLY_PABLO 1 CACHE BOOL "If set, pablo is compiled stand alone")
+set(ONLY_PABLO 0 CACHE BOOL "If set, pablo is compiled stand alone")
 
 set(ENABLE_PROFILING 0 CACHE BOOL "Set appropriate compiler flags to enable profiling")
 set(VERBOSE_MAKE 0 CACHE BOOL "Set appropriate compiler and cmake flags to enable verbose output from compilation")
