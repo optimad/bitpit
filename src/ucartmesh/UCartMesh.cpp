@@ -295,8 +295,8 @@ darray3E UCartMesh::getCenter( iarray3E id ){
 // -------------------------------------------------------------------------- //
 darray3E UCartMesh::getCenter( int J ){
 
-    return  getCenter( AccessCell(J) );
-    
+    return  getCenter( CellCartesianId(J) );
+
 };
 
 // -------------------------------------------------------------------------- //
@@ -309,7 +309,7 @@ darray3E UCartMesh::getPoint( int i, int j, int k ){
     P[2]= edge[2][k] ;
 
     return P;
-    
+
 } ;
 
 // -------------------------------------------------------------------------- //
@@ -322,15 +322,16 @@ darray3E UCartMesh::getPoint( iarray3E id ){
     P[2]= edge[2][id[2]] ;
 
     return P;
-    
-} ;
 
+} ;
 
 // -------------------------------------------------------------------------- //
 darray3E UCartMesh::getPoint( int J ){
 
-    return  getPoint( AccessPoint(J) );
-    
+    return  getPoint( PointCartesianId(J) );
+
+};
+
 };
 
 
@@ -661,10 +662,9 @@ void UCartMesh::Scale(
 
 };
 
-
 // -------------------------------------------------------------------------- //
-iarray3E UCartMesh::ReturnCellCartId(
-        darray3E   &P
+iarray3E UCartMesh::CellCartesianId(
+        const darray3E   &P
         ) {
 
     // ========================================================================== //
@@ -710,54 +710,24 @@ iarray3E UCartMesh::ReturnCellCartId(
 };
 
 // -------------------------------------------------------------------------- //
-int UCartMesh::ReturnCellLinId(
-        darray3E   &P
+int UCartMesh::CellLinearId(
+        const darray3E   &P
         ) {
-
-    // ========================================================================== //
-    // void UCartMesh::ReturnCellID(                                      //
-    //     dvector1D   &P,                                                        //
-    //     int         &i,                                                        //
-    //     int         &j)                                                        //
-    //                                                                            //
-    // Returns the cartesian indices of the cell enclosing the point P.           //
-    // ========================================================================== //
-    // INPUT                                                                      //
-    // ========================================================================== //
-    // - P      : dvector1D, point x, y coordinates                               //
-    // - i, j   : int, cartesian indices of the cell enclosing the point P        //
-    // ========================================================================== //
-    // OUTPUT                                                                     //
-    // ========================================================================== //
-    // - none                                                                     //
-    // ========================================================================== //
-
-    // ========================================================================== //
-    // VARIABLES DECLARATION                                                      //
-    // ========================================================================== //
-
-    // Local variables
-    // none
 
     // Counters
     int         n ;
     iarray3E    id;
 
 
-    // ========================================================================== //
-    // COMPUTE THE CELL ID                                                        //
-    // ========================================================================== //
-
-    id = ReturnCellCartId(P) ;
-    n  = AccessCell(id) ;
+    id = CellCartesianId(P) ;
+    n  = CellLinearId(id) ;
 
     return n; 
 
 };
 
-
 // -------------------------------------------------------------------------- //
-int UCartMesh::AccessCell(
+int UCartMesh::CellLinearId(
         int          i,
         int          j,
         int          k
@@ -799,7 +769,7 @@ int UCartMesh::AccessCell(
 };
 
 // -------------------------------------------------------------------------- //
-int UCartMesh::AccessCell(
+int UCartMesh::CellLinearId(
         iarray3E    id 
         ) {
 
@@ -828,11 +798,11 @@ int UCartMesh::AccessCell(
     // Counters
     // none
 
-    return( AccessCell(id[0], id[1], id[2] ) ); 
+    return( CellLinearId(id[0], id[1], id[2] ) ); 
 };
 
 // -------------------------------------------------------------------------- //
-iarray3E UCartMesh::AccessCell(
+iarray3E UCartMesh::CellCartesianId(
         int          J
         ) {
 
@@ -877,7 +847,39 @@ iarray3E UCartMesh::AccessCell(
 };
 
 // -------------------------------------------------------------------------- //
-int UCartMesh::AccessPoint(
+iarray3E UCartMesh::PointCartesianId(
+        const darray3E   &P
+        ) {
+
+    int         d ;
+    iarray3E    id;
+
+    id.fill(0) ;
+
+    for( d=0; d<dim; ++d){
+        id[d] = min( np[d]-1, max(0, (int) round( (P[d] - B0[d])/h[d] )) );
+    };
+
+    return id; 
+};
+
+// -------------------------------------------------------------------------- //
+int UCartMesh::PointLinearId(
+        const darray3E   &P
+        ) {
+
+    // Counters
+    iarray3E    id;
+
+
+    id = PointCartesianId(P) ;
+
+    return PointLinearId(id); 
+
+};
+
+// -------------------------------------------------------------------------- //
+int UCartMesh::PointLinearId(
         int          i,
         int          j,
         int          k
@@ -919,7 +921,7 @@ int UCartMesh::AccessPoint(
 };
 
 // -------------------------------------------------------------------------- //
-int UCartMesh::AccessPoint(
+int UCartMesh::PointLinearId(
         iarray3E     id
         ) {
 
@@ -952,12 +954,12 @@ int UCartMesh::AccessPoint(
     // COMPUTE THE RECTILINER INDEX                                               //
     // ========================================================================== //
 
-    return ( AccessPoint(id[0], id[1], id[2] ) ); 
+    return ( PointLinearId(id[0], id[1], id[2] ) ); 
 
 };
 
 // -------------------------------------------------------------------------- //
-iarray3E UCartMesh::AccessPoint(
+iarray3E UCartMesh::PointCartesianId(
         int          J
         ) {
 
@@ -1072,7 +1074,7 @@ void UCartMesh::Cart2Unstr(
     for (k = 0; k < np[2]; k++) {
         for (j = 0; j < np[1]; j++) {
             for (i = 0; i < np[0]; i++) {
-                J = AccessPoint(i,j,k);
+                J = PointLinearId(i,j,k);
                 V[J][0] = edge[0][i] ;
                 V[J][1] = edge[1][j] ;
                 V[J][2] = edge[2][k] ; 
@@ -1087,18 +1089,18 @@ void UCartMesh::Cart2Unstr(
     for (k = 0; k < nc[2]; k++) {
         for (j = 0; j < nc[1]; j++) {
             for (i = 0; i < nc[0]; i++) {
-                J = AccessCell(i,j,k);
+                J = CellLinearId(i,j,k);
 
-                S[J][0] = AccessPoint(i,j,k);
-                S[J][1] = AccessPoint(i+1,j,k);
-                S[J][2] = AccessPoint(i,j+1,k);
-                S[J][3] = AccessPoint(i+1,j+1,k);
+                S[J][0] = PointLinearId(i,j,k);
+                S[J][1] = PointLinearId(i+1,j,k);
+                S[J][2] = PointLinearId(i,j+1,k);
+                S[J][3] = PointLinearId(i+1,j+1,k);
 
                 if(dim==3){
-                    S[J][4] = AccessPoint(i,j,k+1);
-                    S[J][5] = AccessPoint(i+1,j,k+1);
-                    S[J][6] = AccessPoint(i,j+1,k+1);
-                    S[J][7] = AccessPoint(i+1,j+1,k+1);
+                    S[J][4] = PointLinearId(i,j,k+1);
+                    S[J][5] = PointLinearId(i+1,j,k+1);
+                    S[J][6] = PointLinearId(i,j+1,k+1);
+                    S[J][7] = PointLinearId(i+1,j+1,k+1);
                 }
 
             }
@@ -1111,16 +1113,16 @@ void UCartMesh::Cart2Unstr(
     for (k = 0; k < nc[2]; k++) {
         for (j = 0; j < nc[1]; j++) {
             for (i = 0; i < nc[0]; i++) {
-                J = AccessCell(i,j);
+                J = CellLinearId(i,j);
 
-                if (i != 0)     { A[J][0][0] = AccessCell(i-1,j,k); }
-                if (i != nc[0]) { A[J][1][0] = AccessCell(i+1,j,k); }
+                if (i != 0)     { A[J][0][0] = CellLinearId(i-1,j,k); }
+                if (i != nc[0]) { A[J][1][0] = CellLinearId(i+1,j,k); }
 
-                if (j != 0)     { A[J][2][0] = AccessCell(i,j-1,k); }
-                if (j != nc[1]) { A[J][3][0] = AccessCell(i,j+1,k); }
+                if (j != 0)     { A[J][2][0] = CellLinearId(i,j-1,k); }
+                if (j != nc[1]) { A[J][3][0] = CellLinearId(i,j+1,k); }
 
-                if (k != 0)     { A[J][4][0] = AccessCell(i,j,k-1); }
-                if (k != nc[2]) { A[J][5][0] = AccessCell(i,j,k+1); }
+                if (k != 0)     { A[J][4][0] = CellLinearId(i,j,k-1); }
+                if (k != nc[2]) { A[J][5][0] = CellLinearId(i,j,k+1); }
 
             }
         }

@@ -167,7 +167,7 @@ void Demo3D_UCartMesh(
             for (j = 0; j < Mesh1.getNPoints(1); j++) {
                 for (i = 0; i < Mesh1.getNPoints(0); i++) {
                     P = Mesh1.getPoint(i,j,k);
-                    J   =   Mesh1.AccessPoint( i, j, k ) ;
+                    J   =   Mesh1.PointLinearId( i, j, k ) ;
 
                     Scalar1[J]       = P[0] + P[1] + P[2] + 1.0;
                     Vectorial1[J][0] = P[0] + P[1] + P[2] + 1.0;

@@ -64,7 +64,7 @@ void UCartMesh::CellData2PointData(
             for (i = 0; i < nc[0]; i++) {
 
                 // Cell index
-                K = AccessCell(i, j, k);
+                K = CellLinearId(i, j, k);
 
                 for (n = 0; n < dim-1; n++) {
                     for (m = 0; m < 2; m++) {
@@ -74,7 +74,7 @@ void UCartMesh::CellData2PointData(
                             ip = i + l;
                             jp = j + m;
                             kp = j + n;
-                            J = AccessPoint(ip,jp,kp);
+                            J = PointLinearId(ip,jp,kp);
 
                             PointData[J] = PointData[J] + CellData[K]; 
                             PointIter[J]++ ;
@@ -201,14 +201,14 @@ void UCartMesh::PointData2CellData(
         for (j = 0; j < nc[1]; j++) {
             for (i = 0; i < nc[0]; i++) {
 
-                K = AccessCell(i,j,k);
+                K = CellLinearId(i,j,k);
                 for (n = 0; n < 2; n++) {
                     for (m = 0; m < 2; m++) {
                         for (l = 0; l < 2; l++) {
                             ip = i + l;
                             jp = j + m;
                             kp = k + n;
-                            J = AccessPoint(ip,jp,kp);
+                            J = PointLinearId(ip,jp,kp);
                             CellData[K] = CellData[K] + factor * PointData[J];
                         } //next n
                     } //next m
@@ -312,26 +312,26 @@ void UCartMesh::interpolateCellData(
         // Local variables
         iarray3E    i0, i1 ;
         darray3E    w0, w1 ;
-    
+
         i0.fill(0);   i1.fill(0) ;
         w0.fill(0.5); w1.fill(0.5) ;
-    
+
         // Counters
         int     d;
-    
-        i0 = ReturnCellCartId(P);
-    
+
+        i0 = CellCartesianId(P);
+
         for( d=0; d<dim; ++d){
-    
-//            i0[d] = max( min( i0[d], nc[d]-1) ,1 );
-    
+
+            //            i0[d] = max( min( i0[d], nc[d]-1) ,1 );
+
             // Find cell index
             if( P[d] < center[d][i0[d] ] ){
                 i0[d] = max(0, i0[d]-1) ; 
             };
 
             i1[d] = min( i0[d] +1, nc[d]-1) ;
-    
+
             // Interpolation weights
             if( i0[d] == i1[d] ){
                 w0[d] = 1. ;
@@ -347,14 +347,14 @@ void UCartMesh::interpolateCellData(
 
 
         value = 
-               w0[0] * w0[1] * w0[2] *field[AccessCell(i0[0],i0[1],i0[2])]
-            +  w1[0] * w0[1] * w0[2] *field[AccessCell(i1[0],i0[1],i0[2])]
-            +  w0[0] * w1[1] * w0[2] *field[AccessCell(i0[0],i1[1],i0[2])]
-            +  w1[0] * w1[1] * w0[2] *field[AccessCell(i1[0],i1[1],i0[2])]
-            +  w0[0] * w0[1] * w1[2] *field[AccessCell(i0[0],i0[1],i1[2])]
-            +  w1[0] * w0[1] * w1[2] *field[AccessCell(i1[0],i0[1],i1[2])]
-            +  w0[0] * w1[1] * w1[2] *field[AccessCell(i0[0],i1[1],i1[2])]
-            +  w1[0] * w1[1] * w1[2] *field[AccessCell(i1[0],i1[1],i1[2])];
+            w0[0] * w0[1] * w0[2] *field[CellLinearId(i0[0],i0[1],i0[2])]
+            +  w1[0] * w0[1] * w0[2] *field[CellLinearId(i1[0],i0[1],i0[2])]
+            +  w0[0] * w1[1] * w0[2] *field[CellLinearId(i0[0],i1[1],i0[2])]
+            +  w1[0] * w1[1] * w0[2] *field[CellLinearId(i1[0],i1[1],i0[2])]
+            +  w0[0] * w0[1] * w1[2] *field[CellLinearId(i0[0],i0[1],i1[2])]
+            +  w1[0] * w0[1] * w1[2] *field[CellLinearId(i1[0],i0[1],i1[2])]
+            +  w0[0] * w1[1] * w1[2] *field[CellLinearId(i0[0],i1[1],i1[2])]
+            +  w1[0] * w1[1] * w1[2] *field[CellLinearId(i1[0],i1[1],i1[2])];
     };
 
     return; 
@@ -467,12 +467,12 @@ void UCartMesh::interpolatePointData(
         // ========================================================================== //
 
         // Closest grid point
-        i0 = ReturnCellCartId( P) ;
+        i0 = CellCartesianId( P) ;
 
 
         for(d=0; d<dim; ++d){
             i1[d] = i0[d] +1 ;
-            
+
             w1[d] = max(0.0, min(1.0, ( P[d] - edge[d][i0[d]]) /h[d] ) ) ;
             w0[d] = 1.0 - w1[d] ;
         };
@@ -483,14 +483,14 @@ void UCartMesh::interpolatePointData(
 
         // Interpolation
         value = 
-               w0[0] * w0[1] * w0[2] *field[AccessPoint(i0[0],i0[1],i0[2])]
-            +  w1[0] * w0[1] * w0[2] *field[AccessPoint(i1[0],i0[1],i0[2])]
-            +  w0[0] * w1[1] * w0[2] *field[AccessPoint(i0[0],i1[1],i0[2])]
-            +  w1[0] * w1[1] * w0[2] *field[AccessPoint(i1[0],i1[1],i0[2])]
-            +  w0[0] * w0[1] * w1[2] *field[AccessPoint(i0[0],i0[1],i1[2])]
-            +  w1[0] * w0[1] * w1[2] *field[AccessPoint(i1[0],i0[1],i1[2])]
-            +  w0[0] * w1[1] * w1[2] *field[AccessPoint(i0[0],i1[1],i1[2])]
-            +  w1[0] * w1[1] * w1[2] *field[AccessPoint(i1[0],i1[1],i1[2])];
+            w0[0] * w0[1] * w0[2] *field[PointLinearId(i0[0],i0[1],i0[2])]
+            +  w1[0] * w0[1] * w0[2] *field[PointLinearId(i1[0],i0[1],i0[2])]
+            +  w0[0] * w1[1] * w0[2] *field[PointLinearId(i0[0],i1[1],i0[2])]
+            +  w1[0] * w1[1] * w0[2] *field[PointLinearId(i1[0],i1[1],i0[2])]
+            +  w0[0] * w0[1] * w1[2] *field[PointLinearId(i0[0],i0[1],i1[2])]
+            +  w1[0] * w0[1] * w1[2] *field[PointLinearId(i1[0],i0[1],i1[2])]
+            +  w0[0] * w1[1] * w1[2] *field[PointLinearId(i0[0],i1[1],i1[2])]
+            +  w1[0] * w1[1] * w1[2] *field[PointLinearId(i1[0],i1[1],i1[2])];
     };
 
 

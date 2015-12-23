@@ -203,41 +203,52 @@ class UCartMesh{
                 );
 
         // Mapping -------------------------------------------------------------- //
-        iarray3E ReturnCellCartId(                              // Return cartesian cell id which encloses a given point
-                darray3E        &                               // (input) point coordinates
+        iarray3E CellCartesianId(                              // Return cartesian cell id which encloses a given point
+                const darray3E        &                               // (input) point coordinates
                 );
 
-        int ReturnCellLinId(                                    // Return linear cell id which encloses a given point
-                darray3E        &                               // (input) point coordinates
+        iarray3E CellCartesianId(                                // Returns cartesian indices of cell given its global index
+                int                                             // (input) cell global index
                 );
 
-        int AccessCell(                                         // Returns the index of cell given its cartesian indices
+        int CellLinearId(                                    // Return linear cell id which encloses a given point
+                const darray3E        &                               // (input) point coordinates
+                );
+
+        int CellLinearId(                                         // Returns the index of cell given its cartesian indices
+                iarray3E                                        // (input) 1st cartesian indices
+                );
+
+        int CellLinearId(                                         // Returns the index of cell given its cartesian indices
                 int              ,                              // (input) 1st cartesian indices
                 int              ,                              // (input) 1st cartesian indices
                 int  k=0                                        // (input) 2nd cartesian indices
                 );
 
-        int AccessCell(                                         // Returns the index of cell given its cartesian indices
+        iarray3E PointCartesianId(                              // Return cartesian id of closest point 
+                const darray3E        &                               // (input) point coordinates
+                );
+
+        iarray3E PointCartesianId(                               // Returns cartesian indices of a vertex given its global index
+                int                                             // (input) vertex global index
+                );
+
+        int PointLinearId(                                    // Return linear id of closest point
+                const darray3E        &                               // (input) point coordinates
+                );
+
+        int PointLinearId(                                         // Returns the index of cell given its cartesian indices
                 iarray3E                                        // (input) 1st cartesian indices
                 );
 
-
-        array<int,3> AccessCell(                                // Returns cartesian indices of cell given its global index
-                int                                             // (input) cell global index
-                );
-
-        int AccessPoint(                                        // Returns the index of vertex given its cartesian indices
+        int PointLinearId(                                        // Returns the index of vertex given its cartesian indices
                 int              ,                              // (input) 1st cartesian index
                 int              ,                              // (input) 2nd cartesian index
                 int  k=0                                        // (input) 2nd cartesian index
                 );
 
-        int AccessPoint(                                         // Returns the index of cell given its cartesian indices
-                iarray3E                                        // (input) 1st cartesian indices
                 );
 
-        array<int,3> AccessPoint(                               // Returns cartesian indices of a vertex given its global index
-                int                                             // (input) vertex global index
                 );
 
         // Interpolation -------------------------------------------------------- //
