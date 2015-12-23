@@ -182,6 +182,9 @@ class UCartMesh{
                 int
                 ) ;
 
+        int         getDim(
+                );
+
         int         getPointNeighbour(
                 const int            &,
                 const int            &

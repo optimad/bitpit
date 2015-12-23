@@ -478,6 +478,11 @@ double      UCartMesh::getSpacing( int d){
 };
 
 // -------------------------------------------------------------------------- //
+int      UCartMesh::getDim( ){
+    return dim ;
+};
+
+// -------------------------------------------------------------------------- //
 int      UCartMesh::getPointNeighbour( const int &I, const int &dir){
 
     int         d = whichDirection[dir], step = whichStep[dir];
