@@ -300,8 +300,24 @@ class UCartMesh{
 
         // Interpolation -------------------------------------------------------- //
         //
-        bool PointInGrid(                                                              // Point-in-triangle condition
-                array<double, 3> const              &                                   // (input) Point coordinatesertex
+        bool PointInGrid(                                       // Point-in-grid condition
+                array<double, 3> const              &           // (input) Point coordinatesertex
+                );
+
+        bool PointInGrid(                                       // Point-in-grid condition
+                array<double, 3> const              &,          // (input) Point coordinatesertex
+                int                                 &           // (output) Cell index
+                );
+
+        bool PointInGrid(                                       // Point-in-grid condition
+                array<double, 3> const              &,          // (input) Point coordinatesertex
+                uint32_t                             &           // (output) Cell index
+                );
+
+
+        bool PointInGrid(                                       // Point-in-grid condition
+                array<double, 3> const              &,          // (input) Point coordinatesertex
+                iarray3E                            &           // (output) Cell index
                 );
 
         template <class T>
@@ -358,8 +374,10 @@ class UCartMesh{
 
         // Paraview ------------------------------------------------------------------------- //
         void Export_vtr(string );
+
         template <class T>
             void Export_CellData_vtr(string , string , vector<T> &);
+
         template <class T>
             void Export_PointData_vtr(string , string , vector<T> &);
 

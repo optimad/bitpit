@@ -1116,6 +1116,86 @@ iarray3E UCartMesh::PointCartesianId(
 };
 
 
+//-------------------------------------------------------------------------- //
+bool UCartMesh::PointInGrid(                                           // Point-in-triangle condition
+        array<double, 3> const              &P            // (input) Point coordinatesertex
+        ){
+
+
+    int     d;
+
+    for( d=0; d<dim; ++d){
+
+        if( P[d]< B0[d] || P[d] > B1[d] ){
+            return false;
+        };
+    };
+
+    return true ;
+};
+
+//-------------------------------------------------------------------------- //
+bool UCartMesh::PointInGrid(                                           // Point-in-triangle condition
+        array<double, 3> const              &P,                         // (input) Point coordinatesertex
+        iarray3E                            &I                          // (output) Cell index 
+        ){
+
+
+    int     d;
+
+    for( d=0; d<dim; ++d){
+
+        if( P[d]< B0[d] || P[d] > B1[d] ){
+            return false;
+        };
+    };
+
+    I = CellCartesianId(P) ;
+
+    return true ;
+};
+
+//-------------------------------------------------------------------------- //
+bool UCartMesh::PointInGrid(                                           // Point-in-triangle condition
+        array<double, 3> const              &P,                          // (input) Point coordinatesertex
+        int                                 &I                          // (output) Cell index 
+        ){
+
+
+    int     d;
+
+    for( d=0; d<dim; ++d){
+
+        if( P[d]< B0[d] || P[d] > B1[d] ){
+            return false;
+        };
+    };
+
+    I = CellLinearId(P) ;
+
+    return true ;
+};
+
+//-------------------------------------------------------------------------- //
+bool UCartMesh::PointInGrid(                                           // Point-in-triangle condition
+        array<double, 3> const              &P,                          // (input) Point coordinatesertex
+        uint32_t                            &I                          // (output) Cell index 
+        ){
+
+
+    int     d;
+
+    for( d=0; d<dim; ++d){
+
+        if( P[d]< B0[d] || P[d] > B1[d] ){
+            return false;
+        };
+    };
+
+    I = CellLinearId(P) ;
+
+    return true ;
+};
 // -------------------------------------------------------------------------- //
 void UCartMesh::Cart2Unstr(
         int         &nV,
@@ -1286,20 +1366,3 @@ void UCartMesh::Export_vtr(string filename) {
     return; 
 };
 
-//-------------------------------------------------------------------------- //
-bool UCartMesh::PointInGrid(                                           // Point-in-triangle condition
-        array<double, 3> const              &P            // (input) Point coordinatesertex
-        ){
-
-
-    int     d;
-
-    for( d=0; d<dim; ++d){
-
-        if( P[d]< B0[d] || P[d] > B1[d] ){
-            return false;
-        };
-    };
-
-    return true ;
-};
