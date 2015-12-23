@@ -425,6 +425,7 @@ void UCartMesh::ClearMesh(
 
     // Number of cells
     nc.fill(0) ;
+    np.fill(0) ;
 
     // Resize mesh data structure
     ResizeMesh();
@@ -532,6 +533,7 @@ int      UCartMesh::getCellNeighbour( const int &I, const int &d, const int &ste
 
     return  CellLinearId(i) ;
 };
+
 // -------------------------------------------------------------------------- //
 void UCartMesh::setMesh(
         darray3E        &A0,
