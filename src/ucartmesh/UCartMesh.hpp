@@ -96,6 +96,9 @@ class UCartMesh{
 
         array<int,6>        whichDirection ;
         array<int,6>        whichStep ;
+
+        int                 status ;
+
         // Constructors ========================================================= //
     public:
 
@@ -126,7 +129,6 @@ class UCartMesh{
                 void                                            // (input) none
                 );
 
-        // Initialization ------------------------------------------------------- //
     public:
         int  getNCells();
         int  getNCells( int );
@@ -206,6 +208,11 @@ class UCartMesh{
                 const int            &,
                 const int            &
                 );
+
+        int         getStatus() ;
+
+
+
         void setMesh(                                           // Generate mesh
                 darray3E       &,                               // (input) lower/left limit point
                 darray3E       &,                               // (input) upper/right limit point

@@ -86,6 +86,8 @@ UCartMesh::UCartMesh(
     whichStep[4] = -1 ;
     whichStep[5] = +1 ;
 
+    status = 0;
+
     return; 
 };
 
@@ -135,6 +137,7 @@ UCartMesh::UCartMesh(
 
     setMesh( P0, P1, N, dimension);
 
+    status = 0 ;
 
     return; 
 };
@@ -292,7 +295,7 @@ darray3E UCartMesh::getCenter( int i, int j, int k ){
     P[2]= center[2][k] ;
 
     return P;
-    
+
 } ;
 
 // -------------------------------------------------------------------------- //
@@ -305,7 +308,7 @@ darray3E UCartMesh::getCenter( iarray3E id ){
     P[2]= center[2][id[2]] ;
 
     return P;
-    
+
 } ;
 
 // -------------------------------------------------------------------------- //
@@ -373,6 +376,12 @@ darray3E UCartMesh::getLastPointOfCell( int J ){
 
 
 
+// -------------------------------------------------------------------------- //
+int UCartMesh::getStatus(  ){
+
+    return  status ;
+
+};
 
 // -------------------------------------------------------------------------- //
 void UCartMesh::ClearMesh(
@@ -419,6 +428,8 @@ void UCartMesh::ClearMesh(
 
     // Resize mesh data structure
     ResizeMesh();
+
+    status++ ;
 
     return; 
 }
@@ -613,6 +624,8 @@ void UCartMesh::setMesh(
         };
     };
 
+    status++ ;
+
     return; 
 
 };
@@ -660,6 +673,9 @@ void UCartMesh::Translate(
         edge[d] = edge[d] + ds[d] ;
         center[d] = center[d] + ds[d] ;
     };
+
+    status++ ;
+
     return; 
 };
 
@@ -710,6 +726,8 @@ void UCartMesh::Scale(
         center[d] = origin[d] +s[d] *( center[d] - origin[d]) ;
     };
 
+    status++ ;
+
     return; 
 
 };
@@ -750,6 +768,7 @@ void UCartMesh::Scale(
 
     Scale( s, B0);
 
+    status++ ;
 
     return; 
 
