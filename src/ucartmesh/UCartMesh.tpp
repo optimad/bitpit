@@ -94,6 +94,8 @@ unordered_map<int,T> UCartMesh::PointSubSet(
 
 
 
+// -------------------------------------------------------------------------- //
+template < class T >
 void UCartMesh::CellData2PointData(
         vector< T > &CellData,
         vector< T > &PointData
