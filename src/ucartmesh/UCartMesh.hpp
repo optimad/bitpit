@@ -94,6 +94,8 @@ class UCartMesh{
         dvector2D           center;                             // Cell's centers coordinates
         dvector2D           edge;                               // Cell's edges coordinates
 
+        array<int,6>        whichDirection ;
+        array<int,6>        whichStep ;
         // Constructors ========================================================= //
     public:
 
@@ -180,6 +182,27 @@ class UCartMesh{
                 int
                 ) ;
         void SetMesh(                                           // Generate mesh
+        int         getPointNeighbour(
+                const int            &,
+                const int            &
+                );
+
+        int         getPointNeighbour(
+                const int            &,
+                const int            &,
+                const int            &
+                );
+
+        int         getCellNeighbour(
+                const int            &,
+                const int            &
+                );
+
+        int         getCellNeighbour(
+                const int            &,
+                const int            &,
+                const int            &
+                );
                 darray3E       &,                               // (input) lower/left limit point
                 darray3E       &,                               // (input) upper/right limit point
                 iarray3E       &,                               // (input) number of mesh cells in each direction

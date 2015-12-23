@@ -71,6 +71,21 @@ UCartMesh::UCartMesh(
     // Mesh spacing
     h.fill(0.0);
 
+
+    whichDirection[0] = 0 ;
+    whichDirection[1] = 0 ;
+    whichDirection[2] = 1 ;
+    whichDirection[3] = 1 ;
+    whichDirection[4] = 2 ;
+    whichDirection[5] = 2 ;
+
+    whichStep[0] = -1 ;
+    whichStep[1] = +1 ;
+    whichStep[2] = -1 ;
+    whichStep[3] = +1 ;
+    whichStep[4] = -1 ;
+    whichStep[5] = +1 ;
+
     return; 
 };
 
@@ -462,6 +477,45 @@ double      UCartMesh::getSpacing( int d){
 };
 
 void UCartMesh::SetMesh(
+// -------------------------------------------------------------------------- //
+int      UCartMesh::getPointNeighbour( const int &I, const int &dir){
+
+    int         d = whichDirection[dir], step = whichStep[dir];
+
+    return  getPointNeighbour(I,d,step) ;
+};
+
+// -------------------------------------------------------------------------- //
+int      UCartMesh::getPointNeighbour( const int &I, const int &d, const int &step){
+
+    iarray3E    i;
+
+    i       = PointCartesianId(I) ;
+    i[d]    += step ; 
+    i[d]    = max( min( i[d], nc[d] ), 0 ) ;
+
+    return  PointLinearId(i) ;
+};
+
+// -------------------------------------------------------------------------- //
+int      UCartMesh::getCellNeighbour( const int &I, const int &dir){
+
+    int         d = whichDirection[dir], step = whichStep[dir];
+
+    return  getCellNeighbour(I,d,step) ;
+};
+
+// -------------------------------------------------------------------------- //
+int      UCartMesh::getCellNeighbour( const int &I, const int &d, const int &step){
+
+    iarray3E    i;
+
+    i       = CellCartesianId(I) ;
+    i[d]    += step ; 
+    i[d]    = max( min( i[d], nc[d]-1 ), 0 ) ;
+
+    return  CellLinearId(i) ;
+};
         darray3E        &A0,
         darray3E        &A1,
         iarray3E        &N ,
