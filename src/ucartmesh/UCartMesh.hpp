@@ -132,6 +132,11 @@ class UCartMesh{
         int  getNPoints();
         int  getNPoints( int d);
 
+        void getBoundingBox(
+                darray3E    &,
+                darray3E    &
+                );
+
         darray3E  getCenter(
                 int
                 );

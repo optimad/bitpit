@@ -258,6 +258,15 @@ int UCartMesh::getNPoints( int d){
 };
 
 // -------------------------------------------------------------------------- //
+void UCartMesh::getBoundingBox( darray3E &A0, darray3E &A1){
+
+    A0 = B0; 
+    A1 = B1; 
+
+    return ;
+}
+
+// -------------------------------------------------------------------------- //
 darray3E UCartMesh::getCenter( int i, int j, int k ){
 
     darray3E    P ;
