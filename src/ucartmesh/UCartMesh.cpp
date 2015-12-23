@@ -1115,6 +1115,96 @@ iarray3E UCartMesh::PointCartesianId(
 
 };
 
+// -------------------------------------------------------------------------- //
+ivector1D UCartMesh::CellSubSet(
+        iarray3E     i0,
+        iarray3E     i1
+        ) {
+   
+    int                     i, j, k; 
+    ivector1D               ids;
+    ivector1D::iterator     it;
+
+    i  =  i1[0]-i0[0]+1  ;
+    j  =  i1[1]-i0[1]+1  ;
+    k  =  i1[2]-i0[2]+1  ;
+
+    i  =  i *j *k ;
+    ids.resize(i) ;
+
+    it = ids.begin() ;
+
+    for( k=i0[2]; k<=i0[2]; ++k){
+        for( j=i0[1]; j<=i0[1]; ++j){
+            for( i=i0[0]; i<=i0[0]; ++i){
+                
+                *it = CellLinearId( i, j, k) ;            
+                ++it ;
+
+            };
+        };
+    };
+
+    return ids; 
+
+};
+
+// -------------------------------------------------------------------------- //
+ivector1D UCartMesh::CellSubSet(
+        int     I0,
+        int     I1
+        ) {
+   
+    return CellSubSet( CellCartesianId(I0), CellCartesianId(I1) ); 
+
+};
+
+
+
+// -------------------------------------------------------------------------- //
+ivector1D UCartMesh::PointSubSet(
+        iarray3E     i0,
+        iarray3E     i1
+        ) {
+   
+    int                     i, j, k; 
+    ivector1D               ids;
+    ivector1D::iterator     it;
+
+    i  =  i1[0]-i0[0]+1  ;
+    j  =  i1[1]-i0[1]+1  ;
+    k  =  i1[2]-i0[2]+1  ;
+
+    i  =  i *j *k ;
+    ids.resize(i) ;
+
+    it = ids.begin() ;
+
+    for( k=i0[2]; k<=i0[2]; ++k){
+        for( j=i0[1]; j<=i0[1]; ++j){
+            for( i=i0[0]; i<=i0[0]; ++i){
+                
+                *it = PointLinearId( i, j, k) ;            
+                ++it ;
+
+            };
+        };
+    };
+
+    return ids; 
+
+};
+
+// -------------------------------------------------------------------------- //
+ivector1D UCartMesh::PointSubSet(
+        int     I0,
+        int     I1
+        ) {
+   
+    return PointSubSet( PointCartesianId(I0), PointCartesianId(I1) ); 
+
+};
+
 
 //-------------------------------------------------------------------------- //
 bool UCartMesh::PointInGrid(                                           // Point-in-triangle condition

@@ -20,6 +20,7 @@
 // Standard template library
 # include <array>
 # include <vector>
+# include <unordered_map>
 # include <string>
 # include <sstream>
 # include <fstream>
@@ -294,9 +295,55 @@ class UCartMesh{
                 int  k=0                                        // (input) 2nd cartesian index
                 );
 
+        // subsets  ------------------------------------------------------------- //
+        ivector1D   CellSubSet(
+                int,
+                int
                 );
 
+        template< class T>
+        unordered_map<int,T>   CellSubSet(
+                int,
+                int,
+                const vector<T> &
                 );
+
+        ivector1D   CellSubSet(
+                iarray3E,
+                iarray3E
+                );
+
+        template< class T>
+        unordered_map<int,T>   CellSubSet(
+                iarray3E,
+                iarray3E,
+                const vector<T> &
+                );
+
+        ivector1D   PointSubSet(
+                int,
+                int
+                );
+
+        template< class T>
+        unordered_map<int,T>   PointSubSet(
+                int,
+                int,
+                const vector<T> &
+                );
+
+        ivector1D   PointSubSet(
+                iarray3E,
+                iarray3E
+                );
+
+        template< class T>
+        unordered_map<int,T>   PointSubSet(
+                iarray3E,
+                iarray3E,
+                const vector<T> &
+                );
+
 
         // Interpolation -------------------------------------------------------- //
         //
