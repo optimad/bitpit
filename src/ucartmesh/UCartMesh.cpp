@@ -332,7 +332,30 @@ darray3E UCartMesh::getPoint( int J ){
 
 };
 
+// -------------------------------------------------------------------------- //
+darray3E UCartMesh::getFirstPointOfCell( int J ){
+
+    return  getPoint( CellCartesianId(J) );
+
 };
+
+// -------------------------------------------------------------------------- //
+darray3E UCartMesh::getLastPointOfCell( int J ){
+
+    int         d ;
+    iarray3E    ic ;
+
+    ic = CellCartesianId(J) ;
+
+    for( d=0; d<dim; ++d){
+        ic[d]++ ;
+    };
+
+    return  getPoint( ic );
+
+};
+
+
 
 
 // -------------------------------------------------------------------------- //

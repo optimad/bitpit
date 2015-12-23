@@ -165,6 +165,13 @@ class UCartMesh{
                 int   k=0          
                 );
 
+        darray3E  getFirstPointOfCell(
+                int
+                );
+
+        darray3E  getLastPointOfCell(
+                int
+                );
 
         void SetMesh(                                           // Generate mesh
                 darray3E       &,                               // (input) lower/left limit point
