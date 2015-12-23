@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 			cout << "the seed = " << Time << endl;
 
 #if NOMPI==0
-		int nb = 100;
+		int nb = 50;
 #else
 		int nb = 10;
 #endif
@@ -159,8 +159,7 @@ int main(int argc, char *argv[]) {
 					}
 					if (pabloBB.getLevel(i) > 0 && !inside){
 						/**<Set to coarse outside the band if the octant has a level higher than 6.*/
-						pabloBB.setMarker(i,-10+(uint(sqrt(pabloBB.getNproc())-1)));
-//						pabloBB.setMarker(i,-1);
+						pabloBB.setMarker(i,-4);
 					}
 				}
 

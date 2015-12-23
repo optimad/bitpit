@@ -3067,8 +3067,20 @@ classParaTree::private_adapt_mapidx(bool mapflag) {
 		updateAdapt();
 
 		// Coarse
-		while(octree.coarse(mapidx));
-		updateAfterCoarse(mapidx);
+		//while(octree.coarse(mapidx));
+		while (coarse) {
+			coarse = octree.coarse(mapidx_temp);
+			if (mapflag){
+				mapidx_temp2.resize(octree.getNumOctants());
+				for (uint32_t i=0; i<octree.getNumOctants(); i++){
+					mapidx_temp2[mapidx_temp[i]] = mapidx[mapidx_temp[i]];
+				}
+				mapidx.clear();
+				mapidx = mapidx_temp2;
+			}
+			updateAfterCoarse(mapidx);
+		}
+		//updateAfterCoarse(mapidx);
 		//			balance21(false);
 		//			while(octree.refine(mapidx));
 		//			updateAdapt();
