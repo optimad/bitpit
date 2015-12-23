@@ -133,7 +133,8 @@ UCartMesh::UCartMesh(
     // ========================================================================== //
 
 
-    SetMesh( P0, P1, N, dimension);
+    setMesh( P0, P1, N, dimension);
+
 
     return; 
 };
@@ -476,7 +477,6 @@ double      UCartMesh::getSpacing( int d){
     return h[d] ;
 };
 
-void UCartMesh::SetMesh(
 // -------------------------------------------------------------------------- //
 int      UCartMesh::getPointNeighbour( const int &I, const int &dir){
 
@@ -516,6 +516,8 @@ int      UCartMesh::getCellNeighbour( const int &I, const int &d, const int &ste
 
     return  CellLinearId(i) ;
 };
+// -------------------------------------------------------------------------- //
+void UCartMesh::setMesh(
         darray3E        &A0,
         darray3E        &A1,
         iarray3E        &N ,
@@ -523,7 +525,7 @@ int      UCartMesh::getCellNeighbour( const int &I, const int &d, const int &ste
         ) {
 
     // ========================================================================== //
-    // void UCartMesh::SetMesh(                                           //
+    // void UCartMesh::setMesh(                                           //
     //     dvector1D       &x,                                                    //
     //     dvector1D       &y,                                                    //
     //     int              n_x,                                                  //
@@ -585,7 +587,7 @@ int      UCartMesh::getCellNeighbour( const int &I, const int &d, const int &ste
 
     // Mesh spacing
     for( d=0; d<dim; ++d){
-            h[d] = (B1[d] - B0[d])/((double) nc[d]);
+        h[d] = (B1[d] - B0[d])/((double) nc[d]);
     };
 
     // vetices

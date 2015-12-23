@@ -80,7 +80,7 @@ void Demo3D_UCartMesh(
         B1.fill(1.) ; 
         nc.fill(100) ; 
 
-        Mesh1.SetMesh(B0, B1, nc,3);
+        Mesh1.setMesh(B0, B1, nc,3);
         Mesh2 = Mesh1;
         Mesh2.Export_vtr("original.vtr");
 

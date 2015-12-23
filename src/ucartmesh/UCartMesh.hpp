@@ -181,7 +181,7 @@ class UCartMesh{
         double      getSpacing( 
                 int
                 ) ;
-        void SetMesh(                                           // Generate mesh
+
         int         getPointNeighbour(
                 const int            &,
                 const int            &
@@ -203,10 +203,11 @@ class UCartMesh{
                 const int            &,
                 const int            &
                 );
+        void setMesh(                                           // Generate mesh
                 darray3E       &,                               // (input) lower/left limit point
                 darray3E       &,                               // (input) upper/right limit point
                 iarray3E       &,                               // (input) number of mesh cells in each direction
-                int             
+                int        dim=3 
                 );
 
         void ClearMesh(                                         // Destroy current mesh
