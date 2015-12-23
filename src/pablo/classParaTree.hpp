@@ -134,6 +134,7 @@ public:
 	// =================================================================================== //
 
 	int 		getRank();
+	int 		getNproc();
 	int 		getMaxLevel();
 	uint32_t 	getMaxLength();
 	uint8_t 	getNnodes();

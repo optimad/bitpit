@@ -521,21 +521,28 @@ classLocalTree::checkCoarse(uint64_t lastDescPre,
 	nocts = getNumOctants();
 	idx = 0;
 	Morton = octants[idx].computeMorton();
-	while(Morton <= lastDescPre && idx < nocts && Morton != 0){
+
+	while(Morton <= lastDescPre && idx < nocts-1 && Morton != 0){
 		// To delete, the father is in proc before me
 		toDelete++;
 		idx++;
 		Morton = octants[idx].computeMorton();
 	}
-	for(idx=0; idx<nocts-toDelete; idx++){
-		octants[idx] = octants[idx+toDelete];
-		if (mapsize>0) mapidx[idx] = mapidx[idx+toDelete];
+	if (nocts>toDelete){
+		for(idx=0; idx<nocts-toDelete; idx++){
+			octants[idx] = octants[idx+toDelete];
+			if (mapsize>0) mapidx[idx] = mapidx[idx+toDelete];
+		}
+		octants.resize(nocts-toDelete);
+		//octvector(octants).swap(octants);
+		if (mapsize>0){
+			mapidx.resize(nocts-toDelete);
+			//		u32vector((*mapidx)).swap((*mapidx));
+		}
 	}
-	octants.resize(nocts-toDelete);
-	octvector(octants).swap(octants);
-	if (mapsize>0){
-		mapidx.resize(nocts-toDelete);
-//		u32vector((*mapidx)).swap((*mapidx));
+	else{
+		octants.clear();
+		mapidx.clear();
 	}
 	nocts = getNumOctants();
 
@@ -1720,7 +1727,8 @@ void
 			idx1_gh++;
 		}
 		idx1_gh-=1;
-		if (idx1_gh==-1) idx1_gh=0;
+		if (idx1_gh > size_ghosts-1) idx1_gh=0;
+//		idx1_gh = min((size_ghosts-1), idx1_gh);
 	}
 
 	// End on ghosts
@@ -1879,7 +1887,8 @@ classLocalTree::preBalance21(u32vector& newmodified){
 			idx1_gh++;
 		}
 		idx1_gh-=1;
-		if (idx1_gh==-1) idx1_gh=0;
+		if (idx1_gh > size_ghosts-1) idx1_gh = 0;
+//		idx1_gh = min((size_ghosts-1), idx1_gh);
 	}
 
 	// End on ghosts
@@ -1964,8 +1973,10 @@ classLocalTree::preBalance21(u32vector& newmodified){
 	nbro = 0;
 	for (idx=0; idx<global.nchildren; idx++){
 		// Check if family is complete or to be checked in the internal loop (some brother refined)
-		if (octants[idx].computeMorton() <= mortonld){
-			nbro++;
+		if (idx<nocts){
+			if (octants[idx].computeMorton() <= mortonld){
+				nbro++;
+			}
 		}
 	}
 	if (nbro != global.nchildren)

@@ -185,7 +185,7 @@ int main(int argc, char *argv[]) {
 						oct_data[i] = 0.0;
                         if (pabloBB.getLevel(i) > 3){
 							/**<Set to coarse outside the band if the octant has a level higher than 4.*/
-							pabloBB.setMarker(i,0);
+							pabloBB.setMarker(i,-2);
 						}
 					}
 				}

@@ -413,12 +413,16 @@ classOctant	classOctant::buildLastDesc(int8_t & maxlevel){
 // =================================================================================== //
 
 classOctant	classOctant::buildFather(int8_t & maxlevel){
-	uint32_t delta[3] = {0,0,0};
-	uint32_t xx[3] = {x, y, z};
+	uint32_t delta[3];
+	uint32_t xx[3];
+	xx[0] = x;
+	xx[1] = y;
+	xx[2] = z;
+	delta[2] = 0;
 	for (int i=0; i<dim; i++){
-		delta[i] = xx[i]%(uint32_t(1 << (maxlevel - (level-1))));
+		delta[i] = xx[i]%(uint32_t(1 << (maxlevel - max(0,(level-1)))));
 	}
-	classOctant father(dim, level-1, x-delta[0], y-delta[1], z-delta[2]);
+	classOctant father(dim, max(0,level-1), x-delta[0], y-delta[1], z-delta[2]);
 	return father;
 };
 

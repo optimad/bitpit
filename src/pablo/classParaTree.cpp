@@ -241,6 +241,11 @@ classParaTree::getRank(){
 };
 
 int
+classParaTree::getNproc(){
+	return nproc;
+};
+
+int
 classParaTree::getMaxLevel(){
 	return global.MAX_LEVEL;
 };
@@ -3007,7 +3012,9 @@ classParaTree::private_adapt_mapidx(bool mapflag) {
 	//TODO recoding for adapting with abs(marker) > 1
 
 	bool globalDone = false, localDone = false;
+	bool refine = true, coarse = true, globalCoarse = true;
 	uint32_t nocts = octree.getNumOctants();
+	u32vector mapidx_temp, mapidx_temp2;
 	vector<classOctant >::iterator iter, iterend = octree.octants.end();
 
 	for (iter = octree.octants.begin(); iter != iterend; iter++){
@@ -3018,12 +3025,14 @@ classParaTree::private_adapt_mapidx(bool mapflag) {
 
 	// mapidx init
 	u32vector().swap(mapidx);
+	u32vector().swap(mapidx_temp);
+	u32vector().swap(mapidx_temp2);
 	if (mapflag) {
 		mapidx.resize(nocts);
-		//u32vector(mapidx).swap(mapidx);
-
+		mapidx_temp.resize(nocts);
 		for (uint32_t i=0; i<nocts; i++){
 			mapidx[i] = i;
+			mapidx_temp[i] = i;
 		}
 	}
 
@@ -3041,8 +3050,16 @@ classParaTree::private_adapt_mapidx(bool mapflag) {
 		log.writeLog(" Initial Number of octants	:	" + to_string(static_cast<unsigned long long>(octree.getNumOctants())));
 
 		// Refine
-		while(octree.refine(mapidx));
-
+		//		while(octree.refine(mapidx));
+		while (refine) {
+			refine = octree.refine(mapidx_temp);
+			mapidx_temp2.resize(octree.getNumOctants());
+			for (uint32_t i=0; i<octree.getNumOctants(); i++){
+				mapidx_temp2[mapidx_temp[i]] = mapidx[mapidx_temp[i]];
+			}
+			mapidx.clear();
+			mapidx = mapidx_temp2;
+		}
 		if (octree.getNumOctants() > nocts)
 			localDone = true;
 		log.writeLog(" Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(octree.getNumOctants())));
@@ -3081,7 +3098,18 @@ classParaTree::private_adapt_mapidx(bool mapflag) {
 		log.writeLog(" Initial Number of octants	:	" + to_string(static_cast<unsigned long long>(global_num_octants)));
 
 		// Refine
-		while(octree.refine(mapidx));
+//		while(octree.refine(mapidx));
+		while (refine) {
+			refine = octree.refine(mapidx_temp);
+			if (mapflag){
+				mapidx_temp2.resize(octree.getNumOctants());
+				for (uint32_t i=0; i<octree.getNumOctants(); i++){
+					mapidx_temp2[mapidx_temp[i]] = mapidx[mapidx_temp[i]];
+				}
+				mapidx.clear();
+				mapidx = mapidx_temp2;
+			}
+		}
 		if (octree.getNumOctants() > nocts)
 			localDone = true;
 		updateAdapt();
@@ -3091,9 +3119,25 @@ classParaTree::private_adapt_mapidx(bool mapflag) {
 
 
 		// Coarse
-		while(octree.coarse(mapidx));
-		updateAfterCoarse(mapidx);
-		setPboundGhosts();
+//		while(octree.coarse(mapidx));
+		while (globalCoarse) {
+			coarse = octree.coarse(mapidx_temp);
+			if (mapflag){
+				mapidx_temp2.resize(octree.getNumOctants());
+				for (uint32_t i=0; i<octree.getNumOctants(); i++){
+					mapidx_temp2[mapidx_temp[i]] = mapidx[mapidx_temp[i]];
+				}
+				mapidx.clear();
+				mapidx = mapidx_temp2;
+			}
+			updateAfterCoarse(mapidx);
+			setPboundGhosts();
+			globalCoarse = false;
+			MPI_Barrier(comm);
+			error_flag = MPI_Allreduce(&coarse,&globalCoarse,1,MPI::BOOL,MPI_LOR,comm);
+		}
+//		updateAfterCoarse(mapidx);
+//		setPboundGhosts();
 		//			balance21(false);
 		//			while(octree.refine(mapidx));
 		//			updateAdapt();
@@ -3924,7 +3968,6 @@ classParaTree::balance21(bool const first){
 		log.writeLog(" Iterative procedure	");
 		log.writeLog(" ");
 		log.writeLog(" Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)));
-
 
 		localDone = octree.localBalance(true);
 		octree.preBalance21(false);

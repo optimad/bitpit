@@ -45,7 +45,7 @@ int main(int argc, char *argv[]) {
 		pabloBB.setBalance(idx,true);
 
 		/**<Refine globally four level and write the para_tree.*/
-		for (iter=1; iter<7; iter++){
+		for (iter=1; iter<4; iter++){
 			pabloBB.adaptGlobalRefine();
 		}
 
@@ -157,16 +157,15 @@ int main(int argc, char *argv[]) {
 						}
 						ib++;
 					}
-					if (pabloBB.getLevel(i) > 6 && !inside){
+					if (pabloBB.getLevel(i) > 0 && !inside){
 						/**<Set to coarse outside the band if the octant has a level higher than 6.*/
-						pabloBB.setMarker(i,-1);
+						pabloBB.setMarker(i,-10+(uint(sqrt(pabloBB.getNproc())-1)));
+//						pabloBB.setMarker(i,-1);
 					}
 				}
 
 				/**<Adapt the octree.*/
-//				cout << "in adapt" << endl;
 				adapt = pabloBB.adapt();
-//				cout << "out adapt" << endl;
 
 
 				/**<Update the number of local octants.*/
