@@ -131,27 +131,21 @@ public:
 	// BASIC GET/SET METHODS
 	// =================================================================================== //
 private:
-	const classOctant &  getFirstDesc() const;
-	const classOctant &  getLastDesc() const;
-	uint32_t getSizeGhost() const;
-	uint32_t getNumOctants() const;
-	uint8_t getLocalMaxDepth() const;
-	int8_t getMarker(int32_t idx);
-	uint8_t getLevel(int32_t idx);
-	uint8_t getGhostLevel(int32_t idx);
-	bool getBalance(int32_t idx);
-	/*! Get the codimension for 2:1 balancing
-	 * \return Maximum codimension of the entity through which the 2:1 balance is performed.
-	 */
-	uint8_t getBalanceCodim() const;
-	void setMarker(int32_t idx, int8_t marker);
-	void setBalance(int32_t idx, bool balance);
-	/*! Set the codimension for 2:1 balancing
-	 * \param[in] Maximum codimension of the entity through which the 2:1 balance is performed.
-	 */
-	void setBalanceCodim(uint8_t b21codim);
-	void setFirstDesc();
-	void setLastDesc();
+	const classOctant&	getFirstDesc() const;
+	const classOctant&	getLastDesc() const;
+	uint32_t 		getSizeGhost() const;
+	uint32_t 		getNumOctants() const;
+	uint8_t 		getLocalMaxDepth() const;
+	int8_t 			getMarker(int32_t idx);
+	uint8_t 		getLevel(int32_t idx);
+	uint8_t 		getGhostLevel(int32_t idx);
+	bool 			getBalance(int32_t idx);
+	uint8_t 		getBalanceCodim() const;
+	void 			setMarker(int32_t idx, int8_t marker);
+	void 			setBalance(int32_t idx, bool balance);
+	void 			setBalanceCodim(uint8_t b21codim);
+	void 			setFirstDesc();
+	void 			setLastDesc();
 
 	// =================================================================================== //
 	// OTHER GET/SET METHODS
@@ -161,55 +155,55 @@ private:
 	// OTHER METHODS
 	// =================================================================================== //
 
-	classOctant& extractOctant(uint32_t idx);
+	classOctant& 		extractOctant(uint32_t idx);
 	const classOctant&	extractOctant(uint32_t idx) const;
-	classOctant& extractGhostOctant(uint32_t idx);
-	const classOctant& extractGhostOctant(uint32_t idx) const;
+	classOctant& 		extractGhostOctant(uint32_t idx);
+	const classOctant&	extractGhostOctant(uint32_t idx) const;
 
 
-	bool refine(u32vector & mapidx);
-	bool coarse(u32vector & mapidx);
-	bool globalRefine(u32vector & mapidx);
-	bool globalCoarse(u32vector & mapidx);
-	void checkCoarse(uint64_t lastDescPre, uint64_t firstDescPost, u32vector & mapidx);
-	void updateLocalMaxDepth();
+	bool 		refine(u32vector & mapidx);
+	bool 		coarse(u32vector & mapidx);
+	bool 		globalRefine(u32vector & mapidx);
+	bool 		globalCoarse(u32vector & mapidx);
+	void 		checkCoarse(uint64_t lastDescPre, uint64_t firstDescPost, u32vector & mapidx);
+	void 		updateLocalMaxDepth();
 
 
-	void findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours,
-			vector<bool> & isghost);
-	void findNeighbours(classOctant* oct, uint8_t iface, u32vector & neighbours,
-			vector<bool> & isghost);
-	void findGhostNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours);
-	void findEdgeNeighbours(uint32_t idx, uint8_t iedge,
-			u32vector & neighbours, vector<bool> & isghost);
-	void findEdgeNeighbours(classOctant* oct, uint8_t iedge,
-			u32vector & neighbours, vector<bool> & isghost);
-	void findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge,
-			u32vector & neighbours);
-	void findNodeNeighbours(classOctant* oct, uint8_t inode,
-			u32vector & neighbours, vector<bool> & isghost);
-	void findNodeNeighbours(uint32_t idx, uint8_t inode,
-			u32vector & neighbours, vector<bool> & isghost);
-	void findGhostNodeNeighbours(uint32_t idx, uint8_t inode,
-			u32vector & neighbours);
+	void 		findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours,
+								vector<bool> & isghost);
+	void 		findNeighbours(classOctant* oct, uint8_t iface, u32vector & neighbours,
+								vector<bool> & isghost);
+	void 		findGhostNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours);
+	void 		findEdgeNeighbours(uint32_t idx, uint8_t iedge,
+								u32vector & neighbours, vector<bool> & isghost);
+	void 		findEdgeNeighbours(classOctant* oct, uint8_t iedge,
+								u32vector & neighbours, vector<bool> & isghost);
+	void 		findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge,
+								u32vector & neighbours);
+	void 		findNodeNeighbours(classOctant* oct, uint8_t inode,
+								u32vector & neighbours, vector<bool> & isghost);
+	void 		findNodeNeighbours(uint32_t idx, uint8_t inode,
+								u32vector & neighbours, vector<bool> & isghost);
+	void 		findGhostNodeNeighbours(uint32_t idx, uint8_t inode,
+								u32vector & neighbours);
 
 
-	void preBalance21(bool internal);
-	void preBalance21(u32vector& newmodified);
-	bool localBalance(bool doInterior);
-	bool localBalanceAll(bool doInterior);
+	void 		preBalance21(bool internal);
+	void 		preBalance21(u32vector& newmodified);
+	bool 		localBalance(bool doInterior);
+	bool 		localBalanceAll(bool doInterior);
 
-	void computeIntersections();
+	void 		computeIntersections();
 
-	uint32_t findMorton(uint64_t Morton);
-	uint32_t findGhostMorton(uint64_t Morton);
+	uint32_t 	findMorton(uint64_t Morton);
+	uint32_t 	findGhostMorton(uint64_t Morton);
 
-	void computeConnectivity();
-	void clearConnectivity();
-	void updateConnectivity();
-	void computeGhostsConnectivity();
-	void clearGhostsConnectivity();
-	void updateGhostsConnectivity();
+	void 		computeConnectivity();
+	void 		clearConnectivity();
+	void 		updateConnectivity();
+	void 		computeGhostsConnectivity();
+	void 		clearGhostsConnectivity();
+	void 		updateGhostsConnectivity();
 
 	// =================================================================================== //
 

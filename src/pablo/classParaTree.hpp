@@ -133,110 +133,121 @@ public:
 	// BASIC GET/SET METHODS
 	// =================================================================================== //
 
-	int getRank();
-	int getMaxLevel();
-
-	void setMaxLevel(int8_t maxlevel);
+	int 		getRank();
+	int 		getMaxLevel();
+	uint32_t 	getMaxLength();
+	uint8_t 	getNnodes();
+	uint8_t 	getNfaces();
+	uint8_t 	getNedges();
+	uint8_t 	getNchildren();
+	uint8_t 	getNnodesperface();
+	void 		getNormals(int8_t normals[6][3]);
+	void 		getOppface(uint8_t oppface[4]);
+	void 		getFacenode(uint8_t facenode[6][3]);
+	void 		getNodeface(uint8_t nodeface[8][3]);
+	void 		getEdgeface(uint8_t edgeface[12][2]);
+	void 		getNodecoeffs(int8_t nodecoeffs[8][3]);
+	void 		getEdgecoeffs(int8_t edgecoeffs[12][3]);
+	void 		setMaxLevel(int8_t maxlevel);
 
 	// =================================================================================== //
 	// INDEX BASED METHODS
 	// =================================================================================== //
 
-	double getX(uint32_t idx);
-	double getY(uint32_t idx);
-	double getZ(uint32_t idx);
-	double getSize(uint32_t idx);
-	double getArea(uint32_t idx);
-	double getVolume(uint32_t idx);
-	void getCenter(uint32_t idx, dvector& center);
-	dvector getCenter(uint32_t idx);
-	dvector getFaceCenter(uint32_t idx, uint8_t iface);
-	void getFaceCenter(uint32_t idx, uint8_t iface, dvector& center);
-	dvector getNode(uint32_t idx, uint8_t inode);
-	void getNode(uint32_t idx, uint8_t inode, dvector& node);
-	void getNodes(uint32_t idx, dvector2D & nodes);
-	dvector2D getNodes(uint32_t idx);
-	void getNormal(uint32_t idx, uint8_t & iface, dvector & normal);
-	dvector getNormal(uint32_t idx, uint8_t & iface);
-	int8_t getMarker(uint32_t idx);
-	uint8_t getLevel(uint32_t idx);
-	bool getBalance(uint32_t idx);
+	double 		getX(uint32_t idx);
+	double 		getY(uint32_t idx);
+	double 		getZ(uint32_t idx);
+	double 		getSize(uint32_t idx);
+	double 		getArea(uint32_t idx);
+	double 		getVolume(uint32_t idx);
+	void 		getCenter(uint32_t idx, dvector& center);
+	dvector 	getCenter(uint32_t idx);
+	dvector 	getFaceCenter(uint32_t idx, uint8_t iface);
+	void 		getFaceCenter(uint32_t idx, uint8_t iface, dvector& center);
+	dvector 	getNode(uint32_t idx, uint8_t inode);
+	void 		getNode(uint32_t idx, uint8_t inode, dvector& node);
+	void 		getNodes(uint32_t idx, dvector2D & nodes);
+	dvector2D 	getNodes(uint32_t idx);
+	void 		getNormal(uint32_t idx, uint8_t & iface, dvector & normal);
+	dvector 	getNormal(uint32_t idx, uint8_t & iface);
+	int8_t 		getMarker(uint32_t idx);
+	uint8_t 	getLevel(uint32_t idx);
+	bool 		getBalance(uint32_t idx);
 #if NOMPI==0
-	bool getIsGhost(uint32_t idx);
+	bool 		getIsGhost(uint32_t idx);
 #endif
-	bool getIsNewR(uint32_t idx);
-	bool getIsNewC(uint32_t idx);
-	uint64_t getGlobalIdx(uint32_t idx);
-	uint64_t getGhostGlobalIdx(uint32_t idx);
-	void setMarker(uint32_t idx, int8_t marker);
-	void setBalance(uint32_t idx, bool balance);
+	bool 		getIsNewR(uint32_t idx);
+	bool 		getIsNewC(uint32_t idx);
+	uint64_t 	getGlobalIdx(uint32_t idx);
+	uint64_t 	getGhostGlobalIdx(uint32_t idx);
+	void 		setMarker(uint32_t idx, int8_t marker);
+	void 		setBalance(uint32_t idx, bool balance);
 
 	// =================================================================================== //
 	// POINTER BASED METHODS
 	// =================================================================================== //
 
-	double getX(classOctant* oct);
-	double getY(classOctant* oct);
-	double getZ(classOctant* oct);
-	double getSize(classOctant* oct);
-	double getArea(classOctant* oct);
-	double getVolume(classOctant* oct);
-	void getCenter(classOctant* oct, dvector& center);
-	dvector getCenter(classOctant* oct);
-	dvector getFaceCenter(classOctant* oct, uint8_t iface);
-	void getFaceCenter(classOctant* oct, uint8_t iface, dvector& center);
-	dvector getNode(classOctant* oct, uint8_t inode);
-	void getNode(classOctant* oct, uint8_t inode, dvector& node);
-	void getNodes(classOctant* oct, dvector2D & nodes);
-	dvector2D getNodes(classOctant* oct);
-	void getNormal(classOctant* oct, uint8_t & iface, dvector & normal);
-	dvector getNormal(classOctant* oct, uint8_t & iface);
-	int8_t getMarker(classOctant* oct);
-	uint8_t getLevel(classOctant* oct);
-	bool getBalance(classOctant* oct);
-	bool getIsNewR(classOctant* oct);
-	bool getIsNewC(classOctant* oct);
-	void setMarker(classOctant* oct, int8_t marker);
-	void setBalance(classOctant* oct, bool balance);
-
+	double 		getX(classOctant* oct);
+	double 		getY(classOctant* oct);
+	double 		getZ(classOctant* oct);
+	double 		getSize(classOctant* oct);
+	double 		getArea(classOctant* oct);
+	double 		getVolume(classOctant* oct);
+	void 		getCenter(classOctant* oct, dvector& center);
+	dvector 	getCenter(classOctant* oct);
+	dvector 	getFaceCenter(classOctant* oct, uint8_t iface);
+	void 		getFaceCenter(classOctant* oct, uint8_t iface, dvector& center);
+	dvector 	getNode(classOctant* oct, uint8_t inode);
+	void 		getNode(classOctant* oct, uint8_t inode, dvector& node);
+	void 		getNodes(classOctant* oct, dvector2D & nodes);
+	dvector2D 	getNodes(classOctant* oct);
+	void 		getNormal(classOctant* oct, uint8_t & iface, dvector & normal);
+	dvector 	getNormal(classOctant* oct, uint8_t & iface);
+	int8_t 		getMarker(classOctant* oct);
+	uint8_t 	getLevel(classOctant* oct);
+	bool 		getBalance(classOctant* oct);
+	bool 		getIsNewR(classOctant* oct);
+	bool 		getIsNewC(classOctant* oct);
+	void 		setMarker(classOctant* oct, int8_t marker);
+	void 		setBalance(classOctant* oct, bool balance);
 
 	// =================================================================================== //
 	// LOCAL TREE GET/SET METHODS
 	// =================================================================================== //
 
-	uint64_t getStatus();
-	uint32_t getNumOctants() const;
-	uint32_t getNumGhosts() const;
-	uint32_t getNumNodes() const;
-	uint8_t getLocalMaxDepth() const;
-	uint8_t getBalanceCodimension() const;
-	void getBoundingBox(dvector & P0, dvector & P1);
-	void getBoundingBox(darray3 & P0, darray3 & P1);
-	void setBalanceCodimension(uint8_t b21codim);
+	uint64_t 	getStatus();
+	uint32_t 	getNumOctants() const;
+	uint32_t 	getNumGhosts() const;
+	uint32_t 	getNumNodes() const;
+	uint8_t 	getLocalMaxDepth() const;
+	uint8_t 	getBalanceCodimension() const;
+	void 		getBoundingBox(dvector & P0, dvector & P1);
+	void 		getBoundingBox(darray3 & P0, darray3 & P1);
+	void 		setBalanceCodimension(uint8_t b21codim);
 	const classOctant & getFirstDesc() const;
 	const classOctant & getLastDesc() const;
-	uint64_t getLastDescMorton(uint32_t idx);
+	uint64_t 	getLastDescMorton(uint32_t idx);
 
 	// =================================================================================== //
 	// INTERSECTION GET/SET METHODS
 	// =================================================================================== //
 
-	uint32_t getNumIntersections();
+	uint32_t 	getNumIntersections();
 	classIntersection* getIntersection(uint32_t idx);
-	uint8_t getLevel(classIntersection* inter);
-	bool getFiner(classIntersection* inter);
-	bool getBound(classIntersection* inter);
-	bool getIsGhost(classIntersection* inter);
-	bool getPbound(classIntersection* inter);
-	uint8_t getFace(classIntersection* inter);
-	u32vector getOwners(classIntersection* inter);
-	uint32_t getIn(classIntersection* inter);
-	uint32_t getOut(classIntersection* inter);
-	double getSize(classIntersection* inter);
-	double getArea(classIntersection* inter);
-	dvector getCenter(classIntersection* inter);
-	dvector2D getNodes(classIntersection* inter);
-	dvector getNormal(classIntersection* inter);
+	uint8_t 	getLevel(classIntersection* inter);
+	bool 		getFiner(classIntersection* inter);
+	bool 		getBound(classIntersection* inter);
+	bool 		getIsGhost(classIntersection* inter);
+	bool 		getPbound(classIntersection* inter);
+	uint8_t 	getFace(classIntersection* inter);
+	u32vector 	getOwners(classIntersection* inter);
+	uint32_t 	getIn(classIntersection* inter);
+	uint32_t 	getOut(classIntersection* inter);
+	double 		getSize(classIntersection* inter);
+	double 		getArea(classIntersection* inter);
+	dvector 	getCenter(classIntersection* inter);
+	dvector2D 	getNodes(classIntersection* inter);
+	dvector 	getNormal(classIntersection* inter);
 
 	// =================================================================================== //
 	// OTHER GET/SET METHODS
@@ -244,20 +255,20 @@ public:
 
 	classOctant* getOctant(uint32_t idx);
 	classOctant* getGhostOctant(uint32_t idx);
-	uint64_t getGlobalIdx(classOctant* oct);
-	uint32_t getIdx(classOctant* oct);
-	uint32_t getIdx(classOctant oct);
+	uint64_t 	getGlobalIdx(classOctant* oct);
+	uint32_t 	getIdx(classOctant* oct);
+	uint32_t 	getIdx(classOctant oct);
 #if NOMPI==0
-	bool getIsGhost(classOctant* oct);
-	bool getIsGhost(classOctant oct);
+	bool 		getIsGhost(classOctant* oct);
+	bool 		getIsGhost(classOctant oct);
 #endif
 
 	// =================================================================================== //
 	// PRIVATE GET/SET METHODS
 	// =================================================================================== //
 private:
-	void setFirstDesc();
-	void setLastDesc();
+	void 		setFirstDesc();
+	void 		setLastDesc();
 
 	// =================================================================================== //
 	// OTHER METHODS												    			   //
@@ -267,80 +278,77 @@ private:
 	// OTHER OCTANT BASED METHODS												    			   //
 	// =================================================================================== //
 public:
-	void findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, vector<bool> & isghost);
-	void findNeighbours(classOctant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, vector<bool> & isghost);
-	void findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours);
+	void 		findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, vector<bool> & isghost);
+	void 		findNeighbours(classOctant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, vector<bool> & isghost);
+	void 		findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours);
 	classOctant* getPointOwner(dvector & point);
-	uint32_t getPointOwnerIdx(dvector & point);
-	void getMapping(uint32_t & idx, u32vector & mapper, vector<bool> & isghost);
+	uint32_t 	getPointOwnerIdx(dvector & point);
+	void 		getMapping(uint32_t & idx, u32vector & mapper, vector<bool> & isghost);
 
 	// =================================================================================== //
 	// OTHER PARATREE BASED METHODS												    			   //
 	// =================================================================================== //
 
-	int findOwner(const uint64_t & morton);
-	bool adapt(bool mapper_flag = false);
-	bool adaptGlobalRefine(bool mapper_flag = false);
-	bool adaptGlobalCoarse(bool mapper_flag = false);
-	void computeConnectivity();
-	void clearConnectivity();
-	void updateConnectivity();
+	int 		findOwner(const uint64_t & morton);
+	bool 		adapt(bool mapper_flag = false);
+	bool 		adaptGlobalRefine(bool mapper_flag = false);
+	bool 		adaptGlobalCoarse(bool mapper_flag = false);
+	void 		computeConnectivity();
+	void 		clearConnectivity();
+	void 		updateConnectivity();
 	const u32vector2D & getConnectivity();
 	const u32vector & getConnectivity(uint32_t idx);
 	const u32vector & getConnectivity(classOctant* oct);
 	const u32arr3vector & getNodes();
 	const u32array3 & getNodeLogicalCoordinates(uint32_t inode);
-	dvector getNodeCoordinates(uint32_t inode);
-	void computeGhostsConnectivity();
-	void clearGhostsConnectivity();
-	void updateGhostsConnectivity();
+	dvector 	getNodeCoordinates(uint32_t inode);
+	void 		computeGhostsConnectivity();
+	void 		clearGhostsConnectivity();
+	void 		updateGhostsConnectivity();
 	const u32vector2D & getGhostConnectivity();
 	const u32vector & getGhostConnectivity(uint32_t idx);
 	const u32vector & getGhostConnectivity(classOctant* oct);
 	const u32arr3vector & getGhostNodes();
 	const u32array3 & getGhostNodeLogicalCoordinates(uint32_t inode);
-	dvector getGhostNodeCoordinates(uint32_t inode);
+	dvector 	getGhostNodeCoordinates(uint32_t inode);
 	//TODO MapPablos
 #if NOMPI==0
-	void loadBalance();
-	void loadBalance(uint8_t & level);
+	void 		loadBalance();
+	void 		loadBalance(uint8_t & level);
 #endif
 
 	// =================================================================================== //
 	// OTHER INTERSECTION BASED METHODS												    			   //
 	// =================================================================================== //
 
-	void computeIntersections();
+	void 		computeIntersections();
 
 	// =================================================================================== //
 	// OTHER PRIVATE METHODS												    			   //
 	// =================================================================================== //
 private:
 	classOctant& extractOctant(uint32_t idx);
-	bool private_adapt();
-	bool private_adapt_mapidx(bool mapflag);
-	void updateAdapt();
+	bool 		private_adapt();
+	bool 		private_adapt_mapidx(bool mapflag);
+	void 		updateAdapt();
 #if NOMPI==0
-	void computePartition(uint32_t* partition);
-	void computePartition(uint32_t* partition, dvector* weight);
-	void computePartition(uint32_t* partition, uint8_t & level_);
-	void updateLoadBalance();
-	void setPboundGhosts();
-	void commMarker();
+	void 		computePartition(uint32_t* partition);
+	void 		computePartition(uint32_t* partition, dvector* weight);
+	void 		computePartition(uint32_t* partition, uint8_t & level_);
+	void 		updateLoadBalance();
+	void 		setPboundGhosts();
+	void 		commMarker();
 #endif
-	void updateAfterCoarse();
-	void updateAfterCoarse(u32vector & mapidx);
-	void balance21(bool const first);
+	void 		updateAfterCoarse();
+	void 		updateAfterCoarse(u32vector & mapidx);
+	void 		balance21(bool const first);
 
 	// =================================================================================== //
 	// TESTING OUTPUT METHODS												    			   //
 	// =================================================================================== //
 public:
-	void write(string filename);
-	void writeTest(string filename, vector<double> data);
-
-	// =============================================================================== //
-
+	void 		write(string filename);
+	void 		writeTest(string filename, vector<double> data);
 
 	// =================================================================================== //
 	// TEMPLATE METHODS												    			       //
@@ -351,7 +359,8 @@ public:
 	/** Communicate data provided by the user between the processes.
 	 */
 	template<class Impl>
-	void communicate(Class_Data_Comm_Interface<Impl> & userData){
+	void
+	communicate(Class_Data_Comm_Interface<Impl> & userData){
 		//BUILD SEND BUFFERS
 		map<int,Class_Comm_Buffer> sendBuffers;
 		size_t fixedDataSize = userData.fixedSize();
@@ -440,7 +449,8 @@ public:
 	 * Until loadBalance is not called for the first time the mesh is serial.
 	 */
 	template<class Impl>
-	void loadBalance(Class_Data_LB_Interface<Impl> & userData, dvector* weight = NULL){
+	void
+	loadBalance(Class_Data_LB_Interface<Impl> & userData, dvector* weight = NULL){
 		//Write info on log
 		log.writeLog("---------------------------------------------");
 		log.writeLog(" LOAD BALANCE ");
@@ -949,7 +959,8 @@ public:
 	 * \param[in] level Number of level over the max depth reached in the tree at which families of octants are fixed compact on the same process (level=0 is classic LoadBalance).
 	 */
 	template<class Impl>
-	void loadBalance(Class_Data_LB_Interface<Impl> & userData, uint8_t & level){
+	void
+	loadBalance(Class_Data_LB_Interface<Impl> & userData, uint8_t & level){
 
 		//Write info on log
 		log.writeLog("---------------------------------------------");

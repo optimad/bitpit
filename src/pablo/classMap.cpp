@@ -11,6 +11,7 @@
  * and side length 1.
  */
 classMap::classMap(int8_t maxlevel, uint8_t dim_){
+	maxlevel = int8_t(max(0,min(int(maxlevel),21)));
 	X0 = Y0 = Z0 = 0.0;
 	L = 1.0;
 	dim = dim_;
@@ -28,6 +29,7 @@ classMap::classMap(int8_t maxlevel, uint8_t dim_){
  * \param[in] LL Side length of domain.
  */
 classMap::classMap(double & X, double & Y, double & Z, double & LL, int8_t maxlevel, uint8_t dim_){
+	maxlevel = int8_t(max(0,min(int(maxlevel),21)));
 	X0 = X;
 	Y0 = Y;
 	Z0 = Z;

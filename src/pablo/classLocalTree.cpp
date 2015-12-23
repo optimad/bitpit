@@ -37,61 +37,99 @@ classLocalTree::~classLocalTree(){};
 // BASIC GET/SET METHODS
 // =================================================================================== //
 
-const classOctant &  classLocalTree::getFirstDesc() const{
+const classOctant&
+classLocalTree::getFirstDesc() const{
 	return first_desc;
 };
-const classOctant &  classLocalTree::getLastDesc() const{
+
+const classOctant&
+classLocalTree::getLastDesc() const{
 	return last_desc;
 };
-uint32_t classLocalTree::getSizeGhost() const{
+
+uint32_t
+classLocalTree::getSizeGhost() const{
 	return size_ghosts;
 };
-uint32_t classLocalTree::getNumOctants() const{
+
+uint32_t
+classLocalTree::getNumOctants() const{
 	return octants.size();
 };
-uint8_t classLocalTree::getLocalMaxDepth() const{							// Get max depth reached in local tree
+
+/** Get max depth reached in local tree
+ */
+uint8_t
+classLocalTree::getLocalMaxDepth() const{
 	return local_max_depth;
 };
-int8_t classLocalTree::getMarker(int32_t idx){								// Get refinement/coarsening marker for idx-th octant
+
+/** Get refinement/coarsening marker for idx-th octant
+ */
+int8_t
+classLocalTree::getMarker(int32_t idx){
 	return octants[idx].getMarker();
 };
-uint8_t classLocalTree::getLevel(int32_t idx){								// Get refinement/coarsening marker for idx-th octant
+
+/** Get refinement/coarsening marker for idx-th octant
+ */
+uint8_t
+classLocalTree::getLevel(int32_t idx){
 	return octants[idx].getLevel();
 };
-uint8_t classLocalTree::getGhostLevel(int32_t idx){								// Get refinement/coarsening marker for idx-th ghost octant
+
+/** Get refinement/coarsening marker for idx-th ghost octant
+ */
+uint8_t
+classLocalTree::getGhostLevel(int32_t idx){
 	return ghosts[idx].getLevel();
 };
-bool classLocalTree::getBalance(int32_t idx){								// Get if balancing-blocked idx-th octant
+
+/** Get if balancing-blocked idx-th octant
+ */
+bool
+classLocalTree::getBalance(int32_t idx){
 	return octants[idx].getNotBalance();
 };
 
 /*! Get the codimension for 2:1 balancing
  * \return Maximum codimension of the entity through which the 2:1 balance is performed.
  */
-uint8_t classLocalTree::getBalanceCodim() const{
+uint8_t
+classLocalTree::getBalanceCodim() const{
 	return balance_codim;
 };
 
-void classLocalTree::setMarker(int32_t idx, int8_t marker){					// Set refinement/coarsening marker for idx-th octant
+/** Set refinement/coarsening marker for idx-th octant
+ */
+void
+classLocalTree::setMarker(int32_t idx, int8_t marker){
 	octants[idx].setMarker(marker);
 };
-void classLocalTree::setBalance(int32_t idx, bool balance){					// Set if balancing-blocked idx-th octant
+
+/** Set if balancing-blocked idx-th octant
+ */
+void
+classLocalTree::setBalance(int32_t idx, bool balance){
 	octants[idx].setBalance(balance);
 };
 
 /*! Set the codimension for 2:1 balancing
  * \param[in] Maximum codimension of the entity through which the 2:1 balance is performed.
  */
-void classLocalTree::setBalanceCodim(uint8_t b21codim){
+void
+classLocalTree::setBalanceCodim(uint8_t b21codim){
 	balance_codim = b21codim;
 };
 
-void classLocalTree::setFirstDesc(){
+void
+classLocalTree::setFirstDesc(){
 	octvector::const_iterator firstOctant = octants.begin();
 	first_desc = classOctant(dim, global.MAX_LEVEL, firstOctant->x, firstOctant->y, firstOctant->z);
 };
 
-void classLocalTree::setLastDesc(){
+void
+classLocalTree::setLastDesc(){
 	octvector::const_iterator lastOctant = octants.end() - 1;
 	uint32_t x,y,z,delta;
 	//delta = (uint32_t)pow(2.0,(double)((uint8_t)global.MAX_LEVEL - lastOctant->level)) - 1;
@@ -111,19 +149,23 @@ void classLocalTree::setLastDesc(){
 // OTHER METHODS
 // =================================================================================== //
 
-classOctant& classLocalTree::extractOctant(uint32_t idx){
+classOctant&
+classLocalTree::extractOctant(uint32_t idx){
 	return octants[idx];
 };
 
-const classOctant&	classLocalTree::extractOctant(uint32_t idx) const{
+const classOctant&
+classLocalTree::extractOctant(uint32_t idx) const{
 	return octants[idx];
 };
 
-classOctant& classLocalTree::extractGhostOctant(uint32_t idx) {
+classOctant&
+classLocalTree::extractGhostOctant(uint32_t idx) {
 	return ghosts[idx];
 };
 
-const classOctant& classLocalTree::extractGhostOctant(uint32_t idx) const{
+const classOctant&
+classLocalTree::extractGhostOctant(uint32_t idx) const{
 	return ghosts[idx];
 };
 
@@ -133,7 +175,8 @@ const classOctant& classLocalTree::extractGhostOctant(uint32_t idx) const{
  * \param[in] mapidx mapidx[i] = index in old octants vector of the new i-th octant (index of father if octant is new after refinement)
  * \return	true if refinement done
  */
-bool classLocalTree::refine(u32vector & mapidx){
+bool
+classLocalTree::refine(u32vector & mapidx){
 
 	u32vector		last_child_index;
 	octvector 		children;
@@ -216,7 +259,8 @@ bool classLocalTree::refine(u32vector & mapidx){
  * \param[in] mapidx mpaidx[i] = index in old octants vector of the new i-th octant (index of first child if octant is new after coarsening)
  * \return	true is coarsening done
  */
-bool classLocalTree::coarse(u32vector & mapidx){
+bool
+classLocalTree::coarse(u32vector & mapidx){
 
 	u32vector		first_child_index;
 	classOctant		father;
@@ -419,7 +463,8 @@ bool classLocalTree::coarse(u32vector & mapidx){
  * \param[in] mapidx mpaidx[i] = index in old octants vector of the new i-th octant (index of father if octant is new after refinement)
  * \return	true if refinement done
  */
-bool classLocalTree::globalRefine(u32vector & mapidx){
+bool
+classLocalTree::globalRefine(u32vector & mapidx){
 
 	uint32_t 	idx, nocts;
 	bool 		dorefine = false;
@@ -441,7 +486,8 @@ bool classLocalTree::globalRefine(u32vector & mapidx){
  * \param[in] mapidx mpaidx[i] = index in old octants vector of the new i-th octant (index of father if octant is new after refinement)
  * \return	true if refinement done
  */
-bool classLocalTree::globalCoarse(u32vector & mapidx){
+bool
+classLocalTree::globalCoarse(u32vector & mapidx){
 
 	uint32_t 	idx, nocts;
 	bool 		dorefine = false;
@@ -461,7 +507,8 @@ bool classLocalTree::globalCoarse(u32vector & mapidx){
 /*! Delete overlapping octants after coarse local tree. Check first and last descendants
  * of process before and after the local process
  */
-void classLocalTree::checkCoarse(uint64_t lastDescPre,
+void
+classLocalTree::checkCoarse(uint64_t lastDescPre,
 		uint64_t firstDescPost,
 		u32vector & mapidx){
 
@@ -500,7 +547,8 @@ void classLocalTree::checkCoarse(uint64_t lastDescPre,
 // =================================================================================== //
 /*! Update max depth reached in local tree
  */
-void classLocalTree::updateLocalMaxDepth(){
+void
+classLocalTree::updateLocalMaxDepth(){
 
 	uint32_t noctants = getNumOctants();
 	uint32_t i;
@@ -520,7 +568,8 @@ void classLocalTree::updateLocalMaxDepth(){
  * in their structure (octants or ghosts) and sets isghost[i] = true if the
  * i-th neighbour is ghost in the local tree
  */
-void classLocalTree::findNeighbours(uint32_t idx, uint8_t iface,
+void
+classLocalTree::findNeighbours(uint32_t idx, uint8_t iface,
 		u32vector & neighbours, vector<bool> & isghost){
 
 	uint64_t  		Morton, Mortontry;
@@ -992,7 +1041,8 @@ void classLocalTree::findNeighbours(uint32_t idx, uint8_t iface,
  * in their structure (octants or ghosts) and sets isghost[i] = true if the
  * i-th neighbour is ghost in the local tree
  */
-void classLocalTree::findNeighbours(classOctant* oct,
+void
+classLocalTree::findNeighbours(classOctant* oct,
 		uint8_t iface,
 		u32vector & neighbours,
 		vector<bool> & isghost){
@@ -1463,7 +1513,8 @@ void classLocalTree::findNeighbours(classOctant* oct,
  * Returns a vector (empty if iface is not the pbound face for ghost) with the index of neighbours
  * in the structure octants
  */
-void classLocalTree::findGhostNeighbours(uint32_t const idx,
+void
+classLocalTree::findGhostNeighbours(uint32_t const idx,
 		uint8_t iface,
 		u32vector & neighbours){
 
@@ -1630,7 +1681,8 @@ void classLocalTree::findGhostNeighbours(uint32_t const idx,
 
 // =================================================================================== //
 
-void classLocalTree::preBalance21(bool internal){
+void
+ classLocalTree::preBalance21(bool internal){
 
 	classOctant 	father, lastdesc;
 	uint64_t 		mortonld;
@@ -1789,7 +1841,8 @@ void classLocalTree::preBalance21(bool internal){
 
 // =================================================================================== //
 
-void classLocalTree::preBalance21(u32vector& newmodified){
+void
+classLocalTree::preBalance21(u32vector& newmodified){
 
 	classOctant 		father, lastdesc;
 	uint64_t 			mortonld;
@@ -1952,7 +2005,8 @@ void classLocalTree::preBalance21(u32vector& newmodified){
  * Return true if balanced done with some markers modification
  * Seto doInterior = false if the interior octants are already balanced
  */
-bool classLocalTree::localBalance(bool doInterior){
+bool
+classLocalTree::localBalance(bool doInterior){
 
 	uint32_t			sizeneigh, modsize;
 	u32vector		 	neigh;
@@ -2442,7 +2496,8 @@ bool classLocalTree::localBalance(bool doInterior){
  * Return true if balanced done with some markers modification
  * Seto doInterior = false if the interior octants are already balanced
  */
-bool classLocalTree::localBalanceAll(bool doInterior){
+bool
+classLocalTree::localBalanceAll(bool doInterior){
 	// Local variables
 	uint32_t			sizeneigh, modsize;
 	u32vector		 	neigh;
@@ -2935,7 +2990,8 @@ bool classLocalTree::localBalanceAll(bool doInterior){
  * in their structure (octants or ghosts) and sets isghost[i] = true if the
  * i-th neighbour is ghost in the local tree
  */
-void classLocalTree::findEdgeNeighbours(uint32_t idx,
+void
+classLocalTree::findEdgeNeighbours(uint32_t idx,
 		uint8_t iedge,
 		u32vector & neighbours,
 		vector<bool> & isghost){
@@ -3206,7 +3262,8 @@ void classLocalTree::findEdgeNeighbours(uint32_t idx,
  * in their structure (octants or ghosts) and sets isghost[i] = true if the
  * i-th neighbour is ghost in the local tree
  */
-void classLocalTree::findEdgeNeighbours(classOctant* oct,
+void
+classLocalTree::findEdgeNeighbours(classOctant* oct,
 		uint8_t iedge,
 		u32vector & neighbours,
 		vector<bool> & isghost){
@@ -3475,7 +3532,8 @@ void classLocalTree::findEdgeNeighbours(classOctant* oct,
  * Returns a vector (empty if iedge is not a pbound edge) with the index of neighbours
  * in the structure octants.
  */
-void classLocalTree::findGhostEdgeNeighbours(uint32_t idx,
+void
+classLocalTree::findGhostEdgeNeighbours(uint32_t idx,
 		uint8_t iedge,
 		u32vector & neighbours){
 
@@ -3623,7 +3681,8 @@ void classLocalTree::findGhostEdgeNeighbours(uint32_t idx,
  * in their structure (octants or ghosts) and sets isghost[i] = true if the
  * i-th neighbour is ghost in the local tree
  */
-void classLocalTree::findNodeNeighbours(classOctant* oct,
+void
+classLocalTree::findNodeNeighbours(classOctant* oct,
 		uint8_t inode,
 		u32vector & neighbours,
 		vector<bool> & isghost){
@@ -3874,7 +3933,8 @@ void classLocalTree::findNodeNeighbours(classOctant* oct,
  * in their structure (octants or ghosts) and sets isghost[i] = true if the
  * i-th neighbour is ghost in the local tree
  */
-void classLocalTree::findNodeNeighbours(uint32_t idx,
+void
+classLocalTree::findNodeNeighbours(uint32_t idx,
 		uint8_t inode,
 		u32vector & neighbours,
 		vector<bool> & isghost){
@@ -4125,7 +4185,8 @@ void classLocalTree::findNodeNeighbours(uint32_t idx,
  * Returns a vector (empty if inode is not a pbound node) with the index of neighbours
  * in the structure octants.
  */
-void classLocalTree::findGhostNodeNeighbours(uint32_t idx,
+void
+classLocalTree::findGhostNodeNeighbours(uint32_t idx,
 		uint8_t inode,
 		u32vector & neighbours){
 
@@ -4247,7 +4308,8 @@ void classLocalTree::findGhostNodeNeighbours(uint32_t idx,
 
 // =================================================================================== //
 
-void classLocalTree::computeIntersections() {
+void
+classLocalTree::computeIntersections() {
 
 		octvector::iterator 	it, obegin, oend;
 		classIntersection 		intersection;
@@ -4362,7 +4424,8 @@ void classLocalTree::computeIntersections() {
 /*! Find an input Morton in octants and return the local idx
  * Return nocts if target Morton not found.
 */
-uint32_t classLocalTree::findMorton(uint64_t Morton){
+uint32_t
+classLocalTree::findMorton(uint64_t Morton){
 
 	uint32_t 		nocts = octants.size();
 	uint32_t 		idx = nocts/2;
@@ -4403,7 +4466,8 @@ uint32_t classLocalTree::findMorton(uint64_t Morton){
 /*! Find an input Morton in ghosts and return the local idx
 * Return nghosts if target Morton not found.
 */
-uint32_t classLocalTree::findGhostMorton(uint64_t Morton){
+uint32_t
+classLocalTree::findGhostMorton(uint64_t Morton){
 	uint32_t 		nocts = ghosts.size();
 	uint32_t 		idx = nocts/2;
 	uint64_t 		Mortontry = ghosts[idx].computeMorton();
@@ -4443,7 +4507,8 @@ uint32_t classLocalTree::findGhostMorton(uint64_t Morton){
 
 /** Compute the connectivity of octants and store the coordinates of nodes.
  */
-void classLocalTree::computeConnectivity(){
+void
+classLocalTree::computeConnectivity(){
 
 	map<uint64_t, vector<uint32_t> > 			mapnodes;
 	map<uint64_t, vector<uint32_t> >::iterator 	iter, iterend;
@@ -4507,7 +4572,8 @@ void classLocalTree::computeConnectivity(){
 // =================================================================================== //
 /*! Clear nodes vector and connectivity of octants of local tree
 */
-void classLocalTree::clearConnectivity(){
+void
+classLocalTree::clearConnectivity(){
 	u32arr3vector().swap(nodes);
 	u32vector2D().swap(connectivity);
 };
@@ -4515,7 +4581,8 @@ void classLocalTree::clearConnectivity(){
 // =================================================================================== //
 /*! Updates nodes vector and connectivity of octants of local tree
 */
-void classLocalTree::updateConnectivity(){
+void
+classLocalTree::updateConnectivity(){
 	clearConnectivity();
 	computeConnectivity();
 };
@@ -4523,7 +4590,8 @@ void classLocalTree::updateConnectivity(){
 // =================================================================================== //
 /*! Computes ghosts nodes vector and connectivity of ghosts octants of local tree
 */
-void classLocalTree::computeGhostsConnectivity(){
+void
+classLocalTree::computeGhostsConnectivity(){
 
 	map<uint64_t, vector<uint32_t> > 			mapnodes;
 	map<uint64_t, vector<uint32_t> >::iterator 	iter, iterend;
@@ -4582,7 +4650,8 @@ void classLocalTree::computeGhostsConnectivity(){
 // =================================================================================== //
 /*! Clear ghosts nodes vector and connectivity of ghosts octants of local tree
 */
-void classLocalTree::clearGhostsConnectivity(){
+void
+classLocalTree::clearGhostsConnectivity(){
 	u32arr3vector().swap(ghostsnodes);
 	u32vector2D().swap(ghostsconnectivity);
 };
@@ -4590,7 +4659,8 @@ void classLocalTree::clearGhostsConnectivity(){
 // =================================================================================== //
 /*! Update ghosts nodes vector and connectivity of ghosts octants of local tree
 */
-void classLocalTree::updateGhostsConnectivity(){
+void
+classLocalTree::updateGhostsConnectivity(){
 	clearGhostsConnectivity();
 	computeGhostsConnectivity();
 };
