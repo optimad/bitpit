@@ -173,6 +173,12 @@ class UCartMesh{
                 int
                 );
 
+        darray3E    getSpacing( 
+                ) ;
+
+        double      getSpacing( 
+                int
+                ) ;
         void SetMesh(                                           // Generate mesh
                 darray3E       &,                               // (input) lower/left limit point
                 darray3E       &,                               // (input) upper/right limit point

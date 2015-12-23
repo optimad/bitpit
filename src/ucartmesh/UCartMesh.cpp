@@ -452,6 +452,15 @@ void UCartMesh::ResizeMesh(
 };
 
 // -------------------------------------------------------------------------- //
+darray3E    UCartMesh::getSpacing(){
+    return h ;
+};
+
+// -------------------------------------------------------------------------- //
+double      UCartMesh::getSpacing( int d){
+    return h[d] ;
+};
+
 void UCartMesh::SetMesh(
         darray3E        &A0,
         darray3E        &A1,
