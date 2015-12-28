@@ -735,7 +735,13 @@ void UCartMesh::Export_PointData_vtr(string      filename,
     Open_vtr(file_handle, trim(filename));
 
     // Write mesh data
-    Write_vtrMeshData(file_handle, nc[0], nc[1], nc[2], edge[0], edge[1], edge[2]);
+    if( dim == 2){
+        Write_vtrMeshData(file_handle, nc[0], nc[1], nc[2]-1, edge[0], edge[1], edge[2]);
+    }
+
+    else{
+        Write_vtrMeshData(file_handle, nc[0], nc[1], nc[2], edge[0], edge[1], edge[2]);
+    }
 
     // Write cell data
     Open_Data(file_handle, "PointData");
