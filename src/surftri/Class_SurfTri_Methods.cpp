@@ -22,7 +22,7 @@
 
 // -------------------------------------------------------------------------- //
 Class_SurfTri::Class_SurfTri(
-    void
+    int    dim
 ) {
 
 // ========================================================================== //
@@ -64,6 +64,8 @@ nEdge = 0;
 // # simplicies
 nSimplex = 0;
 
+dimensions = dim ;
+
 // tolerance for distance checks
 toll = 1.0e-8;
 
@@ -72,7 +74,8 @@ return; };
 // -------------------------------------------------------------------------- //
 Class_SurfTri::Class_SurfTri(
     int nV,
-    int nS
+    int nS,
+    int dim
 ) {
 
 // ========================================================================== //
@@ -115,6 +118,8 @@ nEdge = 0;
 
 // # simplicies
 nSimplex = nS;
+
+dimensions = dim ;
 
 // tolerance for distance check
 toll = 1.0e-8;
@@ -180,6 +185,13 @@ DestroyAdjacency();
 
 return; }
 
+void Class_SurfTri::SetDimensions(
+        int dim
+        ){
+
+    dimensions = dim;
+    return;
+};
 // ========================================================================== //
 // RESIZE OPERATORS                                                           //
 // ========================================================================== //

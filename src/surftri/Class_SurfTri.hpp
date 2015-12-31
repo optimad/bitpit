@@ -85,7 +85,9 @@ class Class_SurfTri {
         int                     nVertex;                                          // # of vertexes
         int                     nSimplex;                                         // # of simplicies
         int                     nEdge;                                            // # of edges
+        int                     dimensions;                                       // # of dimensions
         double                  toll;                                             // tolerance for distance check
+
         dvecarr3E               Vertex;                                           // vertex list
         dvecarr3E               Normal;                                           // normals list
         dvecarr3E               ENormal;                                          // edge normals
@@ -98,11 +100,13 @@ class Class_SurfTri {
         // Class constructors =================================================== //
     public:
         Class_SurfTri(                                                            // Default constructor
-                void                                                                  // (input) nonde
+                int                 dim=3                                         // (input) number of dimensions
                 );
+
         Class_SurfTri(                                                            // Custom constructor #1
                 int                  ,                                                // (input) number of vertices
-                int                                                                   // (input) number of simplicies
+                int                  ,                                                // (input) number of simplicies
+                int                  dim=3                                         // (input) number of dimensions
                 );
 
         // Class destructors ==================================================== //
@@ -110,6 +114,16 @@ class Class_SurfTri {
         ~Class_SurfTri(                                                           // Default destructor
                 void                                                                  // (input) none
                 );
+
+
+
+        // set methods ========================================================== //
+    public:
+        void SetDimensions(                                                           // Default destructor
+                int                                                              // (input) # of dimensions
+                );
+
+
 
         // Resize operators ===================================================== //
 
