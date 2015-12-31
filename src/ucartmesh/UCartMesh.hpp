@@ -301,48 +301,24 @@ class UCartMesh{
                 int
                 );
 
-        template< class T>
-        unordered_map<int,T>   CellSubSet(
-                int,
-                int,
-                const vector<T> &
-                );
 
         ivector1D   CellSubSet(
                 iarray3E,
                 iarray3E
                 );
 
-        template< class T>
-        unordered_map<int,T>   CellSubSet(
-                iarray3E,
-                iarray3E,
-                const vector<T> &
-                );
 
         ivector1D   PointSubSet(
                 int,
                 int
                 );
 
-        template< class T>
-        unordered_map<int,T>   PointSubSet(
-                int,
-                int,
-                const vector<T> &
-                );
 
         ivector1D   PointSubSet(
                 iarray3E,
                 iarray3E
                 );
 
-        template< class T>
-        unordered_map<int,T>   PointSubSet(
-                iarray3E,
-                iarray3E,
-                const vector<T> &
-                );
 
 
         // Interpolation -------------------------------------------------------- //
