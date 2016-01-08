@@ -113,6 +113,23 @@ vector< vector< T > > operator- (                                               
         const T                       &                                                     // 2nd argument (constant)
         );
 
+// Operator "-=" -------------------------------------------------------------------- //
+template <class T>
+vector< T >& operator-= (                                                             // ELEMENT-WISE DECREMENT OF A VECTOR
+        vector< T >                   &,                                                    // 1st argument (vector)
+        const vector< T >             &                                                     // 2nd argument (vector)
+        );
+template <class T>
+vector< T >& operator-= (                                                             // ELEMENT-WISE DECREMENT OF A VECTOR
+        vector< T >                   &,                                                    // 1st argument (vector)
+        const T                       &                                                     // 2nd argument (constant)
+        );
+template <class T>
+vector< vector< T > >& operator-= (                                                   // ELEMENT-WISE DECREMENT OF A VECTOR
+        vector< vector< T > >         &,                                                    // 1st argument (vector)
+        const T                       &                                                     // 2nd argument (constant)
+        );
+
 // Operator "*" --------------------------------------------------------------------- //
 template <class T>
 vector< T > operator* (                                                               // ELEMENT-WISE PRODUCT BETWEEN TWO VECTORS
@@ -376,6 +393,23 @@ array<array<T, e>, d> operator+ (                                               
         const T                       &                                                     // 2nd argument (array)
         );
 
+// Operator "+=" -------------------------------------------------------------------- //
+template <class T, size_t d>
+array< T, d >& operator+= (                                                           // ELEMENT-WISE INCREMENT OF A ARRAY
+        array< T, d >                 &,                                                    // 1st argument (array)
+        const array< T, d >           &                                                     // 2nd argument (vector)
+        );
+template <class T, size_t d>
+array< T, d >& operator+= (                                                           // ELEMENT-WISE INCREMENT OF A ARRAY
+        array< T, d >                 &,                                                    // 1st argument (array)
+        const T                       &                                                     // 2nd argument (constant)
+        );
+template <class T, size_t d, size_t e>
+array< array< T, e >, d >& operator+= (                                               // ELEMENT-WISE INCREMENT OF A ARRAY
+        array< array< T, e >, d >     &,                                                    // 1st argument (array)
+        const T                       &                                                     // 2nd argument (constant)
+        );
+
 // Operator "-" --------------------------------------------------------------------- //
 template <class T, size_t d>
 array<T, d> operator- (                                                               // ELEMENT-WISE DIFFERENCE BETWEEN TWO ARRAYS
@@ -400,6 +434,23 @@ array<array<T, e>, d> operator- (                                               
 template <class T, size_t d, size_t e>
 array<array<T, e>, d> operator- (                                                     // ELEMENT-WISE DIFFERENCE BETWEEN CONSTANT AND ARRAY
         const array<array<T, e>, d>   &,                                                    // 1st argument (array)
+        const T                       &                                                     // 2nd argument (constant)
+        );
+
+// Operator "-=" -------------------------------------------------------------------- //
+template <class T, size_t d>
+array< T, d >& operator-= (                                                           // ELEMENT-WISE DECREMENT OF A ARRAY
+        array< T, d >                 &,                                                    // 1st argument (array)
+        const array< T, d >           &                                                     // 2nd argument (vector)
+        );
+template <class T, size_t d>
+array< T, d >& operator-= (                                                           // ELEMENT-WISE DECREMENT OF A ARRAY
+        array< T, d >                 &,                                                    // 1st argument (array)
+        const T                       &                                                     // 2nd argument (constant)
+        );
+template <class T, size_t d, size_t e>
+array< array< T, e >, d >& operator-= (                                               // ELEMENT-WISE DECREMENT OF A ARRAY
+        array< array< T, e >, d >     &,                                                    // 1st argument (array)
         const T                       &                                                     // 2nd argument (constant)
         );
 

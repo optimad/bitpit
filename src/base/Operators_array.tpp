@@ -305,6 +305,179 @@ z = y + x;
 
 return (z); };
 
+// Operator "+=" ==================================================================== //
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Operator+= for std::array.
+
+    Increment each element in the input array, using the corresping value
+    on array at the r.h.s. as increment, i.e.:
+    x[i] += y[i] for all i = 0, ..., d-1
+    Template parameters, T, can by any type for which the operator+= is defined.
+
+    The element-wise increment is performed recursively, i.e. if the i-th element of x and
+    the i-th element of y are std::array, operator+= calls itself
+    to increment x[i][j] by y[i][j], j = 0, ..., x[i].size()-1
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result first argument incremented with r.h.s. values.
+*/
+template <class T, size_t d>
+array< T, d >& operator+= (
+  array< T, d >                 &x,
+  const array< T, d >           &y
+) {
+
+// ================================================================================== //
+// template <class T, size_t d>                                                       //
+// array< T, d >& operator+= (                                                        //
+//   array< T, d >                 &x,                                                //
+//   const array< T, d >           &y)                                                //
+//                                                                                    //
+// Element-wise increment. Returns:                                                   //
+//      x += y, s.t. x[i] += y[i]                                                     //
+// ================================================================================== //
+// INPUT                                                                              //
+// ================================================================================== //
+// - x   : array< T, d >, 1st argument of '+=' operator                               //
+// - y   : array< T, d >, 2nd argument of '+=' operator                               //
+// ================================================================================== //
+// OUTPUT                                                                             //
+// ================================================================================== //
+// - x   : array< T, d >&, reference to first argument                                //
+// ================================================================================== //
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+// none
+
+// ================================================================================== //
+// PERFORM SUM                                                                        //
+// ================================================================================== //
+for (int i = 0; i < d; i++){
+    x[i] += y[i];
+};
+
+return (x); };
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Operator+= for std::array.
+
+    Increment each element in the input array, using the value
+    on the r.h.s. as increment, i.e.:
+    x[i] += y for all i = 0, ..., d-1
+    Template parameters, T, can by any type for which the operator+= is defined.
+
+    The element-wise increment is performed recursively, i.e. if the i-th element of x and
+    y are std::array, operator+= calls itself
+    to increment x[i][j] by y[j], j = 0, ... , x[i].size()-1
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result first argument incremented with r.h.s. values.
+*/
+template <class T, size_t d>
+array< T, d >& operator+= (
+  array< T, d >                 &x,
+  const T                       &y
+) {
+
+// ================================================================================== //
+// template <class T, size_t d>                                                       //
+// array< T, d >& operator+= (                                                        //
+//   array< T, d >                 &x,                                                //
+//   const T                       &y)                                                //
+//                                                                                    //
+// Element-wise increment. Returns:                                                   //
+//        x += y, s.t x[i] += y                                                       //
+// ================================================================================== //
+// INPUT                                                                              //
+// ================================================================================== //
+// - x   : array< T, d >, 1st argument of '+=' operator                               //
+// - y   : T          , 2nd argument of '+=' operator                                 //
+// ================================================================================== //
+// OUTPUT                                                                             //
+// ================================================================================== //
+// - x   : array< T, d >&, reference to first argument                                //
+// ================================================================================== //
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+// none
+
+// ================================================================================== //
+// PERFORM SUM                                                                        //
+// ================================================================================== //
+for (int i = 0; i < d; i++){
+    x[i] += y;
+};
+
+return (x); };
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Operator+= for std::array.
+
+    Increment each element in the input array, using the value
+    on the r.h.s. as increment, i.e.:
+    x[i][j] += y for all j = 0, ..., e-1, i = 0, ..., d-1
+    Template parameters, T, can by any type for which the operator+= is defined.
+
+    The element-wise increment is performed recursively, i.e. if x[i][j] and
+    y are std::array, operator+= calls itself
+    to increment x[i][j][k] by y[k], k = 0, ... , x.size()-1
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result first argument incremented with r.h.s. values.
+*/
+template <class T, size_t d, size_t e>
+array< array< T, e >, d >& operator+= (
+    array< array< T, e >, d >       &x,
+    const T                         &y
+) {
+
+// ================================================================================== //
+// template <class T, size_t d, size_t e>                                             //
+// array< array< T, e >, d >& operator+= (                                            //
+//     array< array< T, e >, d >       &x,                                            //
+//     const T                         &y)                                            //
+//                                                                                    //
+// Element-wise increment. Returns:                                                   //
+//     x += y, s.t. x[i][j] += y                                                      //
+// ================================================================================== //
+// INPUT                                                                              //
+// ================================================================================== //
+// - x   : array< array< T, e >, d >, 1st argument of '+=' operator                   //
+// - y   : T, 2nd argument of '+=' operator                                           //
+// ================================================================================== //
+// OUTPUT                                                                             //
+// ================================================================================== //
+// - x   : array< array< T, e >, d >&, reference to first argument                    //
+// ================================================================================== //
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+// none
+
+// ================================================================================== //
+// PERFORM SUM                                                                        //
+// ================================================================================== //
+for (int i = 0; i < d; i++) {
+    x[i] += y;
+} //next i
+
+return (x); };
+
 // Operator "-" ===================================================================== //
 
 // ---------------------------------------------------------------------------------- //
@@ -594,6 +767,179 @@ array<array<T, e>, d>   z;
 z = y - x;
 
 return(z); };
+
+// Operator "-=" ==================================================================== //
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Operator-= for std::array.
+
+    Decrement each element in the input array, using the corresping value
+    on the array at the r.h.s. as negative increment, i.e.:
+    x[i] -= y[i] for all i = 0, ..., d-1
+    Template parameters, T, can by any type for which the operator-= is defined.
+
+    The element-wise decrement is performed recursively, i.e. if the i-th element of x and
+    the i-th element of y are std::array, operator-= calls itself
+    to decrement x[i][j] by y[i][j], j = 0, ..., x[i].size()-1
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result first argument decremented with r.h.s. values.
+*/
+template <class T, size_t d>
+array< T, d >& operator-= (
+  array< T, d >                 &x,
+  const array< T, d >           &y
+) {
+
+// ================================================================================== //
+// template <class T, size_t d>                                                       //
+// array< T, d >& operator-= (                                                        //
+//   array< T, d >                 &x,                                                //
+//   const array< T, d >           &y)                                                //
+//                                                                                    //
+// Element-wise decrement. Returns:                                                   //
+//      x -= y, s.t. x[i] -= y[i]                                                     //
+// ================================================================================== //
+// INPUT                                                                              //
+// ================================================================================== //
+// - x   : array< T, d >, 1st argument of '-=' operator                               //
+// - y   : array< T, d >, 2nd argument of '-=' operator                               //
+// ================================================================================== //
+// OUTPUT                                                                             //
+// ================================================================================== //
+// - x   : array< T, d >&, reference to first argument                                //
+// ================================================================================== //
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+// none
+
+// ================================================================================== //
+// PERFORM SUM                                                                        //
+// ================================================================================== //
+for (int i = 0; i < d; i++){
+    x[i] -= y[i];
+};
+
+return (x); };
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Operator-= for std::array.
+
+    Decrement each element in the input array, using the value
+    on the r.h.s. as negative increment, i.e.:
+    x[i] -= y for all i = 0, ..., d-1
+    Template parameters, T, can by any type for which the operator-= is defined.
+
+    The element-wise decrement is performed recursively, i.e. if the i-th element of x and
+    y are std::array, operator-= calls itself
+    to decrement x[i][j] by y[j], j = 0, ... , x[i].size()-1
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result first argument decremented with r.h.s. values.
+*/
+template <class T, size_t d>
+array< T, d >& operator-= (
+  array< T, d >                 &x,
+  const T                       &y
+) {
+
+// ================================================================================== //
+// template <class T, size_t d>                                                       //
+// array< T, d >& operator-= (                                                        //
+//   array< T, d >                 &x,                                                //
+//   const T                       &y)                                                //
+//                                                                                    //
+// Element-wise decrement. Returns:                                                   //
+//        x -= y, s.t x[i] -= y                                                       //
+// ================================================================================== //
+// INPUT                                                                              //
+// ================================================================================== //
+// - x   : array< T, d >, 1st argument of '-=' operator                               //
+// - y   : T          , 2nd argument of '-=' operator                                 //
+// ================================================================================== //
+// OUTPUT                                                                             //
+// ================================================================================== //
+// - x   : array< T, d >&, reference to first argument                                //
+// ================================================================================== //
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+// none
+
+// ================================================================================== //
+// PERFORM SUM                                                                        //
+// ================================================================================== //
+for (int i = 0; i < d; i++){
+    x[i] -= y;
+};
+
+return (x); };
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Operator-= for std::array.
+
+    Decrement each element in the input array, using the value
+    on the r.h.s. as negative increment, i.e.:
+    x[i][j] -= y for all j = 0, ..., e-1, i = 0, ..., d-1
+    Template parameters, T, can by any type for which the operator-= is defined.
+
+    The element-wise decrement is performed recursively, i.e. if x[i][j] and
+    y are std::array, operator-= calls itself
+    to decrement x[i][j][k] by y[k], k = 0, ... , x.size()-1
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result first argument decremented with r.h.s. values.
+*/
+template <class T, size_t d, size_t e>
+array< array< T, e >, d >& operator-= (
+    array< array< T, e >, d >       &x,
+    const T                         &y
+) {
+
+// ================================================================================== //
+// template <class T, size_t d, size_t e>                                             //
+// array< array< T, e >, d >& operator-= (                                            //
+//     array< array< T, e >, d >       &x,                                            //
+//     const T                         &y)                                            //
+//                                                                                    //
+// Element-wise decrement. Returns:                                                   //
+//     x -= y, s.t. x[i][j] -= y                                                      //
+// ================================================================================== //
+// INPUT                                                                              //
+// ================================================================================== //
+// - x   : array< array< T, e >, d >, 1st argument of '-=' operator                   //
+// - y   : T, 2nd argument of '-=' operator                                           //
+// ================================================================================== //
+// OUTPUT                                                                             //
+// ================================================================================== //
+// - x   : array< array< T, e >, d >&, reference to first argument                    //
+// ================================================================================== //
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+// none
+
+// ================================================================================== //
+// PERFORM SUM                                                                        //
+// ================================================================================== //
+for (int i = 0; i < d; i++) {
+    x[i] -= y;
+} //next i
+
+return (x); };
 
 // Operator "*" ===================================================================== //
 

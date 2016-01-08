@@ -153,7 +153,7 @@ void vectorOperators_Ex(
     cout << "Y = ";
     cout << Y << endl;
 
-    // Sum between vectors
+    // Increment vectors
     cout << "Increment of 1D vector with 1D vector ------------ " << endl;
     cout << "x += y, x = ";
     x += y;
@@ -278,7 +278,7 @@ void vectorOperators_Ex(
     cout << "Y = ";
     cout << Y << endl;
 
-    // Sum between vectors
+    // Negative increment of vectors
     cout << "Increment of 1D vector with 1D vector ------------ " << endl;
     cout << "x -= y, x = ";
     x -= y;
@@ -871,12 +871,15 @@ void arrayOperators_Ex(
 // ================================================================================== //
 {
 
+    // Output message
+    cout << "** operator+ for std::array" << endl;
+
     // Scope variables
     double                      a = 1, b = 2;
     array<double, 2>            x, y, z;
     array<array<double, 2>, 2>  X, Y, Z;
 
-    // Initialize vectors
+    // Initialize arrays
     x[0] = 1.0;    x[1] = 2.0;
     y = x;
     X[0][0] = 1.0;    X[0][1] = 2.0;
@@ -896,7 +899,7 @@ void arrayOperators_Ex(
     cout << "Y = ";
     cout << Y << endl;
 
-    // Sum between vectors
+    // Sum between arrays
     cout << "sum between 1D arrays ----------------------------- " << endl;
     cout << "x + y = ";
     z = x+y;
@@ -926,12 +929,76 @@ void arrayOperators_Ex(
     cout << "Y + b = ";
     Z = Y + b;
     cout << Z << endl;
+    cout << endl;
+}
+
+// ================================================================================== //
+// OPERATOR "+="                                                                      //
+// ================================================================================== //
+{
+
+    // Output message
+    cout << "** operator+= for std::array" << endl;
+
+    // Scope variables
+    double                              a = 1, b = 2;
+    array<double, 2>                    c, d;
+    array<double, 3>                    x, y, z;
+    array<array<double, 2>, 3>          X, Y, Z;
+
+    // Initialize arrays
+    c[0] = 1.0;    c[1] = 2.0;
+    d = c;
+    x[0] = 1.0;    x[1] = 2.0;    x[2] = 3.0;
+    y = x;
+    X[0][0] = 1.0;    X[0][1] = 2.0;
+    X[1][0] = 3.0;    X[1][1] = 4.0;
+    X[2][0] = 5.0;    X[2][1] = 6.0;
+    Y = X;
+
+    // Variables
+    cout << "a = " << a << endl;
+    cout << "b = " << b << endl;
+    cout << "x = ";
+    cout << x << endl;
+    cout << "y = ";
+    cout << y << endl;
+    cout << "X = ";
+    cout << X << endl;
+    cout << "Y = ";
+    cout << Y << endl;
+
+    // Increment of arrays
+    cout << "Increment of 1D array with 1D array -------------- " << endl;
+    cout << "x += y, x = ";
+    x += y;
+    cout << x << endl;
+    cout << "Increment of 2D array with 2D array -------------- " << endl;
+    cout << "X += Y, X = ";
+    X += Y;
+    cout << X << endl;
+    cout << "Increment of 2D array with 1D array -------------- " << endl;
+    cout << "X += y, X = ";
+    X += c;
+    cout << X << endl;
+    cout << "Increment of 1D array with constant -------------- " << endl;
+    cout << "x += a, x = ";
+    x += a;
+    cout << x << endl;
+    cout << "Increment of 2D array with constant -------------- " << endl;
+    cout << "X += a, X = ";
+    X += a;
+    cout << X << endl;
+    cout << endl;
 }
 
 // ================================================================================== //
 // OPERATOR "-"                                                                       //
 // ================================================================================== //
 {
+
+    // Output message
+    cout << "** operator- for std::array" << endl;
 
     // Scope variables
     double                      a = 1, b = 2;
@@ -958,7 +1025,7 @@ void arrayOperators_Ex(
     cout << "Y = ";
     cout << Y << endl;
 
-    // Sum between vectors
+    // Sum between arrays
     cout << "diff between 1D arrays ---------------------------- " << endl;
     cout << "x - y = ";
     z = x - y;
@@ -988,6 +1055,65 @@ void arrayOperators_Ex(
     cout << "Y - b = ";
     Z = Y - b;
     cout << Z << endl;
+    cout << endl;
+}
+
+// ================================================================================== //
+// OPERATOR "-="                                                                      //
+// ================================================================================== //
+{
+    // Output message
+    cout << "** operator-= for std::array" << endl;
+
+    // Scope variables
+    double                      a = 1, b = 2;
+    array<double, 2>            c, d;
+    array<double, 3>            x, y, z;
+    array<array<double, 2>, 3>  X, Y, Z;
+
+    // Initialize arrays
+    c[0] = 1.0;    c[1] = 2.0;
+    d = c;
+    x[0] = 1.0;    x[1] = 2.0;    x[2] = 3.0;
+    y = x;
+    X[0][0] = 1.0;    X[0][1] = 2.0;
+    X[1][0] = 3.0;    X[1][1] = 4.0;
+    X[2][0] = 5.0;    X[2][1] = 6.0;
+    Y = X;
+
+    // Variables
+    cout << "a = " << a << endl;
+    cout << "b = " << b << endl;
+    cout << "x = ";
+    cout << x << endl;
+    cout << "y = ";
+    cout << y << endl;
+    cout << "X = ";
+    cout << X << endl;
+    cout << "Y = ";
+    cout << Y << endl;
+
+    // Negative increment of arrays
+    cout << "Increment of 1D array with 1D array -------------- " << endl;
+    cout << "x -= y, x = ";
+    x -= y;
+    cout << x << endl;
+    cout << "Increment of 2D array with 2D array -------------- " << endl;
+    cout << "X -= Y, X = ";
+    X -= Y;
+    cout << X << endl;
+    cout << "Increment of 2D array with 1D array -------------- " << endl;
+    cout << "X -= y, X = ";
+    X -= c;
+    cout << X << endl;
+    cout << "Increment of 1D array with constant -------------- " << endl;
+    cout << "x -= a, x = ";
+    x -= a;
+    cout << x << endl;
+    cout << "Increment of 2D array with constant -------------- " << endl;
+    cout << "X -= a, X = ";
+    X -= a;
+    cout << X << endl;
 }
 
 // ================================================================================== //
@@ -1000,7 +1126,7 @@ void arrayOperators_Ex(
     array<double, 2>            x, y, z;
     array<array<double, 2>, 2>  X, Y, Z;
 
-    // Initialize vectors
+    // Initialize arrays
     x[0] = 1.0;    x[1] = 2.0;
     y = x;
     X[0][0] = 1.0;    X[0][1] = 2.0;
@@ -1020,7 +1146,7 @@ void arrayOperators_Ex(
     cout << "Y = ";
     cout << Y << endl;
 
-    // Sum between vectors
+    // Sum between arrays
     cout << "prod between 1D arrays ---------------------------- " << endl;
     cout << "x * y = ";
     z = x * y;
@@ -1062,7 +1188,7 @@ void arrayOperators_Ex(
     array<double, 2>            x, y, z;
     array<array<double, 2>, 2>  X, Y, Z;
 
-    // Initialize vectors
+    // Initialize arrays
     x[0] = 1.0;    x[1] = 2.0;
     y = x;
     X[0][0] = 1.0;    X[0][1] = 2.0;
@@ -1082,7 +1208,7 @@ void arrayOperators_Ex(
     cout << "Y = ";
     cout << Y << endl;
 
-    // Sum between vectors
+    // Sum between arrays
     cout << "div between 1D arrays ---------------------------- " << endl;
     cout << "x / y = ";
     z = x / y;
@@ -1223,11 +1349,11 @@ void arrayMathFunct_Ex(
     minval(a,mm);
     cout << "minval(a) = " << mm << endl;
 
-    // Minval of 1D vector ---------------------------------------------------------- //
+    // Minval of 1D arrays ---------------------------------------------------------- //
     minval(x,mm);
     cout << "minval(x) = " << mm << endl;
 
-    // Minval of 2D vector ---------------------------------------------------------- //
+    // Minval of 2D arrays ---------------------------------------------------------- //
     minval(y,nn);
     cout << "minval(y) = " << nn << endl;
 
@@ -1303,11 +1429,11 @@ void arrayMathFunct_Ex(
     maxval(a,mm);
     cout << "maxval(a) = " << mm << endl;
 
-    // Minval of 1D vector ---------------------------------------------------------- //
+    // Minval of 1D arrays ---------------------------------------------------------- //
     maxval(x,mm);
     cout << "maxval(x) = " << mm << endl;
 
-    // Minval of 2D vector ---------------------------------------------------------- //
+    // Minval of 2D arrays ---------------------------------------------------------- //
     maxval(y,nn);
     cout << "maxval(y) = " << nn << endl;
 
@@ -1341,11 +1467,11 @@ void arrayMathFunct_Ex(
     sum(a,mm);
     cout << "sum(a) = " << mm << endl;
 
-    // Minval of 1D vector ---------------------------------------------------------- //
+    // Minval of 1D arrays ---------------------------------------------------------- //
     sum(x,mm);
     cout << "sum(x) = " << mm << endl;
 
-    // Minval of 2D vector ---------------------------------------------------------- //
+    // Minval of 2D arrays ---------------------------------------------------------- //
     sum(y,nn);
     cout << "sum(y) = " << nn << endl;
 
@@ -1377,10 +1503,10 @@ void arrayMathFunct_Ex(
     // Minval of double ------------------------------------------------------------- //
     cout << "abs(a) = " << abs(a) << endl;
 
-    // Minval of 1D vector ---------------------------------------------------------- //
+    // Minval of 1D arrays ---------------------------------------------------------- //
     cout << "abs(x) = " << abs(x) << endl;
 
-    // Minval of 2D vector ---------------------------------------------------------- //
+    // Minval of 2D arrays ---------------------------------------------------------- //
     cout << "abs(y) = " << abs(y) << endl;
 
 }
@@ -1411,10 +1537,10 @@ void arrayMathFunct_Ex(
     // Minval of double ------------------------------------------------------------- //
     cout << "pow(a,2) = " << pow(a,2.0) << endl;
 
-    // Minval of 1D vector ---------------------------------------------------------- //
+    // Minval of 1D arrays ---------------------------------------------------------- //
     cout << "pow(x,2) = " << pow(x,2.0) << endl;
 
-    // Minval of 2D vector ---------------------------------------------------------- //
+    // Minval of 2D arrays ---------------------------------------------------------- //
     cout << "pow(y,2) = " << pow(y,2.0) << endl;
 
 }
@@ -1436,12 +1562,12 @@ void arrayMathFunct_Ex(
     cout << "x = " << x << endl;
     cout << "i = " << i << endl;
 
-    // norm of vector< double > ----------------------------------------------------- //
+    // norm of array< double > ------------------------------------------------------ //
     cout << "norm(x,2) = " << norm(x,2) << endl;
     cout << "norm(x,3) = " << norm(x,3) << endl;
     cout << "norm_inf(x) = " << norm_inf(x) << endl;
 
-    // norm of vector< int > -------------------------------------------------------- //
+    // norm of array< int > --------------------------------------------------------- //
     cout << "norm(i,2) = " << norm(i,2) << endl;
     cout << "norm(i,3) = " << norm(i,3) << endl;
     cout << "norm_inf(i) = " << norm_inf(i) << endl;
@@ -1469,10 +1595,10 @@ void arrayMathFunct_Ex(
     cout << "i = " << i << endl;
     cout << "j = " << i << endl;
 
-    // Dot_Product of vector< double > ---------------------------------------------- //
+    // Dot_Product of array< double > ----------------------------------------------- //
     cout << "Dot_Product(x,y) = " << Dot_Product(x,y) << endl;
 
-    // Dot_Product of vector< int > ------------------------------------------------- //
+    // Dot_Product of array< int > -------------------------------------------------- //
     cout << "Dot_Product(i,j) = " << Dot_Product(i,j) << endl;
 
 }
@@ -1602,11 +1728,15 @@ return; };
 // MAIN                                                                               //
 // ================================================================================== //
 int main(void) {
-
+cout << "========== TEST base operators for std::vector ==========" << endl;
 vectorOperators_Ex();
+cout << "========== TEST math functions for std::vector ==========" << endl;
 vectorMathFunct_Ex();
+cout << "========== TEST base operators for std::array ===========" << endl;
 arrayOperators_Ex();
+cout << "========== TEST math functions for std::array ===========" << endl;
 arrayMathFunct_Ex();
+cout << "============ TEST operators for std::string =============" << endl;
 stringOperators_Ex();
 
 return(0); };
