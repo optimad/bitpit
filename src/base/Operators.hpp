@@ -69,6 +69,23 @@ vector< vector< T > > operator+ (                                               
         const T                       &                                                     // 2nd argument (constant)
         );
 
+// Operator "+=" -------------------------------------------------------------------- //
+template <class T>
+vector< T >& operator+= (                                                             // ELEMENT-WISE INCREMENT OF A VECTOR
+        vector< T >                   &,                                                    // 1st argument (vector)
+        const vector< T >             &                                                     // 2nd argument (vector)
+        );
+template <class T>
+vector< T >& operator+= (                                                             // ELEMENT-WISE INCREMENT OF A VECTOR
+        vector< T >                   &,                                                    // 1st argument (vector)
+        const T                       &                                                     // 2nd argument (constant)
+        );
+template <class T>
+vector< vector< T > >& operator+= (                                                   // ELEMENT-WISE INCREMENT OF A VECTOR
+        vector< vector< T > >         &,                                                    // 1st argument (vector)
+        const T                       &                                                     // 2nd argument (constant)
+        );
+
 // Operator "-" --------------------------------------------------------------------- //
 template <class T>
 vector< T > operator- (                                                               // ELEMENT-WISE DIFFERENCE BETWEEN TWO VECTORS

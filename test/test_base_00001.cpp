@@ -55,6 +55,9 @@ void vectorOperators_Ex(
 // ================================================================================== //
 {
 
+    // Output message
+    cout << "** operator+ for std::vector" << endl;
+
     // Scope variables
     double              a = 1, b = 2;
     dvector1D           x, y, z;
@@ -112,12 +115,74 @@ void vectorOperators_Ex(
     cout << "Y + b = ";
     Z = Y + b;
     cout << Z << endl;
+    cout << endl;
+}
+
+// ================================================================================== //
+// OPERATOR "+="                                                                      //
+// ================================================================================== //
+{
+
+    // Output message
+    cout << "** operator+= for std::vector" << endl;
+
+    // Scope variables
+    double              a = 1, b = 2;
+    dvector1D           x, y, z;
+    dvector2D           X, Y, Z;
+
+    // Initialize vectors
+    x.resize(3, 1.0);
+    x[0] = 1.0;    x[1] = 2.0;    x[2] = 3.0;
+    y = x;
+    X.resize(3, dvector1D(2, 0.0));
+    X[0][0] = 1.0;    X[0][1] = 2.0;
+    X[1][0] = 3.0;    X[1][1] = 4.0;
+    X[2][0] = 5.0;    X[2][1] = 6.0;
+    Y = X;
+
+    // Variables
+    cout << "a = " << a << endl;
+    cout << "b = " << b << endl;
+    cout << "x = ";
+    cout << x << endl;
+    cout << "y = ";
+    cout << y << endl;
+    cout << "X = ";
+    cout << X << endl;
+    cout << "Y = ";
+    cout << Y << endl;
+
+    // Sum between vectors
+    cout << "Increment of 1D vector with 1D vector ------------ " << endl;
+    cout << "x += y, x = ";
+    x += y;
+    cout << x << endl;
+    cout << "Increment of 2D vector with 2D vector ------------ " << endl;
+    cout << "X += Y, X = ";
+    X += Y;
+    cout << X << endl;
+    cout << "Increment of 2D vector with 1D vector ------------ " << endl;
+    cout << "X += y, X = ";
+    X += y;
+    cout << X << endl;
+    cout << "Increment of 1D vector with constant ------------- " << endl;
+    cout << "x += a, x = ";
+    x += a;
+    cout << x << endl;
+    cout << "Increment of 2D vector with constant ------------- " << endl;
+    cout << "X += a, X = ";
+    X += a;
+    cout << X << endl;
+    cout << endl;
 }
 
 // ================================================================================== //
 // OPERATOR "-"                                                                       //
 // ================================================================================== //
 {
+    // Output message
+    cout << "** operator- for std::vector" << endl;
 
     // Scope variables
     double              a = 1, b = 2;
@@ -176,6 +241,64 @@ void vectorOperators_Ex(
     cout << "Y - b = ";
     Z = Y - b;
     cout << Z << endl;
+    cout << endl;
+}
+
+// ================================================================================== //
+// OPERATOR "-="                                                                      //
+// ================================================================================== //
+{
+    // Output message
+    cout << "** operator-= for std::vector" << endl;
+
+    // Scope variables
+    double              a = 1, b = 2;
+    dvector1D           x, y, z;
+    dvector2D           X, Y, Z;
+
+    // Initialize vectors
+    x.resize(3, 1.0);
+    x[0] = 1.0;    x[1] = 2.0;    x[2] = 3.0;
+    y = x;
+    X.resize(3, dvector1D(2, 0.0));
+    X[0][0] = 1.0;    X[0][1] = 2.0;
+    X[1][0] = 3.0;    X[1][1] = 4.0;
+    X[2][0] = 5.0;    X[2][1] = 6.0;
+    Y = X;
+
+    // Variables
+    cout << "a = " << a << endl;
+    cout << "b = " << b << endl;
+    cout << "x = ";
+    cout << x << endl;
+    cout << "y = ";
+    cout << y << endl;
+    cout << "X = ";
+    cout << X << endl;
+    cout << "Y = ";
+    cout << Y << endl;
+
+    // Sum between vectors
+    cout << "Increment of 1D vector with 1D vector ------------ " << endl;
+    cout << "x -= y, x = ";
+    x -= y;
+    cout << x << endl;
+    cout << "Increment of 2D vector with 2D vector ------------ " << endl;
+    cout << "X -= Y, X = ";
+    X -= Y;
+    cout << X << endl;
+    cout << "Increment of 2D vector with 1D vector ------------ " << endl;
+    cout << "X -= y, X = ";
+    X -= y;
+    cout << X << endl;
+    cout << "Increment of 1D vector with constant ------------- " << endl;
+    cout << "x -= a, x = ";
+    x -= a;
+    cout << x << endl;
+    cout << "Increment of 2D vector with constant ------------- " << endl;
+    cout << "X -= a, X = ";
+    X -= a;
+    cout << X << endl;
 }
 
 // ================================================================================== //
