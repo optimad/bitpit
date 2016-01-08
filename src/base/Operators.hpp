@@ -364,6 +364,30 @@ vector<T> Cross_Product(                                                        
         vector<T> const             &                                                     // (input) 2nd argument of cross product
         );
 
+// Various -------------------------------------------------------------------------- //
+template<typename T, typename std::enable_if< std::is_scalar< T >::value>::type* = nullptr>
+ostream& display(                                                                     // DUMMY ROUTINE FOR RECURSIVE TEMPLATED FUNCTION display
+        ostream                     &,                                                    // (input/output) output stream
+        const T                     &                                                     // (input) vector to be displayed
+        );
+template<class T>
+ostream& display(                                                                     // DISPLAY VECTOR IN A NICELY FORMATTED FORM
+        ostream                     &,                                                    // (input/output) output stream
+        const vector<T>             &,                                                    // (input) vector to be displayed
+        unsigned int                 padding = 0                                          // (input/optional) number of trailing spaces
+        );
+template<typename T, typename std::enable_if< std::is_scalar< T >::value>::type* = nullptr>
+ofstream& display(                                                                    // DUMMY ROUTINE FOR RECURSIVE TEMPLATED FUNCTION display
+        ofstream                    &,                                                    // (input/output) output stream
+        const T                     &                                                     // (input) vector to be displayed
+        );
+template<class T>
+ofstream& display(                                                                    // DISPLAY VECTOR IN A NICELY FORMATTED FORM
+        ofstream                    &,                                                    // (input/output) output stream
+        const vector<T>             &,                                                    // (input) vector to be displayed
+        unsigned int                 padding = 0                                          // (input/optional) number of trailing spaces
+        );
+
 // C++ v10.0 arrays ================================================================= //
 
 // Operator "+" --------------------------------------------------------------------- //

@@ -1599,15 +1599,11 @@ unsigned int         n = x.size();
 // ================================================================================== //
 // OUTPUT VECTOR CONTENT                                                              //
 // ================================================================================== //
-if (n == 0) {
-    out << "[]";
-    return(out);
-}
-out << "[";
+if (n == 0) return(out);
 for (int i = 0; i < n-1; i++) {
-    out << x[i] << ", ";
+    out << x[i] << " ";
 } //next i
-out << x[n-1] << "]";
+out << x[n-1];
 
 return(out); };
 
@@ -1801,4 +1797,224 @@ while (in.good()) {
 }
 
 return(in); };
+
+// Miscellanea ====================================================================== //
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Dummy function for recursive templated routines display
+
+    \param[in,out] out output stream
+    \param[in] x variable to be displayed
+    \param[in] padding (default = 0), number of trailing spaces
+
+    \result reference to output stream
+*/
+template<typename T, typename std::enable_if< std::is_scalar< T >::value>::type* = nullptr>
+ostream& display(
+    ostream             &out,
+    const T             &x
+) {
+
+// ================================================================================== //
+// template<typename T,                                                               //
+//          typename std::enable_if< std::is_scalar< T >::value>::type* = nullptr>    //
+// ostream& display(                                                                  //
+//     ostream             &out,                                                      //
+//     const T             &x,                                                        //
+//     unsigned int         padding)                                                  //
+//                                                                                    //
+// Display variable in a nicely formatted form.                                       //
+// ================================================================================== //
+// INPUT                                                                              //
+// ================================================================================== //
+// - out      : ostream, output stream                                                //
+// - x        : T, variable to be displayed.                                          //
+// - padding  : unsigned int (default = 0), number of trailing spaces                 //
+// ================================================================================== //
+// OUTPUT                                                                             //
+// ================================================================================== //
+// - out      : ostream&, reference to output stream                                  //
+// ================================================================================== //
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+// none
+
+// ================================================================================== //
+// DISPLAY VARIABLE                                                                   //
+// ================================================================================== //
+out << x;
+
+return(out); }
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Display vector in a nicely formatted to a std::ostream
+
+    \param[in,out] out output stream
+    \param[in] x vector to be displayed
+    \param[in] padding (default = 0) number of trailing spaces
+
+    \result reference to output stream
+*/
+template<class T>
+ostream& display(
+    ostream             &out,
+    const vector<T>     &x,
+    unsigned int         padding
+) {
+
+// ================================================================================== //
+// template<class T>                                                                  //
+// ostream& display(                                                                  //
+//     ostream             &out,                                                      //
+//     const vector<T>     &x,                                                        //
+//     unsigned int         padding)                                                  //
+//                                                                                    //
+// Display vector in a nicely formatted form.                                         //
+// ================================================================================== //
+// INPUT                                                                              //
+// ================================================================================== //
+// - out      : ostream, output stream                                                //
+// - x        : vector<T>, vector to be displayed                                     //
+// - padding  : unsigned int (default = 0), number of trailing spaces                 //
+// ================================================================================== //
+// OUTPUT                                                                             //
+// ================================================================================== //
+// - out      : ostream&, reference to output stream                                  //
+// ================================================================================== //
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+
+// Counters
+typename vector<T>::const_iterator      i, e = --x.cend();
+
+// ================================================================================== //
+// DISPLAY VECTOR                                                                     //
+// ================================================================================== //
+if (x.size() == 0) {
+    out << "[ ]";
+    return(out);
+}
+out << string(padding, ' ') << "[ ";
+for (i = x.begin(); i != e; ++i) {
+    display(out, *i) << ", ";
+} //next i
+i = --x.cend();
+display(out, *i) << " ]";
+
+return(out); }
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Dummy function for recursive templated routines display
+
+    \param[in,out] out output stream
+    \param[in] x variable to be displayed
+    \param[in] padding (default = 0), number of trailing spaces
+
+    \result reference to output stream
+*/
+template<typename T, typename std::enable_if< std::is_scalar< T >::value>::type* = nullptr>
+ofstream& display(
+    ofstream            &out,
+    const T             &x
+) {
+
+// ================================================================================== //
+// template<typename T,                                                               //
+//          typename std::enable_if< std::is_scalar< T >::value>::type* = nullptr>    //
+// ofstream& display(                                                                 //
+//     ofstream            &out,                                                      //
+//     const T             &x,                                                        //
+//     unsigned int         padding)                                                  //
+//                                                                                    //
+// Display variable in a nicely formatted form.                                       //
+// ================================================================================== //
+// INPUT                                                                              //
+// ================================================================================== //
+// - out      : ofstream, output stream                                               //
+// - x        : T, variable to be displayed.                                          //
+// - padding  : unsigned int (default = 0), number of trailing spaces                 //
+// ================================================================================== //
+// OUTPUT                                                                             //
+// ================================================================================== //
+// - out      : ostream&, reference to output stream                                  //
+// ================================================================================== //
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+// none
+
+// ================================================================================== //
+// DISPLAY VARIABLE                                                                   //
+// ================================================================================== //
+out << x;
+
+return(out); }
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Display vector in a nicely formatted to a std::ofstream
+
+    \param[in,out] out output file stream
+    \param[in] x vector to be displayed
+    \param[in] padding (default = 0) number of trailing spaces
+
+    \result reference to output stream
+*/
+template<class T>
+ofstream& display(
+    ofstream            &out,
+    const vector<T>     &x,
+    unsigned int         padding
+) {
+
+// ================================================================================== //
+// template<class T>                                                                  //
+// ofstream& display(                                                                 //
+//     ofstream            &out,                                                      //
+//     const vector<T>     &x,                                                        //
+//     unsigned int         padding)                                                  //
+//                                                                                    //
+// Display vector in a nicely formatted form.                                         //
+// ================================================================================== //
+// INPUT                                                                              //
+// ================================================================================== //
+// - out      : ofstream, output stream                                               //
+// - x        : vector<T>, vector to be displayed                                     //
+// - padding  : unsigned int (default = 0), number of trailing spaces                 //
+// ================================================================================== //
+// OUTPUT                                                                             //
+// ================================================================================== //
+// - out      : ofstream&, reference to output stream                                 //
+// ================================================================================== //
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+
+// Counters
+typename vector<T>::const_iterator      i, e = x.cend();
+
+// ================================================================================== //
+// DISPLAY VECTOR                                                                     //
+// ================================================================================== //
+if (x.size() == 0) {
+    out << "[ ]";
+    return(out);
+}
+out << string(padding, ' ') << "[ ";
+for (i = x.begin(); i != e; ++i) {
+    display(out, *i) << ", ";
+} //next i
+i = --x.cend();
+display(out, *i) << " ]";
+
+return(out); }
 
