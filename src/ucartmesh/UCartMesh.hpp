@@ -1,412 +1,214 @@
-// ========================================================================== //
-//                 - GRID MANAGER FOR CARTESIAN MESHES -                      //
-//                                                                            //
-// Grid manager for cartesian meshes                                          //
-// ========================================================================== //
-// INFO                                                                       //
-// ========================================================================== //
-// Author      :   Alessandro Alaia                                           //
-// Version     :   v2.0                                                       //
-//                                                                            //
-// All rights reserved.                                                       //
-// ========================================================================== //
+/*!
+ * \ingroup    UCartMesh
+ * @{
+ * \class      UCartMesh
+ * \brief Uniform Cartesian Mesh with variable spacing in each direction
+ *      
+ * UCartMesh provides the methods to access both Node and Cell indices either through cartesian indices or through a linear index.
+ * Cartesian to Linear and vice versa.
+ * SubSet extraction
+ * Bi/Tri-linear interpolation methods.
+ *
+ */
+
+
+
+
+// INCLUDES                                                                   //
 # ifndef __UCARTMESH_HPP__
 # define __UCARTMESH_HPP__
 
-// ========================================================================== //
-// INCLUDES                                                                   //
-// ========================================================================== //
-
-// Standard template library
 # include <array>
 # include <vector>
-# include <unordered_map>
 # include <string>
-# include <sstream>
-# include <fstream>
 
-// CC_Lib
-# include "Operators.hpp"
-# include "DGF_IOFunct.hpp"
-# include "VTK_IOFunct.hpp"
 
-// ========================================================================== //
 // NAMESPACES                                                                 //
-// ========================================================================== //
-using namespace std;
 
-// ========================================================================== //
 // TYPES DEFINITIONS                                                          //
-// ========================================================================== //
 
 // boolean vectors
-typedef vector< bool >                 bvector1D;
-typedef vector< bvector1D >            bvector2D;
-typedef vector< bvector2D >            bvector3D;
-typedef vector< bvector3D >            bvector4D;
+typedef std::vector< bool >                 bvector1D;
+typedef std::vector< bvector1D >            bvector2D;
+typedef std::vector< bvector2D >            bvector3D;
+typedef std::vector< bvector3D >            bvector4D;
 
 // characters vectors
-typedef vector< char >                 cvector1D;
-typedef vector< cvector1D >            cvector2D;
-typedef vector< cvector2D >            cvector3D;
-typedef vector< cvector3D >            cvector4D;
+typedef std::vector< char >                 cvector1D;
+typedef std::vector< cvector1D >            cvector2D;
+typedef std::vector< cvector2D >            cvector3D;
+typedef std::vector< cvector3D >            cvector4D;
 
 // integer vectors
-typedef vector< int >                  ivector1D;
-typedef vector< ivector1D >            ivector2D;
-typedef vector< ivector2D >            ivector3D;
-typedef vector< ivector3D >            ivector4D;
+typedef std::vector< int >                  ivector1D;
+typedef std::vector< ivector1D >            ivector2D;
+typedef std::vector< ivector2D >            ivector3D;
+typedef std::vector< ivector3D >            ivector4D;
 
-typedef array<int,3>                   iarray3E;
+typedef std::array<int,3>                   iarray3E;
 
 // double vectors
-typedef vector< double >               dvector1D;
-typedef vector< dvector1D >            dvector2D;
-typedef vector< dvector2D >            dvector3D;
-typedef vector< dvector3D >            dvector4D;
+typedef std::vector< double >               dvector1D;
+typedef std::vector< dvector1D >            dvector2D;
+typedef std::vector< dvector2D >            dvector3D;
+typedef std::vector< dvector3D >            dvector4D;
 
-typedef array<double,3>                darray3E;
-typedef vector<darray3E>               dvecar3E;
+typedef std::array<double,3>                darray3E;
 
 // string vectors
-typedef vector< string >               svector1D;
-typedef vector< svector1D >            svector2D;
-typedef vector< svector2D >            svector3D;
-typedef vector< svector3D >            svector4D;
+typedef std::vector< std::string >          svector1D;
+typedef std::vector< svector1D >            svector2D;
+typedef std::vector< svector2D >            svector3D;
+typedef std::vector< svector3D >            svector4D;
 
 class UCartMesh{
 
     // Members ============================================================== //
     private:
 
-        int                 dim;
-        int                 nCells ;
-        int                 nPoints ;
-        int                 CellsInIJPlane;
-        int                 PointsInIJPlane;
+        int                 dim;                                /**< number of space dimensions*/
+        int                 nCells ;                            /**< number of cells in grid*/
+        int                 nNodes ;                            /**< number of nodes in grid*/
+        int                 CellsInIJPlane;                     /**< number of cells in the IJ plane*/
+        int                 NodesInIJPlane;                     /**< number of nodes in the IJ plane*/
 
-        darray3E            B0;                                 // left/lower/front limit point
-        darray3E            B1;                                 // right/upper/rear limit point
+        darray3E            B0;                                 /**< min point of axis aligned boundig box*/
+        darray3E            B1;                                 /**< max point of axis aligned boundig box*/
 
-        iarray3E            nc;                                 // Number of cells in each direction
-        iarray3E            np;                                 // Number of points in each direction
-        darray3E            h;                                  // grid spacing in each direction
+        iarray3E            nc;                                 /**< number of cells in each direction; if 2D nc[2]=1 anyway */
+        iarray3E            np;                                 /**< number of nodes in each direction; if 2D np[2]=1 anyway */
+        darray3E            h;                                  /**< grid spacing in each direction*/
 
-        dvector2D           center;                             // Cell's centers coordinates
-        dvector2D           edge;                               // Cell's edges coordinates
+        dvector2D           center;                             /**< center coordinates in each direction */
+        dvector2D           edge;                               /**< node coordinates in each direction */
 
-        array<int,6>        whichDirection ;
-        array<int,6>        whichStep ;
+        std::array<int,6>   whichDirection ;                    /**< maps face indices [0...5] to space direction [0...2] */
+        std::array<int,6>   whichStep ;                         /**< maps face indices [0...5] to positive or negative steps */
 
-        int                 status ;
+        int                 status ;                            /**< indentifier for mesh status; is incresed each time mesh is moified */
 
-        // Constructors ========================================================= //
+        // Constructors, Destructor, assignment================================== //
     public:
 
-        UCartMesh(                                              // Default constructor for Class_UCartMesh2D
-                void                                            // (input) none
-                );
+        UCartMesh( ) ;
+        UCartMesh( darray3E const &, darray3E const &, iarray3E const &, int dim=3 ) ;
+        UCartMesh( darray3E const &, darray3E const &, int const &, int const & ) ; 
+        UCartMesh( darray3E const &, darray3E const &, int const &, int const &, int const & ) ; 
 
-        UCartMesh(                                              // Custom constructor #1 for Class_UCartMesh2D
-                darray3E       &,                               // (input) lower/left limit point
-                darray3E       &,                               // (input) upper/right limit point
-                iarray3E       &,                               // (input) number of mesh cells in each direction
-                int                                            // (input) dimensions
-                );
+        ~UCartMesh( ) ;
 
-        // Destructors ========================================================== //
-        ~UCartMesh(                                             // Default destructor for Class_UCartMesh2D
-                void
-                );
+        UCartMesh&  operator=( const UCartMesh & ) ;
+        void        setMesh( darray3E const &, darray3E const &, iarray3E const &, int const &dim=3 ) ;
+        void        ClearMesh( ) ;
 
-        // Assignament operators ================================================ //
-        UCartMesh& operator=(                                   // Default assignament operator
-                const UCartMesh &                               // Source mesh
-                );
-
-        // Methods ============================================================== //
     private:
-        void ResizeMesh(                                        // Resize mesh data structure according to mesh size
-                void                                            // (input) none
-                );
+        void        ResizeMesh( ) ;
 
     public:
-        int  getNCells();
-        int  getNCells( int );
+        int         getNCells();
+        int         getNCells( int );
 
-        int  getNPoints();
-        int  getNPoints( int d);
+        int         getNNodes();
+        int         getNNodes( int d);
 
-        void getBoundingBox(
-                darray3E    &,
-                darray3E    &
-                );
+        darray3E    getSpacing( ) ;
+        double      getSpacing( int ) ;
 
-        darray3E  getCenter(
-                int
-                );
-
-        darray3E  getCenter(
-                iarray3E 
-                );
-
-        darray3E  getCenter(
-                int             ,
-                int             ,
-                int k=0            
-                );
-
-        darray3E  getPoint(
-                int
-                );
-
-        darray3E  getPoint(
-                iarray3E 
-                );
-
-        darray3E  getPoint(
-                int             ,
-                int             ,
-                int   k=0          
-                );
-
-        darray3E  getFirstPointOfCell(
-                int
-                );
-
-        darray3E  getLastPointOfCell(
-                int
-                );
-
-        darray3E    getSpacing( 
-                ) ;
-
-        double      getSpacing( 
-                int
-                ) ;
-
-        int         getDim(
-                );
-
-        int         getPointNeighbour(
-                const int            &,
-                const int            &
-                );
-
-        int         getPointNeighbour(
-                const int            &,
-                const int            &,
-                const int            &
-                );
-
-        int         getCellNeighbour(
-                const int            &,
-                const int            &
-                );
-
-        int         getCellNeighbour(
-                const int            &,
-                const int            &,
-                const int            &
-                );
+        int         getDimension( ) ;
+        void        getBoundingBox( darray3E &, darray3E & ) ; 
 
         int         getStatus() ;
 
-
-
-        void setMesh(                                           // Generate mesh
-                darray3E       &,                               // (input) lower/left limit point
-                darray3E       &,                               // (input) upper/right limit point
-                iarray3E       &,                               // (input) number of mesh cells in each direction
-                int        dim=3 
-                );
-
-        void ClearMesh(                                         // Destroy current mesh
-                void                                            // (input) none
-                );
-
-
         // Transformations ------------------------------------------------------ //
-        void Translate(                                         // Translate mesh along x, y axis
-                darray3E       &                                // (input) displacement for each direction
-                );
+        void        Translate( darray3E const & ) ;
 
-        void Scale(                                             // Scale mesh
-                darray3E       &,                               // (input) scaling factor along each dimension
-                darray3E                                        // (input) origin 
-                );
+        void        Scale( darray3E const & ) ; 
+        void        Scale( darray3E const &, darray3E const & ) ; 
 
-        void Scale(                                             // Scale mesh with origin in B0
-                darray3E       &                                // (input) scaling factor along each dimension
-                );
+
+        // Cell information ----------------------------------------------------- //
+        iarray3E    CellCartesianId( darray3E const & ) ;
+        void        CellCartesianId( darray3E const &, int &, int & ) ;
+        void        CellCartesianId( darray3E const &, int &, int &, int & ) ;
+
+        iarray3E    CellCartesianId( int const & ) ; 
+        void        CellCartesianId( int const &, int &, int & ) ; 
+        void        CellCartesianId( int const &, int &, int &, int & ) ; 
+
+        int         CellLinearId( darray3E const & ) ;
+        int         CellLinearId( iarray3E const & ) ;
+        int         CellLinearId( int const &, int const &, int const & k=0 ) ;
+
+        darray3E    getCellCenter( int ) ;
+        darray3E    getCellCenter( iarray3E ) ;
+        darray3E    getCellCenter( int, int, int k=0 ) ;
+
+        void        getCellBoundingBox( int const &, darray3E &, darray3E &) ;
+        void        getCellBoundingBox( iarray3E const &, darray3E &, darray3E &) ;
+        void        getCellBoundingBox( int const &, int const &, darray3E &, darray3E &  ) ;
+        void        getCellBoundingBox( int const &, int const &, int const &, darray3E &, darray3E &  ) ;
+
+        int         getCellNeighbour( int const &, int const & ) ;
+        int         getCellNeighbour( int const &, int const &, int const & ) ;
+
+
+        // Node information ----------------------------------------------------- //
+        iarray3E    NodeCartesianId( darray3E const & ) ;
+        void        NodeCartesianId( darray3E const &, int &, int & ) ;
+        void        NodeCartesianId( darray3E const &, int &, int &, int & ) ;
+
+        iarray3E    NodeCartesianId( int const & ) ;
+        void        NodeCartesianId( int const &, int &, int & ) ;
+        void        NodeCartesianId( int const &, int &, int &, int & ) ;
+
+        int         NodeLinearId( darray3E const & ) ;
+        int         NodeLinearId( iarray3E const & ) ;
+        int         NodeLinearId( int const &, int const &, int const & k=0 ) ;
+
+        darray3E    getNodeCoordinates( int ) ;
+        darray3E    getNodeCoordinates( iarray3E ) ;
+        darray3E    getNodeCoordinates( int, int, int k=0 ) ;
+
+        int         getNodeNeighbour( int const &, int const & ) ;
+        int         getNodeNeighbour( int const &, int const &, int const & ) ;
 
 
         // Format conversion ---------------------------------------------------- //
-        void Cart2Unstr(                                     // Convertes cartesian mesh to unstructured surface mesh
-                int             &,                              // (input/output) number of mesh vertices
-                int             &,                              // (input/output) number of simplicies
-                dvecarr3E       &,                              // (input/output) vertex coordinate list
-                ivector2D       &,                              // (input/output) simplex-vertex connectivity
-                ivector3D       &                               // (input/output) simplex-simplex adjacency
-                );
+        void        Cart2Unstr( int &, int &, std::vector<darray3E> &, ivector2D &, ivector3D & ) ;
 
-        // Mapping -------------------------------------------------------------- //
-        iarray3E CellCartesianId(                              // Return cartesian cell id which encloses a given point
-                const darray3E        &                               // (input) point coordinates
-                );
-
-        iarray3E CellCartesianId(                                // Returns cartesian indices of cell given its global index
-                int                                             // (input) cell global index
-                );
-
-        int CellLinearId(                                    // Return linear cell id which encloses a given point
-                const darray3E        &                               // (input) point coordinates
-                );
-
-        int CellLinearId(                                         // Returns the index of cell given its cartesian indices
-                iarray3E                                        // (input) 1st cartesian indices
-                );
-
-        int CellLinearId(                                         // Returns the index of cell given its cartesian indices
-                int              ,                              // (input) 1st cartesian indices
-                int              ,                              // (input) 1st cartesian indices
-                int  k=0                                        // (input) 2nd cartesian indices
-                );
-
-        iarray3E PointCartesianId(                              // Return cartesian id of closest point 
-                const darray3E        &                               // (input) point coordinates
-                );
-
-        iarray3E PointCartesianId(                               // Returns cartesian indices of a vertex given its global index
-                int                                             // (input) vertex global index
-                );
-
-        int PointLinearId(                                    // Return linear id of closest point
-                const darray3E        &                               // (input) point coordinates
-                );
-
-        int PointLinearId(                                         // Returns the index of cell given its cartesian indices
-                iarray3E                                        // (input) 1st cartesian indices
-                );
-
-        int PointLinearId(                                        // Returns the index of vertex given its cartesian indices
-                int              ,                              // (input) 1st cartesian index
-                int              ,                              // (input) 2nd cartesian index
-                int  k=0                                        // (input) 2nd cartesian index
-                );
 
         // subsets  ------------------------------------------------------------- //
-        ivector1D   CellSubSet(
-                int,
-                int
-                );
+        ivector1D   CellSubSet( int const &, int const & ) ;
+        ivector1D   CellSubSet( iarray3E const &, iarray3E const & ) ;
+        ivector1D   CellSubSet( darray3E const &, darray3E const & ) ;
+
+        ivector1D   NodeSubSet( int const &, int const & ) ;
+        ivector1D   NodeSubSet( iarray3E const &, iarray3E const & ) ;
+        ivector1D   NodeSubSet( darray3E const &, darray3E const & ) ;
 
 
-        ivector1D   CellSubSet(
-                iarray3E,
-                iarray3E
-                );
-
-
-        ivector1D   PointSubSet(
-                int,
-                int
-                );
-
-
-        ivector1D   PointSubSet(
-                iarray3E,
-                iarray3E
-                );
-
-
+        // Point in Grid -------------------------------------------------------- //
+        bool        PointInGrid( darray3E const & ) ;
+        bool        PointInGrid( darray3E const &, int &) ;
+        bool        PointInGrid( darray3E const &, iarray3E &) ;
+        bool        PointInGrid( darray3E const &, int &, int &, int &) ;
 
         // Interpolation -------------------------------------------------------- //
-        //
-        bool PointInGrid(                                       // Point-in-grid condition
-                array<double, 3> const              &           // (input) Point coordinatesertex
-                );
+        int         linearCellInterpolation( darray3E &, ivector1D &, dvector1D & ) ;
+        int         linearNodeInterpolation( darray3E &, ivector1D &, dvector1D & ) ;
 
-        bool PointInGrid(                                       // Point-in-grid condition
-                array<double, 3> const              &,          // (input) Point coordinatesertex
-                int                                 &           // (output) Cell index
-                );
+        void        CellData2NodeData( dvector1D &, dvector1D & ) ;
+        void        NodeData2CellData( dvector1D &, dvector1D & ) ;
 
-        bool PointInGrid(                                       // Point-in-grid condition
-                array<double, 3> const              &,          // (input) Point coordinatesertex
-                uint32_t                             &           // (output) Cell index
-                );
-
-
-        bool PointInGrid(                                       // Point-in-grid condition
-                array<double, 3> const              &,          // (input) Point coordinatesertex
-                iarray3E                            &           // (output) Cell index
-                );
-
-        template <class T>
-            void CellData2PointData(                            // Convertes cell data into point data
-                    vector< T >     &,                          // (input) cell data
-                    vector< T >     &                           // (input/output) point data
-                    );
-        template < class T, typename ... T2 >
-            void CellData2PointData(                            // Convertes arbitrary cell dataset into point data
-                    vector< T >     &,                          // (input) cell data
-                    vector< T >     &,                          // (input/output) point data
-                    T2              &...                        // (input/optional) other cell data set to be converted
-                    );
-        template <class T>
-            void PointData2CellData(                            // Convertes point data into cell data
-                    vector< T >     &,                          // (input) point data
-                    vector< T >     &                           // (input/output) cell data
-                    );
-        template < class T, typename ... T2 >
-            void PointData2CellData(                            // Convertes arbitrary point dataset into cell data
-                    vector< T >     &,                          // (input) cell data
-                    vector< T >     &,                          // (input/output) point data
-                    T2              &...                        // (input/optional) other cell data set to be converted
-                    );
-        template < class T >
-            void interpolateCellData(                           // Interpolate cell data at a specified point
-                    darray3E        &,                          // (input) point coordinates
-                    vector< T >     &,                          // (input) cell data
-                    T               &                           // (input/output) interpolation result
-                    );
-        template < class T, typename ... T2 >
-            void interpolateCellData(                           // Interpolate cell datasets at a specified point
-                    darray3E       &,                          // (input) point coordinates
-                    vector< T >     &,                          // (input) cell data
-                    T               &,                          // (input/output) interpolation result
-                    T2          &...                            // (input/optional) other dataset to be used for interpolation
-                    );
-        template <class T>
-            void interpolatePointData(                          // Interpolate point datasets at a specified point
-                    darray3E       &,                          // (input) point coordinates
-                    vector< T >     &,                          // (input) point data
-                    T               &                           // (input/output) interpolation result
-                    );
-
-        template < class T, typename ... T2 >
-            void interpolatePointData(                          // Interpolate vertex datasets at a specified point
-                    darray3E       &,                          // (input) point coordinates
-                    vector< T >     &,                          // (input) point data
-                    T               &,                          // (input/output) interpolation result
-                    T2          &...                            // (input/optional) other dataset to be used for interpolation
-                    );
-
-        // I/O methods ====================================================================== //
-
-        // Paraview ------------------------------------------------------------------------- //
-        void Export_vtr(string );
-
-        template <class T>
-            void Export_CellData_vtr(string , string , vector<T> &);
-
-        template <class T>
-            void Export_PointData_vtr(string , string , vector<T> &);
-
+        // I/O methods --------------------------------------------------------- //                   
+        void        ExportVtr(std::string, std::string);
+        void        ExportVtr(std::string, std::string, std::string, std::string, std::vector<double> &);
+        void        ExportVtr(std::string, std::string, std::string, std::string, std::vector<int> &);
+        void        ExportVtr(std::string, std::string, std::string, std::string, std::vector<std::array<double,3>> &);
 
 };
 
-#include"UCartMesh.tpp"
 
 #endif
+
+/* @} */

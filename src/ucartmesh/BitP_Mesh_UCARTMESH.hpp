@@ -3,5 +3,14 @@
 
 #include "UCartMesh.hpp"
 #include "Class_UCartMesh.hpp"
+/*!
+ *
+ * @defgroup UCartMesh
+ *
+ * UCartMesh
+ *
+ * Uniform Cartesian Mesh with variable spacing in each direction
+ *
+ */
 
 #endif

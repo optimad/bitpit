@@ -82,20 +82,20 @@ void Demo2D_UCartMesh(
 
         Mesh1.setMesh(B0, B1, nc, 2);
         Mesh2 = Mesh1;
-        Mesh2.Export_vtr("original.vtr");
+        Mesh2.ExportVtr("./","original");
 
         // Scale mesh ----------------------------------------------------------- //
         darray3E        scale;
         scale.fill(2.0) ;
 
         Mesh2.Scale(scale);
-        Mesh2.Export_vtr("scaled.vtr");
+        Mesh2.ExportVtr("./","scaled");
 
         // Translate mesh ------------------------------------------------------- //
         darray3E        transl;
         transl[0] = -0.507;    transl[1] = -0.523;    transl[2] = 0.0 ;
         Mesh2.Translate(transl);
-        Mesh2.Export_vtr("translated.vtr");    
+        Mesh2.ExportVtr("./","translated");
 
     }
 
@@ -110,6 +110,11 @@ void Demo2D_UCartMesh(
         dvector1D           Scalar2( Mesh2.getNCells(), 0.0);
         dvecarr3E           Vectorial1( Mesh1.getNCells(), darray3E() );
         dvecarr3E           Vectorial2( Mesh2.getNCells(), darray3E() );
+
+        int                 n, N ;
+        vector<int>         intStencil ;
+        vector<double>      intWeights ;
+
         darray3E            P;
 
         P[2] = 0.0 ;
@@ -119,7 +124,7 @@ void Demo2D_UCartMesh(
 
         // Intialize cell data on finer mesh ------------------------------------ //
         for( J=0 ; J<Mesh1.getNCells(); ++J){
-            P = Mesh1.getCenter(J) ;
+            P = Mesh1.getCellCenter(J) ;
             Scalar1[J] =  P[0] + P[1] +1.0;
             Vectorial1[J][0] = P[0] + P[1] + 1.0;
             Vectorial1[J][1] = P[0] + P[1] + 1.0;
@@ -128,15 +133,24 @@ void Demo2D_UCartMesh(
 
         // Interpolate cell data on the coarser mesh ---------------------------- //
         for (J = 0; J < Mesh2.getNCells(); J++) {
-            P = Mesh2.getCenter( J ) ;
-            Mesh1.interpolateCellData(P, Scalar1, Scalar2[J], Vectorial1, Vectorial2[J]);
+            P = Mesh2.getCellCenter( J ) ;
+
+            N = Mesh1.linearCellInterpolation( P, intStencil, intWeights );
+
+            Scalar2[J] = 0. ;
+            Vectorial2[J] = {0.,0.,0.} ;
+            for( n=0; n<N; ++n){
+                Scalar2[J] += intWeights[n] * Scalar1[ intStencil[n] ] ;
+                Vectorial2[J] = Vectorial2[J] + intWeights[n] * Vectorial1[ intStencil[n] ] ;
+            };
+
         } //next j
 
         // Export vectorial data ------------------------------------------------ //
-        Mesh1.Export_CellData_vtr("2Doriginal_CSdata.vtr" , "scalar_field" , Scalar1);
-        Mesh2.Export_CellData_vtr("2Dmapped_CSdata.vtr" , "scalar_field" , Scalar2);
-        Mesh1.Export_CellData_vtr("2Doriginal_CVdata.vtr" , "vectorial_field" , Vectorial1);
-        Mesh2.Export_CellData_vtr("2Dmapped_CVdata.vtr" , "vectorial_field" , Vectorial2);
+        Mesh1.ExportVtr("./", "2Doriginal_CSdata", "scalar_field", "Cell", Scalar1);
+        Mesh2.ExportVtr("./", "2Dmapped_CSdata", "scalar_field", "Cell", Scalar2);
+        Mesh1.ExportVtr("./", "2Doriginal_CVdata", "vectorial_field", "Cell", Vectorial1);
+        Mesh2.ExportVtr("./", "2Dmapped_CVdata", "vectorial_field", "Cell", Vectorial2);
     }
 
 
@@ -148,19 +162,24 @@ void Demo2D_UCartMesh(
 
         // Scope variables ------------------------------------------------------ //
         int                 J ;
-        dvector1D           Scalar1( Mesh1.getNPoints(), 1.0);
-        dvector1D           Scalar2( Mesh2.getNPoints(), 0.0);
-        dvecarr3E           Vectorial1( Mesh1.getNPoints(), darray3E() );
-        dvecarr3E           Vectorial2( Mesh1.getNPoints(), darray3E() );
+        dvector1D           Scalar1( Mesh1.getNNodes(), 1.0);
+        dvector1D           Scalar2( Mesh2.getNNodes(), 0.0);
+        dvecarr3E           Vectorial1( Mesh1.getNNodes(), darray3E() );
+        dvecarr3E           Vectorial2( Mesh1.getNNodes(), darray3E() );
+
+        int                 n, N ;
+        vector<int>         intStencil ;
+        vector<double>      intWeights ;
+
         darray3E            P;
 
         // Output message ------------------------------------------------------- //
         cout << " - Point data interpolation" << endl;
 
         // Intialize cell data on finer mesh ------------------------------------ //
-        for (J = 0; J < Mesh1.getNPoints(); J++) {
+        for (J = 0; J < Mesh1.getNNodes(); J++) {
 
-            P = Mesh1.getPoint(J);
+            P = Mesh1.getNodeCoordinates(J);
 
             Scalar1[J]       = P[0] + P[1] + 1.0;
 
@@ -170,18 +189,26 @@ void Demo2D_UCartMesh(
         } //next j
 
         // Interpolate cell data on the coarser mesh ---------------------------- //
-        for (J = 0; J < Mesh2.getNPoints(); J++) {
+        for (J = 0; J < Mesh2.getNNodes(); J++) {
 
-            P = Mesh2.getPoint(J);
+            P = Mesh2.getNodeCoordinates(J);
 
-            Mesh1.interpolatePointData(P, Scalar1, Scalar2[J], Vectorial1, Vectorial2[J]);
+            N = Mesh1.linearNodeInterpolation( P, intStencil, intWeights );
+
+            Scalar2[J] = 0. ;
+            Vectorial2[J] = {0.,0.,0.} ;
+            for( n=0; n<N; ++n){
+                Scalar2[J] += intWeights[n] * Scalar1[ intStencil[n] ] ;
+                Vectorial2[J] = Vectorial2[J] + intWeights[n] * Vectorial1[ intStencil[n] ] ;
+            };
+
         } //next j
 
         // Export vectorial data ------------------------------------------------ //
-        Mesh1.Export_PointData_vtr("2Doriginal_PSdata.vtr" , "scalar_field" , Scalar1);
-        Mesh2.Export_PointData_vtr("2Dmapped_PSdata.vtr" , "scalar_field" , Scalar2);
-        Mesh1.Export_PointData_vtr("2Doriginal_PVdata.vtr" , "vectorial_field" , Vectorial1);
-        Mesh2.Export_PointData_vtr("2Dmapped_PVdata.vtr" , "vectorial_field" , Vectorial2);
+        Mesh1.ExportVtr("./", "2Doriginal_PSdata", "scalar_field", "Point", Scalar1);
+        Mesh2.ExportVtr("./", "2Dmapped_PSdata", "scalar_field", "Point", Scalar2);
+        Mesh1.ExportVtr("./", "2Doriginal_PVdata", "vectorial_field", "Point", Vectorial1);
+        Mesh2.ExportVtr("./", "2Dmapped_PVdata", "vectorial_field", "Point", Vectorial2);
 
     }
 
