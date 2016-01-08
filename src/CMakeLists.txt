@@ -2,23 +2,20 @@
 # Subdirectories
 #------------------------------------------------------------------------------------#
 
+if (DEFINED BITPIT_SOURCES)
+	unset(${BITPIT_SOURCES})
+endif ()
+
 # Common
 add_subdirectory(common)
 
-# Operators
-add_subdirectory(operators)
+# Modules
+foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
+	string(TOUPPER ${MODULE_NAME} UPPERCASE_MODULE_NAME)
 
-# Containers
-add_subdirectory(containers)
-
-# IO
-add_subdirectory(IO)
-
-# SA
-add_subdirectory(SA)
-
-# LA
-add_subdirectory(LA)
+	add_subdirectory(${MODULE_NAME})
+	set(BITPIT_SOURCES ${BITPIT_SOURCES} $<TARGET_OBJECTS:${UPPERCASE_MODULE_NAME}_TARGET_OBJECT>)
+endforeach()
 
 #------------------------------------------------------------------------------------#
 # Library
@@ -34,13 +31,7 @@ endif()
 # Library
 set(BITP_BASE_LIBRARY ${CMAKE_PROJECT_NAME} CACHE INTERNAL "BitPit Base Library" FORCE)
 
-add_library(${BITP_BASE_LIBRARY} ${LIBRARY_TYPE}
-	$<TARGET_OBJECTS:OPERATORS_TARGET_OBJECT>
-	$<TARGET_OBJECTS:CONTAINERS_TARGET_OBJECT>
-	$<TARGET_OBJECTS:IO_TARGET_OBJECT>
-	$<TARGET_OBJECTS:SA_TARGET_OBJECT>
-	$<TARGET_OBJECTS:LA_TARGET_OBJECT>
-)
+add_library(${BITP_BASE_LIBRARY} ${LIBRARY_TYPE} ${BITPIT_SOURCES})
 
 if (WITHOUT_MPI)
 	set_target_properties(${BITP_BASE_LIBRARY} PROPERTIES DEBUG_POSTFIX "_D")

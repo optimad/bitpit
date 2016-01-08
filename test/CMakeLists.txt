@@ -5,23 +5,18 @@ cmake_minimum_required(VERSION 2.8)
 # Subdirectories
 #------------------------------------------------------------------------------------#
 
-set(TEST_LIST_DESCRIPTION "List of tests")
+if (DEFINED TEST_LIST)
+	unset(TEST_LIST)
+endif ()
 
-# Operators
-add_subdirectory(operators)
-set(TEST_LIST "${OPERATORS_TEST_LIST}" CACHE INTERNAL ${TEST_LIST_DESCRIPTION} FORCE)
-
-# IO
-add_subdirectory(IO)
-set(TEST_LIST "${TEST_LIST};${IO_TEST_LIST}" CACHE INTERNAL ${TEST_LIST_DESCRIPTION} FORCE)
-
-# SA
-add_subdirectory(SA)
-set(TEST_LIST "${TEST_LIST};${SA_TEST_LIST}" CACHE INTERNAL ${TEST_LIST_DESCRIPTION} FORCE)
-
-# LA
-add_subdirectory(LA)
-set(TEST_LIST "${TEST_LIST};${LA_TEST_LIST}" CACHE INTERNAL ${TEST_LIST_DESCRIPTION} FORCE)
+# Modules
+foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
+	if (IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_NAME}")
+		string(TOUPPER ${MODULE_NAME} UPPERCASE_MODULE_NAME)
+		add_subdirectory(${MODULE_NAME})
+		list(APPEND TEST_LIST "${${UPPERCASE_MODULE_NAME}_TEST_LIST}")
+	endif ()
+endforeach()
 
 #------------------------------------------------------------------------------------#
 # Targets
