@@ -105,7 +105,7 @@ void vectorOperators_Ex(
     cout << "  sum between const and 1D vectors" << endl;
     cout << "    a + x = ";
     z = a + x;
-    cout << z << endl;
+    display(cout, z) << endl;
     cout << "    y + b = ";
     z = y + b;
     display(cout, z) << endl;
@@ -371,6 +371,7 @@ void vectorOperators_Ex(
     cout << "    Y * b = ";
     Z = Y * b;
     display(cout, Z) << endl;
+    cout << endl;
 }
 
 // ================================================================================== //
@@ -439,6 +440,7 @@ void vectorOperators_Ex(
     cout << "    Y / b = ";
     Z = Y / b;
     display(cout, Z) << endl;
+    cout << endl;
 }
 
 // ================================================================================== //
@@ -900,47 +902,48 @@ void arrayOperators_Ex(
     Y = X;
 
     // Variables
-    cout << "a = " << a << endl;
-    cout << "b = " << b << endl;
-    cout << "x = ";
-    cout << x << endl;
-    cout << "y = ";
-    cout << y << endl;
-    cout << "X = ";
-    cout << X << endl;
-    cout << "Y = ";
-    cout << Y << endl;
+    cout << "  Declared:" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    b = " << b << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
+    cout << "    X = ";
+    display(cout, X) << endl;
+    cout << "    Y = ";
+    display(cout, Y) << endl;
 
     // Sum between arrays
-    cout << "sum between 1D arrays ----------------------------- " << endl;
-    cout << "x + y = ";
+    cout << "  sum between 1D arrays" << endl;
+    cout << "    x + y = ";
     z = x+y;
-    cout << z << endl;
-    cout << "sum between 2D arrays ---------------------------- " << endl;
-    cout << "X + Y = ";
+    display(cout, z) << endl;
+    cout << "  sum between 2D arrays" << endl;
+    cout << "    X + Y = ";
     Z = X + Y;
-    cout << Z << endl;
-    cout << "sum between 1D/2D arrays ------------------------- " << endl;
-    cout << "x + Y = ";
+    display(cout, Z) << endl;
+    cout << "  sum between 1D/2D arrays" << endl;
+    cout << "    x + Y = ";
     Z = x + Y;
-    cout << Z << endl;
-    cout << "X + y = ";
+    display(cout, Z) << endl;
+    cout << "    X + y = ";
     Z = X + y;
-    cout << Z << endl;
-    cout << "sum between const and 1D arrays ------------------ " << endl;
-    cout << "a + x = ";
+    display(cout, Z) << endl;
+    cout << "  sum between const and 1D arrays" << endl;
+    cout << "    a + x = ";
     z = a + x;
-    cout << z << endl;
-    cout << "y + b = ";
+    display(cout, z) << endl;
+    cout << "    y + b = ";
     z = y + b;
-    cout << z << endl;
-    cout << "sum between const and 2D arrays ------------------ " << endl;
-    cout << "a + X = ";
+    display(cout, z) << endl;
+    cout << "  sum between const and 2D arrays" << endl;
+    cout << "    a + X = ";
     Z = a + X;
-    cout << Z << endl;
-    cout << "Y + b = ";
+    display(cout, Z) << endl;
+    cout << "    Y + b = ";
     Z = Y + b;
-    cout << Z << endl;
+    display(cout, Z) << endl;
     cout << endl;
 }
 
@@ -969,38 +972,39 @@ void arrayOperators_Ex(
     Y = X;
 
     // Variables
-    cout << "a = " << a << endl;
-    cout << "b = " << b << endl;
-    cout << "x = ";
-    cout << x << endl;
-    cout << "y = ";
-    cout << y << endl;
-    cout << "X = ";
-    cout << X << endl;
-    cout << "Y = ";
-    cout << Y << endl;
+    cout << "  Declared:" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    b = " << b << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
+    cout << "    X = ";
+    display(cout, X) << endl;
+    cout << "    Y = ";
+    display(cout, Y) << endl;
 
     // Increment of arrays
-    cout << "Increment of 1D array with 1D array -------------- " << endl;
-    cout << "x += y, x = ";
+    cout << "  Increment of 1D array with 1D array" << endl;
+    cout << "    x += y, x = ";
     x += y;
-    cout << x << endl;
-    cout << "Increment of 2D array with 2D array -------------- " << endl;
-    cout << "X += Y, X = ";
+    display(cout, x) << endl;
+    cout << "  Increment of 2D array with 2D array" << endl;
+    cout << "    X += Y, X = ";
     X += Y;
-    cout << X << endl;
-    cout << "Increment of 2D array with 1D array -------------- " << endl;
-    cout << "X += y, X = ";
+    display(cout, X) << endl;
+    cout << "  Increment of 2D array with 1D array" << endl;
+    cout << "    X += y, X = ";
     X += c;
-    cout << X << endl;
-    cout << "Increment of 1D array with constant -------------- " << endl;
-    cout << "x += a, x = ";
+    display(cout, X) << endl;
+    cout << "  Increment of 1D array with constant" << endl;
+    cout << "    x += a, x = ";
     x += a;
-    cout << x << endl;
-    cout << "Increment of 2D array with constant -------------- " << endl;
-    cout << "X += a, X = ";
+    display(cout, x) << endl;
+    cout << "  Increment of 2D array with constant" << endl;
+    cout << "    X += a, X = ";
     X += a;
-    cout << X << endl;
+    display(cout, X) << endl;
     cout << endl;
 }
 
@@ -1026,47 +1030,48 @@ void arrayOperators_Ex(
     Y = X;
 
     // Variables
-    cout << "a = " << a << endl;
-    cout << "b = " << b << endl;
-    cout << "x = ";
-    cout << x << endl;
-    cout << "y = ";
-    cout << y << endl;
-    cout << "X = ";
-    cout << X << endl;
-    cout << "Y = ";
-    cout << Y << endl;
+    cout << "  Declared: " << endl;
+    cout << "    a = " << a << endl;
+    cout << "    b = " << b << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
+    cout << "    X = ";
+    display(cout, X) << endl;
+    cout << "    Y = ";
+    display(cout, Y) << endl;
 
     // Sum between arrays
-    cout << "diff between 1D arrays ---------------------------- " << endl;
-    cout << "x - y = ";
+    cout << "  diff between 1D arrays" << endl;
+    cout << "    x - y = ";
     z = x - y;
-    cout << z << endl;
-    cout << "diff between 2D arrays ---------------------------- " << endl;
-    cout << "X - Y = ";
+    display(cout, z) << endl;
+    cout << "  diff between 2D arrays" << endl;
+    cout << "    X - Y = ";
     Z = X - Y;
-    cout << Z << endl;
-    cout << "diff between 1D/2D arrays ------------------------- " << endl;
-    cout << "x - Y = ";
+    display(cout, Z) << endl;
+    cout << "  diff between 1D/2D arrays" << endl;
+    cout << "    x - Y = ";
     Z = x - Y;
-    cout << Z << endl;
-    cout << "X - y = ";
+    display(cout, Z) << endl;
+    cout << "    X - y = ";
     Z = X - y;
-    cout << Z << endl;
-    cout << "diff between const and 1D arrays ------------------ " << endl;
-    cout << "a - x = ";
+    display(cout, Z) << endl;
+    cout << "  diff between const and 1D arrays" << endl;
+    cout << "    a - x = ";
     z = a - x;
-    cout << z << endl;
-    cout << "y - b = ";
+    display(cout, z) << endl;
+    cout << "    y - b = ";
     z = y - b;
-    cout << z << endl;
-    cout << "diff between const and 2D arrays ------------------ " << endl;
-    cout << "a - X = ";
+    display(cout, z) << endl;
+    cout << "  diff between const and 2D arrays" << endl;
+    cout << "    a - X = ";
     Z = a - X;
-    cout << Z << endl;
-    cout << "Y - b = ";
+    display(cout, Z) << endl;
+    cout << "    Y - b = ";
     Z = Y - b;
-    cout << Z << endl;
+    display(cout, Z) << endl;
     cout << endl;
 }
 
@@ -1094,45 +1099,49 @@ void arrayOperators_Ex(
     Y = X;
 
     // Variables
-    cout << "a = " << a << endl;
-    cout << "b = " << b << endl;
-    cout << "x = ";
-    cout << x << endl;
-    cout << "y = ";
-    cout << y << endl;
-    cout << "X = ";
-    cout << X << endl;
-    cout << "Y = ";
-    cout << Y << endl;
+    cout << "  Declared:" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    b = " << b << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
+    cout << "    X = ";
+    display(cout, X) << endl;
+    cout << "    Y = ";
+    display(cout, Y) << endl;
 
     // Negative increment of arrays
-    cout << "Increment of 1D array with 1D array -------------- " << endl;
-    cout << "x -= y, x = ";
+    cout << "  Increment of 1D array with 1D array" << endl;
+    cout << "    x -= y, x = ";
     x -= y;
-    cout << x << endl;
-    cout << "Increment of 2D array with 2D array -------------- " << endl;
-    cout << "X -= Y, X = ";
+    display(cout, x) << endl;
+    cout << "  Increment of 2D array with 2D array" << endl;
+    cout << "    X -= Y, X = ";
     X -= Y;
-    cout << X << endl;
-    cout << "Increment of 2D array with 1D array -------------- " << endl;
-    cout << "X -= y, X = ";
+    display(cout, X) << endl;
+    cout << "  Increment of 2D array with 1D array" << endl;
+    cout << "    X -= y, X = ";
     X -= c;
-    cout << X << endl;
-    cout << "Increment of 1D array with constant -------------- " << endl;
-    cout << "x -= a, x = ";
+    display(cout, X) << endl;
+    cout << "  Increment of 1D array with constant" << endl;
+    cout << "    x -= a, x = ";
     x -= a;
-    cout << x << endl;
-    cout << "Increment of 2D array with constant -------------- " << endl;
-    cout << "X -= a, X = ";
+    display(cout, x) << endl;
+    cout << "  Increment of 2D array with constant" << endl;
+    cout << "    X -= a, X = ";
     X -= a;
-    cout << X << endl;
+    display(cout, X) << endl;
+    cout << endl;
 }
 
 // ================================================================================== //
 // OPERATOR "*"                                                                       //
 // ================================================================================== //
 {
-
+    // Output message
+    cout << "** operator* for std::array" << endl;
+   
     // Scope variables
     double                      a = 1, b = 2;
     array<double, 2>            x, y, z;
@@ -1147,53 +1156,57 @@ void arrayOperators_Ex(
     Y = X;
 
     // Variables
-    cout << "a = " << a << endl;
-    cout << "b = " << b << endl;
-    cout << "x = ";
-    cout << x << endl;
-    cout << "y = ";
-    cout << y << endl;
-    cout << "X = ";
-    cout << X << endl;
-    cout << "Y = ";
-    cout << Y << endl;
+    cout << "  Declared:" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    b = " << b << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
+    cout << "    X = ";
+    display(cout, X) << endl;
+    cout << "    Y = ";
+    display(cout, Y) << endl;
 
     // Sum between arrays
-    cout << "prod between 1D arrays ---------------------------- " << endl;
-    cout << "x * y = ";
+    cout << "  prod between 1D arrays" << endl;
+    cout << "    x * y = ";
     z = x * y;
-    cout << z << endl;
-    cout << "prod between 2D arrays ---------------------------- " << endl;
-    cout << "X * Y = ";
+    display(cout, z) << endl;
+    cout << "  prod between 2D arrays" << endl;
+    cout << "    X * Y = ";
     Z = X * Y;
-    cout << Z << endl;
-    cout << "prod between 1D/2D arrays ------------------------- " << endl;
-    cout << "x * Y = ";
+    display(cout, Z) << endl;
+    cout << "  prod between 1D/2D arrays" << endl;
+    cout << "    x * Y = ";
     Z = x * Y;
-    cout << Z << endl;
-    cout << "X * y = ";
+    display(cout, Z) << endl;
+    cout << "    X * y = ";
     Z = X * y;
-    cout << Z << endl;
-    cout << "prod between const and 1D arrays ------------------ " << endl;
-    cout << "a * x = ";
+    display(cout, Z) << endl;
+    cout << "  prod between const and 1D arrays" << endl;
+    cout << "    a * x = ";
     z = a * x;
-    cout << z << endl;
-    cout << "y * b = ";
+    display(cout, z) << endl;
+    cout << "    y * b = ";
     z = y * b;
-    cout << z << endl;
-    cout << "prod between const and 2D arrays ------------------ " << endl;
-    cout << "a * X = ";
+    display(cout, z) << endl;
+    cout << "  prod between const and 2D arrays" << endl;
+    cout << "    a * X = ";
     Z = a * X;
-    cout << Z << endl;
-    cout << "Y * b = ";
+    display(cout, Z) << endl;
+    cout << "    Y * b = ";
     Z = Y * b;
-    cout << Z << endl;
+    display(cout, Z) << endl;
+    cout << endl;
 }
 
 // ================================================================================== //
 // OPERATOR "/"                                                                       //
 // ================================================================================== //
 {
+    // Output message
+    cout << "** operator/ for std::array" << endl;
 
     // Scope variables
     double                      a = 1, b = 2;
@@ -1209,54 +1222,56 @@ void arrayOperators_Ex(
     Y = X;
 
     // Variables
-    cout << "a = " << a << endl;
-    cout << "b = " << b << endl;
-    cout << "x = " << endl;
-    cout << x << endl;
-    cout << "y = ";
-    cout << y << endl;
-    cout << "X = ";
-    cout << X << endl;
-    cout << "Y = ";
-    cout << Y << endl;
+    cout << "  Declared:" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    b = " << b << endl;
+    cout << "    x = " << endl;
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
+    cout << "    X = ";
+    display(cout, X) << endl;
+    cout << "    Y = ";
+    display(cout, Y) << endl;
 
     // Sum between arrays
-    cout << "div between 1D arrays ---------------------------- " << endl;
-    cout << "x / y = ";
+    cout << "  div between 1D arrays" << endl;
+    cout << "    x / y = ";
     z = x / y;
-    cout << z << endl;
-    cout << "div between 2D arrays ---------------------------- " << endl;
-    cout << "X / Y = ";
+    display(cout, z) << endl;
+    cout << "  div between 2D arrays" << endl;
+    cout << "    X / Y = ";
     Z = X / Y;
-    cout << Z << endl;
-    cout << "div between 1D/2D arrays ------------------------- " << endl;
-    cout << "x / Y = ";
+    display(cout, Z) << endl;
+    cout << "  div between 1D/2D arrays" << endl;
+    cout << "    x / Y = ";
     Z = x / Y;
-    cout << Z << endl;
-    cout << "X / y = ";
+    display(cout, Z) << endl;
+    cout << "    X / y = ";
     Z = X / y;
-    cout << Z << endl;
-    cout << "div between const and 1D arrays ------------------ " << endl;
-    cout << "a / x = ";
+    display(cout, Z) << endl;
+    cout << "  div between const and 1D arrays" << endl;
+    cout << "    a / x = ";
     z = a / x;
-    cout << z << endl;
-    cout << "y / b = ";
+    display(cout, z) << endl;
+    cout << "    y / b = ";
     z = y / b;
-    cout << z << endl;
-    cout << "div between const and 2D arrays ------------------ " << endl;
-    cout << "a / X = ";
+    display(cout, z) << endl;
+    cout << "  div between const and 2D arrays" << endl;
+    cout << "    a / X = ";
     Z = a / X;
-    cout << Z << endl;
-    cout << "Y / b = ";
+    display(cout, Z) << endl;
+    cout << "    Y / b = ";
     Z = Y / b;
-    cout << Z << endl;
+    display(cout, Z) << endl;
+    cout << endl;
 }
 
 // ================================================================================== //
 // OUTPUT MESSAGE                                                                     //
 // ================================================================================== //
 {
-    cout << "DEMO:  done!!" << endl;
+    cout << endl;
 }
 
 return; };

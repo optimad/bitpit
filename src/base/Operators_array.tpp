@@ -1766,6 +1766,128 @@ while ((in.good()) && (i < d)) {
 
 return(in); };
 
+// Miscellanea ====================================================================== //
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Display array in a nicely formatted to a std::ostream
+
+    \param[in,out] out output stream
+    \param[in] x array to be displayed
+    \param[in] padding (default = 0) number of trailing spaces
+
+    \result reference to output stream
+*/
+template<class T, size_t d>
+ostream& display(
+    ostream             &out,
+    const array<T, d>   &x,
+    unsigned int         padding
+) {
+
+// ================================================================================== //
+// template<class T, size_t d>                                                        //
+// ostream& display(                                                                  //
+//     ostream             &out,                                                      //
+//     const array<T, d>   &x,                                                        //
+//     unsigned int         padding)                                                  //
+//                                                                                    //
+// Display array in a nicely formatted form.                                          //
+// ================================================================================== //
+// INPUT                                                                              //
+// ================================================================================== //
+// - out      : ostream, output stream                                                //
+// - x        : array<T, d>, array to be displayed                                    //
+// - padding  : unsigned int (default = 0), number of trailing spaces                 //
+// ================================================================================== //
+// OUTPUT                                                                             //
+// ================================================================================== //
+// - out      : ostream&, reference to output stream                                  //
+// ================================================================================== //
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+
+// Counters
+typename array<T, d>::const_iterator      i, e = x.cend();
+
+// ================================================================================== //
+// DISPLAY VECTOR                                                                     //
+// ================================================================================== //
+if (x.size() == 0) {
+    out << "[ ]";
+    return(out);
+}
+out << string(padding, ' ') << "[ ";
+--e;
+for (i = x.begin(); i != e; ++i) {
+    display(out, *i) << ", ";
+} //next i
+display(out, *e) << " ]";
+
+return(out); }
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Display array in a nicely formatted to a std::ofstream
+
+    \param[in,out] out output file stream
+    \param[in] x array to be displayed
+    \param[in] padding (default = 0) number of trailing spaces
+
+    \result reference to output stream
+*/
+template<class T, size_t d>
+ofstream& display(
+    ofstream            &out,
+    const array<T, d>   &x,
+    unsigned int         padding
+) {
+
+// ================================================================================== //
+// template<class T, size_t d>                                                        //
+// ofstream& display(                                                                 //
+//     ofstream            &out,                                                      //
+//     const array<T, d>   &x,                                                        //
+//     unsigned int         padding)                                                  //
+//                                                                                    //
+// Display array in a nicely formatted form.                                          //
+// ================================================================================== //
+// INPUT                                                                              //
+// ================================================================================== //
+// - out      : ofstream, output stream                                               //
+// - x        : array<T, d>, array to be displayed                                    //
+// - padding  : unsigned int (default = 0), number of trailing spaces                 //
+// ================================================================================== //
+// OUTPUT                                                                             //
+// ================================================================================== //
+// - out      : ofstream&, reference to output stream                                 //
+// ================================================================================== //
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+
+// Counters
+typename array<T, d>::const_iterator      i, e = x.cend();
+
+// ================================================================================== //
+// DISPLAY VECTOR                                                                     //
+// ================================================================================== //
+if (x.size() == 0) {
+    out << "[ ]";
+    return(out);
+}
+out << string(padding, ' ') << "[ ";
+--e;
+for (i = x.begin(); i != e; ++i) {
+    display(out, *i) << ", ";
+} //next i
+display(out, *e) << " ]";
+
+return(out); }
+
 
 
 

@@ -186,24 +186,24 @@ vector< vector< T > > operator/ (                                               
 
 // Output operator ------------------------------------------------------------------ //
 template <class T>
-ostream& operator<< (                                                                 // OUTPUT STREAM OPERATOR
+ostream& operator<< (                                                                 // INSERTION OPERATOR
         ostream                     &,                                                    // (input) output stream
         const vector< T >           &                                                     // (input) vector to be streamed
         );
 template <class T>
-ofstream& operator<< (                                                                // OUTPUT FILE STREAM OPERATOR
+ofstream& operator<< (                                                                // INSERTION OPERATOR
         ofstream                    &,                                                    // (input) output file stream
         const vector< T >           &                                                     // (input) vector to be streamed
         );
 
 // Input operators ------------------------------------------------------------------ //
 template <class T>
-istream& operator>> (                                                                 // INPUT STREAM OPERATOR
+istream& operator>> (                                                                 // EXTRACTION OPERATOR
         istream                     &,                                                    // (input) input stream
         vector< T >                 &                                                     // (input/output) vector to be streamed
         );
 template <class T>
-ifstream& operator>> (                                                                // INPUT FILE STREAM OPERATOR
+ifstream& operator>> (                                                                // EXTRACTION OPERATOR
         ifstream                    &,                                                    // (input) input file stream
         vector< T >                 &                                                     // (input/output) vector to be streamed
         );
@@ -297,12 +297,12 @@ void inline sum(                                                                
         const int                   &,                                                    // (dummy input) 1st argument
         int                         &                                                     // (dummy input/output) 2nd argument
         );
-void inline sum(                                                                    // DUMMY ROUTINE FOR SUM OPERATOR
+void inline sum(                                                                      // DUMMY ROUTINE FOR SUM OPERATOR
         const double                &,                                                    // (dummy input) 1st argument
         double                      &                                                     // (dummy input/output) 2nd argument
         );
 template <class T>
-void inline sum(                                                                    // DUMMY ROUTINE FOR SUM OPERATOR
+void inline sum(                                                                      // DUMMY ROUTINE FOR SUM OPERATOR
         const T                     &,                                                    // (dummy input) 1st argument
         T                           &                                                     // (dummy input/output) 2nd argument
         );
@@ -534,19 +534,24 @@ array<array<T, e>, d> operator/ (                                               
 
 // Output operator ------------------------------------------------------------------ //
 template <class T, size_t d>
-ostream& operator<< (                                                                 // OUTPUT STREAM OPERATOR
+ostream& operator<< (                                                                 // INSERTION OPERATOR
         ostream                     &,                                                    // (input) output stream
         const array<T, d>           &                                                     // (input) vector to be streamed
         );
 template <class T, size_t d>
-ofstream& operator<< (                                                                // OUTPUT FILE STREAM OPERATOR
+ofstream& operator<< (                                                                // INSERTION OPERATOR
         ofstream                    &,                                                    // (input) output file stream
         const array<T, d>           &                                                     // (input) vector to be streamed
         );
 
 // Input operators ------------------------------------------------------------------ //
 template <class T, size_t d>
-ifstream& operator>> (                                                                // INPUT FILE STREAM OPERATOR
+istream& operator>> (                                                                 // EXTRACTION OPERATOR
+        istream                    &,                                                     // (input) input stream
+        array< T, d >              &                                                     // (input/output) vector to be streamed
+        );
+template <class T, size_t d>
+ifstream& operator>> (                                                                // EXTRACTION OPERATOR
         ifstream                    &,                                                    // (input) input file stream
         array<T, d>                 &                                                     // (input) vector to be streamed
         );
@@ -667,7 +672,7 @@ T Dot_Product(                                                                  
 
 // Operator Cross_Product ----------------------------------------------------------- //
 template <class T, size_t d>
-T Cross_Product(                                                            // COMPUTE THE CROSS-PRODUCT OF TWO ARRAYS
+T Cross_Product(                                                                      // COMPUTE THE CROSS-PRODUCT OF TWO ARRAYS
         array<T, 2> const           &,                                                    // (input) 1st argument of cross product
         array<T, 2> const           &                                                     // (input) 2nd argument of cross product
         );
@@ -676,6 +681,20 @@ template <class T, size_t d>
 array<T, 3> Cross_Product(                                                            // COMPUTE THE CROSS-PRODUCT OF TWO ARRAYS
         array<T, 3> const           &,                                                    // (input) 1st argument of cross product
         array<T, 3> const           &                                                     // (input) 2nd argument of cross product
+        );
+
+// Various -------------------------------------------------------------------------- //
+template<class T, size_t d>
+ostream& display(                                                                     // DISPLAY ARRAY IN A NICELY FORMATTED FORM
+        ostream                     &,                                                    // (input/output) output stream
+        const array<T, d>           &,                                                    // (input) array to be displayed
+        unsigned int                 padding = 0                                          // (input/optional) number of trailing spaces
+        );
+template<class T, size_t d>
+ofstream& display(                                                                    // DISPLAY ARRAY IN A NICELY FORMATTED FORM
+        ofstream                    &,                                                    // (input/output) output stream
+        const array<T, d>           &,                                                    // (input) array to be displayed
+        unsigned int                 padding = 0                                          // (input/optional) number of trailing spaces
         );
 
 // String =========================================================================== //

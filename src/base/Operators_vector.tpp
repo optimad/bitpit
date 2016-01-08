@@ -1891,7 +1891,7 @@ ostream& display(
 // ================================================================================== //
 
 // Counters
-typename vector<T>::const_iterator      i, e = --x.cend();
+typename vector<T>::const_iterator      i, e = x.cend();
 
 // ================================================================================== //
 // DISPLAY VECTOR                                                                     //
@@ -1901,11 +1901,11 @@ if (x.size() == 0) {
     return(out);
 }
 out << string(padding, ' ') << "[ ";
+--e;
 for (i = x.begin(); i != e; ++i) {
     display(out, *i) << ", ";
 } //next i
-i = --x.cend();
-display(out, *i) << " ]";
+display(out, *e) << " ]";
 
 return(out); }
 
@@ -2010,11 +2010,11 @@ if (x.size() == 0) {
     return(out);
 }
 out << string(padding, ' ') << "[ ";
+--e;
 for (i = x.begin(); i != e; ++i) {
     display(out, *i) << ", ";
 } //next i
-i = --x.cend();
-display(out, *i) << " ]";
+display(out, *e) << " ]";
 
 return(out); }
 
