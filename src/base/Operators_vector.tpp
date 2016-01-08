@@ -18,6 +18,24 @@
 // Operator "+" ===================================================================== //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator+ for std::vector.
+
+    Perform the element-wise sum between two vectors (x and y) and returns a
+    vector z s.t.
+    z[i] = x[i] + y[i] for all i = 0, ..., n-1
+    where n = min(x.size(), y.size().
+    Template parameters, T, can by any type for which the operator+ is defined.
+
+    The element-wise sum is performed recursively, i.e. if the i-th element of x and
+    the i-th element of y are std::vector, operator+ calls itself
+    to perform the element-wise sum between x[i] and y[i].
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result vector with n elements, storing the element-wise sum of x and y.
+*/
 template <class T>
 vector< T > operator+ (
   const vector< T > &x,
@@ -59,6 +77,24 @@ for (int i = 0; i < n; i++){
 return (z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator+ for std::vector.
+
+    Perform the element-wise sum between a vector (x) and a constant (y), 
+    and returns a vector (z) s.t.
+    z[i] = x[i] + y for all i = 0, ..., n-1
+    where n = x.size().
+    Template parameters, T, can by any type for which the operator+ is defined.
+
+    The element-wise sum is performed recursively, i.e. if the i-th element of x and
+    y are std::vector, operator+ calls itself to perform the element-wise sum
+    between x[i] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result vector with n elements, storing the element-wise sum of x and y.
+*/
 template <class T>
 vector< T > operator+ (
   const vector< T > &x,
@@ -100,6 +136,24 @@ for (int i = 0; i < n; i++){
 return (z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator+ for std::vector.
+
+    Perform the element-wise sum between a constant (x), and a vector (y)
+    and returns a vector (z) s.t.
+    z[i] = x + y[i] for all i = 0, ..., n-1
+    where n = y.size().
+    Template parameters, T, can by any type for which the operator+ is defined.
+
+    The element-wise sum is performed recursively, i.e. if the i-th element of y and
+    x are std::vector, operator+ calls itself to perform the element-wise sum
+    between x[i] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result vector with n elements, storing the element-wise sum of x and y.
+*/
 template <class T>
 vector< T > operator+ (
   const T           &x,
@@ -138,6 +192,25 @@ z = y + x;
 return (z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator+ for std::vector.
+
+    Perform the element-wise sum between a vector of vectors (x) and a constant (y), 
+    and returns z s.t.
+    z[i][j] = x[i][j] + y for all j = 0, ..., x[i].size()-1, i = 0, ..., n-1
+    where n = x.size().
+    Template parameters, T, can by any type for which the operator+ is defined.
+
+    The element-wise sum is performed recursively, i.e. if x[i][j] and
+    y are std::vector, operator+ calls itself to perform the element-wise sum
+    between x[i][j] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result vector of vectors having the same dimensions of x and
+    storing the element-wise sum of x and y.
+*/
 template <class T>
 vector< vector< T > > operator+ (
     const vector< vector< T > >     &x,
@@ -178,6 +251,25 @@ for (int i = 0; i < n; i++) {
 return (z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator+ for std::vector.
+
+    Perform the element-wise sum between a constant (y) and a vector of vectors (y),
+    and returns z s.t.
+    z[i][j] = x + y[i][j] for all j = 0, ..., y[i].size()-1, i = 0, ..., n-1
+    where n = y.size().
+    Template parameters, T, can by any type for which the operator+ is defined.
+
+    The element-wise sum is performed recursively, i.e. if y[i][j] and
+    y are std::vector, operator+ calls itself to perform the element-wise sum
+    between y[i][j] and x.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result vector of vectors having the same dimensions of y and
+    storing the element-wise sum of x and y.
+*/
 template <class T>
 vector< vector< T > > operator+ (
     const T                         &x,
@@ -217,6 +309,24 @@ return (z); };
 // Operator "-" ===================================================================== //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator- for std::vector.
+
+    Perform the element-wise difference between two vectors (x and y) and returns a
+    vector z s.t.
+    z[i] = x[i] - y[i] for all i = 0, ..., n-1
+    where n = min(x.size(), y.size().
+    Template parameters, T, can by any type for which the operator- is defined.
+
+    The element-wise difference is performed recursively, i.e. if the i-th element of x and
+    the i-th element of y are std::vector, operator- calls itself
+    to perform the element-wise difference between x[i] and y[i].
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result vector with n elements, storing the element-wise difference between x and y.
+*/
 template <class T>
 vector< T > operator- (
   const vector< T > &x,
@@ -258,6 +368,24 @@ for (int i = 0; i < n; i++){
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator- for std::vector.
+
+    Perform the element-wise difference between a vector (x) and a constant (y), 
+    and returns a vector (z) s.t.
+    z[i] = x[i] - y for all i = 0, ..., n-1
+    where n = x.size().
+    Template parameters, T, can by any type for which the operator- is defined.
+
+    The element-wise difference is performed recursively, i.e. if the i-th element of x and
+    y are std::vector, operator- calls itself to perform the element-wise difference
+    between x[i] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result vector with n elements, storing the element-wise difference between x and y.
+*/
 template <class T>
 vector< T > operator- (
   const vector< T > &x,
@@ -299,6 +427,24 @@ for (int i = 0; i < n; i++){
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator- for std::vector.
+
+    Perform the element-wise difference between a constant (x), and a vector (y)
+    and returns a vector (z) s.t.
+    z[i] = x - y[i] for all i = 0, ..., n-1
+    where n = y.size().
+    Template parameters, T, can by any type for which the operator- is defined.
+
+    The element-wise difference is performed recursively, i.e. if the i-th element of y and
+    x are std::vector, operator- calls itself to perform the element-wise difference
+    between x[i] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result vector with n elements, storing the element-wise difference between x and y.
+*/
 template <class T>
 vector< T > operator- (
   const T           &x,
@@ -337,6 +483,25 @@ z = y - x;
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator- for std::vector.
+
+    Perform the element-wise difference between a constant (y) and a vector of vectors (y),
+    and returns z s.t.
+    z[i][j] = x - y[i][j] for all j = 0, ..., y[i].size()-1, i = 0, ..., n-1
+    where n = y.size().
+    Template parameters, T, can by any type for which the operator- is defined.
+
+    The element-wise difference is performed recursively, i.e. if y[i][j] and
+    y are std::vector, operator- calls itself to perform the element-wise difference
+    between y[i][j] and x.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result vector of vectors having the same dimensions of y and
+    storing the element-wise difference between x and y.
+*/
 template <class T>
 vector< vector< T > > operator- (
   const T                       &x,
@@ -378,6 +543,25 @@ for (int i = 0; i < n; i++) {
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator- for std::vector.
+
+    Perform the element-wise difference between a vector of vectors (x) and a constant (y), 
+    and returns z s.t.
+    z[i][j] = x[i][j] - y for all j = 0, ..., x[i].size()-1, i = 0, ..., n-1
+    where n = x.size().
+    Template parameters, T, can by any type for which the operator- is defined.
+
+    The element-wise difference is performed recursively, i.e. if x[i][j] and
+    y are std::vector, operator. calls itself to perform the element-wise difference
+    between x[i][j] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result vector of vectors having the same dimensions of x and
+    storing the element-wise difference between x and y.
+*/
 template <class T>
 vector< vector< T > > operator- (
   const vector< vector< T > >   &x,
@@ -418,6 +602,24 @@ return(z); };
 // Operator "*" ===================================================================== //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator* for std::vector.
+
+    Perform the element-wise product between two vectors (x and y) and returns a
+    vector z s.t.
+    z[i] = x[i] * y[i] for all i = 0, ..., n-1
+    where n = min(x.size(), y.size().
+    Template parameters, T, can by any type for which the operator* is defined.
+
+    The element-wise product is performed recursively, i.e. if the i-th element of x and
+    the i-th element of y are std::vector, operator* calls itself
+    to perform the element-wise product between x[i] and y[i].
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result vector with n elements, storing the element-wise product between x and y.
+*/
 template <class T>
 vector< T > operator* (
   const vector< T > &x,
@@ -458,6 +660,24 @@ for (int i = 0; i < n; i++){
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator* for std::vector.
+
+    Perform the element-wise product between a vector (x) and a constant (y), 
+    and returns a vector (z) s.t.
+    z[i] = x[i] * y for all i = 0, ..., n-1
+    where n = x.size().
+    Template parameters, T, can by any type for which the operator* is defined.
+
+    The element-wise product is performed recursively, i.e. if the i-th element of x and
+    y are std::vector, operator* calls itself to perform the element-wise product
+    between x[i] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result vector with n elements, storing the element-wise product between x and y.
+*/
 template <class T>
 vector< T > operator* (
   const vector< T > &x,
@@ -499,6 +719,24 @@ for (int i = 0; i < n; i++){
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator* for std::vector.
+
+    Perform the element-wise product between a constant (x), and a vector (y)
+    and returns a vector (z) s.t.
+    z[i] = x * y[i] for all i = 0, ..., n-1
+    where n = y.size().
+    Template parameters, T, can by any type for which the operator* is defined.
+
+    The element-wise product is performed recursively, i.e. if the i-th element of y and
+    x are std::vector, operator* calls itself to perform the element-wise product
+    between x[i] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result vector with n elements, storing the element-wise product between x and y.
+*/
 template <class T>
 vector< T > operator* (
   const T           &x,
@@ -537,6 +775,25 @@ z = y * x;
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator* for std::vector.
+
+    Perform the element-wise product between a constant (y) and a vector of vectors (y),
+    and returns z s.t.
+    z[i][j] = x * y[i][j] for all j = 0, ..., y[i].size()-1, i = 0, ..., n-1
+    where n = y.size().
+    Template parameters, T, can by any type for which the operator* is defined.
+
+    The element-wise product is performed recursively, i.e. if y[i][j] and
+    y are std::vector, operator* calls itself to perform the element-wise product
+    between y[i][j] and x.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result vector of vectors having the same dimensions of y and
+    storing the element-wise product between x and y.
+*/
 template <class T>
 vector< vector< T > > operator* (
   const T                     &x,
@@ -578,6 +835,25 @@ for (int i = 0; i < n; i++) {
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator* for std::vector.
+
+    Perform the element-wise product between a vector of vectors (x) and a constant (y), 
+    and returns z s.t.
+    z[i][j] = x[i][j] * y for all j = 0, ..., x[i].size()-1, i = 0, ..., n-1
+    where n = x.size().
+    Template parameters, T, can by any type for which the operator* is defined.
+
+    The element-wise product is performed recursively, i.e. if x[i][j] and
+    y are std::vector, operator* calls itself to perform the element-wise product
+    between x[i][j] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result vector of vectors having the same dimensions of x and
+    storing the element-wise product between x and y.
+*/
 template <class T>
 vector< vector< T > > operator* (
   const vector< vector< T > > &x,
@@ -618,6 +894,24 @@ return(z); };
 // Operator "/" ===================================================================== //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator/ for std::vector.
+
+    Perform the element-wise division between two vectors (x and y) and returns a
+    vector z s.t.
+    z[i] = x[i] / y[i] for all i = 0, ..., n-1
+    where n = min(x.size(), y.size().
+    Template parameters, T, can by any type for which the operator/ is defined.
+
+    The element-wise division is performed recursively, i.e. if the i-th element of x and
+    the i-th element of y are std::vector, operator/ calls itself
+    to perform the element-wise division between x[i] and y[i].
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result vector with n elements, storing the element-wise division between x and y.
+*/
 template <class T>
 vector< T > operator/ (
   const vector< T > &x,
@@ -659,6 +953,24 @@ for (int i = 0; i < n; i++){
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator/ for std::vector.
+
+    Perform the element-wise division between a vector (x) and a constant (y), 
+    and returns a vector (z) s.t.
+    z[i] = x[i] / y for all i = 0, ..., n-1
+    where n = x.size().
+    Template parameters, T, can by any type for which the operator/ is defined.
+
+    The element-wise division is performed recursively, i.e. if the i-th element of x and
+    y are std::vector, operator/ calls itself to perform the element-wise division
+    between x[i] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result vector with n elements, storing the element-wise division between x and y.
+*/
 template <class T>
 vector< T > operator/ (
   const vector< T > &x,
@@ -705,6 +1017,24 @@ for (i = 0; i < n; i++) {
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator/ for std::vector.
+
+    Perform the element-wise division between a constant (x), and a vector (y)
+    and returns a vector (z) s.t.
+    z[i] = x / y[i] for all i = 0, ..., n-1
+    where n = y.size().
+    Template parameters, T, can by any type for which the operator/ is defined.
+
+    The element-wise division is performed recursively, i.e. if the i-th element of y and
+    x are std::vector, operator/ calls itself to perform the element-wise division
+    between x[i] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result vector with n elements, storing the element-wise division between x and y.
+*/
 template <class T>
 vector< T > operator/ (
   const T           &x,
@@ -746,6 +1076,25 @@ for (int i = 0; i < n; i++) {
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator/ for std::vector.
+
+    Perform the element-wise division between a constant (y) and a vector of vectors (y),
+    and returns z s.t.
+    z[i][j] = x / y[i][j] for all j = 0, ..., y[i].size()-1, i = 0, ..., n-1
+    where n = y.size().
+    Template parameters, T, can by any type for which the operator/ is defined.
+
+    The element-wise division is performed recursively, i.e. if y[i][j] and
+    y are std::vector, operator/ calls itself to perform the element-wise division
+    between y[i][j] and x.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result vector of vectors having the same dimensions of y and
+    storing the element-wise division between x and y.
+*/
 template <class T>
 vector< vector< T > > operator/ (
   const T                       &x,
@@ -787,6 +1136,25 @@ for (int i = 0; i < n; i++) {
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator/ for std::vector.
+
+    Perform the element-wise division between a vector of vectors (x) and a constant (y), 
+    and returns z s.t.
+    z[i][j] = x[i][j] / y for all j = 0, ..., x[i].size()-1, i = 0, ..., n-1
+    where n = x.size().
+    Template parameters, T, can by any type for which the operator/ is defined.
+
+    The element-wise division is performed recursively, i.e. if x[i][j] and
+    y are std::vector, operator/ calls itself to perform the element-wise division
+    between x[i][j] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result vector of vectors having the same dimensions of x and
+    storing the element-wise division between x and y.
+*/
 template <class T>
 vector< vector< T > > operator/ (
   const vector< vector< T > >   &x,
@@ -830,6 +1198,20 @@ return(z); };
 // Output operator ================================================================== //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Insertion operator for std::vector.
+
+    Flush the content of std::vector to std::ostream.
+    The content of the input vector is flushed with the following format:
+    x[0] x[1] x[2] ... x[n-1] where n = x.size();
+    (i.e. vector elements are separated by blank spaces).
+    Template parameter T can be any type such that operator<< is defined.
+
+    \param[in,out] out output stream
+    \param[in] x argument of insertion operator
+
+    \result reference to the stream (allows concatenation)
+*/
 template <class T>
 ostream& operator<< (
     ostream              &out,
@@ -880,6 +1262,20 @@ out << x[n-1] << "]";
 return(out); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Insertion operator for std::vector.
+
+    Flush the content of std::vector to std::ofstream.
+    The content of the input vector is flushed with the following format:
+    x[0] x[1] x[2] ... x[n-1] where n = x.size();
+    (i.e. vector elements are separated by blank spaces).
+    Template parameter T can be any type such that operator<< is defined.
+
+    \param[in,out] out output file stream
+    \param[in] x argument of insertion operator
+
+    \result reference to the stream (allows concatenation)
+*/
 template <class T>
 ofstream& operator<< (
     ofstream             &out,
@@ -930,6 +1326,21 @@ return(out); };
 // Input operator =================================================================== //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Extraction operator for std::vector.
+
+    Extract the content of std::vector from std::istream.
+    The content of the input vector is extracted until end-of-stream condition
+    is met. Element extracted from the stream are copyied into vector starting from position
+    0. When all the availble position within the vector have been overwritten, further
+    elements will be added to the container using push_back, therefore increasing
+    container's size.
+
+    \param[in,out] out input stream
+    \param[in,out] x argument of extraction operator
+
+    \result reference to input stream (allows concatenation)
+*/
 template <class T>
 istream& operator>> (
     istream              &in,
@@ -979,6 +1390,21 @@ while (in.good()) {
 return(in); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Extraction operator for std::vector.
+
+    Extract the content of std::vector from std::ifstream.
+    The content of the input vector is extracted until end-of-file condition
+    is met. Element extracted from the stream are copyied into vector starting from position
+    0. When all the availble position within the vector have been overwritten, further
+    elements will be added to the container using push_back, therefore increasing
+    container's size.
+
+    \param[in,out] out input file stream
+    \param[in,out] x argument of extraction operator
+
+    \result reference to input file stream (allows concatenation)
+*/
 template <class T>
 ifstream& operator>> (
     ifstream             &in,

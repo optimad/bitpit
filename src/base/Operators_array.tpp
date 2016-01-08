@@ -18,6 +18,24 @@
 // Operator "+" ===================================================================== //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator+ for std::array
+
+    Perform the element-wise sum between two arrays (x and y) and returns a
+    array z s.t.
+    z[i] = x[i] + y[i] for all i = 0, ..., d
+    where d = x.size() = y.size().
+    Template parameters, T, can by any type for which the operator+ is defined.
+
+    The element-wise sum is performed recursively, i.e. if the i-th element of x and
+    the i-th element of y are std::array, operator+ calls itself
+    to perform the element-wise sum between x[i] and y[i].
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result array with d elements, storing the element-wise sum of x and y.
+*/
 template <class T, size_t d>
 array<T, d> operator+ (
   const array<T, d> &x,
@@ -58,6 +76,24 @@ for (int i = 0; i < d; i++){
 return (z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator+ for std::array.
+
+    Perform the element-wise sum between a array (x) and a constant (y), 
+    and returns a array (z) s.t.
+    z[i] = x[i] + y for all i = 0, ..., d
+    where d = x.size().
+    Template parameters, T, can by any type for which the operator+ is defined.
+
+    The element-wise sum is performed recursively, i.e. if the i-th element of x and
+    y are std::array, operator+ calls itself to perform the element-wise sum
+    between x[i] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result array with d elements, storing the element-wise sum of x and y.
+*/
 template <class T, size_t d>
 array<T, d> operator+ (
   const array<T, d> &x,
@@ -98,6 +134,24 @@ for (int i = 0; i < d; i++){
 return (z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator+ for std::array.
+
+    Perform the element-wise sum between a constant (x), and a array (y)
+    and returns a array (z) s.t.
+    z[i] = x + y[i] for all i = 0, ..., d
+    where d = y.size().
+    Template parameters, T, can by any type for which the operator+ is defined.
+
+    The element-wise sum is performed recursively, i.e. if the i-th element of y and
+    x are std::array, operator+ calls itself to perform the element-wise sum
+    between x[i] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result array with d elements, storing the element-wise sum of x and y.
+*/
 template <class T, size_t d>
 array<T, d> operator+ (
   const T           &x,
@@ -136,6 +190,25 @@ z = y + x;
 return (z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator+ for std::array.
+
+    Perform the element-wise sum between a array of arrays (x) and a constant (y), 
+    and returns z s.t.
+    z[i][j] = x[i][j] + y for all j = 0, ..., e-1, i = 0, ..., d-1
+    where d = x.size().
+    Template parameters, T, can by any type for which the operator+ is defined.
+
+    The element-wise sum is performed recursively, i.e. if x[i][j] and
+    y are std::array, operator+ calls itself to perform the element-wise sum
+    between x[i][j] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result array of arrays having the same dimensions of x and
+    storing the element-wise sum of x and y.
+*/
 template <class T, size_t d, size_t e>
 array<array<T, e>, d> operator+ (
   const T                       &x,
@@ -176,6 +249,25 @@ for (int i = 0; i < d; i++){
 return (z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator+ for std::array.
+
+    Perform the element-wise sum between a constant (y) and a array of arrays (y),
+    and returns z s.t.
+    z[i][j] = x + y[i][j] for all j = 0, ..., e-1, i = 0, ..., d-1
+    where d = y.size().
+    Template parameters, T, can by any type for which the operator+ is defined.
+
+    The element-wise sum is performed recursively, i.e. if y[i][j] and
+    y are std::array, operator+ calls itself to perform the element-wise sum
+    between y[i][j] and x.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result array of arrays having the same dimensions of y and
+    storing the element-wise sum of x and y.
+*/
 template <class T, size_t d, size_t e>
 array<array<T, e>, d> operator+ (
   const array<array<T, e>, d>   &x,
@@ -216,6 +308,24 @@ return (z); };
 // Operator "-" ===================================================================== //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator- for std::array.
+
+    Perform the element-wise difference between two arrays (x and y) and returns a
+    array z s.t.
+    z[i] = x[i] - y[i] for all i = 0, ..., d-1
+    where d = min(x.size(), y.size().
+    Template parameters, T, can by any type for which the operator- is defined.
+
+    The element-wise difference is performed recursively, i.e. if the i-th element of x and
+    the i-th element of y are std::array, operator- calls itself
+    to perform the element-wise difference between x[i] and y[i].
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result array with n elements, storing the element-wise difference between x and y.
+*/
 template <class T, size_t d>
 array<T, d> operator- (
   const array<T, d> &x,
@@ -256,6 +366,24 @@ for (int i = 0; i < d; i++){
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator- for std::array.
+
+    Perform the element-wise difference between a array (x) and a constant (y), 
+    and returns a array (z) s.t.
+    z[i] = x[i] - y for all i = 0, ..., d-1
+    where d = x.size().
+    Template parameters, T, can by any type for which the operator- is defined.
+
+    The element-wise difference is performed recursively, i.e. if the i-th element of x and
+    y are std::array, operator- calls itself to perform the element-wise difference
+    between x[i] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result array with d elements, storing the element-wise difference between x and y.
+*/
 template <class T, size_t d>
 array<T, d> operator- (
   const array<T, d> &x,
@@ -278,7 +406,7 @@ array<T, d> operator- (
 // ================================================================================== //
 // OUTPUT                                                                             //
 // ================================================================================== //
-// - z   : vector<T>, difference of x, y                                              //
+// - z   : array<T, d>, difference of x, y                                            //
 // ================================================================================== //
 
 // ================================================================================== //
@@ -296,6 +424,24 @@ for (int i = 0; i < d; i++){
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator- for std::array.
+
+    Perform the element-wise difference between a constant (x), and a array (y)
+    and returns a array (z) s.t.
+    z[i] = x - y[i] for all i = 0, ..., d-1
+    where d = y.size().
+    Template parameters, T, can by any type for which the operator- is defined.
+
+    The element-wise difference is performed recursively, i.e. if the i-th element of y and
+    x are std::array, operator- calls itself to perform the element-wise difference
+    between x[i] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result array with d elements, storing the element-wise difference between x and y.
+*/
 template <class T, size_t d>
 array<T, d> operator- (
   const T           &x,
@@ -334,6 +480,25 @@ z = y - x;
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator- for std::array.
+
+    Perform the element-wise difference between a constant (y) and a array of arrays (y),
+    and returns z s.t.
+    z[i][j] = x - y[i][j] for all j = 0, ..., e-1, i = 0, ..., d-1
+    where d = y.size().
+    Template parameters, T, can by any type for which the operator- is defined.
+
+    The element-wise difference is performed recursively, i.e. if y[i][j] and
+    y are std::array, operator- calls itself to perform the element-wise difference
+    between y[i][j] and x.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result array of arrays having the same dimensions of y and
+    storing the element-wise difference between x and y.
+*/
 template <class T, size_t d, size_t e>
 array<array<T, e>, d> operator- (
   const T                       &x,
@@ -374,6 +539,25 @@ for (int i = 0; i < d; i++) {
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator- for std::array.
+
+    Perform the element-wise difference between a array of arrays (x) and a constant (y), 
+    and returns z s.t.
+    z[i][j] = x[i][j] - y for all j = 0, ..., e-1, i = 0, ..., d-1
+    where n = x.size().
+    Template parameters, T, can by any type for which the operator- is defined.
+
+    The element-wise difference is performed recursively, i.e. if x[i][j] and
+    y are std::array, operator. calls itself to perform the element-wise difference
+    between x[i][j] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result array of arrays having the same dimensions of x and
+    storing the element-wise difference between x and y.
+*/
 template <class T, size_t d, size_t e>
 array<array<T, e>, d> operator- (
   const array<array<T, e>, d>   &x,
@@ -414,6 +598,24 @@ return(z); };
 // Operator "*" ===================================================================== //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator* for std::array.
+
+    Perform the element-wise product between two arrays (x and y) and returns a
+    array z s.t.
+    z[i] = x[i] * y[i] for all i = 0, ..., d-1
+    where d = min(x.size(), y.size().
+    Template parameters, T, can by any type for which the operator* is defined.
+
+    The element-wise product is performed recursively, i.e. if the i-th element of x and
+    the i-th element of y are std::array, operator* calls itself
+    to perform the element-wise product between x[i] and y[i].
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result array with d elements, storing the element-wise product between x and y.
+*/
 template <class T, size_t d>
 array<T, d> operator* (
   const array<T, d> &x,
@@ -454,6 +656,24 @@ for (int i = 0; i < d; i++){
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator* for std::array.
+
+    Perform the element-wise product between a array (x) and a constant (y), 
+    and returns a array (z) s.t.
+    z[i] = x[i] * y for all i = 0, ..., d-1
+    where d = x.size().
+    Template parameters, T, can by any type for which the operator* is defined.
+
+    The element-wise product is performed recursively, i.e. if the i-th element of x and
+    y are std::array, operator* calls itself to perform the element-wise product
+    between x[i] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result array with d elements, storing the element-wise product between x and y.
+*/
 template <class T, size_t d>
 array<T, d> operator* (
   const array<T, d> &x,
@@ -494,6 +714,24 @@ for (int i = 0; i < d; i++){
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator* for std::array.
+
+    Perform the element-wise product between a constant (x), and a array (y)
+    and returns a array (z) s.t.
+    z[i] = x * y[i] for all i = 0, ..., d-1
+    where d = y.size().
+    Template parameters, T, can by any type for which the operator* is defined.
+
+    The element-wise product is performed recursively, i.e. if the i-th element of y and
+    x are std::array, operator* calls itself to perform the element-wise product
+    between x[i] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result array with d elements, storing the element-wise product between x and y.
+*/
 template <class T, size_t d>
 array<T, d> operator* (
   const T           &x,
@@ -532,6 +770,25 @@ z = y * x;
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator* for std::array.
+
+    Perform the element-wise product between a constant (y) and a array of arrays (y),
+    and returns z s.t.
+    z[i][j] = x * y[i][j] for all j = 0, ..., e-1, i = 0, ..., d-1
+    where d = y.size().
+    Template parameters, T, can by any type for which the operator* is defined.
+
+    The element-wise product is performed recursively, i.e. if y[i][j] and
+    y are std::array, operator* calls itself to perform the element-wise product
+    between y[i][j] and x.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result array of arrays having the same dimensions of y and
+    storing the element-wise product between x and y.
+*/
 template <class T, size_t d, size_t e>
 array<array<T, e>, d> operator* (
   const T                       &x,
@@ -572,6 +829,25 @@ for (int i = 0; i < d; i++) {
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator* for std::array.
+
+    Perform the element-wise product between a array of arrays (x) and a constant (y), 
+    and returns z s.t.
+    z[i][j] = x[i][j] * y for all j = 0, ..., e-1, i = 0, ..., d-1
+    where d = x.size().
+    Template parameters, T, can by any type for which the operator* is defined.
+
+    The element-wise product is performed recursively, i.e. if x[i][j] and
+    y are std::array, operator* calls itself to perform the element-wise product
+    between x[i][j] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result array of arrays having the same dimensions of x and
+    storing the element-wise product between x and y.
+*/
 template <class T, size_t d, size_t e>
 array<array<T, e>, d> operator* (
   const array<array<T, e>, d>   &x,
@@ -614,6 +890,24 @@ return(z); };
 // Operator "/" ===================================================================== //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator/ for std::array.
+
+    Perform the element-wise division between two arrays (x and y) and returns a
+    array z s.t.
+    z[i] = x[i] / y[i] for all i = 0, ..., d-1
+    where d = min(x.size(), y.size().
+    Template parameters, T, can by any type for which the operator/ is defined.
+
+    The element-wise division is performed recursively, i.e. if the i-th element of x and
+    the i-th element of y are std::array, operator/ calls itself
+    to perform the element-wise division between x[i] and y[i].
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result array with d elements, storing the element-wise division between x and y.
+*/
 template <class T, size_t d>
 array<T, d> operator/ (
   const array<T, d> &x,
@@ -654,6 +948,24 @@ for (int i = 0; i < d; i++){
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator/ for std::array.
+
+    Perform the element-wise division between a array (x) and a constant (y), 
+    and returns a array (z) s.t.
+    z[i] = x[i] / y for all i = 0, ..., d-1
+    where d = x.size().
+    Template parameters, T, can by any type for which the operator/ is defined.
+
+    The element-wise division is performed recursively, i.e. if the i-th element of x and
+    y are std::array, operator/ calls itself to perform the element-wise division
+    between x[i] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result array with d elements, storing the element-wise division between x and y.
+*/
 template <class T, size_t d>
 array<T, d> operator/ (
   const array<T, d> &x,
@@ -699,6 +1011,24 @@ for (i = 0; i < d; i++) {
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator/ for std::array.
+
+    Perform the element-wise division between a constant (x), and a array (y)
+    and returns a array (z) s.t.
+    z[i] = x / y[i] for all i = 0, ..., d-1
+    where d = y.size().
+    Template parameters, T, can by any type for which the operator/ is defined.
+
+    The element-wise division is performed recursively, i.e. if the i-th element of y and
+    x are std::array, operator/ calls itself to perform the element-wise division
+    between x[i] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result array with d elements, storing the element-wise division between x and y.
+*/
 template <class T, size_t d>
 array<T, d> operator/ (
   const T           &x,
@@ -739,6 +1069,25 @@ for (int i = 0; i < d; i++) {
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator/ for std::array.
+
+    Perform the element-wise division between a constant (y) and a array of arrays (y),
+    and returns z s.t.
+    z[i][j] = x / y[i][j] for all j = 0, ..., e-1, i = 0, ..., d-1
+    where d = y.size().
+    Template parameters, T, can by any type for which the operator/ is defined.
+
+    The element-wise division is performed recursively, i.e. if y[i][j] and
+    y are std::array, operator/ calls itself to perform the element-wise division
+    between y[i][j] and x.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result array of arrays having the same dimensions of y and
+    storing the element-wise division between x and y.
+*/
 template <class T, size_t d, size_t e>
 array<array<T, e>, d> operator/ (
   const T                       &x,
@@ -779,6 +1128,25 @@ for (int i = 0; i < d; i++) {
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Operator/ for std::array.
+
+    Perform the element-wise division between a array of arrays (x) and a constant (y), 
+    and returns z s.t.
+    z[i][j] = x[i][j] / y for all j = 0, ..., e-1, i = 0, ..., d-1
+    where d = x.size().
+    Template parameters, T, can by any type for which the operator/ is defined.
+
+    The element-wise division is performed recursively, i.e. if x[i][j] and
+    y are std::array, operator/ calls itself to perform the element-wise division
+    between x[i][j] and y.
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result array of arrays having the same dimensions of x and
+    storing the element-wise division between x and y.
+*/
 template <class T, size_t d, size_t e>
 array<array<T, e>, d> operator/ (
   const array<array<T, e>, d>   &x,
@@ -821,6 +1189,20 @@ return(z); };
 // Output operator ================================================================== //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Insertion operator for std::array.
+
+    Flush the content of std::array to std::ostream.
+    The content of the input array is flushed with the following format:
+    x[0] x[1] x[2] ... x[d-1] where d = x.size();
+    (i.e. array elements are separated by blank spaces).
+    Template parameter T can be any type such that operator<< is defined.
+
+    \param[in,out] out output stream
+    \param[in] x argument of insertion operator
+
+    \result reference to the stream (allows concatenation)
+*/
 template <class T, size_t d>
 ostream& operator<< (
     ostream              &out,
@@ -833,12 +1215,12 @@ ostream& operator<< (
 //     ostream              &out,                                                     //
 //     const array<T, d>    &x)                                                       //
 //                                                                                    //
-// Output stream for vector.                                                          //
+// Output stream for array.                                                           //
 // ================================================================================== //
 // INPUT                                                                              //
 // ================================================================================== //
 // - out       : ostream, with output stream                                          //
-// - x         : array<T, d>, with vector to be streamed                              //
+// - x         : array<T, d>, with array to be streamed                               //
 // ================================================================================== //
 // OUTPUT                                                                             //
 // ================================================================================== //
@@ -851,7 +1233,7 @@ ostream& operator<< (
 // none
 
 // ================================================================================== //
-// OUTPUT VECTOR CONTENT                                                              //
+// OUTPUT ARRAY CONTENT                                                               //
 // ================================================================================== //
 if (d == 0) {
     return(out);
@@ -864,6 +1246,20 @@ out << x[d-1] ;
 return(out); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Insertion operator for std::array.
+
+    Flush the content of std::array to std::ofstream.
+    The content of the input array is flushed with the following format:
+    x[0] x[1] x[2] ... x[d-1] where d = x.size();
+    (i.e. array elements are separated by blank spaces).
+    Template parameter T can be any type such that operator<< is defined.
+
+    \param[in,out] out output file stream
+    \param[in] x argument of insertion operator
+
+    \result reference to the stream (allows concatenation)
+*/
 template <class T, size_t d>
 ofstream& operator<< (
     ofstream             &out,
@@ -876,12 +1272,12 @@ ofstream& operator<< (
 //     ofstream              &out,                                                    //
 //     const array<T, d>    &x)                                                       //
 //                                                                                    //
-// Output file stream for vector.                                                     //
+// Output file stream for array.                                                      //
 // ================================================================================== //
 // INPUT                                                                              //
 // ================================================================================== //
 // - out       : ofstream, with output stream                                         //
-// - x         : array<T, d>, with vector to be streamed                              //
+// - x         : array<T, d>, with array to be streamed                               //
 // ================================================================================== //
 // OUTPUT                                                                             //
 // ================================================================================== //
@@ -894,7 +1290,7 @@ ofstream& operator<< (
 // none
 
 // ================================================================================== //
-// OUTPUT VECTOR CONTENT                                                              //
+// OUTPUT ARRAY CONTENT                                                               //
 // ================================================================================== //
 if (d == 0) {
     return(out);
@@ -909,6 +1305,18 @@ return(out); };
 // Input operator =================================================================== //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Extraction operator for std::array.
+
+    Extract the content of std::array from std::istream.
+    The content of the input array is extracted until end-of-stream condition
+    is met or all available position in the array are filled.
+
+    \param[in,out] out input stream
+    \param[in,out] x argument of extraction operator
+
+    \result reference to input stream (allows concatenation)
+*/
 template <class T, size_t d>
 istream& operator>> (
     istream              &in,
@@ -944,7 +1352,7 @@ T                    dummy;
 int                  i;
 
 // ================================================================================== //
-// EXTRACT STREAM CONTENT INTO VECTOR                                                 //
+// EXTRACT STREAM CONTENT INTO ARRAY                                                  //
 // ================================================================================== //
 i = 0;
 while ((in.good()) && (i < d)) {
@@ -955,6 +1363,18 @@ while ((in.good()) && (i < d)) {
 return(in); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Extraction operator for std::array.
+
+    Extract the content of std::array from std::ifstream.
+    The content of the input array is extracted until end-of-stream condition
+    is met or all available position in the array are filled.
+
+    \param[in,out] out input file stream
+    \param[in,out] x argument of extraction operator
+
+    \result reference to input file stream (allows concatenation)
+*/
 template <class T, size_t d>
 ifstream& operator>> (
     ifstream             &in,
@@ -990,7 +1410,7 @@ T       dummy;
 int     i;
 
 // ================================================================================== //
-// EXTRACT FILE CONTENT INTO VECTOR                                                   //
+// EXTRACT FILE CONTENT INTO ARRAY                                                    //
 // ================================================================================== //
 i = 0;
 while ((in.good()) && (i < d)) {
