@@ -487,6 +487,9 @@ void vectorMathFunct_Ex(
 // ================================================================================== //
 {
 
+    // Output message --------------------------------------------------------------- //
+    cout << "** function min()" << endl;
+
     // Scope variables -------------------------------------------------------------- //
     double                       a = 1.5;
     dvector1D                    x(3), t(3);
@@ -501,26 +504,37 @@ void vectorMathFunct_Ex(
     z[0][0] = 2.0; z[0][1] = 2.0; z[0][2] = 2.0;
     z[1][0] = 2.0; z[1][1] = 2.0; z[1][2] = 2.0;
     z[2][0] = 2.0; z[2][1] = 2.0; z[2][2] = 2.0;
-    cout << "a = " << a << endl;
-    cout << "x = " << x << endl;
-    cout << "t = " << t << endl;
-    cout << "y = " << y << endl;
-    cout << "z = " << z << endl;
+    cout << "  Declared:" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    t = ";
+    display(cout, t) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
+    cout << "    z = ";
+    display(cout, z) << endl;
 
     // min between scalar and 1D array ---------------------------------------------- //
-    cout << "min(t, a) = " << min(t,a) << endl;
+    cout << "  min(t, a) = ";
+    display(cout, min(t, a)) << endl;
 
     // min between 1D arrays -------------------------------------------------------- //
-    cout << "min(x, t) = " << min(x, t) << endl;
+    cout << "  min(x, t) = ";
+    display(cout, min(x, t)) << endl;
 
     // min between scalar and 2D array ---------------------------------------------- //
-    cout << "min(y, a) = " << min(y, a) << endl;
+    cout << "  min(y, a) = ";
+    display(cout, min(y, a)) << endl;
 
     // min between 1D array and 2D array -------------------------------------------- //
-    cout << "min(y, x) = " << min(y, x) << endl;
+    cout << "  min(y, x) = ";
+    display(cout, min(y, x)) << endl;
 
     // min between 2D arrays -------------------------------------------------------- //
-    cout << "min(y, z) = " << min(y, z) << endl;
+    cout << "  min(y, z) = ";
+    display(cout, min(y, z)) << endl;
+    cout << endl;
 
 }
 
@@ -528,6 +542,9 @@ void vectorMathFunct_Ex(
 // OPERATOR "minval"                                                                  //
 // ================================================================================== //
 {
+
+    // Output message --------------------------------------------------------------- //
+    cout << "** function minval()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     int                nn = 0;
@@ -544,21 +561,25 @@ void vectorMathFunct_Ex(
     y[2] = 2*i;
 
     // Output message --------------------------------------------------------------- //
-    cout << "a = " << a << endl;
-    cout << "x = " << x << endl;
-    cout << "y = " << y << endl;
+    cout << "  Declared" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
 
     // Minval of double ------------------------------------------------------------- //
     minval(a,mm);
-    cout << "minval(a) = " << mm << endl;
+    cout << "  minval(a) = " << mm << endl;
 
     // Minval of 1D vector ---------------------------------------------------------- //
     minval(x,mm);
-    cout << "minval(x) = " << mm << endl;
+    cout << "  minval(x) = " << mm << endl;
 
     // Minval of 2D vector ---------------------------------------------------------- //
     minval(y,nn);
-    cout << "minval(y) = " << nn << endl;
+    cout << "  minval(y) = " << nn << endl;
+    cout << endl;
 
 }
 
@@ -566,6 +587,8 @@ void vectorMathFunct_Ex(
 // OPERATOR "max"                                                                     //
 // ================================================================================== //
 {
+    // Output message --------------------------------------------------------------- //
+    cout << "** function max()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     double                       a = 1.5;
@@ -573,6 +596,7 @@ void vectorMathFunct_Ex(
     dvector2D                    y(3, dvector1D(3)), z(3, dvector1D(3));
 
     // Initialize scope variables --------------------------------------------------- //
+    cout << "  Declared:" << endl;
     x[0] = 3.0; x[1] = 3.0; x[2] = 3.0;
     t[0] = 1.0; t[1] = 4.0; t[2] = 2.0;
     y[0][0] = 0.0; y[0][1] = 1.0; y[0][2] = 2.0;
@@ -581,26 +605,36 @@ void vectorMathFunct_Ex(
     z[0][0] = 2.0; z[0][1] = 2.0; z[0][2] = 2.0;
     z[1][0] = 2.0; z[1][1] = 2.0; z[1][2] = 2.0;
     z[2][0] = 2.0; z[2][1] = 2.0; z[2][2] = 2.0;
-    cout << "a = " << a << endl;
-    cout << "x = " << x << endl;
-    cout << "t = " << t << endl;
-    cout << "y = " << y << endl;
-    cout << "z = " << z << endl;
+    cout << "    a = " << a << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    t = ";
+    display(cout, t) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
+    cout << "    z = ";
+    display(cout, z) << endl;
 
     // min between scalar and 1D array ---------------------------------------------- //
-    cout << "max(t, a) = " << max(t,a) << endl;
+    cout << "  max(t, a) = ";
+    display(cout, max(t,a)) << endl;
 
     // min between 1D arrays -------------------------------------------------------- //
-    cout << "max(x, t) = " << max(x, t) << endl;
+    cout << "  max(x, t) = ";
+    display(cout, max(x, t)) << endl;
 
     // min between scalar and 2D array ---------------------------------------------- //
-    cout << "max(y, a) = " << max(y, a) << endl;
+    cout << "  max(y, a) = ";
+    display(cout, max(y, a)) << endl;
 
     // min between 1D array and 2D array -------------------------------------------- //
-    cout << "max(y, x) = " << max(y, x) << endl;
+    cout << "  max(y, x) = ";
+    display(cout, max(y, x)) << endl;
 
     // min between 2D arrays -------------------------------------------------------- //
-    cout << "max(y, z) = " << max(y, z) << endl;
+    cout << "  max(y, z) = ";
+    display(cout, max(y, z)) << endl;
+    cout << endl;
 
 }
 
@@ -608,6 +642,9 @@ void vectorMathFunct_Ex(
 // OPERATOR "maxval"                                                                  //
 // ================================================================================== //
 {
+
+    // Output message --------------------------------------------------------------- //
+    cout << "** function maxval()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     int                nn = 0;
@@ -624,21 +661,25 @@ void vectorMathFunct_Ex(
     y[2] = 3*i;
 
     // Output message --------------------------------------------------------------- //
-    cout << "a = " << a << endl;
-    cout << "x = " << x << endl;
-    cout << "y = " << y << endl;
+    cout << "  Declared:" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
 
     // Minval of double ------------------------------------------------------------- //
     maxval(a,mm);
-    cout << "maxval(a) = " << mm << endl;
+    cout << "  maxval(a) = " << mm << endl;
 
     // Minval of 1D vector ---------------------------------------------------------- //
     maxval(x,mm);
-    cout << "maxval(x) = " << mm << endl;
+    cout << "  maxval(x) = " << mm << endl;
 
     // Minval of 2D vector ---------------------------------------------------------- //
     maxval(y,nn);
-    cout << "maxval(y) = " << nn << endl;
+    cout << "  maxval(y) = " << nn << endl;
+    cout << endl;
 
 }
 
@@ -646,6 +687,9 @@ void vectorMathFunct_Ex(
 // OPERATOR "sum"                                                                     //
 // ================================================================================== //
 {
+
+    // Output message --------------------------------------------------------------- //
+    cout << "** function sum()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     int                nn = -5;
@@ -666,28 +710,32 @@ void vectorMathFunct_Ex(
     y[2] = 3*i;
 
     // Output message --------------------------------------------------------------- //
-    cout << "a = " << a << endl;
-    cout << "x = " << x << endl;
-    cout << "u = " << x << endl;
-    cout << "y = " << y << endl;
+    cout << "  Declared:" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    u = ";
+    display(cout, u) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
 
     // Minval of double ------------------------------------------------------------- //
     sum(a,mm);
-    cout << "sum(a) = " << mm << endl;
+    cout << "  sum(a) = " << mm << endl;
 
     // Minval of 1D vector ---------------------------------------------------------- //
     sum(x,mm);
-    cout << "sum(x) = " << mm << endl;
+    cout << "  sum(x) = " << mm << endl;
 
     // Minval of 1D vector ---------------------------------------------------------- //
     sum(u,su);
-    cout << "sum(u) = " << su << endl;
+    cout << "  sum(u) = " << su << endl;
 
 
     // Minval of 2D vector ---------------------------------------------------------- //
     sum(y,nn);
-    cout << "sum(y) = " << nn << endl;
-
+    cout << "  sum(y) = " << nn << endl;
+    cout << endl;
 
 }
 
@@ -695,6 +743,8 @@ void vectorMathFunct_Ex(
 // OPERATOR "abs"                                                                     //
 // ================================================================================== //
 {
+    // Output message --------------------------------------------------------------- //
+    cout << "** function abs()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     double             a = 3.0;
@@ -710,18 +760,24 @@ void vectorMathFunct_Ex(
     y[2] = -1*i;
 
     // Output message --------------------------------------------------------------- //
-    cout << "a = " << a << endl;
-    cout << "x = " << x << endl;
-    cout << "y = " << y << endl;
+    cout << "  Declared:" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
 
     // Minval of double ------------------------------------------------------------- //
-    cout << "abs(a) = " << abs(a) << endl;
+    cout << "  abs(a) = " << abs(a) << endl;
 
     // Minval of 1D vector ---------------------------------------------------------- //
-    cout << "abs(x) = " << abs(x) << endl;
+    cout << "  abs(x) = ";
+    display(cout, abs(x)) << endl;
 
     // Minval of 2D vector ---------------------------------------------------------- //
-    cout << "abs(y) = " << abs(y) << endl;
+    cout << "  abs(y) = ";
+    display(cout, abs(y)) << endl;
+    cout << endl;
 
 }
 
@@ -729,6 +785,8 @@ void vectorMathFunct_Ex(
 // OPERATOR "pow"                                                                     //
 // ================================================================================== //
 {
+    // Output message --------------------------------------------------------------- //
+    cout << "** function pow()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     double             a = 3.0;
@@ -744,18 +802,24 @@ void vectorMathFunct_Ex(
     y[2] = 3*i;
 
     // Output message --------------------------------------------------------------- //
-    cout << "a = " << a << endl;
-    cout << "x = " << x << endl;
-    cout << "y = " << y << endl;
+    cout << "  Declared:" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
 
     // Minval of double ------------------------------------------------------------- //
-    cout << "pow(a,2) = " << pow(a,2.0) << endl;
+    cout << "  pow(a,2) = " << pow(a,2.0) << endl;
 
     // Minval of 1D vector ---------------------------------------------------------- //
-    cout << "pow(x,2) = " << pow(x,2.0) << endl;
+    cout << "  pow(x,2) = ";
+    display(cout, pow(x,2.0)) << endl;
 
     // Minval of 2D vector ---------------------------------------------------------- //
-    cout << "pow(y,2) = " << pow(y,2.0) << endl;
+    cout << "  pow(y,2) = ";
+    display(cout, pow(y,2.0)) << endl;
+    cout << endl;
 
 }
 
@@ -763,6 +827,9 @@ void vectorMathFunct_Ex(
 // OPERATOR "norm"                                                                    //
 // ================================================================================== //
 {
+
+    // Output message --------------------------------------------------------------- //
+    cout << "** function norm()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     dvector1D          x(3, 0.0);
@@ -773,18 +840,22 @@ void vectorMathFunct_Ex(
     i[0] = 1;   i[1] = -2;   i[2] = -4;
 
     // Output message --------------------------------------------------------------- //
-    cout << "x = " << x << endl;
-    cout << "i = " << i << endl;
+    cout << "  Declared:" << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    i = ";
+    display(cout, i) << endl;
 
     // norm of vector< double > ----------------------------------------------------- //
-    cout << "norm(x,2) = " << norm(x,2) << endl;
-    cout << "norm(x,3) = " << norm(x,3) << endl;
-    cout << "norm_inf(x) = " << norm_inf(x) << endl;
+    cout << "  norm(x,2) = " << norm(x,2) << endl;
+    cout << "  norm(x,3) = " << norm(x,3) << endl;
+    cout << "  norm_inf(x) = " << norm_inf(x) << endl;
 
     // norm of vector< int > -------------------------------------------------------- //
-    cout << "norm(i,2) = " << norm(i,2) << endl;
-    cout << "norm(i,3) = " << norm(i,3) << endl;
-    cout << "norm_inf(i) = " << norm_inf(i) << endl;
+    cout << "  norm(i,2) = " << norm(i,2) << endl;
+    cout << "  norm(i,3) = " << norm(i,3) << endl;
+    cout << "  norm_inf(i) = " << norm_inf(i) << endl;
+    cout << endl;
 
 }
 
@@ -792,6 +863,9 @@ void vectorMathFunct_Ex(
 // OPERATOR "Dot_Product"                                                             //
 // ================================================================================== //
 {
+
+    // Output message --------------------------------------------------------------- //
+    cout << "** function Dot_Product()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     dvector1D          x(3, 0.0), y(3, 0.0);
@@ -804,16 +878,22 @@ void vectorMathFunct_Ex(
     j = i;
 
     // Output message --------------------------------------------------------------- //
-    cout << "x = " << x << endl;
-    cout << "y = " << x << endl;
-    cout << "i = " << i << endl;
-    cout << "j = " << i << endl;
+    cout << "  Declared:" << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
+    cout << "    i = ";
+    display(cout, i) << endl;
+    cout << "    j = ";
+    display(cout, j) << endl;
 
     // Dot_Product of vector< double > ---------------------------------------------- //
-    cout << "Dot_Product(x,y) = " << Dot_Product(x,y) << endl;
+    cout << "  Dot_Product(x,y) = " << Dot_Product(x,y) << endl;
 
     // Dot_Product of vector< int > ------------------------------------------------- //
-    cout << "Dot_Product(i,j) = " << Dot_Product(i,j) << endl;
+    cout << "  Dot_Product(i,j) = " << Dot_Product(i,j) << endl;
+    cout << endl;
 
 }
 
@@ -821,6 +901,8 @@ void vectorMathFunct_Ex(
 // OPERATOR "Cross_Product"                                                           //
 // ================================================================================== //
 {
+    // Output message --------------------------------------------------------------- //
+    cout << "** function Cross_Product()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     dvector1D          x(3, 0.0), y(3, 0.0);
@@ -833,19 +915,36 @@ void vectorMathFunct_Ex(
     j[0] = 4;   j[1] =  0;   j[2] = 0;
 
     // Output message --------------------------------------------------------------- //
-    cout << "x = " << x << endl;
-    cout << "y = " << x << endl;
-    cout << "i = " << i << endl;
-    cout << "j = " << i << endl;
+    cout << "  Declared:" << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
+    cout << "    i = ";
+    display(cout, i) << endl;
+    cout << "    j = ";
+    display(cout, j) << endl;
 
     // Dot_Product of vector< double > ---------------------------------------------- //
-    cout << "Cross_Product(x,y) = " << Cross_Product(x,y) << endl;
-    cout << "Cross_Product(x,x) = " << Cross_Product(x,x) << endl;
+    cout << "  Cross_Product(x,y) = ";
+    display(cout, Cross_Product(x,y)) << endl;
+    cout << "  Cross_Product(x,x) = ";
+    display(cout, Cross_Product(x,x)) << endl;
 
     // Dot_Product of vector< int > ------------------------------------------------- //
-    cout << "Cross_Product(i,j) = " << Cross_Product(i,j) << endl;
-    cout << "Cross_Product(i,i) = " << Cross_Product(i,i) << endl;
+    cout << "  Cross_Product(i,j) = ";
+    display(cout, Cross_Product(i,j)) << endl;
+    cout << "  Cross_Product(i,i) = ";
+    display(cout, Cross_Product(i,i)) << endl;
+    cout << endl;
 
+}
+
+// ================================================================================== //
+// OUTPUT MESSAGE                                                                     //
+// ================================================================================== //
+{
+    cout << endl;
 }
 
 return; };
@@ -1311,6 +1410,9 @@ void arrayMathFunct_Ex(
 // ================================================================================== //
 {
 
+    // Output message --------------------------------------------------------------- //
+    cout << "** function min()" << endl;
+
     // Scope variables -------------------------------------------------------------- //
     double                       a = 1.5;
     array<double, 3>             x, t;
@@ -1325,26 +1427,37 @@ void arrayMathFunct_Ex(
     z[0][0] = 2.0; z[0][1] = 2.0; z[0][2] = 2.0;
     z[1][0] = 2.0; z[1][1] = 2.0; z[1][2] = 2.0;
     z[2][0] = 2.0; z[2][1] = 2.0; z[2][2] = 2.0;
-    cout << "a = " << a << endl;
-    cout << "x = " << x << endl;
-    cout << "t = " << t << endl;
-    cout << "y = " << y << endl;
-    cout << "z = " << z << endl;
+    cout << "  Declared:" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    t = ";
+    display(cout, t) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
+    cout << "    z = ";
+    display(cout, z) << endl;
 
     // min between scalar and 1D array ---------------------------------------------- //
-    cout << "min(t, a) = " << min(t,a) << endl;
+    cout << "  min(t, a) = ";
+    display(cout, min(t,a)) << endl;
 
     // min between 1D arrays -------------------------------------------------------- //
-    cout << "min(x, t) = " << min(x, t) << endl;
+    cout << "  min(x, t) = ";
+    display(cout, min(x, t)) << endl;
 
     // min between scalar and 2D array ---------------------------------------------- //
-    cout << "min(y, a) = " << min(y, a) << endl;
+    cout << "  min(y, a) = ";
+    display(cout, min(y, a)) << endl;
 
     // min between 1D array and 2D array -------------------------------------------- //
-    cout << "min(y, x) = " << min(y, x) << endl;
+    cout << "  min(y, x) = ";
+    display(cout, min(y, x)) << endl;
 
     // min between 2D arrays -------------------------------------------------------- //
-    cout << "min(y, z) = " << min(y, z) << endl;
+    cout << "  min(y, z) = ";
+    display(cout, min(y, z)) << endl;
+    cout << endl;
 
 }
 
@@ -1352,6 +1465,9 @@ void arrayMathFunct_Ex(
 // OPERATOR "minval"                                                                  //
 // ================================================================================== //
 {
+
+    // Output message --------------------------------------------------------------- //
+    cout << "** function minval()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     int                      nn = 0;
@@ -1368,21 +1484,28 @@ void arrayMathFunct_Ex(
     y[2] = -3*i;
 
     // Output message --------------------------------------------------------------- //
-    cout << "a = " << a << endl;
-    cout << "x = " << x << endl;
-    cout << "y = " << y << endl;
+    cout << "  Declared:" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
 
     // Minval of double ------------------------------------------------------------- //
     minval(a,mm);
-    cout << "minval(a) = " << mm << endl;
+    cout << "  minval(a) = ";
+    display(cout, mm) << endl;
 
     // Minval of 1D arrays ---------------------------------------------------------- //
     minval(x,mm);
-    cout << "minval(x) = " << mm << endl;
+    cout << "  minval(x) = ";
+    display(cout, mm) << endl;
 
     // Minval of 2D arrays ---------------------------------------------------------- //
     minval(y,nn);
-    cout << "minval(y) = " << nn << endl;
+    cout << "  minval(y) = ";
+    display(cout, nn) << endl;
+    cout << endl;
 
 }
 
@@ -1390,6 +1513,8 @@ void arrayMathFunct_Ex(
 // OPERATOR "max"                                                                     //
 // ================================================================================== //
 {
+    // Output message --------------------------------------------------------------- //
+    cout << "** function max()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     double                       a = 1.5;
@@ -1405,26 +1530,37 @@ void arrayMathFunct_Ex(
     z[0][0] = 2.0; z[0][1] = 2.0; z[0][2] = 2.0;
     z[1][0] = 2.0; z[1][1] = 2.0; z[1][2] = 2.0;
     z[2][0] = 2.0; z[2][1] = 2.0; z[2][2] = 2.0;
-    cout << "a = " << a << endl;
-    cout << "x = " << x << endl;
-    cout << "t = " << t << endl;
-    cout << "y = " << y << endl;
-    cout << "z = " << z << endl;
+    cout << "  Declared:" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    t = ";
+    display(cout, t) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
+    cout << "    z = ";
+    display(cout, z) << endl;
 
     // min between scalar and 1D array ---------------------------------------------- //
-    cout << "max(t, a) = " << max(t,a) << endl;
+    cout << "  max(t, a) = ";
+    display(cout, max(t,a)) << endl;
 
     // min between 1D arrays -------------------------------------------------------- //
-    cout << "max(x, t) = " << max(x, t) << endl;
+    cout << "  max(x, t) = ";
+    display(cout, max(x, t)) << endl;
 
     // min between scalar and 2D array ---------------------------------------------- //
-    cout << "max(y, a) = " << max(y, a) << endl;
+    cout << "  max(y, a) = ";
+    display(cout, max(y, a)) << endl;
 
     // min between 1D array and 2D array -------------------------------------------- //
-    cout << "max(y, x) = " << max(y, x) << endl;
+    cout << "  max(y, x) = ";
+    display(cout, max(y, x)) << endl;
 
     // min between 2D arrays -------------------------------------------------------- //
-    cout << "max(y, z) = " << max(y, z) << endl;
+    cout << "  max(y, z) = ";
+    display(cout, max(y, z)) << endl;
+    cout << endl;
 
 }
 
@@ -1432,6 +1568,8 @@ void arrayMathFunct_Ex(
 // OPERATOR "maxval"                                                                  //
 // ================================================================================== //
 {
+    // Output message --------------------------------------------------------------- //
+    cout << "** function maxval()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     int                          nn = 0;
@@ -1448,21 +1586,28 @@ void arrayMathFunct_Ex(
     y[2] = -3*i;
 
     // Output message --------------------------------------------------------------- //
-    cout << "a = " << a << endl;
-    cout << "x = " << x << endl;
-    cout << "y = " << y << endl;
+    cout << "  Declared:" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
 
     // Minval of double ------------------------------------------------------------- //
     maxval(a,mm);
-    cout << "maxval(a) = " << mm << endl;
+    cout << "  maxval(a) = ";
+    display(cout, mm) << endl;
 
     // Minval of 1D arrays ---------------------------------------------------------- //
     maxval(x,mm);
-    cout << "maxval(x) = " << mm << endl;
+    cout << "  maxval(x) = ";
+    display(cout, mm) << endl;
 
     // Minval of 2D arrays ---------------------------------------------------------- //
     maxval(y,nn);
-    cout << "maxval(y) = " << nn << endl;
+    cout << "  maxval(y) = ";
+    display(cout, nn) << endl;
+    cout << endl;
 
 }
 
@@ -1470,6 +1615,9 @@ void arrayMathFunct_Ex(
 // OPERATOR "sum"                                                                     //
 // ================================================================================== //
 {
+
+    // Output message --------------------------------------------------------------- //
+    cout << "** function sum()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     int                      nn = -5;
@@ -1486,21 +1634,25 @@ void arrayMathFunct_Ex(
     y[2] = 3*i;
 
     // Output message --------------------------------------------------------------- //
-    cout << "a = " << a << endl;
-    cout << "x = " << x << endl;
-    cout << "y = " << y << endl;
+    cout << "  Declared: " << endl;
+    cout << "    a = " << a << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
 
     // Minval of double ------------------------------------------------------------- //
     sum(a,mm);
-    cout << "sum(a) = " << mm << endl;
+    cout << "  sum(a) = " << mm << endl;
 
     // Minval of 1D arrays ---------------------------------------------------------- //
     sum(x,mm);
-    cout << "sum(x) = " << mm << endl;
+    cout << "  sum(x) = " << mm << endl;
 
     // Minval of 2D arrays ---------------------------------------------------------- //
     sum(y,nn);
-    cout << "sum(y) = " << nn << endl;
+    cout << "  sum(y) = " << nn << endl;
+    cout << endl;
 
 }
 
@@ -1508,6 +1660,9 @@ void arrayMathFunct_Ex(
 // OPERATOR "abs"                                                                     //
 // ================================================================================== //
 {
+
+    // Output message --------------------------------------------------------------- //
+    cout << "** function abs()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     double                   a = 3.0;
@@ -1523,18 +1678,25 @@ void arrayMathFunct_Ex(
     y[2] = -1*i;
 
     // Output message --------------------------------------------------------------- //
-    cout << "a = " << a << endl;
-    cout << "x = " << x << endl;
-    cout << "y = " << y << endl;
+    cout << "  Declared:" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
 
     // Minval of double ------------------------------------------------------------- //
-    cout << "abs(a) = " << abs(a) << endl;
+    cout << "  abs(a) = ";
+    display(cout, abs(a)) << endl;
 
     // Minval of 1D arrays ---------------------------------------------------------- //
-    cout << "abs(x) = " << abs(x) << endl;
+    cout << "  abs(x) = ";
+    display(cout, abs(x)) << endl;
 
     // Minval of 2D arrays ---------------------------------------------------------- //
-    cout << "abs(y) = " << abs(y) << endl;
+    cout << "  abs(y) = ";
+    display(cout, abs(y)) << endl;
+    cout << endl;
 
 }
 
@@ -1542,6 +1704,9 @@ void arrayMathFunct_Ex(
 // OPERATOR "pow"                                                                     //
 // ================================================================================== //
 {
+
+    // Output message --------------------------------------------------------------- //
+    cout << "** function pow()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     double                   a = 3.0;
@@ -1557,18 +1722,22 @@ void arrayMathFunct_Ex(
     y[2] = 3*i;
 
     // Output message --------------------------------------------------------------- //
-    cout << "a = " << a << endl;
-    cout << "x = " << x << endl;
-    cout << "y = " << y << endl;
+    cout << "  Declared:" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
 
     // Minval of double ------------------------------------------------------------- //
-    cout << "pow(a,2) = " << pow(a,2.0) << endl;
+    cout << "  pow(a,2) = " << pow(a,2.0) << endl;
 
     // Minval of 1D arrays ---------------------------------------------------------- //
-    cout << "pow(x,2) = " << pow(x,2.0) << endl;
+    cout << "  pow(x,2) = " << pow(x,2.0) << endl;
 
     // Minval of 2D arrays ---------------------------------------------------------- //
-    cout << "pow(y,2) = " << pow(y,2.0) << endl;
+    cout << "  pow(y,2) = " << pow(y,2.0) << endl;
+    cout << endl;
 
 }
 
@@ -1576,6 +1745,9 @@ void arrayMathFunct_Ex(
 // OPERATOR "norm"                                                                    //
 // ================================================================================== //
 {
+
+    // Output message --------------------------------------------------------------- //
+    cout << "** functon norm()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     array<double, 3>   x;
@@ -1586,18 +1758,22 @@ void arrayMathFunct_Ex(
     i[0] = 1;   i[1] = -2;   i[2] = -4;
 
     // Output message --------------------------------------------------------------- //
-    cout << "x = " << x << endl;
-    cout << "i = " << i << endl;
+    cout << "  Declared:" << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    i = ";
+    display(cout, i) << endl;
 
     // norm of array< double > ------------------------------------------------------ //
-    cout << "norm(x,2) = " << norm(x,2) << endl;
-    cout << "norm(x,3) = " << norm(x,3) << endl;
-    cout << "norm_inf(x) = " << norm_inf(x) << endl;
+    cout << "  norm(x,2) = " << norm(x,2) << endl;
+    cout << "  norm(x,3) = " << norm(x,3) << endl;
+    cout << "  norm_inf(x) = " << norm_inf(x) << endl;
 
     // norm of array< int > --------------------------------------------------------- //
-    cout << "norm(i,2) = " << norm(i,2) << endl;
-    cout << "norm(i,3) = " << norm(i,3) << endl;
-    cout << "norm_inf(i) = " << norm_inf(i) << endl;
+    cout << "  norm(i,2) = " << norm(i,2) << endl;
+    cout << "  norm(i,3) = " << norm(i,3) << endl;
+    cout << "  norm_inf(i) = " << norm_inf(i) << endl;
+    cout << endl;
 
 }
 
@@ -1605,6 +1781,8 @@ void arrayMathFunct_Ex(
 // OPERATOR "Dot_Product"                                                             //
 // ================================================================================== //
 {
+    // Output message --------------------------------------------------------------- //
+    cout << "** functon Dot_Product()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     array<double, 3>   x, y;
@@ -1617,16 +1795,22 @@ void arrayMathFunct_Ex(
     j = i;
 
     // Output message --------------------------------------------------------------- //
-    cout << "x = " << x << endl;
-    cout << "y = " << x << endl;
-    cout << "i = " << i << endl;
-    cout << "j = " << i << endl;
+    cout << "  Declared:" << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
+    cout << "    i = ";
+    display(cout, i) << endl;
+    cout << "    j = ";
+    display(cout, j) << endl;
 
     // Dot_Product of array< double > ----------------------------------------------- //
-    cout << "Dot_Product(x,y) = " << Dot_Product(x,y) << endl;
+    cout << "  Dot_Product(x,y) = " << Dot_Product(x,y) << endl;
 
     // Dot_Product of array< int > -------------------------------------------------- //
-    cout << "Dot_Product(i,j) = " << Dot_Product(i,j) << endl;
+    cout << "  Dot_Product(i,j) = " << Dot_Product(i,j) << endl;
+    cout << endl;
 
 }
 
@@ -1634,6 +1818,8 @@ void arrayMathFunct_Ex(
 // OPERATOR "Cross_Product"                                                           //
 // ================================================================================== //
 {
+    // Output message --------------------------------------------------------------- //
+    cout << "** functon Cross_Product()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     dvector1D          x(3, 0.0), y(3, 0.0);
@@ -1646,18 +1832,28 @@ void arrayMathFunct_Ex(
     j[0] = 4;   j[1] =  0;   j[2] = 0;
 
     // Output message --------------------------------------------------------------- //
-    cout << "x = " << x << endl;
-    cout << "y = " << x << endl;
-    cout << "i = " << i << endl;
-    cout << "j = " << i << endl;
+    cout << "  Declared:" << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y ) << endl;
+    cout << "    i = ";
+    display(cout, i) << endl;
+    cout << "    j = ";
+    display(cout, j) << endl;
 
     // Dot_Product of vector< double > ---------------------------------------------- //
-    cout << "Cross_Product(x,y) = " << Cross_Product(x,y) << endl;
-    cout << "Cross_Product(x,x) = " << Cross_Product(x,x) << endl;
+    cout << "  Cross_Product(x,y) = ";
+    display(cout, Cross_Product(x,y)) << endl;
+    cout << "  Cross_Product(x,x) = ";
+    display(cout, Cross_Product(x,x)) << endl;
 
     // Dot_Product of vector< int > ------------------------------------------------- //
-    cout << "Cross_Product(i,j) = " << Cross_Product(i,j) << endl;
-    cout << "Cross_Product(i,i) = " << Cross_Product(i,i) << endl;
+    cout << "  Cross_Product(i,j) = ";
+    display(cout, Cross_Product(i,j)) << endl;
+    cout << "  Cross_Product(i,i) = ";
+    display(cout, Cross_Product(i,i)) << endl;
+    cout << endl;
 
 }
 
@@ -1665,7 +1861,7 @@ void arrayMathFunct_Ex(
 // OUTPUT MESSAGE                                                                     //
 // ================================================================================== //
 {
-    cout << "DEMO:  done!!" << endl;
+    cout << endl;
 }
 
 return; };

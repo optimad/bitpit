@@ -18,6 +18,22 @@
 // Operator "min" =================================================================== //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Element-wise minimum between two arrays.
+    Given two array x and y, returns z such that:
+    z[i] = min(x[i], y[i]), for all i = 0, ..., d-1
+    where the d is the size of x and y.
+    
+    Template parameters T can be any type such that min is defined.
+    For instance if T = std::array<T1, e>, min function call itself to return
+    the element-wise minimum between x[i] and y[i].
+
+    \param[in] x 1st argument
+    \param[in] y 2nd argument
+
+    \result returns an array having the same dimensions of x and y, storing
+    the element-wise minimum between x and y.
+*/
 template <class T, size_t d>
 array<T, d> min(
     const array<T, d>    &x,
@@ -32,7 +48,7 @@ array<T, d> min(
 //                                                                                    //
 // Returns the mininum between two arrays, i.e. given x, y 1D arrays                  //
 //       z = min(x, y) <-> z[i] = min(x[i], y[i])                                     //
-// Note that this function can be used with multidimensional vectors.                 //
+// Note that this function can be used with multidimensional arrays.                  //
 // ================================================================================== //
 //                                                                                    //
 // ================================================================================== //
@@ -59,6 +75,22 @@ for (int i = 0; i < d; i++) {
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Element-wise minimum between array and constant.
+    Given a array x and a constant y, returns z such that:
+    z[i] = min(x[i], y), for all i = 0, ..., d-1
+    where d is the size of x.
+
+    Template parameters T can be any type such that min is defined.
+    For instance if T = std::array<T1, e>, min function call itself to return
+    the element-wise minimum between x[i] and y.
+
+    \param[in] x 1st argument
+    \param[in] y 2nd argument
+
+    \result returns an array having the same dimensions of x, storing
+    the element-wise minimum between x and y.
+*/
 template <class T, size_t d>
 array<T, d> min(
     const array<T, d>    &x,
@@ -99,6 +131,22 @@ for (int i = 0; i < d; i++) {
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Element-wise minimum between constant and array.
+    Given a constant x and a array y, returns z such that:
+    z[i] = min(x, y[i]), for all i = 0, ..., d-1
+    where d is the size of y.
+
+    Template parameters T can be any type such that min is defined.
+    For instance if T = std::array<T1, e>, min function call itself to return
+    the element-wise minimum between x and y[i].
+
+    \param[in] x 1st argument
+    \param[in] y 2nd argument
+
+    \result returns an array having the same dimensions of y, storing
+    the element-wise minimum between x and y.
+*/
 template <class T, size_t d>
 array<T, d> min(
     const T              &x,
@@ -137,6 +185,22 @@ z = min(y, x);
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Element-wise minimum between 2D array and constant.
+    Given a 2D array x and a constant y, returns z such that:
+    z[i][j] = min(x[i][j], y), for all j = 0, ..., n-1, i = 0, ..., d-1
+    where d is the size of x.
+
+    Template parameters T can be any type such that min is defined.
+    For instance if T = std::array<T1, e>, min function call itself to return
+    the element-wise minimum between x[i][j] and y.
+
+    \param[in] x 1st argument
+    \param[in] y 2nd argument
+
+    \result returns an array having the same dimensions of x, storing
+    the element-wise minimum between x and y.
+*/
 template <class T, size_t d, size_t n>
 array<array<T, n>, d> min(
     const array<array<T, n>, d>    &x,
@@ -177,6 +241,22 @@ for (int i = 0; i < d; i++) {
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Element-wise minimum between constant and 2D array.
+    Given a constant x and a 2D array y, returns z such that:
+    z[i][j] = min(x, y[i][j]), for all j = 0, ..., n-1, i = 0, ..., d-1
+    where d is the size of y.
+
+    Template parameters T can be any type such that min is defined.
+    For instance if T = std::array<T1, e>, min function call itself to return
+    the element-wise minimum between x and y[i][j].
+
+    \param[in] x 1st argument
+    \param[in] y 2nd argument
+
+    \result returns a array having the same dimensions of y, storing
+    the element-wise minimum between x and y.
+*/
 template <class T, size_t d, size_t n>
 array<array<T, n>, d> min(
     const T                        &x,
@@ -217,6 +297,18 @@ return(z); };
 // Operator "minval" ================================================================ //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Returns the element with the smallest value within a array, i.e. given an input array, x
+    min_value = min(x[i]) over all i = 0, ..., d-1
+
+    Parameters template can be of any type with the following requirements:
+    1. minval must be defined for any type T
+    2. type T1 must be a scalar type
+    (for instance, T = std::array<double, e>, T1 = double)
+
+    \param[in] x input array
+    \param[in,out] min_value on output stores the elements with the smallest value.
+*/
 template <class T, size_t d, class T1>
 void minval(
     const array<T, d>    &x,
@@ -229,12 +321,12 @@ void minval(
 //     const array<T, d>  &x,                                                         //
 //     T1                 &min_value)                                                 //
 //                                                                                    //
-// Find the minimum element in a vector                                               //
+// Find the minimum element in a array                                                //
 // ================================================================================== //
 // INPUT                                                                              //
 // ================================================================================== //
-// - x             : array<T, d>, input vector                                        //
-// - min_value     : T1, minimum value of vector                                      //
+// - x             : array<T, d>, input array                                         //
+// - min_value     : T1, minimum value of array                                       //
 // ================================================================================== //
 // OUTPUT                                                                             //
 // ================================================================================== //
@@ -269,6 +361,22 @@ return; };
 // Operator "max" =================================================================== //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Element-wise maximum between two arrays.
+    Given two array x and y, returns z such that:
+    z[i] = max(x[i], y[i]), for all i = 0, ..., d-1
+    where the d is the size of x and y.
+    
+    Template parameters T can be any type such that max is defined.
+    For instance if T = std::array<T1, e>, max function call itself to return
+    the element-wise maximum between x[i] and y[i].
+
+    \param[in] x 1st argument
+    \param[in] y 2nd argument
+
+    \result returns an array having the same dimensions of x and y, storing
+    the element-wise maximum between x and y.
+*/
 template <class T, size_t d>
 array<T, d> max(
     const array<T, d>    &x,
@@ -283,7 +391,7 @@ array<T, d> max(
 //                                                                                    //
 // Returns the maximum between two arrays, i.e. given x, y arrays                     //
 //       z = max(x, y) <-> z[i] = max(x[i], y[i])                                     //
-// Note that this function can be used with multidimensional vectors.                 //
+// Note that this function can be used with multidimensional arrays.                  //
 // ================================================================================== //
 //                                                                                    //
 // ================================================================================== //
@@ -310,6 +418,22 @@ for (int i = 0; i < d; i++) {
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Element-wise maximum between array and constant.
+    Given a array x and a constant y, returns z such that:
+    z[i] = max(x[i], y), for all i = 0, ..., d-1
+    where d is the size of x.
+
+    Template parameters T can be any type such that max is defined.
+    For instance if T = std::array<T1, e>, max function call itself to return
+    the element-wise maximum between x[i] and y.
+
+    \param[in] x 1st argument
+    \param[in] y 2nd argument
+
+    \result returns an array having the same dimensions of x, storing
+    the element-wise maximum between x and y.
+*/
 template <class T, size_t d>
 array<T, d> max(
     const array<T, d>    &x,
@@ -323,7 +447,7 @@ array<T, d> max(
 //     const T              &y)                                                       //
 //                                                                                    //
 // Return the max value between a C++ v10.0 array and a scalar, i.e.                  //
-//      z = min(x, y) <-> z[i] = max(x[i], y)                                         //
+//      z = max(x, y) <-> z[i] = max(x[i], y)                                         //
 // ================================================================================== //
 // INPUT                                                                              //
 // ================================================================================== //
@@ -350,6 +474,22 @@ for (int i = 0; i < d; i++) {
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Element-wise maximum between constant and array.
+    Given a constant x and a array y, returns z such that:
+    z[i] = max(x, y[i]), for all i = 0, ..., d-1
+    where d is the size of y.
+
+    Template parameters T can be any type such that max is defined.
+    For instance if T = std::array<T1, e>, max function call itself to return
+    the element-wise maximum between x and y[i].
+
+    \param[in] x 1st argument
+    \param[in] y 2nd argument
+
+    \result returns an array having the same dimensions of y, storing
+    the element-wise maximum between x and y.
+*/
 template <class T, size_t d>
 array<T, d> max(
     const T              &x,
@@ -363,7 +503,7 @@ array<T, d> max(
 //     const array<T, d>    &y)                                                       //
 //                                                                                    //
 // Return the max value between a C++ v10.0 array and a scalar, i.e.                  //
-//      z = min(x, y) <-> z[i] = max(x, y[i])                                         //
+//      z = max(x, y) <-> z[i] = max(x, y[i])                                         //
 // ================================================================================== //
 // INPUT                                                                              //
 // ================================================================================== //
@@ -388,6 +528,22 @@ z = max(y, x);
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Element-wise maximum between 2D array and constant.
+    Given a 2D array x and a constant y, returns z such that:
+    z[i][j] = max(x[i][j], y), for all j = 0, ..., n-1, i = 0, ..., d-1
+    where d is the size of x.
+
+    Template parameters T can be any type such that max is defined.
+    For instance if T = std::array<T1, e>, max function call itself to return
+    the element-wise maximum between x[i][j] and y.
+
+    \param[in] x 1st argument
+    \param[in] y 2nd argument
+
+    \result returns an array having the same dimensions of x, storing
+    the element-wise maximum between x and y.
+*/
 template <class T, size_t d, size_t n>
 array<array<T, n>, d> max(
     const array<array<T, n>, d>    &x,
@@ -401,7 +557,7 @@ array<array<T, n>, d> max(
 //     const T                        &y)                                             //
 //                                                                                    //
 // Return the max value between a C++ v10.0 2D array and a scalar, i.e.               //
-//      z = min(x, y) <-> z[i][j] = max(x[i][j], y)                                   //
+//      z = max(x, y) <-> z[i][j] = max(x[i][j], y)                                   //
 // ================================================================================== //
 // INPUT                                                                              //
 // ================================================================================== //
@@ -428,6 +584,22 @@ for (int i = 0; i < d; i++) {
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Element-wise maximum between constant and 2D array.
+    Given a constant x and a 2D array y, returns z such that:
+    z[i][j] = max(x, y[i][j]), for all j = 0, ..., n-1, i = 0, ..., d-1
+    where d is the size of y.
+
+    Template parameters T can be any type such that max is defined.
+    For instance if T = std::array<T1, e>, max function call itself to return
+    the element-wise maximum between x and y[i][j].
+
+    \param[in] x 1st argument
+    \param[in] y 2nd argument
+
+    \result returns a array having the same dimensions of y, storing
+    the element-wise maximum between x and y.
+*/
 template <class T, size_t d, size_t n>
 array<array<T, n>, d> max(
     const T                        &x,
@@ -441,7 +613,7 @@ array<array<T, n>, d> max(
 //     const array<array<T, n>, d>    &y)                                             //
 //                                                                                    //
 // Return the max value between a C++ v10.0 2D array and a scalar, i.e.               //
-//      z = min(x, y) <-> z[i][j] = max(x, y[i][j])                                   //
+//      z = max(x, y) <-> z[i][j] = max(x, y[i][j])                                   //
 // ================================================================================== //
 // INPUT                                                                              //
 // ================================================================================== //
@@ -469,6 +641,19 @@ return(z); };
 // Operator "maxval" ================================================================ //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Returns the element with the largest value within a array, i.e. given an input array, x
+    max_value = max(x[i]) over all i = 0, ..., n-1
+    where n = x.size().
+
+    Parameters template can be of any type with the following requirements:
+    1. minval must be defined for any type T
+    2. type T1 must be a scalar type
+    (for instance, T = std::array<double, e>, T1 = double)
+
+    \param[in] x input array
+    \param[in,out] max_value on output stores the elements with the largest value.
+*/
 template <class T, size_t d, class T1>
 void maxval(
     const array<T, d>    &x,
@@ -485,8 +670,8 @@ void maxval(
 // ================================================================================== //
 // INPUT                                                                              //
 // ================================================================================== //
-// - x             : array<T, d>, input vector                                        //
-// - max_value     : T1, maximum value of vector                                      //
+// - x             : array<T, d>, input array                                         //
+// - max_value     : T1, maximum value of array                                       //
 // ================================================================================== //
 // OUTPUT                                                                             //
 // ================================================================================== //
@@ -521,6 +706,19 @@ return; };
 // Operator "sum" =================================================================== //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Given a input array, x, returns the sum of its elements, i.e.:
+    s = sum (x[i]) over all i = 0, ..., n-1
+    where n = x.size().
+
+    Parameters template can be of any type with the following requirements:
+    1. operator += must be defined for type T
+    2. type T1 must be a scalar type
+    (for instance, T = std::array<double, e>, T1 = double)
+
+    \param[in] x input array
+    \param[in,out] s sum of element in x.
+*/
 template <class T, size_t d, class T1>
 void sum(
     const array<T, d>  &x,
@@ -533,7 +731,7 @@ void sum(
 //     const array<T, d>  &x,                                                         //
 //     T1                 &s)                                                         //
 //                                                                                    //
-// Summation of arrays elements.                                                      //
+// Returns the sum of elements in the input array.                                    //
 // ================================================================================== //
 // INPUT                                                                              //
 // ================================================================================== //
@@ -569,6 +767,23 @@ if (d > 0) {
 return; };
 
 // Operator "abs" =================================================================== //
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Given a input array, x, returns a array storing the absolute value of elements
+    in x, i.e.:
+    z[i] = abs(x[i]), for i = 0, ..., d-1
+    where d is the size of x.
+
+    Template parameter can be any type such that abs() function is defined.
+    For instance if  T = std::array<T1, e>, the abs() function will call itself
+    to return the absolute value of elements in x[i].
+
+    \param[in] x input array
+
+    \result array having the same dimensions of x storing the absolute value
+    of the elements in x.
+*/  
 template <class T, size_t d>
 array<T, d> abs(
     const array<T, d>  &x
@@ -583,11 +798,11 @@ array<T, d> abs(
 // ================================================================================== //
 // INPUT                                                                              //
 // ================================================================================== //
-// - x            : array<T, d>, input vector                                         //
+// - x            : array<T, d>, input array                                          //
 // ================================================================================== //
 // OUTPUT                                                                             //
 // ================================================================================== //
-// - z            : array<T, d>, absolute value of a input vector                     //
+// - z            : array<T, d>, absolute value of a input array                      //
 // ================================================================================== //
 
 // ================================================================================== //
@@ -604,7 +819,7 @@ int                     i;
 // COMPUTE THE ABSOLUTE VALUE OF A VECTOR                                             //
 // ================================================================================== //
 if (d > 0) {
-    for (i = 0; i < d; i++) {
+    for (i = 0; i < d; ++i) {
         z[i] = abs(x[i]);
     } //next i
 }
@@ -614,6 +829,21 @@ return(z); };
 // Operator "pow" =================================================================== //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Given a input array, x, returns a array storing the p-th power of its elements, i.e.:
+    z[i] = pow(x[i], p), for i = 0, ..., d-1
+    where d is the size of x.
+
+    Template parameter can be any type such that pow function is defined.
+    For instance if  T = std::array<T1, e>, the pow() function will call itself
+    to return the p-th power of the elements in x[i].
+
+    \param[in] x input array
+    \param[in] p power index
+
+    \result array having the same dimensions of x storing the p-th power
+    of the elements in x.
+*/  
 template <class T, size_t d>
 array<T, d> pow(
     array<T, d>        &x,
@@ -626,16 +856,16 @@ array<T, d> pow(
 //     array<T, d>        &x,                                                         //
 //     double              p)                                                         //
 //                                                                                    //
-// Element-wise power of vector. Returns z[i] = pow(x[i], n)                          //
+// Element-wise power of array. Returns z[i] = pow(x[i], n)                           //
 // ================================================================================== //
 // INPUT                                                                              //
 // ================================================================================== //
-// - x       : array<T, d>, input vector                                              //
+// - x       : array<T, d>, input array                                               //
 // - p       : double, exponent                                                       //
 // ================================================================================== //
 // OUTPUT                                                                             //
 // ================================================================================== //
-// - y       : array<T, d>, output vector                                             //
+// - y       : array<T, d>, output array                                              //
 // ================================================================================== //
 
 // ================================================================================== //
@@ -660,6 +890,16 @@ return(y); };
 // Operator "norm" ================================================================== //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Compute the 1-norm of a input array, x, i.e.:
+    n = sum(abs(x)).
+
+    Template parameter can be any scalar type
+
+    \param[in] x input array
+
+    \result on output returns the 1-norm of the input array.
+*/
 template <class T, size_t d>
 double norm_1(
     const array<T, d>  &x
@@ -670,15 +910,15 @@ double norm_1(
 // double norm_1(                                                                     //
 //     const array<T, d>  &x)                                                         //
 //                                                                                    //
-// Compute the 1-norm of a input vector.                                              //
+// Compute the 1-norm of a input array.                                               //
 // ================================================================================== //
 // INPUT                                                                              //
 // ================================================================================== //
-// - x           : array<T, d>, input vector                                          //
+// - x           : array<T, d>, input array                                           //
 // ================================================================================== //
 // OUTPUT                                                                             //
 // ================================================================================== //
-// - n           : double, norm of vector                                             //
+// - n           : double, norm of array                                              //
 // ================================================================================== //
 
 // ================================================================================== //
@@ -703,6 +943,16 @@ if (d > 0) {
 return(z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Compute the 2-norm of a input array, x, i.e.:
+    n = sqrt(sum(pow(x, 2))).
+
+    Template parameter can be any scalar type
+
+    \param[in] x input array
+
+    \result on output returns the 2-norm of the input array.
+*/
 template <class T, size_t d>
 double norm_2(
     const array<T, d>  &x
@@ -713,15 +963,15 @@ double norm_2(
 // double norm_2(                                                                     //
 //     const array<T, d>  &x)                                                         //
 //                                                                                    //
-// Compute the 2-norm of a input vector.                                              //
+// Compute the 2-norm of a input array.                                               //
 // ================================================================================== //
 // INPUT                                                                              //
 // ================================================================================== //
-// - x           : array<T, d>, input vector                                          //
+// - x           : array<T, d>, input array                                           //
 // ================================================================================== //
 // OUTPUT                                                                             //
 // ================================================================================== //
-// - n           : double, norm of vector                                             //
+// - n           : double, norm of array                                              //
 // ================================================================================== //
 
 // ================================================================================== //
@@ -746,6 +996,17 @@ if (d > 0) {
 return(sqrt(z)); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Compute the generic norm of a input array, x, i.e.:
+    n = pow( sum( pow( abs(x), p ) ), 1/p ).
+
+    Template parameter can be any scalar type
+
+    \param[in] x input array
+    \param[in] p norm index
+
+    \result on output returns the p-norm of the input array.
+*/
 template <class T, size_t d>
 double norm(
     const array<T, d>  &x,
@@ -758,16 +1019,16 @@ double norm(
 //     const array<T, d>  &x,                                                         //
 //     int                 p)                                                         //
 //                                                                                    //
-// Compute the p-norm of a input vector.                                              //
+// Compute the p-norm of a input array.                                               //
 // ================================================================================== //
 // INPUT                                                                              //
 // ================================================================================== //
-// - x           : array<T, d>, input vector                                          //
+// - x           : array<T, d>, input array                                           //
 // - p           : int, norm index                                                    //
 // ================================================================================== //
 // OUTPUT                                                                             //
 // ================================================================================== //
-// - n           : double, norm of vector                                             //
+// - n           : double, norm of array                                              //
 // ================================================================================== //
 
 // ================================================================================== //
@@ -802,6 +1063,16 @@ if (d > 0) {
 return(exp(log(max(z, 1.0e-307))/((double) p))); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Compute the infinity-norm of a input array, x, i.e.:
+    n = maxval(abs(x)).
+
+    Template parameter can be any scalar type
+
+    \param[in] x input array
+
+    \result on output returns the inf-norm of the input array.
+*/
 template <class T, size_t d>
 double norm_inf(
     const array<T, d>  &x
@@ -816,11 +1087,11 @@ double norm_inf(
 // ================================================================================== //
 // INPUT                                                                              //
 // ================================================================================== //
-// - x           : array<T, d>, input vector                                          //
+// - x           : array<T, d>, input array                                           //
 // ================================================================================== //
 // OUTPUT                                                                             //
 // ================================================================================== //
-// - n           : double, inf-norm of vector                                         //
+// - n           : double, inf-norm of array                                          //
 // ================================================================================== //
 
 // ================================================================================== //
@@ -851,6 +1122,17 @@ return(z); };
 // Operator "Dot_Product" =========================================================== //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Compute the scalar product of 2 input arrays, x and y, i.e.:
+    d = sum(x * y).
+
+    Template parameter can be any scalar type
+
+    \param[in] x 1st argument
+    \param[in] y 2nd argument
+
+    \result on output returns the scalar product of x and y.
+*/
 template <class T, size_t d>
 T Dot_Product(
     const array<T, d>  &x,
@@ -867,8 +1149,8 @@ T Dot_Product(
 // ================================================================================== //
 // INPUT                                                                              //
 // ================================================================================== //
-// - x        : vector< T >, 1st argument of dot product                              //
-// - y        : vector< T >, 2nd argument of dot product                              //
+// - x        : array< T, d >, 1st argument of dot product                            //
+// - y        : array< T, d >, 2nd argument of dot product                            //
 // ================================================================================== //
 // OUTPUT                                                                             //
 // ================================================================================== //
@@ -899,6 +1181,15 @@ return(dp); };
 // Operator "Cross_Product" ========================================================= //
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Compute the cross product in R3 of input arrays, x and y.
+    Template parameter can be any scalar type
+
+    \param[in] x 1st argument
+    \param[in] y 2nd argument
+
+    \result on output returns the cross product product of x and y.
+*/
 template <class T>
 array<T, 3> Cross_Product(
     const array<T, 3> &x,
@@ -938,6 +1229,15 @@ z[2] = x[0] * y[1] - x[1] * y[0];
 return (z); };
 
 // ---------------------------------------------------------------------------------- //
+/*!
+    Compute the cross product in R2 of input arrays, x and y.
+    Template parameter can be any scalar type
+
+    \param[in] x 1st argument
+    \param[in] y 2nd argument
+
+    \result on output returns the cross product product of x and y.
+*/
 template <class T>
 T Cross_Product(
     const array<T, 2> &x,

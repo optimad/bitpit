@@ -236,13 +236,10 @@ vector< vector< T > > min(                                                      
         );
 
 // Operator "minval" ---------------------------------------------------------------- //
+template<typename T, typename std::enable_if< std::is_scalar< T >::value>::type* = nullptr>
 void inline minval(                                                                   // DUMMY ROUTINE FOR MINVAL SEARCH
-        const double                &,                                                    // (dummy input) 1st argument
-        double                      &                                                     // (dummy input/output) 2nd argument
-        );
-void inline minval(                                                                   // DUMMY ROUTINE FOR MINVAL SEARCH
-        const int                   &,                                                    // (dummy input) 1st argument
-        int                         &                                                     // (dummy input/output) 2nd argument
+        const T                     &,                                                    // (dummy input) 1st argument
+        T                           &                                                     // (dummy input/output) 2nd argument
         );
 template <class T, class T1>
 void minval(                                                                          // RETURNS THE MINIMUM ELEMENT OF A VECTOR
@@ -278,13 +275,10 @@ vector< vector< T > > max(                                                      
         );
 
 // Operator "maxval" ---------------------------------------------------------------- //
+template<typename T, typename std::enable_if< std::is_scalar< T >::value>::type* = nullptr>
 void inline maxval(                                                                   // DUMMY ROUTINE FOR MAXVAL SEARCH
-        const double                &,                                                    // (dummy input) 1st argument
-        double                      &                                                     // (dummy input/output) 2nd argument
-        );
-void inline maxval(                                                                   // DUMMY ROUTINE FOR MAXVAL SEARCH
-        const int                   &,                                                    // (dummy input) 1st argument
-        int                         &                                                     // (dummy input/output) 2nd argument
+        const T                     &,                                                    // (dummy input) 1st argument
+        T                           &                                                     // (dummy input/output) 2nd argument
         );
 template <class T, class T1>
 void maxval(                                                                          // RETURNS THE MAXIMUM ELEMENT OF A VECTOR
@@ -293,15 +287,7 @@ void maxval(                                                                    
         );
 
 // Operator "sum" ------------------------------------------------------------------- //
-void inline sum(                                                                      // DUMMY ROUTINE FOR SUM OPERATOR
-        const int                   &,                                                    // (dummy input) 1st argument
-        int                         &                                                     // (dummy input/output) 2nd argument
-        );
-void inline sum(                                                                      // DUMMY ROUTINE FOR SUM OPERATOR
-        const double                &,                                                    // (dummy input) 1st argument
-        double                      &                                                     // (dummy input/output) 2nd argument
-        );
-template <class T>
+template <class T, typename std::enable_if< std::is_scalar< T >::value>::type* = nullptr>
 void inline sum(                                                                      // DUMMY ROUTINE FOR SUM OPERATOR
         const T                     &,                                                    // (dummy input) 1st argument
         T                           &                                                     // (dummy input/output) 2nd argument
