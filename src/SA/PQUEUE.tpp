@@ -14,9 +14,46 @@
 // TEMPLATE IMPLEMENTATIONS FOR minPQUEUE                                     //
 // ========================================================================== //
 
+/*!
+
+    \class minPQUEUE
+    \brief class for min priority queue.
+
+    Class for priority element insertion and extraction. Elements inserted in
+    a min. priority queue are internally sorted on a binary tree to ensure the
+    following property (heap property):
+    given a parent node in the tree (P), and given its children nodes (L and R),
+    P < L and P < R.
+    In this way, the root element is the one with smallest value in the tree.
+
+    Each time a new element is inserted or removed from the heap, the tree is updated
+    by moving the elements upwards or downwards on each branch to maintain the heap
+    property.
+    The new position of elements in the tree can be tracked by passing a non-null
+    pointer to a mapping (a vector< array<int, 2> >) to the heap constructor.
+    At any time, the mapping will store the following information:
+        - mapping[i][0] stores the index of the node currently stored in the i-th
+        position of the tree.
+        - mapping[i][1] stores the current position in the tree of the i-th node
+
+    - Template parameter T can be of any copy-constructible type for which operator<
+    is defined
+    - Template parameter T1 is used for labelling tree nodes, and can be any
+    copy-constructible type.
+*/
+
 // Constructors ============================================================= //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Default constructor for class minPQUEUE.
+    Initialize an empty priority queue.
+    If a pointer to a vector<array<int, 2>> is provided, the mapping between
+    the original and current element position in the tree is tracked.
+
+    \param[in] flag_label flag for using node labelling (true) or not (false).
+    \param[in] map_ (default = NULL) pointer to map between the original->current element positions
+*/
 template <class T, class T1>
 minPQUEUE<T, T1>::minPQUEUE(
         bool                        flag_label,
@@ -75,6 +112,17 @@ minPQUEUE<T, T1>::minPQUEUE(
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Constructor #1 for class minPQUEUE.
+    Initialize an empty priority queue.
+    The size of memory reserve is specified by maxstack.
+    If a pointer to a vector<array<int, 2>> is provided, the mapping between
+    the original and current element position in the tree is tracked.
+
+    \param[in] maxstack size of memory reserve.
+    \param[in] flag_label flag for using node labelling (true) or not (false).
+    \param[in] map_ (default = NULL) pointer to map between the original->current element positions
+*/
 template <class T, class T1>
 minPQUEUE<T, T1>::minPQUEUE(
         int                     maxstack,
@@ -138,6 +186,10 @@ minPQUEUE<T, T1>::minPQUEUE(
 // Destructors ============================================================== //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Default destructor for class minPQUEUE.
+    Clear queue content and free memory.
+*/
 template <class T, class T1>
 minPQUEUE<T, T1>::~minPQUEUE(
         void
@@ -193,6 +245,9 @@ minPQUEUE<T, T1>::~minPQUEUE(
 // Methods ================================================================== //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Clear current content without freeing memory.
+*/
 template <class T, class T1>
 void minPQUEUE<T, T1>::clear(
         void
@@ -235,6 +290,10 @@ void minPQUEUE<T, T1>::clear(
 }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Increase memory reserve by maxstack. The value of the parameter maxstack
+    is set at construction.
+*/
 template <class T, class T1>
 void minPQUEUE<T, T1>::IncreaseSTACK(
         void
@@ -282,6 +341,10 @@ void minPQUEUE<T, T1>::IncreaseSTACK(
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Decrease memory reserve by maxstack. The value of the parameter maxstack
+    is set at construction.
+*/
 template <class T, class T1>
 void minPQUEUE<T, T1>::DecreaseSTACK(
         void
@@ -329,6 +392,11 @@ void minPQUEUE<T, T1>::DecreaseSTACK(
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Restore heap property after element insertion or extraction
+
+    \param[in] i index of element to be moved down/upwards in the tree
+*/
 template <class T, class T1 >
 void minPQUEUE<T, T1>::heapify(
         int                       i
@@ -405,6 +473,9 @@ void minPQUEUE<T, T1>::heapify(
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Build a min heap, from data currently stored in the underlying container.
+*/
 template <class T, class T1>
 void minPQUEUE<T, T1>::build_heap(
         void
@@ -447,6 +518,15 @@ void minPQUEUE<T, T1>::build_heap(
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Extract the next element (i.e. the element on the root of the tree) from heap
+    list and reduce heap size by one element. After extraction heap property is
+    automatically restored by updating the tree.
+
+    \param[in,out] root value of element at tree root.
+    \param[in,out] root_label label associated to root element (available only if
+    flag_label is set to 'true' at heap construction)
+*/
 template <class T, class T1>
 void minPQUEUE<T, T1>::extract(
         T                      &root,
@@ -519,6 +599,13 @@ void minPQUEUE<T, T1>::extract(
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Extract the next element (i.e. the element on the root of the tree) from heap
+    list and reduce heap size by one element. After extraction heap property is
+    automatically restored by updating the tree.
+
+    \param[in,out] root value of element at tree root.
+*/
 template <class T, class T1>
 void minPQUEUE<T, T1>::extract(
         T                      &root
@@ -584,6 +671,14 @@ void minPQUEUE<T, T1>::extract(
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Insert a new element in the heap. After insertion the heap property is
+    automatically restored by updating the tree.
+
+    \param[in] key_new value of the new element.
+    \param[in] label_new label associated to the new element (available only if
+    flag_label is set to 'true' at heap construction)
+*/
 template <class T, class T1>
 void minPQUEUE<T, T1>::insert(
         T                      &key_new,
@@ -645,6 +740,12 @@ void minPQUEUE<T, T1>::insert(
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Insert a new element in the heap. After insertion the heap property is
+    automatically restored by updating the tree.
+
+    \param[in] key_new value of the new element.
+*/
 template <class T, class T1>
 void minPQUEUE<T, T1>::insert(
         T                      &key_new
@@ -698,6 +799,15 @@ void minPQUEUE<T, T1>::insert(
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Modify the value of an existing element in the heap. The heap property is
+    automatically restored by moving down/upwards the element in the tree.
+
+    \param[in] i index of element in the tree.
+    \param[in] key_new new value of the element.
+    \param[in] label_new new label to assign to the element (available only if
+    flag_label is set to 'true' at heap construction)
+*/
 template <class T, class T1>
 void minPQUEUE<T, T1>::modify(
         int                     i,
@@ -787,6 +897,13 @@ void minPQUEUE<T, T1>::modify(
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Modify the value of an existing element in the heap. The heap property is
+    automatically restored by moving down/upwards the element in the tree.
+
+    \param[in] i index of element in the tree.
+    \param[in] key_new new value of the element.
+*/
 template <class T, class T1>
 void minPQUEUE<T, T1>::modify(
         int                    i,
@@ -861,6 +978,12 @@ void minPQUEUE<T, T1>::modify(
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Display info about the heap to output stream (e.g. current number of element
+    stored in the tree, memory reserved, etc.)
+
+    \param[in,out] out output stream
+*/
 template <class T, class T1>
 void minPQUEUE<T, T1>::display(
         ostream    &out
@@ -928,9 +1051,46 @@ void minPQUEUE<T, T1>::display(
 // TEMPLATE IMPLEMENTATIONS FOR maxPQUEUE                                     //
 // ========================================================================== //
 
+/*!
+
+    \class maxPQUEUE
+    \brief class for max priority queue.
+
+    Class for priority element insertion and extraction. Elements inserted in
+    a max. priority queue are internally sorted on a binary tree to ensure the
+    following property (heap property):
+    given a parent node in the tree (P), and given its children nodes (L and R),
+    P > L and P > R.
+    In this way, the root element is the one with the largest value in the tree.
+
+    Each time a new element is inserted or removed from the heap, the tree is updated
+    by moving the elements upwards or downwards on each branch to maintain the heap
+    property.
+    The new position of elements in the tree can be tracked by passing a non-null
+    pointer to a mapping (a vector< array<int, 2> >) to the heap constructor.
+    At any time, the mapping will store the following information:
+        - mapping[i][0] stores the index of the node currently stored in the i-th
+        position of the tree.
+        - mapping[i][1] stores the current position in the tree of the i-th node
+
+    - Template parameter T can be of any copy-constructible type for which operator<
+    is defined
+    - Template parameter T1 is used for labelling tree nodes, and can be any
+    copy-constructible type.
+*/
+
 // Constructors ============================================================= //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Default constructor for class maxPQUEUE.
+    Initialize an empty priority queue.
+    If a pointer to a vector<array<int, 2>> is provided, the mapping between
+    the original and current element position in the tree is tracked.
+
+    \param[in] flag_label flag for using node labelling (true) or not (false).
+    \param[in] map_ (default = NULL) pointer to map between the original->current element positions
+*/
 template <class T, class T1>
 maxPQUEUE<T, T1>::maxPQUEUE(
         bool                        flag_label,
@@ -989,6 +1149,17 @@ maxPQUEUE<T, T1>::maxPQUEUE(
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Constructor #1 for class maxPQUEUE.
+    Initialize an empty priority queue.
+    The size of memory reserve is specified by maxstack.
+    If a pointer to a vector<array<int, 2>> is provided, the mapping between
+    the original and current element position in the tree is tracked.
+
+    \param[in] maxstack size of memory reserve.
+    \param[in] flag_label flag for using node labelling (true) or not (false).
+    \param[in] map_ (default = NULL) pointer to map between the original->current element positions
+*/
 template <class T, class T1>
 maxPQUEUE<T, T1>::maxPQUEUE(
         int                         maxstack,
@@ -1052,6 +1223,10 @@ maxPQUEUE<T, T1>::maxPQUEUE(
 // Destructors ============================================================== //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Default destructor for class maxPQUEUE.
+    Clear queue content and free memory.
+*/
 template <class T, class T1>
 maxPQUEUE<T, T1>::~maxPQUEUE(
         void
@@ -1107,6 +1282,9 @@ maxPQUEUE<T, T1>::~maxPQUEUE(
 // Methods ================================================================== //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Clear current content without freeing memory.
+*/
 template <class T, class T1>
 void maxPQUEUE<T, T1>::clear(
         void
@@ -1149,6 +1327,10 @@ void maxPQUEUE<T, T1>::clear(
 }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Increase memory reserve by maxstack. The value of the parameter maxstack
+    is set at construction.
+*/
 template <class T, class T1>
 void maxPQUEUE<T, T1>::IncreaseSTACK(
         void
@@ -1196,6 +1378,10 @@ void maxPQUEUE<T, T1>::IncreaseSTACK(
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Decrease memory reserve by maxstack. The value of the parameter maxstack
+    is set at construction.
+*/
 template <class T, class T1>
 void maxPQUEUE<T, T1>::DecreaseSTACK(
         void
@@ -1243,6 +1429,11 @@ void maxPQUEUE<T, T1>::DecreaseSTACK(
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Restore heap property after element insertion or extraction
+
+    \param[in] i index of element to be moved down/upwards in the tree
+*/
 template <class T, class T1 >
 void maxPQUEUE<T, T1>::heapify(
         int                       i
@@ -1319,6 +1510,9 @@ void maxPQUEUE<T, T1>::heapify(
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Build a max heap, from data currently stored in the underlying container.
+*/
 template <class T, class T1>
 void maxPQUEUE<T, T1>::build_heap(
         void
@@ -1351,7 +1545,7 @@ void maxPQUEUE<T, T1>::build_heap(
     int                i;
 
     // ========================================================================== //
-    // BUILD MIN HEAP                                                             //
+    // BUILD MAX HEAP                                                             //
     // ========================================================================== //
     for (i = (heap_size - 1)/2; i >= 0; i--) {
         heapify(i);
@@ -1361,6 +1555,15 @@ void maxPQUEUE<T, T1>::build_heap(
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Extract the next element (i.e. the element on the root of the tree) from heap
+    list and reduce heap size by one element. After extraction heap property is
+    automatically restored by updating the tree.
+
+    \param[in,out] root value of element at tree root.
+    \param[in,out] root_label label associated to root element (available only if
+    flag_label is set to 'true' at heap construction)
+*/
 template <class T, class T1>
 void maxPQUEUE<T, T1>::extract(
         T                      &root,
@@ -1397,10 +1600,10 @@ void maxPQUEUE<T, T1>::extract(
     // none
 
     // ========================================================================== //
-    // EXTRACT HEAP MIN ELEMENT                                                   //
+    // EXTRACT HEAP MAX ELEMENT                                                   //
     // ========================================================================== //
 
-    // Extract min element
+    // Extract max element
     if (heap_size == 0) {
         return;
     }
@@ -1426,13 +1629,20 @@ void maxPQUEUE<T, T1>::extract(
         DecreaseSTACK();
     }
 
-    // Restore min-heap condition
+    // Restore max-heap condition
     heapify(0);
 
     return; 
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Extract the next element (i.e. the element on the root of the tree) from heap
+    list and reduce heap size by one element. After extraction heap property is
+    automatically restored by updating the tree.
+
+    \param[in,out] root value of element at tree root.
+*/
 template <class T, class T1>
 void maxPQUEUE<T, T1>::extract(
         T                      &root
@@ -1466,10 +1676,10 @@ void maxPQUEUE<T, T1>::extract(
     // none
 
     // ========================================================================== //
-    // EXTRACT HEAP MIN ELEMENT                                                   //
+    // EXTRACT HEAP MAX ELEMENT                                                   //
     // ========================================================================== //
 
-    // Extract min element
+    // Extract max element
     if (heap_size == 0) {
         return;
     }
@@ -1491,13 +1701,21 @@ void maxPQUEUE<T, T1>::extract(
         DecreaseSTACK();
     }
 
-    // Restore min-heap condition
+    // Restore max-heap condition
     heapify(0);
 
     return; 
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Insert a new element in the heap. After insertion the heap property is
+    automatically restored by updating the tree.
+
+    \param[in] key_new value of the new element.
+    \param[in] label_new label associated to the new element (available only if
+    flag_label is set to 'true' at heap construction)
+*/
 template <class T, class T1>
 void maxPQUEUE<T, T1>::insert(
         T                      &key_new,
@@ -1559,6 +1777,12 @@ void maxPQUEUE<T, T1>::insert(
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Insert a new element in the heap. After insertion the heap property is
+    automatically restored by updating the tree.
+
+    \param[in] key_new value of the new element.
+*/
 template <class T, class T1>
 void maxPQUEUE<T, T1>::insert(
         T                      &key_new
@@ -1612,6 +1836,15 @@ void maxPQUEUE<T, T1>::insert(
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Modify the value of an existing element in the heap. The heap property is
+    automatically restored by moving down/upwards the element in the tree.
+
+    \param[in] i index of element in the tree.
+    \param[in] key_new new value of the element.
+    \param[in] label_new new label to assign to the element (available only if
+    flag_label is set to 'true' at heap construction)
+*/
 template <class T, class T1>
 void maxPQUEUE<T, T1>::modify(
         int                     i,
@@ -1701,6 +1934,13 @@ void maxPQUEUE<T, T1>::modify(
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Modify the value of an existing element in the heap. The heap property is
+    automatically restored by moving down/upwards the element in the tree.
+
+    \param[in] i index of element in the tree.
+    \param[in] key_new new value of the element.
+*/
 template <class T, class T1>
 void maxPQUEUE<T, T1>::modify(
         int                    i,
@@ -1775,6 +2015,12 @@ void maxPQUEUE<T, T1>::modify(
 };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Display info about the heap to output stream (e.g. current number of element
+    stored in the tree, memory reserved, etc.)
+
+    \param[in,out] out output stream
+*/
 template <class T, class T1>
 void maxPQUEUE<T, T1>::display(
         ostream    &out
@@ -1807,7 +2053,7 @@ void maxPQUEUE<T, T1>::display(
     int           i, j, k;
 
     // ========================================================================== //
-    // DISPLAY MIN-HEAP INFO                                                      //
+    // DISPLAY MAX-HEAP INFO                                                      //
     // ========================================================================== //
 
     // General info ------------------------------------------------------------- //

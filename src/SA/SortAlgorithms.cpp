@@ -41,6 +41,14 @@
 // (see Sort_Algorithm.tpp)
 
 // RANDOM SORTING =========================================================== //
+/*!
+    Extract n integers in the interval [0,m] without replacement.
+    if n = m+1, returns a random permutation of {0, 1, 2, ..., m}
+
+    \param[in] n number of extraction
+    \param[in] m upper bound of extraction interval
+    \param[in,out] list vector with size n, storing extracted values
+*/
 void Extract_wo_Repl(
     int         n,
     int         m,
