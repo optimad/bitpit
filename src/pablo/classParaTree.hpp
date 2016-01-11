@@ -132,9 +132,14 @@ public:
 	// =================================================================================== //
 	// BASIC GET/SET METHODS
 	// =================================================================================== //
-
 	int 		getRank();
 	int 		getNproc();
+	MPI_Comm	getComm();
+	uint64_t*	getPartitionRangeGlobalIdx();
+	double		getX0();
+	double		getY0();
+	double		getZ0();
+	double		getL();
 	int 		getMaxLevel();
 	uint32_t 	getMaxLength();
 	uint8_t 	getNnodes();
@@ -143,8 +148,10 @@ public:
 	uint8_t 	getNchildren();
 	uint8_t 	getNnodesperface();
 	void 		getNormals(int8_t normals[6][3]);
-	void 		getOppface(uint8_t oppface[4]);
-	void 		getFacenode(uint8_t facenode[6][3]);
+	int8_t		(*getNormals())[3];
+	void 		getOppface(uint8_t oppface[6]);
+	uint8_t		(*getOppface());
+	void 		getFacenode(uint8_t facenode[6][4]);
 	void 		getNodeface(uint8_t nodeface[8][3]);
 	void 		getEdgeface(uint8_t edgeface[12][2]);
 	void 		getNodecoeffs(int8_t nodecoeffs[8][3]);
@@ -174,6 +181,10 @@ public:
 	int8_t 		getMarker(uint32_t idx);
 	uint8_t 	getLevel(uint32_t idx);
 	bool 		getBalance(uint32_t idx);
+	bool		getBound(uint32_t idx, uint8_t iface);
+	bool		getBound(uint32_t idx);
+	bool		getPbound(uint32_t idx, uint8_t iface);
+	bool		getPbound(uint32_t idx);
 #if NOMPI==0
 	bool 		getIsGhost(uint32_t idx);
 #endif
@@ -207,6 +218,10 @@ public:
 	int8_t 		getMarker(classOctant* oct);
 	uint8_t 	getLevel(classOctant* oct);
 	bool 		getBalance(classOctant* oct);
+	bool		getBound(classOctant* oct, uint8_t iface);
+	bool		getBound(classOctant* oct);
+	bool		getPbound(classOctant* oct, uint8_t iface);
+	bool		getPbound(classOctant* oct);
 	bool 		getIsNewR(classOctant* oct);
 	bool 		getIsNewC(classOctant* oct);
 	void 		setMarker(classOctant* oct, int8_t marker);

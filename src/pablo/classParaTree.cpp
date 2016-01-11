@@ -245,6 +245,35 @@ classParaTree::getNproc(){
 	return nproc;
 };
 
+MPI_Comm
+classParaTree::getComm(){
+	return comm;
+};
+
+uint64_t*
+classParaTree::getPartitionRangeGlobalIdx(){
+	return partition_range_globalidx;
+};
+
+double
+classParaTree::getX0(){
+	return trans.X0;
+};
+double
+classParaTree::getY0(){
+	return trans.Y0;
+};
+double
+classParaTree::getZ0(){
+	return trans.Z0;
+};
+double
+classParaTree::getL(){
+	return trans.L;
+};
+
+
+
 int
 classParaTree::getMaxLevel(){
 	return global.MAX_LEVEL;
@@ -291,17 +320,27 @@ classParaTree::getNormals(int8_t normals_[6][3])  {
 	}
 }
 
+int8_t
+(*classParaTree::getNormals())[3] {
+	return global.normals;
+}
+
 void
-classParaTree::getOppface(uint8_t oppface_[4])  {
-	for (int j=0; j<4; j++){
+classParaTree::getOppface(uint8_t oppface_[6])  {
+	for (int j=0; j<6; j++){
 		oppface_[j] = global.oppface[j];
 	}
 }
 
+uint8_t
+(*classParaTree::getOppface()) {
+	return global.oppface;
+}
+
 void
-classParaTree::getFacenode(uint8_t facenode_[6][3])  {
+classParaTree::getFacenode(uint8_t facenode_[6][4])  {
 	for (int i=0; i<6; i++){
-		for (int j=0; j<3; j++){
+		for (int j=0; j<4; j++){
 			facenode_[i][j] = global.facenode[i][j];
 		}
 	}
@@ -394,7 +433,7 @@ classParaTree::getSize(uint32_t idx) {
  */
 double
 classParaTree::getArea(uint32_t idx) {
-	return trans.mapSize(octree.octants[idx].getArea(global.MAX_LEVEL));
+	return trans.mapArea(octree.octants[idx].getArea(global.MAX_LEVEL));
 }
 
 /*! Get the volume of an octant.
@@ -403,7 +442,7 @@ classParaTree::getArea(uint32_t idx) {
  */
 double
 classParaTree::getVolume(uint32_t idx) {
-	return trans.mapArea(octree.octants[idx].getVolume(global.MAX_LEVEL));
+	return trans.mapVolume(octree.octants[idx].getVolume(global.MAX_LEVEL));
 }
 
 /*! Get the coordinates of the center of an octant.
@@ -558,6 +597,26 @@ classParaTree::getBalance(uint32_t idx){
 	return !octree.getBalance(idx);
 };
 
+/*! Get the bound condition of the face of the octant
+ * \param[in] idx Local index of the target octant
+ * \param[in] iface Index of the face
+ * \return Is the face a boundary face?
+ */
+bool
+classParaTree::getBound(uint32_t idx, uint8_t iface){
+	return octree.octants[idx].getBound(iface);
+}
+
+/*! Get the bound condition of the face of the octant
+ * \param[in] idx Local index of the target octant
+ * \return Is the octant a boundary octant?
+ */
+bool
+classParaTree::getBound(uint32_t idx){
+	return octree.octants[idx].getBound();
+}
+
+
 #if NOMPI==0
 /*! Get the nature of an octant.
  * \param[in] idx Local index of target octant.
@@ -679,7 +738,7 @@ classParaTree::getSize(classOctant* oct) {
  */
 double
 classParaTree::getArea(classOctant* oct) {
-	return trans.mapSize(oct->getArea(global.MAX_LEVEL));
+	return trans.mapArea(oct->getArea(global.MAX_LEVEL));
 }
 
 /*! Get the volume of an octant.
@@ -688,7 +747,7 @@ classParaTree::getArea(classOctant* oct) {
  */
 double
 classParaTree::getVolume(classOctant* oct) {
-	return trans.mapArea(oct->getVolume(global.MAX_LEVEL));
+	return trans.mapVolume(oct->getVolume(global.MAX_LEVEL));
 }
 
 /*! Get the coordinates of the center of an octant.
@@ -842,6 +901,25 @@ bool
 classParaTree::getBalance(classOctant* oct){
 	return !oct->getBalance();
 };
+
+/*! Get the bound condition of the face of the octant
+ * \param[in] oct pointer to the target octant
+ * \param[in] iface Index of the face
+ * \return Is the face a boundary face?
+ */
+bool
+classParaTree::getBound(classOctant* oct, uint8_t iface){
+	return oct->getBound(iface);
+}
+
+/*! Get the bound condition of the octant
+ * \param[in] oct pointer to the target octant
+ * \return Is the octant a boundary octant?
+ */
+bool
+classParaTree::getBound(classOctant* oct){
+	return oct->getBound();
+}
 
 /*! Get if the octant is new after refinement.
  * \param[in] idx Local index of target octant.

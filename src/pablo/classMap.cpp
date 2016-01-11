@@ -105,7 +105,7 @@ double classMap::mapSize(uint32_t const & size){
  * \return Area of octant in physical domain.
  */
 double classMap::mapArea(uint64_t const & Area){
-	return ((pow(L,2.0)/pow(double(max_length),2.0))*double(Area));
+	return ((pow(L,dim-1)/pow(double(max_length),dim-1))*double(Area));
 };
 
 /*! Transformation of volume of an octant.
@@ -113,7 +113,7 @@ double classMap::mapArea(uint64_t const & Area){
  * \return Coordinate Volume of octant in physical domain.
  */
 double classMap::mapVolume(uint64_t const & Volume){
-	return ((pow(L,3.0)/pow(double(max_length),3.0))*double(Volume));
+	return ((pow(L,dim)/pow(double(max_length),dim))*double(Volume));
 };
 
 /*! Transformation of coordinates of center of an octant.

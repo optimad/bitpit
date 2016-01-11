@@ -50,9 +50,9 @@ private:
 	uint8_t  markerBytes;			/**< Bytes occupation of the refinement marker of an octant */
 	uint8_t  levelBytes;			/**< Bytes occupation of the level of an octant */
 	uint8_t  boolBytes;				/**< Bytes occupation of a boolean */
-	uint8_t  oppface[4];			/**< oppface[i] = Index of the face of an octant neighbour through the i-th face of the current octant */
+	uint8_t  oppface[6];			/**< oppface[i] = Index of the face of an octant neighbour through the i-th face of the current octant */
 	uint8_t  nodeface[8][3];		/**< nodeface[i][0:1] = local indices of faces sharing the i-th node of an octant */
-	uint8_t  facenode[6][3];		/**< facenode[i][0:1] = local indices of nodes of the i-th face of an octant */
+	uint8_t  facenode[6][4];		/**< facenode[i][0:1] = local indices of nodes of the i-th face of an octant */
 	uint8_t  edgeface[12][2];		/**< edgeface[i][0:1] = local indices of faces sharing the i-th edge of an octant */
 	int8_t   normals[6][3];			/**< Components (x,y,z) of the normals per face (z=0 in 2D) */
 	int8_t   edgecoeffs[12][3];		/**< Components (x,y,z) of the "normals" per edge */
@@ -64,7 +64,7 @@ public:
 	uint8_t getBoolBytes();
 	void 	getEdgecoeffs(int8_t edgecoeffs[12][3]);
 	void 	getEdgeface(uint8_t edgeface[12][2]);
-	void 	getFacenode(uint8_t facenode[6][3]);
+	void 	getFacenode(uint8_t facenode[6][4]);
 	uint8_t getGlobalIndexBytes();
 	uint8_t getLevelBytes();
 	uint8_t getMarkerBytes();
@@ -79,7 +79,7 @@ public:
 	void 	getNodeface(uint8_t nodeface[8][3]);
 	void 	getNormals(int8_t normals[6][3]);
 	uint8_t getOctantBytes();
-	void 	getOppface(uint8_t oppface[4]);
+	void 	getOppface(uint8_t oppface[6]);
 
 	void 	setGlobal(int8_t maxlevel, uint8_t dim);
 

@@ -144,6 +144,14 @@ bool		classOctant::getBound(uint8_t face) const{
 	return info[face];
 };
 
+/*! Get the bound flag on an octant.
+ * \return true if the octant is a boundary octant.
+ */
+bool		classOctant::getBound() const{
+	return info[0]||info[1]||info[2]||info[3]||((dim-2)*(info[4]||info[5]));
+};
+
+
 //private:
 void		classOctant::setBound(uint8_t face) {
 	info[face] = true;

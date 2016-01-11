@@ -151,6 +151,12 @@ public:
 	 * \return true if the iface face is a boundary face.
 	 */
 	bool		getBound(uint8_t face) const;
+	
+	/*! Get the bound flag on an octant.
+	 * \return true if the octant is a boundary octant.
+	 */
+	bool		getBound() const;
+	
 
 private:
 	void		setBound(uint8_t face);

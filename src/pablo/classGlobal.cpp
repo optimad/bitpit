@@ -26,9 +26,9 @@ classGlobal::getEdgeface(uint8_t edgeface_[12][2])  {
 }
 
 void
-classGlobal::getFacenode(uint8_t facenode_[6][3])  {
+classGlobal::getFacenode(uint8_t facenode_[6][4])  {
 	for (int i=0; i<6; i++){
-		for (int j=0; j<3; j++){
+		for (int j=0; j<4; j++){
 			facenode_[i][j] = facenode[i][j];
 		}
 	}
@@ -117,8 +117,8 @@ classGlobal::getOctantBytes()  {
 }
 
 void
-classGlobal::getOppface(uint8_t oppface_[4])  {
-	for (int j=0; j<4; j++){
+classGlobal::getOppface(uint8_t oppface_[6])  {
+	for (int j=0; j<6; j++){
 		oppface_[j] = oppface[j];
 	}
 }
