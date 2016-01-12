@@ -1,6 +1,6 @@
-#include "classParaTree.hpp"
-#include "User_Data_Comm.hpp"
-#include "User_Data_LB.hpp"
+#include "ClassParaTree.hpp"
+#include "UserDataComm.hpp"
+#include "UserDataLB.hpp"
 
 using namespace std;
 
@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 		int iter = 0;
 
 		/**<Instantation of a 2D para_tree object.*/
-		classParaTree pablo15;
+		ClassParaTree pablo15;
 
 		/**<Set NO 2:1 balance for the octree.*/
 		int idx = 0;
@@ -40,9 +40,9 @@ int main(int argc, char *argv[]) {
 		/**<Assign a data (distance from center of a circle) to the octants with at least one node inside the circle.*/
 		for (int i=0; i<nocts; i++){
 			/**<Compute the nodes of the octant.*/
-			vector<vector<double> > nodes = pablo15.getNodes(i);
+			vector<array<double,3> > nodes = pablo15.getNodes(i);
 			/**<Compute the center of the octant.*/
-			vector<double> center = pablo15.getCenter(i);
+			array<double,3> center = pablo15.getCenter(i);
 			for (int j=0; j<4; j++){
 				double x = nodes[j][0];
 				double y = nodes[j][1];
@@ -64,9 +64,9 @@ int main(int argc, char *argv[]) {
 		for (iter=start; iter<start+2; iter++){
 			for (int i=0; i<nocts; i++){
 				/**<Compute the nodes of the octant.*/
-				vector<vector<double> > nodes = pablo15.getNodes(i);
+				vector<array<double,3> > nodes = pablo15.getNodes(i);
 				/**<Compute the center of the octant.*/
-				vector<double> center = pablo15.getCenter(i);
+				array<double,3> center = pablo15.getCenter(i);
 				for (int j=0; j<4; j++){
 					weight[i] = 2.0;
 					double x = nodes[j][0];
@@ -129,8 +129,7 @@ int main(int argc, char *argv[]) {
 
 #if NOMPI==0
 		/**<(Load)Balance the octree over the processes with communicating the data.*/
-//		User_Data_LB<vector<double> > data_lb(oct_data);
-		User_Data_LB<vector<double> > data_lb(weight,weightGhost);
+		UserDataLB<vector<double> > data_lb(weight,weightGhost);
 		pablo15.loadBalance(data_lb, &weight);
 #endif
 
@@ -138,12 +137,11 @@ int main(int argc, char *argv[]) {
 		for (int i=0; i<weight.size(); i++){
 			tot += weight[i];
 		}
-		cout << pablo15.getRank() << " weight : " << tot << endl;
-		cout << pablo15.getRank() << " size : " << weight.size() << endl;
+		cout << "- Rank " << pablo15.getRank() << " has weight : " << tot << endl;
+		cout << "- Rank " << pablo15.getRank() << " has size : " << weight.size() << endl;
 
 		/**<Update the connectivity and write the para_tree.*/
 		pablo15.updateConnectivity();
-//		pablo15.writeTest("Pablo15_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
 		pablo15.writeTest("Pablo15_iter"+to_string(static_cast<unsigned long long>(iter)), weight);
 
 #if NOMPI==0

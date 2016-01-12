@@ -39,15 +39,15 @@ inline uint64_t mortonEncode_magicbits(unsigned int x, unsigned int y){
 
 
 
-inline uint64_t keyXY(uint64_t x, uint64_t y){
+inline uint64_t keyXY(uint64_t x, uint64_t y, int8_t max_level){
 	uint64_t answer = 0;
-	answer |= x | (y << MAX_LEVEL_2D);
+	answer |= x | (y << max_level);
 	return answer;
 }
 
-inline uint64_t keyXYZ(uint64_t x, uint64_t y, uint64_t z){
+inline uint64_t keyXYZ(uint64_t x, uint64_t y, uint64_t z, int8_t max_level){
 	uint64_t answer = 0;
-	answer |= x | (y << MAX_LEVEL_3D) | (z << 2*MAX_LEVEL_3D);
+	answer |= x | (y << max_level) | (z << 2*max_level);
 	return answer;
 }
 

@@ -1,6 +1,6 @@
-#include "classParaTree.hpp"
-#include "User_Data_Comm.hpp"
-#include "User_Data_LB.hpp"
+#include "ClassParaTree.hpp"
+#include "UserDataComm.hpp"
+#include "UserDataLB.hpp"
 
 using namespace std;
 
@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
 		int iter = 0;
 
 		/**<Instantation of a 2D para_tree object.*/
-		classParaTree pabloBB;
+		ClassParaTree pabloBB;
 
 		/**<Set 2:1 balance for the octree.*/
 		pabloBB.setBalanceCodimension(1);
@@ -60,7 +60,6 @@ int main(int argc, char *argv[]) {
 		/**<Define and initialize a set of bubbles and their trajectories.*/
 		time_t Time = time(NULL);
 		srand(Time);
-//		srand(1450623971);
 		if(pabloBB.getRank() == 0)
 			cout << "the seed = " << Time << endl;
 
@@ -101,10 +100,6 @@ int main(int argc, char *argv[]) {
 		/**<Adapt itend times with refinement on the interface of the bubbles.*/
 		int itstart = 1;
 		int itend = 200;
-//		int itend = 11;
-
-		/**<Set the number of refinement per time iteration.*/
-		int nrefperiter = 4;
 
 		/**<Perform time iterations.*/
 		for (iter=itstart; iter<itend; iter++){
@@ -118,19 +113,15 @@ int main(int argc, char *argv[]) {
 			}
 
 			/**<Adapting (refinement and coarsening).*/
-//			for (int iref=0; iref<nrefperiter; iref++){
-
 			bool adapt = true;
 			while (adapt){
 
 				for (int i=0; i<nocts; i++){
 					bool inside = false;
 					/**<Compute the nodes of the octant.*/
-					vector<vector<double> > nodes = pabloBB.getNodes(i);
+					vector<array<double,3> > nodes = pabloBB.getNodes(i);
 					/**<Compute the center of the octant.*/
-					vector<double> center = pabloBB.getCenter(i);
-//					if(pabloBB.getRank()==0) cout << "oct " << i << " center : " << center[0] <<
-//							" , " << center[1] << " , " << center[2] << endl;
+					array<double,3> center = pabloBB.getCenter(i);
 					int ib = 0;
 					while (!inside && ib<nb){
 						double xc = BB[ib].c[0];
@@ -159,13 +150,12 @@ int main(int argc, char *argv[]) {
 					}
 					if (pabloBB.getLevel(i) > 0 && !inside){
 						/**<Set to coarse outside the band if the octant has a level higher than 6.*/
-						pabloBB.setMarker(i,-4);
+						pabloBB.setMarker(i,5-pabloBB.getLevel(i));
 					}
 				}
 
 				/**<Adapt the octree.*/
 				adapt = pabloBB.adapt();
-
 
 				/**<Update the number of local octants.*/
 				nocts = pabloBB.getNumOctants();

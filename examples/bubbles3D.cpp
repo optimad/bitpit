@@ -1,6 +1,6 @@
-#include "classParaTree.hpp"
-#include "User_Data_Comm.hpp"
-#include "User_Data_LB.hpp"
+#include "ClassParaTree.hpp"
+#include "UserDataComm.hpp"
+#include "UserDataLB.hpp"
 
 using namespace std;
 
@@ -28,7 +28,6 @@ public:
 };
 /*!  \endcond  */
 
-
 int main(int argc, char *argv[]) {
 
 #if NOMPI==0
@@ -39,7 +38,7 @@ int main(int argc, char *argv[]) {
 		int iter = 0;
 
 		/**<Instantation of a 3D para_tree object.*/
-		classParaTree pabloBB(3);
+		ClassParaTree pabloBB(3);
 
 		/**<Set 2:1 balance for the octree.*/
 		pabloBB.setBalanceCodimension(1);
@@ -79,7 +78,6 @@ int main(int argc, char *argv[]) {
 			randc[1] = 0.8 * (double) (rand()) /  RAND_MAX + 0.1;
 			randc[2] = (double) (rand()) /  RAND_MAX - 0.5;
 			double randr = (0.05 * (double) (rand()) / RAND_MAX + 0.04);
-			//double randr = 0.005 * (double) (rand()) / RAND_MAX + 0.002;
 			double dz = 0.005 + 0.05 * (double) (rand()) / RAND_MAX;
 			double omega = 0.5 * (double) (rand()) / RAND_MAX;
 			double aa = 0.15 * (double) (rand()) / RAND_MAX;
@@ -107,9 +105,6 @@ int main(int argc, char *argv[]) {
 		int itstart = 1;
 		int itend = 200;
 
-//		/**<Set the number of refinement per time iteration.*/
-//		int nrefperiter = 3;
-
 		/**<Perform time iterations.*/
 		for (iter=itstart; iter<itend; iter++){
 			if(pabloBB.getRank()==0) cout << "iter " << iter << endl;
@@ -123,26 +118,21 @@ int main(int argc, char *argv[]) {
 			}
 
 			/**<Adapting (refinement and coarsening).*/
-//			for (int iref=0; iref<nrefperiter; iref++){
 			bool adapt = true;
 			while (adapt){
 
 				for (int i=0; i<nocts; i++){
-
-//					cout << pabloBB.getRank()  << " " << i << "/" << nocts-1 << endl;
-
 					bool inside = false;
 					/**<Compute the nodes of the octant.*/
-					vector<vector<double> > nodes = pabloBB.getNodes(i);
+					vector<array<double,3> > nodes = pabloBB.getNodes(i);
 					/**<Compute the center of the octant.*/
-					vector<double> center = pabloBB.getCenter(i);
+					array<double,3> center = pabloBB.getCenter(i);
 					int ib = 0;
 					while (!inside && ib<nb){
 						double xc = BB[ib].c[0];
 						double yc = BB[ib].c[1];
 						double zc = BB[ib].c[2];
 						double radius = BB[ib].r;
-//						oct_data[i] = 0.0;
 						/**<Set marker with condition on center or nodes of the octant.*/
 						if (((!inside))){
 							if (((pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0) <= 1.25*pow(radius,2.0) &&
@@ -185,7 +175,7 @@ int main(int argc, char *argv[]) {
 						oct_data[i] = 0.0;
                         if (pabloBB.getLevel(i) > 3){
 							/**<Set to coarse outside the band if the octant has a level higher than 4.*/
-							pabloBB.setMarker(i,-1);
+							pabloBB.setMarker(i,3-pabloBB.getLevel(i));
 						}
 					}
 				}
@@ -207,13 +197,12 @@ int main(int argc, char *argv[]) {
 				oct_data = oct_data_new;
 				vector<double>().swap(oct_data_new);
 
-
 			}
 
 #if NOMPI==0
 			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
 			/**<Communicate the data of the octants and the ghost octants between the processes.*/
-			User_Data_LB<vector<double> > data_lb(oct_data,oct_data_ghost);
+			UserDataLB<vector<double> > data_lb(oct_data,oct_data_ghost);
 			pabloBB.loadBalance(data_lb);
 			/**<Update the number of local octants.*/
 			nocts = pabloBB.getNumOctants();

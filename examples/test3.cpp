@@ -1,4 +1,4 @@
-#include "classParaTree.hpp"
+#include "ClassParaTree.hpp"
 
 using namespace std;
 
@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
 #endif
 		int iter = 0;
 		/**<Instantation of a 2D para_tree object.*/
-		classParaTree pablo3;
+		ClassParaTree pablo3;
 
 		/**<Set NO 2:1 balance for ancestor octant.*/
 		uint32_t idx=0;
@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
 			uint32_t nocts = pablo3.getNumOctants();
 			for (int i=0; i<nocts; i++){
 				/**<Compute the nodes of the octant.*/
-				vector<vector<double> > nodes = pablo3.getNodes(i);
+				vector<array<double,3> > nodes = pablo3.getNodes(i);
 				for (int j=0; j<4; j++){
 					double x = nodes[j][0];
 					double y = nodes[j][1];
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
 			uint32_t nocts = pablo3.getNumOctants();
 			for (int i=0; i<nocts; i++){
 				/**<Compute the nodes of the octant.*/
-				vector<vector<double> > nodes = pablo3.getNodes(i);
+				vector<array<double,3> > nodes = pablo3.getNodes(i);
 				for (int j=0; j<4; j++){
 					double x = nodes[j][0];
 					double y = nodes[j][1];

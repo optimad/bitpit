@@ -3,8 +3,6 @@
 #ifndef CLASSDATACOMMINTERFACE_HPP_
 #define CLASSDATACOMMINTERFACE_HPP_
 
-#include <stdint.h>
-
 /*!
  *  \ingroup PABLO
  *  @{
@@ -38,7 +36,7 @@
  */
 
 template <class Impl>
-class Class_Data_Comm_Interface {
+class ClassDataCommInterface {
 public:
 	/*! Its user specification computes the specific size of data for an element.
 	 * \param[in] e Element local index.
@@ -92,7 +90,7 @@ public:
 	void scatter(Buffer & buff,const uint32_t e);
 
 protected:
-	Class_Data_Comm_Interface();
+	ClassDataCommInterface();
 
 private:
 	//BartonHackman trick
@@ -102,6 +100,6 @@ private:
 
 /*  @{ */
 
-#include "Class_Data_Comm_Interface.tpp"
+#include "ClassDataCommInterface.tpp"
 
 #endif /* CLASSDATACOMMINTERFACE_HPP_ */

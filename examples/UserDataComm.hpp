@@ -8,11 +8,11 @@
 #ifndef USERDATACOMM_HPP_
 #define USERDATACOMM_HPP_
 
-#include "Class_Data_Comm_Interface.hpp"
+#include "ClassDataCommInterface.hpp"
 
 /*!  \cond  EXAMPLE_CLASSES */
 template <class D>
-class User_Data_Comm : public Class_Data_Comm_Interface< User_Data_Comm<D> > {
+class UserDataComm : public ClassDataCommInterface< UserDataComm<D> > {
 public:
 
 	typedef D Data;
@@ -29,11 +29,11 @@ public:
 	template<class Buffer>
 	void scatter(Buffer & buff, const uint32_t e);
 
-	User_Data_Comm(Data & data_, Data & ghostData_);
-	~User_Data_Comm();
+	UserDataComm(Data & data_, Data & ghostData_);
+	~UserDataComm();
 };
 /*!  \endcond  */
 
-#include "User_Data_Comm.tpp"
+#include "UserDataComm.tpp"
 
 #endif /* USERDATACOMM_HPP_ */

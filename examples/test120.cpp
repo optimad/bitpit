@@ -1,6 +1,6 @@
-#include "classParaTree.hpp"
-#include "User_Data_Comm.hpp"
-#include "User_Data_LB.hpp"
+#include "ClassParaTree.hpp"
+#include "UserDataComm.hpp"
+#include "UserDataLB.hpp"
 
 using namespace std;
 
@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 		int iter = 0;
 
 		/**<Instantation of a 3D para_tree object.*/
-		classParaTree pablo120;
+		ClassParaTree pablo120;
 
 		/**<Set NO 2:1 balance for the octree.*/
 		int idx = 0;
@@ -62,9 +62,9 @@ int main(int argc, char *argv[]) {
 			for (int i=0; i<nocts; i++){
 				bool inside = false;
 				/**<Compute the nodes of the octant.*/
-				vector<vector<double> > nodes = pablo120.getNodes(i);
+				vector<array<double,3> > nodes = pablo120.getNodes(i);
 				/**<Compute the center of the octant.*/
-				vector<double> center = pablo120.getCenter(i);
+				array<double,3> center = pablo120.getCenter(i);
 				oct_data[i] = sqrt((pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0)));
 				for (int j=0; j<8; j++){
 					double x = nodes[j][0];
@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
 			nocts = pablo120.getNumOctants();
 			vector<double> oct_data_new(nocts, 0.0);
 			for (int i=0; i<nocts; i++){
-				vector<double> center = pablo120.getCenter(i);
+				array<double,3> center = pablo120.getCenter(i);
 				oct_data_new[i] = sqrt((pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0)));
 			}
 

@@ -1,4 +1,4 @@
-#include "classParaTree.hpp"
+#include "ClassParaTree.hpp"
 
 using namespace std;
 
@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
 	{
 #endif
 		/**<Instantation of a 2D para_tree object.*/
-		classParaTree pablo1;
+		ClassParaTree pablo1;
 
 		/**<Compute the connectivity and write the para_tree.*/
 		pablo1.computeConnectivity();
@@ -33,7 +33,7 @@ int main(int argc, char *argv[]) {
 		/**<Set NO 2:1 balance in the right side of domain.*/
 		uint32_t nocts = pablo1.getNumOctants();
 		for (int i=0; i<nocts; i++){
-			vector<double> center = pablo1.getCenter(i);
+			array<double,3> center = pablo1.getCenter(i);
 			double x = center[0];
 			double y = center[1];
 			if (x>xc)
@@ -49,10 +49,9 @@ int main(int argc, char *argv[]) {
 			nocts = pablo1.getNumOctants();
 			for (int i=0; i<nocts; i++){
 				/**<Extract Octant (pointer use).*/
-//				Class_Octant<2> *oct = pablo1.getOctant(i);
-				classOctant *oct = pablo1.getOctant(i);
+				ClassOctant *oct = pablo1.getOctant(i);
 				/**<Compute center of the octant.*/
-				vector<double> center = pablo1.getCenter(oct);
+				array<double,3> center = pablo1.getCenter(oct);
 				double x = center[0];
 				double y = center[1];
 
@@ -80,7 +79,7 @@ int main(int argc, char *argv[]) {
 				nocts = pablo1.getNumOctants();
 				for (int i=0; i<nocts; i++){
 					/**<Compute center of the octant (index use).*/
-					vector<double> center = pablo1.getCenter(i);
+					array<double,3> center = pablo1.getCenter(i);
 					double x = center[0];
 					double y = center[1];
 					if ((pow((x-xc),2.0)+pow((y-yc),2.0) < pow(radius,2.0)) &&

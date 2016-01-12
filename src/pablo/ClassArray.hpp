@@ -1,19 +1,10 @@
-#ifndef CLASS_ARRAY_HPP_
-#define CLASS_ARRAY_HPP_
+#ifndef CLASSARRAY_HPP_
+#define CLASSARRAY_HPP_
 
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
-#if NOMPI==0
-#include "mpi.h"
-#endif
-#include "preprocessor_defines.dat"
 #include <cstdint>
-#include <algorithm>
-// =================================================================================== //
-// NAME SPACES                                                                         //
-// =================================================================================== //
-using namespace std;
 
 // =================================================================================== //
 // CLASS DEFINITION                                                                    //
@@ -35,26 +26,26 @@ using namespace std;
  *  Class_Array contains a pointer to an array of integer values. Implemented here for fast using in PABLO.
  *
  */
-class Class_Array {
+class ClassArray {
 
-	friend class classParaTree;
+	friend class ClassParaTree;
 
 	// ------------------------------------------------------------------------------- //
 	// MEMBERS ----------------------------------------------------------------------- //
-	uint32_t arraySize;		/**< Size of array */
-	int* array;				/**< Pointer to array of integers */
+	uint32_t m_arraySize;		/**< Size of array */
+	int* m_array;				/**< Pointer to array of integers */
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
 public:
-	Class_Array();
-	Class_Array(uint32_t size, int value);
-	Class_Array(const Class_Array& other);
-	~Class_Array();
+	ClassArray();
+	ClassArray(uint32_t size, int value);
+	ClassArray(const ClassArray& other);
+	~ClassArray();
 
 	// ------------------------------------------------------------------------------- //
 	// METHODS ----------------------------------------------------------------------- //
-	Class_Array& operator=(const Class_Array& rhs);
+	ClassArray& operator=(const ClassArray& rhs);
 };
 
 /* @} */

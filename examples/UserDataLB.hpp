@@ -8,11 +8,11 @@
 #ifndef USER_DATA_LB_HPP_
 #define USER_DATA_LB_HPP_
 
-#include "Class_Data_LB_Interface.hpp"
+#include "ClassDataLBInterface.hpp"
 
 /*!  \cond  EXAMPLE_CLASSES */
 template <class D>
-class User_Data_LB : public Class_Data_LB_Interface<User_Data_LB<D> >{
+class UserDataLB : public ClassDataLBInterface<UserDataLB<D> >{
 public:
 
 	typedef D Data;
@@ -35,11 +35,11 @@ public:
 	void resizeGhost(uint32_t newSize);
 	void shrink();
 
-	User_Data_LB(Data& data_, Data& ghostdata_);
-	~User_Data_LB();
+	UserDataLB(Data& data_, Data& ghostdata_);
+	~UserDataLB();
 };
 /*!  \endcond  */
 
-#include "User_Data_LB.tpp"
+#include "UserDataLB.tpp"
 
 #endif /* USER_DATA_LB_HPP_ */

@@ -1,4 +1,4 @@
-#include "classParaTree.hpp"
+#include "ClassParaTree.hpp"
 
 using namespace std;
 
@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
 #endif
 		int iter = 0;
 		/**<Instantation of a 2D para_tree object.*/
-		classParaTree pablo5;
+		ClassParaTree pablo5;
 
 		/**<Set NO 2:1 balance for the octree (ancestor octant).*/
 		int idx = 0;
@@ -37,8 +37,8 @@ int main(int argc, char *argv[]) {
 		/**<Assign a data (distance from center of a circle) to the octants with at least one node inside the circle.*/
 		for (int i=0; i<nocts; i++){
 			/**<Compute the nodes of the octant.*/
-			vector<vector<double> > nodes = pablo5.getNodes(i);
-			vector<double> center = pablo5.getCenter(i);
+			vector<array<double,3> > nodes = pablo5.getNodes(i);
+			array<double,3> center = pablo5.getCenter(i);
 			for (int j=0; j<4; j++){
 				double x = nodes[j][0];
 				double y = nodes[j][1];
@@ -58,8 +58,8 @@ int main(int argc, char *argv[]) {
 		for (iter=start; iter<start+2; iter++){
 			for (int i=0; i<nocts; i++){
 				/**<Compute the nodes of the octant.*/
-				vector<vector<double> > nodes = pablo5.getNodes(i);
-				vector<double> center = pablo5.getCenter(i);
+				vector<array<double,3> > nodes = pablo5.getNodes(i);
+				array<double,3> center = pablo5.getCenter(i);
 				for (int j=0; j<4; j++){
 					double x = nodes[j][0];
 					double y = nodes[j][1];

@@ -1,4 +1,4 @@
-#include "classParaTree.hpp"
+#include "ClassParaTree.hpp"
 
 using namespace std;
 
@@ -7,7 +7,7 @@ using namespace std;
 void test2() {
 
     /**<Instantation of a 2D para_tree object.*/
-	classParaTree pablo2;
+	ClassParaTree pablo2;
 
     /**<Set 2:1 balance only through faces.*/
     pablo2.setBalanceCodimension(1);
@@ -35,7 +35,7 @@ void test2() {
         uint32_t nocts = pablo2.getNumOctants();
         for (int i=0; i<nocts; i++){
             /**<Compute the nodes of the octant.*/
-            vector<vector<double> > nodes = pablo2.getNodes(i);
+            vector<array<double,3> > nodes = pablo2.getNodes(i);
             for (int j=0; j<4; j++){
                 double x = nodes[j][0];
                 double y = nodes[j][1];
@@ -61,7 +61,7 @@ void test2() {
         uint32_t nocts = pablo2.getNumOctants();
         for (int i=0; i<nocts; i++){
             /**<Compute the nodes of the octant.*/
-            vector<vector<double> > nodes = pablo2.getNodes(i);
+            vector<array<double,3> > nodes = pablo2.getNodes(i);
             for (int j=0; j<4; j++){
                 double x = nodes[j][0];
                 double y = nodes[j][1];

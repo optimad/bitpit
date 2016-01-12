@@ -5,17 +5,8 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
-#include "mpi.h"
-#include "preprocessor_defines.dat"
-#include <cstdint>
-#include <typeinfo>
-#include <algorithm>
-#include "mpi_datatype_conversion.hpp"
 
-// =================================================================================== //
-// NAME SPACES                                                                         //
-// =================================================================================== //
-using namespace std;
+#include "mpi.h"
 
 // =================================================================================== //
 // CLASS DEFINITION                                                                    //
@@ -40,31 +31,30 @@ using namespace std;
  *
  *	More precisely, he has to call read/write methods to read/write every MPI-compatible POD datum in the buffer. By this way, data communications are data independent.
  */
-class Class_Comm_Buffer {
+class ClassCommBuffer {
 
-	template<int dim> friend class Class_Para_Tree;
-	friend class classParaTree;
+	friend class ClassParaTree;
 
 	// ------------------------------------------------------------------------------- //
 	// MEMBERS ----------------------------------------------------------------------- //
-	uint32_t commBufferSize;
-	char* commBuffer;
-	int pos;
-	MPI_Comm comm;
+	uint32_t m_commBufferSize;
+	char* m_commBuffer;
+	int m_pos;
+	MPI_Comm m_comm;
 
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
 public:
-	Class_Comm_Buffer();
-	Class_Comm_Buffer(MPI_Comm comm_);
-	Class_Comm_Buffer(uint32_t size, char value, MPI_Comm comm_);
-	Class_Comm_Buffer(const Class_Comm_Buffer& other);
-	~Class_Comm_Buffer();
+	ClassCommBuffer();
+	ClassCommBuffer(MPI_Comm comm_);
+	ClassCommBuffer(uint32_t size, char value, MPI_Comm comm_);
+	ClassCommBuffer(const ClassCommBuffer& other);
+	~ClassCommBuffer();
 
 	// ------------------------------------------------------------------------------- //
 	// METHODS ----------------------------------------------------------------------- //
 	//TODO routines write and read to write and read POD types in buffer
-	Class_Comm_Buffer& operator=(const Class_Comm_Buffer& rhs);
+	ClassCommBuffer& operator=(const ClassCommBuffer& rhs);
 
 	/*! This method writes a MPI-compatible POD datum of type T in commBuffer
 	 * \param[in] val The values that has to be written in the buffer.
@@ -81,7 +71,7 @@ public:
 
 /* @} */
 
-#include "Class_Comm_Buffer.tpp"
+#include "ClassCommBuffer.tpp"
 
 #endif /* CLASSCOMMBUFFER_HPP_ */
 #endif /* NOMPI */

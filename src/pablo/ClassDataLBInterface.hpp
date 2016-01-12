@@ -1,9 +1,7 @@
 // Communications Class for Load Balancing
 
-#ifndef CLASS_DATA_LB_INTERFACE_HPP_
-#define CLASS_DATA_LB_INTERFACE_HPP_
-
-#include <stdint.h>
+#ifndef CLASS_DATALBINTERFACE_HPP_
+#define CLASS_DATALBINTERFACE_HPP_
 
 /*!
  *  \ingroup        PABLO
@@ -37,7 +35,7 @@
  *	Easily speaking, only the user knows his data and through the interface specialization he states the size of element data, how to write/read and move them in a communication buffer.
  */
 template <class Impl>
-class Class_Data_LB_Interface {
+class ClassDataLBInterface {
 public:
 	/*! Its user specification computes the specific size of data for an element.
 	 * \param[in] e The element local index.
@@ -115,7 +113,7 @@ public:
 	void shrink();
 
 protected:
-	Class_Data_LB_Interface();
+	ClassDataLBInterface();
 
 private:
 	//BartonHackman trick
@@ -124,6 +122,6 @@ private:
 };
 
 /*  @{ */
-#include "Class_Data_LB_Interface.tpp"
+#include "ClassDataLBInterface.tpp"
 
 #endif /* CLASS_DATA_LB_INTERFACE_HPP_ */

@@ -1,4 +1,4 @@
-#include "classParaTree.hpp"
+#include "ClassParaTree.hpp"
 
 using namespace std;
 
@@ -9,7 +9,7 @@ void test104() {
     int dim = 3;
 
     /**<Instantation of a 3D para_tree object.*/
-    classParaTree pablo104(3);
+    ClassParaTree pablo104(3);
 
     /**<Refine globally four level and write the para_tree.*/
     for (iter=1; iter<4; iter++){
@@ -28,7 +28,7 @@ void test104() {
     /**<Assign a data to the octants with at least one node inside the cylinder.*/
     for (int i=0; i<nocts; i++){
         /**<Compute the nodes of the octant.*/
-        vector<vector<double> > nodes = pablo104.getNodes(i);
+        vector<array<double,3> > nodes = pablo104.getNodes(i);
         for (int j=0; j<8; j++){
             double x = nodes[j][0];
             double y = nodes[j][1];

@@ -4,16 +4,11 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
-#include "classGlobal.hpp"
-#include <vector>
-#include <string.h>
-#include "inlinedFunct.hpp"
+#include <stdint.h>
 
 // =================================================================================== //
 // NAME SPACES                                                                         //
 // =================================================================================== //
-using namespace std;
-
 
 // =================================================================================== //
 // CLASS DEFINITION                                                                    //
@@ -40,21 +35,17 @@ using namespace std;
  *	- a flag to communicate if the intersection is new after a mesh refinement.
  *
  */
-class classIntersection{
+class ClassIntersection{
 
 	// =================================================================================== //
 	// FRIENDSHIPS
 	// =================================================================================== //
 
-	friend class classLocalTree;
-	template<int dim> friend class Class_Local_Tree;
-	template<int dim> friend class Class_Para_Tree;
+	friend class ClassLocalTree;
 
 	// =================================================================================== //
 	// TYPEDEFS
 	// =================================================================================== //
-
-	typedef classGlobal					CG;
 
 public:
 
@@ -62,25 +53,25 @@ public:
 	// MEMBERS
 	// =================================================================================== //
 
-	uint32_t 	owners[2];			/**< Owner octants of the intersection (first is the internal octant) */
-	uint8_t   	iface;				/**< Index of the face of the finer owner */
-	bool		finer;				/**< 0/1 finer octant (if same level =0) */
-	bool		isghost;			/**< The intersection has a member ghost */
-	bool		isnew;				/**< The intersection is new after a mesh adapting? */
-	bool		bound;				/**< The intersection is a boundary intersection of the whole domain */
-	bool		pbound;				/**< The intersection is a boundary intersection of a process domain */
-	uint8_t		dim;				/**< Dimension of intersection (2D/3D) */
+	uint32_t 	m_owners[2];		/**< Owner octants of the intersection (first is the internal octant) */
+	uint8_t   	m_iface;			/**< Index of the face of the finer owner */
+	bool		m_finer;			/**< 0/1 finer octant (if same level =0) */
+	bool		m_isghost;			/**< The intersection has a member ghost */
+	bool		m_isnew;			/**< The intersection is new after a mesh adapting? */
+	bool		m_bound;			/**< The intersection is a boundary intersection of the whole domain */
+	bool		m_pbound;			/**< The intersection is a boundary intersection of a process domain */
+	uint8_t		m_dim;				/**< Dimension of intersection (2D/3D) */
 
 	// =================================================================================== //
 	// CONSTRUCTORS AND OPERATORS
 	// =================================================================================== //
 public:
 
-	classIntersection();
-	classIntersection(uint8_t dim_);
-	classIntersection(const classIntersection & intersection);
-	classIntersection & operator =(const classIntersection & intersection);
-	bool operator ==(const classIntersection & intersection);
+	ClassIntersection();
+	ClassIntersection(uint8_t dim_);
+	ClassIntersection(const ClassIntersection & intersection);
+	ClassIntersection & operator =(const ClassIntersection & intersection);
+	bool operator ==(const ClassIntersection & intersection);
 
 	// =================================================================================== //
 	// METHODS

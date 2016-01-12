@@ -1,6 +1,6 @@
-#include "classParaTree.hpp"
-#include "User_Data_Comm.hpp"
-#include "User_Data_LB.hpp"
+#include "ClassParaTree.hpp"
+#include "UserDataComm.hpp"
+#include "UserDataLB.hpp"
 
 using namespace std;
 
@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 		int iter = 0;
 
 		/**<Instantation of a 2D para_tree object.*/
-		classParaTree pablo16;
+		ClassParaTree pablo16;
 
 		/**<Set NO 2:1 balance for the octree.*/
 		int idx = 0;
@@ -40,9 +40,9 @@ int main(int argc, char *argv[]) {
 		/**<Assign a data (distance from center of a circle) to the octants with at least one node inside the circle.*/
 		for (int i=0; i<nocts; i++){
 			/**<Compute the nodes of the octant.*/
-			vector<vector<double> > nodes = pablo16.getNodes(i);
+			vector<array<double,3> > nodes = pablo16.getNodes(i);
 			/**<Compute the center of the octant.*/
-			vector<double> center = pablo16.getCenter(i);
+			array<double,3> center = pablo16.getCenter(i);
 			for (int j=0; j<4; j++){
 				double x = nodes[j][0];
 				double y = nodes[j][1];
@@ -62,9 +62,9 @@ int main(int argc, char *argv[]) {
 		for (iter=start; iter<start+2; iter++){
 			for (int i=0; i<nocts; i++){
 				/**<Compute the nodes of the octant.*/
-				vector<vector<double> > nodes = pablo16.getNodes(i);
+				vector<array<double,3> > nodes = pablo16.getNodes(i);
 				/**<Compute the center of the octant.*/
-				vector<double> center = pablo16.getCenter(i);
+				array<double,3> center = pablo16.getCenter(i);
 				for (int j=0; j<4; j++){
 					double x = nodes[j][0];
 					double y = nodes[j][1];
@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
 		/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.
 		 * Preserve the family compact up to 4 levels over the max deep reached in the octree.*/
 		uint8_t levels = 4;
-		User_Data_LB<vector<double> > data_lb(oct_data,ghost_data);
+		UserDataLB<vector<double> > data_lb(oct_data,ghost_data);
 		pablo16.loadBalance(data_lb, levels);
 #endif
 

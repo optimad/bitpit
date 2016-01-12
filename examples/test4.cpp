@@ -1,4 +1,4 @@
-#include "classParaTree.hpp"
+#include "ClassParaTree.hpp"
 
 using namespace std;
 
@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
 #endif
 		int iter = 0;
 		/**<Instantation of a 2D para_tree object.*/
-		classParaTree pablo4;
+		ClassParaTree pablo4;
 
 		/**<Refine globally four level and write the para_tree.*/
 		for (iter=1; iter<5; iter++){
@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
 		/**<Assign a data to the octants with at least one node inside the circle.*/
 		for (int i=0; i<nocts; i++){
 			/**<Compute the nodes of the octant.*/
-			vector<vector<double> > nodes = pablo4.getNodes(i);
+			vector<array<double,3> > nodes = pablo4.getNodes(i);
 			for (int j=0; j<4; j++){
 				double x = nodes[j][0];
 				double y = nodes[j][1];

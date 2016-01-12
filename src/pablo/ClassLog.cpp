@@ -5,18 +5,21 @@
  *      Author: marco
  */
 
-#include "Class_Log.hpp"
+#include "ClassLog.hpp"
+#include <fstream>
+
+using namespace std;
 
 #if NOMPI==0
-Class_Log::Class_Log(string filename_,MPI_Comm comm_) : filename(filename_),comm(comm_) {};
+ClassLog::ClassLog(string filename_,MPI_Comm comm_) : m_filename(filename_),m_comm(comm_) {};
 #else
-Class_Log::Class_Log(string filename_) : filename(filename_) {};
+ClassLog::ClassLog(string filename_) : m_filename(filename_) {};
 #endif
 
-Class_Log::~Class_Log() {};
+ClassLog::~ClassLog() {};
 
 // ----------------------------------------------------------------------------------- //
-void Class_Log::writeLog(string msg) {
+void ClassLog::writeLog(string msg) {
 
 	// =================================================================================== //
 	// void Write_Log(string msg)                                                          //
@@ -51,11 +54,11 @@ void Class_Log::writeLog(string msg) {
 #if NOMPI==0
 	bool flag = MPI::Is_finalized();
 	if (!(flag))
-		int error_flag = MPI_Comm_rank(comm,&rank);
+		int error_flag = MPI_Comm_rank(m_comm,&rank);
 #endif
 	if(rank == 0){
 		// Open the .log file
-		file_handle.open(filename.c_str(), ifstream::app);
+		file_handle.open(m_filename.c_str(), ifstream::app);
 		if(!file_handle.is_open())
 			exit(1);
 
