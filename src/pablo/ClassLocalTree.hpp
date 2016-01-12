@@ -81,8 +81,6 @@ private:
 	 	 	 	 	 	 	 	 	 	 	 	 	 	 2 = 2:1 balance through edges and faces;
 	 	 	 	 	 	 	 	 	 	 	 	 	 	 3 = 2:1 balance through nodes, edges and faces)*/
 	u32vector 				m_lastGhostBros;		/**<Index of ghost brothers in case of broken family coarsened*/
-
-	// connectivity
 	u32vector2D				m_connectivity;			/**<Local vector of connectivity (node1, node2, ...) ordered with Morton-order.
 	 	 	 	 	 	 	 	 	 	 	 	 	 	 The nodes are stored as index of vector nodes*/
 	u32vector2D				m_ghostsConnectivity;	/**<Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
@@ -133,11 +131,9 @@ private:
 	// OTHER METHODS
 	// =================================================================================== //
 
-private:
 	ClassOctant& 		extractOctant(uint32_t idx);
-	ClassOctant& 		extractGhostOctant(uint32_t idx);
-public:
 	const ClassOctant&	extractOctant(uint32_t idx) const;
+	ClassOctant& 		extractGhostOctant(uint32_t idx);
 	const ClassOctant&	extractGhostOctant(uint32_t idx) const;
 
 
@@ -187,9 +183,6 @@ public:
 
 	// =================================================================================== //
 
-
 };
-
-
 
 #endif /* CLASSLOCALTREE_HPP_ */
