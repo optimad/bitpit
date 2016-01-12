@@ -13,7 +13,6 @@
 // =================================================================================== //
 // CLASS DEFINITION                                                                    //
 // =================================================================================== //
-
 /*!
  *  \ingroup        PABLO
  *  @{
@@ -26,11 +25,13 @@
  *
  *	\brief Intersection class definition
  *
- *	The intersection is the face (edge in 2D) or portion of face shared by two octants. An intersection is defined
- *	by :
- *	- the owner octants, i.e. the octants sharing the intersection, identified by a couple (array[2]) of indices;
+ *	The intersection is the face (edge in 2D) or portion of face shared by two octants.
+ *	An intersection is defined by :
+ *	- the owner octants, i.e. the octants sharing the intersection,
+ *	identified by a couple (array[2]) of indices;
  *	- the index of the face, that contains the intersection, of the first owner;
- *	- an identifier of the octant in the couple with higher level of refinement (0/1) [if same level identifier =0];
+ *	- an identifier of the octant in the couple with higher
+ *	level of refinement (0/1) [if same level identifier =0];
  *	- a flag stating if an owner is ghost;
  *	- a flag to communicate if the intersection is new after a mesh refinement.
  *
@@ -47,12 +48,10 @@ class ClassIntersection{
 	// TYPEDEFS
 	// =================================================================================== //
 
-public:
-
 	// =================================================================================== //
 	// MEMBERS
 	// =================================================================================== //
-
+public:
 	uint32_t 	m_owners[2];		/**< Owner octants of the intersection (first is the internal octant) */
 	uint8_t   	m_iface;			/**< Index of the face of the finer owner */
 	bool		m_finer;			/**< 0/1 finer octant (if same level =0) */
@@ -66,7 +65,6 @@ public:
 	// CONSTRUCTORS AND OPERATORS
 	// =================================================================================== //
 public:
-
 	ClassIntersection();
 	ClassIntersection(uint8_t dim_);
 	ClassIntersection(const ClassIntersection & intersection);
@@ -81,11 +79,7 @@ public:
 	// BASIC GET/SET METHODS
 	// =================================================================================== //
 
-	/*!Get the owner with exiting normal;
-	 */
 	uint32_t getOut();
-	/*!Get the owner with entering normal;
-	 */
 	uint32_t getIn();
 	void getNormal(int8_t normal[3], int8_t normals[6][3]);
 	bool getBound();

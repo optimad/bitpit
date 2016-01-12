@@ -98,12 +98,7 @@ private:
 	// =================================================================================== //
 
 public:
-	/*!Dimensional and default constructor.
-	 */
 	ClassLocalTree(int8_t maxlevel, uint8_t dim_);
-
-	/*!Default destructor.
-	 */
 	~ClassLocalTree();
 
 	// =================================================================================== //
@@ -138,9 +133,11 @@ private:
 	// OTHER METHODS
 	// =================================================================================== //
 
+private:
 	ClassOctant& 		extractOctant(uint32_t idx);
-	const ClassOctant&	extractOctant(uint32_t idx) const;
 	ClassOctant& 		extractGhostOctant(uint32_t idx);
+public:
+	const ClassOctant&	extractOctant(uint32_t idx) const;
 	const ClassOctant&	extractGhostOctant(uint32_t idx) const;
 
 

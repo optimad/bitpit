@@ -16,14 +16,14 @@
  *	\date		03/mar/2014
  *  \authors	Marco Cisternino
  *  \authors	Edoardo Lombardi
- *  \version		0.1
- *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
- *	\par			License:\n
+ *	\copyright	Copyright 2014 Optimad engineering srl. All rights reserved.
+ *	\par		License:\n
  *	This version of PABLO is released under the LGPL License.
  *
  *  \brief Customized array definition
  *
- *  Class_Array contains a pointer to an array of integer values. Implemented here for fast using in PABLO.
+ *  ClassArray contains a pointer to an array of integer values.
+ *  Implemented here for fast using in PABLO.
  *
  */
 class ClassArray {

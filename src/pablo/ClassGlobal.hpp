@@ -12,7 +12,6 @@
  *	\date			23/apr/2014
  *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
- *	\version		0.1
  *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
  *	\par			License:\n
  *	This version of PABLO is released under the LGPL License.
@@ -22,7 +21,8 @@
  *	Global variables are used in PABLO everywhere and they are public, i.e. each
  *	global variable can be used asant by external codes.
  *
- *	Class ClassGlobal is a class with static members initialized during theruction of a paratree object.
+ *	Class ClassGlobal is a class with static members initialized during the construction
+ *	of a paratree object.
  *
  */
 class ClassGlobal{
@@ -30,16 +30,13 @@ class ClassGlobal{
 	// =================================================================================== //
 	// FRIENDSHIPS
 	// =================================================================================== //
-
 	friend class ClassParaTree;
 	friend class ClassLocalTree;
 
 	// =================================================================================== //
 	// MEMBERS
 	// =================================================================================== //
-
 private:
-
 	uint32_t m_maxLength;			/**< Length of the logical domain */
 	uint8_t  m_nchildren;			/**< Number of children of an octant */
 	uint8_t  m_nfaces;				/**< Number of faces of an octant */
@@ -61,28 +58,34 @@ private:
 	int8_t   m_maxLevel;			/**< Maximum allowed refinement level of octree */
 
 	// =================================================================================== //
-public:
-	uint8_t getBoolBytes();
-	void 	getEdgecoeffs(int8_t edgecoeffs[12][3]);
-	void 	getEdgeface(uint8_t edgeface[12][2]);
-	void 	getFacenode(uint8_t facenode[6][4]);
-	uint8_t getGlobalIndexBytes();
-	uint8_t getLevelBytes();
-	uint8_t getMarkerBytes();
-	uint32_t getMaxLength();
-	int8_t 	getMaxLevel();
-	uint8_t getNchildren();
-	uint8_t getNedges();
-	uint8_t getNfaces();
-	uint8_t getNnodes();
-	uint8_t getNnodesperface();
-	void 	getNodecoeffs(int8_t nodecoeffs[8][3]);
-	void 	getNodeface(uint8_t nodeface[8][3]);
-	void 	getNormals(int8_t normals[6][3]);
-	uint8_t getOctantBytes();
-	void 	getOppface(uint8_t oppface[6]);
+	// METHODS
+	// =================================================================================== //
 
-	void 	setGlobal(int8_t maxlevel, uint8_t dim);
+	// =================================================================================== //
+	// BASIC GET/SET METHODS
+	// =================================================================================== //
+public:
+	uint8_t 	getBoolBytes();
+	void 		getEdgecoeffs(int8_t edgecoeffs[12][3]);
+	void 		getEdgeface(uint8_t edgeface[12][2]);
+	void 		getFacenode(uint8_t facenode[6][4]);
+	uint8_t 	getGlobalIndexBytes();
+	uint8_t 	getLevelBytes();
+	uint8_t 	getMarkerBytes();
+	uint32_t 	getMaxLength();
+	int8_t 		getMaxLevel();
+	uint8_t 	getNchildren();
+	uint8_t 	getNedges();
+	uint8_t 	getNfaces();
+	uint8_t 	getNnodes();
+	uint8_t 	getNnodesperface();
+	void 		getNodecoeffs(int8_t nodecoeffs[8][3]);
+	void 		getNodeface(uint8_t nodeface[8][3]);
+	void 		getNormals(int8_t normals[6][3]);
+	uint8_t 	getOctantBytes();
+	void 		getOppface(uint8_t oppface[6]);
+
+	void 		setGlobal(int8_t maxlevel, uint8_t dim);
 
 };
 

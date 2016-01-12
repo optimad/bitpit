@@ -42,11 +42,13 @@ typedef std::vector<u32array3>				u32arr3vector;
  *
  *	The main feature of each octant are:
  *	- x,y,z        : coordinates of the node 0 of the octant;
- *	- Morton index : classical Morton index defined anly by the coordinates (info about level used additionally for equality operator);
+ *	- Morton index : classical Morton index defined anly by the coordinates
+ *	(info about level used additionally for equality operator);
  *	- marker       : refinement marker can assume negative, positive or zero values, wich mean
  *	a coarsening, refinement and none adaptation respectively;
  *	- level        : octant level in the octree, zero for the first upper level.
- *	- balance      : flag to fix if the octant has to 2:1 balanced with respect to its face neighbours.
+ *	- balance      : flag to fix if the octant has to 2:1 balanced with respect
+ *	to its face neighbours.
  *
  */
 class ClassOctant{
@@ -94,17 +96,10 @@ private:
 	// =================================================================================== //
 public:
 	ClassOctant();
-
 	ClassOctant(uint8_t dim);
-
 	ClassOctant(uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0);
-
 	ClassOctant(bool bound, uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0);
-
 	ClassOctant(const ClassOctant &octant);
-
-	/*! Check if two octants are equal (no check on info)
-	 */
 	bool operator ==(const ClassOctant & oct2);
 
 	// =================================================================================== //
@@ -179,8 +174,6 @@ private:
 			uint32_t & sizem, int8_t & maxlevel, uint8_t (&edgeface)[12][2]);
 	std::vector<uint64_t>		computeEdgeVirtualMorton(uint8_t iedge, const uint8_t & maxdepth,
 			uint32_t & sizeneigh, uint8_t balance_codim, int8_t & maxlevel, uint8_t (&edgeface)[12][2]);
-	uint64_t 		computeNodeHalfSizeMorton(uint8_t inode, uint32_t & sizehf,
-			int8_t & maxlevel, uint8_t (&nodeface)[8][3]);
 	uint64_t 		computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxdepth,
 			uint32_t & sizehf, int8_t & maxlevel, uint8_t (&nodeface)[8][3]);
 	uint64_t 		computeNodeVirtualMorton(uint8_t inode, const uint8_t & maxdepth,

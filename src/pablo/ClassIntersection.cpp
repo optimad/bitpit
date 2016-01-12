@@ -80,8 +80,6 @@ bool ClassIntersection::operator ==(const ClassIntersection & intersection){
 // =================================================================================== //
 // BASIC GET/SET METHODS
 // =================================================================================== //
-
-
 /*!Get the owner with exiting normal;
  */
 uint32_t ClassIntersection::getOut(){
@@ -94,20 +92,33 @@ uint32_t ClassIntersection::getIn(){
 	return m_owners[!m_finer];
 };
 
+/*!Get the direction of the exiting normal;
+ * \param[out] normal Components of the exiting normal.
+ * \param[in] normals Basic matrix with components of the elementary normals.
+ */
 void ClassIntersection::getNormal(int8_t normal[3], int8_t normals[6][3]){
 	for (int i=0; i<m_dim; i++){
 		normal[i] = normals[m_iface][i];
 	}
 };
 
+/*!Get the boundary condition of the intersection;
+ * \return Boolean true/false if the intersection is/is not a boundary intersection
+ */
 bool ClassIntersection::getBound(){
 	return m_bound;
 };
 
+/*!Get the ghost information about the intersection;
+ * \return Boolean true/false if the intersection is/is not a ghost intersection
+ */
 bool ClassIntersection::getIsGhost(){
 	return m_isghost;
 };
 
+/*!Get the partition boundary condition of the intersection;
+ * \return Boolean true/false if the intersection is/is not a process boundary intersection
+ */
 bool ClassIntersection::getPbound(){
 	return m_pbound;
 };

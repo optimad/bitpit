@@ -18,6 +18,7 @@ using namespace std;
 // =================================================================================== //
 
 /*!Dimensional and default constructor.
+ * \param[in] maxlevel Maximum refinement level of the octree.
  * \param[in] dim_ Space dimension of octree.
  */
 ClassLocalTree::ClassLocalTree(int8_t maxlevel, uint8_t dim_){
@@ -47,27 +48,40 @@ ClassLocalTree::~ClassLocalTree(){};
 // BASIC GET/SET METHODS
 // =================================================================================== //
 
+/*!Get the first descentant octant of the octree.
+ * \return Constant reference to the first descendant of the octree.
+ */
 const ClassOctant&
 ClassLocalTree::getFirstDesc() const{
 	return m_firstDesc;
 };
 
+/*!Get the last descentant octant of the octree.
+ * \return Constant reference to the last descendant of the octree.
+ */
 const ClassOctant&
 ClassLocalTree::getLastDesc() const{
 	return m_lastDesc;
 };
 
+/*! Get the number of the ghosts for the local partition of the tree.
+ * \return Number of ghosts.
+ */
 uint32_t
 ClassLocalTree::getSizeGhost() const{
 	return m_sizeGhosts;
 };
 
+/*! Get the number of the octants in the local tree.
+ * \return Number of local octants.
+ */
 uint32_t
 ClassLocalTree::getNumOctants() const{
 	return m_octants.size();
 };
 
-/** Get max depth reached in local tree
+/*! Get max depth reached in local tree
+ * \return Max depth in local partition of the octree.
  */
 uint8_t
 ClassLocalTree::getLocalMaxDepth() const{
@@ -75,6 +89,8 @@ ClassLocalTree::getLocalMaxDepth() const{
 };
 
 /** Get refinement/coarsening marker for idx-th octant
+ * \param[in] idx Local index of the target octant.
+ * \return Marker of the octant.
  */
 int8_t
 ClassLocalTree::getMarker(int32_t idx){
@@ -82,6 +98,8 @@ ClassLocalTree::getMarker(int32_t idx){
 };
 
 /** Get refinement/coarsening marker for idx-th octant
+ * \param[in] idx Local index of the target octant.
+ * \return Level of the octant.
  */
 uint8_t
 ClassLocalTree::getLevel(int32_t idx){
@@ -89,6 +107,8 @@ ClassLocalTree::getLevel(int32_t idx){
 };
 
 /** Get refinement/coarsening marker for idx-th ghost octant
+ * \param[in] idx Local index of the target ghost octant.
+ * \return Level of the ghost octant.
  */
 uint8_t
 ClassLocalTree::getGhostLevel(int32_t idx){
@@ -96,6 +116,8 @@ ClassLocalTree::getGhostLevel(int32_t idx){
 };
 
 /** Get if balancing-blocked idx-th octant
+ * \param[in] idx Local index of the target octant.
+ * \return Has the octant to be balanced?
  */
 bool
 ClassLocalTree::getBalance(int32_t idx){
@@ -111,6 +133,8 @@ ClassLocalTree::getBalanceCodim() const{
 };
 
 /** Set refinement/coarsening marker for idx-th octant
+ * \param[in] idx Local index of the target octant.
+ * \param[in] marker Refinement marker for the target octant.
  */
 void
 ClassLocalTree::setMarker(int32_t idx, int8_t marker){
@@ -118,6 +142,8 @@ ClassLocalTree::setMarker(int32_t idx, int8_t marker){
 };
 
 /** Set if balancing-blocked idx-th octant
+ * \param[in] idx Local index of the target octant.
+ * \param[in] balance Has the octant to be balanced?
  */
 void
 ClassLocalTree::setBalance(int32_t idx, bool balance){
@@ -132,17 +158,20 @@ ClassLocalTree::setBalanceCodim(uint8_t b21codim){
 	m_balanceCodim = b21codim;
 };
 
+/*!Set the first descentant octant of the octree.
+ */
 void
 ClassLocalTree::setFirstDesc(){
 	octvector::const_iterator firstOctant = m_octants.begin();
 	m_firstDesc = ClassOctant(m_dim, m_global.m_maxLevel, firstOctant->m_x, firstOctant->m_y, firstOctant->m_z);
 };
 
+/*!Set the last descentant octant of the octree.
+ */
 void
 ClassLocalTree::setLastDesc(){
 	octvector::const_iterator lastOctant = m_octants.end() - 1;
 	uint32_t x,y,z,delta;
-	//delta = (uint32_t)pow(2.0,(double)((uint8_t)m_global.m_maxLevel - lastOctant->m_level)) - 1;
 	delta = (uint32_t)(1<<((uint8_t)m_global.m_maxLevel - lastOctant->m_level)) - 1;
 	x = lastOctant->m_x + delta;
 	y = lastOctant->m_y + delta;
@@ -159,21 +188,37 @@ ClassLocalTree::setLastDesc(){
 // OTHER METHODS
 // =================================================================================== //
 
+/*!Extract an octant of the octree.
+ * \param[in] idx Local index of the target octant.
+ * \return Reference to the idx-th octant of the octree.
+ */
 ClassOctant&
 ClassLocalTree::extractOctant(uint32_t idx){
 	return m_octants[idx];
 };
 
+/*!Extract an octant of the octree.
+ * \param[in] idx Local index of the target octant.
+ * \return Constant reference to the idx-th octant of the octree.
+ */
 const ClassOctant&
 ClassLocalTree::extractOctant(uint32_t idx) const{
 	return m_octants[idx];
 };
 
+/*!Extract a ghost octant of the octree.
+ * \param[in] idx Local index of the target ghost octant.
+ * \return Reference to the idx-th ghost octant of the octree.
+ */
 ClassOctant&
 ClassLocalTree::extractGhostOctant(uint32_t idx) {
 	return m_ghosts[idx];
 };
 
+/*!Extract a ghost octant of the octree.
+ * \param[in] idx Local index of the target ghost octant.
+ * \return Constant reference to the idx-th ghost octant of the octree.
+ */
 const ClassOctant&
 ClassLocalTree::extractGhostOctant(uint32_t idx) const{
 	return m_ghosts[idx];
@@ -182,7 +227,7 @@ ClassLocalTree::extractGhostOctant(uint32_t idx) const{
 // =================================================================================== //
 
 /*! Refine local tree: refine one time octants with marker >0
- * \param[in] mapidx mapidx[i] = index in old octants vector of the new i-th octant (index of father if octant is new after refinement)
+ * \param[out] mapidx mapidx[i] = index in old octants vector of the new i-th octant (index of father if octant is new after refinement)
  * \return	true if refinement done
  */
 bool
@@ -266,7 +311,7 @@ ClassLocalTree::refine(u32vector & mapidx){
 // =================================================================================== //
 /*! Coarse local tree: coarse one time family of octants with marker <0
  * (if at least one octant of family has marker>=0 set marker=0 for the entire family)
- * \param[in] mapidx mpaidx[i] = index in old octants vector of the new i-th octant (index of first child if octant is new after coarsening)
+ * \param[out] mapidx mpaidx[i] = index in old octants vector of the new i-th octant (index of first child if octant is new after coarsening)
  * \return	true is coarsening done
  */
 bool
@@ -474,7 +519,7 @@ ClassLocalTree::coarse(u32vector & mapidx){
 // =================================================================================== //
 
 /*! Refine local tree: refine one time all the octants
- * \param[in] mapidx mpaidx[i] = index in old octants vector of the new i-th octant (index of father if octant is new after refinement)
+ * \param[out] mapidx mpaidx[i] = index in old octants vector of the new i-th octant (index of father if octant is new after refinement)
  * \return	true if refinement done
  */
 bool
@@ -497,8 +542,8 @@ ClassLocalTree::globalRefine(u32vector & mapidx){
 // =================================================================================== //
 
 /*! Refine local tree: corse one time all the octants
- * \param[in] mapidx mpaidx[i] = index in old octants vector of the new i-th octant (index of father if octant is new after refinement)
- * \return	true if refinement done
+ * \param[out] mapidx mpaidx[i] = index in old octants vector of the new i-th octant (index of first child if octant is new after coarsening)
+ * \return	true if coarsening done
  */
 bool
 ClassLocalTree::globalCoarse(u32vector & mapidx){
@@ -520,6 +565,9 @@ ClassLocalTree::globalCoarse(u32vector & mapidx){
 // =================================================================================== //
 /*! Delete overlapping octants after coarse local tree. Check first and last descendants
  * of process before and after the local process
+ * \param[in] lastDescPre Morton of last descendant of the previous process (rank-1).
+ * \param[in] firstDescPost Morton of first descendant of the next process (rank+1).
+ * \param[out] mapidx mpaidx[i] = index in old octants vector of the new i-th octant (index of first child if octant is new after coarsening)
  */
 void
 ClassLocalTree::checkCoarse(uint64_t lastDescPre,
