@@ -20,11 +20,24 @@
 // IMPLEMENTATIONS                                                            //
 // ========================================================================== //
 
+/*!
+    \class STL_obj
+    \brief Interface to STL I/O function
+
+    This class has been designed to allow an easy interface between end-user
+    and STL I/O functions.
+*/
+
 // Class STL_obj methods ==================================================== //
 
 // Constructors ------------------------------------------------------------- //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Default constructor for class STL_obj.
+
+    Initialize an empty interface to stl file.
+*/
 STL_obj::STL_obj(
     void
 ) {
@@ -71,6 +84,13 @@ data.n_solids = -1;
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Constructor #1 for class STL_obj.
+    Initialize an interface to stl file with name specified in filename.
+
+    \param[in] filename stl file name
+    \param[in] filetype boolean flag for ascii (false) or binary (true) stl file
+*/
 STL_obj::STL_obj(
     string  filename,
     bool    filetype
@@ -121,6 +141,11 @@ return; };
 // Public methods ----------------------------------------------------------- //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Open the file associated to the interface.
+
+    \param[in] mode opening mode ("in": input, "out": output, "app": append mode)
+*/
 void STL_obj::open(
     string  mode
 ) {
@@ -220,6 +245,12 @@ else if (mode.compare("app") == 0) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Close the current stream to stl file.
+
+    \param[in] mode opening mode used to open stream ("in": input, "out": output,
+    "app": append)
+*/
 void STL_obj::close(
     string  mode
 ) {
@@ -271,6 +302,10 @@ else if (mode.compare("") == 0) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Clear info and error flags gathered on the stl file associated
+    to the interface.
+*/
 void STL_obj::clear(
     void
 ) {
@@ -321,6 +356,11 @@ data.solid_facets.resize(0);
 return; }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Display info gathered on the stl file associated to the interface.
+
+    \param[in,out] out output stream
+*/
 void STL_obj::display(
     ostream     &out
 ) {
@@ -406,6 +446,9 @@ if ((data.n_solids >= 0) && (stl_errors.size() > 0)) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Scan and gather info from the stl file associated to the interface
+*/
 void STL_obj::scan(
     void
 ) {
@@ -465,6 +508,9 @@ close("in");
 return; }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Scan and check for format errors in the stl file associated to the interface
+*/
 void STL_obj::check(
     void
 ) {
@@ -518,6 +564,25 @@ close("in");
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Load solid data from the stl file associated to the interface.
+
+    \param[in,out] nV on input stores the current number of vertices hosted in V.
+    On output stores the input values incremented by the number
+    of vertices acquired from the stl file.
+    \param[in,out] nT on input stores the number of facet->vertex connectivity
+    entries stores in T. On output stores the input value incremented by the
+    number of facets acquired from the stl file.
+    \param[in,out] V vertex coordinates list. On output stores the coordinates of
+    vertices vertices acquired from the stl file. New vertices are appended
+    at the end of V.
+    \param[in,out] N facet normals. On output stores the normal unit vector to
+    each facet acquired from the stl file. New normals are appended
+    at the end of N.
+    \param[in,out] T facet->vertex connectivity. On output stores the facet->vertex
+    connectivity entries for the facets acquired from the stl file. New connectivity entries
+    are appended at the end of T.
+*/
 void STL_obj::load(
     int                       &nV,
     int                       &nT,
@@ -585,6 +650,26 @@ close("in");
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Load solid data from the stl file associated to the interface. Overloading of
+    member function STL_obj::load() for container vector<array<double, 3>>
+
+    \param[in,out] nV on input stores the current number of vertices hosted in V.
+    On output stores the input values incremented by the number
+    of vertices acquired from the stl file.
+    \param[in,out] nT on input stores the number of facet->vertex connectivity
+    entries stores in T. On output stores the input value incremented by the
+    number of facets acquired from the stl file.
+    \param[in,out] V vertex coordinates list. On output stores the coordinates of
+    vertices vertices acquired from the stl file. New vertices are appended
+    at the end of V.
+    \param[in,out] N facet normals. On output stores the normal unit vector to
+    each facet acquired from the stl file. New normals are appended
+    at the end of N.
+    \param[in,out] T facet->vertex connectivity. On output stores the facet->vertex
+    connectivity entries for the facets acquired from the stl file. New connectivity entries
+    are appended at the end of T.
+*/
 void STL_obj::load(
     int                       &nV,
     int                       &nT,
@@ -655,6 +740,9 @@ return; };
 // Private methods ---------------------------------------------------------- //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Dummy function for recursive variadic template STL_obj::save().
+*/
 void STL_obj::save(
     void
 ) {
@@ -692,6 +780,9 @@ close("out");
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Dummy function for recursive variadic template STL_obj::load().
+*/
 void STL_obj::load(
     void
 ) {
@@ -731,6 +822,18 @@ return; };
 // Scanning routines ======================================================== //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Scan ascii stl file and retrieve infos about content.
+
+    \param[in,out] file_handle input stream from stl file
+    \param[in,out] solid_names list of solid names stored in the stl file
+    \param[in] solid_facets number of facets for each stl solid found in the
+    stl file (same ordering of solid_names).
+
+    \result returns an error flag for I/O errors
+        err = 0: no error(s) encountered
+        err = 1: failed to scan stl file.
+*/
 unsigned int Scan_STL_ASCII(
     ifstream                  &file_handle,
     svector1D                 &solid_names,
@@ -838,6 +941,18 @@ file_handle.seekg(start_pos);
 return(0); };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Scan binary stl file and retrieve infos about content.
+
+    \param[in,out] file_handle input stream from stl file
+    \param[in,out] solid_names list of solid names stored in the stl file
+    \param[in] solid_facets number of facets for each stl solid found in the
+    stl file (same ordering of solid_names).
+
+    \result returns an error flag for I/O errors
+        err = 0: no error(s) encountered
+        err = 1: failed to scan stl file.
+*/
 unsigned int Scan_STL_bin(
     ifstream                  &file_handle,
     svector1D                 &solid_names,
@@ -914,6 +1029,16 @@ file_handle.seekg(start_pos);
 return(0); };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Scan solid data from ascii stl file and retrieve infos.
+
+    \param[in,out] file_handle input stream from stl file
+    \param[in,out] nT number of facets found in the solid data section
+
+    \result returns an error flag for I/O errors
+        err = 0: no error(s) encountered
+        err = 1: failed to scan stl file.
+*/
 unsigned int Scan_STLsolid_ASCII(
     ifstream                  &file_handle,
     int                       &nT
@@ -1002,6 +1127,24 @@ return(0); };
 // Check routines =========================================================== //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Scan ascii stl file and perform check on format error.
+
+    \param[in] file_handle input stream from stl file.
+    \param[in,out] err_map for each solid found in the stl file, store a bitmask
+    for format errors encountered in the solid data section.
+    error code:
+        0 -> unterminated solid block
+        1 -> undeterminated facet block
+        2 -> normal data are missing
+        3 -> wrong number of components for facet normal
+        4 -> wrong number of vertices in facet block
+        5 -> wrong number of coordinates for vertex
+
+    \result returns and error flag for I/O errors:
+        err = 0: no error(s) encountered
+        err = 1: failed to scan/check stl file
+*/
 unsigned int Check_STL_ASCII(
     ifstream                  &file_handle,
     bvector2D                 &err_map
@@ -1091,6 +1234,22 @@ file_handle.seekg(start_pos);
 return(0); }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Scan solid data section in ascii stl file and perform check on format error.
+
+    \param[in] file_handle input stream from stl file.
+    \param[in,out] err_map bitmask for format errors encountered in the solid data section.
+        0 -> unterminated solid block
+        1 -> undeterminated facet block
+        2 -> normal data are missing
+        3 -> wrong number of components for facet normal
+        4 -> wrong number of vertices in facet block
+        5 -> wrong number of coordinates for vertex
+
+    \result returns and error flag for I/O errors:
+        err = 0: no error(s) encountered
+        err = 1: failed to scan/check stl file
+*/
 unsigned int Check_STLsolid_ASCII(
     ifstream                  &file_handle,
     bvector1D                 &err_map
@@ -1189,6 +1348,20 @@ if (word.compare("endsolid") != 0) {
 return(0); };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Scan facet data section in ascii stl file and perform check on format error.
+
+    \param[in] file_handle input stream from stl file.
+    \param[in,out] err_map bitmask for format errors encountered in the facet data section.
+        2 -> normal data are missing
+        3 -> wrong number of components for facet normal
+        4 -> wrong number of vertices in facet block
+        5 -> wrong number of coordinates for vertex
+
+    \result returns and error flag for I/O errors:
+        err = 0: no error(s) encountered
+        err = 1: failed to scan/check stl file
+*/
 unsigned int Check_STLfacet_ASCII(
     ifstream                  &file_handle,
     bvector1D                 &err_map
@@ -1313,6 +1486,24 @@ if (nV != 3) { err_map[4] = true; }
 return(0); }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Scan binary stl file and perform check on format error.
+
+    \param[in] file_handle input stream from stl file.
+    \param[in,out] err_map for each solid found in the stl file, store a bitmask
+    for format errors encountered in the solid data section.
+    error code:
+        0 -> unterminated solid block
+        1 -> undeterminated facet block
+        2 -> normal data are missing
+        3 -> wrong number of components for facet normal
+        4 -> wrong number of vertices in facet block
+        5 -> wrong number of coordinates for vertex
+
+    \result returns and error flag for I/O errors:
+        err = 0: no error(s) encountered
+        err = 1: failed to scan/check stl file
+*/
 unsigned int Check_STL_bin(
     ifstream                  &file_handle,
     bvector2D                 &err_map
@@ -1427,6 +1618,29 @@ return(0); }
 // Input routines =========================================================== //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Read STL facet data from ascii stl file.
+
+    \param[in,out] file_handle, input stream from stl file
+    \param[in,out] nV on input stores the number of vertices previously acquired from
+    the stl file, on output stores the input value incremented by the number
+    of vertices read from the facet section.
+    \param[in,out] nT on input stores the number of facets previously aquired from
+    the stl file, on output stores the input value incremented by 1.
+    \param[in,out] V vertex coordinate list. Vertices read from facet section
+    are stored in the location V[nV], V[nV+1], etc. nV is the number of vertices
+    previously acquired from the stl file and passed as input to this function.
+    \param[in,out] N normal list. Normal read from facet section is stored at
+    position N[nT], where nT is the number of facet previously acquired from the
+    stl file and passed as input to this function.
+    \param[in,out] T vertex->facet connectivity. A new connectivity entry for the facet
+    begin read is created at position T[nT], where nT is the number of facet previously
+    acquired from the stl file and passed as input to this function.
+
+    \result returns an error flag for I/O errors:
+        err = 0: no error(s) encountered
+        err = 1: failed to read from input stream
+*/  
 unsigned int Read_STLfacet_ASCII(
     ifstream                  &file_handle,
     int                       &nV,
@@ -1541,6 +1755,30 @@ nT++;
 return(0); }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Read STL facet data from ascii stl file.
+    Overloading of Read_STLfacet_ASCII() for vector<array<double, 3> > container.
+
+    \param[in,out] file_handle, input stream from stl file
+    \param[in,out] nV on input stores the number of vertices previously acquired from
+    the stl file, on output stores the input value incremented by the number
+    of vertices read from the facet section.
+    \param[in,out] nT on input stores the number of facets previously aquired from
+    the stl file, on output stores the input value incremented by 1.
+    \param[in,out] V vertex coordinate list. Vertices read from facet section
+    are stored in the location V[nV], V[nV+1], etc. nV is the number of vertices
+    previously acquired from the stl file and passed as input to this function.
+    \param[in,out] N normal list. Normal read from facet section is stored at
+    position N[nT], where nT is the number of facet previously acquired from the
+    stl file and passed as input to this function.
+    \param[in,out] T vertex->facet connectivity. A new connectivity entry for the facet
+    begin read is created at position T[nT], where nT is the number of facet previously
+    acquired from the stl file and passed as input to this function.
+
+    \result returns an error flag for I/O errors:
+        err = 0: no error(s) encountered
+        err = 1: failed to read from input stream
+*/  
 unsigned int Read_STLfacet_ASCII(
     ifstream                  &file_handle,
     int                       &nV,
@@ -1654,8 +1892,32 @@ nT++;
 
 return(0); }
 
-
 // -------------------------------------------------------------------------- //
+/*!
+    Read solid data from ascii stl file.
+
+    \param[in,out] file_handle stream from stl file
+    \param[in,out] nV on input stores the number of vertices currently stored in V.
+    On output stores the input value increased by the number of vertices acquired
+    from the solid.
+    \param[in,out] nT on input stores the number of facets->vertex connectivity
+    entries currently stored in T. On output stores the input value increased
+    by the number of facet acquired from the solid.
+    \param[in,out] V vertex coordinate list. On output stores the coordinates of vertices
+    acquired from the solid. Vertices acquired from solid are appended at the end
+    of V.
+    \param[in,out] N facet's normals. On output stores the normal unit vector
+    to each facet acquired from the solid. Normals acquired from solid are appended at the end
+    of N.
+    \param[in,out] T facet->vertex connectivity. On output stores facet->vertex connectivity
+    for each facet acquired from the solid. New connectivity entries are appended at the end
+    of T.
+    \param[in,out] solid_name name of the stl solid (if available) read from the stl file
+
+    \result returns an error flag for I/O errors:
+        err = 0: no error(s) encountered
+        err = 1: failed to read from input stream
+*/
 unsigned int Read_STLsolid_ASCII(
     ifstream                  &file_handle,
     int                       &nV,
@@ -1810,6 +2072,32 @@ if (word.compare("endsolid") != 0) {
 return(0); }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Read solid data from ascii stl file. Overloading of Read_STLsolid_ASCII()
+    for vector<array<double, 3> > container.
+
+    \param[in,out] file_handle stream from stl file
+    \param[in,out] nV on input stores the number of vertices currently stored in V.
+    On output stores the input value increased by the number of vertices acquired
+    from the solid.
+    \param[in,out] nT on input stores the number of facets->vertex connectivity
+    entries currently stored in T. On output stores the input value increased
+    by the number of facet acquired from the solid.
+    \param[in,out] V vertex coordinate list. On output stores the coordinates of vertices
+    acquired from the solid. Vertices acquired from solid are appended at the end
+    of V.
+    \param[in,out] N facet's normals. On output stores the normal unit vector
+    to each facet acquired from the solid. Normals acquired from solid are appended at the end
+    of N.
+    \param[in,out] T facet->vertex connectivity. On output stores facet->vertex connectivity
+    for each facet acquired from the solid. New connectivity entries are appended at the end
+    of T.
+    \param[in,out] solid_name name of the stl solid (if available) read from the stl file
+
+    \result returns an error flag for I/O errors:
+        err = 0: no error(s) encountered
+        err = 1: failed to read from input stream
+*/
 unsigned int Read_STLsolid_ASCII(
     ifstream                  &file_handle,
     int                       &nV,
@@ -1966,8 +2254,31 @@ if (word.compare("endsolid") != 0) {
 
 return(0); }
 
-
 // -------------------------------------------------------------------------- //
+/*!
+    Read data from ascii stl file.
+
+    \param[in,out] file_handle stream from stl file
+    \param[in,out] nV on input stores the number of vertices currently stored in V.
+    On output stores the input value increased by the number of vertices acquired
+    from the stl file.
+    \param[in,out] nT on input stores the number of facets->vertex connectivity
+    entries currently stored in T. On output stores the input value increased
+    by the number of facet acquired from the stl file.
+    \param[in,out] V vertex coordinate list. On output stores the coordinates of vertices
+    acquired from the stl file. Vertices acquired from the stl file are appended at the end
+    of V (no distinction is made if multiple solids are stored in the same stl file).
+    \param[in,out] N facet's normals. On output stores the normal unit vector
+    to each facet acquired from the stl file. Normals acquired from the stl file are appended at the end
+    of N (no distinction is made if multiple solids are stored in the same stl file).
+    \param[in,out] T facet->vertex connectivity. On output stores facet->vertex connectivity
+    for each facet acquired from the solid. New connectivity entries are appended at the end
+    of T (no distinction is made if multiple solids are stored in the same stl file).
+
+    \result returns an error flag for I/O errors:
+        err = 0: no error(s) encountered
+        err = 1: failed to read from input stream
+*/
 unsigned int Read_STL_ASCII(
     ifstream                  &file_handle,
     int                       &nV,
@@ -2063,6 +2374,31 @@ return(0); }
 
 
 // -------------------------------------------------------------------------- //
+/*!
+    Read data from ascii stl file. Overloading of Read_STL_ASCII()
+    for container vector<array<double,3> >
+
+    \param[in,out] file_handle stream from stl file
+    \param[in,out] nV on input stores the number of vertices currently stored in V.
+    On output stores the input value increased by the number of vertices acquired
+    from the stl file.
+    \param[in,out] nT on input stores the number of facets->vertex connectivity
+    entries currently stored in T. On output stores the input value increased
+    by the number of facet acquired from the stl file.
+    \param[in,out] V vertex coordinate list. On output stores the coordinates of vertices
+    acquired from the stl file. Vertices acquired from the stl file are appended at the end
+    of V (no distinction is made if multiple solids are stored in the same stl file).
+    \param[in,out] N facet's normals. On output stores the normal unit vector
+    to each facet acquired from the stl file. Normals acquired from the stl file are appended at the end
+    of N (no distinction is made if multiple solids are stored in the same stl file).
+    \param[in,out] T facet->vertex connectivity. On output stores facet->vertex connectivity
+    for each facet acquired from the solid. New connectivity entries are appended at the end
+    of T (no distinction is made if multiple solids are stored in the same stl file).
+
+    \result returns an error flag for I/O errors:
+        err = 0: no error(s) encountered
+        err = 1: failed to read from input stream
+*/
 unsigned int Read_STL_ASCII(
     ifstream                  &file_handle,
     int                       &nV,
@@ -2157,6 +2493,30 @@ file_handle.seekg(start_pos);
 return(0); }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Read data from binary  stl file.
+
+    \param[in,out] file_handle stream from stl file
+    \param[in,out] nV on input stores the number of vertices currently stored in V.
+    On output stores the input value increased by the number of vertices acquired
+    from the stl file.
+    \param[in,out] nT on input stores the number of facets->vertex connectivity
+    entries currently stored in T. On output stores the input value increased
+    by the number of facet acquired from the stl file.
+    \param[in,out] V vertex coordinate list. On output stores the coordinates of vertices
+    acquired from the stl file. Vertices acquired from the stl file are appended at the end
+    of V (no distinction is made if multiple solids are stored in the same stl file).
+    \param[in,out] N facet's normals. On output stores the normal unit vector
+    to each facet acquired from the stl file. Normals acquired from the stl file are appended at the end
+    of N (no distinction is made if multiple solids are stored in the same stl file).
+    \param[in,out] T facet->vertex connectivity. On output stores facet->vertex connectivity
+    for each facet acquired from the solid. New connectivity entries are appended at the end
+    of T (no distinction is made if multiple solids are stored in the same stl file).
+
+    \result returns an error flag for I/O errors:
+        err = 0: no error(s) encountered
+        err = 1: failed to read from input stream
+*/
 unsigned int Read_STL_bin(
     ifstream                  &file_handle,
     int                       &nV,
@@ -2297,6 +2657,31 @@ file_handle.seekg(start_pos);
 return(0); }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Read data from binary stl file. Overloading of Read_STL_bin() for container
+    vector<array<double,3> >
+
+    \param[in,out] file_handle stream from stl file
+    \param[in,out] nV on input stores the number of vertices currently stored in V.
+    On output stores the input value increased by the number of vertices acquired
+    from the stl file.
+    \param[in,out] nT on input stores the number of facets->vertex connectivity
+    entries currently stored in T. On output stores the input value increased
+    by the number of facet acquired from the stl file.
+    \param[in,out] V vertex coordinate list. On output stores the coordinates of vertices
+    acquired from the stl file. Vertices acquired from the stl file are appended at the end
+    of V (no distinction is made if multiple solids are stored in the same stl file).
+    \param[in,out] N facet's normals. On output stores the normal unit vector
+    to each facet acquired from the stl file. Normals acquired from the stl file are appended at the end
+    of N (no distinction is made if multiple solids are stored in the same stl file).
+    \param[in,out] T facet->vertex connectivity. On output stores facet->vertex connectivity
+    for each facet acquired from the solid. New connectivity entries are appended at the end
+    of T (no distinction is made if multiple solids are stored in the same stl file).
+
+    \result returns an error flag for I/O errors:
+        err = 0: no error(s) encountered
+        err = 1: failed to read from input stream
+*/
 unsigned int Read_STL_bin(
     ifstream                  &file_handle,
     int                       &nV,
@@ -2443,6 +2828,21 @@ return(0); }
 // Output routines ========================================================== //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Write solid data to ascii stl file.
+
+    \param[in,out] file_handle stream to stl file
+    \param[in,out] nV number of vertices to be written to stl file.
+    \param[in,out] nT number of facet to be written to stl file.
+    \param[in,out] V vertex coordinate list
+    \param[in,out] N facet's normals
+    \param[in,out] T facet->vertex connectivity
+    \param[in] solid_name solid name
+
+    \result returns an error flag for I/O errors:
+        err = 0: no error(s) encountered
+        err = 1: failed to write data to output stream
+*/
 unsigned int Write_STLsolid_ASCII(
     ofstream                  &file_handle,
     int                       &nV,
@@ -2568,8 +2968,23 @@ sheader.str("");
 
 return(0); };
 
-
 // -------------------------------------------------------------------------- //
+/*!
+    Write solid data to ascii stl file. Overloading of Write_STLsolid_ASCII() for
+    container vector<array<double, 3> >.
+
+    \param[in,out] file_handle stream to stl file
+    \param[in,out] nV number of vertices to be written to stl file.
+    \param[in,out] nT number of facet to be written to stl file.
+    \param[in,out] V vertex coordinate list
+    \param[in,out] N facet's normals
+    \param[in,out] T facet->vertex connectivity
+    \param[in] solid_name solid name
+
+    \result returns an error flag for I/O errors:
+        err = 0: no error(s) encountered
+        err = 1: failed to write data to output stream
+*/
 unsigned int Write_STLsolid_ASCII(
     ofstream                  &file_handle,
     int                       &nV,
@@ -2696,6 +3111,21 @@ sheader.str("");
 return(0); };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Write solid data to binary stl file.
+
+    \param[in,out] file_handle stream to stl file
+    \param[in,out] nV number of vertices to be written to stl file.
+    \param[in,out] nT number of facet to be written to stl file.
+    \param[in,out] V vertex coordinate list
+    \param[in,out] N facet's normals
+    \param[in,out] T facet->vertex connectivity
+    \param[in] solid_name solid name
+
+    \result returns an error flag for I/O errors:
+        err = 0: no error(s) encountered
+        err = 1: failed to write data to output stream
+*/
 unsigned int Write_STLsolid_bin(
     ofstream                  &file_handle,
     int                       &nV,
@@ -2811,6 +3241,22 @@ for (i = 0; i < nT; i++) {
 return(0); };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Write solid data to binary stl file. Overloading of Write_STLsolid_bin()
+    for container vector<array<double, 3> >
+
+    \param[in,out] file_handle stream to stl file
+    \param[in,out] nV number of vertices to be written to stl file.
+    \param[in,out] nT number of facet to be written to stl file.
+    \param[in,out] V vertex coordinate list
+    \param[in,out] N facet's normals
+    \param[in,out] T facet->vertex connectivity
+    \param[in] solid_name solid name
+
+    \result returns an error flag for I/O errors:
+        err = 0: no error(s) encountered
+        err = 1: failed to write data to output stream
+*/
 unsigned int Write_STLsolid_bin(
     ofstream                  &file_handle,
     int                       &nV,

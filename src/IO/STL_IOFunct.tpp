@@ -21,6 +21,29 @@
 // ========================================================================== //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Load data for solid with specified label from stl ascii file.
+    
+    \param[in] sname label associated to the solid. If empty label is specified
+    (i.e. sname = ""), data of the first solid encountered in the stl file is returned.
+    If no solid is found with the specified label, no data are loaded from the stl file.
+    \param[in,out] nV on input stores the current number of vertices hosted in V.
+    On output stores the input values incremented by the number
+    of vertices acquired from the stl file.
+    \param[in,out] nT on input stores the number of facet->vertex connectivity
+    entries stores in T. On output stores the input value incremented by the
+    number of facets acquired from the stl file.
+    \param[in,out] V vertex coordinates list. On output stores the coordinates of
+    vertices vertices acquired from the stl file. New vertices are appended
+    at the end of V.
+    \param[in,out] N facet normals. On output stores the normal unit vector to
+    each facet acquired from the stl file. New normals are appended
+    at the end of N.
+    \param[in,out] T facet->vertex connectivity. On output stores the facet->vertex
+    connectivity entries for the facets acquired from the stl file. New connectivity entries
+    are appended at the end of T.
+    \param[in] others parameter packs
+*/
 template <typename ... T2>
 void STL_obj::load(
     string           sname,
@@ -102,6 +125,31 @@ load(others ...);
 
 return; }
 
+// -------------------------------------------------------------------------- //
+/*!
+    Load data for solid with specified label from stl ascii file. Overloading of
+    member function STL_obj::load() for container vector<array<double, 3> >
+    
+    \param[in] sname label associated to the solid. If empty label is specified
+    (i.e. sname = ""), data of the first solid encountered in the stl file is returned.
+    If no solid is found with the specified label, no data are loaded from the stl file.
+    \param[in,out] nV on input stores the current number of vertices hosted in V.
+    On output stores the input values incremented by the number
+    of vertices acquired from the stl file.
+    \param[in,out] nT on input stores the number of facet->vertex connectivity
+    entries stores in T. On output stores the input value incremented by the
+    number of facets acquired from the stl file.
+    \param[in,out] V vertex coordinates list. On output stores the coordinates of
+    vertices vertices acquired from the stl file. New vertices are appended
+    at the end of V.
+    \param[in,out] N facet normals. On output stores the normal unit vector to
+    each facet acquired from the stl file. New normals are appended
+    at the end of N.
+    \param[in,out] T facet->vertex connectivity. On output stores the facet->vertex
+    connectivity entries for the facets acquired from the stl file. New connectivity entries
+    are appended at the end of T.
+    \param[in] others parameter packs
+*/
 template <typename ... T2>
 void STL_obj::load(
     string           sname,
@@ -184,6 +232,17 @@ load(others ...);
 return; }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Save solid data to stl ascii file.
+    
+    \param[in] sname label associated to the solid.
+    \param[in,out] nV number of solid vertices.
+    \param[in,out] nT number of solid facets.
+    \param[in,out] V vertex coordinates list.
+    \param[in,out] N facet normals. 
+    \param[in,out] T facet->vertex connectivity.
+    \param[in] others parameter packs
+*/
 template <typename ... T2>
 void STL_obj::save(
     string           sname,
@@ -259,6 +318,18 @@ save(others ...);
 return; }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Save solid data to stl ascii file. Overloading of member function STL_obj::save()
+    for container vector<array<double, 3> >
+    
+    \param[in] sname label associated to the solid.
+    \param[in,out] nV number of solid vertices.
+    \param[in,out] nT number of solid facets.
+    \param[in,out] V vertex coordinates list.
+    \param[in,out] N facet normals. 
+    \param[in,out] T facet->vertex connectivity.
+    \param[in] others parameter packs
+*/
 template <typename ... T2>
 void STL_obj::save(
     string           sname,
@@ -334,6 +405,17 @@ save(others ...);
 return; }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Append solid data at the end of an existing stl ascii file.
+    
+    \param[in] sname label associated to the solid.
+    \param[in,out] nV number of solid vertices.
+    \param[in,out] nT number of solid facets.
+    \param[in,out] V vertex coordinates list.
+    \param[in,out] N facet normals. 
+    \param[in,out] T facet->vertex connectivity.
+    \param[in] others parameter packs
+*/
 template <typename ... T2>
 void STL_obj::append(
     string           sname,
@@ -409,6 +491,18 @@ save(others ...);
 return; }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Append solid data at the end of an existing stl ascii file. Overloading of
+    member function STL_obj::append() for container vector<array<double, 3> >.
+    
+    \param[in] sname label associated to the solid.
+    \param[in,out] nV number of solid vertices.
+    \param[in,out] nT number of solid facets.
+    \param[in,out] V vertex coordinates list.
+    \param[in,out] N facet normals. 
+    \param[in,out] T facet->vertex connectivity.
+    \param[in] others parameter packs
+*/
 template <typename ... T2>
 void STL_obj::append(
     string           sname,
