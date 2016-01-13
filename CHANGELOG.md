@@ -2,9 +2,12 @@
 All notable changes to this project will be documented in this file.
 This project *tries* to adhere to [Semantic Versioning](http://semver.org/).
 
-# PABLO
+# v1.0.0 - 2016-01-13
 
-## v1.0.0 - 2016-01-13
+## COMMON
+
+## PABLO
+
 ### Added
 - Unique Octant 2D/3D class, no more template class.
 - Unique LocalTree 2D/3D class, no more template class.
@@ -23,7 +26,20 @@ This project *tries* to adhere to [Semantic Versioning](http://semver.org/).
 - Old deprecated use of mapping now removed.
 - Private overloaded adapt methods removed.
 
-## v0.4.0 - 2015-11-10
+## PATCHMAN
+
+## SURFTRI
+
+## UCARTMESH
+
+## VOLTRI
+
+# v0.4.0 - 2015-11-10
+
+## COMMON
+
+## PABLO
+
 ### Added
 - This CHANGELOG file.
 - CMAKE folders, files and new custom variables for ccmake precompiling.
@@ -38,4 +54,13 @@ This project *tries* to adhere to [Semantic Versioning](http://semver.org/).
 
 ### Removed
 - Temporary tests for bug fixing.
+
+## PATCHMAN
+
+## SURFTRI
+
+## UCARTMESH
+
+## VOLTRI
+
 
