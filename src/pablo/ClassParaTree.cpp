@@ -20,19 +20,17 @@ using namespace std;
 // CONSTRUCTORS AND OPERATORS
 // =================================================================================== //
 /*! Default Constructor of Para_Tree.
- * It builds one octant with node 0 in the Origin (0,0,0)
- * and side of length 1
- * \param[in] dim_ The space dimension of the m_octree. PABLO.log is the default value
- * \param[in] logfile The file name for the log of this object. PABLO.log is the default value
- * \param[in] logfile The file name for the log of this object. PABLO.log is the default value
- *
+ * It builds one octant with node 0 in the Origin (0,0,0) and side of length 1.
+ * \param[in] dim The space dimension of the m_octree. 2D is the default value.
+ * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
+ * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
+ * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
  */
 #if NOMPI==0
-ClassParaTree::ClassParaTree(uint8_t dim_, int8_t maxlevel, string logfile, MPI_Comm comm_) : m_dim(uint8_t(min(max(2,int(dim_)),3))),m_log(logfile,comm_),m_comm(comm_),m_trans(maxlevel,dim_),m_octree(maxlevel,dim_){
+ClassParaTree::ClassParaTree(uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm comm_) : m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(logfile,comm_),m_comm(comm_),m_trans(maxlevel,dim),m_octree(maxlevel,dim){
 #else
-ClassParaTree::ClassParaTree(uint8_t dim_, int8_t maxlevel, string logfile ) : m_dim(uint8_t(min(max(2,int(dim_)),3))),m_log(logfile),m_trans(maxlevel, dim_),m_octree(maxlevel,dim_){
+ClassParaTree::ClassParaTree(uint8_t dim, int8_t maxlevel, string logfile ) : m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(logfile),m_trans(maxlevel, dim),m_octree(maxlevel,dim){
 #endif
-//	m_dim = dim_;
 	m_global.setGlobal(maxlevel, m_dim);
 	m_serial = true;
 	m_errorFlag = 0;
@@ -79,12 +77,15 @@ ClassParaTree::ClassParaTree(uint8_t dim_, int8_t maxlevel, string logfile ) : m
  * \param[in] Y Coordinate Y of node 0,
  * \param[in] Z Coordinate Z of node 0,
  * \param[in] L Side length of the octant.
- * \param[in] logfile The file name for the log of this object. PABLO.log is the default value
+ * \param[in] dim The space dimension of the m_octree. 2D is the default value.
+ * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
+ * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
+ * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
  */
 #if NOMPI==0
-ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, uint8_t dim_, int8_t maxlevel, string logfile, MPI_Comm comm_):m_dim(uint8_t(min(max(2,int(dim_)),3))),m_trans(X,Y,Z,L,maxlevel,dim_),m_log(logfile,comm_),m_comm(comm_),m_octree(maxlevel,dim_){
+ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm comm_):m_dim(uint8_t(min(max(2,int(dim)),3))),m_trans(X,Y,Z,L,maxlevel,dim),m_log(logfile,comm_),m_comm(comm_),m_octree(maxlevel,dim){
 #else
-ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, uint8_t dim_, int8_t maxlevel, string logfile):m_dim(uint8_t(min(max(2,int(dim_)),3))),m_trans(X,Y,Z,L,maxlevel,dim_),m_log(logfile),m_octree(maxlevel,dim_){
+ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, uint8_t dim, int8_t maxlevel, string logfile):m_dim(uint8_t(min(max(2,int(dim)),3))),m_trans(X,Y,Z,L,maxlevel,dim),m_log(logfile),m_octree(maxlevel,dim){
 #endif
 	m_global.setGlobal(maxlevel, m_dim);
 	m_serial = true;
@@ -136,19 +137,22 @@ ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, uint8_t dim
  * \param[in] Y Physical Coordinate Y of node 0,
  * \param[in] Z Physical Coordinate Z of node 0,
  * \param[in] L Physical Side length of the domain,
- * \param[in] XY Coordinates of octants (node 0) in logical domain,
+ * \param[in] XYZ Coordinates of octants (node 0) in logical domain,
  * \param[in] levels Level of each octant.
- * \param[in] logfile The file name for the log of this object. PABLO.log is the default value
+ * \param[in] dim The space dimension of the m_octree. 2D is the default value.
+ * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
+ * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
+ * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
  */
 #if NOMPI==0
-ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim_, int8_t maxlevel, string logfile, MPI_Comm comm_):m_dim(uint8_t(min(max(2,int(dim_)),3))),m_trans(X,Y,Z,L,maxlevel,dim_),m_log(logfile,comm_),m_comm(comm_),m_octree(maxlevel,dim_){
+ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm comm_):m_dim(uint8_t(min(max(2,int(dim)),3))),m_trans(X,Y,Z,L,maxlevel,dim),m_log(logfile,comm_),m_comm(comm_),m_octree(maxlevel,dim){
 #else
-ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim_, int8_t maxlevel, string logfile):m_dim(uint8_t(min(max(2,int(dim_)),3))),m_trans(X,Y,Z,L,maxlevel,dim_),m_log(logfile),m_octree(maxlevel,dim_){
+ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, string logfile):m_dim(uint8_t(min(max(2,int(dim)),3))),m_trans(X,Y,Z,L,maxlevel,dim),m_log(logfile),m_octree(maxlevel,dim){
 #endif
 	uint8_t lev, iface;
 	uint32_t x0, y0, z0;
 	uint32_t NumOctants = XYZ.size();
-	m_dim = dim_;
+	m_dim = dim;
 	m_global.setGlobal(maxlevel, m_dim);
 	m_octree.m_octants.resize(NumOctants);
 	for (uint32_t i=0; i<NumOctants; i++){
@@ -239,7 +243,6 @@ ClassParaTree::~ClassParaTree(){
 	m_log.writeLog("---------------------------------------------");
 };
 
-
 // =================================================================================== //
 // METHODS
 // =================================================================================== //
@@ -248,186 +251,288 @@ ClassParaTree::~ClassParaTree(){
 // BASIC GET/SET METHODS
 // =================================================================================== //
 
+/*! Get the rank of local process.
+ * \return Rank of local process.
+ */
 int
 ClassParaTree::getRank(){
 	return m_rank;
 };
 
+/*! Get the total number of processes.
+ * \return Number of processes.
+ */
 int
 ClassParaTree::getNproc(){
 	return m_nproc;
 };
 
+/*! Get thecommunicator used by octree between processes.
+ * \return MPI Communicator.
+ */
 MPI_Comm
 ClassParaTree::getComm(){
 	return m_comm;
 };
 
+/*! Get the partition information of the octree over the processes
+ * by using the global index of the octants.
+ * \return Pointer to m_partitionRangeGlobalIdx (global array containing global
+ * index of the last existing octant in each processor).
+ */
 uint64_t*
 ClassParaTree::getPartitionRangeGlobalIdx(){
 	return m_partitionRangeGlobalIdx;
 };
 
+/*! Get the coordinates of the origin of the octree.
+ * \return Coordinates of the origin.
+ */
 darray3
 ClassParaTree::getOrigin(){
 	return m_trans.m_origin;
 };
 
+/*! Get the coordinate X of the origin of the octree.
+ * \return Coordinate X of the origin.
+ */
 double
 ClassParaTree::getX0(){
 	return m_trans.m_origin[0];
 };
 
+/*! Get the coordinate Y of the origin of the octree.
+ * \return Coordinate Y of the origin.
+ */
 double
 ClassParaTree::getY0(){
 	return m_trans.m_origin[1];
 };
 
+/*! Get the coordinate Z of the origin of the octree.
+ * \return Coordinate Z of the origin.
+ */
 double
 ClassParaTree::getZ0(){
 	return m_trans.m_origin[2];
 };
 
+/*! Get the length of the domain.
+ * \return Length of the octree.
+ */
 double
 ClassParaTree::getL(){
 	return m_trans.m_L;
 };
 
-
-
+/*! Get the maximum level of refinement allowed for this octree.
+ * \return Maximum refinement level for the octree.
+ */
 int
 ClassParaTree::getMaxLevel(){
 	return m_global.m_maxLevel;
 };
 
+/*! Get the length of the domain in logical domain.
+ * \return Length of the octree in logical domain.
+ */
 uint32_t
 ClassParaTree::getMaxLength(){
 	return m_global.m_maxLength;
 }
 
-
+/*! Get the number of nodes for each octant (4 for 2D case, 8 for 3D case)
+ * \return Number of nodes for octant.
+ */
 uint8_t
 ClassParaTree::getNnodes(){
 	return m_global.m_nnodes;
 }
 
+/*! Get the number of faces for each octant (4 for 2D case, 6 for 3D case)
+ * \return Number of faces for octant.
+ */
 uint8_t
 ClassParaTree::getNfaces(){
 	return m_global.m_nfaces;
 }
 
+/*! Get the number of edges for each octant (0 for 2D case, 12 for 3D case)
+ * \return Number of edges for octant.
+ */
 uint8_t
 ClassParaTree::getNedges(){
 	return m_global.m_nedges;
 }
 
+/*! Get the number of possible children for each octant (4 for 2D case, 8 for 3D case)
+ * \return Number of children for octant.
+ */
 uint8_t
 ClassParaTree::getNchildren(){
 	return m_global.m_nchildren;
 }
 
-
+/*! Get the number of nodes for each face of an octant (2 for 2D case, 4 for 3D case)
+ * \return Number of nodes for face for an octant.
+ */
 uint8_t
 ClassParaTree::getNnodesperface(){
 	return m_global.m_nnodesPerFace;
 }
 
+/*! Get the components (in logical domain) of the 6 normals to the faces of an octant (for the 2D case consider only the first 4)
+ * \param[out] normals Normals array[6][3] to the faces of an octant.
+ */
 void
-ClassParaTree::getNormals(int8_t normals_[6][3]){
+ClassParaTree::getNormals(int8_t normals[6][3]){
 	for (int i=0; i<6; i++){
 		for (int j=0; j<3; j++){
-			normals_[i][j] = m_global.m_normals[i][j];
+			normals[i][j] = m_global.m_normals[i][j];
 		}
 	}
 }
 
+/*! Get the indices of the faces of virtual octants opposed to the 6 faces of an octant
+ * (for the 2D case consider only the first 4 terms).
+ * \param[out] oppface Opposed faces array[6] to the faces of an octant (oppface[i] = Index of the
+ * face of an octant neighbour through the i-th face of the current octant).
+ */
 void
-ClassParaTree::getOppface(uint8_t oppface_[6]){
+ClassParaTree::getOppface(uint8_t oppface[6]){
 	for (int j=0; j<6; j++){
-		oppface_[j] = m_global.m_oppFace[j];
+		oppface[j] = m_global.m_oppFace[j];
 	}
 }
 
+/*! Get the face-node connectivity for 6 faces (in 2D case consider only the first 4 terms).
+ * \param[out] facenode Connectivity face-node. facenode[i][0:1] = local indices of nodes
+ * of the i-th face of an octant.
+ */
 void
-ClassParaTree::getFacenode(uint8_t facenode_[6][4]){
+ClassParaTree::getFacenode(uint8_t facenode[6][4]){
 	for (int i=0; i<6; i++){
 		for (int j=0; j<4; j++){
-			facenode_[i][j] = m_global.m_faceNode[i][j];
+			facenode[i][j] = m_global.m_faceNode[i][j];
 		}
 	}
 }
 
+/*! Get the node-face connectivity for 8 nodes (in 2D case consider only the first 4 terms).
+ * \param[out] nodeface Connectivity node-face. nodeface[i][0:1] = local indices of faces
+ * sharing the i-th node of an octant.
+ */
 void
-ClassParaTree::getNodeface(uint8_t nodeface_[8][3]){
+ClassParaTree::getNodeface(uint8_t nodeface[8][3]){
 	for (int i=0; i<8; i++){
 		for (int j=0; j<3; j++){
-			nodeface_[i][j] = m_global.m_nodeFace[i][j];
+			nodeface[i][j] = m_global.m_nodeFace[i][j];
 		}
 	}
 }
 
+/*! Get the edge-face connectivity for 12 edge (in 2D case not to be considered at all).
+ * \param[out] edgeface Connectivity edge-face. edgeface[i][0:1] = local indices of
+ * faces sharing the i-th edge of an octant.
+ */
 void
-ClassParaTree::getEdgeface(uint8_t edgeface_[12][2]){
+ClassParaTree::getEdgeface(uint8_t edgeface[12][2]){
 	for (int i=0; i<12; i++){
 		for (int j=0; j<2; j++){
-			edgeface_[i][j] = m_global.m_edgeFace[i][j];
+			edgeface[i][j] = m_global.m_edgeFace[i][j];
 		}
 	}
 }
 
+/*!Get the normals of the nodes (in 2D case consider only the first 4).
+ * \param[out] nodecoeffs Components (x,y,z) of the "normals" of the nodes.
+ */
 void
-ClassParaTree::getNodecoeffs(int8_t nodecoeffs_[8][3]){
+ClassParaTree::getNodecoeffs(int8_t nodecoeffs[8][3]){
 	for (int i=0; i<8; i++){
-		for (int j=0; j<3; j++){
-			nodecoeffs_[i][j] = m_global.m_nodeCoeffs[i][j];
+		nodecoeffs[i][3] = 0;
+		for (int j=0; j<m_dim; j++){
+			nodecoeffs[i][j] = m_global.m_nodeCoeffs[i][j];
 		}
 	}
 }
 
+/*!Get the normals per edge (in 2D case not to be considered at all).
+ * \param[out] edgecoeffs Components (x,y,z) of the "normals" per edge.
+ */
 void
-ClassParaTree::getEdgecoeffs(int8_t edgecoeffs_[12][3]){
+ClassParaTree::getEdgecoeffs(int8_t edgecoeffs[12][3]){
 	for (int i=0; i<12; i++){
 		for (int j=0; j<3; j++){
-		edgecoeffs_[i][j] = m_global.m_edgeCoeffs[i][j];
+		edgecoeffs[i][j] = m_global.m_edgeCoeffs[i][j];
 		}
 	}
 }
 
+/*! Get the components (in logical domain) of the 6 normals to the faces of an octant (for the 2D case consider only the first 4)
+ * \return Pointer to normals array[6][3] to the faces of an octant.
+ */
 int8_t
 (*ClassParaTree::getNormals())[3]{
 	return m_global.m_normals;
 }
 
+/*! Get the indices of the faces of virtual octants opposed to the 6 faces of an octant
+ * (for the 2D case consider only the first 4 terms).
+ * \return Pointer to opposed faces array[6] to the faces of an octant (oppface[i] = Index of the
+ * face of an octant neighbour through the i-th face of the current octant).
+ */
 uint8_t
 (*ClassParaTree::getOppface()){
 	return m_global.m_oppFace;
 }
 
+/*! Get the face-node connectivity for 6 faces (in 2D case consider only the first 4 terms).
+ * \return Pointer to connectivity face-node. facenode[i][0:1] = local indices of nodes
+ * of the i-th face of an octant.
+ */
 uint8_t
 (*ClassParaTree::getFacenode())[4]{
 	return m_global.m_faceNode;
 }
 
+/*! Get the node-face connectivity for 8 nodes (in 2D case consider only the first 4 terms).
+ * \return Pointer to connectivity node-face. nodeface[i][0:1] = local indices of faces
+ * sharing the i-th node of an octant.
+ */
 uint8_t
 (*ClassParaTree::getNodeface())[3]{
 	return m_global.m_nodeFace;
 }
 
+/*! Get the edge-face connectivity for 12 edge (in 2D case not to be considered at all).
+ * \return Pointer to connectivity edge-face. edgeface[i][0:1] = local indices of
+ * faces sharing the i-th edge of an octant.
+ */
 uint8_t
 (*ClassParaTree::getEdgeface())[2]{
 	return m_global.m_edgeFace;
 }
 
+/*!Get the normals of the nodes (in 2D case consider only the first 4).
+ * \return Pointer to components (x,y,z) of the "normals" of the nodes.
+ */
 int8_t
 (*ClassParaTree::getNodecoeffs())[3]{
 	return m_global.m_nodeCoeffs;
 }
 
+/*!Get the normals per edge (in 2D case not to be considered at all).
+ * \return Pointer to components (x,y,z) of the "normals" per edge.
+ */
 int8_t
 (*ClassParaTree::getEdgecoeffs())[3]{
 	return m_global.m_edgeCoeffs;
 }
 
+/*|Set the maximum refinement level allowed for the octree.
+ * \param[in] maxlevel Maximum refinement level.
+ */
 void
 ClassParaTree::setMaxLevel(int8_t maxlevel){
 	m_global.m_maxLevel = maxlevel;
@@ -505,8 +610,7 @@ ClassParaTree::getVolume(uint32_t idx) {
  * \param[out] center Coordinates of the center of octant.
  */
 void
-ClassParaTree::getCenter(uint32_t idx,
-		darray3& center) {
+ClassParaTree::getCenter(uint32_t idx, darray3& center) {
 	darray3 center_ = m_octree.m_octants[idx].getCenter(m_global.m_maxLevel);
 	m_trans.mapCenter(center_, center);
 }
@@ -576,8 +680,7 @@ ClassParaTree::getNode(uint32_t idx, uint8_t inode, darray3& node) {
  * \param[out] nodes Coordinates of the nodes of octant.
  */
 void
-ClassParaTree::getNodes(uint32_t idx,
-		darr3vector & nodes) {
+ClassParaTree::getNodes(uint32_t idx, darr3vector & nodes) {
 	u32arr3vector nodes_;
 	m_octree.m_octants[idx].getNodes(nodes_, m_global.m_maxLevel);
 	m_trans.mapNodes(nodes_, nodes);
@@ -602,9 +705,7 @@ ClassParaTree::getNodes(uint32_t idx){
  * \param[out] normal Coordinates of the normal of face.
  */
 void
-ClassParaTree::getNormal(uint32_t idx,
-		uint8_t & iface,
-		darray3 & normal) {
+ClassParaTree::getNormal(uint32_t idx, uint8_t & iface, darray3 & normal) {
 	i8array3 normal_;
 	m_octree.m_octants[idx].getNormal(iface, normal_, m_global.m_normals, m_global.m_maxLevel);
 	m_trans.mapNormals(normal_, normal);
@@ -616,8 +717,7 @@ ClassParaTree::getNormal(uint32_t idx,
  * \return normal Coordinates of the normal of face.
  */
 darray3
-ClassParaTree::getNormal(uint32_t idx,
-		uint8_t & iface){
+ClassParaTree::getNormal(uint32_t idx, uint8_t & iface){
 	darray3 normal;
 	i8array3 normal_;
 	m_octree.m_octants[idx].getNormal(iface, normal_, m_global.m_normals, m_global.m_maxLevel);
@@ -837,8 +937,7 @@ ClassParaTree::getVolume(ClassOctant* oct) {
  * \param[out] center Coordinates of the center of octant.
  */
 void
-ClassParaTree::getCenter(ClassOctant* oct,
-		darray3& center) {
+ClassParaTree::getCenter(ClassOctant* oct, darray3& center) {
 	darray3 center_ = oct->getCenter(m_global.m_maxLevel);
 	m_trans.mapCenter(center_, center);
 }
@@ -908,8 +1007,7 @@ ClassParaTree::getNode(ClassOctant* oct, uint8_t inode, darray3& node) {
  * \param[out] nodes Coordinates of the nodes of octant.
  */
 void
-ClassParaTree::getNodes(ClassOctant* oct,
-		darr3vector & nodes) {
+ClassParaTree::getNodes(ClassOctant* oct, darr3vector & nodes) {
 	u32arr3vector nodes_;
 	oct->getNodes(nodes_, m_global.m_maxLevel);
 	m_trans.mapNodes(nodes_, nodes);
@@ -934,9 +1032,7 @@ ClassParaTree::getNodes(ClassOctant* oct){
  * \param[out] normal Coordinates of the normal of face.
  */
 void
-ClassParaTree::getNormal(ClassOctant* oct,
-		uint8_t & iface,
-		darray3 & normal) {
+ClassParaTree::getNormal(ClassOctant* oct, uint8_t & iface, darray3 & normal) {
 	i8array3 normal_;
 	oct->getNormal(iface, normal_, m_global.m_normals, m_global.m_maxLevel);
 	m_trans.mapNormals(normal_, normal);
@@ -948,8 +1044,7 @@ ClassParaTree::getNormal(ClassOctant* oct,
  * \return normal Coordinates of the normal of face.
  */
 darray3
-ClassParaTree::getNormal(ClassOctant* oct,
-		uint8_t & iface){
+ClassParaTree::getNormal(ClassOctant* oct, uint8_t & iface){
 	darray3 normal;
 	i8array3 normal_;
 	oct->getNormal(iface, normal_, m_global.m_normals, m_global.m_maxLevel);
@@ -1062,8 +1157,8 @@ ClassParaTree::setBalance(ClassOctant* oct, bool balance){
 // LOCAL TREE GET/SET METHODS
 // =================================================================================== //
 
-/*! Get the m_status label of the m_octree.
- * 	\return Status.
+/*! Get the status label of the octree.
+ * 	\return Status label of the octree.
  */
 uint64_t
 ClassParaTree::getStatus(){
@@ -1087,14 +1182,15 @@ ClassParaTree::getNumGhosts() const{
 };
 
 /** Get the local number of nodes.
+ * \return Local total number of nodes.
  */
 uint32_t
 ClassParaTree::getNumNodes() const{
 	return m_octree.m_nodes.size();
 }
 
-/*! Get the local depth of m_octree.
- * \return Local depth of m_octree.
+/*! Get the local depth of the octree.
+ * \return Local depth of the octree.
  */
 uint8_t
 ClassParaTree::getLocalMaxDepth() const{
@@ -1136,16 +1232,26 @@ ClassParaTree::getBoundingBox(darray3 & P0, darray3 & P1){
 	}
 };
 
+/*!Get the first possible descendant with maximum refinement level of the local tree.
+ * \return Constant reference to the first finest descendant of the local tree.
+ */
 const
 ClassOctant & ClassParaTree::getFirstDesc() const{
 	return m_octree.getFirstDesc();
 };
 
+/*!Get the last possible descendant with maximum refinement level of the local tree.
+ * \return Constant reference to the last finest descendant of the local tree.
+ */
 const
 ClassOctant & ClassParaTree::getLastDesc() const{
 	return m_octree.getLastDesc();
 };
 
+/*!Get the morton index of the last possible descendant with maximum refinement level of a target octant.
+ * \param[in] idx Local index of the target octant.
+ * \return Morton index of the last finest descendant of the target octant.
+ */
 uint64_t
 ClassParaTree::getLastDescMorton(uint32_t idx) {
 	return m_octree.m_octants[idx].buildLastDesc(m_global.m_maxLevel).computeMorton();
@@ -1470,11 +1576,15 @@ ClassParaTree::getIsGhost(ClassOctant oct){
 // PRIVATE GET/SET METHODS
 // =================================================================================== //
 
+/*! Set the first finer descendant of the local tree.
+ */
 void
 ClassParaTree::setFirstDesc(){
 	m_octree.setFirstDesc();
 };
 
+/*! Set the last finer descendant of the local tree.
+ */
 void
 ClassParaTree::setLastDesc(){
 	m_octree.setLastDesc();
@@ -1498,8 +1608,7 @@ ClassParaTree::setLastDesc(){
  * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
  * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs. */
 void
-ClassParaTree::findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim,
-		u32vector & neighbours, vector<bool> & isghost){
+ClassParaTree::findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, vector<bool> & isghost){
 
 	bool	Fedge = ((codim>1) && (m_dim==3));
 	bool	Fnode = (codim == m_dim);
@@ -1529,8 +1638,7 @@ ClassParaTree::findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim,
  * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
  * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs. */
 void
-ClassParaTree::findNeighbours(ClassOctant* oct, uint8_t iface, uint8_t codim,
-		u32vector & neighbours, vector<bool> & isghost){
+ClassParaTree::findNeighbours(ClassOctant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, vector<bool> & isghost){
 
 	bool	Fedge = ((codim>1) && (m_dim==3));
 	bool	Fnode = (codim == m_dim);
@@ -1778,16 +1886,9 @@ ClassParaTree::adapt(bool mapper_flag){
 
 	bool done = false;
 
-//	if (mapper_flag){
 		done = private_adapt_mapidx(mapper_flag);
 		m_status += done;
 		return done;
-//	}
-//	else{
-//		done = private_adapt();
-//		m_status += done;
-//		return done;
-//	}
 
 };
 
@@ -2001,9 +2102,9 @@ ClassParaTree::adaptGlobalCoarse(bool mapper_flag) {
 }
 
 /** It finds the process owning the element definded by the Morton number passed as argument
- * The Morton number can be computed using the method ClassOctant#computeMorton().
- * \param[in] morton is the Morton number of the element you want find the owner of
- * \return it returns the rank of the process owning the element
+ * The Morton number can be computed using the method computeMorton() of ClassOctant.
+ * \param[in] morton Morton number of the element you want find the owner of
+ * \return Rank of the process owning the element
  */
 int
 ClassParaTree::findOwner(const uint64_t & morton) {
@@ -2052,7 +2153,8 @@ ClassParaTree::updateConnectivity() {
 }
 
 /** Get the connectivity of the octants
- * \return connectivity Matrix of noctants*4 with the connectivity of each octant (4 indices of nodes).
+ * \return Constant reference to the connectivity matrix of noctants*nnodes with
+ * the connectivity of each octant (4/8 indices of nodes for 2D/3D case).
  */
 const u32vector2D &
 ClassParaTree::getConnectivity(){
@@ -2061,7 +2163,8 @@ ClassParaTree::getConnectivity(){
 
 /** Get the local connectivity of an octant
  * \param[in] idx Local index of octant
- * \return connectivity Connectivity of the octant (4 indices of nodes).
+ * \return Constant reference to the connectivity of the octant
+ * (4/8 indices of nodes for 2D/3D case).
  */
 const u32vector &
 ClassParaTree::getConnectivity(uint32_t idx){
@@ -2070,7 +2173,7 @@ ClassParaTree::getConnectivity(uint32_t idx){
 
 /** Get the local connectivity of an octant
  * \param[in] oct Pointer to an octant
- * \return connectivity Connectivity of the octant (4 indices of nodes).
+ * \return Constant reference to the connectivity of the octant (4/8 indices of nodes for 2D/3D case).
  */
 const u32vector &
 ClassParaTree::getConnectivity(ClassOctant* oct){
@@ -2078,7 +2181,7 @@ ClassParaTree::getConnectivity(ClassOctant* oct){
 }
 
 /** Get the logical coordinates of the nodes
- * \return nodes Matrix of nnodes*3 with the coordinates of the nodes.
+ * \return Constant reference to the nodes matrix [nnodes*3] with the coordinates of the nodes.
  */
 const u32arr3vector &
 ClassParaTree::getNodes(){
@@ -2087,7 +2190,7 @@ ClassParaTree::getNodes(){
 
 /** Get the logical coordinates of a node
  * \param[in] inode Local index of node
- * \return nodes Vector with the coordinates of the node.
+ * \return Constant reference to a vector containing the coordinates of the node.
  */
 const u32array3 &
 ClassParaTree::getNodeLogicalCoordinates(uint32_t inode){
@@ -2096,7 +2199,7 @@ ClassParaTree::getNodeLogicalCoordinates(uint32_t inode){
 
 /** Get the physical coordinates of a node
  * \param[in] inode Local index of node
- * \return nodes Vector with the coordinates of the node.
+ * \return Vector with the coordinates of the node.
  */
 dvector
 ClassParaTree::getNodeCoordinates(uint32_t inode){
@@ -2129,7 +2232,8 @@ ClassParaTree::updateGhostsConnectivity() {
 }
 
 /** Get the connectivity of the ghost octants
- * \return connectivity Matrix of nghostoctants*4 with the connectivity of each octant (4 indices of nodes).
+ * \return Constant reference to connectivity matrix [nghostoctants*nnodes] with
+ * the connectivity of each octant (4/8 indices of nodes for 2D/3D case).
  */
 const u32vector2D &
 ClassParaTree::getGhostConnectivity(){
@@ -2138,7 +2242,8 @@ ClassParaTree::getGhostConnectivity(){
 
 /** Get the local connectivity of a ghost octant
  * \param[in] idx Local index of ghost octant
- * \return connectivity Connectivity of the ghost octant (4 indices of nodes).
+ * \return Constant reference to the connectivity of the ghost octant
+ * (4/8 indices of nodes for 2D/3D case).
  */
 const u32vector &
 ClassParaTree::getGhostConnectivity(uint32_t idx){
@@ -2147,7 +2252,8 @@ ClassParaTree::getGhostConnectivity(uint32_t idx){
 
 /** Get the local connectivity of a ghost octant
  * \param[in] oct Pointer to a ghost octant
- * \return connectivity Connectivity of the ghost octant (4 indices of nodes).
+ * \return Constant reference to the connectivity of the ghost octant
+ * (4/8 indices of nodes for 2D/3D case).
  */
 const u32vector &
 ClassParaTree::getGhostConnectivity(ClassOctant* oct){
@@ -2155,7 +2261,8 @@ ClassParaTree::getGhostConnectivity(ClassOctant* oct){
 }
 
 /** Get the logical coordinates of the ghost nodes
- * \return nodes Matrix of nghostnodes*3 with the coordinates of the nodes.
+ * \return Constant reference to nodes matrix [nghostnodes*3] with the coordinates
+ * of the nodes.
  */
 const u32arr3vector &
 ClassParaTree::getGhostNodes(){
@@ -2164,7 +2271,7 @@ ClassParaTree::getGhostNodes(){
 
 /** Get the logical coordinates of a ghost node
  * \param[in] inode Local index of node
- * \return nodes Vector with the coordinates of the node.
+ * \return Constant reference to a vector with the coordinates of the node.
  */
 const u32array3 &
 ClassParaTree::getGhostNodeLogicalCoordinates(uint32_t inode){
@@ -2173,7 +2280,7 @@ ClassParaTree::getGhostNodeLogicalCoordinates(uint32_t inode){
 
 /** Get the physical coordinates of a ghost node
  * \param[in] inode Local index of node
- * \return nodes Vector with the coordinates of the node.
+ * \return Vector with the coordinates of the node.
  */
 dvector
 ClassParaTree::getGhostNodeCoordinates(uint32_t inode){
@@ -3035,7 +3142,7 @@ ClassParaTree::loadBalance(uint8_t & level){
 // OTHER INTERSECTION BASED METHODS												    			   //
 // =================================================================================== //
 
-/** Compute the intersection of octants (intersections of bord, of inner domain and with ghost octants).
+/** Compute the intersection between octants (local, ghost, boundary).
  */
 void
 ClassParaTree::computeIntersections(){
@@ -3046,122 +3153,17 @@ ClassParaTree::computeIntersections(){
 // OTHER PRIVATE METHODS												    			   //
 // =================================================================================== //
 
+/*! Extract an octant from the local tree.
+ * \param[in] idx Local index of target octant.
+ * \return Reference to target octant.
+ */
 ClassOctant&
 ClassParaTree::extractOctant(uint32_t idx) {
 	return m_octree.extractOctant(idx) ;
 };
 
-/** Adapt the octree mesh with user setup for markers and 2:1 balancing conditions.
- */
-//bool
-//ClassParaTree::private_adapt() {
-//	bool globalDone = false, localDone = false, cDone = false;
-//	uint32_t nocts = m_octree.getNumOctants();
-//	vector<ClassOctant >::iterator iter, iterend = m_octree.m_octants.end();
-//
-//	m_mapIdx.clear();
-//
-//	for (iter = m_octree.m_octants.begin(); iter != iterend; iter++){
-//		iter->m_info[12] = false;
-//		iter->m_info[13] = false;
-//		iter->m_info[15] = false;
-//	}
-//#if NOMPI==0
-//	if(m_serial){
-//#endif
-//		m_log.writeLog("---------------------------------------------");
-//		m_log.writeLog(" ADAPT (Refine/Coarse)");
-//		m_log.writeLog(" ");
-//
-//		// 2:1 Balance
-//		balance21(true);
-//
-//		m_log.writeLog(" ");
-//		m_log.writeLog(" Initial Number of octants	:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())));
-//
-//		// Refine
-//		while(m_octree.refine(m_mapIdx));
-//
-//		if (m_octree.getNumOctants() > nocts)
-//			localDone = true;
-//		m_log.writeLog(" Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())));
-//		nocts = m_octree.getNumOctants();
-//		updateAdapt();
-//
-//		// Coarse
-//		while(m_octree.coarse(m_mapIdx));
-//		updateAfterCoarse();
-//		//			balance21(false);
-//		//			while(m_octree.refine());
-//		//			updateAdapt();
-//		if (m_octree.getNumOctants() < nocts){
-//			localDone = true;
-//		}
-//		nocts = m_octree.getNumOctants();
-//
-//		m_log.writeLog(" Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(nocts)));
-//#if NOMPI==0
-//		MPI_Barrier(m_comm);
-//		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
-//#endif
-//		m_log.writeLog(" ");
-//		m_log.writeLog("---------------------------------------------");
-//#if NOMPI==0
-//	}
-//	else{
-//		m_log.writeLog("---------------------------------------------");
-//		m_log.writeLog(" ADAPT (Refine/Coarse)");
-//		m_log.writeLog(" ");
-//
-//		// 2:1 Balance
-//		balance21(true);
-//
-//		m_log.writeLog(" ");
-//		m_log.writeLog(" Initial Number of octants	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)));
-//
-//		// Refine
-//		while(m_octree.refine(m_mapIdx));
-//		if (m_octree.getNumOctants() > nocts)
-//			localDone = true;
-//		//cout << m_rank << " refine done " << localDone << endl;
-//		updateAdapt();
-//		setPboundGhosts();
-//		m_log.writeLog(" Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)));
-//		nocts = m_octree.getNumOctants();
-//
-//		// Coarse
-//		while(m_octree.coarse(m_mapIdx));
-//		//		cout << m_rank << " out coarse " << endl;
-//		updateAfterCoarse();
-//		//		cout << m_rank << " out updatecoarse " << endl;
-//		setPboundGhosts();
-//		//		cout << m_rank << " out setghosts " << endl;
-//		//			balance21(false);
-//		//			while(m_octree.refine());
-//		//			updateAdapt();
-//		//			setPboundGhosts();
-//		if (m_octree.getNumOctants() < nocts){
-//			localDone = true;
-//			//cout << m_rank << " coarse done " << localDone << endl;
-//		}
-//		nocts = m_octree.getNumOctants();
-//
-//		MPI_Barrier(m_comm);
-//		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
-//		m_log.writeLog(" Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)));
-//		m_log.writeLog(" ");
-//		m_log.writeLog("---------------------------------------------");
-//	}
-//	m_status += globalDone;
-//	return globalDone;
-//#else
-//	m_status += localDone;
-//	return localDone;
-//#endif
-//}
-
-/** Adapt the octree mesh with user setup for markers and 2:1 balancing conditions.
- * Track the changes in structure octant by a mapper.
+/*! Adapt the octree mesh with user setup for markers and 2:1 balancing conditions.
+ * \param[in] mapflag True to track the changes in structure octant by a mapper.
  */
 bool
 ClassParaTree::private_adapt_mapidx(bool mapflag) {
@@ -3327,6 +3329,8 @@ ClassParaTree::private_adapt_mapidx(bool mapflag) {
 #endif
 }
 
+/*!Update the local tree after an adapt.
+ */
 void
 ClassParaTree::updateAdapt(){
 #if NOMPI==0
@@ -3367,6 +3371,11 @@ ClassParaTree::updateAdapt(){
 }
 
 #if NOMPI==0
+/*! Compute the partition of the octree over the processes (only compute the information about
+ * how distribute the mesh). This is an uniform distribution method.
+ * \param[out] partition Pointer to partition information array. partition[i] = number of octants
+ * to be stored on the i-th process (i-th rank).
+ */
 void
 ClassParaTree::computePartition(uint32_t* partition){
 
@@ -3384,8 +3393,11 @@ ClassParaTree::computePartition(uint32_t* partition){
 
 }
 
-/*! compute octant partition giving the same weight to
- * each process and redistributing the reminder
+/*! Compute the partition of the octree over the processes (only compute the information about
+ * how distribute the mesh). This is an weighted distribution method: each process will have the same weight.
+ * \param[out] partition Pointer to partition information array. partition[i] = number of octants
+ * to be stored on the i-th process (i-th rank).
+ * \param[in] weight Pointer to weight array. weight[i] = weight of i-th local octant.
  */
 void
 ClassParaTree::computePartition(uint32_t* partition, dvector* weight){
@@ -3560,6 +3572,15 @@ ClassParaTree::computePartition(uint32_t* partition, dvector* weight){
 	}
 };
 
+/*! Compute the partition of the octree over the processes (only compute the information about
+ * how distribute the mesh). This is a "compact families" method: the families of octants
+ * of a desired level are retained compact on the same process.
+ * \param[out] partition Pointer to partition information array. partition[i] = number of octants
+ * to be stored on the i-th process (i-th rank).
+ * \param[in] level Number of level over the max depth reached in the tree at
+ * which families of octants are fixed compact on the same process
+ * (level=0 is uniform partition).
+ */
 void
 ClassParaTree::computePartition(uint32_t* partition, uint8_t & level_) {
 
@@ -3664,6 +3685,8 @@ ClassParaTree::computePartition(uint32_t* partition, uint8_t & level_) {
 	delete [] deplace; deplace = NULL;
 }
 
+/*! Update the distributed octree after a LoadBalance over the processes.
+ */
 void
 ClassParaTree::updateLoadBalance() {
 	m_octree.updateLocalMaxDepth();
@@ -3688,6 +3711,9 @@ ClassParaTree::updateLoadBalance() {
 	delete [] rbuff; rbuff = NULL;
 }
 
+/*! Build the structure with the information about ghost octants, partition boundary octants
+ *  and parameters for communicate between porcesses.
+ */
 void
 ClassParaTree::setPboundGhosts() {
 	//BUILD BORDER OCTANT INDECES VECTOR (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
@@ -3910,6 +3936,8 @@ ClassParaTree::setPboundGhosts() {
 
 }
 
+/*! Communicate the marker of the octants and the auxiliary info[15].
+ */
 void
 ClassParaTree::commMarker() {
 	//PACK (mpi) LEVEL AND MARKER OF BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
@@ -4007,6 +4035,8 @@ ClassParaTree::commMarker() {
 }
 #endif
 
+/*! Update the distributed octree over the processes after a coarsening procedure.
+ */
 void
 ClassParaTree::updateAfterCoarse(){
 	m_mapIdx.clear();
@@ -4028,6 +4058,11 @@ ClassParaTree::updateAfterCoarse(){
 #endif
 }
 
+/*! Update the distributed octree over the processes after a coarsening procedure
+ * and track the change in a mapper.
+ * \param[out] mapidx Mapper from new octants to old octants.
+ * I.e. mapper[i] = j -> the i-th octant after adapt was in the j-th position before adapt.
+ */
 void
 ClassParaTree::updateAfterCoarse(u32vector & mapidx){
 #if NOMPI==0
@@ -4049,6 +4084,9 @@ ClassParaTree::updateAfterCoarse(u32vector & mapidx){
 #endif
 }
 
+/*!Balance 2:1 the octree.
+ * \param[in] first Is the first call of the 2:1 balance method?
+ */
 void
 ClassParaTree::balance21(bool const first){
 #if NOMPI==0

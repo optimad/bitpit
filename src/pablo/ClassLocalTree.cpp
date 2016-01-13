@@ -635,11 +635,14 @@ ClassLocalTree::updateLocalMaxDepth(){
 /*! Finds neighbours of idx-th octant through iface in vector m_octants.
  * Returns a vector (empty if iface is a bound face) with the index of neighbours
  * in their structure (octants or ghosts) and sets isghost[i] = true if the
- * i-th neighbour is ghost in the local tree
+ * i-th neighbour is ghost in the local tree.
+ * \param[in] idx Local index of the target local octant.
+ * \param[in] iface local index of the face.
+ * \param[out] neighbours Vector with the local indices of the neighbours (size = 0 if boundary face).
+ * \param[out] isghost Vector with the information about the identity of each neighbour (is the i-th neighours a ghost octant?).
  */
 void
-ClassLocalTree::findNeighbours(uint32_t idx, uint8_t iface,
-		u32vector & neighbours, vector<bool> & isghost){
+ClassLocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, vector<bool> & isghost){
 
 	uint64_t  		Morton, Mortontry;
 	uint32_t 		noctants = getNumOctants();
@@ -1108,13 +1111,14 @@ ClassLocalTree::findNeighbours(uint32_t idx, uint8_t iface,
 /*! Finds neighbours of octant through iface in vector m_octants.
  * Returns a vector (empty if iface is a bound face) with the index of neighbours
  * in their structure (octants or ghosts) and sets isghost[i] = true if the
- * i-th neighbour is ghost in the local tree
+ * i-th neighbour is ghost in the local tree.
+ * \param[in] oct Pointer to the target local octant.
+ * \param[in] iface local index of the face.
+ * \param[out] neighbours Vector with the local indices of the neighbours (size = 0 if boundary face).
+ * \param[out] isghost Vector with the information about the identity of each neighbour (is the i-th neighours a ghost octant?).
  */
 void
-ClassLocalTree::findNeighbours(ClassOctant* oct,
-		uint8_t iface,
-		u32vector & neighbours,
-		vector<bool> & isghost){
+ClassLocalTree::findNeighbours(ClassOctant* oct, uint8_t iface, u32vector & neighbours, vector<bool> & isghost){
 
 	uint64_t  Morton, Mortontry;
 	uint32_t  noctants = getNumOctants();
@@ -1579,13 +1583,14 @@ ClassLocalTree::findNeighbours(ClassOctant* oct,
 // =================================================================================== //
 
 /*! Finds neighbours of idx-th ghost octant through iface in vector m_octants.
- * Returns a vector (empty if iface is not the pbound face for ghost) with the index of neighbours
- * in the structure octants
+ * Returns a vector (empty if iface is not the pbound face for ghost)
+ * with the index of neighbours in the structure octants.
+ * \param[in] oct Local index of the target ghost octant.
+ * \param[in] iface local index of the face.
+ * \param[out] neighbours Vector with the local indices of the local octant neighbours (size = 0 if boundary face).
  */
 void
-ClassLocalTree::findGhostNeighbours(uint32_t const idx,
-		uint8_t iface,
-		u32vector & neighbours){
+ClassLocalTree::findGhostNeighbours(uint32_t const idx, uint8_t iface, u32vector & neighbours){
 
 	uint64_t  Morton, Mortontry;
 	uint32_t  noctants = getNumOctants();
@@ -1750,6 +1755,9 @@ ClassLocalTree::findGhostNeighbours(uint32_t const idx,
 
 // =================================================================================== //
 
+/*! Pre-processing for 2:1 balancing of local tree. Check if there are broken families over processes.
+ * \param[in] internal Set to true if the interior octants have to be checked.
+ */
 void
  ClassLocalTree::preBalance21(bool internal){
 
@@ -1911,6 +1919,9 @@ void
 
 // =================================================================================== //
 
+/*! Pre-processing for 2:1 balancing of local tree. Check if there are broken families over processes.
+ * \param[out] newmodified Vector of indices of interior octants checked and whose marker is modified.
+ */
 void
 ClassLocalTree::preBalance21(u32vector& newmodified){
 
@@ -2074,9 +2085,9 @@ ClassLocalTree::preBalance21(u32vector& newmodified){
 
 // =================================================================================== //
 
-/*! 2:1 balancing on level a local tree already adapted (balance only the octants with info[14] = false) (refinement wins!)
- * Return true if balanced done with some markers modification
- * Seto doInterior = false if the interior octants are already balanced
+/*! 2:1 balancing on level a local tree already adapted (balance only the octants with info[15] = false) (refinement wins!)
+ * \param[in] doInterior Set to false if the interior octants are already balanced.
+ * \return True if balanced done with some markers modification.
  */
 bool
 ClassLocalTree::localBalance(bool doInterior){
@@ -2565,9 +2576,9 @@ ClassLocalTree::localBalance(bool doInterior){
 
 // =================================================================================== //
 
-/*! 2:1 balancing on level a local tree already adapted (balance only the octants with info[14] = false) (refinement wins!)
- * Return true if balanced done with some markers modification
- * Seto doInterior = false if the interior octants are already balanced
+/*! 2:1 balancing on level a local tree already adapted (balance all the local octants and new or modified ghost octants) (refinement wins!)
+ * \param[in] doInterior Set to false if the interior octants are already balanced.
+ * \return True if balanced done with some markers modification.
  */
 bool
 ClassLocalTree::localBalanceAll(bool doInterior){
@@ -3061,13 +3072,14 @@ ClassLocalTree::localBalanceAll(bool doInterior){
 /*! Finds neighbours of idx-th octant through iedge in vector m_octants.
  * Returns a vector (empty if iedge is a bound edge) with the index of neighbours
  * in their structure (octants or ghosts) and sets isghost[i] = true if the
- * i-th neighbour is ghost in the local tree
+ * i-th neighbour is ghost in the local tree.
+ * \param[in] idx Local index of the target local octant.
+ * \param[in] iedge local index of the edge.
+ * \param[out] neighbours Vector with the local indices of the neighbours (size = 0 if boundary edge).
+ * \param[out] isghost Vector with the information about the identity of each neighbour (is the i-th neighours a ghost octant?).
  */
 void
-ClassLocalTree::findEdgeNeighbours(uint32_t idx,
-		uint8_t iedge,
-		u32vector & neighbours,
-		vector<bool> & isghost){
+ClassLocalTree::findEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbours, vector<bool> & isghost){
 
 	uint64_t  		Morton, Mortontry;
 	uint32_t  		noctants = getNumOctants();
@@ -3333,13 +3345,14 @@ ClassLocalTree::findEdgeNeighbours(uint32_t idx,
 /*! Finds neighbours of idx-th octant through iedge in vector m_octants.
  * Returns a vector (empty if iedge is a bound edge) with the index of neighbours
  * in their structure (octants or ghosts) and sets isghost[i] = true if the
- * i-th neighbour is ghost in the local tree
+ * i-th neighbour is ghost in the local tree.
+ * \param[in] oct Pointer to the target local octant.
+ * \param[in] iedge local index of the edge.
+ * \param[out] neighbours Vector with the local indices of the neighbours (size = 0 if boundary edge).
+ * \param[out] isghost Vector with the information about the identity of each neighbour (is the i-th neighours a ghost octant?).
  */
 void
-ClassLocalTree::findEdgeNeighbours(ClassOctant* oct,
-		uint8_t iedge,
-		u32vector & neighbours,
-		vector<bool> & isghost){
+ClassLocalTree::findEdgeNeighbours(ClassOctant* oct, uint8_t iedge, u32vector & neighbours, vector<bool> & isghost){
 
 	uint64_t  		Morton, Mortontry;
 	uint32_t  		noctants = getNumOctants();
@@ -3604,11 +3617,12 @@ ClassLocalTree::findEdgeNeighbours(ClassOctant* oct,
 /*! Finds neighbours of idx-th ghost through iedge in vector m_octants.
  * Returns a vector (empty if iedge is not a pbound edge) with the index of neighbours
  * in the structure m_octants.
+ * \param[in] idx Local index of the target ghost octant.
+ * \param[in] iedge local index of the edge.
+ * \param[out] neighbours Vector with the local indices of the local octants neighbours (size = 0 if boundary edge).
  */
 void
-ClassLocalTree::findGhostEdgeNeighbours(uint32_t idx,
-		uint8_t iedge,
-		u32vector & neighbours){
+ClassLocalTree::findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbours){
 
 	uint64_t  		Morton, Mortontry;
 	uint32_t  		noctants = getNumOctants();
@@ -3752,13 +3766,14 @@ ClassLocalTree::findGhostEdgeNeighbours(uint32_t idx,
 /*! Finds neighbours of idx-th octant through inode in vector m_octants.
  * Returns a vector (empty if inode is a bound node) with the index of neighbours
  * in their structure (octants or ghosts) and sets isghost[i] = true if the
- * i-th neighbour is ghost in the local tree
+ * i-th neighbour is ghost in the local tree.
+ * \param[in] oct Pointer to the target local octant.
+ * \param[in] inode local index of the node.
+ * \param[out] neighbours Vector with the local indices of the neighbours (size = 0 if boundary node).
+ * \param[out] isghost Vector with the information about the identity of each neighbour (is the i-th neighours a ghost octant?).
  */
 void
-ClassLocalTree::findNodeNeighbours(ClassOctant* oct,
-		uint8_t inode,
-		u32vector & neighbours,
-		vector<bool> & isghost){
+ClassLocalTree::findNodeNeighbours(ClassOctant* oct, uint8_t inode, u32vector & neighbours, vector<bool> & isghost){
 
 	uint64_t  	Morton, Mortontry;
 	uint32_t  	noctants = getNumOctants();
@@ -4004,13 +4019,14 @@ ClassLocalTree::findNodeNeighbours(ClassOctant* oct,
 /*! Finds neighbours of idx-th octant through inode in vector m_octants.
  * Returns a vector (empty if inode is a bound node) with the index of neighbours
  * in their structure (octants or ghosts) and sets isghost[i] = true if the
- * i-th neighbour is ghost in the local tree
+ * i-th neighbour is ghost in the local tree.
+ * \param[in] idx Local index of the target local octant.
+ * \param[in] inode local index of the node.
+ * \param[out] neighbours Vector with the local indices of the neighbours (size = 0 if boundary node).
+ * \param[out] isghost Vector with the information about the identity of each neighbour (is the i-th neighours a ghost octant?).
  */
 void
-ClassLocalTree::findNodeNeighbours(uint32_t idx,
-		uint8_t inode,
-		u32vector & neighbours,
-		vector<bool> & isghost){
+ClassLocalTree::findNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours, vector<bool> & isghost){
 
 	uint64_t  		Morton, Mortontry;
 	uint32_t  		noctants = getNumOctants();
@@ -4257,11 +4273,12 @@ ClassLocalTree::findNodeNeighbours(uint32_t idx,
 /*! Finds neighbours of idx-th ghost through inode in vector m_octants.
  * Returns a vector (empty if inode is not a pbound node) with the index of neighbours
  * in the structure m_octants.
+ * \param[in] idx Local index of the target ghost octant.
+ * \param[in] inode local index of the node.
+ * \param[out] neighbours Vector with the local indices of the local octants neighbours (size = 0 if boundary node).
  */
 void
-ClassLocalTree::findGhostNodeNeighbours(uint32_t idx,
-		uint8_t inode,
-		u32vector & neighbours){
+ClassLocalTree::findGhostNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours){
 
 	uint64_t  		Morton, Mortontry;
 	uint32_t  		noctants = getNumOctants();
@@ -4381,6 +4398,8 @@ ClassLocalTree::findGhostNodeNeighbours(uint32_t idx,
 
 // =================================================================================== //
 
+/*! Compute and store in m_intersections the intersections of the local tree.
+ */
 void
 ClassLocalTree::computeIntersections() {
 
@@ -4495,7 +4514,8 @@ ClassLocalTree::computeIntersections() {
 
 // =================================================================================== //
 /*! Find an input Morton in octants and return the local idx
- * Return nocts if target Morton not found.
+ * \param[in] Morton Morton index to be found.
+ * \return Local index of the target octant (=nocts if target Morton not found).
 */
 uint32_t
 ClassLocalTree::findMorton(uint64_t Morton){
@@ -4537,7 +4557,8 @@ ClassLocalTree::findMorton(uint64_t Morton){
 
 // =================================================================================== //
 /*! Find an input Morton in ghosts and return the local idx
-* Return nghosts if target Morton not found.
+ * \param[in] Morton Morton index to be found.
+ * \return Index of the target ghost octant (=nghosts if target Morton not found).
 */
 uint32_t
 ClassLocalTree::findGhostMorton(uint64_t Morton){
@@ -4642,7 +4663,6 @@ ClassLocalTree::computeConnectivity(){
 
 };
 
-// =================================================================================== //
 /*! Clear nodes vector and connectivity of octants of local tree
 */
 void
@@ -4651,7 +4671,6 @@ ClassLocalTree::clearConnectivity(){
 	u32vector2D().swap(m_connectivity);
 };
 
-// =================================================================================== //
 /*! Updates nodes vector and connectivity of octants of local tree
 */
 void
@@ -4660,7 +4679,6 @@ ClassLocalTree::updateConnectivity(){
 	computeConnectivity();
 };
 
-// =================================================================================== //
 /*! Computes ghosts nodes vector and connectivity of ghosts octants of local tree
 */
 void
@@ -4720,7 +4738,6 @@ ClassLocalTree::computeGhostsConnectivity(){
 
 };
 
-// =================================================================================== //
 /*! Clear ghosts nodes vector and connectivity of ghosts octants of local tree
 */
 void
@@ -4729,7 +4746,6 @@ ClassLocalTree::clearGhostsConnectivity(){
 	u32vector2D().swap(m_ghostsConnectivity);
 };
 
-// =================================================================================== //
 /*! Update ghosts nodes vector and connectivity of ghosts octants of local tree
 */
 void

@@ -20,7 +20,7 @@
 #include <algorithm>
 
 // =================================================================================== //
-// TYPEDEFS
+// TYPEDEFS																			   //
 // =================================================================================== //
 typedef std::vector<bool>			bvector;
 
@@ -51,7 +51,7 @@ typedef std::vector<bool>			bvector;
 class ClassParaTree{
 
 	// =================================================================================== //
-	// MEMBERS
+	// MEMBERS																			   //
 	// =================================================================================== //
 private:
 	//undistributed members
@@ -95,28 +95,26 @@ private:
 #endif
 
 	// =================================================================================== //
-	// CONSTRUCTORS AND OPERATORS
+	// CONSTRUCTORS AND OPERATORS														   //
 	// =================================================================================== //
 public:
-
 #if NOMPI==0
-	ClassParaTree(uint8_t dim_ = 2, int8_t maxlevel = 20, std::string m_logfile="PABLO.m_log", MPI_Comm comm_ = MPI_COMM_WORLD);// : m_log(m_logfile,comm_),m_comm(comm_);
-	ClassParaTree(double X, double Y, double Z, double L, uint8_t dim_ = 2, int8_t maxlevel = 20, std::string m_logfile="PABLO.m_log", MPI_Comm comm_ = MPI_COMM_WORLD);//:m_dim(2),m_trans(X,Y,Z,L),m_log(m_logfile,comm_),m_comm(comm_);
-	ClassParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim_ = 2, int8_t maxlevel = 20, std::string m_logfile="PABLO.m_log", MPI_Comm comm_ = MPI_COMM_WORLD);//:m_trans(X,Y,Z,L),m_log(m_logfile,comm_),m_comm(comm_);
+	ClassParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.m_log", MPI_Comm comm_ = MPI_COMM_WORLD);
+	ClassParaTree(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.m_log", MPI_Comm comm_ = MPI_COMM_WORLD);
+	ClassParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.m_log", MPI_Comm comm_ = MPI_COMM_WORLD);
 #else
-	ClassParaTree(uint8_t dim_ = 2, int8_t maxlevel = 20, std::string m_logfile="PABLO.m_log");// : m_log(m_logfile);
-	ClassParaTree(double X, double Y, double Z, double L, uint8_t dim_ = 2, int8_t maxlevel = 20, std::string m_logfile="PABLO.m_log");//:m_dim(2),m_trans(X,Y,Z,L),m_log(m_logfile);
-	ClassParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim_ = 2, int8_t maxlevel = 20, std::string m_logfile="PABLO.m_log");//:m_trans(X,Y,Z,L),m_log(m_logfile);
+	ClassParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.m_log");
+	ClassParaTree(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.m_log");
+	ClassParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.m_log");
 #endif
-
 	~ClassParaTree();
 
 	// =================================================================================== //
-	// METHODS
+	// METHODS																			   //
 	// =================================================================================== //
 
 	// =================================================================================== //
-	// BASIC GET/SET METHODS
+	// BASIC GET/SET METHODS															   //
 	// =================================================================================== //
 	int 		getRank();
 	int 		getNproc();
@@ -151,9 +149,8 @@ public:
 	void 		setMaxLevel(int8_t maxlevel);
 
 	// =================================================================================== //
-	// INDEX BASED METHODS
+	// INDEX BASED METHODS																   //
 	// =================================================================================== //
-
 	darray3 	getCoordinates(uint32_t idx);
 	double 		getX(uint32_t idx);
 	double 		getY(uint32_t idx);
@@ -189,9 +186,8 @@ public:
 	void 		setBalance(uint32_t idx, bool balance);
 
 	// =================================================================================== //
-	// POINTER BASED METHODS
+	// POINTER BASED METHODS															   //
 	// =================================================================================== //
-
 	darray3 	getCoordinates(ClassOctant* oct);
 	double 		getX(ClassOctant* oct);
 	double 		getY(ClassOctant* oct);
@@ -222,9 +218,8 @@ public:
 	void 		setBalance(ClassOctant* oct, bool balance);
 
 	// =================================================================================== //
-	// LOCAL TREE GET/SET METHODS
+	// LOCAL TREE GET/SET METHODS														   //
 	// =================================================================================== //
-
 	uint64_t 	getStatus();
 	uint32_t 	getNumOctants() const;
 	uint32_t 	getNumGhosts() const;
@@ -238,9 +233,8 @@ public:
 	uint64_t 	getLastDescMorton(uint32_t idx);
 
 	// =================================================================================== //
-	// INTERSECTION GET/SET METHODS
+	// INTERSECTION GET/SET METHODS														   //
 	// =================================================================================== //
-
 	uint32_t 	getNumIntersections();
 	ClassIntersection* getIntersection(uint32_t idx);
 	uint8_t 	getLevel(ClassIntersection* inter);
@@ -259,9 +253,8 @@ public:
 	darray3 	getNormal(ClassIntersection* inter);
 
 	// =================================================================================== //
-	// OTHER GET/SET METHODS
+	// OTHER GET/SET METHODS															   //
 	// =================================================================================== //
-
 	ClassOctant*	getOctant(uint32_t idx);
 	ClassOctant*	getGhostOctant(uint32_t idx);
 	uint64_t 		getGlobalIdx(ClassOctant* oct);
@@ -273,18 +266,18 @@ public:
 #endif
 
 	// =================================================================================== //
-	// PRIVATE GET/SET METHODS
+	// PRIVATE GET/SET METHODS															   //
 	// =================================================================================== //
 private:
 	void 		setFirstDesc();
 	void 		setLastDesc();
 
 	// =================================================================================== //
-	// OTHER METHODS												    			   //
+	// OTHER METHODS												    			       //
 	// =================================================================================== //
 
 	// =================================================================================== //
-	// OTHER OCTANT BASED METHODS												    			   //
+	// OTHER OCTANT BASED METHODS												    	   //
 	// =================================================================================== //
 public:
 	void 		findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost);
@@ -295,9 +288,8 @@ public:
 	void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost);
 
 	// =================================================================================== //
-	// OTHER PARATREE BASED METHODS												    			   //
+	// OTHER PARATREE BASED METHODS												    	   //
 	// =================================================================================== //
-
 	int 		findOwner(const uint64_t & morton);
 	bool 		adapt(bool mapper_flag = false);
 	bool 		adaptGlobalRefine(bool mapper_flag = false);
@@ -320,20 +312,18 @@ public:
 	const u32arr3vector & getGhostNodes();
 	const u32array3 & getGhostNodeLogicalCoordinates(uint32_t inode);
 	dvector 	getGhostNodeCoordinates(uint32_t inode);
-	//TODO MapPablos
 #if NOMPI==0
 	void 		loadBalance();
 	void 		loadBalance(uint8_t & level);
 #endif
 
 	// =================================================================================== //
-	// OTHER INTERSECTION BASED METHODS												    			   //
+	// OTHER INTERSECTION BASED METHODS										     		   //
 	// =================================================================================== //
-
 	void 		computeIntersections();
 
 	// =================================================================================== //
-	// OTHER PRIVATE METHODS												    			   //
+	// OTHER PRIVATE METHODS												    		   //
 	// =================================================================================== //
 private:
 	ClassOctant& extractOctant(uint32_t idx);
@@ -362,7 +352,6 @@ public:
 	// =================================================================================== //
 	// TEMPLATE METHODS												    			       //
 	// =================================================================================== //
-
 #if NOMPI==0
 
 	/** Communicate data provided by the user between the processes.
@@ -1467,13 +1456,9 @@ public:
 
 #endif
 
-
-
 	// =============================================================================== //
 
-
 };
-
 
 /*  @}  */
 

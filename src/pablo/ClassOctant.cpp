@@ -208,14 +208,17 @@ ClassOctant::getBound() const{
 	return m_info[0]||m_info[1]||m_info[2]||m_info[3]||((m_dim-2)*(m_info[4]||m_info[5]));
 };
 
+/*! Set the boundary flag to true on an octant face.
+ * \param[in] face local index of the boundary face.
+ */
 void
 ClassOctant::setBound(uint8_t face) {
 	m_info[face] = true;
 };
 
 /*! Get the pbound flag on an octant face.
- * \param[in] iface local index of the face.
- * \return true if the iface face is a process boundary face.
+ * \param[in] face local index of the face.
+ * \return true if the face-th face is a process boundary face.
  */
 bool
 ClassOctant::getPbound(uint8_t face) const{
@@ -455,8 +458,7 @@ u32array3		ClassOctant::getNode(uint8_t inode, int8_t maxlevel) const{
  * \param[out] normal Array[3] with components (with z=0) of the normal of face.
  * \param[in] maxlevel Maximum refinement level of the octree.
  */
-void		ClassOctant::getNormal(uint8_t & iface, i8array3 & normal,
-		int8_t (&normals)[6][3], int8_t maxlevel) const{
+void		ClassOctant::getNormal(uint8_t & iface, i8array3 & normal, int8_t (&normals)[6][3], int8_t maxlevel) const{
 	uint8_t		i;
 	for (i = 0; i < 3; i++){
 		normal[i] = normals[iface][i];
@@ -684,8 +686,7 @@ vector< ClassOctant >	ClassOctant::buildChildren(int8_t & maxlevel){
  * \param[in] maxlevel Maximum refinement level of the octree.
  * \return Vector of neighbours morton numbers.
  */
-vector<uint64_t> ClassOctant::computeHalfSizeMorton(uint8_t iface, uint32_t & sizehf,
-		int8_t & maxlevel){
+vector<uint64_t> ClassOctant::computeHalfSizeMorton(uint8_t iface, uint32_t & sizehf, int8_t & maxlevel){
 	uint32_t dh,dh2;
 	uint32_t nneigh;
 	uint32_t i,cx,cy,cz;
@@ -774,8 +775,7 @@ vector<uint64_t> ClassOctant::computeHalfSizeMorton(uint8_t iface, uint32_t & si
  * \param[in] maxlevel Maximum refinement level of the octree.
  * \return Vector of neighbours morton numbers.
  */
-vector<uint64_t> ClassOctant::computeMinSizeMorton(uint8_t iface, const uint8_t & maxdepth,
-		uint32_t & sizem, int8_t & maxlevel){
+vector<uint64_t> ClassOctant::computeMinSizeMorton(uint8_t iface, const uint8_t & maxdepth, uint32_t & sizem, int8_t & maxlevel){
 	uint32_t dh,dh2;
 	uint32_t nneigh, nline;
 	uint32_t i,cx,cy,cz;
@@ -864,8 +864,7 @@ vector<uint64_t> ClassOctant::computeMinSizeMorton(uint8_t iface, const uint8_t 
  * \param[in] maxlevel Maximum refinement level of the octree.
  * \return Vector of neighbours morton numbers.
  */
-vector<uint64_t> ClassOctant::computeVirtualMorton(uint8_t iface, const uint8_t & maxdepth,
-		uint32_t & sizeneigh, int8_t & maxlevel){
+vector<uint64_t> ClassOctant::computeVirtualMorton(uint8_t iface, const uint8_t & maxdepth, uint32_t & sizeneigh, int8_t & maxlevel){
 	vector<uint64_t> Morton;
 	if (getNotBalance()){
 		return computeMinSizeMorton(iface,
@@ -887,8 +886,7 @@ vector<uint64_t> ClassOctant::computeVirtualMorton(uint8_t iface, const uint8_t 
  * \param[in] edgeface Local edge-face connectivity.
  * \return Vector of neighbours morton numbers.
  */
-vector<uint64_t> ClassOctant::computeEdgeHalfSizeMorton(uint8_t iedge,
-		uint32_t & sizehf, int8_t & maxlevel, uint8_t (&edgeface)[12][2]){
+vector<uint64_t> ClassOctant::computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & sizehf, int8_t & maxlevel, uint8_t (&edgeface)[12][2]){
 	uint32_t dh,dh2;
 	uint32_t nneigh;
 	uint32_t i,cx,cy,cz;
@@ -1046,8 +1044,7 @@ vector<uint64_t> ClassOctant::computeEdgeHalfSizeMorton(uint8_t iedge,
  * \param[in] edgeface Local edge-face connectivity.
  * \return Vector of neighbours morton numbers.
  */
-vector<uint64_t> 		ClassOctant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t & maxdepth,
-		uint32_t & sizem, int8_t & maxlevel, uint8_t (&edgeface)[12][2]){
+vector<uint64_t> 		ClassOctant::computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t & maxdepth, uint32_t & sizem, int8_t & maxlevel, uint8_t (&edgeface)[12][2]){
 	uint32_t dh,dh2;
 	uint32_t nneigh, nline;
 	uint32_t i,cx,cy,cz;
@@ -1207,8 +1204,7 @@ vector<uint64_t> 		ClassOctant::computeEdgeMinSizeMorton(uint8_t iedge, const ui
  * \param[in] edgeface Local edge-face connectivity.
  * \return Vector of neighbours morton numbers.
  */
-vector<uint64_t>		ClassOctant::computeEdgeVirtualMorton(uint8_t iedge, const uint8_t & maxdepth,
-		uint32_t & sizeneigh, uint8_t balance_codim, int8_t & maxlevel, uint8_t (&edgeface)[12][2]){
+vector<uint64_t>		ClassOctant::computeEdgeVirtualMorton(uint8_t iedge, const uint8_t & maxdepth, uint32_t & sizeneigh, uint8_t balance_codim, int8_t & maxlevel, uint8_t (&edgeface)[12][2]){
 
 	if(!getNotBalance() && balance_codim > 1){
 		return computeEdgeHalfSizeMorton(iedge,
@@ -1229,9 +1225,8 @@ vector<uint64_t>		ClassOctant::computeEdgeVirtualMorton(uint8_t iedge, const uin
  * \param[in] maxlevel Maximum refinement level of the octree.
  * \param[in] nodeface Local node-face connectivity.
  * \return Vector of neighbours morton numbers.
- */uint64_t 		ClassOctant::computeNodeMinSizeMorton(uint8_t inode,
-		const uint8_t & maxdepth,uint32_t & sizem,
-		int8_t & maxlevel, uint8_t (&nodeface)[8][3]){
+ */
+uint64_t 		ClassOctant::computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxdepth,uint32_t & sizem, int8_t & maxlevel, uint8_t (&nodeface)[8][3]){
 
 	uint32_t dh,dh2;
 	uint32_t nneigh;
@@ -1331,9 +1326,8 @@ vector<uint64_t>		ClassOctant::computeEdgeVirtualMorton(uint8_t iedge, const uin
  * \param[in] maxlevel Maximum refinement level of the octree.
  * \param[in] nodeface Local node-face connectivity.
  * \return Vector of neighbours morton numbers.
- */uint64_t 		ClassOctant::computeNodeVirtualMorton(uint8_t inode,
-		 const uint8_t & maxdepth, uint32_t & sizeneigh, int8_t & maxlevel,
-		 uint8_t (&nodeface)[8][3]){
+ */
+uint64_t 		ClassOctant::computeNodeVirtualMorton(uint8_t inode, const uint8_t & maxdepth, uint32_t & sizeneigh, int8_t & maxlevel, uint8_t (&nodeface)[8][3]){
 
 	return computeNodeMinSizeMorton(inode, maxdepth,
 			sizeneigh, maxlevel, nodeface);
