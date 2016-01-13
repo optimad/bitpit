@@ -1,4 +1,3 @@
-
 // Operator "sign" ------------------------------------------------------------------- //
 /*!
     Sign function.
@@ -11,8 +10,8 @@
     \result returns the sign of the input value.
 */
 template <class T>
-T sign(                                                                               // RETURNS THE SIGN 
-        const  T                & val                                                      // (input) input value
+T sign(
+        const  T                & val
       ){
     return (T(0) < val) - (val < T(0)) ;
 };

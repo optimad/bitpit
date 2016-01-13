@@ -24,7 +24,7 @@
     Perform the element-wise sum between two vectors (x and y) and returns a
     vector z s.t.
     z[i] = x[i] + y[i] for all i = 0, ..., n-1
-    where n = min(x.size(), y.size().
+    where n = std::min(x.size(), y.size().
     Template parameters, T, can by any type for which the operator+ is defined.
 
     The element-wise sum is performed recursively, i.e. if the i-th element of x and
@@ -37,35 +37,16 @@
     \result vector with n elements, storing the element-wise sum of x and y.
 */
 template <class T>
-vector< T > operator+ (
-  const vector< T > &x,
-  const vector< T > &y
+std::vector< T > operator+ (
+  const std::vector< T >                        &x,
+  const std::vector< T >                        &y
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< T > operator+ (                                                            //
-//   const vector< T > &x,                                                            //
-//   const vector< T > &y)                                                            //
-//                                                                                    //
-// Element-wise sum between vectors. Returns:                                         //
-//      z = x + y, s.t. z[i] = x[i] + y[i]                                            //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : vector< T >, 1st argument of '+' operator                                  //
-// - y   : vector< T >, 2nd argument of '+' operator                                  //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - z   : vector< T >, sum of x, y                                                   //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
-unsigned int       n = min(x.size(), y.size());
-vector< T >        z(n, T(0));
+unsigned int       n = std::min(x.size(), y.size());
+std::vector< T >        z(n, T(0));
 
 // ================================================================================== //
 // PERFORM SUM                                                                        //
@@ -96,35 +77,16 @@ return (z); };
     \result vector with n elements, storing the element-wise sum of x and y.
 */
 template <class T>
-vector< T > operator+ (
-  const vector< T > &x,
-  const T           &y
+std::vector< T > operator+ (
+  const std::vector< T >                        &x,
+  const T                                       &y
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< T > operator+ (                                                            //
-//   const vector< T > &x,                                                            //
-//   const T           &y)                                                            //
-//                                                                                    //
-// Element-wise sum between vector and scalar. Returns:                               //
-//        z = x + y, s.t z[i] = x[i] + y                                              //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : vector< T >, 1st argument of '+' operator                                  //
-// - y   : T          , 2nd argument of '+' operator                                  //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - z   : vector< T >, sum of x, y                                                   //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
 unsigned int        n = x.size();
-vector< T >         z(n, T(0));
+std::vector< T >         z(n, T(0));
 
 // ================================================================================== //
 // PERFORM SUM                                                                        //
@@ -155,34 +117,15 @@ return (z); };
     \result vector with n elements, storing the element-wise sum of x and y.
 */
 template <class T>
-vector< T > operator+ (
-  const T           &x,
-  const vector< T > &y
+std::vector< T > operator+ (
+  const T                                       &x,
+  const std::vector< T >                        &y
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< T > operator+ (                                                            //
-//   const T           &x,                                                            //
-//   const vector< T > &y)                                                            //
-//                                                                                    //
-// Element-wise sum between scalar and vector. Returns:                               //
-//     z = x + y, s.t. z[i] = x + y[i]                                                //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : vector< T >, 1st argument of '+' operator                                  //
-// - y   : T          , 2nd argument of '+' operator                                  //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - z   : vector< T >, sum of x, y                                                   //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
-vector< T >   z;
+std::vector< T >   z;
 
 // ================================================================================== //
 // PERFORM SUM                                                                        //
@@ -212,34 +155,16 @@ return (z); };
     storing the element-wise sum of x and y.
 */
 template <class T>
-vector< vector< T > > operator+ (
-    const vector< vector< T > >     &x,
-    const T                         &y
+std::vector< std::vector< T > > operator+ (
+    const std::vector< std::vector< T > >       &x,
+    const T                                     &y
 ) {
-
-// ================================================================================== //
-// vector< vector< T > > operator+ (                                                  //
-//     const T                         &x,                                            //
-//     const vector< vector< T > >     &y)                                            //
-//                                                                                    //
-// Element-wise sum between scalar and vector. Returns:                               //
-//     z = x + y, s.t. z[i][j] = x[i][j] + y                                          //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : vector< vector< T > >, 1st argument of '+' operator                        //
-// - y   : T, 2nd argument of '+' operator                                            //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - z   : vector< vector< T > >, sum of x, y                                         //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
 unsigned int            n = x.size();
-vector< vector< T > >   z(n);
+std::vector< std::vector< T > >   z(n);
 
 // ================================================================================== //
 // PERFORM SUM                                                                        //
@@ -271,33 +196,15 @@ return (z); };
     storing the element-wise sum of x and y.
 */
 template <class T>
-vector< vector< T > > operator+ (
-    const T                         &x,
-    const vector< vector< T > >     &y
+std::vector< std::vector< T > > operator+ (
+    const T                                     &x,
+    const std::vector< std::vector< T > >       &y
 ) {
-
-// ================================================================================== //
-// vector< vector< T > > operator+ (                                                  //
-//     const T                         &x,                                            //
-//     const vector< vector< T > >     &y                                             //
-//                                                                                    //
-// Element-wise sum between scalar and vector. Returns:                               //
-//     z = x + y, s.t. z[i][j] = x + y[i][j]                                          //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : T, 1st argument of '+' operator                                            //
-// - y   : vector< vector< T > >, 2nd argument of '+' operator                        //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - z   : vector< vector< T > >, sum of x, y                                         //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
-vector< vector< T > >   z;
+std::vector< std::vector< T > >   z;
 
 // ================================================================================== //
 // PERFORM SUM                                                                        //
@@ -328,34 +235,15 @@ return (z); };
     \result first argument incremented with r.h.s. values.
 */
 template <class T>
-vector< T >& operator+= (
-  vector< T >       &x,
-  const vector< T > &y
+std::vector< T >& operator+= (
+  std::vector< T >                              &x,
+  const std::vector< T >                        &y
 ) {
 
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< T >& operator+= (                                                          //
-//   vector< T >       &x,                                                            //
-//   const vector< T > &y)                                                            //
-//                                                                                    //
-// Element-wise increment. Returns:                                                   //
-//      x += y, s.t. x[i] += y[i]                                                     //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : vector< T >, 1st argument of '+=' operator                                 //
-// - y   : vector< T >, 2nd argument of '+=' operator                                 //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - x   : vector< T >&, reference to first argument                                  //
-// ================================================================================== //
-
-// ================================================================================== //
+    // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
-size_t                  n = min(x.size(), y.size());
+size_t                  n = std::min(x.size(), y.size());
 
 // ================================================================================== //
 // PERFORM SUM                                                                        //
@@ -386,29 +274,10 @@ return (x); };
     \result first argument incremented with r.h.s. values.
 */
 template <class T>
-vector< T >& operator+= (
-  vector< T >       &x,
-  const T           &y
+std::vector< T >& operator+= (
+  std::vector< T >                              &x,
+  const T                                       &y
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< T > operator+= (                                                           //
-//   vector< T >       &x,                                                            //
-//   const T           &y)                                                            //
-//                                                                                    //
-// Element-wise increment. Returns:                                                   //
-//        x += y, s.t x[i] += y                                                       //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : vector< T >, 1st argument of '+=' operator                                 //
-// - y   : T          , 2nd argument of '+=' operator                                 //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - x   : vector< T >&, reference to first argument                                  //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
@@ -444,28 +313,10 @@ return (x); };
     \result first argument incremented with r.h.s. values.
 */
 template <class T>
-vector< vector< T > >& operator+= (
-    vector< vector< T > >           &x,
-    const T                         &y
+std::vector< std::vector< T > >& operator+= (
+    std::vector< std::vector< T > >             &x,
+    const T                                     &y
 ) {
-
-// ================================================================================== //
-// vector< vector< T > > operator+= (                                                 //
-//     vector< vector< T > >           &x,                                            //
-//     const T                         &y)                                            //
-//                                                                                    //
-// Element-wise increment. Returns:                                                   //
-//     x += y, s.t. x[i][j] += y                                                      //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : vector< vector< T > >, 1st argument of '+=' operator                       //
-// - y   : T, 2nd argument of '+=' operator                                           //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - x   : vector< vector< T > >&, reference to first argument                        //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
@@ -503,35 +354,16 @@ return (x); };
     \result vector with n elements, storing the element-wise difference between x and y.
 */
 template <class T>
-vector< T > operator- (
-  const vector< T > &x,
-  const vector< T > &y
+std::vector< T > operator- (
+  const std::vector< T >                        &x,
+  const std::vector< T >                        &y
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< T > operator- (                                                            //
-//   const vector< T > &x,                                                            //
-//   const vector< T > &y)                                                            //
-//                                                                                    //
-// Element-wise difference between vectors. Returns:                                  //
-//     z = x - y, s.t. z[i] = x[i] - y[i]                                             //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : vector< T >, 1st argument of '-' operator                                  //
-// - y   : vector< T >, 2nd argument of '-' operator                                  //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - z   : vector< T >, difference of x, y                                            //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
-unsigned int        n = min(x.size(), y.size());
-vector< T >         z(n, T(0));
+unsigned int        n = std::min(x.size(), y.size());
+std::vector< T >         z(n, T(0));
 
 // ================================================================================== //
 // PERFORM DIFFERENCE                                                                 //
@@ -562,35 +394,16 @@ return(z); };
     \result vector with n elements, storing the element-wise difference between x and y.
 */
 template <class T>
-vector< T > operator- (
-  const vector< T > &x,
-  const T           &y
+std::vector< T > operator- (
+  const std::vector< T >                        &x,
+  const T                                       &y
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< T > operator- (                                                            //
-//   const vector< T > &x,                                                            //
-//   const T           &y)                                                            //
-//                                                                                    //
-// Element-wise difference between vector and constant. Return:                       //
-//     z = x - y, s.t. z[i] = x[i] - y                                                //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : vector< T >, 1st argument of '-' operator                                  //
-// - y   : T, 2nd argument of '-' operator                                            //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - z   : vector< T >, difference of x, y                                            //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
 unsigned int        n = x.size();
-vector< T >         z(n, T(0));
+std::vector< T >         z(n, T(0));
 
 // ================================================================================== //
 // PERFORM DIFFERENCE                                                                 //
@@ -621,34 +434,15 @@ return(z); };
     \result vector with n elements, storing the element-wise difference between x and y.
 */
 template <class T>
-vector< T > operator- (
-  const T           &x,
-  const vector< T > &y
+std::vector< T > operator- (
+  const T                                       &x,
+  const std::vector< T >                        &y
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< T > operator- (                                                            //
-//   const T           &x,                                                            //
-//   const vector< T > &y)                                                            //
-//                                                                                    //
-// Element-wise difference between constant and vector. Returns:                      //
-//     z = x - y, s.t. z[i] = x - y[i]                                                //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : T, 1st argument of '-' operator                                            //
-// - y   : vector< T >, 2nd argument of '-' operator                                  //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - z   : vector< T >, difference of x, y                                            //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
-vector< T >   z;
+std::vector< T >   z;
 
 // =================================================================================== //
 // PERFORM DIFFERENCE                                                                  //
@@ -678,35 +472,16 @@ return(z); };
     storing the element-wise difference between x and y.
 */
 template <class T>
-vector< vector< T > > operator- (
-  const T                       &x,
-  const vector< vector< T > >   &y
+std::vector< std::vector< T > > operator- (
+  const T                                       &x,
+  const std::vector< std::vector< T > >         &y
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< vector< T > > operator- (                                                  //
-//   const T                       &x,                                                //
-//   const vector< vector< T > >   &y)                                                //
-//                                                                                    //
-// Element-wise difference between constant and vector. Returns:                      //
-//     z = x - y, s.t. z[i] = x - y[i][j]                                             //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : T, 1st argument of '-' operator                                            //
-// - y   : vector< vector< T > >, 2nd argument of '-' operator                        //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - z   : vector< vector< T > >, difference of x, y                                  //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
 unsigned int            n = y.size();
-vector< vector< T > >   z(n);
+std::vector< std::vector< T > >   z(n);
 
 // ================================================================================== //
 // PERFORM DIFFERENCE                                                                 //
@@ -738,34 +513,15 @@ return(z); };
     storing the element-wise difference between x and y.
 */
 template <class T>
-vector< vector< T > > operator- (
-  const vector< vector< T > >   &x,
-  const T                       &y
+std::vector< std::vector< T > > operator- (
+  const std::vector< std::vector< T > >         &x,
+  const T                                       &y
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< vector< T > > operator- (                                                  //
-//   const vector< vector< T > >   &x,                                                //
-//   const T                       &y)                                                //
-//                                                                                    //
-// Element-wise difference between constant and vector. Returns:                      //
-//     z = x - y, s.t. z[i] = x[i][j] - y                                             //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : vector< vector< T > >, 1st argument of '-' operator                        //
-// - y   : T, 2nd argument of '-' operator                                            //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - z   : vector< vector< T > >, difference of x, y                                  //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
-vector< vector< T > >   z;
+std::vector< std::vector< T > >   z;
 
 // ================================================================================== //
 // PERFORM DIFFERENCE                                                                 //
@@ -796,34 +552,15 @@ return(z); };
     \result first argument decremented with r.h.s. values.
 */
 template <class T>
-vector< T >& operator-= (
-  vector< T >       &x,
-  const vector< T > &y
+std::vector< T >& operator-= (
+  std::vector< T >                              &x,
+  const std::vector< T >                        &y
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< T >& operator-= (                                                          //
-//   vector< T >       &x,                                                            //
-//   const vector< T > &y)                                                            //
-//                                                                                    //
-// Element-wise decrement. Returns:                                                   //
-//      x -= y, s.t. x[i] -= y[i]                                                     //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : vector< T >, 1st argument of '-=' operator                                 //
-// - y   : vector< T >, 2nd argument of '-=' operator                                 //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - x   : vector< T >&, reference to first argument                                  //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
-size_t                  n = min(x.size(), y.size());
+size_t                  n = std::min(x.size(), y.size());
 
 // ================================================================================== //
 // PERFORM SUM                                                                        //
@@ -854,29 +591,10 @@ return (x); };
     \result first argument decremented with r.h.s. values.
 */
 template <class T>
-vector< T >& operator-= (
-  vector< T >       &x,
-  const T           &y
+std::vector< T >& operator-= (
+  std::vector< T >                              &x,
+  const T                                       &y
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< T > operator-= (                                                           //
-//   vector< T >       &x,                                                            //
-//   const T           &y)                                                            //
-//                                                                                    //
-// Element-wise decrement. Returns:                                                   //
-//        x -= y, s.t x[i] -= y                                                       //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : vector< T >, 1st argument of '-=' operator                                 //
-// - y   : T          , 2nd argument of '-=' operator                                 //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - x   : vector< T >&, reference to first argument                                  //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
@@ -912,28 +630,10 @@ return (x); };
     \result first argument decremented with r.h.s. values.
 */
 template <class T>
-vector< vector< T > >& operator-= (
-    vector< vector< T > >           &x,
-    const T                         &y
+std::vector< std::vector< T > >& operator-= (
+    std::vector< std::vector< T > >             &x,
+    const T                                     &y
 ) {
-
-// ================================================================================== //
-// vector< vector< T > > operator-= (                                                 //
-//     vector< vector< T > >           &x,                                            //
-//     const T                         &y)                                            //
-//                                                                                    //
-// Element-wise decrement. Returns:                                                   //
-//     x -= y, s.t. x[i][j] -= y                                                      //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : vector< vector< T > >, 1st argument of '-=' operator                       //
-// - y   : T, 2nd argument of '-=' operator                                           //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - x   : vector< vector< T > >&, reference to first argument                        //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
@@ -971,34 +671,16 @@ return (x); };
     \result vector with n elements, storing the element-wise product between x and y.
 */
 template <class T>
-vector< T > operator* (
-  const vector< T > &x,
-  const vector< T > &y
+std::vector< T > operator* (
+  const std::vector< T >                        &x,
+  const std::vector< T >                        &y
 ) {
-
-// ================================================================================== //
-// vector< T > operator* (                                                            //
-//   const vector< T > &x,                                                            //
-//   const vector< T > &y)                                                            //
-//                                                                                    //
-// Element-wise product between vectors. Returns:                                     //
-//      z = x * y, s.t. z[i] = x[i]*y[i]                                              //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : vector< T >, 1st argument of '*' operator                                  //
-// - y   : vector< T >, 2nd argument of '*' operator                                  //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - z   : vector< T >, elementwise product between x, y                              //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
-unsigned int       n = min(x.size(), y.size());
-vector<T>          z(n, T(0));
+unsigned int       n = std::min(x.size(), y.size());
+std::vector<T>          z(n, T(0));
 
 // ================================================================================== //
 // PERFORM PRODUCT                                                                    //
@@ -1029,35 +711,16 @@ return(z); };
     \result vector with n elements, storing the element-wise product between x and y.
 */
 template <class T>
-vector< T > operator* (
-  const vector< T > &x,
-  const T           &y
+std::vector< T > operator* (
+  const std::vector< T >                        &x,
+  const T                                       &y
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< T > operator* (                                                            //
-//   const vector< T > &x,                                                            //
-//   const T           &y)                                                            //
-//                                                                                    //
-// Element-wise product between vector and constant. Returns:                         //
-//      z = x * y, s.t. z[i] = x[i]*y                                                 //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : vector< T >, 1st argument of '*' operator                                  //
-// - y   : T, 2nd argument of '*' operator                                            //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - z   : vector< T >, elementwise product between x, y                              //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
 unsigned int       n = x.size();
-vector< T >        z(n, T(0));
+std::vector< T >        z(n, T(0));
 
 // =================================================================================== //
 // PERFORM PRODUCT                                                                     //
@@ -1088,34 +751,15 @@ return(z); };
     \result vector with n elements, storing the element-wise product between x and y.
 */
 template <class T>
-vector< T > operator* (
-  const T           &x,
-  const vector< T > &y
+std::vector< T > operator* (
+  const T                                       &x,
+  const std::vector< T >                        &y
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< T > operator* (                                                            //
-//   const T         &x,                                                              //
-//   const vector< T > &y)                                                            //
-//                                                                                    //
-// Element-wise product between constant and vector. Returns:                         //
-//      z = x * y, s.t. z[i] = x*y[i]                                                 //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : T, 1st argument of '*' operator                                            //
-// - y   : vector< T >, 2nd argument of '*' operator                                  //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - z   : vector< T >, elementwise product between x, y                              //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
-vector< T >   z;                                                                     
+std::vector< T >   z;                                                                     
 
 // ================================================================================== //
 // PERFORM PRODUCT                                                                    //
@@ -1145,35 +789,16 @@ return(z); };
     storing the element-wise product between x and y.
 */
 template <class T>
-vector< vector< T > > operator* (
-  const T                     &x,
-  const vector< vector< T > > &y
+std::vector< std::vector< T > > operator* (
+  const T                                       &x,
+  const std::vector< std::vector< T > >         &y
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< vector< T > > operator* (                                                  //
-//   const T                     &x,                                                  //
-//   const vector< vector< T > > &y)                                                  //
-//                                                                                    //
-// Element-wise product between constant and vector. Returns:                         //
-//      z = x * y, s.t. z[i][j] = x*y[i][j]                                           //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : T, 1st argument of '*' operator                                            //
-// - y   : vector< vector< T > >, 2nd argument of '*' operator                        //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - z   : vector< vector< T > >, elementwise product between x, y                    //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
 unsigned int            n = y.size();
-vector< vector< T > >   z(n);
+std::vector< std::vector< T > >   z(n);
 
 // ================================================================================== //
 // PERFORM PRODUCT                                                                    //
@@ -1205,34 +830,15 @@ return(z); };
     storing the element-wise product between x and y.
 */
 template <class T>
-vector< vector< T > > operator* (
-  const vector< vector< T > > &x,
-  const T                     &y
+std::vector< std::vector< T > > operator* (
+  const std::vector< std::vector< T > >         &x,
+  const T                                       &y
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< vector< T > > operator* (                                                  //
-//   const vector< vector< T > > &x,                                                  //
-//   const T                     &y)                                                  //
-//                                                                                    //
-// Element-wise product between constant and vector. Returns:                         //
-//      z = x * y, s.t. z[i][j] = x[i][j]*y                                           //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : vector< vector< T > >, 1st argument of '*' operator                        //
-// - y   : T, 2nd argument of '*' operator                                            //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - z   : vector< vector< T > >, elementwise product between x, y                    //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
-vector< vector< T > >   z;
+std::vector< std::vector< T > >   z;
 
 // ================================================================================== //
 // PERFORM PRODUCT                                                                    //
@@ -1263,35 +869,16 @@ return(z); };
     \result vector with n elements, storing the element-wise division between x and y.
 */
 template <class T>
-vector< T > operator/ (
-  const vector< T > &x,
-  const vector< T > &y
+std::vector< T > operator/ (
+  const std::vector< T >                        &x,
+  const std::vector< T >                        &y
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< T > operator/ (                                                            //
-//   const vector< T > &x,                                                            //
-//   const vector< T > &y)                                                            //
-//                                                                                    //
-// Element-wise division between vectors. Retuns:                                     //
-//    z = x / y, s.t. z[i] = x[i]/y[i].                                               //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x   : vector< T >, 1st argument of '/' operator                                  //
-// - y   : vector< T >, 2nd argument of '/' operator                                  //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - z   : vector< T >, elementwise division between x, y                             //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
-unsigned int       n = min(x.size(), y.size());
-vector<T>          z(n, T(0));
+unsigned int       n = std::min(x.size(), y.size());
+std::vector<T>          z(n, T(0));
 
 // ================================================================================== //
 // PERFORM DIVISION                                                                   //
@@ -1322,29 +909,10 @@ return(z); };
     \result vector with n elements, storing the element-wise division between x and y.
 */
 template <class T>
-vector< T > operator/ (
-  const vector< T > &x,
-  const T           &y
+std::vector< T > operator/ (
+  const std::vector< T >                        &x,
+  const T                                       &y
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< T > operator/ (                                                            //
-//   const vector< T > &x,                                                            //
-//   const T           &y)                                                            //
-//                                                                                    //
-// Element-wise division between vector and constant. Retuns:                         //
-//    z = x / y, s.t. z[i] = x[i]/y                                                   //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x    : vector< T >, 1st argument of "/" operator                                 //
-// - y    : T, 2nd argument of "/" operator                                           //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - z    : vector< T >, result of element-wise division                              //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
@@ -1352,7 +920,7 @@ vector< T > operator/ (
 
 // Local variables
 unsigned int  n = x.size();
-vector< T >   z(n, T(0));
+std::vector< T >   z(n, T(0));
 
 // Counters
 int           i;
@@ -1386,35 +954,16 @@ return(z); };
     \result vector with n elements, storing the element-wise division between x and y.
 */
 template <class T>
-vector< T > operator/ (
-  const T           &x,
-  const vector< T > &y
+std::vector< T > operator/ (
+  const T                                       &x,
+  const std::vector< T >                        &y
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< T > operator/ (                                                            //
-//   const T           &x,                                                            //
-//   const vector< T > &y)                                                            //
-//                                                                                    //
-// Element-wise division between constant and vector. Retuns:                         //
-//    z = x / y, s.t. z[i] = x/y[i].                                                  //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x    : T, 1st argument of "/" operator                                           //
-// - y    : vector< T >, 2nd argument of "/" operator                                 //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - z    : vector< T >, result of element-wise division                              //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
 unsigned int   n = y.size();
-vector< T >    z(n);
+std::vector< T >    z(n);
 
 // ================================================================================== //
 // DIVIDE X BY Y                                                                      //
@@ -1446,35 +995,16 @@ return(z); };
     storing the element-wise division between x and y.
 */
 template <class T>
-vector< vector< T > > operator/ (
-  const T                       &x,
-  const vector< vector< T > >   &y
+std::vector< std::vector< T > > operator/ (
+  const T                                       &x,
+  const std::vector< std::vector< T > >         &y
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< vector< T > > operator/ (                                                  //
-//   const T                     &x,                                                  //
-//   const vector< vector< T > > &y)                                                  //
-//                                                                                    //
-// Element-wise division between constant and vector. Retuns:                         //
-//    z = x / y, s.t. z[i][j] = x/y[i][j].                                            //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x    : T, 1st argument of "/" operator                                           //
-// - y    : vector< vector< T > >, 2nd argument of "/" operator                       //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - z    : vector< vector< T > >, result of element-wise division                    //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
 unsigned int            n = y.size();
-vector< vector< T > >   z(n);
+std::vector< std::vector< T > >   z(n);
 
 // ================================================================================== //
 // DIVIDE X BY Y                                                                      //
@@ -1506,35 +1036,16 @@ return(z); };
     storing the element-wise division between x and y.
 */
 template <class T>
-vector< vector< T > > operator/ (
-  const vector< vector< T > >   &x,
-  const T                       &y
+std::vector< std::vector< T > > operator/ (
+  const std::vector< std::vector< T > >         &x,
+  const T                                       &y
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// vector< vector< T > > operator/ (                                                  //
-//   const vector< vector< T > >   &x,                                                //
-//   const T                       &y)                                                //
-//                                                                                    //
-// Element-wise division between constant and vector. Retuns:                         //
-//    z = x / y, s.t. z[i][j] = x[i][j]/y.                                            //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - x    : vector< vector< T > >, 1st argument of "/" operator                       //
-// - y    : T, 2nd argument of "/" operator                                           //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - z    : vector< vector< T > >, result of element-wise division                    //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
 unsigned int            n = x.size();
-vector< vector< T > >   z(n);
+std::vector< std::vector< T > >   z(n);
 
 // ================================================================================== //
 // DIVIDE X BY Y                                                                      //
@@ -1563,30 +1074,12 @@ return(z); };
     \result reference to the stream (allows concatenation)
 */
 template <class T>
-ostream& operator<< (
-    ostream              &out,
-    const vector< T >    &x
+std::ostream& operator<< (
+    std::ostream                                &out,
+    const std::vector< T >                      &x
 ) {
 
-// ================================================================================== //
-// template <class T>                                                                 //
-// ostream& operator<< (                                                              //
-//     ostream              &out,                                                     //
-//     const vector< T >    &x)                                                       //
-//                                                                                    //
-// Output stream for vector.                                                          //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - out       : ostream, with output stream                                          //
-// - x         : vector< T >, with vector to be streamed                              //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - out       : ostream, with updated output stream                                  //
-// ================================================================================== //
-
-// ================================================================================== //
+    // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
 
@@ -1623,28 +1116,10 @@ return(out); };
     \result reference to the stream (allows concatenation)
 */
 template <class T>
-ofstream& operator<< (
-    ofstream             &out,
-    const vector< T >    &x
+std::ofstream& operator<< (
+    std::ofstream                               &out,
+    const std::vector< T >                      &x
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// ofstream& operator<< (                                                             //
-//     ofstream             &out,                                                     //
-//     const vector< T >    &x)                                                       //
-//                                                                                    //
-// Output file stream for vector.                                                     //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - out       : ofstream, with output file stream                                    //
-// - x         : vector< T >, with vector to be streamed                              //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - out       : ofstream, with updated output stream                                 //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
@@ -1688,28 +1163,10 @@ return(out); };
     \result reference to input stream (allows concatenation)
 */
 template <class T>
-istream& operator>> (
-    istream              &in,
-    vector< T >          &x
+std::istream& operator>> (
+    std::istream                                &in,
+    std::vector< T >                            &x
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// istream& operator>> (                                                              //
-//     istream              &in,                                                      //
-//     vector< T >          &x)                                                       //
-//                                                                                    //
-// Input stream for vector.                                                           //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - in        : istream, with input stream                                           //
-// - x         : vector< T >, with vector to be streamed                              //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - x         : vector< T >, update streamed vector                                  //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
@@ -1752,28 +1209,10 @@ return(in); };
     \result reference to input file stream (allows concatenation)
 */
 template <class T>
-ifstream& operator>> (
-    ifstream             &in,
-    vector< T >          &x
+std::ifstream& operator>> (
+    std::ifstream                               &in,
+    std::vector< T >                            &x
 ) {
-
-// ================================================================================== //
-// template <class T>                                                                 //
-// ifstream& operator>> (                                                             //
-//     ifstream             &in,                                                      //
-//     vector< T >          &x)                                                       //
-//                                                                                    //
-// Input file stream for vector.                                                      //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - in        : ifstream, with input file stream                                     //
-// - x         : vector< T >, with vector to be streamed                              //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - x         : vector< T > updated vector.                                          //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
@@ -1811,31 +1250,10 @@ return(in); };
     \result reference to output stream
 */
 template<typename T, typename std::enable_if< std::is_scalar< T >::value>::type* = nullptr>
-ostream& display(
-    ostream             &out,
-    const T             &x
+std::ostream& display(
+    std::ostream                                &out,
+    const T                                     &x
 ) {
-
-// ================================================================================== //
-// template<typename T,                                                               //
-//          typename std::enable_if< std::is_scalar< T >::value>::type* = nullptr>    //
-// ostream& display(                                                                  //
-//     ostream             &out,                                                      //
-//     const T             &x,                                                        //
-//     unsigned int         padding)                                                  //
-//                                                                                    //
-// Display variable in a nicely formatted form.                                       //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - out      : ostream, output stream                                                //
-// - x        : T, variable to be displayed.                                          //
-// - padding  : unsigned int (default = 0), number of trailing spaces                 //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - out      : ostream&, reference to output stream                                  //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
@@ -1860,38 +1278,18 @@ return(out); }
     \result reference to output stream
 */
 template<class T>
-ostream& display(
-    ostream             &out,
-    const vector<T>     &x,
-    unsigned int         padding
+std::ostream& display(
+    std::ostream                                &out,
+    const std::vector<T>                        &x,
+    unsigned int                                 padding
 ) {
-
-// ================================================================================== //
-// template<class T>                                                                  //
-// ostream& display(                                                                  //
-//     ostream             &out,                                                      //
-//     const vector<T>     &x,                                                        //
-//     unsigned int         padding)                                                  //
-//                                                                                    //
-// Display vector in a nicely formatted form.                                         //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - out      : ostream, output stream                                                //
-// - x        : vector<T>, vector to be displayed                                     //
-// - padding  : unsigned int (default = 0), number of trailing spaces                 //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - out      : ostream&, reference to output stream                                  //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
 
 // Counters
-typename vector<T>::const_iterator      i, e = x.cend();
+typename std::vector<T>::const_iterator      i, e = x.cend();
 
 // ================================================================================== //
 // DISPLAY VECTOR                                                                     //
@@ -1900,7 +1298,7 @@ if (x.size() == 0) {
     out << "[ ]";
     return(out);
 }
-out << string(padding, ' ') << "[ ";
+out << std::string(padding, ' ') << "[ ";
 --e;
 for (i = x.begin(); i != e; ++i) {
     display(out, *i) << ", ";
@@ -1920,31 +1318,10 @@ return(out); }
     \result reference to output stream
 */
 template<typename T, typename std::enable_if< std::is_scalar< T >::value>::type* = nullptr>
-ofstream& display(
-    ofstream            &out,
-    const T             &x
+std::ofstream& display(
+    std::ofstream                               &out,
+    const T                                     &x
 ) {
-
-// ================================================================================== //
-// template<typename T,                                                               //
-//          typename std::enable_if< std::is_scalar< T >::value>::type* = nullptr>    //
-// ofstream& display(                                                                 //
-//     ofstream            &out,                                                      //
-//     const T             &x,                                                        //
-//     unsigned int         padding)                                                  //
-//                                                                                    //
-// Display variable in a nicely formatted form.                                       //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - out      : ofstream, output stream                                               //
-// - x        : T, variable to be displayed.                                          //
-// - padding  : unsigned int (default = 0), number of trailing spaces                 //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - out      : ostream&, reference to output stream                                  //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
@@ -1969,38 +1346,18 @@ return(out); }
     \result reference to output stream
 */
 template<class T>
-ofstream& display(
-    ofstream            &out,
-    const vector<T>     &x,
-    unsigned int         padding
+std::ofstream& display(
+    std::ofstream                               &out,
+    const std::vector<T>                        &x,
+    unsigned int                                 padding
 ) {
-
-// ================================================================================== //
-// template<class T>                                                                  //
-// ofstream& display(                                                                 //
-//     ofstream            &out,                                                      //
-//     const vector<T>     &x,                                                        //
-//     unsigned int         padding)                                                  //
-//                                                                                    //
-// Display vector in a nicely formatted form.                                         //
-// ================================================================================== //
-// INPUT                                                                              //
-// ================================================================================== //
-// - out      : ofstream, output stream                                               //
-// - x        : vector<T>, vector to be displayed                                     //
-// - padding  : unsigned int (default = 0), number of trailing spaces                 //
-// ================================================================================== //
-// OUTPUT                                                                             //
-// ================================================================================== //
-// - out      : ofstream&, reference to output stream                                 //
-// ================================================================================== //
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
 
 // Counters
-typename vector<T>::const_iterator      i, e = x.cend();
+typename std::vector<T>::const_iterator      i, e = x.cend();
 
 // ================================================================================== //
 // DISPLAY VECTOR                                                                     //
@@ -2009,7 +1366,7 @@ if (x.size() == 0) {
     out << "[ ]";
     return(out);
 }
-out << string(padding, ' ') << "[ ";
+out << std::string(padding, ' ') << "[ ";
 --e;
 for (i = x.begin(); i != e; ++i) {
     display(out, *i) << ", ";
