@@ -64,7 +64,6 @@ private:
 	// =================================================================================== //
 	// BASIC GET/SET METHODS
 	// =================================================================================== //
-public:
 	uint8_t 	getBoolBytes();
 	void 		getEdgecoeffs(int8_t edgecoeffs[12][3]);
 	void 		getEdgeface(uint8_t edgeface[12][2]);

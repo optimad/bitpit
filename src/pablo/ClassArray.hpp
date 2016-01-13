@@ -32,6 +32,7 @@ class ClassArray {
 
 	// ------------------------------------------------------------------------------- //
 	// MEMBERS ----------------------------------------------------------------------- //
+private:
 	uint32_t m_arraySize;		/**< Size of array */
 	int* m_array;				/**< Pointer to array of integers */
 
@@ -39,9 +40,10 @@ class ClassArray {
 	// CONSTRUCTORS ------------------------------------------------------------------ //
 public:
 	ClassArray();
-	ClassArray(uint32_t size, int value);
 	ClassArray(const ClassArray& other);
 	~ClassArray();
+private:
+	ClassArray(uint32_t size, int value);
 
 	// ------------------------------------------------------------------------------- //
 	// METHODS ----------------------------------------------------------------------- //

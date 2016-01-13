@@ -43,6 +43,7 @@ class ClassIntersection{
 	// =================================================================================== //
 
 	friend class ClassLocalTree;
+	friend class ClassParaTree;
 
 	// =================================================================================== //
 	// TYPEDEFS
@@ -51,7 +52,7 @@ class ClassIntersection{
 	// =================================================================================== //
 	// MEMBERS
 	// =================================================================================== //
-public:
+private:
 	uint32_t 	m_owners[2];		/**< Owner octants of the intersection (first is the internal octant) */
 	uint8_t   	m_iface;			/**< Index of the face of the finer owner */
 	bool		m_finer;			/**< 0/1 finer octant (if same level =0) */
@@ -66,8 +67,9 @@ public:
 	// =================================================================================== //
 public:
 	ClassIntersection();
-	ClassIntersection(uint8_t dim_);
 	ClassIntersection(const ClassIntersection & intersection);
+private:
+	ClassIntersection(uint8_t dim_);
 	ClassIntersection & operator =(const ClassIntersection & intersection);
 	bool operator ==(const ClassIntersection & intersection);
 

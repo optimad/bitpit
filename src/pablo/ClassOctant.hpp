@@ -96,10 +96,11 @@ private:
 	// =================================================================================== //
 public:
 	ClassOctant();
+	ClassOctant(const ClassOctant &octant);
+private:
 	ClassOctant(uint8_t dim);
 	ClassOctant(uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0);
 	ClassOctant(bool bound, uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0);
-	ClassOctant(const ClassOctant &octant);
 	bool operator ==(const ClassOctant & oct2);
 
 	// =================================================================================== //
@@ -109,7 +110,6 @@ public:
 	// =================================================================================== //
 	// BASIC GET/SET METHODS
 	// =================================================================================== //
-public:
 	uint32_t	getDim() const;
 	u32array3	getCoordinates() const;
 	uint32_t	getX() const;
@@ -120,9 +120,7 @@ public:
 	int8_t		getMarker() const;
 	bool		getBound(uint8_t face) const;
 	bool		getBound() const;
-private:
 	void		setBound(uint8_t face);
-public:
 	bool		getPbound(uint8_t face) const;
 	bool		getPbound() const;
 	bool		getIsNewR() const;
@@ -132,15 +130,12 @@ public:
 	bool		getBalance() const;
 	void		setMarker(int8_t marker);
 	void		setBalance(bool balance);
-private:
 	void		setLevel(uint8_t level);
 	void 		setPbound(uint8_t face, bool flag);
 
 	// =================================================================================== //
 	// OTHER GET/SET METHODS
 	// =================================================================================== //
-
-public:
 	uint32_t	getSize(int8_t maxlevel) const;
 	uint64_t	getArea(int8_t maxlevel) const;
 	uint64_t	getVolume(int8_t maxlevel) const;
@@ -157,8 +152,6 @@ public:
 	// =================================================================================== //
 	// OTHER METHODS												    			   //
 	// =================================================================================== //
-
-private:
 	ClassOctant	buildLastDesc(int8_t & maxlevel);
 	ClassOctant	buildFather(int8_t & maxlevel);
 	std::vector< ClassOctant >	buildChildren(int8_t & maxlevel);
