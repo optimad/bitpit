@@ -4,11 +4,24 @@ This project *tries* to adhere to [Semantic Versioning](http://semver.org/).
 
 # PABLO
 
-## [Unreleased]
+## v1.0.0 - 2016-01-13
 ### Added
-- Unique Octant 2D/3D class.
-- Base ParaTree class and derived 2D/3D classes.
-- Get method for Bounding Box of local tree partition.
+- Unique Octant 2D/3D class, no more template class.
+- Unique LocalTree 2D/3D class, no more template class.
+- Unique ParaTree 2D/3D classes, no more template class.
+- New basic get methods for parallel and local tree. 
+
+### Changed
+- Major changes in ParaTree interface. Main change: use of array instead of vector where possible.
+- Class Global rearranged and new methods to manipulate it.
+- Coding style and syntax modified according to the Coding Style Guide of this project.
+
+### Fixed
+- Possibility to adapt the octree, tracking the changes with the mapper, even with marker <-1 and >1.
+
+### Removed
+- Old deprecated use of mapping now removed.
+- Private overloaded adapt methods removed.
 
 ## v0.4.0 - 2015-11-10
 ### Added
