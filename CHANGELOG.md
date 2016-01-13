@@ -18,6 +18,8 @@ This project *tries* to adhere to [Semantic Versioning](http://semver.org/).
 - Major changes in ParaTree interface. Main change: use of array instead of vector where possible.
 - Class Global rearranged and new methods to manipulate it.
 - Coding style and syntax modified according to the Coding Style Guide of this project.
+- Pre-compilation variable NOMPI renamed ENABLE_MPI.
+- CMakeLists files changed with new variables ENABLE_MPI.
 
 ### Fixed
 - Possibility to adapt the octree, tracking the changes with the mapper, even with marker <-1 and >1.

@@ -8,19 +8,20 @@
 #ifndef INCLUDE_CLASSLOG_HPP_
 #define INCLUDE_CLASSLOG_HPP_
 
-#if NOMPI==0
+#if ENABLE_MPI
 #include <mpi.h>
 #endif
 
 class ClassLog {
 
 	std::string m_filename;
-#if NOMPI==0
+
+#if ENABLE_MPI
 	MPI_Comm m_comm;
 #endif
 
 public:
-#if NOMPI==0
+#if ENABLE_MPI
 	ClassLog(std::string filename_,MPI_Comm comm_ = MPI_COMM_WORLD);
 #else
 	ClassLog(std::string filename_);

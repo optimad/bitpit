@@ -10,7 +10,7 @@
 
 using namespace std;
 
-#if NOMPI==0
+#if ENABLE_MPI
 ClassLog::ClassLog(string filename_,MPI_Comm comm_) : m_filename(filename_),m_comm(comm_) {};
 #else
 ClassLog::ClassLog(string filename_) : m_filename(filename_) {};
@@ -51,7 +51,7 @@ void ClassLog::writeLog(string msg) {
 
 	int rank = 0;
 
-#if NOMPI==0
+#if ENABLE_MPI
 	bool flag = MPI::Is_finalized();
 	if (!(flag))
 		int error_flag = MPI_Comm_rank(m_comm,&rank);
@@ -68,7 +68,7 @@ void ClassLog::writeLog(string msg) {
 		// Close file
 		file_handle.close();
 	}
-//#if NOMPI==0
+//#if ENABLE_MPI
 //	error_flag = MPI_Barrier(comm);
 //#endif
 	return; };

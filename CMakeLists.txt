@@ -37,7 +37,7 @@ if (NOT ONLY_PABLO)
 	set(VTK_DIR "/opt/VTK/lib/cmake/vtk" CACHE PATH "The directory containing a CMake configuration file for VTK")
 endif()
 
-set(WITHOUT_MPI 0 CACHE BOOL "If set, the program is compiled without MPI support")
+set(ENABLE_MPI 1 CACHE BOOL "If set, the program is compiled without MPI support")
 
 #------------------------------------------------------------------------------------#
 # Internal variables
@@ -49,7 +49,7 @@ set(STATIC 1 CACHE BOOL INTERNAL "If set, the program is linked using static lib
 #------------------------------------------------------------------------------------#
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${BITPIT_DIR}/cmake/Modules")
 
-if (NOT WITHOUT_MPI)
+if (ENABLE_MPI)
 	find_package(MPI)
 endif()
 
@@ -68,11 +68,11 @@ if (VERBOSE_MAKE)
 	set(CMAKE_VERBOSE_MAKEFILE ON)
 endif()
 
-if (WITHOUT_MPI)
+add_definitions(-DENABLE_MPI=${ENABLE_MPI})
+
+if (NOT ENABLE_MPI)
 	add_definitions(-DDISABLE_MPI)
-    add_definitions(-DNOMPI=1)
 else()
-    add_definitions(-DNOMPI=0)
 	if (MPI_C_FOUND)
 		set(CMAKE_C_COMPILER ${MPI_C_COMPILER})
 	else()

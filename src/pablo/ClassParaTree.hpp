@@ -4,7 +4,7 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
-#if NOMPI==0
+#if ENABLE_MPI
 #include <mpi.h>
 #endif
 #include "ClassGlobal.hpp"
@@ -90,7 +90,7 @@ private:
 	//m_log member
 	ClassLog 				m_log;							/**<Log object*/
 
-#if NOMPI==0
+#if ENABLE_MPI
 	MPI_Comm 				m_comm;							/**<MPI communicator*/
 #endif
 
@@ -98,7 +98,7 @@ private:
 	// CONSTRUCTORS AND OPERATORS														   //
 	// =================================================================================== //
 public:
-#if NOMPI==0
+#if ENABLE_MPI
 	ClassParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.m_log", MPI_Comm comm = MPI_COMM_WORLD);
 	ClassParaTree(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.m_log", MPI_Comm comm = MPI_COMM_WORLD);
 	ClassParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.m_log", MPI_Comm comm = MPI_COMM_WORLD);
@@ -175,7 +175,7 @@ public:
 	bool		getBound(uint32_t idx);
 	bool		getPbound(uint32_t idx, uint8_t iface);
 	bool		getPbound(uint32_t idx);
-#if NOMPI==0
+#if ENABLE_MPI
 	bool 		getIsGhost(uint32_t idx);
 #endif
 	bool 		getIsNewR(uint32_t idx);
@@ -260,7 +260,7 @@ public:
 	uint64_t 		getGlobalIdx(ClassOctant* oct);
 	uint32_t 		getIdx(ClassOctant* oct);
 	uint32_t 		getIdx(ClassOctant oct);
-#if NOMPI==0
+#if ENABLE_MPI
 	bool 			getIsGhost(ClassOctant* oct);
 	bool 			getIsGhost(ClassOctant oct);
 #endif
@@ -312,7 +312,7 @@ public:
 	const u32arr3vector & getGhostNodes();
 	const u32array3 & getGhostNodeLogicalCoordinates(uint32_t inode);
 	dvector 	getGhostNodeCoordinates(uint32_t inode);
-#if NOMPI==0
+#if ENABLE_MPI
 	void 		loadBalance();
 	void 		loadBalance(uint8_t & level);
 #endif
@@ -330,7 +330,7 @@ private:
 	bool 		private_adapt();
 	bool 		private_adapt_mapidx(bool mapflag);
 	void 		updateAdapt();
-#if NOMPI==0
+#if ENABLE_MPI
 	void 		computePartition(uint32_t* partition);
 	void 		computePartition(uint32_t* partition, dvector* weight);
 	void 		computePartition(uint32_t* partition, uint8_t & level_);
@@ -352,7 +352,7 @@ public:
 	// =================================================================================== //
 	// TEMPLATE METHODS												    			       //
 	// =================================================================================== //
-#if NOMPI==0
+#if ENABLE_MPI
 
 	/** Communicate data provided by the user between the processes.
 	 */

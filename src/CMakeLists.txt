@@ -53,7 +53,7 @@ else()
     )
 endif()
 
-if (WITHOUT_MPI)
+if (NOT ENABLE_MPI)
 	set_target_properties(${BITP_MESH_LIBRARY} PROPERTIES DEBUG_POSTFIX "_D")
 else()
 	set_target_properties(${BITP_MESH_LIBRARY} PROPERTIES DEBUG_POSTFIX "_MPI_D")

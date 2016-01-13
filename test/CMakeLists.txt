@@ -24,7 +24,7 @@ if (NOT ONLY_PABLO)
     list(APPEND TESTS "patchman_003")
 endif()
 
-if (NOT WITHOUT_MPI)
+if (ENABLE_MPI)
     set(PARALLEL_TEST "")
     list(APPEND PARALLEL_TESTS "parallel_pablo_001")
 endif()
