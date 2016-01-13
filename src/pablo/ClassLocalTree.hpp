@@ -96,7 +96,7 @@ private:
 	// =================================================================================== //
 
 public:
-	ClassLocalTree(int8_t maxlevel, uint8_t dim_);
+	ClassLocalTree(int8_t maxlevel, uint8_t dim);
 	~ClassLocalTree();
 
 	// =================================================================================== //

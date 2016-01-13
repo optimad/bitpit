@@ -27,7 +27,7 @@ using namespace std;
  * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
  */
 #if NOMPI==0
-ClassParaTree::ClassParaTree(uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm comm_) : m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(logfile,comm_),m_comm(comm_),m_trans(maxlevel,dim),m_octree(maxlevel,dim){
+ClassParaTree::ClassParaTree(uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm comm) : m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(logfile,comm),m_comm(comm),m_trans(maxlevel,dim),m_octree(maxlevel,dim){
 #else
 ClassParaTree::ClassParaTree(uint8_t dim, int8_t maxlevel, string logfile ) : m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(logfile),m_trans(maxlevel, dim),m_octree(maxlevel,dim){
 #endif
@@ -83,7 +83,7 @@ ClassParaTree::ClassParaTree(uint8_t dim, int8_t maxlevel, string logfile ) : m_
  * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
  */
 #if NOMPI==0
-ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm comm_):m_dim(uint8_t(min(max(2,int(dim)),3))),m_trans(X,Y,Z,L,maxlevel,dim),m_log(logfile,comm_),m_comm(comm_),m_octree(maxlevel,dim){
+ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm comm):m_dim(uint8_t(min(max(2,int(dim)),3))),m_trans(X,Y,Z,L,maxlevel,dim),m_log(logfile,comm),m_comm(comm),m_octree(maxlevel,dim){
 #else
 ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, uint8_t dim, int8_t maxlevel, string logfile):m_dim(uint8_t(min(max(2,int(dim)),3))),m_trans(X,Y,Z,L,maxlevel,dim),m_log(logfile),m_octree(maxlevel,dim){
 #endif
@@ -145,7 +145,7 @@ ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, uint8_t dim
  * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
  */
 #if NOMPI==0
-ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm comm_):m_dim(uint8_t(min(max(2,int(dim)),3))),m_trans(X,Y,Z,L,maxlevel,dim),m_log(logfile,comm_),m_comm(comm_),m_octree(maxlevel,dim){
+ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm comm):m_dim(uint8_t(min(max(2,int(dim)),3))),m_trans(X,Y,Z,L,maxlevel,dim),m_log(logfile,comm),m_comm(comm),m_octree(maxlevel,dim){
 #else
 ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, string logfile):m_dim(uint8_t(min(max(2,int(dim)),3))),m_trans(X,Y,Z,L,maxlevel,dim),m_log(logfile),m_octree(maxlevel,dim){
 #endif

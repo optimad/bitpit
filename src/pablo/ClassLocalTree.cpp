@@ -19,10 +19,10 @@ using namespace std;
 
 /*!Dimensional and default constructor.
  * \param[in] maxlevel Maximum refinement level of the octree.
- * \param[in] dim_ Space dimension of octree.
+ * \param[in] dim Space dimension of octree.
  */
-ClassLocalTree::ClassLocalTree(int8_t maxlevel, uint8_t dim_){
-	m_dim = dim_;
+ClassLocalTree::ClassLocalTree(int8_t maxlevel, uint8_t dim){
+	m_dim = dim;
 	m_global.setGlobal(maxlevel, m_dim);
 	ClassOctant oct0(m_dim);
 	ClassOctant octf(m_dim,m_global.m_maxLevel,0,0,0);

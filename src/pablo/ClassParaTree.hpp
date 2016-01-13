@@ -99,9 +99,9 @@ private:
 	// =================================================================================== //
 public:
 #if NOMPI==0
-	ClassParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.m_log", MPI_Comm comm_ = MPI_COMM_WORLD);
-	ClassParaTree(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.m_log", MPI_Comm comm_ = MPI_COMM_WORLD);
-	ClassParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.m_log", MPI_Comm comm_ = MPI_COMM_WORLD);
+	ClassParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.m_log", MPI_Comm comm = MPI_COMM_WORLD);
+	ClassParaTree(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.m_log", MPI_Comm comm = MPI_COMM_WORLD);
+	ClassParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.m_log", MPI_Comm comm = MPI_COMM_WORLD);
 #else
 	ClassParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.m_log");
 	ClassParaTree(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.m_log");
