@@ -5,6 +5,10 @@
 // ================================================================================== //
 // INFO                                                                               //
 // ================================================================================== //
+/*!
+        \file: Operators_array.tpp
+        \brief: Basic operator for (C++11) std::array
+        \author: Alessandro Alaia
 // Author     : Alessandro Alaia                                                      //
 // Version    : v3.0                                                                  //
 //                                                                                    //
