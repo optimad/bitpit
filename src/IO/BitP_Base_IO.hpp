@@ -1,3 +1,7 @@
+/*!
+ * \defgroup IO
+ */
+
 #ifndef __BITP_BASE_IO__
 #define __BITP_BASE_IO__
 
