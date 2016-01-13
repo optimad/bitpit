@@ -65,7 +65,6 @@ private:
 	// =================================================================================== //
 	// CONSTRUCTORS AND OPERATORS
 	// =================================================================================== //
-public:
 	ClassMap(int8_t maxlevel, uint8_t dim_);
 	ClassMap(double & X, double & Y, double & Z, double & LL, int8_t maxlevel, uint8_t dim_);
 
