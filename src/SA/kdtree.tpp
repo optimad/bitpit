@@ -10,13 +10,34 @@
 // All rights reserved.                                                       //
 // ========================================================================== //
 
+/*!
+
+    \class kdnode
+    \brief class for kd-tree node.
+
+    Store the informatino of a node in kd-tree data structure.
+    
+    Template parameters are:
+    - T, container used to store node coordinates
+    - T1, label associated to the node.
+
+    Template parameters can be any type fulfilling the following requirements:
+    1. operator* (dereferencing operator) must be defined for class T
+    2. T1 must be a copy-constructible type.
+
+*/
+
 // ========================================================================== //
 // TEMPLATE IMPLEMENTATIONS FOR KDNODE                                        //
 // ========================================================================== //
 
-// Constructors ============================================================= //
+// Constructor(s) =========================================================== //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Default constructor for class kdnode.
+    Initialize an empty node in the kd-tree.
+*/
 template<class T, class T1>
 kdnode<T, T1>::kdnode(
     void
@@ -56,7 +77,13 @@ rchild_ = -1;
 
 return; }
 
+// Destructor(s) ============================================================ //
+
 // -------------------------------------------------------------------------- //
+/*!
+    Default destructor for class kdnode.
+    Clear kdnode content and release memory.
+*/
 template<class T, class T1>
 kdnode<T, T1>::~kdnode(
     void
@@ -100,9 +127,38 @@ return; }
 // TEMPLATE IMPLEMENTATIONS FOR KDTREE                                        //
 // ========================================================================== //
 
+/*!
+
+    \class kdtree
+    \brief class for kd-tree data structure.
+
+    Sort vertices in a d-dimensional Euclidean space into a kd-tree structure.
+    
+    Template parameters are:
+    - d, number dimensions (i.e. number of coordinates for vertices)
+    - T, container used to store vertex coordinates
+    - T1, label type associated to each node in the kd-tree.
+
+    Template parameters can be any type fulfilling the following requirements:
+    1. operator* (dereferencing operator) must be defined for class T
+    2. T1 must be a copy-constructible type.
+    3. operator== must be defined for container T, which returns true
+       if two objects of type T have the same content (i.e. two vertices have the
+       same coordinates)
+
+*/
+
 // Constructors ============================================================= //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Default constructor for class kdtree.
+
+    Initialize an empty kd-tree structure and reserve memory for the insertion
+    of maxstack nodes.
+
+    \param[in] maxstack memory reserve (in terms of number of elements)
+*/
 template<int d, class T, class T1>
 kdtree<d, T, T1>::kdtree(
     int      maxstack
@@ -150,6 +206,11 @@ return; }
 // Destructors ============================================================== //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Default destructor for class kdtree.
+
+    Clear kd-tree content and release memory.
+*/
 template<int d, class T, class T1>
 kdtree<d, T, T1>::~kdtree(
     void
@@ -193,6 +254,17 @@ return; }
 // Methods ================================================================== //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Check whether a given vertex already exist in the kd-tree.
+    Check is performed via lexicographical comparison of vertex coordinates.
+
+    \param[in] P_ pointer to container storing the coordinates of the vertex
+    to be checked.
+
+    \result on output returns the index of the kd-node in the tree having the
+    same coordinates of the input vertex. If no node is found in the kd-tree,
+    returns -1.
+*/
 template<int d, class T, class T1>
 int kdtree<d, T, T1>::exist(
     T      *P_
@@ -257,6 +329,19 @@ if (check) {
 return(index); };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Check whether a given vertex already exist in the kd-tree.
+    Check is performed via lexicographical comparison of vertex coordinates.
+
+    \param[in] P_ pointer to container storing the coordinates of the vertex
+    to be checked.
+    \param[in,out] label on output stores the label associated with the kdnode
+    (if any) whose coordinates match those of the input vector
+
+    \result on output returns the index of the kd-node in the tree having the
+    same coordinates of the input vertex. If no node is found in the kd-tree,
+    returns -1.
+*/
 template<int d, class T, class T1>
 int kdtree<d, T, T1>::exist(
     T               *P_,
@@ -325,6 +410,22 @@ if (check) {
 return(index); };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Given an input vertex P, returns the index of the first node encountered
+    in the kd-tree which is in the 1-ball centered on P and having a radius of h.
+    The 1-ball is defined as:
+    B1(x; h) = {y: norm_1(y-x) <= h}
+    \param[in] P_ pointer to container storing the coordinates of P
+    \param[in] h 1-ball radius
+    \param[in] debug (default = false) flag for running the search in debug mode
+    \param[in] next_ (default = 0) index of element in the kd tree used as starting
+    point by the kd-tree search algorithm
+    \param[in] lev   (default = 0) level in kd-tree of node used as starting point
+    by the kd-tree search algorithm.
+
+    \result on output returns the index of the first kd-node encountered in the tree
+    which lies in the 1-ball centered on P. If no node is found, returns -1.
+*/
 template<int d, class T, class T1 >
 template< class T2>
 int kdtree<d, T, T1>::h_neighbor(
@@ -403,6 +504,24 @@ if (((*(nodes[prev_].object_))[dim] <= (*P_)[dim] + h)
 return(max(index_l, index_r)); };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Given an input vertex P, returns the index of the first node encountered
+    in the kd-tree which is in the 1-ball centered on P and having a radius of h.
+    The 1-ball is defined as:
+    B1(x; h) = {y: norm_1(y-x) <= h}
+    \param[in] P_ pointer to container storing the coordinates of P
+    \param[in,out] label on output stores the label of the kdnode in the 1-ball
+    centered on P (if any).
+    \param[in] h 1-ball radius
+    \param[in] debug (default = false) flag for running the search in debug mode
+    \param[in] next_ (default = 0) index of element in the kd tree used as starting
+    point by the kd-tree search algorithm
+    \param[in] lev   (default = 0) level in kd-tree of node used as starting point
+    by the kd-tree search algorithm.
+
+    \result on output returns the index of the first kd-node encountered in the tree
+    which lies in the 1-ball centered on P. If no node is found, returns -1.
+*/
 template<int d, class T, class T1 >
 template< class T2>
 int kdtree<d, T, T1>::h_neighbor(
@@ -476,6 +595,11 @@ int              dim;
 return(max(index_l, index_r)); };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Insert a new vertex in the kd-tree.
+
+    \param[in] P_ pointer to container storing vertex coordinates.
+*/
 template<int d, class T, class T1>
 void kdtree<d, T, T1>::insert(
     T               *P_
@@ -560,6 +684,12 @@ return; };
 
 
 // -------------------------------------------------------------------------- //
+/*!
+    Insert a new vertex and the associated label into kd-tree.
+
+    \param[in] P_ pointer to container storing vertex coordinates.
+    \param[in] label label associated to P_
+*/
 template<int d, class T, class T1>
 void kdtree<d, T, T1>::insert(
     T               *P_,
@@ -648,6 +778,11 @@ n_nodes++;
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Whenever the kd-tree reaches its full capacity (i.e. the number of kdnode
+    stored in the tree is equal to the memory reserved), increase the memory
+    reserve by maxstack. The parameters maxstack is set at construction.
+*/
 template<int d, class T, class T1>
 void kdtree<d, T, T1>::IncreaseStack(
     void
@@ -687,6 +822,10 @@ nodes.resize(nodes.size() + MAXSTK);
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Decrease the memory reserved for kd-tree by maxstack.
+    The parameters maxstack is set at construction.
+*/
 template<int d, class T, class T1>
 void kdtree<d, T, T1>::DecreaseStack(
     void
