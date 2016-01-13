@@ -1,6 +1,13 @@
+/*!
+  \ingroup    VTK
+  @{
+ */
+
 #include"Class_VTK.hpp"
 
-//------------------------------------------------------------------
+/*! ------------------------------------------------------------------
+ * Default constructor
+ */
 VTK::Field_C::Field_C(){
 
     name            = "undefined" ;  
@@ -13,8 +20,13 @@ VTK::Field_C::Field_C(){
 
 };
 
-//------------------------------------------------------------------
-VTK::Field_C::Field_C( string name_, uint8_t comp_, string loc_ ):
+/*! ------------------------------------------------------------------
+ * Constructor
+ * \param[in]   name_   name of data field
+ * \param[in]   comp_   number of coponents of data field [1/3]
+ * \param[in]   loc_    location of data field ["Cell"/"Point"]
+ */
+VTK::Field_C::Field_C( std::string name_, uint8_t comp_, std::string loc_ ):
        name(name_), components(comp_), location(loc_) {
 
     type            = "undefined" ;
@@ -24,8 +36,14 @@ VTK::Field_C::Field_C( string name_, uint8_t comp_, string loc_ ):
 
 };
 
-//------------------------------------------------------------------
-VTK::Field_C::Field_C( string name_, uint8_t comp_, string type_, string loc_ ):
+/*! ------------------------------------------------------------------
+ * Constructor
+ * \param[in]   name_   name of data field
+ * \param[in]   comp_   number of coponents of data field [1/3]
+ * \param[in]   type_   type of data field [ "[U]Int8", "[U]Int16", "[U]Int32", "[U]Int64", "Float32", "Float64" ]
+ * \param[in]   loc_    location of data field ["Cell"/"Point"]
+ */
+VTK::Field_C::Field_C( std::string name_, uint8_t comp_, std::string type_, std::string loc_ ):
        name(name_), components(comp_), type(type_), location(loc_) {
 
     nr_elements     = 0 ;
@@ -34,21 +52,41 @@ VTK::Field_C::Field_C( string name_, uint8_t comp_, string type_, string loc_ ):
 
 };
 
-//------------------------------------------------------------------
-VTK::Field_C::Field_C( string name_, uint8_t comp_, string type_, string loc_, string cod_, uint64_t nr_elements_):
+/*! ------------------------------------------------------------------
+ * Constructor
+ * \param[in]   name_   name of data field
+ * \param[in]   comp_   number of coponents of data field [1/3]
+ * \param[in]   type_   type of data field [ "[U]Int8", "[U]Int16", "[U]Int32", "[U]Int64", "Float32", "Float64" ]
+ * \param[in]   loc_    location of data field ["Cell"/"Point"]
+ * \param[in]   cod_    codex ["ascii"/ "appended"]
+ * \param[in]   nr_elements_    number of elements of data field
+ */
+VTK::Field_C::Field_C( std::string name_, uint8_t comp_, std::string type_, std::string loc_, std::string cod_, uint64_t nr_elements_):
        name(name_), components(comp_), type(type_), location(loc_), codification(cod_), nr_elements(nr_elements_){
 
 };
 
-//------------------------------------------------------------------
-VTK::Field_C::~Field_C(){};
+/*! ------------------------------------------------------------------
+ * Destructor
+ * */
+VTK::Field_C::~Field_C(){
+};
 
 
-//------------------------------------------------------------------
-void      VTK::Field_C::SetName( string  name_){ name= name_; return; };
+/*! ------------------------------------------------------------------
+ * Set name of data field
+ * \param[in]   name_   name of data field
+ */
+void      VTK::Field_C::SetName( std::string  name_){ 
+    name= name_; 
+    return; 
+};
 
-//------------------------------------------------------------------
-void      VTK::Field_C::SetType( string  type_){
+/*! ------------------------------------------------------------------
+ * Set type of data field
+ * \param[in]   type_   type of data field [ "[U]Int8", "[U]Int16", "[U]Int32", "[U]Int64", "Float32", "Float64" ]
+ */
+void      VTK::Field_C::SetType( std::string  type_){
 
     if( type_ == "Int8"    || 
         type_ == "UInt8"   ||
@@ -74,57 +112,140 @@ void      VTK::Field_C::SetType( string  type_){
     return; 
 };
 
-//------------------------------------------------------------------
-void      VTK::Field_C::SetLocation( string  loc_ ){ location= loc_; return; };
+/*! ------------------------------------------------------------------
+ * Set location of data field
+ * \param[in]   loc_   location of data field [ "Cell", "Point" ] 
+ */
+void      VTK::Field_C::SetLocation( std::string  loc_ ){ 
+    location= loc_; 
+    return; 
+};
 
-//------------------------------------------------------------------
-void      VTK::Field_C::SetCodification( string  code_ ){ codification= code_; return; };
+/*! ------------------------------------------------------------------
+ * Set codification of data field
+ * \param[in]   code_  codification ["appended"/ "ascii"]
+ */
+void      VTK::Field_C::SetCodification( std::string  code_ ){ 
+    codification= code_; 
+    return; 
+};
 
-//------------------------------------------------------------------
-void      VTK::Field_C::SetComponents( uint8_t comp_){ components= comp_; return; };
+/*! ------------------------------------------------------------------
+ * Set number of components of data field
+ * \param[in]   comp_   number of components [1/3]
+ */
+void      VTK::Field_C::SetComponents( uint8_t comp_){ 
+    components= comp_; 
+    return; 
+};
 
-//------------------------------------------------------------------
-void      VTK::Field_C::SetElements( uint64_t ele_){ nr_elements= ele_; return; };
+/*! ------------------------------------------------------------------
+ * Set numer of elements of data field
+ * \param[in]   ele_   number of elements
+ */
+void      VTK::Field_C::SetElements( uint64_t ele_){ 
+    nr_elements= ele_; 
+    return; 
+};
 
-//------------------------------------------------------------------
-void      VTK::Field_C::SetPosition( fstream::pos_type pos_ ){ position =pos_ ; return; } ;
+/*! ------------------------------------------------------------------
+ * Set position of data field
+ * \param[in]   pos_    position of data field ["Cell"/"Point"]
+ */
+void      VTK::Field_C::SetPosition( std::fstream::pos_type pos_ ){ 
+    position =pos_ ; 
+    return; 
+} ;
 
-//------------------------------------------------------------------
-void      VTK::Field_C::SetOffset( uint64_t offs_){ offset= offs_; return; };
+/*! ------------------------------------------------------------------
+ * Set offset of data field for appended output
+ * \param[in]   offs_   offset from "_" character of appended section
+ */
+void      VTK::Field_C::SetOffset( uint64_t offs_){ 
+    offset= offs_; 
+    return; 
+};
 
-//------------------------------------------------------------------
-string    VTK::Field_C::GetName(){ return name; };
+/*! ------------------------------------------------------------------
+ * Get name of data field
+ * \return  name of data field
+ */
+string    VTK::Field_C::GetName(){ 
+    return name; 
+};
 
-//------------------------------------------------------------------
+/*! ------------------------------------------------------------------
+ * Get type of data field
+ * \return   type of data field [ "[U]Int8", "[U]Int16", "[U]Int32", "[U]Int64", "Float32", "Float64" ]
+ */
 string    VTK::Field_C::GetType(){ return type; };
 
-//------------------------------------------------------------------
-string    VTK::Field_C::GetLocation(){ return location; };
+/*! ------------------------------------------------------------------
+ * Get location of data field
+ * \return  location ["Cell"/"Point"]
+ */
+string    VTK::Field_C::GetLocation(){ 
+    return location; 
+};
 
-//------------------------------------------------------------------
-string    VTK::Field_C::GetCodification(){ return codification; };
+/*! ------------------------------------------------------------------
+ * Get codification of data field
+ * \return  codification ["ascii"/"appended"]
+ */
+string    VTK::Field_C::GetCodification(){ 
+    return codification; 
+};
 
-//------------------------------------------------------------------
-uint8_t   VTK::Field_C::GetComponents(){ return components; };
+/*! ------------------------------------------------------------------
+ * Get number of components of data field
+ * \return  number of components [1/3]
+ */
+uint8_t   VTK::Field_C::GetComponents(){ 
+    return components; 
+};
 
-//------------------------------------------------------------------
+/*! ------------------------------------------------------------------
+ * Get number of elements of data field. 
+ * Generally number of points or number of cells.
+ * \return  number of elements
+ */
 uint64_t  VTK::Field_C::GetElements(){ return nr_elements; };
 
-//------------------------------------------------------------------
+/*! ------------------------------------------------------------------
+ * Get total number of entries data field
+ * \return  total size = number of elements *nuber of components
+ */
 uint64_t  VTK::Field_C::GetSize(){ 
     return components *nr_elements ; 
 };
 
-//------------------------------------------------------------------
-uint64_t  VTK::Field_C::GetOffset(){ return offset; };
+/*! ------------------------------------------------------------------
+ * Get offset in appended section
+ * \return  offset for "_" character in appended section
+ */
+uint64_t  VTK::Field_C::GetOffset(){ 
+    return offset; 
+};
 
-//------------------------------------------------------------------
+/*! ------------------------------------------------------------------
+ * Get bytes of  data field
+ * \return  memory size of data field
+ */
 uint64_t  VTK::Field_C::GetNbytes(){ 
     return components *nr_elements *SizeOfType( type ) ;
 };
 
-//------------------------------------------------------------------
-fstream::pos_type   VTK::Field_C::GetPosition(){ return position; };
+/*! ------------------------------------------------------------------
+ * Get position of data field in VTK file. 
+ * This information is available after VTK::ReadMetaData() has been called.
+ * \return      position in VTK file.
+ */
+std::fstream::pos_type   VTK::Field_C::GetPosition(){ 
+    return position; 
+};
 
 
 
+/*!
+  @}
+ */

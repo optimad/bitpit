@@ -1,19 +1,35 @@
-//------------------------------------------------------------------
+/*!
+ *   \ingroup    VTK
+ *   @{
+ */
+
+/*!  ===================================================================================
+ *  Default constructor.
+ *  Allocates four geometry fields called "Points"(Float64), "offsets"(Int32), "types"(Int32) and "connectivity"(Int32).
+ *  \tparam     Derived     Derived class for CRTP
+ */
 template <class Derived>
 VTK_UnstructuredGrid<Derived>::VTK_UnstructuredGrid( )
                               :VTK() {
 
   fh.SetAppendix("vtu");
 
-  geometry.push_back( VTK::Field_C( "Points",       3,  "Point" ) ) ;
-  geometry.push_back( VTK::Field_C( "offsets",      1,  "Cell"  ) ) ;
-  geometry.push_back( VTK::Field_C( "types",        1,  "Cell"  ) ) ;
-  geometry.push_back( VTK::Field_C( "connectivity", 1,  "Cell"  ) ) ;
+  geometry.push_back( VTK::Field_C( "Points",       3, "Float64", "Point" ) ) ;
+  geometry.push_back( VTK::Field_C( "offsets",      1, "Int32",   "Cell"  ) ) ;
+  geometry.push_back( VTK::Field_C( "types",        1, "Int32",   "Cell"  ) ) ;
+  geometry.push_back( VTK::Field_C( "connectivity", 1, "Int32",   "Cell"  ) ) ;
 
 };
-//------------------------------------------------------------------
+
+/*!  ===================================================================================
+ *  Constructor.
+ *  Sets input parameters and calls default constructor
+ *  \tparam     Derived     Derived class for CRTP
+ *  \param[in]  dir_        Directory of vtk file with final "/"
+ *  \param[in]  name_       Name of vtk file without suffix
+ */
 template <class Derived>
-VTK_UnstructuredGrid<Derived>::VTK_UnstructuredGrid( string dir_, string name_  )
+VTK_UnstructuredGrid<Derived>::VTK_UnstructuredGrid( std::string dir_, std::string name_  )
                               :VTK_UnstructuredGrid( ){
 
   SetNames( dir_, name_ ) ; 
@@ -21,15 +37,24 @@ VTK_UnstructuredGrid<Derived>::VTK_UnstructuredGrid( string dir_, string name_  
 
 };
 
-//------------------------------------------------------------------
+/*!  ===================================================================================
+ *  Destructor.
+ */
 template <class Derived>
 VTK_UnstructuredGrid<Derived>::~VTK_UnstructuredGrid( ) {
     
 };
 
-//------------------------------------------------------------------
+/*!  ===================================================================================
+ *  Sets the type of the geometry variables
+ *  \tparam     Derived     Derived class for CRTP
+ *  \param[in]  Ptype       Type of "Point" geometry information [ "Float[32/64]"]
+ *  \param[in]  Otype       Type of "offset" geometry information [ "[U]Int[8/16/32/64]"] 
+ *  \param[in]  Ttype       Type of "types" geometry information [ "[U]Int[8/16/32/64]"]
+ *  \param[in]  Ctype       Type of "connectivity" geometry information [ "[U]Int[8/16/32/64]"]
+ */
 template <class Derived>
-void VTK_UnstructuredGrid<Derived>::SetGeomTypes(string Ptype, string Otype, string Ttype, string Ctype  ){
+void VTK_UnstructuredGrid<Derived>::SetGeomTypes( std::string Ptype, std::string Otype, std::string Ttype, std::string Ctype  ){
 
     geometry[0].SetType(Ptype) ;
     geometry[1].SetType(Otype) ;
@@ -39,7 +64,13 @@ void VTK_UnstructuredGrid<Derived>::SetGeomTypes(string Ptype, string Otype, str
     return ;
 };
 
-//------------------------------------------------------------------
+/*!  ===================================================================================
+ *  Sets the size of the unstructured grid.
+ *  \tparam     Derived     Derived class for CRTP
+ *  \param[in]  ncells_     number of cells
+ *  \param[in]  npoints_    number of points
+ *  \param[in]  nconn_      size of the connectivity information
+ */
 template <class Derived>
 void VTK_UnstructuredGrid<Derived>::SetDimensions( uint64_t ncells_, uint64_t npoints_, uint64_t nconn_ ){
 
@@ -59,13 +90,17 @@ void VTK_UnstructuredGrid<Derived>::SetDimensions( uint64_t ncells_, uint64_t np
     return ;
 };
 
-// =================================================================================== //
+/*!  ===================================================================================
+ *  Reads "type" information of existint grid and calculates the correspondng connectivity size.
+ *  \tparam     Derived     Derived class for CRTP
+ *  \return     size of the connectivity information
+ */
 template <class Derived>
 uint64_t VTK_UnstructuredGrid<Derived>::CalcSizeConnectivity( ){
 
-    fstream                  str  ;
-    fstream::pos_type        position_appended;
-    string                   line;
+    std::fstream                  str  ;
+    std::fstream::pos_type        position_appended;
+    std::string                   line;
     char                     c_ ;
     uint32_t                 nbytes32 ;
     uint64_t                 nbytes64 ;
@@ -109,8 +144,8 @@ uint64_t VTK_UnstructuredGrid<Derived>::CalcSizeConnectivity( ){
     if(  geometry[3].GetCodification() == "ascii"){
         str.seekg( geometry[3].GetPosition() ) ;
 
-        string              line ;
-        vector<uint64_t>    temp;
+        std::string              line ;
+        std::vector<uint64_t>    temp;
 
         nconn = 0 ;
 
@@ -132,7 +167,13 @@ uint64_t VTK_UnstructuredGrid<Derived>::CalcSizeConnectivity( ){
 
 };
 
-// =================================================================================== //
+/*!  ===================================================================================
+ *  Returns number of vertices for a given element type.
+ *  Codification of element type according to http://www.vtk.org/wp-content/uploads/2015/04/file-formats.pdf
+ *  \tparam     Derived     Derived class for CRTP
+ *  \param[in]  t           element type
+ *  \return     number of vertices of element type
+ */
 template <class Derived>
 uint8_t VTK_UnstructuredGrid<Derived>::NumberOfElements( uint8_t t){
 
@@ -157,12 +198,15 @@ uint8_t VTK_UnstructuredGrid<Derived>::NumberOfElements( uint8_t t){
 
 };
 
-// =================================================================================== //
+/*!  ===================================================================================
+ *  Writes entire VTU but the data.
+ *  \tparam     Derived     Derived class for CRTP
+ */
 template <class Derived>
 void VTK_UnstructuredGrid<Derived>::WriteMetaData( ){
 
-    fstream str ;
-    string line ; 
+    std::fstream str ;
+    std::string line ; 
     
     str.open( fh.GetName( ), ios::out ) ;
     
@@ -204,11 +248,15 @@ void VTK_UnstructuredGrid<Derived>::WriteMetaData( ){
     return ;
 };
 
-// =================================================================================== //
+/*!  ===================================================================================
+ *  Writes collection file for parallel output. 
+ *  Is called by rank 0 in VTK::Write()
+ *  \tparam     Derived     Derived class for CRTP
+ */
 template <class Derived>
 void VTK_UnstructuredGrid<Derived>::WriteCollection( ){
 
-  fstream str ;
+  std::fstream str ;
 
   FileHandler_C   fhp, fho ;
 
@@ -253,14 +301,18 @@ void VTK_UnstructuredGrid<Derived>::WriteCollection( ){
   return ;
 };
 
-// =================================================================================== //
+/*!  ===================================================================================
+ *  Reads meta data of VTU file (grid size, data fields, codex, position of data within file).
+ *  Calls SetDimension.
+ *  \tparam     Derived     Derived class for CRTP
+ */
 template <class Derived>
 void VTK_UnstructuredGrid<Derived>::ReadMetaData( ){
 
-    fstream str;
-    string line, temp;
+    std::fstream str;
+    std::string line, temp;
     
-    fstream::pos_type        position;
+    std::fstream::pos_type        position;
     
     str.open( fh.GetName( ), ios::in ) ;
     
@@ -303,25 +355,45 @@ void VTK_UnstructuredGrid<Derived>::ReadMetaData( ){
     return ;
 };
 
-// =================================================================================== //
+/*!  ===================================================================================
+ *  Returns the size of the connectivity information
+ *  \tparam     Derived     Derived class for CRTP
+ *  \return     size of connectivity
+ */
 template <class Derived>
 uint64_t VTK_UnstructuredGrid<Derived>::GetNConnectivity( ){
 
   return nconnectivity ;
 };
 
-// =================================================================================== //
+/*!  ===================================================================================
+ *  CRPT interface for writing data to stream.
+ *  \tparam     Derived     Derived class for CRTP
+ *  \param[in]  str         stream to write to
+ *  \param[in]  codex       codex which must be used ["ascii"/"appended"]. If "appended" a unformatted binary stream must be used
+ *  \param[in]  name        name of the data to be written. Either user data or grid data
+ */
 template <class Derived>
-void VTK_UnstructuredGrid<Derived>::Flush( fstream &str, string codex, string name ){
+void VTK_UnstructuredGrid<Derived>::Flush( std::fstream &str, std::string codex, std::string name ){
 
   static_cast<Derived *>(this)->Flush( str, codex, name );
   return ;
 };
 
-// =================================================================================== //
+/*!  ===================================================================================
+ *  CRPT interface for reading data from stream.
+ *  \tparam     Derived     Derived class for CRTP
+ *  \param[in]  str         stream to read from
+ *  \param[in]  codex       codex which must be used ["ascii"/"appended"]. If "appended" a unformatted binary stream must be used
+ *  \param[in]  name        name of the data to be read. Either user data or grid data
+ */
 template <class Derived>
-void VTK_UnstructuredGrid<Derived>::Absorb( fstream &str, string codex, string name ){
+void VTK_UnstructuredGrid<Derived>::Absorb( std::fstream &str, std::string codex, std::string name ){
 
   static_cast<Derived *>(this)->Absorb( str, codex, name );
   return ;
 };
+
+/*!
+ *   @}
+ */
