@@ -20,29 +20,27 @@
 // IMPLEMENTATIONS                                                            //
 // ========================================================================== //
 
+/*!
+    \class DGF_obj
+    \brief Interface to DGF I/O function
+
+    This class has been designed to allow an easy interface between end-user
+    and DGF I/O functions.
+*/
+
 // class DGF_obj methods ==================================================== //
 
 // Constructors ------------------------------------------------------------- //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Default constructor for class DGF obj.
+
+    Initialize an empty interface.
+*/
 DGF_obj::DGF_obj(
     void
 ) {
-
-// ========================================================================== //
-// DGF_obj::DGF_obj(                                                          //
-//     void)                                                                  //
-//                                                                            //
-// Default constructor for class DGF_obj.                                     //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -72,24 +70,16 @@ data.nS = -1;
 return; }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Constructor #1 for class DGF_obj.
+
+    Initialize an interface associated to a dgf file with specified name.
+
+    \param[in] filename dgf file name
+*/
 DGF_obj::DGF_obj(
     string      filename
 ) {
-
-// ========================================================================== //
-// DGF_obj::DGF_obj(                                                          //
-//     string      filename)                                                  //
-//                                                                            //
-// Custom constructor #1 for DGF_obj.                                         //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - filename      : string, dgf file name                                    //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -123,24 +113,14 @@ return; }
 // Public methods ----------------------------------------------------------- //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Open stream to dgf file associated with the interface.
+
+    \param[in] mode opening mode ("in": input, "out": output, "app": append mode)
+*/
 void DGF_obj::open(
     string      mode
 ) {
-
-// ========================================================================== //
-// void DGF_obj::open(                                                        //
-//     string      mode)                                                      //
-//                                                                            //
-// Open input/output stream to dgf file.                                      //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - mode     : string, stream mode                                           //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -195,28 +175,15 @@ else if (mode.compare("app") == 0) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Close stream from/to the dgf file associated with the interface.
+
+    \param[in] mode opening mode used for the stream ("in": input, "out": output,
+    "app": append mode)
+*/
 void DGF_obj::close(
     string      mode
 ) {
-
-// ========================================================================== //
-// void DGF_obj::close(                                                       //
-//     string      mode)                                                      //
-//                                                                            //
-// Close input/output stream to dgf file.                                     //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - mode      : string, stream type to be closed                             //
-//               "in"    --> close input stream                               //
-//               "out"   --> close output stream                              //
-//               "app"   --> close output stream                              //
-//               "inout" --> close input & output stream                      //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -260,24 +227,12 @@ else if (mode.compare("inout") == 0) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Clear info gathered from the associated dgf file,
+*/
 void DGF_obj::clear(
     void
 ) {
-
-// ========================================================================== //
-// void DGF_obj::clear(                                                       //
-//     void)                                                                  //
-//                                                                            //
-// Reset mebers to default values.                                            //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -311,6 +266,11 @@ close("inout");
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Display content and info to output stream
+
+    \param[in,out] out output stream
+*/
 void DGF_obj::display(
     ostream     &out
 ) {
@@ -425,24 +385,12 @@ if (dgf_error.size() > 0) {
 return; }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Scan dgf file associated to the interface and gather infos.
+*/
 void DGF_obj::scan(
     void
 ) {
-
-// ========================================================================== //
-// void DGF_obj::scan(                                                        //
-//     void)                                                                  //
-//                                                                            //
-// Scan dgf file and returns infos                                            //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -478,24 +426,13 @@ close("in");
 return; }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Scan dgf file associated with the interface and perform check on format
+    error(s).
+*/
 void DGF_obj::check(
     void
 ) {
-
-// ========================================================================== //
-// void DGF_obj::check(                                                       //
-//     void)                                                                  //
-//                                                                            //
-// Check data coherency in dgf file.                                          //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -530,6 +467,22 @@ close("in");
 return; }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Load mesh data from DGF file.
+
+    \param[in,out] nV on input stores the number of vertices already acquired
+    from the dgf file. On output stores the input value incremented by 
+    the number of mesh vertices loaded from the dgf file.
+    \param[in,out] nS on input stores the number of cells already acquired
+    from the dgf file. On output stores the input value incremented by 
+    the number of mesh cells loaded from the dgf file.
+    \param[in,out] V vertex coordinate list. On output stores the coordinates of
+    the vertices already acquired from the dgf file. New coordinates are appended
+    at the end of V.
+    \param[in,out] S cell->vertex connectivity data. On output stores the connectivity
+    entries for cells acquired from the dgf file. New connectivity entries are
+    appended at the and of S.
+*/
 void DGF_obj::load(
     int         &nV,
     int         &nS,
@@ -538,29 +491,6 @@ void DGF_obj::load(
 ) {
 
 // ========================================================================== //
-// void DGF_obj::load(                                                        //
-//     int         &nV,                                                       //
-//     int         &nS,                                                       //
-//     dvector2D   &V,                                                        //
-//     ivector2D   &S)                                                        //
-//                                                                            //
-// Load mesh data from dgf file.                                              //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - nV          : int, number of mesh vertices                               //
-// - nS          : int, number of simplicies                                  //
-// - V           : dvector2D, vertex coordinate list. V[i][0], V[i][1], ...   //
-//                 are the x, y, ... coordinates of the i-th vertex           //
-// - S           : ivector2D, simplex-vertex connectivity S[i][0], S[i][1],   //
-//                 ... are the global indices of vertices of the i-th simplex //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-
-// ========================================================================== //
 // VARIABLES DECLARATION                                                      //
 // ========================================================================== //
 
@@ -586,7 +516,25 @@ err = Read_DGF_mesh(ifile_handle, nV, nS, V, S);
 close("in");
 
 return; };
+
 // -------------------------------------------------------------------------- //
+/*!
+    Load mesh data from DGF file. Overloading of member function DGF_obj::load()
+    for container vector<array<double,3>>
+
+    \param[in,out] nV on input stores the number of vertices already acquired
+    from the dgf file. On output stores the input value incremented by 
+    the number of mesh vertices loaded from the dgf file.
+    \param[in,out] nS on input stores the number of cells already acquired
+    from the dgf file. On output stores the input value incremented by 
+    the number of mesh cells loaded from the dgf file.
+    \param[in,out] V vertex coordinate list. On output stores the coordinates of
+    the vertices already acquired from the dgf file. New coordinates are appended
+    at the end of V.
+    \param[in,out] S cell->vertex connectivity data. On output stores the connectivity
+    entries for cells acquired from the dgf file. New connectivity entries are
+    appended at the and of S.
+*/
 void DGF_obj::load(
     int         &nV,
     int         &nS,
@@ -595,29 +543,6 @@ void DGF_obj::load(
 ) {
 
 // ========================================================================== //
-// void DGF_obj::load(                                                        //
-//     int         &nV,                                                       //
-//     int         &nS,                                                       //
-//     dvector2D   &V,                                                        //
-//     ivector2D   &S)                                                        //
-//                                                                            //
-// Load mesh data from dgf file.                                              //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - nV          : int, number of mesh vertices                               //
-// - nS          : int, number of simplicies                                  //
-// - V           : dvector2D, vertex coordinate list. V[i][0], V[i][1], ...   //
-//                 are the x, y, ... coordinates of the i-th vertex           //
-// - S           : ivector2D, simplex-vertex connectivity S[i][0], S[i][1],   //
-//                 ... are the global indices of vertices of the i-th simplex //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-
-// ========================================================================== //
 // VARIABLES DECLARATION                                                      //
 // ========================================================================== //
 
@@ -645,6 +570,14 @@ close("in");
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Save mesh data from DGF file.
+
+    \param[in] nV number of vertices in the mesh
+    \param[in] nS number of cells in the mesh
+    \param[in] V vertex coordinate list.
+    \param[in] S cell->vertex connectivity data.
+*/
 void DGF_obj::save(
     int         &nV,
     int         &nS,
@@ -703,35 +636,21 @@ close("out");
 return; }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Save mesh data from DGF file. Overloading of member function DGF_obj::save()
+    for container vector<array<double,3>>
+
+    \param[in] nV number of vertices in the mesh
+    \param[in] nS number of cells in the mesh
+    \param[in] V vertex coordinate list.
+    \param[in] S cell->vertex connectivity data.
+*/
 void DGF_obj::save(
     int         &nV,
     int         &nS,
     dvecarr3E   &V,
     ivector2D   &S
 ) {
-
-// ========================================================================== //
-// void DGF_obj::save(                                                        //
-//     int         &nV,                                                       //
-//     int         &nS,                                                       //
-//     dvector2D   &V,                                                        //
-//     ivector2D   &S)                                                        //
-//                                                                            //
-// SAve mesh data into a dgf file.                                            //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - nV          : int, number of mesh vertices                               //
-// - nS          : int, number of simplicies                                  //
-// - V           : dvector2D, vertex coordinate list. V[i][0], V[i][1], ...   //
-//                 are the x, y, ... coordinates of the i-th vertex           //
-// - S           : ivector2D, simplex-vertex connectivity S[i][0], S[i][1],   //
-//                 ... are the global indices of vertices of the i-th simplex //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -764,26 +683,14 @@ return; }
 // Private methods ---------------------------------------------------------- //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Dummy function to end recursive calls to DGF_obj::load_vdata().
+*/
 void DGF_obj::load_vdata(
     void
 ) {
 
 // ========================================================================== //
-// void load_vdata(                                                           //
-//     void)                                                                  //
-//                                                                            //
-// Dummy function for recursive variadic template "load_vdata".               //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-
-// ========================================================================== //
 // VARIABLES DECLARATION                                                      //
 // ========================================================================== //
 
@@ -801,26 +708,14 @@ close("in");
 return; }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Dummy function to end recursive calls to DGF_obj::load_sdata().
+*/
 void DGF_obj::load_sdata(
     void
 ) {
 
 // ========================================================================== //
-// void load_sdata(                                                           //
-//     void)                                                                  //
-//                                                                            //
-// Dummy function for recursive variadic template "load_sdata".               //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-
-// ========================================================================== //
 // VARIABLES DECLARATION                                                      //
 // ========================================================================== //
 
@@ -838,24 +733,12 @@ close("in");
 return; }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Dummy function to end recursive calls to DGF_obj::append_vdata().
+*/
 void DGF_obj::append_vdata(
     void
 ) {
-
-// ========================================================================== //
-// void DGF_obj::append_vdata(                                                //
-//     void)                                                                  //
-//                                                                            //
-// Dummy function for recursive variadic template "append_vdata".             //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -875,24 +758,12 @@ close("app");
 return; }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Dummy function to end recursive calls to DGF_obj::append_sdata().
+*/
 void DGF_obj::append_sdata(
     void
 ) {
-
-// ========================================================================== //
-// void DGF_obj::append_sdata(                                                //
-//     void)                                                                  //
-//                                                                            //
-// Dummy function for recursive variadic template "append_sdata".             //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -914,29 +785,21 @@ return; }
 // Scanning routines ======================================================== //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Scan dgf data block and returns the number of entries in the block.
+
+    \param[in,out] file_handle input stream from dgf file
+    \param[in,out] n on output stores the number of entries found in the data
+    block
+
+    \result error flag for I/O errors:
+        err = 0: no error(s) encountered
+        err = 1: failed to scan dgf file.
+*/
 unsigned int Scan_DGF_data(
     ifstream    &file_handle,
     int         &n
 ) {
-
-// ========================================================================== //
-// unsigned int Scan_DGF_data(                                                //
-//     ifstream    &file_handle,                                              //
-//     int         &n)                                                        //
-//                                                                            //
-// Scan data block and returns infos.                                         //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle     : ifstream, input stream to dgf file.                    //
-// - n               : int, number of data in dataset                         //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err             : unsigned int, error flag:                              //
-//                     err = 0     --> no errors encountered                  //
-//                     err = 1     --> file is missing or cannot be opened    //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -997,6 +860,21 @@ if ((word.compare("#") == 0)
 return(0); }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Scan dgf file and gather infos
+
+    \param[in,out] file_handle input stream from dgf file.
+    \param[in,out] nV on output stores the number of mesh vertices
+    \param[in,out] nS on output stores the number of mesh cells
+    \param[in,out] sV_data name associated to each vertex data block
+    \param[in,out] sS_data name associated to each cell data block
+    \param[in,out] nV_data number of data entries for each vertex data block
+    \param[in,out] nS_data number of data entries for each cell data block
+
+    \result error flag for I/O errors:
+        err = 0: no error(s) encountered
+        err = 1: failed to scan dgf file.
+*/
 unsigned int Scan_DGF(
     ifstream    &file_handle,
     int         &nV,
@@ -1006,35 +884,6 @@ unsigned int Scan_DGF(
     ivector1D   &nV_data,
     ivector1D   &nS_data
 ) {
-
-// ========================================================================== //
-// unsigned int Scan_DGF(                                                     //
-//     ifstream    &file_handle,                                              //
-//     int         &nV,                                                       //
-//     int         &nS,                                                       //
-//     svector1D   &sV_data,                                                  //
-//     svector1D   &sS_data,                                                  //
-//     ivector1D   &nV_data,                                                  //
-//     ivector1D   &nS_data)                                                  //
-//                                                                            //
-// Scan dgf file and returns infos.                                           //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle  : ifstream, input stream to dgf file.                       //
-// - nV           : int, number of mesh vertices                              //
-// - nS           : int, number of mesh simplicies                            //
-// - sV_data      : svector1D, names of vertex dataset                        //
-// - sS_data      : svector1D, names of simplex dataset                       //
-// - nV_data      : ivector1D, number of data for each vertex dataset         //
-// - nS_data      : ivector1D, number of data for each simplex dataset        //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err          : unsigned int, error flag;                                 //
-//                  err = 0     --> no errors encountered                     //
-//                  err = 1                                                   //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1131,32 +980,23 @@ return(err); }
 // Checking routines ======================================================== //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Scan dgf data block and check for format errors.
+
+    \param[in,out] file_handle input stream from dgf file.
+    \param[in,out] err_code error code for format error founds in the data block
+        err_code = 0: no error(s) found
+        err_code = 1: unterminated data block
+        err_code = 2: unreadable data
+
+    \result error flag for I/O errors:
+        err = 0: no error(s) encountered
+        err = 1: failed to scan dgf file.
+*/
 unsigned int Check_DGF_data(
     ifstream    &file_handle,
     int         &err_code
 ) {
-
-// ========================================================================== //
-// unsigned int Check_DGF_data(                                               //
-//     ifstream    &file_handle,                                              //
-//     int         &err_code)                                                 //
-//                                                                            //
-// Check errors in data set definition.                                       //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle  : ifstream, input stream to dgf file.                       //
-// - err_code     : int, error code:                                          //
-//                  '0'  --> no errors found                                  //
-//                  '1'  --> unterminated data block                          //
-//                  '2'  --> unreadable data                                  //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err       : unsigned int, error flag:                                    //
-//               err = 0       --> no errors encountered                      //
-//               err = 1       --> file is missing or not accessible          //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1213,37 +1053,29 @@ if (word.compare("#") != 0) {
 return(0); }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Scan dgf file and check for format error(s) within the file.
+
+    \param[in,out] file_handle input stream from dgf file.
+    \param[in,out] err_code on output stores the error code for format error(s)
+    found in each data section:
+        err_code[0][0] stores the list of error codes found in the vertex section
+        err_code[1][0] stores the list of error codes found in the cell section
+        err_code[2][i] stores the list of error codes found in the i-th vertex data section
+        err_code[3][i] stores the list of error codes found in the i-th cell data section
+    Error codes are listed below:
+        err_code[i][j] = 0: no error(s) found
+        err_code[i][j] = 1: unterminated data block
+        err_code[i][j] = 2: unreadable data
+
+    \result error flag for I/O errors:
+        err = 0: no error(s) encountered
+        err = 1: failed to scan dgf file.
+*/
 unsigned int Check_DGF(
     ifstream    &file_handle,
     ivector2D   &err_code
 ) {
-
-// ========================================================================== //
-// unsigned int Check_DGF(                                                    //
-//     ifstream    &file_handle,                                              //
-//     ivector2D   &err_code)                                                 //
-//                                                                            //
-// Check dgf file.                                                            //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle   : ifstream, input stream to dgf file.                      //
-// - err_code      : ivector2D, with error code associated to:                //
-//                   vertex      --> err_code[0][0]                           //
-//                   simplex     --> err_code[1][0]                           //
-//                   vertexdata  --> err_code[2][i] (i-th vertex dataset)     //
-//                   simplexdata --> err_code[3][i] (i-th simplex dataset)    //
-//                   err_code can assume the following values:                //
-//                   '1'         --> unterminated datablock                   //
-//                   '2'         --> unreadable data                          //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err           : unsigned int, error flag:                                //
-//                   err = 0     --> no errors encountered                    //
-//                   err = 1     --> file is missing or is not accessble      //
-//                   err = 2     --> Unterminated file                        //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1320,6 +1152,26 @@ return(err); }
 // Input functions ========================================================== //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Load mesh from dgf file.
+
+    \param[in,out] nV on input stores the number of vertices already acquired
+    from the dgf file. On output stores the input value incremented by 
+    the number of mesh vertices loaded from the dgf file.
+    \param[in,out] nS on input stores the number of cells already acquired
+    from the dgf file. On output stores the input value incremented by 
+    the number of mesh cells loaded from the dgf file.
+    \param[in,out] V vertex coordinate list. On output stores the coordinates of
+    the vertices already acquired from the dgf file. New coordinates are appended
+    at the end of V.
+    \param[in,out] S cell->vertex connectivity data. On output stores the connectivity
+    entries for cells acquired from the dgf file. New connectivity entries are
+    appended at the and of S.
+
+    \result error flag for I/O errors.
+        err = 0: no error(s) occurred
+        err = 1: failed to import mesh data from dgf file.
+*/
 unsigned int Read_DGF_mesh(
     ifstream    &file_handle,
     int         &nV,
@@ -1327,33 +1179,6 @@ unsigned int Read_DGF_mesh(
     dvector2D   &V,
     ivector2D   &S
 ) {
-
-// ========================================================================== //
-// unsigned int Read_DGF_mesh(                                                //
-//     ifstream    &file_handle,                                              //
-//     int         &nV,                                                       //
-//     int         &nS,                                                       //
-//     dvector2D   &V,                                                        //
-//     ivector2D   &S)                                                        //
-//                                                                            //
-// Read mesh data from dgf file.                                              //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle : ifstream, input stream to dgf file                         //
-// - nV          : int, number of mesh vertices                               //
-// - nS          : int, number of simplicies                                  //
-// - V           : dvector2D, vertex coordinate list. V[i][0], V[i][1], ...   //
-//                 are the x, y, ... coordinates of the i-th vertex           //
-// - S           : ivector2D, simplex-vertex connectivity S[i][0], S[i][1],   //
-//                 ... are the global indices of vertices of the i-th simplex //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err         : unsigned int, error flag:                                  //
-//                 err = 0    --> no errors encountered                       //
-//                 err = 1    --> file is missing or cannot be accessed       //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1413,6 +1238,27 @@ file_handle.seekg(start_pos);
 return(err); };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Load mesh from dgf file. Overloading of function Read_DGF_mesh()
+    for container vector<array<double,3>>
+
+    \param[in,out] nV on input stores the number of vertices already acquired
+    from the dgf file. On output stores the input value incremented by 
+    the number of mesh vertices loaded from the dgf file.
+    \param[in,out] nS on input stores the number of cells already acquired
+    from the dgf file. On output stores the input value incremented by 
+    the number of mesh cells loaded from the dgf file.
+    \param[in,out] V vertex coordinate list. On output stores the coordinates of
+    the vertices already acquired from the dgf file. New coordinates are appended
+    at the end of V.
+    \param[in,out] S cell->vertex connectivity data. On output stores the connectivity
+    entries for cells acquired from the dgf file. New connectivity entries are
+    appended at the and of S.
+
+    \result error flag for I/O errors.
+        err = 0: no error(s) occurred
+        err = 1: failed to import mesh data from dgf file.
+*/
 unsigned int Read_DGF_mesh(
     ifstream    &file_handle,
     int         &nV,
@@ -1420,33 +1266,6 @@ unsigned int Read_DGF_mesh(
     dvecarr3E   &V,
     ivector2D   &S
 ) {
-
-// ========================================================================== //
-// unsigned int Read_DGF_mesh(                                                //
-//     ifstream    &file_handle,                                              //
-//     int         &nV,                                                       //
-//     int         &nS,                                                       //
-//     dvector2D   &V,                                                        //
-//     ivector2D   &S)                                                        //
-//                                                                            //
-// Read mesh data from dgf file.                                              //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle : ifstream, input stream to dgf file                         //
-// - nV          : int, number of mesh vertices                               //
-// - nS          : int, number of simplicies                                  //
-// - V           : dvector2D, vertex coordinate list. V[i][0], V[i][1], ...   //
-//                 are the x, y, ... coordinates of the i-th vertex           //
-// - S           : ivector2D, simplex-vertex connectivity S[i][0], S[i][1],   //
-//                 ... are the global indices of vertices of the i-th simplex //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err         : unsigned int, error flag:                                  //
-//                 err = 0    --> no errors encountered                       //
-//                 err = 1    --> file is missing or cannot be accessed       //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1509,6 +1328,19 @@ return(err); };
 // Output functions ========================================================= //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Export mesh to dgf file.
+
+    \param[in,out] file_handle output stream to dgf file.
+    \param[in] nV number of mesh vertices
+    \param[in] nS number of mesh cells
+    \param[in] V vertex coordinate list
+    \param[in] S cell->vertex connectivity
+
+    \result error flag for I/O errors:
+    err = 0: no error(s) encountered
+    err = 1: failed to write data to dgf file.
+*/
 unsigned int Write_DGF_mesh(
     ofstream    &file_handle,
     int         &nV,
@@ -1516,33 +1348,6 @@ unsigned int Write_DGF_mesh(
     dvector2D   &V,
     ivector2D   &S
 ) {
-
-// ========================================================================== //
-// unsigned int Write_DGF_mesh(                                               //
-//     ofstream    &file_handle,                                              //
-//     int         &nV,                                                       //
-//     int         &nS,                                                       //
-//     dvector2D   &V,                                                        //
-//     ivector2D   &S)                                                        //
-//                                                                            //
-// Export mesh data into dgf file.                                            //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle : ofstream, output stream to dgf file                        //
-// - nV          : int, number of mesh vertices                               //
-// - nS          : int, number of simplicies                                  //
-// - V           : dvector2D, vertex coordinate list. V[i][0], V[i][1], ...   //
-//                 are the x, y, ... coordinates of the i-th vertex           //
-// - S           : ivector2D, simplex-vertex connectivity S[i][0], S[i][1],   //
-//                 ... are the global indices of vertices of the i-th simplex //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err         : unsigned int, error flag:                                  //
-//                 err = 0    --> no errors encountered                       //
-//                 err = 1    --> file is missing or cannot be accessed       //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1574,6 +1379,20 @@ err = Write_DGF_data(file_handle, nS, S);
 return(err); }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Export mesh to dgf file. Overloading of function Write_DGF_mesh() for
+    container vector<array<double,3> >
+
+    \param[in,out] file_handle output stream to dgf file.
+    \param[in] nV number of mesh vertices
+    \param[in] nS number of mesh cells
+    \param[in] V vertex coordinate list
+    \param[in] S cell->vertex connectivity
+
+    \result error flag for I/O errors:
+    err = 0: no error(s) encountered
+    err = 1: failed to write data to dgf file.
+*/
 unsigned int Write_DGF_mesh(
     ofstream    &file_handle,
     int         &nV,
@@ -1581,33 +1400,6 @@ unsigned int Write_DGF_mesh(
     dvecarr3E   &V,
     ivector2D   &S
 ) {
-
-// ========================================================================== //
-// unsigned int Write_DGF_mesh(                                               //
-//     ofstream    &file_handle,                                              //
-//     int         &nV,                                                       //
-//     int         &nS,                                                       //
-//     dvector2D   &V,                                                        //
-//     ivector2D   &S)                                                        //
-//                                                                            //
-// Export mesh data into dgf file.                                            //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle : ofstream, output stream to dgf file                        //
-// - nV          : int, number of mesh vertices                               //
-// - nS          : int, number of simplicies                                  //
-// - V           : dvector2D, vertex coordinate list. V[i][0], V[i][1], ...   //
-//                 are the x, y, ... coordinates of the i-th vertex           //
-// - S           : ivector2D, simplex-vertex connectivity S[i][0], S[i][1],   //
-//                 ... are the global indices of vertices of the i-th simplex //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err         : unsigned int, error flag:                                  //
-//                 err = 0    --> no errors encountered                       //
-//                 err = 1    --> file is missing or cannot be accessed       //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //

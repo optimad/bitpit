@@ -18,6 +18,17 @@
 // class DGF_obj templated methods ========================================== //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Load vertex data from dgf file.
+
+    \param[in] data_name name of vertex data block to be loaded.
+    If no name is specified (i.e. data_name = "") the first vertex data block
+    found in the dgf file is returned. If no vertex datablock is found with the
+    specified name no data is loaded.
+    \param[in,out] n number data entries loaded from the data set
+    \param[in,out] data on output stores the data loaded from the data block
+    \param[in] others other data to be loaded.
+*/ 
 template< typename T, typename ... T2 >
 void DGF_obj::load_vdata(
     string      data_name,
@@ -25,31 +36,6 @@ void DGF_obj::load_vdata(
     vector< T >&data,
     T2     &... others
 ) {
-
-// ========================================================================== //
-// template< typename T, typename ... T2 >                                    //
-// void load_vdata(                                                           //
-//     string      data_name,                                                 //
-//     int        &n,                                                         //
-//     vector< T >&data,                                                      //
-//     T2     &... others)                                                    //
-//                                                                            //
-// Load vertex datasets from dgf file whose name is specified in "data_name". //
-// If no dataset is found, the input data structure is unchanged.             //
-// If no name is specified (i.e. data_name = ""), returns the first vertex    //
-// dataset found by circular scanning of the dgf file.                        //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - data_name    : string, dataset name.                                     //
-// - n            : int, number of data in the dataset                        //
-// - data         : vector< T >, loaded data.                                 //
-// - others       : T2 (optional) other datasets to be loaded                 //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -79,6 +65,17 @@ load_vdata(others ...);
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Load cell data from dgf file.
+
+    \param[in] data_name name of cell data block to be loaded.
+    If no name is specified (i.e. data_name = "") the first cell data block
+    found in the dgf file is returned. If no cell datablock is found with the
+    specified name no data is loaded.
+    \param[in,out] n number data entries loaded from the data set
+    \param[in,out] data on output stores the data loaded from the data block
+    \param[in] others other data to be loaded.
+*/
 template< typename T, typename ... T2 >
 void DGF_obj::load_sdata(
     string      data_name,
@@ -86,31 +83,6 @@ void DGF_obj::load_sdata(
     vector< T >&data,
     T2     &... others
 ) {
-
-// ========================================================================== //
-// template< typename T, typename ... T2 >                                    //
-// void load_sdata(                                                           //
-//     string      data_name,                                                 //
-//     int        &n,                                                         //
-//     vector< T >&data,                                                      //
-//     T2     &... others)                                                    //
-//                                                                            //
-// Load simplex datasets from dgf file whose name is specified in "data_name".//
-// If no dataset is found, the input data structure is unchanged.             //
-// If no name is specified (i.e. data_name = ""), returns the first simplex   //
-// dataset found by circular scanning of the dgf file.                        //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - data_name    : string, dataset name.                                     //
-// - n            : int, number of data in the dataset                        //
-// - data         : vector< T >, loaded data.                                 //
-// - others       : T2 (optional) other datasets to be loaded                 //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -140,6 +112,14 @@ load_sdata(others ...);
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Append vertex data to dgf file.
+
+    \param[in] data_name name of vertex data block to be appended.
+    \param[in] n number data entries to be exported to the dgf file.
+    \param[in] data container storing the data to be written into the dgf file.
+    \param[in] others other data to be exported.
+*/ 
 template< typename T, typename ... T2 >
 void DGF_obj::append_vdata(
     string      data_name,
@@ -147,28 +127,6 @@ void DGF_obj::append_vdata(
     vector< T >&data,
     T2     &... others
 ) {
-
-// ========================================================================== //
-// template< typename T, typename ... T2 >                                    //
-// void DGF_obj::append_vdata(                                                //
-//     string      data_name,                                                 //
-//     int        &n,                                                         //
-//     vector< T >&data,                                                      //
-//     T2     &... others)                                                    //
-//                                                                            //
-// Append vertex data set to dgf file.                                        //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - data_name      : string, data set name                                   //
-// - n              : int, number of data in the dataset                      //
-// - data           : vector< T >, dataset to be exported                     //
-// - others         : T2 (optional) others data set to be exported.           //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -198,6 +156,14 @@ append_vdata(others ...);
 return; }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Append cell data to dgf file.
+
+    \param[in] data_name name of cell data block to be appended.
+    \param[in] n number data entries to be exported to the dgf file.
+    \param[in] data container storing the data to be written into the dgf file.
+    \param[in] others other data to be exported.
+*/ 
 template< typename T, typename ... T2 >
 void DGF_obj::append_sdata(
     string      data_name,
@@ -205,28 +171,6 @@ void DGF_obj::append_sdata(
     vector< T >&data,
     T2     &... others
 ) {
-
-// ========================================================================== //
-// template< typename T, typename ... T2 >                                    //
-// void DGF_obj::append_sdata(                                                //
-//     string      data_name,                                                 //
-//     int        &n,                                                         //
-//     vector< T >&data,                                                      //
-//     T2     &... others)                                                    //
-//                                                                            //
-// Append simplex data set to dgf file.                                       //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - data_name      : string, data set name                                   //
-// - n              : int, number of data in the dataset                      //
-// - data           : vector< T >, dataset to be exported                     //
-// - others         : T2 (optional) others data set to be exported.           //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -256,36 +200,25 @@ append_sdata(others ...);
 return; }
 
 // Input routines =========================================================== //
-    
+
 // -------------------------------------------------------------------------- //
+/*!
+    Read data block from dgf file.
+
+    \param[in,out] file_handle input stream from dgf file
+    \param[in,out] n number data entries loaded from the data set
+    \param[in,out] data on output stores the data loaded from the data block
+
+    \result error flag tor I/O errors
+        err = 0: no error(s) encountered
+        err = 1: failed to load data from dgf file
+*/ 
 template< typename T >
 unsigned int Read_DGF_data(
     ifstream        &file_handle,
     int             &N,
     vector< T >     &Data
 ) {
-
-// ========================================================================== //
-// template< typename T >                                                     //
-// unsigned int Read_DGF_data(                                                //
-//     ifstream        &file_handle,                                          //
-//     int             &N,                                                    //
-//     vector< T >     &Data)                                                 //
-//                                                                            //
-// Read data in a dgf data block.                                             //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle    : ifstream, input stream to dgf file.                     //
-// - N              : int, number of data currently hosted in Data            //
-// - Data           : vector< T >, imported data                              //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err            : unsigned int, error flag:                               //
-//                    err = 0    --> no errors encountered                    //
-//                    err = 1    --> file is missing or is not accessible     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -358,6 +291,21 @@ N+=n;
 return(0); }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Read vertex data from dgf file.
+
+    \param[in,out] file_handle input stream from dgf file
+    \param[in,out] n number data entries loaded from the data set
+    \param[in,out] data on output stores the data loaded from the data block
+    \param[in] data_name name of the vertex data set to be loaded. If no name
+    is specified (i.e. data_name = "") the first vertex data set encountered
+    in the dgf file is returned. If no vertex data set matching the input
+    name is found, no data is loaded from the dgf file.
+
+    \result error flag tor I/O errors
+        err = 0: no error(s) encountered
+        err = 1: failed to load data from dgf file
+*/ 
 template <typename T>
 unsigned int Read_DGF_VERTEXDATA(
     ifstream        &file_handle,
@@ -365,34 +313,6 @@ unsigned int Read_DGF_VERTEXDATA(
     vector< T >     &data,
     string           data_name
 ) {
-
-// ========================================================================== //
-// template <typename T>                                                      //
-// unsigned int Read_DGF_VERTEXDATA(                                          //
-//     ifstream        &file_handle,                                          //
-//     int             &n,                                                    //
-//     vector< T >     &data,                                                 //
-//     string           data_name)                                            //
-//                                                                            //
-// Load vertex data from dgf file, corresponding to name specified in         //
-// data_name. If data_name is not specified (i.e. data_name = "") the first   //
-// dataset found by circular scanning of the dgf file is loaded. If no        //
-// data set is found corresponding to data_name, the input data_structure is  //
-// not modified.                                                              //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle  : ifstream, input stream to dgf file.                       //
-// - n            : int, number of data stored in data.                       // 
-// - data         : vector< T >, loaded data                                  //
-// - data_name    : string, dataset name                                      //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err          : unsigned int, error flag:                                 //
-//                  err = 0      --> no errors encountered                    //
-//                  err = 1      --> file is missing or is not accessible     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -466,6 +386,21 @@ if (check) {
 return(0); }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Read cell data from dgf file.
+
+    \param[in,out] file_handle input stream from dgf file
+    \param[in,out] n number data entries loaded from the data set
+    \param[in,out] data on output stores the data loaded from the data block
+    \param[in] data_name name of the cell data set to be loaded. If no name
+    is specified (i.e. data_name = "") the first cell data set encountered
+    in the dgf file is returned. If no cell data set matching the input
+    name is found, no data is loaded from the dgf file.
+
+    \result error flag tor I/O errors
+        err = 0: no error(s) encountered
+        err = 1: failed to load data from dgf file
+*/
 template <typename T>
 unsigned int Read_DGF_SIMPLEXDATA(
     ifstream        &file_handle,
@@ -473,34 +408,6 @@ unsigned int Read_DGF_SIMPLEXDATA(
     vector< T >     &data,
     string           data_name
 ) {
-
-// ========================================================================== //
-// template <typename T>                                                      //
-// unsigned int Read_DGF_SIMPLEXDATA(                                         //
-//     ifstream        &file_handle,                                          //
-//     int             &n,                                                    //
-//     vector< T >     &data,                                                 //
-//     string           data_name)                                            //
-//                                                                            //
-// Load simplex data from dgf file, corresponding to name specified in        //
-// data_name. If data_name is not specified (i.e. data_name = "") the first   //
-// dataset found by circular scanning of the dgf file is loaded. If no        //
-// data set is found corresponding to data_name, the input data_structure is  //
-// not modified.                                                              //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle  : ifstream, input stream to dgf file.                       //
-// - n            : int, number of data stored in data.                       // 
-// - data         : vector< T >, loaded data                                  //
-// - data_name    : string, dataset name                                      //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err          : unsigned int, error flag:                                 //
-//                  err = 0      --> no errors encountered                    //
-//                  err = 1      --> file is missing or is not accessible     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -576,35 +483,23 @@ return(0); }
 // Output routines ========================================================== //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Write data block to dgf file.
+
+    \param[in,out] file_handle output stream to dgf file
+    \param[in,out] N number data entries to be written to file
+    \param[in,out] Data container storing the data
+
+    \result error flag tor I/O errors
+        err = 0: no error(s) encountered
+        err = 1: failed to write data to dgf file
+*/ 
 template < typename T >
 unsigned int Write_DGF_data(
     ofstream        &file_handle,
     int             &N,
     vector< T >     &Data
 ) {
-
-// ========================================================================== //
-// template < typename T >                                                    //
-// unsigned int Write_DGF_data(                                               //
-//     ifstream        &file_handle,                                          //
-//     int             &N,                                                    //
-//     vector< T >     &Data)                                                 //
-//                                                                            //
-// Write dgf data into dgf file.                                              //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle   : ofstream, output stream to dgf file.                     //
-// - N             : int, number of data to be exported                       //
-// - Data          : vector< T >, data to be exported                         //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err           : unsigned int, error flag:                                //
-//                   err = 0     --> no errors encountered                    //
-//                   err = 1     --> file is missing or is not accessible     //
-//                   err = 2     --> input data are badly defined             //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -632,6 +527,18 @@ file_handle << "#" << endl << endl;
 return(0); }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Write vertex data to dgf file.
+
+    \param[in,out] file_handle output stream to dgf file
+    \param[in,out] N number data entries to be written
+    \param[in,out] Data container storing the data
+    \param[in] Data_name name of the vertex data set
+
+    \result error flag tor I/O errors
+        err = 0: no error(s) encountered
+        err = 1: failed to load data from dgf file
+*/ 
 template < typename T >
 unsigned int Write_DGF_VERTEXDATA(
     ofstream        &file_handle,
@@ -639,30 +546,6 @@ unsigned int Write_DGF_VERTEXDATA(
     vector< T >     &Data,
     string           Data_name
 ) {
-
-// ========================================================================== //
-// template < typename T >                                                    //
-// unsigned int Write_DGF_VERTEXDATA(                                         //
-//     ifstream        &file_handle,                                          //
-//     int             &N,                                                    //
-//     vector< T >     &Data,                                                 //
-//     stirng           Data_name)                                            //
-//                                                                            //
-// Write vertex data into dgf file.                                           //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle   : ofstream, output stream to dgf file.                     //
-// - N             : int, number of data to be exported                       //
-// - Data          : vector< T >, data to be exported                         //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err           : unsigned int, error flag:                                //
-//                   err = 0     --> no errors encountered                    //
-//                   err = 1     --> file is missing or is not accessible     //
-//                   err = 2     --> input data are badly defined             //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -698,6 +581,18 @@ err = Write_DGF_data(file_handle, N, Data);
 return(err); };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Write cell data to dgf file.
+
+    \param[in,out] file_handle output stream to dgf file
+    \param[in,out] N number data entries to be written
+    \param[in,out] Data container storing the data
+    \param[in] Data_name name of the cell data set
+
+    \result error flag tor I/O errors
+        err = 0: no error(s) encountered
+        err = 1: failed to load data from dgf file
+*/ 
 template < typename T >
 unsigned int Write_DGF_SIMPLEXDATA(
     ofstream        &file_handle,
@@ -705,30 +600,6 @@ unsigned int Write_DGF_SIMPLEXDATA(
     vector< T >     &Data,
     string           Data_name
 ) {
-
-// ========================================================================== //
-// template < typename T >                                                    //
-// unsigned int Write_DGF_SIMPLEXDATA(                                        //
-//     ifstream        &file_handle,                                          //
-//     int             &N,                                                    //
-//     vector< T >     &Data,                                                 //
-//     stirng           Data_name)                                            //
-//                                                                            //
-// Write simplex data into dgf file.                                          //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle   : ofstream, output stream to dgf file.                     //
-// - N             : int, number of data to be exported                       //
-// - Data          : vector< T >, data to be exported                         //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err           : unsigned int, error flag:                                //
-//                   err = 0     --> no errors encountered                    //
-//                   err = 1     --> file is missing or is not accessible     //
-//                   err = 2     --> input data are badly defined             //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
