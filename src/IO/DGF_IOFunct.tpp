@@ -31,10 +31,10 @@
 */ 
 template< typename T, typename ... T2 >
 void DGF_obj::load_vdata(
-    string      data_name,
-    int        &n,
-    vector< T >&data,
-    T2     &... others
+    std::string                  data_name,
+    int                         &n,
+    std::vector< T >            &data,
+    T2                          &... others
 ) {
 
 // ========================================================================== //
@@ -78,10 +78,10 @@ return; };
 */
 template< typename T, typename ... T2 >
 void DGF_obj::load_sdata(
-    string      data_name,
-    int        &n,
-    vector< T >&data,
-    T2     &... others
+    std::string                  data_name,
+    int                         &n,
+    std::vector< T >            &data,
+    T2                          &... others
 ) {
 
 // ========================================================================== //
@@ -122,10 +122,10 @@ return; };
 */ 
 template< typename T, typename ... T2 >
 void DGF_obj::append_vdata(
-    string      data_name,
-    int        &n,
-    vector< T >&data,
-    T2     &... others
+    std::string                  data_name,
+    int                         &n,
+    std::vector< T >            &data,
+    T2                          &... others
 ) {
 
 // ========================================================================== //
@@ -166,10 +166,10 @@ return; }
 */ 
 template< typename T, typename ... T2 >
 void DGF_obj::append_sdata(
-    string      data_name,
-    int        &n,
-    vector< T >&data,
-    T2     &... others
+    std::string                  data_name,
+    int                         &n,
+    std::vector< T >            &data,
+    T2                          &... others
 ) {
 
 // ========================================================================== //
@@ -215,9 +215,9 @@ return; }
 */ 
 template< typename T >
 unsigned int Read_DGF_data(
-    ifstream        &file_handle,
-    int             &N,
-    vector< T >     &Data
+    std::ifstream               &file_handle,
+    int                         &N,
+    std::vector< T >            &Data
 ) {
 
 // ========================================================================== //
@@ -227,8 +227,8 @@ unsigned int Read_DGF_data(
 // Local variables
 bool                check;
 long int            start_pos;
-string              word, line;
-stringstream        sline;
+std::string              word, line;
+std::stringstream        sline;
 
 // Counters
 int                 n = 0;
@@ -261,7 +261,7 @@ while (!file_handle.eof() && check) {
 
     // Get current line
     start_pos = file_handle.tellg();
-    getline(file_handle, line);
+    std::getline(file_handle, line);
     line = trim(line);
     sline.clear();
     sline.str(line);
@@ -308,10 +308,10 @@ return(0); }
 */ 
 template <typename T>
 unsigned int Read_DGF_VERTEXDATA(
-    ifstream        &file_handle,
-    int             &n,
-    vector< T >     &data,
-    string           data_name
+    std::ifstream               &file_handle,
+    int                         &n,
+    std::vector< T >            &data,
+    std::string                  data_name
 ) {
 
 // ========================================================================== //
@@ -321,8 +321,8 @@ unsigned int Read_DGF_VERTEXDATA(
 // Local variables
 bool            check = false;
 long int        current_pos, start_pos;
-string          header, line, word;
-stringstream    sline;
+std::string          header, line, word;
+std::stringstream    sline;
 
 // Counters
 
@@ -334,7 +334,7 @@ if (!file_handle.good()) { return(1); }
 // ========================================================================== //
 // PARAMETERS                                                                 //
 // ========================================================================== //
-sline << "VERTEXDATA " << data_name << endl;
+sline << "VERTEXDATA " << data_name << std::endl;
 header = sline.str();
 header = trim(header);
 
@@ -347,7 +347,7 @@ current_pos = -1;
 while (start_pos != current_pos) {
 
     // Get current line
-    getline(file_handle, line);
+    std::getline(file_handle, line);
     line = trim(line);
     sline.clear();
     sline.str(line);
@@ -403,10 +403,10 @@ return(0); }
 */
 template <typename T>
 unsigned int Read_DGF_SIMPLEXDATA(
-    ifstream        &file_handle,
-    int             &n,
-    vector< T >     &data,
-    string           data_name
+    std::ifstream               &file_handle,
+    int                         &n,
+    std::vector< T >            &data,
+    std::string                  data_name
 ) {
 
 // ========================================================================== //
@@ -416,8 +416,8 @@ unsigned int Read_DGF_SIMPLEXDATA(
 // Local variables
 bool            check = false;
 long int        current_pos, start_pos;
-string          header, line, word;
-stringstream    sline;
+std::string          header, line, word;
+std::stringstream    sline;
 
 // Counters
 
@@ -429,7 +429,7 @@ if (!file_handle.good()) { return(1); }
 // ========================================================================== //
 // PARAMETERS                                                                 //
 // ========================================================================== //
-sline << "SIMPLEXDATA " << data_name << endl;
+sline << "SIMPLEXDATA " << data_name << std::endl;
 header = sline.str();
 header = trim(header);
 
@@ -442,7 +442,7 @@ current_pos = -1;
 while (start_pos != current_pos) {
 
     // Get current line
-    getline(file_handle, line);
+    std::getline(file_handle, line);
     line = trim(line);
     sline.clear();
     sline.str(line);
@@ -496,9 +496,9 @@ return(0); }
 */ 
 template < typename T >
 unsigned int Write_DGF_data(
-    ofstream        &file_handle,
-    int             &N,
-    vector< T >     &Data
+    std::ofstream               &file_handle,
+    int                         &N,
+    std::vector< T >            &Data
 ) {
 
 // ========================================================================== //
@@ -520,9 +520,9 @@ if (!file_handle.good()) { return(1); }
 // EXPORT DATA                                                                //
 // ========================================================================== //
 for (i = 0; i < N; i++) {
-    file_handle << Data[i] << endl;
+    file_handle << Data[i] << std::endl;
 } //next i
-file_handle << "#" << endl << endl;
+file_handle << "#" << std::endl << std::endl;
 
 return(0); }
 
@@ -541,10 +541,10 @@ return(0); }
 */ 
 template < typename T >
 unsigned int Write_DGF_VERTEXDATA(
-    ofstream        &file_handle,
-    int             &N,
-    vector< T >     &Data,
-    string           Data_name
+    std::ofstream               &file_handle,
+    int                         &N,
+    std::vector< T >            &Data,
+    std::string                 Data_name
 ) {
 
 // ========================================================================== //
@@ -553,8 +553,8 @@ unsigned int Write_DGF_VERTEXDATA(
 
 // Local variables
 unsigned int        err = 0;
-stringstream        sheader;
-string              header;
+std::stringstream        sheader;
+std::string              header;
 
 // Counters
 int             i;
@@ -570,10 +570,10 @@ if (!file_handle.good()) { return(1); }
 
 // Data header -------------------------------------------------------------- //
 Data_name = trim(Data_name);
-sheader << "VERTEXDATA " << Data_name << endl;
+sheader << "VERTEXDATA " << Data_name << std::endl;
 header = sheader.str();
 header = trim(header);
-file_handle << header << endl;
+file_handle << header << std::endl;
 
 // Export data -------------------------------------------------------------- //
 err = Write_DGF_data(file_handle, N, Data);
@@ -595,10 +595,10 @@ return(err); };
 */ 
 template < typename T >
 unsigned int Write_DGF_SIMPLEXDATA(
-    ofstream        &file_handle,
-    int             &N,
-    vector< T >     &Data,
-    string           Data_name
+    std::ofstream               &file_handle,
+    int                         &N,
+    std::vector< T >            &Data,
+    std::string                  Data_name
 ) {
 
 // ========================================================================== //
@@ -607,8 +607,8 @@ unsigned int Write_DGF_SIMPLEXDATA(
 
 // Local variables
 unsigned int        err = 0;
-stringstream        sheader;
-string              header;
+std::stringstream        sheader;
+std::string              header;
 
 // Counters
 int             i;
@@ -624,10 +624,10 @@ if (!file_handle.good()) { return(1); }
 
 // Data header -------------------------------------------------------------- //
 Data_name = trim(Data_name);
-sheader << "SIMPLEXDATA " << Data_name << endl;
+sheader << "SIMPLEXDATA " << Data_name << std::endl;
 header = sheader.str();
 header = trim(header);
-file_handle << header << endl;
+file_handle << header << std::endl;
 
 // Export data -------------------------------------------------------------- //
 err = Write_DGF_data(file_handle, N, Data);

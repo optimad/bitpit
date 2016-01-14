@@ -19,6 +19,7 @@
 // ========================================================================== //
 // IMPLEMENTATIONS                                                            //
 // ========================================================================== //
+using namespace std;
 
 /*!
     \class DGF_obj
@@ -78,7 +79,7 @@ return; }
     \param[in] filename dgf file name
 */
 DGF_obj::DGF_obj(
-    string      filename
+    std::string                          filename
 ) {
 
 // ========================================================================== //
@@ -119,7 +120,7 @@ return; }
     \param[in] mode opening mode ("in": input, "out": output, "app": append mode)
 */
 void DGF_obj::open(
-    string      mode
+    std::string                          mode
 ) {
 
 // ========================================================================== //
@@ -182,7 +183,7 @@ return; };
     "app": append mode)
 */
 void DGF_obj::close(
-    string      mode
+    std::string                          mode
 ) {
 
 // ========================================================================== //
@@ -272,7 +273,7 @@ return; };
     \param[in,out] out output stream
 */
 void DGF_obj::display(
-    ostream     &out
+    std::ostream                        &out
 ) {
 
 // ========================================================================== //
@@ -484,10 +485,10 @@ return; }
     appended at the and of S.
 */
 void DGF_obj::load(
-    int         &nV,
-    int         &nS,
-    dvector2D   &V,
-    ivector2D   &S
+    int                                 &nV,
+    int                                 &nS,
+    std::vector<std::vector<double> >   &V,
+    std::vector<std::vector<int> >      &S
 ) {
 
 // ========================================================================== //
@@ -536,10 +537,10 @@ return; };
     appended at the and of S.
 */
 void DGF_obj::load(
-    int         &nV,
-    int         &nS,
-    dvecarr3E   &V,
-    ivector2D   &S
+    int                                 &nV,
+    int                                 &nS,
+    std::vector<std::array<double,3> >  &V,
+    std::vector<std::vector<int> >      &S
 ) {
 
 // ========================================================================== //
@@ -579,10 +580,10 @@ return; };
     \param[in] S cell->vertex connectivity data.
 */
 void DGF_obj::save(
-    int         &nV,
-    int         &nS,
-    dvector2D   &V,
-    ivector2D   &S
+    int                                 &nV,
+    int                                 &nS,
+    std::vector<std::vector<double> >   &V,
+    std::vector<std::vector<int> >      &S
 ) {
 
 // ========================================================================== //
@@ -646,10 +647,10 @@ return; }
     \param[in] S cell->vertex connectivity data.
 */
 void DGF_obj::save(
-    int         &nV,
-    int         &nS,
-    dvecarr3E   &V,
-    ivector2D   &S
+    int                                 &nV,
+    int                                 &nS,
+    std::vector<std::array<double,3> >  &V,
+    std::vector<std::vector<int> >      &S
 ) {
 
 // ========================================================================== //
@@ -678,7 +679,6 @@ err = Write_DGF_mesh(ofile_handle, nV, nS, V, S);
 close("out");
 
 return; }
-
 
 // Private methods ---------------------------------------------------------- //
 
@@ -797,8 +797,8 @@ return; }
         err = 1: failed to scan dgf file.
 */
 unsigned int Scan_DGF_data(
-    ifstream    &file_handle,
-    int         &n
+    std::ifstream                       &file_handle,
+    int                                 &n
 ) {
 
 // ========================================================================== //
@@ -876,13 +876,13 @@ return(0); }
         err = 1: failed to scan dgf file.
 */
 unsigned int Scan_DGF(
-    ifstream    &file_handle,
-    int         &nV,
-    int         &nS,
-    svector1D   &sV_data,
-    svector1D   &sS_data,
-    ivector1D   &nV_data,
-    ivector1D   &nS_data
+    std::ifstream                       &file_handle,
+    int                                 &nV,
+    int                                 &nS,
+    std::vector<std::string>            &sV_data,
+    std::vector<std::string>            &sS_data,
+    std::vector<int>                    &nV_data,
+    std::vector<int>                    &nS_data
 ) {
 
 // ========================================================================== //
@@ -994,8 +994,8 @@ return(err); }
         err = 1: failed to scan dgf file.
 */
 unsigned int Check_DGF_data(
-    ifstream    &file_handle,
-    int         &err_code
+    std::ifstream                       &file_handle,
+    int                                 &err_code
 ) {
 
 // ========================================================================== //
@@ -1073,8 +1073,8 @@ return(0); }
         err = 1: failed to scan dgf file.
 */
 unsigned int Check_DGF(
-    ifstream    &file_handle,
-    ivector2D   &err_code
+    std::ifstream                       &file_handle,
+    std::vector<std::vector<int> >      &err_code
 ) {
 
 // ========================================================================== //
@@ -1173,11 +1173,11 @@ return(err); }
         err = 1: failed to import mesh data from dgf file.
 */
 unsigned int Read_DGF_mesh(
-    ifstream    &file_handle,
-    int         &nV,
-    int         &nS,
-    dvector2D   &V,
-    ivector2D   &S
+    std::ifstream                       &file_handle,
+    int                                 &nV,
+    int                                 &nS,
+    std::vector<std::vector<double> >   &V,
+    std::vector<std::vector<int> >      &S
 ) {
 
 // ========================================================================== //
@@ -1260,11 +1260,11 @@ return(err); };
         err = 1: failed to import mesh data from dgf file.
 */
 unsigned int Read_DGF_mesh(
-    ifstream    &file_handle,
-    int         &nV,
-    int         &nS,
-    dvecarr3E   &V,
-    ivector2D   &S
+    std::ifstream                       &file_handle,
+    int                                 &nV,
+    int                                 &nS,
+    std::vector<std::array<double,3> >  &V,
+    std::vector<std::vector<int> >      &S
 ) {
 
 // ========================================================================== //
@@ -1324,7 +1324,6 @@ file_handle.seekg(start_pos);
 
 return(err); };
 
-
 // Output functions ========================================================= //
 
 // -------------------------------------------------------------------------- //
@@ -1342,11 +1341,11 @@ return(err); };
     err = 1: failed to write data to dgf file.
 */
 unsigned int Write_DGF_mesh(
-    ofstream    &file_handle,
-    int         &nV,
-    int         &nS,
-    dvector2D   &V,
-    ivector2D   &S
+    std::ofstream                       &file_handle,
+    int                                 &nV,
+    int                                 &nS,
+    std::vector<std::vector<double> >   &V,
+    std::vector<std::vector<int> >      &S
 ) {
 
 // ========================================================================== //
@@ -1394,11 +1393,11 @@ return(err); }
     err = 1: failed to write data to dgf file.
 */
 unsigned int Write_DGF_mesh(
-    ofstream    &file_handle,
-    int         &nV,
-    int         &nS,
-    dvecarr3E   &V,
-    ivector2D   &S
+    std::ofstream                       &file_handle,
+    int                                 &nV,
+    int                                 &nS,
+    std::vector<std::array<double,3> >  &V,
+    std::vector<std::vector<int> >      &S
 ) {
 
 // ========================================================================== //
