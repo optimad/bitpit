@@ -1,10 +1,17 @@
-/*!
-  \ingroup    VTK
-  @{
- */
-
 #include "Class_VTK.hpp"
 
+/*! ========================================================================================
+ *
+ * \ingroup    VisualizationToolKit
+ * \{
+ *
+ * \class      VTK
+ * \brief A base class for VTK input output. 
+ *
+ * VTK provides all basic methods for reading and writing VTK files.
+ * ASCII and APPENDED mode are supported.
+ *
+ */
 
 /*! ------------------------------------------------------------------
  * Default constructor referes to a serial VTK file with appended binary data.
@@ -1021,4 +1028,6 @@ bool  VTK::ReadDataArray( std::fstream &str, VTK::Field_C &field_  ){
 
 };
 
-/* @} */
+/*! 
+ * \} 
+ */

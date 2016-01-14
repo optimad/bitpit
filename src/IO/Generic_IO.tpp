@@ -1,560 +1,751 @@
-// =================================================================================== //
-// For Writing
 
+#include"Operators.hpp"
+
+/*!
+ * @ingroup Generic
+ * @{
+ */
+
+/*! -----------------------------------------------------------------------------------
+ * Writes a POD data type to file stream in ascii format using scientific format
+ * @tparam  data_T  type of POD data
+ * @param[in]   str     file stream
+ * @param[in]   data    data to be written
+ */
 template< class data_T >
-void flush_ascii( fstream &str, const data_T data ){
+void flush_ascii( std::fstream &str, const data_T &data ){
 
-  str << setprecision(8) << scientific ;
-  str << data << " ";
+    str << setprecision(8) << scientific ;
+    str << data << " ";
 
-  return ;
+    return ;
 };
 
-// =================================================================================== //
+/*! -----------------------------------------------------------------------------------
+ * Writes a vector of POD data type to file stream in ascii format using scientific format on a single line
+ * @tparam  data_T  type of POD data
+ * @param[in]   str     file stream
+ * @param[in]   data    data to be written
+ */
 template< class data_T >
-void flush_ascii( fstream &str, const vector<data_T> &data ){
+void flush_ascii( std::fstream &str, const std::vector<data_T> &data ){
 
-  flush_ascii( str, data.size(), data) ;
+    flush_ascii( str, data.size(), data) ;
 
-  return ;
+    return ;
 };
 
-// =================================================================================== //
+/*! -----------------------------------------------------------------------------------
+ * Writes a vector of POD data type to file stream in ascii format using scientific format putting a fixed number of elements per line
+ * @tparam  data_T  type of POD data
+ * @param[in]   str     file stream
+ * @param[in]   elements_per_line     number of entries per line
+ * @param[in]   data    data to be written
+ */
 template< class data_T >
-void flush_ascii( fstream &str, int elements_per_line, const vector<data_T> &data ){
+void flush_ascii( std::fstream &str, int elements_per_line, const std::vector<data_T> &data ){
 
-  int i(0), j(0), k(0) ;
-  int nr ;
+    int i(0), j(0), k(0) ;
+    int nr ;
 
-  int lines, this_line ;
+    int lines, this_line ;
 
-  bool next(true) ;
+    bool next(true) ;
 
-  nr = data.size() ;
-  lines = (nr-1) /elements_per_line + 1;
+    nr = data.size() ;
+    lines = (nr-1) /elements_per_line + 1;
 
-  str << setprecision(8) << scientific ;
+    str << setprecision(8) << scientific ;
 
-  
-  while( next ) {
 
-    this_line = min( elements_per_line, nr - k ) ;
+    while( next ) {
 
-    for( j=0; j<this_line; j++){
-      flush_ascii( str, data[k] ) ;
-      k++ ;
+        this_line = min( elements_per_line, nr - k ) ;
+
+        for( j=0; j<this_line; j++){
+            flush_ascii( str, data[k] ) ;
+            k++ ;
+        };
+
+        i++ ;
+        if( i<lines){
+            str << endl;
+        }
+        else{
+            next = false;
+        };
+
     };
 
-    i++ ;
-    if( i<lines){
-      str << endl;
+    return ;
+};
+
+/*! -----------------------------------------------------------------------------------
+ * Writes a array of POD data type to file stream in ascii format using scientific format on one single line
+ * @tparam  data_T  type of POD data
+ * @tparam  d       size of array
+ * @param[in]       str     file stream
+ * @param[in]       data    data to be written
+ */
+template< class data_T, size_t d >
+void flush_ascii( std::fstream &str, const std::array<data_T,d> &data ){
+
+    flush_ascii( str, d, data ) ;
+    return ;
+};
+
+/*! -----------------------------------------------------------------------------------
+ * Writes a std::array of POD data type to file stream in ascii format using scientific format putting a fixed number of elements per line
+ * @tparam          data_T  type of POD data
+ * @tparam          d       size of array
+ * @param[in]       str     file stream
+ * @param[in]       elements_per_line     number of entries per line
+ * @param[in]       data    data to be written
+ */
+template< class data_T, size_t d >
+void flush_ascii( std::fstream &str, int elements_per_line, const std::array<data_T,d> &data ){
+
+    int i(0), j(0), k(0) ;
+    int nr ;
+
+    int lines, this_line ;
+
+    bool next(true) ;
+
+    nr = d ;
+    lines = nr /elements_per_line ;
+
+    str << setprecision(8) << scientific ;
+
+
+    while( next ) {
+
+        this_line = min( elements_per_line, nr - k ) ;
+        for( j=0; j<this_line; j++){
+            flush_ascii( str, data[k] ) ;
+            k++ ;
+        };
+
+        i++ ;
+        if( i<lines){
+            str << endl;
+        }
+        else{
+            next = false;
+        };
+
+    };
+
+    return ;
+};
+
+/*! -----------------------------------------------------------------------------------
+ * Writes a C array of POD data type to file stream in ascii format using scientific format putting a fixed number of elements per line
+ * @tparam          data_T  type of POD data
+ * @param[in]       str     file stream
+ * @param[in]       elements_per_line     number of entries per line
+ * @param[in]       data    data to be written
+ * @param[in]       nr      size of the C array
+ */
+template< class data_T >
+void flush_ascii( std::fstream &str, int elements_per_line, const data_T *data, int nr ){
+
+    int i(0), j(0), k(0) ;
+
+    int lines, this_line ;
+
+    bool next(true) ;
+
+    lines = nr /elements_per_line ;
+
+    str << setprecision(8) << scientific ;
+
+
+    while( next ) {
+
+        this_line = min( elements_per_line, nr - k ) ;
+        for( j=0; j<this_line; j++){
+            flush_ascii( str, data[k] ) ;
+            k++ ;
+        };
+
+        i++ ;
+        if( i<lines){
+            str << endl;
+        }
+        else{
+            next = false;
+        };
+
+    };
+
+    return ;
+};
+
+/*! -----------------------------------------------------------------------------------
+ * Writes a POD data type to file stream in binary format.
+ * The function makes uses of memory contigiuty.
+ * @tparam          data_T  type of POD data
+ * @param[in]       str     file stream
+ * @param[in]       data    data to be written
+ */
+template< class data_T >
+void flush_binary( std::fstream &str, const data_T &data ){
+
+    int nbytes;
+    nbytes = sizeof(data_T) ;
+
+    str.write( reinterpret_cast<const char*>(&data), nbytes ) ;
+
+    return ;
+};
+
+/*! -----------------------------------------------------------------------------------
+ * Writes a std::vector of POD data type to file stream in binary format.
+ * The function makes uses of memory contigiuty.
+ * @tparam          data_T  type of POD data
+ * @param[in]       str     file stream
+ * @param[in]       data    data to be written
+ */
+template< class data_T >
+void flush_binary( std::fstream &str, const std::vector<data_T> &data ){
+
+    int nbytes, nr;
+    nr = data.size() ;
+    nbytes = sizeof(data_T) *nr ;
+
+    str.write( reinterpret_cast<const char*>(&data[0]), nbytes ) ;
+
+    return ;
+};
+
+/*! -----------------------------------------------------------------------------------
+ * Writes a std::vector<std::vector> of POD data type to file stream in binary format.
+ * @tparam          data_T  type of POD data
+ * @param[in]       str     file stream
+ * @param[in]       data    data to be written
+ */
+template< class data_T >
+void flush_binary( std::fstream &str, const std::vector< std::vector<data_T> > &data ){
+
+
+    for( const auto &item : data){
+        flush_binary( str, item ) ;
+    };
+
+    return ;
+};
+
+/*! -----------------------------------------------------------------------------------
+ * Writes a std::vector<std::array> of POD data type to file stream in binary format.
+ * The function makes uses of memory contigiuty.
+ * @tparam          data_T  type of POD data
+ * @tparam          d       size of the array
+ * @param[in]       str     file stream
+ * @param[in]       data    data to be written
+ */
+template< class data_T, size_t d >
+void flush_binary( std::fstream &str, const std::vector< std::array<data_T,d> > &data ){
+
+    int nbytes, nr;
+    nr = data.size() ;
+    nbytes = sizeof(data_T) *nr *d ;
+
+    str.write( reinterpret_cast<const char*>(&data[0]), nbytes ) ;
+
+    return ;
+};
+
+/*! -----------------------------------------------------------------------------------
+ * Writes a std::array of POD data type to file stream in binary format 
+ * @tparam          data_T  type of POD data
+ * @tparam          d       size of the array
+ * @param[in]       str     file stream
+ * @param[in]       data    data to be written
+ */
+template< class data_T, size_t d >
+void flush_binary( std::fstream &str, const std::array<data_T,d> &data ){
+
+    int nbytes;
+    std::array<int,8> data1 ;
+    nbytes = sizeof(data_T)*d ;
+
+    str.write( reinterpret_cast<const char*>(&data[0]), nbytes ) ;
+
+    return ;
+};
+
+/*! -----------------------------------------------------------------------------------
+ * Writes a C array of POD data type to file stream in binary format 
+ * @tparam          data_T  type of POD data
+ * @param[in]       str     file stream
+ * @param[in]       data    data to be written
+ * @param[in]       nr      size of the C array
+ */
+template< class data_T >
+void flush_binary( std::fstream &str, const data_T *data, int nr ){
+
+    int nbytes;
+    nbytes = sizeof(data_T) *nr ;
+
+    str.write( reinterpret_cast<const char*>(data), nbytes ) ;
+
+    return ;
+};
+
+/*! -----------------------------------------------------------------------------------
+ * Reads one line into templated data type.
+ * Relies on operator ">>" of the templated data type.
+ * In case the information on the line is not sufficient or exceeds the data type and error message is displayed std::cout
+ * @tparam          data_T  type of POD data
+ * @param[in]       str     file stream
+ * @param[in]       data    data to be written
+ */
+template< class data_T >
+void  line_stream( std::fstream &str, data_T &data){
+
+    std::vector<data_T> temp;
+    data_T         x_;
+    std::string         line;
+    int            expected, read(0) ;
+
+    expected = 1;
+
+    getline( str, line );
+    trim( line );
+
+    std::stringstream ss( line );
+
+    while( ss.good() ){
+        ss >> x_ ;
+        temp.push_back(x_);
+        read++ ;
+    };
+
+    if( read != expected){
+        std::cout << " Not expected nr of element in line" << endl;
+        std::cout << " Expected number: "<< expected << endl ; 
+        std::cout << " Actual number: "<< read << endl ; 
     }
+
     else{
-      next = false;
+        data=temp[0];
     };
 
-  };
+    return;
 
-  return ;
 };
 
-// =================================================================================== //
-template< class data_T, size_t d >
-void flush_ascii( fstream &str, const array<data_T,d> &data ){
+/*! -----------------------------------------------------------------------------------
+ * Reads one line into std::vector of templated data type.
+ * Relies on operator ">>" of the templated data type.
+ * In case data.size() == 0, data will be resized to match all information available on the line.
+ * Otherwise the information on the line should fit exactly the size of data.
+ * If not an error message is displayed std::cout
+ * @tparam          data_T  type of POD data
+ * @param[in]       str     file stream
+ * @param[in]       data    data to be written
+ */
+template< class data_T >
+void  line_stream( std::fstream &str, std::vector<data_T> &data){
 
-  flush_ascii( str, d, data ) ;
-  return ;
-};
+    std::vector<data_T>   temp;
+    data_T                x_;
+    std::string           line;
+    int                   expected, read(0) ;
 
-// =================================================================================== //
-template< class data_T, size_t d >
-void flush_ascii( fstream &str, int elements_per_line, const array<data_T,d> &data ){
+    expected = data.size() ;
 
-  int i(0), j(0), k(0) ;
-  int nr ;
+    getline( str, line );
+    trim( line );
 
-  int lines, this_line ;
+    std::stringstream ss( line );
 
-  bool next(true) ;
-
-  nr = d ;
-  lines = nr /elements_per_line ;
-
-  str << setprecision(8) << scientific ;
-
-  
-  while( next ) {
-
-    this_line = min( elements_per_line, nr - k ) ;
-    for( j=0; j<this_line; j++){
-      flush_ascii( str, data[k] ) ;
-      k++ ;
+    while( ss.good() ){
+        ss >> x_ ;
+        temp.push_back(x_);
+        read++ ;
     };
 
-    i++ ;
-    if( i<lines){
-      str << endl;
+    if( expected == 0) {
+        data = temp ;
     }
+
     else{
-      next = false;
+        if( expected == read){
+            data = temp ;
+        }
+        else{
+            std::cout << " Not expected nr of element in line" << endl;
+            std::cout << " Expected number: "<< expected << endl ; 
+            std::cout << " Actual number: "<< read << endl ; 
+        };
     };
 
-  };
+    return;
 
-  return ;
 };
 
-// =================================================================================== //
-template< class data_T >
-void flush_ascii( fstream &str, int elements_per_line, const data_T *data, int nr ){
-
-  int i(0), j(0), k(0) ;
-
-  int lines, this_line ;
-
-  bool next(true) ;
-
-  lines = nr /elements_per_line ;
-
-  str << setprecision(8) << scientific ;
-
-  
-  while( next ) {
-
-    this_line = min( elements_per_line, nr - k ) ;
-    for( j=0; j<this_line; j++){
-      flush_ascii( str, data[k] ) ;
-      k++ ;
-    };
-
-    i++ ;
-    if( i<lines){
-      str << endl;
-    }
-    else{
-      next = false;
-    };
-
-  };
-
-  return ;
-};
-
-// =================================================================================== //
-template< class data_T >
-void flush_binary( fstream &str, const data_T data ){
-
-  int nbytes;
-  nbytes = sizeof(data_T) ;
-
-  str.write( reinterpret_cast<const char*>(&data), nbytes ) ;
-
-  return ;
-};
-
-// =================================================================================== //
-template< class data_T >
-void flush_binary( fstream &str, const vector<data_T> &data ){
-
-  int nbytes, nr;
-  nr = data.size() ;
-  nbytes = sizeof(data_T) *nr ;
-
-  str.write( reinterpret_cast<const char*>(&data[0]), nbytes ) ;
-
-  return ;
-};
-
-// =================================================================================== //
-template< class data_T >
-void flush_binary( fstream &str, const vector< vector<data_T> > &data ){
-
-  int i, nr(data.size());
-
-
-  for(i=0; i<nr; i++){
-    flush_binary( str, data[i] ) ;
-  };
-
-  return ;
-};
-
-// =================================================================================== //
+/*! -----------------------------------------------------------------------------------
+ * Reads one line into std::array of templated data type and templated size
+ * Relies on operator ">>" of the templated data type.
+ * The information on the line should fit exactly the size of the array.
+ * If not an error message is displayed std::cout
+ * @tparam          data_T  type of POD data
+ * @tparam          d       size of std::array
+ * @param[in]       str     file stream
+ * @param[in]       data    data to be written
+ */
 template< class data_T, size_t d >
-void flush_binary( fstream &str, const vector< array<data_T,d> > &data ){
+void  line_stream( std::fstream &str, std::array<data_T,d> &data){
 
-  int nbytes, nr;
-  nr = data.size() ;
-  nbytes = sizeof(data_T) *nr *d ;
+    std::vector<data_T> temp;
+    data_T              x_;
+    std::string         line;
+    int                 expected, read(0), i ;
 
-  str.write( reinterpret_cast<const char*>(&data[0]), nbytes ) ;
+    expected = d ;
 
-  return ;
-};
+    getline( str, line );
+    trim( line );
 
-// =================================================================================== //
-template< class data_T, size_t d >
-void flush_binary( fstream &str, const array<data_T,d> &data ){
+    std::stringstream ss( line );
 
-  int nbytes;
-  array<int,8> data1 ;
-  nbytes = sizeof(data_T)*d ;
+    while( ss.good() ){
+        ss >> x_ ;
+        temp.push_back(x_);
+        read++ ;
+    };
 
-  str.write( reinterpret_cast<const char*>(&data[0]), nbytes ) ;
-
-  return ;
-};
-
-// =================================================================================== //
-template< class data_T >
-void flush_binary( fstream &str, const data_T *data, int nr ){
-
-  int nbytes;
-  nbytes = sizeof(data_T) *nr ;
-
-  str.write( reinterpret_cast<const char*>(data), nbytes ) ;
-
-  return ;
-};
-
-// =================================================================================== //
-// FOR READING
-
-template< class data_T >
-void  line_stream( fstream &str, data_T &data){
-
-  vector<data_T> temp;
-  data_T         x_;
-  string         line;
-  int            expected, read(0) ;
-
-  expected = 1;
-
-  getline( str, line );
-  trim( line );
-
-  stringstream ss( line );
-
-  while( ss.good() ){
-    ss >> x_ ;
-    temp.push_back(x_);
-    read++ ;
-  };
-
-  if( read != expected){
-    cout << " Not expected nr of element in line" << endl;
-    cout << " Expected number: "<< expected << endl ; 
-    cout << " Actual number: "<< read << endl ; 
-  }
-
-  else{
-    data=temp[0];
-  };
-
-  return;
-
-};
-
-// =================================================================================== //
-template< class data_T >
-void  line_stream( fstream &str, vector<data_T> &data){
-
-  vector<data_T> temp;
-  data_T         x_;
-  string         line;
-  int            expected, read(0) ;
-
-  expected = data.size() ;
-
-  getline( str, line );
-  trim( line );
-
-  stringstream ss( line );
-  
-  while( ss.good() ){
-    ss >> x_ ;
-    temp.push_back(x_);
-    read++ ;
-  };
-
-  if( expected == 0) {
-    data = temp ;
-  }
-
-  else{
     if( expected == read){
-      data = temp ;
+        for(i=0; i<read; i++) data[i] = temp[i] ;
     }
     else{
-      cout << " Not expected nr of element in line" << endl;
-      cout << " Expected number: "<< expected << endl ; 
-      cout << " Actual number: "<< read << endl ; 
+        std::cout << " Not expected nr of element in line" << endl;
+        std::cout << " Expected number: "<< expected << endl ; 
+        std::cout << " Actual number: "<< read << endl ; 
     };
-  };
 
-  return;
-  
+    return;
+
 };
 
-// =================================================================================== //
-template< class data_T, size_t d >
-void  line_stream( fstream &str, array<data_T,d> &data){
-
-  vector<data_T> temp;
-  data_T         x_;
-  string         line;
-  int            expected, read(0), i ;
-
-  expected = d ;
-
-  getline( str, line );
-  trim( line );
-
-  stringstream ss( line );
-  
-  while( ss.good() ){
-    ss >> x_ ;
-    temp.push_back(x_);
-    read++ ;
-  };
-
-  if( expected == read){
-    for(i=0; i<read; i++) data[i] = temp[i] ;
-  }
-  else{
-    cout << " Not expected nr of element in line" << endl;
-    cout << " Expected number: "<< expected << endl ; 
-    cout << " Actual number: "<< read << endl ; 
-  };
-
-  return;
-  
-};
-
-// =================================================================================== //
+/*! -----------------------------------------------------------------------------------
+ * Reads one line into C array of templated data type and given size.
+ * Relies on operator ">>" of the templated data type.
+ * The information on the line should fit exactly the size .
+ * If not an error message is displayed std::cout
+ * @tparam          data_T  type of POD data
+ * @param[in]       str     file stream
+ * @param[in]       data    data to be written
+ * @param[in]       nr      number of elements to be read
+ */
 template< class data_T >
-void  line_stream( fstream &str, data_T *data, int nr ){
+void  line_stream( std::fstream &str, data_T *data, int nr ){
 
-  vector<data_T> temp;
-  data_T         x_;
-  string         line;
-  int            expected, read(0), i ;
+    std::vector<data_T> temp;
+    data_T              x_;
+    std::string         line;
+    int                 expected, read(0), i ;
 
-  expected = nr ;
+    expected = nr ;
 
-  getline( str, line );
-  trim( line );
+    getline( str, line );
+    trim( line );
 
-  stringstream ss( line );
+    std::stringstream ss( line );
 
-  while( ss.good() ){
-    ss >> x_ ;
-    temp.push_back(x_);
-    read++ ;
-  };
-
-  if( expected == read){
-    for(i=0; i<read; i++) data[i] = temp[i] ;
-  }
-  else{
-    cout << " Not expected nr of element in line" << endl;
-    cout << " Expected number: "<< expected << endl ; 
-    cout << " Actual number: "<< read << endl ; 
-  };
-  
-  return;
-
-};
-
-// =================================================================================== //
-template< class data_T >
-void absorb_ascii( fstream &str, data_T &data ){
-
-  str >> data ;
-
-  return ;
-};
-
-// =================================================================================== //
-template< class data_T >
-void absorb_ascii( fstream &str, vector<data_T> &data ){
-
-  vector<data_T>   temp;
-  int              i ;
-  int              nr, read, new_ ;
-
-  read = 0 ;
-  nr = data.size() ;
-
-
-  while( str.good() && read < nr) {
-
-    line_stream( str, temp) ;
-    new_ = temp.size() ; 
-
-    for( i=0; i<new_; i++){
-      if( read < nr ){
-        data[read] = temp[i] ;
+    while( ss.good() ){
+        ss >> x_ ;
+        temp.push_back(x_);
         read++ ;
-      };
     };
 
-  };
-
-  if( read != nr) {
-    cout << "Not enough elements found to fill vector" << endl ;
-    cout << "Size of vector: " << nr << endl ;
-    cout << "Elements within file: " << read << endl ;
-  };
-
-
-  return ;
-};
-
-// =================================================================================== //
-template< class data_T, size_t d >
-void absorb_ascii( fstream &str, array<data_T,d> &data ){
-
-  vector<data_T>   temp;
-  int              i ;
-  int              nr, read, new_ ;
-
-  read = 0 ;
-  nr = d ;
-
-
-  while( str.good() && read<nr ) {
-
-    line_stream( str, temp) ;
-    new_ = temp.size() ; 
-
-    for( i=0; i<new_; i++){
-      if( read < nr ){
-        data[read] = temp[i] ;
-        read++ ;
-      };
+    if( expected == read){
+        for(i=0; i<read; i++) data[i] = temp[i] ;
+    }
+    else{
+        std::cout << " Not expected nr of element in line" << endl;
+        std::cout << " Expected number: "<< expected << endl ; 
+        std::cout << " Actual number: "<< read << endl ; 
     };
 
-  };
+    return;
 
-  if( read != nr) {
-    cout << "absorb_ascii<> array overloading" << endl ;
-    cout << "Not enough elements found to fill array" << endl ;
-    cout << "Size of array: " << nr << endl ;
-    cout << "Elements within file: " << read << endl ;
-  };
-
-
-
-  return ;
 };
 
-// =================================================================================== //
+/*! -----------------------------------------------------------------------------------
+ * Reads a templated data type from file stream in ascii 
+ * Relies on the ">>" operator.
+ * @tparam  data_T  type of POD data
+ * @param[in]   str     file stream
+ * @param[in]   data    data to be read
+ */
 template< class data_T >
-void absorb_ascii( fstream &str, data_T *data, int nr ){
+void absorb_ascii( std::fstream &str, data_T &data ){
 
-  vector<data_T>   temp;
-  int              i ;
-  int              read, new_ ;
+    str >> data ;
 
-  read = 0 ;
+    return ;
+};
 
-  while( str.good() ) {
+/*! -----------------------------------------------------------------------------------
+ * Reads a std::vector of data type from file stream in ascii.
+ * The size of the vector defines the number of elements to be read.
+ * If not enough elements are present in the file an error message is displayed on std::cout
+ * Relies on the function line_stream.
+ * @tparam  data_T  type of POD data
+ * @param[in]   str     file stream
+ * @param[in]   data    data to be read
+ */
+template< class data_T >
+void absorb_ascii( std::fstream &str, std::vector<data_T> &data ){
 
-    line_stream( str, temp) ;
-    new_ = temp.size() ; 
+    std::vector<data_T>             temp;
 
-    for( i=0; i<new_; i++){
-      if( read < nr ){
-        data[read] = temp[i] ;
-        read++ ;
-      };
+    typename std::vector<data_T>::iterator   itrData, begData, endData;
+    typename std::vector<data_T>::iterator   itrTemp, begTemp, endTemp;
+
+    begData = data.begin() ;
+    endData = data.end() ;
+
+    itrData = begData ;
+
+    while( str.good() && itrData!=endData ) {
+
+        temp.clear() ;
+        line_stream( str, temp) ;
+
+        begTemp = temp.begin() ;
+        endTemp = temp.end() ;
+
+        for( itrTemp=begTemp; (itrTemp!=endTemp && itrData!=endData); ){
+            *itrData = *itrTemp ;
+
+            ++itrTemp;
+            ++itrData;
+
+        };
+
+
     };
 
-  };
-
-  if( read != nr) {
-    cout << "Not enough elements found to fill c array" << endl ;
-    cout << "Size of c array: " << nr << endl ;
-    cout << "Elements within file: " << read << endl ;
-  };
+    if( itrData != endData ) {
+        std::cout << "Not enough elements found to fill vector" << endl ;
+    };
 
 
-  return ;
+    return ;
 };
 
-// =================================================================================== //
-template< class data_T >
-void absorb_binary( fstream &str, data_T &data ){
-
-  int nbytes ;
-  nbytes = sizeof(data_T) ;
-
-  str.read( reinterpret_cast<char*>(&data), nbytes ) ;
-
-  return ;
-};
-
-// =================================================================================== //
-template< class data_T >
-void absorb_binary( fstream &str, vector<data_T> &data ){
-
-  int nbytes, nr;
-  nr = data.size() ;
-  nbytes = sizeof(data_T) *nr ;
-
-  str.read( reinterpret_cast<char*>(&data[0]), nbytes ) ;
-
-  return ;
-};
-
-// =================================================================================== //
-template< class data_T >
-void absorb_binary( fstream &str, vector< vector<data_T> > &data ){
-
-  int i, nr;
-  nr = data.size() ;
-
-  for( i=0; i<nr; ++i){
-      absorb_binary( str, data[i] ) ;
-  };
-
-  return ;
-};
-
-// =================================================================================== //
+/*! -----------------------------------------------------------------------------------
+ * Reads a std::array of data type from file stream in ascii.
+ * The size of the array defines the number of elements to be read.
+ * If not enough elements are present in the file an error message is displayed on std::cout
+ * Relies on the function line_stream.
+ * @tparam      data_T  class stored in std::array
+ * @tparam      d       size of std::array
+ * @param[in]   str     file stream
+ * @param[in]   data    data to be read
+ */
 template< class data_T, size_t d >
-void absorb_binary( fstream &str, vector< array<data_T,d> > &data ){
+void absorb_ascii( std::fstream &str, std::array<data_T,d> &data ){
 
-  int  nbytes, nr;
-  nr = data.size() ;
-  nbytes = sizeof(data_T) *nr *d ;
+    std::vector<data_T>             temp;
 
-  str.read( reinterpret_cast<char*>(&data[0]), nbytes ) ;
+    typename std::array<data_T,d>::iterator  itrData, begData, endData;
+    typename std::vector<data_T>::iterator   itrTemp, begTemp, endTemp;
 
-  return ;
+    begData = data.begin() ;
+    endData = data.end() ;
+
+    itrData = begData ;
+
+    while( str.good() && itrData!=endData ) {
+
+        temp.clear() ;
+        line_stream( str, temp) ;
+
+        begTemp = temp.begin() ;
+        endTemp = temp.end() ;
+
+        for( itrTemp=begTemp; (itrTemp!=endTemp && itrData!=endData); ){
+            *itrData = *itrTemp ;
+
+            ++itrTemp;
+            ++itrData;
+
+        };
+
+
+    };
+
+    if( itrData != endData ) {
+        std::cout << "Not enough elements found to fill array" << endl ;
+    };
+
+
+
+    return ;
 };
 
-// =================================================================================== //
-template< class data_T, size_t d >
-void absorb_binary( fstream &str, array<data_T,d> &data ){
-
-  int nbytes;
-  nbytes = sizeof(data_T) *d ;
-
-  str.read( reinterpret_cast<char*>(&data[0]), nbytes ) ;
-  
-  return ;
-};
-
-// =================================================================================== //
+/*! -----------------------------------------------------------------------------------
+ * Reads a C array of data type from file stream in ascii.
+ * If not enough elements are present in the file an error message is displayed on std::cout
+ * Relies on the function line_stream.
+ * @tparam      data_T  class stored in C array
+ * @tparam      d       size of std::array
+ * @param[in]   str     file stream
+ * @param[in]   data    pointer to C array
+ * @param[in]   nr      number of elements
+ */
 template< class data_T >
-void absorb_binary( fstream &str, data_T *data, int nr ){
+void absorb_ascii( std::fstream &str, data_T *data, int nr ){
 
-  int nbytes;
-  nbytes = sizeof(data_T) *nr ;
 
-  str.read( reinterpret_cast<char*>(data), nbytes ) ;
+    std::vector<data_T>                      temp;
 
-  return ;
+    data_T*                                  itrData, begData, endData;
+    typename std::vector<data_T>::iterator   itrTemp, begTemp, endTemp;
+
+    begData = &data[0] ;
+    endData = &data[nr-1] ;
+
+    itrData = begData ;
+
+    while( str.good() && itrData!=endData ) {
+
+        temp.clear() ;
+        line_stream( str, temp) ;
+
+        begTemp = temp.begin() ;
+        endTemp = temp.end() ;
+
+        for( itrTemp=begTemp; (itrTemp!=endTemp && itrData!=endData); ){
+            *itrData = *itrTemp ;
+
+            ++itrTemp;
+            ++itrData;
+
+        };
+
+
+    };
+
+    if( itrData != endData ) {
+        std::cout << "Not enough elements found to fill array" << endl ;
+    };
+
+
+    return ;
 };
+
+/*! -----------------------------------------------------------------------------------
+ * Reads a templated data type from file stream in binary
+ * @tparam      data_T  type of data
+ * @param[in]   str     file stream
+ * @param[in]   data    data to be read
+ */
+template< class data_T >
+void absorb_binary( std::fstream &str, data_T &data ){
+
+    int nbytes ;
+    nbytes = sizeof(data_T) ;
+
+    str.read( reinterpret_cast<char*>(&data), nbytes ) ;
+
+    return ;
+};
+
+/*! -----------------------------------------------------------------------------------
+ * Reads a std::vector of templated POD data type from file stream in binary format
+ * @tparam      data_T  type of data
+ * @param[in]   str     file stream
+ * @param[in]   data    data to be read
+ */
+template< class data_T >
+void absorb_binary( std::fstream &str, std::vector<data_T> &data ){
+
+    int nbytes, nr;
+    nr = data.size() ;
+    nbytes = sizeof(data_T) *nr ;
+
+    str.read( reinterpret_cast<char*>(&data[0]), nbytes ) ;
+
+    return ;
+};
+
+/*! -----------------------------------------------------------------------------------
+ * Reads a std::vector of std::vector of templated POD data type from file stream in binary format
+ * @tparam      data_T  type of data
+ * @param[in]   str     file stream
+ * @param[in]   data    data to be read
+ */
+template< class data_T >
+void absorb_binary( std::fstream &str, std::vector< std::vector<data_T> > &data ){
+
+    for( auto &item: data ){
+        absorb_binary( str, item ) ;
+    };
+
+    return ;
+};
+
+/*! -----------------------------------------------------------------------------------
+ * Reads a std::vector of std::array of templated POD data type of templated size from file stream in binary
+ * @tparam      data_T  type of data
+ * @tparam      d       size of array
+ * @param[in]   str     file stream
+ * @param[in]   data    data to be read
+ */
+template< class data_T, size_t d >
+void absorb_binary( std::fstream &str, std::vector< std::array<data_T,d> > &data ){
+
+    int  nbytes, nr;
+    nr = data.size() ;
+    nbytes = sizeof(data_T) *nr *d ;
+
+    str.read( reinterpret_cast<char*>(&data[0]), nbytes ) ;
+
+    return ;
+};
+
+/*! -----------------------------------------------------------------------------------
+ * Reads a std::array of templated POD data type of templated size from file stream in binary format
+ * @tparam      data_T  type of data
+ * @tparam      d       size of array
+ * @param[in]   str     file stream
+ * @param[in]   data    data to be read
+ */
+template< class data_T, size_t d >
+void absorb_binary( std::fstream &str, std::array<data_T,d> &data ){
+
+    int nbytes;
+    nbytes = sizeof(data_T) *d ;
+
+    str.read( reinterpret_cast<char*>(&data[0]), nbytes ) ;
+
+    return ;
+};
+
+/*! -----------------------------------------------------------------------------------
+ * Reads a C array of templated data type from file stream in binary format
+ * @tparam      data_T  type of data
+ * @param[in]   str     file stream
+ * @param[in]   data    data to be read
+ * @param[in]   nr      number of elements to be read
+ */
+template< class data_T >
+void absorb_binary( std::fstream &str, data_T *data, int nr ){
+
+    int nbytes;
+    nbytes = sizeof(data_T) *nr ;
+
+    str.read( reinterpret_cast<char*>(data), nbytes ) ;
+
+    return ;
+};
+
+/*!
+ * @}
+ */

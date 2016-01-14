@@ -1,7 +1,3 @@
-/*!
-  \ingroup    VTK
-  @{
- */
 
 
 #ifndef __CLASS_VTK__HH__
@@ -18,23 +14,9 @@
 uint8_t SizeOfType( std::string type ) ;
 
 
-/*! ========================================================================================
- * \class      VTK
- * \brief A base class for VTK input output. 
- *
- * VTK provides all basic methods for reading and writing VTK files.
- * ASCII and APPENDED mode are supported.
- *
- */
 class VTK{
 
     protected:
-
-        /*!
-         * \class        Field_C
-         * \brief        VTKField handles geometry and data field information for the VTK format
-         *
-         */
 
         class Field_C{
 
@@ -161,15 +143,6 @@ class VTK{
 
 };
 
-/*! ========================================================================================
- * \class       VTK_UnstructuredGrid
- * \brief       VTK input output for Unstructured Meshes
- * \tparam      Derived     this argument is used for the static-dispatch interface through CRTP
- *
- * VTK_UnstructuredGrid provides methods to read and write parallel and serial unstructured meshes and data. 
- * The class is agnostic with respect to the container used for the data and provides an interface through the CRTP mechanism.
- *
- */
 template <class Derived >
 class VTK_UnstructuredGrid : public VTK{
 
@@ -199,16 +172,6 @@ class VTK_UnstructuredGrid : public VTK{
 
 };
 
-/*! ========================================================================================
- * \class       VTK_RectilinearGrid
- * \brief       VTK input output for Rectilinear Meshes
- * \tparam      Derived     this argument is used for the static-dispatch interface through CRTP
- *
- * VTK_RectilinearGrid provides methods to read and write parallel and serial rectlinear meshes and data. 
- * The class is agnostic with respect to the container used for the data and provides an interface through the CRTP mechanism.
- * The numbering of nodes start with 0. Different numbering scheme is not supported.
- *
- */
 template <class Derived>
 class VTK_RectilinearGrid : public VTK{
 
@@ -260,5 +223,3 @@ class VTK_RectilinearGrid : public VTK{
 
 
 #endif
-
-/* @} */
