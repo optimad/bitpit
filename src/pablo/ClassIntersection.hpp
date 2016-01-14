@@ -68,9 +68,9 @@ private:
 public:
 	ClassIntersection();
 	ClassIntersection(const ClassIntersection & intersection);
+	ClassIntersection & operator =(const ClassIntersection & intersection);
 private:
 	ClassIntersection(uint8_t dim_);
-	ClassIntersection & operator =(const ClassIntersection & intersection);
 	bool operator ==(const ClassIntersection & intersection);
 
 	// =================================================================================== //
