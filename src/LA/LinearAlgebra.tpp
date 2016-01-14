@@ -13,40 +13,23 @@
 // ========================================================================== //
 
 // ========================================================================== //
-// INCLUDES                                                                   //
-// ========================================================================== //
-# include "LinearAlgebra.hpp"
-
-// ========================================================================== //
 // TEMPLATES                                                                  //
 // ========================================================================== //
 
 // Generic routines ========================================================= //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Display matrix to output stream in a nicely formatted form.
+
+    \param[in,out] out output stream
+    \param[in] A matrix to be displayed
+*/
 template<class T>
 void display_matrix(
-    ostream                     &out,
-    vector< vector< T > >       &A
+    std::ostream                                &out,
+    std::vector< std::vector< T > >             &A
 ) {
-
-// ========================================================================== //
-// template<class T, size_t n, size_t m>                                      //
-// void display_matrix(                                                       //
-//     ostream                     &out,                                      //
-//     vector< vector< T > >       &A)                                        //
-//                                                                            //
-// Display matrix content in a nicely formatted output.                       //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - out   : ostream, ref. to output stream                                   //
-// - A     : vector<vector<T > >, matrix to be displayed                      //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -62,35 +45,24 @@ int             i;
 // DISPLAY MATRIX CONTENT                                                     //
 // ========================================================================== //
 for (i = 0; i < m; ++i) {
-    out << A[i] << endl;
+    out << A[i] << std::endl;
 } //next i
 
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Display matrix to output stream in a nicely formatted form.
+    Overloading of display_matrix() function for container array.
+
+    \param[in,out] out output stream
+    \param[in] A matrix to be displayed
+*/
 template<class T, size_t m, size_t n>
 void display_matrix(
-    ostream                     &out,
-    array<array<T, n>, m>       &A
+    std::ostream                                &out,
+    std::array<std::array<T, n>, m>             &A
 ) {
-
-// ========================================================================== //
-// template<class T, size_t m, size_t n>                                      //
-// void display_matrix(                                                       //
-//     ostream                     &out,                                      //
-//     array<array<T, n>, m>       &A)                                        //
-//                                                                            //
-// Display matrix content in a nicely formatted output.                       //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - out   : ostream, ref. to output stream                                   //
-// - A     : array<array<T, n>, m>, matrix to be displayed                    //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -106,7 +78,7 @@ int             i;
 // DISPLAY MATRIX CONTENT                                                     //
 // ========================================================================== //
 for (i = 0; i < m; ++i) {
-    out << A[i] << endl;
+    out << A[i] << std::endl;
 } //next i
 
 return; };
@@ -114,32 +86,19 @@ return; };
 // Matrix basic templates =================================================== //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Initialize a m-by-n matrix with 0 entries
+
+    \param[in,out] A container for matrix storage
+    \param[in] m number of matrix rows
+    \param[in] n number of matrix columns
+*/
 template <class T>
 void zeros(
-    vector< vector < T > >      &A,
-    int                          m,
-    int                          n
+    std::vector< std::vector < T > >            &A,
+    int                                          m,
+    int                                          n
 ) {
-
-// ========================================================================== //
-// template <class T>                                                         //
-// void zeros(                                                                //
-//     vector< vector < T > >      &A,                                        //
-//     int                          m,                                        //
-//     int                          n)                                        //
-//                                                                            //
-// Initialize a m-by-n matrix of zeros.                                       //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A      : vector< vector< T > >, with m-by-n matrix of zeros              //
-// - m      : int, number of rows                                             //
-// - n      : int, number of columns                                          //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -172,9 +131,17 @@ for (i = 0; i < m; i++) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Initalize a m-by-n matrix with 0-entries. Overloading of zeros() function
+    for container array.
+
+    \param[in,out] A container for matrix storage
+    \param[in] m number of matrix rows
+    \param[in] n number of matrix columns
+*/
 template <class T, size_t m, size_t n>
 void zeros(
-    array< array < T, n >, m >  &A
+    std::array< std::array < T, n >, m >        &A
 ) {
 
 // ========================================================================== //
@@ -221,32 +188,19 @@ for (i = 0; i < m; i++) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Initialize a m-by-n matrix of ones.
+
+    \param[in,out] A container for matrix storage
+    \param[in] m number of matrix rows
+    \param[in] n number of matrix columns
+*/
 template <class T>
 void ones(
-    vector< vector < T > >      &A,
-    int                          m,
-    int                          n
+    std::vector< std::vector < T > >            &A,
+    int                                          m,
+    int                                          n
 ) {
-
-// ========================================================================== //
-// template <class T>                                                         //
-// void ones(                                                                 //
-//     vector< vector < T > >      &A,                                        //
-//     int                          m,                                        //
-//     int                          n)                                        //
-//                                                                            //
-// Initialize a m-by-n matrix of ones.                                        //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A      : vector< vector< T > >, with m-by-n matrix of ones               //
-// - m      : int, number of rows                                             //
-// - n      : int, number of columns                                          //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -262,7 +216,7 @@ int      i, j;
 // CHECK INPUT                                                                //
 // ========================================================================== //
 if ((m == 0) || (n == 0)) {
-    cout << "ERROR: number of rows (columns) must be > 0!!" << endl;
+    std::cout << "ERROR: number of rows (columns) must be > 0!!" << std::endl;
 }
 
 // ========================================================================== //
@@ -279,27 +233,18 @@ for (i = 0; i < m; i++) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Initialize a m-by-n matrix of ones. Overloading of ones() function for
+    container array.
+
+    \param[in,out] A container for matrix storage
+    \param[in] m number of matrix rows
+    \param[in] n number of matrix columns
+*/
 template <class T, size_t m, size_t n>
 void ones(
-    array< array < T, n >, m >  &A
+    std::array< std::array < T, n >, m >        &A
 ) {
-
-// ========================================================================== //
-// template <class T, size_t m, size_t n>                                     //
-// void ones(                                                                 //
-//     array< array < T, n >, m >  &A)                                        //
-//                                                                            //
-// Initialize a m-by-n matrix of ones.                                        //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A      : array< array< T, n >, m >, with m-by-n matrix of ones           //
-// - none                                                                     //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -328,39 +273,27 @@ for (i = 0; i < m; i++) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Initialize a m-by-n identity matrix having. All the entries on the main
+    diagonal are set to 1.
+
+    \param[in,out] A container for matrix storage
+    \param[in] m number of matrix rows
+    \param[in] n number of matrix columns
+*/
 template <class T>
 void eye(
-    vector< vector < T > >      &A,
-    int                          m,
-    int                          n
+    std::vector< std::vector < T > >            &A,
+    int                                          m,
+    int                                          n
 ) {
-
-// ========================================================================== //
-// template <class T>                                                         //
-// void eye(                                                                  //
-//     vector< vector < T > >      &A,                                        //
-//     int                          m,                                        //
-//     int                          n)                                        //
-//                                                                            //
-// Initialize a m-by-n identity matrix.                                       //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A      : vector< vector< T > >, with m-by-n identity matrix              //
-// - m      : int, number of rows                                             //
-// - n      : int, number of columns                                          //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
 // ========================================================================== //
 
 // Local variables
-int      s = min(m, n);
+int      s = std::min(m, n);
 
 // Counters
 int      i;
@@ -383,33 +316,25 @@ for (i = 0; i < s; i++) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Initialize a m-by-n identity matrix having. All the entries on the main
+    diagonal are set to 1. Overloading of eye() function for container array.
+
+    \param[in,out] A container for matrix storage
+    \param[in] m number of matrix rows
+    \param[in] n number of matrix columns
+*/
 template <class T, size_t m, size_t n>
 void eye(
-    array< array < T, n >, m >  &A
+    std::array< std::array < T, n >, m >        &A
 ) {
-
-// ========================================================================== //
-// template <class T, size_t m, size_t n>                                     //
-// void eye(                                                                  //
-//     array< array < T, n >, m >  &A)                                        //
-//                                                                            //
-// Initialize a m-by-n identity matrix.                                       //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A      : array< array< T, n >, m >, with m-by-n identity matrix          //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
 // ========================================================================== //
 
 // Local variables
-int      s = min(m, n);
+int      s = std::min(m, n);
 
 // Counters
 int      i;
@@ -434,32 +359,19 @@ return; };
 // Matrix multiplications =================================================== //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Matrix multiplication between a scalar and a matrix.
+
+    \param[in] A input scalar
+    \param[in] B input matrix
+    \param[in,out] C product between A and B
+*/
 template <class T>
 void matmul(
-    T                            A,
-    vector< vector< T > >       &B,
-    vector< vector< T > >       &C
+    T                                            A,
+    std::vector< std::vector< T > >             &B,
+    std::vector< std::vector< T > >             &C
 ) {
-
-// ========================================================================== //
-// template <class T>                                                         //
-// void matmul(                                                               //
-//     T                            A,                                        //
-//     vector< vector< T > >       &B,                                        //
-//     vector< vector< T > >       &C)                                        //
-//                                                                            //
-// Perform product between scalar A and matrix B.                             //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A      : T, 1st input scalar                                             //
-// - B      : vector< vector < T > >, 2nd input matrix                        //
-// - C      : vector< vector < T > >, with product between A and B            //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLE DECLARATION                                                       //
@@ -503,32 +415,20 @@ for (i = 0; i < m; i++) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Matrix multiplication between a scalar and a matrix. Overloading of 
+    matmul() function for container array.
+
+    \param[in] A input scalar
+    \param[in] B input matrix
+    \param[in,out] C product between A and B
+*/
 template <class T, size_t m, size_t n>
 void matmul(
-    T                            A,
-    array< array< T, n >, m >   &B,
-    array< array< T, n >, m >   &C
+    T                                            A,
+    std::array< std::array< T, n >, m >         &B,
+    std::array< std::array< T, n >, m >         &C
 ) {
-
-// ========================================================================== //
-// template <class T, size_t m, size_t n>                                     //
-// void matmul(                                                               //
-//     T                            A,                                        //
-//     array< array< T, n >, m >   &B,                                        //
-//     array< array< T, n >, m >   &C)                                        //
-//                                                                            //
-// Perform product between scalar A and matrix B.                             //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A      : T, 1st input scalar                                             //
-// - B      : array< array < T, n >, m >, 2nd input matrix                    //
-// - C      : array< array < T, n >, m >, with product between A and B        //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLE DECLARATION                                                       //
@@ -564,32 +464,19 @@ for (i = 0; i < m; i++) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Matrix multiplication between matrix and scalar.
+
+    \param[in] A input matrix
+    \param[in] B input scalar
+    \param[in,out] C product between A and B
+*/
 template <class T>
 void matmul(
-    vector< vector< T > >       &B,
-    T                            A,
-    vector< vector< T > >       &C
+    std::vector< std::vector< T > >             &B,
+    T                                            A,
+    std::vector< std::vector< T > >             &C
 ) {
-
-// ========================================================================== //
-// template <class T>                                                         //
-// void matmul(                                                               //
-//     vector< vector< T > >       &B,                                        //
-//     T                            A,                                        //
-//     vector< vector< T > >       &C)                                        //
-//                                                                            //
-// Perform product between scalar A and matrix B.                             //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - B      : vector< vector < T > >, 1st input matrix                        //
-// - A      : T, 2nd input scalar                                             //
-// - C      : vector< vector < T > >, with product between A and B            //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLE DECLARATION                                                       //
@@ -623,32 +510,20 @@ matmul(A, B, C);
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Matrix multiplication between matrix and scalar. Overloading of matmul()
+    function for container array.
+
+    \param[in] A input matrix
+    \param[in] B input scalar
+    \param[in,out] C product between A and B
+*/
 template <class T, size_t m, size_t n>
 void matmul(
-    array< array< T, n >, m >   &B,
-    T                            A,
-    array< array< T, n >, m >   &C
+    std::array< std::array< T, n >, m >         &B,
+    T                                            A,
+    std::array< std::array< T, n >, m >         &C
 ) {
-
-// ========================================================================== //
-// template <class T, size_t m, size_t n>                                     //
-// void matmul(                                                               //
-//     array< array< T, n >, m >   &B,                                        //
-//     T                            A,                                        //
-//     array< array< T, n >, m >   &C)                                        //
-//                                                                            //
-// Perform product between scalar A and matrix B.                             //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - B      : array< array < T, n >, m >, 1st input matrix                    //
-// - A      : T, 2nd input scalar                                             //
-// - C      : array< array < T, n >, m >, with product between A and B        //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLE DECLARATION                                                       //
@@ -680,32 +555,19 @@ matmul(A, B, C);
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Matrix multiplication between vector and matrix.
+
+    \param[in] A input vector
+    \param[in] B input matrix
+    \param[in,out] C product between A and B
+*/
 template <class T>
 void matmul(
-    vector< T >                &A,
-    vector< vector < T > >     &B,
-    vector< T >                &C
+    std::vector< T >                            &A,
+    std::vector< std::vector < T > >            &B,
+    std::vector< T >                            &C
 ) {
-
-// ========================================================================== //
-// template <class T>                                                         //
-// void matmul(                                                               //
-//     vector< T >                &A,                                         //
-//     vector< vector < T > >     &B,                                         //
-//     vector< T >                &C)                                         //
-//                                                                            //
-// Matrix left-product between a matrix and a vector.                         //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A      : vector< T >, vector                                             //
-// - B      : vector< vector < T > >, m-by-n matrix                           //
-// - C      : vector< T >, output vector                                      //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -760,32 +622,20 @@ for (i = 0; i < n; i++) {
 return; }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Matrix multiplication between vector and matrix. Overloading of matmul()
+    function for container array.
+
+    \param[in] A input vector
+    \param[in] B input matrix
+    \param[in,out] C product between A and B
+*/
 template <class T, size_t m, size_t n>
 void matmul(
-    array< T, m >              &A,
-    array< array < T, n >, m > &B,
-    array< T, n >              &C
+    std::array< T, m >                          &A,
+    std::array< std::array < T, n >, m >        &B,
+    std::array< T, n >                          &C
 ) {
-
-// ========================================================================== //
-// template <class T, size_t m, size_t n>                                     //
-// void matmul(                                                               //
-//     array< T, m >              &A,                                         //
-//     array< array < T, n >, m > &B,                                         //
-//     array< T, n >              &C)                                         //
-//                                                                            //
-// Matrix left-product between a matrix and a vector.                         //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A      : array< T, m >, vector                                           //
-// - B      : array< array < T, n >, m >, m-by-n matrix                       //
-// - C      : vector< T, n >, output vector                                   //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -822,32 +672,19 @@ for (i = 0; i < n; i++) {
 return; }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Matrix multiplication between matrix and vector.
+
+    \param[in] A input matrix
+    \param[in] B input vector
+    \param[in,out] C product between A and B
+*/
 template <class T>
 void matmul(
-    vector< vector < T > >      &A,
-    vector< T >                 &B,
-    vector< T >                 &C
+    std::vector< std::vector < T > >            &A,
+    std::vector< T >                            &B,
+    std::vector< T >                            &C
 ) {
-
-// ========================================================================== //
-// template <class T>                                                         //
-// void matmul(                                                               //
-//     vector< vector < T > >      &A,                                        //
-//     vector< T >                 &B,                                        //
-//     vector< T >                 &C)                                        //
-//                                                                            //
-// Matrix rught-product between a matrix and a vector.                        //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A      : vector< vector < T > >, m-by-n matrix                           //
-// - B      : vector< T >, vector                                             //
-// - C      : vector< T >, output vector                                      //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -902,32 +739,20 @@ for (i = 0; i < m; i++) {
 return; }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Matrix multiplication between matrix and vector. Overloading of matmul()
+    function for container array.
+
+    \param[in] A input matrix
+    \param[in] B input vector
+    \param[in,out] C product between A and B
+*/
 template <class T, size_t m, size_t n>
 void matmul(
-    array< array < T, n >, m >  &A,
-    array< T, n >               &B,
-    array< T, m >               &C
+    std::array< std::array < T, n >, m >        &A,
+    std::array< T, n >                          &B,
+    std::array< T, m >                          &C
 ) {
-
-// ========================================================================== //
-// template <class T, size_t m, size_t n>                                     //
-// void matmul(                                                               //
-//     array< array < T, n >, m >  &A,                                        //
-//     array< T, n >               &B,                                        //
-//     array< T, m >               &C)                                        //
-//                                                                            //
-// Matrix rught-product between a matrix and a vector.                        //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A      : array< array < T, n >, m >, m-by-n matrix                       //
-// - B      : array< T, n >, vector                                           //
-// - C      : array< T, m >, output vector                                    //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -964,32 +789,19 @@ for (i = 0; i < m; i++) {
 return; }
 
 // -------------------------------------------------------------------------- //
+/*!
+    Matrix multiplication between two matrices.
+
+    \param[in] A input matrix
+    \param[in] B input matrix
+    \param[in,out] C product between A and B
+*/
 template <class T>
 void matmul(
-    vector< vector< T > >       &A,
-    vector< vector< T > >       &B,
-    vector< vector< T > >       &C
+    std::vector< std::vector< T > >             &A,
+    std::vector< std::vector< T > >             &B,
+    std::vector< std::vector< T > >             &C
 ) {
-
-// ========================================================================== //
-// template <class T>                                                         //
-// void matmul(                                                               //
-//     vector< vector< T > >       &A,                                        //
-//     vector< vector< T > >       &B,                                        //
-//     vector< vector< T > >       &C)                                        //
-//                                                                            //
-// Perform row-column product between matrices A and B.                       //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A      : vector< vector < T > >, 1st input matrix                        //
-// - B      : vector< vector < T > >, 2nd input matrix                        //
-// - C      : vector< vector < T > >, with product between A and B            //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLE DECLARATION                                                       //
@@ -1050,32 +862,20 @@ for (i = 0; i < m1; i++) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Matrix multiplication between two matrices. Overloading of matmul() for
+    container array.
+
+    \param[in] A input matrix
+    \param[in] B input matrix
+    \param[in,out] C product between A and B
+*/
 template <class T, size_t m, size_t n, size_t l>
 void matmul(
-    array< array< T, n >, m >   &A,
-    array< array< T, l >, n >   &B,
-    array< array< T, l >, m >   &C
+    std::array< std::array< T, n >, m >         &A,
+    std::array< std::array< T, l >, n >         &B,
+    std::array< std::array< T, l >, m >         &C
 ) {
-
-// ========================================================================== //
-// template <class T, size_t m, size_t n, size_t l>                           //
-// void matmul(                                                               //
-//     array< array< T, n >, m >   &A,                                        //
-//     array< array< T, n >, l >   &B,                                        //
-//     array< array< T, l >, m >   &C)                                        //
-//                                                                            //
-// Perform row-column product between matrices A and B.                       //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A      : array< array < T, n >, m >, 1st input matrix                    //
-// - B      : array< array < T, l >, n >, 2nd input matrix                    //
-// - C      : array< array < T, l >, m >, with product between A and B        //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLE DECLARATION                                                       //
@@ -1122,29 +922,17 @@ return; };
 // Matrix manipulation ====================================================== //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Given an input matrix, compute its transpose.
+
+    \param[in] A input matrix
+    \param[in,out] B transpose of A
+*/
 template <class T>
 void transpose(
-    vector< vector< T > >       &A,
-    vector< vector< T > >       &B
+    std::vector< std::vector< T > >             &A,
+    std::vector< std::vector< T > >             &B
 ) {
-
-// ========================================================================== //
-// template <class T>                                                         //
-// void transpose(                                                            //
-//     vector< vector< T > >       &A,                                        //
-//     vector< vector< T > >       &B)                                        //
-//                                                                            //
-// Matrix transposition.                                                      //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A       : vector< vector< T > >, with input matrix                       //
-// - B       : vector< vector< T > >, with matrix transpose                   //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1184,29 +972,18 @@ for (i = 0; i < m; i++) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Given an input matrix, compute its transpose. Overloading of transpose()
+    function for container array.
+
+    \param[in] A input matrix
+    \param[in,out] B transpose of A
+*/
 template <class T, size_t m, size_t n>
 void transpose(
-    array< array< T, n >, m >   &A,
-    array< array< T, m >, n >   &B
+    std::array< std::array< T, n >, m >         &A,
+    std::array< std::array< T, m >, n >         &B
 ) {
-
-// ========================================================================== //
-// template <class T, size_t m, size_t n>                                     //
-// void transpose(                                                            //
-//     array< array< T, n >, m >   &A,                                        //
-//     array< array< T, m >, n >   &B)                                        //
-//                                                                            //
-// Matrix transposition.                                                      //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A       : array< array< T, n >, m >, with input matrix                   //
-// - B       : array< array< T, m >, n >, with matrix transpose               //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1236,27 +1013,17 @@ for (i = 0; i < m; i++) {
 return; };
 
 // -------------------------------------------------------------------------- //
-template <class T>
-vector< vector< T > > transpose(
-    vector< vector< T > >       &A
-) {
+/*!
+    Given an input matrix, compute its transpose. Overloading of transpose()
+    function.
 
-// ========================================================================== //
-// template <class T>                                                         //
-// void transpose(                                                            //
-//     vector< vector< T > >       &A)                                        //
-//                                                                            //
-// Matrix transposition.                                                      //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A       : vector< vector< T > >, with input matrix                       //
-// - B       : vector< vector< T > >, with matrix transpose                   //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
+    \param[in] A input matrix
+    \param[in,out] B transpose of A
+*/
+template <class T>
+std::vector< std::vector< T > > transpose(
+    std::vector< std::vector< T > >             &A
+) {
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1278,7 +1045,7 @@ if (m != 0) n = A[0].size() ;
 // MATRIX TRANSPOSITION                                                       //
 // ========================================================================== //
 
-vector< vector< T > >      B( n, vector<T> (m,0.) ) ;
+std::vector< std::vector< T > >      B( n, std::vector<T> (m,0.) ) ;
 
 // Transposition
 for (i = 0; i < m; i++) {
@@ -1290,33 +1057,24 @@ for (i = 0; i < m; i++) {
 return; };
 
 // -------------------------------------------------------------------------- //
-template <class T, size_t m, size_t n>
-array< array< T, m >, n > transpose(
-    array< array< T, n >, m >   &A
-) {
+/*!
+    Given an input matrix, compute its transpose. Overloading of transpose()
+    function for container array.
 
-// ========================================================================== //
-// template <class T, size_t m, size_t n>                                     //
-// void transpose(                                                            //
-//     array< array< T, n >, m >   &A                                        //
-//                                                                            //
-// Matrix transposition.                                                      //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A       : array< array< T, n >, m >, with input matrix                   //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
+    \param[in] A input matrix
+    \param[in,out] B transpose of A
+*/
+template <class T, size_t m, size_t n>
+std::array< std::array< T, m >, n > transpose(
+    std::array< std::array< T, n >, m >         &A
+) {
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
 // ========================================================================== //
 
 // Local variables
-array< array< T, m >, n >  B ;
+std::array< std::array< T, m >, n >  B ;
 
 // Counters
 int            i, j;
@@ -1335,35 +1093,22 @@ for (i = 0; i < m; i++) {
 
 return B; };
 
-
 // -------------------------------------------------------------------------- //
+/*!
+    Given an input matrix A, compute the complement of the element A[i][j].
+
+    \param[in] i row index of element
+    \param[in] j column index of element
+    \param[in] A input matrix
+    \param[in,out] B complement of alement A[i][j].
+*/
 template <class T>
 void complement(
-    int                          i,
-    int                          j,
-    vector< vector< T > >       &A,
-    vector< vector< T > >       &B
+    int                                          i,
+    int                                          j,
+    std::vector< std::vector< T > >             &A,
+    std::vector< std::vector< T > >             &B
 ) {
-
-// ========================================================================== //
-// template <class T>                                                         //
-// void complement(                                                           //
-//     int                          i,                                        //
-//     int                          j,                                        //
-//     vector< vector< T > >       &A,                                        //
-//     vector< vector< T > >       &B)                                        //
-//                                                                            //
-// Extract the matrix complement of A.                                        //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - i, j    : int, complement index                                          //
-// - A       : vector< vector< T > >, with input matrix                       //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - B       : vector< vector< T > >, (i,j) complement of A                   //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1421,34 +1166,22 @@ for (l = i+1; l < m; l++) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Given an input matrix A, compute the complement of the element A[i][j].
+    Overloading of complement() function for container array.
+
+    \param[in] i row index of element
+    \param[in] j column index of element
+    \param[in] A input matrix
+    \param[in,out] B complement of alement A[i][j].
+*/
 template <class T, size_t m, size_t n>
 void complement(
-    int                          i,
-    int                          j,
-    array< array< T, n >, m >   &A,
-    array< array<T, n-1>, m-1>  &B
+    int                                          i,
+    int                                          j,
+    std::array< std::array< T, n >, m >         &A,
+    std::array< std::array<T, n-1>, m-1>        &B
 ) {
-
-// ========================================================================== //
-// template <class T, size_t m, size_t n>                                     //
-// void complement(                                                           //
-//     int                          i,                                        //
-//     int                          j,                                        //
-//     array< array< T, n >, m >   &A,                                        //
-//     array< array<T, n-1>, m-1>  &B)                                        //
-//                                                                            //
-// Extract the matrix complement of A.                                        //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - i, j    : int, complement index                                          //
-// - A       : array< array< T, n >, m >, with input matrix                   //
-// - B       : array< array< T, n-1 >, m-1 >, (i,j) complement of A           ///
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1496,29 +1229,17 @@ for (l = i+1; l < m; l++) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Extract the lower triangular part of a matrix.
+
+    \param[in] A input matrix
+    \param[in,out] L lower triangular part of A
+*/
 template <class T>
 void triL(
-    vector< vector< T > >       &A,
-    vector< vector< T > >       &L
+    std::vector< std::vector< T > >             &A,
+    std::vector< std::vector< T > >             &L
 ) {
-
-// ========================================================================== //
-// template <class T>                                                         //
-// void triL(                                                                 //
-//     vector< vector< T > >       &A,                                        //
-//     vector< vector< T > >       &L)                                        //
-//                                                                            //
-// Extract the lower triangular part of a matrix.                             //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A      : vector< vector< T > >, input matrix                             //
-// - L      : vector< vector< T > >, lower triangular part of matrix A        //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1554,29 +1275,19 @@ for (i = 0; i < m; i++) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Extract the lower triangular part of a matrix. Overloading of triL() function
+    for container array.
+
+    \param[in] A input matrix
+    \param[in,out] L lower triangular part of A
+*/
+
 template <class T, size_t m, size_t n>
 void triL(
-    array< array< T, n >, m >       &A,
-    array< array< T, n >, m >       &L
+    std::array< std::array< T, n >, m >         &A,
+    std::array< std::array< T, n >, m >         &L
 ) {
-
-// ========================================================================== //
-// template <class T, size_t m, size_t n>                                     //
-// void triL(                                                                 //
-//     array< array< T, n >, m >       &A,                                    //
-//     array< array< T, n >, m >       &L)                                    //
-//                                                                            //
-// Extract the lower triangular part of a matrix.                             //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A      : array< array< T, n >, m >, input matrix                         //
-// - L      : array< array< T, n >, m >, lower triangular part of matrix A    //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1610,29 +1321,17 @@ for (i = 0; i < m; i++) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Extract the upper triangular part of a matrix.
+
+    \param[in] A input matrix
+    \param[in,out] U upper triangular part of A
+*/
 template <class T>
 void triU(
-    vector< vector< T > >           &A,
-    vector< vector< T > >           &U
+    std::vector< std::vector< T > >             &A,
+    std::vector< std::vector< T > >             &U
 ) {
-
-// ========================================================================== //
-// template <class T>                                                         //
-// void triU(                                                                 //
-//     vector< vector< T > >           &A,                                    //
-//     vector< vector< T > >           &U)                                    //
-//                                                                            //
-// Extract the upper triangular part of a matrix.                             //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A      : vector< vector< T > >, input matrix                             //
-// - U      : vector< vector< T > >, upper triangular part of matrix A        //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1668,28 +1367,18 @@ for (i = 0; i < m; i++) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Extract the upper triangular part of a matrix. Overloading of triU() function
+    for container array.
+
+    \param[in] A input matrix
+    \param[in,out] U upper triangular part of A
+*/
 template <class T, size_t m, size_t n>
 void triU(
-    array< array< T, n >, m >       &A,
-    array< array< T, n >, m >       &U
+    std::array< std::array< T, n >, m >         &A,
+    std::array< std::array< T, n >, m >         &U
 ) {
-
-// ========================================================================== //
-// template <class T, size_t m, size_t n>                                     //
-// void triU(                                                                 //
-//     array< array< T, n >, m >       &A,                                    //
-//     array< array< T, n >, m >       &U)                                    //
-//                                                                            //
-// Extract the upper triangular part of a matrix.                             //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A      : array< array< T, n >, m >, input matrix                         //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - U      : array< array< T, n >, m >, upper triangular part of matrix A    //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1725,26 +1414,32 @@ return; };
 // Matrix determinant ======================================================= //
 
 // -------------------------------------------------------------------------- //
+/*!
+    End function for recursive calls to det().
+
+    \param[in] A input matrix
+
+    \result determinant of A.
+*/
 template <class T>
 T det(
-    vector< vector < T > >          &A
+    std::array< std::array< T, 1 >, 1 >         &A
 ) {
 
-// ========================================================================== //
-// template <class T>                                                         //
-// T det(                                                                     //
-//     vector< vector < T > > &A)                                             //
-//                                                                            //
-// Compute matrix determinant.                                                //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A         : vector< vector < T > >, input matrix                         //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - d         : double, matrix determinant                                   //
-// ========================================================================== //
+return(A[0][0]); };
+
+// -------------------------------------------------------------------------- //
+/*!
+    Compute determinant of a matrix of small dimenions using Laplace rule.
+
+    \param[in] A input matrix
+
+    \result determinant of A.
+*/
+template <class T>
+T det(
+    std::vector< std::vector < T > >            &A
+) {
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1753,7 +1448,7 @@ T det(
 // Local variables
 int                     m, n;
 T                       d = (T) 1.0e+18;
-vector< vector < T > >  C;
+std::vector< std::vector < T > >  C;
 
 // Counters
 int                     i;
@@ -1794,57 +1489,18 @@ else {
 return(d); };
 
 // -------------------------------------------------------------------------- //
-template <class T>
-T det(
-    array< array < T, 1 >, 1 >      &A
-) {
+/*!
+    Compute determinant of a matrix of small dimenions using Laplace rule.
+    Overloading of det() function for container array.
 
-// ========================================================================== //
-// template <class T>                                                         //
-// T det(                                                                     //
-//     array< array < T, 1 >, 1 >      &A)                                    //
-//                                                                            //
-// Dummy function for self-recursive template of det function                 //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A         : array< array < T, 1 >, 1 >, input matrix                     //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - d         : double, matrix determinant                                   //
-// ========================================================================== //
+    \param[in] A input matrix
 
-// ========================================================================== //
-// VARIABLES DECLARATION                                                      //
-// ========================================================================== //
-
-// Local variables
-// none
-
-return(A[0][0]); };
-
-// -------------------------------------------------------------------------- //
+    \result determinant of A.
+*/
 template <class T, size_t m, size_t n>
 T det(
-    array< array < T, n >, m >      &A
+    std::array< std::array < T, n >, m >        &A
 ) {
-
-// ========================================================================== //
-// template <class T, size_t m, size_t n>                                     //
-// T det(                                                                     //
-//     array< array < T, n >, m >      &A)                                    //
-//                                                                            //
-// Compute matrix determinant.                                                //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A         : array< array < T, n >, m >, input matrix                     //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - d         : double, matrix determinant                                   //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1880,7 +1536,7 @@ else if (m == 3) {
         + A[0][2]*A[1][0]*A[2][1] - A[0][2]*A[1][1]*A[2][0];
 }
 else {
-    array< array < double, m-1 >, m-1 >     C;
+    std::array< std::array < double, m-1 >, m-1 >     C;
     for (i = 0; i < m; i++) {
         complement(1, i+1, A, C);
         d += pow(-1.0, i+2) * A[0][i] * det(C);
@@ -1892,32 +1548,19 @@ return(d); };
 // Linear system ============================================================ //
 
 // -------------------------------------------------------------------------- //
+/*!
+    Solve a linear system of small dimenions using Cramer's rule.
+
+    \param[in] A coeffs matrix
+    \param[in] B r.h.s. of the linear system
+    \param[in,out] x on output stores the solution to the linear system
+*/
 template <class T>
 void Cramer(
-    vector< vector < T > >          &A,
-    vector< T >                     &B,
-    vector< T >                     &x
+    std::vector< std::vector < T > >            &A,
+    std::vector< T >                            &B,
+    std::vector< T >                            &x
 ) {
-
-// ========================================================================== //
-// void Cramer(                                                               //
-//     vector< vector < T > >          &A,                                    //
-//     vector< T >                     &B,                                    //
-//     vector< T >                     &x)                                    //
-//                                                                            //
-// Solve linear system using Cramer's rule.                                   //
-// (Reccomanded for small-size linear sys.)                                   //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A     : vector< vector< T > >, linear system coeff. matrix               //
-// - B     : vector< T >, known term.                                         //
-// - x     : vector< T >, linear system solution                              //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1926,7 +1569,7 @@ void Cramer(
 // Local variables
 int                    l, m, n;
 T                      dA;
-vector< vector < T > > C;
+std::vector< std::vector < T > > C;
 
 // Counters
 int                    i, j;
@@ -1973,33 +1616,20 @@ for (i = 0; i < m; i++) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Solve a linear system of small dimenions using Cramer's rule. Overloading
+    of Cramer() function for container array.
+
+    \param[in] A coeffs matrix
+    \param[in] B r.h.s. of the linear system
+    \param[in,out] x on output stores the solution to the linear system
+*/
 template <class T, size_t m, size_t n>
 void Cramer(
-    array< array < T, n >, m >      &A,
-    array< T, m >                   &B,
-    array< T, n >                   &x
+    std::array< std::array < T, n >, m >        &A,
+    std::array< T, m >                          &B,
+    std::array< T, n >                          &x
 ) {
-
-// ========================================================================== //
-// template <class T, size_t m, size_t n>                                     //
-// void Cramer(                                                               //
-//     array< array < T, n >, m >      &A,                                    //
-//     array< T, m >                   &B,                                    //
-//     array< T, n >                   &x)                                    //
-//                                                                            //
-// Solve linear system using Cramer's rule.                                   //
-// (Reccomanded for small-size linear sys.)                                   //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A     : array< array< T, n >, m >, linear system coeff. matrix           //
-// - B     : array< T, m >, known term.                                       //
-// - x     : array< T, n >, linear system solution                            //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -2007,7 +1637,7 @@ void Cramer(
 
 // Local variables
 T                           dA;
-array< array < T, n >, m >  C;
+std::array< std::array < T, n >, m >  C;
 
 // Counters
 int                         i, j;
@@ -2046,38 +1676,28 @@ for (i = 0; i < m; i++) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Compute the LU factorization (with row pivoting) for a given non-singular matrix.
+    Overloading of LU() function for container array.
+
+    \param[in] A input matrix
+    \param[in,out] L lower triangular part (L factor)
+    \param[in,out] U upper triangular part (U factor)
+    \param[in,out] P permutation matrix
+
+    \result returns an error flag:
+        err = 0: no error(s) encountered
+        err = 1: matrix is ill conditioned
+        err = 2: matrix is singular to working precision
+        err = 3: wrong dimensions
+*/
 template<size_t m>
 unsigned int LU(
-    array< array < double, m >, m > &A,
-    array< array < double, m >, m > &L,
-    array< array < double, m >, m > &U,
-    array< array < double, m >, m > *P
+    std::array< std::array < double, m >, m >   &A,
+    std::array< std::array < double, m >, m >   &L,
+    std::array< std::array < double, m >, m >   &U,
+    std::array< std::array < double, m >, m >   *P
 ) {
-
-// ========================================================================== //
-// template<size_t m>                                                         //
-// unsigned int LU(                                                           //
-//     array< array < double, m >, m > &A,                                    //
-//     array< array < double, m >, m > &L,                                    //
-//     array< array < double, m >, m > &U,                                    //
-//     array< array < double, m >, m > *P)                                    //
-//                                                                            //
-// Compute the LU factorization of a given matrix.                            //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A         : array<array<double, n>, m>, coeff. matrix                    //
-// - L, U      : array<array<double, n>, m>, LU factorization                 //
-// - P         : (optional) array<array<double, n>, m>*, permutation matrix   //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - info      : int, info flag.                                              //
-//               info = 0   --->  no errors encounterd                        //
-//               info = 1   --->  matrix is ill-conditioned                   //
-//               info = 2   --->  matrix is singular to working precision     //
-//               info = 3   --->  input data are not coherent                 //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -2090,7 +1710,7 @@ double            toll_pivot = 1.0e-8;
 int                             info = 0;
 int                             pivot_row;
 double                          pivot, pivot_trial;
-array<array<double, m>, m>      AA;
+std::array<std::array<double, m>, m>      AA;
 
 // Counter
 int                             i, j, k;
@@ -2164,33 +1784,20 @@ for (k = 0; k < m; k++) {
 return(info); };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Solve a lower triangular system using backward substitution. Overloading
+    of BackwardSubst() for container array.
+
+    \param[in] A coeffs matrix
+    \param[in] B r.h.s. of the linear system
+    \param[in] x on output stores the solution to the linear system
+*/
 template<size_t m>
 void BackwardSubst(
-    array< array < double, m >, m > &A,
-    array< double, m >              &B,
-    array< double, m >              &x
+    std::array< std::array < double, m >, m >   &A,
+    std::array< double, m >                     &B,
+    std::array< double, m >                     &x
 ) {
-
-// ========================================================================== //
-// template<size_t m>                                                         //
-// void BackwardSubst(                                                        //
-//     array< array < double, m >, m > &A,                                    //
-//     array< double, m >              &B,                                    //
-//     array< double, m >              &x)                                    //
-//                                                                            //
-// Backward substitution method. Solve a linear system Ax = b with upper      //
-// triangular coeffs. matrix.                                                 //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A     : array< array< double, m >, m >, coeff.s matrix                   //
-// - B     : array< double, m >, source term                                  //
-// - x     : array< double, m >, solution of the linear system                //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -2232,33 +1839,20 @@ for (i = m-1; i >= 0; i--) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Solve a upper triangular system using forward substitution. Overloading
+    of ForwardSubst() for container array.
+
+    \param[in] A coeffs matrix
+    \param[in] B r.h.s. of the linear system
+    \param[in] x on output stores the solution to the linear system
+*/
 template<size_t m>
 void ForwardSubst(
-    array< array < double, m >, m > &A,
-    array< double, m >              &B,
-    array< double, m >              &x
+    std::array< std::array < double, m >, m >   &A,
+    std::array< double, m >                     &B,
+    std::array< double, m >                     &x
 ) {
-
-// ========================================================================== //
-// template<size_t m>                                                         //
-// void ForwardSubst(                                                         //
-//     array< array < double, m >, m > &A,                                    //
-//     array< double, m >              &B,                                    //
-//     array< double, m >              &x)                                    //
-//                                                                            //
-// Forward substitution method. Solve a linear system Ax = B with lower       //
-// triangular coeffs.                                                         //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A     : array< array< double, m >, m >, coeff.s matrix                   //
-// - B     : array< double, m >, source term                                  //
-// - x     : array< double, m >, solution of the linear system                //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -2301,31 +1895,20 @@ for(i = 0; i < m; i++) {
 return; };
 
 // -------------------------------------------------------------------------- //
+/*!
+    Solve a non-singular linear system using LU factorization. Overloading
+    of LU() function for container array.
+
+    \param[in] A coeffs matrix
+    \param[in] B r.h.s. of linear system
+    \param[in,out] x on output stores the solution to the linear system
+*/
 template<size_t m>
 void SolveLU(
-    array< array< double, m >, m >  &A,
-    array< double, m >              &B,
-    array< double, m >              &x
+    std::array< std::array< double, m >, m >    &A,
+    std::array< double, m >                     &B,
+    std::array< double, m >                     &x
 ) {
-
-// ========================================================================== //
-// template<size_t m>                                                         //
-// void SolveLU(                                                              //
-//     array< array< double, m >, m >  &A,                                    //
-//     array< double, m >              &B,                                    //
-//     array< double, m >              &x)                                    //
-//                                                                            //
-// Solve liner system Ax = B, using LU factorization.                         //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A        : array<array<double, m>, m>, coeffs. matrix                    //
-// - B        : array<double, m>, source term                                 //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - x        : array<double, m>, solution to the linear system               //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -2333,8 +1916,8 @@ void SolveLU(
 
 // Local variables
 unsigned int                info;
-array<array<double, m>, m>  L, U, P, *P_ = &P;
-array<double, m>            z, C;
+std::array<std::array<double, m>, m>  L, U, P, *P_ = &P;
+std::array<double, m>            z, C;
 
 // Counters
 // none

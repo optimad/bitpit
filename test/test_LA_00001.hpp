@@ -38,7 +38,18 @@ using namespace std;
 // ========================================================================== //
 // TYPES DEFINITIONS                                                          //
 // ========================================================================== //
-// none
+
+// Double vectors
+typedef vector<double>                  dvector1D;
+typedef vector<dvector1D>               dvector2D;
+typedef vector<dvector2D>               dvector3D;
+typedef vector<dvector3D>               dvector4D;
+
+// Integer vectors
+typedef vector<int>                     ivector1D;
+typedef vector<ivector1D>               ivector2D;
+typedef vector<ivector2D>               ivector3D;
+typedef vector<ivector3D>               ivector4D;
 
 // ========================================================================== //
 // FUNCTIONS PROTOTYPES                                                       //

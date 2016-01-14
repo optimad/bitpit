@@ -20,38 +20,30 @@
 // ========================================================================== //
 // IMPLEMENTATIONS                                                            //
 // ========================================================================== //
+using namespace std;
 
 // -------------------------------------------------------------------------- //
-unsigned int LU(
-    dvector2D                       &A,
-    dvector2D                       &L,
-    dvector2D                       &U,
-    dvector2D                       *P
-) {
+/*!
+    Compute the LU factorization (with partial pivoting) of an input matrix of
+    small dimensions.
 
-// ========================================================================== //
-// unsigned int LU(                                                           //
-//     dvector2D                       &A,                                    //
-//     dvector2D                       &L,                                    //
-//     dvector2D                       &U,                                    //
-//     dvector2D                       *P)                                    //
-//                                                                            //
-// Compute the LU factorization of a given matrix.                            //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A         : dvector2D, coeff. matrix                                     //
-// - L, U      : dvector2D, LU factorization                                  //
-// - P         : (optional) ivector2D, with permutation matrix                //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - info      : int, info flag.                                              //
-//               info = 0   --->  no errors encounterd                        //
-//               info = 1   --->  matrix is ill-conditioned                   //
-//               info = 2   --->  matrix is singular to working precision     //
-//               info = 3   --->  input data are not coherent                 //
-// ========================================================================== //
+    \param[in] A input matrix
+    \param[in,out] L lower triangular part (factor L)
+    \param[in,out] U upper triangular part (factor U)
+    \param[in,out] P permutation matrix
+
+    \result error flag:
+        err = 0: no error(s) encountered
+        err = 1: matrix is ill conditioned
+        err = 2: matrix is singular to working precision
+        err = 3: wrong dimensions
+*/
+unsigned int LU(
+    vector<vector<double> >         &A,
+    vector<vector<double> >         &L,
+    vector<vector<double> >         &U,
+    vector<vector<double> >         *P
+) {
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -64,7 +56,7 @@ double            toll_pivot = 1.0e-8;
 int               info = 0;
 int               m, n, pivot_row;
 double            pivot, pivot_trial;
-dvector2D         AA;
+vector<vector<double>> AA;
 
 // Counter
 int               i, j, k;
@@ -143,31 +135,18 @@ for (k = 0; k < n; k++) {
 return(info); };
 
 // -------------------------------------------------------------------------- //
-void BackwardSubst(
-    dvector2D                       &A,
-    dvector1D                       &B,
-    dvector1D                       &x
-) {
+/*!
+    Solve a upper triangular linear system, using backward substitution.
 
-// ========================================================================== //
-// void BackwardSubst(                                                        //
-//     dvector2D                       &A,                                    //
-//     dvector1D                       &B,                                    //
-//     dvector1D                       &x)                                    //
-//                                                                            //
-// Backward substitution method. Solve a linear system Ax = b with upper      //
-// triangular coeffs. matrix.                                                 //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A     : dvector2D, coeff.s matrix                                        //
-// - B     : dvector1D, source term                                           //
-// - x     : dvector1D, solution of the linear system                         //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
+    \param[in] A coeffs. matrix
+    \param[in] B r.h.s. of linear system
+    \param[in,out] x on output store the solution of the linear system
+*/
+void BackwardSubst(
+    vector<vector<double> >         &A,
+    vector<double>                  &B,
+    vector<double>                  &x
+) {
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -225,31 +204,18 @@ for (i = n-1; i >= 0; i--) {
 return; };
 
 // -------------------------------------------------------------------------- //
-void ForwardSubst(
-    dvector2D                       &A,
-    dvector1D                       &B,
-    dvector1D                       &x
-) {
+/*!
+    Solve a lower triangular linear system, using forward substitution.
 
-// ========================================================================== //
-// void Forward(                                                              //
-//     dvector2D                       &A,                                    //
-//     dvector1D                       &B,                                    //
-//     dvector1D                       &x)                                    //
-//                                                                            //
-// Forward substitution method. Solve a linear system Ax = B with lower       //
-// triangular coeffs.                                                         //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A      : dvector2D, lower triangular coeffs. matrix                      //
-// - B      : dvector1D, source term.                                         //
-// - x      : dvector1D, solution of the linear system                        //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
+    \param[in] A coeffs. matrix
+    \param[in] B r.h.s. of linear system
+    \param[in,out] x on output store the solution of the linear system
+*/
+void ForwardSubst(
+    vector<vector<double> >         &A,
+    vector<double>                  &B,
+    vector<double>                  &x
+) {
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -308,29 +274,19 @@ for(i = 0; i < n; i++) {
 return; };
 
 // -------------------------------------------------------------------------- //
-void SolveLU(
-    dvector2D                       &A,
-    dvector1D                       &B,
-    dvector1D                       &x
-) {
+/*!
+    Solve a linear system of small dimenions (coeffs. matrix must have full rank)
+    using LU factorization.
 
-// ========================================================================== //
-// void SolveLU(                                                              //
-//     dvector2D                       &A,                                    //
-//     dvector1D                       &B,                                    //
-//     dvector1D                       &x)                                    //
-//                                                                            //
-// Solve liner system Ax = B, using LU factorization.                         //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - A        : dvector2D, with coeffs. matrix                                //
-// - B        : dvector1D, with source term                                   //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - x        : dvector1D, with solution to the linear system                 //
-// ========================================================================== //
+    \param[in] A coeffs matrix
+    \param[in] B r.h.s. of the linear system
+    \param[in,out] x on output stores the solution of the linear system
+*/
+void SolveLU(
+    vector<vector<double> >         &A,
+    vector<double>                  &B,
+    vector<double>                  &x
+) {
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -338,8 +294,8 @@ void SolveLU(
 
 // Local variables
 unsigned int    info;
-dvector2D       L, U, P, *P_ = &P;
-dvector1D       z, C;
+vector<vector<double>> L, U, P, *P_ = &P;
+vector<double> z, C;
 
 // Counters
 // none
