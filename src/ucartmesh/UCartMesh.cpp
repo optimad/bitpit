@@ -5,9 +5,6 @@
 
 #include "UCartMesh.hpp"
 
-//# include <sstream>
-//# include <fstream>
-
 # include "Operators.hpp"
 # include "Class_VTK.hpp"
 
