@@ -19,31 +19,31 @@ IF(BUILD_DOCUMENTATION)
   ENDIF ()
 
   # Doxygen options
-  SET( doxyfile_in          ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in     )
-  SET( doxyfile             ${PROJECT_BINARY_DIR}/Doxyfile              )
-  SET( doxy_html_index_file ${CMAKE_CURRENT_BINARY_DIR}/html/index.html )
-  SET( doxy_extra_files     ${CMAKE_CURRENT_SOURCE_DIR}/extra/BitP_Base.hpp )
+  SET(DOXYFILE_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
+  SET(DOXYFILE ${PROJECT_BINARY_DIR}/Doxyfile)
+  SET(DOXY_HTML_INDEX_FILE ${CMAKE_CURRENT_BINARY_DIR}/html/index.html)
+  SET(DOXY_EXTRA_FILES ${CMAKE_CURRENT_SOURCE_DIR}/extra/BitP_Base.hpp)
 
   # Create Doxygen input file
   if (NOT "${DOC_EXTRACT_PRIVATE_INTERNAL}" STREQUAL "${DOC_EXTRACT_PRIVATE}")
-    if (EXISTS ${doxy_html_index_file})
-      FILE (REMOVE ${doxy_html_index_file})
+    if (EXISTS ${DOXY_HTML_INDEX_FILE})
+      FILE (REMOVE ${DOXY_HTML_INDEX_FILE})
     endif ()
     set(DOC_EXTRACT_PRIVATE_INTERNAL ${DOC_EXTRACT_PRIVATE} CACHE INTERNAL "This is the value of the last time DOC_EXTRACT_PRIVATE was set successfully." FORCE)
   endif ()
 
-  CONFIGURE_FILE( ${doxyfile_in} ${doxyfile} @ONLY )
+  CONFIGURE_FILE( ${DOXYFILE_IN} ${DOXYFILE} @ONLY )
 
   # Targets
-  ADD_CUSTOM_COMMAND( OUTPUT ${doxy_html_index_file}
-                      COMMAND ${DOXYGEN_EXECUTABLE} ${doxyfile}
-                      # The following should be ${doxyfile} only but it
+  ADD_CUSTOM_COMMAND( OUTPUT ${DOXY_HTML_INDEX_FILE}
+                      COMMAND ${DOXYGEN_EXECUTABLE} ${DOXYFILE}
+                      # The following should be ${DOXYFILE} only but it
                       # will break the dependency.
                       # The optimal solution would be creating a
-                      # custom_command for ${doxyfile} generation
+                      # custom_command for ${DOXYFILE} generation
                       # but I still have to figure out how...
-                      MAIN_DEPENDENCY ${doxyfile} ${doxyfile_in}
-                      DEPENDS ${doxy_extra_files} ${doxyfile_in}
+                      MAIN_DEPENDENCY ${DOXYFILE} ${DOXYFILE_IN}
+                      DEPENDS ${DOXY_EXTRA_FILES} ${DOXYFILE_IN}
                               ${COMMON_HEADERS}
                               ${OPERATORS_SOURCES} ${OPERATORS_HEADERS}
                               ${IO_SOURCES} ${IO_HEADERS}
@@ -51,7 +51,7 @@ IF(BUILD_DOCUMENTATION)
                               ${EXAMPLES_SOURCES}
                       COMMENT "Generating HTML documentation")
 
-  ADD_CUSTOM_TARGET( doc ALL DEPENDS ${doxy_html_index_file} )
+  ADD_CUSTOM_TARGET( doc ALL DEPENDS ${DOXY_HTML_INDEX_FILE} )
   add_custom_target(clean-doc COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
   INSTALL( DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/html DESTINATION doc/${CMAKE_PROJECT_NAME}-${BITP_BASE_VERSION} )
