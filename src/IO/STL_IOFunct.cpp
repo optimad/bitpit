@@ -19,6 +19,7 @@
 // ========================================================================== //
 // IMPLEMENTATIONS                                                            //
 // ========================================================================== //
+using namespace std;
 
 /*!
     \class STL_obj
@@ -41,21 +42,6 @@
 STL_obj::STL_obj(
     void
 ) {
-
-// ========================================================================== //
-// STL_obj::STL_obj(                                                          //
-//     void)                                                                  //
-//                                                                            //
-// Default constructor for class STL_obj variables.                           //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -92,25 +78,9 @@ return; };
     \param[in] filetype boolean flag for ascii (false) or binary (true) stl file
 */
 STL_obj::STL_obj(
-    string  filename,
-    bool    filetype
+    string                              filename,
+    bool                                filetype
 ) {
-
-// ========================================================================== //
-// STL_obj::STL_obj(                                                          //
-//     string  filename,                                                      //
-//     bool    filetype)                                                      //
-//                                                                            //
-// Custom constructor #1 for class STL_obj variables.                         //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -147,32 +117,8 @@ return; };
     \param[in] mode opening mode ("in": input, "out": output, "app": append mode)
 */
 void STL_obj::open(
-    string  mode
+    string                              mode
 ) {
-
-// ========================================================================== //
-// void STL_obj::open(                                                        //
-//     string)                                                                //
-//                                                                            //
-// Open stream to stl file.                                                   //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - mode       : string, stream mode:                                        //
-//                "in", open an input stream (if not already opened)          //
-//                "out", open an output stream in 'write' mode (if not        //
-//                already opened). If an output stream is already open in a   //
-//                different mode, then the output stream is closed and re-    //
-//                opened in 'write' mode.                                     //
-//                "app", open an output stream in 'append' mode (if not       //
-//                already opened). If an output stream is already open in a   //
-//                different mode, then the output stream is closed and re-    //
-//                opened in 'append' mode.                                    //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -252,23 +198,8 @@ return; };
     "app": append)
 */
 void STL_obj::close(
-    string  mode
+    string                              mode
 ) {
-
-// ========================================================================== //
-// void STL_obj::close(                                                       //
-//     string  mode)                                                          //
-//                                                                            //
-// Close stream to stl file.                                                  //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - mode        : string, stream mode to be closed (input/output/append)     //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -311,21 +242,6 @@ void STL_obj::clear(
 ) {
 
 // ========================================================================== //
-// void STL_obj::clear(                                                       //
-//     void)                                                                  //
-//                                                                            //
-// Clear infos and error flags in a class STL_obj variable.                   //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-
-// ========================================================================== //
 // VARIABLES DECLARATION                                                      //
 // ========================================================================== //
 
@@ -362,23 +278,8 @@ return; }
     \param[in,out] out output stream
 */
 void STL_obj::display(
-    ostream     &out
+    ostream                             &out
 ) {
-
-// ========================================================================== //
-// void (STL_obj::display(                                                    //
-//     ostream     &out)                                                      //
-//                                                                            //
-// Display infos about stl object.                                            //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - out       : ostream, output stream to redirect messages                  //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -454,21 +355,6 @@ void STL_obj::scan(
 ) {
 
 // ========================================================================== //
-// void STL_obj::scan(                                                        //
-//     void)                                                                  //
-//                                                                            //
-// Scan stl object for infos.                                                 //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-//  OUTPUT                                                                    //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-
-// ========================================================================== //
 // VARIABLES DECLARATION                                                      //
 // ========================================================================== //
 
@@ -514,21 +400,6 @@ return; }
 void STL_obj::check(
     void
 ) {
-
-// ========================================================================== //
-// void STL_obj::check(                                                       //
-//     void)                                                                  //
-//                                                                            //
-// Check errors in stl data structure.                                        //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -584,41 +455,12 @@ return; };
     are appended at the end of T.
 */
 void STL_obj::load(
-    int                       &nV,
-    int                       &nT,
-    dvector2D                 &V,
-    dvector2D                 &N,
-    ivector2D                 &T
+    int                                 &nV,
+    int                                 &nT,
+    vector<vector<double> >             &V,
+    vector<vector<double> >             &N,
+    vector<vector<int> >                &T
 ) {
-
-// ========================================================================== //
-// void STL_obj::load(                                                        //
-//     int                       &nV,                                         //
-//     int                       &nT,                                         //
-//     dvector2D                 &V,                                          //
-//     dvector2D                 &N,                                          //
-//     ivector2D                 &T)                                          //
-//                                                                            //
-// Load stl triangulation from stl file.                                      //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - nV                : int, number of stl vertices                          //
-// - nT                : int, number of stl facets                            //
-// - V                 : dvector2D, vertex coordinate list. V[i][0], V[i][1], //
-//                       and V[i][2] are the x, y, z coordinates of the i-th  //
-//                       vertex in the stl triangulation                      //
-// - N                 : dvector2D, triangles normal. N[i][1], N[i][1],       //
-//                       and N[i][2] are the x, y, z components of the normal //
-//                       unit vector to the i-th triangle                     //
-// - T                 : ivector2D, triangle-vertex connectivity. T[i][0],    //
-//                       T[i][1], and T[i][2] are the global indices of       //
-//                       vertices of the i-th triangle                        //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -671,41 +513,12 @@ return; };
     are appended at the end of T.
 */
 void STL_obj::load(
-    int                       &nV,
-    int                       &nT,
-    dvecarr3E                 &V,
-    dvecarr3E                 &N,
-    ivector2D                 &T
+    int                                 &nV,
+    int                                 &nT,
+    vector<array<double,3> >            &V,
+    vector<array<double,3> >            &N,
+    vector<vector<int> >                &T
 ) {
-
-// ========================================================================== //
-// void STL_obj::load(                                                        //
-//     int                       &nV,                                         //
-//     int                       &nT,                                         //
-//     dvector2D                 &V,                                          //
-//     dvector2D                 &N,                                          //
-//     ivector2D                 &T)                                          //
-//                                                                            //
-// Load stl triangulation from stl file.                                      //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - nV                : int, number of stl vertices                          //
-// - nT                : int, number of stl facets                            //
-// - V                 : dvector2D, vertex coordinate list. V[i][0], V[i][1], //
-//                       and V[i][2] are the x, y, z coordinates of the i-th  //
-//                       vertex in the stl triangulation                      //
-// - N                 : dvector2D, triangles normal. N[i][1], N[i][1],       //
-//                       and N[i][2] are the x, y, z components of the normal //
-//                       unit vector to the i-th triangle                     //
-// - T                 : ivector2D, triangle-vertex connectivity. T[i][0],    //
-//                       T[i][1], and T[i][2] are the global indices of       //
-//                       vertices of the i-th triangle                        //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -748,21 +561,6 @@ void STL_obj::save(
 ) {
 
 // ========================================================================== //
-// void STL_obj::save(                                                        //
-//     void)                                                                  //
-//                                                                            //
-// Dummy function for self-recursive variadic template.                       //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-
-// ========================================================================== //
 // VARIABLES DECLARATION                                                      //
 // ========================================================================== //
 
@@ -786,21 +584,6 @@ return; };
 void STL_obj::load(
     void
 ) {
-
-// ========================================================================== //
-// void STL_obj::load(                                                        //
-//     void)                                                                  //
-//                                                                            //
-// Dummy function for self-recursive variadic template "load".                //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - none                                                                     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -835,31 +618,10 @@ return; };
         err = 1: failed to scan stl file.
 */
 unsigned int Scan_STL_ASCII(
-    ifstream                  &file_handle,
-    svector1D                 &solid_names,
-    ivector1D                 &solid_facets
+    ifstream                            &file_handle,
+    vector<string>                      &solid_names,
+    vector<int>                         &solid_facets
 ) {
-
-// ========================================================================== //
-// unsigned int Scan_STL_ASCII(                                               //
-//     ifstream                  &file_handle,                                //
-//     svector1D                 &solid_names,                                //
-//     ivector1D                 &solid_facets)                               //
-//                                                                            //
-// Scan STL solid and returns infos for each stl solid,                       //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle      : ifstream, input stream to ASCII stl file.             //
-// - solid_names      : svector1D, solid names.                               //
-// - solid_facets     : ivector1D, number of facets for each solid.           //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err              : unsigned int, error flag:                             //
-//                      err = 0     --> no errors encountered                 //
-//                      err = 1     --> file not found or corrupted.          //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -954,31 +716,10 @@ return(0); };
         err = 1: failed to scan stl file.
 */
 unsigned int Scan_STL_bin(
-    ifstream                  &file_handle,
-    svector1D                 &solid_names,
-    ivector1D                 &solid_facets
+    ifstream                            &file_handle,
+    vector<string>                      &solid_names,
+    vector<int>                         &solid_facets
 ) {
-
-// ========================================================================== //
-// unsigned int Scan_STL_bin(                                                 //
-//     ifstream                  &file_handle,                                //
-//     svector1D                 &solid_names,                                //
-//     ivector1D                 &solid_facets)                               //
-//                                                                            //
-// Scan binary stl file and returns infos.                                    //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle      : ifstream, input stream to ASCII stl file.             //
-// - solid_names      : svector1D, solid names.                               //
-// - solid_facets     : ivector1D, number of facets for each solid.           //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err              : unsigned int, error flag:                             //
-//                      err = 0     --> no errors encountered                 //
-//                      err = 1     --> file not found or corrupted.          //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1040,28 +781,9 @@ return(0); };
         err = 1: failed to scan stl file.
 */
 unsigned int Scan_STLsolid_ASCII(
-    ifstream                  &file_handle,
-    int                       &nT
+    ifstream                            &file_handle,
+    int                                 &nT
 ) {
-
-// ========================================================================== //
-// unsigned int Scan_STLsolid_ASCII(                                          //
-//     ifstream                  &file_handle,                                //
-//     int                       &nT)                                         //
-//                                                                            //
-// Scan stl solid from ASCII stl file and returns the number of facets.       //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle    : ifstream, input stream to stl file                      //
-// - nT             : int, number of triangles                                //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err            : unsigned int, error flag:                               //
-//                    err = 0     --> no errors encountered                   //
-//                    err =       -->                                         //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1146,39 +868,9 @@ return(0); };
         err = 1: failed to scan/check stl file
 */
 unsigned int Check_STL_ASCII(
-    ifstream                  &file_handle,
-    bvector2D                 &err_map
+    ifstream                            &file_handle,
+    vector<vector<bool> >               &err_map
 ) {
-
-// ========================================================================== //
-// unsigned int Check_STL_ASCII(                                              //
-//     ifstream                  &file_handle,                                //
-//     bvector2D                 &err_map)                                    //
-//                                                                            //
-// Check errors in a ASCII stl file.                                          //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle : ifstream, input stream to stl file.                        //
-// - err_map     : bvector2D, list of errors encountered for each solid block //
-//                 while checking stl file.                                   //
-//                 err_map[i][err_code] for the i-th stl solid is true        //
-//                 if an error corresponding to error code "err_code"         //
-//                 is detected.                                               //
-//                 err_code = 0   --> unterminated solid block                //
-//                 err_code = 1   --> unterminated facet block                //
-//                 err_code = 2   --> normal data are missing                 //
-//                 err_code = 3   --> wrong number of components for normal   //
-//                 err_code = 4   --> wrong number of vertices in facet block //
-//                 err_code = 5   --> wrong number of coordinates for vertex  //
-//                                    data.                                   //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err         : unsigned int, error flag:                                  //
-//                 err = 0  --> no errors encountered                         //
-//                 err = 1  --> file is missing or is corrupted               //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1219,7 +911,7 @@ while (getline(file_handle, line)) {
     sline.str(line);
 
     if ((sline >> word) && (word.compare("solid") == 0)) {
-        bvector1D       _map(6, false);
+        vector<bool>    _map(6, false);
         n_solid++;
         Check_STLsolid_ASCII(file_handle, _map);
         err_map.push_back(_map);
@@ -1251,37 +943,9 @@ return(0); }
         err = 1: failed to scan/check stl file
 */
 unsigned int Check_STLsolid_ASCII(
-    ifstream                  &file_handle,
-    bvector1D                 &err_map
+    ifstream                            &file_handle,
+    vector<bool>                        &err_map
 ) {
-
-// ========================================================================== //
-// unsigned int Check_STLsolid_ASCII(                                         //
-//     ifstream                  &file_handle,                                //
-//     bvector1D                 &err_map)                                    //
-//                                                                            //
-// Check errors in solid data of ASCII stl file.                              //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle : ifstream, input stream to stl file.                        //
-// - err_map     : bvector1D, list of errors encountered while checking stl   //
-//                 file. err_map[err_code] is true if error corresponding to  //
-//                 error code "err_code" is detected.                         //
-//                 err_code = 0   --> unterminated solid block                //
-//                 err_code = 1   --> unterminated facet block                //
-//                 err_code = 2   --> normal data are missing                 //
-//                 err_code = 3   --> wrong number of components for normal   //
-//                 err_code = 4   --> wrong number of vertices in facet block //
-//                 err_code = 5   --> wrong number of coordinates for vertex  //
-//                                    data.                                   //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err         : unsigned int, error flag:                                  //
-//                 err = 0  --> no errors encountered                         //
-//                 err = 1  --> file is missing or is corrupted               //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1363,37 +1027,9 @@ return(0); };
         err = 1: failed to scan/check stl file
 */
 unsigned int Check_STLfacet_ASCII(
-    ifstream                  &file_handle,
-    bvector1D                 &err_map
+    ifstream                            &file_handle,
+    vector<bool>                        &err_map
 ) {
-
-// ========================================================================== //
-// unsigned int Check_STLfacet_ASCII(                                         //
-//     ifstream                  &file_handle,                                //
-//     bvector1D                 &err_map)                                    //
-//                                                                            //
-// Check errors in facet data of ASCII stl file.                              //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle : ifstream, input stream to stl file.                        //
-// - err_map     : bvector1D, list of errors encountered while checking stl   //
-//                 file. err_map[err_code] is true if error corresponding to  //
-//                 error code "err_code" is detected.                         //
-//                 err_code = 0   --> unterminated solid block                //
-//                 err_code = 1   --> unterminated facet block                //
-//                 err_code = 2   --> normal data are missing                 //
-//                 err_code = 3   --> wrong number of components for normal   //
-//                 err_code = 4   --> wrong number of vertices in facet block //
-//                 err_code = 5   --> wrong number of coordinates for vertex  //
-//                                    data.                                   //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err         : unsigned int, error flag:                                  //
-//                 err = 0  --> no errors encountered                         //
-//                 err = 1  --> file is missing or is corrupted               //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1505,8 +1141,8 @@ return(0); }
         err = 1: failed to scan/check stl file
 */
 unsigned int Check_STL_bin(
-    ifstream                  &file_handle,
-    bvector2D                 &err_map
+    ifstream                            &file_handle,
+    vector<vector<bool> >               &err_map
 ) {
 
 // ========================================================================== //
@@ -1557,7 +1193,7 @@ int                i, j, k, nT;
 // ========================================================================== //
 // RESIZE INPUT VARIABLES                                                     //
 // ========================================================================== //
-err_map.resize(1, bvector1D(6, false));
+err_map.resize(1, vector<bool>(6, false));
 
 // ========================================================================== //
 // CHECK STREAM STATUS                                                        //
@@ -1642,46 +1278,13 @@ return(0); }
         err = 1: failed to read from input stream
 */  
 unsigned int Read_STLfacet_ASCII(
-    ifstream                  &file_handle,
-    int                       &nV,
-    int                       &nT,
-    dvector2D                 &V,
-    dvector2D                 &N,
-    ivector2D                 &T
+    ifstream                            &file_handle,
+    int                                 &nV,
+    int                                 &nT,
+    vector<vector<double> >             &V,
+    vector<vector<double> >             &N,
+    vector<vector<int> >                &T
 ) {
-
-// ========================================================================== //
-// unsigned int Read_STLfacet_ASCII(                                          //
-//     ifstream                  &file_handle,                                //
-//     int                       &nV,                                         //
-//     int                       &nT,                                         //
-//     dvector2D                 &V,                                          //
-//     dvector2D                 &N,                                          //
-//     ivector2D                 &T)                                          //
-//                                                                            //
-// Read stl facet data from ASCII stl file.                                   //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle       : ifstream, handle to stl file                         //
-// - nV                : int, number of stl vertices                          //
-// - nT                : int, number of stl facets                            //
-// - V                 : dvector2D, vertex coordinate list. V[i][0], V[i][1], //
-//                       and V[i][2] are the x, y, z coordinates of the i-th  //
-//                       vertex in the stl triangulation                      //
-// - N                 : dvector2D, triangles normal. N[i][1], N[i][1],       //
-//                       and N[i][2] are the x, y, z components of the normal //
-//                       unit vector to the i-th triangle                     //
-// - T                 : ivector2D, triangle-vertex connectivity. T[i][0],    //
-//                       T[i][1], and T[i][2] are the global indices of       //
-//                       vertices of the i-th triangle                        //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err               : unsigned int, error flag                             //
-//                       err = 0    --> no errors encountered                 //
-//                       err = 1    --> file is missing or cannot be open     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1780,46 +1383,13 @@ return(0); }
         err = 1: failed to read from input stream
 */  
 unsigned int Read_STLfacet_ASCII(
-    ifstream                  &file_handle,
-    int                       &nV,
-    int                       &nT,
-    dvecarr3E                 &V,
-    dvecarr3E                 &N,
-    ivector2D                 &T
+    ifstream                            &file_handle,
+    int                                 &nV,
+    int                                 &nT,
+    vector<array<double,3> >            &V,
+    vector<array<double,3> >            &N,
+    vector<vector<int> >                &T
 ) {
-
-// ========================================================================== //
-// unsigned int Read_STLfacet_ASCII(                                          //
-//     ifstream                  &file_handle,                                //
-//     int                       &nV,                                         //
-//     int                       &nT,                                         //
-//     dvector2D                 &V,                                          //
-//     dvector2D                 &N,                                          //
-//     ivector2D                 &T)                                          //
-//                                                                            //
-// Read stl facet data from ASCII stl file.                                   //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle       : ifstream, handle to stl file                         //
-// - nV                : int, number of stl vertices                          //
-// - nT                : int, number of stl facets                            //
-// - V                 : dvector2D, vertex coordinate list. V[i][0], V[i][1], //
-//                       and V[i][2] are the x, y, z coordinates of the i-th  //
-//                       vertex in the stl triangulation                      //
-// - N                 : dvector2D, triangles normal. N[i][1], N[i][1],       //
-//                       and N[i][2] are the x, y, z components of the normal //
-//                       unit vector to the i-th triangle                     //
-// - T                 : ivector2D, triangle-vertex connectivity. T[i][0],    //
-//                       T[i][1], and T[i][2] are the global indices of       //
-//                       vertices of the i-th triangle                        //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err               : unsigned int, error flag                             //
-//                       err = 0    --> no errors encountered                 //
-//                       err = 1    --> file is missing or cannot be open     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -1919,54 +1489,14 @@ return(0); }
         err = 1: failed to read from input stream
 */
 unsigned int Read_STLsolid_ASCII(
-    ifstream                  &file_handle,
-    int                       &nV,
-    int                       &nT,
-    dvector2D                 &V,
-    dvector2D                 &N,
-    ivector2D                 &T,
-    string                     solid_name
+    ifstream                            &file_handle,
+    int                                 &nV,
+    int                                 &nT,
+    vector<vector<double> >             &V,
+    vector<vector<double> >             &N,
+    vector<vector<int> >                &T,
+    string                              solid_name
 ) {
-
-// ========================================================================== //
-// unsigned int Read_STLsolid_ASCII(                                          //
-//     ifstream                  &file_handle,                                //
-//     int                       &nV,                                         //
-//     int                       &nT,                                         //
-//     dvector2D                 &V,                                          //
-//     dvector2D                 &N,                                          //
-//     ivector2D                 &T,                                          //
-//     string                     solid_name)                                 //
-//                                                                            //
-// Load stl triangulation for stl solid whose name is specified in            //
-// "solid_name". Vertex ccordinate list, triangles normals and connectivity   //
-// are stored in V, N and T respectively. If no solid is found input data     //
-// structure is unchanged.                                                    //
-// If solid_name is not specified, load the first stl solid found by circular //
-// scanning the file until the current cursor position is reached again.      //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle       : ifstream, handle to stl file                         //
-// - nV                : int, number of stl vertices                          //
-// - nT                : int, number of stl facets                            //
-// - V                 : dvector2D, vertex coordinate list. V[i][0], V[i][1], //
-//                       and V[i][2] are the x, y, z coordinates of the i-th  //
-//                       vertex in the stl triangulation                      //
-// - N                 : dvector2D, triangles normal. N[i][1], N[i][1],       //
-//                       and N[i][2] are the x, y, z components of the normal //
-//                       unit vector to the i-th triangle                     //
-// - T                 : ivector2D, triangle-vertex connectivity. T[i][0],    //
-//                       T[i][1], and T[i][2] are the global indices of       //
-//                       vertices of the i-th triangle                        //
-// - solid_name        : string (optional), stl solid name                    //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err               : unsigned int, error flag                             //
-//                       err = 0    --> no errors encountered                 //
-//                       err = 1    --> file is missing or cannot be open     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -2039,9 +1569,9 @@ Scan_STLsolid_ASCII(file_handle, nt);
 // ========================================================================== //
 
 // Resize input variables --------------------------------------------------- //
-V.resize(nV+3*nt, dvector1D(3, 0.0));
-N.resize(nT+nt, dvector1D(3, 0.0));
-T.resize(nT+nt, ivector1D(3, -1));
+V.resize(nV+3*nt, vector<double>(3, 0.0));
+N.resize(nT+nt, vector<double>(3, 0.0));
+T.resize(nT+nt, vector<int>(3, -1));
 
 // Read solid data ---------------------------------------------------------- //
 file_handle.clear();
@@ -2099,54 +1629,14 @@ return(0); }
         err = 1: failed to read from input stream
 */
 unsigned int Read_STLsolid_ASCII(
-    ifstream                  &file_handle,
-    int                       &nV,
-    int                       &nT,
-    dvecarr3E                 &V,
-    dvecarr3E                 &N,
-    ivector2D                 &T,
-    string                     solid_name
+    ifstream                            &file_handle,
+    int                                 &nV,
+    int                                 &nT,
+    vector<array<double,3> >            &V,
+    vector<array<double,3> >            &N,
+    vector<vector<int> >                &T,
+    string                               solid_name
 ) {
-
-// ========================================================================== //
-// unsigned int Read_STLsolid_ASCII(                                          //
-//     ifstream                  &file_handle,                                //
-//     int                       &nV,                                         //
-//     int                       &nT,                                         //
-//     dvector2D                 &V,                                          //
-//     dvector2D                 &N,                                          //
-//     ivector2D                 &T,                                          //
-//     string                     solid_name)                                 //
-//                                                                            //
-// Load stl triangulation for stl solid whose name is specified in            //
-// "solid_name". Vertex ccordinate list, triangles normals and connectivity   //
-// are stored in V, N and T respectively. If no solid is found input data     //
-// structure is unchanged.                                                    //
-// If solid_name is not specified, load the first stl solid found by circular //
-// scanning the file until the current cursor position is reached again.      //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle       : ifstream, handle to stl file                         //
-// - nV                : int, number of stl vertices                          //
-// - nT                : int, number of stl facets                            //
-// - V                 : dvector2D, vertex coordinate list. V[i][0], V[i][1], //
-//                       and V[i][2] are the x, y, z coordinates of the i-th  //
-//                       vertex in the stl triangulation                      //
-// - N                 : dvector2D, triangles normal. N[i][1], N[i][1],       //
-//                       and N[i][2] are the x, y, z components of the normal //
-//                       unit vector to the i-th triangle                     //
-// - T                 : ivector2D, triangle-vertex connectivity. T[i][0],    //
-//                       T[i][1], and T[i][2] are the global indices of       //
-//                       vertices of the i-th triangle                        //
-// - solid_name        : string (optional), stl solid name                    //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err               : unsigned int, error flag                             //
-//                       err = 0    --> no errors encountered                 //
-//                       err = 1    --> file is missing or cannot be open     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -2219,12 +1709,12 @@ Scan_STLsolid_ASCII(file_handle, nt);
 // ========================================================================== //
 
 // Resize input variables --------------------------------------------------- //
-darray3E    temp;
+array<double,3>         temp;
 temp.fill(0.) ;
 
 V.resize(nV+3*nt, temp);
 N.resize(nT+nt, temp);
-T.resize(nT+nt, ivector1D(3, -1));
+T.resize(nT+nt, vector<int>(3, -1));
 
 // Read solid data ---------------------------------------------------------- //
 file_handle.clear();
@@ -2280,46 +1770,13 @@ return(0); }
         err = 1: failed to read from input stream
 */
 unsigned int Read_STL_ASCII(
-    ifstream                  &file_handle,
-    int                       &nV,
-    int                       &nT,
-    dvector2D                 &V,
-    dvector2D                 &N,
-    ivector2D                 &T
+    ifstream                            &file_handle,
+    int                                 &nV,
+    int                                 &nT,
+    vector<vector<double> >             &V,
+    vector<vector<double> >             &N,
+    vector<vector<int> >                &T
 ) {
-
-// ========================================================================== //
-// unsigned int Read_STL_ASCII(                                               //
-//     ifstream                  &file_handle,                                //
-//     int                       &nV,                                         //
-//     int                       &nT,                                         //
-//     dvector2D                 &V,                                          //
-//     dvector2D                 &N,                                          //
-//     ivector2D                 &T)                                          //
-//                                                                            //
-// Read stl solid data from binary stl file.                                  //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle       : ifstream, handle to stl file                         //
-// - nV                : int, number of stl vertices                          //
-// - nT                : int, number of stl facets                            //
-// - V                 : dvector2D, vertex coordinate list. V[i][0], V[i][1], //
-//                       and V[i][2] are the x, y, z coordinates of the i-th  //
-//                       vertex in the stl triangulation                      //
-// - N                 : dvector2D, triangles normal. N[i][1], N[i][1],       //
-//                       and N[i][2] are the x, y, z components of the normal //
-//                       unit vector to the i-th triangle                     //
-// - T                 : ivector2D, triangle-vertex connectivity. T[i][0],    //
-//                       T[i][1], and T[i][2] are the global indices of       //
-//                       vertices of the i-th triangle                        //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err               : unsigned int, error flag                             //
-//                       err = 0    --> no errors encountered                 //
-//                       err = 1    --> file is missing or cannot be open     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -2400,46 +1857,13 @@ return(0); }
         err = 1: failed to read from input stream
 */
 unsigned int Read_STL_ASCII(
-    ifstream                  &file_handle,
-    int                       &nV,
-    int                       &nT,
-    dvecarr3E                 &V,
-    dvecarr3E                 &N,
-    ivector2D                 &T
+    ifstream                            &file_handle,
+    int                                 &nV,
+    int                                 &nT,
+    vector<array<double,3> >            &V,
+    vector<array<double,3> >            &N,
+    vector<vector<int> >                &T
 ) {
-
-// ========================================================================== //
-// unsigned int Read_STL_ASCII(                                               //
-//     ifstream                  &file_handle,                                //
-//     int                       &nV,                                         //
-//     int                       &nT,                                         //
-//     dvector2D                 &V,                                          //
-//     dvector2D                 &N,                                          //
-//     ivector2D                 &T)                                          //
-//                                                                            //
-// Read stl solid data from binary stl file.                                  //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle       : ifstream, handle to stl file                         //
-// - nV                : int, number of stl vertices                          //
-// - nT                : int, number of stl facets                            //
-// - V                 : dvector2D, vertex coordinate list. V[i][0], V[i][1], //
-//                       and V[i][2] are the x, y, z coordinates of the i-th  //
-//                       vertex in the stl triangulation                      //
-// - N                 : dvector2D, triangles normal. N[i][1], N[i][1],       //
-//                       and N[i][2] are the x, y, z components of the normal //
-//                       unit vector to the i-th triangle                     //
-// - T                 : ivector2D, triangle-vertex connectivity. T[i][0],    //
-//                       T[i][1], and T[i][2] are the global indices of       //
-//                       vertices of the i-th triangle                        //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err               : unsigned int, error flag                             //
-//                       err = 0    --> no errors encountered                 //
-//                       err = 1    --> file is missing or cannot be open     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -2518,46 +1942,13 @@ return(0); }
         err = 1: failed to read from input stream
 */
 unsigned int Read_STL_bin(
-    ifstream                  &file_handle,
-    int                       &nV,
-    int                       &nT,
-    dvector2D                 &V,
-    dvector2D                 &N,
-    ivector2D                 &T
+    ifstream                            &file_handle,
+    int                                 &nV,
+    int                                 &nT,
+    vector<vector<double> >             &V,
+    vector<vector<double> >             &N,
+    vector<vector<int> >                &T
 ) {
-
-// ========================================================================== //
-// unsigned int Read_STL_bin(                                                 //
-//     ifstream                  &file_handle,                                //
-//     int                       &nV,                                         //
-//     int                       &nT,                                         //
-//     dvector2D                 &V,                                          //
-//     dvector2D                 &N,                                          //
-//     ivector2D                 &T)                                          //
-//                                                                            //
-// Read stl solid data from binary stl file.                                  //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle       : ifstream, handle to stl file                         //
-// - nV                : int, number of stl vertices                          //
-// - nT                : int, number of stl facets                            //
-// - V                 : dvector2D, vertex coordinate list. V[i][0], V[i][1], //
-//                       and V[i][2] are the x, y, z coordinates of the i-th  //
-//                       vertex in the stl triangulation                      //
-// - N                 : dvector2D, triangles normal. N[i][1], N[i][1],       //
-//                       and N[i][2] are the x, y, z components of the normal //
-//                       unit vector to the i-th triangle                     //
-// - T                 : ivector2D, triangle-vertex connectivity. T[i][0],    //
-//                       T[i][1], and T[i][2] are the global indices of       //
-//                       vertices of the i-th triangle                        //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err               : unsigned int, error flag                             //
-//                       err = 0    --> no errors encountered                 //
-//                       err = 1    --> file is missing or cannot be open     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -2609,13 +2000,13 @@ nV = 3*nT;
 // ========================================================================== //
 
 // Vertex list
-V.resize(nV, dvector1D(3, 0.0));
+V.resize(nV, vector<double>(3, 0.0));
 
 // Normals
-N.resize(nT, dvector1D(3, 0.0));
+N.resize(nT, vector<double>(3, 0.0));
 
 // Triangle-vector connectivity
-T.resize(nT, ivector1D(3, -1));
+T.resize(nT, vector<int>(3, -1));
 
 // ========================================================================== //
 // READ DATA                                                                  //
@@ -2683,46 +2074,13 @@ return(0); }
         err = 1: failed to read from input stream
 */
 unsigned int Read_STL_bin(
-    ifstream                  &file_handle,
-    int                       &nV,
-    int                       &nT,
-    dvecarr3E                 &V,
-    dvecarr3E                 &N,
-    ivector2D                 &T
+    ifstream                            &file_handle,
+    int                                 &nV,
+    int                                 &nT,
+    vector<array<double,3> >            &V,
+    vector<array<double,3> >            &N,
+    vector<vector<int> >                &T
 ) {
-
-// ========================================================================== //
-// unsigned int Read_STL_bin(                                                 //
-//     ifstream                  &file_handle,                                //
-//     int                       &nV,                                         //
-//     int                       &nT,                                         //
-//     dvector2D                 &V,                                          //
-//     dvector2D                 &N,                                          //
-//     ivector2D                 &T)                                          //
-//                                                                            //
-// Read stl solid data from binary stl file.                                  //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle       : ifstream, handle to stl file                         //
-// - nV                : int, number of stl vertices                          //
-// - nT                : int, number of stl facets                            //
-// - V                 : dvector2D, vertex coordinate list. V[i][0], V[i][1], //
-//                       and V[i][2] are the x, y, z coordinates of the i-th  //
-//                       vertex in the stl triangulation                      //
-// - N                 : dvector2D, triangles normal. N[i][1], N[i][1],       //
-//                       and N[i][2] are the x, y, z components of the normal //
-//                       unit vector to the i-th triangle                     //
-// - T                 : ivector2D, triangle-vertex connectivity. T[i][0],    //
-//                       T[i][1], and T[i][2] are the global indices of       //
-//                       vertices of the i-th triangle                        //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err               : unsigned int, error flag                             //
-//                       err = 0    --> no errors encountered                 //
-//                       err = 1    --> file is missing or cannot be open     //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -2773,7 +2131,7 @@ nV = 3*nT;
 // RESIZE INPUT VARIABLES                                                     //
 // ========================================================================== //
 
-darray3E     temp;
+array<double,3>     temp;
 temp.fill(0.) ;
 
 // Vertex list
@@ -2783,7 +2141,7 @@ V.resize(nV, temp);
 N.resize(nT, temp);
 
 // Triangle-vector connectivity
-T.resize(nT, ivector1D(3, -1));
+T.resize(nT, vector<int>(3, -1));
 
 // ========================================================================== //
 // READ DATA                                                                  //
@@ -2844,49 +2202,14 @@ return(0); }
         err = 1: failed to write data to output stream
 */
 unsigned int Write_STLsolid_ASCII(
-    ofstream                  &file_handle,
-    int                       &nV,
-    int                       &nT,
-    dvector2D                 &V,
-    dvector2D                 &N,
-    ivector2D                 &T,
-    string                     solid_name
+    ofstream                            &file_handle,
+    int                                 &nV,
+    int                                 &nT,
+    vector<vector<double> >             &V,
+    vector<vector<double> >             &N,
+    vector<vector<int> >                &T,
+    string                              solid_name
 ) {
-
-// ========================================================================== //
-// unsigned int Write_STLsolid_ASCII(                                         //
-//     ofstream                  &file_handle,                                //
-//     int                       &nV,                                         //
-//     int                       &nT,                                         //
-//     dvector2D                 &V,                                          //
-//     dvector2D                 &N,                                          //
-//     ivector2D                 &T,                                          //
-//     string                     solid_name)                                 //
-//                                                                            //
-// Write a stl solid in a ASCII .stl file.                                    //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle : ofstream, output stream                                    //
-// - nV          : int, number of triangulation vertices                      //
-// - nT          : int, number of triangles in the stl triangulation          //
-// - V           : dvector2D, vertex coordinate list. V[i][0], V[i][1] and    //
-//                 V[i][2] are the x, y, z coordinates of the i-th vertex     //
-// - N           : dvector2D, triangles unit normals. N[i][0], N[i][1], and   //
-//                 N[i][2] are the x, y, z components of the normal unit      //
-//                 vector to the i-th triangle of the stl triangulation.      //
-// - T           : ivector2D, triangle-vertex connectivity. T[i][0], T[i][1]  //
-//                 and T[i][2] are the global indices of vertices of the i-th //
-//                 triangle in the stl triangulation                          //
-// - solid_name  : string (optional) stl solid name                           //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err         : int, output flag:                                          //
-//                 err = 0      --> no errors encountered                     //
-//                 err = 1      --> file is missing or cannot be accessed     //
-//                 err = 2      --> input data are badly formatted            //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -2986,49 +2309,14 @@ return(0); };
         err = 1: failed to write data to output stream
 */
 unsigned int Write_STLsolid_ASCII(
-    ofstream                  &file_handle,
-    int                       &nV,
-    int                       &nT,
-    dvecarr3E                 &V,
-    dvecarr3E                 &N,
-    ivector2D                 &T,
-    string                     solid_name
+    ofstream                            &file_handle,
+    int                                 &nV,
+    int                                 &nT,
+    vector<array<double,3> >            &V,
+    vector<array<double,3> >            &N,
+    vector<vector<int> >                &T,
+    string                               solid_name
 ) {
-
-// ========================================================================== //
-// unsigned int Write_STLsolid_ASCII(                                         //
-//     ofstream                  &file_handle,                                //
-//     int                       &nV,                                         //
-//     int                       &nT,                                         //
-//     dvector2D                 &V,                                          //
-//     dvector2D                 &N,                                          //
-//     ivector2D                 &T,                                          //
-//     string                     solid_name)                                 //
-//                                                                            //
-// Write a stl solid in a ASCII .stl file.                                    //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle : ofstream, output stream                                    //
-// - nV          : int, number of triangulation vertices                      //
-// - nT          : int, number of triangles in the stl triangulation          //
-// - V           : dvector2D, vertex coordinate list. V[i][0], V[i][1] and    //
-//                 V[i][2] are the x, y, z coordinates of the i-th vertex     //
-// - N           : dvector2D, triangles unit normals. N[i][0], N[i][1], and   //
-//                 N[i][2] are the x, y, z components of the normal unit      //
-//                 vector to the i-th triangle of the stl triangulation.      //
-// - T           : ivector2D, triangle-vertex connectivity. T[i][0], T[i][1]  //
-//                 and T[i][2] are the global indices of vertices of the i-th //
-//                 triangle in the stl triangulation                          //
-// - solid_name  : string (optional) stl solid name                           //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err         : int, output flag:                                          //
-//                 err = 0      --> no errors encountered                     //
-//                 err = 1      --> file is missing or cannot be accessed     //
-//                 err = 2      --> input data are badly formatted            //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -3127,48 +2415,14 @@ return(0); };
         err = 1: failed to write data to output stream
 */
 unsigned int Write_STLsolid_bin(
-    ofstream                  &file_handle,
-    int                       &nV,
-    int                       &nT,
-    dvector2D                 &V,
-    dvector2D                 &N,
-    ivector2D                 &T,
-    string                     solid_name
+    ofstream                            &file_handle,
+    int                                 &nV,
+    int                                 &nT,
+    vector<vector<double> >             &V,
+    vector<vector<double> >             &N,
+    vector<vector<int> >                &T,
+    string                               solid_name
 ) {
-
-// ========================================================================== //
-// unsigned int Write_STLsolid_bin(                                           //
-//     ofstream                  &file_handle,                                //
-//     int                       &nV,                                         //
-//     int                       &nT,                                         //
-//     dvector2D                 &V,                                          //
-//     dvector2D                 &N,                                          //
-//     ivector2D                 &T,                                          //
-//     string                     solid_name)                                 //
-//                                                                            //
-// Export triangulation in a binary .stl file.                                //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle : ofstream, output stream to binary stl file                 //
-// - nV          : int, number of vertices in the stl triangulation           //
-// - nT          : int, number of triangles in the stl triangulation          //
-// - V           : dvector2D, vertex coordinate list. V[i][0], V[i][1], and   //
-//                 V[i][2] are the x, y, z coordinates of the i-th vertex     //
-// - N           : dvector2D, triangle unit normal. N[i][0], N[i][1], and     //
-//                 N[i][2] are the x, y, z components of the unit normal to   //
-//                 the i-th triangle in the stl triangulation                 //
-// - T           : ivector2D, triangle-vertex connectivity. T[i][0], T[i][1], //
-//                 and T[i][2] are the global indices of vertices of the i-th //
-//                 triangle in the stl triangulation                          //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err         : int, output flag:                                          //
-//                 err = 0      --> no errors encountered                     //
-//                 err = 1      --> file is missing or cannot be accessed     //
-//                 err = 2      --> stl solid is badly defined                //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
@@ -3258,48 +2512,14 @@ return(0); };
         err = 1: failed to write data to output stream
 */
 unsigned int Write_STLsolid_bin(
-    ofstream                  &file_handle,
-    int                       &nV,
-    int                       &nT,
-    dvecarr3E                 &V,
-    dvecarr3E                 &N,
-    ivector2D                 &T,
-    string                     solid_name
+    ofstream                            &file_handle,
+    int                                 &nV,
+    int                                 &nT,
+    vector<array<double,3> >            &V,
+    vector<array<double,3> >            &N,
+    vector<vector<int> >                &T,
+    string                               solid_name
 ) {
-
-// ========================================================================== //
-// unsigned int Write_STLsolid_bin(                                           //
-//     ofstream                  &file_handle,                                //
-//     int                       &nV,                                         //
-//     int                       &nT,                                         //
-//     dvector2D                 &V,                                          //
-//     dvector2D                 &N,                                          //
-//     ivector2D                 &T,                                          //
-//     string                     solid_name)                                 //
-//                                                                            //
-// Export triangulation in a binary .stl file.                                //
-// ========================================================================== //
-// INPUT                                                                      //
-// ========================================================================== //
-// - file_handle : ofstream, output stream to binary stl file                 //
-// - nV          : int, number of vertices in the stl triangulation           //
-// - nT          : int, number of triangles in the stl triangulation          //
-// - V           : dvector2D, vertex coordinate list. V[i][0], V[i][1], and   //
-//                 V[i][2] are the x, y, z coordinates of the i-th vertex     //
-// - N           : dvector2D, triangle unit normal. N[i][0], N[i][1], and     //
-//                 N[i][2] are the x, y, z components of the unit normal to   //
-//                 the i-th triangle in the stl triangulation                 //
-// - T           : ivector2D, triangle-vertex connectivity. T[i][0], T[i][1], //
-//                 and T[i][2] are the global indices of vertices of the i-th //
-//                 triangle in the stl triangulation                          //
-// ========================================================================== //
-// OUTPUT                                                                     //
-// ========================================================================== //
-// - err         : int, output flag:                                          //
-//                 err = 0      --> no errors encountered                     //
-//                 err = 1      --> file is missing or cannot be accessed     //
-//                 err = 2      --> stl solid is badly defined                //
-// ========================================================================== //
 
 // ========================================================================== //
 // VARIABLES DECLARATION                                                      //
