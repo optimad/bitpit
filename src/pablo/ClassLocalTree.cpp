@@ -106,6 +106,15 @@ ClassLocalTree::getLevel(int32_t idx){
 	return m_octants[idx].getLevel();
 };
 
+/** Compute the Morton index of the idx-th octant (without level).
+ * \param[in] idx Local index of the target octant.
+ * \return Morton index of the octant.
+ */
+uint64_t
+ClassLocalTree::computeMorton(int32_t idx){
+	return m_octants[idx].computeMorton();
+};
+
 /** Get refinement/coarsening marker for idx-th ghost octant
  * \param[in] idx Local index of the target ghost octant.
  * \return Level of the ghost octant.
@@ -113,6 +122,15 @@ ClassLocalTree::getLevel(int32_t idx){
 uint8_t
 ClassLocalTree::getGhostLevel(int32_t idx){
 	return m_ghosts[idx].getLevel();
+};
+
+/** Compute the Morton index of the idx-th ghost octant (without level).
+ * \param[in] idx Local index of the target octant.
+ * \return Morton index of the octant.
+ */
+uint64_t
+ClassLocalTree::computeGhostMorton(int32_t idx){
+	return m_ghosts[idx].computeMorton();
 };
 
 /** Get if balancing-blocked idx-th octant

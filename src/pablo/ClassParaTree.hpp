@@ -170,6 +170,7 @@ public:
 	darray3 	getNormal(uint32_t idx, uint8_t & iface);
 	int8_t 		getMarker(uint32_t idx);
 	uint8_t 	getLevel(uint32_t idx);
+	uint64_t 	computeMorton(uint32_t idx);
 	bool 		getBalance(uint32_t idx);
 	bool		getBound(uint32_t idx, uint8_t iface);
 	bool		getBound(uint32_t idx);
@@ -207,6 +208,7 @@ public:
 	darray3 	getNormal(ClassOctant* oct, uint8_t & iface);
 	int8_t 		getMarker(ClassOctant* oct);
 	uint8_t 	getLevel(ClassOctant* oct);
+	uint64_t 	computeMorton(ClassOctant* oct);
 	bool 		getBalance(ClassOctant* oct);
 	bool		getBound(ClassOctant* oct, uint8_t iface);
 	bool		getBound(ClassOctant* oct);

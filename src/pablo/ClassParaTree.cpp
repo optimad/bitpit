@@ -743,6 +743,15 @@ ClassParaTree::getLevel(uint32_t idx){
 	return m_octree.getLevel(idx);
 };
 
+/** Compute the Morton index of an octant (without level).
+ * \param[in] idx Local index of target octant.
+ * \return morton Morton index of the octant.
+ */
+uint64_t
+ClassParaTree::computeMorton(uint32_t idx){
+	return m_octree.computeMorton(idx);
+};
+
 /*! Get the balancing condition of an octant.
  * \param[in] idx Local index of target octant.
  * \return Has octant to be balanced?
@@ -1068,6 +1077,15 @@ ClassParaTree::getMarker(ClassOctant* oct){
 uint8_t
 ClassParaTree::getLevel(ClassOctant* oct){
 	return oct->getLevel();
+};
+
+/** Compute the Morton index of an octant (without level).
+ * \param[in] oct Pointer to the target octant
+ * \return morton Morton index of the octant.
+ */
+uint64_t
+ClassParaTree::computeMorton(ClassOctant* oct){
+	return oct->computeMorton();
 };
 
 /*! Get the balancing condition of an octant.

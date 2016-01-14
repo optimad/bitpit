@@ -112,7 +112,9 @@ private:
 	uint8_t 		getLocalMaxDepth() const;
 	int8_t 			getMarker(int32_t idx);
 	uint8_t 		getLevel(int32_t idx);
+	uint64_t 		computeMorton(int32_t idx);
 	uint8_t 		getGhostLevel(int32_t idx);
+	uint64_t 		computeGhostMorton(int32_t idx);
 	bool 			getBalance(int32_t idx);
 	uint8_t 		getBalanceCodim() const;
 	void 			setMarker(int32_t idx, int8_t marker);
