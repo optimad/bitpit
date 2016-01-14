@@ -60,7 +60,7 @@ void  VTK::SetHeaderType( std::string st_){
     }
 
     else{
-        cout << "Unsupported HeaderType " << st_ << endl ;
+        std::cout << "Unsupported HeaderType " << st_ << std::endl ;
     };
 
     return; 
@@ -106,8 +106,8 @@ void  VTK::SetCounter( int c_){
  */
 void  VTK::SetParallel( int nr, int my){ 
 
-  if( nr <  1 ) cout << " Numer of processes must be greater than 0" << endl ;
-  if( my >= nr) cout << " my_process is not in valid range " << endl ;
+  if( nr <  1 ) std::cout << " Numer of processes must be greater than 0" << std::endl ;
+  if( my >= nr) std::cout << " my_process is not in valid range " << std::endl ;
 
   nr_procs = nr; 
   my_proc  = my; 
@@ -150,7 +150,7 @@ void  VTK::SetGeomCodex( std::string cod_ ) {
     } 
     
     else{
-      cout << "Codification: " << cod_ << " not supported in VTK::SetGeomCodex"  << endl ;
+      std::cout << "Codification: " << cod_ << " not supported in VTK::SetGeomCodex"  << std::endl ;
     };
 
     return;
@@ -171,7 +171,7 @@ void  VTK::SetDataCodex( std::string cod_ ) {
     } 
     
     else{
-      cout << "Codification: " << cod_ << " not supported in VTK::SetDataCodex"  << endl ;
+      std::cout << "Codification: " << cod_ << " not supported in VTK::SetDataCodex"  << std::endl ;
     };
 
  
@@ -211,7 +211,7 @@ VTK::Field_C* VTK::AddData( std::string name_, int comp_, std::string type_, std
         }
         
         else{
-           cout << "Location: " << loc_ << " not supported in VTK::Add_Data"  << endl ;
+           std::cout << "Location: " << loc_ << " not supported in VTK::Add_Data"  << std::endl ;
            allocate = false ;
         };
         
@@ -224,7 +224,7 @@ VTK::Field_C* VTK::AddData( std::string name_, int comp_, std::string type_, std
         }
         
         else{
-          cout << "Type: " << type_ << " not supported in VTK::Add_Data"  << endl ;
+          std::cout << "Type: " << type_ << " not supported in VTK::Add_Data"  << std::endl ;
           allocate = false ;
         };
         
@@ -274,7 +274,7 @@ VTK::Field_C* VTK::AddData( std::string name_, int comp_, std::string type_, std
         }
         
         else{
-           cout << "Location: " << loc_ << " not supported in VTK::Add_Data"  << endl ;
+           std::cout << "Location: " << loc_ << " not supported in VTK::Add_Data"  << std::endl ;
            allocate = false ;
         };
         
@@ -287,7 +287,7 @@ VTK::Field_C* VTK::AddData( std::string name_, int comp_, std::string type_, std
         }
         
         else{
-          cout << "Type: " << type_ << " not supported in VTK::Add_Data"  << endl ;
+          std::cout << "Type: " << type_ << " not supported in VTK::Add_Data"  << std::endl ;
           allocate = false ;
         };
         
@@ -296,7 +296,7 @@ VTK::Field_C* VTK::AddData( std::string name_, int comp_, std::string type_, std
         } 
         
         else{
-          cout << "Codification: " << cod_ << " not supported in VTK::Add_Data"  << endl ;
+          std::cout << "Codification: " << cod_ << " not supported in VTK::Add_Data"  << std::endl ;
           allocate = false ;
         };
         
@@ -337,7 +337,7 @@ void VTK::RemoveData( std::string name_ ){
     }
     
     else{
-        cout << "did not find field for removing: " << name_ << endl;
+        std::cout << "did not find field for removing: " << name_ << std::endl;
     };
     
     
@@ -579,7 +579,7 @@ void VTK::WriteData( ){
     int                 length;
     char*               buffer ;
 
-    str.open( fh.GetName( ), ios::in | ios::out ) ;
+    str.open( fh.GetName( ), std::ios::in | std::ios::out ) ;
 
     { // Write Ascii
 
@@ -598,7 +598,7 @@ void VTK::WriteData( ){
             Flush( str, "ascii", data[i].GetName() ) ;
 
             position_insert = str.tellg();
-            str << endl ;
+            str << std::endl ;
             flush_binary( str, buffer, length) ;
 
             delete [] buffer ;
@@ -617,7 +617,7 @@ void VTK::WriteData( ){
             Flush( str, "ascii", data[i].GetName() ) ;
 
             position_insert = str.tellg();
-            str << endl ;
+            str << std::endl ;
             flush_binary( str, buffer, length) ;
 
             delete [] buffer ;
@@ -635,7 +635,7 @@ void VTK::WriteData( ){
             Flush( str, "ascii", geometry[i].GetName() ) ;
 
             position_insert = str.tellg();
-            str << endl ;
+            str << std::endl ;
             flush_binary( str, buffer, length) ;
 
             delete [] buffer ;
@@ -667,10 +667,10 @@ void VTK::WriteData( ){
         
         
         //Reopening in binary mode
-        str.open( fh.GetName( ), ios::out | ios::in | ios::binary);
+        str.open( fh.GetName( ), std::ios::out | std::ios::in | std::ios::binary);
         str.seekg( position_insert) ;
 
-        //str.open( "data.dat", ios::out | ios::binary);
+        //str.open( "data.dat", std::ios::out | std::ios::binary);
 
         //Writing first point data then cell data
         for( unsigned i=0; i< nr_data; i++){
@@ -721,7 +721,7 @@ void VTK::WriteData( ){
    
         // { 
         // std::fstream             str2 ;
-        // str2.open( "test2.dat", ios::out | ios::binary);
+        // str2.open( "test2.dat", std::ios::out | std::ios::binary);
         // flush_binary( str2, buffer, length) ;
         // str2.close();
         // }
@@ -789,7 +789,7 @@ void VTK::WriteDataHeader( std::fstream &str, bool parallel ){
 
     str << " Scalars=" << scalars.str()
         << " Vectors=" << vectors.str()
-        << ">" << endl;
+        << ">" << std::endl;
 
     //Writing DataArray
     for( unsigned i=0; i< nr_data; i++){
@@ -800,8 +800,8 @@ void VTK::WriteDataHeader( std::fstream &str, bool parallel ){
     str << "      </" ;
     if( parallel )  str << "P" ;
 
-    if( location == "Point") str << "PointData> " << endl;
-    if( location == "Cell")  str << "CellData> "  << endl;
+    if( location == "Point") str << "PointData> " << std::endl;
+    if( location == "Cell")  str << "CellData> "  << std::endl;
 
   };
 
@@ -820,9 +820,9 @@ void VTK::WriteDataArray( std::fstream &str, VTK::Field_C &field_ ){
 
     DataArrayToString( line, field_ ) ;
 
-    str << line << endl ;
+    str << line << std::endl ;
     
-    str << "        </DataArray>" << endl ;
+    str << "        </DataArray>" << std::endl ;
 
     return ;
 
@@ -839,8 +839,8 @@ void VTK::WritePDataArray( std::fstream &str, VTK::Field_C &field_ ){
 
     PDataArrayToString( line, field_ ) ;
 
-    str << line << endl ;
-    str << "        </PDataArray>" << endl ;
+    str << line << std::endl ;
+    str << "        </PDataArray>" << std::endl ;
 
     return ;
 
@@ -869,7 +869,7 @@ void VTK::ReadData( ){
   uint32_t                 nbytes32 ;
   uint64_t                 nbytes64 ;
 
-  str.open( fh.GetName( ), ios::in ) ;
+  str.open( fh.GetName( ), std::ios::in ) ;
 
   //Read appended data
   //Go to the initial position of the appended section
@@ -885,13 +885,13 @@ void VTK::ReadData( ){
   str.clear();
 
   //Open in binary for read
-  str.open( fh.GetName( ), ios::in | ios::binary);
+  str.open( fh.GetName( ), std::ios::in | std::ios::binary);
 
   //Read fields
   for( unsigned i=0; i< nr_data; i++){
     if( data[i].GetCodification() == "appended"){
       str.seekg( position_appended) ;
-      str.seekg( data[i].GetOffset(), ios::cur) ;
+      str.seekg( data[i].GetOffset(), std::ios::cur) ;
       if( HeaderType== "UInt32") absorb_binary( str, nbytes32 ) ;
       if( HeaderType== "UInt64") absorb_binary( str, nbytes64 ) ;
       Absorb( str, "binary", data[i].GetName() ) ;
@@ -902,7 +902,7 @@ void VTK::ReadData( ){
   for(unsigned i=0; i<geometry.size(); i++){
     if( geometry[i].GetCodification() == "appended"){
       str.seekg( position_appended) ;
-      str.seekg( geometry[i].GetOffset(), ios::cur) ;
+      str.seekg( geometry[i].GetOffset(), std::ios::cur) ;
       if( HeaderType== "UInt32") absorb_binary( str, nbytes32 ) ;
       if( HeaderType== "UInt64") absorb_binary( str, nbytes64 ) ;
       Absorb( str, "binary", geometry[i].GetName() ) ;

@@ -14,7 +14,7 @@
 template< >
 void flush_ascii( std::fstream &str, const uint8_t &data ){
 
-    str << setprecision(8) << scientific ;
+    str << std::setprecision(8) << std::scientific ;
     str << unsigned(data) << " ";
 
     return ;

@@ -175,7 +175,7 @@ void VTK_RectilinearGrid<Derived>::ReadMetaData( ){
     std::array<int,6>             extensions ;
 
 
-    str.open( fh.GetName( ), ios::in ) ;
+    str.open( fh.GetName( ), std::ios::in ) ;
 
     getline( str, line);
     while( ! Keyword_In_String( line, "<VTKFile")){
@@ -207,7 +207,7 @@ void VTK_RectilinearGrid<Derived>::ReadMetaData( ){
     for( int i=0; i<geometry.size(); ++i){
         str.seekg( position) ;
         if( ! ReadDataArray( str, geometry[i] ) ) {
-            cout << geometry[i].GetName() << " DataArray not found" << endl ;
+            std::cout << geometry[i].GetName() << " DataArray not found" << std::endl ;
         };
     };
 
@@ -228,24 +228,24 @@ void VTK_RectilinearGrid<Derived>::WriteMetaData( ){
 
     std::fstream str;
 
-    str.open( fh.GetName( ), ios::out ) ;
+    str.open( fh.GetName( ), std::ios::out ) ;
 
     //Writing XML header
-    str << "<?xml version=\"1.0\"?>" << endl;
+    str << "<?xml version=\"1.0\"?>" << std::endl;
 
     //Writing Piece Information
-    str << "<VTKFile type=\"RectilinearGrid\" version=\"0.1\" byte_order=\"LittleEndian\"  header_type=\"" << HeaderType << "\">" << endl; 
+    str << "<VTKFile type=\"RectilinearGrid\" version=\"0.1\" byte_order=\"LittleEndian\"  header_type=\"" << HeaderType << "\">" << std::endl; 
     str << "  <RectilinearGrid WholeExtent= \"" 
         << global_index[0][0] << " " << global_index[0][1]<< " "
         << global_index[1][0] << " " << global_index[1][1]<< " "
         << global_index[2][0] << " " << global_index[2][1]<< " "
-        << "\" >" << endl;
+        << "\" >" << std::endl;
 
     str << "    <Piece Extent= \" " 
         << local_index[0][0] << " " << local_index[0][1]<< " "
         << local_index[1][0] << " " << local_index[1][1]<< " "
         << local_index[2][0] << " " << local_index[2][1]<< " "
-        << "\" >" << endl;
+        << "\" >" << std::endl;
 
 
 
@@ -253,23 +253,23 @@ void VTK_RectilinearGrid<Derived>::WriteMetaData( ){
     WriteDataHeader( str, false ) ;
 
     //Wring Geometry Information   
-    str << "       <Coordinates>" << endl;
+    str << "       <Coordinates>" << std::endl;
     WriteDataArray( str, geometry[0] ) ;
     WriteDataArray( str, geometry[1] ) ;
     WriteDataArray( str, geometry[2] ) ;
-    str << "       </Coordinates>" << endl;
+    str << "       </Coordinates>" << std::endl;
 
     //Closing Piece
-    str << "    </Piece>" << endl;
-    str << "  </RectilinearGrid>" << endl;
+    str << "    </Piece>" << std::endl;
+    str << "  </RectilinearGrid>" << std::endl;
 
     //Write Appended Section
-    str << "  <AppendedData encoding=\"raw\">" << endl;
+    str << "  <AppendedData encoding=\"raw\">" << std::endl;
     str << "_" ;
-    str << endl ;
+    str << std::endl ;
 
     //Closing XML
-    str << "</VTKFile>" << endl;
+    str << "</VTKFile>" << std::endl;
 
     str.close() ;
 
@@ -296,18 +296,18 @@ void VTK_RectilinearGrid<Derived>::WriteCollection( ){
 
     fho.SetDirectory(".") ;
 
-    str.open( fhp.GetName( ), ios::out ) ;
+    str.open( fhp.GetName( ), std::ios::out ) ;
 
     //Writing XML header
-    str << "<?xml version=\"1.0\"?>" << endl;
+    str << "<?xml version=\"1.0\"?>" << std::endl;
 
     //Writing Piece Information
-    str << "<VTKFile type=\"PRectilinearGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << endl;
+    str << "<VTKFile type=\"PRectilinearGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
     str << "  <PRectilinearGrid WholeExtent= \"" 
         << global_index[0][0] << " " << global_index[0][1]<< " "
         << global_index[1][0] << " " << global_index[1][1]<< " "
         << global_index[2][0] << " " << global_index[2][1]<< " "
-        << "GhostLevel=\"0\">" << endl;
+        << "GhostLevel=\"0\">" << std::endl;
 
 
 
@@ -315,11 +315,11 @@ void VTK_RectilinearGrid<Derived>::WriteCollection( ){
     WriteDataHeader( str, true );
 
     //Wring Geometry Information
-    str << "      <PCoordinates>" << endl;
+    str << "      <PCoordinates>" << std::endl;
     WritePDataArray( str, geometry[0] ) ;
     WritePDataArray( str, geometry[1] ) ;
     WritePDataArray( str, geometry[2] ) ;
-    str << "      </PCoordinates>" << endl;
+    str << "      </PCoordinates>" << std::endl;
 
 
     for( int i=0; i<nr_procs; i++){
@@ -330,11 +330,11 @@ void VTK_RectilinearGrid<Derived>::WriteCollection( ){
             << index[0][0] << " " << index[0][1] << " "
             << index[1][0] << " " << index[1][1] << " "
             << index[2][0] << " " << index[2][1] << " "
-            << "\" Source= \"" << fho.GetName() << "\"/>" << endl;
+            << "\" Source= \"" << fho.GetName() << "\"/>" << std::endl;
     };
 
-    str << "  </PRectilinearGrid>"  << endl;
-    str << "</VTKFile>" << endl;
+    str << "  </PRectilinearGrid>"  << std::endl;
+    str << "</VTKFile>" << std::endl;
 
     str.close() ;
 
@@ -485,7 +485,7 @@ void VTK_RectilinearGrid<Derived>::SetGlobalDimensions( int I, int J ){
 template <class Derived>
 void VTK_RectilinearGrid<Derived>::SetGlobalIndex( std::vector<extension3D_t> loc_ ){
 
-    if( loc_.size() !=nr_procs ) cout << "Size of loc_ in VTK_RectilinearGrid<Derived>::SetParallelIndex does not fit nr_procs " << endl ;
+    if( loc_.size() !=nr_procs ) std::cout << "Size of loc_ in VTK_RectilinearGrid<Derived>::SetParallelIndex does not fit nr_procs " << std::endl ;
 
     proc_index   = loc_ ;
 
@@ -501,7 +501,7 @@ void VTK_RectilinearGrid<Derived>::SetGlobalIndex( std::vector<extension3D_t> lo
 template <class Derived>
 void VTK_RectilinearGrid<Derived>::SetGlobalIndex( std::vector<extension2D_t> loc_ ){
 
-    if( loc_.size() !=nr_procs ) cout << "Size of loc_ in VTK_RectilinearGrid<Derived>::SetParallelIndex does not fit nr_procs " << endl ;
+    if( loc_.size() !=nr_procs ) std::cout << "Size of loc_ in VTK_RectilinearGrid<Derived>::SetParallelIndex does not fit nr_procs " << std::endl ;
 
     proc_index.resize(nr_procs) ;
 

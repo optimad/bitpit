@@ -114,7 +114,7 @@ uint64_t VTK_UnstructuredGrid<Derived>::CalcSizeConnectivity( ){
     uint64_t                 nbytes64 ;
     uint64_t                 nconn ;
 
-    str.open( fh.GetName( ), ios::in ) ;
+    str.open( fh.GetName( ), std::ios::in ) ;
 
     //Read appended data
     //Go to the initial position of the appended section
@@ -130,11 +130,11 @@ uint64_t VTK_UnstructuredGrid<Derived>::CalcSizeConnectivity( ){
     str.clear();
 
     //Open in binary for read
-    str.open( fh.GetName( ), ios::in | ios::binary);
+    str.open( fh.GetName( ), std::ios::in | std::ios::binary);
 
     if( geometry[3].GetCodification() == "appended" ){
         str.seekg( position_appended) ;
-        str.seekg( geometry[3].GetOffset(), ios::cur) ;
+        str.seekg( geometry[3].GetOffset(), std::ios::cur) ;
 
         if( HeaderType== "UInt32") {
             absorb_binary( str, nbytes32 ) ;
@@ -198,7 +198,7 @@ uint8_t VTK_UnstructuredGrid<Derived>::NumberOfElements( uint8_t t){
     case 14: e=5; break;
     case 25: e=20; break;
     default:
-      cout << "Element type not supported: " << t << endl;
+      std::cout << "Element type not supported: " << t << std::endl;
 
   };
 
@@ -216,40 +216,40 @@ void VTK_UnstructuredGrid<Derived>::WriteMetaData( ){
     std::fstream str ;
     std::string line ; 
     
-    str.open( fh.GetName( ), ios::out ) ;
+    str.open( fh.GetName( ), std::ios::out ) ;
     
     //Writing XML header
-    str << "<?xml version=\"1.0\"?>" << endl;
+    str << "<?xml version=\"1.0\"?>" << std::endl;
     
     //Writing Piece Information
-    str << "<VTKFile type=\"UnstructuredGrid\" version=\"1.0\" byte_order=\"LittleEndian\" header_type=\"" << HeaderType << "\">" << endl;
-    str << "  <UnstructuredGrid>"  << endl;;
-    str << "    <Piece  NumberOfPoints=\"" << nr_points << "\" NumberOfCells=\"" << nr_cells << "\">" << endl;
+    str << "<VTKFile type=\"UnstructuredGrid\" version=\"1.0\" byte_order=\"LittleEndian\" header_type=\"" << HeaderType << "\">" << std::endl;
+    str << "  <UnstructuredGrid>"  << std::endl;;
+    str << "    <Piece  NumberOfPoints=\"" << nr_points << "\" NumberOfCells=\"" << nr_cells << "\">" << std::endl;
     
     //Header for Data
     WriteDataHeader( str, false );
     
     //Wring Geometry Information
-    str << "      <Points>" << endl ;;
+    str << "      <Points>" << std::endl ;;
     WriteDataArray( str, geometry[0] ) ;
-    str << "      </Points>" << endl;
+    str << "      </Points>" << std::endl;
     
-    str << "      <Cells>" << endl ;;
+    str << "      <Cells>" << std::endl ;;
     WriteDataArray( str, geometry[1] ) ;
     WriteDataArray( str, geometry[2] ) ;
     WriteDataArray( str, geometry[3] ) ;
-    str << "      </Cells>" << endl;
+    str << "      </Cells>" << std::endl;
     
     //Closing Piece
-    str << "    </Piece>" << endl;
-    str << "  </UnstructuredGrid>"  << endl;
+    str << "    </Piece>" << std::endl;
+    str << "  </UnstructuredGrid>"  << std::endl;
     
     //Appended Section
     
-    str << "  <AppendedData encoding=\"raw\">" << endl;
+    str << "  <AppendedData encoding=\"raw\">" << std::endl;
     str << "_" ;
-    str << endl ;
-    str << "</VTKFile>" << endl;
+    str << std::endl ;
+    str << "</VTKFile>" << std::endl;
     
     str.close() ;
     
@@ -276,32 +276,32 @@ void VTK_UnstructuredGrid<Derived>::WriteCollection( ){
 
   fho.SetDirectory(".") ;
 
-  str.open( fhp.GetName( ), ios::out ) ;
+  str.open( fhp.GetName( ), std::ios::out ) ;
 
   //Writing XML header
-  str << "<?xml version=\"1.0\"?>" << endl;
+  str << "<?xml version=\"1.0\"?>" << std::endl;
 
   //Writing Piece Information
-  str << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << endl;
-  str << "  <PUnstructuredGrid GhostLevel=\"0\">"  << endl;;
+  str << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
+  str << "  <PUnstructuredGrid GhostLevel=\"0\">"  << std::endl;;
 
   //Header for Data
   WriteDataHeader( str, true );
 
   //Wring Geometry Information
-  str << "      <PPoints>" << endl;
+  str << "      <PPoints>" << std::endl;
   WritePDataArray( str, geometry[0] ) ;
-  str << endl ;
-  str << "      </PPoints>" << endl;
+  str << std::endl ;
+  str << "      </PPoints>" << std::endl;
 
 
   for( int i=0; i<nr_procs; i++){
     fho.SetBlock(i) ;
-    str << "    <Piece  Source=\"" << fho.GetName() <<  "\"/>" << endl;
+    str << "    <Piece  Source=\"" << fho.GetName() <<  "\"/>" << std::endl;
   };
 
-  str << "  </PUnstructuredGrid>"  << endl;
-  str << "</VTKFile>" << endl;
+  str << "  </PUnstructuredGrid>"  << std::endl;
+  str << "</VTKFile>" << std::endl;
 
   str.close() ;
 
@@ -322,7 +322,7 @@ void VTK_UnstructuredGrid<Derived>::ReadMetaData( ){
     
     std::fstream::pos_type        position;
     
-    str.open( fh.GetName( ), ios::in ) ;
+    str.open( fh.GetName( ), std::ios::in ) ;
     
     getline( str, line);
     while( ! Keyword_In_String( line, "<VTKFile")){
@@ -351,7 +351,7 @@ void VTK_UnstructuredGrid<Derived>::ReadMetaData( ){
     for( int i=0; i<geometry.size(); ++i){
         str.seekg( position) ;
         if( ! ReadDataArray( str, geometry[i] ) ) {
-          cout << geometry[i].GetName() << " DataArray not found" << endl ;
+          std::cout << geometry[i].GetName() << " DataArray not found" << std::endl ;
         };
     };
     

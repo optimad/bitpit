@@ -15,7 +15,7 @@
 template< class data_T >
 void flush_ascii( std::fstream &str, const data_T &data ){
 
-    str << setprecision(8) << scientific ;
+    str << std::setprecision(8) << std::scientific ;
     str << data << " ";
 
     return ;
@@ -55,12 +55,12 @@ void flush_ascii( std::fstream &str, int elements_per_line, const std::vector<da
     nr = data.size() ;
     lines = (nr-1) /elements_per_line + 1;
 
-    str << setprecision(8) << scientific ;
+    str << std::setprecision(8) << std::scientific ;
 
 
     while( next ) {
 
-        this_line = min( elements_per_line, nr - k ) ;
+        this_line = std::min( elements_per_line, nr - k ) ;
 
         for( j=0; j<this_line; j++){
             flush_ascii( str, data[k] ) ;
@@ -69,7 +69,7 @@ void flush_ascii( std::fstream &str, int elements_per_line, const std::vector<da
 
         i++ ;
         if( i<lines){
-            str << endl;
+            str << std::endl;
         }
         else{
             next = false;
@@ -115,12 +115,12 @@ void flush_ascii( std::fstream &str, int elements_per_line, const std::array<dat
     nr = d ;
     lines = nr /elements_per_line ;
 
-    str << setprecision(8) << scientific ;
+    str << std::setprecision(8) << std::scientific ;
 
 
     while( next ) {
 
-        this_line = min( elements_per_line, nr - k ) ;
+        this_line = std::min( elements_per_line, nr - k ) ;
         for( j=0; j<this_line; j++){
             flush_ascii( str, data[k] ) ;
             k++ ;
@@ -128,7 +128,7 @@ void flush_ascii( std::fstream &str, int elements_per_line, const std::array<dat
 
         i++ ;
         if( i<lines){
-            str << endl;
+            str << std::endl;
         }
         else{
             next = false;
@@ -158,12 +158,12 @@ void flush_ascii( std::fstream &str, int elements_per_line, const data_T *data, 
 
     lines = nr /elements_per_line ;
 
-    str << setprecision(8) << scientific ;
+    str << std::setprecision(8) << std::scientific ;
 
 
     while( next ) {
 
-        this_line = min( elements_per_line, nr - k ) ;
+        this_line = std::min( elements_per_line, nr - k ) ;
         for( j=0; j<this_line; j++){
             flush_ascii( str, data[k] ) ;
             k++ ;
@@ -171,7 +171,7 @@ void flush_ascii( std::fstream &str, int elements_per_line, const data_T *data, 
 
         i++ ;
         if( i<lines){
-            str << endl;
+            str << std::endl;
         }
         else{
             next = false;
@@ -323,9 +323,9 @@ void  line_stream( std::fstream &str, data_T &data){
     };
 
     if( read != expected){
-        std::cout << " Not expected nr of element in line" << endl;
-        std::cout << " Expected number: "<< expected << endl ; 
-        std::cout << " Actual number: "<< read << endl ; 
+        std::cout << " Not expected nr of element in line" << std::endl;
+        std::cout << " Expected number: "<< expected << std::endl ; 
+        std::cout << " Actual number: "<< read << std::endl ; 
     }
 
     else{
@@ -376,9 +376,9 @@ void  line_stream( std::fstream &str, std::vector<data_T> &data){
             data = temp ;
         }
         else{
-            std::cout << " Not expected nr of element in line" << endl;
-            std::cout << " Expected number: "<< expected << endl ; 
-            std::cout << " Actual number: "<< read << endl ; 
+            std::cout << " Not expected nr of element in line" << std::endl;
+            std::cout << " Expected number: "<< expected << std::endl ; 
+            std::cout << " Actual number: "<< read << std::endl ; 
         };
     };
 
@@ -421,9 +421,9 @@ void  line_stream( std::fstream &str, std::array<data_T,d> &data){
         for(i=0; i<read; i++) data[i] = temp[i] ;
     }
     else{
-        std::cout << " Not expected nr of element in line" << endl;
-        std::cout << " Expected number: "<< expected << endl ; 
-        std::cout << " Actual number: "<< read << endl ; 
+        std::cout << " Not expected nr of element in line" << std::endl;
+        std::cout << " Expected number: "<< expected << std::endl ; 
+        std::cout << " Actual number: "<< read << std::endl ; 
     };
 
     return;
@@ -465,9 +465,9 @@ void  line_stream( std::fstream &str, data_T *data, int nr ){
         for(i=0; i<read; i++) data[i] = temp[i] ;
     }
     else{
-        std::cout << " Not expected nr of element in line" << endl;
-        std::cout << " Expected number: "<< expected << endl ; 
-        std::cout << " Actual number: "<< read << endl ; 
+        std::cout << " Not expected nr of element in line" << std::endl;
+        std::cout << " Expected number: "<< expected << std::endl ; 
+        std::cout << " Actual number: "<< read << std::endl ; 
     };
 
     return;
@@ -531,7 +531,7 @@ void absorb_ascii( std::fstream &str, std::vector<data_T> &data ){
     };
 
     if( itrData != endData ) {
-        std::cout << "Not enough elements found to fill vector" << endl ;
+        std::cout << "Not enough elements found to fill vector" << std::endl ;
     };
 
 
@@ -581,7 +581,7 @@ void absorb_ascii( std::fstream &str, std::array<data_T,d> &data ){
     };
 
     if( itrData != endData ) {
-        std::cout << "Not enough elements found to fill array" << endl ;
+        std::cout << "Not enough elements found to fill array" << std::endl ;
     };
 
 
@@ -633,7 +633,7 @@ void absorb_ascii( std::fstream &str, data_T *data, int nr ){
     };
 
     if( itrData != endData ) {
-        std::cout << "Not enough elements found to fill array" << endl ;
+        std::cout << "Not enough elements found to fill array" << std::endl ;
     };
 
 
