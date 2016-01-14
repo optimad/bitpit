@@ -2219,13 +2219,9 @@ ClassParaTree::getNodeLogicalCoordinates(uint32_t inode){
  * \param[in] inode Local index of node
  * \return Vector with the coordinates of the node.
  */
-dvector
+darray3
 ClassParaTree::getNodeCoordinates(uint32_t inode){
-	vector<double> coords(3,0);
-	coords[0] = m_trans.mapX(m_octree.m_nodes[inode][0]);
-	coords[1] = m_trans.mapY(m_octree.m_nodes[inode][1]);
-	coords[2] = m_trans.mapZ(m_octree.m_nodes[inode][2]);
-	return coords;
+	return m_trans.mapCoordinates(m_octree.m_nodes[inode]);
 }
 
 /** Compute the connectivity of ghost octants and store the coordinates of nodes.
@@ -2300,13 +2296,9 @@ ClassParaTree::getGhostNodeLogicalCoordinates(uint32_t inode){
  * \param[in] inode Local index of node
  * \return Vector with the coordinates of the node.
  */
-dvector
+darray3
 ClassParaTree::getGhostNodeCoordinates(uint32_t inode){
-	vector<double> coords(3,0);
-	coords[0] = m_trans.mapX(m_octree.m_ghostsNodes[inode][0]);
-	coords[1] = m_trans.mapY(m_octree.m_ghostsNodes[inode][1]);
-	coords[2] = m_trans.mapZ(m_octree.m_ghostsNodes[inode][2]);
-	return coords;
+	return m_trans.mapCoordinates(m_octree.m_ghostsNodes[inode]);
 }
 
 #if ENABLE_MPI

@@ -304,7 +304,7 @@ public:
 	const u32vector & getConnectivity(ClassOctant* oct);
 	const u32arr3vector & getNodes();
 	const u32array3 & getNodeLogicalCoordinates(uint32_t inode);
-	dvector 	getNodeCoordinates(uint32_t inode);
+	darray3 	getNodeCoordinates(uint32_t inode);
 	void 		computeGhostsConnectivity();
 	void 		clearGhostsConnectivity();
 	void 		updateGhostsConnectivity();
@@ -313,7 +313,7 @@ public:
 	const u32vector & getGhostConnectivity(ClassOctant* oct);
 	const u32arr3vector & getGhostNodes();
 	const u32array3 & getGhostNodeLogicalCoordinates(uint32_t inode);
-	dvector 	getGhostNodeCoordinates(uint32_t inode);
+	darray3 	getGhostNodeCoordinates(uint32_t inode);
 #if ENABLE_MPI
 	void 		loadBalance();
 	void 		loadBalance(uint8_t & level);
