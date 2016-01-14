@@ -33,6 +33,12 @@ PatchOctree::PatchOctree(const int &id, const int &dimension,
 {
 	std::cout << ">> Initializing Octree mesh\n";
 
+	// Inizializzazione dell'octree
+	double initial_level = ceil(log2(std::max(1., length / dh)));
+
+	m_tree = classParaTree(origin[0], origin[1], origin[2], length, get_dimension());
+	m_tree.setMarker((uint32_t) 0, initial_level);
+
 	// Info sull'octree
 	int maxLevels;
 	if (is_three_dimensional()) {

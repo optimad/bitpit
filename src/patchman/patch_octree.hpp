@@ -122,9 +122,9 @@ private:
 	Class_Para_Tree<2> m_tree_2D;
 	Class_Para_Tree<3> m_tree_3D;
 
-	vector<double> m_tree_dh;
-	vector<double> m_tree_area;
-	vector<double> m_tree_volume;
+	std::vector<double> m_tree_dh;
+	std::vector<double> m_tree_area;
+	std::vector<double> m_tree_volume;
 
 	std::vector<std::array<double, 3> > m_normals;
 
