@@ -104,7 +104,7 @@ void      VTK::Field_C::SetType( std::string  type_){
 
     else{
 
-        cout << type_ << " not admitted in VTK::Field_C::SetType." << endl ;
+        std::cout << type_ << " not admitted in VTK::Field_C::SetType." << std::endl ;
     };
 
 
@@ -169,7 +169,7 @@ void      VTK::Field_C::SetOffset( uint64_t offs_){
  * Get name of data field
  * @return  name of data field
  */
-string    VTK::Field_C::GetName(){ 
+std::string    VTK::Field_C::GetName(){ 
     return name; 
 };
 
@@ -177,13 +177,13 @@ string    VTK::Field_C::GetName(){
  * Get type of data field
  * @return   type of data field [ "[U]Int8", "[U]Int16", "[U]Int32", "[U]Int64", "Float32", "Float64" ]
  */
-string    VTK::Field_C::GetType(){ return type; };
+std::string    VTK::Field_C::GetType(){ return type; };
 
 /*! ------------------------------------------------------------------
  * Get location of data field
  * @return  location ["Cell"/"Point"]
  */
-string    VTK::Field_C::GetLocation(){ 
+std::string    VTK::Field_C::GetLocation(){ 
     return location; 
 };
 
@@ -191,7 +191,7 @@ string    VTK::Field_C::GetLocation(){
  * Get codification of data field
  * @return  codification ["ascii"/"appended"]
  */
-string    VTK::Field_C::GetCodification(){ 
+std::string    VTK::Field_C::GetCodification(){ 
     return codification; 
 };
 

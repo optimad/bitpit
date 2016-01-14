@@ -23,7 +23,7 @@ VtkUnstrVec::VtkUnstrVec():VTK_UnstructuredGrid<VtkUnstrVec>(){
 /*!====================================================================================================
  * Constructor for reading VTU files. Sets the given input parameters
  * @param[in]   dir_    directory of vtu file with final "/"
- * @param[in]   name_   name of vtu file without suffix
+ * @param[in]   name_   name of vtu file withstd::out suffix
  * @param[in]   codex_  codex used in file ["appended"/"ascii"]
  * @param[in]   type_   element type of unstructured grid. See http://www.vtk.org/wp-content/uploads/2015/04/file-formats.pdf
  */
@@ -45,12 +45,12 @@ VtkUnstrVec::~VtkUnstrVec(){
 /*!====================================================================================================
  * Finds a field within class by its name.
  * @param[in]    name_   name of the field
- * @param[out]  the_field   pointer to the field if found, else unaltered
+ * @param[std::out]  the_field   pointer to the field if found, else unaltered
  * @return      true if found, else false   
  */
 bool VtkUnstrVec::GetFieldByName( const std::string &name_, VtkUnstrVec::ufield *&the_field ){
 
-    vector<VtkUnstrVec::ufield>::iterator    it_ ;
+    std::vector<VtkUnstrVec::ufield>::iterator    it_ ;
 
     for( it_=adata.begin(); it_!=adata.end(); ++it_){
         if( (*it_).name == name_ ){
@@ -93,7 +93,7 @@ void VtkUnstrVec::Write(  ) {
     }
 
     else{
-        cout << " VtkUnstrVec::Write cannot write file since \"Points\" or \"connectivity\" vectors are missing" << endl ;
+        std::cout << " VtkUnstrVec::Write cannot write file since \"Points\" or \"connectivity\" vectors are missing" << std::endl ;
 
     };
 
@@ -112,7 +112,7 @@ void VtkUnstrVec::Flush( std::fstream &str, std::string codex, std::string name 
     if( codex == "ascii" && name == "types"){
         for( uint64_t n=0; n<nr_cells-1; n++) {
             flush_ascii( str, type  ) ;
-            str << endl ;
+            str << std::endl ;
         };
         flush_ascii( str, type  ) ;
     }
@@ -126,7 +126,7 @@ void VtkUnstrVec::Flush( std::fstream &str, std::string codex, std::string name 
         for(uint64_t  n=0; n<nr_cells-1; n++) {
             off_ += NumberOfElements( type ) ; 
             flush_ascii( str, off_  ) ;
-            str << endl ;
+            str << std::endl ;
         };
         off_ += NumberOfElements( type ) ;
         flush_ascii( str, off_  ) ;

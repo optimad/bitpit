@@ -5,7 +5,7 @@
  * @tparam      T0      class used to store grid nodes
  * @tparam      T1      class used to store grid connectivity
  * @param[in]   dir_    directory of VTU file with final "/"
- * @param[in]   name_   name of VTU file without suffix
+ * @param[in]   name_   name of VTU file withstd::out suffix
  * @param[in]   codex_  codex used for writing
  * @param[in]   type_   element type of unstructured grid. See http://www.vtk.org/wp-content/uploads/2015/04/file-formats.pdf
  * @param[in]   points_ext  grid nodes; the size of the vector is used to determine the number of nodes in grid;
@@ -45,9 +45,9 @@ VtkUnstrVec::VtkUnstrVec( std::string dir_, std::string name_, std::string codex
 
 
 /*! ====================================================================================================
- * Adds scalar field data for output stored in std::vector< T >
+ * Adds scalar field data for std::output stored in std::vector< T >
  * @tparam      T       POD type 
- * @param[in]   data_   data for output
+ * @param[in]   data_   data for std::output
  * @param[in]   name_   name of data file
  * @param[in]   loc_    location of the data
  */
@@ -64,9 +64,9 @@ void VtkUnstrVec::AddData( std::vector<T> &data_, std::string name_, std::string
 };
 
 /*! ====================================================================================================
- * Adds vector field data for output stored in std::vector< std::array<T,3> >
+ * Adds vector field data for std::output stored in std::vector< std::array<T,3> >
  * @tparam      T       POD type 
- * @param[in]   data_   data for output
+ * @param[in]   data_   data for std::output
  * @param[in]   name_   name of data file
  * @param[in]   loc_    location of the data
  */
@@ -83,10 +83,10 @@ void VtkUnstrVec::AddData( std::vector< std::array<T,3> > &data_, std::string na
 };
 
 /*! ====================================================================================================
- * Adds vector field data for output stored in std::vector< std::vector<T>>.
+ * Adds vector field data for std::output stored in std::vector< std::vector<T>>.
  * Assumes that the size of each internal vector is equal 3.
  * @tparam      T       POD type 
- * @param[in]   data_   data for output
+ * @param[in]   data_   data for std::output
  * @param[in]   name_   name of data file
  * @param[in]   loc_    location of the data
  */
