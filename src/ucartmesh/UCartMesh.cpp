@@ -1720,6 +1720,12 @@ int UCartMesh::linearNodeInterpolation( darray3E &P, vector<int> &stencil, vecto
             cWeights[d][0] = 1. ;
         };
 
+        stencil.resize(nStencil) ;
+        weights.resize(nStencil) ;
+
+        itrStencil = stencil.begin() ;
+        itrWeights = weights.begin() ;
+
         for( k=0; k<dim-1; ++k){
             for( j=0; j<2; ++j){
                 for( i=0; i<2; ++i){
