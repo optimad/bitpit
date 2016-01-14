@@ -24,6 +24,7 @@
 // ========================================================================== //
 // IMPLEMENTATIONS                                                            //
 // ========================================================================== //
+using namespace std;
 
 // BIN SORTING ============================================================== //
 // (see Sort_Algorithm.tpp)
@@ -50,16 +51,16 @@
     \param[in,out] list vector with size n, storing extracted values
 */
 void Extract_wo_Repl(
-    int         n,
-    int         m,
-    ivector1D  &list
+    int                 n,
+    int                 m,
+    vector<int>        &list
 ) {
 
 // ========================================================================== //
 // void Extract_wo_Repl(                                                      //
-//     int         n,                                                         //
-//     int         m,                                                         //
-//     ivector1D  &list)                                                      //
+//     int                 n,                                                 //
+//     int                 m,                                                 //
+//     vector<int>        &list)                                              //
 //                                                                            //
 // Extract n integers in the interval [0, m] without replacement.             //
 // ========================================================================== //
@@ -80,7 +81,7 @@ void Extract_wo_Repl(
 
 // Local variables
 int                 N;
-ivector1D           set(m+1, -1);
+vector<int>         set(m+1, -1);
 
 // Counters
 int                 i, index;
