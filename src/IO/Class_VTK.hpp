@@ -1,11 +1,12 @@
+/*!
+  \ingroup    VTK
+  @{
+ */
+
 
 #ifndef __CLASS_VTK__HH__
 #define __CLASS_VTK__HH__
 
-#include <iostream>
-#include <iomanip>
-#include <fstream>
-#include <sstream>
 #include <vector>
 #include <array>
 
@@ -13,210 +14,243 @@
 #include "Class_FH.hpp"
 
 
-using namespace std;
+
+uint8_t SizeOfType( std::string type ) ;
 
 
-uint8_t SizeOfType( string type ) ;
-
-
-// =================================================================================== //
-// VTK BASE CLASS DEFINITION                                                           //
+/*! ========================================================================================
+ * \class      VTK
+ * \brief A base class for VTK input output. 
+ *
+ * VTK provides all basic methods for reading and writing VTK files.
+ * ASCII and APPENDED mode are supported.
+ *
+ */
 class VTK{
 
     protected:
-    // =================================================================================== //
-    // FIELD Class DEFINITIONS                                                        //
-    class Field_C{
-    
-      //members
-      protected:
-        string                   name;          // name of the field
-        uint8_t                  components;    // nr of components of field, options[ 1, 3 ]
-        string                   type;          // type of data, options [ [U]Int8, [U]Int16, [U]Int32, [U]Int64, Float32, Float64 ]
-        string                   location;      // cell or point data, [ Cell, Point ]
-        string                   codification ; // Type of codification [ascii, appended]
-        uint64_t                 nr_elements;   // nr of cells or points
-        uint64_t                 offset;        // offset in the appended section
-        fstream::pos_type        position;      // position in file
-    
-      //methods
-      public:
-        Field_C();
-        Field_C( string name_, uint8_t comp_, string loc_ );
-        Field_C( string name_, uint8_t comp_, string type_, string loc_ );
-        Field_C( string name_, uint8_t comp_, string type_, string loc_, string cod_, uint64_t nr_elements_);
-       ~Field_C();
-    
-        string                   GetName();
-        string                   GetType();
-        string                   GetLocation();
-        string                   GetCodification();
-        uint8_t                  GetComponents();
-        uint64_t                 GetElements();
-        uint64_t                 GetSize();
-        uint64_t                 GetOffset();
-        uint64_t                 GetNbytes();
-        fstream::pos_type        GetPosition(); 
 
-        void                     SetName( string name_ ) ;
-        void                     SetType( string type_ ) ;
-        void                     SetLocation( string loc_ ) ;
-        void                     SetCodification( string cod_ ) ;
-        void                     SetComponents( uint8_t comp_ ) ;
-        void                     SetElements( uint64_t elem_ ) ;
-        void                     SetOffset( uint64_t offs_ ) ;
-        void                     SetPosition( fstream::pos_type pos_ ) ;
-    
-    };
-     
-    // members ---------------------------------------------------------------------- //
+        /*!
+         * \class        Field_C
+         * \brief        VTKField handles geometry and data field information for the VTK format
+         *
+         */
+
+        class Field_C{
+
+            //members
+            protected:
+                std::string              name;                      /**< name of the field */
+                uint8_t                  components;                /**< nr of components of field, options[ 1, 3 ] */
+                std::string              type;                      /**< type of data, options [ [U]Int8, [U]Int16, [U]Int32, [U]Int64, Float32, Float64 ] */
+                std::string              location;                  /**< cell or point data, [ Cell, Point ] */
+                std::string              codification ;             /**< Type of codification [ascii, appended] */
+                uint64_t                 nr_elements;               /**< nr of cells or points */
+                uint64_t                 offset;                    /**< offset in the appended section */
+                std::fstream::pos_type   position;                  /**< position in file */
+
+                //methods
+            public:
+                Field_C();
+                Field_C( std::string , uint8_t , std::string );
+                Field_C( std::string , uint8_t , std::string , std::string );
+                Field_C( std::string , uint8_t , std::string , std::string , std::string , uint64_t );
+                ~Field_C();
+
+                std::string              GetName();
+                std::string              GetType();
+                std::string              GetLocation();
+                std::string              GetCodification();
+                uint8_t                  GetComponents();
+                uint64_t                 GetElements();
+                uint64_t                 GetSize();
+                uint64_t                 GetOffset();
+                uint64_t                 GetNbytes();
+                std::fstream::pos_type   GetPosition(); 
+
+                void                     SetName( std::string ) ;
+                void                     SetType( std::string ) ;
+                void                     SetLocation( std::string ) ;
+                void                     SetCodification( std::string ) ;
+                void                     SetComponents( uint8_t ) ;
+                void                     SetElements( uint64_t ) ;
+                void                     SetOffset( uint64_t ) ;
+                void                     SetPosition( std::fstream::pos_type ) ;
+
+        };
+
+        // members ---------------------------------------------------------------------- //
     protected:
-      FileHandler_C        fh ;                     // File_Handler for Input&Output
-      uint64_t             nr_points ;              // Number of vertices
-      uint64_t             nr_cells  ;              // Number of Cells
-      int                  nr_procs  ;              // Number of parallel processes 
-      int                  my_proc   ;              // My process id
+        FileHandler_C                   fh ;                        /**< File_Handler for Input and Output */
+        uint64_t                        nr_points ;                 /**< Number of vertices */
+        uint64_t                        nr_cells  ;                 /**< Number of Cells */
+        int                             nr_procs  ;                 /**< Number of parallel processes  */
+        int                             my_proc   ;                 /**< My process id */
 
-      string               HeaderType ;            // UInt32 or UInt64_t
+        std::string                     HeaderType ;                /**< UInt32 or UInt64_t */
 
-      vector< Field_C >    geometry ;               // Geometry fields
-      string               GeomCodex ;
+        std::vector< Field_C >          geometry ;                  /**< Geometry fields */
+        std::string                     GeomCodex ;                 /**< Geometry codex */
 
-      unsigned             nr_data ;                // Nr of data fields
-      vector< Field_C >    data ;                   // Data fields
-      string               DataCodex ;
+        unsigned                        nr_data ;                   /**< Nr of data fields */
+        std::vector< Field_C >          data ;                      /**< Data fields */
+        std::string                     DataCodex ;                 /**< Data codex */
 
-    // methods ----------------------------------------------------------------------- //
+        // methods ----------------------------------------------------------------------- //
     public:
-      VTK( );
-      VTK( string dir_, string name_ );
-      virtual ~VTK( );
+        VTK( );
+        VTK( std::string dir_, std::string name_ );
+        virtual ~VTK( );
 
-      void    SetHeaderType( string sg_ );
-      string  GetHeaderType(  );
+        void                            SetHeaderType( std::string );
+        std::string                     GetHeaderType(  );
 
-      void    SetNames( string dir_ , string name_  ) ;
-      void    SetCounter( int c_ ) ;
-      void    SetParallel( int nr, int my ) ;
+        void                            SetNames( std::string , std::string ) ;
+        void                            SetCounter( int c_=0 ) ;
+        void                            SetParallel( int , int ) ;
 
-      void    SetCodex( string cod_ );
-      void    SetGeomCodex( string cod_ );
-      void    SetDataCodex( string cod_ );
+        void                            SetCodex( std::string );
+        void                            SetGeomCodex( std::string );
+        void                            SetDataCodex( std::string );
 
-      Field_C*  AddData( string name_, int comp_, string type_, string loc_ ) ;
-      Field_C*  AddData( string name_, int comp_, string type_, string loc_, string cod_ ) ;
-      void      RemoveData( string name_ ) ;
+        Field_C*                        AddData( std::string , int , std::string , std::string ) ;
+        Field_C*                        AddData( std::string , int , std::string , std::string , std::string ) ;
+        void                            RemoveData( std::string ) ;
 
-      void    Read() ;
+        void                            Read() ;
 
-      virtual 
-      void    ReadMetaData() = 0 ;
-      void    ReadData() ;
+        virtual void                    ReadMetaData() = 0 ; 
+        void                            ReadData() ;
 
+        void                            Write()  ;
+        virtual void                    WriteMetaData() = 0 ;
+        void                            WriteData() ;
 
-      void    Write()  ;
-      virtual 
-      void    WriteMetaData() = 0 ;
-      void    WriteData() ;
-
-      virtual
-      void    WriteCollection() = 0 ;  
+        virtual void                    WriteCollection() = 0 ;
 
     protected:
-      //General Purpose
-      bool    GetFieldByName( const string &name_, VTK::Field_C*& the_field ) ;
-      void    CalcAppendedOffsets() ;
+        //For Writing
+        void                            WriteDataHeader( std::fstream &, bool parallel=false ) ;
+        void                            WriteDataArray( std::fstream &, Field_C &) ;
+        void                            WritePDataArray( std::fstream &, Field_C &) ;
 
-      bool    StringToDataArray( string &str, Field_C &data_ ) ;
-      void    DataArrayToString( string &str, Field_C &data_ ) ;
-      void    PDataArrayToString( string &str, Field_C &data_ ) ;
+        virtual void                    Flush( std::fstream &, std::string , std::string ) =0 ;
 
-      template<class T>
-      string  WhichType( T dum_) ;
+        //For Reading
+        void                            ReadDataHeader( std::fstream &) ;
+        bool                            ReadDataArray( std::fstream &, Field_C &);
 
-      template<class T>
-      string  WhichType( vector<T> dum_) ;
+        virtual  void                   Absorb( std::fstream &, std::string , std::string ) =0 ;
 
-      template<class T, size_t d>
-      string  WhichType( array<T,d> dum_) ;
+        //General Purpose
+        bool                            GetFieldByName( const std::string &, VTK::Field_C*& ) ;
+        void                            CalcAppendedOffsets() ;
 
-      //For Writing
-      void    WriteDataHeader( fstream &str, bool parallel ) ;
-      void    WriteDataArray( fstream &str, Field_C &data_ ) ;
-      void    WritePDataArray( fstream &str, Field_C &data_ ) ;
+        bool                            StringToDataArray( std::string &, Field_C &) ;
+        void                            DataArrayToString( std::string &, Field_C &) ;
+        void                            PDataArrayToString( std::string &, Field_C &) ;
 
-      virtual
-      void    Flush( fstream &str, string codex_, string name  ) =0 ; 
+        template<class T> 
+        std::string                     WhichType( T ) ;
 
-      //For Reading
-      void    ReadDataHeader( fstream &str ) ;
-      bool    ReadDataArray( fstream &str, Field_C &field_  );
+        template<class T> 
+        std::string                     WhichType( std::vector<T> ) ;
 
-      virtual
-      void    Absorb( fstream &str, string codex_, string name  ) =0 ; 
-       
+        template<class T, size_t d>
+        std::string                     WhichType( std::array<T,d> ) ;
+
 };
 
-//----------------------------------------------------------------------
-// Derived Classes -----------------------------------------------------
-//----------------------------------------------------------------------
+/*! ========================================================================================
+ * \class       VTK_UnstructuredGrid
+ * \brief       VTK input output for Unstructured Meshes
+ * \tparam      Derived     this argument is used for the static-dispatch interface through CRTP
+ *
+ * VTK_UnstructuredGrid provides methods to read and write parallel and serial unstructured meshes and data. 
+ * The class is agnostic with respect to the container used for the data and provides an interface through the CRTP mechanism.
+ *
+ */
 template <class Derived >
 class VTK_UnstructuredGrid : public VTK{
 
-  protected:
-    uint64_t  nconnectivity ;
+    protected:
+        uint64_t                        nconnectivity ;             /**< size of the connectivity information */
 
-  protected:
-    VTK_UnstructuredGrid();
-    VTK_UnstructuredGrid( string dir_, string name_  ) ;
-   ~VTK_UnstructuredGrid();
+    protected:
+        VTK_UnstructuredGrid();
+        VTK_UnstructuredGrid( std::string , std::string ) ;
+        ~VTK_UnstructuredGrid();
 
-    void      WriteCollection() ;  
+        void                            WriteCollection() ;  
 
-    void      Flush(  fstream &str, string codex_, string name  ) ; //CRTP
-    void      Absorb( fstream &str, string codex_, string name  ) ; //CRTP
-    uint64_t  CalcSizeConnectivity( ) ;
+        void                            Flush(  std::fstream &, std::string , std::string ) ; //CRTP
+        void                            Absorb( std::fstream &, std::string , std::string ) ; //CRTP
+        uint64_t                        CalcSizeConnectivity( ) ;
 
-  public:
-    void      ReadMetaData() ;
-    void      WriteMetaData() ;
+    public:
+        void                            ReadMetaData() ;
+        void                            WriteMetaData() ;
 
-    void      WritePMetaData() ;
+        void                            SetDimensions( uint64_t , uint64_t , uint64_t ) ;
+        void                            SetGeomTypes( std::string , std::string , std::string , std::string ) ;
 
-    void      SetDimensions( uint64_t ncells_, uint64_t npoints_, uint64_t nconn_ ) ;
-    void      SetGeomTypes( string Ptype, string Otype, string Ttype, string Ctype ) ;
-
-    uint8_t   NumberOfElements( uint8_t t ) ;
-    uint64_t  GetNConnectivity( ) ; 
+        uint8_t                         NumberOfElements( uint8_t t ) ;
+        uint64_t                        GetNConnectivity( ) ; 
 
 };
 
-//------------------------------------------------------------------
+/*! ========================================================================================
+ * \class       VTK_RectilinearGrid
+ * \brief       VTK input output for Rectilinear Meshes
+ * \tparam      Derived     this argument is used for the static-dispatch interface through CRTP
+ *
+ * VTK_RectilinearGrid provides methods to read and write parallel and serial rectlinear meshes and data. 
+ * The class is agnostic with respect to the container used for the data and provides an interface through the CRTP mechanism.
+ * The numbering of nodes start with 0. Different numbering scheme is not supported.
+ *
+ */
 template <class Derived>
 class VTK_RectilinearGrid : public VTK{
 
-  protected:
-    int                    n1, n2, m1, m2, l1, l2 ;
-    array<int,6>           global_index ;
-    vector<array<int,6> >  proc_index ;
+    typedef std::array<std::array<int,2>,2> extension2D_t ;         /**< typedef to describe min and max indices in 2D of restilinear grid */
+    typedef std::array<std::array<int,2>,3> extension3D_t ;         /**< typedef to describe min and max indices in 3D of restilinear grid */
 
-  protected:
-    VTK_RectilinearGrid();
-    VTK_RectilinearGrid( string dir_, string name_ );
-    VTK_RectilinearGrid( string dir_, string name_, string codex_, int n1_, int n2_, int m1_, int m2_, int l1_, int l2_ );
-   ~VTK_RectilinearGrid();
+    protected:
+        int                             dimensions ;                /**< dimensions of the grid [2/3] */
+        extension3D_t                   local_index ;               /**< min and max indices of local grid */
+        extension3D_t                   global_index ;              /**< min and max indices of global grid */
+        std::vector<extension3D_t>      proc_index ;                /**< global indices of each processors */
 
-    void      WriteCollection() ;  
+    protected:
+        VTK_RectilinearGrid();
+        VTK_RectilinearGrid( std::string , std::string  );
+        VTK_RectilinearGrid( std::string , std::string , std::string, int, int, int, int, int, int );
+        VTK_RectilinearGrid( std::string , std::string , std::string, int, int, int );
+        VTK_RectilinearGrid( std::string , std::string , std::string, int, int, int, int );
+        VTK_RectilinearGrid( std::string , std::string , std::string, int, int );
+        ~VTK_RectilinearGrid();
 
-    void      Flush(  fstream &str, string codex_, string name  ) ; //CRTP
-    void      Absorb( fstream &str, string codex_, string name  ) ; //CRTP
+        void                            WriteCollection() ;  
 
-  public:
-    void      ReadMetaData() ;
-    void      WriteMetaData() ;
+        void                            Flush(  std::fstream &, std::string , std::string ) ; //CRTP
+        void                            Absorb( std::fstream &, std::string , std::string ) ; //CRTP
 
-    void      SetParallelIndex( array<int,6> glo_, vector<array<int,6>> loc_ ) ;
-    void      SetDimensions( int n1_, int n2_, int m1_, int m2_, int l1_, int l2_ ) ;
+    public:
+        void                            ReadMetaData() ;
+        void                            WriteMetaData() ;
+
+        void                            SetDimensions( int, int, int, int, int, int ) ;
+        void                            SetDimensions( int, int, int ) ;
+        void                            SetDimensions( int, int, int, int ) ;
+        void                            SetDimensions( int, int ) ;
+
+        void                            SetGlobalDimensions( int, int, int ) ;
+        void                            SetGlobalDimensions( int, int ) ;
+
+        void                            SetGeomTypes( std::string ) ;
+
+        void                            SetGlobalIndex( std::vector<extension3D_t> ) ;
+        void                            SetGlobalIndex( std::vector<extension2D_t> ) ;
 
 };
 
@@ -226,3 +260,5 @@ class VTK_RectilinearGrid : public VTK{
 
 
 #endif
+
+/* @} */

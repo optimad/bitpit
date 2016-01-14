@@ -8,11 +8,11 @@ using namespace std;
 int main()
 {
 
-    dvecarr3E    points ;
-    ivector2D    connectivity ;
+    vector<array<double,3>>     points ;
+    vector<vector<int>>          connectivity ;
 
-    dvector1D    pressure ;
-    dvecarr3E    velocity ;
+    vector<double>              pressure ;
+    vector<array<double,3>>     velocity ;
 
 
     points.resize(8) ;
@@ -81,11 +81,11 @@ int main()
     { //Read grid and data, rename and rexport
         cout << "Read grid and data, rename and rexport" << endl;
 
-        dvecarr3E    Ipoints ;
-        ivector2D    Iconnectivity ;
+        vector<array<double,3>> Ipoints ;
+        vector<vector<int>>     Iconnectivity ;
 
-        dvector1D    Ipressure ;
-        dvecarr3E    Ivelocity ;
+        vector<double>    Ipressure ;
+        vector<array<double,3>>    Ivelocity ;
 
 
         VtkUnstrVec   vtk(".", "ustr2", "appended", 11 );

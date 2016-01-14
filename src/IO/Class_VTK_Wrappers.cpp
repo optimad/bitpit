@@ -1,14 +1,26 @@
+/*!
+  \ingroup    VTK
+  @{
+ */
 
 #include"Class_VTK_Wrappers.hpp"
 
 using namespace std;
 
-VtkUnstrVec::VtkUnstrVec()
-             :VTK_UnstructuredGrid<VtkUnstrVec>(){};
+/*!====================================================================================================
+ * Default constructor
+ */
+VtkUnstrVec::VtkUnstrVec():VTK_UnstructuredGrid<VtkUnstrVec>(){
+};
 
-//====================================================================================================
-VtkUnstrVec::VtkUnstrVec( string dir_, string name_, string codex_, uint8_t type_ )
-             :VTK_UnstructuredGrid<VtkUnstrVec>( ){ 
+/*!====================================================================================================
+ * Constructor for reading VTU files. Sets the given input parameters
+ * \param[in]   dir_    directory of vtu file with final "/"
+ * \param[in]   name_   name of vtu file without suffix
+ * \param[in]   codex_  codex used in file ["appended"/"ascii"]
+ * \param[in]   type_   element type of unstructured grid. See http://www.vtk.org/wp-content/uploads/2015/04/file-formats.pdf
+ */
+VtkUnstrVec::VtkUnstrVec( std::string dir_, std::string name_, std::string codex_, uint8_t type_ ):VTK_UnstructuredGrid<VtkUnstrVec>( ){
 
     SetNames( dir_, name_ );
     SetCodex( codex_ ) ;
@@ -17,13 +29,19 @@ VtkUnstrVec::VtkUnstrVec( string dir_, string name_, string codex_, uint8_t type
 
 };
 
-//====================================================================================================
+/*!====================================================================================================
+ * Destructor
+ */
 VtkUnstrVec::~VtkUnstrVec(){
-
 };
 
-// =================================================================================== //
-bool VtkUnstrVec::GetFieldByName( const string &name_, VtkUnstrVec::ufield *&the_field ){
+/*!====================================================================================================
+ * Finds a field within class by its name.
+ * \param[in]    name_   name of the field
+ * \param[out]  the_field   pointer to the field if found, else unaltered
+ * \return      true if found, else false   
+ */
+bool VtkUnstrVec::GetFieldByName( const std::string &name_, VtkUnstrVec::ufield *&the_field ){
 
     vector<VtkUnstrVec::ufield>::iterator    it_ ;
 
@@ -37,13 +55,16 @@ bool VtkUnstrVec::GetFieldByName( const string &name_, VtkUnstrVec::ufield *&the
     return false ;
 };
 
-//====================================================================================================
+/*!====================================================================================================
+ * Writes the vtu file. Checks if all necessary information has been provided.
+ * Will write only data which has been provided by VtkUnstrVec::AddData() or VtkUnstrVec::LinkData().
+ */
 void VtkUnstrVec::Write(  ) {
 
-    bool            CanWrite(true) ;
-    ufield*         FPtr ; 
-    string          name ;
-    vector<string>  TBD;
+    bool                        CanWrite(true) ;
+    ufield*                     FPtr ; 
+    std::string                 name ;
+    std::vector<std::string>    TBD;
 
     CanWrite = CanWrite && GetFieldByName( "Points", FPtr ) ; 
     CanWrite = CanWrite && GetFieldByName( "connectivity", FPtr ) ; 
@@ -72,8 +93,13 @@ void VtkUnstrVec::Write(  ) {
     return;
 };
 
-//====================================================================================================
-void VtkUnstrVec::Flush( fstream &str, string codex, string name ) {
+/*!  ===================================================================================
+ *  CRPT interface for writing data to stream. Uses static visitor pattern.
+ *  \param[in]  str         stream to write to
+ *  \param[in]  codex       codex which must be used ["ascii"/"appended"]. If "appended" a unformatted binary stream must be used
+ *  \param[in]  name        name of the data to be written. Either user data or grid data
+ */
+void VtkUnstrVec::Flush( std::fstream &str, std::string codex, std::string name ) {
 
 
     if( codex == "ascii" && name == "types"){
@@ -127,8 +153,13 @@ void VtkUnstrVec::Flush( fstream &str, string codex, string name ) {
 
 };
 
-//====================================================================================================
-void VtkUnstrVec::Absorb( fstream &str, string codex, string name ) {
+/*!  ===================================================================================
+ *  CRPT interface for reading data from stream. Uses static visitor pattern.
+ *  \param[in]  str         stream to write to
+ *  \param[in]  codex       codex which must be used ["ascii"/"appended"]. If "appended" a unformatted binary stream must be used
+ *  \param[in]  name        name of the data to be written. Either user data or grid data
+ */
+void VtkUnstrVec::Absorb( std::fstream &str, std::string codex, std::string name ) {
 
     ufield  *f_ ;
 
@@ -155,3 +186,64 @@ void VtkUnstrVec::Absorb( fstream &str, string codex, string name ) {
     return ;
 
 };
+
+
+/*!  ===================================================================================
+ * Default constructor.
+ */
+VtkUnstrVec::ufield::ufield( ){
+};
+
+/*!  ===================================================================================
+ * Sets the file stream
+ * \param[in]   str_    file stream to be used.
+ */
+void VtkUnstrVec::stream_visitor::SetStream( std::fstream& str_){
+    str = &str_ ;
+};
+
+/*!  ===================================================================================
+ * Sets the file codex
+ * \param[in]   codex_    codex_ to be used ["ascii"/"appended"]
+ */
+void VtkUnstrVec::stream_visitor::SetCodex( std::string codex_){
+    codex = codex_ ;
+};
+
+/*!  ===================================================================================
+ * Sets the task
+ * \param[in]   task_   sets the task ["read"/"write"]
+ */
+void VtkUnstrVec::stream_visitor::SetTask( std::string task_){
+    task = task_ ;
+};
+
+/*!  ===================================================================================
+ * Sets the name of the field which should be visited.
+ * In case name="connectivity" special treatment is performed 
+ * \param[in]   name_   name of the field 
+ */
+void VtkUnstrVec::stream_visitor::SetName( std::string name_){
+    name = name_ ;
+};
+
+/*!  ===================================================================================
+ * Sets the size of the filed
+ * \param[in]   size_    size of the entire field
+ */
+void VtkUnstrVec::stream_visitor::SetSize( uint64_t size_){
+    size = size_ ;
+};
+
+/*!  ===================================================================================
+ * Sets the number of components of the field
+ * \param[in]   com_    numer of components
+ */
+void VtkUnstrVec::stream_visitor::SetComponents( uint8_t com_){
+    components = com_ ;
+};
+
+/*!
+  @}
+*/
+

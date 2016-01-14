@@ -268,7 +268,7 @@ OPTIMIZE_OUTPUT_VHDL   = NO
 # Note that for custom extensions you also need to set FILE_PATTERNS otherwise
 # the files are not read by doxygen.
 
-EXTENSION_MAPPING      =
+EXTENSION_MAPPING      = tpp=C++
 
 # If the MARKDOWN_SUPPORT tag is enabled then doxygen pre-processes all comments
 # according to the Markdown format, which allows for more readable
@@ -755,7 +755,19 @@ INPUT_ENCODING         = UTF-8
 # *.md, *.mm, *.dox, *.py, *.f90, *.f, *.for, *.tcl, *.vhd, *.vhdl, *.ucf,
 # *.qsf, *.as and *.js.
 
-FILE_PATTERNS          =
+FILE_PATTERNS          = *.c *.cc *.cxx *.cpp *.c++ \
+                         *.h *.hh *.hxx *.hpp *h++ *.tpp \
+                         *.ii *.ixx *.ipp *.i++ *.inl *.inc \
+                         *.f90 *.f *.for \
+                         *.java *.js \
+                         *.idl *.ddl *.odl \
+                         *.cs *.d \
+                         *.php *.php4 *.php5 *.phtml \
+                         *.m *.markdown *.md *.mm \
+                         *.dox \ 
+                         *.py \ 
+                         *.tcl *.vhd *.vhdl *.ucf \
+                         *.qsf *.as
 
 # The RECURSIVE tag can be used to specify whether or not subdirectories should
 # be searched for input files as well.
@@ -2109,7 +2121,7 @@ UML_LIMIT_NUM_FIELDS   = 10
 # The default value is: NO.
 # This tag requires that the tag HAVE_DOT is set to YES.
 
-TEMPLATE_RELATIONS     = NO
+TEMPLATE_RELATIONS     = YES
 
 # If the INCLUDE_GRAPH, ENABLE_PREPROCESSING and SEARCH_INCLUDES tags are set to
 # YES then doxygen will generate a graph for each documented file showing the

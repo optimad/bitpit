@@ -1,5 +1,17 @@
+/*!
+  \ingroup    VTK
+  @{
+ */
+
+/*! -------------------------------------------------------
+ *  Determines the basic VTK type from argument.
+ *  \tparam     T           type of argument
+ *  \param[in]  dummy       argument type to be deduced
+ *  \return     basic VTK type [ [U]Int8, [U]Int16, [U]Int32, [U]Int64, Float32, Float64, unsupported ]
+ *
+ */
 template<class T>
-string VTK::WhichType( T dummy ){
+std::string VTK::WhichType( T dummy ){
 
     if(std::is_same<T,int8_t>::value){
         return "Int8" ;
@@ -53,20 +65,31 @@ string VTK::WhichType( T dummy ){
 
 };
 
-//-----------------------------------------------------------
-//-----------------------------------------------------------
+/*! -------------------------------------------------------
+ *  Determines the basic VTK type from argument.
+ *  \tparam     T           type of argument
+ *  \param[in]  dummy      argument type to be deduced
+ *  \return     basic VTK type [ [U]Int8, [U]Int16, [U]Int32, [U]Int64, Float32, Float64, unsupported ]
+ */
 template<class T>
-string VTK::WhichType( vector<T> dummy ){
+std::string VTK::WhichType( std::vector<T> dummy ){
 
     T dummy2 ;
     return  WhichType(dummy2) ;
 };
 
-//-----------------------------------------------------------
-//-----------------------------------------------------------
+/*! -------------------------------------------------------
+ *  Determines the basic VTK type from argument.
+ *  \tparam     T           type of argument
+ *  \param[in]  dummy      argument type to be deduced
+ *  \return     basic VTK type [ [U]Int8, [U]Int16, [U]Int32, [U]Int64, Float32, Float64, unsupported ]
+ */
 template<class T, size_t d>
-string VTK::WhichType( std::array<T,d> dummy ){
+std::string VTK::WhichType( std::array<T,d> dummy ){
 
     T dummy2 ;
     return  WhichType(dummy2) ;
 };
+/*!
+  @}
+ */
