@@ -3211,12 +3211,14 @@ ClassParaTree::private_adapt_mapidx(bool mapflag) {
 		//		while(m_octree.refine(m_mapIdx));
 		while (refine) {
 			refine = m_octree.refine(m_mapIdx_temp);
-			m_mapIdx_temp2.resize(m_octree.getNumOctants());
-			for (uint32_t i=0; i<m_octree.getNumOctants(); i++){
-				m_mapIdx_temp2[m_mapIdx_temp[i]] = m_mapIdx[m_mapIdx_temp[i]];
+			if (mapflag){
+				m_mapIdx_temp2.resize(m_octree.getNumOctants());
+				for (uint32_t i=0; i<m_octree.getNumOctants(); i++){
+					m_mapIdx_temp2[m_mapIdx_temp[i]] = m_mapIdx[m_mapIdx_temp[i]];
+				}
+				m_mapIdx.clear();
+				m_mapIdx = m_mapIdx_temp2;
 			}
-			m_mapIdx.clear();
-			m_mapIdx = m_mapIdx_temp2;
 		}
 		if (m_octree.getNumOctants() > nocts)
 			localDone = true;
