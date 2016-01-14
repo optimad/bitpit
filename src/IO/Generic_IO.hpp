@@ -1,3 +1,4 @@
+
 #ifndef __Generic_IO__HH__
 #define __Generic_IO__HH__
 
@@ -7,10 +8,6 @@
 #include <sstream>
 #include <vector>
 #include <array>
-
-#include"Operators.hpp"
-
-using namespace std;
 
 /*
 
@@ -28,81 +25,81 @@ absorb_(format)    reads the filestream str and fills the content of data.
 */
 
 template< class data_T >
-void  line_stream( fstream &str, data_T &data) ;
+void  line_stream( std::fstream &str, data_T &data) ;
 
 template< class data_T >
-void  line_stream( fstream &str, vector<data_T> &data) ;
+void  line_stream( std::fstream &str, std::vector<data_T> &data) ;
 
 template< class data_T, size_t d >
-void  line_stream( fstream &str, array<data_T,d> &data) ;
+void  line_stream( std::fstream &str, std::array<data_T,d> &data) ;
 
 template< class data_T, size_t d >
-void  line_stream( fstream &str, int nr, data_T *data) ;
+void  line_stream( std::fstream &str, int nr, data_T *data) ;
 
 template< class data_T >
-void flush_ascii( fstream &str, const data_T data  ) ;
+void flush_ascii( std::fstream &str, const data_T &data  ) ;
 
 template<>
-void flush_ascii( fstream &str, const uint8_t data  ) ;
+void flush_ascii( std::fstream &str, const uint8_t &data  ) ;
 
 template< class data_T >
-void flush_ascii( fstream &str, int elements_per_line, const vector<data_T> &data  ) ;
+void flush_ascii( std::fstream &str, int elements_per_line, const std::vector<data_T> &data  ) ;
 
 template< class data_T, size_t d >
-void flush_ascii( fstream &str, int elements_per_line, const array<data_T,d> &data  ) ;
+void flush_ascii( std::fstream &str, int elements_per_line, const std::array<data_T,d> &data  ) ;
 
 template< class data_T >
-void flush_ascii( fstream &str, int elements_per_line, const data_T *data, int nr  ) ;
+void flush_ascii( std::fstream &str, int elements_per_line, const data_T *data, int nr  ) ;
 
 template< class data_T >
-void flush_binary( fstream &str, const data_T data  ) ;
+void flush_binary( std::fstream &str, const data_T &data  ) ;
 
 template< class data_T >
-void flush_binary( fstream &str, const vector<data_T> &data  ) ;
+void flush_binary( std::fstream &str, const std::vector<data_T> &data  ) ;
 
 template< class data_T >
-void flush_binary( fstream &str, const vector< vector<data_T> > &data  ) ;
+void flush_binary( std::fstream &str, const std::vector< std::vector<data_T> > &data  ) ;
 
 template< class data_T, size_t d >
-void flush_binary( fstream &str, const vector< array<data_T,d> > &data  ) ;
+void flush_binary( std::fstream &str, const std::vector< std::array<data_T,d> > &data  ) ;
 
 template< class data_T, size_t d >
-void flush_binary( fstream &str, const array<data_T,d> &data  ) ;
+void flush_binary( std::fstream &str, const std::array<data_T,d> &data  ) ;
 
 template< class data_T >
-void flush_binary( fstream &str, const data_T *data, int nr  ) ;
+void flush_binary( std::fstream &str, const data_T *data, int nr  ) ;
 
 template< class data_T >
-void absorb_ascii( fstream &str, data_T &data  ) ;
+void absorb_ascii( std::fstream &str, data_T &data  ) ;
 
 template< class data_T >
-void absorb_ascii( fstream &str, vector<data_T> &data  ) ;
+void absorb_ascii( std::fstream &str, std::vector<data_T> &data  ) ;
 
 template< class data_T, size_t d >
-void absorb_ascii( fstream &str, array<data_T,d> &data  ) ;
+void absorb_ascii( std::fstream &str, std::array<data_T,d> &data  ) ;
 
 template< class data_T >
-void absorb_ascii( fstream &str, data_T *data, int nr  ) ;
+void absorb_ascii( std::fstream &str, data_T *data, int nr  ) ;
 
 template< class data_T >
-void absorb_binary( fstream &str, data_T &data  ) ;
+void absorb_binary( std::fstream &str, data_T &data  ) ;
 
 template< class data_T >
-void absorb_binary( fstream &str, vector<data_T> &data  ) ;
+void absorb_binary( std::fstream &str, std::vector<data_T> &data  ) ;
 
 template< class data_T >
-void absorb_binary( fstream &str, vector< vector<data_T> > &data  ) ;
+void absorb_binary( std::fstream &str, std::vector< std::vector<data_T> > &data  ) ;
 
 template< class data_T, size_t d >
-void absorb_binary( fstream &str, vector< array<data_T,d> > &data  ) ;
+void absorb_binary( std::fstream &str, std::vector< std::array<data_T,d> > &data  ) ;
 
 template< class data_T, size_t d >
-void absorb_binary( fstream &str, array<data_T,d> &data  ) ;
+void absorb_binary( std::fstream &str, std::array<data_T,d> &data  ) ;
 
 template< class data_T >
-void absorb_binary( fstream &str, data_T *data, int nr  ) ;
+void absorb_binary( std::fstream &str, data_T *data, int nr  ) ;
 
-void CopyUntilEOFInString( fstream &str, char*& buffer, int& length);
+void CopyUntilEOFInString( std::fstream &str, char*& buffer, int& length);
 
 #include "Generic_IO.tpp"
 

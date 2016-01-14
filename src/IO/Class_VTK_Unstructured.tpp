@@ -1,6 +1,14 @@
-/*!
- *   \ingroup    VTK
- *   @{
+/*! ========================================================================================
+ * \ingroup     VisualizationToolKit
+ * \{
+ *
+ * \class       VTK_UnstructuredGrid
+ * \brief       VTK input output for Unstructured Meshes
+ * \tparam      Derived     this argument is used for the static-dispatch interface through CRTP
+ *
+ * VTK_UnstructuredGrid provides methods to read and write parallel and serial unstructured meshes and data. 
+ * The class is agnostic with respect to the container used for the data and provides an interface through the CRTP mechanism.
+ *
  */
 
 /*!  ===================================================================================

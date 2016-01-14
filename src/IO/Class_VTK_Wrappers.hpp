@@ -1,7 +1,3 @@
-/*!
-  \ingroup    VTK
-  @{
-*/
 
 #ifndef __CLASS_VTK_WRAP_HH__
 #define __CLASS_VTK_WRAP_HH__
@@ -13,6 +9,15 @@
 #include"Class_VTK.hpp"
 
 
+/*!
+ * @ingroup    VisualizationToolKit
+ * @{
+ */
+
+/*!
+ * @typedef     VtkVecOfVector
+ * All supported variants of vector of POD and vector of vector of POD
+ */
 typedef boost::mpl::vector<
     std::vector<int8_t>*  ,
     std::vector<int16_t>* ,
@@ -37,8 +42,12 @@ typedef boost::mpl::vector<
 
     std::vector< std::vector<float> >*  , 
     std::vector< std::vector<double> >*
->::type BVector;                                                    /**< All supported variants of vector of POD and vector of vector of POD */
+>::type VtkVecOfVector;
 
+/*!
+ * @typedef     VtkVecOfArray
+ * All supported variants of vector of array of POD
+ */
 typedef boost::mpl::vector<
     std::vector< std::array<int16_t,3> >*  , 
     std::vector< std::array<int32_t,3> >*  , 
@@ -63,38 +72,33 @@ typedef boost::mpl::vector<
 
     std::vector< std::array<float,3> >*    ,
     std::vector< std::array<double,3> >*   
->::type BArray;                                                     /**< All supported variants of vector of array of POD */
+>::type VtkVecOfArray;
 
-typedef boost::mpl::copy<
-BVector::type, 
-    boost::mpl::back_inserter<BArray> 
->::type SAll ;                                                      /**< All supported conatiners */
-
-typedef boost::make_variant_over< SAll >::type bv ;                 /**< Variant over all supported containers */
-
-
-/*! ========================================================================================
- * \class       VtkUnstrVec
- * \brief       VtkUnstrVec implements an generic interface for VTK_UnstructuredGrid for std::vector<> containers
- *
- * VTKUnstrVec is a final class for reading and  writing unstructured grids when the grid and user data are stored in std::vector<> container.
- * The supported types are defined in BVector and BArray and merged in SAll.
- * The grid must be composed of uniform elements, e.g. only thetraeda.
- *
+/*!
+ * @typedef     VtkVecContainers
+ * All supported containers by VtkUnstrVec
  */
+typedef boost::mpl::copy< VtkVecOfVector::type, boost::mpl::back_inserter<VtkVecOfArray> > ::type VtkVecContainers ;
+
+/*!
+ * @typedef     VtkVecVariants
+ * Boost variant over VtkVecContainers
+ */
+typedef boost::make_variant_over< VtkVecContainers >::type  VtkVecVariants ;
+
+/*!
+ * @}
+ */
+
 class VtkUnstrVec : public VTK_UnstructuredGrid<VtkUnstrVec>{
 
 
     friend VTK_UnstructuredGrid<VtkUnstrVec> ;                      /**< provides friendship to base class */
 
     private:
-    /*! 
-     * \struct      ufield
-     * \brief       ufield stores the name and a pointer to field data, both geometry and user data
-     */
     struct ufield{
         std::string             name;                               /**< name of the field */
-        bv                      DPtr ;                              /**< pointer to the field */
+        VtkVecVariants          DPtr ;                              /**< pointer to the field */
 
         ufield() ;
 
@@ -103,11 +107,6 @@ class VtkUnstrVec : public VTK_UnstructuredGrid<VtkUnstrVec>{
 
     };
 
-    /*! 
-     * \struct      stream_visitor
-     * \brief       static visitor pattern used for reading and writing different data types
-     *  stream_visitor distinguishes different data types and codexes to be read or written and calls the correct low level function
-     */
     struct stream_visitor : public boost::static_visitor<>{
 
         private:
@@ -172,9 +171,7 @@ class VtkUnstrVec : public VTK_UnstructuredGrid<VtkUnstrVec>{
 
 };
 
+
 #include"Class_VTK_Wrappers.tpp"
 
 #endif
-/*!
-  @}
-*/

@@ -1,5 +1,12 @@
 /*!
- * \defgroup IO
+ * @defgroup IO
+ * @{
+ * @defgroup Generic
+ * @defgroup DuneGridFormat
+ * @defgroup STereoLithography
+ * @defgroup VisualizationToolKit
+ * @}
+ *
  */
 
 #ifndef __BITP_BASE_IO__

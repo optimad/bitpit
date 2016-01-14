@@ -1,8 +1,18 @@
+/*!
+ * @ingroup Generic
+ * @{
+ */
+
 #include "Generic_IO.hpp"
 
-// =================================================================================== //
+/*!-----------------------------------------------------------------------------
+ * @fn void flush_ascii( std::fstream &str, const uint8_t &data )
+ * Writes uint_8 data as formatted integer 
+ * @param[in]   str     file stream to be copied; file needs already to be opened
+ * @param[in]   data    data to be written
+ */
 template< >
-void flush_ascii( fstream &str, const uint8_t data ){
+void flush_ascii( std::fstream &str, const uint8_t &data ){
 
     str << setprecision(8) << scientific ;
     str << unsigned(data) << " ";
@@ -11,10 +21,16 @@ void flush_ascii( fstream &str, const uint8_t data ){
 };
 
 
-// =================================================================================== //
-void CopyUntilEOFInString( fstream &str, char*& buffer, int &length){
+/*!-----------------------------------------------------------------------------
+ * @fn void CopyUntilEOFInString( std::fstream &str, char*& buffer, int &length)
+ * Copies entire file into a char array
+ * @param[in]   str     file stream to be copied; file nneds already to be opened
+ * @param[out]  buffer  char array containing entire array
+ * @param[out]  length  number of elements which hvae benn copied
+ */
+void CopyUntilEOFInString( std::fstream &str, char*& buffer, int &length){
 
-    fstream::pos_type   position_insert, position_eof ;
+    std::fstream::pos_type   position_insert, position_eof ;
 
     position_insert = str.tellg() ;
 
@@ -31,3 +47,7 @@ void CopyUntilEOFInString( fstream &str, char*& buffer, int &length){
 
     return;
 };
+
+/*!
+ * @}
+ */

@@ -1,13 +1,8 @@
-/*!
-  \ingroup    VTK
-  @{
- */
-
 /*! -------------------------------------------------------
  *  Determines the basic VTK type from argument.
- *  \tparam     T           type of argument
- *  \param[in]  dummy       argument type to be deduced
- *  \return     basic VTK type [ [U]Int8, [U]Int16, [U]Int32, [U]Int64, Float32, Float64, unsupported ]
+ *  @tparam     T           type of argument
+ *  @param[in]  dummy       argument type to be deduced
+ *  @return     basic VTK type [ [U]Int8, [U]Int16, [U]Int32, [U]Int64, Float32, Float64, unsupported ]
  *
  */
 template<class T>
@@ -67,9 +62,9 @@ std::string VTK::WhichType( T dummy ){
 
 /*! -------------------------------------------------------
  *  Determines the basic VTK type from argument.
- *  \tparam     T           type of argument
- *  \param[in]  dummy      argument type to be deduced
- *  \return     basic VTK type [ [U]Int8, [U]Int16, [U]Int32, [U]Int64, Float32, Float64, unsupported ]
+ *  @tparam     T           type of argument
+ *  @param[in]  dummy      argument type to be deduced
+ *  @return     basic VTK type [ [U]Int8, [U]Int16, [U]Int32, [U]Int64, Float32, Float64, unsupported ]
  */
 template<class T>
 std::string VTK::WhichType( std::vector<T> dummy ){
@@ -80,9 +75,9 @@ std::string VTK::WhichType( std::vector<T> dummy ){
 
 /*! -------------------------------------------------------
  *  Determines the basic VTK type from argument.
- *  \tparam     T           type of argument
- *  \param[in]  dummy      argument type to be deduced
- *  \return     basic VTK type [ [U]Int8, [U]Int16, [U]Int32, [U]Int64, Float32, Float64, unsupported ]
+ *  @tparam     T           type of argument
+ *  @param[in]  dummy      argument type to be deduced
+ *  @return     basic VTK type [ [U]Int8, [U]Int16, [U]Int32, [U]Int64, Float32, Float64, unsupported ]
  */
 template<class T, size_t d>
 std::string VTK::WhichType( std::array<T,d> dummy ){
@@ -90,6 +85,3 @@ std::string VTK::WhichType( std::array<T,d> dummy ){
     T dummy2 ;
     return  WhichType(dummy2) ;
 };
-/*!
-  @}
- */
