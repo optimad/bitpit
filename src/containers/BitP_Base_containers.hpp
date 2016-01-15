@@ -11,5 +11,6 @@
 
 #include "binary_stream.hpp"
 #include "collapsedArray2D.tpp"
+#include "collapsedVector2D.tpp"
 
 #endif
