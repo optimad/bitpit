@@ -22,6 +22,11 @@
 // ========================================================================== //
 using namespace std;
 
+/*!
+ \ingroup   LinearAlgebra
+ \{
+ */
+
 // -------------------------------------------------------------------------- //
 /*!
     Compute the LU factorization (with partial pivoting) of an input matrix of
@@ -322,3 +327,6 @@ BackwardSubst(U, z, x);
 return; };
 
 
+/*!
+ \}
+ */

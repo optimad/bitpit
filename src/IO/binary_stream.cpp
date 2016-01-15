@@ -12,6 +12,17 @@ using namespace std;
 // IMPLEMENTATIONS OF METHODS FOR CLASS ibinarystream                         //
 // ========================================================================== //
 
+/*!
+ * @ingroup BinaryStream
+ * @{
+ */
+
+/*!
+ * @class   ibinarystream
+ * @brief   creates input binary stream
+ */
+
+
 // Constructor(s) =========================================================== //
 
 // -------------------------------------------------------------------------- //
@@ -228,14 +239,29 @@ void ibinarystream::read(
     current_pos += vec.size();
 }
 
+/*!
+ * @}
+ */
+
 // ========================================================================== //
 // IMPLEMENTATIONS OF METHODS FOR CLASS obinarystream                           //
 // ========================================================================== //
+
+/*!
+ * @ingroup BinaryStream
+ * @{
+ */
+
+/*!
+ * @class   obinarystream
+ * @brief   creates output binary stream
+ */
 
 // Constructor(s) =========================================================== //
 
 // -------------------------------------------------------------------------- //
 /*!
+        \ingroup BinaryStream
         Default constructor. Initialize an empty object
 */
 obinarystream::obinarystream(
@@ -447,8 +473,8 @@ ibinarystream& operator>>(
 */
 template<>
 obinarystream& operator << (
-    obinarystream                 &ostm,
-    const string                &val
+    obinarystream                 & ostm,
+    const string                & val
 ) {
     int size = val.size();
 
@@ -485,3 +511,7 @@ obinarystream& operator<<(
 
     return ostm;
 }
+
+/*!
+ * @}
+ */

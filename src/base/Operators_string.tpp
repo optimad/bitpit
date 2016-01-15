@@ -12,6 +12,11 @@
 // All rights reserved.                                                               //
 // ================================================================================== //
 
+/*!
+   \ingroup StringFunctions
+   \{
+ */
+
 // Trimming operators =============================================================== //
 
 // ---------------------------------------------------------------------------------- //
@@ -24,7 +29,7 @@
 
     \result reference to input string
 */
-static inline std::string &ltrim(
+ inline std::string &ltrim(
     std::string &s
 ) {
 
@@ -55,7 +60,7 @@ return(s); };
 
     \result reference to input string
 */
-static inline std::string &rtrim(
+ inline std::string &rtrim(
     std::string &s
 ) {
 
@@ -86,7 +91,7 @@ return(s); };
 
     \result reference to input string
 */
-static inline std::string &trim(
+ inline std::string &trim(
     std::string &s
 ) {
 
@@ -122,7 +127,7 @@ return(ltrim(rtrim(s))); };
 
     \result returns a string storing the input number in the format 000xxx.
 */
-static inline std::string ZeroPadNumber(
+ inline std::string ZeroPadNumber(
     int nchar,
     int num
 ) {
@@ -153,7 +158,7 @@ return (ss.str()); };
     
     \result boolean flag (true) if the keyword has been found, (false) otherwise.
 */
-static inline bool Keyword_In_String( std::string line_, std::string key_){
+ inline bool Keyword_In_String( std::string line_, std::string key_){
   bool exist= ( line_.find( key_) != std::string::npos ) ;
   return exist  ;
 };
@@ -306,3 +311,7 @@ void  convert_string( std::string input_, std::array<T,n> &output_) {
 
   return ;
 };
+
+/*!
+   \}
+ */

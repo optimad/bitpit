@@ -11,6 +11,11 @@
 // ========================================================================== //
 
 /*!
+ \ingroup   SortAlgorithms
+ \{
+ */
+
+/*!
 
     \class kdnode
     \brief class for kd-tree node.
@@ -653,3 +658,6 @@ void kdtree<d, T, T1>::DecreaseStack(
 nodes.resize(max(MAXSTK, nodes.size() - MAXSTK));
 
 return; };
+/*!
+ \}
+ */

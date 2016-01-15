@@ -1,6 +1,11 @@
 #include"Operators.hpp"
 using namespace std;      
 
+/*!
+   \ingroup StringFunctions
+   \{
+ */
+
 // ---------------------------------------------------------------------------------- //
 /*!
     Given an input string containing several fields separated by a delimiter,
@@ -57,3 +62,6 @@ bool Get_After_Keyword( string line_, string key_, char del_, string& result_){
   };
 
 };
+/*!
+   \}
+ */

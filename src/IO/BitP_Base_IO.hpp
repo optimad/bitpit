@@ -1,6 +1,7 @@
 /*!
  * @defgroup IO
  * @{
+ * @defgroup BinaryStream
  * @defgroup Generic
  * @defgroup DuneGridFormat
  * @defgroup STereoLithography
