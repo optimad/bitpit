@@ -69,7 +69,7 @@ void Demo2D_UCartMesh(
     // ========================================================================== //
     {
         // Scope variables ------------------------------------------------------ //
-        darray3E        B0, B1;
+        std::array<double,3>        B0, B1;
         iarray3E        nc ;
 
         // Output message ------------------------------------------------------- //
@@ -85,14 +85,14 @@ void Demo2D_UCartMesh(
         Mesh2.ExportVtr("./","original");
 
         // Scale mesh ----------------------------------------------------------- //
-        darray3E        scale;
+        std::array<double,3>        scale;
         scale.fill(2.0) ;
 
         Mesh2.Scale(scale);
         Mesh2.ExportVtr("./","scaled");
 
         // Translate mesh ------------------------------------------------------- //
-        darray3E        transl;
+        std::array<double,3>        transl;
         transl[0] = -0.507;    transl[1] = -0.523;    transl[2] = 0.0 ;
         Mesh2.Translate(transl);
         Mesh2.ExportVtr("./","translated");
@@ -106,16 +106,16 @@ void Demo2D_UCartMesh(
 
         // Scope variables ------------------------------------------------------ //
         int                 J;
-        dvector1D           Scalar1( Mesh1.getNCells(), 1.0);
-        dvector1D           Scalar2( Mesh2.getNCells(), 0.0);
-        dvecarr3E           Vectorial1( Mesh1.getNCells(), darray3E() );
-        dvecarr3E           Vectorial2( Mesh2.getNCells(), darray3E() );
+        vector<double>           Scalar1( Mesh1.getNCells(), 1.0);
+        vector<double>           Scalar2( Mesh2.getNCells(), 0.0);
+        vector<array<double,3>>           Vectorial1( Mesh1.getNCells(), std::array<double,3>() );
+        vector<array<double,3>>           Vectorial2( Mesh2.getNCells(), std::array<double,3>() );
 
         int                 n, N ;
         vector<int>         intStencil ;
         vector<double>      intWeights ;
 
-        darray3E            P;
+        std::array<double,3>            P;
 
         P[2] = 0.0 ;
 
@@ -162,16 +162,16 @@ void Demo2D_UCartMesh(
 
         // Scope variables ------------------------------------------------------ //
         int                 J ;
-        dvector1D           Scalar1( Mesh1.getNNodes(), 1.0);
-        dvector1D           Scalar2( Mesh2.getNNodes(), 0.0);
-        dvecarr3E           Vectorial1( Mesh1.getNNodes(), darray3E() );
-        dvecarr3E           Vectorial2( Mesh1.getNNodes(), darray3E() );
+        vector<double>           Scalar1( Mesh1.getNNodes(), 1.0);
+        vector<double>           Scalar2( Mesh2.getNNodes(), 0.0);
+        vector<array<double,3>>           Vectorial1( Mesh1.getNNodes(), std::array<double,3>() );
+        vector<array<double,3>>           Vectorial2( Mesh1.getNNodes(), std::array<double,3>() );
 
         int                 n, N ;
         vector<int>         intStencil ;
         vector<double>      intWeights ;
 
-        darray3E            P;
+        std::array<double,3>            P;
 
         // Output message ------------------------------------------------------- //
         cout << " - Point data interpolation" << endl;
