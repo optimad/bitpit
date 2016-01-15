@@ -2,23 +2,20 @@
 
 using namespace std;
 
-
-
-
 // =================================================================================== //
-void test1() {
+void test002() {
 
     /**<Instantation of a 2D para_tree object.*/
     ClassParaTree pablo1;
 
     /**<Compute the connectivity and write the para_tree.*/
     pablo1.computeConnectivity();
-    pablo1.write("Pablo1_iter0");
+    pablo1.write("Pablo002_iter0");
 
     /**<Refine globally one level and write the para_tree.*/
     pablo1.adaptGlobalRefine();
     pablo1.updateConnectivity();
-    pablo1.write("Pablo1_iter1");
+    pablo1.write("Pablo002_iter1");
 
     /**<Define a center point.*/
     double xc, yc;
@@ -60,7 +57,7 @@ void test1() {
         /**<Adapt octree, update connectivity and write.*/
         pablo1.adapt();
         pablo1.updateConnectivity();
-        pablo1.write("Pablo1_iter"+to_string(static_cast<unsigned long long>(iter+2)));
+        pablo1.write("Pablo002_iter"+to_string(static_cast<unsigned long long>(iter+2)));
     }
 
     /**<While adapt() nref2 times in the upper area of domain.
@@ -87,14 +84,14 @@ void test1() {
             }
             done = pablo1.adapt();
             pablo1.updateConnectivity();
-            pablo1.write("Pablo1_iter"+to_string(static_cast<unsigned long long>(iter+nref1+2)));
+            pablo1.write("Pablo002_iter"+to_string(static_cast<unsigned long long>(iter+nref1+2)));
         }
         iter++;
     }
     /**<Globally refine one level, update the connectivity and write the para_tree.*/
     pablo1.adaptGlobalRefine();
     pablo1.updateConnectivity();
-    pablo1.write("Pablo1_iter"+to_string(static_cast<unsigned long long>(iter+nref1+3)));
+    pablo1.write("Pablo002_iter"+to_string(static_cast<unsigned long long>(iter+nref1+3)));
 
     return ;
 }
@@ -108,7 +105,7 @@ int main( int argc, char *argv[] ) {
 	{
 #endif
 		/**<Calling Pablo Test routines*/
-        test1() ;
+        test002() ;
 
 #if ENABLE_MPI
 	}

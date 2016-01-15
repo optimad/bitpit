@@ -13,13 +13,14 @@
 using namespace std;
 
 // =================================================================================== //
-// CLASS IMPLEMENTATION                                                                    //
+// CLASS IMPLEMENTATION                                                                //
 // =================================================================================== //
 
 // =================================================================================== //
-// CONSTRUCTORS AND OPERATORS
+// CONSTRUCTORS AND OPERATORS														   //
 // =================================================================================== //
-/*! Default Constructor of Para_Tree.
+
+/*! Default Constructor of ParaTree.
  * It builds one octant with node 0 in the Origin (0,0,0) and side of length 1.
  * \param[in] dim The space dimension of the m_octree. 2D is the default value.
  * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
@@ -71,7 +72,7 @@ ClassParaTree::ClassParaTree(uint8_t dim, int8_t maxlevel, string logfile ) : m_
 
 // =============================================================================== //
 
-/*! Constructor of Para_Tree with input parameters.
+/*! Constructor of ParaTree with input parameters.
  * It builds one octant with :
  * \param[in] X Coordinate X of node 0,
  * \param[in] Y Coordinate Y of node 0,
@@ -131,7 +132,7 @@ ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, uint8_t dim
 
 // =============================================================================== //
 
-/*! Constructor of Para_Tree for restart a simulation with input parameters.
+/*! Constructor of ParaTree for restart a simulation with input parameters.
  * For each process it builds a vector of octants. The input parameters are :
  * \param[in] X Physical Coordinate X of node 0,
  * \param[in] Y Physical Coordinate Y of node 0,
@@ -189,7 +190,6 @@ ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, u32vector2D
 		m_octree.m_octants[i] = oct;
 	}
 
-	//ATTENTO if nompi deve aver l'else
 #if ENABLE_MPI
 	m_errorFlag = MPI_Comm_size(m_comm,&m_nproc);
 	m_errorFlag = MPI_Comm_rank(m_comm,&m_rank);
@@ -257,6 +257,14 @@ ClassParaTree::~ClassParaTree(){
 uint8_t
 ClassParaTree::getDim(){
 	return m_dim;
+};
+
+/*! Get the global number of octants.
+ * \return Global number of octants.
+ */
+uint64_t
+ClassParaTree::getGlobalNumOctants(){
+	return m_globalNumOctants;
 };
 
 /*! Get the rank of local process.
@@ -1225,6 +1233,30 @@ ClassParaTree::getLocalMaxDepth() const{
 	return m_octree.getLocalMaxDepth();
 };
 
+/*! Get the local current minimum size reached by the octree.
+ * \return Local current minimum size of the local partition of the octree.
+ */
+double
+ClassParaTree::getLocalMinSize(){
+	uint32_t size = uint32_t(1<<(m_global.m_maxLevel-m_octree.getLocalMaxDepth()));
+	return m_trans.mapSize(size);
+};
+
+/*! Get the local current maximum size of the octree.
+ * \return Local current maximum size of the local partition of the octree.
+ */
+double
+ClassParaTree::getLocalMaxSize(){
+	uint32_t nocts = getNumOctants();
+	double octSize;
+	double size = 0;
+	for (uint32_t idx = 0; idx < nocts; idx++){
+		octSize = getSize(idx);
+		if (octSize > size) size = octSize;
+	}
+	return octSize;
+};
+
 /*! Get the codimension for 2:1 balancing
  * \return Maximum codimension of the entity through which the 2:1 balance is performed.
  */
@@ -1907,6 +1939,8 @@ ClassParaTree::getMapping(uint32_t & idx, u32vector & mapper, vector<bool> & isg
 
 /** Adapt the octree mesh with user setup for markers and 2:1 balancing conditions.
  * \param[in] mapper_flag True/False if you want/don't want to track the changes in structure octant by a mapper.
+ * \n NOTE: if mapper_flag = true the adapt method ends after a single level (refining/coarsening) adaptation.
+ * \n The resulting markers will be increased/decreased by one.
  * \return Boolean if adapt has done something.
  */
 bool
@@ -2128,6 +2162,14 @@ ClassParaTree::adaptGlobalCoarse(bool mapper_flag) {
 	return localDone;
 #endif
 }
+
+/*! Get the local current maximum size of the octree.
+ * \return Local current maximum size of the local partition of the octree.
+ */
+uint8_t
+ClassParaTree::getMaxDepth() const{
+	return m_maxDepth;
+};
 
 /** It finds the process owning the element definded by the Morton number passed as argument
  * The Morton number can be computed using the method computeMorton() of ClassOctant.

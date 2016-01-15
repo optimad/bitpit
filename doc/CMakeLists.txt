@@ -32,6 +32,8 @@ IF(BUILD_DOCUMENTATION)
     set(DOC_EXTRACT_PRIVATE_INTERNAL ${DOC_EXTRACT_PRIVATE} CACHE INTERNAL "This is the value of the last time DOC_EXTRACT_PRIVATE was set successfully." FORCE)
   endif ()
 
+  SET( DOXY_PREDEFINED "ENABLE_MPI=${DOXY_ENABLE_MPI}" ) 
+
   CONFIGURE_FILE( ${doxyfile_in} ${doxyfile} @ONLY )
 
   ADD_CUSTOM_COMMAND( OUTPUT ${doxy_html_index_file}
@@ -42,7 +44,7 @@ IF(BUILD_DOCUMENTATION)
                       # custom_command for ${doxyfile} generation
                       # but I still have to figure out how...
                       MAIN_DEPENDENCY ${doxyfile} ${doxyfile_in}
-                      DEPENDS ${doxy_extra_files} ${doxyfile_in}
+                      DEPENDS ${doxyfile} ${doxy_extra_files} ${doxyfile_in}
                               ${COMMON_SOURCES} ${COMMON_HEADERS}
                               ${PABLO_SOURCES} ${PABLO_HEADERS}
                               ${PATCHMAN_SOURCES} ${PATCHMAN_HEADERS}

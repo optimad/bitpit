@@ -1,6 +1,8 @@
 #include "ClassParaTree.hpp"
+#if ENABLE_MPI
 #include "UserDataComm.hpp"
 #include "UserDataLB.hpp"
+#endif
 
 using namespace std;
 

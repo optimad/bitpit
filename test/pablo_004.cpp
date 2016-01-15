@@ -3,7 +3,7 @@
 using namespace std;
 
 // =================================================================================== //
-void test104() {
+void test004() {
 
     int iter = 0;
     int dim = 3;
@@ -41,7 +41,7 @@ void test104() {
     /**<Update the connectivity and write the para_tree.*/
     iter = 0;
     pablo104.updateConnectivity();
-    pablo104.writeTest("Pablo104_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
+    pablo104.writeTest("Pablo004_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
 
     /**<Smoothing iterations on initial data*/
     int start = 1;
@@ -85,7 +85,7 @@ void test104() {
 
         /**<Update the connectivity and write the para_tree.*/
         pablo104.updateConnectivity();
-        pablo104.writeTest("Pablo104_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data_smooth);
+        pablo104.writeTest("Pablo004_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data_smooth);
 
         oct_data = oct_data_smooth;
     };
@@ -102,7 +102,7 @@ int main( int argc, char *argv[] ) {
 	{
 #endif
 		/**<Calling Pablo Test routines*/
-        test104() ;
+        test004() ;
 
 #if ENABLE_MPI
 	}

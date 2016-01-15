@@ -4,12 +4,12 @@ using namespace std;
 
 // =================================================================================== //
 
-void test0() {
+void test001() {
 
     /**<Instantation of a 2D para_tree object with default constructor.*/
     ClassParaTree ptreedefault;
     /**<Write the para_tree in physical domain.*/
-    ptreedefault.write("Pablo0_default");
+    ptreedefault.write("Pablo001_default");
 
     /**<Set coordinates of the origin and size of a 2D custom para_tree object.*/
     double X, Y, Z, L;
@@ -17,7 +17,7 @@ void test0() {
     /**<Instantation of a 2D para_tree object with custom constructor.*/
     ClassParaTree ptreecustom(X, Y, Z, L);
     /**<Write the para_tree in physical domain.*/
-    ptreecustom.write("Pablo0_custom");
+    ptreecustom.write("Pablo001_custom");
 
     return ;
 
@@ -34,7 +34,7 @@ int main( int argc, char *argv[] ) {
 #endif
 		/**<Calling Pablo Test routines*/
 
-        test0() ;
+        test001() ;
 
 #if ENABLE_MPI
 	}

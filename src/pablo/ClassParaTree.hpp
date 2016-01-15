@@ -6,15 +6,15 @@
 // =================================================================================== //
 #if ENABLE_MPI
 #include <mpi.h>
+#include "ClassCommBuffer.hpp"
+#include "ClassDataLBInterface.hpp"
+#include "ClassDataCommInterface.hpp"
 #endif
 #include "ClassGlobal.hpp"
 #include "ClassArray.hpp"
 #include "ClassOctant.hpp"
 #include "ClassLocalTree.hpp"
-#include "ClassCommBuffer.hpp"
 #include "ClassMap.hpp"
-#include "ClassDataLBInterface.hpp"
-#include "ClassDataCommInterface.hpp"
 #include "ClassLog.hpp"
 #include <map>
 #include <set>
@@ -118,6 +118,7 @@ public:
 	// BASIC GET/SET METHODS															   //
 	// =================================================================================== //
 	uint8_t 	getDim();
+	uint64_t 	getGlobalNumOctants();
 	int 		getRank();
 	int 		getNproc();
 #if ENABLE_MPI
@@ -231,6 +232,8 @@ public:
 	uint32_t 	getNumGhosts() const;
 	uint32_t 	getNumNodes() const;
 	uint8_t 	getLocalMaxDepth() const;
+	double	 	getLocalMaxSize();
+	double	 	getLocalMinSize();
 	uint8_t 	getBalanceCodimension() const;
 	void 		getBoundingBox(darray3 & P0, darray3 & P1);
 	void 		setBalanceCodimension(uint8_t b21codim);
@@ -296,6 +299,7 @@ public:
 	// =================================================================================== //
 	// OTHER PARATREE BASED METHODS												    	   //
 	// =================================================================================== //
+	uint8_t		getMaxDepth() const;
 	int 		findOwner(const uint64_t & morton);
 	bool 		adapt(bool mapper_flag = false);
 	bool 		adaptGlobalRefine(bool mapper_flag = false);

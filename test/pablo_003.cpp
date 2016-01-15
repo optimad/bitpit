@@ -2,9 +2,8 @@
 
 using namespace std;
 
-
 // =================================================================================== //
-void test2() {
+void test003() {
 
     /**<Instantation of a 2D para_tree object.*/
 	ClassParaTree pablo2;
@@ -16,13 +15,13 @@ void test2() {
 
     /**<Compute the connectivity and write the para_tree.*/
     pablo2.computeConnectivity();
-    pablo2.write("Pablo2_iter0");
+    pablo2.write("Pablo003_iter0");
 
     /**<Refine globally two level and write the para_tree.*/
     for (int iter=1; iter<3; iter++){
         pablo2.adaptGlobalRefine();
         pablo2.updateConnectivity();
-        pablo2.write("Pablo2_iter"+to_string(static_cast<unsigned long long>(iter)));
+        pablo2.write("Pablo003_iter"+to_string(static_cast<unsigned long long>(iter)));
     }
 
     /**<Define a center point and a radius.*/
@@ -49,7 +48,7 @@ void test2() {
 
         /**<Update the connectivity and write the para_tree.*/
         pablo2.updateConnectivity();
-        pablo2.write("Pablo2_iter"+to_string(static_cast<unsigned long long>(iter)));
+        pablo2.write("Pablo003_iter"+to_string(static_cast<unsigned long long>(iter)));
     }
 
     /**<Simple adapt() [coarse] 3 times the octants with at least one node inside the 2nd circle.*/
@@ -75,7 +74,7 @@ void test2() {
 
         /**<Update the connectivity and write the para_tree.*/
         pablo2.updateConnectivity();
-        pablo2.write("Pablo2_iter"+to_string(static_cast<unsigned long long>(iter)));
+        pablo2.write("Pablo003_iter"+to_string(static_cast<unsigned long long>(iter)));
     }
 
     return ;
@@ -91,7 +90,7 @@ int main( int argc, char *argv[] ) {
 	{
 #endif
 		/**<Calling Pablo Test routines*/
-        test2() ;
+        test003() ;
 
 #if ENABLE_MPI
 	}

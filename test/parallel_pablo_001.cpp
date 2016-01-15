@@ -3,7 +3,7 @@
 using namespace std;
 
 // =================================================================================== //
-void test12() {
+void testParallel001() {
 
     /**<Instantation of a 2D para_tree object.*/
     ClassParaTree pablo12;
@@ -14,13 +14,13 @@ void test12() {
 
     /**<Compute the connectivity and write the para_tree.*/
     pablo12.computeConnectivity();
-    pablo12.write("Pablo12_iter0");
+    pablo12.write("PabloParallel001_iter0");
 
     /**<Refine globally two level and write the para_tree.*/
     for (int iter=1; iter<3; iter++){
         pablo12.adaptGlobalRefine();
         pablo12.updateConnectivity();
-        pablo12.write("Pablo12_iter"+to_string(static_cast<unsigned long long>(iter)));
+        pablo12.write("PabloParallel001_iter"+to_string(static_cast<unsigned long long>(iter)));
     }
 
 #if ENABLE_MPI
@@ -58,7 +58,7 @@ void test12() {
 
         /**<Update the connectivity and write the para_tree.*/
         pablo12.updateConnectivity();
-        pablo12.write("Pablo12_iter"+to_string(static_cast<unsigned long long>(iter)));
+        pablo12.write("PabloParallel001_iter"+to_string(static_cast<unsigned long long>(iter)));
     }
 
     return ;
@@ -74,7 +74,7 @@ int main( int argc, char *argv[] ) {
 #endif
 		/**<Calling Pablo Test routines*/
 
-        test12() ;
+        testParallel001() ;
 
 #if ENABLE_MPI
 	}
