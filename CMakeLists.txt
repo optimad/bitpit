@@ -29,12 +29,12 @@ else()
 endif()
 
 set(ENABLE_PROFILING 0 CACHE BOOL "Set appropriate compiler flags to enable profiling")
+set(ENABLE_MPI 0 CACHE BOOL "If set, the program is compiled with MPI support")
 set(VERBOSE_MAKE 0 CACHE BOOL "Set appropriate compiler and cmake flags to enable verbose output from compilation")
 
 #------------------------------------------------------------------------------------#
 # Internal variables
 #------------------------------------------------------------------------------------#
-set(ENABLE_MPI "0" CACHE INTERNAL "If set, the program is compiled with MPI support")
 set(STATIC 1 CACHE BOOL INTERNAL "If set, the program is linked using static libraries")
 
 #------------------------------------------------------------------------------------#
