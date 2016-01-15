@@ -19,6 +19,7 @@ endif()
 
 # Rules to build the tests
 include_directories("${PROJECT_SOURCE_DIR}/src/base")
+include_directories("${PROJECT_SOURCE_DIR}/src/containers")
 include_directories("${PROJECT_SOURCE_DIR}/src/IO")
 include_directories("${PROJECT_SOURCE_DIR}/src/SA")
 include_directories("${PROJECT_SOURCE_DIR}/src/LA")
