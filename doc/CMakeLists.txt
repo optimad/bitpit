@@ -58,7 +58,7 @@ IF(BUILD_DOCUMENTATION)
                       # custom_command for ${DOXYFILE} generation
                       # but I still have to figure out how...
                       MAIN_DEPENDENCY ${DOXYFILE} ${DOXYFILE_IN}
-                      DEPENDS ${DOXYFILE_IN} ${DOXY_INPUT_FILES}
+                      DEPENDS ${DOXYFILE} ${DOXYFILE_IN} ${DOXY_INPUT_FILES}
                       COMMENT "Generating HTML documentation")
 
   ADD_CUSTOM_TARGET( doc ALL DEPENDS ${DOXY_HTML_INDEX_FILE} )
