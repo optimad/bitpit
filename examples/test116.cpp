@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
 		int iter = 0;
 
 		/**<Instantation of a 3D para_tree object.*/
-		ClassParaTree pablo116;
+		ClassParaTree pablo116(0,0,0,1,3);
 
 		/**<Set NO 2:1 balance for the octree.*/
 		int idx = 0;
@@ -119,11 +119,13 @@ int main(int argc, char *argv[]) {
 				}
 			}
 
+			oct_data = oct_data_new;
+			vector<double>().swap(oct_data_new);
+
 			/**<Update the connectivity and write the para_tree.*/
 			pablo116.updateConnectivity();
-			pablo116.writeTest("Pablo116_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data_new);
+			pablo116.writeTest("Pablo116_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
 
-			oct_data = oct_data_new;
 		}
 
 #if NOMPI==0

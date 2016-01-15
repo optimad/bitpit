@@ -22,7 +22,7 @@ This project *tries* to adhere to [Semantic Versioning](http://semver.org/).
 - CMakeLists files changed with new variables ENABLE_MPI.
 
 ### Fixed
-- Possibility to adapt the octree, tracking the changes with the mapper, even with marker <-1 and >1.
+- Bug-fixing in adapt tracking the changes with the mapper. In this version, when the mapping is active, even if some markers are set <-1 or >1, the octants will be adapted one times in refinement and coarsening; the resulting markers will be decreased or increased by 1 respctively.
 
 ### Removed
 - Old deprecated use of mapping now removed.

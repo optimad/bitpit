@@ -3182,7 +3182,6 @@ ClassParaTree::private_adapt_mapidx(bool mapflag) {
 	bool globalDone = false, localDone = false;
 	bool refine = true, coarse = true, globalCoarse = true;
 	uint32_t nocts = m_octree.getNumOctants();
-	u32vector m_mapIdx_temp, m_mapIdx_temp2;
 	vector<ClassOctant >::iterator iter, iterend = m_octree.m_octants.end();
 
 	for (iter = m_octree.m_octants.begin(); iter != iterend; iter++){
@@ -3193,14 +3192,10 @@ ClassParaTree::private_adapt_mapidx(bool mapflag) {
 
 	// m_mapIdx init
 	u32vector().swap(m_mapIdx);
-	u32vector().swap(m_mapIdx_temp);
-	u32vector().swap(m_mapIdx_temp2);
 	if (mapflag) {
 		m_mapIdx.resize(nocts);
-		m_mapIdx_temp.resize(nocts);
 		for (uint32_t i=0; i<nocts; i++){
 			m_mapIdx[i] = i;
-			m_mapIdx_temp[i] = i;
 		}
 	}
 
@@ -3218,18 +3213,10 @@ ClassParaTree::private_adapt_mapidx(bool mapflag) {
 		m_log.writeLog(" Initial Number of octants	:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())));
 
 		// Refine
-		//		while(m_octree.refine(m_mapIdx));
-		while (refine) {
-			refine = m_octree.refine(m_mapIdx_temp);
-			if (mapflag){
-				m_mapIdx_temp2.resize(m_octree.getNumOctants());
-				for (uint32_t i=0; i<m_octree.getNumOctants(); i++){
-					m_mapIdx_temp2[m_mapIdx_temp[i]] = m_mapIdx[m_mapIdx_temp[i]];
-				}
-				m_mapIdx.clear();
-				m_mapIdx = m_mapIdx_temp2;
-			}
-		}
+		while(m_octree.refine(m_mapIdx));
+//		while (refine) {
+//			refine = m_octree.refine(m_mapIdx);
+//		}
 		if (m_octree.getNumOctants() > nocts)
 			localDone = true;
 		m_log.writeLog(" Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())));
@@ -3237,20 +3224,11 @@ ClassParaTree::private_adapt_mapidx(bool mapflag) {
 		updateAdapt();
 
 		// Coarse
-		//while(m_octree.coarse(m_mapIdx));
-		while (coarse) {
-			coarse = m_octree.coarse(m_mapIdx_temp);
-			if (mapflag){
-				m_mapIdx_temp2.resize(m_octree.getNumOctants());
-				for (uint32_t i=0; i<m_octree.getNumOctants(); i++){
-					m_mapIdx_temp2[m_mapIdx_temp[i]] = m_mapIdx[m_mapIdx_temp[i]];
-				}
-				m_mapIdx.clear();
-				m_mapIdx = m_mapIdx_temp2;
-			}
-			updateAfterCoarse(m_mapIdx);
-		}
-		//updateAfterCoarse(m_mapIdx);
+		while(m_octree.coarse(m_mapIdx));
+//		while (coarse) {
+//			coarse = m_octree.coarse(m_mapIdx);
+//		}
+		updateAfterCoarse(m_mapIdx);
 		//			balance21(false);
 		//			while(m_octree.refine(m_mapIdx));
 		//			updateAdapt();
@@ -3280,18 +3258,10 @@ ClassParaTree::private_adapt_mapidx(bool mapflag) {
 		m_log.writeLog(" Initial Number of octants	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)));
 
 		// Refine
-//		while(m_octree.refine(m_mapIdx));
-		while (refine) {
-			refine = m_octree.refine(m_mapIdx_temp);
-			if (mapflag){
-				m_mapIdx_temp2.resize(m_octree.getNumOctants());
-				for (uint32_t i=0; i<m_octree.getNumOctants(); i++){
-					m_mapIdx_temp2[m_mapIdx_temp[i]] = m_mapIdx[m_mapIdx_temp[i]];
-				}
-				m_mapIdx.clear();
-				m_mapIdx = m_mapIdx_temp2;
-			}
-		}
+		while(m_octree.refine(m_mapIdx));
+//		while (refine) {
+//			refine = m_octree.refine(mapIdx_temp);
+//		}
 		if (m_octree.getNumOctants() > nocts)
 			localDone = true;
 		updateAdapt();
@@ -3301,25 +3271,12 @@ ClassParaTree::private_adapt_mapidx(bool mapflag) {
 
 
 		// Coarse
-//		while(m_octree.coarse(m_mapIdx));
-		while (globalCoarse) {
-			coarse = m_octree.coarse(m_mapIdx_temp);
-			if (mapflag){
-				m_mapIdx_temp2.resize(m_octree.getNumOctants());
-				for (uint32_t i=0; i<m_octree.getNumOctants(); i++){
-					m_mapIdx_temp2[m_mapIdx_temp[i]] = m_mapIdx[m_mapIdx_temp[i]];
-				}
-				m_mapIdx.clear();
-				m_mapIdx = m_mapIdx_temp2;
-			}
-			updateAfterCoarse(m_mapIdx);
-			setPboundGhosts();
-			globalCoarse = false;
-			MPI_Barrier(m_comm);
-			m_errorFlag = MPI_Allreduce(&coarse,&globalCoarse,1,MPI::BOOL,MPI_LOR,m_comm);
-		}
-//		updateAfterCoarse(m_mapIdx);
-//		setPboundGhosts();
+		while(m_octree.coarse(m_mapIdx));
+//		while (globalCoarse) {
+//			coarse = m_octree.coarse(mapIdx_temp);
+//		}
+		updateAfterCoarse(m_mapIdx);
+		setPboundGhosts();
 		//			balance21(false);
 		//			while(m_octree.refine(m_mapIdx));
 		//			updateAdapt();

@@ -296,7 +296,7 @@ ClassLocalTree::refine(u32vector & mapidx){
 				if (children[0].getLevel() > m_localMaxDepth){
 					m_localMaxDepth = children[0].getLevel();
 				}
-				if (children[0].getMarker() > 0){
+				if (children[0].getMarker() > 0 && mapsize == 0){
 					//More Refinement to do
 					dorefine = true;
 				}
@@ -315,7 +315,7 @@ ClassLocalTree::refine(u32vector & mapidx){
 	octvector(m_octants).swap(m_octants);
 	nocts = m_octants.size();
 	if(mapsize>0) {
-		mapidx.resize(nocts);
+//		mapidx.resize(nocts);
 //		u32vector((*mapidx)).swap((*mapidx));
 	}
 
@@ -422,7 +422,7 @@ ClassLocalTree::coarse(u32vector & mapidx){
 						father.m_info[13] = true;
 						father.m_info[15] = true;
 						father.setMarker(markerfather);
-						if (markerfather < 0){
+						if (markerfather < 0 && mapsize == 0){
 							docoarse = true;
 						}
 						m_octants[idx] = father;
@@ -509,7 +509,7 @@ ClassLocalTree::coarse(u32vector & mapidx){
 			}
 			father.m_info[13] = true;
 			father.m_info[15] = true;
-			if (markerfather < 0){
+			if (markerfather < 0 && mapsize == 0){
 				docoarse = true;
 			}
 			father.setMarker(markerfather);
