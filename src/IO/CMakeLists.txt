@@ -17,7 +17,7 @@ set(IO_VTK_WRAPPERS_SOURCE_CPP "Class_VTK_Wrappers.cpp" CACHE INTERNAL "Source f
 set(IO_VTK_WRAPPERS_DEFINITION "-DIO_ENABLE_VTK_WRAPPERS" CACHE INTERNAL "Preprocessor defnition needed by the VTK Wrapper feature" FORCE)
 
 # Add library to targets
-include_directories("${PROJECT_SOURCE_DIR}/src/base")
+include_directories("${PROJECT_SOURCE_DIR}/src/operators")
 if (IO_ENABLE_VTK_WRAPPERS)
 	include_directories("${Boost_INCLUDE_DIRS}")
 endif()

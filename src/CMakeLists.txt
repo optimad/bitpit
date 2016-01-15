@@ -5,8 +5,8 @@
 # Common
 add_subdirectory(common)
 
-# Base
-add_subdirectory(base)
+# Operators
+add_subdirectory(operators)
 
 # Containers
 add_subdirectory(containers)
@@ -35,7 +35,7 @@ endif()
 set(BITP_BASE_LIBRARY ${CMAKE_PROJECT_NAME} CACHE INTERNAL "BitPit Base Library" FORCE)
 
 add_library(${BITP_BASE_LIBRARY} ${LIBRARY_TYPE}
-	$<TARGET_OBJECTS:BASE_TARGET_OBJECT>
+	$<TARGET_OBJECTS:OPERATORS_TARGET_OBJECT>
 	$<TARGET_OBJECTS:CONTAINERS_TARGET_OBJECT>
 	$<TARGET_OBJECTS:IO_TARGET_OBJECT>
 	$<TARGET_OBJECTS:SA_TARGET_OBJECT>

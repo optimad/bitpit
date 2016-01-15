@@ -4,7 +4,7 @@ cmake_minimum_required(VERSION 2.8)
 # Add a target to generate the examples
 option(BUILD_EXAMPLES "Create and install the examples" OFF)
 
-include_directories("${PROJECT_SOURCE_DIR}/src/base")
+include_directories("${PROJECT_SOURCE_DIR}/src/operators")
 
 if(BUILD_EXAMPLES)
 	# List of examples

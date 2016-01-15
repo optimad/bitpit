@@ -1,8 +1,8 @@
-#ifndef __BITP_BASE_BASE__
-#define __BITP_BASE_BASE__
+#ifndef __BITP_BASE_OPERATORS__
+#define __BITP_BASE_OPERATORS__
 
 /*! 
- * @defgroup base
+ * @defgroup operators
  * @{
  * @defgroup MathFunctions
  * @defgroup Operators

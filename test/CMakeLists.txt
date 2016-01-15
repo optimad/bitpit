@@ -3,7 +3,7 @@ cmake_minimum_required(VERSION 2.8)
 
 # List of tests
 set(TESTS "")
-list(APPEND TESTS "test_base_00001")
+list(APPEND TESTS "test_operators_00001")
 if (IO_ENABLE_VTK_WRAPPERS)
 	list(APPEND TESTS "test_IO_00001")
 endif()
@@ -18,7 +18,7 @@ if (IO_ENABLE_VTK_WRAPPERS)
 endif()
 
 # Rules to build the tests
-include_directories("${PROJECT_SOURCE_DIR}/src/base")
+include_directories("${PROJECT_SOURCE_DIR}/src/operators")
 include_directories("${PROJECT_SOURCE_DIR}/src/containers")
 include_directories("${PROJECT_SOURCE_DIR}/src/IO")
 include_directories("${PROJECT_SOURCE_DIR}/src/SA")

@@ -3,7 +3,7 @@
 
 #include <BitP_Base_version.hpp>
 
-#include <BitP_Base_base.hpp>
+#include <BitP_Base_operators.hpp>
 #include <BitP_Base_containers.hpp>
 #include <BitP_Base_IO.hpp>
 #include <BitP_Base_LA.hpp>

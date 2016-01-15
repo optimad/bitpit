@@ -43,7 +43,7 @@ IF(BUILD_DOCUMENTATION)
                       MAIN_DEPENDENCY ${doxyfile} ${doxyfile_in}
                       DEPENDS ${doxy_extra_files} ${doxyfile_in}
                               ${COMMON_HEADERS}
-                              ${BASE_SOURCES} ${BASE_HEADERS}
+                              ${OPERATORS_SOURCES} ${OPERATORS_HEADERS}
                               ${IO_SOURCES} ${IO_HEADERS}
                               ${SA_SOURCES} ${SA_HEADERS}
                               ${EXAMPLES_SOURCES}
