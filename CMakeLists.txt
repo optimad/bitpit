@@ -160,8 +160,13 @@ add_subdirectory(doc)
 #------------------------------------------------------------------------------------#
 enable_testing()
 
-foreach(TEST_NAME IN LISTS TEST_LIST)
-	add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME} WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/test")
+foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
+	string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
+	if (DEFINED ${UPPER_MODULE_NAME}_TEST_LIST)
+		foreach(TEST_NAME IN LISTS ${UPPER_MODULE_NAME}_TEST_LIST)
+			add_test(NAME ${TEST_NAME} COMMAND ${TEST_NAME} WORKING_DIRECTORY "${CMAKE_BINARY_DIR}/test/${MODULE_NAME}")
+		endforeach()
+	endif()
 endforeach()
 
 add_custom_target(check DEPENDS tests COMMAND ${CMAKE_MAKE_PROGRAM} test)
