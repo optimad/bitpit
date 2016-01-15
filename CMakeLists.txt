@@ -34,7 +34,7 @@ set(VERBOSE_MAKE 0 CACHE BOOL "Set appropriate compiler and cmake flags to enabl
 #------------------------------------------------------------------------------------#
 # Internal variables
 #------------------------------------------------------------------------------------#
-set(WITHOUT_MPI "1" CACHE INTERNAL "If set, the program is compiled without MPI support")
+set(ENABLE_MPI "0" CACHE INTERNAL "If set, the program is compiled with MPI support")
 set(STATIC 1 CACHE BOOL INTERNAL "If set, the program is linked using static libraries")
 
 #------------------------------------------------------------------------------------#
@@ -136,7 +136,7 @@ endfunction()
 #------------------------------------------------------------------------------------#
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${BITPIT_DIR}/cmake/Modules")
 
-if (NOT WITHOUT_MPI)
+if (ENABLE_MPI)
 	find_package(MPI)
 endif()
 
@@ -148,7 +148,7 @@ if (VERBOSE_MAKE)
 	set(CMAKE_VERBOSE_MAKEFILE ON)
 endif()
 
-if (WITHOUT_MPI)
+if (NOT ENABLE_MPI)
 	add_definitions(-DDISABLE_MPI)
 else()
 	if (MPI_C_FOUND)

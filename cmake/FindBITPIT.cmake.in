@@ -13,7 +13,7 @@
 #	The following cache entries must be set by the user to locate @FIND_MODULE_PACKAGE@:
 #
 #	- STATIC - If set, the the static version of the library will be used
-#	- WITHOUT_MPI - If set, the the serial version of the library will be used
+#	- ENABLE_MPI - If set, the the parallel version of the library will be used
 #	- BITPIT_DIR - The directory containing the BITPIT libraries
 #
 
@@ -124,13 +124,13 @@ if (NOT "${${PACKAGE_NAME}_STATIC_INTERNAL}" STREQUAL "${STATIC}")
 	set(${PACKAGE_NAME}_STATIC_INTERNAL ${STATIC} CACHE INTERNAL "This is the value of the last time STATIC was set successfully." FORCE)
 endif ()
 
-if (NOT "${${PACKAGE_NAME}_WITHOUT_MPI_INTERNAL}" STREQUAL "${WITHOUT_MPI}")
-	if (WITHOUT_MPI AND ${PACKAGE_NAME}_LIBRARY MATCHES "${SUFFIX_MPI}")
+if (NOT "${${PACKAGE_NAME}_ENABLE_MPI_INTERNAL}" STREQUAL "${ENABLE_MPI}")
+	if (ENABLE_MPI AND ${PACKAGE_NAME}_LIBRARY MATCHES "${SUFFIX_MPI}")
               SET (FORCE_RELOAD "FORCE")
-        elseif (NOT WITHOUT_MPI AND NOT ${PACKAGE_NAME}_LIBRARY MATCHES "${SUFFIX_MPI}")
+        elseif (NOT ENABLE_MPI AND NOT ${PACKAGE_NAME}_LIBRARY MATCHES "${SUFFIX_MPI}")
               SET (FORCE_RELOAD "FORCE")
-	endif (WITHOUT_MPI AND ${PACKAGE_NAME}_LIBRARY MATCHES "${SUFFIX_MPI}")
-	set(${PACKAGE_NAME}_WITHOUT_MPI_INTERNAL ${WITHOUT_MPI} CACHE INTERNAL "This is the value of the last time WITHOUT_MPI was set successfully." FORCE)
+	endif (ENABLE_MPI AND ${PACKAGE_NAME}_LIBRARY MATCHES "${SUFFIX_MPI}")
+	set(${PACKAGE_NAME}_ENABLE_MPI_INTERNAL ${ENABLE_MPI} CACHE INTERNAL "This is the value of the last time ENABLE_MPI was set successfully." FORCE)
 endif ()
 
 if (NOT "${${PACKAGE_NAME}_DIR_INTERNAL}" STREQUAL "${${PACKAGE_NAME}_DIR}")
@@ -170,9 +170,9 @@ endif()
 
 # Library
 set(LIBRARY_FILENAME_RELEASE ${LIBRARY_NAME})
-if (NOT WITHOUT_MPI)
+if (ENABLE_MPI)
 	set(LIBRARY_FILENAME_RELEASE "${LIBRARY_FILENAME_RELEASE}${SUFFIX_MPI}")
-endif (NOT WITHOUT_MPI)
+endif (ENABLE_MPI)
 set(LIBRARY_FILENAME_DEBUG "${LIBRARY_FILENAME_RELEASE}${SUFFIX_DEBUG}")
 
 if (UNIX)

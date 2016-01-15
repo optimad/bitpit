@@ -35,11 +35,11 @@ set(BITPIT_LIBRARY ${CMAKE_PROJECT_NAME} CACHE INTERNAL "BitPit Base Library" FO
 
 add_library(${BITPIT_LIBRARY} ${LIBRARY_TYPE} ${BITPIT_SOURCES})
 
-if (WITHOUT_MPI)
-	set_target_properties(${BITPIT_LIBRARY} PROPERTIES DEBUG_POSTFIX "_D")
-else()
+if (ENABLE_MPI)
 	set_target_properties(${BITPIT_LIBRARY} PROPERTIES DEBUG_POSTFIX "_MPI_D")
 	set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELEASE_POSTFIX "_MPI")
+else()
+	set_target_properties(${BITPIT_LIBRARY} PROPERTIES DEBUG_POSTFIX "_D")
 endif()
 
 set_target_properties(${BITPIT_LIBRARY} PROPERTIES VERSION "${BITPIT_VERSION}"
