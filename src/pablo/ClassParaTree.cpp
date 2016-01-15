@@ -538,7 +538,7 @@ uint8_t
 int8_t
 (*ClassParaTree::getNodecoeffs())[3]{
 	return m_global.m_nodeCoeffs;
-}
+};
 
 /*!Get the normals per edge (in 2D case not to be considered at all).
  * \return Pointer to components (x,y,z) of the "normals" per edge.
@@ -546,9 +546,9 @@ int8_t
 int8_t
 (*ClassParaTree::getEdgecoeffs())[3]{
 	return m_global.m_edgeCoeffs;
-}
+};
 
-/*|Set the maximum refinement level allowed for the octree.
+/*!Set the maximum refinement level allowed for the octree.
  * \param[in] maxlevel Maximum refinement level.
  */
 void
