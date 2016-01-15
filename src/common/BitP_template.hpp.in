@@ -1,7 +1,0 @@
-#ifndef __BITP_@UPPER_GROUP_NAME@__
-#define __BITP_@UPPER_GROUP_NAME@__
-
-#include <BitP_Base_version.hpp>
-
-@INCLUDE_LIST@
-#endif

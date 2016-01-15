@@ -1,0 +1,7 @@
+#ifndef __BITPIT_@UPPER_GROUP_NAME@__
+#define __BITPIT_@UPPER_GROUP_NAME@__
+
+#include <BitPit_version.hpp>
+
+@INCLUDE_LIST@
+#endif

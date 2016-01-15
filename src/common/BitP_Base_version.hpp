@@ -1,1 +1,0 @@
-#define BITP_BASE_VERSION "0.99.0"

@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef __BITP_BASE_CONTAINERS__
-#define __BITP_BASE_CONTAINERS__
+#ifndef __BITPIT_CONTAINERS__
+#define __BITPIT_CONTAINERS__
 
 #include "binary_stream.hpp"
 #include "collapsedArray2D.tpp"

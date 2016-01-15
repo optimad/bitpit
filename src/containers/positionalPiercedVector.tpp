@@ -1,8 +1,8 @@
 //
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
-#ifndef __BITP_BASE_POSITIONAL_PIERCED_VECTOR_TPP__
-#define __BITP_BASE_POSITIONAL_PIERCED_VECTOR_TPP__
+#ifndef __BITPIT_POSITIONAL_PIERCED_VECTOR_TPP__
+#define __BITPIT_POSITIONAL_PIERCED_VECTOR_TPP__
 
 #include <algorithm>
 #include <cassert>

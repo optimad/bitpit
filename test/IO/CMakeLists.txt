@@ -26,7 +26,7 @@ foreach(TEST_NAME IN LISTS IO_TEST_LIST)
 	set(TEST_SOURCES "${TEST_NAME}.cpp")
 
 	add_executable(${TEST_NAME} "${TEST_SOURCES}")
-	target_link_libraries(${TEST_NAME} ${BITP_BASE_LIBRARY})
+	target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
 	if (IO_ENABLE_VTK_WRAPPERS)
 		target_link_libraries(${TEST_NAME} "${Boost_LIBRARIES}")
 	endif()

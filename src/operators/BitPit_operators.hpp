@@ -1,5 +1,5 @@
-#ifndef __BITP_BASE_OPERATORS__
-#define __BITP_BASE_OPERATORS__
+#ifndef __BITPIT_OPERATORS__
+#define __BITPIT_OPERATORS__
 
 /*! 
  * @defgroup operators

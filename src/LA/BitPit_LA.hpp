@@ -1,5 +1,5 @@
-#ifndef __BITP_BASE_LA__
-#define __BITP_BASE_LA__
+#ifndef __BITPIT_LA__
+#define __BITPIT_LA__
 
 /*!
  * \defgroup  LinearAlgebra

@@ -9,8 +9,8 @@
  *
  */
 
-#ifndef __BITP_BASE_IO__
-#define __BITP_BASE_IO__
+#ifndef __BITPIT_IO__
+#define __BITPIT_IO__
 
 #include "Class_FH.hpp"
 #include "Class_VTK.hpp"

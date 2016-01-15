@@ -3,7 +3,7 @@
 #------------------------------------------------------------------------------------#
 cmake_minimum_required(VERSION 0.99.0)
 
-project("BitP_Base")
+project("BitPit")
 
 #------------------------------------------------------------------------------------#
 # Variables visible to the user
@@ -197,10 +197,10 @@ string(TOUPPER "${CMAKE_PROJECT_NAME}_VERSION" VERSION_DEFINE_NAME)
 file(READ "${VERSION_HEADER_FILENAME}" header)
 
 string(REGEX REPLACE ".*#[ \t]*define[ \t]*${VERSION_DEFINE_NAME}[ \t]*\"([^\n]*)\".*" "\\1" match "${header}")
-set(BITP_BASE_VERSION "${match}")
+set(BITPIT_VERSION "${match}")
 
-STRING(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" match "${BITP_BASE_VERSION}")
-set(BITP_BASE_MAJOR_VERSION "${match}")
+STRING(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" match "${BITPIT_VERSION}")
+set(BITPIT_MAJOR_VERSION "${match}")
 
 #------------------------------------------------------------------------------------#
 # List of all avilable modules

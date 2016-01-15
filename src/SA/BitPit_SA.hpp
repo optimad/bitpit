@@ -1,5 +1,5 @@
-#ifndef __BITP_BASE_SA__
-#define __BITP_BASE_SA__
+#ifndef __BITPIT_SA__
+#define __BITPIT_SA__
 
 /*!
  * \defgroup SortAlgorithms

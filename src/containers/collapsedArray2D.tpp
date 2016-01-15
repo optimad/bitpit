@@ -1,8 +1,8 @@
 //
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
-#ifndef __BITP_BASE_COLLAPSED_ARRAY_2D_HPP__
-#define __BITP_BASE_COLLAPSED_ARRAY_2D_HPP__
+#ifndef __BITPIT_COLLAPSED_ARRAY_2D_HPP__
+#define __BITPIT_COLLAPSED_ARRAY_2D_HPP__
 
 #include <vector>
 #include <cassert>

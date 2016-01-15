@@ -5,16 +5,16 @@ cmake_minimum_required(VERSION 2.8)
 set(HEADERS "")
 
 # Generate the reference header files
-set(HEADER_TEMPLATE "BitP_template.hpp.in")
+set(HEADER_TEMPLATE "BitPit_template.hpp.in")
 foreach (GROUP_NAME IN LISTS BITPIT_GROUP_LIST)
-	set(REFERENCE_HEADER "BitP_${GROUP_NAME}.hpp")
+	set(REFERENCE_HEADER "BitPit_${GROUP_NAME}.hpp")
 	string(TOUPPER ${GROUP_NAME} UPPER_GROUP_NAME)
 
 	set(INCLUDE_LIST "")
 	foreach(MODULE_NAME IN LISTS BITPIT_${UPPER_GROUP_NAME}_MODULE_LIST)
 		isModuledEnabled(${MODULE_NAME} MODULE_ENABLED)
 		if (MODULE_ENABLED)
-			set(INCLUDE_LIST "${INCLUDE_LIST}#include <BitP_Base_${MODULE_NAME}.hpp>\n")
+			set(INCLUDE_LIST "${INCLUDE_LIST}#include <BitPit_Base_${MODULE_NAME}.hpp>\n")
 		endif ()
 	endforeach ()
 
