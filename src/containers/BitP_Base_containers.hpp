@@ -10,5 +10,6 @@
 #define __BITP_BASE_CONTAINERS__
 
 #include "binary_stream.hpp"
+#include "collapsedArray2D.tpp"
 
 #endif
