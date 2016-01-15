@@ -50,7 +50,7 @@ class PositionalPiercedIterator
 {
 	// PositionalPiercedIterator can work only with calsses that are identified by a
 	// unique id (i.e., classes that implements get_id)
-	static_assert(has_get_id<T>::value, "Provided class does not implement get_id");
+	static_assert(containers::has_get_id<T>::value, "Provided class does not implement get_id");
 
 private:
 	/*!
@@ -252,8 +252,8 @@ class PositionalPiercedVector
 {
 	// PositionalPiercedVector can work only with calsses that are identified by a
 	// unique id (i.e., classes that implements set_id and get_id)
-	static_assert(has_get_id<T>::value, "Provided class does not implement get_id");
-	static_assert(has_set_id<T>::value, "Provided class does not implement set_id");
+	static_assert(containers::has_get_id<T>::value, "Provided class does not implement get_id");
+	static_assert(containers::has_set_id<T>::value, "Provided class does not implement set_id");
 
 private:
 	enum FillType {
