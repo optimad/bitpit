@@ -22,10 +22,17 @@ IF(BUILD_DOCUMENTATION)
   #
   # DOXY_INPUT_DIRECTORIES will be substitued in the Doxygen input file,
   # therefore its elements are separated by spaces and not by semicolons.
+  if (ENABLE_MPI)
+    SET(DOXY_ENABLE_MPI 1)
+  else ()
+    SET(DOXY_ENABLE_MPI 0)
+  endif ()
+
   SET(DOXYFILE_IN          ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
   SET(DOXYFILE             ${PROJECT_BINARY_DIR}/Doxyfile)
   SET(DOXY_HTML_INDEX_FILE ${CMAKE_CURRENT_BINARY_DIR}/html/index.html)
   SET(DOXY_OUTPUT_ROOT     ${CMAKE_CURRENT_BINARY_DIR})
+  SET(DOXY_PREDEFINED      "ENABLE_MPI=${DOXY_ENABLE_MPI}")
 
   SET(DOXY_INPUT_DIRECTORIES "${CMAKE_SOURCE_DIR}/src/common \\\n      ${CMAKE_SOURCE_DIR}/examples \\\n      ${CMAKE_SOURCE_DIR}/extra")
   SET(DOXY_INPUT_FILES "${COMMON_HEADERS};${EXAMPLES_SOURCES}")
