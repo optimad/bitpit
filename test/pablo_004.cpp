@@ -96,7 +96,7 @@ void test104() {
 // =================================================================================== //
 int main( int argc, char *argv[] ) {
 
-#if NOMPI==0
+#if ENABLE_MPI
 	MPI::Init(argc, argv);
 
 	{
@@ -104,7 +104,7 @@ int main( int argc, char *argv[] ) {
 		/**<Calling Pablo Test routines*/
         test104() ;
 
-#if NOMPI==0
+#if ENABLE_MPI
 	}
 
 	MPI::Finalize();

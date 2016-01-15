@@ -8,7 +8,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
-#if NOMPI==0
+#if ENABLE_MPI
 	MPI::Init(argc, argv);
 
 	{
@@ -118,7 +118,7 @@ int main(int argc, char *argv[]) {
 			oct_data = oct_data_new;
 		}
 
-#if NOMPI==0
+#if ENABLE_MPI
 		/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.
 		 * Preserve the family compact up to 4 levels over the max deep reached in the octree.*/
 		uint8_t levels = 4;
@@ -130,7 +130,7 @@ int main(int argc, char *argv[]) {
 		pablo16.updateConnectivity();
 		pablo16.writeTest("Pablo16_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
 
-#if NOMPI==0
+#if ENABLE_MPI
 	}
 
 	MPI::Finalize();

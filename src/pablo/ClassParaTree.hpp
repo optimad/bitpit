@@ -16,6 +16,7 @@
 #include "ClassDataLBInterface.hpp"
 #include "ClassDataCommInterface.hpp"
 #include "ClassLog.hpp"
+#include <map>
 #include <set>
 #include <algorithm>
 
@@ -116,9 +117,12 @@ public:
 	// =================================================================================== //
 	// BASIC GET/SET METHODS															   //
 	// =================================================================================== //
+	uint8_t 	getDim();
 	int 		getRank();
 	int 		getNproc();
+#if ENABLE_MPI
 	MPI_Comm	getComm();
+#endif
 	uint64_t*	getPartitionRangeGlobalIdx();
 	darray3		getOrigin();
 	double		getX0();

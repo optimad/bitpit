@@ -6,7 +6,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
-#if NOMPI==0
+#if ENABLE_MPI
 	MPI::Init(argc, argv);
 
 	{
@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
 		pablo1.adaptGlobalRefine();
 		pablo1.updateConnectivity();
 		pablo1.write("Pablo1b_iter"+to_string(static_cast<unsigned long long>(iter+nref1+3)));
-#if NOMPI==0
+#if ENABLE_MPI
 	}
 
 	MPI::Finalize();

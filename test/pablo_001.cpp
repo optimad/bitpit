@@ -27,7 +27,7 @@ void test0() {
 
 int main( int argc, char *argv[] ) {
 
-#if NOMPI==0
+#if ENABLE_MPI
 	MPI::Init(argc, argv);
 
 	{
@@ -36,7 +36,7 @@ int main( int argc, char *argv[] ) {
 
         test0() ;
 
-#if NOMPI==0
+#if ENABLE_MPI
 	}
 
 	MPI::Finalize();

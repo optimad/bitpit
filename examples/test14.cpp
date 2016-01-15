@@ -7,7 +7,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
-#if NOMPI==0
+#if ENABLE_MPI
 	MPI::Init(argc, argv);
 
 	{
@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
 			pablo14.adaptGlobalRefine();
 		}
 
-#if NOMPI==0
+#if ENABLE_MPI
 		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
 		pablo14.loadBalance();
 #endif
@@ -111,7 +111,7 @@ int main(int argc, char *argv[]) {
 			pablo14.updateConnectivity();
 			pablo14.writeTest("Pablo14_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data_smooth);
 
-#if NOMPI==0
+#if ENABLE_MPI
 			/**<Communicate the data of the octants and the ghost octants between the processes.*/
 			UserDataComm<vector<double> > data_comm(oct_data_smooth, ghost_data);
 			pablo14.communicate(data_comm);
@@ -120,7 +120,7 @@ int main(int argc, char *argv[]) {
 			oct_data = oct_data_smooth;
 
 		}
-#if NOMPI==0
+#if ENABLE_MPI
 	}
 
 	MPI::Finalize();

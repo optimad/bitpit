@@ -8,7 +8,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
-#if NOMPI==0
+#if ENABLE_MPI
 	MPI::Init(argc, argv);
 
 	{
@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
 			weight = weight_new;
 		}
 
-#if NOMPI==0
+#if ENABLE_MPI
 		/**<(Load)Balance the octree over the processes with communicating the data.*/
 		UserDataLB<vector<double> > data_lb(weight,weightGhost);
 		pablo15.loadBalance(data_lb, &weight);
@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
 		pablo15.updateConnectivity();
 		pablo15.writeTest("Pablo15_iter"+to_string(static_cast<unsigned long long>(iter)), weight);
 
-#if NOMPI==0
+#if ENABLE_MPI
 	}
 
 	MPI::Finalize();

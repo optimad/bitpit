@@ -23,7 +23,7 @@ void test12() {
         pablo12.write("Pablo12_iter"+to_string(static_cast<unsigned long long>(iter)));
     }
 
-#if NOMPI==0
+#if ENABLE_MPI
     /**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
     pablo12.loadBalance();
 #endif
@@ -51,7 +51,7 @@ void test12() {
         /**<Adapt octree.*/
         pablo12.adapt();
 
-#if NOMPI==0
+#if ENABLE_MPI
         /**<(Load)Balance the octree over the processes.*/
         pablo12.loadBalance();
 #endif
@@ -67,7 +67,7 @@ void test12() {
 // =================================================================================== //
 int main( int argc, char *argv[] ) {
 
-#if NOMPI==0
+#if ENABLE_MPI
 	MPI::Init(argc, argv);
 
 	{
@@ -76,7 +76,7 @@ int main( int argc, char *argv[] ) {
 
         test12() ;
 
-#if NOMPI==0
+#if ENABLE_MPI
 	}
 
 	MPI::Finalize();

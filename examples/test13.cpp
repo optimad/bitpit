@@ -6,7 +6,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
-#if NOMPI==0
+#if ENABLE_MPI
 	MPI::Init(argc, argv);
 
 	{
@@ -31,7 +31,7 @@ int main(int argc, char *argv[]) {
 			pablo13.write("Pablo13_iter"+to_string(static_cast<unsigned long long>(iter)));
 		}
 
-#if NOMPI==0
+#if ENABLE_MPI
 		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
 		pablo13.loadBalance();
 #endif
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
 			/**<Adapt octree.*/
 			pablo13.adapt();
 
-#if NOMPI==0
+#if ENABLE_MPI
 			/**<(Load)Balance the octree over the processes.*/
 			pablo13.loadBalance();
 #endif
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
 			/**<Adapt octree.*/
 			pablo13.adapt();
 
-#if NOMPI==0
+#if ENABLE_MPI
 			/**<(Load)Balance the octree over the processes.*/
 			pablo13.loadBalance();
 #endif
@@ -106,7 +106,7 @@ int main(int argc, char *argv[]) {
 			pablo13.updateConnectivity();
 			pablo13.write("Pablo13_iter"+to_string(static_cast<unsigned long long>(iter)));
 		}
-#if NOMPI==0
+#if ENABLE_MPI
 	}
 	MPI::Finalize();
 #endif

@@ -30,7 +30,7 @@ public:
 
 int main(int argc, char *argv[]) {
 
-#if NOMPI==0
+#if ENABLE_MPI
 	MPI::Init(argc, argv);
 
 	{
@@ -50,7 +50,7 @@ int main(int argc, char *argv[]) {
 			pabloBB.adaptGlobalRefine();
 		}
 
-#if NOMPI==0
+#if ENABLE_MPI
 		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
 		pabloBB.loadBalance();
 #endif
@@ -61,7 +61,7 @@ int main(int argc, char *argv[]) {
 		/**<Define and initialize a set of bubbles and their trajectories.*/
 		srand(time(NULL));
 
-#if NOMPI==0
+#if ENABLE_MPI
         int nb = 50;
 #else
 		int nb = 10;
@@ -199,7 +199,7 @@ int main(int argc, char *argv[]) {
 
 			}
 
-#if NOMPI==0
+#if ENABLE_MPI
 			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
 			/**<Communicate the data of the octants and the ghost octants between the processes.*/
 			UserDataLB<vector<double> > data_lb(oct_data,oct_data_ghost);
@@ -213,7 +213,7 @@ int main(int argc, char *argv[]) {
 			pabloBB.writeTest("PabloBubble3D_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
 		}
 
-#if NOMPI==0
+#if ENABLE_MPI
 	}
 
 	MPI::Finalize();

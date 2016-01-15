@@ -40,7 +40,7 @@ ClassParaTree::ClassParaTree(uint8_t dim, int8_t maxlevel, string logfile ) : m_
 	m_errorFlag = MPI_Comm_size(m_comm,&m_nproc);
 	m_errorFlag = MPI_Comm_rank(m_comm,&m_rank);
 #else
-	rank = 0;
+	m_rank = 0;
 	m_nproc = 1;
 #endif
 	m_partitionFirstDesc = new uint64_t[m_nproc];
@@ -96,7 +96,7 @@ ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, uint8_t dim
 	m_errorFlag = MPI_Comm_size(m_comm,&m_nproc);
 	m_errorFlag = MPI_Comm_rank(m_comm,&m_rank);
 #else
-	rank = 0;
+	m_rank = 0;
 	m_nproc = 1;
 #endif
 	m_partitionFirstDesc = new uint64_t[m_nproc];
@@ -198,7 +198,7 @@ ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, u32vector2D
 #else
 	m_serial = true;
 	m_nproc = 1;
-	rank = 0;
+	m_rank = 0;
 #endif
 	m_partitionFirstDesc = new uint64_t[m_nproc];
 	m_partitionLastDesc = new uint64_t[m_nproc];
@@ -251,6 +251,14 @@ ClassParaTree::~ClassParaTree(){
 // BASIC GET/SET METHODS
 // =================================================================================== //
 
+/*! Get the dimension of the octree.
+ * \return Dimension of the octree (2D/3D).
+ */
+uint8_t
+ClassParaTree::getDim(){
+	return m_dim;
+};
+
 /*! Get the rank of local process.
  * \return Rank of local process.
  */
@@ -267,6 +275,7 @@ ClassParaTree::getNproc(){
 	return m_nproc;
 };
 
+#if ENABLE_MPI
 /*! Get thecommunicator used by octree between processes.
  * \return MPI Communicator.
  */
@@ -274,6 +283,7 @@ MPI_Comm
 ClassParaTree::getComm(){
 	return m_comm;
 };
+#endif
 
 /*! Get the partition information of the octree over the processes
  * by using the global index of the octants.

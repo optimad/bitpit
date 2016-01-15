@@ -8,7 +8,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
-#if NOMPI==0
+#if ENABLE_MPI
 	MPI::Init(argc, argv);
 
 	{
@@ -135,7 +135,7 @@ int main(int argc, char *argv[]) {
 
 		}
 
-#if NOMPI==0
+#if ENABLE_MPI
 		/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.
 		 * Preserve the family compact up to 4 levels over the max deep reached in the octree.*/
 		UserDataLB<vector<double> > data_lb(oct_data,ghost_data);
@@ -149,7 +149,7 @@ int main(int argc, char *argv[]) {
 #endif
 
 
-#if NOMPI==0
+#if ENABLE_MPI
 	}
 
 	MPI::Finalize();

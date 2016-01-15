@@ -11,6 +11,7 @@
 #if ENABLE_MPI
 #include <mpi.h>
 #endif
+#include <string>
 
 class ClassLog {
 
