@@ -148,9 +148,9 @@ if (VERBOSE_MAKE)
 	set(CMAKE_VERBOSE_MAKEFILE ON)
 endif()
 
-if (NOT ENABLE_MPI)
-	add_definitions(-DDISABLE_MPI)
-else()
+if (ENABLE_MPI)
+	add_definitions(-DENABLE_MPI=1)
+
 	if (MPI_C_FOUND)
 		set(CMAKE_C_COMPILER ${MPI_C_COMPILER})
 	else()
