@@ -16,7 +16,7 @@
 *
 */
 
-#include "binary_stream.cpp"
+#include "binary_stream.hpp"
 #include "piercedVector.tpp"
 #include "positionalPiercedVector.tpp"
 
