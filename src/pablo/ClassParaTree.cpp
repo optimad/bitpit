@@ -267,6 +267,22 @@ ClassParaTree::getGlobalNumOctants(){
 	return m_globalNumOctants;
 };
 
+/*! Get if the octree is serial.
+ * \return Is the octree serial?.
+ */
+bool
+ClassParaTree::getSerial(){
+	return m_serial;
+};
+
+/*! Get if the octree is parallel.
+ * \return Is the octree distributed?.
+ */
+bool
+ClassParaTree::getParallel(){
+	return (!m_serial);
+};
+
 /*! Get the rank of local process.
  * \return Rank of local process.
  */
@@ -3199,6 +3215,17 @@ ClassParaTree::loadBalance(uint8_t & level){
 
 }
 #endif
+
+/*! Get the size of an octant corresponding to a target level.
+ * \param[in] idx Input level.
+ * \return Size of an octant of input level.
+ */
+double
+ClassParaTree::levelToSize(uint8_t & level) {
+	uint32_t size = uint32_t(1<<(m_global.m_maxLevel-level));
+	return m_trans.mapSize(size);
+}
+
 
 // =================================================================================== //
 // OTHER INTERSECTION BASED METHODS												    			   //

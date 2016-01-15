@@ -119,6 +119,8 @@ public:
 	// =================================================================================== //
 	uint8_t 	getDim();
 	uint64_t 	getGlobalNumOctants();
+	bool		getSerial();
+	bool		getParallel();
 	int 		getRank();
 	int 		getNproc();
 #if ENABLE_MPI
@@ -326,6 +328,7 @@ public:
 	void 		loadBalance();
 	void 		loadBalance(uint8_t & level);
 #endif
+	double		levelToSize(uint8_t & level);
 
 	// =================================================================================== //
 	// OTHER INTERSECTION BASED METHODS										     		   //
