@@ -6,7 +6,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	MPI::Init(argc, argv);
 
 	{
@@ -86,7 +86,7 @@ int main(int argc, char *argv[]) {
 			pablo3.updateConnectivity();
 			pablo3.write("Pablo3_iter"+to_string(static_cast<unsigned long long>(iter)));
 		}
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	}
 	MPI::Finalize();
 #endif

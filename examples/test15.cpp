@@ -1,5 +1,5 @@
 #include "ClassParaTree.hpp"
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 #include "UserDataComm.hpp"
 #include "UserDataLB.hpp"
 #endif
@@ -10,7 +10,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	MPI::Init(argc, argv);
 
 	{
@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
 			weight = weight_new;
 		}
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 		/**<(Load)Balance the octree over the processes with communicating the data.*/
 		UserDataLB<vector<double> > data_lb(weight,weightGhost);
 		pablo15.loadBalance(data_lb, &weight);
@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
 		pablo15.updateConnectivity();
 		pablo15.writeTest("Pablo15_iter"+to_string(static_cast<unsigned long long>(iter)), weight);
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	}
 
 	MPI::Finalize();

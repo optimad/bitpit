@@ -47,7 +47,7 @@ void writeLog(string msg) {
 	// =================================================================================== //
 
 	int rank = 0;
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	int error_flag = MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 #endif
 	if(rank == 0){
@@ -82,7 +82,7 @@ void writeLog(string msg) {
 		// Close file
 		file_handle.close();
 	}
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	error_flag = MPI_Barrier(MPI_COMM_WORLD);
 #endif
 	return; };

@@ -1,5 +1,5 @@
 #include "ClassParaTree.hpp"
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 #include "UserDataComm.hpp"
 #include "UserDataLB.hpp"
 #endif
@@ -10,7 +10,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	MPI::Init(argc, argv);
 
 	{
@@ -137,7 +137,7 @@ int main(int argc, char *argv[]) {
 
 		}
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 		/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.
 		 * Preserve the family compact up to 4 levels over the max deep reached in the octree.*/
 		UserDataLB<vector<double> > data_lb(oct_data,ghost_data);
@@ -151,7 +151,7 @@ int main(int argc, char *argv[]) {
 #endif
 
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	}
 
 	MPI::Finalize();

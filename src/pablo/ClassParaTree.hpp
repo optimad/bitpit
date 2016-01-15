@@ -4,7 +4,7 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 #include <mpi.h>
 #include "ClassCommBuffer.hpp"
 #include "ClassDataLBInterface.hpp"
@@ -91,7 +91,7 @@ private:
 	//m_log member
 	ClassLog 				m_log;							/**<Log object*/
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	MPI_Comm 				m_comm;							/**<MPI communicator*/
 #endif
 
@@ -99,7 +99,7 @@ private:
 	// CONSTRUCTORS AND OPERATORS														   //
 	// =================================================================================== //
 public:
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	ClassParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
 	ClassParaTree(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
 	ClassParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
@@ -123,7 +123,7 @@ public:
 	bool		getParallel();
 	int 		getRank();
 	int 		getNproc();
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	MPI_Comm	getComm();
 #endif
 	uint64_t*	getPartitionRangeGlobalIdx();
@@ -183,7 +183,7 @@ public:
 	bool		getBound(uint32_t idx);
 	bool		getPbound(uint32_t idx, uint8_t iface);
 	bool		getPbound(uint32_t idx);
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	bool 		getIsGhost(uint32_t idx);
 #endif
 	bool 		getIsNewR(uint32_t idx);
@@ -271,7 +271,7 @@ public:
 	uint64_t 		getGlobalIdx(ClassOctant* oct);
 	uint32_t 		getIdx(ClassOctant* oct);
 	uint32_t 		getIdx(ClassOctant oct);
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	bool 			getIsGhost(ClassOctant* oct);
 	bool 			getIsGhost(ClassOctant oct);
 #endif
@@ -324,7 +324,7 @@ public:
 	const u32arr3vector & getGhostNodes();
 	const u32array3 & getGhostNodeLogicalCoordinates(uint32_t inode);
 	darray3 	getGhostNodeCoordinates(uint32_t inode);
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	void 		loadBalance();
 	void 		loadBalance(uint8_t & level);
 #endif
@@ -343,7 +343,7 @@ private:
 	bool 		private_adapt();
 	bool 		private_adapt_mapidx(bool mapflag);
 	void 		updateAdapt();
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	void 		computePartition(uint32_t* partition);
 	void 		computePartition(uint32_t* partition, dvector* weight);
 	void 		computePartition(uint32_t* partition, uint8_t & level_);
@@ -365,7 +365,7 @@ public:
 	// =================================================================================== //
 	// TEMPLATE METHODS												    			       //
 	// =================================================================================== //
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 
 	/** Communicate data provided by the user between the processes.
 	 */

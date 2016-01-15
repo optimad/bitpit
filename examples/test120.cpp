@@ -1,5 +1,5 @@
 #include "ClassParaTree.hpp"
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 #include "UserDataComm.hpp"
 #include "UserDataLB.hpp"
 #endif
@@ -10,7 +10,7 @@ using namespace std;
 
 int main(int argc, char *argv[]) {
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	MPI::Init(argc, argv);
 
 	{
@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
 			pablo120.adaptGlobalRefine();
 		}
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
 		pablo120.loadBalance();
 #endif
@@ -92,7 +92,7 @@ int main(int argc, char *argv[]) {
 			/**<Adapt the octree.*/
 			bool adapt = pablo120.adapt();
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
 			pablo120.loadBalance();
 #endif
@@ -113,7 +113,7 @@ int main(int argc, char *argv[]) {
 			pablo120.updateConnectivity();
 			pablo120.writeTest("Pablo120_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
 		}
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	}
 
 	MPI::Finalize();

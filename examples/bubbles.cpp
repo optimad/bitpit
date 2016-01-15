@@ -1,5 +1,5 @@
 #include "ClassParaTree.hpp"
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 #include "UserDataComm.hpp"
 #include "UserDataLB.hpp"
 #endif
@@ -31,7 +31,7 @@ public:
 
 int main(int argc, char *argv[]) {
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	MPI::Init(argc, argv);
 
 	{
@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
 			pabloBB.adaptGlobalRefine();
 		}
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
 		pabloBB.loadBalance();
 #endif
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 		if(pabloBB.getRank() == 0)
 			cout << "the seed = " << Time << endl;
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 		int nb = 50;
 #else
 		int nb = 10;
@@ -164,7 +164,7 @@ int main(int argc, char *argv[]) {
 
 			}
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 				/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
 				pabloBB.loadBalance();
 #endif
@@ -176,7 +176,7 @@ int main(int argc, char *argv[]) {
 			pabloBB.updateConnectivity();
 			pabloBB.write("PabloBubble_iter"+to_string(static_cast<unsigned long long>(iter)));
 		}
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	}
 
 	MPI::Finalize();

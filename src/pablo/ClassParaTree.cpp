@@ -27,7 +27,7 @@ using namespace std;
  * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
  * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
  */
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 ClassParaTree::ClassParaTree(uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm comm) : m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(logfile,comm),m_comm(comm),m_trans(maxlevel,dim),m_octree(maxlevel,dim){
 #else
 ClassParaTree::ClassParaTree(uint8_t dim, int8_t maxlevel, string logfile ) : m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(logfile),m_trans(maxlevel, dim),m_octree(maxlevel,dim){
@@ -37,7 +37,7 @@ ClassParaTree::ClassParaTree(uint8_t dim, int8_t maxlevel, string logfile ) : m_
 	m_errorFlag = 0;
 	m_maxDepth = 0;
 	m_globalNumOctants = m_octree.getNumOctants();
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	m_errorFlag = MPI_Comm_size(m_comm,&m_nproc);
 	m_errorFlag = MPI_Comm_rank(m_comm,&m_rank);
 #else
@@ -65,7 +65,7 @@ ClassParaTree::ClassParaTree(uint8_t dim, int8_t maxlevel, string logfile ) : m_
 	m_log.writeLog(" Max allowed level	:	" + to_string(static_cast<unsigned long long>(m_global.m_maxLevel)));
 	m_log.writeLog("---------------------------------------------");
 	m_log.writeLog(" ");
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	MPI_Barrier(m_comm);
 #endif
 };
@@ -83,7 +83,7 @@ ClassParaTree::ClassParaTree(uint8_t dim, int8_t maxlevel, string logfile ) : m_
  * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
  * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
  */
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm comm):m_dim(uint8_t(min(max(2,int(dim)),3))),m_trans(X,Y,Z,L,maxlevel,dim),m_log(logfile,comm),m_comm(comm),m_octree(maxlevel,dim){
 #else
 ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, uint8_t dim, int8_t maxlevel, string logfile):m_dim(uint8_t(min(max(2,int(dim)),3))),m_trans(X,Y,Z,L,maxlevel,dim),m_log(logfile),m_octree(maxlevel,dim){
@@ -93,7 +93,7 @@ ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, uint8_t dim
 	m_errorFlag = 0;
 	m_maxDepth = 0;
 	m_globalNumOctants = m_octree.getNumOctants();
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	m_errorFlag = MPI_Comm_size(m_comm,&m_nproc);
 	m_errorFlag = MPI_Comm_rank(m_comm,&m_rank);
 #else
@@ -125,7 +125,7 @@ ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, uint8_t dim
 	m_log.writeLog(" Domain Size		:	" + to_string(static_cast<unsigned long long>(L)));
 	m_log.writeLog("---------------------------------------------");
 	m_log.writeLog(" ");
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	MPI_Barrier(m_comm);
 #endif
 };
@@ -145,7 +145,7 @@ ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, uint8_t dim
  * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
  * \param[in] comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
  */
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm comm):m_dim(uint8_t(min(max(2,int(dim)),3))),m_trans(X,Y,Z,L,maxlevel,dim),m_log(logfile,comm),m_comm(comm),m_octree(maxlevel,dim){
 #else
 ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, string logfile):m_dim(uint8_t(min(max(2,int(dim)),3))),m_trans(X,Y,Z,L,maxlevel,dim),m_log(logfile),m_octree(maxlevel,dim){
@@ -190,7 +190,7 @@ ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, u32vector2D
 		m_octree.m_octants[i] = oct;
 	}
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	m_errorFlag = MPI_Comm_size(m_comm,&m_nproc);
 	m_errorFlag = MPI_Comm_rank(m_comm,&m_rank);
 	m_serial = true;
@@ -208,7 +208,7 @@ ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, u32vector2D
 	setLastDesc();
 	m_octree.updateLocalMaxDepth();
 	updateAdapt();
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	setPboundGhosts();
 #endif
 	// Write info log
@@ -229,7 +229,7 @@ ClassParaTree::ClassParaTree(double X, double Y, double Z, double L, u32vector2D
 	m_log.writeLog(" Number of octants	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)));
 	m_log.writeLog("---------------------------------------------");
 	m_log.writeLog(" ");
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	MPI_Barrier(m_comm);
 #endif
 };
@@ -299,7 +299,7 @@ ClassParaTree::getNproc(){
 	return m_nproc;
 };
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 /*! Get thecommunicator used by octree between processes.
  * \return MPI Communicator.
  */
@@ -833,7 +833,7 @@ ClassParaTree::getPbound(uint32_t idx){
 	return m_octree.m_octants[idx].getPbound();
 }
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 /*! Get the nature of an octant.
  * \param[in] idx Local index of target octant.
  * \return Is octant ghost?
@@ -1578,7 +1578,7 @@ ClassParaTree::getGhostOctant(uint32_t idx) {
  */
 uint64_t
 ClassParaTree::getGlobalIdx(ClassOctant* oct){
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	if (getIsGhost(oct)){
 		uint32_t idx = m_octree.findGhostMorton(oct->computeMorton());
 		return m_octree.m_globalIdxGhosts[idx];
@@ -1597,7 +1597,7 @@ ClassParaTree::getGlobalIdx(ClassOctant* oct){
  */
 uint32_t
 ClassParaTree::getIdx(ClassOctant* oct){
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	if (getIsGhost(oct)){
 		return m_octree.findGhostMorton(oct->computeMorton());
 	}
@@ -1611,20 +1611,20 @@ ClassParaTree::getIdx(ClassOctant* oct){
  */
 uint32_t
 ClassParaTree::getIdx(ClassOctant oct){
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	if (getIsGhost(oct)){
 		return m_octree.findGhostMorton(oct.computeMorton());
 	}
 	else{
 #endif
 		return m_octree.findMorton(oct.computeMorton());
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	};
 #endif
 	return m_octree.getNumOctants();
 };
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 /*! Get the nature of an octant.
  * \param[in] oct Pointer to target octant.
  * \return Is octant ghost?
@@ -1997,7 +1997,7 @@ ClassParaTree::adaptGlobalRefine(bool mapper_flag) {
 			m_mapIdx[i] = i;
 		}
 	}
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	if(m_serial){
 #endif
 		m_log.writeLog("---------------------------------------------");
@@ -2021,13 +2021,13 @@ ClassParaTree::adaptGlobalRefine(bool mapper_flag) {
 		nocts = m_octree.getNumOctants();
 		updateAdapt();
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 		MPI_Barrier(m_comm);
 		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
 #endif
 		m_log.writeLog(" ");
 		m_log.writeLog("---------------------------------------------");
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	}
 	else{
 		m_log.writeLog("---------------------------------------------");
@@ -2090,7 +2090,7 @@ ClassParaTree::adaptGlobalCoarse(bool mapper_flag) {
 			m_mapIdx[i] = i;
 		}
 	}
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	if(m_serial){
 #endif
 		m_log.writeLog("---------------------------------------------");
@@ -2125,13 +2125,13 @@ ClassParaTree::adaptGlobalCoarse(bool mapper_flag) {
 		nocts = m_octree.getNumOctants();
 
 		m_log.writeLog(" Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(nocts)));
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 		MPI_Barrier(m_comm);
 		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
 #endif
 		m_log.writeLog(" ");
 		m_log.writeLog("---------------------------------------------");
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	}
 	else{
 		m_log.writeLog("---------------------------------------------");
@@ -2369,7 +2369,7 @@ ClassParaTree::getGhostNodeCoordinates(uint32_t inode){
 	return m_trans.mapCoordinates(m_octree.m_ghostsNodes[inode]);
 }
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 /** Distribute Load-Balancing the octants of the whole tree over
  * the processes of the job following the Morton order.
  * Until loadBalance is not called for the first time the mesh is serial.
@@ -3278,7 +3278,7 @@ ClassParaTree::private_adapt_mapidx(bool mapflag) {
 		}
 	}
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	if(m_serial){
 #endif
 		m_log.writeLog("---------------------------------------------");
@@ -3317,13 +3317,13 @@ ClassParaTree::private_adapt_mapidx(bool mapflag) {
 		nocts = m_octree.getNumOctants();
 
 		m_log.writeLog(" Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(nocts)));
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 		MPI_Barrier(m_comm);
 		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
 #endif
 		m_log.writeLog(" ");
 		m_log.writeLog("---------------------------------------------");
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	}
 	else{
 		m_log.writeLog("---------------------------------------------");
@@ -3381,7 +3381,7 @@ ClassParaTree::private_adapt_mapidx(bool mapflag) {
  */
 void
 ClassParaTree::updateAdapt(){
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	if(m_serial)
 	{
 #endif
@@ -3390,7 +3390,7 @@ ClassParaTree::updateAdapt(){
 		for(int p = 0; p < m_nproc; ++p){
 			m_partitionRangeGlobalIdx[p] = m_globalNumOctants - 1;
 		}
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	}
 	else
 	{
@@ -3418,7 +3418,7 @@ ClassParaTree::updateAdapt(){
 #endif
 }
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 /*! Compute the partition of the octree over the processes (only compute the information about
  * how distribute the mesh). This is an uniform distribution method.
  * \param[out] partition Pointer to partition information array. partition[i] = number of octants
@@ -4088,11 +4088,11 @@ ClassParaTree::commMarker() {
 void
 ClassParaTree::updateAfterCoarse(){
 	m_mapIdx.clear();
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	if(m_serial){
 #endif
 		updateAdapt();
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	}
 	else{
 		//Only if parallel
@@ -4113,11 +4113,11 @@ ClassParaTree::updateAfterCoarse(){
  */
 void
 ClassParaTree::updateAfterCoarse(u32vector & mapidx){
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	if(m_serial){
 #endif
 		updateAdapt();
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	}
 	else{
 		//Only if parallel
@@ -4137,7 +4137,7 @@ ClassParaTree::updateAfterCoarse(u32vector & mapidx){
  */
 void
 ClassParaTree::balance21(bool const first){
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	bool globalDone = true, localDone = false;
 	int  iteration  = 0;
 
@@ -4425,7 +4425,7 @@ ClassParaTree::write(string filename) {
 		pout.close();
 
 	}
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	MPI_Barrier(m_comm);
 #endif
 
@@ -4570,7 +4570,7 @@ ClassParaTree::writeTest(string filename, vector<double> data) {
 		pout.close();
 
 	}
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	MPI_Barrier(m_comm);
 #endif
 

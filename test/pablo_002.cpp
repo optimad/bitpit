@@ -99,7 +99,7 @@ void test002() {
 // =================================================================================== //
 int main( int argc, char *argv[] ) {
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	MPI::Init(argc, argv);
 
 	{
@@ -107,7 +107,7 @@ int main( int argc, char *argv[] ) {
 		/**<Calling Pablo Test routines*/
         test002() ;
 
-#if ENABLE_MPI
+#if ENABLE_MPI==1
 	}
 
 	MPI::Finalize();
