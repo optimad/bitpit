@@ -679,18 +679,18 @@ std::ofstream& display(                                                         
 // String =========================================================================== //
 
 // Trimming operators --------------------------------------------------------------- //
-static inline std::string &ltrim(                                                     // STRING LEFT TRIMMING
+inline std::string &ltrim(                                                     // STRING LEFT TRIMMING
         std::string                             &                                     // (input) std::string to be trimmed
         );
-static inline std::string &rtrim(                                                     // STRING RIGHT TRIMMING
+inline std::string &rtrim(                                                     // STRING RIGHT TRIMMING
         std::string                             &                                     // (input) std::string to be trimmed
         );
-static inline std::string &trim(                                                      // STRING TRIMMING
+inline std::string &trim(                                                      // STRING TRIMMING
         std::string                             &                                     // (input) std::string to be trimmed
         );
 
 // Padding operators ---------------------------------------------------------------- //
-static inline std::string ZeroPadNumber(                                              // PERFORMS CONVERSION OF INTEGER INTO STRING
+inline std::string ZeroPadNumber(                                              // PERFORMS CONVERSION OF INTEGER INTO STRING
         int                                      ,                                    // (input) number of char in std::string
         int                                                                           // (input) integer to be padded
         );
@@ -704,7 +704,7 @@ bool Get_After_Keyword(                                                         
         );
 
 // returns true if key_ is present in line ------------------------------------------ //
-static inline bool Keyword_In_String(                                                 // SEARCH KEYWORD IN STRING
+inline bool Keyword_In_String(                                                 // SEARCH KEYWORD IN STRING
         std::string                              ,                                    // (input) input string            
         std::string                                                                   // (input) keyword
         ) ;

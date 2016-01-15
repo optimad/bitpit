@@ -1,5 +1,6 @@
 // Operator "sign" ------------------------------------------------------------------- //
 /*!
+    \ingroup MathFunctions
     Sign function.
     Given a a variable of integral type, val, returns:
     1 if val > 0

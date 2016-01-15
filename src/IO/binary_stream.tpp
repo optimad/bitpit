@@ -4,6 +4,7 @@
 
 // -------------------------------------------------------------------------- //
 /*!
+        \ingroup    BinaryStream
         Read data from memory location and store in the stream buffer.
 
         \param[in] t data to be stored in the stream buffer
@@ -27,6 +28,7 @@ void ibinarystream::read(
 
 // -------------------------------------------------------------------------- //
 /*!
+        \ingroup    BinaryStream
         Write data from memory to internal buffer.
 
         \param[in] t data to be stored in the stream buffer
@@ -47,6 +49,7 @@ void obinarystream::write(
 
 // -------------------------------------------------------------------------- //
 /*!
+        \ingroup    BinaryStream
         Input stream operator for class ibinarystream.
 
         \param[in] istm input stream
@@ -66,6 +69,7 @@ ibinarystream& operator>> (
 
 // -------------------------------------------------------------------------- //
 /*!
+        \ingroup    BinaryStream
         Output stream operator for class ibinarystream.
 
         \param[in] istm output stream
@@ -83,3 +87,4 @@ obinarystream& operator<< (
 
     return ostm;
 }
+

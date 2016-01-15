@@ -22,6 +22,11 @@ using namespace std;
 // TEMPLATE IMPLEMENTATIONS                                                   //
 // ========================================================================== //
 
+/*!
+ * @ingroup STereoLithography
+ * @{
+ */
+
 // -------------------------------------------------------------------------- //
 /*!
     Load data for solid with specified label from stl ascii file.
@@ -370,3 +375,6 @@ save(others ...);
 return; }
 
 
+/*!
+ * @}
+ */

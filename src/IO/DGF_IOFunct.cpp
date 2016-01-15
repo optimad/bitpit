@@ -22,6 +22,11 @@
 using namespace std;
 
 /*!
+    \ingroup DuneGridFormat
+    \{
+ */
+
+/*!
     \class DGF_obj
     \brief Interface to DGF I/O function
 
@@ -782,8 +787,16 @@ close("app");
 
 return; }
 
+/*!
+    \}
+ */
+
 // Scanning routines ======================================================== //
 
+/*!
+    \ingroup DuneGridFormat
+    \{
+ */
 // -------------------------------------------------------------------------- //
 /*!
     Scan dgf data block and returns the number of entries in the block.
@@ -1430,3 +1443,6 @@ err = Write_DGF_data(file_handle, nS, S);
 return(err); }
 
 
+/*!
+    \}
+ */

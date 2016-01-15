@@ -21,6 +21,7 @@
 // ========================================================================== //
 # include "SortAlgorithms.hpp"
 
+
 // ========================================================================== //
 // IMPLEMENTATIONS                                                            //
 // ========================================================================== //
@@ -43,6 +44,8 @@ using namespace std;
 
 // RANDOM SORTING =========================================================== //
 /*!
+    \ingroup    SortAlgorithms
+
     Extract n integers in the interval [0,m] without replacement.
     if n = m+1, returns a random permutation of {0, 1, 2, ..., m}
 
@@ -112,3 +115,5 @@ for (i = 0; i < n; i++) {
 
 
 return; }
+
+

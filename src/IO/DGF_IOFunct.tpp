@@ -17,6 +17,11 @@
 
 // class DGF_obj templated methods ========================================== //
 
+/*!
+    \ingroup DuneGridFormat
+    /{
+ */
+
 // -------------------------------------------------------------------------- //
 /*!
     Load vertex data from dgf file.
@@ -199,10 +204,16 @@ append_sdata(others ...);
 
 return; }
 
+/*!
+    /}
+ */
+
 // Input routines =========================================================== //
+
 
 // -------------------------------------------------------------------------- //
 /*!
+    \ingroup DuneGridFormat
     Read data block from dgf file.
 
     \param[in,out] file_handle input stream from dgf file
@@ -292,6 +303,7 @@ return(0); }
 
 // -------------------------------------------------------------------------- //
 /*!
+    \ingroup DuneGridFormat
     Read vertex data from dgf file.
 
     \param[in,out] file_handle input stream from dgf file
@@ -387,6 +399,7 @@ return(0); }
 
 // -------------------------------------------------------------------------- //
 /*!
+    \ingroup DuneGridFormat
     Read cell data from dgf file.
 
     \param[in,out] file_handle input stream from dgf file
@@ -484,6 +497,7 @@ return(0); }
 
 // -------------------------------------------------------------------------- //
 /*!
+    \ingroup DuneGridFormat
     Write data block to dgf file.
 
     \param[in,out] file_handle output stream to dgf file
@@ -528,6 +542,7 @@ return(0); }
 
 // -------------------------------------------------------------------------- //
 /*!
+    \ingroup DuneGridFormat
     Write vertex data to dgf file.
 
     \param[in,out] file_handle output stream to dgf file
@@ -582,6 +597,7 @@ return(err); };
 
 // -------------------------------------------------------------------------- //
 /*!
+    \ingroup DuneGridFormat
     Write cell data to dgf file.
 
     \param[in,out] file_handle output stream to dgf file
@@ -633,4 +649,5 @@ file_handle << header << std::endl;
 err = Write_DGF_data(file_handle, N, Data);
 
 return(err); };
+
 
