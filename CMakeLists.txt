@@ -38,6 +38,100 @@ set(WITHOUT_MPI "1" CACHE INTERNAL "If set, the program is compiled without MPI 
 set(STATIC 1 CACHE BOOL INTERNAL "If set, the program is linked using static libraries")
 
 #------------------------------------------------------------------------------------#
+# Functions
+#------------------------------------------------------------------------------------#
+function(getModuleEnableName MODULE_NAME FLAG_NAME)
+	string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
+	string(TOUPPER ${${MODULE_NAME}_GROUP} UPPER_GROUP_NAME)
+	set(${FLAG_NAME} "BITPIT_${UPPER_GROUP_NAME}_${UPPER_MODULE_NAME}" PARENT_SCOPE)
+endfunction()
+
+function(isModuledEnabled MODULE_NAME ENABLED)
+	getModuleEnableName(${MODULE_NAME} ENABLED_VARIABLE)
+	if (DEFINED ${ENABLED_VARIABLE})
+		set(${ENABLED} ${${ENABLED_VARIABLE}} PARENT_SCOPE)
+	else ()
+		set(${ENABLED} "FALSE" PARENT_SCOPE)
+	endif ()
+endfunction()
+
+function(enableModule MODULE_NAME ENABLED)
+	set (EXTRA_ARGUMENTS ${ARGN})
+	list(LENGTH EXTRA_ARGUMENTS EXTRA_ARGUMENT_COUNT)
+	if (${EXTRA_ARGUMENT_COUNT} GREATER 0)
+		list(GET EXTRA_ARGUMENTS 0 FORCED)
+		if (FORCED)
+			set(FORCE_FLAG "FORCE")
+		endif()
+	endif ()
+
+	if (NOT DEFINED FORCE_FLAG)
+		set(FORCE_FLAG "")
+	endif ()
+
+	getModuleEnableName(${MODULE_NAME} MODULE_ENABLE_FLAG)
+	set(${MODULE_ENABLE_FLAG} ${ENABLED} CACHE BOOL "Request building ${MODULE_NAME} module" ${FORCE_FLAG})
+	mark_as_advanced(${MODULE_ENABLE_FLAG})
+
+	isGroupEnabled(${${MODULE_NAME}_GROUP} GROUP_ENABLED)
+	if (NOT GROUP_ENABLED)
+		enableGroup(${MODULE_GROUP} TRUE TRUE)
+	endif ()
+endfunction()
+
+function(hideModule MODULE_NAME)
+	getModuleEnableName(${MODULE_NAME} MODULE_ENABLE_FLAG)
+	if (DEFINED ${MODULE_ENABLE_FLAG})
+		unset(${MODULE_ENABLE_FLAG} CACHE)
+	endif ()
+endfunction()
+
+function(getGroupEnableName GROUP_NAME FLAG_NAME)
+	string(TOUPPER ${GROUP_NAME} UPPER_GROUP_NAME)
+	set(${FLAG_NAME} "BITPIT_${UPPER_GROUP_NAME}" PARENT_SCOPE)
+endfunction()
+
+function(isGroupEnabled GROUP_NAME ENABLED)
+	getGroupEnableName(${GROUP_NAME} ENABLED_VARIABLE)
+	if (DEFINED ${ENABLED_VARIABLE})
+		set(${ENABLED} ${${ENABLED_VARIABLE}} PARENT_SCOPE)
+	else ()
+		set(${ENABLED} "FALSE" PARENT_SCOPE)
+	endif ()
+endfunction()
+
+function(enableGroup GROUP_NAME ENABLED)
+	set (EXTRA_ARGUMENTS ${ARGN})
+	list(LENGTH EXTRA_ARGUMENTS EXTRA_ARGUMENT_COUNT)
+	if (${EXTRA_ARGUMENT_COUNT} GREATER 0)
+		list(GET EXTRA_ARGUMENTS 0 FORCED)
+		if (FORCED)
+			set(FORCE_FLAG "FORCE")
+		endif()
+	endif ()
+
+	if (NOT DEFINED FORCE_FLAG)
+		set(FORCE_FLAG "")
+	endif ()
+
+	getGroupEnableName(${GROUP_NAME} GROUP_ENABLE_FLAG)
+	set(${GROUP_ENABLE_FLAG} ${ENABLED} CACHE BOOL "Request building ${MODULE_NAME} BitPit modules" ${FORCE_FLAG})
+
+	isGroupEnabled(${GROUP_NAME} GROUP_ENABLED)
+	string(TOUPPER ${GROUP_NAME} UPPER_GROUP_NAME)
+	foreach (MODULE_NAME IN LISTS BITPIT_${UPPER_GROUP_NAME}_MODULE_LIST)
+		if (GROUP_ENABLED)
+			isModuledEnabled(${MODULE_NAME} MODULE_ENABLED)
+			if (NOT MODULE_ENABLED)
+				enableModule(${MODULE_NAME} TRUE)
+			endif ()
+		else ()
+			hideModule(${MODULE_NAME})
+		endif ()
+	endforeach ()
+endfunction()
+
+#------------------------------------------------------------------------------------#
 # External dependencies
 #------------------------------------------------------------------------------------#
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${BITPIT_DIR}/cmake/Modules")
@@ -135,6 +229,47 @@ foreach (GROUP_NAME IN LISTS BITPIT_GROUP_LIST)
 		set(${MODULE_NAME}_GROUP ${GROUP_NAME})
 	endforeach ()
 endforeach ()
+
+#------------------------------------------------------------------------------------#
+# Modules dependecies
+#------------------------------------------------------------------------------------#
+set(CONTAINERS_DEPS "operators")
+set(IO_DEPS "operators")
+set(LA_DEPS "operators")
+set(SA_DEPS "operators")
+
+#------------------------------------------------------------------------------------#
+# Check of the dependencies
+#------------------------------------------------------------------------------------#
+foreach (GROUP_NAME IN LISTS BITPIT_GROUP_LIST)
+	enableGroup(${GROUP_NAME} 1)
+endforeach ()
+
+set(CHECK_DEPS 1)
+while (${CHECK_DEPS} EQUAL 1)
+	set(CHECK_DEPS 0)
+	foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
+		isModuledEnabled(${MODULE_NAME} MODULE_ENABLED)
+		if (MODULE_ENABLED)
+			string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
+			foreach (DEPENDENCY_NAME IN LISTS ${UPPER_MODULE_NAME}_DEPS)
+				isModuledEnabled(${DEPENDENCY_NAME} DEPENDENCY_ENABLED)
+				if (NOT DEPENDENCY_ENABLED)
+					set(CHECK_DEPS 1 BOOL)
+					enableModule(${DEPENDENCY_NAME} TRUE TRUE)
+					message("Module '${DEPENDENCY_NAME}' has been enabled because it's needed by module '${MODULE_NAME}'")
+				endif ()
+			endforeach ()
+		endif ()
+		unset(MODULE_ENABLE_FLAG)
+	endforeach ()
+endwhile()
+unset(CHECK_DEPS)
+
+# Module 'operators' module has to be always build
+getModuleEnableName("operators" BASE_ENABLE_VARIABLE)
+unset(${BASE_ENABLE_VARIABLE} CACHE)
+set(${BASE_ENABLE_VARIABLE} 1 CACHE INTERNAL "Request building operators module" FORCE)
 
 #------------------------------------------------------------------------------------#
 # Subdirectories

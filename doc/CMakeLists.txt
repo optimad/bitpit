@@ -19,10 +19,25 @@ IF(BUILD_DOCUMENTATION)
   ENDIF ()
 
   # Doxygen options
-  SET(DOXYFILE_IN ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
-  SET(DOXYFILE ${PROJECT_BINARY_DIR}/Doxyfile)
+  #
+  # DOXY_INPUT_DIRECTORIES will be substitued in the Doxygen input file,
+  # therefore its elements are separated by spaces and not by semicolons.
+  SET(DOXYFILE_IN          ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
+  SET(DOXYFILE             ${PROJECT_BINARY_DIR}/Doxyfile)
   SET(DOXY_HTML_INDEX_FILE ${CMAKE_CURRENT_BINARY_DIR}/html/index.html)
-  SET(DOXY_EXTRA_FILES ${CMAKE_CURRENT_SOURCE_DIR}/extra/BitP_Base.hpp)
+  SET(DOXY_OUTPUT_ROOT     ${CMAKE_CURRENT_BINARY_DIR})
+
+  SET(DOXY_INPUT_DIRECTORIES "${CMAKE_SOURCE_DIR}/src/common \\\n      ${CMAKE_SOURCE_DIR}/examples \\\n      ${CMAKE_SOURCE_DIR}/extra")
+  SET(DOXY_INPUT_FILES "${COMMON_HEADERS};${EXAMPLES_SOURCES}")
+  foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
+    isModuledEnabled(${MODULE_NAME} MODULE_ENABLED)
+    if (MODULE_ENABLED)
+       string(TOUPPER ${MODULE_NAME} UPPERCASE_MODULE_NAME)
+
+       set(DOXY_INPUT_DIRECTORIES "${DOXY_INPUT_DIRECTORIES} \\\n      ${CMAKE_SOURCE_DIR}/src/${MODULE_NAME}")
+       list(APPEND DOXY_INPUT_FILES ${${UPPERCASE_MODULE_NAME}_SOURCES} ${${UPPERCASE_MODULE_NAME}_HEADERS})
+    endif ()
+  endforeach ()
 
   # Create Doxygen input file
   if (NOT "${DOC_EXTRACT_PRIVATE_INTERNAL}" STREQUAL "${DOC_EXTRACT_PRIVATE}")
@@ -43,12 +58,7 @@ IF(BUILD_DOCUMENTATION)
                       # custom_command for ${DOXYFILE} generation
                       # but I still have to figure out how...
                       MAIN_DEPENDENCY ${DOXYFILE} ${DOXYFILE_IN}
-                      DEPENDS ${DOXY_EXTRA_FILES} ${DOXYFILE_IN}
-                              ${COMMON_HEADERS}
-                              ${OPERATORS_SOURCES} ${OPERATORS_HEADERS}
-                              ${IO_SOURCES} ${IO_HEADERS}
-                              ${SA_SOURCES} ${SA_HEADERS}
-                              ${EXAMPLES_SOURCES}
+                      DEPENDS ${DOXYFILE_IN} ${DOXY_INPUT_FILES}
                       COMMENT "Generating HTML documentation")
 
   ADD_CUSTOM_TARGET( doc ALL DEPENDS ${DOXY_HTML_INDEX_FILE} )

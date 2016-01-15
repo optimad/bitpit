@@ -11,10 +11,12 @@ add_subdirectory(common)
 
 # Modules
 foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
-	string(TOUPPER ${MODULE_NAME} UPPERCASE_MODULE_NAME)
-
-	add_subdirectory(${MODULE_NAME})
-	set(BITPIT_SOURCES ${BITPIT_SOURCES} $<TARGET_OBJECTS:${UPPERCASE_MODULE_NAME}_TARGET_OBJECT>)
+	isModuledEnabled(${MODULE_NAME} MODULE_ENABLED)
+	if (MODULE_ENABLED)
+		string(TOUPPER ${MODULE_NAME} UPPERCASE_MODULE_NAME)
+		add_subdirectory(${MODULE_NAME})
+		set(BITPIT_SOURCES ${BITPIT_SOURCES} $<TARGET_OBJECTS:${UPPERCASE_MODULE_NAME}_TARGET_OBJECT>)
+	endif ()
 endforeach()
 
 #------------------------------------------------------------------------------------#
