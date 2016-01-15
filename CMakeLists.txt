@@ -109,6 +109,34 @@ STRING(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" match "${BITP_BASE_VERS
 set(BITP_BASE_MAJOR_VERSION "${match}")
 
 #------------------------------------------------------------------------------------#
+# List of all avilable modules
+#------------------------------------------------------------------------------------#
+set(BITPIT_GROUP_LIST "")
+list(APPEND BITPIT_GROUP_LIST "base")
+
+set(BITPIT_BASE_MODULE_LIST "")
+list(APPEND BITPIT_BASE_MODULE_LIST "operators")
+list(APPEND BITPIT_BASE_MODULE_LIST "containers")
+list(APPEND BITPIT_BASE_MODULE_LIST "IO")
+list(APPEND BITPIT_BASE_MODULE_LIST "LA")
+list(APPEND BITPIT_BASE_MODULE_LIST "SA")
+
+set(BITPIT_MODULE_LIST "")
+foreach (GROUP_NAME IN LISTS BITPIT_GROUP_LIST)
+	string(TOUPPER ${GROUP_NAME} UPPER_GROUP_NAME)
+	foreach (MODULE_NAME IN LISTS BITPIT_${UPPER_GROUP_NAME}_MODULE_LIST)
+		list(APPEND BITPIT_MODULE_LIST ${MODULE_NAME})
+	endforeach ()
+endforeach ()
+
+foreach (GROUP_NAME IN LISTS BITPIT_GROUP_LIST)
+	string(TOUPPER ${GROUP_NAME} UPPER_GROUP_NAME)
+	foreach (MODULE_NAME IN LISTS BITPIT_${UPPER_GROUP_NAME}_MODULE_LIST)
+		set(${MODULE_NAME}_GROUP ${GROUP_NAME})
+	endforeach ()
+endforeach ()
+
+#------------------------------------------------------------------------------------#
 # Subdirectories
 #------------------------------------------------------------------------------------#
 
