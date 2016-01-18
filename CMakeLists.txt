@@ -186,7 +186,11 @@ if (ENABLE_PROFILING)
 	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
 endif (ENABLE_PROFILING)
 
-add_compile_options("-std=c++11")
+if (NOT (${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}.${CMAKE_PATCH_VERSION} LESS 2.8.12))
+	add_compile_options("-std=c++11")
+else ()
+	add_definitions("-std=c++11")
+endif ()
 
 #------------------------------------------------------------------------------------#
 # Library version
