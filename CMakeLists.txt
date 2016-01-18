@@ -206,6 +206,12 @@ set(BITPIT_VERSION "${match}")
 STRING(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" match "${BITPIT_VERSION}")
 set(BITPIT_MAJOR_VERSION "${match}")
 
+STRING(REGEX REPLACE "^[0-9]+\\.([0-9])+\\.[0-9]+" "\\1" match "${BITPIT_VERSION}")
+set(BITPIT_MINOR_VERSION "${match}")
+
+STRING(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" match "${BITPIT_VERSION}")
+set(BITPIT_PATCH_VERSION "${match}")
+
 #------------------------------------------------------------------------------------#
 # List of all avilable modules
 #------------------------------------------------------------------------------------#
