@@ -576,7 +576,7 @@ ClassParaTree::setMaxLevel(int8_t maxlevel){
  * \param[in] Length of the octree.
  */
 void
-ClassParaTree::getL(double L){
+ClassParaTree::setL(double L){
 	m_trans.m_L = L;
 };
 
