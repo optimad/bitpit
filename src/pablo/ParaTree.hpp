@@ -26,8 +26,6 @@
 // =================================================================================== //
 typedef std::vector<bool>				bvector;
 typedef std::bitset<72>					octantID;
-typedef u32vector::iterator				iteratorOctantsIdx;
-typedef std::vector<Octant*>::iterator	iteratorOctantsPtr;
 
 // =================================================================================== //
 // CLASS DEFINITION                                                                    //
@@ -72,8 +70,6 @@ private:
 	int 					m_rank;							/**<Local m_rank of process*/
 	LocalTree 				m_octree;						/**<Local tree in each processor*/
 	std::map<int,u32vector> m_bordersPerProc;				/**<Local indices of border octants per process*/
-//	u32vector				m_pborderOctants;				/**<Local indices of pborder octants*/
-//	u32vector				m_internalOctants;				/**<Local indices of internal and no-border octants*/
 
 	//distributed adpapting memebrs
 	u32vector 				m_mapIdx;						/**<Local mapper for adapting. Mapper from new octants to old octants.
@@ -1482,22 +1478,6 @@ public:
 
 	// =============================================================================== //
 
-	// =================================================================================== //
-	// ITERATORS
-	// =================================================================================== //
-
-//	iteratorOctantsIdx	getInternalIterator(){
-//		return m_internalOctants.begin();
-//	};
-//	iteratorOctantsIdx	getInternalIteratorEnd(){
-//		return m_internalOctants.end();
-//	};
-//	iteratorOctantsIdx	getPboundIterator(){
-//		return m_pborderOctants.begin();
-//	};
-//	iteratorOctantsIdx	getPboundIteratorEnd(){
-//		return m_pborderOctants.end();
-//	};
 
 };
 
