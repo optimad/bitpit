@@ -580,6 +580,14 @@ ClassParaTree::setL(double L){
 	m_trans.m_L = L;
 };
 
+/*! Set the origin of the domain.
+ * \param[in] Oriin of the octree.
+ */
+void
+ClassParaTree::setOrigin(darray3 origin){
+	m_trans.m_origin = origin;
+};
+
 // =================================================================================== //
 // INDEX BASED METHODS
 // =================================================================================== //

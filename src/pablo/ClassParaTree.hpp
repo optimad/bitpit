@@ -156,6 +156,7 @@ public:
 	int8_t 		(*getEdgecoeffs())[3];
 	void 		setMaxLevel(int8_t maxlevel);
 	void		setL(double L);
+	void		setOrigin(darray3 origin);
 
 	// =================================================================================== //
 	// INDEX BASED METHODS																   //
