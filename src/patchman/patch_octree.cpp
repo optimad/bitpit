@@ -36,7 +36,7 @@ PatchOctree::PatchOctree(const int &id, const int &dimension,
 	// Inizializzazione dell'octree
 	double initial_level = ceil(log2(std::max(1., length / dh)));
 
-	m_tree = ClassParaTree(origin[0], origin[1], origin[2], length, get_dimension());
+	m_tree = ParaTree(origin[0], origin[1], origin[2], length, get_dimension());
 	m_tree.setMarker((uint32_t) 0, initial_level);
 
 	// Info sull'octree
@@ -95,7 +95,7 @@ std::array<double, 3> PatchOctree::eval_cell_centroid(const long &id)
 {
 	OctantInfo octantInfo = get_cell_octant(id);
 
-	ClassOctant *octant;
+	Octant *octant;
 	if (octantInfo.internal) {
 		octant = m_tree.getOctant(octantInfo.id);
 	} else {
@@ -171,7 +171,7 @@ PatchOctree::OctantInfo PatchOctree::get_cell_octant(const long &id) const
 
 	\result A reference to the octree associated to the patch.
 */
-ClassParaTree & PatchOctree::get_tree()
+ParaTree & PatchOctree::get_tree()
 {
 	return m_tree;
 }
@@ -225,7 +225,7 @@ const std::vector<uint32_t> & PatchOctree::get_octant_connect(const OctantInfo &
 PatchOctree::OctantHash PatchOctree::evaluate_octant_hash(const OctantInfo &octantInfo)
 {
 	uint8_t level   = m_tree.getLevel(octantInfo.id);
-	uint64_t morton = m_tree.computeMorton(octantInfo.id);
+	uint64_t morton = m_tree.getMorton(octantInfo.id);
 
 	OctantHash octantHash;
 	octantHash |= morton;
@@ -245,7 +245,7 @@ int PatchOctree::get_cell_level(const long &id)
 {
 	OctantInfo octantInfo = get_cell_octant(id);
 
-	ClassOctant *octant;
+	Octant *octant;
 	if (m_tree.getIsGhost(octantInfo.id)) {
 		octant = m_tree.getGhostOctant(octantInfo.id);
 	} else {
@@ -754,7 +754,7 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 		}
 
 		// Info on the interface
-		ClassIntersection *treeInterface = m_tree.getIntersection(interfaceTreeId);
+		Intersection *treeInterface = m_tree.getIntersection(interfaceTreeId);
 
 		int owner       = m_tree.getOut(treeInterface);
 		int ownerFace   = m_tree.getFace(treeInterface);
@@ -855,7 +855,7 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 			const long &interfaceId = interfaceMap.at(interfaceTreeId);
 			const Interface &interface = m_interfaces[interfaceId];
 
-			ClassIntersection *treeInterface = m_tree.getIntersection(interfaceTreeId);
+			Intersection *treeInterface = m_tree.getIntersection(interfaceTreeId);
 			int owner = m_tree.getOut(treeInterface);
 			bool ownerFlag = (owner == octantInfo.id);
 

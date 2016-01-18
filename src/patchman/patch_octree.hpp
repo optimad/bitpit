@@ -9,7 +9,7 @@
 
 #include "patch.hpp"
 
-#include "ClassParaTree.hpp"
+#include "ParaTree.hpp"
 
 #include <assert.h>
 #include <deque>
@@ -60,7 +60,7 @@ public:
 	long get_octant_id(const OctantInfo &octantInfo) const;
 	const std::vector<uint32_t> & get_octant_connect(const OctantInfo &octantInfo);
 
-	ClassParaTree & get_tree();
+	ParaTree & get_tree();
 
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
@@ -102,7 +102,7 @@ private:
 	std::unordered_map<uint32_t, long> m_octant_to_cell;
 	std::unordered_map<uint32_t, long> m_ghost_to_cell;
 
-	ClassParaTree m_tree;
+	ParaTree m_tree;
 
 	std::vector<double> m_tree_dh;
 	std::vector<double> m_tree_area;
