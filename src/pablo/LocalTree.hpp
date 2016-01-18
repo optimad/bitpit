@@ -12,7 +12,7 @@
 // TYPEDEFS
 // =================================================================================== //
 
-typedef std::vector<Octant>		 	octvector;
+typedef std::vector<Octant>		 		octvector;
 typedef std::vector<Intersection>	 	intervector;
 
 // =================================================================================== //

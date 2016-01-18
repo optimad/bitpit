@@ -118,12 +118,14 @@ int main(int argc, char *argv[]) {
 			bool adapt = true;
 			while (adapt){
 
-				for (int i=0; i<nocts; i++){
+				octantIterator it, itend = pabloBB.getInternalOctantsEnd();
+//				for (int i=0; i<nocts; i++){
+				for (it=pabloBB.getInternalOctantsBegin(); it!=itend; ++it){
 					bool inside = false;
 					/**<Compute the nodes of the octant.*/
-					vector<array<double,3> > nodes = pabloBB.getNodes(i);
+					vector<array<double,3> > nodes = pabloBB.getNodes((*it));
 					/**<Compute the center of the octant.*/
-					array<double,3> center = pabloBB.getCenter(i);
+					array<double,3> center = pabloBB.getCenter((*it));
 					int ib = 0;
 					while (!inside && ib<nb){
 						double xc = BB[ib].c[0];
@@ -138,21 +140,61 @@ int main(int argc, char *argv[]) {
 											pow((x-xc),2.0)+pow((y-yc),2.0) >= 0.85*pow(radius,2.0)))
 											|| ((!inside) && (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) <= 1.15*pow(radius,2.0) &&
 													pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) >= 0.85*pow(radius,2.0)))){
-								if (pabloBB.getLevel(i) < 9){
+								if (pabloBB.getLevel((*it)) < 9){
 									/**<Set to refine inside a band around the interface of the bubbles.*/
-									pabloBB.setMarker(i,1);
+									pabloBB.setMarker((*it),1);
 								}
 								else{
-									pabloBB.setMarker(i,0);
+									pabloBB.setMarker((*it),0);
 								}
 								inside = true;
 							}
 						}
 						ib++;
 					}
-					if (pabloBB.getLevel(i) > 0 && !inside){
+					if (pabloBB.getLevel((*it)) > 0 && !inside){
 						/**<Set to coarse outside the band if the octant has a level higher than 6.*/
-						pabloBB.setMarker(i,5-pabloBB.getLevel(i));
+						pabloBB.setMarker((*it),5-pabloBB.getLevel((*it)));
+					}
+				}
+
+				itend = pabloBB.getPboundOctantsEnd();
+//				for (int i=0; i<nocts; i++){
+				for (it=pabloBB.getPboundOctantsBegin(); it!=itend; ++it){
+					bool inside = false;
+					/**<Compute the nodes of the octant.*/
+					vector<array<double,3> > nodes = pabloBB.getNodes((*it));
+					/**<Compute the center of the octant.*/
+					array<double,3> center = pabloBB.getCenter((*it));
+					int ib = 0;
+					while (!inside && ib<nb){
+						double xc = BB[ib].c[0];
+						double yc = BB[ib].c[1];
+						double radius = BB[ib].r;
+						/**<Set marker with condition on center or nodes of the octant.*/
+						for (int j=0; j<4; j++){
+							double x = nodes[j][0];
+							double y = nodes[j][1];
+							if ( ((!inside) &&
+									(pow((x-xc),2.0)+pow((y-yc),2.0) <= 1.15*pow(radius,2.0) &&
+											pow((x-xc),2.0)+pow((y-yc),2.0) >= 0.85*pow(radius,2.0)))
+											|| ((!inside) && (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) <= 1.15*pow(radius,2.0) &&
+													pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) >= 0.85*pow(radius,2.0)))){
+								if (pabloBB.getLevel((*it)) < 9){
+									/**<Set to refine inside a band around the interface of the bubbles.*/
+									pabloBB.setMarker((*it),1);
+								}
+								else{
+									pabloBB.setMarker((*it),0);
+								}
+								inside = true;
+							}
+						}
+						ib++;
+					}
+					if (pabloBB.getLevel((*it)) > 0 && !inside){
+						/**<Set to coarse outside the band if the octant has a level higher than 6.*/
+						pabloBB.setMarker((*it),5-pabloBB.getLevel((*it)));
 					}
 				}
 

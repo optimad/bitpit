@@ -26,6 +26,8 @@
 // =================================================================================== //
 typedef std::vector<bool>				bvector;
 typedef std::bitset<72>					octantID;
+typedef std::vector<Octant*>			ptroctvector;
+typedef ptroctvector::iterator			octantIterator;
 
 // =================================================================================== //
 // CLASS DEFINITION                                                                    //
@@ -70,6 +72,8 @@ private:
 	int 					m_rank;							/**<Local m_rank of process*/
 	LocalTree 				m_octree;						/**<Local tree in each processor*/
 	std::map<int,u32vector> m_bordersPerProc;				/**<Local indices of border octants per process*/
+	ptroctvector 			m_internals;					/**<Local pointers to internal octants*/
+	ptroctvector 			m_pborders;						/**<Local pointers to border of process octants*/
 
 	//distributed adpapting memebrs
 	u32vector 				m_mapIdx;						/**<Local mapper for adapting. Mapper from new octants to old octants.
@@ -247,10 +251,16 @@ public:
 	double	 	getLocalMinSize();
 	uint8_t 	getBalanceCodimension() const;
 	void 		getBoundingBox(darray3 & P0, darray3 & P1);
-	void 		setBalanceCodimension(uint8_t b21codim);
 	const Octant & getFirstDesc() const;
 	const Octant & getLastDesc() const;
 	uint64_t 	getLastDescMorton(uint32_t idx);
+#if ENABLE_MPI==1
+	octantIterator	getInternalOctantsBegin();
+	octantIterator	getInternalOctantsEnd();
+	octantIterator	getPboundOctantsBegin();
+	octantIterator	getPboundOctantsEnd();
+#endif
+	void 		setBalanceCodimension(uint8_t b21codim);
 
 	// =================================================================================== //
 	// INTERSECTION GET/SET METHODS														   //

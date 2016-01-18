@@ -1409,6 +1409,40 @@ ParaTree::getLastDescMorton(uint32_t idx) {
 	return m_octree.m_octants[idx].buildLastDesc(m_global.m_maxLevel).computeMorton();
 };
 
+#if ENABLE_MPI==1
+/*!Get the begin position for the iterator of the local internal octants.
+ * \return Iterator begin of the local internal octants (dereferencing results in a pointer to an octant).
+ */
+octantIterator
+ParaTree::getInternalOctantsBegin(){
+	return m_internals.begin();
+}
+
+/*!Get the end position for the iterator of the local internal octants.
+ * \return Iterator end of the local internal octants (dereferencing results in a pointer to an octant).
+ */
+octantIterator
+ParaTree::getInternalOctantsEnd(){
+	return m_internals.end();
+}
+
+/*!Get the begin position for the iterator of the local border of process octants.
+ * \return Iterator begin of the local border of process octants (dereferencing results in a pointer to an octant).
+ */
+octantIterator
+ParaTree::getPboundOctantsBegin(){
+	return m_pborders.begin();
+}
+
+/*!Get the end position for the iterator of the local border of process octants.
+ * \return Iterator end of the local border of process octants (dereferencing results in a pointer to an octant).
+ */
+octantIterator
+ParaTree::getPboundOctantsEnd(){
+	return m_pborders.end();
+}
+#endif
+
 /*! Set the codimension for 2:1 balancing
  * \param[in] Maximum codimension of the entity through which the 2:1 balance is performed (1 = 2:1 balance through edges (default); 2 = 2:1 balance through nodes and edges).
  */
@@ -3433,6 +3467,13 @@ ParaTree::updateAdapt(){
 		for(int p = 0; p < m_nproc; ++p){
 			m_partitionRangeGlobalIdx[p] = m_globalNumOctants - 1;
 		}
+		m_internals.resize(getNumOctants());
+		int i = 0;
+		octvector::iterator itend = m_octree.m_octants.end();
+		for (octvector::iterator it = m_octree.m_octants.begin(); it != itend; ++it){
+			m_internals[i] = &(*it);
+			i++;
+		}
 #if ENABLE_MPI==1
 	}
 	else
@@ -3817,30 +3858,27 @@ ParaTree::setPboundGhosts() {
 	LocalTree::octvector::iterator end = m_octree.m_octants.end();
 	LocalTree::octvector::iterator begin = m_octree.m_octants.begin();
 	m_bordersPerProc.clear();
-	int count = 0;
+	m_internals.resize(getNumOctants());
+	m_pborders.resize(getNumOctants());
+	bool pbd = false;
+	int countpbd = 0;
+	int countint = 0;
 	for(LocalTree::octvector::iterator it = begin; it != end; ++it){
 		set<int> procs;
-		//if (m_rank!=0) cout << m_rank << " border face " << endl;
-        //if (m_rank!=0 && it->getZ()==0) cout << "oct " << count << " info " << it->m_info << endl;
-        //if (m_rank!=0 && it->getZ()==0) cout << it->getX() << " " << it->getY() << "  " << it->getZ() << endl;
 		//Virtual Face Neighbors
 		for(uint8_t i = 0; i < m_global.m_nfaces; ++i){
 			if(it->getBound(i) == false){
-				//if (m_rank!=0 && it->getZ()==0) cout << "oct " << count << " face " << int(i) << " bound " << it->getBound(i) << endl;
 				uint32_t virtualNeighborsSize = 0;
 				vector<uint64_t> virtualNeighbors = it->computeVirtualMorton(i,m_maxDepth,virtualNeighborsSize,m_global.m_maxLevel);
 				uint32_t maxDelta = virtualNeighborsSize/2;
 				for(uint32_t j = 0; j <= maxDelta; ++j){
-					//if (m_rank!=0 && it->getZ()==0) cout << "oct " << count << " j " << j << " face " << int(i) << " searching for pBegin " << virtualNeighbors[j] << endl;
 					int pBegin = findOwner(virtualNeighbors[j]);
-					//if (m_rank!=0) cout << j << " pBegin " << pBegin << endl;
-					//if (m_rank!=0) cout << j << " searching for pEnd " << virtualNeighbors[virtualNeighborsSize - 1 - j] << endl;
 					int pEnd = findOwner(virtualNeighbors[virtualNeighborsSize - 1 - j]);
-					//if (m_rank!=0) cout << j << " pEnd " << pEnd << endl;
 					procs.insert(pBegin);
 					procs.insert(pEnd);
 					if(pBegin != m_rank || pEnd != m_rank){
 						it->setPbound(i,true);
+						pbd = true;
 					}
 					else{
 						it->setPbound(i,false);
@@ -3860,6 +3898,9 @@ ParaTree::setPboundGhosts() {
 					int pEnd = findOwner(virtualEdgeNeighbors[virtualEdgeNeighborSize - 1- ee]);
 					procs.insert(pBegin);
 					procs.insert(pEnd);
+					if(pBegin != m_rank || pEnd != m_rank){
+						pbd = true;
+					}
 				}
 			}
 		}
@@ -3872,6 +3913,9 @@ ParaTree::setPboundGhosts() {
 				if(virtualCornerNeighborSize){
 					int proc = findOwner(virtualCornerNeighbor);
 					procs.insert(proc);
+					if(proc != m_rank ){
+						pbd = true;
+					}
 				}
 			}
 		}
@@ -3887,8 +3931,18 @@ ParaTree::setPboundGhosts() {
 					bordersSingleProc.reserve(2*bordersSingleProc.size());
 			}
 		}
-		count++;
+
+		if (pbd){
+			m_pborders[countpbd] = &(*it);
+			countpbd++;
+		}
+		else{
+			m_internals[countint] = &(*it);
+			countint++;
+		}
 	}
+	m_pborders.resize(countpbd);
+	m_internals.resize(countint);
 
 	//cout << m_rank << " border end " << endl;
 
