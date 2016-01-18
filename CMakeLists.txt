@@ -30,6 +30,7 @@ endif()
 
 set(ONLY_PABLO 0 CACHE BOOL "If set, pablo is compiled stand alone")
 
+set(BITPIT_FIND_MODULE_DIR "/opt/bitpit/BitPit/cmake/Modules" CACHE PATH "Directory where the CMake find module of BitPit is located")
 set(ENABLE_PROFILING 0 CACHE BOOL "Set appropriate compiler flags to enable profiling")
 set(VERBOSE_MAKE 0 CACHE BOOL "Set appropriate compiler and cmake flags to enable verbose output from compilation")
 
@@ -47,7 +48,7 @@ set(STATIC 1 CACHE BOOL INTERNAL "If set, the program is linked using static lib
 #------------------------------------------------------------------------------------#
 # External dependencies
 #------------------------------------------------------------------------------------#
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${BITPIT_DIR}/cmake/Modules")
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${BITPIT_FIND_MODULE_DIR}")
 
 if (ENABLE_MPI)
 	find_package(MPI)

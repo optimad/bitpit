@@ -2,7 +2,7 @@
 cmake_minimum_required(VERSION 2.8)
 
 # Directory where to intall the CMake find module
-set(DEFAULT_DIR "${BITPIT_DIR}/cmake/Modules")
+set(DEFAULT_DIR "${BITPIT_FIND_MODULE_DIR}")
 
 set(FIND_MODULE_CUSTOMIZE_INSTALL OFF CACHE BOOL "Enables the customization of the directory where the CMake module file will be installed.")
 mark_as_advanced(FIND_MODULE_CUSTOMIZE_INSTALL)
