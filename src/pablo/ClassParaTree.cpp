@@ -782,7 +782,7 @@ ClassParaTree::getLevel(uint32_t idx){
  * \return morton Morton index of the octant.
  */
 uint64_t
-ClassParaTree::computeMorton(uint32_t idx){
+ClassParaTree::getMorton(uint32_t idx){
 	return m_octree.computeMorton(idx);
 };
 
@@ -1118,7 +1118,7 @@ ClassParaTree::getLevel(ClassOctant* oct){
  * \return morton Morton index of the octant.
  */
 uint64_t
-ClassParaTree::computeMorton(ClassOctant* oct){
+ClassParaTree::getMorton(ClassOctant* oct){
 	return oct->computeMorton();
 };
 
