@@ -27,6 +27,6 @@
 *
 */
 
-#include "ClassParaTree.hpp"
+#include "ParaTree.hpp"
 
 #endif

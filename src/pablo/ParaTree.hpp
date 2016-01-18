@@ -24,8 +24,10 @@
 // =================================================================================== //
 // TYPEDEFS																			   //
 // =================================================================================== //
-typedef std::vector<bool>			bvector;
-typedef std::bitset<72>				octantID;
+typedef std::vector<bool>				bvector;
+typedef std::bitset<72>					octantID;
+typedef u32vector::iterator				iteratorOctantsIdx;
+typedef std::vector<Octant*>::iterator	iteratorOctantsPtr;
 
 // =================================================================================== //
 // CLASS DEFINITION                                                                    //
@@ -62,7 +64,6 @@ private:
 	uint64_t*				m_partitionLastDesc; 			/**<Global array containing position of the last possible octant in each processor*/
 	uint64_t* 				m_partitionRangeGlobalIdx;	 	/**<Global array containing global index of the last existing octant in each processor*/
 	uint64_t 				m_globalNumOctants;   			/**<Global number of octants in the parallel octree*/
-	std::map<int,u32vector> m_bordersPerProc;				/**<Local indices of border octants per process*/
 	int 					m_nproc;						/**<Number of processes of the job*/
 	uint8_t 				m_maxDepth;						/**<Global max existing level in the parallel octree*/
 	Global					m_global;						/**<Global variables*/
@@ -70,6 +71,9 @@ private:
 	//distributed members
 	int 					m_rank;							/**<Local m_rank of process*/
 	LocalTree 				m_octree;						/**<Local tree in each processor*/
+	std::map<int,u32vector> m_bordersPerProc;				/**<Local indices of border octants per process*/
+//	u32vector				m_pborderOctants;				/**<Local indices of pborder octants*/
+//	u32vector				m_internalOctants;				/**<Local indices of internal and no-border octants*/
 
 	//distributed adpapting memebrs
 	u32vector 				m_mapIdx;						/**<Local mapper for adapting. Mapper from new octants to old octants.
@@ -90,9 +94,10 @@ private:
 	uint64_t				m_status;						/**<Label of actual m_status of octree (incremental after an adpat
 															with at least one modifyed element).*/
 
-	//m_log member
+	//log member
 	Log 					m_log;							/**<Log object*/
 
+	//communicator
 #if ENABLE_MPI==1
 	MPI_Comm 				m_comm;							/**<MPI communicator*/
 #endif
@@ -1476,6 +1481,23 @@ public:
 #endif
 
 	// =============================================================================== //
+
+	// =================================================================================== //
+	// ITERATORS
+	// =================================================================================== //
+
+//	iteratorOctantsIdx	getInternalIterator(){
+//		return m_internalOctants.begin();
+//	};
+//	iteratorOctantsIdx	getInternalIteratorEnd(){
+//		return m_internalOctants.end();
+//	};
+//	iteratorOctantsIdx	getPboundIterator(){
+//		return m_pborderOctants.begin();
+//	};
+//	iteratorOctantsIdx	getPboundIteratorEnd(){
+//		return m_pborderOctants.end();
+//	};
 
 };
 
