@@ -25,6 +25,7 @@
 // TYPEDEFS																			   //
 // =================================================================================== //
 typedef std::vector<bool>			bvector;
+typedef std::bitset<72>				octantID;
 
 // =================================================================================== //
 // CLASS DEFINITION                                                                    //
@@ -193,7 +194,7 @@ public:
 	bool 		getIsNewC(uint32_t idx);
 	uint64_t 	getGlobalIdx(uint32_t idx);
 	uint64_t 	getGhostGlobalIdx(uint32_t idx);
-	std::bitset<72>	getPersistentIdx(uint32_t idx);
+	octantID	getPersistentIdx(uint32_t idx);
 	void 		setMarker(uint32_t idx, int8_t marker);
 	void 		setBalance(uint32_t idx, bool balance);
 
@@ -229,7 +230,7 @@ public:
 	bool 		getIsNewC(ClassOctant* oct);
 	uint32_t 	getIdx(ClassOctant* oct);
 	uint64_t 	getGlobalIdx(ClassOctant* oct);
-	std::bitset<72>	getPersistentIdx(ClassOctant* oct);
+	octantID	getPersistentIdx(ClassOctant* oct);
 	void 		setMarker(ClassOctant* oct, int8_t marker);
 	void 		setBalance(ClassOctant* oct, bool balance);
 
