@@ -572,6 +572,14 @@ ClassParaTree::setMaxLevel(int8_t maxlevel){
 	m_global.m_maxLevel = maxlevel;
 };
 
+/*! Set the length of the domain.
+ * \param[in] Length of the octree.
+ */
+void
+ClassParaTree::getL(double L){
+	m_trans.m_L = L;
+};
+
 // =================================================================================== //
 // INDEX BASED METHODS
 // =================================================================================== //

@@ -155,6 +155,7 @@ public:
 	int8_t 		(*getNodecoeffs())[3];
 	int8_t 		(*getEdgecoeffs())[3];
 	void 		setMaxLevel(int8_t maxlevel);
+	void		setL(double L);
 
 	// =================================================================================== //
 	// INDEX BASED METHODS																   //
