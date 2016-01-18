@@ -889,6 +889,19 @@ ClassParaTree::getGhostGlobalIdx(uint32_t idx){
 	return uint64_t(m_octree.m_sizeGhosts);
 };
 
+/*! Get the persistent index of an octant.
+ * \param[in] idx Local index of target octant.
+ * \return Persistent index of octant,
+ * i.e. a bitset composed by Morton index and level of octant.
+ */
+bitset<72>
+ClassParaTree::getPersistentIdx(uint32_t idx){
+	bitset<72> persistent = getMorton(idx);
+	bitset<72> level = getLevel(idx);
+	persistent <<= 8;
+	persistent |= level;
+	return persistent;
+};
 
 /*! Set the refinement marker of an octant.
  * \param[in] idx Local index of target octant.
@@ -1185,6 +1198,53 @@ ClassParaTree::getIsNewR(ClassOctant* oct){
 bool
 ClassParaTree::getIsNewC(ClassOctant* oct){
 	return oct->getIsNewC();
+};
+
+/*! Get the local index of an octant.
+ * \param[in] oct Pointer to target octant.
+ * \return Local index of octant.
+ */
+uint32_t
+ClassParaTree::getIdx(ClassOctant* oct){
+#if ENABLE_MPI==1
+	if (getIsGhost(oct)){
+		return m_octree.findGhostMorton(oct->computeMorton());
+	}
+#endif
+	return m_octree.findMorton(oct->computeMorton());
+};
+
+/*! Get the global index of an octant.
+ * \param[in] idx Local index of target octant.
+ * \return Global index of octant.
+ */
+uint64_t
+ClassParaTree::getGlobalIdx(ClassOctant* oct){
+#if ENABLE_MPI==1
+	if (getIsGhost(oct)){
+		uint32_t idx = m_octree.findGhostMorton(oct->computeMorton());
+		return m_octree.m_globalIdxGhosts[idx];
+	}
+#endif
+	uint32_t idx = m_octree.findMorton(oct->computeMorton());
+	if (m_rank){
+		return m_partitionRangeGlobalIdx[m_rank-1] + uint64_t(idx + 1);
+	}
+	return uint64_t(idx);
+};
+
+/*! Get the persistent index of an octant.
+ * \param[in] oct Pointer to the target octant
+ * \return Persistent index of octant,
+ * i.e. a bitset composed by Morton index and level of octant.
+ */
+bitset<72>
+ClassParaTree::getPersistentIdx(ClassOctant* oct){
+	bitset<72> persistent = getMorton(oct);
+	bitset<72> level = getLevel(oct);
+	persistent <<= 8;
+	persistent |= level;
+	return persistent;
 };
 
 /*! Set the refinement marker of an octant.
@@ -1570,39 +1630,6 @@ ClassParaTree::getGhostOctant(uint32_t idx) {
 		return &m_octree.m_ghosts[idx] ;
 	}
 	return NULL;
-};
-
-/*! Get the global index of an octant.
- * \param[in] idx Local index of target octant.
- * \return Global index of octant.
- */
-uint64_t
-ClassParaTree::getGlobalIdx(ClassOctant* oct){
-#if ENABLE_MPI==1
-	if (getIsGhost(oct)){
-		uint32_t idx = m_octree.findGhostMorton(oct->computeMorton());
-		return m_octree.m_globalIdxGhosts[idx];
-	}
-#endif
-	uint32_t idx = m_octree.findMorton(oct->computeMorton());
-	if (m_rank){
-		return m_partitionRangeGlobalIdx[m_rank-1] + uint64_t(idx + 1);
-	}
-	return uint64_t(idx);
-};
-
-/*! Get the local index of an octant.
- * \param[in] oct Pointer to target octant.
- * \return Local index of octant.
- */
-uint32_t
-ClassParaTree::getIdx(ClassOctant* oct){
-#if ENABLE_MPI==1
-	if (getIsGhost(oct)){
-		return m_octree.findGhostMorton(oct->computeMorton());
-	}
-#endif
-	return m_octree.findMorton(oct->computeMorton());
 };
 
 /*! Get the local index of an octant.

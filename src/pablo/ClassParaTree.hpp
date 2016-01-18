@@ -18,6 +18,7 @@
 #include "ClassLog.hpp"
 #include <map>
 #include <set>
+#include <bitset>
 #include <algorithm>
 
 // =================================================================================== //
@@ -190,6 +191,7 @@ public:
 	bool 		getIsNewC(uint32_t idx);
 	uint64_t 	getGlobalIdx(uint32_t idx);
 	uint64_t 	getGhostGlobalIdx(uint32_t idx);
+	std::bitset<72>	getPersistentIdx(uint32_t idx);
 	void 		setMarker(uint32_t idx, int8_t marker);
 	void 		setBalance(uint32_t idx, bool balance);
 
@@ -223,6 +225,9 @@ public:
 	bool		getPbound(ClassOctant* oct);
 	bool 		getIsNewR(ClassOctant* oct);
 	bool 		getIsNewC(ClassOctant* oct);
+	uint32_t 	getIdx(ClassOctant* oct);
+	uint64_t 	getGlobalIdx(ClassOctant* oct);
+	std::bitset<72>	getPersistentIdx(ClassOctant* oct);
 	void 		setMarker(ClassOctant* oct, int8_t marker);
 	void 		setBalance(ClassOctant* oct, bool balance);
 
@@ -268,8 +273,6 @@ public:
 	// =================================================================================== //
 	ClassOctant*	getOctant(uint32_t idx);
 	ClassOctant*	getGhostOctant(uint32_t idx);
-	uint64_t 		getGlobalIdx(ClassOctant* oct);
-	uint32_t 		getIdx(ClassOctant* oct);
 	uint32_t 		getIdx(ClassOctant oct);
 #if ENABLE_MPI==1
 	bool 			getIsGhost(ClassOctant* oct);
