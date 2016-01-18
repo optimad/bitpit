@@ -11,10 +11,10 @@ if (IO_ENABLE_VTK_WRAPPERS)
 endif()
 
 # VTK Wrappers feature
-set(IO_VTK_WRAPPERS_HEADER_HPP "Class_VTK_Wrappers.hpp" CACHE INTERNAL "Header file needed by the VTK Wrapper feature" FORCE)
-set(IO_VTK_WRAPPERS_HEADER_TPP "Class_VTK_Wrappers.tpp" CACHE INTERNAL "Template header file needed by the VTK Wrapper feature" FORCE)
-set(IO_VTK_WRAPPERS_SOURCE_CPP "Class_VTK_Wrappers.cpp" CACHE INTERNAL "Source file needed by the VTK Wrapper feature" FORCE)
-set(IO_VTK_WRAPPERS_DEFINITION "IO_ENABLE_VTK_WRAPPERS" CACHE INTERNAL "Preprocessor defnition needed by the VTK Wrapper feature" FORCE)
+set(IO_VTK_WRAPPERS_HEADER_HPP "Class_VTK_Wrappers.hpp")
+set(IO_VTK_WRAPPERS_HEADER_TPP "Class_VTK_Wrappers.tpp")
+set(IO_VTK_WRAPPERS_SOURCE_CPP "Class_VTK_Wrappers.cpp")
+set(IO_VTK_WRAPPERS_DEFINITION "IO_ENABLE_VTK_WRAPPERS")
 
 # Add library to targets
 include_directories("${PROJECT_SOURCE_DIR}/src/operators")
