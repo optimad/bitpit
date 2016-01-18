@@ -1,19 +1,19 @@
 /*
- * ClassLog.hpp
+ * Log.hpp
  *
  *  Created on: 3 dec 2014
  *      Author: marco
  */
 
-#ifndef INCLUDE_CLASSLOG_HPP_
-#define INCLUDE_CLASSLOG_HPP_
+#ifndef LOG_HPP_
+#define LOG_HPP_
 
 #if ENABLE_MPI==1
 #include <mpi.h>
 #endif
 #include <string>
 
-class ClassLog {
+class Log {
 
 	std::string m_filename;
 
@@ -23,14 +23,14 @@ class ClassLog {
 
 public:
 #if ENABLE_MPI==1
-	ClassLog(std::string filename_,MPI_Comm comm_ = MPI_COMM_WORLD);
+	Log(std::string filename_,MPI_Comm comm_ = MPI_COMM_WORLD);
 #else
-	ClassLog(std::string filename_);
+	Log(std::string filename_);
 #endif
-	~ClassLog();
+	~Log();
 
 	void writeLog(std::string msg);
 
 };
 
-#endif /* INCLUDE_CLASS_LOG_HPP_ */
+#endif /* LOG_HPP_ */

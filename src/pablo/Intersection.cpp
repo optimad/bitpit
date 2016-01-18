@@ -1,7 +1,7 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
-#include "ClassIntersection.hpp"
+#include "Intersection.hpp"
 
 // =================================================================================== //
 // CLASS IMPLEMENTATION                                                                    //
@@ -11,7 +11,7 @@
 // CONSTRUCTORS AND OPERATORS
 // =================================================================================== //
 
-ClassIntersection::ClassIntersection(){
+Intersection::Intersection(){
 	m_owners[0] = 0;
 	m_owners[1] = 0;
 	m_iface = 0;
@@ -22,7 +22,7 @@ ClassIntersection::ClassIntersection(){
 	m_dim = 2;
 };
 
-ClassIntersection::ClassIntersection(uint8_t dim_){
+Intersection::Intersection(uint8_t dim_){
 	m_owners[0] = 0;
 	m_owners[1] = 0;
 	m_iface = 0;
@@ -33,7 +33,7 @@ ClassIntersection::ClassIntersection(uint8_t dim_){
 	m_dim = dim_;
 };
 
-ClassIntersection::ClassIntersection(const ClassIntersection & intersection){
+Intersection::Intersection(const Intersection & intersection){
 	m_owners[0] = intersection.m_owners[0];
 	m_owners[1] = intersection.m_owners[1];
 	m_iface = intersection.m_iface;
@@ -45,7 +45,7 @@ ClassIntersection::ClassIntersection(const ClassIntersection & intersection){
 	m_dim = intersection.m_dim;
 };
 
-ClassIntersection& ClassIntersection::operator =(const ClassIntersection & intersection){
+Intersection& Intersection::operator =(const Intersection & intersection){
 	m_owners[0] = intersection.m_owners[0];
 	m_owners[1] = intersection.m_owners[1];
 	m_iface = intersection.m_iface;
@@ -58,7 +58,7 @@ ClassIntersection& ClassIntersection::operator =(const ClassIntersection & inter
 	return *this;
 };
 
-bool ClassIntersection::operator ==(const ClassIntersection & intersection){
+bool Intersection::operator ==(const Intersection & intersection){
 	bool check = true;
 	check = check && (m_owners[0] == intersection.m_owners[0]);
 	check = check && (m_owners[1] == intersection.m_owners[1]);
@@ -82,13 +82,13 @@ bool ClassIntersection::operator ==(const ClassIntersection & intersection){
 // =================================================================================== //
 /*!Get the owner with exiting normal;
  */
-uint32_t ClassIntersection::getOut(){
+uint32_t Intersection::getOut(){
 	return m_owners[m_finer];
 };
 
 /*!Get the owner with entering normal;
  */
-uint32_t ClassIntersection::getIn(){
+uint32_t Intersection::getIn(){
 	return m_owners[!m_finer];
 };
 
@@ -96,7 +96,7 @@ uint32_t ClassIntersection::getIn(){
  * \param[out] normal Components of the exiting normal.
  * \param[in] normals Basic matrix with components of the elementary normals.
  */
-void ClassIntersection::getNormal(int8_t normal[3], int8_t normals[6][3]){
+void Intersection::getNormal(int8_t normal[3], int8_t normals[6][3]){
 	for (int i=0; i<m_dim; i++){
 		normal[i] = normals[m_iface][i];
 	}
@@ -105,21 +105,21 @@ void ClassIntersection::getNormal(int8_t normal[3], int8_t normals[6][3]){
 /*!Get the boundary condition of the intersection;
  * \return Boolean true/false if the intersection is/is not a boundary intersection
  */
-bool ClassIntersection::getBound(){
+bool Intersection::getBound(){
 	return m_bound;
 };
 
 /*!Get the ghost information about the intersection;
  * \return Boolean true/false if the intersection is/is not a ghost intersection
  */
-bool ClassIntersection::getIsGhost(){
+bool Intersection::getIsGhost(){
 	return m_isghost;
 };
 
 /*!Get the partition boundary condition of the intersection;
  * \return Boolean true/false if the intersection is/is not a process boundary intersection
  */
-bool ClassIntersection::getPbound(){
+bool Intersection::getPbound(){
 	return m_pbound;
 };
 

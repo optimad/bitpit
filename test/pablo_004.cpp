@@ -1,4 +1,4 @@
-#include "ClassParaTree.hpp"
+#include "ParaTree.hpp"
 
 using namespace std;
 
@@ -9,7 +9,7 @@ void test004() {
     int dim = 3;
 
     /**<Instantation of a 3D para_tree object.*/
-    ClassParaTree pablo104(3);
+    ParaTree pablo104(3);
 
     /**<Refine globally four level and write the para_tree.*/
     for (iter=1; iter<4; iter++){

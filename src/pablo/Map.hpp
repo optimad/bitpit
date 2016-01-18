@@ -1,5 +1,5 @@
-#ifndef CLASSMAP_HPP_
-#define CLASSMAP_HPP_
+#ifndef MAP_HPP_
+#define MAP_HPP_
 
 // =================================================================================== //
 // INCLUDES                                                                            //
@@ -41,16 +41,15 @@ typedef std::vector<darray3>		darr3vector;
  *	Definition of the transformation from the logical domain to the physical domain.
  *	It contains a default (temporary) implementation of a scaling and translation mapper
  *	of logical octree.
- *	ClassMap has to be implemented and customized by the user for different applications.
+ *	Map has to be implemented and customized by the user for different applications.
  */
-class ClassMap{
+class Map{
 
 	// =================================================================================== //
 	// FRIENDSHIPS
 	// =================================================================================== //
 
-	friend class ClassLocalTree;
-	friend class ClassParaTree;
+	friend class ParaTree;
 
 	// =================================================================================== //
 	// MEMBERS
@@ -66,8 +65,8 @@ private:
 	// =================================================================================== //
 	// CONSTRUCTORS AND OPERATORS
 	// =================================================================================== //
-	ClassMap(int8_t maxlevel, uint8_t dim_);
-	ClassMap(double & X, double & Y, double & Z, double & LL, int8_t maxlevel, uint8_t dim_);
+	Map(int8_t maxlevel, uint8_t dim_);
+	Map(double & X, double & Y, double & Z, double & LL, int8_t maxlevel, uint8_t dim_);
 
 	// =================================================================================== //
 	// METHODS
@@ -97,4 +96,4 @@ private:
 
 /* @} */
 
-#endif /* CLASSMAP_HPP_ */
+#endif /* MAP_HPP_ */

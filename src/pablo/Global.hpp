@@ -1,5 +1,5 @@
-#ifndef CLASSGLOBAL_HPP_
-#define CLASSGLOBAL_HPP_
+#ifndef GLOBAL_HPP_
+#define GLOBAL_HPP_
 
 // =================================================================================== //
 // INCLUDES                                                                            //
@@ -21,17 +21,17 @@
  *	Global variables are used in PABLO everywhere and they are public, i.e. each
  *	global variable can be used asant by external codes.
  *
- *	Class ClassGlobal is a class with static members initialized during the construction
+ *	Class Global is a class with static members initialized during the construction
  *	of a paratree object.
  *
  */
-class ClassGlobal{
+class Global{
 
 	// =================================================================================== //
 	// FRIENDSHIPS
 	// =================================================================================== //
-	friend class ClassParaTree;
-	friend class ClassLocalTree;
+	friend class ParaTree;
+	friend class LocalTree;
 
 	// =================================================================================== //
 	// MEMBERS
@@ -90,4 +90,4 @@ private:
 
 /*  @} */
 
-#endif /* CLASSGLOBAL_HPP_ */
+#endif /* GLOBAL_HPP_ */

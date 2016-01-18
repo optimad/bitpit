@@ -1,4 +1,4 @@
-#include "ClassParaTree.hpp"
+#include "ParaTree.hpp"
 
 using namespace std;
 
@@ -6,7 +6,7 @@ using namespace std;
 void testParallel001() {
 
     /**<Instantation of a 2D para_tree object.*/
-    ClassParaTree pablo12;
+    ParaTree pablo12;
 
     /**<Set NO 2:1 balance for the octree.*/
     uint32_t idx=0;

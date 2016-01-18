@@ -1,12 +1,12 @@
 template <class Impl>
-ClassDataCommInterface<Impl>::ClassDataCommInterface(){}
+DataCommInterface<Impl>::DataCommInterface(){}
 
 /*! Its user specification computes the specific size of data for an element.
  * \param[in] e Element local index.
  * \return the size of the data for the e element
  */
 template <class Impl>
-size_t ClassDataCommInterface<Impl>::size(const uint32_t e) const {
+size_t DataCommInterface<Impl>::size(const uint32_t e) const {
 	return getImpl().size(e);
 };
 
@@ -14,7 +14,7 @@ size_t ClassDataCommInterface<Impl>::size(const uint32_t e) const {
  * \return the size of the data for every element
  */
 template <class Impl>
-size_t ClassDataCommInterface<Impl>::fixedSize() const {
+size_t DataCommInterface<Impl>::fixedSize() const {
 	return getImpl().fixedSize();
 };
 
@@ -39,7 +39,7 @@ size_t ClassDataCommInterface<Impl>::fixedSize() const {
  */
 template<class Impl>
 template<class Buffer>
-void ClassDataCommInterface<Impl>::gather(Buffer& buff, const uint32_t e) {
+void DataCommInterface<Impl>::gather(Buffer& buff, const uint32_t e) {
 	return getImpl().gather(buff,e);
 }
 
@@ -65,17 +65,17 @@ void ClassDataCommInterface<Impl>::gather(Buffer& buff, const uint32_t e) {
  */
 template<class Impl>
 template<class Buffer>
-void ClassDataCommInterface<Impl>::scatter(Buffer& buff,	const uint32_t e) {
+void DataCommInterface<Impl>::scatter(Buffer& buff,	const uint32_t e) {
 	return getImpl().scatter(buff,e);
 }
 
 
 template <class Impl>
-Impl& ClassDataCommInterface<Impl>::getImpl() {
+Impl& DataCommInterface<Impl>::getImpl() {
 	return static_cast<Impl &>(*this);
 }
 
 template <class Impl>
-const Impl& ClassDataCommInterface<Impl>::getImpl() const{
+const Impl& DataCommInterface<Impl>::getImpl() const{
 	return static_cast<const Impl &>(*this);
 }

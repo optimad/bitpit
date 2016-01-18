@@ -1,7 +1,7 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
-#include "ClassArray.hpp"
+#include "Array.hpp"
 #include <algorithm>
 
 // =================================================================================== //
@@ -13,13 +13,13 @@ using namespace std;
 // CLASS IMPLEMENTATION                                                                    //
 // =================================================================================== //
 
-ClassArray::ClassArray() {
+Array::Array() {
 	// TODO Auto-generated constructor stub
 	m_arraySize = 0;
 	m_array = NULL;
 }
 
-ClassArray::ClassArray(uint32_t size, int value) {
+Array::Array(uint32_t size, int value) {
 
 	m_arraySize = size;
 	m_array = new int [size];
@@ -27,19 +27,19 @@ ClassArray::ClassArray(uint32_t size, int value) {
 		m_array[i] = value;
 }
 
-ClassArray::ClassArray(
-		const ClassArray& other) {
+Array::Array(
+		const Array& other) {
 	m_arraySize = other.m_arraySize;
 	m_array = new int [m_arraySize];
 	for(uint32_t i = 0; i < m_arraySize; ++i)
 		m_array[i] = other.m_array[i];
 }
 
-ClassArray::~ClassArray() {
+Array::~Array() {
 }
 
-ClassArray& ClassArray::operator =(
-		const ClassArray& rhs) {
+Array& Array::operator =(
+		const Array& rhs) {
 	if(this != &rhs)
 	{
 		int* new_array = new int[rhs.m_arraySize];

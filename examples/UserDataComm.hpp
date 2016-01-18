@@ -8,11 +8,11 @@
 #ifndef USERDATACOMM_HPP_
 #define USERDATACOMM_HPP_
 
-#include "ClassDataCommInterface.hpp"
+#include "DataCommInterface.hpp"
 
 /*!  \cond  EXAMPLE_CLASSES */
 template <class D>
-class UserDataComm : public ClassDataCommInterface< UserDataComm<D> > {
+class UserDataComm : public DataCommInterface< UserDataComm<D> > {
 public:
 
 	typedef D Data;

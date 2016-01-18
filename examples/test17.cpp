@@ -1,4 +1,4 @@
-#include "ClassParaTree.hpp"
+#include "ParaTree.hpp"
 #if ENABLE_MPI==1
 #include "UserDataComm.hpp"
 #include "UserDataLB.hpp"
@@ -17,8 +17,8 @@ int main(int argc, char *argv[]) {
 #endif
 		int iter = 0;
 		/**<Instantation of a 2D para_tree object.*/
-		ClassParaTree pablo17a;
-		ClassParaTree pablo17b;
+		ParaTree pablo17a;
+		ParaTree pablo17b;
 
 		/**<Set NO 2:1 balance for the octree.*/
 		int idx = 0;

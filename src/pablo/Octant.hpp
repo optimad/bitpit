@@ -1,5 +1,5 @@
-#ifndef CLASSOCTANT_HPP_
-#define CLASSOCTANT_HPP_
+#ifndef OCTANT_HPP_
+#define OCTANT_HPP_
 
 // INCLUDES                                                                            //
 #include "inlinedFunct.hpp"
@@ -51,14 +51,14 @@ typedef std::vector<u32array3>				u32arr3vector;
  *	to its face neighbours.
  *
  */
-class ClassOctant{
+class Octant{
 
 	// =================================================================================== //
 	// FRIENDSHIPS
 	// =================================================================================== //
 
-	friend class ClassLocalTree;
-	friend class ClassParaTree;
+	friend class LocalTree;
+	friend class ParaTree;
 
 	// =================================================================================== //
 	// MEMBERS
@@ -95,13 +95,13 @@ private:
 	// CONSTRUCTORS AND OPERATORS
 	// =================================================================================== //
 public:
-	ClassOctant();
-	ClassOctant(const ClassOctant &octant);
+	Octant();
+	Octant(const Octant &octant);
 private:
-	ClassOctant(uint8_t dim);
-	ClassOctant(uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0);
-	ClassOctant(bool bound, uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0);
-	bool operator ==(const ClassOctant & oct2);
+	Octant(uint8_t dim);
+	Octant(uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0);
+	Octant(bool bound, uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0);
+	bool operator ==(const Octant & oct2);
 
 	// =================================================================================== //
 	// METHODS
@@ -152,9 +152,9 @@ private:
 	// =================================================================================== //
 	// OTHER METHODS												    			   //
 	// =================================================================================== //
-	ClassOctant	buildLastDesc(int8_t & maxlevel);
-	ClassOctant	buildFather(int8_t & maxlevel);
-	std::vector< ClassOctant >	buildChildren(int8_t & maxlevel);
+	Octant	buildLastDesc(int8_t & maxlevel);
+	Octant	buildFather(int8_t & maxlevel);
+	std::vector< Octant >	buildChildren(int8_t & maxlevel);
 	std::vector<uint64_t> 		computeHalfSizeMorton(uint8_t iface, uint32_t & sizehf,
 			int8_t & maxlevel);
 	std::vector<uint64_t>		computeMinSizeMorton(uint8_t iface, const uint8_t & maxdepth,
@@ -177,4 +177,4 @@ private:
 
 /*  @} */
 
-#endif /* CLASSOCTANT_HPP_ */
+#endif /* OCTANT_HPP_ */

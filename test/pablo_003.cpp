@@ -1,4 +1,4 @@
-#include "ClassParaTree.hpp"
+#include "ParaTree.hpp"
 
 using namespace std;
 
@@ -6,7 +6,7 @@ using namespace std;
 void test003() {
 
     /**<Instantation of a 2D para_tree object.*/
-	ClassParaTree pablo2;
+	ParaTree pablo2;
 
     /**<Set 2:1 balance only through faces.*/
     pablo2.setBalanceCodimension(1);

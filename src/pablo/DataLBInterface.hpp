@@ -1,7 +1,7 @@
 // Communications Class for Load Balancing
 
-#ifndef CLASS_DATALBINTERFACE_HPP_
-#define CLASS_DATALBINTERFACE_HPP_
+#ifndef DATALBINTERFACE_HPP_
+#define DATALBINTERFACE_HPP_
 
 /*!
  *  \ingroup        PABLO
@@ -39,7 +39,7 @@
  *	in a communication buffer.
  */
 template <class Impl>
-class ClassDataLBInterface {
+class DataLBInterface {
 public:
 	size_t size(const uint32_t e) const;
 	size_t fixedSize() const;
@@ -57,7 +57,7 @@ public:
 	void shrink();
 
 protected:
-	ClassDataLBInterface();
+	DataLBInterface();
 
 private:
 	//BartonHackman trick
@@ -67,6 +67,6 @@ private:
 };
 
 /*  @{ */
-#include "ClassDataLBInterface.tpp"
+#include "DataLBInterface.tpp"
 
-#endif /* CLASS_DATA_LB_INTERFACE_HPP_ */
+#endif /* DATA_LB_INTERFACE_HPP_ */

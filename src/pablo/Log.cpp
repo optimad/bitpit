@@ -1,25 +1,25 @@
 /*
- * ClassLog.cpp
+ * Log.cpp
  *
  *  Created on: 3 dec 2014
  *      Author: marco
  */
 
-#include "ClassLog.hpp"
+#include "Log.hpp"
 #include <fstream>
 
 using namespace std;
 
 #if ENABLE_MPI==1
-ClassLog::ClassLog(string filename_,MPI_Comm comm_) : m_filename(filename_),m_comm(comm_) {};
+Log::Log(string filename_,MPI_Comm comm_) : m_filename(filename_),m_comm(comm_) {};
 #else
-ClassLog::ClassLog(string filename_) : m_filename(filename_) {};
+Log::Log(string filename_) : m_filename(filename_) {};
 #endif
 
-ClassLog::~ClassLog() {};
+Log::~Log() {};
 
 // ----------------------------------------------------------------------------------- //
-void ClassLog::writeLog(string msg) {
+void Log::writeLog(string msg) {
 
 	// =================================================================================== //
 	// void Write_Log(string msg)                                                          //

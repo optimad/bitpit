@@ -1,4 +1,4 @@
-#include "ClassParaTree.hpp"
+#include "ParaTree.hpp"
 
 using namespace std;
 
@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
 	{
 #endif
 		/**<Instantation of a 2D para_tree object.*/
-		ClassParaTree pablo1;
+		ParaTree pablo1;
 
 		/**<Compute the connectivity and write the para_tree.*/
 		pablo1.computeConnectivity();
@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
 			nocts = pablo1.getNumOctants();
 			for (int i=0; i<nocts; i++){
 				/**<Extract Octant (pointer use).*/
-				ClassOctant *oct = pablo1.getOctant(i);
+				Octant *oct = pablo1.getOctant(i);
 				/**<Compute center of the octant.*/
 				array<double,3> center = pablo1.getCenter(oct);
 				double x = center[0];

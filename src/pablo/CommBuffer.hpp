@@ -1,6 +1,6 @@
 #if ENABLE_MPI==1
-#ifndef CLASSCOMMBUFFER_HPP_
-#define CLASSCOMMBUFFER_HPP_
+#ifndef COMMBUFFER_HPP_
+#define COMMBUFFER_HPP_
 
 // =================================================================================== //
 // INCLUDES                                                                            //
@@ -35,9 +35,9 @@
  *	every MPI-compatible POD datum in the buffer.
  *	By this way, data communications are data independent.
  */
-class ClassCommBuffer {
+class CommBuffer {
 
-	friend class ClassParaTree;
+	friend class ParaTree;
 
 	// =================================================================================== //
 	// MEMBERS																			   //
@@ -51,17 +51,17 @@ class ClassCommBuffer {
 	// CONSTRUCTORS 																	   //
 	// =================================================================================== //
 public:
-	ClassCommBuffer();
-	ClassCommBuffer(MPI_Comm comm_);
-	ClassCommBuffer(uint32_t size, char value, MPI_Comm comm_);
-	ClassCommBuffer(const ClassCommBuffer& other);
-	~ClassCommBuffer();
+	CommBuffer();
+	CommBuffer(MPI_Comm comm_);
+	CommBuffer(uint32_t size, char value, MPI_Comm comm_);
+	CommBuffer(const CommBuffer& other);
+	~CommBuffer();
 
 	// =================================================================================== //
 	// METHODS                                                                		       //
 	// =================================================================================== //
 	//TODO routines write and read to write and read POD types in buffer
-	ClassCommBuffer& operator=(const ClassCommBuffer& rhs);
+	CommBuffer& operator=(const CommBuffer& rhs);
 
 	// =================================================================================== //
 	// TEMPLATE METHODS                                                                    //
@@ -89,5 +89,5 @@ public:
 
 /* @} */
 
-#endif /* CLASSCOMMBUFFER_HPP_ */
+#endif /* COMMBUFFER_HPP_ */
 #endif /* NOMPI */

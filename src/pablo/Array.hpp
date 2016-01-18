@@ -1,5 +1,5 @@
-#ifndef CLASSARRAY_HPP_
-#define CLASSARRAY_HPP_
+#ifndef ARRAY_HPP_
+#define ARRAY_HPP_
 
 // =================================================================================== //
 // INCLUDES                                                                            //
@@ -22,13 +22,13 @@
  *
  *  \brief Customized array definition
  *
- *  ClassArray contains a pointer to an array of integer values.
+ *  Array contains a pointer to an array of integer values.
  *  Implemented here for fast using in PABLO.
  *
  */
-class ClassArray {
+class Array {
 
-	friend class ClassParaTree;
+	friend class ParaTree;
 
 	// ------------------------------------------------------------------------------- //
 	// MEMBERS ----------------------------------------------------------------------- //
@@ -39,17 +39,17 @@ private:
 	// ------------------------------------------------------------------------------- //
 	// CONSTRUCTORS ------------------------------------------------------------------ //
 public:
-	ClassArray();
-	ClassArray(const ClassArray& other);
-	~ClassArray();
+	Array();
+	Array(const Array& other);
+	~Array();
 private:
-	ClassArray(uint32_t size, int value);
+	Array(uint32_t size, int value);
 
 	// ------------------------------------------------------------------------------- //
 	// METHODS ----------------------------------------------------------------------- //
-	ClassArray& operator=(const ClassArray& rhs);
+	Array& operator=(const Array& rhs);
 };
 
 /* @} */
 
-#endif /* CLASS_ARRAY_HPP_ */
+#endif /* ARRAY_HPP_ */

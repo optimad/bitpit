@@ -1,25 +1,25 @@
-#ifndef CLASSLOCALTREE_HPP_
-#define CLASSLOCALTREE_HPP_
+#ifndef LOCALTREE_HPP_
+#define LOCALTREE_HPP_
 
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
-#include "ClassGlobal.hpp"
-#include "ClassOctant.hpp"
-#include "ClassIntersection.hpp"
+#include "Global.hpp"
+#include "Octant.hpp"
+#include "Intersection.hpp"
 
 // =================================================================================== //
 // TYPEDEFS
 // =================================================================================== //
 
-typedef std::vector<ClassOctant>		 	octvector;
-typedef std::vector<ClassIntersection>	 	intervector;
+typedef std::vector<Octant>		 	octvector;
+typedef std::vector<Intersection>	 	intervector;
 
 // =================================================================================== //
 // CLASS DEFINITION                                                                    //
 // =================================================================================== //
 /*!
- * ClassLocalTree.hpp
+ * LocalTree.hpp
  *
  *  \ingroup    PABLO
  *  @{
@@ -43,22 +43,22 @@ typedef std::vector<ClassIntersection>	 	intervector;
  *	- intersections of process bord (i.e. between octants and ghosts);
  *	- intersections completely located in the domain of the process (i.e. between actual octants).
  *
- *	Class ClassLocalTree is built with a dimensional parameter int dim and it accepts only two values: dim=2 and dim=3, for 2D and 3D respectively.
+ *	Class LocalTree is built with a dimensional parameter int dim and it accepts only two values: dim=2 and dim=3, for 2D and 3D respectively.
  */
-class ClassLocalTree{
+class LocalTree{
 
 	// =================================================================================== //
 	// FRIENDSHIPS
 	// =================================================================================== //
 
-	friend class ClassParaTree;
+	friend class ParaTree;
 
 	// =================================================================================== //
 	// TYPEDEFS
 	// =================================================================================== //
 public:
-	typedef std::vector<ClassOctant>		 	octvector;
-	typedef std::vector<ClassIntersection>	 	intervector;
+	typedef std::vector<Octant>				 	octvector;
+	typedef std::vector<Intersection>	 		intervector;
 	typedef std::vector<uint8_t>				u8vector;
 	typedef std::vector<uint32_t>				u32vector;
 	typedef std::vector<uint64_t>				u64vector;
@@ -73,8 +73,8 @@ private:
 	octvector				m_ghosts;				/**< Local vector of ghost octants ordered with Morton Number */
 	intervector				m_intersections;		/**< Local vector of intersections */
 	u64vector 				m_globalIdxGhosts;		/**< Global index of the ghost octants (size = size_ghosts) */
-	ClassOctant 			m_firstDesc;			/**< First (Morton order) most refined octant possible in local partition */
-	ClassOctant		 		m_lastDesc;				/**< Last (Morton order) most refined octant possible in local partition */
+	Octant 					m_firstDesc;			/**< First (Morton order) most refined octant possible in local partition */
+	Octant			 		m_lastDesc;				/**< Last (Morton order) most refined octant possible in local partition */
 	uint32_t 				m_sizeGhosts;			/**< Size of vector of ghost octants */
 	uint8_t					m_localMaxDepth;		/**< Reached max depth in local tree */
 	uint8_t 				m_balanceCodim;			/**<Maximum codimension of the entity for 2:1 balancing (1 = 2:1 balance through faces (default);
@@ -89,13 +89,13 @@ private:
 	u32arr3vector			m_ghostsNodes;			/**<Local vector of ghosts nodes (x,y,z) ordered with Morton Number*/
 
 	uint8_t					m_dim;					/**<Space dimension. Only 2D or 3D space accepted*/
-	ClassGlobal				m_global;				/**<Global variables*/
+	Global					m_global;				/**<Global variables*/
 
 	// =================================================================================== //
 	// CONSTRUCTORS
 	// =================================================================================== //
-	ClassLocalTree(int8_t maxlevel, uint8_t dim);
-	~ClassLocalTree();
+	LocalTree(int8_t maxlevel, uint8_t dim);
+	~LocalTree();
 
 	// =================================================================================== //
 	// METHODS
@@ -105,8 +105,8 @@ private:
 	// BASIC GET/SET METHODS
 	// =================================================================================== //
 private:
-	const ClassOctant&	getFirstDesc() const;
-	const ClassOctant&	getLastDesc() const;
+	const Octant&	getFirstDesc() const;
+	const Octant&	getLastDesc() const;
 	uint32_t 		getSizeGhost() const;
 	uint32_t 		getNumOctants() const;
 	uint8_t 		getLocalMaxDepth() const;
@@ -131,10 +131,10 @@ private:
 	// OTHER METHODS
 	// =================================================================================== //
 
-	ClassOctant& 		extractOctant(uint32_t idx);
-	const ClassOctant&	extractOctant(uint32_t idx) const;
-	ClassOctant& 		extractGhostOctant(uint32_t idx);
-	const ClassOctant&	extractGhostOctant(uint32_t idx) const;
+	Octant& 		extractOctant(uint32_t idx);
+	const Octant&	extractOctant(uint32_t idx) const;
+	Octant& 		extractGhostOctant(uint32_t idx);
+	const Octant&	extractGhostOctant(uint32_t idx) const;
 
 
 	bool 		refine(u32vector & mapidx);
@@ -147,16 +147,16 @@ private:
 
 	void 		findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours,
 								std::vector<bool> & isghost);
-	void 		findNeighbours(ClassOctant* oct, uint8_t iface, u32vector & neighbours,
+	void 		findNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours,
 								std::vector<bool> & isghost);
 	void 		findGhostNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours);
 	void 		findEdgeNeighbours(uint32_t idx, uint8_t iedge,
 								u32vector & neighbours, std::vector<bool> & isghost);
-	void 		findEdgeNeighbours(ClassOctant* oct, uint8_t iedge,
+	void 		findEdgeNeighbours(Octant* oct, uint8_t iedge,
 								u32vector & neighbours, std::vector<bool> & isghost);
 	void 		findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge,
 								u32vector & neighbours);
-	void 		findNodeNeighbours(ClassOctant* oct, uint8_t inode,
+	void 		findNodeNeighbours(Octant* oct, uint8_t inode,
 								u32vector & neighbours, std::vector<bool> & isghost);
 	void 		findNodeNeighbours(uint32_t idx, uint8_t inode,
 								u32vector & neighbours, std::vector<bool> & isghost);
@@ -185,4 +185,4 @@ private:
 
 };
 
-#endif /* CLASSLOCALTREE_HPP_ */
+#endif /* LOCALTREE_HPP_ */

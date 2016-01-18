@@ -1,16 +1,16 @@
-#include "ClassGlobal.hpp"
+#include "Global.hpp"
 
 // =================================================================================== //
 // CLASS IMPLEMENTATION                                                                    //
 // =================================================================================== //
 
 uint8_t
-ClassGlobal::getBoolBytes()  {
+Global::getBoolBytes()  {
 	return m_boolBytes;
 }
 
 void
-ClassGlobal::getEdgecoeffs(int8_t edgecoeffs_[12][3])  {
+Global::getEdgecoeffs(int8_t edgecoeffs_[12][3])  {
 	for (int i=0; i<12; i++){
 		for (int j=0; j<3; j++){
 		edgecoeffs_[i][j] = m_edgeCoeffs[i][j];
@@ -19,7 +19,7 @@ ClassGlobal::getEdgecoeffs(int8_t edgecoeffs_[12][3])  {
 }
 
 void
-ClassGlobal::getEdgeface(uint8_t edgeface_[12][2])  {
+Global::getEdgeface(uint8_t edgeface_[12][2])  {
 	for (int i=0; i<12; i++){
 		for (int j=0; j<2; j++){
 			edgeface_[i][j] = m_edgeFace[i][j];
@@ -28,7 +28,7 @@ ClassGlobal::getEdgeface(uint8_t edgeface_[12][2])  {
 }
 
 void
-ClassGlobal::getFacenode(uint8_t facenode_[6][4])  {
+Global::getFacenode(uint8_t facenode_[6][4])  {
 	for (int i=0; i<6; i++){
 		for (int j=0; j<4; j++){
 			facenode_[i][j] = m_faceNode[i][j];
@@ -37,57 +37,57 @@ ClassGlobal::getFacenode(uint8_t facenode_[6][4])  {
 }
 
 uint8_t
-ClassGlobal::getGlobalIndexBytes()  {
+Global::getGlobalIndexBytes()  {
 	return m_globalIndexBytes;
 }
 
 uint8_t
-ClassGlobal::getLevelBytes()  {
+Global::getLevelBytes()  {
 	return m_levelBytes;
 }
 
 uint8_t
-ClassGlobal::getMarkerBytes()  {
+Global::getMarkerBytes()  {
 	return m_markerBytes;
 }
 
 uint32_t
-ClassGlobal::getMaxLength()  {
+Global::getMaxLength()  {
 	return m_maxLength;
 }
 
 int8_t
-ClassGlobal::getMaxLevel()  {
+Global::getMaxLevel()  {
 	return m_maxLevel;
 }
 
 uint8_t
-ClassGlobal::getNchildren()  {
+Global::getNchildren()  {
 	return m_nchildren;
 }
 
 uint8_t
-ClassGlobal::getNedges()  {
+Global::getNedges()  {
 	return m_nedges;
 }
 
 uint8_t
-ClassGlobal::getNfaces()  {
+Global::getNfaces()  {
 	return m_nfaces;
 }
 
 uint8_t
-ClassGlobal::getNnodes()  {
+Global::getNnodes()  {
 	return m_nnodes;
 }
 
 uint8_t
-ClassGlobal::getNnodesperface()  {
+Global::getNnodesperface()  {
 	return m_nnodesPerFace;
 }
 
 void
-ClassGlobal::getNodecoeffs(int8_t nodecoeffs_[8][3])  {
+Global::getNodecoeffs(int8_t nodecoeffs_[8][3])  {
 	for (int i=0; i<8; i++){
 		for (int j=0; j<3; j++){
 			nodecoeffs_[i][j] = m_nodeCoeffs[i][j];
@@ -96,7 +96,7 @@ ClassGlobal::getNodecoeffs(int8_t nodecoeffs_[8][3])  {
 }
 
 void
-ClassGlobal::getNodeface(uint8_t nodeface_[8][3])  {
+Global::getNodeface(uint8_t nodeface_[8][3])  {
 	for (int i=0; i<8; i++){
 		for (int j=0; j<3; j++){
 			nodeface_[i][j] = m_nodeFace[i][j];
@@ -105,7 +105,7 @@ ClassGlobal::getNodeface(uint8_t nodeface_[8][3])  {
 }
 
 void
-ClassGlobal::getNormals(int8_t normals_[6][3])  {
+Global::getNormals(int8_t normals_[6][3])  {
 	for (int i=0; i<6; i++){
 		for (int j=0; j<3; j++){
 			normals_[i][j] = m_normals[i][j];
@@ -114,12 +114,12 @@ ClassGlobal::getNormals(int8_t normals_[6][3])  {
 }
 
 uint8_t
-ClassGlobal::getOctantBytes()  {
+Global::getOctantBytes()  {
 	return m_octantBytes;
 }
 
 void
-ClassGlobal::getOppface(uint8_t oppface_[6])  {
+Global::getOppface(uint8_t oppface_[6])  {
 	for (int j=0; j<6; j++){
 		oppface_[j] = m_oppFace[j];
 	}
@@ -130,7 +130,7 @@ ClassGlobal::getOppface(uint8_t oppface_[6])  {
  * \param[in] dim Space dimension; only value equal to 2 or 3 are accepted.
  */
 void
-ClassGlobal::setGlobal(int8_t maxlevel, uint8_t dim){
+Global::setGlobal(int8_t maxlevel, uint8_t dim){
 
 	if (dim>3) dim = 3;
 	if (dim<2) dim = 2;

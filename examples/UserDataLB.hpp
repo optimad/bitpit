@@ -8,11 +8,11 @@
 #ifndef USER_DATA_LB_HPP_
 #define USER_DATA_LB_HPP_
 
-#include "ClassDataLBInterface.hpp"
+#include "DataLBInterface.hpp"
 
 /*!  \cond  EXAMPLE_CLASSES */
 template <class D>
-class UserDataLB : public ClassDataLBInterface<UserDataLB<D> >{
+class UserDataLB : public DataLBInterface<UserDataLB<D> >{
 public:
 
 	typedef D Data;

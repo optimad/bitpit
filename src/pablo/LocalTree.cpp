@@ -1,7 +1,7 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
-#include "ClassLocalTree.hpp"
+#include "LocalTree.hpp"
 #include <map>
 
 // =================================================================================== //
@@ -21,12 +21,12 @@ using namespace std;
  * \param[in] maxlevel Maximum refinement level of the octree.
  * \param[in] dim Space dimension of octree.
  */
-ClassLocalTree::ClassLocalTree(int8_t maxlevel, uint8_t dim){
+LocalTree::LocalTree(int8_t maxlevel, uint8_t dim){
 	m_dim = dim;
 	m_global.setGlobal(maxlevel, m_dim);
-	ClassOctant oct0(m_dim);
-	ClassOctant octf(m_dim,m_global.m_maxLevel,0,0,0);
-	ClassOctant octl(m_dim,m_global.m_maxLevel,m_global.m_maxLength-1,m_global.m_maxLength-1,(m_dim-2)*(m_global.m_maxLength-1));
+	Octant oct0(m_dim);
+	Octant octf(m_dim,m_global.m_maxLevel,0,0,0);
+	Octant octl(m_dim,m_global.m_maxLevel,m_global.m_maxLength-1,m_global.m_maxLength-1,(m_dim-2)*(m_global.m_maxLength-1));
 	m_octants.resize(1);
 	m_octants[0] = oct0;
 	m_firstDesc = octf;
@@ -38,7 +38,7 @@ ClassLocalTree::ClassLocalTree(int8_t maxlevel, uint8_t dim){
 
 /*!Default destructor.
  */
-ClassLocalTree::~ClassLocalTree(){};
+LocalTree::~LocalTree(){};
 
 // =================================================================================== //
 // METHODS
@@ -51,16 +51,16 @@ ClassLocalTree::~ClassLocalTree(){};
 /*!Get the first descentant octant of the octree.
  * \return Constant reference to the first descendant of the octree.
  */
-const ClassOctant&
-ClassLocalTree::getFirstDesc() const{
+const Octant&
+LocalTree::getFirstDesc() const{
 	return m_firstDesc;
 };
 
 /*!Get the last descentant octant of the octree.
  * \return Constant reference to the last descendant of the octree.
  */
-const ClassOctant&
-ClassLocalTree::getLastDesc() const{
+const Octant&
+LocalTree::getLastDesc() const{
 	return m_lastDesc;
 };
 
@@ -68,7 +68,7 @@ ClassLocalTree::getLastDesc() const{
  * \return Number of ghosts.
  */
 uint32_t
-ClassLocalTree::getSizeGhost() const{
+LocalTree::getSizeGhost() const{
 	return m_sizeGhosts;
 };
 
@@ -76,7 +76,7 @@ ClassLocalTree::getSizeGhost() const{
  * \return Number of local octants.
  */
 uint32_t
-ClassLocalTree::getNumOctants() const{
+LocalTree::getNumOctants() const{
 	return m_octants.size();
 };
 
@@ -84,7 +84,7 @@ ClassLocalTree::getNumOctants() const{
  * \return Max depth in local partition of the octree.
  */
 uint8_t
-ClassLocalTree::getLocalMaxDepth() const{
+LocalTree::getLocalMaxDepth() const{
 	return m_localMaxDepth;
 };
 
@@ -93,7 +93,7 @@ ClassLocalTree::getLocalMaxDepth() const{
  * \return Marker of the octant.
  */
 int8_t
-ClassLocalTree::getMarker(int32_t idx){
+LocalTree::getMarker(int32_t idx){
 	return m_octants[idx].getMarker();
 };
 
@@ -102,7 +102,7 @@ ClassLocalTree::getMarker(int32_t idx){
  * \return Level of the octant.
  */
 uint8_t
-ClassLocalTree::getLevel(int32_t idx){
+LocalTree::getLevel(int32_t idx){
 	return m_octants[idx].getLevel();
 };
 
@@ -111,7 +111,7 @@ ClassLocalTree::getLevel(int32_t idx){
  * \return Morton index of the octant.
  */
 uint64_t
-ClassLocalTree::computeMorton(int32_t idx){
+LocalTree::computeMorton(int32_t idx){
 	return m_octants[idx].computeMorton();
 };
 
@@ -120,7 +120,7 @@ ClassLocalTree::computeMorton(int32_t idx){
  * \return Level of the ghost octant.
  */
 uint8_t
-ClassLocalTree::getGhostLevel(int32_t idx){
+LocalTree::getGhostLevel(int32_t idx){
 	return m_ghosts[idx].getLevel();
 };
 
@@ -129,7 +129,7 @@ ClassLocalTree::getGhostLevel(int32_t idx){
  * \return Morton index of the octant.
  */
 uint64_t
-ClassLocalTree::computeGhostMorton(int32_t idx){
+LocalTree::computeGhostMorton(int32_t idx){
 	return m_ghosts[idx].computeMorton();
 };
 
@@ -138,7 +138,7 @@ ClassLocalTree::computeGhostMorton(int32_t idx){
  * \return Has the octant to be balanced?
  */
 bool
-ClassLocalTree::getBalance(int32_t idx){
+LocalTree::getBalance(int32_t idx){
 	return m_octants[idx].getNotBalance();
 };
 
@@ -146,7 +146,7 @@ ClassLocalTree::getBalance(int32_t idx){
  * \return Maximum codimension of the entity through which the 2:1 balance is performed.
  */
 uint8_t
-ClassLocalTree::getBalanceCodim() const{
+LocalTree::getBalanceCodim() const{
 	return m_balanceCodim;
 };
 
@@ -155,7 +155,7 @@ ClassLocalTree::getBalanceCodim() const{
  * \param[in] marker Refinement marker for the target octant.
  */
 void
-ClassLocalTree::setMarker(int32_t idx, int8_t marker){
+LocalTree::setMarker(int32_t idx, int8_t marker){
 	m_octants[idx].setMarker(marker);
 };
 
@@ -164,7 +164,7 @@ ClassLocalTree::setMarker(int32_t idx, int8_t marker){
  * \param[in] balance Has the octant to be balanced?
  */
 void
-ClassLocalTree::setBalance(int32_t idx, bool balance){
+LocalTree::setBalance(int32_t idx, bool balance){
 	m_octants[idx].setBalance(balance);
 };
 
@@ -172,29 +172,29 @@ ClassLocalTree::setBalance(int32_t idx, bool balance){
  * \param[in] Maximum codimension of the entity through which the 2:1 balance is performed.
  */
 void
-ClassLocalTree::setBalanceCodim(uint8_t b21codim){
+LocalTree::setBalanceCodim(uint8_t b21codim){
 	m_balanceCodim = b21codim;
 };
 
 /*!Set the first descentant octant of the octree.
  */
 void
-ClassLocalTree::setFirstDesc(){
+LocalTree::setFirstDesc(){
 	octvector::const_iterator firstOctant = m_octants.begin();
-	m_firstDesc = ClassOctant(m_dim, m_global.m_maxLevel, firstOctant->m_x, firstOctant->m_y, firstOctant->m_z);
+	m_firstDesc = Octant(m_dim, m_global.m_maxLevel, firstOctant->m_x, firstOctant->m_y, firstOctant->m_z);
 };
 
 /*!Set the last descentant octant of the octree.
  */
 void
-ClassLocalTree::setLastDesc(){
+LocalTree::setLastDesc(){
 	octvector::const_iterator lastOctant = m_octants.end() - 1;
 	uint32_t x,y,z,delta;
 	delta = (uint32_t)(1<<((uint8_t)m_global.m_maxLevel - lastOctant->m_level)) - 1;
 	x = lastOctant->m_x + delta;
 	y = lastOctant->m_y + delta;
 	z = lastOctant->m_z + (m_dim-2)*delta;
-	m_lastDesc = ClassOctant(m_dim, m_global.m_maxLevel,x,y,z);
+	m_lastDesc = Octant(m_dim, m_global.m_maxLevel,x,y,z);
 };
 
 
@@ -210,8 +210,8 @@ ClassLocalTree::setLastDesc(){
  * \param[in] idx Local index of the target octant.
  * \return Reference to the idx-th octant of the octree.
  */
-ClassOctant&
-ClassLocalTree::extractOctant(uint32_t idx){
+Octant&
+LocalTree::extractOctant(uint32_t idx){
 	return m_octants[idx];
 };
 
@@ -219,8 +219,8 @@ ClassLocalTree::extractOctant(uint32_t idx){
  * \param[in] idx Local index of the target octant.
  * \return Constant reference to the idx-th octant of the octree.
  */
-const ClassOctant&
-ClassLocalTree::extractOctant(uint32_t idx) const{
+const Octant&
+LocalTree::extractOctant(uint32_t idx) const{
 	return m_octants[idx];
 };
 
@@ -228,8 +228,8 @@ ClassLocalTree::extractOctant(uint32_t idx) const{
  * \param[in] idx Local index of the target ghost octant.
  * \return Reference to the idx-th ghost octant of the octree.
  */
-ClassOctant&
-ClassLocalTree::extractGhostOctant(uint32_t idx) {
+Octant&
+LocalTree::extractGhostOctant(uint32_t idx) {
 	return m_ghosts[idx];
 };
 
@@ -237,8 +237,8 @@ ClassLocalTree::extractGhostOctant(uint32_t idx) {
  * \param[in] idx Local index of the target ghost octant.
  * \return Constant reference to the idx-th ghost octant of the octree.
  */
-const ClassOctant&
-ClassLocalTree::extractGhostOctant(uint32_t idx) const{
+const Octant&
+LocalTree::extractGhostOctant(uint32_t idx) const{
 	return m_ghosts[idx];
 };
 
@@ -249,7 +249,7 @@ ClassLocalTree::extractGhostOctant(uint32_t idx) const{
  * \return	true if refinement done
  */
 bool
-ClassLocalTree::refine(u32vector & mapidx){
+LocalTree::refine(u32vector & mapidx){
 
 	u32vector		last_child_index;
 	octvector 		children;
@@ -333,10 +333,10 @@ ClassLocalTree::refine(u32vector & mapidx){
  * \return	true is coarsening done
  */
 bool
-ClassLocalTree::coarse(u32vector & mapidx){
+LocalTree::coarse(u32vector & mapidx){
 
 	u32vector		first_child_index;
-	ClassOctant		father;
+	Octant		father;
 	uint32_t 		nocts, nocts0;
 	uint32_t 		idx, idx2;
 	uint32_t 		offset;
@@ -541,7 +541,7 @@ ClassLocalTree::coarse(u32vector & mapidx){
  * \return	true if refinement done
  */
 bool
-ClassLocalTree::globalRefine(u32vector & mapidx){
+LocalTree::globalRefine(u32vector & mapidx){
 
 	uint32_t 	idx, nocts;
 	bool 		dorefine = false;
@@ -564,7 +564,7 @@ ClassLocalTree::globalRefine(u32vector & mapidx){
  * \return	true if coarsening done
  */
 bool
-ClassLocalTree::globalCoarse(u32vector & mapidx){
+LocalTree::globalCoarse(u32vector & mapidx){
 
 	uint32_t 	idx, nocts;
 	bool 		dorefine = false;
@@ -588,7 +588,7 @@ ClassLocalTree::globalCoarse(u32vector & mapidx){
  * \param[out] mapidx mpaidx[i] = index in old octants vector of the new i-th octant (index of first child if octant is new after coarsening)
  */
 void
-ClassLocalTree::checkCoarse(uint64_t lastDescPre,
+LocalTree::checkCoarse(uint64_t lastDescPre,
 		uint64_t firstDescPost,
 		u32vector & mapidx){
 
@@ -635,7 +635,7 @@ ClassLocalTree::checkCoarse(uint64_t lastDescPre,
 /*! Update max depth reached in local tree
  */
 void
-ClassLocalTree::updateLocalMaxDepth(){
+LocalTree::updateLocalMaxDepth(){
 
 	uint32_t noctants = getNumOctants();
 	uint32_t i;
@@ -660,12 +660,12 @@ ClassLocalTree::updateLocalMaxDepth(){
  * \param[out] isghost Vector with the information about the identity of each neighbour (is the i-th neighours a ghost octant?).
  */
 void
-ClassLocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, vector<bool> & isghost){
+LocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, vector<bool> & isghost){
 
 	uint64_t  		Morton, Mortontry;
 	uint32_t 		noctants = getNumOctants();
 	uint32_t 		idxtry;
-	ClassOctant* 	oct = &m_octants[idx];
+	Octant* 	oct = &m_octants[idx];
 	uint32_t 		size = oct->getSize(m_global.m_maxLevel);
 
 	//	int8_t 			cx = m_global.m_normals[iface][0];
@@ -691,7 +691,7 @@ ClassLocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbou
 		if (oct->m_info[iface] == false){
 
 			//Build Morton number of virtual neigh of same size
-			ClassOctant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size));
+			Octant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size));
 			Morton = samesizeoct.computeMorton();
 			// Search morton in octants
 			// If a even face morton is lower than morton of oct, if odd higher
@@ -751,7 +751,7 @@ ClassLocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbou
 					return;
 				}
 				// Compute Last discendent of virtual octant of same size
-				ClassOctant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
+				Octant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = m_octants[idxtry].computeMorton();
 				//				int32_t Dx, Dy, Dz;
@@ -836,11 +836,11 @@ ClassLocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbou
 
 				// Search in ghosts
 				uint32_t idxghost = uint32_t(m_sizeGhosts/2);
-				ClassOctant* octghost = &m_ghosts[idxghost];
+				Octant* octghost = &m_ghosts[idxghost];
 
 				//Build Morton number of virtual neigh of same size
-				//ClassOctant samesizeoct(oct->m_level, oct->m_x+cx*size, oct->m_y+cy*size, oct->m_z+cz*size);
-				ClassOctant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size));
+				//Octant samesizeoct(oct->m_level, oct->m_x+cx*size, oct->m_y+cy*size, oct->m_z+cz*size);
+				Octant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size));
 				Morton = samesizeoct.computeMorton(); //mortonEncode_magicbits(oct->m_x-size,oct->m_y,oct->m_z);
 				// Search morton in octants
 				// If a even face morton is lower than morton of oct, if odd higher
@@ -903,7 +903,7 @@ ClassLocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbou
 							return;
 						}
 						// Compute Last discendent of virtual octant of same size
-						ClassOctant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
+						Octant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
 						uint64_t Mortonlast = last_desc.computeMorton();
 						Mortontry = m_ghosts[idxtry].computeMorton();
 						//						int32_t Dx, Dy, Dz;
@@ -984,7 +984,7 @@ ClassLocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbou
 					if (oct->m_info[iface] == false){
 
 						//Build Morton number of virtual neigh of same size
-						ClassOctant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size));
+						Octant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size));
 						Morton = samesizeoct.computeMorton();
 						// Search morton in octants
 						// If a even face morton is lower than morton of oct, if odd higher
@@ -1044,7 +1044,7 @@ ClassLocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbou
 								return;
 							}
 							// Compute Last discendent of virtual octant of same size
-							ClassOctant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
+							Octant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
 							uint64_t Mortonlast = last_desc.computeMorton();
 							Mortontry = m_octants[idxtry].computeMorton();
 							//				int32_t Dx, Dy, Dz;
@@ -1136,7 +1136,7 @@ ClassLocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbou
  * \param[out] isghost Vector with the information about the identity of each neighbour (is the i-th neighours a ghost octant?).
  */
 void
-ClassLocalTree::findNeighbours(ClassOctant* oct, uint8_t iface, u32vector & neighbours, vector<bool> & isghost){
+LocalTree::findNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours, vector<bool> & isghost){
 
 	uint64_t  Morton, Mortontry;
 	uint32_t  noctants = getNumOctants();
@@ -1166,8 +1166,8 @@ ClassLocalTree::findNeighbours(ClassOctant* oct, uint8_t iface, u32vector & neig
 		if (oct->m_info[iface] == false){
 
 			//Build Morton number of virtual neigh of same size
-			//			ClassOctant samesizeoct(oct->m_level, int32_t(oct->m_x)+int32_t(cx*size), int32_t(oct->m_y)+int32_t(cy*size), int32_t(oct->m_z)+int32_t(cz*size));
-			ClassOctant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size));
+			//			Octant samesizeoct(oct->m_level, int32_t(oct->m_x)+int32_t(cx*size), int32_t(oct->m_y)+int32_t(cy*size), int32_t(oct->m_z)+int32_t(cz*size));
+			Octant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size));
 			Morton = samesizeoct.computeMorton();
 			// Search morton in octants
 			// If a even face morton is lower than morton of oct, if odd higher
@@ -1226,7 +1226,7 @@ ClassLocalTree::findNeighbours(ClassOctant* oct, uint8_t iface, u32vector & neig
 					return;
 				}
 				// Compute Last discendent of virtual octant of same size
-				ClassOctant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
+				Octant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = m_octants[idxtry].computeMorton();
 				//				int32_t Dx, Dy, Dz;
@@ -1311,11 +1311,11 @@ ClassLocalTree::findNeighbours(ClassOctant* oct, uint8_t iface, u32vector & neig
 
 				// Search in ghosts
 				uint32_t idxghost = uint32_t(m_sizeGhosts/2);
-				ClassOctant* octghost = &m_ghosts[idxghost];
+				Octant* octghost = &m_ghosts[idxghost];
 
 				//Build Morton number of virtual neigh of same size
-				//ClassOctant samesizeoct(oct->m_level, oct->m_x+cx*size, oct->m_y+cy*size, oct->m_z+cz*size);
-				ClassOctant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size));
+				//Octant samesizeoct(oct->m_level, oct->m_x+cx*size, oct->m_y+cy*size, oct->m_z+cz*size);
+				Octant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size));
 				Morton = samesizeoct.computeMorton(); //mortonEncode_magicbits(oct->m_x-size,oct->m_y,oct->m_z);
 				// Search morton in octants
 				// If a even face morton is lower than morton of oct, if odd higher
@@ -1378,7 +1378,7 @@ ClassLocalTree::findNeighbours(ClassOctant* oct, uint8_t iface, u32vector & neig
 							return;
 						}
 						// Compute Last discendent of virtual octant of same size
-						ClassOctant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
+						Octant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
 						uint64_t Mortonlast = last_desc.computeMorton();
 						Mortontry = m_ghosts[idxtry].computeMorton();
 						//						int32_t Dx, Dy, Dz;
@@ -1459,8 +1459,8 @@ ClassLocalTree::findNeighbours(ClassOctant* oct, uint8_t iface, u32vector & neig
 					if (oct->m_info[iface] == false){
 
 						//Build Morton number of virtual neigh of same size
-						//ClassOctant samesizeoct(oct->m_level, oct->m_x+cx*size, oct->m_y+cy*size, oct->m_z+cz*size);
-						ClassOctant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size));
+						//Octant samesizeoct(oct->m_level, oct->m_x+cx*size, oct->m_y+cy*size, oct->m_z+cz*size);
+						Octant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size));
 						Morton = samesizeoct.computeMorton();
 						// Search morton in octants
 						// If a even face morton is lower than morton of oct, if odd higher
@@ -1518,7 +1518,7 @@ ClassLocalTree::findNeighbours(ClassOctant* oct, uint8_t iface, u32vector & neig
 								return;
 							}
 							// Compute Last discendent of virtual octant of same size
-							ClassOctant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
+							Octant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
 							uint64_t Mortonlast = last_desc.computeMorton();
 							Mortontry = m_octants[idxtry].computeMorton();
 							//				int32_t Dx, Dy, Dz;
@@ -1608,12 +1608,12 @@ ClassLocalTree::findNeighbours(ClassOctant* oct, uint8_t iface, u32vector & neig
  * \param[out] neighbours Vector with the local indices of the local octant neighbours (size = 0 if boundary face).
  */
 void
-ClassLocalTree::findGhostNeighbours(uint32_t const idx, uint8_t iface, u32vector & neighbours){
+LocalTree::findGhostNeighbours(uint32_t const idx, uint8_t iface, u32vector & neighbours){
 
 	uint64_t  Morton, Mortontry;
 	uint32_t  noctants = getNumOctants();
 	uint32_t idxtry;
-	ClassOctant* oct = &m_ghosts[idx];
+	Octant* oct = &m_ghosts[idx];
 	uint32_t size = oct->getSize(m_global.m_maxLevel);
 
 	//	int8_t cx = int8_t((iface<2)*(int8_t(2*iface-1)));
@@ -1635,8 +1635,8 @@ ClassLocalTree::findGhostNeighbours(uint32_t const idx, uint8_t iface, u32vector
 	if (oct->m_info[6+iface] == true){
 
 		//Build Morton number of virtual neigh of same size
-		//ClassOctant samesizeoct(oct->m_level, int32_t(oct->m_x)+int32_t(cx*size), int32_t(oct->m_y)+int32_t(cy*size), int32_t(oct->m_z)+int32_t(cz*size));
-		ClassOctant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size));
+		//Octant samesizeoct(oct->m_level, int32_t(oct->m_x)+int32_t(cx*size), int32_t(oct->m_y)+int32_t(cy*size), int32_t(oct->m_z)+int32_t(cz*size));
+		Octant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size));
 		Morton = samesizeoct.computeMorton();
 		// Search morton in octants
 		// If a even face morton is lower than morton of oct, if odd higher
@@ -1696,7 +1696,7 @@ ClassLocalTree::findGhostNeighbours(uint32_t const idx, uint8_t iface, u32vector
 				return;
 			}
 			// Compute Last discendent of virtual octant of same size
-			ClassOctant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
+			Octant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
 			uint64_t Mortonlast = last_desc.computeMorton();
 			Mortontry = m_octants[idxtry].computeMorton();
 			//			int32_t Dx, Dy, Dz;
@@ -1777,9 +1777,9 @@ ClassLocalTree::findGhostNeighbours(uint32_t const idx, uint8_t iface, u32vector
  * \param[in] internal Set to true if the interior octants have to be checked.
  */
 void
- ClassLocalTree::preBalance21(bool internal){
+ LocalTree::preBalance21(bool internal){
 
-	ClassOctant 	father, lastdesc;
+	Octant 	father, lastdesc;
 	uint64_t 		mortonld;
 	uint32_t 		nocts;
 	uint32_t 		idx, idx2, idx0, last_idx;
@@ -1941,9 +1941,9 @@ void
  * \param[out] newmodified Vector of indices of interior octants checked and whose marker is modified.
  */
 void
-ClassLocalTree::preBalance21(u32vector& newmodified){
+LocalTree::preBalance21(u32vector& newmodified){
 
-	ClassOctant 		father, lastdesc;
+	Octant 		father, lastdesc;
 	uint64_t 			mortonld;
 	uint32_t 			nocts;
 	uint32_t 			idx, idx2, idx0, last_idx;
@@ -2108,7 +2108,7 @@ ClassLocalTree::preBalance21(u32vector& newmodified){
  * \return True if balanced done with some markers modification.
  */
 bool
-ClassLocalTree::localBalance(bool doInterior){
+LocalTree::localBalance(bool doInterior){
 
 	uint32_t			sizeneigh, modsize;
 	u32vector		 	neigh;
@@ -2599,7 +2599,7 @@ ClassLocalTree::localBalance(bool doInterior){
  * \return True if balanced done with some markers modification.
  */
 bool
-ClassLocalTree::localBalanceAll(bool doInterior){
+LocalTree::localBalanceAll(bool doInterior){
 	// Local variables
 	uint32_t			sizeneigh, modsize;
 	u32vector		 	neigh;
@@ -3097,12 +3097,12 @@ ClassLocalTree::localBalanceAll(bool doInterior){
  * \param[out] isghost Vector with the information about the identity of each neighbour (is the i-th neighours a ghost octant?).
  */
 void
-ClassLocalTree::findEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbours, vector<bool> & isghost){
+LocalTree::findEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbours, vector<bool> & isghost){
 
 	uint64_t  		Morton, Mortontry;
 	uint32_t  		noctants = getNumOctants();
 	uint32_t 		idxtry;
-	ClassOctant* 	oct = &m_octants[idx];
+	Octant* 	oct = &m_octants[idx];
 	uint32_t 		size = oct->getSize(m_global.m_maxLevel);
 	uint8_t 		iface1, iface2;
 	int32_t 		Dx, Dy, Dz;
@@ -3129,7 +3129,7 @@ ClassLocalTree::findEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neig
 	if (oct->m_info[iface1] == false && oct->m_info[iface2] == false){
 
 		//Build Morton number of virtual neigh of same size
-		ClassOctant samesizeoct(m_dim, oct->m_level, oct->m_x+cx*size, oct->m_y+cy*size, oct->m_z+cz*size);
+		Octant samesizeoct(m_dim, oct->m_level, oct->m_x+cx*size, oct->m_y+cy*size, oct->m_z+cz*size);
 		Morton = samesizeoct.computeMorton(); //mortonEncode_magicbits(oct->m_x-size,oct->m_y,oct->m_z);
 
 		//SEARCH IN GHOSTS
@@ -3137,7 +3137,7 @@ ClassLocalTree::findEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neig
 		if (m_ghosts.size()>0){
 			// Search in ghosts
 			uint32_t idxghost = uint32_t(m_sizeGhosts/2);
-			ClassOctant* octghost = &m_ghosts[idxghost];
+			Octant* octghost = &m_ghosts[idxghost];
 
 			// Search morton in octants
 			// If a even face morton is lower than morton of oct, if odd higher
@@ -3192,7 +3192,7 @@ ClassLocalTree::findEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neig
 						return;
 					}
 					// Compute Last discendent of virtual octant of same size
-					ClassOctant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
+					Octant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
 					uint64_t Mortonlast = last_desc.computeMorton();
 					Mortontry = m_ghosts[idxtry].computeMorton();
 					while(Mortontry < Mortonlast && idxtry < m_ghosts.size()){
@@ -3301,7 +3301,7 @@ ClassLocalTree::findEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neig
 					return;
 				}
 				// Compute Last discendent of virtual octant of same size
-				ClassOctant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
+				Octant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = m_octants[idxtry].computeMorton();
 				while(Mortontry < Mortonlast && idxtry <= noctants-1){
@@ -3370,7 +3370,7 @@ ClassLocalTree::findEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neig
  * \param[out] isghost Vector with the information about the identity of each neighbour (is the i-th neighours a ghost octant?).
  */
 void
-ClassLocalTree::findEdgeNeighbours(ClassOctant* oct, uint8_t iedge, u32vector & neighbours, vector<bool> & isghost){
+LocalTree::findEdgeNeighbours(Octant* oct, uint8_t iedge, u32vector & neighbours, vector<bool> & isghost){
 
 	uint64_t  		Morton, Mortontry;
 	uint32_t  		noctants = getNumOctants();
@@ -3401,7 +3401,7 @@ ClassLocalTree::findEdgeNeighbours(ClassOctant* oct, uint8_t iedge, u32vector & 
 	if (oct->m_info[iface1] == false && oct->m_info[iface2] == false){
 
 		//Build Morton number of virtual neigh of same size
-		ClassOctant samesizeoct(m_dim, oct->m_level, oct->m_x+cx*size, oct->m_y+cy*size, oct->m_z+cz*size);
+		Octant samesizeoct(m_dim, oct->m_level, oct->m_x+cx*size, oct->m_y+cy*size, oct->m_z+cz*size);
 		Morton = samesizeoct.computeMorton(); //mortonEncode_magicbits(oct->m_x-size,oct->m_y,oct->m_z);
 
 		//SEARCH IN GHOSTS
@@ -3409,7 +3409,7 @@ ClassLocalTree::findEdgeNeighbours(ClassOctant* oct, uint8_t iedge, u32vector & 
 		if (m_ghosts.size()>0){
 			// Search in ghosts
 			uint32_t idxghost = uint32_t(m_sizeGhosts/2);
-			ClassOctant* octghost = &m_ghosts[idxghost];
+			Octant* octghost = &m_ghosts[idxghost];
 
 			// Search morton in octants
 			// If a even face morton is lower than morton of oct, if odd higher
@@ -3464,7 +3464,7 @@ ClassLocalTree::findEdgeNeighbours(ClassOctant* oct, uint8_t iedge, u32vector & 
 						return;
 					}
 					// Compute Last discendent of virtual octant of same size
-					ClassOctant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
+					Octant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
 					uint64_t Mortonlast = last_desc.computeMorton();
 					Mortontry = m_ghosts[idxtry].computeMorton();
 					while(Mortontry < Mortonlast && idxtry < m_ghosts.size()){
@@ -3572,7 +3572,7 @@ ClassLocalTree::findEdgeNeighbours(ClassOctant* oct, uint8_t iedge, u32vector & 
 					return;
 				}
 				// Compute Last discendent of virtual octant of same size
-				ClassOctant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
+				Octant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = m_octants[idxtry].computeMorton();
 				while(Mortontry < Mortonlast && idxtry <= noctants-1){
@@ -3640,12 +3640,12 @@ ClassLocalTree::findEdgeNeighbours(ClassOctant* oct, uint8_t iedge, u32vector & 
  * \param[out] neighbours Vector with the local indices of the local octants neighbours (size = 0 if boundary edge).
  */
 void
-ClassLocalTree::findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbours){
+LocalTree::findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbours){
 
 	uint64_t  		Morton, Mortontry;
 	uint32_t  		noctants = getNumOctants();
 	uint32_t 		idxtry;
-	ClassOctant* 	oct = &m_ghosts[idx];
+	Octant* 	oct = &m_ghosts[idx];
 	uint32_t 		size = oct->getSize(m_global.m_maxLevel);
 	uint8_t 		iface1, iface2;
 	int32_t 		Dx, Dy, Dz;
@@ -3671,7 +3671,7 @@ ClassLocalTree::findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector &
 	if (oct->m_info[iface1+6] == true || oct->m_info[iface2+6] == true){
 
 		//Build Morton number of virtual neigh of same size
-		ClassOctant samesizeoct(m_dim, oct->m_level, oct->m_x+cx*size, oct->m_y+cy*size, oct->m_z+cz*size);
+		Octant samesizeoct(m_dim, oct->m_level, oct->m_x+cx*size, oct->m_y+cy*size, oct->m_z+cz*size);
 		Morton = samesizeoct.computeMorton();
 
 		//Build Morton number of virtual neigh of same size
@@ -3725,7 +3725,7 @@ ClassLocalTree::findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector &
 					return;
 				}
 				// Compute Last discendent of virtual octant of same size
-				ClassOctant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
+				Octant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = m_octants[idxtry].computeMorton();
 				while(Mortontry < Mortonlast && idxtry <= noctants-1){
@@ -3791,7 +3791,7 @@ ClassLocalTree::findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector &
  * \param[out] isghost Vector with the information about the identity of each neighbour (is the i-th neighours a ghost octant?).
  */
 void
-ClassLocalTree::findNodeNeighbours(ClassOctant* oct, uint8_t inode, u32vector & neighbours, vector<bool> & isghost){
+LocalTree::findNodeNeighbours(Octant* oct, uint8_t inode, u32vector & neighbours, vector<bool> & isghost){
 
 	uint64_t  	Morton, Mortontry;
 	uint32_t  	noctants = getNumOctants();
@@ -3830,7 +3830,7 @@ ClassLocalTree::findNodeNeighbours(ClassOctant* oct, uint8_t inode, u32vector & 
 	if (oct->m_info[iface1] == false && oct->m_info[iface2] == false && oct->m_info[iface3] == false){
 
 		//Build Morton number of virtual neigh of same size
-		ClassOctant samesizeoct(m_dim, oct->m_level, oct->m_x+cxyz[0]*size, oct->m_y+cxyz[1]*size, oct->m_z+cxyz[2]*size);
+		Octant samesizeoct(m_dim, oct->m_level, oct->m_x+cxyz[0]*size, oct->m_y+cxyz[1]*size, oct->m_z+cxyz[2]*size);
 		Morton = samesizeoct.computeMorton(); //mortonEncode_magicbits(oct->m_x-size,oct->m_y,oct->m_z);
 
 		//SEARCH IN GHOSTS
@@ -3838,7 +3838,7 @@ ClassLocalTree::findNodeNeighbours(ClassOctant* oct, uint8_t inode, u32vector & 
 		if (m_ghosts.size()>0){
 			// Search in ghosts
 			uint32_t idxghost = uint32_t(m_sizeGhosts/2);
-			ClassOctant* octghost = &m_ghosts[idxghost];
+			Octant* octghost = &m_ghosts[idxghost];
 
 			// Search morton in octants
 			// If a even face morton is lower than morton of oct, if odd higher
@@ -3895,7 +3895,7 @@ ClassLocalTree::findNodeNeighbours(ClassOctant* oct, uint8_t inode, u32vector & 
 						return;
 					}
 					// Compute Last discendent of virtual octant of same size
-					ClassOctant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
+					Octant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
 					uint64_t Mortonlast = last_desc.computeMorton();
 					Mortontry = m_ghosts[idxtry].computeMorton();
 					int32_t Dx[3] = {0,0,0};
@@ -3989,7 +3989,7 @@ ClassLocalTree::findNodeNeighbours(ClassOctant* oct, uint8_t inode, u32vector & 
 					return;
 				}
 				// Compute Last discendent of virtual octant of same size
-				ClassOctant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
+				Octant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = m_octants[idxtry].computeMorton();
 				int32_t Dx[3] = {0,0,0};
@@ -4044,12 +4044,12 @@ ClassLocalTree::findNodeNeighbours(ClassOctant* oct, uint8_t inode, u32vector & 
  * \param[out] isghost Vector with the information about the identity of each neighbour (is the i-th neighours a ghost octant?).
  */
 void
-ClassLocalTree::findNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours, vector<bool> & isghost){
+LocalTree::findNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours, vector<bool> & isghost){
 
 	uint64_t  		Morton, Mortontry;
 	uint32_t  		noctants = getNumOctants();
 	uint32_t 		idxtry;
-	ClassOctant* 	oct = &m_octants[idx];
+	Octant* 	oct = &m_octants[idx];
 	uint32_t 		size = oct->getSize(m_global.m_maxLevel);
 	uint8_t 		iface1, iface2, iface3;
 	//	int32_t Dhx, Dhy, Dhz;
@@ -4084,7 +4084,7 @@ ClassLocalTree::findNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neig
 	if (oct->m_info[iface1] == false && oct->m_info[iface2] == false && oct->m_info[iface3] == false){
 
 		//Build Morton number of virtual neigh of same size
-		ClassOctant samesizeoct(m_dim, oct->m_level, oct->m_x+cxyz[0]*size, oct->m_y+cxyz[1]*size, oct->m_z+cxyz[2]*size);
+		Octant samesizeoct(m_dim, oct->m_level, oct->m_x+cxyz[0]*size, oct->m_y+cxyz[1]*size, oct->m_z+cxyz[2]*size);
 		Morton = samesizeoct.computeMorton(); //mortonEncode_magicbits(oct->m_x-size,oct->m_y,oct->m_z);
 
 		//SEARCH IN GHOSTS
@@ -4092,7 +4092,7 @@ ClassLocalTree::findNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neig
 		if (m_ghosts.size()>0){
 			// Search in ghosts
 			uint32_t idxghost = uint32_t(m_sizeGhosts/2);
-			ClassOctant* octghost = &m_ghosts[idxghost];
+			Octant* octghost = &m_ghosts[idxghost];
 
 			// Search morton in octants
 			// If a even face morton is lower than morton of oct, if odd higher
@@ -4149,7 +4149,7 @@ ClassLocalTree::findNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neig
 						return;
 					}
 					// Compute Last discendent of virtual octant of same size
-					ClassOctant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
+					Octant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
 					uint64_t Mortonlast = last_desc.computeMorton();
 					Mortontry = m_ghosts[idxtry].computeMorton();
 					int32_t Dx[3] = {0,0,0};
@@ -4243,7 +4243,7 @@ ClassLocalTree::findNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neig
 					return;
 				}
 				// Compute Last discendent of virtual octant of same size
-				ClassOctant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
+				Octant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = m_octants[idxtry].computeMorton();
 				int32_t Dx[3] = {0,0,0};
@@ -4296,12 +4296,12 @@ ClassLocalTree::findNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neig
  * \param[out] neighbours Vector with the local indices of the local octants neighbours (size = 0 if boundary node).
  */
 void
-ClassLocalTree::findGhostNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours){
+LocalTree::findGhostNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours){
 
 	uint64_t  		Morton, Mortontry;
 	uint32_t  		noctants = getNumOctants();
 	uint32_t 		idxtry;
-	ClassOctant* 	oct = &m_ghosts[idx];
+	Octant* 	oct = &m_ghosts[idx];
 	uint32_t 		size = oct->getSize(m_global.m_maxLevel);
 	uint8_t 		iface1, iface2, iface3;
 	//int32_t Dhx, Dhy, Dhz;
@@ -4337,7 +4337,7 @@ ClassLocalTree::findGhostNodeNeighbours(uint32_t idx, uint8_t inode, u32vector &
 	if (oct->m_info[iface1+6] == true || oct->m_info[iface2+6] == true || oct->m_info[iface3+6] == true){
 
 		//Build Morton number of virtual neigh of same size
-		ClassOctant samesizeoct(m_dim, oct->m_level, oct->m_x+cxyz[0]*size, oct->m_y+cxyz[1]*size, oct->m_z+cxyz[2]*size);
+		Octant samesizeoct(m_dim, oct->m_level, oct->m_x+cxyz[0]*size, oct->m_y+cxyz[1]*size, oct->m_z+cxyz[2]*size);
 		Morton = samesizeoct.computeMorton(); //mortonEncode_magicbits(oct->m_x-size,oct->m_y,oct->m_z);
 		int32_t jump = noctants/2;
 		idxtry = jump;
@@ -4376,7 +4376,7 @@ ClassLocalTree::findGhostNodeNeighbours(uint32_t idx, uint8_t inode, u32vector &
 					return;
 				}
 				// Compute Last discendent of virtual octant of same size
-				ClassOctant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
+				Octant last_desc = samesizeoct.buildLastDesc(m_global.m_maxLevel);
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = m_octants[idxtry].computeMorton();
 				int32_t Dx[3] = {0,0,0};
@@ -4419,10 +4419,10 @@ ClassLocalTree::findGhostNodeNeighbours(uint32_t idx, uint8_t inode, u32vector &
 /*! Compute and store in m_intersections the intersections of the local tree.
  */
 void
-ClassLocalTree::computeIntersections() {
+LocalTree::computeIntersections() {
 
 		octvector::iterator 	it, obegin, oend;
-		ClassIntersection 		intersection;
+		Intersection 			intersection;
 		u32vector 				neighbours;
 		vector<bool>			isghost;
 		uint32_t 				counter, idx;
@@ -4536,7 +4536,7 @@ ClassLocalTree::computeIntersections() {
  * \return Local index of the target octant (=nocts if target Morton not found).
 */
 uint32_t
-ClassLocalTree::findMorton(uint64_t Morton){
+LocalTree::findMorton(uint64_t Morton){
 
 	uint32_t 		nocts = m_octants.size();
 	uint32_t 		idx = nocts/2;
@@ -4579,7 +4579,7 @@ ClassLocalTree::findMorton(uint64_t Morton){
  * \return Index of the target ghost octant (=nghosts if target Morton not found).
 */
 uint32_t
-ClassLocalTree::findGhostMorton(uint64_t Morton){
+LocalTree::findGhostMorton(uint64_t Morton){
 	uint32_t 		nocts = m_ghosts.size();
 	uint32_t 		idx = nocts/2;
 	uint64_t 		Mortontry = m_ghosts[idx].computeMorton();
@@ -4620,7 +4620,7 @@ ClassLocalTree::findGhostMorton(uint64_t Morton){
 /** Compute the connectivity of octants and store the coordinates of nodes.
  */
 void
-ClassLocalTree::computeConnectivity(){
+LocalTree::computeConnectivity(){
 
 	map<uint64_t, vector<uint32_t> > 			mapnodes;
 	map<uint64_t, vector<uint32_t> >::iterator 	iter, iterend;
@@ -4684,7 +4684,7 @@ ClassLocalTree::computeConnectivity(){
 /*! Clear nodes vector and connectivity of octants of local tree
 */
 void
-ClassLocalTree::clearConnectivity(){
+LocalTree::clearConnectivity(){
 	u32arr3vector().swap(m_nodes);
 	u32vector2D().swap(m_connectivity);
 };
@@ -4692,7 +4692,7 @@ ClassLocalTree::clearConnectivity(){
 /*! Updates nodes vector and connectivity of octants of local tree
 */
 void
-ClassLocalTree::updateConnectivity(){
+LocalTree::updateConnectivity(){
 	clearConnectivity();
 	computeConnectivity();
 };
@@ -4700,7 +4700,7 @@ ClassLocalTree::updateConnectivity(){
 /*! Computes ghosts nodes vector and connectivity of ghosts octants of local tree
 */
 void
-ClassLocalTree::computeGhostsConnectivity(){
+LocalTree::computeGhostsConnectivity(){
 
 	map<uint64_t, vector<uint32_t> > 			mapnodes;
 	map<uint64_t, vector<uint32_t> >::iterator 	iter, iterend;
@@ -4759,7 +4759,7 @@ ClassLocalTree::computeGhostsConnectivity(){
 /*! Clear ghosts nodes vector and connectivity of ghosts octants of local tree
 */
 void
-ClassLocalTree::clearGhostsConnectivity(){
+LocalTree::clearGhostsConnectivity(){
 	u32arr3vector().swap(m_ghostsNodes);
 	u32vector2D().swap(m_ghostsConnectivity);
 };
@@ -4767,7 +4767,7 @@ ClassLocalTree::clearGhostsConnectivity(){
 /*! Update ghosts nodes vector and connectivity of ghosts octants of local tree
 */
 void
-ClassLocalTree::updateGhostsConnectivity(){
+LocalTree::updateGhostsConnectivity(){
 	clearGhostsConnectivity();
 	computeGhostsConnectivity();
 };

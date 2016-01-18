@@ -1,4 +1,4 @@
-#include "ClassParaTree.hpp"
+#include "ParaTree.hpp"
 
 using namespace std;
 
@@ -13,7 +13,7 @@ int main(int argc, char *argv[]) {
 #endif
 		int iter = 0;
 		/**<Instantation of a 2D para_tree object.*/
-		ClassParaTree pablo7a;
+		ParaTree pablo7a;
 
 		/**<Set NO 2:1 balance for the octree.*/
 		int idx = 0;
@@ -25,7 +25,7 @@ int main(int argc, char *argv[]) {
 		}
 
 		/**<Instantation and copy pablo7a.*/
-		ClassParaTree pablo7b = pablo7a;
+		ParaTree pablo7b = pablo7a;
 
 		/**<Define a center point and a radius.*/
 		double xc, yc;

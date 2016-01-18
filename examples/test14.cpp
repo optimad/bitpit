@@ -1,4 +1,4 @@
-#include "ClassParaTree.hpp"
+#include "ParaTree.hpp"
 #if ENABLE_MPI==1
 #include "UserDataComm.hpp"
 #endif
@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
 		int dim = 2;
 
 		/**<Instantation of a 2D para_tree object.*/
-		ClassParaTree pablo14;
+		ParaTree pablo14;
 
 		/**<Refine globally four level and write the para_tree.*/
 		for (iter=1; iter<5; iter++){
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
 		/**<Assign a data to the ghost octants (PARALLEL TEST) with at least one node inside the circle.*/
 		for (int i=0; i<nghosts; i++){
 			/**<Compute the nodes of the octant (Use pointer for ghost).*/
-			ClassOctant *oct = pablo14.getGhostOctant(i);
+			Octant *oct = pablo14.getGhostOctant(i);
 			vector<array<double,3> > nodes = pablo14.getNodes(oct);
 			for (int j=0; j<4; j++){
 				double x = nodes[j][0];

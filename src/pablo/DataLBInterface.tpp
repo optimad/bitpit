@@ -1,12 +1,12 @@
 template<class Impl>
-inline ClassDataLBInterface<Impl>::ClassDataLBInterface() {};
+inline DataLBInterface<Impl>::DataLBInterface() {};
 
 /*! Its user specification computes the specific size of data for an element.
  * \param[in] e The element local index.
  * \return the size of the data for the e element
  */
 template<class Impl>
-inline size_t ClassDataLBInterface<Impl>::size(const uint32_t e) const {
+inline size_t DataLBInterface<Impl>::size(const uint32_t e) const {
 	return getImpl().size(e);
 }
 
@@ -14,7 +14,7 @@ inline size_t ClassDataLBInterface<Impl>::size(const uint32_t e) const {
  * \return The size of the data for every element
  */
 template<class Impl>
-inline size_t ClassDataLBInterface<Impl>::fixedSize() const {
+inline size_t DataLBInterface<Impl>::fixedSize() const {
 	return getImpl().fixedSize();
 }
 
@@ -23,7 +23,7 @@ inline size_t ClassDataLBInterface<Impl>::fixedSize() const {
  * \param[in] to Element local index to.
  */
 template<class Impl>
-inline void ClassDataLBInterface<Impl>::move(const uint32_t from, const uint32_t to) {
+inline void DataLBInterface<Impl>::move(const uint32_t from, const uint32_t to) {
 	return getImpl().move(from,to);
 }
 
@@ -47,7 +47,7 @@ inline void ClassDataLBInterface<Impl>::move(const uint32_t from, const uint32_t
  */
 template<class Impl>
 template<class Buffer>
-inline void ClassDataLBInterface<Impl>::gather(Buffer& buff,	const uint32_t e) {
+inline void DataLBInterface<Impl>::gather(Buffer& buff,	const uint32_t e) {
 	return getImpl().gather(buff,e);
 }
 
@@ -71,7 +71,7 @@ inline void ClassDataLBInterface<Impl>::gather(Buffer& buff,	const uint32_t e) {
  */
 template<class Impl>
 template<class Buffer>
-inline void ClassDataLBInterface<Impl>::scatter(Buffer& buff, const uint32_t e) {
+inline void DataLBInterface<Impl>::scatter(Buffer& buff, const uint32_t e) {
 	return getImpl().scatter(buff,e);
 }
 
@@ -82,7 +82,7 @@ inline void ClassDataLBInterface<Impl>::scatter(Buffer& buff, const uint32_t e) 
  * \param[in] length The length of the data container the process has to read
  */
 template<class Impl>
-inline void ClassDataLBInterface<Impl>::assign(uint32_t stride, uint32_t length){
+inline void DataLBInterface<Impl>::assign(uint32_t stride, uint32_t length){
 	return getImpl().assign(stride, length);
 }
 
@@ -90,7 +90,7 @@ inline void ClassDataLBInterface<Impl>::assign(uint32_t stride, uint32_t length)
  * \param[in] newSize The new size of the user data container
  */
 template<class Impl>
-inline void ClassDataLBInterface<Impl>::resize(uint32_t newSize){
+inline void DataLBInterface<Impl>::resize(uint32_t newSize){
 	return getImpl().resize(newSize);
 }
 
@@ -98,7 +98,7 @@ inline void ClassDataLBInterface<Impl>::resize(uint32_t newSize){
  * \param[in] newSize The new size of the user ghost data container
  */
 template<class Impl>
-inline void ClassDataLBInterface<Impl>::resizeGhost(uint32_t newSize){
+inline void DataLBInterface<Impl>::resizeGhost(uint32_t newSize){
 	return getImpl().resizeGhost(newSize);
 }
 
@@ -106,17 +106,17 @@ inline void ClassDataLBInterface<Impl>::resizeGhost(uint32_t newSize){
  * 	If the user container has no capacity concept, nothing has to be done.
  */
 template<class Impl>
-inline void ClassDataLBInterface<Impl>::shrink(){
+inline void DataLBInterface<Impl>::shrink(){
 	return getImpl().shrink();
 }
 
 template<class Impl>
-inline Impl& ClassDataLBInterface<Impl>::getImpl() {
+inline Impl& DataLBInterface<Impl>::getImpl() {
 	return static_cast<Impl &>(*this);
 }
 
 template<class Impl>
-inline const Impl& ClassDataLBInterface<Impl>::getImpl() const {
+inline const Impl& DataLBInterface<Impl>::getImpl() const {
 	return static_cast<const Impl &>(*this);
 }
 

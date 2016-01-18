@@ -1,21 +1,21 @@
-#ifndef CLASSPARATREE_HPP_
-#define CLASSPARATREE_HPP_
+#ifndef PARATREE_HPP_
+#define PARATREE_HPP_
 
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
 #if ENABLE_MPI==1
 #include <mpi.h>
-#include "ClassCommBuffer.hpp"
-#include "ClassDataLBInterface.hpp"
-#include "ClassDataCommInterface.hpp"
+#include "CommBuffer.hpp"
+#include "DataLBInterface.hpp"
+#include "DataCommInterface.hpp"
 #endif
-#include "ClassGlobal.hpp"
-#include "ClassArray.hpp"
-#include "ClassOctant.hpp"
-#include "ClassLocalTree.hpp"
-#include "ClassMap.hpp"
-#include "ClassLog.hpp"
+#include "Global.hpp"
+#include "Array.hpp"
+#include "Octant.hpp"
+#include "LocalTree.hpp"
+#include "Map.hpp"
+#include "Log.hpp"
 #include <map>
 #include <set>
 #include <bitset>
@@ -43,15 +43,15 @@ typedef std::bitset<72>				octantID;
  *	The user should (read can...) work only
  *	with this Class and its methods.
  *	The sizes are intended in physical domain. The transformation from the m_logical
- *	domain to the physical domain is defined by ClassMap trans.
+ *	domain to the physical domain is defined by Map trans.
  *
  *	The partition of the octree is performed by following the Z-curve defined by the Morton
  *	index of the octants. By default it is a balanced partition over the number of octants for each
  *	process.
  *
- *	Class ClassParaTree has a dimensional parameter int dim and it accepts only two values: dim=2 (Class_Para_Tree<2>)and dim=3 (Class_Para_Tree<3>), obviously for 2D and 3D respectively.
+ *	Class ParaTree has a dimensional parameter int dim and it accepts only two values: dim=2 (Class_Para_Tree<2>)and dim=3 (Class_Para_Tree<3>), obviously for 2D and 3D respectively.
  */
-class ClassParaTree{
+class ParaTree{
 
 	// =================================================================================== //
 	// MEMBERS																			   //
@@ -65,11 +65,11 @@ private:
 	std::map<int,u32vector> m_bordersPerProc;				/**<Local indices of border octants per process*/
 	int 					m_nproc;						/**<Number of processes of the job*/
 	uint8_t 				m_maxDepth;						/**<Global max existing level in the parallel octree*/
-	ClassGlobal				m_global;						/**<Global variables*/
+	Global					m_global;						/**<Global variables*/
 
 	//distributed members
 	int 					m_rank;							/**<Local m_rank of process*/
-	ClassLocalTree 			m_octree;						/**<Local tree in each processor*/
+	LocalTree 				m_octree;						/**<Local tree in each processor*/
 
 	//distributed adpapting memebrs
 	u32vector 				m_mapIdx;						/**<Local mapper for adapting. Mapper from new octants to old octants.
@@ -83,7 +83,7 @@ private:
 	bool 					m_serial;						/**<True if the octree is the same on each processor, False if the octree is distributed*/
 
 	//map members
-	ClassMap 				m_trans;						/**<Transformation map from m_logical to physical domain*/
+	Map 					m_trans;						/**<Transformation map from m_logical to physical domain*/
 	uint8_t					m_dim;							/**<Space dimension of the octree object (2D/3D).*/
 
 	//info member
@@ -91,7 +91,7 @@ private:
 															with at least one modifyed element).*/
 
 	//m_log member
-	ClassLog 				m_log;							/**<Log object*/
+	Log 					m_log;							/**<Log object*/
 
 #if ENABLE_MPI==1
 	MPI_Comm 				m_comm;							/**<MPI communicator*/
@@ -102,15 +102,15 @@ private:
 	// =================================================================================== //
 public:
 #if ENABLE_MPI==1
-	ClassParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
-	ClassParaTree(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
-	ClassParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
+	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
+	ParaTree(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
+	ParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
 #else
-	ClassParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
-	ClassParaTree(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
-	ClassParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
+	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
+	ParaTree(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
+	ParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
 #endif
-	~ClassParaTree();
+	~ParaTree();
 
 	// =================================================================================== //
 	// METHODS																			   //
@@ -201,38 +201,38 @@ public:
 	// =================================================================================== //
 	// POINTER BASED METHODS															   //
 	// =================================================================================== //
-	darray3 	getCoordinates(ClassOctant* oct);
-	double 		getX(ClassOctant* oct);
-	double 		getY(ClassOctant* oct);
-	double 		getZ(ClassOctant* oct);
-	double 		getSize(ClassOctant* oct);
-	double 		getArea(ClassOctant* oct);
-	double 		getVolume(ClassOctant* oct);
-	void 		getCenter(ClassOctant* oct, darray3& center);
-	darray3 	getCenter(ClassOctant* oct);
-	darray3 	getFaceCenter(ClassOctant* oct, uint8_t iface);
-	void 		getFaceCenter(ClassOctant* oct, uint8_t iface, darray3& center);
-	darray3 	getNode(ClassOctant* oct, uint8_t inode);
-	void 		getNode(ClassOctant* oct, uint8_t inode, darray3& node);
-	void 		getNodes(ClassOctant* oct, darr3vector & nodes);
-	darr3vector getNodes(ClassOctant* oct);
-	void 		getNormal(ClassOctant* oct, uint8_t & iface, darray3 & normal);
-	darray3 	getNormal(ClassOctant* oct, uint8_t & iface);
-	int8_t 		getMarker(ClassOctant* oct);
-	uint8_t 	getLevel(ClassOctant* oct);
-	uint64_t 	getMorton(ClassOctant* oct);
-	bool 		getBalance(ClassOctant* oct);
-	bool		getBound(ClassOctant* oct, uint8_t iface);
-	bool		getBound(ClassOctant* oct);
-	bool		getPbound(ClassOctant* oct, uint8_t iface);
-	bool		getPbound(ClassOctant* oct);
-	bool 		getIsNewR(ClassOctant* oct);
-	bool 		getIsNewC(ClassOctant* oct);
-	uint32_t 	getIdx(ClassOctant* oct);
-	uint64_t 	getGlobalIdx(ClassOctant* oct);
-	octantID	getPersistentIdx(ClassOctant* oct);
-	void 		setMarker(ClassOctant* oct, int8_t marker);
-	void 		setBalance(ClassOctant* oct, bool balance);
+	darray3 	getCoordinates(Octant* oct);
+	double 		getX(Octant* oct);
+	double 		getY(Octant* oct);
+	double 		getZ(Octant* oct);
+	double 		getSize(Octant* oct);
+	double 		getArea(Octant* oct);
+	double 		getVolume(Octant* oct);
+	void 		getCenter(Octant* oct, darray3& center);
+	darray3 	getCenter(Octant* oct);
+	darray3 	getFaceCenter(Octant* oct, uint8_t iface);
+	void 		getFaceCenter(Octant* oct, uint8_t iface, darray3& center);
+	darray3 	getNode(Octant* oct, uint8_t inode);
+	void 		getNode(Octant* oct, uint8_t inode, darray3& node);
+	void 		getNodes(Octant* oct, darr3vector & nodes);
+	darr3vector getNodes(Octant* oct);
+	void 		getNormal(Octant* oct, uint8_t & iface, darray3 & normal);
+	darray3 	getNormal(Octant* oct, uint8_t & iface);
+	int8_t 		getMarker(Octant* oct);
+	uint8_t 	getLevel(Octant* oct);
+	uint64_t 	getMorton(Octant* oct);
+	bool 		getBalance(Octant* oct);
+	bool		getBound(Octant* oct, uint8_t iface);
+	bool		getBound(Octant* oct);
+	bool		getPbound(Octant* oct, uint8_t iface);
+	bool		getPbound(Octant* oct);
+	bool 		getIsNewR(Octant* oct);
+	bool 		getIsNewC(Octant* oct);
+	uint32_t 	getIdx(Octant* oct);
+	uint64_t 	getGlobalIdx(Octant* oct);
+	octantID	getPersistentIdx(Octant* oct);
+	void 		setMarker(Octant* oct, int8_t marker);
+	void 		setBalance(Octant* oct, bool balance);
 
 	// =================================================================================== //
 	// LOCAL TREE GET/SET METHODS														   //
@@ -247,39 +247,39 @@ public:
 	uint8_t 	getBalanceCodimension() const;
 	void 		getBoundingBox(darray3 & P0, darray3 & P1);
 	void 		setBalanceCodimension(uint8_t b21codim);
-	const ClassOctant & getFirstDesc() const;
-	const ClassOctant & getLastDesc() const;
+	const Octant & getFirstDesc() const;
+	const Octant & getLastDesc() const;
 	uint64_t 	getLastDescMorton(uint32_t idx);
 
 	// =================================================================================== //
 	// INTERSECTION GET/SET METHODS														   //
 	// =================================================================================== //
 	uint32_t 	getNumIntersections();
-	ClassIntersection* getIntersection(uint32_t idx);
-	uint8_t 	getLevel(ClassIntersection* inter);
-	bool 		getFiner(ClassIntersection* inter);
-	bool 		getBound(ClassIntersection* inter);
-	bool 		getIsGhost(ClassIntersection* inter);
-	bool 		getPbound(ClassIntersection* inter);
-	uint8_t 	getFace(ClassIntersection* inter);
-	u32vector 	getOwners(ClassIntersection* inter);
-	uint32_t 	getIn(ClassIntersection* inter);
-	uint32_t 	getOut(ClassIntersection* inter);
-	double 		getSize(ClassIntersection* inter);
-	double 		getArea(ClassIntersection* inter);
-	darray3 	getCenter(ClassIntersection* inter);
-	darr3vector getNodes(ClassIntersection* inter);
-	darray3 	getNormal(ClassIntersection* inter);
+	Intersection* getIntersection(uint32_t idx);
+	uint8_t 	getLevel(Intersection* inter);
+	bool 		getFiner(Intersection* inter);
+	bool 		getBound(Intersection* inter);
+	bool 		getIsGhost(Intersection* inter);
+	bool 		getPbound(Intersection* inter);
+	uint8_t 	getFace(Intersection* inter);
+	u32vector 	getOwners(Intersection* inter);
+	uint32_t 	getIn(Intersection* inter);
+	uint32_t 	getOut(Intersection* inter);
+	double 		getSize(Intersection* inter);
+	double 		getArea(Intersection* inter);
+	darray3 	getCenter(Intersection* inter);
+	darr3vector getNodes(Intersection* inter);
+	darray3 	getNormal(Intersection* inter);
 
 	// =================================================================================== //
 	// OTHER GET/SET METHODS															   //
 	// =================================================================================== //
-	ClassOctant*	getOctant(uint32_t idx);
-	ClassOctant*	getGhostOctant(uint32_t idx);
-	uint32_t 		getIdx(ClassOctant oct);
+	Octant*	getOctant(uint32_t idx);
+	Octant*	getGhostOctant(uint32_t idx);
+	uint32_t 		getIdx(Octant oct);
 #if ENABLE_MPI==1
-	bool 			getIsGhost(ClassOctant* oct);
-	bool 			getIsGhost(ClassOctant oct);
+	bool 			getIsGhost(Octant* oct);
+	bool 			getIsGhost(Octant oct);
 #endif
 
 	// =================================================================================== //
@@ -298,9 +298,9 @@ private:
 	// =================================================================================== //
 public:
 	void 		findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost);
-	void 		findNeighbours(ClassOctant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost);
+	void 		findNeighbours(Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost);
 	void 		findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours);
-	ClassOctant* getPointOwner(dvector & point);
+	Octant* getPointOwner(dvector & point);
 	uint32_t 	getPointOwnerIdx(dvector & point);
 	void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost);
 
@@ -317,7 +317,7 @@ public:
 	void 		updateConnectivity();
 	const u32vector2D & getConnectivity();
 	const u32vector & getConnectivity(uint32_t idx);
-	const u32vector & getConnectivity(ClassOctant* oct);
+	const u32vector & getConnectivity(Octant* oct);
 	const u32arr3vector & getNodes();
 	const u32array3 & getNodeLogicalCoordinates(uint32_t inode);
 	darray3 	getNodeCoordinates(uint32_t inode);
@@ -326,7 +326,7 @@ public:
 	void 		updateGhostsConnectivity();
 	const u32vector2D & getGhostConnectivity();
 	const u32vector & getGhostConnectivity(uint32_t idx);
-	const u32vector & getGhostConnectivity(ClassOctant* oct);
+	const u32vector & getGhostConnectivity(Octant* oct);
 	const u32arr3vector & getGhostNodes();
 	const u32array3 & getGhostNodeLogicalCoordinates(uint32_t inode);
 	darray3 	getGhostNodeCoordinates(uint32_t inode);
@@ -345,7 +345,7 @@ public:
 	// OTHER PRIVATE METHODS												    		   //
 	// =================================================================================== //
 private:
-	ClassOctant& extractOctant(uint32_t idx);
+	Octant& extractOctant(uint32_t idx);
 	bool 		private_adapt();
 	bool 		private_adapt_mapidx(bool mapflag);
 	void 		updateAdapt();
@@ -377,9 +377,9 @@ public:
 	 */
 	template<class Impl>
 	void
-	communicate(ClassDataCommInterface<Impl> & userData){
+	communicate(DataCommInterface<Impl> & userData){
 		//BUILD SEND BUFFERS
-		std::map<int,ClassCommBuffer> sendBuffers;
+		std::map<int,CommBuffer> sendBuffers;
 		size_t fixedDataSize = userData.fixedSize();
 		std::map<int,u32vector >::iterator bitend = m_bordersPerProc.end();
 		std::map<int,u32vector >::iterator bitbegin = m_bordersPerProc.begin();
@@ -399,7 +399,7 @@ public:
 			//enlarge buffer to store number of pborders from this proc
 			buffSize += sizeof(int);
 			//build buffer for this proc
-			sendBuffers[key] = ClassCommBuffer(buffSize,'a',m_comm);
+			sendBuffers[key] = CommBuffer(buffSize,'a',m_comm);
 			//store number of pborders from this proc at the begining
 			MPI_Pack(&nofPbordersPerProc,1,MPI_INT,sendBuffers[key].m_commBuffer,sendBuffers[key].m_commBufferSize,&sendBuffers[key].m_pos,m_comm);
 
@@ -414,31 +414,31 @@ public:
 		MPI_Status* stats = new MPI_Status[sendBuffers.size()*2];
 		int nReq = 0;
 		std::map<int,int> recvBufferSizePerProc;
-		std::map<int,ClassCommBuffer>::iterator sitend = sendBuffers.end();
-		for(std::map<int,ClassCommBuffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
+		std::map<int,CommBuffer>::iterator sitend = sendBuffers.end();
+		for(std::map<int,CommBuffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
 			recvBufferSizePerProc[sit->first] = 0;
 			m_errorFlag = MPI_Irecv(&recvBufferSizePerProc[sit->first],1,MPI_UINT32_T,sit->first,m_rank,m_comm,&req[nReq]);
 			++nReq;
 		}
-		std::map<int,ClassCommBuffer>::reverse_iterator rsitend = sendBuffers.rend();
-		for(std::map<int,ClassCommBuffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+		std::map<int,CommBuffer>::reverse_iterator rsitend = sendBuffers.rend();
+		for(std::map<int,CommBuffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
 			m_errorFlag =  MPI_Isend(&rsit->second.m_commBufferSize,1,MPI_UINT32_T,rsit->first,rsit->first,m_comm,&req[nReq]);
 			++nReq;
 		}
 		MPI_Waitall(nReq,req,stats);
 
 		//Communicate Buffers
-		std::map<int,ClassCommBuffer> recvBuffers;
+		std::map<int,CommBuffer> recvBuffers;
 		std::map<int,int>::iterator ritend = recvBufferSizePerProc.end();
 		for(std::map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
-			recvBuffers[rit->first] = ClassCommBuffer(rit->second,'a',m_comm);
+			recvBuffers[rit->first] = CommBuffer(rit->second,'a',m_comm);
 		}
 		nReq = 0;
-		for(std::map<int,ClassCommBuffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
+		for(std::map<int,CommBuffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
 			m_errorFlag = MPI_Irecv(recvBuffers[sit->first].m_commBuffer,recvBuffers[sit->first].m_commBufferSize,MPI_PACKED,sit->first,m_rank,m_comm,&req[nReq]);
 			++nReq;
 		}
-		for(std::map<int,ClassCommBuffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+		for(std::map<int,CommBuffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
 			m_errorFlag =  MPI_Isend(rsit->second.m_commBuffer,rsit->second.m_commBufferSize,MPI_PACKED,rsit->first,rsit->first,m_comm,&req[nReq]);
 			++nReq;
 		}
@@ -446,9 +446,9 @@ public:
 
 		//READ RECEIVE BUFFERS
 		int ghostOffset = 0;
-		std::map<int,ClassCommBuffer>::iterator rbitend = recvBuffers.end();
-		std::map<int,ClassCommBuffer>::iterator rbitbegin = recvBuffers.begin();
-		for(std::map<int,ClassCommBuffer>::iterator rbit = rbitbegin; rbit != rbitend; ++rbit){
+		std::map<int,CommBuffer>::iterator rbitend = recvBuffers.end();
+		std::map<int,CommBuffer>::iterator rbitbegin = recvBuffers.begin();
+		for(std::map<int,CommBuffer>::iterator rbit = rbitbegin; rbit != rbitend; ++rbit){
 			int nofGhostFromThisProc = 0;
 			MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&nofGhostFromThisProc,1,MPI_INT,m_comm);
 			for(int k = 0; k < nofGhostFromThisProc; ++k){
@@ -467,7 +467,7 @@ public:
 	 */
 	template<class Impl>
 	void
-	loadBalance(ClassDataLBInterface<Impl> & userData, dvector* weight = NULL){
+	loadBalance(DataLBInterface<Impl> & userData, dvector* weight = NULL){
 		//Write info on m_log
 		m_log.writeLog("---------------------------------------------");
 		m_log.writeLog(" LOAD BALANCE ");
@@ -491,9 +491,9 @@ public:
 			uint32_t stride = 0;
 			for(int i = 0; i < m_rank; ++i)
 				stride += partition[i];
-			ClassLocalTree::octvector octantsCopy = m_octree.m_octants;
-			ClassLocalTree::octvector::const_iterator first = octantsCopy.begin() + stride;
-			ClassLocalTree::octvector::const_iterator last = first + partition[m_rank];
+			LocalTree::octvector octantsCopy = m_octree.m_octants;
+			LocalTree::octvector::const_iterator first = octantsCopy.begin() + stride;
+			LocalTree::octvector::const_iterator last = first + partition[m_rank];
 			m_octree.m_octants.assign(first, last);
 			octvector(m_octree.m_octants).swap(m_octree.m_octants);
 
@@ -558,7 +558,7 @@ public:
 			uint32_t tailOffset = tailSize;
 
 			//build send buffers
-			std::map<int,ClassCommBuffer> sendBuffers;
+			std::map<int,CommBuffer> sendBuffers;
 
 			//Compute first predecessor and first successor to send buffers to
 			int64_t firstOctantGlobalIdx = 0;// offset to compute global index of each octant in every process
@@ -613,14 +613,14 @@ public:
 						}
 						//add room for int, number of octants in this buffer
 						buffSize += sizeof(int);
-						sendBuffers[p] = ClassCommBuffer(buffSize,'a',m_comm);
+						sendBuffers[p] = CommBuffer(buffSize,'a',m_comm);
 						//store the number of octants at the beginning of the buffer
 						MPI_Pack(&nofElementsFromSuccessiveToPrevious,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,sendBuffers[p].m_commBufferSize,&sendBuffers[p].m_pos,m_comm);
 						//USE BUFFER POS
 						for(uint32_t i = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1); i <= (uint32_t)lh; ++i){
 							//PACK octants from 0 to lh in sendBuffer[p]
 							//const Class_Octant<2> & octant = m_octree.m_octants[i];
-							const ClassOctant & octant = m_octree.m_octants[i];
+							const Octant & octant = m_octree.m_octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -661,14 +661,14 @@ public:
 						}
 						//add room for int, number of octants in this buffer
 						buffSize += sizeof(int);
-						sendBuffers[p] = ClassCommBuffer(buffSize,'a',m_comm);
+						sendBuffers[p] = CommBuffer(buffSize,'a',m_comm);
 						//store the number of octants at the beginning of the buffer
 						MPI_Pack(&nofElementsFromSuccessiveToPrevious,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,sendBuffers[p].m_commBufferSize,&sendBuffers[p].m_pos,m_comm);
 						//USE BUFFER POS
 						for(uint32_t i = lh - nofElementsFromSuccessiveToPrevious + 1; i <= lh; ++i){
 							//pack octants from lh - partition[p] to lh
 							//const Class_Octant<2> & octant = m_octree.m_octants[i];
-							const ClassOctant & octant = m_octree.m_octants[i];
+							const Octant & octant = m_octree.m_octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -719,14 +719,14 @@ public:
 						}
 						//add room for int, number of octants in this buffer
 						buffSize += sizeof(int);
-						sendBuffers[p] = ClassCommBuffer(buffSize,'a',m_comm);
+						sendBuffers[p] = CommBuffer(buffSize,'a',m_comm);
 						//store the number of octants at the beginning of the buffer
 						MPI_Pack(&nofElementsFromPreviousToSuccessive,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,sendBuffers[p].m_commBufferSize,&sendBuffers[p].m_pos,m_comm);
 						//USE BUFFER POS
 						for(uint32_t i = ft; i < ft + nofElementsFromPreviousToSuccessive; ++i){
 							//PACK octants from ft to octantsSize-1
 							//const Class_Octant<2> & octant = m_octree.m_octants[i];
-							const ClassOctant & octant = m_octree.m_octants[i];
+							const Octant & octant = m_octree.m_octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -766,13 +766,13 @@ public:
 						}
 						//add room for int, number of octants in this buffer
 						buffSize += sizeof(int);
-						sendBuffers[p] = ClassCommBuffer(buffSize,'a',m_comm);
+						sendBuffers[p] = CommBuffer(buffSize,'a',m_comm);
 						//store the number of octants at the beginning of the buffer
 						MPI_Pack(&nofElementsFromPreviousToSuccessive,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,sendBuffers[p].m_commBufferSize,&sendBuffers[p].m_pos,m_comm);
 						for(uint32_t i = ft; i <= endOctants; ++i ){
 							//PACK octants from ft to ft + partition[p] -1
 							//const Class_Octant<2> & octant = m_octree.m_octants[i];
-							const ClassOctant & octant = m_octree.m_octants[i];
+							const Octant & octant = m_octree.m_octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -801,12 +801,12 @@ public:
 //			cout << "second" << endl;
 
 			//Build receiver sources
-			std::vector<ClassArray> recvs(m_nproc);
-			recvs[m_rank] = ClassArray((uint32_t)sendBuffers.size()+1,-1);
+			std::vector<Array> recvs(m_nproc);
+			recvs[m_rank] = Array((uint32_t)sendBuffers.size()+1,-1);
 			recvs[m_rank].m_array[0] = m_rank;
 			int counter = 1;
-			std::map<int,ClassCommBuffer>::iterator sitend = sendBuffers.end();
-			for(std::map<int,ClassCommBuffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
+			std::map<int,CommBuffer>::iterator sitend = sendBuffers.end();
+			for(std::map<int,CommBuffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
 				recvs[m_rank].m_array[counter] = sit->first;
 				++counter;
 			}
@@ -843,8 +843,8 @@ public:
 				m_errorFlag = MPI_Irecv(&recvBufferSizePerProc[*sendit],1,MPI_UINT32_T,*sendit,m_rank,m_comm,&req[nReq]);
 				++nReq;
 			}
-			std::map<int,ClassCommBuffer>::reverse_iterator rsitend = sendBuffers.rend();
-			for(std::map<int,ClassCommBuffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+			std::map<int,CommBuffer>::reverse_iterator rsitend = sendBuffers.rend();
+			for(std::map<int,CommBuffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
 				m_errorFlag =  MPI_Isend(&rsit->second.m_commBufferSize,1,MPI_UINT32_T,rsit->first,rsit->first,m_comm,&req[nReq]);
 				++nReq;
 			}
@@ -855,11 +855,11 @@ public:
 			//then, sendBuffers are communicated by senders and stored in recvBuffers in the receivers
 			uint32_t nofNewHead = 0;
 			uint32_t nofNewTail = 0;
-			std::map<int,ClassCommBuffer> recvBuffers;
+			std::map<int,CommBuffer> recvBuffers;
 
 			std::map<int,int>::iterator ritend = recvBufferSizePerProc.end();
 			for(std::map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
-				recvBuffers[rit->first] = ClassCommBuffer(rit->second,'a',m_comm);
+				recvBuffers[rit->first] = CommBuffer(rit->second,'a',m_comm);
 			}
 
 			nReq = 0;
@@ -867,7 +867,7 @@ public:
 				m_errorFlag = MPI_Irecv(recvBuffers[*sendit].m_commBuffer,recvBuffers[*sendit].m_commBufferSize,MPI_PACKED,*sendit,m_rank,m_comm,&req[nReq]);
 				++nReq;
 			}
-			for(std::map<int,ClassCommBuffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+			for(std::map<int,CommBuffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
 				m_errorFlag =  MPI_Isend(rsit->second.m_commBuffer,rsit->second.m_commBufferSize,MPI_PACKED,rsit->first,rsit->first,m_comm,&req[nReq]);
 				++nReq;
 			}
@@ -875,8 +875,8 @@ public:
 
 			//Unpack number of octants per sender
 			std::map<int,uint32_t> nofNewOverProcs;
-			std::map<int,ClassCommBuffer>::iterator rbitend = recvBuffers.end();
-			for(std::map<int,ClassCommBuffer>::iterator rbit = recvBuffers.begin(); rbit != rbitend; ++rbit){
+			std::map<int,CommBuffer>::iterator rbitend = recvBuffers.end();
+			for(std::map<int,CommBuffer>::iterator rbit = recvBuffers.begin(); rbit != rbitend; ++rbit){
 				uint32_t nofNewPerProc;
 				MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&nofNewPerProc,1,MPI_UINT32_T,m_comm);
 				nofNewOverProcs[rbit->first] = nofNewPerProc;
@@ -909,7 +909,7 @@ public:
 			newCounter = 0;
 			bool jumpResident = false;
 
-			for(std::map<int,ClassCommBuffer>::iterator rbit = recvBuffers.begin(); rbit != rbitend; ++rbit){
+			for(std::map<int,CommBuffer>::iterator rbit = recvBuffers.begin(); rbit != rbitend; ++rbit){
 				uint32_t nofNewPerProc = nofNewOverProcs[rbit->first];
 				if(rbit->first > m_rank && !jumpResident){
 					newCounter += nofResidents ;
@@ -921,7 +921,7 @@ public:
 					m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&z,1,MPI_UINT32_T,m_comm);
 					m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&l,1,MPI_UINT8_T,m_comm);
 					//m_octree.m_octants[newCounter] = Class_Octant<2>(l,x,y);
-					m_octree.m_octants[newCounter] = ClassOctant(m_dim,l,x,y,z);
+					m_octree.m_octants[newCounter] = Octant(m_dim,l,x,y,z);
 					m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&m,1,MPI_INT8_T,m_comm);
 					m_octree.m_octants[newCounter].setMarker(m);
 					for(int j = 0; j < 17; ++j){
@@ -977,7 +977,7 @@ public:
 	 */
 	template<class Impl>
 	void
-	loadBalance(ClassDataLBInterface<Impl> & userData, uint8_t & level){
+	loadBalance(DataLBInterface<Impl> & userData, uint8_t & level){
 
 		//Write info on m_log
 		m_log.writeLog("---------------------------------------------");
@@ -996,9 +996,9 @@ public:
 			uint32_t stride = 0;
 			for(int i = 0; i < m_rank; ++i)
 				stride += partition[i];
-			ClassLocalTree::octvector octantsCopy = m_octree.m_octants;
-			ClassLocalTree::octvector::const_iterator first = octantsCopy.begin() + stride;
-			ClassLocalTree::octvector::const_iterator last = first + partition[m_rank];
+			LocalTree::octvector octantsCopy = m_octree.m_octants;
+			LocalTree::octvector::const_iterator first = octantsCopy.begin() + stride;
+			LocalTree::octvector::const_iterator last = first + partition[m_rank];
 			m_octree.m_octants.assign(first, last);
 			octvector(m_octree.m_octants).swap(m_octree.m_octants);
 
@@ -1064,7 +1064,7 @@ public:
 			uint32_t tailOffset = tailSize;
 
 			//build send buffers
-			std::map<int,ClassCommBuffer> sendBuffers;
+			std::map<int,CommBuffer> sendBuffers;
 
 			//Compute first predecessor and first successor to send buffers to
 			int64_t firstOctantGlobalIdx = 0;// offset to compute global index of each octant in every process
@@ -1119,14 +1119,14 @@ public:
 						}
 						//add room for int, number of octants in this buffer
 						buffSize += sizeof(int);
-						sendBuffers[p] = ClassCommBuffer(buffSize,'a',m_comm);
+						sendBuffers[p] = CommBuffer(buffSize,'a',m_comm);
 						//store the number of octants at the beginning of the buffer
 						MPI_Pack(&nofElementsFromSuccessiveToPrevious,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,sendBuffers[p].m_commBufferSize,&sendBuffers[p].m_pos,m_comm);
 						//USE BUFFER POS
 						for(uint32_t i = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1); i <= (uint32_t)lh; ++i){
 							//PACK octants from 0 to lh in sendBuffer[p]
 							//const Class_Octant<2> & octant = m_octree.m_octants[i];
-							const ClassOctant & octant = m_octree.m_octants[i];
+							const Octant & octant = m_octree.m_octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -1167,14 +1167,14 @@ public:
 						}
 						//add room for int, number of octants in this buffer
 						buffSize += sizeof(int);
-						sendBuffers[p] = ClassCommBuffer(buffSize,'a',m_comm);
+						sendBuffers[p] = CommBuffer(buffSize,'a',m_comm);
 						//store the number of octants at the beginning of the buffer
 						MPI_Pack(&nofElementsFromSuccessiveToPrevious,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,sendBuffers[p].m_commBufferSize,&sendBuffers[p].m_pos,m_comm);
 						//USE BUFFER POS
 						for(uint32_t i = lh - nofElementsFromSuccessiveToPrevious + 1; i <= lh; ++i){
 							//pack octants from lh - partition[p] to lh
 							//const Class_Octant<2> & octant = m_octree.m_octants[i];
-							const ClassOctant & octant = m_octree.m_octants[i];
+							const Octant & octant = m_octree.m_octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -1224,14 +1224,14 @@ public:
 						}
 						//add room for int, number of octants in this buffer
 						buffSize += sizeof(int);
-						sendBuffers[p] = ClassCommBuffer(buffSize,'a',m_comm);
+						sendBuffers[p] = CommBuffer(buffSize,'a',m_comm);
 						//store the number of octants at the beginning of the buffer
 						MPI_Pack(&nofElementsFromPreviousToSuccessive,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,sendBuffers[p].m_commBufferSize,&sendBuffers[p].m_pos,m_comm);
 						//USE BUFFER POS
 						for(uint32_t i = ft; i < ft + nofElementsFromPreviousToSuccessive; ++i){
 							//PACK octants from ft to octantsSize-1
 							//const Class_Octant<2> & octant = m_octree.m_octants[i];
-							const ClassOctant & octant = m_octree.m_octants[i];
+							const Octant & octant = m_octree.m_octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -1271,13 +1271,13 @@ public:
 						}
 						//add room for int, number of octants in this buffer
 						buffSize += sizeof(int);
-						sendBuffers[p] = ClassCommBuffer(buffSize,'a',m_comm);
+						sendBuffers[p] = CommBuffer(buffSize,'a',m_comm);
 						//store the number of octants at the beginning of the buffer
 						MPI_Pack(&nofElementsFromPreviousToSuccessive,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,sendBuffers[p].m_commBufferSize,&sendBuffers[p].m_pos,m_comm);
 						for(uint32_t i = ft; i <= endOctants; ++i ){
 							//PACK octants from ft to ft + partition[p] -1
 							//const Class_Octant<2> & octant = m_octree.m_octants[i];
-							const ClassOctant & octant = m_octree.m_octants[i];
+							const Octant & octant = m_octree.m_octants[i];
 							x = octant.getX();
 							y = octant.getY();
 							z = octant.getZ();
@@ -1305,12 +1305,12 @@ public:
 			}
 
 			//Build receiver sources
-			std::vector<ClassArray> recvs(m_nproc);
-			recvs[m_rank] = ClassArray((uint32_t)sendBuffers.size()+1,-1);
+			std::vector<Array> recvs(m_nproc);
+			recvs[m_rank] = Array((uint32_t)sendBuffers.size()+1,-1);
 			recvs[m_rank].m_array[0] = m_rank;
 			int counter = 1;
-			std::map<int,ClassCommBuffer>::iterator sitend = sendBuffers.end();
-			for(std::map<int,ClassCommBuffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
+			std::map<int,CommBuffer>::iterator sitend = sendBuffers.end();
+			for(std::map<int,CommBuffer>::iterator sit = sendBuffers.begin(); sit != sitend; ++sit){
 				recvs[m_rank].m_array[counter] = sit->first;
 				++counter;
 			}
@@ -1346,8 +1346,8 @@ public:
 				m_errorFlag = MPI_Irecv(&recvBufferSizePerProc[*sendit],1,MPI_UINT32_T,*sendit,m_rank,m_comm,&req[nReq]);
 				++nReq;
 			}
-			std::map<int,ClassCommBuffer>::reverse_iterator rsitend = sendBuffers.rend();
-			for(std::map<int,ClassCommBuffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+			std::map<int,CommBuffer>::reverse_iterator rsitend = sendBuffers.rend();
+			for(std::map<int,CommBuffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
 				m_errorFlag =  MPI_Isend(&rsit->second.m_commBufferSize,1,MPI_UINT32_T,rsit->first,rsit->first,m_comm,&req[nReq]);
 				++nReq;
 			}
@@ -1358,11 +1358,11 @@ public:
 			//then, sendBuffers are communicated by senders and stored in recvBuffers in the receivers
 			uint32_t nofNewHead = 0;
 			uint32_t nofNewTail = 0;
-			std::map<int,ClassCommBuffer> recvBuffers;
+			std::map<int,CommBuffer> recvBuffers;
 
 			std::map<int,int>::iterator ritend = recvBufferSizePerProc.end();
 			for(std::map<int,int>::iterator rit = recvBufferSizePerProc.begin(); rit != ritend; ++rit){
-				recvBuffers[rit->first] = ClassCommBuffer(rit->second,'a',m_comm);
+				recvBuffers[rit->first] = CommBuffer(rit->second,'a',m_comm);
 			}
 
 			nReq = 0;
@@ -1370,7 +1370,7 @@ public:
 				m_errorFlag = MPI_Irecv(recvBuffers[*sendit].m_commBuffer,recvBuffers[*sendit].m_commBufferSize,MPI_PACKED,*sendit,m_rank,m_comm,&req[nReq]);
 				++nReq;
 			}
-			for(std::map<int,ClassCommBuffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
+			for(std::map<int,CommBuffer>::reverse_iterator rsit = sendBuffers.rbegin(); rsit != rsitend; ++rsit){
 				m_errorFlag =  MPI_Isend(rsit->second.m_commBuffer,rsit->second.m_commBufferSize,MPI_PACKED,rsit->first,rsit->first,m_comm,&req[nReq]);
 				++nReq;
 			}
@@ -1378,8 +1378,8 @@ public:
 
 			//Unpack number of octants per sender
 			std::map<int,uint32_t> nofNewOverProcs;
-			std::map<int,ClassCommBuffer>::iterator rbitend = recvBuffers.end();
-			for(std::map<int,ClassCommBuffer>::iterator rbit = recvBuffers.begin(); rbit != rbitend; ++rbit){
+			std::map<int,CommBuffer>::iterator rbitend = recvBuffers.end();
+			for(std::map<int,CommBuffer>::iterator rbit = recvBuffers.begin(); rbit != rbitend; ++rbit){
 				uint32_t nofNewPerProc;
 				MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&nofNewPerProc,1,MPI_UINT32_T,m_comm);
 				nofNewOverProcs[rbit->first] = nofNewPerProc;
@@ -1414,7 +1414,7 @@ public:
 			newCounter = 0;
 			bool jumpResident = false;
 
-			for(std::map<int,ClassCommBuffer>::iterator rbit = recvBuffers.begin(); rbit != rbitend; ++rbit){
+			for(std::map<int,CommBuffer>::iterator rbit = recvBuffers.begin(); rbit != rbitend; ++rbit){
 				//TODO change new octants counting, probably you have to communicate the number of news per proc
 				uint32_t nofNewPerProc = nofNewOverProcs[rbit->first];
 				if(rbit->first > m_rank && !jumpResident){
@@ -1427,7 +1427,7 @@ public:
 					m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&z,1,MPI_UINT32_T,m_comm);
 					m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&l,1,MPI_UINT8_T,m_comm);
 					//m_octree.m_octants[newCounter] = Class_Octant<2>(l,x,y);
-					m_octree.m_octants[newCounter] = ClassOctant(m_dim,l,x,y,z);
+					m_octree.m_octants[newCounter] = Octant(m_dim,l,x,y,z);
 					m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&m,1,MPI_INT8_T,m_comm);
 					m_octree.m_octants[newCounter].setMarker(m);
 					for(int j = 0; j < 17; ++j){
@@ -1481,4 +1481,4 @@ public:
 
 /*  @}  */
 
-#endif /* CLASSPARATREE_HPP_ */
+#endif /* PARATREE_HPP_ */

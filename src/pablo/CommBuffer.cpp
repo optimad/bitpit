@@ -2,7 +2,7 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
-#include "ClassCommBuffer.hpp"
+#include "CommBuffer.hpp"
 #include <cstdint>
 
 // =================================================================================== //
@@ -11,7 +11,7 @@
 using namespace std;
 
 
-ClassCommBuffer::ClassCommBuffer(){
+CommBuffer::CommBuffer(){
 
 	m_commBufferSize = 0;
 	m_commBuffer = NULL;
@@ -19,14 +19,14 @@ ClassCommBuffer::ClassCommBuffer(){
 	m_comm = MPI_COMM_WORLD;
 }
 
-ClassCommBuffer::ClassCommBuffer(MPI_Comm comm_) : m_comm(comm_){
+CommBuffer::CommBuffer(MPI_Comm comm_) : m_comm(comm_){
 
 	m_commBufferSize = 0;
 	m_commBuffer = NULL;
 	m_pos = 0;
 }
 
-ClassCommBuffer::ClassCommBuffer(uint32_t size, char value, MPI_Comm comm_) : m_comm(comm_){
+CommBuffer::CommBuffer(uint32_t size, char value, MPI_Comm comm_) : m_comm(comm_){
 
 	m_commBufferSize = size;
 	m_commBuffer = new char [size];
@@ -35,7 +35,7 @@ ClassCommBuffer::ClassCommBuffer(uint32_t size, char value, MPI_Comm comm_) : m_
 	m_pos = 0;
 }
 
-ClassCommBuffer::ClassCommBuffer(const ClassCommBuffer& other) {
+CommBuffer::CommBuffer(const CommBuffer& other) {
 
 	m_commBufferSize = other.m_commBufferSize;
 	//	if(commBuffer != NULL){
@@ -49,12 +49,12 @@ ClassCommBuffer::ClassCommBuffer(const ClassCommBuffer& other) {
 	m_comm = other.m_comm;
 }
 
-ClassCommBuffer::~ClassCommBuffer() {
+CommBuffer::~CommBuffer() {
 		delete [] m_commBuffer;
 		m_commBuffer = NULL;
 }
 
-ClassCommBuffer& ClassCommBuffer::operator =(const ClassCommBuffer& rhs) {
+CommBuffer& CommBuffer::operator =(const CommBuffer& rhs) {
 	if(this != &rhs)
 	{
 		char* new_array = new char[rhs.m_commBufferSize];

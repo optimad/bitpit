@@ -1,7 +1,7 @@
 // Communications Class for Ghosts Update
 
-#ifndef CLASSDATACOMMINTERFACE_HPP_
-#define CLASSDATACOMMINTERFACE_HPP_
+#ifndef DATACOMMINTERFACE_HPP_
+#define DATACOMMINTERFACE_HPP_
 
 /*!
  *  \ingroup PABLO
@@ -38,7 +38,7 @@
  */
 
 template <class Impl>
-class ClassDataCommInterface {
+class DataCommInterface {
 public:
 	size_t size(const uint32_t e) const;
 	size_t fixedSize() const;
@@ -50,7 +50,7 @@ public:
 	void scatter(Buffer & buff,const uint32_t e);
 
 protected:
-	ClassDataCommInterface();
+	DataCommInterface();
 
 private:
 	//BartonHackman trick
@@ -60,6 +60,6 @@ private:
 
 /*  @{ */
 
-#include "ClassDataCommInterface.tpp"
+#include "DataCommInterface.tpp"
 
-#endif /* CLASSDATACOMMINTERFACE_HPP_ */
+#endif /* DATACOMMINTERFACE_HPP_ */

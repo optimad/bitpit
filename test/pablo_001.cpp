@@ -1,4 +1,4 @@
-#include "ClassParaTree.hpp"
+#include "ParaTree.hpp"
 
 using namespace std;
 
@@ -7,7 +7,7 @@ using namespace std;
 void test001() {
 
     /**<Instantation of a 2D para_tree object with default constructor.*/
-    ClassParaTree ptreedefault;
+    ParaTree ptreedefault;
     /**<Write the para_tree in physical domain.*/
     ptreedefault.write("Pablo001_default");
 
@@ -15,7 +15,7 @@ void test001() {
     double X, Y, Z, L;
     X = 10.0; Y = 20.0; Z = 0.0; L = 250.0;
     /**<Instantation of a 2D para_tree object with custom constructor.*/
-    ClassParaTree ptreecustom(X, Y, Z, L);
+    ParaTree ptreecustom(X, Y, Z, L);
     /**<Write the para_tree in physical domain.*/
     ptreecustom.write("Pablo001_custom");
 

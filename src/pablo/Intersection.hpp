@@ -1,5 +1,5 @@
-#ifndef CLASSINTERSECTION_HPP_
-#define CLASSINTERSECTION_HPP_
+#ifndef INTERSECTION_HPP_
+#define INTERSECTION_HPP_
 
 // =================================================================================== //
 // INCLUDES                                                                            //
@@ -36,14 +36,14 @@
  *	- a flag to communicate if the intersection is new after a mesh refinement.
  *
  */
-class ClassIntersection{
+class Intersection{
 
 	// =================================================================================== //
 	// FRIENDSHIPS
 	// =================================================================================== //
 
-	friend class ClassLocalTree;
-	friend class ClassParaTree;
+	friend class LocalTree;
+	friend class ParaTree;
 
 	// =================================================================================== //
 	// TYPEDEFS
@@ -66,12 +66,12 @@ private:
 	// CONSTRUCTORS AND OPERATORS
 	// =================================================================================== //
 public:
-	ClassIntersection();
-	ClassIntersection(const ClassIntersection & intersection);
-	ClassIntersection & operator =(const ClassIntersection & intersection);
+	Intersection();
+	Intersection(const Intersection & intersection);
+	Intersection & operator =(const Intersection & intersection);
 private:
-	ClassIntersection(uint8_t dim_);
-	bool operator ==(const ClassIntersection & intersection);
+	Intersection(uint8_t dim_);
+	bool operator ==(const Intersection & intersection);
 
 	// =================================================================================== //
 	// METHODS
@@ -93,4 +93,4 @@ private:
 
 /*  @} */
 
-#endif /* CLASSINTERSECTION_HPP_ */
+#endif /* INTERSECTION_HPP_ */
