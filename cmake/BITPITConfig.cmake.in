@@ -1,0 +1,92 @@
+# BITPITConfig.cmake - BITPIT CMake configuration file for external projects.
+# -----------
+#
+# This file is configured by BITPIT and used by the UseBITPIT.cmake module
+# to load BITPIT's settings for an external project.
+
+# Compute the installation prefix from this BITPITConfig.cmake file location.
+@BITPIT_CONFIG_CODE@
+
+# The C and C++ flags added by BITPIT to the cmake-configured flags.
+SET(BITPIT_REQUIRED_C_FLAGS "")
+SET(BITPIT_REQUIRED_CXX_FLAGS "")
+SET(BITPIT_REQUIRED_EXE_LINKER_FLAGS "")
+SET(BITPIT_REQUIRED_SHARED_LINKER_FLAGS "")
+SET(BITPIT_REQUIRED_MODULE_LINKER_FLAGS "")
+
+# The BITPIT version number
+SET(BITPIT_MAJOR_VERSION "@BITPIT_MAJOR_VERSION@")
+SET(BITPIT_MINOR_VERSION "@BITPIT_MINOR_VERSION@")
+SET(BITPIT_PATCH_VERSION "@BITPIT_PATCH_VERSION@")
+SET(BITPIT_VERSION "@BITPIT_VERSION@")
+
+# The location of the UseBITPIT.cmake file.
+SET(BITPIT_CMAKE_DIR "@BITPIT_CONFIG_CMAKE_DIR@")
+SET(BITPIT_USE_FILE "${BITPIT_CMAKE_DIR}/UseBITPIT.cmake")
+
+# Include macros for finding packages
+list(APPEND CMAKE_MODULE_PATH ${BITPIT_CMAKE_DIR})
+include(LibFindMacros)
+include(FindPackageHandleStandardArgs)
+
+#-----------------------------------------------------------------------------
+# Find BitPit libraries and headers
+#-----------------------------------------------------------------------------
+
+# Headers
+find_path(BITPIT_INCLUDE_DIR "@PROJECT_NAME@_version.hpp"
+          HINTS "${BITPIT_INSTALL_PREFIX}/include/BitPit")
+
+mark_as_advanced(BITPIT_INCLUDE_DIR)
+
+# Library
+find_library(BITPIT_LIBRARY_RELEASE
+             NAMES @PROJECT_NAME@@BITPIT_RELEASE_POSTFIX@ @PROJECT_NAME@
+             HINTS "${BITPIT_INSTALL_PREFIX}/lib")
+
+find_library(BITPIT_LIBRARY_DEBUG
+             NAMES @PROJECT_NAME@@BITPIT_DEBUG_POSTFIX@ @PROJECT_NAME@
+             HINTS "${BITPIT_INSTALL_PREFIX}/lib")
+
+mark_as_advanced(BITPIT_LIBRARY_RELEASE)
+mark_as_advanced(BITPIT_LIBRARY_DEBUG)
+
+# Choose good values for BITPIT_LIBRARY, BITPIT_LIBRARIES,
+# BITPIT_LIBRARY_DEBUG, and BITPIT_LIBRARY_RELEASE depending on what
+# has been found and set.  If only BITPIT_LIBRARY_RELEASE is defined,
+# BITPIT_LIBRARY will be set to the release value, and
+# BITPIT_LIBRARY_DEBUG will be set to BITPIT_LIBRARY_DEBUG-NOTFOUND.
+# If only BITPIT_LIBRARY_DEBUG is defined, then BITPIT_LIBRARY will
+# take the debug value, and BITPIT_LIBRARY_RELEASE will be set to
+# BITPIT_LIBRARY_RELEASE-NOTFOUND.
+#
+# If the generator supports configuration types, then BITPIT_LIBRARY
+# and BITPIT_LIBRARIES will be set with debug and optimized flags
+# specifying the library to be used for the given configuration.  If no
+# build type has been set or the generator in use does not support
+# configuration types, then BITPIT_LIBRARY and BITPIT_LIBRARIES will
+# take only the release value, or the debug value if the release one is
+# not set.
+if (BITPIT_LIBRARY_DEBUG AND BITPIT_LIBRARY_RELEASE AND
+       NOT BITPIT_LIBRARY_DEBUG STREQUAL BITPIT_LIBRARY_RELEASE AND
+           (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))
+    set( BITPIT_LIBRARY "" )
+    foreach( _libname IN LISTS BITPIT_LIBRARY_RELEASE )
+        list( APPEND BITPIT_LIBRARY optimized "${_libname}" )
+    endforeach()
+    foreach( _libname IN LISTS BITPIT_LIBRARY_DEBUG )
+        list( APPEND BITPIT_LIBRARY debug "${_libname}" )
+    endforeach()
+elseif (BITPIT_LIBRARY_RELEASE)
+    set (BITPIT_LIBRARY ${BITPIT_LIBRARY_RELEASE})
+elseif (BITPIT_LIBRARY_DEBUG)
+    set (BITPIT_LIBRARY ${BITPIT_LIBRARY_DEBUG})
+else ()
+    set( BITPIT_LIBRARY "BITPIT_LIBRARY-NOTFOUND")
+endif ()
+
+# BITPIT Definitions
+set(BITPIT_DEFINITIONS "@BITPIT_DEFINITIONS@")
+
+# Let libfind_process initialize the appropriate variables
+libfind_process(BITPIT)

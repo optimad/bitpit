@@ -14,7 +14,7 @@ endif()
 set(IO_VTK_WRAPPERS_HEADER_HPP "Class_VTK_Wrappers.hpp" CACHE INTERNAL "Header file needed by the VTK Wrapper feature" FORCE)
 set(IO_VTK_WRAPPERS_HEADER_TPP "Class_VTK_Wrappers.tpp" CACHE INTERNAL "Template header file needed by the VTK Wrapper feature" FORCE)
 set(IO_VTK_WRAPPERS_SOURCE_CPP "Class_VTK_Wrappers.cpp" CACHE INTERNAL "Source file needed by the VTK Wrapper feature" FORCE)
-set(IO_VTK_WRAPPERS_DEFINITION "-DIO_ENABLE_VTK_WRAPPERS" CACHE INTERNAL "Preprocessor defnition needed by the VTK Wrapper feature" FORCE)
+set(IO_VTK_WRAPPERS_DEFINITION "IO_ENABLE_VTK_WRAPPERS" CACHE INTERNAL "Preprocessor defnition needed by the VTK Wrapper feature" FORCE)
 
 # Add library to targets
 include_directories("${PROJECT_SOURCE_DIR}/src/operators")
@@ -43,6 +43,12 @@ endif ()
 
 install(FILES ${IO_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})
 
+# Definitions
+set(IO_DEFINITIONS_DESCRIPTION "Pre-processor definitions needed by IO Library")
 if (IO_ENABLE_VTK_WRAPPERS)
-	add_definitions(${IO_VTK_WRAPPERS_DEFINITION})
+	add_definitions(-D${IO_VTK_WRAPPERS_DEFINITION})
+
+	set(IO_DEFINITIONS "${IO_VTK_WRAPPERS_DEFINITION}" CACHE INTERNAL "${IO_DEFINITIONS_DESCRIPTION}" FORCE)
+else ()
+	set(IO_DEFINITIONS "" CACHE INTERNAL "${IO_DEFINITIONS_DESCRIPTION}" FORCE)
 endif()
