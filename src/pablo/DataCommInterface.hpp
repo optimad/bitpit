@@ -29,8 +29,6 @@
  *	The user has to implement all the methods of the base class in his derived class.
  *	These user's methods will really do the job.
  *
- *	An example of user derived class can be found, [here](https://github.com/optimad/PABLO/blob/master/test/User_Data_Comm.hpp),in test folder for the case of a double datum for each grid element.
- *
  *	Easily speaking, only the user knows his data and through the interface
  *	specialization he states the size of element data, how to write/read them
  *	 in a communication buffer.
