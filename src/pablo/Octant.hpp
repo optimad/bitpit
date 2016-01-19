@@ -39,7 +39,8 @@ typedef std::vector<u32array3>				u32arr3vector;
  *	Octants are the grid elements of PABLO. In the logical domain octants are
  *	squares or cubes, depending on dimension, with size function of their level.
  *	Each octant has nodes and faces ordered with Z-order.
- *
+ *	\image html PabloOctant.png
+ *	\image html PabloOctant3D.png
  *	The main feature of each octant are:
  *	- x,y,z        : coordinates of the node 0 of the octant;
  *	- Morton index : classical Morton index defined anly by the coordinates
