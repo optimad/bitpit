@@ -1409,7 +1409,6 @@ ParaTree::getLastDescMorton(uint32_t idx) {
 	return m_octree.m_octants[idx].buildLastDesc(m_global.m_maxLevel).computeMorton();
 };
 
-#if ENABLE_MPI==1
 /*!Get the begin position for the iterator of the local internal octants.
  * \return Iterator begin of the local internal octants (dereferencing results in a pointer to an octant).
  */
@@ -1441,7 +1440,6 @@ octantIterator
 ParaTree::getPboundOctantsEnd(){
 	return m_pborders.end();
 }
-#endif
 
 /*! Set the codimension for 2:1 balancing
  * \param[in] Maximum codimension of the entity through which the 2:1 balance is performed (1 = 2:1 balance through edges (default); 2 = 2:1 balance through nodes and edges).

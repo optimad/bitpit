@@ -254,12 +254,10 @@ public:
 	const Octant & getFirstDesc() const;
 	const Octant & getLastDesc() const;
 	uint64_t 	getLastDescMorton(uint32_t idx);
-#if ENABLE_MPI==1
 	octantIterator	getInternalOctantsBegin();
 	octantIterator	getInternalOctantsEnd();
 	octantIterator	getPboundOctantsBegin();
 	octantIterator	getPboundOctantsEnd();
-#endif
 	void 		setBalanceCodimension(uint8_t b21codim);
 
 	// =================================================================================== //
