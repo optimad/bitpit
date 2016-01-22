@@ -212,7 +212,7 @@ public:
 
 		\param nSubArrays is the minimum number of sub-arrays that the
 		collapsed-vector should be able to contain
-		\param nArrays is the minimum number of elements that the
+		\param nElemnts is the minimum number of elements that the
 		collapsed-vector should be able to contain
 	*/
 	void reserve(int nSubArrays, int nElemnts = 0)

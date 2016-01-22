@@ -31,21 +31,43 @@ class CollapsedArray2D
 
 public:
 
+	/*!
+		Default constructor
+	*/
 	CollapsedArray2D()
 		: m_capacity(-1)
 	{
 	}
 
+	/*!
+		Destructor
+	*/
 	~CollapsedArray2D()
 	{
 		clear();
 	}
 
+	/*!
+		Creates a new CollapsedArray2D
+
+		\param nArrays is the number of sub-arrays that the will be
+		stored in the container
+		\param dataCapacity is the total capacity, expressed in number
+		of elements, of the container
+	*/
 	CollapsedArray2D(const int &nArrays, const int &dataCapacity)
 	{
 		initialize(nArrays, dataCapacity);
 	}
 
+	/*!
+		Creates a new CollapsedArray2D
+
+		\param nArrays is the number of sub-arrays that the will be
+		stored in the container
+		\param subArraySize is the size of each sub-array stored in
+		the container
+	*/
 	CollapsedArray2D(const int &nArrays, const int subArraySize[])
 	{
 		int dataCapacity = 0;
@@ -60,6 +82,12 @@ public:
 		}
 	}
 
+	/*!
+		Creates a new CollapsedArray2D
+
+		\param buildFrom is a 2D vector that will be used to initialize
+		the newly created container
+	*/
 	CollapsedArray2D(const std::vector<std::vector<T> > &buildFrom)
 	{
 		// Initialize the array
@@ -82,6 +110,12 @@ public:
 		}
 	}
 
+	/*!
+		Copy constructor
+
+		\param other is the CollapsedArray2D from which the data will
+		be copied from
+	*/
 	CollapsedArray2D(const CollapsedArray2D &other)
 	{
 		m_capacity = other.m_capacity;
@@ -103,6 +137,12 @@ public:
 		m_index = new_index;
 	}
 
+	/*!
+		Copy assignment operator
+
+		Assigns new contents to the container, replacing its current
+		contents, and modifying its size accordingly.
+	*/
 	CollapsedArray2D & operator= (CollapsedArray2D other)
 	{
 		if (this != &other) {
@@ -112,6 +152,11 @@ public:
 		return *this;
 	}
 
+	/*!
+		Swaps the contents
+
+		\param other is another collapsed-array container of the same type
+	*/
 	void swap(CollapsedArray2D &other)
 	{
 		std::swap(m_index.get(), other.m_index.get());
@@ -119,6 +164,14 @@ public:
 		std::swap(m_capacity, other.m_capacity);
 	}
 
+	/*!
+		Initializes the container
+
+		\param nArrays is the number of sub-arrays that the will be
+		stored in the container
+		\param dataCapacity is the total capacity, expressed in number
+		of elements, of the container
+	*/
 	void initialize(int nArrays, int dataCapacity)
 	{
 		m_capacity = nArrays;
@@ -131,21 +184,42 @@ public:
 		std::fill_n(m_index.get() + 1, m_capacity - 1, -1);
 	}
 
+	/*!
+		Tests whether two collapsed-arrays are equal
+
+		\result true if the collapsed-arrays are equal, false otherwise.
+	*/
 	bool operator==(const CollapsedArray2D& rhs) const
 	{
 		return m_index == rhs.m_index && m_v == rhs.m_v;
 	}
 
+	/*!
+		Tests whether the collapsed-array is empty
+
+		\result true if the container size is 0, false otherwise.
+	*/
 	bool empty() const
 	{
 		return size() == 0;
 	}
 
+	/*!
+		Tests whether the collapsed-array is initialized
+
+		\result true if the container is inizializes, false otherwise.
+	*/
 	bool initialized() const
 	{
 		return m_capacity >= 0;
 	}
 
+	/*!
+		Clears content
+
+		Removes all elements from the collapsed-array (which are
+		destroyed), leaving the container with a size of 0.
+	*/
 	void clear()
 	{
 		if (!initialized()) {
@@ -162,7 +236,7 @@ public:
 		by the container to store its elements.
 
 		\result A pointer to the first element in the array used
-		        internally by the container.
+		internally by the container.
 
 	*/
 	T * data() noexcept
@@ -170,6 +244,16 @@ public:
 		return m_v.get();
 	}
 
+	/*!
+		Adds a sub-array with the specified size at the end
+
+		Adds a sub-array with the specified size at the end of the vector,
+		after its current last element. The specified content is copied
+		to the new sub-array.
+
+		\param subArraySize is the size of the sub-array
+		\param subArray is the content to be copied to the new sub-array
+	*/
 	void push_back(const int &subArraySize, T * subArray = NULL)
 	{
 		int currentSize = size();
@@ -184,11 +268,24 @@ public:
 		}
 	}
 
+	/*!
+		Adds an empty sub-array at the end
+
+		Adds an empty sub-array at the end of the vector, after its
+		current last sub-array.
+	*/
 	void push_back()
 	{
 		push_back(0);
 	}
 
+	/*!
+		Adds an element to the last sub-array
+
+		Adds an element at the end of to the last sub-array.
+
+		\param value is the value that will be added
+	*/
 	void push_back_in_sub_array(const T& value)
 	{
 		assert(!empty());
@@ -198,6 +295,12 @@ public:
 		m_v[lastIndex] = value;
 	}
 
+	/*!
+		Deletes last element from last sub-array
+
+		Removes the last element from the last sub-array in the
+		collapsed-array.
+	*/
 	void pop_back_in_sub_array()
 	{
 		assert(!empty());
@@ -208,30 +311,63 @@ public:
 		lastIndex--;
 	}
 
+	/*!
+		Gets a constant copy of the specified element in a sub-array
+
+		\param i is the index of the sub-array
+		\param j is the index of the element that will be removed
+		\return A constant copy of the requested value.
+	*/
 	const T get(const int &i, const int &j) const
 	{
 		assert(indexValid(i, j));
 		return (*this)[i][j];
 	}
 
+	/*!
+		Gets a copy of the specified element in a sub-array
+
+		\param i is the index of the sub-array
+		\param j is the index of the element that will be removed
+		\return A copy of the requested value.
+	*/
 	T get(const int &i, const int &j)
 	{
 		assert(indexValid(i, j));
 		return (*this)[i][j];
 	}
 
+	/*!
+		Gets a pointer to the first element of the specified sub-array
+
+		\param i is the index of the sub-array
+		\return A pointer to the first element of the sub-array.
+	*/
 	T * get(const int &i)
 	{
 		assert(indexValid(i));
 		return (*this)[i];
 	}
 
+	/*!
+		Sets a value in the container
+
+		\param i is the index of the sub-array
+		\param j is the index of the element that will be removed
+		\param value is the value that will be set
+	*/
 	void set(const int &i, const int &j, T value)
 	{
 		assert(indexValid(i, j));
 		(*this)[i][j] = value;
 	}
 
+	/*!
+		Sets all the values of the specified sub-array
+
+		\param i is the index of the sub-array
+		\param values is a pointer to the values that will be set
+	*/
 	void set(const int &i, T *values)
 	{
 		assert(indexValid(i));
@@ -240,19 +376,33 @@ public:
 		}
 	}
 
+	/*!
+		Gets a reference to the first element of the last sub-array
 
+		\return A reference to the first element of the last sub-array.
+	*/
 	const T & back() const
 	{
 		assert(!empty());
 		return m_v[m_index[m_capacity - 1]];
 	}
 
+	/*!
+		Gets a pointer to the first element of the last sub-array
+
+		\return A pointer to the first element of the sub-array.
+	*/
 	T* back()
 	{
 		assert(!empty());
 		return &m_v[m_index[m_capacity - 1]];
 	}
 
+	/*!
+		Returns the number of sub-arrays in the collapsed-array
+
+		\return The number of sub-arrays in the collapsed-array.
+	*/
 	int size() const
 	{
 		if (!initialized()) {
@@ -271,6 +421,11 @@ public:
 		return nSubArrays;
 	}
 
+	/*!
+		Returns the number of elements stored in the sub-array
+
+		\return The number of elements stored in the sub-array.
+	*/
 	int data_size() const
 	{
 		int currentSize = size();
@@ -278,11 +433,25 @@ public:
 		return m_index[currentSize];
 	}
 
+	/*!
+		Returns the size of the storage space currently allocated for
+		storing sub-arrays, expressed in terms of elements.
+
+		\return The size of the storage space currently allocated for
+		storing sub-arrays, expressed in terms of elements.
+	*/
 	int capacity() const
 	{
 		return m_capacity;
 	}
 
+	/*!
+		Returns the size of the storage space currently allocated for
+		storing elements, expressed in terms of elements.
+
+		\return The size of the storage space currently allocated for
+		storing elements, expressed in terms of elements.
+	*/
 	int data_capacity() const
 	{
 		if (m_capacity < 0) {
@@ -292,6 +461,12 @@ public:
 		return abs(m_index[m_capacity]);
 	}
 
+	/*!
+		Returns the size of the specified sub-array.
+
+		\param i is the index of the sub-array
+		\return The size of the specified sub-array.
+	*/
 	int sub_array_size(int i) const
 	{
 		return m_index[i + 1] - m_index[i];
@@ -302,6 +477,12 @@ private:
 	std::unique_ptr<int[]> m_index;
 	int m_capacity;
 
+	/*!
+		Gets a constant pointer to the specified sub-array
+
+		\param i is the index of the sub-array
+		\return A constant pointer to the specified sub-array.
+	*/
 	const T* operator[](const int &i) const
 	{
 		assert(indexValid(i));
@@ -310,6 +491,12 @@ private:
 		return &m_v[index];
 	}
 
+	/*!
+		Gets a pointer to the specified sub-array
+
+		\param i is the index of the sub-array
+		\return A pointer to the specified sub-array.
+	*/
 	T* operator[](const int &i)
 	{
 		assert(indexValid(i));
@@ -318,6 +505,12 @@ private:
 		return &m_v[index];
 	}
 
+	/*!
+		Checks if the specified index is valid
+
+		\param i is the index of the sub-array
+		\return true if the index is vaid, false otherwise.
+	*/
 	bool indexValid(const int &i)
 	{
 		if (empty()) {
@@ -329,6 +522,13 @@ private:
 		return m_index[i] >= 0;
 	}
 
+	/*!
+		Checks if the specified indexes are valid
+
+		\param i is the index of the sub-array
+		\param j is the index of the element in the sub-array
+		\return true if the indexes are vaid, false otherwise.
+	*/
 	bool indexValid(const int &i, const int &j)
 	{
 		if (!indexValid(i)) {

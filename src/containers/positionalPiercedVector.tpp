@@ -857,8 +857,6 @@ public:
 		that was previously occupying the position or it will be
 		empty if there was no empty position and a new element
 		has been created.
-
-		\param id is the id that will be assigned to the element
 	*/
 	iterator reclaim_back()
 	{

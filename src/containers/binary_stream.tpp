@@ -72,7 +72,7 @@ ibinarystream& operator>> (
         \ingroup    BinaryStream
         Output stream operator for class ibinarystream.
 
-        \param[in] istm output stream
+        \param[in] ostm output stream
         \param[in] val  value to be streamed
 
         \result updated input stream
