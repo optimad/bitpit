@@ -26,9 +26,15 @@ foreach (GROUP_NAME IN LISTS BITPIT_GROUP_LIST)
 endforeach ()
 
 # Add common files to targets
+file(GLOB SOURCE_FILES "*.cpp")
+set(COMMON_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Common sources" FORCE)
+unset(SOURCE_FILES)
+
 file(GLOB HEADER_FILES "*.hpp" "*.tpp")
 list(APPEND HEADERS "${HEADER_FILES}")
 unset(HEADER_FILES)
-
 set(COMMON_HEADERS "${HEADERS}" CACHE INTERNAL "Common headers" FORCE)
+
+add_library(COMMON_TARGET_OBJECT OBJECT ${COMMON_SOURCES})
+
 install(FILES ${COMMON_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})

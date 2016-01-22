@@ -8,6 +8,7 @@ endif ()
 
 # Common
 add_subdirectory(common)
+set(BITPIT_SOURCES ${BITPIT_SOURCES} $<TARGET_OBJECTS:COMMON_TARGET_OBJECT>)
 
 # Modules
 foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)

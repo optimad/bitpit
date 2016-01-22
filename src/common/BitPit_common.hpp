@@ -1,5 +1,8 @@
 /*!
  * @defgroup common Common
+ * @{
+ * @defgroup utils Utils
+ * @}
  *
  */
 
