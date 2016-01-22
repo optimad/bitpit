@@ -1,7 +1,7 @@
 /*!
- * @defgroup containers
+ * @defgroup containers Containers
  * @{
- * @defgroup BinaryStream
+ * @defgroup BinaryStream Binary stream
  * @}
  *
  */

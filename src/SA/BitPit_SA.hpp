@@ -2,7 +2,7 @@
 #define __BITPIT_SA__
 
 /*!
- * \defgroup SortAlgorithms
+ * \defgroup SortAlgorithms Sort algorithms (SA)
  */
 
 #include "SortAlgorithms.hpp"

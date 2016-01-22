@@ -2,7 +2,7 @@
 #define __BITPIT_LA__
 
 /*!
- * \defgroup  LinearAlgebra
+ * \defgroup LinearAlgebra Linear algebra (LA)
  */
 
 #include "LinearAlgebra.hpp"

@@ -2,11 +2,11 @@
 #define __BITPIT_OPERATORS__
 
 /*! 
- * @defgroup operators
+ * @defgroup operators Operators
  * @{
- * @defgroup MathFunctions
- * @defgroup Operators
- * @defgroup StringFunctions
+ * @defgroup MathFunctions Mathematical functions
+ * @defgroup Operators Operators
+ * @defgroup StringFunctions String functions
  * @}
  */
 

@@ -1,10 +1,10 @@
 /*!
- * @defgroup IO
+ * @defgroup IO Input/Output
  * @{
- * @defgroup Generic
- * @defgroup DuneGridFormat
- * @defgroup STereoLithography
- * @defgroup VisualizationToolKit
+ * @defgroup Generic Generic
+ * @defgroup DuneGridFormat DuneGridFormat (DGF)
+ * @defgroup STereoLithography STereoLithography (STL)
+ * @defgroup VisualizationToolKit VisualizationToolKit (VTK)
  * @}
  *
  */
