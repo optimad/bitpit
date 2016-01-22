@@ -12,6 +12,8 @@ file(GLOB HEADER_FILES "*.hpp" "*.tpp")
 set(SA_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of SA Library" FORCE)
 unset(HEADER_FILES)
 
-add_library(SA_TARGET_OBJECT OBJECT ${SA_SOURCES})
+if (NOT "${SA_SOURCES}" STREQUAL "")
+    add_library(SA_TARGET_OBJECT OBJECT ${SA_SOURCES})
+endif ()
 
 install(FILES ${SA_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})

@@ -12,6 +12,8 @@ file(GLOB HEADER_FILES "*.hpp" "*.tpp")
 set(LA_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of LA Library" FORCE)
 unset(HEADER_FILES)
 
-add_library(LA_TARGET_OBJECT OBJECT ${LA_SOURCES})
+if (NOT "${LA_SOURCES}" STREQUAL "")
+    add_library(LA_TARGET_OBJECT OBJECT ${LA_SOURCES})
+endif ()
 
 install(FILES ${LA_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})

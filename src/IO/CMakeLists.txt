@@ -37,7 +37,9 @@ endif()
 set(IO_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of IO Library" FORCE)
 unset(HEADER_FILES)
 
-add_library(IO_TARGET_OBJECT OBJECT ${IO_SOURCES})
+if (NOT "${IO_SOURCES}" STREQUAL "")
+	add_library(IO_TARGET_OBJECT OBJECT ${IO_SOURCES})
+endif ()
 
 install(FILES ${IO_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})
 
