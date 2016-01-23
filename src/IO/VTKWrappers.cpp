@@ -50,11 +50,10 @@ VTKUnstructuredVec::~VTKUnstructuredVec(){
  */
 bool VTKUnstructuredVec::getFieldByName( const std::string &name_, VTKUnstructuredVec::ufield *&the_field ){
 
-    std::vector<VTKUnstructuredVec::ufield>::iterator    it_ ;
 
-    for( it_=adata.begin(); it_!=adata.end(); ++it_){
-        if( (*it_).name == name_ ){
-            the_field = &(*it_) ;
+    for(  auto &field : adata ){
+        if( field.name == name_ ){
+            the_field = &field ;
             return true ;
         };
     };
@@ -78,15 +77,15 @@ void VTKUnstructuredVec::write(  ) {
 
     if( CanWrite){
 
-        for( unsigned i=0; i<nr_data; ++i){
-            name = data[i].getName() ;
+        for( auto &field : data ){
+            name = field.getName() ;
             if( !getFieldByName(name,FPtr) ){
                 TBD.push_back(name) ;
             };
         };
 
-        for( unsigned i=0; i<TBD.size(); ++i){
-            VTK::removeData( TBD[i] ) ;
+        for( auto &field : TBD ){
+            VTK::removeData( field ) ;
         };
 
         VTK::write() ;

@@ -380,9 +380,9 @@ void VTKRectilinearGrid<Derived>::setDimensions( int n1_, int n2_, int m1_, int 
         nr_points = nr_points *  ( local_index[d][1] -local_index[d][0] +1 ) ;
     };
 
-    for( int i=0; i< nr_data; i++){
-        if( data[i].getLocation() == "Cell")  data[i].setElements(nr_cells) ;
-        if( data[i].getLocation() == "Point") data[i].setElements(nr_points) ;
+    for( auto &field : data ){
+        if( field.getLocation() == "Cell")  field.setElements(nr_cells) ;
+        if( field.getLocation() == "Point") field.setElements(nr_points) ;
     };
 
     return ;

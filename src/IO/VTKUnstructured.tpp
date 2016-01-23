@@ -90,9 +90,9 @@ void VTKUnstructuredGrid<Derived>::setDimensions( uint64_t ncells_, uint64_t npo
     geometry[2].setElements(nr_cells) ;
     geometry[3].setElements(nconn_) ;
 
-    for( int i=0; i< nr_data; i++){
-        if( data[i].getLocation() == "Cell")  data[i].setElements(nr_cells) ;
-        if( data[i].getLocation() == "Point") data[i].setElements(nr_points) ;
+    for( auto &field : data ){
+        if( field.getLocation() == "Cell")  field.setElements(nr_cells) ;
+        if( field.getLocation() == "Point") field.setElements(nr_points) ;
     };
 
     return ;

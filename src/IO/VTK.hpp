@@ -72,7 +72,6 @@ class VTK{
         std::vector<VTKField>           geometry ;                  /**< Geometry fields */
         std::string                     GeomCodex ;                 /**< Geometry codex */
 
-        unsigned                        nr_data ;                   /**< Nr of data fields */
         std::vector<VTKField>           data ;                      /**< Data fields */
         std::string                     DataCodex ;                 /**< Data codex */
 
