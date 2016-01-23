@@ -1,33 +1,33 @@
-/*! ========================================================================================
+/*! =====
  * @ingroup     VisualizationToolKit
  * @{
- * @class       VTK_RectilinearGrid
+ * @class       VTKRectilinearGrid
  * @brief       VTK input output for Rectilinear Meshes
  * @tparam      Derived     this argument is used for the static-dispatch interface through CRTP
  *
- * VTK_RectilinearGrid provides methods to read and write parallel and serial rectlinear meshes and data. 
+ * VTKRectilinearGrid provides methods to read and write parallel and serial rectlinear meshes and data. 
  * The class is agnostic with respect to the container used for the data and provides an interface through the CRTP mechanism.
  * The numbering of nodes start with 0. Different numbering scheme is not supported.
  *
  */
 
-/*!  ===================================================================================
+/*!  
  *  Default constructor.
  *  Allocates three geometry fields called "x_Coord", "y_Coord" and "z_Coord".
  *  @tparam     Derived     Derived class for CRTP
  */
 template <class Derived>
-VTK_RectilinearGrid<Derived>::VTK_RectilinearGrid( )  :VTK() {
+VTKRectilinearGrid<Derived>::VTKRectilinearGrid( )  :VTK() {
 
-    fh.SetAppendix( "vtr" );
+    fh.setAppendix( "vtr" );
 
-    geometry.push_back( VTK::Field_C( "x_Coord", 1, "Float64", "Point" ) ) ;
-    geometry.push_back( VTK::Field_C( "y_Coord", 1, "Float64", "Point" ) ) ;
-    geometry.push_back( VTK::Field_C( "z_Coord", 1, "Float64", "Point" ) ) ;
+    geometry.push_back( VTKField( "x_Coord", 1, "Float64", "Point" ) ) ;
+    geometry.push_back( VTKField( "y_Coord", 1, "Float64", "Point" ) ) ;
+    geometry.push_back( VTKField( "z_Coord", 1, "Float64", "Point" ) ) ;
 
 } ;
 
-/*!  ===================================================================================
+/*!  
  *  Constructor for parallel 3D grid.
  *  Calls default constructor and sets provided input information.
  *  @tparam     Derived     Derived class for CRTP
@@ -35,14 +35,14 @@ VTK_RectilinearGrid<Derived>::VTK_RectilinearGrid( )  :VTK() {
  *  @param[in]  name_       name of VTK without suffix
  */
 template <class Derived>
-VTK_RectilinearGrid<Derived>::VTK_RectilinearGrid( std::string dir_, std::string name_ ) :VTK_RectilinearGrid( ) {
+VTKRectilinearGrid<Derived>::VTKRectilinearGrid( std::string dir_, std::string name_ ) :VTKRectilinearGrid( ) {
 
-    SetNames( dir_, name_ ) ;
+    setNames( dir_, name_ ) ;
 
     return ;
 };
 
-/*!  ===================================================================================
+/*!  
  *  Constructor for parallel 3D grid.
  *  Calls default constructor and sets provided input information.
  *  @tparam     Derived     Derived class for CRTP
@@ -57,17 +57,17 @@ VTK_RectilinearGrid<Derived>::VTK_RectilinearGrid( std::string dir_, std::string
  *  @param[in]  l2_         max node index in third direction 
  */
 template <class Derived>
-VTK_RectilinearGrid<Derived>::VTK_RectilinearGrid( std::string dir_, std::string name_, std::string codex_, int n1_, int n2_, int m1_, int m2_, int l1_, int l2_ ) :VTK_RectilinearGrid( ) {
+VTKRectilinearGrid<Derived>::VTKRectilinearGrid( std::string dir_, std::string name_, std::string codex_, int n1_, int n2_, int m1_, int m2_, int l1_, int l2_ ) :VTKRectilinearGrid( ) {
 
-    SetNames( dir_, name_ ) ;
+    setNames( dir_, name_ ) ;
 
-    SetDimensions( n1_, n2_, m1_, m2_, l1_, l2_) ;
-    SetGeomCodex( codex_ ) ;
+    setDimensions( n1_, n2_, m1_, m2_, l1_, l2_) ;
+    setGeomCodex( codex_ ) ;
 
     return ;
 };
 
-/*!  ===================================================================================
+/*!  
  *  Constructor for serial 3D grids.
  *  Min index is set automatically to zero.
  *  Calls default constructor and sets provided input information.
@@ -80,17 +80,17 @@ VTK_RectilinearGrid<Derived>::VTK_RectilinearGrid( std::string dir_, std::string
  *  @param[in]  l_          number of nodes in third direction 
  */
 template <class Derived>
-VTK_RectilinearGrid<Derived>::VTK_RectilinearGrid( std::string dir_, std::string name_, std::string codex_, int n_, int m_, int l_ ) : VTK_RectilinearGrid( ) {
+VTKRectilinearGrid<Derived>::VTKRectilinearGrid( std::string dir_, std::string name_, std::string codex_, int n_, int m_, int l_ ) : VTKRectilinearGrid( ) {
 
-    SetNames( dir_, name_ ) ;
+    setNames( dir_, name_ ) ;
 
-    SetDimensions( 0, n_-1, 0, m_-1, 0, l_-1) ;
-    SetGeomCodex( codex_ ) ;
+    setDimensions( 0, n_-1, 0, m_-1, 0, l_-1) ;
+    setGeomCodex( codex_ ) ;
 
     return ;
 };
 
-/*!  ===================================================================================
+/*!  
  *  Constructor for parallel 2D grid.
  *  Calls default constructor and sets provided input information.
  *  @tparam     Derived     Derived class for CRTP
@@ -103,17 +103,17 @@ VTK_RectilinearGrid<Derived>::VTK_RectilinearGrid( std::string dir_, std::string
  *  @param[in]  m2_         max node index in second direction 
  */
 template <class Derived>
-VTK_RectilinearGrid<Derived>::VTK_RectilinearGrid( std::string dir_, std::string name_, std::string codex_, int n1_, int n2_, int m1_, int m2_ ) :VTK_RectilinearGrid( ) {
+VTKRectilinearGrid<Derived>::VTKRectilinearGrid( std::string dir_, std::string name_, std::string codex_, int n1_, int n2_, int m1_, int m2_ ) :VTKRectilinearGrid( ) {
 
-    SetNames( dir_, name_ ) ;
+    setNames( dir_, name_ ) ;
 
-    SetDimensions( n1_, n2_, m1_, m2_, 0, 0) ;
-    SetGeomCodex( codex_ ) ;
+    setDimensions( n1_, n2_, m1_, m2_, 0, 0) ;
+    setGeomCodex( codex_ ) ;
 
     return ;
 };
 
-/*!  ===================================================================================
+/*!  
  *  Constructor for serial 2D grid.
  *  Calls default constructor and sets provided input information.
  *  @tparam     Derived     Derived class for CRTP
@@ -124,46 +124,46 @@ VTK_RectilinearGrid<Derived>::VTK_RectilinearGrid( std::string dir_, std::string
  *  @param[in]  m_          number of nodes in second direction 
  */
 template <class Derived>
-VTK_RectilinearGrid<Derived>::VTK_RectilinearGrid( std::string dir_, std::string name_, std::string codex_, int n_, int m_ ) : VTK_RectilinearGrid( ) {
+VTKRectilinearGrid<Derived>::VTKRectilinearGrid( std::string dir_, std::string name_, std::string codex_, int n_, int m_ ) : VTKRectilinearGrid( ) {
 
-    SetNames( dir_, name_ ) ;
+    setNames( dir_, name_ ) ;
 
-    SetDimensions( 0, n_-1, 0, m_-1, 0, 0) ;
-    SetGeomCodex( codex_ ) ;
+    setDimensions( 0, n_-1, 0, m_-1, 0, 0) ;
+    setGeomCodex( codex_ ) ;
 
     return ;
 };
 
-
-/*!  ===================================================================================
+/*!  
  *  Destructor 
  *  @tparam     Derived     Derived class for CRTP
  */
 template <class Derived>
-VTK_RectilinearGrid<Derived>::~VTK_RectilinearGrid( ) {} ;
+VTKRectilinearGrid<Derived>::~VTKRectilinearGrid( ){
+} ;
 
-/*!  ===================================================================================
- *  Sets the type of the geometry variables
+/*!  
+ *  sets the type of the geometry variables
  *  @tparam     Derived     Derived class for CRTP
  *  @param[in]  Ptype       Type of "x_Coord", "y_Coord" and "z_Coord" geometry information [ "Float[32/64]"]
  */
 template <class Derived>
-void VTK_RectilinearGrid<Derived>::SetGeomTypes( std::string Ptype ){
+void VTKRectilinearGrid<Derived>::setGeomTypes( std::string Ptype ){
 
-    geometry[0].SetType(Ptype) ;
-    geometry[1].SetType(Ptype) ;
-    geometry[2].SetType(Ptype) ;
+    geometry[0].setType(Ptype) ;
+    geometry[1].setType(Ptype) ;
+    geometry[2].setType(Ptype) ;
 
     return ;
 };
 
-/*!  ===================================================================================
+/*!  
  *  Reads meta data of VTR file (grid size, data fields, codex, position of data within file).
- *  Calls SetDimension.
+ *  Calls setDimension.
  *  @tparam     Derived     Derived class for CRTP
  */
 template <class Derived>
-void VTK_RectilinearGrid<Derived>::ReadMetaData( ){
+void VTKRectilinearGrid<Derived>::readMetaData( ){
 
     std::fstream str;
     std::string line, temp;
@@ -175,7 +175,7 @@ void VTK_RectilinearGrid<Derived>::ReadMetaData( ){
     std::array<int,6>             extensions ;
 
 
-    str.open( fh.GetName( ), std::ios::in ) ;
+    str.open( fh.getName( ), std::ios::in ) ;
 
     getline( str, line);
     while( ! Keyword_In_String( line, "<VTKFile")){
@@ -183,7 +183,7 @@ void VTK_RectilinearGrid<Derived>::ReadMetaData( ){
     };
 
     if( Get_After_Keyword( line, "header_type", '\"', temp) ){
-        SetHeaderType( temp) ;
+        setHeaderType( temp) ;
     };
 
     while( ! Keyword_In_String( line, "<Piece")){
@@ -202,33 +202,33 @@ void VTK_RectilinearGrid<Derived>::ReadMetaData( ){
 
     position = str.tellg() ;
 
-    ReadDataHeader( str ) ;
+    readDataHeader( str ) ;
 
     for( int i=0; i<geometry.size(); ++i){
         str.seekg( position) ;
-        if( ! ReadDataArray( str, geometry[i] ) ) {
-            std::cout << geometry[i].GetName() << " DataArray not found" << std::endl ;
+        if( ! readDataArray( str, geometry[i] ) ) {
+            std::cout << geometry[i].getName() << " DataArray not found" << std::endl ;
         };
     };
 
 
-    SetDimensions( local_index[0][0], local_index[0][1], local_index[1][0], local_index[1][1], local_index[2][0], local_index[2][1] ) ;
+    setDimensions( local_index[0][0], local_index[0][1], local_index[1][0], local_index[1][1], local_index[2][0], local_index[2][1] ) ;
     str.close() ; 
 
     return ;
 
 };
 
-/*!  ===================================================================================
+/*!  
  *  Writes entire VTR but the data.
  *  @tparam     Derived     Derived class for CRTP
  */
 template <class Derived>
-void VTK_RectilinearGrid<Derived>::WriteMetaData( ){
+void VTKRectilinearGrid<Derived>::writeMetaData( ){
 
     std::fstream str;
 
-    str.open( fh.GetName( ), std::ios::out ) ;
+    str.open( fh.getName( ), std::ios::out ) ;
 
     //Writing XML header
     str << "<?xml version=\"1.0\"?>" << std::endl;
@@ -250,13 +250,13 @@ void VTK_RectilinearGrid<Derived>::WriteMetaData( ){
 
 
     //Header for Data
-    WriteDataHeader( str, false ) ;
+    writeDataHeader( str, false ) ;
 
     //Wring Geometry Information   
     str << "       <Coordinates>" << std::endl;
-    WriteDataArray( str, geometry[0] ) ;
-    WriteDataArray( str, geometry[1] ) ;
-    WriteDataArray( str, geometry[2] ) ;
+    writeDataArray( str, geometry[0] ) ;
+    writeDataArray( str, geometry[1] ) ;
+    writeDataArray( str, geometry[2] ) ;
     str << "       </Coordinates>" << std::endl;
 
     //Closing Piece
@@ -276,27 +276,27 @@ void VTK_RectilinearGrid<Derived>::WriteMetaData( ){
     return ;
 };
 
-/*!  ===================================================================================
+/*!  
  *  Writes collection file for parallel output. 
  *  Is called by rank 0 in VTK::Write()
  *  @tparam     Derived     Derived class for CRTP
  */
 template <class Derived>
-void VTK_RectilinearGrid<Derived>::WriteCollection( ){
+void VTKRectilinearGrid<Derived>::writeCollection( ){
 
     std::fstream str ;
 
-    FileHandler_C   fhp, fho ;
+    FileHandler     fhp, fho ;
 
     fhp = fh ;
     fho = fh ;
 
-    fhp.SetParallel(false) ;
-    fhp.SetAppendix("pvtr") ;
+    fhp.setParallel(false) ;
+    fhp.setAppendix("pvtr") ;
 
-    fho.SetDirectory(".") ;
+    fho.setDirectory(".") ;
 
-    str.open( fhp.GetName( ), std::ios::out ) ;
+    str.open( fhp.getName( ), std::ios::out ) ;
 
     //Writing XML header
     str << "<?xml version=\"1.0\"?>" << std::endl;
@@ -312,25 +312,25 @@ void VTK_RectilinearGrid<Derived>::WriteCollection( ){
 
 
     //Header for Data
-    WriteDataHeader( str, true );
+    writeDataHeader( str, true );
 
     //Wring Geometry Information
     str << "      <PCoordinates>" << std::endl;
-    WritePDataArray( str, geometry[0] ) ;
-    WritePDataArray( str, geometry[1] ) ;
-    WritePDataArray( str, geometry[2] ) ;
+    writePDataArray( str, geometry[0] ) ;
+    writePDataArray( str, geometry[1] ) ;
+    writePDataArray( str, geometry[2] ) ;
     str << "      </PCoordinates>" << std::endl;
 
 
     for( int i=0; i<nr_procs; i++){
-        fho.SetBlock(i) ;
+        fho.setBlock(i) ;
         extension3D_t &index = proc_index[i] ;
 
         str << "    <Piece Extent= \" " 
             << index[0][0] << " " << index[0][1] << " "
             << index[1][0] << " " << index[1][1] << " "
             << index[2][0] << " " << index[2][1] << " "
-            << "\" Source= \"" << fho.GetName() << "\"/>" << std::endl;
+            << "\" Source= \"" << fho.getName() << "\"/>" << std::endl;
     };
 
     str << "  </PRectilinearGrid>"  << std::endl;
@@ -342,8 +342,8 @@ void VTK_RectilinearGrid<Derived>::WriteCollection( ){
     return ;
 };
 
-/*!  ===================================================================================
- *  Sets the dimension for 3D parallel grids.
+/*!  
+ *  sets the dimension for 3D parallel grids.
  *  @tparam     Derived     Derived class for CRTP
  *  @param[in]  n1_         min node index in first direction 
  *  @param[in]  n2_         max node index in first direction 
@@ -353,7 +353,7 @@ void VTK_RectilinearGrid<Derived>::WriteCollection( ){
  *  @param[in]  l2_         max node index in third direction 
  */
 template <class Derived>
-void VTK_RectilinearGrid<Derived>::SetDimensions( int n1_, int n2_, int m1_, int m2_, int l1_, int l2_ ){
+void VTKRectilinearGrid<Derived>::setDimensions( int n1_, int n2_, int m1_, int m2_, int l1_, int l2_ ){
 
     dimensions = ( l1_ == l2_ ) ? 2 :3 ;
 
@@ -368,7 +368,7 @@ void VTK_RectilinearGrid<Derived>::SetDimensions( int n1_, int n2_, int m1_, int
         global_index = local_index ;
 
     for(int d=0; d<3; ++d){
-        geometry[d].SetElements( local_index[d][1] -local_index[d][0] +1 ) ;
+        geometry[d].setElements( local_index[d][1] -local_index[d][0] +1 ) ;
     };
 
 
@@ -381,30 +381,30 @@ void VTK_RectilinearGrid<Derived>::SetDimensions( int n1_, int n2_, int m1_, int
     };
 
     for( int i=0; i< nr_data; i++){
-        if( data[i].GetLocation() == "Cell")  data[i].SetElements(nr_cells) ;
-        if( data[i].GetLocation() == "Point") data[i].SetElements(nr_points) ;
+        if( data[i].getLocation() == "Cell")  data[i].setElements(nr_cells) ;
+        if( data[i].getLocation() == "Point") data[i].setElements(nr_points) ;
     };
 
     return ;
 };
 
-/*!  ===================================================================================
- *  Sets the dimension for 3D serial grids.
+/*!  
+ *  sets the dimension for 3D serial grids.
  *  @tparam     Derived     Derived class for CRTP
  *  @param[in]  n_          number of nodes in first direction 
  *  @param[in]  m_          number of nodes in second direction 
  *  @param[in]  l_          number of nodes in third direction 
  */
 template <class Derived>
-void VTK_RectilinearGrid<Derived>::SetDimensions( int n_, int m_, int l_ ){
+void VTKRectilinearGrid<Derived>::setDimensions( int n_, int m_, int l_ ){
 
-    this->SetDimensions( 0, n_-1, 0, m_-1, 0, l_-1 );
+    this->setDimensions( 0, n_-1, 0, m_-1, 0, l_-1 );
 
     return ;
 };
 
-/*!  ===================================================================================
- *  Sets the dimension for 2D parallel grids.
+/*!  
+ *  sets the dimension for 2D parallel grids.
  *  @tparam     Derived     Derived class for CRTP
  *  @param[in]  n1_         min node index in first direction 
  *  @param[in]  n2_         max node index in first direction 
@@ -412,29 +412,29 @@ void VTK_RectilinearGrid<Derived>::SetDimensions( int n_, int m_, int l_ ){
  *  @param[in]  m2_         max node index in second direction 
  */
 template <class Derived>
-void VTK_RectilinearGrid<Derived>::SetDimensions( int n1_, int n2_, int m1_, int m2_ ){
+void VTKRectilinearGrid<Derived>::setDimensions( int n1_, int n2_, int m1_, int m2_ ){
 
-    this->SetDimensions( n1_, n2_, m1_, m2_, 0, 0 );
+    this->setDimensions( n1_, n2_, m1_, m2_, 0, 0 );
 
     return ;
 };
 
-/*!  ===================================================================================
- *  Sets the dimension for 2D serial grids.
+/*!  
+ *  sets the dimension for 2D serial grids.
  *  @tparam     Derived     Derived class for CRTP
  *  @param[in]  n_          number of nodes in first direction 
  *  @param[in]  m_          number of nodes in second direction 
  */
 template <class Derived>
-void VTK_RectilinearGrid<Derived>::SetDimensions( int n_, int m_ ){
+void VTKRectilinearGrid<Derived>::setDimensions( int n_, int m_ ){
 
-    this->SetDimensions( 0, n_-1, 0, m_-1, 0, 0 );
+    this->setDimensions( 0, n_-1, 0, m_-1, 0, 0 );
 
     return ;
 };
 
-/*!  ===================================================================================
- *  Sets the global 3D grid information for parallel output.
+/*!  
+ *  sets the global 3D grid information for parallel output.
  *  Needs to be called by all processes
  *  @tparam     Derived     Derived class for CRTP
  *  @param[in]  I           numer of nodes in first direction
@@ -442,7 +442,7 @@ void VTK_RectilinearGrid<Derived>::SetDimensions( int n_, int m_ ){
  *  @param[in]  K           numer of nodes in third direction
  */
 template <class Derived>
-void VTK_RectilinearGrid<Derived>::SetGlobalDimensions( int I, int J, int K ){
+void VTKRectilinearGrid<Derived>::setGlobalDimensions( int I, int J, int K ){
 
 
     global_index[0][0] = 0;
@@ -455,15 +455,15 @@ void VTK_RectilinearGrid<Derived>::SetGlobalDimensions( int I, int J, int K ){
     return;
 };
 
-/*!  ===================================================================================
- *  Sets the global 2D grid information for parallel output.
+/*!  
+ *  sets the global 2D grid information for parallel output.
  *  Needs to be called by all processes
  *  @tparam     Derived     Derived class for CRTP
  *  @param[in]  I           numer of nodes in first direction
  *  @param[in]  J           numer of nodes in second direction
  */
 template <class Derived>
-void VTK_RectilinearGrid<Derived>::SetGlobalDimensions( int I, int J ){
+void VTKRectilinearGrid<Derived>::setGlobalDimensions( int I, int J ){
 
 
     global_index[0][0] = 0;
@@ -476,32 +476,32 @@ void VTK_RectilinearGrid<Derived>::SetGlobalDimensions( int I, int J ){
     return;
 };
 
-/*!  ===================================================================================
- *  Sets the global 3D grid information for parallel output.
+/*!  
+ *  sets the global 3D grid information for parallel output.
  *  Needs to be called only by rank 0.
  *  @tparam     Derived     Derived class for CRTP
  *  @param[in]  loc_        min I-index, max I-index, min J-index, max J-index, min K-index, max K-index for each process
  */
 template <class Derived>
-void VTK_RectilinearGrid<Derived>::SetGlobalIndex( std::vector<extension3D_t> loc_ ){
+void VTKRectilinearGrid<Derived>::setGlobalIndex( std::vector<extension3D_t> loc_ ){
 
-    if( loc_.size() !=nr_procs ) std::cout << "Size of loc_ in VTK_RectilinearGrid<Derived>::SetParallelIndex does not fit nr_procs " << std::endl ;
+    if( loc_.size() !=nr_procs ) std::cout << "Size of loc_ in VTKRectilinearGrid<Derived>::setParallelIndex does not fit nr_procs " << std::endl ;
 
     proc_index   = loc_ ;
 
     return;
 };
 
-/*!  ===================================================================================
- *  Sets the global 2D grid information for parallel output.
+/*!  
+ *  sets the global 2D grid information for parallel output.
  *  Needs to be called only by rank 0.
  *  @tparam     Derived     Derived class for CRTP
  *  @param[in]  loc_        min I-index, max I-index, min J-index, max J-index for each process
  */
 template <class Derived>
-void VTK_RectilinearGrid<Derived>::SetGlobalIndex( std::vector<extension2D_t> loc_ ){
+void VTKRectilinearGrid<Derived>::setGlobalIndex( std::vector<extension2D_t> loc_ ){
 
-    if( loc_.size() !=nr_procs ) std::cout << "Size of loc_ in VTK_RectilinearGrid<Derived>::SetParallelIndex does not fit nr_procs " << std::endl ;
+    if( loc_.size() !=nr_procs ) std::cout << "Size of loc_ in VTKRectilinearGrid<Derived>::setParallelIndex does not fit nr_procs " << std::endl ;
 
     proc_index.resize(nr_procs) ;
 
@@ -514,7 +514,7 @@ void VTK_RectilinearGrid<Derived>::SetGlobalIndex( std::vector<extension2D_t> lo
     return;
 };
 
-/*!  ===================================================================================
+/*!  
  *  CRPT interface for writing data to stream.
  *  @tparam     Derived     Derived class for CRTP
  *  @param[in]  str         stream to write to
@@ -522,14 +522,14 @@ void VTK_RectilinearGrid<Derived>::SetGlobalIndex( std::vector<extension2D_t> lo
  *  @param[in]  name        name of the data to be written. Either user data or grid data
  */
 template <class Derived>
-void VTK_RectilinearGrid<Derived>::Flush( std::fstream &str, std::string codex, std::string name ){
+void VTKRectilinearGrid<Derived>::flush( std::fstream &str, std::string codex, std::string name ){
 
-    static_cast<Derived *>(this)->Flush( str, codex, name );
+    static_cast<Derived *>(this)->flush( str, codex, name );
     return ;
 
 };
 
-/*!  ===================================================================================
+/*!  
  *  CRPT interface for reading data from stream.
  *  @tparam     Derived     Derived class for CRTP
  *  @param[in]  str         stream to read from
@@ -537,9 +537,9 @@ void VTK_RectilinearGrid<Derived>::Flush( std::fstream &str, std::string codex, 
  *  @param[in]  name        name of the data to be read. Either user data or grid data
  */
 template <class Derived>
-void VTK_RectilinearGrid<Derived>::Absorb( std::fstream &str, std::string codex, std::string name ){
+void VTKRectilinearGrid<Derived>::absorb( std::fstream &str, std::string codex, std::string name ){
 
-    static_cast<Derived *>(this)->Absorb( str, codex, name );
+    static_cast<Derived *>(this)->absorb( str, codex, name );
     return ;
 
 };

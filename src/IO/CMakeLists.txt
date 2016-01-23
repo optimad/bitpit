@@ -11,9 +11,9 @@ if (IO_ENABLE_VTK_WRAPPERS)
 endif()
 
 # VTK Wrappers feature
-set(IO_VTK_WRAPPERS_HEADER_HPP "Class_VTK_Wrappers.hpp")
-set(IO_VTK_WRAPPERS_HEADER_TPP "Class_VTK_Wrappers.tpp")
-set(IO_VTK_WRAPPERS_SOURCE_CPP "Class_VTK_Wrappers.cpp")
+set(IO_VTK_WRAPPERS_HEADER_HPP "VTKWrappers.hpp")
+set(IO_VTK_WRAPPERS_HEADER_TPP "VTKWrappers.tpp")
+set(IO_VTK_WRAPPERS_SOURCE_CPP "VTKWrappers.cpp")
 set(IO_VTK_WRAPPERS_DEFINITION "IO_ENABLE_VTK_WRAPPERS")
 
 # Add library to targets

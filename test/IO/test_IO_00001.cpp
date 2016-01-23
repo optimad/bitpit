@@ -1,7 +1,7 @@
 
 #include <iostream>
 
-#include "Class_VTK_Wrappers.hpp"
+#include "VTKWrappers.hpp"
 
 using namespace std;
 
@@ -65,17 +65,17 @@ int main()
     { //Write only grid to VTK in ascii format
         cout << "Write only grid to VTK in ascii format" << endl;
 
-        VtkUnstrVec   vtk(".", "ustr1", "ascii", 11, points, connectivity );
-        vtk.Write() ;
+        VTKUnstructuredVec   vtk(".", "ustr1", "ascii", 11, points, connectivity );
+        vtk.write() ;
     }
 
     { //Write grid and data to VTK in appended mode
         cout << "Write grid and data to VTK in appended mode" << endl;
 
-        VtkUnstrVec   vtk(".", "ustr2", "appended", 11, points, connectivity );
-        vtk.AddData( pressure, "press", "Point") ;
-        vtk.AddData( velocity, "vel", "Cell") ;
-        vtk.Write() ;
+        VTKUnstructuredVec   vtk(".", "ustr2", "appended", 11, points, connectivity );
+        vtk.addData( pressure, "press", "Point") ;
+        vtk.addData( velocity, "vel", "Cell") ;
+        vtk.write() ;
     }
 
     { //Read grid and data, rename and rexport
@@ -88,19 +88,19 @@ int main()
         vector<array<double,3>>    Ivelocity ;
 
 
-        VtkUnstrVec   vtk(".", "ustr2", "appended", 11 );
+        VTKUnstructuredVec   vtk(".", "ustr2", "appended", 11 );
 
-        vtk.LinkData( Ipoints, "Points") ;
-        vtk.LinkData( Iconnectivity, "connectivity") ;
-        vtk.LinkData( Ipressure, "press") ;
-        vtk.LinkData( Ivelocity, "vel") ;
+        vtk.linkData( Ipoints, "Points") ;
+        vtk.linkData( Iconnectivity, "connectivity") ;
+        vtk.linkData( Ipressure, "press") ;
+        vtk.linkData( Ivelocity, "vel") ;
 
-        vtk.Read() ;
+        vtk.read() ;
 
         Ipressure = 2. * Ipressure ;
 
-        vtk.SetNames("./", "ustr3") ;
-        vtk.Write() ;
+        vtk.setNames("./", "ustr3") ;
+        vtk.write() ;
     }
 
 
@@ -113,17 +113,17 @@ int main()
         vector<float>   label ;
         vector<int64_t> ids ;
 
-        VtkUnstrVec   vtk("./data", "selection", "appended", 5 );
+        VTKUnstructuredVec   vtk("./data", "selection", "appended", 5 );
 
-        vtk.LinkData( Ipoints, "Points") ;
-        vtk.LinkData( Iconnectivity, "connectivity") ;
-        vtk.LinkData( label, "STLSolidLabeling") ;
-        vtk.LinkData( ids, "vtkOriginalCellIds") ;
+        vtk.linkData( Ipoints, "Points") ;
+        vtk.linkData( Iconnectivity, "connectivity") ;
+        vtk.linkData( label, "STLSolidLabeling") ;
+        vtk.linkData( ids, "vtkOriginalCellIds") ;
 
-        vtk.Read() ;
+        vtk.read() ;
 
-        vtk.SetNames("./", "my_selection") ;
-        vtk.Write() ;
+        vtk.setNames("./", "my_selection") ;
+        vtk.write() ;
     }
 
 }

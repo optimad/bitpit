@@ -1,5 +1,5 @@
-#ifndef __CLASS_FH__HH__
-#define __CLASS_FH__HH__
+#ifndef __FileHandler__HH__
+#define __FileHandler__HH__
 
 #include <iostream>
 #include <iomanip>
@@ -8,7 +8,7 @@
 
 
 /*!
- * \class   FileHandler_C
+ * \class   FileHandler
  * \brief   Creates file names and checks status
  *
  * Permits to create easily filenames for parallel output and for writing time series.
@@ -18,7 +18,7 @@
  * - *bxxxx* is added if SetParallel(true) and SetBlock(xxxx) have been called
  * - *yyyy* is added if SetSeries(true) and SetCounter(yyyy) have been called. yyyy is incremented by one if IncrementCounter() is called.
  */
-class FileHandler_C{
+class FileHandler{
 
     private:
         std::string           directory;       /**< name od directory where file resides */
@@ -31,25 +31,26 @@ class FileHandler_C{
 
 
     public:
-        FileHandler_C() ;
-        FileHandler_C( std::string dir_, std::string name_, std::string app_) ;
-        FileHandler_C(  const FileHandler_C& other ) ;
+        FileHandler() ;
+        FileHandler( std::string dir_, std::string name_, std::string app_) ;
+        FileHandler(  const FileHandler& other ) ;
 
-        ~FileHandler_C() ;
+        ~FileHandler() ;
 
-        FileHandler_C& operator=( const FileHandler_C& other) ;
+        FileHandler& operator=( const FileHandler& other) ;
 
-        void                SetDirectory( std::string d_) ;
-        void                SetName( std::string n_) ;
-        void                SetAppendix( std::string a_) ;
-        void                SetSeries( bool s_) ;
-        void                SetParallel( bool p_) ;
-        void                SetCounter(int c_);
-        void                SetBlock( int b_) ;
+        void                setDirectory( std::string d_) ;
+        void                setName( std::string n_) ;
+        void                setAppendix( std::string a_) ;
+        void                setSeries( bool s_) ;
+        void                setParallel( bool p_) ;
+        void                setCounter(int c_);
+        void                setBlock( int b_) ;
 
-        void                IncrementCounter();
-        std::string         GetName() ;
-        bool                Exists() ;
+        std::string         getName() ;
+
+        void                incrementCounter();
+        bool                exists() ;
 
 };
 
