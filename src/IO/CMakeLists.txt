@@ -17,6 +17,7 @@ set(IO_VTK_WRAPPERS_SOURCE_CPP "VTKWrappers.cpp")
 set(IO_VTK_WRAPPERS_DEFINITION "IO_ENABLE_VTK_WRAPPERS")
 
 # Add library to targets
+include_directories("${PROJECT_SOURCE_DIR}/src/common")
 include_directories("${PROJECT_SOURCE_DIR}/src/operators")
 if (IO_ENABLE_VTK_WRAPPERS)
 	include_directories("${Boost_INCLUDE_DIRS}")

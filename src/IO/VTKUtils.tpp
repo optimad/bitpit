@@ -14,7 +14,7 @@
 template<class T>
 std::string VTKUtils::whichType( T dummy ){
 
-//    BITPIT_UNUSED(dummy) ;
+    BITPIT_UNUSED(dummy) ;
 
     if(std::is_same<T,int8_t>::value){
         return "Int8" ;
@@ -77,7 +77,7 @@ std::string VTKUtils::whichType( T dummy ){
 template<class T>
 std::string VTKUtils::whichType( std::vector<T> dummy ){
 
-//    BITPIT_UNUSED(dummy) ;
+    BITPIT_UNUSED(dummy) ;
 
     T dummy2 ;
     return  whichType(dummy2) ;
@@ -92,7 +92,7 @@ std::string VTKUtils::whichType( std::vector<T> dummy ){
 template<class T, size_t d>
 std::string VTKUtils::whichType( std::array<T,d> dummy ){
 
-//    BITPIT_UNUSED(dummy) ;
+    BITPIT_UNUSED(dummy) ;
 
     T dummy2 ;
     return  whichType(dummy2) ;

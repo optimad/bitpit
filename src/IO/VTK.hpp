@@ -6,7 +6,7 @@
 #include <vector>
 #include <array>
 
-//#include "BitPit_common.hpp"
+#include "BitPit_common.hpp"
 #include "Generic_IO.hpp"
 #include "FileHandler.hpp"
 

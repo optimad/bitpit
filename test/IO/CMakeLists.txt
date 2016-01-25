@@ -15,6 +15,7 @@ if (IO_ENABLE_VTK_WRAPPERS)
 endif()
 
 # Rules to build the tests
+include_directories("${PROJECT_SOURCE_DIR}/src/common")
 include_directories("${PROJECT_SOURCE_DIR}/src/operators")
 include_directories("${PROJECT_SOURCE_DIR}/src/containers")
 include_directories("${PROJECT_SOURCE_DIR}/src/IO")

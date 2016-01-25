@@ -14,6 +14,7 @@
 // ========================================================================== //
 // INCLUDES                                                                   //
 // ========================================================================== //
+# include "BitPit_common.hpp"
 # include "STL_IOFunct.hpp"
 
 // ========================================================================== //
@@ -2302,7 +2303,7 @@ header = trim(header);
 file_handle << header << endl;
 sheader.str("");
 
-return(0); };
+return(err); };
 
 // -------------------------------------------------------------------------- //
 /*!
@@ -2409,7 +2410,7 @@ header = trim(header);
 file_handle << header << endl;
 sheader.str("");
 
-return(0); };
+return(err); };
 
 // -------------------------------------------------------------------------- //
 /*!
@@ -2451,6 +2452,8 @@ float             *float4byte_pointer = &float4byte;
 
 // Counters
 int                n, m, i, j, k;
+
+BITPIT_UNUSED(solid_name);
 
 // ============================================================================ //
 // CHECK SOLID DEFINITION                                                       //
@@ -2548,6 +2551,8 @@ float             *float4byte_pointer = &float4byte;
 
 // Counters
 int                n, m, i, j, k;
+
+BITPIT_UNUSED(solid_name);
 
 // ============================================================================ //
 // CHECK SOLID DEFINITION                                                       //
