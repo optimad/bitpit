@@ -536,12 +536,18 @@ public:
 	/*!
 		Removes all elements from the vector (which are destroyed),
 		leaving the container with a size of 0.
+
+		\param release if it's true the memory hold by the container will
+		be released, otherwise the container will be cleared but its
+		memory will not be relased
 	*/
-	void clear()
+	void clear(bool release = true)
 	{
 		// Clear storage
 		m_v.clear();
-		std::vector<value_type>().swap(m_v);
+		if (release) {
+			std::vector<value_type>().swap(m_v);
+		}
 		storage_resize(0);
 
 		// Reset first and last counters
