@@ -17,38 +17,38 @@ using namespace std;
 // CONSTRUCTORS AND OPERATORS
 // =================================================================================== //
 
-/*!Default constructor. Origin of octree in physical domain in (0,0,0)
- * and side length 1.
+/*!Default constructor.
+ * Origin of octree in reference domain in (0,0,0) and side length 1.
  */
 Map::Map(int8_t maxlevel, uint8_t dim_){
-	maxlevel = int8_t(max(0,min(int(maxlevel),21)));
+	maxlevel = int8_t(max(0,min(int(maxlevel),20)));
 	m_origin[0] = m_origin[1] = m_origin[2] = 0.0;
 	m_L = 1.0;
 	m_dim = dim_;
 	m_nnodes = 1<<m_dim;
 	m_nnodesPerFace = 1<<(m_dim-1);
 	m_maxLength = uint32_t(1<<maxlevel);
-
+	m_maxLength_1 = 1/double(m_maxLength);
 };
 
-/*!Customized constructor with origin of octree in physical
- * domain side length provided by the user.
- * \param[in] X Coordinate X of the origin.
- * \param[in] Y Coordinate Y of the origin.
- * \param[in] Z Coordinate Z of the origin.
- * \param[in] LL Side length of domain.
- */
-Map::Map(double & X, double & Y, double & Z, double & LL, int8_t maxlevel, uint8_t dim_){
-	maxlevel = int8_t(max(0,min(int(maxlevel),21)));
-	m_origin[0] = X;
-	m_origin[1] = Y;
-	m_origin[2] = Z;
-	m_L = LL;
-	m_dim = dim_;
-	m_nnodes = 1<<m_dim;
-	m_nnodesPerFace = 1<<(m_dim-1);
-	m_maxLength = uint32_t(1<<maxlevel);
-};
+///*!Customized constructor with origin of octree in physical
+// * domain side length provided by the user.
+// * \param[in] X Coordinate X of the origin.
+// * \param[in] Y Coordinate Y of the origin.
+// * \param[in] Z Coordinate Z of the origin.
+// * \param[in] LL Side length of domain.
+// */
+//Map::Map(double & X, double & Y, double & Z, double & LL, int8_t maxlevel, uint8_t dim_){
+//	maxlevel = int8_t(max(0,min(int(maxlevel),20)));
+//	m_origin[0] = X;
+//	m_origin[1] = Y;
+//	m_origin[2] = Z;
+//	m_L = LL;
+//	m_dim = dim_;
+//	m_nnodes = 1<<m_dim;
+//	m_nnodesPerFace = 1<<(m_dim-1);
+//	m_maxLength = uint32_t(1<<maxlevel);
+//};
 
 // =================================================================================== //
 // METHODS
@@ -61,7 +61,7 @@ Map::Map(double & X, double & Y, double & Z, double & LL, int8_t maxlevel, uint8
 darray3 Map::mapCoordinates(u32array3 const & X){
 	darray3 coords;
 	for (int i=0; i<3; ++i){
-		coords[i] = (m_origin[i] + m_L/double(m_maxLength) * double(X[i]));
+		coords[i] = m_maxLength_1 * double(X[i]);
 	}
 	return coords;
 };
@@ -71,7 +71,7 @@ darray3 Map::mapCoordinates(u32array3 const & X){
  * \return Coordinate X in physical domain.
  */
 double Map::mapX(uint32_t const & X){
-	return (m_origin[0] + m_L/double(m_maxLength) * double(X));
+	return m_maxLength_1 * double(X);
 };
 
 /*! Transformation of coordinate Y (logical->physical).
@@ -79,7 +79,7 @@ double Map::mapX(uint32_t const & X){
  * \return Coordinate Y in physical domain.
  */
 double Map::mapY(uint32_t const & Y){
-	return (m_origin[1] + m_L/double(m_maxLength) * double(Y));
+	return m_maxLength_1 * double(Y);
 };
 
 /*! Transformation of coordinate Z (logical->physical).
@@ -87,7 +87,7 @@ double Map::mapY(uint32_t const & Y){
  * \return Coordinate Z in physical domain.
  */
 double Map::mapZ(uint32_t const & Z){
-	return (m_origin[2] + m_L/double(m_maxLength) * double(Z));
+	return m_maxLength_1 * double(Z);
 };
 
 /*! Transformation of coordinates X,Y,Z (physical->logical).
@@ -97,7 +97,7 @@ double Map::mapZ(uint32_t const & Z){
 u32array3 Map::mapCoordinates(darray3 const & X){
 	u32array3 coords;
 	for (int i=0; i<3; ++i){
-		coords[i] = (uint32_t)(double(m_maxLength)/m_L * (X[i] - m_origin[i]));
+		coords[i] = (uint32_t)(double(m_maxLength) * X[i]);
 	}
 	return coords;
 };
@@ -107,7 +107,7 @@ u32array3 Map::mapCoordinates(darray3 const & X){
  * \return Coordinate X in logical domain.
  */
 uint32_t Map::mapX(double const & X){
-	return (uint32_t)(double(m_maxLength)/m_L * (X - m_origin[0]));
+	return (uint32_t)(double(m_maxLength) * X);
 };
 
 /*! Transformation of coordinate Y (physical->logical).
@@ -115,7 +115,7 @@ uint32_t Map::mapX(double const & X){
  * \return Coordinate Y in logical domain.
  */
 uint32_t Map::mapY(double const & Y){
-	return (uint32_t)(double(m_maxLength)/m_L * (Y - m_origin[1]));
+	return (uint32_t)(double(m_maxLength) * Y);
 };
 
 /*! Transformation of coordinate Z (physical->logical).
@@ -123,7 +123,7 @@ uint32_t Map::mapY(double const & Y){
  * \return Coordinate Z in logical domain.
  */
 uint32_t Map::mapZ(double const & Z){
-	return (uint32_t)(double(m_maxLength)/m_L * (Z - m_origin[2]));
+	return (uint32_t)(double(m_maxLength) * Z);
 };
 
 /*! Transformation of size of an octant (logical->physical).
@@ -131,7 +131,7 @@ uint32_t Map::mapZ(double const & Z){
  * \return Size of octant in physical domain.
  */
 double Map::mapSize(uint32_t const & size){
-	return ((m_L/double(m_maxLength))*double(size));
+	return m_maxLength_1 *double(size);
 };
 
 /*! Transformation of area of an octant (logical->physical).
@@ -139,7 +139,7 @@ double Map::mapSize(uint32_t const & size){
  * \return Area of octant in physical domain.
  */
 double Map::mapArea(uint64_t const & Area){
-	return ((pow(m_L,m_dim-1)/pow(double(m_maxLength),m_dim-1))*double(Area));
+	return ((1/pow(double(m_maxLength),(m_dim-1)))*double(Area));
 };
 
 /*! Transformation of volume of an octant (logical->physical).
@@ -147,7 +147,7 @@ double Map::mapArea(uint64_t const & Area){
  * \return Coordinate Volume of octant in physical domain.
  */
 double Map::mapVolume(uint64_t const & Volume){
-	return ((pow(m_L,m_dim)/pow(double(m_maxLength),m_dim))*double(Volume));
+	return ((1/pow(double(m_maxLength),m_dim))*double(Volume));
 };
 
 /*! Transformation of coordinates of center of an octant (logical->physical).
@@ -156,7 +156,7 @@ double Map::mapVolume(uint64_t const & Volume){
  */
 void Map::mapCenter(double* & center, darray3 & mapcenter){
 	for (int i=0; i<m_dim; i++){
-		mapcenter[i] = m_origin[i] + m_L/double(m_maxLength) * center[i];
+		mapcenter[i] = m_maxLength_1 * center[i];
 	}
 };
 
@@ -166,7 +166,7 @@ void Map::mapCenter(double* & center, darray3 & mapcenter){
  */
 void Map::mapCenter(darray3 & center, darray3 & mapcenter){
 	for (int i=0; i<m_dim; i++){
-		mapcenter[i] = m_origin[i] + m_L/double(m_maxLength) * center[i];
+		mapcenter[i] = m_maxLength_1 * center[i];
 	}
 };
 
@@ -178,7 +178,7 @@ void Map::mapNodes(uint32_t (*nodes)[3], darr3vector & mapnodes){
 	mapnodes.resize(m_nnodes);
 	for (int i=0; i<m_nnodes; i++){
 		for (int j=0; j<3; j++){
-			mapnodes[i][j] = m_origin[j] + m_L/double(m_maxLength) * double(nodes[i][j]);
+			mapnodes[i][j] = m_maxLength_1 * double(nodes[i][j]);
 		}
 	}
 };
@@ -191,7 +191,7 @@ void Map::mapNodes(u32arr3vector nodes, darr3vector & mapnodes){
 	mapnodes.resize(m_nnodes);
 	for (int i=0; i<m_nnodes; i++){
 		for (int j=0; j<3; j++){
-			mapnodes[i][j] = m_origin[j] + m_L/double(m_maxLength) * double(nodes[i][j]);
+			mapnodes[i][j] = m_maxLength_1 * double(nodes[i][j]);
 		}
 	}
 };
@@ -202,7 +202,7 @@ void Map::mapNodes(u32arr3vector nodes, darr3vector & mapnodes){
  */
 void Map::mapNode(u32array3 & node, darray3 & mapnode){
 	for (int j=0; j<3; j++){
-		mapnode[j] = m_origin[j] + m_L/double(m_maxLength) * double(node[j]);
+		mapnode[j] = m_maxLength_1 * double(node[j]);
 	}
 };
 
@@ -214,7 +214,7 @@ void Map::mapNodesIntersection(uint32_t (*nodes)[3], darr3vector & mapnodes){
 	mapnodes.resize(m_nnodesPerFace);
 	for (int i=0; i<m_nnodesPerFace; i++){
 		for (int j=0; j<3; j++){
-			mapnodes[i][j] = m_origin[j] + m_L/double(m_maxLength) * double(nodes[i][j]);
+			mapnodes[i][j] = m_maxLength_1 * double(nodes[i][j]);
 		}
 	}
 };
@@ -227,7 +227,7 @@ void Map::mapNodesIntersection(u32arr3vector nodes, darr3vector & mapnodes){
 	mapnodes.resize(m_nnodesPerFace);
 	for (int i=0; i<m_nnodesPerFace; i++){
 		for (int j=0; j<3; j++){
-			mapnodes[i][j] = m_origin[j] + m_L/double(m_maxLength) * double(nodes[i][j]);
+			mapnodes[i][j] = m_maxLength_1 * double(nodes[i][j]);
 		}
 	}
 };

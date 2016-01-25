@@ -11,11 +11,12 @@ void test001() {
     /**<Write the para_tree in physical domain.*/
     ptreedefault.write("Pablo001_default");
 
-    /**<Set coordinates of the origin and size of a 2D custom para_tree object.*/
-    double X, Y, Z, L;
-    X = 10.0; Y = 20.0; Z = 0.0; L = 250.0;
+//		DEPRECATED
+//    /**<Set coordinates of the origin and size of a 2D custom para_tree object.*/
+//    double X, Y, Z, L;
+//    X = 10.0; Y = 20.0; Z = 0.0; L = 250.0;
     /**<Instantation of a 2D para_tree object with custom constructor.*/
-    ParaTree ptreecustom(X, Y, Z, L);
+    ParaTree ptreecustom(3);
     /**<Write the para_tree in physical domain.*/
     ptreecustom.write("Pablo001_custom");
 

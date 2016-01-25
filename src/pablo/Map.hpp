@@ -61,12 +61,13 @@ private:
 	uint8_t		m_nnodes;				/**<Number of nodes*/
 	uint8_t		m_nnodesPerFace;		/**<Number of nodes for each face*/
 	uint32_t	m_maxLength;			/**< Length of the logical domain */
+	double		m_maxLength_1;			/**< 1/Length of the logical domain */
 
 	// =================================================================================== //
 	// CONSTRUCTORS AND OPERATORS
 	// =================================================================================== //
 	Map(int8_t maxlevel, uint8_t dim_);
-	Map(double & X, double & Y, double & Z, double & LL, int8_t maxlevel, uint8_t dim_);
+//	Map(double & X, double & Y, double & Z, double & LL, int8_t maxlevel, uint8_t dim_);
 
 	// =================================================================================== //
 	// METHODS

@@ -42,16 +42,16 @@ typedef ptroctvector::iterator			octantIterator;
  *
  *	\brief Para Tree is the user interface class
  *
- *	The user should (read can...) work only
- *	with this Class and its methods.
- *	The sizes are intended in physical domain. The transformation from the m_logical
- *	domain to the physical domain is defined by Map trans.
+ *	The user should (read can...) work only with this class and its methods.
+ *	The sizes are intended in reference physical domain with limits [0,1]. The transformation from the logical
+ *	domain to the physical domain is defined by an internal mapping.
  *
  *	The partition of the octree is performed by following the Z-curve defined by the Morton
  *	index of the octants. By default it is a balanced partition over the number of octants for each
  *	process.
  *
- *	Class ParaTree has a dimensional parameter int dim and it accepts only two values: dim=2 (Class_Para_Tree<2>)and dim=3 (Class_Para_Tree<3>), obviously for 2D and 3D respectively.
+ *	Class ParaTree has a dimensional parameter int dim and it accepts only two
+ *	 values: dim=2 and dim=3, for 2D and 3D respectively.
  */
 class ParaTree{
 
@@ -108,12 +108,12 @@ private:
 public:
 #if ENABLE_MPI==1
 	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
-	ParaTree(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
-	ParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
+//	ParaTree(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
+//	ParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
 #else
 	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
-	ParaTree(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
-	ParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
+//	ParaTree(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
+//	ParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
 #endif
 	~ParaTree();
 

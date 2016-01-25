@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
 		int iter = 0;
 
 		/**<Instantation of a 3D para_tree object.*/
-		ParaTree pablo120(0,0,0,1,3);
+		ParaTree pablo120(3);
 
 		/**<Set NO 2:1 balance for the octree.*/
 		int idx = 0;
