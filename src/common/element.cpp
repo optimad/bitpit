@@ -1171,7 +1171,7 @@ void Element::set_vertex(const int &index, const long &vertex)
 	\param vertex is the local index of the vertex
 	\result The id of the specified vertex.
 */
-int Element::get_vertex(const int &vertex) const
+long Element::get_vertex(const int &vertex) const
 {
 	return m_connect[vertex];
 }

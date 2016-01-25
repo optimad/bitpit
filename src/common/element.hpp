@@ -157,7 +157,7 @@ public:
 
 	void set_vertex(const int &index, const long &vertex);
 	int get_vertex_count() const;
-	int get_vertex(const int &vertex) const;
+	long get_vertex(const int &vertex) const;
 
 	static const long NULL_ELEMENT_ID;
 
