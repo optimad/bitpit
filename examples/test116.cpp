@@ -1,4 +1,4 @@
-#include "ParaTree.hpp"
+#include "PabloUniform.hpp"
 #if ENABLE_MPI==1
 #include "UserDataComm.hpp"
 #include "UserDataLB.hpp"
@@ -18,7 +18,7 @@ int main(int argc, char *argv[]) {
 		int iter = 0;
 
 		/**<Instantation of a 3D para_tree object.*/
-		ParaTree pablo116(3);
+		PabloUniform pablo116(0,0,0,2,3);
 
 		/**<Set NO 2:1 balance for the octree.*/
 		int idx = 0;

@@ -15,6 +15,7 @@ using namespace std;
 // =================================================================================== //
 // CONSTRUCTORS AND OPERATORS
 // =================================================================================== //
+#if ENABLE_MPI==1
 PabloUniform::PabloUniform(uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm comm):ParaTree(dim,maxlevel,logfile,comm){
 	m_origin = { {0,0,0} };
 	m_L = 1.0;
@@ -26,6 +27,19 @@ PabloUniform::PabloUniform(double X, double Y, double Z, double L, uint8_t dim, 
 	m_origin[2] = Z;
 	m_L = L;
 };
+#else
+PabloUniform::PabloUniform(uint8_t dim, int8_t maxlevel, std::string logfile):ParaTree(dim,maxlevel,logfile){
+	m_origin = { {0,0,0} };
+	m_L = 1.0;
+};
+
+PabloUniform::PabloUniform(double X, double Y, double Z, double L, uint8_t dim, int8_t maxlevel, std::string logfile):ParaTree(dim,maxlevel,logfile){
+	m_origin[0] = X;
+	m_origin[1] = Y;
+	m_origin[2] = Z;
+	m_L = L;
+};
+#endif
 
 // =================================================================================== //
 // METHODS
