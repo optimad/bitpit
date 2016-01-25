@@ -1820,6 +1820,9 @@ private:
 	*/
 	void pierce_pos(size_type pos)
 	{
+		// Update id of the empty element
+		update_empty_pos_id(pos);
+
 		// Update first and last counters
 		if (empty()) {
 			m_last_pos  = 0;
@@ -1833,9 +1836,6 @@ private:
 				m_first_pos = next_used_pos(pos);
 			}
 		}
-
-		// Update id of the empty element
-		update_empty_pos_id(pos);
 
 		// Hole
 		//
@@ -1937,7 +1937,7 @@ private:
 	{
 		// Position of the next non-empty element
 		id_type distanceFromNonEmpty;
-		if (empty() || pos > m_last_pos) {
+		if (empty() || pos >= m_last_pos) {
 			distanceFromNonEmpty = SENTINEL_ID;
 		} else if (is_pos_empty(pos + 1)) {
 			distanceFromNonEmpty = m_v[pos + 1].get_id() - 1;
