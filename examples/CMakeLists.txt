@@ -16,7 +16,7 @@ if(BUILD_EXAMPLES)
 
 	# List of examples
 	set(EXAMPLE_LIST "")
-	list(APPEND EXAMPLE_LIST "test1b")
+    list(APPEND EXAMPLE_LIST "test1b")
 	list(APPEND EXAMPLE_LIST "test3")
 	list(APPEND EXAMPLE_LIST "test4")
 	list(APPEND EXAMPLE_LIST "test5")

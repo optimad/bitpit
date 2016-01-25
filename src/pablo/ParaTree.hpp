@@ -311,6 +311,8 @@ public:
 	void 		findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours);
 	Octant* getPointOwner(dvector & point);
 	uint32_t 	getPointOwnerIdx(dvector & point);
+	Octant* getPointOwner(darray3 & point);
+	uint32_t 	getPointOwnerIdx(darray3 & point);
 	void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost);
 
 	// =================================================================================== //

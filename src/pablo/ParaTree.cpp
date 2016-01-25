@@ -1984,6 +1984,152 @@ ParaTree::getPointOwnerIdx(dvector & point){
 	}
 };
 
+/** Get the octant owner of an input point.
+ * \param[in] point Coordinates of target point.
+ * \return Pointer to octant owner of target point (=NULL if point is outside of the domain).
+ */
+Octant*
+ParaTree::getPointOwner(darray3 & point){
+	uint32_t noctants = m_octree.m_octants.size();
+	uint32_t idxtry = noctants/2;
+	uint32_t x, y, z;
+	uint64_t morton, mortontry;
+	int powner = 0;
+
+	x = m_trans.mapX(point[0]);
+	y = m_trans.mapX(point[1]);
+	z = m_trans.mapX(point[2]);
+	if ((x > m_global.m_maxLength) || (y > m_global.m_maxLength) || (z > m_global.m_maxLength))
+		return NULL;
+
+	if (x == m_global.m_maxLength) x = x - 1;
+	if (y == m_global.m_maxLength) y = y - 1;
+	if (z == m_global.m_maxLength) z = z - 1;
+	morton = mortonEncode_magicbits(x,y,z);
+
+	powner = 0;
+	if (!m_serial) powner = findOwner(morton);
+
+	if ((powner!=m_rank) && (!m_serial))
+		return NULL;
+
+	int32_t jump = idxtry;
+	while(abs(jump) > 0){
+		mortontry = m_octree.m_octants[idxtry].computeMorton();
+		jump = ((mortontry<morton)-(mortontry>morton))*abs(jump)/2;
+		idxtry += jump;
+		if (idxtry > noctants-1){
+			if (jump > 0){
+				idxtry = noctants - 1;
+				jump = 0;
+			}
+			else if (jump < 0){
+				idxtry = 0;
+				jump = 0;
+			}
+		}
+	}
+	if(m_octree.m_octants[idxtry].computeMorton() == morton){
+		return &m_octree.m_octants[idxtry];
+	}
+	else{
+		// Step until the mortontry lower than morton (one idx of distance)
+		{
+			while(m_octree.m_octants[idxtry].computeMorton() < morton){
+				idxtry++;
+				if(idxtry > noctants-1){
+					idxtry = noctants-1;
+					break;
+				}
+			}
+			while(m_octree.m_octants[idxtry].computeMorton() > morton){
+				idxtry--;
+				if(idxtry > noctants-1){
+					idxtry = 0;
+					break;
+				}
+			}
+		}
+		return &m_octree.m_octants[idxtry];
+	}
+
+};
+
+/** Get the octant owner of an input point.
+ * \param[in] point Coordinates of target point.
+ * \return Index of octant owner of target point (max uint32_t representable if point outside of the domain).
+ */
+uint32_t
+ParaTree::getPointOwnerIdx(darray3 & point){
+	uint32_t noctants = m_octree.m_octants.size();
+	uint32_t idxtry = noctants/2;
+	uint32_t x, y, z;
+	uint64_t morton, mortontry;
+	int powner = 0;
+
+	x = m_trans.mapX(point[0]);
+	y = m_trans.mapY(point[1]);
+	z = m_trans.mapZ(point[2]);
+
+	if ((x > m_global.m_maxLength) || (y > m_global.m_maxLength) || (z > m_global.m_maxLength)
+			|| (point[0] < m_trans.m_origin[0]) || (point[1] < m_trans.m_origin[1]) || (point[2] < m_trans.m_origin[2])){
+		return -1;
+	}
+
+	if (x == m_global.m_maxLength) x = x - 1;
+	if (y == m_global.m_maxLength) y = y - 1;
+	if (z == m_global.m_maxLength) z = z - 1;
+	morton = mortonEncode_magicbits(x,y,z);
+
+
+	powner = 0;
+	if(!m_serial) powner = findOwner(morton);
+
+	if ((powner!=m_rank) && (!m_serial))
+		return -1;
+
+	int32_t jump = idxtry;
+	while(abs(jump) > 0){
+
+		mortontry = m_octree.m_octants[idxtry].computeMorton();
+		jump = ((mortontry<morton)-(mortontry>morton))*abs(jump)/2;
+		idxtry += jump;
+		if (idxtry > noctants-1){
+			if (jump > 0){
+				idxtry = noctants - 1;
+				jump = 0;
+			}
+			else if (jump < 0){
+				idxtry = 0;
+				jump = 0;
+			}
+		}
+	}
+	if(m_octree.m_octants[idxtry].computeMorton() == morton){
+		return idxtry;
+	}
+	else{
+		// Step until the mortontry lower than morton (one idx of distance)
+		{
+			while(m_octree.m_octants[idxtry].computeMorton() < morton){
+				idxtry++;
+				if(idxtry > noctants-1){
+					idxtry = noctants-1;
+					break;
+				}
+			}
+			while(m_octree.m_octants[idxtry].computeMorton() > morton){
+				idxtry--;
+				if(idxtry > noctants-1){
+					idxtry = 0;
+					break;
+				}
+			}
+		}
+		return idxtry;
+	}
+};
+
 /** Get mapping info of an octant after an adapting with tracking changes.
  * \param[in] idx Index of new octant.
  * \param[out] mapper Mapper from new octants to old octants. I.e. mapper[i] = j -> the i-th octant after adapt was in the j-th position before adapt;
