@@ -1454,14 +1454,21 @@ private:
 	*/
 	iterator _erase(size_type pos, bool delayed = false)
 	{
-		// Delete id from map
-		unlink_id(m_v[pos].get_id());
+		// If the container contains only the element we want to erase,
+		// we can clear the container. However we do not want to relase
+		// the memory the container is holding.
+		if (size() > 1) {
+			// Delete id from map
+			unlink_id(m_v[pos].get_id());
 
-		// Free the position
-		if (delayed) {
-			pending_deletes_add(pos);
+			// Free the position
+			if (delayed) {
+				pending_deletes_add(pos);
+			} else {
+				pierce_pos(pos);
+			}
 		} else {
-			pierce_pos(pos);
+			clear(false);
 		}
 
 		// Return the iterator to the element following the one erased
