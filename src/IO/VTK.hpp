@@ -160,17 +160,15 @@ class VTK{
         void                            writeDataArray( std::fstream &, VTKField &) ;
         void                            writePDataArray( std::fstream &, VTKField &) ;
 
-        virtual void                    flush( std::fstream &, VTKFormat , std::string ) =0 ;
-
         //For Reading
         void                            readDataHeader( std::fstream &) ;
         bool                            readDataArray( std::fstream &, VTKField &);
 
-        virtual  void                   absorb( std::fstream &, VTKFormat , std::string ) =0 ;
-
         //General Purpose
         bool                            getFieldByName( const std::string &, VTKField*& ) ;
         void                            calcAppendedOffsets() ;
+        virtual void                    flushData( std::fstream &, VTKFormat , std::string )  ;
+        virtual  void                   absorbData( std::fstream &, VTKFormat , std::string )  ;
 
 };
 

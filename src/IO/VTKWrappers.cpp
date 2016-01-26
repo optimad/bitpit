@@ -105,7 +105,7 @@ void VTKUnstructuredVec::write(  ) {
  *  @param[in]  codex       codex which must be used ["ascii"/"appended"]. If "appended" a unformatted binary stream must be used
  *  @param[in]  name        name of the data to be written. Either user data or grid data
  */
-void VTKUnstructuredVec::flush( std::fstream &str, VTKFormat codex, std::string name ) {
+void VTKUnstructuredVec::flushData( std::fstream &str, VTKFormat codex, std::string name ) {
 
     uint8_t myType = static_cast<std::underlying_type<VTKElementType>::type>(type) ;
 
@@ -166,7 +166,7 @@ void VTKUnstructuredVec::flush( std::fstream &str, VTKFormat codex, std::string 
  *  @param[in]  codex       codex which must be used ["ascii"/"appended"]. If "appended" a unformatted binary stream must be used
  *  @param[in]  name        name of the data to be written. Either user data or grid data
  */
-void VTKUnstructuredVec::absorb( std::fstream &str, VTKFormat codex, std::string name ) {
+void VTKUnstructuredVec::absorbData( std::fstream &str, VTKFormat codex, std::string name ) {
 
     ufield  *f_ ;
 

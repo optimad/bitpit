@@ -449,7 +449,7 @@ void VTK::writeData( ){
                 str.seekg( field.getPosition() ) ;
                 CopyUntilEOFInString( str, buffer, length );
 
-                flush( str, VTKFormat::ASCII, field.getName() ) ;
+                flushData( str, VTKFormat::ASCII, field.getName() ) ;
 
                 position_insert = str.tellg();
                 str << std::endl ;
@@ -468,7 +468,7 @@ void VTK::writeData( ){
                 str.seekg( field.getPosition() ) ;
                 CopyUntilEOFInString( str, buffer, length );
 
-                flush( str, VTKFormat::ASCII, field.getName() ) ;
+                flushData( str, VTKFormat::ASCII, field.getName() ) ;
 
                 position_insert = str.tellg();
                 str << std::endl ;
@@ -486,7 +486,7 @@ void VTK::writeData( ){
                 str.seekg( field.getPosition() ) ;
                 CopyUntilEOFInString( str, buffer, length );
 
-                flush( str, VTKFormat::ASCII, field.getName() ) ;
+                flushData( str, VTKFormat::ASCII, field.getName() ) ;
 
                 position_insert = str.tellg();
                 str << std::endl ;
@@ -538,12 +538,13 @@ void VTK::writeData( ){
                     uint64_t    nbytes = field.getNbytes() ;
                     flush_binary(str, nbytes) ;
                 };
-                flush( str, VTKFormat::APPENDED, field.getName() ) ;
+                flushData( str, VTKFormat::APPENDED, field.getName() ) ;
             };
         } 
 
         for( auto &field : data ){
             if( field.getCodification() == VTKFormat::APPENDED && field.getLocation() == VTKLocation::CELL ) {
+
                 if( getHeaderType() == "UInt32"){
                     uint32_t    nbytes = field.getNbytes() ;
                     flush_binary(str, nbytes) ;
@@ -553,7 +554,8 @@ void VTK::writeData( ){
                     uint64_t    nbytes = field.getNbytes() ;
                     flush_binary(str, nbytes) ;
                 };
-                flush( str, VTKFormat::APPENDED, field.getName() ) ;
+                flushData( str, VTKFormat::APPENDED, field.getName() ) ;
+
             };
         } 
 
@@ -569,7 +571,7 @@ void VTK::writeData( ){
                     uint64_t    nbytes = field.getNbytes() ;
                     flush_binary(str, nbytes) ;
                 };
-                flush( str, VTKFormat::APPENDED, field.getName() ) ;           
+                flushData( str, VTKFormat::APPENDED, field.getName() ) ;           
             };
         };
 
@@ -739,7 +741,7 @@ void VTK::readData( ){
             str.seekg( field.getOffset(), std::ios::cur) ;
             if( HeaderType== "UInt32") absorb_binary( str, nbytes32 ) ;
             if( HeaderType== "UInt64") absorb_binary( str, nbytes64 ) ;
-            absorb( str, VTKFormat::APPENDED, field.getName() ) ;
+            absorbData( str, VTKFormat::APPENDED, field.getName() ) ;
         };
     };
 
@@ -750,7 +752,7 @@ void VTK::readData( ){
             str.seekg( field.getOffset(), std::ios::cur) ;
             if( HeaderType== "UInt32") absorb_binary( str, nbytes32 ) ;
             if( HeaderType== "UInt64") absorb_binary( str, nbytes64 ) ;
-            absorb( str, VTKFormat::APPENDED, field.getName() ) ;
+            absorbData( str, VTKFormat::APPENDED, field.getName() ) ;
         };
     };
 
@@ -758,7 +760,7 @@ void VTK::readData( ){
     for( auto & field : data ){
         if(  field.getCodification() == VTKFormat::ASCII){
             str.seekg( field.getPosition() ) ;
-            absorb( str, VTKFormat::ASCII, field.getName() ) ;
+            absorbData( str, VTKFormat::ASCII, field.getName() ) ;
         };
     };
 
@@ -766,7 +768,7 @@ void VTK::readData( ){
     for( auto & field : geometry ){
         if( field.getCodification() == VTKFormat::ASCII){
             str.seekg( field.getPosition() ) ;
-            absorb( str, VTKFormat::ASCII, field.getName() ) ;
+            absorbData( str, VTKFormat::ASCII, field.getName() ) ;
         };
     };
 
@@ -878,6 +880,29 @@ bool  VTK::readDataArray( std::fstream &str, VTKField &field_  ){
 
 };
 
+/*!
+ * Interface method for writing field data
+ * @param[in] str output stream
+ * @param[in] format codex to be used [VTKFormat::ASCII/VKFormat::APPENDED]
+ * @param[in] name name of the field to be written
+ */
+void VTK::flushData( std::fstream &str, VTKFormat format, std::string name ){
+    BITPIT_UNUSED( str ) ;
+    BITPIT_UNUSED( format ) ;
+    BITPIT_UNUSED( name ) ;
+};
+
+/*!
+ * Interface method for reading field data
+ * @param[in] str output stream
+ * @param[in] format codex to be used [VTKFormat::ASCII/VKFormat::APPENDED]
+ * @param[in] name name of the field to be read
+ */
+void VTK::absorbData( std::fstream &str, VTKFormat format, std::string name ){
+    BITPIT_UNUSED( str ) ;
+    BITPIT_UNUSED( format ) ;
+    BITPIT_UNUSED( name ) ;
+};
 /*! 
  * @} 
  */

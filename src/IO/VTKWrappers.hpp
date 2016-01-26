@@ -64,8 +64,8 @@ class VTKUnstructuredVec : public VTKUnstructuredGrid{
     VTKElementType          type ;                                  /**< Type of element used in unstructured grid */
     std::vector<ufield>     adata;                                  /**< All field data */
 
-    void flush( std::fstream &str, VTKFormat codex_, std::string name ) ;
-    void absorb( std::fstream &str, VTKFormat codex_, std::string name ) ;
+    void flushData( std::fstream &str, VTKFormat codex_, std::string name ) ;
+    void absorbData( std::fstream &str, VTKFormat codex_, std::string name ) ;
 
     public:
     VTKUnstructuredVec( ) ;
