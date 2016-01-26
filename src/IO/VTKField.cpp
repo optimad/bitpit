@@ -226,6 +226,43 @@ std::fstream::pos_type   VTKField::getPosition() const{
 };
 
 
+/*!
+ * get position of data field in VTK file. 
+ * This information is available after VTK::ReadMetaData() has been called.
+ * @return      position in VTK file.
+ */
+bool   VTKField::hasAllMetaData() const{ 
+
+    bool    allData(true);
+
+    allData = allData && name != "undefined" ;  
+    allData = allData && type != VTKDataType::UNDEFINED ;
+    allData = allData && location != VTKLocation::UNDEFINED ;
+    allData = allData && codification != VTKFormat::UNDEFINED ;
+    allData = allData && components != VTKFieldType::UNDEFINED ;   ;
+    allData = allData && nr_elements != 0 ;
+
+    return allData;
+};
+
+
+/*!
+ * Update field information using VTKFieldMetaData class
+ */
+void VTKField::importMetaData( const VTKFieldMetaData &data){ 
+
+    std::cout << "viva" << std::endl;
+    std::cout << static_cast<const int>(VTKUtils::whichType(data.getType())) << std::endl;
+
+    setType( VTKUtils::whichType( data.getType() ) );
+
+    if( getComponents() == VTKFieldType::UNDEFINED)
+        setComponents( VTKFieldType::SCALAR);
+    setElements( data.getSize() / static_cast<int>(components)  );
+
+    return ;
+};
+
 
 /*!
  * @}

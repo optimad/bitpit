@@ -406,9 +406,30 @@ void VTK::calcAppendedOffsets(){
 };
 
 /*!
+ * Uses VTK::getFieldMetaData() interface to retrieve missing information
+ */
+void VTK::getMissingMetaData(){
+
+
+    for( auto & field : geometry ){
+        VTKFieldMetaData const & metaData = getMetaData( field.getName() ) ;
+        field.importMetaData( metaData ) ;
+    };
+
+    for( auto & field : data ){
+        VTKFieldMetaData const & metaData = getMetaData( field.getName() ) ;
+        field.importMetaData( metaData ) ;
+    };
+
+
+    return ;
+};
+/*!
  * Writes entire VTK file (headers and data).
  */
 void VTK::write( ){
+
+    getMissingMetaData() ;
 
     calcAppendedOffsets() ;
 
@@ -903,6 +924,19 @@ void VTK::absorbData( std::fstream &str, VTKFormat format, std::string name ){
     BITPIT_UNUSED( format ) ;
     BITPIT_UNUSED( name ) ;
 };
+
+/*!
+ * Interface method for obtaining field meta Data
+ * @param[in] name name of the field to be written
+ * @return VTKFieldMetaData containing the size of field and typeid of data
+ */
+const VTKFieldMetaData VTK::getFieldMetaData( std::string name ){
+    BITPIT_UNUSED( name ) ;
+
+     VTKFieldMetaData   dummy(0,typeid(int));
+     return dummy ;
+};
+
 /*! 
  * @} 
  */

@@ -56,6 +56,20 @@ enum class VTKElementType {
     PYRAMID    = 14,
     POLYHEDRON = 42
 };
+
+class VTKFieldMetaData{
+
+    private:
+    uint64_t                m_size ;
+    const std::type_info&   m_type ;
+
+    public:
+    VTKFieldMetaData( uint64_t, const std::type_info &);
+    uint64_t                getSize() const;
+    const std::type_info&   getType() const;
+
+};
+
 class VTKField{
 
     //members
@@ -87,6 +101,7 @@ class VTKField{
         uint64_t                 getOffset() const;
         uint64_t                 getNbytes() const;
         std::fstream::pos_type   getPosition() const; 
+        bool                     hasAllMetaData() const ;
 
         void                     setName( std::string ) ;
         void                     setType( VTKDataType ) ;
@@ -97,6 +112,7 @@ class VTKField{
         void                     setOffset( uint64_t ) ;
         void                     setPosition( std::fstream::pos_type ) ;
 
+        void                     importMetaData( const VTKFieldMetaData & ) ;
 };
 
 class VTK{
@@ -167,8 +183,12 @@ class VTK{
         //General Purpose
         bool                            getFieldByName( const std::string &, VTKField*& ) ;
         void                            calcAppendedOffsets() ;
+        void                            getMissingMetaData() ;
+
+        //Interface methods
         virtual void                    flushData( std::fstream &, VTKFormat , std::string )  ;
         virtual  void                   absorbData( std::fstream &, VTKFormat , std::string )  ;
+        virtual const VTKFieldMetaData  getFieldMetaData( std::string )  ;
 
 };
 
