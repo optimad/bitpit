@@ -17,7 +17,7 @@
 /*!
  * Default constructor
  */
-VTKUnstructuredVec::VTKUnstructuredVec():VTKUnstructuredGrid<VTKUnstructuredVec>(){
+VTKUnstructuredVec::VTKUnstructuredVec():VTKUnstructuredGrid(){
 };
 
 /*!
@@ -27,7 +27,7 @@ VTKUnstructuredVec::VTKUnstructuredVec():VTKUnstructuredGrid<VTKUnstructuredVec>
  * @param[in]   codex_  codex used in file ["appended"/"ascii"]
  * @param[in]   type_   element type of unstructured grid. See http://www.vtk.org/wp-content/uploads/2015/04/file-formats.pdf
  */
-VTKUnstructuredVec::VTKUnstructuredVec( std::string dir_, std::string name_, VTKFormat codex_, VTKElementType type_ ):VTKUnstructuredGrid<VTKUnstructuredVec>( ){
+VTKUnstructuredVec::VTKUnstructuredVec( std::string dir_, std::string name_, VTKFormat codex_, VTKElementType type_ ):VTKUnstructuredGrid( ){
 
     setNames( dir_, name_ );
     setCodex( codex_ ) ;

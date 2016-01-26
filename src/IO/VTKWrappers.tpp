@@ -12,7 +12,7 @@
  * @param[in]   connectivity_ext   grid cell-node connectivity; the size of the vector is used to determine the number of cells in grid;
  */
 template< class T0, class T1>
-VTKUnstructuredVec::VTKUnstructuredVec( std::string dir_, std::string name_, VTKFormat codex_, VTKElementType type_, std::vector<T0> &points_ext, std::vector<T1> &connectivity_ext ) :VTKUnstructuredGrid<VTKUnstructuredVec>( ){
+VTKUnstructuredVec::VTKUnstructuredVec( std::string dir_, std::string name_, VTKFormat codex_, VTKElementType type_, std::vector<T0> &points_ext, std::vector<T1> &connectivity_ext ) :VTKUnstructuredGrid() {
 
 
     int ncells_, npoints_, nconn_;
@@ -58,7 +58,7 @@ void VTKUnstructuredVec::addData( std::vector<T> &data_, std::string name_, VTKL
 
     adata.push_back( ufield(name_,data_) ) ;
 
-    VTKUnstructuredGrid<VTKUnstructuredVec>::addData( name_, 1, loc_, VTKUtils::whichType(dum_) ) ;
+    VTKUnstructuredGrid::addData( name_, 1, loc_, VTKUtils::whichType(dum_) ) ;
 
     return;
 };
@@ -77,7 +77,7 @@ void VTKUnstructuredVec::addData( std::vector< std::array<T,3> > &data_, std::st
 
     adata.push_back( ufield(name_,data_) ) ;
 
-    VTKUnstructuredGrid<VTKUnstructuredVec>::addData( name_, 3, loc_, VTKUtils::whichType(dum_) ) ;
+    VTKUnstructuredGrid::addData( name_, 3, loc_, VTKUtils::whichType(dum_) ) ;
 
     return;
 };
@@ -97,7 +97,7 @@ void VTKUnstructuredVec::addData( std::vector< std::vector<T> > &data_, std::str
 
     adata.push_back( ufield(name_,data_) ) ;
 
-    VTKUnstructuredGrid<VTKUnstructuredVec>::addData( name_, 3, loc_, VTKUtils::whichType(dum_) ) ;
+    VTKUnstructuredGrid::addData( name_, 3, loc_, VTKUtils::whichType(dum_) ) ;
 
 
     return;

@@ -15,10 +15,10 @@
  */
 
 
-class VTKUnstructuredVec : public VTKUnstructuredGrid<VTKUnstructuredVec>{
+class VTKUnstructuredVec : public VTKUnstructuredGrid{
 
 
-    friend VTKUnstructuredGrid<VTKUnstructuredVec> ;                      /**< provides friendship to base class */
+    friend VTKUnstructuredGrid ;                                        /**< provides friendship to base class */
 
     private:
     struct ufield{

@@ -201,7 +201,7 @@ uint64_t  VTKField::getSize() const{
 
 /*!
  * get offset in appended section
- * @return  offset for "_" character in appended section
+ * @return  offset from "_" character in appended section
  */
 uint64_t  VTKField::getOffset() const{ 
     return offset; 

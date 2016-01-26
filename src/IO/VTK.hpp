@@ -171,7 +171,6 @@ class VTK{
 
 };
 
-template <class Derived >
 class VTKUnstructuredGrid : public VTK{
 
     protected:
@@ -183,9 +182,6 @@ class VTKUnstructuredGrid : public VTK{
         ~VTKUnstructuredGrid();
 
         void                            writeCollection() ;  
-
-        void                            flush(  std::fstream &, VTKFormat , std::string ) ; //CRTP
-        void                            absorb( std::fstream &, VTKFormat , std::string ) ; //CRTP
         uint64_t                        calcSizeConnectivity( ) ;
 
     public:
@@ -199,7 +195,6 @@ class VTKUnstructuredGrid : public VTK{
 
 };
 
-template <class Derived>
 class VTKRectilinearGrid : public VTK{
 
     typedef std::array<std::array<int,2>,2> extension2D_t ;         /**< typedef to describe min and max indices in 2D of restilinear grid */
@@ -214,16 +209,14 @@ class VTKRectilinearGrid : public VTK{
     protected:
     VTKRectilinearGrid();
     VTKRectilinearGrid( std::string , std::string  );
-    VTKRectilinearGrid( std::string , std::string , std::string, int, int, int, int, int, int );
-    VTKRectilinearGrid( std::string , std::string , std::string, int, int, int );
-    VTKRectilinearGrid( std::string , std::string , std::string, int, int, int, int );
-    VTKRectilinearGrid( std::string , std::string , std::string, int, int );
+    VTKRectilinearGrid( std::string , std::string , VTKFormat, int, int, int, int, int, int );
+    VTKRectilinearGrid( std::string , std::string , VTKFormat, int, int, int );
+    VTKRectilinearGrid( std::string , std::string , VTKFormat, int, int, int, int );
+    VTKRectilinearGrid( std::string , std::string , VTKFormat, int, int );
     ~VTKRectilinearGrid();
 
     void                            writeCollection() ;  
 
-    void                            flush(  std::fstream &, VTKFormat , std::string ) ; //CRTP
-    void                            absorb( std::fstream &, VTKFormat , std::string ) ; //CRTP
 
     public:
     void                            readMetaData() ;
@@ -260,23 +253,21 @@ namespace VTKUtils{
     bool                            convertStringToEnum( const std::string &, VTKLocation & ) ;
     bool                            convertStringToEnum( const std::string &, VTKFormat & ) ;
     bool                            convertStringToEnum( const std::string &, VTKDataType &) ;
-    
+
     VTKDataType                     whichType( const std::type_info & ) ;
 
     template<class T> 
-    VTKDataType                     whichType( T ) ;
-    
+        VTKDataType                     whichType( T ) ;
+
     template<class T> 
-    VTKDataType                     whichType( std::vector<T> ) ;
-    
+        VTKDataType                     whichType( std::vector<T> ) ;
+
     template<class T, size_t d>
-    VTKDataType                     whichType( std::array<T,d> ) ;
+        VTKDataType                     whichType( std::array<T,d> ) ;
 }
 
 
 #include"VTKUtils.tpp"
-#include"VTKUnstructured.tpp"
-#include"VTKRectilinear.tpp"
 
 
 #endif
