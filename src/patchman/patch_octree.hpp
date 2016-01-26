@@ -9,7 +9,7 @@
 
 #include "patch.hpp"
 
-#include "ParaTree.hpp"
+#include "PabloUniform.hpp"
 
 #include <assert.h>
 #include <deque>

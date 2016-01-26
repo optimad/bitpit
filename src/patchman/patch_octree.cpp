@@ -36,7 +36,7 @@ PatchOctree::PatchOctree(const int &id, const int &dimension,
 	// Inizializzazione dell'octree
 	double initial_level = ceil(log2(std::max(1., length / dh)));
 
-	m_tree = ParaTree(origin[0], origin[1], origin[2], length, get_dimension());
+	m_tree = PabloUniform(origin[0], origin[1], origin[2], length, get_dimension());
 	m_tree.setMarker((uint32_t) 0, initial_level);
 
 	// Info sull'octree
