@@ -102,7 +102,7 @@ void  VTK::setCounter( int c_){
  * @param[in]  nr    number of processes
  * @param[in]  my    my rank
  */
-void  VTK::setParallel( int nr, int my){ 
+void  VTK::setParallel( uint16_t nr, uint16_t my){ 
 
   if( nr <  1 ) std::cout << " Numer of processes must be greater than 0" << std::endl ;
   if( my >= nr) std::cout << " my_process is not in valid range " << std::endl ;

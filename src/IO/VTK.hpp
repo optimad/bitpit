@@ -11,10 +11,20 @@
 #include "Generic_IO.hpp"
 #include "FileHandler.hpp"
 
+/*!
+ * @ingroup VTKEnums
+ * Enum class defining types of fields whic may be written through class VTK
+ */
 enum class VTKFieldType {
     UNDEFINED = -1,
     SCALAR = 1,
     VECTOR = 3
+};
+
+/*!
+ * @ingroup VTKEnums
+ * Enum class defining basic data types of fields which may be written through VTK
+ */
 enum class VTKDataType {
     UNDEFINED,
     Int8     ,
@@ -29,18 +39,30 @@ enum class VTKDataType {
     Float64      
 };
 
+/*!
+ * @ingroup VTKEnums
+ * Enum class defining the VTK format to be used for writing fields 
+ */
 enum class VTKFormat {
     UNDEFINED,
     ASCII,
     APPENDED
 };
 
+/*!
+ * @ingroup VTKEnums
+ * Enum class defining wheather data is stored at cells or nodes
+ */
 enum class VTKLocation {
     UNDEFINED,
     CELL,
     POINT
 };
 
+/*!
+ * @ingroup VTKEnums
+ * Enum class listing different element types supported by VTKUnstructuredGrid
+ */
 enum class VTKElementType {
     UNDEFINED  = -1,
     VERTEX     = 1,
@@ -115,6 +137,7 @@ class VTKField{
         void                     importMetaData( const VTKFieldMetaData & ) ;
 };
 
+
 class VTK{
 
     protected:
@@ -125,8 +148,8 @@ class VTK{
         FileHandler                     fh ;                        /**< File_Handler for Input and Output */
         uint64_t                        nr_points ;                 /**< Number of vertices */
         uint64_t                        nr_cells  ;                 /**< Number of Cells */
-        int                             nr_procs  ;                 /**< Number of parallel processes  */
-        int                             my_proc   ;                 /**< My process id */
+        uint16_t                        nr_procs  ;                 /**< Number of parallel processes  */
+        uint16_t                        my_proc   ;                 /**< My process id */
 
         std::string                     HeaderType ;                /**< UInt32 or UInt64_t */
 
@@ -147,7 +170,7 @@ class VTK{
 
         void                            setNames( std::string , std::string ) ;
         void                            setCounter( int c_=0 ) ;
-        void                            setParallel( int , int ) ;
+        void                            setParallel( uint16_t , uint16_t ) ;
 
         void                            setCodex( VTKFormat );
         void                            setGeomCodex( VTKFormat );

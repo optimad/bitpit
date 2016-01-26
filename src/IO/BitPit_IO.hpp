@@ -7,6 +7,7 @@
  * @defgroup VisualizationToolKit VisualizationToolKit (VTK)
  * @{
  * @defgroup VTKContainers
+ * @defgroup VTKEnums
  * @defgroup VTKUtils
  * @}
  * @}

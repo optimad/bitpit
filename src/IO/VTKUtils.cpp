@@ -35,6 +35,9 @@ uint8_t VTKUtils::sizeOfType( const VTKDataType & type ){
 
         case VTKDataType::UNDEFINED :
            return( 0 ) ;
+
+        default:
+           return(0);
     };
 
 };
@@ -66,9 +69,10 @@ uint8_t VTKUtils::getNNodeInElement( const VTKElementType & t){
             return(5) ;
         case 25: 
             return(20);
+        default:
+           return(-1);
     };
 
-    return(-1) ;
 
 };
 
@@ -189,6 +193,8 @@ std::string VTKUtils::convertEnumToString( const VTKLocation &loc ){
             return("Point");
         case VTKLocation::UNDEFINED :
             return("Undefined") ;
+        default:
+            return("Undefined") ;
     };
 };
 
@@ -205,6 +211,8 @@ std::string VTKUtils::convertEnumToString( const VTKFormat &cod ){
         case VTKFormat::APPENDED :
             return("appended");
         case VTKFormat::UNDEFINED :
+            return("Undefined") ;
+        default:
             return("Undefined") ;
     };
 };
@@ -239,8 +247,8 @@ std::string VTKUtils::convertEnumToString( const VTKDataType &type ){
             return("Float64");
         case VTKDataType::UNDEFINED :
             return("Undefined");
-
-
+        default:
+            return("Undefined") ;
     };
 };
 
