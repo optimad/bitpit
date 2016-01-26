@@ -163,11 +163,54 @@ void  VTK::setDataCodex( VTKFormat cod_ ) {
  * Add user data for input or output. 
  * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
  * @param[in]  name_    name of field
- * @param[in]  comp_    nr of components [1/3]
+ * @param[in]  comp_    type of data field [ VTKFieldType::SCALAR/ VTKFieldType::VECTOR ] 
+ * @param[in]  loc_     location of data [VTKLocation::CELL/VTKLocation::POINT]
+ */
+VTKField* VTK::addData( std::string name_, VTKFieldType comp_,  VTKLocation loc_ ){
+
+    int         size_ ;
+    bool        allocate(true) ;
+    VTKField*   ptr(NULL) ;
+
+    if(  getFieldByName( name_, ptr ) ) {
+        ptr->setComponents(comp_) ;
+        ptr->setLocation(loc_) ;
+    }
+
+    else{
+
+        if( loc_ == VTKLocation::UNDEFINED ){
+            std::cout << " VTK::addData needs defined VTKLocation "  << std::endl ;
+            allocate = false ;
+
+        } else if( loc_ == VTKLocation::CELL ){
+            size_ = nr_cells;
+
+        } else if( loc_ == VTKLocation::POINT ){
+            size_ = nr_points;
+        }
+
+        // Do allocation if everything ok ---------------------------------------------
+        if( allocate) {
+            data.push_back( VTKField( name_, comp_, loc_, VTKDataType::UNDEFINED, DataCodex, size_ ) ) ;
+            ptr = &data.back() ;
+        };
+
+    };
+
+    return ptr ;
+
+};
+
+/*!
+ * Add user data for input or output. 
+ * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
+ * @param[in]  name_    name of field
+ * @param[in]  comp_    type of data field [ VTKFieldType::SCALAR/ VTKFieldType::VECTOR ] 
  * @param[in]  loc_     location of data [VTKLocation::CELL/VTKLocation::POINT]
  * @param[in]  type_    type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
  */
-VTKField* VTK::addData( std::string name_, int comp_,  VTKLocation loc_, VTKDataType type_ ){
+VTKField* VTK::addData( std::string name_, VTKFieldType comp_,  VTKLocation loc_, VTKDataType type_ ){
 
     int         size_ ;
     bool        allocate(true) ;
@@ -212,67 +255,14 @@ VTKField* VTK::addData( std::string name_, int comp_,  VTKLocation loc_, VTKData
 };
 
 /*!
- * Add user data for input or output. 
- * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
- * @param[in]  name_    name of field
- * @param[in]  comp_    nr of components [1/3]
- * @param[in]  loc_     location of data [VTKLocation::CELL/VTKLocation::POINT]
- * @param[in]  type_    type of data 
- */
-VTKField* VTK::addData( std::string name_, int comp_,  VTKLocation loc_, std::type_info type_ ){
-
-    int         size_ ;
-    bool        allocate(true) ;
-    VTKField*   ptr(NULL) ;
-    VTKDataType type( VTKUtils::whichType(type_) );
-
-    if(  getFieldByName( name_, ptr ) ) {
-        ptr->setComponents(comp_) ;
-        ptr->setType(type) ;
-        ptr->setLocation(loc_) ;
-
-    }
-
-    else{
-
-        if( loc_ == VTKLocation::UNDEFINED ){
-            std::cout << " VTK::addData needs defined VTKLocation "  << std::endl ;
-            allocate = false ;
-
-        } else if( loc_ == VTKLocation::CELL ){
-            size_ = nr_cells;
-
-        } else if( loc_ == VTKLocation::POINT ){
-            size_ = nr_points;
-        }
-
-        if( type == VTKDataType::UNDEFINED){
-            std::cout << " VTK::addData needs defined VTKDataType "  << std::endl ;
-            allocate = false ;
-        }
-
-
-        // Do allocation if everything ok ---------------------------------------------
-        if( allocate) {
-            data.push_back( VTKField( name_, comp_, loc_, type, DataCodex, size_ ) ) ;
-            ptr = &data.back() ;
-        };
-
-    };
-
-    return ptr ;
-
-};
-
-/*!
  * add user data for input or output. 
  * @param[in]  name_    name of field
- * @param[in]  comp_    nr of components [1/3]
+ * @param[in]  comp_    type of data field [ VTKFieldType::SCALAR/ VTKFieldType::VECTOR ] 
  * @param[in]  loc_     location of data [VTKLocation::CELL/VTKLocation::POINT]
  * @param[in]  type_    type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
  * @param[in]  cod_     codification of data [VTKFormat::APPENDED/VTKFormat::ASCII]
  */
-VTKField* VTK::addData( std::string name_, int comp_, VTKLocation loc_, VTKDataType type_, VTKFormat cod_ ){
+VTKField* VTK::addData( std::string name_, VTKFieldType comp_, VTKLocation loc_, VTKDataType type_, VTKFormat cod_ ){
 
     int         size_ ;
     bool        allocate(true) ;
@@ -315,57 +305,6 @@ VTKField* VTK::addData( std::string name_, int comp_, VTKLocation loc_, VTKDataT
 
 };
 
-/*!
- * add user data for input or output. 
- * @param[in]  name_    name of field
- * @param[in]  comp_    nr of components [1/3]
- * @param[in]  loc_     location of data [VTKLocation::CELL/VTKLocation::POINT]
- * @param[in]  type_    type of data 
- * @param[in]  cod_     codification of data [VTKFormat::APPENDED/VTKFormat::ASCII]
- */
-VTKField* VTK::addData( std::string name_, int comp_, VTKLocation loc_, std::type_info type_, VTKFormat cod_ ){
-
-    int         size_ ;
-    bool        allocate(true) ;
-    VTKField*   ptr(NULL) ;
-    VTKDataType type( VTKUtils::whichType(type_) );
-
-    if( getFieldByName( name_, ptr ) ){
-        ptr->setComponents(comp_) ;
-        ptr->setType(type) ;
-        ptr->setLocation(loc_) ;
-        ptr->setCodification(cod_) ;
-    }
-
-    else{
-
-        if( loc_ == VTKLocation::UNDEFINED ){
-            std::cout << " VTK::addData needs defined VTKLocation "  << std::endl ;
-            allocate = false ;
-
-        } else if( loc_ == VTKLocation::CELL ){
-            size_ = nr_cells;
-
-        } else if( loc_ == VTKLocation::POINT ){
-            size_ = nr_points;
-        }
-
-        if( type == VTKDataType::UNDEFINED){
-            std::cout << " VTK::addData needs defined VTKDataType "  << std::endl ;
-            allocate = false ;
-        }
-
-        // Do allocation if everything ok ---------------------------------------------
-        if( allocate) {
-            data.push_back( VTKField( name_, comp_, loc_, type, cod_, size_ ) ) ;
-            ptr = &data.back() ;
-        };
-
-    };
-
-    return ptr ;
-
-};
 /*!
  * Removes user data from input or output 
  * @param[in]  name_    name of field to be removed
@@ -564,9 +503,9 @@ void VTK::writeData( ){
 
     { // Write Appended
 
-        char                c_;
-        std::string              line ;
-        std::fstream::pos_type   position_appended ;
+        char                    c_;
+        std::string             line ;
+        std::fstream::pos_type  position_appended ;
 
         //Go to the initial position of the appended section
         while( getline(str, line) && (! Keyword_In_String( line, "<AppendedData")) ){} ;
@@ -681,8 +620,8 @@ void VTK::writeDataHeader( std::fstream &str, bool parallel ){
 
         for( auto &field : data ){
             if( field.getLocation() == location){
-                if(      field.getComponents() == 1 ) scalars <<  field.getName() << " " ;
-                else if( field.getComponents() == 3 ) vectors <<  field.getName() << " " ;
+                if(      field.getComponents() == VTKFieldType::SCALAR ) scalars <<  field.getName() << " " ;
+                else if( field.getComponents() == VTKFieldType::VECTOR ) vectors <<  field.getName() << " " ;
             };
 
         };

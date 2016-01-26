@@ -83,8 +83,9 @@ bool VTKUtils::convertStringToDataArray( const std::string &line_, VTKField &dat
     std::string type_, name_, code_, comp_, offs_ ;
     int         components_(1), offset_ ;
 
-    VTKFormat   codex ;
-    VTKDataType type ;
+    VTKFormat    codex ;
+    VTKDataType  type ;
+    VTKFieldType comp(VTKFieldType::SCALAR) ;
 
     bool  success(true) ;
 
@@ -98,12 +99,15 @@ bool VTKUtils::convertStringToDataArray( const std::string &line_, VTKField &dat
             convert_string( comp_, components_ ) ;
         };
 
+        if(components_==3)
+            comp=VTKFieldType::VECTOR ;
+
         convertStringToEnum( type_, type) ;
         convertStringToEnum( code_, codex) ;
 
         data_.setType(type) ;
         data_.setName(name_) ;
-        data_.setComponents(components_) ;
+        data_.setComponents(comp) ;
         data_.setCodification(codex) ;
 
         if(code_=="appended") {

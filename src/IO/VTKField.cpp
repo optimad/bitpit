@@ -15,7 +15,7 @@ VTKField::VTKField(){
     type            = VTKDataType::UNDEFINED ;
     location        = VTKLocation::UNDEFINED ;
     codification    = VTKFormat::UNDEFINED ;
-    components      = 1 ;   ;
+    components      = VTKFieldType::UNDEFINED ;   ;
     nr_elements     = 0 ;
     position        = 0 ;
 
@@ -24,10 +24,10 @@ VTKField::VTKField(){
 /*!
  * Constructor
  * @param[in]   name_   name of data field
- * @param[in]   comp_   number of coponents of data field [1/3]
+ * @param[in]   comp_   number of coponents of data field [VTKFieldType::SCALAR/VTKFieldType::VECTOR]
  * @param[in]   loc_    location of data field [VTKLocation::CELL/VTKLocation::POINT]
  */
-VTKField::VTKField( std::string name_, uint8_t comp_, VTKLocation loc_ ): name(name_), components(comp_), location(loc_) {
+VTKField::VTKField( std::string name_, VTKFieldType comp_, VTKLocation loc_ ): name(name_), components(comp_), location(loc_) {
 
     type            = VTKDataType::UNDEFINED ;
     nr_elements     = 0 ;
@@ -39,11 +39,11 @@ VTKField::VTKField( std::string name_, uint8_t comp_, VTKLocation loc_ ): name(n
 /*!
  * Constructor
  * @param[in]   name_   name of data field
- * @param[in]   comp_   number of coponents of data field [1/3]
+ * @param[in]   comp_   number of coponents of data field [VTKFieldType::SCALAR/VTKFieldType::VECTOR]
  * @param[in]   loc_    location of data field [VTKLocation::CELL/VTKLocation::POINT]
  * @param[in]   type_   type of data field [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
  */
-VTKField::VTKField( std::string name_, uint8_t comp_, VTKLocation loc_, VTKDataType type_ ): name(name_), components(comp_), type(type_), location(loc_) {
+VTKField::VTKField( std::string name_, VTKFieldType comp_, VTKLocation loc_, VTKDataType type_ ): name(name_), components(comp_), type(type_), location(loc_) {
 
     nr_elements     = 0 ;
     codification    = VTKFormat::UNDEFINED ;
@@ -54,13 +54,13 @@ VTKField::VTKField( std::string name_, uint8_t comp_, VTKLocation loc_, VTKDataT
 /*!
  * Constructor
  * @param[in]   name_   name of data field
- * @param[in]   comp_   number of coponents of data field [1/3]
+ * @param[in]   comp_   number of coponents of data field [VTKFieldType::SCALAR/VTKFieldType::VECTOR]
  * @param[in]   loc_    location of data field [VTKLocation::CELL/VTKLocation::POINT]
  * @param[in]   type_   type of data field [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
  * @param[in]   cod_    codex [VTKFormat::APPENDED/VTKFormat::ASCII]
  * @param[in]   nr_elements_    number of elements of data field
  */
-VTKField::VTKField( std::string name_, uint8_t comp_, VTKLocation loc_, VTKDataType type_, VTKFormat cod_, uint64_t nr_elements_):
+VTKField::VTKField( std::string name_, VTKFieldType comp_, VTKLocation loc_, VTKDataType type_, VTKFormat cod_, uint64_t nr_elements_):
     name(name_), components(comp_), type(type_), location(loc_), codification(cod_), nr_elements(nr_elements_){
 };
 
@@ -108,9 +108,9 @@ void      VTKField::setCodification( VTKFormat  code_ ){
 
 /*!
  * set number of components of data field
- * @param[in]   comp_   number of components [1/3]
+ * @param[in]   comp_   number of coponents of data field [VTKFieldType::SCALAR/VTKFieldType::VECTOR]
  */
-void      VTKField::setComponents( uint8_t comp_){ 
+void      VTKField::setComponents( VTKFieldType comp_){ 
     components= comp_; 
     return; 
 };
@@ -178,7 +178,7 @@ VTKFormat    VTKField::getCodification() const{
  * get number of components of data field
  * @return  number of components [1/3]
  */
-uint8_t   VTKField::getComponents() const{ 
+VTKFieldType   VTKField::getComponents() const{ 
     return components; 
 };
 
@@ -196,7 +196,8 @@ uint64_t  VTKField::getElements() const{
  * @return  total size = number of elements *nuber of components
  */
 uint64_t  VTKField::getSize() const{ 
-    return components *nr_elements ; 
+
+    return static_cast<int>(components) *nr_elements ; 
 };
 
 /*!
@@ -212,7 +213,7 @@ uint64_t  VTKField::getOffset() const{
  * @return  memory size of data field
  */
 uint64_t  VTKField::getNbytes() const{ 
-    return components *nr_elements *VTKUtils::sizeOfType( type ) ;
+    return static_cast<int>(components) *nr_elements *VTKUtils::sizeOfType( type ) ;
 };
 
 /*!

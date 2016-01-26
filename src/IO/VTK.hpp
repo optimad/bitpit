@@ -11,6 +11,10 @@
 #include "Generic_IO.hpp"
 #include "FileHandler.hpp"
 
+enum class VTKFieldType {
+    UNDEFINED = -1,
+    SCALAR = 1,
+    VECTOR = 3
 enum class VTKDataType {
     UNDEFINED,
     Int8     ,
@@ -57,7 +61,7 @@ class VTKField{
     //members
     protected:
         std::string              name;                      /**< name of the field */
-        uint8_t                  components;                /**< nr of components of field, options[ 1, 3 ] */
+        VTKFieldType             components;                /**< nr of components of field, options[ 1, 3 ] */
         VTKDataType              type;                      /**< type of data, options [  VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ]] */
         VTKLocation              location;                  /**< cell or point data, [ VTKLocation::CELL/VTKLocation::Point] */
         VTKFormat                codification ;             /**< Type of codification [VTKFormat::ASCII, VTKFormat::APPENDED] */
@@ -68,16 +72,16 @@ class VTKField{
         //methods
     public:
         VTKField();
-        VTKField( std::string , uint8_t , VTKLocation );
-        VTKField( std::string , uint8_t , VTKLocation, VTKDataType );
-        VTKField( std::string , uint8_t , VTKLocation, VTKDataType , VTKFormat , uint64_t );
+        VTKField( std::string, VTKFieldType, VTKLocation );
+        VTKField( std::string, VTKFieldType, VTKLocation, VTKDataType );
+        VTKField( std::string, VTKFieldType, VTKLocation, VTKDataType , VTKFormat , uint64_t );
         ~VTKField();
 
         std::string              getName() const;
         VTKDataType              getType() const;
         VTKLocation              getLocation() const;
         VTKFormat                getCodification() const;
-        uint8_t                  getComponents() const;
+        VTKFieldType             getComponents() const;
         uint64_t                 getElements() const;
         uint64_t                 getSize() const;
         uint64_t                 getOffset() const;
@@ -88,7 +92,7 @@ class VTKField{
         void                     setType( VTKDataType ) ;
         void                     setLocation( VTKLocation ) ;
         void                     setCodification( VTKFormat ) ;
-        void                     setComponents( uint8_t ) ;
+        void                     setComponents( VTKFieldType ) ;
         void                     setElements( uint64_t ) ;
         void                     setOffset( uint64_t ) ;
         void                     setPosition( std::fstream::pos_type ) ;
@@ -133,10 +137,9 @@ class VTK{
         void                            setGeomCodex( VTKFormat );
         void                            setDataCodex( VTKFormat );
 
-        VTKField*                       addData( std::string, int, VTKLocation, VTKDataType ) ;
-        VTKField*                       addData( std::string, int, VTKLocation, std::type_info ) ;
-        VTKField*                       addData( std::string, int, VTKLocation, VTKDataType, VTKFormat ) ;
-        VTKField*                       addData( std::string, int, VTKLocation, std::type_info, VTKFormat ) ;
+        VTKField*                       addData( std::string, VTKFieldType, VTKLocation ) ;
+        VTKField*                       addData( std::string, VTKFieldType, VTKLocation, VTKDataType ) ;
+        VTKField*                       addData( std::string, VTKFieldType, VTKLocation, VTKDataType, VTKFormat ) ;
 
         void                            removeData( std::string ) ;
 
@@ -257,13 +260,13 @@ namespace VTKUtils{
     VTKDataType                     whichType( const std::type_info & ) ;
 
     template<class T> 
-        VTKDataType                     whichType( T ) ;
+    VTKDataType                     whichType( T ) ;
 
     template<class T> 
-        VTKDataType                     whichType( std::vector<T> ) ;
+    VTKDataType                     whichType( std::vector<T> ) ;
 
     template<class T, size_t d>
-        VTKDataType                     whichType( std::array<T,d> ) ;
+    VTKDataType                     whichType( std::array<T,d> ) ;
 }
 
 

@@ -182,7 +182,7 @@ void VTKUnstructuredVec::absorb( std::fstream &str, VTKFormat codex, std::string
             visitor.setTask( "read" ) ;
 
             visitor.setSize( FPtr->getElements() ) ;
-            visitor.setComponents( FPtr->getComponents() ) ;
+            visitor.setComponents( static_cast<int>(FPtr->getComponents()) ) ;
 
             if( name == "connectivity") visitor.setComponents( VTKUtils::getNNodeInElement(type) ) ;
 
@@ -250,7 +250,7 @@ void VTKUnstructuredVec::stream_visitor::setSize( uint64_t size_){
  * sets the number of components of the field
  * @param[in]   com_    numer of components
  */
-void VTKUnstructuredVec::stream_visitor::setComponents( uint8_t com_){
+void VTKUnstructuredVec::stream_visitor::setComponents( int com_){
     components = com_ ;
 };
 

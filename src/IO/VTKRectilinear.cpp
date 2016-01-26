@@ -20,9 +20,9 @@ VTKRectilinearGrid::VTKRectilinearGrid( )  :VTK() {
 
     fh.setAppendix( "vtr" );
 
-    geometry.push_back( VTKField( "x_Coord", 1, VTKLocation::POINT, VTKDataType::Float64 ) ) ;
-    geometry.push_back( VTKField( "y_Coord", 1, VTKLocation::POINT, VTKDataType::Float64 ) ) ;
-    geometry.push_back( VTKField( "z_Coord", 1, VTKLocation::POINT, VTKDataType::Float64 ) ) ;
+    geometry.push_back( VTKField( "x_Coord", VTKFieldType::SCALAR, VTKLocation::POINT, VTKDataType::Float64 ) ) ;
+    geometry.push_back( VTKField( "y_Coord", VTKFieldType::SCALAR, VTKLocation::POINT, VTKDataType::Float64 ) ) ;
+    geometry.push_back( VTKField( "z_Coord", VTKFieldType::SCALAR, VTKLocation::POINT, VTKDataType::Float64 ) ) ;
 
 } ;
 
@@ -152,9 +152,6 @@ void VTKRectilinearGrid::readMetaData( ){
     std::string line, temp;
 
     std::fstream::pos_type        position;
-
-    bool                     read ;
-
     std::array<int,6>             extensions ;
 
 
@@ -187,10 +184,10 @@ void VTKRectilinearGrid::readMetaData( ){
 
     readDataHeader( str ) ;
 
-    for( int i=0; i<geometry.size(); ++i){
+    for( auto &field : geometry ){ //int i=0; i<geometry.size(); ++i){
         str.seekg( position) ;
-        if( ! readDataArray( str, geometry[i] ) ) {
-            std::cout << geometry[i].getName() << " DataArray not found" << std::endl ;
+        if( ! readDataArray( str, field ) ) {
+            std::cout << field.getName() << " DataArray not found" << std::endl ;
         };
     };
 
@@ -341,7 +338,7 @@ void VTKRectilinearGrid::setDimensions( int n1_, int n2_, int m1_, int m2_, int 
     local_index[2][0] = l1_ ;
     local_index[2][1] = l2_ ;
 
-    if(nr_procs=1)
+    if(nr_procs==1)
         global_index = local_index ;
 
     for(int d=0; d<3; ++d){
@@ -450,7 +447,8 @@ void VTKRectilinearGrid::setGlobalDimensions( int I, int J ){
  */
 void VTKRectilinearGrid::setGlobalIndex( std::vector<extension3D_t> loc_ ){
 
-    if( loc_.size() !=nr_procs ) std::cout << "Size of loc_ in VTKRectilinearGrid::setParallelIndex does not fit nr_procs " << std::endl ;
+    if( loc_.size() != nr_procs ) 
+        std::cout << "Size of loc_ in VTKRectilinearGrid::setParallelIndex does not fit nr_procs " << std::endl ;
 
     proc_index   = loc_ ;
 

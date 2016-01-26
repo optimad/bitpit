@@ -58,7 +58,7 @@ void VTKUnstructuredVec::addData( std::vector<T> &data_, std::string name_, VTKL
 
     adata.push_back( ufield(name_,data_) ) ;
 
-    VTKUnstructuredGrid::addData( name_, 1, loc_, VTKUtils::whichType(dum_) ) ;
+    VTKUnstructuredGrid::addData( name_, VTKFieldType::SCALAR, loc_, VTKUtils::whichType(dum_) ) ;
 
     return;
 };
@@ -77,7 +77,7 @@ void VTKUnstructuredVec::addData( std::vector< std::array<T,3> > &data_, std::st
 
     adata.push_back( ufield(name_,data_) ) ;
 
-    VTKUnstructuredGrid::addData( name_, 3, loc_, VTKUtils::whichType(dum_) ) ;
+    VTKUnstructuredGrid::addData( name_, VTKFieldType::VECTOR, loc_, VTKUtils::whichType(dum_) ) ;
 
     return;
 };

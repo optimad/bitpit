@@ -36,7 +36,7 @@ class VTKUnstructuredVec : public VTKUnstructuredGrid{
 
         private:
             std::fstream*       str ;                               /**< stream for reading/writing */
-            uint8_t             components ;                        /**< number of components of field */
+            int                 components ;                        /**< number of components of field */
             uint64_t            size ;                              /**< number of elements */
             VTKFormat           codex ;                             /**< codex of VTK file [VTKFormat::ASCII/VTKFormat::APPENDED */
             std::string         name ;                              /**< name of the field */
@@ -56,7 +56,7 @@ class VTKUnstructuredVec : public VTKUnstructuredGrid{
             void                setTask( std::string );
             void                setName( std::string );
             void                setSize( uint64_t );
-            void                setComponents( uint8_t );
+            void                setComponents( int );
 
 
     };

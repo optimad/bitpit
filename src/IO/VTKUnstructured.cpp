@@ -19,10 +19,10 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( ) :VTK() {
 
   fh.setAppendix("vtu");
 
-  geometry.push_back( VTKField( "Points",       3, VTKLocation::POINT, VTKDataType::Float64) ) ;
-  geometry.push_back( VTKField( "offsets",      1, VTKLocation::CELL, VTKDataType::Int32   ) ) ;
-  geometry.push_back( VTKField( "types",        1, VTKLocation::CELL, VTKDataType::Int32   ) ) ;
-  geometry.push_back( VTKField( "connectivity", 1, VTKLocation::CELL, VTKDataType::Int32   ) ) ;
+  geometry.push_back( VTKField( "Points",       VTKFieldType::VECTOR, VTKLocation::POINT, VTKDataType::Float64) ) ;
+  geometry.push_back( VTKField( "offsets",      VTKFieldType::SCALAR, VTKLocation::CELL, VTKDataType::Int32   ) ) ;
+  geometry.push_back( VTKField( "types",        VTKFieldType::SCALAR, VTKLocation::CELL, VTKDataType::Int32   ) ) ;
+  geometry.push_back( VTKField( "connectivity", VTKFieldType::SCALAR, VTKLocation::CELL, VTKDataType::Int32   ) ) ;
 
 };
 
