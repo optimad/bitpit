@@ -338,8 +338,9 @@ public:
 	const u32array3 & getGhostNodeLogicalCoordinates(uint32_t inode);
 	darray3 	getGhostNodeCoordinates(uint32_t inode);
 #if ENABLE_MPI==1
-	void 		loadBalance();
-	void 		loadBalance(uint8_t & level);
+	void 		loadBalance(dvector* weight = NULL);
+	void 		loadBalance(uint8_t & level, dvector* weight = NULL);
+	void 		privateLoadBalance(uint32_t* partition);
 #endif
 	double		levelToSize(uint8_t & level);
 
@@ -359,7 +360,7 @@ private:
 #if ENABLE_MPI==1
 	void 		computePartition(uint32_t* partition);
 	void 		computePartition(uint32_t* partition, dvector* weight);
-	void 		computePartition(uint32_t* partition, uint8_t & level_);
+	void 		computePartition(uint32_t* partition, uint8_t & level_, dvector* weight);
 	void 		updateLoadBalance();
 	void 		setPboundGhosts();
 	void 		commMarker();
@@ -984,14 +985,15 @@ public:
 	 */
 	template<class Impl>
 	void
-	loadBalance(DataLBInterface<Impl> & userData, uint8_t & level){
+	loadBalance(DataLBInterface<Impl> & userData, uint8_t & level, dvector* weight = NULL){
 
 		//Write info on m_log
 		m_log.writeLog("---------------------------------------------");
 		m_log.writeLog(" LOAD BALANCE ");
 
 		uint32_t* partition = new uint32_t [m_nproc];
-		computePartition(partition, level);
+		computePartition(partition, level, weight);
+
 		if(m_serial)
 		{
 			m_log.writeLog(" ");
