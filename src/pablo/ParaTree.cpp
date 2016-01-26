@@ -849,7 +849,6 @@ ParaTree::getPbound(uint32_t idx){
 	return m_octree.m_octants[idx].getPbound();
 }
 
-#if ENABLE_MPI==1
 /*! Get the nature of an octant.
  * \param[in] idx Local index of target octant.
  * \return Is octant ghost?
@@ -858,7 +857,6 @@ bool
 ParaTree::getIsGhost(uint32_t idx){
 	return (findOwner(m_octree.m_octants[idx].computeMorton()) != m_rank);
 };
-#endif
 
 /*! Get if the octant is new after refinement.
  * \param[in] idx Local index of target octant.
@@ -1699,7 +1697,6 @@ ParaTree::getIdx(Octant oct){
 	return m_octree.getNumOctants();
 };
 
-#if ENABLE_MPI==1
 /*! Get the nature of an octant.
  * \param[in] oct Pointer to target octant.
  * \return Is octant ghost?
@@ -1721,7 +1718,6 @@ ParaTree::getIsGhost(Octant oct){
 		return false;
 	return (findOwner(oct.computeMorton()) != m_rank);
 };
-#endif
 
 // =================================================================================== //
 // PRIVATE GET/SET METHODS

@@ -192,9 +192,7 @@ public:
 	bool		getBound(uint32_t idx);
 	bool		getPbound(uint32_t idx, uint8_t iface);
 	bool		getPbound(uint32_t idx);
-#if ENABLE_MPI==1
 	bool 		getIsGhost(uint32_t idx);
-#endif
 	bool 		getIsNewR(uint32_t idx);
 	bool 		getIsNewC(uint32_t idx);
 	uint64_t 	getGlobalIdx(uint32_t idx);
@@ -286,10 +284,8 @@ public:
 	Octant*	getOctant(uint32_t idx);
 	Octant*	getGhostOctant(uint32_t idx);
 	uint32_t 		getIdx(Octant oct);
-#if ENABLE_MPI==1
 	bool 			getIsGhost(Octant* oct);
 	bool 			getIsGhost(Octant oct);
-#endif
 
 	// =================================================================================== //
 	// PRIVATE GET/SET METHODS															   //
