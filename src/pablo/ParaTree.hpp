@@ -340,8 +340,10 @@ public:
 #if ENABLE_MPI==1
 	void 		loadBalance(dvector* weight = NULL);
 	void 		loadBalance(uint8_t & level, dvector* weight = NULL);
+private:
 	void 		privateLoadBalance(uint32_t* partition);
 #endif
+public:
 	double		levelToSize(uint8_t & level);
 
 	// =================================================================================== //
@@ -469,9 +471,12 @@ public:
 
 	};
 
-	/** Distribute Load-Balancing the octants of the whole tree and data provided by the user
+	/** Distribute Load-Balancing the octants (with user defined weights) of the whole tree and data provided by the user
 	 * over the processes of the job following the Morton order.
 	 * Until loadBalance is not called for the first time the mesh is serial.
+	 * Even distribute data provided by the user between the processes.
+	 * \param[in] userData User interface to distribute the data during loadBalance.
+	 * \param[in] weight Pointer to a vector of weights of the local octants (weight=NULL is uniform distribution).
 	 */
 	template<class Impl>
 	void
@@ -978,10 +983,13 @@ public:
 
 	}
 
-	/** Distribute Load-Balanced the octants of the whole tree and data provided by the user
+	/** Distribute Load-Balanced the octants (with user defined weights) of the whole tree and data provided by the user
 	 * over the processes of the job. Until loadBalance is not called for the first time the mesh is serial.
 	 * The families of octants of a desired level are retained compact on the same process.
+	 * Even distribute data provided by the user between the processes.
+	 * \param[in] userData User interface to distribute the data during loadBalance.
 	 * \param[in] level Number of level over the max depth reached in the tree at which families of octants are fixed compact on the same process (level=0 is classic LoadBalance).
+	 * \param[in] weight Pointer to a vector of weights of the local octants (weight=NULL is uniform distribution).
 	 */
 	template<class Impl>
 	void

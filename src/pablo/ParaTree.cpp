@@ -2588,9 +2588,10 @@ ParaTree::getGhostNodeCoordinates(uint32_t inode){
 
 #if ENABLE_MPI==1
 
-/** Distribute Load-Balancing the octants of the whole tree over
+/** Distribute Load-Balancing the octants (with user defined weights) of the whole tree over
  * the processes of the job following the Morton order.
  * Until loadBalance is not called for the first time the mesh is serial.
+ * \param[in] weight Pointer to a vector of weights of the local octants (weight=NULL is uniform distribution).
  */
 void
 ParaTree::loadBalance(dvector* weight){
@@ -2624,10 +2625,11 @@ ParaTree::loadBalance(dvector* weight){
 
 }
 
-/** Distribute Load-Balanced the octants of the whole tree over
+/** Distribute Load-Balanced the octants (with user defined weights) of the whole tree over
  * the processes of the job. Until loadBalance is not called for the first time the mesh is serial.
  * The families of octants of a desired level are retained compact on the same process.
  * \param[in] level Number of level over the max depth reached in the tree at which families of octants are fixed compact on the same process (level=0 is classic LoadBalance).
+ * \param[in] weight Pointer to a vector of weights of the local octants (weight=NULL is uniform distribution).
  */
 void
 ParaTree::loadBalance(uint8_t & level, dvector* weight){
@@ -2656,9 +2658,13 @@ ParaTree::loadBalance(uint8_t & level, dvector* weight){
 
 };
 
+/** Distribute Load-Balancing the octants of the whole tree over
+ * the processes of the job following a given partition distribution.
+ * Until loadBalance is not called for the first time the mesh is serial.
+ * \param[in] partition Target distribution of octants over processes.
+ */
 void
 ParaTree::privateLoadBalance(uint32_t* partition){
-
 
 	if(m_serial)
 	{
