@@ -21,9 +21,9 @@ VTKRectilinearGrid<Derived>::VTKRectilinearGrid( )  :VTK() {
 
     fh.setAppendix( "vtr" );
 
-    geometry.push_back( VTKField( "x_Coord", 1, "Float64", "Point" ) ) ;
-    geometry.push_back( VTKField( "y_Coord", 1, "Float64", "Point" ) ) ;
-    geometry.push_back( VTKField( "z_Coord", 1, "Float64", "Point" ) ) ;
+    geometry.push_back( VTKField( "x_Coord", 1, VTKLocation::POINT, VTKDataType::Float64 ) ) ;
+    geometry.push_back( VTKField( "y_Coord", 1, VTKLocation::POINT, VTKDataType::Float64 ) ) ;
+    geometry.push_back( VTKField( "z_Coord", 1, VTKLocation::POINT, VTKDataType::Float64 ) ) ;
 
 } ;
 
@@ -145,10 +145,10 @@ VTKRectilinearGrid<Derived>::~VTKRectilinearGrid( ){
 /*!  
  *  sets the type of the geometry variables
  *  @tparam     Derived     Derived class for CRTP
- *  @param[in]  Ptype       Type of "x_Coord", "y_Coord" and "z_Coord" geometry information [ "Float[32/64]"]
+ *  @param[in]  Ptype       Type of "x_Coord", "y_Coord" and "z_Coord" geometry information [ VTKDataType::Float[32/64] ]
  */
 template <class Derived>
-void VTKRectilinearGrid<Derived>::setGeomTypes( std::string Ptype ){
+void VTKRectilinearGrid<Derived>::setGeomTypes( VTKDataType Ptype ){
 
     geometry[0].setType(Ptype) ;
     geometry[1].setType(Ptype) ;
@@ -381,8 +381,8 @@ void VTKRectilinearGrid<Derived>::setDimensions( int n1_, int n2_, int m1_, int 
     };
 
     for( auto &field : data ){
-        if( field.getLocation() == "Cell")  field.setElements(nr_cells) ;
-        if( field.getLocation() == "Point") field.setElements(nr_points) ;
+        if( field.getLocation() == VTKLocation::CELL)  field.setElements(nr_cells) ;
+        if( field.getLocation() == VTKLocation::POINT) field.setElements(nr_points) ;
     };
 
     return ;
@@ -522,7 +522,7 @@ void VTKRectilinearGrid<Derived>::setGlobalIndex( std::vector<extension2D_t> loc
  *  @param[in]  name        name of the data to be written. Either user data or grid data
  */
 template <class Derived>
-void VTKRectilinearGrid<Derived>::flush( std::fstream &str, std::string codex, std::string name ){
+void VTKRectilinearGrid<Derived>::flush( std::fstream &str, VTKFormat codex, std::string name ){
 
     static_cast<Derived *>(this)->flush( str, codex, name );
     return ;
@@ -537,7 +537,7 @@ void VTKRectilinearGrid<Derived>::flush( std::fstream &str, std::string codex, s
  *  @param[in]  name        name of the data to be read. Either user data or grid data
  */
 template <class Derived>
-void VTKRectilinearGrid<Derived>::absorb( std::fstream &str, std::string codex, std::string name ){
+void VTKRectilinearGrid<Derived>::absorb( std::fstream &str, VTKFormat codex, std::string name ){
 
     static_cast<Derived *>(this)->absorb( str, codex, name );
     return ;

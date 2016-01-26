@@ -27,7 +27,7 @@ VTKUnstructuredVec::VTKUnstructuredVec():VTKUnstructuredGrid<VTKUnstructuredVec>
  * @param[in]   codex_  codex used in file ["appended"/"ascii"]
  * @param[in]   type_   element type of unstructured grid. See http://www.vtk.org/wp-content/uploads/2015/04/file-formats.pdf
  */
-VTKUnstructuredVec::VTKUnstructuredVec( std::string dir_, std::string name_, std::string codex_, uint8_t type_ ):VTKUnstructuredGrid<VTKUnstructuredVec>( ){
+VTKUnstructuredVec::VTKUnstructuredVec( std::string dir_, std::string name_, VTKFormat codex_, VTKElementType type_ ):VTKUnstructuredGrid<VTKUnstructuredVec>( ){
 
     setNames( dir_, name_ );
     setCodex( codex_ ) ;
@@ -105,22 +105,23 @@ void VTKUnstructuredVec::write(  ) {
  *  @param[in]  codex       codex which must be used ["ascii"/"appended"]. If "appended" a unformatted binary stream must be used
  *  @param[in]  name        name of the data to be written. Either user data or grid data
  */
-void VTKUnstructuredVec::flush( std::fstream &str, std::string codex, std::string name ) {
+void VTKUnstructuredVec::flush( std::fstream &str, VTKFormat codex, std::string name ) {
 
+    uint8_t myType = static_cast<std::underlying_type<VTKElementType>::type>(type) ;
 
-    if( codex == "ascii" && name == "types"){
+    if( codex == VTKFormat::ASCII && name == "types"){
         for( uint64_t n=0; n<nr_cells-1; n++) {
-            flush_ascii( str, type  ) ;
+            flush_ascii( str, myType  ) ;
             str << std::endl ;
         };
-        flush_ascii( str, type  ) ;
+        flush_ascii( str, myType  ) ;
     }
 
-    else if( codex == "binary" && name == "types"){
-        for( uint64_t n=0; n<nr_cells; n++) flush_binary( str, type  ) ;
+    else if( codex == VTKFormat::APPENDED && name == "types"){
+        for( uint64_t n=0; n<nr_cells; n++) flush_binary( str, myType  ) ;
     }
 
-    else if( codex == "ascii" && name == "offsets"){
+    else if( codex == VTKFormat::ASCII && name == "offsets"){
         uint64_t off_(0), nT( VTKUtils::getNNodeInElement( type ) ) ;
         for(uint64_t  n=0; n<nr_cells-1; n++) {
             off_ += nT ;
@@ -131,7 +132,7 @@ void VTKUnstructuredVec::flush( std::fstream &str, std::string codex, std::strin
         flush_ascii( str, off_  ) ;
     }
 
-    else if( codex == "binary" && name == "offsets"){
+    else if( codex == VTKFormat::APPENDED && name == "offsets"){
         uint64_t off_(0), nT( VTKUtils::getNNodeInElement( type ) ) ;
         for( uint64_t n=0; n<nr_cells; n++) {
             off_ += nT ; 
@@ -165,7 +166,7 @@ void VTKUnstructuredVec::flush( std::fstream &str, std::string codex, std::strin
  *  @param[in]  codex       codex which must be used ["ascii"/"appended"]. If "appended" a unformatted binary stream must be used
  *  @param[in]  name        name of the data to be written. Either user data or grid data
  */
-void VTKUnstructuredVec::absorb( std::fstream &str, std::string codex, std::string name ) {
+void VTKUnstructuredVec::absorb( std::fstream &str, VTKFormat codex, std::string name ) {
 
     ufield  *f_ ;
 
@@ -216,7 +217,7 @@ void VTKUnstructuredVec::stream_visitor::setStream( std::fstream& str_){
  * sets the file codex
  * @param[in]   codex_    codex_ to be used ["ascii"/"appended"]
  */
-void VTKUnstructuredVec::stream_visitor::setCodex( std::string codex_){
+void VTKUnstructuredVec::stream_visitor::setCodex( VTKFormat codex_){
     codex = codex_ ;
 };
 

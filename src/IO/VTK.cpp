@@ -25,8 +25,8 @@ VTK::VTK(){
     fh.setSeries( false ) ;
     fh.setParallel( false ) ;
 
-    GeomCodex = "appended" ;
-    DataCodex = "appended" ;
+    GeomCodex = VTKFormat::APPENDED ;
+    DataCodex = VTKFormat::APPENDED ;
 
 };
 
@@ -124,9 +124,9 @@ void  VTK::setParallel( int nr, int my){
 
 /*!
  * sets codex for geometry and data
- * @param[in]  cod_    codex for VTK output ["ascii"/"appended"]
+ * @param[in]  cod_    codex for VTK output [VTKFormat::APPENDED/VTKFormat::ASCII]
  */
-void  VTK::setCodex( std::string cod_ ) {
+void  VTK::setCodex( VTKFormat cod_) {
 
     setGeomCodex( cod_) ;
     setDataCodex( cod_) ;
@@ -136,101 +136,130 @@ void  VTK::setCodex( std::string cod_ ) {
 
 /*!
  * sets codex for geometry only
- * @param[in]  cod_    codex for VTK output ["ascii"/"appended"]
+ * @param[in]  cod_    codex for VTK output [VTKFormat::APPENDED/VTKFormat::ASCII]
  */
-void  VTK::setGeomCodex( std::string cod_ ) {
+void  VTK::setGeomCodex( VTKFormat cod_ ) {
 
-    if( cod_ == "ascii"  || cod_ == "appended" ) {
-        GeomCodex = cod_ ;
-        for( auto &field : geometry)
-            field.setCodification( cod_ ) ;
-    } 
-    
-    else{
-      std::cout << "Codification: " << cod_ << " not supported in VTK::setGeomCodex"  << std::endl ;
-    };
-
+    GeomCodex = cod_ ;
+    for( auto &field : geometry)
+        field.setCodification( cod_ ) ;
     return;
 };
 
 /*!
  * sets codex for data only
- * @param[in]  cod_    codex for VTK output ["ascii"/"appended"]
+ * @param[in]  cod_    codex for VTK output [VTKFormat::APPENDED/VTKFormat::ASCII]
  */
-void  VTK::setDataCodex( std::string cod_ ) {
+void  VTK::setDataCodex( VTKFormat cod_ ) {
 
-    if( cod_ == "ascii"  || cod_ == "appended" ) {
-        DataCodex = cod_ ;
-        for( auto &field : data)
-            field.setCodification( cod_ ) ;
-    } 
-    
-    else{
-      std::cout << "Codification: " << cod_ << " not supported in VTK::setDataCodex"  << std::endl ;
-    };
+    DataCodex = cod_ ;
+    for( auto &field : data)
+        field.setCodification( cod_ ) ;
 
- 
     return ;
 };
 
 /*!
  * Add user data for input or output. 
- * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( std::string ) or VTK::setCodex( std::string )
+ * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
  * @param[in]  name_    name of field
  * @param[in]  comp_    nr of components [1/3]
- * @param[in]  type_    type of data [ "[U]Int8", "[U]Int16", "[U]Int32", "[U]Int64", "Float32", "Float6"4 ]
- * @param[in]  loc_     location of data ["Cell"/"Point"]
+ * @param[in]  loc_     location of data [VTKLocation::CELL/VTKLocation::POINT]
+ * @param[in]  type_    type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
  */
-VTKField* VTK::addData( std::string name_, int comp_, std::string type_, std::string loc_ ){
+VTKField* VTK::addData( std::string name_, int comp_,  VTKLocation loc_, VTKDataType type_ ){
 
     int         size_ ;
     bool        allocate(true) ;
     VTKField*   ptr(NULL) ;
-    
+
     if(  getFieldByName( name_, ptr ) ) {
         ptr->setComponents(comp_) ;
         ptr->setType(type_) ;
         ptr->setLocation(loc_) ;
-    
+
     }
-    
+
     else{
-    
-        // Check location -------------------------------------------------------------
-        if( loc_ == "Point"){
-           size_ = nr_points ;
+
+        if( loc_ == VTKLocation::UNDEFINED ){
+            std::cout << " VTK::addData needs defined VTKLocation "  << std::endl ;
+            allocate = false ;
+
+        } else if( loc_ == VTKLocation::CELL ){
+            size_ = nr_cells;
+
+        } else if( loc_ == VTKLocation::POINT ){
+            size_ = nr_points;
         }
-        
-        else if( loc_ == "Cell" ){
-           size_ = nr_cells ;
+
+        if( type_ == VTKDataType::UNDEFINED){
+            std::cout << " VTK::addData needs defined VTKDataType "  << std::endl ;
+            allocate = false ;
         }
-        
-        else{
-           std::cout << "Location: " << loc_ << " not supported in VTK::addData"  << std::endl ;
-           allocate = false ;
-        };
-        
-        // Check type -----------------------------------------------------------------
-        if(      type_ == "Int8"    || type_ == "UInt8"    ||
-                 type_ == "Int16"   || type_ == "UInt16"   ||
-                 type_ == "Int32"   || type_ == "UInt32"   || 
-                 type_ == "Int64"   || type_ == "UInt64"   || 
-                 type_ == "Float32" || type_ == "Float64"  ){
-        }
-        
-        else{
-          std::cout << "Type: " << type_ << " not supported in VTK::add_Data"  << std::endl ;
-          allocate = false ;
-        };
-        
+
+
         // Do allocation if everything ok ---------------------------------------------
         if( allocate) {
-          data.push_back( VTKField( name_, comp_, type_, loc_, DataCodex, size_ ) ) ;
-          ptr = &data.back() ;
+            data.push_back( VTKField( name_, comp_, loc_, type_, DataCodex, size_ ) ) ;
+            ptr = &data.back() ;
         };
 
     };
-    
+
+    return ptr ;
+
+};
+
+/*!
+ * Add user data for input or output. 
+ * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
+ * @param[in]  name_    name of field
+ * @param[in]  comp_    nr of components [1/3]
+ * @param[in]  loc_     location of data [VTKLocation::CELL/VTKLocation::POINT]
+ * @param[in]  type_    type of data 
+ */
+VTKField* VTK::addData( std::string name_, int comp_,  VTKLocation loc_, std::type_info type_ ){
+
+    int         size_ ;
+    bool        allocate(true) ;
+    VTKField*   ptr(NULL) ;
+    VTKDataType type( VTKUtils::whichType(type_) );
+
+    if(  getFieldByName( name_, ptr ) ) {
+        ptr->setComponents(comp_) ;
+        ptr->setType(type) ;
+        ptr->setLocation(loc_) ;
+
+    }
+
+    else{
+
+        if( loc_ == VTKLocation::UNDEFINED ){
+            std::cout << " VTK::addData needs defined VTKLocation "  << std::endl ;
+            allocate = false ;
+
+        } else if( loc_ == VTKLocation::CELL ){
+            size_ = nr_cells;
+
+        } else if( loc_ == VTKLocation::POINT ){
+            size_ = nr_points;
+        }
+
+        if( type == VTKDataType::UNDEFINED){
+            std::cout << " VTK::addData needs defined VTKDataType "  << std::endl ;
+            allocate = false ;
+        }
+
+
+        // Do allocation if everything ok ---------------------------------------------
+        if( allocate) {
+            data.push_back( VTKField( name_, comp_, loc_, type, DataCodex, size_ ) ) ;
+            ptr = &data.back() ;
+        };
+
+    };
+
     return ptr ;
 
 };
@@ -239,16 +268,16 @@ VTKField* VTK::addData( std::string name_, int comp_, std::string type_, std::st
  * add user data for input or output. 
  * @param[in]  name_    name of field
  * @param[in]  comp_    nr of components [1/3]
- * @param[in]  type_    type of data [ [U]Int8, [U]Int16, [U]Int32, [U]Int64, Float32, Float64 ]
- * @param[in]  loc_     location of data ["Cell"/"Point"]
- * @param[in]  cod_     codification of data ["ascii"/"appended"]
+ * @param[in]  loc_     location of data [VTKLocation::CELL/VTKLocation::POINT]
+ * @param[in]  type_    type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
+ * @param[in]  cod_     codification of data [VTKFormat::APPENDED/VTKFormat::ASCII]
  */
-VTKField* VTK::addData( std::string name_, int comp_, std::string type_, std::string loc_, std::string cod_ ){
+VTKField* VTK::addData( std::string name_, int comp_, VTKLocation loc_, VTKDataType type_, VTKFormat cod_ ){
 
     int         size_ ;
     bool        allocate(true) ;
     VTKField*   ptr(NULL) ;
-    
+
     if( getFieldByName( name_, ptr ) ){
         ptr->setComponents(comp_) ;
         ptr->setType(type_) ;
@@ -257,55 +286,86 @@ VTKField* VTK::addData( std::string name_, int comp_, std::string type_, std::st
     }
 
     else{
-    
-        // Check location -------------------------------------------------------------
-        if( loc_ == "Point"){
-           size_ = nr_points ;
+
+        if( loc_ == VTKLocation::UNDEFINED ){
+            std::cout << " VTK::addData needs defined VTKLocation "  << std::endl ;
+            allocate = false ;
+
+        } else if( loc_ == VTKLocation::CELL ){
+            size_ = nr_cells;
+
+        } else if( loc_ == VTKLocation::POINT ){
+            size_ = nr_points;
         }
-        
-        else if( loc_ == "Cell" ){
-           size_ = nr_cells ;
+
+        if( type_ == VTKDataType::UNDEFINED){
+            std::cout << " VTK::addData needs defined VTKDataType "  << std::endl ;
+            allocate = false ;
         }
-        
-        else{
-           std::cout << "Location: " << loc_ << " not supported in VTK::add_Data"  << std::endl ;
-           allocate = false ;
-        };
-        
-        // Check type -----------------------------------------------------------------
-        if(      type_ == "Int8"    || type_ == "UInt8"    ||
-                 type_ == "Int16"   || type_ == "UInt16"   ||
-                 type_ == "Int32"   || type_ == "UInt32"   || 
-                 type_ == "Int64"   || type_ == "UInt64"   || 
-                 type_ == "Float32" || type_ == "Float64"  ){
-        }
-        
-        else{
-          std::cout << "Type: " << type_ << " not supported in VTK::add_Data"  << std::endl ;
-          allocate = false ;
-        };
-        
-        // Check codification ---------------------------------------------------------
-        if( cod_ == "ascii"  || cod_ == "appended" ) {
-        } 
-        
-        else{
-          std::cout << "Codification: " << cod_ << " not supported in VTK::add_Data"  << std::endl ;
-          allocate = false ;
-        };
-        
+
         // Do allocation if everything ok ---------------------------------------------
         if( allocate) {
-          data.push_back( VTKField( name_, comp_, type_, loc_, cod_, size_ ) ) ;
-          ptr = &data.back() ;
+            data.push_back( VTKField( name_, comp_, loc_, type_, cod_, size_ ) ) ;
+            ptr = &data.back() ;
         };
 
     };
-    
+
     return ptr ;
 
 };
 
+/*!
+ * add user data for input or output. 
+ * @param[in]  name_    name of field
+ * @param[in]  comp_    nr of components [1/3]
+ * @param[in]  loc_     location of data [VTKLocation::CELL/VTKLocation::POINT]
+ * @param[in]  type_    type of data 
+ * @param[in]  cod_     codification of data [VTKFormat::APPENDED/VTKFormat::ASCII]
+ */
+VTKField* VTK::addData( std::string name_, int comp_, VTKLocation loc_, std::type_info type_, VTKFormat cod_ ){
+
+    int         size_ ;
+    bool        allocate(true) ;
+    VTKField*   ptr(NULL) ;
+    VTKDataType type( VTKUtils::whichType(type_) );
+
+    if( getFieldByName( name_, ptr ) ){
+        ptr->setComponents(comp_) ;
+        ptr->setType(type) ;
+        ptr->setLocation(loc_) ;
+        ptr->setCodification(cod_) ;
+    }
+
+    else{
+
+        if( loc_ == VTKLocation::UNDEFINED ){
+            std::cout << " VTK::addData needs defined VTKLocation "  << std::endl ;
+            allocate = false ;
+
+        } else if( loc_ == VTKLocation::CELL ){
+            size_ = nr_cells;
+
+        } else if( loc_ == VTKLocation::POINT ){
+            size_ = nr_points;
+        }
+
+        if( type == VTKDataType::UNDEFINED){
+            std::cout << " VTK::addData needs defined VTKDataType "  << std::endl ;
+            allocate = false ;
+        }
+
+        // Do allocation if everything ok ---------------------------------------------
+        if( allocate) {
+            data.push_back( VTKField( name_, comp_, loc_, type, cod_, size_ ) ) ;
+            ptr = &data.back() ;
+        };
+
+    };
+
+    return ptr ;
+
+};
 /*!
  * Removes user data from input or output 
  * @param[in]  name_    name of field to be removed
@@ -314,25 +374,25 @@ void VTK::removeData( std::string name_ ){
 
     std::vector<VTKField>::iterator  i_, j_ ;
     bool                            found ;
-    
+
     found     = false ;
-    
+
     for ( i_ = data.begin(); i_ != data.end(); i_++){
         if( (i_)->getName() == name_){
             j_ = i_ ;
             found     = true ;
         };
     };
-    
+
     if( found ){
         data.erase(j_);
     }
-    
+
     else{
         std::cout << "did not find field for removing: " << name_ << std::endl;
     };
-    
-    
+
+
     return ;
 
 };
@@ -371,7 +431,7 @@ void VTK::calcAppendedOffsets(){
 
     uint64_t    offset(0) ;
     uint64_t    HeaderByte ;
-    
+
     if( getHeaderType() == "UInt32"){
         HeaderByte = sizeof(uint32_t) ;
     }
@@ -379,30 +439,30 @@ void VTK::calcAppendedOffsets(){
     else if( getHeaderType() == "UInt64") {
         HeaderByte = sizeof(uint64_t) ;
     };
-    
-    
+
+
     for( auto & field : data ){
-        if( field.getCodification() == "appended" && field.getLocation() == "Point") {
+        if( field.getCodification() == VTKFormat::APPENDED && field.getLocation() == VTKLocation::POINT ) {
             field.setOffset( offset) ;
             offset += HeaderByte + field.getNbytes()  ;
         };
     };
-    
+
     for( auto & field : data ){
-        if( field.getCodification() == "appended" && field.getLocation() == "Cell") {
+        if( field.getCodification() == VTKFormat::APPENDED && field.getLocation() == VTKLocation::CELL) {
             field.setOffset( offset) ;
             offset += HeaderByte + field.getNbytes()  ;
         };
     };
-    
+
     for( auto & field : geometry ){
-        if( field.getCodification() == "appended" ) {
+        if( field.getCodification() == VTKFormat::APPENDED ) {
             field.setOffset( offset) ;
             offset += HeaderByte + field.getNbytes()  ;
         }; 
     };
-    
-    
+
+
     return ;
 };
 
@@ -443,57 +503,57 @@ void VTK::writeData( ){
 
         //Writing first point data then cell data
         for( auto &field : data ){
-            if( field.getCodification() == "ascii" && field.getLocation() == "Point") {
-            str.seekg( position_insert);
-            readDataArray( str, field ) ;
+            if( field.getCodification() == VTKFormat::ASCII && field.getLocation() == VTKLocation::POINT ) {
+                str.seekg( position_insert);
+                readDataArray( str, field ) ;
 
-            str.seekg( field.getPosition() ) ;
-            CopyUntilEOFInString( str, buffer, length );
+                str.seekg( field.getPosition() ) ;
+                CopyUntilEOFInString( str, buffer, length );
 
-            flush( str, "ascii", field.getName() ) ;
+                flush( str, VTKFormat::ASCII, field.getName() ) ;
 
-            position_insert = str.tellg();
-            str << std::endl ;
-            flush_binary( str, buffer, length) ;
+                position_insert = str.tellg();
+                str << std::endl ;
+                flush_binary( str, buffer, length) ;
 
-            delete [] buffer ;
+                delete [] buffer ;
 
             };
         }; 
 
         for( auto &field : data ){
-            if( field.getCodification() == "ascii" && field.getLocation() == "Cell") {
-            str.seekg( position_insert);
-            readDataArray( str, field ) ;
+            if( field.getCodification() == VTKFormat::ASCII && field.getLocation() == VTKLocation::CELL ) {
+                str.seekg( position_insert);
+                readDataArray( str, field ) ;
 
-            str.seekg( field.getPosition() ) ;
-            CopyUntilEOFInString( str, buffer, length );
+                str.seekg( field.getPosition() ) ;
+                CopyUntilEOFInString( str, buffer, length );
 
-            flush( str, "ascii", field.getName() ) ;
+                flush( str, VTKFormat::ASCII, field.getName() ) ;
 
-            position_insert = str.tellg();
-            str << std::endl ;
-            flush_binary( str, buffer, length) ;
+                position_insert = str.tellg();
+                str << std::endl ;
+                flush_binary( str, buffer, length) ;
 
-            delete [] buffer ;
+                delete [] buffer ;
             };
         }; 
 
         for( auto &field : geometry ){
-            if( field.getCodification() == "ascii" ) {
-            str.seekg( position_insert);
-            readDataArray( str, field ) ;
+            if( field.getCodification() == VTKFormat::ASCII ) {
+                str.seekg( position_insert);
+                readDataArray( str, field ) ;
 
-            str.seekg( field.getPosition() ) ;
-            CopyUntilEOFInString( str, buffer, length );
+                str.seekg( field.getPosition() ) ;
+                CopyUntilEOFInString( str, buffer, length );
 
-            flush( str, "ascii", field.getName() ) ;
+                flush( str, VTKFormat::ASCII, field.getName() ) ;
 
-            position_insert = str.tellg();
-            str << std::endl ;
-            flush_binary( str, buffer, length) ;
+                position_insert = str.tellg();
+                str << std::endl ;
+                flush_binary( str, buffer, length) ;
 
-            delete [] buffer ;
+                delete [] buffer ;
             };
         }; 
 
@@ -501,7 +561,7 @@ void VTK::writeData( ){
 
 
     }
-    
+
     { // Write Appended
 
         char                c_;
@@ -510,17 +570,17 @@ void VTK::writeData( ){
 
         //Go to the initial position of the appended section
         while( getline(str, line) && (! Keyword_In_String( line, "<AppendedData")) ){} ;
-        
+
         str >> c_;
         while( c_ != '_') str >> c_;
-        
+
         position_insert = str.tellg();
         CopyUntilEOFInString( str, buffer, length );
 
         str.close();
         str.clear();
-        
-        
+
+
         //Reopening in binary mode
         str.open( fh.getName( ), std::ios::out | std::ios::in | std::ios::binary);
         str.seekg( position_insert) ;
@@ -529,7 +589,7 @@ void VTK::writeData( ){
 
         //Writing first point data then cell data
         for( auto &field : data ){
-            if( field.getCodification() == "appended" && field.getLocation() == "Point") {
+            if( field.getCodification() == VTKFormat::APPENDED && field.getLocation() == VTKLocation::POINT ) {
                 if( getHeaderType() == "UInt32"){
                     uint32_t    nbytes = field.getNbytes() ;
                     flush_binary(str, nbytes) ;
@@ -539,12 +599,12 @@ void VTK::writeData( ){
                     uint64_t    nbytes = field.getNbytes() ;
                     flush_binary(str, nbytes) ;
                 };
-                flush( str, "binary", field.getName() ) ;
+                flush( str, VTKFormat::APPENDED, field.getName() ) ;
             };
         } 
-        
+
         for( auto &field : data ){
-            if( field.getCodification() == "appended" && field.getLocation() == "Cell") {
+            if( field.getCodification() == VTKFormat::APPENDED && field.getLocation() == VTKLocation::CELL ) {
                 if( getHeaderType() == "UInt32"){
                     uint32_t    nbytes = field.getNbytes() ;
                     flush_binary(str, nbytes) ;
@@ -554,13 +614,13 @@ void VTK::writeData( ){
                     uint64_t    nbytes = field.getNbytes() ;
                     flush_binary(str, nbytes) ;
                 };
-                flush( str, "binary", field.getName() ) ;
+                flush( str, VTKFormat::APPENDED, field.getName() ) ;
             };
         } 
-        
+
         //Writing Geometry Data
         for( auto &field : geometry ){
-            if( field.getCodification() == "appended" ) {
+            if( field.getCodification() == VTKFormat::APPENDED ) {
                 if( getHeaderType() == "UInt32"){
                     uint32_t    nbytes = field.getNbytes() ;
                     flush_binary(str, nbytes) ;
@@ -570,10 +630,10 @@ void VTK::writeData( ){
                     uint64_t    nbytes = field.getNbytes() ;
                     flush_binary(str, nbytes) ;
                 };
-                flush( str, "binary", field.getName() ) ;           
+                flush( str, VTKFormat::APPENDED, field.getName() ) ;           
             };
         };
-   
+
         // { 
         // std::fstream             str2 ;
         // str2.open( "test2.dat", std::ios::out | std::ios::binary);
@@ -585,10 +645,10 @@ void VTK::writeData( ){
 
         delete [] buffer ;
     };
-    
+
     // Closing Appended Secyion
     str.close();
-    
+
     return ;
 
 };
@@ -600,66 +660,67 @@ void VTK::writeData( ){
  */
 void VTK::writeDataHeader( std::fstream &str, bool parallel ){
 
-  std::string           location, line ;
-  std::stringstream     scalars, vectors ;
+    std::string           line ;
+    VTKLocation           location ;
+    std::stringstream     scalars, vectors ;
 
-  for( int j=0; j<2; j++){
+    for( int j=0; j<2; j++){
 
-    if( j==0 ) location = "Point" ;
-    if( j==1 ) location = "Cell" ;
+        if( j==0 ) location = VTKLocation::POINT ;
+        if( j==1 ) location = VTKLocation::CELL ;
 
-//    scalars.clear();
-//    vectors.clear();
+        //    scalars.clear();
+        //    vectors.clear();
 
-    scalars.str("");
-    vectors.str("");
+        scalars.str("");
+        vectors.str("");
 
-    //Creating Scalar and Vector Lists
-    scalars << "\"" ;
-    vectors << "\"" ;
+        //Creating Scalar and Vector Lists
+        scalars << "\"" ;
+        vectors << "\"" ;
 
-    for( auto &field : data ){
-      if( field.getLocation() == location){
-        if(      field.getComponents() == 1 ) scalars <<  field.getName() << " " ;
-        else if( field.getComponents() == 3 ) vectors <<  field.getName() << " " ;
-      };
+        for( auto &field : data ){
+            if( field.getLocation() == location){
+                if(      field.getComponents() == 1 ) scalars <<  field.getName() << " " ;
+                else if( field.getComponents() == 3 ) vectors <<  field.getName() << " " ;
+            };
+
+        };
+
+        scalars << "\"" ;
+        vectors << "\"" ;
+
+        if(      location == VTKLocation::POINT) {
+            str << "      <" ;
+            if( parallel )  str << "P" ;
+            str << "PointData " ;
+        }
+
+        else if( location == VTKLocation::CELL )  {
+            str << "      <" ;
+            if( parallel )  str << "P" ;
+            str << "CellData " ;
+        };
+
+        str << " Scalars=" << scalars.str()
+            << " Vectors=" << vectors.str()
+            << ">" << std::endl;
+
+        //Writing DataArray
+        for( auto &field : data ){
+            if( field.getLocation() == location && !parallel) writeDataArray( str, field ) ;
+            if( field.getLocation() == location &&  parallel) writePDataArray( str, field ); 
+        };
+
+        str << "      </" ;
+        if( parallel )  str << "P" ;
+
+        if( location == VTKLocation::POINT) str << "PointData> " << std::endl;
+        if( location == VTKLocation::CELL)  str << "CellData> "  << std::endl;
 
     };
 
-    scalars << "\"" ;
-    vectors << "\"" ;
-
-    if(      location == "Point") {
-      str << "      <" ;
-      if( parallel )  str << "P" ;
-      str << "PointData " ;
-    }
-
-    else if( location == "Cell")  {
-      str << "      <" ;
-      if( parallel )  str << "P" ;
-      str << "CellData " ;
-    };
-
-    str << " Scalars=" << scalars.str()
-        << " Vectors=" << vectors.str()
-        << ">" << std::endl;
-
-    //Writing DataArray
-    for( auto &field : data ){
-      if( field.getLocation() == location && !parallel) writeDataArray( str, field ) ;
-      if( field.getLocation() == location &&  parallel) writePDataArray( str, field ); 
-    };
-
-    str << "      </" ;
-    if( parallel )  str << "P" ;
-
-    if( location == "Point") str << "PointData> " << std::endl;
-    if( location == "Cell")  str << "CellData> "  << std::endl;
-
-  };
-
-  return ;
+    return ;
 
 };
 
@@ -670,12 +731,7 @@ void VTK::writeDataHeader( std::fstream &str, bool parallel ){
  */
 void VTK::writeDataArray( std::fstream &str, VTKField &field_ ){
 
-    std::string          line;
-
-    VTKUtils::convertDataArrayToString( line, field_ ) ;
-
-    str << line << std::endl ;
-    
+    str << VTKUtils::convertDataArrayToString( field_ )  << std::endl ;
     str << "        </DataArray>" << std::endl ;
 
     return ;
@@ -689,11 +745,7 @@ void VTK::writeDataArray( std::fstream &str, VTKField &field_ ){
  */
 void VTK::writePDataArray( std::fstream &str, VTKField &field_ ){
 
-    std::string          line;
-
-    VTKUtils::convertPDataArrayToString( line, field_ ) ;
-
-    str << line << std::endl ;
+    str << VTKUtils::convertPDataArrayToString( field_ ) << std::endl ;
     str << "        </PDataArray>" << std::endl ;
 
     return ;
@@ -716,72 +768,72 @@ void VTK::read( ){
  */
 void VTK::readData( ){
 
-  std::fstream              str  ;
-  std::fstream::pos_type    position_appended;
-  std::string               line;
-  char                      c_ ;
-  uint32_t                  nbytes32 ;
-  uint64_t                  nbytes64 ;
+    std::fstream              str  ;
+    std::fstream::pos_type    position_appended;
+    std::string               line;
+    char                      c_ ;
+    uint32_t                  nbytes32 ;
+    uint64_t                  nbytes64 ;
 
-  str.open( fh.getName( ), std::ios::in ) ;
+    str.open( fh.getName( ), std::ios::in ) ;
 
-  //Read appended data
-  //Go to the initial position of the appended section
-  while( getline(str, line) && (! Keyword_In_String( line, "<AppendedData")) ){} ;
+    //Read appended data
+    //Go to the initial position of the appended section
+    while( getline(str, line) && (! Keyword_In_String( line, "<AppendedData")) ){} ;
 
-  str >> c_;
-  while( c_ != '_') str >> c_;
+    str >> c_;
+    while( c_ != '_') str >> c_;
 
-  position_appended = str.tellg();
+    position_appended = str.tellg();
 
 
-  str.close();
-  str.clear();
+    str.close();
+    str.clear();
 
-  //Open in binary for read
-  str.open( fh.getName( ), std::ios::in | std::ios::binary);
+    //Open in binary for read
+    str.open( fh.getName( ), std::ios::in | std::ios::binary);
 
-  //Read fields
-  for( auto & field : data){
-    if( field.getCodification() == "appended"){
-      str.seekg( position_appended) ;
-      str.seekg( field.getOffset(), std::ios::cur) ;
-      if( HeaderType== "UInt32") absorb_binary( str, nbytes32 ) ;
-      if( HeaderType== "UInt64") absorb_binary( str, nbytes64 ) ;
-      absorb( str, "binary", field.getName() ) ;
+    //Read fields
+    for( auto & field : data){
+        if( field.getCodification() == VTKFormat::APPENDED){
+            str.seekg( position_appended) ;
+            str.seekg( field.getOffset(), std::ios::cur) ;
+            if( HeaderType== "UInt32") absorb_binary( str, nbytes32 ) ;
+            if( HeaderType== "UInt64") absorb_binary( str, nbytes64 ) ;
+            absorb( str, VTKFormat::APPENDED, field.getName() ) ;
+        };
     };
-  };
 
-  //Read geometry
-  for( auto & field : geometry ){
-    if( field.getCodification() == "appended"){
-      str.seekg( position_appended) ;
-      str.seekg( field.getOffset(), std::ios::cur) ;
-      if( HeaderType== "UInt32") absorb_binary( str, nbytes32 ) ;
-      if( HeaderType== "UInt64") absorb_binary( str, nbytes64 ) ;
-      absorb( str, "binary", field.getName() ) ;
+    //Read geometry
+    for( auto & field : geometry ){
+        if( field.getCodification() == VTKFormat::APPENDED){
+            str.seekg( position_appended) ;
+            str.seekg( field.getOffset(), std::ios::cur) ;
+            if( HeaderType== "UInt32") absorb_binary( str, nbytes32 ) ;
+            if( HeaderType== "UInt64") absorb_binary( str, nbytes64 ) ;
+            absorb( str, VTKFormat::APPENDED, field.getName() ) ;
+        };
     };
-  };
 
-  //Read ascii data
-  for( auto & field : data ){
-    if(  field.getCodification() == "ascii"){
-      str.seekg( field.getPosition() ) ;
-      absorb( str, "ascii", field.getName() ) ;
+    //Read ascii data
+    for( auto & field : data ){
+        if(  field.getCodification() == VTKFormat::ASCII){
+            str.seekg( field.getPosition() ) ;
+            absorb( str, VTKFormat::ASCII, field.getName() ) ;
+        };
     };
-  };
 
-  //Read geometry
-  for( auto & field : geometry ){
-    if( field.getCodification() == "ascii"){
-      str.seekg( field.getPosition() ) ;
-      absorb( str, "ascii", field.getName() ) ;
+    //Read geometry
+    for( auto & field : geometry ){
+        if( field.getCodification() == VTKFormat::ASCII){
+            str.seekg( field.getPosition() ) ;
+            absorb( str, VTKFormat::ASCII, field.getName() ) ;
+        };
     };
-  };
 
-  str.close();
+    str.close();
 
-  return ; 
+    return ; 
 };
 
 /*!
@@ -792,64 +844,70 @@ void VTK::readData( ){
 void VTK::readDataHeader( std::fstream &str ){
 
 
-  std::fstream::pos_type   pos_ ;
+    std::fstream::pos_type   pos_ ;
 
-  std::string                   location ;
-  std::string                   line, loc_;
-  std::stringstream             ss;
+    VTKLocation             location;
+    std::string             locationString ;
+    std::string             line, loc_;
+    std::stringstream       ss;
 
-  bool                     read ;
+    bool                    read ;
 
-  VTKField                  temp ;
-  VTKField*                 ptemp ;
+    VTKField                temp ;
+    VTKField*               ptemp ;
 
 
-  for( int i=0; i<2; i++){
+    for( int i=0; i<2; i++){
 
-    ss.str("") ;
-    if( i== 0) location = "Point" ;
-    if( i== 1) location = "Cell" ;
-
-    temp.setLocation( location ) ;
-
-    ss << "</" << location << "Data>" ;
-    loc_ = ss.str();
- 
-    read= true ; 
-    if( ! getline( str, line) ) read = false ;
-    if( Keyword_In_String( line, loc_) ) read=false ;
-    
-
-    while( read ){
-      if( VTKUtils::convertStringToDataArray( line, temp  ) ) {
-
-        if( temp.getCodification() == "ascii") {
-            pos_ = str.tellg() ;
+        ss.str("") ;
+        if( i== 0) {
+            location = VTKLocation::POINT;
+            locationString = "Point" ;
+        } else if( i== 1) {
+            location = VTKLocation::CELL;
+            locationString = "Cell" ;
         }
 
-        else{
-            pos_ =  0 ; 
-        };
+        temp.setLocation( location ) ;
 
-        temp.setPosition( pos_ ) ;
+        ss << "</" << locationString << "Data>" ;
+        loc_ = ss.str();
 
-        if( ! getFieldByName( temp.getName(), ptemp )) {
-            data.push_back( temp ) ;
-        }
-        
-        else{
-            *ptemp = temp ;
-        };
+        read= true ; 
+        if( ! getline( str, line) ) read = false ;
+        if( Keyword_In_String( line, loc_) ) read=false ;
 
-      };
 
-      if( ! getline( str, line) ) read = false ;
-      if( Keyword_In_String( line, loc_) ) read=false ;
-    }; 
+        while( read ){
+            if( VTKUtils::convertStringToDataArray( line, temp  ) ) {
 
-  };
+                if( temp.getCodification() == VTKFormat::ASCII) {
+                    pos_ = str.tellg() ;
+                }
 
-  return ;
+                else{
+                    pos_ =  0 ; 
+                };
+
+                temp.setPosition( pos_ ) ;
+
+                if( ! getFieldByName( temp.getName(), ptemp )) {
+                    data.push_back( temp ) ;
+                }
+
+                else{
+                    *ptemp = temp ;
+                };
+
+            };
+
+            if( ! getline( str, line) ) read = false ;
+            if( Keyword_In_String( line, loc_) ) read=false ;
+        }; 
+
+    };
+
+    return ;
 };
 
 /*!
@@ -859,25 +917,25 @@ void VTK::readDataHeader( std::fstream &str ){
  */
 bool  VTK::readDataArray( std::fstream &str, VTKField &field_  ){
 
-  std::string              line_ ;
+    std::string              line_ ;
 
-  while( getline(str, line_)  ){
+    while( getline(str, line_)  ){
 
-    if( Keyword_In_String( line_, field_.getName() ) ){
-      if( VTKUtils::convertStringToDataArray( line_, field_  ) ){
+        if( Keyword_In_String( line_, field_.getName() ) ){
+            if( VTKUtils::convertStringToDataArray( line_, field_  ) ){
 
-        if( field_.getCodification() == "ascii") {
-          field_.setPosition( str.tellg() ) ;
+                if( field_.getCodification() == VTKFormat::ASCII) {
+                    field_.setPosition( str.tellg() ) ;
+                };
+
+                return true ;
+            };
+
         };
-
-        return true ;
-      };
 
     };
 
-  };
- 
-  return false ; 
+    return false ; 
 
 };
 

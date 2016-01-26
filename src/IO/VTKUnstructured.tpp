@@ -22,10 +22,10 @@ VTKUnstructuredGrid<Derived>::VTKUnstructuredGrid( )
 
   fh.setAppendix("vtu");
 
-  geometry.push_back( VTKField( "Points",       3, "Float64", "Point" ) ) ;
-  geometry.push_back( VTKField( "offsets",      1, "Int32",   "Cell"  ) ) ;
-  geometry.push_back( VTKField( "types",        1, "Int32",   "Cell"  ) ) ;
-  geometry.push_back( VTKField( "connectivity", 1, "Int32",   "Cell"  ) ) ;
+  geometry.push_back( VTKField( "Points",       3, VTKLocation::POINT, VTKDataType::Float64) ) ;
+  geometry.push_back( VTKField( "offsets",      1, VTKLocation::CELL, VTKDataType::Int32   ) ) ;
+  geometry.push_back( VTKField( "types",        1, VTKLocation::CELL, VTKDataType::Int32   ) ) ;
+  geometry.push_back( VTKField( "connectivity", 1, VTKLocation::CELL, VTKDataType::Int32   ) ) ;
 
 };
 
@@ -56,13 +56,13 @@ VTKUnstructuredGrid<Derived>::~VTKUnstructuredGrid( ) {
 /*!  
  *  sets the type of the geometry variables
  *  @tparam     Derived     Derived class for CRTP
- *  @param[in]  Ptype       Type of "Point" geometry information [ "Float[32/64]"]
- *  @param[in]  Otype       Type of "offset" geometry information [ "[U]Int[8/16/32/64]"] 
- *  @param[in]  Ttype       Type of "types" geometry information [ "[U]Int[8/16/32/64]"]
- *  @param[in]  Ctype       Type of "connectivity" geometry information [ "[U]Int[8/16/32/64]"]
+ *  @param[in]  Ptype       Type of "Point" geometry information [ VTKDataType::Float[32/64]]
+ *  @param[in]  Otype       Type of "offset" geometry information [ VTKDataType::[U]Int[8/16/32/64] ] 
+ *  @param[in]  Ttype       Type of "types" geometry information [ VTKDataType::[U]Int[8/16/32/64] ]
+ *  @param[in]  Ctype       Type of "connectivity" geometry information [ VTKDataType::[U]Int[8/16/32/64] ]
  */
 template <class Derived>
-void VTKUnstructuredGrid<Derived>::setGeomTypes( std::string Ptype, std::string Otype, std::string Ttype, std::string Ctype  ){
+void VTKUnstructuredGrid<Derived>::setGeomTypes( VTKDataType Ptype, VTKDataType Otype, VTKDataType Ttype, VTKDataType Ctype  ){
 
     geometry[0].setType(Ptype) ;
     geometry[1].setType(Otype) ;
@@ -91,8 +91,8 @@ void VTKUnstructuredGrid<Derived>::setDimensions( uint64_t ncells_, uint64_t npo
     geometry[3].setElements(nconn_) ;
 
     for( auto &field : data ){
-        if( field.getLocation() == "Cell")  field.setElements(nr_cells) ;
-        if( field.getLocation() == "Point") field.setElements(nr_points) ;
+        if( field.getLocation() == VTKLocation::CELL)  field.setElements(nr_cells) ;
+        if( field.getLocation() == VTKLocation::POINT) field.setElements(nr_points) ;
     };
 
     return ;
@@ -132,7 +132,7 @@ uint64_t VTKUnstructuredGrid<Derived>::calcSizeConnectivity( ){
     //Open in binary for read
     str.open( fh.getName( ), std::ios::in | std::ios::binary);
 
-    if( geometry[3].getCodification() == "appended" ){
+    if( geometry[3].getCodification() == VTKFormat::APPENDED ){
         str.seekg( position_appended) ;
         str.seekg( geometry[3].getOffset(), std::ios::cur) ;
 
@@ -149,7 +149,7 @@ uint64_t VTKUnstructuredGrid<Derived>::calcSizeConnectivity( ){
 
 
     //Read geometry
-    if(  geometry[3].getCodification() == "ascii"){
+    if(  geometry[3].getCodification() == VTKFormat::ASCII ){
         str.seekg( geometry[3].getPosition() ) ;
 
         std::string              line ;
@@ -351,7 +351,7 @@ uint64_t VTKUnstructuredGrid<Derived>::getNConnectivity( ){
  *  @param[in]  name        name of the data to be written. Either user data or grid data
  */
 template <class Derived>
-void VTKUnstructuredGrid<Derived>::flush( std::fstream &str, std::string codex, std::string name ){
+void VTKUnstructuredGrid<Derived>::flush( std::fstream &str, VTKFormat codex, std::string name ){
 
   static_cast<Derived *>(this)->flush( str, codex, name );
   return ;
@@ -365,7 +365,7 @@ void VTKUnstructuredGrid<Derived>::flush( std::fstream &str, std::string codex, 
  *  @param[in]  name        name of the data to be read. Either user data or grid data
  */
 template <class Derived>
-void VTKUnstructuredGrid<Derived>::absorb( std::fstream &str, std::string codex, std::string name ){
+void VTKUnstructuredGrid<Derived>::absorb( std::fstream &str, VTKFormat codex, std::string name ){
 
   static_cast<Derived *>(this)->absorb( str, codex, name );
   return ;

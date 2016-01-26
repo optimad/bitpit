@@ -12,7 +12,7 @@
  * @param[in]   connectivity_ext   grid cell-node connectivity; the size of the vector is used to determine the number of cells in grid;
  */
 template< class T0, class T1>
-VTKUnstructuredVec::VTKUnstructuredVec( std::string dir_, std::string name_, std::string codex_, uint8_t type_, std::vector<T0> &points_ext, std::vector<T1> &connectivity_ext ) :VTKUnstructuredGrid<VTKUnstructuredVec>( ){
+VTKUnstructuredVec::VTKUnstructuredVec( std::string dir_, std::string name_, VTKFormat codex_, VTKElementType type_, std::vector<T0> &points_ext, std::vector<T1> &connectivity_ext ) :VTKUnstructuredGrid<VTKUnstructuredVec>( ){
 
 
     int ncells_, npoints_, nconn_;
@@ -30,7 +30,7 @@ VTKUnstructuredVec::VTKUnstructuredVec( std::string dir_, std::string name_, std
 
     nconn_ = ncells_ * VTKUtils::getNNodeInElement( type ) ;
 
-    setGeomTypes( VTKUtils::whichType(dum0), "UInt64", "UInt8", VTKUtils::whichType(dum1)  ) ;
+    setGeomTypes( VTKUtils::whichType(dum0), VTKDataType::UInt64, VTKDataType::UInt8, VTKUtils::whichType(dum1)  ) ;
     setDimensions( ncells_, npoints_, nconn_ ) ;
 
     adata.resize(2) ;
@@ -52,13 +52,13 @@ VTKUnstructuredVec::VTKUnstructuredVec( std::string dir_, std::string name_, std
  * @param[in]   loc_    location of the data
  */
 template<class T>
-void VTKUnstructuredVec::addData( std::vector<T> &data_, std::string name_, std::string loc_ ){
+void VTKUnstructuredVec::addData( std::vector<T> &data_, std::string name_, VTKLocation loc_ ){
 
     T               dum_ ;
 
     adata.push_back( ufield(name_,data_) ) ;
 
-    VTKUnstructuredGrid<VTKUnstructuredVec>::addData( name_, 1, VTKUtils::whichType(dum_), loc_ ) ;
+    VTKUnstructuredGrid<VTKUnstructuredVec>::addData( name_, 1, loc_, VTKUtils::whichType(dum_) ) ;
 
     return;
 };
@@ -71,13 +71,13 @@ void VTKUnstructuredVec::addData( std::vector<T> &data_, std::string name_, std:
  * @param[in]   loc_    location of the data
  */
 template<class T>
-void VTKUnstructuredVec::addData( std::vector< std::array<T,3> > &data_, std::string name_, std::string loc_ ){
+void VTKUnstructuredVec::addData( std::vector< std::array<T,3> > &data_, std::string name_, VTKLocation loc_ ){
 
     T               dum_ ;
 
     adata.push_back( ufield(name_,data_) ) ;
 
-    VTKUnstructuredGrid<VTKUnstructuredVec>::addData( name_, 3, VTKUtils::whichType(dum_), loc_ ) ;
+    VTKUnstructuredGrid<VTKUnstructuredVec>::addData( name_, 3, loc_, VTKUtils::whichType(dum_) ) ;
 
     return;
 };
@@ -91,13 +91,13 @@ void VTKUnstructuredVec::addData( std::vector< std::array<T,3> > &data_, std::st
  * @param[in]   loc_    location of the data
  */
 template<class T>
-void VTKUnstructuredVec::addData( std::vector< std::vector<T> > &data_, std::string name_, std::string loc_ ){
+void VTKUnstructuredVec::addData( std::vector< std::vector<T> > &data_, std::string name_, VTKLocation loc_ ){
 
     T               dum_ ;
 
     adata.push_back( ufield(name_,data_) ) ;
 
-    VTKUnstructuredGrid<VTKUnstructuredVec>::addData( name_, 3, VTKUtils::whichType(dum_), loc_ ) ;
+    VTKUnstructuredGrid<VTKUnstructuredVec>::addData( name_, 3, loc_, VTKUtils::whichType(dum_) ) ;
 
 
     return;
@@ -142,13 +142,13 @@ VTKUnstructuredVec::ufield::ufield( std::string name_, std::vector<T>& data_): n
  */
 template <typename T>
 void VTKUnstructuredVec::stream_visitor::operator()( T* t) const{
-    if( task=="write" && codex=="ascii")  flush_ascii( *str, 1, *t) ;
-    if( task=="write" && codex=="binary") flush_binary( *str, *t) ;
-    if( task=="read"  && codex=="ascii")  {
+    if( task=="write" && codex==VTKFormat::ASCII)  flush_ascii( *str, 1, *t) ;
+    if( task=="write" && codex==VTKFormat::APPENDED) flush_binary( *str, *t) ;
+    if( task=="read"  && codex==VTKFormat::ASCII)  {
         (*t).resize(size); 
         absorb_ascii( *str, *t) ;
     };
-    if( task=="read"  && codex=="binary") {
+    if( task=="read"  && codex==VTKFormat::APPENDED) {
         (*t).resize(size);
         absorb_binary( *str, *t) ;
     };
@@ -156,18 +156,18 @@ void VTKUnstructuredVec::stream_visitor::operator()( T* t) const{
 
 /*!
  * opertor() for std::vector<str::vector<>> used in boost::apply_visitor. 
- * Distinguishes task ["read"/"write"] and codex ["ascii"/"binary"].
+ * Distinguishes task ["read"/"write"] and codex [VTKFormat::ASCII/VTKFormat::APPENDED]
  * If task=="read" the data structure is resized.
  * @tparam      T       container type
  */
 template <typename T>
 void VTKUnstructuredVec::stream_visitor::operator()( std::vector< std::vector<T> >* t) const{
 
-    if( task=="write" && codex=="ascii")  flush_ascii( *str, 1, *t) ;
+    if( task=="write" && codex==VTKFormat::ASCII)  flush_ascii( *str, 1, *t) ;
 
-    if( task=="write" && codex=="binary") flush_binary( *str, *t) ;
+    if( task=="write" && codex==VTKFormat::APPENDED) flush_binary( *str, *t) ;
 
-    if( task=="read"  && codex=="ascii" )  {
+    if( task=="read"  && codex==VTKFormat::ASCII )  {
         if( name == "connectivity"){
             (*t).resize( size/components , std::vector<T>( components , 0 ) ) ;
         }
@@ -179,7 +179,7 @@ void VTKUnstructuredVec::stream_visitor::operator()( std::vector< std::vector<T>
         absorb_ascii( *str, *t) ;
     };
 
-    if( task=="read"  && codex=="binary") {
+    if( task=="read"  && codex==VTKFormat::APPENDED) {
         if( name == "connectivity"){
             (*t).resize( size/components , std::vector<T>( components , 0 ) ) ;
         }

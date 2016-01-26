@@ -3,6 +3,7 @@
 #ifndef __VTK__HH__
 #define __VTK__HH__
 
+#include <typeinfo>
 #include <vector>
 #include <array>
 
@@ -10,16 +11,56 @@
 #include "Generic_IO.hpp"
 #include "FileHandler.hpp"
 
+enum class VTKDataType {
+    UNDEFINED,
+    Int8     ,
+    Int16    ,
+    Int32    ,
+    Int64    ,
+    UInt8    ,
+    UInt16   ,
+    UInt32   ,
+    UInt64   ,
+    Float32  ,
+    Float64      
+};
 
+enum class VTKFormat {
+    UNDEFINED,
+    ASCII,
+    APPENDED
+};
+
+enum class VTKLocation {
+    UNDEFINED,
+    CELL,
+    POINT
+};
+
+enum class VTKElementType {
+    UNDEFINED  = -1,
+    VERTEX     = 1,
+    LINE       = 3,
+    TRIANGLE   = 5,
+    POLYGON    = 7,
+    PIXEL      = 8,
+    QUAD       = 9,
+    TETRA      = 10,
+    VOXEL      = 11,
+    HEXAHEDRON = 12,
+    WEDGE      = 13,
+    PYRAMID    = 14,
+    POLYHEDRON = 42
+};
 class VTKField{
 
     //members
     protected:
         std::string              name;                      /**< name of the field */
         uint8_t                  components;                /**< nr of components of field, options[ 1, 3 ] */
-        std::string              type;                      /**< type of data, options [ [U]Int8, [U]Int16, [U]Int32, [U]Int64, Float32, Float64 ] */
-        std::string              location;                  /**< cell or point data, [ Cell, Point ] */
-        std::string              codification ;             /**< Type of codification [ascii, appended] */
+        VTKDataType              type;                      /**< type of data, options [  VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ]] */
+        VTKLocation              location;                  /**< cell or point data, [ VTKLocation::CELL/VTKLocation::Point] */
+        VTKFormat                codification ;             /**< Type of codification [VTKFormat::ASCII, VTKFormat::APPENDED] */
         uint64_t                 nr_elements;               /**< nr of cells or points */
         uint64_t                 offset;                    /**< offset in the appended section */
         std::fstream::pos_type   position;                  /**< position in file */
@@ -27,26 +68,26 @@ class VTKField{
         //methods
     public:
         VTKField();
-        VTKField( std::string , uint8_t , std::string );
-        VTKField( std::string , uint8_t , std::string , std::string );
-        VTKField( std::string , uint8_t , std::string , std::string , std::string , uint64_t );
+        VTKField( std::string , uint8_t , VTKLocation );
+        VTKField( std::string , uint8_t , VTKLocation, VTKDataType );
+        VTKField( std::string , uint8_t , VTKLocation, VTKDataType , VTKFormat , uint64_t );
         ~VTKField();
 
-        std::string              getName();
-        std::string              getType();
-        std::string              getLocation();
-        std::string              getCodification();
-        uint8_t                  getComponents();
-        uint64_t                 getElements();
-        uint64_t                 getSize();
-        uint64_t                 getOffset();
-        uint64_t                 getNbytes();
-        std::fstream::pos_type   getPosition(); 
+        std::string              getName() const;
+        VTKDataType              getType() const;
+        VTKLocation              getLocation() const;
+        VTKFormat                getCodification() const;
+        uint8_t                  getComponents() const;
+        uint64_t                 getElements() const;
+        uint64_t                 getSize() const;
+        uint64_t                 getOffset() const;
+        uint64_t                 getNbytes() const;
+        std::fstream::pos_type   getPosition() const; 
 
         void                     setName( std::string ) ;
-        void                     setType( std::string ) ;
-        void                     setLocation( std::string ) ;
-        void                     setCodification( std::string ) ;
+        void                     setType( VTKDataType ) ;
+        void                     setLocation( VTKLocation ) ;
+        void                     setCodification( VTKFormat ) ;
         void                     setComponents( uint8_t ) ;
         void                     setElements( uint64_t ) ;
         void                     setOffset( uint64_t ) ;
@@ -70,10 +111,10 @@ class VTK{
         std::string                     HeaderType ;                /**< UInt32 or UInt64_t */
 
         std::vector<VTKField>           geometry ;                  /**< Geometry fields */
-        std::string                     GeomCodex ;                 /**< Geometry codex */
+        VTKFormat                       GeomCodex ;                 /**< Geometry codex */
 
         std::vector<VTKField>           data ;                      /**< Data fields */
-        std::string                     DataCodex ;                 /**< Data codex */
+        VTKFormat                       DataCodex ;                 /**< Data codex */
 
         // methods ----------------------------------------------------------------------- //
     public:
@@ -88,12 +129,15 @@ class VTK{
         void                            setCounter( int c_=0 ) ;
         void                            setParallel( int , int ) ;
 
-        void                            setCodex( std::string );
-        void                            setGeomCodex( std::string );
-        void                            setDataCodex( std::string );
+        void                            setCodex( VTKFormat );
+        void                            setGeomCodex( VTKFormat );
+        void                            setDataCodex( VTKFormat );
 
-        VTKField*                       addData( std::string , int , std::string , std::string ) ;
-        VTKField*                       addData( std::string , int , std::string , std::string , std::string ) ;
+        VTKField*                       addData( std::string, int, VTKLocation, VTKDataType ) ;
+        VTKField*                       addData( std::string, int, VTKLocation, std::type_info ) ;
+        VTKField*                       addData( std::string, int, VTKLocation, VTKDataType, VTKFormat ) ;
+        VTKField*                       addData( std::string, int, VTKLocation, std::type_info, VTKFormat ) ;
+
         void                            removeData( std::string ) ;
 
         void                            read() ;
@@ -113,13 +157,13 @@ class VTK{
         void                            writeDataArray( std::fstream &, VTKField &) ;
         void                            writePDataArray( std::fstream &, VTKField &) ;
 
-        virtual void                    flush( std::fstream &, std::string , std::string ) =0 ;
+        virtual void                    flush( std::fstream &, VTKFormat , std::string ) =0 ;
 
         //For Reading
         void                            readDataHeader( std::fstream &) ;
         bool                            readDataArray( std::fstream &, VTKField &);
 
-        virtual  void                   absorb( std::fstream &, std::string , std::string ) =0 ;
+        virtual  void                   absorb( std::fstream &, VTKFormat , std::string ) =0 ;
 
         //General Purpose
         bool                            getFieldByName( const std::string &, VTKField*& ) ;
@@ -140,8 +184,8 @@ class VTKUnstructuredGrid : public VTK{
 
         void                            writeCollection() ;  
 
-        void                            flush(  std::fstream &, std::string , std::string ) ; //CRTP
-        void                            absorb( std::fstream &, std::string , std::string ) ; //CRTP
+        void                            flush(  std::fstream &, VTKFormat , std::string ) ; //CRTP
+        void                            absorb( std::fstream &, VTKFormat , std::string ) ; //CRTP
         uint64_t                        calcSizeConnectivity( ) ;
 
     public:
@@ -149,7 +193,7 @@ class VTKUnstructuredGrid : public VTK{
         void                            writeMetaData() ;
 
         void                            setDimensions( uint64_t , uint64_t , uint64_t ) ;
-        void                            setGeomTypes( std::string , std::string , std::string , std::string ) ;
+        void                            setGeomTypes( VTKDataType , VTKDataType , VTKDataType , VTKDataType ) ;
 
         uint64_t                        getNConnectivity( ) ; 
 
@@ -178,8 +222,8 @@ class VTKRectilinearGrid : public VTK{
 
     void                            writeCollection() ;  
 
-    void                            flush(  std::fstream &, std::string , std::string ) ; //CRTP
-    void                            absorb( std::fstream &, std::string , std::string ) ; //CRTP
+    void                            flush(  std::fstream &, VTKFormat , std::string ) ; //CRTP
+    void                            absorb( std::fstream &, VTKFormat , std::string ) ; //CRTP
 
     public:
     void                            readMetaData() ;
@@ -193,7 +237,7 @@ class VTKRectilinearGrid : public VTK{
     void                            setGlobalDimensions( int, int, int ) ;
     void                            setGlobalDimensions( int, int ) ;
 
-    void                            setGeomTypes( std::string ) ;
+    void                            setGeomTypes( VTKDataType ) ;
 
     void                            setGlobalIndex( std::vector<extension3D_t> ) ;
     void                            setGlobalIndex( std::vector<extension2D_t> ) ;
@@ -201,20 +245,32 @@ class VTKRectilinearGrid : public VTK{
 };
 
 namespace VTKUtils{
-    uint8_t                         sizeOfType( std::string type ) ;
-    uint8_t                         getNNodeInElement( uint8_t t ) ;
-    bool                            convertStringToDataArray( std::string &, VTKField &) ;
-    void                            convertDataArrayToString( std::string &, VTKField &) ;
-    void                            convertPDataArrayToString( std::string &, VTKField &) ;
+    uint8_t                         sizeOfType( const VTKDataType & ) ;
+    uint8_t                         getNNodeInElement( const VTKElementType & ) ;
+
+    std::string                     convertDataArrayToString( const VTKField & ) ;
+    std::string                     convertPDataArrayToString( const VTKField & ) ;
+
+    bool                            convertStringToDataArray( const std::string &, VTKField &) ;
+
+    std::string                     convertEnumToString( const VTKLocation & ) ;
+    std::string                     convertEnumToString( const VTKFormat & ) ;
+    std::string                     convertEnumToString( const VTKDataType & ) ;
+
+    bool                            convertStringToEnum( const std::string &, VTKLocation & ) ;
+    bool                            convertStringToEnum( const std::string &, VTKFormat & ) ;
+    bool                            convertStringToEnum( const std::string &, VTKDataType &) ;
+    
+    VTKDataType                     whichType( const std::type_info & ) ;
+
+    template<class T> 
+    VTKDataType                     whichType( T ) ;
     
     template<class T> 
-    std::string                     whichType( T ) ;
-    
-    template<class T> 
-    std::string                     whichType( std::vector<T> ) ;
+    VTKDataType                     whichType( std::vector<T> ) ;
     
     template<class T, size_t d>
-    std::string                     whichType( std::array<T,d> ) ;
+    VTKDataType                     whichType( std::array<T,d> ) ;
 }
 
 

@@ -12,9 +12,9 @@
 VTKField::VTKField(){
 
     name            = "undefined" ;  
-    type            = "undefined" ;
-    location        = "undefined" ;
-    codification    = "undefined" ;
+    type            = VTKDataType::UNDEFINED ;
+    location        = VTKLocation::UNDEFINED ;
+    codification    = VTKFormat::UNDEFINED ;
     components      = 1 ;   ;
     nr_elements     = 0 ;
     position        = 0 ;
@@ -25,13 +25,13 @@ VTKField::VTKField(){
  * Constructor
  * @param[in]   name_   name of data field
  * @param[in]   comp_   number of coponents of data field [1/3]
- * @param[in]   loc_    location of data field ["Cell"/"Point"]
+ * @param[in]   loc_    location of data field [VTKLocation::CELL/VTKLocation::POINT]
  */
-VTKField::VTKField( std::string name_, uint8_t comp_, std::string loc_ ): name(name_), components(comp_), location(loc_) {
+VTKField::VTKField( std::string name_, uint8_t comp_, VTKLocation loc_ ): name(name_), components(comp_), location(loc_) {
 
-    type            = "undefined" ;
+    type            = VTKDataType::UNDEFINED ;
     nr_elements     = 0 ;
-    codification    = "undefined" ;
+    codification    = VTKFormat::UNDEFINED ;
     position        = 0 ;
 
 };
@@ -40,13 +40,13 @@ VTKField::VTKField( std::string name_, uint8_t comp_, std::string loc_ ): name(n
  * Constructor
  * @param[in]   name_   name of data field
  * @param[in]   comp_   number of coponents of data field [1/3]
- * @param[in]   type_   type of data field [ "[U]Int8", "[U]Int16", "[U]Int32", "[U]Int64", "Float32", "Float64" ]
- * @param[in]   loc_    location of data field ["Cell"/"Point"]
+ * @param[in]   loc_    location of data field [VTKLocation::CELL/VTKLocation::POINT]
+ * @param[in]   type_   type of data field [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
  */
-VTKField::VTKField( std::string name_, uint8_t comp_, std::string type_, std::string loc_ ): name(name_), components(comp_), type(type_), location(loc_) {
+VTKField::VTKField( std::string name_, uint8_t comp_, VTKLocation loc_, VTKDataType type_ ): name(name_), components(comp_), type(type_), location(loc_) {
 
     nr_elements     = 0 ;
-    codification    = "undefined" ;
+    codification    = VTKFormat::UNDEFINED ;
     position        = 0 ;
 
 };
@@ -55,12 +55,12 @@ VTKField::VTKField( std::string name_, uint8_t comp_, std::string type_, std::st
  * Constructor
  * @param[in]   name_   name of data field
  * @param[in]   comp_   number of coponents of data field [1/3]
- * @param[in]   type_   type of data field [ "[U]Int8", "[U]Int16", "[U]Int32", "[U]Int64", "Float32", "Float64" ]
- * @param[in]   loc_    location of data field ["Cell"/"Point"]
- * @param[in]   cod_    codex ["ascii"/ "appended"]
+ * @param[in]   loc_    location of data field [VTKLocation::CELL/VTKLocation::POINT]
+ * @param[in]   type_   type of data field [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
+ * @param[in]   cod_    codex [VTKFormat::APPENDED/VTKFormat::ASCII]
  * @param[in]   nr_elements_    number of elements of data field
  */
-VTKField::VTKField( std::string name_, uint8_t comp_, std::string type_, std::string loc_, std::string cod_, uint64_t nr_elements_):
+VTKField::VTKField( std::string name_, uint8_t comp_, VTKLocation loc_, VTKDataType type_, VTKFormat cod_, uint64_t nr_elements_):
     name(name_), components(comp_), type(type_), location(loc_), codification(cod_), nr_elements(nr_elements_){
 };
 
@@ -81,48 +81,27 @@ void      VTKField::setName( std::string  name_){
 
 /*!
  * set type of data field
- * @param[in]   type_   type of data field [ "[U]Int8", "[U]Int16", "[U]Int32", "[U]Int64", "Float32", "Float64" ]
+ * @param[in]  type_    type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
  */
-void      VTKField::setType( std::string  type_){
-
-    if( type_ == "Int8"    || 
-            type_ == "UInt8"   ||
-            type_ == "Int16"   || 
-            type_ == "UInt16"  ||
-            type_ == "Int32"   || 
-            type_ == "UInt32"  ||
-            type_ == "Int64"   || 
-            type_ == "UInt64"  ||
-            type_ == "Float32" ||
-            type_ == "Float64" ){
-
-        type= type_; 
-
-    }
-
-    else{
-
-        std::cout << type_ << " not admitted in VTKField::setType." << std::endl ;
-    };
-
-
+void      VTKField::setType( VTKDataType  type_){
+    type= type_; 
     return; 
 };
 
 /*!
  * set location of data field
- * @param[in]   loc_   location of data field [ "Cell", "Point" ] 
+ * @param[in]   loc_   location of data field [VTKLocation::CELL/VTKLocation::POINT]
  */
-void      VTKField::setLocation( std::string  loc_ ){ 
+void      VTKField::setLocation( VTKLocation  loc_ ){ 
     location= loc_; 
     return; 
 };
 
 /*!
  * set codification of data field
- * @param[in]   code_  codification ["appended"/ "ascii"]
+ * @param[in]   code_  codification [VTKFormat::APPENDED/VTKFormat::ASCII]
  */
-void      VTKField::setCodification( std::string  code_ ){ 
+void      VTKField::setCodification( VTKFormat  code_ ){ 
     codification= code_; 
     return; 
 };
@@ -147,7 +126,7 @@ void      VTKField::setElements( uint64_t ele_){
 
 /*!
  * set position of data field
- * @param[in]   pos_    position of data field ["Cell"/"Point"]
+ * @param[in]   pos_    position of data field [VTKLocation::CELL/VTKLocation::POINT]
  */
 void      VTKField::setPosition( std::fstream::pos_type pos_ ){ 
     position =pos_ ; 
@@ -167,7 +146,7 @@ void      VTKField::setOffset( uint64_t offs_){
  * get name of data field
  * @return  name of data field
  */
-std::string    VTKField::getName(){ 
+std::string    VTKField::getName() const{ 
     return name; 
 };
 
@@ -175,23 +154,23 @@ std::string    VTKField::getName(){
  * get type of data field
  * @return   type of data field [ "[U]Int8", "[U]Int16", "[U]Int32", "[U]Int64", "Float32", "Float64" ]
  */
-std::string    VTKField::getType(){ 
+VTKDataType    VTKField::getType() const{ 
     return type; 
 };
 
 /*!
  * get location of data field
- * @return  location ["Cell"/"Point"]
+ * @return  location [VTKLocation::CELL/VTKLocation::POINT]
  */
-std::string    VTKField::getLocation(){ 
+VTKLocation    VTKField::getLocation() const{ 
     return location; 
 };
 
 /*!
  * get codification of data field
- * @return  codification ["ascii"/"appended"]
+ * @return  codification [VTKFormat::APPENDED/VTKFormat::ASCII]
  */
-std::string    VTKField::getCodification(){ 
+VTKFormat    VTKField::getCodification() const{ 
     return codification; 
 };
 
@@ -199,7 +178,7 @@ std::string    VTKField::getCodification(){
  * get number of components of data field
  * @return  number of components [1/3]
  */
-uint8_t   VTKField::getComponents(){ 
+uint8_t   VTKField::getComponents() const{ 
     return components; 
 };
 
@@ -208,7 +187,7 @@ uint8_t   VTKField::getComponents(){
  * Generally number of points or number of cells.
  * @return  number of elements
  */
-uint64_t  VTKField::getElements(){ 
+uint64_t  VTKField::getElements() const{ 
     return nr_elements; 
 };
 
@@ -216,7 +195,7 @@ uint64_t  VTKField::getElements(){
  * get total number of entries data field
  * @return  total size = number of elements *nuber of components
  */
-uint64_t  VTKField::getSize(){ 
+uint64_t  VTKField::getSize() const{ 
     return components *nr_elements ; 
 };
 
@@ -224,7 +203,7 @@ uint64_t  VTKField::getSize(){
  * get offset in appended section
  * @return  offset for "_" character in appended section
  */
-uint64_t  VTKField::getOffset(){ 
+uint64_t  VTKField::getOffset() const{ 
     return offset; 
 };
 
@@ -232,7 +211,7 @@ uint64_t  VTKField::getOffset(){
  * get bytes of  data field
  * @return  memory size of data field
  */
-uint64_t  VTKField::getNbytes(){ 
+uint64_t  VTKField::getNbytes() const{ 
     return components *nr_elements *VTKUtils::sizeOfType( type ) ;
 };
 
@@ -241,7 +220,7 @@ uint64_t  VTKField::getNbytes(){
  * This information is available after VTK::ReadMetaData() has been called.
  * @return      position in VTK file.
  */
-std::fstream::pos_type   VTKField::getPosition(){ 
+std::fstream::pos_type   VTKField::getPosition() const{ 
     return position; 
 };
 
