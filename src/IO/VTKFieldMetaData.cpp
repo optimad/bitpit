@@ -5,7 +5,7 @@
  * @{
  *
  * @class       VTKFieldMetaData
- * @brief       A class used in the interface VTK::getFieldMetaData( std::string )
+ * @brief       A class used in the interface VTK::getMetaData( std::string )
  *
  */
 

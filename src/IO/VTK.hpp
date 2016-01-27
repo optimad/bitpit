@@ -211,7 +211,7 @@ class VTK{
         //Interface methods
         virtual void                    flushData( std::fstream &, VTKFormat , std::string )  ;
         virtual  void                   absorbData( std::fstream &, VTKFormat , std::string )  ;
-        virtual const VTKFieldMetaData  getFieldMetaData( std::string )  ;
+        virtual const VTKFieldMetaData  getMetaData( std::string )  ;
 
 };
 

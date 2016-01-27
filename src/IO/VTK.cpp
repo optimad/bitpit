@@ -406,7 +406,7 @@ void VTK::calcAppendedOffsets(){
 };
 
 /*!
- * Uses VTK::getFieldMetaData() interface to retrieve missing information
+ * Uses VTK::getMetaData() interface to retrieve missing information
  */
 void VTK::getMissingMetaData(){
 
@@ -930,7 +930,7 @@ void VTK::absorbData( std::fstream &str, VTKFormat format, std::string name ){
  * @param[in] name name of the field to be written
  * @return VTKFieldMetaData containing the size of field and typeid of data
  */
-const VTKFieldMetaData VTK::getFieldMetaData( std::string name ){
+const VTKFieldMetaData VTK::getMetaData( std::string name ){
     BITPIT_UNUSED( name ) ;
 
      VTKFieldMetaData   dummy(0,typeid(int));
