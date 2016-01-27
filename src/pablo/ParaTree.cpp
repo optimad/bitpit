@@ -782,15 +782,6 @@ ParaTree::getPbound(uint32_t idx){
 	return m_octree.m_octants[idx].getPbound();
 }
 
-/*! Get the nature of an octant.
- * \param[in] idx Local index of target octant.
- * \return Is octant ghost?
- */
-bool
-ParaTree::getIsGhost(uint32_t idx){
-	return (findOwner(m_octree.m_octants[idx].computeMorton()) != m_rank);
-};
-
 /*! Get if the octant is new after refinement.
  * \param[in] idx Local index of target octant.
  * \return Is octant new?
@@ -1610,9 +1601,7 @@ ParaTree::getIdx(Octant oct){
  */
 bool
 ParaTree::getIsGhost(Octant* oct){
-	if (m_serial)
-		return false;
-	return (findOwner(oct->computeMorton()) != m_rank);
+	return oct->info[16]
 };
 
 /*! Get the nature of an octant.
@@ -1621,9 +1610,7 @@ ParaTree::getIsGhost(Octant* oct){
  */
 bool
 ParaTree::getIsGhost(Octant oct){
-	if (m_serial)
-		return false;
-	return (findOwner(oct.computeMorton()) != m_rank);
+	return oct.info[16];
 };
 
 // =================================================================================== //
@@ -3041,9 +3028,6 @@ ParaTree::private_adapt_mapidx(bool mapflag) {
 
 		// Refine
 		while(m_octree.refine(m_mapIdx));
-//		while (refine) {
-//			refine = m_octree.refine(m_mapIdx);
-//		}
 		if (m_octree.getNumOctants() > nocts)
 			localDone = true;
 		m_log.writeLog(" Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())));
@@ -3052,13 +3036,7 @@ ParaTree::private_adapt_mapidx(bool mapflag) {
 
 		// Coarse
 		while(m_octree.coarse(m_mapIdx));
-//		while (coarse) {
-//			coarse = m_octree.coarse(m_mapIdx);
-//		}
 		updateAfterCoarse(m_mapIdx);
-		//			balance21(false);
-		//			while(m_octree.refine(m_mapIdx));
-		//			updateAdapt();
 		if (m_octree.getNumOctants() < nocts){
 			localDone = true;
 		}
@@ -3086,9 +3064,6 @@ ParaTree::private_adapt_mapidx(bool mapflag) {
 
 		// Refine
 		while(m_octree.refine(m_mapIdx));
-//		while (refine) {
-//			refine = m_octree.refine(mapIdx_temp);
-//		}
 		if (m_octree.getNumOctants() > nocts)
 			localDone = true;
 		updateAdapt();
@@ -3099,15 +3074,8 @@ ParaTree::private_adapt_mapidx(bool mapflag) {
 
 		// Coarse
 		while(m_octree.coarse(m_mapIdx));
-//		while (globalCoarse) {
-//			coarse = m_octree.coarse(mapIdx_temp);
-//		}
 		updateAfterCoarse(m_mapIdx);
 		setPboundGhosts();
-		//			balance21(false);
-		//			while(m_octree.refine(m_mapIdx));
-		//			updateAdapt();
-		//			setPboundGhosts();
 		if (m_octree.getNumOctants() < nocts){
 			localDone = true;
 		}
@@ -3622,7 +3590,6 @@ ParaTree::setPboundGhosts() {
 				}
 			}
 		}
-		// if (m_rank!=0) cout << m_rank << " border edge " << endl;
 		//Virtual Edge Neighbors
 		for(uint8_t e = 0; e < m_global.m_nedges; ++e){
 			uint32_t virtualEdgeNeighborSize = 0;
@@ -3640,7 +3607,6 @@ ParaTree::setPboundGhosts() {
 				}
 			}
 		}
-		//if (m_rank!=0) cout << m_rank << " border corner " << endl;
 		//Virtual Corner Neighbors
 		for(uint8_t c = 0; c < m_global.m_nnodes; ++c){
 			if(!it->getBound(m_global.m_nodeFace[c][0]) && !it->getBound(m_global.m_nodeFace[c][1])){
@@ -3680,11 +3646,8 @@ ParaTree::setPboundGhosts() {
 	m_pborders.resize(countpbd);
 	m_internals.resize(countint);
 
-	//cout << m_rank << " border end " << endl;
-
 	MPI_Barrier(m_comm);
 
-	//	cout << m_rank << " pack " << endl;
 	//PACK (mpi) BORDER OCTANTS IN CHAR BUFFERS WITH SIZE (map value) TO BE SENT TO THE RIGHT PROCESS (map key)
 	//it visits every element in m_bordersPerProc (one for every neighbor proc)
 	//for every element it visits the border octants it contains and pack them in a new structure, sendBuffers
@@ -3700,7 +3663,6 @@ ParaTree::setPboundGhosts() {
 	uint32_t pbordersOversize = 0;
 	for(map<int,vector<uint32_t> >::iterator bit = m_bordersPerProc.begin(); bit != bitend; ++bit){
 		pbordersOversize += bit->second.size();
-		//int buffSize = bit->second.size() * (int)ceil((double)(m_global.m_octantBytes + m_global.m_globalIndexBytes) / (double)(CHAR_BIT/8));
 		int buffSize = bit->second.size() * (int)ceil((double)(m_global.m_octantBytes + m_global.m_globalIndexBytes) / (double)(CHAR_BIT/8));
 		int key = bit->first;
 		const vector<uint32_t> & value = bit->second;
@@ -3789,7 +3751,6 @@ ParaTree::setPboundGhosts() {
 	map<int,CommBuffer>::iterator rritend = recvBuffers.end();
 	for(map<int,CommBuffer>::iterator rrit = recvBuffers.begin(); rrit != rritend; ++rrit){
 		int pos = 0;
-		//			int nofGhostsPerProc = int(rrit->second.m_commBufferSize / (uint32_t) (m_global.m_octantBytes + m_global.m_globalIndexBytes));
 		int nofGhostsPerProc = int(rrit->second.m_commBufferSize / (uint32_t) (m_global.m_octantBytes + m_global.m_globalIndexBytes));
 		for(int i = 0; i < nofGhostsPerProc; ++i){
 			m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&x,1,MPI_UINT32_T,m_comm);
@@ -4007,10 +3968,6 @@ ParaTree::balance21(bool const first){
 		commMarker();
 		m_log.writeLog(" Iteration	:	Finalizing ");
 		m_log.writeLog(" ");
-		//localDone = m_octree.localBalance(false);
-		//commMarker();
-		//m_octree.preBalance21(true);
-		//commMarker();
 
 		m_log.writeLog(" 2:1 Balancing reached ");
 		m_log.writeLog(" ");
@@ -4037,10 +3994,6 @@ ParaTree::balance21(bool const first){
 		}
 
 		commMarker();
-		//			localDone = m_octree.localBalance(false);
-		//			commMarker();
-		//			m_octree.preBalance21(false);
-		//			commMarker();
 
 	}
 #else
@@ -4069,8 +4022,6 @@ ParaTree::balance21(bool const first){
 
 		m_log.writeLog(" Iteration	:	Finalizing ");
 		m_log.writeLog(" ");
-		//			localDone = m_octree.localBalance(false);
-		//			m_octree.preBalance21(false);
 
 		m_log.writeLog(" 2:1 Balancing reached ");
 		m_log.writeLog(" ");
@@ -4087,10 +4038,6 @@ ParaTree::balance21(bool const first){
 			localDone = m_octree.localBalanceAll(false);
 			m_octree.preBalance21(false);
 		}
-
-		//			localDone = m_octree.localBalance(false);
-		//			m_octree.preBalance21(false);
-
 	}
 
 #endif /* NOMPI */

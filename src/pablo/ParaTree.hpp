@@ -188,7 +188,6 @@ public:
 	bool		getBound(uint32_t idx);
 	bool		getPbound(uint32_t idx, uint8_t iface);
 	bool		getPbound(uint32_t idx);
-	bool 		getIsGhost(uint32_t idx);
 	bool 		getIsNewR(uint32_t idx);
 	bool 		getIsNewC(uint32_t idx);
 	uint64_t 	getGlobalIdx(uint32_t idx);
