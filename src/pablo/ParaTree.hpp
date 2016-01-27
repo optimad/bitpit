@@ -108,12 +108,10 @@ private:
 public:
 #if ENABLE_MPI==1
 	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
-//	ParaTree(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
-//	ParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
+	ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
 #else
 	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
-//	ParaTree(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
-//	ParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
+	ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
 #endif
 	~ParaTree();
 

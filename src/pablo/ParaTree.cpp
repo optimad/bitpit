@@ -20,6 +20,7 @@ using namespace std;
 // CONSTRUCTORS AND OPERATORS														   //
 // =================================================================================== //
 
+#if ENABLE_MPI==1
 /*! Default Constructor of ParaTree.
  * It builds one octant with node 0 in the Origin (0,0,0) and side of length 1.
  * \param[in] dim The space dimension of the m_octree. 2D is the default value.
@@ -27,9 +28,14 @@ using namespace std;
  * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
  * \param[in] m_comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
  */
-#if ENABLE_MPI==1
 ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm m_comm) : m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(logfile,m_comm),m_comm(m_comm),m_trans(maxlevel,dim),m_octree(maxlevel,dim){
 #else
+	/*! Default Constructor of ParaTree.
+	 * It builds one octant with node 0 in the Origin (0,0,0) and side of length 1.
+	 * \param[in] dim The space dimension of the m_octree. 2D is the default value.
+	 * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
+	 * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
+	 */
 ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, string logfile ) : m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(logfile),m_trans(maxlevel, dim),m_octree(maxlevel,dim){
 #endif
 	m_global.setGlobal(maxlevel, m_dim);
@@ -72,170 +78,113 @@ ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, string logfile ) : m_dim(uint8_
 
 // =============================================================================== //
 
-///*! Constructor of ParaTree with input parameters.
-// * It builds one octant with :
-// * \param[in] X Coordinate X of node 0,
-// * \param[in] Y Coordinate Y of node 0,
-// * \param[in] Z Coordinate Z of node 0,
-// * \param[in] L Side length of the octant.
-// * \param[in] dim The space dimension of the m_octree. 2D is the default value.
-// * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
-// * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
-// * \param[in] m_comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
-// */
-//#if ENABLE_MPI==1
-//ParaTree::ParaTree(double X, double Y, double Z, double L, uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm m_comm):m_dim(uint8_t(min(max(2,int(dim)),3))),m_trans(X,Y,Z,L,maxlevel,dim),m_log(logfile,m_comm),m_comm(m_comm),m_octree(maxlevel,dim){
-//#else
-//ParaTree::ParaTree(double X, double Y, double Z, double L, uint8_t dim, int8_t maxlevel, string logfile):m_dim(uint8_t(min(max(2,int(dim)),3))),m_trans(X,Y,Z,L,maxlevel,dim),m_log(logfile),m_octree(maxlevel,dim){
-//#endif
-//	m_global.setGlobal(maxlevel, m_dim);
-//	m_serial = true;
-//	m_errorFlag = 0;
-//	m_maxDepth = 0;
-//	m_globalNumOctants = m_octree.getNumOctants();
-//#if ENABLE_MPI==1
-//	m_errorFlag = MPI_Comm_size(m_comm,&m_nproc);
-//	m_errorFlag = MPI_Comm_rank(m_comm,&m_rank);
-//#else
-//	m_rank = 0;
-//	m_nproc = 1;
-//#endif
-//	m_partitionFirstDesc = new uint64_t[m_nproc];
-//	m_partitionLastDesc = new uint64_t[m_nproc];
-//	m_partitionRangeGlobalIdx = new uint64_t[m_nproc];
-//	uint64_t lastDescMorton = m_octree.getLastDesc().computeMorton();
-//	uint64_t firstDescMorton = m_octree.getFirstDesc().computeMorton();
-//	for(int p = 0; p < m_nproc; ++p){
-//		m_partitionRangeGlobalIdx[p] = 0;
-//		m_partitionLastDesc[p] = lastDescMorton;
-//		m_partitionLastDesc[p] = firstDescMorton;
-//	}
-//	// Write info log
-//	m_log.writeLog("---------------------------------------------");
-//	m_log.writeLog("- PABLO PArallel Balanced Linear Octree -");
-//	m_log.writeLog("---------------------------------------------");
-//	m_log.writeLog(" ");
-//	m_log.writeLog("---------------------------------------------");
-//	m_log.writeLog(" Number of proc		:	" + to_string(static_cast<unsigned long long>(m_nproc)));
-//	m_log.writeLog(" Dimension		:	" + to_string(static_cast<unsigned long long>(m_dim)));
-//	m_log.writeLog(" Max allowed level	:	" + to_string(static_cast<unsigned long long>(m_global.m_maxLevel)));
-//	m_log.writeLog(" Domain Origin		:	" + to_string(static_cast<unsigned long long>(X)));
-//	m_log.writeLog("				" + to_string(static_cast<unsigned long long>(Y)));
-//	m_log.writeLog("				" + to_string(static_cast<unsigned long long>(Z)));
-//	m_log.writeLog(" Domain Size		:	" + to_string(static_cast<unsigned long long>(L)));
-//	m_log.writeLog("---------------------------------------------");
-//	m_log.writeLog(" ");
-//#if ENABLE_MPI==1
-//	MPI_Barrier(m_comm);
-//#endif
-//};
-//
-//// =============================================================================== //
-//
-///*! Constructor of ParaTree for restart a simulation with input parameters.
-// * For each process it builds a vector of octants. The input parameters are :
-// * \param[in] X Physical Coordinate X of node 0,
-// * \param[in] Y Physical Coordinate Y of node 0,
-// * \param[in] Z Physical Coordinate Z of node 0,
-// * \param[in] L Physical Side length of the domain,
-// * \param[in] XYZ Coordinates of octants (node 0) in logical domain,
-// * \param[in] levels Level of each octant.
-// * \param[in] dim The space dimension of the m_octree. 2D is the default value.
-// * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
-// * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
-// * \param[in] m_comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
-// */
-//#if ENABLE_MPI==1
-//ParaTree::ParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm m_comm):m_dim(uint8_t(min(max(2,int(dim)),3))),m_trans(X,Y,Z,L,maxlevel,dim),m_log(logfile,m_comm),m_comm(m_comm),m_octree(maxlevel,dim){
-//#else
-//ParaTree::ParaTree(double X, double Y, double Z, double L, u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, string logfile):m_dim(uint8_t(min(max(2,int(dim)),3))),m_trans(X,Y,Z,L,maxlevel,dim),m_log(logfile),m_octree(maxlevel,dim){
-//#endif
-//	uint8_t lev, iface;
-//	uint32_t x0, y0, z0;
-//	uint32_t NumOctants = XYZ.size();
-//	m_dim = dim;
-//	m_global.setGlobal(maxlevel, m_dim);
-//	m_octree.m_octants.resize(NumOctants);
-//	for (uint32_t i=0; i<NumOctants; i++){
-//		lev = uint8_t(levels[i]);
-//		x0 = uint32_t(XYZ[i][0]);
-//        y0 = uint32_t(XYZ[i][1]);
-//        z0 = uint32_t(XYZ[i][2]);
-//		Octant oct(false, m_dim, lev, x0, y0, z0);
-//		oct.setBalance(false);
-//		if (x0 == 0){
-//			iface = 0;
-//			oct.setBound(iface);
-//		}
-//		else if (x0 == m_global.m_maxLength - oct.getSize(m_global.m_maxLevel)){
-//			iface = 1;
-//			oct.setBound(iface);
-//		}
-//        if (y0 == 0){
-//            iface = 2;
-//            oct.setBound(iface);
-//        }
-//        else if (y0 == m_global.m_maxLength - oct.getSize(m_global.m_maxLevel)){
-//            iface = 3;
-//            oct.setBound(iface);
-//        }
-//        if (z0 == 0){
-//            iface = 4;
-//            oct.setBound(iface);
-//        }
-//        else if (z0 == m_global.m_maxLength - oct.getSize(m_global.m_maxLevel)){
-//            iface = 5;
-//            oct.setBound(iface);
-//        }
-//		m_octree.m_octants[i] = oct;
-//	}
-//
-//#if ENABLE_MPI==1
-//	m_errorFlag = MPI_Comm_size(m_comm,&m_nproc);
-//	m_errorFlag = MPI_Comm_rank(m_comm,&m_rank);
-//	m_serial = true;
-//	if (m_nproc > 1 ) m_serial = false;
-//#else
-//	m_serial = true;
-//	m_nproc = 1;
-//	m_rank = 0;
-//#endif
-//	m_partitionFirstDesc = new uint64_t[m_nproc];
-//	m_partitionLastDesc = new uint64_t[m_nproc];
-//	m_partitionRangeGlobalIdx = new uint64_t[m_nproc];
-//
-//	setFirstDesc();
-//	setLastDesc();
-//	m_octree.updateLocalMaxDepth();
-//	updateAdapt();
-//#if ENABLE_MPI==1
-//	setPboundGhosts();
-//#endif
-//	// Write info log
-//	m_log.writeLog("---------------------------------------------");
-//	m_log.writeLog("- PABLO PArallel Balanced Linear Octree -");
-//	m_log.writeLog("---------------------------------------------");
-//	m_log.writeLog(" ");
-//	m_log.writeLog("---------------------------------------------");
-//	m_log.writeLog("- PABLO restart -");
-//	m_log.writeLog("---------------------------------------------");
-//	m_log.writeLog(" Number of proc		:	" + to_string(static_cast<unsigned long long>(m_nproc)));
-//	m_log.writeLog(" Dimension		:	" + to_string(static_cast<unsigned long long>(m_dim)));
-//	m_log.writeLog(" Max allowed level	:	" + to_string(static_cast<unsigned long long>(m_global.m_maxLevel)));
-//	m_log.writeLog(" Domain Origin		:	" + to_string(static_cast<unsigned long long>(X)));
-//	m_log.writeLog("				" + to_string(static_cast<unsigned long long>(Y)));
-//	m_log.writeLog("				" + to_string(static_cast<unsigned long long>(Z)));
-//	m_log.writeLog(" Domain Size		:	" + to_string(static_cast<unsigned long long>(L)));
-//	m_log.writeLog(" Number of octants	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)));
-//	m_log.writeLog("---------------------------------------------");
-//	m_log.writeLog(" ");
-//#if ENABLE_MPI==1
-//	MPI_Barrier(m_comm);
-//#endif
-//};
+#if ENABLE_MPI==1
+/*! Constructor of ParaTree for restart a simulation with input parameters.
+ * For each process it builds a vector of octants. The input parameters are :
+ * \param[in] XYZ Coordinates of octants (node 0) in logical domain,
+ * \param[in] levels Level of each octant.
+ * \param[in] dim The space dimension of the m_octree. 2D is the default value.
+ * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
+ * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
+ * \param[in] m_comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
+ */
+ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm m_comm):m_dim(uint8_t(min(max(2,int(dim)),3))),m_trans(maxlevel,dim),m_log(logfile,m_comm),m_comm(m_comm),m_octree(maxlevel,dim){
+#else
+	/*! Constructor of ParaTree for restart a simulation with input parameters.
+	 * For each process it builds a vector of octants. The input parameters are :
+	 * \param[in] XYZ Coordinates of octants (node 0) in logical domain,
+	 * \param[in] levels Level of each octant.
+	 * \param[in] dim The space dimension of the m_octree. 2D is the default value.
+	 * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
+	 * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
+	 */
+ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, string logfile):m_dim(uint8_t(min(max(2,int(dim)),3))),m_trans(maxlevel,dim),m_log(logfile),m_octree(maxlevel,dim){
+#endif
+	uint8_t lev, iface;
+	uint32_t x0, y0, z0;
+	uint32_t NumOctants = XYZ.size();
+	m_dim = dim;
+	m_global.setGlobal(maxlevel, m_dim);
+	m_octree.m_octants.resize(NumOctants);
+	for (uint32_t i=0; i<NumOctants; i++){
+		lev = uint8_t(levels[i]);
+		x0 = uint32_t(XYZ[i][0]);
+        y0 = uint32_t(XYZ[i][1]);
+        z0 = uint32_t(XYZ[i][2]);
+		Octant oct(false, m_dim, lev, x0, y0, z0, maxlevel);
+		oct.setBalance(false);
+		if (x0 == 0){
+			iface = 0;
+			oct.setBound(iface);
+		}
+		else if (x0 == m_global.m_maxLength - oct.getSize()){
+			iface = 1;
+			oct.setBound(iface);
+		}
+        if (y0 == 0){
+            iface = 2;
+            oct.setBound(iface);
+        }
+        else if (y0 == m_global.m_maxLength - oct.getSize()){
+            iface = 3;
+            oct.setBound(iface);
+        }
+        if (z0 == 0){
+            iface = 4;
+            oct.setBound(iface);
+        }
+        else if (z0 == m_global.m_maxLength - oct.getSize()){
+            iface = 5;
+            oct.setBound(iface);
+        }
+		m_octree.m_octants[i] = oct;
+	}
+
+#if ENABLE_MPI==1
+	m_errorFlag = MPI_Comm_size(m_comm,&m_nproc);
+	m_errorFlag = MPI_Comm_rank(m_comm,&m_rank);
+	m_serial = true;
+	if (m_nproc > 1 ) m_serial = false;
+#else
+	m_serial = true;
+	m_nproc = 1;
+	m_rank = 0;
+#endif
+	m_partitionFirstDesc = new uint64_t[m_nproc];
+	m_partitionLastDesc = new uint64_t[m_nproc];
+	m_partitionRangeGlobalIdx = new uint64_t[m_nproc];
+
+	setFirstDesc();
+	setLastDesc();
+	m_octree.updateLocalMaxDepth();
+	updateAdapt();
+#if ENABLE_MPI==1
+	setPboundGhosts();
+#endif
+	// Write info log
+	m_log.writeLog("---------------------------------------------");
+	m_log.writeLog("- PABLO PArallel Balanced Linear Octree -");
+	m_log.writeLog("---------------------------------------------");
+	m_log.writeLog(" ");
+	m_log.writeLog("---------------------------------------------");
+	m_log.writeLog("- PABLO restart -");
+	m_log.writeLog("---------------------------------------------");
+	m_log.writeLog(" Number of proc		:	" + to_string(static_cast<unsigned long long>(m_nproc)));
+	m_log.writeLog(" Dimension		:	" + to_string(static_cast<unsigned long long>(m_dim)));
+	m_log.writeLog(" Max allowed level	:	" + to_string(static_cast<unsigned long long>(m_global.m_maxLevel)));
+	m_log.writeLog(" Number of octants	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)));
+	m_log.writeLog("---------------------------------------------");
+	m_log.writeLog(" ");
+#if ENABLE_MPI==1
+	MPI_Barrier(m_comm);
+#endif
+};
+
 
 // =============================================================================== //
 
+/*! Default Destructor of ParaTree.
+*/
 ParaTree::~ParaTree(){
 	m_log.writeLog("---------------------------------------------");
 	m_log.writeLog("--------------- R.I.P. PABLO ----------------");
