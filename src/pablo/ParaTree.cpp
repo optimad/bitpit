@@ -3803,6 +3803,7 @@ ParaTree::setPboundGhosts() {
 				m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&info[j],1,MPI::BOOL,m_comm);
 				m_octree.m_ghosts[ghostCounter].m_info[j] = info[j];
 			}
+			m_octree.m_ghosts[ghostCounter].m_info[16] = true;
 			m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&global_index,1,MPI_UINT64_T,m_comm);
 			m_octree.m_globalIdxGhosts[ghostCounter] = global_index;
 			++ghostCounter;
