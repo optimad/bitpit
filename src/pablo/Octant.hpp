@@ -101,9 +101,9 @@ public:
 	Octant();
 	Octant(const Octant &octant);
 private:
-	Octant(uint8_t dim);
-	Octant(uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0);
-	Octant(bool bound, uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0);
+	Octant(uint8_t dim, int8_t maxlevel = 20);
+	Octant(uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0, int8_t maxlevel = 20);
+	Octant(bool bound, uint8_t dim, uint8_t level, int32_t x, int32_t y, int32_t z = 0, int8_t maxlevel = 20);
 	bool operator ==(const Octant & oct2);
 
 	// =================================================================================== //
@@ -139,41 +139,40 @@ private:
 	// =================================================================================== //
 	// OTHER GET/SET METHODS
 	// =================================================================================== //
-	uint32_t	getSize(int8_t maxlevel) const;
-	uint64_t	getArea(int8_t maxlevel) const;
-	uint64_t	getVolume(int8_t maxlevel) const;
-	darray3		getCenter(int8_t maxlevel) const;
-	darray3		getFaceCenter(uint8_t iface, int8_t maxlevel) const;
-	darray3		getEdgeCenter(uint8_t iedge, int8_t maxlevel) const;
-	void		getNodes(u32arr3vector & nodes, int8_t maxlevel) const;
-	void		getNode(u32array3 & node, uint8_t inode, int8_t maxlevel) const;
-	u32array3		getNode(uint8_t inode, int8_t maxlevel) const;
-	void		getNormal(uint8_t & iface, i8array3 & normal, int8_t (&normals)[6][3], int8_t maxlevel) const;
-	uint64_t	computeMorton() const;
-	uint64_t	computeMorton();
+	uint32_t		getSize() const;
+	uint64_t		getArea() const;
+	uint64_t		getVolume() const;
+	darray3			getCenter() const;
+	darray3			getFaceCenter(uint8_t iface) const;
+	darray3			getEdgeCenter(uint8_t iedge) const;
+	void			getNodes(u32arr3vector & nodes) const;
+	u32arr3vector	getNodes() const;
+	void			getNode(u32array3 & node, uint8_t inode) const;
+	u32array3		getNode(uint8_t inode) const;
+	void			getNormal(uint8_t & iface, i8array3 & normal, int8_t (&normals)[6][3]) const;
+	uint64_t		computeMorton() const;
+	uint64_t		computeMorton();
 
 	// =================================================================================== //
 	// OTHER METHODS												    			   //
 	// =================================================================================== //
-	Octant	buildLastDesc(int8_t & maxlevel);
-	Octant	buildFather(int8_t & maxlevel);
-	std::vector< Octant >	buildChildren(int8_t & maxlevel);
-	std::vector<uint64_t> 		computeHalfSizeMorton(uint8_t iface, uint32_t & sizehf,
-			int8_t & maxlevel);
+	Octant					buildLastDesc();
+	Octant					buildFather();
+	std::vector< Octant >	buildChildren();
+	std::vector<uint64_t> 		computeHalfSizeMorton(uint8_t iface, uint32_t & sizehf);
 	std::vector<uint64_t>		computeMinSizeMorton(uint8_t iface, const uint8_t & maxdepth,
-			uint32_t & sizem, int8_t & maxlevel);
+			uint32_t & sizem);
 	std::vector<uint64_t> 		computeVirtualMorton(uint8_t iface, const uint8_t & maxdepth,
-			uint32_t & sizeneigh, int8_t & maxlevel);
-	std::vector<uint64_t> 		computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & sizehf,
-			int8_t & maxlevel, uint8_t (&edgeface)[12][2]);
+			uint32_t & sizeneigh);
+	std::vector<uint64_t> 		computeEdgeHalfSizeMorton(uint8_t iedge, uint32_t & sizehf, uint8_t (&edgeface)[12][2]);
 	std::vector<uint64_t> 		computeEdgeMinSizeMorton(uint8_t iedge, const uint8_t & maxdepth,
-			uint32_t & sizem, int8_t & maxlevel, uint8_t (&edgeface)[12][2]);
+			uint32_t & sizem, uint8_t (&edgeface)[12][2]);
 	std::vector<uint64_t>		computeEdgeVirtualMorton(uint8_t iedge, const uint8_t & maxdepth,
-			uint32_t & sizeneigh, uint8_t balance_codim, int8_t & maxlevel, uint8_t (&edgeface)[12][2]);
+			uint32_t & sizeneigh, uint8_t balance_codim, uint8_t (&edgeface)[12][2]);
 	uint64_t 		computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxdepth,
-			uint32_t & sizehf, int8_t & maxlevel, uint8_t (&nodeface)[8][3]);
+			uint32_t & sizehf, uint8_t (&nodeface)[8][3]);
 	uint64_t 		computeNodeVirtualMorton(uint8_t inode, const uint8_t & maxdepth,
-			uint32_t & sizeneigh, int8_t & maxlevel, uint8_t (&nodeface)[8][3]);
+			uint32_t & sizeneigh, uint8_t (&nodeface)[8][3]);
 
 };
 

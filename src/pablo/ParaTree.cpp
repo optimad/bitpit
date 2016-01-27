@@ -618,7 +618,7 @@ ParaTree::getZ(uint32_t idx) {
  */
 double
 ParaTree::getSize(uint32_t idx) {
-	return m_trans.mapSize(m_octree.m_octants[idx].getSize(m_global.m_maxLevel));
+	return m_trans.mapSize(m_octree.m_octants[idx].getSize());
 }
 
 /*! Get the area of an octant (for 2D case the same value of getSize).
@@ -627,7 +627,7 @@ ParaTree::getSize(uint32_t idx) {
  */
 double
 ParaTree::getArea(uint32_t idx) {
-	return m_trans.mapArea(m_octree.m_octants[idx].getArea(m_global.m_maxLevel));
+	return m_trans.mapArea(m_octree.m_octants[idx].getArea());
 }
 
 /*! Get the volume of an octant.
@@ -636,7 +636,7 @@ ParaTree::getArea(uint32_t idx) {
  */
 double
 ParaTree::getVolume(uint32_t idx) {
-	return m_trans.mapVolume(m_octree.m_octants[idx].getVolume(m_global.m_maxLevel));
+	return m_trans.mapVolume(m_octree.m_octants[idx].getVolume());
 }
 
 /*! Get the coordinates of the center of an octant.
@@ -645,7 +645,7 @@ ParaTree::getVolume(uint32_t idx) {
  */
 void
 ParaTree::getCenter(uint32_t idx, darray3& center) {
-	darray3 center_ = m_octree.m_octants[idx].getCenter(m_global.m_maxLevel);
+	darray3 center_ = m_octree.m_octants[idx].getCenter();
 	m_trans.mapCenter(center_, center);
 }
 
@@ -656,7 +656,7 @@ ParaTree::getCenter(uint32_t idx, darray3& center) {
 darray3
 ParaTree::getCenter(uint32_t idx) {
 	darray3 center;
-	darray3 center_ = m_octree.m_octants[idx].getCenter(m_global.m_maxLevel);
+	darray3 center_ = m_octree.m_octants[idx].getCenter();
 	m_trans.mapCenter(center_, center);
 	return center;
 }
@@ -669,7 +669,7 @@ ParaTree::getCenter(uint32_t idx) {
 darray3
 ParaTree::getFaceCenter(uint32_t idx, uint8_t iface) {
 	darray3 center;
-	darray3 center_ = m_octree.m_octants[idx].getFaceCenter(iface, m_global.m_maxLevel);
+	darray3 center_ = m_octree.m_octants[idx].getFaceCenter(iface);
 	m_trans.mapCenter(center_, center);
 	return center;
 }
@@ -681,7 +681,7 @@ ParaTree::getFaceCenter(uint32_t idx, uint8_t iface) {
  */
 void
 ParaTree::getFaceCenter(uint32_t idx, uint8_t iface, darray3& center) {
-	darray3 center_ = m_octree.m_octants[idx].getFaceCenter(iface, m_global.m_maxLevel);
+	darray3 center_ = m_octree.m_octants[idx].getFaceCenter(iface);
 	m_trans.mapCenter(center_, center);
 }
 
@@ -693,7 +693,7 @@ ParaTree::getFaceCenter(uint32_t idx, uint8_t iface, darray3& center) {
 darray3
 ParaTree::getNode(uint32_t idx, uint8_t inode) {
 	darray3 node;
-	u32array3 node_ = m_octree.m_octants[idx].getNode(inode, m_global.m_maxLevel);
+	u32array3 node_ = m_octree.m_octants[idx].getNode(inode);
 	m_trans.mapNode(node_, node);
 	return node;
 }
@@ -705,7 +705,7 @@ ParaTree::getNode(uint32_t idx, uint8_t inode) {
  */
 void
 ParaTree::getNode(uint32_t idx, uint8_t inode, darray3& node) {
-	u32array3 node_ = m_octree.m_octants[idx].getNode(inode, m_global.m_maxLevel);
+	u32array3 node_ = m_octree.m_octants[idx].getNode(inode);
 	m_trans.mapNode(node_, node);
 }
 
@@ -716,7 +716,7 @@ ParaTree::getNode(uint32_t idx, uint8_t inode, darray3& node) {
 void
 ParaTree::getNodes(uint32_t idx, darr3vector & nodes) {
 	u32arr3vector nodes_;
-	m_octree.m_octants[idx].getNodes(nodes_, m_global.m_maxLevel);
+	m_octree.m_octants[idx].getNodes(nodes_);
 	m_trans.mapNodes(nodes_, nodes);
 }
 
@@ -728,7 +728,7 @@ darr3vector
 ParaTree::getNodes(uint32_t idx){
 	darr3vector nodes;
 	u32arr3vector nodes_;
-	m_octree.m_octants[idx].getNodes(nodes_, m_global.m_maxLevel);
+	m_octree.m_octants[idx].getNodes(nodes_);
 	m_trans.mapNodes(nodes_, nodes);
 	return nodes;
 }
@@ -741,7 +741,7 @@ ParaTree::getNodes(uint32_t idx){
 void
 ParaTree::getNormal(uint32_t idx, uint8_t & iface, darray3 & normal) {
 	i8array3 normal_;
-	m_octree.m_octants[idx].getNormal(iface, normal_, m_global.m_normals, m_global.m_maxLevel);
+	m_octree.m_octants[idx].getNormal(iface, normal_, m_global.m_normals);
 	m_trans.mapNormals(normal_, normal);
 }
 
@@ -754,7 +754,7 @@ darray3
 ParaTree::getNormal(uint32_t idx, uint8_t & iface){
 	darray3 normal;
 	i8array3 normal_;
-	m_octree.m_octants[idx].getNormal(iface, normal_, m_global.m_normals, m_global.m_maxLevel);
+	m_octree.m_octants[idx].getNormal(iface, normal_, m_global.m_normals);
 	m_trans.mapNormals(normal_, normal);
 	return normal;
 }
@@ -965,7 +965,7 @@ ParaTree::getZ(Octant* oct) {
  */
 double
 ParaTree::getSize(Octant* oct) {
-	return m_trans.mapSize(oct->getSize(m_global.m_maxLevel));
+	return m_trans.mapSize(oct->getSize());
 }
 
 /*! Get the area of an octant (for 2D case the same value of getSize).
@@ -974,7 +974,7 @@ ParaTree::getSize(Octant* oct) {
  */
 double
 ParaTree::getArea(Octant* oct) {
-	return m_trans.mapArea(oct->getArea(m_global.m_maxLevel));
+	return m_trans.mapArea(oct->getArea());
 }
 
 /*! Get the volume of an octant.
@@ -983,7 +983,7 @@ ParaTree::getArea(Octant* oct) {
  */
 double
 ParaTree::getVolume(Octant* oct) {
-	return m_trans.mapVolume(oct->getVolume(m_global.m_maxLevel));
+	return m_trans.mapVolume(oct->getVolume());
 }
 
 /*! Get the coordinates of the center of an octant.
@@ -992,7 +992,7 @@ ParaTree::getVolume(Octant* oct) {
  */
 void
 ParaTree::getCenter(Octant* oct, darray3& center) {
-	darray3 center_ = oct->getCenter(m_global.m_maxLevel);
+	darray3 center_ = oct->getCenter();
 	m_trans.mapCenter(center_, center);
 }
 
@@ -1003,7 +1003,7 @@ ParaTree::getCenter(Octant* oct, darray3& center) {
 darray3
 ParaTree::getCenter(Octant* oct) {
 	darray3 center;
-	darray3 center_ = oct->getCenter(m_global.m_maxLevel);
+	darray3 center_ = oct->getCenter();
 	m_trans.mapCenter(center_, center);
 	return center;
 }
@@ -1016,7 +1016,7 @@ ParaTree::getCenter(Octant* oct) {
 darray3
 ParaTree::getFaceCenter(Octant* oct, uint8_t iface) {
 	darray3 center;
-	darray3 center_ = oct->getFaceCenter(iface, m_global.m_maxLevel);
+	darray3 center_ = oct->getFaceCenter(iface);
 	m_trans.mapCenter(center_, center);
 	return center;
 }
@@ -1028,7 +1028,7 @@ ParaTree::getFaceCenter(Octant* oct, uint8_t iface) {
  */
 void
 ParaTree::getFaceCenter(Octant* oct, uint8_t iface, darray3& center) {
-	darray3 center_ = oct->getFaceCenter(iface, m_global.m_maxLevel);
+	darray3 center_ = oct->getFaceCenter(iface);
 	m_trans.mapCenter(center_, center);
 }
 
@@ -1040,7 +1040,7 @@ ParaTree::getFaceCenter(Octant* oct, uint8_t iface, darray3& center) {
 darray3
 ParaTree::getNode(Octant* oct, uint8_t inode) {
 	darray3 node;
-	u32array3 node_ = oct->getNode(inode, m_global.m_maxLevel);
+	u32array3 node_ = oct->getNode(inode);
 	m_trans.mapNode(node_, node);
 	return node;
 }
@@ -1052,7 +1052,7 @@ ParaTree::getNode(Octant* oct, uint8_t inode) {
  */
 void
 ParaTree::getNode(Octant* oct, uint8_t inode, darray3& node) {
-	u32array3 node_ = oct->getNode(inode, m_global.m_maxLevel);
+	u32array3 node_ = oct->getNode(inode);
 	m_trans.mapNode(node_, node);
 }
 
@@ -1063,7 +1063,7 @@ ParaTree::getNode(Octant* oct, uint8_t inode, darray3& node) {
 void
 ParaTree::getNodes(Octant* oct, darr3vector & nodes) {
 	u32arr3vector nodes_;
-	oct->getNodes(nodes_, m_global.m_maxLevel);
+	oct->getNodes(nodes_);
 	m_trans.mapNodes(nodes_, nodes);
 }
 
@@ -1075,7 +1075,7 @@ darr3vector
 ParaTree::getNodes(Octant* oct){
 	darr3vector nodes;
 	u32arr3vector nodes_;
-	oct->getNodes(nodes_, m_global.m_maxLevel);
+	oct->getNodes(nodes_);
 	m_trans.mapNodes(nodes_, nodes);
 	return nodes;
 }
@@ -1088,7 +1088,7 @@ ParaTree::getNodes(Octant* oct){
 void
 ParaTree::getNormal(Octant* oct, uint8_t & iface, darray3 & normal) {
 	i8array3 normal_;
-	oct->getNormal(iface, normal_, m_global.m_normals, m_global.m_maxLevel);
+	oct->getNormal(iface, normal_, m_global.m_normals);
 	m_trans.mapNormals(normal_, normal);
 }
 
@@ -1101,7 +1101,7 @@ darray3
 ParaTree::getNormal(Octant* oct, uint8_t & iface){
 	darray3 normal;
 	i8array3 normal_;
-	oct->getNormal(iface, normal_, m_global.m_normals, m_global.m_maxLevel);
+	oct->getNormal(iface, normal_, m_global.m_normals);
 	m_trans.mapNormals(normal_, normal);
 	return normal;
 }
@@ -1362,7 +1362,7 @@ Octant & ParaTree::getLastDesc() const{
  */
 uint64_t
 ParaTree::getLastDescMorton(uint32_t idx) {
-	return m_octree.m_octants[idx].buildLastDesc(m_global.m_maxLevel).computeMorton();
+	return m_octree.m_octants[idx].buildLastDesc().computeMorton();
 };
 
 /*!Get the begin position for the iterator of the local internal octants.
@@ -1524,9 +1524,9 @@ double
 ParaTree::getSize(Intersection* inter) {
 	uint32_t Size;
 	if(inter->m_finer && inter->m_isghost)
-		Size = m_octree.extractGhostOctant(inter->m_owners[inter->m_finer]).getSize(m_global.m_maxLevel);
+		Size = m_octree.extractGhostOctant(inter->m_owners[inter->m_finer]).getSize();
 	else
-		Size = m_octree.extractOctant(inter->m_owners[inter->m_finer]).getSize(m_global.m_maxLevel);
+		Size = m_octree.extractOctant(inter->m_owners[inter->m_finer]).getSize();
 	return m_trans.mapSize(Size);
 }
 
@@ -1538,9 +1538,9 @@ double
 ParaTree::getArea(Intersection* inter) {
 	uint32_t Area;
 	if(inter->m_finer && inter->m_isghost)
-		Area = m_octree.extractGhostOctant(inter->m_owners[1]).getArea(m_global.m_maxLevel);
+		Area = m_octree.extractGhostOctant(inter->m_owners[1]).getArea();
 	else
-		Area = m_octree.extractOctant(inter->m_owners[inter->m_finer]).getArea(m_global.m_maxLevel);
+		Area = m_octree.extractOctant(inter->m_owners[inter->m_finer]).getArea();
 	return m_trans.mapSize(Area);
 }
 
@@ -1556,9 +1556,9 @@ ParaTree::getCenter(Intersection* inter){
 		oct = m_octree.extractGhostOctant(inter->m_owners[inter->m_finer]);
 	else
 		oct = m_octree.extractOctant(inter->m_owners[inter->m_finer]);
-	darray3  center_ = oct.getCenter(m_global.m_maxLevel);
+	darray3  center_ = oct.getCenter();
 	int sign = ( int(2*((inter->m_iface)%2)) - 1);
-	double deplace = double (sign * int(oct.getSize(m_global.m_maxLevel))) / 2;
+	double deplace = double (sign * int(oct.getSize())) / 2;
 	center_[inter->m_iface/2] = uint32_t(int(center_[inter->m_iface/2]) + deplace);
 	m_trans.mapCenter(center_, center);
 	return center;
@@ -1578,7 +1578,7 @@ ParaTree::getNodes(Intersection* inter){
 		oct = m_octree.extractOctant(inter->m_owners[inter->m_finer]);
 	uint8_t iface = inter->m_iface;
 	u32arr3vector nodes_all;
-	oct.getNodes(nodes_all, m_global.m_maxLevel);
+	oct.getNodes(nodes_all);
 	u32arr3vector nodes_(m_global.m_nnodesPerFace);
 	for (int i=0; i<m_global.m_nnodesPerFace; i++){
 		for (int j=0; j<3; j++){
@@ -1603,7 +1603,7 @@ ParaTree::getNormal(Intersection* inter){
 		oct = m_octree.extractOctant(inter->m_owners[inter->m_finer]);
 	uint8_t iface = inter->m_iface;
 	i8array3 normal_;
-	oct.getNormal(iface, normal_, m_global.m_normals, m_global.m_maxLevel);
+	oct.getNormal(iface, normal_, m_global.m_normals);
 	m_trans.mapNormals(normal_, normal);
 	return normal;
 }
@@ -2989,7 +2989,7 @@ ParaTree::privateLoadBalance(uint32_t* partition){
 				m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&pos,&y,1,MPI_UINT32_T,m_comm);
 				m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&pos,&z,1,MPI_UINT32_T,m_comm);
 				m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&pos,&l,1,MPI_UINT8_T,m_comm);
-				m_octree.m_octants[newCounter] = Octant(m_dim,l,x,y,z);
+				m_octree.m_octants[newCounter] = Octant(m_dim,l,x,y,z,m_global.m_maxLevel);
 				m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&pos,&m,1,MPI_INT8_T,m_comm);
 				m_octree.m_octants[newCounter].setMarker(m);
 				for(int j = 0; j < 17; ++j){
@@ -3656,7 +3656,7 @@ ParaTree::setPboundGhosts() {
 		for(uint8_t i = 0; i < m_global.m_nfaces; ++i){
 			if(it->getBound(i) == false){
 				uint32_t virtualNeighborsSize = 0;
-				vector<uint64_t> virtualNeighbors = it->computeVirtualMorton(i,m_maxDepth,virtualNeighborsSize,m_global.m_maxLevel);
+				vector<uint64_t> virtualNeighbors = it->computeVirtualMorton(i,m_maxDepth,virtualNeighborsSize);
 				uint32_t maxDelta = virtualNeighborsSize/2;
 				for(uint32_t j = 0; j <= maxDelta; ++j){
 					int pBegin = findOwner(virtualNeighbors[j]);
@@ -3677,7 +3677,7 @@ ParaTree::setPboundGhosts() {
 		//Virtual Edge Neighbors
 		for(uint8_t e = 0; e < m_global.m_nedges; ++e){
 			uint32_t virtualEdgeNeighborSize = 0;
-			vector<uint64_t> virtualEdgeNeighbors = it->computeEdgeVirtualMorton(e,m_maxDepth,virtualEdgeNeighborSize,m_octree.m_balanceCodim, m_global.m_maxLevel, m_global.m_edgeFace);
+			vector<uint64_t> virtualEdgeNeighbors = it->computeEdgeVirtualMorton(e,m_maxDepth,virtualEdgeNeighborSize,m_octree.m_balanceCodim, m_global.m_edgeFace);
 			uint32_t maxDelta = virtualEdgeNeighborSize/2;
 			if(virtualEdgeNeighborSize){
 				for(uint32_t ee = 0; ee <= maxDelta; ++ee){
@@ -3696,7 +3696,7 @@ ParaTree::setPboundGhosts() {
 		for(uint8_t c = 0; c < m_global.m_nnodes; ++c){
 			if(!it->getBound(m_global.m_nodeFace[c][0]) && !it->getBound(m_global.m_nodeFace[c][1])){
 				uint32_t virtualCornerNeighborSize = 0;
-				uint64_t virtualCornerNeighbor = it ->computeNodeVirtualMorton(c,m_maxDepth,virtualCornerNeighborSize, m_global.m_maxLevel, m_global.m_nodeFace);
+				uint64_t virtualCornerNeighbor = it ->computeNodeVirtualMorton(c,m_maxDepth,virtualCornerNeighborSize, m_global.m_nodeFace);
 				if(virtualCornerNeighborSize){
 					int proc = findOwner(virtualCornerNeighbor);
 					procs.insert(proc);
@@ -3847,7 +3847,7 @@ ParaTree::setPboundGhosts() {
 			m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&y,1,MPI_UINT32_T,m_comm);
 			m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&z,1,MPI_UINT32_T,m_comm);
 			m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&l,1,MPI_UINT8_T,m_comm);
-			m_octree.m_ghosts[ghostCounter] = Octant(m_dim,l,x,y,z);
+			m_octree.m_ghosts[ghostCounter] = Octant(m_dim,l,x,y,z,m_global.m_maxLevel);
 			m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&m,1,MPI_INT8_T,m_comm);
 			m_octree.m_ghosts[ghostCounter].setMarker(m);
 			for(int j = 0; j < 17; ++j){
