@@ -22,10 +22,6 @@ using namespace std;
 // TEMPLATE IMPLEMENTATIONS                                                   //
 // ========================================================================== //
 
-/*!
- * @ingroup STereoLithography
- * @{
- */
 
 // -------------------------------------------------------------------------- //
 /*!
@@ -52,7 +48,7 @@ using namespace std;
     \param[in] others parameter packs
 */
 template <typename ... T2>
-void STL_obj::load(
+void STLObj::load(
     std::string                                  sname,
     int                                         &nV,
     int                                         &nT,
@@ -85,8 +81,8 @@ if (err == 1) {
 // ========================================================================== //
 
 // Load solid data
-if (stl_type) { Read_STL_bin(ifile_handle, nV, nT, V, N, T); }
-else          { Read_STLsolid_ASCII(ifile_handle, nV, nT, V, N, T, sname); }
+if (stl_type) { STLUtils::readBINARY(ifile_handle, nV, nT, V, N, T); }
+else          { STLUtils::readSolidASCII(ifile_handle, nV, nT, V, N, T, sname); }
 
 // ========================================================================== //
 // ITERATIVELY READ STL SOLIDS                                                //
@@ -98,7 +94,7 @@ return; }
 // -------------------------------------------------------------------------- //
 /*!
     Load data for solid with specified label from stl ascii file. Overloading of
-    member function STL_obj::load() for container vector<array<double, 3> >
+    member function STLObj::load() for container vector<array<double, 3> >
     
     \param[in] sname label associated to the solid. If empty label is specified
     (i.e. sname = ""), data of the first solid encountered in the stl file is returned.
@@ -121,7 +117,7 @@ return; }
     \param[in] others parameter packs
 */
 template <typename ... T2>
-void STL_obj::load(
+void STLObj::load(
     std::string                                  sname,
     int                                         &nV,
     int                                         &nT,
@@ -154,8 +150,8 @@ if (err == 1) {
 // ========================================================================== //
 
 // Load solid data
-if (stl_type) { Read_STL_bin(ifile_handle, nV, nT, V, N, T); }
-else          { Read_STLsolid_ASCII(ifile_handle, nV, nT, V, N, T, sname); }
+if (stl_type) { STLUtils::readBINARY(ifile_handle, nV, nT, V, N, T); }
+else          { STLUtils::readSolidASCII(ifile_handle, nV, nT, V, N, T, sname); }
 
 // ========================================================================== //
 // ITERATIVELY READ STL SOLIDS                                                //
@@ -177,7 +173,7 @@ return; }
     \param[in] others parameter packs
 */
 template <typename ... T2>
-void STL_obj::save(
+void STLObj::save(
     std::string                                  sname,
     int                                         &nV,
     int                                         &nT,
@@ -208,8 +204,8 @@ if (err == 1) { return; }
 // ========================================================================== //
 
 // Export solid
-if (stl_type) { Write_STLsolid_bin(ofile_handle, nV, nT, V, N, T, sname); }
-else          { Write_STLsolid_ASCII(ofile_handle, nV, nT, V, N, T, sname); }
+if (stl_type) { STLUtils::writeSolidBINARY(ofile_handle, nV, nT, V, N, T, sname); }
+else          { STLUtils::writeSolidASCII(ofile_handle, nV, nT, V, N, T, sname); }
 
 // Recursively call variadic template
 save(others ...);
@@ -218,7 +214,7 @@ return; }
 
 // -------------------------------------------------------------------------- //
 /*!
-    Save solid data to stl ascii file. Overloading of member function STL_obj::save()
+    Save solid data to stl ascii file. Overloading of member function STLObj::save()
     for container vector<array<double, 3> >
     
     \param[in] sname label associated to the solid.
@@ -230,7 +226,7 @@ return; }
     \param[in] others parameter packs
 */
 template <typename ... T2>
-void STL_obj::save(
+void STLObj::save(
     std::string                                  sname,
     int                                         &nV,
     int                                         &nT,
@@ -261,8 +257,8 @@ if (err == 1) { return; }
 // ========================================================================== //
 
 // Export solid
-if (stl_type) { Write_STLsolid_bin(ofile_handle, nV, nT, V, N, T, sname); }
-else          { Write_STLsolid_ASCII(ofile_handle, nV, nT, V, N, T, sname); }
+if (stl_type) { STLUtils::writeSolidBINARY(ofile_handle, nV, nT, V, N, T, sname); }
+else          { STLUtils::writeSolidASCII(ofile_handle, nV, nT, V, N, T, sname); }
 
 // Recursively call variadic template
 save(others ...);
@@ -282,7 +278,7 @@ return; }
     \param[in] others parameter packs
 */
 template <typename ... T2>
-void STL_obj::append(
+void STLObj::append(
     std::string                                  sname,
     int                                         &nV,
     int                                         &nT,
@@ -313,8 +309,8 @@ if (err == 1) { return; }
 // ========================================================================== //
 
 // Export solid
-if (stl_type) { Write_STLsolid_bin(ofile_handle, nV, nT, V, N, T, sname); }
-else          { Write_STLsolid_ASCII(ofile_handle, nV, nT, V, N, T, sname); }
+if (stl_type) { STLUtils::writeSolidBINARY(ofile_handle, nV, nT, V, N, T, sname); }
+else          { STLUtils::writeSolidASCII(ofile_handle, nV, nT, V, N, T, sname); }
 
 // Recursively call variadic template
 save(others ...);
@@ -324,7 +320,7 @@ return; }
 // -------------------------------------------------------------------------- //
 /*!
     Append solid data at the end of an existing stl ascii file. Overloading of
-    member function STL_obj::append() for container vector<array<double, 3> >.
+    member function STLObj::append() for container vector<array<double, 3> >.
     
     \param[in] sname label associated to the solid.
     \param[in,out] nV number of solid vertices.
@@ -335,7 +331,7 @@ return; }
     \param[in] others parameter packs
 */
 template <typename ... T2>
-void STL_obj::append(
+void STLObj::append(
     std::string                                  sname,
     int                                         &nV,
     int                                         &nT,
@@ -366,15 +362,11 @@ if (err == 1) { return; }
 // ========================================================================== //
 
 // Export solid
-if (stl_type) { Write_STLsolid_bin(ofile_handle, nV, nT, V, N, T, sname); }
-else          { Write_STLsolid_ASCII(ofile_handle, nV, nT, V, N, T, sname); }
+if (stl_type) { STLUtils::writeSolidBINARY(ofile_handle, nV, nT, V, N, T, sname); }
+else          { STLUtils::writeSolidASCII(ofile_handle, nV, nT, V, N, T, sname); }
 
 // Recursively call variadic template
 save(others ...);
 
 return; }
 
-
-/*!
- * @}
- */

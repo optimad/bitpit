@@ -3,7 +3,13 @@
  * @{
  * @defgroup Generic Generic
  * @defgroup DuneGridFormat DuneGridFormat (DGF)
+ * @{
+ * @defgroup DGFUtils
+ * @}
  * @defgroup STereoLithography STereoLithography (STL)
+ * @{
+ * @defgroup STLUtils
+ * @}
  * @defgroup VisualizationToolKit VisualizationToolKit (VTK)
  * @{
  * @defgroup VTKContainers
@@ -22,8 +28,8 @@
 #ifdef IO_ENABLE_VTK_WRAPPERS
 #include "VTKWrappers.hpp"
 #endif
-#include "DGF_IOFunct.hpp"
-#include "Generic_IO.hpp"
-#include "STL_IOFunct.hpp"
+#include "DGF.hpp"
+#include "GenericIO.hpp"
+#include "STL.hpp"
 
 #endif

@@ -1,53 +1,158 @@
-// ========================================================================== //
-//                         LINEAR ALGEBRA PACKAGE                             //
-//                                                                            //
-// Functions for basic linear algebra computations.                           //
-// ========================================================================== //
-// INFO                                                                       //
-// ========================================================================== //
-// Author            : Alessandro Alaia                                       //
-// Data              : Sept 26, 2014                                          //
-// Version           : v2.0                                                   //
-//                                                                            //
-// All rights reserved.                                                       //
-// ========================================================================== //
-
-// ========================================================================== //
-// INCLUDES                                                                   //
-// ========================================================================== //
-# include "LinearAlgebra.hpp"
-
-// ========================================================================== //
-// IMPLEMENTATIONS                                                            //
-// ========================================================================== //
-using namespace std;
-
 /*!
- \ingroup   Solve
- \{
+ * @ingroup Solve
+ * @{
  */
 
 // -------------------------------------------------------------------------- //
 /*!
-    Compute the LU factorization (with partial pivoting) of an input matrix of
-    small dimensions.
+    Solve a linear system of small dimenions using Cramer's rule.
+
+    \param[in] A coeffs matrix
+    \param[in] B r.h.s. of the linear system
+    \param[in,out] x on output stores the solution to the linear system
+*/
+template <class T>
+void Cramer(
+    std::vector< std::vector < T > >            &A,
+    std::vector< T >                            &B,
+    std::vector< T >                            &x
+) {
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+int                    l, m, n;
+T                      dA;
+std::vector< std::vector < T > > C;
+
+// Counters
+int                    i, j;
+
+// ========================================================================== //
+// CHECK INPUT                                                                //
+// ========================================================================== //
+m = A.size();
+if (m == 0) { return; }
+n = A[0].size();
+if (n == 0) { return; }
+if (m != n) {
+    return;
+}
+l = B.size();
+if (l == 0) { return; }
+if (l != m) {
+    return;
+}
+
+// =================================================================================== //
+// SOLVE LINEAR SYSTEM                                                                 //
+// =================================================================================== //
+
+// Solvability condition
+dA = det(A);
+if (dA < 1.0e-14) {
+    return;
+}
+
+// Solve linear system
+x.resize(n, (T) 0.0);
+for (i = 0; i < m; i++) {
+
+    // Build B
+    C = A;
+    for (j = 0; j < m; j++) {
+        C[j][i] = B[j];
+    } //next j
+    x[i] = det(C)/dA;
+
+} //next i
+
+return; };
+
+// -------------------------------------------------------------------------- //
+/*!
+    Solve a linear system of small dimenions using Cramer's rule. Overloading
+    of Cramer() function for container array.
+
+    \param[in] A coeffs matrix
+    \param[in] B r.h.s. of the linear system
+    \param[in,out] x on output stores the solution to the linear system
+*/
+template <class T, size_t m, size_t n>
+void Cramer(
+    std::array< std::array < T, n >, m >        &A,
+    std::array< T, m >                          &B,
+    std::array< T, n >                          &x
+) {
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+T                           dA;
+std::array< std::array < T, n >, m >  C;
+
+// Counters
+int                         i, j;
+
+// ========================================================================== //
+// CHECK INPUT                                                                //
+// ========================================================================== //
+if (m == 0) { return; }
+if (n == 0) { return; }
+if (m != n) {
+    return;
+}
+
+// ========================================================================== //
+// SOLVE LINEAR SYSTEM                                                        //
+// ========================================================================== //
+
+// Solvability condition
+dA = det(A);
+if (dA < 1.0e-14) {
+    return;
+}
+
+// Solve linear system
+for (i = 0; i < m; i++) {
+
+    // Build B
+    C = A;
+    for (j = 0; j < m; j++) {
+        C[j][i] = B[j];
+    } //next j
+    x[i] = det(C)/dA;
+
+} //next i
+
+return; };
+
+// -------------------------------------------------------------------------- //
+/*!
+    Compute the LU factorization (with row pivoting) for a given non-singular matrix.
+    Overloading of LU() function for container array.
 
     \param[in] A input matrix
-    \param[in,out] L lower triangular part (factor L)
-    \param[in,out] U upper triangular part (factor U)
+    \param[in,out] L lower triangular part (L factor)
+    \param[in,out] U upper triangular part (U factor)
     \param[in,out] P permutation matrix
 
-    \result error flag:
+    \result returns an error flag:
         err = 0: no error(s) encountered
         err = 1: matrix is ill conditioned
         err = 2: matrix is singular to working precision
         err = 3: wrong dimensions
 */
+template<size_t m>
 unsigned int LU(
-    vector<vector<double> >         &A,
-    vector<vector<double> >         &L,
-    vector<vector<double> >         &U,
-    vector<vector<double> >         *P
+    std::array< std::array < double, m >, m >   &A,
+    std::array< std::array < double, m >, m >   &L,
+    std::array< std::array < double, m >, m >   &U,
+    std::array< std::array < double, m >, m >   *P
 ) {
 
 // ========================================================================== //
@@ -58,48 +163,43 @@ unsigned int LU(
 double            toll_pivot = 1.0e-8;
 
 // Local variables
-int               info = 0;
-int               m, n, pivot_row;
-double            pivot, pivot_trial;
-vector<vector<double>> AA;
+int                             info = 0;
+int                             pivot_row;
+double                          pivot, pivot_trial;
+std::array<std::array<double, m>, m>      AA;
 
 // Counter
-int               i, j, k;
+int                             i, j, k;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
 // ========================================================================== //
-m = A.size();
 if (m == 0) { return(3); };
-n = A[0].size();
-if (m != n) {
-    return (3);
-}
 
 // ========================================================================== //
 // RESIZE INPUT VARIABLES                                                     //
 // ========================================================================== //
 
 // LU matrices
-zeros(L, n, n);
-zeros(U, n, n);
+zeros(L);
+zeros(U);
 
 // Backup copy of coeffs. matrix
 AA = A;
 
 // Pivoting array
-eye(*P, n, n);
+eye(*P);
 
 // ========================================================================== //
 // COMPUTE LU FACTORIZATION                                                   //
 // ========================================================================== //
-for (k = 0; k < n; k++) {
+for (k = 0; k < m; k++) {
     L[k][k] = 1.0;
 
     // Pivoting ------------------------------------------------------------- //
     pivot_row = k;
     pivot = abs(AA[k][k]);
-    for (i = k+1; i < n; i++) {
+    for (i = k+1; i < m; i++) {
         pivot_trial = abs(AA[i][k]);
         if (pivot_trial > pivot) {
             pivot = pivot_trial;
@@ -125,14 +225,14 @@ for (k = 0; k < n; k++) {
     }
 
     // Gauss elimination ---------------------------------------------------- //
-    for (i = k+1; i < n; i++) {
+    for (i = k+1; i < m; i++) {
         L[i][k] = AA[i][k]/AA[k][k] ;
-        for (j = k+1; j < n; j++) {
+        for (j = k+1; j < m; j++) {
             AA[i][j] = AA[i][j] - L[i][k]*AA[k][j];
         } //next j
 
     } //next i
-    for (j = k; j < n; j++) {
+    for (j = k; j < m; j++) {
         U[k][j] = AA[k][j];
     } //next j
 } //next k
@@ -141,16 +241,18 @@ return(info); };
 
 // -------------------------------------------------------------------------- //
 /*!
-    Solve a upper triangular linear system, using backward substitution.
+    Solve a lower triangular system using backward substitution. Overloading
+    of BackwardSubst() for container array.
 
-    \param[in] A coeffs. matrix
-    \param[in] B r.h.s. of linear system
-    \param[in,out] x on output store the solution of the linear system
+    \param[in] A coeffs matrix
+    \param[in] B r.h.s. of the linear system
+    \param[in] x on output stores the solution to the linear system
 */
+template<size_t m>
 void BackwardSubst(
-    vector<vector<double> >         &A,
-    vector<double>                  &B,
-    vector<double>                  &x
+    std::array< std::array < double, m >, m >   &A,
+    std::array< double, m >                     &B,
+    std::array< double, m >                     &x
 ) {
 
 // ========================================================================== //
@@ -158,7 +260,6 @@ void BackwardSubst(
 // ========================================================================== //
 
 // Local variables
-int    m, n, l;
 double sum, d;
 
 // Counter
@@ -167,23 +268,13 @@ int    i, p;
 // ========================================================================== //
 // CHECK INPUT                                                                //
 // ========================================================================== //
-m = A.size();
 if (m == 0) { return; };
-n = A[0].size();
-if (m != n) {
-    return;
-}
-l = B.size();
-if (l == 0) { return; };
-if (l != n) {
-    return;
-}
 
 // ========================================================================== //
 // CHECK SOLVABILITY CONDITION                                                //
 // ========================================================================== //
 d = 1.0;
-for (i = 0; i < n; i++) {
+for (i = 0; i < m; i++) {
     d = d*A[i][i];
 } //next i
 if (abs(d) < 1.0e-14) {
@@ -191,16 +282,11 @@ if (abs(d) < 1.0e-14) {
 }
 
 // ========================================================================== //
-// RESIZE OUTPUT VARIABLES                                                    //
-// ========================================================================== //
-x.resize(n, 0.0);
-
-// ========================================================================== //
 // SOLVE LINEAR SYSTEM WITH BACKWARD SUBSTITUTION                             //
 // ========================================================================== //
-for (i = n-1; i >= 0; i--) {
+for (i = m-1; i >= 0; i--) {
     sum = 0.0;
-    for(p = n-1; p > i; p--) {
+    for(p = m-1; p > i; p--) {
         sum += A[i][p]*x[p];
     } //next p
     x[i] = (B[i] - sum)/A[i][i];
@@ -210,16 +296,18 @@ return; };
 
 // -------------------------------------------------------------------------- //
 /*!
-    Solve a lower triangular linear system, using forward substitution.
+    Solve a upper triangular system using forward substitution. Overloading
+    of ForwardSubst() for container array.
 
-    \param[in] A coeffs. matrix
-    \param[in] B r.h.s. of linear system
-    \param[in,out] x on output store the solution of the linear system
+    \param[in] A coeffs matrix
+    \param[in] B r.h.s. of the linear system
+    \param[in] x on output stores the solution to the linear system
 */
+template<size_t m>
 void ForwardSubst(
-    vector<vector<double> >         &A,
-    vector<double>                  &B,
-    vector<double>                  &x
+    std::array< std::array < double, m >, m >   &A,
+    std::array< double, m >                     &B,
+    std::array< double, m >                     &x
 ) {
 
 // ========================================================================== //
@@ -227,7 +315,6 @@ void ForwardSubst(
 // ========================================================================== //
 
 // Local variables
-int        m, n, l;
 double     d, sum;
 
 // Counters
@@ -237,23 +324,13 @@ int        i, p;
 // ========================================================================== //
 // CHECK INPUT                                                                //
 // ========================================================================== //
-m = A.size();
 if (m == 0) { return; };
-n = A[0].size();
-if (m != n) {
-    return;
-}
-l = B.size();
-if (l == 0) { return; };
-if (l != n) {
-    return;
-}
 
 // ========================================================================== //
 // CHECK SOLVABILITY CONDITION                                                //
 // ========================================================================== //
 d = 1.0;
-for (i = 0; i < n; i++) {
+for (i = 0; i < m; i++) {
     d = d*A[i][i];
 } //next i
 if (abs(d) < 1.0e-14) {
@@ -261,14 +338,9 @@ if (abs(d) < 1.0e-14) {
 }
 
 // ========================================================================== //
-// RESIZE OUTPUT VARIABLES                                                    //
-// ========================================================================== //
-x.resize(n, 0.0);
-
-// ========================================================================== //
 // FORWARD SUBSTITUTION                                                       //
 // ========================================================================== //
-for(i = 0; i < n; i++) {
+for(i = 0; i < m; i++) {
     sum = 0.0;
     for(p = 0; p < i; p++) {
         sum += A[i][p] * x[p];
@@ -280,17 +352,18 @@ return; };
 
 // -------------------------------------------------------------------------- //
 /*!
-    Solve a linear system of small dimenions (coeffs. matrix must have full rank)
-    using LU factorization.
+    Solve a non-singular linear system using LU factorization. Overloading
+    of LU() function for container array.
 
     \param[in] A coeffs matrix
-    \param[in] B r.h.s. of the linear system
-    \param[in,out] x on output stores the solution of the linear system
+    \param[in] B r.h.s. of linear system
+    \param[in,out] x on output stores the solution to the linear system
 */
+template<size_t m>
 void SolveLU(
-    vector<vector<double> >         &A,
-    vector<double>                  &B,
-    vector<double>                  &x
+    std::array< std::array< double, m >, m >    &A,
+    std::array< double, m >                     &B,
+    std::array< double, m >                     &x
 ) {
 
 // ========================================================================== //
@@ -298,9 +371,9 @@ void SolveLU(
 // ========================================================================== //
 
 // Local variables
-unsigned int    info;
-vector<vector<double>> L, U, P, *P_ = &P;
-vector<double> z, C;
+unsigned int                info;
+std::array<std::array<double, m>, m>  L, U, P, *P_ = &P;
+std::array<double, m>            z, C;
 
 // Counters
 // none
@@ -326,7 +399,6 @@ BackwardSubst(U, z, x);
 
 return; };
 
-
 /*!
- \}
+ * @}
  */

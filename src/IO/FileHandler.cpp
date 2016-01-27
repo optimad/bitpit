@@ -152,8 +152,8 @@ std::string  FileHandler::getName(){
   std::stringstream filename ;
 
   filename << directory << "/"<<name ;
-  if(parallel) filename <<".b"<< ZeroPadNumber(4, block)    ;
-  if(series)   filename <<"." << ZeroPadNumber(4, counter)  ;
+  if(parallel) filename <<".b"<< zeroPadNumber(4, block)    ;
+  if(series)   filename <<"." << zeroPadNumber(4, counter)  ;
   filename <<"."<< appendix  ;
 
   return filename.str() ;

@@ -312,11 +312,11 @@ std::vector< T > pow(                                                           
 
 // Operator "norm" ------------------------------------------------------------------ //
 template <class T>
-double norm_1(                                                                        // RETURNS THE 1-NORM OF A VECTOR
+double norm1(                                                                        // RETURNS THE 1-NORM OF A VECTOR
         const std::vector< T >                  &                                     // (input) input std::vector
         );
 template <class T>
-double norm_2(                                                                        // RETURNS THE 2-NORM OF A VECTOR
+double norm2(                                                                        // RETURNS THE 2-NORM OF A VECTOR
         const std::vector< T >                  &                                     // (input) input std::vector
         );
 template <class T>
@@ -325,20 +325,20 @@ double norm(                                                                    
         int                                                                           // (input) norm index
         );
 template <class T>
-double norm_inf(                                                                      // RETURNS THE inf-NORM OF A VECTOR
+double normInf(                                                                      // RETURNS THE inf-NORM OF A VECTOR
         const std::vector< T >                  &                                     // (input) input std::vector
         );
 
-// Operator "Dot_Product" ----------------------------------------------------------- //
+// Operator "dotProduct" ----------------------------------------------------------- //
 template <class T>
-T Dot_Product(                                                                        // COMPUTE THE DOT PRODUCT OF TWO VECTORS
+T dotProduct(                                                                        // COMPUTE THE DOT PRODUCT OF TWO VECTORS
         const std::vector< T >                  &,                                    // (input) 1st argument of dot product
         const std::vector< T >                  &                                     // (input) 2nd argument of dot product
         );
 
-// Operator Cross_Product ----------------------------------------------------------- //
+// Operator crossProduct ----------------------------------------------------------- //
 template <class T>
-std::vector<T> Cross_Product(                                                         // COMPUTE THE CROSS-PRODUCT OF TWO VECTORS
+std::vector<T> crossProduct(                                                         // COMPUTE THE CROSS-PRODUCT OF TWO VECTORS
         std::vector<T> const                    &,                                    // (input) 1st argument of cross product
         std::vector<T> const                    &                                     // (input) 2nd argument of cross product
         );
@@ -625,11 +625,11 @@ std::array<T, d> pow(                                                           
 
 // Operator "norm" ------------------------------------------------------------------ //
 template <class T, size_t d>
-double norm_1(                                                                        // RETURNS THE 1-NORM OF ARRAY
+double norm1(                                                                        // RETURNS THE 1-NORM OF ARRAY
         const std::array<T, d>                  &                                     // (input) input std::array
         );
 template <class T, size_t d>
-double norm_2(                                                                        // RETURNS THE 2-NORM OF ARRAY
+double norm2(                                                                        // RETURNS THE 2-NORM OF ARRAY
         const std::array<T, d>                  &                                     // (input) input std::array
         );
 template <class T, size_t d>
@@ -638,26 +638,26 @@ double norm(                                                                    
         int                                                                           // (input) norm index
         );
 template <class T, size_t d>
-double norm_inf(                                                                      // RETURNS THE inf NORM OF ARRAY
+double normInf(                                                                      // RETURNS THE inf NORM OF ARRAY
         const std::array<T, d>                  &                                     // (input) input std::array
         );
 
-// Operator "Dot_Product" ----------------------------------------------------------- //
+// Operator "dotProduct" ----------------------------------------------------------- //
 template <class T, size_t d>
-T Dot_Product(                                                                        // COMPUTE THE DOT PRODUCT OF TWO ARRAYS
+T dotProduct(                                                                        // COMPUTE THE DOT PRODUCT OF TWO ARRAYS
         const std::array<T, d>                  &,                                    // (input) 1st argument of dot product
         const std::array<T, d>                  &                                     // (input) 2nd argument of dot product
         );
 
-// Operator Cross_Product ----------------------------------------------------------- //
+// Operator crossProduct ----------------------------------------------------------- //
 template <class T, size_t d>
-T Cross_Product(                                                                      // COMPUTE THE CROSS-PRODUCT OF TWO ARRAYS
+T crossProduct(                                                                      // COMPUTE THE CROSS-PRODUCT OF TWO ARRAYS
         std::array<T, 2> const                  &,                                    // (input) 1st argument of cross product
         std::array<T, 2> const                  &                                     // (input) 2nd argument of cross product
         );
 
 template <class T, size_t d>
-std::array<T, 3> Cross_Product(                                                       // COMPUTE THE CROSS-PRODUCT OF TWO ARRAYS
+std::array<T, 3> crossProduct(                                                       // COMPUTE THE CROSS-PRODUCT OF TWO ARRAYS
         std::array<T, 3> const                  &,                                    // (input) 1st argument of cross product
         std::array<T, 3> const                  &                                     // (input) 2nd argument of cross product
         );
@@ -690,13 +690,13 @@ inline std::string &trim(                                                      /
         );
 
 // Padding operators ---------------------------------------------------------------- //
-inline std::string ZeroPadNumber(                                              // PERFORMS CONVERSION OF INTEGER INTO STRING
+inline std::string zeroPadNumber(                                              // PERFORMS CONVERSION OF INTEGER INTO STRING
         int                                      ,                                    // (input) number of char in std::string
         int                                                                           // (input) integer to be padded
         );
 
 // Input stream operator ------------------------------------------------------------ //
-bool Get_After_Keyword(                                                               // EXTRACT FIELD AFTER SPECIFIC KEYWORD
+bool getAfterKeyword(                                                               // EXTRACT FIELD AFTER SPECIFIC KEYWORD
         std::string                              ,                                    // (input) std::string
         std::string                              ,                                    // (input) keyword
         char                                     ,                                    // (input) field delimiter
@@ -704,26 +704,26 @@ bool Get_After_Keyword(                                                         
         );
 
 // returns true if key_ is present in line ------------------------------------------ //
-inline bool Keyword_In_String(                                                 // SEARCH KEYWORD IN STRING
+inline bool keywordInString(                                                 // SEARCH KEYWORD IN STRING
         std::string                              ,                                    // (input) input string            
         std::string                                                                   // (input) keyword
         ) ;
 
 // converts a string to fundamental data types and vectors or arrays of them -------- //
 template <class T>
-void convert_string(                                                                  // EXTRACT SCALAR FROM STRING
+void convertString(                                                                  // EXTRACT SCALAR FROM STRING
         std::string                              ,                                    // (input) input string
         T                                       &                                     // (input/output) scalar
         );
 
 template <class T>
-void  convert_string(                                                                 // EXTRACT DATA FROM STRING AND STORE THEM INTO VECTOR
+void  convertString(                                                                 // EXTRACT DATA FROM STRING AND STORE THEM INTO VECTOR
         std::string                              ,                                    // (input) string
         std::vector<T>                          &                                     // (input/output) vector used to store string
         );
 
 template <class T, size_t n>
-void  convert_string(                                                                 // EXTRACT DATA FROM STRING AND STORE THEM INTO ARRAY
+void  convertString(                                                                 // EXTRACT DATA FROM STRING AND STORE THEM INTO ARRAY
         std::string                              ,                                    // (input) string
         std::array<T,n>                         &                                     // (input/output) array used to store data
         );

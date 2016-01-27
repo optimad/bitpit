@@ -15,36 +15,37 @@
 // INCLUDES                                                                   //
 // ========================================================================== //
 # include "BitPit_common.hpp"
-# include "STL_IOFunct.hpp"
+# include "STL.hpp"
 
 // ========================================================================== //
 // IMPLEMENTATIONS                                                            //
 // ========================================================================== //
 using namespace std;
+
 /*!
  * @ingroup STereoLithography
  * @{
  */
 
 /*!
-    \class STL_obj
+    \class STLObj
     \brief Interface to STL I/O function
 
     This class has been designed to allow an easy interface between end-user
     and STL I/O functions.
 */
 
-// Class STL_obj methods ==================================================== //
+// Class STLObj methods ==================================================== //
 
 // Constructors ------------------------------------------------------------- //
 
 // -------------------------------------------------------------------------- //
 /*!
-    Default constructor for class STL_obj.
+    Default constructor for class STLObj.
 
     Initialize an empty interface to stl file.
 */
-STL_obj::STL_obj(
+STLObj::STLObj(
     void
 ) {
 
@@ -76,13 +77,13 @@ return; };
 
 // -------------------------------------------------------------------------- //
 /*!
-    Constructor #1 for class STL_obj.
+    Constructor #1 for class STLObj.
     Initialize an interface to stl file with name specified in filename.
 
     \param[in] filename stl file name
     \param[in] filetype boolean flag for ascii (false) or binary (true) stl file
 */
-STL_obj::STL_obj(
+STLObj::STLObj(
     string                              filename,
     bool                                filetype
 ) {
@@ -121,7 +122,7 @@ return; };
 
     \param[in] mode opening mode ("in": input, "out": output, "app": append mode)
 */
-void STL_obj::open(
+void STLObj::open(
     string                              mode
 ) {
 
@@ -202,7 +203,7 @@ return; };
     \param[in] mode opening mode used to open stream ("in": input, "out": output,
     "app": append)
 */
-void STL_obj::close(
+void STLObj::close(
     string                              mode
 ) {
 
@@ -242,7 +243,7 @@ return; };
     Clear info and error flags gathered on the stl file associated
     to the interface.
 */
-void STL_obj::clear(
+void STLObj::clear(
     void
 ) {
 
@@ -282,7 +283,7 @@ return; }
 
     \param[in,out] out output stream
 */
-void STL_obj::display(
+void STLObj::display(
     ostream                             &out
 ) {
 
@@ -355,7 +356,7 @@ return; };
 /*!
     Scan and gather info from the stl file associated to the interface
 */
-void STL_obj::scan(
+void STLObj::scan(
     void
 ) {
 
@@ -383,11 +384,11 @@ open("in");
 // SCAN STL FILE                                                              //
 // ========================================================================== //
 if (stl_type) {
-    err = Scan_STL_bin(ifile_handle, data.solid_names, data.solid_facets);
+    err = STLUtils::scanBINARY(ifile_handle, data.solid_names, data.solid_facets);
     data.n_solids = data.solid_names.size();
 }
 else {
-    err = Scan_STL_ASCII(ifile_handle, data.solid_names, data.solid_facets);
+    err = STLUtils::scanASCII(ifile_handle, data.solid_names, data.solid_facets);
     data.n_solids = data.solid_names.size();
 }
 
@@ -402,7 +403,7 @@ return; }
 /*!
     Scan and check for format errors in the stl file associated to the interface
 */
-void STL_obj::check(
+void STLObj::check(
     void
 ) {
 
@@ -429,8 +430,8 @@ open("in");
 // ========================================================================== //
 // CHECK STL FILE                                                             //
 // ========================================================================== //
-if (stl_type) { Check_STL_bin(ifile_handle, stl_errors); }
-else          { Check_STL_ASCII(ifile_handle, stl_errors); }
+if (stl_type) { STLUtils::checkBINARY(ifile_handle, stl_errors); }
+else          { STLUtils::checkASCII(ifile_handle, stl_errors); }
 
 // ========================================================================== //
 // CLOSE INPUT STREAM                                                         //
@@ -459,7 +460,7 @@ return; };
     connectivity entries for the facets acquired from the stl file. New connectivity entries
     are appended at the end of T.
 */
-void STL_obj::load(
+void STLObj::load(
     int                                 &nV,
     int                                 &nT,
     vector<vector<double> >             &V,
@@ -486,8 +487,8 @@ if (err == 1) { return; }
 // ========================================================================== //
 // READ STL DATA                                                              //
 // ========================================================================== //
-if (stl_type)   { Read_STL_bin(ifile_handle, nV, nT, V, N, T); }
-else            { Read_STL_ASCII(ifile_handle, nV, nT, V, N, T); }
+if (stl_type)   { STLUtils::readBINARY(ifile_handle, nV, nT, V, N, T); }
+else            { STLUtils::readASCII(ifile_handle, nV, nT, V, N, T); }
 
 // ========================================================================== //
 // CLOSE INPUT STREAM                                                         //
@@ -499,7 +500,7 @@ return; };
 // -------------------------------------------------------------------------- //
 /*!
     Load solid data from the stl file associated to the interface. Overloading of
-    member function STL_obj::load() for container vector<array<double, 3>>
+    member function STLObj::load() for container vector<array<double, 3>>
 
     \param[in,out] nV on input stores the current number of vertices hosted in V.
     On output stores the input values incremented by the number
@@ -517,7 +518,7 @@ return; };
     connectivity entries for the facets acquired from the stl file. New connectivity entries
     are appended at the end of T.
 */
-void STL_obj::load(
+void STLObj::load(
     int                                 &nV,
     int                                 &nT,
     vector<array<double,3> >            &V,
@@ -544,8 +545,8 @@ if (err == 1) { return; }
 // ========================================================================== //
 // READ STL DATA                                                              //
 // ========================================================================== //
-if (stl_type)   { Read_STL_bin(ifile_handle, nV, nT, V, N, T); }
-else            { Read_STL_ASCII(ifile_handle, nV, nT, V, N, T); }
+if (stl_type)   { STLUtils::readBINARY(ifile_handle, nV, nT, V, N, T); }
+else            { STLUtils::readASCII(ifile_handle, nV, nT, V, N, T); }
 
 // ========================================================================== //
 // CLOSE INPUT STREAM                                                         //
@@ -559,9 +560,9 @@ return; };
 
 // -------------------------------------------------------------------------- //
 /*!
-    Dummy function for recursive variadic template STL_obj::save().
+    Dummy function for recursive variadic template STLObj::save().
 */
-void STL_obj::save(
+void STLObj::save(
     void
 ) {
 
@@ -584,9 +585,9 @@ return; };
 
 // -------------------------------------------------------------------------- //
 /*!
-    Dummy function for recursive variadic template STL_obj::load().
+    Dummy function for recursive variadic template STLObj::load().
 */
-void STL_obj::load(
+void STLObj::load(
     void
 ) {
 
@@ -614,7 +615,7 @@ return; };
 // Scanning routines ======================================================== //
 
 /*!
- * @ingroup STereoLithography
+ * @ingroup STLUtils
  * @{
  */
 
@@ -631,7 +632,7 @@ return; };
         err = 0: no error(s) encountered
         err = 1: failed to scan stl file.
 */
-unsigned int Scan_STL_ASCII(
+unsigned int STLUtils::scanASCII(
     ifstream                            &file_handle,
     vector<string>                      &solid_names,
     vector<int>                         &solid_facets
@@ -702,7 +703,7 @@ while (!file_handle.eof()) {
             solid_names.push_back(trim(word));
 
             // Get solid info
-            Scan_STLsolid_ASCII(file_handle, nF);
+            STLUtils::scanSolidASCII(file_handle, nF);
             solid_facets.push_back(nF);
             
         }
@@ -729,7 +730,7 @@ return(0); };
         err = 0: no error(s) encountered
         err = 1: failed to scan stl file.
 */
-unsigned int Scan_STL_bin(
+unsigned int STLUtils::scanBINARY(
     ifstream                            &file_handle,
     vector<string>                      &solid_names,
     vector<int>                         &solid_facets
@@ -794,7 +795,7 @@ return(0); };
         err = 0: no error(s) encountered
         err = 1: failed to scan stl file.
 */
-unsigned int Scan_STLsolid_ASCII(
+unsigned int STLUtils::scanSolidASCII(
     ifstream                            &file_handle,
     int                                 &nT
 ) {
@@ -881,7 +882,7 @@ return(0); };
         err = 0: no error(s) encountered
         err = 1: failed to scan/check stl file
 */
-unsigned int Check_STL_ASCII(
+unsigned int STLUtils::checkASCII(
     ifstream                            &file_handle,
     vector<vector<bool> >               &err_map
 ) {
@@ -927,7 +928,7 @@ while (getline(file_handle, line)) {
     if ((sline >> word) && (word.compare("solid") == 0)) {
         vector<bool>    _map(6, false);
         n_solid++;
-        Check_STLsolid_ASCII(file_handle, _map);
+        STLUtils::checkSolidASCII(file_handle, _map);
         err_map.push_back(_map);
     }
 
@@ -956,7 +957,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to scan/check stl file
 */
-unsigned int Check_STLsolid_ASCII(
+unsigned int STLUtils::checkSolidASCII(
     ifstream                            &file_handle,
     vector<bool>                        &err_map
 ) {
@@ -1003,7 +1004,7 @@ while ((!file_handle.eof())
         // Look for keyword "facet"
         if (word.compare("facet") == 0) {
             file_handle.seekg(backup_pos);
-            Check_STLfacet_ASCII(file_handle, err_map);
+            STLUtils::checkFacetASCII(file_handle, err_map);
         }
 
         // Get next line
@@ -1040,7 +1041,7 @@ return(0); };
         err = 0: no error(s) encountered
         err = 1: failed to scan/check stl file
 */
-unsigned int Check_STLfacet_ASCII(
+unsigned int STLUtils::checkFacetASCII(
     ifstream                            &file_handle,
     vector<bool>                        &err_map
 ) {
@@ -1154,13 +1155,13 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to scan/check stl file
 */
-unsigned int Check_STL_bin(
+unsigned int STLUtils::checkBINARY(
     ifstream                            &file_handle,
     vector<vector<bool> >               &err_map
 ) {
 
 // ========================================================================== //
-// unsigned int Check_STL_bin(                                                //
+// unsigned int checkBINARY(                                                //
 //     ifstream                  &file_handle,                                //
 //     bvector2D                 &err_map)                                    //
 //                                                                            //
@@ -1291,7 +1292,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
 */  
-unsigned int Read_STLfacet_ASCII(
+unsigned int STLUtils::readFacetASCII(
     ifstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -1374,7 +1375,7 @@ return(0); }
 // -------------------------------------------------------------------------- //
 /*!
     Read STL facet data from ascii stl file.
-    Overloading of Read_STLfacet_ASCII() for vector<array<double, 3> > container.
+    Overloading of readFacetASCII() for vector<array<double, 3> > container.
 
     \param[in,out] file_handle, input stream from stl file
     \param[in,out] nV on input stores the number of vertices previously acquired from
@@ -1396,7 +1397,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
 */  
-unsigned int Read_STLfacet_ASCII(
+unsigned int STLUtils::readFacetASCII(
     ifstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -1502,7 +1503,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
 */
-unsigned int Read_STLsolid_ASCII(
+unsigned int STLUtils::readSolidASCII(
     ifstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -1576,7 +1577,7 @@ if (!check) { return(0); }
 // Scan stl solid ----------------------------------------------------------- //
 file_handle.clear();
 file_handle.seekg(start_pos);
-Scan_STLsolid_ASCII(file_handle, nt);
+STLUtils::scanSolidASCII(file_handle, nt);
 
 // ========================================================================== //
 // READ SOLID DATA                                                            //
@@ -1605,7 +1606,7 @@ while ((!file_handle.eof())
     // Look for keyword "facet"
     if ((sline >> word) && (word.compare("facet") == 0)) {
         file_handle.seekg(current_pos);
-        Read_STLfacet_ASCII(file_handle, nV, nT, V, N, T);
+        STLUtils::readFacetASCII(file_handle, nV, nT, V, N, T);
     }
 } //next line
 if (word.compare("endsolid") != 0) {
@@ -1617,7 +1618,7 @@ return(0); }
 
 // -------------------------------------------------------------------------- //
 /*!
-    Read solid data from ascii stl file. Overloading of Read_STLsolid_ASCII()
+    Read solid data from ascii stl file. Overloading of readSolidASCII()
     for vector<array<double, 3> > container.
 
     \param[in,out] file_handle stream from stl file
@@ -1642,7 +1643,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
 */
-unsigned int Read_STLsolid_ASCII(
+unsigned int STLUtils::readSolidASCII(
     ifstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -1716,7 +1717,7 @@ if (!check) { return(0); }
 // Scan stl solid ----------------------------------------------------------- //
 file_handle.clear();
 file_handle.seekg(start_pos);
-Scan_STLsolid_ASCII(file_handle, nt);
+STLUtils::scanSolidASCII(file_handle, nt);
 
 // ========================================================================== //
 // READ SOLID DATA                                                            //
@@ -1748,7 +1749,7 @@ while ((!file_handle.eof())
     // Look for keyword "facet"
     if ((sline >> word) && (word.compare("facet") == 0)) {
         file_handle.seekg(current_pos);
-        Read_STLfacet_ASCII(file_handle, nV, nT, V, N, T);
+        readFacetASCII(file_handle, nV, nT, V, N, T);
     }
 } //next line
 if (word.compare("endsolid") != 0) {
@@ -1783,7 +1784,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
 */
-unsigned int Read_STL_ASCII(
+unsigned int STLUtils::readASCII(
     ifstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -1829,7 +1830,7 @@ while (getline(file_handle, line)) {
     if ((sline >> word) && (word.compare("solid") == 0)) {
         file_handle.clear();
         file_handle.seekg(current_pos);
-        Read_STLsolid_ASCII(file_handle, nV, nT, V, N, T, "");
+        readSolidASCII(file_handle, nV, nT, V, N, T, "");
     }
     current_pos = file_handle.tellg();
 }
@@ -1846,7 +1847,7 @@ return(0); }
 
 // -------------------------------------------------------------------------- //
 /*!
-    Read data from ascii stl file. Overloading of Read_STL_ASCII()
+    Read data from ascii stl file. Overloading of readASCII()
     for container vector<array<double,3> >
 
     \param[in,out] file_handle stream from stl file
@@ -1870,7 +1871,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
 */
-unsigned int Read_STL_ASCII(
+unsigned int STLUtils::readASCII(
     ifstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -1916,7 +1917,7 @@ while (getline(file_handle, line)) {
     if ((sline >> word) && (word.compare("solid") == 0)) {
         file_handle.clear();
         file_handle.seekg(current_pos);
-        Read_STLsolid_ASCII(file_handle, nV, nT, V, N, T, "");
+        STLUtils::readSolidASCII(file_handle, nV, nT, V, N, T, "");
     }
     current_pos = file_handle.tellg();
 }
@@ -1955,7 +1956,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
 */
-unsigned int Read_STL_bin(
+unsigned int STLUtils::readBINARY(
     ifstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -1996,7 +1997,7 @@ start_pos = file_handle.tellg();
 file_handle.seekg(0);
 
 // ========================================================================== //
-// SCAN BINARY STL                                                            //
+// SCAN _BINARY STL                                                            //
 // ========================================================================== //
 
 // Title
@@ -2063,7 +2064,7 @@ return(0); }
 
 // -------------------------------------------------------------------------- //
 /*!
-    Read data from binary stl file. Overloading of Read_STL_bin() for container
+    Read data from binary stl file. Overloading of readBINARY() for container
     vector<array<double,3> >
 
     \param[in,out] file_handle stream from stl file
@@ -2087,7 +2088,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
 */
-unsigned int Read_STL_bin(
+unsigned int STLUtils::readBINARY(
     ifstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -2128,7 +2129,7 @@ start_pos = file_handle.tellg();
 file_handle.seekg(0);
 
 // ========================================================================== //
-// SCAN BINARY STL                                                            //
+// SCAN _BINARY STL                                                            //
 // ========================================================================== //
 
 // Title
@@ -2215,7 +2216,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to write data to output stream
 */
-unsigned int Write_STLsolid_ASCII(
+unsigned int STLUtils::writeSolidASCII(
     ofstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -2307,7 +2308,7 @@ return(err); };
 
 // -------------------------------------------------------------------------- //
 /*!
-    Write solid data to ascii stl file. Overloading of Write_STLsolid_ASCII() for
+    Write solid data to ascii stl file. Overloading of writeSolidASCII() for
     container vector<array<double, 3> >.
 
     \param[in,out] file_handle stream to stl file
@@ -2322,7 +2323,7 @@ return(err); };
         err = 0: no error(s) encountered
         err = 1: failed to write data to output stream
 */
-unsigned int Write_STLsolid_ASCII(
+unsigned int STLUtils::writeSolidASCII(
     ofstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -2428,7 +2429,7 @@ return(err); };
         err = 0: no error(s) encountered
         err = 1: failed to write data to output stream
 */
-unsigned int Write_STLsolid_bin(
+unsigned int STLUtils::writeSolidBINARY(
     ofstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -2512,7 +2513,7 @@ return(0); };
 
 // -------------------------------------------------------------------------- //
 /*!
-    Write solid data to binary stl file. Overloading of Write_STLsolid_bin()
+    Write solid data to binary stl file. Overloading of writeSolidBINARY()
     for container vector<array<double, 3> >
 
     \param[in,out] file_handle stream to stl file
@@ -2527,7 +2528,7 @@ return(0); };
         err = 0: no error(s) encountered
         err = 1: failed to write data to output stream
 */
-unsigned int Write_STLsolid_bin(
+unsigned int STLUtils::writeSolidBINARY(
     ofstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,

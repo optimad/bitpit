@@ -127,7 +127,7 @@ return(ltrim(rtrim(s))); };
 
     \result returns a string storing the input number in the format 000xxx.
 */
- inline std::string ZeroPadNumber(
+ inline std::string zeroPadNumber(
     int nchar,
     int num
 ) {
@@ -158,7 +158,7 @@ return (ss.str()); };
     
     \result boolean flag (true) if the keyword has been found, (false) otherwise.
 */
- inline bool Keyword_In_String( std::string line_, std::string key_){
+ inline bool keywordInString( std::string line_, std::string key_){
   bool exist= ( line_.find( key_) != std::string::npos ) ;
   return exist  ;
 };
@@ -176,7 +176,7 @@ return (ss.str()); };
     \param[in,out] output_ variable storing the value read from string.
 */
 template <class T>
-void  convert_string( std::string input_, T &output_ ){
+void  convertString( std::string input_, T &output_ ){
 
   std::vector<T>    temp_;
   T            x_;
@@ -227,7 +227,7 @@ void  convert_string( std::string input_, T &output_ ){
     \param[in,out] output_ vector storing the value extracted from string.
 */
 template <class T>
-void  convert_string( std::string input_, std::vector<T> &output_){
+void  convertString( std::string input_, std::vector<T> &output_){
 
   std::vector<T>    temp_;
   T            x_;
@@ -265,7 +265,7 @@ void  convert_string( std::string input_, std::vector<T> &output_){
     \param[in,out] output_ array storing the value extracted from string.
 */
 template <class T, size_t n>
-void  convert_string( std::string input_, std::array<T,n> &output_) {
+void  convertString( std::string input_, std::array<T,n> &output_) {
 
   std::vector<T>    temp_;
   T            x_;

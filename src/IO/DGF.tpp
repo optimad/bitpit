@@ -15,12 +15,8 @@
 // TEMPLATE IMPLEMENTATIONS                                                   //
 // ========================================================================== //
 
-// class DGF_obj templated methods ========================================== //
+// class DGFObj templated methods ========================================== //
 
-/*!
-    \ingroup DuneGridFormat
-    /{
- */
 
 // -------------------------------------------------------------------------- //
 /*!
@@ -35,7 +31,7 @@
     \param[in] others other data to be loaded.
 */ 
 template< typename T, typename ... T2 >
-void DGF_obj::load_vdata(
+void DGFObj::loadVData(
     std::string                  data_name,
     int                         &n,
     std::vector< T >            &data,
@@ -60,12 +56,12 @@ open("in");
 // ========================================================================== //
 // READ DATA SET                                                              //
 // ========================================================================== //
-err = Read_DGF_VERTEXDATA(ifile_handle, n, data, data_name);
+err = DGFUtils::readVertexData(ifile_handle, n, data, data_name);
 
 // ========================================================================== //
 // ITERATIVELY READ OTHER DATASET                                             //
 // ========================================================================== //
-load_vdata(others ...);
+loadVData(others ...);
 
 return; };
 
@@ -82,7 +78,7 @@ return; };
     \param[in] others other data to be loaded.
 */
 template< typename T, typename ... T2 >
-void DGF_obj::load_sdata(
+void DGFObj::loadSData(
     std::string                  data_name,
     int                         &n,
     std::vector< T >            &data,
@@ -107,12 +103,12 @@ open("in");
 // ========================================================================== //
 // READ DATA SET                                                              //
 // ========================================================================== //
-err = Read_DGF_SIMPLEXDATA(ifile_handle, n, data, data_name);
+err = DGFUtils::readSimplexData(ifile_handle, n, data, data_name);
 
 // ========================================================================== //
 // ITERATIVELY READ OTHER DATASET                                             //
 // ========================================================================== //
-load_sdata(others ...);
+loadSData(others ...);
 
 return; };
 
@@ -126,7 +122,7 @@ return; };
     \param[in] others other data to be exported.
 */ 
 template< typename T, typename ... T2 >
-void DGF_obj::append_vdata(
+void DGFObj::appendVData(
     std::string                  data_name,
     int                         &n,
     std::vector< T >            &data,
@@ -151,12 +147,12 @@ open("app");
 // ========================================================================== //
 // SAVE DATA SET                                                              //
 // ========================================================================== //
-err = Write_DGF_VERTEXDATA(ofile_handle, n, data, data_name);
+err = DGFUtils::writeVertexData(ofile_handle, n, data, data_name);
 
 // ========================================================================== //
 // RECURSIVELY SAVE OTHERS DATASETS                                           //
 // ========================================================================== //
-append_vdata(others ...);
+appendVData(others ...);
 
 return; }
 
@@ -170,7 +166,7 @@ return; }
     \param[in] others other data to be exported.
 */ 
 template< typename T, typename ... T2 >
-void DGF_obj::append_sdata(
+void DGFObj::appendSData(
     std::string                  data_name,
     int                         &n,
     std::vector< T >            &data,
@@ -195,12 +191,12 @@ open("app");
 // ========================================================================== //
 // SAVE DATA SET                                                              //
 // ========================================================================== //
-err = Write_DGF_SIMPLEXDATA(ofile_handle, n, data, data_name);
+err = DGFUtils::writeSimplexData(ofile_handle, n, data, data_name);
 
 // ========================================================================== //
 // RECURSIVELY SAVE OTHERS DATASETS                                           //
 // ========================================================================== //
-append_sdata(others ...);
+appendSData(others ...);
 
 return; }
 
@@ -210,10 +206,13 @@ return; }
 
 // Input routines =========================================================== //
 
+/*!
+  \ingroup DGFUtils
+  \{
+*/
 
 // -------------------------------------------------------------------------- //
 /*!
-    \ingroup DuneGridFormat
     Read data block from dgf file.
 
     \param[in,out] file_handle input stream from dgf file
@@ -225,7 +224,7 @@ return; }
         err = 1: failed to load data from dgf file
 */ 
 template< typename T >
-unsigned int Read_DGF_data(
+unsigned int DGFUtils::readData(
     std::ifstream               &file_handle,
     int                         &N,
     std::vector< T >            &Data
@@ -254,7 +253,7 @@ if (!file_handle.good()) { return(1); }
 // ========================================================================== //
 file_handle.clear();
 start_pos = file_handle.tellg();
-Scan_DGF_data(file_handle, n);
+DGFUtils::scanData(file_handle, n);
 file_handle.clear();
 file_handle.seekg(start_pos);
 
@@ -303,7 +302,7 @@ return(0); }
 
 // -------------------------------------------------------------------------- //
 /*!
-    \ingroup DuneGridFormat
+    \ingroup DGFUtils
     Read vertex data from dgf file.
 
     \param[in,out] file_handle input stream from dgf file
@@ -319,7 +318,7 @@ return(0); }
         err = 1: failed to load data from dgf file
 */ 
 template <typename T>
-unsigned int Read_DGF_VERTEXDATA(
+unsigned int DGFUtils::readVertexData(
     std::ifstream               &file_handle,
     int                         &n,
     std::vector< T >            &data,
@@ -392,14 +391,14 @@ while (start_pos != current_pos) {
 // LOAD DATA                                                                  //
 // ========================================================================== //
 if (check) {
-    Read_DGF_data(file_handle, n, data);
+    DGFUtils::readData(file_handle, n, data);
 }
 
 return(0); }
 
 // -------------------------------------------------------------------------- //
 /*!
-    \ingroup DuneGridFormat
+    \ingroup DGFUtils
     Read cell data from dgf file.
 
     \param[in,out] file_handle input stream from dgf file
@@ -415,7 +414,7 @@ return(0); }
         err = 1: failed to load data from dgf file
 */
 template <typename T>
-unsigned int Read_DGF_SIMPLEXDATA(
+unsigned int DGFUtils::readSimplexData(
     std::ifstream               &file_handle,
     int                         &n,
     std::vector< T >            &data,
@@ -488,7 +487,7 @@ while (start_pos != current_pos) {
 // LOAD DATA                                                                  //
 // ========================================================================== //
 if (check) {
-    Read_DGF_data(file_handle, n, data);
+    DGFUtils::readData(file_handle, n, data);
 }
 
 return(0); }
@@ -497,7 +496,7 @@ return(0); }
 
 // -------------------------------------------------------------------------- //
 /*!
-    \ingroup DuneGridFormat
+    \ingroup DGFUtils
     Write data block to dgf file.
 
     \param[in,out] file_handle output stream to dgf file
@@ -509,7 +508,7 @@ return(0); }
         err = 1: failed to write data to dgf file
 */ 
 template < typename T >
-unsigned int Write_DGF_data(
+unsigned int DGFUtils::writeData(
     std::ofstream               &file_handle,
     int                         &N,
     std::vector< T >            &Data
@@ -542,7 +541,7 @@ return(0); }
 
 // -------------------------------------------------------------------------- //
 /*!
-    \ingroup DuneGridFormat
+    \ingroup DGFUtils
     Write vertex data to dgf file.
 
     \param[in,out] file_handle output stream to dgf file
@@ -555,7 +554,7 @@ return(0); }
         err = 1: failed to load data from dgf file
 */ 
 template < typename T >
-unsigned int Write_DGF_VERTEXDATA(
+unsigned int DGFUtils::writeVertexData(
     std::ofstream               &file_handle,
     int                         &N,
     std::vector< T >            &Data,
@@ -591,13 +590,13 @@ header = trim(header);
 file_handle << header << std::endl;
 
 // Export data -------------------------------------------------------------- //
-err = Write_DGF_data(file_handle, N, Data);
+err = DGFUtils::writeData(file_handle, N, Data);
 
 return(err); };
 
 // -------------------------------------------------------------------------- //
 /*!
-    \ingroup DuneGridFormat
+    \ingroup DGFUtils
     Write cell data to dgf file.
 
     \param[in,out] file_handle output stream to dgf file
@@ -610,7 +609,7 @@ return(err); };
         err = 1: failed to load data from dgf file
 */ 
 template < typename T >
-unsigned int Write_DGF_SIMPLEXDATA(
+unsigned int DGFUtils::writeSimplexData(
     std::ofstream               &file_handle,
     int                         &N,
     std::vector< T >            &Data,
@@ -646,7 +645,7 @@ header = trim(header);
 file_handle << header << std::endl;
 
 // Export data -------------------------------------------------------------- //
-err = Write_DGF_data(file_handle, N, Data);
+err = DGFUtils::writeData(file_handle, N, Data);
 
 return(err); };
 

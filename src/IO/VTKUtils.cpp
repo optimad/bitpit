@@ -94,13 +94,13 @@ bool VTKUtils::convertStringToDataArray( const std::string &line_, VTKField &dat
     bool  success(true) ;
 
 
-    if( Keyword_In_String( line_, "<DataArray ") ){  
-        success = success && Get_After_Keyword( line_, "type=", '\"', type_) ;
-        success = success && Get_After_Keyword( line_, "Name=", '\"', name_) ;
-        success = success && Get_After_Keyword( line_, "format=", '\"', code_) ;
+    if( keywordInString( line_, "<DataArray ") ){  
+        success = success && getAfterKeyword( line_, "type=", '\"', type_) ;
+        success = success && getAfterKeyword( line_, "Name=", '\"', name_) ;
+        success = success && getAfterKeyword( line_, "format=", '\"', code_) ;
 
-        if( Get_After_Keyword( line_, "NumberOfComponents=", '\"', comp_)  ){
-            convert_string( comp_, components_ ) ;
+        if( getAfterKeyword( line_, "NumberOfComponents=", '\"', comp_)  ){
+            convertString( comp_, components_ ) ;
         };
 
         if(components_==3)
@@ -115,8 +115,8 @@ bool VTKUtils::convertStringToDataArray( const std::string &line_, VTKField &dat
         data_.setCodification(codex) ;
 
         if(code_=="appended") {
-            if( Get_After_Keyword( line_, "offset=", '\"', offs_) ){
-                convert_string( offs_, offset_ ) ;
+            if( getAfterKeyword( line_, "offset=", '\"', offs_) ){
+                convertString( offs_, offset_ ) ;
                 data_.setOffset(offset_) ;
             }
             else{

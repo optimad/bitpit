@@ -383,8 +383,8 @@ string         selection;
     cout << "  'abs' operator" << endl;
     cout << "  'pow' operator" << endl;
     cout << "  'norm' operator" << endl;
-    cout << "  'Dot_Product' operator" << endl;
-    cout << "  'Cross_Product' operator" << endl;
+    cout << "  'dotProduct' operator" << endl;
+    cout << "  'crossProduct' operator" << endl;
     cin  >> selection;
 
 }
@@ -686,19 +686,19 @@ else if (selection.compare("norm") == 0) {
     // norm of vector< double > ----------------------------------------------------- //
     cout << "norm(x,2) = " << norm(x,2) << endl;
     cout << "norm(x,3) = " << norm(x,3) << endl;
-    cout << "norm_inf(x) = " << norm_inf(x) << endl;
+    cout << "normInf(x) = " << normInf(x) << endl;
 
     // norm of vector< int > -------------------------------------------------------- //
     cout << "norm(i,2) = " << norm(i,2) << endl;
     cout << "norm(i,3) = " << norm(i,3) << endl;
-    cout << "norm_inf(i) = " << norm_inf(i) << endl;
+    cout << "normInf(i) = " << normInf(i) << endl;
 
 }
 
 // ================================================================================== //
-// OPERATOR "Dot_Product"                                                             //
+// OPERATOR "dotProduct"                                                             //
 // ================================================================================== //
-else if (selection.compare("Dot_Product") == 0) {
+else if (selection.compare("dotProduct") == 0) {
 
     // Scope variables -------------------------------------------------------------- //
     dvector1D          x(3, 0.0), y(3, 0.0);
@@ -716,18 +716,18 @@ else if (selection.compare("Dot_Product") == 0) {
     cout << "i = " << i << endl;
     cout << "j = " << i << endl;
 
-    // Dot_Product of vector< double > ---------------------------------------------- //
-    cout << "Dot_Product(x,y) = " << Dot_Product(x,y) << endl;
+    // dotProduct of vector< double > ---------------------------------------------- //
+    cout << "dotProduct(x,y) = " << dotProduct(x,y) << endl;
 
-    // Dot_Product of vector< int > ------------------------------------------------- //
-    cout << "Dot_Product(i,j) = " << Dot_Product(i,j) << endl;
+    // dotProduct of vector< int > ------------------------------------------------- //
+    cout << "dotProduct(i,j) = " << dotProduct(i,j) << endl;
 
 }
 
 // ================================================================================== //
-// OPERATOR "Cross_Product"                                                           //
+// OPERATOR "crossProduct"                                                           //
 // ================================================================================== //
-else if (selection.compare("Cross_Product") == 0) {
+else if (selection.compare("crossProduct") == 0) {
 
     // Scope variables -------------------------------------------------------------- //
     dvector1D          x(3, 0.0), y(3, 0.0);
@@ -745,13 +745,13 @@ else if (selection.compare("Cross_Product") == 0) {
     cout << "i = " << i << endl;
     cout << "j = " << i << endl;
 
-    // Dot_Product of vector< double > ---------------------------------------------- //
-    cout << "Cross_Product(x,y) = " << Cross_Product(x,y) << endl;
-    cout << "Cross_Product(x,x) = " << Cross_Product(x,x) << endl;
+    // dotProduct of vector< double > ---------------------------------------------- //
+    cout << "crossProduct(x,y) = " << crossProduct(x,y) << endl;
+    cout << "crossProduct(x,x) = " << crossProduct(x,x) << endl;
 
-    // Dot_Product of vector< int > ------------------------------------------------- //
-    cout << "Cross_Product(i,j) = " << Cross_Product(i,j) << endl;
-    cout << "Cross_Product(i,i) = " << Cross_Product(i,i) << endl;
+    // dotProduct of vector< int > ------------------------------------------------- //
+    cout << "crossProduct(i,j) = " << crossProduct(i,j) << endl;
+    cout << "crossProduct(i,i) = " << crossProduct(i,i) << endl;
 
 }
 
@@ -1117,8 +1117,8 @@ string         selection;
     cout << "  'abs' operator" << endl;
     cout << "  'pow' operator" << endl;
     cout << "  'norm' operator" << endl;
-    cout << "  'Dot_Product' operator" << endl;
-    cout << "  'Cross_Product' operator" << endl;
+    cout << "  'dotProduct' operator" << endl;
+    cout << "  'crossProduct' operator" << endl;
     cin  >> selection;
 
 }
@@ -1409,19 +1409,19 @@ else if (selection.compare("norm") == 0) {
     // norm of vector< double > ----------------------------------------------------- //
     cout << "norm(x,2) = " << norm(x,2) << endl;
     cout << "norm(x,3) = " << norm(x,3) << endl;
-    cout << "norm_inf(x) = " << norm_inf(x) << endl;
+    cout << "normInf(x) = " << normInf(x) << endl;
 
     // norm of vector< int > -------------------------------------------------------- //
     cout << "norm(i,2) = " << norm(i,2) << endl;
     cout << "norm(i,3) = " << norm(i,3) << endl;
-    cout << "norm_inf(i) = " << norm_inf(i) << endl;
+    cout << "normInf(i) = " << normInf(i) << endl;
 
 }
 
 // ================================================================================== //
-// OPERATOR "Dot_Product"                                                             //
+// OPERATOR "dotProduct"                                                             //
 // ================================================================================== //
-else if (selection.compare("Dot_Product") == 0) {
+else if (selection.compare("dotProduct") == 0) {
 
     // Scope variables -------------------------------------------------------------- //
     array<double, 3>   x, y;
@@ -1439,18 +1439,18 @@ else if (selection.compare("Dot_Product") == 0) {
     cout << "i = " << i << endl;
     cout << "j = " << i << endl;
 
-    // Dot_Product of vector< double > ---------------------------------------------- //
-    cout << "Dot_Product(x,y) = " << Dot_Product(x,y) << endl;
+    // dotProduct of vector< double > ---------------------------------------------- //
+    cout << "dotProduct(x,y) = " << dotProduct(x,y) << endl;
 
-    // Dot_Product of vector< int > ------------------------------------------------- //
-    cout << "Dot_Product(i,j) = " << Dot_Product(i,j) << endl;
+    // dotProduct of vector< int > ------------------------------------------------- //
+    cout << "dotProduct(i,j) = " << dotProduct(i,j) << endl;
 
 }
 
 // ================================================================================== //
-// OPERATOR "Cross_Product"                                                           //
+// OPERATOR "crossProduct"                                                           //
 // ================================================================================== //
-else if (selection.compare("Cross_Product") == 0) {
+else if (selection.compare("crossProduct") == 0) {
 
     // Scope variables -------------------------------------------------------------- //
     dvector1D          x(3, 0.0), y(3, 0.0);
@@ -1468,13 +1468,13 @@ else if (selection.compare("Cross_Product") == 0) {
     cout << "i = " << i << endl;
     cout << "j = " << i << endl;
 
-    // Dot_Product of vector< double > ---------------------------------------------- //
-    cout << "Cross_Product(x,y) = " << Cross_Product(x,y) << endl;
-    cout << "Cross_Product(x,x) = " << Cross_Product(x,x) << endl;
+    // dotProduct of vector< double > ---------------------------------------------- //
+    cout << "crossProduct(x,y) = " << crossProduct(x,y) << endl;
+    cout << "crossProduct(x,x) = " << crossProduct(x,x) << endl;
 
-    // Dot_Product of vector< int > ------------------------------------------------- //
-    cout << "Cross_Product(i,j) = " << Cross_Product(i,j) << endl;
-    cout << "Cross_Product(i,i) = " << Cross_Product(i,i) << endl;
+    // dotProduct of vector< int > ------------------------------------------------- //
+    cout << "crossProduct(i,j) = " << crossProduct(i,j) << endl;
+    cout << "crossProduct(i,i) = " << crossProduct(i,i) << endl;
 
 }
 

@@ -849,23 +849,23 @@ void vectorMathFunct_Ex(
     // norm of vector< double > ----------------------------------------------------- //
     cout << "  norm(x,2) = " << norm(x,2) << endl;
     cout << "  norm(x,3) = " << norm(x,3) << endl;
-    cout << "  norm_inf(x) = " << norm_inf(x) << endl;
+    cout << "  normInf(x) = " << normInf(x) << endl;
 
     // norm of vector< int > -------------------------------------------------------- //
     cout << "  norm(i,2) = " << norm(i,2) << endl;
     cout << "  norm(i,3) = " << norm(i,3) << endl;
-    cout << "  norm_inf(i) = " << norm_inf(i) << endl;
+    cout << "  normInf(i) = " << normInf(i) << endl;
     cout << endl;
 
 }
 
 // ================================================================================== //
-// OPERATOR "Dot_Product"                                                             //
+// OPERATOR "dotProduct"                                                             //
 // ================================================================================== //
 {
 
     // Output message --------------------------------------------------------------- //
-    cout << "** function Dot_Product()" << endl;
+    cout << "** function dotProduct()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     dvector1D          x(3, 0.0), y(3, 0.0);
@@ -888,21 +888,21 @@ void vectorMathFunct_Ex(
     cout << "    j = ";
     display(cout, j) << endl;
 
-    // Dot_Product of vector< double > ---------------------------------------------- //
-    cout << "  Dot_Product(x,y) = " << Dot_Product(x,y) << endl;
+    // dotProduct of vector< double > ---------------------------------------------- //
+    cout << "  dotProduct(x,y) = " << dotProduct(x,y) << endl;
 
-    // Dot_Product of vector< int > ------------------------------------------------- //
-    cout << "  Dot_Product(i,j) = " << Dot_Product(i,j) << endl;
+    // dotProduct of vector< int > ------------------------------------------------- //
+    cout << "  dotProduct(i,j) = " << dotProduct(i,j) << endl;
     cout << endl;
 
 }
 
 // ================================================================================== //
-// OPERATOR "Cross_Product"                                                           //
+// OPERATOR "crossProduct"                                                           //
 // ================================================================================== //
 {
     // Output message --------------------------------------------------------------- //
-    cout << "** function Cross_Product()" << endl;
+    cout << "** function crossProduct()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     dvector1D          x(3, 0.0), y(3, 0.0);
@@ -925,17 +925,17 @@ void vectorMathFunct_Ex(
     cout << "    j = ";
     display(cout, j) << endl;
 
-    // Dot_Product of vector< double > ---------------------------------------------- //
-    cout << "  Cross_Product(x,y) = ";
-    display(cout, Cross_Product(x,y)) << endl;
-    cout << "  Cross_Product(x,x) = ";
-    display(cout, Cross_Product(x,x)) << endl;
+    // dotProduct of vector< double > ---------------------------------------------- //
+    cout << "  crossProduct(x,y) = ";
+    display(cout, crossProduct(x,y)) << endl;
+    cout << "  crossProduct(x,x) = ";
+    display(cout, crossProduct(x,x)) << endl;
 
-    // Dot_Product of vector< int > ------------------------------------------------- //
-    cout << "  Cross_Product(i,j) = ";
-    display(cout, Cross_Product(i,j)) << endl;
-    cout << "  Cross_Product(i,i) = ";
-    display(cout, Cross_Product(i,i)) << endl;
+    // dotProduct of vector< int > ------------------------------------------------- //
+    cout << "  crossProduct(i,j) = ";
+    display(cout, crossProduct(i,j)) << endl;
+    cout << "  crossProduct(i,i) = ";
+    display(cout, crossProduct(i,i)) << endl;
     cout << endl;
 
 }
@@ -1057,8 +1057,8 @@ void arrayOperators_Ex(
     // Scope variables
     double                              a = 1, b = 2;
     array<double, 2>                    c, d;
-    array<double, 3>                    x, y, z;
-    array<array<double, 2>, 3>          X, Y, Z;
+    array<double, 3>                    x, y;
+    array<array<double, 2>, 3>          X, Y;
 
     // Initialize arrays
     c[0] = 1.0;    c[1] = 2.0;
@@ -1184,8 +1184,8 @@ void arrayOperators_Ex(
     // Scope variables
     double                      a = 1, b = 2;
     array<double, 2>            c, d;
-    array<double, 3>            x, y, z;
-    array<array<double, 2>, 3>  X, Y, Z;
+    array<double, 3>            x, y;
+    array<array<double, 2>, 3>  X, Y;
 
     // Initialize arrays
     c[0] = 1.0;    c[1] = 2.0;
@@ -1767,22 +1767,22 @@ void arrayMathFunct_Ex(
     // norm of array< double > ------------------------------------------------------ //
     cout << "  norm(x,2) = " << norm(x,2) << endl;
     cout << "  norm(x,3) = " << norm(x,3) << endl;
-    cout << "  norm_inf(x) = " << norm_inf(x) << endl;
+    cout << "  normInf(x) = " << normInf(x) << endl;
 
     // norm of array< int > --------------------------------------------------------- //
     cout << "  norm(i,2) = " << norm(i,2) << endl;
     cout << "  norm(i,3) = " << norm(i,3) << endl;
-    cout << "  norm_inf(i) = " << norm_inf(i) << endl;
+    cout << "  normInf(i) = " << normInf(i) << endl;
     cout << endl;
 
 }
 
 // ================================================================================== //
-// OPERATOR "Dot_Product"                                                             //
+// OPERATOR "dotProduct"                                                             //
 // ================================================================================== //
 {
     // Output message --------------------------------------------------------------- //
-    cout << "** functon Dot_Product()" << endl;
+    cout << "** functon dotProduct()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     array<double, 3>   x, y;
@@ -1805,21 +1805,21 @@ void arrayMathFunct_Ex(
     cout << "    j = ";
     display(cout, j) << endl;
 
-    // Dot_Product of array< double > ----------------------------------------------- //
-    cout << "  Dot_Product(x,y) = " << Dot_Product(x,y) << endl;
+    // dotProduct of array< double > ----------------------------------------------- //
+    cout << "  dotProduct(x,y) = " << dotProduct(x,y) << endl;
 
-    // Dot_Product of array< int > -------------------------------------------------- //
-    cout << "  Dot_Product(i,j) = " << Dot_Product(i,j) << endl;
+    // dotProduct of array< int > -------------------------------------------------- //
+    cout << "  dotProduct(i,j) = " << dotProduct(i,j) << endl;
     cout << endl;
 
 }
 
 // ================================================================================== //
-// OPERATOR "Cross_Product"                                                           //
+// OPERATOR "crossProduct"                                                           //
 // ================================================================================== //
 {
     // Output message --------------------------------------------------------------- //
-    cout << "** functon Cross_Product()" << endl;
+    cout << "** functon crossProduct()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     dvector1D          x(3, 0.0), y(3, 0.0);
@@ -1842,17 +1842,17 @@ void arrayMathFunct_Ex(
     cout << "    j = ";
     display(cout, j) << endl;
 
-    // Dot_Product of vector< double > ---------------------------------------------- //
-    cout << "  Cross_Product(x,y) = ";
-    display(cout, Cross_Product(x,y)) << endl;
-    cout << "  Cross_Product(x,x) = ";
-    display(cout, Cross_Product(x,x)) << endl;
+    // dotProduct of vector< double > ---------------------------------------------- //
+    cout << "  crossProduct(x,y) = ";
+    display(cout, crossProduct(x,y)) << endl;
+    cout << "  crossProduct(x,x) = ";
+    display(cout, crossProduct(x,x)) << endl;
 
-    // Dot_Product of vector< int > ------------------------------------------------- //
-    cout << "  Cross_Product(i,j) = ";
-    display(cout, Cross_Product(i,j)) << endl;
-    cout << "  Cross_Product(i,i) = ";
-    display(cout, Cross_Product(i,i)) << endl;
+    // dotProduct of vector< int > ------------------------------------------------- //
+    cout << "  crossProduct(i,j) = ";
+    display(cout, crossProduct(i,j)) << endl;
+    cout << "  crossProduct(i,i) = ";
+    display(cout, crossProduct(i,i)) << endl;
     cout << endl;
 
 }
@@ -1952,19 +1952,19 @@ void stringOperators_Ex(
 }
 
 // ================================================================================== //
-// OPERATOR "ZeroPadNumber"                                                           //
+// OPERATOR "zeroPadNumber"                                                           //
 // ================================================================================== //
 {
     // Output message --------------------------------------------------------------- //
-    cout << "** function ZeroPadNumber()" << endl;
+    cout << "** function zeroPadNumber()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     int                          x = 14, y = 1283;
     string                       s;
 
     // Padding strings -------------------------------------------------------------- //
-    cout << "  ZeroPadNumber(6, 14) =\"" << ZeroPadNumber(6, x) << "\"" << endl;
-    cout << "  ZeroPadNumber(3, 1283) =\"" << ZeroPadNumber(3, y) << "\"" << endl;
+    cout << "  zeroPadNumber(6, 14) =\"" << zeroPadNumber(6, x) << "\"" << endl;
+    cout << "  zeroPadNumber(3, 1283) =\"" << zeroPadNumber(3, y) << "\"" << endl;
     cout << endl;
 }
 
@@ -1973,7 +1973,7 @@ void stringOperators_Ex(
 // ================================================================================== //
 {
     // Output message --------------------------------------------------------------- //
-    cout << "** function convert_string()" << endl;
+    cout << "** function convertString()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     double                       x;
@@ -1987,23 +1987,23 @@ void stringOperators_Ex(
     cout << "  std::string s0 = \"" << s0 << "\"" << endl;
     cout << "  std::string s1 = \"" << s1 << "\"" << endl;
     cout << "  std::string s2 = \"" << s2 << "\"" << endl;
-    convert_string(s0, x);
-    cout << "  convert_string(s0, x), x = " << x << endl;
-    convert_string(s1, v);
-    cout << "  convert_string(s1, v), v = ";
+    convertString(s0, x);
+    cout << "  convertString(s0, x), x = " << x << endl;
+    convertString(s1, v);
+    cout << "  convertString(s1, v), v = ";
     display(cout, v) << endl;
-    convert_string(s2, a);
-    cout << "  convert_string(s2, a), a = ";
+    convertString(s2, a);
+    cout << "  convertString(s2, a), a = ";
     display(cout, a) << endl;
     cout << endl;
 }
 
 // ================================================================================== //
-// OPERATOR "Get_After_Keyword"                                                       //
+// OPERATOR "getAfterKeyword"                                                       //
 // ================================================================================== //
 {
     // Output message --------------------------------------------------------------- //
-    cout << "** function Get_After_Keyword()" << endl;
+    cout << "** function getAfterKeyword()" << endl;
 
     // Scope variables -------------------------------------------------------------- //
     string                       s = " field_1 ; field_2 ; field_3";
@@ -2011,8 +2011,8 @@ void stringOperators_Ex(
 
     // Padding strings -------------------------------------------------------------- //
     cout << "  std::string s = \"" << s << "\"" << endl;
-    Get_After_Keyword(s, "field_1", ';', field);
-    cout << "  Get_After_Keyword(s \"field_1\", ';', field), field = \"" << field << "\"" << endl;
+    getAfterKeyword(s, "field_1", ';', field);
+    cout << "  getAfterKeyword(s \"field_1\", ';', field), field = \"" << field << "\"" << endl;
     cout << endl;
 }
 

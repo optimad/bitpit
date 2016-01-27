@@ -10,8 +10,8 @@
 //                                                                            //
 // All rights reserved.                                                       //
 // ========================================================================== //
-# ifndef __STL_IOFunct__HPP__
-# define __STL_IOFunct__HPP__
+# ifndef __IOFunct__HPP__
+# define __IOFunct__HPP__
 
 // ========================================================================== //
 // INCLUDES                                                                   //
@@ -32,13 +32,13 @@
 // ========================================================================== //
 // CLASSES                                                                    //
 // ========================================================================== //
-struct STL_data {
+struct STLData {
     int                                 n_solids;                             // number of stl solids
     std::vector<std::string>            solid_names;                          // solids names
     std::vector<int>                    solid_facets;                         // number of facet for each stl solid
 };
 
-class STL_obj {
+class STLObj {
 
     // Public members ======================================================= //
     public:
@@ -52,7 +52,7 @@ class STL_obj {
 
     // stl content
     std::vector<std::vector<bool> >     stl_errors;                           // error flags for each stl solid
-    STL_data                            data;                                 // stl data
+    STLData                            data;                                 // stl data
 
     // Private members ====================================================== //
     private:
@@ -61,10 +61,10 @@ class STL_obj {
 
     // Constructors ========================================================= //
     public:
-    STL_obj(                                                                  // Default constructor
+    STLObj(                                                                  // Default constructor
         void                                                                  // (input) none
     );
-    STL_obj(                                                                  // Custom constructor #1
+    STLObj(                                                                  // Custom constructor #1
         std::string                      ,                                    // stl file name
         bool                                                                  // flag for binary/ASCII stl file
     );
@@ -182,42 +182,44 @@ class STL_obj {
 // FUNCTION PROTOTYPES                                                        //
 // ========================================================================== //
 
+namespace STLUtils{
+
 // Scanning functions ------------------------------------------------------- //
-unsigned int Scan_STL_ASCII(                                                  // Scan ASCII stl file and returns infos
+unsigned int scanASCII(                                                  // Scan ASCII stl file and returns infos
     std::ifstream                               &,                            // (input) input stream to stl file
     std::vector<std::string>                    &,                            // (input/output) names of each stl solid
     std::vector<int>                            &                             // (input/output) number of facet for each stl solid
 );
-unsigned int Scan_STL_bin(                                                    // Scan binary stl file and returns infos
+unsigned int scanBINARY(                                                    // Scan binary stl file and returns infos
     std::ifstream                               &,                            // (input) input stream to stl file
     std::vector<std::string>                    &,                            // (input/output) names of each stl solid
     std::vector<int>                            &                             // (input/output) number of facet for each stl solid
 );
-unsigned int Scan_STLsolid_ASCII(                                             // Scan stl solid from binary stl file
+unsigned int scanSolidASCII(                                             // Scan stl solid from binary stl file
     std::ifstream                               &,                            // (input) input stream to stl file
     int                                         &                             // (input/output) number of facets
 );
 
 // Check routines ----------------------------------------------------------- //
-unsigned int Check_STL_ASCII(                                                 // Check data coeherency in ASCII stl file
+unsigned int checkASCII(                                                 // Check data coeherency in ASCII stl file
     std::ifstream                               &,                            // (input) input stream to stl file
     std::vector<std::vector<bool> >             &                             // (input/output) error map
 );
-unsigned int Check_STLsolid_ASCII(                                            // Check coherency of stl solid data in ASCII stl files
+unsigned int checkSolidASCII(                                            // Check coherency of stl solid data in ASCII stl files
     std::ifstream                               &,                            // (input) input stream to stl file
     std::vector<bool>                           &                             // (input/output) error map
 );
-unsigned int Check_STLfacet_ASCII(                                            // Check coherency of stl facet data in ASCII stl files
+unsigned int checkFacetASCII(                                            // Check coherency of stl facet data in ASCII stl files
     std::ifstream                               &,                            // (input) input stream to stl file
     std::vector<bool>                           &                             // (input/output) error map
 );
-unsigned int Check_STL_bin(                                                   // Check data coherency in binary stl file
+unsigned int checkBINARY(                                                   // Check data coherency in binary stl file
     std::ifstream                               &,                            // (input) input stream to stl file
     std::vector<std::vector<bool> >             &                             // (input/output) error map
 );
 
 // Input routines ----------------------------------------------------------- //
-unsigned int Read_STLsolid_ASCII(                                             // Read stl solid from ASCII stl file
+unsigned int readSolidASCII(                                             // Read stl solid from ASCII stl file
     std::ifstream                               &,                            // (input/output) input stream to stl file
     int                                         &,                            // (input/output) number of vertices
     int                                         &,                            // (input/output) number of triangles
@@ -226,7 +228,7 @@ unsigned int Read_STLsolid_ASCII(                                             //
     std::vector<std::vector<int> >              &,                            // (input/output) triangle-vertex connectivity
     std::string                                  a = ""                       // (input/optional) stl solid name
 );
-unsigned int Read_STLsolid_ASCII(                                             // Read stl solid from ASCII stl file
+unsigned int readSolidASCII(                                             // Read stl solid from ASCII stl file
     std::ifstream                               &,                            // (input/output) input stream to stl file
     int                                         &,                            // (input/output) number of vertices
     int                                         &,                            // (input/output) number of triangles
@@ -235,7 +237,7 @@ unsigned int Read_STLsolid_ASCII(                                             //
     std::vector<std::vector<int> >              &,                            // (input/output) triangle-vertex connectivity
     std::string                                  a = ""                       // (input/optional) stl solid name
 );
-unsigned int Read_STLfacet_ASCII(                                             // Read stl facet from ASCII stl file
+unsigned int readFacetASCII(                                             // Read stl facet from ASCII stl file
     std::ifstream                               &,                            // (input/output) input stream to stl file
     int                                         &,                            // (input/output) number of vertices
     int                                         &,                            // (input/output) number of triangles
@@ -243,7 +245,7 @@ unsigned int Read_STLfacet_ASCII(                                             //
     std::vector<std::vector<double> >           &,                            // (input/output) triangles unit normal
     std::vector<std::vector<int> >              &                             // (input/output) triangle-vertex connectivity
 );
-unsigned int Read_STLfacet_ASCII(                                             // Read stl facet from ASCII stl file
+unsigned int readFacetASCII(                                             // Read stl facet from ASCII stl file
     std::ifstream                               &,                            // (input/output) input stream to stl file
     int                                         &,                            // (input/output) number of vertices
     int                                         &,                            // (input/output) number of triangles
@@ -251,7 +253,7 @@ unsigned int Read_STLfacet_ASCII(                                             //
     std::vector<std::array<double,3> >          &,                            // (input/output) triangles unit normal
     std::vector<std::vector<int> >              &                             // (input/output) triangle-vertex connectivity
 );
-unsigned int Read_STL_ASCII(                                                  // Load stl trianuglation data from ASCII stl file
+unsigned int readASCII(                                                  // Load stl trianuglation data from ASCII stl file
     std::ifstream                               &,                            // (input) input stream to stl file
     int                                         &,                            // (input/output) number of stl veritces
     int                                         &,                            // (input/output) number of stl facets
@@ -259,7 +261,7 @@ unsigned int Read_STL_ASCII(                                                  //
     std::vector<std::vector<double> >           &,                            // (input/output) triangles unit normals
     std::vector<std::vector<int> >              &                             // (input/output) triangle-vertex connectivity
 );
-unsigned int Read_STL_ASCII(                                                  // Load stl trianuglation data from ASCII stl file
+unsigned int readASCII(                                                  // Load stl trianuglation data from ASCII stl file
     std::ifstream                               &,                            // (input) input stream to stl file
     int                                         &,                            // (input/output) number of stl veritces
     int                                         &,                            // (input/output) number of stl facets
@@ -267,7 +269,7 @@ unsigned int Read_STL_ASCII(                                                  //
     std::vector<std::array<double,3> >          &,                            // (input/output) triangles unit normals
     std::vector<std::vector<int> >              &                             // (input/output) triangle-vertex connectivity
 );
-unsigned int Read_STL_bin(                                                    // Read stl triangulation data from binary stl file
+unsigned int readBINARY(                                                    // Read stl triangulation data from binary stl file
     std::ifstream                               &,                            // (input) input stream to stl file
     int                                         &,                            // (input/output) number of stl veritces
     int                                         &,                            // (input/output) number of stl facets
@@ -275,7 +277,7 @@ unsigned int Read_STL_bin(                                                    //
     std::vector<std::vector<double> >           &,                            // (input/output) triangles unit normals
     std::vector<std::vector<int> >              &                             // (input/output) triangle-vertex connectivity
 );
-unsigned int Read_STL_bin(                                                    // Read stl triangulation data from binary stl file
+unsigned int readBINARY(                                                    // Read stl triangulation data from binary stl file
     std::ifstream                               &,                            // (input) input stream to stl file
     int                                         &,                            // (input/output) number of stl veritces
     int                                         &,                            // (input/output) number of stl facets
@@ -285,7 +287,7 @@ unsigned int Read_STL_bin(                                                    //
 );
 
 // Output routines ---------------------------------------------------------- //
-unsigned int Write_STLsolid_ASCII(                                            // Write stl triangulation in a ASCII stl file
+unsigned int writeSolidASCII(                                            // Write stl triangulation in a ASCII stl file
     std::ofstream                               &,                            // (input) output stream
     int                                         &,                            // (input) number of triangulation vertices
     int                                         &,                            // (input) number of triangles
@@ -294,7 +296,7 @@ unsigned int Write_STLsolid_ASCII(                                            //
     std::vector<std::vector<int> >              &,                            // (input) triangle-vertex connectivity
     std::string                                  a = ""                       // (input/optional) stl solid name
 );
-unsigned int Write_STLsolid_ASCII(                                            // Write stl triangulation in a ASCII stl file
+unsigned int writeSolidASCII(                                            // Write stl triangulation in a ASCII stl file
     std::ofstream                               &,                            // (input) output stream
     int                                         &,                            // (input) number of triangulation vertices
     int                                         &,                            // (input) number of triangles
@@ -303,7 +305,7 @@ unsigned int Write_STLsolid_ASCII(                                            //
     std::vector<std::vector<int> >              &,                            // (input) triangle-vertex connectivity
     std::string                                  a = ""                       // (input/optional) stl solid name
 );
-unsigned int Write_STLsolid_bin(                                              // Write stl triangulation in a binary stl file
+unsigned int writeSolidBINARY(                                              // Write stl triangulation in a binary stl file
     std::ofstream                               &,                            // (input) output stream
     int                                         &,                            // (input) number of triangulation vertices
     int                                         &,                            // (input) number of triangles
@@ -312,7 +314,7 @@ unsigned int Write_STLsolid_bin(                                              //
     std::vector<std::vector<int> >              &,                            // (input) triangle-vertex connectivity
     std::string                                  a = ""                       // (input/optional) stl solid name
 );
-unsigned int Write_STLsolid_bin(                                              // Write stl triangulation in a binary stl file
+unsigned int writeSolidBINARY(                                              // Write stl triangulation in a binary stl file
     std::ofstream                               &,                            // (input) output stream
     int                                         &,                            // (input) number of triangulation vertices
     int                                         &,                            // (input) number of triangles
@@ -322,9 +324,11 @@ unsigned int Write_STLsolid_bin(                                              //
     std::string                                  a = ""                       // (input/optional) stl solid name
 );
 
+}
+
 // =================================================================================== //
 // TEMPLATES                                                                           //
 // =================================================================================== //
-# include "STL_IOFunct.tpp"
+# include "STL.tpp"
 
 # endif

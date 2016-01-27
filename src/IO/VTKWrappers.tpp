@@ -142,15 +142,15 @@ VTKUnstructuredVec::ufield::ufield( std::string name_, std::vector<T>& data_): n
  */
 template <typename T>
 void VTKUnstructuredVec::stream_visitor::operator()( T* t) const{
-    if( task=="write" && codex==VTKFormat::ASCII)  flush_ascii( *str, 1, *t) ;
-    if( task=="write" && codex==VTKFormat::APPENDED) flush_binary( *str, *t) ;
+    if( task=="write" && codex==VTKFormat::ASCII)  flushASCII( *str, 1, *t) ;
+    if( task=="write" && codex==VTKFormat::APPENDED) flushBINARY( *str, *t) ;
     if( task=="read"  && codex==VTKFormat::ASCII)  {
         (*t).resize(size); 
-        absorb_ascii( *str, *t) ;
+        absorbASCII( *str, *t) ;
     };
     if( task=="read"  && codex==VTKFormat::APPENDED) {
         (*t).resize(size);
-        absorb_binary( *str, *t) ;
+        absorbBINARY( *str, *t) ;
     };
 };
 
@@ -163,9 +163,9 @@ void VTKUnstructuredVec::stream_visitor::operator()( T* t) const{
 template <typename T>
 void VTKUnstructuredVec::stream_visitor::operator()( std::vector< std::vector<T> >* t) const{
 
-    if( task=="write" && codex==VTKFormat::ASCII)  flush_ascii( *str, 1, *t) ;
+    if( task=="write" && codex==VTKFormat::ASCII)  flushASCII( *str, 1, *t) ;
 
-    if( task=="write" && codex==VTKFormat::APPENDED) flush_binary( *str, *t) ;
+    if( task=="write" && codex==VTKFormat::APPENDED) flushBINARY( *str, *t) ;
 
     if( task=="read"  && codex==VTKFormat::ASCII )  {
         if( name == "connectivity"){
@@ -176,7 +176,7 @@ void VTKUnstructuredVec::stream_visitor::operator()( std::vector< std::vector<T>
             (*t).resize( size , std::vector<T>( components , 0 ) ) ;
         };
 
-        absorb_ascii( *str, *t) ;
+        absorbASCII( *str, *t) ;
     };
 
     if( task=="read"  && codex==VTKFormat::APPENDED) {
@@ -187,7 +187,7 @@ void VTKUnstructuredVec::stream_visitor::operator()( std::vector< std::vector<T>
         else{
             (*t).resize( size , std::vector<T>( components , 0 ) ) ;
         };
-        absorb_binary( *str, *t) ;
+        absorbBINARY( *str, *t) ;
     };
 };
 

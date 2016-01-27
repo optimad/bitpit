@@ -105,7 +105,7 @@ uint64_t VTKUnstructuredGrid::calcSizeConnectivity( ){
 
     //Read appended data
     //Go to the initial position of the appended section
-    while( getline(str, line) && (! Keyword_In_String( line, "<AppendedData")) ){} ;
+    while( getline(str, line) && (! keywordInString( line, "<AppendedData")) ){} ;
 
     str >> c_;
     while( c_ != '_') str >> c_;
@@ -124,12 +124,12 @@ uint64_t VTKUnstructuredGrid::calcSizeConnectivity( ){
         str.seekg( geometry[3].getOffset(), std::ios::cur) ;
 
         if( HeaderType== "UInt32") {
-            absorb_binary( str, nbytes32 ) ;
+            absorbBINARY( str, nbytes32 ) ;
             nconn = nbytes32 /VTKUtils::sizeOfType( geometry[3].getType() ) ;
         }
 
         if( HeaderType== "UInt64") {
-            absorb_binary( str, nbytes64 ) ;
+            absorbBINARY( str, nbytes64 ) ;
             nconn = nbytes64 /VTKUtils::sizeOfType( geometry[3].getType() ) ;
         };
     };
@@ -145,10 +145,10 @@ uint64_t VTKUnstructuredGrid::calcSizeConnectivity( ){
         nconn = 0 ;
 
         getline( str, line) ;
-        while( ! Keyword_In_String(line,"/DataArray") ) {
+        while( ! keywordInString(line,"/DataArray") ) {
 
             temp.clear() ;
-            convert_string( line, temp) ;
+            convertString( line, temp) ;
             nconn += temp.size() ;
         };
 
@@ -275,23 +275,23 @@ void VTKUnstructuredGrid::readMetaData( ){
     str.open( fh.getName( ), std::ios::in ) ;
     
     getline( str, line);
-    while( ! Keyword_In_String( line, "<VTKFile")){
+    while( ! keywordInString( line, "<VTKFile")){
         getline(str, line);
     };
                                               
-    if( Get_After_Keyword( line, "header_type", '\"', temp) ){
+    if( getAfterKeyword( line, "header_type", '\"', temp) ){
         setHeaderType( temp) ;
     };
 
-    while( ! Keyword_In_String( line, "<Piece")){
+    while( ! keywordInString( line, "<Piece")){
       getline(str, line);
     };
     
-    Get_After_Keyword( line, "NumberOfPoints", '\"', temp) ;
-    convert_string( temp, nr_points );
+    getAfterKeyword( line, "NumberOfPoints", '\"', temp) ;
+    convertString( temp, nr_points );
     
-    Get_After_Keyword( line, "NumberOfCells", '\"', temp) ;
-    convert_string( temp, nr_cells );
+    getAfterKeyword( line, "NumberOfCells", '\"', temp) ;
+    convertString( temp, nr_cells );
     
     
     position = str.tellg() ;

@@ -158,20 +158,20 @@ void VTKRectilinearGrid::readMetaData( ){
     str.open( fh.getName( ), std::ios::in ) ;
 
     getline( str, line);
-    while( ! Keyword_In_String( line, "<VTKFile")){
+    while( ! keywordInString( line, "<VTKFile")){
         getline(str, line);
     };
 
-    if( Get_After_Keyword( line, "header_type", '\"', temp) ){
+    if( getAfterKeyword( line, "header_type", '\"', temp) ){
         setHeaderType( temp) ;
     };
 
-    while( ! Keyword_In_String( line, "<Piece")){
+    while( ! keywordInString( line, "<Piece")){
         getline(str, line);
     };
 
-    Get_After_Keyword( line, "Extent", '\"', temp) ;
-    convert_string( temp, extensions );
+    getAfterKeyword( line, "Extent", '\"', temp) ;
+    convertString( temp, extensions );
 
     local_index[0][0] = extensions[0] ;
     local_index[0][1] = extensions[1] ;

@@ -28,7 +28,7 @@ namespace utils {
 	\result Returns true is the id was added to the list, false otherwise.
 */
 template <typename T, typename Comparator>
-bool add_to_ordered_vector(const T &value, std::vector<T> &list, Comparator comparator)
+bool addToOrderedVector(const T &value, std::vector<T> &list, Comparator comparator)
 {
 	if (list.empty()) {
 		list.push_back(value);

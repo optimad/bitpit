@@ -342,7 +342,8 @@ std::array < std::array<T, n>, m> Transpose(
 // TEMPLATES                                                                           //
 // =================================================================================== //
 # include "LinearAlgebra.tpp"
-# include "LinearAlgebra2.tpp"
-
+# include "Manipulation.tpp"
+# include "Multiplication.tpp"
+# include "Solve.tpp"
 
 # endif

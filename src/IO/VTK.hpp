@@ -8,7 +8,7 @@
 #include <array>
 
 #include "BitPit_common.hpp"
-#include "Generic_IO.hpp"
+#include "GenericIO.hpp"
 #include "FileHandler.hpp"
 
 /*!

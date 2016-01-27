@@ -34,7 +34,7 @@
 // ========================================================================== //
 // DATA STRUCTURES AND CLASSES                                                //
 // ========================================================================== //
-struct DGF_data {
+struct DGFData {
     int                                 nV;                                   // number of mesh vertices
     int                                 nS;                                   // number of mesh simplex
     std::vector<int>                    nV_data;                              // number of vertex data for each vertex data block
@@ -43,7 +43,7 @@ struct DGF_data {
     std::vector<std::string>            sS_data;                              // simplex data set names
 };
 
-class DGF_obj {
+class DGFObj {
 
     // Members ============================================================== //
 
@@ -51,7 +51,7 @@ class DGF_obj {
     public:
     std::string                         dgf_name;                             // dgf file name
     unsigned int                        err;                                  // general error flag
-    DGF_data                            data;                                 // dgf file content
+    DGFData                             data;                                 // dgf file content
 
     // Private members ------------------------------------------------------ //
     private:
@@ -61,10 +61,10 @@ class DGF_obj {
 
     // Constructor ========================================================== //
     public:
-    DGF_obj(                                                                  // Standard constructor for DGF object
+    DGFObj(                                                                  // Standard constructor for DGF object
         void                                                                  // (input) none
     );
-    DGF_obj(                                                                  // Custom constructor #1 for DGF object
+    DGFObj(                                                                  // Custom constructor #1 for DGF object
         std::string                                                           // (input) dgf file name
     );
 
@@ -120,28 +120,28 @@ class DGF_obj {
     );
 
     template< typename T, typename ... T2 >
-    void load_vdata(                                                          // Load vertex data sets from dgf file
+    void loadVData(                                                          // Load vertex data sets from dgf file
         std::string                              data_name,                   // (input) dataset name
         int                                     &n,                           // (input/output) number of data in the dataset
         std::vector< T >                        &data,                        // (input/output) loaded dataset
         T2                                      &... others                   // (input/optional) others datasets to be loaded
     );
     template< typename T, typename ... T2 >
-    void load_sdata(                                                          // Load simplex data sets from dgf file
+    void loadSData(                                                          // Load simplex data sets from dgf file
         std::string                              data_name,                   // (input) dataset name
         int                                     &n,                           // (input/output) number of data in the dataset
         std::vector< T >                        &data,                        // (input/output) loaded dataset
         T2                                      &... others                   // (input/optional) others datasets to be loaded
     );
     template < typename T, typename ... T2 >
-    void append_vdata(                                                        // Append vertex data set to dgf file
+    void appendVData(                                                        // Append vertex data set to dgf file
         std::string                              data_name,                   // (input) dataset name
         int                                     &n,                           // (input) number of data in the dataset
         std::vector< T >                        &data,                        // (input) dataset to be exported
         T2                                      &... others                   // (input/optional) others datasets to be exported
     );
     template < typename T, typename ... T2 >
-    void append_sdata(                                                        // Append simplex data set to dgf file
+    void appendSData(                                                        // Append simplex data set to dgf file
         std::string                              data_name,                   // (input) dataset name
         int                                     &n,                           // (input) number of data in the dataset
         std::vector< T >                        &data,                        // (input) dataset to be exported
@@ -150,16 +150,16 @@ class DGF_obj {
 
     // Private methods ------------------------------------------------------ //
     private:
-    void load_vdata(                                                          // Dummy function for recursive variadic-template "load_vdata"
+    void loadVData(                                                          // Dummy function for recursive variadic-template "load_vdata"
         void                                                                  // (input) none
     );
-    void load_sdata(                                                          // Dummy function for recursive variadic-template "load_sdata"
+    void loadSData(                                                          // Dummy function for recursive variadic-template "load_sdata"
         void                                                                  // (input) none
     );
-    void append_vdata(                                                        // Dummy function for recursive variadic template "append_vdata"
+    void appendVData(                                                        // Dummy function for recursive variadic template "append_vdata"
         void                                                                  // (input) none
     );
-    void append_sdata(                                                        // Dummy function for recursive variadic template "append_sdata"
+    void appendSData(                                                        // Dummy function for recursive variadic template "append_sdata"
         void                                                                  // (input) none
     );
 
@@ -168,13 +168,14 @@ class DGF_obj {
 // ========================================================================== //
 // FUNCTION PROTOTYPES                                                        //
 // ========================================================================== //
+namespace DGFUtils{
 
 // Scanning routines -------------------------------------------------------- //
-unsigned int Scan_DGF_data(                                                   // Scan DGF data and returns info
+unsigned int scanData(                                                   // Scan DGF data and returns info
     std::ifstream                               &,                            // (input) input stream to dgf file
     int                                         &                             // (input/output) number of data in the dataset
 );
-unsigned int Scan_DGF(                                                        // Scan DGF file and returns infos
+unsigned int scan(                                                        // Scan DGF file and returns infos
     std::ifstream                               &,                            // (input) input stream to dgf file
     int                                         &,                            // (input/output) number of mesh vertices
     int                                         &,                            // (input/output) number of simplicies
@@ -185,30 +186,30 @@ unsigned int Scan_DGF(                                                        //
 );
 
 // Check routines ----------------------------------------------------------- //
-unsigned int Check_DGF_data(                                                  // Check DGF data structure
+unsigned int checkData(                                                  // Check DGF data structure
     std::ifstream                               &,                            // (input) input stream to dgf file
     int                                         &                             // (input/output) error code
 );
-unsigned int Check_DGF(                                                       // Check DGF
+unsigned int check(                                                       // Check DGF
     std::ifstream                               &,                            // (input) input stream to dgf file
     std::vector<std::vector<int> >              &                             // (input/output) error code for each dataset
 );
 
 // Input routines ----------------------------------------------------------- //
 template< typename T >
-unsigned int Read_DGF_data(                                                   // Read DGF data
+unsigned int readData(                                                   // Read DGF data
     std::ifstream                               &,                            // (input) input stream to dgf file
     int                                         &,                            // (input/output) number of data loaded
     std::vector< T >                            &                             // (input/output) loaded data
 );
-unsigned int Read_DGF_mesh(                                                   // Read mesh data from file.
+unsigned int readMesh(                                                   // Read mesh data from file.
     std::ifstream                               &,                            // (input) input stream to dgf file
     int                                         &,                            // (input/output) number of mesh vertices
     int                                         &,                            // (input/output) number of simplicies
     std::vector<std::vector<double> >           &,                            // (input/output) vertex coordinate list
     std::vector<std::vector<int> >              &                             // (input/output) simplex-vertex connectivity
 );
-unsigned int Read_DGF_mesh(                                                   // Read mesh data from file.
+unsigned int readMesh(                                                   // Read mesh data from file.
     std::ifstream                               &,                            // (input) input stream to dgf file
     int                                         &,                            // (input/output) number of mesh vertices
     int                                         &,                            // (input/output) number of simplicies
@@ -216,14 +217,14 @@ unsigned int Read_DGF_mesh(                                                   //
     std::vector<std::vector<int> >              &                             // (input/output) simplex-vertex connectivity
 );
 template <typename T>
-unsigned int Read_DGF_VERTEXDATA(                                             // Load dgf vertex data
+unsigned int readVertexData(                                             // Load dgf vertex data
     std::ifstream                               &,                            // (input) input stream to dgf file
     int                                         &,                            // (input/output) number of loaded data
     std::vector< T >                            &,                            // (input/output) loaded data
     std::string                                  a = ""                       // (input/optional) dataset name
 );
 template< typename T >
-unsigned int Read_DGF_SIMPLEXDATA(                                            // Load dgf simplex data
+unsigned int readSimplexData(                                            // Load dgf simplex data
     std::ifstream                               &,                            // (input) input stream to dgf file
     int                                         &,                            // (input/output) number of loaded data
     std::vector< T >                            &,                            // (input/output) loaded data
@@ -232,19 +233,19 @@ unsigned int Read_DGF_SIMPLEXDATA(                                            //
 
 // Output routines ---------------------------------------------------------- //
 template < typename T >
-unsigned int Write_DGF_data(                                                  // Export data set to dgf file
+unsigned int writeData(                                                  // Export data set to dgf file
     std::ofstream                               &,                            // (input) output stream to dgf file
     int                                         &,                            // (input) number of data in the dataset
     std::vector< T >                            &                             // (input) dataset to be exported
 );
-unsigned int Write_DGF_mesh(                                                  // Export mesh data into dgf file
+unsigned int writeMesh(                                                  // Export mesh data into dgf file
     std::ofstream                               &,                            // (input) output stream to dgf file
     int                                         &,                            // (input) number of vertices
     int                                         &,                            // (input) number of simplicies
     std::vector<std::vector<double> >           &,                            // (input) vertex coordinate list
     std::vector<std::vector<int> >              &                             // (input) simplex-vertex connectivity
 );
-unsigned int Write_DGF_mesh(                                                  // Export mesh data into dgf file
+unsigned int writeMesh(                                                  // Export mesh data into dgf file
     std::ofstream                               &,                            // (input) output stream to dgf file
     int                                         &,                            // (input) number of vertices
     int                                         &,                            // (input) number of simplicies
@@ -253,23 +254,25 @@ unsigned int Write_DGF_mesh(                                                  //
 );
 
 template < typename T >
-unsigned int Write_DGF_VERTEXDATA(                                            // Export vertex data to dgf file
+unsigned int writeVertexData(                                            // Export vertex data to dgf file
     std::ofstream                               &,                            // (input) output stream to dgf file
     int                                         &,                            // (input) number of data in the dataset
     std::vector< T >                            &,                            // (input) vertex data set
     std::string                                  a = ""                       // (input/optional) data set name
 );
 template < typename T >
-unsigned int Write_DGF_SIMPLEXDATA(                                           // Export simplex data to dgf file
+unsigned int writeSimplexData(                                           // Export simplex data to dgf file
     std::ofstream                               &,                            // (input) output stream to dgf file
     int                                         &,                            // (input) number of data in the dataset
     std::vector< T >                            &,                            // (input) simplex data set
     std::string                                  a = ""                       // (input/optional) data set name
 );
 
+}
+
 // ========================================================================== //
 // TEMPLATES                                                                  //
 // ========================================================================== //
-# include "DGF_IOFunct.tpp"
+# include "DGF.tpp"
 
 # endif

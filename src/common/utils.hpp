@@ -10,10 +10,10 @@
 namespace utils {
 
 template <typename T, typename Comparator = std::less<T> >
-bool add_to_ordered_vector(const T &value, std::vector<T> &list, Comparator comparator = Comparator());
+bool addToOrderedVector(const T &value, std::vector<T> &list, Comparator comparator = Comparator());
 
 #ifndef __BITPIT_UTILS_SRC__
-extern template bool add_to_ordered_vector<>(const long&, std::vector<long>&, std::less<long>);
+extern template bool addToOrderedVector<>(const long&, std::vector<long>&, std::less<long>);
 #endif
 
 }

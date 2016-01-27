@@ -646,7 +646,7 @@ return(y); };
     \result on output returns the 1-norm of the input array.
 */
 template <class T, size_t d>
-double norm_1(
+double norm1(
     const std::array<T, d>                      &x
 ) {
 
@@ -683,7 +683,7 @@ return(z); };
     \result on output returns the 2-norm of the input array.
 */
 template <class T, size_t d>
-double norm_2(
+double norm2(
     const std::array<T, d>                      &x
 ) {
 
@@ -740,8 +740,8 @@ int             i, j;
 // ================================================================================== //
 // COMPUTE THE P-NORM                                                                 //
 // ================================================================================== //
-if (p == 1) { return(norm_1(x)); }
-if (p == 2) { return(norm_2(x)); }
+if (p == 1) { return(norm1(x)); }
+if (p == 2) { return(norm2(x)); }
 
 if (d > 0) {
     for (i = 0; i < d; i++) {
@@ -769,7 +769,7 @@ return(std::exp(std::log(std::max(z, 1.0e-307))/((double) p))); };
     \result on output returns the inf-norm of the input array.
 */
 template <class T, size_t d>
-double norm_inf(
+double normInf(
     const std::array<T, d>                      &x
 ) {
 
@@ -798,7 +798,7 @@ if (d > 0) {
 
 return(z); };
 
-// Operator "Dot_Product" =========================================================== //
+// Operator "dotProduct" =========================================================== //
 
 // ---------------------------------------------------------------------------------- //
 /*!
@@ -813,7 +813,7 @@ return(z); };
     \result on output returns the scalar product of x and y.
 */
 template <class T, size_t d>
-T Dot_Product(
+T dotProduct(
     const std::array<T, d>                      &x,
     const std::array<T, d>                      &y
 ) {
@@ -839,7 +839,7 @@ if (d > 0) {
 
 return(dp); };
 
-// Operator "Cross_Product" ========================================================= //
+// Operator "crossProduct" ========================================================= //
 
 // ---------------------------------------------------------------------------------- //
 /*!
@@ -852,7 +852,7 @@ return(dp); };
     \result on output returns the cross product product of x and y.
 */
 template <class T>
-std::array<T, 3> Cross_Product(
+std::array<T, 3> crossProduct(
     const std::array<T, 3>                      &x,
     const std::array<T, 3>                      &y
 ) {
@@ -882,7 +882,7 @@ return (z); };
     \result on output returns the cross product product of x and y.
 */
 template <class T>
-T Cross_Product(
+T crossProduct(
     const std::array<T, 2>                      &x,
     const std::array<T, 2>                      &y
 ) {
