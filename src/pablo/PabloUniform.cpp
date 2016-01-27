@@ -73,6 +73,22 @@ PabloUniform::getL(){
 	return m_L;
 };
 
+/*! Set the length of the domain.
+ * \param[in] Length of the octree.
+ */
+void
+PabloUniform::setL(double L){
+	m_L = L;
+};
+
+/*! Set the origin of the domain.
+ * \param[in] Oriin of the octree.
+ */
+void
+PabloUniform::setOrigin(darray3 origin){
+	m_origin = origin;
+};
+
 // =================================================================================== //
 // INDEX BASED METHODS																   //
 // =================================================================================== //
@@ -358,14 +374,36 @@ PabloUniform::getLocalMinSize(){
 	return m_L * ParaTree::getLocalMinSize();
 };
 
+
+/*! Get the coordinates of the extreme points of a bounding box containing the local tree
+ *  \param[out] P0 Array with coordinates of the first point (lowest coordinates);
+ *  \param[out] P1 Array with coordinates of the last point (highest coordinates).
+ */
 void
 PabloUniform::getBoundingBox(darray3 & P0, darray3 & P1){
-	ParaTree::getBoundingBox(P0,P1);
+	darray3		cnode, cnode0, cnode1;
+	uint32_t 	nocts = ParaTree::getNumOctants();
+	uint32_t	id = 0;
+	uint8_t 	nnodes = ParaTree::getNnodes();
+	cnode0 = ParaTree::getNode(id, 0);
+	id = nocts-1;
+	cnode1 = ParaTree::getNode(id, nnodes-1);
+	copy(begin(P0), end(P0), begin(cnode0));
+	copy(begin(P1), end(P1), begin(cnode1));
+	for (id=0; id<nocts; id++){
+		cnode0 = ParaTree::getNode(id, 0);
+		cnode1 = ParaTree::getNode(id, nnodes-1);
+		for (int i=0; i<3; i++){
+			P0[i] = min(P0[i], (double)cnode0[i]);
+			P1[i] = max(P1[i], (double)cnode1[i]);
+		}
+	}
 	for (int i=0; i<3; i++){
 		P0[i] = m_origin[i] + m_L * P0[i];
 		P1[i] = m_origin[i] + m_L * P1[i];
 	}
 };
+
 
 // =================================================================================== //
 // INTERSECTION GET/SET METHODS														   //

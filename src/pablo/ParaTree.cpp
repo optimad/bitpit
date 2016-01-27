@@ -572,22 +572,6 @@ ParaTree::setMaxLevel(int8_t maxlevel){
 	m_global.m_maxLevel = maxlevel;
 };
 
-/*! Set the length of the domain.
- * \param[in] Length of the octree.
- */
-void
-ParaTree::setL(double L){
-	m_trans.m_L = L;
-};
-
-/*! Set the origin of the domain.
- * \param[in] Oriin of the octree.
- */
-void
-ParaTree::setOrigin(darray3 origin){
-	m_trans.m_origin = origin;
-};
-
 // =================================================================================== //
 // INDEX BASED METHODS
 // =================================================================================== //
@@ -1355,32 +1339,6 @@ ParaTree::getBalanceCodimension() const{
 	return m_octree.getBalanceCodim();
 };
 
-/*! Get the coordinates of the extreme points of a bounding box containing the local tree
- *  \param[out] P0 Array with coordinates of the first point (lowest coordinates);
- *  \param[out] P1 Array with coordinates of the last point (highest coordinates).
- */
-void
-ParaTree::getBoundingBox(darray3 & P0, darray3 & P1){
-	darray3		cnode, cnode0, cnode1;
-	uint32_t 	nocts = getNumOctants();
-	uint32_t	id = 0;
-	cnode0 = getNode(id, 0);
-	id = nocts-1;
-	cnode1 = getNode(id, m_global.m_nnodes-1);
-	for (uint8_t i=0; i<3; i++){
-		P0[i] = cnode0[i];
-		P1[i] = cnode1[i];
-	}
-	for (uint32_t idx=0; idx<m_global.m_nnodes; idx++){
-		for (uint8_t inode=0; inode<nocts; inode++){
-			cnode = getNode(idx, inode);
-			for (uint8_t i=0; i<3; i++){
-				P0[i] = min(P0[i], cnode[i]);
-				P1[i] = max(P1[i], cnode[i]);
-			}
-		}
-	}
-};
 
 /*!Get the first possible descendant with maximum refinement level of the local tree.
  * \return Constant reference to the first finest descendant of the local tree.

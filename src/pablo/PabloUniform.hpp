@@ -65,6 +65,8 @@ public:
 	double		getY0();
 	double		getZ0();
 	double		getL();
+	void		setL(double L);
+	void		setOrigin(darray3 origin);
 
 	// =================================================================================== //
 	// INDEX BASED METHODS																   //

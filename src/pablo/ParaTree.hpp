@@ -161,8 +161,6 @@ public:
 	int8_t 		(*getNodecoeffs())[3];
 	int8_t 		(*getEdgecoeffs())[3];
 	void 		setMaxLevel(int8_t maxlevel);
-	void		setL(double L);
-	void		setOrigin(darray3 origin);
 
 	// =================================================================================== //
 	// INDEX BASED METHODS																   //
@@ -248,7 +246,6 @@ public:
 	double	 	getLocalMaxSize();
 	double	 	getLocalMinSize();
 	uint8_t 	getBalanceCodimension() const;
-	void 		getBoundingBox(darray3 & P0, darray3 & P1);
 	const Octant & getFirstDesc() const;
 	const Octant & getLastDesc() const;
 	uint64_t 	getLastDescMorton(uint32_t idx);
