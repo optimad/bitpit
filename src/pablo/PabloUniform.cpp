@@ -89,6 +89,16 @@ PabloUniform::setOrigin(darray3 origin){
 	m_origin = origin;
 };
 
+/*! Get the size of an octant corresponding to a target level.
+ * \param[in] idx Input level.
+ * \return Size of an octant of input level.
+ */
+double
+PabloUniform::levelToSize(uint8_t & level) {
+	double size = (double) (1<<(ParaTree::getMaxLevel()-level));
+	return m_L *size /ParaTree::getMaxLength() ;
+}
+
 // =================================================================================== //
 // INDEX BASED METHODS																   //
 // =================================================================================== //

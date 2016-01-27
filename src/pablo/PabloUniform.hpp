@@ -67,6 +67,7 @@ public:
 	double		getL();
 	void		setL(double L);
 	void		setOrigin(darray3 origin);
+	double		levelToSize( uint8_t& level);
 
 	// =================================================================================== //
 	// INDEX BASED METHODS																   //
