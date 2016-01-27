@@ -213,7 +213,7 @@ uint64_t  VTKField::getOffset() const{
  * @return  memory size of data field
  */
 uint64_t  VTKField::getNbytes() const{ 
-    return static_cast<int>(components) *nr_elements *VTKUtils::sizeOfType( type ) ;
+    return static_cast<int>(components) *nr_elements *VTKTypes::sizeOfType( type ) ;
 };
 
 /*!
@@ -251,7 +251,7 @@ bool   VTKField::hasAllMetaData() const{
  */
 void VTKField::importMetaData( const VTKFieldMetaData &data){ 
 
-    setType( VTKUtils::whichType( data.getType() ) );
+    setType( VTKTypes::whichType( data.getType() ) );
 
     if( getComponents() == VTKFieldType::UNDEFINED)
         setComponents( VTKFieldType::SCALAR);

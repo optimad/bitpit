@@ -6,6 +6,8 @@
 #include <typeinfo>
 #include <vector>
 #include <array>
+#include <typeindex>
+#include <unordered_map>
 
 #include "BitPit_common.hpp"
 #include "GenericIO.hpp"
@@ -77,6 +79,33 @@ enum class VTKElementType {
     WEDGE      = 13,
     PYRAMID    = 14,
     POLYHEDRON = 42
+};
+
+class VTKTypes {
+
+    public:
+        static uint8_t                  sizeOfType( const VTKDataType & type );
+
+        template<typename T>
+        static VTKDataType              registerType();
+
+        template<typename T>
+        static VTKDataType              registerType(VTKDataType VTKType);
+
+        static VTKDataType              whichType( const std::type_info & ) ;
+
+        template<class T>
+        static VTKDataType              whichType( T ) ;
+
+        template<class T>
+        static VTKDataType              whichType( std::vector<T> ) ;
+
+        template<class T, size_t d>
+        static VTKDataType              whichType( std::array<T,d> ) ;
+
+     private:
+        static std::unordered_map<std::type_index, VTKDataType> m_types;
+
 };
 
 class VTKFieldMetaData{
@@ -282,7 +311,6 @@ class VTKRectilinearGrid : public VTK{
 };
 
 namespace VTKUtils{
-    uint8_t                         sizeOfType( const VTKDataType & ) ;
     uint8_t                         getNNodeInElement( const VTKElementType & ) ;
 
     std::string                     convertDataArrayToString( const VTKField & ) ;
@@ -297,21 +325,10 @@ namespace VTKUtils{
     bool                            convertStringToEnum( const std::string &, VTKLocation & ) ;
     bool                            convertStringToEnum( const std::string &, VTKFormat & ) ;
     bool                            convertStringToEnum( const std::string &, VTKDataType &) ;
-
-    VTKDataType                     whichType( const std::type_info & ) ;
-
-    template<class T> 
-    VTKDataType                     whichType( T ) ;
-
-    template<class T> 
-    VTKDataType                     whichType( std::vector<T> ) ;
-
-    template<class T, size_t d>
-    VTKDataType                     whichType( std::array<T,d> ) ;
 }
 
 
-#include"VTKUtils.tpp"
+#include"VTKTypes.tpp"
 
 
 #endif

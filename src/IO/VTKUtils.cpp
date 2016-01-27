@@ -8,41 +8,6 @@
  */
 
 /*!
- * Calculates the size in bytes of basic types supported by VTK
- * @param[in]  type    type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
- * \return      size of basic type
- */
-uint8_t VTKUtils::sizeOfType( const VTKDataType & type ){
-
-    switch( type){
-        case VTKDataType::Int8 : case VTKDataType::UInt8:
-           return( sizeof(int8_t) ); 
-
-        case VTKDataType::Int16 : case VTKDataType::UInt16 : 
-           return( sizeof(int16_t) ) ;
-
-        case VTKDataType::Int32 : case VTKDataType::UInt32 : 
-           return( sizeof(int32_t) ) ;
-
-        case VTKDataType::Int64 : case VTKDataType::UInt64 : 
-           return( sizeof(int64_t) ) ;
-
-        case VTKDataType::Float32 :
-           return( sizeof(float) ) ;
-
-        case VTKDataType::Float64 :
-           return( sizeof(double) ) ;
-
-        case VTKDataType::UNDEFINED :
-           return( 0 ) ;
-
-        default:
-           return(0);
-    };
-
-};
-
-/*!  
  *  Returns number of vertices for a given element type.
  *  Codification of element type according to http://www.vtk.org/wp-content/uploads/2015/04/file-formats.pdf
  *  @param[in]  t           element type
@@ -362,62 +327,6 @@ bool VTKUtils::convertStringToEnum( const std::string &str, VTKDataType &type ){
         type = VTKDataType::UNDEFINED;
         return(false);
     }
-
-};
-
-/*!
- *  Determines the basic VTK type from argument.
- *  @param[in]  type       argument type
- *  @return     basic VTK type 
- *
- */
-VTKDataType VTKUtils::whichType( const std::type_info & type ){
-
-    if( type == typeid(int8_t) ){
-        return VTKDataType::Int8 ;
-    }
-
-    else if( type == typeid(uint8_t) ){
-        return VTKDataType::UInt8 ;
-    }
-
-    else if( type == typeid(int16_t) ){
-        return VTKDataType::Int16 ;
-    }
-
-    else if( type == typeid(uint16_t) ){
-        return VTKDataType::UInt16 ;
-    }
-
-    else if( type == typeid(int32_t) ){
-        return VTKDataType::Int32 ;
-    }
-
-    else if( type == typeid(uint32_t) ){
-        return VTKDataType::UInt32 ;
-    }
-
-    else if( type == typeid(uint64_t) ){
-        return VTKDataType::Int64 ;
-    }
-
-    else if( type == typeid(uint64_t) ){
-        return VTKDataType::UInt64 ;
-    }
-
-    else if( type == typeid(float) ){
-        return VTKDataType::Float32 ;
-    }
-
-    else if( type == typeid(double) ){
-        return VTKDataType::Float64 ;
-    }
-
-
-    else{
-        return VTKDataType::UNDEFINED ;
-    };
-
 
 };
 

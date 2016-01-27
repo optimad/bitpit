@@ -30,7 +30,7 @@ VTKUnstructuredVec::VTKUnstructuredVec( std::string dir_, std::string name_, VTK
 
     nconn_ = ncells_ * VTKUtils::getNNodeInElement( type ) ;
 
-    setGeomTypes( VTKUtils::whichType(dum0), VTKDataType::UInt64, VTKDataType::UInt8, VTKUtils::whichType(dum1)  ) ;
+    setGeomTypes( VTKTypes::whichType(dum0), VTKDataType::UInt64, VTKDataType::UInt8, VTKTypes::whichType(dum1)  ) ;
     setDimensions( ncells_, npoints_, nconn_ ) ;
 
     adata.resize(2) ;
@@ -58,7 +58,7 @@ void VTKUnstructuredVec::addData( std::vector<T> &data_, std::string name_, VTKL
 
     adata.push_back( ufield(name_,data_) ) ;
 
-    VTKUnstructuredGrid::addData( name_, VTKFieldType::SCALAR, loc_, VTKUtils::whichType(dum_) ) ;
+    VTKUnstructuredGrid::addData( name_, VTKFieldType::SCALAR, loc_, VTKTypes::whichType(dum_) ) ;
 
     return;
 };
@@ -77,7 +77,7 @@ void VTKUnstructuredVec::addData( std::vector< std::array<T,3> > &data_, std::st
 
     adata.push_back( ufield(name_,data_) ) ;
 
-    VTKUnstructuredGrid::addData( name_, VTKFieldType::VECTOR, loc_, VTKUtils::whichType(dum_) ) ;
+    VTKUnstructuredGrid::addData( name_, VTKFieldType::VECTOR, loc_, VTKTypes::whichType(dum_) ) ;
 
     return;
 };
@@ -97,7 +97,7 @@ void VTKUnstructuredVec::addData( std::vector< std::vector<T> > &data_, std::str
 
     adata.push_back( ufield(name_,data_) ) ;
 
-    VTKUnstructuredGrid::addData( name_, 3, loc_, VTKUtils::whichType(dum_) ) ;
+    VTKUnstructuredGrid::addData( name_, 3, loc_, VTKTypes::whichType(dum_) ) ;
 
 
     return;
