@@ -251,9 +251,6 @@ bool   VTKField::hasAllMetaData() const{
  */
 void VTKField::importMetaData( const VTKFieldMetaData &data){ 
 
-    std::cout << "viva" << std::endl;
-    std::cout << static_cast<const int>(VTKUtils::whichType(data.getType())) << std::endl;
-
     setType( VTKUtils::whichType( data.getType() ) );
 
     if( getComponents() == VTKFieldType::UNDEFINED)
