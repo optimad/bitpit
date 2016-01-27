@@ -225,7 +225,6 @@ std::fstream::pos_type   VTKField::getPosition() const{
     return position; 
 };
 
-
 /*!
  * get position of data field in VTK file. 
  * This information is available after VTK::ReadMetaData() has been called.
@@ -244,7 +243,6 @@ bool   VTKField::hasAllMetaData() const{
 
     return allData;
 };
-
 
 /*!
  * Update field information using VTKFieldMetaData class

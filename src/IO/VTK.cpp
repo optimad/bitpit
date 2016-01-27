@@ -421,9 +421,19 @@ void VTK::getMissingMetaData(){
         field.importMetaData( metaData ) ;
     };
 
+    setMissingGlobalData();
+
 
     return ;
 };
+
+/*!
+ *  Sets missing data like number of cells and points
+ */
+void VTK::setMissingGlobalData(){
+};
+
+
 /*!
  * Writes entire VTK file (headers and data).
  */

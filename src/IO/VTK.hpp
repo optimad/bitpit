@@ -236,6 +236,7 @@ class VTK{
         bool                            getFieldByName( const std::string &, VTKField*& ) ;
         void                            calcAppendedOffsets() ;
         void                            getMissingMetaData() ;
+        virtual void                    setMissingGlobalData() ;
 
         //Interface methods
         virtual void                    flushData( std::fstream &, VTKFormat , std::string )  ;
@@ -256,6 +257,7 @@ class VTKUnstructuredGrid : public VTK{
 
         void                            writeCollection() ;  
         uint64_t                        calcSizeConnectivity( ) ;
+        void                            setMissingGlobalData() ;
 
     public:
         void                            readMetaData() ;
@@ -290,6 +292,7 @@ class VTKRectilinearGrid : public VTK{
 
     void                            writeCollection() ;  
 
+    void                            setMissingGlobalData() ;
 
     public:
     void                            readMetaData() ;
@@ -304,6 +307,7 @@ class VTKRectilinearGrid : public VTK{
     void                            setGlobalDimensions( int, int ) ;
 
     void                            setGeomTypes( VTKDataType ) ;
+
 
     void                            setGlobalIndex( std::vector<extension3D_t> ) ;
     void                            setGlobalIndex( std::vector<extension2D_t> ) ;

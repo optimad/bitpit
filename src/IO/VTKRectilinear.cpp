@@ -475,6 +475,21 @@ void VTKRectilinearGrid::setGlobalIndex( std::vector<extension2D_t> loc_ ){
     return;
 };
 
+/*!  
+ *  sets the dimensions of the VTKRectilinerGrid deduced from the geometry fields
+ */
+void VTKRectilinearGrid::setMissingGlobalData( ){
+
+    int    nX, nY, nZ;
+
+    nX = geometry[0].getElements() ;
+    nY = geometry[1].getElements() ;
+    nZ = geometry[2].getElements() ;
+
+    setDimensions( nX, nY, nZ ) ;
+
+    return ;
+};
 /*!
  *   @}
  */

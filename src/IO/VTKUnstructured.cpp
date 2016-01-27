@@ -89,7 +89,7 @@ void VTKUnstructuredGrid::setDimensions( uint64_t ncells_, uint64_t npoints_, ui
 
 /*!  
  *  Reads "type" information of existing grid and calculates the correspondng connectivity size.
- *  \return     size of the connectivity information
+ *  @return     size of the connectivity information
  */
 uint64_t VTKUnstructuredGrid::calcSizeConnectivity( ){
 
@@ -315,11 +315,27 @@ void VTKUnstructuredGrid::readMetaData( ){
 
 /*!  
  *  Returns the size of the connectivity information
- *  \return     size of connectivity
+ *  @return     size of connectivity
  */
 uint64_t VTKUnstructuredGrid::getNConnectivity( ){
 
   return nconnectivity ;
+};
+
+/*!  
+ *  sets the dimensions of the VTKUnstructuredGrid deduced from the geometry fields
+ */
+void VTKUnstructuredGrid::setMissingGlobalData( ){
+
+    uint64_t    ncells, npoints, nconn;
+
+    ncells  = std::max( geometry[1].getElements(), geometry[2].getElements() );
+    npoints = geometry[0].getElements() ;
+    nconn   = geometry[3].getElements() ;
+
+    setDimensions( ncells, npoints, nconn) ;
+
+    return ;
 };
 
 /*!
