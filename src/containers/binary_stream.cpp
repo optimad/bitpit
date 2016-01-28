@@ -8,8 +8,9 @@
 // ========================================================================== //
 using namespace std;
 
+namespace bitpit{
 // ========================================================================== //
-// IMPLEMENTATIONS OF METHODS FOR CLASS ibinarystream                         //
+// IMPLEMENTATIONS OF METHODS FOR CLASS IBinaryStream                         //
 // ========================================================================== //
 
 /*!
@@ -18,7 +19,7 @@ using namespace std;
  */
 
 /*!
- * @class   ibinarystream
+ * @class   IBinaryStream
  * @brief   creates input binary stream
  */
 
@@ -27,10 +28,10 @@ using namespace std;
 
 // -------------------------------------------------------------------------- //
 /*!
-        Default constructor. Initialize an empty object of class ibinarystream
+        Default constructor. Initialize an empty object of class IBinaryStream
 
 */
-ibinarystream::ibinarystream(
+IBinaryStream::IBinaryStream(
     void
 ) {
     current_pos = 0;
@@ -38,12 +39,12 @@ ibinarystream::ibinarystream(
 
 // -------------------------------------------------------------------------- //
 /*!
-        Custom constructor #1. Initialize an empty object of class ibinarystream
+        Custom constructor #1. Initialize an empty object of class IBinaryStream
         with assigned size
 
         \param[in] size buffer size
 */
-ibinarystream::ibinarystream(
+IBinaryStream::IBinaryStream(
     size_t                      size
 ) {
     current_pos = 0;
@@ -54,14 +55,14 @@ ibinarystream::ibinarystream(
 
 // -------------------------------------------------------------------------- //
 /*!
-        Custom constructor #2. Initialize a object of class ibinarystream
+        Custom constructor #2. Initialize a object of class IBinaryStream
         pointing to a memory location with specified size
 
         \param[in] buf_ pointer to memory location
         \param[in] size buffer size
 
 */
-ibinarystream::ibinarystream(
+IBinaryStream::IBinaryStream(
     const char                  *buf_,
     size_t                       size
 ) {
@@ -73,13 +74,13 @@ ibinarystream::ibinarystream(
 
 // -------------------------------------------------------------------------- //
 /*!
-        Custom constructor #3. Initialize a object of class ibinarystream
+        Custom constructor #3. Initialize a object of class IBinaryStream
         from a std::vector of char
 
         \param[in] vec input vector
 
 */
-ibinarystream::ibinarystream(
+IBinaryStream::IBinaryStream(
     const vector<char>          &vec
 ) {
     current_pos = 0;
@@ -104,7 +105,7 @@ ibinarystream::ibinarystream(
         \param[in] size size (in bytes) of memory location to be streamed
 
 */
-void ibinarystream::open(
+void IBinaryStream::open(
     const char                  *mem,
     size_t                       size
 ) {
@@ -119,7 +120,7 @@ void ibinarystream::open(
         Close stream from memory
 
 */
-void ibinarystream::close(
+void IBinaryStream::close(
     void
 )
 {
@@ -133,7 +134,7 @@ void ibinarystream::close(
         \result boolean flag (true) if end of file is reached, (false) otherwise
 
 */
-bool ibinarystream::eof(
+bool IBinaryStream::eof(
     void
 ) const
 {
@@ -147,7 +148,7 @@ bool ibinarystream::eof(
         \result cursor position
 
 */
-ifstream::pos_type ibinarystream::tellg(
+ifstream::pos_type IBinaryStream::tellg(
     void
 ) {
     return current_pos;
@@ -162,7 +163,7 @@ ifstream::pos_type ibinarystream::tellg(
         \result (true) if new position is valid, (false) otherwise
 
 */
-bool ibinarystream::seekg (
+bool IBinaryStream::seekg (
     size_t                       pos
 ) {
     if(pos<buffer.size())
@@ -183,7 +184,7 @@ bool ibinarystream::seekg (
         \result (true) if new position is valid, (false) otherwise
 
 */
-bool ibinarystream::seekg (
+bool IBinaryStream::seekg (
     streamoff                    offset,
     ios_base::seekdir            way
 ) {
@@ -209,7 +210,7 @@ bool ibinarystream::seekg (
         \param[in] size size (in bytes) of data chunk to be read
 
 */
-void ibinarystream::read(
+void IBinaryStream::read(
     char                        *p,
     size_t                       size
 ) {
@@ -228,7 +229,7 @@ void ibinarystream::read(
         \param[in] vec vector of char
 
 */
-void ibinarystream::read(
+void IBinaryStream::read(
     std::vector<char>           &vec
 ) {
     if ( eof() || ( current_pos + vec.size() ) > buffer.size() ) {
@@ -244,7 +245,7 @@ void ibinarystream::read(
  */
 
 // ========================================================================== //
-// IMPLEMENTATIONS OF METHODS FOR CLASS obinarystream                           //
+// IMPLEMENTATIONS OF METHODS FOR CLASS OBinaryStream                           //
 // ========================================================================== //
 
 /*!
@@ -253,7 +254,7 @@ void ibinarystream::read(
  */
 
 /*!
- * @class   obinarystream
+ * @class   OBinaryStream
  * @brief   creates output binary stream
  */
 
@@ -264,7 +265,7 @@ void ibinarystream::read(
         \ingroup BinaryStream
         Default constructor. Initialize an empty object
 */
-obinarystream::obinarystream(
+OBinaryStream::OBinaryStream(
     void
 ) {
     current_pos = 0;
@@ -277,7 +278,7 @@ obinarystream::obinarystream(
 
         \param[in] size buffer size
 */
-obinarystream::obinarystream(
+OBinaryStream::OBinaryStream(
     size_t                       size
 ) {
     current_pos = 0;
@@ -299,7 +300,7 @@ obinarystream::obinarystream(
         \param[in] size stream size
 
 */
-void obinarystream::open(
+void OBinaryStream::open(
     size_t                       size
 ) {
     buffer.reserve(size);
@@ -311,7 +312,7 @@ void obinarystream::open(
         Close output stream
 
 */
-void obinarystream::close(
+void OBinaryStream::close(
     void
 ) {
     buffer.clear();
@@ -324,7 +325,7 @@ void obinarystream::close(
         \result boolean flag (true) if end of file is reached, (false) otherwise
 
 */
-bool obinarystream::eof(
+bool OBinaryStream::eof(
     void
 ) const
 {
@@ -338,7 +339,7 @@ bool obinarystream::eof(
         \result cursor position
 
 */
-ifstream::pos_type obinarystream::tellg(
+ifstream::pos_type OBinaryStream::tellg(
     void
 ) {
     return current_pos;
@@ -353,7 +354,7 @@ ifstream::pos_type obinarystream::tellg(
         \result (true) if new position is valid, (false) otherwise
 
 */
-bool obinarystream::seekg (
+bool OBinaryStream::seekg (
     size_t                       pos
 ) {
     if(pos < buffer.size())
@@ -374,7 +375,7 @@ bool obinarystream::seekg (
         \result (true) if new position is valid, (false) otherwise
 
 */
-bool obinarystream::seekg (
+bool OBinaryStream::seekg (
     streamoff                    offset,
     ios_base::seekdir            way
 ) {
@@ -399,7 +400,7 @@ bool obinarystream::seekg (
         buffer
 
 */
-void obinarystream::write(
+void OBinaryStream::write(
     const char                  *p,
     size_t                       size
 ) {
@@ -421,7 +422,7 @@ void obinarystream::write(
 
 */
 
-void obinarystream::write(
+void OBinaryStream::write(
     const vector<char>          &vec
 ) {
     if ( buffer.size() - current_pos < vec.size() ) {
@@ -439,15 +440,15 @@ void obinarystream::write(
 
 // -------------------------------------------------------------------------- //
 /*!
-        Explicit template specialization for stream operator for class ibinarystream
+        Explicit template specialization for stream operator for class IBinaryStream
 
         \param[in] istm input stream
         \param[in] val std::string to be streamed
 
 */
 template<>
-ibinarystream& operator>>(
-        ibinarystream             &istm,
+IBinaryStream& operator>>(
+        IBinaryStream             &istm,
         string                  &val)
 {
     int                 size = 0;
@@ -472,8 +473,8 @@ ibinarystream& operator>>(
 
 */
 template<>
-obinarystream& operator << (
-    obinarystream                 & ostm,
+OBinaryStream& operator << (
+    OBinaryStream                 & ostm,
     const string                & val
 ) {
     int size = val.size();
@@ -496,8 +497,8 @@ obinarystream& operator << (
         \param[in] val pointer to char array
 
 */
-obinarystream& operator<<(
-    obinarystream                 &ostm,
+OBinaryStream& operator<<(
+    OBinaryStream                 &ostm,
     const char                  *val
 ) {
     int size = strlen(val);
@@ -510,6 +511,8 @@ obinarystream& operator<<(
     ostm.write(val, size);
 
     return ostm;
+}
+
 }
 
 /*!

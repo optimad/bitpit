@@ -1,11 +1,6 @@
 #include "VTK.hpp"
 
-/*!
- * @ingroup    VTKUtils
- * @{
- *
- * @brief Utility fuctions for VTK
- */
+namespace bitpit{
 
 /*!
  *  Returns number of vertices for a given element type.
@@ -165,7 +160,7 @@ std::string VTKUtils::convertEnumToString( const VTKLocation &loc ){
 
 /*!
  * Converts a VTKFormat into string for DataArray format
- * @param[in]  loc VTKFormat to be converted
+ * @param[in]  cod VTKFormat to be converted
  * @return string to be used in DataArray
  */
 std::string VTKUtils::convertEnumToString( const VTKFormat &cod ){
@@ -330,6 +325,5 @@ bool VTKUtils::convertStringToEnum( const std::string &str, VTKDataType &type ){
 
 };
 
-/*!
- * @}
- */
+
+}

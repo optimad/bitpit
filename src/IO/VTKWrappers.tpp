@@ -1,4 +1,5 @@
 #include "VTKWrappers.hpp"
+namespace bitpit{
 
 /*!
  * Constructor suited for writing. sets the provided input information and calls default constructor
@@ -191,4 +192,4 @@ void VTKUnstructuredVec::stream_visitor::operator()( std::vector< std::vector<T>
     };
 };
 
-
+}

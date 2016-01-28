@@ -65,7 +65,7 @@ int main()
     { //Write only grid to VTK in ascii format
         cout << "Write only grid to VTK in ascii format" << endl;
 
-        VTKUnstructuredVec   vtk(".", "ustr1", VTKFormat::ASCII, VTKElementType::VOXEL, points, connectivity );
+        bitpit::VTKUnstructuredVec   vtk(".", "ustr1", bitpit::VTKFormat::ASCII, bitpit::VTKElementType::VOXEL, points, connectivity );
         vtk.write() ;
 
     }
@@ -73,9 +73,9 @@ int main()
     { //Write grid and data to VTK in appended mode
         cout << "Write grid and data to VTK in appended mode" << endl;
 
-        VTKUnstructuredVec   vtk(".", "ustr2", VTKFormat::APPENDED, VTKElementType::VOXEL, points, connectivity );
-        vtk.addData( pressure, "press", VTKLocation::POINT ) ;
-        vtk.addData( velocity, "vel", VTKLocation::CELL ) ;
+        bitpit::VTKUnstructuredVec   vtk(".", "ustr2", bitpit::VTKFormat::APPENDED, bitpit::VTKElementType::VOXEL, points, connectivity );
+        vtk.addData( pressure, "press", bitpit::VTKLocation::POINT ) ;
+        vtk.addData( velocity, "vel", bitpit::VTKLocation::CELL ) ;
         vtk.write() ;
     }
 
@@ -89,7 +89,7 @@ int main()
         vector<array<double,3>>    Ivelocity ;
 
 
-        VTKUnstructuredVec   vtk(".", "ustr2", VTKFormat::APPENDED, VTKElementType::VOXEL );
+        bitpit::VTKUnstructuredVec   vtk(".", "ustr2", bitpit::VTKFormat::APPENDED, bitpit::VTKElementType::VOXEL );
 
         vtk.linkData( Ipoints, "Points") ;
         vtk.linkData( Iconnectivity, "connectivity") ;
@@ -114,7 +114,8 @@ int main()
         vector<float>   label ;
         vector<int64_t> ids ;
 
-        VTKUnstructuredVec   vtk("./data", "selection", VTKFormat::APPENDED, VTKElementType::TRIANGLE );
+        bitpit::VTKUnstructuredVec   vtk("./data", "selection", bitpit::VTKFormat::APPENDED, bitpit::VTKElementType::TRIANGLE );
+
 
         vtk.linkData( Ipoints, "Points") ;
         vtk.linkData( Iconnectivity, "connectivity") ;

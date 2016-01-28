@@ -18,10 +18,7 @@
 #include <utility>
 #include <vector>
 
-/*!
-	\ingroup containers
-	@{
-*/
+namespace bitpit{
 
 // To check if the provided template argument implements the needed methods,
 // the following Stackoverflow questions are used:
@@ -29,9 +26,8 @@
 // http://stackoverflow.com/questions/257288/is-it-possible-to-write-a-c-template-to-check-for-a-functions-existence
 // http://stackoverflow.com/questions/16976720/how-to-i-restrict-a-template-class-to-certain-types
 
-namespace containers {
-
 /*!
+	\ingroup containerUtils
 	Checks if the template parameter has a method called "get_id".
 */
 template <typename T>
@@ -48,6 +44,7 @@ public:
 };
 
 /*!
+	\ingroup containerUtils
 	Checks if the template parameter has a method called "set_id".
 */
 template <typename T>
@@ -63,7 +60,10 @@ public:
     enum { value = (sizeof(test<T>(0)) == sizeof(true_type)) };
 };
 
-}
+/*!
+	\ingroup containers
+	@{
+*/
 
 /*!
 	@brief Iterator for the class PiercedVector
@@ -1929,8 +1929,7 @@ private:
 			}
 		}
 	}
-
-};
+}
 
 // Definition of static constants of PiercedVector
 template<class T>
@@ -1948,5 +1947,7 @@ const typename PiercedVector<T>::size_type
 /*!
 	@}
 */
+
+}
 
 #endif

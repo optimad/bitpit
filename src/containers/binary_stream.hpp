@@ -19,43 +19,44 @@
 // Others
 // none
 
+namespace bitpit{
 // ========================================================================== //
 // TYPES DEFINITIONS                                                          //
 // ========================================================================== //
 // none
 
 // Forward declarations ------------------------------------------------- //
-class ibinarystream;
-class obinarystream;
+class IBinaryStream;
+class OBinaryStream;
 
 // Function prototypes -------------------------------------------------- //
 template<typename T>
-ibinarystream& operator>>(                                                  // Stream operator for class ibinarystream
-    ibinarystream                     &istm,                                // (input) input stream
+IBinaryStream& operator>>(                                                  // Stream operator for class IBinaryStream
+    IBinaryStream                     &istm,                                // (input) input stream
     T                               &val                                  // (input) value to be streamed
 );
 template<>
-ibinarystream& operator>>(                                                  // Explicit specialization of input stream operator for std::string
-    ibinarystream                     &istm,                                // (input) input stream
+IBinaryStream& operator>>(                                                  // Explicit specialization of input stream operator for std::string
+    IBinaryStream                     &istm,                                // (input) input stream
     std::string                     &val                                  // (input) string to be streamed
 );
 template<typename T>
-obinarystream& operator<<(                                                  // Stream operator for class obinarystream
-    obinarystream                     &ostm,                                // (input) output stream
+OBinaryStream& operator<<(                                                  // Stream operator for class OBinaryStream
+    OBinaryStream                     &ostm,                                // (input) output stream
     const T                         &val                                  // (input) value to be streamed
 );
 template<>
-obinarystream& operator<<(                                                  // Explicit specialization of input stream operator for std::string
-    obinarystream                     &ostm,                                // (input) output stream
+OBinaryStream& operator<<(                                                  // Explicit specialization of input stream operator for std::string
+    OBinaryStream                     &ostm,                                // (input) output stream
     const std::string               &val                                  // (input) string to be streamed
 );
-obinarystream& operator<<(                                                  // Stream operator for class obinarystream
-    obinarystream                     &ostm,                                // (input) output stream
+OBinaryStream& operator<<(                                                  // Stream operator for class OBinaryStream
+    OBinaryStream                     &ostm,                                // (input) output stream
     const char                      *val                                  // (input) char array to be streamed
 );
 
-// Class ibinarystream ---------------------------------------------------- //
-class ibinarystream {
+// Class IBinaryStream ---------------------------------------------------- //
+class IBinaryStream {
 
     // Member(s) ======================================================== //
     private:
@@ -66,17 +67,17 @@ class ibinarystream {
     // Constructor(s) =================================================== //
     public:
 
-    ibinarystream(                                                          // Default constructor (empty stream)
+    IBinaryStream(                                                          // Default constructor (empty stream)
         void                                                              // (input) none
     );
-    ibinarystream(                                                          // Custom constructor #1 (empty stream with known size);
+    IBinaryStream(                                                          // Custom constructor #1 (empty stream with known size);
         size_t                       size                                 // (input) buffer size
     );
-    ibinarystream(                                                          // Custom constructor #2 (stream pointing to memory location)
+    IBinaryStream(                                                          // Custom constructor #2 (stream pointing to memory location)
         const char*                  buf_,                                // (input) pointer to memory location
         size_t                       size                                 // (input) buffer size
     );
-    ibinarystream(                                                          // Custom constructor #3 (stream initialized from std::vector<char>)
+    IBinaryStream(                                                          // Custom constructor #3 (stream initialized from std::vector<char>)
         const std::vector<char>          &vec                                  // (input) vector used for initialization
     );
 
@@ -84,8 +85,8 @@ class ibinarystream {
     // default
 
     // Assignament operator(s) ========================================== //
-    const ibinarystream& operator=(
-        const ibinarystream           &istm
+    const IBinaryStream& operator=(
+        const IBinaryStream           &istm
     ) = delete;
 
     // Public method(s) ================================================= //
@@ -110,7 +111,7 @@ class ibinarystream {
         std::streamoff               offset,                              // (input) offset with respect to the specified direction
         std::ios_base::seekdir       way                                  // (input) offset direction
     );
-    const std::vector<char>& get_internal_vec(                                 // Returns reference to buffer
+    const std::vector<char>& getInternalVec(                                 // Returns reference to buffer
         void                                                              // (input) none
     ) { return(buffer); }
     char* get_buffer(                                                     // Returns pointer to buffer
@@ -124,7 +125,7 @@ class ibinarystream {
     void read(                                                            // Read data from memory location pointed by t and store into stream buffer
         T                           &t                                    // (input) data to be imported in the stream buffer
     );
-    void read(                                                            // Explicit template specialization of ibinarystream::read for vector<char>
+    void read(                                                            // Explicit template specialization of IBinaryStream::read for vector<char>
         std::vector<char>           &vec                                  // (input) source vector
     );
     void read(                                                                // Read data from memory location pointed by p and store into stream buffer
@@ -134,12 +135,12 @@ class ibinarystream {
 
     // Friendships ====================================================== //
     template< typename T >
-    friend ibinarystream& operator >> (ibinarystream&, T& );
-    friend ibinarystream& operator >> (ibinarystream&, std::string& );
+    friend IBinaryStream& operator >> (IBinaryStream&, T& );
+    friend IBinaryStream& operator >> (IBinaryStream&, std::string& );
 };
 
-// Class obinarystream ---------------------------------------------------- //
-class obinarystream {
+// Class OBinaryStream ---------------------------------------------------- //
+class OBinaryStream {
 
     // Member(s) ======================================================== //
     private:
@@ -150,10 +151,10 @@ class obinarystream {
     // Constructor(s) =================================================== //
     public:
 
-    obinarystream(                                                          // Default constructor (create empty object)
+    OBinaryStream(                                                          // Default constructor (create empty object)
         void                                                              // (input) none
     );
-    obinarystream(                                                          // Custom constructor #1 (create an empty object with buffer of specified size)
+    OBinaryStream(                                                          // Custom constructor #1 (create an empty object with buffer of specified size)
         size_t                       size                                 // (input) none
     );
 
@@ -161,8 +162,8 @@ class obinarystream {
     // none
 
     // Assignement operator(s) ========================================== //
-    const obinarystream& operator=(
-        const obinarystream           &
+    const OBinaryStream& operator=(
+        const OBinaryStream           &
     ) = delete;
 
     // Public method(s) ================================================= //
@@ -185,7 +186,7 @@ class obinarystream {
         std::streamoff               offset,                              // (input) offset with respect to the specified direction
         std::ios_base::seekdir       way                                  // (input) offset direction
     );
-    const std::vector<char>& get_internal_vec(                                 // Returns reference to buffer
+    const std::vector<char>& getInternalVec(                                 // Returns reference to buffer
         void                                                              // (input) none
     ) { return(buffer); }
     char* get_buffer(                                                     // Returns pointer to buffer
@@ -209,10 +210,12 @@ class obinarystream {
 
     // Friendship(s) ==================================================== //
     template<typename T>
-    friend obinarystream& operator<<( obinarystream&, const T& );
-    friend obinarystream& operator<<( obinarystream&, const std::string& );
-    friend obinarystream& operator<<( obinarystream&, const char* );
+    friend OBinaryStream& operator<<( OBinaryStream&, const T& );
+    friend OBinaryStream& operator<<( OBinaryStream&, const std::string& );
+    friend OBinaryStream& operator<<( OBinaryStream&, const char* );
 };
+
+}
 
 // ========================================================================== //
 // TEMPLATES                                                                  //

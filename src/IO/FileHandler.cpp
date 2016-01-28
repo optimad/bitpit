@@ -6,6 +6,8 @@
 #include"FileHandler.hpp"
 #include"Operators.hpp"
 
+namespace bitpit{
+
 /*!
  * Default constructor. 
  * Refers to a serial file in the current directory called "file.dat"
@@ -168,3 +170,5 @@ bool   FileHandler::exists() {
     std::ifstream f( getName() );
     return f.good() ;
 };
+
+}

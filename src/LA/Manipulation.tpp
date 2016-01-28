@@ -1,3 +1,5 @@
+namespace bitpit{
+
 /*!
  * @ingroup Manipulation
  * @{
@@ -548,4 +550,4 @@ return; };
 /*!
  * @}
  */
-
+}

@@ -1,5 +1,7 @@
 #include "VTK.hpp"
 
+namespace bitpit{
+
 /*!
  * @ingroup     VisualizationToolKit
  * @{
@@ -36,3 +38,5 @@ const std::type_info& VTKFieldMetaData::getType() const{
 /*! 
  * @} 
  */
+
+}

@@ -1,10 +1,13 @@
 #include "VTK.hpp"
+
+namespace bitpit{
+
 /*!        
- * \ingroup     VisualizationToolKit
- * \{
+ * @ingroup     VisualizationToolKit
+ * @{
  *
- * \class       VTKUnstructuredGrid
- * \brief       VTK input output for Unstructured Meshes
+ * @class       VTKUnstructuredGrid
+ * @brief       VTK input output for Unstructured Meshes
  *
  * VTKUnstructuredGrid provides methods to read and write parallel and serial unstructured meshes and data. 
  * The class is agnostic with respect to the container used for the data and provides an interface through the CRTP mechanism.
@@ -341,3 +344,5 @@ void VTKUnstructuredGrid::setMissingGlobalData( ){
 /*!
  *   @}
  */
+
+}

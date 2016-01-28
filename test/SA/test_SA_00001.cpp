@@ -45,7 +45,7 @@ void Test000(
 
 // Local variables
 int                            N = 10;
-LIFOstack<ivector1D>           stack(5);
+bitpit::LIFOStack<ivector1D>           stack(5);
 
 // Counters
 int                            i;
@@ -108,7 +108,7 @@ void Test001(
 // void Test001(                                                              //
 //     void)                                                                  //
 //                                                                            //
-// Demo for minPQUEUE (min heap queue)                                        //
+// Demo for MinPQueue (min heap queue)                                        //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
@@ -125,7 +125,7 @@ void Test001(
 
 // Local variables
 vector< array<int,2> >       map(20), *map_ = &map;
-minPQUEUE<double, string>    heap(2, true, map_);
+bitpit::MinPQueue<double, string>    heap(2, true, map_);
 
 // Counters
 // none
@@ -249,7 +249,7 @@ void Test002(
 // void Test002(                                                              //
 //     void)                                                                  //
 //                                                                            //
-// Demo for maxPQUEUE (max heap queue)                                        //
+// Demo for MaxPQueue (max heap queue)                                        //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
@@ -266,7 +266,7 @@ void Test002(
 
 // Local variables
 vector< array<int,2> >       map(20), *map_ = &map;
-maxPQUEUE<double, string>    heap(2, true, map_);
+bitpit::MaxPQueue<double, string>    heap(2, true, map_);
 
 // Counters
 // none
@@ -405,7 +405,7 @@ void Test003(
 
 // Local variables
 int                         N = 5120000;
-kdtree<2, vector<double> >           KD(N);
+bitpit::KdTree<2, vector<double> >           KD(N);
 dvector2D                   X(N, dvector1D(2, 0.0));
 dvector1D                   x(2, -0.1);
 
@@ -581,7 +581,7 @@ if (selection == 0) {
     cout << "Subtest: random permutation of integers in [0, " << N << "]" << endl;
 
     // Extract n integers in [0, N] ----------------------------------------- //
-    Extract_wo_Repl(n, N, list);
+    bitpit::extractWithoutReplacement(n, N, list);
     cout << "Extracted: " << list << endl;
     cout << endl;
 
@@ -592,7 +592,7 @@ if (selection == 0) {
     // Extract n integers in [0, N] ----------------------------------------- //
     out = 0;
     for (int I_ = 0; I_ < 100000; I_++) {
-        Extract_wo_Repl(1, N, list);
+        bitpit::extractWithoutReplacement(1, N, list);
         out += list[0];
     } //next I
     cout << "Expectation: " << ((double) out)/(100000.0) << endl;

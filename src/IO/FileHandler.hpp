@@ -6,6 +6,7 @@
 #include <fstream>
 #include <sstream>
 
+namespace bitpit{
 
 /*!
  * \class   FileHandler
@@ -54,5 +55,6 @@ class FileHandler{
 
 };
 
+}
 
 #endif

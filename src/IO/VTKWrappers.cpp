@@ -1,5 +1,6 @@
 
 #include "VTKWrappers.hpp"
+namespace bitpit{
 
 /*!
  * @ingroup     VisualizationToolKit
@@ -45,7 +46,7 @@ VTKUnstructuredVec::~VTKUnstructuredVec(){
 /*!
  * Finds a field within class by its name.
  * @param[in]    name_   name of the field
- * @param[std::out]  the_field   pointer to the field if found, else unaltered
+ * @param[out]  the_field   pointer to the field if found, else unaltered
  * @return      true if found, else false   
  */
 bool VTKUnstructuredVec::getFieldByName( const std::string &name_, VTKUnstructuredVec::ufield *&the_field ){
@@ -257,3 +258,5 @@ void VTKUnstructuredVec::stream_visitor::setComponents( int com_){
 /*!
  @}
 */
+
+}

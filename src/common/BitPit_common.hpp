@@ -1,7 +1,7 @@
 /*!
  * @defgroup common Common
  * @{
- * @defgroup utils Utils
+ * @defgroup commonUtils Utils
  * @}
  *
  */

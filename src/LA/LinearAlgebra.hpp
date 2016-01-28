@@ -24,15 +24,9 @@
 # include <array>
 # include <iostream>
 
-// CC_lib
 # include "Operators.hpp"
 
-// Others
-// none
-
-// ========================================================================== //
-// FUNCTIONS PROTOTYPES                                                       //
-// ========================================================================== //
+namespace bitpit{
 
 // Generic routines --------------------------------------------------------- //
 template <class T>
@@ -337,6 +331,8 @@ template <class T, size_t m, size_t n>
 std::array < std::array<T, n>, m> Transpose(
     const std::array< std::array<T, m>, n>      &
 );
+
+}
 
 // =================================================================================== //
 // TEMPLATES                                                                           //

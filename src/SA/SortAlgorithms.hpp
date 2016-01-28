@@ -29,14 +29,11 @@
 // BitPit
 # include "Operators.hpp"
 
-// ========================================================================== //
-// CLASSES                                                                    //
-// ========================================================================== //
+namespace bitpit{
 
-// kdtree ------------------------------------------------------------------- //
-
+// KdTree ------------------------------------------------------------------- //
 template <class T, class T1 = int>
-class kdnode {
+class KdNode {
 
     // Members ========================================================== //
     public:
@@ -47,35 +44,35 @@ class kdnode {
 
     // Constructor ====================================================== //
     public:
-    kdnode(                                                               // default constructor for kdnode variables
+    KdNode(                                                               // default constructor for KdNode variables
         void                                                              // (input) none
     );
 
     // Destructor ======================================================= //
     public:
-    ~kdnode(                                                              // default destructor for kdnode variables
+    ~KdNode(                                                              // default destructor for KdNode variables
         void                                                              // (input) none
     );
 };
 
 template <int d, class T, class T1 = int>
-class kdtree {
+class KdTree {
 
     // Members ============================================================== //
     public:
     int                                 MAXSTK;                               // max stack size
     int                                 n_nodes;                              // number of nodes
-    std::vector< kdnode<T, T1> >        nodes;                                // kd-tree nodes
+    std::vector< KdNode<T, T1> >        nodes;                                // kd-tree nodes
 
     // Constructors ========================================================= //
     public:
-    kdtree(                                                                   // Default constructor for kdtree
+    KdTree(                                                                   // Default constructor for KdTree
         int                 stack_size = 10                                   // (input/optional stack size)
     );
 
     // Destructors ========================================================== //
     public:
-    ~kdtree(                                                                  // default destructor for kdtree variables
+    ~KdTree(                                                                  // default destructor for KdTree variables
         void                                                                  // (input) none
     );
 
@@ -90,7 +87,7 @@ class kdtree {
     );
 
     template <class T2>
-    int h_neighbor(                                                           // Check if a kd-node exists in the h-neighborhood of a given item
+    int hNeighbor(                                                           // Check if a kd-node exists in the h-neighborhood of a given item
         T           *,                                                        // (input) pointer to element to be tested
         T2           ,                                                        // (input) radius of ball
         bool         ,
@@ -99,7 +96,7 @@ class kdtree {
     );
 
     template <class T2>
-    int h_neighbor(                                                           // Check if a kd-node exists in the h-neighborhood of a given item
+    int hNeighbor(                                                           // Check if a kd-node exists in the h-neighborhood of a given item
         T           *,                                                        // (input) pointer to element to be tested
         T1          &,                                                      // (input/output) label of the kd node matching test object
         T2           ,                                                        // (input) radius of ball
@@ -114,10 +111,10 @@ class kdtree {
         T1          &                                                         // (input) label of the new element
     );
     private:
-    void IncreaseStack(                                                       // Increase stack size
+    void increaseStack(                                                       // Increase stack size
         void                                                                  // )input) none
     );
-    void DecreaseStack(                                                       // Decrease stack size
+    void decreaseStack(                                                       // Decrease stack size
         void                                                                  // )input) none
     );
 
@@ -125,7 +122,7 @@ class kdtree {
 
 // min PQUEUE --------------------------------------------------------------- //
 template <class T, class T1 = T>
-class minPQUEUE {
+class MinPQueue {
 
     // Members ============================================================== //
     public:
@@ -140,11 +137,11 @@ class minPQUEUE {
 
     // Constructor ========================================================== //
     public:
-    minPQUEUE(                                                                // Default constructor for min priority queue
+    MinPQueue(                                                                // Default constructor for min priority queue
         bool                                    a = false,                    // (input/optional) flag for key labelling
         std::vector< std::array<int,2> >       *b = NULL                      // (input/optional) pointer to user-defined map
     );
-    minPQUEUE(                                                                // Default constructor for min priority queue
+    MinPQueue(                                                                // Default constructor for min priority queue
         int                                      ,                            // (input) stack size
         bool                                    a = false,                    // (input/optional) flag for key labelling
         std::vector< std::array<int,2> >       *b = NULL                      // (input/optional) pointer to user-defined map
@@ -152,7 +149,7 @@ class minPQUEUE {
 
     // Destructor =========================================================== //
     public:
-    ~minPQUEUE(                                                               // Standard destructor for min priority queues
+    ~MinPQueue(                                                               // Standard destructor for min priority queues
         void                                                                  // (input) none
     );
 
@@ -184,17 +181,17 @@ class minPQUEUE {
         T               &,                                                    // (input) new key value
         T1              &                                                     // (input) label attached to the new key
     );
-    void build_heap(                                                          // Build min-heap
+    void buildHeap(                                                          // Build min-heap
         void                                                                  // (input) none
     );
     void display(                                                             // Display min-heap content
         std::ostream    &                                                     // (input) output stream
     );
     private:
-    void IncreaseSTACK(                                                       // Increase stack size
+    void increaseSTACK(                                                       // Increase stack size
         void                                                                  // (input) none
     );
-    void DecreaseSTACK(                                                       // Decrease stack size
+    void decreaseSTACK(                                                       // Decrease stack size
         void                                                                  // (input) none
     );
     void heapify(                                                             // Restore min heap condition on spacified element
@@ -205,7 +202,7 @@ class minPQUEUE {
 
 // max PQUEUE --------------------------------------------------------------- //
 template <class T, class T1 = T>
-class maxPQUEUE {
+class MaxPQueue {
 
     // Members ============================================================== //
     public:
@@ -219,11 +216,11 @@ class maxPQUEUE {
 
     // Constructor ========================================================== //
     public:
-    maxPQUEUE(                                                                // Default constructor for min priority queue
+    MaxPQueue(                                                                // Default constructor for min priority queue
         bool                                    a = false,                    // (input/optional) flag for key labelling
         std::vector< std::array<int,2> >       *b = NULL                      // (input/optional) pointer to user-defined map
     );
-    maxPQUEUE(                                                                // Default constructor for min priority queue
+    MaxPQueue(                                                                // Default constructor for min priority queue
         int              ,                                                    // (input) stack size
         bool                                    a = false,                    // (input/optional) flag for key labelling
         std::vector< std::array<int,2> >       *b = NULL                      // (input/optional) pointer to user-defined map
@@ -231,7 +228,7 @@ class maxPQUEUE {
 
     // Destructor =========================================================== //
     public:
-    ~maxPQUEUE(                                                               // Standard destructor for min priority queues
+    ~MaxPQueue(                                                               // Standard destructor for min priority queues
         void                                                                  // (input) none
     );
 
@@ -263,17 +260,17 @@ class maxPQUEUE {
         T               &,                                                    // (input) new key value
         T1              &                                                     // (input) label attached to the new key
     );
-    void build_heap(                                                          // Build min-heap
+    void buildHeap(                                                          // Build min-heap
         void
     );
     void display(                                                             // Display min-heap content
         std::ostream         &                                                     // (input) output stream
     );
     private:
-    void IncreaseSTACK(                                                       // Increase stack size
+    void increaseSTACK(                                                       // Increase stack size
         void                                                                  // (input) none
     );
-    void DecreaseSTACK(                                                       // Decrease stack size
+    void decreaseSTACK(                                                       // Decrease stack size
         void                                                                  // (input) none
     );
     void heapify(                                                             // Restore min heap condition on spacified element
@@ -284,7 +281,7 @@ class maxPQUEUE {
 
 // LIFO stack --------------------------------------------------------------- //
 template <class T>
-class LIFOstack {
+class LIFOStack {
 
     // Members ============================================================== //
     public:
@@ -294,19 +291,19 @@ class LIFOstack {
 
     // Constructor ========================================================== //
     public:
-    LIFOstack(                                                                // Standard constructor for LIFO stack
+    LIFOStack(                                                                // Standard constructor for LIFO stack
         void                                                                  // (input) none
     );
-    LIFOstack(                                                                // Custom constructor #1 for LIFO stack
+    LIFOStack(                                                                // Custom constructor #1 for LIFO stack
         int                                                                   // (input) maximal stack size
     );
-    LIFOstack(                                                                // Custom constructor #2 for LIFO stack
+    LIFOStack(                                                                // Custom constructor #2 for LIFO stack
         std::vector<T>  &                                                     // (input) items to be added in the LIFO stack
     );
 
     // Destructor =========================================================== //
     public:
-    ~LIFOstack(                                                               // Standard destructor for LIFO stack
+    ~LIFOStack(                                                               // Standard destructor for LIFO stack
         void                                                                  // (input) none
     );
 
@@ -315,10 +312,10 @@ class LIFOstack {
     void clear(                                                               // Clear stack content
         void                                                                  // (input) none
     );
-    void IncreaseSTACK(                                                       // Increase stack size
+    void increaseSTACK(                                                       // Increase stack size
         void                                                                  // (input) none
     );
-    void DecreaseSTACK(                                                       // Decrease stack size
+    void decreaseSTACK(                                                       // Decrease stack size
         void                                                                  // (output) none
     );
     T pop(                                                                    // Pop last item from stack
@@ -340,17 +337,21 @@ class LIFOstack {
 // ========================================================================== //
 
 // RANDOM SORTING =========================================================== //
-void Extract_wo_Repl(                                                         // Extract integers without replacement
+void extractWithoutReplacement(                                               // Extract integers without replacement
     int                         ,                                             // (input) number of integers to be extracted
     int                         ,                                             // (input) upper bound of extraction interval
     std::vector<int>           &                                              // (input/output) list of extracted value
 );
 
+}
+
 // ========================================================================== //
 // TEMPLATES                                                                  //
 // ========================================================================== //
-# include "LIFOstack.tpp"
-# include "PQUEUE.tpp"
-# include "kdtree.tpp"
+# include "LIFOStack.tpp"
+# include "PQueue.tpp"
+# include "KdTree.tpp"
+
+
 
 # endif

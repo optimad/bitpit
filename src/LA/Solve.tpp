@@ -1,3 +1,4 @@
+namespace bitpit{
 /*!
  * @ingroup Solve
  * @{
@@ -402,3 +403,4 @@ return; };
 /*!
  * @}
  */
+}

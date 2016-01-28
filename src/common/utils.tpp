@@ -6,10 +6,12 @@
 #include <algorithm>
 #include <vector>
 
+namespace bitpit {
+
 namespace utils {
 
 /*!
-	\ingroup utils
+	\ingroup commonUtils
 
 	Adds an id to an ordered list of unique ids.
 
@@ -43,6 +45,8 @@ bool addToOrderedVector(const T &value, std::vector<T> &list, Comparator compara
 		return false;
 	}
 };
+
+}
 
 }
 

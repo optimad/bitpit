@@ -17,9 +17,6 @@
 // ========================================================================== //
 # include "LinearAlgebra.hpp"
 
-// ========================================================================== //
-// IMPLEMENTATIONS                                                            //
-// ========================================================================== //
 using namespace std;
 
 /*!
@@ -43,7 +40,7 @@ using namespace std;
         err = 2: matrix is singular to working precision
         err = 3: wrong dimensions
 */
-unsigned int LU(
+unsigned int bitpit::LU(
     vector<vector<double> >         &A,
     vector<vector<double> >         &L,
     vector<vector<double> >         &U,
@@ -147,7 +144,7 @@ return(info); };
     \param[in] B r.h.s. of linear system
     \param[in,out] x on output store the solution of the linear system
 */
-void BackwardSubst(
+void bitpit::BackwardSubst(
     vector<vector<double> >         &A,
     vector<double>                  &B,
     vector<double>                  &x
@@ -216,7 +213,7 @@ return; };
     \param[in] B r.h.s. of linear system
     \param[in,out] x on output store the solution of the linear system
 */
-void ForwardSubst(
+void bitpit::ForwardSubst(
     vector<vector<double> >         &A,
     vector<double>                  &B,
     vector<double>                  &x
@@ -287,7 +284,7 @@ return; };
     \param[in] B r.h.s. of the linear system
     \param[in,out] x on output stores the solution of the linear system
 */
-void SolveLU(
+void bitpit::SolveLU(
     vector<vector<double> >         &A,
     vector<double>                  &B,
     vector<double>                  &x

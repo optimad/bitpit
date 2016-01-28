@@ -10,6 +10,8 @@
 
 #include<iostream>
 
+namespace bitpit{
+
 /*!
 	\ingroup containers
 	@{
@@ -543,5 +545,8 @@ private:
 /*!
 	@}
 */
+
+}
+
 
 #endif

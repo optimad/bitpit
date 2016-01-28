@@ -10,18 +10,19 @@
 // All rights reserved.                                                       //
 // ========================================================================== //
 
-
+namespace bitpit{
 /*!
  \ingroup   SortAlgorithms
  \{
  */
+
 // ========================================================================== //
-// TEMPLATE IMPLEMENTATIONS FOR minPQUEUE                                     //
+// TEMPLATE IMPLEMENTATIONS FOR MinPQueue                                     //
 // ========================================================================== //
 
 /*!
 
-    \class minPQUEUE
+    \class MinPQueue
     \brief class for min priority queue.
 
     Class for priority element insertion and extraction. Elements inserted in
@@ -51,7 +52,7 @@
 
 // -------------------------------------------------------------------------- //
 /*!
-    Default constructor for class minPQUEUE.
+    Default constructor for class MinPQueue.
     Initialize an empty priority queue.
     If a pointer to a vector<array<int, 2>> is provided, the mapping between
     the original and current element position in the tree is tracked.
@@ -60,7 +61,7 @@
     \param[in] map_ (default = NULL) pointer to map between the original->current element positions
 */
 template <class T, class T1>
-minPQUEUE<T, T1>::minPQUEUE(
+MinPQueue<T, T1>::MinPQueue(
         bool                            flag_label,
         std::vector< std::array<int,2> >*map_
         ) {
@@ -92,14 +93,14 @@ minPQUEUE<T, T1>::minPQUEUE(
     map = map_;
 
     // Initialize stack
-    IncreaseSTACK();
+    increaseSTACK();
 
     return; 
 };
 
 // -------------------------------------------------------------------------- //
 /*!
-    Constructor #1 for class minPQUEUE.
+    Constructor #1 for class MinPQueue.
     Initialize an empty priority queue.
     The size of memory reserve is specified by maxstack.
     If a pointer to a vector<array<int, 2>> is provided, the mapping between
@@ -110,7 +111,7 @@ minPQUEUE<T, T1>::minPQUEUE(
     \param[in] map_ (default = NULL) pointer to map between the original->current element positions
 */
 template <class T, class T1>
-minPQUEUE<T, T1>::minPQUEUE(
+MinPQueue<T, T1>::MinPQueue(
         int                             maxstack,
         bool                            flag_label,
         std::vector< std::array<int,2> >*map_
@@ -143,7 +144,7 @@ minPQUEUE<T, T1>::minPQUEUE(
     map = map_;
 
     // Initialize stack
-    IncreaseSTACK();
+    increaseSTACK();
 
     return; 
 };
@@ -152,11 +153,11 @@ minPQUEUE<T, T1>::minPQUEUE(
 
 // -------------------------------------------------------------------------- //
 /*!
-    Default destructor for class minPQUEUE.
+    Default destructor for class MinPQueue.
     Clear queue content and free memory.
 */
 template <class T, class T1>
-minPQUEUE<T, T1>::~minPQUEUE(
+MinPQueue<T, T1>::~MinPQueue(
         void
         ) {
 
@@ -198,7 +199,7 @@ minPQUEUE<T, T1>::~minPQUEUE(
     Clear current content without freeing memory.
 */
 template <class T, class T1>
-void minPQUEUE<T, T1>::clear(
+void MinPQueue<T, T1>::clear(
         void
         ) {
 
@@ -228,7 +229,7 @@ void minPQUEUE<T, T1>::clear(
     is set at construction.
 */
 template <class T, class T1>
-void minPQUEUE<T, T1>::IncreaseSTACK(
+void MinPQueue<T, T1>::increaseSTACK(
         void
         ) {
 
@@ -263,7 +264,7 @@ void minPQUEUE<T, T1>::IncreaseSTACK(
     is set at construction.
 */
 template <class T, class T1>
-void minPQUEUE<T, T1>::DecreaseSTACK(
+void MinPQueue<T, T1>::decreaseSTACK(
         void
         ) {
 
@@ -299,7 +300,7 @@ void minPQUEUE<T, T1>::DecreaseSTACK(
     \param[in] i index of element to be moved down/upwards in the tree
 */
 template <class T, class T1 >
-void minPQUEUE<T, T1>::heapify(
+void MinPQueue<T, T1>::heapify(
         int                       i
         ) {
 
@@ -362,7 +363,7 @@ void minPQUEUE<T, T1>::heapify(
     Build a min heap, from data currently stored in the underlying container.
 */
 template <class T, class T1>
-void minPQUEUE<T, T1>::build_heap(
+void MinPQueue<T, T1>::buildHeap(
         void
         ) {
 
@@ -397,7 +398,7 @@ void minPQUEUE<T, T1>::build_heap(
     flag_label is set to 'true' at heap construction)
 */
 template <class T, class T1>
-void minPQUEUE<T, T1>::extract(
+void MinPQueue<T, T1>::extract(
         T                      &root,
         T1                     &root_label
         ) {
@@ -439,7 +440,7 @@ void minPQUEUE<T, T1>::extract(
     // Reduce stack dimensions
     heap_size--;
     if (heap_size <= keys.size() - MAXSTK) {
-        DecreaseSTACK();
+        decreaseSTACK();
     }
 
     // Restore min-heap condition
@@ -457,7 +458,7 @@ void minPQUEUE<T, T1>::extract(
     \param[in,out] root value of element at tree root.
 */
 template <class T, class T1>
-void minPQUEUE<T, T1>::extract(
+void MinPQueue<T, T1>::extract(
         T                      &root
         ) {
 
@@ -494,7 +495,7 @@ void minPQUEUE<T, T1>::extract(
     // Reduce stack dimensions
     heap_size--;
     if (heap_size <= keys.size() - MAXSTK) {
-        DecreaseSTACK();
+        decreaseSTACK();
     }
 
     // Restore min-heap condition
@@ -513,7 +514,7 @@ void minPQUEUE<T, T1>::extract(
     flag_label is set to 'true' at heap construction)
 */
 template <class T, class T1>
-void minPQUEUE<T, T1>::insert(
+void MinPQueue<T, T1>::insert(
         T                      &key_new,
         T1                     &label_new
         ) {
@@ -534,7 +535,7 @@ void minPQUEUE<T, T1>::insert(
 
     // Insert key
     if (heap_size+1 > keys.size()) {
-        IncreaseSTACK();
+        increaseSTACK();
     }
 
     // Add new key
@@ -562,13 +563,13 @@ void minPQUEUE<T, T1>::insert(
     \param[in] key_new value of the new element.
 */
 template <class T, class T1>
-void minPQUEUE<T, T1>::insert(
+void MinPQueue<T, T1>::insert(
         T                      &key_new
         ) {
 
     // ========================================================================== //
     // template <class T, class T1>                                               //
-    // void minPQUEUE<T, T1>::insert(                                             //
+    // void MinPQueue<T, T1>::insert(                                             //
     //     T                      &key_new)                                       //
     //                                                                            //
     // Insert new key into a min heap                                             //
@@ -598,7 +599,7 @@ void minPQUEUE<T, T1>::insert(
 
     // Insert key
     if (heap_size+1 > keys.size()) {
-        IncreaseSTACK();
+        increaseSTACK();
     }
 
     // Add new key
@@ -624,7 +625,7 @@ void minPQUEUE<T, T1>::insert(
     flag_label is set to 'true' at heap construction)
 */
 template <class T, class T1>
-void minPQUEUE<T, T1>::modify(
+void MinPQueue<T, T1>::modify(
         int                     i,
         T                      &key_new,
         T1                     &label_new
@@ -700,7 +701,7 @@ void minPQUEUE<T, T1>::modify(
     \param[in] key_new new value of the element.
 */
 template <class T, class T1>
-void minPQUEUE<T, T1>::modify(
+void MinPQueue<T, T1>::modify(
         int                    i,
         T                      &key_new
         ) {
@@ -762,7 +763,7 @@ void minPQUEUE<T, T1>::modify(
     \param[in,out] out output stream
 */
 template <class T, class T1>
-void minPQUEUE<T, T1>::display(
+void MinPQueue<T, T1>::display(
         std::ostream    &out
         ) {
 
@@ -808,13 +809,22 @@ void minPQUEUE<T, T1>::display(
     return; 
 }
 
+/*!
+ \}
+ */
+
+/*!
+ \ingroup   SortAlgorithms
+ \{
+ */
+
 // ========================================================================== //
-// TEMPLATE IMPLEMENTATIONS FOR maxPQUEUE                                     //
+// TEMPLATE IMPLEMENTATIONS FOR MaxPQueue                                     //
 // ========================================================================== //
 
 /*!
 
-    \class maxPQUEUE
+    \class MaxPQueue
     \brief class for max priority queue.
 
     Class for priority element insertion and extraction. Elements inserted in
@@ -844,7 +854,7 @@ void minPQUEUE<T, T1>::display(
 
 // -------------------------------------------------------------------------- //
 /*!
-    Default constructor for class maxPQUEUE.
+    Default constructor for class MaxPQueue.
     Initialize an empty priority queue.
     If a pointer to a vector<array<int, 2>> is provided, the mapping between
     the original and current element position in the tree is tracked.
@@ -853,7 +863,7 @@ void minPQUEUE<T, T1>::display(
     \param[in] map_ (default = NULL) pointer to map between the original->current element positions
 */
 template <class T, class T1>
-maxPQUEUE<T, T1>::maxPQUEUE(
+MaxPQueue<T, T1>::MaxPQueue(
         bool                            flag_label,
         std::vector< std::array<int,2> >*map_
         ) {
@@ -885,14 +895,14 @@ maxPQUEUE<T, T1>::maxPQUEUE(
     map = map_;
 
     // Initialize stack
-    IncreaseSTACK();
+    increaseSTACK();
 
     return; 
 };
 
 // -------------------------------------------------------------------------- //
 /*!
-    Constructor #1 for class maxPQUEUE.
+    Constructor #1 for class MaxPQueue.
     Initialize an empty priority queue.
     The size of memory reserve is specified by maxstack.
     If a pointer to a vector<array<int, 2>> is provided, the mapping between
@@ -903,7 +913,7 @@ maxPQUEUE<T, T1>::maxPQUEUE(
     \param[in] map_ (default = NULL) pointer to map between the original->current element positions
 */
 template <class T, class T1>
-maxPQUEUE<T, T1>::maxPQUEUE(
+MaxPQueue<T, T1>::MaxPQueue(
         int                             maxstack,
         bool                            flag_label,
         std::vector< std::array<int,2> >*map_
@@ -936,7 +946,7 @@ maxPQUEUE<T, T1>::maxPQUEUE(
     map = map_;
 
     // Initialize stack
-    IncreaseSTACK();
+    increaseSTACK();
 
     return; 
 };
@@ -945,17 +955,17 @@ maxPQUEUE<T, T1>::maxPQUEUE(
 
 // -------------------------------------------------------------------------- //
 /*!
-    Default destructor for class maxPQUEUE.
+    Default destructor for class MaxPQueue.
     Clear queue content and free memory.
 */
 template <class T, class T1>
-maxPQUEUE<T, T1>::~maxPQUEUE(
+MaxPQueue<T, T1>::~MaxPQueue(
         void
         ) {
 
     // ========================================================================== //
     // template <class T, class T1>                                               //
-    // maxPQUEUE<T, T1>::~maxPQUEUE(                                              //
+    // MaxPQueue<T, T1>::~MaxPQueue(                                              //
     //     void)                                                                  //
     //                                                                            //
     // Standard destructor for max heap.                                          //
@@ -1007,7 +1017,7 @@ maxPQUEUE<T, T1>::~maxPQUEUE(
     Clear current content without freeing memory.
 */
 template <class T, class T1>
-void maxPQUEUE<T, T1>::clear(
+void MaxPQueue<T, T1>::clear(
         void
         ) {
 
@@ -1037,7 +1047,7 @@ void maxPQUEUE<T, T1>::clear(
     is set at construction.
 */
 template <class T, class T1>
-void maxPQUEUE<T, T1>::IncreaseSTACK(
+void MaxPQueue<T, T1>::increaseSTACK(
         void
         ) {
 
@@ -1072,13 +1082,13 @@ void maxPQUEUE<T, T1>::IncreaseSTACK(
     is set at construction.
 */
 template <class T, class T1>
-void maxPQUEUE<T, T1>::DecreaseSTACK(
+void MaxPQueue<T, T1>::decreaseSTACK(
         void
         ) {
 
     // ========================================================================== //
     // template <class T, class T1>                                               //
-    // void maxPQUEUE<T, T1>::DecreaseSTACK(                                      //
+    // void MaxPQueue<T, T1>::decreaseSTACK(                                      //
     //     void)                                                                  //
     //                                                                            //
     // Decrease stack size.                                                       //
@@ -1124,7 +1134,7 @@ void maxPQUEUE<T, T1>::DecreaseSTACK(
     \param[in] i index of element to be moved down/upwards in the tree
 */
 template <class T, class T1 >
-void maxPQUEUE<T, T1>::heapify(
+void MaxPQueue<T, T1>::heapify(
         int                       i
         ) {
 
@@ -1187,13 +1197,13 @@ void maxPQUEUE<T, T1>::heapify(
     Build a max heap, from data currently stored in the underlying container.
 */
 template <class T, class T1>
-void maxPQUEUE<T, T1>::build_heap(
+void MaxPQueue<T, T1>::buildHeap(
         void
         ) {
 
     // ========================================================================== //
     // template <class T, class T1>                                               //
-    // void maxPQUEUE<T, T1>::build_heap(                                         //
+    // void MaxPQueue<T, T1>::buildHeap(                                         //
     //     void)                                                                  //
     //                                                                            //
     // Build max heap tree.                                                       //
@@ -1238,7 +1248,7 @@ void maxPQUEUE<T, T1>::build_heap(
     flag_label is set to 'true' at heap construction)
 */
 template <class T, class T1>
-void maxPQUEUE<T, T1>::extract(
+void MaxPQueue<T, T1>::extract(
         T                      &root,
         T1                     &root_label
         ) {
@@ -1280,7 +1290,7 @@ void maxPQUEUE<T, T1>::extract(
     // Reduce stack dimensions
     heap_size--;
     if (heap_size <= keys.size() - MAXSTK) {
-        DecreaseSTACK();
+        decreaseSTACK();
     }
 
     // Restore max-heap condition
@@ -1298,7 +1308,7 @@ void maxPQUEUE<T, T1>::extract(
     \param[in,out] root value of element at tree root.
 */
 template <class T, class T1>
-void maxPQUEUE<T, T1>::extract(
+void MaxPQueue<T, T1>::extract(
         T                      &root
         ) {
 
@@ -1335,7 +1345,7 @@ void maxPQUEUE<T, T1>::extract(
     // Reduce stack dimensions
     heap_size--;
     if (heap_size <= keys.size() - MAXSTK) {
-        DecreaseSTACK();
+        decreaseSTACK();
     }
 
     // Restore max-heap condition
@@ -1354,7 +1364,7 @@ void maxPQUEUE<T, T1>::extract(
     flag_label is set to 'true' at heap construction)
 */
 template <class T, class T1>
-void maxPQUEUE<T, T1>::insert(
+void MaxPQueue<T, T1>::insert(
         T                      &key_new,
         T1                     &label_new
         ) {
@@ -1375,7 +1385,7 @@ void maxPQUEUE<T, T1>::insert(
 
     // Insert key
     if (heap_size+1 > keys.size()) {
-        IncreaseSTACK();
+        increaseSTACK();
     }
 
     // Add new key
@@ -1403,7 +1413,7 @@ void maxPQUEUE<T, T1>::insert(
     \param[in] key_new value of the new element.
 */
 template <class T, class T1>
-void maxPQUEUE<T, T1>::insert(
+void MaxPQueue<T, T1>::insert(
         T                      &key_new
         ) {
 
@@ -1423,7 +1433,7 @@ void maxPQUEUE<T, T1>::insert(
 
     // Insert key
     if (heap_size+1 > keys.size()) {
-        IncreaseSTACK();
+        increaseSTACK();
     }
 
     // Add new key
@@ -1449,7 +1459,7 @@ void maxPQUEUE<T, T1>::insert(
     flag_label is set to 'true' at heap construction)
 */
 template <class T, class T1>
-void maxPQUEUE<T, T1>::modify(
+void MaxPQueue<T, T1>::modify(
         int                     i,
         T                      &key_new,
         T1                     &label_new
@@ -1525,7 +1535,7 @@ void maxPQUEUE<T, T1>::modify(
     \param[in] key_new new value of the element.
 */
 template <class T, class T1>
-void maxPQUEUE<T, T1>::modify(
+void MaxPQueue<T, T1>::modify(
         int                    i,
         T                      &key_new
         ) {
@@ -1587,7 +1597,7 @@ void maxPQUEUE<T, T1>::modify(
     \param[in,out] out output stream
 */
 template <class T, class T1>
-void maxPQUEUE<T, T1>::display(
+void MaxPQueue<T, T1>::display(
         std::ostream    &out
         ) {
 
@@ -1635,4 +1645,4 @@ void maxPQUEUE<T, T1>::display(
 /*!
  \}
  */
-
+}

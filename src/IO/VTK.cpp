@@ -1,5 +1,6 @@
 #include "VTK.hpp"
 
+namespace bitpit{
 /*!
  * @ingroup    VisualizationToolKit
  * @{
@@ -950,3 +951,4 @@ const VTKFieldMetaData VTK::getMetaData( std::string name ){
 /*! 
  * @} 
  */
+}

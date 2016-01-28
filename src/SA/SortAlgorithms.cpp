@@ -53,7 +53,7 @@ using namespace std;
     \param[in] m upper bound of extraction interval
     \param[in,out] list vector with size n, storing extracted values
 */
-void Extract_wo_Repl(
+void bitpit::extractWithoutReplacement(
     int                 n,
     int                 m,
     vector<int>        &list

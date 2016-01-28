@@ -1,5 +1,7 @@
 #include "VTK.hpp"
 
+namespace bitpit{
+
 /*! =====
  * @ingroup     VisualizationToolKit
  * @{
@@ -493,3 +495,5 @@ void VTKRectilinearGrid::setMissingGlobalData( ){
 /*!
  *   @}
  */
+
+}

@@ -1,17 +1,18 @@
 // ========================================================================== //
-// TEMPLATE IMPLEMENTATIONS FOR CLASS ibinarystream                             //
+// TEMPLATE IMPLEMENTATIONS FOR CLASS IBinaryStream                             //
 // ========================================================================== //
+
+namespace bitpit{
 
 // -------------------------------------------------------------------------- //
 /*!
-        \ingroup    BinaryStream
         Read data from memory location and store in the stream buffer.
 
         \param[in] t data to be stored in the stream buffer
 
 */
 template<typename T>
-void ibinarystream::read(
+void IBinaryStream::read(
     T                           &t
 ) {
     if ( eof() || ( current_pos + sizeof(T) ) > buffer.size() ) {
@@ -23,19 +24,18 @@ void ibinarystream::read(
 }
 
 // ========================================================================== //
-// TEMPLATE IMPLEMENTATIONS FOR CLASS obinarystream                             //
+// TEMPLATE IMPLEMENTATIONS FOR CLASS OBinaryStream                             //
 // ========================================================================== //
 
 // -------------------------------------------------------------------------- //
 /*!
-        \ingroup    BinaryStream
         Write data from memory to internal buffer.
 
         \param[in] t data to be stored in the stream buffer
 
 */
 template<typename T>
-void obinarystream::write(
+void OBinaryStream::write(
     const T                     &t
 ) {
     std::vector<char> vec(sizeof(T));
@@ -49,8 +49,7 @@ void obinarystream::write(
 
 // -------------------------------------------------------------------------- //
 /*!
-        \ingroup    BinaryStream
-        Input stream operator for class ibinarystream.
+        Input stream operator for class IBinaryStream.
 
         \param[in] istm input stream
         \param[in] val  value to be streamed
@@ -59,8 +58,8 @@ void obinarystream::write(
 
 */
 template<typename T>
-ibinarystream& operator>> (
-    ibinarystream                 &istm,
+IBinaryStream& operator>> (
+    IBinaryStream                 &istm,
     T                           &val
 ) {
     istm.read(val);
@@ -69,8 +68,7 @@ ibinarystream& operator>> (
 
 // -------------------------------------------------------------------------- //
 /*!
-        \ingroup    BinaryStream
-        Output stream operator for class ibinarystream.
+        Output stream operator for class IBinaryStream.
 
         \param[in] ostm output stream
         \param[in] val  value to be streamed
@@ -79,8 +77,8 @@ ibinarystream& operator>> (
 
 */
 template<typename T>
-obinarystream& operator<< (
-    obinarystream                 &ostm,
+OBinaryStream& operator<< (
+    OBinaryStream                 &ostm,
     const T                     &val
 ) {
     ostm.write(val);
@@ -88,3 +86,4 @@ obinarystream& operator<< (
     return ostm;
 }
 
+}

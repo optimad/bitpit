@@ -6,11 +6,15 @@
 #include <boost/mpl/copy.hpp>
 #include <boost/variant.hpp>
 
+namespace bitpit{
 
+/*!
+ * @ingroup     VisualizationToolKit     
+ * @brief       Contaners which are directly handled by VTK and hence do not need an implemented interface
+ */
 namespace VTKContainers{
 
     /*!
-     * @ingroup    VTKContainers
      * @typedef    VectorOfVector
      * All supported variants of vector of POD and vector of vector of POD
      */
@@ -41,7 +45,6 @@ namespace VTKContainers{
     >::type VectorOfVector;
     
     /*!
-     * @ingroup    VTKContainers
      * @typedef    VectorOfArray
      * All supported variants of vector of array of POD
      */
@@ -72,18 +75,18 @@ namespace VTKContainers{
     >::type VectorOfArray;
     
     /*!
-     * @ingroup    VTKContainers
      * @typedef     VectorContainers
      * All supported containers by VTKUnstructuredVec
      */
     typedef boost::mpl::copy< VectorOfVector::type, boost::mpl::back_inserter<VectorOfArray> > ::type VectorContainers ;
     
     /*!
-     * @ingroup    VTKContainers
      * @typedef     Variants
      * Boost variant over VectorContainers
      */
     typedef boost::make_variant_over< VectorContainers >::type  Variants ;
+
+}
 
 }
 

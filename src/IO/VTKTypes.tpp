@@ -2,11 +2,11 @@
 #include <typeinfo>
 #include <type_traits>
 
+namespace bitpit{
+
 /*!
  * Registers a type that will be used by the VTK functions
  * @tparam  T is the type that will be registered
- * @param   VTKType is the VTK type that will be associated with the specified
- * type
  */
 template<typename T>
 VTKDataType VTKTypes::registerType()
@@ -68,6 +68,7 @@ VTKDataType VTKTypes::registerType()
 /*!
  * Registers a type that will be used by the VTK functions
  * @tparam  T is the type that will be registered
+ * @param[in]   VTKType is the VTK type that will be associated with the specified
  */
 template<typename T>
 VTKDataType VTKTypes::registerType(VTKDataType VTKType)
@@ -87,7 +88,6 @@ VTKDataType VTKTypes::registerType(VTKDataType VTKType)
  *  @tparam     T           type of argument
  *  @param[in]  dummy       argument type to be deduced
  *  @return     basic VTK type 
- *
  */
 template<class T>
 VTKDataType VTKTypes::whichType( T dummy ){
@@ -128,3 +128,4 @@ VTKDataType VTKTypes::whichType( std::array<T,d> dummy ){
     return  whichType(dummy2) ;
 };
 
+}

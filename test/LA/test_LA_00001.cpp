@@ -76,18 +76,18 @@ void Test_000(
 
     // Zeros
     cout << "zeros(A, 4, 3) = " << endl;
-    zeros(A, 4, 3);
-    display_matrix(cout, A);
+    bitpit::zeros(A, 4, 3);
+    bitpit::display_matrix(cout, A);
 
     // Ones
     cout << "ones(A, 3, 2) = " << endl;
-    ones(A, 3, 2);
-    display_matrix(cout, A);
+    bitpit::ones(A, 3, 2);
+    bitpit::display_matrix(cout, A);
 
     // Eye
     cout << "eye(A, 5, 5) = " << endl;
-    eye(A, 5, 5);
-    display_matrix(cout, A);
+    bitpit::eye(A, 5, 5);
+    bitpit::display_matrix(cout, A);
 
     // Closing header ------------------------------------------------------- //
     cout << endl;
@@ -109,18 +109,18 @@ void Test_000(
 
     // Zeros
     cout << "zeros(A, 4, 3) = " << endl;
-    zeros(A1);
-    display_matrix(cout, A1);
+    bitpit::zeros(A1);
+    bitpit::display_matrix(cout, A1);
 
     // Ones
     cout << "ones(A, 3, 2) = " << endl;
-    ones(A2);
-    display_matrix(cout, A2);
+    bitpit::ones(A2);
+    bitpit::display_matrix(cout, A2);
 
     // Eye
     cout << "eye(A, 5, 5) = " << endl;
-    eye(A3);
-    display_matrix(cout, A3);
+    bitpit::eye(A3);
+    bitpit::display_matrix(cout, A3);
 
     // Closing header ------------------------------------------------------- //
     cout << endl;
@@ -213,32 +213,32 @@ void Test_001(
     // Output message ------------------------------------------------------- //
     cout << "Matrix as vector<vector<*>>" << endl;
     cout << "A = " << endl;
-    display_matrix(cout, A);
+    bitpit::display_matrix(cout, A);
     cout << "B = " << endl;
-    display_matrix(cout, B);
+    bitpit::display_matrix(cout, B);
     cout << "a = " << endl << a << endl;
     cout << "b = " << endl << b << endl;
     cout << "k = " << k << endl;
     cout << endl;
 
     // Matrix product ------------------------------------------------------- //
-    cout << "matmul(k, A, P); P = " << endl;
-    matmul(k, A, P);
-    display_matrix(cout, P);
-    cout << "matmul(A, k, P); P = " << endl;
-    matmul(A, k, P);
-    display_matrix(cout, P);
+    cout << "bitpit::matmul(k, A, P); P = " << endl;
+    bitpit::matmul(k, A, P);
+    bitpit::display_matrix(cout, P);
+    cout << "bitpit::matmul(A, k, P); P = " << endl;
+    bitpit::matmul(A, k, P);
+    bitpit::display_matrix(cout, P);
     cout << endl;
-    cout << "matmul(a, A, c); c = " << endl;
-    matmul(a, A, c);
+    cout << "bitpit::matmul(a, A, c); c = " << endl;
+    bitpit::matmul(a, A, c);
     cout << c << endl;;
-    cout << "matmul(A, b, c); c = " << endl;
-    matmul(A, b, c);
+    cout << "bitpit::matmul(A, b, c); c = " << endl;
+    bitpit::matmul(A, b, c);
     cout << c << endl;;
     cout << endl;
-    cout << "matmul(A, B, P); P = " << endl;
-    matmul(A, B, P);
-    display_matrix(cout, P);
+    cout << "bitpit::matmul(A, B, P); P = " << endl;
+    bitpit::matmul(A, B, P);
+    bitpit::display_matrix(cout, P);
 
     // Closing header ------------------------------------------------------- //
     cout << endl;
@@ -278,34 +278,34 @@ void Test_001(
     // Output message ------------------------------------------------------- //
     cout << "Matrix as array<array<*, n>, m>" << endl;
     cout << "A = " << endl;
-    display_matrix(cout, A);
+    bitpit::display_matrix(cout, A);
     cout << "B = " << endl;
-    display_matrix(cout, B);
+    bitpit::display_matrix(cout, B);
     cout << "a = " << endl << a << endl;
     cout << "b = " << endl << b << endl;
     cout << "k = " << k << endl;
     cout << endl;
 
     // Matrix product ------------------------------------------------------- //
-    cout << "matmul(k, A, P); P = " << endl;
-    matmul(k, A, P);
-    display_matrix(cout, P);
-    cout << "matmul(A, k, P); P = " << endl;
-    matmul(A, k, P);
-    display_matrix(cout, P);
+    cout << "bitpit::matmul(k, A, P); P = " << endl;
+    bitpit::matmul(k, A, P);
+    bitpit::display_matrix(cout, P);
+    cout << "bitpit::matmul(A, k, P); P = " << endl;
+    bitpit::matmul(A, k, P);
+    bitpit::display_matrix(cout, P);
     cout << endl;
 
-    cout << "matmul(a, A, c); c = " << endl;
-    matmul(a, A, c);
+    cout << "bitpit::matmul(a, A, c); c = " << endl;
+    bitpit::matmul(a, A, c);
     cout << c << endl;
-    cout << "matmul(A, b, d); d = " << endl;
-    matmul(A, b, d);
+    cout << "bitpit::matmul(A, b, d); d = " << endl;
+    bitpit::matmul(A, b, d);
     cout << d << endl;
     cout << endl;
 
-    cout << "matmul(A, B, Q); Q = " << endl;
-    matmul(A, B, Q);
-    display_matrix(cout, Q);
+    cout << "bitpit::matmul(A, B, Q); Q = " << endl;
+    bitpit::matmul(A, B, Q);
+    bitpit::display_matrix(cout, Q);
 
     // Closing header ------------------------------------------------------- //
     cout << endl;
@@ -385,25 +385,25 @@ void Test_002(
     // Output message ------------------------------------------------------- //
     cout << "Matrix as vector<vector<*>>" << endl;
     cout << "A = " << endl;
-    display_matrix(cout, A);
+    bitpit::display_matrix(cout, A);
     cout << endl;
 
     // Matrix manipulations ------------------------------------------------- //
-    cout << "transpose(A, P); P = " << endl;
-    transpose(A, P);
-    display_matrix(cout, P);
+    cout << "bitpit::transpose(A, P); P = " << endl;
+    bitpit::transpose(A, P);
+    bitpit::display_matrix(cout, P);
     cout << endl;
-    cout << "complement(1, 1, A, P); P = " << endl;
-    complement(1, 1, A, P);
-    display_matrix(cout, P);
+    cout << "bitpit::complement(1, 1, A, P); P = " << endl;
+    bitpit::complement(1, 1, A, P);
+    bitpit::display_matrix(cout, P);
     cout << endl;
-    cout << "triL(A, P); P = " << endl;
-    triL(A, P);
-    display_matrix(cout, P);
+    cout << "bitpit::triL(A, P); P = " << endl;
+    bitpit::triL(A, P);
+    bitpit::display_matrix(cout, P);
     cout << endl;
-    cout << "triU(A, P); P = " << endl;
-    triU(A, P);
-    display_matrix(cout, P);
+    cout << "bitpit::triU(A, P); P = " << endl;
+    bitpit::triU(A, P);
+    bitpit::display_matrix(cout, P);
     cout << endl;
 
     // Closing header ------------------------------------------------------- //
@@ -431,25 +431,25 @@ void Test_002(
     // Output message ------------------------------------------------------- //
     cout << "Matrix as vector<vector<*>>" << endl;
     cout << "A = " << endl;
-    display_matrix(cout, A);
+    bitpit::display_matrix(cout, A);
     cout << endl;
 
     // Matrix manipulations ------------------------------------------------- //
-    cout << "transpose(A, P); P = " << endl;
-    transpose(A, T);
-    display_matrix(cout, T);
+    cout << "bitpit::transpose(A, P); P = " << endl;
+    bitpit::transpose(A, T);
+    bitpit::display_matrix(cout, T);
     cout << endl;
-    cout << "complement(1, 1, A, P); P = " << endl;
-    complement(1, 1, A, C);
-    display_matrix(cout, C);
+    cout << "bitpit::complement(1, 1, A, P); P = " << endl;
+    bitpit::complement(1, 1, A, C);
+    bitpit::display_matrix(cout, C);
     cout << endl;
-    cout << "triL(A, P); P = " << endl;
-    triL(A, P);
-    display_matrix(cout, P);
+    cout << "bitpit::triL(A, P); P = " << endl;
+    bitpit::triL(A, P);
+    bitpit::display_matrix(cout, P);
     cout << endl;
-    cout << "triU(A, P); P = " << endl;
-    triU(A, P);
-    display_matrix(cout, P);
+    cout << "bitpit::triU(A, P); P = " << endl;
+    bitpit::triU(A, P);
+    bitpit::display_matrix(cout, P);
     cout << endl;
 
     // Closing header ------------------------------------------------------- //
@@ -521,8 +521,8 @@ void Test_003(
     dvector2D                   P;
 
     // Initialize scope variables ------------------------------------------- //
-    eye(B, 3, 3);
-    matmul(2.0, B, A);
+    bitpit::eye(B, 3, 3);
+    bitpit::matmul(2.0, B, A);
     for (i = 0; i < 3; ++i) {
         b[i] = ((double) i);
     } //next i
@@ -530,19 +530,19 @@ void Test_003(
     // Output message ------------------------------------------------------- //
     cout << "Matrix as vector<vector<*>>" << endl;
     cout << "A = " << endl;
-    display_matrix(cout, A);
+    bitpit::display_matrix(cout, A);
     cout << "b = " << b << endl;
     cout << endl;
 
     // Matrix manipulations ------------------------------------------------- //
-    cout << "det(A) = " << det(A) << endl;;
+    cout << "bitpit::det(A) = " << bitpit::det(A) << endl;;
     cout << endl;
-    cout << "Cramer(A, b, c); c = " << endl;
-    Cramer(A, b, c);
+    cout << "bitpit::Cramer(A, b, c); c = " << endl;
+    bitpit::Cramer(A, b, c);
     cout << c << endl;
     cout << endl;
-    cout << "SolveLU(A, b, d); d = " << endl;
-    SolveLU(A, b, d);
+    cout << "bitpit::SolveLU(A, b, d); d = " << endl;
+    bitpit::SolveLU(A, b, d);
     cout << d << endl;
 
     // Closing header ------------------------------------------------------- //
@@ -560,8 +560,8 @@ void Test_003(
     dvector2D                   P;
 
     // Initialize scope variables ------------------------------------------- //
-    eye(B);
-    matmul(2.0, B, A);
+    bitpit::eye(B);
+    bitpit::matmul(2.0, B, A);
     for (i = 0; i < 3; ++i) {
         b[i] = ((double) i);
     } //next i
@@ -569,19 +569,19 @@ void Test_003(
     // Output message ------------------------------------------------------- //
     cout << "Matrix as array<array<*, n>, m>" << endl;
     cout << "A = " << endl;
-    display_matrix(cout, A);
+    bitpit::display_matrix(cout, A);
     cout << "b = " << b << endl;
     cout << endl;
 
     // Matrix manipulations ------------------------------------------------- //
-    cout << "det(A) = " << det(A) << endl;;
+    cout << "bitpit::det(A) = " << bitpit::det(A) << endl;;
     cout << endl;
-    cout << "Cramer(A, b, c); c = " << endl;
-    Cramer(A, b, c);
+    cout << "bitpit::Cramer(A, b, c); c = " << endl;
+    bitpit::Cramer(A, b, c);
     cout << c << endl;
     cout << endl;
-    cout << "SolveLU(A, b, d); d = " << endl;
-    SolveLU(A, b, d);
+    cout << "bitpit::SolveLU(A, b, d); d = " << endl;
+    bitpit::SolveLU(A, b, d);
     cout << d << endl;
 
     // Closing header ------------------------------------------------------- //

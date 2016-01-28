@@ -9,10 +9,7 @@
 #include "VTK.hpp"
 #include "VTKContainers.hpp"
 
-/*!
- * @ingroup    VisualizationToolKit
- * @{
- */
+namespace bitpit{
 
 
 class VTKUnstructuredVec : public VTKUnstructuredGrid{
@@ -96,9 +93,7 @@ class VTKUnstructuredVec : public VTKUnstructuredGrid{
 
 };
 
-/*!
- * @}
- */
+}
 
 #include"VTKWrappers.tpp"
 

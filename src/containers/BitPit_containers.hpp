@@ -2,6 +2,7 @@
  * @defgroup containers Containers
  * @{
  * @defgroup BinaryStream Binary stream
+ * @defgroup containerUtils Utils
  * @}
  *
  */

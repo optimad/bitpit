@@ -13,6 +13,8 @@
 #include "GenericIO.hpp"
 #include "FileHandler.hpp"
 
+namespace bitpit{
+
 /*!
  * @ingroup VTKEnums
  * Enum class defining types of fields whic may be written through class VTK
@@ -81,7 +83,10 @@ enum class VTKElementType {
     POLYHEDRON = 42
 };
 
-class VTKTypes {
+class VTKTypes{
+
+     private:
+        static std::unordered_map<std::type_index, VTKDataType> m_types;  /**< map conatining registered data types */
 
     public:
         static uint8_t                  sizeOfType( const VTKDataType & type );
@@ -103,16 +108,14 @@ class VTKTypes {
         template<class T, size_t d>
         static VTKDataType              whichType( std::array<T,d> ) ;
 
-     private:
-        static std::unordered_map<std::type_index, VTKDataType> m_types;
 
 };
 
 class VTKFieldMetaData{
 
     private:
-    uint64_t                m_size ;
-    const std::type_info&   m_type ;
+    uint64_t                m_size ;                        /**< size of the field */
+    const std::type_info&   m_type ;                        /**< tye of the field */
 
     public:
     VTKFieldMetaData( uint64_t, const std::type_info &);
@@ -128,7 +131,7 @@ class VTKField{
         std::string              name;                      /**< name of the field */
         VTKFieldType             components;                /**< nr of components of field, options[ 1, 3 ] */
         VTKDataType              type;                      /**< type of data, options [  VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ]] */
-        VTKLocation              location;                  /**< cell or point data, [ VTKLocation::CELL/VTKLocation::Point] */
+        VTKLocation              location;                  /**< cell or point data, [ VTKLocation::CELL/VTKLocation::POINT] */
         VTKFormat                codification ;             /**< Type of codification [VTKFormat::ASCII, VTKFormat::APPENDED] */
         uint64_t                 nr_elements;               /**< nr of cells or points */
         uint64_t                 offset;                    /**< offset in the appended section */
@@ -314,6 +317,10 @@ class VTKRectilinearGrid : public VTK{
 
 };
 
+/*!
+ * @ingroup  VisualizationToolKit
+ * @brief Utility fuctions for VTK
+ */
 namespace VTKUtils{
     uint8_t                         getNNodeInElement( const VTKElementType & ) ;
 
@@ -331,6 +338,7 @@ namespace VTKUtils{
     bool                            convertStringToEnum( const std::string &, VTKDataType &) ;
 }
 
+}
 
 #include"VTKTypes.tpp"
 

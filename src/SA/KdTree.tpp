@@ -10,6 +10,8 @@
 // All rights reserved.                                                       //
 // ========================================================================== //
 
+namespace bitpit{
+
 /*!
  \ingroup   SortAlgorithms
  \{
@@ -17,7 +19,7 @@
 
 /*!
 
-    \class kdnode
+    \class KdNode
     \brief class for kd-tree node.
 
     Store the informatino of a node in kd-tree data structure.
@@ -40,11 +42,11 @@
 
 // -------------------------------------------------------------------------- //
 /*!
-    Default constructor for class kdnode.
+    Default constructor for class KdNode.
     Initialize an empty node in the kd-tree.
 */
 template<class T, class T1>
-kdnode<T, T1>::kdnode(
+KdNode<T, T1>::KdNode(
     void
 ) {
 
@@ -70,11 +72,11 @@ return; }
 
 // -------------------------------------------------------------------------- //
 /*!
-    Default destructor for class kdnode.
-    Clear kdnode content and release memory.
+    Default destructor for class KdNode.
+    Clear KdNode content and release memory.
 */
 template<class T, class T1>
-kdnode<T, T1>::~kdnode(
+KdNode<T, T1>::~KdNode(
     void
 ) {
 
@@ -103,7 +105,7 @@ return; }
 /*!
 
     \ingroup   SortAlgorithms
-    \class kdtree
+    \class KdTree
     \brief class for kd-tree data structure.
 
     Sort vertices in a d-dimensional Euclidean space into a kd-tree structure.
@@ -126,7 +128,7 @@ return; }
 
 // -------------------------------------------------------------------------- //
 /*!
-    Default constructor for class kdtree.
+    Default constructor for class KdTree.
 
     Initialize an empty kd-tree structure and reserve memory for the insertion
     of maxstack nodes.
@@ -134,7 +136,7 @@ return; }
     \param[in] maxstack memory reserve (in terms of number of elements)
 */
 template<int d, class T, class T1>
-kdtree<d, T, T1>::kdtree(
+KdTree<d, T, T1>::KdTree(
     int      maxstack
 ) {
 
@@ -157,7 +159,7 @@ n_nodes = 0;
 // ========================================================================== //
 // RESIZE NODE LIST                                                           //
 // ========================================================================== //
-IncreaseStack();
+increaseStack();
 
 return; }
 
@@ -165,12 +167,12 @@ return; }
 
 // -------------------------------------------------------------------------- //
 /*!
-    Default destructor for class kdtree.
+    Default destructor for class KdTree.
 
     Clear kd-tree content and release memory.
 */
 template<int d, class T, class T1>
-kdtree<d, T, T1>::~kdtree(
+KdTree<d, T, T1>::~KdTree(
     void
 ) {
 
@@ -208,7 +210,7 @@ return; }
     returns -1.
 */
 template<int d, class T, class T1>
-int kdtree<d, T, T1>::exist(
+int KdTree<d, T, T1>::exist(
     T      *P_
 ) {
 
@@ -260,7 +262,7 @@ return(index); };
 
     \param[in] P_ pointer to container storing the coordinates of the vertex
     to be checked.
-    \param[in,out] label on output stores the label associated with the kdnode
+    \param[in,out] label on output stores the label associated with the KdNode
     (if any) whose coordinates match those of the input vector
 
     \result on output returns the index of the kd-node in the tree having the
@@ -268,7 +270,7 @@ return(index); };
     returns -1.
 */
 template<int d, class T, class T1>
-int kdtree<d, T, T1>::exist(
+int KdTree<d, T, T1>::exist(
     T               *P_,
     T1              &label
 ) {
@@ -334,7 +336,7 @@ return(index); };
 */
 template<int d, class T, class T1 >
 template< class T2>
-int kdtree<d, T, T1>::h_neighbor(
+int KdTree<d, T, T1>::hNeighbor(
     T               *P_,
     T2               h,
     bool             debug,
@@ -374,13 +376,13 @@ if (((*(nodes[prev_].object_))[dim] >= (*P_)[dim] - h)
  && (nodes[prev_].lchild_ >= 0)) {
 // if (nodes[prev_].lchild_ >= 0) {
     next_ = nodes[prev_].lchild_;
-    index_l = h_neighbor(P_, h, debug, next_, lev+1);
+    index_l = hNeighbor(P_, h, debug, next_, lev+1);
 }
 if (((*(nodes[prev_].object_))[dim] <= (*P_)[dim] + h)
  && (nodes[prev_].rchild_ >= 0)) {
 // if (nodes[prev_].rchild_ >= 0) {
     next_ = nodes[prev_].rchild_;
-    index_r = h_neighbor(P_, h, debug, next_, lev+1);
+    index_r = hNeighbor(P_, h, debug, next_, lev+1);
 }
 
 //if (debug) { cout << "result is: " << max(index_l, index_r) << endl; }
@@ -393,7 +395,7 @@ return(std::max(index_l, index_r)); };
     The 1-ball is defined as:
     B1(x; h) = {y: norm_1(y-x) <= h}
     \param[in] P_ pointer to container storing the coordinates of P
-    \param[in,out] label on output stores the label of the kdnode in the 1-ball
+    \param[in,out] label on output stores the label of the KdNode in the 1-ball
     centered on P (if any).
     \param[in] h 1-ball radius
     \param[in] debug (default = false) flag for running the search in debug mode
@@ -407,7 +409,7 @@ return(std::max(index_l, index_r)); };
 */
 template<int d, class T, class T1 >
 template< class T2>
-int kdtree<d, T, T1>::h_neighbor(
+int KdTree<d, T, T1>::hNeighbor(
     T               *P_,
     T1              &label,
     T2               h,
@@ -463,7 +465,7 @@ return(std::max(index_l, index_r)); };
     \param[in] P_ pointer to container storing vertex coordinates.
 */
 template<int d, class T, class T1>
-void kdtree<d, T, T1>::insert(
+void KdTree<d, T, T1>::insert(
     T               *P_
 ) {
 
@@ -511,7 +513,7 @@ while (next_ >= 0) {
 
 // Increase stack size
 if (n_nodes+1 > nodes.size()) {
-    IncreaseStack();
+    increaseStack();
 }
 
 // Update parent
@@ -537,7 +539,7 @@ return; };
     \param[in] label label associated to P_
 */
 template<int d, class T, class T1>
-void kdtree<d, T, T1>::insert(
+void KdTree<d, T, T1>::insert(
     T               *P_,
     T1              &label
 ) {
@@ -587,7 +589,7 @@ while (next_ >= 0) {
 
 // Increase stack size
 if (n_nodes+1 > nodes.size()) {
-    IncreaseStack();
+    increaseStack();
 }
 
 // Update parent
@@ -607,12 +609,12 @@ return; };
 
 // -------------------------------------------------------------------------- //
 /*!
-    Whenever the kd-tree reaches its full capacity (i.e. the number of kdnode
+    Whenever the kd-tree reaches its full capacity (i.e. the number of KdNode
     stored in the tree is equal to the memory reserved), increase the memory
     reserve by maxstack. The parameters maxstack is set at construction.
 */
 template<int d, class T, class T1>
-void kdtree<d, T, T1>::IncreaseStack(
+void KdTree<d, T, T1>::increaseStack(
     void
 ) {
 
@@ -639,7 +641,7 @@ return; };
     The parameters maxstack is set at construction.
 */
 template<int d, class T, class T1>
-void kdtree<d, T, T1>::DecreaseStack(
+void KdTree<d, T, T1>::decreaseStack(
     void
 ) {
 
@@ -662,3 +664,5 @@ return; };
 /*!
  \}
  */
+
+}

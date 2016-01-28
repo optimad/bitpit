@@ -20,6 +20,9 @@
 
 #include "piercedVector.tpp"
 
+
+namespace bitpit{
+
 /*!
 	\ingroup containers
 	@{
@@ -1806,5 +1809,7 @@ const typename PositionalPiercedVector<T>::size_type
 /*!
 	@}
 */
+
+}
 
 #endif

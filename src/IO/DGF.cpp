@@ -21,6 +21,8 @@
 // ========================================================================== //
 using namespace std;
 
+namespace bitpit{
+
 /*!
     \ingroup DuneGridFormat
     \{
@@ -793,10 +795,6 @@ return; }
 
 // Scanning routines ======================================================== //
 
-/*!
-    \ingroup DGFUtils
-    \{
- */
 // -------------------------------------------------------------------------- //
 /*!
     Scan dgf data block and returns the number of entries in the block.
@@ -1441,7 +1439,4 @@ err = DGFUtils::writeData(file_handle, nS, S);
 
 return(err); }
 
-
-/*!
-    \}
- */
+}

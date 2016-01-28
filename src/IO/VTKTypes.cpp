@@ -1,14 +1,7 @@
 #include "VTK.hpp"
 
-/*!
- * @ingroup    VisualizationToolKit
- * @{
- */
+namespace bitpit{
 
-/*!
- * @class VTKTypes
- * @brief VTK data types handling
- */
 
 // Initialize static variables
 std::unordered_map<std::type_index, VTKDataType> VTKTypes::m_types = std::unordered_map<std::type_index, VTKDataType>();
@@ -35,6 +28,14 @@ static VTKDataType VTKTypeIndex_double = VTKTypes::registerType<double>();
 
 // Register VTK types
 static VTKDataType VTKTypeIndex_VTKElement = VTKTypes::registerType<VTKElementType>();
+
+/*!
+ * @ingroup    VisualizationToolKit
+ * @{
+ *
+ * @class VTKTypes
+ * @brief VTK data types handling
+ */
 
 /*!
  * Calculates the size in bytes of basic types supported by VTK
@@ -73,9 +74,8 @@ uint8_t VTKTypes::sizeOfType( const VTKDataType & type ){
 
 /*!
  *  Determines the basic VTK type from argument.
- *  @param[in]  type       argument type
+ *  @param[in]  typeInfo argument type
  *  @return     basic VTK type
- *
  */
 VTKDataType VTKTypes::whichType( const std::type_info & typeInfo ){
 
@@ -91,3 +91,5 @@ VTKDataType VTKTypes::whichType( const std::type_info & typeInfo ){
 /*!
  * @}
  */
+
+}

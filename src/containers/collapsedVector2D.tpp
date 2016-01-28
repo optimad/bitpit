@@ -9,6 +9,7 @@
 #include <iostream>
 #include <memory>
 
+namespace bitpit{
 /*!
 	\ingroup containers
 	@{
@@ -693,5 +694,7 @@ private:
 /*!
 	@}
 */
+
+}
 
 #endif

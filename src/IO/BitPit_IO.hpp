@@ -3,18 +3,10 @@
  * @{
  * @defgroup Generic Generic
  * @defgroup DuneGridFormat DuneGridFormat (DGF)
- * @{
- * @defgroup DGFUtils
- * @}
  * @defgroup STereoLithography STereoLithography (STL)
- * @{
- * @defgroup STLUtils
- * @}
  * @defgroup VisualizationToolKit VisualizationToolKit (VTK)
  * @{
- * @defgroup VTKContainers
  * @defgroup VTKEnums
- * @defgroup VTKUtils
  * @}
  * @}
  *

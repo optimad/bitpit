@@ -10,6 +10,7 @@
 // All rights reserved.                                                       //
 // ========================================================================== //
 
+namespace bitpit{
 
 /*!
  \ingroup   SortAlgorithms
@@ -20,7 +21,7 @@
 // ========================================================================== //
 
 /*!
-    \class LIFOstack
+    \class LIFOStack
     \brief class for Last In First Out stack
 
     Manage insertion and extraction from/to a  list of object
@@ -33,10 +34,10 @@
 
 // -------------------------------------------------------------------------- //
 /*!
-    Default constructor for class LIFOstack. Initalize an empty stack
+    Default constructor for class LIFOStack. Initalize an empty stack
 */
 template <class T>
-LIFOstack<T>::LIFOstack(
+LIFOStack<T>::LIFOStack(
     void
 ) {
 
@@ -58,7 +59,7 @@ LIFOstack<T>::LIFOstack(
 MAXSTK = 10;
 
 // Initialize stack
-IncreaseSTACK();
+increaseSTACK();
 
 // Currenst stack size
 TOPSTK = 0;
@@ -67,7 +68,7 @@ return; };
 
 // -------------------------------------------------------------------------- //
 /*!
-    Constructor #1 for class LIFOstack.
+    Constructor #1 for class LIFOStack.
     Initialize an empty stack, and set the memory reserve to maxstack.
     Once the max capacity is reached, insertion of another elements will cause
     the memory to be further increased by maxstack.
@@ -75,7 +76,7 @@ return; };
     \param[in] maxstack memory reserved for stack.
 */
 template <class T>
-LIFOstack<T>::LIFOstack(
+LIFOStack<T>::LIFOStack(
     int         maxstack
 ) {
 
@@ -97,7 +98,7 @@ LIFOstack<T>::LIFOstack(
 MAXSTK = maxstack;
 
 // Initialize stack
-IncreaseSTACK();
+increaseSTACK();
 
 // Currenst stack size
 TOPSTK = 0;
@@ -106,7 +107,7 @@ return; };
 
 // -------------------------------------------------------------------------- //
 /*!
-    Constructor #2 for LIFOstack.
+    Constructor #2 for LIFOStack.
     Initialize a LIFO stack from a vector of elements.
     The memory reserve is set to the size of the input vector and elements
     are inserted in order from items.begin() to items.end()
@@ -114,7 +115,7 @@ return; };
     \param[in] items list of objects to be inserted into the stack
 */
 template <class T>
-LIFOstack<T>::LIFOstack(
+LIFOStack<T>::LIFOStack(
     std::vector<T>  &items
 ) {
 
@@ -136,7 +137,7 @@ LIFOstack<T>::LIFOstack(
 MAXSTK = items.size();
 
 // Initialize stack
-IncreaseSTACK();
+increaseSTACK();
 
 // Currenst stack size
 TOPSTK = 0;
@@ -150,12 +151,12 @@ return; };
 
 // -------------------------------------------------------------------------- //
 /*!
-    Default destructor for class LIFOstack.
+    Default destructor for class LIFOStack.
 
     Clear stack content and release memory.
 */
 template <class T>
-LIFOstack<T>::~LIFOstack(
+LIFOStack<T>::~LIFOStack(
     void
 ) {
 
@@ -191,7 +192,7 @@ return; };
     Clear stack content without freeing memory.
 */
 template <class T>
-void LIFOstack<T>::clear(
+void LIFOStack<T>::clear(
     void
 ) {
 
@@ -219,7 +220,7 @@ return; }
     is assigned at class declaration.
 */
 template <class T>
-void LIFOstack<T>::IncreaseSTACK(
+void LIFOStack<T>::increaseSTACK(
     void
 ) {
 
@@ -246,7 +247,7 @@ return; };
     is assigned at class declaration.
 */
 template <class T>
-void LIFOstack<T>::DecreaseSTACK(
+void LIFOStack<T>::decreaseSTACK(
     void
 ) {
 
@@ -275,7 +276,7 @@ return; };
     \result returns the first item in the stack
 */
 template <class T>
-T LIFOstack<T>::pop(
+T LIFOStack<T>::pop(
     void
 ) {
 
@@ -299,7 +300,7 @@ TOPSTK--;
 
 // Resize stack list -------------------------------------------------------- //
 if (TOPSTK <= STACK.size() - MAXSTK) {
-    DecreaseSTACK();
+    decreaseSTACK();
 }
 
 return(item); };
@@ -312,7 +313,7 @@ return(item); };
     \param[in] item item to be pushed into the list.
 */
 template <class T>
-void LIFOstack<T>::push(
+void LIFOStack<T>::push(
     T item
 ) {
 
@@ -332,7 +333,7 @@ void LIFOstack<T>::push(
 
 // Resize stack list -------------------------------------------------------- //
 if (TOPSTK >= STACK.size()) {
-    IncreaseSTACK();
+    increaseSTACK();
 }
 
 // Extract last element from the stack list --------------------------------- //
@@ -351,7 +352,7 @@ return; };
     the stack
 */
 template <class T>
-void LIFOstack<T>::push(
+void LIFOStack<T>::push(
     std::vector<T> &items
 ) {
 
@@ -383,7 +384,7 @@ return; };
     \param[in,out] out output stream
 */
 template <class T>
-void LIFOstack<T>::display(
+void LIFOStack<T>::display(
     std::ostream &out
 ) {
 
@@ -415,3 +416,5 @@ return; };
 /*!
  \}
  */
+
+}
