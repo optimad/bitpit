@@ -2494,28 +2494,39 @@ ParaTree::loadBalance(dvector* weight){
 	m_log.writeLog("---------------------------------------------");
 	m_log.writeLog(" LOAD BALANCE ");
 
-	uint32_t* partition = new uint32_t [m_nproc];
-	if (weight == NULL)
-		computePartition(partition);
-	else
-		computePartition(partition, weight);
+	if (m_nproc>1){
 
-	weight = NULL;
+		uint32_t* partition = new uint32_t [m_nproc];
+		if (weight == NULL)
+			computePartition(partition);
+		else
+			computePartition(partition, weight);
 
-	privateLoadBalance(partition);
+		weight = NULL;
 
-	delete [] partition;
-	partition = NULL;
+		privateLoadBalance(partition);
 
-	//Write info of final partition on log
-	m_log.writeLog(" ");
-	m_log.writeLog(" Final Parallel partition : ");
-	m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
-	for(int ii=1; ii<m_nproc; ii++){
-		m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(ii))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])));
+		delete [] partition;
+		partition = NULL;
+
+		//Write info of final partition on log
+		m_log.writeLog(" ");
+		m_log.writeLog(" Final Parallel partition : ");
+		m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
+		for(int ii=1; ii<m_nproc; ii++){
+			m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(ii))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])));
+		}
+		m_log.writeLog(" ");
+		m_log.writeLog("---------------------------------------------");
+
 	}
-	m_log.writeLog(" ");
-	m_log.writeLog("---------------------------------------------");
+	else{
+		m_log.writeLog(" ");
+		m_log.writeLog(" Serial partition : ");
+		m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
+		m_log.writeLog(" ");
+		m_log.writeLog("---------------------------------------------");
+	}
 
 }
 
@@ -2532,23 +2543,34 @@ ParaTree::loadBalance(uint8_t & level, dvector* weight){
 	m_log.writeLog("---------------------------------------------");
 	m_log.writeLog(" LOAD BALANCE ");
 
-	uint32_t* partition = new uint32_t [m_nproc];
-	computePartition(partition, level, weight);
+	if (m_nproc>1){
 
-	privateLoadBalance(partition);
+		uint32_t* partition = new uint32_t [m_nproc];
+		computePartition(partition, level, weight);
 
-	delete [] partition;
-	partition = NULL;
+		privateLoadBalance(partition);
 
-	//Write info of final partition on log
-	m_log.writeLog(" ");
-	m_log.writeLog(" Final Parallel partition : ");
-	m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
-	for(int ii=1; ii<m_nproc; ii++){
-		m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(ii))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])));
+		delete [] partition;
+		partition = NULL;
+
+		//Write info of final partition on log
+		m_log.writeLog(" ");
+		m_log.writeLog(" Final Parallel partition : ");
+		m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
+		for(int ii=1; ii<m_nproc; ii++){
+			m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(ii))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])));
+		}
+		m_log.writeLog(" ");
+		m_log.writeLog("---------------------------------------------");
+
 	}
-	m_log.writeLog(" ");
-	m_log.writeLog("---------------------------------------------");
+	else{
+		m_log.writeLog(" ");
+		m_log.writeLog(" Serial partition : ");
+		m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
+		m_log.writeLog(" ");
+		m_log.writeLog("---------------------------------------------");
+	}
 
 };
 
