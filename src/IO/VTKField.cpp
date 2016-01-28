@@ -249,11 +249,13 @@ bool   VTKField::hasAllMetaData() const{
  */
 void VTKField::importMetaData( const VTKFieldMetaData &data){ 
 
-    setType( VTKTypes::whichType( data.getType() ) );
+    if( data.getSize() != 0 ){
+        setType( VTKTypes::whichType(data.getType()) );
 
-    if( getComponents() == VTKFieldType::UNDEFINED)
-        setComponents( VTKFieldType::SCALAR);
-    setElements( data.getSize() / static_cast<int>(components)  );
+        if( getComponents() == VTKFieldType::UNDEFINED)
+            setComponents( VTKFieldType::SCALAR);
+        setElements( data.getSize() / static_cast<int>(components)  );
+    };
 
     return ;
 };
