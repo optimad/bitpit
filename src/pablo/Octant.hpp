@@ -84,7 +84,11 @@ private:
 	// STATIC MEMBERS
 	// =================================================================================== //
 
-	static constexpr int 	sm_CoeffFaceCenter[6][3] = {{0,1,1},{2,1,1},{1,0,1},
+	static constexpr int 	sm_CoeffNode[8][3] 		  = {{0,0,0},{1,0,0},{0,1,0},
+														{1,1,0},{0,0,1},{1,0,1}
+														{0,1,1},{1,1,1}}; /**< Static member for internal use. */
+
+	static constexpr int 	sm_CoeffFaceCenter[6][3]  = {{0,1,1},{2,1,1},{1,0,1},
 														{1,2,1},{1,1,0},{1,1,2}}; /**< Static member for internal use. */
 
 	static constexpr int 	sm_CoeffEdgeCenter[12][3] =	{{0,1,0},{2,1,0},{1,0,0},
