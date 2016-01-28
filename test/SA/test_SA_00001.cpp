@@ -13,6 +13,8 @@
 // ========================================================================== //
 // INCLUDES                                                                   //
 // ========================================================================== //
+# include "BitPit_common.hpp"
+
 # include "test_SA_00001.hpp"
 
 // ========================================================================== //
@@ -581,7 +583,7 @@ if (selection == 0) {
     cout << "Subtest: random permutation of integers in [0, " << N << "]" << endl;
 
     // Extract n integers in [0, N] ----------------------------------------- //
-    bitpit::extractWithoutReplacement(n, N, list);
+    bitpit::utils::extractWithoutReplacement(n, N, list);
     cout << "Extracted: " << list << endl;
     cout << endl;
 
@@ -592,7 +594,7 @@ if (selection == 0) {
     // Extract n integers in [0, N] ----------------------------------------- //
     out = 0;
     for (int I_ = 0; I_ < 100000; I_++) {
-        bitpit::extractWithoutReplacement(1, N, list);
+        bitpit::utils::extractWithoutReplacement(1, N, list);
         out += list[0];
     } //next I
     cout << "Expectation: " << ((double) out)/(100000.0) << endl;

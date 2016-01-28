@@ -8,6 +8,7 @@ list(APPEND TESTS "test_SA_00001")
 set(SA_TEST_LIST "${TESTS}" CACHE INTERNAL "List of tests for the SA module" FORCE)
 
 # Rules to build the tests
+include_directories("${PROJECT_SOURCE_DIR}/src/common")
 include_directories("${PROJECT_SOURCE_DIR}/src/operators")
 include_directories("${PROJECT_SOURCE_DIR}/src/containers")
 include_directories("${PROJECT_SOURCE_DIR}/src/SA")

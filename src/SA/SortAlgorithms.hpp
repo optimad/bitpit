@@ -335,13 +335,7 @@ class LIFOStack {
 // ========================================================================== //
 // FUNCTIONS PROTOTYPES                                                       //
 // ========================================================================== //
-
-// RANDOM SORTING =========================================================== //
-void extractWithoutReplacement(                                               // Extract integers without replacement
-    int                         ,                                             // (input) number of integers to be extracted
-    int                         ,                                             // (input) upper bound of extraction interval
-    std::vector<int>           &                                              // (input/output) list of extracted value
-);
+//None
 
 }
 

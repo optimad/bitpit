@@ -18,6 +18,12 @@ bool addToOrderedVector(const T &value, std::vector<T> &list, Comparator compara
 extern template bool addToOrderedVector<>(const long&, std::vector<long>&, std::less<long>);
 #endif
 
+void extractWithoutReplacement(                                               // Extract integers without replacement
+    int                         ,                                             // (input) number of integers to be extracted
+    int                         ,                                             // (input) upper bound of extraction interval
+    std::vector<int>           &                                              // (input/output) list of extracted value
+);
+
 }
 
 }
