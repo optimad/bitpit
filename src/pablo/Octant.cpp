@@ -17,7 +17,7 @@ using namespace std;
 // STATIC AND CONSTANT
 // =================================================================================== //
 
-constexpr int Octant::sm_CoeffNodes[8][3];
+constexpr int Octant::sm_CoeffNode[8][3];
 constexpr int Octant::sm_CoeffFaceCenter[6][3];
 constexpr int Octant::sm_CoeffEdgeCenter[12][3];
 int8_t Octant::sm_maxLevel;
@@ -452,9 +452,9 @@ void		Octant::getNode(u32array3 & node, uint8_t inode) const{
 //	cx = inode%2;
 //	cy = (inode-4*(inode/4))/2;
 //	cz = inode/4;
-	node[0] = m_x + sm_CoeffNode[i][0]*dh;
-	node[1] = m_y + sm_CoeffNode[i][1]*dh;
-	node[2] = m_z + sm_CoeffNode[i][2]*dh;
+	node[0] = m_x + sm_CoeffNode[inode][0]*dh;
+	node[1] = m_y + sm_CoeffNode[inode][1]*dh;
+	node[2] = m_z + sm_CoeffNode[inode][2]*dh;
 
 };
 
@@ -471,9 +471,9 @@ u32array3		Octant::getNode(uint8_t inode) const{
 //	cx = inode%2;
 //	cy = (inode-4*(inode/4))/2;
 //	cz = inode/4;
-	node[0] = m_x + sm_CoeffNode[i][0]*dh;
-	node[1] = m_y + sm_CoeffNode[i][1]*dh;
-	node[2] = m_z + sm_CoeffNode[i][2]*dh;
+	node[0] = m_x + sm_CoeffNode[inode][0]*dh;
+	node[1] = m_y + sm_CoeffNode[inode][1]*dh;
+	node[2] = m_z + sm_CoeffNode[inode][2]*dh;
 	return node;
 };
 

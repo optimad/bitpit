@@ -1601,7 +1601,7 @@ ParaTree::getIdx(Octant oct){
  */
 bool
 ParaTree::getIsGhost(Octant* oct){
-	return oct->info[16]
+	return oct->m_info[16];
 };
 
 /*! Get the nature of an octant.
@@ -1610,7 +1610,7 @@ ParaTree::getIsGhost(Octant* oct){
  */
 bool
 ParaTree::getIsGhost(Octant oct){
-	return oct.info[16];
+	return oct.m_info[16];
 };
 
 // =================================================================================== //
@@ -3609,6 +3609,8 @@ ParaTree::setPboundGhosts() {
 					else{
 						it->setPbound(i,false);
 					}
+					//TODO debug
+					if (abs(pBegin-pEnd) <= 1) j = maxDelta + 1;
 				}
 			}
 		}
@@ -3626,6 +3628,8 @@ ParaTree::setPboundGhosts() {
 					if(pBegin != m_rank || pEnd != m_rank){
 						pbd = true;
 					}
+					//TODO debug
+					if (abs(pBegin-pEnd) <= 1) ee = maxDelta + 1;
 				}
 			}
 		}

@@ -980,7 +980,7 @@ public:
 		else{
 			m_log.writeLog(" ");
 			m_log.writeLog(" Serial partition : ");
-			m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
+			m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
 			m_log.writeLog(" ");
 			m_log.writeLog("---------------------------------------------");
 		}
@@ -1496,7 +1496,7 @@ public:
 		else{
 			m_log.writeLog(" ");
 			m_log.writeLog(" Serial partition : ");
-			m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
+			m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
 			m_log.writeLog(" ");
 			m_log.writeLog("---------------------------------------------");
 		}
