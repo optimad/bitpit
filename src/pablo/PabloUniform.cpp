@@ -95,8 +95,8 @@ PabloUniform::setOrigin(darray3 origin){
  */
 double
 PabloUniform::levelToSize(uint8_t & level) {
-	double size = (double) (1<<(ParaTree::getMaxLevel()-level));
-	return m_L *size /ParaTree::getMaxLength() ;
+	double size = ParaTree::levelToSize(level);
+	return m_L *size;
 }
 
 // =================================================================================== //
