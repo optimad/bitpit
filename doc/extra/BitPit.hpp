@@ -1,8 +1,8 @@
 /*!
 
-\mainpage BitPit
+\mainpage bitpit
 
-<B>BitPit</B>.
+<B>bitpit</B>.
 
 @tableofcontents
 

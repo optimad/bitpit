@@ -1,15 +1,34 @@
-// ========================================================================== //
-//                           - STL IO FUNCTIONS -                             //
-//                                                                            //
-// Input/Output function for STL format.                                      //
-// ========================================================================== //
-// INFO                                                                       //
-// ========================================================================== //
-// Author      :   Alessandro Alaia                                           //
-// Version     :   v3.0                                                       //
-//                                                                            //
-// All rights reserved.                                                       //
-// ========================================================================== //
+/*---------------------------------------------------------------------------*\
+ *
+ *  bitpit
+ *
+ *  Copyright (C) 2015-2016 OPTIMAD engineering Srl
+ *
+ *  -------------------------------------------------------------------------
+ *  License
+ *  This file is part of bitbit.
+ *
+ *  bitpit is free software: you can redistribute it and/or modify it
+ *  under the terms of the GNU Lesser General Public License v3 (LGPL)
+ *  as published by by the Free Software Foundation.
+ *
+ *  BitPit is distributed in the hope that it will be useful, but WITHOUT
+ *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+ *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+ *  for more details.
+ *
+ *  You should have received a copy of the GNU Lesser General Public License
+ *  along with bitpit. If not, see <http://www.gnu.org/licenses/>.
+ *
+\*---------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------*\
+*
+* Input/Output function for STL format.
+* Author:   Alessandro Alaia
+* 
+\*---------------------------------------------------------------------------*/
+
 # ifndef __IOFunct__HPP__
 # define __IOFunct__HPP__
 
