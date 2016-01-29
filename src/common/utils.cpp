@@ -31,6 +31,9 @@
 
 namespace bitpit {
 
+/*!
+    \brief Namespace for generic utility functions
+*/
 namespace utils {
 
 template bool addToOrderedVector<>(const long&, std::vector<long>&, std::less<long>);
