@@ -1953,7 +1953,7 @@ private:
 			}
 		}
 	}
-}
+};
 
 // Definition of static constants of PiercedVector
 template<class T>
