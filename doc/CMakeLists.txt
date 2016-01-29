@@ -53,6 +53,7 @@ IF(BUILD_DOCUMENTATION)
   endif ()
 
   SET(DOXYFILE_IN          ${CMAKE_CURRENT_SOURCE_DIR}/Doxyfile.in)
+  SET(DOXYFILE_CSS         ${CMAKE_CURRENT_SOURCE_DIR}/bitpitStyleSheet.css)
   SET(DOXYFILE             ${PROJECT_BINARY_DIR}/Doxyfile)
   SET(DOXY_HTML_INDEX_FILE ${CMAKE_CURRENT_BINARY_DIR}/html/index.html)
   SET(DOXY_OUTPUT_ROOT     ${CMAKE_CURRENT_BINARY_DIR})
@@ -88,8 +89,8 @@ IF(BUILD_DOCUMENTATION)
                       # The optimal solution would be creating a
                       # custom_command for ${DOXYFILE} generation
                       # but I still have to figure out how...
-                      MAIN_DEPENDENCY ${DOXYFILE} ${DOXYFILE_IN}
-                      DEPENDS ${DOXYFILE} ${DOXYFILE_IN} ${DOXY_INPUT_FILES}
+                      MAIN_DEPENDENCY ${DOXYFILE} ${DOXYFILE_IN} ${DOXYFILE_CSS}
+                      DEPENDS ${DOXYFILE} ${DOXYFILE_IN} ${DOXYFILE_CSS} ${DOXY_INPUT_FILES}
                       COMMENT "Generating HTML documentation")
 
   ADD_CUSTOM_TARGET( doc ALL DEPENDS ${DOXY_HTML_INDEX_FILE} )
