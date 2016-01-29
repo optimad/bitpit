@@ -9,10 +9,10 @@
 #include "adaption.hpp"
 #include "cell.hpp"
 #include "interface.hpp"
-#include "output_manager.hpp"
 #include "patchman_piercedVector.hpp"
 #include "vertex.hpp"
 
+#include <bitpit_IO.hpp>
 #include <cstddef>
 #include <memory>
 #include <string>
@@ -25,7 +25,7 @@ namespace pman {
 	@{
 */
 
-class Patch {
+class Patch : public bitpit::VTKUnstructuredGrid {
 
 public:
 	Patch(const int &id, const int &dimension);
@@ -36,7 +36,6 @@ public:
 	void reset_vertices();
 	void reset_cells();
 	void reset_interfaces();
-	void reset_output();
 
 	const std::vector<Adaption::Info> update(bool trackAdaption = true);
 
@@ -45,7 +44,6 @@ public:
 	void enable_cell_balancing(const long &id, bool enabled);
 
 	bool is_dirty() const;
-	bool is_output_dirty() const;
 
 	int get_id() const;
 	int get_dimension() const;
@@ -90,13 +88,15 @@ public:
 
 	void write_mesh();
 	void write_mesh(std::string name);
-	void write_field(std::string name, int type, std::vector<double> values);
-	void write_field(std::string filename, std::string name, int type, std::vector<double> values);
-	void write_cell_field(std::string name, std::vector<double> values);
-	void write_cell_field(std::string filename, std::string name, std::vector<double> values);
-	void write_vertex_field(std::string name, std::vector<double> values);
-	void write_vertex_field(std::string filename, std::string name, std::vector<double> values);
-	OutputManager & get_output_manager();
+	void write_field(std::string name, bitpit::VTKLocation location, const std::vector<double> &values);
+	void write_field(std::string filename, std::string name, bitpit::VTKLocation location, const std::vector<double> &values);
+	void write_cell_field(std::string name, const std::vector<double> &values);
+	void write_cell_field(std::string filename, std::string name, const std::vector<double> &values);
+	void write_vertex_field(std::string name, const std::vector<double> &values);
+	void write_vertex_field(std::string filename, std::string name, const std::vector<double> &values);
+
+	const bitpit::VTKFieldMetaData getMetaData(std::string name);
+	void flushData(std::fstream &stream, bitpit::VTKFormat format, std::string name);
 
 protected:
 	bitpit::PiercedVector<Vertex> m_vertices;
@@ -126,17 +126,16 @@ protected:
 
 	void set_dirty(bool dirty);
 
-	void update_output_manager();
-
 private:
 	bool m_dirty;
-	bool m_dirty_output;
 
 	int m_id;
 	int m_dimension;
 	std::string m_name;
 
-	vtkSmartPointer<OutputManager> m_output_manager;
+	std::unordered_map<std::string, const std::vector<double> *> m_dataFields;
+	std::unordered_map<std::string, bitpit::VTKLocation> m_dataLocations;
+	std::unordered_map<std::string, bitpit::VTKFieldType> m_dataType;
 
 	void set_id(int id);
 	void set_dimension(int dimension);

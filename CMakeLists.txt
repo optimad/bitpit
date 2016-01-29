@@ -14,10 +14,6 @@ set(BITPIT_FIND_MODULE_DIR "/opt/bitpit/bitpit/cmake/Modules" CACHE PATH "Direct
 set(ENABLE_PROFILING 0 CACHE BOOL "Set appropriate compiler flags to enable profiling")
 set(VERBOSE_MAKE 0 CACHE BOOL "Set appropriate compiler and cmake flags to enable verbose output from compilation")
 
-if (NOT ONLY_PABLO)
-	set(VTK_DIR "/opt/VTK/lib/cmake/vtk" CACHE PATH "The directory containing a CMake configuration file for VTK")
-endif()
-
 set(ENABLE_MPI ON CACHE BOOL "If set, the program is compiled without MPI support")
 
 #------------------------------------------------------------------------------------#
@@ -35,9 +31,6 @@ endif()
 if (NOT ONLY_PABLO)
 find_package(BITPIT REQUIRED NO_MODULE)
 include(${BITPIT_USE_FILE})
-
-find_package(VTK 6.0 REQUIRED COMPONENTS vtkIOXML vtkIOLegacy NO_MODULE)
-include(${VTK_USE_FILE})
 endif()
 
 #------------------------------------------------------------------------------------#

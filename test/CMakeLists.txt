@@ -49,8 +49,6 @@ foreach(TEST_NAME IN LISTS TEST_LIST PARALLELTEST_LIST)
     add_executable(${TEST_NAME} "${TEST_SOURCES}")
     target_link_libraries(${TEST_NAME} ${BITP_MESH_LIBRARY})
     target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
-    target_link_libraries(${TEST_NAME} ${VTK_LIBRARIES})
-
 endforeach()
 
 add_custom_target(tests DEPENDS ${TEST_LIST} ${PARALLELTEST_LIST})

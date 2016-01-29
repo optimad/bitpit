@@ -3,6 +3,7 @@
 //
 
 #include <sstream>
+#include <typeinfo>
 #include <unordered_map>
 
 #include "patch.hpp"
@@ -32,7 +33,7 @@ namespace pman {
 	Creates a new patch.
 */
 Patch::Patch(const int &id, const int &dimension)
-	: m_dirty(true), m_dirty_output(true), m_output_manager(nullptr)
+	: m_dirty(true)
 {
 	set_id(id) ;
 	set_dimension(dimension);
@@ -157,58 +158,15 @@ void Patch::reset_interfaces()
 }
 
 /*!
-	Resest the output manager of the patch.
-*/
-void Patch::reset_output()
-{
-	if (m_output_manager == nullptr) {
-		return;
-	}
-
-	get_output_manager().Delete();
-}
-
-/*!
-	Initializes output dataset.
-*/
-void Patch::update_output_manager()
-{
-	long nVertices = m_vertices.size();
-	long nCells = m_cells.size();
-
-	// Create object
-	m_output_manager = vtkSmartPointer<OutputManager>::New();
-	m_output_manager->initialize(nCells, nVertices);
-
-	// Vertices
-	std::unordered_map<long, vtkIdType> vertexMap;
-	for (auto &vertex : m_vertices) {
-		vertexMap[vertex.get_id()] = m_output_manager->InsertNextVertex(vertex);
-	}
-
-	// Cells
-	for (auto &cell : m_cells) {
-		m_output_manager->InsertNextCell(cell, vertexMap);
-	}
-
-	// Fields
-	m_output_manager->resetFields();
-
-	// Finalize
-	m_output_manager->finalize();
-
-	// The output is not dirty anymore
-	m_dirty_output = false;
-}
-
-/*!
 	Writes the mesh to filename specified in input.
 
 	\param filename the filename where the mesh will be written to
 */
 void Patch::write_mesh(std::string filename)
 {
-	get_output_manager().write(filename);
+	bitpit::VTKUnstructuredGrid::setCodex(bitpit::VTKFormat::APPENDED);
+	bitpit::VTKUnstructuredGrid::setNames(".", filename);
+	bitpit::VTKUnstructuredGrid::write();
 }
 
 /*!
@@ -216,20 +174,20 @@ void Patch::write_mesh(std::string filename)
 */
 void Patch::write_mesh()
 {
-	get_output_manager().write(get_name());
+	write_mesh(get_name());
 }
 
 /*!
 	Writes a field defined on the patch.
 
 	\param name is the name of the field
-	\param type is the type of the field, a field can be defined either
-	on the vertices of on the cells
+	\param location is the location of the field, a field can be defined
+	either on the vertices of on the cells
 	\param values is a vector with the values of the field
 */
-void Patch::write_field(std::string name, int type, std::vector<double> values)
+void Patch::write_field(std::string name, bitpit::VTKLocation location, const std::vector<double> &values)
 {
-	write_field(get_name(), name, type, values);
+	write_field(get_name(), name, location, values);
 }
 
 /*!
@@ -237,20 +195,23 @@ void Patch::write_field(std::string name, int type, std::vector<double> values)
 
 	\param filename is the name of the file to write
 	\param name is the name of the field
-	\param type is the type of the field, a field can be defined either
-	on the vertices of on the cells
+	\param location is the location of the field, a field can be defined
+	either on the vertices of on the cells
 	\param values is a vector with the values of the field
 */
-void Patch::write_field(std::string filename, std::string name, int type, std::vector<double> values)
+void Patch::write_field(std::string filename, std::string name, bitpit::VTKLocation location, const std::vector<double> &values)
 {
-	OutputManager &outputManager = get_output_manager();
+	bitpit::VTKUnstructuredGrid::addData(name, bitpit::VTKFieldType::SCALAR, location);
+	m_dataFields[name] = &values;
+	m_dataLocations[name] = location;
+	m_dataType[name] = bitpit::VTKFieldType::SCALAR;
 
-	int index = outputManager.addField(type, name.c_str());
-	outputManager.addFieldValues(type, index, values.data());
+	write_mesh(filename);
 
-	outputManager.write(filename);
-
-	outputManager.resetFields();
+	bitpit::VTKUnstructuredGrid::removeData(name);
+	m_dataFields.erase(name);
+	m_dataLocations.erase(name);
+	m_dataType.erase(name);
 }
 
 /*!
@@ -259,7 +220,7 @@ void Patch::write_field(std::string filename, std::string name, int type, std::v
 	\param name is the name of the field
 	\param values is a vector with the values of the field
 */
-void Patch::write_cell_field(std::string name, std::vector<double> values)
+void Patch::write_cell_field(std::string name, const std::vector<double> &values)
 {
 	write_cell_field(get_name(), name, values);
 }
@@ -272,16 +233,9 @@ void Patch::write_cell_field(std::string name, std::vector<double> values)
 	\param name is the name of the field
 	\param values is a vector with the values of the field
 */
-void Patch::write_cell_field(std::string filename, std::string name, std::vector<double> values)
+void Patch::write_cell_field(std::string filename, std::string name, const std::vector<double> &values)
 {
-	OutputManager &outputManager = get_output_manager();
-
-	int index = outputManager.addField(OutputManager::DATA_ON_CELL, name.c_str());
-	outputManager.addFieldValues(OutputManager::DATA_ON_CELL, index, values.data());
-
-	outputManager.write(filename);
-
-	outputManager.resetFields();
+	write_field(filename, name, bitpit::VTKLocation::CELL, values);
 }
 
 /*!
@@ -290,7 +244,7 @@ void Patch::write_cell_field(std::string filename, std::string name, std::vector
 	\param name is the name of the field
 	\param values is a vector with the values of the field
 */
-void Patch::write_vertex_field(std::string name, std::vector<double> values)
+void Patch::write_vertex_field(std::string name, const std::vector<double> &values)
 {
 	write_vertex_field(get_name(), name, values);
 }
@@ -303,31 +257,9 @@ void Patch::write_vertex_field(std::string name, std::vector<double> values)
 	\param name is the name of the field
 	\param values is a vector with the values of the field
 */
-void Patch::write_vertex_field(std::string filename, std::string name, std::vector<double> values)
+void Patch::write_vertex_field(std::string filename, std::string name, const std::vector<double> &values)
 {
-	OutputManager &outputManager = get_output_manager();
-
-	int index = outputManager.addField(OutputManager::DATA_ON_CELL, name.c_str());
-	outputManager.addFieldValues(OutputManager::DATA_ON_CELL, index, values.data());
-
-	outputManager.write(filename);
-
-	outputManager.resetFields();
-}
-
-/*!
-	Gets the output dataset.
-
-	\return A pointer to the output datase
-*/
-OutputManager & Patch::get_output_manager()
-{
-	if (is_output_dirty()) {
-		update_output_manager();
-	}
-
-	return *m_output_manager;
-
+	write_field(filename, name, bitpit::VTKLocation::POINT, values);
 }
 
 /*!
@@ -344,9 +276,6 @@ void Patch::set_dirty(bool dirty)
 	}
 
 	m_dirty = dirty;
-	if (m_dirty) {
-		m_dirty_output = true;
-	}
 }
 
 /*!
@@ -358,17 +287,6 @@ void Patch::set_dirty(bool dirty)
 bool Patch::is_dirty() const
 {
 	return m_dirty;
-}
-
-/*!
-	Returns true if the the output needs to update its data strucutres.
-
-	\return This method returns true to indicate the output needs to update
-	its data strucutres. Otherwise, it returns false.
-*/
-bool Patch::is_output_dirty() const
-{
-	return m_dirty_output;
 }
 
 /*!
@@ -1097,6 +1015,146 @@ std::array<double, 3> Patch::eval_element_centroid(const Element &element)
 	}
 
 	return centroid;
+}
+
+/*!
+ *  Interface method for obtaining field meta Data
+ *
+ *  @param[in] name is the name of the field to be written
+ *  @return Returns a bitpit::VTKFieldMetaData struct containing the metadata
+ *  of the requested custom data.
+ */
+const bitpit::VTKFieldMetaData Patch::getMetaData(std::string name)
+{
+	if (name == "Points") {
+		std::cout << "Numero di punti: " << 3 * m_vertices.size() << std::endl;
+		return bitpit::VTKFieldMetaData(3 * m_vertices.size(), typeid(double));
+	} else if (name == "offsets") {
+		std::cout << "Offset size: " << m_cells.size() << std::endl;
+		return bitpit::VTKFieldMetaData(m_cells.size(), typeid(int));
+	} else if (name == "types") {
+		std::cout << "Type size: " << m_cells.size() << std::endl;
+		return bitpit::VTKFieldMetaData(m_cells.size(), typeid(bitpit::VTKElementType));
+	} else if (name == "connectivity") {
+		long connectSize = 0;
+		for (Cell &cell : m_cells) {
+			connectSize += cell.get_info().nVertices;
+		}
+		std::cout << "Connect size: " << connectSize << std::endl;
+		return bitpit::VTKFieldMetaData(connectSize, typeid(long));
+	} else if (m_dataFields.count(name) > 0) {
+		long fieldSize = 0;
+
+		if (m_dataLocations[name] == bitpit::VTKLocation::CELL) {
+			fieldSize = m_cells.size();
+		} else {
+			fieldSize = m_vertices.size();
+		}
+
+		if (m_dataType[name] == bitpit::VTKFieldType::VECTOR) {
+			fieldSize *= 3;
+		}
+
+		std::cout << "Field size: " << fieldSize << std::endl;
+
+		return bitpit::VTKFieldMetaData(fieldSize, typeid(double));
+	}
+}
+
+/*!
+ *  Interface for writing data to stream.
+ *
+ *  @param[in] stream is the stream to write to
+ *  @param[in] codex is the codex which must be used. Supported options
+ *  are "ascii" or "appended". For "appended" type an unformatted binary
+ *  stream must be used
+ *  @param[in] name is the name of the data to be written. Either user
+ *  data or grid data
+ */
+void Patch::flushData(std::fstream &stream, bitpit::VTKFormat format, std::string name)
+{
+	assert(format == bitpit::VTKFormat::APPENDED);
+
+	static std::unordered_map<long, long> vertexMap;
+
+	if (name == "Points") {
+		long vertexId = 0;
+		for (Vertex &vertex : m_vertices) {
+			vertexMap[vertex.get_id()] = vertexId++;
+
+			bitpit::genericIO::flushBINARY(stream, vertex.get_coords());
+		}
+	} else if (name == "offsets") {
+		int offset = 0;
+		for (Cell &cell : m_cells) {
+			offset += cell.get_info().nVertices;
+			bitpit::genericIO::flushBINARY(stream, offset);
+		}
+	} else if (name == "types") {
+		for (Cell &cell : m_cells) {
+			bitpit::VTKElementType VTKType;
+			switch (cell.get_type())  {
+
+			case ElementInfo::VERTEX:
+				VTKType = bitpit::VTKElementType::VERTEX;
+				break;
+
+			case ElementInfo::LINE:
+				VTKType = bitpit::VTKElementType::LINE;
+				break;
+
+			case ElementInfo::TRIANGLE:
+				VTKType = bitpit::VTKElementType::TRIANGLE;
+				break;
+
+			case ElementInfo::PIXEL:
+				VTKType = bitpit::VTKElementType::PIXEL;
+				break;
+
+			case ElementInfo::QUAD:
+				VTKType = bitpit::VTKElementType::QUAD;
+				break;
+
+			case ElementInfo::TETRA:
+				VTKType = bitpit::VTKElementType::TETRA;
+				break;
+
+			case ElementInfo::VOXEL:
+				VTKType = bitpit::VTKElementType::VOXEL;
+				break;
+
+			case ElementInfo::HEXAHEDRON:
+				VTKType = bitpit::VTKElementType::HEXAHEDRON;
+				break;
+
+			case ElementInfo::WEDGE:
+				VTKType = bitpit::VTKElementType::WEDGE;
+				break;
+
+			case ElementInfo::PYRAMID:
+				VTKType = bitpit::VTKElementType::PYRAMID;
+				break;
+
+			default:
+				VTKType = bitpit::VTKElementType::UNDEFINED;
+				break;
+
+			}
+
+			bitpit::genericIO::flushBINARY(stream, (int) VTKType);
+		}
+	} else if (name == "connectivity") {
+		for (Cell &cell : m_cells) {
+			for (int i = 0; i < cell.get_info().nVertices; ++i) {
+				bitpit::genericIO::flushBINARY(stream, vertexMap.at(cell.get_vertex(i)));
+			}
+		}
+
+		vertexMap.clear();
+		std::unordered_map<long, long>().swap(vertexMap);
+	} else if (m_dataFields.count(name) > 0) {
+		bitpit::genericIO::flushBINARY(stream, *(m_dataFields.at(name)));
+	}
 }
 
 /*!
