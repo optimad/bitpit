@@ -154,14 +154,22 @@ file(READ "${VERSION_HEADER_FILENAME}" header)
 string(REGEX REPLACE ".*#[ \t]*define[ \t]*${VERSION_DEFINE_NAME}[ \t]*\"([^\n]*)\".*" "\\1" match "${header}")
 set(BITPIT_VERSION "${match}")
 
-STRING(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+" "\\1" match "${BITPIT_VERSION}")
+STRING(REGEX REPLACE "^([0-9]+)\\.[0-9]+\\.[0-9]+(-[0-9A-Za-z-]+)?" "\\1" match "${BITPIT_VERSION}")
 set(BITPIT_MAJOR_VERSION "${match}")
 
-STRING(REGEX REPLACE "^[0-9]+\\.([0-9])+\\.[0-9]+" "\\1" match "${BITPIT_VERSION}")
+STRING(REGEX REPLACE "^[0-9]+\\.([0-9])+\\.[0-9]+(-[0-9A-Za-z-]+)?" "\\1" match "${BITPIT_VERSION}")
 set(BITPIT_MINOR_VERSION "${match}")
 
-STRING(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+)" "\\1" match "${BITPIT_VERSION}")
+STRING(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.([0-9]+)(-[0-9A-Za-z-]+)?" "\\1" match "${BITPIT_VERSION}")
 set(BITPIT_PATCH_VERSION "${match}")
+
+STRING(REGEX MATCH "^[0-9]+\\.[0-9]+\\.[0-9]+-([0-9A-Za-z-]+)" match "${BITPIT_VERSION}")
+if (NOT match STREQUAL "")
+	STRING(REGEX REPLACE "^[0-9]+\\.[0-9]+\\.[0-9]+-([0-9A-Za-z-]+)" "\\1" match "${BITPIT_VERSION}")
+	set(BITPIT_TAG_VERSION "${match}")
+else ()
+	set(BITPIT_TAG_VERSION "")
+endif ()
 
 #------------------------------------------------------------------------------------#
 # List of all avilable modules
