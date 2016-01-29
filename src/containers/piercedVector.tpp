@@ -50,6 +50,8 @@ namespace bitpit{
 // http://stackoverflow.com/questions/257288/is-it-possible-to-write-a-c-template-to-check-for-a-functions-existence
 // http://stackoverflow.com/questions/16976720/how-to-i-restrict-a-template-class-to-certain-types
 
+namespace utils {
+
 /*!
 	\ingroup containerUtils
 	Checks if the template parameter has a method called "get_id".
@@ -84,6 +86,8 @@ public:
     enum { value = (sizeof(test<T>(0)) == sizeof(true_type)) };
 };
 
+}
+
 /*!
 	\ingroup containers
 	@{
@@ -114,7 +118,7 @@ class PiercedIterator
 {
 	// PiercedIterator can work only with calsses that are identified by a
 	// unique id (i.e., classes that implements get_id)
-	static_assert(containers::has_get_id<T>::value, "Provided class does not implement get_id");
+	static_assert(utils::has_get_id<T>::value, "Provided class does not implement get_id");
 
 private:
 	/*!
@@ -313,8 +317,8 @@ class PiercedVector
 {
 	// PiercedVector can work only with calsses that are identified by a
 	// unique id (i.e., classes that implements set_id and get_id)
-	static_assert(containers::has_get_id<T>::value, "Provided class does not implement get_id");
-	static_assert(containers::has_set_id<T>::value, "Provided class does not implement set_id");
+	static_assert(utils::has_get_id<T>::value, "Provided class does not implement get_id");
+	static_assert(utils::has_set_id<T>::value, "Provided class does not implement set_id");
 
 private:
 	enum FillType {
