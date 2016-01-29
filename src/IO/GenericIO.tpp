@@ -24,8 +24,12 @@
 
 #include"Operators.hpp"
 
+namespace bitpit{
+
+namespace genericIO{
+
 /*!
- * @ingroup Generic
+ * @ingroup GenericIO
  * @{
  */
 
@@ -335,7 +339,7 @@ void  lineStream( std::fstream &str, data_T &data){
     expected = 1;
 
     getline( str, line );
-    trim( line );
+    bitpit::utils::trim( line );
 
     std::stringstream ss( line );
 
@@ -380,7 +384,7 @@ void  lineStream( std::fstream &str, std::vector<data_T> &data){
     expected = data.size() ;
 
     getline( str, line );
-    trim( line );
+    bitpit::utils::trim( line );
 
     std::stringstream ss( line );
 
@@ -430,7 +434,7 @@ void  lineStream( std::fstream &str, std::array<data_T,d> &data){
     expected = d ;
 
     getline( str, line );
-    trim( line );
+    bitpit::utils::trim( line );
 
     std::stringstream ss( line );
 
@@ -474,7 +478,7 @@ void  lineStream( std::fstream &str, data_T *data, int nr ){
     expected = nr ;
 
     getline( str, line );
-    trim( line );
+    bitpit::utils::trim( line );
 
     std::stringstream ss( line );
 
@@ -772,3 +776,6 @@ void absorbBINARY( std::fstream &str, data_T *data, int nr ){
 /*!
  * @}
  */
+}
+
+}

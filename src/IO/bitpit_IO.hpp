@@ -25,7 +25,7 @@
 /*!
  * @defgroup IO Input/Output
  * @{
- * @defgroup Generic Generic
+ * @defgroup GenericIO Generic
  * @defgroup DuneGridFormat DuneGridFormat (DGF)
  * @defgroup STereoLithography STereoLithography (STL)
  * @defgroup VisualizationToolKit VisualizationToolKit (VTK)

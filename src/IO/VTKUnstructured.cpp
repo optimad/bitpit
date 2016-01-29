@@ -132,7 +132,7 @@ uint64_t VTKUnstructuredGrid::calcSizeConnectivity( ){
 
     //Read appended data
     //Go to the initial position of the appended section
-    while( getline(str, line) && (! keywordInString( line, "<AppendedData")) ){} ;
+    while( getline(str, line) && (! bitpit::utils::keywordInString( line, "<AppendedData")) ){} ;
 
     str >> c_;
     while( c_ != '_') str >> c_;
@@ -151,12 +151,12 @@ uint64_t VTKUnstructuredGrid::calcSizeConnectivity( ){
         str.seekg( geometry[3].getOffset(), std::ios::cur) ;
 
         if( HeaderType== "UInt32") {
-            absorbBINARY( str, nbytes32 ) ;
+            genericIO::absorbBINARY( str, nbytes32 ) ;
             nconn = nbytes32 /VTKTypes::sizeOfType( geometry[3].getType() ) ;
         }
 
         if( HeaderType== "UInt64") {
-            absorbBINARY( str, nbytes64 ) ;
+            genericIO::absorbBINARY( str, nbytes64 ) ;
             nconn = nbytes64 /VTKTypes::sizeOfType( geometry[3].getType() ) ;
         };
     };
@@ -172,10 +172,10 @@ uint64_t VTKUnstructuredGrid::calcSizeConnectivity( ){
         nconn = 0 ;
 
         getline( str, line) ;
-        while( ! keywordInString(line,"/DataArray") ) {
+        while( ! bitpit::utils::keywordInString(line,"/DataArray") ) {
 
             temp.clear() ;
-            convertString( line, temp) ;
+            bitpit::utils::convertString( line, temp) ;
             nconn += temp.size() ;
         };
 
@@ -302,23 +302,23 @@ void VTKUnstructuredGrid::readMetaData( ){
     str.open( fh.getName( ), std::ios::in ) ;
     
     getline( str, line);
-    while( ! keywordInString( line, "<VTKFile")){
+    while( ! bitpit::utils::keywordInString( line, "<VTKFile")){
         getline(str, line);
     };
                                               
-    if( getAfterKeyword( line, "header_type", '\"', temp) ){
+    if( bitpit::utils::getAfterKeyword( line, "header_type", '\"', temp) ){
         setHeaderType( temp) ;
     };
 
-    while( ! keywordInString( line, "<Piece")){
+    while( ! bitpit::utils::keywordInString( line, "<Piece")){
       getline(str, line);
     };
     
-    getAfterKeyword( line, "NumberOfPoints", '\"', temp) ;
-    convertString( temp, nr_points );
+    bitpit::utils::getAfterKeyword( line, "NumberOfPoints", '\"', temp) ;
+    bitpit::utils::convertString( temp, nr_points );
     
-    getAfterKeyword( line, "NumberOfCells", '\"', temp) ;
-    convertString( temp, nr_cells );
+    bitpit::utils::getAfterKeyword( line, "NumberOfCells", '\"', temp) ;
+    bitpit::utils::convertString( temp, nr_cells );
     
     
     position = str.tellg() ;

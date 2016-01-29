@@ -98,9 +98,6 @@ void arrayOperators_Ex(                                                         
 void arrayMathFunct_Ex(                                                               // Demo for operators between vectors
     void                                                                              // (input) none
 );
-void stringOperators_Ex(                                                              // Demo for operators between strings
-    void                                                                              // (input) none
-);
 
 // ================================================================================== //
 // TEMPLATES                                                                          //

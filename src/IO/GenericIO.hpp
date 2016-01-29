@@ -32,20 +32,14 @@
 #include <vector>
 #include <array>
 
-/*
+#include "bitpit_common.hpp"
 
-lineStream        reads one line from stream str and check if input is sufficient to fill data. 
-                   if successful data will contain input values;
-                   exeption:  if data contains a zero-size vector, data will be resized to match the entire line;
+namespace bitpit{
 
-flush_(format)     writes the content of data into stream str.
-                   if format == ascii, elements_per_line need to be specified
-
-
-absorb_(format)    reads the filestream str and fills the content of data.
-                   checks if data has been filled completely 
-
-*/
+/*!
+ * @brief contains routines for reading/writing in ASCII/BINARY format
+ */
+namespace genericIO{
 
 template< class data_T >
 void  lineStream( std::fstream &str, data_T &data) ;
@@ -123,6 +117,10 @@ template< class data_T >
 void absorbBINARY( std::fstream &str, data_T *data, int nr  ) ;
 
 void copyUntilEOFInString( std::fstream &str, char*& buffer, int& length);
+
+}
+
+}
 
 #include "GenericIO.tpp"
 

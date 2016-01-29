@@ -503,13 +503,13 @@ void VTK::writeData( ){
                 readDataArray( str, field ) ;
 
                 str.seekg( field.getPosition() ) ;
-                copyUntilEOFInString( str, buffer, length );
+                genericIO::copyUntilEOFInString( str, buffer, length );
 
                 flushData( str, VTKFormat::ASCII, field.getName() ) ;
 
                 position_insert = str.tellg();
                 str << std::endl ;
-                flushBINARY( str, buffer, length) ;
+                genericIO::flushBINARY( str, buffer, length) ;
 
                 delete [] buffer ;
 
@@ -522,13 +522,13 @@ void VTK::writeData( ){
                 readDataArray( str, field ) ;
 
                 str.seekg( field.getPosition() ) ;
-                copyUntilEOFInString( str, buffer, length );
+                genericIO::copyUntilEOFInString( str, buffer, length );
 
                 flushData( str, VTKFormat::ASCII, field.getName() ) ;
 
                 position_insert = str.tellg();
                 str << std::endl ;
-                flushBINARY( str, buffer, length) ;
+                genericIO::flushBINARY( str, buffer, length) ;
 
                 delete [] buffer ;
             };
@@ -540,13 +540,13 @@ void VTK::writeData( ){
                 readDataArray( str, field ) ;
 
                 str.seekg( field.getPosition() ) ;
-                copyUntilEOFInString( str, buffer, length );
+                genericIO::copyUntilEOFInString( str, buffer, length );
 
                 flushData( str, VTKFormat::ASCII, field.getName() ) ;
 
                 position_insert = str.tellg();
                 str << std::endl ;
-                flushBINARY( str, buffer, length) ;
+                genericIO::flushBINARY( str, buffer, length) ;
 
                 delete [] buffer ;
             };
@@ -564,13 +564,13 @@ void VTK::writeData( ){
         std::fstream::pos_type  position_appended ;
 
         //Go to the initial position of the appended section
-        while( getline(str, line) && (! keywordInString( line, "<AppendedData")) ){} ;
+        while( getline(str, line) && (! bitpit::utils::keywordInString( line, "<AppendedData")) ){} ;
 
         str >> c_;
         while( c_ != '_') str >> c_;
 
         position_insert = str.tellg();
-        copyUntilEOFInString( str, buffer, length );
+        genericIO::copyUntilEOFInString( str, buffer, length );
 
         str.close();
         str.clear();
@@ -587,12 +587,12 @@ void VTK::writeData( ){
             if( field.getCodification() == VTKFormat::APPENDED && field.getLocation() == VTKLocation::POINT ) {
                 if( getHeaderType() == "UInt32"){
                     uint32_t    nbytes = field.getNbytes() ;
-                    flushBINARY(str, nbytes) ;
+                    genericIO::flushBINARY(str, nbytes) ;
                 }
 
                 else{
                     uint64_t    nbytes = field.getNbytes() ;
-                    flushBINARY(str, nbytes) ;
+                    genericIO::flushBINARY(str, nbytes) ;
                 };
                 flushData( str, VTKFormat::APPENDED, field.getName() ) ;
             };
@@ -603,12 +603,12 @@ void VTK::writeData( ){
 
                 if( getHeaderType() == "UInt32"){
                     uint32_t    nbytes = field.getNbytes() ;
-                    flushBINARY(str, nbytes) ;
+                    genericIO::flushBINARY(str, nbytes) ;
                 }
 
                 else{
                     uint64_t    nbytes = field.getNbytes() ;
-                    flushBINARY(str, nbytes) ;
+                    genericIO::flushBINARY(str, nbytes) ;
                 };
                 flushData( str, VTKFormat::APPENDED, field.getName() ) ;
 
@@ -620,12 +620,12 @@ void VTK::writeData( ){
             if( field.getCodification() == VTKFormat::APPENDED ) {
                 if( getHeaderType() == "UInt32"){
                     uint32_t    nbytes = field.getNbytes() ;
-                    flushBINARY(str, nbytes) ;
+                    genericIO::flushBINARY(str, nbytes) ;
                 }
 
                 else{
                     uint64_t    nbytes = field.getNbytes() ;
-                    flushBINARY(str, nbytes) ;
+                    genericIO::flushBINARY(str, nbytes) ;
                 };
                 flushData( str, VTKFormat::APPENDED, field.getName() ) ;           
             };
@@ -638,7 +638,7 @@ void VTK::writeData( ){
         // str2.close();
         // }
 
-        flushBINARY( str, buffer, length) ;
+        genericIO::flushBINARY( str, buffer, length) ;
 
         delete [] buffer ;
     };
@@ -776,7 +776,7 @@ void VTK::readData( ){
 
     //Read appended data
     //Go to the initial position of the appended section
-    while( getline(str, line) && (! keywordInString( line, "<AppendedData")) ){} ;
+    while( getline(str, line) && (! bitpit::utils::keywordInString( line, "<AppendedData")) ){} ;
 
     str >> c_;
     while( c_ != '_') str >> c_;
@@ -795,8 +795,8 @@ void VTK::readData( ){
         if( field.getCodification() == VTKFormat::APPENDED){
             str.seekg( position_appended) ;
             str.seekg( field.getOffset(), std::ios::cur) ;
-            if( HeaderType== "UInt32") absorbBINARY( str, nbytes32 ) ;
-            if( HeaderType== "UInt64") absorbBINARY( str, nbytes64 ) ;
+            if( HeaderType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
+            if( HeaderType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
             absorbData( str, VTKFormat::APPENDED, field.getName() ) ;
         };
     };
@@ -806,8 +806,8 @@ void VTK::readData( ){
         if( field.getCodification() == VTKFormat::APPENDED){
             str.seekg( position_appended) ;
             str.seekg( field.getOffset(), std::ios::cur) ;
-            if( HeaderType== "UInt32") absorbBINARY( str, nbytes32 ) ;
-            if( HeaderType== "UInt64") absorbBINARY( str, nbytes64 ) ;
+            if( HeaderType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
+            if( HeaderType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
             absorbData( str, VTKFormat::APPENDED, field.getName() ) ;
         };
     };
@@ -872,7 +872,7 @@ void VTK::readDataHeader( std::fstream &str ){
 
         read= true ; 
         if( ! getline( str, line) ) read = false ;
-        if( keywordInString( line, loc_) ) read=false ;
+        if( bitpit::utils::keywordInString( line, loc_) ) read=false ;
 
 
         while( read ){
@@ -899,7 +899,7 @@ void VTK::readDataHeader( std::fstream &str ){
             };
 
             if( ! getline( str, line) ) read = false ;
-            if( keywordInString( line, loc_) ) read=false ;
+            if( bitpit::utils::keywordInString( line, loc_) ) read=false ;
         }; 
 
     };
@@ -918,7 +918,7 @@ bool  VTK::readDataArray( std::fstream &str, VTKField &field_  ){
 
     while( getline(str, line_)  ){
 
-        if( keywordInString( line_, field_.getName() ) ){
+        if( bitpit::utils::keywordInString( line_, field_.getName() ) ){
             if( VTKUtils::convertStringToDataArray( line_, field_  ) ){
 
                 if( field_.getCodification() == VTKFormat::ASCII) {

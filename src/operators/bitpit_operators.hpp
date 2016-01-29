@@ -6,7 +6,6 @@
  * @{
  * @defgroup MathFunctions Mathematical functions
  * @defgroup Operators Operators
- * @defgroup StringFunctions String functions
  * @}
  */
 

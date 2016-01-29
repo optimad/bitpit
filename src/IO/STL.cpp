@@ -129,7 +129,7 @@ STLObj::STLObj(
 // ========================================================================== //
 
 // General info
-stl_name = trim(filename);
+stl_name = utils::trim(filename);
 stl_type = filetype;
 
 // Error flags
@@ -704,7 +704,7 @@ while (!file_handle.eof()) {
 
     // Get current line
     getline(file_handle, line);
-    line = trim(line);
+    line = utils::trim(line);
     sline.clear();
     sline.str(line);
 
@@ -721,7 +721,7 @@ while (!file_handle.eof()) {
                 sword << word << " ";
             }
             word = sword.str();
-            solid_names.push_back(trim(word));
+            solid_names.push_back(utils::trim(word));
 
             // Get solid info
             STLUtils::scanSolidASCII(file_handle, nF);
@@ -850,7 +850,7 @@ if (!file_handle.good()) { return(1); };
 // Get current line
 backup_pos = file_handle.tellg();
 getline(file_handle, line);
-line = trim(line);
+line = utils::trim(line);
 sline.clear();
 sline.str(line);
 if (!(sline >> word)) { word = ""; }
@@ -868,7 +868,7 @@ while ((!file_handle.eof())
     // Get next line
     backup_pos = file_handle.tellg();
     getline(file_handle, line);
-    line = trim(line);
+    line = utils::trim(line);
     sline.clear();
     sline.str(line);
     if (!(sline >> word))  { word = ""; }
@@ -942,7 +942,7 @@ file_handle.seekg(0);
 while (getline(file_handle, line)) {
 
     // Get current line
-    line = trim(line);
+    line = utils::trim(line);
     sline.clear(),
     sline.str(line);
 
@@ -1012,7 +1012,7 @@ if (!file_handle.good()) { return(1); }
 // Get current line
 backup_pos = file_handle.tellg();
 getline(file_handle, line);
-line = trim(line);
+line = utils::trim(line);
 sline.clear();
 sline.str(line);
 if (!(sline >> word)) { word = ""; }
@@ -1031,7 +1031,7 @@ while ((!file_handle.eof())
         // Get next line
         backup_pos = file_handle.tellg();
         getline(file_handle, line);
-        line = trim(line);
+        line = utils::trim(line);
         sline.clear();
         sline.str(line);
         if (!(sline >> word)) { word = ""; }
@@ -1097,7 +1097,7 @@ if (!file_handle.good()) { return(1); }
 // Get current line --------------------------------------------------------- //
 backup_pos = file_handle.tellg();
 getline(file_handle, line);
-line = trim(line);
+line = utils::trim(line);
 sline.clear(),
 sline.str(line);
 if ((!(sline >> word)) || (word.compare("facet") == 0)) { word = "begin"; }
@@ -1132,7 +1132,7 @@ while ((!file_handle.eof()) &&
     // Get next line
     backup_pos = file_handle.tellg();
     getline(file_handle, line);
-    line = trim(line);
+    line = utils::trim(line);
     sline.clear(),
     sline.str(line);
     if (!(sline >> word)) { word = ""; }
@@ -1343,7 +1343,7 @@ int                 nv = 0;
 // Get current line
 cursor_pos = file_handle.tellg();
 getline(file_handle, line);
-line = trim(line);
+line = utils::trim(line);
 sline.clear();
 sline.str(line);
 if ((!(sline >> word)) || (word.compare("facet") == 0)) { word = "begin"; }
@@ -1369,7 +1369,7 @@ while ((!file_handle.eof())
     // Get next line
     cursor_pos = file_handle.tellg();
     getline(file_handle, line);
-    line = trim(line);
+    line = utils::trim(line);
     sline.clear();
     sline.str(line);
     if (!(sline >> word)) { word = ""; }
@@ -1448,7 +1448,7 @@ int                 nv = 0;
 // Get current line
 cursor_pos = file_handle.tellg();
 getline(file_handle, line);
-line = trim(line);
+line = utils::trim(line);
 sline.clear();
 sline.str(line);
 if ((!(sline >> word)) || (word.compare("facet") == 0)) { word = "begin"; }
@@ -1474,7 +1474,7 @@ while ((!file_handle.eof())
     // Get next line
     cursor_pos = file_handle.tellg();
     getline(file_handle, line);
-    line = trim(line);
+    line = utils::trim(line);
     sline.clear();
     sline.str(line);
     if (!(sline >> word)) { word = ""; }
@@ -1559,7 +1559,7 @@ if (!file_handle.good()) { return(1); }
 // Parameters --------------------------------------------------------------- //
 sline << "solid " << solid_name;
 line = sline.str();
-solid_name = trim(line);
+solid_name = utils::trim(line);
 
 // Scan file until stl solid is found --------------------------------------- //
 current_pos = start_pos+1;
@@ -1567,7 +1567,7 @@ while (!check && (start_pos != current_pos)) {
 
     // Get current line
     getline(file_handle, line);
-    line = trim(line);
+    line = utils::trim(line);
     sline.clear();
     sline.str(line);
 
@@ -1620,7 +1620,7 @@ while ((!file_handle.eof())
     // Get current line
     current_pos = file_handle.tellg();
     getline(file_handle, line);
-    line = trim(line);
+    line = utils::trim(line);
     sline.clear();
     sline.str(line);
 
@@ -1699,7 +1699,7 @@ if (!file_handle.good()) { return(1); }
 // Parameters --------------------------------------------------------------- //
 sline << "solid " << solid_name;
 line = sline.str();
-solid_name = trim(line);
+solid_name = utils::trim(line);
 
 // Scan file until stl solid is found --------------------------------------- //
 current_pos = start_pos+1;
@@ -1707,7 +1707,7 @@ while (!check && (start_pos != current_pos)) {
 
     // Get current line
     getline(file_handle, line);
-    line = trim(line);
+    line = utils::trim(line);
     sline.clear();
     sline.str(line);
 
@@ -1763,7 +1763,7 @@ while ((!file_handle.eof())
     // Get current line
     current_pos = file_handle.tellg();
     getline(file_handle, line);
-    line = trim(line);
+    line = utils::trim(line);
     sline.clear();
     sline.str(line);
 
@@ -2278,7 +2278,7 @@ if (!file_handle.good()) { return(1); };
 // Solid header --------------------------------------------------------------- //
 sheader << "solid " << solid_name;
 header = sheader.str();
-header = trim(header);
+header = utils::trim(header);
 file_handle << header << endl;
 sheader.str("");
 
@@ -2321,7 +2321,7 @@ for (i = 0; i < nT; i++) {
 // Closing header ------------------------------------------------------------- //
 sheader << "endsolid " << solid_name;
 header = sheader.str();
-header = trim(header);
+header = utils::trim(header);
 file_handle << header << endl;
 sheader.str("");
 
@@ -2385,7 +2385,7 @@ if (!file_handle.good()) { return(1); };
 // Solid header --------------------------------------------------------------- //
 sheader << "solid " << solid_name;
 header = sheader.str();
-header = trim(header);
+header = utils::trim(header);
 file_handle << header << endl;
 sheader.str("");
 
@@ -2428,7 +2428,7 @@ for (i = 0; i < nT; i++) {
 // Closing header ------------------------------------------------------------- //
 sheader << "endsolid " << solid_name;
 header = sheader.str();
-header = trim(header);
+header = utils::trim(header);
 file_handle << header << endl;
 sheader.str("");
 

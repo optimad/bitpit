@@ -36,8 +36,12 @@
 // All rights reserved.                                                               //
 // ================================================================================== //
 
+namespace bitpit{
+
+namespace utils{
+
 /*!
-   \ingroup StringFunctions
+   \ingroup commonUtils
    \{
  */
 
@@ -101,7 +105,7 @@ return(s); };
 // ================================================================================== //
 // TRIM STRING                                                                        //
 // ================================================================================== //
-s.erase(find_if(s.rbegin(), s.rend(), not1(std::ptr_fun<int, int>(isspace))).base(), s.end());
+s.erase(std::find_if(s.rbegin(), s.rend(), not1(std::ptr_fun<int, int>(isspace))).base(), s.end());
 
 return(s); };
 
@@ -339,3 +343,7 @@ void  convertString( std::string input_, std::array<T,n> &output_) {
 /*!
    \}
  */
+
+}
+
+}

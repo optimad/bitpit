@@ -27,6 +27,7 @@
 #include <fstream>
 #include <sstream>
 
+#include"bitpit_common.hpp"
 #include"FileHandler.hpp"
 #include"Operators.hpp"
 
@@ -178,8 +179,8 @@ std::string  FileHandler::getName(){
   std::stringstream filename ;
 
   filename << directory << "/"<<name ;
-  if(parallel) filename <<".b"<< zeroPadNumber(4, block)    ;
-  if(series)   filename <<"." << zeroPadNumber(4, counter)  ;
+  if(parallel) filename <<".b"<< bitpit::utils::zeroPadNumber(4, block)    ;
+  if(series)   filename <<"." << bitpit::utils::zeroPadNumber(4, counter)  ;
   filename <<"."<< appendix  ;
 
   return filename.str() ;

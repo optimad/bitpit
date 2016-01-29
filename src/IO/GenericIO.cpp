@@ -22,12 +22,17 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#include "GenericIO.hpp"
+
+
+namespace bitpit{
+
+namespace genericIO{
+
 /*!
- * @ingroup Generic
+ * @ingroup GenericIO
  * @{
  */
-
-#include "GenericIO.hpp"
 
 /*!
  * Writes uint_8 data as formatted integer 
@@ -73,3 +78,6 @@ void copyUntilEOFInString( std::fstream &str, char*& buffer, int &length){
 /*!
  * @}
  */
+}
+
+}

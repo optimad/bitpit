@@ -78,20 +78,20 @@ bool VTKUtils::convertStringToDataArray( const std::string &line_, VTKField &dat
     bool  success(true) ;
 
 
-    if( keywordInString( line_, "<DataArray ") ){  
-        success = success && getAfterKeyword( line_, "type=", '\"', type_) ;
-        success = success && getAfterKeyword( line_, "Name=", '\"', name_) ;
-        success = success && getAfterKeyword( line_, "format=", '\"', code_) ;
+    if( bitpit::utils::keywordInString( line_, "<DataArray ") ){  
+        success = success && bitpit::utils::getAfterKeyword( line_, "type=", '\"', type_) ;
+        success = success && bitpit::utils::getAfterKeyword( line_, "Name=", '\"', name_) ;
+        success = success && bitpit::utils::getAfterKeyword( line_, "format=", '\"', code_) ;
 
-        if( getAfterKeyword( line_, "NumberOfComponents=", '\"', comp_)  ){
-            convertString( comp_, components_ ) ;
+        if( bitpit::utils::getAfterKeyword( line_, "NumberOfComponents=", '\"', comp_)  ){
+            bitpit::utils::convertString( comp_, components_ ) ;
         };
 
         if(components_==3)
             comp=VTKFieldType::VECTOR ;
 
-        convertStringToEnum( type_, type) ;
-        convertStringToEnum( code_, codex) ;
+        VTKUtils::convertStringToEnum( type_, type) ;
+        VTKUtils::convertStringToEnum( code_, codex) ;
 
         data_.setType(type) ;
         data_.setName(name_) ;
@@ -99,8 +99,8 @@ bool VTKUtils::convertStringToDataArray( const std::string &line_, VTKField &dat
         data_.setCodification(codex) ;
 
         if(code_=="appended") {
-            if( getAfterKeyword( line_, "offset=", '\"', offs_) ){
-                convertString( offs_, offset_ ) ;
+            if( bitpit::utils::getAfterKeyword( line_, "offset=", '\"', offs_) ){
+                bitpit::utils::convertString( offs_, offset_ ) ;
                 data_.setOffset(offset_) ;
             }
             else{

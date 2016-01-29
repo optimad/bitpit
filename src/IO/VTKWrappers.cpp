@@ -136,32 +136,32 @@ void VTKUnstructuredVec::flushData( std::fstream &str, VTKFormat codex, std::str
 
     if( codex == VTKFormat::ASCII && name == "types"){
         for( uint64_t n=0; n<nr_cells-1; n++) {
-            flushASCII( str, myType  ) ;
+            genericIO::flushASCII( str, myType  ) ;
             str << std::endl ;
         };
-        flushASCII( str, myType  ) ;
+        genericIO::flushASCII( str, myType  ) ;
     }
 
     else if( codex == VTKFormat::APPENDED && name == "types"){
-        for( uint64_t n=0; n<nr_cells; n++) flushBINARY( str, myType  ) ;
+        for( uint64_t n=0; n<nr_cells; n++) genericIO::flushBINARY( str, myType  ) ;
     }
 
     else if( codex == VTKFormat::ASCII && name == "offsets"){
         uint64_t off_(0), nT( VTKUtils::getNNodeInElement( type ) ) ;
         for(uint64_t  n=0; n<nr_cells-1; n++) {
             off_ += nT ;
-            flushASCII( str, off_  ) ;
+            genericIO::flushASCII( str, off_  ) ;
             str << std::endl ;
         };
         off_ += nT ;
-        flushASCII( str, off_  ) ;
+        genericIO::flushASCII( str, off_  ) ;
     }
 
     else if( codex == VTKFormat::APPENDED && name == "offsets"){
         uint64_t off_(0), nT( VTKUtils::getNNodeInElement( type ) ) ;
         for( uint64_t n=0; n<nr_cells; n++) {
             off_ += nT ; 
-            flushBINARY( str, off_  ) ;
+            genericIO::flushBINARY( str, off_  ) ;
         };
     }
 

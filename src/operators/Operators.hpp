@@ -45,7 +45,6 @@
 # include <cmath>
 # include <array>
 # include <vector>
-# include <string>
 # include <sstream>
 # include <fstream>
 # include <iomanip>
@@ -700,57 +699,6 @@ std::ofstream& display(                                                         
         unsigned int                             padding = 0                          // (input/optional) number of trailing spaces
         );
 
-// String =========================================================================== //
-
-// Trimming operators --------------------------------------------------------------- //
-inline std::string &ltrim(                                                     // STRING LEFT TRIMMING
-        std::string                             &                                     // (input) std::string to be trimmed
-        );
-inline std::string &rtrim(                                                     // STRING RIGHT TRIMMING
-        std::string                             &                                     // (input) std::string to be trimmed
-        );
-inline std::string &trim(                                                      // STRING TRIMMING
-        std::string                             &                                     // (input) std::string to be trimmed
-        );
-
-// Padding operators ---------------------------------------------------------------- //
-inline std::string zeroPadNumber(                                              // PERFORMS CONVERSION OF INTEGER INTO STRING
-        int                                      ,                                    // (input) number of char in std::string
-        int                                                                           // (input) integer to be padded
-        );
-
-// Input stream operator ------------------------------------------------------------ //
-bool getAfterKeyword(                                                               // EXTRACT FIELD AFTER SPECIFIC KEYWORD
-        std::string                              ,                                    // (input) std::string
-        std::string                              ,                                    // (input) keyword
-        char                                     ,                                    // (input) field delimiter
-        std::string                             &                                     // (input/output) field found
-        );
-
-// returns true if key_ is present in line ------------------------------------------ //
-inline bool keywordInString(                                                 // SEARCH KEYWORD IN STRING
-        std::string                              ,                                    // (input) input string            
-        std::string                                                                   // (input) keyword
-        ) ;
-
-// converts a string to fundamental data types and vectors or arrays of them -------- //
-template <class T>
-void convertString(                                                                  // EXTRACT SCALAR FROM STRING
-        std::string                              ,                                    // (input) input string
-        T                                       &                                     // (input/output) scalar
-        );
-
-template <class T>
-void  convertString(                                                                 // EXTRACT DATA FROM STRING AND STORE THEM INTO VECTOR
-        std::string                              ,                                    // (input) string
-        std::vector<T>                          &                                     // (input/output) vector used to store string
-        );
-
-template <class T, size_t n>
-void  convertString(                                                                 // EXTRACT DATA FROM STRING AND STORE THEM INTO ARRAY
-        std::string                              ,                                    // (input) string
-        std::array<T,n>                         &                                     // (input/output) array used to store data
-        );
 
 // ================================================================================== //
 // TEMPLATES                                                                          //
@@ -760,6 +708,5 @@ void  convertString(                                                            
 # include "MathOperators_vector.tpp"
 # include "Operators_array.tpp"
 # include "MathOperators_array.tpp"
-# include "Operators_string.tpp"
 
 #endif

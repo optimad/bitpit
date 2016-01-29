@@ -52,7 +52,8 @@
 // Classes
 // none
 
-// CC_lib
+// bitpit
+# include "bitpit_common.hpp"
 # include "Operators.hpp"
 
 namespace bitpit{

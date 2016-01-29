@@ -26,7 +26,7 @@
 
 namespace bitpit{
 
-/*! =====
+/*! 
  * @ingroup     VisualizationToolKit
  * @{
  * @class       VTKRectilinearGrid
@@ -184,20 +184,20 @@ void VTKRectilinearGrid::readMetaData( ){
     str.open( fh.getName( ), std::ios::in ) ;
 
     getline( str, line);
-    while( ! keywordInString( line, "<VTKFile")){
+    while( ! bitpit::utils::keywordInString( line, "<VTKFile")){
         getline(str, line);
     };
 
-    if( getAfterKeyword( line, "header_type", '\"', temp) ){
+    if( bitpit::utils::getAfterKeyword( line, "header_type", '\"', temp) ){
         setHeaderType( temp) ;
     };
 
-    while( ! keywordInString( line, "<Piece")){
+    while( ! bitpit::utils::keywordInString( line, "<Piece")){
         getline(str, line);
     };
 
-    getAfterKeyword( line, "Extent", '\"', temp) ;
-    convertString( temp, extensions );
+    bitpit::utils::getAfterKeyword( line, "Extent", '\"', temp) ;
+    bitpit::utils::convertString( temp, extensions );
 
     local_index[0][0] = extensions[0] ;
     local_index[0][1] = extensions[1] ;

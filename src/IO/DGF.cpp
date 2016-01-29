@@ -38,6 +38,7 @@
 // ========================================================================== //
 // INCLUDES                                                                   //
 // ========================================================================== //
+
 # include "DGF.hpp"
 
 // ========================================================================== //
@@ -128,7 +129,7 @@ DGFObj::DGFObj(
 // ========================================================================== //
 
 // General info
-dgf_name = trim(filename);
+dgf_name = utils::trim(filename);
 
 // Error flags
 err = 0;
@@ -872,7 +873,7 @@ while (!file_handle.eof()
     // Get next line
     current_pos = file_handle.tellg();
     getline(file_handle, line);
-    line = trim(line);
+    line = utils::trim(line);
     sline.clear();
     sline.str(line);
 
@@ -963,7 +964,7 @@ while (!file_handle.eof()) {
 
     // Get current line
     getline(file_handle, line);
-    line = trim(line);
+    line = utils::trim(line);
     sline.clear();
     sline.str(line);
 
@@ -1069,7 +1070,7 @@ while (!file_handle.eof()
     // Get current line
     current_pos = file_handle.tellg();
     getline(file_handle, line);
-    line = trim(line);
+    line = utils::trim(line);
     sline.clear();
     sline.str(line);
 
@@ -1150,7 +1151,7 @@ while ((!file_handle.eof()) && (word.compare("#") != 0)) {
 
     // Get current line
     getline(file_handle, line);
-    line = trim(line);
+    line = utils::trim(line);
     sline.clear();
     sline.str(line);
 
@@ -1248,7 +1249,7 @@ while (!file_handle.eof()
 
     // Get current line
     getline(file_handle, line);
-    line = trim(line);
+    line = utils::trim(line);
     sline.clear();
     sline.str(line);
 
@@ -1335,7 +1336,7 @@ while (!file_handle.eof()
 
     // Get current line
     getline(file_handle, line);
-    line = trim(line);
+    line = utils::trim(line);
     sline.clear();
     sline.str(line);
 

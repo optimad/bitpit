@@ -22,13 +22,22 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#include"Operators.hpp"
+#include"utils.hpp"
+#include"utils.tpp"
+
 using namespace std;      
 
+namespace bitpit {
+
 /*!
-   \ingroup StringFunctions
-   \{
- */
+    \brief Namespace for generic utility functions
+*/
+namespace utils {
+
+/*!
+    \ingroup commonUtils
+    \{
+*/
 
 // ---------------------------------------------------------------------------------- //
 /*!
@@ -86,6 +95,12 @@ bool getAfterKeyword( string line_, string key_, char del_, string& result_){
   };
 
 };
+
+
 /*!
    \}
  */
+
+}
+
+}
