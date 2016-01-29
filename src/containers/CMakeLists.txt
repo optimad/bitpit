@@ -10,7 +10,7 @@
 #
 #  bitpit is free software: you can redistribute it and/or modify it
 #  under the terms of the GNU Lesser General Public License v3 (LGPL)
-#  as published by by the Free Software Foundation.
+#  as published by the Free Software Foundation.
 #
 #  bitpit is distributed in the hope that it will be useful, but WITHOUT
 #  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
