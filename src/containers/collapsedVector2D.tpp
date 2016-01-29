@@ -61,7 +61,7 @@ class CollapsedVector2D;
 	\result Returns the same output stream received in input.
 */
 template<class T>
-obinarystream& operator<<(obinarystream &buffer, const CollapsedVector2D<T> &vector)
+OBinaryStream& operator<<(OBinaryStream &buffer, const CollapsedVector2D<T> &vector)
 {
 	typename std::vector<T>::const_iterator           it;
 	typename std::vector<size_t>::const_iterator      jt;
@@ -86,7 +86,7 @@ obinarystream& operator<<(obinarystream &buffer, const CollapsedVector2D<T> &vec
 	\result Returns the same input stream received in input.
 */
 template<class T>
-ibinarystream& operator>>(ibinarystream &buffer, CollapsedVector2D<T> &vector)
+IBinaryStream& operator>>(IBinaryStream &buffer, CollapsedVector2D<T> &vector)
 {
     size_t                      size_m_v, size_m_index;
     size_t                      i;
@@ -113,9 +113,9 @@ class CollapsedVector2D
 {
 
 template<class U>
-friend obinarystream& operator<<(obinarystream& buffer, const CollapsedVector2D<U>& vector);
+friend OBinaryStream& operator<<(OBinaryStream& buffer, const CollapsedVector2D<U>& vector);
 template<class U>
-friend ibinarystream& operator>>(ibinarystream& buffer, CollapsedVector2D<U>& vector);
+friend IBinaryStream& operator>>(IBinaryStream& buffer, CollapsedVector2D<U>& vector);
 
 public:
 
