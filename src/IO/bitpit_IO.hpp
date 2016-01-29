@@ -12,7 +12,7 @@
  *  under the terms of the GNU Lesser General Public License v3 (LGPL)
  *  as published by by the Free Software Foundation.
  *
- *  BitPit is distributed in the hope that it will be useful, but WITHOUT
+ *  bitpit is distributed in the hope that it will be useful, but WITHOUT
  *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
  *  License for more details.
@@ -22,23 +22,30 @@
  *
  \*---------------------------------------------------------------------------*/
 
-
-
 /*!
- * @defgroup common Common
+ * @defgroup IO Input/Output
  * @{
- * @defgroup commonUtils Utils
+ * @defgroup Generic Generic
+ * @defgroup DuneGridFormat DuneGridFormat (DGF)
+ * @defgroup STereoLithography STereoLithography (STL)
+ * @defgroup VisualizationToolKit VisualizationToolKit (VTK)
+ * @{
+ * @defgroup VTKEnums
+ * @}
  * @}
  *
  */
 
+#ifndef __BITPIT_IO__
+#define __BITPIT_IO__
 
-#ifndef __BITPIT_COMMON__
-#define __BITPIT_COMMON__
-
-#include "utils.hpp"
-#include "utils.tpp"
-
-#define BITPIT_UNUSED(expr) do { (void)(expr); } while (0)
+#include "FileHandler.hpp"
+#include "VTK.hpp"
+#ifdef IO_ENABLE_VTK_WRAPPERS
+#include "VTKWrappers.hpp"
+#endif
+#include "DGF.hpp"
+#include "GenericIO.hpp"
+#include "STL.hpp"
 
 #endif

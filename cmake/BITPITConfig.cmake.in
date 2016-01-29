@@ -30,12 +30,12 @@ include(LibFindMacros)
 include(FindPackageHandleStandardArgs)
 
 #-----------------------------------------------------------------------------
-# Find BitPit libraries and headers
+# Find bitpit libraries and headers
 #-----------------------------------------------------------------------------
 
 # Headers
 find_path(BITPIT_INCLUDE_DIR "@PROJECT_NAME@_version.hpp"
-          HINTS "${BITPIT_INSTALL_PREFIX}/include/BitPit")
+          HINTS "${BITPIT_INSTALL_PREFIX}/include/bitpit")
 
 mark_as_advanced(BITPIT_INCLUDE_DIR)
 

@@ -12,7 +12,7 @@
 #  under the terms of the GNU Lesser General Public License v3 (LGPL)
 #  as published by by the Free Software Foundation.
 #
-#  BitPit is distributed in the hope that it will be useful, but WITHOUT
+#  bitpit is distributed in the hope that it will be useful, but WITHOUT
 #  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 #  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
 #  License for more details.

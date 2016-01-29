@@ -12,7 +12,7 @@
 #  under the terms of the GNU Lesser General Public License v3 (LGPL)
 #  as published by by the Free Software Foundation.
 #
-#  BitPit is distributed in the hope that it will be useful, but WITHOUT
+#  bitpit is distributed in the hope that it will be useful, but WITHOUT
 #  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 #  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
 #  License for more details.
@@ -29,11 +29,11 @@ cmake_minimum_required(VERSION 2.8)
 include_directories("${PROJECT_SOURCE_DIR}/src/containers")
 
 file(GLOB SOURCE_FILES "*.cpp")
-set(CONTAINERS_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Sources for BitPit custom containers" FORCE)
+set(CONTAINERS_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Sources for bitpit custom containers" FORCE)
 unset(SOURCE_FILES)
 
 file(GLOB HEADER_FILES "*.hpp" "*.tpp")
-set(CONTAINERS_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers for BitPit custom containers" FORCE)
+set(CONTAINERS_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers for bitpit custom containers" FORCE)
 unset(HEADER_FILES)
 
 if (NOT "${CONTAINERS_SOURCES}" STREQUAL "")

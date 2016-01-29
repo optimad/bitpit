@@ -12,7 +12,7 @@
 #  under the terms of the GNU Lesser General Public License v3 (LGPL)
 #  as published by by the Free Software Foundation.
 #
-#  BitPit is distributed in the hope that it will be useful, but WITHOUT
+#  bitpit is distributed in the hope that it will be useful, but WITHOUT
 #  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 #  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
 #  License for more details.
@@ -27,7 +27,7 @@
 #------------------------------------------------------------------------------------#
 cmake_minimum_required(VERSION 2.8)
 
-project("BitPit")
+project("bitpit")
 
 #------------------------------------------------------------------------------------#
 # Variables visible to the user
@@ -119,7 +119,7 @@ function(enableGroup GROUP_NAME ENABLED)
 	endif ()
 
 	getGroupEnableName(${GROUP_NAME} GROUP_ENABLE_FLAG)
-	set(${GROUP_ENABLE_FLAG} ${ENABLED} CACHE BOOL "Request building ${MODULE_NAME} BitPit modules" ${FORCE_FLAG})
+	set(${GROUP_ENABLE_FLAG} ${ENABLED} CACHE BOOL "Request building ${MODULE_NAME} bitpit modules" ${FORCE_FLAG})
 
 	isGroupEnabled(${GROUP_NAME} GROUP_ENABLED)
 	string(TOUPPER ${GROUP_NAME} UPPER_GROUP_NAME)

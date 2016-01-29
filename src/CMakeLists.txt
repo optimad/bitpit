@@ -12,7 +12,7 @@
 #  under the terms of the GNU Lesser General Public License v3 (LGPL)
 #  as published by by the Free Software Foundation.
 #
-#  BitPit is distributed in the hope that it will be useful, but WITHOUT
+#  bitpit is distributed in the hope that it will be useful, but WITHOUT
 #  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 #  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
 #  License for more details.
@@ -62,7 +62,7 @@ else()
 endif()
 
 # Library
-set(BITPIT_LIBRARY ${CMAKE_PROJECT_NAME} CACHE INTERNAL "BitPit Base Library" FORCE)
+set(BITPIT_LIBRARY ${CMAKE_PROJECT_NAME} CACHE INTERNAL "bitpit Base Library" FORCE)
 
 add_library(${BITPIT_LIBRARY} ${LIBRARY_TYPE} ${MODULE_SOURCES})
 

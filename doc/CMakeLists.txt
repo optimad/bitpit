@@ -12,7 +12,7 @@
 #  under the terms of the GNU Lesser General Public License v3 (LGPL)
 #  as published by by the Free Software Foundation.
 #
-#  BitPit is distributed in the hope that it will be useful, but WITHOUT
+#  bitpit is distributed in the hope that it will be useful, but WITHOUT
 #  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 #  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
 #  License for more details.
@@ -59,7 +59,7 @@ IF(BUILD_DOCUMENTATION)
   SET(DOXY_PREDEFINED      "ENABLE_MPI=${DOXY_ENABLE_MPI}")
 
   SET(DOXY_INPUT_DIRECTORIES "${CMAKE_SOURCE_DIR}/src/common \\\n      ${CMAKE_SOURCE_DIR}/examples \\\n      ${CMAKE_SOURCE_DIR}/doc/extra")
-  SET(DOXY_INPUT_FILES "${CMAKE_CURRENT_SOURCE_DIR}/extra/BitPit.hpp;${CMAKE_CURRENT_SOURCE_DIR}/extra/BitPitStyleGuide.hpp;${COMMON_SOURCES};${COMMON_HEADERS};${EXAMPLES_SOURCES}")
+  SET(DOXY_INPUT_FILES "${CMAKE_CURRENT_SOURCE_DIR}/extra/bitpit.hpp;${CMAKE_CURRENT_SOURCE_DIR}/extra/bitpitStyleGuide.hpp;${COMMON_SOURCES};${COMMON_HEADERS};${EXAMPLES_SOURCES}")
   foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
     isModuledEnabled(${MODULE_NAME} MODULE_ENABLED)
     if (MODULE_ENABLED)

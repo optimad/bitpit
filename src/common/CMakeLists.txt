@@ -12,7 +12,7 @@
 #  under the terms of the GNU Lesser General Public License v3 (LGPL)
 #  as published by by the Free Software Foundation.
 #
-#  BitPit is distributed in the hope that it will be useful, but WITHOUT
+#  bitpit is distributed in the hope that it will be useful, but WITHOUT
 #  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
 #  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
 #  License for more details.
@@ -29,16 +29,16 @@ cmake_minimum_required(VERSION 2.8)
 set(HEADERS "")
 
 # Generate the reference header files
-set(HEADER_TEMPLATE "BitPit_template.hpp.in")
+set(HEADER_TEMPLATE "bitpit_template.hpp.in")
 foreach (GROUP_NAME IN LISTS BITPIT_GROUP_LIST)
-	set(REFERENCE_HEADER "BitPit_${GROUP_NAME}.hpp")
+	set(REFERENCE_HEADER "bitpit_${GROUP_NAME}.hpp")
 	string(TOUPPER ${GROUP_NAME} UPPER_GROUP_NAME)
 
-	set(INCLUDE_LIST "#include <BitPit_Base_common.hpp>\n")
+	set(INCLUDE_LIST "#include <bitpit_Base_common.hpp>\n")
 	foreach(MODULE_NAME IN LISTS BITPIT_${UPPER_GROUP_NAME}_MODULE_LIST)
 		isModuledEnabled(${MODULE_NAME} MODULE_ENABLED)
 		if (MODULE_ENABLED)
-			set(INCLUDE_LIST "${INCLUDE_LIST}#include <BitPit_Base_${MODULE_NAME}.hpp>\n")
+			set(INCLUDE_LIST "${INCLUDE_LIST}#include <bitpit_Base_${MODULE_NAME}.hpp>\n")
 		endif ()
 	endforeach ()
 

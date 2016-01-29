@@ -12,7 +12,7 @@
  *  under the terms of the GNU Lesser General Public License v3 (LGPL)
  *  as published by by the Free Software Foundation.
  *
- *  BitPit is distributed in the hope that it will be useful, but WITHOUT
+ *  bitpit is distributed in the hope that it will be useful, but WITHOUT
  *  ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
  *  FITNESS FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public
  *  License for more details.
@@ -20,32 +20,24 @@
  *  You should have received a copy of the GNU Lesser General Public License
  *  along with bitpit. If not, see <http://www.gnu.org/licenses/>.
  *
- \*---------------------------------------------------------------------------*/
+\*---------------------------------------------------------------------------*/
 
 /*!
- * @defgroup IO Input/Output
+ * @defgroup containers Containers
  * @{
- * @defgroup Generic Generic
- * @defgroup DuneGridFormat DuneGridFormat (DGF)
- * @defgroup STereoLithography STereoLithography (STL)
- * @defgroup VisualizationToolKit VisualizationToolKit (VTK)
- * @{
- * @defgroup VTKEnums
- * @}
+ * @defgroup BinaryStream Binary stream
+ * @defgroup containerUtils Utils
  * @}
  *
  */
 
-#ifndef __BITPIT_IO__
-#define __BITPIT_IO__
+#ifndef __BITPIT_CONTAINERS__
+#define __BITPIT_CONTAINERS__
 
-#include "FileHandler.hpp"
-#include "VTK.hpp"
-#ifdef IO_ENABLE_VTK_WRAPPERS
-#include "VTKWrappers.hpp"
-#endif
-#include "DGF.hpp"
-#include "GenericIO.hpp"
-#include "STL.hpp"
+#include "binary_stream.hpp"
+#include "collapsedArray2D.tpp"
+#include "collapsedVector2D.tpp"
+#include "piercedVector.tpp"
+#include "positionalPiercedVector.tpp"
 
 #endif
