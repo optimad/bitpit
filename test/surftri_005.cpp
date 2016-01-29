@@ -179,7 +179,7 @@ void Demo_CleaningTools3(
     Tri.ResizeAdjacency();
 
     Tri.Stats(cout);
-    Tri.Export_vtu("cleanedgrid.vtu");
+    // TODO VTK Output
 
     // ========================================================================== //
     // CLOSING MESSAGE                                                            //

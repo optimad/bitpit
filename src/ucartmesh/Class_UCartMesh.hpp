@@ -25,9 +25,8 @@
 # include <fstream>
 
 // CC_Lib
-# include "Operators.hpp"
-# include "DGF_IOFunct.hpp"
-# include "VTK_IOFunct.hpp"
+# include <bitpit_operators.hpp>
+# include <bitpit_IO.hpp>
 
 // ========================================================================== //
 // NAMESPACES                                                                 //
@@ -222,13 +221,6 @@ class Class_UCartMesh2D {
 
         // I/O methods ====================================================================== //
 
-        // Paraview ------------------------------------------------------------------------- //
-        void Export_vtr(string );
-        template <class T>
-        void Export_CellData_vtr(string , string , vector<T> &);
-        template <class T>
-        void Export_PointData_vtr(string , string , vector<T> &);
-
 };
 
 class Class_UCartMesh3D {
@@ -385,12 +377,6 @@ class Class_UCartMesh3D {
 
         // I/O methods ====================================================================== //
 
-        // Paraview ------------------------------------------------------------------------- //
-        void Export_vtr(string );
-        template <class T>
-        void Export_CellData_vtr(string , string , vector<T> &);
-        template <class T>
-        void Export_PointData_vtr(string , string , vector<T> &);
 };
 
 // ========================================================================== //

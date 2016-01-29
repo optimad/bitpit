@@ -1193,7 +1193,7 @@ unsigned int Element::get_binary_size()
 	\param[in] element is the element to be streamed
 	\result Returns the same input stream received in input.
 */
-ibinarystream& operator>>(ibinarystream &buffer, Element &element)
+bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, Element &element)
 {
 	buffer >> element.m_type;
 	element.initialize(element.m_type);
@@ -1212,7 +1212,7 @@ ibinarystream& operator>>(ibinarystream &buffer, Element &element)
 	\param[in] element is the element to be streamed
 	\result Returns the same output stream received in input.
 */
-obinarystream& operator<<(obinarystream  &buffer, const Element &element)
+bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const Element &element)
 {
 	int nVertices = element.get_vertex_count();
 	buffer << element.get_type();

@@ -363,7 +363,7 @@ while (check && (iter < iter_max)) {
     // Update distances
     for (i = 0; i < m; ++i) {
         V = Simplex[T][i];
-        d[i] = norm_2(C - Vertex[V]);
+        d[i] = norm2(C - Vertex[V]);
     } //next i
 
     // Update residuals
@@ -410,10 +410,10 @@ while (check && (iter < iter_max)) {
     } //next i
 
     // Solve linear system
-    Cramer(d2G, dG, dC);
+    bitpit::linearalgebra::cramer(d2G, dG, dC);
 
     // Convergence criterion
-    check = (norm_2(dC) > abs_toll);
+    check = (norm2(dC) > abs_toll);
     iter++;
 
     // Update solution
@@ -467,7 +467,7 @@ if (n <= 1) { return(0.0); }
 else {
     A = Simplex[T][infos[e_type[T]].edges[i][0]];
     B = Simplex[T][infos[e_type[T]].edges[i][1]];
-    l = norm_2(Vertex[A] - Vertex[B]);
+    l = norm2(Vertex[A] - Vertex[B]);
 }
 
 return(l); };
@@ -519,7 +519,7 @@ if (n <= 1) { return(0.0); }
 else {
     A = Simplex[T][infos[e_type[T]].edges[i][0]];
     B = Simplex[T][infos[e_type[T]].edges[i][1]];
-    l = norm_2(V[A] - V[B]);
+    l = norm2(V[A] - V[B]);
 }
 
 return(l); };
@@ -741,7 +741,7 @@ n = infos[e_type[T]].faces[i].size();
 if (n == 2) {
     V0 = Simplex[T][infos[e_type[T]].faces[i][0]];
     V1 = Simplex[T][infos[e_type[T]].faces[i][1]];
-    A = norm_2(Vertex[V0] - Vertex[V1]);
+    A = norm2(Vertex[V0] - Vertex[V1]);
 }
 else if (n == 3) {
     U = Simplex[T][infos[e_type[T]].faces[i][0]];
@@ -751,7 +751,7 @@ else if (n == 3) {
         u[k] = Vertex[V0][k] - Vertex[U][k];
         v[k] = Vertex[V1][k] - Vertex[U][k];
     } //next k
-    A = 0.5 * norm_2(Cross_Product(v, u));
+    A = 0.5 * norm2(crossProduct(v, u));
 }
 else {
     A = 0.0;
@@ -767,7 +767,7 @@ else {
                 u[m] = Vertex[V0][m] - Vertex[U][m];
                 v[m] = Vertex[V1][m] - Vertex[U][m];
             } //next m
-            a += 0.5 * norm_2(Cross_Product(v, u));
+            a += 0.5 * norm2(crossProduct(v, u));
             k++;
             l = (l+1)%n;
         } //next k
@@ -826,7 +826,7 @@ n = infos[e_type[T]].faces[i].size();
 if (n == 2) {
     V0 = Simplex[T][infos[e_type[T]].faces[i][0]];
     V1 = Simplex[T][infos[e_type[T]].faces[i][1]];
-    A = norm_2(V[V0] - V[V1]);
+    A = norm2(V[V0] - V[V1]);
 }
 else if (n == 3) {
     U = Simplex[T][infos[e_type[T]].faces[i][0]];
@@ -836,7 +836,7 @@ else if (n == 3) {
         u[k] = V[V0][k] - V[U][k];
         v[k] = V[V1][k] - V[U][k];
     } //next k
-    A = 0.5 * norm_2(Cross_Product(v, u));
+    A = 0.5 * norm2(crossProduct(v, u));
 }
 else {
     A = 0.0;
@@ -852,7 +852,7 @@ else {
                 u[k] = V[V0][m] - V[U][m];
                 v[k] = V[V1][m] - V[U][m];
             } //next m
-            a += 0.5 * norm_2(Cross_Product(v, u));
+            a += 0.5 * norm2(crossProduct(v, u));
             k++;
             l = (l+1)%n;
         } //next k
@@ -1088,8 +1088,8 @@ else if (n == 2) {
     V1 = Simplex[T][infos[e_type[T]].faces[i][1]];
     u = Vertex[V1] - Vertex[V0];
     v[0] = 0.0;    v[1] = 0.0;    v[2] = 1.0;
-    w = Cross_Product(u, v);
-    N = w/norm_2(w);
+    w = crossProduct(u, v);
+    N = w/norm2(w);
 }
 else if (n == 3) {
     U = Simplex[T][infos[e_type[T]].faces[i][0]];
@@ -1097,8 +1097,8 @@ else if (n == 3) {
     V1 = Simplex[T][infos[e_type[T]].faces[i][2]];
     u = Vertex[V0] - Vertex[U];
     v = Vertex[V1] - Vertex[U];
-    t = Cross_Product(u, v);
-    N = t/norm_2(t);
+    t = crossProduct(u, v);
+    N = t/norm2(t);
 }
 else {
     for (j = 0; j < n; ++j) {
@@ -1111,8 +1111,8 @@ else {
             V1 = Simplex[T][infos[e_type[T]].faces[i][(l+1)%n]];
             u = Vertex[V0] - Vertex[U];
             v = Vertex[V1] - Vertex[U];
-            w = Cross_Product(u, v);
-            t = t + w/norm_2(w);
+            w = crossProduct(u, v);
+            t = t + w/norm2(w);
             k++;
         } //next k
         t = t/((double) (n-2));
@@ -1120,7 +1120,7 @@ else {
             N[k] += t[k];
         } //next k
     } //next j
-    N = N/norm_2(N);
+    N = N/norm2(N);
 }
 
 return(N); };
@@ -1176,8 +1176,8 @@ else if (n == 2) {
     V1 = Simplex[T][infos[e_type[T]].faces[i][1]];
     u = V[V1] - V[V0];
     v[0] = 0.0;    v[1] = 0.0;    v[2] = 1.0;
-    w = Cross_Product(u, v);
-    N = w/norm_2(w);
+    w = crossProduct(u, v);
+    N = w/norm2(w);
 }
 else if (n == 3) {
     U = Simplex[T][infos[e_type[T]].faces[i][0]];
@@ -1185,8 +1185,8 @@ else if (n == 3) {
     V1 = Simplex[T][infos[e_type[T]].faces[i][2]];
     u = V[V0] - V[U];
     v = V[V1] - V[U];
-    t = Cross_Product(u, v);
-    N = t/norm_2(t);
+    t = crossProduct(u, v);
+    N = t/norm2(t);
 }
 else {
     for (j = 0; j < n; ++j) {
@@ -1199,8 +1199,8 @@ else {
             V1 = Simplex[T][infos[e_type[T]].faces[i][(l+1)%n]];
             u = V[V0] - V[U];
             v = V[V1] - V[U];
-            w = Cross_Product(u, v);
-            t = t + w/norm_2(w);
+            w = crossProduct(u, v);
+            t = t + w/norm2(w);
             k++;
         } //next k
         t = t/((double) (n-2));
@@ -1208,7 +1208,7 @@ else {
             N[k] += t[k];
         } //next k
     } //next j
-    N = N/norm_2(N);
+    N = N/norm2(N);
 }
 
 return(N); };
@@ -1256,25 +1256,25 @@ return(N); };
 
         label_tria: {
 //         if (dim == 2) {
-//             V = 0.5*abs(Cross_Product(Vertex[Simplex[T][2]] - Vertex[Simplex[T][1]],
+//             V = 0.5*abs(crossProduct(Vertex[Simplex[T][2]] - Vertex[Simplex[T][1]],
 //                                       Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]]));
 //         }
 //         else if (dim == 3) {
-//             V = 0.5*norm_2(Cross_Product(Vertex[Simplex[T][2]] - Vertex[Simplex[T][1]],
+//             V = 0.5*norm2(crossProduct(Vertex[Simplex[T][2]] - Vertex[Simplex[T][1]],
 //                                          Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]]), dim);
 //         }
         }
         label_quad: {
 //         if (dim == 2) {
-//             V = 0.5*abs(Cross_Product(Vertex[Simplex[T][3]] - Vertex[Simplex[T][2]],
+//             V = 0.5*abs(crossProduct(Vertex[Simplex[T][3]] - Vertex[Simplex[T][2]],
 //                                       Vertex[Simplex[T][2]] - Vertex[Simplex[T][0]]))
-//               + 0.5*abs(Cross_Product(Vertex[Simplex[T][2]] - Vertex[Simplex[T][1]],
+//               + 0.5*abs(crossProduct(Vertex[Simplex[T][2]] - Vertex[Simplex[T][1]],
 //                                       Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]]));
 //         }
 //         else if (dim == 3) {
-//             V = 0.5*norm_2(Cross_Product(Vertex[Simplex[T][3]] - Vertex[Simplex[T][2]],
+//             V = 0.5*norm2(crossProduct(Vertex[Simplex[T][3]] - Vertex[Simplex[T][2]],
 //                                          Vertex[Simplex[T][2]] - Vertex[Simplex[T][0]]), 3)
-//               + 0.5*norm_2(Cross_Product(Vertex[Simplex[T][2]] - Vertex[Simplex[T][1]],
+//               + 0.5*norm2(crossProduct(Vertex[Simplex[T][2]] - Vertex[Simplex[T][1]],
 //                                          Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]]), 3);
 //         }
         }
@@ -1283,8 +1283,8 @@ return(N); };
 //             V = 0.0;
 //         }
 //         else if (dim == 3) {
-//             V = 1.0/6.0 * abs(Dot_Product(Vertex[Simplex[T][0]] - Vertex[Simplex[T][3]],
-//                                           Cross_Product(Vertex[Simplex[T][1]] - Vertex[Simplex[T][3]],
+//             V = 1.0/6.0 * abs(dotProduct(Vertex[Simplex[T][0]] - Vertex[Simplex[T][3]],
+//                                           crossProduct(Vertex[Simplex[T][1]] - Vertex[Simplex[T][3]],
 //                                                         Vertex[Simplex[T][2]] - Vertex[Simplex[T][3]]), dim));
 //         }
         }
@@ -1345,25 +1345,25 @@ return(N); };
 
         label_tria: {
 //         if (dim == 2) {
-//             V = 0.5*abs(Cross_Product(Vertex[Simplex[T][2]] - Vertex[Simplex[T][1]],
+//             V = 0.5*abs(crossProduct(Vertex[Simplex[T][2]] - Vertex[Simplex[T][1]],
 //                                       Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]]));
 //         }
 //         else if (dim == 3) {
-//             V = 0.5*norm_2(Cross_Product(Vertex[Simplex[T][2]] - Vertex[Simplex[T][1]],
+//             V = 0.5*norm2(crossProduct(Vertex[Simplex[T][2]] - Vertex[Simplex[T][1]],
 //                                          Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]]), dim);
 //         }
         }
         label_quad: {
 //         if (dim == 2) {
-//             V = 0.5*abs(Cross_Product(Vertex[Simplex[T][3]] - Vertex[Simplex[T][2]],
+//             V = 0.5*abs(crossProduct(Vertex[Simplex[T][3]] - Vertex[Simplex[T][2]],
 //                                       Vertex[Simplex[T][2]] - Vertex[Simplex[T][0]]))
-//               + 0.5*abs(Cross_Product(Vertex[Simplex[T][2]] - Vertex[Simplex[T][1]],
+//               + 0.5*abs(crossProduct(Vertex[Simplex[T][2]] - Vertex[Simplex[T][1]],
 //                                       Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]]));
 //         }
 //         else if (dim == 3) {
-//             V = 0.5*norm_2(Cross_Product(Vertex[Simplex[T][3]] - Vertex[Simplex[T][2]],
+//             V = 0.5*norm2(crossProduct(Vertex[Simplex[T][3]] - Vertex[Simplex[T][2]],
 //                                          Vertex[Simplex[T][2]] - Vertex[Simplex[T][0]]), 3)
-//               + 0.5*norm_2(Cross_Product(Vertex[Simplex[T][2]] - Vertex[Simplex[T][1]],
+//               + 0.5*norm2(crossProduct(Vertex[Simplex[T][2]] - Vertex[Simplex[T][1]],
 //                                          Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]]), 3);
 //         }
         }
@@ -1372,8 +1372,8 @@ return(N); };
 //             V = 0.0;
 //         }
 //         else if (dim == 3) {
-//             V = 1.0/6.0 * abs(Dot_Product(Vertex[Simplex[T][0]] - Vertex[Simplex[T][3]],
-//                                           Cross_Product(Vertex[Simplex[T][1]] - Vertex[Simplex[T][3]],
+//             V = 1.0/6.0 * abs(dotProduct(Vertex[Simplex[T][0]] - Vertex[Simplex[T][3]],
+//                                           crossProduct(Vertex[Simplex[T][1]] - Vertex[Simplex[T][3]],
 //                                                         Vertex[Simplex[T][2]] - Vertex[Simplex[T][3]]), dim));
 //         }
         }

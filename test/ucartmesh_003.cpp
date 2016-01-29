@@ -80,18 +80,18 @@ void Demo_Class_UCartMesh2D(
         ylim[0] = 0.0;  ylim[1] = 1.0;
         Mesh1.SetMesh(xlim, ylim, nx, ny);
         Mesh2 = Mesh1;
-        Mesh2.Export_vtr("original.vtr");
+        // TODO VTK output
 
         // Scale mesh ----------------------------------------------------------- //
         dvector1D       scale(2, 2.0);
         Mesh2.Scale(scale);
-        Mesh2.Export_vtr("scaled.vtr");
+        // TODO VTK output
 
         // Translate mesh ------------------------------------------------------- //
         dvector1D       transl(2, 0.0);
         transl[0] = -0.507;    transl[1] = -0.523;
         Mesh2.Translate(transl);
-        Mesh2.Export_vtr("translated.vtr");    
+        // TODO VTK output
 
     }
 
@@ -133,10 +133,7 @@ void Demo_Class_UCartMesh2D(
         } //next i
 
         // Export vectorial data ------------------------------------------------ //
-        Mesh1.Export_CellData_vtr("original_CSdata.vtr" , "scalar_field" , Scalar1);
-        Mesh2.Export_CellData_vtr("mapped_CSdata.vtr" , "scalar_field" , Scalar2);
-        Mesh1.Export_CellData_vtr("original_CVdata.vtr" , "vectorial_field" , Vectorial1);
-        Mesh2.Export_CellData_vtr("mapped_CVdata.vtr" , "vectorial_field" , Vectorial2);
+        // TODO VTK output
 
     }
 
@@ -178,10 +175,7 @@ void Demo_Class_UCartMesh2D(
         } //next i
 
         // Export vectorial data ------------------------------------------------ //
-        Mesh1.Export_PointData_vtr("original_PSdata.vtr" , "scalar_field" , Scalar1);
-        Mesh2.Export_PointData_vtr("mapped_PSdata.vtr" , "scalar_field" , Scalar2);
-        Mesh1.Export_PointData_vtr("original_PVdata.vtr" , "vectorial_field" , Vectorial1);
-        Mesh2.Export_PointData_vtr("mapped_PVdata.vtr" , "vectorial_field" , Vectorial2);
+        // TODO VTK output
 
     }
 

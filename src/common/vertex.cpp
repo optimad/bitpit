@@ -131,7 +131,7 @@ const std::array<double, 3> & Vertex::get_coords() const
 	\param[in] vertex is the vertex to be streamed
 	\result updated output stream
 */
-obinarystream& operator<<(obinarystream &out_stream, const Vertex &vertex)
+bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &out_stream, const Vertex &vertex)
 {
 	out_stream << vertex[0]
 		     << vertex[1]
@@ -148,7 +148,7 @@ obinarystream& operator<<(obinarystream &out_stream, const Vertex &vertex)
 	\param[in] vertex is the vertex to be streamed
 	\result updated output stream
 */
-ibinarystream& operator>>(ibinarystream &in_stream, Vertex &vertex)
+bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &in_stream, Vertex &vertex)
 {
 	in_stream >> vertex[0];
 	in_stream >> vertex[1];

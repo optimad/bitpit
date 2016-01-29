@@ -8,10 +8,10 @@
 #include "interface.hpp"
 #include "vertex.hpp"
 
-#include "positionalPiercedVector.tpp"
+#include "positionalbitpit::PiercedVector.tpp"
 
-extern template class PositionalPiercedVector<Cell>;
-extern template class PositionalPiercedVector<Interface>;
-extern template class PositionalPiercedVector<Vertex>;
+extern template class Positionalbitpit::PiercedVector<Cell>;
+extern template class Positionalbitpit::PiercedVector<Interface>;
+extern template class Positionalbitpit::PiercedVector<Vertex>;
 
 #endif

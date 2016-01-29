@@ -8,29 +8,9 @@ project("BitP_Mesh")
 #------------------------------------------------------------------------------------#
 # Variables visible to the user
 #------------------------------------------------------------------------------------#
-if (DEFINED BITPIT_DIR)
-	set(FIRST_BITPIT_DIR_INITIALIZATION 0)
-else()
-	set(FIRST_BITPIT_DIR_INITIALIZATION 1)
-endif()
-
-set(BITPIT_DIR "/opt/bitpit" CACHE PATH "The directory containing the BITPIT libraries")
-if (${CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT})
-	set(CMAKE_INSTALL_PREFIX "${BITPIT_DIR}/${CMAKE_PROJECT_NAME}" CACHE PATH "Install path prefix, prepended onto install directories." FORCE)
-endif()
-
-if (${FIRST_BITPIT_DIR_INITIALIZATION})
-	return()
-else()
-	if (NOT EXISTS ${BITPIT_DIR})
-		set(errorMessage "REQUIRED DIRECTORY NOT FOUND\n We could not find the BITPIT directory. You need to adjust CMake configuration in order to continue building ${CMAKE_PROJECT_NAME}.")
-		message(FATAL_ERROR "${errorMessage}")
-	endif()
-endif()
-
 set(ONLY_PABLO 0 CACHE BOOL "If set, pablo is compiled stand alone")
 
-set(BITPIT_FIND_MODULE_DIR "/opt/bitpit/BitPit/cmake/Modules" CACHE PATH "Directory where the CMake find module of BitPit is located")
+set(BITPIT_FIND_MODULE_DIR "/opt/bitpit/bitpit/cmake/Modules" CACHE PATH "Directory where the CMake find module of bitpit is located")
 set(ENABLE_PROFILING 0 CACHE BOOL "Set appropriate compiler flags to enable profiling")
 set(VERBOSE_MAKE 0 CACHE BOOL "Set appropriate compiler and cmake flags to enable verbose output from compilation")
 
@@ -48,15 +28,14 @@ set(STATIC 1 CACHE BOOL INTERNAL "If set, the program is linked using static lib
 #------------------------------------------------------------------------------------#
 # External dependencies
 #------------------------------------------------------------------------------------#
-set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_CURRENT_SOURCE_DIR}/cmake;${BITPIT_FIND_MODULE_DIR}")
-
 if (ENABLE_MPI)
 	find_package(MPI)
 endif()
 
 if (NOT ONLY_PABLO)
-find_package(BITP_BASE REQUIRED)
-include_directories(${BITP_BASE_INCLUDE_DIRS})
+find_package(BITPIT REQUIRED NO_MODULE)
+include(${BITPIT_USE_FILE})
+
 find_package(VTK 6.0 REQUIRED COMPONENTS vtkIOXML vtkIOLegacy NO_MODULE)
 include(${VTK_USE_FILE})
 endif()

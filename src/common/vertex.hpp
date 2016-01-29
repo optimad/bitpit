@@ -9,7 +9,7 @@
 #include <array>
 #include <memory>
 
-#include "binary_stream.hpp"
+#include <bitpit_containers.hpp>
 
 /*!
 	\ingroup Common
@@ -18,13 +18,13 @@
 
 class Vertex;
 
-obinarystream& operator<<(obinarystream &out, const Vertex &vertex);
-ibinarystream& operator>>(ibinarystream &in, Vertex &vertex);
+bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &out, const Vertex &vertex);
+bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &in, Vertex &vertex);
 
 class Vertex {
 
-friend obinarystream& operator<<(obinarystream&, const Vertex &);
-friend ibinarystream& operator>>(ibinarystream&, Vertex &);
+friend bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream&, const Vertex &);
+friend bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream&, Vertex &);
 
 public:
 	enum Coordinate {

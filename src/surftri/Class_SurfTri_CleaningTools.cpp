@@ -282,14 +282,14 @@ int        i, j, m, I_;
 // ========================================================================== //
 
 // Initialize value
-toll =  1.0e-1*norm_2(Vertex[Simplex[0][1]] - Vertex[Simplex[0][0]]);
+toll =  1.0e-1*norm2(Vertex[Simplex[0][1]] - Vertex[Simplex[0][0]]);
 
 // Loop over simplicies
 for (I_ = 0; I_ < nSimplex; I_++) {
     m = Simplex[I_].size();
     for (i = 0; i < m; i++) {
         j = ((i + 1) % Simplex[I_].size());
-        length = norm_2(Vertex[Simplex[I_][i]] - Vertex[Simplex[I_][j]]);
+        length = norm2(Vertex[Simplex[I_][i]] - Vertex[Simplex[I_][j]]);
         toll = min(toll, 1.0e-1 * length);
     } // next i
 } // next I_
@@ -333,14 +333,14 @@ int        i, j, I_, m;
 // ========================================================================== //
 
 // Initialize value
-toll =  1.0e-1*norm_2(X[Simplex[0][1]] - X[Simplex[0][0]]);
+toll =  1.0e-1*norm2(X[Simplex[0][1]] - X[Simplex[0][0]]);
 
 // Loop over simplicies
 for (I_ = 0; I_ < nSimplex; I_++) {
     m = Simplex[I_].size();
     for (i = 0; i < m; i++) {
         j = ((i + 1) % m);
-        length = norm_2(X[Simplex[I_][i]] - X[Simplex[I_][j]]);
+        length = norm2(X[Simplex[I_][i]] - X[Simplex[I_][j]]);
         toll = min(toll, 1.0e-1 * length);
     } // next i
 } //next I_
@@ -412,10 +412,10 @@ for (I_ = 0; I_ < nSimplex; I_++){
 
         // normal direction based on vertex numbering
         z = Vertex[Simplex[I_][1]] - Vertex[Simplex[I_][0]];
-        z = z/norm_2(z);
+        z = z/norm2(z);
 
         // Fix node numbering
-        if (Dot_Product(z, Normal[I_]) < 0.0) {
+        if (dotProduct(z, Normal[I_]) < 0.0) {
             invert_loc_num(I_);
         }
     }
@@ -426,13 +426,13 @@ for (I_ = 0; I_ < nSimplex; I_++){
         // normal vector based on vertex numbering
         x = Vertex[Simplex[I_][1]] - Vertex[Simplex[I_][0]];
         y = Vertex[Simplex[I_][2]] - Vertex[Simplex[I_][1]];
-        x = x/norm_2(x);
-        y = y/norm_2(y);
-        z = Cross_Product(x, y);
-        z = z/norm_2(z);
+        x = x/norm2(x);
+        y = y/norm2(y);
+        z = crossProduct(x, y);
+        z = z/norm2(z);
 
         // Fix node numbering
-        if (Dot_Product(z, Normal[I_]) < 0.0) {
+        if (dotProduct(z, Normal[I_]) < 0.0) {
             invert_loc_num(I_);
         }
     }
@@ -503,10 +503,10 @@ for (I_ = 0; I_ < nSimplex; I_++){
 
         // normal direction based on vertex numbering
         z = X[Simplex[I_][1]] - X[Simplex[I_][0]];
-        z = z/norm_2(z);
+        z = z/norm2(z);
 
         // Adjust node numbering
-        if (Dot_Product(z, Normal[I_]) < 0.0) {
+        if (dotProduct(z, Normal[I_]) < 0.0) {
             invert_loc_num(I_);
         }
     }
@@ -517,13 +517,13 @@ for (I_ = 0; I_ < nSimplex; I_++){
         // normal vector based on vertex numbering
         x = X[Simplex[I_][1]] - X[Simplex[I_][0]];
         y = X[Simplex[I_][2]] - X[Simplex[I_][1]];
-        x = x/norm_2(x);
-        y = y/norm_2(y);
-        z = Cross_Product(x, y);
-        z = z/norm_2(z);
+        x = x/norm2(x);
+        y = y/norm2(y);
+        z = crossProduct(x, y);
+        z = z/norm2(z);
 
         // Fix node numbering
-        if (Dot_Product(z, Normal[I_]) < 0.0) {
+        if (dotProduct(z, Normal[I_]) < 0.0) {
             invert_loc_num(I_);
         }
     }
@@ -559,7 +559,7 @@ void Class_SurfTri::FixNodeNumb(
 // Local variables
 bvector1D             flag(nSimplex, false);
 int                   m, n, p;
-LIFOstack<int>        stack(sqrt(nSimplex));
+bitpit::LIFOStack<int>        stack(sqrt(nSimplex));
 
 // Counters
 int                   I_, i, j, e, J;
@@ -752,9 +752,9 @@ for (I_ = 0; I_ < nSimplex; I_++) {
         // Triangle --------------------------------------------------------- //
         x = Vertex[Simplex[I_][1]] - Vertex[Simplex[I_][0]];
         y = Vertex[Simplex[I_][2]] - Vertex[Simplex[I_][0]];
-        x = x/norm_2(x);
-        y = y/norm_2(y);
-        z = Cross_Product(x, y);
+        x = x/norm2(x);
+        y = y/norm2(y);
+        z = crossProduct(x, y);
 
     }
     else {
@@ -774,16 +774,16 @@ for (I_ = 0; I_ < nSimplex; I_++) {
             k = (j+1) % m;
             x = Vertex[Simplex[I_][j]] - Vertex[Simplex[I_][i]];
             y = Vertex[Simplex[I_][k]] - Vertex[Simplex[I_][i]];
-            x = x/norm_2(x);
-            y = y/norm_2(y);
-            t = Cross_Product(x, y);
-            t = t/norm_2(t);
+            x = x/norm2(x);
+            y = y/norm2(y);
+            t = crossProduct(x, y);
+            t = t/norm2(t);
             z = z + t/((double) m);
         } //next i
     }
 
     // Set normal
-    Normal[I_] = z/norm_2(z);
+    Normal[I_] = z/norm2(z);
 
 } //next I_
 
@@ -860,9 +860,9 @@ void Class_SurfTri::GenerateNormals(
             // Triangle --------------------------------------------------------- //
             x = X[Simplex[I_][1]] - X[Simplex[I_][0]];
             y = X[Simplex[I_][2]] - X[Simplex[I_][1]];
-            x = x/norm_2(x);
-            y = y/norm_2(y);
-            z = Cross_Product(x, y);
+            x = x/norm2(x);
+            y = y/norm2(y);
+            z = crossProduct(x, y);
 
         }
         else {
@@ -882,16 +882,16 @@ void Class_SurfTri::GenerateNormals(
                 k = (j+1) % m;
                 x = X[Simplex[I_][j]] - X[Simplex[I_][i]];
                 y = X[Simplex[I_][k]] - X[Simplex[I_][i]];
-                x = x/norm_2(x);
-                y = y/norm_2(y);
-                t = Cross_Product(x, y);
-                t = t/norm_2(t);
+                x = x/norm2(x);
+                y = y/norm2(y);
+                t = crossProduct(x, y);
+                t = t/norm2(t);
                 z = z + t/((double) m);
             } //next i
         }
 
         // Set normal
-        Normal[I_] = z/norm_2(z);
+        Normal[I_] = z/norm2(z);
 
     }
 
@@ -966,7 +966,7 @@ void Class_SurfTri::GenerateENormals(
 
     // Normalization
     for (T = 0; T < nE; T++) {
-        ENormal[T] = ENormal[T]/norm_2(ENormal[T]);
+        ENormal[T] = ENormal[T]/norm2(ENormal[T]);
     }
 
     return; }
@@ -1039,7 +1039,7 @@ void Class_SurfTri::GenerateENormals(
 
         // Normalization
         for (T = 0; T < nE; T++) {
-            ENormal[T] = ENormal[T]/norm_2(ENormal[T]);
+            ENormal[T] = ENormal[T]/norm2(ENormal[T]);
         }
 
         return; }
@@ -1143,7 +1143,7 @@ void Class_SurfTri::GenerateENormals(
 
             // Normalization ------------------------------------------------------------ //
             for (T = 0; T < nVertex; T++) {
-                VNormal[T] = VNormal[T]/max(1.0e-16, norm_2(VNormal[T]));
+                VNormal[T] = VNormal[T]/max(1.0e-16, norm2(VNormal[T]));
             } //next T
 
             return; };
@@ -1254,7 +1254,7 @@ void Class_SurfTri::GenerateVNormals(
 
     // Normalization ------------------------------------------------------------ //
     for (T = 0; T < nV; T++) {
-        VNormal[T] = VNormal[T]/norm_2(VNormal[T]);
+        VNormal[T] = VNormal[T]/norm2(VNormal[T]);
     } //next T
 
     return; };
@@ -2848,10 +2848,10 @@ ivector1D Class_SurfTri::FindDoubleVertex(
     //ht 
     //ht             // Scope variables
     //ht             ivector1D    list;
-    //ht             kdtree<2, array<double>, int>     kd(m);
+    //ht             bitpit::KdTree<2, array<double>, int>     kd(m);
     //ht 
     //ht             // Randomize vertex insertion
-    //ht             Extract_wo_Repl(m, m-1, list);
+    //ht             bitpit::utils::extractWithoutReplacement(m, m-1, list);
     //ht             for (I_ = 0; I_ < m; I_++) {
     //ht                 S = cell[C][list[I_]][0];
     //ht                 i = cell[C][list[I_]][1];
@@ -2877,10 +2877,10 @@ ivector1D Class_SurfTri::FindDoubleVertex(
     //ht 
     //ht             // Scope variables
     //ht             ivector1D    list;
-    //ht             kdtree<3, double, int>     kd(m);
+    //ht             bitpit::KdTree<3, double, int>     kd(m);
     //ht 
     //ht             // Randomize vertex insertion
-    //ht             Extract_wo_Repl(m, m-1, list);
+    //ht             bitpit::utils::extractWithoutReplacement(m, m-1, list);
     //ht             for (I_ = 0; I_ < m; I_++) {
     //ht                 S = cell[C][list[I_]][0];
     //ht                 i = cell[C][list[I_]][1];
@@ -2906,10 +2906,10 @@ ivector1D Class_SurfTri::FindDoubleVertex(
 
             // Scope variables
             ivector1D    list;
-            kdtree<3, array<double,3>, int>     kd(m);
+            bitpit::KdTree<3, array<double,3>, int>     kd(m);
 
             // Randomize vertex insertion
-            Extract_wo_Repl(m, m-1, list);
+            bitpit::utils::extractWithoutReplacement(m, m-1, list);
             for (I_ = 0; I_ < m; I_++) {
                 S = cell[C][list[I_]][0];
                 i = cell[C][list[I_]][1];
@@ -3018,10 +3018,10 @@ ivector1D Class_SurfTri::FindDoubleVertex(
     //ht 
     //ht             // Scope variables
     //ht             ivector1D    list;
-    //ht             kdtree<2, double, int>     kd(m);
+    //ht             bitpit::KdTree<2, double, int>     kd(m);
     //ht 
     //ht             // Randomize vertex insertion
-    //ht             Extract_wo_Repl(m, m-1, list);
+    //ht             bitpit::utils::extractWithoutReplacement(m, m-1, list);
     //ht             for (I_ = 0; I_ < m; I_++) {
     //ht                 S = cell[C][list[I_]][0];
     //ht                 i = cell[C][list[I_]][1];
@@ -3047,10 +3047,10 @@ ivector1D Class_SurfTri::FindDoubleVertex(
     //ht 
     //ht             // Scope variables
     //ht             ivector1D    list;
-    //ht             kdtree<3, double, int>     kd(m);
+    //ht             bitpit::KdTree<3, double, int>     kd(m);
     //ht 
     //ht             // Randomize vertex insertion
-    //ht             Extract_wo_Repl(m, m-1, list);
+    //ht             bitpit::utils::extractWithoutReplacement(m, m-1, list);
     //ht             for (I_ = 0; I_ < m; I_++) {
     //ht                 S = cell[C][list[I_]][0];
     //ht                 i = cell[C][list[I_]][1];
@@ -3076,10 +3076,10 @@ ivector1D Class_SurfTri::FindDoubleVertex(
 
             // Scope variables
             ivector1D    list;
-            kdtree<3, array<double,3>, int>     kd(m);
+            bitpit::KdTree<3, array<double,3>, int>     kd(m);
 
             // Randomize vertex insertion
-            Extract_wo_Repl(m, m-1, list);
+            bitpit::utils::extractWithoutReplacement(m, m-1, list);
             for (I_ = 0; I_ < m; I_++) {
                 S = cell[C][list[I_]][0];
                 i = cell[C][list[I_]][1];
@@ -4208,10 +4208,10 @@ void Class_SurfTri::RemoveVertex(
                     //ht 
                     //ht             // Scope variables
                     //ht             ivector1D    list;
-                    //ht             kdtree<2, double, int>     kd(m);
+                    //ht             bitpit::KdTree<2, double, int>     kd(m);
                     //ht 
                     //ht             // Randomize vertex insertion
-                    //ht             Extract_wo_Repl(m, m-1, list);
+                    //ht             bitpit::utils::extractWithoutReplacement(m, m-1, list);
                     //ht             for (I_ = 0; I_ < m; I_++) {
                     //ht                 S = cell[C][list[I_]][0];
                     //ht                 i = cell[C][list[I_]][1];
@@ -4238,10 +4238,10 @@ void Class_SurfTri::RemoveVertex(
                     //ht 
                     //ht             // Scope variables
                     //ht             ivector1D    list;
-                    //ht             kdtree<3, double, int>     kd(m);
+                    //ht             bitpit::KdTree<3, double, int>     kd(m);
                     //ht 
                     //ht             // Randomize vertex insertion
-                    //ht             Extract_wo_Repl(m, m-1, list);
+                    //ht             bitpit::utils::extractWithoutReplacement(m, m-1, list);
                     //ht             for (I_ = 0; I_ < m; I_++) {
                     //ht                 S = cell[C][list[I_]][0];
                     //ht                 i = cell[C][list[I_]][1];
@@ -4268,10 +4268,10 @@ void Class_SurfTri::RemoveVertex(
 
                             // Scope variables
                             ivector1D    list;
-                            kdtree<3, array<double,3>, int>     kd(m);
+                            bitpit::KdTree<3, array<double,3>, int>     kd(m);
 
                             // Randomize vertex insertion
-                            Extract_wo_Repl(m, m-1, list);
+                            bitpit::utils::extractWithoutReplacement(m, m-1, list);
                             for (I_ = 0; I_ < m; I_++) {
                                 S = cell[C][list[I_]][0];
                                 i = cell[C][list[I_]][1];
@@ -4380,10 +4380,10 @@ void Class_SurfTri::CollapseDoubleVertex(
     //ht 
     //ht             // Scope variables
     //ht             ivector1D    list;
-    //ht             kdtree<2, double, int>     kd(m);
+    //ht             bitpit::KdTree<2, double, int>     kd(m);
     //ht 
     //ht             // Randomize vertex insertion
-    //ht             Extract_wo_Repl(m, m-1, list);
+    //ht             bitpit::utils::extractWithoutReplacement(m, m-1, list);
     //ht             for (I_ = 0; I_ < m; I_++) {
     //ht                 S = cell[C][list[I_]][0];
     //ht                 i = cell[C][list[I_]][1];
@@ -4406,10 +4406,10 @@ void Class_SurfTri::CollapseDoubleVertex(
     //ht 
     //ht             // Scope variables
     //ht             ivector1D    list;
-    //ht             kdtree<3, double, int>     kd(m);
+    //ht             bitpit::KdTree<3, double, int>     kd(m);
     //ht 
     //ht             // Randomize vertex insertion
-    //ht             Extract_wo_Repl(m, m-1, list);
+    //ht             bitpit::utils::extractWithoutReplacement(m, m-1, list);
     //ht             for (I_ = 0; I_ < m; I_++) {
     //ht                 S = cell[C][list[I_]][0];
     //ht                 i = cell[C][list[I_]][1];
@@ -4436,10 +4436,10 @@ void Class_SurfTri::CollapseDoubleVertex(
 
             // Scope variables
             ivector1D    list;
-            kdtree<3, array<double,3>, int>     kd(m);
+            bitpit::KdTree<3, array<double,3>, int>     kd(m);
 
             // Randomize vertex insertion
-            Extract_wo_Repl(m, m-1, list);
+            bitpit::utils::extractWithoutReplacement(m, m-1, list);
             for (I_ = 0; I_ < m; I_++) {
                 S = cell[C][list[I_]][0];
                 i = cell[C][list[I_]][1];

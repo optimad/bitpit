@@ -4,8 +4,8 @@
 
 #include "cell.hpp"
 #include "interface.hpp"
-#include "utils.hpp"
 
+#include <bitpit_common.hpp>
 #include<iostream>
 
 /*!
@@ -87,7 +87,7 @@ bool Cell::is_interior() const
 */
 void Cell::initialize_interfaces(std::vector<std::vector<long>> &interfaces)
 {
-	m_interfaces = CollapsedVector2D<long>(interfaces);
+	m_interfaces = bitpit::CollapsedVector2D<long>(interfaces);
 }
 
 /*!
@@ -98,7 +98,7 @@ void Cell::initialize_interfaces(std::vector<std::vector<long>> &interfaces)
 */
 void Cell::initialize_empty_interfaces(const std::vector<int> interfaceCount)
 {
-	m_interfaces = CollapsedVector2D<long>(interfaceCount, NULL_ELEMENT_ID);
+	m_interfaces = bitpit::CollapsedVector2D<long>(interfaceCount, NULL_ELEMENT_ID);
 }
 
 /*!
@@ -274,7 +274,7 @@ void Cell::display(std::ostream &out, unsigned short int indent)
 	\param[in] cell is the cell object
 	\result Returns the same input stream received in input.
 */
-ibinarystream& operator>>(ibinarystream &buffer, Cell &cell)
+bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, Cell &cell)
 {
 	// Write connectivity data ---------------------------------------------- //
 	Element &element_(cell);
@@ -294,7 +294,7 @@ ibinarystream& operator>>(ibinarystream &buffer, Cell &cell)
 	\param[in] cell is the cell object
 	\result Returns the same output stream received in input.
 */
-obinarystream& operator<<(obinarystream  &buffer, const Cell &cell)
+bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const Cell &cell)
 {
 	// Write connectivity data ---------------------------------------------- //
 	const Element &element(cell);

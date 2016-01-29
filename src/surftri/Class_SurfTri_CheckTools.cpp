@@ -269,14 +269,14 @@ int            j, k, m;
 // ========================================================================== //
 // COMPUTE MIN EDGE                                                           //
 // ========================================================================== //
-edge = norm_2(Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]]);
+edge = norm2(Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]]);
 i = 0;
 m = Simplex[T].size();
 for (j = 1; j < m; j++) {
     k = (j + 1) % m;
 
     // Edge length
-    length = norm_2(Vertex[Simplex[T][k]] - Vertex[Simplex[T][j]]);
+    length = norm2(Vertex[Simplex[T][k]] - Vertex[Simplex[T][j]]);
     if (length < edge) {
         edge = length;
         i = j;
@@ -329,14 +329,14 @@ int            j, k, m;
 // ========================================================================== //
 // COMPUTE MIN EDGE                                                           //
 // ========================================================================== //
-edge = norm_2(V[Simplex[T][1]] - V[Simplex[T][0]]);
+edge = norm2(V[Simplex[T][1]] - V[Simplex[T][0]]);
 i = 0;
 m = Simplex[T].size();
 for (j = 1; j < m; j++) {
     k = (j + 1) % m;
 
     // Edge length
-    length = norm_2(V[Simplex[T][k]] - V[Simplex[T][j]]);
+    length = norm2(V[Simplex[T][k]] - V[Simplex[T][j]]);
     if (length < edge) {
         edge = length;
         i = j;
@@ -497,14 +497,14 @@ int            j, k, m;
 // ========================================================================== //
 // COMPUTE MIN EDGE                                                           //
 // ========================================================================== //
-edge = norm_2(Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]]);
+edge = norm2(Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]]);
 i = 0;
 m = Simplex[T].size();
 for (j = 1; j < m; j++) {
     k = (j + 1) % m;
 
     // Edge length
-    length = norm_2(Vertex[Simplex[T][k]] - Vertex[Simplex[T][j]]);
+    length = norm2(Vertex[Simplex[T][k]] - Vertex[Simplex[T][j]]);
     if (length > edge) {
         edge = length;
         i = j;
@@ -557,14 +557,14 @@ int            j, k, m;
 // ========================================================================== //
 // COMPUTE MIN EDGE                                                           //
 // ========================================================================== //
-edge = norm_2(V[Simplex[T][1]] - V[Simplex[T][0]]);
+edge = norm2(V[Simplex[T][1]] - V[Simplex[T][0]]);
 i = 0;
 m = Simplex[T].size();
 for (j = 1; j < m; j++) {
     k = (j + 1) % m;
 
     // Edge length
-    length = norm_2(V[Simplex[T][k]] - V[Simplex[T][j]]);
+    length = norm2(V[Simplex[T][k]] - V[Simplex[T][j]]);
     if (length > edge) {
         edge = length;
         i = j;
@@ -695,14 +695,14 @@ if (m == 1) {
 else if (m == 2) {
 
     // Segment -------------------------------------------------------------- //
-    A = norm_2(Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]]);
+    A = norm2(Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]]);
 
 }
 
 else if (m == 3) {
 
     // Triangle ------------------------------------------------------------- //
-    A = 0.5 * norm_2(Cross_Product(Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]],
+    A = 0.5 * norm2(crossProduct(Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]],
                                    Vertex[Simplex[T][2]] - Vertex[Simplex[T][0]]));
 }
 
@@ -714,7 +714,7 @@ else {
     A = 0.0;
     for (i = 1; i < m; i++) {
         j = (i+1) % m;
-        A += 0.5 * norm_2(Cross_Product(
+        A += 0.5 * norm2(crossProduct(
                           Vertex[Simplex[T][i]] - Vertex[Simplex[T][0]],
                           Vertex[Simplex[T][j]] - Vertex[Simplex[T][0]]));
     } //next i
@@ -774,7 +774,7 @@ if (m == 1) {
 else if (m == 2) {
 
     // Compute area
-    A = norm_2(V[Simplex[T][1]] - V[Simplex[T][0]]);
+    A = norm2(V[Simplex[T][1]] - V[Simplex[T][0]]);
 
 }
 
@@ -782,7 +782,7 @@ else if (m == 2) {
 else if (m == 3) {
 
     // Compute triangle's area
-    A = 0.5 * norm_2(Cross_Product(V[Simplex[T][1]] - V[Simplex[T][0]],
+    A = 0.5 * norm2(crossProduct(V[Simplex[T][1]] - V[Simplex[T][0]],
                                    V[Simplex[T][2]] - V[Simplex[T][0]]));
 }
 
@@ -793,7 +793,7 @@ else {
     A = 0.0;
     for (i = 1; i < m; i++) {
         j = (i+1) % m;
-        A += 0.5 * norm_2(Cross_Product(
+        A += 0.5 * norm2(crossProduct(
                           V[Simplex[T][i]] - V[Simplex[T][0]],
                           V[Simplex[T][j]] - V[Simplex[T][0]]));
     } //next i
@@ -932,10 +932,10 @@ int          i, j, m = Simplex[T].size();
 // ========================================================================== //
 // COMPUTE AR.                                                                //
 // ========================================================================== //
-min_edge = max_edge = norm_2(Vertex[Simplex[T][0]] - Vertex[Simplex[T][1]]);
+min_edge = max_edge = norm2(Vertex[Simplex[T][0]] - Vertex[Simplex[T][1]]);
 for (i = 1; i < m; i++) {
     j = (i+1) % m;
-    edge = norm_2(Vertex[Simplex[T][i]] - Vertex[Simplex[T][j]]);
+    edge = norm2(Vertex[Simplex[T][i]] - Vertex[Simplex[T][j]]);
     min_edge = min(min_edge, edge);
     max_edge = max(max_edge, edge);
 } //next i
@@ -985,10 +985,10 @@ int          i, j, m = Simplex[T].size();
 // ========================================================================== //
 // COMPUTE AR.                                                                //
 // ========================================================================== //
-min_edge = max_edge = norm_2(V[Simplex[T][0]] - V[Simplex[T][1]]);
+min_edge = max_edge = norm2(V[Simplex[T][0]] - V[Simplex[T][1]]);
 for (i = 1; i < m; i++) {
     j = (i+1) % m;
-    edge = norm_2(V[Simplex[T][i]] - V[Simplex[T][j]]);
+    edge = norm2(V[Simplex[T][i]] - V[Simplex[T][j]]);
     min_edge = min(min_edge, edge);
     max_edge = max(max_edge, edge);
 } //next i
@@ -1136,9 +1136,9 @@ j = (i + 1) % m;
 k = (i - 1  + m) % m;
 v1 = Vertex[Simplex[T][j]] - Vertex[Simplex[T][i]];
 v2 = Vertex[Simplex[T][k]] - Vertex[Simplex[T][i]];
-v1 = v1/norm_2(v1);
-v2 = v2/norm_2(v2);
-angle = acos(max(-1.0, min(1.0, Dot_Product(v1, v2))));
+v1 = v1/norm2(v1);
+v2 = v2/norm2(v2);
+angle = acos(max(-1.0, min(1.0, dotProduct(v1, v2))));
 
 return; };
 
@@ -1191,9 +1191,9 @@ j = (i + 1) % m;
 k = (i - 1  + m) % m;
 v1 = V[Simplex[T][j]] - V[Simplex[T][i]];
 v2 = V[Simplex[T][k]] - V[Simplex[T][i]];
-v1 = v1/norm_2(v1);
-v2 = v2/norm_2(v2);
-angle = acos(max(-1.0, min(1.0, Dot_Product(v1, v2))));
+v1 = v1/norm2(v1);
+v2 = v2/norm2(v2);
+angle = acos(max(-1.0, min(1.0, dotProduct(v1, v2))));
 
 return; };
 
@@ -1986,7 +1986,7 @@ int                 i;
 
     // Edge slope
     n1 = Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]];
-    n1 = n1/norm_2(n1);
+    n1 = n1/norm2(n1);
 
     // Edge mid point
     M1 = Edge_midPoint(T, 0);
@@ -1995,7 +1995,7 @@ int                 i;
 
     // Edge slope
     n2 = Vertex[Simplex[T][2]] - Vertex[Simplex[T][1]];
-    n2 = n2/norm_2(n2);
+    n2 = n2/norm2(n2);
 
     // Edge mid point
     M2 = Edge_midPoint(T, 1);
@@ -2003,12 +2003,12 @@ int                 i;
 // Circumcenter coordinates ---------------------------------------------------------- //
 
     // Triangle's normal
-    n = Cross_Product(n1, n2);
-    n = n/norm_2(n);
+    n = crossProduct(n1, n2);
+    n = n/norm2(n);
 
     // Bisect directions
-    n1 = Cross_Product(n, n1);
-    n2 = Cross_Product(n, n2);
+    n1 = crossProduct(n, n1);
+    n2 = crossProduct(n, n2);
 
     // Intersection point
     P = IntersectLines(n1,M1,n2,M2);
@@ -2059,7 +2059,7 @@ int                 i;
 
     // Slope
     n1 = V[Simplex[T][1]] - V[Simplex[T][0]];
-    n1 = n1/norm_2(n1);
+    n1 = n1/norm2(n1);
 
     // Point
     M1 = Edge_midPoint(V, T, 0);
@@ -2068,7 +2068,7 @@ int                 i;
 
     // Slope
     n2 = V[Simplex[T][2]] - V[Simplex[T][1]];
-    n2 = n2/norm_2(n2);
+    n2 = n2/norm2(n2);
 
     // Point
     M2 = Edge_midPoint(V, T, 1);
@@ -2076,12 +2076,12 @@ int                 i;
 // Circumcenter coordinates ---------------------------------------------------------- //
 
     // Triangle's normal
-    n = Cross_Product(n1, n2);
-    n = n/norm_2(n);
+    n = crossProduct(n1, n2);
+    n = n/norm2(n);
 
     // Bisect directions
-    n1 = Cross_Product(n, n1);
-    n2 = Cross_Product(n, n2);
+    n1 = crossProduct(n, n1);
+    n2 = crossProduct(n, n2);
 
     // Intersection point
     P = IntersectLines(n1,M1,n2,M2);
@@ -2244,11 +2244,11 @@ bool Class_SurfTri::PointsOnSameSide(
     // ========================================================================== //
     // PERFORM CHECK                                                              //
     // ========================================================================== //
-    cp1 = Cross_Product(P1 - A, B - A);
+    cp1 = crossProduct(P1 - A, B - A);
     cp1 = cp1/norm(cp1, 2);
-    cp2 = Cross_Product(P2 - A, B - A);
+    cp2 = crossProduct(P2 - A, B - A);
     cp2 = cp2/norm(cp2, 2);
-    s = Dot_Product(cp1, cp2);
+    s = dotProduct(cp1, cp2);
     flag = (s >= 0.0);
 
     return(flag); };
@@ -2296,15 +2296,15 @@ array<double, 3> Class_SurfTri::IntersectLines(
     // ========================================================================== //
     // COMPUTE INTERSECTION POINT.                                                //
     // ========================================================================== //
-    delta = Dot_Product(n1, n2);
+    delta = dotProduct(n1, n2);
     if (abs((abs(delta) - 1.0)) < 1.0e-12) {
         P[0] = P[1] = P[2] = 1.0e+12;
     }
     else {
         den = (1.0 - pow(delta, 2));
-        xi = (Dot_Product(P2, n1)
-                - Dot_Product(P1, n1)
-                + delta * (Dot_Product(P1, n2) - Dot_Product(P2, n2))) / den;
+        xi = (dotProduct(P2, n1)
+                - dotProduct(P1, n1)
+                + delta * (dotProduct(P1, n2) - dotProduct(P2, n2))) / den;
         P = P1 + xi * n1;
     }
 

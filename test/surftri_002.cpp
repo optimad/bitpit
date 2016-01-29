@@ -116,7 +116,7 @@ void Demo_CleaningTools2(
         for (int T = 0; T < Tri.nSimplex; T++) {
             m = Tri.Simplex[T].size();
             for (int i = 0; i < m; i++) {
-                err += norm_2(Tri.Vertex[Tri.Simplex[T][i]] - Tri2.Vertex[Tri2.Simplex[T][i]]);
+                err += norm2(Tri.Vertex[Tri.Simplex[T][i]] - Tri2.Vertex[Tri2.Simplex[T][i]]);
             } //next i
         } //next T
         cout << "error: " << err << endl;

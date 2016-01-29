@@ -24,12 +24,13 @@
 # include <iostream>
 # include <algorithm>
 
+// bitpit
+# include <bitpit_operators.hpp>
+# include <bitpit_IO.hpp>
+# include <bitpit_SA.hpp>
+# include <bitpit_LA.hpp>
+
 // CC_lib
-# include "Operators.hpp"
-# include "VTK_IOFunct.hpp"
-# include "DGF_IOFunct.hpp"
-# include "SortAlgorithms.hpp"
-# include "LinearAlgebra.hpp"
 # include "Class_SurfTri.hpp"
 
 // ========================================================================== //
@@ -616,11 +617,6 @@ class Class_VolTri {
     void Export_dgf(                                                          // Export volume mesh into .dgf file
         string                                                                // (input) .dgf file name
     );
-
-            // vtk format -------------------------------------------------------------------- //
-            void Export_vtu(string);                              // Export volume mesh in .vtu format
-            void Export_CellData_vtu(string, dvector1D &);        // Export cell data to .vtu format
-            void Export_CellData_vtu(string, ivector1D &);        // Export cell data to .vtu format
 
 };
 

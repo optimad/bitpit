@@ -8,10 +8,10 @@
 #include "patch.hpp"
 #include "utils.hpp"
 
-// Explicit instantiation of the PiercedVectors
-template class PiercedVector<Cell>;
-template class PiercedVector<Interface>;
-template class PiercedVector<Vertex>;
+// Explicit instantiation of the bitpit::PiercedVectors
+template class bitpit::PiercedVector<Cell>;
+template class bitpit::PiercedVector<Interface>;
+template class bitpit::PiercedVector<Vertex>;
 
 namespace pman {
 
@@ -122,7 +122,7 @@ void Patch::reset()
 void Patch::reset_vertices()
 {
 	m_vertices.clear();
-	PiercedVector<Vertex>().swap(m_vertices);
+	bitpit::PiercedVector<Vertex>().swap(m_vertices);
 
 	for (auto &cell : m_cells) {
 		cell.unset_connect();
@@ -135,7 +135,7 @@ void Patch::reset_vertices()
 void Patch::reset_cells()
 {
 	m_cells.clear();
-	PiercedVector<Cell>().swap(m_cells);
+	bitpit::PiercedVector<Cell>().swap(m_cells);
 
 	for (auto &interface : m_interfaces) {
 		interface.unset_neigh();
@@ -149,7 +149,7 @@ void Patch::reset_cells()
 void Patch::reset_interfaces()
 {
 	m_interfaces.clear();
-	PiercedVector<Interface>().swap(m_interfaces);
+	bitpit::PiercedVector<Interface>().swap(m_interfaces);
 
 	for (auto &cell : m_cells) {
 		cell.unset_interfaces();
@@ -456,7 +456,7 @@ long Patch::get_vertex_count() const
 
 	\return The nodes owned by the patch.
 */
-PiercedVector<Vertex> & Patch::vertices()
+bitpit::PiercedVector<Vertex> & Patch::vertices()
 {
 	return m_vertices;
 }
@@ -548,7 +548,7 @@ long Patch::get_cell_count() const
 
 	\return The cells owned by the patch.
 */
-PiercedVector<Cell> & Patch::cells()
+bitpit::PiercedVector<Cell> & Patch::cells()
 {
 	return m_cells;
 }
@@ -583,7 +583,7 @@ const Cell & Patch::get_cell(const long &id) const
 */
 long Patch::create_cell(const long &id, bool internal, ElementInfo::Type type)
 {
-	PiercedVector<Cell>::iterator iterator;
+	bitpit::PiercedVector<Cell>::iterator iterator;
 	if (internal) {
 		iterator = m_cells.reclaim(id);
 	} else {
@@ -638,7 +638,7 @@ std::vector<long> Patch::extract_cell_face_neighs(const long &id) const
 	for (int i = 0; i < cell.get_face_count(); ++i) {
 		std::vector<long> faceNeighs = extract_cell_face_neighs(id, i);
 		for (auto &neighId : faceNeighs) {
-			utils::add_to_ordered_vector<long>(neighId, neighs);
+			bitpit::utils::addToOrderedVector<long>(neighId, neighs);
 		}
 	}
 
@@ -717,7 +717,7 @@ std::vector<long> Patch::extract_cell_face_neighs(const long &id, const int &fac
 		}
 
 		// Add the cell to the negihbour list
-		utils::add_to_ordered_vector<long>(neighId, neighs);
+		bitpit::utils::addToOrderedVector<long>(neighId, neighs);
 	}
 
 	return neighs;
@@ -750,7 +750,7 @@ std::vector<long> Patch::extract_cell_edge_neighs(const long &id, bool complete)
 	const Cell &cell = get_cell(id);
 	for (int i = 0; i < cell.get_edge_count(); ++i) {
 		for (auto &neigh : extract_cell_edge_neighs(id, i, blackList)) {
-			utils::add_to_ordered_vector<long>(neigh, neighs);
+			bitpit::utils::addToOrderedVector<long>(neigh, neighs);
 		}
 	}
 
@@ -804,7 +804,7 @@ std::vector<long> Patch::extract_cell_vertex_neighs(const long &id, bool complet
 	const Cell &cell = get_cell(id);
 	for (int i = 0; i < cell.get_vertex_count(); ++i) {
 		for (auto &neigh : extract_cell_vertex_neighs(id, i, blackList)) {
-			utils::add_to_ordered_vector<long>(neigh, neighs);
+			bitpit::utils::addToOrderedVector<long>(neigh, neighs);
 		}
 	}
 
@@ -922,7 +922,7 @@ std::vector<long> Patch::extract_cell_vertex_neighs(const long &id, const std::v
 			// of cells neighbours.
 			if (nCommonVertices == nVerticesToFound) {
 				if (std::find(blackList.begin(), blackList.end(), neighId) == blackList.end()) {
-					utils::add_to_ordered_vector<long>(neighId, neighs);
+					bitpit::utils::addToOrderedVector<long>(neighId, neighs);
 				}
 				processingQueue.push_back(neighId);
 			}
@@ -950,7 +950,7 @@ long Patch::get_interface_count() const
 
 	\return The interfaces owned by the patch.
 */
-PiercedVector<Interface> & Patch::interfaces()
+bitpit::PiercedVector<Interface> & Patch::interfaces()
 {
 	return m_interfaces;
 }
@@ -984,7 +984,7 @@ const Interface & Patch::get_interface(const long &id) const
 */
 long Patch::create_interface(const long &id, ElementInfo::Type type)
 {
-	PiercedVector<Interface>::iterator iterator = m_interfaces.reclaim(id);
+	bitpit::PiercedVector<Interface>::iterator iterator = m_interfaces.reclaim(id);
 
 	Interface &interface = *iterator;
 	interface.initialize(type);

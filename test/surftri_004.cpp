@@ -78,7 +78,7 @@ void Demo_GenerationTools_3D(
         Tri.Import_stl(stl_name, stl_type);
 
         // Export to vtk format ------------------------------------------------- //
-        Tri.Export_vtu("geom.vtu");
+        // TODO
 
     }
 
@@ -108,7 +108,7 @@ void Demo_GenerationTools_3D(
         Edges.AddSimplicies(Tri.Edge);
 
         // Export edge network to .vtu file
-        Edges.Export_vtu("edges.vtu");
+        // TODO
 
     }
 
@@ -127,7 +127,7 @@ void Demo_GenerationTools_3D(
         Tri.GenerateENormals();
 
         // Export results ------------------------------------------------------- //
-        Edges.ExportVCData_vtu("Enormals.vtu", "n", Tri.ENormal);
+        // TODO
 
     }
 
@@ -146,7 +146,7 @@ void Demo_GenerationTools_3D(
         Tri.GenerateVNormals();
 
         // Export results ------------------------------------------------------- //
-        Tri.ExportVPData_vtu("Vnormals.vtu", "n", Tri.VNormal);
+        // TODO
 
     }
 
@@ -164,8 +164,7 @@ void Demo_GenerationTools_3D(
         Tri2 = Tri;
 
         // Export edge and vertex normals --------------------------------------- //
-        Edges.ExportVCData_vtu("Enormals_copy.vtu", "n", Tri2.ENormal);
-        Tri2.ExportVPData_vtu("Vnormals_copy.vtu", "n", Tri2.VNormal);
+        // TODO
 
     }
 
@@ -191,8 +190,7 @@ void Demo_GenerationTools_3D(
         Tri2.AddVertices(Tri.Vertex);
 
         // Export re-generated edge and vertex normals -------------------------- //
-        Edges.ExportVCData_vtu("Enormals_copy2.vtu", "n", Tri2.ENormal);
-        Tri2.ExportVPData_vtu("Vnormals_copy2.vtu", "n", Tri2.VNormal);
+        // TODO
 
     }
 

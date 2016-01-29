@@ -563,7 +563,7 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 
 		createdInterfaces = import_octants(newOctants, danglingFaces);
 
-		std::cout << " Done" << endl;
+		std::cout << " Done" << std::endl;
 		std::cout << ">> Octants imported: " <<  newOctants.size() << std::endl;
 	}
 
@@ -896,7 +896,7 @@ PatchOctree::FaceInfoSet PatchOctree::remove_cells(std::vector<long> &cellIds)
 	// faces to remove in an ordered map. The order should be based upon
 	// the position of the interfaces in the container, rather than upon
 	// the id of the faces.
-	typedef PiercedVector<Interface>::position_less InterfacePositionCompare;
+	typedef bitpit::PiercedVector<Interface>::position_less InterfacePositionCompare;
 	typedef std::map<long, int, InterfacePositionCompare> InterfaceOrderedMap;
 
 	std::unordered_set<long> deadVertices;

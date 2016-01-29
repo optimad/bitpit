@@ -4,6 +4,7 @@
 
 #include "patch_cartesian.hpp"
 
+#include <bitpit_common.hpp>
 #include <math.h>
 
 namespace pman {
@@ -125,7 +126,7 @@ PatchCartesian::~PatchCartesian()
 */
 double PatchCartesian::eval_cell_volume(const long &id)
 {
-	UNUSED(id);
+	BITPIT_UNUSED(id);
 
 	return m_cell_volume;
 }
@@ -138,7 +139,7 @@ double PatchCartesian::eval_cell_volume(const long &id)
 */
 double PatchCartesian::eval_cell_size(const long &id)
 {
-	UNUSED(id);
+	BITPIT_UNUSED(id);
 
 	double cellSize = 0;
 	for(int i = 0; i < get_dimension(); ++i) {
@@ -565,7 +566,7 @@ void PatchCartesian::create_interfaces_direction(const Vertex::Coordinate &direc
 */
 bool PatchCartesian::_mark_cell_for_refinement(const long &id)
 {
-	UNUSED(id);
+	BITPIT_UNUSED(id);
 
 	return false;
 }
@@ -580,7 +581,7 @@ bool PatchCartesian::_mark_cell_for_refinement(const long &id)
 */
 bool PatchCartesian::_mark_cell_for_coarsening(const long &id)
 {
-	UNUSED(id);
+	BITPIT_UNUSED(id);
 
 	return false;
 }
@@ -596,8 +597,8 @@ bool PatchCartesian::_mark_cell_for_coarsening(const long &id)
 */
 bool PatchCartesian::_enable_cell_balancing(const long &id, bool enabled)
 {
-	UNUSED(id);
-	UNUSED(enabled);
+	BITPIT_UNUSED(id);
+	BITPIT_UNUSED(enabled);
 
 	return false;
 }

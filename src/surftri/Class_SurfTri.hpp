@@ -25,12 +25,10 @@
 # include <algorithm>
 # include <unordered_map>
 
-// CC_lib
-# include "Operators.hpp"
-# include "STL_IOFunct.hpp"
-# include "VTK_IOFunct.hpp"
-# include "DGF_IOFunct.hpp"
-# include "SortAlgorithms.hpp"
+// bitpit
+# include <bitpit_operators.hpp>
+# include <bitpit_IO.hpp>
+# include <bitpit_SA.hpp>
 
 // ========================================================================== //
 // NAME SPACES                                                                //
@@ -996,31 +994,6 @@ class Class_SurfTri {
                 string ,                                                               // (input) stl file name
                 bool                                                                   // (input) stl file type (ASCII/binary)
                 );
-
-        // vtu --------------------------------------------------------------------------- //
-        void Export_vtu(          // EXPORT SURFACE TASSELATION IN .VTU FILE
-                string                // .vtu file name                                        (INPUT)
-                );
-        void ExportVPData_vtu(    // EXPORT VECTOR FIELD AT TASSELATION VERTICES IN .VTU FILE
-                string,               // .vtu filename                                         (INPUT)
-                string,               // vector field name                                     (INPUT)
-                dvecarr3E &);         // vector field                                          (INPUT)
-
-        void ExportVCData_vtu(    // EXPORT VECTOR FIELD AT TASSELATION SIMPLEX IN .VTU FILE
-                string,               // .vtu filename                                         (INPUT)
-                string,               // vector field name                                     (INPUT)
-                dvecarr3E &);         // vector field                                          (INPUT)
-
-        template <class T>
-            void ExportCellData_vtu(string,                // Export cell data
-                    svector1D &,
-                    vector< vector < T > > &);
-        template <class T>
-            void ExportPointData_vtu(string,               // Export point data
-                    svector1D &,
-                    vector< vector < T > > &);
-
-
 
 };
 

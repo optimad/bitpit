@@ -944,27 +944,27 @@ while (iter < max_iter) {
         // Check direction for the i-th edge
         j = (i+1) % n;
         // if (dim < 2) {
-            // e = Dot_Product(xP - Vertex[Simplex[J][i]],
+            // e = dotProduct(xP - Vertex[Simplex[J][i]],
                             // Vertex[Simplex[J][i]] - Vertex[Simplex[J][j]],
                             // dim);
             // check = (e >= 0.0);
         // }
         //else {
             v1 = P - Vertex[Simplex[J][i]];
-            n1 = norm_2(v1);
+            n1 = norm2(v1);
             if (n1 < 1.0e-12) {
                 return(-1);
             }
             v1 = v1/n1;
             v2 = Vertex[Simplex[J][j]] - Vertex[Simplex[J][i]];
-            n2 = norm_2(v2);
+            n2 = norm2(v2);
             if (n2 < 1.0e-12) {
                 return(-1);
             }
             v2 = v2/n2;
-            v = Cross_Product(v1, v2);
-            v = v/norm_2(v);
-            theta[i] = Dot_Product(Normal[J], v);
+            v = crossProduct(v1, v2);
+            v = v/norm2(v);
+            theta[i] = dotProduct(Normal[J], v);
 
             // Update min theta
             max_theta = max(max_theta, theta[i]);
@@ -1132,7 +1132,7 @@ return(index); };
          free_edge = (J < 0);
          if (!free_edge) {
              visited = !(P[J] == index0);
-             sharp_edge = (norm_2(Normal[e[0]] - Normal[J]) > toll);
+             sharp_edge = (norm2(Normal[e[0]] - Normal[J]) > toll);
              if ((!visited) && (!sharp_edge)) {
                  e[1] = i;
                  stop1 = true;
@@ -1163,7 +1163,7 @@ return(index); };
              free_edge = (J < 0);
              if (!free_edge) {
                  visited = !(P[J] == index0);
-                 sharp_edge = (norm_2(Normal[I_] - Normal[J]) > toll);
+                 sharp_edge = (norm2(Normal[I_] - Normal[J]) > toll);
                  if ((!visited) && (!sharp_edge)) {
                      dummy[0] = I_;
                      dummy[1] = i;
@@ -1193,7 +1193,7 @@ return(index); };
              free_edge = (J < 0);
              if (!free_edge) {
                  visited = !(P[J] == index0);
-                 sharp_edge = (norm_2(Normal[I_] - Normal[J]) > toll);
+                 sharp_edge = (norm2(Normal[I_] - Normal[J]) > toll);
                  if ((!visited) && (!sharp_edge)) {
                      dummy[1] = i;
                      stop1 = true;
@@ -1270,7 +1270,7 @@ void Class_SurfTri::FindPatch(
 
 // Local variables
 double                  sharp_e;
-LIFOstack<int>          stack;
+bitpit::LIFOStack<int>          stack;
 
 // Counters
 int                     i, j;
@@ -1312,7 +1312,7 @@ while (stack.TOPSTK > 0) {
             if (Adjacency[T][i].size() == 1) {
                 S = Adjacency[T][i][0];
                 if (P[S] == index0) {
-                    sharp_e = norm_2(Normal[T] - Normal[S]);
+                    sharp_e = norm2(Normal[T] - Normal[S]);
                     if (sharp_e < toll) {
                         stack.push(S);
                     }
@@ -1361,7 +1361,7 @@ void Class_SurfTri::FindConnectedLoop(
 // ========================================================================== //
 
 // Local variables
-LIFOstack<int>          stack;
+bitpit::LIFOStack<int>          stack;
 
 // Counters
 int                     i, j;
@@ -2211,7 +2211,7 @@ return; };
                         // Check for sharp edge
                         if (J >= 0) {
                             if (Patches[J] == index0) {
-                                d = norm_2(Normal[i] - Normal[J]);
+                                d = norm2(Normal[i] - Normal[J]);
                                 rule = (d > toll_sharp);
                             }
                         }

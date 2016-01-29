@@ -24,11 +24,11 @@ Enter the `build` folder
 ```
  By this way, PABLO is configured for production (using compiler optimization flags for release cmake building type, `-O3`), the test sources in `PABLO/test/` will be compiled and successively available at `PABLO/build/test/` while the examples sources in `PABLO/examples/` will not. 
 
-The default installation folder is `/opt/bitpit/PABLO`. The folder `/opt/bitpit/` is the default installation folder for BitPit libraries developed by Optimad engineering and available on GitHub.
+The default installation folder is `/opt/bitpit/PABLO`. The folder `/opt/bitpit/` is the default installation folder for bitpit libraries developed by Optimad engineering and available on GitHub.
 
 Setting some variable in ccmake you can customize a bit your configuration.
 
-You can change the `BITPIT_DIR` to choose alternatives location for BitPit libraries. Note that if you choose the default BitPit installation path or another path without write permission you will need administration privileges to install BitPit libraries in.
+You can change the `BITPIT_DIR` to choose alternatives location for bitpit libraries. Note that if you choose the default bitpit installation path or another path without write permission you will need administration privileges to install bitpit libraries in.
 
 You can even choose different installation folder for PABLO setting the cmake variable `CMAKE_INSTALL_PREFIX`.
 Remember that if you choose the default installation path or another path without write permission you will need administration privileges to install PABLO in.

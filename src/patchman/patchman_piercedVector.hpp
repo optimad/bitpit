@@ -8,10 +8,10 @@
 #include "interface.hpp"
 #include "vertex.hpp"
 
-#include "piercedVector.tpp"
+#include <bitpit_containers.hpp>
 
-extern template class PiercedVector<Cell>;
-extern template class PiercedVector<Interface>;
-extern template class PiercedVector<Vertex>;
+extern template class bitpit::PiercedVector<Cell>;
+extern template class bitpit::PiercedVector<Interface>;
+extern template class bitpit::PiercedVector<Vertex>;
 
 #endif

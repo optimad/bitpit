@@ -55,13 +55,13 @@ public:
 	void set_name(std::string name);
 
 	long get_vertex_count() const;
-	PiercedVector<Vertex> &vertices();
+	bitpit::PiercedVector<Vertex> &vertices();
 	Vertex &get_vertex(const long &id);
 	const Vertex & get_vertex(const long &id) const;
 	const std::array<double, 3> & get_vertex_coords(const long &id) const;
 
 	long get_cell_count() const;
-	PiercedVector<Cell> &cells();
+	bitpit::PiercedVector<Cell> &cells();
 	Cell &get_cell(const long &id);
 	const Cell &get_cell(const long &id) const;
 	virtual double eval_cell_volume(const long &id) = 0;
@@ -78,7 +78,7 @@ public:
 	std::vector<long> extract_cell_vertex_neighs(const long &id, const std::vector<int> &vertices, const std::vector<long> &blackList = std::vector<long>()) const;
 
 	long get_interface_count() const;
-	PiercedVector<Interface> &interfaces();
+	bitpit::PiercedVector<Interface> &interfaces();
 	Interface &get_interface(const long &id);
 	const Interface &get_interface(const long &id) const;
 	virtual double eval_interface_area(const long &id) = 0;
@@ -99,9 +99,9 @@ public:
 	OutputManager & get_output_manager();
 
 protected:
-	PiercedVector<Vertex> m_vertices;
-	PiercedVector<Cell> m_cells;
-	PiercedVector<Interface> m_interfaces;
+	bitpit::PiercedVector<Vertex> m_vertices;
+	bitpit::PiercedVector<Cell> m_cells;
+	bitpit::PiercedVector<Interface> m_interfaces;
 
 	std::deque<long> m_unusedVertexIds;
 	std::deque<long> m_unusedInterfaceIds;

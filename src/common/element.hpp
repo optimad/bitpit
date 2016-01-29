@@ -10,7 +10,7 @@
 #include <memory>
 #include <vector>
 
-#include "binary_stream.hpp"
+#include <bitpit_containers.hpp>
 
 /*!
 	\ingroup Common
@@ -83,13 +83,13 @@ private:
 
 class Element;
 
-ibinarystream& operator>>(ibinarystream &buf, Element& element);
-obinarystream& operator<<(obinarystream &buf, const Element& element);
+bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buf, Element& element);
+bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buf, const Element& element);
 
 class Element {
 
-friend obinarystream& operator<<(obinarystream& buf, const Element& element);
-friend ibinarystream& operator>>(ibinarystream& buf, Element& element);
+friend bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream& buf, const Element& element);
+friend bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream& buf, Element& element);
 
 public:
 	/*!

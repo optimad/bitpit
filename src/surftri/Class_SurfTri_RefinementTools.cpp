@@ -170,7 +170,7 @@ flag_n = ((Normal.size() > 0) && (Normal.size() >= nSimplex));
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
-    LIFOstack< pair<int, double> >  stack(nSimplex + nS_new);
+    bitpit::LIFOStack< pair<int, double> >  stack(nSimplex + nS_new);
 
     // Initialize stack ----------------------------------------------------- //
     for (T = 0; T < nSimplex; T++) {
@@ -326,7 +326,7 @@ flag_n = ((Normal.size() > 0) && (Normal.size() >= nSimplex));
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
-    LIFOstack< pair<int, double> >  stack(nSimplex + nS_new);
+    bitpit::LIFOStack< pair<int, double> >  stack(nSimplex + nS_new);
 
     // Initialize stack ----------------------------------------------------- //
     for (T = 0; T < nSimplex; T++) {
@@ -562,10 +562,10 @@ if (flag_a) {
 // Generate normals for new simplex ----------------------------------------- //
 if (flag_n) {
     ddummy1D = Vertex[Simplex[S][1]] - Vertex[Simplex[S][0]];
-    ddummy1D = ddummy1D/norm_2(ddummy1D);
+    ddummy1D = ddummy1D/norm2(ddummy1D);
     SetNormal(S, ddummy1D);
     Normal[T] = Vertex[Simplex[T][1]] - Vertex[Simplex[T][0]];
-    Normal[T] = Normal[T]/norm_2(Normal[T]);
+    Normal[T] = Normal[T]/norm2(Normal[T]);
 }
 
 return; };
@@ -649,10 +649,10 @@ if (flag_a) {
 // Generate normals for new simplex ----------------------------------------- //
 if (flag_n) {
     ddummy1D = X[Simplex[S][1]] - X[Simplex[S][0]];
-    ddummy1D = ddummy1D/norm_2(ddummy1D);
+    ddummy1D = ddummy1D/norm2(ddummy1D);
     SetNormal(S, ddummy1D);
     Normal[T] = X[Simplex[T][1]] - X[Simplex[T][0]];
-    Normal[T] = Normal[T]/norm_2(Normal[T]);
+    Normal[T] = Normal[T]/norm2(Normal[T]);
 }
 
 return; };

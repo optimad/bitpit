@@ -81,18 +81,18 @@ void Demo_Class_UCartMesh3D(
         zlim[0] = 0.0;  zlim[1] = 1.0;
         Mesh1.SetMesh(xlim, ylim, zlim, nx, ny, nz);
         Mesh2 = Mesh1;
-        Mesh2.Export_vtr("original.vtr");
+        // TODO VTK output
 
         // Scale mesh ----------------------------------------------------------- //
         dvector1D       scale(3, 2.0);
         Mesh2.Scale(scale);
-        Mesh2.Export_vtr("scaled.vtr");
+        // TODO VTK output
 
         // Translate mesh ------------------------------------------------------- //
         dvector1D       transl(3, 0.0);
         transl[0] = -0.507;    transl[1] = -0.523;    transl[2] = -0.497;
         Mesh2.Translate(transl);
-        Mesh2.Export_vtr("translated.vtr");    
+        // TODO VTK output
 
     }
 

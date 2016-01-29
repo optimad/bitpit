@@ -6,7 +6,7 @@
 #include "UCartMesh.hpp"
 
 # include "Operators.hpp"
-# include "Class_VTK.hpp"
+# include "VTK.hpp"
 
 using namespace std;
 
@@ -1254,31 +1254,31 @@ void UCartMesh::ExportVtr(string dir, string filename) {
 
     // Local variables
 
-    class VTKOut : public VTK_RectilinearGrid<VTKOut>{
+    class VTKOut : public bitpit::VTKRectilinearGrid{
         private:
             dvector2D   *ptredge ;
 
         public:
-            VTKOut(string dir, string filename, dvector2D &edges) :VTK_RectilinearGrid<VTKOut>( ){ 
-                SetNames( dir, filename) ;
-                SetCodex( "appended") ;
+            VTKOut(string dir, string filename, dvector2D &edges) { 
+                setNames( dir, filename) ;
+                setCodex( bitpit::VTKFormat::APPENDED ) ;
                 ptredge = &edges ;
-                SetDimensions( 0, (*ptredge)[0].size()-1, 0, (*ptredge)[1].size()-1, 0, (*ptredge)[2].size()-1 ) ;
+                setDimensions( 0, (*ptredge)[0].size()-1, 0, (*ptredge)[1].size()-1, 0, (*ptredge)[2].size()-1 ) ;
 
             } ;
 
-            void Flush(  fstream &str, string codex_, string name  ){
+            void flushData(  fstream &str, bitpit::VTKFormat codex_, string name  ){
 
                 if( name == "x_Coord"){
-                    flush_binary( str, (*ptredge)[0] ) ;
+                    bitpit::genericIO::flushBINARY( str, (*ptredge)[0] ) ;
                 }
 
                 else if( name == "y_Coord"){
-                    flush_binary( str, (*ptredge)[1] ) ;
+                    bitpit::genericIO::flushBINARY( str, (*ptredge)[1] ) ;
                 }
 
                 else if( name == "z_Coord"){
-                    flush_binary( str, (*ptredge)[2] ) ;
+                    bitpit::genericIO::flushBINARY( str, (*ptredge)[2] ) ;
                 };
 
                 return ;
@@ -1287,7 +1287,7 @@ void UCartMesh::ExportVtr(string dir, string filename) {
     };
 
     VTKOut      myVTK( dir, filename, edge) ;
-    myVTK.Write() ;
+    myVTK.write() ;
 
     return; 
 };
@@ -1300,42 +1300,42 @@ void UCartMesh::ExportVtr(string dir, string filename) {
  *  \param[in]     location  Cell or point data ["Cell"/"Point"]
  *  \param[in]     data      data field
  */
-void UCartMesh::ExportVtr(string dir, string filename, string dataname, string location, vector<double> &data ) {
+void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::VTKLocation location, vector<double> &data ) {
 
 
-    class VTKOut : public VTK_RectilinearGrid<VTKOut>{
+    class VTKOut : public bitpit::VTKRectilinearGrid{
         private:
             dvector2D   *ptredge ;
             dvector1D   *ptrdata ;
 
         public:
-            VTKOut(string dir, string filename, dvector2D &edges, string dataname, string location, vector<double> &data) :VTK_RectilinearGrid<VTKOut>( ){ 
-                SetNames( dir, filename) ;
-                SetCodex( "appended") ;
+            VTKOut(string dir, string filename, dvector2D &edges, string dataname, bitpit::VTKLocation location, vector<double> &data){ 
+                setNames( dir, filename) ;
+                setCodex( bitpit::VTKFormat::APPENDED ) ;
                 ptredge = &edges ;
-                SetDimensions( 0, (*ptredge)[0].size()-1, 0, (*ptredge)[1].size()-1, 0, (*ptredge)[2].size()-1 ) ;
+                setDimensions( 0, (*ptredge)[0].size()-1, 0, (*ptredge)[1].size()-1, 0, (*ptredge)[2].size()-1 ) ;
 
                 ptrdata = &data ;
-                AddData( dataname, 1, "Float64", location ) ;
+                addData( dataname, bitpit::VTKFieldType::SCALAR, location, bitpit::VTKDataType::Float64 ) ;
 
             } ;
 
-            void Flush(  fstream &str, string codex_, string name  ){
+            void flushData(  fstream &str, bitpit::VTKFormat codex_, string name  ){
 
                 if( name == "x_Coord"){
-                    flush_binary( str, (*ptredge)[0] ) ;
+                    bitpit::genericIO::flushBINARY( str, (*ptredge)[0] ) ;
                 }
 
                 else if( name == "y_Coord"){
-                    flush_binary( str, (*ptredge)[1] ) ;
+                    bitpit::genericIO::flushBINARY( str, (*ptredge)[1] ) ;
                 }
 
                 else if( name == "z_Coord"){
-                    flush_binary( str, (*ptredge)[2] ) ;
+                    bitpit::genericIO::flushBINARY( str, (*ptredge)[2] ) ;
                 }
                 
                 else{
-                    flush_binary( str, (*ptrdata) ) ;
+                    bitpit::genericIO::flushBINARY( str, (*ptrdata) ) ;
                 };
 
                 return ;
@@ -1344,7 +1344,7 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, string l
     };
 
     VTKOut      myVTK( dir, filename, edge, dataname, location, data) ;
-    myVTK.Write() ;
+    myVTK.write() ;
 
     return; 
 
@@ -1358,42 +1358,42 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, string l
  *  \param[in]     location  Cell or point data ["Cell"/"Point"]
  *  \param[in]     data      data field
  */
-void UCartMesh::ExportVtr(string dir, string filename, string dataname, string location, ivector1D &data ) {
+void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::VTKLocation location, ivector1D &data ) {
 
 
-    class VTKOut : public VTK_RectilinearGrid<VTKOut>{
+    class VTKOut : public bitpit::VTKRectilinearGrid{
         private:
             dvector2D   *ptredge ;
             ivector1D   *ptrdata ;
 
         public:
-            VTKOut(string dir, string filename, dvector2D &edges, string dataname, string location, ivector1D &data) :VTK_RectilinearGrid<VTKOut>( ){ 
-                SetNames( dir, filename) ;
-                SetCodex( "appended") ;
+            VTKOut(string dir, string filename, dvector2D &edges, string dataname, bitpit::VTKLocation location, ivector1D &data){ 
+                setNames( dir, filename) ;
+                setCodex( bitpit::VTKFormat::APPENDED ) ;
                 ptredge = &edges ;
-                SetDimensions( 0, (*ptredge)[0].size()-1, 0, (*ptredge)[1].size()-1, 0, (*ptredge)[2].size()-1 ) ;
+                setDimensions( 0, (*ptredge)[0].size()-1, 0, (*ptredge)[1].size()-1, 0, (*ptredge)[2].size()-1 ) ;
 
                 ptrdata = &data ;
-                AddData( dataname, 1, "UInt32", location, "appended" ) ;
+                addData( dataname, bitpit::VTKFieldType::SCALAR, location, bitpit::VTKDataType::Int32 ) ;
 
             } ;
 
-            void Flush(  fstream &str, string codex_, string name  ){
+            void flushData(  fstream &str, bitpit::VTKFormat codex_, string name  ){
 
                 if( name == "x_Coord"){
-                    flush_binary( str, (*ptredge)[0] ) ;
+                    bitpit::genericIO::flushBINARY( str, (*ptredge)[0] ) ;
                 }
 
                 else if( name == "y_Coord"){
-                    flush_binary( str, (*ptredge)[1] ) ;
+                    bitpit::genericIO::flushBINARY( str, (*ptredge)[1] ) ;
                 }
 
                 else if( name == "z_Coord"){
-                    flush_binary( str, (*ptredge)[2] ) ;
+                    bitpit::genericIO::flushBINARY( str, (*ptredge)[2] ) ;
                 }
                 
                 else{
-                    flush_binary( str, (*ptrdata) ) ;
+                    bitpit::genericIO::flushBINARY( str, (*ptrdata) ) ;
                 };
 
                 return ;
@@ -1402,7 +1402,7 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, string l
     };
 
     VTKOut      myVTK( dir, filename, edge, dataname, location, data) ;
-    myVTK.Write() ;
+    myVTK.write() ;
 
     return; 
 
@@ -1416,42 +1416,42 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, string l
  *  \param[in]     location  Cell or point data ["Cell"/"Point"]
  *  \param[in]     data      data field
  */
-void UCartMesh::ExportVtr(string dir, string filename, string dataname, string location, vector<array<double,3>> &data ) {
+void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::VTKLocation location, vector<array<double,3>> &data ) {
 
 
-    class VTKOut : public VTK_RectilinearGrid<VTKOut>{
+    class VTKOut : public bitpit::VTKRectilinearGrid{
         private:
             dvector2D                   *ptredge ;
              vector<array<double,3>>    *ptrdata ;
 
         public:
-            VTKOut(string dir, string filename, dvector2D &edges, string dataname, string location, vector<array<double,3>> &data) :VTK_RectilinearGrid<VTKOut>( ){ 
-                SetNames( dir, filename) ;
-                SetCodex( "appended") ;
+            VTKOut(string dir, string filename, dvector2D &edges, string dataname, bitpit::VTKLocation location, vector<array<double,3>> &data){ 
+                setNames( dir, filename) ;
+                setCodex( bitpit::VTKFormat::APPENDED ) ;
                 ptredge = &edges ;
-                SetDimensions( 0, (*ptredge)[0].size()-1, 0, (*ptredge)[1].size()-1, 0, (*ptredge)[2].size()-1 ) ;
+                setDimensions( 0, (*ptredge)[0].size()-1, 0, (*ptredge)[1].size()-1, 0, (*ptredge)[2].size()-1 ) ;
 
                 ptrdata = &data ;
-                AddData( dataname, 3, "Float64", location, "appended" ) ;
+                addData( dataname, bitpit::VTKFieldType::VECTOR, location, bitpit::VTKDataType::Float64 ) ;
 
             } ;
 
-            void Flush(  fstream &str, string codex_, string name  ){
+            void flushData(  fstream &str, bitpit::VTKFormat codex_, string name ){
 
                 if( name == "x_Coord"){
-                    flush_binary( str, (*ptredge)[0] ) ;
+                    bitpit::genericIO::flushBINARY( str, (*ptredge)[0] ) ;
                 }
 
                 else if( name == "y_Coord"){
-                    flush_binary( str, (*ptredge)[1] ) ;
+                    bitpit::genericIO::flushBINARY( str, (*ptredge)[1] ) ;
                 }
 
                 else if( name == "z_Coord"){
-                    flush_binary( str, (*ptredge)[2] ) ;
+                    bitpit::genericIO::flushBINARY( str, (*ptredge)[2] ) ;
                 }
                 
                 else{
-                    flush_binary( str, (*ptrdata) ) ;
+                    bitpit::genericIO::flushBINARY( str, (*ptrdata) ) ;
                 };
 
                 return ;
@@ -1460,7 +1460,7 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, string l
     };
 
     VTKOut      myVTK( dir, filename, edge, dataname, location, data) ;
-    myVTK.Write() ;
+    myVTK.write() ;
 
     return; 
 

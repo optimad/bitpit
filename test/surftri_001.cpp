@@ -81,7 +81,7 @@ void Demo_CleaningTools(
         // Tri.Stats(cout);
 
         // Export to vtk format ------------------------------------------------- //
-        Tri.Export_vtu("tri_0.vtu");
+        // TODO
 
     }
 
@@ -106,7 +106,7 @@ void Demo_CleaningTools(
 
 
         // Export to vtk format ------------------------------------------------- //
-        Tri.Export_vtu("tri_1.vtu");
+        // TODO
     }
 
     // ========================================================================== //
@@ -127,7 +127,7 @@ void Demo_CleaningTools(
         // Tri.Stats(cout);
 
         // Export to vtk format ------------------------------------------------- //
-        Tri.Export_vtu("tri_2.vtu");
+        // TODO
     }
 
     // ========================================================================== //
@@ -148,7 +148,7 @@ void Demo_CleaningTools(
         // Tri.Stats(cout);
 
         // Export to vtk format ------------------------------------------------- //
-        Tri.Export_vtu("tri_3.vtu");
+        // TODO
     }
 
     // ========================================================================== //
@@ -205,7 +205,7 @@ void Demo_CleaningTools(
         } //next i
 
         // Export to vtk format ------------------------------------------------- //
-        Tri.Export_vtu("tri_4.vtu");
+        // TODO
 
     }
 

@@ -42,7 +42,7 @@ if (NOT ONLY_PABLO)
     include_directories("${PROJECT_SOURCE_DIR}/src/patchman")
 endif()
 
-include_directories(${BITP_BASE_INCLUDE_DIRS})
+include_directories(${BITPIT_INCLUDE_DIRS})
 
 #Rules to build the tests
 foreach(TEST_NAME IN LISTS TEST_LIST PARALLELTEST_LIST)
@@ -50,7 +50,7 @@ foreach(TEST_NAME IN LISTS TEST_LIST PARALLELTEST_LIST)
 
     add_executable(${TEST_NAME} "${TEST_SOURCES}")
     target_link_libraries(${TEST_NAME} ${BITP_MESH_LIBRARY})
-    target_link_libraries(${TEST_NAME} ${BITP_BASE_LIBRARY})
+    target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
     target_link_libraries(${TEST_NAME} ${VTK_LIBRARIES})
 
 endforeach()

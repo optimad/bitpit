@@ -210,7 +210,7 @@ ivector1D Class_VolTri::EdgeNeigh(
 
 // Local variables
 int                             n_faces = infos[e_type[T]].n_faces;
-LIFOstack<int>                  stack(4*n_faces), visited(4*n_faces);
+bitpit::LIFOStack<int>                  stack(4*n_faces), visited(4*n_faces);
 ivector1D                       e;
 ivector1D                       neigh;
 ivector1D::iterator             it_, end_;
@@ -312,7 +312,7 @@ ivector1D Class_VolTri::VertNeigh(
 
 // Local variables
 int                             n_faces = infos[e_type[T]].n_faces;
-LIFOstack<int>                  stack(4*n_faces), visited(4*n_faces);
+bitpit::LIFOStack<int>                  stack(4*n_faces), visited(4*n_faces);
 ivector1D                       e;
 ivector1D                       neigh;
 ivector1D                       e_neigh;
@@ -492,7 +492,7 @@ bvector1D                   visited(nSimplex, false);
 ivector2D                   face_vlist;
 a3vector1D                  x, y, xF, xS, dir;
 a3vector2D                  face_normals;
-LIFOstack<int>              stack;
+bitpit::LIFOStack<int>              stack;
 
 // Counters
 int                         i, j, k, l, S, A;
@@ -564,14 +564,14 @@ while ((stack.TOPSTK > 0) && (!check)) {
                 y[0] = 0.0;
                 y[1] = 0.0;
                 y[2] = 1.0;
-                face_normals[j] = Cross_Product(x, y);
+                face_normals[j] = crossProduct(x, y);
             }
             else {
                 x = Vertex[face_vlist[j][2]] - Vertex[face_vlist[j][1]];
                 y = Vertex[face_vlist[j][1]] - Vertex[face_vlist[j][0]];
-                face_normals[j] = Cross_Product(x, y);
+                face_normals[j] = crossProduct(x, y);
             }
-            face_normals[j] = face_normals[j]/max(norm_2(face_normals[j]), 2.0e-16);
+            face_normals[j] = face_normals[j]/max(norm2(face_normals[j]), 2.0e-16);
         } //next j
     }
     
@@ -592,8 +592,8 @@ while ((stack.TOPSTK > 0) && (!check)) {
     
             // Check if simplex encloses point
             dir = P - xF;
-            dir = dir/max(norm_2(dir), 2.0e-16);
-            check = (check && (Dot_Product(dir, face_normals[j]) <= 0.0));
+            dir = dir/max(norm2(dir), 2.0e-16);
+            check = (check && (dotProduct(dir, face_normals[j]) <= 0.0));
         } //next j
     }
 
@@ -609,14 +609,14 @@ while ((stack.TOPSTK > 0) && (!check)) {
 
         // local direction of searching path
         dir = P - xS;
-        dir = dir/max(norm_2(dir), 2.0e-16);
+        dir = dir/max(norm2(dir), 2.0e-16);
     
         // Loop over simplex faces
         max_dp = -2.0;
         i = 0;
         j = -1;
         while (i < m) {
-            dp = Dot_Product(face_normals[i], dir);
+            dp = dotProduct(face_normals[i], dir);
             if (dp > max_dp) {
                 j = i;
                 max_dp = dp;
@@ -687,7 +687,7 @@ while ((stack.TOPSTK > 0) && (!check)) {
                     // y[0] = 0.0;
                     // y[1] = 0.0;
                     // y[2] = 1.0;
-                    // face_normals[j] = Cross_Product(x, y);
+                    // face_normals[j] = crossProduct(x, y);
                 // }
                 // else {
                     // x[0] = Vertex[face_vlist[j][2]][0] - Vertex[face_vlist[j][1]][0];
@@ -696,9 +696,9 @@ while ((stack.TOPSTK > 0) && (!check)) {
                     // y[0] = Vertex[face_vlist[j][1]][0] - Vertex[face_vlist[j][0]][0];
                     // y[1] = Vertex[face_vlist[j][1]][1] - Vertex[face_vlist[j][0]][1];
                     // y[2] = Vertex[face_vlist[j][1]][2] - Vertex[face_vlist[j][0]][2];
-                    // face_normals[j] = Cross_Product(x, y);
+                    // face_normals[j] = crossProduct(x, y);
                 // }
-                // face_normals[j] = face_normals[j]/max(norm_2(face_normals[j]), 2.0e-16);
+                // face_normals[j] = face_normals[j]/max(norm2(face_normals[j]), 2.0e-16);
             // } //next j
         // }
     
@@ -721,8 +721,8 @@ while ((stack.TOPSTK > 0) && (!check)) {
                 // for (l = 0; l < dim; l++) {
                     // dir[l] = P[l] - xF[l];
                 // } //next l
-                // dir = dir/max(norm_2(dir), 2.0e-16);
-                // check = (check && (Dot_Product(dir, face_normals[j]) <= 0.0));
+                // dir = dir/max(norm2(dir), 2.0e-16);
+                // check = (check && (dotProduct(dir, face_normals[j]) <= 0.0));
                 // // cout << " f " << j << ", c: " << check;
             // } //next j
         // }
@@ -739,7 +739,7 @@ while ((stack.TOPSTK > 0) && (!check)) {
                 // for (l = 0; l < dim; ++l) {
                     // dir[l] = P[l] - xS[l];
                 // } //next l
-                // dir = dir/max(norm_2(dir), 2.0e-16);
+                // dir = dir/max(norm2(dir), 2.0e-16);
         
                 // // Loop over simplex faces
                 // // WARNING: infinite loop at corner simplicies!!
@@ -747,7 +747,7 @@ while ((stack.TOPSTK > 0) && (!check)) {
                 // i = -1;
                 // j = 0;
                 // while (j < m) {
-                    // dp = Dot_Product(face_normals[j], dir);
+                    // dp = dotProduct(face_normals[j], dir);
                     // A = Adjacency[S][j];
                     // if ((dp > max_dp) && (A >= 0)) {//&& (!visited[A])) {
                         // i = j;

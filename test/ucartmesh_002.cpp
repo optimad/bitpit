@@ -150,10 +150,10 @@ void Demo3D_UCartMesh(
         } //next i
 
         // Export vectorial data ------------------------------------------------ //
-        Mesh1.ExportVtr("./", "3Doriginal_CSdata", "scalar_field", "Cell", Scalar1);
-        Mesh2.ExportVtr("./", "3Dmapped_CSdata", "scalar_field", "Cell", Scalar2);
-        Mesh1.ExportVtr("./", "3Doriginal_CVdata", "vectorial_field", "Cell", Vectorial1);
-        Mesh2.ExportVtr("./", "3Dmapped_CVdata", "vectorial_field", "Cell", Vectorial2);
+        Mesh1.ExportVtr("./", "3Doriginal_CSdata", "data", bitpit::VTKLocation::CELL, Scalar1);
+        Mesh2.ExportVtr("./", "3Dmapped_CSdata", "data", bitpit::VTKLocation::CELL, Scalar2);
+        Mesh1.ExportVtr("./", "3Doriginal_CVdata", "data", bitpit::VTKLocation::CELL, Vectorial1);
+        Mesh2.ExportVtr("./", "3Dmapped_CVdata", "data", bitpit::VTKLocation::CELL, Vectorial2);
     }
 
 
@@ -212,10 +212,10 @@ void Demo3D_UCartMesh(
         } //next i
 
         // Export vectorial data ------------------------------------------------ //
-        Mesh1.ExportVtr("./", "3Doriginal_PSdata", "scalar_field", "Point", Scalar1);
-        Mesh2.ExportVtr("./", "3Dmapped_PSdata", "scalar_field", "Point", Scalar2);
-        Mesh1.ExportVtr("./", "3Doriginal_PVdata", "vectorial_field", "Point", Vectorial1);
-        Mesh2.ExportVtr("./", "3Dmapped_PVdata", "vectorial_field", "Point", Vectorial2);
+        Mesh1.ExportVtr("./", "3Doriginal_PSdata", "data", bitpit::VTKLocation::POINT, Scalar1);
+        Mesh2.ExportVtr("./", "3Dmapped_PSdata", "data", bitpit::VTKLocation::POINT, Scalar2);
+        Mesh1.ExportVtr("./", "3Doriginal_PVdata", "data", bitpit::VTKLocation::POINT, Vectorial1);
+        Mesh2.ExportVtr("./", "3Dmapped_PVdata", "data", bitpit::VTKLocation::POINT, Vectorial2);
 
     }
 

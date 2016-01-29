@@ -36,7 +36,7 @@ else()
 endif()
 
 # Library
-set(BITP_MESH_LIBRARY ${CMAKE_PROJECT_NAME} CACHE INTERNAL "BitPit Mesh Library" FORCE)
+set(BITP_MESH_LIBRARY ${CMAKE_PROJECT_NAME} CACHE INTERNAL "bitpit Mesh Library" FORCE)
 
 if (ONLY_PABLO)
     add_library(${BITP_MESH_LIBRARY} ${LIBRARY_TYPE}

@@ -17,8 +17,6 @@
 
 // Standard Template Library
 # include <iostream>
-
-# include <Class_UCartMesh.hpp>
 # include <UCartMesh.hpp>
 
 using namespace std;
@@ -147,10 +145,10 @@ void Demo2D_UCartMesh(
         } //next j
 
         // Export vectorial data ------------------------------------------------ //
-        Mesh1.ExportVtr("./", "2Doriginal_CSdata", "scalar_field", "Cell", Scalar1);
-        Mesh2.ExportVtr("./", "2Dmapped_CSdata", "scalar_field", "Cell", Scalar2);
-        Mesh1.ExportVtr("./", "2Doriginal_CVdata", "vectorial_field", "Cell", Vectorial1);
-        Mesh2.ExportVtr("./", "2Dmapped_CVdata", "vectorial_field", "Cell", Vectorial2);
+        Mesh1.ExportVtr("./", "2Doriginal_CSdata", "data", bitpit::VTKLocation::CELL, Scalar1);
+        Mesh2.ExportVtr("./", "2Dmapped_CSdata", "data", bitpit::VTKLocation::CELL, Scalar2);
+        Mesh1.ExportVtr("./", "2Doriginal_CVdata", "data", bitpit::VTKLocation::CELL, Vectorial1);
+        Mesh2.ExportVtr("./", "2Dmapped_CVdata", "data", bitpit::VTKLocation::CELL, Vectorial2);
     }
 
 
@@ -205,10 +203,10 @@ void Demo2D_UCartMesh(
         } //next j
 
         // Export vectorial data ------------------------------------------------ //
-        Mesh1.ExportVtr("./", "2Doriginal_PSdata", "scalar_field", "Point", Scalar1);
-        Mesh2.ExportVtr("./", "2Dmapped_PSdata", "scalar_field", "Point", Scalar2);
-        Mesh1.ExportVtr("./", "2Doriginal_PVdata", "vectorial_field", "Point", Vectorial1);
-        Mesh2.ExportVtr("./", "2Dmapped_PVdata", "vectorial_field", "Point", Vectorial2);
+        Mesh1.ExportVtr("./", "2Doriginal_PSdata", "data", bitpit::VTKLocation::POINT, Scalar1);
+        Mesh2.ExportVtr("./", "2Dmapped_PSdata", "data", bitpit::VTKLocation::POINT, Scalar2);
+        Mesh1.ExportVtr("./", "2Doriginal_PVdata", "data", bitpit::VTKLocation::POINT, Vectorial1);
+        Mesh2.ExportVtr("./", "2Dmapped_PVdata", "data", bitpit::VTKLocation::POINT, Vectorial2);
 
     }
 

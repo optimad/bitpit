@@ -2,6 +2,7 @@
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
 
+#include <bitpit_common.hpp>
 #include <math.h>
 
 #include "cell.hpp"

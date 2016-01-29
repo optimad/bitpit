@@ -22,6 +22,9 @@
 # include <vector>
 # include <string>
 
+# include <bitpit_operators.hpp>
+# include <bitpit_IO.hpp>
+
 
 // NAMESPACES                                                                 //
 
@@ -202,9 +205,9 @@ class UCartMesh{
 
         // I/O methods --------------------------------------------------------- //                   
         void        ExportVtr(std::string, std::string);
-        void        ExportVtr(std::string, std::string, std::string, std::string, std::vector<double> &);
-        void        ExportVtr(std::string, std::string, std::string, std::string, std::vector<int> &);
-        void        ExportVtr(std::string, std::string, std::string, std::string, std::vector<std::array<double,3>> &);
+        void        ExportVtr(std::string, std::string, std::string, bitpit::VTKLocation, std::vector<double> &);
+        void        ExportVtr(std::string, std::string, std::string, bitpit::VTKLocation, std::vector<int> &);
+        void        ExportVtr(std::string, std::string, std::string, bitpit::VTKLocation, std::vector<std::array<double,3>> &);
 
 };
 

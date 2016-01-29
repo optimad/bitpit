@@ -6,10 +6,11 @@
 
 /*! \file */
 
-#include "collapsedVector2D.hpp"
 #include "element.hpp"
 
 #include <memory>
+
+#include <bitpit_containers.hpp>
 
 /*!
 	\ingroup Common
@@ -18,13 +19,13 @@
 
 class Cell;
 
-ibinarystream& operator>>(ibinarystream &buf, Cell& cell);
-obinarystream& operator<<(obinarystream &buf, const Cell& cell);
+bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buf, Cell& cell);
+bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buf, const Cell& cell);
 
 class Cell : public Element {
 
-friend obinarystream& operator<<(obinarystream& buf, const Cell& cell);
-friend ibinarystream& operator>>(ibinarystream& buf, Cell& cell);
+friend bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream& buf, const Cell& cell);
+friend bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream& buf, Cell& cell);
 
 public:
 	Cell();
@@ -59,7 +60,7 @@ protected:
 private:
 	bool m_interior;
 
-	CollapsedVector2D<long> m_interfaces;
+	bitpit::CollapsedVector2D<long> m_interfaces;
 
 	Cell(const Cell &other) = delete;
 	Cell& operator = (const Cell &other) = delete;

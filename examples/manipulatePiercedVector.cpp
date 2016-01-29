@@ -16,7 +16,7 @@
 #include "BitP_Mesh_COMMON.hpp"
 #include "BitP_Mesh_PATCHMAN.hpp"
 
-void printCellIds(PiercedVector<Cell> &cells)
+void printCellIds(bitpit::PiercedVector<Cell> &cells)
 {
 	std::cout << std::endl << "  List of cell ids:" << std::endl;
 
@@ -30,7 +30,7 @@ void printCellIds(PiercedVector<Cell> &cells)
 	}
 }
 
-void fillCellList(int nCells, PiercedVector<Cell> &cells)
+void fillCellList(int nCells, bitpit::PiercedVector<Cell> &cells)
 {
 	for (int i = 0; i < nCells; i++) {
 		// std::cout << "  Inserting (at the end) cell with id = " << i << std::endl;
@@ -47,7 +47,7 @@ int main(int argc, char *argv[])
 
 	std::cout << "  Pierced vector created" << std::endl;
 
-	PiercedVector<Cell> cells;
+	bitpit::PiercedVector<Cell> cells;
 
 	// Filling the list of cells
 	std::cout << std::endl << "::: Filling the vector :::" << std::endl;

@@ -64,7 +64,7 @@ for (S = 0; S < nSimplex; ++S) {
             k = (j+1) % m;
             U = face_vlist[j];
             V = face_vlist[k];
-            toll = min(toll, norm_2(Vertex[U] - Vertex[V]));
+            toll = min(toll, norm2(Vertex[U] - Vertex[V]));
         } //Next j
     } //next i
 } //next S
@@ -116,7 +116,7 @@ for (S = 0; S < nSimplex; ++S) {
             k = (j+1) % m;
             U = face_vlist[j];
             V = face_vlist[k];
-            toll = min(toll, norm_2(X[U] - X[V]));
+            toll = min(toll, norm2(X[U] - X[V]));
         } //Next j
     } //next i
 } //next S
@@ -1513,10 +1513,10 @@ ncell = cell.size();
 
             // Scope variables
             ivector1D    list;
-            kdtree<3, a3vector1D, int>     kd(m);
+            bitpit::KdTree<3, a3vector1D, int>     kd(m);
 
             // Randomize vertex insertion
-            Extract_wo_Repl(m, m-1, list);
+            bitpit::utils::extractWithoutReplacement(m, m-1, list);
             for (I = 0; I < m; I++) {
                 S = cell[C][list[I]][0];
                 i = cell[C][list[I]][1];
@@ -1620,10 +1620,10 @@ ncell = cell.size();
 
             // Scope variables
             ivector1D    list;
-            kdtree<3, a3vector1D, int>     kd(m);
+            bitpit::KdTree<3, a3vector1D, int>     kd(m);
 
             // Randomize vertex insertion
-            Extract_wo_Repl(m, m-1, list);
+            bitpit::utils::extractWithoutReplacement(m, m-1, list);
             for (I = 0; I < m; I++) {
                 S = cell[C][list[I]][0];
                 i = cell[C][list[I]][1];
@@ -2383,10 +2383,10 @@ ncell = cell.size();
 
             // Scope variables
             ivector1D    list;
-            kdtree<3, a3vector1D, int>     kd(m);
+            bitpit::KdTree<3, a3vector1D, int>     kd(m);
 
             // Randomize vertex insertion
-            Extract_wo_Repl(m, m-1, list);
+            bitpit::utils::extractWithoutReplacement(m, m-1, list);
             for (I = 0; I < m; I++) {
                 S = cell[C][list[I]][0];
                 i = cell[C][list[I]][1];
@@ -2491,10 +2491,10 @@ ncell = cell.size();
 
             // Scope variables
             ivector1D    list;
-            kdtree<3, a3vector1D, int>     kd(m);
+            bitpit::KdTree<3, a3vector1D, int>     kd(m);
 
             // Randomize vertex insertion
-            Extract_wo_Repl(m, m-1, list);
+            bitpit::utils::extractWithoutReplacement(m, m-1, list);
             for (I = 0; I < m; I++) {
                 S = cell[C][list[I]][0];
                 i = cell[C][list[I]][1];
