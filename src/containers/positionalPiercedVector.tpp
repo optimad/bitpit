@@ -48,11 +48,8 @@
 namespace bitpit{
 
 /*!
-	\ingroup containers
-	@{
-*/
+	@ingroup containers
 
-/*!
 	@brief Iterator for the class PositionalPiercedVector
 
 	@details
@@ -255,6 +252,8 @@ const typename PositionalPiercedIterator<T, unqualified_T>::id_type
 	PositionalPiercedIterator<T, unqualified_T>::SENTINEL_ID = std::numeric_limits<id_type>::min();
 
 /*!
+	@ingroup containers
+
 	@brief Metafunction for generating of a pierced vector.
 
 	@details
@@ -1829,10 +1828,6 @@ const typename PositionalPiercedVector<T>::size_type
 template<class T>
 const typename PositionalPiercedVector<T>::size_type
 	PositionalPiercedVector<T>::USABLE_POS_COUNT = std::numeric_limits<size_type>::max() - REQUIRED_SENTINEL_COUNT;
-
-/*!
-	@}
-*/
 
 }
 
