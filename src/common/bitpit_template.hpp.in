@@ -22,8 +22,8 @@
  *
  \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_@UPPER_GROUP_NAME@__
-#define __BITPIT_@UPPER_GROUP_NAME@__
+#ifndef __BITPIT_HPP__
+#define __BITPIT_HPP__
 
 #include <bitpit_version.hpp>
 

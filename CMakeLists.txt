@@ -46,8 +46,7 @@ set(STATIC 1 CACHE BOOL INTERNAL "If set, the program is linked using static lib
 #------------------------------------------------------------------------------------#
 function(getModuleEnableName MODULE_NAME FLAG_NAME)
 	string(TOUPPER ${MODULE_NAME} UPPER_MODULE_NAME)
-	string(TOUPPER ${${MODULE_NAME}_GROUP} UPPER_GROUP_NAME)
-	set(${FLAG_NAME} "BITPIT_${UPPER_GROUP_NAME}_${UPPER_MODULE_NAME}" PARENT_SCOPE)
+	set(${FLAG_NAME} "BITPIT_MODULE_${UPPER_MODULE_NAME}" PARENT_SCOPE)
 endfunction()
 
 function(isModuledEnabled MODULE_NAME ENABLED)
@@ -76,11 +75,6 @@ function(enableModule MODULE_NAME ENABLED)
 	getModuleEnableName(${MODULE_NAME} MODULE_ENABLE_FLAG)
 	set(${MODULE_ENABLE_FLAG} ${ENABLED} CACHE BOOL "Request building ${MODULE_NAME} module" ${FORCE_FLAG})
 	mark_as_advanced(${MODULE_ENABLE_FLAG})
-
-	isGroupEnabled(${${MODULE_NAME}_GROUP} GROUP_ENABLED)
-	if (NOT GROUP_ENABLED)
-		enableGroup(${MODULE_GROUP} TRUE TRUE)
-	endif ()
 endfunction()
 
 function(hideModule MODULE_NAME)
@@ -88,51 +82,6 @@ function(hideModule MODULE_NAME)
 	if (DEFINED ${MODULE_ENABLE_FLAG})
 		unset(${MODULE_ENABLE_FLAG} CACHE)
 	endif ()
-endfunction()
-
-function(getGroupEnableName GROUP_NAME FLAG_NAME)
-	string(TOUPPER ${GROUP_NAME} UPPER_GROUP_NAME)
-	set(${FLAG_NAME} "BITPIT_${UPPER_GROUP_NAME}" PARENT_SCOPE)
-endfunction()
-
-function(isGroupEnabled GROUP_NAME ENABLED)
-	getGroupEnableName(${GROUP_NAME} ENABLED_VARIABLE)
-	if (DEFINED ${ENABLED_VARIABLE})
-		set(${ENABLED} ${${ENABLED_VARIABLE}} PARENT_SCOPE)
-	else ()
-		set(${ENABLED} "FALSE" PARENT_SCOPE)
-	endif ()
-endfunction()
-
-function(enableGroup GROUP_NAME ENABLED)
-	set (EXTRA_ARGUMENTS ${ARGN})
-	list(LENGTH EXTRA_ARGUMENTS EXTRA_ARGUMENT_COUNT)
-	if (${EXTRA_ARGUMENT_COUNT} GREATER 0)
-		list(GET EXTRA_ARGUMENTS 0 FORCED)
-		if (FORCED)
-			set(FORCE_FLAG "FORCE")
-		endif()
-	endif ()
-
-	if (NOT DEFINED FORCE_FLAG)
-		set(FORCE_FLAG "")
-	endif ()
-
-	getGroupEnableName(${GROUP_NAME} GROUP_ENABLE_FLAG)
-	set(${GROUP_ENABLE_FLAG} ${ENABLED} CACHE BOOL "Request building ${MODULE_NAME} bitpit modules" ${FORCE_FLAG})
-
-	isGroupEnabled(${GROUP_NAME} GROUP_ENABLED)
-	string(TOUPPER ${GROUP_NAME} UPPER_GROUP_NAME)
-	foreach (MODULE_NAME IN LISTS BITPIT_${UPPER_GROUP_NAME}_MODULE_LIST)
-		if (GROUP_ENABLED)
-			isModuledEnabled(${MODULE_NAME} MODULE_ENABLED)
-			if (NOT MODULE_ENABLED)
-				enableModule(${MODULE_NAME} TRUE)
-			endif ()
-		else ()
-			hideModule(${MODULE_NAME})
-		endif ()
-	endforeach ()
 endfunction()
 
 #------------------------------------------------------------------------------------#
@@ -217,30 +166,12 @@ set(BITPIT_PATCH_VERSION "${match}")
 #------------------------------------------------------------------------------------#
 # List of all avilable modules
 #------------------------------------------------------------------------------------#
-set(BITPIT_GROUP_LIST "")
-list(APPEND BITPIT_GROUP_LIST "base")
-
-set(BITPIT_BASE_MODULE_LIST "")
-list(APPEND BITPIT_BASE_MODULE_LIST "operators")
-list(APPEND BITPIT_BASE_MODULE_LIST "containers")
-list(APPEND BITPIT_BASE_MODULE_LIST "IO")
-list(APPEND BITPIT_BASE_MODULE_LIST "LA")
-list(APPEND BITPIT_BASE_MODULE_LIST "SA")
-
 set(BITPIT_MODULE_LIST "")
-foreach (GROUP_NAME IN LISTS BITPIT_GROUP_LIST)
-	string(TOUPPER ${GROUP_NAME} UPPER_GROUP_NAME)
-	foreach (MODULE_NAME IN LISTS BITPIT_${UPPER_GROUP_NAME}_MODULE_LIST)
-		list(APPEND BITPIT_MODULE_LIST ${MODULE_NAME})
-	endforeach ()
-endforeach ()
-
-foreach (GROUP_NAME IN LISTS BITPIT_GROUP_LIST)
-	string(TOUPPER ${GROUP_NAME} UPPER_GROUP_NAME)
-	foreach (MODULE_NAME IN LISTS BITPIT_${UPPER_GROUP_NAME}_MODULE_LIST)
-		set(${MODULE_NAME}_GROUP ${GROUP_NAME})
-	endforeach ()
-endforeach ()
+list(APPEND BITPIT_MODULE_LIST "operators")
+list(APPEND BITPIT_MODULE_LIST "containers")
+list(APPEND BITPIT_MODULE_LIST "IO")
+list(APPEND BITPIT_MODULE_LIST "LA")
+list(APPEND BITPIT_MODULE_LIST "SA")
 
 #------------------------------------------------------------------------------------#
 # Modules dependecies
@@ -253,8 +184,8 @@ set(SA_DEPS "operators")
 #------------------------------------------------------------------------------------#
 # Check of the dependencies
 #------------------------------------------------------------------------------------#
-foreach (GROUP_NAME IN LISTS BITPIT_GROUP_LIST)
-	enableGroup(${GROUP_NAME} 1)
+foreach (MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
+	enableModule(${MODULE_NAME} TRUE FALSE)
 endforeach ()
 
 set(CHECK_DEPS 1)

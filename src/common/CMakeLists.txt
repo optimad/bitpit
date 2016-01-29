@@ -28,26 +28,23 @@ cmake_minimum_required(VERSION 2.8)
 # Reset the variable
 set(HEADERS "")
 
-# Generate the reference header files
-set(HEADER_TEMPLATE "bitpit_template.hpp.in")
-foreach (GROUP_NAME IN LISTS BITPIT_GROUP_LIST)
-	set(REFERENCE_HEADER "bitpit_${GROUP_NAME}.hpp")
-	string(TOUPPER ${GROUP_NAME} UPPER_GROUP_NAME)
-
-	set(INCLUDE_LIST "#include <bitpit_Base_common.hpp>\n")
-	foreach(MODULE_NAME IN LISTS BITPIT_${UPPER_GROUP_NAME}_MODULE_LIST)
-		isModuledEnabled(${MODULE_NAME} MODULE_ENABLED)
-		if (MODULE_ENABLED)
-			set(INCLUDE_LIST "${INCLUDE_LIST}#include <bitpit_Base_${MODULE_NAME}.hpp>\n")
-		endif ()
-	endforeach ()
-
-	CONFIGURE_FILE("${HEADER_TEMPLATE}" "${REFERENCE_HEADER}")
-	list(APPEND HEADERS "${CMAKE_CURRENT_BINARY_DIR}/${REFERENCE_HEADER}")
-
-	unset(INCLUDE_LIST)
-	unset(REFERENCE_HEADER)
+# Generate the bitpit header file
+set(INCLUDE_LIST "#include <bitpit_common.hpp>\n")
+foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
+	isModuledEnabled(${MODULE_NAME} MODULE_ENABLED)
+	if (MODULE_ENABLED)
+		set(INCLUDE_LIST "${INCLUDE_LIST}#include <bitpit_${MODULE_NAME}.hpp>\n")
+	endif ()
 endforeach ()
+
+set(BITPIT_HEADER_TEMPLATE "bitpit_template.hpp.in")
+set(BITPIT_HEADER "bitpit.hpp")
+CONFIGURE_FILE("${BITPIT_HEADER_TEMPLATE}" "${BITPIT_HEADER}")
+list(APPEND HEADERS "${CMAKE_CURRENT_BINARY_DIR}/${BITPIT_HEADER}")
+
+unset(BITPIT_HEADER_TEMPLATE)
+unset(BITPIT_HEADER)
+unset(INCLUDE_LIST)
 
 # Add common files to targets
 file(GLOB SOURCE_FILES "*.cpp")
