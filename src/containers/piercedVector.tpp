@@ -54,6 +54,7 @@ namespace utils {
 
 /*!
 	\ingroup containerUtils
+
 	Checks if the template parameter has a method called "get_id".
 */
 template <typename T>
@@ -71,6 +72,7 @@ public:
 
 /*!
 	\ingroup containerUtils
+
 	Checks if the template parameter has a method called "set_id".
 */
 template <typename T>
@@ -90,10 +92,7 @@ public:
 
 /*!
 	\ingroup containers
-	@{
-*/
 
-/*!
 	@brief Iterator for the class PiercedVector
 
 	@details
@@ -296,6 +295,8 @@ const typename PiercedIterator<T, unqualified_T>::id_type
 	PiercedIterator<T, unqualified_T>::SENTINEL_ID = std::numeric_limits<id_type>::min();
 
 /*!
+	\ingroup containers
+
 	@brief Metafunction for generating of a pierced vector.
 
 	@details
@@ -1971,10 +1972,6 @@ const typename PiercedVector<T>::size_type
 template<class T>
 const typename PiercedVector<T>::size_type
 	PiercedVector<T>::USABLE_POS_COUNT = std::numeric_limits<size_type>::max() - REQUIRED_SENTINEL_COUNT;
-
-/*!
-	@}
-*/
 
 }
 
