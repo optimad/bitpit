@@ -5,6 +5,8 @@
  * \defgroup SortAlgorithms Sort algorithms (SA)
  */
 
+#include <bitpit_version.hpp>
+
 #include "SortAlgorithms.hpp"
 
 #endif

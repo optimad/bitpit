@@ -39,6 +39,8 @@
 #ifndef __BITPIT_IO__
 #define __BITPIT_IO__
 
+#include <bitpit_version.hpp>
+
 #include "FileHandler.hpp"
 #include "VTK.hpp"
 #ifdef IO_ENABLE_VTK_WRAPPERS

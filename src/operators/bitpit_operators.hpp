@@ -10,6 +10,8 @@
  * @}
  */
 
+#include <bitpit_version.hpp>
+
 #include "Operators.hpp"
 
 #endif
