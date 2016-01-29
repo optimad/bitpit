@@ -208,8 +208,8 @@ long PatchOctree::get_octant_id(const OctantInfo &octantInfo) const
 */
 const std::vector<uint32_t> & PatchOctree::get_octant_connect(const OctantInfo &octantInfo)
 {
-	bool isGhost = m_tree.getIsGhost(octantInfo.id);
-	if (!isGhost) {
+	Octant* octant;
+	if (octantInfo.internal) {
 		return m_tree.getConnectivity()[octantInfo.id];
 	} else {
 		return m_tree.getGhostConnectivity()[octantInfo.id];
@@ -245,11 +245,11 @@ int PatchOctree::get_cell_level(const long &id)
 {
 	OctantInfo octantInfo = get_cell_octant(id);
 
-	Octant *octant;
-	if (m_tree.getIsGhost(octantInfo.id)) {
-		octant = m_tree.getGhostOctant(octantInfo.id);
-	} else {
+	Octant* octant;
+	if (octantInfo.internal) {
 		octant = m_tree.getOctant(octantInfo.id);
+	} else {
+		octant = m_tree.getGhostOctant(octantInfo.id);
 	}
 	return m_tree.getLevel(octant);
 }
