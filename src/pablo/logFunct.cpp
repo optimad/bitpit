@@ -2,7 +2,7 @@
 // INCLUDES                                                                            //
 // =================================================================================== //
 #include "logFunct.hpp"
-#if NOMPI == 0
+#if ENABLE_MPI==1
 #include <mpi.h>
 #endif
 #include <string>
