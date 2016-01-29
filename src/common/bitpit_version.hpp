@@ -1,1 +1,1 @@
-#define BITPIT_VERSION "0.99.0"
+#define BITPIT_VERSION "1.0.0-rc1"
