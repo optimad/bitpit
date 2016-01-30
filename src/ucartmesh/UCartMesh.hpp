@@ -26,188 +26,149 @@
 # include <bitpit_IO.hpp>
 
 
-// NAMESPACES                                                                 //
-
-// TYPES DEFINITIONS                                                          //
-
-// boolean vectors
-typedef std::vector< bool >                 bvector1D;
-typedef std::vector< bvector1D >            bvector2D;
-typedef std::vector< bvector2D >            bvector3D;
-typedef std::vector< bvector3D >            bvector4D;
-
-// characters vectors
-typedef std::vector< char >                 cvector1D;
-typedef std::vector< cvector1D >            cvector2D;
-typedef std::vector< cvector2D >            cvector3D;
-typedef std::vector< cvector3D >            cvector4D;
-
-// integer vectors
-typedef std::vector< int >                  ivector1D;
-typedef std::vector< ivector1D >            ivector2D;
-typedef std::vector< ivector2D >            ivector3D;
-typedef std::vector< ivector3D >            ivector4D;
-
-typedef std::array<int,3>                   iarray3E;
-
-// double vectors
-typedef std::vector< double >               dvector1D;
-typedef std::vector< dvector1D >            dvector2D;
-typedef std::vector< dvector2D >            dvector3D;
-typedef std::vector< dvector3D >            dvector4D;
-
-typedef std::array<double,3>                darray3E;
-
-// string vectors
-typedef std::vector< std::string >          svector1D;
-typedef std::vector< svector1D >            svector2D;
-typedef std::vector< svector2D >            svector3D;
-typedef std::vector< svector3D >            svector4D;
-
 class UCartMesh{
 
     // Members ============================================================== //
     private:
+        int                                 status ;                            /**< indentifier for mesh status; is incresed each time mesh is moified */
 
-        int                 dim;                                /**< number of space dimensions*/
-        int                 nCells ;                            /**< number of cells in grid*/
-        int                 nNodes ;                            /**< number of nodes in grid*/
-        int                 CellsInIJPlane;                     /**< number of cells in the IJ plane*/
-        int                 NodesInIJPlane;                     /**< number of nodes in the IJ plane*/
+        int                                 dim;                                /**< number of space dimensions*/
+        int                                 nCells ;                            /**< number of cells in grid*/
+        int                                 nNodes ;                            /**< number of nodes in grid*/
+        int                                 CellsInIJPlane;                     /**< number of cells in the IJ plane*/
+        int                                 NodesInIJPlane;                     /**< number of nodes in the IJ plane*/
 
-        darray3E            B0;                                 /**< min point of axis aligned boundig box*/
-        darray3E            B1;                                 /**< max point of axis aligned boundig box*/
+        std::array<double,3>                B0;                                 /**< min point of axis aligned boundig box*/
+        std::array<double,3>                B1;                                 /**< max point of axis aligned boundig box*/
 
-        iarray3E            nc;                                 /**< number of cells in each direction; if 2D nc[2]=1 anyway */
-        iarray3E            np;                                 /**< number of nodes in each direction; if 2D np[2]=1 anyway */
-        darray3E            h;                                  /**< grid spacing in each direction*/
+        std::array<int,3>                   nc;                                 /**< number of cells in each direction; if 2D nc[2]=1 anyway */
+        std::array<int,3>                   np;                                 /**< number of nodes in each direction; if 2D np[2]=1 anyway */
+        std::array<double,3>                h;                                  /**< grid spacing in each direction*/
 
-        dvector2D           center;                             /**< center coordinates in each direction */
-        dvector2D           edge;                               /**< node coordinates in each direction */
+        std::vector<std::vector<double>>    center;                             /**< center coordinates in each direction */
+        std::vector<std::vector<double>>    edge;                               /**< node coordinates in each direction */
 
-        std::array<int,6>   whichDirection ;                    /**< maps face indices [0...5] to space direction [0...2] */
-        std::array<int,6>   whichStep ;                         /**< maps face indices [0...5] to positive or negative steps */
-
-        int                 status ;                            /**< indentifier for mesh status; is incresed each time mesh is moified */
+        std::array<int,6>                   whichDirection ;                    /**< maps face indices [0...5] to space direction [0...2] */
+        std::array<int,6>                   whichStep ;                         /**< maps face indices [0...5] to positive or negative steps */
 
         // Constructors, Destructor, assignment================================== //
     public:
 
         UCartMesh( ) ;
-        UCartMesh( darray3E const &, darray3E const &, iarray3E const &, int dim=3 ) ;
-        UCartMesh( darray3E const &, darray3E const &, int const &, int const & ) ; 
-        UCartMesh( darray3E const &, darray3E const &, int const &, int const &, int const & ) ; 
+        UCartMesh( std::array<double,3> const &, std::array<double,3> const &, std::array<int,3> const &, int dim=3 ) ;
+        UCartMesh( std::array<double,3> const &, std::array<double,3> const &, int const &, int const & ) ; 
+        UCartMesh( std::array<double,3> const &, std::array<double,3> const &, int const &, int const &, int const & ) ; 
 
         ~UCartMesh( ) ;
 
-        UCartMesh&  operator=( const UCartMesh & ) ;
-        void        setMesh( darray3E const &, darray3E const &, iarray3E const &, int const &dim=3 ) ;
-        void        ClearMesh( ) ;
+        UCartMesh&              operator=( const UCartMesh & ) ;
+        void                    setMesh( std::array<double,3> const &, std::array<double,3> const &, std::array<int,3> const &, int const &dim=3 ) ;
+        void                    ClearMesh( ) ;
 
     private:
-        void        ResizeMesh( ) ;
+        void                    ResizeMesh( ) ;
 
     public:
-        int         getNCells();
-        int         getNCells( int );
+        int                     getNCells();
+        int                     getNCells( int );
 
-        int         getNNodes();
-        int         getNNodes( int d);
+        int                     getNNodes();
+        int                     getNNodes( int d);
 
-        darray3E    getSpacing( ) ;
-        double      getSpacing( int ) ;
+        std::array<double,3>    getSpacing( ) ;
+        double                  getSpacing( int ) ;
 
-        int         getDimension( ) ;
-        void        getBoundingBox( darray3E &, darray3E & ) ; 
+        int                     getDimension( ) ;
+        void                    getBoundingBox( std::array<double,3> &, std::array<double,3> & ) ; 
 
-        int         getStatus() ;
+        int                     getStatus() ;
 
         // Transformations ------------------------------------------------------ //
-        void        Translate( darray3E const & ) ;
+        void                    Translate( std::array<double,3> const & ) ;
 
-        void        Scale( darray3E const & ) ; 
-        void        Scale( darray3E const &, darray3E const & ) ; 
+        void                    Scale( std::array<double,3> const & ) ; 
+        void                    Scale( std::array<double,3> const &, std::array<double,3> const & ) ; 
 
 
         // Cell information ----------------------------------------------------- //
-        iarray3E    CellCartesianId( darray3E const & ) ;
-        void        CellCartesianId( darray3E const &, int &, int & ) ;
-        void        CellCartesianId( darray3E const &, int &, int &, int & ) ;
+        std::array<int,3>       CellCartesianId( std::array<double,3> const & ) ;
+        void                    CellCartesianId( std::array<double,3> const &, int &, int & ) ;
+        void                    CellCartesianId( std::array<double,3> const &, int &, int &, int & ) ;
 
-        iarray3E    CellCartesianId( int const & ) ; 
-        void        CellCartesianId( int const &, int &, int & ) ; 
-        void        CellCartesianId( int const &, int &, int &, int & ) ; 
+        std::array<int,3>       CellCartesianId( int const & ) ; 
+        void                    CellCartesianId( int const &, int &, int & ) ; 
+        void                    CellCartesianId( int const &, int &, int &, int & ) ; 
 
-        int         CellLinearId( darray3E const & ) ;
-        int         CellLinearId( iarray3E const & ) ;
-        int         CellLinearId( int const &, int const &, int const & k=0 ) ;
+        int                     CellLinearId( std::array<double,3> const & ) ;
+        int                     CellLinearId( std::array<int,3> const & ) ;
+        int                     CellLinearId( int const &, int const &, int const & k=0 ) ;
 
-        darray3E    getCellCenter( int ) ;
-        darray3E    getCellCenter( iarray3E ) ;
-        darray3E    getCellCenter( int, int, int k=0 ) ;
+        std::array<double,3>    getCellCenter( int ) ;
+        std::array<double,3>    getCellCenter( std::array<int,3> ) ;
+        std::array<double,3>    getCellCenter( int, int, int k=0 ) ;
 
-        void        getCellBoundingBox( int const &, darray3E &, darray3E &) ;
-        void        getCellBoundingBox( iarray3E const &, darray3E &, darray3E &) ;
-        void        getCellBoundingBox( int const &, int const &, darray3E &, darray3E &  ) ;
-        void        getCellBoundingBox( int const &, int const &, int const &, darray3E &, darray3E &  ) ;
+        void                    getCellBoundingBox( int const &, std::array<double,3> &, std::array<double,3> &) ;
+        void                    getCellBoundingBox( std::array<int,3> const &, std::array<double,3> &, std::array<double,3> &) ;
+        void                    getCellBoundingBox( int const &, int const &, std::array<double,3> &, std::array<double,3> &  ) ;
+        void                    getCellBoundingBox( int const &, int const &, int const &, std::array<double,3> &, std::array<double,3> &  ) ;
 
-        int         getCellNeighbour( int const &, int const & ) ;
-        int         getCellNeighbour( int const &, int const &, int const & ) ;
+        int                     getCellNeighbour( int const &, int const & ) ;
+        int                     getCellNeighbour( int const &, int const &, int const & ) ;
 
 
         // Node information ----------------------------------------------------- //
-        iarray3E    NodeCartesianId( darray3E const & ) ;
-        void        NodeCartesianId( darray3E const &, int &, int & ) ;
-        void        NodeCartesianId( darray3E const &, int &, int &, int & ) ;
+        std::array<int,3>       NodeCartesianId( std::array<double,3> const & ) ;
+        void                    NodeCartesianId( std::array<double,3> const &, int &, int & ) ;
+        void                    NodeCartesianId( std::array<double,3> const &, int &, int &, int & ) ;
 
-        iarray3E    NodeCartesianId( int const & ) ;
-        void        NodeCartesianId( int const &, int &, int & ) ;
-        void        NodeCartesianId( int const &, int &, int &, int & ) ;
+        std::array<int,3>       NodeCartesianId( int const & ) ;
+        void                    NodeCartesianId( int const &, int &, int & ) ;
+        void                    NodeCartesianId( int const &, int &, int &, int & ) ;
 
-        int         NodeLinearId( darray3E const & ) ;
-        int         NodeLinearId( iarray3E const & ) ;
-        int         NodeLinearId( int const &, int const &, int const & k=0 ) ;
+        int                     NodeLinearId( std::array<double,3> const & ) ;
+        int                     NodeLinearId( std::array<int,3> const & ) ;
+        int                     NodeLinearId( int const &, int const &, int const & k=0 ) ;
 
-        darray3E    getNodeCoordinates( int ) ;
-        darray3E    getNodeCoordinates( iarray3E ) ;
-        darray3E    getNodeCoordinates( int, int, int k=0 ) ;
+        std::array<double,3>    getNodeCoordinates( int ) ;
+        std::array<double,3>    getNodeCoordinates( std::array<int,3> ) ;
+        std::array<double,3>    getNodeCoordinates( int, int, int k=0 ) ;
 
-        int         getNodeNeighbour( int const &, int const & ) ;
-        int         getNodeNeighbour( int const &, int const &, int const & ) ;
+        int                     getNodeNeighbour( int const &, int const & ) ;
+        int                     getNodeNeighbour( int const &, int const &, int const & ) ;
 
 
         // Format conversion ---------------------------------------------------- //
-        void        Cart2Unstr( int &, int &, std::vector<darray3E> &, ivector2D &, ivector3D & ) ;
+        void                    Cart2Unstr( int &, int &, std::vector<std::array<double,3>> &, std::vector<std::vector<int>> &, std::vector<std::vector<std::vector<int>>> & ) ;
 
 
         // subsets  ------------------------------------------------------------- //
-        ivector1D   CellSubSet( int const &, int const & ) ;
-        ivector1D   CellSubSet( iarray3E const &, iarray3E const & ) ;
-        ivector1D   CellSubSet( darray3E const &, darray3E const & ) ;
+        std::vector<int>        CellSubSet( int const &, int const & ) ;
+        std::vector<int>        CellSubSet( std::array<int,3> const &, std::array<int,3> const & ) ;
+        std::vector<int>        CellSubSet( std::array<double,3> const &, std::array<double,3> const & ) ;
 
-        ivector1D   NodeSubSet( int const &, int const & ) ;
-        ivector1D   NodeSubSet( iarray3E const &, iarray3E const & ) ;
-        ivector1D   NodeSubSet( darray3E const &, darray3E const & ) ;
+        std::vector<int>        NodeSubSet( int const &, int const & ) ;
+        std::vector<int>        NodeSubSet( std::array<int,3> const &, std::array<int,3> const & ) ;
+        std::vector<int>        NodeSubSet( std::array<double,3> const &, std::array<double,3> const & ) ;
 
 
         // Point in Grid -------------------------------------------------------- //
-        bool        PointInGrid( darray3E const & ) ;
-        bool        PointInGrid( darray3E const &, int &) ;
-        bool        PointInGrid( darray3E const &, iarray3E &) ;
-        bool        PointInGrid( darray3E const &, int &, int &, int &) ;
+        bool                    PointInGrid( std::array<double,3> const & ) ;
+        bool                    PointInGrid( std::array<double,3> const &, int &) ;
+        bool                    PointInGrid( std::array<double,3> const &, std::array<int,3> &) ;
+        bool                    PointInGrid( std::array<double,3> const &, int &, int &, int &) ;
 
         // Interpolation -------------------------------------------------------- //
-        int         linearCellInterpolation( darray3E &, ivector1D &, dvector1D & ) ;
-        int         linearNodeInterpolation( darray3E &, ivector1D &, dvector1D & ) ;
+        int                     linearCellInterpolation( std::array<double,3> &, std::vector<int> &, std::vector<double> & ) ;
+        int                     linearNodeInterpolation( std::array<double,3> &, std::vector<int> &, std::vector<double> & ) ;
 
-        void        CellData2NodeData( dvector1D &, dvector1D & ) ;
-        void        NodeData2CellData( dvector1D &, dvector1D & ) ;
+        void                    CellData2NodeData( std::vector<double> &, std::vector<double> & ) ;
+        void                    NodeData2CellData( std::vector<double> &, std::vector<double> & ) ;
 
         // I/O methods --------------------------------------------------------- //                   
-        void        ExportVtr(std::string, std::string);
-        void        ExportVtr(std::string, std::string, std::string, bitpit::VTKLocation, std::vector<double> &);
-        void        ExportVtr(std::string, std::string, std::string, bitpit::VTKLocation, std::vector<int> &);
-        void        ExportVtr(std::string, std::string, std::string, bitpit::VTKLocation, std::vector<std::array<double,3>> &);
+        void                    ExportVtr(std::string, std::string);
+        void                    ExportVtr(std::string, std::string, std::string, bitpit::VTKLocation, std::vector<double> &);
+        void                    ExportVtr(std::string, std::string, std::string, bitpit::VTKLocation, std::vector<int> &);
+        void                    ExportVtr(std::string, std::string, std::string, bitpit::VTKLocation, std::vector<std::array<double,3>> &);
 
 };
 

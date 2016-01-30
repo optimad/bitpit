@@ -69,7 +69,7 @@ void Demo3D_UCartMesh(
     {
         // Scope variables ------------------------------------------------------ //
         std::array<double,3>        B0, B1;
-        iarray3E        nc ;
+        std::array<int,3>        nc ;
 
         // Output message ------------------------------------------------------- //
         cout << " - Setting mesh and mesh manipulation" << endl;

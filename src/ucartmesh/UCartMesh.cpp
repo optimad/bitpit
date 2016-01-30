@@ -64,7 +64,7 @@ UCartMesh::UCartMesh( ){
  *   \param[in] N number of cell in each direction
  *   \param[in] dimension number of space dimensions [2/3]
  */
-UCartMesh::UCartMesh( darray3E const &P0, darray3E const &P1, iarray3E const &N, int const dimension) :UCartMesh(){
+UCartMesh::UCartMesh( std::array<double,3> const &P0, std::array<double,3> const &P1, std::array<int,3> const &N, int const dimension) :UCartMesh(){
 
     setMesh( P0, P1, N, dimension);
     status = 0 ;
@@ -79,9 +79,9 @@ UCartMesh::UCartMesh( darray3E const &P0, darray3E const &P1, iarray3E const &N,
  *   \param[in] I number of cell in first direction
  *   \param[in] J number of cell in second direction
  */
-UCartMesh::UCartMesh( darray3E const &P0, darray3E const &P1, int const &I, int const &J) :UCartMesh(){
+UCartMesh::UCartMesh( std::array<double,3> const &P0, std::array<double,3> const &P1, int const &I, int const &J) :UCartMesh(){
 
-    iarray3E    N={I,J,1} ;     
+    std::array<int,3>    N={I,J,1} ;     
 
     setMesh( P0, P1, N, 2);
     status = 0 ;
@@ -97,9 +97,9 @@ UCartMesh::UCartMesh( darray3E const &P0, darray3E const &P1, int const &I, int 
  *   \param[in] J number of cell in second direction
  *   \param[in] K number of cell in third direction
  */
-UCartMesh::UCartMesh( darray3E const &P0, darray3E const &P1, int const &I, int const &J, int const &K) :UCartMesh(){
+UCartMesh::UCartMesh( std::array<double,3> const &P0, std::array<double,3> const &P1, int const &I, int const &J, int const &K) :UCartMesh(){
 
-    iarray3E    N={I,J,K} ;     
+    std::array<int,3>    N={I,J,K} ;     
 
     setMesh( P0, P1, N, 3);
     status = 0 ;
@@ -113,8 +113,8 @@ UCartMesh::UCartMesh( darray3E const &P0, darray3E const &P1, int const &I, int 
 UCartMesh::~UCartMesh( ){
 
     for( int d=0; d<3; ++d){
-        dvector1D().swap(center[d]);
-        dvector1D().swap(edge[d]);
+        std::vector<double>().swap(center[d]);
+        std::vector<double>().swap(edge[d]);
     };
 
 
@@ -162,7 +162,7 @@ UCartMesh& UCartMesh::operator=(
  *   \param[in]     N       number of cells in each direction
  *   \param[in]     dims    number of cells in each direction
  */
-void UCartMesh::setMesh( darray3E const & A0, darray3E const & A1, iarray3E const & N, int const &dims ){
+void UCartMesh::setMesh( std::array<double,3> const & A0, std::array<double,3> const & A1, std::array<int,3> const & N, int const &dims ){
 
     // Counters
     int       i, d;
@@ -303,7 +303,7 @@ int UCartMesh::getNNodes( int d){
 /*! Get mesh spacing
  *  \return mesh spacing in all directions 
  */
-darray3E    UCartMesh::getSpacing(){
+std::array<double,3>    UCartMesh::getSpacing(){
     return h ;
 };
 
@@ -329,7 +329,7 @@ int      UCartMesh::getDimension( ){
  *   \param[out] A0 min point
  *   \param[out] A1 max point
  */
-void UCartMesh::getBoundingBox( darray3E &A0, darray3E &A1){
+void UCartMesh::getBoundingBox( std::array<double,3> &A0, std::array<double,3> &A1){
 
     A0 = B0; 
     A1 = B1; 
@@ -351,7 +351,7 @@ int UCartMesh::getStatus(  ){
 /*! Tanslate mesh by given offset
  *  \param[in]  ds      offset
  */
-void UCartMesh::Translate( darray3E const &ds ){ 
+void UCartMesh::Translate( std::array<double,3> const &ds ){ 
 
     // Counters
     int     d;
@@ -376,7 +376,7 @@ void UCartMesh::Translate( darray3E const &ds ){
  *  \param[in]  s       scale factor
  *  \param[in]  origin  scale origin
  */
-void UCartMesh::Scale( darray3E const &s, darray3E const &origin ){
+void UCartMesh::Scale( std::array<double,3> const &s, std::array<double,3> const &origin ){
 
     // Counters
     int     d;
@@ -404,7 +404,7 @@ void UCartMesh::Scale( darray3E const &s, darray3E const &origin ){
 /*! Scale mesh with respect to its min coordinate by given factor 
  *  \param[in]  s       scale factor
  */
-void UCartMesh::Scale( darray3E const &s ){
+void UCartMesh::Scale( std::array<double,3> const &s ){
 
     Scale( s, B0);
 
@@ -418,10 +418,10 @@ void UCartMesh::Scale( darray3E const &s ){
  *  \param[in]  P       point coordinates
  *  \return             cartesian cell indices
  */
-iarray3E UCartMesh::CellCartesianId( darray3E const &P ){
+std::array<int,3> UCartMesh::CellCartesianId( std::array<double,3> const &P ){
 
     int         d ;
-    iarray3E    id;
+    std::array<int,3>    id;
 
     id.fill(0) ;
 
@@ -439,7 +439,7 @@ iarray3E UCartMesh::CellCartesianId( darray3E const &P ){
  *  \param[out]  i      first cartesian coordinate
  *  \param[out]  j      second cartesian coordinate
  */
-void UCartMesh::CellCartesianId( darray3E const &P, int &i, int &j ){
+void UCartMesh::CellCartesianId( std::array<double,3> const &P, int &i, int &j ){
 
     i = min( nc[0]-1, max(0, (int) floor( (P[0] - B0[0])/h[0] )) );
     j = min( nc[1]-1, max(0, (int) floor( (P[1] - B0[1])/h[1] )) );
@@ -454,7 +454,7 @@ void UCartMesh::CellCartesianId( darray3E const &P, int &i, int &j ){
  *  \param[out]  j       second cartesian coordinate
  *  \param[out]  k       third cartesian coordinate
  */
-void UCartMesh::CellCartesianId( darray3E const &P, int &i, int &j, int &k ){
+void UCartMesh::CellCartesianId( std::array<double,3> const &P, int &i, int &j, int &k ){
 
     i = min( nc[0]-1, max(0, (int) floor( (P[0] - B0[0])/h[0] )) );
     j = min( nc[1]-1, max(0, (int) floor( (P[1] - B0[1])/h[1] )) );
@@ -468,9 +468,9 @@ void UCartMesh::CellCartesianId( darray3E const &P, int &i, int &j, int &k ){
  *  \param[in]  J       linear cell index
  *  \return             cell cartesien indices
  */
-iarray3E UCartMesh::CellCartesianId( int const &J ){
+std::array<int,3> UCartMesh::CellCartesianId( int const &J ){
 
-    iarray3E    id ;
+    std::array<int,3>    id ;
 
     id[0] = J % nc[0] ;
     id[2] = J / CellsInIJPlane;
@@ -519,11 +519,11 @@ void UCartMesh::CellCartesianId( int const &J, int &i, int &j, int &k ){
  *  \param[in]  P       point coordinates
  *  \return             linear cell index
  */
-int UCartMesh::CellLinearId( darray3E const &P ){
+int UCartMesh::CellLinearId( std::array<double,3> const &P ){
 
     // Counters
     int         n ;
-    iarray3E    id;
+    std::array<int,3>    id;
 
 
     id = CellCartesianId(P) ;
@@ -553,7 +553,7 @@ int UCartMesh::CellLinearId( int const &i, int const &j ,int const &k ){
  *  \param[in]  id      cartesian indices
  *  \return             linear cell index
  */
-int UCartMesh::CellLinearId( iarray3E const &id ){
+int UCartMesh::CellLinearId( std::array<int,3> const &id ){
 
     return( CellLinearId(id[0], id[1], id[2] ) ); 
 };
@@ -565,9 +565,9 @@ int UCartMesh::CellLinearId( iarray3E const &id ){
  *   \param[in] k third index (0 for 2D mesh)
  *   \return cell center 
  */
-darray3E UCartMesh::getCellCenter( int i, int j, int k ){
+std::array<double,3> UCartMesh::getCellCenter( int i, int j, int k ){
 
-    darray3E    P ;
+    std::array<double,3>    P ;
 
     P[0]= center[0][i] ;
     P[1]= center[1][j] ;
@@ -582,9 +582,9 @@ darray3E UCartMesh::getCellCenter( int i, int j, int k ){
  *   \param[in] id array with cartesian indices
  *   \return cell center 
  */
-darray3E UCartMesh::getCellCenter( iarray3E id ){
+std::array<double,3> UCartMesh::getCellCenter( std::array<int,3> id ){
 
-    darray3E    P ;
+    std::array<double,3>    P ;
 
     P[0]= center[0][id[0]] ;
     P[1]= center[1][id[1]] ;
@@ -599,7 +599,7 @@ darray3E UCartMesh::getCellCenter( iarray3E id ){
  *   \param[in] J linear index
  *   \return cell center 
  */
-darray3E UCartMesh::getCellCenter( int J ){
+std::array<double,3> UCartMesh::getCellCenter( int J ){
 
     return  getCellCenter( CellCartesianId(J) );
 
@@ -612,7 +612,7 @@ darray3E UCartMesh::getCellCenter( int J ){
  *   \param[out] C0 min node coordinates
  *   \param[out] C1 max node coordinates
  */
-void UCartMesh::getCellBoundingBox( int const &i, int const &j, darray3E &C0, darray3E &C1 ){
+void UCartMesh::getCellBoundingBox( int const &i, int const &j, std::array<double,3> &C0, std::array<double,3> &C1 ){
 
     C0 =  getNodeCoordinates( i, j );
     C1 =  getNodeCoordinates( i+1, j+1 );
@@ -627,9 +627,9 @@ void UCartMesh::getCellBoundingBox( int const &i, int const &j, darray3E &C0, da
  *   \param[out] C0 min node coordinates
  *   \param[out] C1 max node coordinates
  */
-void UCartMesh::getCellBoundingBox( int const &i, int const &j, int const &k, darray3E &C0, darray3E &C1 ){
+void UCartMesh::getCellBoundingBox( int const &i, int const &j, int const &k, std::array<double,3> &C0, std::array<double,3> &C1 ){
 
-    iarray3E    id({ i, j, k}) ;
+    std::array<int,3>    id({ i, j, k}) ;
 
     getCellBoundingBox( id, C0, C1) ;
 
@@ -641,11 +641,11 @@ void UCartMesh::getCellBoundingBox( int const &i, int const &j, int const &k, da
  *   \param[out] C0 min node coordinates
  *   \param[out] C1 max node coordinates
  */
-void UCartMesh::getCellBoundingBox( iarray3E const &id0, darray3E &C0, darray3E &C1 ){
+void UCartMesh::getCellBoundingBox( std::array<int,3> const &id0, std::array<double,3> &C0, std::array<double,3> &C1 ){
 
 
     int         d;
-    iarray3E    id1(id0) ;
+    std::array<int,3>    id1(id0) ;
 
     for( d=0; d<dim; ++d){
         id1[d]++ ;
@@ -665,10 +665,10 @@ void UCartMesh::getCellBoundingBox( iarray3E const &id0, darray3E &C0, darray3E 
  *   \param[out] C0 min node coordinates
  *   \param[out] C1 max node coordinates
  */
-void UCartMesh::getCellBoundingBox( int const &J, darray3E &C0, darray3E &C1 ){
+void UCartMesh::getCellBoundingBox( int const &J, std::array<double,3> &C0, std::array<double,3> &C1 ){
 
     int         d ;
-    iarray3E    id0, id1 ;
+    std::array<int,3>    id0, id1 ;
 
     id0 = CellCartesianId(J) ;
 
@@ -690,9 +690,9 @@ void UCartMesh::getCellBoundingBox( int const &J, darray3E &C0, darray3E &C1 ){
  *   \param[in] k third index (0 for 2D mesh)
  *   \return node coordinates
  */
-darray3E UCartMesh::getNodeCoordinates( int i, int j, int k ){
+std::array<double,3> UCartMesh::getNodeCoordinates( int i, int j, int k ){
 
-    darray3E    P ;
+    std::array<double,3>    P ;
 
     P[0]= edge[0][i] ;
     P[1]= edge[1][j] ;
@@ -707,9 +707,9 @@ darray3E UCartMesh::getNodeCoordinates( int i, int j, int k ){
  *   \param[in] id array with cartesian indices
  *   \return node coordinates
  */
-darray3E UCartMesh::getNodeCoordinates( iarray3E id ){
+std::array<double,3> UCartMesh::getNodeCoordinates( std::array<int,3> id ){
 
-    darray3E    P ;
+    std::array<double,3>    P ;
 
     P[0]= edge[0][id[0]] ;
     P[1]= edge[1][id[1]] ;
@@ -724,7 +724,7 @@ darray3E UCartMesh::getNodeCoordinates( iarray3E id ){
  *   \param[in] J linear index
  *   \return node coordinates
  */
-darray3E UCartMesh::getNodeCoordinates( int J ){
+std::array<double,3> UCartMesh::getNodeCoordinates( int J ){
 
     return  getNodeCoordinates( NodeCartesianId(J) );
 
@@ -754,7 +754,7 @@ int      UCartMesh::getNodeNeighbour( int const &I, int const &dir){
  */
 int      UCartMesh::getNodeNeighbour( int const &I, int const &d, int const &step){
 
-    iarray3E    i;
+    std::array<int,3>    i;
 
     i       = NodeCartesianId(I) ;
     i[d]    += step ; 
@@ -787,7 +787,7 @@ int      UCartMesh::getCellNeighbour( int const &I, int const &dir){
  */
 int      UCartMesh::getCellNeighbour( int const &I, int const &d, int const &step){
 
-    iarray3E    i;
+    std::array<int,3>    i;
 
     i       = CellCartesianId(I) ;
     i[d]    += step ; 
@@ -801,10 +801,10 @@ int      UCartMesh::getCellNeighbour( int const &I, int const &d, int const &ste
  *  \param[in]  P       point coordinates
  *  \return             cartesian indices
  */
-iarray3E UCartMesh::NodeCartesianId( darray3E const &P ){
+std::array<int,3> UCartMesh::NodeCartesianId( std::array<double,3> const &P ){
 
     int         d ;
-    iarray3E    id;
+    std::array<int,3>    id;
 
     id.fill(0) ;
 
@@ -821,7 +821,7 @@ iarray3E UCartMesh::NodeCartesianId( darray3E const &P ){
  *  \param[out]  i      first cartesian index
  *  \param[out]  j      second cartesian index
  */
-void UCartMesh::NodeCartesianId( darray3E const &P, int &i, int &j ){
+void UCartMesh::NodeCartesianId( std::array<double,3> const &P, int &i, int &j ){
 
 
     i = min( np[0]-1, max(0, (int) round( (P[0] - B0[0])/h[0] )) );
@@ -838,7 +838,7 @@ void UCartMesh::NodeCartesianId( darray3E const &P, int &i, int &j ){
  *  \param[out]  j      second cartesian index
  *  \param[out]  k      third cartesian index
  */
-void UCartMesh::NodeCartesianId( darray3E const &P, int &i, int &j, int &k ){
+void UCartMesh::NodeCartesianId( std::array<double,3> const &P, int &i, int &j, int &k ){
 
 
     i = min( np[0]-1, max(0, (int) round( (P[0] - B0[0])/h[0] )) );
@@ -855,10 +855,10 @@ void UCartMesh::NodeCartesianId( darray3E const &P, int &i, int &j, int &k ){
  *  \param[in]  J       node linear index
  *  \return             node cartesian indices
  */
-iarray3E UCartMesh::NodeCartesianId( int const &J ){
+std::array<int,3> UCartMesh::NodeCartesianId( int const &J ){
 
     // Local variables
-    iarray3E    id ;
+    std::array<int,3>    id ;
 
     id[0] = J % np[0] ;
     id[2] = J / NodesInIJPlane;
@@ -922,10 +922,10 @@ int UCartMesh::NodeLinearId( int const &i, int const &j, int const &k ){
  *  \param[in]  id      node cartesian indices
  *  \return             node linear index
  */
-int UCartMesh::NodeLinearId( darray3E const &P ){
+int UCartMesh::NodeLinearId( std::array<double,3> const &P ){
 
     // Counters
-    iarray3E    id( NodeCartesianId(P) );
+    std::array<int,3>    id( NodeCartesianId(P) );
 
     return NodeLinearId(id); 
 
@@ -937,7 +937,7 @@ int UCartMesh::NodeLinearId( darray3E const &P ){
  *  \param[in]  id      node cartesian indices
  *  \return             node linear index
  */
-int UCartMesh::NodeLinearId( iarray3E const &id){
+int UCartMesh::NodeLinearId( std::array<int,3> const &id){
 
     return ( NodeLinearId(id[0], id[1], id[2] ) ); 
 
@@ -949,11 +949,11 @@ int UCartMesh::NodeLinearId( iarray3E const &id){
  *  \param[in]  i1      max cartesian indices
  *  \return             cell linear indices of subset mesh
  */
-ivector1D UCartMesh::CellSubSet( iarray3E const &i0, iarray3E const &i1 ){
+std::vector<int> UCartMesh::CellSubSet( std::array<int,3> const &i0, std::array<int,3> const &i1 ){
 
     int                     i, j, k; 
-    ivector1D               ids;
-    ivector1D::iterator     it;
+    std::vector<int>               ids;
+    std::vector<int>::iterator     it;
 
     i  =  i1[0]-i0[0]+1  ;
     j  =  i1[1]-i0[1]+1  ;
@@ -985,7 +985,7 @@ ivector1D UCartMesh::CellSubSet( iarray3E const &i0, iarray3E const &i1 ){
  *  \param[in]  I1      max linear indices
  *  \return             cell linear indices of subset mesh
  */
-ivector1D UCartMesh::CellSubSet( int const &I0, int const &I1 ){
+std::vector<int> UCartMesh::CellSubSet( int const &I0, int const &I1 ){
 
     return CellSubSet( CellCartesianId(I0), CellCartesianId(I1) ); 
 
@@ -998,7 +998,7 @@ ivector1D UCartMesh::CellSubSet( int const &I0, int const &I1 ){
  *  \param[in]  P1      max point
  *  \return             cell linear indices of subset mesh
  */
-ivector1D UCartMesh::CellSubSet( darray3E const &P0, darray3E const &P1 ){
+std::vector<int> UCartMesh::CellSubSet( std::array<double,3> const &P0, std::array<double,3> const &P1 ){
 
     return CellSubSet( CellCartesianId(P0), CellCartesianId(P1) ); 
 
@@ -1010,11 +1010,11 @@ ivector1D UCartMesh::CellSubSet( darray3E const &P0, darray3E const &P1 ){
  *  \param[in]  i1      max cartesian indices
  *  \return             node linear indices of subset mesh
  */
-ivector1D UCartMesh::NodeSubSet( iarray3E const &i0, iarray3E const &i1 ){
+std::vector<int> UCartMesh::NodeSubSet( std::array<int,3> const &i0, std::array<int,3> const &i1 ){
 
     int                     i, j, k; 
-    ivector1D               ids;
-    ivector1D::iterator     it;
+    std::vector<int>               ids;
+    std::vector<int>::iterator     it;
 
     i  =  i1[0]-i0[0]+1  ;
     j  =  i1[1]-i0[1]+1  ;
@@ -1046,7 +1046,7 @@ ivector1D UCartMesh::NodeSubSet( iarray3E const &i0, iarray3E const &i1 ){
  *  \param[in]  I1      max linear indices
  *  \return             node linear indices of subset mesh
  */
-ivector1D UCartMesh::NodeSubSet( int const &I0, int const &I1 ){
+std::vector<int> UCartMesh::NodeSubSet( int const &I0, int const &I1 ){
 
     return NodeSubSet( NodeCartesianId(I0), NodeCartesianId(I1) ); 
 
@@ -1059,7 +1059,7 @@ ivector1D UCartMesh::NodeSubSet( int const &I0, int const &I1 ){
  *  \param[in]  P1      max point
  *  \return             cell linear indices of subset mesh
  */
-ivector1D UCartMesh::NodeSubSet( darray3E const &P0, darray3E const &P1 ){
+std::vector<int> UCartMesh::NodeSubSet( std::array<double,3> const &P0, std::array<double,3> const &P1 ){
 
     return NodeSubSet( NodeCartesianId(P0), NodeCartesianId(P1) ); 
 
@@ -1070,7 +1070,7 @@ ivector1D UCartMesh::NodeSubSet( darray3E const &P0, darray3E const &P1 ){
  *  \param[in]  P      
  *  \return             true if point lies within grid
  */
-bool UCartMesh::PointInGrid(  darray3E const &P ){
+bool UCartMesh::PointInGrid(  std::array<double,3> const &P ){
 
     int     d;
 
@@ -1090,7 +1090,7 @@ bool UCartMesh::PointInGrid(  darray3E const &P ){
  *  \param[out] I       cartesian indices of cell containing the point      
  *  \return             true if point lies within grid
  */
-bool UCartMesh::PointInGrid( darray3E const &P, iarray3E &I){
+bool UCartMesh::PointInGrid( std::array<double,3> const &P, std::array<int,3> &I){
 
     int     d;
 
@@ -1114,10 +1114,10 @@ bool UCartMesh::PointInGrid( darray3E const &P, iarray3E &I){
  *  \param[out] k       third cartesian index of cell containing the point      
  *  \return             true if point lies within grid
  */
-bool UCartMesh::PointInGrid( darray3E const &P, int &i, int &j, int &k ){
+bool UCartMesh::PointInGrid( std::array<double,3> const &P, int &i, int &j, int &k ){
 
     bool        inGrid ;
-    iarray3E    I;
+    std::array<int,3>    I;
 
     if(PointInGrid(P,I) ){
 
@@ -1137,7 +1137,7 @@ bool UCartMesh::PointInGrid( darray3E const &P, int &i, int &j, int &k ){
  *  \param[out] I       linear index of cell containing the point      
  *  \return             true if point lies within grid
  */
-bool UCartMesh::PointInGrid( darray3E const &P, int &I ){
+bool UCartMesh::PointInGrid( std::array<double,3> const &P, int &I ){
 
     int     d;
 
@@ -1161,7 +1161,7 @@ bool UCartMesh::PointInGrid( darray3E const &P, int &I ){
  *  \param[out]     S   cell-vertex connectivity
  *  \param[out]     A   cell-cell adjacencies
  */
-void UCartMesh::Cart2Unstr( int &nV, int &nS, vector<darray3E> &V, ivector2D &S, ivector3D &A ){
+void UCartMesh::Cart2Unstr( int &nV, int &nS, vector<std::array<double,3>> &V, std::vector<std::vector<int>> &S, std::vector<std::vector<std::vector<int>>> &A ){
 
     // Local variables
     int         nv, ns;
@@ -1177,10 +1177,10 @@ void UCartMesh::Cart2Unstr( int &nV, int &nS, vector<darray3E> &V, ivector2D &S,
     V.resize(nV + nv);
 
     // Resize simplex list
-    S.resize(nS + ns, ivector1D(pow(2,dim), -1));
+    S.resize(nS + ns, std::vector<int>(pow(2,dim), -1));
 
     // Resize adjacency
-    A.resize(nS + ns, ivector2D(2*dim, ivector1D(1, -1)));
+    A.resize(nS + ns, std::vector<std::vector<int>>(2*dim, std::vector<int>(1, -1)));
 
     // ========================================================================== //
     // GENERATE VERTEX LIST                                                       //
@@ -1256,10 +1256,10 @@ void UCartMesh::ExportVtr(string dir, string filename) {
 
     class VTKOut : public bitpit::VTKRectilinearGrid{
         private:
-            dvector2D   *ptredge ;
+            std::vector<std::vector<double>>   *ptredge ;
 
         public:
-            VTKOut(string dir, string filename, dvector2D &edges) { 
+            VTKOut(string dir, string filename, std::vector<std::vector<double>> &edges) { 
                 setNames( dir, filename) ;
                 setCodex( bitpit::VTKFormat::APPENDED ) ;
                 ptredge = &edges ;
@@ -1305,11 +1305,11 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::
 
     class VTKOut : public bitpit::VTKRectilinearGrid{
         private:
-            dvector2D   *ptredge ;
-            dvector1D   *ptrdata ;
+            std::vector<std::vector<double>>   *ptredge ;
+            std::vector<double>   *ptrdata ;
 
         public:
-            VTKOut(string dir, string filename, dvector2D &edges, string dataname, bitpit::VTKLocation location, vector<double> &data){ 
+            VTKOut(string dir, string filename, std::vector<std::vector<double>> &edges, string dataname, bitpit::VTKLocation location, vector<double> &data){ 
                 setNames( dir, filename) ;
                 setCodex( bitpit::VTKFormat::APPENDED ) ;
                 ptredge = &edges ;
@@ -1358,16 +1358,16 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::
  *  \param[in]     location  Cell or point data ["Cell"/"Point"]
  *  \param[in]     data      data field
  */
-void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::VTKLocation location, ivector1D &data ) {
+void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::VTKLocation location, std::vector<int> &data ) {
 
 
     class VTKOut : public bitpit::VTKRectilinearGrid{
         private:
-            dvector2D   *ptredge ;
-            ivector1D   *ptrdata ;
+            std::vector<std::vector<double>>   *ptredge ;
+            std::vector<int>   *ptrdata ;
 
         public:
-            VTKOut(string dir, string filename, dvector2D &edges, string dataname, bitpit::VTKLocation location, ivector1D &data){ 
+            VTKOut(string dir, string filename, std::vector<std::vector<double>> &edges, string dataname, bitpit::VTKLocation location, std::vector<int> &data){ 
                 setNames( dir, filename) ;
                 setCodex( bitpit::VTKFormat::APPENDED ) ;
                 ptredge = &edges ;
@@ -1421,11 +1421,11 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::
 
     class VTKOut : public bitpit::VTKRectilinearGrid{
         private:
-            dvector2D                   *ptredge ;
+            std::vector<std::vector<double>>                   *ptredge ;
              vector<array<double,3>>    *ptrdata ;
 
         public:
-            VTKOut(string dir, string filename, dvector2D &edges, string dataname, bitpit::VTKLocation location, vector<array<double,3>> &data){ 
+            VTKOut(string dir, string filename, std::vector<std::vector<double>> &edges, string dataname, bitpit::VTKLocation location, vector<array<double,3>> &data){ 
                 setNames( dir, filename) ;
                 setCodex( bitpit::VTKFormat::APPENDED ) ;
                 ptredge = &edges ;
@@ -1586,11 +1586,11 @@ void UCartMesh::NodeData2CellData( vector<double> &NodeData, vector<double> &Cel
  *  \param[out]     weights weights associated to stencil
  *  \return         number of cells used in the interpolation stencil. 0 id point outside the grid
  */
-int UCartMesh::linearCellInterpolation( darray3E &P, vector<int> &stencil, vector<double> &weights ){
+int UCartMesh::linearCellInterpolation( std::array<double,3> &P, vector<int> &stencil, vector<double> &weights ){
 
     int                         nStencil(0) ;
     int                         d, i, j, k;
-    iarray3E                    i0, i1 ;
+    std::array<int,3>                    i0, i1 ;
     
     array< array<int,2>, 3>     cStencil ;
     array< array<double,2>, 3>  cWeights ;
@@ -1688,12 +1688,12 @@ int UCartMesh::linearCellInterpolation( darray3E &P, vector<int> &stencil, vecto
  *  \param[out]     weights weights associated to stencil
  *  \return         number of cells used in the interpolation stencil. 0 id point outside the grid
  */
-int UCartMesh::linearNodeInterpolation( darray3E &P, vector<int> &stencil, vector<double> &weights ){
+int UCartMesh::linearNodeInterpolation( std::array<double,3> &P, vector<int> &stencil, vector<double> &weights ){
 
 
     int                         nStencil(0) ;
     int                         d, i, j, k;
-    iarray3E                    i0, i1 ;
+    std::array<int,3>                    i0, i1 ;
 
     array< array<int,2>, 3>     cStencil ;
     array< array<double,2>, 3>  cWeights ;
