@@ -43,6 +43,9 @@
 
 using namespace std;
 
+namespace bitpit{
+namespace linearalgebra{
+
 /*!
  \ingroup   Solve
  \{
@@ -64,7 +67,7 @@ using namespace std;
         err = 2: matrix is singular to working precision
         err = 3: wrong dimensions
 */
-unsigned int bitpit::linearalgebra::LU(
+unsigned int factorizeLU(
     vector<vector<double> >         &A,
     vector<vector<double> >         &L,
     vector<vector<double> >         &U,
@@ -168,7 +171,7 @@ return(info); };
     \param[in] B r.h.s. of linear system
     \param[in,out] x on output store the solution of the linear system
 */
-void bitpit::linearalgebra::BackwardSubst(
+void backwardSubstitution(
     vector<vector<double> >         &A,
     vector<double>                  &B,
     vector<double>                  &x
@@ -237,7 +240,7 @@ return; };
     \param[in] B r.h.s. of linear system
     \param[in,out] x on output store the solution of the linear system
 */
-void bitpit::linearalgebra::ForwardSubst(
+void forwardSubstitution(
     vector<vector<double> >         &A,
     vector<double>                  &B,
     vector<double>                  &x
@@ -308,7 +311,7 @@ return; };
     \param[in] B r.h.s. of the linear system
     \param[in,out] x on output stores the solution of the linear system
 */
-void bitpit::linearalgebra::SolveLU(
+void solveLU(
     vector<vector<double> >         &A,
     vector<double>                  &B,
     vector<double>                  &x
@@ -329,7 +332,7 @@ vector<double> z, C;
 // ========================================================================== //
 // COMPUTE LU FACTORIZATION                                                   //
 // ========================================================================== //
-info = LU(A, L, U, P_);
+info = factorizeLU(A, L, U, P_);
 if ((info == 2) || (info == 3)) {
     return;
 }
@@ -340,10 +343,10 @@ matmul(P, B, C);
 // ========================================================================== //
 
 // Forward substitution
-ForwardSubst(L, C, z);
+forwardSubstitution(L, C, z);
 
 // Bacward substitution
-BackwardSubst(U, z, x);
+backwardSubstitution(U, z, x);
 
 return; };
 
@@ -351,3 +354,5 @@ return; };
 /*!
  \}
  */
+}
+}

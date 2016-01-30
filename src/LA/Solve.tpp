@@ -31,14 +31,14 @@ namespace linearalgebra{
 
 // -------------------------------------------------------------------------- //
 /*!
-    Solve a linear system of small dimenions using Cramer's rule.
+    Solve a linear system of small dimenions using cramer's rule.
 
     \param[in] A coeffs matrix
     \param[in] B r.h.s. of the linear system
     \param[in,out] x on output stores the solution to the linear system
 */
 template <class T>
-void Cramer(
+void cramer(
     std::vector< std::vector < T > >            &A,
     std::vector< T >                            &B,
     std::vector< T >                            &x
@@ -99,15 +99,15 @@ return; };
 
 // -------------------------------------------------------------------------- //
 /*!
-    Solve a linear system of small dimenions using Cramer's rule. Overloading
-    of Cramer() function for container array.
+    Solve a linear system of small dimenions using cramer's rule. Overloading
+    of cramer() function for container array.
 
     \param[in] A coeffs matrix
     \param[in] B r.h.s. of the linear system
     \param[in,out] x on output stores the solution to the linear system
 */
 template <class T, size_t m, size_t n>
-void Cramer(
+void cramer(
     std::array< std::array < T, n >, m >        &A,
     std::array< T, m >                          &B,
     std::array< T, n >                          &x
@@ -174,7 +174,7 @@ return; };
         err = 3: wrong dimensions
 */
 template<size_t m>
-unsigned int LU(
+unsigned int factorizeLU(
     std::array< std::array < double, m >, m >   &A,
     std::array< std::array < double, m >, m >   &L,
     std::array< std::array < double, m >, m >   &U,
@@ -268,14 +268,14 @@ return(info); };
 // -------------------------------------------------------------------------- //
 /*!
     Solve a lower triangular system using backward substitution. Overloading
-    of BackwardSubst() for container array.
+    of backwardSubstitution() for container array.
 
     \param[in] A coeffs matrix
     \param[in] B r.h.s. of the linear system
     \param[in] x on output stores the solution to the linear system
 */
 template<size_t m>
-void BackwardSubst(
+void backwardSubstitution(
     std::array< std::array < double, m >, m >   &A,
     std::array< double, m >                     &B,
     std::array< double, m >                     &x
@@ -323,14 +323,14 @@ return; };
 // -------------------------------------------------------------------------- //
 /*!
     Solve a upper triangular system using forward substitution. Overloading
-    of ForwardSubst() for container array.
+    of forwardSubstitution() for container array.
 
     \param[in] A coeffs matrix
     \param[in] B r.h.s. of the linear system
     \param[in] x on output stores the solution to the linear system
 */
 template<size_t m>
-void ForwardSubst(
+void forwardSubstitution(
     std::array< std::array < double, m >, m >   &A,
     std::array< double, m >                     &B,
     std::array< double, m >                     &x
@@ -386,7 +386,7 @@ return; };
     \param[in,out] x on output stores the solution to the linear system
 */
 template<size_t m>
-void SolveLU(
+void solveLU(
     std::array< std::array< double, m >, m >    &A,
     std::array< double, m >                     &B,
     std::array< double, m >                     &x
@@ -407,7 +407,7 @@ std::array<double, m>            z, C;
 // ========================================================================== //
 // COMPUTE LU FACTORIZATION                                                   //
 // ========================================================================== //
-info = LU(A, L, U, P_);
+info = factorizeLU(A, L, U, P_);
 if ((info == 2) || (info == 3)) {
     return;
 }
@@ -418,10 +418,10 @@ matmul(P, B, C);
 // ========================================================================== //
 
 // Forward substitution
-ForwardSubst(L, C, z);
+forwardSubstitution(L, C, z);
 
 // Bacward substitution
-BackwardSubst(U, z, x);
+backwardSubstitution(U, z, x);
 
 return; };
 
