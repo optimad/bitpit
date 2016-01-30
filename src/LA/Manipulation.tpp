@@ -202,58 +202,6 @@ for (i = 0; i < m; i++) {
 
 return B; };
 
-
-// ----------------------------------------------------------------------------------- //
-/*!
-    Compute matrix transpose.
-
-    \param[in] M input matrix
-    
-    \result transpose of M
-*/
-template <class T>
-std::vector < std::vector<T> > Transpose(
-    const std::vector< std::vector<T>>          &M
-) {
-
-    int n = M.size();
-    int m = M[0].size() ;
-    std::vector< std::vector<T> >   z(m, std::vector<T>(n, 0.0));
-
-    for( int i=0; i<m; i++){
-        for(int j=0; j<n; j++){
-            z[i][j] = M[j][i];
-        };
-    };
-
-    return (z);
-};
-
-// ----------------------------------------------------------------------------------- //
-/*!
-    Compute matrix transpose. Overloading of Transpose() function for container
-    array.
-
-    \param[in] M input matrix
-    
-    \result transpose of M
-*/
-template <class T, size_t m, size_t n>
-std::array< std::array<T, n>, m> Transpose(
-    const std::array< std::array<T, m>, n>      &M
-) {
-
-    std::array< std::array<T, n> ,m>      z;
-
-    for( int i=0; i<m; i++){
-        for(int j=0; j<n; j++){
-            z[i][j] = M[j][i];
-        };
-    };
-
-    return (z);
-};
-
 // -------------------------------------------------------------------------- //
 /*!
     Given an input matrix A, compute the complement of the element A[i][j].

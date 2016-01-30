@@ -52,7 +52,7 @@ namespace linearalgebra{
     \param[in] A matrix to be displayed
 */
 template<class T>
-void display_matrix(
+void display(
     std::ostream                                &out,
     std::vector< std::vector< T > >             &A
 ) {
@@ -79,13 +79,13 @@ return; };
 // -------------------------------------------------------------------------- //
 /*!
     Display matrix to output stream in a nicely formatted form.
-    Overloading of display_matrix() function for container array.
+    Overloading of display() function for container array.
 
     \param[in,out] out output stream
     \param[in] A matrix to be displayed
 */
 template<class T, size_t m, size_t n>
-void display_matrix(
+void display(
     std::ostream                                &out,
     std::array<std::array<T, n>, m>             &A
 ) {
