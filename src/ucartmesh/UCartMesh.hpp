@@ -22,34 +22,32 @@
 # include <vector>
 # include <string>
 
-# include <bitpit_operators.hpp>
-# include <bitpit_IO.hpp>
-
+# include <VTK.hpp>
 
 class UCartMesh{
 
     // Members ============================================================== //
     private:
-        int                                 status ;                            /**< indentifier for mesh status; is incresed each time mesh is moified */
+        int                                 m_status ;                            /**< indentifier for mesh status; is incresed each time mesh is moified */
 
-        int                                 dim;                                /**< number of space dimensions*/
-        int                                 nCells ;                            /**< number of cells in grid*/
-        int                                 nNodes ;                            /**< number of nodes in grid*/
-        int                                 CellsInIJPlane;                     /**< number of cells in the IJ plane*/
-        int                                 NodesInIJPlane;                     /**< number of nodes in the IJ plane*/
+        int                                 m_dim;                                /**< number of space dimensions*/
+        int                                 m_nCells ;                            /**< number of cells in grid*/
+        int                                 m_nNodes ;                            /**< number of nodes in grid*/
+        int                                 m_CellsInIJPlane;                     /**< number of cells in the IJ plane*/
+        int                                 m_NodesInIJPlane;                     /**< number of nodes in the IJ plane*/
 
-        std::array<double,3>                B0;                                 /**< min point of axis aligned boundig box*/
-        std::array<double,3>                B1;                                 /**< max point of axis aligned boundig box*/
+        std::array<double,3>                m_B0;                                 /**< min point of axis aligned boundig box*/
+        std::array<double,3>                m_B1;                                 /**< max point of axis aligned boundig box*/
 
-        std::array<int,3>                   nc;                                 /**< number of cells in each direction; if 2D nc[2]=1 anyway */
-        std::array<int,3>                   np;                                 /**< number of nodes in each direction; if 2D np[2]=1 anyway */
-        std::array<double,3>                h;                                  /**< grid spacing in each direction*/
+        std::array<int,3>                   m_nc;                                 /**< number of cells in each direction; if 2D nc[2]=1 anyway */
+        std::array<int,3>                   m_np;                                 /**< number of nodes in each direction; if 2D np[2]=1 anyway */
+        std::array<double,3>                m_h;                                  /**< grid spacing in each direction*/
 
-        std::vector<std::vector<double>>    center;                             /**< center coordinates in each direction */
-        std::vector<std::vector<double>>    edge;                               /**< node coordinates in each direction */
+        std::vector<std::vector<double>>    m_center;                             /**< center coordinates in each direction */
+        std::vector<std::vector<double>>    m_edge;                               /**< node coordinates in each direction */
 
-        std::array<int,6>                   whichDirection ;                    /**< maps face indices [0...5] to space direction [0...2] */
-        std::array<int,6>                   whichStep ;                         /**< maps face indices [0...5] to positive or negative steps */
+        std::array<int,6>                   m_whichDirection ;                    /**< maps face indices [0...5] to space direction [0...2] */
+        std::array<int,6>                   m_whichStep ;                         /**< maps face indices [0...5] to positive or negative steps */
 
         // Constructors, Destructor, assignment================================== //
     public:
@@ -63,12 +61,8 @@ class UCartMesh{
 
         UCartMesh&              operator=( const UCartMesh & ) ;
         void                    setMesh( std::array<double,3> const &, std::array<double,3> const &, std::array<int,3> const &, int const &dim=3 ) ;
-        void                    ClearMesh( ) ;
+        void                    clearMesh( ) ;
 
-    private:
-        void                    ResizeMesh( ) ;
-
-    public:
         int                     getNCells();
         int                     getNCells( int );
 
@@ -84,24 +78,24 @@ class UCartMesh{
         int                     getStatus() ;
 
         // Transformations ------------------------------------------------------ //
-        void                    Translate( std::array<double,3> const & ) ;
+        void                    translate( std::array<double,3> const & ) ;
 
-        void                    Scale( std::array<double,3> const & ) ; 
-        void                    Scale( std::array<double,3> const &, std::array<double,3> const & ) ; 
+        void                    scale( std::array<double,3> const & ) ; 
+        void                    scale( std::array<double,3> const &, std::array<double,3> const & ) ; 
 
 
         // Cell information ----------------------------------------------------- //
-        std::array<int,3>       CellCartesianId( std::array<double,3> const & ) ;
-        void                    CellCartesianId( std::array<double,3> const &, int &, int & ) ;
-        void                    CellCartesianId( std::array<double,3> const &, int &, int &, int & ) ;
+        std::array<int,3>       getCellCartesianId( std::array<double,3> const & ) ;
+        void                    getCellCartesianId( std::array<double,3> const &, int &, int & ) ;
+        void                    getCellCartesianId( std::array<double,3> const &, int &, int &, int & ) ;
 
-        std::array<int,3>       CellCartesianId( int const & ) ; 
-        void                    CellCartesianId( int const &, int &, int & ) ; 
-        void                    CellCartesianId( int const &, int &, int &, int & ) ; 
+        std::array<int,3>       getCellCartesianId( int const & ) ; 
+        void                    getCellCartesianId( int const &, int &, int & ) ; 
+        void                    getCellCartesianId( int const &, int &, int &, int & ) ; 
 
-        int                     CellLinearId( std::array<double,3> const & ) ;
-        int                     CellLinearId( std::array<int,3> const & ) ;
-        int                     CellLinearId( int const &, int const &, int const & k=0 ) ;
+        int                     getCellLinearId( std::array<double,3> const & ) ;
+        int                     getCellLinearId( std::array<int,3> const & ) ;
+        int                     getCellLinearId( int const &, int const &, int const & k=0 ) ;
 
         std::array<double,3>    getCellCenter( int ) ;
         std::array<double,3>    getCellCenter( std::array<int,3> ) ;
@@ -117,17 +111,17 @@ class UCartMesh{
 
 
         // Node information ----------------------------------------------------- //
-        std::array<int,3>       NodeCartesianId( std::array<double,3> const & ) ;
-        void                    NodeCartesianId( std::array<double,3> const &, int &, int & ) ;
-        void                    NodeCartesianId( std::array<double,3> const &, int &, int &, int & ) ;
+        std::array<int,3>       getNodeCartesianId( std::array<double,3> const & ) ;
+        void                    getNodeCartesianId( std::array<double,3> const &, int &, int & ) ;
+        void                    getNodeCartesianId( std::array<double,3> const &, int &, int &, int & ) ;
 
-        std::array<int,3>       NodeCartesianId( int const & ) ;
-        void                    NodeCartesianId( int const &, int &, int & ) ;
-        void                    NodeCartesianId( int const &, int &, int &, int & ) ;
+        std::array<int,3>       getNodeCartesianId( int const & ) ;
+        void                    getNodeCartesianId( int const &, int &, int & ) ;
+        void                    getNodeCartesianId( int const &, int &, int &, int & ) ;
 
-        int                     NodeLinearId( std::array<double,3> const & ) ;
-        int                     NodeLinearId( std::array<int,3> const & ) ;
-        int                     NodeLinearId( int const &, int const &, int const & k=0 ) ;
+        int                     getNodeLinearId( std::array<double,3> const & ) ;
+        int                     getNodeLinearId( std::array<int,3> const & ) ;
+        int                     getNodeLinearId( int const &, int const &, int const & k=0 ) ;
 
         std::array<double,3>    getNodeCoordinates( int ) ;
         std::array<double,3>    getNodeCoordinates( std::array<int,3> ) ;
@@ -138,37 +132,37 @@ class UCartMesh{
 
 
         // Format conversion ---------------------------------------------------- //
-        void                    Cart2Unstr( int &, int &, std::vector<std::array<double,3>> &, std::vector<std::vector<int>> &, std::vector<std::vector<std::vector<int>>> & ) ;
+        void                    convertToUnstructured( int &, int &, std::vector<std::array<double,3>> &, std::vector<std::vector<int>> &, std::vector<std::vector<std::vector<int>>> & ) ;
 
 
         // subsets  ------------------------------------------------------------- //
-        std::vector<int>        CellSubSet( int const &, int const & ) ;
-        std::vector<int>        CellSubSet( std::array<int,3> const &, std::array<int,3> const & ) ;
-        std::vector<int>        CellSubSet( std::array<double,3> const &, std::array<double,3> const & ) ;
+        std::vector<int>        extractCellSubSet( int const &, int const & ) ;
+        std::vector<int>        extractCellSubSet( std::array<int,3> const &, std::array<int,3> const & ) ;
+        std::vector<int>        extractCellSubSet( std::array<double,3> const &, std::array<double,3> const & ) ;
 
-        std::vector<int>        NodeSubSet( int const &, int const & ) ;
-        std::vector<int>        NodeSubSet( std::array<int,3> const &, std::array<int,3> const & ) ;
-        std::vector<int>        NodeSubSet( std::array<double,3> const &, std::array<double,3> const & ) ;
+        std::vector<int>        extractNodeSubSet( int const &, int const & ) ;
+        std::vector<int>        extractNodeSubSet( std::array<int,3> const &, std::array<int,3> const & ) ;
+        std::vector<int>        extractNodeSubSet( std::array<double,3> const &, std::array<double,3> const & ) ;
 
 
         // Point in Grid -------------------------------------------------------- //
-        bool                    PointInGrid( std::array<double,3> const & ) ;
-        bool                    PointInGrid( std::array<double,3> const &, int &) ;
-        bool                    PointInGrid( std::array<double,3> const &, std::array<int,3> &) ;
-        bool                    PointInGrid( std::array<double,3> const &, int &, int &, int &) ;
+        bool                    isPointInGrid( std::array<double,3> const & ) ;
+        bool                    isPointInGrid( std::array<double,3> const &, int &) ;
+        bool                    isPointInGrid( std::array<double,3> const &, std::array<int,3> &) ;
+        bool                    isPointInGrid( std::array<double,3> const &, int &, int &, int &) ;
 
         // Interpolation -------------------------------------------------------- //
         int                     linearCellInterpolation( std::array<double,3> &, std::vector<int> &, std::vector<double> & ) ;
         int                     linearNodeInterpolation( std::array<double,3> &, std::vector<int> &, std::vector<double> & ) ;
 
-        void                    CellData2NodeData( std::vector<double> &, std::vector<double> & ) ;
-        void                    NodeData2CellData( std::vector<double> &, std::vector<double> & ) ;
+        void                    convertCellDataToNodeData( std::vector<double> &, std::vector<double> & ) ;
+        void                    convertNodeDataToCellData( std::vector<double> &, std::vector<double> & ) ;
 
         // I/O methods --------------------------------------------------------- //                   
-        void                    ExportVtr(std::string, std::string);
-        void                    ExportVtr(std::string, std::string, std::string, bitpit::VTKLocation, std::vector<double> &);
-        void                    ExportVtr(std::string, std::string, std::string, bitpit::VTKLocation, std::vector<int> &);
-        void                    ExportVtr(std::string, std::string, std::string, bitpit::VTKLocation, std::vector<std::array<double,3>> &);
+        void                    exportVTR(std::string, std::string);
+        void                    exportVTR(std::string, std::string, std::string, bitpit::VTKLocation, std::vector<double> &);
+        void                    exportVTR(std::string, std::string, std::string, bitpit::VTKLocation, std::vector<int> &);
+        void                    exportVTR(std::string, std::string, std::string, bitpit::VTKLocation, std::vector<std::array<double,3>> &);
 
 };
 

@@ -80,20 +80,20 @@ void Demo2D_UCartMesh(
 
         Mesh1.setMesh(B0, B1, nc, 2);
         Mesh2 = Mesh1;
-        Mesh2.ExportVtr("./","original");
+        Mesh2.exportVTR("./","original");
 
         // Scale mesh ----------------------------------------------------------- //
         std::array<double,3>        scale;
         scale.fill(2.0) ;
 
-        Mesh2.Scale(scale);
-        Mesh2.ExportVtr("./","scaled");
+        Mesh2.scale(scale);
+        Mesh2.exportVTR("./","scaled");
 
         // Translate mesh ------------------------------------------------------- //
         std::array<double,3>        transl;
         transl[0] = -0.507;    transl[1] = -0.523;    transl[2] = 0.0 ;
-        Mesh2.Translate(transl);
-        Mesh2.ExportVtr("./","translated");
+        Mesh2.translate(transl);
+        Mesh2.exportVTR("./","translated");
 
     }
 
@@ -145,10 +145,10 @@ void Demo2D_UCartMesh(
         } //next j
 
         // Export vectorial data ------------------------------------------------ //
-        Mesh1.ExportVtr("./", "2Doriginal_CSdata", "data", bitpit::VTKLocation::CELL, Scalar1);
-        Mesh2.ExportVtr("./", "2Dmapped_CSdata", "data", bitpit::VTKLocation::CELL, Scalar2);
-        Mesh1.ExportVtr("./", "2Doriginal_CVdata", "data", bitpit::VTKLocation::CELL, Vectorial1);
-        Mesh2.ExportVtr("./", "2Dmapped_CVdata", "data", bitpit::VTKLocation::CELL, Vectorial2);
+        Mesh1.exportVTR("./", "2Doriginal_CSdata", "data", bitpit::VTKLocation::CELL, Scalar1);
+        Mesh2.exportVTR("./", "2Dmapped_CSdata", "data", bitpit::VTKLocation::CELL, Scalar2);
+        Mesh1.exportVTR("./", "2Doriginal_CVdata", "data", bitpit::VTKLocation::CELL, Vectorial1);
+        Mesh2.exportVTR("./", "2Dmapped_CVdata", "data", bitpit::VTKLocation::CELL, Vectorial2);
     }
 
 
@@ -203,10 +203,10 @@ void Demo2D_UCartMesh(
         } //next j
 
         // Export vectorial data ------------------------------------------------ //
-        Mesh1.ExportVtr("./", "2Doriginal_PSdata", "data", bitpit::VTKLocation::POINT, Scalar1);
-        Mesh2.ExportVtr("./", "2Dmapped_PSdata", "data", bitpit::VTKLocation::POINT, Scalar2);
-        Mesh1.ExportVtr("./", "2Doriginal_PVdata", "data", bitpit::VTKLocation::POINT, Vectorial1);
-        Mesh2.ExportVtr("./", "2Dmapped_PVdata", "data", bitpit::VTKLocation::POINT, Vectorial2);
+        Mesh1.exportVTR("./", "2Doriginal_PSdata", "data", bitpit::VTKLocation::POINT, Scalar1);
+        Mesh2.exportVTR("./", "2Dmapped_PSdata", "data", bitpit::VTKLocation::POINT, Scalar2);
+        Mesh1.exportVTR("./", "2Doriginal_PVdata", "data", bitpit::VTKLocation::POINT, Vectorial1);
+        Mesh2.exportVTR("./", "2Dmapped_PVdata", "data", bitpit::VTKLocation::POINT, Vectorial2);
 
     }
 

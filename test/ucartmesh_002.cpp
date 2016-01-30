@@ -81,20 +81,20 @@ void Demo3D_UCartMesh(
 
         Mesh1.setMesh(B0, B1, nc,3);
         Mesh2 = Mesh1;
-        Mesh2.ExportVtr("./","original");
+        Mesh2.exportVTR("./","original");
 
         // Scale mesh ----------------------------------------------------------- //
         std::array<double,3>        scale;
         scale.fill(2.0) ;
 
-        Mesh2.Scale(scale);
-        Mesh2.ExportVtr("./","scaled");
+        Mesh2.scale(scale);
+        Mesh2.exportVTR("./","scaled");
 
         // Translate mesh ------------------------------------------------------- //
         std::array<double,3>        transl;
         transl[0] = -0.507;    transl[1] = -0.523;    transl[2] = -0.497;
-        Mesh2.Translate(transl);
-        Mesh2.ExportVtr("./","translated");
+        Mesh2.translate(transl);
+        Mesh2.exportVTR("./","translated");
 
     }
 
@@ -149,10 +149,10 @@ void Demo3D_UCartMesh(
         } //next i
 
         // Export vectorial data ------------------------------------------------ //
-        Mesh1.ExportVtr("./", "3Doriginal_CSdata", "data", bitpit::VTKLocation::CELL, Scalar1);
-        Mesh2.ExportVtr("./", "3Dmapped_CSdata", "data", bitpit::VTKLocation::CELL, Scalar2);
-        Mesh1.ExportVtr("./", "3Doriginal_CVdata", "data", bitpit::VTKLocation::CELL, Vectorial1);
-        Mesh2.ExportVtr("./", "3Dmapped_CVdata", "data", bitpit::VTKLocation::CELL, Vectorial2);
+        Mesh1.exportVTR("./", "3Doriginal_CSdata", "data", bitpit::VTKLocation::CELL, Scalar1);
+        Mesh2.exportVTR("./", "3Dmapped_CSdata", "data", bitpit::VTKLocation::CELL, Scalar2);
+        Mesh1.exportVTR("./", "3Doriginal_CVdata", "data", bitpit::VTKLocation::CELL, Vectorial1);
+        Mesh2.exportVTR("./", "3Dmapped_CVdata", "data", bitpit::VTKLocation::CELL, Vectorial2);
     }
 
 
@@ -181,7 +181,7 @@ void Demo3D_UCartMesh(
             for (j = 0; j < Mesh1.getNNodes(1); j++) {
                 for (i = 0; i < Mesh1.getNNodes(0); i++) {
                     P = Mesh1.getNodeCoordinates(i,j,k);
-                    J   =   Mesh1.NodeLinearId( i, j, k ) ;
+                    J   =   Mesh1.getNodeLinearId( i, j, k ) ;
 
                     Scalar1[J]       = P[0] + P[1] + P[2] + 1.0;
                     Vectorial1[J][0] = P[0] + P[1] + P[2] + 1.0;
@@ -211,10 +211,10 @@ void Demo3D_UCartMesh(
         } //next i
 
         // Export vectorial data ------------------------------------------------ //
-        Mesh1.ExportVtr("./", "3Doriginal_PSdata", "data", bitpit::VTKLocation::POINT, Scalar1);
-        Mesh2.ExportVtr("./", "3Dmapped_PSdata", "data", bitpit::VTKLocation::POINT, Scalar2);
-        Mesh1.ExportVtr("./", "3Doriginal_PVdata", "data", bitpit::VTKLocation::POINT, Vectorial1);
-        Mesh2.ExportVtr("./", "3Dmapped_PVdata", "data", bitpit::VTKLocation::POINT, Vectorial2);
+        Mesh1.exportVTR("./", "3Doriginal_PSdata", "data", bitpit::VTKLocation::POINT, Scalar1);
+        Mesh2.exportVTR("./", "3Dmapped_PSdata", "data", bitpit::VTKLocation::POINT, Scalar2);
+        Mesh1.exportVTR("./", "3Doriginal_PVdata", "data", bitpit::VTKLocation::POINT, Vectorial1);
+        Mesh2.exportVTR("./", "3Dmapped_PVdata", "data", bitpit::VTKLocation::POINT, Vectorial2);
 
     }
 

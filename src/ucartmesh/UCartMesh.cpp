@@ -3,12 +3,12 @@
  *  @{
  */
 
+# include <bitpit_operators.hpp>
+# include <bitpit_IO.hpp>
+
 #include "UCartMesh.hpp"
 
-# include "Operators.hpp"
-# include "VTK.hpp"
-
-using namespace std;
+//using namespace std;
 
 // ========================================================================== //
 // METHODS IMPLEMENTATIONS FOR UCartMesh                              //
@@ -22,37 +22,38 @@ using namespace std;
  */
 UCartMesh::UCartMesh( ){
 
-    dim = 3 ;
+    m_dim = 3 ;
 
     // Mesh extent
-    B0.fill(0.0) ;
-    B1.fill(0.0) ;
+    m_B0.fill(0.0) ;
+    m_B1.fill(0.0) ;
 
     // Mesh size
-    nc.fill(0);
+    m_nc.fill(0);
+    m_np.fill(0);
 
-    center.resize(3) ;
-    edge.resize(3) ;
+    m_center.resize(3) ;
+    m_edge.resize(3) ;
 
     // Mesh spacing
-    h.fill(0.0);
+    m_h.fill(0.0);
 
 
-    whichDirection[0] = 0 ;
-    whichDirection[1] = 0 ;
-    whichDirection[2] = 1 ;
-    whichDirection[3] = 1 ;
-    whichDirection[4] = 2 ;
-    whichDirection[5] = 2 ;
+    m_whichDirection[0] = 0 ;
+    m_whichDirection[1] = 0 ;
+    m_whichDirection[2] = 1 ;
+    m_whichDirection[3] = 1 ;
+    m_whichDirection[4] = 2 ;
+    m_whichDirection[5] = 2 ;
 
-    whichStep[0] = -1 ;
-    whichStep[1] = +1 ;
-    whichStep[2] = -1 ;
-    whichStep[3] = +1 ;
-    whichStep[4] = -1 ;
-    whichStep[5] = +1 ;
+    m_whichStep[0] = -1 ;
+    m_whichStep[1] = +1 ;
+    m_whichStep[2] = -1 ;
+    m_whichStep[3] = +1 ;
+    m_whichStep[4] = -1 ;
+    m_whichStep[5] = +1 ;
 
-    status = 0;
+    m_status = 0;
 
 };
 
@@ -67,7 +68,7 @@ UCartMesh::UCartMesh( ){
 UCartMesh::UCartMesh( std::array<double,3> const &P0, std::array<double,3> const &P1, std::array<int,3> const &N, int const dimension) :UCartMesh(){
 
     setMesh( P0, P1, N, dimension);
-    status = 0 ;
+    m_status = 0 ;
 
 };
 
@@ -84,7 +85,7 @@ UCartMesh::UCartMesh( std::array<double,3> const &P0, std::array<double,3> const
     std::array<int,3>    N={I,J,1} ;     
 
     setMesh( P0, P1, N, 2);
-    status = 0 ;
+    m_status = 0 ;
 
 };
 
@@ -102,7 +103,7 @@ UCartMesh::UCartMesh( std::array<double,3> const &P0, std::array<double,3> const
     std::array<int,3>    N={I,J,K} ;     
 
     setMesh( P0, P1, N, 3);
-    status = 0 ;
+    m_status = 0 ;
 
 };
 
@@ -113,8 +114,8 @@ UCartMesh::UCartMesh( std::array<double,3> const &P0, std::array<double,3> const
 UCartMesh::~UCartMesh( ){
 
     for( int d=0; d<3; ++d){
-        std::vector<double>().swap(center[d]);
-        std::vector<double>().swap(edge[d]);
+        std::vector<double>().swap(m_center[d]);
+        std::vector<double>().swap(m_edge[d]);
     };
 
 
@@ -128,29 +129,11 @@ UCartMesh& UCartMesh::operator=(
         const UCartMesh &B
         ) {
 
+    setMesh( B.m_B0, m_B1, B.m_nc, B.m_dim) ;
 
-    // Number of cells
-    nc = B.nc;
-    np = B.np;
-
-    h = B.h;
-
-    CellsInIJPlane = B.CellsInIJPlane ;
-    NodesInIJPlane = B.NodesInIJPlane ;
-
-    nCells = B.nCells ;
-    nNodes = B.nNodes ;
-
-    // Mesh limits
-    B0 = B.B0;
-    B1 = B.B1;
-
-    // Resize mesh data structure ----------------------------------------------- //
-    ResizeMesh();
-
-    // Copy cell edges and cell centers ----------------------------------------- //
-    edge = B.edge;
-    center = B.center;
+    // Copy cell m_edges and cell m_centers ----------------------------------------- //
+    m_edge = B.m_edge;
+    m_center = B.m_center;
 
     return(*this); 
 };
@@ -167,99 +150,89 @@ void UCartMesh::setMesh( std::array<double,3> const & A0, std::array<double,3> c
     // Counters
     int       i, d;
 
-    dim             = dims ;
-    nc              = N ;
-    np              = N + 1;
+    m_dim             = dims ;
+    m_nc              = N ;
+    m_np              = N + 1;
 
-    if( dim ==2 ){
-        nc[2] = 1 ;
-        np[2] = 1 ;
+    if( m_dim ==2 ){
+        m_nc[2] = 1 ;
+        m_np[2] = 1 ;
     };
 
-    nCells          = nc[0]*nc[1]*nc[2] ;
-    nNodes         = np[0]*np[1]*np[2] ;
-    CellsInIJPlane  = nc[0]*nc[1] ;
-    NodesInIJPlane = np[0]*np[1] ;
+    // Number of mesh cells
+    m_nCells          = m_nc[0]*m_nc[1]*m_nc[2] ;
+    m_nNodes         = m_np[0]*m_np[1]*m_np[2] ;
+    m_CellsInIJPlane  = m_nc[0]*m_nc[1] ;
+    m_NodesInIJPlane = m_np[0]*m_np[1] ;
 
 
     // Mesh limits
-    B0 = A0 ;
-    B1 = A1 ;
+    m_B0 = A0 ;
+    m_B1 = A1 ;
 
-    // Number of mesh cells
 
     // Resize mesh data structure ----------------------------------------------- //
-    ResizeMesh();
+    for( d=0; d<3; ++d){
+        m_center[d].resize( m_nc[d], 0.0 ) ;
+        m_edge[d].resize( m_np[d], 0.0);
+    };
 
     // Create mesh -------------------------------------------------------------- //
 
     // Mesh spacing
-    for( d=0; d<dim; ++d){
-        h[d] = (B1[d] - B0[d])/((double) nc[d]);
+    for( d=0; d<m_dim; ++d){
+        m_h[d] = (m_B1[d] - m_B0[d])/((double) m_nc[d]);
     };
 
     // vetices
-    for( d=0; d<dim; ++d){
+    for( d=0; d<m_dim; ++d){
 
-        for( i=0; i<np[d]; ++i){
-            edge[d][i] = B0[d] + ((double) i) * h[d];
+        for( i=0; i<m_np[d]; ++i){
+            m_edge[d][i] = m_B0[d] + ((double) i) * m_h[d];
         };
 
     };
 
+    // Cells m_centers
+    for( d=0; d<m_dim; ++d){
 
-    // Cells centers
-    for( d=0; d<dim; ++d){
-
-        for( i=0; i<nc[d]; ++i){
-            center[d][i] = edge[d][i] + 0.5 *h[d] ;
+        for( i=0; i<m_nc[d]; ++i){
+            m_center[d][i] = m_edge[d][i] + 0.5 *m_h[d] ;
         };
     };
 
-    status++ ;
+    m_status++ ;
 
     return; 
 
 };
 
 /* -------------------------------------------------------------------------- */
-/*!  Get status of mesh; staus is increased each time mesh is modified
+/*!  Clears the mesh data
  *   \return void
  */
-void UCartMesh::ClearMesh( ){
+void UCartMesh::clearMesh( ){
 
     // Mesh limits
-    B0.fill(0.0) ;
-    B1.fill(0.0) ;
+    m_B0.fill(0.0) ;
+    m_B1.fill(0.0) ;
 
-    h.fill(0.0) ;
+    m_h.fill(0.0) ;
 
     // Number of cells
-    nc.fill(0) ;
-    np.fill(0) ;
+    m_nc.fill(0) ;
+    m_np.fill(0) ;
 
     // Resize mesh data structure
-    ResizeMesh();
+    for( int d=0; d<3; ++d){
+        m_center[d].clear() ;
+        m_edge[d].clear() ;
+    };
 
-    status++ ;
+    m_status++ ;
 
     return; 
 }
-
-/* -------------------------------------------------------------------------- */
-/*!  Resize of data structures of UCartMesh
- */
-void UCartMesh::ResizeMesh( ){
-
-    int d ;  
-
-    for( d=0; d<3; ++d){
-        center[d].resize( nc[d], 0.0 ) ;
-        edge[d].resize( np[d], 0.0);
-    };
-
-    return; 
-};
 
 /* -------------------------------------------------------------------------- */
 /*!  Get number of cells 
@@ -267,7 +240,7 @@ void UCartMesh::ResizeMesh( ){
  */
 int UCartMesh::getNCells(){
 
-    return nCells ;
+    return m_nCells ;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -277,7 +250,7 @@ int UCartMesh::getNCells(){
  */
 int UCartMesh::getNCells( int d){
 
-    return nc[d] ;
+    return m_nc[d] ;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -286,7 +259,7 @@ int UCartMesh::getNCells( int d){
  */
 int UCartMesh::getNNodes(){
 
-    return nNodes  ;
+    return m_nNodes  ;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -296,7 +269,7 @@ int UCartMesh::getNNodes(){
  */
 int UCartMesh::getNNodes( int d){
 
-    return np[d]  ;
+    return m_np[d]  ;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -304,7 +277,7 @@ int UCartMesh::getNNodes( int d){
  *  \return mesh spacing in all directions 
  */
 std::array<double,3>    UCartMesh::getSpacing(){
-    return h ;
+    return m_h ;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -313,7 +286,7 @@ std::array<double,3>    UCartMesh::getSpacing(){
  *  \return mesh spacing in direction 
  */
 double      UCartMesh::getSpacing( int d){
-    return h[d] ;
+    return m_h[d] ;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -321,7 +294,7 @@ double      UCartMesh::getSpacing( int d){
  *  \return mesh dimension
  */
 int      UCartMesh::getDimension( ){
-    return dim ;
+    return m_dim ;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -331,8 +304,8 @@ int      UCartMesh::getDimension( ){
  */
 void UCartMesh::getBoundingBox( std::array<double,3> &A0, std::array<double,3> &A1){
 
-    A0 = B0; 
-    A1 = B1; 
+    A0 = m_B0; 
+    A1 = m_B1; 
 
     return ;
 }
@@ -343,7 +316,7 @@ void UCartMesh::getBoundingBox( std::array<double,3> &A0, std::array<double,3> &
  */
 int UCartMesh::getStatus(  ){
 
-    return  status ;
+    return  m_status ;
 
 };
 
@@ -351,62 +324,62 @@ int UCartMesh::getStatus(  ){
 /*! Tanslate mesh by given offset
  *  \param[in]  ds      offset
  */
-void UCartMesh::Translate( std::array<double,3> const &ds ){ 
+void UCartMesh::translate( std::array<double,3> const &ds ){ 
 
     // Counters
     int     d;
 
     // Mesh limits
-    B0 = B0 + ds;
-    B1 = B1 + ds;
+    m_B0 = m_B0 + ds;
+    m_B1 = m_B1 + ds;
 
-    // Cells edges
-    for( d=0; d<dim; ++d){
-        edge[d] = edge[d] + ds[d] ;
-        center[d] = center[d] + ds[d] ;
+    // Cells m_edges
+    for( d=0; d<m_dim; ++d){
+        m_edge[d] = m_edge[d] + ds[d] ;
+        m_center[d] = m_center[d] + ds[d] ;
     };
 
-    status++ ;
+    m_status++ ;
 
     return; 
 };
 
 /* -------------------------------------------------------------------------- */
-/*! Scale mesh with respect to given origin by given factor 
+/*! scale mesh with respect to given origin by given factor 
  *  \param[in]  s       scale factor
  *  \param[in]  origin  scale origin
  */
-void UCartMesh::Scale( std::array<double,3> const &s, std::array<double,3> const &origin ){
+void UCartMesh::scale( std::array<double,3> const &s, std::array<double,3> const &origin ){
 
     // Counters
     int     d;
 
 
-    h = h *s;
+    m_h = m_h *s;
 
     // Mesh limits
-    for( d=0; d<dim; ++d){
-        B0[d] = origin[d] +s[d] *( B0[d] - origin[d]) ;
-        B1[d] = origin[d] +s[d] *( B1[d] - origin[d]) ;
+    for( d=0; d<m_dim; ++d){
+        m_B0[d] = origin[d] +s[d] *( m_B0[d] - origin[d]) ;
+        m_B1[d] = origin[d] +s[d] *( m_B1[d] - origin[d]) ;
 
-        edge[d] = origin[d] +s[d] *( edge[d] - origin[d]) ;
+        m_edge[d] = origin[d] +s[d] *( m_edge[d] - origin[d]) ;
 
-        center[d] = origin[d] +s[d] *( center[d] - origin[d]) ;
+        m_center[d] = origin[d] +s[d] *( m_center[d] - origin[d]) ;
     };
 
-    status++ ;
+    m_status++ ;
 
     return; 
 
 };
 
 /* -------------------------------------------------------------------------- */
-/*! Scale mesh with respect to its min coordinate by given factor 
+/*! scale mesh with respect to its min coordinate by given factor 
  *  \param[in]  s       scale factor
  */
-void UCartMesh::Scale( std::array<double,3> const &s ){
+void UCartMesh::scale( std::array<double,3> const &s ){
 
-    Scale( s, B0);
+    scale( s, m_B0);
 
     return; 
 
@@ -418,15 +391,15 @@ void UCartMesh::Scale( std::array<double,3> const &s ){
  *  \param[in]  P       point coordinates
  *  \return             cartesian cell indices
  */
-std::array<int,3> UCartMesh::CellCartesianId( std::array<double,3> const &P ){
+std::array<int,3> UCartMesh::getCellCartesianId( std::array<double,3> const &P ){
 
     int         d ;
     std::array<int,3>    id;
 
     id.fill(0) ;
 
-    for( d=0; d<dim; ++d){
-        id[d] = min( nc[d]-1, max(0, (int) floor( (P[d] - B0[d])/h[d] )) );
+    for( d=0; d<m_dim; ++d){
+        id[d] = std::min( m_nc[d]-1, std::max(0, (int) floor( (P[d] - m_B0[d])/m_h[d] )) );
     };
 
     return id; 
@@ -439,10 +412,10 @@ std::array<int,3> UCartMesh::CellCartesianId( std::array<double,3> const &P ){
  *  \param[out]  i      first cartesian coordinate
  *  \param[out]  j      second cartesian coordinate
  */
-void UCartMesh::CellCartesianId( std::array<double,3> const &P, int &i, int &j ){
+void UCartMesh::getCellCartesianId( std::array<double,3> const &P, int &i, int &j ){
 
-    i = min( nc[0]-1, max(0, (int) floor( (P[0] - B0[0])/h[0] )) );
-    j = min( nc[1]-1, max(0, (int) floor( (P[1] - B0[1])/h[1] )) );
+    i = std::min( m_nc[0]-1, std::max(0, (int) floor( (P[0] - m_B0[0])/m_h[0] )) );
+    j = std::min( m_nc[1]-1, std::max(0, (int) floor( (P[1] - m_B0[1])/m_h[1] )) );
 
 };
 
@@ -454,11 +427,11 @@ void UCartMesh::CellCartesianId( std::array<double,3> const &P, int &i, int &j )
  *  \param[out]  j       second cartesian coordinate
  *  \param[out]  k       third cartesian coordinate
  */
-void UCartMesh::CellCartesianId( std::array<double,3> const &P, int &i, int &j, int &k ){
+void UCartMesh::getCellCartesianId( std::array<double,3> const &P, int &i, int &j, int &k ){
 
-    i = min( nc[0]-1, max(0, (int) floor( (P[0] - B0[0])/h[0] )) );
-    j = min( nc[1]-1, max(0, (int) floor( (P[1] - B0[1])/h[1] )) );
-    k = min( nc[2]-1, max(0, (int) floor( (P[2] - B0[2])/h[2] )) );
+    i = std::min( m_nc[0]-1, std::max(0, (int) floor( (P[0] - m_B0[0])/m_h[0] )) );
+    j = std::min( m_nc[1]-1, std::max(0, (int) floor( (P[1] - m_B0[1])/m_h[1] )) );
+    k = std::min( m_nc[2]-1, std::max(0, (int) floor( (P[2] - m_B0[2])/m_h[2] )) );
 
 };
 
@@ -468,13 +441,13 @@ void UCartMesh::CellCartesianId( std::array<double,3> const &P, int &i, int &j, 
  *  \param[in]  J       linear cell index
  *  \return             cell cartesien indices
  */
-std::array<int,3> UCartMesh::CellCartesianId( int const &J ){
+std::array<int,3> UCartMesh::getCellCartesianId( int const &J ){
 
     std::array<int,3>    id ;
 
-    id[0] = J % nc[0] ;
-    id[2] = J / CellsInIJPlane;
-    id[1] =  (J - id[2] *CellsInIJPlane ) /nc[0]  ;
+    id[0] = J % m_nc[0] ;
+    id[2] = J / m_CellsInIJPlane;
+    id[1] =  (J - id[2] *m_CellsInIJPlane ) /m_nc[0]  ;
 
 
     return id; 
@@ -487,10 +460,10 @@ std::array<int,3> UCartMesh::CellCartesianId( int const &J ){
  *  \param[out]  i       first cartesian coordinate
  *  \param[out]  j       second cartesian coordinate
  */
-void UCartMesh::CellCartesianId( int const &J, int &i, int &j ){
+void UCartMesh::getCellCartesianId( int const &J, int &i, int &j ){
 
-    i = J % nc[0] ;
-    j = J /nc[0]  ;
+    i = J % m_nc[0] ;
+    j = J /m_nc[0]  ;
 
 
     return ; 
@@ -504,11 +477,11 @@ void UCartMesh::CellCartesianId( int const &J, int &i, int &j ){
  *  \param[out]  j       second cartesian coordinate
  *  \param[out]  k       third cartesian coordinate
  */
-void UCartMesh::CellCartesianId( int const &J, int &i, int &j, int &k ){
+void UCartMesh::getCellCartesianId( int const &J, int &i, int &j, int &k ){
 
-    i = J % nc[0] ;
-    k = J / CellsInIJPlane;
-    j =  (J - k *CellsInIJPlane ) /nc[0]  ;
+    i = J % m_nc[0] ;
+    k = J / m_CellsInIJPlane;
+    j =  (J - k *m_CellsInIJPlane ) /m_nc[0]  ;
 
     return ; 
 };
@@ -519,15 +492,15 @@ void UCartMesh::CellCartesianId( int const &J, int &i, int &j, int &k ){
  *  \param[in]  P       point coordinates
  *  \return             linear cell index
  */
-int UCartMesh::CellLinearId( std::array<double,3> const &P ){
+int UCartMesh::getCellLinearId( std::array<double,3> const &P ){
 
     // Counters
     int         n ;
     std::array<int,3>    id;
 
 
-    id = CellCartesianId(P) ;
-    n  = CellLinearId(id) ;
+    id = getCellCartesianId(P) ;
+    n  = getCellLinearId(id) ;
 
     return n; 
 
@@ -541,9 +514,9 @@ int UCartMesh::CellLinearId( std::array<double,3> const &P ){
  *  \param[in]  k       third cartesian index
  *  \return             linear cell index
  */
-int UCartMesh::CellLinearId( int const &i, int const &j ,int const &k ){
+int UCartMesh::getCellLinearId( int const &i, int const &j ,int const &k ){
 
-    return( CellsInIJPlane*k + nc[0]*j +i );
+    return( m_CellsInIJPlane*k + m_nc[0]*j +i );
 
 };
 
@@ -553,55 +526,55 @@ int UCartMesh::CellLinearId( int const &i, int const &j ,int const &k ){
  *  \param[in]  id      cartesian indices
  *  \return             linear cell index
  */
-int UCartMesh::CellLinearId( std::array<int,3> const &id ){
+int UCartMesh::getCellLinearId( std::array<int,3> const &id ){
 
-    return( CellLinearId(id[0], id[1], id[2] ) ); 
+    return( getCellLinearId(id[0], id[1], id[2] ) ); 
 };
 
 /* -------------------------------------------------------------------------- */
-/*!  Get cell center coordinates through cartesian indices
+/*!  Get cell m_center coordinates through cartesian indices
  *   \param[in] i first index
  *   \param[in] j second index
  *   \param[in] k third index (0 for 2D mesh)
- *   \return cell center 
+ *   \return cell m_center 
  */
 std::array<double,3> UCartMesh::getCellCenter( int i, int j, int k ){
 
     std::array<double,3>    P ;
 
-    P[0]= center[0][i] ;
-    P[1]= center[1][j] ;
-    P[2]= center[2][k] ;
+    P[0]= m_center[0][i] ;
+    P[1]= m_center[1][j] ;
+    P[2]= m_center[2][k] ;
 
     return P;
 
 } ;
 
 /* -------------------------------------------------------------------------- */
-/*!  Get cell center coordinates through cartesian indices
+/*!  Get cell m_center coordinates through cartesian indices
  *   \param[in] id array with cartesian indices
- *   \return cell center 
+ *   \return cell m_center 
  */
 std::array<double,3> UCartMesh::getCellCenter( std::array<int,3> id ){
 
     std::array<double,3>    P ;
 
-    P[0]= center[0][id[0]] ;
-    P[1]= center[1][id[1]] ;
-    P[2]= center[2][id[2]] ;
+    P[0]= m_center[0][id[0]] ;
+    P[1]= m_center[1][id[1]] ;
+    P[2]= m_center[2][id[2]] ;
 
     return P;
 
 } ;
 
 /* -------------------------------------------------------------------------- */
-/*!  Get cell center coordinates through linear index
+/*!  Get cell m_center coordinates through linear index
  *   \param[in] J linear index
- *   \return cell center 
+ *   \return cell m_center 
  */
 std::array<double,3> UCartMesh::getCellCenter( int J ){
 
-    return  getCellCenter( CellCartesianId(J) );
+    return  getCellCenter( getCellCartesianId(J) );
 
 };
 
@@ -647,7 +620,7 @@ void UCartMesh::getCellBoundingBox( std::array<int,3> const &id0, std::array<dou
     int         d;
     std::array<int,3>    id1(id0) ;
 
-    for( d=0; d<dim; ++d){
+    for( d=0; d<m_dim; ++d){
         id1[d]++ ;
     };
 
@@ -670,9 +643,9 @@ void UCartMesh::getCellBoundingBox( int const &J, std::array<double,3> &C0, std:
     int         d ;
     std::array<int,3>    id0, id1 ;
 
-    id0 = CellCartesianId(J) ;
+    id0 = getCellCartesianId(J) ;
 
-    for( d=0; d<dim; ++d){
+    for( d=0; d<m_dim; ++d){
         id1[d] = id0[d] +1 ;
     };
 
@@ -694,9 +667,9 @@ std::array<double,3> UCartMesh::getNodeCoordinates( int i, int j, int k ){
 
     std::array<double,3>    P ;
 
-    P[0]= edge[0][i] ;
-    P[1]= edge[1][j] ;
-    P[2]= edge[2][k] ;
+    P[0]= m_edge[0][i] ;
+    P[1]= m_edge[1][j] ;
+    P[2]= m_edge[2][k] ;
 
     return P;
 
@@ -711,9 +684,9 @@ std::array<double,3> UCartMesh::getNodeCoordinates( std::array<int,3> id ){
 
     std::array<double,3>    P ;
 
-    P[0]= edge[0][id[0]] ;
-    P[1]= edge[1][id[1]] ;
-    P[2]= edge[2][id[2]] ;
+    P[0]= m_edge[0][id[0]] ;
+    P[1]= m_edge[1][id[1]] ;
+    P[2]= m_edge[2][id[2]] ;
 
     return P;
 
@@ -726,7 +699,7 @@ std::array<double,3> UCartMesh::getNodeCoordinates( std::array<int,3> id ){
  */
 std::array<double,3> UCartMesh::getNodeCoordinates( int J ){
 
-    return  getNodeCoordinates( NodeCartesianId(J) );
+    return  getNodeCoordinates( getNodeCartesianId(J) );
 
 };
 
@@ -739,7 +712,7 @@ std::array<double,3> UCartMesh::getNodeCoordinates( int J ){
  */
 int      UCartMesh::getNodeNeighbour( int const &I, int const &dir){
 
-    int     d = whichDirection[dir], step = whichStep[dir];
+    int     d = m_whichDirection[dir], step = m_whichStep[dir];
 
     return  getNodeNeighbour(I,d,step) ;
 };
@@ -756,11 +729,11 @@ int      UCartMesh::getNodeNeighbour( int const &I, int const &d, int const &ste
 
     std::array<int,3>    i;
 
-    i       = NodeCartesianId(I) ;
+    i       = getNodeCartesianId(I) ;
     i[d]    += step ; 
-    i[d]    = max( min( i[d], nc[d] ), 0 ) ;
+    i[d]    = std::max( std::min( i[d], m_nc[d] ), 0 ) ;
 
-    return  NodeLinearId(i) ;
+    return  getNodeLinearId(i) ;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -772,7 +745,7 @@ int      UCartMesh::getNodeNeighbour( int const &I, int const &d, int const &ste
  */
 int      UCartMesh::getCellNeighbour( int const &I, int const &dir){
 
-    int         d = whichDirection[dir], step = whichStep[dir];
+    int         d = m_whichDirection[dir], step = m_whichStep[dir];
 
     return  getCellNeighbour(I,d,step) ;
 };
@@ -789,11 +762,11 @@ int      UCartMesh::getCellNeighbour( int const &I, int const &d, int const &ste
 
     std::array<int,3>    i;
 
-    i       = CellCartesianId(I) ;
+    i       = getCellCartesianId(I) ;
     i[d]    += step ; 
-    i[d]    = max( min( i[d], nc[d]-1 ), 0 ) ;
+    i[d]    = std::max( std::min( i[d], m_nc[d]-1 ), 0 ) ;
 
-    return  CellLinearId(i) ;
+    return  getCellLinearId(i) ;
 };
 
 /* -------------------------------------------------------------------------- */
@@ -801,15 +774,15 @@ int      UCartMesh::getCellNeighbour( int const &I, int const &d, int const &ste
  *  \param[in]  P       point coordinates
  *  \return             cartesian indices
  */
-std::array<int,3> UCartMesh::NodeCartesianId( std::array<double,3> const &P ){
+std::array<int,3> UCartMesh::getNodeCartesianId( std::array<double,3> const &P ){
 
     int         d ;
     std::array<int,3>    id;
 
     id.fill(0) ;
 
-    for( d=0; d<dim; ++d){
-        id[d] = min( np[d]-1, max(0, (int) round( (P[d] - B0[d])/h[d] )) );
+    for( d=0; d<m_dim; ++d){
+        id[d] = std::min( m_np[d]-1, std::max(0, (int) round( (P[d] - m_B0[d])/m_h[d] )) );
     };
 
     return id; 
@@ -821,11 +794,11 @@ std::array<int,3> UCartMesh::NodeCartesianId( std::array<double,3> const &P ){
  *  \param[out]  i      first cartesian index
  *  \param[out]  j      second cartesian index
  */
-void UCartMesh::NodeCartesianId( std::array<double,3> const &P, int &i, int &j ){
+void UCartMesh::getNodeCartesianId( std::array<double,3> const &P, int &i, int &j ){
 
 
-    i = min( np[0]-1, max(0, (int) round( (P[0] - B0[0])/h[0] )) );
-    j = min( np[1]-1, max(0, (int) round( (P[1] - B0[1])/h[1] )) );
+    i = std::min( m_np[0]-1, std::max(0, (int) round( (P[0] - m_B0[0])/m_h[0] )) );
+    j = std::min( m_np[1]-1, std::max(0, (int) round( (P[1] - m_B0[1])/m_h[1] )) );
 
     return ;
 
@@ -838,12 +811,12 @@ void UCartMesh::NodeCartesianId( std::array<double,3> const &P, int &i, int &j )
  *  \param[out]  j      second cartesian index
  *  \param[out]  k      third cartesian index
  */
-void UCartMesh::NodeCartesianId( std::array<double,3> const &P, int &i, int &j, int &k ){
+void UCartMesh::getNodeCartesianId( std::array<double,3> const &P, int &i, int &j, int &k ){
 
 
-    i = min( np[0]-1, max(0, (int) round( (P[0] - B0[0])/h[0] )) );
-    j = min( np[1]-1, max(0, (int) round( (P[1] - B0[1])/h[1] )) );
-    k = min( np[2]-1, max(0, (int) round( (P[2] - B0[2])/h[2] )) );
+    i = std::min( m_np[0]-1, std::max(0, (int) round( (P[0] - m_B0[0])/m_h[0] )) );
+    j = std::min( m_np[1]-1, std::max(0, (int) round( (P[1] - m_B0[1])/m_h[1] )) );
+    k = std::min( m_np[2]-1, std::max(0, (int) round( (P[2] - m_B0[2])/m_h[2] )) );
 
     return ;
 
@@ -855,14 +828,14 @@ void UCartMesh::NodeCartesianId( std::array<double,3> const &P, int &i, int &j, 
  *  \param[in]  J       node linear index
  *  \return             node cartesian indices
  */
-std::array<int,3> UCartMesh::NodeCartesianId( int const &J ){
+std::array<int,3> UCartMesh::getNodeCartesianId( int const &J ){
 
     // Local variables
     std::array<int,3>    id ;
 
-    id[0] = J % np[0] ;
-    id[2] = J / NodesInIJPlane;
-    id[1] =  (J - id[2] *NodesInIJPlane ) /np[0]  ;
+    id[0] = J % m_np[0] ;
+    id[2] = J / m_NodesInIJPlane;
+    id[1] =  (J - id[2] *m_NodesInIJPlane ) /m_np[0]  ;
 
     return id; 
 
@@ -875,10 +848,10 @@ std::array<int,3> UCartMesh::NodeCartesianId( int const &J ){
  *  \param[out]  i      first cartesian  index
  *  \param[out]  j      second cartesian  index
  */
-void UCartMesh::NodeCartesianId( int const &J, int &i, int &j ){
+void UCartMesh::getNodeCartesianId( int const &J, int &i, int &j ){
 
-    i = J %np[0] ;
-    j = J /np[0]  ;
+    i = J %m_np[0] ;
+    j = J /m_np[0]  ;
 
     return ; 
 
@@ -892,11 +865,11 @@ void UCartMesh::NodeCartesianId( int const &J, int &i, int &j ){
  *  \param[out]  j      second cartesian  index
  *  \param[out]  k      third cartesian  index
  */
-void UCartMesh::NodeCartesianId( int const &J, int &i, int &j, int &k ){
+void UCartMesh::getNodeCartesianId( int const &J, int &i, int &j, int &k ){
 
-    i = J % np[0] ;
-    k = J / NodesInIJPlane;
-    j =  (J - k *NodesInIJPlane ) /np[0]  ;
+    i = J % m_np[0] ;
+    k = J / m_NodesInIJPlane;
+    j =  (J - k *m_NodesInIJPlane ) /m_np[0]  ;
 
     return ; 
 
@@ -910,9 +883,9 @@ void UCartMesh::NodeCartesianId( int const &J, int &i, int &j, int &k ){
  *  \param[in]  k       third cartesian index
  *  \return             linear index of node
  */
-int UCartMesh::NodeLinearId( int const &i, int const &j, int const &k ){
+int UCartMesh::getNodeLinearId( int const &i, int const &j, int const &k ){
 
-    return (NodesInIJPlane *k + np[0]*j + i); 
+    return (m_NodesInIJPlane *k + m_np[0]*j + i); 
 
 };
 
@@ -922,12 +895,12 @@ int UCartMesh::NodeLinearId( int const &i, int const &j, int const &k ){
  *  \param[in]  id      node cartesian indices
  *  \return             node linear index
  */
-int UCartMesh::NodeLinearId( std::array<double,3> const &P ){
+int UCartMesh::getNodeLinearId( std::array<double,3> const &P ){
 
     // Counters
-    std::array<int,3>    id( NodeCartesianId(P) );
+    std::array<int,3>    id( getNodeCartesianId(P) );
 
-    return NodeLinearId(id); 
+    return getNodeLinearId(id); 
 
 };
 
@@ -937,9 +910,9 @@ int UCartMesh::NodeLinearId( std::array<double,3> const &P ){
  *  \param[in]  id      node cartesian indices
  *  \return             node linear index
  */
-int UCartMesh::NodeLinearId( std::array<int,3> const &id){
+int UCartMesh::getNodeLinearId( std::array<int,3> const &id){
 
-    return ( NodeLinearId(id[0], id[1], id[2] ) ); 
+    return ( getNodeLinearId(id[0], id[1], id[2] ) ); 
 
 };
 
@@ -949,7 +922,7 @@ int UCartMesh::NodeLinearId( std::array<int,3> const &id){
  *  \param[in]  i1      max cartesian indices
  *  \return             cell linear indices of subset mesh
  */
-std::vector<int> UCartMesh::CellSubSet( std::array<int,3> const &i0, std::array<int,3> const &i1 ){
+std::vector<int> UCartMesh::extractCellSubSet( std::array<int,3> const &i0, std::array<int,3> const &i1 ){
 
     int                     i, j, k; 
     std::vector<int>               ids;
@@ -968,7 +941,7 @@ std::vector<int> UCartMesh::CellSubSet( std::array<int,3> const &i0, std::array<
         for( j=i0[1]; j<=i1[1]; ++j){
             for( i=i0[0]; i<=i1[0]; ++i){
 
-                *it = CellLinearId( i, j, k) ;            
+                *it = getCellLinearId( i, j, k) ;            
                 ++it ;
 
             };
@@ -985,9 +958,9 @@ std::vector<int> UCartMesh::CellSubSet( std::array<int,3> const &i0, std::array<
  *  \param[in]  I1      max linear indices
  *  \return             cell linear indices of subset mesh
  */
-std::vector<int> UCartMesh::CellSubSet( int const &I0, int const &I1 ){
+std::vector<int> UCartMesh::extractCellSubSet( int const &I0, int const &I1 ){
 
-    return CellSubSet( CellCartesianId(I0), CellCartesianId(I1) ); 
+    return extractCellSubSet( getCellCartesianId(I0), getCellCartesianId(I1) ); 
 
 };
 
@@ -998,9 +971,9 @@ std::vector<int> UCartMesh::CellSubSet( int const &I0, int const &I1 ){
  *  \param[in]  P1      max point
  *  \return             cell linear indices of subset mesh
  */
-std::vector<int> UCartMesh::CellSubSet( std::array<double,3> const &P0, std::array<double,3> const &P1 ){
+std::vector<int> UCartMesh::extractCellSubSet( std::array<double,3> const &P0, std::array<double,3> const &P1 ){
 
-    return CellSubSet( CellCartesianId(P0), CellCartesianId(P1) ); 
+    return extractCellSubSet( getCellCartesianId(P0), getCellCartesianId(P1) ); 
 
 };
 
@@ -1010,7 +983,7 @@ std::vector<int> UCartMesh::CellSubSet( std::array<double,3> const &P0, std::arr
  *  \param[in]  i1      max cartesian indices
  *  \return             node linear indices of subset mesh
  */
-std::vector<int> UCartMesh::NodeSubSet( std::array<int,3> const &i0, std::array<int,3> const &i1 ){
+std::vector<int> UCartMesh::extractNodeSubSet( std::array<int,3> const &i0, std::array<int,3> const &i1 ){
 
     int                     i, j, k; 
     std::vector<int>               ids;
@@ -1029,7 +1002,7 @@ std::vector<int> UCartMesh::NodeSubSet( std::array<int,3> const &i0, std::array<
         for( j=i0[1]; j<=i1[1]; ++j){
             for( i=i0[0]; i<=i1[0]; ++i){
 
-                *it = NodeLinearId( i, j, k) ;            
+                *it = getNodeLinearId( i, j, k) ;            
                 ++it ;
 
             };
@@ -1046,9 +1019,9 @@ std::vector<int> UCartMesh::NodeSubSet( std::array<int,3> const &i0, std::array<
  *  \param[in]  I1      max linear indices
  *  \return             node linear indices of subset mesh
  */
-std::vector<int> UCartMesh::NodeSubSet( int const &I0, int const &I1 ){
+std::vector<int> UCartMesh::extractNodeSubSet( int const &I0, int const &I1 ){
 
-    return NodeSubSet( NodeCartesianId(I0), NodeCartesianId(I1) ); 
+    return extractNodeSubSet( getNodeCartesianId(I0), getNodeCartesianId(I1) ); 
 
 };
 
@@ -1059,9 +1032,9 @@ std::vector<int> UCartMesh::NodeSubSet( int const &I0, int const &I1 ){
  *  \param[in]  P1      max point
  *  \return             cell linear indices of subset mesh
  */
-std::vector<int> UCartMesh::NodeSubSet( std::array<double,3> const &P0, std::array<double,3> const &P1 ){
+std::vector<int> UCartMesh::extractNodeSubSet( std::array<double,3> const &P0, std::array<double,3> const &P1 ){
 
-    return NodeSubSet( NodeCartesianId(P0), NodeCartesianId(P1) ); 
+    return extractNodeSubSet( getNodeCartesianId(P0), getNodeCartesianId(P1) ); 
 
 };
 
@@ -1070,13 +1043,13 @@ std::vector<int> UCartMesh::NodeSubSet( std::array<double,3> const &P0, std::arr
  *  \param[in]  P      
  *  \return             true if point lies within grid
  */
-bool UCartMesh::PointInGrid(  std::array<double,3> const &P ){
+bool UCartMesh::isPointInGrid(  std::array<double,3> const &P ){
 
     int     d;
 
-    for( d=0; d<dim; ++d){
+    for( d=0; d<m_dim; ++d){
 
-        if( P[d]< B0[d] || P[d] > B1[d] ){
+        if( P[d]< m_B0[d] || P[d] > m_B1[d] ){
             return false;
         };
     };
@@ -1090,18 +1063,18 @@ bool UCartMesh::PointInGrid(  std::array<double,3> const &P ){
  *  \param[out] I       cartesian indices of cell containing the point      
  *  \return             true if point lies within grid
  */
-bool UCartMesh::PointInGrid( std::array<double,3> const &P, std::array<int,3> &I){
+bool UCartMesh::isPointInGrid( std::array<double,3> const &P, std::array<int,3> &I){
 
     int     d;
 
-    for( d=0; d<dim; ++d){
+    for( d=0; d<m_dim; ++d){
 
-        if( P[d]< B0[d] || P[d] > B1[d] ){
+        if( P[d]< m_B0[d] || P[d] > m_B1[d] ){
             return false;
         };
     };
 
-    I = CellCartesianId(P) ;
+    I = getCellCartesianId(P) ;
 
     return true ;
 };
@@ -1114,12 +1087,12 @@ bool UCartMesh::PointInGrid( std::array<double,3> const &P, std::array<int,3> &I
  *  \param[out] k       third cartesian index of cell containing the point      
  *  \return             true if point lies within grid
  */
-bool UCartMesh::PointInGrid( std::array<double,3> const &P, int &i, int &j, int &k ){
+bool UCartMesh::isPointInGrid( std::array<double,3> const &P, int &i, int &j, int &k ){
 
     bool        inGrid ;
     std::array<int,3>    I;
 
-    if(PointInGrid(P,I) ){
+    if(isPointInGrid(P,I) ){
 
         i = I[0] ;
         j = I[1] ;
@@ -1137,18 +1110,18 @@ bool UCartMesh::PointInGrid( std::array<double,3> const &P, int &i, int &j, int 
  *  \param[out] I       linear index of cell containing the point      
  *  \return             true if point lies within grid
  */
-bool UCartMesh::PointInGrid( std::array<double,3> const &P, int &I ){
+bool UCartMesh::isPointInGrid( std::array<double,3> const &P, int &I ){
 
     int     d;
 
-    for( d=0; d<dim; ++d){
+    for( d=0; d<m_dim; ++d){
 
-        if( P[d]< B0[d] || P[d] > B1[d] ){
+        if( P[d]< m_B0[d] || P[d] > m_B1[d] ){
             return false;
         };
     };
 
-    I = CellLinearId(P) ;
+    I = getCellLinearId(P) ;
 
     return true ;
 };
@@ -1161,7 +1134,7 @@ bool UCartMesh::PointInGrid( std::array<double,3> const &P, int &I ){
  *  \param[out]     S   cell-vertex connectivity
  *  \param[out]     A   cell-cell adjacencies
  */
-void UCartMesh::Cart2Unstr( int &nV, int &nS, vector<std::array<double,3>> &V, std::vector<std::vector<int>> &S, std::vector<std::vector<std::vector<int>>> &A ){
+void UCartMesh::convertToUnstructured( int &nV, int &nS, std::vector<std::array<double,3>> &V, std::vector<std::vector<int>> &S, std::vector<std::vector<std::vector<int>>> &A ){
 
     // Local variables
     int         nv, ns;
@@ -1170,28 +1143,28 @@ void UCartMesh::Cart2Unstr( int &nV, int &nS, vector<std::array<double,3>> &V, s
     int         i, j, k, J;
 
     // Number of new vertices/simplicies
-    nv = nNodes ;
-    ns = nCells ;
+    nv = m_nNodes ;
+    ns = m_nCells ;
 
     // Resize vertex list
     V.resize(nV + nv);
 
     // Resize simplex list
-    S.resize(nS + ns, std::vector<int>(pow(2,dim), -1));
+    S.resize(nS + ns, std::vector<int>(pow(2,m_dim), -1));
 
     // Resize adjacency
-    A.resize(nS + ns, std::vector<std::vector<int>>(2*dim, std::vector<int>(1, -1)));
+    A.resize(nS + ns, std::vector<std::vector<int>>(2*m_dim, std::vector<int>(1, -1)));
 
     // ========================================================================== //
     // GENERATE VERTEX LIST                                                       //
     // ========================================================================== //
-    for (k = 0; k < np[2]; k++) {
-        for (j = 0; j < np[1]; j++) {
-            for (i = 0; i < np[0]; i++) {
-                J = NodeLinearId(i,j,k);
-                V[J][0] = edge[0][i] ;
-                V[J][1] = edge[1][j] ;
-                V[J][2] = edge[2][k] ; 
+    for (k = 0; k < m_np[2]; k++) {
+        for (j = 0; j < m_np[1]; j++) {
+            for (i = 0; i < m_np[0]; i++) {
+                J = getNodeLinearId(i,j,k);
+                V[J][0] = m_edge[0][i] ;
+                V[J][1] = m_edge[1][j] ;
+                V[J][2] = m_edge[2][k] ; 
                 nV++;
             };
         }
@@ -1200,21 +1173,21 @@ void UCartMesh::Cart2Unstr( int &nV, int &nS, vector<std::array<double,3>> &V, s
     // ========================================================================== //
     // SIMPLEX-VERTEX CONNECTIVITY                                                //
     // ========================================================================== //
-    for (k = 0; k < nc[2]; k++) {
-        for (j = 0; j < nc[1]; j++) {
-            for (i = 0; i < nc[0]; i++) {
-                J = CellLinearId(i,j,k);
+    for (k = 0; k < m_nc[2]; k++) {
+        for (j = 0; j < m_nc[1]; j++) {
+            for (i = 0; i < m_nc[0]; i++) {
+                J = getCellLinearId(i,j,k);
 
-                S[J][0] = NodeLinearId(i,j,k);
-                S[J][1] = NodeLinearId(i+1,j,k);
-                S[J][2] = NodeLinearId(i,j+1,k);
-                S[J][3] = NodeLinearId(i+1,j+1,k);
+                S[J][0] = getNodeLinearId(i,j,k);
+                S[J][1] = getNodeLinearId(i+1,j,k);
+                S[J][2] = getNodeLinearId(i,j+1,k);
+                S[J][3] = getNodeLinearId(i+1,j+1,k);
 
-                if(dim==3){
-                    S[J][4] = NodeLinearId(i,j,k+1);
-                    S[J][5] = NodeLinearId(i+1,j,k+1);
-                    S[J][6] = NodeLinearId(i,j+1,k+1);
-                    S[J][7] = NodeLinearId(i+1,j+1,k+1);
+                if(m_dim==3){
+                    S[J][4] = getNodeLinearId(i,j,k+1);
+                    S[J][5] = getNodeLinearId(i+1,j,k+1);
+                    S[J][6] = getNodeLinearId(i,j+1,k+1);
+                    S[J][7] = getNodeLinearId(i+1,j+1,k+1);
                 }
 
             }
@@ -1224,19 +1197,19 @@ void UCartMesh::Cart2Unstr( int &nV, int &nS, vector<std::array<double,3>> &V, s
     // ========================================================================== //
     // SIMPLEX-VERTEX ADJACENCY                                                   //
     // ========================================================================== //
-    for (k = 0; k < nc[2]; k++) {
-        for (j = 0; j < nc[1]; j++) {
-            for (i = 0; i < nc[0]; i++) {
-                J = CellLinearId(i,j);
+    for (k = 0; k < m_nc[2]; k++) {
+        for (j = 0; j < m_nc[1]; j++) {
+            for (i = 0; i < m_nc[0]; i++) {
+                J = getCellLinearId(i,j);
 
-                if (i != 0)     { A[J][0][0] = CellLinearId(i-1,j,k); }
-                if (i != nc[0]) { A[J][1][0] = CellLinearId(i+1,j,k); }
+                if (i != 0)     { A[J][0][0] = getCellLinearId(i-1,j,k); }
+                if (i != m_nc[0]) { A[J][1][0] = getCellLinearId(i+1,j,k); }
 
-                if (j != 0)     { A[J][2][0] = CellLinearId(i,j-1,k); }
-                if (j != nc[1]) { A[J][3][0] = CellLinearId(i,j+1,k); }
+                if (j != 0)     { A[J][2][0] = getCellLinearId(i,j-1,k); }
+                if (j != m_nc[1]) { A[J][3][0] = getCellLinearId(i,j+1,k); }
 
-                if (k != 0)     { A[J][4][0] = CellLinearId(i,j,k-1); }
-                if (k != nc[2]) { A[J][5][0] = CellLinearId(i,j,k+1); }
+                if (k != 0)     { A[J][4][0] = getCellLinearId(i,j,k-1); }
+                if (k != m_nc[2]) { A[J][5][0] = getCellLinearId(i,j,k+1); }
 
             }
         }
@@ -1250,7 +1223,7 @@ void UCartMesh::Cart2Unstr( int &nV, int &nS, vector<std::array<double,3>> &V, s
  *  \param[in]     dir  relative or absolute path to directory with final "/"
  *  \param[in]     filename  name of output file without suffix
  */
-void UCartMesh::ExportVtr(string dir, string filename) {
+void UCartMesh::exportVTR( std::string dir, std::string filename) {
 
     // Local variables
 
@@ -1259,7 +1232,7 @@ void UCartMesh::ExportVtr(string dir, string filename) {
             std::vector<std::vector<double>>   *ptredge ;
 
         public:
-            VTKOut(string dir, string filename, std::vector<std::vector<double>> &edges) { 
+            VTKOut(std::string dir, std::string filename, std::vector<std::vector<double>> &edges) { 
                 setNames( dir, filename) ;
                 setCodex( bitpit::VTKFormat::APPENDED ) ;
                 ptredge = &edges ;
@@ -1267,7 +1240,7 @@ void UCartMesh::ExportVtr(string dir, string filename) {
 
             } ;
 
-            void flushData(  fstream &str, bitpit::VTKFormat codex_, string name  ){
+            void flushData(  std::fstream &str, bitpit::VTKFormat codex_, std::string name  ){
 
                 if( name == "x_Coord"){
                     bitpit::genericIO::flushBINARY( str, (*ptredge)[0] ) ;
@@ -1286,7 +1259,7 @@ void UCartMesh::ExportVtr(string dir, string filename) {
 
     };
 
-    VTKOut      myVTK( dir, filename, edge) ;
+    VTKOut      myVTK( dir, filename, m_edge) ;
     myVTK.write() ;
 
     return; 
@@ -1300,7 +1273,7 @@ void UCartMesh::ExportVtr(string dir, string filename) {
  *  \param[in]     location  Cell or point data ["Cell"/"Point"]
  *  \param[in]     data      data field
  */
-void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::VTKLocation location, vector<double> &data ) {
+void UCartMesh::exportVTR(std::string dir, std::string filename, std::string dataname, bitpit::VTKLocation location, std::vector<double> &data ) {
 
 
     class VTKOut : public bitpit::VTKRectilinearGrid{
@@ -1309,7 +1282,7 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::
             std::vector<double>   *ptrdata ;
 
         public:
-            VTKOut(string dir, string filename, std::vector<std::vector<double>> &edges, string dataname, bitpit::VTKLocation location, vector<double> &data){ 
+            VTKOut(std::string dir, std::string filename, std::vector<std::vector<double>> &edges, std::string dataname, bitpit::VTKLocation location, std::vector<double> &data){ 
                 setNames( dir, filename) ;
                 setCodex( bitpit::VTKFormat::APPENDED ) ;
                 ptredge = &edges ;
@@ -1320,7 +1293,7 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::
 
             } ;
 
-            void flushData(  fstream &str, bitpit::VTKFormat codex_, string name  ){
+            void flushData(  std::fstream &str, bitpit::VTKFormat codex_, std::string name  ){
 
                 if( name == "x_Coord"){
                     bitpit::genericIO::flushBINARY( str, (*ptredge)[0] ) ;
@@ -1333,7 +1306,7 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::
                 else if( name == "z_Coord"){
                     bitpit::genericIO::flushBINARY( str, (*ptredge)[2] ) ;
                 }
-                
+
                 else{
                     bitpit::genericIO::flushBINARY( str, (*ptrdata) ) ;
                 };
@@ -1343,7 +1316,7 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::
 
     };
 
-    VTKOut      myVTK( dir, filename, edge, dataname, location, data) ;
+    VTKOut      myVTK( dir, filename, m_edge, dataname, location, data) ;
     myVTK.write() ;
 
     return; 
@@ -1358,7 +1331,7 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::
  *  \param[in]     location  Cell or point data ["Cell"/"Point"]
  *  \param[in]     data      data field
  */
-void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::VTKLocation location, std::vector<int> &data ) {
+void UCartMesh::exportVTR(std::string dir, std::string filename, std::string dataname, bitpit::VTKLocation location, std::vector<int> &data ) {
 
 
     class VTKOut : public bitpit::VTKRectilinearGrid{
@@ -1367,7 +1340,7 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::
             std::vector<int>   *ptrdata ;
 
         public:
-            VTKOut(string dir, string filename, std::vector<std::vector<double>> &edges, string dataname, bitpit::VTKLocation location, std::vector<int> &data){ 
+            VTKOut(std::string dir, std::string filename, std::vector<std::vector<double>> &edges, std::string dataname, bitpit::VTKLocation location, std::vector<int> &data){ 
                 setNames( dir, filename) ;
                 setCodex( bitpit::VTKFormat::APPENDED ) ;
                 ptredge = &edges ;
@@ -1378,7 +1351,7 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::
 
             } ;
 
-            void flushData(  fstream &str, bitpit::VTKFormat codex_, string name  ){
+            void flushData(  std::fstream &str, bitpit::VTKFormat codex_, std::string name  ){
 
                 if( name == "x_Coord"){
                     bitpit::genericIO::flushBINARY( str, (*ptredge)[0] ) ;
@@ -1391,7 +1364,7 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::
                 else if( name == "z_Coord"){
                     bitpit::genericIO::flushBINARY( str, (*ptredge)[2] ) ;
                 }
-                
+
                 else{
                     bitpit::genericIO::flushBINARY( str, (*ptrdata) ) ;
                 };
@@ -1401,7 +1374,7 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::
 
     };
 
-    VTKOut      myVTK( dir, filename, edge, dataname, location, data) ;
+    VTKOut      myVTK( dir, filename, m_edge, dataname, location, data) ;
     myVTK.write() ;
 
     return; 
@@ -1416,16 +1389,16 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::
  *  \param[in]     location  Cell or point data ["Cell"/"Point"]
  *  \param[in]     data      data field
  */
-void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::VTKLocation location, vector<array<double,3>> &data ) {
+void UCartMesh::exportVTR(std::string dir, std::string filename, std::string dataname, bitpit::VTKLocation location, std::vector<std::array<double,3>> &data ) {
 
 
     class VTKOut : public bitpit::VTKRectilinearGrid{
         private:
-            std::vector<std::vector<double>>                   *ptredge ;
-             vector<array<double,3>>    *ptrdata ;
+            std::vector<std::vector<double>>    *ptredge ;
+            std::vector<std::array<double,3>>   *ptrdata ;
 
         public:
-            VTKOut(string dir, string filename, std::vector<std::vector<double>> &edges, string dataname, bitpit::VTKLocation location, vector<array<double,3>> &data){ 
+            VTKOut(std::string dir, std::string filename, std::vector<std::vector<double>> &edges, std::string dataname, bitpit::VTKLocation location, std::vector<std::array<double,3>> &data){ 
                 setNames( dir, filename) ;
                 setCodex( bitpit::VTKFormat::APPENDED ) ;
                 ptredge = &edges ;
@@ -1436,7 +1409,7 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::
 
             } ;
 
-            void flushData(  fstream &str, bitpit::VTKFormat codex_, string name ){
+            void flushData(  std::fstream &str, bitpit::VTKFormat codex_, std::string name ){
 
                 if( name == "x_Coord"){
                     bitpit::genericIO::flushBINARY( str, (*ptredge)[0] ) ;
@@ -1449,7 +1422,7 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::
                 else if( name == "z_Coord"){
                     bitpit::genericIO::flushBINARY( str, (*ptredge)[2] ) ;
                 }
-                
+
                 else{
                     bitpit::genericIO::flushBINARY( str, (*ptrdata) ) ;
                 };
@@ -1459,26 +1432,25 @@ void UCartMesh::ExportVtr(string dir, string filename, string dataname, bitpit::
 
     };
 
-    VTKOut      myVTK( dir, filename, edge, dataname, location, data) ;
+    VTKOut      myVTK( dir, filename, m_edge, dataname, location, data) ;
     myVTK.write() ;
 
     return; 
 
 };
 
-
 /* -------------------------------------------------------------------------- */
 /*!  Transform cell data to point data by calculating the mean of incident cells in each vertex
  *  \param[in]     CellData  Data on cells
  *  \param[out]    NodeData  Data on nodes
  */
-void UCartMesh::CellData2NodeData( vector<double> &CellData, vector<double> &NodeData ){
+void UCartMesh::convertCellDataToNodeData( std::vector<double> &CellData, std::vector<double> &NodeData ){
     // ========================================================================== //
 
     // Local variables
     int            K, J;
     int            ip, jp, kp;
-    vector<int>     NodeIter ;
+    std::vector<int>     NodeIter ;
 
     // Counters
     int            i, j, k, l, m, n;
@@ -1492,14 +1464,14 @@ void UCartMesh::CellData2NodeData( vector<double> &CellData, vector<double> &Nod
     // ========================================================================== //
     // CONVERT CELL DATA INTO POINT DATA                                          //
     // ========================================================================== //
-    for (k = 0; k < nc[2]; k++) {
-        for (j = 0; j < nc[1]; j++) {
-            for (i = 0; i < nc[0]; i++) {
+    for (k = 0; k < m_nc[2]; k++) {
+        for (j = 0; j < m_nc[1]; j++) {
+            for (i = 0; i < m_nc[0]; i++) {
 
                 // Cell index
-                K = CellLinearId(i, j, k);
+                K = getCellLinearId(i, j, k);
 
-                for (n = 0; n < dim-1; n++) {
+                for (n = 0; n < m_dim-1; n++) {
                     for (m = 0; m < 2; m++) {
                         for (l = 0; l < 2; l++) {
 
@@ -1507,7 +1479,7 @@ void UCartMesh::CellData2NodeData( vector<double> &CellData, vector<double> &Nod
                             ip = i + l;
                             jp = j + m;
                             kp = j + n;
-                            J = NodeLinearId(ip,jp,kp);
+                            J = getNodeLinearId(ip,jp,kp);
 
                             NodeData[J] = NodeData[J] + CellData[K]; 
                             NodeIter[J]++ ;
@@ -1520,7 +1492,7 @@ void UCartMesh::CellData2NodeData( vector<double> &CellData, vector<double> &Nod
     } //next i
 
 
-    for( J=0; J<nNodes; ++J){
+    for( J=0; J<m_nNodes; ++J){
         NodeData[J] = NodeData[J] / ((float) NodeIter[J]) ;
     };
 
@@ -1533,7 +1505,7 @@ void UCartMesh::CellData2NodeData( vector<double> &CellData, vector<double> &Nod
  *  \param[in]    PointData  Data on nodes
  *  \param[out]   CellData  Data on cells
  */
-void UCartMesh::NodeData2CellData( vector<double> &NodeData, vector<double> &CellData ){
+void UCartMesh::convertNodeDataToCellData( std::vector<double> &NodeData, std::vector<double> &CellData ){
 
 
     // Local variables
@@ -1544,7 +1516,7 @@ void UCartMesh::NodeData2CellData( vector<double> &NodeData, vector<double> &Cel
     // Counters
     int     i, j, k, l, m, n;
 
-    factor  =   pow(0.5,dim) ;
+    factor  =   pow(0.5,m_dim) ;
 
     // ========================================================================== //
     // RESIZE OUTPUT VARIABLES                                                    //
@@ -1554,18 +1526,18 @@ void UCartMesh::NodeData2CellData( vector<double> &NodeData, vector<double> &Cel
     // ========================================================================== //
     // CONVERT POINT DATA TO CELL DATA                                            //
     // ========================================================================== //
-    for (k = 0; k < nc[2]; k++) {
-        for (j = 0; j < nc[1]; j++) {
-            for (i = 0; i < nc[0]; i++) {
+    for (k = 0; k < m_nc[2]; k++) {
+        for (j = 0; j < m_nc[1]; j++) {
+            for (i = 0; i < m_nc[0]; i++) {
 
-                K = CellLinearId(i,j,k);
+                K = getCellLinearId(i,j,k);
                 for (n = 0; n < 2; n++) {
                     for (m = 0; m < 2; m++) {
                         for (l = 0; l < 2; l++) {
                             ip = i + l;
                             jp = j + m;
                             kp = k + n;
-                            J = NodeLinearId(ip,jp,kp);
+                            J = getNodeLinearId(ip,jp,kp);
                             CellData[K] = CellData[K] + factor * NodeData[J];
                         } //next n
                     } //next m
@@ -1586,28 +1558,28 @@ void UCartMesh::NodeData2CellData( vector<double> &NodeData, vector<double> &Cel
  *  \param[out]     weights weights associated to stencil
  *  \return         number of cells used in the interpolation stencil. 0 id point outside the grid
  */
-int UCartMesh::linearCellInterpolation( std::array<double,3> &P, vector<int> &stencil, vector<double> &weights ){
+int UCartMesh::linearCellInterpolation( std::array<double,3> &P, std::vector<int> &stencil, std::vector<double> &weights ){
 
     int                         nStencil(0) ;
     int                         d, i, j, k;
     std::array<int,3>                    i0, i1 ;
-    
-    array< array<int,2>, 3>     cStencil ;
-    array< array<double,2>, 3>  cWeights ;
 
-    array<int,3>                nS({1,1,1}) ;
+    std::array< std::array<int,2>, 3>     cStencil ;
+    std::array< std::array<double,2>, 3>  cWeights ;
 
-    vector<int>::iterator       itrStencil ;
-    vector<double>::iterator    itrWeights ;
+    std::array<int,3>                nS({1,1,1}) ;
 
-    if( PointInGrid(P, i0) ){
+    std::vector<int>::iterator       itrStencil ;
+    std::vector<double>::iterator    itrWeights ;
+
+    if( isPointInGrid(P, i0) ){
 
         nStencil = 1 ;
 
-        for( d=0; d<dim; ++d){
+        for( d=0; d<m_dim; ++d){
 
             // Find cell index
-            if( P[d] < center[d][i0[d] ] ){
+            if( P[d] < m_center[d][i0[d] ] ){
                 i0[d] = i0[d]-1 ;
             };
 
@@ -1619,8 +1591,8 @@ int UCartMesh::linearCellInterpolation( std::array<double,3> &P, vector<int> &st
 
             } 
 
-            else if( i1[d] > nc[d]-1 ){
-                cStencil[d][0] = nc[d]-1 ; 
+            else if( i1[d] > m_nc[d]-1 ){
+                cStencil[d][0] = m_nc[d]-1 ; 
                 cWeights[d][0] = 1. ; 
 
             } 
@@ -1631,14 +1603,14 @@ int UCartMesh::linearCellInterpolation( std::array<double,3> &P, vector<int> &st
                 cStencil[d][0] = i0[d] ;
                 cStencil[d][1] = i1[d] ;
 
-                cWeights[d][1] = (P[d] - center[d][i0[d]]) /h[d]   ;
+                cWeights[d][1] = (P[d] - m_center[d][i0[d]]) /m_h[d]   ;
                 cWeights[d][0] = 1.0 - cWeights[d][1] ;  
             }
 
 
         };
 
-        for( d=dim; d<3; ++d){
+        for( d=m_dim; d<3; ++d){
             cStencil[d][0] = 0 ;
             cWeights[d][0] = 1. ;
         };
@@ -1663,7 +1635,7 @@ int UCartMesh::linearCellInterpolation( std::array<double,3> &P, vector<int> &st
                     double &jw = cWeights[1][j] ;
                     double &kw = cWeights[2][k] ;
 
-                    *itrStencil =  CellLinearId(is,js,ks) ;
+                    *itrStencil =  getCellLinearId(is,js,ks) ;
                     *itrWeights =  iw *jw *kw ;
 
                     ++itrStencil ;
@@ -1688,34 +1660,34 @@ int UCartMesh::linearCellInterpolation( std::array<double,3> &P, vector<int> &st
  *  \param[out]     weights weights associated to stencil
  *  \return         number of cells used in the interpolation stencil. 0 id point outside the grid
  */
-int UCartMesh::linearNodeInterpolation( std::array<double,3> &P, vector<int> &stencil, vector<double> &weights ){
+int UCartMesh::linearNodeInterpolation( std::array<double,3> &P, std::vector<int> &stencil, std::vector<double> &weights ){
 
 
     int                         nStencil(0) ;
     int                         d, i, j, k;
     std::array<int,3>                    i0, i1 ;
 
-    array< array<int,2>, 3>     cStencil ;
-    array< array<double,2>, 3>  cWeights ;
+    std::array< std::array<int,2>, 3>     cStencil ;
+    std::array< std::array<double,2>, 3>  cWeights ;
 
-    vector<int>::iterator       itrStencil ;
-    vector<double>::iterator    itrWeights ;
+    std::vector<int>::iterator       itrStencil ;
+    std::vector<double>::iterator    itrWeights ;
 
-    if( PointInGrid(P,i0) ){
+    if( isPointInGrid(P,i0) ){
 
-        nStencil = pow(2,dim) ;
+        nStencil = pow(2,m_dim) ;
 
-        for(d=0; d<dim; ++d){
+        for(d=0; d<m_dim; ++d){
             i1[d] = i0[d] +1 ;
 
             cStencil[d][0] = i0[d] ;
             cStencil[d][1] = i1[d] ;
 
-            cWeights[d][1] = ( P[d] - edge[d][i0[d]]) /h[d]  ;
+            cWeights[d][1] = ( P[d] - m_edge[d][i0[d]]) /m_h[d]  ;
             cWeights[d][0] = 1.0 - cWeights[d][1] ;  
         };
 
-        for( d=dim; d<3; ++d){
+        for( d=m_dim; d<3; ++d){
             cStencil[d][0] = 0 ;
             cWeights[d][0] = 1. ;
         };
@@ -1726,7 +1698,7 @@ int UCartMesh::linearNodeInterpolation( std::array<double,3> &P, vector<int> &st
         itrStencil = stencil.begin() ;
         itrWeights = weights.begin() ;
 
-        for( k=0; k<dim-1; ++k){
+        for( k=0; k<m_dim-1; ++k){
             for( j=0; j<2; ++j){
                 for( i=0; i<2; ++i){
 
@@ -1738,7 +1710,7 @@ int UCartMesh::linearNodeInterpolation( std::array<double,3> &P, vector<int> &st
                     double &jw = cWeights[1][j] ;
                     double &kw = cWeights[2][k] ;
 
-                    *itrStencil =  NodeLinearId(is,js,ks) ;
+                    *itrStencil =  getNodeLinearId(is,js,ks) ;
                     *itrWeights =  iw *jw *kw ;
 
                     ++itrStencil ;
