@@ -23,6 +23,7 @@
 \*---------------------------------------------------------------------------*/
 
 namespace bitpit{
+namespace linearalgebra{
 
 /*!
  * @ingroup Manipulation
@@ -574,4 +575,5 @@ return; };
 /*!
  * @}
  */
+}
 }

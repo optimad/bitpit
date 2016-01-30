@@ -23,6 +23,7 @@
 \*---------------------------------------------------------------------------*/
 
 namespace bitpit{
+namespace linearalgebra{
 /*!
  * @ingroup Multiplication
  * @{
@@ -876,4 +877,5 @@ std::array< std::array<T, d2> , d1> Dia_Mat_Mul(
 /*!
  * @}
  */
+}
 }
