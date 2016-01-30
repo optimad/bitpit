@@ -395,11 +395,10 @@ PabloUniform::getBoundingBox(darray3 & P0, darray3 & P1){
 	uint32_t 	nocts = ParaTree::getNumOctants();
 	uint32_t	id = 0;
 	uint8_t 	nnodes = ParaTree::getNnodes();
-	cnode0 = ParaTree::getNode(id, 0);
-	id = nocts-1;
-	cnode1 = ParaTree::getNode(id, nnodes-1);
-	copy(begin(P0), end(P0), begin(cnode0));
-	copy(begin(P1), end(P1), begin(cnode1));
+
+	P0 = ParaTree::getNode(id, 0);
+	P1 = ParaTree::getNode(nocts-1, nnodes-1);
+
 	for (id=0; id<nocts; id++){
 		cnode0 = ParaTree::getNode(id, 0);
 		cnode1 = ParaTree::getNode(id, nnodes-1);
