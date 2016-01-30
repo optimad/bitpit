@@ -18,7 +18,6 @@
 // Standard Template Library
 # include <iostream>
 
-# include <Class_UCartMesh.hpp>
 # include <UCartMesh.hpp>
 
 using namespace std;
