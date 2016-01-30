@@ -52,6 +52,8 @@
 
 namespace bitpit{
 
+namespace linearalgebra{
+
 // Generic routines --------------------------------------------------------- //
 template <class T>
 void display_matrix(                                                          // Display matrix in nicely formatted output
@@ -355,6 +357,8 @@ template <class T, size_t m, size_t n>
 std::array < std::array<T, n>, m> Transpose(
     const std::array< std::array<T, m>, n>      &
 );
+
+}
 
 }
 

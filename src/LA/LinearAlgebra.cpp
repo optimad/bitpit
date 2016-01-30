@@ -64,7 +64,7 @@ using namespace std;
         err = 2: matrix is singular to working precision
         err = 3: wrong dimensions
 */
-unsigned int bitpit::LU(
+unsigned int bitpit::linearalgebra::LU(
     vector<vector<double> >         &A,
     vector<vector<double> >         &L,
     vector<vector<double> >         &U,
@@ -168,7 +168,7 @@ return(info); };
     \param[in] B r.h.s. of linear system
     \param[in,out] x on output store the solution of the linear system
 */
-void bitpit::BackwardSubst(
+void bitpit::linearalgebra::BackwardSubst(
     vector<vector<double> >         &A,
     vector<double>                  &B,
     vector<double>                  &x
@@ -237,7 +237,7 @@ return; };
     \param[in] B r.h.s. of linear system
     \param[in,out] x on output store the solution of the linear system
 */
-void bitpit::ForwardSubst(
+void bitpit::linearalgebra::ForwardSubst(
     vector<vector<double> >         &A,
     vector<double>                  &B,
     vector<double>                  &x
@@ -308,7 +308,7 @@ return; };
     \param[in] B r.h.s. of the linear system
     \param[in,out] x on output stores the solution of the linear system
 */
-void bitpit::SolveLU(
+void bitpit::linearalgebra::SolveLU(
     vector<vector<double> >         &A,
     vector<double>                  &B,
     vector<double>                  &x

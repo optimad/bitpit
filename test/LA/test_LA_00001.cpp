@@ -100,18 +100,18 @@ void Test_000(
 
     // Zeros
     cout << "zeros(A, 4, 3) = " << endl;
-    bitpit::zeros(A, 4, 3);
-    bitpit::display_matrix(cout, A);
+    bitpit::linearalgebra::zeros(A, 4, 3);
+    bitpit::linearalgebra::display_matrix(cout, A);
 
     // Ones
     cout << "ones(A, 3, 2) = " << endl;
-    bitpit::ones(A, 3, 2);
-    bitpit::display_matrix(cout, A);
+    bitpit::linearalgebra::ones(A, 3, 2);
+    bitpit::linearalgebra::display_matrix(cout, A);
 
     // Eye
     cout << "eye(A, 5, 5) = " << endl;
-    bitpit::eye(A, 5, 5);
-    bitpit::display_matrix(cout, A);
+    bitpit::linearalgebra::eye(A, 5, 5);
+    bitpit::linearalgebra::display_matrix(cout, A);
 
     // Closing header ------------------------------------------------------- //
     cout << endl;
@@ -133,18 +133,18 @@ void Test_000(
 
     // Zeros
     cout << "zeros(A, 4, 3) = " << endl;
-    bitpit::zeros(A1);
-    bitpit::display_matrix(cout, A1);
+    bitpit::linearalgebra::zeros(A1);
+    bitpit::linearalgebra::display_matrix(cout, A1);
 
     // Ones
     cout << "ones(A, 3, 2) = " << endl;
-    bitpit::ones(A2);
-    bitpit::display_matrix(cout, A2);
+    bitpit::linearalgebra::ones(A2);
+    bitpit::linearalgebra::display_matrix(cout, A2);
 
     // Eye
     cout << "eye(A, 5, 5) = " << endl;
-    bitpit::eye(A3);
-    bitpit::display_matrix(cout, A3);
+    bitpit::linearalgebra::eye(A3);
+    bitpit::linearalgebra::display_matrix(cout, A3);
 
     // Closing header ------------------------------------------------------- //
     cout << endl;
@@ -237,32 +237,32 @@ void Test_001(
     // Output message ------------------------------------------------------- //
     cout << "Matrix as vector<vector<*>>" << endl;
     cout << "A = " << endl;
-    bitpit::display_matrix(cout, A);
+    bitpit::linearalgebra::display_matrix(cout, A);
     cout << "B = " << endl;
-    bitpit::display_matrix(cout, B);
+    bitpit::linearalgebra::display_matrix(cout, B);
     cout << "a = " << endl << a << endl;
     cout << "b = " << endl << b << endl;
     cout << "k = " << k << endl;
     cout << endl;
 
     // Matrix product ------------------------------------------------------- //
-    cout << "bitpit::matmul(k, A, P); P = " << endl;
-    bitpit::matmul(k, A, P);
-    bitpit::display_matrix(cout, P);
-    cout << "bitpit::matmul(A, k, P); P = " << endl;
-    bitpit::matmul(A, k, P);
-    bitpit::display_matrix(cout, P);
+    cout << "bitpit::linearalgebra::matmul(k, A, P); P = " << endl;
+    bitpit::linearalgebra::matmul(k, A, P);
+    bitpit::linearalgebra::display_matrix(cout, P);
+    cout << "bitpit::linearalgebra::matmul(A, k, P); P = " << endl;
+    bitpit::linearalgebra::matmul(A, k, P);
+    bitpit::linearalgebra::display_matrix(cout, P);
     cout << endl;
-    cout << "bitpit::matmul(a, A, c); c = " << endl;
-    bitpit::matmul(a, A, c);
+    cout << "bitpit::linearalgebra::matmul(a, A, c); c = " << endl;
+    bitpit::linearalgebra::matmul(a, A, c);
     cout << c << endl;;
-    cout << "bitpit::matmul(A, b, c); c = " << endl;
-    bitpit::matmul(A, b, c);
+    cout << "bitpit::linearalgebra::matmul(A, b, c); c = " << endl;
+    bitpit::linearalgebra::matmul(A, b, c);
     cout << c << endl;;
     cout << endl;
-    cout << "bitpit::matmul(A, B, P); P = " << endl;
-    bitpit::matmul(A, B, P);
-    bitpit::display_matrix(cout, P);
+    cout << "bitpit::linearalgebra::matmul(A, B, P); P = " << endl;
+    bitpit::linearalgebra::matmul(A, B, P);
+    bitpit::linearalgebra::display_matrix(cout, P);
 
     // Closing header ------------------------------------------------------- //
     cout << endl;
@@ -302,34 +302,34 @@ void Test_001(
     // Output message ------------------------------------------------------- //
     cout << "Matrix as array<array<*, n>, m>" << endl;
     cout << "A = " << endl;
-    bitpit::display_matrix(cout, A);
+    bitpit::linearalgebra::display_matrix(cout, A);
     cout << "B = " << endl;
-    bitpit::display_matrix(cout, B);
+    bitpit::linearalgebra::display_matrix(cout, B);
     cout << "a = " << endl << a << endl;
     cout << "b = " << endl << b << endl;
     cout << "k = " << k << endl;
     cout << endl;
 
     // Matrix product ------------------------------------------------------- //
-    cout << "bitpit::matmul(k, A, P); P = " << endl;
-    bitpit::matmul(k, A, P);
-    bitpit::display_matrix(cout, P);
-    cout << "bitpit::matmul(A, k, P); P = " << endl;
-    bitpit::matmul(A, k, P);
-    bitpit::display_matrix(cout, P);
+    cout << "bitpit::linearalgebra::matmul(k, A, P); P = " << endl;
+    bitpit::linearalgebra::matmul(k, A, P);
+    bitpit::linearalgebra::display_matrix(cout, P);
+    cout << "bitpit::linearalgebra::matmul(A, k, P); P = " << endl;
+    bitpit::linearalgebra::matmul(A, k, P);
+    bitpit::linearalgebra::display_matrix(cout, P);
     cout << endl;
 
-    cout << "bitpit::matmul(a, A, c); c = " << endl;
-    bitpit::matmul(a, A, c);
+    cout << "bitpit::linearalgebra::matmul(a, A, c); c = " << endl;
+    bitpit::linearalgebra::matmul(a, A, c);
     cout << c << endl;
-    cout << "bitpit::matmul(A, b, d); d = " << endl;
-    bitpit::matmul(A, b, d);
+    cout << "bitpit::linearalgebra::matmul(A, b, d); d = " << endl;
+    bitpit::linearalgebra::matmul(A, b, d);
     cout << d << endl;
     cout << endl;
 
-    cout << "bitpit::matmul(A, B, Q); Q = " << endl;
-    bitpit::matmul(A, B, Q);
-    bitpit::display_matrix(cout, Q);
+    cout << "bitpit::linearalgebra::matmul(A, B, Q); Q = " << endl;
+    bitpit::linearalgebra::matmul(A, B, Q);
+    bitpit::linearalgebra::display_matrix(cout, Q);
 
     // Closing header ------------------------------------------------------- //
     cout << endl;
@@ -409,25 +409,25 @@ void Test_002(
     // Output message ------------------------------------------------------- //
     cout << "Matrix as vector<vector<*>>" << endl;
     cout << "A = " << endl;
-    bitpit::display_matrix(cout, A);
+    bitpit::linearalgebra::display_matrix(cout, A);
     cout << endl;
 
     // Matrix manipulations ------------------------------------------------- //
-    cout << "bitpit::transpose(A, P); P = " << endl;
-    bitpit::transpose(A, P);
-    bitpit::display_matrix(cout, P);
+    cout << "bitpit::linearalgebra::transpose(A, P); P = " << endl;
+    bitpit::linearalgebra::transpose(A, P);
+    bitpit::linearalgebra::display_matrix(cout, P);
     cout << endl;
-    cout << "bitpit::complement(1, 1, A, P); P = " << endl;
-    bitpit::complement(1, 1, A, P);
-    bitpit::display_matrix(cout, P);
+    cout << "bitpit::linearalgebra::complement(1, 1, A, P); P = " << endl;
+    bitpit::linearalgebra::complement(1, 1, A, P);
+    bitpit::linearalgebra::display_matrix(cout, P);
     cout << endl;
-    cout << "bitpit::triL(A, P); P = " << endl;
-    bitpit::triL(A, P);
-    bitpit::display_matrix(cout, P);
+    cout << "bitpit::linearalgebra::triL(A, P); P = " << endl;
+    bitpit::linearalgebra::triL(A, P);
+    bitpit::linearalgebra::display_matrix(cout, P);
     cout << endl;
-    cout << "bitpit::triU(A, P); P = " << endl;
-    bitpit::triU(A, P);
-    bitpit::display_matrix(cout, P);
+    cout << "bitpit::linearalgebra::triU(A, P); P = " << endl;
+    bitpit::linearalgebra::triU(A, P);
+    bitpit::linearalgebra::display_matrix(cout, P);
     cout << endl;
 
     // Closing header ------------------------------------------------------- //
@@ -455,25 +455,25 @@ void Test_002(
     // Output message ------------------------------------------------------- //
     cout << "Matrix as vector<vector<*>>" << endl;
     cout << "A = " << endl;
-    bitpit::display_matrix(cout, A);
+    bitpit::linearalgebra::display_matrix(cout, A);
     cout << endl;
 
     // Matrix manipulations ------------------------------------------------- //
-    cout << "bitpit::transpose(A, P); P = " << endl;
-    bitpit::transpose(A, T);
-    bitpit::display_matrix(cout, T);
+    cout << "bitpit::linearalgebra::transpose(A, P); P = " << endl;
+    bitpit::linearalgebra::transpose(A, T);
+    bitpit::linearalgebra::display_matrix(cout, T);
     cout << endl;
-    cout << "bitpit::complement(1, 1, A, P); P = " << endl;
-    bitpit::complement(1, 1, A, C);
-    bitpit::display_matrix(cout, C);
+    cout << "bitpit::linearalgebra::complement(1, 1, A, P); P = " << endl;
+    bitpit::linearalgebra::complement(1, 1, A, C);
+    bitpit::linearalgebra::display_matrix(cout, C);
     cout << endl;
-    cout << "bitpit::triL(A, P); P = " << endl;
-    bitpit::triL(A, P);
-    bitpit::display_matrix(cout, P);
+    cout << "bitpit::linearalgebra::triL(A, P); P = " << endl;
+    bitpit::linearalgebra::triL(A, P);
+    bitpit::linearalgebra::display_matrix(cout, P);
     cout << endl;
-    cout << "bitpit::triU(A, P); P = " << endl;
-    bitpit::triU(A, P);
-    bitpit::display_matrix(cout, P);
+    cout << "bitpit::linearalgebra::triU(A, P); P = " << endl;
+    bitpit::linearalgebra::triU(A, P);
+    bitpit::linearalgebra::display_matrix(cout, P);
     cout << endl;
 
     // Closing header ------------------------------------------------------- //
@@ -545,8 +545,8 @@ void Test_003(
     dvector2D                   P;
 
     // Initialize scope variables ------------------------------------------- //
-    bitpit::eye(B, 3, 3);
-    bitpit::matmul(2.0, B, A);
+    bitpit::linearalgebra::eye(B, 3, 3);
+    bitpit::linearalgebra::matmul(2.0, B, A);
     for (i = 0; i < 3; ++i) {
         b[i] = ((double) i);
     } //next i
@@ -554,19 +554,19 @@ void Test_003(
     // Output message ------------------------------------------------------- //
     cout << "Matrix as vector<vector<*>>" << endl;
     cout << "A = " << endl;
-    bitpit::display_matrix(cout, A);
+    bitpit::linearalgebra::display_matrix(cout, A);
     cout << "b = " << b << endl;
     cout << endl;
 
     // Matrix manipulations ------------------------------------------------- //
-    cout << "bitpit::det(A) = " << bitpit::det(A) << endl;;
+    cout << "bitpit::linearalgebra::det(A) = " << bitpit::linearalgebra::det(A) << endl;;
     cout << endl;
-    cout << "bitpit::Cramer(A, b, c); c = " << endl;
-    bitpit::Cramer(A, b, c);
+    cout << "bitpit::linearalgebra::Cramer(A, b, c); c = " << endl;
+    bitpit::linearalgebra::Cramer(A, b, c);
     cout << c << endl;
     cout << endl;
-    cout << "bitpit::SolveLU(A, b, d); d = " << endl;
-    bitpit::SolveLU(A, b, d);
+    cout << "bitpit::linearalgebra::SolveLU(A, b, d); d = " << endl;
+    bitpit::linearalgebra::SolveLU(A, b, d);
     cout << d << endl;
 
     // Closing header ------------------------------------------------------- //
@@ -584,8 +584,8 @@ void Test_003(
     dvector2D                   P;
 
     // Initialize scope variables ------------------------------------------- //
-    bitpit::eye(B);
-    bitpit::matmul(2.0, B, A);
+    bitpit::linearalgebra::eye(B);
+    bitpit::linearalgebra::matmul(2.0, B, A);
     for (i = 0; i < 3; ++i) {
         b[i] = ((double) i);
     } //next i
@@ -593,19 +593,19 @@ void Test_003(
     // Output message ------------------------------------------------------- //
     cout << "Matrix as array<array<*, n>, m>" << endl;
     cout << "A = " << endl;
-    bitpit::display_matrix(cout, A);
+    bitpit::linearalgebra::display_matrix(cout, A);
     cout << "b = " << b << endl;
     cout << endl;
 
     // Matrix manipulations ------------------------------------------------- //
-    cout << "bitpit::det(A) = " << bitpit::det(A) << endl;;
+    cout << "bitpit::linearalgebra::det(A) = " << bitpit::linearalgebra::det(A) << endl;;
     cout << endl;
-    cout << "bitpit::Cramer(A, b, c); c = " << endl;
-    bitpit::Cramer(A, b, c);
+    cout << "bitpit::linearalgebra::Cramer(A, b, c); c = " << endl;
+    bitpit::linearalgebra::Cramer(A, b, c);
     cout << c << endl;
     cout << endl;
-    cout << "bitpit::SolveLU(A, b, d); d = " << endl;
-    bitpit::SolveLU(A, b, d);
+    cout << "bitpit::linearalgebra::SolveLU(A, b, d); d = " << endl;
+    bitpit::linearalgebra::SolveLU(A, b, d);
     cout << d << endl;
 
     // Closing header ------------------------------------------------------- //
