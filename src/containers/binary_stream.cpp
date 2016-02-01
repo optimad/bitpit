@@ -105,7 +105,7 @@ IBinaryStream::IBinaryStream(
 
 */
 IBinaryStream::IBinaryStream(
-    const vector<char>          &vec
+    const std::vector<char>          &vec
 ) {
     current_pos = 0;
     buffer.clear();
@@ -458,6 +458,8 @@ void OBinaryStream::write(
     } //next i
 }
 
+}
+
 // ========================================================================== //
 // OPERATORS
 // ========================================================================== //
@@ -471,9 +473,9 @@ void OBinaryStream::write(
 
 */
 template<>
-IBinaryStream& operator>>(
-        IBinaryStream             &istm,
-        string                  &val)
+bitpit::IBinaryStream& operator>>(
+        bitpit::IBinaryStream             &istm,
+        std::string                  &val)
 {
     int                 size = 0;
 
@@ -497,9 +499,9 @@ IBinaryStream& operator>>(
 
 */
 template<>
-OBinaryStream& operator << (
-    OBinaryStream                 & ostm,
-    const string                & val
+bitpit::OBinaryStream& operator << (
+    bitpit::OBinaryStream                 & ostm,
+    const std::string                & val
 ) {
     int size = val.size();
 
@@ -521,8 +523,8 @@ OBinaryStream& operator << (
         \param[in] val pointer to char array
 
 */
-OBinaryStream& operator<<(
-    OBinaryStream                 &ostm,
+bitpit::OBinaryStream& operator<<(
+    bitpit::OBinaryStream                 &ostm,
     const char                  *val
 ) {
     int size = strlen(val);
@@ -537,7 +539,6 @@ OBinaryStream& operator<<(
     return ostm;
 }
 
-}
 
 /*!
  * @}
