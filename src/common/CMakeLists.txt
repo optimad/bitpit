@@ -33,7 +33,7 @@ set(INCLUDE_LIST "#include <bitpit_common.hpp>\n")
 foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
 	isModuledEnabled(${MODULE_NAME} MODULE_ENABLED)
 	if (MODULE_ENABLED)
-		set(INCLUDE_LIST "${INCLUDE_LIST}#include <bitpit_${MODULE_NAME}.hpp>\n")
+		set(INCLUDE_LIST "${INCLUDE_LIST}#include "bitpit_${MODULE_NAME}.hpp"\n")
 	endif ()
 endforeach ()
 

@@ -34,7 +34,7 @@
 #ifndef __BITPIT_CONTAINERS__
 #define __BITPIT_CONTAINERS__
 
-#include <bitpit_version.hpp>
+#include "bitpit_version.hpp"
 
 #include "binary_stream.hpp"
 #include "collapsedArray2D.tpp"

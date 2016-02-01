@@ -39,7 +39,7 @@
 #ifndef __BITPIT_IO__
 #define __BITPIT_IO__
 
-#include <bitpit_version.hpp>
+#include "bitpit_version.hpp"
 
 #include "FileHandler.hpp"
 #include "VTK.hpp"

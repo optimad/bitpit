@@ -13,7 +13,7 @@
  * @}
  */
 
-#include <bitpit_version.hpp>
+#include "bitpit_version.hpp"
 
 #include "LinearAlgebra.hpp"
 

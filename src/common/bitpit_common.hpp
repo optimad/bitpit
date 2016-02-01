@@ -36,7 +36,7 @@
 #ifndef __BITPIT_COMMON__
 #define __BITPIT_COMMON__
 
-#include <bitpit_version.hpp>
+#include "bitpit_version.hpp"
 
 #include "utils.hpp"
 #include "utils.tpp"
