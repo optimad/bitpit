@@ -33,24 +33,12 @@
 #include <iostream>
 #include <memory>
 
+#include "binary_stream.hpp"
+
 namespace bitpit{
-/*!
-	\ingroup containers
-	@{
-*/
-
-/*!
-	@brief Metafunction for generation of a collapsed vector of arrays.
-
-	@details
-	Usage: Use <tt>CollapsedVector2D<Type></tt> to declare a
-	collapsed vector of arrays.
-
-	@tparam T The type of the objects stored in the vector
-*/
-
-template<class T>
-class CollapsedVector2D;
+	template<class T>
+	class CollapsedVector2D;
+}
 
 /*!
 	Stream operator from class CollapsedVector2D to communication buffer.
@@ -61,7 +49,7 @@ class CollapsedVector2D;
 	\result Returns the same output stream received in input.
 */
 template<class T>
-OBinaryStream& operator<<(OBinaryStream &buffer, const CollapsedVector2D<T> &vector)
+bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buffer, const bitpit::CollapsedVector2D<T> &vector)
 {
 	typename std::vector<T>::const_iterator           it;
 	typename std::vector<size_t>::const_iterator      jt;
@@ -86,7 +74,7 @@ OBinaryStream& operator<<(OBinaryStream &buffer, const CollapsedVector2D<T> &vec
 	\result Returns the same input stream received in input.
 */
 template<class T>
-IBinaryStream& operator>>(IBinaryStream &buffer, CollapsedVector2D<T> &vector)
+bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::CollapsedVector2D<T> &vector)
 {
     size_t                      size_m_v, size_m_index;
     size_t                      i;
@@ -108,15 +96,33 @@ IBinaryStream& operator>>(IBinaryStream &buffer, CollapsedVector2D<T> &vector)
     return buffer;
 }
 
+namespace bitpit{
+/*!
+	\ingroup containers
+	@{
+*/
+
+/*!
+	@brief Metafunction for generation of a collapsed vector of arrays.
+
+	@details
+	Usage: Use <tt>CollapsedVector2D<Type></tt> to declare a
+	collapsed vector of arrays.
+
+	@tparam T The type of the objects stored in the vector
+*/
+
 template <class T>
 class CollapsedVector2D
 {
 
+// Friendship(s)
 template<class U>
-friend OBinaryStream& operator<<(OBinaryStream& buffer, const CollapsedVector2D<U>& vector);
+friend bitpit::OBinaryStream& (::operator<<) (bitpit::OBinaryStream &buffer, const CollapsedVector2D<U> &vector);
 template<class U>
-friend IBinaryStream& operator>>(IBinaryStream& buffer, CollapsedVector2D<U>& vector);
+friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream &buffer, CollapsedVector2D<U> &vector);
 
+// Members and methods
 public:
 
 	/*!
