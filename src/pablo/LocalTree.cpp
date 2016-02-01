@@ -139,7 +139,7 @@ LocalTree::computeGhostMorton(int32_t idx){
  */
 bool
 LocalTree::getBalance(int32_t idx){
-	return m_octants[idx].getNotBalance();
+	return m_octants[idx].getBalance();
 };
 
 /*! Get the codimension for 2:1 balancing
@@ -463,7 +463,7 @@ LocalTree::coarse(u32vector & mapidx){
 				for (uint32_t iii=0; iii<m_global.m_nfaces; iii++){
 					father.m_info[iii] = father.m_info[iii] || m_ghosts[idx].m_info[iii];
 				}
-				father.m_info[14] = father.m_info[14] || m_ghosts[idx].m_info[14];
+//				father.m_info[14] = father.m_info[14] || m_ghosts[idx].m_info[14];
 				idx++;
 				if(idx == m_sizeGhosts){
 					break;
@@ -1935,7 +1935,7 @@ LocalTree::localBalance(bool doInterior){
 		oend = m_octants.end();
 		idx = 0;
 		for (it=obegin; it!=oend; it++){
-			if (!it->getNotBalance() && it->getMarker() != 0){
+			if (it->getBalance() && it->getMarker() != 0){
 				targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
 
 				//Balance through faces

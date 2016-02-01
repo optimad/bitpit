@@ -39,6 +39,7 @@ Octant::Octant(){
 	for (uint8_t i=0; i<4; i++){
 		m_info[i] = true;
 	}
+	m_info[14] = true;
 };
 
 /*! Custom constructor of an octant.
@@ -57,6 +58,7 @@ Octant::Octant(uint8_t dim_, int8_t maxlevel){
 	for (uint8_t i=0; i<nf; i++){
 		m_info[i] = true;
 	}
+	m_info[14] = true;
 };
 
 /*! Custom constructor of an octant.
@@ -81,6 +83,7 @@ Octant::Octant(uint8_t dim_, uint8_t level_, int32_t x_, int32_t y_, int32_t z_,
 			m_info[i] = true;
 		}
 	}
+	m_info[14] = true;
 };
 
 /*! Custom constructor of an octant.
@@ -106,6 +109,7 @@ Octant::Octant(bool bound, uint8_t dim_, uint8_t level_, int32_t x_, int32_t y_,
 			m_info[i] = bound;
 		}
 	}
+	m_info[14] = true;
 };
 
 /*! Copy constructor of an octant.
@@ -265,13 +269,13 @@ Octant::getIsGhost() const{return m_info[16];};
  * \return false if the octant has to be balanced.
  */
 bool
-Octant::getNotBalance() const{return m_info[14];};
+Octant::getNotBalance() const{return !m_info[14];};
 
 /*! Get if the octant has to be balanced.
  * \return true if the octant has to be balanced.
  */
 bool
-Octant::getBalance() const{return (!m_info[14]);};
+Octant::getBalance() const{return (m_info[14]);};
 
 /*! Set the refinement marker of an octant.
  * \param[in] marker Refinement marker of octant (n=n refinement in adapt, -n=n coarsening in adapt, default=0).
@@ -516,12 +520,11 @@ uint64_t	Octant::computeMorton(){
  * \return Last descendant octant.
  */
 Octant	Octant::buildLastDesc(){
-	uint32_t delta[3] = {0,0,0};
+	u32array3 delta = { {0,0,0} };
 	for (int i=0; i<m_dim; i++){
 		delta[i] = (uint32_t)(1 << (sm_maxLevel - m_level)) - 1;
 	}
-
-	Octant last_desc(m_dim, m_x+delta[0], m_y+delta[1], m_z+delta[2], sm_maxLevel);
+	Octant last_desc(m_dim, sm_maxLevel, (m_x+delta[0]), (m_y+delta[1]), (m_z+delta[2]), sm_maxLevel);
 	return last_desc;
 };
 

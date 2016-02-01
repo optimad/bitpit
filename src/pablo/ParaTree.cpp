@@ -112,7 +112,7 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
         y0 = uint32_t(XYZ[i][1]);
         z0 = uint32_t(XYZ[i][2]);
 		Octant oct(false, m_dim, lev, x0, y0, z0, maxlevel);
-		oct.setBalance(false);
+		oct.setBalance(true);
 		if (x0 == 0){
 			iface = 0;
 			oct.setBound(iface);
@@ -741,7 +741,7 @@ ParaTree::getMorton(uint32_t idx){
  */
 bool
 ParaTree::getBalance(uint32_t idx){
-	return !m_octree.getBalance(idx);
+	return m_octree.getBalance(idx);
 };
 
 /*! Get the bound condition of the face of the octant
@@ -856,7 +856,7 @@ ParaTree::setMarker(uint32_t idx, int8_t marker){
  */
 void
 ParaTree::setBalance(uint32_t idx, bool balance){
-	m_octree.setBalance(idx, !balance);
+	m_octree.setBalance(idx, balance);
 };
 
 // =================================================================================== //
@@ -1079,7 +1079,7 @@ ParaTree::getMorton(Octant* oct){
  */
 bool
 ParaTree::getBalance(Octant* oct){
-	return !oct->getBalance();
+	return oct->getBalance();
 };
 
 /*! Get the bound condition of the face of the octant
@@ -1200,7 +1200,7 @@ ParaTree::setMarker(Octant* oct, int8_t marker){
  */
 void
 ParaTree::setBalance(Octant* oct, bool balance){
-	oct->setBalance(!balance);
+	oct->setBalance(balance);
 };
 
 // =================================================================================== //

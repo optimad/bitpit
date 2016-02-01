@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
 
 		/**<Set NO 2:1 balance for ancestor octant.*/
 		uint32_t idx=0;
-		pablo3.setBalance(idx,false);
+		pablo3.setBalance(idx,true);
 
 		/**<Compute the connectivity and write the para_tree.*/
 		pablo3.computeConnectivity();
@@ -61,6 +61,7 @@ int main(int argc, char *argv[]) {
 		pablo3.adaptGlobalCoarse();
 		pablo3.updateConnectivity();
 		pablo3.write("Pablo3_iter"+to_string(static_cast<unsigned long long>(iter)));
+
 
 		/**<Define a center point and a radius.*/
 		xc = yc = 0.35;
