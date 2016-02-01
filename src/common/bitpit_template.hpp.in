@@ -25,7 +25,7 @@
 #ifndef __BITPIT_HPP__
 #define __BITPIT_HPP__
 
-#include <bitpit_version.hpp>
+#include "bitpit_version.hpp"
 
 @INCLUDE_LIST@
 #endif
