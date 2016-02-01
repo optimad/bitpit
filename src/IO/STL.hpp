@@ -203,7 +203,7 @@ class STLObj {
  * @ingroup  STereoLithography
  * @brief Utility fuctions for STL IO
  */
-namespace STLUtils{
+namespace stl{
 
 // Scanning functions ------------------------------------------------------- //
 unsigned int scanASCII(                                                  // Scan ASCII stl file and returns infos

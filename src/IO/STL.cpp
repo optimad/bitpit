@@ -410,11 +410,11 @@ open("in");
 // SCAN STL FILE                                                              //
 // ========================================================================== //
 if (stl_type) {
-    err = STLUtils::scanBINARY(ifile_handle, data.solid_names, data.solid_facets);
+    err = stl::scanBINARY(ifile_handle, data.solid_names, data.solid_facets);
     data.n_solids = data.solid_names.size();
 }
 else {
-    err = STLUtils::scanASCII(ifile_handle, data.solid_names, data.solid_facets);
+    err = stl::scanASCII(ifile_handle, data.solid_names, data.solid_facets);
     data.n_solids = data.solid_names.size();
 }
 
@@ -456,8 +456,8 @@ open("in");
 // ========================================================================== //
 // CHECK STL FILE                                                             //
 // ========================================================================== //
-if (stl_type) { STLUtils::checkBINARY(ifile_handle, stl_errors); }
-else          { STLUtils::checkASCII(ifile_handle, stl_errors); }
+if (stl_type) { stl::checkBINARY(ifile_handle, stl_errors); }
+else          { stl::checkASCII(ifile_handle, stl_errors); }
 
 // ========================================================================== //
 // CLOSE INPUT STREAM                                                         //
@@ -513,8 +513,8 @@ if (err == 1) { return; }
 // ========================================================================== //
 // READ STL DATA                                                              //
 // ========================================================================== //
-if (stl_type)   { STLUtils::readBINARY(ifile_handle, nV, nT, V, N, T); }
-else            { STLUtils::readASCII(ifile_handle, nV, nT, V, N, T); }
+if (stl_type)   { stl::readBINARY(ifile_handle, nV, nT, V, N, T); }
+else            { stl::readASCII(ifile_handle, nV, nT, V, N, T); }
 
 // ========================================================================== //
 // CLOSE INPUT STREAM                                                         //
@@ -571,8 +571,8 @@ if (err == 1) { return; }
 // ========================================================================== //
 // READ STL DATA                                                              //
 // ========================================================================== //
-if (stl_type)   { STLUtils::readBINARY(ifile_handle, nV, nT, V, N, T); }
-else            { STLUtils::readASCII(ifile_handle, nV, nT, V, N, T); }
+if (stl_type)   { stl::readBINARY(ifile_handle, nV, nT, V, N, T); }
+else            { stl::readASCII(ifile_handle, nV, nT, V, N, T); }
 
 // ========================================================================== //
 // CLOSE INPUT STREAM                                                         //
@@ -653,7 +653,7 @@ return; };
         err = 0: no error(s) encountered
         err = 1: failed to scan stl file.
 */
-unsigned int STLUtils::scanASCII(
+unsigned int stl::scanASCII(
     ifstream                            &file_handle,
     vector<string>                      &solid_names,
     vector<int>                         &solid_facets
@@ -724,7 +724,7 @@ while (!file_handle.eof()) {
             solid_names.push_back(utils::trim(word));
 
             // Get solid info
-            STLUtils::scanSolidASCII(file_handle, nF);
+            stl::scanSolidASCII(file_handle, nF);
             solid_facets.push_back(nF);
             
         }
@@ -751,7 +751,7 @@ return(0); };
         err = 0: no error(s) encountered
         err = 1: failed to scan stl file.
 */
-unsigned int STLUtils::scanBINARY(
+unsigned int stl::scanBINARY(
     ifstream                            &file_handle,
     vector<string>                      &solid_names,
     vector<int>                         &solid_facets
@@ -816,7 +816,7 @@ return(0); };
         err = 0: no error(s) encountered
         err = 1: failed to scan stl file.
 */
-unsigned int STLUtils::scanSolidASCII(
+unsigned int stl::scanSolidASCII(
     ifstream                            &file_handle,
     int                                 &nT
 ) {
@@ -903,7 +903,7 @@ return(0); };
         err = 0: no error(s) encountered
         err = 1: failed to scan/check stl file
 */
-unsigned int STLUtils::checkASCII(
+unsigned int stl::checkASCII(
     ifstream                            &file_handle,
     vector<vector<bool> >               &err_map
 ) {
@@ -949,7 +949,7 @@ while (getline(file_handle, line)) {
     if ((sline >> word) && (word.compare("solid") == 0)) {
         vector<bool>    _map(6, false);
         n_solid++;
-        STLUtils::checkSolidASCII(file_handle, _map);
+        stl::checkSolidASCII(file_handle, _map);
         err_map.push_back(_map);
     }
 
@@ -978,7 +978,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to scan/check stl file
 */
-unsigned int STLUtils::checkSolidASCII(
+unsigned int stl::checkSolidASCII(
     ifstream                            &file_handle,
     vector<bool>                        &err_map
 ) {
@@ -1025,7 +1025,7 @@ while ((!file_handle.eof())
         // Look for keyword "facet"
         if (word.compare("facet") == 0) {
             file_handle.seekg(backup_pos);
-            STLUtils::checkFacetASCII(file_handle, err_map);
+            stl::checkFacetASCII(file_handle, err_map);
         }
 
         // Get next line
@@ -1062,7 +1062,7 @@ return(0); };
         err = 0: no error(s) encountered
         err = 1: failed to scan/check stl file
 */
-unsigned int STLUtils::checkFacetASCII(
+unsigned int stl::checkFacetASCII(
     ifstream                            &file_handle,
     vector<bool>                        &err_map
 ) {
@@ -1176,7 +1176,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to scan/check stl file
 */
-unsigned int STLUtils::checkBINARY(
+unsigned int stl::checkBINARY(
     ifstream                            &file_handle,
     vector<vector<bool> >               &err_map
 ) {
@@ -1313,7 +1313,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
 */  
-unsigned int STLUtils::readFacetASCII(
+unsigned int stl::readFacetASCII(
     ifstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -1418,7 +1418,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
 */  
-unsigned int STLUtils::readFacetASCII(
+unsigned int stl::readFacetASCII(
     ifstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -1524,7 +1524,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
 */
-unsigned int STLUtils::readSolidASCII(
+unsigned int stl::readSolidASCII(
     ifstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -1598,7 +1598,7 @@ if (!check) { return(0); }
 // Scan stl solid ----------------------------------------------------------- //
 file_handle.clear();
 file_handle.seekg(start_pos);
-STLUtils::scanSolidASCII(file_handle, nt);
+stl::scanSolidASCII(file_handle, nt);
 
 // ========================================================================== //
 // READ SOLID DATA                                                            //
@@ -1627,7 +1627,7 @@ while ((!file_handle.eof())
     // Look for keyword "facet"
     if ((sline >> word) && (word.compare("facet") == 0)) {
         file_handle.seekg(current_pos);
-        STLUtils::readFacetASCII(file_handle, nV, nT, V, N, T);
+        stl::readFacetASCII(file_handle, nV, nT, V, N, T);
     }
 } //next line
 if (word.compare("endsolid") != 0) {
@@ -1664,7 +1664,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
 */
-unsigned int STLUtils::readSolidASCII(
+unsigned int stl::readSolidASCII(
     ifstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -1738,7 +1738,7 @@ if (!check) { return(0); }
 // Scan stl solid ----------------------------------------------------------- //
 file_handle.clear();
 file_handle.seekg(start_pos);
-STLUtils::scanSolidASCII(file_handle, nt);
+stl::scanSolidASCII(file_handle, nt);
 
 // ========================================================================== //
 // READ SOLID DATA                                                            //
@@ -1805,7 +1805,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
 */
-unsigned int STLUtils::readASCII(
+unsigned int stl::readASCII(
     ifstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -1892,7 +1892,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
 */
-unsigned int STLUtils::readASCII(
+unsigned int stl::readASCII(
     ifstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -1938,7 +1938,7 @@ while (getline(file_handle, line)) {
     if ((sline >> word) && (word.compare("solid") == 0)) {
         file_handle.clear();
         file_handle.seekg(current_pos);
-        STLUtils::readSolidASCII(file_handle, nV, nT, V, N, T, "");
+        stl::readSolidASCII(file_handle, nV, nT, V, N, T, "");
     }
     current_pos = file_handle.tellg();
 }
@@ -1977,7 +1977,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
 */
-unsigned int STLUtils::readBINARY(
+unsigned int stl::readBINARY(
     ifstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -2109,7 +2109,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to read from input stream
 */
-unsigned int STLUtils::readBINARY(
+unsigned int stl::readBINARY(
     ifstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -2237,7 +2237,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to write data to output stream
 */
-unsigned int STLUtils::writeSolidASCII(
+unsigned int stl::writeSolidASCII(
     ofstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -2344,7 +2344,7 @@ return(err); };
         err = 0: no error(s) encountered
         err = 1: failed to write data to output stream
 */
-unsigned int STLUtils::writeSolidASCII(
+unsigned int stl::writeSolidASCII(
     ofstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -2450,7 +2450,7 @@ return(err); };
         err = 0: no error(s) encountered
         err = 1: failed to write data to output stream
 */
-unsigned int STLUtils::writeSolidBINARY(
+unsigned int stl::writeSolidBINARY(
     ofstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,
@@ -2549,7 +2549,7 @@ return(0); };
         err = 0: no error(s) encountered
         err = 1: failed to write data to output stream
 */
-unsigned int STLUtils::writeSolidBINARY(
+unsigned int stl::writeSolidBINARY(
     ofstream                            &file_handle,
     int                                 &nV,
     int                                 &nT,

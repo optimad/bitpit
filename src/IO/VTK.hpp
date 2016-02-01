@@ -344,7 +344,7 @@ class VTKRectilinearGrid : public VTK{
  * @ingroup  VisualizationToolKit
  * @brief Utility fuctions for VTK
  */
-namespace VTKUtils{
+namespace vtk{
     uint8_t                         getNNodeInElement( const VTKElementType & ) ;
 
     std::string                     convertDataArrayToString( const VTKField & ) ;

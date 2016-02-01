@@ -443,7 +443,7 @@ open("in");
 // ========================================================================== //
 // SCAN DGF FILE                                                              //
 // ========================================================================== //
-err = DGFUtils::scan(ifile_handle,
+err = dgf::scan(ifile_handle,
                data.nV,
                data.nS,
                data.sV_data,
@@ -490,7 +490,7 @@ open("in");
 // ========================================================================== //
 // CHECK DATA COHERENCY                                                       //
 // ========================================================================== //
-err = DGFUtils::check(ifile_handle, dgf_error);
+err = dgf::check(ifile_handle, dgf_error);
 
 // ========================================================================== //
 // CLOSE INPUT STREAM                                                         //
@@ -541,7 +541,7 @@ open("in");
 // ========================================================================== //
 // READ MESH DATA FROM DGF FILE                                               //
 // ========================================================================== //
-err = DGFUtils::readMesh(ifile_handle, nV, nS, V, S);
+err = dgf::readMesh(ifile_handle, nV, nS, V, S);
 
 // ========================================================================== //
 // CLOSE INPUT STREAM                                                         //
@@ -593,7 +593,7 @@ open("in");
 // ========================================================================== //
 // READ MESH DATA FROM DGF FILE                                               //
 // ========================================================================== //
-err = DGFUtils::readMesh(ifile_handle, nV, nS, V, S);
+err = dgf::readMesh(ifile_handle, nV, nS, V, S);
 
 // ========================================================================== //
 // CLOSE INPUT STREAM                                                         //
@@ -659,7 +659,7 @@ open("out");
 // ========================================================================== //
 // READ MESH DATA FROM DGF FILE                                               //
 // ========================================================================== //
-err = DGFUtils::writeMesh(ofile_handle, nV, nS, V, S);
+err = dgf::writeMesh(ofile_handle, nV, nS, V, S);
 
 // ========================================================================== //
 // CLOSE OUTPUT STREAM                                                        //
@@ -703,7 +703,7 @@ open("out");
 // ========================================================================== //
 // READ MESH DATA FROM DGF FILE                                               //
 // ========================================================================== //
-err = DGFUtils::writeMesh(ofile_handle, nV, nS, V, S);
+err = dgf::writeMesh(ofile_handle, nV, nS, V, S);
 
 // ========================================================================== //
 // CLOSE OUTPUT STREAM                                                        //
@@ -832,7 +832,7 @@ return; }
         err = 0: no error(s) encountered
         err = 1: failed to scan dgf file.
 */
-unsigned int DGFUtils::scanData(
+unsigned int dgf::scanData(
     std::ifstream                       &file_handle,
     int                                 &n
 ) {
@@ -911,7 +911,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to scan dgf file.
 */
-unsigned int DGFUtils::scan(
+unsigned int dgf::scan(
     std::ifstream                       &file_handle,
     int                                 &nV,
     int                                 &nS,
@@ -973,12 +973,12 @@ while (!file_handle.eof()) {
         if (word.compare("VERTEX") == 0) {
 
             // Get number of vertices
-            err = DGFUtils::scanData(file_handle, nV);
+            err = dgf::scanData(file_handle, nV);
         }
         else if (word.compare("SIMPLEX") == 0) {
 
             // Get number of simplicies
-            err = DGFUtils::scanData(file_handle, nS);
+            err = dgf::scanData(file_handle, nS);
         }
         else if (word.compare("VERTEXDATA") == 0) {
         
@@ -988,7 +988,7 @@ while (!file_handle.eof()) {
 
             // Get number of data in the dataset
             n = 0;
-            err = DGFUtils::scanData(file_handle, n);
+            err = dgf::scanData(file_handle, n);
             nV_data.push_back(n);
         }
         else if (word.compare("SIMPLEXDATA") == 0) {
@@ -999,7 +999,7 @@ while (!file_handle.eof()) {
 
             // Get number of data in the dataset
             n = 0;
-            err = DGFUtils::scanData(file_handle, n);
+            err = dgf::scanData(file_handle, n);
             nS_data.push_back(n);
         }
     }
@@ -1029,7 +1029,7 @@ return(err); }
         err = 0: no error(s) encountered
         err = 1: failed to scan dgf file.
 */
-unsigned int DGFUtils::checkData(
+unsigned int dgf::checkData(
     std::ifstream                       &file_handle,
     int                                 &err_code
 ) {
@@ -1107,7 +1107,7 @@ return(0); }
         err = 0: no error(s) encountered
         err = 1: failed to scan dgf file.
 */
-unsigned int DGFUtils::check(
+unsigned int dgf::check(
     std::ifstream                       &file_handle,
     std::vector<std::vector<int> >      &err_code
 ) {
@@ -1159,18 +1159,18 @@ while ((!file_handle.eof()) && (word.compare("#") != 0)) {
     if (sline >> word) {
         if (word.compare("VERTEX") == 0) {
             err_code[0].resize(1);
-            err = DGFUtils::checkData(file_handle, err_code[0][0]);
+            err = dgf::checkData(file_handle, err_code[0][0]);
         }
         else if (word.compare("SIMPLEX") == 0) {
             err_code[1].resize(1);
-            err = DGFUtils::checkData(file_handle, err_code[1][0]);
+            err = dgf::checkData(file_handle, err_code[1][0]);
         }
         else if (word.compare("VERTEXDATA") == 0) {
-            err = DGFUtils::checkData(file_handle, loc_err);
+            err = dgf::checkData(file_handle, loc_err);
             err_code[2].push_back(loc_err);
         }
         else if (word.compare("SIMPLEXDATA") == 0) {
-            err = DGFUtils::checkData(file_handle, loc_err);
+            err = dgf::checkData(file_handle, loc_err);
             err_code[3].push_back(loc_err);
         }
     }
@@ -1208,7 +1208,7 @@ return(err); }
         err = 0: no error(s) occurred
         err = 1: failed to import mesh data from dgf file.
 */
-unsigned int DGFUtils::readMesh(
+unsigned int dgf::readMesh(
     std::ifstream                       &file_handle,
     int                                 &nV,
     int                                 &nS,
@@ -1275,7 +1275,7 @@ return(err); };
 
 // -------------------------------------------------------------------------- //
 /*!
-    Load mesh from dgf file. Overloading of function VTKUtils::readMesh()
+    Load mesh from dgf file. Overloading of function dgf::readMesh()
     for container vector<array<double,3>>
 
     \param[in] file_handle input file stream
@@ -1296,7 +1296,7 @@ return(err); };
         err = 0: no error(s) occurred
         err = 1: failed to import mesh data from dgf file.
 */
-unsigned int DGFUtils::readMesh(
+unsigned int dgf::readMesh(
     std::ifstream                       &file_handle,
     int                                 &nV,
     int                                 &nS,
@@ -1345,10 +1345,10 @@ while (!file_handle.eof()
     // Look for keywords
     if (sline >> word) {
         if (word.compare("VERTEX") == 0) {
-            err = DGFUtils::readData(file_handle, nV, V);
+            err = dgf::readData(file_handle, nV, V);
         }
         else if (word.compare("SIMPLEX") == 0) {
-            err = DGFUtils::readData(file_handle, nS, S);
+            err = dgf::readData(file_handle, nS, S);
         }
     }
 } //next line
@@ -1377,7 +1377,7 @@ return(err); };
     err = 0: no error(s) encountered
     err = 1: failed to write data to dgf file.
 */
-unsigned int DGFUtils::writeMesh(
+unsigned int dgf::writeMesh(
     std::ofstream                       &file_handle,
     int                                 &nV,
     int                                 &nS,
@@ -1406,17 +1406,17 @@ if (!file_handle.good()) { return(1); }
 
 // Vertex coordinate list
 file_handle << "VERTEX" << endl;
-err = DGFUtils::writeData(file_handle, nV, V);
+err = dgf::writeData(file_handle, nV, V);
 
 // Simplex-vertex connectivity
 file_handle << "SIMPLEX" << endl;
-err = DGFUtils::writeData(file_handle, nS, S);
+err = dgf::writeData(file_handle, nS, S);
 
 return(err); }
 
 // -------------------------------------------------------------------------- //
 /*!
-    Export mesh to dgf file. Overloading of function DGFUtils::writeMesh() for
+    Export mesh to dgf file. Overloading of function dgf::writeMesh() for
     container vector<array<double,3> >
 
     \param[in,out] file_handle output stream to dgf file.
@@ -1429,7 +1429,7 @@ return(err); }
     err = 0: no error(s) encountered
     err = 1: failed to write data to dgf file.
 */
-unsigned int DGFUtils::writeMesh(
+unsigned int dgf::writeMesh(
     std::ofstream                       &file_handle,
     int                                 &nV,
     int                                 &nS,
@@ -1458,11 +1458,11 @@ if (!file_handle.good()) { return(1); }
 
 // Vertex coordinate list
 file_handle << "VERTEX" << endl;
-err = DGFUtils::writeData(file_handle, nV, V);
+err = dgf::writeData(file_handle, nV, V);
 
 // Simplex-vertex connectivity
 file_handle << "SIMPLEX" << endl;
-err = DGFUtils::writeData(file_handle, nS, S);
+err = dgf::writeData(file_handle, nS, S);
 
 return(err); }
 

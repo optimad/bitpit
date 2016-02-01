@@ -32,7 +32,7 @@ namespace bitpit{
  *  @param[in]  t           element type
  *  \return     number of vertices of element type
  */
-uint8_t VTKUtils::getNNodeInElement( const VTKElementType & t){
+uint8_t vtk::getNNodeInElement( const VTKElementType & t){
     int myType = static_cast<std::underlying_type<VTKElementType>::type>(t);
 
     switch (myType){
@@ -66,7 +66,7 @@ uint8_t VTKUtils::getNNodeInElement( const VTKElementType & t){
  * @param[out]  data_       Field information
  * \return      true if successful
  */
-bool VTKUtils::convertStringToDataArray( const std::string &line_, VTKField &data_  ){
+bool vtk::convertStringToDataArray( const std::string &line_, VTKField &data_  ){
 
     std::string type_, name_, code_, comp_, offs_ ;
     int         components_(1), offset_ ;
@@ -90,8 +90,8 @@ bool VTKUtils::convertStringToDataArray( const std::string &line_, VTKField &dat
         if(components_==3)
             comp=VTKFieldType::VECTOR ;
 
-        VTKUtils::convertStringToEnum( type_, type) ;
-        VTKUtils::convertStringToEnum( code_, codex) ;
+        vtk::convertStringToEnum( type_, type) ;
+        vtk::convertStringToEnum( code_, codex) ;
 
         data_.setType(type) ;
         data_.setName(name_) ;
@@ -123,15 +123,15 @@ bool VTKUtils::convertStringToDataArray( const std::string &line_, VTKField &dat
  * @param[in]  field_       Field information
  * @return string in VTK format
  */
-std::string  VTKUtils::convertDataArrayToString( const VTKField &field_ ){
+std::string  vtk::convertDataArrayToString( const VTKField &field_ ){
 
     std::stringstream os("") ;
 
     os << "        <DataArray "
-        << "type=\"" << VTKUtils::convertEnumToString( field_.getType() ) << "\" "
+        << "type=\"" << vtk::convertEnumToString( field_.getType() ) << "\" "
         << "Name=\"" << field_.getName() << "\" "
         << "NumberOfComponents=\""<< unsigned(field_.getComponents()) << "\" "
-        << "format=\"" << VTKUtils::convertEnumToString(field_.getCodification()) << "\" ";
+        << "format=\"" << vtk::convertEnumToString(field_.getCodification()) << "\" ";
 
     if( field_.getCodification() == VTKFormat::APPENDED ){
         os << "offset=\"" << field_.getOffset() << "\" " ;
@@ -149,12 +149,12 @@ std::string  VTKUtils::convertDataArrayToString( const VTKField &field_ ){
  * @param[in]  field_       Field information
  * @return string in VTK format
  */
-std::string  VTKUtils::convertPDataArrayToString( const VTKField &field_ ){
+std::string  vtk::convertPDataArrayToString( const VTKField &field_ ){
 
     std::stringstream  os("") ;
 
     os << "        <PDataArray "
-        << "type=\"" << VTKUtils::convertEnumToString(field_.getType()) << "\" "
+        << "type=\"" << vtk::convertEnumToString(field_.getType()) << "\" "
         << "Name=\"" << field_.getName() << "\" "
         << "NumberOfComponents=\""<< unsigned(field_.getComponents()) << "\" " 
         << ">" ;
@@ -168,7 +168,7 @@ std::string  VTKUtils::convertPDataArrayToString( const VTKField &field_ ){
  * @param[in]  loc VTKLocation to be converted
  * @return string to be used in DataArray
  */
-std::string VTKUtils::convertEnumToString( const VTKLocation &loc ){
+std::string vtk::convertEnumToString( const VTKLocation &loc ){
    
     switch(loc){
         case VTKLocation::CELL :
@@ -187,7 +187,7 @@ std::string VTKUtils::convertEnumToString( const VTKLocation &loc ){
  * @param[in]  cod VTKFormat to be converted
  * @return string to be used in DataArray
  */
-std::string VTKUtils::convertEnumToString( const VTKFormat &cod ){
+std::string vtk::convertEnumToString( const VTKFormat &cod ){
     
     switch(cod){
         case VTKFormat::ASCII :
@@ -206,7 +206,7 @@ std::string VTKUtils::convertEnumToString( const VTKFormat &cod ){
  * @param[in]  type VTKDataType to be converted
  * @return string to be used in DataArray
  */
-std::string VTKUtils::convertEnumToString( const VTKDataType &type ){
+std::string vtk::convertEnumToString( const VTKDataType &type ){
     
     switch(type){
         case VTKDataType::Int8 :
@@ -242,7 +242,7 @@ std::string VTKUtils::convertEnumToString( const VTKDataType &type ){
  * @param[out]  loc VTKLocation
  * @return  if str contained expected value
  */
-bool VTKUtils::convertStringToEnum(  const std::string &str, VTKLocation &loc ){
+bool vtk::convertStringToEnum(  const std::string &str, VTKLocation &loc ){
     
 
     if( str == "Cell"){
@@ -266,7 +266,7 @@ bool VTKUtils::convertStringToEnum(  const std::string &str, VTKLocation &loc ){
  * @param[out]  cod VTKFormat
  * @return  if str contained expected value
  */
-bool VTKUtils::convertStringToEnum( const  std::string &str, VTKFormat &cod ){
+bool vtk::convertStringToEnum( const  std::string &str, VTKFormat &cod ){
     
 
     if( str == "ascii"){
@@ -290,7 +290,7 @@ bool VTKUtils::convertStringToEnum( const  std::string &str, VTKFormat &cod ){
  * @param[out]  type VTKDataType to be converted
  * @return  if str contained expected value
  */
-bool VTKUtils::convertStringToEnum( const std::string &str, VTKDataType &type ){
+bool vtk::convertStringToEnum( const std::string &str, VTKDataType &type ){
 
     if ( str =="Int8" ){
         type = VTKDataType::Int8;

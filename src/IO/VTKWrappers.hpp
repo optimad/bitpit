@@ -44,7 +44,7 @@ class VTKUnstructuredVec : public VTKUnstructuredGrid{
     private:
     struct ufield{
         std::string                 name;                               /**< name of the field */
-        VTKContainers::Variants     DPtr ;                              /**< pointer to the field */
+        vtk::Variants               DPtr ;                              /**< pointer to the field */
 
         ufield() ;
 

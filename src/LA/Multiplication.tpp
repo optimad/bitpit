@@ -626,7 +626,7 @@ std::vector< std::vector<T> > matmul(
 
 // ----------------------------------------------------------------------------------- //
 /*!
-    Matrix multiplication. Overloading of Mat_Mul() function for container array.
+    Matrix multiplication. Overloading of matmul() function for container array.
     \param[in] M 1st argument
     \param[in] N 2nd argument
 
@@ -794,7 +794,7 @@ std::vector<T> matmul(
 
 // ----------------------------------------------------------------------------------- //
 /*!
-    Matrix-vector multiplication. Overloading of Mat_Mul() for container array.
+    Matrix-vector multiplication. Overloading of matmul() for container array.
 
     \param[in] M input matrix
     \param[in] x input vector
