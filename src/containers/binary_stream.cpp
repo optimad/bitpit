@@ -209,8 +209,8 @@ bool IBinaryStream::seekg (
 
 */
 bool IBinaryStream::seekg (
-    streamoff                    offset,
-    ios_base::seekdir            way
+    std::streamoff               offset,
+    std::ios_base::seekdir       way
 ) {
     if ( ( way == ios_base::beg ) && ( offset < (long) buffer.size() ) )
         current_pos = offset;
@@ -400,8 +400,8 @@ bool OBinaryStream::seekg (
 
 */
 bool OBinaryStream::seekg (
-    streamoff                    offset,
-    ios_base::seekdir            way
+    std::streamoff               offset,
+    std::ios_base::seekdir       way
 ) {
     if ( ( way == ios_base::beg ) && ( offset < (long) buffer.size() ) )
         current_pos = offset;
