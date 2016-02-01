@@ -33,8 +33,8 @@
 //                                                                            //
 // All rights reserved.                                                       //
 // ========================================================================== //
-# ifndef __SORT_ALG_HH__
-# define __SORT_ALG_HH__
+# ifndef __BITPIT_SORT_ALGORITHMS_HPP__
+# define __BITPIT_SORT_ALGORITHMS_HPP__
 
 // ========================================================================== //
 // INCLUDES                                                                   //

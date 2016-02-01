@@ -36,8 +36,8 @@
  *
  */
 
-#ifndef __BITPIT_IO__
-#define __BITPIT_IO__
+#ifndef __BITPIT_MODULE_IO_HPP__
+#define __BITPIT_MODULE_IO_HPP__
 
 #include "bitpit_version.hpp"
 

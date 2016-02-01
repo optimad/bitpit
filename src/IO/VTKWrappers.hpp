@@ -23,8 +23,8 @@
 \*---------------------------------------------------------------------------*/
 
 
-#ifndef __VTKWRAP_HH__
-#define __VTKWRAP_HH__
+#ifndef __BITPIT_VTK_WRAPPERS_HPP__
+#define __BITPIT_VTK_WRAPPERS_HPP__
 
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/copy.hpp>

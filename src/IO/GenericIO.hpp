@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __Generic_IO__HH__
-#define __Generic_IO__HH__
+#ifndef __BITPIT_GENERIC_IO_HPP__
+#define __BITPIT_GENERIC_IO_HPP__
 
 #include <iostream>
 #include <iomanip>

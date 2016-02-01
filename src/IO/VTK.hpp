@@ -23,8 +23,8 @@
 \*---------------------------------------------------------------------------*/
 
 
-#ifndef __VTK__HH__
-#define __VTK__HH__
+#ifndef __BITPIT_VTK_HPP__
+#define __BITPIT_VTK_HPP__
 
 #include <typeinfo>
 #include <vector>

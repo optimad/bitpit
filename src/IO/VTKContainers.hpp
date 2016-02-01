@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __VTKCONTAINERS_HH__
-#define __VTKCONTAINERS_HH__
+#ifndef __BITPIT_VTK_CONTAINERS_HPP__
+#define __BITPIT_VTK_CONTAINERS_HPP__
 
 #include <boost/mpl/vector.hpp>
 #include <boost/mpl/copy.hpp>

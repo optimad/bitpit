@@ -35,8 +35,8 @@
 //                                                                            //
 // All rights reserved.                                                       //
 // ========================================================================== //
-# ifndef __EXAMPLES_HPP__
-# define __EXAMPLES_HPP__
+# ifndef __BITPIT_TEST_LA_00001_HPP__
+# define __BITPIT_TEST_LA_00001_HPP__
 
 // ========================================================================== //
 // INCLUDES                                                                   //

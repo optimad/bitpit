@@ -34,8 +34,8 @@
 //                                                                            //
 // All rights reserved.                                                       //
 // ========================================================================== //
-# ifndef __DGF_IOFUNCT_HH_
-# define __DGF_IOFUNCT_HH_
+# ifndef __BITPIT_DGF_HPP__
+# define __BITPIT_DGF_HPP__
 
 // ========================================================================== //
 // INCLUDES                                                                   //
