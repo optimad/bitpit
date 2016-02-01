@@ -29,7 +29,7 @@ cmake_minimum_required(VERSION 2.8)
 set(HEADERS "")
 
 # Generate the bitpit header file
-set(INCLUDE_LIST "#include <bitpit_common.hpp>\n")
+set(INCLUDE_LIST "#include \"bitpit_common.hpp\"\n")
 foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
 	isModuledEnabled(${MODULE_NAME} MODULE_ENABLED)
 	if (MODULE_ENABLED)
