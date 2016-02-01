@@ -226,9 +226,9 @@ unsigned int check(                                                       // Che
 // Input routines ----------------------------------------------------------- //
 template< typename T >
 unsigned int readData(                                                   // Read DGF data
-    std::ifstream                               &,                            // (input) input stream to dgf file
-    int                                         &,                            // (input/output) number of data loaded
-    std::vector< T >                            &                             // (input/output) loaded data
+    std::ifstream                               &file_handle,                 // (input) input stream to dgf file
+    int                                         &N,                           // (input/output) number of data loaded
+    std::vector< T >                            &Data                         // (input/output) loaded data
 );
 unsigned int readMesh(                                                   // Read mesh data from file.
     std::ifstream                               &,                            // (input) input stream to dgf file
@@ -246,17 +246,17 @@ unsigned int readMesh(                                                   // Read
 );
 template <typename T>
 unsigned int readVertexData(                                             // Load dgf vertex data
-    std::ifstream                               &,                            // (input) input stream to dgf file
-    int                                         &,                            // (input/output) number of loaded data
-    std::vector< T >                            &,                            // (input/output) loaded data
-    std::string                                  a = ""                       // (input/optional) dataset name
+    std::ifstream                               &file_handle,                 // (input) input stream to dgf file
+    int                                         &n,                           // (input/output) number of loaded data
+    std::vector< T >                            &data,                        // (input/output) loaded data
+    std::string                                 data_name = ""                // (input/optional) dataset name
 );
 template< typename T >
 unsigned int readSimplexData(                                            // Load dgf simplex data
-    std::ifstream                               &,                            // (input) input stream to dgf file
-    int                                         &,                            // (input/output) number of loaded data
-    std::vector< T >                            &,                            // (input/output) loaded data
-    std::string                                  a = ""                       // (input/optional) dataset name
+    std::ifstream                               &file_handle,                 // (input) input stream to dgf file
+    int                                         &n,                           // (input/output) number of loaded data
+    std::vector< T >                            &data,                        // (input/output) loaded data
+    std::string                                 data_name = ""                // (input/optional) dataset name
 );
 
 // Output routines ---------------------------------------------------------- //
@@ -283,17 +283,17 @@ unsigned int writeMesh(                                                  // Expo
 
 template < typename T >
 unsigned int writeVertexData(                                            // Export vertex data to dgf file
-    std::ofstream                               &,                            // (input) output stream to dgf file
-    int                                         &,                            // (input) number of data in the dataset
-    std::vector< T >                            &,                            // (input) vertex data set
-    std::string                                  a = ""                       // (input/optional) data set name
+    std::ofstream                               &file_handle,                 // (input) output stream to dgf file
+    int                                         &N,                           // (input) number of data in the dataset
+    std::vector< T >                            &Data,                        // (input) vertex data set
+    std::string                                 Data_name = ""                // (input/optional) data set name
 );
 template < typename T >
 unsigned int writeSimplexData(                                           // Export simplex data to dgf file
-    std::ofstream                               &,                            // (input) output stream to dgf file
-    int                                         &,                            // (input) number of data in the dataset
-    std::vector< T >                            &,                            // (input) simplex data set
-    std::string                                  a = ""                       // (input/optional) data set name
+    std::ofstream                               &file_handle,                 // (input) output stream to dgf file
+    int                                         &N,                           // (input) number of data in the dataset
+    std::vector< T >                            &Data,                        // (input) simplex data set
+    std::string                                 Data_name = ""                // (input/optional) data set name
 );
 
 }
