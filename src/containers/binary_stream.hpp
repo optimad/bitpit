@@ -43,41 +43,45 @@
 // Others
 // none
 
-namespace bitpit{
 // ========================================================================== //
 // TYPES DEFINITIONS                                                          //
 // ========================================================================== //
 // none
 
 // Forward declarations ------------------------------------------------- //
+namespace bitpit{
 class IBinaryStream;
 class OBinaryStream;
+};
+
 
 // Function prototypes -------------------------------------------------- //
 template<typename T>
-IBinaryStream& operator>>(                                                  // Stream operator for class IBinaryStream
-    IBinaryStream                     &istm,                                // (input) input stream
+bitpit::IBinaryStream& operator>>(                                                  // Stream operator for class IBinaryStream
+    bitpit::IBinaryStream                     &istm,                                // (input) input stream
     T                               &val                                  // (input) value to be streamed
 );
 template<>
-IBinaryStream& operator>>(                                                  // Explicit specialization of input stream operator for std::string
-    IBinaryStream                     &istm,                                // (input) input stream
+bitpit::IBinaryStream& operator>>(                                                  // Explicit specialization of input stream operator for std::string
+    bitpit::IBinaryStream                     &istm,                                // (input) input stream
     std::string                     &val                                  // (input) string to be streamed
 );
 template<typename T>
-OBinaryStream& operator<<(                                                  // Stream operator for class OBinaryStream
-    OBinaryStream                     &ostm,                                // (input) output stream
+bitpit::OBinaryStream& operator<<(                                                  // Stream operator for class OBinaryStream
+    bitpit::OBinaryStream                     &ostm,                                // (input) output stream
     const T                         &val                                  // (input) value to be streamed
 );
 template<>
-OBinaryStream& operator<<(                                                  // Explicit specialization of input stream operator for std::string
-    OBinaryStream                     &ostm,                                // (input) output stream
+bitpit::OBinaryStream& operator<<(                                                  // Explicit specialization of input stream operator for std::string
+    bitpit::OBinaryStream                     &ostm,                                // (input) output stream
     const std::string               &val                                  // (input) string to be streamed
 );
-OBinaryStream& operator<<(                                                  // Stream operator for class OBinaryStream
-    OBinaryStream                     &ostm,                                // (input) output stream
+bitpit::OBinaryStream& operator<<(                                                  // Stream operator for class OBinaryStream
+    bitpit::OBinaryStream                     &ostm,                                // (input) output stream
     const char                      *val                                  // (input) char array to be streamed
 );
+
+namespace bitpit{
 
 // Class IBinaryStream ---------------------------------------------------- //
 class IBinaryStream {
@@ -159,8 +163,8 @@ class IBinaryStream {
 
     // Friendships ====================================================== //
     template< typename T >
-    friend IBinaryStream& operator >> (IBinaryStream&, T& );
-    friend IBinaryStream& operator >> (IBinaryStream&, std::string& );
+    friend IBinaryStream& (::operator >>) (IBinaryStream&, T& );
+    friend IBinaryStream& (::operator >> <>) (IBinaryStream&, std::string& );
 };
 
 // Class OBinaryStream ---------------------------------------------------- //
@@ -234,9 +238,9 @@ class OBinaryStream {
 
     // Friendship(s) ==================================================== //
     template<typename T>
-    friend OBinaryStream& operator<<( OBinaryStream&, const T& );
-    friend OBinaryStream& operator<<( OBinaryStream&, const std::string& );
-    friend OBinaryStream& operator<<( OBinaryStream&, const char* );
+    friend OBinaryStream& (::operator<<) ( OBinaryStream&, const T& );
+    friend OBinaryStream& (::operator<< <>) ( OBinaryStream&, const std::string& );
+    friend OBinaryStream& (::operator<<) ( OBinaryStream&, const char* );
 };
 
 }
