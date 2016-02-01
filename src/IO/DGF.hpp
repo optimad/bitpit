@@ -62,12 +62,12 @@ namespace bitpit{
 // DATA STRUCTURES AND CLASSES                                                //
 // ========================================================================== //
 struct DGFData {
-    int                                 nV;                                   // number of mesh vertices
-    int                                 nS;                                   // number of mesh simplex
-    std::vector<int>                    nV_data;                              // number of vertex data for each vertex data block
-    std::vector<std::string>            sV_data;                              // vertex data set names
-    std::vector<int>                    nS_data;                              // number of simplex data for each simplex data block
-    std::vector<std::string>            sS_data;                              // simplex data set names
+    int                                 nV;                                   /**< number of mesh vertices*/
+    int                                 nS;                                   /**< number of mesh simplex */
+    std::vector<int>                    nV_data;                              /**< number of vertex data for each vertex data block */
+    std::vector<std::string>            sV_data;                              /**< vertex data set names */
+    std::vector<int>                    nS_data;                              /**< number of simplex data for each simplex data block */
+    std::vector<std::string>            sS_data;                              /**< simplex data set names */
 };
 
 class DGFObj {
@@ -76,15 +76,15 @@ class DGFObj {
 
     // Public members ------------------------------------------------------- //
     public:
-    std::string                         dgf_name;                             // dgf file name
-    unsigned int                        err;                                  // general error flag
-    DGFData                             data;                                 // dgf file content
+    std::string                         dgf_name;                             /**< dgf file name */
+    unsigned int                        err;                                  /**< general error flag */
+    DGFData                             data;                                 /**< dgf file content */
 
     // Private members ------------------------------------------------------ //
     private:
-    std::ifstream                       ifile_handle;                         // Input stream to dgf file
-    std::ofstream                       ofile_handle;                         // Outuput stream to dgf file
-    std::vector<std::vector<int> >      dgf_error;                            // Error map
+    std::ifstream                       ifile_handle;                         /**< Input stream to dgf file */
+    std::ofstream                       ofile_handle;                         /**< Outuput stream to dgf file */
+    std::vector<std::vector<int> >      dgf_error;                            /**< Error map */
 
     // Constructor ========================================================== //
     public:

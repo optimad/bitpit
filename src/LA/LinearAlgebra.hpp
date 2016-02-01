@@ -53,7 +53,6 @@
 namespace bitpit{
 
 /*!
- * @ingroup LinearAlgebra
  * @brief   collection of functions to create and solve small linear systems
  */
 namespace linearalgebra{
@@ -388,7 +387,6 @@ void solveLU(                                                                 //
     std::array<double, m>                       &,                            // (input) Source term
     std::array<double, m>                       &                             // (input/output) Solution
 );
-
 
 
 }

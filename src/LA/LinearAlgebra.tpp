@@ -169,8 +169,9 @@ return; };
     for container array.
 
     \param[in,out] A container for matrix storage
-    \param[in] m number of matrix rows
-    \param[in] n number of matrix columns
+    \tparam T data type
+    \tparam m number of matrix rows
+    \tparam n number of matrix columns
 */
 template <class T, size_t m, size_t n>
 void zeros(
@@ -271,8 +272,9 @@ return; };
     container array.
 
     \param[in,out] A container for matrix storage
-    \param[in] m number of matrix rows
-    \param[in] n number of matrix columns
+    \tparam T data type
+    \tparam m number of matrix rows
+    \tparam n number of matrix columns
 */
 template <class T, size_t m, size_t n>
 void ones(
@@ -309,7 +311,7 @@ return; };
 /*!
     Initialize a m-by-n identity matrix having. All the entries on the main
     diagonal are set to 1.
-
+    \tparam T data type
     \param[in,out] A container for matrix storage
     \param[in] m number of matrix rows
     \param[in] n number of matrix columns
@@ -354,8 +356,9 @@ return; };
     diagonal are set to 1. Overloading of eye() function for container array.
 
     \param[in,out] A container for matrix storage
-    \param[in] m number of matrix rows
-    \param[in] n number of matrix columns
+    \tparam T data type
+    \tparam m number of matrix rows
+    \tparam n number of matrix columns
 */
 template <class T, size_t m, size_t n>
 void eye(
@@ -404,6 +407,7 @@ return; };
 // -------------------------------------------------------------------------- //
 /*!
     End function for recursive calls to det().
+    \tparam T data type
     \param[in] A input matrix
     \result determinant of A.
 */
@@ -417,6 +421,7 @@ return(A[0][0]); };
 // -------------------------------------------------------------------------- //
 /*!
     Compute determinant of a matrix of small dimenions using Laplace rule.
+    \tparam T data type
     \param[in] A input matrix
     \result determinant of A.
 */
@@ -476,6 +481,9 @@ return(d); };
 /*!
     Compute determinant of a matrix of small dimenions using Laplace rule.
     Overloading of det() function for container array.
+    \tparam T data type
+    \tparam m number of matrix rows
+    \tparam n number of matrix columns
     \param[in] A input matrix
     \result determinant of A.
 */

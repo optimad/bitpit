@@ -44,11 +44,12 @@
 using namespace std;
 
 namespace bitpit{
+
 namespace linearalgebra{
 
 /*!
- \ingroup   Solve
- \{
+ * @ingroup Solve
+ * @{
  */
 
 // -------------------------------------------------------------------------- //
@@ -68,10 +69,10 @@ namespace linearalgebra{
         err = 3: wrong dimensions
 */
 unsigned int factorizeLU(
-    vector<vector<double> >         &A,
-    vector<vector<double> >         &L,
-    vector<vector<double> >         &U,
-    vector<vector<double> >         *P
+    std::vector<std::vector<double> >         &A,
+    std::vector<std::vector<double> >         &L,
+    std::vector<std::vector<double> >         &U,
+    std::vector<std::vector<double> >         *P
 ) {
 
 // ========================================================================== //
@@ -172,9 +173,9 @@ return(info); };
     \param[in,out] x on output store the solution of the linear system
 */
 void backwardSubstitution(
-    vector<vector<double> >         &A,
-    vector<double>                  &B,
-    vector<double>                  &x
+    std::vector<std::vector<double> >         &A,
+    std::vector<double>                  &B,
+    std::vector<double>                  &x
 ) {
 
 // ========================================================================== //
@@ -241,9 +242,9 @@ return; };
     \param[in,out] x on output store the solution of the linear system
 */
 void forwardSubstitution(
-    vector<vector<double> >         &A,
-    vector<double>                  &B,
-    vector<double>                  &x
+    std::vector<std::vector<double> >         &A,
+    std::vector<double>                  &B,
+    std::vector<double>                  &x
 ) {
 
 // ========================================================================== //
@@ -312,9 +313,9 @@ return; };
     \param[in,out] x on output stores the solution of the linear system
 */
 void solveLU(
-    vector<vector<double> >         &A,
-    vector<double>                  &B,
-    vector<double>                  &x
+    std::vector<std::vector<double> >         &A,
+    std::vector<double>                  &B,
+    std::vector<double>                  &x
 ) {
 
 // ========================================================================== //
@@ -323,8 +324,8 @@ void solveLU(
 
 // Local variables
 unsigned int    info;
-vector<vector<double>> L, U, P, *P_ = &P;
-vector<double> z, C;
+std::vector<std::vector<double>> L, U, P, *P_ = &P;
+std::vector<double> z, C;
 
 // Counters
 // none
@@ -350,9 +351,9 @@ backwardSubstitution(U, z, x);
 
 return; };
 
-
 /*!
- \}
+ * @}
  */
+
 }
 }

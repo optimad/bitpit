@@ -127,7 +127,7 @@ return; };
     function.
 
     \param[in] A input matrix
-    \param[in,out] B transpose of A
+    \return B transpose of A
 */
 template <class T>
 std::vector< std::vector< T > > transpose(
@@ -171,7 +171,7 @@ return; };
     function for container array.
 
     \param[in] A input matrix
-    \param[in,out] B transpose of A
+    \return B transpose of A
 */
 template <class T, size_t m, size_t n>
 std::array< std::array< T, m >, n > transpose(
