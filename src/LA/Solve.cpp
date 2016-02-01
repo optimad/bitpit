@@ -67,10 +67,10 @@ namespace linearalgebra{
         err = 3: wrong dimensions
 */
 unsigned int factorizeLU(
-    std::vector<std::vector<double> >         &A,
-    std::vector<std::vector<double> >         &L,
-    std::vector<std::vector<double> >         &U,
-    std::vector<std::vector<double> >         *P
+    std::vector<std::vector<double>>         &A,
+    std::vector<std::vector<double>>         &L,
+    std::vector<std::vector<double>>         &U,
+    std::vector<std::vector<double>>         *P
 ) {
 
 // ========================================================================== //
@@ -171,7 +171,7 @@ return(info); };
     \param[in,out] x on output store the solution of the linear system
 */
 void backwardSubstitution(
-    std::vector<std::vector<double> >    &A,
+    std::vector<std::vector<double>>     &A,
     std::vector<double>                  &B,
     std::vector<double>                  &x
 ) {
@@ -240,7 +240,7 @@ return; };
     \param[in,out] x on output store the solution of the linear system
 */
 void forwardSubstitution(
-    std::vector<std::vector<double> >         &A,
+    std::vector<std::vector<double>>     &A,
     std::vector<double>                  &B,
     std::vector<double>                  &x
 ) {
@@ -311,7 +311,7 @@ return; };
     \param[in,out] x on output stores the solution of the linear system
 */
 void solveLU(
-    std::vector<std::vector<double> >         &A,
+    std::vector<std::vector<double>>     &A,
     std::vector<double>                  &B,
     std::vector<double>                  &x
 ) {
