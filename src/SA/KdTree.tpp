@@ -422,7 +422,6 @@ return(std::max(index_l, index_r)); };
     \param[in,out] label on output stores the label of the KdNode in the 1-ball
     centered on P (if any).
     \param[in] h 1-ball radius
-    \param[in] debug (default = false) flag for running the search in debug mode
     \param[in] next_ (default = 0) index of element in the kd tree used as starting
     point by the kd-tree search algorithm
     \param[in] lev   (default = 0) level in kd-tree of node used as starting point

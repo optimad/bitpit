@@ -1181,7 +1181,7 @@ return(out); };
     The content of the input array is extracted until end-of-stream condition
     is met or all available position in the array are filled.
 
-    \param[in,out] out input stream
+    \param[in,out] in input stream
     \param[in,out] x argument of extraction operator
 
     \result reference to input stream (allows concatenation)
@@ -1221,7 +1221,7 @@ return(in); };
     The content of the input array is extracted until end-of-stream condition
     is met or all available position in the array are filled.
 
-    \param[in,out] out input file stream
+    \param[in,out] in input file stream
     \param[in,out] x argument of extraction operator
 
     \result reference to input file stream (allows concatenation)

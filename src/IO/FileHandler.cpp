@@ -147,7 +147,7 @@ void    FileHandler::setCounter(int c_){
 
 /*!
  * sets if file belongs to a parallel output
- * @param[in]   s_      [true/false] if parallel
+ * @param[in]   p_      [true/false] if parallel
  */
 void    FileHandler::setParallel( bool p_){ 
     parallel=p_; 
@@ -156,7 +156,7 @@ void    FileHandler::setParallel( bool p_){
 
 /*!
  * sets the counter of the series
- * @param[in]   v_      index of block of parallel set
+ * @param[in]   b_      index of block of parallel set
  */
 void    FileHandler::setBlock( int b_){ 
     block=b_; 

@@ -1186,7 +1186,7 @@ return(out); };
     elements will be added to the container using push_back, therefore increasing
     container's size.
 
-    \param[in,out] out input stream
+    \param[in,out] in input stream
     \param[in,out] x argument of extraction operator
 
     \result reference to input stream (allows concatenation)
@@ -1232,7 +1232,7 @@ return(in); };
     elements will be added to the container using push_back, therefore increasing
     container's size.
 
-    \param[in,out] out input file stream
+    \param[in,out] in input file stream
     \param[in,out] x argument of extraction operator
 
     \result reference to input file stream (allows concatenation)
@@ -1274,7 +1274,6 @@ return(in); };
 
     \param[in,out] out output stream
     \param[in] x variable to be displayed
-    \param[in] padding (default = 0), number of trailing spaces
 
     \result reference to output stream
 */
@@ -1342,7 +1341,6 @@ return(out); }
 
     \param[in,out] out output stream
     \param[in] x variable to be displayed
-    \param[in] padding (default = 0), number of trailing spaces
 
     \result reference to output stream
 */

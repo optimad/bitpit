@@ -240,8 +240,8 @@ return; }
     Read data block from dgf file.
 
     \param[in,out] file_handle input stream from dgf file
-    \param[in,out] n number data entries loaded from the data set
-    \param[in,out] data on output stores the data loaded from the data block
+    \param[in,out] N number data entries loaded from the data set
+    \param[in,out] Data on output stores the data loaded from the data block
 
     \result error flag tor I/O errors
         err = 0: no error(s) encountered

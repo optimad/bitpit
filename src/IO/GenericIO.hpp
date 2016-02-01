@@ -51,7 +51,7 @@ template< class data_T, size_t d >
 void  lineStream( std::fstream &str, std::array<data_T,d> &data) ;
 
 template< class data_T, size_t d >
-void  lineStream( std::fstream &str, int nr, data_T *data) ;
+void  lineStream( std::fstream &str, data_T *data, int nr) ;
 
 template< class data_T >
 void flushASCII( std::fstream &str, const data_T &data  ) ;

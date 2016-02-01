@@ -1293,7 +1293,7 @@ return(0); }
 /*!
     Read STL facet data from ascii stl file.
 
-    \param[in,out] file_handle, input stream from stl file
+    \param[in,out] file_handle input stream from stl file
     \param[in,out] nV on input stores the number of vertices previously acquired from
     the stl file, on output stores the input value incremented by the number
     of vertices read from the facet section.
@@ -1398,7 +1398,7 @@ return(0); }
     Read STL facet data from ascii stl file.
     Overloading of readFacetASCII() for vector<array<double, 3> > container.
 
-    \param[in,out] file_handle, input stream from stl file
+    \param[in,out] file_handle input stream from stl file
     \param[in,out] nV on input stores the number of vertices previously acquired from
     the stl file, on output stores the input value incremented by the number
     of vertices read from the facet section.

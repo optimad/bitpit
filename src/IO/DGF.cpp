@@ -1190,6 +1190,7 @@ return(err); }
 /*!
     Load mesh from dgf file.
 
+    \param[in] file_handle input file stream
     \param[in,out] nV on input stores the number of vertices already acquired
     from the dgf file. On output stores the input value incremented by 
     the number of mesh vertices loaded from the dgf file.
@@ -1277,6 +1278,7 @@ return(err); };
     Load mesh from dgf file. Overloading of function VTKUtils::readMesh()
     for container vector<array<double,3>>
 
+    \param[in] file_handle input file stream
     \param[in,out] nV on input stores the number of vertices already acquired
     from the dgf file. On output stores the input value incremented by 
     the number of mesh vertices loaded from the dgf file.

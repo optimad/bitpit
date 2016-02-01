@@ -541,7 +541,7 @@ return(z); };
     Overloading of maxval() function for scalar types.
     
     \param[in] x input scalar
-    \param[in,out] min_value on output returns the input value
+    \param[in,out] max_value on output returns the input value
 */
 template <typename T, typename std::enable_if< std::is_scalar< T >::value>::type* = nullptr>
 void inline maxval(

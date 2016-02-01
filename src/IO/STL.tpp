@@ -47,6 +47,12 @@ using namespace std;
 // ========================================================================== //
 
 
+/*!
+ * @ingroup STereoLithography
+ * @{
+ */
+
+
 // -------------------------------------------------------------------------- //
 /*!
     Load data for solid with specified label from stl ascii file.
@@ -292,7 +298,8 @@ return; }
 // -------------------------------------------------------------------------- //
 /*!
     Append solid data at the end of an existing stl ascii file.
-    
+   
+    \tparam T2 vriadic template 
     \param[in] sname label associated to the solid.
     \param[in,out] nV number of solid vertices.
     \param[in,out] nT number of solid facets.
@@ -303,7 +310,7 @@ return; }
 */
 template <typename ... T2>
 void STLObj::append(
-    std::string                                  sname,
+    std::string                                 sname,
     int                                         &nV,
     int                                         &nT,
     std::vector<std::vector<double> >           &V,
@@ -394,3 +401,6 @@ save(others ...);
 
 return; }
 
+/*!
+ * @}
+ */

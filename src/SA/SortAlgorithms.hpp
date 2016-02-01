@@ -61,10 +61,10 @@ class KdNode {
 
     // Members ========================================================== //
     public:
-    int        lchild_;                                                   // pointer to left child
-    int        rchild_;                                                   // pointer to left child
-    T         *object_;                                                   // pointer to object
-    T1         label;
+    int        lchild_;                                                   /**< pointer to left child */
+    int        rchild_;                                                   /**< pointer to left child */
+    T         *object_;                                                   /**< pointer to object */
+    T1         label;                                                     /**< label */
 
     // Constructor ====================================================== //
     public:
@@ -84,9 +84,9 @@ class KdTree {
 
     // Members ============================================================== //
     public:
-    int                                 MAXSTK;                               // max stack size
-    int                                 n_nodes;                              // number of nodes
-    std::vector< KdNode<T, T1> >        nodes;                                // kd-tree nodes
+    int                                 MAXSTK;                               /**< max stack size */
+    int                                 n_nodes;                              /**< number of nodes */
+    std::vector< KdNode<T, T1> >        nodes;                                /**< kd-tree nodes */
 
     // Constructors ========================================================= //
     public:
@@ -150,14 +150,14 @@ class MinPQueue {
 
     // Members ============================================================== //
     public:
-    int                                          MAXSTK;                      // Maximal stack size between resize
-    int                                          heap_size;                   // number of elements in stack
-    std::vector< T >                             keys;                        // stack
-    std::vector< T1 >                            labels;                      // labels associated to keys
-    std::vector< std::array<int,2> >            *map;                         // pointer to mapper
+    int                                          MAXSTK;                      /**< Maximal stack size between resize */
+    int                                          heap_size;                   /**< number of elements in stack */
+    std::vector< T >                             keys;                        /**< stack */
+    std::vector< T1 >                            labels;                      /**< labels associated to keys */
+    std::vector< std::array<int,2> >            *map;                         /**< pointer to mapper */
 
     private:
-    bool                                        use_labels;                   // flag for key labelling
+    bool                                        use_labels;                   /**< flag for key labelling */
 
     // Constructor ========================================================== //
     public:
@@ -230,13 +230,13 @@ class MaxPQueue {
 
     // Members ============================================================== //
     public:
-    int                                         MAXSTK;                       // Maximal stack size between resize
-    int                                         heap_size;                    // number of elements in stack
-    std::vector< T >                            keys;                         // stack
-    std::vector< T1 >                           labels;                       // labels associated to keys
-    std::vector< std::array<int,2> >           *map;                          // pointer to mapper
+    int                                         MAXSTK;                       /**< Maximal stack size between resize */
+    int                                         heap_size;                    /**< number of elements in stack */
+    std::vector< T >                            keys;                         /**< stack */
+    std::vector< T1 >                           labels;                       /**< labels associated to keys */
+    std::vector< std::array<int,2> >           *map;                          /**< pointer to mapper */
     private:
-    bool                                        use_labels;                   // flag for key labelling
+    bool                                        use_labels;                   /**< flag for key labelling */
 
     // Constructor ========================================================== //
     public:
@@ -309,9 +309,9 @@ class LIFOStack {
 
     // Members ============================================================== //
     public:
-    int                 MAXSTK;                                               // Maximal stack size between resize
-    int                 TOPSTK;                                               // Current stack size
-    std::vector<T>      STACK;                                                // LIFO stack
+    int                 MAXSTK;                                               /**< Maximal stack size between resize */
+    int                 TOPSTK;                                               /**< Current stack size */
+    std::vector<T>      STACK;                                                /**< LIFO stack */
 
     // Constructor ========================================================== //
     public:
