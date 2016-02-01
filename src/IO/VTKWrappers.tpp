@@ -53,7 +53,7 @@ VTKUnstructuredVec::VTKUnstructuredVec( std::string dir_, std::string name_, VTK
     ncells_ = connectivity_ext.size() ;
     npoints_ = points_ext.size() ;
 
-    nconn_ = ncells_ * VTKUtils::getNNodeInElement( type ) ;
+    nconn_ = ncells_ * vtk::getNNodeInElement( type ) ;
 
     setGeomTypes( VTKTypes::whichType(dum0), VTKDataType::UInt64, VTKDataType::UInt8, VTKTypes::whichType(dum1)  ) ;
     setDimensions( ncells_, npoints_, nconn_ ) ;

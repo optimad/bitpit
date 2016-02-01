@@ -80,7 +80,7 @@ open("in");
 // ========================================================================== //
 // READ DATA SET                                                              //
 // ========================================================================== //
-err = DGFUtils::readVertexData(ifile_handle, n, data, data_name);
+err = dgf::readVertexData(ifile_handle, n, data, data_name);
 
 // ========================================================================== //
 // ITERATIVELY READ OTHER DATASET                                             //
@@ -127,7 +127,7 @@ open("in");
 // ========================================================================== //
 // READ DATA SET                                                              //
 // ========================================================================== //
-err = DGFUtils::readSimplexData(ifile_handle, n, data, data_name);
+err = dgf::readSimplexData(ifile_handle, n, data, data_name);
 
 // ========================================================================== //
 // ITERATIVELY READ OTHER DATASET                                             //
@@ -171,7 +171,7 @@ open("app");
 // ========================================================================== //
 // SAVE DATA SET                                                              //
 // ========================================================================== //
-err = DGFUtils::writeVertexData(ofile_handle, n, data, data_name);
+err = dgf::writeVertexData(ofile_handle, n, data, data_name);
 
 // ========================================================================== //
 // RECURSIVELY SAVE OTHERS DATASETS                                           //
@@ -215,7 +215,7 @@ open("app");
 // ========================================================================== //
 // SAVE DATA SET                                                              //
 // ========================================================================== //
-err = DGFUtils::writeSimplexData(ofile_handle, n, data, data_name);
+err = dgf::writeSimplexData(ofile_handle, n, data, data_name);
 
 // ========================================================================== //
 // RECURSIVELY SAVE OTHERS DATASETS                                           //
@@ -231,7 +231,7 @@ return; }
 // Input routines =========================================================== //
 
 /*!
-  \ingroup DGFUtils
+  \ingroup dgf
   \{
 */
 
@@ -248,7 +248,7 @@ return; }
         err = 1: failed to load data from dgf file
 */ 
 template< typename T >
-unsigned int DGFUtils::readData(
+unsigned int dgf::readData(
     std::ifstream               &file_handle,
     int                         &N,
     std::vector< T >            &Data
@@ -277,7 +277,7 @@ if (!file_handle.good()) { return(1); }
 // ========================================================================== //
 file_handle.clear();
 start_pos = file_handle.tellg();
-DGFUtils::scanData(file_handle, n);
+dgf::scanData(file_handle, n);
 file_handle.clear();
 file_handle.seekg(start_pos);
 
@@ -326,7 +326,7 @@ return(0); }
 
 // -------------------------------------------------------------------------- //
 /*!
-    \ingroup DGFUtils
+    \ingroup dgf
     Read vertex data from dgf file.
 
     \param[in,out] file_handle input stream from dgf file
@@ -342,7 +342,7 @@ return(0); }
         err = 1: failed to load data from dgf file
 */ 
 template <typename T>
-unsigned int DGFUtils::readVertexData(
+unsigned int dgf::readVertexData(
     std::ifstream               &file_handle,
     int                         &n,
     std::vector< T >            &data,
@@ -415,14 +415,14 @@ while (start_pos != current_pos) {
 // LOAD DATA                                                                  //
 // ========================================================================== //
 if (check) {
-    DGFUtils::readData(file_handle, n, data);
+    dgf::readData(file_handle, n, data);
 }
 
 return(0); }
 
 // -------------------------------------------------------------------------- //
 /*!
-    \ingroup DGFUtils
+    \ingroup dgf
     Read cell data from dgf file.
 
     \param[in,out] file_handle input stream from dgf file
@@ -438,7 +438,7 @@ return(0); }
         err = 1: failed to load data from dgf file
 */
 template <typename T>
-unsigned int DGFUtils::readSimplexData(
+unsigned int dgf::readSimplexData(
     std::ifstream               &file_handle,
     int                         &n,
     std::vector< T >            &data,
@@ -511,7 +511,7 @@ while (start_pos != current_pos) {
 // LOAD DATA                                                                  //
 // ========================================================================== //
 if (check) {
-    DGFUtils::readData(file_handle, n, data);
+    dgf::readData(file_handle, n, data);
 }
 
 return(0); }
@@ -520,7 +520,7 @@ return(0); }
 
 // -------------------------------------------------------------------------- //
 /*!
-    \ingroup DGFUtils
+    \ingroup dgf
     Write data block to dgf file.
 
     \param[in,out] file_handle output stream to dgf file
@@ -532,7 +532,7 @@ return(0); }
         err = 1: failed to write data to dgf file
 */ 
 template < typename T >
-unsigned int DGFUtils::writeData(
+unsigned int dgf::writeData(
     std::ofstream               &file_handle,
     int                         &N,
     std::vector< T >            &Data
@@ -565,7 +565,7 @@ return(0); }
 
 // -------------------------------------------------------------------------- //
 /*!
-    \ingroup DGFUtils
+    \ingroup dgf
     Write vertex data to dgf file.
 
     \param[in,out] file_handle output stream to dgf file
@@ -578,7 +578,7 @@ return(0); }
         err = 1: failed to load data from dgf file
 */ 
 template < typename T >
-unsigned int DGFUtils::writeVertexData(
+unsigned int dgf::writeVertexData(
     std::ofstream               &file_handle,
     int                         &N,
     std::vector< T >            &Data,
@@ -614,13 +614,13 @@ header = utils::trim(header);
 file_handle << header << std::endl;
 
 // Export data -------------------------------------------------------------- //
-err = DGFUtils::writeData(file_handle, N, Data);
+err = dgf::writeData(file_handle, N, Data);
 
 return(err); };
 
 // -------------------------------------------------------------------------- //
 /*!
-    \ingroup DGFUtils
+    \ingroup dgf
     Write cell data to dgf file.
 
     \param[in,out] file_handle output stream to dgf file
@@ -633,7 +633,7 @@ return(err); };
         err = 1: failed to load data from dgf file
 */ 
 template < typename T >
-unsigned int DGFUtils::writeSimplexData(
+unsigned int dgf::writeSimplexData(
     std::ofstream               &file_handle,
     int                         &N,
     std::vector< T >            &Data,
@@ -669,7 +669,7 @@ header = utils::trim(header);
 file_handle << header << std::endl;
 
 // Export data -------------------------------------------------------------- //
-err = DGFUtils::writeData(file_handle, N, Data);
+err = dgf::writeData(file_handle, N, Data);
 
 return(err); };
 

@@ -47,12 +47,6 @@ using namespace std;
 // ========================================================================== //
 
 
-/*!
- * @ingroup STereoLithography
- * @{
- */
-
-
 // -------------------------------------------------------------------------- //
 /*!
     Load data for solid with specified label from stl ascii file.
@@ -111,8 +105,8 @@ if (err == 1) {
 // ========================================================================== //
 
 // Load solid data
-if (stl_type) { STLUtils::readBINARY(ifile_handle, nV, nT, V, N, T); }
-else          { STLUtils::readSolidASCII(ifile_handle, nV, nT, V, N, T, sname); }
+if (stl_type) { stl::readBINARY(ifile_handle, nV, nT, V, N, T); }
+else          { stl::readSolidASCII(ifile_handle, nV, nT, V, N, T, sname); }
 
 // ========================================================================== //
 // ITERATIVELY READ STL SOLIDS                                                //
@@ -180,8 +174,8 @@ if (err == 1) {
 // ========================================================================== //
 
 // Load solid data
-if (stl_type) { STLUtils::readBINARY(ifile_handle, nV, nT, V, N, T); }
-else          { STLUtils::readSolidASCII(ifile_handle, nV, nT, V, N, T, sname); }
+if (stl_type) { stl::readBINARY(ifile_handle, nV, nT, V, N, T); }
+else          { stl::readSolidASCII(ifile_handle, nV, nT, V, N, T, sname); }
 
 // ========================================================================== //
 // ITERATIVELY READ STL SOLIDS                                                //
@@ -234,8 +228,8 @@ if (err == 1) { return; }
 // ========================================================================== //
 
 // Export solid
-if (stl_type) { STLUtils::writeSolidBINARY(ofile_handle, nV, nT, V, N, T, sname); }
-else          { STLUtils::writeSolidASCII(ofile_handle, nV, nT, V, N, T, sname); }
+if (stl_type) { stl::writeSolidBINARY(ofile_handle, nV, nT, V, N, T, sname); }
+else          { stl::writeSolidASCII(ofile_handle, nV, nT, V, N, T, sname); }
 
 // Recursively call variadic template
 save(others ...);
@@ -287,8 +281,8 @@ if (err == 1) { return; }
 // ========================================================================== //
 
 // Export solid
-if (stl_type) { STLUtils::writeSolidBINARY(ofile_handle, nV, nT, V, N, T, sname); }
-else          { STLUtils::writeSolidASCII(ofile_handle, nV, nT, V, N, T, sname); }
+if (stl_type) { stl::writeSolidBINARY(ofile_handle, nV, nT, V, N, T, sname); }
+else          { stl::writeSolidASCII(ofile_handle, nV, nT, V, N, T, sname); }
 
 // Recursively call variadic template
 save(others ...);
@@ -340,8 +334,8 @@ if (err == 1) { return; }
 // ========================================================================== //
 
 // Export solid
-if (stl_type) { STLUtils::writeSolidBINARY(ofile_handle, nV, nT, V, N, T, sname); }
-else          { STLUtils::writeSolidASCII(ofile_handle, nV, nT, V, N, T, sname); }
+if (stl_type) { stl::writeSolidBINARY(ofile_handle, nV, nT, V, N, T, sname); }
+else          { stl::writeSolidASCII(ofile_handle, nV, nT, V, N, T, sname); }
 
 // Recursively call variadic template
 save(others ...);
@@ -393,14 +387,11 @@ if (err == 1) { return; }
 // ========================================================================== //
 
 // Export solid
-if (stl_type) { STLUtils::writeSolidBINARY(ofile_handle, nV, nT, V, N, T, sname); }
-else          { STLUtils::writeSolidASCII(ofile_handle, nV, nT, V, N, T, sname); }
+if (stl_type) { stl::writeSolidBINARY(ofile_handle, nV, nT, V, N, T, sname); }
+else          { stl::writeSolidASCII(ofile_handle, nV, nT, V, N, T, sname); }
 
 // Recursively call variadic template
 save(others ...);
 
 return; }
 
-/*!
- * @}
- */

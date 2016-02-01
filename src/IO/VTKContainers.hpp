@@ -31,11 +31,7 @@
 
 namespace bitpit{
 
-/*!
- * @ingroup     VisualizationToolKit     
- * @brief       Contaners which are directly handled by VTK and hence do not need an implemented interface
- */
-namespace VTKContainers{
+namespace vtk{
 
     /*!
      * @typedef    VectorOfVector

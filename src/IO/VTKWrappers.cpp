@@ -147,7 +147,7 @@ void VTKUnstructuredVec::flushData( std::fstream &str, VTKFormat codex, std::str
     }
 
     else if( codex == VTKFormat::ASCII && name == "offsets"){
-        uint64_t off_(0), nT( VTKUtils::getNNodeInElement( type ) ) ;
+        uint64_t off_(0), nT( vtk::getNNodeInElement( type ) ) ;
         for(uint64_t  n=0; n<nr_cells-1; n++) {
             off_ += nT ;
             genericIO::flushASCII( str, off_  ) ;
@@ -158,7 +158,7 @@ void VTKUnstructuredVec::flushData( std::fstream &str, VTKFormat codex, std::str
     }
 
     else if( codex == VTKFormat::APPENDED && name == "offsets"){
-        uint64_t off_(0), nT( VTKUtils::getNNodeInElement( type ) ) ;
+        uint64_t off_(0), nT( vtk::getNNodeInElement( type ) ) ;
         for( uint64_t n=0; n<nr_cells; n++) {
             off_ += nT ; 
             genericIO::flushBINARY( str, off_  ) ;
@@ -209,7 +209,7 @@ void VTKUnstructuredVec::absorbData( std::fstream &str, VTKFormat codex, std::st
             visitor.setSize( FPtr->getElements() ) ;
             visitor.setComponents( static_cast<int>(FPtr->getComponents()) ) ;
 
-            if( name == "connectivity") visitor.setComponents( VTKUtils::getNNodeInElement(type) ) ;
+            if( name == "connectivity") visitor.setComponents( vtk::getNNodeInElement(type) ) ;
 
             boost::apply_visitor(visitor, f_->DPtr ); 
         };

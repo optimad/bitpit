@@ -41,8 +41,6 @@
 // ========================================================================== //
 # include "LinearAlgebra.hpp"
 
-using namespace std;
-
 namespace bitpit{
 
 namespace linearalgebra{
@@ -86,7 +84,7 @@ double            toll_pivot = 1.0e-8;
 int               info = 0;
 int               m, n, pivot_row;
 double            pivot, pivot_trial;
-vector<vector<double>> AA;
+std::vector<std::vector<double>> AA;
 
 // Counter
 int               i, j, k;
@@ -173,7 +171,7 @@ return(info); };
     \param[in,out] x on output store the solution of the linear system
 */
 void backwardSubstitution(
-    std::vector<std::vector<double> >         &A,
+    std::vector<std::vector<double> >    &A,
     std::vector<double>                  &B,
     std::vector<double>                  &x
 ) {

@@ -196,7 +196,7 @@ class DGFObj {
  * @ingroup  DuneGridFormat
  * @brief Utility fuctions for DGF IO
  */
-namespace DGFUtils{
+namespace dgf{
 
 // Scanning routines -------------------------------------------------------- //
 unsigned int scanData(                                                   // Scan DGF data and returns info
