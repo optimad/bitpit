@@ -249,7 +249,7 @@ return(z); };
     \param[in] x input scalar
     \param[in,out] min_value on output returns the input value
 */
-template <typename T, typename std::enable_if< std::is_scalar< T >::value>::type* = nullptr>
+template <typename T, typename std::enable_if< std::is_scalar< T >::value>::type*>
 void inline minval(
     const T                                     &x,
     T                                           &min_value
@@ -543,7 +543,7 @@ return(z); };
     \param[in] x input scalar
     \param[in,out] max_value on output returns the input value
 */
-template <typename T, typename std::enable_if< std::is_scalar< T >::value>::type* = nullptr>
+template <typename T, typename std::enable_if< std::is_scalar< T >::value>::type*>
 void inline maxval(
     const T                                     &x,
     T                                           &max_value
@@ -640,7 +640,7 @@ return; };
     \param[in] x input scalar
     \param[in,out] s on output stores the value of the input scalar
 */
-template<class T, typename std::enable_if< std::is_scalar< T >::value>::type* = nullptr>
+template<class T, typename std::enable_if< std::is_scalar< T >::value>::type*>
 void inline sum(
     const T                                     &x,
     T                                           &s

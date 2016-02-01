@@ -1277,7 +1277,7 @@ return(in); };
 
     \result reference to output stream
 */
-template<typename T, typename std::enable_if< std::is_scalar< T >::value>::type* = nullptr>
+template<typename T, typename std::enable_if< std::is_scalar< T >::value>::type*>
 std::ostream& display(
     std::ostream                                &out,
     const T                                     &x
@@ -1344,7 +1344,7 @@ return(out); }
 
     \result reference to output stream
 */
-template<typename T, typename std::enable_if< std::is_scalar< T >::value>::type* = nullptr>
+template<typename T, typename std::enable_if< std::is_scalar< T >::value>::type*>
 std::ofstream& display(
     std::ofstream                               &out,
     const T                                     &x
