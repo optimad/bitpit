@@ -1,5 +1,5 @@
-#ifndef __BITPIT_LA__
-#define __BITPIT_LA__
+#ifndef __BITPIT_MODULE_LA_HPP__
+#define __BITPIT_MODULE_LA_HPP__
 
 /*!
  * @defgroup LinearAlgebra Linear algebra (LA)

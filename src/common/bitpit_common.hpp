@@ -33,8 +33,8 @@
  */
 
 
-#ifndef __BITPIT_COMMON__
-#define __BITPIT_COMMON__
+#ifndef __BITPIT_MODULE_COMMON_HPP__
+#define __BITPIT_MODULE_COMMON_HPP__
 
 #include "bitpit_version.hpp"
 

@@ -35,8 +35,8 @@
 //                                                                            //
 // All rights reserved.                                                       //
 // ========================================================================== //
-# ifndef __LINEAR_ALGEBRA_HH__
-# define __LINEAR_ALGEBRA_HH__
+# ifndef __BITPIT_LINEAR_ALGEBRA_HPP__
+# define __BITPIT_LINEAR_ALGEBRA_HPP__
 
 // ========================================================================== //
 // INCLUDES                                                                   //

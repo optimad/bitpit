@@ -21,8 +21,8 @@
  *  along with bitpit. If not, see <http://www.gnu.org/licenses/>.
  *
 \*---------------------------------------------------------------------------*/
-#ifndef __FileHandler__HH__
-#define __FileHandler__HH__
+#ifndef __BITPIT_FILEHANDLER_HPP__
+#define __BITPIT_FILEHANDLER_HPP__
 
 #include <iostream>
 #include <iomanip>

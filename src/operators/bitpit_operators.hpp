@@ -1,5 +1,5 @@
-#ifndef __BITPIT_OPERATORS__
-#define __BITPIT_OPERATORS__
+#ifndef __BITPIT_MODULE_OPERATORS_HPP__
+#define __BITPIT_MODULE_OPERATORS_HPP__
 
 /*! 
  * @defgroup operators Operators

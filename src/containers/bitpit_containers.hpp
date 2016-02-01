@@ -31,8 +31,8 @@
  *
  */
 
-#ifndef __BITPIT_CONTAINERS__
-#define __BITPIT_CONTAINERS__
+#ifndef __BITPIT_MODULE_CONTAINERS_HPP__
+#define __BITPIT_MODULE_CONTAINERS_HPP__
 
 #include "bitpit_version.hpp"
 

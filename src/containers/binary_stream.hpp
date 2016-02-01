@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __PATCHMAN_BINARY_STREAM_HPP__
-#define __PATCHMAN_BINARY_STREAM_HPP__
+#ifndef __BITPIT_BINARY_STREAM_HPP__
+#define __BITPIT_BINARY_STREAM_HPP__
 
 // ========================================================================== //
 // INCLUDES                                                                   //

@@ -34,8 +34,8 @@
 //                                                                                    //
 // All rights reserved.                                                               //
 // ================================================================================== //
-#ifndef __OPERATORS_HH__
-#define __OPERATORS_HH__
+#ifndef __BITPIT_OPERATORS_HPP__
+#define __BITPIT_OPERATORS_HPP__
 
 // ================================================================================== //
 // INCLUDES                                                                           //
