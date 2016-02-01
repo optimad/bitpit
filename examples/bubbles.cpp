@@ -40,8 +40,7 @@ int main(int argc, char *argv[]) {
 		int iter = 0;
 
 		/**<Instantation of a 2D para_tree object.*/
-		ParaTree pabloBB;
-		PabloUniform pabloBBU;
+		PabloUniform pabloBB;
 
 		/**<Set 2:1 balance for the octree.*/
 		pabloBB.setBalanceCodimension(1);
