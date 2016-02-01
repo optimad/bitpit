@@ -67,6 +67,8 @@ void OBinaryStream::write(
     write(vec);
 }
 
+}
+
 // ========================================================================== //
 // OPERATORS                                                                  //
 // ========================================================================== //
@@ -82,8 +84,8 @@ void OBinaryStream::write(
 
 */
 template<typename T>
-IBinaryStream& operator>> (
-    IBinaryStream                 &istm,
+bitpit::IBinaryStream& operator>> (
+    bitpit::IBinaryStream       &istm,
     T                           &val
 ) {
     istm.read(val);
@@ -101,13 +103,11 @@ IBinaryStream& operator>> (
 
 */
 template<typename T>
-OBinaryStream& operator<< (
-    OBinaryStream                 &ostm,
+bitpit::OBinaryStream& operator<< (
+    bitpit::OBinaryStream       &ostm,
     const T                     &val
 ) {
     ostm.write(val);
 
     return ostm;
-}
-
 }
