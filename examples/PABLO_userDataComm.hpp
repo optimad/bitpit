@@ -29,8 +29,8 @@
  *      Author: Marco Cisternino
  */
 
-#ifndef USERDATACOMM_HPP_
-#define USERDATACOMM_HPP_
+#ifndef __BITPIT_USERDATACOMM_HPP__
+#define __BITPIT_USERDATACOMM_HPP__
 
 #include "DataCommInterface.hpp"
 
@@ -60,4 +60,4 @@ public:
 
 #include "PABLO_userDataComm.tpp"
 
-#endif /* USERDATACOMM_HPP_ */
+#endif /* __BITPIT_USERDATACOMM_HPP__ */

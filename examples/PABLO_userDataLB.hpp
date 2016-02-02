@@ -29,8 +29,8 @@
  *      Author: Marco Cisternino
  */
 
-#ifndef USER_DATA_LB_HPP_
-#define USER_DATA_LB_HPP_
+#ifndef __BITPIT_USER_DATA_LB_HPP__
+#define __BITPIT_USER_DATA_LB_HPP__
 
 #include "DataLBInterface.hpp"
 
@@ -66,4 +66,4 @@ public:
 
 #include "PABLO_userDataLB.tpp"
 
-#endif /* USER_DATA_LB_HPP_ */
+#endif /* __BITPIT_USER_DATA_LB_HPP__ */
