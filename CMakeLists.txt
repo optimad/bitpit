@@ -181,6 +181,7 @@ list(APPEND BITPIT_MODULE_LIST "IO")
 list(APPEND BITPIT_MODULE_LIST "LA")
 list(APPEND BITPIT_MODULE_LIST "SA")
 list(APPEND BITPIT_MODULE_LIST "PABLO")
+list(APPEND BITPIT_MODULE_LIST "ucartmesh")
 
 #------------------------------------------------------------------------------------#
 # Modules dependecies

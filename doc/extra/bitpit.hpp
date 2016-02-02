@@ -62,5 +62,9 @@ hanging nodes.
 Additional features available in PABLO are: 2:1 balancing between octants
 and a easy way to generate and store intersections between octants.
 
+2. Uniform Cartesian Mesh (UCartMesh)
+------------------------
+<B>UCartMesh</B> provides a uniform cartesian mesh with variable spacing in
+each direction.
 
 */
