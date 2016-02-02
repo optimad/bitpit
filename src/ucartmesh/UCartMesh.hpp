@@ -48,6 +48,8 @@
 
 # include <VTK.hpp>
 
+namespace bitpit {
+
 class UCartMesh{
 
     // Members ============================================================== //
@@ -190,6 +192,7 @@ class UCartMesh{
 
 };
 
+}
 
 #endif
 

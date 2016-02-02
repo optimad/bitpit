@@ -45,6 +45,7 @@
 # include <UCartMesh.hpp>
 
 using namespace std;
+using namespace bitpit;
 
 void Demo3D_UCartMesh(
         void

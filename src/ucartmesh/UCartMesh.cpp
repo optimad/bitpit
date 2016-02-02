@@ -32,6 +32,8 @@
 
 #include "UCartMesh.hpp"
 
+namespace bitpit {
+
 //using namespace std;
 
 // ========================================================================== //
@@ -1752,5 +1754,6 @@ int UCartMesh::linearNodeInterpolation( std::array<double,3> &P, std::vector<int
 
 };
 
+}
 
 /* @} */
