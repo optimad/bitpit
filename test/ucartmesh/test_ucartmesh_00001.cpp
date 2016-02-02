@@ -41,7 +41,8 @@
 
 // Standard Template Library
 # include <iostream>
-# include <UCartMesh.hpp>
+
+# include "bitpit_ucartmesh.hpp"
 
 using namespace std;
 using namespace bitpit;
