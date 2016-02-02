@@ -39,8 +39,8 @@
 
 
 // INCLUDES                                                                   //
-# ifndef __UCARTMESH_HPP__
-# define __UCARTMESH_HPP__
+# ifndef __BITPIT_UCARTMESH_HPP__
+# define __BITPIT_UCARTMESH_HPP__
 
 # include <array>
 # include <vector>
