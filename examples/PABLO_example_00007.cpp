@@ -1,6 +1,6 @@
 #include "ParaTree.hpp"
 #if ENABLE_MPI==1
-#include "UserDataComm.hpp"
+#include "PABLO_userDataComm.hpp"
 #endif
 
 using namespace std;

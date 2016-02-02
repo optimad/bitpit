@@ -29,11 +29,26 @@ cmake_minimum_required(VERSION 2.8)
 option(BUILD_EXAMPLES "Create and install the examples" OFF)
 
 include_directories("${PROJECT_SOURCE_DIR}/src/operators")
+include_directories("${PROJECT_SOURCE_DIR}/src/PABLO")
 
 if(BUILD_EXAMPLES)
 	# List of examples
 	set(EXAMPLE_LIST "")
 	list(APPEND EXAMPLE_LIST "operators")
+	list(APPEND EXAMPLE_LIST "PABLO_bubbles_2D")
+	list(APPEND EXAMPLE_LIST "PABLO_bubbles_3D")
+	list(APPEND EXAMPLE_LIST "PABLO_example_00001")
+	list(APPEND EXAMPLE_LIST "PABLO_example_00002")
+	list(APPEND EXAMPLE_LIST "PABLO_example_00003")
+	list(APPEND EXAMPLE_LIST "PABLO_example_00004")
+	list(APPEND EXAMPLE_LIST "PABLO_example_00005")
+	list(APPEND EXAMPLE_LIST "PABLO_example_00006")
+	list(APPEND EXAMPLE_LIST "PABLO_example_00007")
+	list(APPEND EXAMPLE_LIST "PABLO_example_00008")
+	list(APPEND EXAMPLE_LIST "PABLO_example_00009")
+	list(APPEND EXAMPLE_LIST "PABLO_example_00010")
+	list(APPEND EXAMPLE_LIST "PABLO_example_00011")
+	list(APPEND EXAMPLE_LIST "PABLO_example_00012")
 
 	#Rules to build the examples
 	foreach(EXAMPLE_NAME IN LISTS EXAMPLE_LIST)

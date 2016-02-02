@@ -1,15 +1,15 @@
 #include "ParaTree.hpp"
 #include "PabloUniform.hpp"
 #if ENABLE_MPI==1
-#include "UserDataComm.hpp"
-#include "UserDataLB.hpp"
+#include "PABLO_userDataComm.hpp"
+#include "PABLO_userDataLB.hpp"
 #endif
 
 using namespace std;
 
 // =================================================================================== //
 /*!
-	\example bubbles.cpp
+	\example PABLO_bubbles_2D.cpp
 
 	\brief 2D dynamic adaptive mesh refinement using PABLO 
 

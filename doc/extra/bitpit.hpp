@@ -46,4 +46,21 @@ Basic modules
 - <B>KdTree</B> sorts vertices in a d-dimensional Euclidean space in a Kd-tree structure
 - <B>MinPQueue & MaxPQueue</B> manage a binary tree which ensures that the root element has the smalles/largest value in the tree
 
+Mesh modules
+========================
+
+1. PArallel Balanced Linear Octree (PABLO)
+------------------------
+<B>PABLO</B> provides a parallel linear octree/quadtree. Message passing paradigm
+is transparent to the user since PABLO has embedded MPI calls. By this way, the
+user can easily perform data communications and dynamic load-balance by calling
+straightforward high level methods.
+
+PABLO allows adaptive mesh refinement by generating non-conforming grid with
+hanging nodes.
+
+Additional features available in PABLO are: 2:1 balancing between octants
+and a easy way to generate and store intersections between octants.
+
+
 */
