@@ -1782,7 +1782,7 @@ private:
 
 	/*!
 		Gets the position associated with the first pending delete
-                and deletes that pending delete from the list.
+		and deletes that pending delete from the list.
 
 		\result The position associated with the first pending delete.
 	*/
@@ -1795,8 +1795,8 @@ private:
 	}
 
 	/*!
-		Gets the position associated with the first pending delete
-                and deletes that pending delete from the list.
+		Gets the position associated with the last pending delete
+		and deletes that pending delete from the list.
 
 		\result The position associated with the first pending delete.
 	*/
