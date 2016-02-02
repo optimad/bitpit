@@ -22,7 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#include "PabloUniform.hpp"
+#include "bitpit_PABLO.hpp"
+
 #if ENABLE_MPI==1
 #include "PABLO_userDataComm.hpp"
 #include "PABLO_userDataLB.hpp"

@@ -32,7 +32,7 @@
 #ifndef __BITPIT_USER_DATA_LB_HPP__
 #define __BITPIT_USER_DATA_LB_HPP__
 
-#include "DataLBInterface.hpp"
+#include "DataCommInterface.hpp"
 
 /*!  \cond  EXAMPLE_CLASSES */
 template <class D>
