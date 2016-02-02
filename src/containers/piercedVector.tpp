@@ -1632,7 +1632,7 @@ private:
 					update_empty_pos_id(pos - 1);
 				}
 			} else {
-				pos = pending_deletes_pop_back();
+				pos = pending_deletes_pop_front();
 			}
 
 			assert(pos < m_v.size() - 1);
