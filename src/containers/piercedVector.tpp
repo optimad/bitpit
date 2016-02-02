@@ -834,7 +834,7 @@ public:
 		\param pos the position of the element
 		\result A reference to the element in the specified position.
 	*/
-	value_type & raw_at(const id_type &pos)
+	value_type & raw_at(const size_type &pos)
 	{
 		return m_v[pos];
 	}
@@ -847,7 +847,7 @@ public:
 		\result A constant reference to the element in the specified
 		        position.
 	*/
-	const value_type & raw_at(const id_type &pos) const
+	const value_type & raw_at(const size_type &pos) const
 	{
 		return m_v[pos];
 	}
