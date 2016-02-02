@@ -28,6 +28,8 @@
 #include <stdint.h>
 #include <limits.h>
 
+namespace bitpit {
+
 // method to seperate bits from a given integer 3 positions apart
 inline uint64_t splitBy3(unsigned int a){
 	uint64_t x = a & 0x1fffff; // we only look at the first 21 bits
@@ -75,5 +77,6 @@ inline uint64_t keyXYZ(uint64_t x, uint64_t y, uint64_t z, int8_t max_level){
 	return answer;
 }
 
+}
 
 #endif /* INLINEDFUNCT_HPP_ */

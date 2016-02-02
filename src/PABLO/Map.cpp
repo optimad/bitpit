@@ -4,6 +4,8 @@
 #include "Map.hpp"
 #include <math.h>
 
+namespace bitpit {
+
 // =================================================================================== //
 // NAME SPACES                                                                         //
 // =================================================================================== //
@@ -241,3 +243,5 @@ void Map::mapNormals(i8array3 normal, darray3 & mapnormal){
 	mapnormal[1] = double(normal[1]);
 	mapnormal[2] = double(normal[2]);
 };
+
+}

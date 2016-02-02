@@ -22,6 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
+namespace bitpit {
+
 template <class Impl>
 DataCommInterface<Impl>::DataCommInterface(){}
 
@@ -102,4 +104,6 @@ Impl& DataCommInterface<Impl>::getImpl() {
 template <class Impl>
 const Impl& DataCommInterface<Impl>::getImpl() const{
 	return static_cast<const Impl &>(*this);
+}
+
 }

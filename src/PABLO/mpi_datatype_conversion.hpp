@@ -28,6 +28,8 @@
 
 #include <mpi.h>
 
+namespace bitpit {
+
 template <class T>
 MPI_Datatype convert();
 
@@ -75,6 +77,8 @@ inline MPI_Datatype convert<unsigned long long>(){return MPI_UINT64_T;}
 
 template <>
 inline MPI_Datatype convert<int8_t>(){return MPI_INT8_T;}
+
+}
 
 #endif /* MPI_DATATYPE_CONVERSION_HPP_ */
 #endif /* NOMPI */

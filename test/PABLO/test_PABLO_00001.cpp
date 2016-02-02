@@ -26,6 +26,7 @@
 #include "PabloUniform.hpp"
 
 using namespace std;
+using namespace bitpit;
 
 // =================================================================================== //
 

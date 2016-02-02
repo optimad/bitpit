@@ -27,6 +27,8 @@
 #ifndef DATALBINTERFACE_HPP_
 #define DATALBINTERFACE_HPP_
 
+namespace bitpit {
+
 /*!
  *  \ingroup        PABLO
  *  @{
@@ -91,6 +93,9 @@ private:
 };
 
 /*  @{ */
+
+}
+
 #include "DataLBInterface.tpp"
 
 #endif /* DATA_LB_INTERFACE_HPP_ */

@@ -36,7 +36,7 @@
 
 /*!  \cond  EXAMPLE_CLASSES */
 template <class D>
-class UserDataLB : public DataLBInterface<UserDataLB<D> >{
+class UserDataLB : public bitpit::DataLBInterface<UserDataLB<D> >{
 public:
 
 	typedef D Data;

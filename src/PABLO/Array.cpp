@@ -28,6 +28,8 @@
 #include "Array.hpp"
 #include <algorithm>
 
+namespace bitpit {
+
 // =================================================================================== //
 // NAME SPACES                                                                         //
 // =================================================================================== //
@@ -75,4 +77,6 @@ Array& Array::operator =(
 		m_arraySize = rhs.m_arraySize;
 	}
 	return *this;
+}
+
 }

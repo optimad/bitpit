@@ -33,6 +33,8 @@
 #include "mpi.h"
 #include "mpi_datatype_conversion.hpp"
 
+namespace bitpit {
+
 // =================================================================================== //
 // CLASS DEFINITION                                                                    //
 // =================================================================================== //
@@ -112,6 +114,8 @@ public:
 };
 
 /* @} */
+
+}
 
 #endif /* COMMBUFFER_HPP_ */
 #endif /* NOMPI */

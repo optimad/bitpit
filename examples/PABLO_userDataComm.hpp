@@ -36,7 +36,7 @@
 
 /*!  \cond  EXAMPLE_CLASSES */
 template <class D>
-class UserDataComm : public DataCommInterface< UserDataComm<D> > {
+class UserDataComm : public bitpit::DataCommInterface< UserDataComm<D> > {
 public:
 
 	typedef D Data;

@@ -22,6 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
+namespace bitpit {
+
 template<class Impl>
 inline DataLBInterface<Impl>::DataLBInterface() {};
 
@@ -144,3 +146,4 @@ inline const Impl& DataLBInterface<Impl>::getImpl() const {
 	return static_cast<const Impl &>(*this);
 }
 
+}

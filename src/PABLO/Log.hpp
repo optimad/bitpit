@@ -37,6 +37,8 @@
 #endif
 #include <string>
 
+namespace bitpit {
+
 class Log {
 
 	std::string m_filename;
@@ -56,5 +58,7 @@ public:
 	void writeLog(std::string msg);
 
 };
+
+}
 
 #endif /* LOG_HPP_ */

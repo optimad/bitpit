@@ -27,6 +27,8 @@
 #ifndef DATACOMMINTERFACE_HPP_
 #define DATACOMMINTERFACE_HPP_
 
+namespace bitpit {
+
 /*!
  *  \ingroup PABLO
  *  @{
@@ -81,6 +83,8 @@ private:
 };
 
 /*  @{ */
+
+}
 
 #include "DataCommInterface.tpp"
 

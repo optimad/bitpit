@@ -32,6 +32,8 @@
 #include "Log.hpp"
 #include <fstream>
 
+namespace bitpit {
+
 using namespace std;
 
 #if ENABLE_MPI==1
@@ -96,3 +98,5 @@ void Log::writeLog(string msg) {
 //	error_flag = MPI_Barrier(comm);
 //#endif
 	return; };
+
+}

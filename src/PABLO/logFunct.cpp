@@ -34,6 +34,8 @@
 #include <sstream>
 #include <chrono>
 
+namespace bitpit {
+
 // =================================================================================== //
 // NAMESPACES                                                                          //
 // =================================================================================== //
@@ -110,3 +112,5 @@ void writeLog(string msg) {
 	error_flag = MPI_Barrier(MPI_COMM_WORLD);
 #endif
 	return; };
+
+}

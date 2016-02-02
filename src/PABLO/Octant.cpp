@@ -28,6 +28,8 @@
 #include "Octant.hpp"
 #include <algorithm>
 
+namespace bitpit {
+
 // =================================================================================== //
 // NAME SPACES                                                                         //
 // =================================================================================== //
@@ -1373,5 +1375,4 @@ uint64_t 		Octant::computeNodeVirtualMorton(uint8_t inode, const uint8_t & maxde
 
  };
 
-
-
+}
