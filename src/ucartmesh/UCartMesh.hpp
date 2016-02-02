@@ -22,22 +22,6 @@
  *
 \*---------------------------------------------------------------------------*/
 
-/*!
- * \ingroup    UCartMesh
- * @{
- * \class      UCartMesh
- * \brief Uniform Cartesian Mesh with variable spacing in each direction
- *      
- * UCartMesh provides the methods to access both Node and Cell indices either through cartesian indices or through a linear index.
- * Cartesian to Linear and vice versa.
- * SubSet extraction
- * Bi/Tri-linear interpolation methods.
- *
- */
-
-
-
-
 // INCLUDES                                                                   //
 # ifndef __BITPIT_UCARTMESH_HPP__
 # define __BITPIT_UCARTMESH_HPP__
@@ -195,5 +179,3 @@ class UCartMesh{
 }
 
 #endif
-
-/* @} */
