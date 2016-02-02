@@ -23,8 +23,8 @@
 \*---------------------------------------------------------------------------*/
 
 #if ENABLE_MPI==1
-#ifndef MPI_DATATYPE_CONVERSION_HPP_
-#define MPI_DATATYPE_CONVERSION_HPP_
+#ifndef __BITPIT_MPI_DATATYPE_CONVERSION_HPP__
+#define __BITPIT_MPI_DATATYPE_CONVERSION_HPP__
 
 #include <mpi.h>
 
@@ -80,5 +80,5 @@ inline MPI_Datatype convert<int8_t>(){return MPI_INT8_T;}
 
 }
 
-#endif /* MPI_DATATYPE_CONVERSION_HPP_ */
+#endif /* __BITPIT_MPI_DATATYPE_CONVERSION_HPP__ */
 #endif /* NOMPI */

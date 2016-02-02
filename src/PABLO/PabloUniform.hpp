@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef PABLOUNIFORM_HPP_
-#define PABLOUNIFORM_HPP_
+#ifndef __BITPIT_PABLO_UNIFORM_HPP__
+#define __BITPIT_PABLO_UNIFORM_HPP__
 
 // =================================================================================== //
 // INCLUDES                                                                            //
@@ -164,4 +164,4 @@ public:
 
 }
 
-#endif /* PABLOUNIFORM_HPP_ */
+#endif /* __BITPIT_PABLO_UNIFORM_HPP__ */

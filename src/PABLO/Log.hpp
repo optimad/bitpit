@@ -29,8 +29,8 @@
  *      Author: marco
  */
 
-#ifndef LOG_HPP_
-#define LOG_HPP_
+#ifndef __BITPIT_PABLO_LOG_HPP__
+#define __BITPIT_PABLO_LOG_HPP__
 
 #if ENABLE_MPI==1
 #include <mpi.h>
@@ -61,4 +61,4 @@ public:
 
 }
 
-#endif /* LOG_HPP_ */
+#endif /* __BITPIT_PABLO_LOG_HPP__ */

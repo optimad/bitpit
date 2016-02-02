@@ -24,8 +24,8 @@
 
 // Communications Class for Ghosts Update
 
-#ifndef DATACOMMINTERFACE_HPP_
-#define DATACOMMINTERFACE_HPP_
+#ifndef __BITPIT_DATA_COMM_INTERFACE_HPP__
+#define __BITPIT_DATA_COMM_INTERFACE_HPP__
 
 namespace bitpit {
 
@@ -88,4 +88,4 @@ private:
 
 #include "DataCommInterface.tpp"
 
-#endif /* DATACOMMINTERFACE_HPP_ */
+#endif /* __BITPIT_DATA_COMM_INTERFACE_HPP__ */

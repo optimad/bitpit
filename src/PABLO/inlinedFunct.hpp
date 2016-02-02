@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef INLINEDFUNCT_HPP_
-#define INLINEDFUNCT_HPP_
+#ifndef __BITPIT_INLINED_FUNCTIONS_HPP__
+#define __BITPIT_INLINED_FUNCTIONS_HPP__
 
 #include <stdint.h>
 #include <limits.h>
@@ -79,4 +79,4 @@ inline uint64_t keyXYZ(uint64_t x, uint64_t y, uint64_t z, int8_t max_level){
 
 }
 
-#endif /* INLINEDFUNCT_HPP_ */
+#endif /* __BITPIT_INLINED_FUNCTIONS_HPP__ */

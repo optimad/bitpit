@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef INTERSECTION_HPP_
-#define INTERSECTION_HPP_
+#ifndef __BITPIT_INTERSECTION_HPP__
+#define __BITPIT_INTERSECTION_HPP__
 
 // =================================================================================== //
 // INCLUDES                                                                            //
@@ -121,4 +121,4 @@ private:
 
 }
 
-#endif /* INTERSECTION_HPP_ */
+#endif /* __BITPIT_INTERSECTION_HPP__ */

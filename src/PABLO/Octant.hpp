@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef OCTANT_HPP_
-#define OCTANT_HPP_
+#ifndef __BITPIT_OCTANT_HPP__
+#define __BITPIT_OCTANT_HPP__
 
 // INCLUDES                                                                            //
 #include "inlinedFunct.hpp"
@@ -211,4 +211,4 @@ private:
 
 }
 
-#endif /* OCTANT_HPP_ */
+#endif /* __BITPIT_OCTANT_HPP__ */

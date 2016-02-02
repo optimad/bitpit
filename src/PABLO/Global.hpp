@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef GLOBAL_HPP_
-#define GLOBAL_HPP_
+#ifndef __BITPIT_GLOBAL_HPP__
+#define __BITPIT_GLOBAL_HPP__
 
 // =================================================================================== //
 // INCLUDES                                                                            //
@@ -118,4 +118,4 @@ private:
 
 }
 
-#endif /* GLOBAL_HPP_ */
+#endif /* __BITPIT_GLOBAL_HPP__ */

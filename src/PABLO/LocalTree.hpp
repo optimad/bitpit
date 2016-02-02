@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef LOCALTREE_HPP_
-#define LOCALTREE_HPP_
+#ifndef __BITPIT_LOCALTREE_HPP__
+#define __BITPIT_LOCALTREE_HPP__
 
 // =================================================================================== //
 // INCLUDES                                                                            //
@@ -213,4 +213,4 @@ private:
 
 }
 
-#endif /* LOCALTREE_HPP_ */
+#endif /* __BITPIT_LOCALTREE_HPP__ */

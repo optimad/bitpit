@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef PARATREE_HPP_
-#define PARATREE_HPP_
+#ifndef __BITPIT_PARA_TREE_HPP__
+#define __BITPIT_PARA_TREE_HPP__
 
 // =================================================================================== //
 // INCLUDES                                                                            //
@@ -1539,4 +1539,4 @@ public:
 
 }
 
-#endif /* PARATREE_HPP_ */
+#endif /* __BITPIT_PARA_TREE_HPP__ */

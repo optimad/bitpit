@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef ARRAY_HPP_
-#define ARRAY_HPP_
+#ifndef __BITPIT_ARRAY_HPP__
+#define __BITPIT_ARRAY_HPP__
 
 // =================================================================================== //
 // INCLUDES                                                                            //
@@ -80,4 +80,4 @@ private:
 
 }
 
-#endif /* ARRAY_HPP_ */
+#endif /* __BITPIT_ARRAY_HPP__ */

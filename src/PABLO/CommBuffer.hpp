@@ -23,8 +23,8 @@
 \*---------------------------------------------------------------------------*/
 
 #if ENABLE_MPI==1
-#ifndef COMMBUFFER_HPP_
-#define COMMBUFFER_HPP_
+#ifndef __BITPIT_COMMBUFFER_HPP__
+#define __BITPIT_COMMBUFFER_HPP__
 
 // =================================================================================== //
 // INCLUDES                                                                            //
@@ -117,5 +117,5 @@ public:
 
 }
 
-#endif /* COMMBUFFER_HPP_ */
+#endif /* __BITPIT_COMMBUFFER_HPP__ */
 #endif /* NOMPI */
