@@ -29,17 +29,17 @@ cmake_minimum_required(VERSION 2.8)
 set(TESTS "")
 list(APPEND TESTS "test_common_00001")
 
-set(COMMON_TEST_LIST "${TESTS}" CACHE INTERNAL "List of tests for common" FORCE)
+set(COMMON_TEST_LIST_SERIAL "${TESTS}" CACHE INTERNAL "List of serial tests for common" FORCE)
 
 # Rules to build the tests
 include_directories("${PROJECT_SOURCE_DIR}/src/common")
 
-foreach(TEST_NAME IN LISTS COMMON_TEST_LIST)
+foreach(TEST_NAME IN LISTS COMMON_TEST_LIST_SERIAL)
 	set(TEST_SOURCES "${TEST_NAME}.cpp")
 
 	add_executable(${TEST_NAME} "${TEST_SOURCES}")
 	target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
 endforeach()
 
-add_custom_target(tests-common DEPENDS ${COMMON_TEST_LIST})
+add_custom_target(tests-common DEPENDS ${COMMON_TEST_LIST_SERIAL})
 add_custom_target(clean-tests-common COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})

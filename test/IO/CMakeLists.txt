@@ -31,7 +31,7 @@ if (IO_ENABLE_VTK_WRAPPERS)
 	list(APPEND TESTS "test_IO_00001")
 endif()
 
-set(IO_TEST_LIST "${TESTS}" CACHE INTERNAL "List of tests fo the IO module" FORCE)
+set(IO_TEST_LIST_SERIAL "${TESTS}" CACHE INTERNAL "List of serial tests fo the IO module" FORCE)
 
 # External dependencies
 if (IO_ENABLE_VTK_WRAPPERS)
@@ -47,7 +47,7 @@ if (IO_ENABLE_VTK_WRAPPERS)
 	include_directories("${Boost_INCLUDE_DIRS}")
 endif()
 
-foreach(TEST_NAME IN LISTS IO_TEST_LIST)
+foreach(TEST_NAME IN LISTS IO_TEST_LIST_SERIAL)
 	set(TEST_SOURCES "${TEST_NAME}.cpp")
 
 	add_executable(${TEST_NAME} "${TEST_SOURCES}")
@@ -57,7 +57,7 @@ foreach(TEST_NAME IN LISTS IO_TEST_LIST)
 	endif()
 endforeach()
 
-add_custom_target(tests-IO DEPENDS ${IO_TEST_LIST})
+add_custom_target(tests-IO DEPENDS ${IO_TEST_LIST_SERIAL})
 add_custom_target(clean-tests-IO COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 # Data files

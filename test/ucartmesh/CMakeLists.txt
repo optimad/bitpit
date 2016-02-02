@@ -30,7 +30,7 @@ set(TESTS "")
 list(APPEND TESTS "test_ucartmesh_00001")
 list(APPEND TESTS "test_ucartmesh_00002")
 
-set(UCARTMESH_TEST_LIST "${TESTS}" CACHE INTERNAL "List of tests for the ucartmesh module" FORCE)
+set(UCARTMESH_TEST_LIST_SERIAL "${TESTS}" CACHE INTERNAL "List of serial tests for the ucartmesh module" FORCE)
 
 # Rules to build the tests
 include_directories("${PROJECT_SOURCE_DIR}/src/common")
@@ -38,12 +38,12 @@ include_directories("${PROJECT_SOURCE_DIR}/src/operators")
 include_directories("${PROJECT_SOURCE_DIR}/src/IO")
 include_directories("${PROJECT_SOURCE_DIR}/src/ucartmesh")
 
-foreach(TEST_NAME IN LISTS UCARTMESH_TEST_LIST)
+foreach(TEST_NAME IN LISTS UCARTMESH_TEST_LIST_SERIAL)
 	set(TEST_SOURCES "${TEST_NAME}.cpp")
 
 	add_executable(${TEST_NAME} "${TEST_SOURCES}")
 	target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
 endforeach()
 
-add_custom_target(tests-ucartmesh DEPENDS ${UCARTMESH_TEST_LIST})
+add_custom_target(tests-ucartmesh DEPENDS ${UCARTMESH_TEST_LIST_SERIAL})
 add_custom_target(clean-tests-ucartmesh COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
