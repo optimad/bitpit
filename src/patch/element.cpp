@@ -8,7 +8,7 @@
 #include <limits>
 
 /*!
-	\ingroup Common
+	\ingroup patch
 	@{
 */
 

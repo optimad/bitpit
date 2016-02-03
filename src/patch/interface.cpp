@@ -10,7 +10,7 @@
 #include "utils.hpp"
 
 /*!
-	\ingroup Common
+	\ingroup patch
 	@{
 */
 

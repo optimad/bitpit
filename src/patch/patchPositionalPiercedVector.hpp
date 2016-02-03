@@ -8,7 +8,7 @@
 #include "interface.hpp"
 #include "vertex.hpp"
 
-#include "positionalbitpit::PiercedVector.tpp"
+#include <bitpit_containers.hpp>
 
 extern template class Positionalbitpit::PiercedVector<Cell>;
 extern template class Positionalbitpit::PiercedVector<Interface>;

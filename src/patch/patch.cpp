@@ -17,7 +17,7 @@ template class bitpit::PiercedVector<Vertex>;
 namespace pman {
 
 /*!
-	\ingroup PatchMan
+	\ingroup patch
 	@{
 */
 

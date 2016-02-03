@@ -193,6 +193,7 @@ list(APPEND BITPIT_MODULE_LIST "IO")
 list(APPEND BITPIT_MODULE_LIST "LA")
 list(APPEND BITPIT_MODULE_LIST "SA")
 list(APPEND BITPIT_MODULE_LIST "PABLO")
+list(APPEND BITPIT_MODULE_LIST "patch")
 list(APPEND BITPIT_MODULE_LIST "ucartmesh")
 
 #------------------------------------------------------------------------------------#
@@ -203,6 +204,7 @@ set(IO_DEPS "operators")
 set(LA_DEPS "operators")
 set(SA_DEPS "operators")
 set(UCARTMESH_DEPS "IO")
+set(PATCH_DEPS "containers IO")
 
 #------------------------------------------------------------------------------------#
 # Check of the dependencies

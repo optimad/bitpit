@@ -9,7 +9,7 @@
 #include<iostream>
 
 /*!
-	\ingroup Common
+	\ingroup patch
 	@{
 */
 

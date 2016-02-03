@@ -10,6 +10,11 @@
 namespace utils {
 
 /*!
+    \ingroup utils
+    \{
+*/
+
+/*!
 	Evaluates the cross product of two three-dimensional arrays.
 
 	\param x is the first a three-dimensional array
@@ -60,5 +65,9 @@ void transpose_3D(std::array<std::array<double, 3>, 3> &A)
 		}
 	}
 }
+
+/*!
+    \}
+*/
 
 }

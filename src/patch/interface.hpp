@@ -12,7 +12,7 @@
 #include "element.hpp"
 
 /*!
-	\ingroup Common
+	\ingroup patch
 	@{
 */
 

@@ -12,6 +12,8 @@
 namespace utils {
 
 /*!
+	\ingroup utils
+
 	Adds an id to an ordered list of unique ids.
 
 	\tparam T is the type of elements contained in the list

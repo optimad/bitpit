@@ -12,7 +12,7 @@
 #include <bitpit_containers.hpp>
 
 /*!
-	\ingroup Common
+	\ingroup patch
 	@{
 */
 

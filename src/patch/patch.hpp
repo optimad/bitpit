@@ -9,7 +9,7 @@
 #include "adaption.hpp"
 #include "cell.hpp"
 #include "interface.hpp"
-#include "patchman_piercedVector.hpp"
+#include "patchPiercedVector.hpp"
 #include "vertex.hpp"
 
 #include <bitpit_IO.hpp>
@@ -21,7 +21,7 @@
 namespace pman {
 
 /*!
-	\ingroup PatchMan
+	\ingroup patch
 	@{
 */
 
