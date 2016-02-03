@@ -1375,4 +1375,59 @@ uint64_t 		Octant::computeNodeVirtualMorton(uint8_t inode, const uint8_t & maxde
 
  };
 
+
+/*! Computes Morton index (without level) of same size
+ * periodic neighbour of octant throught face iface.
+ * \param[in] iface Local index of the face target.
+ * \return Periodic neighbour morton number.
+ */
+uint64_t Octant::computePeriodicMorton(uint8_t iface){
+	uint64_t Morton;
+	uint32_t dh;
+	uint32_t i,cx,cy,cz;
+	dh = getSize();
+	uint32_t maxLength = uint32_t(1<<sm_maxLevel);
+
+	if (!m_info[iface]){
+		return this->computeMorton();
+	}
+	else{
+		switch (iface) {
+		case 0 :
+		{
+			Morton = mortonEncode_magicbits(maxLength-dh,this->m_y,this->m_z);
+		}
+		break;
+		case 1 :
+		{
+			Morton = mortonEncode_magicbits(0,this->m_y,this->m_z);
+		}
+		break;
+		case 2 :
+		{
+			Morton = mortonEncode_magicbits(this->m_x,maxLength-dh,this->m_z);
+		}
+		break;
+		case 3 :
+		{
+			Morton = mortonEncode_magicbits(this->m_x,0,this->m_z);
+		}
+		break;
+		case 4 :
+		{
+			Morton = mortonEncode_magicbits(this->m_x,this->m_y,maxLength-dh);
+		}
+		break;
+		case 5 :
+		{
+			Morton = mortonEncode_magicbits(this->m_x,this->m_y,0);
+		}
+		break;
+		}
+		return Morton;
+	}
+
+
+};
+
 }

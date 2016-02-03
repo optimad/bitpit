@@ -223,6 +223,10 @@ LocalTree::setLastDesc(){
 	m_lastDesc = Octant(m_dim, m_global.m_maxLevel,x,y,z, m_global.m_maxLevel);
 };
 
+void
+LocalTree::setPeriodic(bvector & periodic){
+	m_periodic = periodic;
+};
 
 // =================================================================================== //
 // OTHER GET/SET METHODS
@@ -813,10 +817,26 @@ LocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, v
 				return;
 			}
 		}
-		else{
-			// Boundary Face
+		else if(m_periodic[iface]){
+			// Check if octants face is a periodic boundary
+			Morton = oct->computePeriodicMorton(iface);
+			uint32_t idxtry = findMorton(Morton);
+			if (idxtry<noctants){
+				isghost.push_back(false);
+				neighbours.push_back(idxtry);
+			}
+			else{
+				idxtry = findGhostMorton(Morton);
+				isghost.push_back(true);
+				neighbours.push_back(idxtry);
+			}
 			return;
 		}
+		else{
+		// Boundary Face
+		return;
+		}
+
 	}
 	else{
 		// Check if octants face is a boundary
@@ -1059,10 +1079,26 @@ LocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, v
 				return;
 			}
 		}
-		else{
-			// Boundary Face
+		else if(m_periodic[iface]){
+			// Check if octants face is a periodic boundary
+			Morton = oct->computePeriodicMorton(iface);
+			uint32_t idxtry = findMorton(Morton);
+			if (idxtry<noctants){
+				isghost.push_back(false);
+				neighbours.push_back(idxtry);
+			}
+			else{
+				idxtry = findGhostMorton(Morton);
+				isghost.push_back(true);
+				neighbours.push_back(idxtry);
+			}
 			return;
 		}
+		else{
+		// Boundary Face
+		return;
+		}
+
 	}
 };
 
@@ -1210,10 +1246,26 @@ LocalTree::findNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours, ve
 				return;
 			}
 		}
-		else{
-			// Boundary Face
+		else if(m_periodic[iface]){
+			// Check if octants face is a periodic boundary
+			Morton = oct->computePeriodicMorton(iface);
+			uint32_t idxtry = findMorton(Morton);
+			if (idxtry<noctants){
+				isghost.push_back(false);
+				neighbours.push_back(idxtry);
+			}
+			else{
+				idxtry = findGhostMorton(Morton);
+				isghost.push_back(true);
+				neighbours.push_back(idxtry);
+			}
 			return;
 		}
+		else{
+		// Boundary Face
+		return;
+		}
+
 	}
 	else{
 		// Check if octants face is a boundary
@@ -1454,9 +1506,24 @@ LocalTree::findNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours, ve
 				return;
 			}
 		}
-		else{
-			// Boundary Face
+		else if(m_periodic[iface]){
+			// Check if octants face is a periodic boundary
+			Morton = oct->computePeriodicMorton(iface);
+			uint32_t idxtry = findMorton(Morton);
+			if (idxtry<noctants){
+				isghost.push_back(false);
+				neighbours.push_back(idxtry);
+			}
+			else{
+				idxtry = findGhostMorton(Morton);
+				isghost.push_back(true);
+				neighbours.push_back(idxtry);
+			}
 			return;
+		}
+		else{
+		// Boundary Face
+		return;
 		}
 	}
 };
@@ -1598,10 +1665,18 @@ LocalTree::findGhostNeighbours(uint32_t const idx, uint8_t iface, u32vector & ne
 			return;
 		}
 	}
-	//--------------------------------------------------------------- //
-	//-----Not Pbound face------------- ----------------------------- //
-	else{
+	else if(oct->m_info[iface] && m_periodic[iface]){
+		// Check if octants face is a periodic boundary
+		Morton = oct->computePeriodicMorton(iface);
+		uint32_t idxtry = findMorton(Morton);
+		if (idxtry < noctants){
+			neighbours.push_back(idxtry);
+		}
 		return;
+	}
+	else{
+	// Boundary Face
+	return;
 	}
 
 };
@@ -1637,7 +1712,6 @@ void
 
 	//Clean index of ghost brothers in case of coarsening a broken family
 	m_lastGhostBros.clear();
-
 
 	// Set index for start and end check for ghosts
 	if (m_ghosts.size()){
@@ -4337,7 +4411,7 @@ LocalTree::findMorton(uint64_t Morton){
 			}
 		}
 	}
-	return nocts-1;
+	return nocts;
 };
 
 // =================================================================================== //
@@ -4380,6 +4454,46 @@ LocalTree::findGhostMorton(uint64_t Morton){
 		}
 	}
 	return nocts;
+};
+
+// =================================================================================== //
+
+bool
+LocalTree::checkPeriodics(){
+	// Local variables
+	u32vector		 	neigh;
+	uint32_t 			i, idx;
+	uint8_t				iface;
+	bvector		 		isghost;
+	bool				Pdone = false;
+	bool				Do = false;
+
+	octvector::iterator 	obegin, oend, it;
+	u32vector::iterator 	ibegin, iend, iit;
+
+	for (iface=0; iface<m_global.m_nfaces; iface++){
+		Do |= m_periodic[iface];
+	}
+
+	if (Do){
+		// Loop on the octants
+		obegin = m_octants.begin();
+		oend = m_octants.end();
+		idx = 0;
+		for (it=obegin; it!=oend; it++){
+			for (iface=0; iface<m_global.m_nfaces; iface++){
+				if (it->getBound(iface) && m_periodic[iface]){
+					findNeighbours(idx, iface, neigh, isghost);
+					if ((it->getLevel() + it->getMarker()) < (m_octants[neigh[0]].getLevel() + m_octants[neigh[0]].getMarker())){
+						it->setMarker(m_octants[neigh[0]].getLevel() + m_octants[neigh[0]].getMarker() - it->getLevel());
+						Pdone = true;
+					}
+				}
+			}
+			idx++;
+		}
+	}
+	return Pdone;
 };
 
 // =================================================================================== //

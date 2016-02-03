@@ -85,6 +85,7 @@ class LocalTree{
 public:
 	typedef std::vector<Octant>				 	octvector;
 	typedef std::vector<Intersection>	 		intervector;
+	typedef std::vector<bool>					bvector;
 	typedef std::vector<uint8_t>				u8vector;
 	typedef std::vector<uint32_t>				u32vector;
 	typedef std::vector<uint64_t>				u64vector;
@@ -97,13 +98,12 @@ public:
 private:
 	octvector				m_octants;				/**< Local vector of octants ordered with Morton Number */
 	octvector				m_ghosts;				/**< Local vector of ghost octants ordered with Morton Number */
-	octvector				m_periodics;			/**< Local vector of local periodic octants ordered with Morton Number */
-	octvector				m_periodicsGhosts;		/**< Local vector of ghost periodic octants ordered with Morton Number */
 	intervector				m_intersections;		/**< Local vector of intersections */
 	u64vector 				m_globalIdxGhosts;		/**< Global index of the ghost octants (size = size_ghosts) */
 	Octant 					m_firstDesc;			/**< First (Morton order) most refined octant possible in local partition */
 	Octant			 		m_lastDesc;				/**< Last (Morton order) most refined octant possible in local partition */
 	uint32_t 				m_sizeGhosts;			/**< Size of vector of ghost octants */
+	uint32_t 				m_sizePGhosts;			/**< Size of vector of periodic ghost octants */
 	uint8_t					m_localMaxDepth;		/**< Reached max depth in local tree */
 	uint8_t 				m_balanceCodim;			/**<Maximum codimension of the entity for 2:1 balancing (1 = 2:1 balance through faces (default);
 	 	 	 	 	 	 	 	 	 	 	 	 	 	 2 = 2:1 balance through edges and faces;
@@ -118,6 +118,8 @@ private:
 
 	uint8_t					m_dim;					/**<Space dimension. Only 2D or 3D space accepted*/
 	Global					m_global;				/**<Global variables*/
+	bvector 				m_periodic;				/**<Boolvector: i-th element is true if the i-th boundary face is a periodic interface.*/
+
 
 	// =================================================================================== //
 	// CONSTRUCTORS
@@ -150,6 +152,7 @@ private:
 	void 			setBalanceCodim(uint8_t b21codim);
 	void 			setFirstDesc();
 	void 			setLastDesc();
+	void 			setPeriodic(bvector & periodic);
 
 	// =================================================================================== //
 	// OTHER GET/SET METHODS
@@ -201,6 +204,8 @@ private:
 
 	uint32_t 	findMorton(uint64_t Morton);
 	uint32_t 	findGhostMorton(uint64_t Morton);
+
+	bool 		checkPeriodics();
 
 	void 		computeConnectivity();
 	void 		clearConnectivity();

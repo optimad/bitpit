@@ -396,7 +396,6 @@ private:
 	void 		updateAfterCoarse();
 	void 		updateAfterCoarse(u32vector & mapidx);
 	void 		balance21(bool const first);
-	void		setPeriodicsGhosts();
 
 	// =================================================================================== //
 	// TESTING OUTPUT METHODS												    			   //

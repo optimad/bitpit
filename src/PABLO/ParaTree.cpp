@@ -573,6 +573,7 @@ void
 ParaTree::setPeriodic(uint8_t i){
 	m_periodic[i] = true;
 	m_periodic[m_global.m_oppFace[i]] = true;
+	m_octree.setPeriodic(m_periodic);
 };
 
 // =================================================================================== //
@@ -1332,7 +1333,6 @@ uint8_t
 ParaTree::getBalanceCodimension() const{
 	return m_octree.getBalanceCodim();
 };
-
 
 /*!Get the first possible descendant with maximum refinement level of the local tree.
  * \return Constant reference to the first finest descendant of the local tree.
@@ -3037,7 +3037,6 @@ ParaTree::levelToSize(uint8_t & level) {
 	return m_trans.mapSize(size);
 }
 
-
 // =================================================================================== //
 // OTHER INTERSECTION BASED METHODS												    			   //
 // =================================================================================== //
@@ -4039,7 +4038,9 @@ ParaTree::balance21(bool const first){
 			iteration++;
 			m_log.writeLog(" Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)));
 			commMarker();
-			localDone = m_octree.localBalance(false);
+			localDone = m_octree.checkPeriodics();
+			commMarker();
+			localDone |= m_octree.localBalance(false);
 			commMarker();
 			m_octree.preBalance21(false);
 			m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
@@ -4067,7 +4068,9 @@ ParaTree::balance21(bool const first){
 		while(globalDone){
 			iteration++;
 			commMarker();
-			localDone = m_octree.localBalanceAll(false);
+			localDone = m_octree.checkPeriodics();
+			commMarker();
+			localDone |= m_octree.localBalanceAll(false);
 			commMarker();
 			m_octree.preBalance21(false);
 			m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
@@ -4096,7 +4099,8 @@ ParaTree::balance21(bool const first){
 		while(localDone){
 			iteration++;
 			m_log.writeLog(" Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)));
-			localDone = m_octree.localBalance(false);
+			localDone = m_octree.checkPeriodics();
+			localDone |= m_octree.localBalance(false);
 			m_octree.preBalance21(false);
 		}
 
@@ -4115,55 +4119,13 @@ ParaTree::balance21(bool const first){
 
 		while(localDone){
 			iteration++;
-			localDone = m_octree.localBalanceAll(false);
+			localDone = m_octree.checkPeriodics();
+			localDone |= m_octree.localBalanceAll(false);
 			m_octree.preBalance21(false);
 		}
 	}
 
 #endif /* NOMPI */
-};
-
-/*!Compute and distribute the periodic octants over the processes
- *
- */
-void
-ParaTree::setPeriodicsGhosts(){
-	octvector::iterator it, itend;
-	itend = m_octree.m_octants.end();
-	m_octree.m_periodics.clear();
-	bool condition;
-
-	if (m_serial){
-
-		for (it = m_octree.m_octants.begin(); it != itend; it++){
-			condition = false;
-			for (uint8_t iface = 0; iface < m_global.m_nfaces; iface++){
-					condition = condition || it->getPbound(iface)*m_periodic[iface];
-			}
-			if (condition) m_octree.m_periodics.push_back((*it));
-		}
-
-	}
-	else{
-
-		for (it = m_octree.m_octants.begin(); it != itend; it++){
-			condition = false;
-			for (uint8_t iface = 0; iface < m_global.m_nfaces; iface++){
-					condition = condition || it->getPbound(iface)*m_periodic[iface];
-			}
-			Octant virtualOct = it->computeVirtualMorton(i,m_maxDepth,virtualNeighborsSize);
-
-
-
-
-			if (condition) m_octree.m_periodics.push_back((*it));
-		}
-
-
-	}
-
-
-
 };
 
 // =================================================================================== //

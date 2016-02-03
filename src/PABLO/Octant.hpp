@@ -203,6 +203,7 @@ private:
 			uint32_t & sizehf, uint8_t (&nodeface)[8][3]);
 	uint64_t 		computeNodeVirtualMorton(uint8_t inode, const uint8_t & maxdepth,
 			uint32_t & sizeneigh, uint8_t (&nodeface)[8][3]);
+	uint64_t computePeriodicMorton(uint8_t iface);
 
 };
 
