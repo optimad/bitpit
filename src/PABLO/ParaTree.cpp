@@ -3662,8 +3662,20 @@ ParaTree::setPboundGhosts() {
 					else{
 						it->setPbound(i,false);
 					}
-					//TODO debug
-					if (abs(pBegin-pEnd) <= 1) j = maxDelta + 1;
+//					//TODO debug
+//					if (abs(pBegin-pEnd) <= 1) j = maxDelta + 1;
+				}
+			}
+			else if(m_periodic[i]){
+				uint64_t virtualNeighbor = it->computePeriodicMorton(i);
+				int pOwner = findOwner(virtualNeighbor);
+				procs.insert(pOwner);
+				if(pOwner != m_rank){
+					it->setPbound(i,true);
+					pbd = true;
+				}
+				else{
+					it->setPbound(i,false);
 				}
 			}
 		}
@@ -3681,8 +3693,8 @@ ParaTree::setPboundGhosts() {
 					if(pBegin != m_rank || pEnd != m_rank){
 						pbd = true;
 					}
-					//TODO debug
-					if (abs(pBegin-pEnd) <= 1) ee = maxDelta + 1;
+//					//TODO debug
+//					if (abs(pBegin-pEnd) <= 1) ee = maxDelta + 1;
 				}
 			}
 		}
@@ -4027,7 +4039,6 @@ ParaTree::balance21(bool const first){
 		m_log.writeLog(" Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)));
 
 		commMarker();
-
 		localDone = m_octree.localBalance(true);
 		commMarker();
 		m_octree.preBalance21(false);
@@ -4038,9 +4049,7 @@ ParaTree::balance21(bool const first){
 			iteration++;
 			m_log.writeLog(" Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)));
 			commMarker();
-			localDone = m_octree.checkPeriodics();
-			commMarker();
-			localDone |= m_octree.localBalance(false);
+			localDone = m_octree.localBalance(false);
 			commMarker();
 			m_octree.preBalance21(false);
 			m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
@@ -4068,9 +4077,7 @@ ParaTree::balance21(bool const first){
 		while(globalDone){
 			iteration++;
 			commMarker();
-			localDone = m_octree.checkPeriodics();
-			commMarker();
-			localDone |= m_octree.localBalanceAll(false);
+			localDone = m_octree.localBalanceAll(false);
 			commMarker();
 			m_octree.preBalance21(false);
 			m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
@@ -4099,8 +4106,7 @@ ParaTree::balance21(bool const first){
 		while(localDone){
 			iteration++;
 			m_log.writeLog(" Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)));
-			localDone = m_octree.checkPeriodics();
-			localDone |= m_octree.localBalance(false);
+			localDone = m_octree.localBalance(false);
 			m_octree.preBalance21(false);
 		}
 
@@ -4119,8 +4125,7 @@ ParaTree::balance21(bool const first){
 
 		while(localDone){
 			iteration++;
-			localDone = m_octree.checkPeriodics();
-			localDone |= m_octree.localBalanceAll(false);
+			localDone = m_octree.localBalanceAll(false);
 			m_octree.preBalance21(false);
 		}
 	}

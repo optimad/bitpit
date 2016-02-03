@@ -88,7 +88,8 @@ int main(int argc, char *argv[]) {
 
 		/**<Define and initialize a set of bubbles and their trajectories.*/
 		time_t Time = time(NULL);
-		srand(Time);
+//		srand(Time);
+		srand(100);
 		if(pabloBB.getRank() == 0)
 			cout << "the seed = " << Time << endl;
 
@@ -107,7 +108,7 @@ int main(int argc, char *argv[]) {
 			double randc[2];
 			randc[0] = 0.8 * (double) (rand()) /  RAND_MAX + 0.1;
 			randc[1] = (double) (rand()) /  RAND_MAX - 0.5;
-			double randr = 0.05 * (double) (rand()) / RAND_MAX + 0.02;
+			double randr = 0.1 * (double) (rand()) / RAND_MAX + 0.02;
 			double dy = 0.005 + 0.05 * (double) (rand()) / RAND_MAX;
 			double omega = 0.5 * (double) (rand()) / RAND_MAX;
 			double aa = 0.15 * (double) (rand()) / RAND_MAX;
@@ -141,8 +142,10 @@ int main(int argc, char *argv[]) {
 				BB[i].c[1] = BB[i].c[1]+ Dt*DY[i];
 			}
 
+
 			/**<Adapting (refinement and coarsening).*/
 			bool adapt = true;
+			int itad = 0;
 			while (adapt){
 
 				octantIterator it, itend = pabloBB.getInternalOctantsEnd();
@@ -225,11 +228,18 @@ int main(int argc, char *argv[]) {
 					}
 				}
 
+				/**<Update the connectivity and write the para_tree.*/
+				pabloBB.updateConnectivity();
+				pabloBB.updateGhostsConnectivity();
+				pabloBB.write("PabloBubble_iteradapt"+to_string(static_cast<unsigned long long>(itad)));
+
 				/**<Adapt the octree.*/
 				adapt = pabloBB.adapt();
 
 				/**<Update the number of local octants.*/
 				nocts = pabloBB.getNumOctants();
+
+				itad++;
 
 			}
 
@@ -243,6 +253,7 @@ int main(int argc, char *argv[]) {
 
 			/**<Update the connectivity and write the para_tree.*/
 			pabloBB.updateConnectivity();
+			pabloBB.updateGhostsConnectivity();
 			pabloBB.write("PabloBubble_iter"+to_string(static_cast<unsigned long long>(iter)));
 		}
 #if ENABLE_MPI==1

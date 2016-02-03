@@ -204,7 +204,8 @@ private:
 	uint64_t 		computeNodeVirtualMorton(uint8_t inode, const uint8_t & maxdepth,
 			uint32_t & sizeneigh, uint8_t (&nodeface)[8][3]);
 	uint64_t computePeriodicMorton(uint8_t iface);
-
+	Octant computePeriodicOctant(uint8_t iface);
+	std::array<int64_t,3> getPeriodicCoord(uint8_t iface);
 };
 
 

@@ -103,7 +103,6 @@ private:
 	Octant 					m_firstDesc;			/**< First (Morton order) most refined octant possible in local partition */
 	Octant			 		m_lastDesc;				/**< Last (Morton order) most refined octant possible in local partition */
 	uint32_t 				m_sizeGhosts;			/**< Size of vector of ghost octants */
-	uint32_t 				m_sizePGhosts;			/**< Size of vector of periodic ghost octants */
 	uint8_t					m_localMaxDepth;		/**< Reached max depth in local tree */
 	uint8_t 				m_balanceCodim;			/**<Maximum codimension of the entity for 2:1 balancing (1 = 2:1 balance through faces (default);
 	 	 	 	 	 	 	 	 	 	 	 	 	 	 2 = 2:1 balance through edges and faces;
@@ -194,6 +193,10 @@ private:
 	void 		findGhostNodeNeighbours(uint32_t idx, uint8_t inode,
 								u32vector & neighbours);
 
+	void 		findPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours,
+								std::vector<bool> & isghost);
+
+	void 		findGhostPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours);
 
 	void 		preBalance21(bool internal);
 	void 		preBalance21(u32vector& newmodified);

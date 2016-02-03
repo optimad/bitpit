@@ -1384,7 +1384,6 @@ uint64_t 		Octant::computeNodeVirtualMorton(uint8_t inode, const uint8_t & maxde
 uint64_t Octant::computePeriodicMorton(uint8_t iface){
 	uint64_t Morton;
 	uint32_t dh;
-	uint32_t i,cx,cy,cz;
 	dh = getSize();
 	uint32_t maxLength = uint32_t(1<<sm_maxLevel);
 
@@ -1426,8 +1425,102 @@ uint64_t Octant::computePeriodicMorton(uint8_t iface){
 		}
 		return Morton;
 	}
+};
+
+
+Octant Octant::computePeriodicOctant(uint8_t iface){
+	Octant degOct(this->m_dim, this->m_level, this->m_x, this->m_y, this->m_z, sm_maxLevel);
+	uint32_t maxLength = uint32_t(1<<sm_maxLevel);
+	uint32_t dh = this->getSize();
+
+	if (!m_info[iface]){
+		return this->computeMorton();
+	}
+	else{
+		switch (iface) {
+		case 0 :
+		{
+			degOct.m_x = maxLength-dh;
+		}
+		break;
+		case 1 :
+		{
+			degOct.m_x = 0;
+		}
+		break;
+		case 2 :
+		{
+			degOct.m_y = maxLength-dh;
+		}
+		break;
+		case 3 :
+		{
+			degOct.m_y = 0;
+		}
+		break;
+		case 4 :
+		{
+			degOct.m_z = maxLength-dh;
+		}
+		break;
+		case 5 :
+		{
+			degOct.m_y = 0;
+		}
+		break;
+		}
+		degOct.m_level = this->m_level;
+		degOct.m_info = false;
+		return degOct;
+	}
 
 
 };
+
+array<int64_t,3> Octant::getPeriodicCoord(uint8_t iface){
+	array<int64_t,3> coord;
+	coord[0] = this->m_x;
+	coord[1] = this->m_y;
+	coord[2] = this->m_z;
+	uint32_t dh = this->getSize();
+	uint32_t maxLength = uint32_t(1<<sm_maxLevel);
+
+	switch (iface) {
+	case 0 :
+	{
+		coord[0] = maxLength;
+	}
+	break;
+	case 1 :
+	{
+		coord[0]  = -dh;
+	}
+	break;
+	case 2 :
+	{
+		coord[1]  = maxLength;
+	}
+	break;
+	case 3 :
+	{
+		coord[1] = -dh;
+	}
+	break;
+	case 4 :
+	{
+		coord[2] = maxLength;
+	}
+	break;
+	case 5 :
+	{
+		coord[2] = -dh;
+	}
+	break;
+	}
+	return coord;
+
+};
+
+
 
 }
