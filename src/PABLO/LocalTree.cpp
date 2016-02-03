@@ -592,6 +592,9 @@ LocalTree::globalCoarse(u32vector & mapidx){
 	for (idx=0; idx<nocts; idx++){
 		m_octants[idx].setMarker(-1);
 	}
+	for (idx=0; idx<m_sizeGhosts; idx++){
+		m_ghosts[idx].setMarker(-1);
+	}
 
 	dorefine = coarse(mapidx);
 
