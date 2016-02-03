@@ -1833,11 +1833,6 @@ private:
 	*/
 	void pierce_pos(size_type pos)
 	{
-		// Update id of the empty element
-		if (pos != m_last_pos) {
-			update_empty_pos_id(pos);
-		}
-
 		// Update first and last counters
 		if (empty()) {
 			m_last_pos  = 0;
@@ -1852,8 +1847,10 @@ private:
 			}
 		}
 
-		// If the element is past
-		if (pos > m_last_pos) {
+		// Update id of the empty element
+		if (pos < m_last_pos) {
+			update_empty_pos_id(pos);
+		} else {
 			update_empty_pos_id(m_last_pos + 1);
 		}
 
