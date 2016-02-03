@@ -1834,7 +1834,9 @@ private:
 	void pierce_pos(size_type pos)
 	{
 		// Update id of the empty element
-		update_empty_pos_id(pos);
+		if (pos != m_last_pos) {
+			update_empty_pos_id(pos);
+		}
 
 		// Update first and last counters
 		if (empty()) {
@@ -1848,6 +1850,11 @@ private:
 			if (m_first_pos == pos) {
 				m_first_pos = next_used_pos(pos);
 			}
+		}
+
+		// If the element is past
+		if (pos > m_last_pos) {
+			update_empty_pos_id(m_last_pos + 1);
 		}
 
 		// Hole
