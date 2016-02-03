@@ -804,7 +804,7 @@ public:
 				break;
 			}
 
-			size_type pos = pending_deletes_pop_back();
+			size_type pos = positions_pop_back(m_pending_deletes);
 			if (pos != m_last_pos) {
 				_erase(pos, false);
 			}
@@ -1136,7 +1136,7 @@ public:
 		}
 
 		// Delete all holes above the updated last position
-		holes_delete_after(updated_last_pos);
+		positions_delete_after(m_holes, updated_last_pos);
 
 		// Resize the vector
 		storage_resize(updated_last_pos + 1);
@@ -1463,7 +1463,7 @@ private:
 
 			// Free the position
 			if (delayed) {
-				pending_deletes_add(pos);
+				positions_add(m_pending_deletes, pos);
 			} else {
 				pierce_pos(pos);
 			}
@@ -1611,12 +1611,12 @@ private:
 
 			pos = m_last_pos;
 			if (!m_pending_deletes.empty()) {
-				pending_deletes_delete(pos);
+				positions_delete(m_pending_deletes, pos);
 			}
 		} else if (fillType == FILL_FIRST) {
 			if (m_pending_deletes.empty()) {
 				// Get first hole
-				pos = holes_pop();
+				pos = positions_pop_front(m_holes);
 
 				// Update first and last counters
 				if (m_last_pos < pos) {
@@ -1632,75 +1632,11 @@ private:
 					update_empty_pos_id(pos - 1);
 				}
 			} else {
-				pos = pending_deletes_pop_front();
+				pos = positions_pop_front(m_pending_deletes);
 			}
 
 			assert(pos < m_v.size() - 1);
 		}
-
-		return pos;
-	}
-
-	/*!
-		Add a position to the holes.
-
-		The container that hold the hole list has to be always
-		kept in ascending order.
-
-		\param pos the position to be added to the holes
-	*/
-	void holes_add(size_type pos)
-	{
-		std::deque<size_type>::iterator itr = lower_bound(m_holes.begin(), m_holes.end(), pos);
-		m_holes.insert(itr, pos);
-	}
-
-	/*!
-		Removes a hole.
-
-		\param hole is the hole to be removed
-		\result Returns true if the hole was found and successfuly
-		removed, otherwise it returns false.
-	*/
-	bool holes_delete(size_type hole)
-	{
-		std::deque<size_type>::iterator itr = lower_bound(m_holes.begin(), m_holes.end(), hole);
-		if (itr == m_holes.end()) {
-			return false;
-		}
-
-		m_holes.erase(itr);
-		return true;
-	}
-
-	/*!
-		Deletes all holes after a specified position.
-
-		\param pos the position after wich all holes have to be
-		           deleted
-	*/
-	void holes_delete_after(size_type pos)
-	{
-		if (m_holes.empty()) {
-			return;
-		} else if (m_holes.back() <= pos) {
-			return;
-		}
-
-		std::deque<size_type>::iterator itr = upper_bound(m_holes.begin(), m_holes.end(), pos);
-		m_holes.erase(itr, m_holes.end());
-	}
-
-	/*!
-		Gets the position associated with the first hole and deletes
-		that hole from the list.
-
-		\result The position associated with the first hole.
-	*/
-	size_type holes_pop()
-	{
-		size_type pos = m_holes.front();
-		m_holes.pop_front();
 
 		return pos;
 	}
@@ -1765,68 +1701,6 @@ private:
 	}
 
 	/*!
-		Add a position to the pending deletes list.
-
-		The container that hold the pending deletes has to be always
-		kept in ascending order.
-
-		\param pos the position to be added to the pending deletes list
-	*/
-	void pending_deletes_add(size_type pos)
-	{
-		m_dirty = true;
-
-		std::deque<size_type>::iterator itr = lower_bound(m_pending_deletes.begin(), m_pending_deletes.end(), pos);
-		m_pending_deletes.insert(itr, pos);
-	}
-
-	/*!
-		Gets the position associated with the first pending delete
-		and deletes that pending delete from the list.
-
-		\result The position associated with the first pending delete.
-	*/
-	size_t pending_deletes_pop_front()
-	{
-		size_t pos = m_pending_deletes.front();
-		m_pending_deletes.pop_front();
-
-		return pos;
-	}
-
-	/*!
-		Gets the position associated with the last pending delete
-		and deletes that pending delete from the list.
-
-		\result The position associated with the first pending delete.
-	*/
-	size_t pending_deletes_pop_back()
-	{
-		size_t pos = m_pending_deletes.back();
-		m_pending_deletes.pop_back();
-
-		return pos;
-	}
-
-	/*!
-		Removes a pending delete.
-
-		\param pending_delete is the pending delete to be removed
-		\result Returns true if the pending delete was found and
-		successfuly removed, false otherwise.
-	*/
-	bool pending_deletes_delete(size_type pending_delete)
-	{
-		std::deque<size_type>::iterator itr = lower_bound(m_pending_deletes.begin(), m_pending_deletes.end(), pending_delete);
-		if (itr == m_pending_deletes.end()) {
-			return false;
-		}
-
-		m_pending_deletes.erase(itr);
-		return true;
-	}
-
-	/*!
 		Mark the position as empty.
 
 		\param pos the position to be marked as empty
@@ -1860,10 +1734,90 @@ private:
 		// the last used position. All holes after the last used
 		// position need to be removed.
 		if (pos < m_last_pos) {
-			holes_add(pos);
+			positions_add(m_holes, pos);
 		} else {
-			holes_delete_after(m_last_pos);
+			positions_delete_after(m_holes, m_last_pos);
 		}
+	}
+
+	/*!
+		Adds an element form the specified list of ordered positions.
+
+		The list is always kept ordered in ascending order.
+
+		\param pos is the position to be added
+	*/
+	void positions_add(std::deque<size_type> &list, size_type pos)
+	{
+		std::deque<size_type>::iterator itr = lower_bound(list.begin(), list.end(), pos);
+		list.insert(itr, pos);
+	}
+
+	/*!
+		Removes an element form the specified list of ordered positions.
+
+		\param pos is the position to be removed
+		\result Returns true if the position was found and successfuly
+		removed, otherwise it returns false.
+	*/
+	bool positions_delete(std::deque<size_type> &list, const size_type &pos)
+	{
+		std::deque<size_type>::iterator itr = lower_bound(list.begin(), list.end(), pos);
+		if (itr == list.end()) {
+			return false;
+		}
+
+		list.erase(itr);
+		return true;
+	}
+
+	/*!
+		Deletes all elements of the specified list of ordered positions
+		after a given position.
+
+		\param pos the position after wich all elements have to be
+		deleted
+	*/
+	void positions_delete_after(std::deque<size_type> &list, const size_type &pos)
+	{
+		if (list.empty()) {
+			return;
+		} else if (list.back() <= pos) {
+			return;
+		}
+
+		std::deque<size_type>::iterator itr = upper_bound(list.begin(), list.end(), pos);
+		list.erase(itr, list.end());
+	}
+
+	/*!
+		Remove the last element of the specificed list of ordered
+		positions and returns a copy of that element.
+
+		\param list is the list of ordered positions that will be modified
+		\result The previous last element of the list.
+	*/
+	size_type positions_pop_back(std::deque<size_type> &list)
+	{
+		size_type pos = m_holes.back();
+		m_holes.pop_back();
+
+		return pos;
+	}
+
+	/*!
+		Remove the first element of the specificed list of ordered
+		positions and returns a copy of that element.
+
+		\param list is the list of ordered positions that will be modified
+		\result The previous first element of the list.
+	*/
+	size_type positions_pop_front(std::deque<size_type> &list)
+	{
+		size_type pos = list.front();
+		list.pop_front();
+
+		return pos;
 	}
 
 	/*!
