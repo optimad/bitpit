@@ -479,9 +479,9 @@ LocalTree::coarse(u32vector & mapidx){
 	if (m_ghosts.size() && nocts > 0){
 		if (m_ghosts[idx2_gh].buildFather() == m_octants[nocts-1].buildFather()){
 			father = m_ghosts[idx2_gh].buildFather();
-//			for (uint32_t iii=0; iii<17; iii++){
-//				father.m_info[iii] = false;
-//			}
+			for (uint32_t iii=0; iii<17; iii++){
+				father.m_info[iii] = false;
+			}
 			markerfather = m_ghosts[idx2_gh].getMarker()+1;
 			nbro = 0;
 			idx = idx2_gh;
@@ -494,7 +494,7 @@ LocalTree::coarse(u32vector & mapidx){
 				for (uint32_t iii=0; iii<m_global.m_nfaces; iii++){
 					father.m_info[iii] = father.m_info[iii] || m_ghosts[idx].m_info[iii];
 				}
-//				father.m_info[14] = father.m_info[14] || m_ghosts[idx].m_info[14];
+				father.m_info[14] = father.m_info[14] || m_ghosts[idx].m_info[14];
 				idx++;
 				if(idx == m_sizeGhosts){
 					break;

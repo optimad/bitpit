@@ -131,6 +131,12 @@ int main(int argc, char *argv[]) {
 			pablo13.updateConnectivity();
 			pablo13.write("Pablo13_iter"+to_string(static_cast<unsigned long long>(iter)));
 		}
+
+		/**<Coarse globally one level and write the para_tree.*/
+		pablo13.adaptGlobalCoarse();
+		pablo13.updateConnectivity();
+		pablo13.write("Pablo13_iter"+to_string(static_cast<unsigned long long>(iter)));
+
 #if ENABLE_MPI==1
 	}
 	MPI::Finalize();

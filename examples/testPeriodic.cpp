@@ -79,7 +79,8 @@ int main(int argc, char *argv[]) {
 		/**<Coarse globally one level and write the para_tree.*/
 		pabloP.adaptGlobalCoarse();
 		pabloP.updateConnectivity();
-		pabloP.updateGhostsConnectivity();
+//		pabloP.updateGhostsConnectivity();
+		pabloP.clearGhostsConnectivity();
 		pabloP.write("PabloPeriodic_iter"+to_string(static_cast<unsigned long long>(iter)));
 
 		exit(0);
