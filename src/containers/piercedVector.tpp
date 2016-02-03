@@ -324,8 +324,13 @@ class PiercedVector
 private:
 	enum FillType {
 		FILL_APPEND,
-		FILL_FIRST
+		FILL_FRONT,
+		FILL_BACK,
+		FILL_BEFORE,
+		FILL_AFTER,
+		FILL_POSITION
 	};
+
 
 	/*!
 		Type size_type is an unsigned integral type.
@@ -606,7 +611,23 @@ public:
 	template <class... Args>
 	iterator emplace(Args&&... args)
 	{
-		return _emplace(FILL_FIRST, std::forward<Args>(args)...);
+		return _emplace(FILL_FRONT, 0, std::forward<Args>(args)...);
+	}
+
+	/*!
+		The container is extended by inserting a new element. The element
+		will have a position that is between the element with the
+		specified reference id and the end of the container.
+
+		\param referenceId is the id of the element after which the
+		new element will be inserted
+		\param args the arguments forwarded to construct the new element
+		\result An iterator that points to the newly inserted element.
+	*/
+	template <class... Args>
+	iterator emplace_after(const id_type &referenceId, Args&&... args)
+	{
+		return _emplace(FILL_AFTER, get_pos_from_id(referenceId), std::forward<Args>(args)...);
 	}
 
 	/*!
@@ -619,7 +640,25 @@ public:
 	template <class... Args>
 	void emplace_back(Args&&... args)
 	{
-		_emplace(FILL_APPEND, std::forward<Args>(args)...);
+		_emplace(FILL_APPEND, 0, std::forward<Args>(args)...);
+	}
+
+	/*!
+		The container is extended by inserting a new element. This new
+		element is constructed in place using args as the arguments for
+		its construction. The element will have a position that is between
+		the beginning of the container and the element with the specified
+		reference id.
+
+		\param referenceId is the id of the element before which the
+		new element will be inserted
+		\param args the arguments forwarded to construct the new element
+		\result An iterator that points to the newly inserted element.
+	*/
+	template <class... Args>
+	iterator emplace_before(const id_type &referenceId, Args&&... args)
+	{
+		return _emplace(FILL_BEFORE, get_pos_from_id(referenceId), std::forward<Args>(args)...);
 	}
 
 	/*!
@@ -768,7 +807,39 @@ public:
 	*/
 	iterator insert(value_type &&value)
 	{
-		return _insert(FILL_FIRST, std::move(value));
+		return _insert(FILL_FRONT, 0, std::move(value));
+	}
+
+	/*!
+		The container is extended by inserting a new element. The element
+		will have a position that is between the element with the
+		specified reference id and the end of the container.
+
+		\param value is the value to be copied (or moved) to the
+		inserted element
+		\param referenceId is the id of the element after which the
+		new element will be inserted
+		\result An iterator that points to the newly inserted element.
+	*/
+	iterator insert_after(const id_type &referenceId, value_type &&value)
+	{
+		return _insert(FILL_AFTER, get_pos_from_id(referenceId), std::move(value));
+	}
+
+	/*!
+		The container is extended by inserting a new element. The element
+		will have a position that is between the beginning of the
+		container and the element with the specified reference id.
+
+		\param value is the value to be copied (or moved) to the
+		inserted element
+		\param referenceId is the id of the element before which the
+		new element will be inserted
+		\result An iterator that points to the newly inserted element.
+	*/
+	iterator insert_before(const id_type &referenceId, value_type &&value)
+	{
+		return _insert(FILL_BEFORE, get_pos_from_id(referenceId), std::move(value));
 	}
 
 	/*!
@@ -825,7 +896,7 @@ public:
 	*/
 	iterator push_back(value_type &&value)
 	{
-		return _insert(FILL_APPEND, std::move(value));
+		return _insert(FILL_APPEND, 0, std::move(value));
 	}
 
 	/*!
@@ -926,7 +997,29 @@ public:
 	*/
 	iterator reclaim(const id_type &id)
 	{
-		return _reclaim(FILL_FIRST, id);
+		return _reclaim(FILL_FRONT, 0, id);
+	}
+
+	/*!
+		Gets an element marked as empty and assignes to it the specified
+		id. The element will have a position that is between the element
+		with the specified reference id and the end of the container.
+		Except for setting the id, the element is not modified. Therefore
+		it will still contain the data of the element that was previously
+		occupying the position or it will be empty if there was no empty
+		position and a new element has been created.
+		The container is extended by inserting a new element. The element
+		will be inserted .
+
+		\param value is the value to be copied (or moved) to the
+		inserted element
+		\param referenceId is the id of the element after which an
+		empty position will be reclaimed
+		\result An iterator that points to the newly inserted element.
+	*/
+	iterator insert_after(const id_type &id, const id_type &referenceId)
+	{
+		return _reclaim(FILL_AFTER, get_pos_from_id(referenceId), id);
 	}
 
 	/*!
@@ -942,7 +1035,29 @@ public:
 	*/
 	iterator reclaim_back(const id_type &id)
 	{
-		return _reclaim(FILL_APPEND, id);
+		return _reclaim(FILL_APPEND, 0, id);
+	}
+
+	/*!
+		Gets an element marked as empty and assignes to it the specified
+		id. The element will have a position that is between the begin
+		of the container and the specified reference id.
+		Except for setting the id, the element is not modified. Therefore
+		it will still contain the data of the element that was previously
+		occupying the position or it will be empty if there was no empty
+		position and a new element has been created.
+		The container is extended by inserting a new element. The element
+		will be inserted .
+
+		\param value is the value to be copied (or moved) to the
+		inserted element
+		\param referenceId is the id of the element before which an
+		empty position will be reclaimed
+		\result An iterator that points to the newly inserted element.
+	*/
+	iterator insert_before(const id_type &id, const id_type &referenceId)
+	{
+		return _reclaim(FILL_BEFORE, get_pos_from_id(referenceId), id);
 	}
 
 	/*!
@@ -1421,10 +1536,10 @@ private:
 		\result An iterator that points to the newly inserted element.
 	*/
 	template <class... Args>
-	iterator _emplace(FillType fillType, Args&&... args)
+	iterator _emplace(const FillType &fillType, const size_t &referencePos, Args&&... args)
 	{
 		// Position of the element
-		size_type pos = fill_pos(fillType);
+		size_type pos = fill_pos(fillType, referencePos);
 
 		// Insert the element
 		m_v[pos] = T(std::forward<Args>(args)...);
@@ -1494,10 +1609,10 @@ private:
 		        element.
 
 	*/
-	iterator _insert(FillType fillType, value_type &&value)
+	iterator _insert(const FillType &fillType, const size_t &referencePos, value_type &&value)
 	{
 		// Position of the element
-		size_type pos = fill_pos(fillType);
+		size_type pos = fill_pos(fillType, referencePos);
 
 		// Insert the element
 		m_v[pos] = std::move(value);
@@ -1525,10 +1640,10 @@ private:
 		\param id is the id that will be assigned to the element
 		\result An iterator that points to the the reclaimed element.
 	*/
-	iterator _reclaim(FillType fillType, const id_type &id)
+	iterator _reclaim(const FillType &fillType, const size_t &referencePos, const id_type &id)
 	{
 		// Position of the element
-		size_type pos = fill_pos(fillType);
+		size_type pos = fill_pos(fillType, referencePos);
 
 		// Set the id of the element
 		m_v[pos].set_id(id);
@@ -1590,33 +1705,88 @@ private:
 		\param fillType is the fill-pattern that will be used to
 		identify the position
 	*/
-	size_type fill_pos(FillType fillType)
+	size_type fill_pos(FillType fillType, const size_type &referencePos)
 	{
-		// If the container is empty or if there are no holes nor
-		// pending deletes, elements can only be appened at the
-		// end of the vector.
-		if (fillType == FILL_FIRST) {
-			if (empty() || (m_holes.empty() && m_pending_deletes.empty())) {
-				fillType = FILL_APPEND;
-			}
+		// If the container is empty, all fills are of type append
+		if (fillType != FILL_APPEND && empty()) {
+			fillType = FILL_APPEND;
 		}
 
-		// Find the position
-		size_type pos;
+		// Appending to the end of the conatainer is easy: extend the
+		// container and update the last used position. If there
+		// are pending deletes and the filled position is among these
+		// deletes, it is also necessary to remove the filled position
+		// from the list of pending deletes.
 		if (fillType == FILL_APPEND) {
 			if (!empty()) {
 				m_last_pos++;
 			}
 			storage_resize(m_last_pos + 1);
 
-			pos = m_last_pos;
+			size_type pos = m_last_pos;
 			if (!m_pending_deletes.empty()) {
 				positions_delete(m_pending_deletes, pos);
 			}
-		} else if (fillType == FILL_FIRST) {
-			if (m_pending_deletes.empty()) {
-				// Get first hole
-				pos = positions_pop_front(m_holes);
+
+			return pos;
+		}
+
+		// If we have to insert a new element at the specified position
+		// we have to extend the container and shit all the elements
+		// after the specified position. We need also to update the
+		// holes and pending deletes.
+		if (fillType == FILL_POSITION) {
+			// Extend the container
+			fill_pos(FILL_APPEND, 0);
+
+			// Shit the elements
+			for (size_t i = m_last_pos; i > referencePos; --i) {
+				m_v[i] = std::move(m_v[i - 1]);
+				link_id(m_v[i].get_id(), i, false);
+			}
+
+			// Update the holes
+			if (!m_holes.empty()) {
+				std::deque<size_type>::iterator itr = upper_bound(m_holes.begin(), m_holes.end(), referencePos);
+				while (itr != m_holes.end()) {
+					(*itr)++;
+					itr++;
+				}
+			}
+
+			// Update the pending deletes
+			if (!m_pending_deletes.empty()) {
+				std::deque<size_type>::iterator itr = upper_bound(m_pending_deletes.begin(), m_pending_deletes.end(), referencePos);
+				while (itr != m_pending_deletes.end()) {
+					(*itr)++;
+					itr++;
+				}
+			}
+
+			return referencePos;
+		}
+
+		// Insert at the front or at the back
+		if (fillType == FILL_FRONT || fillType == FILL_BACK) {
+			// If there are pending deletes we can just pop a position
+			// from the list of pending deletetes.
+			if (!m_pending_deletes.empty()) {
+				if (fillType == FILL_FRONT) {
+					return positions_pop_front(m_pending_deletes);
+				} else if (fillType == FILL_BACK) {
+					return positions_pop_back(m_pending_deletes);
+				}
+			}
+
+			// If there are holes we can fill a hole.
+			if (!m_holes.empty()) {
+				// Pop a hole
+				size_type pos;
+				if (fillType == FILL_FRONT) {
+					pos = positions_pop_front(m_holes);
+				} else if (fillType == FILL_BACK) {
+					pos = positions_pop_back(m_holes);
+				}
 
 				// Update first and last counters
 				if (m_last_pos < pos) {
@@ -1631,14 +1801,46 @@ private:
 				if (pos > 0 && is_pos_empty(pos - 1)) {
 					update_empty_pos_id(pos - 1);
 				}
-			} else {
-				pos = positions_pop_front(m_pending_deletes);
+
+				// Return the position filled
+				return pos;
 			}
 
-			assert(pos < m_v.size() - 1);
+			// There are no holes nor pending delete: use an append fill.
+			return fill_pos(FILL_APPEND, 0);
 		}
 
-		return pos;
+		// Insert after specified position
+		if (fillType == FILL_AFTER) {
+			// Check if we can fill a pending delete
+			if (!m_pending_deletes.empty() && m_pending_deletes.back() > referencePos) {
+				return fill_pos(FILL_BACK, 0);
+			}
+
+			// Check if we can fill a hole
+			if (!m_holes.empty() && m_holes.back() > referencePos) {
+				return fill_pos(FILL_BACK, 0);
+			}
+
+			// We have to append the element at the end of the vector
+			return fill_pos(FILL_APPEND, 0);
+		}
+
+		// Insert before specified position
+		if (fillType == FILL_BEFORE) {
+			// Check if we can fill a pending delete
+			if (!m_pending_deletes.empty() && m_pending_deletes.back() < referencePos) {
+				return fill_pos(FILL_FRONT, 0);
+			}
+
+			// Check if we can fill a hole
+			if (!m_holes.empty() && m_holes.back() < referencePos) {
+				return fill_pos(FILL_FRONT, 0);
+			}
+
+			// We have to insert the element at the specified position
+			return fill_pos(FILL_POSITION, referencePos);
+		}
 	}
 
 	/*!
