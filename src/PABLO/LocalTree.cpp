@@ -60,6 +60,7 @@ LocalTree::LocalTree(int8_t maxlevel, uint8_t dim){
 	m_sizeGhosts = 0;
 	m_localMaxDepth = 0;
 	m_balanceCodim = 1;
+	m_periodic.resize(m_dim*2);
 };
 
 /*!Default destructor.
@@ -836,6 +837,7 @@ LocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, v
 		// Boundary Face
 		return;
 		}
+
 
 	}
 	else{
@@ -4411,7 +4413,7 @@ LocalTree::findMorton(uint64_t Morton){
 			}
 		}
 	}
-	return nocts;
+	return nocts-1;
 };
 
 // =================================================================================== //
