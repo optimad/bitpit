@@ -202,6 +202,7 @@ set(CONTAINERS_DEPS "operators")
 set(IO_DEPS "operators")
 set(LA_DEPS "operators")
 set(SA_DEPS "operators")
+set(UCARTMESH_DEPS "IO")
 
 #------------------------------------------------------------------------------------#
 # Check of the dependencies
