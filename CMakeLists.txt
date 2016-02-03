@@ -58,6 +58,18 @@ function(isModuledEnabled MODULE_NAME ENABLED)
 	endif ()
 endfunction()
 
+function(areModulesEnabled MODULE_LIST ENABLED)
+	foreach (MODULE_NAME IN LISTS MODULE_LIST)
+		isModuledEnabled(${MODULE_NAME} MODULE_ENABLED)
+		if (NOT MODULE_ENABLED)
+			set(${ENABLED} "FALSE" PARENT_SCOPE)
+			return()
+		endif()
+	endforeach ()
+
+	set(${ENABLED} "TRUE" PARENT_SCOPE)
+endfunction()
+
 function(enableModule MODULE_NAME ENABLED)
 	set (EXTRA_ARGUMENTS ${ARGN})
 	list(LENGTH EXTRA_ARGUMENTS EXTRA_ARGUMENT_COUNT)

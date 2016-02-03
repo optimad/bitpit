@@ -25,9 +25,16 @@
 #Specify the version being used as well as the language
 cmake_minimum_required(VERSION 2.8)
 
-# Add a target to generate the examples
-option(BUILD_EXAMPLES "Create and install the examples" OFF)
+# Examples can be compiled only if all modules are enabled
+areModulesEnabled("${BITPIT_MODULE_LIST}" ALL_MODULES_ENABLED)
+if (ALL_MODULES_ENABLED)
+	option(BUILD_EXAMPLES "Create and install the examples" OFF)
+else ()
+	unset(BUILD_EXAMPLES CACHE)
+	return()
+endif ()
 
+# Add a target to generate the examples
 include_directories("${PROJECT_SOURCE_DIR}/src/common")
 include_directories("${PROJECT_SOURCE_DIR}/src/operators")
 include_directories("${PROJECT_SOURCE_DIR}/src/PABLO")
