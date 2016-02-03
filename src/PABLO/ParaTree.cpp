@@ -86,6 +86,7 @@ ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, string logfile ) : m_dim(uint8_
 		m_partitionLastDesc[p] = lastDescMorton;
 		m_partitionLastDesc[p] = firstDescMorton;
 	}
+	m_periodic.resize(m_global.m_nfaces, false);
 	// Write info log
 	m_log.writeLog("---------------------------------------------");
 	m_log.writeLog("- PABLO PArallel Balanced Linear Octree -");
@@ -187,6 +188,7 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 #if ENABLE_MPI==1
 	setPboundGhosts();
 #endif
+	m_periodic.resize(m_global.m_nfaces, false);
 	// Write info log
 	m_log.writeLog("---------------------------------------------");
 	m_log.writeLog("- PABLO PArallel Balanced Linear Octree -");
@@ -539,12 +541,38 @@ int8_t
 	return m_global.m_edgeCoeffs;
 };
 
+/*! Get the periodic condition of the boundaries.
+ * \return Vector with the periodic conditions (true/false) of each boundary.
+ */
+bvector
+ParaTree::getPeriodic(){
+	return m_periodic;
+};
+
+/*! Get the periodic condition of a target boundary.
+ * \param[in] i Index of the target boundary face.
+ * \return Boolean with the periodic conditions (true/false) of the target boundary.
+ */
+bool
+ParaTree::getPeriodic(uint8_t i){
+	return m_periodic[i];
+};
+
 /*!Set the maximum refinement level allowed for the octree.
  * \param[in] maxlevel Maximum refinement level.
  */
 void
 ParaTree::setMaxLevel(int8_t maxlevel){
 	m_global.m_maxLevel = maxlevel;
+};
+
+/*! Set the periodic condition of a target boundary (implicitly set the periodic face).
+ * \param[in] i Index of the target boundary face (even the opp face will be set).
+ */
+void
+ParaTree::setPeriodic(uint8_t i){
+	m_periodic[i] = true;
+	m_periodic[m_global.m_oppFace[i]] = true;
 };
 
 // =================================================================================== //
@@ -4093,7 +4121,50 @@ ParaTree::balance21(bool const first){
 	}
 
 #endif /* NOMPI */
-}
+};
+
+/*!Compute and distribute the periodic octants over the processes
+ *
+ */
+void
+ParaTree::setPeriodicsGhosts(){
+	octvector::iterator it, itend;
+	itend = m_octree.m_octants.end();
+	m_octree.m_periodics.clear();
+	bool condition;
+
+	if (m_serial){
+
+		for (it = m_octree.m_octants.begin(); it != itend; it++){
+			condition = false;
+			for (uint8_t iface = 0; iface < m_global.m_nfaces; iface++){
+					condition = condition || it->getPbound(iface)*m_periodic[iface];
+			}
+			if (condition) m_octree.m_periodics.push_back((*it));
+		}
+
+	}
+	else{
+
+		for (it = m_octree.m_octants.begin(); it != itend; it++){
+			condition = false;
+			for (uint8_t iface = 0; iface < m_global.m_nfaces; iface++){
+					condition = condition || it->getPbound(iface)*m_periodic[iface];
+			}
+			Octant virtualOct = it->computeVirtualMorton(i,m_maxDepth,virtualNeighborsSize);
+
+
+
+
+			if (condition) m_octree.m_periodics.push_back((*it));
+		}
+
+
+	}
+
+
+
+};
 
 // =================================================================================== //
 // TESTING OUTPUT METHODS												    			   //

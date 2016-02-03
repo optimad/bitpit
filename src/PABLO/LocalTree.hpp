@@ -97,6 +97,8 @@ public:
 private:
 	octvector				m_octants;				/**< Local vector of octants ordered with Morton Number */
 	octvector				m_ghosts;				/**< Local vector of ghost octants ordered with Morton Number */
+	octvector				m_periodics;			/**< Local vector of local periodic octants ordered with Morton Number */
+	octvector				m_periodicsGhosts;		/**< Local vector of ghost periodic octants ordered with Morton Number */
 	intervector				m_intersections;		/**< Local vector of intersections */
 	u64vector 				m_globalIdxGhosts;		/**< Global index of the ghost octants (size = size_ghosts) */
 	Octant 					m_firstDesc;			/**< First (Morton order) most refined octant possible in local partition */

@@ -116,6 +116,9 @@ private:
 	Map 					m_trans;						/**<Transformation map from m_logical to physical domain*/
 	uint8_t					m_dim;							/**<Space dimension of the octree object (2D/3D).*/
 
+	//boundary conditions members
+	bvector 				m_periodic;						/**<Boolvector: i-th element is true if the i-th boundary face is a periodic interface.*/
+
 	//info member
 	uint64_t				m_status;						/**<Label of actual m_status of octree (incremental after an adpat
 															with at least one modifyed element).*/
@@ -184,7 +187,10 @@ public:
 	uint8_t 	(*getEdgeface())[2];
 	int8_t 		(*getNodecoeffs())[3];
 	int8_t 		(*getEdgecoeffs())[3];
+	bvector		getPeriodic();
+	bool		getPeriodic(uint8_t i);
 	void 		setMaxLevel(int8_t maxlevel);
+	void		setPeriodic(uint8_t i);
 
 	// =================================================================================== //
 	// INDEX BASED METHODS																   //
@@ -390,6 +396,7 @@ private:
 	void 		updateAfterCoarse();
 	void 		updateAfterCoarse(u32vector & mapidx);
 	void 		balance21(bool const first);
+	void		setPeriodicsGhosts();
 
 	// =================================================================================== //
 	// TESTING OUTPUT METHODS												    			   //
