@@ -1482,8 +1482,8 @@ array<int64_t,3> Octant::getPeriodicCoord(uint8_t iface){
 	coord[0] = this->m_x;
 	coord[1] = this->m_y;
 	coord[2] = this->m_z;
-	uint32_t dh = this->getSize();
-	uint32_t maxLength = uint32_t(1<<sm_maxLevel);
+	int64_t dh = this->getSize();
+	int64_t maxLength = int64_t(1<<sm_maxLevel);
 
 	switch (iface) {
 	case 0 :

@@ -786,7 +786,7 @@ LocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, v
 				uint8_t leveltry = m_octants[idxtry].getLevel();
 				while(Mortontry < Mortonlast && idxtry < noctants){
 					for (int idim=0; idim<m_dim; idim++){
-						Dx[idim] 		= int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]);
+						Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
 						coord1[idim] 	= coord[idim] + size;
 						coordtry1[idim] = coordtry[idim] + m_octants[idxtry].getSize();
@@ -918,7 +918,7 @@ LocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, v
 						uint8_t leveltry = m_octants[idxtry].getLevel();
 						while(Mortontry < Mortonlast && idxtry < m_sizeGhosts){
 							for (int idim=0; idim<m_dim; idim++){
-								Dx[idim] 		= int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]);
+								Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 								Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_ghosts[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
 								coord1[idim] 	= coord[idim] + size;
 								coordtry1[idim] = coordtry[idim] + m_ghosts[idxtry].getSize();
@@ -1035,7 +1035,7 @@ LocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, v
 							uint8_t leveltry = m_octants[idxtry].getLevel();
 							while(Mortontry < Mortonlast && idxtry < noctants){
 								for (int idim=0; idim<m_dim; idim++){
-									Dx[idim] 		= int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]);
+									Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 									Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
 									coord1[idim] 	= coord[idim] + size;
 									coordtry1[idim] = coordtry[idim] + m_octants[idxtry].getSize();
@@ -1195,7 +1195,7 @@ LocalTree::findNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours, ve
 				uint8_t leveltry = m_octants[idxtry].getLevel();
 				while(Mortontry < Mortonlast && idxtry < noctants){
 					for (int idim=0; idim<m_dim; idim++){
-						Dx[idim] 		= int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]);
+						Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
 						coord1[idim] 	= coord[idim] + size;
 						coordtry1[idim] = coordtry[idim] + m_octants[idxtry].getSize();
@@ -1327,7 +1327,7 @@ LocalTree::findNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours, ve
 						uint8_t leveltry = m_octants[idxtry].getLevel();
 						while(Mortontry < Mortonlast && idxtry < m_sizeGhosts){
 							for (int idim=0; idim<m_dim; idim++){
-								Dx[idim] 		= int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]);
+								Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 								Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_ghosts[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
 								coord1[idim] 	= coord[idim] + size;
 								coordtry1[idim] = coordtry[idim] + m_ghosts[idxtry].getSize();
@@ -1442,7 +1442,7 @@ LocalTree::findNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours, ve
 							uint8_t leveltry = m_octants[idxtry].getLevel();
 							while(Mortontry < Mortonlast && idxtry < noctants){
 								for (int idim=0; idim<m_dim; idim++){
-									Dx[idim] 		= int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]);
+									Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 									Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
 									coord1[idim] 	= coord[idim] + size;
 									coordtry1[idim] = coordtry[idim] + m_octants[idxtry].getSize();
@@ -1535,7 +1535,7 @@ LocalTree::findGhostNeighbours(uint32_t const idx, uint8_t iface, u32vector & ne
 			int32_t jump = getNumOctants()/2;
 			idxtry = uint32_t(getNumOctants()/2);
 			Mortontry = m_octants[idxtry].computeMorton();
-			jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
+//			jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
 			while(abs(jump) > 0){
 				Mortontry = m_octants[idxtry].computeMorton();
 				jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
@@ -1600,7 +1600,7 @@ LocalTree::findGhostNeighbours(uint32_t const idx, uint8_t iface, u32vector & ne
 				uint8_t leveltry = m_octants[idxtry].getLevel();
 				while(Mortontry < Mortonlast && idxtry < noctants){
 					for (int idim=0; idim<m_dim; idim++){
-						Dx[idim] 		= int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]);
+						Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
 						coord1[idim] 	= coord[idim] + size;
 						coordtry1[idim] = coordtry[idim] + m_octants[idxtry].getSize();
@@ -1648,7 +1648,6 @@ LocalTree::findGhostNeighbours(uint32_t const idx, uint8_t iface, u32vector & ne
 void
 LocalTree::findPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours, vector<bool> & isghost){
 
-	cout << "IN PERIODIC!" << endl;
 	uint64_t  Morton, Mortontry;
 	uint32_t  noctants = getNumOctants();
 	uint32_t idxtry;
@@ -1678,7 +1677,7 @@ LocalTree::findPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighb
 		// ---> can i search only before or after idx in octants
 		int32_t jump = int32_t((noctants)/2+1);
 		idxtry = uint32_t(jump);
-		Mortontry = oct->computeMorton();
+		Mortontry = m_octants[idxtry].computeMorton();
 		while(abs(jump) > 0){
 			Mortontry = m_octants[idxtry].computeMorton();
 			jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
@@ -1723,6 +1722,7 @@ LocalTree::findPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighb
 					Mortontry = m_octants[idxtry].computeMorton();
 				}
 			}
+
 			if(Mortontry == Morton && m_octants[idxtry].m_level == oct->m_level){
 				//Found neighbour of same size
 				isghost.push_back(false);
@@ -1743,8 +1743,8 @@ LocalTree::findPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighb
 			uint8_t leveltry = m_octants[idxtry].getLevel();
 			while(Mortontry < Mortonlast && idxtry < noctants){
 				for (int idim=0; idim<m_dim; idim++){
-					Dx[idim] 		= int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]);
-					Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
+					Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
+					Dxstar[idim]	= int32_t(int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size);
 					coord1[idim] 	= coord[idim] + size;
 					coordtry1[idim] = coordtry[idim] + m_octants[idxtry].getSize();
 				}
@@ -1854,15 +1854,15 @@ LocalTree::findPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighb
 						Mortontry = m_ghosts[idxtry].computeMorton();
 						int32_t Dx[3] = {0,0,0};
 						int32_t Dxstar[3] = {0,0,0};
-						u32array3 coord = oct->getCoord();
+						array<int64_t,3> coord = oct->getPeriodicCoord(iface);
 						u32array3 coordtry = m_ghosts[idxtry].getCoord();
-						u32array3 coord1 = {1,1,1};
+						array<int64_t,3> coord1 = {1,1,1};
 						u32array3 coordtry1 = {1,1,1};
 						uint8_t level = oct->m_level;
 						uint8_t leveltry = m_octants[idxtry].getLevel();
 						while(Mortontry < Mortonlast && idxtry < m_sizeGhosts){
 							for (int idim=0; idim<m_dim; idim++){
-								Dx[idim] 		= int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]);
+								Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 								Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_ghosts[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
 								coord1[idim] 	= coord[idim] + size;
 								coordtry1[idim] = coordtry[idim] + m_ghosts[idxtry].getSize();
@@ -1902,11 +1902,8 @@ LocalTree::findPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighb
 				if (lengthneigh < oct->getArea()){
 					// Search in octants
 
-					// Check if octants face is a boundary
-					if (oct->m_info[iface] == false){
-
 						//Build Morton number of virtual neigh of same size
-						Octant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size), m_global.m_maxLevel);
+						Octant samesizeoct = oct->computePeriodicOctant(iface);
 						Morton = samesizeoct.computeMorton();
 						// Search morton in octants
 						// If a even face morton is lower than morton of oct, if odd higher
@@ -1977,7 +1974,7 @@ LocalTree::findPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighb
 							uint8_t leveltry = m_octants[idxtry].getLevel();
 							while(Mortontry < Mortonlast && idxtry < noctants){
 								for (int idim=0; idim<m_dim; idim++){
-									Dx[idim] 		= int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]);
+									Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 									Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
 									coord1[idim] 	= coord[idim] + size;
 									coordtry1[idim] = coordtry[idim] + m_octants[idxtry].getSize();
@@ -2008,7 +2005,6 @@ LocalTree::findPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighb
 							}
 							return;
 						}
-					}
 				}
 				return;
 			}
@@ -2049,8 +2045,9 @@ LocalTree::findGhostPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & n
 		int32_t jump = getNumOctants()/2;
 		idxtry = uint32_t(getNumOctants()/2);
 		Mortontry = m_octants[idxtry].computeMorton();
-		jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
+//		jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
 		while(abs(jump) > 0){
+
 			Mortontry = m_octants[idxtry].computeMorton();
 			jump = ((Mortontry<Morton)-(Mortontry>Morton))*abs(jump)/2;
 			idxtry += jump;
@@ -2107,6 +2104,7 @@ LocalTree::findGhostPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & n
 			int32_t Dx[3] = {0,0,0};
 			int32_t Dxstar[3] = {0,0,0};
 			array<int64_t,3> coord = oct->getPeriodicCoord(iface);
+
 			u32array3 coordtry = m_octants[idxtry].getCoord();
 			array<int64_t,3> coord1 = {1,1,1};
 			u32array3 coordtry1 = {1,1,1};
@@ -2114,7 +2112,7 @@ LocalTree::findGhostPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & n
 			uint8_t leveltry = m_octants[idxtry].getLevel();
 			while(Mortontry < Mortonlast && idxtry < noctants){
 				for (int idim=0; idim<m_dim; idim++){
-					Dx[idim] 		= int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]);
+					Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 					Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
 					coord1[idim] 	= coord[idim] + size;
 					coordtry1[idim] = coordtry[idim] + m_octants[idxtry].getSize();
@@ -2541,6 +2539,7 @@ LocalTree::localBalance(bool doInterior){
 							}
 						}
 //					}
+						targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
 				}
 
 				if (Bedge){
@@ -2576,6 +2575,7 @@ LocalTree::localBalance(bool doInterior){
 								}
 							}
 						//}
+							targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
 					}
 				}
 
@@ -2612,6 +2612,7 @@ LocalTree::localBalance(bool doInterior){
 								}
 							}
 						//}
+							targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
 					}
 				}
 
@@ -2641,6 +2642,7 @@ LocalTree::localBalance(bool doInterior){
 							}
 						}
 					}
+					targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 				}
 
 				if (Bedge){
@@ -2659,6 +2661,7 @@ LocalTree::localBalance(bool doInterior){
 								}
 							}
 						//}
+							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 					}
 				}
 
@@ -2678,6 +2681,7 @@ LocalTree::localBalance(bool doInterior){
 								}
 							}
 						//}
+							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 					}
 				}
 
@@ -2720,6 +2724,7 @@ LocalTree::localBalance(bool doInterior){
 								}
 							}
 						}
+						targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
 					}
 
 					if (Bedge){
@@ -2747,6 +2752,7 @@ LocalTree::localBalance(bool doInterior){
 									}
 								}
 							//}
+								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
 						}
 					}
 
@@ -2775,6 +2781,7 @@ LocalTree::localBalance(bool doInterior){
 									}
 								}
 							//}
+								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
 						}
 					}
 
@@ -2813,6 +2820,7 @@ LocalTree::localBalance(bool doInterior){
 							}
 						}
 					}
+					targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 				}
 
 				if (Bedge){
@@ -2831,6 +2839,7 @@ LocalTree::localBalance(bool doInterior){
 								}
 							}
 						//}
+							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 					}
 				}
 
@@ -2850,6 +2859,7 @@ LocalTree::localBalance(bool doInterior){
 								}
 							}
 						//}
+							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 					}
 				}
 
@@ -2892,6 +2902,7 @@ LocalTree::localBalance(bool doInterior){
 								}
 							}
 						}
+						targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
 					}
 
 					if (Bedge){
@@ -2919,6 +2930,7 @@ LocalTree::localBalance(bool doInterior){
 									}
 								}
 							//}
+								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
 						}
 					}
 
@@ -2947,6 +2959,7 @@ LocalTree::localBalance(bool doInterior){
 									}
 								}
 							//}
+								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
 						}
 					}
 
@@ -3034,6 +3047,7 @@ LocalTree::localBalanceAll(bool doInterior){
 							}
 						}
 //					}
+						targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
 				}
 
 				if (Bedge){
@@ -3069,6 +3083,7 @@ LocalTree::localBalanceAll(bool doInterior){
 								}
 							}
 						//}
+							targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
 					}
 				}
 
@@ -3105,6 +3120,7 @@ LocalTree::localBalanceAll(bool doInterior){
 								}
 							}
 						//}
+							targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
 					}
 				}
 
@@ -3134,6 +3150,7 @@ LocalTree::localBalanceAll(bool doInterior){
 							}
 						}
 					}
+					targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 				}
 
 				if (Bedge){
@@ -3152,6 +3169,7 @@ LocalTree::localBalanceAll(bool doInterior){
 								}
 							}
 						//}
+							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 					}
 				}
 
@@ -3171,6 +3189,7 @@ LocalTree::localBalanceAll(bool doInterior){
 								}
 							}
 						//}
+							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 					}
 				}
 
@@ -3213,6 +3232,7 @@ LocalTree::localBalanceAll(bool doInterior){
 								}
 							}
 						}
+						targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
 					}
 
 					if (Bedge){
@@ -3240,6 +3260,7 @@ LocalTree::localBalanceAll(bool doInterior){
 									}
 								}
 							//}
+								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
 						}
 					}
 
@@ -3268,6 +3289,7 @@ LocalTree::localBalanceAll(bool doInterior){
 									}
 								}
 							//}
+								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
 						}
 					}
 
@@ -3306,6 +3328,7 @@ LocalTree::localBalanceAll(bool doInterior){
 							}
 						}
 					}
+					targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 				}
 
 				if (Bedge){
@@ -3324,6 +3347,7 @@ LocalTree::localBalanceAll(bool doInterior){
 								}
 							}
 						//}
+							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 					}
 				}
 
@@ -3343,6 +3367,7 @@ LocalTree::localBalanceAll(bool doInterior){
 								}
 							}
 						//}
+							targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 					}
 				}
 
@@ -3385,6 +3410,7 @@ LocalTree::localBalanceAll(bool doInterior){
 								}
 							}
 						}
+						targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
 					}
 
 					if (Bedge){
@@ -3412,6 +3438,7 @@ LocalTree::localBalanceAll(bool doInterior){
 									}
 								}
 							//}
+								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
 						}
 					}
 
@@ -3440,6 +3467,7 @@ LocalTree::localBalanceAll(bool doInterior){
 									}
 								}
 							//}
+								targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel()+m_octants[idx].getMarker()));
 						}
 					}
 
@@ -4920,61 +4948,6 @@ LocalTree::findGhostMorton(uint64_t Morton){
 		}
 	}
 	return nocts;
-};
-
-// =================================================================================== //
-
-bool
-LocalTree::checkPeriodics(){
-	// Local variables
-	u32vector		 	neigh;
-	uint32_t 			i, idx;
-	uint8_t				iface;
-	bvector		 		isghost;
-	bool				Pdone = false;
-	bool				Do = false;
-
-	octvector::iterator 	obegin, oend, it;
-	u32vector::iterator 	ibegin, iend, iit;
-
-	for (iface=0; iface<m_global.m_nfaces; iface++){
-		Do |= m_periodic[iface];
-	}
-
-	if (Do){
-		// Loop on the octants
-		obegin = m_octants.begin();
-		oend = m_octants.end();
-		idx = 0;
-		for (it=obegin; it!=oend; it++){
-			for (iface=0; iface<m_global.m_nfaces; iface++){
-				if (it->getBound(iface) && m_periodic[iface]){
-					findNeighbours(idx, iface, neigh, isghost);
-					if (neigh.size()==0) cout << " size 0 " << endl;
-					if (neigh.size()==0) cout << " idx " << idx << "/" << getNumOctants() << endl;
-					if (neigh.size()==0) cout << " pbound " << it->getPbound(iface) << endl;
-					if (neigh.size()==0) cout << " iface " << int(iface) << endl;
-					if (neigh.size()==0) exit(0);
-					if (isghost[0]){
-						if (it->getMarker()<0) cout << "idx " << idx << " coarsening "<<endl;
-						if (it->getMarker()<0) cout << "ghost marker " << int(m_ghosts[neigh[0]].getMarker()) <<endl;
-						if ((it->getLevel() + it->getMarker()) < (m_ghosts[neigh[0]].getLevel() + m_ghosts[neigh[0]].getMarker())){
-							it->setMarker(m_ghosts[neigh[0]].getLevel() + m_ghosts[neigh[0]].getMarker() - it->getLevel());
-							Pdone = true;
-						}
-					}
-					else{
-						if ((it->getLevel() + it->getMarker()) < (m_octants[neigh[0]].getLevel() + m_octants[neigh[0]].getMarker())){
-							it->setMarker(m_octants[neigh[0]].getLevel() + m_octants[neigh[0]].getMarker() - it->getLevel());
-							Pdone = true;
-						}
-					}
-				}
-			}
-			idx++;
-		}
-	}
-	return Pdone;
 };
 
 // =================================================================================== //

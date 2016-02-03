@@ -208,8 +208,6 @@ private:
 	uint32_t 	findMorton(uint64_t Morton);
 	uint32_t 	findGhostMorton(uint64_t Morton);
 
-	bool 		checkPeriodics();
-
 	void 		computeConnectivity();
 	void 		clearConnectivity();
 	void 		updateConnectivity();

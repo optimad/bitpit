@@ -71,7 +71,8 @@ int main(int argc, char *argv[]) {
 		pabloBB.setBalanceCodimension(1);
 		int idx = 0;
 		pabloBB.setBalance(idx,true);
-		pabloBB.setPeriodic(1);
+		pabloBB.setPeriodic(0);
+		pabloBB.setPeriodic(2);
 
 		/**<Refine globally four level and write the para_tree.*/
 		for (iter=1; iter<4; iter++){
@@ -88,8 +89,7 @@ int main(int argc, char *argv[]) {
 
 		/**<Define and initialize a set of bubbles and their trajectories.*/
 		time_t Time = time(NULL);
-//		srand(Time);
-		srand(100);
+		srand(Time);
 		if(pabloBB.getRank() == 0)
 			cout << "the seed = " << Time << endl;
 
@@ -228,11 +228,6 @@ int main(int argc, char *argv[]) {
 					}
 				}
 
-				/**<Update the connectivity and write the para_tree.*/
-				pabloBB.updateConnectivity();
-				pabloBB.updateGhostsConnectivity();
-				pabloBB.write("PabloBubble_iteradapt"+to_string(static_cast<unsigned long long>(itad)));
-
 				/**<Adapt the octree.*/
 				adapt = pabloBB.adapt();
 
@@ -253,8 +248,8 @@ int main(int argc, char *argv[]) {
 
 			/**<Update the connectivity and write the para_tree.*/
 			pabloBB.updateConnectivity();
-			pabloBB.updateGhostsConnectivity();
 			pabloBB.write("PabloBubble_iter"+to_string(static_cast<unsigned long long>(iter)));
+
 		}
 #if ENABLE_MPI==1
 	}
