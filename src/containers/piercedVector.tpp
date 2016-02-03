@@ -1380,6 +1380,71 @@ public:
 	}
 
 	/*!
+		Returns the id of the elmement before which there is the requested
+		number of other elements. If this element does not exist the
+		fallback value will be returned.
+
+		\param targetSize is the number of elements that needs to be
+		contained before the marker
+		\param fallback is the fallback value to be returned if the
+		marker cannot be found
+		\return The id of the elmement before which there is the requested
+		number of other elements. If this element does not exist the
+		fallback value will be returned.
+	*/
+	id_type get_size_marker(const size_t &targetSize, const id_type &fallback = SENTINEL_ID) const
+	{
+		// If the size is zero, we return the first element, if the target
+		// size is greater or equal the current container size we return
+		// the fallback value
+		if (targetSize == 0) {
+			return m_v[m_first_pos].get_id();
+		} else if (targetSize >= size()) {
+			return fallback;
+		}
+
+		// Iterate to find the position before wihch there is the
+		// requeste number of element.
+		std::deque<size_type>::const_iterator hole_itr    = m_holes.begin();
+		std::deque<size_type>::const_iterator pending_itr = m_pending_deletes.begin();
+
+		size_type nEmpties  = 0;
+		size_type markerPos = targetSize;
+		while (true) {
+			// Count the number of holes and pending deletes before the
+			// current marker position
+			if (hole_itr != m_holes.end()) {
+				std::deque<size_type>::const_iterator itr_previous = hole_itr;
+				hole_itr = std::upper_bound(hole_itr, m_holes.end(), markerPos);
+				nEmpties += std::distance(itr_previous, hole_itr);
+			}
+
+			if (pending_itr != m_pending_deletes.end()) {
+				std::deque<size_type>::const_iterator itr_previous = pending_itr;
+				pending_itr = std::upper_bound(pending_itr, m_pending_deletes.end(), markerPos);
+				nEmpties += std::distance(itr_previous, pending_itr);
+			}
+
+			// Get the marker size
+			//
+			// If we have reached the target size we can exit, otherwise
+			// we update the marker and we continue iterating
+			size_type markerSize = markerPos - nEmpties;
+			if (markerSize == targetSize) {
+				break;
+			} else {
+				markerPos += targetSize - markerSize;
+			}
+		}
+
+		if (markerPos > m_last_pos) {
+			return fallback;
+		} else {
+			return m_v[markerPos].get_id();
+		}
+	}
+
+	/*!
 		Assigns new contents to the vector, replacing its current
 		contents.
 
