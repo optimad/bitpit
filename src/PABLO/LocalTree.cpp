@@ -4907,7 +4907,7 @@ LocalTree::computeIntersections() {
 					counter++;
 				}
 				if (it->m_info[iface2+1]){
-					if (!(m_periodics[iface2+1])){
+					if (!(m_periodic[iface2+1])){
 						//Boundary intersection
 						intersection.m_dim = m_dim;
 						intersection.m_owners[0] = idx;

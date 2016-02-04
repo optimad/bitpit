@@ -455,4 +455,17 @@ uint32_t PabloUniform::getPointOwnerIdx(darray3 & point){
 	return ParaTree::getPointOwnerIdx(point);
 };
 
+
+// =================================================================================== //
+// OTHER PARATREE BASED METHODS												    	   //
+// =================================================================================== //
+darray3 PabloUniform::getNodeCoordinates(uint32_t inode){
+	darray3 node = ParaTree::getNodeCoordinates(inode);
+	for (int i=0; i<3; i++){
+		node[i] = m_origin[i] + m_L * node[i];
+	}
+	return node;
+}
+
+
 }

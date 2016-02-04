@@ -160,6 +160,11 @@ public:
 	Octant* getPointOwner(darray3 & point);
 	uint32_t getPointOwnerIdx(darray3 & point);
 
+	// =================================================================================== //
+	// OTHER PARATREE BASED METHODS												    	   //
+	// =================================================================================== //
+	darray3 	getNodeCoordinates(uint32_t inode);
+
 };
 
 }
