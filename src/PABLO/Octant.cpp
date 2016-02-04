@@ -1375,7 +1375,6 @@ uint64_t 		Octant::computeNodeVirtualMorton(uint8_t inode, const uint8_t & maxde
 
  };
 
-
 /*! Computes Morton index (without level) of same size
  * periodic neighbour of octant throught face iface.
  * \param[in] iface Local index of the face target.
@@ -1427,7 +1426,10 @@ uint64_t Octant::computePeriodicMorton(uint8_t iface){
 	}
 };
 
-
+/** Build a same size periodic octant of this octant throught face iface.
+ * \return Periodic octant of the same size (note: it is a stand-alone octant,
+ * may be not living in octree).
+ */
 Octant Octant::computePeriodicOctant(uint8_t iface){
 	Octant degOct(this->m_dim, this->m_level, this->m_x, this->m_y, this->m_z, sm_maxLevel);
 	uint32_t maxLength = uint32_t(1<<sm_maxLevel);
@@ -1477,6 +1479,12 @@ Octant Octant::computePeriodicOctant(uint8_t iface){
 
 };
 
+/*! Get the coordinates of the octant shifted throught face iface and
+ * near the opposite periodic boundary (i.e. the coordinates considering this octant
+ * as a ghost periodic octant).
+ * \param[in] iface Local index of the face target.
+ * \return Coordinates of octant considered as periodic ghost out of the logical domain.
+ */
 array<int64_t,3> Octant::getPeriodicCoord(uint8_t iface){
 	array<int64_t,3> coord;
 	coord[0] = this->m_x;

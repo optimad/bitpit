@@ -208,7 +208,6 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 #endif
 };
 
-
 // =============================================================================== //
 
 /*! Default Destructor of ParaTree.

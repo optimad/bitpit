@@ -224,6 +224,9 @@ LocalTree::setLastDesc(){
 	m_lastDesc = Octant(m_dim, m_global.m_maxLevel,x,y,z, m_global.m_maxLevel);
 };
 
+/*! Set the periodic condition of the boundaries.
+ * \param[in] periodic Vector with the periodic conditions (true/false) of each boundary.
+ */
 void
 LocalTree::setPeriodic(bvector & periodic){
 	m_periodic = periodic;
@@ -675,7 +678,7 @@ LocalTree::updateLocalMaxDepth(){
 
 // =================================================================================== //
 
-/*! Finds neighbours of idx-th octant through iface in vector m_octants.
+/*! Finds neighbours of idx-th octant through iface in vector m_octants or m_ghosts.
  * Returns a vector (empty if iface is a bound face) with the index of neighbours
  * in their structure (octants or ghosts) and sets isghost[i] = true if the
  * i-th neighbour is ghost in the local tree.
@@ -1086,7 +1089,7 @@ LocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, v
 
 // =================================================================================== //
 
-/*! Finds neighbours of octant through iface in vector m_octants.
+/*! Finds neighbours of octant through iface in vector m_octants or m_ghosts.
  * Returns a vector (empty if iface is a bound face) with the index of neighbours
  * in their structure (octants or ghosts) and sets isghost[i] = true if the
  * i-th neighbour is ghost in the local tree.
@@ -1645,6 +1648,14 @@ LocalTree::findGhostNeighbours(uint32_t const idx, uint8_t iface, u32vector & ne
 
 // =================================================================================== //
 
+/*! Finds neighbours of octant through a periodic iface in vector m_octants or m_ghosts.
+ * Returns a vector with the index of neighbours in their structure (octants or ghosts)
+ * and sets isghost[i] = true if the i-th neighbour is ghost in the local tree.
+ * \param[in] oct Pointer to the target local octant.
+ * \param[in] iface local index of the face.
+ * \param[out] neighbours Vector with the local indices of the neighbours
+ * \param[out] isghost Vector with the information about the identity of each neighbour (is the i-th neighours a ghost octant?).
+ */
 void
 LocalTree::findPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours, vector<bool> & isghost){
 
@@ -2013,6 +2024,12 @@ LocalTree::findPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighb
 
 // =================================================================================== //
 
+/*! Finds neighbours of idx-th ghost octant through a periodic iface in vector m_octants.
+ * Returns a vector with the index of neighbours in the structure octants.
+ * \param[in] oct Pointer to the target ghost octant.
+ * \param[in] iface local index of the face.
+ * \param[out] neighbours Vector with the local indices of the local octant neighbours.
+ */
 void
 LocalTree::findGhostPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours){
 
