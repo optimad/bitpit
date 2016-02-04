@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MODULE_OCTREE_PATCH_HPP__
-#define __BITPIT_MODULE_OCTREE_PATCH_HPP__
+#ifndef __BITPIT_MODULE_OCTREEPATCH_HPP__
+#define __BITPIT_MODULE_OCTREEPATCH_HPP__
 
 /*!
  * @defgroup octreepatch Octree patch

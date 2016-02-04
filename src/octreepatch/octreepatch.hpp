@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __PATCHMAN_PATCH_OCTREE_HPP__
-#define __PATCHMAN_PATCH_OCTREE_HPP__
+#ifndef __BITPIT_OCTREEPATCH_HPP__
+#define __BITPIT_OCTREEPATCH_HPP__
 
 /*! \file */
 
