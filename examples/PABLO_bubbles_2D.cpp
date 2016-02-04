@@ -71,8 +71,9 @@ int main(int argc, char *argv[]) {
 		pabloBB.setBalanceCodimension(1);
 		int idx = 0;
 		pabloBB.setBalance(idx,true);
+
+		/**<Set periodic condition on face 0 (and 1).*/
 		pabloBB.setPeriodic(0);
-		pabloBB.setPeriodic(2);
 
 		/**<Refine globally four level and write the para_tree.*/
 		for (iter=1; iter<4; iter++){

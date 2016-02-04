@@ -4777,18 +4777,38 @@ LocalTree::computeIntersections() {
 				iface2 = iface*2;
 				findGhostNeighbours(idx, iface2, neighbours);
 				nsize = neighbours.size();
-				for (i = 0; i < nsize; i++){
-					intersection.m_dim = m_dim;
-					intersection.m_finer = getGhostLevel(idx) >= getLevel((int)neighbours[i]);
-					intersection.m_owners[0]  = neighbours[i];
-					intersection.m_owners[1] = idx;
-					intersection.m_iface = m_global.m_oppFace[iface2] - (getGhostLevel(idx) >= getLevel((int)neighbours[i]));
-					intersection.m_isnew = false;
-					intersection.m_isghost = true;
-					intersection.m_bound = false;
-					intersection.m_pbound = true;
-					m_intersections.push_back(intersection);
-					counter++;
+				if (!(it->m_info[iface2])){
+					//Internal intersection
+					for (i = 0; i < nsize; i++){
+						intersection.m_dim = m_dim;
+						intersection.m_finer = getGhostLevel(idx) >= getLevel((int)neighbours[i]);
+						intersection.m_owners[0]  = neighbours[i];
+						intersection.m_owners[1] = idx;
+						intersection.m_iface = m_global.m_oppFace[iface2] - (getGhostLevel(idx) >= getLevel((int)neighbours[i]));
+						intersection.m_isnew = false;
+						intersection.m_isghost = true;
+						intersection.m_bound = false;
+						intersection.m_pbound = true;
+						m_intersections.push_back(intersection);
+						counter++;
+					}
+				}
+				else{
+					//Periodic intersection
+					for (i = 0; i < nsize; i++){
+						intersection.m_dim = m_dim;
+						intersection.m_finer = getGhostLevel(idx) >= getLevel((int)neighbours[i]);
+						intersection.m_out = 0;
+						intersection.m_owners[0]  = neighbours[i];
+						intersection.m_owners[1] = idx;
+						intersection.m_iface = m_global.m_oppFace[iface2];
+						intersection.m_isnew = false;
+						intersection.m_isghost = true;
+						intersection.m_bound = true;
+						intersection.m_pbound = true;
+						m_intersections.push_back(intersection);
+						counter++;
+					}
 				}
 			}
 			idx++;
@@ -4804,40 +4824,80 @@ LocalTree::computeIntersections() {
 				findNeighbours(idx, iface2, neighbours, isghost);
 				nsize = neighbours.size();
 				if (nsize) {
-					for (i = 0; i < nsize; i++){
-						if (isghost[i]){
-							intersection.m_dim = m_dim;
-							intersection.m_owners[0] = idx;
-							intersection.m_owners[1] = neighbours[i];
-							intersection.m_finer = (nsize>1);
-							intersection.m_iface = iface2 + (nsize>1);
-							intersection.m_isnew = false;
-							intersection.m_isghost = true;
-							intersection.m_bound = false;
-							intersection.m_pbound = true;
-							m_intersections.push_back(intersection);
-							counter++;
+					if (!(it->m_info[iface2])){
+						//Internal intersection
+						for (i = 0; i < nsize; i++){
+							if (isghost[i]){
+								intersection.m_dim = m_dim;
+								intersection.m_owners[0] = idx;
+								intersection.m_owners[1] = neighbours[i];
+								intersection.m_finer = (nsize>1);
+								intersection.m_out = (nsize>1);
+								intersection.m_iface = iface2 + (nsize>1);
+								intersection.m_isnew = false;
+								intersection.m_isghost = true;
+								intersection.m_bound = false;
+								intersection.m_pbound = true;
+								m_intersections.push_back(intersection);
+								counter++;
+							}
+							else{
+								intersection.m_dim = m_dim;
+								intersection.m_owners[0] = idx;
+								intersection.m_owners[1] = neighbours[i];
+								intersection.m_finer = (nsize>1);
+								intersection.m_out = (nsize>1);
+								intersection.m_iface = iface2 + (nsize>1);
+								intersection.m_isnew = false;
+								intersection.m_isghost = false;
+								intersection.m_bound = false;
+								intersection.m_pbound = false;
+								m_intersections.push_back(intersection);
+								counter++;
+							}
 						}
-						else{
-							intersection.m_dim = m_dim;
-							intersection.m_owners[0] = idx;
-							intersection.m_owners[1] = neighbours[i];
-							intersection.m_finer = (nsize>1);
-							intersection.m_iface = iface2 + (nsize>1);
-							intersection.m_isnew = false;
-							intersection.m_isghost = false;
-							intersection.m_bound = false;
-							intersection.m_pbound = false;
-							m_intersections.push_back(intersection);
-							counter++;
+					}
+					else{
+						//Periodic intersection
+						for (i = 0; i < nsize; i++){
+							if (isghost[i]){
+								intersection.m_dim = m_dim;
+								intersection.m_owners[0] = idx;
+								intersection.m_owners[1] = neighbours[i];
+								intersection.m_finer = (nsize>1);
+								intersection.m_out = 0;
+								intersection.m_iface = iface2;
+								intersection.m_isnew = false;
+								intersection.m_isghost = true;
+								intersection.m_bound = true;
+								intersection.m_pbound = true;
+								m_intersections.push_back(intersection);
+								counter++;
+							}
+							else{
+								intersection.m_dim = m_dim;
+								intersection.m_owners[0] = idx;
+								intersection.m_owners[1] = neighbours[i];
+								intersection.m_finer = (nsize>1);
+								intersection.m_out = 0;
+								intersection.m_iface = iface2;
+								intersection.m_isnew = false;
+								intersection.m_isghost = false;
+								intersection.m_bound = true;
+								intersection.m_pbound = false;
+								m_intersections.push_back(intersection);
+								counter++;
+							}
 						}
 					}
 				}
 				else{
+					//Boundary intersection
 					intersection.m_dim = m_dim;
 					intersection.m_owners[0] = idx;
 					intersection.m_owners[1] = idx;
 					intersection.m_finer = 0;
+					intersection.m_out = 0;
 					intersection.m_iface = iface2;
 					intersection.m_isnew = false;
 					intersection.m_isghost = false;
@@ -4847,17 +4907,56 @@ LocalTree::computeIntersections() {
 					counter++;
 				}
 				if (it->m_info[iface2+1]){
-					intersection.m_dim = m_dim;
-					intersection.m_owners[0] = idx;
-					intersection.m_owners[1] = idx;
-					intersection.m_finer = 0;
-					intersection.m_iface = iface2+1;
-					intersection.m_isnew = false;
-					intersection.m_isghost = false;
-					intersection.m_bound = true;
-					intersection.m_pbound = false;
-					m_intersections.push_back(intersection);
-					counter++;
+					if (!(m_periodics[iface2+1])){
+						//Boundary intersection
+						intersection.m_dim = m_dim;
+						intersection.m_owners[0] = idx;
+						intersection.m_owners[1] = idx;
+						intersection.m_finer = 0;
+						intersection.m_out = 0;
+						intersection.m_iface = iface2+1;
+						intersection.m_isnew = false;
+						intersection.m_isghost = false;
+						intersection.m_bound = true;
+						intersection.m_pbound = false;
+						m_intersections.push_back(intersection);
+						counter++;
+					}
+					else{
+						//Periodic intersection
+						findNeighbours(idx, iface2+1, neighbours, isghost);
+						nsize = neighbours.size();
+						for (i = 0; i < nsize; i++){
+							if (isghost[i]){
+								intersection.m_dim = m_dim;
+								intersection.m_owners[0] = idx;
+								intersection.m_owners[1] = neighbours[i];
+								intersection.m_finer = (nsize>1);
+								intersection.m_out = 0;
+								intersection.m_iface = iface2+1;
+								intersection.m_isnew = false;
+								intersection.m_isghost = true;
+								intersection.m_bound = true;
+								intersection.m_pbound = true;
+								m_intersections.push_back(intersection);
+								counter++;
+							}
+							else{
+								intersection.m_dim = m_dim;
+								intersection.m_owners[0] = idx;
+								intersection.m_owners[1] = neighbours[i];
+								intersection.m_finer = (nsize>1);
+								intersection.m_out = 0;
+								intersection.m_iface = iface2+1;
+								intersection.m_isnew = false;
+								intersection.m_isghost = false;
+								intersection.m_bound = true;
+								intersection.m_pbound = false;
+								m_intersections.push_back(intersection);
+								counter++;
+							}
+						}
+					}
 				}
 			}
 			idx++;
