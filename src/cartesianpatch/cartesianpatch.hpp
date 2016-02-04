@@ -32,7 +32,6 @@
 #include <vector>
 
 #include "patch.hpp"
-#include "utils.hpp"
 
 namespace bitpit {
 
