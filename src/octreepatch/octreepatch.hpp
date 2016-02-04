@@ -25,8 +25,6 @@
 #ifndef __BITPIT_OCTREEPATCH_HPP__
 #define __BITPIT_OCTREEPATCH_HPP__
 
-/*! \file */
-
 #include <assert.h>
 #include <deque>
 #include <cstddef>
@@ -37,11 +35,6 @@
 #include "bitpit_patch.hpp"
 
 namespace bitpit {
-
-/*!
-	\ingroup octreepatch
-	@{
-*/
 
 struct OctreeLevelInfo{
     int    level;
@@ -150,10 +143,6 @@ private:
 	                 std::vector<std::vector<bool>> &ownerFlags);
 	void deleteCell(long id);
 };
-
-/*!
-	@}
-*/
 
 }
 
