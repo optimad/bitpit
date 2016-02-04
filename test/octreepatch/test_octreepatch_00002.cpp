@@ -4,13 +4,15 @@
 
 #include <array>
 
-#include "BitP_Mesh_PATCHMAN.hpp"
+#include "bitpit_octreepatch.hpp"
+
+using namespace bitpit;
 
 int main(int argc, char *argv[]) {
 
-	std::cout << "Testing adaption on Octree mesh" << std::endl;
+	std::cout << "Testing adaption on octree patch" << std::endl;
 
-#ifndef DISABLE_MPI
+#if ENABLE_MPI==1
 	MPI::Init(argc,argv);
 #endif
 
@@ -19,21 +21,21 @@ int main(int argc, char *argv[]) {
 	double dh = 1.0;
 
 	std::cout << std::endl;
-	std::cout << "  :: 2D Mesh adaption test ::" << std::endl;
+	std::cout << "  :: 2D adaption test ::" << std::endl;
 
 	std::cout << std::endl;
-	std::cout << ">> Creating the mesh" << std::endl;
+	std::cout << ">> Creating the patch" << std::endl;
 
-	pman::Patch *patch_2D = new pman::PatchOctree(0, 2, origin, length, dh);
-	patch_2D->set_name("octree_adapted_mesh_2D");
+	Patch *patch_2D = new OctreePatch(0, 2, origin, length, dh);
+	patch_2D->setName("octree_adapted_patch_2D");
 	patch_2D->update();
-	patch_2D->write_mesh();
+	patch_2D->writeMesh();
 
 	std::cout << std::endl;
-	std::cout << ">> Adapting mesh" << std::endl;
+	std::cout << ">> Adapting patch" << std::endl;
 
 	for (int k = 0; k < 5; ++k) {
-		long nCells = patch_2D->get_cell_count();
+		long nCells = patch_2D->getCellCount();
 		std::cout << std::endl;
 		std::cout << ">> Marking the cells to adapt... " << std::endl;
 
@@ -43,9 +45,9 @@ int main(int argc, char *argv[]) {
 				continue;
 			}
 
-			for (auto neighId : patch_2D->extract_cell_neighs(cellId)) {
-				for (auto coarseId : patch_2D->extract_cell_neighs(neighId)) {
-					patch_2D->mark_cell_for_coarsening(coarseId);
+			for (auto neighId : patch_2D->extractCellNeighs(cellId)) {
+				for (auto coarseId : patch_2D->extractCellNeighs(neighId)) {
+					patch_2D->markCellForCoarsening(coarseId);
 				}
 			}
 		}
@@ -56,8 +58,8 @@ int main(int argc, char *argv[]) {
 				continue;
 			}
 
-			for (auto neighId : patch_2D->extract_cell_neighs(cellId)) {
-				patch_2D->mark_cell_for_refinement(neighId);
+			for (auto neighId : patch_2D->extractCellNeighs(cellId)) {
+				patch_2D->markCellForRefinement(neighId);
 			}
 		}
 
@@ -66,27 +68,27 @@ int main(int argc, char *argv[]) {
 
 		patch_2D->update();
 
-		nCells = patch_2D->get_cell_count();
+		nCells = patch_2D->getCellCount();
 		std::cout << ">> Final number of cells... " << nCells << std::endl;
 	}
-	patch_2D->write_mesh();
+	patch_2D->writeMesh();
 
 	std::cout << std::endl;
-	std::cout << "  :: 3D Mesh adaption test ::" << std::endl;
+	std::cout << "  :: 3D adaption test ::" << std::endl;
 
 	std::cout << std::endl;
-	std::cout << ">> Creating mesh" << std::endl;
+	std::cout << ">> Creating patch" << std::endl;
 
-	pman::Patch *patch_3D = new pman::PatchOctree(0, 3, origin, length, dh);
-	patch_3D->set_name("octree_adapted_mesh_3D");
+	Patch *patch_3D = new OctreePatch(0, 3, origin, length, dh);
+	patch_3D->setName("octree_adapted_patch_3D");
 	patch_3D->update();
-	patch_3D->write_mesh();
+	patch_3D->writeMesh();
 
 	std::cout << std::endl;
-	std::cout << ">> Adapting mesh" << std::endl;
+	std::cout << ">> Adapting patch" << std::endl;
 
 	for (int k = 0; k < 5; ++k) {
-		long nCells = patch_3D->get_cell_count();
+		long nCells = patch_3D->getCellCount();
 		std::cout << std::endl;
 		std::cout << ">> Marking the cells to adapt... " << std::endl;
 
@@ -96,9 +98,9 @@ int main(int argc, char *argv[]) {
 				continue;
 			}
 
-			for (auto neighId : patch_3D->extract_cell_neighs(cellId)) {
-				for (auto coarseId : patch_3D->extract_cell_neighs(neighId)) {
-					patch_3D->mark_cell_for_coarsening(coarseId);
+			for (auto neighId : patch_3D->extractCellNeighs(cellId)) {
+				for (auto coarseId : patch_3D->extractCellNeighs(neighId)) {
+					patch_3D->markCellForCoarsening(coarseId);
 				}
 			}
 		}
@@ -109,8 +111,8 @@ int main(int argc, char *argv[]) {
 				continue;
 			}
 
-			for (auto neighId : patch_3D->extract_cell_neighs(cellId)) {
-				patch_3D->mark_cell_for_refinement(neighId);
+			for (auto neighId : patch_3D->extractCellNeighs(cellId)) {
+				patch_3D->markCellForRefinement(neighId);
 			}
 		}
 
@@ -119,12 +121,12 @@ int main(int argc, char *argv[]) {
 
 		patch_3D->update();
 		
-		nCells = patch_3D->get_cell_count();
+		nCells = patch_3D->getCellCount();
 		std::cout << ">> Final number of cells... " << nCells << std::endl;
 	}
-	patch_3D->write_mesh();
+	patch_3D->writeMesh();
 
-#ifndef DISABLE_MPI
+#if ENABLE_MPI==1
 	MPI::Finalize();
 #endif
 

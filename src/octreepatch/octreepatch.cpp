@@ -2,32 +2,31 @@
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
 
-#ifndef DISABLE_OCTREE
-#include "patch_octree.hpp"
+#include "octreepatch.hpp"
 
 #include <math.h>
 
 #include "utils.hpp"
 
-namespace pman {
+namespace bitpit {
 
 /*!
-	\ingroup PatchMan
+	\ingroup octreepatch
 	@{
 */
 
 /*!
-	\class PatchOctree
+	\class OctreePatch
 
-	\brief The PatchOctree defines a Octree patch.
+	\brief The OctreePatch defines a Octree patch.
 
-	PatchOctree defines a Octree patch.
+	OctreePatch defines a Octree patch.
 */
 
 /*!
 	Creates a new patch.
 */
-PatchOctree::PatchOctree(const int &id, const int &dimension,
+OctreePatch::OctreePatch(const int &id, const int &dimension,
 				 std::array<double, 3> origin, double length, double dh )
 	: Patch(id, dimension)
 {
@@ -36,7 +35,7 @@ PatchOctree::PatchOctree(const int &id, const int &dimension,
 	// Inizializzazione dell'octree
 	double initial_level = ceil(log2(std::max(1., length / dh)));
 
-	m_tree = PabloUniform(origin[0], origin[1], origin[2], length, get_dimension());
+	m_tree = PabloUniform(origin[0], origin[1], origin[2], length, getDimension());
 	m_tree.setMarker((uint32_t) 0, initial_level);
 
 	// Info sull'octree
@@ -49,8 +48,8 @@ PatchOctree::PatchOctree(const int &id, const int &dimension,
 	    double levelLength = length / ((double) pow(2,i));
 
 	    m_tree_dh.push_back(pow(levelLength, 1.));
-	    m_tree_area.push_back(pow(levelLength, (double) (get_dimension() - 1)));
-	    m_tree_volume.push_back(pow(levelLength, (double) (get_dimension())));
+	    m_tree_area.push_back(pow(levelLength, (double) (getDimension() - 1)));
+	    m_tree_volume.push_back(pow(levelLength, (double) (getDimension())));
 	};
 
 	// Info sulle interfacce
@@ -67,7 +66,7 @@ PatchOctree::PatchOctree(const int &id, const int &dimension,
 /*!
 	Destroys the patch.
 */
-PatchOctree::~PatchOctree()
+OctreePatch::~OctreePatch()
 {
 
 }
@@ -78,9 +77,9 @@ PatchOctree::~PatchOctree()
 	\param id is the id of the cell
 	\result The volume of the specified cell.
 */
-double PatchOctree::eval_cell_volume(const long &id)
+double OctreePatch::evalCellVolume(const long &id)
 {
-	int level = get_cell_level(id);
+	int level = getCellLevel(id);
 
 	return m_tree_volume[level];
 }
@@ -91,9 +90,9 @@ double PatchOctree::eval_cell_volume(const long &id)
 	\param id is the id of the cell
 	\result The centroid of the specified cell.
 */
-std::array<double, 3> PatchOctree::eval_cell_centroid(const long &id)
+std::array<double, 3> OctreePatch::eval_cell_centroid(const long &id)
 {
-	OctantInfo octantInfo = get_cell_octant(id);
+	OctantInfo octantInfo = getCellOctant(id);
 
 	Octant *octant;
 	if (octantInfo.internal) {
@@ -111,9 +110,9 @@ std::array<double, 3> PatchOctree::eval_cell_centroid(const long &id)
 	\param id is the id of the cell
 	\result The characteristic size of the specified cell.
 */
-double PatchOctree::eval_cell_size(const long &id)
+double OctreePatch::evalCellSize(const long &id)
 {
-	int level = get_cell_level(id);
+	int level = getCellLevel(id);
 
 	return m_tree_dh[level];
 }
@@ -124,11 +123,11 @@ double PatchOctree::eval_cell_size(const long &id)
 	\param id is the id of the interface
 	\result The area of the specified interface.
 */
-double PatchOctree::eval_interface_area(const long &id)
+double OctreePatch::evalInterfaceArea(const long &id)
 {
-	const Interface &interface = get_interface(id);
-	int owner = interface.get_owner();
-	int level = get_cell_level(owner);
+	const Interface &interface = getInterface(id);
+	int owner = interface.getOwner();
+	int level = getCellLevel(owner);
 
 	return m_tree_area[level];
 }
@@ -139,10 +138,10 @@ double PatchOctree::eval_interface_area(const long &id)
 	\param id is the id of the interface
 	\result The normal of the specified interface.
 */
-std::array<double, 3> PatchOctree::eval_interface_normal(const long &id)
+std::array<double, 3> OctreePatch::evalInterfaceNormal(const long &id)
 {
-	const Interface &interface = get_interface(id);
-	int ownerFace = interface.get_owner_face();
+	const Interface &interface = getInterface(id);
+	int ownerFace = interface.getOwnerFace();
 
 	return m_normals[ownerFace];
 }
@@ -153,14 +152,14 @@ std::array<double, 3> PatchOctree::eval_interface_normal(const long &id)
 	\param id the id of the cell
 	\result The octant info of the specified cell
 */
-PatchOctree::OctantInfo PatchOctree::get_cell_octant(const long &id) const
+OctreePatch::OctantInfo OctreePatch::getCellOctant(const long &id) const
 {
 	OctantInfo octantInfo;
-	octantInfo.internal = m_cells[id].is_interior();
+	octantInfo.internal = m_cells[id].isInterior();
 	if (octantInfo.internal) {
-		octantInfo.id = m_cell_to_octant.at(id);
+		octantInfo.id = m_cellToOctant.at(id);
 	} else {
-		octantInfo.id = m_cell_to_ghost.at(id);
+		octantInfo.id = m_cellToGhost.at(id);
 	}
 
 	return octantInfo;
@@ -171,7 +170,7 @@ PatchOctree::OctantInfo PatchOctree::get_cell_octant(const long &id) const
 
 	\result A reference to the octree associated to the patch.
 */
-ParaTree & PatchOctree::get_tree()
+ParaTree & OctreePatch::get_tree()
 {
 	return m_tree;
 }
@@ -182,17 +181,17 @@ ParaTree & PatchOctree::get_tree()
 	\param octantInfo the data of the octant
 	\result The id of the specified octant
 */
-long PatchOctree::get_octant_id(const OctantInfo &octantInfo) const
+long OctreePatch::getOctantId(const OctantInfo &octantInfo) const
 {
 	std::unordered_map<uint32_t, long>::const_iterator octantItr;
 	if (octantInfo.internal) {
-		octantItr = m_octant_to_cell.find(octantInfo.id);
-		if (octantItr == m_octant_to_cell.end()) {
+		octantItr = m_octantToCell.find(octantInfo.id);
+		if (octantItr == m_octantToCell.end()) {
 			return Element::NULL_ELEMENT_ID;
 		}
 	} else {
-		octantItr = m_ghost_to_cell.find(octantInfo.id);
-		if (octantItr == m_ghost_to_cell.end()) {
+		octantItr = m_ghostToCell.find(octantInfo.id);
+		if (octantItr == m_ghostToCell.end()) {
 			return Element::NULL_ELEMENT_ID;
 		}
 	}
@@ -206,7 +205,7 @@ long PatchOctree::get_octant_id(const OctantInfo &octantInfo) const
 	\param octantInfo the data of the octant
 	\result A reference to the octant's connectivity
 */
-const std::vector<uint32_t> & PatchOctree::get_octant_connect(const OctantInfo &octantInfo)
+const std::vector<uint32_t> & OctreePatch::getOctantConnect(const OctantInfo &octantInfo)
 {
 	Octant* octant;
 	if (octantInfo.internal) {
@@ -222,7 +221,7 @@ const std::vector<uint32_t> & PatchOctree::get_octant_connect(const OctantInfo &
 	\param octantInfo the data of the octant
 	\result A unique hash for the octant.
 */
-PatchOctree::OctantHash PatchOctree::evaluate_octant_hash(const OctantInfo &octantInfo)
+OctreePatch::OctantHash OctreePatch::evaluate_octant_hash(const OctantInfo &octantInfo)
 {
 	uint8_t level   = m_tree.getLevel(octantInfo.id);
 	uint64_t morton = m_tree.getMorton(octantInfo.id);
@@ -241,9 +240,9 @@ PatchOctree::OctantHash PatchOctree::evaluate_octant_hash(const OctantInfo &octa
 	\param id is the id of the cell
 	\result The refinement level of the specified cell.
 */
-int PatchOctree::get_cell_level(const long &id)
+int OctreePatch::getCellLevel(const long &id)
 {
-	OctantInfo octantInfo = get_cell_octant(id);
+	OctantInfo octantInfo = getCellOctant(id);
 
 	Octant* octant;
 	if (octantInfo.internal) {
@@ -259,14 +258,14 @@ int PatchOctree::get_cell_level(const long &id)
 
 	\result Returns true if the mesh was updated, false otherwise.
 */
-const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
+const std::vector<Adaption::Info> OctreePatch::_update(bool trackAdaption)
 {
-	if (!is_dirty()) {
+	if (!isDirty()) {
 		return std::vector<Adaption::Info>();
 	}
 
 	// Check if the mesh is currently empty
-	bool initiallyEmpty = (get_cell_count() == 0);
+	bool initiallyEmpty = (getCellCount() == 0);
 
 	// Updating the tree
 	std::cout << ">> Adapting tree...";
@@ -282,13 +281,13 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 
 	// Info on the tree
 	long nOctants = m_tree.getNumOctants();
-	long nPreviousOctants = m_octant_to_cell.size();
+	long nPreviousOctants = m_octantToCell.size();
 
 	std::cout << ">> Number of octants : " << nOctants << std::endl;
 
 	// Info on the tree
 	long nGhostsOctants = m_tree.getNumGhosts();
-	long nPreviousGhosts = m_ghost_to_cell.size();
+	long nPreviousGhosts = m_ghostToCell.size();
 
 	// Evaluate tree conenctivity
 	std::cout << ">> Evaluating Octree connectivity...";
@@ -355,10 +354,10 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 		// Re-numbered cells just need to be added to the proper list.
 		//
 		// Renumbered cells are not tracked, because the re-numbering
-		// only happens inside PatchMan.
+		// only happens inside OctreePatch.
 		if (adaptionType == Adaption::TYPE_RENUMBERING) {
 			uint32_t previousTreeId = mapper_octantMap.front();
-			long cellId = m_octant_to_cell.at(previousTreeId);
+			long cellId = m_octantToCell.at(previousTreeId);
 
 			renumberedOctants.insert({{treeId, cellId}});
 
@@ -381,7 +380,7 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 		if (initiallyEmpty) {
 			nCurrentTreeIds = nOctants - treeId;
 		} else if (adaptionType == Adaption::TYPE_REFINEMENT) {
-			nCurrentTreeIds = pow(2, get_dimension());
+			nCurrentTreeIds = pow(2, getDimension());
 		} else {
 			nCurrentTreeIds = 1;
 		}
@@ -399,7 +398,7 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 
 				removedCells.emplace_back();
 				long &cellId = removedCells.back();
-				cellId = m_octant_to_cell.at(previousTreeId);
+				cellId = m_octantToCell.at(previousTreeId);
 
 				mapperIter++;
 			}
@@ -447,8 +446,8 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 					adaptionId = id;
 
 					const Cell &cell = m_cells.at(id);
-					long nCellInterfaces = cell.get_interface_count();
-					const long *interfaces = cell.get_interfaces();
+					long nCellInterfaces = cell.getInterfaceCount();
+					const long *interfaces = cell.getInterfaces();
 					for (int k = 0; k < nCellInterfaces; ++k) {
 						removedInterfaces.insert(interfaces[k]);
 					}
@@ -477,8 +476,8 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 			deletedGhostsInfoIdx = adaptionData.size() - 1;
 		}
 
-		auto cellIterator = m_cell_to_ghost.cbegin();
-		while (cellIterator != m_cell_to_ghost.cend()) {
+		auto cellIterator = m_cellToGhost.cbegin();
+		while (cellIterator != m_cellToGhost.cend()) {
 			long id = cellIterator->first;
 
 			removedCells.emplace_back();
@@ -510,7 +509,7 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 	if (removedCells.size() > 0) {
 		std::cout << ">> Removing non-existing cells...";
 
-		danglingFaces = remove_cells(removedCells);
+		danglingFaces = removeCells(removedCells);
 
 		std::cout << " Done" << std::endl;
 		std::cout << ">> Cells removed: " <<  removedCells.size() << std::endl;
@@ -519,8 +518,8 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 	std::vector<long>().swap(removedCells);
 
 	// Reserve space in the octant-to-cell maps
-	m_cell_to_octant.reserve(nOctants);
-	m_octant_to_cell.reserve(nOctants);
+	m_cellToOctant.reserve(nOctants);
+	m_octantToCell.reserve(nOctants);
 
 	// Remap renumbered cells
 	if (renumberedOctants.size() > 0) {
@@ -532,12 +531,12 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 			long cellId = cellIterator->second;
 
 			uint32_t currentTreeId  = cellIterator->first;
-			uint32_t previousTreeId = m_cell_to_octant.at(cellId);
+			uint32_t previousTreeId = m_cellToOctant.at(cellId);
 
-			m_cell_to_octant[cellId] = currentTreeId;
-			m_octant_to_cell[currentTreeId] = cellId;
+			m_cellToOctant[cellId] = currentTreeId;
+			m_octantToCell[currentTreeId] = cellId;
 			if (renumberedOctants.count(previousTreeId) == 0) {
-				m_octant_to_cell.erase(previousTreeId);
+				m_octantToCell.erase(previousTreeId);
 			}
 
 			cellIterator++;
@@ -550,18 +549,18 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 	std::unordered_map<uint32_t, long>().swap(renumberedOctants);
 
 	// Reset ghost maps
-	m_cell_to_ghost.clear();
-	m_cell_to_ghost.reserve(nGhostsOctants);
+	m_cellToGhost.clear();
+	m_cellToGhost.reserve(nGhostsOctants);
 
-	m_ghost_to_cell.clear();
-	m_ghost_to_cell.reserve(nGhostsOctants);
+	m_ghostToCell.clear();
+	m_ghostToCell.reserve(nGhostsOctants);
 
 	// Import added octants
 	std::vector<unsigned long> createdInterfaces;
 	if (newOctants.size() > 0) {
 		std::cout << ">> Importing new octants...";
 
-		createdInterfaces = import_octants(newOctants, danglingFaces);
+		createdInterfaces = importOctants(newOctants, danglingFaces);
 
 		std::cout << " Done" << std::endl;
 		std::cout << ">> Octants imported: " <<  newOctants.size() << std::endl;
@@ -579,7 +578,7 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 
 			int nCurrentIds = adaptionInfo.current.size();
 			for (int k = 0; k < nCurrentIds; ++k) {
-				long cellId = m_octant_to_cell.at(adaptionInfo.current[k]);
+				long cellId = m_octantToCell.at(adaptionInfo.current[k]);
 				adaptionInfo.current[k] = cellId;
 			}
 		}
@@ -592,8 +591,8 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 			createdGhostsInfo.entity = Adaption::ENTITY_CELL;
 
 			createdGhostsInfo.previous.reserve(nGhostsOctants);
-			auto cellIterator = m_cell_to_ghost.cbegin();
-			while (cellIterator != m_cell_to_ghost.cend()) {
+			auto cellIterator = m_cellToGhost.cbegin();
+			while (cellIterator != m_cellToGhost.cend()) {
 				createdGhostsInfo.previous.emplace_back();
 				unsigned long &adaptionId = createdGhostsInfo.previous.back();
 				adaptionId = cellIterator->first;
@@ -645,11 +644,11 @@ const std::vector<Adaption::Info> PatchOctree::_update(bool trackAdaption)
 
 	\param octantInfoList is the list of octant to import
 */
-std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &octantInfoList)
+std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &octantInfoList)
 {
 	FaceInfoSet danglingFaces;
 
-	return import_octants(octantInfoList, danglingFaces);
+	return importOctants(octantInfoList, danglingFaces);
 }
 
 /*!
@@ -657,31 +656,31 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 
 	\param octantInfoList is the list of octant to import
 */
-std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &octantInfoList,
+std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &octantInfoList,
                                  FaceInfoSet &danglingFaces)
 {
 	// Info of the cells
 	ElementInfo::Type cellType;
-	if (is_three_dimensional()) {
+	if (isThreeDimensional()) {
 		cellType = ElementInfo::VOXEL;
 	} else {
 		cellType = ElementInfo::PIXEL;
 	}
 
-	const ElementInfo &cellTypeInfo = ElementInfo::get_element_info(cellType);
+	const ElementInfo &cellTypeInfo = ElementInfo::getElementInfo(cellType);
 	const int &nCellFaces = cellTypeInfo.nFaces;
 	const int &nCellVertices = cellTypeInfo.nVertices;
 	const std::vector<std::vector<int>> &cellLocalFaceConnect = cellTypeInfo.face_connect;
 
 	// Info on the interfaces
 	ElementInfo::Type interfaceType;
-	if (is_three_dimensional()) {
+	if (isThreeDimensional()) {
 		interfaceType = ElementInfo::PIXEL;
 	} else {
 		interfaceType = ElementInfo::LINE;
 	}
 
-	const ElementInfo &interfaceTypeInfo = ElementInfo::get_element_info(interfaceType);
+	const ElementInfo &interfaceTypeInfo = ElementInfo::getElementInfo(interfaceType);
 	const int &nInterfaceVertices = interfaceTypeInfo.nVertices;
 
 	uint32_t nIntersections = m_tree.getNumIntersections();
@@ -697,17 +696,17 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 		Cell &danglingCell = m_cells[danglingId];
 		int danglingFace = danglingFaceInfo.face;
 
-		int nInterfaces = danglingCell.get_interface_count(danglingFace);
+		int nInterfaces = danglingCell.getInterfaceCount(danglingFace);
 		std::vector<FaceInfo> vertexSourceList(1 + nInterfaces);
 		vertexSourceList[0] = danglingFaceInfo;
 		for (int k = 0; k < nInterfaces; ++k) {
-			long interfaceId = danglingCell.get_interface(danglingFace, k);
+			long interfaceId = danglingCell.getInterface(danglingFace, k);
 
 			Interface &interface = m_interfaces[interfaceId];
-			if (interface.get_owner() != danglingId) {
-				vertexSourceList[1 + k] = FaceInfo(interface.get_owner(), interface.get_owner_face());
+			if (interface.getOwner() != danglingId) {
+				vertexSourceList[1 + k] = FaceInfo(interface.getOwner(), interface.getOwnerFace());
 			} else {
-				vertexSourceList[1 + k] = FaceInfo(interface.get_neigh(), interface.get_neigh_face());
+				vertexSourceList[1 + k] = FaceInfo(interface.getNeigh(), interface.getNeighFace());
 			}
 		}
 
@@ -715,11 +714,11 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 		for (auto & vertexSource : vertexSourceList) {
 			// Cell data
 			Cell &cell = m_cells[vertexSource.id];
-			const long *cellConnect = cell.get_connect();
+			const long *cellConnect = cell.getConnect();
 
 			// Octant data
-			OctantInfo octantInfo = get_cell_octant(vertexSource.id);
-			const std::vector<uint32_t> &octantTreeConnect = get_octant_connect(octantInfo);
+			OctantInfo octantInfo = getCellOctant(vertexSource.id);
+			const std::vector<uint32_t> &octantTreeConnect = getOctantConnect(octantInfo);
 
 			// List of vertices
 			const std::vector<int> &localConnect = cellLocalFaceConnect[vertexSource.face];
@@ -734,11 +733,11 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 
 	// Create the new vertices
 	for (OctantInfo &octantInfo : octantInfoList) {
-		const std::vector<uint32_t> &octantTreeConnect = get_octant_connect(octantInfo);
+		const std::vector<uint32_t> &octantTreeConnect = getOctantConnect(octantInfo);
 		for (int k = 0; k < nCellVertices; ++k) {
 			uint32_t vertexTreeId = octantTreeConnect[k];
 			if (vertexMap.count(vertexTreeId) == 0) {
-				vertexMap[vertexTreeId] = create_vertex(vertexTreeId);
+				vertexMap[vertexTreeId] = createVertex(vertexTreeId);
 			}
 		}
 	}
@@ -763,26 +762,26 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 		bool isGhost    = m_tree.getIsGhost(treeInterface);
 
 		// Decide if we need to build the interface
-		bool createInterface = false;
+		bool buildInterface = false;
 
 		OctantInfo ownerOctantInfo(owner, true);
-		long ownerId = get_octant_id(ownerOctantInfo);
+		long ownerId = getOctantId(ownerOctantInfo);
 		if (ownerId == Element::NULL_ELEMENT_ID) {
 			octantTreeInterfaces[ownerOctantInfo.id].push_back(interfaceTreeId);
-			createInterface = true;
+			buildInterface = true;
 		}
 
 		long neighId = Element::NULL_ELEMENT_ID;
 		if (!isBoundary) {
 			OctantInfo neighOctantInfo(neigh, !isGhost);
-			neighId = get_octant_id(neighOctantInfo);
+			neighId = getOctantId(neighOctantInfo);
 			if (neighId == Element::NULL_ELEMENT_ID) {
 				octantTreeInterfaces[neighOctantInfo.id].push_back(interfaceTreeId);
-				createInterface = true;
+				buildInterface = true;
 			}
 		}
 
-		if (!createInterface) {
+		if (!buildInterface) {
 			continue;
 		}
 
@@ -797,7 +796,7 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 		interfaceFaces[1] = FaceInfo(neighId, ownerFace + 1 - 2 * (ownerFace % 2));
 
 		// Interface connectivity
-		const std::vector<uint32_t> &octantTreeConnect = get_octant_connect(ownerOctantInfo);
+		const std::vector<uint32_t> &octantTreeConnect = getOctantConnect(ownerOctantInfo);
 		const std::vector<int> &localConnect = cellLocalFaceConnect[ownerFace];
 		std::unique_ptr<long[]> interfaceConnect = std::unique_ptr<long[]>(new long[nInterfaceVertices]);
 		for (int k = 0; k < nInterfaceVertices; ++k) {
@@ -807,7 +806,7 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 		// Create the interface
 		createdInterfaces.emplace_back();
 		unsigned long &interfaceId = createdInterfaces.back();
-		interfaceId = create_interface(interfaceTreeId, interfaceConnect, interfaceFaces);
+		interfaceId = createInterface(interfaceTreeId, interfaceConnect, interfaceFaces);
 		interfaceMap[interfaceTreeId] = interfaceId;
 
 		// If the interface is on an dangling faces, the owner or
@@ -826,7 +825,7 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 
 			if (danglingFaces.count(*guessDanglingInfo) != 0) {
 				Cell &danglingCell = m_cells[guessDanglingInfo->id];
-				danglingCell.push_interface(guessDanglingInfo->face, interfaceId);
+				danglingCell.pushInterface(guessDanglingInfo->face, interfaceId);
 			}
 		}
 	}
@@ -836,7 +835,7 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 	std::vector<std::vector<bool>> interfaceOwnerFlags(nCellFaces, std::vector<bool>());
 	for (OctantInfo &octantInfo : octantInfoList) {
 		// Octant connectivity
-		const std::vector<uint32_t> &octantTreeConnect = get_octant_connect(octantInfo);
+		const std::vector<uint32_t> &octantTreeConnect = getOctantConnect(octantInfo);
 
 		// Cell connectivity
 		std::unique_ptr<long[]> cellConnect = std::unique_ptr<long[]>(new long[nCellVertices]);
@@ -861,9 +860,9 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 
 			int cellFace;
 			if (ownerFlag) {
-				cellFace = interface.get_owner_face();
+				cellFace = interface.getOwnerFace();
 			} else {
-				cellFace = interface.get_neigh_face();
+				cellFace = interface.getNeighFace();
 			}
 
 			cellInterfaces[cellFace].emplace_back();
@@ -874,7 +873,7 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 		}
 
 		// Add cell
-		create_cell(octantInfo, cellConnect, cellInterfaces, interfaceOwnerFlags);
+		createCell(octantInfo, cellConnect, cellInterfaces, interfaceOwnerFlags);
 	}
 
 	// Done
@@ -888,7 +887,7 @@ std::vector<unsigned long> PatchOctree::import_octants(std::vector<OctantInfo> &
 
 	\param octantTreeIds is the list of octant ids to remove
 */
-PatchOctree::FaceInfoSet PatchOctree::remove_cells(std::vector<long> &cellIds)
+OctreePatch::FaceInfoSet OctreePatch::removeCells(std::vector<long> &cellIds)
 {
 	// Delete cells
 	//
@@ -908,24 +907,24 @@ PatchOctree::FaceInfoSet PatchOctree::remove_cells(std::vector<long> &cellIds)
 		//
 		// For now, all cell vertices will be listed. Later, the vertex of
 		// the dangling faces will be removed from the list.
-		int nCellVertices = cell.get_vertex_count();
-		const long *vertices = cell.get_connect();
+		int nCellVertices = cell.getVertexCount();
+		const long *vertices = cell.getConnect();
 		for (int k = 0; k < nCellVertices; ++k) {
 			deadVertices.insert(vertices[k]);
 		}
 
 		// List dead interface and set the dangling status. An interface
 		// is dangling if only the owner or the neighbour will be deleted.
-		int nCellInterfaces = cell.get_interface_count();
-		const long *interfaces = cell.get_interfaces();
+		int nCellInterfaces = cell.getInterfaceCount();
+		const long *interfaces = cell.getInterfaces();
 		for (int k = 0; k < nCellInterfaces; ++k) {
 			long interfaceId = interfaces[k];
 
 			int danglingSide = -1;
 			if (deadInterfaces.count(interfaceId) == 0) {
 				Interface &interface = m_interfaces[interfaceId];
-				if (!interface.is_border()) {
-					if (interface.get_owner() == cellId) {
+				if (!interface.isBorder()) {
+					if (interface.getOwner() == cellId) {
 						danglingSide = 1;
 					} else {
 						danglingSide = 0;
@@ -936,7 +935,7 @@ PatchOctree::FaceInfoSet PatchOctree::remove_cells(std::vector<long> &cellIds)
 		}
 
 		// Delete cell
-		delete_cell(cellId);
+		deleteCell(cellId);
 	}
 
 	// Delete interfaces
@@ -953,16 +952,16 @@ PatchOctree::FaceInfoSet PatchOctree::remove_cells(std::vector<long> &cellIds)
 			long danglingCellId;
 			long danglingCellFace;
 			if (danglingSide == 0) {
-				danglingCellId   = interface.get_owner();
-				danglingCellFace = interface.get_owner_face();
+				danglingCellId   = interface.getOwner();
+				danglingCellFace = interface.getOwnerFace();
 			} else {
-				danglingCellId   = interface.get_neigh();
-				danglingCellFace = interface.get_neigh_face();
+				danglingCellId   = interface.getNeigh();
+				danglingCellFace = interface.getNeighFace();
 			}
 
 			// Remove interface vertices from dead vertices
-			int nFaceVertices = interface.get_vertex_count();
-			const long *vertices = interface.get_connect();
+			int nFaceVertices = interface.getVertexCount();
+			const long *vertices = interface.getConnect();
 			for (int k = 0; k < nFaceVertices; ++k) {
 				deadVertices.erase(vertices[k]);
 			}
@@ -971,10 +970,10 @@ PatchOctree::FaceInfoSet PatchOctree::remove_cells(std::vector<long> &cellIds)
 			Cell &danglingCell = m_cells[danglingCellId];
 
 			int j = 0;
-			while (danglingCell.get_interface(danglingCellFace, j) != interfaceId) {
+			while (danglingCell.getInterface(danglingCellFace, j) != interfaceId) {
 				++j;
 			}
-			danglingCell.delete_interface(danglingCellFace, j);
+			danglingCell.deleteInterface(danglingCellFace, j);
 
 			// Add the associated cell face to the dangling faces list
 			FaceInfo danglingFace(danglingCellId, danglingCellFace);
@@ -982,12 +981,12 @@ PatchOctree::FaceInfoSet PatchOctree::remove_cells(std::vector<long> &cellIds)
 		}
 
 		// Add the interface to the list of interfaces to delete
-		Patch::delete_interface(interfaceId, true);
+		Patch::deleteInterface(interfaceId, true);
 	}
 
 	// Delete vertices
 	for (auto it = deadVertices.begin(); it != deadVertices.end(); ++it) {
-		Patch::delete_vertex(*it, true);
+		Patch::deleteVertex(*it, true);
 	}
 
 	// Done
@@ -999,15 +998,15 @@ PatchOctree::FaceInfoSet PatchOctree::remove_cells(std::vector<long> &cellIds)
 
 	\param treeId is the id of the vertex in the tree
 */
-long PatchOctree::create_vertex(uint32_t treeId)
+long OctreePatch::createVertex(uint32_t treeId)
 {
 	// Create the vertex
-	long id = Patch::create_vertex();
+	long id = Patch::createVertex();
 	Vertex &vertex = m_vertices[id];
 
 	// Coordinate
 	std::array<double, 3> nodeCoords = m_tree.getNodeCoordinates(treeId);
-	vertex.set_coords(nodeCoords);
+	vertex.setCoords(nodeCoords);
 
 	// Done
 	return id;
@@ -1018,27 +1017,27 @@ long PatchOctree::create_vertex(uint32_t treeId)
 
 	\param treeId is the id of the intersection in the tree
 */
-long PatchOctree::create_interface(uint32_t treeId,
+long OctreePatch::createInterface(uint32_t treeId,
                                    std::unique_ptr<long[]> &vertices,
                                    std::array<FaceInfo, 2> &faces)
 {
 	// Create the interface
-	long id = Patch::create_interface();
+	long id = Patch::createInterface();
 	Interface &interface = m_interfaces[id];
 
 	// Tipo
-	if (is_three_dimensional()) {
-		interface.set_type(ElementInfo::PIXEL);
+	if (isThreeDimensional()) {
+		interface.setType(ElementInfo::PIXEL);
 	} else {
-		interface.set_type(ElementInfo::LINE);
+		interface.setType(ElementInfo::LINE);
 	}
 
 	// Connectivity
-	interface.set_connect(std::move(vertices));
+	interface.setConnect(std::move(vertices));
 
 	// Owner and neighbour
-	interface.set_owner(faces[0].id, faces[0].face);
-	interface.set_neigh(faces[1].id, faces[1].face);
+	interface.setOwner(faces[0].id, faces[0].face);
+	interface.setNeigh(faces[1].id, faces[1].face);
 
 	// Done
 	return id;
@@ -1049,27 +1048,27 @@ long PatchOctree::create_interface(uint32_t treeId,
 
 	\param treeId is the id of the octant in the tree
 */
-long PatchOctree::create_cell(OctantInfo octantInfo,
+long OctreePatch::createCell(OctantInfo octantInfo,
                               std::unique_ptr<long[]> &vertices,
                               std::vector<std::vector<long>> &interfaces,
                               std::vector<std::vector<bool>> &ownerFlags)
 {
 	// Create the cell
-	long id = Patch::create_cell(octantInfo.internal);
+	long id = Patch::createCell(octantInfo.internal);
 	Cell &cell = m_cells[id];
 
 	// Tipo
-	if (is_three_dimensional()) {
-		cell.set_type(ElementInfo::VOXEL);
+	if (isThreeDimensional()) {
+		cell.setType(ElementInfo::VOXEL);
 	} else {
-		cell.set_type(ElementInfo::PIXEL);
+		cell.setType(ElementInfo::PIXEL);
 	}
 
 	// Interior flag
-	cell.set_interior(octantInfo.internal);
+	cell.setInterior(octantInfo.internal);
 
 	// Connectivity
-	cell.set_connect(std::move(vertices));
+	cell.setConnect(std::move(vertices));
 
 	// Interfaces
 	int nCellFaces = interfaces.size();
@@ -1081,21 +1080,21 @@ long PatchOctree::create_cell(OctantInfo octantInfo,
 
 			Interface &interface = m_interfaces[interfaceId];
 			if (ownsInterface) {
-				interface.set_owner(id, face);
+				interface.setOwner(id, face);
 			} else {
-				interface.set_neigh(id, face);
+				interface.setNeigh(id, face);
 			}
 		}
 	}
-	cell.initialize_interfaces(interfaces);
+	cell.initializeInterfaces(interfaces);
 
 	// Update cell to octant mapping
 	if (octantInfo.internal) {
-		m_cell_to_octant.insert({{id, octantInfo.id}});
-		m_octant_to_cell.insert({{octantInfo.id, id}});
+		m_cellToOctant.insert({{id, octantInfo.id}});
+		m_octantToCell.insert({{octantInfo.id, id}});
 	} else {
-		m_cell_to_ghost.insert({{id, octantInfo.id}});
-		m_ghost_to_cell.insert({{octantInfo.id, id}});
+		m_cellToGhost.insert({{id, octantInfo.id}});
+		m_ghostToCell.insert({{octantInfo.id, id}});
 	}
 
 	// Done
@@ -1107,16 +1106,16 @@ long PatchOctree::create_cell(OctantInfo octantInfo,
 
 	\param id is the id of the cell
 */
-void PatchOctree::delete_cell(long id)
+void OctreePatch::deleteCell(long id)
 {
 	// Remove the information that link the cell to the octant
-	bool interior = m_cells[id].is_interior();
+	bool interior = m_cells[id].isInterior();
 
 	std::unordered_map<long, uint32_t, Element::IdHasher> *cellMap;
 	if (interior) {
-		cellMap = &m_cell_to_octant;
+		cellMap = &m_cellToOctant;
 	} else {
-		cellMap = &m_cell_to_ghost;
+		cellMap = &m_cellToGhost;
 	}
 
 	std::unordered_map<long, uint32_t, Element::IdHasher>::const_iterator cellItr = cellMap->find(id);
@@ -1124,9 +1123,9 @@ void PatchOctree::delete_cell(long id)
 		// Delete octant-to-cell entry
 		std::unordered_map<uint32_t, long> *octantMap;
 		if (interior) {
-			octantMap = &m_octant_to_cell;
+			octantMap = &m_octantToCell;
 		} else {
-			octantMap = &m_ghost_to_cell;
+			octantMap = &m_ghostToCell;
 		}
 
 		uint32_t treeId = cellItr->second;
@@ -1137,7 +1136,7 @@ void PatchOctree::delete_cell(long id)
 	}
 
 	// Delete the cell
-	Patch::delete_cell(id, true);
+	Patch::deleteCell(id, true);
 }
 
 /*!
@@ -1145,7 +1144,7 @@ void PatchOctree::delete_cell(long id)
 
 	\param id is the id of the cell that needs to be refined
 */
-bool PatchOctree::_mark_cell_for_refinement(const long &id)
+bool OctreePatch::_markCellForRefinement(const long &id)
 {
 	return set_marker(id, 1);
 }
@@ -1155,7 +1154,7 @@ bool PatchOctree::_mark_cell_for_refinement(const long &id)
 
 	\param id is the id of the cell that needs to be coarsened
 */
-bool PatchOctree::_mark_cell_for_coarsening(const long &id)
+bool OctreePatch::_markCellForCoarsening(const long &id)
 {
 	return set_marker(id, -1);
 }
@@ -1166,9 +1165,9 @@ bool PatchOctree::_mark_cell_for_coarsening(const long &id)
 	\param id is the id of the cell
 	\param value is the value of the marker
 */
-bool PatchOctree::set_marker(const long &id, const int8_t &value)
+bool OctreePatch::set_marker(const long &id, const int8_t &value)
 {
-	OctantInfo octantInfo = get_cell_octant(id);
+	OctantInfo octantInfo = getCellOctant(id);
 	if (!octantInfo.internal) {
 		return false;
 	}
@@ -1184,9 +1183,9 @@ bool PatchOctree::set_marker(const long &id, const int8_t &value)
 	\param id is the id of the cell
 	\param enabled defines if enable the balancing for the specified cell
 */
-bool PatchOctree::_enable_cell_balancing(const long &id, bool enabled)
+bool OctreePatch::_enableCellBalancing(const long &id, bool enabled)
 {
-	OctantInfo octantInfo = get_cell_octant(id);
+	OctantInfo octantInfo = getCellOctant(id);
 	if (!octantInfo.internal) {
 		return false;
 	}
@@ -1201,5 +1200,3 @@ bool PatchOctree::_enable_cell_balancing(const long &id, bool enabled)
 */
 
 }
-
-#endif

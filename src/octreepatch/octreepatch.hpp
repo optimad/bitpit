@@ -1,15 +1,13 @@
 //
 // Written by Andrea Iob <andrea_iob@hotmail.com>
 //
-#ifndef DISABLE_OCTREE
 #ifndef __PATCHMAN_PATCH_OCTREE_HPP__
 #define __PATCHMAN_PATCH_OCTREE_HPP__
 
 /*! \file */
 
-#include "patch.hpp"
-
-#include "PabloUniform.hpp"
+#include "bitpit_PABLO.hpp"
+#include "bitpit_patch.hpp"
 
 #include <assert.h>
 #include <deque>
@@ -17,10 +15,10 @@
 #include <vector>
 #include <unordered_set>
 
-namespace pman {
+namespace bitpit {
 
 /*!
-	\ingroup PatchMan
+	\ingroup octreepatch
 	@{
 */
 
@@ -31,7 +29,7 @@ struct OctreeLevelInfo{
     double volume;
 };
 
-class PatchOctree : public Patch {
+class OctreePatch : public Patch {
 
 public:
 	struct OctantInfo {
@@ -42,31 +40,31 @@ public:
 		bool internal;
 	};
 
-	PatchOctree(const int &id, const int &dimension, std::array<double, 3> origin,
+	OctreePatch(const int &id, const int &dimension, std::array<double, 3> origin,
 			double length, double dh);
 
-	~PatchOctree();
+	~OctreePatch();
 
-	double eval_cell_volume(const long &id);
-	double eval_cell_size(const long &id);
+	double evalCellVolume(const long &id);
+	double evalCellSize(const long &id);
 	std::array<double, 3> eval_cell_centroid(const long &id);
 
-	double eval_interface_area(const long &id);
-	std::array<double, 3> eval_interface_normal(const long &id);
+	double evalInterfaceArea(const long &id);
+	std::array<double, 3> evalInterfaceNormal(const long &id);
 
-	OctantInfo get_cell_octant(const long &id) const;
-	int get_cell_level(const long &id);
+	OctantInfo getCellOctant(const long &id) const;
+	int getCellLevel(const long &id);
 
-	long get_octant_id(const OctantInfo &octantInfo) const;
-	const std::vector<uint32_t> & get_octant_connect(const OctantInfo &octantInfo);
+	long getOctantId(const OctantInfo &octantInfo) const;
+	const std::vector<uint32_t> & getOctantConnect(const OctantInfo &octantInfo);
 
 	ParaTree & get_tree();
 
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
-	bool _mark_cell_for_refinement(const long &id);
-	bool _mark_cell_for_coarsening(const long &id);
-	bool _enable_cell_balancing(const long &id, bool enabled);
+	bool _markCellForRefinement(const long &id);
+	bool _markCellForCoarsening(const long &id);
+	bool _enableCellBalancing(const long &id, bool enabled);
 
 private:
 	typedef std::bitset<72> OctantHash;
@@ -97,10 +95,10 @@ private:
 
 	typedef std::unordered_set<FaceInfo, FaceInfoHasher> FaceInfoSet;
 
-	std::unordered_map<long, uint32_t, Element::IdHasher> m_cell_to_octant;
-	std::unordered_map<long, uint32_t, Element::IdHasher> m_cell_to_ghost;
-	std::unordered_map<uint32_t, long> m_octant_to_cell;
-	std::unordered_map<uint32_t, long> m_ghost_to_cell;
+	std::unordered_map<long, uint32_t, Element::IdHasher> m_cellToOctant;
+	std::unordered_map<long, uint32_t, Element::IdHasher> m_cellToGhost;
+	std::unordered_map<uint32_t, long> m_octantToCell;
+	std::unordered_map<uint32_t, long> m_ghostToCell;
 
 	ParaTree m_tree;
 
@@ -114,22 +112,22 @@ private:
 
 	OctantHash evaluate_octant_hash(const OctantInfo &octantInfo);
 
-	std::vector<unsigned long> import_octants(std::vector<OctantInfo> &octantTreeIds);
-	std::vector<unsigned long> import_octants(std::vector<OctantInfo> &octantTreeIds, FaceInfoSet &danglingInfoSet);
+	std::vector<unsigned long> importOctants(std::vector<OctantInfo> &octantTreeIds);
+	std::vector<unsigned long> importOctants(std::vector<OctantInfo> &octantTreeIds, FaceInfoSet &danglingInfoSet);
 
-	FaceInfoSet remove_cells(std::vector<long> &cellIds);
+	FaceInfoSet removeCells(std::vector<long> &cellIds);
 
-	long create_vertex(uint32_t treeId);
+	long createVertex(uint32_t treeId);
 
-	long create_interface(uint32_t treeId,
+	long createInterface(uint32_t treeId,
                             std::unique_ptr<long[]> &vertices,
                             std::array<FaceInfo, 2> &faces);
 
-	long create_cell(OctantInfo octantInfo,
+	long createCell(OctantInfo octantInfo,
 	                 std::unique_ptr<long[]> &vertices,
 	                 std::vector<std::vector<long>> &interfaces,
 	                 std::vector<std::vector<bool>> &ownerFlags);
-	void delete_cell(long id);
+	void deleteCell(long id);
 };
 
 /*!
@@ -138,5 +136,4 @@ private:
 
 }
 
-#endif
 #endif
