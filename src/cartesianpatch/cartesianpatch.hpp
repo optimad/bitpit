@@ -27,12 +27,12 @@
 
 /*! \file */
 
-#include "patch.hpp"
-#include "utils.hpp"
-
 #include <cstddef>
 #include <memory>
 #include <vector>
+
+#include "patch.hpp"
+#include "utils.hpp"
 
 namespace bitpit {
 

@@ -22,10 +22,11 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#include "cartesianpatch.hpp"
+#include <math.h>
 
 #include <bitpit_common.hpp>
-#include <math.h>
+
+#include "cartesianpatch.hpp"
 
 namespace bitpit {
 
