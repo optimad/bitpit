@@ -47,7 +47,7 @@ using namespace std;
 // =================================================================================== //
 
 #if ENABLE_MPI==1
-/*! Default Constructor of ParaTree.
+/*! Default constructor of ParaTree.
  * It builds one octant with node 0 in the Origin (0,0,0) and side of length 1.
  * \param[in] dim The space dimension of the m_octree. 2D is the default value.
  * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
@@ -56,7 +56,7 @@ using namespace std;
  */
 ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm m_comm) : m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(logfile,m_comm),m_comm(m_comm),m_trans(maxlevel,dim),m_octree(maxlevel,dim){
 #else
-	/*! Default Constructor of ParaTree.
+	/*! Default constructor of ParaTree.
 	 * It builds one octant with node 0 in the Origin (0,0,0) and side of length 1.
 	 * \param[in] dim The space dimension of the m_octree. 2D is the default value.
 	 * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
@@ -617,7 +617,7 @@ ParaTree::getZ(uint32_t idx) {
 
 /*! Get the size of an octant, i.e. the side length.
  * \param[in] idx Local index of target octant.
- * \return Area of octant.
+ * \return Size of octant.
  */
 double
 ParaTree::getSize(uint32_t idx) {
@@ -955,7 +955,7 @@ ParaTree::getZ(Octant* oct) {
 
 /*! Get the size of an octant, i.e. the side length.
  * \param[in] oct Pointer to the target octant
- * \return Area of octant.
+ * \return Size of octant.
  */
 double
 ParaTree::getSize(Octant* oct) {

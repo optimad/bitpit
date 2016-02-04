@@ -64,10 +64,11 @@ typedef std::vector<darray3>		darr3vector;
  *
  *	\brief Transformation Mapper
  *
- *	Definition of the transformation from the logical domain to the physical domain.
- *	It contains a default (temporary) implementation of a scaling and translation mapper
- *	of logical octree.
- *	Map has to be implemented and customized by the user for different applications.
+ *	Definition of the transformation from the logical domain to the physical reference domain.
+ *	It contains a default implementation of a scaling and translation mapper
+ *	of logical octree in the reference domain with origin in (0,0,0) and size 1.
+ *	Map has to be implemented and customized by the user for different applications as a derived
+ *	class of ParaTree (see PabloUniform for a basic example).
  */
 class Map{
 

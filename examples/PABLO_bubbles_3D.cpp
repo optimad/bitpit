@@ -36,24 +36,26 @@ using namespace bitpit;
 /*!
 	\example PABLO_bubbles_3D.cpp
 
-	\brief 3D dynamic adaptive mesh refinement using PABLO 
+	\brief 3D dynamic adaptive mesh refinement (AMR) using PABLO
 
-	This example creates a 2D Cartesian mesh on the square domain [-10,10]x[-10,10].
-	The domain is discretized with a cell size of 0.5 both in x and y directions.
+	This example creates a 3D Octree mesh on the cube domain [0,1]x[0,1]x[0,1].
+	The domain is adapted to track a set of moving bubbles with random initialization.
 
-	<b>To run</b>: ./createCartesianMesh2D \n
+	<b>To run</b>: ./PABLO_bubbles_3D \n
+
+	<b>To see the result visit</b>: <a href="http://optimad.github.io/PABLO/">PABLO website</a> \n
 */
 
-/**<Declaration of a class bubble with center and radius.*/
 
 /*!  \cond  EXAMPLE_CLASSES */
+
+/**<Declaration of a class bubble with center and radius.*/
 class bubble{
 public:
 	double c[3];
 	double r;
-
-
 };
+
 /*!  \endcond  */
 
 int main(int argc, char *argv[]) {
@@ -66,7 +68,7 @@ int main(int argc, char *argv[]) {
 		int iter = 0;
 
 		/**<Instantation of a 3D para_tree object.*/
-		ParaTree pabloBB(3);
+		PabloUniform pabloBB(3);
 
 		/**<Set 2:1 balance for the octree.*/
 		pabloBB.setBalanceCodimension(1);

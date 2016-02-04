@@ -28,6 +28,31 @@ using namespace std;
 using namespace bitpit;
 
 // =================================================================================== //
+/*!
+	\example PABLO_example_00003.cpp
+
+	\brief 2D smoothing data using PABLO
+
+	This example shows how to use PABLO's methods to find neighboring quadrants of a
+	specified element.
+	Neighbors search can be performed through faces, edges and nodes
+	(in 2D case, only faces and nodes).
+
+	In this example a 2D octree is refined four times and then a set of data is
+	assigned to the mesh using STL vectors.
+	More specifically, an integer equal to 1 is assigned uniformly to all
+	quadrants within a circle, and 0 to the remaining quadrants.
+	In this example neighbor-search is used to perform a simple moving-average-smoothing
+	procedure of the data.
+
+	The obtained results show the time-evolution of data over 25 smoothing iterations.
+
+	<b>To run</b>: ./PABLO_example_00003 \n
+
+	<b>To see the result visit</b>: <a href="http://optimad.github.io/PABLO/">PABLO website</a> \n
+
+*/
+// =================================================================================== //
 
 int main(int argc, char *argv[]) {
 
@@ -37,12 +62,12 @@ int main(int argc, char *argv[]) {
 	{
 #endif
 		int iter = 0;
-		/**<Instantation of a 2D para_tree object.*/
-		ParaTree pablo4;
+		/**<Instantation of a 2D pablo uniform object.*/
+		PabloUniform pablo3;
 
-		/**<Refine globally four level and write the para_tree.*/
+		/**<Refine globally four level and write the octree.*/
 		for (iter=1; iter<5; iter++){
-			pablo4.adaptGlobalRefine();
+			pablo3.adaptGlobalRefine();
 		}
 
 		/**<Define a center point and a radius.*/
@@ -51,13 +76,13 @@ int main(int argc, char *argv[]) {
 		double radius = 0.25;
 
 		/**<Define vectors of data.*/
-		uint32_t nocts = pablo4.getNumOctants();
+		uint32_t nocts = pablo3.getNumOctants();
 		vector<double> oct_data(nocts, 0.0);
 
 		/**<Assign a data to the octants with at least one node inside the circle.*/
 		for (int i=0; i<nocts; i++){
 			/**<Compute the nodes of the octant.*/
-			vector<array<double,3> > nodes = pablo4.getNodes(i);
+			vector<array<double,3> > nodes = pablo3.getNodes(i);
 			for (int j=0; j<4; j++){
 				double x = nodes[j][0];
 				double y = nodes[j][1];
@@ -67,10 +92,10 @@ int main(int argc, char *argv[]) {
 			}
 		}
 
-		/**<Update the connectivity and write the para_tree.*/
+		/**<Update the connectivity and write the octree.*/
 		iter = 0;
-		pablo4.updateConnectivity();
-		pablo4.writeTest("Pablo4_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
+		pablo3.updateConnectivity();
+		pablo3.writeTest("pablo00003_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
 
 		/**<Smoothing iterations on initial data*/
 		int start = 1;
@@ -93,7 +118,7 @@ int main(int argc, char *argv[]) {
 						nfaces = 4;
 					}
 					for (iface=0; iface<nfaces; iface++){
-						pablo4.findNeighbours(i,iface,codim,neigh_t,isghost_t);
+						pablo3.findNeighbours(i,iface,codim,neigh_t,isghost_t);
 						neigh.insert(neigh.end(), neigh_t.begin(), neigh_t.end());
 						isghost.insert(isghost.end(), isghost_t.begin(), isghost_t.end());
 					}
@@ -111,9 +136,9 @@ int main(int argc, char *argv[]) {
 				}
 			}
 
-			/**<Update the connectivity and write the para_tree.*/
-			pablo4.updateConnectivity();
-			pablo4.writeTest("Pablo4_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data_smooth);
+			/**<Update the connectivity and write the octree.*/
+			pablo3.updateConnectivity();
+			pablo3.writeTest("pablo00003_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data_smooth);
 
 			oct_data = oct_data_smooth;
 		}

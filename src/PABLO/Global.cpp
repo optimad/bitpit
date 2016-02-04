@@ -30,11 +30,17 @@ namespace bitpit {
 // CLASS IMPLEMENTATION                                                                    //
 // =================================================================================== //
 
+/*!Get the bytes occupation of a boolean.
+ * \return Bytes occupation of a boolean.
+ */
 uint8_t
 Global::getBoolBytes()  {
 	return m_boolBytes;
 }
 
+/*! Get the components of the "normals" per edge (bisector of edge)
+ * \return Components (x,y,z) of the "normals" per edge.
+ */
 void
 Global::getEdgecoeffs(int8_t edgecoeffs_[12][3])  {
 	for (int i=0; i<12; i++){
@@ -44,6 +50,10 @@ Global::getEdgecoeffs(int8_t edgecoeffs_[12][3])  {
 	}
 }
 
+/*! Get the connectivity edge-face.
+ * \param[out] edgeface_ edgeface[i][0:1] = local indices of faces sharing
+ * the i-th edge of an octant.
+ */
 void
 Global::getEdgeface(uint8_t edgeface_[12][2])  {
 	for (int i=0; i<12; i++){
@@ -53,6 +63,10 @@ Global::getEdgeface(uint8_t edgeface_[12][2])  {
 	}
 }
 
+/*! Get the connectivity face-node.
+ * \param[out] facenode_ facenode[i][0:1] = local indices of nodes
+ * of the i-th face of an octant.
+ */
 void
 Global::getFacenode(uint8_t facenode_[6][4])  {
 	for (int i=0; i<6; i++){
@@ -62,56 +76,89 @@ Global::getFacenode(uint8_t facenode_[6][4])  {
 	}
 }
 
+/*!Get the bytes occupation of the global index of an octant.
+ * \return Bytes occupation of a global index.
+ */
 uint8_t
 Global::getGlobalIndexBytes()  {
 	return m_globalIndexBytes;
 }
 
+/*!Get the bytes occupation of the level of an octant.
+ * \return Bytes occupation of level.
+ */
 uint8_t
 Global::getLevelBytes()  {
 	return m_levelBytes;
 }
 
+/*!Get the bytes occupation of the marker of an octant.
+ * \return Bytes occupation of marker.
+ */
 uint8_t
 Global::getMarkerBytes()  {
 	return m_markerBytes;
 }
 
+/*!Get the length of the logical domain.
+ * \return Length of the logical domain.
+ */
 uint32_t
 Global::getMaxLength()  {
 	return m_maxLength;
 }
 
+/*!Get the maximum allowed refinement level of octree.
+ * \return Maximum allowed refinement level of octree.
+ */
 int8_t
 Global::getMaxLevel()  {
 	return m_maxLevel;
 }
 
+/*!Get the number of children of an octant.
+ * \return Number of children of an octant.
+ */
 uint8_t
 Global::getNchildren()  {
 	return m_nchildren;
 }
 
+/*!Get the number of edges of an octant.
+ * \return Number of edges of an octant.
+ */
 uint8_t
 Global::getNedges()  {
 	return m_nedges;
 }
 
+/*!Get the number of faces of an octant.
+ * \return Number of faces of an octant.
+ */
 uint8_t
 Global::getNfaces()  {
 	return m_nfaces;
 }
 
+/*!Get the number of nodes of an octant.
+ * \return Number of nodes of an octant.
+ */
 uint8_t
 Global::getNnodes()  {
 	return m_nnodes;
 }
 
+/*!Get the number of nodes of a face an octant.
+ * \return Number of nodes of a face of an octant.
+ */
 uint8_t
 Global::getNnodesperface()  {
 	return m_nnodesPerFace;
 }
 
+/*! Get the components of the "normals" per node (bisector of node)
+ * \return Components (x,y,z) of the "normals" per node.
+ */
 void
 Global::getNodecoeffs(int8_t nodecoeffs_[8][3])  {
 	for (int i=0; i<8; i++){
@@ -121,6 +168,10 @@ Global::getNodecoeffs(int8_t nodecoeffs_[8][3])  {
 	}
 }
 
+/*! Get the connectivity node-face.
+ * \param[out] nodeface_ nodeface[i][0:1] = local indices of faces
+ * sharing the i-th node of an octant.
+ */
 void
 Global::getNodeface(uint8_t nodeface_[8][3])  {
 	for (int i=0; i<8; i++){
@@ -130,6 +181,9 @@ Global::getNodeface(uint8_t nodeface_[8][3])  {
 	}
 }
 
+/*! Get the components of the normals of faces.
+ * \return Components (x,y,z) of the normals per face (z=0 in 2D).
+ */
 void
 Global::getNormals(int8_t normals_[6][3])  {
 	for (int i=0; i<6; i++){
@@ -139,11 +193,17 @@ Global::getNormals(int8_t normals_[6][3])  {
 	}
 }
 
+/*!Get the bytes occupation of an octant.
+ * \return Bytes occupation of an octant.
+ */
 uint8_t
 Global::getOctantBytes()  {
 	return m_octantBytes;
 }
-
+/*! Get the index of the opposite face of each face.
+* \return oppface[i] = index of the face of an octant neighbour
+* through the i-th face of the current octant.
+*/
 void
 Global::getOppface(uint8_t oppface_[6])  {
 	for (int j=0; j<6; j++){

@@ -97,7 +97,7 @@ public:
 	Intersection(const Intersection & intersection);
 	Intersection & operator =(const Intersection & intersection);
 private:
-	Intersection(uint8_t dim_);
+	Intersection(uint8_t dim);
 	bool operator ==(const Intersection & intersection);
 
 	// =================================================================================== //

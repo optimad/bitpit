@@ -122,7 +122,7 @@ private:
 														{0,2,1},{2,2,1},{0,1,2},
 														{2,1,2},{1,0,2},{1,2,2}};  /**< Static member for internal use. */
 
-	static int8_t			sm_maxLevel;
+	static int8_t			sm_maxLevel;				/**<Static member: maximum allowed refinement level of the octree. */
 
 	// =================================================================================== //
 	// CONSTRUCTORS AND OPERATORS

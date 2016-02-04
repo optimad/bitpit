@@ -36,7 +36,10 @@ namespace bitpit {
 // =================================================================================== //
 // CONSTRUCTORS AND OPERATORS
 // =================================================================================== //
-
+/*! Default constructor of Intersection.
+ * It build a void 2D, no boundary neither process boundary intersection.
+ * Every member set to a default value 0.
+ */
 Intersection::Intersection(){
 	m_owners[0] = 0;
 	m_owners[1] = 0;
@@ -49,7 +52,12 @@ Intersection::Intersection(){
 	m_dim = 2;
 };
 
-Intersection::Intersection(uint8_t dim_){
+/*! Custom constructor of Intersection with user set dimension.
+ * It build a void, no boundary neither process boundary intersection.
+ * Every member set to a default value 0.
+ * \param[in] dim The space dimension of the octree. 2D is the default value.
+ */
+Intersection::Intersection(uint8_t dim){
 	m_owners[0] = 0;
 	m_owners[1] = 0;
 	m_iface = 0;
@@ -58,9 +66,12 @@ Intersection::Intersection(uint8_t dim_){
 	m_finer = 0;
 	m_out = 0;
 	m_bound = m_pbound = false;
-	m_dim = dim_;
+	m_dim = dim;
 };
 
+/*! Copy constructor of Intersection.
+ * \param[in] intersection Intersection to be copied.
+ */
 Intersection::Intersection(const Intersection & intersection){
 	m_owners[0] = intersection.m_owners[0];
 	m_owners[1] = intersection.m_owners[1];
@@ -74,6 +85,9 @@ Intersection::Intersection(const Intersection & intersection){
 	m_dim = intersection.m_dim;
 };
 
+/*! Assigmnement operator of Intersection.
+ * \param[in] intersection Intersection to be assigned.
+ */
 Intersection& Intersection::operator =(const Intersection & intersection){
 	m_owners[0] = intersection.m_owners[0];
 	m_owners[1] = intersection.m_owners[1];
@@ -88,6 +102,9 @@ Intersection& Intersection::operator =(const Intersection & intersection){
 	return *this;
 };
 
+/*! Equality operator of Intersection.
+ * \param[in] intersection Intersection to be compared.
+ */
 bool Intersection::operator ==(const Intersection & intersection){
 	bool check = true;
 	check = check && (m_owners[0] == intersection.m_owners[0]);

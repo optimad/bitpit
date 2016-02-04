@@ -33,25 +33,6 @@ Map::Map(int8_t maxlevel, uint8_t dim_){
 	m_maxLength_1 = 1/double(m_maxLength);
 };
 
-///*!Customized constructor with origin of octree in physical
-// * domain side length provided by the user.
-// * \param[in] X Coordinate X of the origin.
-// * \param[in] Y Coordinate Y of the origin.
-// * \param[in] Z Coordinate Z of the origin.
-// * \param[in] LL Side length of domain.
-// */
-//Map::Map(double & X, double & Y, double & Z, double & LL, int8_t maxlevel, uint8_t dim_){
-//	maxlevel = int8_t(max(0,min(int(maxlevel),20)));
-//	m_origin[0] = X;
-//	m_origin[1] = Y;
-//	m_origin[2] = Z;
-//	m_L = LL;
-//	m_dim = dim_;
-//	m_nnodes = 1<<m_dim;
-//	m_nnodesPerFace = 1<<(m_dim-1);
-//	m_maxLength = uint32_t(1<<maxlevel);
-//};
-
 // =================================================================================== //
 // METHODS
 // =================================================================================== //

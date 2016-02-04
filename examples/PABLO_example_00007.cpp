@@ -26,11 +26,37 @@
 
 #if ENABLE_MPI==1
 #include "PABLO_userDataComm.hpp"
+#include "PABLO_userDataLB.hpp"
 #endif
 
 using namespace std;
 using namespace bitpit;
 
+// =================================================================================== //
+/*!
+	\example PABLO_example_00007.cpp
+
+	\brief Parallel 2D adaptive mesh refinement (AMR) with data using PABLO
+
+	The example is the parallel version of PABLO_example_00004.
+
+	Here the main focus is on the load-balance of both grid and data.
+	The grid is refined several times together with the data and their inheritance
+	follows the same rules like in example 00004.
+	Until the last refinement no parallel paradigm is in action: every process owns
+	the entire grid.
+
+	After this refinement, the load-balance with data is introduced, giving as result
+	a parallel distribution of grid and data.
+
+	Even a constant vector of weight is used, in order to show that the loadBalance
+	can be performed by using a weight function for each cell.
+
+	<b>To run</b>: ./PABLO_example_00007 \n
+
+	<b>To see the result visit</b>: <a href="http://optimad.github.io/PABLO/">PABLO website</a> \n
+
+*/
 // =================================================================================== //
 
 int main(int argc, char *argv[]) {
@@ -41,20 +67,18 @@ int main(int argc, char *argv[]) {
 	{
 #endif
 		int iter = 0;
-		int dim = 2;
 
-		/**<Instantation of a 2D para_tree object.*/
-		ParaTree pablo14;
+		/**<Instantation of a 2D pablo uniform object.*/
+		PabloUniform pablo7;
 
-		/**<Refine globally four level and write the para_tree.*/
-		for (iter=1; iter<5; iter++){
-			pablo14.adaptGlobalRefine();
+		/**<Set NO 2:1 balance for the octree.*/
+		int idx = 0;
+		pablo7.setBalance(idx,false);
+
+		/**<Refine globally five level and write the octree.*/
+		for (iter=1; iter<6; iter++){
+			pablo7.adaptGlobalRefine();
 		}
-
-#if ENABLE_MPI==1
-		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
-		pablo14.loadBalance();
-#endif
 
 		/**<Define a center point and a radius.*/
 		double xc, yc;
@@ -62,97 +86,121 @@ int main(int argc, char *argv[]) {
 		double radius = 0.25;
 
 		/**<Define vectors of data.*/
-		uint32_t nocts = pablo14.getNumOctants();
-		uint32_t nghosts = pablo14.getNumGhosts();
+		uint32_t nocts = pablo7.getNumOctants();
+		uint32_t nghosts = pablo7.getNumGhosts();
 		vector<double> oct_data(nocts, 0.0), ghost_data(nghosts, 0.0);
 
-		/**<Assign a data to the octants with at least one node inside the circle.*/
+		/**<Assign a data (distance from center of a circle) to the octants with at least one node inside the circle.*/
 		for (int i=0; i<nocts; i++){
-			vector<array<double,3> > nodes = pablo14.getNodes(i);
+			/**<Compute the nodes of the octant.*/
+			vector<array<double,3> > nodes = pablo7.getNodes(i);
+			/**<Compute the center of the octant.*/
+			array<double,3> center = pablo7.getCenter(i);
 			for (int j=0; j<4; j++){
 				double x = nodes[j][0];
 				double y = nodes[j][1];
 				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
-					oct_data[i] = 1.0;
+					oct_data[i] = (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0));
 				}
 			}
 		}
 
-		/**<Assign a data to the ghost octants (PARALLEL TEST) with at least one node inside the circle.*/
-		for (int i=0; i<nghosts; i++){
-			/**<Compute the nodes of the octant (Use pointer for ghost).*/
-			Octant *oct = pablo14.getGhostOctant(i);
-			vector<array<double,3> > nodes = pablo14.getNodes(oct);
-			for (int j=0; j<4; j++){
-				double x = nodes[j][0];
-				double y = nodes[j][1];
-				if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
-					ghost_data[i] = 1.0;
-				}
-			}
-		}
-
-		/**<Update the connectivity and write the para_tree.*/
+		/**<Update the connectivity and write the octree.*/
 		iter = 0;
-		pablo14.updateConnectivity();
-		pablo14.writeTest("Pablo14_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
+		pablo7.updateConnectivity();
+		pablo7.writeTest("pablo00007_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
 
-		/**<Smoothing iterations on initial data*/
-		int start = iter + 1;
-		for (iter=start; iter<start+25; iter++){
-			vector<double> oct_data_smooth(nocts, 0.0);
-			vector<uint32_t> neigh, neigh_t;
-			vector<bool> isghost, isghost_t;
-			uint8_t iface, nfaces, codim;
+		/**<Adapt two times with data injection on new octants.*/
+		int start = 1;
+		/**<Weight.*/
+		vector<double> weight(nocts, 1.0),weightGhost;
+		for (iter=start; iter<start+2; iter++){
 			for (int i=0; i<nocts; i++){
-				neigh.clear();
-				isghost.clear();
+				/**<Compute the nodes of the octant.*/
+				vector<array<double,3> > nodes = pablo7.getNodes(i);
+				/**<Compute the center of the octant.*/
+				array<double,3> center = pablo7.getCenter(i);
+				for (int j=0; j<4; j++){
+					weight[i] = 2.0;
+					double x = nodes[j][0];
+					double y = nodes[j][1];
+					if ((pow((x-xc),2.0)+pow((y-yc),2.0) <= pow(radius,2.0))){
+						if (center[0]<=xc){
 
-				/**<Find neighbours through faces (codim=1) and edges (codim=2) of the octants*/
-				for (codim=1; codim<dim+1; codim++){
-					if (codim == 1){
-						nfaces = 4;
-					}
-					else if (codim == 2){
-						nfaces = 4;
-					}
-					for (iface=0; iface<nfaces; iface++){
-						pablo14.findNeighbours(i,iface,codim,neigh_t,isghost_t);
-						neigh.insert(neigh.end(), neigh_t.begin(), neigh_t.end());
-						isghost.insert(isghost.end(), isghost_t.begin(), isghost_t.end());
-					}
-				}
+							/**<Set to refine to the octants in the left side of the domain inside a circle.*/
+							pablo7.setMarker(i,1);
+							weight[i] = 1.0;
+						}
+						else{
 
-				/**<Smoothing data with the average over the one ring neighbours of octants*/
-				oct_data_smooth[i] = oct_data[i]/(neigh.size()+1);
-				for (int j=0; j<neigh.size(); j++){
-					if (isghost[j]){
-						oct_data_smooth[i] += ghost_data[neigh[j]]/(neigh.size()+1);
-					}
-					else{
-						oct_data_smooth[i] += oct_data[neigh[j]]/(neigh.size()+1);
+							/**<Set to coarse to the octants in the right side of the domain inside a circle.*/
+							pablo7.setMarker(i,-1);
+							weight[i] = 1.0;
+						}
 					}
 				}
 			}
 
-			/**<Update the connectivity and write the para_tree.*/
-			pablo14.updateConnectivity();
-			pablo14.writeTest("Pablo14_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data_smooth);
+			/**<Adapt the octree and map the data in the new octants.*/
+			vector<double> oct_data_new;
+			vector<double> weight_new;
+			vector<uint32_t> mapper;
+			vector<bool> isghost;
+			pablo7.adapt(true);
+			nocts = pablo7.getNumOctants();
+			oct_data_new.resize(nocts, 0.0);
+			weight_new.resize(nocts,0.0);
+
+			/**<Assign to the new octant the average of the old children if it is new after a coarsening;
+			 * while assign to the new octant the data of the old father if it is new after a refinement.
+			 */
+			for (uint32_t i=0; i<nocts; i++){
+				pablo7.getMapping(i, mapper, isghost);
+				if (pablo7.getIsNewC(i)){
+					for (int j=0; j<4; j++){
+						oct_data_new[i] += oct_data[mapper[j]]/4;
+						weight_new[i] += weight[mapper[j]];
+					}
+				}
+				else if (pablo7.getIsNewR(i)){
+					oct_data_new[i] += oct_data[mapper[0]];
+					weight_new[i] += weight[mapper[0]];
+				}
+				else{
+					oct_data_new[i] += oct_data[mapper[0]];
+					weight_new[i] += weight[mapper[0]];
+				}
+			}
+
+			/**<Update the connectivity and write the octree.*/
+			pablo7.updateConnectivity();
+			pablo7.writeTest("pablo00007_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data_new);
+
+			oct_data = oct_data_new;
+			weight = weight_new;
+		}
 
 #if ENABLE_MPI==1
-			/**<Communicate the data of the octants and the ghost octants between the processes.*/
-			UserDataComm<vector<double> > data_comm(oct_data_smooth, ghost_data);
-			pablo14.communicate(data_comm);
-
+		/**<(Load)Balance the octree over the processes with communicating the data.*/
+		UserDataLB<vector<double> > data_lb(weight,weightGhost);
+		pablo7.loadBalance(data_lb, &weight);
 #endif
-			oct_data = oct_data_smooth;
 
+		double tot = 0.0;
+		for (int i=0; i<weight.size(); i++){
+			tot += weight[i];
 		}
+
+		/**<Update the connectivity and write the octree.*/
+		pablo7.updateConnectivity();
+		pablo7.writeTest("pablo00007_iter"+to_string(static_cast<unsigned long long>(iter)), weight);
+
 #if ENABLE_MPI==1
 	}
 
 	MPI::Finalize();
 #endif
 }
+
 
 

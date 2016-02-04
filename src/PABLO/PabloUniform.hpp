@@ -53,7 +53,7 @@ typedef std::vector<darray3>			darray3vector;
  *	\authors		Marco Cisternino
  *
  *	\brief PABLO Uniform is an example of user class derived from ParaTree to map
- *	ParaTree in a uniform (quadratic/cubic) domain.
+ *	ParaTree in a uniform (square/cubic) domain.
  *	Pablo Uniform takes as input in constructor the coordinates of the origin (X,Y,Z) and the length of the side L.
  *
  *	Class PabloUniform has a dimensional parameter int dim and it accepts

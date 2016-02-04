@@ -36,23 +36,27 @@ using namespace bitpit;
 /*!
 	\example PABLO_bubbles_2D.cpp
 
-	\brief 2D dynamic adaptive mesh refinement using PABLO 
+	\brief 2D dynamic adaptive mesh refinement (AMR) using PABLO
 
-	This example creates a 2D Cartesian mesh on the square domain [-10,10]x[-10,10].
-	The domain is discretized with a cell size of 0.5 both in x and y directions.
+	This example creates a 2D Octree mesh on the square domain [0,1]x[0,1].
 
-	<b>To run</b>: ./createCartesianMesh2D \n
+	The domain is adapted to track a set of moving bubbles with random initialization.
+
+	<b>To run</b>: ./PABLO_bubbles_2D \n
+
+	<b>To see the result visit</b>: <a href="http://optimad.github.io/PABLO/">PABLO website</a> \n
 */
 
 
-/**<Declaration of a class bubble with center and radius.*/
-
 /*!  \cond  EXAMPLE_CLASSES */
+
+/**<Declaration of a class bubble with center and radius.*/
 class bubble{
 public:
 	double c[2];
 	double r;
 };
+
 /*!  \endcond   */
 
 int main(int argc, char *argv[]) {
@@ -72,7 +76,7 @@ int main(int argc, char *argv[]) {
 		int idx = 0;
 		pabloBB.setBalance(idx,true);
 
-		/**<Set periodic condition on face 0 (and 1).*/
+		/**<Set periodic condition on face 0 (and 1) (test 2:1 balance for periodic boundaries).*/
 		pabloBB.setPeriodic(0);
 
 		/**<Refine globally four level and write the para_tree.*/
@@ -143,14 +147,10 @@ int main(int argc, char *argv[]) {
 				BB[i].c[1] = BB[i].c[1]+ Dt*DY[i];
 			}
 
-
 			/**<Adapting (refinement and coarsening).*/
 			bool adapt = true;
-			int itad = 0;
 			while (adapt){
-
 				octantIterator it, itend = pabloBB.getInternalOctantsEnd();
-//				for (int i=0; i<nocts; i++){
 				for (it=pabloBB.getInternalOctantsBegin(); it!=itend; ++it){
 					bool inside = false;
 					/**<Compute the nodes of the octant.*/
@@ -167,11 +167,11 @@ int main(int argc, char *argv[]) {
 							double x = nodes[j][0];
 							double y = nodes[j][1];
 							if ( ((!inside) &&
-									(pow((x-xc),2.0)+pow((y-yc),2.0) <= 1.15*pow(radius,2.0) &&
-											pow((x-xc),2.0)+pow((y-yc),2.0) >= 0.85*pow(radius,2.0)))
-											|| ((!inside) && (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) <= 1.15*pow(radius,2.0) &&
-													pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) >= 0.85*pow(radius,2.0)))){
-								if (pabloBB.getLevel((*it)) < 9){
+									(pow((x-xc),2.0)+pow((y-yc),2.0) <= 1.25*pow(radius,2.0) &&
+											pow((x-xc),2.0)+pow((y-yc),2.0) >= 0.75*pow(radius,2.0)))
+											|| ((!inside) && (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) <= 1.25*pow(radius,2.0) &&
+													pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) >= 0.75*pow(radius,2.0)))){
+								if (int(pabloBB.getLevel((*it))) < 9){
 									/**<Set to refine inside a band around the interface of the bubbles.*/
 									pabloBB.setMarker((*it),1);
 								}
@@ -183,14 +183,13 @@ int main(int argc, char *argv[]) {
 						}
 						ib++;
 					}
-					if (pabloBB.getLevel((*it)) > 0 && !inside){
+					if (int(pabloBB.getLevel((*it))) > 0 && !inside){
 						/**<Set to coarse outside the band if the octant has a level higher than 6.*/
 						pabloBB.setMarker((*it),5-pabloBB.getLevel((*it)));
 					}
 				}
 
 				itend = pabloBB.getPboundOctantsEnd();
-//				for (int i=0; i<nocts; i++){
 				for (it=pabloBB.getPboundOctantsBegin(); it!=itend; ++it){
 					bool inside = false;
 					/**<Compute the nodes of the octant.*/
@@ -207,10 +206,10 @@ int main(int argc, char *argv[]) {
 							double x = nodes[j][0];
 							double y = nodes[j][1];
 							if ( ((!inside) &&
-									(pow((x-xc),2.0)+pow((y-yc),2.0) <= 1.15*pow(radius,2.0) &&
-											pow((x-xc),2.0)+pow((y-yc),2.0) >= 0.85*pow(radius,2.0)))
-											|| ((!inside) && (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) <= 1.15*pow(radius,2.0) &&
-													pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) >= 0.85*pow(radius,2.0)))){
+									(pow((x-xc),2.0)+pow((y-yc),2.0) <= 1.25*pow(radius,2.0) &&
+											pow((x-xc),2.0)+pow((y-yc),2.0) >= 0.75*pow(radius,2.0)))
+											|| ((!inside) && (pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) <= 1.25*pow(radius,2.0) &&
+													pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0) >= 0.75*pow(radius,2.0)))){
 								if (pabloBB.getLevel((*it)) < 9){
 									/**<Set to refine inside a band around the interface of the bubbles.*/
 									pabloBB.setMarker((*it),1);
@@ -234,8 +233,6 @@ int main(int argc, char *argv[]) {
 
 				/**<Update the number of local octants.*/
 				nocts = pabloBB.getNumOctants();
-
-				itad++;
 
 			}
 
