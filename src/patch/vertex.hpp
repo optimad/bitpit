@@ -25,8 +25,6 @@
 #ifndef __BITPIT_VERTEX_HPP__
 #define __BITPIT_VERTEX_HPP__
 
-/*! \file */
-
 #include <array>
 #include <memory>
 
@@ -40,11 +38,6 @@ bitpit::OBinaryStream& operator<< (bitpit::OBinaryStream &out, const bitpit::Ver
 bitpit::IBinaryStream& operator>> (bitpit::IBinaryStream &in, bitpit::Vertex &vertex);
 
 namespace bitpit {
-
-/*!
-	\ingroup patch
-	@{
-*/
 
 class Vertex {
 
@@ -86,10 +79,6 @@ private:
 
 extern template class bitpit::PiercedVector<Vertex>;
 extern template class bitpit::PositionalPiercedVector<Vertex>;
-
-/*!
-	@}
-*/
 
 }
 

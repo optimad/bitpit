@@ -25,8 +25,6 @@
 #ifndef __BITPIT_CELL_HPP__
 #define __BITPIT_CELL_HPP__
 
-/*! \file */
-
 #include <memory>
 
 #include "bitpit_containers.hpp"
@@ -41,11 +39,6 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buf, bitpit::Cell& cell
 bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buf, const bitpit::Cell& cell);
 
 namespace bitpit {
-
-/*!
-	\ingroup patch
-	@{
-*/
 
 class Cell : public Element {
 
@@ -94,10 +87,6 @@ private:
 
 extern template class bitpit::PiercedVector<Cell>;
 extern template class bitpit::PositionalPiercedVector<Cell>;
-
-/*!
-	@}
-*/
 
 }
 

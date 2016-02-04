@@ -22,43 +22,136 @@
  *
 \*---------------------------------------------------------------------------*/
 
-/*! \file */
-
 #include <unordered_map>
 
 #include "patch.hpp"
 
 namespace bitpit {
 
+/*!
+	\ingroup patch
+	@{
+*/
+
+/*!
+	\struct Adaption
+
+	\brief The Adaption struct defines the information associated to an
+	adaption.
+*/
+
+
+/*!
+	\enum Adaption::Type
+
+	\brief The Type enum defines the type of adaption that has been
+	performed.
+*/
+
+/*!
+	\enum Adaption::Entity
+
+	\brief The Entity enum defines the type of entities on which the
+	adaption has been performed.
+*/
+
+/*!
+	\struct Info
+
+	\brief The Info struct defines the information associated to an
+	adaption.
+*/
+
+/*!
+	@}
+*/
+
+/*!
+	\ingroup patch
+	@{
+*/
+
+/*!
+	\class FlatMapping
+
+	\brief The FlatMapping class allows to generate a mapping between an
+	id-base numeration to a continuous-index numeration.
+*/
+
+/*!
+	Default constructor.
+*/
 FlatMapping::FlatMapping()
 	: m_patch(nullptr)
 {
 }
 
+/*!
+	Creates a new flat mapping.
+
+	\param patch is the patch from witch the flat numbering will be built
+*/
 FlatMapping::FlatMapping(Patch *patch)
 	: m_patch(patch)
 {
 }
 
+/*!
+	Default destructor.
+*/
 FlatMapping::~FlatMapping()
 {
 }
 
+/*!
+	Gets the numbering associated to the flat mapping.
+
+	\result The numbering associated to the flat mapping.
+*/
 const std::vector<long> & FlatMapping::getNumbering() const
 {
 	return m_numbering;
 }
 
+/*!
+	Gets the mapping associated to the flat mapping.
+
+	\result The mapping associated to the flat mapping.
+*/
 const std::vector<long> & FlatMapping::getMapping() const
 {
 	return m_mapping;
 }
 
+/*!
+	@}
+*/
+
+/*!
+	\ingroup patch
+	@{
+*/
+
+/*!
+	\class CellFlatMapping
+
+	\brief The CellFlatMapping class allows to generate a cell mapping
+	between an id-base numeration to a continuous-index numeration.
+*/
+
+/*!
+	Default constructor.
+*/
 CellFlatMapping::CellFlatMapping()
 	: FlatMapping()
 {
 }
 
+/*!
+	Creates a new cell flat mapping.
+
+	\param patch is the patch from witch the flat numbering will be built
+*/
 CellFlatMapping::CellFlatMapping(Patch *patch)
 	: FlatMapping(patch)
 {
@@ -79,10 +172,19 @@ CellFlatMapping::CellFlatMapping(Patch *patch)
 	}
 }
 
+/*!
+	Default destructor.
+*/
 CellFlatMapping::~CellFlatMapping()
 {
 }
 
+/*!
+	Updates the cell flat mapping.
+
+	\param adaptionData is adaption data that will be used to update
+	the mapping
+*/
 void CellFlatMapping::update(const std::vector<Adaption::Info> adaptionData)
 {
 	// Previous number of cells

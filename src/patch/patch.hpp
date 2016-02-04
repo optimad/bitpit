@@ -25,8 +25,6 @@
 #ifndef __BITPIT_PATCH_HPP__
 #define __BITPIT_PATCH_HPP__
 
-/*! \file */
-
 #include <cstddef>
 #include <memory>
 #include <string>
@@ -40,11 +38,6 @@
 #include "vertex.hpp"
 
 namespace bitpit {
-
-/*!
-	\ingroup patch
-	@{
-*/
 
 class Patch : public bitpit::VTKUnstructuredGrid {
 
@@ -163,10 +156,6 @@ private:
 
 	std::array<double, 3> evalElementCentroid(const Element &element);
 };
-
-/*!
-	@}
-*/
 
 }
 

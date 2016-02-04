@@ -25,8 +25,6 @@
 #ifndef __BITPIT_ELEMENT_HPP__
 #define __BITPIT_ELEMENT_HPP__
 
-/*! \file */
-
 #include <cstddef>
 #include <memory>
 #include <vector>
@@ -41,11 +39,6 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buf, bitpit::Element& e
 bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buf, const bitpit::Element& element);
 
 namespace bitpit {
-
-/*!
-	\ingroup patch
-	@{
-*/
 
 class ElementInfo {
 
@@ -202,10 +195,6 @@ private:
 
 extern template class bitpit::PiercedVector<Element>;
 extern template class bitpit::PositionalPiercedVector<Element>;
-
-/*!
-	@}
-*/
 
 }
 

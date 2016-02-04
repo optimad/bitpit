@@ -25,8 +25,6 @@
 #ifndef __BITPIT_ADAPTION_HPP__
 #define __BITPIT_ADAPTION_HPP__
 
-/*! \file */
-
 #include <vector>
 
 namespace bitpit {

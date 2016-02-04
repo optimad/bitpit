@@ -25,8 +25,6 @@
 #ifndef __BITPIT_INTERFACE_HPP__
 #define __BITPIT_INTERFACE_HPP__
 
-/*! \file */
-
 #include <array>
 #include <memory>
 
@@ -35,11 +33,6 @@
 #include "element.hpp"
 
 namespace bitpit {
-
-/*!
-	\ingroup patch
-	@{
-*/
 
 class Interface : public Element {
 
@@ -86,11 +79,6 @@ private:
 
 extern template class bitpit::PiercedVector<Interface>;
 extern template class bitpit::PositionalPiercedVector<Interface>;
-
-
-/*!
-	@}
-*/
 
 }
 

@@ -27,10 +27,6 @@
 
 /*!
  * @defgroup patch Generic patch
- * @{
- * @defgroup utils Utils
- * @}
- *
  */
 
 #include "bitpit_version.hpp"
