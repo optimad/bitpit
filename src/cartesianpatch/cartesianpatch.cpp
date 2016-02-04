@@ -24,7 +24,7 @@
 
 #include <math.h>
 
-#include <bitpit_common.hpp>
+#include "bitpit_common.hpp"
 
 #include "cartesianpatch.hpp"
 
