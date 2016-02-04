@@ -677,7 +677,7 @@ public:
 	*/
 	bool exists(id_type id)
 	{
-		return !holes_find(id);
+		return !is_pos_empty(id);
 	}
 
 	/*!
