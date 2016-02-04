@@ -24,8 +24,9 @@
 
 #define __BITPIT_PATCH_UTILS_SRC__
 
+#include <cmath>
+
 #include "utils.hpp"
-#include "utils.tpp"
 
 namespace bitpit {
 
