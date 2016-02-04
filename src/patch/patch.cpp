@@ -80,7 +80,7 @@ const std::vector<Adaption::Info> Patch::update(bool trackAdaption)
 	m_interfaces.flush();
 	m_vertices.flush();
 
-	set_dirty(false);
+	setDirty(false);
 
 	return adaptionInfo;
 }
@@ -94,7 +94,7 @@ void Patch::markCellForRefinement(const long &id)
 {
 	bool updated = _markCellForRefinement(id);
 
-	set_dirty(updated);
+	setDirty(updated);
 }
 
 /*!
@@ -106,7 +106,7 @@ void Patch::markCellForCoarsening(const long &id)
 {
 	bool updated = _markCellForCoarsening(id);
 
-	set_dirty(updated);
+	setDirty(updated);
 }
 
 /*!
@@ -119,7 +119,7 @@ void Patch::enableCellBalancing(const long &id, bool enabled)
 {
 	bool updated = _enableCellBalancing(id, enabled);
 
-	set_dirty(updated);
+	setDirty(updated);
 }
 
 /*!
@@ -284,7 +284,7 @@ void Patch::writeVertexField(std::string filename, std::string name, const std::
 	definition has changed and thus the current data structures are not
 	valid anymore.
 */
-void Patch::set_dirty(bool dirty)
+void Patch::setDirty(bool dirty)
 {
 	if (m_dirty == dirty) {
 		return;

@@ -138,7 +138,7 @@ protected:
 	virtual bool _markCellForCoarsening(const long &id) = 0;
 	virtual bool _enableCellBalancing(const long &id, bool enabled) = 0;
 
-	void set_dirty(bool dirty);
+	void setDirty(bool dirty);
 
 private:
 	bool m_dirty;
