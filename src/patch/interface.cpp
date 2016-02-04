@@ -26,6 +26,7 @@
 
 #include "bitpit_common.hpp"
 #include "bitpit_operators.hpp"
+#include "bitpit_LA.hpp"
 
 #include "cell.hpp"
 #include "interface.hpp"
@@ -172,7 +173,7 @@ std::array<std::array<double, 3>, 3> Interface::eval_rotation_from_cartesian(std
 std::array<std::array<double, 3>, 3> Interface::eval_rotation_to_cartesian(std::array<double, 3> &versor)
 {
 	std::array<std::array<double, 3>, 3> R = eval_rotation_from_cartesian(versor);
-	utils::transpose_3D(R);
+	linearalgebra::transpose(R);
 
 	return R;
 }
@@ -186,7 +187,7 @@ std::array<std::array<double, 3>, 3> Interface::eval_rotation_to_cartesian(std::
 std::array<std::array<double, 3>, 3> Interface::eval_rotation_transpose(const std::array<std::array<double, 3>, 3> &R)
 {
 	std::array<std::array<double, 3>, 3> R_prime = R;
-	utils::transpose_3D(R_prime);
+	linearalgebra::transpose(R_prime);
 
 	return R_prime;
 }
