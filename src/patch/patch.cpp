@@ -29,12 +29,12 @@
 #include "patch.hpp"
 #include "utils.hpp"
 
-// Explicit instantiation of the bitpit::PiercedVectors
-template class bitpit::PiercedVector<Cell>;
-template class bitpit::PiercedVector<Interface>;
-template class bitpit::PiercedVector<Vertex>;
+namespace bitpit {
 
-namespace pman {
+// Explicit instantiation of the bitpit::PiercedVectors
+template class PiercedVector<Cell>;
+template class PiercedVector<Interface>;
+template class PiercedVector<Vertex>;
 
 /*!
 	\ingroup patch

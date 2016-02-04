@@ -29,6 +29,48 @@
 #include<iostream>
 
 /*!
+	Input stream operator for class Cell. Stream cell data from memory
+	input stream to container.
+
+	\param[in] buffer is the input stream from memory
+	\param[in] cell is the cell object
+	\result Returns the same input stream received in input.
+*/
+bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Cell &cell)
+{
+	// Write connectivity data ---------------------------------------------- //
+	bitpit::Element &element(cell);
+	buffer >> element;
+
+	// Write interface data ------------------------------------------------- //
+	buffer >> cell.m_interfaces;
+
+	return buffer;
+}
+
+/*!
+	Output stream operator for class Cell. Stream cell data from container
+	to output stream.
+
+	\param[in] buffer is the output stream from memory
+	\param[in] cell is the cell object
+	\result Returns the same output stream received in input.
+*/
+bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::Cell &cell)
+{
+	// Write connectivity data ---------------------------------------------- //
+	const bitpit::Element &element(cell);
+	buffer << element;
+
+	// Write interface data ------------------------------------------------- //
+	buffer << cell.m_interfaces;
+
+	return buffer;
+}
+
+namespace bitpit {
+
+/*!
 	\ingroup patch
 	@{
 */
@@ -287,46 +329,6 @@ void Cell::display(std::ostream &out, unsigned short int indent)
 }
 
 /*!
-	Input stream operator for class Cell. Stream cell data from memory
-	input stream to container.
-
-	\param[in] buffer is the input stream from memory
-	\param[in] cell is the cell object
-	\result Returns the same input stream received in input.
-*/
-bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, Cell &cell)
-{
-	// Write connectivity data ---------------------------------------------- //
-	Element &element_(cell);
-	buffer >> element_;
-
-	// Write interface data ------------------------------------------------- //
-	buffer >> cell.m_interfaces;
-
-	return buffer;
-}
-
-/*!
-	Output stream operator for class Cell. Stream cell data from container
-	to output stream.
-
-	\param[in] buffer is the output stream from memory
-	\param[in] cell is the cell object
-	\result Returns the same output stream received in input.
-*/
-bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const Cell &cell)
-{
-	// Write connectivity data ---------------------------------------------- //
-	const Element &element(cell);
-	buffer << element;
-
-	// Write interface data ------------------------------------------------- //
-	buffer << cell.m_interfaces;
-
-	return buffer;
-}
-
-/*!
 	Get the size of the buffer required to communicate cell.
 
 	\result Returns the buffer size (in bytes).
@@ -339,3 +341,5 @@ unsigned int Cell::get_binary_size()
 /*!
 	@}
 */
+
+}

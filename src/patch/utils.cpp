@@ -27,6 +27,8 @@
 #include "utils.hpp"
 #include "utils.tpp"
 
+namespace bitpit {
+
 namespace utils {
 
 /*!
@@ -89,5 +91,7 @@ void transpose_3D(std::array<std::array<double, 3>, 3> &A)
 /*!
     \}
 */
+
+}
 
 }

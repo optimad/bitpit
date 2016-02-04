@@ -39,7 +39,7 @@
 #include <string>
 #include <vector>
 
-namespace pman {
+namespace bitpit {
 
 /*!
 	\ingroup patch

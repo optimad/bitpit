@@ -28,7 +28,7 @@
 
 #include "patch.hpp"
 
-namespace pman {
+namespace bitpit {
 
 FlatMapping::FlatMapping()
 	: m_patch(nullptr)

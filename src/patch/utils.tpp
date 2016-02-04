@@ -30,6 +30,8 @@
 #include <algorithm>
 #include <vector>
 
+namespace bitpit {
+
 namespace utils {
 
 /*!
@@ -67,6 +69,8 @@ bool add_to_ordered_vector(const T &value, std::vector<T> &list, Comparator comp
 		return false;
 	}
 };
+
+}
 
 }
 

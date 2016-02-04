@@ -32,20 +32,24 @@
 
 #include <bitpit_containers.hpp>
 
+namespace bitpit {
+	class Vertex;
+}
+
+bitpit::OBinaryStream& operator<< (bitpit::OBinaryStream &out, const bitpit::Vertex &vertex);
+bitpit::IBinaryStream& operator>> (bitpit::IBinaryStream &in, bitpit::Vertex &vertex);
+
+namespace bitpit {
+
 /*!
 	\ingroup patch
 	@{
 */
 
-class Vertex;
-
-bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &out, const Vertex &vertex);
-bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &in, Vertex &vertex);
-
 class Vertex {
 
-friend bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream&, const Vertex &);
-friend bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream&, Vertex &);
+friend bitpit::OBinaryStream& (::operator<<) (bitpit::OBinaryStream&, const Vertex &);
+friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream&, Vertex &);
 
 public:
 	enum Coordinate {
@@ -83,5 +87,7 @@ private:
 /*!
 	@}
 */
+
+}
 
 #endif

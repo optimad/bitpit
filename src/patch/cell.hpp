@@ -33,20 +33,24 @@
 
 #include <bitpit_containers.hpp>
 
+namespace bitpit {
+	class Cell;
+}
+
+bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buf, bitpit::Cell& cell);
+bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buf, const bitpit::Cell& cell);
+
+namespace bitpit {
+
 /*!
 	\ingroup patch
 	@{
 */
 
-class Cell;
-
-bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buf, Cell& cell);
-bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buf, const Cell& cell);
-
 class Cell : public Element {
 
-friend bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream& buf, const Cell& cell);
-friend bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream& buf, Cell& cell);
+friend bitpit::OBinaryStream& (::operator<<) (bitpit::OBinaryStream& buf, const Cell& cell);
+friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream& buf, Cell& cell);
 
 public:
 	Cell();
@@ -91,5 +95,7 @@ private:
 /*!
 	@}
 */
+
+}
 
 #endif

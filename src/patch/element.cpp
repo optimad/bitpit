@@ -28,6 +28,45 @@
 #include <limits>
 
 /*!
+	Input stream operator for class Element
+
+	\param[in] buffer is the input stream
+	\param[in] element is the element to be streamed
+	\result Returns the same input stream received in input.
+*/
+bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Element &element)
+{
+	buffer >> element.m_type;
+	element.initialize(element.m_type);
+	int nVertices = element.get_vertex_count();
+	for (int i = 0; i < nVertices; ++i) {
+	    buffer >> element.m_connect[i];
+	}
+
+	return buffer;
+}
+
+/*!
+	Output stream operator for element
+
+	\param[in] buffer is the output stream
+	\param[in] element is the element to be streamed
+	\result Returns the same output stream received in input.
+*/
+bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::Element &element)
+{
+	int nVertices = element.get_vertex_count();
+	buffer << element.get_type();
+	for (int i = 0; i < nVertices; ++i) {
+	    buffer << element.m_connect[i];
+	}
+
+	return buffer;
+}
+
+namespace bitpit {
+
+/*!
 	\ingroup patch
 	@{
 */
@@ -1207,42 +1246,7 @@ unsigned int Element::get_binary_size()
 }
 
 /*!
-	Input stream operator for class Element
-
-	\param[in] buffer is the input stream
-	\param[in] element is the element to be streamed
-	\result Returns the same input stream received in input.
-*/
-bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, Element &element)
-{
-	buffer >> element.m_type;
-	element.initialize(element.m_type);
-	int nVertices = element.get_vertex_count();
-	for (int i = 0; i < nVertices; ++i) {
-	    buffer >> element.m_connect[i];
-	}
-
-	return buffer;
-}
-
-/*!
-	Output stream operator for element
-
-	\param[in] buffer is the output stream
-	\param[in] element is the element to be streamed
-	\result Returns the same output stream received in input.
-*/
-bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const Element &element)
-{
-	int nVertices = element.get_vertex_count();
-	buffer << element.get_type();
-	for (int i = 0; i < nVertices; ++i) {
-	    buffer << element.m_connect[i];
-	}
-
-	return buffer;
-}
-
-/*!
 	@}
 */
+
+}

@@ -29,6 +29,8 @@
 #include "interface.hpp"
 #include "utils.hpp"
 
+namespace bitpit {
+
 /*!
 	\ingroup patch
 	@{
@@ -295,3 +297,5 @@ std::array<long, 2> Interface::get_owner_neigh() const
 /*!
 	@}
 */
+
+}

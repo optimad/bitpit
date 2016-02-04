@@ -31,8 +31,12 @@
 
 #include <bitpit_containers.hpp>
 
+namespace bitpit {
+
 extern template class Positionalbitpit::PiercedVector<Cell>;
 extern template class Positionalbitpit::PiercedVector<Interface>;
 extern template class Positionalbitpit::PiercedVector<Vertex>;
+
+}
 
 #endif

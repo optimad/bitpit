@@ -32,6 +32,8 @@
 
 #include "element.hpp"
 
+namespace bitpit {
+
 /*!
 	\ingroup patch
 	@{
@@ -83,5 +85,7 @@ private:
 /*!
 	@}
 */
+
+}
 
 #endif

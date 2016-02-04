@@ -29,7 +29,7 @@
 
 #include <vector>
 
-namespace pman {
+namespace bitpit {
 
 struct Adaption
 {

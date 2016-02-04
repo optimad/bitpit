@@ -33,6 +33,15 @@
 
 #include <bitpit_containers.hpp>
 
+namespace bitpit {
+	class Element;
+}
+
+bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buf, bitpit::Element& element);
+bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buf, const bitpit::Element& element);
+
+namespace bitpit {
+
 /*!
 	\ingroup patch
 	@{
@@ -102,15 +111,10 @@ private:
 
 };
 
-class Element;
-
-bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buf, Element& element);
-bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buf, const Element& element);
-
 class Element {
 
-friend bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream& buf, const Element& element);
-friend bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream& buf, Element& element);
+friend bitpit::OBinaryStream& (::operator<<) (bitpit::OBinaryStream& buf, const Element& element);
+friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream& buf, Element& element);
 
 public:
 	/*!
@@ -199,5 +203,7 @@ private:
 /*!
 	@}
 */
+
+}
 
 #endif
