@@ -31,7 +31,7 @@
 #include <memory>
 #include <vector>
 
-#include "patch.hpp"
+#include "bitpit_patch.hpp"
 
 namespace bitpit {
 
