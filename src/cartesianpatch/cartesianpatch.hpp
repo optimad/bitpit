@@ -25,8 +25,6 @@
 #ifndef __BITPIT_CARTESIANPATCH_HPP__
 #define __BITPIT_CARTESIANPATCH_HPP__
 
-/*! \file */
-
 #include <cstddef>
 #include <memory>
 #include <vector>
@@ -34,11 +32,6 @@
 #include "bitpit_patch.hpp"
 
 namespace bitpit {
-
-/*!
-	\ingroup cartesianpatch
-	@{
-*/
 
 class CartesianPatch : public Patch {
 
@@ -98,10 +91,6 @@ private:
 	long interface_cartesianToLinear(const int &normal, const int &i, const int &j, const int &k) const;
 
 };
-
-/*!
-	@}
-*/
 
 }
 
