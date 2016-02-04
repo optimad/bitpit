@@ -30,7 +30,6 @@
 #include "adaption.hpp"
 #include "cell.hpp"
 #include "interface.hpp"
-#include "patchPiercedVector.hpp"
 #include "vertex.hpp"
 
 #include <bitpit_IO.hpp>

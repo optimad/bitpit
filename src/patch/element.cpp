@@ -1245,6 +1245,10 @@ unsigned int Element::get_binary_size()
     return (sizeof(ElementInfo::Type) + get_vertex_count() * sizeof(long));
 }
 
+// Explicit instantiation of the Element containers
+template class PiercedVector<Element>;
+template class PositionalPiercedVector<Element>;
+
 /*!
 	@}
 */

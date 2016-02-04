@@ -338,6 +338,10 @@ unsigned int Cell::get_binary_size()
     return (Element::get_binary_size() + m_interfaces.get_binary_size());
 }
 
+// Explicit instantiation of the Cell containers
+template class PiercedVector<Cell>;
+template class PositionalPiercedVector<Cell>;
+
 /*!
 	@}
 */

@@ -31,11 +31,6 @@
 
 namespace bitpit {
 
-// Explicit instantiation of the bitpit::PiercedVectors
-template class PiercedVector<Cell>;
-template class PiercedVector<Interface>;
-template class PiercedVector<Vertex>;
-
 /*!
 	\ingroup patch
 	@{

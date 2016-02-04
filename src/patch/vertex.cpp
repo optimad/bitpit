@@ -180,6 +180,10 @@ const std::array<double, 3> & Vertex::get_coords() const
 	return m_coords;
 }
 
+// Explicit instantiation of the Vertex containers
+template class PiercedVector<Vertex>;
+template class PositionalPiercedVector<Vertex>;
+
 /*!
 	@}
 */

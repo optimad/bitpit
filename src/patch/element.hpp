@@ -200,6 +200,9 @@ private:
 
 };
 
+extern template class bitpit::PiercedVector<Element>;
+extern template class bitpit::PositionalPiercedVector<Element>;
+
 /*!
 	@}
 */

@@ -84,6 +84,9 @@ private:
 
 };
 
+extern template class bitpit::PiercedVector<Vertex>;
+extern template class bitpit::PositionalPiercedVector<Vertex>;
+
 /*!
 	@}
 */

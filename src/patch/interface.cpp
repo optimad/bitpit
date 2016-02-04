@@ -294,6 +294,10 @@ std::array<long, 2> Interface::get_owner_neigh() const
 	return cells;
 }
 
+// Explicit instantiation of the Interface containers
+template class PiercedVector<Interface>;
+template class PositionalPiercedVector<Interface>;
+
 /*!
 	@}
 */

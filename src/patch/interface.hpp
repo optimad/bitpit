@@ -31,6 +31,7 @@
 #include <memory>
 
 #include "element.hpp"
+#include <bitpit_containers.hpp>
 
 namespace bitpit {
 
@@ -81,6 +82,10 @@ private:
 	Interface& operator = (const Interface &other) = delete;
 
 };
+
+extern template class bitpit::PiercedVector<Interface>;
+extern template class bitpit::PositionalPiercedVector<Interface>;
+
 
 /*!
 	@}
