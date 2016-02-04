@@ -32,5 +32,6 @@
 #include "bitpit_version.hpp"
 
 #include "patch.hpp"
+#include "adaption.hpp"
 
 #endif
