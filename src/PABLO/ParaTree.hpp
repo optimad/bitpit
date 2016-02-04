@@ -382,7 +382,6 @@ public:
 	// =================================================================================== //
 private:
 	Octant& extractOctant(uint32_t idx);
-	bool 		private_adapt();
 	bool 		private_adapt_mapidx(bool mapflag);
 	void 		updateAdapt();
 #if ENABLE_MPI==1
