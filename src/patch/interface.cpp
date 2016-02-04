@@ -142,11 +142,11 @@ std::array<std::array<double, 3>, 3> Interface::eval_rotation_from_cartesian(std
 		std::array<double, 3> x = {1.0, 0.0, 0.0};
 		R[1] = crossProduct(x, R[0]);
 	}
-	utils::normalize_3D(R[1]);
+	R[1] = R[1] / norm2(R[1]);
 
 	// z-interface axis
 	R[2] = crossProduct(R[0], R[1]);
-	utils::normalize_3D(R[2]);
+	R[2] = R[2] / norm2(R[2]);
 
 	return R;
 }
