@@ -22,7 +22,7 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#define __BITP_MESH_UTILS_SRC__
+#define __BITPIT_PATCH_UTILS_SRC__
 
 #include "utils.hpp"
 #include "utils.tpp"

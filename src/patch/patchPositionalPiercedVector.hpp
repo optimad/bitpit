@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __PATCHMAN_POSITIONAL_PIERCED_VECTOR_HPP__
-#define __PATCHMAN_POSITIONAL_PIERCED_VECTOR_HPP__
+#ifndef __BITPIT_POSITIONAL_PIERCED_VECTOR_HPP__
+#define __BITPIT_POSITIONAL_PIERCED_VECTOR_HPP__
 
 #include "cell.hpp"
 #include "interface.hpp"

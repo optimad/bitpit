@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITP_MESH_UTILS_TPP__
-#define __BITP_MESH_UTILS_TPP__
+#ifndef __BITPIT_PATCH_UTILS_TPP__
+#define __BITPIT_PATCH_UTILS_TPP__
 
 /*! \file */
 

@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __PATCHMAN_PATCH_HPP__
-#define __PATCHMAN_PATCH_HPP__
+#ifndef __BITPIT_PATCH_HPP__
+#define __BITPIT_PATCH_HPP__
 
 /*! \file */
 

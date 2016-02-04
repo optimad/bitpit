@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITP_MESH_ELEMENT_HPP__
-#define __BITP_MESH_ELEMENT_HPP__
+#ifndef __BITPIT_ELEMENT_HPP__
+#define __BITPIT_ELEMENT_HPP__
 
 /*! \file */
 

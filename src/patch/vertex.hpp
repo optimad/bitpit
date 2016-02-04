@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITP_MESH_VERTEX_HPP__
-#define __BITP_MESH_VERTEX_HPP__
+#ifndef __BITPIT_VERTEX_HPP__
+#define __BITPIT_VERTEX_HPP__
 
 /*! \file */
 
