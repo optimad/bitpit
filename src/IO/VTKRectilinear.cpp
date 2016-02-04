@@ -495,7 +495,7 @@ void VTKRectilinearGrid::setGlobalIndex( std::vector<extension2D_t> loc_ ){
     for( int i=0; i< nr_procs; ++i){
         proc_index[i][0]   = loc_[i][0] ;
         proc_index[i][1]   = loc_[i][1] ;
-        proc_index[i][2]   = {0,0} ;
+        proc_index[i][2]   = {{0,0}} ;
     }
 
     return;
