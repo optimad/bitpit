@@ -31,7 +31,7 @@
 #include <memory>
 #include <vector>
 
-#include <bitpit_containers.hpp>
+#include "bitpit_containers.hpp"
 
 namespace bitpit {
 	class Element;

@@ -25,7 +25,7 @@
 #include "cell.hpp"
 #include "interface.hpp"
 
-#include <bitpit_common.hpp>
+#include "bitpit_common.hpp"
 #include<iostream>
 
 /*!

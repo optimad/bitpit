@@ -32,7 +32,7 @@
 #include "interface.hpp"
 #include "vertex.hpp"
 
-#include <bitpit_IO.hpp>
+#include "bitpit_IO.hpp"
 #include <cstddef>
 #include <memory>
 #include <string>

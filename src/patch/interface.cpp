@@ -22,7 +22,7 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#include <bitpit_common.hpp>
+#include "bitpit_common.hpp"
 #include <math.h>
 
 #include "cell.hpp"
