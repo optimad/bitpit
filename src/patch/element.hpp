@@ -94,7 +94,7 @@ public:
 	ElementInfo();
 	ElementInfo(ElementInfo::Type type);
 
-	static const ElementInfo & get_element_info(ElementInfo::Type type);
+	static const ElementInfo & getElementInfo(ElementInfo::Type type);
 
 private:
 	void initializeUndefinedInfo();
@@ -162,31 +162,31 @@ public:
 	void set_id(const long &id);
 	long get_id() const;
 	
-	void set_type(ElementInfo::Type type);
-	ElementInfo::Type get_type() const;
+	void setType(ElementInfo::Type type);
+	ElementInfo::Type getType() const;
 
-	int get_dimension() const;
-	bool is_three_dimensional() const;
+	int getDimension() const;
+	bool isThreeDimensional() const;
 	
-	void set_connect(std::unique_ptr<long[]> connect);
-	void unset_connect();
-	const long * get_connect() const;
-	long * get_connect();
+	void setConnect(std::unique_ptr<long[]> connect);
+	void unsetConnect();
+	const long * getConnect() const;
+	long * getConnect();
 
-	int get_face_count() const;
-	ElementInfo::Type get_face_type(const int &face) const;
-	std::vector<int> get_face_local_connect(const int &face) const;
+	int getFaceCount() const;
+	ElementInfo::Type getFaceType(const int &face) const;
+	std::vector<int> getFaceLocalConnect(const int &face) const;
 
-	int get_edge_count() const;
-	std::vector<int> get_edge_local_connect(const int &edge) const;
+	int getEdgeCount() const;
+	std::vector<int> getEdgeLocalConnect(const int &edge) const;
 
-	void set_vertex(const int &index, const long &vertex);
-	int get_vertex_count() const;
-	long get_vertex(const int &vertex) const;
+	void setVertex(const int &index, const long &vertex);
+	int getVertexCount() const;
+	long getVertex(const int &vertex) const;
 
 	static const long NULL_ELEMENT_ID;
 
-	unsigned int get_binary_size();
+	unsigned int getBinarySize();
 
 private:
 	long m_id;

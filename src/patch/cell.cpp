@@ -119,7 +119,7 @@ void Cell::initialize(ElementInfo::Type type, int nInterfacesPerFace)
 	if (type != ElementInfo::UNDEFINED && nInterfacesPerFace >= 1) {
 		const ElementInfo &elementInfo = get_info();
 		std::vector<int> interfaceCount(elementInfo.nFaces, nInterfacesPerFace);
-		initialize_empty_interfaces(interfaceCount);
+		initializeEmptyInterfaces(interfaceCount);
 	}
 }
 
@@ -128,7 +128,7 @@ void Cell::initialize(ElementInfo::Type type, int nInterfacesPerFace)
 
 	\param interior defines if the cells belongs to the the interior domain
 */
-void Cell::set_interior(bool interior)
+void Cell::setInterior(bool interior)
 {
 	m_interior = interior;
 }
@@ -139,7 +139,7 @@ void Cell::set_interior(bool interior)
 	\result Returns true if the cells belongs to the the interior domain,
 	otherwise it returns false.
 */
-bool Cell::is_interior() const
+bool Cell::isInterior() const
 {
 	return m_interior;
 }
@@ -149,7 +149,7 @@ bool Cell::is_interior() const
 
 	\param interfaces the list of all interfaces associated to the cell
 */
-void Cell::initialize_interfaces(std::vector<std::vector<long>> &interfaces)
+void Cell::initializeInterfaces(std::vector<std::vector<long>> &interfaces)
 {
 	m_interfaces = bitpit::CollapsedVector2D<long>(interfaces);
 }
@@ -160,7 +160,7 @@ void Cell::initialize_interfaces(std::vector<std::vector<long>> &interfaces)
 
 	\param nInterfaces An array with the number of interfaces for each face
 */
-void Cell::initialize_empty_interfaces(const std::vector<int> interfaceCount)
+void Cell::initializeEmptyInterfaces(const std::vector<int> interfaceCount)
 {
 	m_interfaces = bitpit::CollapsedVector2D<long>(interfaceCount, NULL_ELEMENT_ID);
 }
@@ -172,7 +172,7 @@ void Cell::initialize_empty_interfaces(const std::vector<int> interfaceCount)
 	\param index the index of the interface
 	\param interface is the index of the interface 
 */
-void Cell::set_interface(const int &face, const int &index, const long &interface)
+void Cell::setInterface(const int &face, const int &index, const long &interface)
 {
 	m_interfaces.set(face, index, interface);
 }
@@ -183,7 +183,7 @@ void Cell::set_interface(const int &face, const int &index, const long &interfac
 	\param face is the face of the cell
 	\param interface is the index of the interface that will be added
 */
-void Cell::push_interface(const int &face, const long &interface)
+void Cell::pushInterface(const int &face, const long &interface)
 {
 	m_interfaces.push_back_in_sub_array(face, interface);
 }
@@ -195,7 +195,7 @@ void Cell::push_interface(const int &face, const long &interface)
 	\param face the face of the cell
 	\param i is the index of the interface to delete
 */
-void Cell::delete_interface(const int &face, const int &i)
+void Cell::deleteInterface(const int &face, const int &i)
 {
 	m_interfaces.erase(face, i);
 }
@@ -203,7 +203,7 @@ void Cell::delete_interface(const int &face, const int &i)
 /*!
 	Unsets the interfaces associated to the cell.
 */
-void Cell::unset_interfaces()
+void Cell::unsetInterfaces()
 {
 	m_interfaces.clear();
 }
@@ -213,7 +213,7 @@ void Cell::unset_interfaces()
 
 	\result The total number of interfaces of the cell.
 */
-int Cell::get_interface_count() const
+int Cell::getInterfaceCount() const
 {
 	return m_interfaces.sub_arrays_total_size();
 }
@@ -224,7 +224,7 @@ int Cell::get_interface_count() const
 	\param face the face of the cell
 	\result The number of interfaces of the specified face of the cell.
 */
-int Cell::get_interface_count(const int &face) const
+int Cell::getInterfaceCount(const int &face) const
 {
 	return m_interfaces.sub_array_size(face);
 }
@@ -236,7 +236,7 @@ int Cell::get_interface_count(const int &face) const
 	\param index the index of the interface to retreive
 	\result The requested interface.
 */
-long Cell::get_interface(const int &face, const int &index) const
+long Cell::getInterface(const int &face, const int &index) const
 {
 	return m_interfaces.get(face, index);
 }
@@ -246,7 +246,7 @@ long Cell::get_interface(const int &face, const int &index) const
 
 	\result The interfaces of the cell.
 */
-const long * Cell::get_interfaces() const
+const long * Cell::getInterfaces() const
 {
 	return m_interfaces.get(0);
 }
@@ -254,12 +254,12 @@ const long * Cell::get_interfaces() const
 /*!
 	Gets the interfaces of the given face of the cell.
 
-	\as get_interface(const int &face, const int &index) const
+	\as getInterface(const int &face, const int &index) const
 
 	\param face the face of the cell
 	\result The requested interfaces
 */
-const long * Cell::get_interfaces(const int &face) const
+const long * Cell::getInterfaces(const int &face) const
 {
 	return m_interfaces.get(face);
 }
@@ -287,17 +287,17 @@ void Cell::display(std::ostream &out, unsigned short int indent)
 	// ====================================================================== //
 	// DISPLAY INFOS                                                          //
 	// ====================================================================== //
-	if (get_type() != ElementInfo::UNDEFINED) {
+	if (getType() != ElementInfo::UNDEFINED) {
 	    out << t_s << "cell type:    (unknown)" << std::endl;
 	    return;
 	}
 
 	// Scope variables -------------------------------------------------- //
-	int                         nv = get_vertex_count();
-	int                         nf = get_face_count();
+	int                         nv = getVertexCount();
+	int                         nf = getFaceCount();
 
 	// General info ----------------------------------------------------- //
-	out << t_s << "cell type:    " << get_type() << std::endl;
+	out << t_s << "cell type:    " << getType() << std::endl;
 	out << t_s << "ID:           " << get_id() << std::endl;
 	out << t_s << "is ghost:     ";
 	if (m_interior)     { out << "(false)"; }
@@ -307,26 +307,26 @@ void Cell::display(std::ostream &out, unsigned short int indent)
 	// Connectivity infos --------------------------------------------------- //
 	out << t_s << "connectivity: [ ";
 	for (i = 0; i < nv-1; ++i) {
-		out << get_vertex(i) << ", ";
+		out << getVertex(i) << ", ";
 	} //next i
-	out << get_vertex(nv-1) << " ]" << std::endl;
+	out << getVertex(nv-1) << " ]" << std::endl;
 
 	// neighbors infos ------------------------------------------------------ //
 	out << t_s << "neighbors:   [ ";
 	for (i = 0; i < nf-1; ++i) {
-		nn = get_interface_count(i);
+		nn = getInterfaceCount(i);
 		out << "[ ";
 		for (j = 0; j < nn-1; ++j) {
-			out << get_interface(i, j) << ", ";
+			out << getInterface(i, j) << ", ";
 		} //next j
-		out << get_interface(i, nn-1) << " ], ";
+		out << getInterface(i, nn-1) << " ], ";
 	} //next i
-	nn = get_interface_count(nf-1);
+	nn = getInterfaceCount(nf-1);
 	out << "[ ";
 	for (j = 0; j < nn-1; ++j) {
-		out << get_interface(nf-1, j) << ", ";
+		out << getInterface(nf-1, j) << ", ";
 	} //next j
-	out << get_interface(nf-1, nn-1) << " ]";
+	out << getInterface(nf-1, nn-1) << " ]";
 	out << " ]" << std::endl;
 }
 
@@ -335,9 +335,9 @@ void Cell::display(std::ostream &out, unsigned short int indent)
 
 	\result Returns the buffer size (in bytes).
 */
-unsigned int Cell::get_binary_size()
+unsigned int Cell::getBinarySize()
 {
-    return (Element::get_binary_size() + m_interfaces.get_binary_size());
+    return (Element::getBinarySize() + m_interfaces.get_binary_size());
 }
 
 // Explicit instantiation of the Cell containers

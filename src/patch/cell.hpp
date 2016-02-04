@@ -61,24 +61,24 @@ public:
 
 	void initialize(ElementInfo::Type type, int nInterfacesPerFace = 0);
 
-	void set_interior(bool interior);
-	bool is_interior() const;
+	void setInterior(bool interior);
+	bool isInterior() const;
 	
-	void initialize_interfaces(std::vector<std::vector<long>> &interfaces);
-	void initialize_empty_interfaces(const std::vector<int> interfaceCount);
-	void set_interface(const int &face, const int &index, const long &interface);
-	void push_interface(const int &face, const long &interface);
-	void delete_interface(const int &face, const int &i);
-	void unset_interfaces();
-	int get_interface_count() const;
-	int get_interface_count(const int &face) const;
-	long get_interface(const int &face, const int &index = 0) const;
-	const long * get_interfaces() const;
-	const long * get_interfaces(const int &face) const;
+	void initializeInterfaces(std::vector<std::vector<long>> &interfaces);
+	void initializeEmptyInterfaces(const std::vector<int> interfaceCount);
+	void setInterface(const int &face, const int &index, const long &interface);
+	void pushInterface(const int &face, const long &interface);
+	void deleteInterface(const int &face, const int &i);
+	void unsetInterfaces();
+	int getInterfaceCount() const;
+	int getInterfaceCount(const int &face) const;
+	long getInterface(const int &face, const int &index = 0) const;
+	const long * getInterfaces() const;
+	const long * getInterfaces(const int &face) const;
 
 	void display(std::ostream &out, unsigned short int indent);
 
-	unsigned int get_binary_size( );
+	unsigned int getBinarySize( );
 
 protected:
 

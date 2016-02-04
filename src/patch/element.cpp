@@ -38,7 +38,7 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Element
 {
 	buffer >> element.m_type;
 	element.initialize(element.m_type);
-	int nVertices = element.get_vertex_count();
+	int nVertices = element.getVertexCount();
 	for (int i = 0; i < nVertices; ++i) {
 	    buffer >> element.m_connect[i];
 	}
@@ -55,8 +55,8 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Element
 */
 bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::Element &element)
 {
-	int nVertices = element.get_vertex_count();
-	buffer << element.get_type();
+	int nVertices = element.getVertexCount();
+	buffer << element.getType();
 	for (int i = 0; i < nVertices; ++i) {
 	    buffer << element.m_connect[i];
 	}
@@ -211,7 +211,7 @@ ElementInfo::ElementInfo(ElementInfo::Type type)
 	\param type is the type of element
 	\result The information for the specified element type.
 */
-const ElementInfo & ElementInfo::get_element_info(ElementInfo::Type type)
+const ElementInfo & ElementInfo::getElementInfo(ElementInfo::Type type)
 {
 	switch (type) {
 
@@ -944,13 +944,13 @@ Element::Element(const long &id, ElementInfo::Type type)
 */
 void Element::initialize(ElementInfo::Type type)
 {
-	set_type(type);
+	setType(type);
 
-	if (get_type() != ElementInfo::UNDEFINED) {
+	if (getType() != ElementInfo::UNDEFINED) {
 		const int &nVertices = get_info().nVertices;
-		set_connect(std::unique_ptr<long[]>(new long[nVertices]));
+		setConnect(std::unique_ptr<long[]>(new long[nVertices]));
 	} else {
-		unset_connect();
+		unsetConnect();
 	}
 }
 
@@ -981,7 +981,7 @@ long Element::get_id() const
 */
 const ElementInfo & Element::get_info() const
 {
-	return ElementInfo::get_element_info(m_type);
+	return ElementInfo::getElementInfo(m_type);
 }
 
 /*!
@@ -989,7 +989,7 @@ const ElementInfo & Element::get_info() const
 
 	\param type the element type
 */
-void Element::set_type(ElementInfo::Type type)
+void Element::setType(ElementInfo::Type type)
 {
 	m_type = type;
 }
@@ -999,7 +999,7 @@ void Element::set_type(ElementInfo::Type type)
 
 	\result The element type
 */
-ElementInfo::Type Element::get_type() const
+ElementInfo::Type Element::getType() const
 {
 	return m_type;
 }
@@ -1009,7 +1009,7 @@ ElementInfo::Type Element::get_type() const
 
 	\param connect a pointer to the connectivity of the element
 */
-void Element::set_connect(std::unique_ptr<long[]> connect)
+void Element::setConnect(std::unique_ptr<long[]> connect)
 {
 	m_connect = std::move(connect);
 }
@@ -1017,7 +1017,7 @@ void Element::set_connect(std::unique_ptr<long[]> connect)
 /*!
 	Unsets the vertex connectivity of the element.
 */
-void Element::unset_connect()
+void Element::unsetConnect()
 {
 	m_connect.reset();
 }
@@ -1027,7 +1027,7 @@ void Element::unset_connect()
 
 	\result A constant pointer to the connectivity of the element
 */
-const long * Element::get_connect() const
+const long * Element::getConnect() const
 {
 	return m_connect.get();
 }
@@ -1037,7 +1037,7 @@ const long * Element::get_connect() const
 
 	\result A pointer to the connectivity of the element
 */
-long * Element::get_connect()
+long * Element::getConnect()
 {
 	return m_connect.get();
 }
@@ -1047,7 +1047,7 @@ long * Element::get_connect()
 
 	\result The number of vertices of the element
 */
-int Element::get_face_count() const
+int Element::getFaceCount() const
 {
 	switch (m_type) {
 
@@ -1058,7 +1058,7 @@ int Element::get_face_count() const
 		return -1;
 
 	default:
-		const ElementInfo &elementInfo = ElementInfo::get_element_info(m_type);
+		const ElementInfo &elementInfo = ElementInfo::getElementInfo(m_type);
 		return elementInfo.nFaces;
 
 	}
@@ -1069,7 +1069,7 @@ int Element::get_face_count() const
 
 	\result The face type of specified face of the element
 */
-ElementInfo::Type Element::get_face_type(const int &face) const
+ElementInfo::Type Element::getFaceType(const int &face) const
 {
 	switch (m_type) {
 
@@ -1080,7 +1080,7 @@ ElementInfo::Type Element::get_face_type(const int &face) const
 		return ElementInfo::UNDEFINED;
 
 	default:
-		const ElementInfo &elementInfo = ElementInfo::get_element_info(m_type);
+		const ElementInfo &elementInfo = ElementInfo::getElementInfo(m_type);
 		return elementInfo.face_type[face];
 
 	}
@@ -1092,7 +1092,7 @@ ElementInfo::Type Element::get_face_type(const int &face) const
 	\param face is the face for which the connectiviy is reqested
 	\result The local connectivity of the specified face of the element.
 */
-std::vector<int> Element::get_face_local_connect(const int &face) const
+std::vector<int> Element::getFaceLocalConnect(const int &face) const
 {
 	switch (m_type) {
 
@@ -1103,7 +1103,7 @@ std::vector<int> Element::get_face_local_connect(const int &face) const
 		return std::vector<int>();
 
 	default:
-		const ElementInfo &elementInfo = ElementInfo::get_element_info(m_type);
+		const ElementInfo &elementInfo = ElementInfo::getElementInfo(m_type);
 		return elementInfo.face_connect[face];
 
 	}
@@ -1114,7 +1114,7 @@ std::vector<int> Element::get_face_local_connect(const int &face) const
 
 	\result The number of edges of the element
 */
-int Element::get_edge_count() const
+int Element::getEdgeCount() const
 {
 	switch (m_type) {
 
@@ -1125,7 +1125,7 @@ int Element::get_edge_count() const
 		return -1;
 
 	default:
-		const ElementInfo &elementInfo = ElementInfo::get_element_info(m_type);
+		const ElementInfo &elementInfo = ElementInfo::getElementInfo(m_type);
 		return elementInfo.nEdges;
 
 	}
@@ -1137,7 +1137,7 @@ int Element::get_edge_count() const
 	\param edge is the edge for which the connectiviy is reqested
 	\result The local connectivity of the specified edge of the element.
 */
-std::vector<int> Element::get_edge_local_connect(const int &edge) const
+std::vector<int> Element::getEdgeLocalConnect(const int &edge) const
 {
 	switch (m_type) {
 
@@ -1148,7 +1148,7 @@ std::vector<int> Element::get_edge_local_connect(const int &edge) const
 		return std::vector<int>();
 
 	default:
-		const ElementInfo &elementInfo = ElementInfo::get_element_info(m_type);
+		const ElementInfo &elementInfo = ElementInfo::getElementInfo(m_type);
 		return elementInfo.edge_connect[edge];
 
 	}
@@ -1159,7 +1159,7 @@ std::vector<int> Element::get_edge_local_connect(const int &edge) const
 
 	\return The dimension of the element
 */
-int Element::get_dimension() const
+int Element::getDimension() const
 {
 	switch (m_type) {
 
@@ -1174,7 +1174,7 @@ int Element::get_dimension() const
 		return -1;
 
 	default:
-		const ElementInfo &elementInfo = ElementInfo::get_element_info(m_type);
+		const ElementInfo &elementInfo = ElementInfo::getElementInfo(m_type);
 		return elementInfo.dimension;
 
 	}
@@ -1186,9 +1186,9 @@ int Element::get_dimension() const
 	\return Returns true if the element is a three-dimensional element,
 	false otherwise.
 */
-bool Element::is_three_dimensional() const
+bool Element::isThreeDimensional() const
 {
-	return (get_dimension() == 3);
+	return (getDimension() == 3);
 }
 
 /*!
@@ -1196,7 +1196,7 @@ bool Element::is_three_dimensional() const
 
 	\result The number of vertices of the element
 */
-int Element::get_vertex_count() const
+int Element::getVertexCount() const
 {
 	switch (m_type) {
 
@@ -1207,7 +1207,7 @@ int Element::get_vertex_count() const
 		return -1;
 
 	default:
-		const ElementInfo &elementInfo = ElementInfo::get_element_info(m_type);
+		const ElementInfo &elementInfo = ElementInfo::getElementInfo(m_type);
 		return elementInfo.nVertices;
 
 	}
@@ -1219,7 +1219,7 @@ int Element::get_vertex_count() const
 	\param index is the local index of the vertex
 	\param vertex is the id of the vertex.
 */
-void Element::set_vertex(const int &index, const long &vertex)
+void Element::setVertex(const int &index, const long &vertex)
 {
 	m_connect[index] = vertex;
 }
@@ -1230,7 +1230,7 @@ void Element::set_vertex(const int &index, const long &vertex)
 	\param vertex is the local index of the vertex
 	\result The id of the specified vertex.
 */
-long Element::get_vertex(const int &vertex) const
+long Element::getVertex(const int &vertex) const
 {
 	return m_connect[vertex];
 }
@@ -1240,9 +1240,9 @@ long Element::get_vertex(const int &vertex) const
 
         \result buffer size (in bytes)
 */
-unsigned int Element::get_binary_size()
+unsigned int Element::getBinarySize()
 {
-    return (sizeof(ElementInfo::Type) + get_vertex_count() * sizeof(long));
+    return (sizeof(ElementInfo::Type) + getVertexCount() * sizeof(long));
 }
 
 // Explicit instantiation of the Element containers

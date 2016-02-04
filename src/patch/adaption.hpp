@@ -75,8 +75,8 @@ public:
 
 	virtual void update(const std::vector<Adaption::Info> adaptionData) = 0;
 
-	const std::vector<long> & get_numbering() const;
-	const std::vector<long> & get_mapping() const;
+	const std::vector<long> & getNumbering() const;
+	const std::vector<long> & getMapping() const;
 
 protected:
 	Patch *m_patch;

@@ -51,11 +51,11 @@ Patch::Patch(const int &id, const int &dimension)
 	: m_dirty(true)
 {
 	set_id(id) ;
-	set_dimension(dimension);
+	setDimension(dimension);
 
 	std::ostringstream convert;
 	convert << get_id();
-	set_name(convert.str());
+	setName(convert.str());
 }
 
 /*!
@@ -90,9 +90,9 @@ const std::vector<Adaption::Info> Patch::update(bool trackAdaption)
 
 	\param id is the id of the cell that needs to be refined
 */
-void Patch::mark_cell_for_refinement(const long &id)
+void Patch::markCellForRefinement(const long &id)
 {
-	bool updated = _mark_cell_for_refinement(id);
+	bool updated = _markCellForRefinement(id);
 
 	set_dirty(updated);
 }
@@ -102,9 +102,9 @@ void Patch::mark_cell_for_refinement(const long &id)
 
 	\param id is the id of the cell that needs to be coarsened
 */
-void Patch::mark_cell_for_coarsening(const long &id)
+void Patch::markCellForCoarsening(const long &id)
 {
-	bool updated = _mark_cell_for_coarsening(id);
+	bool updated = _markCellForCoarsening(id);
 
 	set_dirty(updated);
 }
@@ -115,9 +115,9 @@ void Patch::mark_cell_for_coarsening(const long &id)
 	\param id is the id of the cell
 	\param enabled defines if enable the balancing for the specified cell
 */
-void Patch::enable_cell_balancing(const long &id, bool enabled)
+void Patch::enableCellBalancing(const long &id, bool enabled)
 {
-	bool updated = _enable_cell_balancing(id, enabled);
+	bool updated = _enableCellBalancing(id, enabled);
 
 	set_dirty(updated);
 }
@@ -127,48 +127,48 @@ void Patch::enable_cell_balancing(const long &id, bool enabled)
 */
 void Patch::reset()
 {
-	reset_vertices();
-	reset_cells();
-	reset_interfaces();
+	resetVertices();
+	resetCells();
+	resetInterfaces();
 }
 
 /*!
 	Resest the vertices of the patch.
 */
-void Patch::reset_vertices()
+void Patch::resetVertices()
 {
 	m_vertices.clear();
 	bitpit::PiercedVector<Vertex>().swap(m_vertices);
 
 	for (auto &cell : m_cells) {
-		cell.unset_connect();
+		cell.unsetConnect();
 	}
 }
 
 /*!
 	Resest the cells of the patch.
 */
-void Patch::reset_cells()
+void Patch::resetCells()
 {
 	m_cells.clear();
 	bitpit::PiercedVector<Cell>().swap(m_cells);
 
 	for (auto &interface : m_interfaces) {
-		interface.unset_neigh();
-		interface.unset_owner();
+		interface.unsetNeigh();
+		interface.unsetOwner();
 	}
 }
 
 /*!
 	Resest the interfaces of the patch.
 */
-void Patch::reset_interfaces()
+void Patch::resetInterfaces()
 {
 	m_interfaces.clear();
 	bitpit::PiercedVector<Interface>().swap(m_interfaces);
 
 	for (auto &cell : m_cells) {
-		cell.unset_interfaces();
+		cell.unsetInterfaces();
 	}
 }
 
@@ -177,7 +177,7 @@ void Patch::reset_interfaces()
 
 	\param filename the filename where the mesh will be written to
 */
-void Patch::write_mesh(std::string filename)
+void Patch::writeMesh(std::string filename)
 {
 	bitpit::VTKUnstructuredGrid::setCodex(bitpit::VTKFormat::APPENDED);
 	bitpit::VTKUnstructuredGrid::setNames(".", filename);
@@ -187,9 +187,9 @@ void Patch::write_mesh(std::string filename)
 /*!
 	Writes the mesh a filename with the same name of the mesh
 */
-void Patch::write_mesh()
+void Patch::writeMesh()
 {
-	write_mesh(get_name());
+	writeMesh(getName());
 }
 
 /*!
@@ -200,9 +200,9 @@ void Patch::write_mesh()
 	either on the vertices of on the cells
 	\param values is a vector with the values of the field
 */
-void Patch::write_field(std::string name, bitpit::VTKLocation location, const std::vector<double> &values)
+void Patch::writeField(std::string name, bitpit::VTKLocation location, const std::vector<double> &values)
 {
-	write_field(get_name(), name, location, values);
+	writeField(getName(), name, location, values);
 }
 
 /*!
@@ -214,14 +214,14 @@ void Patch::write_field(std::string name, bitpit::VTKLocation location, const st
 	either on the vertices of on the cells
 	\param values is a vector with the values of the field
 */
-void Patch::write_field(std::string filename, std::string name, bitpit::VTKLocation location, const std::vector<double> &values)
+void Patch::writeField(std::string filename, std::string name, bitpit::VTKLocation location, const std::vector<double> &values)
 {
 	bitpit::VTKUnstructuredGrid::addData(name, bitpit::VTKFieldType::SCALAR, location);
 	m_dataFields[name] = &values;
 	m_dataLocations[name] = location;
 	m_dataType[name] = bitpit::VTKFieldType::SCALAR;
 
-	write_mesh(filename);
+	writeMesh(filename);
 
 	bitpit::VTKUnstructuredGrid::removeData(name);
 	m_dataFields.erase(name);
@@ -235,9 +235,9 @@ void Patch::write_field(std::string filename, std::string name, bitpit::VTKLocat
 	\param name is the name of the field
 	\param values is a vector with the values of the field
 */
-void Patch::write_cell_field(std::string name, const std::vector<double> &values)
+void Patch::writeCellField(std::string name, const std::vector<double> &values)
 {
-	write_cell_field(get_name(), name, values);
+	writeCellField(getName(), name, values);
 }
 
 /*!
@@ -248,9 +248,9 @@ void Patch::write_cell_field(std::string name, const std::vector<double> &values
 	\param name is the name of the field
 	\param values is a vector with the values of the field
 */
-void Patch::write_cell_field(std::string filename, std::string name, const std::vector<double> &values)
+void Patch::writeCellField(std::string filename, std::string name, const std::vector<double> &values)
 {
-	write_field(filename, name, bitpit::VTKLocation::CELL, values);
+	writeField(filename, name, bitpit::VTKLocation::CELL, values);
 }
 
 /*!
@@ -259,9 +259,9 @@ void Patch::write_cell_field(std::string filename, std::string name, const std::
 	\param name is the name of the field
 	\param values is a vector with the values of the field
 */
-void Patch::write_vertex_field(std::string name, const std::vector<double> &values)
+void Patch::writeVertexField(std::string name, const std::vector<double> &values)
 {
-	write_vertex_field(get_name(), name, values);
+	writeVertexField(getName(), name, values);
 }
 
 /*!
@@ -272,9 +272,9 @@ void Patch::write_vertex_field(std::string name, const std::vector<double> &valu
 	\param name is the name of the field
 	\param values is a vector with the values of the field
 */
-void Patch::write_vertex_field(std::string filename, std::string name, const std::vector<double> &values)
+void Patch::writeVertexField(std::string filename, std::string name, const std::vector<double> &values)
 {
-	write_field(filename, name, bitpit::VTKLocation::POINT, values);
+	writeField(filename, name, bitpit::VTKLocation::POINT, values);
 }
 
 /*!
@@ -299,7 +299,7 @@ void Patch::set_dirty(bool dirty)
 	\return This method returns true to indicate the mesh needs to update
 	its data strucutres. Otherwise, it returns false.
 */
-bool Patch::is_dirty() const
+bool Patch::isDirty() const
 {
 	return m_dirty;
 }
@@ -329,7 +329,7 @@ int Patch::get_id() const
 
 	\param dimension the dimension of the patch
 */
-void Patch::set_dimension(int dimension)
+void Patch::setDimension(int dimension)
 {
 	m_dimension = dimension;
 }
@@ -339,7 +339,7 @@ void Patch::set_dimension(int dimension)
 
 	\return The dimension of the patch
 */
-int Patch::get_dimension() const
+int Patch::getDimension() const
 {
 	return m_dimension;
 }
@@ -349,7 +349,7 @@ int Patch::get_dimension() const
 
 	\return This method returns true to indicate the mesh is three-dimensional
 */
-bool Patch::is_three_dimensional() const
+bool Patch::isThreeDimensional() const
 {
 	return (m_dimension == 3);
 }
@@ -359,7 +359,7 @@ bool Patch::is_three_dimensional() const
 
 	\param id the name of the patch
 */
-void Patch::set_name(std::string name)
+void Patch::setName(std::string name)
 {
 	m_name = name;
 }
@@ -369,7 +369,7 @@ void Patch::set_name(std::string name)
 
 	\return The name of the patch
 */
-std::string Patch::get_name() const
+std::string Patch::getName() const
 {
 	return m_name;
 }
@@ -379,7 +379,7 @@ std::string Patch::get_name() const
 
 	\return The number of vertices in the patch
 */
-long Patch::get_vertex_count() const
+long Patch::getVertexCount() const
 {
 	return m_vertices.size();
 }
@@ -400,7 +400,7 @@ bitpit::PiercedVector<Vertex> & Patch::vertices()
 	\param id is the id of the requested vertex
 	\return A reference to the vertex with the specified id.
 */
-Vertex & Patch::get_vertex(const long &id)
+Vertex & Patch::getVertex(const long &id)
 {
 	return m_vertices[id];
 }
@@ -411,7 +411,7 @@ Vertex & Patch::get_vertex(const long &id)
 	\param id is the id of the requested vertex
 	\return A constant reference to the vertex with the specified id.
 */
-const Vertex & Patch::get_vertex(const long &id) const
+const Vertex & Patch::getVertex(const long &id) const
 {
 	return m_vertices[id];
 }
@@ -421,7 +421,7 @@ const Vertex & Patch::get_vertex(const long &id) const
 
 	\param id is the id of the new vertex
 */
-long Patch::create_vertex(const long &id)
+long Patch::createVertex(const long &id)
 {
 	m_vertices.reclaim(id);
 
@@ -431,7 +431,7 @@ long Patch::create_vertex(const long &id)
 /*!
 	Creates a new vertex.
 */
-long Patch::create_vertex()
+long Patch::createVertex()
 {
 	long id;
 	if (m_unusedVertexIds.empty()) {
@@ -441,7 +441,7 @@ long Patch::create_vertex()
 		m_unusedVertexIds.pop_front();
 	}
 
-	return create_vertex(id);
+	return createVertex(id);
 }
 
 /*!
@@ -449,7 +449,7 @@ long Patch::create_vertex()
 
 	\param id is the id of the vertex
 */
-void Patch::delete_vertex(const long &id, bool delayed)
+void Patch::deleteVertex(const long &id, bool delayed)
 {
 	m_vertices.erase(id, delayed);
 	m_unusedVertexIds.push_back(id);
@@ -461,9 +461,9 @@ void Patch::delete_vertex(const long &id, bool delayed)
 	\param is is the id of the vertex
 	\result The coordinates of the specified vertex.
 */
-const std::array<double, 3> & Patch::get_vertex_coords(const long &id) const
+const std::array<double, 3> & Patch::getVertexCoords(const long &id) const
 {
-	return get_vertex(id).get_coords();
+	return getVertex(id).getCoords();
 }
 
 /*!
@@ -471,7 +471,7 @@ const std::array<double, 3> & Patch::get_vertex_coords(const long &id) const
 
 	\return The number of cells in the patch
 */
-long Patch::get_cell_count() const
+long Patch::getCellCount() const
 {
 	return m_cells.size();
 }
@@ -492,7 +492,7 @@ bitpit::PiercedVector<Cell> & Patch::cells()
 	\param id is the id of the requested cell
 	\return A reference to the cell with the specified id.
 */
-Cell & Patch::get_cell(const long &id)
+Cell & Patch::getCell(const long &id)
 {
 	return m_cells[id];
 }
@@ -503,7 +503,7 @@ Cell & Patch::get_cell(const long &id)
 	\param id is the id of the requested cell
 	\return A constant reference to the cell with the specified id.
 */
-const Cell & Patch::get_cell(const long &id) const
+const Cell & Patch::getCell(const long &id) const
 {
 	return m_cells[id];
 }
@@ -514,7 +514,7 @@ const Cell & Patch::get_cell(const long &id) const
 	\param id is the id of the new cell
 	\param internal is true if the cell is an internal cell, false otherwise
 */
-long Patch::create_cell(const long &id, bool internal, ElementInfo::Type type)
+long Patch::createCell(const long &id, bool internal, ElementInfo::Type type)
 {
 	bitpit::PiercedVector<Cell>::iterator iterator;
 	if (internal) {
@@ -534,7 +534,7 @@ long Patch::create_cell(const long &id, bool internal, ElementInfo::Type type)
 
 	\param internal is true if the cell is an internal cell, false otherwise
 */
-long Patch::create_cell(bool internal, ElementInfo::Type type)
+long Patch::createCell(bool internal, ElementInfo::Type type)
 {
 	long id;
 	if (m_unusedCellIds.empty()) {
@@ -544,7 +544,7 @@ long Patch::create_cell(bool internal, ElementInfo::Type type)
 		m_unusedCellIds.pop_front();
 	}
 
-	return create_cell(id, internal, type);
+	return createCell(id, internal, type);
 }
 
 /*!
@@ -552,7 +552,7 @@ long Patch::create_cell(bool internal, ElementInfo::Type type)
 
 	\param id is the id of the cell
 */
-void Patch::delete_cell(const long &id, bool delayed)
+void Patch::deleteCell(const long &id, bool delayed)
 {
 	m_cells.erase(id, delayed);
 	m_unusedCellIds.push_back(id);
@@ -564,12 +564,12 @@ void Patch::delete_cell(const long &id, bool delayed)
 	\param id is the id of the cell
 	\result The neighbours of all the faces of the specified cell.
 */
-std::vector<long> Patch::extract_cell_face_neighs(const long &id) const
+std::vector<long> Patch::extractCellFaceNeighs(const long &id) const
 {
 	std::vector<long> neighs;
-	const Cell &cell = get_cell(id);
-	for (int i = 0; i < cell.get_face_count(); ++i) {
-		std::vector<long> faceNeighs = extract_cell_face_neighs(id, i);
+	const Cell &cell = getCell(id);
+	for (int i = 0; i < cell.getFaceCount(); ++i) {
+		std::vector<long> faceNeighs = extractCellFaceNeighs(id, i);
 		for (auto &neighId : faceNeighs) {
 			bitpit::utils::addToOrderedVector<long>(neighId, neighs);
 		}
@@ -584,9 +584,9 @@ std::vector<long> Patch::extract_cell_face_neighs(const long &id) const
 	\param id is the id of the cell
 	\result All the neighbours of the specified cell.
 */
-std::vector<long> Patch::extract_cell_neighs(const long &id) const
+std::vector<long> Patch::extractCellNeighs(const long &id) const
 {
-	return extract_cell_vertex_neighs(id);
+	return extractCellVertexNeighs(id);
 }
 
 /*!
@@ -606,16 +606,16 @@ std::vector<long> Patch::extract_cell_neighs(const long &id) const
 	also the neighbours for lower codimensions.
 	\result The neighbours for the specified codimension.
 */
-std::vector<long> Patch::extract_cell_neighs(const long &id, int codimension, bool complete) const
+std::vector<long> Patch::extractCellNeighs(const long &id, int codimension, bool complete) const
 {
-	assert(codimension >= 1 && codimension <= get_dimension());
+	assert(codimension >= 1 && codimension <= getDimension());
 
 	if (codimension == 1) {
-		return extract_cell_face_neighs(id);
-	} else if (codimension == get_dimension()) {
-		return extract_cell_vertex_neighs(id, complete);
+		return extractCellFaceNeighs(id);
+	} else if (codimension == getDimension()) {
+		return extractCellVertexNeighs(id, complete);
 	} else if (codimension == 2) {
-		return extract_cell_edge_neighs(id, complete);
+		return extractCellEdgeNeighs(id, complete);
 	} else {
 		return std::vector<long>();
 	}
@@ -629,20 +629,20 @@ std::vector<long> Patch::extract_cell_neighs(const long &id, int codimension, bo
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the specified cell for the given face.
 */
-std::vector<long> Patch::extract_cell_face_neighs(const long &id, const int &face, const std::vector<long> &blackList) const
+std::vector<long> Patch::extractCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList) const
 {
 	std::vector<long> neighs;
-	const Cell &cell = get_cell(id);
-	for (int i = 0; i < cell.get_interface_count(face); ++i) {
-		long interfaceId = cell.get_interface(face, i);
-		const Interface &interface = get_interface(interfaceId);
-		if (interface.is_border()) {
+	const Cell &cell = getCell(id);
+	for (int i = 0; i < cell.getInterfaceCount(face); ++i) {
+		long interfaceId = cell.getInterface(face, i);
+		const Interface &interface = getInterface(interfaceId);
+		if (interface.isBorder()) {
 			continue;
 		}
 
-		long neighId = interface.get_neigh();
+		long neighId = interface.getNeigh();
 		if (neighId == cell.get_id()) {
-			neighId = interface.get_owner();
+			neighId = interface.getOwner();
 		}
 
 		if (std::find(blackList.begin(), blackList.end(), neighId) != blackList.end()) {
@@ -667,22 +667,22 @@ std::vector<long> Patch::extract_cell_face_neighs(const long &id, const int &fac
 	contain also neighbours that share an entire face
 	\result The neighbours of all the edges of the specified cell.
 */
-std::vector<long> Patch::extract_cell_edge_neighs(const long &id, bool complete) const
+std::vector<long> Patch::extractCellEdgeNeighs(const long &id, bool complete) const
 {
-	assert(is_three_dimensional());
-	if (!is_three_dimensional()) {
+	assert(isThreeDimensional());
+	if (!isThreeDimensional()) {
 		return std::vector<long>();
 	}
 
 	std::vector<long> blackList;
 	if (!complete) {
-		blackList = extract_cell_face_neighs(id);
+		blackList = extractCellFaceNeighs(id);
 	}
 
 	std::vector<long> neighs;
-	const Cell &cell = get_cell(id);
-	for (int i = 0; i < cell.get_edge_count(); ++i) {
-		for (auto &neigh : extract_cell_edge_neighs(id, i, blackList)) {
+	const Cell &cell = getCell(id);
+	for (int i = 0; i < cell.getEdgeCount(); ++i) {
+		for (auto &neigh : extractCellEdgeNeighs(id, i, blackList)) {
 			bitpit::utils::addToOrderedVector<long>(neigh, neighs);
 		}
 	}
@@ -700,17 +700,17 @@ std::vector<long> Patch::extract_cell_edge_neighs(const long &id, bool complete)
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the specified cell for the given edge.
 */
-std::vector<long> Patch::extract_cell_edge_neighs(const long &id, const int &edge, const std::vector<long> &blackList) const
+std::vector<long> Patch::extractCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList) const
 {
-	assert(is_three_dimensional());
-	if (!is_three_dimensional()) {
+	assert(isThreeDimensional());
+	if (!isThreeDimensional()) {
 		return std::vector<long>();
 	}
 
-	const Cell &cell = get_cell(id);
-	std::vector<int> vertices = cell.get_edge_local_connect(edge);
+	const Cell &cell = getCell(id);
+	std::vector<int> vertices = cell.getEdgeLocalConnect(edge);
 
-	return extract_cell_vertex_neighs(id, vertices, blackList);
+	return extractCellVertexNeighs(id, vertices, blackList);
 }
 
 /*!
@@ -722,21 +722,21 @@ std::vector<long> Patch::extract_cell_edge_neighs(const long &id, const int &edg
 	contain also neighbours that share an entire face or an entire edge
 	\result The neighbours of all the vertices of the specified cell.
 */
-std::vector<long> Patch::extract_cell_vertex_neighs(const long &id, bool complete) const
+std::vector<long> Patch::extractCellVertexNeighs(const long &id, bool complete) const
 {
 	std::vector<long> blackList;
 	if (!complete) {
-		if (is_three_dimensional()) {
-			blackList = extract_cell_edge_neighs(id);
+		if (isThreeDimensional()) {
+			blackList = extractCellEdgeNeighs(id);
 		} else {
-			blackList = extract_cell_face_neighs(id);
+			blackList = extractCellFaceNeighs(id);
 		}
 	}
 
 	std::vector<long> neighs;
-	const Cell &cell = get_cell(id);
-	for (int i = 0; i < cell.get_vertex_count(); ++i) {
-		for (auto &neigh : extract_cell_vertex_neighs(id, i, blackList)) {
+	const Cell &cell = getCell(id);
+	for (int i = 0; i < cell.getVertexCount(); ++i) {
+		for (auto &neigh : extractCellVertexNeighs(id, i, blackList)) {
 			bitpit::utils::addToOrderedVector<long>(neigh, neighs);
 		}
 	}
@@ -766,12 +766,12 @@ std::vector<long> Patch::extract_cell_vertex_neighs(const long &id, bool complet
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the specified cell for the given vertex.
 */
-std::vector<long> Patch::extract_cell_vertex_neighs(const long &id, const int &vertex, const std::vector<long> &blackList) const
+std::vector<long> Patch::extractCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList) const
 {
 	std::vector<int> vertexList(1);
 	vertexList[0] = vertex;
 
-	return extract_cell_vertex_neighs(id, vertexList, blackList);
+	return extractCellVertexNeighs(id, vertexList, blackList);
 }
 
 /*!
@@ -796,14 +796,14 @@ std::vector<long> Patch::extract_cell_vertex_neighs(const long &id, const int &v
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the specified cell for the given vertices.
 */
-std::vector<long> Patch::extract_cell_vertex_neighs(const long &id, const std::vector<int> &vertices, const std::vector<long> &blackList) const
+std::vector<long> Patch::extractCellVertexNeighs(const long &id, const std::vector<int> &vertices, const std::vector<long> &blackList) const
 {
 	std::vector<long> neighs;
 
 	int nVerticesToFound = vertices.size();
 
-	const Cell &cell = get_cell(id);
-	const long *cellConnect = cell.get_connect();
+	const Cell &cell = getCell(id);
+	const long *cellConnect = cell.getConnect();
 
 	std::vector<long> alreadyScanned;
 	std::vector<long> processingQueue;
@@ -812,20 +812,20 @@ std::vector<long> Patch::extract_cell_vertex_neighs(const long &id, const std::v
 		// Get a cell to scan and remove it form the list
 		long scanId(processingQueue.back());
 		processingQueue.pop_back();
-		const Cell &scanCell = get_cell(scanId);
+		const Cell &scanCell = getCell(scanId);
 
 		// Scan the interfaces of the cell
-		const long *interfaces = scanCell.get_interfaces();
-		for (int i = 0; i < scanCell.get_interface_count(); i++) {
+		const long *interfaces = scanCell.getInterfaces();
+		for (int i = 0; i < scanCell.getInterfaceCount(); i++) {
 			long interfaceId = interfaces[i];
-			const Interface &interface = get_interface(interfaceId);
+			const Interface &interface = getInterface(interfaceId);
 
 			// Neighbour cell assocated to the interface
 			//
 			// Only consider the cells that are not
-			long neighId = interface.get_neigh();
+			long neighId = interface.getNeigh();
 			if (neighId < 0 || neighId == scanId) {
-				neighId = interface.get_owner();
+				neighId = interface.getOwner();
 			}
 
 			if (neighId == id) {
@@ -836,8 +836,8 @@ std::vector<long> Patch::extract_cell_vertex_neighs(const long &id, const std::v
 
 			// Number of vertices owned by the interface
 			int nCommonVertices = 0;
-			const long *interfaceConnect = interface.get_connect();
-			for (int k = 0; k < interface.get_vertex_count(); ++k) {
+			const long *interfaceConnect = interface.getConnect();
+			for (int k = 0; k < interface.getVertexCount(); ++k) {
 				for (int n = 0; n < nVerticesToFound; ++n) {
 					if (interfaceConnect[k] == cellConnect[vertices[n]]) {
 						nCommonVertices++;
@@ -873,7 +873,7 @@ std::vector<long> Patch::extract_cell_vertex_neighs(const long &id, const std::v
 
 	\return The number of interfaces in the patch
 */
-long Patch::get_interface_count() const
+long Patch::getInterfaceCount() const
 {
 	return m_interfaces.size();
 }
@@ -894,7 +894,7 @@ bitpit::PiercedVector<Interface> & Patch::interfaces()
 	\param id is the id of the requested interface
 	\return A reference to the interface with the specified id.
 */
-Interface & Patch::get_interface(const long &id)
+Interface & Patch::getInterface(const long &id)
 {
 	return m_interfaces[id];
 }
@@ -905,7 +905,7 @@ Interface & Patch::get_interface(const long &id)
 	\param id is the id of the requested interface
 	\return A constant reference to the interface with the specified id.
 */
-const Interface & Patch::get_interface(const long &id) const
+const Interface & Patch::getInterface(const long &id) const
 {
 	return m_interfaces[id];
 }
@@ -915,7 +915,7 @@ const Interface & Patch::get_interface(const long &id) const
 
 	\param id is the id of the new interface
 */
-long Patch::create_interface(const long &id, ElementInfo::Type type)
+long Patch::createInterface(const long &id, ElementInfo::Type type)
 {
 	bitpit::PiercedVector<Interface>::iterator iterator = m_interfaces.reclaim(id);
 
@@ -928,7 +928,7 @@ long Patch::create_interface(const long &id, ElementInfo::Type type)
 /*!
 	Creates a new interface.
 */
-long Patch::create_interface(ElementInfo::Type type)
+long Patch::createInterface(ElementInfo::Type type)
 {
 	long id;
 	if (m_unusedInterfaceIds.empty()) {
@@ -938,7 +938,7 @@ long Patch::create_interface(ElementInfo::Type type)
 		m_unusedInterfaceIds.pop_front();
 	}
 
-	return create_interface(id, type);
+	return createInterface(id, type);
 }
 
 /*!
@@ -946,7 +946,7 @@ long Patch::create_interface(ElementInfo::Type type)
 
 	\param id is the id of the interface
 */
-void Patch::delete_interface(const long &id, bool delayed)
+void Patch::deleteInterface(const long &id, bool delayed)
 {
 	m_interfaces.erase(id, delayed);
 	m_unusedInterfaceIds.push_back(id);
@@ -983,11 +983,11 @@ void Patch::squeeze()
 	\param id is the id of the cell
 	\result The centroid of the specified cell.
 */
-std::array<double, 3> Patch::eval_cell_centroid(const long &id)
+std::array<double, 3> Patch::evalCellCentroid(const long &id)
 {
-	Cell &cell = get_cell(id);
+	Cell &cell = getCell(id);
 
-	return eval_element_centroid(cell);
+	return evalElementCentroid(cell);
 }
 
 /*!
@@ -996,11 +996,11 @@ std::array<double, 3> Patch::eval_cell_centroid(const long &id)
 	\param id is the id of the interface
 	\result The centroid of the specified interface.
 */
-std::array<double, 3> Patch::eval_interface_centroid(const long &id)
+std::array<double, 3> Patch::evalInterfaceCentroid(const long &id)
 {
-	Interface &interface = get_interface(id);
+	Interface &interface = getInterface(id);
 
-	return eval_element_centroid(interface);
+	return evalElementCentroid(interface);
 }
 
 /*!
@@ -1009,17 +1009,17 @@ std::array<double, 3> Patch::eval_interface_centroid(const long &id)
 	\param element is the element
 	\result The centroid of the specified element.
 */
-std::array<double, 3> Patch::eval_element_centroid(const Element &element)
+std::array<double, 3> Patch::evalElementCentroid(const Element &element)
 {
 	const int nDimensions = 3;
 
-	const long *elementConnect = element.get_connect();
+	const long *elementConnect = element.getConnect();
 	const ElementInfo &elementInfo = element.get_info();
 
 	std::array<double, nDimensions> centroid = {{0., 0., 0.}};
 	for (int i = 0; i < elementInfo.nVertices; ++i) {
-		Vertex &vertex = get_vertex(elementConnect[i]);
-		const std::array<double, nDimensions> &vertexCoords = vertex.get_coords();
+		Vertex &vertex = getVertex(elementConnect[i]);
+		const std::array<double, nDimensions> &vertexCoords = vertex.getCoords();
 		for (int k = 0; k < nDimensions; ++k) {
 			centroid[k] += vertexCoords[k];
 		}
@@ -1097,7 +1097,7 @@ void Patch::flushData(std::fstream &stream, bitpit::VTKFormat format, std::strin
 		for (Vertex &vertex : m_vertices) {
 			vertexMap[vertex.get_id()] = vertexId++;
 
-			bitpit::genericIO::flushBINARY(stream, vertex.get_coords());
+			bitpit::genericIO::flushBINARY(stream, vertex.getCoords());
 		}
 	} else if (name == "offsets") {
 		int offset = 0;
@@ -1108,7 +1108,7 @@ void Patch::flushData(std::fstream &stream, bitpit::VTKFormat format, std::strin
 	} else if (name == "types") {
 		for (Cell &cell : m_cells) {
 			bitpit::VTKElementType VTKType;
-			switch (cell.get_type())  {
+			switch (cell.getType())  {
 
 			case ElementInfo::VERTEX:
 				VTKType = bitpit::VTKElementType::VERTEX;
@@ -1161,7 +1161,7 @@ void Patch::flushData(std::fstream &stream, bitpit::VTKFormat format, std::strin
 	} else if (name == "connectivity") {
 		for (Cell &cell : m_cells) {
 			for (int i = 0; i < cell.get_info().nVertices; ++i) {
-				bitpit::genericIO::flushBINARY(stream, vertexMap.at(cell.get_vertex(i)));
+				bitpit::genericIO::flushBINARY(stream, vertexMap.at(cell.getVertex(i)));
 			}
 		}
 

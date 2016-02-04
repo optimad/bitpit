@@ -54,67 +54,67 @@ public:
 	virtual ~Patch();
 
 	void reset();
-	void reset_vertices();
-	void reset_cells();
-	void reset_interfaces();
+	void resetVertices();
+	void resetCells();
+	void resetInterfaces();
 
 	const std::vector<Adaption::Info> update(bool trackAdaption = true);
 
-	void mark_cell_for_refinement(const long &id);
-	void mark_cell_for_coarsening(const long &id);
-	void enable_cell_balancing(const long &id, bool enabled);
+	void markCellForRefinement(const long &id);
+	void markCellForCoarsening(const long &id);
+	void enableCellBalancing(const long &id, bool enabled);
 
-	bool is_dirty() const;
+	bool isDirty() const;
 
 	int get_id() const;
-	int get_dimension() const;
-	bool is_three_dimensional() const;
+	int getDimension() const;
+	bool isThreeDimensional() const;
 
-	std::string get_name() const;
-	void set_name(std::string name);
+	std::string getName() const;
+	void setName(std::string name);
 
-	long get_vertex_count() const;
+	long getVertexCount() const;
 	bitpit::PiercedVector<Vertex> &vertices();
-	Vertex &get_vertex(const long &id);
-	const Vertex & get_vertex(const long &id) const;
-	const std::array<double, 3> & get_vertex_coords(const long &id) const;
+	Vertex &getVertex(const long &id);
+	const Vertex & getVertex(const long &id) const;
+	const std::array<double, 3> & getVertexCoords(const long &id) const;
 
-	long get_cell_count() const;
+	long getCellCount() const;
 	bitpit::PiercedVector<Cell> &cells();
-	Cell &get_cell(const long &id);
-	const Cell &get_cell(const long &id) const;
-	virtual double eval_cell_volume(const long &id) = 0;
-	virtual double eval_cell_size(const long &id) = 0;
-	virtual std::array<double, 3> eval_cell_centroid(const long &id);
-	std::vector<long> extract_cell_neighs(const long &id) const;
-	std::vector<long> extract_cell_neighs(const long &id, int codimension, bool complete = true) const;
-	std::vector<long> extract_cell_face_neighs(const long &id) const;
-	std::vector<long> extract_cell_face_neighs(const long &id, const int &face, const std::vector<long> &blackList = std::vector<long>()) const;
-	std::vector<long> extract_cell_edge_neighs(const long &id, bool complete = true) const;
-	std::vector<long> extract_cell_edge_neighs(const long &id, const int &edge, const std::vector<long> &blackList = std::vector<long>()) const;
-	std::vector<long> extract_cell_vertex_neighs(const long &id, bool complete = true) const;
-	std::vector<long> extract_cell_vertex_neighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
-	std::vector<long> extract_cell_vertex_neighs(const long &id, const std::vector<int> &vertices, const std::vector<long> &blackList = std::vector<long>()) const;
+	Cell &getCell(const long &id);
+	const Cell &getCell(const long &id) const;
+	virtual double evalCellVolume(const long &id) = 0;
+	virtual double evalCellSize(const long &id) = 0;
+	virtual std::array<double, 3> evalCellCentroid(const long &id);
+	std::vector<long> extractCellNeighs(const long &id) const;
+	std::vector<long> extractCellNeighs(const long &id, int codimension, bool complete = true) const;
+	std::vector<long> extractCellFaceNeighs(const long &id) const;
+	std::vector<long> extractCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList = std::vector<long>()) const;
+	std::vector<long> extractCellEdgeNeighs(const long &id, bool complete = true) const;
+	std::vector<long> extractCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList = std::vector<long>()) const;
+	std::vector<long> extractCellVertexNeighs(const long &id, bool complete = true) const;
+	std::vector<long> extractCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
+	std::vector<long> extractCellVertexNeighs(const long &id, const std::vector<int> &vertices, const std::vector<long> &blackList = std::vector<long>()) const;
 
-	long get_interface_count() const;
+	long getInterfaceCount() const;
 	bitpit::PiercedVector<Interface> &interfaces();
-	Interface &get_interface(const long &id);
-	const Interface &get_interface(const long &id) const;
-	virtual double eval_interface_area(const long &id) = 0;
-	virtual std::array<double, 3> eval_interface_centroid(const long &id);
-	virtual std::array<double, 3> eval_interface_normal(const long &id) = 0;
+	Interface &getInterface(const long &id);
+	const Interface &getInterface(const long &id) const;
+	virtual double evalInterfaceArea(const long &id) = 0;
+	virtual std::array<double, 3> evalInterfaceCentroid(const long &id);
+	virtual std::array<double, 3> evalInterfaceNormal(const long &id) = 0;
 
 	void sort();
 	void squeeze();
 
-	void write_mesh();
-	void write_mesh(std::string name);
-	void write_field(std::string name, bitpit::VTKLocation location, const std::vector<double> &values);
-	void write_field(std::string filename, std::string name, bitpit::VTKLocation location, const std::vector<double> &values);
-	void write_cell_field(std::string name, const std::vector<double> &values);
-	void write_cell_field(std::string filename, std::string name, const std::vector<double> &values);
-	void write_vertex_field(std::string name, const std::vector<double> &values);
-	void write_vertex_field(std::string filename, std::string name, const std::vector<double> &values);
+	void writeMesh();
+	void writeMesh(std::string name);
+	void writeField(std::string name, bitpit::VTKLocation location, const std::vector<double> &values);
+	void writeField(std::string filename, std::string name, bitpit::VTKLocation location, const std::vector<double> &values);
+	void writeCellField(std::string name, const std::vector<double> &values);
+	void writeCellField(std::string filename, std::string name, const std::vector<double> &values);
+	void writeVertexField(std::string name, const std::vector<double> &values);
+	void writeVertexField(std::string filename, std::string name, const std::vector<double> &values);
 
 	const bitpit::VTKFieldMetaData getMetaData(std::string name);
 	void flushData(std::fstream &stream, bitpit::VTKFormat format, std::string name);
@@ -128,22 +128,22 @@ protected:
 	std::deque<long> m_unusedInterfaceIds;
 	std::deque<long> m_unusedCellIds;
 
-	long create_vertex();
-	long create_vertex(const long &id);
-	void delete_vertex(const long &id, bool delayed = false);
+	long createVertex();
+	long createVertex(const long &id);
+	void deleteVertex(const long &id, bool delayed = false);
 
-	long create_interface(ElementInfo::Type type = ElementInfo::UNDEFINED);
-	long create_interface(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED);
-	void delete_interface(const long &id, bool delayed = false);
+	long createInterface(ElementInfo::Type type = ElementInfo::UNDEFINED);
+	long createInterface(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED);
+	void deleteInterface(const long &id, bool delayed = false);
 
-	long create_cell(bool internal = true, ElementInfo::Type type = ElementInfo::UNDEFINED);
-	long create_cell(const long &id, bool internal = true, ElementInfo::Type type = ElementInfo::UNDEFINED);
-	void delete_cell(const long &id, bool delayed = false);
+	long createCell(bool internal = true, ElementInfo::Type type = ElementInfo::UNDEFINED);
+	long createCell(const long &id, bool internal = true, ElementInfo::Type type = ElementInfo::UNDEFINED);
+	void deleteCell(const long &id, bool delayed = false);
 
 	virtual const std::vector<Adaption::Info> _update(bool trackAdaption) = 0;
-	virtual bool _mark_cell_for_refinement(const long &id) = 0;
-	virtual bool _mark_cell_for_coarsening(const long &id) = 0;
-	virtual bool _enable_cell_balancing(const long &id, bool enabled) = 0;
+	virtual bool _markCellForRefinement(const long &id) = 0;
+	virtual bool _markCellForCoarsening(const long &id) = 0;
+	virtual bool _enableCellBalancing(const long &id, bool enabled) = 0;
 
 	void set_dirty(bool dirty);
 
@@ -159,9 +159,9 @@ private:
 	std::unordered_map<std::string, bitpit::VTKFieldType> m_dataType;
 
 	void set_id(int id);
-	void set_dimension(int dimension);
+	void setDimension(int dimension);
 
-	std::array<double, 3> eval_element_centroid(const Element &element);
+	std::array<double, 3> evalElementCentroid(const Element &element);
 };
 
 /*!

@@ -44,12 +44,12 @@ FlatMapping::~FlatMapping()
 {
 }
 
-const std::vector<long> & FlatMapping::get_numbering() const
+const std::vector<long> & FlatMapping::getNumbering() const
 {
 	return m_numbering;
 }
 
-const std::vector<long> & FlatMapping::get_mapping() const
+const std::vector<long> & FlatMapping::getMapping() const
 {
 	return m_mapping;
 }
@@ -62,8 +62,8 @@ CellFlatMapping::CellFlatMapping()
 CellFlatMapping::CellFlatMapping(Patch *patch)
 	: FlatMapping(patch)
 {
-	m_numbering.reserve(m_patch->get_cell_count());
-	m_mapping.reserve(m_patch->get_cell_count());
+	m_numbering.reserve(m_patch->getCellCount());
+	m_mapping.reserve(m_patch->getCellCount());
 
 	long flatId = -1;
 	for (const auto &cell : m_patch->cells()) {
@@ -89,7 +89,7 @@ void CellFlatMapping::update(const std::vector<Adaption::Info> adaptionData)
 	long nPreviousCells = m_numbering.size();
 
 	// Current number of cells
-	long nCurrentCells = m_patch->get_cell_count();
+	long nCurrentCells = m_patch->getCellCount();
 
 	// Map for renumbering the elements
 	std::unordered_map<long, long> backwardMap;

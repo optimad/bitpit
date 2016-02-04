@@ -73,8 +73,8 @@ public:
 	void set_id(const long &id);
 	long get_id() const;
 
-	void set_coords(std::array<double, 3> &coords);
-	const std::array<double, 3> & get_coords() const;
+	void setCoords(std::array<double, 3> &coords);
+	const std::array<double, 3> & getCoords() const;
 
 	static const long NULL_VERTEX_ID;
 

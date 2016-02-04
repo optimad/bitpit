@@ -116,7 +116,7 @@ Interface::Interface(const long &id, ElementInfo::Type type)
 	\result The rotation matrix from the Cartesian coordinate system
 	to a coordinate system build starting from the specified versor.
 */
-std::array<std::array<double, 3>, 3> Interface::eval_rotation_from_cartesian(std::array<double, 3> &versor)
+std::array<std::array<double, 3>, 3> Interface::evalRotationFromCartesian(std::array<double, 3> &versor)
 {
 	// The rotation matrix has in its rows the versors that define
 	// the interface coordinate system.
@@ -170,9 +170,9 @@ std::array<std::array<double, 3>, 3> Interface::eval_rotation_from_cartesian(std
 	starting from the specified versor to the Cartesian coordinate
 	system.
 */
-std::array<std::array<double, 3>, 3> Interface::eval_rotation_to_cartesian(std::array<double, 3> &versor)
+std::array<std::array<double, 3>, 3> Interface::evalRotationToCartesian(std::array<double, 3> &versor)
 {
-	std::array<std::array<double, 3>, 3> R = eval_rotation_from_cartesian(versor);
+	std::array<std::array<double, 3>, 3> R = evalRotationFromCartesian(versor);
 	linearalgebra::transpose(R);
 
 	return R;
@@ -184,7 +184,7 @@ std::array<std::array<double, 3>, 3> Interface::eval_rotation_to_cartesian(std::
 	\param R the rotation matrix to transpose
 	\result The transposed rotation matrix.
 */
-std::array<std::array<double, 3>, 3> Interface::eval_rotation_transpose(const std::array<std::array<double, 3>, 3> &R)
+std::array<std::array<double, 3>, 3> Interface::evalRotationTranspose(const std::array<std::array<double, 3>, 3> &R)
 {
 	std::array<std::array<double, 3>, 3> R_prime = R;
 	linearalgebra::transpose(R_prime);
@@ -197,7 +197,7 @@ std::array<std::array<double, 3>, 3> Interface::eval_rotation_transpose(const st
 
 	\result Returns true if the interface is a border, false otherwise.
 */
-bool Interface::is_border() const
+bool Interface::isBorder() const
 {
 	return (m_neigh < 0);
 }
@@ -207,7 +207,7 @@ bool Interface::is_border() const
 
 	\param owner the owner of the interface
 */
-void Interface::set_owner(const long &owner, const int &onwerFace)
+void Interface::setOwner(const long &owner, const int &onwerFace)
 {
 	m_owner     = owner;
 	m_ownerFace = onwerFace;
@@ -216,7 +216,7 @@ void Interface::set_owner(const long &owner, const int &onwerFace)
 /*!
 	Deletes the owner of the interface.
 */
-void Interface::unset_owner()
+void Interface::unsetOwner()
 {
 	m_owner     = Element::NULL_ELEMENT_ID;
 	m_ownerFace = -1;
@@ -227,7 +227,7 @@ void Interface::unset_owner()
 
 	\result The owner of the nterface
 */
-long Interface::get_owner() const
+long Interface::getOwner() const
 {
   return m_owner;
 }
@@ -237,7 +237,7 @@ long Interface::get_owner() const
 
 	\result The face of the owner associated with the interface
 */
-int Interface::get_owner_face() const
+int Interface::getOwnerFace() const
 {
   return m_ownerFace;
 }
@@ -247,7 +247,7 @@ int Interface::get_owner_face() const
 
 	\param neigh the neighbour of the interface
 */
-void Interface::set_neigh(const long &neigh, const int &onwerFace)
+void Interface::setNeigh(const long &neigh, const int &onwerFace)
 {
 	m_neigh     = neigh;
 	m_neighFace = onwerFace;
@@ -256,7 +256,7 @@ void Interface::set_neigh(const long &neigh, const int &onwerFace)
 /*!
 	Deletes the neighbour of the interface.
 */
-void Interface::unset_neigh()
+void Interface::unsetNeigh()
 {
 	m_neigh     = Element::NULL_ELEMENT_ID;
 	m_neighFace = -1;
@@ -267,7 +267,7 @@ void Interface::unset_neigh()
 
 	\result The neighbour of the nterface
 */
-long Interface::get_neigh() const
+long Interface::getNeigh() const
 {
   return m_neigh;
 }
@@ -277,7 +277,7 @@ long Interface::get_neigh() const
 
 	\result The face of the neighbour associated with the interface
 */
-int Interface::get_neigh_face() const
+int Interface::getNeighFace() const
 {
   return m_neighFace;
 }
@@ -288,7 +288,7 @@ int Interface::get_neigh_face() const
 	\result An array containing the owner and the neighbour of the
 	        interface.
 */
-std::array<long, 2> Interface::get_owner_neigh() const
+std::array<long, 2> Interface::getOwnerNeigh() const
 {
 	std::array<long, 2> cells;
 	cells[0] = m_owner;
