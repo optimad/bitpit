@@ -27,16 +27,17 @@
 
 /*! \file */
 
-#include "adaption.hpp"
-#include "cell.hpp"
-#include "interface.hpp"
-#include "vertex.hpp"
-
-#include "bitpit_IO.hpp"
 #include <cstddef>
 #include <memory>
 #include <string>
 #include <vector>
+
+#include "bitpit_IO.hpp"
+
+#include "adaption.hpp"
+#include "cell.hpp"
+#include "interface.hpp"
+#include "vertex.hpp"
 
 namespace bitpit {
 

@@ -22,11 +22,13 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#include<iostream>
+
+#include "bitpit_common.hpp"
+
 #include "cell.hpp"
 #include "interface.hpp"
 
-#include "bitpit_common.hpp"
-#include<iostream>
 
 /*!
 	Input stream operator for class Cell. Stream cell data from memory

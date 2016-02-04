@@ -30,8 +30,9 @@
 #include <array>
 #include <memory>
 
-#include "element.hpp"
 #include "bitpit_containers.hpp"
+
+#include "element.hpp"
 
 namespace bitpit {
 

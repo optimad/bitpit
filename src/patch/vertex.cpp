@@ -22,9 +22,9 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#include "vertex.hpp"
-
 #include <limits>
+
+#include "vertex.hpp"
 
 /*!
 	Output stream operator for class Vertex. Stream vertex coordinates from

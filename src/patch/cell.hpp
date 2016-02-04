@@ -27,11 +27,11 @@
 
 /*! \file */
 
-#include "element.hpp"
-
 #include <memory>
 
 #include "bitpit_containers.hpp"
+
+#include "element.hpp"
 
 namespace bitpit {
 	class Cell;

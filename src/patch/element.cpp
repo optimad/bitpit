@@ -22,10 +22,10 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#include "element.hpp"
-
 #include <assert.h>
 #include <limits>
+
+#include "element.hpp"
 
 /*!
 	Input stream operator for class Element
