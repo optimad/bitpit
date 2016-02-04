@@ -27,14 +27,14 @@
 
 /*! \file */
 
-#include "bitpit_PABLO.hpp"
-#include "bitpit_patch.hpp"
-
 #include <assert.h>
 #include <deque>
 #include <cstddef>
 #include <vector>
 #include <unordered_set>
+
+#include "bitpit_PABLO.hpp"
+#include "bitpit_patch.hpp"
 
 namespace bitpit {
 
