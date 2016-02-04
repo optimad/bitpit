@@ -194,6 +194,7 @@ list(APPEND BITPIT_MODULE_LIST "LA")
 list(APPEND BITPIT_MODULE_LIST "SA")
 list(APPEND BITPIT_MODULE_LIST "PABLO")
 list(APPEND BITPIT_MODULE_LIST "patch")
+list(APPEND BITPIT_MODULE_LIST "cartesianpatch")
 list(APPEND BITPIT_MODULE_LIST "octreepatch")
 list(APPEND BITPIT_MODULE_LIST "ucartmesh")
 
@@ -206,6 +207,7 @@ set(LA_DEPS "operators")
 set(SA_DEPS "operators")
 set(UCARTMESH_DEPS "IO")
 set(PATCH_DEPS "operators;containers;IO;LA")
+set(CARTESIANPATCH_DEPS "patch")
 set(OCTREEPATCH_DEPS "PABLO;patch")
 
 #------------------------------------------------------------------------------------#

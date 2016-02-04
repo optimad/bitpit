@@ -37,7 +37,11 @@ endif ()
 # Add a target to generate the examples
 include_directories("${PROJECT_SOURCE_DIR}/src/common")
 include_directories("${PROJECT_SOURCE_DIR}/src/operators")
+include_directories("${PROJECT_SOURCE_DIR}/src/containers")
 include_directories("${PROJECT_SOURCE_DIR}/src/PABLO")
+include_directories("${PROJECT_SOURCE_DIR}/src/IO")
+include_directories("${PROJECT_SOURCE_DIR}/src/patch")
+include_directories("${PROJECT_SOURCE_DIR}/src/cartesianpatch")
 
 if(BUILD_EXAMPLES)
 	# List of examples
@@ -55,6 +59,7 @@ if(BUILD_EXAMPLES)
 	list(APPEND EXAMPLE_LIST "PABLO_example_00008")
 	list(APPEND EXAMPLE_LIST "PABLO_example_00009")
 	list(APPEND EXAMPLE_LIST "PABLO_example_00010")
+	list(APPEND EXAMPLE_LIST "cartesianpatch_example_00001")
 
 	#Rules to build the examples
 	foreach(EXAMPLE_NAME IN LISTS EXAMPLE_LIST)
