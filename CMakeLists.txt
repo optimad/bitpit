@@ -204,7 +204,7 @@ set(IO_DEPS "operators")
 set(LA_DEPS "operators")
 set(SA_DEPS "operators")
 set(UCARTMESH_DEPS "IO")
-set(PATCH_DEPS "containers IO")
+set(PATCH_DEPS "operators containers IO")
 
 #------------------------------------------------------------------------------------#
 # Check of the dependencies

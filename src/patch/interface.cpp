@@ -25,6 +25,7 @@
 #include <math.h>
 
 #include "bitpit_common.hpp"
+#include "bitpit_operators.hpp"
 
 #include "cell.hpp"
 #include "interface.hpp"
@@ -136,15 +137,15 @@ std::array<std::array<double, 3>, 3> Interface::eval_rotation_from_cartesian(std
 	// y-interface axis
 	if (fabs(versor[2] - 1.) > 1e-8) {
 		std::array<double, 3> z = {0.0, 0.0, 1.0};
-		R[1] = utils::cross_3D(z, R[0]);
+		R[1] = crossProduct(z, R[0]);
 	} else {
 		std::array<double, 3> x = {1.0, 0.0, 0.0};
-		R[1] = utils::cross_3D(x, R[0]);
+		R[1] = crossProduct(x, R[0]);
 	}
 	utils::normalize_3D(R[1]);
 
 	// z-interface axis
-	R[2] = utils::cross_3D(R[0], R[1]);
+	R[2] = crossProduct(R[0], R[1]);
 	utils::normalize_3D(R[2]);
 
 	return R;
