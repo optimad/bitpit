@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __PATCHMAN_PATCH_CARTESIAN_HPP__
-#define __PATCHMAN_PATCH_CARTESIAN_HPP__
+#ifndef __BITPIT_CARTESIANPATCH_HPP__
+#define __BITPIT_CARTESIANPATCH_HPP__
 
 /*! \file */
 
