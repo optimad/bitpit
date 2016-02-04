@@ -22,10 +22,7 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#include <math.h>
-
 #include "octreepatch.hpp"
-#include "utils.hpp"
 
 namespace bitpit {
 
