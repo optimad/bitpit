@@ -1956,12 +1956,12 @@ ParaTree::getPointOwner(darray3 point){
 
 	//ParaTree works in [0,1] domain
 	if (point[0] > 1+m_toll || point[1] > 1+m_toll || point[2] > 1+m_toll
-			|| point[0] < -toll || point[1] < -toll || point[2] < -toll){
+			|| point[0] < -m_toll || point[1] < -m_toll || point[2] < -m_toll){
 		return NULL;
 	}
-	point[0] = min(max(point[0],0),1);
-	point[1] = min(max(point[1],0),1);
-	point[2] = min(max(point[2],0),1);
+	point[0] = min(max(point[0],0.0),1.0);
+	point[1] = min(max(point[1],0.0),1.0);
+	point[2] = min(max(point[2],0.0),1.0);
 
 
 	x = m_trans.mapX(point[0]);
@@ -2028,7 +2028,7 @@ ParaTree::getPointOwner(darray3 point){
  * \return Index of octant owner of target point (max uint32_t representable if point outside of the domain).
  */
 uint32_t
-ParaTree::getPointOwnerIdx(darray3 point) const{
+ParaTree::getPointOwnerIdx(darray3 point){
 	uint32_t noctants = m_octree.m_octants.size();
 	uint32_t idxtry = noctants/2;
 	uint32_t x, y, z;
@@ -2036,12 +2036,12 @@ ParaTree::getPointOwnerIdx(darray3 point) const{
 	int powner = 0;
 	//ParaTree works in [0,1] domain
 	if (point[0] > 1+m_toll || point[1] > 1+m_toll || point[2] > 1+m_toll
-			|| point[0] < -toll || point[1] < -toll || point[2] < -toll){
-		return NULL;
+			|| point[0] < -m_toll || point[1] < -m_toll || point[2] < -m_toll){
+		return -1;
 	}
-	point[0] = min(max(point[0],0),1);
-	point[1] = min(max(point[1],0),1);
-	point[2] = min(max(point[2],0),1);
+	point[0] = min(max(point[0],0.0),1.0);
+	point[1] = min(max(point[1],0.0),1.0);
+	point[2] = min(max(point[2],0.0),1.0);
 
 	x = m_trans.mapX(point[0]);
 	y = m_trans.mapY(point[1]);
