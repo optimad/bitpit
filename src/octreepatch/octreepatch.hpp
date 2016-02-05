@@ -114,7 +114,7 @@ private:
 	std::unordered_map<uint32_t, long> m_octantToCell;
 	std::unordered_map<uint32_t, long> m_ghostToCell;
 
-	ParaTree m_tree;
+	PabloUniform m_tree;
 
 	std::vector<double> m_tree_dh;
 	std::vector<double> m_tree_area;
