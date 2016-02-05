@@ -77,8 +77,8 @@ private:
 
 };
 
-extern template class bitpit::PiercedVector<Interface>;
-extern template class bitpit::PositionalPiercedVector<Interface>;
+extern template class PiercedVector<Interface>;
+extern template class PositionalPiercedVector<Interface>;
 
 }
 

@@ -85,8 +85,8 @@ private:
 
 };
 
-extern template class bitpit::PiercedVector<Cell>;
-extern template class bitpit::PositionalPiercedVector<Cell>;
+extern template class PiercedVector<Cell>;
+extern template class PositionalPiercedVector<Cell>;
 
 }
 

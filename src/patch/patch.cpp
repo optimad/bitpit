@@ -140,7 +140,7 @@ void Patch::reset()
 void Patch::resetVertices()
 {
 	m_vertices.clear();
-	bitpit::PiercedVector<Vertex>().swap(m_vertices);
+	PiercedVector<Vertex>().swap(m_vertices);
 
 	for (auto &cell : m_cells) {
 		cell.unsetConnect();
@@ -153,7 +153,7 @@ void Patch::resetVertices()
 void Patch::resetCells()
 {
 	m_cells.clear();
-	bitpit::PiercedVector<Cell>().swap(m_cells);
+	PiercedVector<Cell>().swap(m_cells);
 
 	for (auto &interface : m_interfaces) {
 		interface.unsetNeigh();
@@ -167,7 +167,7 @@ void Patch::resetCells()
 void Patch::resetInterfaces()
 {
 	m_interfaces.clear();
-	bitpit::PiercedVector<Interface>().swap(m_interfaces);
+	PiercedVector<Interface>().swap(m_interfaces);
 
 	for (auto &cell : m_cells) {
 		cell.unsetInterfaces();
@@ -181,9 +181,9 @@ void Patch::resetInterfaces()
 */
 void Patch::writeMesh(std::string filename)
 {
-	bitpit::VTKUnstructuredGrid::setCodex(bitpit::VTKFormat::APPENDED);
-	bitpit::VTKUnstructuredGrid::setNames(".", filename);
-	bitpit::VTKUnstructuredGrid::write();
+	VTKUnstructuredGrid::setCodex(VTKFormat::APPENDED);
+	VTKUnstructuredGrid::setNames(".", filename);
+	VTKUnstructuredGrid::write();
 }
 
 /*!
@@ -202,7 +202,7 @@ void Patch::writeMesh()
 	either on the vertices of on the cells
 	\param values is a vector with the values of the field
 */
-void Patch::writeField(std::string name, bitpit::VTKLocation location, const std::vector<double> &values)
+void Patch::writeField(std::string name, VTKLocation location, const std::vector<double> &values)
 {
 	writeField(getName(), name, location, values);
 }
@@ -216,16 +216,16 @@ void Patch::writeField(std::string name, bitpit::VTKLocation location, const std
 	either on the vertices of on the cells
 	\param values is a vector with the values of the field
 */
-void Patch::writeField(std::string filename, std::string name, bitpit::VTKLocation location, const std::vector<double> &values)
+void Patch::writeField(std::string filename, std::string name, VTKLocation location, const std::vector<double> &values)
 {
-	bitpit::VTKUnstructuredGrid::addData(name, bitpit::VTKFieldType::SCALAR, location);
+	VTKUnstructuredGrid::addData(name, VTKFieldType::SCALAR, location);
 	m_dataFields[name] = &values;
 	m_dataLocations[name] = location;
-	m_dataType[name] = bitpit::VTKFieldType::SCALAR;
+	m_dataType[name] = VTKFieldType::SCALAR;
 
 	writeMesh(filename);
 
-	bitpit::VTKUnstructuredGrid::removeData(name);
+	VTKUnstructuredGrid::removeData(name);
 	m_dataFields.erase(name);
 	m_dataLocations.erase(name);
 	m_dataType.erase(name);
@@ -252,7 +252,7 @@ void Patch::writeCellField(std::string name, const std::vector<double> &values)
 */
 void Patch::writeCellField(std::string filename, std::string name, const std::vector<double> &values)
 {
-	writeField(filename, name, bitpit::VTKLocation::CELL, values);
+	writeField(filename, name, VTKLocation::CELL, values);
 }
 
 /*!
@@ -276,7 +276,7 @@ void Patch::writeVertexField(std::string name, const std::vector<double> &values
 */
 void Patch::writeVertexField(std::string filename, std::string name, const std::vector<double> &values)
 {
-	writeField(filename, name, bitpit::VTKLocation::POINT, values);
+	writeField(filename, name, VTKLocation::POINT, values);
 }
 
 /*!
@@ -391,7 +391,7 @@ long Patch::getVertexCount() const
 
 	\return The nodes owned by the patch.
 */
-bitpit::PiercedVector<Vertex> & Patch::vertices()
+PiercedVector<Vertex> & Patch::vertices()
 {
 	return m_vertices;
 }
@@ -483,7 +483,7 @@ long Patch::getCellCount() const
 
 	\return The cells owned by the patch.
 */
-bitpit::PiercedVector<Cell> & Patch::cells()
+PiercedVector<Cell> & Patch::cells()
 {
 	return m_cells;
 }
@@ -518,7 +518,7 @@ const Cell & Patch::getCell(const long &id) const
 */
 long Patch::createCell(const long &id, bool internal, ElementInfo::Type type)
 {
-	bitpit::PiercedVector<Cell>::iterator iterator;
+	PiercedVector<Cell>::iterator iterator;
 	if (internal) {
 		iterator = m_cells.reclaim(id);
 	} else {
@@ -573,7 +573,7 @@ std::vector<long> Patch::extractCellFaceNeighs(const long &id) const
 	for (int i = 0; i < cell.getFaceCount(); ++i) {
 		std::vector<long> faceNeighs = extractCellFaceNeighs(id, i);
 		for (auto &neighId : faceNeighs) {
-			bitpit::utils::addToOrderedVector<long>(neighId, neighs);
+			utils::addToOrderedVector<long>(neighId, neighs);
 		}
 	}
 
@@ -652,7 +652,7 @@ std::vector<long> Patch::extractCellFaceNeighs(const long &id, const int &face, 
 		}
 
 		// Add the cell to the negihbour list
-		bitpit::utils::addToOrderedVector<long>(neighId, neighs);
+		utils::addToOrderedVector<long>(neighId, neighs);
 	}
 
 	return neighs;
@@ -685,7 +685,7 @@ std::vector<long> Patch::extractCellEdgeNeighs(const long &id, bool complete) co
 	const Cell &cell = getCell(id);
 	for (int i = 0; i < cell.getEdgeCount(); ++i) {
 		for (auto &neigh : extractCellEdgeNeighs(id, i, blackList)) {
-			bitpit::utils::addToOrderedVector<long>(neigh, neighs);
+			utils::addToOrderedVector<long>(neigh, neighs);
 		}
 	}
 
@@ -739,7 +739,7 @@ std::vector<long> Patch::extractCellVertexNeighs(const long &id, bool complete) 
 	const Cell &cell = getCell(id);
 	for (int i = 0; i < cell.getVertexCount(); ++i) {
 		for (auto &neigh : extractCellVertexNeighs(id, i, blackList)) {
-			bitpit::utils::addToOrderedVector<long>(neigh, neighs);
+			utils::addToOrderedVector<long>(neigh, neighs);
 		}
 	}
 
@@ -857,7 +857,7 @@ std::vector<long> Patch::extractCellVertexNeighs(const long &id, const std::vect
 			// of cells neighbours.
 			if (nCommonVertices == nVerticesToFound) {
 				if (std::find(blackList.begin(), blackList.end(), neighId) == blackList.end()) {
-					bitpit::utils::addToOrderedVector<long>(neighId, neighs);
+					utils::addToOrderedVector<long>(neighId, neighs);
 				}
 				processingQueue.push_back(neighId);
 			}
@@ -885,7 +885,7 @@ long Patch::getInterfaceCount() const
 
 	\return The interfaces owned by the patch.
 */
-bitpit::PiercedVector<Interface> & Patch::interfaces()
+PiercedVector<Interface> & Patch::interfaces()
 {
 	return m_interfaces;
 }
@@ -919,7 +919,7 @@ const Interface & Patch::getInterface(const long &id) const
 */
 long Patch::createInterface(const long &id, ElementInfo::Type type)
 {
-	bitpit::PiercedVector<Interface>::iterator iterator = m_interfaces.reclaim(id);
+	PiercedVector<Interface>::iterator iterator = m_interfaces.reclaim(id);
 
 	Interface &interface = *iterator;
 	interface.initialize(type);
@@ -1222,38 +1222,38 @@ bool Patch::isTolCustomized() const
  *  Interface method for obtaining field meta Data
  *
  *  @param[in] name is the name of the field to be written
- *  @return Returns a bitpit::VTKFieldMetaData struct containing the metadata
+ *  @return Returns a VTKFieldMetaData struct containing the metadata
  *  of the requested custom data.
  */
-const bitpit::VTKFieldMetaData Patch::getMetaData(std::string name)
+const VTKFieldMetaData Patch::getMetaData(std::string name)
 {
 	if (name == "Points") {
-		return bitpit::VTKFieldMetaData(3 * m_vertices.size(), typeid(double));
+		return VTKFieldMetaData(3 * m_vertices.size(), typeid(double));
 	} else if (name == "offsets") {
-		return bitpit::VTKFieldMetaData(m_cells.size(), typeid(int));
+		return VTKFieldMetaData(m_cells.size(), typeid(int));
 	} else if (name == "types") {
-		return bitpit::VTKFieldMetaData(m_cells.size(), typeid(bitpit::VTKElementType));
+		return VTKFieldMetaData(m_cells.size(), typeid(VTKElementType));
 	} else if (name == "connectivity") {
 		long connectSize = 0;
 		for (Cell &cell : m_cells) {
 			connectSize += cell.get_info().nVertices;
 		}
 
-		return bitpit::VTKFieldMetaData(connectSize, typeid(long));
+		return VTKFieldMetaData(connectSize, typeid(long));
 	} else if (m_dataFields.count(name) > 0) {
 		long fieldSize = 0;
 
-		if (m_dataLocations[name] == bitpit::VTKLocation::CELL) {
+		if (m_dataLocations[name] == VTKLocation::CELL) {
 			fieldSize = m_cells.size();
 		} else {
 			fieldSize = m_vertices.size();
 		}
 
-		if (m_dataType[name] == bitpit::VTKFieldType::VECTOR) {
+		if (m_dataType[name] == VTKFieldType::VECTOR) {
 			fieldSize *= 3;
 		}
 
-		return bitpit::VTKFieldMetaData(fieldSize, typeid(double));
+		return VTKFieldMetaData(fieldSize, typeid(double));
 	}
 }
 
@@ -1267,9 +1267,9 @@ const bitpit::VTKFieldMetaData Patch::getMetaData(std::string name)
  *  @param[in] name is the name of the data to be written. Either user
  *  data or grid data
  */
-void Patch::flushData(std::fstream &stream, bitpit::VTKFormat format, std::string name)
+void Patch::flushData(std::fstream &stream, VTKFormat format, std::string name)
 {
-	assert(format == bitpit::VTKFormat::APPENDED);
+	assert(format == VTKFormat::APPENDED);
 
 	static std::unordered_map<long, long> vertexMap;
 
@@ -1278,78 +1278,78 @@ void Patch::flushData(std::fstream &stream, bitpit::VTKFormat format, std::strin
 		for (Vertex &vertex : m_vertices) {
 			vertexMap[vertex.get_id()] = vertexId++;
 
-			bitpit::genericIO::flushBINARY(stream, vertex.getCoords());
+			genericIO::flushBINARY(stream, vertex.getCoords());
 		}
 	} else if (name == "offsets") {
 		int offset = 0;
 		for (Cell &cell : m_cells) {
 			offset += cell.get_info().nVertices;
-			bitpit::genericIO::flushBINARY(stream, offset);
+			genericIO::flushBINARY(stream, offset);
 		}
 	} else if (name == "types") {
 		for (Cell &cell : m_cells) {
-			bitpit::VTKElementType VTKType;
+			VTKElementType VTKType;
 			switch (cell.getType())  {
 
 			case ElementInfo::VERTEX:
-				VTKType = bitpit::VTKElementType::VERTEX;
+				VTKType = VTKElementType::VERTEX;
 				break;
 
 			case ElementInfo::LINE:
-				VTKType = bitpit::VTKElementType::LINE;
+				VTKType = VTKElementType::LINE;
 				break;
 
 			case ElementInfo::TRIANGLE:
-				VTKType = bitpit::VTKElementType::TRIANGLE;
+				VTKType = VTKElementType::TRIANGLE;
 				break;
 
 			case ElementInfo::PIXEL:
-				VTKType = bitpit::VTKElementType::PIXEL;
+				VTKType = VTKElementType::PIXEL;
 				break;
 
 			case ElementInfo::QUAD:
-				VTKType = bitpit::VTKElementType::QUAD;
+				VTKType = VTKElementType::QUAD;
 				break;
 
 			case ElementInfo::TETRA:
-				VTKType = bitpit::VTKElementType::TETRA;
+				VTKType = VTKElementType::TETRA;
 				break;
 
 			case ElementInfo::VOXEL:
-				VTKType = bitpit::VTKElementType::VOXEL;
+				VTKType = VTKElementType::VOXEL;
 				break;
 
 			case ElementInfo::HEXAHEDRON:
-				VTKType = bitpit::VTKElementType::HEXAHEDRON;
+				VTKType = VTKElementType::HEXAHEDRON;
 				break;
 
 			case ElementInfo::WEDGE:
-				VTKType = bitpit::VTKElementType::WEDGE;
+				VTKType = VTKElementType::WEDGE;
 				break;
 
 			case ElementInfo::PYRAMID:
-				VTKType = bitpit::VTKElementType::PYRAMID;
+				VTKType = VTKElementType::PYRAMID;
 				break;
 
 			default:
-				VTKType = bitpit::VTKElementType::UNDEFINED;
+				VTKType = VTKElementType::UNDEFINED;
 				break;
 
 			}
 
-			bitpit::genericIO::flushBINARY(stream, (int) VTKType);
+			genericIO::flushBINARY(stream, (int) VTKType);
 		}
 	} else if (name == "connectivity") {
 		for (Cell &cell : m_cells) {
 			for (int i = 0; i < cell.get_info().nVertices; ++i) {
-				bitpit::genericIO::flushBINARY(stream, vertexMap.at(cell.getVertex(i)));
+				genericIO::flushBINARY(stream, vertexMap.at(cell.getVertex(i)));
 			}
 		}
 
 		vertexMap.clear();
 		std::unordered_map<long, long>().swap(vertexMap);
 	} else if (m_dataFields.count(name) > 0) {
-		bitpit::genericIO::flushBINARY(stream, *(m_dataFields.at(name)));
+		genericIO::flushBINARY(stream, *(m_dataFields.at(name)));
 	}
 }
 

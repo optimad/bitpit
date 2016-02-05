@@ -193,8 +193,8 @@ private:
 
 };
 
-extern template class bitpit::PiercedVector<Element>;
-extern template class bitpit::PositionalPiercedVector<Element>;
+extern template class PiercedVector<Element>;
+extern template class PositionalPiercedVector<Element>;
 
 }
 

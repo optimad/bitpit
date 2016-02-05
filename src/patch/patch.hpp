@@ -40,7 +40,7 @@
 
 namespace bitpit {
 
-class Patch : public bitpit::VTKUnstructuredGrid {
+class Patch : public VTKUnstructuredGrid {
 
 public:
 	Patch(const int &id, const int &dimension);
@@ -68,13 +68,13 @@ public:
 	void setName(std::string name);
 
 	long getVertexCount() const;
-	bitpit::PiercedVector<Vertex> &vertices();
+	PiercedVector<Vertex> &vertices();
 	Vertex &getVertex(const long &id);
 	const Vertex & getVertex(const long &id) const;
 	const std::array<double, 3> & getVertexCoords(const long &id) const;
 
 	long getCellCount() const;
-	bitpit::PiercedVector<Cell> &cells();
+	PiercedVector<Cell> &cells();
 	Cell &getCell(const long &id);
 	const Cell &getCell(const long &id) const;
 	virtual double evalCellVolume(const long &id) = 0;
@@ -91,7 +91,7 @@ public:
 	std::vector<long> extractCellVertexNeighs(const long &id, const std::vector<int> &vertices, const std::vector<long> &blackList = std::vector<long>()) const;
 
 	long getInterfaceCount() const;
-	bitpit::PiercedVector<Interface> &interfaces();
+	PiercedVector<Interface> &interfaces();
 	Interface &getInterface(const long &id);
 	const Interface &getInterface(const long &id) const;
 	virtual double evalInterfaceArea(const long &id) = 0;
@@ -117,20 +117,20 @@ public:
 
 	void writeMesh();
 	void writeMesh(std::string name);
-	void writeField(std::string name, bitpit::VTKLocation location, const std::vector<double> &values);
-	void writeField(std::string filename, std::string name, bitpit::VTKLocation location, const std::vector<double> &values);
+	void writeField(std::string name, VTKLocation location, const std::vector<double> &values);
+	void writeField(std::string filename, std::string name, VTKLocation location, const std::vector<double> &values);
 	void writeCellField(std::string name, const std::vector<double> &values);
 	void writeCellField(std::string filename, std::string name, const std::vector<double> &values);
 	void writeVertexField(std::string name, const std::vector<double> &values);
 	void writeVertexField(std::string filename, std::string name, const std::vector<double> &values);
 
-	const bitpit::VTKFieldMetaData getMetaData(std::string name);
-	void flushData(std::fstream &stream, bitpit::VTKFormat format, std::string name);
+	const VTKFieldMetaData getMetaData(std::string name);
+	void flushData(std::fstream &stream, VTKFormat format, std::string name);
 
 protected:
-	bitpit::PiercedVector<Vertex> m_vertices;
-	bitpit::PiercedVector<Cell> m_cells;
-	bitpit::PiercedVector<Interface> m_interfaces;
+	PiercedVector<Vertex> m_vertices;
+	PiercedVector<Cell> m_cells;
+	PiercedVector<Interface> m_interfaces;
 
 	std::deque<long> m_unusedVertexIds;
 	std::deque<long> m_unusedInterfaceIds;
@@ -173,8 +173,8 @@ private:
 	double m_tolerance;
 
 	std::unordered_map<std::string, const std::vector<double> *> m_dataFields;
-	std::unordered_map<std::string, bitpit::VTKLocation> m_dataLocations;
-	std::unordered_map<std::string, bitpit::VTKFieldType> m_dataType;
+	std::unordered_map<std::string, VTKLocation> m_dataLocations;
+	std::unordered_map<std::string, VTKFieldType> m_dataType;
 
 	void set_id(int id);
 	void setDimension(int dimension);

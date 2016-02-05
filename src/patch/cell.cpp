@@ -151,7 +151,7 @@ bool Cell::isInterior() const
 */
 void Cell::initializeInterfaces(std::vector<std::vector<long>> &interfaces)
 {
-	m_interfaces = bitpit::CollapsedVector2D<long>(interfaces);
+	m_interfaces = CollapsedVector2D<long>(interfaces);
 }
 
 /*!
@@ -162,7 +162,7 @@ void Cell::initializeInterfaces(std::vector<std::vector<long>> &interfaces)
 */
 void Cell::initializeEmptyInterfaces(const std::vector<int> interfaceCount)
 {
-	m_interfaces = bitpit::CollapsedVector2D<long>(interfaceCount, NULL_ELEMENT_ID);
+	m_interfaces = CollapsedVector2D<long>(interfaceCount, NULL_ELEMENT_ID);
 }
 
 /*!
