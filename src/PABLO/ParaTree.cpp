@@ -87,6 +87,7 @@ ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, string logfile ) : m_dim(uint8_
 		m_partitionLastDesc[p] = firstDescMorton;
 	}
 	m_periodic.resize(m_global.m_nfaces, false);
+	m_toll = 1.0e-14;
 	// Write info log
 	m_log.writeLog("---------------------------------------------");
 	m_log.writeLog("- PABLO PArallel Balanced Linear Octree -");
@@ -189,6 +190,7 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 	setPboundGhosts();
 #endif
 	m_periodic.resize(m_global.m_nfaces, false);
+	m_toll = 1.0e-14;
 	// Write info log
 	m_log.writeLog("---------------------------------------------");
 	m_log.writeLog("- PABLO PArallel Balanced Linear Octree -");
