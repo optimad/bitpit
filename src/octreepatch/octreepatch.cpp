@@ -231,7 +231,6 @@ long OctreePatch::getOctantId(const OctantInfo &octantInfo) const
 */
 const std::vector<uint32_t> & OctreePatch::getOctantConnect(const OctantInfo &octantInfo)
 {
-	Octant* octant;
 	if (octantInfo.internal) {
 		return m_tree.getConnectivity()[octantInfo.id];
 	} else {
