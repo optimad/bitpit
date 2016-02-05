@@ -726,7 +726,7 @@ PabloUniform::getNormal(Intersection* inter){
  * \return Pointer to octant owner of target point
  * (=NULL if point is outside of the domain).
  */
-Octant* PabloUniform::getPointOwner(darray3 & point){
+Octant* PabloUniform::getPointOwner(darray3 point){
 	for (int i=0; i<3; i++){
 		point[i] = (point[i] - m_origin[i])/m_L;
 	}
@@ -738,7 +738,7 @@ Octant* PabloUniform::getPointOwner(darray3 & point){
  * \return Index of octant owner of target point
  * (max uint32_t representable if point outside of the domain).
  */
-uint32_t PabloUniform::getPointOwnerIdx(darray3 & point){
+uint32_t PabloUniform::getPointOwnerIdx(darray3 point){
 	for (int i=0; i<3; i++){
 		point[i] = (point[i] - m_origin[i])/m_L;
 	}

@@ -111,6 +111,7 @@ private:
 	//auxiliary members
 	int 					m_errorFlag;					/**<MPI error flag*/
 	bool 					m_serial;						/**<True if the octree is the same on each processor, False if the octree is distributed*/
+	double					m_toll;							/**<Tollerance for geometric operations.*/
 
 	//map members
 	Map 					m_trans;						/**<Transformation map from m_logical to physical domain*/
@@ -188,9 +189,11 @@ public:
 	int8_t 		(*getNodecoeffs())[3];
 	int8_t 		(*getEdgecoeffs())[3];
 	bvector		getPeriodic();
+	double		getToll();
 	bool		getPeriodic(uint8_t i);
 	void 		setMaxLevel(int8_t maxlevel);
 	void		setPeriodic(uint8_t i);
+	void		setToll();
 
 	// =================================================================================== //
 	// INDEX BASED METHODS																   //
@@ -331,10 +334,10 @@ public:
 	void 		findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost);
 	void 		findNeighbours(Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost);
 	void 		findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours);
-	Octant* getPointOwner(dvector & point);
-	uint32_t 	getPointOwnerIdx(dvector & point);
-	Octant* getPointOwner(darray3 & point);
-	uint32_t 	getPointOwnerIdx(darray3 & point);
+	Octant* 	getPointOwner(dvector point);
+	uint32_t 	getPointOwnerIdx(dvector point);
+	Octant* 	getPointOwner(darray3 point);
+	uint32_t 	getPointOwnerIdx(darray3 point);
 	void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost);
 
 	// =================================================================================== //

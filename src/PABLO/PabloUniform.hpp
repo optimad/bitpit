@@ -157,8 +157,8 @@ public:
 	// =================================================================================== //
 	// OTHER OCTANT BASED METHODS												    	   //
 	// =================================================================================== //
-	Octant* getPointOwner(darray3 & point);
-	uint32_t getPointOwnerIdx(darray3 & point);
+	Octant* getPointOwner(darray3 point) const;
+	uint32_t getPointOwnerIdx(darray3 point) const;
 
 	// =================================================================================== //
 	// OTHER PARATREE BASED METHODS												    	   //

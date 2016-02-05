@@ -557,6 +557,13 @@ ParaTree::getPeriodic(uint8_t i){
 	return m_periodic[i];
 };
 
+/*!Get the tollerance used in geometric operations.
+ */
+double
+ParaTree::getToll(){
+	return m_toll;
+};
+
 /*!Set the maximum refinement level allowed for the octree.
  * \param[in] maxlevel Maximum refinement level.
  */
@@ -573,6 +580,14 @@ ParaTree::setPeriodic(uint8_t i){
 	m_periodic[i] = true;
 	m_periodic[m_global.m_oppFace[i]] = true;
 	m_octree.setPeriodic(m_periodic);
+};
+
+/*!Set the tollerance used in geometric operations.
+ * \param[in] toll Desired tollerance.
+ */
+void
+ParaTree::setToll(double & toll){
+	 m_toll = toll;
 };
 
 // =================================================================================== //
@@ -1786,7 +1801,7 @@ ParaTree::findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vec
  * \return Pointer to octant owner of target point (=NULL if point is outside of the domain).
  */
 Octant*
-ParaTree::getPointOwner(dvector & point){
+ParaTree::getPointOwner(dvector point){
 	uint32_t noctants = m_octree.m_octants.size();
 	uint32_t idxtry = noctants/2;
 	uint32_t x, y, z;
@@ -1857,7 +1872,7 @@ ParaTree::getPointOwner(dvector & point){
  * \return Index of octant owner of target point (max uint32_t representable if point outside of the domain).
  */
 uint32_t
-ParaTree::getPointOwnerIdx(dvector & point){
+ParaTree::getPointOwnerIdx(dvector point){
 	uint32_t noctants = m_octree.m_octants.size();
 	uint32_t idxtry = noctants/2;
 	uint32_t x, y, z;
@@ -1932,12 +1947,22 @@ ParaTree::getPointOwnerIdx(dvector & point){
  * \return Pointer to octant owner of target point (=NULL if point is outside of the domain).
  */
 Octant*
-ParaTree::getPointOwner(darray3 & point){
+ParaTree::getPointOwner(darray3 point){
 	uint32_t noctants = m_octree.m_octants.size();
 	uint32_t idxtry = noctants/2;
 	uint32_t x, y, z;
 	uint64_t morton, mortontry;
 	int powner = 0;
+
+	//ParaTree works in [0,1] domain
+	if (point[0] > 1+m_toll || point[1] > 1+m_toll || point[2] > 1+m_toll
+			|| point[0] < -toll || point[1] < -toll || point[2] < -toll){
+		return NULL;
+	}
+	point[0] = min(max(point[0],0),1);
+	point[1] = min(max(point[1],0),1);
+	point[2] = min(max(point[2],0),1);
+
 
 	x = m_trans.mapX(point[0]);
 	y = m_trans.mapX(point[1]);
@@ -2003,12 +2028,20 @@ ParaTree::getPointOwner(darray3 & point){
  * \return Index of octant owner of target point (max uint32_t representable if point outside of the domain).
  */
 uint32_t
-ParaTree::getPointOwnerIdx(darray3 & point){
+ParaTree::getPointOwnerIdx(darray3 point) const{
 	uint32_t noctants = m_octree.m_octants.size();
 	uint32_t idxtry = noctants/2;
 	uint32_t x, y, z;
 	uint64_t morton, mortontry;
 	int powner = 0;
+	//ParaTree works in [0,1] domain
+	if (point[0] > 1+m_toll || point[1] > 1+m_toll || point[2] > 1+m_toll
+			|| point[0] < -toll || point[1] < -toll || point[2] < -toll){
+		return NULL;
+	}
+	point[0] = min(max(point[0],0),1);
+	point[1] = min(max(point[1],0),1);
+	point[2] = min(max(point[2],0),1);
 
 	x = m_trans.mapX(point[0]);
 	y = m_trans.mapY(point[1]);
