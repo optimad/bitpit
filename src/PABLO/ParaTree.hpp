@@ -111,7 +111,7 @@ private:
 	//auxiliary members
 	int 					m_errorFlag;					/**<MPI error flag*/
 	bool 					m_serial;						/**<True if the octree is the same on each processor, False if the octree is distributed*/
-	double					m_toll;							/**<Tollerance for geometric operations.*/
+	double					m_tol;							/**<Tolerance for geometric operations.*/
 
 	//map members
 	Map 					m_trans;						/**<Transformation map from m_logical to physical domain*/
@@ -189,11 +189,11 @@ public:
 	int8_t 		(*getNodecoeffs())[3];
 	int8_t 		(*getEdgecoeffs())[3];
 	bvector		getPeriodic();
-	double		getToll();
+	double		getTol();
 	bool		getPeriodic(uint8_t i);
 	void 		setMaxLevel(int8_t maxlevel);
 	void		setPeriodic(uint8_t i);
-	void		setToll(double toll = 1.0e-14);
+	void		setTol(double tol = 1.0e-14);
 
 	// =================================================================================== //
 	// INDEX BASED METHODS																   //

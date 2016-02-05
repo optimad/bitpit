@@ -87,7 +87,7 @@ ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, string logfile ) : m_dim(uint8_
 		m_partitionLastDesc[p] = firstDescMorton;
 	}
 	m_periodic.resize(m_global.m_nfaces, false);
-	m_toll = 1.0e-14;
+	m_tol = 1.0e-14;
 	// Write info log
 	m_log.writeLog("---------------------------------------------");
 	m_log.writeLog("- PABLO PArallel Balanced Linear Octree -");
@@ -190,7 +190,7 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 	setPboundGhosts();
 #endif
 	m_periodic.resize(m_global.m_nfaces, false);
-	m_toll = 1.0e-14;
+	m_tol = 1.0e-14;
 	// Write info log
 	m_log.writeLog("---------------------------------------------");
 	m_log.writeLog("- PABLO PArallel Balanced Linear Octree -");
@@ -559,11 +559,11 @@ ParaTree::getPeriodic(uint8_t i){
 	return m_periodic[i];
 };
 
-/*!Get the tollerance used in geometric operations.
+/*!Get the tolerance used in geometric operations.
  */
 double
-ParaTree::getToll(){
-	return m_toll;
+ParaTree::getTol(){
+	return m_tol;
 };
 
 /*!Set the maximum refinement level allowed for the octree.
@@ -584,12 +584,12 @@ ParaTree::setPeriodic(uint8_t i){
 	m_octree.setPeriodic(m_periodic);
 };
 
-/*!Set the tollerance used in geometric operations.
- * \param[in] toll Desired tollerance.
+/*!Set the tolerance used in geometric operations.
+ * \param[in] tol Desired tolerance.
  */
 void
-ParaTree::setToll(double toll){
-	 m_toll = toll;
+ParaTree::setTol(double tol){
+	 m_tol = tol;
 };
 
 // =================================================================================== //
@@ -1957,8 +1957,8 @@ ParaTree::getPointOwner(darray3 point){
 	int powner = 0;
 
 	//ParaTree works in [0,1] domain
-	if (point[0] > 1+m_toll || point[1] > 1+m_toll || point[2] > 1+m_toll
-			|| point[0] < -m_toll || point[1] < -m_toll || point[2] < -m_toll){
+	if (point[0] > 1+m_tol || point[1] > 1+m_tol || point[2] > 1+m_tol
+			|| point[0] < -m_tol || point[1] < -m_tol || point[2] < -m_tol){
 		return NULL;
 	}
 	point[0] = min(max(point[0],0.0),1.0);
@@ -2037,8 +2037,8 @@ ParaTree::getPointOwnerIdx(darray3 point){
 	uint64_t morton, mortontry;
 	int powner = 0;
 	//ParaTree works in [0,1] domain
-	if (point[0] > 1+m_toll || point[1] > 1+m_toll || point[2] > 1+m_toll
-			|| point[0] < -m_toll || point[1] < -m_toll || point[2] < -m_toll){
+	if (point[0] > 1+m_tol || point[1] > 1+m_tol || point[2] > 1+m_tol
+			|| point[0] < -m_tol || point[1] < -m_tol || point[2] < -m_tol){
 		return -1;
 	}
 	point[0] = min(max(point[0],0.0),1.0);
