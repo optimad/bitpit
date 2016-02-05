@@ -112,12 +112,8 @@ CartesianPatch::CartesianPatch(const int &id, const int &dimension,
 		}
 	}
 
-	m_interfaceAreaX = m_cellSize[Vertex::COORD_Y];
-	m_interfaceAreaY = m_cellSize[Vertex::COORD_X];
-	if (isThreeDimensional()) {
-		m_interfaceAreaX *= m_cellSize[Vertex::COORD_Z];
-		m_interfaceAreaY *= m_cellSize[Vertex::COORD_Z];
-		m_interfaceAreaZ  = m_cellSize[Vertex::COORD_X] * m_cellSize[Vertex::COORD_Y];
+	for (int n = 0; n < dimension; n++) {
+		m_interfaceArea[n] = m_cellVolume / m_cellSize[n];
 	}
 
 	for (int i = 0; i < dimension; i++) {
@@ -171,25 +167,11 @@ double CartesianPatch::evalCellSize(const long &id)
 */
 double CartesianPatch::evalInterfaceArea(const long &id)
 {
-	long offset_x = 1;
-	for (int i = 0; i < getDimension(); ++i) {
-		offset_x *= m_nInterfacesX1D[i];
-	}
+	const Interface &interface = getInterface(id);
+	int ownerFace = interface.getOwnerFace();
+	int direction = std::floor(ownerFace / 2.);
 
-	if (id < offset_x) {
-		return m_interfaceAreaX;
-	}
-
-	long offset_y = 1;
-	for (int i = 0; i < getDimension(); ++i) {
-		offset_y *= m_nInterfacesY1D[i];
-	}
-
-	if (id < (offset_x + offset_y)) {
-		return m_interfaceAreaY;
-	}
-
-	return m_interfaceAreaZ;
+	return m_interfaceArea[direction];
 }
 
 /*!
@@ -461,22 +443,18 @@ void CartesianPatch::createInterfacesDirection(const Vertex::Coordinate &directi
 	const ElementInfo &interfaceTypeInfo = ElementInfo::getElementInfo(interfaceType);
 	const int nInterfaceVertices = interfaceTypeInfo.nVertices;
 
-	double *area;
 	std::vector<int> *interfaceCount1D;
 	switch (direction)  {
 
 	case Vertex::COORD_X:
-		area = &m_interfaceAreaX;
 		interfaceCount1D = &m_nInterfacesX1D;
 		break;
 
 	case Vertex::COORD_Y:
-		area = &m_interfaceAreaY;
 		interfaceCount1D = &m_nInterfacesY1D;
 		break;
 
 	case Vertex::COORD_Z:
-		area = &m_interfaceAreaZ;
 		interfaceCount1D = &m_nInterfacesZ1D;
 		break;
 

@@ -69,9 +69,7 @@ private:
 	std::vector<int> m_nInterfacesZ1D;
 
 	double m_cellVolume;
-	double m_interfaceAreaX;
-	double m_interfaceAreaY;
-	double m_interfaceAreaZ;
+	std::array<double, 3> m_interfaceArea;
 
 	std::vector<std::array<double, 3> > m_normals;
 
