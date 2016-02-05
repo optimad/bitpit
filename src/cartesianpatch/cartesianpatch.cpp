@@ -162,13 +162,7 @@ double CartesianPatch::evalCellSize(const long &id)
 {
 	BITPIT_UNUSED(id);
 
-	double cellSize = 0;
-	for(int i = 0; i < getDimension(); ++i) {
-		cellSize *= m_cellSize[i];
-	}
-	cellSize = pow(cellSize, 1. / getDimension());
-
-	return cellSize;
+	return pow(m_cellVolume, 1. / getDimension());
 }
 
 /*!
