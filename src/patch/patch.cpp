@@ -1120,20 +1120,17 @@ void Patch::evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 
 const bitpit::VTKFieldMetaData Patch::getMetaData(std::string name)
 {
 	if (name == "Points") {
-		std::cout << "Numero di punti: " << 3 * m_vertices.size() << std::endl;
 		return bitpit::VTKFieldMetaData(3 * m_vertices.size(), typeid(double));
 	} else if (name == "offsets") {
-		std::cout << "Offset size: " << m_cells.size() << std::endl;
 		return bitpit::VTKFieldMetaData(m_cells.size(), typeid(int));
 	} else if (name == "types") {
-		std::cout << "Type size: " << m_cells.size() << std::endl;
 		return bitpit::VTKFieldMetaData(m_cells.size(), typeid(bitpit::VTKElementType));
 	} else if (name == "connectivity") {
 		long connectSize = 0;
 		for (Cell &cell : m_cells) {
 			connectSize += cell.get_info().nVertices;
 		}
-		std::cout << "Connect size: " << connectSize << std::endl;
+
 		return bitpit::VTKFieldMetaData(connectSize, typeid(long));
 	} else if (m_dataFields.count(name) > 0) {
 		long fieldSize = 0;
@@ -1147,8 +1144,6 @@ const bitpit::VTKFieldMetaData Patch::getMetaData(std::string name)
 		if (m_dataType[name] == bitpit::VTKFieldType::VECTOR) {
 			fieldSize *= 3;
 		}
-
-		std::cout << "Field size: " << fieldSize << std::endl;
 
 		return bitpit::VTKFieldMetaData(fieldSize, typeid(double));
 	}
