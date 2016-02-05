@@ -193,7 +193,7 @@ public:
 	bool		getPeriodic(uint8_t i);
 	void 		setMaxLevel(int8_t maxlevel);
 	void		setPeriodic(uint8_t i);
-	void		setToll(double & toll);
+	void		setToll(double toll = 1.0e-14);
 
 	// =================================================================================== //
 	// INDEX BASED METHODS																   //

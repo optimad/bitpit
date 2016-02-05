@@ -588,7 +588,7 @@ ParaTree::setPeriodic(uint8_t i){
  * \param[in] toll Desired tollerance.
  */
 void
-ParaTree::setToll(double & toll){
+ParaTree::setToll(double toll){
 	 m_toll = toll;
 };
 
