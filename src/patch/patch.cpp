@@ -1111,6 +1111,47 @@ void Patch::evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 
 }
 
 /*!
+	Sort patch vertices on regular bins.
+
+	\param[in] n_bins (default = 128) is the number of bins (on each space
+	direction)
+	\result Returns the bin index associated to each vertex.
+*/
+std::unordered_map<long, long> Patch::binSortVertex(int nBins)
+{
+	// ====================================================================== //
+	// VARIABLES DECLARATION                                                  //
+	// ====================================================================== //
+
+	// Local variables
+	double                              dx, dy, dz;
+
+	// Counters
+	long                                i, j, k;
+	PiercedVector<Vertex>::iterator     V, E = m_vertices.end();
+
+	// ====================================================================== //
+	// ASSOCIATE EACH VERTEX WITH A BIN                                       //
+	// ====================================================================== //
+
+	// Bin's spacing
+	dx = max(1.0e-12, m_maxPoint[0] - m_minPoint[0]) / ((double) nBins);
+	dy = max(1.0e-12, m_maxPoint[1] - m_minPoint[1]) / ((double) nBins);
+	dz = max(1.0e-12, m_maxPoint[2] - m_minPoint[2]) / ((double) nBins);
+
+	// Loop over vertices
+	std::unordered_map<long, long> bin_index;
+	for (V = m_vertices.begin(); V != E; ++V) {
+		i = std::min(nBins - 1L, long((V->getCoords()[0] - m_minPoint[0]) / dx));
+		j = std::min(nBins - 1L, long((V->getCoords()[1] - m_minPoint[1]) / dy));
+		k = std::min(nBins - 1L, long((V->getCoords()[2] - m_minPoint[2]) / dz));
+		bin_index[V->get_id()] = nBins * nBins * k + nBins * j + i;
+	}
+
+	return bin_index;
+}
+
+/*!
  *  Interface method for obtaining field meta Data
  *
  *  @param[in] name is the name of the field to be written

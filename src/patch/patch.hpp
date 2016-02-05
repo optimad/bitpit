@@ -29,6 +29,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <unordered_map>
 
 #include "bitpit_IO.hpp"
 
@@ -107,6 +108,7 @@ public:
 
 	void updateBoundingBox();
 	void getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
+	std::unordered_map<long, long> binSortVertex(int nBins = 128);
 
 	void writeMesh();
 	void writeMesh(std::string name);
