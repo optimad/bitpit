@@ -55,8 +55,6 @@ protected:
 	bool _enableCellBalancing(const long &id, bool enabled);
 
 private:
-	static const int SPACE_MAX_DIM;
-
 	std::vector<double> m_cellSize;
 	std::vector<double> m_minCoord;
 

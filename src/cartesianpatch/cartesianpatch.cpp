@@ -43,8 +43,6 @@ namespace bitpit {
 	CartesianPatch defines a Cartesian patch.
 */
 
-const int CartesianPatch::SPACE_MAX_DIM = 3;
-
 /*!
 	Creates a new patch.
 */
@@ -485,7 +483,7 @@ void CartesianPatch::createInterfacesDirection(const Vertex::Coordinate &directi
 	}
 
 	// Counters
-	std::array<int, SPACE_MAX_DIM> counters = {{0, 0, 0}};
+	std::array<int, 3> counters = {{0, 0, 0}};
 	int &i = counters[Vertex::COORD_X];
 	int &j = counters[Vertex::COORD_Y];
 	int &k = counters[Vertex::COORD_Z];
@@ -506,8 +504,8 @@ void CartesianPatch::createInterfacesDirection(const Vertex::Coordinate &directi
 				}
 
 				// Owner
-				std::array<int, SPACE_MAX_DIM> ownerIJK;
-				for (int n = 0; n < SPACE_MAX_DIM; n++) {
+				std::array<int, 3> ownerIJK;
+				for (int n = 0; n < 3; n++) {
 					ownerIJK[n] = counters[n];
 				}
 				if (counters[direction] > 0) {
@@ -525,8 +523,8 @@ void CartesianPatch::createInterfacesDirection(const Vertex::Coordinate &directi
 
 				// Neighbour
 				if (counters[direction] != 0 && counters[direction] != (*interfaceCount1D)[direction] - 1) {
-					std::array<int, SPACE_MAX_DIM> neighIJK;
-					for (int n = 0; n < SPACE_MAX_DIM; n++) {
+					std::array<int, 3> neighIJK;
+					for (int n = 0; n < 3; n++) {
 						neighIJK[n] = counters[n];
 					}
 
