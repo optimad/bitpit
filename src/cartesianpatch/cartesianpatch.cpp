@@ -74,13 +74,17 @@ CartesianPatch::CartesianPatch(const int &id, const int &dimension,
 		m_cellVolume *= m_cellSize[Vertex::COORD_Z];
 	}
 
-	// Info sui vertici
-	m_nVertices1D.resize(dimension);
-	for (int n = 0; n < dimension; n++) {
+	// Initialize vertices
+	for (int n = 0; n < 3; n++) {
 		if (!isThreeDimensional() && n == Vertex::COORD_Z) {
 			m_nVertices1D[n] = 0;
 		} else {
 			m_nVertices1D[n] = m_nCells1D[n] + 1;
+		}
+
+		m_vertexCoords[n].resize(m_nVertices1D[n]);
+		for (int i = 0; i < m_nVertices1D[n]; i++) {
+			m_vertexCoords[n][i] = m_minCoord[n] + i * m_cellSize[n];
 		}
 	}
 
@@ -249,26 +253,6 @@ void CartesianPatch::createVertices()
 {
 	std::cout << "  >> Creating vertices\n";
 
-	// Definition of the vertices
-	m_vertexXCoords = std::vector<double>(m_nVertices1D[Vertex::COORD_X]);
-	for (int i = 0; i < m_nVertices1D[Vertex::COORD_X]; i++) {
-		m_vertexXCoords[i] = m_minCoord[Vertex::COORD_X] + i * m_cellSize[Vertex::COORD_X];
-	}
-
-	m_vertexYCoords = std::vector<double>(m_nVertices1D[Vertex::COORD_Y]);
-	for (int j = 0; j < m_nVertices1D[Vertex::COORD_Y]; j++) {
-		m_vertexYCoords[j] = m_minCoord[Vertex::COORD_Y] + j * m_cellSize[Vertex::COORD_Y];
-	}
-
-	if (isThreeDimensional()) {
-		m_vertexZCoords = std::vector<double>(m_nVertices1D[Vertex::COORD_Z]);
-		for (int k = 0; k < m_nVertices1D[Vertex::COORD_Z]; k++) {
-			m_vertexZCoords[k] = m_minCoord[Vertex::COORD_Z] + k * m_cellSize[Vertex::COORD_Z];
-		}
-	} else {
-		m_vertexZCoords = std::vector<double>(0);
-	}
-
 	long nTotalVertices = 1;
 	for (int n = 0; n < getDimension(); n++) {
 		nTotalVertices *= m_nVertices1D[n];
@@ -277,7 +261,6 @@ void CartesianPatch::createVertices()
 	std::cout << "    - Vertex count: " << nTotalVertices << "\n";
 
 	m_vertices.reserve(nTotalVertices);
-
 	for (int i = 0; i < m_nVertices1D[Vertex::COORD_X]; i++) {
 		for (int j = 0; j < m_nVertices1D[Vertex::COORD_Y]; j++) {
 			for (int k = 0; (isThreeDimensional()) ? (k < m_nVertices1D[Vertex::COORD_Z]) : (k <= 0); k++) {
@@ -287,10 +270,10 @@ void CartesianPatch::createVertices()
 
 				// Coordinate
 				std::array<double, 3> coords;
-				coords[Vertex::COORD_X] = m_vertexXCoords[i];
-				coords[Vertex::COORD_Y] = m_vertexYCoords[j];
+				coords[Vertex::COORD_X] = m_vertexCoords[Vertex::COORD_X][i];
+				coords[Vertex::COORD_Y] = m_vertexCoords[Vertex::COORD_Y][j];
 				if (isThreeDimensional()) {
-					coords[Vertex::COORD_Z] = m_vertexZCoords[k];
+					coords[Vertex::COORD_Z] = m_vertexCoords[Vertex::COORD_Z][k];
 				} else {
 					coords[Vertex::COORD_Z] = 0.0;
 				}
@@ -330,11 +313,8 @@ void CartesianPatch::createCells()
 	m_cells.reserve(nTotalCells);
 
 	// Create the cells
-	std::array<double, 3> centroid = {0.0, 0.0, 0.0};
 	for (int i = 0; i < m_nCells1D[Vertex::COORD_X]; i++) {
-		centroid[Vertex::COORD_X] = 0.5 * (m_vertexXCoords[i] + m_vertexXCoords[i+1]);
 		for (int j = 0; j < m_nCells1D[Vertex::COORD_Y]; j++) {
-			centroid[Vertex::COORD_Y] = 0.5 * (m_vertexYCoords[j] + m_vertexYCoords[j+1]);
 			for (int k = 0; (isThreeDimensional()) ? (k < m_nCells1D[Vertex::COORD_Z]) : (k <= 0); k++) {
 				long id_cell = getCellLinearId(i, j, k);
 				Patch::createCell(id_cell);

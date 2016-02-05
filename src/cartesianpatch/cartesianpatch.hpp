@@ -58,12 +58,10 @@ private:
 	std::vector<double> m_cellSize;
 	std::vector<double> m_minCoord;
 
-	std::vector<double> m_vertexXCoords;
-	std::vector<double> m_vertexYCoords;
-	std::vector<double> m_vertexZCoords;
+	std::array<std::vector<double>, 3> m_vertexCoords;
 
 	std::vector<int> m_nCells1D;
-	std::vector<int> m_nVertices1D;
+	std::array<int, 3> m_nVertices1D;
 	std::vector<int> m_nInterfacesX1D;
 	std::vector<int> m_nInterfacesY1D;
 	std::vector<int> m_nInterfacesZ1D;
