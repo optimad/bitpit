@@ -392,7 +392,7 @@ if (n_nodes == 0) { return(-1); };
 
 // Check if root is in the h-neighbor of P_ --------------------------------- //
 //if (debug) { cout << "visiting: " << prev_ << endl; }
-if (norm_2((*(nodes[prev_].object_)) - (*P_)) <= h) { return(prev_); }
+if (norm2((*(nodes[prev_].object_)) - (*P_)) <= h) { return(prev_); }
 
 // Move on next branch ------------------------------------------------------ //
 dim = lev % d;
@@ -463,7 +463,7 @@ int              dim;
 
 // // Find node on leaf -------------------------------------------------------- //
 // while ((next_ >= 0) && (!check)) {
-    // check = (norm_2((*P_) - (*(nodes[next_].object_))) <= h);
+    // check = (norm2((*P_) - (*(nodes[next_].object_))) <= h);
     // prev_ = next_;
     // dim = lev % d;
     // if ((*P_)[dim] <= (*(nodes[next_].object_))[dim]) {
