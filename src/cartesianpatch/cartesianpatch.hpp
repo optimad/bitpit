@@ -25,6 +25,7 @@
 #ifndef __BITPIT_CARTESIANPATCH_HPP__
 #define __BITPIT_CARTESIANPATCH_HPP__
 
+#include <array>
 #include <cstddef>
 #include <memory>
 #include <vector>
@@ -85,9 +86,9 @@ private:
 	void createInterfacesDirection(const Vertex::Coordinate &direction);
 
 	long getCellLinearId(const int &i, const int &j, const int &k) const;
-	long getCellLinearId(const int ijk[]) const;
+	long getCellLinearId(const std::array<int, 3> &ijk) const;
 	long getVertexLinearId(const int &i, const int &j, const int &k) const;
-	long getVertexLinearId(const int ijk[]) const;
+	long getVertexLinearId(const std::array<int, 3> &ijk) const;
 	long getInterfaceLinearId(const int &normal, const int &i, const int &j, const int &k) const;
 
 };

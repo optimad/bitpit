@@ -485,7 +485,7 @@ void CartesianPatch::createInterfacesDirection(const Vertex::Coordinate &directi
 	}
 
 	// Counters
-	int counters[SPACE_MAX_DIM] = {0, 0, 0};
+	std::array<int, SPACE_MAX_DIM> counters = {{0, 0, 0}};
 	int &i = counters[Vertex::COORD_X];
 	int &j = counters[Vertex::COORD_Y];
 	int &k = counters[Vertex::COORD_Z];
@@ -506,7 +506,7 @@ void CartesianPatch::createInterfacesDirection(const Vertex::Coordinate &directi
 				}
 
 				// Owner
-				int ownerIJK[SPACE_MAX_DIM];
+				std::array<int, SPACE_MAX_DIM> ownerIJK;
 				for (int n = 0; n < SPACE_MAX_DIM; n++) {
 					ownerIJK[n] = counters[n];
 				}
@@ -525,7 +525,7 @@ void CartesianPatch::createInterfacesDirection(const Vertex::Coordinate &directi
 
 				// Neighbour
 				if (counters[direction] != 0 && counters[direction] != (*interfaceCount1D)[direction] - 1) {
-					int neighIJK[SPACE_MAX_DIM];
+					std::array<int, SPACE_MAX_DIM> neighIJK;
 					for (int n = 0; n < SPACE_MAX_DIM; n++) {
 						neighIJK[n] = counters[n];
 					}
@@ -635,7 +635,7 @@ long CartesianPatch::getCellLinearId(const int &i, const int &j, const int &k) c
 /*!
 	Converts the cell cartesian notation to a linear notation
 */
-long CartesianPatch::getCellLinearId(const int ijk[]) const
+long CartesianPatch::getCellLinearId(const std::array<int, 3> &ijk) const
 {
 	return getCellLinearId(ijk[Vertex::COORD_X], ijk[Vertex::COORD_Y], ijk[Vertex::COORD_Z]);
 }
@@ -658,7 +658,7 @@ long CartesianPatch::getVertexLinearId(const int &i, const int &j, const int &k)
 /*!
 	Converts the vertex cartesian notation to a linear notation
 */
-long CartesianPatch::getVertexLinearId(const int ijk[]) const
+long CartesianPatch::getVertexLinearId(const std::array<int, 3> &ijk) const
 {
 	return getVertexLinearId(ijk[Vertex::COORD_X], ijk[Vertex::COORD_Y], ijk[Vertex::COORD_Z]);
 }
