@@ -294,7 +294,6 @@ template< class data_T, size_t d >
 void flushBINARY( std::fstream &str, const std::array<data_T,d> &data ){
 
     int nbytes;
-    std::array<int,8> data1 ;
     nbytes = sizeof(data_T)*d ;
 
     str.write( reinterpret_cast<const char*>(&data[0]), nbytes ) ;
