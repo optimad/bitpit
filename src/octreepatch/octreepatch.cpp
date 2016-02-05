@@ -878,7 +878,7 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 			const Interface &interface = m_interfaces[interfaceId];
 
 			Intersection *treeInterface = m_tree.getIntersection(interfaceTreeId);
-			int owner = m_tree.getOut(treeInterface);
+			uint32_t owner = m_tree.getOut(treeInterface);
 			bool ownerFlag = (owner == octantInfo.id);
 
 			int cellFace;
