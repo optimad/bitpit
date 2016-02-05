@@ -1044,6 +1044,8 @@ long OctreePatch::createInterface(uint32_t treeId,
                                    std::unique_ptr<long[]> &vertices,
                                    std::array<FaceInfo, 2> &faces)
 {
+	BITPIT_UNUSED(treeId);
+
 	// Create the interface
 	long id = Patch::createInterface();
 	Interface &interface = m_interfaces[id];
