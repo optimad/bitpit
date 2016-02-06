@@ -1033,6 +1033,19 @@ std::array<double, 3> Patch::evalElementCentroid(const Element &element)
 }
 
 /*!
+	Checks if the specified point is inside the patch.
+
+	\param[in] x is the x coordinate of the point
+	\param[in] y is the y coordinate of the point
+	\param[in] z is the z coordinate of the point
+	\result Returns true if the point is inside the patch, false otherwise.
+ */
+bool Patch::isPointInside(const double &x, const double &y, const double &z)
+{
+	return isPointInside({{x, y, z}});
+}
+
+/*!
  *  Interface method for obtaining field meta Data
  *
  *  @param[in] name is the name of the field to be written

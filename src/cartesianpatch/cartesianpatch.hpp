@@ -51,6 +51,8 @@ public:
 	std::array<double, 3> getSpacing() const;
 	double getSpacing(const int &direction) const;
 
+	bool isPointInside(const std::array<double, 3> &point);
+
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
 	bool _markCellForRefinement(const long &id);

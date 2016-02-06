@@ -100,6 +100,9 @@ public:
 	void sort();
 	void squeeze();
 
+	bool isPointInside(const double &x, const double &y, const double &z);
+	virtual bool isPointInside(const std::array<double, 3> &point) = 0;
+
 	void writeMesh();
 	void writeMesh(std::string name);
 	void writeField(std::string name, bitpit::VTKLocation location, const std::vector<double> &values);

@@ -29,6 +29,7 @@ cmake_minimum_required(VERSION 2.8)
 set(TESTS "")
 list(APPEND TESTS "test_octreepatch_00001")
 list(APPEND TESTS "test_octreepatch_00002")
+list(APPEND TESTS "test_octreepatch_00003")
 
 set(OCTREEPATCH_TEST_LIST_SERIAL "${TESTS}" CACHE INTERNAL "List of serial tests for the octreepatch module" FORCE)
 

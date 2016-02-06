@@ -576,6 +576,25 @@ bool CartesianPatch::_enableCellBalancing(const long &id, bool enabled)
 }
 
 /*!
+	Checks if the specified point is inside the patch.
+
+	\param[in] point is the point to be checked
+	\result Returns true if the point is inside the patch, false otherwise.
+ */
+bool CartesianPatch::isPointInside(const std::array<double, 3> &point)
+{
+	const double EPS = 1e-12;
+
+	for (int n = 0; n < getDimension(); n++) {
+		if (point[n] < m_minCoords[n] - EPS || point[n] > m_maxCoords[n] + EPS) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/*!
 	Converts the cell cartesian notation to a linear notation
 */
 long CartesianPatch::getCellLinearId(const int &i, const int &j, const int &k) const

@@ -1220,6 +1220,17 @@ bool OctreePatch::_enableCellBalancing(const long &id, bool enabled)
 }
 
 /*!
+	Checks if the specified point is inside the patch.
+
+	\param[in] point is the point to be checked
+	\result Returns true if the point is inside the patch, false otherwise.
+ */
+bool OctreePatch::isPointInside(const std::array<double, 3> &point)
+{
+	return (m_tree.getPointOwner(point) != nullptr);
+}
+
+/*!
 	@}
 */
 

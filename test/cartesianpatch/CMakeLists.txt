@@ -28,6 +28,7 @@ cmake_minimum_required(VERSION 2.8)
 # List of tests
 set(TESTS "")
 list(APPEND TESTS "test_cartesianpatch_00001")
+list(APPEND TESTS "test_cartesianpatch_00002")
 
 set(CARTESIANPATCH_TEST_LIST_SERIAL "${TESTS}" CACHE INTERNAL "List of serial tests for the cartesianpatch module" FORCE)
 

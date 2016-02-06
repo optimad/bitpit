@@ -74,6 +74,8 @@ public:
 
 	ParaTree & get_tree();
 
+	bool isPointInside(const std::array<double, 3> &point);
+
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
 	bool _markCellForRefinement(const long &id);
