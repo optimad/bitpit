@@ -53,28 +53,28 @@ CartesianPatch::CartesianPatch(const int &id, const int &dimension,
 	std::cout << ">> Initializing cartesian mesh\n";
 
 	// Info sulle celle
-	m_cellSize.resize(dimension);
 	m_minCoord.resize(dimension);
 	for (int n = 0; n < dimension; n++) {
 		// Dimensioni della cella
-		m_cellSize[n] = dh;
+		m_cellSpacings[n] = dh;
 
 		// Numero di celle
-		m_nCells1D[n] = (int) ceil(length / m_cellSize[n]);
+		m_nCells1D[n] = (int) ceil(length / m_cellSpacings[n]);
 
 		std::cout << "  - Cell count along direction " << n << " : " << m_nCells1D[n] << "\n";
 
 		// Minima coordinata del dominio
-		m_minCoord[n] = origin[n] - 0.5 * (m_nCells1D[n] * m_cellSize[n]);
+		m_minCoord[n] = origin[n] - 0.5 * (m_nCells1D[n] * m_cellSpacings[n]);
 	}
 
 	if (!isThreeDimensional()) {
-		m_nCells1D[Vertex::COORD_Z] = 0;
+		m_nCells1D[Vertex::COORD_Z]     = 0;
+		m_cellSpacings[Vertex::COORD_Z] = 0;
 	}
 
-	m_cellVolume = m_cellSize[Vertex::COORD_X] * m_cellSize[Vertex::COORD_Y];
+	m_cellVolume = m_cellSpacings[Vertex::COORD_X] * m_cellSpacings[Vertex::COORD_Y];
 	if (isThreeDimensional()) {
-		m_cellVolume *= m_cellSize[Vertex::COORD_Z];
+		m_cellVolume *= m_cellSpacings[Vertex::COORD_Z];
 	}
 
 	// Initialize vertices
@@ -87,13 +87,13 @@ CartesianPatch::CartesianPatch(const int &id, const int &dimension,
 
 		m_vertexCoords[n].resize(m_nVertices1D[n]);
 		for (int i = 0; i < m_nVertices1D[n]; i++) {
-			m_vertexCoords[n][i] = m_minCoord[n] + i * m_cellSize[n];
+			m_vertexCoords[n][i] = m_minCoord[n] + i * m_cellSpacings[n];
 		}
 	}
 
 	// Initialize interfaces
 	for (int n = 0; n < dimension; n++) {
-		m_interfaceArea[n] = m_cellVolume / m_cellSize[n];
+		m_interfaceArea[n] = m_cellVolume / m_cellSpacings[n];
 	}
 
 	int k = 0;
@@ -167,6 +167,28 @@ std::array<double, 3> CartesianPatch::evalInterfaceNormal(const long &id)
 	int ownerFace = interface.getOwnerFace();
 
 	return m_normals[ownerFace];
+}
+
+/*!
+	Get cell spacings of the patch.
+
+	\result Cell spacings of the patch.
+*/
+std::array<double, 3> CartesianPatch::getSpacing() const
+{
+	return m_cellSpacings;
+}
+
+/*!
+	Get cell spacing along the specificed direction.
+
+	\param[in] direction is the direction along which the spacing is
+	requested
+	\result The cell spacing along the specificed direction.
+*/
+double CartesianPatch::getSpacing(const int &direction) const
+{
+	return m_cellSpacings[direction];
 }
 
 /*!

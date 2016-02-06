@@ -48,6 +48,9 @@ public:
 	double evalInterfaceArea(const long &id);
 	std::array<double, 3> evalInterfaceNormal(const long &id);
 
+	std::array<double, 3> getSpacing() const;
+	double getSpacing(const int &direction) const;
+
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
 	bool _markCellForRefinement(const long &id);
@@ -55,7 +58,7 @@ protected:
 	bool _enableCellBalancing(const long &id, bool enabled);
 
 private:
-	std::vector<double> m_cellSize;
+	std::array<double, 3> m_cellSpacings;
 	std::vector<double> m_minCoord;
 
 	std::array<std::vector<double>, 3> m_vertexCoords;
