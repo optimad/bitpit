@@ -180,6 +180,54 @@ const std::array<double, 3> & Vertex::getCoords() const
 	return m_coords;
 }
 
+/*!
+	Translates the vertex.
+
+	\param[in] translation is the translation vector
+ */
+void Vertex::translate(const std::array<double, 3> &translation)
+{
+	m_coords[0] += translation[0];
+	m_coords[1] += translation[1];
+	m_coords[2] += translation[2];
+}
+
+/*!
+	Translates the vertex.
+
+	\param[in] sx translation along x direction
+	\param[in] sy translation along y direction
+	\param[in] sy translation along z direction
+ */
+void Vertex::translate(const double &sx, const double &sy, const double &sz)
+{
+	scale({{sx, sy, sz}});
+}
+
+/*!
+	Scales the vertex.
+
+	\param[in] scaling is the scaling vector
+ */
+void Vertex::scale(const std::array<double, 3> &scaling)
+{
+	m_coords[0] *= scaling[0];
+	m_coords[1] *= scaling[1];
+	m_coords[2] *= scaling[2];
+}
+
+/*!
+	Scales the vertex.
+
+	\param[in] sx scaling factor along x direction
+	\param[in] sy scaling factor along y direction
+	\param[in] sy scaling factor along z direction
+ */
+void Vertex::scale(const double &sx, const double &sy, const double &sz)
+{
+	scale({{sx, sy, sz}});
+}
+
 // Explicit instantiation of the Vertex containers
 template class PiercedVector<Vertex>;
 template class PositionalPiercedVector<Vertex>;
