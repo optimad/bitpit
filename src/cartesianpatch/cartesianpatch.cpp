@@ -941,6 +941,98 @@ void CartesianPatch::scale(std::array<double, 3> scaling)
 }
 
 /*!
+	Transform cell data to point data by calculating the mean of incident
+	cells in each vertex.
+
+	\param[in] cellData contains the data on cells
+	\result The cell data converted to vertex data.
+*/
+std::vector<double> CartesianPatch::convertToVertexData(const std::vector<double> &cellData) const
+{
+	int dimension = getDimension();
+
+	std::vector<int> nodeCounter(getVertexCount());
+	std::vector<double> vertexData(getVertexCount());
+	std::fill (vertexData.begin(), vertexData.end(), 0.);
+
+	for (int k = 0; k < m_nCells1D[Vertex::COORD_Z]; ++k) {
+		for (int j = 0; j < m_nCells1D[Vertex::COORD_Y]; ++j) {
+			for (int i = 0; i < m_nCells1D[Vertex::COORD_X]; ++i) {
+				// Cell index
+				long cellId = getCellLinearId(i, j, k);
+
+				for (int n = 0; n < dimension - 1; ++n) {
+					for (int m = 0; m < 2; ++m) {
+						for (int l = 0; l < 2; ++l) {
+							// Vertex index
+							int i_v = i + l;
+							int j_v = j + m;
+							int k_v = j + n;
+							long vertexId = getVertexLinearId(i_v, j_v, k_v);
+
+							vertexData[vertexId] += cellData[cellId];
+							nodeCounter[vertexId]++;
+						}
+					}
+				}
+			}
+		}
+	}
+
+	// Average values
+	for (int i = 0; i < getVertexCount(); ++i) {
+		vertexData[i] /= nodeCounter[i];
+	}
+
+	return vertexData;
+}
+
+/*!
+	Transform node data to cell data by calculating the mean of incident
+	vertices of each cell
+
+	\param[in] vertexData contains the data on vertices
+	\result The vertex data converted to cell data.
+*/
+std::vector<double> CartesianPatch::convertToCellData(const std::vector<double> &vertexData) const
+{
+	int dimension = getDimension();
+
+	std::vector<double> cellData(getCellCount());
+	std::fill (cellData.begin(), cellData.end(), 0.);
+
+	for (int k = 0; k < m_nCells1D[Vertex::COORD_Z]; ++k) {
+		for (int j = 0; j < m_nCells1D[Vertex::COORD_Y]; ++j) {
+			for (int i = 0; i < m_nCells1D[Vertex::COORD_X]; ++i) {
+    				// Cell index
+				long cellId = getCellLinearId(i, j, k);
+
+				for (int n = 0; n < dimension - 1; ++n) {
+					for (int m = 0; m < 2; ++m) {
+						for (int l = 0; l < 2; ++l) {
+							// Vertex index
+							int i_v = i + l;
+							int j_v = j + m;
+							int k_v = j + n;
+							long vertexId = getVertexLinearId(i_v, j_v, k_v);
+
+							cellData[cellId] += vertexData[vertexId];
+						}
+					}
+				}
+			}
+		}
+	}
+
+	double weight = pow(0.5, dimension);
+	for (int i = 0; i < getCellCount(); ++i) {
+		cellData[i] *= weight;
+	}
+
+	return cellData;
+}
+
+/*!
 	@}
 */
 

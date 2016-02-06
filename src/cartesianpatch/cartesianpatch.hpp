@@ -67,6 +67,9 @@ public:
 	void translate(std::array<double, 3> translation);
 	void scale(std::array<double, 3> scaling);
 
+	std::vector<double> convertToVertexData(const std::vector<double> &cellData) const;
+	std::vector<double> convertToCellData(const std::vector<double> &nodeData) const;
+
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
 	bool _markCellForRefinement(const long &id);
