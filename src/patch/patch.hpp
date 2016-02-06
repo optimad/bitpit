@@ -110,6 +110,12 @@ public:
 	void getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
 	std::unordered_map<long, long> binSortVertex(int nBins = 128);
 
+	virtual void translate(std::array<double, 3> translation);
+	void translate(double sx, double sy, double sz);
+	virtual void scale(std::array<double, 3> scaling);
+	void scale(double scaling);
+	void scale(double sx, double sy, double sz);
+
 	void setTol(double tolerance);
 	double getTol() const;
 	void resetTol();

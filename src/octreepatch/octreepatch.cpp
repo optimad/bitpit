@@ -63,18 +63,7 @@ OctreePatch::OctreePatch(const int &id, const int &dimension,
 	m_tree.setMarker((uint32_t) 0, initial_level);
 
 	// Info sull'octree
-	int maxLevels = m_tree.getMaxLevel();
-
-	m_tree_dh.reserve(maxLevels);
-	m_tree_area.reserve(maxLevels);
-	m_tree_volume.reserve(maxLevels);
-	for(int i = 0; i < maxLevels; i++) {
-	    double levelLength = length / ((double) pow(2,i));
-
-	    m_tree_dh.push_back(pow(levelLength, 1.));
-	    m_tree_area.push_back(pow(levelLength, (double) (getDimension() - 1)));
-	    m_tree_volume.push_back(pow(levelLength, (double) (getDimension())));
-	};
+	initializeTreeGeometry();
 
 	// Info sulle interfacce
 	for (int i = 0; i < dimension; i++) {
@@ -93,6 +82,30 @@ OctreePatch::OctreePatch(const int &id, const int &dimension,
 OctreePatch::~OctreePatch()
 {
 
+}
+
+/*!
+	Initializes octree geometry.
+*/
+void OctreePatch::initializeTreeGeometry()
+{
+	int maxLevels = m_tree.getMaxLevel();
+	double length = m_tree.getL();
+
+	m_tree_dh.clear();
+	m_tree_area.clear();
+	m_tree_volume.clear();
+
+	m_tree_dh.reserve(maxLevels);
+	m_tree_area.reserve(maxLevels);
+	m_tree_volume.reserve(maxLevels);
+	for(int i = 0; i < maxLevels; i++) {
+	    double levelLength = length / ((double) pow(2,i));
+
+	    m_tree_dh.push_back(pow(levelLength, 1.));
+	    m_tree_area.push_back(pow(levelLength, (double) (getDimension() - 1)));
+	    m_tree_volume.push_back(pow(levelLength, (double) (getDimension())));
+	}
 }
 
 /*!
@@ -1274,6 +1287,41 @@ void OctreePatch::_resetTol()
 
 	double tolerance = m_tree.getTol();
 	Patch::_setTol(tolerance);
+}
+
+/*!
+	Translates the patch.
+
+	\param[in] translation is the translation vector
+ */
+void OctreePatch::translate(std::array<double, 3> translation)
+{
+	m_tree.setOrigin(m_tree.getOrigin() + translation);
+
+	Patch::translate(translation);
+}
+
+/*!
+	Scales the patch.
+
+	\param[in] scaling is the scaling factor vector
+ */
+void OctreePatch::scale(std::array<double, 3> scaling)
+{
+	bool uniformScaling = true;
+	uniformScaling &= (fabs(scaling[0] - scaling[1]) > 1e-14);
+	uniformScaling &= (fabs(scaling[0] - scaling[2]) > 1e-14);
+	assert(uniformScaling);
+	if (!uniformScaling) {
+		std::cout << "octree patch only allows uniform scaling)" << std::endl;
+		return;
+	}
+
+	m_tree.setL(m_tree.getL() * scaling[0]);
+
+	initializeTreeGeometry();
+
+	Patch::scale(scaling);
 }
 
 /*!

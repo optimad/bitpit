@@ -1152,6 +1152,64 @@ std::unordered_map<long, long> Patch::binSortVertex(int nBins)
 }
 
 /*!
+	Translates the patch.
+
+	\param[in] translation is the translation vector
+*/
+void Patch::translate(std::array<double, 3> translation)
+{
+	for (auto &vertex : m_vertices) {
+		vertex.translate(translation[0], translation[1], translation[2]);
+	}
+}
+
+/*!
+	Translates the patch.
+
+	\param[in] sx translation along x direction
+	\param[in] sy translation along y direction
+	\param[in] sy translation along z direction
+*/
+void Patch::translate(double sx, double sy, double sz)
+{
+	translate({{sx, sy, sz}});
+}
+
+/*!
+	Scales the patch.
+
+	\param[in] scaling is the scaling factor vector
+*/
+void Patch::scale(std::array<double, 3> scaling)
+{
+	for (auto &vertex : m_vertices) {
+		vertex.scale(scaling[0], scaling[1], scaling[2]);
+	}
+}
+
+/*!
+	Scales the patch.
+
+	\param[in] scaling is the scaling factor
+*/
+void Patch::scale(double scaling)
+{
+	scale({{scaling, scaling, scaling}});
+}
+
+/*!
+	Scales the patch.
+
+	\param[in] sx scaling factor along x direction
+	\param[in] sy scaling factor along y direction
+	\param[in] sy scaling factor along z direction
+*/
+void Patch::scale(double sx, double sy, double sz)
+{
+	scale({{sx, sy, sz}});
+}
+
+/*!
 	Sets the tolerance for the geometrical checks.
 
 	\param tolerance is the tolerance that will be used for the geometrical

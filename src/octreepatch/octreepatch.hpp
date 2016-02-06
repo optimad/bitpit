@@ -77,6 +77,9 @@ public:
 	bool isPointInside(const std::array<double, 3> &point);
 	long locatePoint(const std::array<double, 3> &point);
 
+	void translate(std::array<double, 3> translation);
+	void scale(std::array<double, 3> scaling);
+
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
 	bool _markCellForRefinement(const long &id);
@@ -126,6 +129,8 @@ private:
 	std::vector<double> m_tree_volume;
 
 	std::vector<std::array<double, 3> > m_normals;
+
+	void initializeTreeGeometry();
 
 	bool set_marker(const long &id, const int8_t &value);
 

@@ -102,9 +102,6 @@ void CartesianPatch::initialize(std::array<double, 3> origin, std::array<double,
 
 		std::cout << "  - Cell count along direction " << n << " : " << m_nCells1D[n] << "\n";
 
-		// Initialize interfaces
-		m_interfaceArea[n] = m_cellVolume / m_cellSpacings[n];
-
 		// Initialize vertices
 		m_nVertices1D[n] = m_nCells1D[n] + 1;
 
@@ -120,16 +117,14 @@ void CartesianPatch::initialize(std::array<double, 3> origin, std::array<double,
 		m_maxCoords[Vertex::COORD_Z]    = 0.;
 		m_cellSpacings[Vertex::COORD_Z] = 0.;
 
-		m_interfaceArea[Vertex::COORD_Z] = 0.;
-
 		m_nVertices1D[Vertex::COORD_Z] = 0;
 	}
 
-	// Volume
-	m_cellVolume = m_cellSpacings[Vertex::COORD_X] * m_cellSpacings[Vertex::COORD_Y];
-	if (isThreeDimensional()) {
-		m_cellVolume *= m_cellSpacings[Vertex::COORD_Z];
-	}
+	// Interface area
+	initializeInterfaceArea();
+
+	// Cell volume
+	initializeCellVolume();
 
 	// Normals
 	int i = 0;
@@ -140,6 +135,31 @@ void CartesianPatch::initialize(std::array<double, 3> origin, std::array<double,
 
 			m_normals[i++] = normal;
 		}
+	}
+}
+
+/*!
+	Initializes cell volume
+*/
+void CartesianPatch::initializeCellVolume()
+{
+	m_cellVolume = m_cellSpacings[Vertex::COORD_X] * m_cellSpacings[Vertex::COORD_Y];
+	if (isThreeDimensional()) {
+		m_cellVolume *= m_cellSpacings[Vertex::COORD_Z];
+	}
+}
+
+/*!
+	Initializes interface area
+*/
+void CartesianPatch::initializeInterfaceArea()
+{
+	for (int n = 0; n < getDimension(); ++n) {
+		m_interfaceArea[n] = m_cellVolume / m_cellSpacings[n];
+	}
+
+	if (!isThreeDimensional()) {
+		m_interfaceArea[Vertex::COORD_Z] = 0.;
 	}
 }
 
@@ -876,6 +896,48 @@ std::vector<long> CartesianPatch::extractVertexSubSet(int const &idxMin, int con
 std::vector<long> CartesianPatch::extractVertexSubSet(std::array<double, 3> const &pointMin, std::array<double, 3> const &pointMax)
 {
 	return extractVertexSubSet(locatePointCartesian(pointMin), locatePointCartesian(pointMax));
+}
+
+/*!
+	Translates the patch.
+
+	\param[in] translation is the translation vector
+ */
+void CartesianPatch::translate(std::array<double, 3> translation)
+{
+	for (int n = 1; n < 3; ++n) {
+		m_minCoords[n] += translation[n];
+		m_maxCoords[n] += translation[n];
+		for (int i = 1; i < m_nVertices1D[n]; ++i) {
+			m_vertexCoords[n][i] += translation[n];
+		}
+	}
+
+	Patch::translate(translation);
+}
+
+/*!
+	Scales the patch.
+
+	\param[in] scaling is the scaling factor vector
+ */
+void CartesianPatch::scale(std::array<double, 3> scaling)
+{
+	for (int n = 1; n < 3; ++n) {
+		m_minCoords[n] *= scaling[n];
+		m_maxCoords[n] *= scaling[n];
+		for (int i = 1; i < m_nVertices1D[n]; ++i) {
+			m_vertexCoords[n][i] *= scaling[n];
+		}
+
+		m_cellSpacings[n] *= scaling[n];
+	}
+
+	initializeInterfaceArea();
+
+	initializeCellVolume();
+
+	Patch::scale(scaling);
 }
 
 /*!

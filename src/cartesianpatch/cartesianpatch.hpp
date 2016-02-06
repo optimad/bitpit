@@ -64,6 +64,9 @@ public:
 	std::vector<long> extractVertexSubSet(int const &idxMin, int const &idxMax);
 	std::vector<long> extractVertexSubSet(std::array<double, 3> const &pointMin, std::array<double, 3> const &pointMax);
 
+	void translate(std::array<double, 3> translation);
+	void scale(std::array<double, 3> scaling);
+
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
 	bool _markCellForRefinement(const long &id);
@@ -88,6 +91,9 @@ private:
 
 	void initialize(std::array<double, 3> origin, std::array<double, 3> lengths,
 	                std::array<int, 3> nCells);
+
+	void initializeInterfaceArea();
+	void initializeCellVolume();
 
 	void createVertices();
 
