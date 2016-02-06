@@ -54,6 +54,8 @@ public:
 	bool isPointInside(const std::array<double, 3> &point);
 	long locatePoint(const std::array<double, 3> &point);
 	std::array<int, 3> locatePointCartesian(const std::array<double, 3> &point);
+	long locateClosestVertex(std::array<double,3> const &point) const;
+	std::array<int, 3> locateClosestVertexCartesian(std::array<double,3> const &point) const;
 
 	std::vector<long> extractCellSubSet(std::array<int, 3> const &ijkMin, std::array<int, 3> const &ijkMax);
 	std::vector<long> extractCellSubSet(int const &idxMin, int const &idxMax);

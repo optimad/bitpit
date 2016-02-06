@@ -645,6 +645,38 @@ std::array<int, 3> CartesianPatch::locatePointCartesian(const std::array<double,
 }
 
 /*!
+	Locates the closest vertex of the given point.
+
+	\param[in] point is the point
+	\result The linear id of the closest vertex of the given point.
+*/
+long CartesianPatch::locateClosestVertex(std::array<double,3> const &point) const
+{
+	return getVertexLinearId(locateClosestVertexCartesian(point));
+}
+
+/*!
+	Locates the closest vertex of the given point.
+
+	\param[in] point is the point
+	\result The set of Cartesian id of the closest vertex of the given
+	point.
+*/
+std::array<int, 3> CartesianPatch::locateClosestVertexCartesian(std::array<double,3> const &point) const
+{
+	std::array<int, 3> ijk;
+	for (int n = 0; n < getDimension(); ++n) {
+		ijk[n] = std::min(m_nVertices1D[n] - 1, std::max(0, (int) round((point[n] - m_minCoords[n]) / m_cellSpacings[n])));
+	}
+
+	if (isThreeDimensional()) {
+		ijk[Vertex::COORD_Z] = -1;
+	}
+
+	return ijk;
+}
+
+/*!
 	Converts the cell cartesian notation to a linear notation
 */
 long CartesianPatch::getCellLinearId(const int &i, const int &j, const int &k) const
