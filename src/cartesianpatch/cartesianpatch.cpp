@@ -1039,6 +1039,169 @@ std::vector<double> CartesianPatch::convertToCellData(const std::vector<double> 
 	return cellData;
 }
 
+
+/*!
+	Calculates bi-/tri- linear interpolation stencil on cells for a
+	given point.
+
+	At boundaries stencil is reduced to assure positive weights. If the
+	point is outside a null-stencil is returned
+
+	\param[in] point are the point coordinates
+	\param[out] stencil are the linear indices of the interpolation stencil
+	\param[out] weights are the weights associated to stencil
+	\return The number of cells used in the interpolation stencil. If the
+	point is outside a null stencil size is returned.
+*/
+int CartesianPatch::linearCellInterpolation(std::array<double,3> &point,
+                                            std::vector<int> &stencil,
+                                            std::vector<double> &weights)
+{
+	std::array<int, 3> ijk_point = locatePointCartesian(point);
+	if (ijk_point[0] < 0) {
+		stencil.clear();
+		weights.clear();
+		return 0;
+	}
+
+	int dimension = getDimension();
+
+	std::array<int, 3> ijk_next;
+	std::array<int, 3> nS = {{1,1,1}};
+	std::array< std::array<int,2>, 3> cStencil;
+	std::array< std::array<double,2>, 3> cWeights;
+	for (int d = 0; d < dimension; ++d) {
+		// Find cell index
+		if (point[d] < m_cellCenters[d][ijk_point[d]]) {
+			ijk_point[d] = ijk_point[d] - 1;
+		}
+
+		ijk_next[d] = ijk_point[d] + 1;
+
+		if (ijk_point[d] < 0) {
+			cStencil[d][0] = 0.;
+			cWeights[d][0] = 1.;
+		} else if (ijk_next[d] > m_nCells1D[d] - 1) {
+			cStencil[d][0] = m_nCells1D[d] - 1;
+			cWeights[d][0] = 1.;
+		} else {
+			nS[d] = 2;
+
+			cStencil[d][0] = ijk_point[d];
+			cStencil[d][1] = ijk_next[d];
+
+			cWeights[d][1] = (point[d] - m_cellCenters[d][ijk_point[d]]) / m_cellSpacings[d]  ;
+			cWeights[d][0] = 1.0 - cWeights[d][1];
+		}
+	}
+
+	for (int d = dimension; d < 3; ++d) {
+		cStencil[d][0] = 0.;
+		cWeights[d][0] = 1.;
+	}
+
+	int stencilSize = nS[0] * nS[1] * nS[2];
+	stencil.resize(stencilSize);
+	weights.resize(stencilSize);
+
+	std::vector<int>::iterator itrStencil = stencil.begin();
+	std::vector<double>::iterator itrWeights = weights.begin();
+	for (int k = 0; k < nS[2]; ++k) {
+		for (int j = 0; j < nS[1]; ++j) {
+			for (int i = 0; i < nS[0]; ++i) {
+				int &is = cStencil[0][i];
+				int &js = cStencil[1][j];
+				int &ks = cStencil[2][k];
+
+				double &iw = cWeights[0][i];
+				double &jw = cWeights[1][j];
+				double &kw = cWeights[2][k];
+
+				*itrStencil = getCellLinearId(is, js, ks);
+				*itrWeights = iw *jw * kw;
+
+				++itrStencil;
+				++itrWeights;
+			}
+		}
+	}
+
+	return stencilSize;
+}
+
+/*!
+	Calculates bi-/tri- linear interpolation stencil on vertex for a
+	given point.
+
+	At boundaries stencil is reduced to assure positive weights. If the
+	point is outside a null-stencil is returned
+
+	\param[in] point are the point coordinates
+	\param[out] stencil are the linear indices of the interpolation stencil
+	\param[out] weights are the weights associated to stencil
+	\return The number of cells used in the interpolation stencil. If the
+	point is outside a null stencil size is returned.
+*/
+int CartesianPatch::linearVertexInterpolation(std::array<double,3> &point,
+                                              std::vector<int> &stencil,
+                                              std::vector<double> &weights)
+{
+	std::array<int, 3> ijk_point = locatePointCartesian(point);
+	if (ijk_point[0] < 0) {
+		stencil.clear();
+		weights.clear();
+		return 0;
+	}
+
+	int dimension = getDimension();
+
+	std::array<int, 3> ijk_next;
+	std::array< std::array<int,2>, 3> cStencil;
+	std::array< std::array<double,2>, 3> cWeights;
+	for (int d = 0; d < dimension; ++d) {
+		ijk_next[d] = ijk_point[d] +1;
+
+		cStencil[d][0] = ijk_point[d];
+		cStencil[d][1] = ijk_next[d];
+
+		cWeights[d][1] = (point[d] - m_vertexCoords[d][ijk_point[d]]) / m_cellSpacings[d];
+		cWeights[d][0] = 1.0 - cWeights[d][1];
+	}
+
+	for (int d = 0; d < dimension; ++d) {
+		cStencil[d][0] = 0;
+		cWeights[d][0] = 1.;
+	}
+
+	int stencilSize = pow(2, dimension);
+	stencil.resize(stencilSize);
+	weights.resize(stencilSize);
+
+	std::vector<int>::iterator itrStencil    = stencil.begin();
+	std::vector<double>::iterator itrWeights = weights.begin();
+	for (int k = 0; k < dimension - 1; ++k) {
+		for (int j = 0; j < 2; ++j) {
+			for (int i = 0; i < 2; ++i) {
+				int &is = cStencil[0][i];
+				int &js = cStencil[1][j];
+				int &ks = cStencil[2][k];
+
+				double &iw = cWeights[0][i];
+				double &jw = cWeights[1][j];
+				double &kw = cWeights[2][k];
+
+				*itrStencil = getVertexLinearId(is, js, ks);
+				*itrWeights = iw * jw * kw;
+
+				++itrStencil;
+				++itrWeights;
+			}
+		}
+	}
+
+	return stencilSize;
+}
+
 /*!
 	@}
 */

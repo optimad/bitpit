@@ -70,6 +70,11 @@ public:
 	std::vector<double> convertToVertexData(const std::vector<double> &cellData) const;
 	std::vector<double> convertToCellData(const std::vector<double> &nodeData) const;
 
+	int linearCellInterpolation(std::array<double,3> &point,
+		std::vector<int> &stencil, std::vector<double> &weights);
+	int linearVertexInterpolation(std::array<double,3> &point,
+		std::vector<int> &stencil, std::vector<double> &weights);
+
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
 	bool _markCellForRefinement(const long &id);
