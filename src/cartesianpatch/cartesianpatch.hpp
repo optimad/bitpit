@@ -55,6 +55,13 @@ public:
 	long locatePoint(const std::array<double, 3> &point);
 	std::array<int, 3> locatePointCartesian(const std::array<double, 3> &point);
 
+	std::vector<long> extractCellSubSet(std::array<int, 3> const &ijkMin, std::array<int, 3> const &ijkMax);
+	std::vector<long> extractCellSubSet(int const &idxMin, int const &idxMax);
+	std::vector<long> extractCellSubSet(std::array<double, 3> const &pointMin, std::array<double, 3> const &pointMax);
+	std::vector<long> extractVertexSubSet(std::array<int, 3> const &ijkMin, std::array<int, 3> const &ijkMax);
+	std::vector<long> extractVertexSubSet(int const &idxMin, int const &idxMax);
+	std::vector<long> extractVertexSubSet(std::array<double, 3> const &pointMin, std::array<double, 3> const &pointMax);
+
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
 	bool _markCellForRefinement(const long &id);

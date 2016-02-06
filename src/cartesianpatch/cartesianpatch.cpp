@@ -741,6 +741,112 @@ void CartesianPatch::evalBoundingBox(std::array<double, 3> &minPoint, std::array
 }
 
 /*!
+	Extract a cell subset.
+
+	\param[in] ijkMin is the set of cartesian indices of the lower bound
+	\param[in] ijkMax is the set of cartesian indices of the upper bound
+	\result The linear indices of the cell subset.
+*/
+std::vector<long> CartesianPatch::extractCellSubSet(std::array<int, 3> const &ijkMin, std::array<int, 3> const &ijkMax)
+{
+	int nSubsetCells_x = ijkMax[0] - ijkMin[0] + 1;
+	int nSubsetCells_y = ijkMax[1] - ijkMin[1] + 1;
+	int nSubsetCells_z = ijkMax[2] - ijkMin[2] + 1;
+
+	std::vector<long> ids;
+	ids.resize(nSubsetCells_x * nSubsetCells_y * nSubsetCells_z);
+
+	std::vector<long>::iterator it = ids.begin();
+	for (int k = ijkMin[2]; k <= ijkMax[2]; ++k) {
+		for (int j = ijkMin[1]; j <= ijkMax[1]; ++j) {
+			for (int i = ijkMin[0]; i <= ijkMax[0]; ++i) {
+				*it = getCellLinearId(i, j, k);
+				++it;
+			}
+		}
+	}
+
+	return ids;
+}
+
+/*!
+	Extract a cell subset.
+
+	\param[in] idxMin is the linear index of the lower bound
+	\param[in] idxMax is the linear index of the upper bound
+	\result The linear indices of the cell subset.
+*/
+std::vector<long> CartesianPatch::extractCellSubSet(int const &idxMin, int const &idxMax)
+{
+	return extractCellSubSet(getCellCartesianId(idxMin), getCellCartesianId(idxMax));
+}
+
+/*!
+	Extract a cell subset.
+
+	\param[in] pointMin is the lower bound
+	\param[in] pointMax is the upper bound
+	\result The linear indices of the cell subset.
+*/
+std::vector<long> CartesianPatch::extractCellSubSet(std::array<double, 3> const &pointMin, std::array<double, 3> const &pointMax)
+{
+	return extractCellSubSet(locatePointCartesian(pointMin), locatePointCartesian(pointMax));
+}
+
+/*!
+	Extract a vertex subset.
+
+	\param[in] ijkMin is the set of cartesian indices of the lower bound
+	\param[in] ijkMax is the set of cartesian indices of the upper bound
+	\result The linear indices of the vertex subset.
+*/
+std::vector<long> CartesianPatch::extractVertexSubSet(std::array<int, 3> const &ijkMin, std::array<int, 3> const &ijkMax)
+{
+	int nSubsetVertices_x = ijkMax[0] - ijkMin[0] + 1;
+	int nSubsetVertices_y = ijkMax[1] - ijkMin[1] + 1;
+	int nSubsetVertices_z = ijkMax[2] - ijkMin[2] + 1;
+
+	std::vector<long> ids;
+	ids.resize(nSubsetVertices_x * nSubsetVertices_y * nSubsetVertices_z);
+
+	std::vector<long>::iterator it = ids.begin();
+	for (int k = ijkMin[2]; k <= ijkMax[2]; ++k) {
+		for (int j = ijkMin[1]; j <= ijkMax[1]; ++j) {
+			for (int i = ijkMin[0]; i <= ijkMax[0]; ++i) {
+				*it = getVertexLinearId(i, j, k);
+				++it;
+			}
+		}
+	}
+
+	return ids;
+}
+
+/*!
+	Extract a vertex subset.
+
+	\param[in] idxMin is the linear index of the lower bound
+	\param[in] idxMax is the linear index of the upper bound
+	\result The linear indices of the vertex subset.
+*/
+std::vector<long> CartesianPatch::extractVertexSubSet(int const &idxMin, int const &idxMax)
+{
+	return extractVertexSubSet(getVertexCartesianId(idxMin), getVertexCartesianId(idxMax));
+}
+
+/*!
+	Extract a vertex subset.
+
+	\param[in] pointMin is the lower bound
+	\param[in] pointMax is the upper bound
+	\result The linear indices of the vertex subset.
+*/
+std::vector<long> CartesianPatch::extractVertexSubSet(std::array<double, 3> const &pointMin, std::array<double, 3> const &pointMax)
+{
+	return extractVertexSubSet(locatePointCartesian(pointMin), locatePointCartesian(pointMax));
+}
+
+/*!
 	@}
 */
 
