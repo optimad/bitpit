@@ -84,6 +84,7 @@ private:
 	std::array<double, 3> m_maxCoords;
 
 	std::array<std::vector<double>, 3> m_vertexCoords;
+	std::array<std::vector<double>, 3> m_cellCenters;
 
 	std::array<int, 3> m_nCells1D;
 	std::array<int, 3> m_nVertices1D;

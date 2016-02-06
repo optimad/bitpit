@@ -100,6 +100,11 @@ void CartesianPatch::initialize(std::array<double, 3> origin, std::array<double,
 		m_maxCoords[n]    = origin[n] + 0.5 * lengths[n];
 		m_cellSpacings[n] = lengths[n] / m_nCells1D[n];
 
+		m_cellCenters[n].resize(m_nCells1D[n]);
+		for (int i = 0; i < m_nCells1D[n]; i++) {
+			m_cellCenters[n][i] = m_minCoords[n] + (0.5 + i) * m_cellSpacings[n];
+		}
+
 		std::cout << "  - Cell count along direction " << n << " : " << m_nCells1D[n] << "\n";
 
 		// Initialize vertices
@@ -910,6 +915,7 @@ void CartesianPatch::translate(std::array<double, 3> translation)
 		m_maxCoords[n] += translation[n];
 		for (int i = 1; i < m_nVertices1D[n]; ++i) {
 			m_vertexCoords[n][i] += translation[n];
+			m_cellCenters[n][i]  += translation[n];
 		}
 	}
 
@@ -928,6 +934,7 @@ void CartesianPatch::scale(std::array<double, 3> scaling)
 		m_maxCoords[n] *= scaling[n];
 		for (int i = 1; i < m_nVertices1D[n]; ++i) {
 			m_vertexCoords[n][i] *= scaling[n];
+			m_cellCenters[n][i]  *= scaling[n];
 		}
 
 		m_cellSpacings[n] *= scaling[n];
