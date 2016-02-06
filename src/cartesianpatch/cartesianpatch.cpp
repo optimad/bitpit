@@ -539,6 +539,25 @@ long CartesianPatch::getCellLinearId(const std::array<int, 3> &ijk) const
 	return getCellLinearId(ijk[Vertex::COORD_X], ijk[Vertex::COORD_Y], ijk[Vertex::COORD_Z]);
 }
 
+/*!
+	Converts a cell linear index to a set of cartesian indices.
+
+	No check on bounds is performed.
+
+	\param[in] idx is the linear index of the cell
+	\result Returns the set of cartesian indices of the cell.
+*/
+std::array<int, 3> CartesianPatch::getCellCartesianId(long const &idx) const
+{
+	int ijPlane = m_nCells1D[0] * m_nCells1D[1];
+
+	std::array<int, 3> id;
+	id[0] = idx % m_nCells1D[0];
+	id[2] = idx / ijPlane;
+	id[1] = (idx - id[2] * ijPlane) / m_nCells1D[0];
+
+	return id;
+}
 
 /*!
 	Converts the vertex cartesian notation to a linear notation
@@ -550,6 +569,26 @@ long CartesianPatch::getVertexLinearId(const int &i, const int &j, const int &k)
 	if (getDimension() == 3) {
 		id += m_nVertices1D[Vertex::COORD_Y] * m_nVertices1D[Vertex::COORD_X] * k;
 	}
+
+	return id;
+}
+
+/*!
+	Converts a vertex linear index to a set of cartesian indices.
+
+	No check on bounds is performed.
+
+	\param[in] idx is the linear index of the vertex
+	\result Returns the set of cartesian indices of the vertex.
+*/
+std::array<int, 3> CartesianPatch::getVertexCartesianId(long const &idx) const
+{
+	int ijPlane = m_nVertices1D[0] * m_nVertices1D[1];
+
+	std::array<int, 3> id;
+	id[0] = idx % m_nVertices1D[0];
+	id[2] = idx / ijPlane;
+	id[1] = (idx - id[2] * ijPlane) / m_nVertices1D[0];
 
 	return id;
 }

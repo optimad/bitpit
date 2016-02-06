@@ -77,8 +77,10 @@ private:
 
 	long getCellLinearId(const int &i, const int &j, const int &k) const;
 	long getCellLinearId(const std::array<int, 3> &ijk) const;
+	std::array<int, 3> getCellCartesianId(long const &idx) const;
 	long getVertexLinearId(const int &i, const int &j, const int &k) const;
 	long getVertexLinearId(const std::array<int, 3> &ijk) const;
+	std::array<int, 3> getVertexCartesianId(long const &idx) const;
 
 };
 
