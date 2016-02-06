@@ -583,7 +583,7 @@ bool CartesianPatch::_enableCellBalancing(const long &id, bool enabled)
  */
 bool CartesianPatch::isPointInside(const std::array<double, 3> &point)
 {
-	const double EPS = 1e-12;
+	const double EPS = getTol();
 
 	for (int n = 0; n < getDimension(); n++) {
 		if (point[n] < m_minCoords[n] - EPS || point[n] > m_maxCoords[n] + EPS) {

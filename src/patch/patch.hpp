@@ -110,6 +110,11 @@ public:
 	void getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
 	std::unordered_map<long, long> binSortVertex(int nBins = 128);
 
+	void setTol(double tolerance);
+	double getTol() const;
+	void resetTol();
+	bool isTolCustomized() const;
+
 	void writeMesh();
 	void writeMesh(std::string name);
 	void writeField(std::string name, bitpit::VTKLocation location, const std::vector<double> &values);
@@ -152,6 +157,8 @@ protected:
 	virtual bool _markCellForRefinement(const long &id) = 0;
 	virtual bool _markCellForCoarsening(const long &id) = 0;
 	virtual bool _enableCellBalancing(const long &id, bool enabled) = 0;
+	virtual void _setTol(double tolerance);
+	virtual void _resetTol();
 
 	void setDirty(bool dirty);
 
@@ -161,6 +168,9 @@ private:
 	int m_id;
 	int m_dimension;
 	std::string m_name;
+
+	bool m_hasCustomTolerance;
+	double m_tolerance;
 
 	std::unordered_map<std::string, const std::vector<double> *> m_dataFields;
 	std::unordered_map<std::string, bitpit::VTKLocation> m_dataLocations;

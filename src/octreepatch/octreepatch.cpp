@@ -1253,6 +1253,30 @@ long OctreePatch::locatePoint(const std::array<double, 3> &point)
 }
 
 /*!
+	Internal function to set the tolerance for the geometrical checks.
+
+	\param tolerance is the tolerance that will be used for the geometrical
+	checks
+*/
+void OctreePatch::_setTol(double tolerance)
+{
+	m_tree.setTol(tolerance);
+
+	Patch::_setTol(tolerance);
+}
+
+/*!
+	Internal function to reset the tolerance for the geometrical checks.
+*/
+void OctreePatch::_resetTol()
+{
+	m_tree.setTol();
+
+	double tolerance = m_tree.getTol();
+	Patch::_setTol(tolerance);
+}
+
+/*!
 	@}
 */
 

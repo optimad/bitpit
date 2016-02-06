@@ -48,7 +48,7 @@ namespace bitpit {
 	Creates a new patch.
 */
 Patch::Patch(const int &id, const int &dimension)
-	: m_dirty(true)
+	: m_dirty(true), m_hasCustomTolerance(false)
 {
 	set_id(id) ;
 	setDimension(dimension);
@@ -1149,6 +1149,73 @@ std::unordered_map<long, long> Patch::binSortVertex(int nBins)
 	}
 
 	return bin_index;
+}
+
+/*!
+	Sets the tolerance for the geometrical checks.
+
+	\param tolerance is the tolerance that will be used for the geometrical
+	checks
+*/
+void Patch::setTol(double tolerance)
+{
+	_setTol(tolerance);
+
+	m_hasCustomTolerance = true;
+}
+
+/*!
+	Internal function to set the tolerance for the geometrical checks.
+
+	\param tolerance is the tolerance that will be used for the geometrical
+	checks
+*/
+void Patch::_setTol(double tolerance)
+{
+	m_tolerance = tolerance;
+}
+
+/*!
+	Gets the tolerance for the geometrical checks.
+
+	\result The tolerance fot the geometrical checks.
+*/
+double Patch::getTol() const
+{
+	return m_tolerance;
+}
+
+/*!
+	Resets the tolerance for the geometrical checks.
+*/
+void Patch::resetTol()
+{
+	_resetTol();
+
+	m_hasCustomTolerance = false;
+}
+
+/*!
+	Internal function to reset the tolerance for the geometrical checks.
+*/
+void Patch::_resetTol()
+{
+	m_tolerance = 1;
+	for (int k = 0; k < 3; ++k) {
+		m_tolerance = std::max(m_maxPoint[0] - m_minPoint[0], m_tolerance);
+	}
+	m_tolerance *= 1e-14;
+}
+
+/*!
+	Checks if the tolerance for the geometrical checks has been customized
+	by the user.
+
+	\result True if the tolerance was customized by the user, false otherwise.
+*/
+bool Patch::isTolCustomized() const
+{
+	return m_hasCustomTolerance;
 }
 
 /*!

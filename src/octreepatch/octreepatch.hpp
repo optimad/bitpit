@@ -82,6 +82,8 @@ protected:
 	bool _markCellForRefinement(const long &id);
 	bool _markCellForCoarsening(const long &id);
 	bool _enableCellBalancing(const long &id, bool enabled);
+	void _setTol(double tolerance);
+	void _resetTol();
 
 private:
 	typedef std::bitset<72> OctantHash;
