@@ -238,9 +238,9 @@ void CartesianPatch::createVertices()
 	std::cout << "    - Vertex count: " << nTotalVertices << "\n";
 
 	m_vertices.reserve(nTotalVertices);
-	for (int i = 0; i < m_nVertices1D[Vertex::COORD_X]; i++) {
+	for (int k = 0; (isThreeDimensional()) ? (k < m_nVertices1D[Vertex::COORD_Z]) : (k <= 0); k++) {
 		for (int j = 0; j < m_nVertices1D[Vertex::COORD_Y]; j++) {
-			for (int k = 0; (isThreeDimensional()) ? (k < m_nVertices1D[Vertex::COORD_Z]) : (k <= 0); k++) {
+			for (int i = 0; i < m_nVertices1D[Vertex::COORD_X]; i++) {
 				long id_vertex = getVertexLinearId(i, j, k);
 				Patch::createVertex(id_vertex);
 				Vertex &vertex = m_vertices[id_vertex];
@@ -290,9 +290,9 @@ void CartesianPatch::createCells()
 	m_cells.reserve(nTotalCells);
 
 	// Create the cells
-	for (int i = 0; i < m_nCells1D[Vertex::COORD_X]; i++) {
+	for (int k = 0; (isThreeDimensional()) ? (k < m_nCells1D[Vertex::COORD_Z]) : (k <= 0); k++) {
 		for (int j = 0; j < m_nCells1D[Vertex::COORD_Y]; j++) {
-			for (int k = 0; (isThreeDimensional()) ? (k < m_nCells1D[Vertex::COORD_Z]) : (k <= 0); k++) {
+			for (int i = 0; i < m_nCells1D[Vertex::COORD_X]; i++) {
 				long id_cell = getCellLinearId(i, j, k);
 				Patch::createCell(id_cell);
 				Cell &cell = m_cells[id_cell];
@@ -391,9 +391,9 @@ void CartesianPatch::createInterfacesDirection(const int &direction)
 	int &k = counters[Vertex::COORD_Z];
 
 	// Creation of the interfaces
-	for (i = 0; i < interfaceCount1D[Vertex::COORD_X]; i++) {
+	for (k = 0; (isThreeDimensional()) ? (k < interfaceCount1D[Vertex::COORD_Z]) : (k <= 0); k++) {
 		for (j = 0; j < interfaceCount1D[Vertex::COORD_Y]; j++) {
-			for (k = 0; (isThreeDimensional()) ? (k < interfaceCount1D[Vertex::COORD_Z]) : (k <= 0); k++) {
+			for (i = 0; i < interfaceCount1D[Vertex::COORD_X]; i++) {
 				long id_interface = Patch::createInterface();
 				Interface &interface = m_interfaces[id_interface];
 
