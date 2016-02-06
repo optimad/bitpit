@@ -595,6 +595,56 @@ bool CartesianPatch::isPointInside(const std::array<double, 3> &point)
 }
 
 /*!
+	Locates the cell the contains the point.
+
+	If the point is not inside the patch, the function returns the id of the
+	null element.
+
+	\param[in] point is the point to be checked
+	\result Returns the linear id of the cell the contains the point. If the
+	point is not inside the patch, the function returns the id of the null
+	element.
+*/
+long CartesianPatch::locatePoint(const std::array<double, 3> &point)
+{
+	if (!isPointInside(point)) {
+		return Element::NULL_ELEMENT_ID;
+	}
+
+	return getCellLinearId(locatePointCartesian(point));
+}
+
+/*!
+	Locates the cell the contains the point.
+
+	If the point is not inside the patch, the function returns the id of the
+	null element.
+
+	\param[in] point is the point to be checked
+	\result Returns the set of cartesian id of the cell the contains the point.
+	If the point is not inside the patch, the function returns negative ids.
+*/
+std::array<int, 3> CartesianPatch::locatePointCartesian(const std::array<double, 3> &point)
+{
+	std::array<int, 3> ijk;
+	if (!isPointInside(point)) {
+		ijk[0] = -1;
+		ijk[1] = -1;
+		ijk[2] = -1;
+	}
+
+	ijk[0] = std::floor(point[Vertex::COORD_X] - m_minCoords[Vertex::COORD_X]) / m_cellSpacings[Vertex::COORD_X];
+	ijk[1] = std::floor(point[Vertex::COORD_Y] - m_minCoords[Vertex::COORD_Y]) / m_cellSpacings[Vertex::COORD_Y];
+	if (isThreeDimensional()) {
+		ijk[2] = std::floor(point[Vertex::COORD_Z] - m_minCoords[Vertex::COORD_Z]) / m_cellSpacings[Vertex::COORD_Z];
+	} else {
+		ijk[2] = -1;
+	}
+
+	return ijk;
+}
+
+/*!
 	Converts the cell cartesian notation to a linear notation
 */
 long CartesianPatch::getCellLinearId(const int &i, const int &j, const int &k) const

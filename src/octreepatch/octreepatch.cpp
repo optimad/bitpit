@@ -1231,6 +1231,27 @@ bool OctreePatch::isPointInside(const std::array<double, 3> &point)
 }
 
 /*!
+	Locates the cell the contains the point.
+
+	If the point is not inside the patch, the function returns the id of the
+	null element.
+
+	\param[in] point is the point to be checked
+	\result Returns the id of the cell the contains the point. If the point
+	is not inside the patch, the function returns the id of the null element.
+*/
+long OctreePatch::locatePoint(const std::array<double, 3> &point)
+{
+	Octant *octant = m_tree.getPointOwner(point);
+	if (m_tree.getPointOwner(point) == nullptr) {
+		return Element::NULL_ELEMENT_ID;
+	}
+
+	OctantInfo octantInfo(m_tree.getIdx(octant), true);
+	return getOctantId(octantInfo);
+}
+
+/*!
 	@}
 */
 

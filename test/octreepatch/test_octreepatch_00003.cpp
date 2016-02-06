@@ -86,11 +86,17 @@ int main(int argc, char *argv[]) {
 		}
 
 		std::cout << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
+		std::cout << " is inside the element " << patch_2D->locatePoint(testPoint) << std::endl;
+
+		std::cout << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
 		if (patch_2D->isPointInside(testPoint[0], testPoint[1], testPoint[2])) {
 			std::cout << " is inside the patch" << std::endl;
 		} else {
 			std::cout << " is outside the patch" << std::endl;
 		}
+
+		std::cout << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
+		std::cout << " is inside the element " << patch_2D->locatePoint(testPoint[0], testPoint[1], testPoint[2]) << std::endl;
 	}
 
 	std::cout << std::endl;
@@ -114,6 +120,8 @@ int main(int argc, char *argv[]) {
 			std::cout << " is outside the patch" << std::endl;
 		}
 
+		std::cout << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
+		std::cout << " is inside the element " << patch_3D->locatePoint(testPoint) << std::endl;
 
 		std::cout << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
 		if (patch_3D->isPointInside(testPoint[0], testPoint[1], testPoint[2])) {
@@ -122,6 +130,8 @@ int main(int argc, char *argv[]) {
 			std::cout << " is outside the patch" << std::endl;
 		}
 
+		std::cout << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
+		std::cout << " is inside the element " << patch_3D->locatePoint(testPoint[0], testPoint[1], testPoint[2]) << std::endl;
 	}
 
 	std::cout << std::endl;

@@ -102,6 +102,8 @@ public:
 
 	bool isPointInside(const double &x, const double &y, const double &z);
 	virtual bool isPointInside(const std::array<double, 3> &point) = 0;
+	long locatePoint(const double &x, const double &y, const double &z);
+	virtual long locatePoint(const std::array<double, 3> &point) = 0;
 
 	void writeMesh();
 	void writeMesh(std::string name);

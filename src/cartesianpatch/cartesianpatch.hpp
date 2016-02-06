@@ -52,6 +52,8 @@ public:
 	double getSpacing(const int &direction) const;
 
 	bool isPointInside(const std::array<double, 3> &point);
+	long locatePoint(const std::array<double, 3> &point);
+	std::array<int, 3> locatePointCartesian(const std::array<double, 3> &point);
 
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);

@@ -1046,6 +1046,23 @@ bool Patch::isPointInside(const double &x, const double &y, const double &z)
 }
 
 /*!
+	Locates the cell the contains the point.
+
+	If the point is not inside the patch, the function returns the id of the
+	null element.
+
+	\param[in] x is the x coordinate of the point
+	\param[in] y is the y coordinate of the point
+	\param[in] z is the z coordinate of the point
+	\result Returns the id of the cell the contains the point. If the point
+	is not inside the patch, the function returns the id of the null element.
+*/
+long Patch::locatePoint(const double &x, const double &y, const double &z)
+{
+	return locatePoint({{x, y, z}});
+}
+
+/*!
  *  Interface method for obtaining field meta Data
  *
  *  @param[in] name is the name of the field to be written
