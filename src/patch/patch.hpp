@@ -105,6 +105,9 @@ public:
 	long locatePoint(const double &x, const double &y, const double &z);
 	virtual long locatePoint(const std::array<double, 3> &point) = 0;
 
+	void updateBoundingBox();
+	void getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
+
 	void writeMesh();
 	void writeMesh(std::string name);
 	void writeField(std::string name, bitpit::VTKLocation location, const std::vector<double> &values);
@@ -126,6 +129,9 @@ protected:
 	std::deque<long> m_unusedInterfaceIds;
 	std::deque<long> m_unusedCellIds;
 
+	std::array<double, 3> m_minPoint;
+	std::array<double, 3> m_maxPoint;
+
 	long createVertex();
 	long createVertex(const long &id);
 	void deleteVertex(const long &id, bool delayed = false);
@@ -137,6 +143,8 @@ protected:
 	long createCell(bool internal = true, ElementInfo::Type type = ElementInfo::UNDEFINED);
 	long createCell(const long &id, bool internal = true, ElementInfo::Type type = ElementInfo::UNDEFINED);
 	void deleteCell(const long &id, bool delayed = false);
+
+	virtual void evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
 
 	virtual const std::vector<Adaption::Info> _update(bool trackAdaption) = 0;
 	virtual bool _markCellForRefinement(const long &id) = 0;

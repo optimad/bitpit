@@ -34,6 +34,9 @@ int main(int argc, char *argv[]) {
 	MPI::Init(argc,argv);
 #endif
 
+	std::array<double, 3> minPoint;
+	std::array<double, 3> maxPoint;
+
 	std::cout << "Testing octree patch" << "\n";
 
 	std::array<double, 3> origin = {0., 0., 0.};
@@ -47,6 +50,21 @@ int main(int argc, char *argv[]) {
 	patch_2D->update();
 	patch_2D->writeMesh();
 
+	std::cout << std::endl;
+	std::cout << "\n  >> 2D bounding box" << "\n";
+	std::cout << std::endl;
+
+	patch_2D->getBoundingBox(minPoint, maxPoint);
+
+	std::cout << "  >> Minimum x : " << minPoint[0] << std::endl;
+	std::cout << "  >> Minimum y : " << minPoint[1] << std::endl;
+	std::cout << "  >> Minimum z : " << minPoint[2] << std::endl;
+
+	std::cout << "  >> Maximum x : " << maxPoint[0] << std::endl;
+	std::cout << "  >> Maximum y : " << maxPoint[1] << std::endl;
+	std::cout << "  >> Maximum z : " << maxPoint[2] << std::endl;
+
+	std::cout << std::endl;
 	std::cout << "\n  >> 2D neighbour test" << "\n";
 
 	std::vector<long> neighs_2D;
@@ -84,6 +102,21 @@ int main(int argc, char *argv[]) {
 	patch_3D->update();
 	patch_3D->writeMesh();
 
+	std::cout << std::endl;
+	std::cout << "\n  >> 3D bounding box" << "\n";
+	std::cout << std::endl;
+
+	patch_3D->getBoundingBox(minPoint, maxPoint);
+
+	std::cout << "  >> Minimum x : " << minPoint[0] << std::endl;
+	std::cout << "  >> Minimum y : " << minPoint[1] << std::endl;
+	std::cout << "  >> Minimum z : " << minPoint[2] << std::endl;
+
+	std::cout << "  >> Maximum x : " << maxPoint[0] << std::endl;
+	std::cout << "  >> Maximum y : " << maxPoint[1] << std::endl;
+	std::cout << "  >> Maximum z : " << maxPoint[2] << std::endl;
+
+	std::cout << std::endl;
 	std::cout << "\n  >> 3D neighbour test" << "\n";
 
 	std::vector<long> neighs_3D;

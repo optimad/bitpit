@@ -80,6 +80,8 @@ const std::vector<Adaption::Info> Patch::update(bool trackAdaption)
 	m_interfaces.flush();
 	m_vertices.flush();
 
+	updateBoundingBox();
+
 	setDirty(false);
 
 	return adaptionInfo;
@@ -1060,6 +1062,52 @@ bool Patch::isPointInside(const double &x, const double &y, const double &z)
 long Patch::locatePoint(const double &x, const double &y, const double &z)
 {
 	return locatePoint({{x, y, z}});
+}
+
+/*!
+	Updates the stored patch bounding box.
+*/
+void Patch::updateBoundingBox()
+{
+	evalBoundingBox(m_minPoint, m_maxPoint);
+}
+
+/*!
+	Gets the previously stored patch bounding box.
+
+	\param[out] minPoint on output stores the minimum point of the patch
+	\param[out] maxPoint on output stores the maximum point of the patch
+*/
+void Patch::getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint)
+{
+	minPoint = m_minPoint;
+	maxPoint = m_maxPoint;
+}
+
+/*!
+	Evalautes patch bounding box.
+
+	\param[out] minPoint on output stores the minimum point of the patch
+	\param[out] maxPoint on output stores the maximum point of the patch
+*/
+void Patch::evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint)
+{
+	// Initialize bounding box
+	for (int k = 0; k < 3; ++k) {
+		minPoint[k] =   std::numeric_limits<double>::max();
+		maxPoint[k] = - std::numeric_limits<double>::max();
+	}
+
+	// Compute bounding box limits
+	PiercedVector<Vertex>::iterator e = m_vertices.end();
+	for (PiercedVector<Vertex>::iterator i = m_vertices.begin(); i != e; ++i) {
+		for (int k = 0; k < 3; ++k) {
+			double value = i->getCoords()[k];
+
+			minPoint[k] = std::min(minPoint[k], value);
+			maxPoint[k] = std::max(maxPoint[k], value);
+		}
+	}
 }
 
 /*!

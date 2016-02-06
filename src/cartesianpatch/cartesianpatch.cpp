@@ -729,6 +729,18 @@ long CartesianPatch::getVertexLinearId(const std::array<int, 3> &ijk) const
 }
 
 /*!
+	Evalautes patch bounding box.
+
+	\param[out] minPoint on output stores the minimum point of the patch
+	\param[out] maxPoint on output stores the maximum point of the patch
+*/
+void CartesianPatch::evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint)
+{
+	minPoint = m_minCoords;
+	maxPoint = m_maxCoords;
+}
+
+/*!
 	@}
 */
 

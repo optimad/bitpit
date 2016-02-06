@@ -61,6 +61,8 @@ protected:
 	bool _markCellForCoarsening(const long &id);
 	bool _enableCellBalancing(const long &id, bool enabled);
 
+	void evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
+
 private:
 	std::array<double, 3> m_cellSpacings;
 	std::array<double, 3> m_minCoords;
