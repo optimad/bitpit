@@ -60,30 +60,25 @@ private:
 
 	std::array<std::vector<double>, 3> m_vertexCoords;
 
-	std::vector<int> m_nCells1D;
+	std::array<int, 3> m_nCells1D;
 	std::array<int, 3> m_nVertices1D;
-	std::vector<int> m_nInterfacesX1D;
-	std::vector<int> m_nInterfacesY1D;
-	std::vector<int> m_nInterfacesZ1D;
 
 	double m_cellVolume;
 	std::array<double, 3> m_interfaceArea;
-
-	std::vector<std::array<double, 3> > m_normals;
+	std::array<std::array<double, 3>, 3> m_normals;
 
 	void createVertices();
 
 	void createCells();
 
 	void createInterfaces();
-	int countInterfacesDirection(const Vertex::Coordinate &direction);
-	void createInterfacesDirection(const Vertex::Coordinate &direction);
+	std::array<int, 3> getInterfaceCountDirection(const int &direction);
+	void createInterfacesDirection(const int &direction);
 
 	long getCellLinearId(const int &i, const int &j, const int &k) const;
 	long getCellLinearId(const std::array<int, 3> &ijk) const;
 	long getVertexLinearId(const int &i, const int &j, const int &k) const;
 	long getVertexLinearId(const std::array<int, 3> &ijk) const;
-	long getInterfaceLinearId(const int &normal, const int &i, const int &j, const int &k) const;
 
 };
 

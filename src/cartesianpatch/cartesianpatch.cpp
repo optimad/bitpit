@@ -55,7 +55,6 @@ CartesianPatch::CartesianPatch(const int &id, const int &dimension,
 	// Info sulle celle
 	m_cellSize.resize(dimension);
 	m_minCoord.resize(dimension);
-	m_nCells1D.resize(dimension);
 	for (int n = 0; n < dimension; n++) {
 		// Dimensioni della cella
 		m_cellSize[n] = dh;
@@ -67,6 +66,10 @@ CartesianPatch::CartesianPatch(const int &id, const int &dimension,
 
 		// Minima coordinata del dominio
 		m_minCoord[n] = origin[n] - 0.5 * (m_nCells1D[n] * m_cellSize[n]);
+	}
+
+	if (!isThreeDimensional()) {
+		m_nCells1D[Vertex::COORD_Z] = 0;
 	}
 
 	m_cellVolume = m_cellSize[Vertex::COORD_X] * m_cellSize[Vertex::COORD_Y];
@@ -88,44 +91,18 @@ CartesianPatch::CartesianPatch(const int &id, const int &dimension,
 		}
 	}
 
-	// Info sulle interfacce
-	m_nInterfacesX1D.resize(dimension);
-	for (int n = 0; n < dimension; n++) {
-		m_nInterfacesX1D[n] = m_nCells1D[n];
-		if (n == Vertex::COORD_X) {
-			m_nInterfacesX1D[n]++;
-		}
-	}
-
-	m_nInterfacesY1D.resize(dimension);
-	for (int n = 0; n < dimension; n++) {
-		m_nInterfacesY1D[n] = m_nCells1D[n];
-		if (n == Vertex::COORD_Y) {
-			m_nInterfacesY1D[n]++;
-		}
-	}
-
-
-	if (isThreeDimensional()) {
-		m_nInterfacesZ1D.resize(dimension);
-		for (int n = 0; n < dimension; n++) {
-			m_nInterfacesZ1D[n] = m_nCells1D[n];
-			if (n == Vertex::COORD_Z) {
-				m_nInterfacesZ1D[n]++;
-			}
-		}
-	}
-
+	// Initialize interfaces
 	for (int n = 0; n < dimension; n++) {
 		m_interfaceArea[n] = m_cellVolume / m_cellSize[n];
 	}
 
+	int k = 0;
 	for (int i = 0; i < dimension; i++) {
 		for (int n = -1; n <= 1; n += 2) {
 			std::array<double, 3> normal = {0.0, 0.0, 0.0};
 			normal[i] = n;
 
-			m_normals.push_back(normal);
+			m_normals[k++] = normal;
 		}
 	}
 }
@@ -351,55 +328,38 @@ void CartesianPatch::createInterfaces()
 
 	// Count the interfaces
 	long nTotalInterfaces = 0;
-	nTotalInterfaces += countInterfacesDirection(Vertex::COORD_X);
-	nTotalInterfaces += countInterfacesDirection(Vertex::COORD_Y);
-	if (isThreeDimensional()) {
-		nTotalInterfaces += countInterfacesDirection(Vertex::COORD_Z);
+	for (int n = 0; n < getDimension(); n++) {
+		std::array<int, 3> interfaceCount1D = getInterfaceCountDirection(n);
+
+		int nDirectionInterfaces = 1;
+		for (int n = 0; n < getDimension(); n++) {
+			nDirectionInterfaces *= interfaceCount1D[n];
+		}
+		nTotalInterfaces += nDirectionInterfaces;
 	}
 
 	std::cout << "    - Interface count: " << nTotalInterfaces << "\n";
 
 	// Create the interfaces
 	m_interfaces.reserve(nTotalInterfaces);
-
-	createInterfacesDirection(Vertex::COORD_X);
-	createInterfacesDirection(Vertex::COORD_Y);
-	if (isThreeDimensional()) {
-		createInterfacesDirection(Vertex::COORD_Z);
+	for (int n = 0; n < getDimension(); n++) {
+		createInterfacesDirection(n);
 	}
 }
 
 /*!
-	Counts the interfaces normal to the given direction.
+	Get the interface ount for the given direction.
 
 	\param direction the method will count the interfaces normal to this
 	                 direction
+	\result The interface count for the given direction.
 */
-int CartesianPatch::countInterfacesDirection(const Vertex::Coordinate &direction)
+std::array<int, 3> CartesianPatch::getInterfaceCountDirection(const int &direction)
 {
-	std::vector<int> *interfaceCount1D;
-	switch (direction)  {
+	std::array<int, 3> interfaceDirectionCount = m_nCells1D;
+	interfaceDirectionCount[direction]++;
 
-	case Vertex::COORD_X:
-		interfaceCount1D = &m_nInterfacesX1D;
-		break;
-
-	case Vertex::COORD_Y:
-		interfaceCount1D = &m_nInterfacesY1D;
-		break;
-
-	case Vertex::COORD_Z:
-		interfaceCount1D = &m_nInterfacesZ1D;
-		break;
-
-	}
-
-	int nInterfaces = 1;
-	for (int n = 0; n < getDimension(); n++) {
-		nInterfaces *= (*interfaceCount1D)[n];
-	}
-
-	return nInterfaces;
+	return interfaceDirectionCount;
 }
 
 /*!
@@ -408,7 +368,7 @@ int CartesianPatch::countInterfacesDirection(const Vertex::Coordinate &direction
 	\param direction the method will creat the interfaces normal to this
 	                 direction
 */
-void CartesianPatch::createInterfacesDirection(const Vertex::Coordinate &direction)
+void CartesianPatch::createInterfacesDirection(const int &direction)
 {
 	std::cout << "  >> Creating interfaces normal to direction " << direction << "\n";
 
@@ -422,23 +382,7 @@ void CartesianPatch::createInterfacesDirection(const Vertex::Coordinate &directi
 
 	const ElementInfo &interfaceTypeInfo = ElementInfo::getElementInfo(interfaceType);
 	const int nInterfaceVertices = interfaceTypeInfo.nVertices;
-
-	std::vector<int> *interfaceCount1D;
-	switch (direction)  {
-
-	case Vertex::COORD_X:
-		interfaceCount1D = &m_nInterfacesX1D;
-		break;
-
-	case Vertex::COORD_Y:
-		interfaceCount1D = &m_nInterfacesY1D;
-		break;
-
-	case Vertex::COORD_Z:
-		interfaceCount1D = &m_nInterfacesZ1D;
-		break;
-
-	}
+	std::array<int, 3> interfaceCount1D = getInterfaceCountDirection(direction);
 
 	// Counters
 	std::array<int, 3> counters = {{0, 0, 0}};
@@ -447,11 +391,10 @@ void CartesianPatch::createInterfacesDirection(const Vertex::Coordinate &directi
 	int &k = counters[Vertex::COORD_Z];
 
 	// Creation of the interfaces
-	for (i = 0; i < (*interfaceCount1D)[Vertex::COORD_X]; i++) {
-		for (j = 0; j < (*interfaceCount1D)[Vertex::COORD_Y]; j++) {
-			for (k = 0; (isThreeDimensional()) ? (k < (*interfaceCount1D)[Vertex::COORD_Z]) : (k <= 0); k++) {
-				long id_interface = getInterfaceLinearId(direction, i, j, k);
-				Patch::createInterface(id_interface);
+	for (i = 0; i < interfaceCount1D[Vertex::COORD_X]; i++) {
+		for (j = 0; j < interfaceCount1D[Vertex::COORD_Y]; j++) {
+			for (k = 0; (isThreeDimensional()) ? (k < interfaceCount1D[Vertex::COORD_Z]) : (k <= 0); k++) {
+				long id_interface = Patch::createInterface();
 				Interface &interface = m_interfaces[id_interface];
 
 				// Interface type
@@ -480,7 +423,7 @@ void CartesianPatch::createInterfacesDirection(const Vertex::Coordinate &directi
 				owner.setInterface(ownerFace, 0, interface.get_id());
 
 				// Neighbour
-				if (counters[direction] != 0 && counters[direction] != (*interfaceCount1D)[direction] - 1) {
+				if (counters[direction] != 0 && counters[direction] != interfaceCount1D[direction] - 1) {
 					std::array<int, 3> neighIJK;
 					for (int n = 0; n < 3; n++) {
 						neighIJK[n] = counters[n];
@@ -617,53 +560,6 @@ long CartesianPatch::getVertexLinearId(const int &i, const int &j, const int &k)
 long CartesianPatch::getVertexLinearId(const std::array<int, 3> &ijk) const
 {
 	return getVertexLinearId(ijk[Vertex::COORD_X], ijk[Vertex::COORD_Y], ijk[Vertex::COORD_Z]);
-}
-
-/*!
-	Converts the interface cartesian notation to a linear notation
-*/
-long CartesianPatch::getInterfaceLinearId(const int &normal, const int &i, const int &j, const int &k) const
-{
-	const int *nInterfaces;
-	switch (normal) {
-
-	case Vertex::COORD_X:
-		nInterfaces = m_nInterfacesX1D.data();
-		break;
-
-	case Vertex::COORD_Y:
-		nInterfaces = m_nInterfacesY1D.data();
-		break;
-
-	case Vertex::COORD_Z:
-		nInterfaces = m_nInterfacesZ1D.data();
-		break;
-
-	}
-
-	long offset = 0;
-	if (normal <=  Vertex::COORD_Y) {
-		long offset_y = 1;
-		for (int i = 0; i < getDimension(); ++i) {
-			offset_y *= m_nInterfacesY1D[i];
-		}
-		offset += offset_y;
-	}
-	if (normal <=  Vertex::COORD_X) {
-		long offset_x = 1;
-		for (int i = 0; i < getDimension(); ++i) {
-			offset_x *= m_nInterfacesX1D[i];
-		}
-		offset += offset_x;
-	}
-
-	long id = offset + i;
-	id += nInterfaces[Vertex::COORD_X] * j;
-	if (isThreeDimensional()) {
-		id += nInterfaces[Vertex::COORD_Y] * nInterfaces[Vertex::COORD_X] * k;
-	}
-
-	return id;
 }
 
 /*!
