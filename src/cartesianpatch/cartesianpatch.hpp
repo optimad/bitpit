@@ -48,6 +48,7 @@ public:
 
 	double evalCellVolume(const long &id);
 	double evalCellSize(const long &id);
+	std::array<double, 3> evalCellCentroid(const long &id);
 
 	double evalInterfaceArea(const long &id);
 	std::array<double, 3> evalInterfaceNormal(const long &id);

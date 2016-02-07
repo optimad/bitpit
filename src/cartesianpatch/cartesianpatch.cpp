@@ -1261,6 +1261,24 @@ int CartesianPatch::linearVertexInterpolation(std::array<double,3> &point,
 }
 
 /*!
+	Evaluates the centroid of the specified cell.
+
+	\param id is the id of the cell
+	\result The centroid of the specified cell.
+*/
+std::array<double, 3> CartesianPatch::evalCellCentroid(const long &id)
+{
+	std::array<int, 3> ijk = getCellCartesianId(id);
+
+	std::array<double, 3> centroid;
+	for (int n = 0; n < 3; ++n) {
+		centroid[n] = m_cellCenters[n][ijk[n]];
+	}
+
+	return centroid;
+}
+
+/*!
 	@}
 */
 
