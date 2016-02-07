@@ -49,6 +49,61 @@ namespace bitpit {
 	\param id is the id of the patch
 	\param dimension is the dimension of the patch
 	\param origin is the origin of the domain
+	\param lengths are the lengths of the domain
+	\param nCells are the numbers of cells of the patch
+*/
+CartesianPatch::CartesianPatch(const int &id, const int &dimension,
+                               std::array<double, 3> origin, std::array<double, 3> lengths,
+                               std::array<int, 3> nCells)
+	: Patch(id, dimension)
+{
+	initialize(origin, lengths, nCells);
+}
+
+/*!
+	Creates a new patch.
+
+	\param id is the id of the patch
+	\param dimension is the dimension of the patch
+	\param origin is the origin of the domain
+	\param length is the length of the domain
+	\param nCells is the number of cells along each direction
+*/
+CartesianPatch::CartesianPatch(const int &id, const int &dimension,
+                               std::array<double, 3> origin, double length,
+                               int nCells1D)
+	: Patch(id, dimension)
+{
+	// Number of cells
+	std::array<int, 3> nCells;
+	for (int n = 0; n < dimension; n++) {
+		nCells[n] = nCells1D;
+	}
+
+	if (!isThreeDimensional()) {
+		nCells[Vertex::COORD_Z] = 0;
+	}
+
+	// Domain lengths
+	std::array<double, 3> lengths;
+	for (int n = 0; n < dimension; n++) {
+		lengths[n] = length;
+	}
+
+	if (!isThreeDimensional()) {
+		lengths[Vertex::COORD_Z] = 0;
+	}
+
+	// Patch initialization
+	initialize(origin, lengths, nCells);
+}
+
+/*!
+	Creates a new patch.
+
+	\param id is the id of the patch
+	\param dimension is the dimension of the patch
+	\param origin is the origin of the domain
 	\param length is the length of the domain
 	\param dh is the maximum allowed mesh spacing
 */

@@ -38,6 +38,10 @@ class CartesianPatch : public Patch {
 
 public:
 	CartesianPatch(const int &id, const int &dimension, std::array<double, 3> origin,
+			   std::array<double, 3> lengths, std::array<int, 3> nCells);
+	CartesianPatch(const int &id, const int &dimension, std::array<double, 3> origin,
+			   double length, int nCells1D);
+	CartesianPatch(const int &id, const int &dimension, std::array<double, 3> origin,
 			   double length, double dh);
 
 	~CartesianPatch();
