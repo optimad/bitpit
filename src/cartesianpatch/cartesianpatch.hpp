@@ -37,11 +37,11 @@ namespace bitpit {
 class CartesianPatch : public Patch {
 
 public:
-	CartesianPatch(const int &id, const int &dimension, std::array<double, 3> origin,
-			   std::array<double, 3> lengths, std::array<int, 3> nCells);
-	CartesianPatch(const int &id, const int &dimension, std::array<double, 3> origin,
+	CartesianPatch(const int &id, const int &dimension, const std::array<double, 3> &origin,
+			   const std::array<double, 3> &lengths, const std::array<int, 3> &nCells);
+	CartesianPatch(const int &id, const int &dimension, const std::array<double, 3> &origin,
 			   double length, int nCells1D);
-	CartesianPatch(const int &id, const int &dimension, std::array<double, 3> origin,
+	CartesianPatch(const int &id, const int &dimension, const std::array<double, 3> &origin,
 			   double length, double dh);
 
 	~CartesianPatch();
@@ -102,8 +102,8 @@ private:
 	std::array<double, 3> m_interfaceArea;
 	std::array<std::array<double, 3>, 6> m_normals;
 
-	void initialize(std::array<double, 3> origin, std::array<double, 3> lengths,
-	                std::array<int, 3> nCells);
+	void initialize(const std::array<double, 3> &origin, const std::array<double, 3> &lengths,
+	                const std::array<int, 3> &nCells);
 
 	void initializeInterfaceArea();
 	void initializeCellVolume();

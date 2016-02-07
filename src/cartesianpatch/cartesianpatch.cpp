@@ -53,8 +53,9 @@ namespace bitpit {
 	\param nCells are the numbers of cells of the patch
 */
 CartesianPatch::CartesianPatch(const int &id, const int &dimension,
-                               std::array<double, 3> origin, std::array<double, 3> lengths,
-                               std::array<int, 3> nCells)
+                               const std::array<double, 3> &origin,
+                               const std::array<double, 3> &lengths,
+                               const std::array<int, 3> &nCells)
 	: Patch(id, dimension)
 {
 	initialize(origin, lengths, nCells);
@@ -70,8 +71,8 @@ CartesianPatch::CartesianPatch(const int &id, const int &dimension,
 	\param nCells is the number of cells along each direction
 */
 CartesianPatch::CartesianPatch(const int &id, const int &dimension,
-                               std::array<double, 3> origin, double length,
-                               int nCells1D)
+                               const std::array<double, 3> &origin,
+                               double length, int nCells1D)
 	: Patch(id, dimension)
 {
 	// Number of cells
@@ -108,7 +109,8 @@ CartesianPatch::CartesianPatch(const int &id, const int &dimension,
 	\param dh is the maximum allowed mesh spacing
 */
 CartesianPatch::CartesianPatch(const int &id, const int &dimension,
-                               std::array<double, 3> origin, double length, double dh)
+                               const std::array<double, 3> &origin,
+                               double length, double dh)
 	: Patch(id, dimension)
 {
 	// Number of cells
@@ -142,8 +144,9 @@ CartesianPatch::CartesianPatch(const int &id, const int &dimension,
 	\param lengths are the lengths of the domain
 	\param nCells are the numbers of cells of the patch
 */
-void CartesianPatch::initialize(std::array<double, 3> origin, std::array<double, 3> lengths,
-                                std::array<int, 3> nCells)
+void CartesianPatch::initialize(const std::array<double, 3> &origin,
+                                const std::array<double, 3> &lengths,
+                                const std::array<int, 3> &nCells)
 {
 	std::cout << ">> Initializing cartesian patch\n";
 
