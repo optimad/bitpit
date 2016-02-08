@@ -59,6 +59,7 @@ if(BUILD_EXAMPLES)
 	list(APPEND EXAMPLE_LIST "PABLO_example_00008")
 	list(APPEND EXAMPLE_LIST "PABLO_example_00009")
 	list(APPEND EXAMPLE_LIST "PABLO_example_00010")
+	list(APPEND EXAMPLE_LIST "patch_example_00001")
 	list(APPEND EXAMPLE_LIST "cartesianpatch_example_00001")
 
 	#Rules to build the examples
