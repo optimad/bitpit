@@ -153,8 +153,8 @@ protected:
 	long addInterface(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED);
 	void deleteInterface(const long &id, bool delayed = false);
 
-	long addCell(bool internal = true, ElementInfo::Type type = ElementInfo::UNDEFINED);
-	long addCell(const long &id, bool internal = true, ElementInfo::Type type = ElementInfo::UNDEFINED);
+	long addCell(ElementInfo::Type type = ElementInfo::UNDEFINED, bool internal = true);
+	long addCell(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED, bool internal = true);
 	void deleteCell(const long &id, bool delayed = false);
 
 	virtual void evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);

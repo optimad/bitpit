@@ -516,7 +516,7 @@ const Cell & Patch::getCell(const long &id) const
 	\param id is the id of the new cell
 	\param internal is true if the cell is an internal cell, false otherwise
 */
-long Patch::addCell(const long &id, bool internal, ElementInfo::Type type)
+long Patch::addCell(const long &id, ElementInfo::Type type, bool internal)
 {
 	PiercedVector<Cell>::iterator iterator;
 	if (internal) {
@@ -536,7 +536,7 @@ long Patch::addCell(const long &id, bool internal, ElementInfo::Type type)
 
 	\param internal is true if the cell is an internal cell, false otherwise
 */
-long Patch::addCell(bool internal, ElementInfo::Type type)
+long Patch::addCell(ElementInfo::Type type, bool internal)
 {
 	long id;
 	if (m_unusedCellIds.empty()) {
@@ -546,7 +546,7 @@ long Patch::addCell(bool internal, ElementInfo::Type type)
 		m_unusedCellIds.pop_front();
 	}
 
-	return addCell(id, internal, type);
+	return addCell(id, type, internal);
 }
 
 /*!

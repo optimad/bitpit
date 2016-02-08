@@ -1092,15 +1092,18 @@ long OctreePatch::createCell(OctantInfo octantInfo,
                               std::vector<std::vector<bool>> &ownerFlags)
 {
 	// Create the cell
-	long id = Patch::addCell(octantInfo.internal);
+	ElementInfo::Type cellType;
+	if (isThreeDimensional()) {
+		cellType = ElementInfo::VOXEL;
+	} else {
+		cellType = ElementInfo::PIXEL;
+	}
+
+	long id = Patch::addCell(cellType, octantInfo.internal);
 	Cell &cell = m_cells[id];
 
 	// Tipo
-	if (isThreeDimensional()) {
-		cell.setType(ElementInfo::VOXEL);
-	} else {
-		cell.setType(ElementInfo::PIXEL);
-	}
+	cell.setType(cellType);
 
 	// Interior flag
 	cell.setInterior(octantInfo.internal);
