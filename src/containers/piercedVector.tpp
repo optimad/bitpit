@@ -2188,12 +2188,16 @@ private:
 		m_v[pos].set_id(distanceFromNonEmpty);
 
 		// Update the id of the elements the previous positions
-		if (pos > m_first_pos) {
+		if (pos > 0) {
 			size_type prevPos = pos - 1;
-			while (prevPos >= m_first_pos && is_pos_empty(prevPos)) {
+			while (is_pos_empty(prevPos)) {
 				m_v[prevPos].set_id(distanceFromNonEmpty - (pos - prevPos));
 
-				--prevPos;
+				if (prevPos > 0) {
+					--prevPos;
+				} else {
+					break;
+				}
 			}
 		}
 	}
