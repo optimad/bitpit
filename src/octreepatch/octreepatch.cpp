@@ -1037,7 +1037,7 @@ OctreePatch::FaceInfoSet OctreePatch::removeCells(std::vector<long> &cellIds)
 long OctreePatch::createVertex(uint32_t treeId)
 {
 	// Create the vertex
-	long id = Patch::createVertex();
+	long id = Patch::addVertex();
 	Vertex &vertex = m_vertices[id];
 
 	// Coordinate
@@ -1060,7 +1060,7 @@ long OctreePatch::createInterface(uint32_t treeId,
 	BITPIT_UNUSED(treeId);
 
 	// Create the interface
-	long id = Patch::createInterface();
+	long id = Patch::addInterface();
 	Interface &interface = m_interfaces[id];
 
 	// Tipo
@@ -1092,7 +1092,7 @@ long OctreePatch::createCell(OctantInfo octantInfo,
                               std::vector<std::vector<bool>> &ownerFlags)
 {
 	// Create the cell
-	long id = Patch::createCell(octantInfo.internal);
+	long id = Patch::addCell(octantInfo.internal);
 	Cell &cell = m_cells[id];
 
 	// Tipo

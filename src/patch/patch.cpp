@@ -419,11 +419,11 @@ const Vertex & Patch::getVertex(const long &id) const
 }
 
 /*!
-	Creates a new vertex with the specified id.
+	Adds a new vertex with the specified id.
 
 	\param id is the id of the new vertex
 */
-long Patch::createVertex(const long &id)
+long Patch::addVertex(const long &id)
 {
 	m_vertices.reclaim(id);
 
@@ -431,9 +431,9 @@ long Patch::createVertex(const long &id)
 }
 
 /*!
-	Creates a new vertex.
+	Adds a new vertex.
 */
-long Patch::createVertex()
+long Patch::addVertex()
 {
 	long id;
 	if (m_unusedVertexIds.empty()) {
@@ -443,7 +443,7 @@ long Patch::createVertex()
 		m_unusedVertexIds.pop_front();
 	}
 
-	return createVertex(id);
+	return addVertex(id);
 }
 
 /*!
@@ -511,12 +511,12 @@ const Cell & Patch::getCell(const long &id) const
 }
 
 /*!
-	Creates a new cell with the specified id.
+	Adds a new cell with the specified id.
 
 	\param id is the id of the new cell
 	\param internal is true if the cell is an internal cell, false otherwise
 */
-long Patch::createCell(const long &id, bool internal, ElementInfo::Type type)
+long Patch::addCell(const long &id, bool internal, ElementInfo::Type type)
 {
 	PiercedVector<Cell>::iterator iterator;
 	if (internal) {
@@ -532,11 +532,11 @@ long Patch::createCell(const long &id, bool internal, ElementInfo::Type type)
 }
 
 /*!
-	Creates a new cell.
+	Adds a new cell.
 
 	\param internal is true if the cell is an internal cell, false otherwise
 */
-long Patch::createCell(bool internal, ElementInfo::Type type)
+long Patch::addCell(bool internal, ElementInfo::Type type)
 {
 	long id;
 	if (m_unusedCellIds.empty()) {
@@ -546,7 +546,7 @@ long Patch::createCell(bool internal, ElementInfo::Type type)
 		m_unusedCellIds.pop_front();
 	}
 
-	return createCell(id, internal, type);
+	return addCell(id, internal, type);
 }
 
 /*!
@@ -913,11 +913,11 @@ const Interface & Patch::getInterface(const long &id) const
 }
 
 /*!
-	Creates a new interface with the specified id.
+	Adds a new interface with the specified id.
 
 	\param id is the id of the new interface
 */
-long Patch::createInterface(const long &id, ElementInfo::Type type)
+long Patch::addInterface(const long &id, ElementInfo::Type type)
 {
 	PiercedVector<Interface>::iterator iterator = m_interfaces.reclaim(id);
 
@@ -928,9 +928,9 @@ long Patch::createInterface(const long &id, ElementInfo::Type type)
 }
 
 /*!
-	Creates a new interface.
+	Adds a new interface.
 */
-long Patch::createInterface(ElementInfo::Type type)
+long Patch::addInterface(ElementInfo::Type type)
 {
 	long id;
 	if (m_unusedInterfaceIds.empty()) {
@@ -940,7 +940,7 @@ long Patch::createInterface(ElementInfo::Type type)
 		m_unusedInterfaceIds.pop_front();
 	}
 
-	return createInterface(id, type);
+	return addInterface(id, type);
 }
 
 /*!

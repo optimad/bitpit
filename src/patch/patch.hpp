@@ -145,16 +145,16 @@ protected:
 	std::array<double, 3> m_minPoint;
 	std::array<double, 3> m_maxPoint;
 
-	long createVertex();
-	long createVertex(const long &id);
+	long addVertex();
+	long addVertex(const long &id);
 	void deleteVertex(const long &id, bool delayed = false);
 
-	long createInterface(ElementInfo::Type type = ElementInfo::UNDEFINED);
-	long createInterface(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED);
+	long addInterface(ElementInfo::Type type = ElementInfo::UNDEFINED);
+	long addInterface(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED);
 	void deleteInterface(const long &id, bool delayed = false);
 
-	long createCell(bool internal = true, ElementInfo::Type type = ElementInfo::UNDEFINED);
-	long createCell(const long &id, bool internal = true, ElementInfo::Type type = ElementInfo::UNDEFINED);
+	long addCell(bool internal = true, ElementInfo::Type type = ElementInfo::UNDEFINED);
+	long addCell(const long &id, bool internal = true, ElementInfo::Type type = ElementInfo::UNDEFINED);
 	void deleteCell(const long &id, bool delayed = false);
 
 	virtual void evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);

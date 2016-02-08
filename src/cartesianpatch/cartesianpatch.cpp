@@ -383,7 +383,7 @@ void CartesianPatch::createVertices()
 		for (int j = 0; j < m_nVertices1D[Vertex::COORD_Y]; j++) {
 			for (int i = 0; i < m_nVertices1D[Vertex::COORD_X]; i++) {
 				long id_vertex = getVertexLinearId(i, j, k);
-				Patch::createVertex(id_vertex);
+				Patch::addVertex(id_vertex);
 				Vertex &vertex = m_vertices[id_vertex];
 
 				// Coordinate
@@ -434,7 +434,7 @@ void CartesianPatch::createCells()
 		for (int j = 0; j < m_nCells1D[Vertex::COORD_Y]; j++) {
 			for (int i = 0; i < m_nCells1D[Vertex::COORD_X]; i++) {
 				long id_cell = getCellLinearId(i, j, k);
-				Patch::createCell(id_cell);
+				Patch::addCell(id_cell);
 				Cell &cell = m_cells[id_cell];
 
 				// Initialize the cell
@@ -534,7 +534,7 @@ void CartesianPatch::createInterfacesDirection(const int &direction)
 	for (k = 0; (isThreeDimensional()) ? (k < interfaceCount1D[Vertex::COORD_Z]) : (k <= 0); k++) {
 		for (j = 0; j < interfaceCount1D[Vertex::COORD_Y]; j++) {
 			for (i = 0; i < interfaceCount1D[Vertex::COORD_X]; i++) {
-				long id_interface = Patch::createInterface();
+				long id_interface = Patch::addInterface();
 				Interface &interface = m_interfaces[id_interface];
 
 				// Interface type
