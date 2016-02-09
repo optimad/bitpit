@@ -265,7 +265,7 @@ int main(
     // ========================================================================== //
 
     // Local variables
-    int         selection;
+    // none
 
     // Counters
     // none
