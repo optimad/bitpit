@@ -372,13 +372,17 @@ void VTK::getMissingMetaData(){
 
 
     for( auto & field : geometry ){
-        VTKFieldMetaData const & metaData = getMetaData( field->getName() ) ;
-        field->importMetaData( metaData ) ;
+        if( field->usesInterface() ){
+            VTKFieldMetaData const & metaData = getMetaData( field->getName() ) ;
+            field->importMetaData( metaData ) ;
+        }
     };
 
     for( auto & field : data ){
-        VTKFieldMetaData const & metaData = getMetaData( field->getName() ) ;
-        field->importMetaData( metaData ) ;
+        if( field->usesInterface() ){
+            VTKFieldMetaData const & metaData = getMetaData( field->getName() ) ;
+            field->importMetaData( metaData ) ;
+        }
     };
 
     setMissingGlobalData();
