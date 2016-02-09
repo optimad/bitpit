@@ -632,7 +632,7 @@ PabloUniform::getLocalMinSize(){
  */
 void
 PabloUniform::getBoundingBox(darray3 & P0, darray3 & P1){
-	darray3		cnode, cnode0, cnode1;
+	darray3		cnode0, cnode1;
 	uint32_t 	nocts = ParaTree::getNumOctants();
 	uint32_t	id = 0;
 	uint8_t 	nnodes = ParaTree::getNnodes();
