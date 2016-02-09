@@ -2067,8 +2067,8 @@ private:
 	*/
 	size_type positions_pop_back(std::deque<size_type> &list)
 	{
-		size_type pos = m_holes.back();
-		m_holes.pop_back();
+		size_type pos = list.back();
+		list.pop_back();
 
 		return pos;
 	}
