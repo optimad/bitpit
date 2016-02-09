@@ -43,9 +43,6 @@
 
 #include "FileHandler.hpp"
 #include "VTK.hpp"
-#ifdef IO_ENABLE_VTK_WRAPPERS
-#include "VTKWrappers.hpp"
-#endif
 #include "DGF.hpp"
 #include "GenericIO.hpp"
 #include "STL.hpp"

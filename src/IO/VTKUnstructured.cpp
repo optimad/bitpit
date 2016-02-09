@@ -39,17 +39,39 @@ namespace bitpit{
  */
 
 /*!  
+ *  Destructor.
+ */
+VTKUnstructuredGrid::~VTKUnstructuredGrid( ) {
+
+};
+
+/*!  
  *  Default constructor.
  *  Allocates four geometry fields called "Points"(Float64), "offsets"(Int32), "types"(Int32) and "connectivity"(Int32).
  */
 VTKUnstructuredGrid::VTKUnstructuredGrid( ) :VTK() {
 
-  fh.setAppendix("vtu");
+    fh.setAppendix("vtu");
+    homogeneousType = VTKElementType::UNDEFINED ;
 
-  geometry.push_back( VTKField( "Points",       VTKFieldType::VECTOR, VTKLocation::POINT, VTKDataType::Float64) ) ;
-  geometry.push_back( VTKField( "offsets",      VTKFieldType::SCALAR, VTKLocation::CELL, VTKDataType::Int32   ) ) ;
-  geometry.push_back( VTKField( "types",        VTKFieldType::SCALAR, VTKLocation::CELL, VTKDataType::Int32   ) ) ;
-  geometry.push_back( VTKField( "connectivity", VTKFieldType::SCALAR, VTKLocation::CELL, VTKDataType::Int32   ) ) ;
+    geometry.resize(4) ;
+
+    geometry[0] = new VTKField("Points")  ;
+    geometry[1] = new VTKField("offsets")  ;
+    geometry[2] = new VTKField("types")  ;
+    geometry[3] = new VTKField("connectivity")  ;
+
+    for( auto & field : geometry ){
+        field->setLocation( VTKLocation::CELL ) ;
+        field->setFieldType( VTKFieldType::SCALAR ) ;
+        field->setDataType( VTKDataType::Int32 ) ;
+        field->setCodification(GeomCodex);
+    }
+
+    geometry[0]->setLocation( VTKLocation::POINT ) ;
+    geometry[0]->setFieldType( VTKFieldType::VECTOR ) ;
+    geometry[0]->setDataType( VTKDataType::Float64 ) ;
+    geometry[0]->setCodification(GeomCodex);
 
 };
 
@@ -61,18 +83,44 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( ) :VTK() {
  */
 VTKUnstructuredGrid::VTKUnstructuredGrid( std::string dir_, std::string name_ ):VTKUnstructuredGrid( ){
 
-  setNames( dir_, name_ ) ; 
-  return ;
+    setNames( dir_, name_ ) ; 
+    return ;
 
 };
 
 /*!  
- *  Destructor.
+ *  Constructor for grid with homogeneous element type
+ *  sets input parameters and calls default constructor
+ *  @param[in]  dir_        Directory of vtk file with final "/"
+ *  @param[in]  name_       Name of vtk file without suffix
+ *  @param[in]  type_       Type of element
  */
-VTKUnstructuredGrid::~VTKUnstructuredGrid( ) {
-    
+VTKUnstructuredGrid::VTKUnstructuredGrid( std::string dir_, std::string name_, VTKElementType type_ ):VTKUnstructuredGrid( dir_, name_ ){
+
+    setElementType( type_ ) ;
+    return ;
+
 };
 
+/*!  
+ *  Tell VTKUnstructuredGrid that grid is made homogeously of one element type; 
+ *  Consequently type and offset information are handled directly in class and need not to be provided via interface
+ *  @param[in]  type_ Type of element in grid
+ */
+void VTKUnstructuredGrid::setElementType( VTKElementType type_ ){
+
+    homogeneousType = type_ ;
+
+    geometry[1]->setDataType( VTKDataType::UInt64) ; 
+    geometry[1]->setImplicit( true) ; 
+    geometry[2]->setDataType( VTKDataType::UInt8) ; 
+    geometry[2]->setImplicit( true) ; 
+
+    geometry[3]->setFieldType( VTKFieldType::CONSTANT );
+    geometry[3]->setComponents( vtk::getNNodeInElement(type_) );
+    return ;
+
+};
 /*!  
  *  sets the type of the geometry variables
  *  @param[in]  Ptype       Type of "Point" geometry information [ VTKDataType::Float[32/64]]
@@ -82,34 +130,57 @@ VTKUnstructuredGrid::~VTKUnstructuredGrid( ) {
  */
 void VTKUnstructuredGrid::setGeomTypes( VTKDataType Ptype, VTKDataType Otype, VTKDataType Ttype, VTKDataType Ctype  ){
 
-    geometry[0].setType(Ptype) ;
-    geometry[1].setType(Otype) ;
-    geometry[2].setType(Ttype) ;
-    geometry[3].setType(Ctype) ;
+    geometry[0]->setDataType(Ptype) ;
+    geometry[1]->setDataType(Otype) ;
+    geometry[2]->setDataType(Ttype) ;
+    geometry[3]->setDataType(Ctype) ;
 
     return ;
 };
 
 /*!  
- *  sets the size of the unstructured grid.
+ *  sets the size of the unstructured grid. 
+ *  If VTKUnstructuredGrid::setElementType(VTKElelementType) has been called the last argument can be omitted and the connectivity size will be calculated within the method.
  *  @param[in]  ncells_     number of cells
  *  @param[in]  npoints_    number of points
- *  @param[in]  nconn_      size of the connectivity information
+ *  @param[in]  nconn_      size of the connectivity information;
  */
 void VTKUnstructuredGrid::setDimensions( uint64_t ncells_, uint64_t npoints_, uint64_t nconn_ ){
 
     nr_cells        = ncells_ ;
     nr_points       = npoints_ ;
+    nconnectivity   = nconn_ ;
 
-    geometry[0].setElements(nr_points) ;
-    geometry[1].setElements(nr_cells) ;
-    geometry[2].setElements(nr_cells) ;
-    geometry[3].setElements(nconn_) ;
+    geometry[0]->setElements(nr_points) ;
+    geometry[1]->setElements(nr_cells) ;
+    geometry[2]->setElements(nr_cells) ;
+
+    if( homogeneousType != VTKElementType::UNDEFINED ){
+        nconnectivity = ncells_ *vtk::getNNodeInElement( homogeneousType ) ;
+        geometry[3]->setElements(nr_cells) ;
+
+    } else {
+        geometry[3]->setElements(nconnectivity) ;
+    }
 
     for( auto &field : data ){
-        if( field.getLocation() == VTKLocation::CELL)  field.setElements(nr_cells) ;
-        if( field.getLocation() == VTKLocation::POINT) field.setElements(nr_points) ;
+        if( field->getLocation() == VTKLocation::CELL)  field->setElements(nr_cells) ;
+        if( field->getLocation() == VTKLocation::POINT) field->setElements(nr_points) ;
     };
+
+    return ;
+};
+
+/*!  
+ *  sets the size of the unstructured grid for a homogenous grid.
+ *  @param[in]  ncells_     number of cells
+ *  @param[in]  npoints_    number of points
+ *  @param[in]  type_       typeof element in grid
+ */
+void VTKUnstructuredGrid::setDimensions( uint64_t ncells_, uint64_t npoints_, VTKElementType type_ ){
+
+    setElementType( type_ );
+    setDimensions( ncells_, npoints_ );
 
     return ;
 };
@@ -120,13 +191,14 @@ void VTKUnstructuredGrid::setDimensions( uint64_t ncells_, uint64_t npoints_, ui
  */
 uint64_t VTKUnstructuredGrid::calcSizeConnectivity( ){
 
+    uint64_t                 nconn ;
+
     std::fstream                  str  ;
     std::fstream::pos_type        position_appended;
     std::string                   line;
     char                     c_ ;
     uint32_t                 nbytes32 ;
     uint64_t                 nbytes64 ;
-    uint64_t                 nconn ;
 
     str.open( fh.getName( ), std::ios::in ) ;
 
@@ -146,25 +218,25 @@ uint64_t VTKUnstructuredGrid::calcSizeConnectivity( ){
     //Open in binary for read
     str.open( fh.getName( ), std::ios::in | std::ios::binary);
 
-    if( geometry[3].getCodification() == VTKFormat::APPENDED ){
+    if( geometry[3]->getCodification() == VTKFormat::APPENDED ){
         str.seekg( position_appended) ;
-        str.seekg( geometry[3].getOffset(), std::ios::cur) ;
+        str.seekg( geometry[3]->getOffset(), std::ios::cur) ;
 
         if( HeaderType== "UInt32") {
             genericIO::absorbBINARY( str, nbytes32 ) ;
-            nconn = nbytes32 /VTKTypes::sizeOfType( geometry[3].getType() ) ;
+            nconn = nbytes32 /VTKTypes::sizeOfType( geometry[3]->getDataType() ) ;
         }
 
         if( HeaderType== "UInt64") {
             genericIO::absorbBINARY( str, nbytes64 ) ;
-            nconn = nbytes64 /VTKTypes::sizeOfType( geometry[3].getType() ) ;
+            nconn = nbytes64 /VTKTypes::sizeOfType( geometry[3]->getDataType() ) ;
         };
     };
 
 
     //Read geometry
-    if(  geometry[3].getCodification() == VTKFormat::ASCII ){
-        str.seekg( geometry[3].getPosition() ) ;
+    if(  geometry[3]->getCodification() == VTKFormat::ASCII ){
+        str.seekg( geometry[3]->getPosition() ) ;
 
         std::string              line ;
         std::vector<uint64_t>    temp;
@@ -196,45 +268,78 @@ void VTKUnstructuredGrid::writeMetaData( ){
 
     std::fstream str ;
     std::string line ; 
-    
+
     str.open( fh.getName( ), std::ios::out ) ;
-    
+
     //Writing XML header
     str << "<?xml version=\"1.0\"?>" << std::endl;
-    
+
     //Writing Piece Information
     str << "<VTKFile type=\"UnstructuredGrid\" version=\"1.0\" byte_order=\"LittleEndian\" header_type=\"" << HeaderType << "\">" << std::endl;
     str << "  <UnstructuredGrid>"  << std::endl;;
     str << "    <Piece  NumberOfPoints=\"" << nr_points << "\" NumberOfCells=\"" << nr_cells << "\">" << std::endl;
-    
+
     //Header for Data
     writeDataHeader( str, false );
-    
+
     //Wring Geometry Information
     str << "      <Points>" << std::endl ;;
-    writeDataArray( str, geometry[0] ) ;
+    writeDataArray( str, *geometry[0] ) ;
     str << "      </Points>" << std::endl;
-    
+
     str << "      <Cells>" << std::endl ;;
-    writeDataArray( str, geometry[1] ) ;
-    writeDataArray( str, geometry[2] ) ;
-    writeDataArray( str, geometry[3] ) ;
+    writeDataArray( str, *geometry[1] ) ;
+    writeDataArray( str, *geometry[2] ) ;
+    writeDataArray( str, *geometry[3] ) ;
     str << "      </Cells>" << std::endl;
-    
+
     //Closing Piece
     str << "    </Piece>" << std::endl;
     str << "  </UnstructuredGrid>"  << std::endl;
-    
+
     //Appended Section
-    
+
     str << "  <AppendedData encoding=\"raw\">" << std::endl;
     str << "_" ;
     str << std::endl ;
     str << "</VTKFile>" << std::endl;
-    
+
     str.close() ;
-    
+
     return ;
+};
+
+/*!
+ * Write Field data to stream
+ * @param[in] str output stream
+ * @param[in] field field to be written
+ */
+void VTKUnstructuredGrid::writeFieldData( std::fstream &str, VTKField &field ){
+
+    if( field.usesInterface() ){
+        flushData( str, field.getCodification(), field.getName() ) ;
+
+    } else if( field.autoWrite() ) {
+        field.flushData( str ) ;
+
+    } else{ 
+
+        if(field.getName() == "types" && homogeneousType != VTKElementType::UNDEFINED){
+            uint8_t type = (uint8_t) homogeneousType ;
+            for( int i=0; i<nr_cells; ++i)
+                genericIO::flushBINARY(str, type );
+
+        } else if(field.getName() == "offsets" && homogeneousType != VTKElementType::UNDEFINED){
+            uint8_t     n = vtk::getNNodeInElement(homogeneousType) ;
+            uint64_t    offset(0) ;
+            for( int i=0; i<nr_cells; ++i){
+                offset += n ;
+                genericIO::flushBINARY(str, offset );
+            }
+
+        }
+
+    }
 };
 
 /*!  
@@ -243,49 +348,49 @@ void VTKUnstructuredGrid::writeMetaData( ){
  */
 void VTKUnstructuredGrid::writeCollection( ){
 
-  std::fstream str ;
+    std::fstream str ;
 
-  FileHandler     fhp, fho ;
+    FileHandler     fhp, fho ;
 
-  fhp = fh ;
-  fho = fh ;
+    fhp = fh ;
+    fho = fh ;
 
-  fhp.setParallel(false) ;
-  fhp.setAppendix("pvtu") ;
+    fhp.setParallel(false) ;
+    fhp.setAppendix("pvtu") ;
 
-  fho.setDirectory(".") ;
+    fho.setDirectory(".") ;
 
-  str.open( fhp.getName( ), std::ios::out ) ;
+    str.open( fhp.getName( ), std::ios::out ) ;
 
-  //Writing XML header
-  str << "<?xml version=\"1.0\"?>" << std::endl;
+    //Writing XML header
+    str << "<?xml version=\"1.0\"?>" << std::endl;
 
-  //Writing Piece Information
-  str << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
-  str << "  <PUnstructuredGrid GhostLevel=\"0\">"  << std::endl;;
+    //Writing Piece Information
+    str << "<VTKFile type=\"PUnstructuredGrid\" version=\"0.1\" byte_order=\"LittleEndian\">" << std::endl;
+    str << "  <PUnstructuredGrid GhostLevel=\"0\">"  << std::endl;;
 
-  //Header for Data
-  writeDataHeader( str, true );
+    //Header for Data
+    writeDataHeader( str, true );
 
-  //Wring Geometry Information
-  str << "      <PPoints>" << std::endl;
-  writePDataArray( str, geometry[0] ) ;
-  str << std::endl ;
-  str << "      </PPoints>" << std::endl;
-
-
-  for( int i=0; i<nr_procs; i++){
-    fho.setBlock(i) ;
-    str << "    <Piece  Source=\"" << fho.getName() <<  "\"/>" << std::endl;
-  };
-
-  str << "  </PUnstructuredGrid>"  << std::endl;
-  str << "</VTKFile>" << std::endl;
-
-  str.close() ;
+    //Wring Geometry Information
+    str << "      <PPoints>" << std::endl;
+    writePDataArray( str, *geometry[0] ) ;
+    str << std::endl ;
+    str << "      </PPoints>" << std::endl;
 
 
-  return ;
+    for( int i=0; i<nr_procs; i++){
+        fho.setBlock(i) ;
+        str << "    <Piece  Source=\"" << fho.getName() <<  "\"/>" << std::endl;
+    };
+
+    str << "  </PUnstructuredGrid>"  << std::endl;
+    str << "</VTKFile>" << std::endl;
+
+    str.close() ;
+
+
+    return ;
 };
 
 /*!  
@@ -296,49 +401,74 @@ void VTKUnstructuredGrid::readMetaData( ){
 
     std::fstream str;
     std::string line, temp;
-    
+
     std::fstream::pos_type        position;
-    
+
     str.open( fh.getName( ), std::ios::in ) ;
-    
+
     getline( str, line);
     while( ! bitpit::utils::keywordInString( line, "<VTKFile")){
         getline(str, line);
     };
-                                              
+
     if( bitpit::utils::getAfterKeyword( line, "header_type", '\"', temp) ){
         setHeaderType( temp) ;
     };
 
     while( ! bitpit::utils::keywordInString( line, "<Piece")){
-      getline(str, line);
+        getline(str, line);
     };
-    
+
     bitpit::utils::getAfterKeyword( line, "NumberOfPoints", '\"', temp) ;
     bitpit::utils::convertString( temp, nr_points );
-    
+
     bitpit::utils::getAfterKeyword( line, "NumberOfCells", '\"', temp) ;
     bitpit::utils::convertString( temp, nr_cells );
-    
-    
+
+
     position = str.tellg() ;
     readDataHeader( str ) ;
-    
-    
+
+
     for( auto &field : geometry ){ 
         str.seekg( position) ;
-        if( ! readDataArray( str, field ) ) {
-          std::cout << field.getName() << " DataArray not found" << std::endl ;
+        if( ! readDataArray( str, *field ) ) {
+            std::cout << field->getName() << " DataArray not found" << std::endl ;
         };
     };
-    
-    
+
+
     str.close() ;
-    
-    setDimensions( nr_cells, nr_points, calcSizeConnectivity( )  ) ;
+
+    if( homogeneousType == VTKElementType::UNDEFINED) {
+        setDimensions( nr_cells, nr_points, calcSizeConnectivity() ) ;
+    } else {
+        setDimensions( nr_cells, nr_points ) ;
+    };
+
 
     return ;
 };
+
+/*!
+ * Read Field data from stream
+ * @param[in] str input stream
+ * @param[in] field field to be read
+ */
+void VTKUnstructuredGrid::readFieldData( std::fstream &str, VTKField &field ){
+
+    if( field.usesInterface() ){
+        absorbData( str, field.getCodification(), field.getName() ) ;
+
+    } else if( field.autoWrite() ){
+        field.absorbData( str ) ;
+
+    } else {
+        //dont do nothing
+    }
+
+    return;
+}
 
 /*!  
  *  Returns the size of the connectivity information
@@ -346,7 +476,7 @@ void VTKUnstructuredGrid::readMetaData( ){
  */
 uint64_t VTKUnstructuredGrid::getNConnectivity( ){
 
-  return nconnectivity ;
+    return nconnectivity ;
 };
 
 /*!  
@@ -356,9 +486,9 @@ void VTKUnstructuredGrid::setMissingGlobalData( ){
 
     uint64_t    ncells, npoints, nconn;
 
-    ncells  = std::max( geometry[1].getElements(), geometry[2].getElements() );
-    npoints = geometry[0].getElements() ;
-    nconn   = geometry[3].getElements() ;
+    ncells  = std::max( geometry[1]->getElements(), geometry[2]->getElements() );
+    npoints = geometry[0]->getElements() ;
+    nconn   = geometry[3]->getElements() ;
 
     setDimensions( ncells, npoints, nconn) ;
 

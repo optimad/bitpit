@@ -32,67 +32,67 @@ namespace bitpit{
  */
 
 /*!
+ * Destructor
+ */
+VTKField::~VTKField(){
+};
+
+
+/*!
  * Default constructor
  */
 VTKField::VTKField(){
 
     name            = "undefined" ;  
-    type            = VTKDataType::UNDEFINED ;
+    dataType        = VTKDataType::UNDEFINED ;
     location        = VTKLocation::UNDEFINED ;
     codification    = VTKFormat::UNDEFINED ;
-    components      = VTKFieldType::UNDEFINED ;   ;
+    fieldType       = VTKFieldType::UNDEFINED ;
+    components      = 0 ;
     nr_elements     = 0 ;
     position        = 0 ;
 
+    derived         = false;
+    implicitKnown   = false;
+
+};
+
+/*!
+ * Copy constructor
+ * @param[in]   other   object to be copied
+ */
+VTKField::VTKField( const VTKField &other){
+
+    *this = other ;
 };
 
 /*!
  * Constructor
  * @param[in]   name_   name of data field
- * @param[in]   comp_   number of coponents of data field [VTKFieldType::SCALAR/VTKFieldType::VECTOR]
- * @param[in]   loc_    location of data field [VTKLocation::CELL/VTKLocation::POINT]
  */
-VTKField::VTKField( std::string name_, VTKFieldType comp_, VTKLocation loc_ ): name(name_), components(comp_), location(loc_) {
+VTKField::VTKField( std::string name_ ): VTKField() {
 
-    type            = VTKDataType::UNDEFINED ;
-    nr_elements     = 0 ;
-    codification    = VTKFormat::UNDEFINED ;
-    position        = 0 ;
-
+    name = name_ ;
 };
 
 /*!
- * Constructor
- * @param[in]   name_   name of data field
- * @param[in]   comp_   number of coponents of data field [VTKFieldType::SCALAR/VTKFieldType::VECTOR]
- * @param[in]   loc_    location of data field [VTKLocation::CELL/VTKLocation::POINT]
- * @param[in]   type_   type of data field [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
+ * Assignment operator
  */
-VTKField::VTKField( std::string name_, VTKFieldType comp_, VTKLocation loc_, VTKDataType type_ ): name(name_), components(comp_), type(type_), location(loc_) {
+VTKField& VTKField::operator=( const VTKField & other){
 
-    nr_elements     = 0 ;
-    codification    = VTKFormat::UNDEFINED ;
-    position        = 0 ;
+    name  = other.name;
+    fieldType = other.fieldType ;
+    components = other.components ;
+    dataType = other.dataType ;
+    codification = other.codification;
+    location = other.location ;
+    nr_elements = other.nr_elements ;
+    offset = other.offset ;
+    position = other.position ;
+    derived = other.derived ;
+    implicitKnown = other.implicitKnown ;
 
-};
-
-/*!
- * Constructor
- * @param[in]   name_   name of data field
- * @param[in]   comp_   number of coponents of data field [VTKFieldType::SCALAR/VTKFieldType::VECTOR]
- * @param[in]   loc_    location of data field [VTKLocation::CELL/VTKLocation::POINT]
- * @param[in]   type_   type of data field [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
- * @param[in]   cod_    codex [VTKFormat::APPENDED/VTKFormat::ASCII]
- * @param[in]   nr_elements_    number of elements of data field
- */
-VTKField::VTKField( std::string name_, VTKFieldType comp_, VTKLocation loc_, VTKDataType type_, VTKFormat cod_, uint64_t nr_elements_):
-    name(name_), components(comp_), type(type_), location(loc_), codification(cod_), nr_elements(nr_elements_){
-};
-
-/*!
- * Destructor
- */
-VTKField::~VTKField(){
+    return *this;
 };
 
 /*!
@@ -108,8 +108,8 @@ void      VTKField::setName( std::string  name_){
  * set type of data field
  * @param[in]  type_    type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
  */
-void      VTKField::setType( VTKDataType  type_){
-    type= type_; 
+void      VTKField::setDataType( VTKDataType  type_){
+    dataType= type_; 
     return; 
 };
 
@@ -132,10 +132,19 @@ void      VTKField::setCodification( VTKFormat  code_ ){
 };
 
 /*!
- * set number of components of data field
- * @param[in]   comp_   number of coponents of data field [VTKFieldType::SCALAR/VTKFieldType::VECTOR]
+ * set type of data field
+ * @param[in]   type_   type of data field [VTKFieldType::SCALAR/VECTOR/CONSTANT/VARIABLE]
  */
-void      VTKField::setComponents( VTKFieldType comp_){ 
+void      VTKField::setFieldType( VTKFieldType type_){ 
+    fieldType= type_; 
+    return; 
+};
+
+/*!
+ * set number of components of data field to be used if VTKFieldType::CONSTANT
+ * @param[in]   comp_   number of coponents of data field 
+ */
+void      VTKField::setComponents( uint8_t comp_){ 
     components= comp_; 
     return; 
 };
@@ -168,6 +177,15 @@ void      VTKField::setOffset( uint64_t offs_){
 };
 
 /*!
+ * set if class storing the field is aware about data to be written
+ * @param[in]   known   true if aware
+ */
+void      VTKField::setImplicit( bool known ){ 
+    implicitKnown= known; 
+    return; 
+};
+
+/*!
  * get name of data field
  * @return  name of data field
  */
@@ -176,11 +194,19 @@ std::string    VTKField::getName() const{
 };
 
 /*!
- * get type of data field
- * @return   type of data field [ "[U]Int8", "[U]Int16", "[U]Int32", "[U]Int64", "Float32", "Float64" ]
+ * get type of field
+ * @return   type of data field [ VTKFieldType ]
  */
-VTKDataType    VTKField::getType() const{ 
-    return type; 
+VTKFieldType    VTKField::getFieldType() const{ 
+    return fieldType; 
+};
+
+/*!
+ * get type of data field
+ * @return   type of data field [ VTKDataType ]
+ */
+VTKDataType    VTKField::getDataType() const{ 
+    return dataType; 
 };
 
 /*!
@@ -201,9 +227,9 @@ VTKFormat    VTKField::getCodification() const{
 
 /*!
  * get number of components of data field
- * @return  number of components [1/3]
+ * @return  number of components 
  */
-VTKFieldType   VTKField::getComponents() const{ 
+uint8_t   VTKField::getComponents() const{ 
     return components; 
 };
 
@@ -222,7 +248,16 @@ uint64_t  VTKField::getElements() const{
  */
 uint64_t  VTKField::getSize() const{ 
 
-    return static_cast<int>(components) *nr_elements ; 
+    if( fieldType == VTKFieldType::SCALAR || fieldType == VTKFieldType::VARIABLE ){
+        return nr_elements ; 
+
+    } else if( fieldType == VTKFieldType::VECTOR){
+        return static_cast<int>(fieldType) *nr_elements ; 
+
+    } else if( fieldType == VTKFieldType::CONSTANT ){
+        return components *nr_elements ; 
+    };
+
 };
 
 /*!
@@ -238,7 +273,7 @@ uint64_t  VTKField::getOffset() const{
  * @return  memory size of data field
  */
 uint64_t  VTKField::getNbytes() const{ 
-    return static_cast<int>(components) *nr_elements *VTKTypes::sizeOfType( type ) ;
+    return getSize() *VTKTypes::sizeOfType( dataType ) ;
 };
 
 /*!
@@ -260,10 +295,10 @@ bool   VTKField::hasAllMetaData() const{
     bool    allData(true);
 
     allData = allData && name != "undefined" ;  
-    allData = allData && type != VTKDataType::UNDEFINED ;
+    allData = allData && dataType != VTKDataType::UNDEFINED ;
     allData = allData && location != VTKLocation::UNDEFINED ;
     allData = allData && codification != VTKFormat::UNDEFINED ;
-    allData = allData && components != VTKFieldType::UNDEFINED ;   ;
+    allData = allData && fieldType != VTKFieldType::UNDEFINED ;   ;
     allData = allData && nr_elements != 0 ;
 
     return allData;
@@ -275,17 +310,63 @@ bool   VTKField::hasAllMetaData() const{
 void VTKField::importMetaData( const VTKFieldMetaData &data){ 
 
     if( data.getSize() != 0 ){
-        setType( VTKTypes::whichType(data.getType()) );
+        setDataType( VTKTypes::whichType(data.getType()) );
 
-        if( getComponents() == VTKFieldType::UNDEFINED)
-            setComponents( VTKFieldType::SCALAR);
-        setElements( data.getSize() / static_cast<int>(components)  );
+        if( getFieldType() == VTKFieldType::SCALAR ){
+            setElements( data.getSize() ) ;
+
+        } else if (getFieldType() == VTKFieldType::VECTOR) {
+            setElements( data.getSize() /3 ) ;
+
+        } else if (getFieldType() == VTKFieldType::CONSTANT) {
+            setElements( data.getSize() / components  );
+
+        } else if (getFieldType() == VTKFieldType::VARIABLE) {
+            setElements( data.getSize() );
+        }
+
     };
 
     return ;
 };
 
+/*!
+ * Checks which mechanism is used to read/write data
+ * @return  true if flushData is used, false if internal pointer to data is used
+ */
+bool VTKField::usesInterface( )const{ 
 
+    return( !autoWrite() && !implicitKnown ) ;
+};
+
+/*!
+ * Checks which mechanism is used to read/write data
+ * @return  true if a derived class with explicit data storage is used
+ */
+bool VTKField::autoWrite( )const{ 
+
+    return( derived ) ;
+};
+
+/*!
+ * Checks which mechanism is used to read/write data
+ * @return  true if flushData is used, false if internal pointer to data is used
+ */
+void VTKField::flushData( std::fstream &str )const{ 
+    BITPIT_UNUSED( str);
+
+    return  ;
+};
+
+/*!
+ * Checks which mechanism is used to read/write data
+ * @return  true if flushData is used, false if internal pointer to data is used
+ */
+void VTKField::absorbData( std::fstream &str )const{ 
+    BITPIT_UNUSED( str);
+
+    return  ;
+};
 /*!
  * @}
  */

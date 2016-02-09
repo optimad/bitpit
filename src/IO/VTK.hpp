@@ -27,6 +27,7 @@
 #define __BITPIT_VTK_HPP__
 
 #include <typeinfo>
+#include <type_traits>
 #include <vector>
 #include <array>
 #include <typeindex>
@@ -45,7 +46,9 @@ namespace bitpit{
 enum class VTKFieldType {
     UNDEFINED = -1,
     SCALAR = 1,
-    VECTOR = 3
+    VECTOR = 3,
+    CONSTANT = 4,
+    VARIABLE = 5
 };
 
 /*!
@@ -108,7 +111,7 @@ enum class VTKElementType {
 
 class VTKTypes{
 
-     private:
+    private:
         static std::unordered_map<std::type_index, VTKDataType> m_types;  /**< map conatining registered data types */
 
     public:
@@ -137,13 +140,13 @@ class VTKTypes{
 class VTKFieldMetaData{
 
     private:
-    uint64_t                m_size ;                        /**< size of the field */
-    const std::type_info&   m_type ;                        /**< tye of the field */
+        uint64_t                m_size ;                        /**< size of the field */
+        const std::type_info&   m_type ;                        /**< tye of the field */
 
     public:
-    VTKFieldMetaData( uint64_t, const std::type_info &);
-    uint64_t                getSize() const;
-    const std::type_info&   getType() const;
+        VTKFieldMetaData( uint64_t, const std::type_info &);
+        uint64_t                getSize() const;
+        const std::type_info&   getType() const;
 
 };
 
@@ -152,27 +155,34 @@ class VTKField{
     //members
     protected:
         std::string              name;                      /**< name of the field */
-        VTKFieldType             components;                /**< nr of components of field, options[ 1, 3 ] */
-        VTKDataType              type;                      /**< type of data, options [  VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ]] */
-        VTKLocation              location;                  /**< cell or point data, [ VTKLocation::CELL/VTKLocation::POINT] */
+        VTKFieldType             fieldType;                      /**< type of field [ VTKFieldType::SCALAR/VECTOR/CONSTANT/VARIABLE ] */
+        uint8_t                  components;                /**< type of field [ VTKFieldType::SCALAR/VECTOR/CONSTANT/VARIABLE ] */
+        VTKDataType              dataType;                      /**< type of data [  VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ]] */
+        VTKLocation              location;                  /**< cell or point data [ VTKLocation::CELL/VTKLocation::POINT] */
         VTKFormat                codification ;             /**< Type of codification [VTKFormat::ASCII, VTKFormat::APPENDED] */
         uint64_t                 nr_elements;               /**< nr of cells or points */
         uint64_t                 offset;                    /**< offset in the appended section */
         std::fstream::pos_type   position;                  /**< position in file */
 
+        bool                     derived;                   /**< true if derived class (storing a pointer to data vector) is used, false if base class (using interface) */
+        bool                     implicitKnown;             /**< true if class storing the Field is awre about the data to be written */
+
         //methods
     public:
+        virtual ~VTKField();
+
         VTKField();
-        VTKField( std::string, VTKFieldType, VTKLocation );
-        VTKField( std::string, VTKFieldType, VTKLocation, VTKDataType );
-        VTKField( std::string, VTKFieldType, VTKLocation, VTKDataType , VTKFormat , uint64_t );
-        ~VTKField();
+        VTKField( const VTKField &);
+        VTKField( std::string );
+
+        VTKField& operator=( const VTKField & );
 
         std::string              getName() const;
-        VTKDataType              getType() const;
+        VTKDataType              getDataType() const;
+        VTKFieldType             getFieldType() const;
         VTKLocation              getLocation() const;
         VTKFormat                getCodification() const;
-        VTKFieldType             getComponents() const;
+        uint8_t                  getComponents() const;
         uint64_t                 getElements() const;
         uint64_t                 getSize() const;
         uint64_t                 getOffset() const;
@@ -180,18 +190,42 @@ class VTKField{
         std::fstream::pos_type   getPosition() const; 
         bool                     hasAllMetaData() const ;
 
+        bool                     usesInterface() const ;
+        bool                     autoWrite() const ;
+
         void                     setName( std::string ) ;
-        void                     setType( VTKDataType ) ;
+        void                     setDataType( VTKDataType ) ;
+        void                     setFieldType( VTKFieldType ) ;
         void                     setLocation( VTKLocation ) ;
         void                     setCodification( VTKFormat ) ;
-        void                     setComponents( VTKFieldType ) ;
+        void                     setComponents( uint8_t ) ;
         void                     setElements( uint64_t ) ;
         void                     setOffset( uint64_t ) ;
         void                     setPosition( std::fstream::pos_type ) ;
+        void                     setImplicit( bool ) ;
 
         void                     importMetaData( const VTKFieldMetaData & ) ;
+        virtual void             flushData( std::fstream &) const ;
+        virtual void             absorbData( std::fstream &) const ;
 };
 
+template<class T>
+class VTKFieldWithVector : public VTKField{
+    private:
+    std::vector<T>*     m_ptr;            /**< pointer to data */
+
+    public:
+    ~VTKFieldWithVector( ) ;
+
+    VTKFieldWithVector( );
+    VTKFieldWithVector( const VTKField &, std::vector<T> & );
+    VTKFieldWithVector( std::string, std::vector<T> & );
+
+    void    setData( std::vector<T> &) ;
+    void    flushData( std::fstream &) const;
+    void    absorbData( std::fstream &) const;
+
+};
 
 class VTK{
 
@@ -208,10 +242,10 @@ class VTK{
 
         std::string                     HeaderType ;                /**< UInt32 or UInt64_t */
 
-        std::vector<VTKField>           geometry ;                  /**< Geometry fields */
+        std::vector<VTKField*>          geometry ;                  /**< Geometry fields */
         VTKFormat                       GeomCodex ;                 /**< Geometry codex */
 
-        std::vector<VTKField>           data ;                      /**< Data fields */
+        std::vector<VTKField*>          data ;                      /**< Data fields */
         VTKFormat                       DataCodex ;                 /**< Data codex */
 
         // methods ----------------------------------------------------------------------- //
@@ -231,9 +265,14 @@ class VTK{
         void                            setGeomCodex( VTKFormat );
         void                            setDataCodex( VTKFormat );
 
-        VTKField*                       addData( std::string, VTKFieldType, VTKLocation ) ;
-        VTKField*                       addData( std::string, VTKFieldType, VTKLocation, VTKDataType ) ;
-        VTKField*                       addData( std::string, VTKFieldType, VTKLocation, VTKDataType, VTKFormat ) ;
+        VTKField**                      addData( std::string ) ;
+        VTKField**                      addData( std::string, VTKFieldType, VTKLocation ) ;
+        VTKField**                      addData( std::string, VTKFieldType, VTKLocation, VTKDataType ) ;
+
+        template<class T>
+        VTKField**                      addData( std::string, std::vector<T> & ) ;
+        template<class T>
+        VTKField**                      addData( std::string, VTKFieldType, VTKLocation, std::vector<T> & ) ;
 
         void                            removeData( std::string ) ;
 
@@ -253,13 +292,15 @@ class VTK{
         void                            writeDataHeader( std::fstream &, bool parallel=false ) ;
         void                            writeDataArray( std::fstream &, VTKField &) ;
         void                            writePDataArray( std::fstream &, VTKField &) ;
+        virtual void                    writeFieldData( std::fstream &, VTKField &) ; 
 
         //For Reading
         void                            readDataHeader( std::fstream &) ;
         bool                            readDataArray( std::fstream &, VTKField &);
+        virtual void                    readFieldData( std::fstream &, VTKField &) ; 
 
         //General Purpose
-        bool                            getFieldByName( const std::string &, VTKField*& ) ;
+        bool                            getFieldByName( const std::string &, VTKField**& ) ;
         void                            calcAppendedOffsets() ;
         void                            getMissingMetaData() ;
         virtual void                    setMissingGlobalData() ;
@@ -274,25 +315,43 @@ class VTK{
 class VTKUnstructuredGrid : public VTK{
 
     protected:
-        uint64_t                        nconnectivity ;             /**< size of the connectivity information */
-
-    protected:
-        VTKUnstructuredGrid();
-        VTKUnstructuredGrid( std::string , std::string ) ;
-        ~VTKUnstructuredGrid();
-
-        void                            writeCollection() ;  
-        uint64_t                        calcSizeConnectivity( ) ;
-        void                            setMissingGlobalData() ;
+    uint64_t                        nconnectivity ;             /**< size of the connectivity information */
+    VTKElementType                  homogeneousType ;           /**< type of element mesh is made of */
 
     public:
-        void                            readMetaData() ;
-        void                            writeMetaData() ;
+    ~VTKUnstructuredGrid();
 
-        void                            setDimensions( uint64_t , uint64_t , uint64_t ) ;
-        void                            setGeomTypes( VTKDataType , VTKDataType , VTKDataType , VTKDataType ) ;
+    VTKUnstructuredGrid();
+    VTKUnstructuredGrid( std::string , std::string ) ;
+    VTKUnstructuredGrid( std::string , std::string, VTKElementType ) ;
 
-        uint64_t                        getNConnectivity( ) ; 
+    template<class T0, class T1>
+    VTKUnstructuredGrid( std::string , std::string, VTKElementType, std::vector<T0> &, std::vector<T1> & ) ;
+
+    protected:
+    void                            writeFieldData( std::fstream &, VTKField &) ; 
+    void                            readFieldData( std::fstream &, VTKField &) ; 
+
+    void                            writeCollection() ;  
+    uint64_t                        calcSizeConnectivity( ) ;
+    void                            setMissingGlobalData() ;
+
+    public:
+    void                            readMetaData() ;
+    void                            writeMetaData() ;
+
+    void                            setElementType( VTKElementType ) ;
+    void                            setDimensions( uint64_t , uint64_t , uint64_t nconn_=0 ) ;
+    void                            setDimensions( uint64_t , uint64_t , VTKElementType ) ;
+
+    void                            setGeomTypes( VTKDataType , VTKDataType , VTKDataType , VTKDataType ) ;
+
+    template<class T0>
+    void                            setGeomData( std::string, std::vector<T0> & ) ;
+    template<class T0, class T1>
+    void                            setGeomData( std::vector<T0> &, std::vector<T1> & ) ;
+
+    uint64_t                        getNConnectivity( ) ; 
 
 };
 
@@ -359,11 +418,20 @@ namespace vtk{
     bool                            convertStringToEnum( const std::string &, VTKLocation & ) ;
     bool                            convertStringToEnum( const std::string &, VTKFormat & ) ;
     bool                            convertStringToEnum( const std::string &, VTKDataType &) ;
+
+    template<class T>
+    void                            allocate( std::vector<T> &, int) ;
+
+    template<class T>
+    void                            allocate( T &, int) ;
 }
 
 }
 
+#include"VTK.tpp"
 #include"VTKTypes.tpp"
+#include"VTKField.tpp"
+#include"VTKUtils.tpp"
 
 
 #endif

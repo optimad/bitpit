@@ -25,7 +25,7 @@
 
 #include <iostream>
 
-#include "VTKWrappers.hpp"
+#include "VTK.hpp"
 
 using namespace std;
 
@@ -89,7 +89,7 @@ int main()
     { //Write only grid to VTK in ascii format
         cout << "Write only grid to VTK in ascii format" << endl;
 
-        bitpit::VTKUnstructuredVec   vtk(".", "ustr1", bitpit::VTKFormat::ASCII, bitpit::VTKElementType::VOXEL, points, connectivity );
+        bitpit::VTKUnstructuredGrid  vtk(".", "ustr1", bitpit::VTKElementType::VOXEL, points, connectivity );
         vtk.write() ;
 
     }
@@ -97,9 +97,9 @@ int main()
     { //Write grid and data to VTK in appended mode
         cout << "Write grid and data to VTK in appended mode" << endl;
 
-        bitpit::VTKUnstructuredVec   vtk(".", "ustr2", bitpit::VTKFormat::APPENDED, bitpit::VTKElementType::VOXEL, points, connectivity );
-        vtk.addData( pressure, "press", bitpit::VTKLocation::POINT ) ;
-        vtk.addData( velocity, "vel", bitpit::VTKLocation::CELL ) ;
+        bitpit::VTKUnstructuredGrid  vtk(".", "ustr2", bitpit::VTKElementType::VOXEL, points, connectivity );
+        vtk.addData( "press", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, pressure ) ;
+        vtk.addData( "vel", bitpit::VTKFieldType::VECTOR, bitpit::VTKLocation::CELL, velocity ) ;
         vtk.write() ;
     }
 
@@ -113,14 +113,12 @@ int main()
         vector<array<double,3>>    Ivelocity ;
 
 
-        bitpit::VTKUnstructuredVec   vtk(".", "ustr2", bitpit::VTKFormat::APPENDED, bitpit::VTKElementType::VOXEL );
+        bitpit::VTKUnstructuredGrid  vtk(".", "ustr2", bitpit::VTKElementType::VOXEL, Ipoints, Iconnectivity );
 
-        vtk.linkData( Ipoints, "Points") ;
-        vtk.linkData( Iconnectivity, "connectivity") ;
-        vtk.linkData( Ipressure, "press") ;
-        vtk.linkData( Ivelocity, "vel") ;
-
+        vtk.addData( "press", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, Ipressure ) ;
         vtk.read() ;
+
+        vtk.removeData( "vel" ) ;
 
         Ipressure = 2. * Ipressure ;
 
@@ -136,15 +134,15 @@ int main()
         vector< vector<int64_t> >    Iconnectivity ;
 
         vector<float>   label ;
-        vector<int64_t> ids ;
+        vector<int64_t> cids, pids ;
 
-        bitpit::VTKUnstructuredVec   vtk("./data", "selection", bitpit::VTKFormat::APPENDED, bitpit::VTKElementType::TRIANGLE );
+        //bitpit::VTKUnstructuredVec   vtk("./data", "selection", bitpit::VTKFormat::APPENDED, bitpit::VTKElementType::TRIANGLE );
+        bitpit::VTKUnstructuredGrid  vtk("./data", "selection", bitpit::VTKElementType::TRIANGLE, Ipoints, Iconnectivity );
 
 
-        vtk.linkData( Ipoints, "Points") ;
-        vtk.linkData( Iconnectivity, "connectivity") ;
-        vtk.linkData( label, "STLSolidLabeling") ;
-        vtk.linkData( ids, "vtkOriginalCellIds") ;
+        vtk.addData( "STLSolidLabeling", label) ;
+        vtk.addData( "vtkOriginalCellIds", cids) ;
+        vtk.addData( "vtkOriginalPointIds", pids) ;
 
         vtk.read() ;
 

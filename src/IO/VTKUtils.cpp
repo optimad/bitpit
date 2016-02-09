@@ -93,10 +93,11 @@ bool vtk::convertStringToDataArray( const std::string &line_, VTKField &data_  )
         vtk::convertStringToEnum( type_, type) ;
         vtk::convertStringToEnum( code_, codex) ;
 
-        data_.setType(type) ;
+        data_.setDataType(type) ;
         data_.setName(name_) ;
-        data_.setComponents(comp) ;
         data_.setCodification(codex) ;
+        if(name_ != "connectivity") 
+            data_.setFieldType(comp) ;
 
         if(code_=="appended") {
             if( bitpit::utils::getAfterKeyword( line_, "offset=", '\"', offs_) ){
@@ -125,12 +126,16 @@ bool vtk::convertStringToDataArray( const std::string &line_, VTKField &data_  )
  */
 std::string  vtk::convertDataArrayToString( const VTKField &field_ ){
 
-    std::stringstream os("") ;
+    std::stringstream   os("") ;
+    unsigned            comp = static_cast<unsigned>(field_.getFieldType())  ;
+
+    if( field_.getFieldType() != VTKFieldType::SCALAR && field_.getFieldType() != VTKFieldType::VECTOR )
+        comp = 1 ;
 
     os << "        <DataArray "
-        << "type=\"" << vtk::convertEnumToString( field_.getType() ) << "\" "
+        << "type=\"" << vtk::convertEnumToString( field_.getDataType() ) << "\" "
         << "Name=\"" << field_.getName() << "\" "
-        << "NumberOfComponents=\""<< unsigned(field_.getComponents()) << "\" "
+        << "NumberOfComponents=\""<< comp << "\" "
         << "format=\"" << vtk::convertEnumToString(field_.getCodification()) << "\" ";
 
     if( field_.getCodification() == VTKFormat::APPENDED ){
@@ -154,7 +159,7 @@ std::string  vtk::convertPDataArrayToString( const VTKField &field_ ){
     std::stringstream  os("") ;
 
     os << "        <PDataArray "
-        << "type=\"" << vtk::convertEnumToString(field_.getType()) << "\" "
+        << "type=\"" << vtk::convertEnumToString(field_.getDataType()) << "\" "
         << "Name=\"" << field_.getName() << "\" "
         << "NumberOfComponents=\""<< unsigned(field_.getComponents()) << "\" " 
         << ">" ;
