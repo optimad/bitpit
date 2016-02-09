@@ -59,7 +59,8 @@ protected:
 
 private:
 	std::array<double, 3> m_cellSpacings;
-	std::vector<double> m_minCoord;
+	std::array<double, 3> m_minCoords;
+	std::array<double, 3> m_maxCoords;
 
 	std::array<std::vector<double>, 3> m_vertexCoords;
 
@@ -68,7 +69,10 @@ private:
 
 	double m_cellVolume;
 	std::array<double, 3> m_interfaceArea;
-	std::array<std::array<double, 3>, 3> m_normals;
+	std::array<std::array<double, 3>, 6> m_normals;
+
+	void initialize(std::array<double, 3> origin, std::array<double, 3> lengths,
+	                std::array<int, 3> nCells);
 
 	void createVertices();
 

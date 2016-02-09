@@ -45,64 +45,100 @@ namespace bitpit {
 
 /*!
 	Creates a new patch.
+
+	\param id is the id of the patch
+	\param dimension is the dimension of the patch
+	\param origin is the origin of the domain
+	\param length is the length of the domain
+	\param dh is the maximum allowed mesh spacing
 */
 CartesianPatch::CartesianPatch(const int &id, const int &dimension,
-					 std::array<double, 3> origin, double length, double dh)
+                               std::array<double, 3> origin, double length, double dh)
 	: Patch(id, dimension)
 {
-	std::cout << ">> Initializing cartesian mesh\n";
+	// Number of cells
+	std::array<int, 3> nCells;
+	for (int n = 0; n < dimension; n++) {
+		nCells[n] = (int) std::ceil(length / dh);
+	}
+
+	if (!isThreeDimensional()) {
+		nCells[Vertex::COORD_Z] = 0;
+	}
+
+	// Domain lengths
+	std::array<double, 3> lengths;
+	for (int n = 0; n < dimension; n++) {
+		lengths[n] = length;
+	}
+
+	if (!isThreeDimensional()) {
+		lengths[Vertex::COORD_Z] = 0;
+	}
+
+	// Patch initialization
+	initialize(origin, lengths, nCells);
+}
+
+/*!
+	Initializes the patch
+
+	\param origin is the origin of the domain
+	\param lengths are the lengths of the domain
+	\param nCells are the numbers of cells of the patch
+*/
+void CartesianPatch::initialize(std::array<double, 3> origin, std::array<double, 3> lengths,
+                                std::array<int, 3> nCells)
+{
+	std::cout << ">> Initializing cartesian patch\n";
 
 	// Info sulle celle
-	m_minCoord.resize(dimension);
-	for (int n = 0; n < dimension; n++) {
-		// Dimensioni della cella
-		m_cellSpacings[n] = dh;
-
-		// Numero di celle
-		m_nCells1D[n] = (int) ceil(length / m_cellSpacings[n]);
+	for (int n = 0; n < getDimension(); ++n) {
+		// Initialize cells
+		m_nCells1D[n]     = nCells[n];
+		m_minCoords[n]    = origin[n] - 0.5 * lengths[n];
+		m_maxCoords[n]    = origin[n] + 0.5 * lengths[n];
+		m_cellSpacings[n] = lengths[n] / m_nCells1D[n];
 
 		std::cout << "  - Cell count along direction " << n << " : " << m_nCells1D[n] << "\n";
 
-		// Minima coordinata del dominio
-		m_minCoord[n] = origin[n] - 0.5 * (m_nCells1D[n] * m_cellSpacings[n]);
+		// Initialize interfaces
+		m_interfaceArea[n] = m_cellVolume / m_cellSpacings[n];
+
+		// Initialize vertices
+		m_nVertices1D[n] = m_nCells1D[n] + 1;
+
+		m_vertexCoords[n].resize(m_nVertices1D[n]);
+		for (int i = 0; i < m_nVertices1D[n]; i++) {
+			m_vertexCoords[n][i] = m_minCoords[n] + i * m_cellSpacings[n];
+		}
 	}
 
 	if (!isThreeDimensional()) {
 		m_nCells1D[Vertex::COORD_Z]     = 0;
-		m_cellSpacings[Vertex::COORD_Z] = 0;
+		m_minCoords[Vertex::COORD_Z]    = 0.;
+		m_maxCoords[Vertex::COORD_Z]    = 0.;
+		m_cellSpacings[Vertex::COORD_Z] = 0.;
+
+		m_interfaceArea[Vertex::COORD_Z] = 0.;
+
+		m_nVertices1D[Vertex::COORD_Z] = 0;
 	}
 
+	// Volume
 	m_cellVolume = m_cellSpacings[Vertex::COORD_X] * m_cellSpacings[Vertex::COORD_Y];
 	if (isThreeDimensional()) {
 		m_cellVolume *= m_cellSpacings[Vertex::COORD_Z];
 	}
 
-	// Initialize vertices
-	for (int n = 0; n < 3; n++) {
-		if (!isThreeDimensional() && n == Vertex::COORD_Z) {
-			m_nVertices1D[n] = 0;
-		} else {
-			m_nVertices1D[n] = m_nCells1D[n] + 1;
-		}
-
-		m_vertexCoords[n].resize(m_nVertices1D[n]);
-		for (int i = 0; i < m_nVertices1D[n]; i++) {
-			m_vertexCoords[n][i] = m_minCoord[n] + i * m_cellSpacings[n];
-		}
-	}
-
-	// Initialize interfaces
-	for (int n = 0; n < dimension; n++) {
-		m_interfaceArea[n] = m_cellVolume / m_cellSpacings[n];
-	}
-
-	int k = 0;
-	for (int i = 0; i < dimension; i++) {
-		for (int n = -1; n <= 1; n += 2) {
+	// Normals
+	int i = 0;
+	for (int n = 0; n < getDimension(); n++) {
+		for (int k = -1; k <= 1; k += 2) {
 			std::array<double, 3> normal = {0.0, 0.0, 0.0};
-			normal[i] = n;
+			normal[n] = k;
 
-			m_normals[k++] = normal;
+			m_normals[i++] = normal;
 		}
 	}
 }
