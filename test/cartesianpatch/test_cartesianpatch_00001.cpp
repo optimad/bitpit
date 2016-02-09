@@ -40,6 +40,9 @@ int main(int argc, char *argv[]) {
 	std::array<double, 3> minPoint;
 	std::array<double, 3> maxPoint;
 
+	std::vector<double> cellData;
+	std::vector<double> vertexData;
+
 	std::cout << "Testing Cartesian patch" << "\n";
 
 	std::array<double, 3> origin = {0., 0., 0.};
@@ -52,6 +55,22 @@ int main(int argc, char *argv[]) {
 	patch_2D->setName("cartesian_uniform_patch_2D");
 	patch_2D->update();
 	patch_2D->write();
+
+	std::cout << "\n  >> 2D data" << "\n";
+
+	cellData.resize(patch_2D->getCellCount());
+	for (long i = 0; i < patch_2D->getCellCount(); ++i) {
+		cellData[i] = i;
+	}
+
+	patch_2D->writeField("cell_data_2D", "cell_index", VTKLocation::CELL, cellData);
+
+	vertexData.resize(patch_2D->getVertexCount());
+	for (long i = 0; i < patch_2D->getVertexCount(); ++i) {
+		vertexData[i] = i;
+	}
+
+	patch_2D->writeField("vertex_data_2D", "vertex_index", VTKLocation::POINT, vertexData);
 
 	std::cout << std::endl;
 	std::cout << "\n  >> 2D bounding box" << "\n";
@@ -104,6 +123,22 @@ int main(int argc, char *argv[]) {
 	patch_3D->setName("cartesian_uniform_patch_3D");
 	patch_3D->update();
 	patch_3D->write();
+
+	std::cout << "\n  >> 3D data" << "\n";
+
+	cellData.resize(patch_3D->getCellCount());
+	for (long i = 0; i < patch_3D->getCellCount(); ++i) {
+		cellData[i] = i;
+	}
+
+	patch_3D->writeField("cell_data_3D", "cell_index", VTKLocation::CELL, cellData);
+
+	vertexData.resize(patch_3D->getVertexCount());
+	for (long i = 0; i < patch_3D->getVertexCount(); ++i) {
+		vertexData[i] = i;
+	}
+
+	patch_3D->writeField("vertex_data_3D", "vertex_index", VTKLocation::POINT, vertexData);
 
 	std::cout << std::endl;
 	std::cout << "\n  >> 3D bounding box" << "\n";
