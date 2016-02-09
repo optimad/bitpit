@@ -1408,6 +1408,19 @@ public:
 	}
 
 	/*!
+		Updates the id of the specified element.
+
+		\param currentId is the current id of the element
+		\param updatedId is the new id of the element
+	*/
+	void update_id(const id_type &currentId, const id_type &updatedId)
+	{
+		const size_t pos = get_pos_from_id(currentId);
+		m_v[pos].set_id(updatedId);
+		link_id(updatedId, pos, false);
+	}
+
+	/*!
 		Returns the id of the elmement before which there is the requested
 		number of other elements. If this element does not exist the
 		fallback value will be returned.
