@@ -80,7 +80,7 @@ void Log::writeLog(string msg) {
 #if ENABLE_MPI==1
 	bool flag = MPI::Is_finalized();
 	if (!(flag))
-		int error_flag = MPI_Comm_rank(m_comm,&rank);
+		MPI_Comm_rank(m_comm,&rank);
 #endif
 	if(rank == 0){
 		// Open the .log file
@@ -95,7 +95,7 @@ void Log::writeLog(string msg) {
 		file_handle.close();
 	}
 //#if ENABLE_MPI==1
-//	error_flag = MPI_Barrier(comm);
+//	MPI_Barrier(comm);
 //#endif
 	return; };
 
