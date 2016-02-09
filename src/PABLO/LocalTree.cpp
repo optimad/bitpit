@@ -1600,7 +1600,6 @@ LocalTree::findGhostNeighbours(uint32_t const idx, uint8_t iface, u32vector & ne
 				u32array3 coord1 = {1,1,1};
 				u32array3 coordtry1 = {1,1,1};
 				uint8_t level = oct->m_level;
-				uint8_t leveltry = m_octants[idxtry].getLevel();
 				while(Mortontry < Mortonlast && idxtry < noctants){
 					for (int idim=0; idim<m_dim; idim++){
 						Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
@@ -2126,7 +2125,6 @@ LocalTree::findGhostPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & n
 			array<int64_t,3> coord1 = {1,1,1};
 			u32array3 coordtry1 = {1,1,1};
 			uint8_t level = oct->m_level;
-			uint8_t leveltry = m_octants[idxtry].getLevel();
 			while(Mortontry < Mortonlast && idxtry < noctants){
 				for (int idim=0; idim<m_dim; idim++){
 					Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
@@ -2175,10 +2173,8 @@ void
 	uint32_t 		nocts;
 	uint32_t 		idx, idx2, idx0, last_idx;
 	uint32_t 		idx1_gh, idx2_gh;
-	int8_t 			markerfather, marker;
+	int8_t 		marker;
 	uint8_t 		nbro;
-	uint8_t 		nchm1 = m_global.m_nchildren-1;
-	bool 			Bdone = false;
 
 	//------------------------------------------ //
 	// Initialization
@@ -2235,7 +2231,6 @@ void
 					if (m_octants[ii].getMarker()<0){
 						m_octants[ii].setMarker(0);
 						m_octants[ii].m_info[15]=true;
-						Bdone=true;
 					}
 				}
 			}
@@ -2272,7 +2267,6 @@ void
 					if (m_octants[ii].getMarker()<0){
 						m_octants[ii].setMarker(0);
 						m_octants[ii].m_info[15]=true;
-						Bdone=true;
 					}
 				}
 				//Clean ghost index to structure for mapper in case of coarsening a broken family
@@ -2316,7 +2310,6 @@ void
 					if (idx<=last_idx){
 						m_octants[idx].setMarker(0);
 						m_octants[idx].m_info[15]=true;
-						Bdone=true;
 					}
 				}
 			}
@@ -2337,10 +2330,8 @@ LocalTree::preBalance21(u32vector& newmodified){
 	uint32_t 			nocts;
 	uint32_t 			idx, idx2, idx0, last_idx;
 	uint32_t 			idx1_gh, idx2_gh;
-	int8_t 				markerfather, marker;
+	int8_t 			marker;
 	uint8_t 			nbro;
-	uint8_t 			nchm1 = m_global.m_nchildren-1;
-	bool 				Bdone = false;
 
 	//------------------------------------------ //
 	// Initialization
@@ -2401,7 +2392,6 @@ LocalTree::preBalance21(u32vector& newmodified){
 					if (m_octants[ii].getMarker()<0){
 						m_octants[ii].setMarker(0);
 						m_octants[ii].m_info[15]=true;
-						Bdone=true;
 						newmodified.push_back(ii);
 					}
 				}
@@ -2437,7 +2427,6 @@ LocalTree::preBalance21(u32vector& newmodified){
 					if (m_octants[ii].getMarker()<0){
 						m_octants[ii].setMarker(0);
 						m_octants[ii].m_info[15]=true;
-						Bdone=true;
 						newmodified.push_back(ii);
 					}
 				}
@@ -2481,7 +2470,6 @@ LocalTree::preBalance21(u32vector& newmodified){
 				if (idx<=last_idx){
 					m_octants[idx].setMarker(0);
 					m_octants[idx].m_info[15]=true;
-					Bdone=true;
 					newmodified.push_back(idx);
 				}
 			}
