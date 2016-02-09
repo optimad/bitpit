@@ -509,7 +509,7 @@ LocalTree::coarse(u32vector & mapidx){
 			nend = 0;
 			idx = nocts-1;
 			marker = m_octants[idx].getMarker();
-			while(marker < 0 && m_octants[idx].buildFather() == father && idx >= 0){
+			while(marker < 0 && m_octants[idx].buildFather() == father){
 				nbro++;
 				nend++;
 				if (markerfather < m_octants[idx].getMarker()+1){
@@ -709,7 +709,7 @@ LocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, v
 	neighbours.clear();
 
 	// Default if iface is nface<iface<0
-	if (iface < 0 || iface > m_global.m_nfaces){
+	if (iface > m_global.m_nfaces){
 		return;
 	}
 
@@ -1119,7 +1119,7 @@ LocalTree::findNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours, ve
 	neighbours.clear();
 
 	// Default if iface is nface<iface<0
-	if (iface < 0 || iface > m_global.m_nfaces){
+	if (iface > m_global.m_nfaces){
 		return;
 	}
 
@@ -1523,7 +1523,7 @@ LocalTree::findGhostNeighbours(uint32_t const idx, uint8_t iface, u32vector & ne
 	neighbours.clear();
 
 	// Default if iface is nface<iface<0
-	if (iface < 0 || iface > m_global.m_nfaces){
+	if (iface > m_global.m_nfaces){
 		return;
 	}
 
@@ -1676,7 +1676,7 @@ LocalTree::findPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighb
 	neighbours.clear();
 
 	// Default if iface is nface<iface<0
-	if (iface < 0 || iface > m_global.m_nfaces){
+	if (iface > m_global.m_nfaces){
 		return;
 	}
 
@@ -2049,7 +2049,7 @@ LocalTree::findGhostPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & n
 	neighbours.clear();
 
 	// Default if iface is nface<iface<0
-	if (iface < 0 || iface > m_global.m_nfaces){
+	if (iface > m_global.m_nfaces){
 		return;
 	}
 
@@ -3527,7 +3527,7 @@ LocalTree::findEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbour
 	neighbours.clear();
 
 	// Default if iedge is nface<iedge<0
-	if (iedge < 0 || iedge > m_global.m_nfaces*2){
+	if (iedge > m_global.m_nfaces*2){
 		return;
 	}
 
@@ -3797,7 +3797,7 @@ LocalTree::findEdgeNeighbours(Octant* oct, uint8_t iedge, u32vector & neighbours
 	neighbours.clear();
 
 	// Default if iedge is nface<iedge<0
-	if (iedge < 0 || iedge > m_global.m_nfaces*2){
+	if (iedge > m_global.m_nfaces*2){
 		return;
 	}
 
@@ -4065,7 +4065,7 @@ LocalTree::findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neig
 	neighbours.clear();
 
 	// Default if iedge is nface<iedge<0
-	if (iedge < 0 || iedge > m_global.m_nfaces*2){
+	if (iedge > m_global.m_nfaces*2){
 		return;
 	}
 
@@ -4214,7 +4214,7 @@ LocalTree::findNodeNeighbours(Octant* oct, uint8_t inode, u32vector & neighbours
 	neighbours.clear();
 
 	// Default if inode is nnodes<inode<0
-	if (inode < 0 || inode > m_global.m_nnodes){
+	if (inode > m_global.m_nnodes){
 		return;
 	}
 
@@ -4446,7 +4446,7 @@ LocalTree::findNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbour
 	neighbours.clear();
 
 	// Default if inode is nnodes<inode<0
-	if (inode < 0 || inode > m_global.m_nnodes){
+	if (inode > m_global.m_nnodes){
 		return;
 	}
 
@@ -4674,7 +4674,7 @@ LocalTree::findGhostNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neig
 	neighbours.clear();
 
 	// Default if inode is nnodes<inode<0
-	if (inode < 0 || inode > m_global.m_nnodes){
+	if (inode > m_global.m_nnodes){
 		return;
 	}
 
