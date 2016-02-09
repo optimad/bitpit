@@ -715,7 +715,7 @@ PabloUniform::getNodes(Intersection* inter){
  */
 darray3
 PabloUniform::getNormal(Intersection* inter){
-	darray3 normal = ParaTree::getNormal(inter);
+	return ParaTree::getNormal(inter);
 }
 
 // =================================================================================== //
