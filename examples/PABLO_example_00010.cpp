@@ -77,7 +77,6 @@ int main(int argc, char *argv[]) {
 		/**<Define the center point and the radius of the sphere.*/
 		double xc, yc, zc;
 		double radius = 0.15;
-		double t0 = 0;
 		double Dt = 0.000025;
 		double omega = 2.0*3.14/0.001;
 
@@ -130,7 +129,7 @@ int main(int argc, char *argv[]) {
 			}
 
 			/**<Adapt the octree.*/
-			bool adapt = pablo10.adapt();
+			pablo10.adapt();
 
 #if ENABLE_MPI==1
 			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/

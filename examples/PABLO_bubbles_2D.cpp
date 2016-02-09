@@ -89,9 +89,6 @@ int main(int argc, char *argv[]) {
 		pabloBB.loadBalance();
 #endif
 
-		/**<Update the number of local octants.*/
-		uint32_t nocts = pabloBB.getNumOctants();
-
 		/**<Define and initialize a set of bubbles and their trajectories.*/
 		time_t Time = time(NULL);
 		srand(Time);
@@ -231,18 +228,12 @@ int main(int argc, char *argv[]) {
 				/**<Adapt the octree.*/
 				adapt = pabloBB.adapt();
 
-				/**<Update the number of local octants.*/
-				nocts = pabloBB.getNumOctants();
-
 			}
 
 #if ENABLE_MPI==1
 				/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
 				pabloBB.loadBalance();
 #endif
-
-				/**<Update the number of local octants.*/
-				nocts = pabloBB.getNumOctants();
 
 			/**<Update the connectivity and write the para_tree.*/
 			pabloBB.updateConnectivity();

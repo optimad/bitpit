@@ -84,7 +84,6 @@ int main(int argc, char *argv[]) {
 
 		/**<Define vectors of data.*/
 		uint32_t nocts = pablo4.getNumOctants();
-		uint32_t nghosts = pablo4.getNumGhosts();
 		vector<double> oct_data(nocts, 0.0);
 
 		/**<Assign a data (distance from center of a circle) to the octants with at least one node inside the circle.*/
