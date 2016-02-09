@@ -29,6 +29,8 @@
  *      Author: Marco Cisternino
  */
 
+#include "bitpit_common.hpp"
+
 template<class Data>
 UserDataComm<Data>::UserDataComm(Data & data_, Data & ghostData_) : data(data_), ghostData(ghostData_){};
 
@@ -42,6 +44,7 @@ inline size_t UserDataComm<Data>::fixedSize() const {
 
 template<class Data>
 inline size_t UserDataComm<Data>::size(const uint32_t e) const {
+	BITPIT_UNUSED(e);
 	return sizeof(double);
 };
 

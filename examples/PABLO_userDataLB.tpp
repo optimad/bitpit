@@ -29,6 +29,8 @@
  *      Author: Marco Cisternino
  */
 
+#include "bitpit_common.hpp"
+
 template<class D>
 inline size_t UserDataLB<D>::fixedSize() const {
 	return 0;
@@ -36,6 +38,7 @@ inline size_t UserDataLB<D>::fixedSize() const {
 
 template<class D>
 inline size_t UserDataLB<D>::size(const uint32_t e) const {
+	BITPIT_UNUSED(e);
 	return sizeof(double);
 }
 
