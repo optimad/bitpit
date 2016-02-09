@@ -527,6 +527,7 @@ long Patch::addCell(const long &id, ElementInfo::Type type, bool internal)
 
 	Cell &cell = *iterator;
 	cell.initialize(type);
+	cell.setInterior(internal);
 
 	return id;
 }
