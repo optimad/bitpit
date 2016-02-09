@@ -468,6 +468,8 @@ Octant::getNodes() const{
 		nodes[i][1] = m_y + sm_CoeffNode[i][1]*dh;
 		nodes[i][2] = m_z + sm_CoeffNode[i][2]*dh;
 	}
+
+	return nodes;
 };
 
 /*! Get the coordinates of a nodes of an octant in logical domain.
