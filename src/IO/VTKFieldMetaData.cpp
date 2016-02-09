@@ -36,6 +36,12 @@ namespace bitpit{
  */
 
 /*! 
+ * Defaultt constructor 
+ */
+VTKFieldMetaData::VTKFieldMetaData( ):  m_size(0), m_type(typeid(int)){
+};
+
+/*! 
  * Constructor with all members set
  * @param[in] size the entire size of field date, e.g. in case of a vector field on nodes size = NNodes x 3 
  * @param[in] type the type of the basic data used

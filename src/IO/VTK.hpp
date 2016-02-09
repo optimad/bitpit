@@ -144,6 +144,7 @@ class VTKFieldMetaData{
         const std::type_info&   m_type ;                        /**< tye of the field */
 
     public:
+        VTKFieldMetaData( );
         VTKFieldMetaData( uint64_t, const std::type_info &);
         uint64_t                getSize() const;
         const std::type_info&   getType() const;
