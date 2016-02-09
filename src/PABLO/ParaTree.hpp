@@ -749,7 +749,6 @@ public:
 							if(nofElementsFromPreviousToSuccessive > tailSize || contatore == 1)
 								nofElementsFromPreviousToSuccessive = tailSize;
 
-							uint32_t octantsSize = (uint32_t)m_octree.m_octants.size();
 							int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
 							//compute size of data in buffers
 							if(userData.fixedSize()){
@@ -1267,7 +1266,6 @@ public:
 							if(nofElementsFromPreviousToSuccessive > tailSize || contatore == 1)
 								nofElementsFromPreviousToSuccessive = tailSize;
 
-							uint32_t octantsSize = (uint32_t)m_octree.m_octants.size();
 							int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
 							//compute size of data in buffers
 							if(userData.fixedSize()){

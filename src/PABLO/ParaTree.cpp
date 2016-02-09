@@ -2866,7 +2866,6 @@ ParaTree::privateLoadBalance(uint32_t* partition){
 					int buffSize = nofElementsFromPreviousToSuccessive * (int)ceil((double)m_global.m_octantBytes / (double)(CHAR_BIT/8));
 					sendBuffers[p] = CommBuffer(buffSize,'a',m_comm);
 					int pos = 0;
-					uint32_t octantsSize = (uint32_t)m_octree.m_octants.size();
 					for(uint32_t i = ft; i < ft + nofElementsFromPreviousToSuccessive; ++i){
 						//PACK octants from ft to octantsSize-1
 						const Octant & octant = m_octree.m_octants[i];
@@ -3103,7 +3102,6 @@ ParaTree::private_adapt_mapidx(bool mapflag) {
 	//TODO recoding for adapting with abs(marker) > 1
 
 	bool globalDone = false, localDone = false;
-	bool refine = true, coarse = true, globalCoarse = true;
 	uint32_t nocts = m_octree.getNumOctants();
 	vector<Octant >::iterator iter, iterend = m_octree.m_octants.end();
 
@@ -4179,10 +4177,8 @@ ParaTree::balance21(bool const first){
 void
 ParaTree::write(string filename) {
 
-	bool clear = false;
 	if (m_octree.m_connectivity.size() == 0) {
 		m_octree.computeConnectivity();
-		clear = true;
 	}
 
 	stringstream name;
@@ -4344,10 +4340,8 @@ ParaTree::write(string filename) {
 void
 ParaTree::writeTest(string filename, vector<double> data) {
 
-	bool clear = false;
 	if (m_octree.m_connectivity.size() == 0) {
 		m_octree.computeConnectivity();
-		clear = true;
 	}
 
 	stringstream name;
