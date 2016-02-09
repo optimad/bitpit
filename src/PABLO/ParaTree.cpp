@@ -3283,7 +3283,7 @@ ParaTree::computePartition(uint32_t* partition, dvector* weight){
 
 		double division_result = 0;
 		double global_weight = 0.0;
-		for (int i=0; i<weight->size(); i++){
+		for (unsigned int i=0; i<weight->size(); i++){
 			global_weight += (*weight)[i];
 		}
 		division_result = global_weight/(double)m_nproc;
@@ -3311,7 +3311,7 @@ ParaTree::computePartition(uint32_t* partition, dvector* weight){
 		double* gweight;
 		double* lweight = new double[weightSize];
 
-		for (int i=0; i<weight->size(); i++){
+		for (unsigned int i=0; i<weight->size(); i++){
 			lweight[i] = (*weight)[i];
 		}
 
@@ -3340,7 +3340,7 @@ ParaTree::computePartition(uint32_t* partition, dvector* weight){
 		while (iproc < m_nproc-1){
 			double partial_weight = 0.0;
 			partition[iproc] = 0;
-			while(partial_weight < division_result && i < globalNofOctant){
+			while(partial_weight < division_result && (int32_t) i < globalNofOctant){
 				partial_weight += gweight[i];
 				tot++;
 				partition[iproc]++;
