@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
 		vector<double> oct_data(nocts, 0.0), ghost_data(nghosts, 0.0);
 
 		/**<Assign a data to the octants with at least one node inside the circle.*/
-		for (int i=0; i<nocts; i++){
+		for (unsigned int i=0; i<nocts; i++){
 			vector<array<double,3> > nodes = pablo6.getNodes(i);
 			for (int j=0; j<4; j++){
 				double x = nodes[j][0];
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
 		}
 
 		/**<Assign a data to the ghost octants (PARALLEL TEST) with at least one node inside the circle.*/
-		for (int i=0; i<nghosts; i++){
+		for (unsigned int i=0; i<nghosts; i++){
 			/**<Compute the nodes of the octant (Use pointer for ghost).*/
 			Octant *oct = pablo6.getGhostOctant(i);
 			vector<array<double,3> > nodes = pablo6.getNodes(oct);
@@ -122,7 +122,7 @@ int main(int argc, char *argv[]) {
 			vector<uint32_t> neigh, neigh_t;
 			vector<bool> isghost, isghost_t;
 			uint8_t iface, nfaces, codim;
-			for (int i=0; i<nocts; i++){
+			for (unsigned int i=0; i<nocts; i++){
 				neigh.clear();
 				isghost.clear();
 
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
 
 				/**<Smoothing data with the average over the one ring neighbours of octants*/
 				oct_data_smooth[i] = oct_data[i]/(neigh.size()+1);
-				for (int j=0; j<neigh.size(); j++){
+				for (unsigned int j=0; j<neigh.size(); j++){
 					if (isghost[j]){
 						oct_data_smooth[i] += ghost_data[neigh[j]]/(neigh.size()+1);
 					}

@@ -94,7 +94,7 @@ int main(int argc, char *argv[]) {
 		/**<Simple adapt() (refine) 6 times the octants with at least one node inside the circle.*/
 		for (iter=3; iter<9; iter++){
 			uint32_t nocts = pablo5.getNumOctants();
-			for (int i=0; i<nocts; i++){
+			for (unsigned int i=0; i<nocts; i++){
 				/**<Compute the nodes of the octant.*/
 				vector<array<double,3> > nodes = pablo5.getNodes(i);
 				for (int j=0; j<4; j++){
@@ -132,7 +132,7 @@ int main(int argc, char *argv[]) {
 		/**<Simple adapt() 5 times the octants with at least one node inside the circle.*/
 		for (iter=10; iter<15; iter++){
 			uint32_t nocts = pablo5.getNumOctants();
-			for (int i=0; i<nocts; i++){
+			for (unsigned int i=0; i<nocts; i++){
 				/**<Compute the nodes of the octant.*/
 				vector<array<double,3> > nodes = pablo5.getNodes(i);
 				for (int j=0; j<4; j++){

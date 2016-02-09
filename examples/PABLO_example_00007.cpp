@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
 		vector<double> oct_data(nocts, 0.0), ghost_data(nghosts, 0.0);
 
 		/**<Assign a data (distance from center of a circle) to the octants with at least one node inside the circle.*/
-		for (int i=0; i<nocts; i++){
+		for (unsigned int i=0; i<nocts; i++){
 			/**<Compute the nodes of the octant.*/
 			vector<array<double,3> > nodes = pablo7.getNodes(i);
 			/**<Compute the center of the octant.*/
@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
 		/**<Weight.*/
 		vector<double> weight(nocts, 1.0),weightGhost;
 		for (iter=start; iter<start+2; iter++){
-			for (int i=0; i<nocts; i++){
+			for (unsigned int i=0; i<nocts; i++){
 				/**<Compute the nodes of the octant.*/
 				vector<array<double,3> > nodes = pablo7.getNodes(i);
 				/**<Compute the center of the octant.*/
@@ -187,7 +187,7 @@ int main(int argc, char *argv[]) {
 #endif
 
 		double tot = 0.0;
-		for (int i=0; i<weight.size(); i++){
+		for (unsigned int i=0; i<weight.size(); i++){
 			tot += weight[i];
 		}
 

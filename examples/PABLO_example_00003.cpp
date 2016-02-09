@@ -80,7 +80,7 @@ int main(int argc, char *argv[]) {
 		vector<double> oct_data(nocts, 0.0);
 
 		/**<Assign a data to the octants with at least one node inside the circle.*/
-		for (int i=0; i<nocts; i++){
+		for (unsigned int i=0; i<nocts; i++){
 			/**<Compute the nodes of the octant.*/
 			vector<array<double,3> > nodes = pablo3.getNodes(i);
 			for (int j=0; j<4; j++){
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
 			vector<bool> isghost, isghost_t;
 			uint8_t iface, nfaces;
 			int codim;
-			for (int i=0; i<nocts; i++){
+			for (unsigned int i=0; i<nocts; i++){
 				neigh.clear();
 				isghost.clear();
 
@@ -126,7 +126,7 @@ int main(int argc, char *argv[]) {
 
 				/**<Smoothing data with the average over the one ring neighbours of octants*/
 				oct_data_smooth[i] = oct_data[i]/(neigh.size()+1);
-				for (int j=0; j<neigh.size(); j++){
+				for (unsigned int j=0; j<neigh.size(); j++){
 					if (isghost[j]){
 						/**< Do nothing - No ghosts: is a serial test.*/
 					}

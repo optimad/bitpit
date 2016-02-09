@@ -151,7 +151,7 @@ int main(int argc, char *argv[]) {
 			bool adapt = true;
 			while (adapt){
 
-				for (int i=0; i<nocts; i++){
+				for (unsigned int i=0; i<nocts; i++){
 					bool inside = false;
 					/**<Compute the nodes of the octant.*/
 					vector<array<double,3> > nodes = pabloBB.getNodes(i);

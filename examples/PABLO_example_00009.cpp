@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
 		vector<double> oct_data(nocts, 0.0), ghost_data(nghosts, 0.0);
 
 		/**<Assign a data (distance from center of a cylinder) to the octants with at least one node inside the cylinder.*/
-		for (int i=0; i<nocts; i++){
+		for (unsigned int i=0; i<nocts; i++){
 			/**<Compute the nodes of the octant.*/
 			vector<array<double,3> > nodes = pablo9.getNodes(i);
 			/**<Compute the center of the octant.*/
@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
 		/**<Adapt two times with data injection on new octants.*/
 		int start = 1;
 		for (iter=start; iter<start+2; iter++){
-			for (int i=0; i<nocts; i++){
+			for (unsigned int i=0; i<nocts; i++){
 				/**<Compute the nodes of the octant.*/
 				vector<array<double,3> > nodes = pablo9.getNodes(i);
 				/**<Compute the center of the octant.*/

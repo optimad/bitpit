@@ -101,7 +101,7 @@ int main(int argc, char *argv[]) {
 			yc = 0.25*sin(omega* Dt* (double) iter) + 0.5;
 			zc = 100*Dt*iter;
 
-			for (int i=0; i<nocts; i++){
+			for (unsigned int i=0; i<nocts; i++){
 				bool inside = false;
 				/**<Compute the nodes of the octant.*/
 				vector<array<double,3> > nodes = pablo10.getNodes(i);
@@ -140,7 +140,7 @@ int main(int argc, char *argv[]) {
 			/**<Re-Assign to the new octants the data after an adaption.*/
 			nocts = pablo10.getNumOctants();
 			vector<double> oct_data_new(nocts, 0.0);
-			for (int i=0; i<nocts; i++){
+			for (unsigned int i=0; i<nocts; i++){
 				array<double,3> center = pablo10.getCenter(i);
 				oct_data_new[i] = sqrt((pow((center[0]-xc),2.0)+pow((center[1]-yc),2.0)+pow((center[2]-zc),2.0)));
 			}
