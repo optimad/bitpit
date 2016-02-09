@@ -99,7 +99,7 @@ public:
 	template<class T>
 	void write(T& val) {
 		MPI_Datatype datatype = convert<T>();
-		int error = MPI_Pack(&val,1,datatype,m_commBuffer,m_commBufferSize,&m_pos,m_comm);
+		MPI_Pack(&val,1,datatype,m_commBuffer,m_commBufferSize,&m_pos,m_comm);
 	};
 
 	/*! This method reads from commBuffer the user MPI-compatible POD datum of type T.
@@ -108,7 +108,7 @@ public:
 	template<class T>
 	void read(T& val) {
 		MPI_Datatype datatype = convert<T>();
-		int error = MPI_Unpack(m_commBuffer,m_commBufferSize,&m_pos,&val,1,datatype,m_comm);
+		MPI_Unpack(m_commBuffer,m_commBufferSize,&m_pos,&val,1,datatype,m_comm);
 	};
 
 };
