@@ -362,7 +362,7 @@ void Patch::write()
 	either on the vertices of on the cells
 	\param values is a vector with the values of the field
 */
-void Patch::writeField(std::string name, VTKLocation location, const std::vector<double> &values)
+void Patch::writeField(std::string name, VTKLocation location, std::vector<double> &values)
 {
 	writeField(getName(), name, location, values);
 }
@@ -376,19 +376,13 @@ void Patch::writeField(std::string name, VTKLocation location, const std::vector
 	either on the vertices of on the cells
 	\param values is a vector with the values of the field
 */
-void Patch::writeField(std::string filename, std::string name, VTKLocation location, const std::vector<double> &values)
+void Patch::writeField(std::string filename, std::string name, VTKLocation location, std::vector<double> &values)
 {
-	VTKUnstructuredGrid::addData(name, VTKFieldType::SCALAR, location);
-	m_dataFields[name] = &values;
-	m_dataLocations[name] = location;
-	m_dataType[name] = VTKFieldType::SCALAR;
+	VTKUnstructuredGrid::addData<double>(name, VTKFieldType::SCALAR, location, values);
 
 	write(filename);
 
 	VTKUnstructuredGrid::removeData(name);
-	m_dataFields.erase(name);
-	m_dataLocations.erase(name);
-	m_dataType.erase(name);
 }
 
 /*!
@@ -397,7 +391,7 @@ void Patch::writeField(std::string filename, std::string name, VTKLocation locat
 	\param name is the name of the field
 	\param values is a vector with the values of the field
 */
-void Patch::writeCellField(std::string name, const std::vector<double> &values)
+void Patch::writeCellField(std::string name, std::vector<double> &values)
 {
 	writeCellField(getName(), name, values);
 }
@@ -410,7 +404,7 @@ void Patch::writeCellField(std::string name, const std::vector<double> &values)
 	\param name is the name of the field
 	\param values is a vector with the values of the field
 */
-void Patch::writeCellField(std::string filename, std::string name, const std::vector<double> &values)
+void Patch::writeCellField(std::string filename, std::string name, std::vector<double> &values)
 {
 	writeField(filename, name, VTKLocation::CELL, values);
 }
@@ -421,7 +415,7 @@ void Patch::writeCellField(std::string filename, std::string name, const std::ve
 	\param name is the name of the field
 	\param values is a vector with the values of the field
 */
-void Patch::writeVertexField(std::string name, const std::vector<double> &values)
+void Patch::writeVertexField(std::string name, std::vector<double> &values)
 {
 	writeVertexField(getName(), name, values);
 }
@@ -434,7 +428,7 @@ void Patch::writeVertexField(std::string name, const std::vector<double> &values
 	\param name is the name of the field
 	\param values is a vector with the values of the field
 */
-void Patch::writeVertexField(std::string filename, std::string name, const std::vector<double> &values)
+void Patch::writeVertexField(std::string filename, std::string name, std::vector<double> &values)
 {
 	writeField(filename, name, VTKLocation::POINT, values);
 }
@@ -2116,20 +2110,6 @@ const VTKFieldMetaData Patch::getMetaData(std::string name)
 		}
 
 		return VTKFieldMetaData(connectSize, typeid(long));
-	} else if (m_dataFields.count(name) > 0) {
-		long fieldSize = 0;
-
-		if (m_dataLocations[name] == VTKLocation::CELL) {
-			fieldSize = m_cells.size();
-		} else {
-			fieldSize = m_vertices.size();
-		}
-
-		if (m_dataType[name] == VTKFieldType::VECTOR) {
-			fieldSize *= 3;
-		}
-
-		return VTKFieldMetaData(fieldSize, typeid(double));
 	}
 
 	// This code should never be reached
@@ -2227,8 +2207,6 @@ void Patch::flushData(std::fstream &stream, VTKFormat format, std::string name)
 
 		vertexMap.clear();
 		std::unordered_map<long, long>().swap(vertexMap);
-	} else if (m_dataFields.count(name) > 0) {
-		genericIO::flushBINARY(stream, *(m_dataFields.at(name)));
 	}
 }
 
