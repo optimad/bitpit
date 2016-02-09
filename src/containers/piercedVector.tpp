@@ -1906,6 +1906,9 @@ private:
 			// We have to insert the element at the specified position
 			return fill_pos(FILL_POSITION, referencePos);
 		}
+
+		// This code should never be reached
+		assert(false);
 	}
 
 	/*!
