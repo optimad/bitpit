@@ -333,6 +333,36 @@ int main(int argc, char *argv[])
 
 	printCellIds(cells);
 
+	// Moving elements
+	std::cout << std::endl << "::: Moving cells :::" << std::endl;
+	std::cout << std::endl;
+
+	long id_move;
+
+	id_move      = 42;
+	id_reference = 40;
+	std::cout << std::endl;
+	std::cout << "  Moving element with id = " << id_move << " before element with id = " << id_reference << std::endl;
+	cells.move_before(id_reference, id_move);
+
+	printCellIds(cells);
+
+	id_move      = 40;
+	id_reference = 41;
+	std::cout << std::endl;
+	std::cout << "  Moving element with id = " << id_move << " after element with id = " << id_reference << std::endl;
+	cells.move_after(id_reference, id_move);
+
+	printCellIds(cells);
+
+	id_move      = 5;
+	id_reference = 9;
+	std::cout << std::endl;
+	std::cout << "  Moving element with id = " << id_move << " after element with id = " << id_reference << std::endl;
+	cells.move_after(id_reference, id_move);
+
+	printCellIds(cells);
+
 	// Find marker
 	std::cout << std::endl << "::: Marker :::" << std::endl;
 	std::cout << std::endl;

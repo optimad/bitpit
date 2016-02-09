@@ -1023,6 +1023,34 @@ public:
 	}
 
 	/*!
+		Move the specified element after the element with the given
+		reference id.
+
+		\param referenceId is the id of the element after which the
+		new element will be moved
+		\param id is the id of the element that will be moved
+		\result An iterator that points to the moved element.
+	*/
+	iterator move_after(const id_type &referenceId, const id_type &id)
+	{
+		return _move(FILL_AFTER, get_pos_from_id(referenceId), get_pos_from_id(id));
+	}
+
+	/*!
+		Move the specified element before the element with the given
+		reference id.
+
+		\param referenceId is the id of the element before which the
+		new element will be moved
+		\param id is the id of the element that will be moved
+		\result An iterator that points to the moved element.
+	*/
+	iterator move_before(const id_type &referenceId, const id_type &id)
+	{
+		return _move(FILL_BEFORE, get_pos_from_id(referenceId), get_pos_from_id(id));
+	}
+
+	/*!
 		Gets an element from the first position marked as empty
 		past the last element assignes to it the specified id.
 		Except for setting the id, the element is not modified.
@@ -1688,6 +1716,47 @@ private:
 		// Return the iterator that points to the element
 		iterator itr;
 		itr = raw_begin() + pos;
+
+		return itr;
+	}
+
+	/*!
+		Move the element in the specified position.
+
+		\param fillType is the fill-pattern that will be used to
+		identify the new position of the element
+		\param referencePos is the reference position
+		\param currentPos is the current position of the element
+		\result An iterator that points to the moved element.
+	*/
+	iterator _move(const FillType &fillType, const size_t &referencePos, size_t currentPos)
+	{
+		// Id of the element
+		id_type id = m_v[currentPos].get_id();
+
+		// Position where the element will be moved
+		size_type updatedPos = fill_pos(fillType, referencePos);
+
+		// Update the current position of the element
+		//
+		// After filling a position the current position of the element
+		// could be change
+		currentPos = get_pos_from_id(id);
+
+		// Move the element
+		//
+		// Current position is reset to avoid leaving elements in an
+		// inconsistent state
+		m_v[updatedPos] = std::move(m_v[currentPos]);
+		m_v[currentPos] = T();
+		pierce_pos(currentPos);
+
+		// Update the map
+		link_id(m_v[updatedPos].get_id(), updatedPos, false);
+
+		// Return the iterator that points to the element
+		iterator itr;
+		itr = raw_begin() + updatedPos;
 
 		return itr;
 	}
