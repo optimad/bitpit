@@ -1313,6 +1313,9 @@ const VTKFieldMetaData Patch::getMetaData(std::string name)
 
 		return VTKFieldMetaData(fieldSize, typeid(double));
 	}
+
+	// This code should never be reached
+	assert(false);
 }
 
 /*!
