@@ -51,7 +51,7 @@ void test004() {
     vector<double> oct_data(nocts, 0.0);
 
     /**<Assign a data to the octants with at least one node inside the cylinder.*/
-    for (int i=0; i<nocts; i++){
+    for (unsigned int i=0; i<nocts; i++){
         /**<Compute the nodes of the octant.*/
         vector<array<double,3> > nodes = pablo104.getNodes(i);
         for (int j=0; j<8; j++){
@@ -75,7 +75,7 @@ void test004() {
         vector<uint32_t> neigh, neigh_t;
         vector<bool> isghost, isghost_t;
         uint8_t iface, codim, nfaces;
-        for (int i=0; i<nocts; i++){
+        for (unsigned int i=0; i<nocts; i++){
             neigh.clear();
             isghost.clear();
             /**<Find neighbours through faces (codim=1), edges (codim=2) and nodes (codim=3) of the octants*/
@@ -98,7 +98,7 @@ void test004() {
 
             /**<Smoothing data with the average over the one ring neighbours of octants*/
             oct_data_smooth[i] = oct_data[i]/(neigh.size()+1);
-            for (int j=0; j<neigh.size(); j++){
+            for (unsigned int j=0; j<neigh.size(); j++){
                 if (isghost[j]){
                     /**< Do nothing - No ghosts: is a serial test.*/
                 }

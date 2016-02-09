@@ -57,7 +57,7 @@ void test003() {
     /**<Simple adapt() [refine] 6 times the octants with at least one node inside the circle.*/
     for (int iter=3; iter<9; iter++){
         uint32_t nocts = pablo2.getNumOctants();
-        for (int i=0; i<nocts; i++){
+        for (unsigned int i=0; i<nocts; i++){
             /**<Compute the nodes of the octant.*/
             vector<array<double,3> > nodes = pablo2.getNodes(i);
             for (int j=0; j<4; j++){
@@ -83,7 +83,7 @@ void test003() {
     double radius2 = 0.2;
     for (int iter=9; iter<12; iter++){
         uint32_t nocts = pablo2.getNumOctants();
-        for (int i=0; i<nocts; i++){
+        for (unsigned int i=0; i<nocts; i++){
             /**<Compute the nodes of the octant.*/
             vector<array<double,3> > nodes = pablo2.getNodes(i);
             for (int j=0; j<4; j++){

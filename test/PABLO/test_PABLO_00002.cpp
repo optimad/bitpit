@@ -51,7 +51,7 @@ void test002() {
 
     /**<Set NO 2:1 balance in the right side of domain.*/
     uint32_t nocts = pablo1.getNumOctants();
-    for (int i=0; i<nocts; i++){
+    for (unsigned int i=0; i<nocts; i++){
         array<double,3> center = pablo1.getCenter(i);
         double x = center[0];
         double y = center[1];
@@ -66,7 +66,7 @@ void test002() {
     int nref1 = 6;
     for (int iter=0; iter<nref1; iter++){
         nocts = pablo1.getNumOctants();
-        for (int i=0; i<nocts; i++){
+        for (unsigned int i=0; i<nocts; i++){
             /**<Extract Octant (pointer use).*/
             Octant *oct = pablo1.getOctant(i);
             /**<Compute center of the octant.*/
@@ -95,7 +95,7 @@ void test002() {
         while(done)
         {
             nocts = pablo1.getNumOctants();
-            for (int i=0; i<nocts; i++){
+            for (unsigned int i=0; i<nocts; i++){
                 /**<Compute center of the octant (index use).*/
                 array<double,3> center = pablo1.getCenter(i);
                 double x = center[0];
