@@ -1864,7 +1864,7 @@ private:
 
 				// If previos element is a hole, its id need to be udated
 				if (pos > 0 && is_pos_empty(pos - 1)) {
-					update_empty_pos_id(pos - 1);
+					update_empty_pos_id(pos - 1, pos);
 				}
 
 				// Return the position filled
@@ -1996,7 +1996,7 @@ private:
 		if (pos < m_last_pos) {
 			update_empty_pos_id(pos);
 		} else {
-			update_empty_pos_id(m_last_pos + 1);
+			update_empty_pos_id(m_last_pos + 1, m_last_pos);
 		}
 
 		// Hole
