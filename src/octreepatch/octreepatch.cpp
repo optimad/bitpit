@@ -1102,12 +1102,6 @@ long OctreePatch::createCell(OctantInfo octantInfo,
 	long id = Patch::addCell(cellType, octantInfo.internal);
 	Cell &cell = m_cells[id];
 
-	// Tipo
-	cell.setType(cellType);
-
-	// Interior flag
-	cell.setInterior(octantInfo.internal);
-
 	// Connectivity
 	cell.setConnect(std::move(vertices));
 
