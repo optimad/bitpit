@@ -1656,17 +1656,18 @@ private:
 	}
 
 	/*!
-		Adds the specified id from to the map and link it to the
-		give position.
+		Updates the position associated with the specified id.
 
-		\param id is the id that will be added to the list
+		\param id is the id of the element
 		\param pos is the position that will be associated with
 		the id
+		\param checkUnique specifies if a check of the uniqueness
+		of the id will be performed
 	*/
-	void link_id(const id_type id, const size_t pos)
+	void link_id(const id_type id, const size_t pos, bool checkUnique = true)
 	{
-		// Elements must have unique id
-		if (exists(id)) {
+		// Check uniqueness of the id
+		if (checkUnique && exists(id)) {
 			throw std::out_of_range ("Duplicate id");
 		}
 
