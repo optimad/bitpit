@@ -26,6 +26,8 @@
 cmake_minimum_required(VERSION 2.8)
 
 # Add library to targets
+include_directories("${PROJECT_SOURCE_DIR}/src/common")
+
 file(GLOB SOURCE_FILES "*.cpp")
 set(PABLO_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Sources of PABLO module" FORCE)
 unset(SOURCE_FILES)

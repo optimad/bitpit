@@ -25,6 +25,8 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
+#include "bitpit_common.hpp"
+
 #include "LocalTree.hpp"
 #include <map>
 
@@ -621,6 +623,8 @@ void
 LocalTree::checkCoarse(uint64_t lastDescPre,
 		uint64_t firstDescPost,
 		u32vector & mapidx){
+
+	BITPIT_UNUSED(firstDescPost);
 
 	uint32_t		idx;
 	uint32_t 		nocts;
