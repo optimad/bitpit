@@ -54,7 +54,6 @@ void test002() {
     for (unsigned int i=0; i<nocts; i++){
         array<double,3> center = pablo1.getCenter(i);
         double x = center[0];
-        double y = center[1];
         if (x>xc)
             pablo1.setBalance(i,false);
     }
