@@ -418,7 +418,6 @@ void CartesianPatch::createCells()
 	}
 
 	const ElementInfo &cellTypeInfo = ElementInfo::getElementInfo(cellType);
-	const int &nCellVertices = cellTypeInfo.nVertices;
 
 	// Count the cells
 	long nTotalCells = 1;
