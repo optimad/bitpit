@@ -49,7 +49,9 @@ public:
 	Cell();
 	Cell(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED);
 
+	Cell(const Cell &other);
 	Cell(Cell&& other) = default;
+	Cell& operator = (const Cell &other);
 	Cell& operator=(Cell&& other) = default;
 
 	void initialize(ElementInfo::Type type, int nInterfacesPerFace = 0);
@@ -79,9 +81,6 @@ private:
 	bool m_interior;
 
 	bitpit::CollapsedVector2D<long> m_interfaces;
-
-	Cell(const Cell &other) = delete;
-	Cell& operator = (const Cell &other) = delete;
 
 };
 

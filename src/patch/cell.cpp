@@ -104,6 +104,26 @@ Cell::Cell(const long &id, ElementInfo::Type type)
 }
 
 /*!
+        Copy-constructor
+*/
+Cell::Cell(const Cell &other)
+{
+	*this = other;
+}
+
+/*!
+	Copy assignament operator
+*/
+Cell & Cell::operator=(const Cell& other)
+{
+	Element::operator=(other);
+	m_interior   = other.m_interior;
+	m_interfaces = other.m_interfaces;
+
+	return (*this);
+}
+
+/*!
 	Initializes the data structures of the cell.
 
 	\param type is the type of the element
