@@ -1255,14 +1255,38 @@ void Patch::deleteInterface(const long &id, bool delayed)
 }
 
 /*!
-	Sorts the internal storage for cells, vertices and interfaces in
+	Sorts internal vertex storage in ascending id order.
+*/
+void Patch::sortVertices()
+{
+	m_vertices.sort();
+}
+
+/*!
+	Sorts internal cell storage in ascending id order.
+*/
+void Patch::sortCells()
+{
+	m_cells.sort();
+}
+
+/*!
+	Sorts internal interface storage in ascending id order.
+*/
+void Patch::sortInterfaces()
+{
+	m_interfaces.sort();
+}
+
+/*!
+	Sorts internal storage for cells, vertices and interfaces in
 	ascending id order.
 */
 void Patch::sort()
 {
-	m_vertices.sort();
-	m_cells.sort();
-	m_interfaces.sort();
+	sortVertices();
+	sortCells();
+	sortInterfaces();
 }
 
 /*!

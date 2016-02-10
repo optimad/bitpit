@@ -122,6 +122,9 @@ public:
 	virtual std::array<double, 3> evalInterfaceNormal(const long &id) = 0;
 
 	void sort();
+	void sortVertices();
+	void sortCells();
+	void sortInterfaces();
 
 	void squeeze();
 	void squeezeVertices();
