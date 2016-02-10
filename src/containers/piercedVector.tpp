@@ -1810,6 +1810,12 @@ private:
 				link_id(m_v[i].get_id(), i, false);
 			}
 
+			// Reset the, now empty, element
+			//
+			// We need to avoid that this element could be in an
+			// inconsistent state.
+			m_v[referencePos] = T();
+
 			// Update the holes
 			if (!m_holes.empty()) {
 				std::deque<size_type>::iterator itr = upper_bound(m_holes.begin(), m_holes.end(), referencePos);
@@ -2209,6 +2215,10 @@ private:
 		}
 
 		// Update the id of the element in the current position
+		//
+		// NOTE: setting the id of the element it's not enough, the
+		// element in the current position needs to be reset
+		m_v[pos] = T();
 		m_v[pos].set_id(id);
 
 		// Update the id of the elements in previous positions
