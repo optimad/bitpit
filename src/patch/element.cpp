@@ -938,6 +938,31 @@ Element::Element(const long &id, ElementInfo::Type type)
 }
 
 /*!
+	Copy constructor
+*/
+Element::Element(const Element &other)
+{
+	*this = other;
+}
+
+/*!
+	Copy-assignament operator.
+*/
+Element & Element::operator=(const Element& other)
+{
+	m_id   = other.m_id;
+	m_type = other.m_type;
+
+	if (m_connect) {
+		int nVertices = other.getVertexCount();
+		m_connect = std::unique_ptr<long[]>(new long[nVertices]);
+		std::copy(other.m_connect.get(), other.m_connect.get() + nVertices, m_connect.get());
+	}
+
+	return (*this);
+}
+
+/*!
 	Initializes the data structures of the element.
 
 	\param type the type of the element
