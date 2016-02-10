@@ -165,6 +165,7 @@ protected:
 	IndexGenerator m_interfaceIdGenerator;
 	IndexGenerator m_cellIdGenerator;
 
+	long m_nVertices;
 	long m_nInternals;
 	long m_nGhosts;
 

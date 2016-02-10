@@ -126,7 +126,7 @@ void IndexGenerator::reset()
 	Creates a new patch.
 */
 Patch::Patch(const int &id, const int &dimension)
-	: m_nInternals(0), m_nGhosts(0),
+	: m_nVertices(0), m_nInternals(0), m_nGhosts(0),
 	  m_dirty(true), m_hasCustomTolerance(false)
 {
 	set_id(id) ;
@@ -221,6 +221,7 @@ void Patch::resetVertices()
 	m_vertices.clear();
 	PiercedVector<Vertex>().swap(m_vertices);
 	m_vertexIdGenerator.reset();
+	m_nVertices = 0;
 
 	for (auto &cell : m_cells) {
 		cell.unsetConnect();
@@ -467,7 +468,7 @@ std::string Patch::getName() const
 */
 long Patch::getVertexCount() const
 {
-	return m_vertices.size();
+	return m_nVertices;
 }
 
 /*!
@@ -515,6 +516,7 @@ Vertex & Patch::createVertex(long id)
 	}
 
 	PiercedVector<Vertex>::iterator iterator = m_vertices.reclaim(id);
+	m_nVertices++;
 
 	return (*iterator);
 }
@@ -578,6 +580,7 @@ void Patch::deleteVertex(const long &id, bool delayed)
 {
 	m_vertices.erase(id, delayed);
 	m_vertexIdGenerator.trashId(id);
+	m_nVertices--;
 }
 
 /*!
