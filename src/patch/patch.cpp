@@ -31,6 +31,84 @@
 
 namespace bitpit {
 
+
+/*!
+	\ingroup patch
+	@{
+*/
+
+/*!
+	\class IndexGenerator
+
+	\brief The IndexGenerator class allows to generate unique ids.
+*/
+
+/*!
+	Creates a new generator.
+*/
+IndexGenerator::IndexGenerator()
+	: m_next(0), m_depleted(false)
+{
+
+}
+
+/*!
+	Generates a unique index.
+
+	If the trash is empty a new index is generated, otherwise an index taken
+	from the trash is recycled.
+
+	\return A new unique index.
+*/
+long IndexGenerator::generateId()
+{
+	long id;
+	if (m_trash.empty()) {
+		assert(!m_depleted);
+		if (m_next == std::numeric_limits<long>::max()) {
+			m_depleted = true;
+		}
+
+		id = m_next++;
+	} else {
+		id = m_trash.front();
+		m_trash.pop_front();
+	}
+
+	return id;
+}
+
+/*!
+	Gets the last assigned id.
+
+	\return The last assigned index.
+*/
+long IndexGenerator::getLastId()
+{
+	return (m_next - 1);
+}
+
+/*!
+	Trashes an index.
+
+	A trashed index is an index no more used that can be recycled.
+
+	\param id is the index that will be trashed
+*/
+void IndexGenerator::trashId(const long &id)
+{
+	m_trash.push_back(id);
+}
+
+/*!
+	Reset the generator.
+*/
+void IndexGenerator::reset()
+{
+	m_next = 0;
+	m_trash.clear();
+}
+
 /*!
 	\ingroup patch
 	@{

@@ -40,6 +40,23 @@
 
 namespace bitpit {
 
+class IndexGenerator {
+
+public:
+	IndexGenerator();
+
+	long generateId();
+	long getLastId();
+	void trashId(const long &id);
+	void reset();
+
+private:
+	long m_next;
+	bool m_depleted;
+	std::deque<long> m_trash;
+
+};
+
 class Patch : public VTKUnstructuredGrid {
 
 public:
