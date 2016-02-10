@@ -126,7 +126,8 @@ void IndexGenerator::reset()
 	Creates a new patch.
 */
 Patch::Patch(const int &id, const int &dimension)
-	: m_dirty(true), m_hasCustomTolerance(false)
+	: m_nInternals(0), m_nGhosts(0),
+	  m_dirty(true), m_hasCustomTolerance(false)
 {
 	set_id(id) ;
 	setDimension(dimension);
@@ -234,6 +235,8 @@ void Patch::resetCells()
 	m_cells.clear();
 	PiercedVector<Cell>().swap(m_cells);
 	m_cellIdGenerator.reset();
+	m_nInternals = 0;
+	m_nGhosts = 0;
 
 	for (auto &interface : m_interfaces) {
 		interface.unsetNeigh();
@@ -599,6 +602,26 @@ long Patch::getCellCount() const
 }
 
 /*!
+	Gets the number of internal cells in the patch.
+
+	\return The number of internal cells in the patch
+*/
+long Patch::getInternalCount() const
+{
+	return m_nInternals;
+}
+
+/*!
+	Gets the number of ghost cells in the patch.
+
+	\return The number of ghost cells in the patch
+*/
+long Patch::getGhostCount() const
+{
+	return m_nGhosts;
+}
+
+/*!
 	Gets the cells owned by the patch.
 
 	\return The cells owned by the patch.
@@ -646,8 +669,10 @@ Cell & Patch::createCell(bool interior, long id)
 	PiercedVector<Cell>::iterator iterator;
 	if (interior) {
 		iterator = m_cells.reclaim(id);
+		m_nInternals++;
 	} else {
 		iterator = m_cells.reclaim_back(id);
+		m_nGhosts++;
 	}
 
 	return (*iterator);
@@ -731,8 +756,14 @@ long Patch::addCell(Cell &&source, long id)
 */
 void Patch::deleteCell(const long &id, bool delayed)
 {
+	bool isInternal = m_cells.at(id).isInterior();
 	m_cells.erase(id, delayed);
 	m_cellIdGenerator.trashId(id);
+	if (isInternal) {
+		m_nInternals--;
+	} else {
+		m_nGhosts--;
+	}
 }
 
 /*!

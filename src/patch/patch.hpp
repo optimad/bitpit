@@ -95,6 +95,8 @@ public:
 	const std::array<double, 3> & getVertexCoords(const long &id) const;
 
 	long getCellCount() const;
+	long getInternalCount() const;
+	long getGhostCount() const;
 	PiercedVector<Cell> &cells();
 	Cell &getCell(const long &id);
 	const Cell &getCell(const long &id) const;
@@ -162,6 +164,9 @@ protected:
 	IndexGenerator m_vertexIdGenerator;
 	IndexGenerator m_interfaceIdGenerator;
 	IndexGenerator m_cellIdGenerator;
+
+	long m_nInternals;
+	long m_nGhosts;
 
 	std::array<double, 3> m_minPoint;
 	std::array<double, 3> m_maxPoint;
