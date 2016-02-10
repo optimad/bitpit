@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
 	Patch *patch_2D = new OctreePatch(0, 2, origin, length, dh);
 	patch_2D->setName("octree_adapted_patch_2D");
 	patch_2D->update();
-	patch_2D->writeMesh();
+	patch_2D->write();
 
 	std::cout << std::endl;
 	std::cout << ">> Adapting patch" << std::endl;
@@ -91,7 +91,7 @@ int main(int argc, char *argv[]) {
 		nCells = patch_2D->getCellCount();
 		std::cout << ">> Final number of cells... " << nCells << std::endl;
 	}
-	patch_2D->writeMesh();
+	patch_2D->write();
 
 	std::cout << std::endl;
 	std::cout << "  :: 3D adaption test ::" << std::endl;
@@ -102,7 +102,7 @@ int main(int argc, char *argv[]) {
 	Patch *patch_3D = new OctreePatch(0, 3, origin, length, dh);
 	patch_3D->setName("octree_adapted_patch_3D");
 	patch_3D->update();
-	patch_3D->writeMesh();
+	patch_3D->write();
 
 	std::cout << std::endl;
 	std::cout << ">> Adapting patch" << std::endl;
@@ -144,7 +144,7 @@ int main(int argc, char *argv[]) {
 		nCells = patch_3D->getCellCount();
 		std::cout << ">> Final number of cells... " << nCells << std::endl;
 	}
-	patch_3D->writeMesh();
+	patch_3D->write();
 
 #if ENABLE_MPI==1
 	MPI::Finalize();

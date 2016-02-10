@@ -260,7 +260,7 @@ void Patch::resetInterfaces()
 
 	\param filename the filename where the mesh will be written to
 */
-void Patch::writeMesh(std::string filename)
+void Patch::write(std::string filename)
 {
 	VTKUnstructuredGrid::setCodex(VTKFormat::APPENDED);
 	VTKUnstructuredGrid::setNames(".", filename);
@@ -270,9 +270,9 @@ void Patch::writeMesh(std::string filename)
 /*!
 	Writes the mesh a filename with the same name of the mesh
 */
-void Patch::writeMesh()
+void Patch::write()
 {
-	writeMesh(getName());
+	write(getName());
 }
 
 /*!
@@ -304,7 +304,7 @@ void Patch::writeField(std::string filename, std::string name, VTKLocation locat
 	m_dataLocations[name] = location;
 	m_dataType[name] = VTKFieldType::SCALAR;
 
-	writeMesh(filename);
+	write(filename);
 
 	VTKUnstructuredGrid::removeData(name);
 	m_dataFields.erase(name);

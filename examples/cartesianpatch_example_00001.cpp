@@ -57,7 +57,7 @@ int main(int argc, char *argv[]) {
 	Patch *patch_2D = new CartesianPatch(0, 2, origin, length, dh);
 	patch_2D->setName("cartesian_2D_patch");
 	patch_2D->update();
-	patch_2D->writeMesh();
+	patch_2D->write();
 
 #if ENABLE_MPI==1
 	MPI::Finalize();

@@ -138,8 +138,8 @@ public:
 	void resetTol();
 	bool isTolCustomized() const;
 
-	void writeMesh();
-	void writeMesh(std::string name);
+	void write();
+	void write(std::string name);
 	void writeField(std::string name, VTKLocation location, const std::vector<double> &values);
 	void writeField(std::string filename, std::string name, VTKLocation location, const std::vector<double> &values);
 	void writeCellField(std::string name, const std::vector<double> &values);

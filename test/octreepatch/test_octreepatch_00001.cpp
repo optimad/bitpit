@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
 	Patch *patch_2D = new OctreePatch(0, 2, origin, length, dh);
 	patch_2D->setName("octree_uniform_patch_2D");
 	patch_2D->update();
-	patch_2D->writeMesh();
+	patch_2D->write();
 
 	std::cout << std::endl;
 	std::cout << "\n  >> 2D bounding box" << "\n";
@@ -100,7 +100,7 @@ int main(int argc, char *argv[]) {
 	Patch *patch_3D = new OctreePatch(0, 3, origin, length, dh);
 	patch_3D->setName("octree_uniform_patch_3D");
 	patch_3D->update();
-	patch_3D->writeMesh();
+	patch_3D->write();
 
 	std::cout << std::endl;
 	std::cout << "\n  >> 3D bounding box" << "\n";
