@@ -1017,7 +1017,7 @@ public:
 		empty position will be reclaimed
 		\result An iterator that points to the newly inserted element.
 	*/
-	iterator insert_after(const id_type &id, const id_type &referenceId)
+	iterator reclaim_after(const id_type &id, const id_type &referenceId)
 	{
 		return _reclaim(FILL_AFTER, get_pos_from_id(referenceId), id);
 	}
@@ -1083,7 +1083,7 @@ public:
 		empty position will be reclaimed
 		\result An iterator that points to the newly inserted element.
 	*/
-	iterator insert_before(const id_type &id, const id_type &referenceId)
+	iterator reclaim_before(const id_type &id, const id_type &referenceId)
 	{
 		return _reclaim(FILL_BEFORE, get_pos_from_id(referenceId), id);
 	}
