@@ -500,25 +500,70 @@ const Vertex & Patch::getVertex(const long &id) const
 }
 
 /*!
-	Adds a new vertex with the specified id.
+	Creates a new vertex with the specified id.
 
 	\param id is the id of the new vertex
+	\return A reference to the newly created vertex.
+*/
+Vertex & Patch::createVertex(long id)
+{
+	if (id == Vertex::NULL_VERTEX_ID) {
+		id = m_vertexIdGenerator.generateId();
+	}
+
+	PiercedVector<Vertex>::iterator iterator = m_vertices.reclaim(id);
+
+	return (*iterator);
+}
+
+/*!
+	Adds a new vertex with the specified id.
+
+	\param id is the id of the new cell. If a negative id value is
+	specified, ad new unique id will be generated
+	\return The id associated to the vertex.
 */
 long Patch::addVertex(const long &id)
 {
-	m_vertices.reclaim(id);
+	Vertex &vertex = createVertex(id);
+
+	return vertex.get_id();
+}
+
+/*!
+	Adds the specified vertex to the patch.
+
+	\param source is the vertex that will be added
+	\return The id associated to the vertex.
+*/
+long Patch::addVertex(Vertex source)
+{
+	Vertex &vertex = createVertex();
+	long id = vertex.get_id();
+	vertex = std::move(source);
+	vertex.set_id(id);
 
 	return id;
 }
 
 /*!
-	Adds a new vertex.
-*/
-long Patch::addVertex()
-{
-	long id = m_vertexIdGenerator.generateId();
+	Adds the specified vertex to the patch.
 
-	return addVertex(id);
+	\param source is the vertex that will be added
+	\return The id associated to the vertex.
+*/
+long Patch::addVertex(Vertex &&source, long id)
+{
+	if (id == Vertex::NULL_VERTEX_ID) {
+		id = source.get_id();
+	}
+
+	Vertex &vertex = createVertex(std::max(source.get_id(), id));
+	id = vertex.get_id();
+	vertex = std::move(source);
+	vertex.set_id(id);
+
+	return id;
 }
 
 /*!
@@ -586,37 +631,97 @@ const Cell & Patch::getCell(const long &id) const
 }
 
 /*!
-	Adds a new cell with the specified id.
+	Creates a new cell with the specified id.
 
 	\param id is the id of the new cell
-	\param internal is true if the cell is an internal cell, false otherwise
+	\param interior is true if the cell is an interior cell, false otherwise
+	\return A reference to the newly created cell.
 */
-long Patch::addCell(const long &id, ElementInfo::Type type, bool internal)
+Cell & Patch::createCell(bool interior, long id)
 {
+	if (id == Element::NULL_ELEMENT_ID) {
+		id = m_cellIdGenerator.generateId();
+	}
+
 	PiercedVector<Cell>::iterator iterator;
-	if (internal) {
+	if (interior) {
 		iterator = m_cells.reclaim(id);
 	} else {
 		iterator = m_cells.reclaim_back(id);
 	}
 
-	Cell &cell = *iterator;
-	cell.initialize(type);
-	cell.setInterior(internal);
+	return (*iterator);
+}
+
+/*!
+	Adds a new cell with the specified id.
+
+	\param interior is true if the cell is the interior of the patch,
+	false otherwise
+	\param id is the id of the new cell. If a negative id value is
+	specified, ad new unique id will be generated
+	\return The id associated to the cell.
+*/
+long Patch::addCell(const long &id)
+{
+	createCell(true, id);
 
 	return id;
 }
 
 /*!
-	Adds a new cell.
+	Adds a new cell with the specified id and type.
 
-	\param internal is true if the cell is an internal cell, false otherwise
+	\param type is the type of the cell
+	\param interior is true if the cell is the interior of the patch,
+	false otherwise
+	\param id is the id of the new cell. If a negative id value is
+	specified, ad new unique id will be generated
+	\return The id associated to the cell.
 */
-long Patch::addCell(ElementInfo::Type type, bool internal)
+long Patch::addCell(ElementInfo::Type type, bool interior, const long &id)
 {
-	long id = m_cellIdGenerator.generateId();
+	Cell &cell = createCell(interior, id);
+	cell.initialize(type);
+	cell.setInterior(interior);
 
-	return addCell(id, type, internal);
+	return cell.get_id();
+}
+
+/*!
+	Adds the specified cell to the patch.
+
+	\param source is the cell that will be added
+	\return The id associated to the cell.
+*/
+long Patch::addCell(Cell source)
+{
+	Cell &cell = createCell(source.isInterior());
+	long id = cell.get_id();
+	cell = std::move(source);
+	cell.set_id(id);
+
+	return id;
+}
+
+/*!
+	Adds the specified cell to the patch.
+
+	\param source is the cell that will be added
+	\return The id associated to the cell.
+*/
+long Patch::addCell(Cell &&source, long id)
+{
+	if (id == Element::NULL_ELEMENT_ID) {
+		id = source.get_id();
+	}
+
+	Cell &cell = createCell(source.isInterior(), id);
+	id = cell.get_id();
+	cell = std::move(source);
+	cell.set_id(id);
+
+	return id;
 }
 
 /*!
@@ -983,28 +1088,88 @@ const Interface & Patch::getInterface(const long &id) const
 }
 
 /*!
-	Adds a new interface with the specified id.
+	Creates a new interface with the specified id.
 
 	\param id is the id of the new interface
+	\return A reference to the newly created interface.
 */
-long Patch::addInterface(const long &id, ElementInfo::Type type)
+Interface & Patch::createInterface(long id)
 {
+	if (id == Element::NULL_ELEMENT_ID) {
+		id = m_interfaceIdGenerator.generateId();
+	}
+
 	PiercedVector<Interface>::iterator iterator = m_interfaces.reclaim(id);
 
-	Interface &interface = *iterator;
+	return (*iterator);
+}
+
+/*!
+	Adds a new interface with the specified id.
+
+	\param id is the id of the new cell. If a negative id value is
+	specified, ad new unique id will be generated
+	\return The id associated to the interface.
+*/
+long Patch::addInterface(const long &id)
+{
+	Interface &interface = createInterface(id);
+
+	return interface.get_id();
+}
+
+/*!
+	Adds a new interface with the specified id.
+
+	\param type is the type of the interface
+	\param id is the id of the new cell. If a negative id value is
+	specified, ad new unique id will be generated
+	\return The id associated to the interface.
+*/
+long Patch::addInterface(ElementInfo::Type type, const long &id)
+{
+	Interface &interface = createInterface(id);
 	interface.initialize(type);
+
+	return interface.get_id();
+}
+
+/*!
+	Adds the specified interface to the patch.
+
+	\param source is the interface that will be added
+	\return The id associated to the interface.
+*/
+long Patch::addInterface(Interface source)
+{
+	Interface &interface = createInterface();
+	long id = interface.get_id();
+	interface = std::move(source);
+	interface.set_id(id);
 
 	return id;
 }
 
 /*!
-	Adds a new interface.
-*/
-long Patch::addInterface(ElementInfo::Type type)
-{
-	long id = m_interfaceIdGenerator.generateId();
+	Adds the specified interface to the patch.
 
-	return addInterface(id, type);
+	\param source is the interface that will be added
+	\param id is the id that will be assigned to the interface
+	\return The id associated to the interface.
+
+*/
+long Patch::addInterface(Interface &&source, long id)
+{
+	if (id == Element::NULL_ELEMENT_ID) {
+		id = source.get_id();
+	}
+
+	Interface &interface = createInterface(id);
+	id = interface.get_id();
+	interface = std::move(source);
+	interface.set_id(id);
+
+	return id;
 }
 
 /*!

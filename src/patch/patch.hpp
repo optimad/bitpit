@@ -162,16 +162,21 @@ protected:
 	std::array<double, 3> m_minPoint;
 	std::array<double, 3> m_maxPoint;
 
-	long addVertex();
-	long addVertex(const long &id);
+	long addVertex(const long &id = Vertex::NULL_VERTEX_ID);
+	long addVertex(Vertex source);
+	long addVertex(Vertex &&source, long id = Vertex::NULL_VERTEX_ID);
 	void deleteVertex(const long &id, bool delayed = false);
 
-	long addInterface(ElementInfo::Type type = ElementInfo::UNDEFINED);
-	long addInterface(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED);
+	long addInterface(const long &id = Element::NULL_ELEMENT_ID);
+	long addInterface(ElementInfo::Type type, const long &id = Element::NULL_ELEMENT_ID);
+	long addInterface(Interface source);
+	long addInterface(Interface &&source, long id = Element::NULL_ELEMENT_ID);
 	void deleteInterface(const long &id, bool delayed = false);
 
-	long addCell(ElementInfo::Type type = ElementInfo::UNDEFINED, bool internal = true);
-	long addCell(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED, bool internal = true);
+	long addCell(const long &id = Element::NULL_ELEMENT_ID);
+	long addCell(ElementInfo::Type type, bool interior, const long &id = Element::NULL_ELEMENT_ID);
+	long addCell(Cell source);
+	long addCell(Cell &&source, long id = Element::NULL_ELEMENT_ID);
 	void deleteCell(const long &id, bool delayed = false);
 
 	virtual void evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
@@ -194,6 +199,10 @@ private:
 
 	bool m_hasCustomTolerance;
 	double m_tolerance;
+
+	Vertex & createVertex(long id = Vertex::NULL_VERTEX_ID);
+	Interface & createInterface(long id = Element::NULL_ELEMENT_ID);
+	Cell & createCell(bool interior, long id = Element::NULL_ELEMENT_ID);
 
 	std::unordered_map<std::string, const std::vector<double> *> m_dataFields;
 	std::unordered_map<std::string, VTKLocation> m_dataLocations;
