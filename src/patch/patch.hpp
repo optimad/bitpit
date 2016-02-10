@@ -122,7 +122,11 @@ public:
 	virtual std::array<double, 3> evalInterfaceNormal(const long &id) = 0;
 
 	void sort();
+
 	void squeeze();
+	void squeezeVertices();
+	void squeezeCells();
+	void squeezeInterfaces();
 
 	bool isPointInside(const double &x, const double &y, const double &z);
 	virtual bool isPointInside(const std::array<double, 3> &point) = 0;

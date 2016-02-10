@@ -1266,17 +1266,53 @@ void Patch::sort()
 }
 
 /*!
-	Requests the patch to compact the data structures and reduce its capacity
-	to fit its size.
+	Requests the patch to compact the vertex data structure and reduce
+	its capacity to fit its size.
 
-	The request is non-binding, and after the function call the patch can
-	still occupy more memory than it actually needs.
+	The request is non-binding, and after the function call the vertex
+	data structure can still occupy more memory than it actually needs.
+*/
+void Patch::squeezeVertices()
+{
+	m_vertices.squeeze();
+}
+
+/*!
+	Requests the patch to compact the cell data structure and reduce
+	its capacity to fit its size.
+
+	The request is non-binding, and after the function call the cell
+	data structure can still occupy more memory than it actually needs.
+*/
+void Patch::squeezeCells()
+{
+	m_cells.squeeze();
+}
+
+/*!
+	Requests the patch to compact the interface data structure and reduce
+	its capacity to fit its size.
+
+	The request is non-binding, and after the function call the interface
+	data structure can still occupy more memory than it actually needs.
+*/
+void Patch::squeezeInterfaces()
+{
+	m_interfaces.squeeze();
+}
+
+/*!
+	Requests the patch to compact the data structures and reduce its
+	capacity to fit its size.
+
+	The request is non-binding, and after the function call the patch
+	can still occupy more memory than it actually needs.
 */
 void Patch::squeeze()
 {
-	m_vertices.squeeze();
-	m_cells.squeeze();
-	m_interfaces.squeeze();
+	squeezeVertices();
+	squeezeCells();
+	squeezeInterfaces();
 }
 
 /*!
