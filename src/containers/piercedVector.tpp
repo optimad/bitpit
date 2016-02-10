@@ -1440,7 +1440,7 @@ public:
 		// the fallback value
 		if (targetSize == 0) {
 			return m_v[m_first_pos].get_id();
-		} else if (targetSize >= size()) {
+		} else if (targetSize >= size() || targetSize <= 0) {
 			return fallback;
 		}
 
