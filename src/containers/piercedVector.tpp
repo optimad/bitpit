@@ -673,6 +673,40 @@ public:
 	}
 
 	/*!
+		The element with the specified id is replaced with a new element.
+		This new element is constructed in place using args as the
+		arguments for its construction.
+
+		\param id is the id of the element that will be replaced
+		\param args the arguments forwarded to construct the new element
+		\result An iterator that points to the newly inserted element.
+	*/
+	template <class... Args>
+	iterator emreplace(id_type id, Args&&... args)
+	{
+		// Position
+		size_t pos = m_pos.at(id);
+
+		// Id of the element that is currently occupying the position
+		id_type id_prev = m_v[pos].get_id();
+
+		// Replace the element
+		m_v[pos] = T(std::forward<Args>(args)...);
+
+		// Update the map
+		if (id != id_prev) {
+			unlink_id(id_prev);
+			link_id(id, pos);
+		}
+
+		// Return the iterator that points to the element
+		iterator itr;
+		itr = raw_begin() + pos;
+
+		return itr;
+	}
+
+	/*!
 		Returns an iterator referring to the past-the-end element
 		in the vector.
 
@@ -682,6 +716,69 @@ public:
 	iterator end()
 	{
 		return iterator(raw_begin() + m_last_pos + 1);
+	}
+
+	/*!
+		Removes from the vector the element with the specified id.
+		If the id does not exists the function throws an
+		exception.
+
+		Element is not deleted from the internal vector, instead its
+		id is changed to mark the position as empty and allow the
+		container to reuse that position.
+
+		\param id the id of the element to erase
+		\param delayed if true the deletion of the element will
+		be delayed until a flush is called
+		\result An iterator pointing to the new location of the
+		        element that followed the element erased by the
+		        function call. This is the container end if the
+		        operation erased the last element in the sequence.
+	*/
+	iterator erase(id_type id, bool delayed = false)
+	{
+		return _erase(get_pos_from_id(id), delayed);
+	}
+
+	/*!
+		Checks if a given id exists in the vector.
+
+		\param id the id to look for
+		\result Returns true is the given id exists in the vector,
+		        otherwise it returns false.
+	*/
+	bool exists(id_type id)
+	{
+		return (m_pos.count(id) != 0);
+	}
+
+	/*!
+		Gets the flat index of the element with the specified id.
+
+		A flat id is the id associated to a numbering scheme that starts
+		from the element in the first position of the container and is
+		incremented by one for each element in the container. The first
+		element will have a flat id equal to 0, the last element will
+		have a flat id equal to (nElements - 1).
+
+		If there is no element with the specified id, an exception is
+		thrown.
+
+		\param id the id of the element for witch the flat id is requested
+		\result The flat index of the element with the specified id.
+	*/
+	size_type extract_flat_index(id_type id) const
+	{
+		size_t pos = get_pos_from_id(id);
+		size_t flat = pos - m_first_pos;
+		if (m_holes.size() > 0) {
+			auto holeBound = lower_bound(m_holes.cbegin(), m_holes.cend(), pos);
+			size_t nHolesBefore = std::distance(m_holes.cbegin(), holeBound);
+
+			flat -= nHolesBefore;
+		}
+
+		return flat;
 	}
 
 	/*!
@@ -736,40 +833,6 @@ public:
 	}
 
 	/*!
-		Removes from the vector the element with the specified id.
-		If the id does not exists the function throws an
-		exception.
-
-		Element is not deleted from the internal vector, instead its
-		id is changed to mark the position as empty and allow the
-		container to reuse that position.
-
-		\param id the id of the element to erase
-		\param delayed if true the deletion of the element will
-		be delayed until a flush is called
-		\result An iterator pointing to the new location of the
-		        element that followed the element erased by the
-		        function call. This is the container end if the
-		        operation erased the last element in the sequence.
-	*/
-	iterator erase(id_type id, bool delayed = false)
-	{
-		return _erase(get_pos_from_id(id), delayed);
-	}
-
-	/*!
-		Checks if a given id exists in the vector.
-
-		\param id the id to look for
-		\result Returns true is the given id exists in the vector,
-		        otherwise it returns false.
-	*/
-	bool exists(id_type id)
-	{
-		return (m_pos.count(id) != 0);
-	}
-
-	/*!
 		Gets a vector containing the ids of the elements stored in
 		the vector.
 
@@ -796,6 +859,71 @@ public:
 		}
 
 		return ids;
+	}
+
+	/*!
+		Returns the id of the elmement before which there is the requested
+		number of other elements. If this element does not exist the
+		fallback value will be returned.
+
+		\param targetSize is the number of elements that needs to be
+		contained before the marker
+		\param fallback is the fallback value to be returned if the
+		marker cannot be found
+		\return The id of the elmement before which there is the requested
+		number of other elements. If this element does not exist the
+		fallback value will be returned.
+	*/
+	id_type get_size_marker(const size_t &targetSize, const id_type &fallback = SENTINEL_ID) const
+	{
+		// If the size is zero, we return the first element, if the target
+		// size is greater or equal the current container size we return
+		// the fallback value
+		if (targetSize == 0) {
+			return m_v[m_first_pos].get_id();
+		} else if (targetSize >= size() || targetSize <= 0) {
+			return fallback;
+		}
+
+		// Iterate to find the position before wihch there is the
+		// requeste number of element.
+		std::deque<size_type>::const_iterator hole_itr    = m_holes.begin();
+		std::deque<size_type>::const_iterator pending_itr = m_pending_deletes.begin();
+
+		size_type nEmpties  = 0;
+		size_type markerPos = targetSize;
+		while (true) {
+			// Count the number of holes and pending deletes before the
+			// current marker position
+			if (hole_itr != m_holes.end()) {
+				std::deque<size_type>::const_iterator itr_previous = hole_itr;
+				hole_itr = std::upper_bound(hole_itr, m_holes.end(), markerPos);
+				nEmpties += std::distance(itr_previous, hole_itr);
+			}
+
+			if (pending_itr != m_pending_deletes.end()) {
+				std::deque<size_type>::const_iterator itr_previous = pending_itr;
+				pending_itr = std::upper_bound(pending_itr, m_pending_deletes.end(), markerPos);
+				nEmpties += std::distance(itr_previous, pending_itr);
+			}
+
+			// Get the marker size
+			//
+			// If we have reached the target size we can exit, otherwise
+			// we update the marker and we continue iterating
+			size_type markerSize = markerPos - nEmpties;
+			if (markerSize == targetSize) {
+				break;
+			} else {
+				markerPos += targetSize - markerSize;
+			}
+		}
+
+		if (markerPos > m_last_pos) {
+			return fallback;
+		} else {
+			return m_v[markerPos].get_id();
+		}
 	}
 
 	/*!
@@ -854,6 +982,34 @@ public:
 	size_type max_size() const
 	{
 		return USABLE_POS_COUNT;
+	}
+
+	/*!
+		Move the specified element after the element with the given
+		reference id.
+
+		\param referenceId is the id of the element after which the
+		new element will be moved
+		\param id is the id of the element that will be moved
+		\result An iterator that points to the moved element.
+	*/
+	iterator move_after(const id_type &referenceId, const id_type &id)
+	{
+		return _move(FILL_AFTER, get_pos_from_id(referenceId), get_pos_from_id(id));
+	}
+
+	/*!
+		Move the specified element before the element with the given
+		reference id.
+
+		\param referenceId is the id of the element before which the
+		new element will be moved
+		\param id is the id of the element that will be moved
+		\result An iterator that points to the moved element.
+	*/
+	iterator move_before(const id_type &referenceId, const id_type &id)
+	{
+		return _move(FILL_BEFORE, get_pos_from_id(referenceId), get_pos_from_id(id));
 	}
 
 	/*!
@@ -1023,34 +1179,6 @@ public:
 	}
 
 	/*!
-		Move the specified element after the element with the given
-		reference id.
-
-		\param referenceId is the id of the element after which the
-		new element will be moved
-		\param id is the id of the element that will be moved
-		\result An iterator that points to the moved element.
-	*/
-	iterator move_after(const id_type &referenceId, const id_type &id)
-	{
-		return _move(FILL_AFTER, get_pos_from_id(referenceId), get_pos_from_id(id));
-	}
-
-	/*!
-		Move the specified element before the element with the given
-		reference id.
-
-		\param referenceId is the id of the element before which the
-		new element will be moved
-		\param id is the id of the element that will be moved
-		\result An iterator that points to the moved element.
-	*/
-	iterator move_before(const id_type &referenceId, const id_type &id)
-	{
-		return _move(FILL_BEFORE, get_pos_from_id(referenceId), get_pos_from_id(id));
-	}
-
-	/*!
 		Gets an element from the first position marked as empty
 		past the last element assignes to it the specified id.
 		Except for setting the id, the element is not modified.
@@ -1086,70 +1214,6 @@ public:
 	iterator reclaim_before(const id_type &id, const id_type &referenceId)
 	{
 		return _reclaim(FILL_BEFORE, get_pos_from_id(referenceId), id);
-	}
-
-	/*!
-		Gets the flat index of the element with the specified id.
-
-		A flat id is the id associated to a numbering scheme that starts
-		from the element in the first position of the container and is
-		incremented by one for each element in the container. The first
-		element will have a flat id equal to 0, the last element will
-		have a flat id equal to (nElements - 1).
-
-		If there is no element with the specified id, an exception is
-		thrown.
-
-		\param id the id of the element for witch the flat id is requested
-		\result The flat index of the element with the specified id.
-	*/
-	size_type extract_flat_index(id_type id) const
-	{
-		size_t pos = get_pos_from_id(id);
-		size_t flat = pos - m_first_pos;
-		if (m_holes.size() > 0) {
-			auto holeBound = lower_bound(m_holes.cbegin(), m_holes.cend(), pos);
-			size_t nHolesBefore = std::distance(m_holes.cbegin(), holeBound);
-
-			flat -= nHolesBefore;
-		}
-
-		return flat;
-	}
-
-
-	/*!
-		The element with the specified id is replaced with a new element.
-		This new element is constructed in place using args as the
-		arguments for its construction.
-
-		\param id is the id of the element that will be replaced
-		\param args the arguments forwarded to construct the new element
-		\result An iterator that points to the newly inserted element.
-	*/
-	template <class... Args>
-	iterator emreplace(id_type id, Args&&... args)
-	{
-		// Position
-		size_t pos = m_pos.at(id);
-
-		// Id of the element that is currently occupying the position
-		id_type id_prev = m_v[pos].get_id();
-
-		// Replace the element
-		m_v[pos] = T(std::forward<Args>(args)...);
-
-		// Update the map
-		if (id != id_prev) {
-			unlink_id(id_prev);
-			link_id(id, pos);
-		}
-
-		// Return the iterator that points to the element
-		iterator itr;
-		itr = raw_begin() + pos;
-
-		return itr;
 	}
 
 	/*!
@@ -1418,71 +1482,6 @@ public:
 		const size_t pos = get_pos_from_id(currentId);
 		m_v[pos].set_id(updatedId);
 		link_id(updatedId, pos, false);
-	}
-
-	/*!
-		Returns the id of the elmement before which there is the requested
-		number of other elements. If this element does not exist the
-		fallback value will be returned.
-
-		\param targetSize is the number of elements that needs to be
-		contained before the marker
-		\param fallback is the fallback value to be returned if the
-		marker cannot be found
-		\return The id of the elmement before which there is the requested
-		number of other elements. If this element does not exist the
-		fallback value will be returned.
-	*/
-	id_type get_size_marker(const size_t &targetSize, const id_type &fallback = SENTINEL_ID) const
-	{
-		// If the size is zero, we return the first element, if the target
-		// size is greater or equal the current container size we return
-		// the fallback value
-		if (targetSize == 0) {
-			return m_v[m_first_pos].get_id();
-		} else if (targetSize >= size() || targetSize <= 0) {
-			return fallback;
-		}
-
-		// Iterate to find the position before wihch there is the
-		// requeste number of element.
-		std::deque<size_type>::const_iterator hole_itr    = m_holes.begin();
-		std::deque<size_type>::const_iterator pending_itr = m_pending_deletes.begin();
-
-		size_type nEmpties  = 0;
-		size_type markerPos = targetSize;
-		while (true) {
-			// Count the number of holes and pending deletes before the
-			// current marker position
-			if (hole_itr != m_holes.end()) {
-				std::deque<size_type>::const_iterator itr_previous = hole_itr;
-				hole_itr = std::upper_bound(hole_itr, m_holes.end(), markerPos);
-				nEmpties += std::distance(itr_previous, hole_itr);
-			}
-
-			if (pending_itr != m_pending_deletes.end()) {
-				std::deque<size_type>::const_iterator itr_previous = pending_itr;
-				pending_itr = std::upper_bound(pending_itr, m_pending_deletes.end(), markerPos);
-				nEmpties += std::distance(itr_previous, pending_itr);
-			}
-
-			// Get the marker size
-			//
-			// If we have reached the target size we can exit, otherwise
-			// we update the marker and we continue iterating
-			size_type markerSize = markerPos - nEmpties;
-			if (markerSize == targetSize) {
-				break;
-			} else {
-				markerPos += targetSize - markerSize;
-			}
-		}
-
-		if (markerPos > m_last_pos) {
-			return fallback;
-		} else {
-			return m_v[markerPos].get_id();
-		}
 	}
 
 	/*!
@@ -1804,31 +1803,6 @@ private:
 
 		return itr;
 	}
-
-	/*!
-		Compares the id of the specified values.
-
-		\param x first values to compare
-		\param y second values to compare
-		\result Returns true if the x has an id lower that y, false
-		        otherwise. Negative ids are special ids and are
-		        considered higher than positive ids.
-	*/
-	struct less_than_id
-	{
-	    inline bool operator() (const T &x, const T &y)
-	    {
-		    if (x.get_id() >= 0 && y.get_id() < 0) {
-			    return true;
-		    } else if (x.get_id() < 0 && y.get_id() >= 0) {
-			    return false;
-		    } else if (x.get_id() >= 0) {
-			    return (x.get_id() < y.get_id());
-		    } else {
-			    return (x.get_id() > y.get_id());
-		    }
-	    }
-	};
 
 	/*!
 		Gets the position in the storage vector of the element with the
@@ -2180,16 +2154,6 @@ private:
 	}
 
 	/*!
-		Removes the specified id from the map.
-
-		\param id is the id that will be removed from the list
-	*/
-	void unlink_id(const id_type id)
-	{
-		m_pos.erase(id);
-	}
-
-	/*!
 		Returns the first non-empty position before the specified
 		starting position.
 
@@ -2320,6 +2284,41 @@ private:
 			}
 		}
 	}
+
+	/*!
+		Removes the specified id from the map.
+
+		\param id is the id that will be removed from the list
+	*/
+	void unlink_id(const id_type id)
+	{
+		m_pos.erase(id);
+	}
+
+	/*!
+		Compares the id of the specified values.
+
+		\param x first values to compare
+		\param y second values to compare
+		\result Returns true if the x has an id lower that y, false
+		        otherwise. Negative ids are special ids and are
+		        considered higher than positive ids.
+	*/
+	struct less_than_id
+	{
+	    inline bool operator() (const T &x, const T &y)
+	    {
+		    if (x.get_id() >= 0 && y.get_id() < 0) {
+			    return true;
+		    } else if (x.get_id() < 0 && y.get_id() >= 0) {
+			    return false;
+		    } else if (x.get_id() >= 0) {
+			    return (x.get_id() < y.get_id());
+		    } else {
+			    return (x.get_id() > y.get_id());
+		    }
+	    }
+	};
 };
 
 // Definition of static constants of PiercedVector
