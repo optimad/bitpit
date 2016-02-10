@@ -95,6 +95,28 @@ Interface::Interface(const long &id, ElementInfo::Type type)
 }
 
 /*!
+        Copy-constructor
+*/
+Interface::Interface(const Interface &other)
+{
+	*this = other;
+}
+
+/*!
+	Copy assignament operator
+*/
+Interface & Interface::operator=(const Interface& other)
+{
+	Element::operator=(other);
+	m_owner     = other.m_owner;
+	m_ownerFace = other.m_ownerFace;
+	m_neigh     = other.m_neigh;
+	m_neighFace = other.m_neighFace;
+
+	return (*this);
+}
+
+/*!
 	Evaluates the rotation matrix from the Cartesian coordinate system
 	to a coordinate system build starting from the specified versor.
 

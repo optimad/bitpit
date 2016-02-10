@@ -40,7 +40,9 @@ public:
 	Interface();
 	Interface(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED);
 
+	Interface(const Interface &other);
 	Interface(Interface&& other) = default;
+	Interface& operator = (const Interface &other);
 	Interface& operator=(Interface&& other) = default;
 
 	bool isBorder() const;
@@ -71,9 +73,6 @@ private:
 
 	long m_neigh;
 	int m_neighFace;
-
-	Interface(const Interface &other) = delete;
-	Interface& operator = (const Interface &other) = delete;
 
 };
 
