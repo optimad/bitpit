@@ -150,7 +150,7 @@ private:
 	long createCell(OctantInfo octantInfo,
 	                 std::unique_ptr<long[]> &vertices,
 	                 std::vector<std::vector<long>> &interfaces,
-	                 std::vector<std::vector<bool>> &ownerFlags);
+	                 std::vector<std::vector<bool>> &interfacesOwner);
 	void deleteCell(long id);
 };
 

@@ -868,7 +868,7 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 
 	// Add the cells
 	std::vector<std::vector<long>> cellInterfaces(nCellFaces, std::vector<long>());
-	std::vector<std::vector<bool>> interfaceOwnerFlags(nCellFaces, std::vector<bool>());
+	std::vector<std::vector<bool>> cellInterfacesOwner(nCellFaces, std::vector<bool>());
 	for (OctantInfo &octantInfo : octantInfoList) {
 		// Octant connectivity
 		const std::vector<uint32_t> &octantTreeConnect = getOctantConnect(octantInfo);
@@ -883,7 +883,7 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 		// Add interfaces
 		for (int k = 0; k < nCellFaces; ++k) {
 			cellInterfaces[k].clear();
-			interfaceOwnerFlags[k].clear();
+			cellInterfacesOwner[k].clear();
 		}
 
 		for (uint32_t interfaceTreeId : octantTreeInterfaces[octantInfo.id]) {
@@ -892,10 +892,10 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 
 			Intersection *treeInterface = m_tree.getIntersection(interfaceTreeId);
 			uint32_t owner = m_tree.getOut(treeInterface);
-			bool ownerFlag = (owner == octantInfo.id);
+			bool ownsInterface = (owner == octantInfo.id);
 
 			int cellFace;
-			if (ownerFlag) {
+			if (ownsInterface) {
 				cellFace = interface.getOwnerFace();
 			} else {
 				cellFace = interface.getNeighFace();
@@ -905,11 +905,11 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 			long &cellInterfaceId = cellInterfaces[cellFace].back();
 			cellInterfaceId = interfaceId;
 
-			interfaceOwnerFlags[cellFace].push_back(ownerFlag);
+			cellInterfacesOwner[cellFace].push_back(ownsInterface);
 		}
 
 		// Add cell
-		createCell(octantInfo, cellConnect, cellInterfaces, interfaceOwnerFlags);
+		createCell(octantInfo, cellConnect, cellInterfaces, cellInterfacesOwner);
 	}
 
 	// Done
@@ -1089,7 +1089,7 @@ long OctreePatch::createInterface(uint32_t treeId,
 long OctreePatch::createCell(OctantInfo octantInfo,
                               std::unique_ptr<long[]> &vertices,
                               std::vector<std::vector<long>> &interfaces,
-                              std::vector<std::vector<bool>> &ownerFlags)
+                              std::vector<std::vector<bool>> &interfacesOwner)
 {
 	// Create the cell
 	ElementInfo::Type cellType;
@@ -1111,7 +1111,7 @@ long OctreePatch::createCell(OctantInfo octantInfo,
 		int nFaceInterfaces = interfaces[face].size();
 		for (int k = 0; k < nFaceInterfaces; ++k) {
 			long interfaceId   = interfaces[face][k];
-			bool ownsInterface = ownerFlags[face][k];
+			bool ownsInterface = interfacesOwner[face][k];
 
 			Interface &interface = m_interfaces[interfaceId];
 			if (ownsInterface) {
