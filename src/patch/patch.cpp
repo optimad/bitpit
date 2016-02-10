@@ -127,6 +127,8 @@ void IndexGenerator::reset()
 */
 Patch::Patch(const int &id, const int &dimension)
 	: m_nVertices(0), m_nInternals(0), m_nGhosts(0), m_nInterfaces(0),
+	  m_last_internal_id(Element::NULL_ELEMENT_ID),
+	  m_first_ghost_id(Element::NULL_ELEMENT_ID),
 	  m_dirty(true), m_hasCustomTolerance(false)
 {
 	set_id(id) ;
@@ -672,11 +674,41 @@ Cell & Patch::createCell(bool interior, long id)
 
 	PiercedVector<Cell>::iterator iterator;
 	if (interior) {
-		iterator = m_cells.reclaim(id);
+		// Create an internal cell
+		//
+		// If there are ghosts cells, the internal cell should be inserted
+		// before the first ghost cell.
+		if (m_first_ghost_id < 0) {
+			iterator = m_cells.reclaim(id);
+		} else {
+			iterator = m_cells.reclaim_before(m_first_ghost_id, id);
+		}
 		m_nInternals++;
+
+		// Update the id of the last internal cell
+		if (m_last_internal_id < 0) {
+			m_last_internal_id = id;
+		} else if (m_cells.raw_index(m_last_internal_id) < m_cells.raw_index(id)) {
+			m_last_internal_id = id;
+		}
 	} else {
-		iterator = m_cells.reclaim_back(id);
+		// Create a ghost cell
+		//
+		// If there are internal cells, the ghost cell should be inserted
+		// after the last internal cell.
+		if (m_last_internal_id < 0) {
+			iterator = m_cells.reclaim(id);
+		} else {
+			iterator = m_cells.reclaim_after(m_last_internal_id, id);
+		}
 		m_nGhosts++;
+
+		// Update the id of the first ghost cell
+		if (m_first_ghost_id < 0) {
+			m_first_ghost_id = id;
+		} else if (m_cells.raw_index(m_first_ghost_id) > m_cells.raw_index(id)) {
+			m_first_ghost_id = id;
+		}
 	}
 
 	return (*iterator);
@@ -765,8 +797,10 @@ void Patch::deleteCell(const long &id, bool delayed)
 	m_cellIdGenerator.trashId(id);
 	if (isInternal) {
 		m_nInternals--;
+		m_last_internal_id = m_cells.get_size_marker(m_nInternals - 1, Element::NULL_ELEMENT_ID);
 	} else {
 		m_nGhosts--;
+		m_first_ghost_id = m_cells.get_size_marker(m_nInternals, Element::NULL_ELEMENT_ID);
 	}
 }
 

@@ -170,6 +170,9 @@ protected:
 	long m_nGhosts;
 	long m_nInterfaces;
 
+	long m_last_internal_id;
+	long m_first_ghost_id;
+
 	std::array<double, 3> m_minPoint;
 	std::array<double, 3> m_maxPoint;
 
