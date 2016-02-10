@@ -155,9 +155,9 @@ protected:
 	PiercedVector<Cell> m_cells;
 	PiercedVector<Interface> m_interfaces;
 
-	std::deque<long> m_unusedVertexIds;
-	std::deque<long> m_unusedInterfaceIds;
-	std::deque<long> m_unusedCellIds;
+	IndexGenerator m_vertexIdGenerator;
+	IndexGenerator m_interfaceIdGenerator;
+	IndexGenerator m_cellIdGenerator;
 
 	std::array<double, 3> m_minPoint;
 	std::array<double, 3> m_maxPoint;

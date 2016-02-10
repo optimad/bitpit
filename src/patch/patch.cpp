@@ -219,6 +219,7 @@ void Patch::resetVertices()
 {
 	m_vertices.clear();
 	PiercedVector<Vertex>().swap(m_vertices);
+	m_vertexIdGenerator.reset();
 
 	for (auto &cell : m_cells) {
 		cell.unsetConnect();
@@ -232,6 +233,7 @@ void Patch::resetCells()
 {
 	m_cells.clear();
 	PiercedVector<Cell>().swap(m_cells);
+	m_cellIdGenerator.reset();
 
 	for (auto &interface : m_interfaces) {
 		interface.unsetNeigh();
@@ -246,6 +248,7 @@ void Patch::resetInterfaces()
 {
 	m_interfaces.clear();
 	PiercedVector<Interface>().swap(m_interfaces);
+	m_interfaceIdGenerator.reset();
 
 	for (auto &cell : m_cells) {
 		cell.unsetInterfaces();
@@ -513,13 +516,7 @@ long Patch::addVertex(const long &id)
 */
 long Patch::addVertex()
 {
-	long id;
-	if (m_unusedVertexIds.empty()) {
-		id = m_vertices.size();
-	} else {
-		id = m_unusedVertexIds.front();
-		m_unusedVertexIds.pop_front();
-	}
+	long id = m_vertexIdGenerator.generateId();
 
 	return addVertex(id);
 }
@@ -532,7 +529,7 @@ long Patch::addVertex()
 void Patch::deleteVertex(const long &id, bool delayed)
 {
 	m_vertices.erase(id, delayed);
-	m_unusedVertexIds.push_back(id);
+	m_vertexIdGenerator.trashId(id);
 }
 
 /*!
@@ -617,13 +614,7 @@ long Patch::addCell(const long &id, ElementInfo::Type type, bool internal)
 */
 long Patch::addCell(ElementInfo::Type type, bool internal)
 {
-	long id;
-	if (m_unusedCellIds.empty()) {
-		id = m_cells.size();
-	} else {
-		id = m_unusedCellIds.front();
-		m_unusedCellIds.pop_front();
-	}
+	long id = m_cellIdGenerator.generateId();
 
 	return addCell(id, type, internal);
 }
@@ -636,7 +627,7 @@ long Patch::addCell(ElementInfo::Type type, bool internal)
 void Patch::deleteCell(const long &id, bool delayed)
 {
 	m_cells.erase(id, delayed);
-	m_unusedCellIds.push_back(id);
+	m_cellIdGenerator.trashId(id);
 }
 
 /*!
@@ -1011,13 +1002,7 @@ long Patch::addInterface(const long &id, ElementInfo::Type type)
 */
 long Patch::addInterface(ElementInfo::Type type)
 {
-	long id;
-	if (m_unusedInterfaceIds.empty()) {
-		id = m_interfaces.size();
-	} else {
-		id = m_unusedInterfaceIds.front();
-		m_unusedInterfaceIds.pop_front();
-	}
+	long id = m_interfaceIdGenerator.generateId();
 
 	return addInterface(id, type);
 }
@@ -1030,7 +1015,7 @@ long Patch::addInterface(ElementInfo::Type type)
 void Patch::deleteInterface(const long &id, bool delayed)
 {
 	m_interfaces.erase(id, delayed);
-	m_unusedInterfaceIds.push_back(id);
+	m_interfaceIdGenerator.trashId(id);
 }
 
 /*!
