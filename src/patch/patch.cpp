@@ -126,7 +126,7 @@ void IndexGenerator::reset()
 	Creates a new patch.
 */
 Patch::Patch(const int &id, const int &dimension)
-	: m_nVertices(0), m_nInternals(0), m_nGhosts(0),
+	: m_nVertices(0), m_nInternals(0), m_nGhosts(0), m_nInterfaces(0),
 	  m_dirty(true), m_hasCustomTolerance(false)
 {
 	set_id(id) ;
@@ -253,6 +253,7 @@ void Patch::resetInterfaces()
 	m_interfaces.clear();
 	PiercedVector<Interface>().swap(m_interfaces);
 	m_interfaceIdGenerator.reset();
+	m_nInterfaces = 0;
 
 	for (auto &cell : m_cells) {
 		cell.unsetInterfaces();
@@ -1086,7 +1087,7 @@ std::vector<long> Patch::extractCellVertexNeighs(const long &id, const std::vect
 */
 long Patch::getInterfaceCount() const
 {
-	return m_interfaces.size();
+	return m_nInterfaces;
 }
 
 /*!
@@ -1134,6 +1135,7 @@ Interface & Patch::createInterface(long id)
 	}
 
 	PiercedVector<Interface>::iterator iterator = m_interfaces.reclaim(id);
+	m_nInterfaces++;
 
 	return (*iterator);
 }
@@ -1215,6 +1217,7 @@ void Patch::deleteInterface(const long &id, bool delayed)
 {
 	m_interfaces.erase(id, delayed);
 	m_interfaceIdGenerator.trashId(id);
+	m_nInterfaces--;
 }
 
 /*!

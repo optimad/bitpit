@@ -168,6 +168,7 @@ protected:
 	long m_nVertices;
 	long m_nInternals;
 	long m_nGhosts;
+	long m_nInterfaces;
 
 	std::array<double, 3> m_minPoint;
 	std::array<double, 3> m_maxPoint;
