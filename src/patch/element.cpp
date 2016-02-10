@@ -1019,7 +1019,7 @@ void Element::setConnect(std::unique_ptr<long[]> connect)
 */
 void Element::unsetConnect()
 {
-	m_connect.reset();
+	m_connect.reset(nullptr);
 }
 
 /*!
