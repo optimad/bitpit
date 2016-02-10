@@ -55,7 +55,9 @@ public:
 	Vertex(const long &id);
 	Vertex(const long &id, std::array<double, 3> &coords);
 
+	Vertex(const Vertex &other) = default;
 	Vertex(Vertex &&other) = default;
+	Vertex& operator = (const Vertex &other) = default;
 	Vertex& operator=(Vertex &&other) = default;
 
 	bool operator==(const Vertex &other);
