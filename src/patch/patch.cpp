@@ -1374,6 +1374,26 @@ const Interface & Patch::getInterface(const long &id) const
 }
 
 /*!
+	Returns iterator pointing to the first interface.
+
+	\result An iterator to the first interface.
+*/
+InterfaceIterator Patch::interfaceBegin()
+{
+	return m_interfaces.begin();
+}
+
+/*!
+	Returns iterator pointing to last interface.
+
+	\result An iterator to the last interface.
+*/
+InterfaceIterator Patch::interfaceEnd()
+{
+	return m_interfaces.end();
+}
+
+/*!
 	Creates a new interface with the specified id.
 
 	\param id is the id of the new interface

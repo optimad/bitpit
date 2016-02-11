@@ -135,6 +135,9 @@ public:
 	virtual std::array<double, 3> evalInterfaceCentroid(const long &id);
 	virtual std::array<double, 3> evalInterfaceNormal(const long &id) = 0;
 
+	InterfaceIterator interfaceBegin();
+	InterfaceIterator interfaceEnd();
+
 	void sort();
 	void sortVertices();
 	void sortCells();
