@@ -436,7 +436,7 @@ void Cell::display(std::ostream &out, unsigned short int indent)
 	// ====================================================================== //
 	// DISPLAY INFOS                                                          //
 	// ====================================================================== //
-	if (getType() != ElementInfo::UNDEFINED) {
+	if (getType() == ElementInfo::UNDEFINED) {
 	    out << t_s << "cell type:    (unknown)" << std::endl;
 	    return;
 	}
@@ -461,22 +461,24 @@ void Cell::display(std::ostream &out, unsigned short int indent)
 	out << getVertex(nv-1) << " ]" << std::endl;
 
 	// neighbors infos ------------------------------------------------------ //
-	out << t_s << "neighbors:   [ ";
-	for (i = 0; i < nf-1; ++i) {
-		nn = getInterfaceCount(i);
-		out << "[ ";
-		for (j = 0; j < nn-1; ++j) {
-			out << getAdjacency(i, j) << ", ";
-		} //next j
-		out << getAdjacency(i, nn-1) << " ], ";
-	} //next i
-	nn = getInterfaceCount(nf-1);
-	out << "[ ";
-	for (j = 0; j < nn-1; ++j) {
-		out << getAdjacency(nf-1, j) << ", ";
-	} //next j
-	out << getAdjacency(nf-1, nn-1) << " ]";
-	out << " ]" << std::endl;
+        if (m_interfaces.size() > 0) {
+            out << t_s << "neighbors:    [ ";
+            for (i = 0; i < nf-1; ++i) {
+                nn = getInterfaceCount(i);
+                out << "[ ";
+                for (j = 0; j < nn-1; ++j) {
+                    out << getInterface(i, j) << ", ";
+                } //next j
+                out << getInterface(i, nn-1) << " ], ";
+            } //next i
+            nn = getInterfaceCount(nf-1);
+            out << "[ ";
+            for (j = 0; j < nn-1; ++j) {
+                out << getInterface(nf-1, j) << ", ";
+            } //next j
+            out << getInterface(nf-1, nn-1) << " ]";
+            out << " ]" << std::endl;
+        }
 }
 
 /*!
