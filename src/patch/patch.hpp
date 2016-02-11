@@ -94,6 +94,9 @@ public:
 	const Vertex & getVertex(const long &id) const;
 	const std::array<double, 3> & getVertexCoords(const long &id) const;
 
+	VertexIterator vertexBegin();
+	VertexIterator vertexEnd();
+
 	long getCellCount() const;
 	long getInternalCount() const;
 	long getGhostCount() const;

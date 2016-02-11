@@ -507,6 +507,26 @@ const Vertex & Patch::getVertex(const long &id) const
 }
 
 /*!
+	Returns iterator pointing to the first vertex.
+
+	\result An iterator to the first vertex.
+*/
+VertexIterator Patch::vertexBegin()
+{
+	return m_vertices.begin();
+}
+
+/*!
+	Returns iterator pointing to last vertex.
+
+	\result An iterator to the last vertex.
+*/
+VertexIterator Patch::vertexEnd()
+{
+	return m_vertices.end();
+}
+
+/*!
 	Creates a new vertex with the specified id.
 
 	\param id is the id of the new vertex
