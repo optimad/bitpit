@@ -37,6 +37,7 @@
 bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Element &element)
 {
 	buffer >> element.m_type;
+	buffer >> element.m_id;
 	element.initialize(element.m_type);
 	int nVertices = element.getVertexCount();
 	for (int i = 0; i < nVertices; ++i) {
@@ -57,6 +58,7 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::
 {
 	int nVertices = element.getVertexCount();
 	buffer << element.getType();
+	buffer << element.get_id();
 	for (int i = 0; i < nVertices; ++i) {
 	    buffer << element.m_connect[i];
 	}
@@ -1267,7 +1269,7 @@ long Element::getVertex(const int &vertex) const
 */
 unsigned int Element::getBinarySize()
 {
-    return (sizeof(ElementInfo::Type) + getVertexCount() * sizeof(long));
+	return (sizeof(ElementInfo::Type) + (getVertexCount() + 1) * sizeof(long));
 }
 
 // Explicit instantiation of the Element containers
