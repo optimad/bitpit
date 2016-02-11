@@ -1995,17 +1995,21 @@ void Patch::translate(double sx, double sy, double sz)
 /*!
 	Scales the patch.
 
+	The patch is scaled about the lower-left point of the bounding box.
+
 	\param[in] scaling is the scaling factor vector
 */
 void Patch::scale(std::array<double, 3> scaling)
 {
 	for (auto &vertex : m_vertices) {
-		vertex.scale(scaling);
+		vertex.scale(scaling, m_minPoint);
 	}
 }
 
 /*!
 	Scales the patch.
+
+	The patch is scaled about the lower-left point of the bounding box.
 
 	\param[in] scaling is the scaling factor
 */
