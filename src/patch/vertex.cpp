@@ -201,7 +201,7 @@ void Vertex::translate(const std::array<double, 3> &translation)
  */
 void Vertex::translate(const double &sx, const double &sy, const double &sz)
 {
-	scale({{sx, sy, sz}});
+	translate({{sx, sy, sz}});
 }
 
 /*!
