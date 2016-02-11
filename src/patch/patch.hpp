@@ -213,6 +213,8 @@ protected:
 	bool deleteVertex(const long &id, bool delayed = false);
 	bool deleteVertices(const std::vector<long> &ids, bool delayed = false);
 	bool deleteOrphanVertices();
+	std::vector<long> collapseCoincidentVertices(int nBins = 128);
+	bool deleteCoincidentVertex(int nBins = 128);
 
 	long addInterface(const long &id = Element::NULL_ELEMENT_ID);
 	long addInterface(ElementInfo::Type type, const long &id = Element::NULL_ELEMENT_ID);

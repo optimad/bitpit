@@ -27,6 +27,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
+#include "bitpit_SA.hpp"
+
 #include "patch.hpp"
 #include "utils.hpp"
 
@@ -814,6 +816,111 @@ bool Patch::deleteOrphanVertices()
 
 	std::vector<long> list = findOrphanVertices();
 	deleteVertices(list);
+
+	return true;
+}
+
+/*!
+	Find and collapse coincident vertices. Cell connectivity is
+	automatically updated.
+
+	\param[in] nBins (default = 128) is the number of bins used by
+	bin-sorting algorithm to sort tasselation vertices
+	\result The list of the of the collapsed vertices.
+*/
+std::vector<long> Patch::collapseCoincidentVertices(int nBins)
+{
+	std::vector<long> collapsedVertices;
+	if (!isExpert()) {
+		return collapsedVertices;
+	}
+
+	std::vector<std::vector<std::array<long, 2> > > bins;
+
+	// ====================================================================== //
+	// INITIALIZE LOCAL VARIABLES                                             //
+	// ====================================================================== //
+
+	// Random number generator
+	srand(1223145611);
+
+	// Resize variables
+	bins.resize(nBins * nBins * nBins);
+
+	// ====================================================================== //
+	// SORT VERTICES ON BINS                                                  //
+	// ====================================================================== //
+
+	// Sort vertices
+	std::unordered_map<long, long> bin_index = binSortVertex(nBins);
+
+	// Sort cells
+	std::array<long, 2> binEntry;
+	for (const Cell &cell : m_cells) {
+		int nCellVertices = cell.getVertexCount();
+		for (int j = 0; j < nCellVertices; ++j) {
+			binEntry[0] = cell.get_id();
+			binEntry[1] = j;
+
+			long vertexId = cell.getVertex(j);
+			long binId = bin_index[vertexId];
+			bins[binId].push_back(binEntry);
+		}
+	}
+
+	// Free memory
+	bin_index.clear();
+
+	// ====================================================================== //
+	// COLLAPSE DOUBLE VERTICES                                               //
+	// ====================================================================== //
+	long collapsedVertexId;
+	std::vector<bool> flag(m_nVertices, false);
+	for (auto &bin : bins) {
+		int nBinCells = bin.size();
+		if (nBinCells > 0) {
+			// Randomize vertex insertion
+			std::vector<int> list;
+			utils::extractWithoutReplacement(nBinCells, nBinCells - 1, list);
+
+			// Vertex insertion
+			KdTree<3, Vertex, long> kd(nBinCells);
+			for (int j = 0; j < nBinCells; ++j) {
+				long cellId   = bin[list[j]][0];
+				long k        = bin[list[j]][1];
+				long vertexId = m_cells[cellId].getVertex(k);
+
+				if (kd.exist(&m_vertices[vertexId], collapsedVertexId) >= 0) {
+					m_cells[cellId].setVertex(k, collapsedVertexId);
+					if (!flag[vertexId]) {
+						flag[vertexId] = true;
+						collapsedVertices.push_back(vertexId);
+					}
+				} else {
+					flag[vertexId] = true;
+					kd.insert(&m_vertices[vertexId], vertexId);
+				}
+			}
+		}
+	}
+
+	return collapsedVertices;
+}
+
+/*!
+	Remove coincident vertices from the patch.
+
+	\param[in] nBins (default = 128) is the number of bins used by bin
+	sorting algotrithm to sort patch vertices.
+*/
+bool Patch::deleteCoincidentVertex(int nBins)
+{
+	if (!isExpert()) {
+		return false;
+	}
+
+	std::vector<long> verticesToDelete = collapseCoincidentVertices(nBins);
+	deleteVertices(verticesToDelete);
 
 	return true;
 }
