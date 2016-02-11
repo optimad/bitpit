@@ -100,6 +100,10 @@ public:
 	PiercedVector<Cell> &cells();
 	Cell &getCell(const long &id);
 	const Cell &getCell(const long &id) const;
+	Cell &getLastInternal();
+	const Cell &getLastInternal() const;
+	Cell &getFirstGhost();
+	const Cell &getFirstGhost() const;
 	virtual double evalCellVolume(const long &id) = 0;
 	virtual double evalCellSize(const long &id) = 0;
 	virtual std::array<double, 3> evalCellCentroid(const long &id);

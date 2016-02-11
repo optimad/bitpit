@@ -660,6 +660,46 @@ const Cell & Patch::getCell(const long &id) const
 }
 
 /*!
+	Gets a reference to the last internal cell.
+
+	\return A reference to the last internal cell.
+*/
+Cell & Patch::getLastInternal()
+{
+	return m_cells[m_last_internal_id];
+}
+
+/*!
+	Gets a constant reference to the last internal cell.
+
+	\return A constant reference to the last internal cell.
+*/
+const Cell & Patch::getLastInternal() const
+{
+	return m_cells[m_last_internal_id];
+}
+
+/*!
+	Gets a reference to the first ghost cell.
+
+	\return A reference to the first ghost cell.
+*/
+Cell & Patch::getFirstGhost()
+{
+	return m_cells[m_first_ghost_id];
+}
+
+/*!
+	Gets a constant reference to the first ghost cell.
+
+	\return A constant reference to the first ghost cell.
+*/
+const Cell & Patch::getFirstGhost() const
+{
+	return m_cells[m_first_ghost_id];
+}
+
+/*!
 	Creates a new cell with the specified id.
 
 	\param id is the id of the new cell
