@@ -72,6 +72,9 @@ class FileHandler{
         void                setBlock( int b_) ;
 
         std::string         getPath() ;
+        std::string         getName() const ;
+        std::string         getDirectory() const ;
+        std::string         getAppendix() const ;
 
         void                incrementCounter();
         bool                exists() ;
