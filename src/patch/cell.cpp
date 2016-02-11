@@ -47,6 +47,9 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Cell &c
 	// Write interface data ------------------------------------------------- //
 	buffer >> cell.m_interfaces;
 
+	// Write adjacencies data ----------------------------------------------- //
+	buffer >> cell.m_adjacencies;
+
 	return buffer;
 }
 
@@ -66,6 +69,9 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::
 
 	// Write interface data ------------------------------------------------- //
 	buffer << cell.m_interfaces;
+
+	// Write adjacencies data ----------------------------------------------- //
+	buffer << cell.m_adjacencies;
 
 	return buffer;
 }
@@ -117,8 +123,9 @@ Cell::Cell(const Cell &other)
 Cell & Cell::operator=(const Cell& other)
 {
 	Element::operator=(other);
-	m_interior   = other.m_interior;
-	m_interfaces = other.m_interfaces;
+	m_interior    = other.m_interior;
+	m_interfaces  = other.m_interfaces;
+	m_adjacencies = other.m_adjacencies;
 
 	return (*this);
 }
@@ -140,6 +147,7 @@ void Cell::initialize(ElementInfo::Type type, int nInterfacesPerFace)
 		const ElementInfo &elementInfo = get_info();
 		std::vector<int> interfaceCount(elementInfo.nFaces, nInterfacesPerFace);
 		initializeEmptyInterfaces(interfaceCount);
+		initializeEmptyAdjacencies(interfaceCount);
 	}
 }
 
@@ -285,6 +293,127 @@ const long * Cell::getInterfaces(const int &face) const
 }
 
 /*!
+	Initialize all the adjacencies of the cell.
+
+	\param adjacencies the list of all adjacencies associated to the cell
+*/
+void Cell::initializeAdjacencies(std::vector<std::vector<long>> &adjacencies)
+{
+	m_adjacencies = CollapsedVector2D<long>(adjacencies);
+}
+
+/*!
+	Initialize the data structure that holds the information about the
+	adjacencies.
+
+	\param nAdjacencies An array with the number of adjacencies for each
+	face
+*/
+void Cell::initializeEmptyAdjacencies(const std::vector<int> adjacencyCount)
+{
+	m_adjacencies = CollapsedVector2D<long>(adjacencyCount, NULL_ELEMENT_ID);
+}
+
+/*!
+	Sets the i-th adjacency associated the the given face of the cell.
+
+	\param face the face of the cell
+	\param index the index of the adjacency
+	\param adjacency is the index of the adjacency
+*/
+void Cell::setAdjacency(const int &face, const int &index, const long &adjacency)
+{
+	m_adjacencies.set(face, index, adjacency);
+}
+
+/*!
+	Add an adjacency to the given face of the cell.
+
+	\param face is the face of the cell
+	\param adjacency is the index of the adjacency that will be added
+*/
+void Cell::pushAdjacency(const int &face, const long &adjacency)
+{
+	m_adjacencies.push_back_in_sub_array(face, adjacency);
+}
+
+/*!
+	Deletes the specified adjacency from the adjacencies associate to the
+	given face of the cell.
+
+	\param face the face of the cell
+	\param i is the index of the adjacency to delete
+*/
+void Cell::deleteAdjacency(const int &face, const int &i)
+{
+	m_adjacencies.erase(face, i);
+}
+
+/*!
+	Unsets the adjacencies associated to the cell.
+*/
+void Cell::unsetAdjacencies()
+{
+	m_adjacencies.clear();
+}
+
+/*!
+	Gets the total number of adjacencies of the cell.
+
+	\result The total number of adjacencies of the cell.
+*/
+int Cell::getAdjacencyCount() const
+{
+	return m_adjacencies.sub_arrays_total_size();
+}
+
+/*!
+	Gets the number of adjacencies of the specified face of the cell.
+
+	\param face the face of the cell
+	\result The number of adjacencies of the specified face of the cell.
+*/
+int Cell::getAdjacencyCount(const int &face) const
+{
+	return m_adjacencies.sub_array_size(face);
+}
+
+/*!
+	Gets the i-th adjacency of the specified face of the cell.
+
+	\param face the face of the cell
+	\param index the index of the adjacency to retreive
+	\result The requested adjacency.
+*/
+long Cell::getAdjacency(const int &face, const int &index) const
+{
+	return m_adjacencies.get(face, index);
+}
+
+/*!
+	Gets all the adjacencies of the cell.
+
+	\result The adjacencies of the cell.
+*/
+const long * Cell::getAdjacencies() const
+{
+	return m_adjacencies.get(0);
+}
+
+/*!
+	Gets the adjacencies of the given face of the cell.
+
+	\as getAdjacency(const int &face, const int &index) const
+
+	\param face the face of the cell
+	\result The requested adjacencies
+*/
+const long * Cell::getAdjacencies(const int &face) const
+{
+	return m_adjacencies.get(face);
+}
+
+/*!
 	Displays the cell information to an output stream
 
 	\param[in] out is the output stream
@@ -337,16 +466,16 @@ void Cell::display(std::ostream &out, unsigned short int indent)
 		nn = getInterfaceCount(i);
 		out << "[ ";
 		for (j = 0; j < nn-1; ++j) {
-			out << getInterface(i, j) << ", ";
+			out << getAdjacency(i, j) << ", ";
 		} //next j
-		out << getInterface(i, nn-1) << " ], ";
+		out << getAdjacency(i, nn-1) << " ], ";
 	} //next i
 	nn = getInterfaceCount(nf-1);
 	out << "[ ";
 	for (j = 0; j < nn-1; ++j) {
-		out << getInterface(nf-1, j) << ", ";
+		out << getAdjacency(nf-1, j) << ", ";
 	} //next j
-	out << getInterface(nf-1, nn-1) << " ]";
+	out << getAdjacency(nf-1, nn-1) << " ]";
 	out << " ]" << std::endl;
 }
 
@@ -357,7 +486,7 @@ void Cell::display(std::ostream &out, unsigned short int indent)
 */
 unsigned int Cell::getBinarySize()
 {
-    return (Element::getBinarySize() + m_interfaces.get_binary_size());
+    return (Element::getBinarySize() + m_interfaces.get_binary_size() + m_adjacencies.get_binary_size());
 }
 
 // Explicit instantiation of the Cell containers

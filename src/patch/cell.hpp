@@ -71,6 +71,18 @@ public:
 	const long * getInterfaces() const;
 	const long * getInterfaces(const int &face) const;
 
+	void initializeAdjacencies(std::vector<std::vector<long>> &interfaces);
+	void initializeEmptyAdjacencies(const std::vector<int> interfaceCount);
+	void setAdjacency(const int &face, const int &index, const long &interface);
+	void pushAdjacency(const int &face, const long &interface);
+	void deleteAdjacency(const int &face, const int &i);
+	void unsetAdjacencies();
+	int getAdjacencyCount() const;
+	int getAdjacencyCount(const int &face) const;
+	long getAdjacency(const int &face, const int &index = 0) const;
+	const long * getAdjacencies() const;
+	const long * getAdjacencies(const int &face) const;
+
 	void display(std::ostream &out, unsigned short int indent);
 
 	unsigned int getBinarySize( );
@@ -81,6 +93,7 @@ private:
 	bool m_interior;
 
 	bitpit::CollapsedVector2D<long> m_interfaces;
+	bitpit::CollapsedVector2D<long> m_adjacencies;
 
 };
 

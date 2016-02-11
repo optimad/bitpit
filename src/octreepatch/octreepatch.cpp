@@ -867,6 +867,7 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 	}
 
 	// Add the cells
+	std::vector<std::vector<long>> cellAdjacencies(nCellFaces, std::vector<long>());
 	std::vector<std::vector<long>> cellInterfaces(nCellFaces, std::vector<long>());
 	std::vector<std::vector<bool>> cellInterfacesOwner(nCellFaces, std::vector<bool>());
 	for (OctantInfo &octantInfo : octantInfoList) {
@@ -880,8 +881,9 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 			cellConnect[k] = vertexMap.at(vertexTreeId);
 		}
 
-		// Add interfaces
+		// Cell interfaces and adjacencies
 		for (int k = 0; k < nCellFaces; ++k) {
+			cellAdjacencies[k].clear();
 			cellInterfaces[k].clear();
 			cellInterfacesOwner[k].clear();
 		}
@@ -901,6 +903,14 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 				cellFace = interface.getNeighFace();
 			}
 
+			cellAdjacencies[cellFace].emplace_back();
+			long &cellAdjacencyId = cellAdjacencies[cellFace].back();
+			if (ownsInterface) {
+				cellAdjacencyId = interface.getNeigh();
+			} else {
+				cellAdjacencyId = interface.getOwner();
+			}
+
 			cellInterfaces[cellFace].emplace_back();
 			long &cellInterfaceId = cellInterfaces[cellFace].back();
 			cellInterfaceId = interfaceId;
@@ -909,7 +919,8 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 		}
 
 		// Add cell
-		createCell(octantInfo, cellConnect, cellInterfaces, cellInterfacesOwner);
+		createCell(octantInfo, cellConnect, cellAdjacencies,
+			   cellInterfaces, cellInterfacesOwner);
 	}
 
 	// Done
@@ -1088,6 +1099,7 @@ long OctreePatch::createInterface(uint32_t treeId,
 */
 long OctreePatch::createCell(OctantInfo octantInfo,
                               std::unique_ptr<long[]> &vertices,
+                              std::vector<std::vector<long>> &adjacencies,
                               std::vector<std::vector<long>> &interfaces,
                               std::vector<std::vector<bool>> &interfacesOwner)
 {
@@ -1122,6 +1134,9 @@ long OctreePatch::createCell(OctantInfo octantInfo,
 		}
 	}
 	cell.initializeInterfaces(interfaces);
+
+	// Adjacencies
+	cell.initializeAdjacencies(adjacencies);
 
 	// Update cell to octant mapping
 	if (octantInfo.internal) {

@@ -544,7 +544,7 @@ void CartesianPatch::createInterfacesDirection(const int &direction)
 					interface.setType(ElementInfo::LINE);
 				}
 
-				// Owner
+				// Owner id
 				std::array<int, 3> ownerIJK;
 				for (int n = 0; n < 3; n++) {
 					ownerIJK[n] = counters[n];
@@ -552,7 +552,23 @@ void CartesianPatch::createInterfacesDirection(const int &direction)
 				if (counters[direction] > 0) {
 					ownerIJK[direction] -= 1;
 				}
-				Cell &owner = m_cells[getCellLinearId(ownerIJK)];
+				long ownerId = getCellLinearId(ownerIJK);
+
+				// Neighbour id
+				long neighId;
+				if (counters[direction] != 0 && counters[direction] != interfaceCount1D[direction] - 1) {
+					std::array<int, 3> neighIJK;
+					for (int n = 0; n < 3; n++) {
+						neighIJK[n] = counters[n];
+					}
+
+					neighId = getCellLinearId(neighIJK);
+				} else {
+					neighId = Element::NULL_ELEMENT_ID;
+				}
+
+				// Owner data
+				Cell &owner = m_cells[ownerId];
 
 				int ownerFace = 2 * direction;
 				if (counters[direction] == 0) {
@@ -561,20 +577,17 @@ void CartesianPatch::createInterfacesDirection(const int &direction)
 
 				interface.setOwner(owner.get_id(), ownerFace);
 				owner.setInterface(ownerFace, 0, interface.get_id());
+				owner.setAdjacency(ownerFace, 0, neighId);
 
-				// Neighbour
+				// Neighbour data
 				if (counters[direction] != 0 && counters[direction] != interfaceCount1D[direction] - 1) {
-					std::array<int, 3> neighIJK;
-					for (int n = 0; n < 3; n++) {
-						neighIJK[n] = counters[n];
-					}
-
-					Cell &neigh = m_cells[getCellLinearId(neighIJK)];
+					Cell &neigh = m_cells[neighId];
 
 					int neighFace = 2 * direction + 1;
 
 					interface.setNeigh(neigh.get_id(), neighFace);
 					neigh.setInterface(neighFace, 0, interface.get_id());
+					neigh.setAdjacency(neighFace, 0, ownerId);
 				} else {
 					interface.unsetNeigh();
 				}
