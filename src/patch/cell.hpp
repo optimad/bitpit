@@ -34,6 +34,7 @@
 namespace bitpit {
 	class Cell;
 	class Patch;
+	class Class_PMesh;
 }
 
 bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buf, bitpit::Cell& cell);
@@ -44,6 +45,7 @@ namespace bitpit {
 class Cell : public Element {
 
 friend class Patch;
+friend class Class_PMesh;
 
 friend bitpit::OBinaryStream& (::operator<<) (bitpit::OBinaryStream& buf, const Cell& cell);
 friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream& buf, Cell& cell);
