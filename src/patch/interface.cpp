@@ -22,7 +22,7 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#include <math.h>
+#include <cmath>
 
 #include "bitpit_common.hpp"
 #include "bitpit_operators.hpp"
