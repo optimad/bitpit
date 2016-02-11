@@ -98,6 +98,8 @@ public:
 	Vertex &getVertex(const long &id);
 	const Vertex & getVertex(const long &id) const;
 	const std::array<double, 3> & getVertexCoords(const long &id) const;
+	long countOrphanVertices();
+	std::vector<long> findOrphanVertices();
 
 	VertexIterator vertexBegin();
 	VertexIterator vertexEnd();
@@ -210,6 +212,7 @@ protected:
 	long addVertex(Vertex &&source, long id = Vertex::NULL_VERTEX_ID);
 	bool deleteVertex(const long &id, bool delayed = false);
 	bool deleteVertices(const std::vector<long> &ids, bool delayed = false);
+	bool deleteOrphanVertices();
 
 	long addInterface(const long &id = Element::NULL_ELEMENT_ID);
 	long addInterface(ElementInfo::Type type, const long &id = Element::NULL_ELEMENT_ID);

@@ -25,6 +25,7 @@
 #include <sstream>
 #include <typeinfo>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "patch.hpp"
 #include "utils.hpp"
@@ -743,6 +744,76 @@ bool Patch::deleteVertices(const std::vector<long> &ids, bool delayed)
 	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
 		deleteVertex(*i, delayed);
 	}
+
+	return true;
+}
+
+/*!
+	Count orphan vertices in the mesh.
+
+	An orphan vertex is a vertex not linked by any cells.
+
+	\result The number of orphan vertices.
+*/
+long Patch::countOrphanVertices()
+{
+	std::unordered_set<long> usedVertices;
+	for (const Cell &cell : m_cells) {
+		int nCellVertices = cell.getVertexCount();
+		for (int i = 0; i < nCellVertices; ++i) {
+			usedVertices.insert(cell.getVertex(i));
+		}
+	}
+
+	return (m_nVertices - usedVertices.size());
+}
+
+/*!
+	Find orphan vertices in the patch.
+
+	An orphan vertex is a vertex not linked by any cells.
+
+	\result The list of orphan vertice.
+*/
+std::vector<long> Patch::findOrphanVertices()
+{
+	// Add all the vertices to the list
+	std::unordered_set<long> vertexSet;
+	for (const Vertex &vertex : m_vertices) {
+		vertexSet.insert(vertex.get_id());
+	}
+
+	// Remove used vertices
+	for (const Cell &cell : m_cells) {
+		int nCellVertices = cell.getVertexCount();
+		for (int i = 0; i < nCellVertices; ++i) {
+			vertexSet.erase(cell.getVertex(i));
+		}
+	}
+
+	// Build a list
+	std::vector<long> vertexList;
+	vertexList.reserve(vertexSet.size());
+	for (const long &id : vertexSet) {
+		vertexList.emplace_back();
+		long &lastId = vertexList.back();
+		lastId = id;
+	}
+
+	return vertexList;
+}
+
+/*!
+	Remove orphan vertices
+*/
+bool Patch::deleteOrphanVertices()
+{
+	if (!isExpert()) {
+		return false;
+	}
+
+	std::vector<long> list = findOrphanVertices();
+	deleteVertices(list);
 
 	return true;
 }
