@@ -953,7 +953,7 @@ Element & Element::operator=(const Element& other)
 	m_id   = other.m_id;
 	m_type = other.m_type;
 
-	if (m_connect) {
+	if (other.m_connect) {
 		int nVertices = other.getVertexCount();
 		m_connect = std::unique_ptr<long[]>(new long[nVertices]);
 		std::copy(other.m_connect.get(), other.m_connect.get() + nVertices, m_connect.get());
