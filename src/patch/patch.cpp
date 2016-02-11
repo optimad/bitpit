@@ -1976,7 +1976,7 @@ std::unordered_map<long, long> Patch::binSortVertex(int nBins)
 void Patch::translate(std::array<double, 3> translation)
 {
 	for (auto &vertex : m_vertices) {
-		vertex.translate(translation[0], translation[1], translation[2]);
+		vertex.translate(translation);
 	}
 }
 
@@ -2000,7 +2000,7 @@ void Patch::translate(double sx, double sy, double sz)
 void Patch::scale(std::array<double, 3> scaling)
 {
 	for (auto &vertex : m_vertices) {
-		vertex.scale(scaling[0], scaling[1], scaling[2]);
+		vertex.scale(scaling);
 	}
 }
 
