@@ -73,6 +73,10 @@ public:
 	void resetCells();
 	void resetInterfaces();
 
+	void reserveVertices(size_t nVertices);
+	void reserveCells(size_t nCells);
+	void reserveInterfaces(size_t nInterfaces);
+
 	const std::vector<Adaption::Info> update(bool trackAdaption = true);
 
 	void markCellForRefinement(const long &id);

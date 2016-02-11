@@ -263,6 +263,60 @@ void Patch::resetInterfaces()
 }
 
 /*!
+    Reserve memory for vertex storage.
+
+    If the reserve size is smaller than the number of vertices currently stored
+    within the mesh no action will be taken.
+
+    If instead, the reserve size is greater than the current number of vertices,
+    reserve might cause re-location of the internal container into memory,
+    potentially invalidating pointers and iterators to vertex entities.
+
+    \param[in] nVertices size of memory reserve (in terms of number of
+    vertices).
+*/
+void Patch::reserveVertices(size_t nVertices)
+{
+	m_vertices.reserve(nVertices);
+}
+
+/*!
+	Reserve memory for cell storage.
+
+	If the reserve size is smaller than the number of cells currently stored
+	within the mesh no action will be taken.
+
+	If instead, the reserve size is greater than the current number of cells,
+	reserve might cause re-location of the internal container into memory,
+	potentially invalidating pointers and iterators to cell entities.
+
+	\param[in] nCells is size of memory reserve (in terms of number of cells).
+*/
+void Patch::reserveCells(size_t nCells)
+{
+	m_cells.reserve(nCells);
+}
+
+/*!
+	Reserve memory for interface storage.
+
+	If the reserve size is smaller than the number of interfaces currently
+	stored within the mesh no action will be taken.
+
+	If instead, the reserve size is greater than the current number of
+	interfaces, reserve might cause re-location of the internal container
+	into memory, potentially invalidating pointers and iterators to cell
+	entities.
+
+	\param[in] nCells is size of memory reserve (in terms of number of
+	interfaces).
+*/
+void Patch::reserveInterfaces(size_t nInterfaces)
+{
+	m_interfaces.reserve(nInterfaces);
+}
+
+/*!
 	Writes the mesh to filename specified in input.
 
 	\param filename the filename where the mesh will be written to
