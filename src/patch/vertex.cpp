@@ -208,12 +208,13 @@ void Vertex::translate(const double &sx, const double &sy, const double &sz)
 	Scales the vertex.
 
 	\param[in] scaling is the scaling vector
+	\param[in] center is the center of the scaling
  */
-void Vertex::scale(const std::array<double, 3> &scaling)
+void Vertex::scale(const std::array<double, 3> &scaling, const std::array<double, 3> &center)
 {
-	m_coords[0] *= scaling[0];
-	m_coords[1] *= scaling[1];
-	m_coords[2] *= scaling[2];
+	m_coords[0] = center[0] + scaling[0] * (m_coords[0] - center[0]);
+	m_coords[1] = center[1] + scaling[1] * (m_coords[1] - center[1]);
+	m_coords[2] = center[2] + scaling[2] * (m_coords[2] - center[2]);
 }
 
 /*!
@@ -222,10 +223,14 @@ void Vertex::scale(const std::array<double, 3> &scaling)
 	\param[in] sx scaling factor along x direction
 	\param[in] sy scaling factor along y direction
 	\param[in] sy scaling factor along z direction
+	\param[in] cx is the x coordinate scaling center
+	\param[in] cy is the y coordinate scaling center
+	\param[in] cy is the z coordinate scaling center
  */
-void Vertex::scale(const double &sx, const double &sy, const double &sz)
+void Vertex::scale(const double &sx, const double &sy, const double &sz,
+                   const double &cx, const double &cy, const double &cz)
 {
-	scale({{sx, sy, sz}});
+	scale({{sx, sy, sz}}, {{cx, cy, cz}});
 }
 
 /*!
