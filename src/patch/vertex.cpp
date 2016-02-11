@@ -228,6 +228,28 @@ void Vertex::scale(const double &sx, const double &sy, const double &sz)
 	scale({{sx, sy, sz}});
 }
 
+/*!
+        Display vertex content to output stream in a nicely formatted form
+
+        \param[in,out] out      output stream
+        \param[in]     padding  (default = 0) number of trailing spaces
+*/
+void Vertex::display(std::ostream &out, unsigned int padding)
+{
+    // Local variables
+    std::string         indent(padding, ' ');
+
+    // Display vertex content
+    out << indent << "id:     " << m_id << std::endl;
+    out << indent << "coords: ";
+    for (int i = 0; i < 3; ++i) {
+        out << m_coords[i] << " ";
+    } //next i
+    out << std::endl;
+
+    return;
+}
+
 // Explicit instantiation of the Vertex containers
 template class PiercedVector<Vertex>;
 template class PositionalPiercedVector<Vertex>;

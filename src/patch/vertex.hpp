@@ -75,6 +75,7 @@ public:
 	void translate(const double &sx, const double &sy, const double &sz);
 	void scale(const std::array<double, 3> &scaling);
 	void scale(const double &sx, const double &sy, const double &sz);
+        void display(std::ostream &, unsigned int padding = 0);
 
 	static const long NULL_VERTEX_ID;
 
