@@ -2165,7 +2165,7 @@ void Patch::evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 
 /*!
 	Sort patch vertices on regular bins.
 
-	\param[in] n_bins (default = 128) is the number of bins (on each space
+	\param[in] nBins (default = 128) is the number of bins (on each space
 	direction)
 	\result Returns the bin index associated to each vertex.
 */
