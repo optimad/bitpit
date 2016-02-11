@@ -258,6 +258,8 @@ uint64_t  VTKField::getSize() const{
         return components *nr_elements ; 
     };
 
+    assert(false);
+
 };
 
 /*!
