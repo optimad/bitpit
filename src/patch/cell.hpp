@@ -33,6 +33,7 @@
 
 namespace bitpit {
 	class Cell;
+	class Patch;
 }
 
 bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buf, bitpit::Cell& cell);
@@ -41,6 +42,8 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &buf, const bitpit::Cell
 namespace bitpit {
 
 class Cell : public Element {
+
+friend class Patch;
 
 friend bitpit::OBinaryStream& (::operator<<) (bitpit::OBinaryStream& buf, const Cell& cell);
 friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream& buf, Cell& cell);
@@ -56,7 +59,6 @@ public:
 
 	void initialize(ElementInfo::Type type, int nInterfacesPerFace = 0);
 
-	void setInterior(bool interior);
 	bool isInterior() const;
 	
 	void initializeInterfaces(std::vector<std::vector<long>> &interfaces);
@@ -88,6 +90,7 @@ public:
 	unsigned int getBinarySize( );
 
 protected:
+	void setInterior(bool interior);
 
 private:
 	bool m_interior;

@@ -199,6 +199,9 @@ protected:
 	long addCell(Cell source);
 	long addCell(Cell &&source, long id = Element::NULL_ELEMENT_ID);
 	void deleteCell(const long &id, bool delayed = false);
+	void setCellInternal(const long &id, bool isInternal);
+	CellIterator moveGhost2Internal(const long &id);
+	CellIterator moveInternal2Ghost(const long &id);
 
 	virtual void evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
 

@@ -805,6 +805,103 @@ void Patch::deleteCell(const long &id, bool delayed)
 }
 
 /*!
+	Sets the internal flag of a cell.
+
+	\param[in] id is the index of the cell
+	\param[in] isInternal is the internal flag that will be set
+*/
+void Patch::setCellInternal(const long &id, bool isInternal)
+{
+	if (m_cells[id].isInterior() == isInternal) {
+		return;
+	} else if (isInternal) {
+		moveGhost2Internal(id);
+	} else {
+		moveInternal2Ghost(id);
+	}
+}
+
+/*!
+	Sets the internal flag of a cell.
+
+	\param[in] id is the index of the cell
+	\param[in] isInternal is the internal flag that will be set
+*/
+CellIterator Patch::moveGhost2Internal(const long &id)
+{
+	// If we are moving the last internal cell we can just update the
+	// last internal and first ghost markers. Otherwise the cell needs
+	// to be moved.
+	PiercedVector<Cell>::iterator iterator;
+	if (id == m_last_internal_id) {
+		// Cell iterator
+		iterator = CellIterator(m_cells.raw_begin() + m_cells.raw_index(id));
+
+		// Update markers
+		m_first_ghost_id   = id;
+		m_last_internal_id = m_cells.get_size_marker(m_nInternals - 1, Element::NULL_ELEMENT_ID);
+	} else {
+		// Move the cell
+		iterator = m_cells.move_after(m_last_internal_id, id);
+
+		// Update markers
+		if (m_first_ghost_id < 0) {
+			m_first_ghost_id = id;
+		} else if (m_cells.raw_index(m_first_ghost_id) > m_cells.raw_index(id)) {
+			m_first_ghost_id = id;
+		}
+	}
+	iterator->setInterior(false);
+
+	// Update counters
+	--m_nInternals;
+	++m_nGhosts;
+
+	// Return the iterator to the new position
+	return(iterator);
+}
+
+/*!
+	Sets the internal flag of a cell.
+
+	\param[in] id is the index of the cell
+	\param[in] isInternal is the internal flag that will be set
+*/
+CellIterator Patch::moveInternal2Ghost(const long &id)
+{
+	// If we are moving the first ghost cell we can just update the
+	// last internal and first ghost markers. Otherwise the cell needs
+	// to be moved.
+	PiercedVector<Cell>::iterator iterator;
+	if (id == m_first_ghost_id) {
+		// Cell iterator
+		iterator = CellIterator(m_cells.raw_begin() + m_cells.raw_index(id));
+
+		// Update markers
+		m_last_internal_id = id;
+		m_first_ghost_id   = m_cells.get_size_marker(m_nInternals, -1);
+	} else {
+		// Move cell
+		iterator = m_cells.move_before(m_first_ghost_id, id);
+
+		// Update the id of the last internal cell
+		if (m_last_internal_id < 0) {
+			m_last_internal_id = id;
+		} else if (m_cells.raw_index(m_last_internal_id) < m_cells.raw_index(id)) {
+			m_last_internal_id = id;
+		}
+	}
+	iterator->setInterior(true);
+
+	// Update counters
+	++m_nInternals;
+	--m_nGhosts;
+
+	// Return the iterator to the new position
+	return(iterator);
+}
+
+/*!
 	Extracts the neighbours of all the faces of the specified cell.
 
 	\param id is the id of the cell

@@ -434,14 +434,11 @@ void CartesianPatch::createCells()
 		for (int j = 0; j < m_nCells1D[Vertex::COORD_Y]; j++) {
 			for (int i = 0; i < m_nCells1D[Vertex::COORD_X]; i++) {
 				long id_cell = getCellLinearId(i, j, k);
-				Patch::addCell(id_cell);
+				Patch::addCell(cellType, true, id_cell);
 				Cell &cell = m_cells[id_cell];
 
 				// Initialize the cell
 				cell.initialize(cellType, 1);
-
-				// Interior flag
-				cell.setInterior(true);
 
 				// Connettività
 				cell.setVertex(0, getVertexLinearId(i,     j,     k));
