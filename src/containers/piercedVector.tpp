@@ -406,13 +406,6 @@ public:
 	}
 
 	/*!
-		Move constructor.
-
-		\param other vector with the new contents
-	*/
-	PiercedVector(PiercedVector&& other) = default;
-
-	/*!
 		Constructs a pierced vector with a capacity at least enough
 		to contain n elements.
 
@@ -1483,14 +1476,6 @@ public:
 		m_v[pos].set_id(updatedId);
 		link_id(updatedId, pos, false);
 	}
-
-	/*!
-		Assigns new contents to the vector, replacing its current
-		contents.
-
-		\param other vector with the new contents
-	*/
-	PiercedVector& operator=(PiercedVector&& other) = default;
 
 	/*!
 		Returns a constant reference to the element with the
