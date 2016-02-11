@@ -341,9 +341,14 @@ bool Patch::reserveInterfaces(size_t nInterfaces)
 */
 void Patch::write(std::string filename)
 {
+	std::string oldFilename  = VTKUnstructuredGrid::getName();
+	std::string oldDirectory = VTKUnstructuredGrid::getDirectory();
+
 	VTKUnstructuredGrid::setCodex(VTKFormat::APPENDED);
 	VTKUnstructuredGrid::setNames(".", filename);
 	VTKUnstructuredGrid::write();
+
+	VTKUnstructuredGrid::setNames(oldDirectory, oldFilename);
 }
 
 /*!
