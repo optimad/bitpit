@@ -1,5 +1,7 @@
 template <class T>
 void bitpit::vtk::allocate( T & data, int n){
+    BITPIT_UNUSED(data);
+    BITPIT_UNUSED(n);
     return;
 }
 
