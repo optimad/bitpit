@@ -700,6 +700,66 @@ const Cell & Patch::getFirstGhost() const
 }
 
 /*!
+	Returns iterator pointing to the first cell.
+
+	\result An iterator to the first cell.
+*/
+CellIterator Patch::cellBegin()
+{
+	return m_cells.begin();
+}
+
+/*!
+	Returns iterator pointing to last cell.
+
+	\result An iterator to the last cell.
+*/
+CellIterator Patch::cellEnd()
+{
+	return m_cells.end();
+}
+
+/*!
+	Returns iterator pointing to the first internal cell.
+
+	\result An iterator to the first internal cell.
+*/
+CellIterator Patch::internalBegin()
+{
+	return m_cells.begin();
+}
+
+/*!
+	Returns iterator pointing to the end of the list of internal cells.
+
+	\result An iterator to the end of the list of internal cells.
+*/
+CellIterator Patch::internalEnd()
+{
+	return ++CellIterator(m_cells.raw_begin() + m_cells.raw_index(m_last_internal_id));
+}
+
+/*!
+    Returns iterator to the first ghost cells within the cell list.
+
+    \result An iterator to the first ghost cell.
+*/
+CellIterator Patch::ghostBegin()
+{
+    return CellIterator(m_cells.raw_begin() + m_cells.raw_index(m_first_ghost_id));
+}
+
+/*!
+	Returns iterator to the end of the list of ghost cells.
+
+	\result An iterator to the end of the list of ghost cell.
+*/
+CellIterator Patch::ghostEnd()
+{
+	return m_cells.end();
+}
+
+/*!
 	Creates a new cell with the specified id.
 
 	\param id is the id of the new cell

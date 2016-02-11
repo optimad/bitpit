@@ -117,6 +117,13 @@ public:
 	std::vector<long> extractCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
 	std::vector<long> extractCellVertexNeighs(const long &id, const std::vector<int> &vertices, const std::vector<long> &blackList = std::vector<long>()) const;
 
+	CellIterator cellBegin();
+	CellIterator cellEnd();
+	CellIterator internalBegin();
+	CellIterator internalEnd();
+	CellIterator ghostBegin();
+	CellIterator ghostEnd();
+
 	long getInterfaceCount() const;
 	PiercedVector<Interface> &interfaces();
 	Interface &getInterface(const long &id);
