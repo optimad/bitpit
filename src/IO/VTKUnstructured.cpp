@@ -326,13 +326,13 @@ void VTKUnstructuredGrid::writeFieldData( std::fstream &str, VTKField &field ){
 
         if(field.getName() == "types" && homogeneousType != VTKElementType::UNDEFINED){
             uint8_t type = (uint8_t) homogeneousType ;
-            for( int i=0; i<nr_cells; ++i)
+            for( unsigned int i=0; i<nr_cells; ++i)
                 genericIO::flushBINARY(str, type );
 
         } else if(field.getName() == "offsets" && homogeneousType != VTKElementType::UNDEFINED){
             uint8_t     n = vtk::getNNodeInElement(homogeneousType) ;
             uint64_t    offset(0) ;
-            for( int i=0; i<nr_cells; ++i){
+            for( unsigned int i=0; i<nr_cells; ++i){
                 offset += n ;
                 genericIO::flushBINARY(str, offset );
             }
