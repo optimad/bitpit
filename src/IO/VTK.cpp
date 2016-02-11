@@ -127,6 +127,24 @@ void  VTK::setNames( std::string dir_, std::string name_ ){
 };
 
 /*!
+ * Get the name of the VTK file
+ * @return The name of the VTK file.
+ */
+std::string  VTK::getName() const {
+
+  return fh.getName();
+};
+
+/*!
+ * Get the directory where the VTK file will be saved
+ * @return The directory where the VTK file will be saved.
+ */
+std::string  VTK::getDirectory() const {
+
+  return fh.getDirectory();
+};
+
+/*!
  * Activates output for time series. sets series to true first output index to input
  * @param[in]  c_    first output index
  */

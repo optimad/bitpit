@@ -258,6 +258,9 @@ class VTK{
         void                            setHeaderType( std::string );
         std::string                     getHeaderType(  );
 
+        std::string                     getName(  ) const;
+        std::string                     getDirectory(  ) const;
+
         void                            setNames( std::string , std::string ) ;
         void                            setCounter( int c_=0 ) ;
         void                            setParallel( uint16_t , uint16_t ) ;
