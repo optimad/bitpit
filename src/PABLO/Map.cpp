@@ -2,7 +2,7 @@
 // INCLUDES                                                                            //
 // =================================================================================== //
 #include "Map.hpp"
-#include <math.h>
+#include <cmath>
 
 namespace bitpit {
 
