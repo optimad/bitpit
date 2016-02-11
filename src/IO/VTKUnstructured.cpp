@@ -200,7 +200,7 @@ uint64_t VTKUnstructuredGrid::calcSizeConnectivity( ){
     uint32_t                 nbytes32 ;
     uint64_t                 nbytes64 ;
 
-    str.open( fh.getName( ), std::ios::in ) ;
+    str.open( fh.getPath( ), std::ios::in ) ;
 
     //Read appended data
     //Go to the initial position of the appended section
@@ -216,7 +216,7 @@ uint64_t VTKUnstructuredGrid::calcSizeConnectivity( ){
     str.clear();
 
     //Open in binary for read
-    str.open( fh.getName( ), std::ios::in | std::ios::binary);
+    str.open( fh.getPath( ), std::ios::in | std::ios::binary);
 
     if( geometry[3]->getCodification() == VTKFormat::APPENDED ){
         str.seekg( position_appended) ;
@@ -269,7 +269,7 @@ void VTKUnstructuredGrid::writeMetaData( ){
     std::fstream str ;
     std::string line ; 
 
-    str.open( fh.getName( ), std::ios::out ) ;
+    str.open( fh.getPath( ), std::ios::out ) ;
 
     //Writing XML header
     str << "<?xml version=\"1.0\"?>" << std::endl;
@@ -360,7 +360,7 @@ void VTKUnstructuredGrid::writeCollection( ){
 
     fho.setDirectory(".") ;
 
-    str.open( fhp.getName( ), std::ios::out ) ;
+    str.open( fhp.getPath( ), std::ios::out ) ;
 
     //Writing XML header
     str << "<?xml version=\"1.0\"?>" << std::endl;
@@ -381,7 +381,7 @@ void VTKUnstructuredGrid::writeCollection( ){
 
     for( int i=0; i<nr_procs; i++){
         fho.setBlock(i) ;
-        str << "    <Piece  Source=\"" << fho.getName() <<  "\"/>" << std::endl;
+        str << "    <Piece  Source=\"" << fho.getPath() <<  "\"/>" << std::endl;
     };
 
     str << "  </PUnstructuredGrid>"  << std::endl;
@@ -404,7 +404,7 @@ void VTKUnstructuredGrid::readMetaData( ){
 
     std::fstream::pos_type        position;
 
-    str.open( fh.getName( ), std::ios::in ) ;
+    str.open( fh.getPath( ), std::ios::in ) ;
 
     getline( str, line);
     while( ! bitpit::utils::keywordInString( line, "<VTKFile")){

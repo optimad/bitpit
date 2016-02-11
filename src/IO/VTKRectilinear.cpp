@@ -188,7 +188,7 @@ void VTKRectilinearGrid::readMetaData( ){
     std::array<int,6>             extensions ;
 
 
-    str.open( fh.getName( ), std::ios::in ) ;
+    str.open( fh.getPath( ), std::ios::in ) ;
 
     getline( str, line);
     while( ! bitpit::utils::keywordInString( line, "<VTKFile")){
@@ -239,7 +239,7 @@ void VTKRectilinearGrid::writeMetaData( ){
 
     std::fstream str;
 
-    str.open( fh.getName( ), std::ios::out ) ;
+    str.open( fh.getPath( ), std::ios::out ) ;
 
     //Writing XML header
     str << "<?xml version=\"1.0\"?>" << std::endl;
@@ -305,7 +305,7 @@ void VTKRectilinearGrid::writeCollection( ){
 
     fho.setDirectory(".") ;
 
-    str.open( fhp.getName( ), std::ios::out ) ;
+    str.open( fhp.getPath( ), std::ios::out ) ;
 
     //Writing XML header
     str << "<?xml version=\"1.0\"?>" << std::endl;
@@ -339,7 +339,7 @@ void VTKRectilinearGrid::writeCollection( ){
             << index[0][0] << " " << index[0][1] << " "
             << index[1][0] << " " << index[1][1] << " "
             << index[2][0] << " " << index[2][1] << " "
-            << "\" Source= \"" << fho.getName() << "\"/>" << std::endl;
+            << "\" Source= \"" << fho.getPath() << "\"/>" << std::endl;
     };
 
     str << "  </PRectilinearGrid>"  << std::endl;

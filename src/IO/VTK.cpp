@@ -427,7 +427,7 @@ void VTK::writeData( ){
     int                 length;
     char*               buffer ;
 
-    str.open( fh.getName( ), std::ios::in | std::ios::out ) ;
+    str.open( fh.getPath( ), std::ios::in | std::ios::out ) ;
 
     { // Write Ascii
 
@@ -516,7 +516,7 @@ void VTK::writeData( ){
 
 
         //Reopening in binary mode
-        str.open( fh.getName( ), std::ios::out | std::ios::in | std::ios::binary);
+        str.open( fh.getPath( ), std::ios::out | std::ios::in | std::ios::binary);
         str.seekg( position_insert) ;
 
         //str.open( "data.dat", std::ios::out | std::ios::binary);
@@ -711,7 +711,7 @@ void VTK::readData( ){
     uint32_t                  nbytes32 ;
     uint64_t                  nbytes64 ;
 
-    str.open( fh.getName( ), std::ios::in ) ;
+    str.open( fh.getPath( ), std::ios::in ) ;
 
     //Read appended data
     //Go to the initial position of the appended section
@@ -727,7 +727,7 @@ void VTK::readData( ){
     str.clear();
 
     //Open in binary for read
-    str.open( fh.getName( ), std::ios::in | std::ios::binary);
+    str.open( fh.getPath( ), std::ios::in | std::ios::binary);
 
     //Read appended data
     for( auto & field : data){

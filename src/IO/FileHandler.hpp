@@ -71,7 +71,7 @@ class FileHandler{
         void                setCounter(int c_);
         void                setBlock( int b_) ;
 
-        std::string         getName() ;
+        std::string         getPath() ;
 
         void                incrementCounter();
         bool                exists() ;

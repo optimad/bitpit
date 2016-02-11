@@ -175,7 +175,7 @@ void    FileHandler::incrementCounter(){
  * Composes the filename.
  * @return  complete filename
  */
-std::string  FileHandler::getName(){
+std::string  FileHandler::getPath(){
   std::stringstream filename ;
 
   filename << directory << "/"<<name ;
@@ -192,7 +192,7 @@ std::string  FileHandler::getName(){
  * @return  [true/false] if file exists
  */
 bool   FileHandler::exists() {
-    std::ifstream f( getName() );
+    std::ifstream f( getPath() );
     return f.good() ;
 };
 
