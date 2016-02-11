@@ -1911,7 +1911,7 @@ private:
 				size_type pos;
 				if (fillType == FILL_FRONT) {
 					pos = positions_pop_front(m_holes);
-				} else if (fillType == FILL_BACK) {
+				} else {
 					pos = positions_pop_back(m_holes);
 				}
 
