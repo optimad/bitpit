@@ -70,6 +70,36 @@ bool addToOrderedVector(const T &value, std::vector<T> &list, Comparator compara
 	}
 };
 
+/*!
+	\ingroup commonUtils
+
+	Search a value in an ordered list of unique ids.
+
+	\tparam T is the type of elements contained in the list
+	\tparam Comparator is the type of the binary function used for the
+	comparison of the elements
+
+	\param value is the value to be searched for
+	\param list is the ordered list
+	\param comparator is a binary function that accepts two arguments (the first
+	of the type pointed by ForwardIterator, and the second, always val), and
+	returns a value convertible to bool. The value returned indicates whether
+	the first argument is considered to go before the second. The function
+	shall not modify any of its arguments. This can either be a function
+	pointer or a function object.
+	\result Returns true is the value is in the list, false otherwise.
+*/
+template <typename T, typename Comparator>
+typename std::vector<T>::const_iterator findInOrderedVector(const T &value, const std::vector<T> &list, Comparator comparator)
+{
+	typename std::vector<T>::const_iterator itr = std::lower_bound(list.begin(), list.end(), value, comparator);
+	if (itr == list.end() || *itr != value) {
+		return list.end();
+	}
+
+	return itr;
+};
+
 }
 
 }

@@ -43,9 +43,15 @@ namespace utils {
 template <typename T, typename Comparator = std::less<T> >
 bool addToOrderedVector(const T &value, std::vector<T> &list, Comparator comparator = Comparator());
 
+template <typename T, typename Comparator = std::less<T> >
+typename std::vector<T>::const_iterator findInOrderedVector(const T &value, const std::vector<T> &list, Comparator comparator = Comparator());
+
 #ifndef __BITPIT_UTILS_SRC__
 extern template bool addToOrderedVector<>(const long&, std::vector<long>&, std::less<long>);
 extern template bool addToOrderedVector<>(const unsigned long&, std::vector<unsigned long>&, std::less<unsigned long>);
+
+extern template std::vector<long>::const_iterator findInOrderedVector<>(const long&, const std::vector<long>&, std::less<long>);
+extern template std::vector<unsigned long>::const_iterator findInOrderedVector<>(const unsigned long&, const std::vector<unsigned long>&, std::less<unsigned long>);
 #endif
 
 void extractWithoutReplacement(                                               // Extract integers without replacement
