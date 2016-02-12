@@ -648,7 +648,7 @@ Patch::VertexIterator Patch::vertexEnd()
 
 	\result A new unique id for the vertices.
 */
-long Patch::genereateVertexId()
+long Patch::generateVertexId()
 {
 	if (!isExpert()) {
 		return Vertex::NULL_ID;
@@ -666,7 +666,7 @@ long Patch::genereateVertexId()
 Patch::VertexIterator Patch::createVertex(long id)
 {
 	if (id == Vertex::NULL_ID) {
-		id = genereateVertexId();
+		id = generateVertexId();
 	}
 
 	PiercedVector<Vertex>::iterator iterator = m_vertices.reclaim(id);
@@ -1137,7 +1137,7 @@ Patch::CellIterator Patch::ghostEnd()
 
 	\result A new unique id for the cells.
 */
-long Patch::genereateCellId()
+long Patch::generateCellId()
 {
 	if (!isExpert()) {
 		return Element::NULL_ID;
@@ -1156,7 +1156,7 @@ long Patch::genereateCellId()
 Patch::CellIterator Patch::createCell(bool interior, long id)
 {
 	if (id == Element::NULL_ID) {
-		id = genereateCellId();
+		id = generateCellId();
 	}
 
 	PiercedVector<Cell>::iterator iterator;
@@ -1870,7 +1870,7 @@ Patch::InterfaceIterator Patch::interfaceEnd()
  *
  * \result A new unique id for the interfaces.
  */
-long Patch::genereateInterfaceId()
+long Patch::generateInterfaceId()
 {
 	if (!isExpert()) {
 		return Element::NULL_ID;
@@ -1888,7 +1888,7 @@ long Patch::genereateInterfaceId()
 Patch::InterfaceIterator Patch::createInterface(long id)
 {
 	if (id == Element::NULL_ID) {
-		id = genereateInterfaceId();
+		id = generateInterfaceId();
 	}
 
 	PiercedVector<Interface>::iterator iterator = m_interfaces.reclaim(id);

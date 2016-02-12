@@ -98,7 +98,7 @@ public:
 	Vertex &getVertex(const long &id);
 	const Vertex & getVertex(const long &id) const;
 	const std::array<double, 3> & getVertexCoords(const long &id) const;
-	long genereateVertexId();
+	long generateVertexId();
 	VertexIterator addVertex(const long &id = Vertex::NULL_ID);
 	VertexIterator addVertex(Vertex source);
 	VertexIterator addVertex(Vertex &&source, long id = Vertex::NULL_ID);
@@ -122,7 +122,7 @@ public:
 	const Cell &getLastInternal() const;
 	Cell &getFirstGhost();
 	const Cell &getFirstGhost() const;
-	long genereateCellId();
+	long generateCellId();
 	CellIterator addCell(const long &id = Element::NULL_ID);
 	CellIterator addCell(ElementInfo::Type type, bool interior, const long &id = Element::NULL_ID);
 	CellIterator addCell(Cell source);
@@ -157,7 +157,7 @@ public:
 	PiercedVector<Interface> &interfaces();
 	Interface &getInterface(const long &id);
 	const Interface &getInterface(const long &id) const;
-	long genereateInterfaceId();
+	long generateInterfaceId();
 	InterfaceIterator addInterface(const long &id = Element::NULL_ID);
 	InterfaceIterator addInterface(ElementInfo::Type type, const long &id = Element::NULL_ID);
 	InterfaceIterator addInterface(Interface source);
