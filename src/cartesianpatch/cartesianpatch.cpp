@@ -555,9 +555,10 @@ void CartesianPatch::createInterfacesDirection(const int &direction)
 				for (int n = 0; n < 3; n++) {
 					ownerIJK[n] = counters[n];
 				}
-				if (counters[direction] > 0) {
+				if (counters[direction] == (interfaceCount1D[direction] - 1)) {
 					ownerIJK[direction] -= 1;
 				}
+
 				long ownerId = getCellLinearId(ownerIJK);
 
 				// Neighbour id
@@ -567,6 +568,7 @@ void CartesianPatch::createInterfacesDirection(const int &direction)
 					for (int n = 0; n < 3; n++) {
 						neighIJK[n] = counters[n];
 					}
+					neighIJK[direction] -= 1;
 
 					neighId = getCellLinearId(neighIJK);
 				} else {
