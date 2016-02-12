@@ -1057,15 +1057,15 @@ OctreePatch::FaceInfoSet OctreePatch::removeCells(std::vector<long> &cellIds)
 long OctreePatch::createVertex(uint32_t treeId)
 {
 	// Create the vertex
-	long id = Patch::addVertex();
-	Vertex &vertex = m_vertices[id];
+	VertexIterator vertexIterator = Patch::addVertex();
+	Vertex &vertex = *vertexIterator;
 
 	// Coordinate
 	std::array<double, 3> nodeCoords = m_tree.getNodeCoordinates(treeId);
 	vertex.setCoords(nodeCoords);
 
 	// Done
-	return id;
+	return vertex.get_id();
 }
 
 /*!
@@ -1080,8 +1080,8 @@ long OctreePatch::createInterface(uint32_t treeId,
 	BITPIT_UNUSED(treeId);
 
 	// Create the interface
-	long id = Patch::addInterface();
-	Interface &interface = m_interfaces[id];
+	InterfaceIterator interfaceIterator = Patch::addInterface();
+	Interface &interface = *interfaceIterator;
 
 	// Tipo
 	if (isThreeDimensional()) {
@@ -1098,7 +1098,7 @@ long OctreePatch::createInterface(uint32_t treeId,
 	interface.setNeigh(faces[1].id, faces[1].face);
 
 	// Done
-	return id;
+	return interface.get_id();
 }
 
 /*!
@@ -1120,8 +1120,9 @@ long OctreePatch::createCell(OctantInfo octantInfo,
 		cellType = ElementInfo::PIXEL;
 	}
 
-	long id = Patch::addCell(cellType, octantInfo.internal);
-	Cell &cell = m_cells[id];
+	CellIterator cellIterator = Patch::addCell(cellType, octantInfo.internal);
+	Cell &cell = *cellIterator;
+	long id = cell.get_id();
 
 	// Connectivity
 	cell.setConnect(std::move(vertices));

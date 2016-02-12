@@ -653,7 +653,7 @@ long Patch::genereateVertexId()
 	\param id is the id of the new vertex
 	\return A reference to the newly created vertex.
 */
-Vertex & Patch::createVertex(long id)
+VertexIterator Patch::createVertex(long id)
 {
 	if (id == Vertex::NULL_ID) {
 		id = genereateVertexId();
@@ -662,7 +662,7 @@ Vertex & Patch::createVertex(long id)
 	PiercedVector<Vertex>::iterator iterator = m_vertices.reclaim(id);
 	m_nVertices++;
 
-	return (*iterator);
+	return iterator;
 }
 
 /*!
@@ -672,15 +672,13 @@ Vertex & Patch::createVertex(long id)
 	specified, ad new unique id will be generated
 	\return The id associated to the vertex.
 */
-long Patch::addVertex(const long &id)
+VertexIterator Patch::addVertex(const long &id)
 {
 	if (!isExpert()) {
-		return Vertex::NULL_ID;
+		return vertexEnd();
 	}
 
-	Vertex &vertex = createVertex(id);
-
-	return vertex.get_id();
+	return createVertex(id);
 }
 
 /*!
@@ -689,18 +687,19 @@ long Patch::addVertex(const long &id)
 	\param source is the vertex that will be added
 	\return The id associated to the vertex.
 */
-long Patch::addVertex(Vertex source)
+VertexIterator Patch::addVertex(Vertex source)
 {
 	if (!isExpert()) {
-		return Vertex::NULL_ID;
+		return vertexEnd();
 	}
 
-	Vertex &vertex = createVertex();
+	VertexIterator iterator = createVertex();
+	Vertex &vertex = (*iterator);
 	long id = vertex.get_id();
 	vertex = std::move(source);
 	vertex.set_id(id);
 
-	return id;
+	return iterator;
 }
 
 /*!
@@ -709,22 +708,23 @@ long Patch::addVertex(Vertex source)
 	\param source is the vertex that will be added
 	\return The id associated to the vertex.
 */
-long Patch::addVertex(Vertex &&source, long id)
+VertexIterator Patch::addVertex(Vertex &&source, long id)
 {
 	if (!isExpert()) {
-		return Vertex::NULL_ID;
+		return vertexEnd();
 	}
 
 	if (id == Vertex::NULL_ID) {
 		id = source.get_id();
 	}
 
-	Vertex &vertex = createVertex(std::max(source.get_id(), id));
+	VertexIterator iterator = createVertex(std::max(source.get_id(), id));
+	Vertex &vertex = (*iterator);
 	id = vertex.get_id();
 	vertex = std::move(source);
 	vertex.set_id(id);
 
-	return id;
+	return iterator;
 }
 
 /*!
@@ -1133,7 +1133,7 @@ long Patch::genereateCellId()
 	\param interior is true if the cell is an interior cell, false otherwise
 	\return A reference to the newly created cell.
 */
-Cell & Patch::createCell(bool interior, long id)
+CellIterator Patch::createCell(bool interior, long id)
 {
 	if (id == Element::NULL_ID) {
 		id = genereateCellId();
@@ -1178,7 +1178,7 @@ Cell & Patch::createCell(bool interior, long id)
 		}
 	}
 
-	return (*iterator);
+	return iterator;
 }
 
 /*!
@@ -1190,15 +1190,13 @@ Cell & Patch::createCell(bool interior, long id)
 	specified, ad new unique id will be generated
 	\return The id associated to the cell.
 */
-long Patch::addCell(const long &id)
+CellIterator Patch::addCell(const long &id)
 {
 	if (!isExpert()) {
-		return Element::NULL_ID;
+		return cellEnd();
 	}
 
-	createCell(true, id);
-
-	return id;
+	return createCell(true, id);
 }
 
 /*!
@@ -1211,17 +1209,18 @@ long Patch::addCell(const long &id)
 	specified, ad new unique id will be generated
 	\return The id associated to the cell.
 */
-long Patch::addCell(ElementInfo::Type type, bool interior, const long &id)
+CellIterator Patch::addCell(ElementInfo::Type type, bool interior, const long &id)
 {
 	if (!isExpert()) {
-		return Element::NULL_ID;
+		return cellEnd();
 	}
 
-	Cell &cell = createCell(interior, id);
+	CellIterator iterator = createCell(interior, id);
+	Cell &cell = (*iterator);
 	cell.initialize(type);
 	cell.setInterior(interior);
 
-	return cell.get_id();
+	return iterator;
 }
 
 /*!
@@ -1230,18 +1229,19 @@ long Patch::addCell(ElementInfo::Type type, bool interior, const long &id)
 	\param source is the cell that will be added
 	\return The id associated to the cell.
 */
-long Patch::addCell(Cell source)
+CellIterator Patch::addCell(Cell source)
 {
 	if (!isExpert()) {
-		return Element::NULL_ID;
+		return cellEnd();
 	}
 
-	Cell &cell = createCell(source.isInterior());
+	CellIterator iterator = createCell(source.isInterior());
+	Cell &cell = (*iterator);
 	long id = cell.get_id();
 	cell = std::move(source);
 	cell.set_id(id);
 
-	return id;
+	return iterator;
 }
 
 /*!
@@ -1250,22 +1250,23 @@ long Patch::addCell(Cell source)
 	\param source is the cell that will be added
 	\return The id associated to the cell.
 */
-long Patch::addCell(Cell &&source, long id)
+CellIterator Patch::addCell(Cell &&source, long id)
 {
 	if (!isExpert()) {
-		return Element::NULL_ID;
+		return cellEnd();
 	}
 
 	if (id == Element::NULL_ID) {
 		id = source.get_id();
 	}
 
-	Cell &cell = createCell(source.isInterior(), id);
+	CellIterator iterator = createCell(source.isInterior(), id);
+	Cell &cell = (*iterator);
 	id = cell.get_id();
 	cell = std::move(source);
 	cell.set_id(id);
 
-	return id;
+	return iterator;
 }
 
 /*!
@@ -1858,7 +1859,7 @@ long Patch::genereateInterfaceId()
 	\param id is the id of the new interface
 	\return A reference to the newly created interface.
 */
-Interface & Patch::createInterface(long id)
+InterfaceIterator Patch::createInterface(long id)
 {
 	if (id == Element::NULL_ID) {
 		id = genereateInterfaceId();
@@ -1867,7 +1868,7 @@ Interface & Patch::createInterface(long id)
 	PiercedVector<Interface>::iterator iterator = m_interfaces.reclaim(id);
 	m_nInterfaces++;
 
-	return (*iterator);
+	return iterator;
 }
 
 /*!
@@ -1877,15 +1878,13 @@ Interface & Patch::createInterface(long id)
 	specified, ad new unique id will be generated
 	\return The id associated to the interface.
 */
-long Patch::addInterface(const long &id)
+InterfaceIterator Patch::addInterface(const long &id)
 {
 	if (!isExpert()) {
-		return Element::NULL_ID;
+		return interfaceEnd();
 	}
 
-	Interface &interface = createInterface(id);
-
-	return interface.get_id();
+	return createInterface(id);
 }
 
 /*!
@@ -1896,16 +1895,17 @@ long Patch::addInterface(const long &id)
 	specified, ad new unique id will be generated
 	\return The id associated to the interface.
 */
-long Patch::addInterface(ElementInfo::Type type, const long &id)
+InterfaceIterator Patch::addInterface(ElementInfo::Type type, const long &id)
 {
 	if (!isExpert()) {
-		return Element::NULL_ID;
+		return interfaceEnd();
 	}
 
-	Interface &interface = createInterface(id);
+	InterfaceIterator iterator = createInterface(id);
+	Interface &interface = (*iterator);
 	interface.initialize(type);
 
-	return interface.get_id();
+	return iterator;
 }
 
 /*!
@@ -1914,18 +1914,19 @@ long Patch::addInterface(ElementInfo::Type type, const long &id)
 	\param source is the interface that will be added
 	\return The id associated to the interface.
 */
-long Patch::addInterface(Interface source)
+InterfaceIterator Patch::addInterface(Interface source)
 {
 	if (!isExpert()) {
-		return Element::NULL_ID;
+		return interfaceEnd();
 	}
 
-	Interface &interface = createInterface();
+	InterfaceIterator iterator = createInterface();
+	Interface &interface = (*iterator);
 	long id = interface.get_id();
 	interface = std::move(source);
 	interface.set_id(id);
 
-	return id;
+	return iterator;
 }
 
 /*!
@@ -1936,22 +1937,23 @@ long Patch::addInterface(Interface source)
 	\return The id associated to the interface.
 
 */
-long Patch::addInterface(Interface &&source, long id)
+InterfaceIterator Patch::addInterface(Interface &&source, long id)
 {
 	if (!isExpert()) {
-		return Element::NULL_ID;
+		return interfaceEnd();
 	}
 
 	if (id == Element::NULL_ID) {
 		id = source.get_id();
 	}
 
-	Interface &interface = createInterface(id);
+	InterfaceIterator iterator = createInterface(id);
+	Interface &interface = (*iterator);
 	id = interface.get_id();
 	interface = std::move(source);
 	interface.set_id(id);
 
-	return id;
+	return iterator;
 }
 
 /*!
