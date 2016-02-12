@@ -52,7 +52,7 @@ friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream& buf, Cell& 
 
 public:
 	Cell();
-	Cell(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED, bool interior = false);
+	Cell(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED, bool interior = true);
 
 	Cell(const Cell &other);
 	Cell(Cell&& other) = default;
