@@ -82,13 +82,24 @@ int subtest_001(
 SurfTriPatch                    mesh(0);
 vector<long>                    c_connect{0, 1, 2};
 vector<long>                    g_connect{3, 4, 5};
-Cell                            cell(0, ElementInfo::TRIANGLE);
-Cell                            ghost(0, ElementInfo::TRIANGLE);
+Cell                            cell(0, ElementInfo::TRIANGLE, true);
+Cell                            ghost(0, ElementInfo::TRIANGLE, false);
 vector<long>                    expected;
 vector<bool>                    internal;
 
 // Counters
 int                             i;
+
+// ========================================================================== //
+// INITIALIZE MESH PARAMETERS                                                 //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    // none
+
+    // Enable changes ------------------------------------------------------- //
+    mesh.setExpert(true);
+}
 
 // ========================================================================== //
 // INITIALIZE CELL                                                            //
@@ -121,22 +132,23 @@ int                             i;
     // Insert internal cells (IDX 0-4) -------------------------------------- //
     // cells:  {0,1,2,3,4}
     // ghosts: {}
-    cout << "** Inserting interal cells" << endl;
+    cout << "** Inserting internal cells" << endl;
     for (i = 0; i < N/2; ++i) {
         mesh.addCell(cell);
         expected.push_back(long(i));
         internal.push_back(true);
     } //next i
     for (i = N/2; i < N; ++i) {
-        mesh.addCell(ElementInfo::TRIANGLE, true, c_connect);
+/*TODO: rimuovere*/mesh.addCell(cell);
+/*TODO: ripristinare metodo con connettività*///mesh.addCell(ElementInfo::TRIANGLE, true, mesh.genereateCellId());
         expected.push_back(long(i));
         internal.push_back(true);
     } //next i
 
     // Check cell ordering -------------------------------------------------- //
     i = 0;
-    et = mesh.end();
-    for (it = mesh.begin(); it != et; ++it) {
+    et = mesh.cellEnd();
+    for (it = mesh.cellBegin(); it != et; ++it) {
         if (it->get_id() != expected[i]) return 1;
         if (it->isInterior() != internal[i]) return 1;
         ++i;
@@ -144,8 +156,8 @@ int                             i;
 
     // Display mesh content ------------------------------------------------- //
     cout << "** After inserting internal cells" << endl;
-    et = mesh.end();
-    for (it = mesh.begin(); it != et; ++it) {
+    et = mesh.cellEnd();
+    for (it = mesh.cellBegin(); it != et; ++it) {
         cout << "  cell: " << endl;
         it->display(cout, 4);
     } //next it
@@ -155,20 +167,21 @@ int                             i;
     // ghosts: {5,6,7,8,9}
     cout << "** Inserting ghost cells" << endl;
     for (i = 0; i < N/2; ++i) {
-        mesh.AddGhost(ghost);
+        mesh.addCell(ghost);
         expected.push_back(long(N + i));
         internal.push_back(false);
     } //next i
     for (i = N/2; i < N; ++i) {
-        mesh.AddGhost(ElementInfo::TRIANGLE, false, g_connect);
+/*TODO: rimuovere*/mesh.addCell(ghost);
+/*TODO: ripristinare metodo con connettività*/// mesh.addCell(ElementInfo::TRIANGLE, false, g_connect);
         expected.push_back(long(N + i));
         internal.push_back(false);
     }
 
     // Check cells ordering ------------------------------------------------- //
     i = 0;
-    et = mesh.end();
-    for (it = mesh.begin(); it != et; ++it) {
+    et = mesh.cellEnd();
+    for (it = mesh.cellBegin(); it != et; ++it) {
         if (it->get_id() != expected[i]) return 1;
         if (it->isInterior() != internal[i]) return 1;
         ++i;
@@ -176,174 +189,179 @@ int                             i;
 
     // Display mesh content ------------------------------------------------- //
     cout << "** After inserting ghost cells" << endl;
-    et = mesh.end();
-    for (it = mesh.begin(); it != et; ++it) {
+    et = mesh.cellEnd();
+    for (it = mesh.cellBegin(); it != et; ++it) {
         cout << "  cell: " << endl;
         it->display(cout, 4);
     } //next it
 
 }
 
-// // ========================================================================== //
-// // REMOVE INSERT/CELLS (STEP #2)                                              //
-// // ========================================================================== //
-// {
-//     // Scope variables
-//     Class_PMesh::cell_iterator                  it, et;
-// 
-//     // Remove internal cells
-//     //cells:  {0,1,-1,3,-1}
-//     //ghosts: {-1,-1,7,8,9}
-//     mesh.DeleteCell(4);
-//     mesh.DeleteCell(2);
-//     mesh.DeleteGhost(5);
-//     mesh.DeleteGhost(6);
-//     expected.erase(expected.begin() + 6);
-//     expected.erase(expected.begin() + 5);
-//     expected.erase(expected.begin() + 4);
-//     expected.erase(expected.begin() + 2);
-//     internal.erase(internal.begin() + 6);
-//     internal.erase(internal.begin() + 5);
-//     internal.erase(internal.begin() + 4);
-//     internal.erase(internal.begin() + 2);
-// 
-//     // Check element order
-//     i = 0;
-//     et = mesh.end();
-//     for (it = mesh.begin(); it != et; ++it) {
-//         if (it->get_id() != expected[i]) return 2;
-//         if (it->isInterior() != internal[i]) return 2;
-//         ++i;
-//     } //next it
-// 
-//     // Display mesh
-//     cout << "** After removing internal/ghost cells" << endl;
-//     et = mesh.end();
-//     for (it = mesh.begin(); it != et; ++it) {
-//         cout << "  cell: " << endl;
-//         it->display(cout, 4);
-//     } //next it
-// 
-//     // Remove ghost cells
-//     //cells:  {0,1,12,3,13}
-//     //ghosts: {11,10,7,8,9}
-//     mesh.AddGhost(ElementInfo::TRIANGLE, g_connect);
-//     mesh.AddGhost(ghost);
-//     mesh.AddCell(cell);
-//     mesh.AddCell(ElementInfo::TRIANGLE, c_connect);
-//     expected.insert(expected.begin() + 3, 10);
-//     expected.insert(expected.begin() + 3, 11);
-//     expected.insert(expected.begin() + 2, 12);
-//     expected.insert(expected.begin() + 4, 13);
-//     internal.insert(internal.begin() + 3, false);
-//     internal.insert(internal.begin() + 3, false);
-//     internal.insert(internal.begin() + 2, true);
-//     internal.insert(internal.begin() + 4, true);
-// 
-//     // Check element order
-//     i = 0;
-//     et = mesh.end();
-//     for (it = mesh.begin(); it != et; ++it) {
-//         if (it->get_id() != expected[i]) return 2;
-//         ++i;
-//     } //next it
-// 
-//     cout << "** After inserting internal/ghost cells" << endl;
-//     et = mesh.end();
-//     for (it = mesh.begin(); it != et; ++it) {
-//         cout << "  cell: " << endl;
-//         it->display(cout, 4);
-//     } //next it
-// 
-//     // Remove all internal cells and add 2 ghost cells
-//     //cells:  {}
-//     //ghosts: {14,15,11,10,7,8,9}
-//     mesh.DeleteCell(13);
-//     mesh.DeleteCell(1);
-//     mesh.DeleteCell(12);
-//     mesh.DeleteCell(0);
-//     mesh.DeleteCell(3);
-//     mesh.AddGhost(ghost);
-//     mesh.AddGhost(ElementInfo::TRIANGLE, g_connect);
-//     expected.erase(expected.begin());
-//     expected.erase(expected.begin());
-//     expected.erase(expected.begin());
-//     expected.erase(expected.begin());
-//     expected.erase(expected.begin());
-//     expected.insert(expected.begin(), 15);
-//     expected.insert(expected.begin(), 14);
-//     internal.erase(internal.begin());
-//     internal.erase(internal.begin());
-//     internal.erase(internal.begin());
-//     internal.erase(internal.begin());
-//     internal.erase(internal.begin());
-//     internal.insert(internal.begin(), false);
-//     internal.insert(internal.begin(), false);
-// 
-//     // Check element order
-//     i = 0;
-//     et = mesh.end();
-//     for (it = mesh.begin(); it != et; ++it) {
-//         if (it->get_id() != expected[i]) return 2;
-//         if (it->isInterior() != internal[i]) return 2;
-//         ++i;
-//     } //next it
-// 
-//     cout << "** After erasing all internal cells and inserting 2 new ghosts" << endl;
-//     et = mesh.end();
-//     for (it = mesh.begin(); it != et; ++it) {
-//         cout << "  cell: " << endl;
-//         it->display(cout, 4);
-//     } //next it
-// 
-//     // Remove all ghosts add 2 internal cells
-//     //cells:  {16,17}
-//     //ghosts: {}
-//     mesh.DeleteGhost(14);
-//     mesh.DeleteGhost(10);
-//     mesh.DeleteGhost(11);
-//     mesh.DeleteGhost(15);
-//     mesh.DeleteGhost(9);
-//     mesh.DeleteGhost(7);
-//     mesh.DeleteGhost(8);
-//     mesh.AddCell(cell);
-//     mesh.AddCell(ElementInfo::TRIANGLE, c_connect);
-//     expected.erase(expected.begin());
-//     expected.erase(expected.begin());
-//     expected.erase(expected.begin());
-//     expected.erase(expected.begin());
-//     expected.erase(expected.begin());
-//     expected.erase(expected.begin());
-//     expected.erase(expected.begin());
-//     expected.insert(expected.begin(),17);
-//     expected.insert(expected.begin(),16);
-//     internal.erase(internal.begin());
-//     internal.erase(internal.begin());
-//     internal.erase(internal.begin());
-//     internal.erase(internal.begin());
-//     internal.erase(internal.begin());
-//     internal.erase(internal.begin());
-//     internal.erase(internal.begin());
-//     internal.insert(internal.begin(),true);
-//     internal.insert(internal.begin(),true);
-// 
-//     // Check element order
-//     i = 0;
-//     et = mesh.end();
-//     for (it = mesh.begin(); it != et; ++it) {
-//         if (it->get_id() != expected[i]) return 2;
-//         if (it->isInterior() != internal[i]) return 2;
-//         ++i;
-//     } //next it
-// 
-//     cout << "** After erasing all ghost cells and inserting 2 new internal cells" << endl;
-//     et = mesh.end();
-//     for (it = mesh.begin(); it != et; ++it) {
-//         cout << "  cell: " << endl;
-//         it->display(cout, 4);
-//     } //next it
-// 
-// }
+// ========================================================================== //
+// REMOVE INSERT/CELLS (STEP #2)                                              //
+// ========================================================================== //
+{
+    // Scope variables
+    SurfTriPatch::CellIterator                  it, et;
+
+    // Remove internal cells
+    //cells:  {0,1,-1,3,-1}
+    //ghosts: {-1,-1,7,8,9}
+    mesh.deleteCell(4);
+    mesh.deleteCell(2);
+    mesh.deleteCell(5);
+    mesh.deleteCell(6);
+    cout << "deleting cell done" << endl;
+    expected.erase(expected.begin() + 6);
+    expected.erase(expected.begin() + 5);
+    expected.erase(expected.begin() + 4);
+    expected.erase(expected.begin() + 2);
+    internal.erase(internal.begin() + 6);
+    internal.erase(internal.begin() + 5);
+    internal.erase(internal.begin() + 4);
+    internal.erase(internal.begin() + 2);
+
+    // Check element order
+    i = 0;
+    et = mesh.cellEnd();
+    for (it = mesh.cellBegin(); it != et; ++it) {
+        if (it->get_id() != expected[i]) return 2;
+        if (it->isInterior() != internal[i]) return 2;
+        ++i;
+    } //next it
+
+    // Display mesh
+    cout << "** After removing internal/ghost cells" << endl;
+    et = mesh.cellEnd();
+    for (it = mesh.cellBegin(); it != et; ++it) {
+        cout << "  cell: " << endl;
+        it->display(cout, 4);
+    } //next it
+
+    // Remove ghost cells
+    //cells:  {0,1,12,3,13}
+    //ghosts: {11,10,7,8,9}
+/*TODO: ripristinare metodo con connettività*///mesh.addGhost(ElementInfo::TRIANGLE, g_connect);
+/*TODO: rimuovere*/mesh.addCell(ghost);
+    mesh.addCell(ghost);
+    mesh.addCell(cell);
+/*TODO: ripristinare metodo con connettività*///mesh.addCell(ElementInfo::TRIANGLE, c_connect);
+/*TODO: rimuovere*/mesh.addCell(cell);
+    expected.insert(expected.begin() + 3, 10);
+    expected.insert(expected.begin() + 3, 11);
+    expected.insert(expected.begin() + 2, 12);
+    expected.insert(expected.begin() + 4, 13);
+    internal.insert(internal.begin() + 3, false);
+    internal.insert(internal.begin() + 3, false);
+    internal.insert(internal.begin() + 2, true);
+    internal.insert(internal.begin() + 4, true);
+
+    // Check element order
+    i = 0;
+    et = mesh.cellEnd();
+    for (it = mesh.cellBegin(); it != et; ++it) {
+        if (it->get_id() != expected[i]) return 2;
+        ++i;
+    } //next it
+
+    cout << "** After inserting internal/ghost cells" << endl;
+    et = mesh.cellEnd();
+    for (it = mesh.cellBegin(); it != et; ++it) {
+        cout << "  cell: " << endl;
+        it->display(cout, 4);
+    } //next it
+
+    // Remove all internal cells and add 2 ghost cells
+    //cells:  {}
+    //ghosts: {14,15,11,10,7,8,9}
+    mesh.deleteCell(13);
+    mesh.deleteCell(1);
+    mesh.deleteCell(12);
+    mesh.deleteCell(0);
+    mesh.deleteCell(3);
+    mesh.addCell(ghost);
+/*TODO: ripristinare metodo con connettività*///mesh.AddGhost(ElementInfo::TRIANGLE, g_connect);
+/*TODO: rimuovere*/mesh.addCell(ghost);
+    expected.erase(expected.begin());
+    expected.erase(expected.begin());
+    expected.erase(expected.begin());
+    expected.erase(expected.begin());
+    expected.erase(expected.begin());
+    expected.insert(expected.begin(), 15);
+    expected.insert(expected.begin(), 14);
+    internal.erase(internal.begin());
+    internal.erase(internal.begin());
+    internal.erase(internal.begin());
+    internal.erase(internal.begin());
+    internal.erase(internal.begin());
+    internal.insert(internal.begin(), false);
+    internal.insert(internal.begin(), false);
+
+    // Check element order
+    i = 0;
+    et = mesh.cellEnd();
+    for (it = mesh.cellBegin(); it != et; ++it) {
+        if (it->get_id() != expected[i]) return 2;
+        if (it->isInterior() != internal[i]) return 2;
+        ++i;
+    } //next it
+
+    cout << "** After erasing all internal cells and inserting 2 new ghosts" << endl;
+    et = mesh.cellEnd();
+    for (it = mesh.cellBegin(); it != et; ++it) {
+        cout << "  cell: " << endl;
+        it->display(cout, 4);
+    } //next it
+
+    // Remove all ghosts add 2 internal cells
+    //cells:  {16,17}
+    //ghosts: {}
+    mesh.deleteCell(14);
+    mesh.deleteCell(10);
+    mesh.deleteCell(11);
+    mesh.deleteCell(15);
+    mesh.deleteCell(9);
+    mesh.deleteCell(7);
+    mesh.deleteCell(8);
+    mesh.addCell(cell);
+/*TODO: ripristinare metodo connettività*///mesh.addCell(ElementInfo::TRIANGLE, c_connect);
+/*TODO: rimuovere*/mesh.addCell(cell);
+    expected.erase(expected.begin());
+    expected.erase(expected.begin());
+    expected.erase(expected.begin());
+    expected.erase(expected.begin());
+    expected.erase(expected.begin());
+    expected.erase(expected.begin());
+    expected.erase(expected.begin());
+    expected.insert(expected.begin(),17);
+    expected.insert(expected.begin(),16);
+    internal.erase(internal.begin());
+    internal.erase(internal.begin());
+    internal.erase(internal.begin());
+    internal.erase(internal.begin());
+    internal.erase(internal.begin());
+    internal.erase(internal.begin());
+    internal.erase(internal.begin());
+    internal.insert(internal.begin(),true);
+    internal.insert(internal.begin(),true);
+
+    // Check element order
+    i = 0;
+    et = mesh.cellEnd();
+    for (it = mesh.cellBegin(); it != et; ++it) {
+        if (it->get_id() != expected[i]) return 2;
+        if (it->isInterior() != internal[i]) return 2;
+        ++i;
+    } //next it
+
+    cout << "** After erasing all ghost cells and inserting 2 new internal cells" << endl;
+    et = mesh.cellEnd();
+    for (it = mesh.cellBegin(); it != et; ++it) {
+        cout << "  cell: " << endl;
+        it->display(cout, 4);
+    } //next it
+
+}
 
 return 0; }
 
