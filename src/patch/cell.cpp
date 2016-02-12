@@ -103,8 +103,8 @@ Cell::Cell()
 /*!
 	Creates a new cell.
 */
-Cell::Cell(const long &id, ElementInfo::Type type)
-	: Element(id, type)
+Cell::Cell(const long &id, ElementInfo::Type type, bool interior)
+	: Element(id, type), m_interior(interior)
 {
 
 }
