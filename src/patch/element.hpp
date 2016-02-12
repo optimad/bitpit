@@ -190,6 +190,8 @@ private:
 
 	std::unique_ptr<long[]> m_connect;
 
+	void _initialize(ElementInfo::Type type);
+
 };
 
 extern template class PiercedVector<Element>;

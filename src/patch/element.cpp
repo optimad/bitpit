@@ -38,7 +38,7 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &buffer, bitpit::Element
 {
 	buffer >> element.m_type;
 	buffer >> element.m_id;
-	element.initialize(element.m_type);
+	element._initialize(element.m_type);
 	int nVertices = element.getVertexCount();
 	for (int i = 0; i < nVertices; ++i) {
 	    buffer >> element.m_connect[i];
@@ -924,7 +924,7 @@ const long Element::NULL_ID = std::numeric_limits<long>::min();
 */
 Element::Element()
 {
-	initialize(ElementInfo::UNDEFINED);
+	_initialize(ElementInfo::UNDEFINED);
 
 	set_id(NULL_ID);
 }
@@ -934,7 +934,7 @@ Element::Element()
 */
 Element::Element(const long &id, ElementInfo::Type type)
 {
-	initialize(type);
+	_initialize(type);
 
 	set_id(id);
 }
@@ -970,6 +970,16 @@ Element & Element::operator=(const Element& other)
 	\param type the type of the element
 */
 void Element::initialize(ElementInfo::Type type)
+{
+	_initialize(type);
+}
+
+/*!
+	Internal function to initialize the data structures of the element.
+
+	\param type the type of the element
+*/
+void Element::_initialize(ElementInfo::Type type)
 {
 	setType(type);
 
