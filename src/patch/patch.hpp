@@ -40,10 +40,6 @@
 
 namespace bitpit {
 
-typedef PiercedVector<Vertex>::iterator VertexIterator;
-typedef PiercedVector<Cell>::iterator CellIterator;
-typedef PiercedVector<Interface>::iterator InterfaceIterator;
-
 class IndexGenerator {
 
 public:
@@ -64,6 +60,10 @@ private:
 class Patch : public VTKUnstructuredGrid {
 
 public:
+	typedef PiercedVector<Vertex>::iterator VertexIterator;
+	typedef PiercedVector<Cell>::iterator CellIterator;
+	typedef PiercedVector<Interface>::iterator InterfaceIterator;
+
 	Patch(const int &id, const int &dimension);
 
 	virtual ~Patch();

@@ -618,7 +618,7 @@ const Vertex & Patch::getVertex(const long &id) const
 
 	\result An iterator to the first vertex.
 */
-VertexIterator Patch::vertexBegin()
+Patch::VertexIterator Patch::vertexBegin()
 {
 	return m_vertices.begin();
 }
@@ -628,7 +628,7 @@ VertexIterator Patch::vertexBegin()
 
 	\result An iterator to the last vertex.
 */
-VertexIterator Patch::vertexEnd()
+Patch::VertexIterator Patch::vertexEnd()
 {
 	return m_vertices.end();
 }
@@ -653,7 +653,7 @@ long Patch::genereateVertexId()
 	\param id is the id of the new vertex
 	\return A reference to the newly created vertex.
 */
-VertexIterator Patch::createVertex(long id)
+Patch::VertexIterator Patch::createVertex(long id)
 {
 	if (id == Vertex::NULL_ID) {
 		id = genereateVertexId();
@@ -672,7 +672,7 @@ VertexIterator Patch::createVertex(long id)
 	specified, ad new unique id will be generated
 	\return The id associated to the vertex.
 */
-VertexIterator Patch::addVertex(const long &id)
+Patch::VertexIterator Patch::addVertex(const long &id)
 {
 	if (!isExpert()) {
 		return vertexEnd();
@@ -687,7 +687,7 @@ VertexIterator Patch::addVertex(const long &id)
 	\param source is the vertex that will be added
 	\return The id associated to the vertex.
 */
-VertexIterator Patch::addVertex(Vertex source)
+Patch::VertexIterator Patch::addVertex(Vertex source)
 {
 	if (!isExpert()) {
 		return vertexEnd();
@@ -708,7 +708,7 @@ VertexIterator Patch::addVertex(Vertex source)
 	\param source is the vertex that will be added
 	\return The id associated to the vertex.
 */
-VertexIterator Patch::addVertex(Vertex &&source, long id)
+Patch::VertexIterator Patch::addVertex(Vertex &&source, long id)
 {
 	if (!isExpert()) {
 		return vertexEnd();
@@ -1057,7 +1057,7 @@ const Cell & Patch::getFirstGhost() const
 
 	\result An iterator to the first cell.
 */
-CellIterator Patch::cellBegin()
+Patch::CellIterator Patch::cellBegin()
 {
 	return m_cells.begin();
 }
@@ -1067,7 +1067,7 @@ CellIterator Patch::cellBegin()
 
 	\result An iterator to the last cell.
 */
-CellIterator Patch::cellEnd()
+Patch::CellIterator Patch::cellEnd()
 {
 	return m_cells.end();
 }
@@ -1077,7 +1077,7 @@ CellIterator Patch::cellEnd()
 
 	\result An iterator to the first internal cell.
 */
-CellIterator Patch::internalBegin()
+Patch::CellIterator Patch::internalBegin()
 {
 	return m_cells.begin();
 }
@@ -1087,7 +1087,7 @@ CellIterator Patch::internalBegin()
 
 	\result An iterator to the end of the list of internal cells.
 */
-CellIterator Patch::internalEnd()
+Patch::CellIterator Patch::internalEnd()
 {
 	return ++CellIterator(m_cells.raw_begin() + m_cells.raw_index(m_last_internal_id));
 }
@@ -1097,7 +1097,7 @@ CellIterator Patch::internalEnd()
 
     \result An iterator to the first ghost cell.
 */
-CellIterator Patch::ghostBegin()
+Patch::CellIterator Patch::ghostBegin()
 {
     return CellIterator(m_cells.raw_begin() + m_cells.raw_index(m_first_ghost_id));
 }
@@ -1107,7 +1107,7 @@ CellIterator Patch::ghostBegin()
 
 	\result An iterator to the end of the list of ghost cell.
 */
-CellIterator Patch::ghostEnd()
+Patch::CellIterator Patch::ghostEnd()
 {
 	return m_cells.end();
 }
@@ -1133,7 +1133,7 @@ long Patch::genereateCellId()
 	\param interior is true if the cell is an interior cell, false otherwise
 	\return A reference to the newly created cell.
 */
-CellIterator Patch::createCell(bool interior, long id)
+Patch::CellIterator Patch::createCell(bool interior, long id)
 {
 	if (id == Element::NULL_ID) {
 		id = genereateCellId();
@@ -1190,7 +1190,7 @@ CellIterator Patch::createCell(bool interior, long id)
 	specified, ad new unique id will be generated
 	\return The id associated to the cell.
 */
-CellIterator Patch::addCell(const long &id)
+Patch::CellIterator Patch::addCell(const long &id)
 {
 	if (!isExpert()) {
 		return cellEnd();
@@ -1209,7 +1209,7 @@ CellIterator Patch::addCell(const long &id)
 	specified, ad new unique id will be generated
 	\return The id associated to the cell.
 */
-CellIterator Patch::addCell(ElementInfo::Type type, bool interior, const long &id)
+Patch::CellIterator Patch::addCell(ElementInfo::Type type, bool interior, const long &id)
 {
 	if (!isExpert()) {
 		return cellEnd();
@@ -1229,7 +1229,7 @@ CellIterator Patch::addCell(ElementInfo::Type type, bool interior, const long &i
 	\param source is the cell that will be added
 	\return The id associated to the cell.
 */
-CellIterator Patch::addCell(Cell source)
+Patch::CellIterator Patch::addCell(Cell source)
 {
 	if (!isExpert()) {
 		return cellEnd();
@@ -1250,7 +1250,7 @@ CellIterator Patch::addCell(Cell source)
 	\param source is the cell that will be added
 	\return The id associated to the cell.
 */
-CellIterator Patch::addCell(Cell &&source, long id)
+Patch::CellIterator Patch::addCell(Cell &&source, long id)
 {
 	if (!isExpert()) {
 		return cellEnd();
@@ -1385,7 +1385,7 @@ bool Patch::setCellInternal(const long &id, bool isInternal)
 	\param[in] id is the index of the cell
 	\param[in] isInternal is the internal flag that will be set
 */
-CellIterator Patch::moveGhost2Internal(const long &id)
+Patch::CellIterator Patch::moveGhost2Internal(const long &id)
 {
 	if (!isExpert()) {
 		return m_cells.end();
@@ -1429,7 +1429,7 @@ CellIterator Patch::moveGhost2Internal(const long &id)
 	\param[in] id is the index of the cell
 	\param[in] isInternal is the internal flag that will be set
 */
-CellIterator Patch::moveInternal2Ghost(const long &id)
+Patch::CellIterator Patch::moveInternal2Ghost(const long &id)
 {
 	if (!isExpert()) {
 		return m_cells.end();
@@ -1824,7 +1824,7 @@ const Interface & Patch::getInterface(const long &id) const
 
 	\result An iterator to the first interface.
 */
-InterfaceIterator Patch::interfaceBegin()
+Patch::InterfaceIterator Patch::interfaceBegin()
 {
 	return m_interfaces.begin();
 }
@@ -1834,7 +1834,7 @@ InterfaceIterator Patch::interfaceBegin()
 
 	\result An iterator to the last interface.
 */
-InterfaceIterator Patch::interfaceEnd()
+Patch::InterfaceIterator Patch::interfaceEnd()
 {
 	return m_interfaces.end();
 }
@@ -1859,7 +1859,7 @@ long Patch::genereateInterfaceId()
 	\param id is the id of the new interface
 	\return A reference to the newly created interface.
 */
-InterfaceIterator Patch::createInterface(long id)
+Patch::InterfaceIterator Patch::createInterface(long id)
 {
 	if (id == Element::NULL_ID) {
 		id = genereateInterfaceId();
@@ -1878,7 +1878,7 @@ InterfaceIterator Patch::createInterface(long id)
 	specified, ad new unique id will be generated
 	\return The id associated to the interface.
 */
-InterfaceIterator Patch::addInterface(const long &id)
+Patch::InterfaceIterator Patch::addInterface(const long &id)
 {
 	if (!isExpert()) {
 		return interfaceEnd();
@@ -1895,7 +1895,7 @@ InterfaceIterator Patch::addInterface(const long &id)
 	specified, ad new unique id will be generated
 	\return The id associated to the interface.
 */
-InterfaceIterator Patch::addInterface(ElementInfo::Type type, const long &id)
+Patch::InterfaceIterator Patch::addInterface(ElementInfo::Type type, const long &id)
 {
 	if (!isExpert()) {
 		return interfaceEnd();
@@ -1914,7 +1914,7 @@ InterfaceIterator Patch::addInterface(ElementInfo::Type type, const long &id)
 	\param source is the interface that will be added
 	\return The id associated to the interface.
 */
-InterfaceIterator Patch::addInterface(Interface source)
+Patch::InterfaceIterator Patch::addInterface(Interface source)
 {
 	if (!isExpert()) {
 		return interfaceEnd();
@@ -1937,7 +1937,7 @@ InterfaceIterator Patch::addInterface(Interface source)
 	\return The id associated to the interface.
 
 */
-InterfaceIterator Patch::addInterface(Interface &&source, long id)
+Patch::InterfaceIterator Patch::addInterface(Interface &&source, long id)
 {
 	if (!isExpert()) {
 		return interfaceEnd();
