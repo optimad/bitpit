@@ -144,7 +144,7 @@ void Cell::initialize(ElementInfo::Type type, int nInterfacesPerFace)
 	Element::initialize(type);
 
 	if (type != ElementInfo::UNDEFINED && nInterfacesPerFace >= 1) {
-		const ElementInfo &elementInfo = get_info();
+		const ElementInfo &elementInfo = getInfo();
 		std::vector<int> interfaceCount(elementInfo.nFaces, nInterfacesPerFace);
 		initializeEmptyInterfaces(interfaceCount);
 		initializeEmptyAdjacencies(interfaceCount);

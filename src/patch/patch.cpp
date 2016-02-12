@@ -2183,7 +2183,7 @@ std::array<double, 3> Patch::evalElementCentroid(const Element &element)
 	const int nDimensions = 3;
 
 	const long *elementConnect = element.getConnect();
-	const ElementInfo &elementInfo = element.get_info();
+	const ElementInfo &elementInfo = element.getInfo();
 
 	std::array<double, nDimensions> centroid = {{0., 0., 0.}};
 	for (int i = 0; i < elementInfo.nVertices; ++i) {
@@ -2465,7 +2465,7 @@ const VTKFieldMetaData Patch::getMetaData(std::string name)
 	} else if (name == "connectivity") {
 		long connectSize = 0;
 		for (Cell &cell : m_cells) {
-			connectSize += cell.get_info().nVertices;
+			connectSize += cell.getInfo().nVertices;
 		}
 
 		return VTKFieldMetaData(connectSize, typeid(long));
@@ -2501,7 +2501,7 @@ void Patch::flushData(std::fstream &stream, VTKFormat format, std::string name)
 	} else if (name == "offsets") {
 		int offset = 0;
 		for (Cell &cell : m_cells) {
-			offset += cell.get_info().nVertices;
+			offset += cell.getInfo().nVertices;
 			genericIO::flushBINARY(stream, offset);
 		}
 	} else if (name == "types") {
@@ -2559,7 +2559,7 @@ void Patch::flushData(std::fstream &stream, VTKFormat format, std::string name)
 		}
 	} else if (name == "connectivity") {
 		for (Cell &cell : m_cells) {
-			for (int i = 0; i < cell.get_info().nVertices; ++i) {
+			for (int i = 0; i < cell.getInfo().nVertices; ++i) {
 				genericIO::flushBINARY(stream, vertexMap.at(cell.getVertex(i)));
 			}
 		}

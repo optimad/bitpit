@@ -152,7 +152,7 @@ public:
 
 	void initialize(ElementInfo::Type type);
 
-	const ElementInfo & get_info() const;
+	const ElementInfo & getInfo() const;
 
 	void set_id(const long &id);
 	long get_id() const;

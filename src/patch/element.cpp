@@ -974,7 +974,7 @@ void Element::initialize(ElementInfo::Type type)
 	setType(type);
 
 	if (getType() != ElementInfo::UNDEFINED) {
-		const int &nVertices = get_info().nVertices;
+		const int &nVertices = getInfo().nVertices;
 		setConnect(std::unique_ptr<long[]>(new long[nVertices]));
 	} else {
 		unsetConnect();
@@ -1006,7 +1006,7 @@ long Element::get_id() const
 
 	\result A constant reference to the basic information of the element.
 */
-const ElementInfo & Element::get_info() const
+const ElementInfo & Element::getInfo() const
 {
 	return ElementInfo::getElementInfo(m_type);
 }
