@@ -1245,12 +1245,55 @@ long Patch::addCell(Cell &&source, long id)
 
 	\param id is the id of the cell
 */
-bool Patch::deleteCell(const long &id, bool delayed)
+bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
 {
 	if (!isExpert()) {
 		return false;
 	}
 
+	// Update neighbours
+	if (updateNeighs) {
+		const Cell &cell = m_cells[id];
+		int nCellFaces = m_cells[id].getFaceCount();
+		for (int i = 0; i < nCellFaces; ++i) {
+			int nFaceInterfaces = cell.getInterfaceCount(i);
+			for (int k = 0; k < nFaceInterfaces; ++k) {
+				long interfaceId = cell.getInterface(i,k);
+				Interface &interface = m_interfaces[interfaceId];
+
+				// Update adjacency of the neighbours
+				long neighId = cell.getAdjacency(i,k);
+
+				int neighFace;
+				if (interface.getOwner() == neighId) {
+					neighFace = interface.getOwnerFace();
+				} else {
+					neighFace = interface.getNeighFace();
+				}
+
+				Cell &neigh = m_cells[neighId];
+				if (neigh.getAdjacencyCount(neighFace) == 1) {
+					neigh.setAdjacency(neighFace, 0, Element::NULL_ELEMENT_ID);
+				} else {
+					int adjacenyId = 0;
+					while (neigh.getAdjacency(neighId, adjacenyId) != id) {
+						++adjacenyId;
+					}
+
+					neigh.deleteAdjacency(neighFace, adjacenyId);
+				}
+
+				// Update interface
+				if (interface.getOwner() == id) {
+					interface.unsetOwner();
+				} else {
+					interface.unsetNeigh();
+				}
+			}
+		}
+	}
+
+	// Delete cell
 	bool isInternal = m_cells.at(id).isInterior();
 	m_cells.erase(id, delayed);
 	m_cellIdGenerator.trashId(id);
@@ -1270,7 +1313,7 @@ bool Patch::deleteCell(const long &id, bool delayed)
  *
  * \param ids are the ids of the cells to be deleted
  */
-bool Patch::deleteCells(const std::vector<long> &ids, bool delayed)
+bool Patch::deleteCells(const std::vector<long> &ids, bool updateNeighs, bool delayed)
 {
 	if (!isExpert()) {
 		return false;
@@ -1278,7 +1321,7 @@ bool Patch::deleteCells(const std::vector<long> &ids, bool delayed)
 
 	std::vector<long>::const_iterator end = ids.cend();
 	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
-		deleteCell(*i, delayed);
+		deleteCell(*i, updateNeighs, delayed);
 	}
 
 	return true;

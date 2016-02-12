@@ -1195,7 +1195,7 @@ void OctreePatch::deleteCell(long id)
 	}
 
 	// Delete the cell
-	Patch::deleteCell(id, true);
+	Patch::deleteCell(id, false, true);
 }
 
 /*!
