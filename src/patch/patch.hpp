@@ -108,6 +108,7 @@ public:
 	std::vector<long> collapseCoincidentVertices(int nBins = 128);
 	bool deleteCoincidentVertex(int nBins = 128);
 
+	VertexIterator getVertexIterator(const long &id);
 	VertexIterator vertexBegin();
 	VertexIterator vertexEnd();
 
@@ -144,6 +145,7 @@ public:
 	std::vector<long> findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
 	std::vector<long> findCellVertexNeighs(const long &id, const std::vector<int> &vertices, const std::vector<long> &blackList = std::vector<long>()) const;
 
+	CellIterator getCellIterator(const long &id);
 	CellIterator cellBegin();
 	CellIterator cellEnd();
 	CellIterator internalBegin();
@@ -166,6 +168,7 @@ public:
 	virtual std::array<double, 3> evalInterfaceCentroid(const long &id);
 	virtual std::array<double, 3> evalInterfaceNormal(const long &id) = 0;
 
+	InterfaceIterator getInterfaceIterator(const long &id);
 	InterfaceIterator interfaceBegin();
 	InterfaceIterator interfaceEnd();
 

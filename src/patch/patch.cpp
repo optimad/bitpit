@@ -614,6 +614,16 @@ const Vertex & Patch::getVertex(const long &id) const
 }
 
 /*!
+	Returns an iterator pointing to the specified vertex.
+
+	\result An iterator to the specified vertex.
+*/
+Patch::VertexIterator Patch::getVertexIterator(const long &id)
+{
+	return VertexIterator(m_vertices.raw_begin() + m_vertices.raw_index(id));
+}
+
+/*!
 	Returns iterator pointing to the first vertex.
 
 	\result An iterator to the first vertex.
@@ -1050,6 +1060,16 @@ Cell & Patch::getFirstGhost()
 const Cell & Patch::getFirstGhost() const
 {
 	return m_cells[m_first_ghost_id];
+}
+
+/*!
+	Returns an iterator pointing to the specified cell.
+
+	\result An iterator to the specified cell.
+*/
+Patch::CellIterator Patch::getCellIterator(const long &id)
+{
+	return CellIterator(m_cells.raw_begin() + m_cells.raw_index(id));
 }
 
 /*!
@@ -1813,6 +1833,16 @@ Interface & Patch::getInterface(const long &id)
 const Interface & Patch::getInterface(const long &id) const
 {
 	return m_interfaces[id];
+}
+
+/*!
+	Returns an iterator pointing to the specified interface.
+
+	\result An iterator to the specified interface.
+*/
+Patch::InterfaceIterator Patch::getInterfaceIterator(const long &id)
+{
+	return InterfaceIterator(m_interfaces.raw_begin() + m_interfaces.raw_index(id));
 }
 
 /*!
