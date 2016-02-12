@@ -729,6 +729,25 @@ bool Patch::deleteVertex(const long &id, bool delayed)
 }
 
 /*!
+	Deletes a list of vertices.
+
+	\param ids are the ids of the vertices to be deleted
+*/
+bool Patch::deleteVertices(const std::vector<long> &ids, bool delayed)
+{
+	if (!isExpert()) {
+		return false;
+	}
+
+	std::vector<long>::const_iterator end = ids.cend();
+	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
+		deleteVertex(*i, delayed);
+	}
+
+	return true;
+}
+
+/*!
 	Gets the coordinates of the specified vertex.
 
 	\param is is the id of the vertex
@@ -1063,6 +1082,25 @@ bool Patch::deleteCell(const long &id, bool delayed)
 	} else {
 		m_nGhosts--;
 		m_first_ghost_id = m_cells.get_size_marker(m_nInternals, Element::NULL_ELEMENT_ID);
+	}
+
+	return true;
+}
+
+/*!
+ * Deletes a list of cells.
+ *
+ * \param ids are the ids of the cells to be deleted
+ */
+bool Patch::deleteCells(const std::vector<long> &ids, bool delayed)
+{
+	if (!isExpert()) {
+		return false;
+	}
+
+	std::vector<long>::const_iterator end = ids.cend();
+	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
+		deleteCell(*i, delayed);
 	}
 
 	return true;
@@ -1667,6 +1705,25 @@ bool Patch::deleteInterface(const long &id, bool delayed)
 	m_interfaces.erase(id, delayed);
 	m_interfaceIdGenerator.trashId(id);
 	m_nInterfaces--;
+
+	return true;
+}
+
+/*!
+	Deletes a list of interfaces.
+
+	\param ids are the ids of the interfaces to be deleted
+*/
+bool Patch::deleteInterfaces(const std::vector<long> &ids, bool delayed)
+{
+	if (!isExpert()) {
+		return false;
+	}
+
+	std::vector<long>::const_iterator end = ids.cend();
+	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
+		deleteInterface(*i, delayed);
+	}
 
 	return true;
 }
