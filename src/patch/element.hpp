@@ -79,7 +79,7 @@ public:
 	static const ElementInfo wedgeInfo;
 
 	std::vector<Type> face_type;
-	std::vector<std::vector<int>> face_connect;
+	std::vector<std::vector<int>> faceConnect;
 
 	std::vector<Type> edge_type;
 	std::vector<std::vector<int>> edge_connect;

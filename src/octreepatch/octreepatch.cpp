@@ -715,7 +715,7 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 	const ElementInfo &cellTypeInfo = ElementInfo::getElementInfo(cellType);
 	const int &nCellFaces = cellTypeInfo.nFaces;
 	const int &nCellVertices = cellTypeInfo.nVertices;
-	const std::vector<std::vector<int>> &cellLocalFaceConnect = cellTypeInfo.face_connect;
+	const std::vector<std::vector<int>> &cellLocalFaceConnect = cellTypeInfo.faceConnect;
 
 	// Info on the interfaces
 	ElementInfo::Type interfaceType;
