@@ -98,8 +98,14 @@ public:
 	Vertex &getVertex(const long &id);
 	const Vertex & getVertex(const long &id) const;
 	const std::array<double, 3> & getVertexCoords(const long &id) const;
+	long addVertex(const long &id = Vertex::NULL_VERTEX_ID);
+	long addVertex(Vertex source);
+	long addVertex(Vertex &&source, long id = Vertex::NULL_VERTEX_ID);
 	long countOrphanVertices();
 	std::vector<long> findOrphanVertices();
+	bool deleteOrphanVertices();
+	std::vector<long> collapseCoincidentVertices(int nBins = 128);
+	bool deleteCoincidentVertex(int nBins = 128);
 
 	VertexIterator vertexBegin();
 	VertexIterator vertexEnd();
@@ -114,6 +120,15 @@ public:
 	const Cell &getLastInternal() const;
 	Cell &getFirstGhost();
 	const Cell &getFirstGhost() const;
+	long addCell(const long &id = Element::NULL_ELEMENT_ID);
+	long addCell(ElementInfo::Type type, bool interior, const long &id = Element::NULL_ELEMENT_ID);
+	long addCell(Cell source);
+	long addCell(Cell &&source, long id = Element::NULL_ELEMENT_ID);
+	bool deleteCell(const long &id, bool updateNeighs = true, bool delayed = false);
+	bool deleteCells(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
+	bool setCellInternal(const long &id, bool isInternal);
+	CellIterator moveGhost2Internal(const long &id);
+	CellIterator moveInternal2Ghost(const long &id);
 	virtual double evalCellVolume(const long &id) = 0;
 	virtual double evalCellSize(const long &id) = 0;
 	virtual std::array<double, 3> evalCellCentroid(const long &id);
@@ -138,6 +153,12 @@ public:
 	PiercedVector<Interface> &interfaces();
 	Interface &getInterface(const long &id);
 	const Interface &getInterface(const long &id) const;
+	long addInterface(const long &id = Element::NULL_ELEMENT_ID);
+	long addInterface(ElementInfo::Type type, const long &id = Element::NULL_ELEMENT_ID);
+	long addInterface(Interface source);
+	long addInterface(Interface &&source, long id = Element::NULL_ELEMENT_ID);
+	bool deleteInterface(const long &id, bool updateNeighs = true, bool delayed = false);
+	bool deleteInterfaces(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
 	virtual double evalInterfaceArea(const long &id) = 0;
 	virtual std::array<double, 3> evalInterfaceCentroid(const long &id);
 	virtual std::array<double, 3> evalInterfaceNormal(const long &id) = 0;
@@ -207,31 +228,8 @@ protected:
 	std::array<double, 3> m_minPoint;
 	std::array<double, 3> m_maxPoint;
 
-	long addVertex(const long &id = Vertex::NULL_VERTEX_ID);
-	long addVertex(Vertex source);
-	long addVertex(Vertex &&source, long id = Vertex::NULL_VERTEX_ID);
 	bool deleteVertex(const long &id, bool delayed = false);
 	bool deleteVertices(const std::vector<long> &ids, bool delayed = false);
-	bool deleteOrphanVertices();
-	std::vector<long> collapseCoincidentVertices(int nBins = 128);
-	bool deleteCoincidentVertex(int nBins = 128);
-
-	long addInterface(const long &id = Element::NULL_ELEMENT_ID);
-	long addInterface(ElementInfo::Type type, const long &id = Element::NULL_ELEMENT_ID);
-	long addInterface(Interface source);
-	long addInterface(Interface &&source, long id = Element::NULL_ELEMENT_ID);
-	bool deleteInterface(const long &id, bool updateNeighs = true, bool delayed = false);
-	bool deleteInterfaces(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
-
-	long addCell(const long &id = Element::NULL_ELEMENT_ID);
-	long addCell(ElementInfo::Type type, bool interior, const long &id = Element::NULL_ELEMENT_ID);
-	long addCell(Cell source);
-	long addCell(Cell &&source, long id = Element::NULL_ELEMENT_ID);
-	bool deleteCell(const long &id, bool updateNeighs = true, bool delayed = false);
-	bool deleteCells(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
-	bool setCellInternal(const long &id, bool isInternal);
-	CellIterator moveGhost2Internal(const long &id);
-	CellIterator moveInternal2Ghost(const long &id);
 
 	virtual void evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
 
