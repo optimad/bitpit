@@ -1037,7 +1037,7 @@ OctreePatch::FaceInfoSet OctreePatch::removeCells(std::vector<long> &cellIds)
 		}
 
 		// Add the interface to the list of interfaces to delete
-		Patch::deleteInterface(interfaceId, true);
+		Patch::deleteInterface(interfaceId, false, true);
 	}
 
 	// Delete vertices

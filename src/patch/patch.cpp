@@ -1917,12 +1917,42 @@ long Patch::addInterface(Interface &&source, long id)
 
 	\param id is the id of the interface
 */
-bool Patch::deleteInterface(const long &id, bool delayed)
+bool Patch::deleteInterface(const long &id, bool updateNeighs, bool delayed)
 {
 	if (!isExpert()) {
 		return false;
 	}
 
+	// Update neighbours
+	if (updateNeighs) {
+		Interface &interface = m_interfaces[id];
+
+		// Update owner
+		long ownerId = interface.getOwner();
+		Cell &owner = m_cells[ownerId];
+		int ownerFace = interface.getOwnerFace();
+
+		int ownerInterfaceId = 0;
+		while (owner.getInterface(ownerFace, ownerInterfaceId) != id) {
+			++ownerInterfaceId;
+		}
+		owner.deleteInterface(ownerFace, ownerInterfaceId);
+
+		// Update neighbour
+		long neighId = interface.getNeigh();
+		if (neighId != Element::NULL_ELEMENT_ID) {
+			Cell &neigh = m_cells[neighId];
+			int neighFace = interface.getNeighFace();
+
+			int neighInterfaceId = 0;
+			while (neigh.getInterface(neighFace, neighInterfaceId) != id) {
+				++neighInterfaceId;
+			}
+			neigh.deleteInterface(neighFace, neighInterfaceId);
+		}
+	}
+
+	// Delete interface
 	m_interfaces.erase(id, delayed);
 	m_interfaceIdGenerator.trashId(id);
 	m_nInterfaces--;
@@ -1935,7 +1965,7 @@ bool Patch::deleteInterface(const long &id, bool delayed)
 
 	\param ids are the ids of the interfaces to be deleted
 */
-bool Patch::deleteInterfaces(const std::vector<long> &ids, bool delayed)
+bool Patch::deleteInterfaces(const std::vector<long> &ids, bool updateNeighs, bool delayed)
 {
 	if (!isExpert()) {
 		return false;
@@ -1943,7 +1973,7 @@ bool Patch::deleteInterfaces(const std::vector<long> &ids, bool delayed)
 
 	std::vector<long>::const_iterator end = ids.cend();
 	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
-		deleteInterface(*i, delayed);
+		deleteInterface(*i, updateNeighs, delayed);
 	}
 
 	return true;

@@ -220,8 +220,8 @@ protected:
 	long addInterface(ElementInfo::Type type, const long &id = Element::NULL_ELEMENT_ID);
 	long addInterface(Interface source);
 	long addInterface(Interface &&source, long id = Element::NULL_ELEMENT_ID);
-	bool deleteInterface(const long &id, bool delayed = false);
-	bool deleteInterfaces(const std::vector<long> &ids, bool delayed = false);
+	bool deleteInterface(const long &id, bool updateNeighs = true, bool delayed = false);
+	bool deleteInterfaces(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
 
 	long addCell(const long &id = Element::NULL_ELEMENT_ID);
 	long addCell(ElementInfo::Type type, bool interior, const long &id = Element::NULL_ELEMENT_ID);
