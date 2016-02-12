@@ -76,14 +76,14 @@ namespace bitpit {
 	Vertex is class that defines the vertexs.
 */
 
-const long Vertex::NULL_VERTEX_ID = std::numeric_limits<long>::min();
+const long Vertex::NULL_ID = std::numeric_limits<long>::min();
 
 /*!
 	Default constructor.
 */
 Vertex::Vertex()
 {
-	set_id(NULL_VERTEX_ID);
+	set_id(NULL_ID);
 }
 
 /*!

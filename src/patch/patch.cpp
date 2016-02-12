@@ -641,7 +641,7 @@ VertexIterator Patch::vertexEnd()
 long Patch::genereateVertexId()
 {
 	if (!isExpert()) {
-		return Vertex::NULL_VERTEX_ID;
+		return Vertex::NULL_ID;
 	}
 
 	return m_vertexIdGenerator.generateId();
@@ -655,7 +655,7 @@ long Patch::genereateVertexId()
 */
 Vertex & Patch::createVertex(long id)
 {
-	if (id == Vertex::NULL_VERTEX_ID) {
+	if (id == Vertex::NULL_ID) {
 		id = genereateVertexId();
 	}
 
@@ -675,7 +675,7 @@ Vertex & Patch::createVertex(long id)
 long Patch::addVertex(const long &id)
 {
 	if (!isExpert()) {
-		return Vertex::NULL_VERTEX_ID;
+		return Vertex::NULL_ID;
 	}
 
 	Vertex &vertex = createVertex(id);
@@ -692,7 +692,7 @@ long Patch::addVertex(const long &id)
 long Patch::addVertex(Vertex source)
 {
 	if (!isExpert()) {
-		return Vertex::NULL_VERTEX_ID;
+		return Vertex::NULL_ID;
 	}
 
 	Vertex &vertex = createVertex();
@@ -712,10 +712,10 @@ long Patch::addVertex(Vertex source)
 long Patch::addVertex(Vertex &&source, long id)
 {
 	if (!isExpert()) {
-		return Vertex::NULL_VERTEX_ID;
+		return Vertex::NULL_ID;
 	}
 
-	if (id == Vertex::NULL_VERTEX_ID) {
+	if (id == Vertex::NULL_ID) {
 		id = source.get_id();
 	}
 

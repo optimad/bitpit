@@ -99,9 +99,9 @@ public:
 	const Vertex & getVertex(const long &id) const;
 	const std::array<double, 3> & getVertexCoords(const long &id) const;
 	long genereateVertexId();
-	long addVertex(const long &id = Vertex::NULL_VERTEX_ID);
+	long addVertex(const long &id = Vertex::NULL_ID);
 	long addVertex(Vertex source);
-	long addVertex(Vertex &&source, long id = Vertex::NULL_VERTEX_ID);
+	long addVertex(Vertex &&source, long id = Vertex::NULL_ID);
 	long countOrphanVertices();
 	std::vector<long> findOrphanVertices();
 	bool deleteOrphanVertices();
@@ -257,7 +257,7 @@ private:
 	bool m_hasCustomTolerance;
 	double m_tolerance;
 
-	Vertex & createVertex(long id = Vertex::NULL_VERTEX_ID);
+	Vertex & createVertex(long id = Vertex::NULL_ID);
 	Interface & createInterface(long id = Element::NULL_ID);
 	Cell & createCell(bool interior, long id = Element::NULL_ID);
 

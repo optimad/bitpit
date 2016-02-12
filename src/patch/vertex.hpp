@@ -78,7 +78,7 @@ public:
 	           const double &cx, const double &cy, const double &cz);
         void display(std::ostream &, unsigned int padding = 0);
 
-	static const long NULL_VERTEX_ID;
+	static const long NULL_ID;
 
 private:
 	long m_id;
