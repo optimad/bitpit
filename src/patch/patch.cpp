@@ -1542,24 +1542,15 @@ std::vector<long> Patch::findCellFaceNeighs(const long &id, const int &face, con
 {
 	std::vector<long> neighs;
 	const Cell &cell = getCell(id);
-	for (int i = 0; i < cell.getInterfaceCount(face); ++i) {
-		long interfaceId = cell.getInterface(face, i);
-		const Interface &interface = getInterface(interfaceId);
-		if (interface.isBorder()) {
+	for (int i = 0; i < cell.getAdjacencyCount(face); ++i) {
+		long neighId = cell.getAdjacency(face, i);
+		if (neighId < 0) {
 			continue;
 		}
 
-		long neighId = interface.getNeigh();
-		if (neighId == cell.get_id()) {
-			neighId = interface.getOwner();
+		if (std::find(blackList.begin(), blackList.end(), neighId) == blackList.end()) {
+			utils::addToOrderedVector<long>(neighId, neighs);
 		}
-
-		if (std::find(blackList.begin(), blackList.end(), neighId) != blackList.end()) {
-			continue;
-		}
-
-		// Add the cell to the negihbour list
-		utils::addToOrderedVector<long>(neighId, neighs);
 	}
 
 	return neighs;
@@ -1707,70 +1698,75 @@ std::vector<long> Patch::findCellVertexNeighs(const long &id, const int &vertex,
 */
 std::vector<long> Patch::findCellVertexNeighs(const long &id, const std::vector<int> &vertices, const std::vector<long> &blackList) const
 {
-	std::vector<long> neighs;
+	const Cell &cell = getCell(id);
 
 	int nVerticesToFound = vertices.size();
+	std::vector<long> verticesToFind(nVerticesToFound);
+	for (int k = 0; k < nVerticesToFound; ++k) {
+		verticesToFind[k] = cell.getVertex(vertices[k]);
+	}
 
-	const Cell &cell = getCell(id);
-	const long *cellConnect = cell.getConnect();
-
-	std::vector<long> alreadyScanned;
-	std::vector<long> processingQueue;
-	processingQueue.push_back(cell.get_id());
-	while (!processingQueue.empty()) {
-		// Get a cell to scan and remove it form the list
-		long scanId(processingQueue.back());
-		processingQueue.pop_back();
+	std::vector<long> neighs;
+	std::unordered_set<long> scanQueue;
+	std::unordered_set<long> alreadyScan;
+	scanQueue.insert(cell.get_id());
+	while (!scanQueue.empty()) {
+		// Pop a cell to process
+		long scanId = *(scanQueue.begin());
 		const Cell &scanCell = getCell(scanId);
 
-		// Scan the interfaces of the cell
-		const long *interfaces = scanCell.getInterfaces();
-		for (int i = 0; i < scanCell.getInterfaceCount(); i++) {
-			long interfaceId = interfaces[i];
-			const Interface &interface = getInterface(interfaceId);
+		scanQueue.erase(scanId);
+		alreadyScan.insert(scanId);
 
-			// Neighbour cell assocated to the interface
-			//
-			// Only consider the cells that are not
-			long neighId = interface.getNeigh();
-			if (neighId < 0 || neighId == scanId) {
-				neighId = interface.getOwner();
-			}
+		// Info on the cell
+		const ElementInfo &cellTypeInfo = scanCell.getInfo();
+		const std::vector<std::vector<int>> &cellLocalFaceConnect = cellTypeInfo.faceConnect;
+		const long *scanCellConnect = scanCell.getConnect();
 
-			if (neighId == id) {
-				continue;
-			} else if (std::find(alreadyScanned.begin(), alreadyScanned.end(), neighId) != alreadyScanned.end()) {
-				continue;
-			}
+		// Find the faces that share the vertices
+		std::vector<long> faceList;
+		for (int i = 0; i < scanCell.getFaceCount(); ++i) {
+			// Info on the face
+			ElementInfo::Type faceType = scanCell.getFaceType(i);
+			const ElementInfo &faceTypeInfo = ElementInfo::getElementInfo(faceType);
+			const std::vector<int> &faceLocalConnect = cellLocalFaceConnect[i];
 
-			// Number of vertices owned by the interface
+			// Check if the face shares all the vertices
 			int nCommonVertices = 0;
-			const long *interfaceConnect = interface.getConnect();
-			for (int k = 0; k < interface.getVertexCount(); ++k) {
+			for (int k = 0; k < faceTypeInfo.nVertices; ++k) {
+				long faceVertexId = scanCellConnect[faceLocalConnect[k]];
 				for (int n = 0; n < nVerticesToFound; ++n) {
-					if (interfaceConnect[k] == cellConnect[vertices[n]]) {
+					if (faceVertexId == verticesToFind[n]) {
 						nCommonVertices++;
 						break;
 					}
 				}
-
-				if (nCommonVertices == nVerticesToFound) {
-					break;
-				}
 			}
 
-			// If the interface contains all the requested vertices,
-			// add the neighbour cell of the interface to the list
-			// of cells neighbours.
 			if (nCommonVertices == nVerticesToFound) {
-				if (std::find(blackList.begin(), blackList.end(), neighId) == blackList.end()) {
-					utils::addToOrderedVector<long>(neighId, neighs);
-				}
-				processingQueue.push_back(neighId);
+				faceList.push_back(i);
 			}
+		}
 
-			// The cell has been scanned
-			alreadyScanned.push_back(neighId);
+		// If there are no faces that share the vertices go to the next face
+		if (faceList.empty()) {
+			continue;
+		}
+
+		// Add the current cell to the neighoburs
+		if (scanId != id && std::find(blackList.begin(), blackList.end(), scanId) == blackList.end()) {
+			utils::addToOrderedVector<long>(scanId, neighs);
+		}
+
+		// Add the neighbours of the faces to the scan list
+		for (const long &face : faceList) {
+			int nFaceNeighs = scanCell.getAdjacencyCount(face);
+			for (int k = 0; k < nFaceNeighs; ++k) {
+				long neighId = scanCell.getAdjacency(face, k);
+				if (neighId >= 0 && alreadyScan.count(neighId) == 0) {
+					scanQueue.insert(neighId);
+				}
+			}
 		}
 	}
 
