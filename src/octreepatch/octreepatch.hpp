@@ -92,7 +92,7 @@ private:
 	typedef std::bitset<72> OctantHash;
 
 	struct FaceInfo {
-		FaceInfo() : id(Element::NULL_ELEMENT_ID), face(-1) {};
+		FaceInfo() : id(Element::NULL_ID), face(-1) {};
 		FaceInfo(long _id, int _face) : id(_id), face(_face) {};
 
 		bool operator==(const FaceInfo &other) const

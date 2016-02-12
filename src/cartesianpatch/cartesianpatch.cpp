@@ -570,7 +570,7 @@ void CartesianPatch::createInterfacesDirection(const int &direction)
 
 					neighId = getCellLinearId(neighIJK);
 				} else {
-					neighId = Element::NULL_ELEMENT_ID;
+					neighId = Element::NULL_ID;
 				}
 
 				// Owner data
@@ -709,7 +709,7 @@ bool CartesianPatch::isPointInside(const std::array<double, 3> &point)
 long CartesianPatch::locatePoint(const std::array<double, 3> &point)
 {
 	if (!isPointInside(point)) {
-		return Element::NULL_ELEMENT_ID;
+		return Element::NULL_ID;
 	}
 
 	return getCellLinearId(locatePointCartesian(point));

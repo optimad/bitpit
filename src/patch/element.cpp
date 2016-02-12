@@ -917,7 +917,7 @@ void ElementInfo::initializeWedgeInfo()
 	intefaces.
 */
 
-const long Element::NULL_ELEMENT_ID = std::numeric_limits<long>::min();
+const long Element::NULL_ID = std::numeric_limits<long>::min();
 
 /*!
 	Default constructor.
@@ -926,7 +926,7 @@ Element::Element()
 {
 	initialize(ElementInfo::UNDEFINED);
 
-	set_id(NULL_ELEMENT_ID);
+	set_id(NULL_ID);
 }
 
 /*!

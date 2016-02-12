@@ -190,7 +190,7 @@ void Cell::initializeInterfaces(std::vector<std::vector<long>> &interfaces)
 */
 void Cell::initializeEmptyInterfaces(const std::vector<int> interfaceCount)
 {
-	m_interfaces = CollapsedVector2D<long>(interfaceCount, NULL_ELEMENT_ID);
+	m_interfaces = CollapsedVector2D<long>(interfaceCount, NULL_ID);
 }
 
 /*!
@@ -311,7 +311,7 @@ void Cell::initializeAdjacencies(std::vector<std::vector<long>> &adjacencies)
 */
 void Cell::initializeEmptyAdjacencies(const std::vector<int> adjacencyCount)
 {
-	m_adjacencies = CollapsedVector2D<long>(adjacencyCount, NULL_ELEMENT_ID);
+	m_adjacencies = CollapsedVector2D<long>(adjacencyCount, NULL_ID);
 }
 
 /*!

@@ -122,10 +122,10 @@ public:
 	Cell &getFirstGhost();
 	const Cell &getFirstGhost() const;
 	long genereateCellId();
-	long addCell(const long &id = Element::NULL_ELEMENT_ID);
-	long addCell(ElementInfo::Type type, bool interior, const long &id = Element::NULL_ELEMENT_ID);
+	long addCell(const long &id = Element::NULL_ID);
+	long addCell(ElementInfo::Type type, bool interior, const long &id = Element::NULL_ID);
 	long addCell(Cell source);
-	long addCell(Cell &&source, long id = Element::NULL_ELEMENT_ID);
+	long addCell(Cell &&source, long id = Element::NULL_ID);
 	bool deleteCell(const long &id, bool updateNeighs = true, bool delayed = false);
 	bool deleteCells(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
 	bool setCellInternal(const long &id, bool isInternal);
@@ -156,10 +156,10 @@ public:
 	Interface &getInterface(const long &id);
 	const Interface &getInterface(const long &id) const;
 	long genereateInterfaceId();
-	long addInterface(const long &id = Element::NULL_ELEMENT_ID);
-	long addInterface(ElementInfo::Type type, const long &id = Element::NULL_ELEMENT_ID);
+	long addInterface(const long &id = Element::NULL_ID);
+	long addInterface(ElementInfo::Type type, const long &id = Element::NULL_ID);
 	long addInterface(Interface source);
-	long addInterface(Interface &&source, long id = Element::NULL_ELEMENT_ID);
+	long addInterface(Interface &&source, long id = Element::NULL_ID);
 	bool deleteInterface(const long &id, bool updateNeighs = true, bool delayed = false);
 	bool deleteInterfaces(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
 	virtual double evalInterfaceArea(const long &id) = 0;
@@ -258,8 +258,8 @@ private:
 	double m_tolerance;
 
 	Vertex & createVertex(long id = Vertex::NULL_VERTEX_ID);
-	Interface & createInterface(long id = Element::NULL_ELEMENT_ID);
-	Cell & createCell(bool interior, long id = Element::NULL_ELEMENT_ID);
+	Interface & createInterface(long id = Element::NULL_ID);
+	Cell & createCell(bool interior, long id = Element::NULL_ID);
 
 	void set_id(int id);
 	void setDimension(int dimension);

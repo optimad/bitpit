@@ -280,7 +280,7 @@ void CellFlatMapping::update(const std::vector<Adaption::Info> adaptionData)
 			if (previousNumberingMap.count(previousId) != 0) {
 				previousFlatId = previousNumberingMap.at(previousId);
 			} else {
-				previousFlatId = Element::NULL_ELEMENT_ID;
+				previousFlatId = Element::NULL_ID;
 			}
 		}
 

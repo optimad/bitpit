@@ -240,7 +240,7 @@ void Interface::setOwner(const long &owner, const int &onwerFace)
 */
 void Interface::unsetOwner()
 {
-	m_owner     = Element::NULL_ELEMENT_ID;
+	m_owner     = Element::NULL_ID;
 	m_ownerFace = -1;
 }
 
@@ -280,7 +280,7 @@ void Interface::setNeigh(const long &neigh, const int &onwerFace)
 */
 void Interface::unsetNeigh()
 {
-	m_neigh     = Element::NULL_ELEMENT_ID;
+	m_neigh     = Element::NULL_ID;
 	m_neighFace = -1;
 }
 

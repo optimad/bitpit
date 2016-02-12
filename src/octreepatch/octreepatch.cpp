@@ -227,12 +227,12 @@ long OctreePatch::getOctantId(const OctantInfo &octantInfo) const
 	if (octantInfo.internal) {
 		octantItr = m_octantToCell.find(octantInfo.id);
 		if (octantItr == m_octantToCell.end()) {
-			return Element::NULL_ELEMENT_ID;
+			return Element::NULL_ID;
 		}
 	} else {
 		octantItr = m_ghostToCell.find(octantInfo.id);
 		if (octantItr == m_ghostToCell.end()) {
-			return Element::NULL_ELEMENT_ID;
+			return Element::NULL_ID;
 		}
 	}
 
@@ -811,16 +811,16 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 
 		OctantInfo ownerOctantInfo(owner, true);
 		long ownerId = getOctantId(ownerOctantInfo);
-		if (ownerId == Element::NULL_ELEMENT_ID) {
+		if (ownerId == Element::NULL_ID) {
 			octantTreeInterfaces[ownerOctantInfo.id].push_back(interfaceTreeId);
 			buildInterface = true;
 		}
 
-		long neighId = Element::NULL_ELEMENT_ID;
+		long neighId = Element::NULL_ID;
 		if (!isBoundary) {
 			OctantInfo neighOctantInfo(neigh, !isGhost);
 			neighId = getOctantId(neighOctantInfo);
-			if (neighId == Element::NULL_ELEMENT_ID) {
+			if (neighId == Element::NULL_ID) {
 				octantTreeInterfaces[neighOctantInfo.id].push_back(interfaceTreeId);
 				buildInterface = true;
 			}
@@ -862,7 +862,7 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 		// A boundary interface cannnot be on a dangling face.
 		if (!isBoundary) {
 			FaceInfo *guessDanglingInfo;
-			if (ownerId == Element::NULL_ELEMENT_ID) {
+			if (ownerId == Element::NULL_ID) {
 				guessDanglingInfo = &interfaceFaces[1];
 			} else {
 				guessDanglingInfo = &interfaceFaces[0];
@@ -1279,7 +1279,7 @@ long OctreePatch::locatePoint(const std::array<double, 3> &point)
 {
 	Octant *octant = m_tree.getPointOwner(point);
 	if (m_tree.getPointOwner(point) == nullptr) {
-		return Element::NULL_ELEMENT_ID;
+		return Element::NULL_ID;
 	}
 
 	OctantInfo octantInfo(m_tree.getIdx(octant), true);

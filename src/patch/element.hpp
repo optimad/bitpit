@@ -179,7 +179,7 @@ public:
 	int getVertexCount() const;
 	long getVertex(const int &vertex) const;
 
-	static const long NULL_ELEMENT_ID;
+	static const long NULL_ID;
 
 	unsigned int getBinarySize();
 

@@ -130,8 +130,8 @@ void IndexGenerator::reset()
 */
 Patch::Patch(const int &id, const int &dimension)
 	: m_nVertices(0), m_nInternals(0), m_nGhosts(0), m_nInterfaces(0),
-	  m_last_internal_id(Element::NULL_ELEMENT_ID),
-	  m_first_ghost_id(Element::NULL_ELEMENT_ID),
+	  m_last_internal_id(Element::NULL_ID),
+	  m_first_ghost_id(Element::NULL_ID),
 	  m_dirty(true), m_expert(false), m_hasCustomTolerance(false)
 {
 	set_id(id) ;
@@ -1120,7 +1120,7 @@ CellIterator Patch::ghostEnd()
 long Patch::genereateCellId()
 {
 	if (!isExpert()) {
-		return Element::NULL_ELEMENT_ID;
+		return Element::NULL_ID;
 	}
 
 	return m_cellIdGenerator.generateId();
@@ -1135,7 +1135,7 @@ long Patch::genereateCellId()
 */
 Cell & Patch::createCell(bool interior, long id)
 {
-	if (id == Element::NULL_ELEMENT_ID) {
+	if (id == Element::NULL_ID) {
 		id = genereateCellId();
 	}
 
@@ -1193,7 +1193,7 @@ Cell & Patch::createCell(bool interior, long id)
 long Patch::addCell(const long &id)
 {
 	if (!isExpert()) {
-		return Element::NULL_ELEMENT_ID;
+		return Element::NULL_ID;
 	}
 
 	createCell(true, id);
@@ -1214,7 +1214,7 @@ long Patch::addCell(const long &id)
 long Patch::addCell(ElementInfo::Type type, bool interior, const long &id)
 {
 	if (!isExpert()) {
-		return Element::NULL_ELEMENT_ID;
+		return Element::NULL_ID;
 	}
 
 	Cell &cell = createCell(interior, id);
@@ -1233,7 +1233,7 @@ long Patch::addCell(ElementInfo::Type type, bool interior, const long &id)
 long Patch::addCell(Cell source)
 {
 	if (!isExpert()) {
-		return Element::NULL_ELEMENT_ID;
+		return Element::NULL_ID;
 	}
 
 	Cell &cell = createCell(source.isInterior());
@@ -1253,10 +1253,10 @@ long Patch::addCell(Cell source)
 long Patch::addCell(Cell &&source, long id)
 {
 	if (!isExpert()) {
-		return Element::NULL_ELEMENT_ID;
+		return Element::NULL_ID;
 	}
 
-	if (id == Element::NULL_ELEMENT_ID) {
+	if (id == Element::NULL_ID) {
 		id = source.get_id();
 	}
 
@@ -1301,7 +1301,7 @@ bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
 
 				Cell &neigh = m_cells[neighId];
 				if (neigh.getAdjacencyCount(neighFace) == 1) {
-					neigh.setAdjacency(neighFace, 0, Element::NULL_ELEMENT_ID);
+					neigh.setAdjacency(neighFace, 0, Element::NULL_ID);
 				} else {
 					int adjacenyId = 0;
 					while (neigh.getAdjacency(neighId, adjacenyId) != id) {
@@ -1327,10 +1327,10 @@ bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
 	m_cellIdGenerator.trashId(id);
 	if (isInternal) {
 		m_nInternals--;
-		m_last_internal_id = m_cells.get_size_marker(m_nInternals - 1, Element::NULL_ELEMENT_ID);
+		m_last_internal_id = m_cells.get_size_marker(m_nInternals - 1, Element::NULL_ID);
 	} else {
 		m_nGhosts--;
-		m_first_ghost_id = m_cells.get_size_marker(m_nInternals, Element::NULL_ELEMENT_ID);
+		m_first_ghost_id = m_cells.get_size_marker(m_nInternals, Element::NULL_ID);
 	}
 
 	return true;
@@ -1400,7 +1400,7 @@ CellIterator Patch::moveGhost2Internal(const long &id)
 
 		// Update markers
 		m_first_ghost_id   = id;
-		m_last_internal_id = m_cells.get_size_marker(m_nInternals - 1, Element::NULL_ELEMENT_ID);
+		m_last_internal_id = m_cells.get_size_marker(m_nInternals - 1, Element::NULL_ID);
 	} else {
 		// Move the cell
 		iterator = m_cells.move_after(m_last_internal_id, id);
@@ -1846,7 +1846,7 @@ InterfaceIterator Patch::interfaceEnd()
 long Patch::genereateInterfaceId()
 {
 	if (!isExpert()) {
-		return Element::NULL_ELEMENT_ID;
+		return Element::NULL_ID;
 	}
 
 	return m_interfaceIdGenerator.generateId();
@@ -1860,7 +1860,7 @@ long Patch::genereateInterfaceId()
 */
 Interface & Patch::createInterface(long id)
 {
-	if (id == Element::NULL_ELEMENT_ID) {
+	if (id == Element::NULL_ID) {
 		id = genereateInterfaceId();
 	}
 
@@ -1880,7 +1880,7 @@ Interface & Patch::createInterface(long id)
 long Patch::addInterface(const long &id)
 {
 	if (!isExpert()) {
-		return Element::NULL_ELEMENT_ID;
+		return Element::NULL_ID;
 	}
 
 	Interface &interface = createInterface(id);
@@ -1899,7 +1899,7 @@ long Patch::addInterface(const long &id)
 long Patch::addInterface(ElementInfo::Type type, const long &id)
 {
 	if (!isExpert()) {
-		return Element::NULL_ELEMENT_ID;
+		return Element::NULL_ID;
 	}
 
 	Interface &interface = createInterface(id);
@@ -1917,7 +1917,7 @@ long Patch::addInterface(ElementInfo::Type type, const long &id)
 long Patch::addInterface(Interface source)
 {
 	if (!isExpert()) {
-		return Element::NULL_ELEMENT_ID;
+		return Element::NULL_ID;
 	}
 
 	Interface &interface = createInterface();
@@ -1939,10 +1939,10 @@ long Patch::addInterface(Interface source)
 long Patch::addInterface(Interface &&source, long id)
 {
 	if (!isExpert()) {
-		return Element::NULL_ELEMENT_ID;
+		return Element::NULL_ID;
 	}
 
-	if (id == Element::NULL_ELEMENT_ID) {
+	if (id == Element::NULL_ID) {
 		id = source.get_id();
 	}
 
@@ -1982,7 +1982,7 @@ bool Patch::deleteInterface(const long &id, bool updateNeighs, bool delayed)
 
 		// Update neighbour
 		long neighId = interface.getNeigh();
-		if (neighId != Element::NULL_ELEMENT_ID) {
+		if (neighId != Element::NULL_ID) {
 			Cell &neigh = m_cells[neighId];
 			int neighFace = interface.getNeighFace();
 
