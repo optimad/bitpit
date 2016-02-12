@@ -65,8 +65,8 @@ int main(int argc, char *argv[]) {
 				continue;
 			}
 
-			for (auto neighId : patch_2D->extractCellNeighs(cellId)) {
-				for (auto coarseId : patch_2D->extractCellNeighs(neighId)) {
+			for (auto neighId : patch_2D->findCellNeighs(cellId)) {
+				for (auto coarseId : patch_2D->findCellNeighs(neighId)) {
 					patch_2D->markCellForCoarsening(coarseId);
 				}
 			}
@@ -78,7 +78,7 @@ int main(int argc, char *argv[]) {
 				continue;
 			}
 
-			for (auto neighId : patch_2D->extractCellNeighs(cellId)) {
+			for (auto neighId : patch_2D->findCellNeighs(cellId)) {
 				patch_2D->markCellForRefinement(neighId);
 			}
 		}
@@ -118,8 +118,8 @@ int main(int argc, char *argv[]) {
 				continue;
 			}
 
-			for (auto neighId : patch_3D->extractCellNeighs(cellId)) {
-				for (auto coarseId : patch_3D->extractCellNeighs(neighId)) {
+			for (auto neighId : patch_3D->findCellNeighs(cellId)) {
+				for (auto coarseId : patch_3D->findCellNeighs(neighId)) {
 					patch_3D->markCellForCoarsening(coarseId);
 				}
 			}
@@ -131,7 +131,7 @@ int main(int argc, char *argv[]) {
 				continue;
 			}
 
-			for (auto neighId : patch_3D->extractCellNeighs(cellId)) {
+			for (auto neighId : patch_3D->findCellNeighs(cellId)) {
 				patch_3D->markCellForRefinement(neighId);
 			}
 		}

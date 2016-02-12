@@ -117,15 +117,15 @@ public:
 	virtual double evalCellVolume(const long &id) = 0;
 	virtual double evalCellSize(const long &id) = 0;
 	virtual std::array<double, 3> evalCellCentroid(const long &id);
-	std::vector<long> extractCellNeighs(const long &id) const;
-	std::vector<long> extractCellNeighs(const long &id, int codimension, bool complete = true) const;
-	std::vector<long> extractCellFaceNeighs(const long &id) const;
-	std::vector<long> extractCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList = std::vector<long>()) const;
-	std::vector<long> extractCellEdgeNeighs(const long &id, bool complete = true) const;
-	std::vector<long> extractCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList = std::vector<long>()) const;
-	std::vector<long> extractCellVertexNeighs(const long &id, bool complete = true) const;
-	std::vector<long> extractCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
-	std::vector<long> extractCellVertexNeighs(const long &id, const std::vector<int> &vertices, const std::vector<long> &blackList = std::vector<long>()) const;
+	std::vector<long> findCellNeighs(const long &id) const;
+	std::vector<long> findCellNeighs(const long &id, int codimension, bool complete = true) const;
+	std::vector<long> findCellFaceNeighs(const long &id) const;
+	std::vector<long> findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList = std::vector<long>()) const;
+	std::vector<long> findCellEdgeNeighs(const long &id, bool complete = true) const;
+	std::vector<long> findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList = std::vector<long>()) const;
+	std::vector<long> findCellVertexNeighs(const long &id, bool complete = true) const;
+	std::vector<long> findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
+	std::vector<long> findCellVertexNeighs(const long &id, const std::vector<int> &vertices, const std::vector<long> &blackList = std::vector<long>()) const;
 
 	CellIterator cellBegin();
 	CellIterator cellEnd();

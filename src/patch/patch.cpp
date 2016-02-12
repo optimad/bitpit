@@ -1444,12 +1444,12 @@ CellIterator Patch::moveInternal2Ghost(const long &id)
 	\param id is the id of the cell
 	\result The neighbours of all the faces of the specified cell.
 */
-std::vector<long> Patch::extractCellFaceNeighs(const long &id) const
+std::vector<long> Patch::findCellFaceNeighs(const long &id) const
 {
 	std::vector<long> neighs;
 	const Cell &cell = getCell(id);
 	for (int i = 0; i < cell.getFaceCount(); ++i) {
-		std::vector<long> faceNeighs = extractCellFaceNeighs(id, i);
+		std::vector<long> faceNeighs = findCellFaceNeighs(id, i);
 		for (auto &neighId : faceNeighs) {
 			utils::addToOrderedVector<long>(neighId, neighs);
 		}
@@ -1464,9 +1464,9 @@ std::vector<long> Patch::extractCellFaceNeighs(const long &id) const
 	\param id is the id of the cell
 	\result All the neighbours of the specified cell.
 */
-std::vector<long> Patch::extractCellNeighs(const long &id) const
+std::vector<long> Patch::findCellNeighs(const long &id) const
 {
-	return extractCellVertexNeighs(id);
+	return findCellVertexNeighs(id);
 }
 
 /*!
@@ -1486,16 +1486,16 @@ std::vector<long> Patch::extractCellNeighs(const long &id) const
 	also the neighbours for lower codimensions.
 	\result The neighbours for the specified codimension.
 */
-std::vector<long> Patch::extractCellNeighs(const long &id, int codimension, bool complete) const
+std::vector<long> Patch::findCellNeighs(const long &id, int codimension, bool complete) const
 {
 	assert(codimension >= 1 && codimension <= getDimension());
 
 	if (codimension == 1) {
-		return extractCellFaceNeighs(id);
+		return findCellFaceNeighs(id);
 	} else if (codimension == getDimension()) {
-		return extractCellVertexNeighs(id, complete);
+		return findCellVertexNeighs(id, complete);
 	} else if (codimension == 2) {
-		return extractCellEdgeNeighs(id, complete);
+		return findCellEdgeNeighs(id, complete);
 	} else {
 		return std::vector<long>();
 	}
@@ -1509,7 +1509,7 @@ std::vector<long> Patch::extractCellNeighs(const long &id, int codimension, bool
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the specified cell for the given face.
 */
-std::vector<long> Patch::extractCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList) const
+std::vector<long> Patch::findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList) const
 {
 	std::vector<long> neighs;
 	const Cell &cell = getCell(id);
@@ -1547,7 +1547,7 @@ std::vector<long> Patch::extractCellFaceNeighs(const long &id, const int &face, 
 	contain also neighbours that share an entire face
 	\result The neighbours of all the edges of the specified cell.
 */
-std::vector<long> Patch::extractCellEdgeNeighs(const long &id, bool complete) const
+std::vector<long> Patch::findCellEdgeNeighs(const long &id, bool complete) const
 {
 	assert(isThreeDimensional());
 	if (!isThreeDimensional()) {
@@ -1556,13 +1556,13 @@ std::vector<long> Patch::extractCellEdgeNeighs(const long &id, bool complete) co
 
 	std::vector<long> blackList;
 	if (!complete) {
-		blackList = extractCellFaceNeighs(id);
+		blackList = findCellFaceNeighs(id);
 	}
 
 	std::vector<long> neighs;
 	const Cell &cell = getCell(id);
 	for (int i = 0; i < cell.getEdgeCount(); ++i) {
-		for (auto &neigh : extractCellEdgeNeighs(id, i, blackList)) {
+		for (auto &neigh : findCellEdgeNeighs(id, i, blackList)) {
 			utils::addToOrderedVector<long>(neigh, neighs);
 		}
 	}
@@ -1580,7 +1580,7 @@ std::vector<long> Patch::extractCellEdgeNeighs(const long &id, bool complete) co
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the specified cell for the given edge.
 */
-std::vector<long> Patch::extractCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList) const
+std::vector<long> Patch::findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList) const
 {
 	assert(isThreeDimensional());
 	if (!isThreeDimensional()) {
@@ -1590,7 +1590,7 @@ std::vector<long> Patch::extractCellEdgeNeighs(const long &id, const int &edge, 
 	const Cell &cell = getCell(id);
 	std::vector<int> vertices = cell.getEdgeLocalConnect(edge);
 
-	return extractCellVertexNeighs(id, vertices, blackList);
+	return findCellVertexNeighs(id, vertices, blackList);
 }
 
 /*!
@@ -1602,21 +1602,21 @@ std::vector<long> Patch::extractCellEdgeNeighs(const long &id, const int &edge, 
 	contain also neighbours that share an entire face or an entire edge
 	\result The neighbours of all the vertices of the specified cell.
 */
-std::vector<long> Patch::extractCellVertexNeighs(const long &id, bool complete) const
+std::vector<long> Patch::findCellVertexNeighs(const long &id, bool complete) const
 {
 	std::vector<long> blackList;
 	if (!complete) {
 		if (isThreeDimensional()) {
-			blackList = extractCellEdgeNeighs(id);
+			blackList = findCellEdgeNeighs(id);
 		} else {
-			blackList = extractCellFaceNeighs(id);
+			blackList = findCellFaceNeighs(id);
 		}
 	}
 
 	std::vector<long> neighs;
 	const Cell &cell = getCell(id);
 	for (int i = 0; i < cell.getVertexCount(); ++i) {
-		for (auto &neigh : extractCellVertexNeighs(id, i, blackList)) {
+		for (auto &neigh : findCellVertexNeighs(id, i, blackList)) {
 			utils::addToOrderedVector<long>(neigh, neighs);
 		}
 	}
@@ -1646,12 +1646,12 @@ std::vector<long> Patch::extractCellVertexNeighs(const long &id, bool complete) 
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the specified cell for the given vertex.
 */
-std::vector<long> Patch::extractCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList) const
+std::vector<long> Patch::findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList) const
 {
 	std::vector<int> vertexList(1);
 	vertexList[0] = vertex;
 
-	return extractCellVertexNeighs(id, vertexList, blackList);
+	return findCellVertexNeighs(id, vertexList, blackList);
 }
 
 /*!
@@ -1676,7 +1676,7 @@ std::vector<long> Patch::extractCellVertexNeighs(const long &id, const int &vert
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the specified cell for the given vertices.
 */
-std::vector<long> Patch::extractCellVertexNeighs(const long &id, const std::vector<int> &vertices, const std::vector<long> &blackList) const
+std::vector<long> Patch::findCellVertexNeighs(const long &id, const std::vector<int> &vertices, const std::vector<long> &blackList) const
 {
 	std::vector<long> neighs;
 
