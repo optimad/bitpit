@@ -284,9 +284,9 @@ void ElementInfo::initializeVertexInfo()
 	edge_type = std::vector<Type>(nEdges);
 	edge_type[0] = VERTEX;
 
-	edge_connect = std::vector<std::vector<int>>(nEdges);
-	edge_connect[0] = std::vector<int>(nVertices);
-	edge_connect[0][0] = 0;
+	edgeConnect = std::vector<std::vector<int>>(nEdges);
+	edgeConnect[0] = std::vector<int>(nVertices);
+	edgeConnect[0][0] = 0;
 
 	// Face data
 	nFaces = 1;
@@ -316,11 +316,11 @@ void ElementInfo::initializeLineInfo()
 	nEdges = 2;
 
 	edge_type = std::vector<Type>(nEdges);
-	edge_connect = std::vector<std::vector<int>>(nEdges);
+	edgeConnect = std::vector<std::vector<int>>(nEdges);
 	for (int k = 0; k < nEdges; ++k) {
 		edge_type[k]       = VERTEX;
-		edge_connect[k]    = std::vector<int>(vertexInfo.nVertices);
-		edge_connect[k][0] = k;
+		edgeConnect[k]    = std::vector<int>(vertexInfo.nVertices);
+		edgeConnect[k][0] = k;
 	}
 
 	// Face data
@@ -353,11 +353,11 @@ void ElementInfo::initializeTriangleInfo()
 	nEdges = 3;
 
 	edge_type = std::vector<Type>(nEdges);
-	edge_connect = std::vector<std::vector<int>>(nEdges);
+	edgeConnect = std::vector<std::vector<int>>(nEdges);
 	for (int k = 0; k < nEdges; ++k) {
 		edge_type[k]       = VERTEX;
-		edge_connect[k]    = std::vector<int>(vertexInfo.nVertices);
-		edge_connect[k][0] = k;
+		edgeConnect[k]    = std::vector<int>(vertexInfo.nVertices);
+		edgeConnect[k][0] = k;
 	}
 
 	// Face data
@@ -391,11 +391,11 @@ void ElementInfo::initializePixelInfo()
 	nEdges = 4;
 
 	edge_type = std::vector<Type>(nEdges);
-	edge_connect = std::vector<std::vector<int>>(nEdges);
+	edgeConnect = std::vector<std::vector<int>>(nEdges);
 	for (int k = 0; k < nEdges; ++k) {
 		edge_type[k]       = VERTEX;
-		edge_connect[k]    = std::vector<int>(vertexInfo.nVertices);
-		edge_connect[k][0] = k;
+		edgeConnect[k]    = std::vector<int>(vertexInfo.nVertices);
+		edgeConnect[k][0] = k;
 	}
 
 	// Face data
@@ -439,11 +439,11 @@ void ElementInfo::initializeQuadInfo()
 	nEdges = 4;
 
 	edge_type = std::vector<Type>(nEdges);
-	edge_connect = std::vector<std::vector<int>>(nEdges);
+	edgeConnect = std::vector<std::vector<int>>(nEdges);
 	for (int k = 0; k < nEdges; ++k) {
 		edge_type[k]       = VERTEX;
-		edge_connect[k]    = std::vector<int>(vertexInfo.nVertices);
-		edge_connect[k][0] = k;
+		edgeConnect[k]    = std::vector<int>(vertexInfo.nVertices);
+		edgeConnect[k][0] = k;
 	}
 
 	// Face data
@@ -477,29 +477,29 @@ void ElementInfo::initializeTetraInfo()
 	nEdges = 6;
 
 	edge_type = std::vector<Type>(nEdges);
-	edge_connect = std::vector<std::vector<int>>(nEdges);
+	edgeConnect = std::vector<std::vector<int>>(nEdges);
 	for (int k = 0; k < nEdges; ++k) {
 		edge_type[k]    = LINE;
-		edge_connect[k] = std::vector<int>(lineInfo.nVertices);
+		edgeConnect[k] = std::vector<int>(lineInfo.nVertices);
 	}
 
-	edge_connect[0][0] = 0;
-	edge_connect[0][1] = 1;
+	edgeConnect[0][0] = 0;
+	edgeConnect[0][1] = 1;
 
-	edge_connect[1][0] = 1;
-	edge_connect[1][1] = 2;
+	edgeConnect[1][0] = 1;
+	edgeConnect[1][1] = 2;
 
-	edge_connect[2][0] = 2;
-	edge_connect[2][1] = 0;
+	edgeConnect[2][0] = 2;
+	edgeConnect[2][1] = 0;
 
-	edge_connect[3][0] = 3;
-	edge_connect[3][1] = 0;
+	edgeConnect[3][0] = 3;
+	edgeConnect[3][1] = 0;
 
-	edge_connect[4][0] = 3;
-	edge_connect[4][1] = 1;
+	edgeConnect[4][0] = 3;
+	edgeConnect[4][1] = 1;
 
-	edge_connect[5][0] = 3;
-	edge_connect[5][1] = 2;
+	edgeConnect[5][0] = 3;
+	edgeConnect[5][1] = 2;
 
 	// Face data
 	nFaces = 4;
@@ -546,47 +546,47 @@ void ElementInfo::initializeVoxelInfo()
 	nEdges = 12;
 
 	edge_type = std::vector<Type>(nEdges);
-	edge_connect = std::vector<std::vector<int>>(nEdges);
+	edgeConnect = std::vector<std::vector<int>>(nEdges);
 	for (int k = 0; k < nEdges; ++k) {
 		edge_type[k]    = LINE;
-		edge_connect[k] = std::vector<int>(lineInfo.nVertices);
+		edgeConnect[k] = std::vector<int>(lineInfo.nVertices);
 	}
 
-	edge_connect[0][0] = 1;
-	edge_connect[0][1] = 0;
+	edgeConnect[0][0] = 1;
+	edgeConnect[0][1] = 0;
 
-	edge_connect[1][0] = 1;
-	edge_connect[1][1] = 2;
+	edgeConnect[1][0] = 1;
+	edgeConnect[1][1] = 2;
 
-	edge_connect[2][0] = 2;
-	edge_connect[2][1] = 3;
+	edgeConnect[2][0] = 2;
+	edgeConnect[2][1] = 3;
 
-	edge_connect[3][0] = 3;
-	edge_connect[3][1] = 0;
+	edgeConnect[3][0] = 3;
+	edgeConnect[3][1] = 0;
 
-	edge_connect[4][0] = 4;
-	edge_connect[4][1] = 5;
+	edgeConnect[4][0] = 4;
+	edgeConnect[4][1] = 5;
 
-	edge_connect[5][0] = 5;
-	edge_connect[5][1] = 6;
+	edgeConnect[5][0] = 5;
+	edgeConnect[5][1] = 6;
 
-	edge_connect[6][0] = 6;
-	edge_connect[6][1] = 7;
+	edgeConnect[6][0] = 6;
+	edgeConnect[6][1] = 7;
 
-	edge_connect[7][0] = 7;
-	edge_connect[7][1] = 4;
+	edgeConnect[7][0] = 7;
+	edgeConnect[7][1] = 4;
 
-	edge_connect[8][0] = 0;
-	edge_connect[8][1] = 4;
+	edgeConnect[8][0] = 0;
+	edgeConnect[8][1] = 4;
 
-	edge_connect[9][0] = 1;
-	edge_connect[9][1] = 5;
+	edgeConnect[9][0] = 1;
+	edgeConnect[9][1] = 5;
 
-	edge_connect[10][0] = 2;
-	edge_connect[10][1] = 6;
+	edgeConnect[10][0] = 2;
+	edgeConnect[10][1] = 6;
 
-	edge_connect[11][0] = 3;
-	edge_connect[11][1] = 7;
+	edgeConnect[11][0] = 3;
+	edgeConnect[11][1] = 7;
 
 	// Face data
 	nFaces = 6;
@@ -647,47 +647,47 @@ void ElementInfo::initializeHexahedronInfo()
 	nEdges = 12;
 
 	edge_type = std::vector<Type>(nEdges);
-	edge_connect = std::vector<std::vector<int>>(nEdges);
+	edgeConnect = std::vector<std::vector<int>>(nEdges);
 	for (int k = 0; k < nEdges; ++k) {
 		edge_type[k]    = LINE;
-		edge_connect[k] = std::vector<int>(lineInfo.nVertices);
+		edgeConnect[k] = std::vector<int>(lineInfo.nVertices);
 	}
 
-	edge_connect[0][0] = 1;
-	edge_connect[0][1] = 0;
+	edgeConnect[0][0] = 1;
+	edgeConnect[0][1] = 0;
 
-	edge_connect[1][0] = 1;
-	edge_connect[1][1] = 2;
+	edgeConnect[1][0] = 1;
+	edgeConnect[1][1] = 2;
 
-	edge_connect[2][0] = 2;
-	edge_connect[2][1] = 3;
+	edgeConnect[2][0] = 2;
+	edgeConnect[2][1] = 3;
 
-	edge_connect[3][0] = 3;
-	edge_connect[3][1] = 0;
+	edgeConnect[3][0] = 3;
+	edgeConnect[3][1] = 0;
 
-	edge_connect[4][0] = 4;
-	edge_connect[4][1] = 5;
+	edgeConnect[4][0] = 4;
+	edgeConnect[4][1] = 5;
 
-	edge_connect[5][0] = 5;
-	edge_connect[5][1] = 6;
+	edgeConnect[5][0] = 5;
+	edgeConnect[5][1] = 6;
 
-	edge_connect[6][0] = 6;
-	edge_connect[6][1] = 7;
+	edgeConnect[6][0] = 6;
+	edgeConnect[6][1] = 7;
 
-	edge_connect[7][0] = 7;
-	edge_connect[7][1] = 4;
+	edgeConnect[7][0] = 7;
+	edgeConnect[7][1] = 4;
 
-	edge_connect[8][0] = 0;
-	edge_connect[8][1] = 4;
+	edgeConnect[8][0] = 0;
+	edgeConnect[8][1] = 4;
 
-	edge_connect[9][0] = 1;
-	edge_connect[9][1] = 5;
+	edgeConnect[9][0] = 1;
+	edgeConnect[9][1] = 5;
 
-	edge_connect[10][0] = 2;
-	edge_connect[10][1] = 6;
+	edgeConnect[10][0] = 2;
+	edgeConnect[10][1] = 6;
 
-	edge_connect[11][0] = 3;
-	edge_connect[11][1] = 7;
+	edgeConnect[11][0] = 3;
+	edgeConnect[11][1] = 7;
 
 	// Face data
 	nFaces = 6;
@@ -749,35 +749,35 @@ void ElementInfo::initializePyramidInfo()
 	nEdges = 8;
 
 	edge_type = std::vector<Type>(nEdges);
-	edge_connect = std::vector<std::vector<int>>(nEdges);
+	edgeConnect = std::vector<std::vector<int>>(nEdges);
 	for (int k = 0; k < nEdges; ++k) {
 		edge_type[k]    = LINE;
-		edge_connect[k] = std::vector<int>(lineInfo.nVertices);
+		edgeConnect[k] = std::vector<int>(lineInfo.nVertices);
 	}
 
-	edge_connect[0][0] = 0;
-	edge_connect[0][1] = 1;
+	edgeConnect[0][0] = 0;
+	edgeConnect[0][1] = 1;
 
-	edge_connect[1][0] = 1;
-	edge_connect[1][1] = 2;
+	edgeConnect[1][0] = 1;
+	edgeConnect[1][1] = 2;
 
-	edge_connect[2][0] = 2;
-	edge_connect[2][1] = 3;
+	edgeConnect[2][0] = 2;
+	edgeConnect[2][1] = 3;
 
-	edge_connect[3][0] = 3;
-	edge_connect[3][1] = 0;
+	edgeConnect[3][0] = 3;
+	edgeConnect[3][1] = 0;
 
-	edge_connect[4][0] = 4;
-	edge_connect[4][1] = 0;
+	edgeConnect[4][0] = 4;
+	edgeConnect[4][1] = 0;
 
-	edge_connect[5][0] = 4;
-	edge_connect[5][1] = 1;
+	edgeConnect[5][0] = 4;
+	edgeConnect[5][1] = 1;
 
-	edge_connect[6][0] = 4;
-	edge_connect[6][1] = 2;
+	edgeConnect[6][0] = 4;
+	edgeConnect[6][1] = 2;
 
-	edge_connect[7][0] = 4;
-	edge_connect[7][1] = 3;
+	edgeConnect[7][0] = 4;
+	edgeConnect[7][1] = 3;
 
 	// Face data
 	nFaces = 5;
@@ -835,38 +835,38 @@ void ElementInfo::initializeWedgeInfo()
 	nEdges = 9;
 
 	edge_type = std::vector<Type>(nEdges);
-	edge_connect = std::vector<std::vector<int>>(nEdges);
+	edgeConnect = std::vector<std::vector<int>>(nEdges);
 	for (int k = 0; k < nEdges; ++k) {
 		edge_type[k]    = LINE;
-		edge_connect[k] = std::vector<int>(lineInfo.nVertices);
+		edgeConnect[k] = std::vector<int>(lineInfo.nVertices);
 	}
 
-	edge_connect[0][0] = 1;
-	edge_connect[0][1] = 0;
+	edgeConnect[0][0] = 1;
+	edgeConnect[0][1] = 0;
 
-	edge_connect[1][0] = 1;
-	edge_connect[1][1] = 2;
+	edgeConnect[1][0] = 1;
+	edgeConnect[1][1] = 2;
 
-	edge_connect[2][0] = 2;
-	edge_connect[2][1] = 0;
+	edgeConnect[2][0] = 2;
+	edgeConnect[2][1] = 0;
 
-	edge_connect[3][0] = 3;
-	edge_connect[3][1] = 4;
+	edgeConnect[3][0] = 3;
+	edgeConnect[3][1] = 4;
 
-	edge_connect[4][0] = 4;
-	edge_connect[4][1] = 5;
+	edgeConnect[4][0] = 4;
+	edgeConnect[4][1] = 5;
 
-	edge_connect[5][0] = 5;
-	edge_connect[5][1] = 3;
+	edgeConnect[5][0] = 5;
+	edgeConnect[5][1] = 3;
 
-	edge_connect[6][0] = 3;
-	edge_connect[6][1] = 0;
+	edgeConnect[6][0] = 3;
+	edgeConnect[6][1] = 0;
 
-	edge_connect[7][0] = 4;
-	edge_connect[7][1] = 1;
+	edgeConnect[7][0] = 4;
+	edgeConnect[7][1] = 1;
 
-	edge_connect[8][0] = 5;
-	edge_connect[8][1] = 2;
+	edgeConnect[8][0] = 5;
+	edgeConnect[8][1] = 2;
 
 	// Face data
 	nFaces = 5;
@@ -1176,7 +1176,7 @@ std::vector<int> Element::getEdgeLocalConnect(const int &edge) const
 
 	default:
 		const ElementInfo &elementInfo = ElementInfo::getElementInfo(m_type);
-		return elementInfo.edge_connect[edge];
+		return elementInfo.edgeConnect[edge];
 
 	}
 }

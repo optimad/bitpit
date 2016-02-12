@@ -82,7 +82,7 @@ public:
 	std::vector<std::vector<int>> faceConnect;
 
 	std::vector<Type> edge_type;
-	std::vector<std::vector<int>> edge_connect;
+	std::vector<std::vector<int>> edgeConnect;
 
 	ElementInfo();
 	ElementInfo(ElementInfo::Type type);
