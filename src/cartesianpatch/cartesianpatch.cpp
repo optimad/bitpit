@@ -150,6 +150,9 @@ void CartesianPatch::initialize(const std::array<double, 3> &origin,
 {
 	std::cout << ">> Initializing cartesian patch\n";
 
+	// Disable advanced editing
+	setExpert(false);
+
 	// Info sulle celle
 	for (int n = 0; n < getDimension(); ++n) {
 		// Initialize cells
@@ -324,6 +327,9 @@ const std::vector<Adaption::Info> CartesianPatch::_update(bool trackAdaption)
 
 	std::cout << ">> Updating cartesian mesh\n";
 
+	// Enable advanced editing
+	setExpert(true);
+
 	// Reset the mesh
 	reset();
 
@@ -331,6 +337,9 @@ const std::vector<Adaption::Info> CartesianPatch::_update(bool trackAdaption)
 	createVertices();
 	createCells();
 	createInterfaces();
+
+	// Disable advanced editing
+	setExpert(false);
 
 	// Adaption info
 	std::vector<Adaption::Info> adaptionData;

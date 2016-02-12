@@ -73,9 +73,9 @@ public:
 	void resetCells();
 	void resetInterfaces();
 
-	void reserveVertices(size_t nVertices);
-	void reserveCells(size_t nCells);
-	void reserveInterfaces(size_t nInterfaces);
+	bool reserveVertices(size_t nVertices);
+	bool reserveCells(size_t nCells);
+	bool reserveInterfaces(size_t nInterfaces);
 
 	const std::vector<Adaption::Info> update(bool trackAdaption = true);
 
@@ -84,6 +84,7 @@ public:
 	void enableCellBalancing(const long &id, bool enabled);
 
 	bool isDirty() const;
+	bool isExpert() const;
 
 	int get_id() const;
 	int getDimension() const;
@@ -142,15 +143,15 @@ public:
 	InterfaceIterator interfaceBegin();
 	InterfaceIterator interfaceEnd();
 
-	void sort();
-	void sortVertices();
-	void sortCells();
-	void sortInterfaces();
+	bool sort();
+	bool sortVertices();
+	bool sortCells();
+	bool sortInterfaces();
 
-	void squeeze();
-	void squeezeVertices();
-	void squeezeCells();
-	void squeezeInterfaces();
+	bool squeeze();
+	bool squeezeVertices();
+	bool squeezeCells();
+	bool squeezeInterfaces();
 
 	bool isPointInside(const double &x, const double &y, const double &z);
 	virtual bool isPointInside(const std::array<double, 3> &point) = 0;
@@ -207,20 +208,20 @@ protected:
 	long addVertex(const long &id = Vertex::NULL_VERTEX_ID);
 	long addVertex(Vertex source);
 	long addVertex(Vertex &&source, long id = Vertex::NULL_VERTEX_ID);
-	void deleteVertex(const long &id, bool delayed = false);
+	bool deleteVertex(const long &id, bool delayed = false);
 
 	long addInterface(const long &id = Element::NULL_ELEMENT_ID);
 	long addInterface(ElementInfo::Type type, const long &id = Element::NULL_ELEMENT_ID);
 	long addInterface(Interface source);
 	long addInterface(Interface &&source, long id = Element::NULL_ELEMENT_ID);
-	void deleteInterface(const long &id, bool delayed = false);
+	bool deleteInterface(const long &id, bool delayed = false);
 
 	long addCell(const long &id = Element::NULL_ELEMENT_ID);
 	long addCell(ElementInfo::Type type, bool interior, const long &id = Element::NULL_ELEMENT_ID);
 	long addCell(Cell source);
 	long addCell(Cell &&source, long id = Element::NULL_ELEMENT_ID);
-	void deleteCell(const long &id, bool delayed = false);
-	void setCellInternal(const long &id, bool isInternal);
+	bool deleteCell(const long &id, bool delayed = false);
+	bool setCellInternal(const long &id, bool isInternal);
 	CellIterator moveGhost2Internal(const long &id);
 	CellIterator moveInternal2Ghost(const long &id);
 
@@ -234,9 +235,11 @@ protected:
 	virtual void _resetTol();
 
 	void setDirty(bool dirty);
+	void setExpert(bool expert);
 
 private:
 	bool m_dirty;
+	bool m_expert;
 
 	int m_id;
 	int m_dimension;

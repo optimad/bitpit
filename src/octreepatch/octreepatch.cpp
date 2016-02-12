@@ -56,6 +56,9 @@ OctreePatch::OctreePatch(const int &id, const int &dimension,
 {
 	std::cout << ">> Initializing Octree mesh\n";
 
+	// Disable advanced editing
+	setExpert(false);
+
 	// Inizializzazione dell'octree
 	double initial_level = ceil(log2(std::max(1., length / dh)));
 
@@ -540,6 +543,9 @@ const std::vector<Adaption::Info> OctreePatch::_update(bool trackAdaption)
 	}
 	newOctants.shrink_to_fit();
 
+	// Enable advanced editing
+	setExpert(true);
+
 	// Delete removed cells
 	FaceInfoSet danglingFaces;
 	if (removedCells.size() > 0) {
@@ -603,6 +609,9 @@ const std::vector<Adaption::Info> OctreePatch::_update(bool trackAdaption)
 	}
 
 	FaceInfoSet().swap(danglingFaces);
+
+	// Disable advanced editing
+	setExpert(false);
 
 	// Track mesh adaption
 	if (trackAdaption) {

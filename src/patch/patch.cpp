@@ -129,7 +129,7 @@ Patch::Patch(const int &id, const int &dimension)
 	: m_nVertices(0), m_nInternals(0), m_nGhosts(0), m_nInterfaces(0),
 	  m_last_internal_id(Element::NULL_ELEMENT_ID),
 	  m_first_ghost_id(Element::NULL_ELEMENT_ID),
-	  m_dirty(true), m_hasCustomTolerance(false)
+	  m_dirty(true), m_expert(false), m_hasCustomTolerance(false)
 {
 	set_id(id) ;
 	setDimension(dimension);
@@ -275,9 +275,15 @@ void Patch::resetInterfaces()
     \param[in] nVertices size of memory reserve (in terms of number of
     vertices).
 */
-void Patch::reserveVertices(size_t nVertices)
+bool Patch::reserveVertices(size_t nVertices)
 {
+	if (!isExpert()) {
+		return false;
+	}
+
 	m_vertices.reserve(nVertices);
+
+	return true;
 }
 
 /*!
@@ -292,9 +298,15 @@ void Patch::reserveVertices(size_t nVertices)
 
 	\param[in] nCells is size of memory reserve (in terms of number of cells).
 */
-void Patch::reserveCells(size_t nCells)
+bool Patch::reserveCells(size_t nCells)
 {
+	if (!isExpert()) {
+		return false;
+	}
+
 	m_cells.reserve(nCells);
+
+	return true;
 }
 
 /*!
@@ -311,9 +323,15 @@ void Patch::reserveCells(size_t nCells)
 	\param[in] nCells is size of memory reserve (in terms of number of
 	interfaces).
 */
-void Patch::reserveInterfaces(size_t nInterfaces)
+bool Patch::reserveInterfaces(size_t nInterfaces)
 {
+	if (!isExpert()) {
+		return false;
+	}
+
 	m_interfaces.reserve(nInterfaces);
+
+	return true;
 }
 
 /*!
@@ -446,6 +464,39 @@ void Patch::setDirty(bool dirty)
 bool Patch::isDirty() const
 {
 	return m_dirty;
+}
+
+/*!
+	Enables or disables expert mode.
+
+	When expert mode is enabled, it will be possible to change the
+	patch using low level functions (e.g., it will be possible to
+	add individual cells, add vertices, delete cells, ...).
+
+	\param expert if true, the expert mode will be enabled
+*/
+void Patch::setExpert(bool expert)
+{
+	if (isExpert() == expert) {
+		return;
+	}
+
+	m_expert = expert;
+}
+
+/*!
+	Checks if the expert mode is enabled.
+
+	When expert mode is enabled, it will be possible to change the
+	patch using low level functions (e.g., it will be possible to
+	add individual cells, add vertices, delete cells, ...).
+
+	\return This method returns true when the expert is enabled,
+	otherwise it returns false.
+*/
+bool Patch::isExpert() const
+{
+	return m_expert;
 }
 
 /*!
@@ -607,6 +658,10 @@ Vertex & Patch::createVertex(long id)
 */
 long Patch::addVertex(const long &id)
 {
+	if (!isExpert()) {
+		return Vertex::NULL_VERTEX_ID;
+	}
+
 	Vertex &vertex = createVertex(id);
 
 	return vertex.get_id();
@@ -620,6 +675,10 @@ long Patch::addVertex(const long &id)
 */
 long Patch::addVertex(Vertex source)
 {
+	if (!isExpert()) {
+		return Vertex::NULL_VERTEX_ID;
+	}
+
 	Vertex &vertex = createVertex();
 	long id = vertex.get_id();
 	vertex = std::move(source);
@@ -636,6 +695,10 @@ long Patch::addVertex(Vertex source)
 */
 long Patch::addVertex(Vertex &&source, long id)
 {
+	if (!isExpert()) {
+		return Vertex::NULL_VERTEX_ID;
+	}
+
 	if (id == Vertex::NULL_VERTEX_ID) {
 		id = source.get_id();
 	}
@@ -653,11 +716,17 @@ long Patch::addVertex(Vertex &&source, long id)
 
 	\param id is the id of the vertex
 */
-void Patch::deleteVertex(const long &id, bool delayed)
+bool Patch::deleteVertex(const long &id, bool delayed)
 {
+	if (!isExpert()) {
+		return false;
+	}
+
 	m_vertices.erase(id, delayed);
 	m_vertexIdGenerator.trashId(id);
 	m_nVertices--;
+
+	return true;
 }
 
 /*!
@@ -899,6 +968,10 @@ Cell & Patch::createCell(bool interior, long id)
 */
 long Patch::addCell(const long &id)
 {
+	if (!isExpert()) {
+		return Element::NULL_ELEMENT_ID;
+	}
+
 	createCell(true, id);
 
 	return id;
@@ -916,6 +989,10 @@ long Patch::addCell(const long &id)
 */
 long Patch::addCell(ElementInfo::Type type, bool interior, const long &id)
 {
+	if (!isExpert()) {
+		return Element::NULL_ELEMENT_ID;
+	}
+
 	Cell &cell = createCell(interior, id);
 	cell.initialize(type);
 	cell.setInterior(interior);
@@ -931,6 +1008,10 @@ long Patch::addCell(ElementInfo::Type type, bool interior, const long &id)
 */
 long Patch::addCell(Cell source)
 {
+	if (!isExpert()) {
+		return Element::NULL_ELEMENT_ID;
+	}
+
 	Cell &cell = createCell(source.isInterior());
 	long id = cell.get_id();
 	cell = std::move(source);
@@ -947,6 +1028,10 @@ long Patch::addCell(Cell source)
 */
 long Patch::addCell(Cell &&source, long id)
 {
+	if (!isExpert()) {
+		return Element::NULL_ELEMENT_ID;
+	}
+
 	if (id == Element::NULL_ELEMENT_ID) {
 		id = source.get_id();
 	}
@@ -964,8 +1049,12 @@ long Patch::addCell(Cell &&source, long id)
 
 	\param id is the id of the cell
 */
-void Patch::deleteCell(const long &id, bool delayed)
+bool Patch::deleteCell(const long &id, bool delayed)
 {
+	if (!isExpert()) {
+		return false;
+	}
+
 	bool isInternal = m_cells.at(id).isInterior();
 	m_cells.erase(id, delayed);
 	m_cellIdGenerator.trashId(id);
@@ -976,6 +1065,8 @@ void Patch::deleteCell(const long &id, bool delayed)
 		m_nGhosts--;
 		m_first_ghost_id = m_cells.get_size_marker(m_nInternals, Element::NULL_ELEMENT_ID);
 	}
+
+	return true;
 }
 
 /*!
@@ -984,15 +1075,21 @@ void Patch::deleteCell(const long &id, bool delayed)
 	\param[in] id is the index of the cell
 	\param[in] isInternal is the internal flag that will be set
 */
-void Patch::setCellInternal(const long &id, bool isInternal)
+bool Patch::setCellInternal(const long &id, bool isInternal)
 {
+	if (!isExpert()) {
+		return false;
+	}
+
 	if (m_cells[id].isInterior() == isInternal) {
-		return;
+		return true;
 	} else if (isInternal) {
 		moveGhost2Internal(id);
 	} else {
 		moveInternal2Ghost(id);
 	}
+
+	return true;
 }
 
 /*!
@@ -1003,6 +1100,10 @@ void Patch::setCellInternal(const long &id, bool isInternal)
 */
 CellIterator Patch::moveGhost2Internal(const long &id)
 {
+	if (!isExpert()) {
+		return m_cells.end();
+	}
+
 	// If we are moving the last internal cell we can just update the
 	// last internal and first ghost markers. Otherwise the cell needs
 	// to be moved.
@@ -1043,6 +1144,10 @@ CellIterator Patch::moveGhost2Internal(const long &id)
 */
 CellIterator Patch::moveInternal2Ghost(const long &id)
 {
+	if (!isExpert()) {
+		return m_cells.end();
+	}
+
 	// If we are moving the first ghost cell we can just update the
 	// last internal and first ghost markers. Otherwise the cell needs
 	// to be moved.
@@ -1474,6 +1579,10 @@ Interface & Patch::createInterface(long id)
 */
 long Patch::addInterface(const long &id)
 {
+	if (!isExpert()) {
+		return Element::NULL_ELEMENT_ID;
+	}
+
 	Interface &interface = createInterface(id);
 
 	return interface.get_id();
@@ -1489,6 +1598,10 @@ long Patch::addInterface(const long &id)
 */
 long Patch::addInterface(ElementInfo::Type type, const long &id)
 {
+	if (!isExpert()) {
+		return Element::NULL_ELEMENT_ID;
+	}
+
 	Interface &interface = createInterface(id);
 	interface.initialize(type);
 
@@ -1503,6 +1616,10 @@ long Patch::addInterface(ElementInfo::Type type, const long &id)
 */
 long Patch::addInterface(Interface source)
 {
+	if (!isExpert()) {
+		return Element::NULL_ELEMENT_ID;
+	}
+
 	Interface &interface = createInterface();
 	long id = interface.get_id();
 	interface = std::move(source);
@@ -1521,6 +1638,10 @@ long Patch::addInterface(Interface source)
 */
 long Patch::addInterface(Interface &&source, long id)
 {
+	if (!isExpert()) {
+		return Element::NULL_ELEMENT_ID;
+	}
+
 	if (id == Element::NULL_ELEMENT_ID) {
 		id = source.get_id();
 	}
@@ -1538,46 +1659,72 @@ long Patch::addInterface(Interface &&source, long id)
 
 	\param id is the id of the interface
 */
-void Patch::deleteInterface(const long &id, bool delayed)
+bool Patch::deleteInterface(const long &id, bool delayed)
 {
+	if (!isExpert()) {
+		return false;
+	}
+
 	m_interfaces.erase(id, delayed);
 	m_interfaceIdGenerator.trashId(id);
 	m_nInterfaces--;
+
+	return true;
 }
 
 /*!
 	Sorts internal vertex storage in ascending id order.
 */
-void Patch::sortVertices()
+bool Patch::sortVertices()
 {
+	if (!isExpert()) {
+		return false;
+	}
+
 	m_vertices.sort();
+
+	return true;
 }
 
 /*!
 	Sorts internal cell storage in ascending id order.
 */
-void Patch::sortCells()
+bool Patch::sortCells()
 {
+	if (!isExpert()) {
+		return false;
+	}
+
 	m_cells.sort();
+
+	return true;
 }
 
 /*!
 	Sorts internal interface storage in ascending id order.
 */
-void Patch::sortInterfaces()
+bool Patch::sortInterfaces()
 {
+	if (!isExpert()) {
+		return false;
+	}
+
 	m_interfaces.sort();
+
+	return true;
 }
 
 /*!
 	Sorts internal storage for cells, vertices and interfaces in
 	ascending id order.
 */
-void Patch::sort()
+bool Patch::sort()
 {
-	sortVertices();
-	sortCells();
-	sortInterfaces();
+	bool status = sortVertices();
+	status |= sortCells();
+	status |= sortInterfaces();
+
+	return status;
 }
 
 /*!
@@ -1587,9 +1734,15 @@ void Patch::sort()
 	The request is non-binding, and after the function call the vertex
 	data structure can still occupy more memory than it actually needs.
 */
-void Patch::squeezeVertices()
+bool Patch::squeezeVertices()
 {
+	if (!isExpert()) {
+		return false;
+	}
+
 	m_vertices.squeeze();
+
+	return true;
 }
 
 /*!
@@ -1599,9 +1752,15 @@ void Patch::squeezeVertices()
 	The request is non-binding, and after the function call the cell
 	data structure can still occupy more memory than it actually needs.
 */
-void Patch::squeezeCells()
+bool Patch::squeezeCells()
 {
+	if (!isExpert()) {
+		return false;
+	}
+
 	m_cells.squeeze();
+
+	return true;
 }
 
 /*!
@@ -1611,9 +1770,15 @@ void Patch::squeezeCells()
 	The request is non-binding, and after the function call the interface
 	data structure can still occupy more memory than it actually needs.
 */
-void Patch::squeezeInterfaces()
+bool Patch::squeezeInterfaces()
 {
+	if (!isExpert()) {
+		return false;
+	}
+
 	m_interfaces.squeeze();
+
+	return true;
 }
 
 /*!
@@ -1623,11 +1788,13 @@ void Patch::squeezeInterfaces()
 	The request is non-binding, and after the function call the patch
 	can still occupy more memory than it actually needs.
 */
-void Patch::squeeze()
+bool Patch::squeeze()
 {
-	squeezeVertices();
-	squeezeCells();
-	squeezeInterfaces();
+	bool status = squeezeVertices();
+	status |= squeezeCells();
+	status |= squeezeInterfaces();
+
+	return status;
 }
 
 /*!
