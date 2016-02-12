@@ -634,6 +634,20 @@ VertexIterator Patch::vertexEnd()
 }
 
 /*!
+	Generates a new unique id for the vertices.
+
+	\result A new unique id for the vertices.
+*/
+long Patch::genereateVertexId()
+{
+	if (!isExpert()) {
+		return Vertex::NULL_VERTEX_ID;
+	}
+
+	return m_vertexIdGenerator.generateId();
+}
+
+/*!
 	Creates a new vertex with the specified id.
 
 	\param id is the id of the new vertex
@@ -642,7 +656,7 @@ VertexIterator Patch::vertexEnd()
 Vertex & Patch::createVertex(long id)
 {
 	if (id == Vertex::NULL_VERTEX_ID) {
-		id = m_vertexIdGenerator.generateId();
+		id = genereateVertexId();
 	}
 
 	PiercedVector<Vertex>::iterator iterator = m_vertices.reclaim(id);
@@ -1099,6 +1113,20 @@ CellIterator Patch::ghostEnd()
 }
 
 /*!
+	Generates a new unique id for the cells.
+
+	\result A new unique id for the cells.
+*/
+long Patch::genereateCellId()
+{
+	if (!isExpert()) {
+		return Element::NULL_ELEMENT_ID;
+	}
+
+	return m_cellIdGenerator.generateId();
+}
+
+/*!
 	Creates a new cell with the specified id.
 
 	\param id is the id of the new cell
@@ -1108,7 +1136,7 @@ CellIterator Patch::ghostEnd()
 Cell & Patch::createCell(bool interior, long id)
 {
 	if (id == Element::NULL_ELEMENT_ID) {
-		id = m_cellIdGenerator.generateId();
+		id = genereateCellId();
 	}
 
 	PiercedVector<Cell>::iterator iterator;
@@ -1811,6 +1839,20 @@ InterfaceIterator Patch::interfaceEnd()
 }
 
 /*!
+ * Generates a new unique id for the interfaces.
+ *
+ * \result A new unique id for the interfaces.
+ */
+long Patch::genereateInterfaceId()
+{
+	if (!isExpert()) {
+		return Element::NULL_ELEMENT_ID;
+	}
+
+	return m_interfaceIdGenerator.generateId();
+}
+
+/*!
 	Creates a new interface with the specified id.
 
 	\param id is the id of the new interface
@@ -1819,7 +1861,7 @@ InterfaceIterator Patch::interfaceEnd()
 Interface & Patch::createInterface(long id)
 {
 	if (id == Element::NULL_ELEMENT_ID) {
-		id = m_interfaceIdGenerator.generateId();
+		id = genereateInterfaceId();
 	}
 
 	PiercedVector<Interface>::iterator iterator = m_interfaces.reclaim(id);

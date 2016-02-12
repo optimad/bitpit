@@ -98,6 +98,7 @@ public:
 	Vertex &getVertex(const long &id);
 	const Vertex & getVertex(const long &id) const;
 	const std::array<double, 3> & getVertexCoords(const long &id) const;
+	long genereateVertexId();
 	long addVertex(const long &id = Vertex::NULL_VERTEX_ID);
 	long addVertex(Vertex source);
 	long addVertex(Vertex &&source, long id = Vertex::NULL_VERTEX_ID);
@@ -120,6 +121,7 @@ public:
 	const Cell &getLastInternal() const;
 	Cell &getFirstGhost();
 	const Cell &getFirstGhost() const;
+	long genereateCellId();
 	long addCell(const long &id = Element::NULL_ELEMENT_ID);
 	long addCell(ElementInfo::Type type, bool interior, const long &id = Element::NULL_ELEMENT_ID);
 	long addCell(Cell source);
@@ -153,6 +155,7 @@ public:
 	PiercedVector<Interface> &interfaces();
 	Interface &getInterface(const long &id);
 	const Interface &getInterface(const long &id) const;
+	long genereateInterfaceId();
 	long addInterface(const long &id = Element::NULL_ELEMENT_ID);
 	long addInterface(ElementInfo::Type type, const long &id = Element::NULL_ELEMENT_ID);
 	long addInterface(Interface source);
