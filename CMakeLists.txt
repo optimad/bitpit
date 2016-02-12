@@ -196,6 +196,7 @@ list(APPEND BITPIT_MODULE_LIST "PABLO")
 list(APPEND BITPIT_MODULE_LIST "patch")
 list(APPEND BITPIT_MODULE_LIST "cartesianpatch")
 list(APPEND BITPIT_MODULE_LIST "octreepatch")
+list(APPEND BITPIT_MODULE_LIST "surftripatch")
 list(APPEND BITPIT_MODULE_LIST "ucartmesh")
 
 #------------------------------------------------------------------------------------#
@@ -209,6 +210,7 @@ set(UCARTMESH_DEPS "IO")
 set(PATCH_DEPS "operators;containers;IO;LA;SA")
 set(CARTESIANPATCH_DEPS "patch")
 set(OCTREEPATCH_DEPS "PABLO;patch")
+set(SURFTRIPATCH_DEPS "patch")
 
 #------------------------------------------------------------------------------------#
 # Check of the dependencies
