@@ -1128,25 +1128,42 @@ long OctreePatch::createCell(OctantInfo octantInfo,
 	cell.setConnect(std::move(vertices));
 
 	// Interfaces
-	int nCellFaces = interfaces.size();
+	cell.initializeInterfaces(interfaces);
+
+	// Adjacencies
+	cell.initializeAdjacencies(adjacencies);
+
+	// Update data of interfaces and neighbours
+	int nCellFaces = cell.getFaceCount();
 	for (int face = 0; face < nCellFaces; ++face) {
-		int nFaceInterfaces = interfaces[face].size();
-		for (int k = 0; k < nFaceInterfaces; ++k) {
-			long interfaceId   = interfaces[face][k];
+		int nNeighbours = adjacencies[face].size();
+		for (int k = 0; k < nNeighbours; ++k) {
+			long interfaceId = interfaces[face][k];
+			Interface &interface = m_interfaces[interfaceId];
 			bool ownsInterface = interfacesOwner[face][k];
 
-			Interface &interface = m_interfaces[interfaceId];
+			// Update data of interfaces
 			if (ownsInterface) {
 				interface.setOwner(id, face);
 			} else {
 				interface.setNeigh(id, face);
 			}
+
+			// Update data of neighbours
+			long neighId = adjacencies[face][k];
+			if (neighId > 0) {
+				int neighFace;
+				if (ownsInterface) {
+					neighFace = interface.getNeighFace();
+				} else {
+					neighFace = interface.getOwnerFace();
+				}
+
+				Cell &neigh = m_cells.at(neighId);
+				neigh.pushAdjacency(neighFace, id);
+			}
 		}
 	}
-	cell.initializeInterfaces(interfaces);
-
-	// Adjacencies
-	cell.initializeAdjacencies(adjacencies);
 
 	// Update cell to octant mapping
 	if (octantInfo.internal) {
