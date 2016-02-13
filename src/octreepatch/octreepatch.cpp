@@ -790,7 +790,7 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 		for (int k = 0; k < nCellVertices; ++k) {
 			uint32_t vertexTreeId = octantTreeConnect[k];
 			if (vertexMap.count(vertexTreeId) == 0) {
-				vertexMap[vertexTreeId] = createVertex(vertexTreeId);
+				vertexMap[vertexTreeId] = addVertex(vertexTreeId);
 			}
 		}
 	}
@@ -859,7 +859,7 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 		// Create the interface
 		createdInterfaces.emplace_back();
 		unsigned long &interfaceId = createdInterfaces.back();
-		interfaceId = createInterface(interfaceTreeId, interfaceConnect, interfaceFaces);
+		interfaceId = addInterface(interfaceTreeId, interfaceConnect, interfaceFaces);
 		interfaceMap[interfaceTreeId] = interfaceId;
 
 		// If the interface is on an dangling faces, the owner or
@@ -936,7 +936,7 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 		}
 
 		// Add cell
-		createCell(octantInfo, cellConnect, cellAdjacencies,
+		addCell(octantInfo, cellConnect, cellAdjacencies,
 			   cellInterfaces, cellInterfacesOwner);
 	}
 
@@ -1065,7 +1065,7 @@ OctreePatch::FaceInfoSet OctreePatch::removeCells(std::vector<long> &cellIds)
 
 	\param treeId is the id of the vertex in the tree
 */
-long OctreePatch::createVertex(uint32_t treeId)
+long OctreePatch::addVertex(uint32_t treeId)
 {
 	// Create the vertex
 	VertexIterator vertexIterator = Patch::addVertex();
@@ -1084,7 +1084,7 @@ long OctreePatch::createVertex(uint32_t treeId)
 
 	\param treeId is the id of the intersection in the tree
 */
-long OctreePatch::createInterface(uint32_t treeId,
+long OctreePatch::addInterface(uint32_t treeId,
                                    std::unique_ptr<long[]> &vertices,
                                    std::array<FaceInfo, 2> &faces)
 {
@@ -1117,7 +1117,7 @@ long OctreePatch::createInterface(uint32_t treeId,
 
 	\param treeId is the id of the octant in the tree
 */
-long OctreePatch::createCell(OctantInfo octantInfo,
+long OctreePatch::addCell(OctantInfo octantInfo,
                               std::unique_ptr<long[]> &vertices,
                               std::vector<std::vector<long>> &adjacencies,
                               std::vector<std::vector<long>> &interfaces,

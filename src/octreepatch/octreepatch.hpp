@@ -141,13 +141,13 @@ private:
 
 	FaceInfoSet removeCells(std::vector<long> &cellIds);
 
-	long createVertex(uint32_t treeId);
+	long addVertex(uint32_t treeId);
 
-	long createInterface(uint32_t treeId,
+	long addInterface(uint32_t treeId,
                             std::unique_ptr<long[]> &vertices,
                             std::array<FaceInfo, 2> &faces);
 
-	long createCell(OctantInfo octantInfo,
+	long addCell(OctantInfo octantInfo,
 	                 std::unique_ptr<long[]> &vertices,
 	                 std::vector<std::vector<long>> &adjacencies,
 	                 std::vector<std::vector<long>> &interfaces,
