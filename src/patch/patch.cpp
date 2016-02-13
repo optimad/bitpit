@@ -692,6 +692,27 @@ Patch::VertexIterator Patch::addVertex(const long &id)
 }
 
 /*!
+	Adds a new vertex with the specified coordinates.
+
+	\param coords are the coordinates of the vertex
+	\param id is the id of the new cell. If a negative id value is
+	specified, ad new unique id will be generated
+	\return The id associated to the vertex.
+*/
+Patch::VertexIterator Patch::addVertex(const std::array<double, 3> &coords, const long &id)
+{
+	if (!isExpert()) {
+		return vertexEnd();
+	}
+
+	VertexIterator iterator = createVertex();
+	Vertex &vertex = (*iterator);
+	vertex.setCoords(coords);
+
+	return iterator;
+}
+
+/*!
 	Adds the specified vertex to the patch.
 
 	\param source is the vertex that will be added
