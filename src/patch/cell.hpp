@@ -52,35 +52,34 @@ friend bitpit::IBinaryStream& (::operator>>) (bitpit::IBinaryStream& buf, Cell& 
 
 public:
 	Cell();
-	Cell(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED, bool interior = true);
+	Cell(const long &id, ElementInfo::Type type = ElementInfo::UNDEFINED,
+	     bool interior = true, bool storeNeighbourhood = true);
 
 	Cell(const Cell &other);
 	Cell(Cell&& other) = default;
 	Cell& operator = (const Cell &other);
 	Cell& operator=(Cell&& other) = default;
 
-	void initialize(ElementInfo::Type type, bool interior, int nInterfacesPerFace = 0);
+	void initialize(ElementInfo::Type type, bool interior, bool storeNeighbourhood = true);
 
 	bool isInterior() const;
 	
-	void initializeInterfaces(std::vector<std::vector<long>> &interfaces);
-	void initializeEmptyInterfaces(const std::vector<int> interfaceCount);
+	void resetInterfaces(bool storeInterfaces = true);
+	void setInterfaces(std::vector<std::vector<long>> &interfaces);
 	void setInterface(const int &face, const int &index, const long &interface);
 	void pushInterface(const int &face, const long &interface);
 	void deleteInterface(const int &face, const int &i);
-	void unsetInterfaces();
 	int getInterfaceCount() const;
 	int getInterfaceCount(const int &face) const;
 	long getInterface(const int &face, const int &index = 0) const;
 	const long * getInterfaces() const;
 	const long * getInterfaces(const int &face) const;
 
-	void initializeAdjacencies(std::vector<std::vector<long>> &interfaces);
-	void initializeEmptyAdjacencies(const std::vector<int> interfaceCount);
+	void resetAdjacencies(bool storeInterfaces = true);
+	void setAdjacencies(std::vector<std::vector<long>> &interfaces);
 	void setAdjacency(const int &face, const int &index, const long &interface);
 	void pushAdjacency(const int &face, const long &interface);
 	void deleteAdjacency(const int &face, const int &i);
-	void unsetAdjacencies();
 	int getAdjacencyCount() const;
 	int getAdjacencyCount(const int &face) const;
 	long getAdjacency(const int &face, const int &index = 0) const;
@@ -100,7 +99,7 @@ private:
 	bitpit::CollapsedVector2D<long> m_interfaces;
 	bitpit::CollapsedVector2D<long> m_adjacencies;
 
-	void _initialize(bool interior, int nInterfacesPerFace = 0);
+	void _initialize(bool interior, bool storeNeighbourhood);
 
 };
 

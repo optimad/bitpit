@@ -488,7 +488,10 @@ const std::vector<Adaption::Info> OctreePatch::_update(bool trackAdaption)
 					long nCellInterfaces = cell.getInterfaceCount();
 					const long *interfaces = cell.getInterfaces();
 					for (int k = 0; k < nCellInterfaces; ++k) {
-						removedInterfaces.insert(interfaces[k]);
+						long interfaceId = interfaces[k];
+						if (interfaceId >= 0) {
+							removedInterfaces.insert(interfaceId);
+						}
 					}
 
 					removedCellsIter++;
@@ -742,16 +745,21 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 		int danglingFace = danglingFaceInfo.face;
 
 		int nInterfaces = danglingCell.getInterfaceCount(danglingFace);
-		std::vector<FaceInfo> vertexSourceList(1 + nInterfaces);
-		vertexSourceList[0] = danglingFaceInfo;
+		std::vector<FaceInfo> vertexSourceList;
+		vertexSourceList.reserve(1 + nInterfaces);
+
+		vertexSourceList.emplace_back(danglingFaceInfo.id, danglingFaceInfo.face);
 		for (int k = 0; k < nInterfaces; ++k) {
 			long interfaceId = danglingCell.getInterface(danglingFace, k);
+			if (interfaceId < 0) {
+				continue;
+			}
 
 			Interface &interface = m_interfaces[interfaceId];
 			if (interface.getOwner() != danglingId) {
-				vertexSourceList[1 + k] = FaceInfo(interface.getOwner(), interface.getOwnerFace());
+				vertexSourceList.emplace_back(interface.getOwner(), interface.getOwnerFace());
 			} else {
-				vertexSourceList[1 + k] = FaceInfo(interface.getNeigh(), interface.getNeighFace());
+				vertexSourceList.emplace_back(interface.getNeigh(), interface.getNeighFace());
 			}
 		}
 
@@ -975,6 +983,9 @@ OctreePatch::FaceInfoSet OctreePatch::removeCells(std::vector<long> &cellIds)
 		const long *interfaces = cell.getInterfaces();
 		for (int k = 0; k < nCellInterfaces; ++k) {
 			long interfaceId = interfaces[k];
+			if (interfaceId < 0) {
+				continue;
+			}
 
 			int danglingSide = -1;
 			if (deadInterfaces.count(interfaceId) == 0) {
@@ -1128,10 +1139,10 @@ long OctreePatch::createCell(OctantInfo octantInfo,
 	cell.setConnect(std::move(vertices));
 
 	// Interfaces
-	cell.initializeInterfaces(interfaces);
+	cell.setInterfaces(interfaces);
 
 	// Adjacencies
-	cell.initializeAdjacencies(adjacencies);
+	cell.setAdjacencies(adjacencies);
 
 	// Update data of interfaces and neighbours
 	int nCellFaces = cell.getFaceCount();

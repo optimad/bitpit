@@ -103,10 +103,10 @@ Cell::Cell()
 /*!
 	Creates a new cell.
 */
-Cell::Cell(const long &id, ElementInfo::Type type, bool interior)
-	: Element(id, type), m_interior(interior)
+Cell::Cell(const long &id, ElementInfo::Type type, bool interior, bool storeNeighbourhood)
+	: Element(id, type)
 {
-	_initialize(type);
+	_initialize(interior, storeNeighbourhood);
 }
 
 /*!
@@ -135,37 +135,23 @@ Cell & Cell::operator=(const Cell& other)
 
 	\param type is the type of the element
 	\param interior if true the cell is flagged as interior
-	\param nInterfacesPerFace is the number of interfaces per face that
-	will be used to initialize the interface's data structure. If this
-	parameter is less or equal to zero, the interface's data structure
-	will not be initialized.
 */
-void Cell::initialize(ElementInfo::Type type, bool interior, int nInterfacesPerFace)
+void Cell::initialize(ElementInfo::Type type, bool interior, bool storeNeighbourhood)
 {
 	Element::initialize(type);
 
-	_initialize(interior, nInterfacesPerFace);
+	_initialize(interior, storeNeighbourhood);
 }
 
 /*!
 	Internal function to initialize the data structures of the cell.
-
-	\param interior if true the cell is flagged as interior
-	\param nInterfacesPerFace is the number of interfaces per face that
-	will be used to initialize the interface's data structure. If this
-	parameter is less or equal to zero, the interface's data structure
-	will not be initialized.
 */
-void Cell::_initialize(bool interior, int nInterfacesPerFace)
+void Cell::_initialize(bool interior, bool storeNeighbourhood)
 {
 	setInterior(interior);
 
-	if (getType() != ElementInfo::UNDEFINED && nInterfacesPerFace >= 1) {
-		const ElementInfo &elementInfo = getInfo();
-		std::vector<int> interfaceCount(elementInfo.nFaces, nInterfacesPerFace);
-		initializeEmptyInterfaces(interfaceCount);
-		initializeEmptyAdjacencies(interfaceCount);
-	}
+	resetInterfaces(storeNeighbourhood);
+	resetAdjacencies(storeNeighbourhood);
 }
 
 /*!
@@ -190,24 +176,60 @@ bool Cell::isInterior() const
 }
 
 /*!
-	Initialize all the interfaces of the cell.
+	Resets the interfaces of the cell.
 
-	\param interfaces the list of all interfaces associated to the cell
+	If the interfaces are stored, there will always be at least one
+	interface entry for each face. If a face is not linked with an
+	interface, its entry needs to be set to the placeholder value
+	NULL_ID. When multiple interfaces are linked to a face, all
+	entries must point to valid interfaces.
+
+	The interface data structure can be prepared to store the interfaces
+	only if the cell type is known.
+
+	\param storeInterfaces if true the interface data structure will
+	prepared to store the interfaces, otherwise the data structure will
+	be cleared and it will not be possible to store interfaces.
 */
-void Cell::initializeInterfaces(std::vector<std::vector<long>> &interfaces)
+void Cell::resetInterfaces(bool storeInterfaces)
 {
-	m_interfaces = CollapsedVector2D<long>(interfaces);
+	if (!storeInterfaces || getType() == ElementInfo::UNDEFINED) {
+		m_interfaces.clear();
+	} else {
+		std::vector<int> interfaceCount(getFaceCount(), 1);
+		m_interfaces = CollapsedVector2D<long>(interfaceCount, NULL_ID);
+	}
 }
 
 /*!
-	Initialize the data structure that holds the information about the
-	interfaces.
+	Sets all the interfaces of the cell.
 
-	\param nInterfaces An array with the number of interfaces for each face
+	\param interfaces the list of all interfaces associated to the cell
 */
-void Cell::initializeEmptyInterfaces(const std::vector<int> interfaceCount)
+void Cell::setInterfaces(std::vector<std::vector<long>> &interfaces)
 {
-	m_interfaces = CollapsedVector2D<long>(interfaceCount, NULL_ID);
+	m_interfaces = CollapsedVector2D<long>(interfaces);
+
+	// The interface vector must have as many elements as faces
+	if (getType() != ElementInfo::UNDEFINED) {
+		int delta = m_interfaces.size() - getFaceCount();
+		if (delta > 0) {
+			for (int i = 0; i < delta; ++i) {
+				m_interfaces.pop_back();
+			}
+		} else if (delta < 0) {
+			for (int i = 0; i < delta; ++i) {
+				m_interfaces.push_back(1, NULL_ID);
+			}
+		}
+	}
+
+	// Check that there is at least one interfaces for each face
+	for (int i = 0; i < m_interfaces.size(); ++i) {
+		if (m_interfaces.sub_array_size(i) == 0) {
+			m_interfaces.push_back_in_sub_array(i, NULL_ID);
+		}
+	}
 }
 
 /*!
@@ -230,6 +252,17 @@ void Cell::setInterface(const int &face, const int &index, const long &interface
 */
 void Cell::pushInterface(const int &face, const long &interface)
 {
+	// If there is only one interface stored for the specified face and
+	// that interface is negative, we need to overwrite the value and
+	// not add another interface.
+	if (m_interfaces.sub_array_size(face) == 1) {
+		if (m_interfaces.get(face, 0) < 0) {
+			m_interfaces.set(face, 0, interface);
+			return;
+		}
+	}
+
+	// There are multiple adjacency, we need to add the interface.
 	m_interfaces.push_back_in_sub_array(face, interface);
 }
 
@@ -242,19 +275,22 @@ void Cell::pushInterface(const int &face, const long &interface)
 */
 void Cell::deleteInterface(const int &face, const int &i)
 {
+	// If there is only one interface stored for the specified face, we
+	// need to overwrite the value and not delete the interface.
+	if (m_interfaces.sub_array_size(face) == 1) {
+		m_interfaces.set(face, 0, NULL_ID);
+		return;
+	}
+
+	// There are multiple interfaces, we need to delete the interface.
 	m_interfaces.erase(face, i);
 }
 
 /*!
-	Unsets the interfaces associated to the cell.
-*/
-void Cell::unsetInterfaces()
-{
-	m_interfaces.clear();
-}
-
-/*!
 	Gets the total number of interfaces of the cell.
+
+	The placeholder interface ids on faces not acutally linked to a
+	real interfaces will be counted as well.
 
 	\result The total number of interfaces of the cell.
 */
@@ -265,6 +301,9 @@ int Cell::getInterfaceCount() const
 
 /*!
 	Gets the number of interfaces of the specified face of the cell.
+
+	The placeholder interface id on a face not acutally linked to a
+	real interfaces will be counted as well.
 
 	\param face the face of the cell
 	\result The number of interfaces of the specified face of the cell.
@@ -299,8 +338,6 @@ const long * Cell::getInterfaces() const
 /*!
 	Gets the interfaces of the given face of the cell.
 
-	\as getInterface(const int &face, const int &index) const
-
 	\param face the face of the cell
 	\result The requested interfaces
 */
@@ -310,25 +347,60 @@ const long * Cell::getInterfaces(const int &face) const
 }
 
 /*!
-	Initialize all the adjacencies of the cell.
+	Resets the adjacencies of the cell.
 
-	\param adjacencies the list of all adjacencies associated to the cell
+	If the adjacencies are stored, there will always be at least one
+	adjacency entry for each face. If a face is not linked with a
+	neighbour, its entry needs to be set to the placeholder value
+	NULL_ID. When multiple neighbours are linked to a face, all
+	entries must point to valid cells.
+
+	The adjacency data structure can be prepared to store the neighbours
+	only if the cell type is known.
+
+	\param storeAdjacencies if true the adjacency data structure will
+	prepared to store the neighbours, otherwise the data structure will
+	be cleared and it will not be possible to store neighbours.
 */
-void Cell::initializeAdjacencies(std::vector<std::vector<long>> &adjacencies)
+void Cell::resetAdjacencies(bool storeAdjacencies)
 {
-	m_adjacencies = CollapsedVector2D<long>(adjacencies);
+	if (!storeAdjacencies || getType() == ElementInfo::UNDEFINED) {
+		m_adjacencies.clear();
+	} else {
+		std::vector<int> adjacencyCount(getFaceCount(), 1);
+		m_adjacencies = CollapsedVector2D<long>(adjacencyCount, NULL_ID);
+	}
 }
 
 /*!
-	Initialize the data structure that holds the information about the
-	adjacencies.
+	Sets all the adjacencies of the cell.
 
-	\param nAdjacencies An array with the number of adjacencies for each
-	face
+	\param adjacencies the list of all adjacencies associated to the cell
 */
-void Cell::initializeEmptyAdjacencies(const std::vector<int> adjacencyCount)
+void Cell::setAdjacencies(std::vector<std::vector<long>> &adjacencies)
 {
-	m_adjacencies = CollapsedVector2D<long>(adjacencyCount, NULL_ID);
+	m_adjacencies = CollapsedVector2D<long>(adjacencies);
+
+	// The adjacency vector must have as many elements as faces
+	if (getType() != ElementInfo::UNDEFINED) {
+		int delta = m_adjacencies.size() - getFaceCount();
+		if (delta > 0) {
+			for (int i = 0; i < delta; ++i) {
+				m_adjacencies.pop_back();
+			}
+		} else if (delta < 0) {
+			for (int i = 0; i < delta; ++i) {
+				m_adjacencies.push_back(1, NULL_ID);
+			}
+		}
+	}
+
+	// Check that there is at least one adjacency for each face
+	for (int i = 0; i < m_adjacencies.size(); ++i) {
+		if (m_adjacencies.sub_array_size(i) == 0) {
+			m_adjacencies.push_back_in_sub_array(i, NULL_ID);
+		}
+	}
 }
 
 /*!
@@ -351,6 +423,17 @@ void Cell::setAdjacency(const int &face, const int &index, const long &adjacency
 */
 void Cell::pushAdjacency(const int &face, const long &adjacency)
 {
+	// If there is only one adjacency stored for the specified face and
+	// that adjacency is negative, we need to overwrite the value and
+	// not add another adjacency.
+	if (m_adjacencies.sub_array_size(face) == 1) {
+		if (m_adjacencies.get(face, 0) < 0) {
+			m_adjacencies.set(face, 0, adjacency);
+			return;
+		}
+	}
+
+	// There are multiple adjacency, we need to add the adjacency.
 	m_adjacencies.push_back_in_sub_array(face, adjacency);
 }
 
@@ -363,19 +446,22 @@ void Cell::pushAdjacency(const int &face, const long &adjacency)
 */
 void Cell::deleteAdjacency(const int &face, const int &i)
 {
+	// If there is only one adjacency stored for the specified face, we
+	// need to overwrite that value and not delete the adjacency.
+	if (m_adjacencies.sub_array_size(face) == 1) {
+		m_adjacencies.set(face, 0, NULL_ID);
+		return;
+	}
+
+	// There are multiple adjacencies, we need to delete the adjacency.
 	m_adjacencies.erase(face, i);
 }
 
 /*!
-	Unsets the adjacencies associated to the cell.
-*/
-void Cell::unsetAdjacencies()
-{
-	m_adjacencies.clear();
-}
-
-/*!
 	Gets the total number of adjacencies of the cell.
+
+	The placeholder neighbour ids on faces not acutally linked to a
+	real neighbour will be counted as well.
 
 	\result The total number of adjacencies of the cell.
 */
@@ -386,6 +472,9 @@ int Cell::getAdjacencyCount() const
 
 /*!
 	Gets the number of adjacencies of the specified face of the cell.
+
+	The placeholder neighbour id on a face not acutally linked to a
+	real neighbours will be counted as well.
 
 	\param face the face of the cell
 	\result The number of adjacencies of the specified face of the cell.

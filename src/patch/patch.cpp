@@ -261,7 +261,7 @@ void Patch::resetInterfaces()
 	m_nInterfaces = 0;
 
 	for (auto &cell : m_cells) {
-		cell.unsetInterfaces();
+		cell.resetInterfaces();
 	}
 }
 
@@ -1307,10 +1307,15 @@ bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
 			int nFaceInterfaces = cell.getInterfaceCount(i);
 			for (int k = 0; k < nFaceInterfaces; ++k) {
 				long interfaceId = cell.getInterface(i,k);
+				if (interfaceId < 0) {
+					continue;
+				}
+
 				Interface &interface = m_interfaces[interfaceId];
 
 				// Update adjacency of the neighbours
 				long neighId = cell.getAdjacency(i,k);
+				Cell &neigh = m_cells[neighId];
 
 				int neighFace;
 				if (interface.getOwner() == neighId) {
@@ -1319,17 +1324,11 @@ bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
 					neighFace = interface.getNeighFace();
 				}
 
-				Cell &neigh = m_cells[neighId];
-				if (neigh.getAdjacencyCount(neighFace) == 1) {
-					neigh.setAdjacency(neighFace, 0, Element::NULL_ID);
-				} else {
-					int adjacenyId = 0;
-					while (neigh.getAdjacency(neighId, adjacenyId) != id) {
-						++adjacenyId;
-					}
-
-					neigh.deleteAdjacency(neighFace, adjacenyId);
+				int adjacenyId = 0;
+				while (neigh.getAdjacency(neighId, adjacenyId) != id) {
+					++adjacenyId;
 				}
+				neigh.deleteAdjacency(neighFace, adjacenyId);
 
 				// Update interface
 				if (interface.getOwner() == id) {
