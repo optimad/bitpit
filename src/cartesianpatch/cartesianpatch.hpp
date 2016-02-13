@@ -109,13 +109,13 @@ private:
 	void initializeInterfaceArea();
 	void initializeCellVolume();
 
-	void createVertices();
+	void addVertices();
 
-	void createCells();
+	void addCells();
 
-	void createInterfaces();
+	void addInterfaces();
 	std::array<int, 3> getInterfaceCountDirection(const int &direction);
-	void createInterfacesDirection(const int &direction);
+	void addInterfacesDirection(const int &direction);
 
 	long getCellLinearId(const int &i, const int &j, const int &k) const;
 	long getCellLinearId(const std::array<int, 3> &ijk) const;

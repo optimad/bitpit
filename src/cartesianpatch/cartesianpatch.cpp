@@ -334,9 +334,9 @@ const std::vector<Adaption::Info> CartesianPatch::_update(bool trackAdaption)
 	reset();
 
 	// Definition of the mesh
-	createVertices();
-	createCells();
-	createInterfaces();
+	addVertices();
+	addCells();
+	addInterfaces();
 
 	// Disable advanced editing
 	setExpert(false);
@@ -376,7 +376,7 @@ const std::vector<Adaption::Info> CartesianPatch::_update(bool trackAdaption)
 /*!
 	Creates the vertices of the patch.
 */
-void CartesianPatch::createVertices()
+void CartesianPatch::addVertices()
 {
 	std::cout << "  >> Creating vertices\n";
 
@@ -414,7 +414,7 @@ void CartesianPatch::createVertices()
 /*!
 	Creates the cells of the patch.
 */
-void CartesianPatch::createCells()
+void CartesianPatch::addCells()
 {
 	std::cout << "  >> Creating cells\n";
 
@@ -465,7 +465,7 @@ void CartesianPatch::createCells()
 /*!
 	Creates the interfaces of the patch.
 */
-void CartesianPatch::createInterfaces()
+void CartesianPatch::addInterfaces()
 {
 	std::cout << "  >> Creating interfaces\n";
 
@@ -486,7 +486,7 @@ void CartesianPatch::createInterfaces()
 	// Create the interfaces
 	m_interfaces.reserve(nTotalInterfaces);
 	for (int n = 0; n < getDimension(); n++) {
-		createInterfacesDirection(n);
+		addInterfacesDirection(n);
 	}
 }
 
@@ -511,7 +511,7 @@ std::array<int, 3> CartesianPatch::getInterfaceCountDirection(const int &directi
 	\param direction the method will creat the interfaces normal to this
 	                 direction
 */
-void CartesianPatch::createInterfacesDirection(const int &direction)
+void CartesianPatch::addInterfacesDirection(const int &direction)
 {
 	std::cout << "  >> Creating interfaces normal to direction " << direction << "\n";
 
