@@ -431,6 +431,7 @@ out << "  stack buffer:        " << MAXSTK          << std::endl;
 out << "  data struct. size:   " << STACK.size()    << std::endl;
 out << "  data: " << std::endl;
 out << "[";
+if (TOPSTK == 0) return;
 for (int i = 0; i < TOPSTK-1; i++) {
     out << STACK[i] << ", ";
 } //next i
