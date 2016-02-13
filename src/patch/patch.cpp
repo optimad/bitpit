@@ -665,7 +665,7 @@ long Patch::generateVertexId()
 */
 Patch::VertexIterator Patch::createVertex(long id)
 {
-	if (id == Vertex::NULL_ID) {
+	if (id < 0) {
 		id = generateVertexId();
 	}
 
@@ -745,7 +745,7 @@ Patch::VertexIterator Patch::addVertex(Vertex &&source, long id)
 		return vertexEnd();
 	}
 
-	if (id == Vertex::NULL_ID) {
+	if (id < 0) {
 		id = source.get_id();
 	}
 
@@ -1176,7 +1176,7 @@ long Patch::generateCellId()
 */
 Patch::CellIterator Patch::createCell(bool interior, long id)
 {
-	if (id == Element::NULL_ID) {
+	if (id < 0) {
 		id = generateCellId();
 	}
 
@@ -1321,7 +1321,7 @@ Patch::CellIterator Patch::addCell(Cell &&source, long id)
 		return cellEnd();
 	}
 
-	if (id == Element::NULL_ID) {
+	if (id < 0) {
 		id = source.get_id();
 	}
 
@@ -1931,7 +1931,7 @@ long Patch::generateInterfaceId()
 */
 Patch::InterfaceIterator Patch::createInterface(long id)
 {
-	if (id == Element::NULL_ID) {
+	if (id < 0) {
 		id = generateInterfaceId();
 	}
 
@@ -2013,7 +2013,7 @@ Patch::InterfaceIterator Patch::addInterface(Interface &&source, long id)
 		return interfaceEnd();
 	}
 
-	if (id == Element::NULL_ID) {
+	if (id < 0) {
 		id = source.get_id();
 	}
 
@@ -2054,7 +2054,7 @@ bool Patch::deleteInterface(const long &id, bool updateNeighs, bool delayed)
 
 		// Update neighbour
 		long neighId = interface.getNeigh();
-		if (neighId != Element::NULL_ID) {
+		if (neighId >= 0) {
 			Cell &neigh = m_cells[neighId];
 			int neighFace = interface.getNeighFace();
 
