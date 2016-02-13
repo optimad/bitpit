@@ -100,7 +100,7 @@ Vertex::Vertex(const long &id)
 	\param[in] id is the id of the vertex
 	\param[in] coords are the vertex coordinates
 */
-Vertex::Vertex(const long &id, std::array<double, 3> &coords)
+Vertex::Vertex(const long &id, const std::array<double, 3> &coords)
 {
 	set_id(id);
 	setCoords(coords);
@@ -165,7 +165,7 @@ long Vertex::get_id() const
 
 	\param coords are the coordinates of the vertex
 */
-void Vertex::setCoords(std::array<double, 3> &coords)
+void Vertex::setCoords(const std::array<double, 3> &coords)
 {
 	m_coords = coords;
 }

@@ -53,7 +53,7 @@ public:
 
 	Vertex();
 	Vertex(const long &id);
-	Vertex(const long &id, std::array<double, 3> &coords);
+	Vertex(const long &id, const std::array<double, 3> &coords);
 
 	Vertex(const Vertex &other) = default;
 	Vertex(Vertex &&other) = default;
@@ -68,7 +68,7 @@ public:
 	void set_id(const long &id);
 	long get_id() const;
 
-	void setCoords(std::array<double, 3> &coords);
+	void setCoords(const std::array<double, 3> &coords);
 	const std::array<double, 3> & getCoords() const;
 
 	void translate(const std::array<double, 3> &translation);
