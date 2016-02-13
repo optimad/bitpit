@@ -819,7 +819,7 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 
 		OctantInfo ownerOctantInfo(owner, true);
 		long ownerId = getOctantId(ownerOctantInfo);
-		if (ownerId == Element::NULL_ID) {
+		if (ownerId < 0) {
 			octantTreeInterfaces[ownerOctantInfo.id].push_back(interfaceTreeId);
 			buildInterface = true;
 		}
@@ -828,7 +828,7 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 		if (!isBoundary) {
 			OctantInfo neighOctantInfo(neigh, !isGhost);
 			neighId = getOctantId(neighOctantInfo);
-			if (neighId == Element::NULL_ID) {
+			if (neighId < 0) {
 				octantTreeInterfaces[neighOctantInfo.id].push_back(interfaceTreeId);
 				buildInterface = true;
 			}
@@ -870,7 +870,7 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 		// A boundary interface cannnot be on a dangling face.
 		if (!isBoundary) {
 			FaceInfo *guessDanglingInfo;
-			if (ownerId == Element::NULL_ID) {
+			if (ownerId < 0) {
 				guessDanglingInfo = &interfaceFaces[1];
 			} else {
 				guessDanglingInfo = &interfaceFaces[0];
