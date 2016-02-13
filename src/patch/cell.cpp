@@ -106,7 +106,7 @@ Cell::Cell()
 Cell::Cell(const long &id, ElementInfo::Type type, bool interior)
 	: Element(id, type), m_interior(interior)
 {
-
+	_initialize(type);
 }
 
 /*!
@@ -134,16 +134,33 @@ Cell & Cell::operator=(const Cell& other)
 	Initializes the data structures of the cell.
 
 	\param type is the type of the element
+	\param interior if true the cell is flagged as interior
 	\param nInterfacesPerFace is the number of interfaces per face that
 	will be used to initialize the interface's data structure. If this
 	parameter is less or equal to zero, the interface's data structure
 	will not be initialized.
 */
-void Cell::initialize(ElementInfo::Type type, int nInterfacesPerFace)
+void Cell::initialize(ElementInfo::Type type, bool interior, int nInterfacesPerFace)
 {
 	Element::initialize(type);
 
-	if (type != ElementInfo::UNDEFINED && nInterfacesPerFace >= 1) {
+	_initialize(interior, nInterfacesPerFace);
+}
+
+/*!
+	Internal function to initialize the data structures of the cell.
+
+	\param interior if true the cell is flagged as interior
+	\param nInterfacesPerFace is the number of interfaces per face that
+	will be used to initialize the interface's data structure. If this
+	parameter is less or equal to zero, the interface's data structure
+	will not be initialized.
+*/
+void Cell::_initialize(bool interior, int nInterfacesPerFace)
+{
+	setInterior(interior);
+
+	if (getType() != ElementInfo::UNDEFINED && nInterfacesPerFace >= 1) {
 		const ElementInfo &elementInfo = getInfo();
 		std::vector<int> interfaceCount(elementInfo.nFaces, nInterfacesPerFace);
 		initializeEmptyInterfaces(interfaceCount);

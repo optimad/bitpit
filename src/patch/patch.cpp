@@ -1237,8 +1237,7 @@ Patch::CellIterator Patch::addCell(ElementInfo::Type type, bool interior, const 
 
 	CellIterator iterator = createCell(interior, id);
 	Cell &cell = (*iterator);
-	cell.initialize(type);
-	cell.setInterior(interior);
+	cell.initialize(type, interior);
 
 	return iterator;
 }

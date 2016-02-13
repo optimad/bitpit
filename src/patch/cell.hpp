@@ -59,7 +59,7 @@ public:
 	Cell& operator = (const Cell &other);
 	Cell& operator=(Cell&& other) = default;
 
-	void initialize(ElementInfo::Type type, int nInterfacesPerFace = 0);
+	void initialize(ElementInfo::Type type, bool interior, int nInterfacesPerFace = 0);
 
 	bool isInterior() const;
 	
@@ -99,6 +99,8 @@ private:
 
 	bitpit::CollapsedVector2D<long> m_interfaces;
 	bitpit::CollapsedVector2D<long> m_adjacencies;
+
+	void _initialize(bool interior, int nInterfacesPerFace = 0);
 
 };
 

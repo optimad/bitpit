@@ -446,9 +446,6 @@ void CartesianPatch::createCells()
 				CellIterator cellIterator = Patch::addCell(cellType, true, id_cell);
 				Cell &cell = *cellIterator;
 
-				// Initialize the cell
-				cell.initialize(cellType, 1);
-
 				// Connettività
 				cell.setVertex(0, getVertexLinearId(i,     j,     k));
 				cell.setVertex(1, getVertexLinearId(i + 1, j,     k));
