@@ -1243,6 +1243,31 @@ Patch::CellIterator Patch::addCell(ElementInfo::Type type, bool interior, const 
 }
 
 /*!
+	Adds a new cell with the specified id, type, and connectivity.
+
+	\param type is the type of the cell
+	\param type is the connectivity of the cell
+	\param interior defines if the cell is in the interior of the patch
+	or if it's a ghost cell
+	\param id is the id of the new cell. If a negative id value is
+	specified, ad new unique id will be generated
+	\return The id associated to the cell.
+*/
+Patch::CellIterator Patch::addCell(ElementInfo::Type type, bool interior,
+                                   std::unique_ptr<long[]> &connect, const long &id)
+{
+	if (!isExpert()) {
+		return cellEnd();
+	}
+
+	CellIterator iterator = addCell(type, interior, id);
+	Cell &cell = (*iterator);
+	cell.setConnect(std::move(connect));
+
+	return iterator;
+}
+
+/*!
 	Adds the specified cell to the patch.
 
 	\param source is the cell that will be added

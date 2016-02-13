@@ -125,6 +125,7 @@ public:
 	long generateCellId();
 	CellIterator addCell(const long &id = Element::NULL_ID);
 	CellIterator addCell(ElementInfo::Type type, bool interior, const long &id = Element::NULL_ID);
+	CellIterator addCell(ElementInfo::Type type, bool interior, std::unique_ptr<long[]> &connect, const long &id = Element::NULL_ID);
 	CellIterator addCell(Cell source);
 	CellIterator addCell(Cell &&source, long id = Element::NULL_ID);
 	bool deleteCell(const long &id, bool updateNeighs = true, bool delayed = false);
