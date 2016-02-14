@@ -520,6 +520,22 @@ const long * Cell::getAdjacencies(const int &face) const
 }
 
 /*!
+	Checks if the specified face is a border.
+
+	\return True if the face is a border, false otherwise.
+*/
+bool Cell::isFaceBorder(int face) const
+{
+	assert(m_adjacencies.size() > 0);
+
+	if (m_adjacencies.size() == 0) {
+		return true;
+	} else {
+		return (getAdjacency(face, 0) < 0);
+	}
+}
+
+/*!
 	Displays the cell information to an output stream
 
 	\param[in] out is the output stream

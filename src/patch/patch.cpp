@@ -788,7 +788,7 @@ long Patch::countFreeVertices() const
 	for (const Cell &cell : m_cells) {
 		int nCellFaces = cell.getFaceCount();
 		for (int i = 0; i < nCellFaces; ++i) {
-			if (cell.getAdjacency(i, 0) >= 0) {
+			if (!cell.isFaceBorder(i)) {
 				continue;
 			}
 
@@ -1551,7 +1551,7 @@ long Patch::countFreeCells() const
 	for (const Cell &cell : m_cells) {
 		int nCellFaces = cell.getFaceCount();
 		for (int i = 0; i < nCellFaces; ++i) {
-			if (cell.getAdjacency(i, 0) < 0) {
+			if (cell.isFaceBorder(i)) {
 				++nFreeCells;
 				break;
 			}
@@ -2212,7 +2212,7 @@ long Patch::countFaces() const
 	for (const Cell &cell : m_cells) {
 		int nCellFaces = cell.getFaceCount();
 		for (int i = 0; i < nCellFaces; ++i) {
-			if (cell.getAdjacency(i, 0) >= 0) {
+			if (!cell.isFaceBorder(i)) {
 				nFaces += 1. / (cell.getAdjacencyCount(i) + 1);
 			} else {
 				nFaces += 1.;
@@ -2236,7 +2236,7 @@ long Patch::countFreeFaces() const
 	for (const Cell &cell : m_cells) {
 		int nCellFaces = cell.getFaceCount();
 		for (int i = 0; i < nCellFaces; ++i) {
-			if (cell.getAdjacency(i, 0) < 0) {
+			if (cell.isFaceBorder(i)) {
 				++nFreeFaces;
 			}
 		}
@@ -2694,7 +2694,7 @@ void Patch::extractEnvelope(Patch &envelope) const
 	for (const Cell &cell : m_cells) {
 		int nCellFaces = cell.getFaceCount();
 		for (int i = 0; i < nCellFaces; ++i) {
-			if (cell.getAdjacency(i, 0) >= 0) {
+			if (!cell.isFaceBorder(i)) {
 				continue;
 			}
 
