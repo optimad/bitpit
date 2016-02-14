@@ -1582,6 +1582,46 @@ long Patch::countFreeCells() const
 }
 
 /*!
+	Counts orphan cells within the patch.
+
+	A cell is orphan if not adjacent to any cell in the mesh (neither
+	along an edge, nor at vertex)
+
+	\return The number of orphan cells.
+*/
+long Patch::countOrphanCells() const
+{
+	// Compute vertex valence
+	std::unordered_map<long, short> vertexValence;
+	for (const Cell &cell : m_cells) {
+		int nCellVertices = cell.getVertexCount();
+		for (int j = 0; j < nCellVertices; j++) {
+			vertexValence[cell.getVertex(j)] += 1;
+		}
+	}
+
+	// Loop over cells
+	long nOrphanCells = 0;
+	for (const Cell &cell : m_cells) {
+		long isIsolated = true;
+		int nCellVertices = cell.getVertexCount();
+		for (int j = 0; j < nCellVertices; j++) {
+			long vertexId = cell.getVertex(j);
+			if (vertexValence[vertexId] > 1) {
+				isIsolated = false;
+				break;
+			}
+		}
+
+		if (isIsolated) {
+			++nOrphanCells;
+		}
+        }
+
+	return nOrphanCells;
+}
+
+/*!
 	Extracts the neighbours of all the faces of the specified cell.
 
 	\param id is the id of the cell
@@ -2160,6 +2200,25 @@ long Patch::countFreeInterfaces() const
         }
 
 	return nFreeInterfaces;
+}
+
+/*!
+	Counts orphan interfaces within the patch.
+
+	An interface is orphan if not linked to any cell in the mesh.
+
+	\return The number of orphan interfaces.
+*/
+long Patch::countOrphanInterfaces() const
+{
+	long nOrphanInterfaces = 0;
+	for (const Interface &interface : m_interfaces) {
+		if (interface.getOwner() < 0 && interface.getNeigh() < 0) {
+			++nOrphanInterfaces;
+		}
+        }
+
+	return nOrphanInterfaces;
 }
 
 /*!

@@ -138,6 +138,7 @@ public:
 	virtual double evalCellVolume(const long &id) = 0;
 	virtual double evalCellSize(const long &id) = 0;
 	long countFreeCells() const;
+	long countOrphanCells() const;
 	virtual std::array<double, 3> evalCellCentroid(const long &id);
 	std::vector<long> findCellNeighs(const long &id) const;
 	std::vector<long> findCellNeighs(const long &id, int codimension, bool complete = true) const;
@@ -169,6 +170,7 @@ public:
 	bool deleteInterface(const long &id, bool updateNeighs = true, bool delayed = false);
 	bool deleteInterfaces(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
 	long countFreeInterfaces() const;
+	long countOrphanInterfaces() const;
 	virtual double evalInterfaceArea(const long &id) = 0;
 	virtual std::array<double, 3> evalInterfaceCentroid(const long &id);
 	virtual std::array<double, 3> evalInterfaceNormal(const long &id) = 0;
