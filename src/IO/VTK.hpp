@@ -262,6 +262,8 @@ class VTK{
         std::string                     getDirectory(  ) const;
 
         void                            setNames( std::string , std::string ) ;
+        void                            setName( std::string ) ;
+        void                            setDirectory( std::string ) ;
         void                            setCounter( int c_=0 ) ;
         void                            setParallel( uint16_t , uint16_t ) ;
 

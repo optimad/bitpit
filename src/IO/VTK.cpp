@@ -115,14 +115,36 @@ std::string  VTK::getHeaderType( ){
 };
 
 /*! 
- * set name for VTK file
+ * set directory and name for VTK file
  * @param[in]  dir_    directory of file with final "/"
  * @param[in]  name_   file name without suffix
  */
 void  VTK::setNames( std::string dir_, std::string name_ ){
 
-  fh.setDirectory(dir_);
+  setDirectory(dir_);
+  setName(name_);
+
+  return ;
+};
+
+/*!
+ * set name for VTK file
+ * @param[in]  name_   file name without suffix
+ */
+void  VTK::setName( std::string name_ ){
+
   fh.setName(name_);
+
+  return ;
+};
+
+/*!
+ * set directory for VTK file
+ * @param[in]  dir_    directory of file with final "/"
+ */
+void  VTK::setDirectory( std::string dir_ ){
+
+  fh.setDirectory(dir_);
 
   return ;
 };
