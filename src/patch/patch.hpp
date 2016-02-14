@@ -90,9 +90,6 @@ public:
 	int getDimension() const;
 	bool isThreeDimensional() const;
 
-	std::string getName() const;
-	void setName(std::string name);
-
 	long getVertexCount() const;
 	PiercedVector<Vertex> &vertices();
 	Vertex &getVertex(const long &id);
@@ -270,7 +267,6 @@ private:
 
 	int m_id;
 	int m_dimension;
-	std::string m_name;
 
 	bool m_hasCustomTolerance;
 	double m_tolerance;

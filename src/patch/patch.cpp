@@ -344,14 +344,13 @@ bool Patch::reserveInterfaces(size_t nInterfaces)
 */
 void Patch::write(std::string filename)
 {
-	std::string oldFilename  = VTKUnstructuredGrid::getName();
-	std::string oldDirectory = VTKUnstructuredGrid::getDirectory();
+	std::string oldFilename = VTKUnstructuredGrid::getName();
 
 	VTKUnstructuredGrid::setCodex(VTKFormat::APPENDED);
-	VTKUnstructuredGrid::setNames(".", filename);
+	VTKUnstructuredGrid::setName(filename);
 	VTKUnstructuredGrid::write();
 
-	VTKUnstructuredGrid::setNames(oldDirectory, oldFilename);
+	VTKUnstructuredGrid::setName(oldFilename);
 }
 
 /*!
@@ -549,26 +548,6 @@ int Patch::getDimension() const
 bool Patch::isThreeDimensional() const
 {
 	return (m_dimension == 3);
-}
-
-/*!
-	Sets the name of the patch.
-
-	\param id the name of the patch
-*/
-void Patch::setName(std::string name)
-{
-	m_name = name;
-}
-
-/*!
-	Gets the name of the patch.
-
-	\return The name of the patch
-*/
-std::string Patch::getName() const
-{
-	return m_name;
 }
 
 /*!
