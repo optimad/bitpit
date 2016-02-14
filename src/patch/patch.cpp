@@ -796,6 +796,33 @@ bool Patch::deleteVertices(const std::vector<long> &ids, bool delayed)
 }
 
 /*!
+	Counts free vertices within the patch.
+
+	A free vertex is a vertex on a free face.
+
+	\return The number of free vertices.
+*/
+long Patch::countFreeVertices() const
+{
+	std::unordered_set<long> freeVertices;
+	for (const Cell &cell : m_cells) {
+		int nCellFaces = cell.getFaceCount();
+		for (int i = 0; i < nCellFaces; ++i) {
+			if (cell.getAdjacency(i, 0) >= 0) {
+				continue;
+			}
+
+			std::vector<int> faceLocalConnect = cell.getFaceLocalConnect(i);
+			for (unsigned int j = 0; j < faceLocalConnect.size(); ++j) {
+				freeVertices.insert(cell.getVertex(faceLocalConnect[j]));
+			}
+		}
+	}
+
+        return freeVertices.size();
+}
+
+/*!
 	Count orphan vertices in the mesh.
 
 	An orphan vertex is a vertex not linked by any cells.
@@ -1532,6 +1559,29 @@ Patch::CellIterator Patch::moveInternal2Ghost(const long &id)
 }
 
 /*!
+	Counts free cells within the patch.
+
+	A cell is free if contains at least one free face.
+
+	\return The number of free cells.
+*/
+long Patch::countFreeCells() const
+{
+	double nFreeCells = 0;
+	for (const Cell &cell : m_cells) {
+		int nCellFaces = cell.getFaceCount();
+		for (int i = 0; i < nCellFaces; ++i) {
+			if (cell.getAdjacency(i, 0) < 0) {
+				++nFreeCells;
+				break;
+			}
+		}
+	}
+
+	return nFreeCells;
+}
+
+/*!
 	Extracts the neighbours of all the faces of the specified cell.
 
 	\param id is the id of the cell
@@ -2094,6 +2144,25 @@ bool Patch::deleteInterfaces(const std::vector<long> &ids, bool updateNeighs, bo
 }
 
 /*!
+	Counts free interfaces within the patch.
+
+	An interface is free if belongs to just one cell.
+
+	\result The number of free interfaces.
+*/
+long Patch::countFreeInterfaces() const
+{
+	long nFreeInterfaces = 0;
+	for (const Interface &interface : m_interfaces) {
+		if (interface.getNeigh() < 0) {
+			++nFreeInterfaces;
+		}
+        }
+
+	return nFreeInterfaces;
+}
+
+/*!
 	Count faces within the patch.
 
 	\result The total number of faces in the patch.
@@ -2113,6 +2182,28 @@ long Patch::countFaces() const
 	}
 
 	return ((long) round(nFaces));
+}
+
+/*!
+	Counts free faces within the patch.
+
+	A face is free if a cell has no adjacent along that faces.
+
+	\result The number of free faces.
+*/
+long Patch::countFreeFaces() const
+{
+	double nFreeFaces = 0;
+	for (const Cell &cell : m_cells) {
+		int nCellFaces = cell.getFaceCount();
+		for (int i = 0; i < nCellFaces; ++i) {
+			if (cell.getAdjacency(i, 0) < 0) {
+				++nFreeFaces;
+			}
+		}
+	}
+
+	return nFreeFaces;
 }
 
 /*!

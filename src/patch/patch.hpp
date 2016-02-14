@@ -103,6 +103,7 @@ public:
 	VertexIterator addVertex(const std::array<double, 3> &coords, const long &id = Vertex::NULL_ID);
 	VertexIterator addVertex(Vertex source);
 	VertexIterator addVertex(Vertex &&source, long id = Vertex::NULL_ID);
+	long countFreeVertices() const;
 	long countOrphanVertices();
 	std::vector<long> findOrphanVertices();
 	bool deleteOrphanVertices();
@@ -136,6 +137,7 @@ public:
 	CellIterator moveInternal2Ghost(const long &id);
 	virtual double evalCellVolume(const long &id) = 0;
 	virtual double evalCellSize(const long &id) = 0;
+	long countFreeCells() const;
 	virtual std::array<double, 3> evalCellCentroid(const long &id);
 	std::vector<long> findCellNeighs(const long &id) const;
 	std::vector<long> findCellNeighs(const long &id, int codimension, bool complete = true) const;
@@ -166,6 +168,7 @@ public:
 	InterfaceIterator addInterface(Interface &&source, long id = Element::NULL_ID);
 	bool deleteInterface(const long &id, bool updateNeighs = true, bool delayed = false);
 	bool deleteInterfaces(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
+	long countFreeInterfaces() const;
 	virtual double evalInterfaceArea(const long &id) = 0;
 	virtual std::array<double, 3> evalInterfaceCentroid(const long &id);
 	virtual std::array<double, 3> evalInterfaceNormal(const long &id) = 0;
@@ -175,6 +178,7 @@ public:
 	InterfaceIterator interfaceEnd();
 
 	long countFaces() const;
+	long countFreeFaces() const;
 
 	bool sort();
 	bool sortVertices();
