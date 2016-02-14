@@ -65,6 +65,8 @@ public:
 
 	std::array<long, 2> getOwnerNeigh() const;
 
+	void display(std::ostream &out, unsigned short int indent) const;
+
 protected:
 
 private:

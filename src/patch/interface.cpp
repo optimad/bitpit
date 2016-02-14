@@ -319,6 +319,50 @@ std::array<long, 2> Interface::getOwnerNeigh() const
 	return cells;
 }
 
+/*!
+	Displays interface information to an output stream
+
+	\param[in] out is the output stream
+	\param[in] indent is the number of trailing spaces to prepend when
+	writing the information
+*/
+void Interface::display(std::ostream &out, unsigned short int indent) const
+{
+	std::string t_s = std::string(indent, ' ');
+
+	// If the type is unknown there are no information to display
+	if (getType() == ElementInfo::UNDEFINED) {
+	    out << t_s << "interface type:    (unknown)" << std::endl;
+	    return;
+	}
+
+	// General info ----------------------------------------------------- //
+	out << t_s << "interface type: " << getType() << std::endl;
+	out << t_s << "ID:             " << get_id() << std::endl;
+	out << t_s << "is border:      ";
+	if (getNeigh() >= 0)  { out << "(false)"; }
+	else                  { out << "(true)"; }
+	out << std::endl;
+
+	// Connectivity infos --------------------------------------------------- //
+	int nVertices = getVertexCount();
+	out << t_s << "connectivity: [ ";
+	for (int i = 0; i < nVertices - 1; ++i) {
+		out << getVertex(i) << ", ";
+	} //next i
+	out << getVertex(nVertices - 1) << " ]" << std::endl;
+
+	// Onwer infos ---------------------------------------------------------- //
+	out << t_s << "onwer ID:    " << getOwner() << std::endl;
+	out << t_s << "owner face:  " << getOwnerFace() << std::endl;
+
+	// Onwer infos ---------------------------------------------------------- //
+	if (getNeigh() >= 0) {
+		out << t_s << "neighbour ID:    " << getNeigh() << std::endl;
+		out << t_s << "neighbour face:  " << getNeighFace() << std::endl;
+	}
+}
+
 // Explicit instantiation of the Interface containers
 template class PiercedVector<Interface>;
 template class PositionalPiercedVector<Interface>;
