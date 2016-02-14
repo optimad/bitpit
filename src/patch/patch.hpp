@@ -212,6 +212,11 @@ public:
 	void resetTol();
 	bool isTolCustomized() const;
 
+	void displayStats(std::ostream &out, unsigned int padding = 0) const;
+	void displayVertices(std::ostream &out, unsigned int padding = 0) const;
+	void displayCells(std::ostream &out, unsigned int padding = 0) const;
+	void displayInterfaces(std::ostream &out, unsigned int padding = 0) const;
+
 	void write();
 	void write(std::string name);
 	void writeField(std::string name, VTKLocation location, std::vector<double> &values);

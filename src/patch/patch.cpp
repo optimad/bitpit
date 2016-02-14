@@ -2692,6 +2692,89 @@ bool Patch::isTolCustomized() const
 }
 
 /*!
+	Display patch statistics.
+
+	\param[in,out] out output stream
+	\param[in] padding (default = 0) number of leading spaces for
+	formatted output
+*/
+void Patch::displayStats(std::ostream &out, unsigned int padding) const
+{
+	std::string indent = std::string(padding, ' ');
+
+	// ====================================================================== //
+	// VERTEX STATS                                                           //
+	// ====================================================================== //
+	out << indent<< "  Vertices --------------------------------"     << endl;
+	out << indent<< "    # vertices        " << getVertexCount()      << endl;
+	out << indent<< "    # orphan vertices " << countOrphanVertices() << endl;
+	out << indent<< "    # free vertices   " << countFreeVertices()   << endl;
+
+	// ====================================================================== //
+	// FACE STATS                                                             //
+	// ====================================================================== //
+	out << indent<< "  Faces -----------------------------------"   << endl;
+	out << indent<< "    # faces         " << countFaces()          << endl;
+	out << indent<< "    # free faces    " << countFreeFaces()      << endl;
+
+	// ====================================================================== //
+	// CELLS STATS                                                            //
+	// ====================================================================== //
+	out << indent<< "  Cells -----------------------------------"   << endl;
+	out << indent<< "    # cells           " << getCellCount()      << endl;
+	out << indent<< "    # orphan cells    " << countOrphanCells()  << endl;
+	out << indent<< "    # free cells      " << countFreeCells()    << endl;
+}
+
+/*!
+	Display all the vertices currently stored within the patch.
+
+	\param[in,out] out output stream
+	\param[in] padding (default = 0) number of leading spaces for
+	formatted output
+*/
+void Patch::displayVertices(std::ostream &out, unsigned int padding) const
+{
+	std::string indent = std::string(padding, ' ');
+	for (const Vertex &vertex : m_vertices) {
+		out << indent << "vertex: " << std::endl;
+		vertex.display(out, padding + 2);
+	}
+}
+
+/*!
+	Display all the cells currently stored within the mesh.
+
+	\param[in,out] out output stream
+	\param[in] padding (default = 0) number of leading spaces for
+	formatted output
+*/
+void Patch::displayCells(std::ostream &out, unsigned int padding) const
+{
+	std::string indent = std::string(padding, ' ');
+	for (const Cell &cell : m_cells) {
+		out << indent << "cell: " << std::endl;
+		cell.display(out, padding + 2);
+	}
+}
+
+/*!
+	Display all the interfaces currently stored within the patch.
+
+	\param[in,out] out output stream
+	\param[in] padding (default = 0) number of leading spaces for
+	formatted output
+*/
+void Patch::displayInterfaces(std::ostream &out, unsigned int padding) const
+{
+	std::string indent = std::string(padding, ' ');
+	for (const Interface &interface : m_interfaces) {
+		out << indent << "interface: " << std::endl;
+		interface.display(out, padding + 2);
+	}
+}
+
+/*!
  *  Interface method for obtaining field meta Data
  *
  *  @param[in] name is the name of the field to be written
