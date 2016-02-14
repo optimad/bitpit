@@ -491,6 +491,18 @@ public:
 	}
 
 	/*!
+		Returns a constant iterator pointing to the first element
+		in the vector.
+
+		\result A constant iterator pointing to the first element in
+		the vector.
+	*/
+	const_iterator begin() const noexcept
+	{
+		return cbegin();
+	}
+
+	/*!
 		Returns the size of the storage space currently allocated
 		for the vector, expressed in terms of elements.
 
@@ -709,6 +721,18 @@ public:
 	iterator end()
 	{
 		return iterator(raw_begin() + m_last_pos + 1);
+	}
+
+	/*!
+		Returns a constant iterator referring to the past-the-end
+		element in the vector.
+
+		\result A constant iterator referring to the past-the-end
+		element in the vector.
+	*/
+	const_iterator end() const noexcept
+	{
+		return cend();
 	}
 
 	/*!
@@ -1085,6 +1109,18 @@ public:
 	}
 
 	/*!
+		Returns a constant iterator pointing to the first element
+		in the raw container.
+
+		\result A constant iterator pointing to the first element in
+		the raw container.
+	*/
+	raw_const_iterator raw_begin() const noexcept
+	{
+		return raw_cbegin();
+	}
+
+	/*!
 		Returns an conts_iterator pointing to the first element in the
 		raw container.
 
@@ -1118,6 +1154,18 @@ public:
 	raw_iterator raw_end()
 	{
 		return m_v.end();
+	}
+
+	/*!
+		Returns a constant iterator referring to the past-the-end
+		element in the raw container.
+
+		\result A constant iterator referring to the past-the-end
+		element in the raw container.
+	*/
+	raw_const_iterator raw_end() const noexcept
+	{
+		return raw_cend();
 	}
 
 	/*!
