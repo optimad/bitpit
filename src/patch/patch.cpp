@@ -2672,6 +2672,61 @@ bool Patch::isTolCustomized() const
 }
 
 /*!
+	Extracts the external envelope and appends it to the given patch.
+
+	The external envelope is composed by all the free faces of the patch.
+
+	\param[in,out] envelope is the patch to which the external envelope
+	will be appended
+*/
+void Patch::extractEnvelope(Patch &envelope) const
+{
+	// ====================================================================== //
+	// RESIZE DATA STRUCTURES                                                 //
+	// ====================================================================== //
+	envelope.reserveVertices(envelope.getVertexCount() + countFreeVertices());
+	envelope.reserveCells(envelope.getCellCount() + countFreeFaces());
+
+	// ====================================================================== //
+	// LOOP OVER CELLS                                                        //
+	// ====================================================================== //
+	std::unordered_map<long, long> vertexMap;
+	for (const Cell &cell : m_cells) {
+		int nCellFaces = cell.getFaceCount();
+		for (int i = 0; i < nCellFaces; ++i) {
+			if (cell.getAdjacency(i, 0) >= 0) {
+				continue;
+			}
+
+			// Add face vertices to the envelope and get face
+			// connectivity in the envelope
+			std::vector<int> faceLocalConnect = cell.getFaceLocalConnect(i);
+			int nFaceVertices = faceLocalConnect.size();
+
+			std::unique_ptr<long[]> faceEnvelopeConnect = std::unique_ptr<long[]>(new long[nFaceVertices]);
+			for (int j = 0; j < nFaceVertices; ++j) {
+				long vertexId = cell.getVertex(faceLocalConnect[j]);
+
+				// If the vertex is not yet in the envelope
+				// add it.
+				if (vertexMap.count(vertexId) == 0) {
+					const Vertex &vertex = getVertex(vertexId);
+					VertexIterator envelopeVertex = envelope.addVertex(vertex);
+					vertexMap[vertexId] = envelopeVertex->get_id();
+				}
+
+				// Update face ace connectivity in the envelope
+				faceEnvelopeConnect[j] = vertexMap.at(vertexId);
+			}
+
+			// Add face to envelope
+			ElementInfo::Type faceType = cell.getFaceType(i);
+			envelope.addCell(faceType, true, faceEnvelopeConnect);
+		}
+	}
+}
+
+/*!
 	Display patch statistics.
 
 	\param[in,out] out output stream

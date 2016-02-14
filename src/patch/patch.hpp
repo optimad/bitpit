@@ -209,6 +209,8 @@ public:
 	void resetTol();
 	bool isTolCustomized() const;
 
+	void extractEnvelope(Patch &envelope) const;
+
 	void displayStats(std::ostream &out, unsigned int padding = 0) const;
 	void displayVertices(std::ostream &out, unsigned int padding = 0) const;
 	void displayCells(std::ostream &out, unsigned int padding = 0) const;
