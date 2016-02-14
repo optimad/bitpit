@@ -829,7 +829,7 @@ long Patch::countFreeVertices() const
 
 	\result The number of orphan vertices.
 */
-long Patch::countOrphanVertices()
+long Patch::countOrphanVertices() const
 {
 	std::unordered_set<long> usedVertices;
 	for (const Cell &cell : m_cells) {

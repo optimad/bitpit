@@ -104,7 +104,7 @@ public:
 	VertexIterator addVertex(Vertex source);
 	VertexIterator addVertex(Vertex &&source, long id = Vertex::NULL_ID);
 	long countFreeVertices() const;
-	long countOrphanVertices();
+	long countOrphanVertices() const;
 	std::vector<long> findOrphanVertices();
 	bool deleteOrphanVertices();
 	std::vector<long> collapseCoincidentVertices(int nBins = 128);
