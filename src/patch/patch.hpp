@@ -174,6 +174,8 @@ public:
 	InterfaceIterator interfaceBegin();
 	InterfaceIterator interfaceEnd();
 
+	long countFaces() const;
+
 	bool sort();
 	bool sortVertices();
 	bool sortCells();

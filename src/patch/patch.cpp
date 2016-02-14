@@ -2094,6 +2094,28 @@ bool Patch::deleteInterfaces(const std::vector<long> &ids, bool updateNeighs, bo
 }
 
 /*!
+	Count faces within the patch.
+
+	\result The total number of faces in the patch.
+*/
+long Patch::countFaces() const
+{
+	double nFaces = 0;
+	for (const Cell &cell : m_cells) {
+		int nCellFaces = cell.getFaceCount();
+		for (int i = 0; i < nCellFaces; ++i) {
+			if (cell.getAdjacency(i, 0) >= 0) {
+				nFaces += 1. / (cell.getAdjacencyCount(i) + 1);
+			} else {
+				nFaces += 1.;
+			}
+		}
+	}
+
+	return ((long) round(nFaces));
+}
+
+/*!
 	Sorts internal vertex storage in ascending id order.
 */
 bool Patch::sortVertices()
