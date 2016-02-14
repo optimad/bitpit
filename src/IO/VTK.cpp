@@ -47,6 +47,7 @@ VTK::VTK(){
 
     HeaderType = "UInt32" ;
     
+    fh.setDirectory( "." ) ;
     fh.setSeries( false ) ;
     fh.setParallel( false ) ;
 
