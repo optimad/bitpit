@@ -255,6 +255,27 @@ void Vertex::display(std::ostream &out, unsigned int padding)
     return;
 }
 
+/*!
+	Displays vertex information to an output stream
+
+	\param[in] out is the output stream
+	\param[in] indent is the number of trailing spaces to prepend when
+	writing the information
+*/
+void Vertex::display(std::ostream &out, unsigned short int indent) const
+{
+	std::string t_s = std::string(indent, ' ');
+
+	// General info ----------------------------------------------------- //
+	out << t_s << "ID:             " << get_id() << std::endl;
+
+	// Coordinates ------------------------------------------------------ //
+	out << t_s << "coordinates :   (";
+	out << m_coords[0] << ", ";
+	out << m_coords[1] << ", ";
+	out << m_coords[2] << ")" << std::endl;
+}
+
 // Explicit instantiation of the Vertex containers
 template class PiercedVector<Vertex>;
 template class PositionalPiercedVector<Vertex>;
