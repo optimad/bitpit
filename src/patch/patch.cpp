@@ -151,7 +151,7 @@ Patch::~Patch()
 }
 
 /*!
-	Updates the mesh
+	Updates the patch
 
 	\result Returns a vector of Adaption::Info that can be used to track
 	the changes done during the update.
@@ -269,7 +269,7 @@ void Patch::resetInterfaces()
     Reserve memory for vertex storage.
 
     If the reserve size is smaller than the number of vertices currently stored
-    within the mesh no action will be taken.
+    within the patch no action will be taken.
 
     If instead, the reserve size is greater than the current number of vertices,
     reserve might cause re-location of the internal container into memory,
@@ -293,7 +293,7 @@ bool Patch::reserveVertices(size_t nVertices)
 	Reserve memory for cell storage.
 
 	If the reserve size is smaller than the number of cells currently stored
-	within the mesh no action will be taken.
+	within the patch no action will be taken.
 
 	If instead, the reserve size is greater than the current number of cells,
 	reserve might cause re-location of the internal container into memory,
@@ -316,7 +316,7 @@ bool Patch::reserveCells(size_t nCells)
 	Reserve memory for interface storage.
 
 	If the reserve size is smaller than the number of interfaces currently
-	stored within the mesh no action will be taken.
+	stored within the patch no action will be taken.
 
 	If instead, the reserve size is greater than the current number of
 	interfaces, reserve might cause re-location of the internal container
@@ -338,9 +338,9 @@ bool Patch::reserveInterfaces(size_t nInterfaces)
 }
 
 /*!
-	Writes the mesh to filename specified in input.
+	Writes the patch to filename specified in input.
 
-	\param filename the filename where the mesh will be written to
+	\param filename the filename where the patch will be written to
 */
 void Patch::write(std::string filename)
 {
@@ -354,7 +354,7 @@ void Patch::write(std::string filename)
 }
 
 /*!
-	Writes the mesh a filename with the same name of the mesh
+	Writes the patch a filename with the same name of the patch
 */
 void Patch::write()
 {
@@ -441,11 +441,11 @@ void Patch::writeVertexField(std::string filename, std::string name, std::vector
 }
 
 /*!
-	Flags the mesh for update.
+	Flags the patch for update.
 
-	\param dirty if true, then mesh is informed that something in the mesh
-	definition has changed and thus the current data structures are not
-	valid anymore.
+	\param dirty if true, then patch is informed that something in the
+	patch definition has changed and thus the current data structures
+	are not valid anymore.
 */
 void Patch::setDirty(bool dirty)
 {
@@ -457,9 +457,9 @@ void Patch::setDirty(bool dirty)
 }
 
 /*!
-	Returns true if the the mesh needs to update its data strucutres.
+	Returns true if the the patch needs to update its data strucutres.
 
-	\return This method returns true to indicate the mesh needs to update
+	\return This method returns true to indicate the patch needs to update
 	its data strucutres. Otherwise, it returns false.
 */
 bool Patch::isDirty() const
@@ -541,9 +541,10 @@ int Patch::getDimension() const
 }
 
 /*!
-	Returns true if the mesh is a three-dimensional mesh.
+	Returns true if the patch is a three-dimensional patch.
 
-	\return This method returns true to indicate the mesh is three-dimensional
+	\return This method returns true to indicate the patch is
+	three-dimensional
 */
 bool Patch::isThreeDimensional() const
 {
@@ -802,7 +803,7 @@ long Patch::countFreeVertices() const
 }
 
 /*!
-	Count orphan vertices in the mesh.
+	Count orphan vertices in the patch.
 
 	An orphan vertex is a vertex not linked by any cells.
 
@@ -1563,7 +1564,7 @@ long Patch::countFreeCells() const
 /*!
 	Counts orphan cells within the patch.
 
-	A cell is orphan if not adjacent to any cell in the mesh (neither
+	A cell is orphan if not adjacent to any cell in the patch (neither
 	along an edge, nor at vertex)
 
 	\return The number of orphan cells.
@@ -2184,7 +2185,7 @@ long Patch::countFreeInterfaces() const
 /*!
 	Counts orphan interfaces within the patch.
 
-	An interface is orphan if not linked to any cell in the mesh.
+	An interface is orphan if not linked to any cell in the patch.
 
 	\return The number of orphan interfaces.
 */
@@ -2722,7 +2723,7 @@ void Patch::displayVertices(std::ostream &out, unsigned int padding) const
 }
 
 /*!
-	Display all the cells currently stored within the mesh.
+	Display all the cells currently stored within the patch.
 
 	\param[in,out] out output stream
 	\param[in] padding (default = 0) number of leading spaces for
@@ -2789,7 +2790,7 @@ const VTKFieldMetaData Patch::getMetaData(std::string name)
  *  are "ascii" or "appended". For "appended" type an unformatted binary
  *  stream must be used
  *  @param[in] name is the name of the data to be written. Either user
- *  data or grid data
+ *  data or patch data
  */
 void Patch::flushData(std::fstream &stream, VTKFormat format, std::string name)
 {
