@@ -86,7 +86,7 @@ public:
 	const long * getAdjacencies() const;
 	const long * getAdjacencies(const int &face) const;
 
-	void display(std::ostream &out, unsigned short int indent);
+	void display(std::ostream &out, unsigned short int indent) const;
 
 	unsigned int getBinarySize( );
 

@@ -526,7 +526,7 @@ const long * Cell::getAdjacencies(const int &face) const
 	\param[in] indent is the number of trailing spaces to prepend when
 	writing the information
 */
-void Cell::display(std::ostream &out, unsigned short int indent)
+void Cell::display(std::ostream &out, unsigned short int indent) const
 {
 	// ====================================================================== //
 	// VARIABLES DECLARATION                                                  //
