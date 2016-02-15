@@ -132,7 +132,11 @@ Patch::Patch(const int &id, const int &dimension, bool expert)
 	: m_nVertices(0), m_nInternals(0), m_nGhosts(0), m_nInterfaces(0),
 	  m_last_internal_id(Element::NULL_ID),
 	  m_first_ghost_id(Element::NULL_ID),
-	  m_dirty(true), m_expert(expert), m_hasCustomTolerance(false)
+	  m_dirty(true), m_expert(expert), m_hasCustomTolerance(false),
+	  m_rank(0), m_nProcessors(1)
+#if ENABLE_MPI==1
+	  , m_communicator(nullptr)
+#endif
 {
 	set_id(id) ;
 	setDimension(dimension);

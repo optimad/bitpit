@@ -27,6 +27,9 @@
 
 #include <cstddef>
 #include <memory>
+#if ENABLE_MPI==1
+#	include <mpi.h>
+#endif
 #include <string>
 #include <vector>
 #include <unordered_map>
@@ -230,6 +233,14 @@ public:
 	const VTKFieldMetaData getMetaData(std::string name);
 	void flushData(std::fstream &stream, VTKFormat format, std::string name);
 
+#if ENABLE_MPI==1
+	void setCommunicator(MPI::Comm *communicator);
+	void unsetCommunicator();
+	MPI::Comm & getCommunicator() const;
+	int getRank() const;
+	int getProcessorCount() const;
+#endif
+
 protected:
 	PiercedVector<Vertex> m_vertices;
 	PiercedVector<Cell> m_cells;
@@ -274,6 +285,12 @@ private:
 
 	bool m_hasCustomTolerance;
 	double m_tolerance;
+
+	int m_rank;
+	int m_nProcessors;
+#if ENABLE_MPI==1
+	MPI::Comm *m_communicator;
+#endif
 
 	VertexIterator createVertex(long id = Vertex::NULL_ID);
 	InterfaceIterator createInterface(long id = Element::NULL_ID);
