@@ -1940,6 +1940,21 @@ std::vector<long> Patch::findCellVertexNeighs(const long &id, const std::vector<
 }
 
 /*!
+	Finds the one-ring of the specified vertex of the cell.
+
+	\param id is the id of the cell
+	\param vertex is a vertex of the cell
+	\result The one-ring of the specified vertex of the cell.
+*/
+std::vector<long> Patch::findCellVertexOneRing(const long &id, const int &vertex) const
+{
+	std::vector<long> oneRing = findCellVertexNeighs(id, vertex);
+	utils::addToOrderedVector<long>(id, oneRing);
+
+	return oneRing;
+}
+
+/*!
 	Gets the number of interfaces in the patch.
 
 	\return The number of interfaces in the patch
