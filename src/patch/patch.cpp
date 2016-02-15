@@ -2549,6 +2549,57 @@ long Patch::locatePoint(const double &x, const double &y, const double &z)
 }
 
 /*!
+ * Check whether the i-th face on cell "cell_1" is the same as the j-th face
+ * on cell "cell_2".
+ * 
+ * \param[in] cell_1 global ID of the 1st cell
+ * \param[in] i      local index of face to be checked on cell_1
+ * \param[in] cell_1 global ID of the 2nd cell
+ * \param[in] i      local index of face to be checked on cell_2
+ * 
+ * \result returns true if face (cell_1, i) and face (cell_2, j) are the same.
+*/
+bool Patch::isSameFace(
+    const long                  &cell_1,
+    const int                   &i,
+    const long                  &cell_2,
+    const int                   &j
+) {
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+bool                            check = false;
+std::vector<int>                face_loc_connect_A, face_loc_connect_B;
+Cell                            *cell_1_ = &m_cells[cell_1], *cell_2_ = &m_cells[cell_2];
+
+// Counters
+int                             k;
+
+// ========================================================================== //
+// CHECK FOR COINCIDENT FACES                                                 //
+// ========================================================================== //
+face_loc_connect_A = cell_1_->getFaceLocalConnect(i);
+face_loc_connect_B = cell_2_->getFaceLocalConnect(j);
+if (face_loc_connect_A.size() == face_loc_connect_B.size()) {
+    for (k = 0; k < face_loc_connect_A.size(); ++k) {
+        face_loc_connect_A[k] = cell_1_->getVertex(face_loc_connect_A[k]);
+    } //next i
+    for (k = 0; k < face_loc_connect_B.size(); ++k) {
+        face_loc_connect_B[k] = cell_2_->getVertex(face_loc_connect_B[k]);
+    } //next i
+    std::sort(face_loc_connect_A.begin(), face_loc_connect_A.end());
+    std::sort(face_loc_connect_B.begin(), face_loc_connect_B.end());
+    check = (face_loc_connect_A == face_loc_connect_B);
+}
+
+return(check);
+    
+};
+
+/*!
 	Updates the stored patch bounding box.
 */
 void Patch::updateBoundingBox()
