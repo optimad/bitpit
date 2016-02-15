@@ -362,6 +362,27 @@ void Patch::write(std::string filename)
 */
 void Patch::write()
 {
+	// Add basic patch data
+	std::vector<long> cellIndex;
+	cellIndex.reserve(getCellCount());
+	for (const Cell &cell : m_cells) {
+		cellIndex.emplace_back(cell.get_id());
+	}
+	VTKUnstructuredGrid::addData<long>("cellIndex", VTKFieldType::SCALAR, VTKLocation::CELL, cellIndex);
+
+	std::vector<long> vertexIndex;
+	vertexIndex.reserve(getVertexCount());
+	for (const Vertex &vertex : m_vertices) {
+		vertexIndex.emplace_back(vertex.get_id());
+	}
+	VTKUnstructuredGrid::addData<long>("vertexIndex", VTKFieldType::SCALAR, VTKLocation::POINT, vertexIndex);
+
+#if ENABLE_MPI==1
+	std::vector<long> rank(getCellCount(), m_rank);
+	VTKUnstructuredGrid::addData<long>("rank", VTKFieldType::SCALAR, VTKLocation::CELL, rank);
+#endif
+
+	// Write mesh
 	VTKUnstructuredGrid::write();
 }
 
