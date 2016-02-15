@@ -144,6 +144,8 @@ Patch::Patch(const int &id, const int &dimension, bool expert)
 	std::ostringstream convert;
 	convert << get_id();
 	setName(convert.str());
+
+	VTKUnstructuredGrid::setCodex(VTKFormat::APPENDED);
 }
 
 /*!
@@ -350,7 +352,6 @@ void Patch::write(std::string filename)
 {
 	std::string oldFilename = VTKUnstructuredGrid::getName();
 
-	VTKUnstructuredGrid::setCodex(VTKFormat::APPENDED);
 	VTKUnstructuredGrid::setName(filename);
 	VTKUnstructuredGrid::write();
 
