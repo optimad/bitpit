@@ -2877,32 +2877,34 @@ void Patch::extractEnvelope(Patch &envelope) const
 	\param[in] padding (default = 0) number of leading spaces for
 	formatted output
 */
-void Patch::displayStats(std::ostream &out, unsigned int padding) const
+void Patch::displayTopologyStats(std::ostream &out, unsigned int padding) const
 {
 	std::string indent = std::string(padding, ' ');
 
 	// ====================================================================== //
 	// VERTEX STATS                                                           //
 	// ====================================================================== //
-	out << indent<< "  Vertices --------------------------------"     << endl;
-	out << indent<< "    # vertices        " << getVertexCount()      << endl;
-	out << indent<< "    # orphan vertices " << countOrphanVertices() << endl;
-	out << indent<< "    # free vertices   " << countFreeVertices()   << endl;
+	out << indent<< "Vertices --------------------------------"     << endl;
+	out << indent<< "  # vertices        " << getVertexCount()      << endl;
+	out << indent<< "  # orphan vertices " << countOrphanVertices() << endl;
+	out << indent<< "  # free vertices   " << countFreeVertices()   << endl;
+        //out << indent<< "  # free vertices   " << countDoubleVertices()   << endl;
 
 	// ====================================================================== //
 	// FACE STATS                                                             //
 	// ====================================================================== //
-	out << indent<< "  Faces -----------------------------------"   << endl;
-	out << indent<< "    # faces         " << countFaces()          << endl;
-	out << indent<< "    # free faces    " << countFreeFaces()      << endl;
+	out << indent<< "Faces -----------------------------------"     << endl;
+	out << indent<< "  # faces           " << countFaces()          << endl;
+	out << indent<< "  # free faces      " << countFreeFaces()      << endl;
 
 	// ====================================================================== //
 	// CELLS STATS                                                            //
 	// ====================================================================== //
-	out << indent<< "  Cells -----------------------------------"   << endl;
-	out << indent<< "    # cells           " << getCellCount()      << endl;
-	out << indent<< "    # orphan cells    " << countOrphanCells()  << endl;
-	out << indent<< "    # free cells      " << countFreeCells()    << endl;
+	out << indent<< "Cells -----------------------------------"     << endl;
+	out << indent<< "  # cells           " << getCellCount()        << endl;
+	out << indent<< "  # orphan cells    " << countOrphanCells()    << endl;
+	out << indent<< "  # free cells      " << countFreeCells()      << endl;
+        //out << indent<< "  # free vertices   " << countDoubleCells()   << endl;
 }
 
 /*!
