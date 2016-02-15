@@ -49,6 +49,7 @@ public:
 
 	bool isPointInside(const std::array<double, 3> &point);
 	long locatePoint(const std::array<double, 3> &point);
+        void buildAdjacencies(void);
 
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
