@@ -28,8 +28,6 @@
 
 #include "vertex.hpp"
 #include "cell.hpp"
-#include "interface.hpp"
-
 
 /*!
 	Input stream operator for class Cell. Stream cell data from memory
