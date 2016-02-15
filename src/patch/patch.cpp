@@ -353,8 +353,7 @@ void Patch::write(std::string filename)
 	std::string oldFilename = VTKUnstructuredGrid::getName();
 
 	VTKUnstructuredGrid::setName(filename);
-	VTKUnstructuredGrid::write();
-
+	write();
 	VTKUnstructuredGrid::setName(oldFilename);
 }
 
@@ -363,7 +362,7 @@ void Patch::write(std::string filename)
 */
 void Patch::write()
 {
-	write(getName());
+	VTKUnstructuredGrid::write();
 }
 
 /*!
