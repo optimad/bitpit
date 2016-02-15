@@ -162,7 +162,7 @@ typename std::vector<T>::const_iterator         it_, cit_;
 // ========================================================================== //
 // PERFORM SET INTERSECTION                                                   //
 // ========================================================================== //
-intersect.reserve( min( vec_1.size(), vec_2.size() ) );
+intersect.reserve( std::min( vec_1.size(), vec_2.size() ) );
 for (cit_ = vec_2.begin(); cit_ != vec_2.end(); ++cit_) {
     storage[*cit_] = true;
 } //next cit_
