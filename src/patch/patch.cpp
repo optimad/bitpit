@@ -1443,9 +1443,9 @@ bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
 				// Update adjacency of the neighbours
 				long neighId = cell.getAdjacency(i,k);
                                 if (neighId >= 0) {
+                                    cout << "erasing myself (id) " << id << " from neigh: " << neighId << endl;
                                     Cell &neigh = m_cells[neighId];
 
-/*TODO AGGIORNARE */            //int neighFace;
 /*TODO AGGIORNARE */            //if (interface.getOwner() == neighId) {
 /*TODO AGGIORNARE */            //	neighFace = interface.getOwnerFace();
 /*TODO AGGIORNARE */            //} else {
@@ -1456,14 +1456,20 @@ bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
 /*TODO AGGIORNARE */            //while (neigh.getAdjacency(neighId, adjacenyId) != id) {
 /*TODO AGGIORNARE */            //        ++adjacenyId;
 /*TODO AGGIORNARE */            //}
-                                    FindNeigh(neighId, id, neighFace, adjacencyId);
-                                    if (neighFace >= 0) neigh.deleteAdjacency(neighFace, adjacenyId);
+                                    int neighFace, adjacencyId;
+                                    findFaceNeighCell(neighId, id, neighFace, adjacencyId);
+                                    if (neighFace >= 0) {
+                                        neigh.deleteAdjacency(neighFace, adjacencyId);
+                                        --nFaceAdjacencies;
+                                    }
 
                                 }
 
 				// Update interface
+				cout << "removing interfaces" << endl;
                                 long interfaceId = cell.getInterface(i,k);
                                 if (interfaceId >= 0) {
+                                    cout << "removing interface: " << interfaceId << endl;
                                     Interface &interface = m_interfaces[interfaceId];
                                     if (interface.getOwner() == id) {
                                             interface.unsetOwner();
@@ -1476,6 +1482,7 @@ bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
 	}
 
 	// Delete cell
+	cout << "deleting cells" << endl;
 	bool isInternal = m_cells.at(id).isInterior();
 	m_cells.erase(id, delayed);
 	m_cellIdGenerator.trashId(id);
@@ -1486,7 +1493,7 @@ bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
 		m_nGhosts--;
 		m_first_ghost_id = m_cells.get_size_marker(m_nInternals, Element::NULL_ID);
 	}
-
+        cout << "done" << endl;
 	return true;
 }
 
@@ -1797,7 +1804,7 @@ void Patch::findFaceNeighCell(const long &cell_idx, const long &neigh_idx, int &
     bool                        loop_continue = true;
     int                         n_faces, n_adj;
     int                         j, k;
-    Cell                       &cell_ = cells[cell_idx];
+    Cell                       &cell_ = m_cells[cell_idx];
 
     // ====================================================================== //
     // LOOP OVER ADJACENCIES                                                  //
@@ -2875,6 +2882,7 @@ bool Patch::isTolCustomized() const
 */
 void Patch::extractEnvelope(Patch &envelope) const
 {
+
 	// ====================================================================== //
 	// RESIZE DATA STRUCTURES                                                 //
 	// ====================================================================== //

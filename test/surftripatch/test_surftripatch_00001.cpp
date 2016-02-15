@@ -48,16 +48,506 @@
 using namespace std;
 using namespace bitpit;
 
- 
 // ========================================================================== //
-// SUBTEST #001 Test for cell insertion and deletion                          //
+// GENERATE A TEST NON-MANIFOLD SURFACE TRIANGULATION FOR TESTS.              //
+// ========================================================================== //
+void generateTestTriangulation(
+    SurfTriPatch                &mesh
+) {
+
+// ========================================================================== //
+// void generateTestTriangulation(                                            //
+//     SurfTriPatch                &mesh)                                     //
+//                                                                            //
+// Generate a non-manifold surface triangulation for tests.                   //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - mesh    : SurfTriPatch, surface mesh patch                               //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+long                    nV = 27;
+long                    nS = 33;
+
+// Counters
+int                     i, j;
+
+// ========================================================================== //
+// INITIALIZE TRIANGULATION                                                   //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+
+    // Reserve memory for vertex & cell storage ----------------------------- //
+    mesh.reserveVertices(nV);
+    mesh.reserveCells(nS);
+}
+
+// ========================================================================== //
+// GENERATE VERTEX LIST                                                       //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    double                      off = -0.5;
+    array<double, 3>            vertex;
+    
+    // 0-row ---------------------------------------------------------------- //
+    vertex.fill(0.0);
+    for (i = 0; i < 8; ++i) {
+        vertex[0] = double(i);
+        mesh.addVertex(vertex);
+    } //next i
+
+    // 1-row ---------------------------------------------------------------- //
+    vertex.fill(0.0);
+    vertex[1] = 1.0;
+    for (i = 0; i < 9; ++i) {
+        vertex[0] = double(i) + off;
+        mesh.addVertex(vertex);
+    } //next i
+
+    // 2-row ---------------------------------------------------------------- //
+    vertex.fill(0.0);
+    vertex[1] = 2.0;
+    for (i = 0; i < 8; ++i) {
+        vertex[0] = double(i);
+        mesh.addVertex(vertex);
+    } //next i
+
+    // Orthogonal element(s) ------------------------------------------------ //
+    vertex[0] = 0.5*(mesh.getVertex(3)[0] + mesh.getVertex(12)[0]);
+    vertex[1] = 0.5*(mesh.getVertex(3)[1] + mesh.getVertex(12)[1]);
+    vertex[2] = 0.5 * sqrt(3.0);
+    mesh.addVertex(vertex);
+    vertex[0] = 0.5*(mesh.getVertex(12)[0] + mesh.getVertex(21)[0]);
+    vertex[1] = 0.5*(mesh.getVertex(12)[1] + mesh.getVertex(21)[1]);
+    vertex[2] = 0.5 * sqrt(3.0);
+    mesh.addVertex(vertex);
+}
+
+// ========================================================================== //
+// GENERATE CONNECTIVITY                                                      //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    long int                    off;
+    vector<long>                connectivity(3);
+
+    // 0-row ---------------------------------------------------------------- //
+    off = 8;
+    for (i = 0; i < 7; ++i) {
+        connectivity[0] = i;
+        connectivity[1] = i + 1 + off;
+        connectivity[2] = i + off;
+        mesh.addCell(ElementInfo::TRIANGLE, true, connectivity);
+        connectivity[0] = i;
+        connectivity[1] = i + 1;
+        connectivity[2] = i + 1 + off;
+        mesh.addCell(ElementInfo::TRIANGLE, true, connectivity);
+    } //next i
+    connectivity[0] = i;
+    connectivity[1] = i + 1 + off;
+    connectivity[2] = i + off;
+    mesh.addCell(ElementInfo::TRIANGLE, true, connectivity);
+
+    // 1-row ---------------------------------------------------------------- //
+    off = 9;
+    for (i = 8; i < 15; ++i) {
+        connectivity[0] = i;
+        connectivity[1] = i + 1;
+        connectivity[2] = i + off;
+        mesh.addCell(ElementInfo::TRIANGLE, true, connectivity);
+        connectivity[0] = i + 1;
+        connectivity[1] = i + 1 + off;
+        connectivity[2] = i + off;
+        mesh.addCell(ElementInfo::TRIANGLE, true, connectivity);
+    } //next i
+    connectivity[0] = i;
+    connectivity[1] = i + 1;
+    connectivity[2] = i + off;
+    mesh.addCell(ElementInfo::TRIANGLE, true, connectivity);
+
+    // Orthogonal element --------------------------------------------------- //
+    connectivity[0] = 3;
+    connectivity[1] = 12;
+    connectivity[2] = 25;
+    mesh.addCell(ElementInfo::TRIANGLE, true, connectivity);
+    connectivity[0] = 12;
+    connectivity[1] = 26;
+    connectivity[2] = 25;
+    mesh.addCell(ElementInfo::TRIANGLE, true, connectivity);
+    connectivity[0] = 12;
+    connectivity[1] = 21;
+    connectivity[2] = 26;
+    mesh.addCell(ElementInfo::TRIANGLE, true, connectivity);
+    
+}
+
+return;
+}
+
+// ========================================================================== //
+// SUBTEST #002 Test adjacencies construction and update                      //
+// ========================================================================== //
+int subtest_002(
+    void
+) {
+
+// ========================================================================== //
+// int subtest_002(                                                           //
+//     void)                                                                  //
+//                                                                            //
+// Test cell removal/insertion and adjacencies construction/updates on        //
+// non-manifold surface triangulation.                                        //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - err      : int, error flag:                                              //
+//              err = 0  --> no error(s)                                      //
+//              err = 1  --> error at step #1                                 //
+//              err = 2  --> error at step #2                                 //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+SurfTriPatch                            mesh(0);
+Cell                                    cell_17, cell_5, cell_7;
+vector<long>                            cell_list;
+
+// Counters
+// none
+
+// ========================================================================== //
+// INITIALIZE MESH PARAMETERS                                                 //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    // none
+
+    // Enable changes ------------------------------------------------------- //
+    mesh.setExpert(true);
+    //mesh.setParallel(1 ,0);
+}
+
+// ========================================================================== //
+// OUTPUT MESSAGE                                                             //
+// ========================================================================== //
+{
+    // Scope variables
+    // none
+
+    // Output message
+    cout << "** ================================================================= **" << endl;
+    cout << "** Test #00001 - sub-test #002 - Testing adjacencies construction    **" << endl;
+    cout << "**                               and update.                         **" << endl;
+    cout << "** ================================================================= **" << endl;
+    cout << endl;
+}
+
+// ========================================================================== //
+// GENERATE A DUMMY TRIANGULATION (STEP #1)                                   //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    SurfTriPatch                        envelope(0);
+    vector<long>                        ring1, ring1_expected{6,7,8,21,22,23,30,31,32};
+
+    // Set envelope attributes ---------------------------------------------- //
+    envelope.setExpert(true);
+
+    // Generate a dummy triangulation --------------------------------------- //
+    cout << "** Generating non-manifold surface triangulation" << endl;
+    generateTestTriangulation(mesh);
+    cout << "   building adjacencies" << endl;
+    mesh.buildAdjacencies();
+
+    // Mesh stats ----------------------------------------------------------- //
+    cout << "   mesh stats (step 1):" << endl;
+    mesh.displayTopologyStats(cout, 3);
+
+    // Check mesh topology -------------------------------------------------- //
+
+    // Vertices stats
+    if (mesh.getVertexCount() != 27)            return 1;
+    if (mesh.countFreeVertices() != 20)         return 1;
+
+    // Faces stats
+    if (mesh.countFaces() != 59)                return 1;
+    if (mesh.countFreeFaces() != 21)            return 1;
+
+    // Cells stats
+    if (mesh.getCellCount() != 33)              return 1;
+    if (mesh.countFreeCells() != 21)            return 1;
+
+    // Compute 1-ring of vertex 12 -------------------------------------- //
+///*TODO:activate when member function is ready*/     ring1 = mesh.Ring1(7, 2);
+///*TODO:activate when member function is ready*/     sort(ring1.begin(), ring1.end());
+///*TODO:activate when member function is ready*/     cout << "  1-ring of vertex (7, 2): " << ring1 << endl;
+
+    // Check 1-ring of vertex (7,2) ------------------------------------- //
+///*TODO:activate when member function is ready*/     if (ring1 != ring1_expected)            return 1;
+
+    // External envelope ------------------------------------------------ //
+    cout << "  extracting mesh envelope" << endl;
+    mesh.extractEnvelope(envelope);
+    envelope.buildAdjacencies();
+
+    // Check external envelope topology --------------------------------- //
+
+    // Vertices stats
+    if (envelope.getVertexCount() != 20)        return 1;
+    if (envelope.countFreeVertices() != 0)      return 1;
+
+    // Faces stats
+    if (envelope.countFaces() != 20)            return 1;
+    if (envelope.countFreeFaces() != 0)         return 1;
+
+    // Cells stats
+    if (envelope.getCellCount() != 21)          return 1;
+    if (envelope.countFreeCells() != 0)         return 1;
+
+    // Export triangulation --------------------------------------------- //
+    mesh.write("step1");
+    cout << "  (mesh exported to \"step1.vtu\")" << endl;
+    envelope.write("env_step1");
+    cout << "  (external mesh envelope exported to \"env_step1.vtu\")" << endl;
+    cout << endl;
+
+}
+
+// ========================================================================== //
+// TEST CELL REMOVAL                                                          //
+// ========================================================================== //
+{
+    // Scope variables -------------------------------------------------- //
+    SurfTriPatch                        envelope(0);
+    vector<long>                        ring1, ring1_expected{6,8,21,22,23,30,31,32};
+
+    // Set envelope attributes ---------------------------------------------- //
+    envelope.setExpert(true);
+
+    // Backup copy of cells --------------------------------------------- //
+    cout << "** Removing cell ID 5, 7, and 17" << endl;
+    cell_17 = mesh.getCell(17);
+    cell_17.resetAdjacencies();
+    cell_5  = mesh.getCell(5);
+    cell_5.resetAdjacencies();
+    cell_7  = mesh.getCell(7);
+    cell_7.resetAdjacencies();
+
+    // Remove cells ----------------------------------------------------- //
+    mesh.deleteCell(17);
+    mesh.deleteCell(5);
+    mesh.deleteCell(7);
+
+    // Mesh stats ------------------------------------------------------- //
+    cout << "   mesh stats (step 2):" << endl;
+    mesh.displayTopologyStats(cout, 3);
+    cout << endl;
+
+    // Check mesh ------------------------------------------------------- //
+
+//     // Vertices stats
+//     if (mesh.getVertexCount() != 27)            return 2;
+//     if (mesh.countFreeVertices() != 24)         return 2;
+// 
+//     // Face stats
+//     if (mesh.countFaces() != 57)                return 2;
+//     if (mesh.countFreeFaces() != 25)            return 2;
+// 
+//     // Cells stats
+//     if (mesh.getCellCount() != 30)              return 2;
+//     if (mesh.countFreeCells() != 23)            return 2;
+
+
+    // Compute 1-ring of vertex 12 -------------------------------------- //
+///*TODO:activate when member function is ready*/     ring1 = mesh.Ring1(23, 0);
+///*TODO:activate when member function is ready*/     sort(ring1.begin(), ring1.end());
+///*TODO:activate when member function is ready*/     cout << "  1-ring of vertex (23, 0): " << ring1 << endl;
+
+    // Check 1-ring of vertex (23,0) ------------------------------------ //
+///*TODO:activate when member function is ready*/     if (ring1 != ring1_expected)            return 2;
+
+    // External envelope ------------------------------------------------ //
+    cout << "   extracting mesh envelope" << endl;
+    mesh.extractEnvelope(envelope);
+    envelope.buildAdjacencies();
+
+    // Check external envelope ------------------------------------------ //
+
+//     // Vertex stats
+//     if (envelope.getVertexCount() != 24)        return 2;
+//     if (envelope.countFreeVertices() != 1)      return 2;
+// 
+//     // Faces stats
+//     if (envelope.countFaces() != 24)            return 2;
+//     if (envelope.countFreeFaces() != 1)         return 2;
+// 
+//     // Cells stats
+//     if (envelope.getCellCount() != 25)          return 2;
+//     if (envelope.countFreeCells() != 1)         return 2;
+
+    // Export triangulation --------------------------------------------- //
+    mesh.write("step2");
+    cout << "   (mesh exported to \"step2.vtu\")" << endl;
+    envelope.write("env_step2");
+    cout << "   (external mesh envelope exported to \"env_step2.vtu\")" << endl << endl;
+
+}
+
+// ========================================================================== //
+// TEST CELL INSERTION                                                        //
+// ========================================================================== //
+{
+//     // Scope variables -------------------------------------------------- //
+//     Class_PMesh                     envelope;
+//     vector<long>                    ring1, ring1_expected{35};
+// 
+//     // Insert cells ----------------------------------------------------- //
+//     cout << "* inserting previously deleted cells" << endl;
+//     mesh.AddCell(cell_17);
+//     cell_list.push_back(mesh.get_last_cellid());
+// 
+//     mesh.AddCell(cell_5);
+//     cell_list.push_back(mesh.get_last_cellid());
+// 
+//     mesh.AddCell(cell_7);
+//     cell_list.push_back(mesh.get_last_cellid());
+// 
+//     // Mesh stats ------------------------------------------------------- //
+//     cout << "  mesh stats (step 3)" << endl;
+//     mesh.Stats(cout);
+// 
+//     // Check mesh ------------------------------------------------------- //
+//     if (mesh.get_nVertex() != 27)           return 3;
+//     if (mesh.CountFreeVertex() != 24)       return 3;
+//     if (mesh.get_nCells() != 33)            return 3;
+//     if (mesh.CountFreeCells() != 26)        return 3;
+//     if (mesh.CountFaces() != 66)            return 3;
+//     if (mesh.CountFreeFaces() != 34)        return 3;
+// 
+//     // Compute 1-ring of vertex 12 -------------------------------------- //
+//     ring1 = mesh.Ring1(mesh.get_last_cellid(), 2);
+//     sort(ring1.begin(), ring1.end());
+//     cout << "  1-ring of vertex (" << mesh.get_last_cellid() << ", 2): " << ring1 << endl;
+// 
+//     // Check 1-ring of (35, 2) ------------------------------------------ //
+//     if (ring1 != ring1_expected)            return 3;
+// 
+//     // External envelope ------------------------------------------------ //
+//     cout << "  extracting mesh external envelope" << endl;
+//     mesh.ExtractBoundaries(envelope);
+//     envelope.BuildAdjacency();
+// 
+//     // Check external envelope ------------------------------------------ //
+//     if (envelope.get_nVertex() != 24)       return 3;
+//     if (envelope.CountFreeVertex() != 0)    return 3;
+//     if (envelope.get_nCells() != 34)        return 3;
+//     if (envelope.CountFreeCells() != 0)     return 3;
+//     if (envelope.CountFaces() != 24)        return 3;
+//     if (envelope.CountFreeFaces() != 0)     return 3;
+// 
+//     // Export triangulation --------------------------------------------- //
+//     mesh.Export_vtu("step3.vtu");
+//     envelope.Export_vtu("env_step3.vtu");
+//     cout << "  (mesh exported to \"step3.vtu\")" << endl;
+//     cout << "  (external mesh envelope exported to \"env_step3.vtu\")" << endl << endl;
+}
+
+// ========================================================================== //
+// TEST UPDATE ADJACENCIES                                                    //
+// ========================================================================== //
+{
+//     // Scope variables -------------------------------------------------- //
+//     Class_PMesh                     envelope;
+//     vector<long>                    ring1, ring1_expected{6,8,21,22,23,30,31,32,35};
+// 
+//     // Insert cells ----------------------------------------------------- //
+//     cout << "* updating adjacencies" << endl;
+//     mesh.UpdateAdjacency(cell_list);
+// 
+//     // Mesh stats ------------------------------------------------------- //
+//     cout << "  mesh stats (step 4)" << endl;
+//     mesh.Stats(cout);
+// 
+//     // Check mesh ------------------------------------------------------- //
+//     if (mesh.get_nVertex() != 27)           return 4;
+//     if (mesh.CountFreeVertex() != 20)       return 4;
+//     if (mesh.get_nCells() != 33)            return 4;
+//     if (mesh.CountFreeCells() != 21)        return 4;
+//     if (mesh.CountFaces() != 59)            return 4;
+//     if (mesh.CountFreeFaces() != 21)        return 4;
+// 
+//     // Compute 1-ring of vertex 12 -------------------------------------- //
+//     ring1 = mesh.Ring1(35, 2);
+//     sort(ring1.begin(), ring1.end());
+//     cout << "  1-ring of vertex (35, 2): " << ring1 << endl;
+// 
+//     // Check 1-ring of vertex (7,2) ------------------------------------- //
+//     if (ring1 != ring1_expected)            return 4;
+// 
+//     // External envelope ------------------------------------------------ //
+//     cout << "  extracting mesh external envelope" << endl;
+//     mesh.ExtractBoundaries(envelope);
+//     envelope.BuildAdjacency();
+// 
+//     // Check external envelope ------------------------------------------ //
+//     if (envelope.get_nVertex() != 20)       return 4;
+//     if (envelope.CountFreeVertex() != 0)    return 4;
+//     if (envelope.get_nCells() != 21)        return 4;
+//     if (envelope.CountFreeCells() != 0)     return 4;
+//     if (envelope.CountFaces() != 20)        return 4;
+//     if (envelope.CountFreeFaces() != 0)     return 4;
+// 
+//     // Export triangulation --------------------------------------------- //
+//     mesh.Export_vtu("step4.vtu");
+//     envelope.Export_vtu("env_step4.vtu");
+//     cout << "  (mesh exported to \"step4.vtu\")" << endl;
+//     cout << "  (external mesh envelope exported to \"env_step4.vtu\")" << endl << endl;
+}
+
+// ========================================================================== //
+// OUTPUT MESSAGE                                                             //
+// ========================================================================== //
+{
+    // Scope variables -------------------------------------------------- //
+    // none
+
+    // Output message --------------------------------------------------- //
+    cout << "** ================================================================= **" << endl;
+    cout << "** Test #00001 - sub-test #002 - completed!                          **" << endl;
+    cout << "** ================================================================= **" << endl;
+    cout << endl;
+}
+
+return 0;
+}
+
+// ========================================================================== //
+// SUBTEST #001 Test cell insertion and deletion                              //
 // ========================================================================== //
 int subtest_001(
     void
 ) {
 
 // ========================================================================== //
-// int test_001(                                                              //
+// int subtest_001(                                                           //
 //     void)                                                                  //
 //                                                                            //
 // Test insertion order.                                                      //
@@ -395,6 +885,7 @@ int                             i;
     cout << "** ================================================================= **" << endl;
     cout << "** Test #00001 - sub-test #001 - completed!                          **" << endl;
     cout << "** ================================================================= **" << endl;
+    cout << endl;
 }
 
 return 0; }
@@ -422,6 +913,9 @@ if (err > 0) return(10 + err);
 // ========================================================================== //
 // RUN SUB-TEST #002                                                          //
 // ========================================================================== //
+err = subtest_002();
+if (err > 0) return(20 + err);
+
 
 // ========================================================================== //
 // RUN SUB-TEST #003                                                          //
