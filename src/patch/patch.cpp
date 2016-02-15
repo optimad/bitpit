@@ -1436,38 +1436,41 @@ bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
 		const Cell &cell = m_cells[id];
 		int nCellFaces = m_cells[id].getFaceCount();
 		for (int i = 0; i < nCellFaces; ++i) {
-			int nFaceInterfaces = cell.getInterfaceCount(i);
-			for (int k = 0; k < nFaceInterfaces; ++k) {
-				long interfaceId = cell.getInterface(i,k);
-				if (interfaceId < 0) {
-					continue;
-				}
+			int nFaceAdjacencies = cell.getAdjacencyCount(i);
+			for (int k = 0; k < nFaceAdjacencies; ++k) {
 
-				Interface &interface = m_interfaces[interfaceId];
 
 				// Update adjacency of the neighbours
 				long neighId = cell.getAdjacency(i,k);
-				Cell &neigh = m_cells[neighId];
+                                if (neighId >= 0) {
+                                    Cell &neigh = m_cells[neighId];
 
-				int neighFace;
-				if (interface.getOwner() == neighId) {
-					neighFace = interface.getOwnerFace();
-				} else {
-					neighFace = interface.getNeighFace();
-				}
+/*TODO AGGIORNARE */            int neighFace;
+/*TODO AGGIORNARE */            if (interface.getOwner() == neighId) {
+/*TODO AGGIORNARE */            	neighFace = interface.getOwnerFace();
+/*TODO AGGIORNARE */            } else {
+/*TODO AGGIORNARE */            	neighFace = interface.getNeighFace();
+/*TODO AGGIORNARE */            }
 
-				int adjacenyId = 0;
-				while (neigh.getAdjacency(neighId, adjacenyId) != id) {
-					++adjacenyId;
-				}
-				neigh.deleteAdjacency(neighFace, adjacenyId);
+/*TODO AGGIORNARE */            int adjacenyId = 0;
+/*TODO AGGIORNARE */            while (neigh.getAdjacency(neighId, adjacenyId) != id) {
+/*TODO AGGIORNARE */                    ++adjacenyId;
+/*TODO AGGIORNARE */            }
+                                    FindNeigh(neighId, id, neighFace, adjacencyId);
+                                    if (neighFace >= 0) neigh.deleteAdjacency(neighFace, adjacenyId);
+
+                                }
 
 				// Update interface
-				if (interface.getOwner() == id) {
-					interface.unsetOwner();
-				} else {
-					interface.unsetNeigh();
-				}
+                                long interfaceId = cell.getInterface(i,k);
+                                if (interfaceId >= 0) {
+                                    Interface &interface = m_interfaces[interfaceId];
+                                    if (interface.getOwner() == id) {
+                                            interface.unsetOwner();
+                                    } else {
+                                            interface.unsetNeigh();
+                                    }
+                                }
 			}
 		}
 	}
@@ -1768,6 +1771,53 @@ std::vector<long> Patch::findCellFaceNeighs(const long &id, const int &face, con
 	}
 
 	return neighs;
+}
+
+/*!
+        Stores the local index of the face shared by cell_idx and neigh_idx
+        into face_loc_idx.
+        If cell cell_idx and neigh_idx do not share any face, -1 is stored in
+        face_loc_idx.
+
+        \param[in] cell_idx cell index
+        \param[in] neigh_idx neighbour index
+        \param[in,out] face_loc_idx on output stores the local index (on cell
+        cell_idx) shared by cell_idx and neigh_idx. If cells cell_idx and neigh_idx
+        do not share any face, -1 is stored in face_loc_idx.
+        \param[in,out] intf_loc_idx on output stores the index of the adjacency (on face
+        face_loc_idx of cell cell_idx). If cells cell_idx and neigh_idx do not share
+        any face, -1 is stored into intf_loc_idx.
+*/
+void Patch::findFaceNeighCell(const long &cell_idx, const long &neigh_idx, int &face_loc_idx, int &intf_loc_idx)
+{
+
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+    bool                        loop_continue = true;
+    int                         n_faces, n_adj;
+    int                         j, k;
+    Cell                       &cell_ = cells[cell_idx];
+
+    // ====================================================================== //
+    // LOOP OVER ADJACENCIES                                                  //
+    // ====================================================================== //
+    n_faces = cell_->getFaceCount();
+    j = 0;
+    while ( loop_continue && (j < n_faces) ) {
+        n_adj = cell_->getAdjacencyCount(j);
+        k = 0;
+        while ( loop_continue && (k < n_adj) ) {
+            loop_continue = ( cell_->getAdjacency( j, k ) != neigh_idx );
+            ++k;
+        } //next k
+        ++j;
+    } //next j
+
+    if ( loop_continue) { face_loc_idx = intf_loc_idx = -1; }
+    else                { face_loc_idx = --j; intf_loc_idx = --k; }
+
+    return;
 }
 
 /*!
