@@ -48,7 +48,7 @@ namespace bitpit {
 	\param id is the id of the patch
 */
 SurfTriPatch::SurfTriPatch(const int &id)
-	: Patch(id, 2)
+	: Patch(id, 2, true)
 {
 
 }

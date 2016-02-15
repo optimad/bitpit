@@ -64,7 +64,7 @@ public:
 	typedef PiercedVector<Cell>::iterator CellIterator;
 	typedef PiercedVector<Interface>::iterator InterfaceIterator;
 
-	Patch(const int &id, const int &dimension);
+	Patch(const int &id, const int &dimension, bool epxert);
 
 	virtual ~Patch();
 

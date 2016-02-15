@@ -56,7 +56,7 @@ CartesianPatch::CartesianPatch(const int &id, const int &dimension,
                                const std::array<double, 3> &origin,
                                const std::array<double, 3> &lengths,
                                const std::array<int, 3> &nCells)
-	: Patch(id, dimension)
+	: Patch(id, dimension, false)
 {
 	initialize(origin, lengths, nCells);
 }
@@ -73,7 +73,7 @@ CartesianPatch::CartesianPatch(const int &id, const int &dimension,
 CartesianPatch::CartesianPatch(const int &id, const int &dimension,
                                const std::array<double, 3> &origin,
                                double length, int nCells1D)
-	: Patch(id, dimension)
+	: Patch(id, dimension, false)
 {
 	// Number of cells
 	std::array<int, 3> nCells;
@@ -111,7 +111,7 @@ CartesianPatch::CartesianPatch(const int &id, const int &dimension,
 CartesianPatch::CartesianPatch(const int &id, const int &dimension,
                                const std::array<double, 3> &origin,
                                double length, double dh)
-	: Patch(id, dimension)
+	: Patch(id, dimension, false)
 {
 	// Number of cells
 	std::array<int, 3> nCells;
@@ -149,9 +149,6 @@ void CartesianPatch::initialize(const std::array<double, 3> &origin,
                                 const std::array<int, 3> &nCells)
 {
 	std::cout << ">> Initializing cartesian patch\n";
-
-	// Disable advanced editing
-	setExpert(false);
 
 	// Info sulle celle
 	for (int n = 0; n < getDimension(); ++n) {
