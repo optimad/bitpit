@@ -139,8 +139,7 @@ int                             i;
         internal.push_back(true);
     } //next i
     for (i = N/2; i < N; ++i) {
-/*TODO: rimuovere*/mesh.addCell(cell);
-/*TODO: ripristinare metodo con connettività*///mesh.addCell(ElementInfo::TRIANGLE, true, mesh.genereateCellId());
+        mesh.addCell(ElementInfo::TRIANGLE, true, c_connect);
         expected.push_back(long(i));
         internal.push_back(true);
     } //next i
@@ -158,7 +157,7 @@ int                             i;
     cout << "** After inserting internal cells" << endl;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
-        cout << "  cell: " << endl;
+        cout << "   cell: " << endl;
         it->display(cout, 4);
     } //next it
 
@@ -172,8 +171,7 @@ int                             i;
         internal.push_back(false);
     } //next i
     for (i = N/2; i < N; ++i) {
-/*TODO: rimuovere*/mesh.addCell(ghost);
-/*TODO: ripristinare metodo con connettività*/// mesh.addCell(ElementInfo::TRIANGLE, false, g_connect);
+        mesh.addCell(ElementInfo::TRIANGLE, false, g_connect);
         expected.push_back(long(N + i));
         internal.push_back(false);
     }
@@ -191,7 +189,7 @@ int                             i;
     cout << "** After inserting ghost cells" << endl;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
-        cout << "  cell: " << endl;
+        cout << "   cell: " << endl;
         it->display(cout, 4);
     } //next it
 
@@ -236,7 +234,7 @@ int                             i;
     cout << "** After removing internal/ghost cells" << endl;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
-        cout << "  cell: " << endl;
+        cout << "   cell: " << endl;
         it->display(cout, 4);
     } //next it
 
@@ -244,12 +242,10 @@ int                             i;
     //bucket = {}
     //cells:  {0,1,5,3,6}
     //ghosts: {2,4,7,8,9}
-/*TODO: ripristinare metodo con connettività*///mesh.addGhost(ElementInfo::TRIANGLE, g_connect);
-/*TODO: rimuovere*/mesh.addCell(ghost);
+    mesh.addCell(ElementInfo::TRIANGLE, false, g_connect);
     mesh.addCell(ghost);
     mesh.addCell(cell);
-/*TODO: ripristinare metodo con connettività*///mesh.addCell(ElementInfo::TRIANGLE, c_connect);
-/*TODO: rimuovere*/mesh.addCell(cell);
+    mesh.addCell(ElementInfo::TRIANGLE, true, c_connect);
     expected.insert(expected.begin() + 3, 4);
     expected.insert(expected.begin() + 3, 2);
     expected.insert(expected.begin() + 2, 5);
@@ -273,7 +269,7 @@ int                             i;
     cout << "** After inserting internal/ghost cells" << endl;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
-        cout << "  cell: " << endl;
+        cout << "   cell: " << endl;
         it->display(cout, 4);
     } //next it
 
@@ -287,8 +283,7 @@ int                             i;
     mesh.deleteCell(0);
     mesh.deleteCell(3);
     mesh.addCell(ghost);
-/*TODO: ripristinare metodo con connettività*///mesh.AddGhost(ElementInfo::TRIANGLE, g_connect);
-/*TODO: rimuovere*/mesh.addCell(ghost);
+    mesh.addCell(ElementInfo::TRIANGLE, false, g_connect);
     expected.erase(expected.begin());
     expected.erase(expected.begin());
     expected.erase(expected.begin());
@@ -316,7 +311,7 @@ int                             i;
     cout << "** After erasing all internal cells and inserting 2 new ghosts" << endl;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
-        cout << "  cell: " << endl;
+        cout << "   cell: " << endl;
         it->display(cout, 4);
     } //next it
 
@@ -332,8 +327,7 @@ int                             i;
     mesh.deleteCell(7);
     mesh.deleteCell(8);
     mesh.addCell(cell);
-/*TODO: ripristinare metodo connettività*///mesh.addCell(ElementInfo::TRIANGLE, c_connect);
-/*TODO: rimuovere*/mesh.addCell(cell);
+    mesh.addCell(ElementInfo::TRIANGLE, true, c_connect);
     expected.erase(expected.begin());
     expected.erase(expected.begin());
     expected.erase(expected.begin());
@@ -365,7 +359,7 @@ int                             i;
     cout << "** After erasing all ghost cells and inserting 2 new internal cells" << endl;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
-        cout << "  cell: " << endl;
+        cout << "   cell: " << endl;
         it->display(cout, 4);
     } //next it
 
