@@ -205,13 +205,13 @@ int                             i;
     SurfTriPatch::CellIterator                  it, et;
 
     // Remove internal cells
+    //bucket: {4,2,5,6}
     //cells:  {0,1,-1,3,-1}
     //ghosts: {-1,-1,7,8,9}
     mesh.deleteCell(4);
     mesh.deleteCell(2);
     mesh.deleteCell(5);
     mesh.deleteCell(6);
-    cout << "deleting cell done" << endl;
     expected.erase(expected.begin() + 6);
     expected.erase(expected.begin() + 5);
     expected.erase(expected.begin() + 4);
@@ -222,11 +222,13 @@ int                             i;
     internal.erase(internal.begin() + 2);
 
     // Check element order
+    cout << expected << endl;
+    cout << internal << endl;
     i = 0;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
-        if (it->get_id() != expected[i]) return 2;
-        if (it->isInterior() != internal[i]) return 2;
+        if (it->get_id() != expected[i])        return 2;
+        if (it->isInterior() != internal[i])    return 2;
         ++i;
     } //next it
 
@@ -239,28 +241,32 @@ int                             i;
     } //next it
 
     // Remove ghost cells
-    //cells:  {0,1,12,3,13}
-    //ghosts: {11,10,7,8,9}
+    //bucket = {}
+    //cells:  {0,1,5,3,6}
+    //ghosts: {2,4,7,8,9}
 /*TODO: ripristinare metodo con connettività*///mesh.addGhost(ElementInfo::TRIANGLE, g_connect);
 /*TODO: rimuovere*/mesh.addCell(ghost);
     mesh.addCell(ghost);
     mesh.addCell(cell);
 /*TODO: ripristinare metodo con connettività*///mesh.addCell(ElementInfo::TRIANGLE, c_connect);
 /*TODO: rimuovere*/mesh.addCell(cell);
-    expected.insert(expected.begin() + 3, 10);
-    expected.insert(expected.begin() + 3, 11);
-    expected.insert(expected.begin() + 2, 12);
-    expected.insert(expected.begin() + 4, 13);
+    expected.insert(expected.begin() + 3, 4);
+    expected.insert(expected.begin() + 3, 2);
+    expected.insert(expected.begin() + 2, 5);
+    expected.insert(expected.begin() + 4, 6);
     internal.insert(internal.begin() + 3, false);
     internal.insert(internal.begin() + 3, false);
     internal.insert(internal.begin() + 2, true);
     internal.insert(internal.begin() + 4, true);
+    cout << "expected: " << expected << endl;
+    cout << "interior: " << internal << endl;
 
     // Check element order
     i = 0;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
-        if (it->get_id() != expected[i]) return 2;
+        if (it->get_id() != expected[i])        return 2;
+        if (it->isInterior() != internal[i])    return 2;
         ++i;
     } //next it
 
@@ -272,11 +278,12 @@ int                             i;
     } //next it
 
     // Remove all internal cells and add 2 ghost cells
+    //bucket: {5,0,3}
     //cells:  {}
-    //ghosts: {14,15,11,10,7,8,9}
-    mesh.deleteCell(13);
+    //ghosts: {6,1,2,4,7,8,9}
+    mesh.deleteCell(6);
     mesh.deleteCell(1);
-    mesh.deleteCell(12);
+    mesh.deleteCell(5);
     mesh.deleteCell(0);
     mesh.deleteCell(3);
     mesh.addCell(ghost);
@@ -287,8 +294,8 @@ int                             i;
     expected.erase(expected.begin());
     expected.erase(expected.begin());
     expected.erase(expected.begin());
-    expected.insert(expected.begin(), 15);
-    expected.insert(expected.begin(), 14);
+    expected.insert(expected.begin(), 1);
+    expected.insert(expected.begin(), 6);
     internal.erase(internal.begin());
     internal.erase(internal.begin());
     internal.erase(internal.begin());
@@ -314,12 +321,13 @@ int                             i;
     } //next it
 
     // Remove all ghosts add 2 internal cells
-    //cells:  {16,17}
+    //bucket: {3,4,2,1,6,9,7,8}
+    //cells:  {5,0}
     //ghosts: {}
-    mesh.deleteCell(14);
-    mesh.deleteCell(10);
-    mesh.deleteCell(11);
-    mesh.deleteCell(15);
+    mesh.deleteCell(4);
+    mesh.deleteCell(2);
+    mesh.deleteCell(1);
+    mesh.deleteCell(6);
     mesh.deleteCell(9);
     mesh.deleteCell(7);
     mesh.deleteCell(8);
@@ -333,8 +341,8 @@ int                             i;
     expected.erase(expected.begin());
     expected.erase(expected.begin());
     expected.erase(expected.begin());
-    expected.insert(expected.begin(),17);
-    expected.insert(expected.begin(),16);
+    expected.insert(expected.begin(),0);
+    expected.insert(expected.begin(),5);
     internal.erase(internal.begin());
     internal.erase(internal.begin());
     internal.erase(internal.begin());
