@@ -102,6 +102,20 @@ int                             i;
 }
 
 // ========================================================================== //
+// OUTPUT MESSAGE                                                             //
+// ========================================================================== //
+{
+    // Scope variables
+    // none
+
+    // Output message
+    cout << "** ================================================================= **" << endl;
+    cout << "** Test #00001 - sub-test #001 - Testing cell insertion and deletion **" << endl;
+    cout << "** ================================================================= **" << endl;
+    cout << endl;
+}
+
+// ========================================================================== //
 // INITIALIZE CELL                                                            //
 // ========================================================================== //
 {
@@ -119,6 +133,7 @@ int                             i;
     for (j = 0; j < n; ++j) {
         ghost.setVertex(j, g_connect[j]);
     } //next j
+    cout << endl;
 }
 
 // ========================================================================== //
@@ -143,6 +158,7 @@ int                             i;
         expected.push_back(long(i));
         internal.push_back(true);
     } //next i
+    cout << endl;
 
     // Check cell ordering -------------------------------------------------- //
     i = 0;
@@ -160,6 +176,7 @@ int                             i;
         cout << "   cell: " << endl;
         it->display(cout, 4);
     } //next it
+    cout << endl;
 
     // Insert ghost cells (IDX 5-9) ----------------------------------------- //
     // cells:  {0,1,2,3,4}
@@ -174,7 +191,8 @@ int                             i;
         mesh.addCell(ElementInfo::TRIANGLE, false, g_connect);
         expected.push_back(long(N + i));
         internal.push_back(false);
-    }
+    } //next i
+    cout << endl;
 
     // Check cells ordering ------------------------------------------------- //
     i = 0;
@@ -192,6 +210,7 @@ int                             i;
         cout << "   cell: " << endl;
         it->display(cout, 4);
     } //next it
+    cout << endl;
 
 }
 
@@ -220,8 +239,6 @@ int                             i;
     internal.erase(internal.begin() + 2);
 
     // Check element order
-    cout << expected << endl;
-    cout << internal << endl;
     i = 0;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
@@ -237,6 +254,7 @@ int                             i;
         cout << "   cell: " << endl;
         it->display(cout, 4);
     } //next it
+    cout << endl;
 
     // Remove ghost cells
     //bucket = {}
@@ -254,8 +272,6 @@ int                             i;
     internal.insert(internal.begin() + 3, false);
     internal.insert(internal.begin() + 2, true);
     internal.insert(internal.begin() + 4, true);
-    cout << "expected: " << expected << endl;
-    cout << "interior: " << internal << endl;
 
     // Check element order
     i = 0;
@@ -272,6 +288,7 @@ int                             i;
         cout << "   cell: " << endl;
         it->display(cout, 4);
     } //next it
+    cout << endl;
 
     // Remove all internal cells and add 2 ghost cells
     //bucket: {5,0,3}
@@ -314,6 +331,7 @@ int                             i;
         cout << "   cell: " << endl;
         it->display(cout, 4);
     } //next it
+    cout << endl;
 
     // Remove all ghosts add 2 internal cells
     //bucket: {3,4,2,1,6,9,7,8}
@@ -362,7 +380,21 @@ int                             i;
         cout << "   cell: " << endl;
         it->display(cout, 4);
     } //next it
+    cout << endl;
 
+}
+
+// ========================================================================== //
+// OUTPUT MESSAGE                                                             //
+// ========================================================================== //
+{
+    // Scope variables
+    // none
+
+    // Output message
+    cout << "** ================================================================= **" << endl;
+    cout << "** Test #00001 - sub-test #001 - completed!                          **" << endl;
+    cout << "** ================================================================= **" << endl;
 }
 
 return 0; }
