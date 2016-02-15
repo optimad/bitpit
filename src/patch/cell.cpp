@@ -26,6 +26,7 @@
 
 #include "bitpit_common.hpp"
 
+#include "vertex.hpp"
 #include "cell.hpp"
 #include "interface.hpp"
 
@@ -578,29 +579,60 @@ void Cell::display(std::ostream &out, unsigned short int indent) const
 	// Connectivity infos --------------------------------------------------- //
 	out << t_s << "connectivity: [ ";
 	for (i = 0; i < nv-1; ++i) {
-		out << getVertex(i) << ", ";
+            if (getVertex(i) == Vertex::NULL_ID)   out << "n.a. ";
+            else                                   out << getVertex(i) << ", ";
 	} //next i
-	out << getVertex(nv-1) << " ]" << std::endl;
+	if (getVertex(nv-1) == Vertex::NULL_ID)    out << "n.a. ";
+	else                                       out << getVertex(nv-1) << " ]" << std::endl;
 
 	// neighbors infos ------------------------------------------------------ //
-        if (m_interfaces.size() > 0) {
+        if (m_adjacencies.size() > 0) {
             out << t_s << "neighbors:    [ ";
+            for (i = 0; i < nf-1; ++i) {
+                nn = getAdjacencyCount(i);
+                out << "[ ";
+                for (j = 0; j < nn-1; ++j) {
+                    if (getAdjacency(i,j) == Element::NULL_ID)  out << "n.a. ";
+                    else                                        out << getAdjacency(i, j) << ", ";
+                } //next j
+                if (getAdjacency(i, nn-1) == Element::NULL_ID)  out << "n.a. ], ";
+                else                                            out << getAdjacency(i, nn-1) << " ], ";
+            } //next i
+            nn = getAdjacencyCount(nf-1);
+            out << "[ ";
+            for (j = 0; j < nn-1; ++j) {
+                if (getAdjacency(nf-1, j) == Element::NULL_ID)  out << "n.a. ";
+                else                                            out << getAdjacency(nf-1, j) << ", ";
+            } //next j
+            if (getAdjacency(nf-1, nn-1) == Element::NULL_ID)   out << "n.a. ]";
+            else                                                out << getAdjacency(nf-1, nn-1) << " ]";
+            out << " ]" << std::endl;
+        }
+
+        // interface infos ------------------------------------------------------ //
+        if (m_interfaces.size() > 0) {
+            out << t_s << "interfaces:   [ ";
             for (i = 0; i < nf-1; ++i) {
                 nn = getInterfaceCount(i);
                 out << "[ ";
                 for (j = 0; j < nn-1; ++j) {
-                    out << getInterface(i, j) << ", ";
+                    if (getInterface(i,j) == Element::NULL_ID)  out << "n.a. ";
+                    else                                        out << getInterface(i, j) << ", ";
                 } //next j
-                out << getInterface(i, nn-1) << " ], ";
+                if (getInterface(i, nn-1) == Element::NULL_ID)  out << "n.a. ], ";
+                else                                            out << getInterface(i, nn-1) << " ], ";
             } //next i
             nn = getInterfaceCount(nf-1);
             out << "[ ";
             for (j = 0; j < nn-1; ++j) {
-                out << getInterface(nf-1, j) << ", ";
+                if (getInterface(nf-1, j) == Element::NULL_ID)  out << "n.a. ";
+                else                                            out << getInterface(nf-1, j) << ", ";
             } //next j
-            out << getInterface(nf-1, nn-1) << " ]";
+            if (getInterface(nf-1, nn-1) == Element::NULL_ID)   out << "n.a. ]";
+            else                                                out << getInterface(nf-1, nn-1) << " ]";
             out << " ]" << std::endl;
         }
+
 }
 
 /*!
