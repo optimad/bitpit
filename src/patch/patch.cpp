@@ -1445,17 +1445,17 @@ bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
                                 if (neighId >= 0) {
                                     Cell &neigh = m_cells[neighId];
 
-/*TODO AGGIORNARE */            int neighFace;
-/*TODO AGGIORNARE */            if (interface.getOwner() == neighId) {
-/*TODO AGGIORNARE */            	neighFace = interface.getOwnerFace();
-/*TODO AGGIORNARE */            } else {
-/*TODO AGGIORNARE */            	neighFace = interface.getNeighFace();
-/*TODO AGGIORNARE */            }
+/*TODO AGGIORNARE */            //int neighFace;
+/*TODO AGGIORNARE */            //if (interface.getOwner() == neighId) {
+/*TODO AGGIORNARE */            //	neighFace = interface.getOwnerFace();
+/*TODO AGGIORNARE */            //} else {
+/*TODO AGGIORNARE */            //	neighFace = interface.getNeighFace();
+/*TODO AGGIORNARE */            //}
 
-/*TODO AGGIORNARE */            int adjacenyId = 0;
-/*TODO AGGIORNARE */            while (neigh.getAdjacency(neighId, adjacenyId) != id) {
-/*TODO AGGIORNARE */                    ++adjacenyId;
-/*TODO AGGIORNARE */            }
+/*TODO AGGIORNARE */            //int adjacenyId = 0;
+/*TODO AGGIORNARE */            //while (neigh.getAdjacency(neighId, adjacenyId) != id) {
+/*TODO AGGIORNARE */            //        ++adjacenyId;
+/*TODO AGGIORNARE */            //}
                                     FindNeigh(neighId, id, neighFace, adjacencyId);
                                     if (neighFace >= 0) neigh.deleteAdjacency(neighFace, adjacenyId);
 
@@ -1802,13 +1802,13 @@ void Patch::findFaceNeighCell(const long &cell_idx, const long &neigh_idx, int &
     // ====================================================================== //
     // LOOP OVER ADJACENCIES                                                  //
     // ====================================================================== //
-    n_faces = cell_->getFaceCount();
+    n_faces = cell_.getFaceCount();
     j = 0;
     while ( loop_continue && (j < n_faces) ) {
-        n_adj = cell_->getAdjacencyCount(j);
+        n_adj = cell_.getAdjacencyCount(j);
         k = 0;
         while ( loop_continue && (k < n_adj) ) {
-            loop_continue = ( cell_->getAdjacency( j, k ) != neigh_idx );
+            loop_continue = ( cell_.getAdjacency( j, k ) != neigh_idx );
             ++k;
         } //next k
         ++j;
