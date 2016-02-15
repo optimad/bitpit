@@ -48,7 +48,7 @@ template <typename T, typename Comparator = std::less<T> >
 typename std::vector<T>::const_iterator findInOrderedVector(const T &value, const std::vector<T> &list, Comparator comparator = Comparator());
 
 template <class T>
-void eraseValue(std::vector<T> &, const T);
+void eraseValue(std::vector<T> &, const T&);
 
 template <class T>
 std::vector<T> intersectionVector(const std::vector<T>&, const std::vector<T>&);
