@@ -685,7 +685,7 @@ Patch::VertexIterator Patch::addVertex(const std::array<double, 3> &coords, cons
 		return vertexEnd();
 	}
 
-	VertexIterator iterator = createVertex();
+	VertexIterator iterator = createVertex(id);
 	Vertex &vertex = (*iterator);
 	vertex.setCoords(coords);
 
