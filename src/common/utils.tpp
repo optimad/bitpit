@@ -100,6 +100,78 @@ typename std::vector<T>::const_iterator findInOrderedVector(const T &value, cons
 	return itr;
 };
 
+/*!
+    Remove a element with specified value from input std::vector.
+
+    \param[in,out] vec   inptut vector set. On output stores the input vector
+    deprived by the element with specified value.
+    \param[in]     value value of element to be removed from the input vector.
+*/
+template<class T>
+void eraseValue(
+    std::vector<T>              &vec,
+    const T                     &value
+) {
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+// none
+
+// Counters
+typename std::vector<T>::iterator             it;
+
+// ========================================================================== //
+// PERFORM SET DIFFERENCE                                                     //
+// ========================================================================== //
+it = find(vec.begin(), vec.end(), value);
+if (it != vec.end()) {
+    vec.erase(it);
+}
+
+return; }
+
+/*!
+    Compute intersection between two std::vectors.
+
+    \param[in] vec_1 1st argument for intersection.
+    \param[in] vec_2 2nd argument for intersection.
+
+    \result on output returns a vector storing the common elements of the input
+    vectors.
+*/
+template<class T>
+std::vector<T> intersectionVector(
+    const std::vector<T>        &vec_1,
+    const std::vector<T>        &vec_2
+) {
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+std::map<T, bool>                               storage;
+std::vector<T>                                  intersect;
+
+// Counters
+typename std::vector<T>::const_iterator         it_, cit_;
+
+// ========================================================================== //
+// PERFORM SET INTERSECTION                                                   //
+// ========================================================================== //
+intersect.reserve( min( vec_1.size(), vec_2.size() ) );
+for (cit_ = vec_2.begin(); cit_ != vec_2.end(); ++cit_) {
+    storage[*cit_] = true;
+} //next cit_
+for (it_ = vec_1.begin(); it_ != vec_1.end(); ++it_) {
+    if (storage[*it_]) { intersect.push_back(*it_); }
+}
+
+return(intersect); }
+
 }
 
 }
