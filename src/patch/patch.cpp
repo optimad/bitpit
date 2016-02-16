@@ -1443,19 +1443,8 @@ bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
 				// Update adjacency of the neighbours
 				long neighId = cell.getAdjacency(i,k);
                                 if (neighId >= 0) {
-                                    cout << "erasing myself (id) " << id << " from neigh: " << neighId << endl;
                                     Cell &neigh = m_cells[neighId];
 
-/*TODO AGGIORNARE */            //if (interface.getOwner() == neighId) {
-/*TODO AGGIORNARE */            //	neighFace = interface.getOwnerFace();
-/*TODO AGGIORNARE */            //} else {
-/*TODO AGGIORNARE */            //	neighFace = interface.getNeighFace();
-/*TODO AGGIORNARE */            //}
-
-/*TODO AGGIORNARE */            //int adjacenyId = 0;
-/*TODO AGGIORNARE */            //while (neigh.getAdjacency(neighId, adjacenyId) != id) {
-/*TODO AGGIORNARE */            //        ++adjacenyId;
-/*TODO AGGIORNARE */            //}
                                     int neighFace, adjacencyId;
                                     findFaceNeighCell(neighId, id, neighFace, adjacencyId);
                                     if (neighFace >= 0) {
@@ -1466,10 +1455,8 @@ bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
                                 }
 
 				// Update interface
-				cout << "removing interfaces" << endl;
                                 long interfaceId = cell.getInterface(i,k);
                                 if (interfaceId >= 0) {
-                                    cout << "removing interface: " << interfaceId << endl;
                                     Interface &interface = m_interfaces[interfaceId];
                                     if (interface.getOwner() == id) {
                                             interface.unsetOwner();
@@ -1482,7 +1469,6 @@ bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
 	}
 
 	// Delete cell
-	cout << "deleting cells" << endl;
 	bool isInternal = m_cells.at(id).isInterior();
 	m_cells.erase(id, delayed);
 	m_cellIdGenerator.trashId(id);
@@ -1493,7 +1479,6 @@ bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
 		m_nGhosts--;
 		m_first_ghost_id = m_cells.get_size_marker(m_nInternals, Element::NULL_ID);
 	}
-        cout << "done" << endl;
 	return true;
 }
 
