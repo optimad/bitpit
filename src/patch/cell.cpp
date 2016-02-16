@@ -346,6 +346,52 @@ const long * Cell::getInterfaces(const int &face) const
 }
 
 /*!
+	Find the specified interface among the interfaces of the given face.
+
+	The function returns the position in the interface face list of the
+	specified interface. If the face doesn't contain the specified interface
+	the function returns a dummy position equal to -1.
+
+	\param face is the face of the cell
+	\param interface is the interface to look for
+	\result The position in the interface face list of the specfied interface.
+*/
+int Cell::findInterface(const int &face, const int &interface)
+{
+	int nFaceInterfaces = getInterfaceCount(face);
+	for (int i = 0; i < nFaceInterfaces; i++) {
+		if (getInterface(face, i) == interface) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+/*!
+	Find the specified interface among all the interfaces of the cell.
+
+	The function returns the first position in the interface cell list of the
+	specified interface. If the cell doesn't contain the specified interface
+	the function returns a dummy position equal to -1.
+
+	\param interface is the interface to look for
+	\result The position in the interface cell list of the specfied interface.
+*/
+int Cell::findInterface(const int &interface)
+{
+	int nCellInterfaces = getInterfaceCount();
+	const long *interfaces = getInterfaces();
+	for (int i = 0; i < nCellInterfaces; i++) {
+		if (interfaces[i] == interface) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+/*!
 	Resets the adjacencies of the cell.
 
 	If the adjacencies are stored, there will always be at least one
@@ -516,6 +562,52 @@ const long * Cell::getAdjacencies() const
 const long * Cell::getAdjacencies(const int &face) const
 {
 	return m_adjacencies.get(face);
+}
+
+/*!
+	Find the specified adjacency among the adjacencies of the given face.
+
+	The function returns the position in the adjacency face list of the
+	specified adjacency. If the face doesn't contain the specified adjacency
+	the function returns a dummy position equal to -1.
+
+	\param face is the face of the cell
+	\param adjacency is the adjacency to look for
+	\result The position in the adjacency face list of the specfied adjacency.
+*/
+int Cell::findAdjacency(const int &face, const int &adjacency)
+{
+	int nFaceAdjacencies = getAdjacencyCount(face);
+	for (int i = 0; i < nFaceAdjacencies; i++) {
+		if (getAdjacency(face, i) == adjacency) {
+			return i;
+		}
+	}
+
+	return -1;
+}
+
+/*!
+	Find the specified adjacency among all the adjacencies of the cell.
+
+	The function returns the first position in the adjacency cell list of the
+	specified adjacency. If the cell doesn't contain the specified adjacency
+	the function returns a dummy position equal to -1.
+
+	\param adjacency is the adjacency to look for
+	\result The position in the adjacency cell list of the specfied adjacency.
+*/
+int Cell::findAdjacency(const int &adjacency)
+{
+	int nCellAdjacencies = getAdjacencyCount();
+	const long *adjacencies = getAdjacencies();
+	for (int i = 0; i < nCellAdjacencies; i++) {
+		if (adjacencies[i] == adjacency) {
+			return i;
+		}
+	}
+
+	return -1;
 }
 
 /*!

@@ -74,6 +74,8 @@ public:
 	long getInterface(const int &face, const int &index = 0) const;
 	const long * getInterfaces() const;
 	const long * getInterfaces(const int &face) const;
+	int findInterface(const int &face, const int &interface);
+	int findInterface(const int &interface);
 
 	void resetAdjacencies(bool storeInterfaces = true);
 	void setAdjacencies(std::vector<std::vector<long>> &interfaces);
@@ -85,6 +87,8 @@ public:
 	long getAdjacency(const int &face, const int &index = 0) const;
 	const long * getAdjacencies() const;
 	const long * getAdjacencies(const int &face) const;
+	int findAdjacency(const int &face, const int &adjacency);
+	int findAdjacency(const int &adjacency);
 
 	bool isFaceBorder(int face) const;
 
