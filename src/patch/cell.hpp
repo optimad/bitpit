@@ -77,10 +77,10 @@ public:
 	int findInterface(const int &face, const int &interface);
 	int findInterface(const int &interface);
 
-	void resetAdjacencies(bool storeInterfaces = true);
-	void setAdjacencies(std::vector<std::vector<long>> &interfaces);
-	void setAdjacency(const int &face, const int &index, const long &interface);
-	void pushAdjacency(const int &face, const long &interface);
+	void resetAdjacencies(bool storeAdjacencies = true);
+	void setAdjacencies(std::vector<std::vector<long>> &adjacencies);
+	void setAdjacency(const int &face, const int &index, const long &adjacencies);
+	void pushAdjacency(const int &face, const long &adjacency);
 	void deleteAdjacency(const int &face, const int &i);
 	int getAdjacencyCount() const;
 	int getAdjacencyCount(const int &face) const;
