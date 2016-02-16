@@ -259,7 +259,7 @@ void SurfTriPatch::buildAdjacencies(void)
         // Allocate memory for adjacencies ---------------------------------- //
         for (c_ = cellBegin(); c_ != e_; ++c_) {
             c_->resetAdjacencies();
-        } //next it_
+        } //next c_
     }
 
     // ====================================================================== //
@@ -341,10 +341,6 @@ void SurfTriPatch::buildAdjacencies(void)
                         if (check) {
                             c_->pushAdjacency(m, candidate_idx);
                             n_->pushAdjacency(k, simplex_idx);
-//OLD VERS, TO BE DELETED      if ( cells[simplex_idx].getAdjacency(m, 0) == -1 ) cells[simplex_idx].setAdjacency(m, 0, candidate_idx);
-//OLD VERS, TO BE DELETED      else                                                cells[simplex_idx].pushAdjacency(m, candidate_idx);
-//OLD VERS, TO BE DELETED      if ( cells[candidate_idx].getAdjacency(k, 0) == -1 ) cells[candidate_idx].setAdjacency(k, 0, simplex_idx);
-//OLD VERS, TO BE DELETED      else                                                  cells[candidate_idx].pushAdjacency(k, simplex_idx);
                         }
                     }
                 } //next j
@@ -460,7 +456,7 @@ void SurfTriPatch::updateAdjacencies(const std::vector<long> &cell_ids)
                 // Update adjacencies
                 for (j = 0; j < n_candidates; ++j) {
                     candidate_idx = candidate_list[j];
-                    if ( (candidate_idx > simplex_idx) ) {
+//                     if ( (candidate_idx > simplex_idx) ) {
                         n_ = &(m_cells[candidate_idx]);
                         m_faces = n_->getFaceCount();
                         k = 0;
@@ -473,8 +469,12 @@ void SurfTriPatch::updateAdjacencies(const std::vector<long> &cell_ids)
                         if (check) {
                             c_->pushAdjacency(m, candidate_idx);
                             n_->pushAdjacency(k, simplex_idx);
+                            cout << " cell:  " << c_->get_id() << endl;
+                            c_->display(cout, 4);
+                            cout << " neigh: " << n_->get_id() << endl;
+                            n_->display(cout, 4);
                         }
-                    }
+//                     }
                 } //next j
 
             } //next m
