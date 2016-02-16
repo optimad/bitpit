@@ -374,6 +374,9 @@ vector<long>                            cell_list;
     if (mesh.getCellCount() != 30)              return 2;
     if (mesh.countFreeCells() != 23)            return 2;
 
+    cout << "==================" << endl;
+    mesh.displayCells(cout);
+    cout << "==================" << endl;
 
     // Compute 1-ring of vertex 12 ------------------------------------------ //
     cout << "1-ring" << endl;
@@ -419,7 +422,7 @@ vector<long>                            cell_list;
 {
     // Scope variables ------------------------------------------------------ //
     SurfTriPatch                        envelope(0);
-    vector<long>                        ring1, ring1_expected{35};
+    vector<long>                        ring1, ring1_expected{7};
     SurfTriPatch::CellIterator          it;
 
     // Set envelope attributes ---------------------------------------------- //
@@ -496,7 +499,7 @@ vector<long>                            cell_list;
 {
     // Scope variables ------------------------------------------------------ //
     SurfTriPatch                        envelope(0);
-    vector<long>                        ring1, ring1_expected{6,8,21,22,23,30,31,32,35};
+    vector<long>                        ring1, ring1_expected{6,7,8,21,22,23,30,31,32};
 
     // Set envelope attributes ---------------------------------------------- //
     envelope.setExpert(true);
@@ -524,9 +527,9 @@ vector<long>                            cell_list;
     if (mesh.countFreeCells() != 21)            return 4;
 
     // Compute 1-ring of vertex 12 ------------------------------------------ //
-    ring1 = mesh.findCellVertexOneRing(35, 2);
+    ring1 = mesh.findCellVertexOneRing(7, 2);
     sort(ring1.begin(), ring1.end());
-    cout << "  1-ring of vertex (35, 2): " << ring1 << endl;
+    cout << "  1-ring of vertex (7, 2): " << ring1 << endl;
 
     // Check 1-ring of vertex (7,2) ----------------------------------------- //
     if (ring1 != ring1_expected)                return 4;

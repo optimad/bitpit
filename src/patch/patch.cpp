@@ -1449,10 +1449,12 @@ bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
                                     findFaceNeighCell(neighId, id, neighFace, adjacencyId);
                                     if (neighFace >= 0) {
                                         neigh.deleteAdjacency(neighFace, adjacencyId);
-                                        --nFaceAdjacencies;
                                     }
 
                                 }
+                        } //next k
+                        int nFaceInterfaces = cell.getInterfaceCount(i);
+                        for (int k = 0; k < nFaceInterfaces; ++k) {
 
 				// Update interface
                                 long interfaceId = cell.getInterface(i,k);
@@ -1464,7 +1466,7 @@ bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
                                             interface.unsetNeigh();
                                     }
                                 }
-			}
+			} //next k
 		}
 	}
 

@@ -469,10 +469,6 @@ void SurfTriPatch::updateAdjacencies(const std::vector<long> &cell_ids)
                         if (check) {
                             c_->pushAdjacency(m, candidate_idx);
                             n_->pushAdjacency(k, simplex_idx);
-                            cout << " cell:  " << c_->get_id() << endl;
-                            c_->display(cout, 4);
-                            cout << " neigh: " << n_->get_id() << endl;
-                            n_->display(cout, 4);
                         }
 //                     }
                 } //next j
