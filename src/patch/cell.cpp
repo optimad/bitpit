@@ -251,6 +251,11 @@ void Cell::setInterface(const int &face, const int &index, const long &interface
 */
 void Cell::pushInterface(const int &face, const long &interface)
 {
+	// Do not push an existing interface
+	if (findInterface(face, interface) >= 0) {
+		return;
+	}
+
 	// If there is only one interface stored for the specified face and
 	// that interface is negative, we need to overwrite the value and
 	// not add another interface.
@@ -468,6 +473,11 @@ void Cell::setAdjacency(const int &face, const int &index, const long &adjacency
 */
 void Cell::pushAdjacency(const int &face, const long &adjacency)
 {
+	// Do not push an existing adjacency
+	if (findAdjacency(face, adjacency) >= 0) {
+		return;
+	}
+
 	// If there is only one adjacency stored for the specified face and
 	// that adjacency is negative, we need to overwrite the value and
 	// not add another adjacency.
