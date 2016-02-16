@@ -298,7 +298,7 @@ vector<long>                            cell_list;
     // Compute 1-ring of vertex 12 ------------------------------------------ //
     ring1 = mesh.findCellVertexOneRing(7, 2);
     sort(ring1.begin(), ring1.end());
-    cout << "  1-ring of vertex (7, 2): " << ring1 << endl;
+    cout << "   1-ring of vertex (7, 2): " << ring1 << endl;
 
     // Check 1-ring of vertex (7,2) ----------------------------------------- //
     if (ring1 != ring1_expected)            return 1;
@@ -374,16 +374,10 @@ vector<long>                            cell_list;
     if (mesh.getCellCount() != 30)              return 2;
     if (mesh.countFreeCells() != 23)            return 2;
 
-    cout << "==================" << endl;
-    mesh.displayCells(cout);
-    cout << "==================" << endl;
-
     // Compute 1-ring of vertex 12 ------------------------------------------ //
-    cout << "1-ring" << endl;
-    mesh.getCell(23).display(cout, 4);
     ring1 = mesh.findCellVertexOneRing(23, 0);
     sort(ring1.begin(), ring1.end());
-    cout << "  1-ring of vertex (23, 0): " << ring1 << endl;
+    cout << "   1-ring of vertex (23, 0): " << ring1 << endl;
 
     // Check 1-ring of vertex (23,0) ---------------------------------------- //
     if (ring1 != ring1_expected)                return 2;
@@ -461,7 +455,7 @@ vector<long>                            cell_list;
     // Compute 1-ring of vertex 12 ------------------------------------------ //
     ring1 = mesh.findCellVertexOneRing(7, 2);
     sort(ring1.begin(), ring1.end());
-    cout << "  1-ring of vertex (7, 2): " << ring1 << endl;
+    cout << "   1-ring of vertex (7, 2): " << ring1 << endl;
 
     // Check 1-ring of (35, 2) ---------------------------------------------- //
     if (ring1 != ring1_expected)                return 3;
@@ -529,7 +523,7 @@ vector<long>                            cell_list;
     // Compute 1-ring of vertex 12 ------------------------------------------ //
     ring1 = mesh.findCellVertexOneRing(7, 2);
     sort(ring1.begin(), ring1.end());
-    cout << "  1-ring of vertex (7, 2): " << ring1 << endl;
+    cout << "   1-ring of vertex (7, 2): " << ring1 << endl;
 
     // Check 1-ring of vertex (7,2) ----------------------------------------- //
     if (ring1 != ring1_expected)                return 4;
