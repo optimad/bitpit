@@ -231,9 +231,8 @@ long SurfTriPatch::locatePoint(const std::array<double, 3> &point)
 /*!
  * Fill adjacencies info for each cell.
 */
-void SurfTriPatch::buildAdjacencies(
-    void
-) {
+void SurfTriPatch::buildAdjacencies(void)
+{
 
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -346,6 +345,134 @@ void SurfTriPatch::buildAdjacencies(
 //OLD VERS, TO BE DELETED      else                                                cells[simplex_idx].pushAdjacency(m, candidate_idx);
 //OLD VERS, TO BE DELETED      if ( cells[candidate_idx].getAdjacency(k, 0) == -1 ) cells[candidate_idx].setAdjacency(k, 0, simplex_idx);
 //OLD VERS, TO BE DELETED      else                                                  cells[candidate_idx].pushAdjacency(k, simplex_idx);
+                        }
+                    }
+                } //next j
+
+            } //next m
+        } //next c_
+
+    }
+
+    return;
+}
+
+/*!
+ * Update adjacencies info for cells with specified ID.
+ * 
+ * \param[in] cell_ids list of cell ids
+*/
+void SurfTriPatch::updateAdjacencies(const std::vector<long> &cell_ids)
+{
+
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    int                                         n_faces;
+    unordered_map<long, vector<long> >          V2S;
+
+    // Counters
+    int                                         i, j, k, m;
+    long int                                    vertex_idx;
+    long int                                    simplex_idx;
+    std::vector<long>::const_iterator           i_, e_ = cell_ids.cend();
+    Cell                                        *c_, *n_;
+
+    // ====================================================================== //
+    // RESET ADJACENCY INFO                                                   //
+    // ====================================================================== //
+    {
+        // Scope variables -------------------------------------------------- //
+        vector<int>                                     interfs;
+
+        // Allocate memory for adjacencies ---------------------------------- //
+        for (i_ = cell_ids.cbegin(); i_ != e_; ++i_) {
+            m_cells[*i_].resetAdjacencies();
+        } //next i_
+    }
+
+    // ====================================================================== //
+    // BUILD VERTEX->SIMPLEX CONNECTIVITY                                     //
+    // ====================================================================== //
+    {
+        // Scope variables -------------------------------------------------- //
+        CellIterator                    j_, k_ = cellEnd();
+
+        // Build vertex->simplex connectivity ------------------------------- //
+        for (j_ = cellBegin(); j_ != k_; ++j_) {
+            n_faces = j_->getFaceCount();
+            for (i = 0; i < n_faces; ++i) {
+                vertex_idx = j_->getVertex(i);
+                simplex_idx = j_->get_id();
+                V2S[vertex_idx].push_back(simplex_idx);
+            } //next i
+        } //next c_
+
+    }
+
+    // ====================================================================== //
+    // UPDATE ADJACENCY                                                       //
+    // ====================================================================== //
+    {
+        // Scope variables -------------------------------------------------- //
+        bool                    check;
+        int                     n_candidates;
+        int                     m_faces;
+        int                     n_vertex_on_face;
+        long                    candidate_idx;
+        vector< int >           face_loc_connectivity;
+        vector< long >          face_connectivity;
+        vector< long >          candidate_list;
+
+        // Build adjacencies ------------------------------------------------ //
+        for (i_ = cell_ids.cbegin(); i_ != e_; ++i_) {
+
+            c_ = &m_cells[*i_];
+            simplex_idx = c_->get_id();
+            n_faces = c_->getFaceCount();
+
+            for (m = 0; m < n_faces; m++) {
+
+                // Build face connectivity
+                face_loc_connectivity = c_->getFaceLocalConnect(m);
+                n_vertex_on_face = face_loc_connectivity.size();
+                face_connectivity.resize(n_vertex_on_face, -1);
+                for (i = 0; i < n_vertex_on_face; ++i) {
+                    face_connectivity[i] = c_->getVertex(face_loc_connectivity[i]);
+                } //next i
+
+                // Build list of candidates for adjacency test
+                vertex_idx = face_connectivity[0];
+                candidate_list = V2S[vertex_idx];
+                j = 1;
+                n_candidates = candidate_list.size();
+                while ( ( n_candidates > 0 ) && ( j < n_vertex_on_face ) ) {
+                    vertex_idx = face_connectivity[j];
+                    candidate_list = utils::intersectionVector(candidate_list, V2S[vertex_idx]);
+                    j++;
+                    n_candidates = candidate_list.size();
+                } //next j
+                utils::eraseValue(candidate_list, simplex_idx);
+                --n_candidates;
+
+                // Update adjacencies
+                for (j = 0; j < n_candidates; ++j) {
+                    candidate_idx = candidate_list[j];
+                    if ( (candidate_idx > simplex_idx) ) {
+                        n_ = &(m_cells[candidate_idx]);
+                        m_faces = n_->getFaceCount();
+                        k = 0;
+                        check = false;
+                        while (!check && (k < m_faces)) {
+                            check = isSameFace(simplex_idx, m, candidate_idx, k);
+                            ++k;
+                        } //next
+                        --k;
+                        if (check) {
+                            c_->pushAdjacency(m, candidate_idx);
+                            n_->pushAdjacency(k, simplex_idx);
                         }
                     }
                 } //next j
