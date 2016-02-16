@@ -296,12 +296,12 @@ vector<long>                            cell_list;
     if (mesh.countFreeCells() != 21)            return 1;
 
     // Compute 1-ring of vertex 12 ------------------------------------------ //
-///*TODO:activate when member function is ready*/     ring1 = mesh.Ring1(7, 2);
-///*TODO:activate when member function is ready*/     sort(ring1.begin(), ring1.end());
-///*TODO:activate when member function is ready*/     cout << "  1-ring of vertex (7, 2): " << ring1 << endl;
+    ring1 = mesh.findCellVertexOneRing(7, 2);
+    sort(ring1.begin(), ring1.end());
+    cout << "  1-ring of vertex (7, 2): " << ring1 << endl;
 
     // Check 1-ring of vertex (7,2) ----------------------------------------- //
-///*TODO:activate when member function is ready*/     if (ring1 != ring1_expected)            return 1;
+    if (ring1 != ring1_expected)            return 1;
 
     // External envelope ---------------------------------------------------- //
     cout << "  extracting mesh envelope" << endl;
@@ -376,12 +376,14 @@ vector<long>                            cell_list;
 
 
     // Compute 1-ring of vertex 12 ------------------------------------------ //
-///*TODO:activate when member function is ready*/     ring1 = mesh.Ring1(23, 0);
-///*TODO:activate when member function is ready*/     sort(ring1.begin(), ring1.end());
-///*TODO:activate when member function is ready*/     cout << "  1-ring of vertex (23, 0): " << ring1 << endl;
+    cout << "1-ring" << endl;
+    mesh.getCell(23).display(cout, 4);
+    ring1 = mesh.findCellVertexOneRing(23, 0);
+    sort(ring1.begin(), ring1.end());
+    cout << "  1-ring of vertex (23, 0): " << ring1 << endl;
 
     // Check 1-ring of vertex (23,0) ---------------------------------------- //
-///*TODO:activate when member function is ready*/     if (ring1 != ring1_expected)            return 2;
+    if (ring1 != ring1_expected)                return 2;
 
     // External envelope ---------------------------------------------------- //
     cout << "   extracting mesh envelope" << endl;
@@ -443,7 +445,7 @@ vector<long>                            cell_list;
 
     // Vertices stats
     if (mesh.getVertexCount() != 27)            return 3;
-    if (mesh.countFreeVertices() != 24)           return 3;
+    if (mesh.countFreeVertices() != 24)         return 3;
 
     // Faces stats
     if (mesh.countFaces() != 66)                return 3;
@@ -454,12 +456,12 @@ vector<long>                            cell_list;
     if (mesh.countFreeCells() != 26)            return 3;
 
     // Compute 1-ring of vertex 12 ------------------------------------------ //
-///*TODO:activate when member function is ready*/     ring1 = mesh.Ring1(mesh.get_last_cellid(), 2);
-///*TODO:activate when member function is ready*/     sort(ring1.begin(), ring1.end());
-///*TODO:activate when member function is ready*/     cout << "  1-ring of vertex (" << mesh.get_last_cellid() << ", 2): " << ring1 << endl;
+    ring1 = mesh.findCellVertexOneRing(7, 2);
+    sort(ring1.begin(), ring1.end());
+    cout << "  1-ring of vertex (7, 2): " << ring1 << endl;
 
     // Check 1-ring of (35, 2) ---------------------------------------------- //
-///*TODO:activate when member function is ready*/     if (ring1 != ring1_expected)            return 3;
+    if (ring1 != ring1_expected)                return 3;
 
     // External envelope ---------------------------------------------------- //
     cout << "   extracting mesh external envelope" << endl;
@@ -477,7 +479,7 @@ vector<long>                            cell_list;
     if (envelope.countFreeFaces() != 0)         return 3;
 
     // Check cells stats
-    if (envelope.getCellCount() != 34)            return 3;
+    if (envelope.getCellCount() != 34)          return 3;
     if (envelope.countFreeCells() != 0)         return 3;
 
     // Export triangulation ------------------------------------------------- //
@@ -509,25 +511,25 @@ vector<long>                            cell_list;
 
     // Check mesh topology -------------------------------------------------- //
 
-//     // Vertices stats
-//     if (mesh.getVertexCount() != 27)            return 4;
-//     if (mesh.countFreeVertices() != 20)         return 4;
-// 
-//     // Faces stats
-//     if (mesh.countFaces() != 59)                return 4;
-//     if (mesh.countFreeFaces() != 21)            return 4;
-// 
-//     // Cells stats
-//     if (mesh.getCellCount() != 33)              return 4;
-//     if (mesh.countFreeCells() != 21)            return 4;
+    // Vertices stats
+    if (mesh.getVertexCount() != 27)            return 4;
+    if (mesh.countFreeVertices() != 20)         return 4;
+
+    // Faces stats
+    if (mesh.countFaces() != 59)                return 4;
+    if (mesh.countFreeFaces() != 21)            return 4;
+
+    // Cells stats
+    if (mesh.getCellCount() != 33)              return 4;
+    if (mesh.countFreeCells() != 21)            return 4;
 
     // Compute 1-ring of vertex 12 ------------------------------------------ //
-///*TODO:activate when member function is ready*/     ring1 = mesh.Ring1(35, 2);
-///*TODO:activate when member function is ready*/     sort(ring1.begin(), ring1.end());
-///*TODO:activate when member function is ready*/     cout << "  1-ring of vertex (35, 2): " << ring1 << endl;
+    ring1 = mesh.findCellVertexOneRing(35, 2);
+    sort(ring1.begin(), ring1.end());
+    cout << "  1-ring of vertex (35, 2): " << ring1 << endl;
 
     // Check 1-ring of vertex (7,2) ----------------------------------------- //
-///*TODO:activate when member function is ready*/     if (ring1 != ring1_expected)            return 4;
+    if (ring1 != ring1_expected)                return 4;
 
     // External envelope ---------------------------------------------------- //
     cout << "   extracting mesh external envelope" << endl;
@@ -536,17 +538,17 @@ vector<long>                            cell_list;
 
     // Check external envelope topology ------------------------------------- //
 
-//     // Vertices stats
-//     if (envelope.getVertexCount() != 20)        return 4;
-//     if (envelope.countFreeVertices() != 0)      return 4;
-// 
-//     // Faces stats
-//     if (envelope.countFaces() != 20)            return 4;
-//     if (envelope.countFreeFaces() != 0)         return 4;
-// 
-//     // Cells stats
-//     if (envelope.getCellCount() != 21)          return 4;
-//     if (envelope.countFreeCells() != 0)         return 4;
+    // Vertices stats
+    if (envelope.getVertexCount() != 20)        return 4;
+    if (envelope.countFreeVertices() != 0)      return 4;
+
+    // Faces stats
+    if (envelope.countFaces() != 20)            return 4;
+    if (envelope.countFreeFaces() != 0)         return 4;
+
+    // Cells stats
+    if (envelope.getCellCount() != 21)          return 4;
+    if (envelope.countFreeCells() != 0)         return 4;
 
     // Export triangulation ------------------------------------------------- //
     mesh.write("step4");
@@ -949,11 +951,6 @@ if (err > 0) return(10 + err);
 // ========================================================================== //
 err = subtest_002();
 if (err > 0) return(20 + err);
-
-
-// ========================================================================== //
-// RUN SUB-TEST #003                                                          //
-// ========================================================================== //
 
 return err;
 
