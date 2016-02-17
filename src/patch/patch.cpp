@@ -1202,14 +1202,20 @@ long Patch::generateCellId()
 /*!
 	Creates a new cell with the specified id.
 
+	\param type is the type of the cell
 	\param id is the id of the new cell
 	\param interior is true if the cell is an interior cell, false otherwise
 	\return A reference to the newly created cell.
 */
-Patch::CellIterator Patch::createCell(bool interior, long id)
+Patch::CellIterator Patch::createCell(ElementInfo::Type type, bool interior, long id)
 {
 	if (id < 0) {
 		id = generateCellId();
+	}
+
+	const ElementInfo &cellTypeInfo = ElementInfo::getElementInfo(type);
+	if (cellTypeInfo.dimension != getDimension()) {
+		return cellEnd();
 	}
 
 	PiercedVector<Cell>::iterator iterator;
@@ -1259,17 +1265,18 @@ Patch::CellIterator Patch::createCell(bool interior, long id)
 
 	\param interior is true if the cell is the interior of the patch,
 	false otherwise
+	\param type is the type of the cell
 	\param id is the id of the new cell. If a negative id value is
 	specified, ad new unique id will be generated
 	\return The id associated to the cell.
 */
-Patch::CellIterator Patch::addCell(const long &id)
+Patch::CellIterator Patch::addCell(ElementInfo::Type type, const long &id)
 {
 	if (!isExpert()) {
 		return cellEnd();
 	}
 
-	return createCell(true, id);
+	return createCell(type, true, id);
 }
 
 /*!
@@ -1288,7 +1295,7 @@ Patch::CellIterator Patch::addCell(ElementInfo::Type type, bool interior, const 
 		return cellEnd();
 	}
 
-	CellIterator iterator = createCell(interior, id);
+	CellIterator iterator = createCell(type, interior, id);
 	Cell &cell = (*iterator);
 	cell.initialize(type, interior);
 
@@ -1364,7 +1371,7 @@ Patch::CellIterator Patch::addCell(Cell source)
 		return cellEnd();
 	}
 
-	CellIterator iterator = createCell(source.isInterior());
+	CellIterator iterator = createCell(source.getType(), source.isInterior());
 	Cell &cell = (*iterator);
 	long id = cell.get_id();
 	cell = std::move(source);
@@ -1389,7 +1396,7 @@ Patch::CellIterator Patch::addCell(Cell &&source, long id)
 		id = source.get_id();
 	}
 
-	CellIterator iterator = createCell(source.isInterior(), id);
+	CellIterator iterator = createCell(source.getType(), source.isInterior(), id);
 	Cell &cell = (*iterator);
 	id = cell.get_id();
 	cell = std::move(source);

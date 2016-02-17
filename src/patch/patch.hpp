@@ -125,7 +125,7 @@ public:
 	Cell &getFirstGhost();
 	const Cell &getFirstGhost() const;
 	long generateCellId();
-	CellIterator addCell(const long &id = Element::NULL_ID);
+	CellIterator addCell(ElementInfo::Type type, const long &id = Element::NULL_ID);
 	CellIterator addCell(ElementInfo::Type type, bool interior, const long &id = Element::NULL_ID);
 	CellIterator addCell(ElementInfo::Type type, bool interior, std::unique_ptr<long[]> &connect, const long &id = Element::NULL_ID);
 	CellIterator addCell(ElementInfo::Type type, bool interior, const std::vector<long> &connect, const long &id = Element::NULL_ID);
@@ -294,7 +294,7 @@ private:
 
 	VertexIterator createVertex(long id = Vertex::NULL_ID);
 	InterfaceIterator createInterface(long id = Element::NULL_ID);
-	CellIterator createCell(bool interior, long id = Element::NULL_ID);
+	CellIterator createCell(ElementInfo::Type type, bool interior, long id = Element::NULL_ID);
 
 	void set_id(int id);
 	void setDimension(int dimension);
