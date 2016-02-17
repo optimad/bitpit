@@ -101,7 +101,7 @@ public:
 	long generateVertexId();
 	VertexIterator addVertex(const long &id = Vertex::NULL_ID);
 	VertexIterator addVertex(const std::array<double, 3> &coords, const long &id = Vertex::NULL_ID);
-	VertexIterator addVertex(Vertex source);
+	VertexIterator addVertex(Vertex source, long id = Vertex::NULL_ID);
 	VertexIterator addVertex(Vertex &&source, long id = Vertex::NULL_ID);
 	long countFreeVertices() const;
 	long countOrphanVertices() const;
@@ -129,7 +129,7 @@ public:
 	CellIterator addCell(ElementInfo::Type type, bool interior, const long &id = Element::NULL_ID);
 	CellIterator addCell(ElementInfo::Type type, bool interior, std::unique_ptr<long[]> &connect, const long &id = Element::NULL_ID);
 	CellIterator addCell(ElementInfo::Type type, bool interior, const std::vector<long> &connect, const long &id = Element::NULL_ID);
-	CellIterator addCell(Cell source);
+	CellIterator addCell(Cell source, long id = Element::NULL_ID);
 	CellIterator addCell(Cell &&source, long id = Element::NULL_ID);
 	bool deleteCell(const long &id, bool updateNeighs = true, bool delayed = false);
 	bool deleteCells(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
@@ -166,7 +166,7 @@ public:
 	const Interface &getInterface(const long &id) const;
 	long generateInterfaceId();
 	InterfaceIterator addInterface(ElementInfo::Type type, const long &id = Element::NULL_ID);
-	InterfaceIterator addInterface(Interface source);
+	InterfaceIterator addInterface(Interface source, long id = Element::NULL_ID);
 	InterfaceIterator addInterface(Interface &&source, long id = Element::NULL_ID);
 	bool deleteInterface(const long &id, bool updateNeighs = true, bool delayed = false);
 	bool deleteInterfaces(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);

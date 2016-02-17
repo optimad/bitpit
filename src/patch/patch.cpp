@@ -721,17 +721,19 @@ Patch::VertexIterator Patch::addVertex(const std::array<double, 3> &coords, cons
 	Adds the specified vertex to the patch.
 
 	\param source is the vertex that will be added
+	\param id is the id of the new cell. If a negative id value is
+	specified, ad new unique id will be generated
 	\return An iterator pointing to the added vertex.
 */
-Patch::VertexIterator Patch::addVertex(Vertex source)
+Patch::VertexIterator Patch::addVertex(Vertex source, long id)
 {
 	if (!isExpert()) {
 		return vertexEnd();
 	}
 
-	VertexIterator iterator = createVertex();
+	VertexIterator iterator = createVertex(id);
 	Vertex &vertex = (*iterator);
-	long id = vertex.get_id();
+	id = vertex.get_id();
 	vertex = std::move(source);
 	vertex.set_id(id);
 
@@ -1361,17 +1363,19 @@ Patch::CellIterator Patch::addCell(ElementInfo::Type type, bool interior,
 	Adds the specified cell to the patch.
 
 	\param source is the cell that will be added
+	\param id is the id of the new cell. If a negative id value is
+	specified, ad new unique id will be generated
 	\return An iterator pointing to the added cell.
 */
-Patch::CellIterator Patch::addCell(Cell source)
+Patch::CellIterator Patch::addCell(Cell source, long id)
 {
 	if (!isExpert()) {
 		return cellEnd();
 	}
 
-	CellIterator iterator = createCell(source.getType(), source.isInterior());
+	CellIterator iterator = createCell(source.getType(), source.isInterior(), id);
 	Cell &cell = (*iterator);
-	long id = cell.get_id();
+	id = cell.get_id();
 	cell = std::move(source);
 	cell.set_id(id);
 
@@ -2126,17 +2130,19 @@ Patch::InterfaceIterator Patch::addInterface(ElementInfo::Type type, const long 
 	Adds the specified interface to the patch.
 
 	\param source is the interface that will be added
+	\param id is the id of the new cell. If a negative id value is
+	specified, ad new unique id will be generated
 	\return An iterator pointing to the added interface.
 */
-Patch::InterfaceIterator Patch::addInterface(Interface source)
+Patch::InterfaceIterator Patch::addInterface(Interface source, long id)
 {
 	if (!isExpert()) {
 		return interfaceEnd();
 	}
 
-	InterfaceIterator iterator = createInterface(source.getType());
+	InterfaceIterator iterator = createInterface(source.getType(), id);
 	Interface &interface = (*iterator);
-	long id = interface.get_id();
+	id = interface.get_id();
 	interface = std::move(source);
 	interface.set_id(id);
 
