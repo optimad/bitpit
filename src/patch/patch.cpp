@@ -666,7 +666,7 @@ long Patch::generateVertexId()
 	Creates a new vertex with the specified id.
 
 	\param id is the id of the new vertex
-	\return A reference to the newly created vertex.
+	\return An iterator pointing to the newly created vertex.
 */
 Patch::VertexIterator Patch::createVertex(long id)
 {
@@ -685,7 +685,7 @@ Patch::VertexIterator Patch::createVertex(long id)
 
 	\param id is the id of the new cell. If a negative id value is
 	specified, ad new unique id will be generated
-	\return The id associated to the vertex.
+	\return An iterator pointing to the added vertex.
 */
 Patch::VertexIterator Patch::addVertex(const long &id)
 {
@@ -702,7 +702,7 @@ Patch::VertexIterator Patch::addVertex(const long &id)
 	\param coords are the coordinates of the vertex
 	\param id is the id of the new cell. If a negative id value is
 	specified, ad new unique id will be generated
-	\return The id associated to the vertex.
+	\return An iterator pointing to the added vertex.
 */
 Patch::VertexIterator Patch::addVertex(const std::array<double, 3> &coords, const long &id)
 {
@@ -721,7 +721,7 @@ Patch::VertexIterator Patch::addVertex(const std::array<double, 3> &coords, cons
 	Adds the specified vertex to the patch.
 
 	\param source is the vertex that will be added
-	\return The id associated to the vertex.
+	\return An iterator pointing to the added vertex.
 */
 Patch::VertexIterator Patch::addVertex(Vertex source)
 {
@@ -742,7 +742,7 @@ Patch::VertexIterator Patch::addVertex(Vertex source)
 	Adds the specified vertex to the patch.
 
 	\param source is the vertex that will be added
-	\return The id associated to the vertex.
+	\return An iterator pointing to the added vertex.
 */
 Patch::VertexIterator Patch::addVertex(Vertex &&source, long id)
 {
@@ -1205,7 +1205,7 @@ long Patch::generateCellId()
 	\param type is the type of the cell
 	\param id is the id of the new cell
 	\param interior is true if the cell is an interior cell, false otherwise
-	\return A reference to the newly created cell.
+	\return An iterator pointing to the newly created cell.
 */
 Patch::CellIterator Patch::createCell(ElementInfo::Type type, bool interior, long id)
 {
@@ -1266,7 +1266,7 @@ Patch::CellIterator Patch::createCell(ElementInfo::Type type, bool interior, lon
 	\param type is the type of the cell
 	\param id is the id of the new cell. If a negative id value is
 	specified, ad new unique id will be generated
-	\return The id associated to the cell.
+	\return An iterator pointing to the added cell.
 */
 Patch::CellIterator Patch::addCell(ElementInfo::Type type, const long &id)
 {
@@ -1285,7 +1285,7 @@ Patch::CellIterator Patch::addCell(ElementInfo::Type type, const long &id)
 	false otherwise
 	\param id is the id of the new cell. If a negative id value is
 	specified, ad new unique id will be generated
-	\return The id associated to the cell.
+	\return An iterator pointing to the added cell.
 */
 Patch::CellIterator Patch::addCell(ElementInfo::Type type, bool interior, const long &id)
 {
@@ -1304,12 +1304,12 @@ Patch::CellIterator Patch::addCell(ElementInfo::Type type, bool interior, const 
 	Adds a new cell with the specified id, type, and connectivity.
 
 	\param type is the type of the cell
-	\param type is the connectivity of the cell
 	\param interior defines if the cell is in the interior of the patch
 	or if it's a ghost cell
+	\param connect is the connectivity of the cell
 	\param id is the id of the new cell. If a negative id value is
 	specified, ad new unique id will be generated
-	\return The id associated to the cell.
+	\return An iterator pointing to the added cell.
 */
 Patch::CellIterator Patch::addCell(ElementInfo::Type type, bool interior,
                                    std::unique_ptr<long[]> &connect, const long &id)
@@ -1329,12 +1329,12 @@ Patch::CellIterator Patch::addCell(ElementInfo::Type type, bool interior,
 	Adds a new cell with the specified id, type, and connectivity.
 
 	\param type is the type of the cell
-	\param type is the connectivity of the cell
 	\param interior defines if the cell is in the interior of the patch
 	or if it's a ghost cell
+	\param connect is the connectivity of the cell
 	\param id is the id of the new cell. If a negative id value is
 	specified, ad new unique id will be generated
-	\return The id associated to the cell.
+	\return An iterator pointing to the added cell.
 */
 Patch::CellIterator Patch::addCell(ElementInfo::Type type, bool interior,
 								   const std::vector<long> &connect, const long &id)
@@ -1361,7 +1361,7 @@ Patch::CellIterator Patch::addCell(ElementInfo::Type type, bool interior,
 	Adds the specified cell to the patch.
 
 	\param source is the cell that will be added
-	\return The id associated to the cell.
+	\return An iterator pointing to the added cell.
 */
 Patch::CellIterator Patch::addCell(Cell source)
 {
@@ -1382,7 +1382,9 @@ Patch::CellIterator Patch::addCell(Cell source)
 	Adds the specified cell to the patch.
 
 	\param source is the cell that will be added
-	\return The id associated to the cell.
+	\param id is the id of the new cell. If a negative id value is
+	specified, ad new unique id will be generated
+	\return An iterator pointing to the added cell.
 */
 Patch::CellIterator Patch::addCell(Cell &&source, long id)
 {
@@ -1407,6 +1409,9 @@ Patch::CellIterator Patch::addCell(Cell &&source, long id)
 	Deletes a cell.
 
 	\param id is the id of the cell
+	\param updateNeighs if true the neighbour data will be updated after
+	removing the cell
+	\param delayed is true a delayed delete will be performed
 */
 bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
 {
@@ -1471,9 +1476,12 @@ bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
 }
 
 /*!
- * Deletes a list of cells.
- *
- * \param ids are the ids of the cells to be deleted
+	Deletes a list of cells.
+
+	\param ids are the ids of the cells to be deleted
+	\param updateNeighs if true the neighbour data will be updated after
+	removing the cell
+	\param delayed is true a delayed delete will be performed
  */
 bool Patch::deleteCells(const std::vector<long> &ids, bool updateNeighs, bool delayed)
 {
@@ -2074,7 +2082,7 @@ long Patch::generateInterfaceId()
 	Creates a new interface with the specified id.
 
 	\param id is the id of the new interface
-	\return A reference to the newly created interface.
+	\return An iterator pointing to the newly created interface.
 */
 Patch::InterfaceIterator Patch::createInterface(ElementInfo::Type type, long id)
 {
@@ -2099,7 +2107,7 @@ Patch::InterfaceIterator Patch::createInterface(ElementInfo::Type type, long id)
 	\param type is the type of the interface
 	\param id is the id of the new cell. If a negative id value is
 	specified, ad new unique id will be generated
-	\return The id associated to the interface.
+	\return An iterator pointing to the added interface.
 */
 Patch::InterfaceIterator Patch::addInterface(ElementInfo::Type type, const long &id)
 {
@@ -2118,7 +2126,7 @@ Patch::InterfaceIterator Patch::addInterface(ElementInfo::Type type, const long 
 	Adds the specified interface to the patch.
 
 	\param source is the interface that will be added
-	\return The id associated to the interface.
+	\return An iterator pointing to the added interface.
 */
 Patch::InterfaceIterator Patch::addInterface(Interface source)
 {
@@ -2140,7 +2148,7 @@ Patch::InterfaceIterator Patch::addInterface(Interface source)
 
 	\param source is the interface that will be added
 	\param id is the id that will be assigned to the interface
-	\return The id associated to the interface.
+	\return An iterator pointing to the added interface.
 
 */
 Patch::InterfaceIterator Patch::addInterface(Interface &&source, long id)
@@ -2166,6 +2174,9 @@ Patch::InterfaceIterator Patch::addInterface(Interface &&source, long id)
 	Deletes an interface.
 
 	\param id is the id of the interface
+	\param updateNeighs if true the neighbour data will be updated after
+	removing the interface
+	\param delayed is true a delayed delete will be performed
 */
 bool Patch::deleteInterface(const long &id, bool updateNeighs, bool delayed)
 {
@@ -2214,6 +2225,9 @@ bool Patch::deleteInterface(const long &id, bool updateNeighs, bool delayed)
 	Deletes a list of interfaces.
 
 	\param ids are the ids of the interfaces to be deleted
+	\param updateNeighs if true the neighbour data will be updated after
+	removing the interface
+	\param delayed is true a delayed delete will be performed
 */
 bool Patch::deleteInterfaces(const std::vector<long> &ids, bool updateNeighs, bool delayed)
 {
