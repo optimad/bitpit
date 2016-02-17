@@ -42,11 +42,11 @@ namespace bitpit {
 	\param communicator is the communicator to be used for parallel
 	communications.
 */
-void Patch::setCommunicator(MPI::Intracomm *communicator)
+void Patch::setCommunicator(MPI_Comm *communicator)
 {
 	// Free previous communicator
 	if (m_communicator) {
-		m_communicator->Free();
+		MPI_Comm_free(m_communicator);
 		m_communicator = nullptr;
 	}
 
@@ -56,13 +56,13 @@ void Patch::setCommunicator(MPI::Intracomm *communicator)
 	// instead, a duplicate of a user-specified communicator should always
 	// be used.
 	if (communicator) {
-		m_communicator = new MPI::Intracomm(communicator->Dup());
+		MPI_Comm_dup(*communicator, m_communicator);
 	}
 
 	// Get MPI information
 	if (m_communicator) {
-		m_nProcessors = m_communicator->Get_size();
-		m_rank        = m_communicator->Get_rank();
+		MPI_Comm_size(*m_communicator, &m_nProcessors);
+		MPI_Comm_rank(*m_communicator, &m_rank);
 	} else {
 		m_rank        = 0;
 		m_nProcessors = 1;
@@ -85,7 +85,7 @@ void Patch::unsetCommunicator()
 
 	\return The MPI communicator associated to the patch.
 */
-MPI::Comm & Patch::getCommunicator() const
+MPI_Comm & Patch::getCommunicator() const
 {
 	return *m_communicator;
 }
