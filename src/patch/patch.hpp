@@ -243,6 +243,19 @@ public:
 #endif
 
 protected:
+        template<class T, class T1>
+        class unary_predicate {
+            private:
+            T                                   value;
+            public:
+            unary_predicate(
+                T                               value_
+            ) : value(value_) {}
+            template<class U, class U1>
+            //friend bool operator==(const std::pair<U, U1>&, const unary_predicate<U, U1>&);
+            bool operator==(const std::pair<U, U1>&pair_) { return( this->value == pair_.second ); }
+        };
+
 	PiercedVector<Vertex> m_vertices;
 	PiercedVector<Cell> m_cells;
 	PiercedVector<Interface> m_interfaces;
