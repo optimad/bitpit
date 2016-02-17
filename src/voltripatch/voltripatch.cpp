@@ -47,8 +47,8 @@ namespace bitpit {
 
 	\param id is the id of the patch
 */
-VolTriPatch::VolTriPatch(const int &id)
-	: Patch(id, 3, true)
+VolTriPatch::VolTriPatch(const int &id, const int &dimension)
+	: Patch(id, dimension, true)
 {
 
 }

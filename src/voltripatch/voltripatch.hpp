@@ -35,7 +35,7 @@ namespace bitpit {
 class VolTriPatch : public Patch {
 
 public:
-	VolTriPatch(const int &id);
+	VolTriPatch(const int &id, const int &dimension);
 
 	~VolTriPatch();
 
