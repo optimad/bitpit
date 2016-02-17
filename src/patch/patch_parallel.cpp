@@ -61,8 +61,8 @@ void Patch::setCommunicator(MPI::Intracomm *communicator)
 
 	// Get MPI information
 	if (m_communicator) {
-		MPI_Comm_size(*m_communicator, &m_nProcessors);
-		MPI_Comm_rank(*m_communicator, &m_rank);
+		m_nProcessors = m_communicator->Get_size();
+		m_rank        = m_communicator->Get_rank();
 	} else {
 		m_rank        = 0;
 		m_nProcessors = 1;
