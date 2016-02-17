@@ -165,7 +165,6 @@ public:
 	Interface &getInterface(const long &id);
 	const Interface &getInterface(const long &id) const;
 	long generateInterfaceId();
-	InterfaceIterator addInterface(const long &id = Element::NULL_ID);
 	InterfaceIterator addInterface(ElementInfo::Type type, const long &id = Element::NULL_ID);
 	InterfaceIterator addInterface(Interface source);
 	InterfaceIterator addInterface(Interface &&source, long id = Element::NULL_ID);
@@ -293,7 +292,7 @@ private:
 #endif
 
 	VertexIterator createVertex(long id = Vertex::NULL_ID);
-	InterfaceIterator createInterface(long id = Element::NULL_ID);
+	InterfaceIterator createInterface(ElementInfo::Type type, long id = Element::NULL_ID);
 	CellIterator createCell(ElementInfo::Type type, bool interior, long id = Element::NULL_ID);
 
 	void set_id(int id);

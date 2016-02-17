@@ -1087,16 +1087,17 @@ long OctreePatch::addInterface(uint32_t treeId,
 {
 	BITPIT_UNUSED(treeId);
 
-	// Create the interface
-	InterfaceIterator interfaceIterator = Patch::addInterface();
-	Interface &interface = *interfaceIterator;
-
-	// Tipo
+	// Info on the interfaces
+	ElementInfo::Type interfaceType;
 	if (isThreeDimensional()) {
-		interface.setType(ElementInfo::PIXEL);
+		interfaceType = ElementInfo::PIXEL;
 	} else {
-		interface.setType(ElementInfo::LINE);
+		interfaceType = ElementInfo::LINE;
 	}
+
+	// Create the interface
+	InterfaceIterator interfaceIterator = Patch::addInterface(interfaceType);
+	Interface &interface = *interfaceIterator;
 
 	// Connectivity
 	interface.setConnect(std::move(vertices));

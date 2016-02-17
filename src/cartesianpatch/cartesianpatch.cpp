@@ -534,15 +534,8 @@ void CartesianPatch::addInterfacesDirection(const int &direction)
 	for (k = 0; (isThreeDimensional()) ? (k < interfaceCount1D[Vertex::COORD_Z]) : (k <= 0); k++) {
 		for (j = 0; j < interfaceCount1D[Vertex::COORD_Y]; j++) {
 			for (i = 0; i < interfaceCount1D[Vertex::COORD_X]; i++) {
-				InterfaceIterator interfaceIterator = Patch::addInterface();
+				InterfaceIterator interfaceIterator = Patch::addInterface(interfaceType);
 				Interface &interface = *interfaceIterator;
-
-				// Interface type
-				if (isThreeDimensional()) {
-					interface.setType(ElementInfo::PIXEL);
-				} else {
-					interface.setType(ElementInfo::LINE);
-				}
 
 				// Owner id
 				std::array<int, 3> ownerIJK;

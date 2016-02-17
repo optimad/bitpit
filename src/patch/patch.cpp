@@ -1263,8 +1263,6 @@ Patch::CellIterator Patch::createCell(ElementInfo::Type type, bool interior, lon
 /*!
 	Adds a new cell with the specified id.
 
-	\param interior is true if the cell is the interior of the patch,
-	false otherwise
 	\param type is the type of the cell
 	\param id is the id of the new cell. If a negative id value is
 	specified, ad new unique id will be generated
@@ -2078,32 +2076,21 @@ long Patch::generateInterfaceId()
 	\param id is the id of the new interface
 	\return A reference to the newly created interface.
 */
-Patch::InterfaceIterator Patch::createInterface(long id)
+Patch::InterfaceIterator Patch::createInterface(ElementInfo::Type type, long id)
 {
 	if (id < 0) {
 		id = generateInterfaceId();
+	}
+
+	const ElementInfo &cellTypeInfo = ElementInfo::getElementInfo(type);
+	if (cellTypeInfo.dimension != (getDimension() - 1)) {
+		return interfaceEnd();
 	}
 
 	PiercedVector<Interface>::iterator iterator = m_interfaces.reclaim(id);
 	m_nInterfaces++;
 
 	return iterator;
-}
-
-/*!
-	Adds a new interface with the specified id.
-
-	\param id is the id of the new cell. If a negative id value is
-	specified, ad new unique id will be generated
-	\return The id associated to the interface.
-*/
-Patch::InterfaceIterator Patch::addInterface(const long &id)
-{
-	if (!isExpert()) {
-		return interfaceEnd();
-	}
-
-	return createInterface(id);
 }
 
 /*!
@@ -2120,7 +2107,7 @@ Patch::InterfaceIterator Patch::addInterface(ElementInfo::Type type, const long 
 		return interfaceEnd();
 	}
 
-	InterfaceIterator iterator = createInterface(id);
+	InterfaceIterator iterator = createInterface(type, id);
 	Interface &interface = (*iterator);
 	interface.initialize(type);
 
@@ -2139,7 +2126,7 @@ Patch::InterfaceIterator Patch::addInterface(Interface source)
 		return interfaceEnd();
 	}
 
-	InterfaceIterator iterator = createInterface();
+	InterfaceIterator iterator = createInterface(source.getType());
 	Interface &interface = (*iterator);
 	long id = interface.get_id();
 	interface = std::move(source);
@@ -2166,7 +2153,7 @@ Patch::InterfaceIterator Patch::addInterface(Interface &&source, long id)
 		id = source.get_id();
 	}
 
-	InterfaceIterator iterator = createInterface(id);
+	InterfaceIterator iterator = createInterface(source.getType(), id);
 	Interface &interface = (*iterator);
 	id = interface.get_id();
 	interface = std::move(source);
