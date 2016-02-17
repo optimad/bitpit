@@ -42,9 +42,22 @@ namespace bitpit {
 	\param communicator is the communicator to be used for parallel
 	communications.
 */
-void Patch::setCommunicator(MPI::Comm *communicator)
+void Patch::setCommunicator(MPI::Intracomm *communicator)
 {
-	m_communicator = communicator;
+	// Free previous communicator
+	if (m_communicator) {
+		m_communicator->Free();
+		m_communicator = nullptr;
+	}
+
+	// Creat a copy of the user-specified communicator
+	//
+	// No library routine should use MPI_COMM_WORLD as the communicator;
+	// instead, a duplicate of a user-specified communicator should always
+	// be used.
+	if (communicator) {
+		m_communicator = new MPI::Intracomm(communicator->Dup());
+	}
 
 	// Get MPI information
 	if (m_communicator) {

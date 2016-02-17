@@ -234,7 +234,7 @@ public:
 	void flushData(std::fstream &stream, VTKFormat format, std::string name);
 
 #if ENABLE_MPI==1
-	void setCommunicator(MPI::Comm *communicator);
+	void setCommunicator(MPI::Intracomm *communicator);
 	void unsetCommunicator();
 	MPI::Comm & getCommunicator() const;
 	int getRank() const;
