@@ -79,6 +79,8 @@ public:
 		std::vector<int> &stencil, std::vector<double> &weights);
 	int linearVertexInterpolation(std::array<double,3> &point,
 		std::vector<int> &stencil, std::vector<double> &weights);
+        void buildAdjacencies() {};
+        void updateAdjacencies(const std::vector<long>&) {};
 
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
