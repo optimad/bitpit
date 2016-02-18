@@ -1525,12 +1525,11 @@ bool Patch::setCellInternal(const long &id, bool isInternal)
 }
 
 /*!
-	Sets the internal flag of a cell.
+	Converts an internal cell to a ghost cell.
 
 	\param[in] id is the index of the cell
-	\param[in] isInternal is the internal flag that will be set
 */
-Patch::CellIterator Patch::moveGhost2Internal(const long &id)
+Patch::CellIterator Patch::moveInternal2Ghost(const long &id)
 {
 	if (!isExpert()) {
 		return m_cells.end();
@@ -1569,12 +1568,11 @@ Patch::CellIterator Patch::moveGhost2Internal(const long &id)
 }
 
 /*!
-	Sets the internal flag of a cell.
+	Converts a ghost cell to an internal cell.
 
 	\param[in] id is the index of the cell
-	\param[in] isInternal is the internal flag that will be set
 */
-Patch::CellIterator Patch::moveInternal2Ghost(const long &id)
+Patch::CellIterator Patch::moveGhost2Internal(const long &id)
 {
 	if (!isExpert()) {
 		return m_cells.end();
