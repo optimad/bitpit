@@ -23,14 +23,14 @@
  \*---------------------------------------------------------------------------*/
 
 /*!
- * @defgroup IO Input/Output
+ * @defgroup IO Input/Output (IO)
  * @{
  * @defgroup GenericIO Generic
  * @defgroup DuneGridFormat DuneGridFormat (DGF)
  * @defgroup STereoLithography STereoLithography (STL)
  * @defgroup VisualizationToolKit VisualizationToolKit (VTK)
  * @{
- * @defgroup VTKEnums
+ * @defgroup VTKEnums VTK Enumerations
  * @}
  * @}
  *
