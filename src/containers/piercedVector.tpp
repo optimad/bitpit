@@ -1896,7 +1896,9 @@ private:
 			// Shit the elements
 			for (size_t i = m_last_pos; i > referencePos; --i) {
 				m_v[i] = std::move(m_v[i - 1]);
-				link_id(m_v[i].get_id(), i, false);
+				if (m_v[i].get_id() > 0) {
+					link_id(m_v[i].get_id(), i, false);
+				}
 			}
 
 			// Reset the, now empty, element
