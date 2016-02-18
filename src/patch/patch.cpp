@@ -725,7 +725,7 @@ Patch::VertexIterator Patch::addVertex(const std::array<double, 3> &coords, cons
 	specified, ad new unique id will be generated
 	\return An iterator pointing to the added vertex.
 */
-Patch::VertexIterator Patch::addVertex(Vertex source, long id)
+Patch::VertexIterator Patch::addVertex(const Vertex &source, long id)
 {
 	if (!isExpert()) {
 		return vertexEnd();
@@ -734,7 +734,7 @@ Patch::VertexIterator Patch::addVertex(Vertex source, long id)
 	VertexIterator iterator = createVertex(id);
 	Vertex &vertex = (*iterator);
 	id = vertex.get_id();
-	vertex = std::move(source);
+	vertex = source;
 	vertex.set_id(id);
 
 	return iterator;
@@ -1367,7 +1367,7 @@ Patch::CellIterator Patch::addCell(ElementInfo::Type type, bool interior,
 	specified, ad new unique id will be generated
 	\return An iterator pointing to the added cell.
 */
-Patch::CellIterator Patch::addCell(Cell source, long id)
+Patch::CellIterator Patch::addCell(const Cell &source, long id)
 {
 	if (!isExpert()) {
 		return cellEnd();
@@ -1376,7 +1376,7 @@ Patch::CellIterator Patch::addCell(Cell source, long id)
 	CellIterator iterator = createCell(source.getType(), source.isInterior(), id);
 	Cell &cell = (*iterator);
 	id = cell.get_id();
-	cell = std::move(source);
+	cell = source;
 	cell.set_id(id);
 
 	return iterator;
@@ -2134,7 +2134,7 @@ Patch::InterfaceIterator Patch::addInterface(ElementInfo::Type type, const long 
 	specified, ad new unique id will be generated
 	\return An iterator pointing to the added interface.
 */
-Patch::InterfaceIterator Patch::addInterface(Interface source, long id)
+Patch::InterfaceIterator Patch::addInterface(const Interface &source, long id)
 {
 	if (!isExpert()) {
 		return interfaceEnd();
@@ -2143,7 +2143,7 @@ Patch::InterfaceIterator Patch::addInterface(Interface source, long id)
 	InterfaceIterator iterator = createInterface(source.getType(), id);
 	Interface &interface = (*iterator);
 	id = interface.get_id();
-	interface = std::move(source);
+	interface = source;
 	interface.set_id(id);
 
 	return iterator;
