@@ -2038,6 +2038,11 @@ private:
 			throw std::out_of_range ("Duplicate id");
 		}
 
+		// Ids needs to be positive
+		if (id < 0) {
+			throw std::out_of_range ("Negative id");
+		}
+
 		// Add id to the map
 		m_pos[id] = pos;
 	}
