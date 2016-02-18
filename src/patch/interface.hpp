@@ -58,7 +58,7 @@ public:
 	long getOwner() const;
 	int getOwnerFace() const;
 
-	void setNeigh(const long &neigh, const int &onwerFace);
+	void setNeigh(const long &neigh, const int &neighFace);
 	void unsetNeigh();
 	long getNeigh() const;
 	int getNeighFace() const;

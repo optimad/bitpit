@@ -197,7 +197,7 @@ void Vertex::translate(const std::array<double, 3> &translation)
 
 	\param[in] sx translation along x direction
 	\param[in] sy translation along y direction
-	\param[in] sy translation along z direction
+	\param[in] sz translation along z direction
  */
 void Vertex::translate(const double &sx, const double &sy, const double &sz)
 {
@@ -222,10 +222,10 @@ void Vertex::scale(const std::array<double, 3> &scaling, const std::array<double
 
 	\param[in] sx scaling factor along x direction
 	\param[in] sy scaling factor along y direction
-	\param[in] sy scaling factor along z direction
+	\param[in] sz scaling factor along z direction
 	\param[in] cx is the x coordinate scaling center
 	\param[in] cy is the y coordinate scaling center
-	\param[in] cy is the z coordinate scaling center
+	\param[in] cz is the z coordinate scaling center
  */
 void Vertex::scale(const double &sx, const double &sy, const double &sz,
                    const double &cx, const double &cy, const double &cz)

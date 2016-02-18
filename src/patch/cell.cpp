@@ -134,6 +134,8 @@ Cell & Cell::operator=(const Cell& other)
 
 	\param type is the type of the element
 	\param interior if true the cell is flagged as interior
+	\param storeNeighbourhood if true the structures to store adjacencies
+	and interfaces will be initialized
 */
 void Cell::initialize(ElementInfo::Type type, bool interior, bool storeNeighbourhood)
 {
@@ -293,7 +295,7 @@ void Cell::deleteInterface(const int &face, const int &i)
 /*!
 	Gets the total number of interfaces of the cell.
 
-	The placeholder interface ids on faces not acutally linked to a
+	The placeholder interface ids of the faces not acutally linked to a
 	real interfaces will be counted as well.
 
 	\result The total number of interfaces of the cell.
@@ -306,7 +308,7 @@ int Cell::getInterfaceCount() const
 /*!
 	Gets the number of interfaces of the specified face of the cell.
 
-	The placeholder interface id on a face not acutally linked to a
+	The placeholder interface ids of the faces not acutally linked to a
 	real interfaces will be counted as well.
 
 	\param face the face of the cell
@@ -515,7 +517,7 @@ void Cell::deleteAdjacency(const int &face, const int &i)
 /*!
 	Gets the total number of adjacencies of the cell.
 
-	The placeholder neighbour ids on faces not acutally linked to a
+	The placeholder neighbour ids of the faces not acutally linked to a
 	real neighbour will be counted as well.
 
 	\result The total number of adjacencies of the cell.
@@ -528,7 +530,7 @@ int Cell::getAdjacencyCount() const
 /*!
 	Gets the number of adjacencies of the specified face of the cell.
 
-	The placeholder neighbour id on a face not acutally linked to a
+	The placeholder neighbour ids of the faces not acutally linked to a
 	real neighbours will be counted as well.
 
 	\param face the face of the cell
@@ -563,8 +565,6 @@ const long * Cell::getAdjacencies() const
 
 /*!
 	Gets the adjacencies of the given face of the cell.
-
-	\as getAdjacency(const int &face, const int &index) const
 
 	\param face the face of the cell
 	\result The requested adjacencies

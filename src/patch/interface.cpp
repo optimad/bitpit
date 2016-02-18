@@ -47,35 +47,6 @@ namespace bitpit {
 	Interface is class that defines the interfaces among cells.
 */
 
-
-
-/*!
-	\enum Interface::Position
-
-	This enum defines the element types that can be used.
-
-	\var Interface::Type Interface::INTERNAL
-	The interface is internal to the domain.
-
-	\var Interface::Type Interface::BOUNDARY
-	The interface is on a boundary.
-
-	\var Interface::Type Interface::GHOST
-	The interface is a ghost.
-*/
-
-/*!
-	\enum Interface::Position
-
-	This enum defines the element types that can be used.
-
-	\var Interface::Type Interface::LEFT
-	Left side of the interface.
-
-	\var Interface::Type Interface::RIGHT
-	Right side of the interface.
-*/
-
 /*!
 	Default constructor.
 */
@@ -228,6 +199,7 @@ bool Interface::isBorder() const
 	Sets the owner of the interface.
 
 	\param owner the owner of the interface
+	\param onwerFace the owner's face adjacent to the interface
 */
 void Interface::setOwner(const long &owner, const int &onwerFace)
 {
@@ -268,11 +240,12 @@ int Interface::getOwnerFace() const
 	Sets the neighbour of the interface.
 
 	\param neigh the neighbour of the interface
+	\param neighFace the neighbour's face adjacent to the interface
 */
-void Interface::setNeigh(const long &neigh, const int &onwerFace)
+void Interface::setNeigh(const long &neigh, const int &neighFace)
 {
 	m_neigh     = neigh;
-	m_neighFace = onwerFace;
+	m_neighFace = neighFace;
 }
 
 /*!

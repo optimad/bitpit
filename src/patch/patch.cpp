@@ -122,7 +122,11 @@ void IndexGenerator::reset()
 
 	\brief The Patch class provides an interface for defining patches.
 
-	Patch is the base class for defining patches like .
+	Patch is the base class for defining patches.
+
+	\param id is the id that will be assigned to the patch
+	\param dimension is the dimension of the patch
+	\param expert if true, the expert mode will be enabled
 */
 
 /*!
@@ -329,7 +333,7 @@ bool Patch::reserveCells(size_t nCells)
 	into memory, potentially invalidating pointers and iterators to cell
 	entities.
 
-	\param[in] nCells is size of memory reserve (in terms of number of
+	\param[in] nInterfaces is size of memory reserve (in terms of number of
 	interfaces).
 */
 bool Patch::reserveInterfaces(size_t nInterfaces)
@@ -744,6 +748,8 @@ Patch::VertexIterator Patch::addVertex(const Vertex &source, long id)
 	Adds the specified vertex to the patch.
 
 	\param source is the vertex that will be added
+	\param id is the id of the new cell. If a negative id value is
+	specified, ad new unique id will be generated
 	\return An iterator pointing to the added vertex.
 */
 Patch::VertexIterator Patch::addVertex(Vertex &&source, long id)
@@ -769,6 +775,7 @@ Patch::VertexIterator Patch::addVertex(Vertex &&source, long id)
 	Deletes a vertex.
 
 	\param id is the id of the vertex
+	\param delayed is true a delayed delete will be performed
 */
 bool Patch::deleteVertex(const long &id, bool delayed)
 {
@@ -787,6 +794,7 @@ bool Patch::deleteVertex(const long &id, bool delayed)
 	Deletes a list of vertices.
 
 	\param ids are the ids of the vertices to be deleted
+	\param delayed is true a delayed delete will be performed
 */
 bool Patch::deleteVertices(const std::vector<long> &ids, bool delayed)
 {
@@ -1007,7 +1015,7 @@ bool Patch::deleteCoincidentVertex(int nBins)
 /*!
 	Gets the coordinates of the specified vertex.
 
-	\param is is the id of the vertex
+	\param id is the id of the vertex
 	\result The coordinates of the specified vertex.
 */
 const std::array<double, 3> & Patch::getVertexCoords(const long &id) const
@@ -1588,7 +1596,7 @@ Patch::CellIterator Patch::moveGhost2Internal(const long &id)
 
 		// Update markers
 		m_last_internal_id = id;
-		m_first_ghost_id   = m_cells.get_size_marker(m_nInternals, -1);
+		m_first_ghost_id   = m_cells.get_size_marker(m_nInternals, Element::NULL_ID);
 	} else {
 		// Move cell
 		iterator = m_cells.move_before(m_first_ghost_id, id);
@@ -1802,7 +1810,7 @@ std::vector<long> Patch::findCellEdgeNeighs(const long &id, bool complete) const
 	This function can be only used with three-dimensional cells.
 
 	\param id is the id of the cell
-	\param vertex is an edge of the cell
+	\param edge is an edge of the cell
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the specified cell for the given edge.
 */
@@ -2083,6 +2091,7 @@ long Patch::generateInterfaceId()
 /*!
 	Creates a new interface with the specified id.
 
+	\param type is the type of the interface
 	\param id is the id of the new interface
 	\return An iterator pointing to the newly created interface.
 */
@@ -2643,7 +2652,7 @@ void Patch::translate(std::array<double, 3> translation)
 
 	\param[in] sx translation along x direction
 	\param[in] sy translation along y direction
-	\param[in] sy translation along z direction
+	\param[in] sz translation along z direction
 */
 void Patch::translate(double sx, double sy, double sz)
 {
@@ -2681,7 +2690,7 @@ void Patch::scale(double scaling)
 
 	\param[in] sx scaling factor along x direction
 	\param[in] sy scaling factor along y direction
-	\param[in] sy scaling factor along z direction
+	\param[in] sz scaling factor along z direction
 */
 void Patch::scale(double sx, double sy, double sz)
 {
@@ -2925,7 +2934,7 @@ const VTKFieldMetaData Patch::getMetaData(std::string name)
  *  Interface for writing data to stream.
  *
  *  @param[in] stream is the stream to write to
- *  @param[in] codex is the codex which must be used. Supported options
+ *  @param[in] format is the format which must be used. Supported options
  *  are "ascii" or "appended". For "appended" type an unformatted binary
  *  stream must be used
  *  @param[in] name is the name of the data to be written. Either user
