@@ -1208,10 +1208,9 @@ public:
 		The container is extended by inserting a new element. The element
 		will be inserted .
 
-		\param value is the value to be copied (or moved) to the
-		inserted element
 		\param referenceId is the id of the element after which an
 		empty position will be reclaimed
+		\param id is the id that will be assigned to the element
 		\result An iterator that points to the newly inserted element.
 	*/
 	iterator reclaim_after(const id_type &referenceId, const id_type &id)
@@ -1246,10 +1245,9 @@ public:
 		The container is extended by inserting a new element. The element
 		will be inserted .
 
-		\param value is the value to be copied (or moved) to the
-		inserted element
 		\param referenceId is the id of the element before which an
 		empty position will be reclaimed
+		\param id is the id that will be assigned to the element
 		\result An iterator that points to the newly inserted element.
 	*/
 	iterator reclaim_before(const id_type &referenceId, const id_type &id)
@@ -1670,6 +1668,7 @@ private:
 
 		\param fillType is the fill-pattern that will be used to
 		identify the position
+		\param referencePos is the reference position
 		\param args the arguments forwarded to construct the new element
 		\result An iterator that points to the newly inserted element.
 	*/
@@ -1816,6 +1815,7 @@ private:
 
 		\param fillType is the fill-pattern that will be used to
 		identify the position
+		\param referencePos is the reference position
 		\param id is the id that will be assigned to the element
 		\result An iterator that points to the the reclaimed element.
 	*/
@@ -2111,6 +2111,7 @@ private:
 
 		The list is always kept ordered in ascending order.
 
+		\param list is the list of ordered positions that will be modified
 		\param pos is the position to be added
 	*/
 	void positions_add(std::deque<size_type> &list, size_type pos)
@@ -2122,6 +2123,7 @@ private:
 	/*!
 		Removes an element form the specified list of ordered positions.
 
+		\param list is the list of ordered positions that will be modified
 		\param pos is the position to be removed
 		\result Returns true if the position was found and successfuly
 		removed, otherwise it returns false.
@@ -2141,6 +2143,7 @@ private:
 		Deletes all elements of the specified list of ordered positions
 		after a given position.
 
+		\param list is the list of ordered positions that will be modified
 		\param pos the position after wich all elements have to be
 		deleted
 	*/

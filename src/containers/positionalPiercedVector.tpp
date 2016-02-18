@@ -1349,6 +1349,8 @@ private:
 		container to reuse that position.
 
 		\param pos the position of the element to erase
+		\param delayed if true the deletion of the element will
+		be delayed until a flush is called
 		\result An iterator pointing to the new location of the
 		        element that followed the element erased by the
 		        function call. This is the container end if the
