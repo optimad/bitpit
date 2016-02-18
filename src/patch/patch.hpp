@@ -218,8 +218,8 @@ public:
 	virtual long locatePoint(const std::array<double, 3> &point) = 0;
         bool isSameFace(const long &, const int&, const long&, const int&);
 
-        virtual buildAdjacencies() = 0;
-        virtual updateAdjacencies(const std::vector<long>&) = 0;
+        virtual void buildAdjacencies() = 0;
+        virtual void updateAdjacencies(const std::vector<long>&) = 0;
 	void updateBoundingBox();
 	void getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
 	std::unordered_map<long, long> binSortVertex(int nBins = 128);
