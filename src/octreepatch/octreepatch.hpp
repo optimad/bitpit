@@ -80,6 +80,9 @@ public:
 	void translate(std::array<double, 3> translation);
 	void scale(std::array<double, 3> scaling);
 
+        void buildAdjacencies() {};
+        void updateAdjacencies(const std::vector<long>&) {};
+
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
 	bool _markCellForRefinement(const long &id);
