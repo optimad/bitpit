@@ -148,6 +148,7 @@ Octant::Octant(const Octant &octant){
 	m_level = octant.m_level;
 	m_marker = octant.m_marker;
 	m_info = octant.m_info;
+	sm_maxLevel = octant.sm_maxLevel;
 };
 
 /*! Check if two octants are equal (no check on info)
@@ -159,6 +160,7 @@ bool Octant::operator ==(const Octant & oct2){
 	check = check && (m_y == oct2.m_y);
 	check = check && (m_z == oct2.m_z);
 	check = check && (m_level == oct2.m_level);
+	check = check && (sm_maxLevel == oct2.sm_maxLevel);
 	return check;
 }
 

@@ -55,8 +55,8 @@ LocalTree::LocalTree(int8_t maxlevel, uint8_t dim){
 	Octant oct0(m_dim, m_global.m_maxLevel);
 	Octant octf(m_dim,m_global.m_maxLevel,0,0,0, m_global.m_maxLevel);
 	Octant octl(m_dim,m_global.m_maxLevel,m_global.m_maxLength-1,m_global.m_maxLength-1,(m_dim-2)*(m_global.m_maxLength-1), m_global.m_maxLevel);
-	m_octants.resize(1);
-	m_octants[0] = oct0;
+	m_octants.clear();
+	m_octants.push_back(oct0);
 	m_firstDesc = octf;
 	m_lastDesc = octl;
 	m_sizeGhosts = 0;

@@ -29,6 +29,7 @@
 // =================================================================================== //
 #include "CommBuffer.hpp"
 #include <cstdint>
+#include <algorithm>
 
 namespace bitpit {
 
