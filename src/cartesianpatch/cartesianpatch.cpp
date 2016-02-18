@@ -68,7 +68,7 @@ CartesianPatch::CartesianPatch(const int &id, const int &dimension,
 	\param dimension is the dimension of the patch
 	\param origin is the origin of the domain
 	\param length is the length of the domain
-	\param nCells is the number of cells along each direction
+	\param nCells1D is the number of cells along each direction
 */
 CartesianPatch::CartesianPatch(const int &id, const int &dimension,
                                const std::array<double, 3> &origin,
