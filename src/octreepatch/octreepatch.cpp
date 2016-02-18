@@ -49,6 +49,12 @@ namespace bitpit {
 
 /*!
 	Creates a new patch.
+
+	\param id is the id that will be assigned to the patch
+	\param dimension is the dimension of the patch
+	\param origin is the origin of the domain
+	\param length is the length of the domain
+	\param dh is the maximum allowed cell size of the initial refinement
 */
 OctreePatch::OctreePatch(const int &id, const int &dimension,
 				 std::array<double, 3> origin, double length, double dh )
@@ -700,6 +706,7 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 	Imports a list of octants into the patch.
 
 	\param octantInfoList is the list of octant to import
+	\param danglingFaces is the list of dangling faces in the current mesh
 */
 std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &octantInfoList,
                                  FaceInfoSet &danglingFaces)
@@ -946,7 +953,7 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 /*!
 	Remove a list of octants from the patch.
 
-	\param octantTreeIds is the list of octant ids to remove
+	\param cellIds is the list of cells ids to remove
 */
 OctreePatch::FaceInfoSet OctreePatch::removeCells(std::vector<long> &cellIds)
 {
@@ -1061,6 +1068,7 @@ OctreePatch::FaceInfoSet OctreePatch::removeCells(std::vector<long> &cellIds)
 	Creates a new patch vertex from the specified tree vertex.
 
 	\param treeId is the id of the vertex in the tree
+	\result The id of the newly created vertex.
 */
 long OctreePatch::addVertex(uint32_t treeId)
 {
@@ -1080,6 +1088,9 @@ long OctreePatch::addVertex(uint32_t treeId)
 	Creates a new patch interface from the specified tree intersection.
 
 	\param treeId is the id of the intersection in the tree
+	\param vertices are the vertices of the interface
+	\param faces are the faces of the interface
+	\result The id of the newly created interface.
 */
 long OctreePatch::addInterface(uint32_t treeId,
                                    std::unique_ptr<long[]> &vertices,
@@ -1113,7 +1124,13 @@ long OctreePatch::addInterface(uint32_t treeId,
 /*!
 	Creates a new patch cell from the specified tree octant.
 
-	\param treeId is the id of the octant in the tree
+	\param octantInfo is the octant associated to the cell
+	\param vertices are the vertices of the cell
+	\param adjacencies are the adjacencies of the cell
+	\param interfaces are the interfaces of the cell
+	\param interfacesOwner is a flag that defines if an interface is owned
+	by the cell
+	\result The id of the newly created cell.
 */
 long OctreePatch::addCell(OctantInfo octantInfo,
                               std::unique_ptr<long[]> &vertices,
