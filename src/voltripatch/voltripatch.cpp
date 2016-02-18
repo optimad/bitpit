@@ -46,6 +46,7 @@ namespace bitpit {
 	Creates a new patch.
 
 	\param id is the id of the patch
+	\param dimension is the dimension of the patch
 */
 VolTriPatch::VolTriPatch(const int &id, const int &dimension)
 	: Patch(id, dimension, true)
