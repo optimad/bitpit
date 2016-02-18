@@ -233,9 +233,9 @@ public:
 	void flushData(std::fstream &stream, VTKFormat format, std::string name);
 
 #if ENABLE_MPI==1
-	void setCommunicator(MPI_Comm *communicator);
+	void setCommunicator(MPI_Comm communicator);
 	void unsetCommunicator();
-	MPI_Comm & getCommunicator() const;
+	const MPI_Comm & getCommunicator() const;
 	int getRank() const;
 	int getProcessorCount() const;
 #endif
@@ -288,7 +288,7 @@ private:
 	int m_rank;
 	int m_nProcessors;
 #if ENABLE_MPI==1
-	MPI_Comm *m_communicator;
+	MPI_Comm m_communicator;
 #endif
 
 	VertexIterator createVertex(long id = Vertex::NULL_ID);

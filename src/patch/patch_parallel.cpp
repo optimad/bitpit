@@ -42,12 +42,12 @@ namespace bitpit {
 	\param communicator is the communicator to be used for parallel
 	communications.
 */
-void Patch::setCommunicator(MPI_Comm *communicator)
+void Patch::setCommunicator(MPI_Comm communicator)
 {
 	// Free previous communicator
-	if (m_communicator) {
-		MPI_Comm_free(m_communicator);
-		m_communicator = nullptr;
+	if (m_communicator != MPI_COMM_NULL) {
+		MPI_Comm_free(&m_communicator);
+		m_communicator = MPI_COMM_NULL;
 	}
 
 	// Creat a copy of the user-specified communicator
@@ -55,14 +55,14 @@ void Patch::setCommunicator(MPI_Comm *communicator)
 	// No library routine should use MPI_COMM_WORLD as the communicator;
 	// instead, a duplicate of a user-specified communicator should always
 	// be used.
-	if (communicator) {
-		MPI_Comm_dup(*communicator, m_communicator);
+	if (communicator != MPI_COMM_NULL) {
+		MPI_Comm_dup(communicator, &m_communicator);
 	}
 
 	// Get MPI information
 	if (m_communicator) {
-		MPI_Comm_size(*m_communicator, &m_nProcessors);
-		MPI_Comm_rank(*m_communicator, &m_rank);
+		MPI_Comm_size(m_communicator, &m_nProcessors);
+		MPI_Comm_rank(m_communicator, &m_rank);
 	} else {
 		m_rank        = 0;
 		m_nProcessors = 1;
@@ -77,7 +77,7 @@ void Patch::setCommunicator(MPI_Comm *communicator)
 */
 void Patch::unsetCommunicator()
 {
-	setCommunicator(nullptr);
+	setCommunicator(MPI_COMM_NULL);
 }
 
 /*!
@@ -85,9 +85,9 @@ void Patch::unsetCommunicator()
 
 	\return The MPI communicator associated to the patch.
 */
-MPI_Comm & Patch::getCommunicator() const
+const MPI_Comm & Patch::getCommunicator() const
 {
-	return *m_communicator;
+	return m_communicator;
 }
 
 /*!

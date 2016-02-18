@@ -135,7 +135,7 @@ Patch::Patch(const int &id, const int &dimension, bool expert)
 	  m_dirty(true), m_expert(expert), m_hasCustomTolerance(false),
 	  m_rank(0), m_nProcessors(1)
 #if ENABLE_MPI==1
-	  , m_communicator(nullptr)
+	  , m_communicator(MPI_COMM_NULL)
 #endif
 {
 	set_id(id) ;
