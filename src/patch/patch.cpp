@@ -1216,7 +1216,7 @@ Patch::CellIterator Patch::createCell(ElementInfo::Type type, bool interior, lon
 	}
 
 	const ElementInfo &cellTypeInfo = ElementInfo::getElementInfo(type);
-	if (cellTypeInfo.dimension != getDimension()) {
+	if (cellTypeInfo.dimension > getDimension()) {
 		return cellEnd();
 	}
 
@@ -2095,7 +2095,7 @@ Patch::InterfaceIterator Patch::createInterface(ElementInfo::Type type, long id)
 	}
 
 	const ElementInfo &cellTypeInfo = ElementInfo::getElementInfo(type);
-	if (cellTypeInfo.dimension != (getDimension() - 1)) {
+	if (cellTypeInfo.dimension > (getDimension() - 1)) {
 		return interfaceEnd();
 	}
 
