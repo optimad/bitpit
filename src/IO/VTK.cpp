@@ -980,7 +980,7 @@ void VTK::absorbData( std::fstream &str, VTKFormat format, std::string name ){
 const VTKFieldMetaData VTK::getMetaData( std::string name ){
     BITPIT_UNUSED( name ) ;
 
-    VTKFieldMetaData   dummy(0,typeid(int));
+    VTKFieldMetaData   dummy(-1,typeid(int));
     return dummy ;
 };
 

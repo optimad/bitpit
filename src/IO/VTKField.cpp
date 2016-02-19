@@ -311,7 +311,7 @@ bool   VTKField::hasAllMetaData() const{
  */
 void VTKField::importMetaData( const VTKFieldMetaData &data){ 
 
-    if( data.getSize() != 0 ){
+    if( data.getSize() != -1 ){
         setDataType( VTKTypes::whichType(data.getType()) );
 
         if( getFieldType() == VTKFieldType::SCALAR ){
