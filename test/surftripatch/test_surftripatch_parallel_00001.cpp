@@ -352,7 +352,6 @@ if (mesh.getRank() == 0) {
     COM_step(mesh, 2, 1, cell_list, 3);
     cout << endl;
 }
-return 0;
 
 // ========================================================================== //
 // RANK#1 SENDING CELLS {3,4,5} TO RANK #2                                    //
