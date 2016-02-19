@@ -2178,7 +2178,7 @@ void
 	uint32_t 		nocts;
 	uint32_t 		idx, idx2, idx0, last_idx;
 	uint32_t 		idx1_gh, idx2_gh;
-	int8_t 		marker;
+	int8_t 			marker;
 	uint8_t 		nbro;
 
 	//------------------------------------------ //
@@ -2197,13 +2197,15 @@ void
 
 	// Set index for start and end check for ghosts
 	if (m_ghosts.size()){
-		while(idx2_gh < m_sizeGhosts && m_ghosts[idx2_gh].computeMorton() <= m_lastDesc.computeMorton()){
+		while(m_ghosts[idx2_gh].computeMorton() <= m_lastDesc.computeMorton()){
 			idx2_gh++;
+			if (idx2_gh > m_sizeGhosts-1) break;
 		}
 		idx2_gh = min((m_sizeGhosts-1), idx2_gh);
 
-		while(idx1_gh < m_sizeGhosts && m_ghosts[idx1_gh].computeMorton() <= m_octants[0].computeMorton()){
+		while(m_ghosts[idx1_gh].computeMorton() <= m_octants[0].computeMorton()){
 			idx1_gh++;
+			if (idx1_gh > m_sizeGhosts-1) break;
 		}
 		idx1_gh-=1;
 		if (idx1_gh > m_sizeGhosts-1) idx1_gh=0;
@@ -2354,13 +2356,15 @@ LocalTree::preBalance21(u32vector& newmodified){
 
 	// Set index for start and end check for ghosts
 	if (m_ghosts.size()){
-		while(idx2_gh < m_sizeGhosts && m_ghosts[idx2_gh].computeMorton() <= m_lastDesc.computeMorton()){
+		while(m_ghosts[idx2_gh].computeMorton() <= m_lastDesc.computeMorton()){
 			idx2_gh++;
+			if (idx2_gh > m_sizeGhosts-1) break;
 		}
 		idx2_gh = min((m_sizeGhosts-1), idx2_gh);
 
-		while(idx1_gh < m_sizeGhosts && m_ghosts[idx1_gh].computeMorton() <= m_octants[0].computeMorton()){
+		while(m_ghosts[idx1_gh].computeMorton() <= m_octants[0].computeMorton()){
 			idx1_gh++;
+			if (idx1_gh > m_sizeGhosts-1) break;
 		}
 		idx1_gh-=1;
 		if (idx1_gh > m_sizeGhosts-1) idx1_gh = 0;
