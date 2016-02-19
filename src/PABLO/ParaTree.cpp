@@ -462,7 +462,7 @@ ParaTree::getEdgeface(uint8_t edgeface[12][2]){
 void
 ParaTree::getNodecoeffs(int8_t nodecoeffs[8][3]){
 	for (int i=0; i<8; i++){
-		nodecoeffs[i][3] = 0;
+		nodecoeffs[i][2] = 0;
 		for (int j=0; j<m_dim; j++){
 			nodecoeffs[i][j] = m_global.m_nodeCoeffs[i][j];
 		}
