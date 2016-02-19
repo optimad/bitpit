@@ -844,13 +844,13 @@ if (m_rank == rcv_rank)
         OBinaryStream                           feedback( feedback_size );
 
         // Add cells to cell list
-        cell.setInterior( true );
         reserveCells( m_nInternals + m_nGhosts + n_cells );
         for ( i = 0; i < n_cells; ++i ) {
 
             // Stream cell data
             com_buff >> cell;
             cell_idx = cell.get_id();
+            cell.setInterior( true );
 
 /*DEBUG*/   {
 /*DEBUG*/       out << "    received cell:" << endl;
