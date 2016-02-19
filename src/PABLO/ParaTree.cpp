@@ -133,13 +133,13 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 	uint32_t NumOctants = XYZ.size();
 	m_dim = dim;
 	m_global.setGlobal(maxlevel, m_dim);
-	m_octree.m_octants.resize(NumOctants);
+	m_octree.m_octants.resize(NumOctants, Octant(m_dim, m_global.m_maxLevel));
 	for (uint32_t i=0; i<NumOctants; i++){
 		lev = uint8_t(levels[i]);
 		x0 = uint32_t(XYZ[i][0]);
         y0 = uint32_t(XYZ[i][1]);
         z0 = uint32_t(XYZ[i][2]);
-		Octant oct(false, m_dim, lev, x0, y0, z0, maxlevel);
+		Octant oct(false, m_dim, lev, x0, y0, z0, m_global.m_maxLevel);
 		oct.setBalance(true);
 		if (x0 == 0){
 			iface = 0;
@@ -1561,7 +1561,7 @@ ParaTree::getArea(Intersection* inter) {
 darray3
 ParaTree::getCenter(Intersection* inter){
 	darray3 center;
-	Octant oct;
+	Octant oct(m_dim, m_global.m_maxLevel);
 	if(inter->m_finer && inter->m_isghost)
 		oct = m_octree.extractGhostOctant(inter->m_owners[inter->m_finer]);
 	else
@@ -1581,7 +1581,7 @@ ParaTree::getCenter(Intersection* inter){
 darr3vector
 ParaTree::getNodes(Intersection* inter){
 	darr3vector nodes;
-	Octant oct;
+	Octant oct(m_dim, m_global.m_maxLevel);
 	if(inter->m_finer && inter->m_isghost)
 		oct = m_octree.extractGhostOctant(inter->m_owners[inter->m_finer]);
 	else
@@ -1606,7 +1606,7 @@ ParaTree::getNodes(Intersection* inter){
 darray3
 ParaTree::getNormal(Intersection* inter){
 	darray3 normal;
-	Octant oct;
+	Octant oct(m_dim, m_global.m_maxLevel);
 	if(inter->m_finer && inter->m_isghost)
 		oct = m_octree.extractGhostOctant(inter->m_owners[inter->m_finer]);
 	else
@@ -3011,7 +3011,7 @@ ParaTree::privateLoadBalance(uint32_t* partition){
 			++octCounter;
 		}
 		uint32_t newCounter = nofNewHead + nofNewTail + nofResidents;
-		m_octree.m_octants.resize(newCounter);
+		m_octree.m_octants.resize(newCounter, Octant(m_dim, m_global.m_maxLevel));
 		//MOVE RESIDENTS IN RIGHT POSITION
 		uint32_t resCounter = nofNewHead + nofResidents - 1;
 		for(uint32_t k = 0; k < nofResidents ; ++k){
@@ -3864,7 +3864,7 @@ ParaTree::setPboundGhosts() {
 	uint32_t nofGhosts = nofBytesOverProc / (uint32_t)(m_global.m_octantBytes + m_global.m_globalIndexBytes);
 	m_octree.m_sizeGhosts = nofGhosts;
 	m_octree.m_ghosts.clear();
-	m_octree.m_ghosts.resize(nofGhosts);
+	m_octree.m_ghosts.resize(nofGhosts, Octant(m_dim, m_global.m_maxLevel));
 	m_octree.m_globalIdxGhosts.resize(nofGhosts);
 
 	//UNPACK BUFFERS AND BUILD GHOSTS CONTAINER OF CLASS_LOCAL_TREE

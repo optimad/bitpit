@@ -49,7 +49,7 @@ using namespace std;
  * \param[in] maxlevel Maximum refinement level of the octree.
  * \param[in] dim Space dimension of octree.
  */
-LocalTree::LocalTree(int8_t maxlevel, uint8_t dim){
+LocalTree::LocalTree(int8_t maxlevel, uint8_t dim):m_firstDesc(m_dim, m_global.m_maxLevel),m_lastDesc(m_dim, m_global.m_maxLevel){
 	m_dim = dim;
 	m_global.setGlobal(maxlevel, m_dim);
 	Octant oct0(m_dim, m_global.m_maxLevel);
@@ -59,6 +59,7 @@ LocalTree::LocalTree(int8_t maxlevel, uint8_t dim){
 	m_octants.push_back(oct0);
 	m_firstDesc = octf;
 	m_lastDesc = octl;
+	m_ghosts.clear();
 	m_sizeGhosts = 0;
 	m_localMaxDepth = 0;
 	m_balanceCodim = 1;
@@ -312,7 +313,7 @@ LocalTree::refine(u32vector & mapidx){
 		if(mapsize > 0){
 			mapidx.resize(m_octants.size()+offset);
 		}
-		m_octants.resize(m_octants.size()+offset);
+		m_octants.resize(m_octants.size()+offset, Octant(m_dim, m_global.m_maxLevel));
 		blockidx = last_child_index[0]-nchm1;
 		idx = m_octants.size();
 		ilastch = last_child_index.size()-1;
@@ -367,7 +368,7 @@ bool
 LocalTree::coarse(u32vector & mapidx){
 
 	u32vector		first_child_index;
-	Octant			father;
+	Octant			father(m_dim, m_global.m_maxLevel);
 	uint32_t 		nocts, nocts0;
 	uint32_t 		idx, idx2;
 	uint32_t 		offset;
@@ -473,7 +474,7 @@ LocalTree::coarse(u32vector & mapidx){
 			}
 		}
 	}
-	m_octants.resize(nblock);
+	m_octants.resize(nblock, Octant(m_dim, m_global.m_maxLevel));
 	octvector(m_octants).swap(m_octants);
 	nocts = m_octants.size();
 	if(mapsize > 0){
@@ -543,7 +544,7 @@ LocalTree::coarse(u32vector & mapidx){
 				docoarse = true;
 			}
 			father.setMarker(markerfather);
-			m_octants.resize(nocts-offset);
+			m_octants.resize(nocts-offset, Octant(m_dim, m_global.m_maxLevel));
 			m_octants.push_back(father);
 			octvector(m_octants).swap(m_octants);
 			nocts = m_octants.size();
@@ -647,7 +648,7 @@ LocalTree::checkCoarse(uint64_t lastDescPre,
 			m_octants[idx] = m_octants[idx+toDelete];
 			if (mapsize>0) mapidx[idx] = mapidx[idx+toDelete];
 		}
-		m_octants.resize(nocts-toDelete);
+		m_octants.resize(nocts-toDelete, Octant(m_dim, m_global.m_maxLevel));
 		if (mapsize>0){
 			mapidx.resize(nocts-toDelete);
 		}
@@ -2172,7 +2173,7 @@ LocalTree::findGhostPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & n
 void
  LocalTree::preBalance21(bool internal){
 
-	Octant 			father, lastdesc;
+	Octant 			father(m_dim, m_global.m_maxLevel), lastdesc(m_dim, m_global.m_maxLevel);
 	uint64_t 		mortonld;
 	uint32_t 		nocts;
 	uint32_t 		idx, idx2, idx0, last_idx;
@@ -2329,7 +2330,7 @@ void
 void
 LocalTree::preBalance21(u32vector& newmodified){
 
-	Octant 				father, lastdesc;
+	Octant 				father(m_dim, m_global.m_maxLevel), lastdesc(m_dim, m_global.m_maxLevel);
 	uint64_t 			mortonld;
 	uint32_t 			nocts;
 	uint32_t 			idx, idx2, idx0, last_idx;
