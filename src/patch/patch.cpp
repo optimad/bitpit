@@ -382,8 +382,7 @@ void Patch::write()
 	VTKUnstructuredGrid::addData<long>("vertexIndex", VTKFieldType::SCALAR, VTKLocation::POINT, vertexIndex);
 
 #if ENABLE_MPI==1
-	std::vector<long> rank(getCellCount(), m_rank);
-	VTKUnstructuredGrid::addData<long>("rank", VTKFieldType::SCALAR, VTKLocation::CELL, rank);
+	VTKUnstructuredGrid::addData("rank", VTKFieldType::SCALAR, VTKLocation::CELL);
 #endif
 
 	// Write mesh
@@ -3023,6 +3022,10 @@ const VTKFieldMetaData Patch::getMetaData(std::string name)
 		}
 
 		return VTKFieldMetaData(connectSize, typeid(long));
+#if ENABLE_MPI==1
+	} else if (name == "rank") {
+		return VTKFieldMetaData(m_cells.size(), typeid(int));
+#endif
 	}
 
 	// This code should never be reached
@@ -3120,6 +3123,28 @@ void Patch::flushData(std::fstream &stream, VTKFormat format, std::string name)
 
 		vertexMap.clear();
 		std::unordered_map<long, long>().swap(vertexMap);
+#if ENABLE_MPI==1
+	} else if (name == "rank") {
+		std::unordered_map<long, int> rank;
+		rank.reserve(getCellCount());
+
+		for (Cell &cell : m_cells) {
+			if (cell.isInterior()) {
+				rank[cell.get_id()] = m_rank;
+			}
+		}
+
+		for (const auto &neighghostInfo : m_ghost2id) {
+			int ghostRank = neighghostInfo.first;
+			for (const auto &neighGhost : neighghostInfo.second) {
+				rank[neighGhost.second] = ghostRank;
+			}
+		}
+
+		for (Cell &cell : m_cells) {
+			genericIO::flushBINARY(stream, rank.at(cell.get_id()));
+		}
+#endif
 	}
 }
 
