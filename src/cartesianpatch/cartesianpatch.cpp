@@ -423,8 +423,6 @@ void CartesianPatch::addCells()
 		cellType = ElementInfo::PIXEL;
 	}
 
-	const ElementInfo &cellTypeInfo = ElementInfo::getElementInfo(cellType);
-
 	// Count the cells
 	long nTotalCells = 1;
 	for (int n = 0; n < getDimension(); n++) {
