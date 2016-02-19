@@ -291,6 +291,7 @@ private:
 	int m_nProcessors;
 #if ENABLE_MPI==1
 	MPI_Comm m_communicator;
+        std::unordered_map<short, std::unordered_map<long, long> > m_ghost2id;
 #endif
 
 	VertexIterator createVertex(long id = Vertex::NULL_ID);
