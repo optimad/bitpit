@@ -2711,6 +2711,9 @@ std::unordered_map<long, long> Patch::binSortVertex(int nBins)
 	// ASSOCIATE EACH VERTEX WITH A BIN                                       //
 	// ====================================================================== //
 
+	// Update bounding box
+	updateBoundingBox();
+
 	// Bin's spacing
 	dx = max(1.0e-12, m_maxPoint[0] - m_minPoint[0]) / ((double) nBins);
 	dy = max(1.0e-12, m_maxPoint[1] - m_minPoint[1]) / ((double) nBins);
