@@ -130,10 +130,10 @@ std::array<std::array<double, 3>, 3> Interface::evalRotationFromCartesian(std::a
 
 	// y-interface axis
 	if (fabs(versor[2] - 1.) > 1e-8) {
-		std::array<double, 3> z = {0.0, 0.0, 1.0};
+		std::array<double, 3> z = {{0.0, 0.0, 1.0}};
 		R[1] = crossProduct(z, R[0]);
 	} else {
-		std::array<double, 3> x = {1.0, 0.0, 0.0};
+		std::array<double, 3> x = {{1.0, 0.0, 0.0}};
 		R[1] = crossProduct(x, R[0]);
 	}
 	R[1] = R[1] / norm2(R[1]);
