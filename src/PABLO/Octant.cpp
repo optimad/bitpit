@@ -1290,7 +1290,7 @@ uint64_t 		Octant::computeNodeMinSizeMorton(uint8_t inode, const uint8_t & maxde
 		return this->computeMorton();
 	}
 	else{
-		uint64_t Morton;
+		uint64_t Morton = this->computeMorton();
 		switch (inode) {
 		case 0 :
 		{
@@ -1384,13 +1384,13 @@ uint64_t 		Octant::computeNodeVirtualMorton(uint8_t inode, const uint8_t & maxde
  * \return Periodic neighbour morton number.
  */
 uint64_t Octant::computePeriodicMorton(uint8_t iface){
-	uint64_t Morton;
+	uint64_t Morton = this->computeMorton();
 	uint32_t dh;
 	dh = getSize();
 	uint32_t maxLength = uint32_t(1<<sm_maxLevel);
 
 	if (!m_info[iface]){
-		return this->computeMorton();
+		return Morton;
 	}
 	else{
 		switch (iface) {

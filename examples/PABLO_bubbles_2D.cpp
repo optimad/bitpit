@@ -73,7 +73,7 @@ int main(int argc, char *argv[]) {
 
 		/**<Set 2:1 balance for the octree.*/
 		pabloBB.setBalanceCodimension(1);
-		int idx = 0;
+		uint32_t idx = 0;
 		pabloBB.setBalance(idx,true);
 
 		/**<Set periodic condition on face 0 (and 1) (test 2:1 balance for periodic boundaries).*/
@@ -108,12 +108,12 @@ int main(int argc, char *argv[]) {
 
 		for (int i=0; i<nb; i++){
 			double randc[2];
-			randc[0] = 0.8 * (double) (rand()) /  RAND_MAX + 0.1;
-			randc[1] = (double) (rand()) /  RAND_MAX - 0.5;
-			double randr = 0.1 * (double) (rand()) / RAND_MAX + 0.02;
-			double dy = 0.005 + 0.05 * (double) (rand()) / RAND_MAX;
-			double omega = 0.5 * (double) (rand()) / RAND_MAX;
-			double aa = 0.15 * (double) (rand()) / RAND_MAX;
+			randc[0] = 0.8 * double(rand()) /  RAND_MAX + 0.1;
+			randc[1] = double(rand()) /  RAND_MAX - 0.5;
+			double randr = 0.1 * double(rand()) / RAND_MAX + 0.02;
+			double dy = 0.005 + 0.05 * double(rand()) / RAND_MAX;
+			double omega = 0.5 * double(rand()) / RAND_MAX;
+			double aa = 0.15 * double(rand()) / RAND_MAX;
 			bubble bb;
 			bb.c[0] = randc[0];
 			bb.c[1] = randc[1];
@@ -131,10 +131,10 @@ int main(int argc, char *argv[]) {
 
 		/**<Adapt itend times with refinement on the interface of the bubbles.*/
 		int itstart = 1;
-		int itend = 200;
+		int iterend = 200;
 
 		/**<Perform time iterations.*/
-		for (iter=itstart; iter<itend; iter++){
+		for (iter=itstart; iter<iterend; iter++){
 			if(pabloBB.getRank()==0) cout << "iter " << iter << endl;
 			t += Dt;
 

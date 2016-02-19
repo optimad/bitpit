@@ -1333,7 +1333,7 @@ ParaTree::getLocalMinSize(){
 double
 ParaTree::getLocalMaxSize(){
 	uint32_t nocts = getNumOctants();
-	double octSize;
+	double octSize = 0;
 	double size = 0;
 	for (uint32_t idx = 0; idx < nocts; idx++){
 		octSize = getSize(idx);
@@ -3523,8 +3523,8 @@ ParaTree::computePartition(uint32_t* partition, uint8_t & level_, dvector* weigh
 	uint8_t* glbdimcomm = new uint8_t[m_nproc];
 	uint8_t* glbindcomm = new uint8_t[m_nproc];
 
-	uint32_t division_result = 0;
-	uint32_t remind = 0;
+//	uint32_t division_result = 0;
+//	uint32_t remind = 0;
 	uint32_t Dh = uint32_t(pow(double(2),double(m_global.m_maxLevel-level)));
 	uint32_t istart, nocts, rest, forw, backw;
 	uint32_t i = 0, iproc, j;
