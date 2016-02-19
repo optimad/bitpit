@@ -1548,7 +1548,7 @@ Patch::CellIterator Patch::moveInternal2Ghost(const long &id)
 
 		// Update markers
 		m_first_ghost_id   = id;
-		m_last_internal_id = m_cells.get_size_marker(m_nInternals - 1, Element::NULL_ID);
+		m_last_internal_id = m_cells.get_size_marker(m_nInternals - 2, Element::NULL_ID);
 	} else {
 		// Move the cell
 		iterator = m_cells.move_after(m_last_internal_id, id);
@@ -1591,7 +1591,7 @@ Patch::CellIterator Patch::moveGhost2Internal(const long &id)
 
 		// Update markers
 		m_last_internal_id = id;
-		m_first_ghost_id   = m_cells.get_size_marker(m_nInternals, Element::NULL_ID);
+		m_first_ghost_id   = m_cells.get_size_marker(m_nInternals + 1, Element::NULL_ID);
 	} else {
 		// Move cell
 		iterator = m_cells.move_before(m_first_ghost_id, id);
