@@ -140,13 +140,13 @@ class VTKTypes{
 class VTKFieldMetaData{
 
     private:
-        uint64_t                m_size ;                        /**< size of the field */
+        int64_t                 m_size ;                        /**< size of the field */
         const std::type_info&   m_type ;                        /**< tye of the field */
 
     public:
         VTKFieldMetaData( );
-        VTKFieldMetaData( uint64_t, const std::type_info &);
-        uint64_t                getSize() const;
+        VTKFieldMetaData( int64_t, const std::type_info &);
+        int64_t                 getSize() const;
         const std::type_info&   getType() const;
 
 };

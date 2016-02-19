@@ -38,7 +38,7 @@ namespace bitpit{
 /*! 
  * Defaultt constructor 
  */
-VTKFieldMetaData::VTKFieldMetaData( ):  m_size(0), m_type(typeid(int)){
+VTKFieldMetaData::VTKFieldMetaData( ):  m_size(-1), m_type(typeid(int)){
 };
 
 /*! 
@@ -46,14 +46,14 @@ VTKFieldMetaData::VTKFieldMetaData( ):  m_size(0), m_type(typeid(int)){
  * @param[in] size the entire size of field date, e.g. in case of a vector field on nodes size = NNodes x 3 
  * @param[in] type the type of the basic data used
  */
-VTKFieldMetaData::VTKFieldMetaData( uint64_t size, const std::type_info &type): m_size(size), m_type(type){
+VTKFieldMetaData::VTKFieldMetaData( int64_t size, const std::type_info &type): m_size(size), m_type(type){
 };
 
 /*! 
  * Get the size of field
  * @return size of field
  */
-uint64_t VTKFieldMetaData::getSize() const{
+int64_t VTKFieldMetaData::getSize() const{
     return m_size;
 }
 
