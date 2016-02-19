@@ -193,7 +193,7 @@ void CartesianPatch::initialize(const std::array<double, 3> &origin,
 	int i = 0;
 	for (int n = 0; n < getDimension(); n++) {
 		for (int k = -1; k <= 1; k += 2) {
-			std::array<double, 3> normal = {0.0, 0.0, 0.0};
+			std::array<double, 3> normal = {{0.0, 0.0, 0.0}};
 			normal[n] = k;
 
 			m_normals[i++] = normal;
