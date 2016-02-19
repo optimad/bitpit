@@ -31,6 +31,14 @@ list(APPEND TESTS "test_surftripatch_00001")
 
 set(SURFTRIPATCH_TEST_LIST_SERIAL "${TESTS}" CACHE INTERNAL "List of serial tests for the surftripatch module" FORCE)
 
+# List of parallel tests
+if (ENABLE_MPI)
+        set(TESTS_PARALLEL "")
+        list(APPEND TESTS_PARALLEL "test_surftripatch_parallel_00001")
+
+        set(SURFTRIPATCH_TEST_LIST_PARALLEL "${TESTS_PARALLEL}" CACHE INTERNAL "List of parallel tests for the surftripatch module" FORCE)
+endif()
+
 # Rules to build the tests
 include_directories("${PROJECT_SOURCE_DIR}/src/common")
 include_directories("${PROJECT_SOURCE_DIR}/src/operators")
@@ -39,7 +47,7 @@ include_directories("${PROJECT_SOURCE_DIR}/src/IO")
 include_directories("${PROJECT_SOURCE_DIR}/src/patch")
 include_directories("${PROJECT_SOURCE_DIR}/src/surftripatch")
 
-foreach(TEST_NAME IN LISTS SURFTRIPATCH_TEST_LIST_SERIAL)
+foreach(TEST_NAME IN LISTS SURFTRIPATCH_TEST_LIST_SERIAL SURFTRIPATCH_TEST_LIST_PARALLEL)
 	set(TEST_SOURCES "${TEST_NAME}.cpp")
 
 	add_executable(${TEST_NAME} "${TEST_SOURCES}")

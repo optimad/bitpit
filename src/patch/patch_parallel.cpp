@@ -1174,8 +1174,6 @@ if ( (m_rank != snd_rank) && (m_rank != rcv_rank) )
 
 /*DEBUG*/{
 /*DEBUG*/    out << "* display mesh infos" << endl;
-/*DEBUG*/    out << "  PiercedVector.size(): " << m_cells.size() << endl;
-/*DEBUG*/    m_cells.displayIDs(out);
 /*DEBUG*/    displayCells(out);
 /*DEBUG*/    out.close();
 /*DEBUG*/}
