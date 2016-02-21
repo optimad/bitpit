@@ -149,7 +149,15 @@ Patch::Patch(const int &id, const int &dimension, bool expert)
 	convert << get_id();
 	setName(convert.str());
 
+	// Set VTK codex
 	VTKUnstructuredGrid::setCodex(VTKFormat::APPENDED);
+
+	// Add VTK basic patch data
+	VTKUnstructuredGrid::addData("cellIndex", VTKFieldType::SCALAR, VTKLocation::CELL);
+	VTKUnstructuredGrid::addData("vertexIndex", VTKFieldType::SCALAR, VTKLocation::POINT);
+#if ENABLE_MPI==1
+	VTKUnstructuredGrid::addData("rank", VTKFieldType::SCALAR, VTKLocation::CELL);
+#endif
 }
 
 /*!
@@ -366,26 +374,6 @@ void Patch::write(std::string filename)
 */
 void Patch::write()
 {
-	// Add basic patch data
-	std::vector<long> cellIndex;
-	cellIndex.reserve(getCellCount());
-	for (const Cell &cell : m_cells) {
-		cellIndex.emplace_back(cell.get_id());
-	}
-	VTKUnstructuredGrid::addData<long>("cellIndex", VTKFieldType::SCALAR, VTKLocation::CELL, cellIndex);
-
-	std::vector<long> vertexIndex;
-	vertexIndex.reserve(getVertexCount());
-	for (const Vertex &vertex : m_vertices) {
-		vertexIndex.emplace_back(vertex.get_id());
-	}
-	VTKUnstructuredGrid::addData<long>("vertexIndex", VTKFieldType::SCALAR, VTKLocation::POINT, vertexIndex);
-
-#if ENABLE_MPI==1
-	VTKUnstructuredGrid::addData("rank", VTKFieldType::SCALAR, VTKLocation::CELL);
-#endif
-
-	// Write mesh
 	VTKUnstructuredGrid::write();
 }
 
@@ -3022,6 +3010,11 @@ const VTKFieldMetaData Patch::getMetaData(std::string name)
 		}
 
 		return VTKFieldMetaData(connectSize, typeid(long));
+
+	} else if (name == "cellIndex") {
+		return VTKFieldMetaData(m_cells.size(), typeid(long));
+	} else if (name == "vertexIndex") {
+		return VTKFieldMetaData(m_vertices.size(), typeid(long));
 #if ENABLE_MPI==1
 	} else if (name == "rank") {
 		return VTKFieldMetaData(m_cells.size(), typeid(int));
@@ -3123,26 +3116,32 @@ void Patch::flushData(std::fstream &stream, VTKFormat format, std::string name)
 
 		vertexMap.clear();
 		std::unordered_map<long, long>().swap(vertexMap);
+	} else if (name == "cellIndex") {
+		for (const Cell &cell : m_cells) {
+			genericIO::flushBINARY(stream, cell.get_id());
+		}
+	} else if (name == "vertexIndex") {
+		for (const Vertex &vertex : m_vertices) {
+			genericIO::flushBINARY(stream, vertex.get_id());
+		}
 #if ENABLE_MPI==1
 	} else if (name == "rank") {
-		std::unordered_map<long, int> rank;
-		rank.reserve(getCellCount());
+		std::unordered_map<long, int> ghostRank;
+		ghostRank.reserve(getGhostCount());
+
+		for (const auto &neighghostInfo : m_ghost2id) {
+			int rank = neighghostInfo.first;
+			for (const auto &neighGhost : neighghostInfo.second) {
+				ghostRank[neighGhost.second] = rank;
+			}
+		}
 
 		for (Cell &cell : m_cells) {
 			if (cell.isInterior()) {
-				rank[cell.get_id()] = m_rank;
+				genericIO::flushBINARY(stream, m_rank);
+			} else {
+				genericIO::flushBINARY(stream, ghostRank.at(cell.get_id()));
 			}
-		}
-
-		for (const auto &neighghostInfo : m_ghost2id) {
-			int ghostRank = neighghostInfo.first;
-			for (const auto &neighGhost : neighghostInfo.second) {
-				rank[neighGhost.second] = ghostRank;
-			}
-		}
-
-		for (Cell &cell : m_cells) {
-			genericIO::flushBINARY(stream, rank.at(cell.get_id()));
 		}
 #endif
 	}
