@@ -316,13 +316,13 @@ void  convertString( std::string input_, std::array<T,n> &output_) {
     x_ = static_cast<T> (0) ;
     output_.fill( x_ ) ;
 
-    for( int i=0; i<temp_.size(); i++){
+    for(size_t i=0; i<temp_.size(); i++){
       output_[i] = temp_[i] ;
     };
   }
 
   else if( temp_.size() == n){
-    for( int i=0; i<n; i++){
+    for(size_t i=0; i<n; i++){
       output_[i] = temp_[i] ;
     };
   }
@@ -331,7 +331,7 @@ void  convertString( std::string input_, std::array<T,n> &output_) {
     std::cout << " more than " << n << " elements in string " << input_   << std::endl;
     std::cout << " assigning first element " << n << " elements "   << std::endl;
 
-    for( int i=0; i<n; i++){
+    for(size_t i=0; i<n; i++){
       output_[i] = temp_[i] ;
     };
   };
