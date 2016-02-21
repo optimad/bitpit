@@ -463,7 +463,7 @@ void MinPQueue<T, T1>::extract(
 
     // Reduce stack dimensions
     heap_size--;
-    if (heap_size <= keys.size() - MAXSTK) {
+    if (heap_size <= (long) keys.size() - MAXSTK) {
         decreaseSTACK();
     }
 
@@ -558,7 +558,7 @@ void MinPQueue<T, T1>::insert(
     // ========================================================================== //
 
     // Insert key
-    if (heap_size+1 > keys.size()) {
+    if (heap_size+1 > (long) keys.size()) {
         increaseSTACK();
     }
 
@@ -1313,7 +1313,7 @@ void MaxPQueue<T, T1>::extract(
 
     // Reduce stack dimensions
     heap_size--;
-    if (heap_size <= keys.size() - MAXSTK) {
+    if (heap_size <= (long) keys.size() - MAXSTK) {
         decreaseSTACK();
     }
 
@@ -1408,7 +1408,7 @@ void MaxPQueue<T, T1>::insert(
     // ========================================================================== //
 
     // Insert key
-    if (heap_size+1 > keys.size()) {
+    if (heap_size+1 > (long) keys.size()) {
         increaseSTACK();
     }
 

@@ -323,7 +323,7 @@ item = STACK[TOPSTK - 1];
 TOPSTK--;
 
 // Resize stack list -------------------------------------------------------- //
-if (TOPSTK <= STACK.size() - MAXSTK) {
+if (TOPSTK <= (long) STACK.size() - MAXSTK) {
     decreaseSTACK();
 }
 
@@ -356,7 +356,7 @@ void LIFOStack<T>::push(
 // ========================================================================== //
 
 // Resize stack list -------------------------------------------------------- //
-if (TOPSTK >= STACK.size()) {
+if (TOPSTK >= (long) STACK.size()) {
     increaseSTACK();
 }
 

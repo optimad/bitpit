@@ -611,7 +611,7 @@ while (next_ >= 0) {
 // Insert new element ------------------------------------------------------- //
 
 // Increase stack size
-if (n_nodes+1 > nodes.size()) {
+if (n_nodes+1 > (long) nodes.size()) {
     increaseStack();
 }
 
