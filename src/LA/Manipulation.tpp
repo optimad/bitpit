@@ -102,7 +102,7 @@ void transpose(
 // none
 
 // Counters
-int            i, j;
+size_t         i, j;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
@@ -186,7 +186,7 @@ std::array< std::array< T, m >, n > transpose(
 std::array< std::array< T, m >, n >  B ;
 
 // Counters
-int            i, j;
+size_t         i, j;
 
 // ========================================================================== //
 // CHECK INPUT                                                                //
@@ -308,10 +308,10 @@ int            l, k;
 if (m == 0) { return; }
 if (n == 0) { return; }
 i--; j--;
-if ((i >= m) || (i < 0)) {
+if ((i >= (long) m) || (i < 0)) {
     return;
 }
-if ((j >= n) || (j < 0)) {
+if ((j >= (long) n) || (j < 0)) {
     return;
 }
 
@@ -322,15 +322,15 @@ for (l = 0; l < i; l++) {
     for (k = 0; k < j; k++) {
         B[l][k] = A[l][k];
     } //next k
-    for (k = j+1; k < n; k++) {
+    for (k = j+1; k < (long) n; k++) {
         B[l][k-1] = A[l][k];
     } //next k
 } //next l
-for (l = i+1; l < m; l++) {
+for (l = i+1; l < (long) m; l++) {
     for (k = 0; k < j; k++) {
         B[l-1][k] = A[l][k];
     } //next k
-    for (k = j+1; k < n; k++) {
+    for (k = j+1; k < (long) n; k++) {
         B[l-1][k-1] = A[l][k];
     } //next k
 } //next l
@@ -406,7 +406,7 @@ void triL(
 // none
 
 // Counters
-int        i, j;
+size_t     i, j;
 
 // ========================================================================== //
 // CHECK INPUT COHERENCY                                                      //
@@ -497,7 +497,7 @@ void triU(
 // none
 
 // Counters
-int        i, j;
+size_t     i, j;
 
 // ========================================================================== //
 // CHECK INPUT COHERENCY                                                      //
