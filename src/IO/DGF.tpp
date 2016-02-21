@@ -595,7 +595,7 @@ std::stringstream        sheader;
 std::string              header;
 
 // Counters
-int             i;
+// None
 
 // ========================================================================== //
 // CHECK STREAM STATUS                                                        //
@@ -650,7 +650,7 @@ std::stringstream        sheader;
 std::string              header;
 
 // Counters
-int             i;
+// None
 
 // ========================================================================== //
 // CHECK STREAM STATUS                                                        //
