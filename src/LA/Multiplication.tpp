@@ -698,7 +698,7 @@ std::vector< std::vector<T> > matmulDiag(
     const std::vector<T>                        &N
 ) {
 
-    int i, j;
+    int i;
     int d1;
 
     std::vector< std::vector<T> > Q( M );
@@ -781,7 +781,6 @@ std::vector<T> matmul(
 ) {
 
     int d1 = M.size();
-    int d2 = M[0].size();
 
     std::vector<T>      z(d1,0.0);
 
