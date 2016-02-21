@@ -37,6 +37,16 @@
 #include <vector>
 #include <map>
 
+// Macros to allow using oveload in preprocessing macro
+#define BITPIT_CAT(A, B) A ## B
+
+#define BITPIT_COUNT_ARGS_MAX6(_1, _2, _3, _4, _5, _6 /* ad nauseam */, COUNT, ...) COUNT
+#define BITPIT_EXPAND_ARGS_FOR_COUNT(ARGS) BITPIT_COUNT_ARGS_MAX6 ARGS
+#define BITPIT_ARGS_SIZE(...) BITPIT_EXPAND_ARGS_FOR_COUNT((__VA_ARGS__, 6, 5, 4, 3, 2, 1, 0))
+
+#define BITPIT_SELECT_OVERLOAD(NAME, NUM) BITPIT_CAT(NAME ## _, NUM)
+#define BITPIT_OVERLOAD_CALL(NAME, ...) BITPIT_SELECT_OVERLOAD(NAME, BITPIT_ARGS_SIZE(__VA_ARGS__))(__VA_ARGS__)
+
 namespace bitpit {
 
 namespace utils {
