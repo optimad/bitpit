@@ -184,6 +184,14 @@ else ()
 	add_definitions("-std=c++11")
 endif ()
 
+# Define a preprocessor macro to recognize debug builds
+string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
+IF(CMAKE_BUILD_TYPE_LOWER MATCHES "debug")
+	add_definitions("-DENABLE_DEBUG=1")
+else ()
+	add_definitions("-DENABLE_DEBUG=0")
+endif ()
+
 #------------------------------------------------------------------------------------#
 # Library version
 #------------------------------------------------------------------------------------#
