@@ -1,3 +1,5 @@
+#include <cassert>
+
 namespace bitpit{
 
 /*!
@@ -83,6 +85,9 @@ void VTKUnstructuredGrid::setGeomData( std::string name, std::vector<T0> &data )
 
     } else if ( name == "connectivity" ){
         index = 3 ; 
+
+    } else {
+        assert(false);
 
     };
 
