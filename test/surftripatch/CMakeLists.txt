@@ -29,7 +29,7 @@ cmake_minimum_required(VERSION 2.8)
 set(TESTS "")
 list(APPEND TESTS "test_surftripatch_00001")
 if (ENABLE_MPI)
-	list(APPEND TESTS "test_surftripatch_parallel_00001")
+	list(APPEND TESTS "test_surftripatch_parallel_00001:3")
 endif ()
 
 set(SURFTRIPATCH_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the surftripatch module" FORCE)
