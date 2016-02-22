@@ -2289,9 +2289,11 @@ void
 		mortonld = lastdesc.computeMorton();
 		nbro = 0;
 		for (idx=0; idx<m_global.m_nchildren; idx++){
-			// Check if family is complete or to be checked in the internal loop (some brother refined)
-			if (m_octants[idx].computeMorton() <= mortonld){
-				nbro++;
+			if (idx<nocts){
+				// Check if family is complete or to be checked in the internal loop (some brother refined)
+				if (m_octants[idx].computeMorton() <= mortonld){
+					nbro++;
+				}
 			}
 		}
 		if (nbro != m_global.m_nchildren)
