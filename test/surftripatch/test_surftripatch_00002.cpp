@@ -144,7 +144,6 @@ SurfTriPatch                    mesh(0);
     
 
     // Display mesh data ---------------------------------------------------- //
-    cout << "** Mesh data" << endl;
     cout << "   Topology:" << endl;
     mesh.displayTopologyStats(cout, 5);
     cout << "   Vertex list:" << endl;
@@ -166,6 +165,9 @@ SurfTriPatch                    mesh(0);
     double                      m_length, M_length;
     int                         i;
 
+    // Output message ------------------------------------------------------- //
+    cout << "** Testing routines for edge length calculations" << endl;
+
     // Ref. value to check against ------------------------------------------ //
     expected[0] = vector<double>{1.0, sqrt(2.0), 1.0};
     expected[1].resize(4, 1.0);
@@ -184,7 +186,7 @@ SurfTriPatch                    mesh(0);
         maxval(expected[i], M_length);
 
         // Compute cell edge
-        cout << "   Edge length for cell " << id << ": " << endl;
+        cout << "   Edge(s) length for cell " << id << ": " << endl;
         for (int j = 0; j < nedges; ++j) {
             length =  mesh.evalEdgeLength(id, j);
             cout << "     edge loc. id = " << j << ", edge length = " << length << endl;
@@ -215,6 +217,9 @@ SurfTriPatch                    mesh(0);
     double                      m_angle, M_angle;
     int                         i;
 
+    // Output message ------------------------------------------------------- //
+    cout << "** Testing routines for angle calculations" << endl;
+
     // Ref. value to check against ------------------------------------------ //
     expected[0] = vector<double>{0.5*PI, 0.25*PI, 0.25*PI};
     expected[1].resize(4, 0.5*PI);
@@ -233,7 +238,7 @@ SurfTriPatch                    mesh(0);
         maxval(expected[i], M_angle);
 
         // Compute cell angles
-        cout << "   Angle for cell " << id << ": " << endl;
+        cout << "   Angle(s) for cell " << id << ": " << endl;
         for (int j = 0; j < nedges; ++j) {
             angle = mesh.evalAngleAtVertex(id, j);
             cout << "     vertex loc. id = " << j << ", angle = " << angle << " [rad]" << endl;
@@ -262,6 +267,9 @@ SurfTriPatch                    mesh(0);
     array<double, 3>             normal;
     vector<array<double, 3>>     expected(2, array<double, 3>{0.0, 0.0, 1.0});
     int                          i;
+
+    // Output message ------------------------------------------------------- //
+    cout << "** Testing routines for facet normal calculations" << endl;
 
     // Compute face normal -------------------------------------------------- //
     SurfTriPatch::CellIterator  cell_, end_ = mesh.cellEnd();
