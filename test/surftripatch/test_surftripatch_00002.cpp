@@ -331,9 +331,10 @@ SurfTriPatch                    mesh(0);
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
-    double                      area;
-    vector<double>              expected{0.5, 1.0};
+    vector<double>              expected_area{0.5, 1.0};
+    vector<double>              expected_size{sqrt(0.5), 1.0};
     int                         i;
+    double                      area, c_size;
 
     // Output message ------------------------------------------------------- //
     cout << "** Testing routines for facet area computation" << endl;
@@ -349,8 +350,11 @@ SurfTriPatch                    mesh(0);
         // Compute face normal
         cout << "   Facet area for cell " << id << ": " << endl;
         area = mesh.evalFacetArea(id);
+        c_size = mesh.evalCellSize(id);
         cout << "     area: " << area << endl;
-        if (abs(area - expected[i]) > 1.0e-12) return 4;
+        cout << "     cell size: " << c_size << endl;
+        if (abs(area - expected_area[i]) > 1.0e-12) return 4;
+        if (abs(c_size - expected_size[i]) > 1.0e-12) return 4;
 
         // Update counters
         ++i;

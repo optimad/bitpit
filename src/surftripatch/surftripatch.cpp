@@ -109,7 +109,7 @@ double SurfTriPatch::evalCellSize(const long &id)
     // ====================================================================== //
     // COMPUTE CELL SIZE                                                      //
     // ====================================================================== //
-    return(sqrt(evalFacetArea)); 
+    return(sqrt(evalFacetArea(id))); 
 }
 
 /*!
