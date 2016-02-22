@@ -69,8 +69,10 @@ int subtest_001(
 // ========================================================================== //
 // - err       : int, error flag:                                             //
 //               err = 0  --> no error(s)                                     //
-//               err = 1  --> error at step #1                                //
-//               err = 2  --> error at step #2                                //
+//               err = 1  --> error at step #1 (edge length calculations)     //
+//               err = 2  --> error at step #2 (angle calculations)           //
+//               err = 3  --> error at step #3 (facet normal calculations)    //
+//               err = 4  --> error at step #4 (aspect ratio calculations)    //
 // ========================================================================== //
     
 // ========================================================================== //
@@ -284,6 +286,40 @@ SurfTriPatch                    mesh(0);
         normal = mesh.evalFacetNormal(id);
         cout << "     normal: " << normal << endl;
         if (norm2(normal - expected[i]) > 1.0e-12) return 3;
+
+    } //next cell_
+    cout << endl;
+
+}
+
+// ========================================================================== //
+// STEP #4 TEST ASPECT RATIO COMPUTATION                                      //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    double                      ar;
+    vector<double>              expected{sqrt(2), 1.0};
+    int                         i;
+
+    // Output message ------------------------------------------------------- //
+    cout << "** Testing routines for aspect ratio computation" << endl;
+
+    // Compute face normal -------------------------------------------------- //
+    SurfTriPatch::CellIterator  cell_, end_ = mesh.cellEnd();
+    i = 0;
+    for (cell_ = mesh.cellBegin(); cell_ != end_; ++cell_) {
+
+        // Cell data
+        id = cell_->get_id();
+
+        // Compute face normal
+        cout << "   Aspect ratio for cell " << id << ": " << endl;
+        ar = mesh.evalAspectRatio(id);
+        cout << "     a.r.: " << ar << endl;
+        if (abs(ar - expected[i]) > 1.0e-12) return 4;
+
+        // Update counters
+        ++i;
 
     } //next cell_
     cout << endl;
