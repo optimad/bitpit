@@ -63,6 +63,7 @@ public:
         double evalMinAngleAtVertex(const long&, int &);
         double evalMaxAngleAtVertex(const long&, int &);
         array<double, 3> evalFacetNormal(const long&);
+        double evalAspectRatio(const long&);
 
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);

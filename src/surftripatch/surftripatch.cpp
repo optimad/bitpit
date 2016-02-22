@@ -780,6 +780,49 @@ array<double, 3> SurfTriPatch::evalFacetNormal(const long &id)
     return(normal);
 
 }
+
+/*!
+ * Evalute the aspect ratio for a cell with specified ID. The aspect ratio
+ * is defined as the ratio between the longest and the shortest edge.
+ * If cell is of type ElementInfo::VERTEX or ElementInfo::LINE, returns 0.0
+ * 
+ * \param[in] id cell ID
+ * 
+ * \result cell aspect ratio
+*/
+double SurfTriPatch::evalAspectRatio(const long &id)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    Cell                        *cell_ = &m_cells[id];
+
+    // Counters
+    // none
+
+    // ====================================================================== //
+    // EVALUATE ASPECT RATIO                                                  //
+    // ====================================================================== //
+    if ((cell_->getType() == ElementInfo::UNDEFINED)
+     || (cell_->getType() == ElementInfo::VERTEX)
+     || (cell_->getType() == ElementInfo::LINE)) return 0.0;
+
+    double                      l_edge;
+    double                      m_edge = std::numeric_limits<double>::max();
+    double                      M_edge = std::numeric_limits<double>::min();
+    double                      ar = 1.0;
+    int                         nfaces = cell_->getFaceCount();
+    for (int i = 0; i < nfaces; ++i) {
+        l_edge = evalEdgeLength(id, i);
+        m_edge = min(m_edge, l_edge);
+        M_edge = max(M_edge, l_edge);
+    } //next i
+
+    return (M_edge/m_edge);
+
+}
 /*!
 	@}
 */
