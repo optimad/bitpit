@@ -82,7 +82,6 @@ const double                    PI = 3.14159265358979;
 // Local variables
 long                            id;
 SurfTriPatch                    mesh(0);
-vector<long>                    c_connect(3, Element::NULL_ID);
 
 // Counters
 // none
@@ -119,17 +118,30 @@ vector<long>                    c_connect(3, Element::NULL_ID);
     // Scope variables ------------------------------------------------------ //
     SurfTriPatch::VertexIterator                        vit;
     SurfTriPatch::CellIterator                          cit;
+    vector<long>                                        t_connect(3, Vertex::NULL_ID);
+    vector<long>                                        q_connect(4, Vertex::NULL_ID);
     
     // Initialize internal cell --------------------------------------------- //
     cout << "** Initializing mesh" << endl;
+
+    // Place a triangle
     vit = mesh.addVertex(array<double, 3>{0.0, 0.0, 0.0});
-    c_connect[0] = vit->get_id();
+    t_connect[0] = vit->get_id();
+    q_connect[0] = vit->get_id();
     vit = mesh.addVertex(array<double, 3>{1.0, 0.0, 0.0});
-    c_connect[1] = vit->get_id();
+    t_connect[1] = vit->get_id();
+    q_connect[3] = vit->get_id();
     vit = mesh.addVertex(array<double, 3>{0.0, 1.0, 0.0});
-    c_connect[2] = vit->get_id();
-    cit = mesh.addCell(ElementInfo::TRIANGLE, true, c_connect);
-    id = cit->get_id();
+    t_connect[2] = vit->get_id();
+    cit = mesh.addCell(ElementInfo::TRIANGLE, true, t_connect);
+
+    // Place a quad
+    vit = mesh.addVertex(array<double, 3>{0.0, -1.0, 0.0});
+    q_connect[1] = vit->get_id();
+    vit = mesh.addVertex(array<double, 3>{1.0, -1.0, 0.0});
+    q_connect[2] = vit->get_id();
+    cit = mesh.addCell(ElementInfo::QUAD, true, q_connect);
+    
 
     // Display mesh data ---------------------------------------------------- //
     cout << "** Mesh data" << endl;
@@ -148,29 +160,48 @@ vector<long>                    c_connect(3, Element::NULL_ID);
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
-    Cell                        *cell_ = &mesh.getCell(id);
-    int                         nedges = cell_->getFaceCount(), edge_id;
+    int                         nedges, edge_id;
     double                      length;
-    vector<double>              expected{1.0, sqrt(2.0), 1.0};
+    vector<vector<double>>      expected(2);
     double                      m_length, M_length;
+    int                         i;
 
-    // Check edge length ---------------------------------------------------- //
-    minval(expected, m_length);
-    maxval(expected, M_length);
-    cout << "   Edge length for cell " << id << ": " << endl;
-    for (int i = 0; i < nedges; ++i) {
-        length =  mesh.evalEdgeLength(id, i);
-        cout << "     edge loc. id = " << i << ", edge length = " << length << endl;
-        if (abs(length - expected[i]) > 1.0e-12) return 1;
-    } //next i
-    length = mesh.evalMinEdgeLength(id, edge_id);
-    cout << "     min. edge = " << length << " on edge: " << edge_id << endl;
-    if (abs(length - m_length) > 1.0e-12) return 1;
-    length = mesh.evalMaxEdgeLength(id, edge_id);
-    cout << "     max. edge = " << length << " on edge: " << edge_id << endl;
-    if (abs(length - M_length) > 1.0e-12) return 1;
+    // Ref. value to check against ------------------------------------------ //
+    expected[0] = vector<double>{1.0, sqrt(2.0), 1.0};
+    expected[1].resize(4, 1.0);
+
+    // Check edge length for each cell witin the mesh ----------------------- //
+    SurfTriPatch::CellIterator  cell_, end_ = mesh.cellEnd();
+    i = 0;
+    for (cell_ = mesh.cellBegin(); cell_ != end_; ++cell_) {
+
+        // Cell data
+        nedges = cell_->getFaceCount();
+        id = cell_->get_id();
+
+        // Initialize ref. value for checks
+        minval(expected[i], m_length);
+        maxval(expected[i], M_length);
+
+        // Compute cell edge
+        cout << "   Edge length for cell " << id << ": " << endl;
+        for (int j = 0; j < nedges; ++j) {
+            length =  mesh.evalEdgeLength(id, j);
+            cout << "     edge loc. id = " << j << ", edge length = " << length << endl;
+            if (abs(length - expected[i][j]) > 1.0e-12) return 1;
+        } //next i
+        length = mesh.evalMinEdgeLength(id, edge_id);
+        cout << "     min. edge = " << length << " on edge: " << edge_id << endl;
+        if (abs(length - m_length) > 1.0e-12) return 1;
+        length = mesh.evalMaxEdgeLength(id, edge_id);
+        cout << "     max. edge = " << length << " on edge: " << edge_id << endl;
+        if (abs(length - M_length) > 1.0e-12) return 1;
+        
+        // Update counters
+        ++i;
+
+    } //next cell_
     cout << endl;
-
 }
 
 // ========================================================================== //
@@ -178,44 +209,75 @@ vector<long>                    c_connect(3, Element::NULL_ID);
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
-    Cell                        *cell_ = &mesh.getCell(id);
-    int                         nedges = cell_->getVertexCount(), vertex_id;
+    int                         nedges, vertex_id;
     double                      angle;
-    vector<double>              expected{0.5*PI, 0.25*PI, 0.25*PI};
+    vector<vector<double>>      expected(2);
     double                      m_angle, M_angle;
+    int                         i;
+
+    // Ref. value to check against ------------------------------------------ //
+    expected[0] = vector<double>{0.5*PI, 0.25*PI, 0.25*PI};
+    expected[1].resize(4, 0.5*PI);
 
     // Check edge length ---------------------------------------------------- //
-    minval(expected, m_angle);
-    maxval(expected, M_angle);
-    cout << "   Angle for cell " << id << ": " << endl;
-    for (int i = 0; i < nedges; ++i) {
-        angle = mesh.evalAngleAtVertex(id, i);
-        cout << "     vertex loc. id = " << i << ", angle = " << angle << " [rad]" << endl;
-        if (abs(angle - expected[i]) > 1.0e-12) return 2;
-    } //next i
-    angle = mesh.evalMinAngleAtVertex(id, vertex_id);
-    cout << "     min. angle = " << angle << " on vertex: " << vertex_id << endl;
-    if (abs(angle - m_angle) > 1.0e-12) return 2;
-    angle = mesh.evalMaxAngleAtVertex(id, vertex_id);
-    cout << "     max. angle = " << angle << " on vertex: " << vertex_id << endl;
-    if (abs(angle - M_angle) > 1.0e-12) return 2;
+    SurfTriPatch::CellIterator  cell_, end_ = mesh.cellEnd();
+    i = 0;
+    for (cell_ = mesh.cellBegin(); cell_ != end_; ++cell_) {
+
+        // Cell data
+        id = cell_->get_id();
+        nedges = cell_->getVertexCount();
+
+        // Initialize ref. value for check
+        minval(expected[i], m_angle);
+        maxval(expected[i], M_angle);
+
+        // Compute cell angles
+        cout << "   Angle for cell " << id << ": " << endl;
+        for (int j = 0; j < nedges; ++j) {
+            angle = mesh.evalAngleAtVertex(id, j);
+            cout << "     vertex loc. id = " << j << ", angle = " << angle << " [rad]" << endl;
+            if (abs(angle - expected[i][j]) > 1.0e-12) return 2;
+        } //next i
+        angle = mesh.evalMinAngleAtVertex(id, vertex_id);
+        cout << "     min. angle = " << angle << " on vertex: " << vertex_id << endl;
+        if (abs(angle - m_angle) > 1.0e-12) return 2;
+        angle = mesh.evalMaxAngleAtVertex(id, vertex_id);
+        cout << "     max. angle = " << angle << " on vertex: " << vertex_id << endl;
+        if (abs(angle - M_angle) > 1.0e-12) return 2;
+
+        // Update counters
+        ++i;
+
+    } //next cell_
     cout << endl;
 
 }
 
 // ========================================================================== //
-// STEP #3 TEST (MIN/MAX) ANGLE AT VERTEX                                     //
+// STEP #3 TEST FACET NORMAL COMPUTATION                                      //
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
-    Cell                *cell_ = &mesh.getCell(id);
-    array<double, 3>     normal, expected{0.0, 0.0, 1.0};
+    array<double, 3>             normal;
+    vector<array<double, 3>>     expected(2, array<double, 3>{0.0, 0.0, 1.0});
+    int                          i;
 
     // Compute face normal -------------------------------------------------- //
-    cout << "   Facet normal for cell " << id << ": " << endl;
-    normal = mesh.evalFacetNormal(id);
-    cout << "     normal: " << normal << endl;
-    if (norm2(normal - expected) > 1.0e-12) return 3;
+    SurfTriPatch::CellIterator  cell_, end_ = mesh.cellEnd();
+    i = 0;
+    for (cell_ = mesh.cellBegin(); cell_ != end_; ++cell_) {
+
+        // Cell data
+        id = cell_->get_id();
+
+        // Compute face normal
+        cout << "   Facet normal for cell " << id << ": " << endl;
+        normal = mesh.evalFacetNormal(id);
+        cout << "     normal: " << normal << endl;
+        if (norm2(normal - expected[i]) > 1.0e-12) return 3;
+
+    } //next cell_
     cout << endl;
 
 }

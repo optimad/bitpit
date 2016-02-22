@@ -637,6 +637,7 @@ double SurfTriPatch::evalAngleAtVertex(const long &id, const int &vertex_id)
     int                          next = (vertex_id + 1) % n_vert;
     double                       angle;
     array<double, 3>             d1, d2;
+
     d1 = m_vertices[cell_->getVertex(next)].getCoords() - m_vertices[cell_->getVertex(vertex_id)].getCoords();
     d2 = m_vertices[cell_->getVertex(prev)].getCoords() - m_vertices[cell_->getVertex(vertex_id)].getCoords();
     d1 = d1/norm2(d1);
