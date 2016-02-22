@@ -22,6 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#include "logger.hpp"
+
 #include "octreepatch.hpp"
 
 namespace bitpit {
@@ -60,7 +62,7 @@ OctreePatch::OctreePatch(const int &id, const int &dimension,
 				 std::array<double, 3> origin, double length, double dh )
 	: Patch(id, dimension, false)
 {
-	std::cout << ">> Initializing Octree mesh\n";
+	log::cout() << ">> Initializing Octree mesh\n";
 
 	// Inizializzazione dell'octree
 	double initial_level = ceil(log2(std::max(1., length / dh)));
@@ -310,40 +312,40 @@ const std::vector<Adaption::Info> OctreePatch::_update(bool trackAdaption)
 	bool initiallyEmpty = (getCellCount() == 0);
 
 	// Updating the tree
-	std::cout << ">> Adapting tree...";
+	log::cout() << ">> Adapting tree...";
 
 	bool updated = m_tree.adapt(!initiallyEmpty);
 	if (!updated) {
-		std::cout << " Already updated" << std::endl;
+		log::cout() << " Already updated" << std::endl;
 
 		return std::vector<Adaption::Info>();
 	}
 
-	std::cout << " Done" << std::endl;
+	log::cout() << " Done" << std::endl;
 
 	// Info on the tree
 	long nOctants = m_tree.getNumOctants();
 	long nPreviousOctants = m_octantToCell.size();
 
-	std::cout << ">> Number of octants : " << nOctants << std::endl;
+	log::cout() << ">> Number of octants : " << nOctants << std::endl;
 
 	// Info on the tree
 	long nGhostsOctants = m_tree.getNumGhosts();
 	long nPreviousGhosts = m_ghostToCell.size();
 
 	// Evaluate tree conenctivity
-	std::cout << ">> Evaluating Octree connectivity...";
+	log::cout() << ">> Evaluating Octree connectivity...";
 
 	m_tree.computeConnectivity();
 
-	std::cout << " Done" << std::endl;
+	log::cout() << " Done" << std::endl;
 
 	// Initialize intersections
-	std::cout << ">> Evaluating Octree intersections...";
+	log::cout() << ">> Evaluating Octree intersections...";
 
 	m_tree.computeIntersections();
 
-	std::cout << " Done" << std::endl;
+	log::cout() << " Done" << std::endl;
 
 	// Initialize tracking data
 	std::vector<Adaption::Info> adaptionData;
@@ -352,7 +354,7 @@ const std::vector<Adaption::Info> OctreePatch::_update(bool trackAdaption)
 	//
 	// If there are no cells in the mesh we need to import all
 	// octants.
-	std::cout << ">> Extract information for transforming the patch...";
+	log::cout() << ">> Extract information for transforming the patch...";
 
 	std::vector<OctantInfo> newOctants;
 	std::unordered_map<uint32_t, long> renumberedOctants;
@@ -504,7 +506,7 @@ const std::vector<Adaption::Info> OctreePatch::_update(bool trackAdaption)
 		treeId += nCurrentTreeIds;
 	}
 
-	std::cout << " Done" << std::endl;
+	log::cout() << " Done" << std::endl;
 
 	// Previous ghosts cells need to be removed
 	if (nPreviousGhosts > 0) {
@@ -553,12 +555,12 @@ const std::vector<Adaption::Info> OctreePatch::_update(bool trackAdaption)
 	// Delete removed cells
 	FaceInfoSet danglingFaces;
 	if (removedCells.size() > 0) {
-		std::cout << ">> Removing non-existing cells...";
+		log::cout() << ">> Removing non-existing cells...";
 
 		danglingFaces = removeCells(removedCells);
 
-		std::cout << " Done" << std::endl;
-		std::cout << ">> Cells removed: " <<  removedCells.size() << std::endl;
+		log::cout() << " Done" << std::endl;
+		log::cout() << ">> Cells removed: " <<  removedCells.size() << std::endl;
 	}
 
 	std::vector<long>().swap(removedCells);
@@ -569,7 +571,7 @@ const std::vector<Adaption::Info> OctreePatch::_update(bool trackAdaption)
 
 	// Remap renumbered cells
 	if (renumberedOctants.size() > 0) {
-		std::cout << ">> Rebuilding octant-to-cell map for renumbered cells...";
+		log::cout() << ">> Rebuilding octant-to-cell map for renumbered cells...";
 
 		// Remap cells to the new tree ids
 		auto cellIterator = renumberedOctants.begin();
@@ -588,8 +590,8 @@ const std::vector<Adaption::Info> OctreePatch::_update(bool trackAdaption)
 			cellIterator++;
 		}
 
-		std::cout << " Done" << std::endl;
-		std::cout << ">> Cells renumbered: " <<  renumberedOctants.size() << std::endl;
+		log::cout() << " Done" << std::endl;
+		log::cout() << ">> Cells renumbered: " <<  renumberedOctants.size() << std::endl;
 	}
 
 	std::unordered_map<uint32_t, long>().swap(renumberedOctants);
@@ -604,12 +606,12 @@ const std::vector<Adaption::Info> OctreePatch::_update(bool trackAdaption)
 	// Import added octants
 	std::vector<unsigned long> createdInterfaces;
 	if (newOctants.size() > 0) {
-		std::cout << ">> Importing new octants...";
+		log::cout() << ">> Importing new octants...";
 
 		createdInterfaces = importOctants(newOctants, danglingFaces);
 
-		std::cout << " Done" << std::endl;
-		std::cout << ">> Octants imported: " <<  newOctants.size() << std::endl;
+		log::cout() << " Done" << std::endl;
+		log::cout() << ">> Octants imported: " <<  newOctants.size() << std::endl;
 	}
 
 	FaceInfoSet().swap(danglingFaces);
@@ -1376,7 +1378,7 @@ void OctreePatch::scale(std::array<double, 3> scaling)
 	uniformScaling &= (fabs(scaling[0] - scaling[2]) > 1e-14);
 	assert(uniformScaling);
 	if (!uniformScaling) {
-		std::cout << "octree patch only allows uniform scaling)" << std::endl;
+		log::cout() << "octree patch only allows uniform scaling)" << std::endl;
 		return;
 	}
 

@@ -24,13 +24,14 @@
 
 #include <array>
 
+#include "bitpit_IO.hpp"
 #include "bitpit_octreepatch.hpp"
 
 using namespace bitpit;
 
 int main(int argc, char *argv[]) {
 
-	std::cout << "Testing adaption on octree patch" << std::endl;
+	log::cout() << "Testing adaption on octree patch" << std::endl;
 
 #if ENABLE_MPI==1
 	MPI::Init(argc,argv);
@@ -40,24 +41,24 @@ int main(int argc, char *argv[]) {
 	double length = 20;
 	double dh = 1.0;
 
-	std::cout << std::endl;
-	std::cout << "  :: 2D adaption test ::" << std::endl;
+	log::cout() << std::endl;
+	log::cout() << "  :: 2D adaption test ::" << std::endl;
 
-	std::cout << std::endl;
-	std::cout << ">> Creating the patch" << std::endl;
+	log::cout() << std::endl;
+	log::cout() << ">> Creating the patch" << std::endl;
 
 	OctreePatch *patch_2D = new OctreePatch(0, 2, origin, length, dh);
 	patch_2D->setName("octree_adapted_patch_2D");
 	patch_2D->update();
 	patch_2D->write();
 
-	std::cout << std::endl;
-	std::cout << ">> Adapting patch" << std::endl;
+	log::cout() << std::endl;
+	log::cout() << ">> Adapting patch" << std::endl;
 
 	for (int k = 0; k < 5; ++k) {
 		long nCells = patch_2D->getCellCount();
-		std::cout << std::endl;
-		std::cout << ">> Marking the cells to adapt... " << std::endl;
+		log::cout() << std::endl;
+		log::cout() << ">> Marking the cells to adapt... " << std::endl;
 
 		for (int i = 0; i < 150; ++i) {
 			long cellId = rand() % nCells;
@@ -83,34 +84,34 @@ int main(int argc, char *argv[]) {
 			}
 		}
 
-		std::cout << std::endl;
-		std::cout << ">> Initial number of cells... " << nCells << std::endl;
+		log::cout() << std::endl;
+		log::cout() << ">> Initial number of cells... " << nCells << std::endl;
 
 		patch_2D->update();
 
 		nCells = patch_2D->getCellCount();
-		std::cout << ">> Final number of cells... " << nCells << std::endl;
+		log::cout() << ">> Final number of cells... " << nCells << std::endl;
 	}
 	patch_2D->write();
 
-	std::cout << std::endl;
-	std::cout << "  :: 3D adaption test ::" << std::endl;
+	log::cout() << std::endl;
+	log::cout() << "  :: 3D adaption test ::" << std::endl;
 
-	std::cout << std::endl;
-	std::cout << ">> Creating patch" << std::endl;
+	log::cout() << std::endl;
+	log::cout() << ">> Creating patch" << std::endl;
 
 	OctreePatch *patch_3D = new OctreePatch(0, 3, origin, length, dh);
 	patch_3D->setName("octree_adapted_patch_3D");
 	patch_3D->update();
 	patch_3D->write();
 
-	std::cout << std::endl;
-	std::cout << ">> Adapting patch" << std::endl;
+	log::cout() << std::endl;
+	log::cout() << ">> Adapting patch" << std::endl;
 
 	for (int k = 0; k < 5; ++k) {
 		long nCells = patch_3D->getCellCount();
-		std::cout << std::endl;
-		std::cout << ">> Marking the cells to adapt... " << std::endl;
+		log::cout() << std::endl;
+		log::cout() << ">> Marking the cells to adapt... " << std::endl;
 
 		for (int i = 0; i < 150; ++i) {
 			long cellId = rand() % nCells;
@@ -136,13 +137,13 @@ int main(int argc, char *argv[]) {
 			}
 		}
 
-		std::cout << std::endl;
-		std::cout << ">> Initial number of cells... " << nCells << std::endl;
+		log::cout() << std::endl;
+		log::cout() << ">> Initial number of cells... " << nCells << std::endl;
 
 		patch_3D->update();
 		
 		nCells = patch_3D->getCellCount();
-		std::cout << ">> Final number of cells... " << nCells << std::endl;
+		log::cout() << ">> Final number of cells... " << nCells << std::endl;
 	}
 	patch_3D->write();
 
