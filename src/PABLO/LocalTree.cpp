@@ -49,7 +49,7 @@ using namespace std;
  * \param[in] maxlevel Maximum refinement level of the octree.
  * \param[in] dim Space dimension of octree.
  */
-LocalTree::LocalTree(int8_t maxlevel, uint8_t dim):m_firstDesc(m_dim, m_global.m_maxLevel),m_lastDesc(m_dim, m_global.m_maxLevel){
+LocalTree::LocalTree(int8_t maxlevel, uint8_t dim):m_firstDesc(dim, maxlevel),m_lastDesc(dim, maxlevel){
 	m_dim = dim;
 	m_global.setGlobal(maxlevel, m_dim);
 	Octant oct0(m_dim, m_global.m_maxLevel);
