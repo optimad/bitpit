@@ -28,6 +28,7 @@ cmake_minimum_required(VERSION 2.8)
 # List of tests
 set(TESTS "")
 list(APPEND TESTS "test_surftripatch_00001")
+list(APPEND TESTS "test_surftripatch_00002")
 if (ENABLE_MPI)
 	list(APPEND TESTS "test_surftripatch_parallel_00001:3")
 endif ()
