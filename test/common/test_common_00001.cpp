@@ -139,7 +139,7 @@ int main(
 
     // Scope variables -------------------------------------------------------------- //
     double                       x;
-    dvector1D                    v;
+    std::vector<double>          v;
     array<double, 3>             a;
     string                       s0 = " 0.12 ";
     string                       s1 = "  0.12 0.13 0.14 ";
@@ -153,10 +153,15 @@ int main(
     cout << "  convertString(s0, x), x = " << x << endl;
     bitpit::utils::convertString(s1, v);
     cout << "  convertString(s1, v), v = ";
-    display(cout, v) << endl;
+	for (size_t i = 0; i < v.size(); ++i) {
+		cout << v[i] << "   ";
+	}
+    cout << endl;
     bitpit::utils::convertString(s2, a);
     cout << "  convertString(s2, a), a = ";
-    display(cout, a) << endl;
+	for (size_t i = 0; i < a.size(); ++i) {
+		cout << a[i] << "   ";
+	}
     cout << endl;
 }
 
