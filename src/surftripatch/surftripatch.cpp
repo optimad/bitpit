@@ -95,9 +95,21 @@ double SurfTriPatch::evalCellVolume(const long &id)
 */
 double SurfTriPatch::evalCellSize(const long &id)
 {
-	BITPIT_UNUSED(id);
 
-	return 0;
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    // none
+
+    // Counters
+    // none
+
+    // ====================================================================== //
+    // COMPUTE CELL SIZE                                                      //
+    // ====================================================================== //
+    return(sqrt(evalFacetArea)); 
 }
 
 /*!
