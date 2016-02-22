@@ -527,10 +527,11 @@ double SurfTriPatch::evalEdgeLength(const long &id, const int &edge_id)
  *  returns 0.0.
  * 
  *  \param[in] id cell id
+ *  \param[in,out] edge_id on output stores the local index of edge with minimal edge length
  * 
  *  \result minimal edge length
 */
-double SurfTriPatch::evalMinEdgeLength(const long &id)
+double SurfTriPatch::evalMinEdgeLength(const long &id, int &edge_id)
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -550,10 +551,14 @@ double SurfTriPatch::evalMinEdgeLength(const long &id)
      || (cell_->getType() == ElementInfo::VERTEX)
      || (cell_->getType() == ElementInfo::UNDEFINED)) return 0.0;
 
-    double edge_length = std::numeric_limits<double>::max();
+    double edge_length = std::numeric_limits<double>::max(), tmp;
     n_faces = cell_->getFaceCount();
     for (i = 0; i < n_faces; ++i) {
-        edge_length = min( edge_length, evalEdgeLength(id, i) );
+        tmp = evalEdgeLength(id, i);
+        if (tmp < edge_length) {
+            edge_length = tmp;
+            edge_id = i;
+        }
     } //next i
 
     return(edge_length);
@@ -565,10 +570,11 @@ double SurfTriPatch::evalMinEdgeLength(const long &id)
  *  returns 0.0.
  * 
  *  \param[in] id cell id
+ *  \param[in,out] edge_id on output stores the local inde xof edge with maximal edge length
  * 
  *  \result maximal edge length
 */
-double SurfTriPatch::evalMaxEdgeLength(const long &id)
+double SurfTriPatch::evalMaxEdgeLength(const long &id, int &edge_id)
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -588,10 +594,14 @@ double SurfTriPatch::evalMaxEdgeLength(const long &id)
      || (cell_->getType() == ElementInfo::VERTEX)
      || (cell_->getType() == ElementInfo::UNDEFINED)) return 0.0;
 
-    double edge_length = std::numeric_limits<double>::min();
+    double edge_length = std::numeric_limits<double>::min(), tmp;
     n_faces = cell_->getFaceCount();
     for (i = 0; i < n_faces; ++i) {
-        edge_length = max( edge_length, evalEdgeLength(id, i) );
+        tmp = evalEdgeLength(id, i);
+        if (tmp > edge_length) {
+            edge_length = tmp;
+            edge_id = i;
+        }
     } //next i
 
     return(edge_length);

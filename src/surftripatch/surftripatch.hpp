@@ -57,8 +57,8 @@ public:
 
         //TODO: double evalCellArea(const long &);
         double evalEdgeLength(const long&, const int&);
-        double evalMinEdgeLength(const long &);
-        double evalMaxEdgeLength(const long &);
+        double evalMinEdgeLength(const long &, int &);
+        double evalMaxEdgeLength(const long &, int &);
         double evalAngleAtVertex(const long&, const int&);
         double evalMinAngleAtVertex(const long&, int &);
         double evalMaxAngleAtVertex(const long&, int &);

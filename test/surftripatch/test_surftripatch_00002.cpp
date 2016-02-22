@@ -149,7 +149,7 @@ vector<long>                    c_connect(3, Element::NULL_ID);
 {
     // Scope variables ------------------------------------------------------ //
     Cell                        *cell_ = &mesh.getCell(id);
-    int                         nedges = cell_->getFaceCount();
+    int                         nedges = cell_->getFaceCount(), edge_id;
     double                      length;
     vector<double>              expected{1.0, sqrt(2.0), 1.0};
     double                      m_length, M_length;
@@ -163,11 +163,11 @@ vector<long>                    c_connect(3, Element::NULL_ID);
         cout << "     edge loc. id = " << i << ", edge length = " << length << endl;
         if (abs(length - expected[i]) > 1.0e-12) return 1;
     } //next i
-    length = mesh.evalMinEdgeLength(id);
-    cout << "     min. edge = " << length << endl;
+    length = mesh.evalMinEdgeLength(id, edge_id);
+    cout << "     min. edge = " << length << " on edge: " << edge_id << endl;
     if (abs(length - m_length) > 1.0e-12) return 1;
-    length = mesh.evalMaxEdgeLength(id);
-    cout << "     max. edge = " << length << endl;
+    length = mesh.evalMaxEdgeLength(id, edge_id);
+    cout << "     max. edge = " << length << " on edge: " << edge_id << endl;
     if (abs(length - M_length) > 1.0e-12) return 1;
     cout << endl;
 
@@ -179,7 +179,7 @@ vector<long>                    c_connect(3, Element::NULL_ID);
 {
     // Scope variables ------------------------------------------------------ //
     Cell                        *cell_ = &mesh.getCell(id);
-    int                         nedges = cell_->getVertexCount(), edge_id;
+    int                         nedges = cell_->getVertexCount(), vertex_id;
     double                      angle;
     vector<double>              expected{0.5*PI, 0.25*PI, 0.25*PI};
     double                      m_angle, M_angle;
@@ -193,11 +193,11 @@ vector<long>                    c_connect(3, Element::NULL_ID);
         cout << "     vertex loc. id = " << i << ", angle = " << angle << " [rad]" << endl;
         if (abs(angle - expected[i]) > 1.0e-12) return 2;
     } //next i
-    angle = mesh.evalMinAngleAtVertex(id, edge_id);
-    cout << "     min. angle = " << angle << " on edge: " << edge_id << endl;
+    angle = mesh.evalMinAngleAtVertex(id, vertex_id);
+    cout << "     min. angle = " << angle << " on vertex: " << vertex_id << endl;
     if (abs(angle - m_angle) > 1.0e-12) return 2;
-    angle = mesh.evalMaxAngleAtVertex(id, edge_id);
-    cout << "     max. angle = " << angle << " on edge: " << edge_id << endl;
+    angle = mesh.evalMaxAngleAtVertex(id, vertex_id);
+    cout << "     max. angle = " << angle << " on vertex: " << vertex_id << endl;
     if (abs(angle - M_angle) > 1.0e-12) return 2;
     cout << endl;
 
