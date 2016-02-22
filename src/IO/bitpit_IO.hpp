@@ -32,6 +32,7 @@
  * @{
  * @defgroup VTKEnums VTK Enumerations
  * @}
+ * @defgroup Logger Logger
  * @}
  *
  */
@@ -41,6 +42,7 @@
 
 #include "bitpit_version.hpp"
 
+#include "logger.hpp"
 #include "FileHandler.hpp"
 #include "VTK.hpp"
 #include "DGF.hpp"

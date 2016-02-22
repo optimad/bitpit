@@ -11,6 +11,7 @@ Here is a list of the main authors of each bitpit module:
 * IO
 
   * [Alessandro Alaia](mailto:alessandro.alaia@optimad.it)
+  * [Andrea Iob](mailto:andrea_iob@hotmail.com)
   * [Haysam Telib](mailto:haysam.telib@optimad.it)
 
 * containers
