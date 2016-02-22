@@ -823,6 +823,56 @@ double SurfTriPatch::evalAspectRatio(const long &id)
     return (M_edge/m_edge);
 
 }
+
+/*!
+ * Evaluate facet area for a cell with specified ID. If cell is of type
+ * ElementInfo::VERTEX or ElementInfo::LINE, returns 0.0
+ * 
+ * \param[in] id cell ID
+ * 
+ * \result facet area
+*/
+double SurfTriPatch::evalFacetArea(const long &id)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    Cell                        *cell_ = &m_cells[id];
+
+    // Counters
+    // none
+
+    // ====================================================================== //
+    // EVALUATE FACET AREA                                                    //
+    // ====================================================================== //
+    if ((cell_->getType() == ElementInfo::UNDEFINED)
+     || (cell_->getType() == ElementInfo::VERTEX)
+     || (cell_->getType() == ElementInfo::LINE)) return 0.0;
+
+    array<double, 3>            d1, d2;
+    if (cell_->getType() == ElementInfo::TRIANGLE) {
+        d1 = m_vertices[cell_->getVertex(1)].getCoords() - m_vertices[cell_->getVertex(0)].getCoords();
+        d2 = m_vertices[cell_->getVertex(2)].getCoords() - m_vertices[cell_->getVertex(0)].getCoords();
+        return (0.5*norm2(crossProduct(d1, d2)));
+    }
+    else {
+        int                     nvert = cell_->getVertexCount();
+        int                     next, prev;
+        double                  coeff = 0.25;
+        double                  area = 0;
+        for (int i = 0; i < nvert; ++i) {
+            next = (i+1) % nvert;
+            prev = (nvert + i + 1) % nvert;
+            d1 = m_vertices[cell_->getVertex(next)].getCoords() - m_vertices[cell_->getVertex(i)].getCoords();
+            d2 = m_vertices[cell_->getVertex(prev)].getCoords() - m_vertices[cell_->getVertex(i)].getCoords();
+            area += coeff*norm2(crossProduct(d1, d2));
+        } //next i
+        return(area);
+    }
+}
+
 /*!
 	@}
 */
