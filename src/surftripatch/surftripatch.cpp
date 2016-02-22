@@ -482,6 +482,130 @@ void SurfTriPatch::updateAdjacencies(const std::vector<long> &cell_ids)
 }
 
 /*!
+    Evaluate the length of the edge with specified local index
+    for e cell with specified ID.
+    If the cell is of type ElementInfo::SEGMENT or ElementInfo::POINT
+    returns 0.0.
+
+    \param[in] id cell id
+    \param[in] edge_id edge local index
+
+    \result minimal edge length
+*/
+double SurfTriPatch::evalEdgeLength(const long &id, const int &edge_id)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    Cell                                *cell_ = &m_cells[id];
+
+    // Counters
+    int                                 nv_on_edge = 2;
+
+    // ====================================================================== //
+    // COMPUTE MIN EDGE SIZE                                                  //
+    // ====================================================================== //
+    if ((cell_->getType() == ElementInfo::LINE)
+     || (cell_->getType() == ElementInfo::VERTEX)
+     || (cell_->getType() == ElementInfo::UNDEFINED)) return 0.0;
+
+    double edge_length = 0.0;
+    vector<int> edge_loc_connect(2, Vertex::NULL_ID);
+    edge_loc_connect = cell_->getEdgeLocalConnect(edge_id);
+    edge_loc_connect[0] = cell_->getVertex(edge_loc_connect[0]);
+    edge_loc_connect[1] = cell_->getVertex(edge_loc_connect[1]);
+    edge_length = norm2(m_vertices[edge_loc_connect[0]].getCoords() - m_vertices[edge_loc_connect[1]].getCoords());
+
+    return(edge_length);
+}
+
+/*!
+    Evaluate the minimal edge length for e cell with specified ID.
+    If the cell is of type ElementInfo::SEGMENT or ElementInfo::POINT
+    returns 0.0.
+
+    \param[in] id cell id
+
+    \result minimal edge length
+*/
+double SurfTriPatch::evalMinEdgeLength(const long &id)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    Cell                                *cell_ = &m_cells[id];
+
+    // Counters
+    int                                 i, j, nv_on_edge = 2;
+    int                                 n_edges;
+
+    // ====================================================================== //
+    // COMPUTE MIN EDGE SIZE                                                  //
+    // ====================================================================== //
+    if ((cell_->getType() == ElementInfo::LINE)
+     || (cell_->getType() == ElementInfo::VERTEX)
+     || (cell_->getType() == ElementInfo::UNDEFINED)) return 0.0;
+
+    double edge_length = std::numeric_limits<double>::max();
+    vector<int> edge_loc_connect(2, Vertex::NULL_ID);
+    n_edges = cell_->getEdgeCount();
+    for (i = 0; i < n_edges; ++i) {
+        edge_loc_connect = cell_->getEdgeLocalConnect(i);
+        edge_loc_connect[0] = cell_->getVertex(edge_loc_connect[0]);
+        edge_loc_connect[1] = cell_->getVertex(edge_loc_connect[1]);
+        edge_length = min( edge_length, norm2(m_vertices[edge_loc_connect[0]].getCoords() - m_vertices[edge_loc_connect[1]].getCoords()) );
+    } //next i
+
+    return(edge_length);
+}
+
+/*!
+    Evaluate the maximal edge length for e cell with specified ID.
+    If the cell is of type ElementInfo::SEGMENT or ElementInfo::POINT
+    returns 0.0.
+
+    \param[in] id cell id
+
+    \result maximal edge length
+*/
+double SurfTriPatch::evalMaxEdgeLength(const long &id)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    Cell                                *cell_ = &m_cells[id];
+
+    // Counters
+    int                                 i, j, nv_on_edge = 2;
+    int                                 n_edges;
+
+    // ====================================================================== //
+    // COMPUTE MIN EDGE SIZE                                                  //
+    // ====================================================================== //
+    if ((cell_->getType() == ElementInfo::LINE)
+     || (cell_->getType() == ElementInfo::VERTEX)
+     || (cell_->getType() == ElementInfo::UNDEFINED)) return 0.0;
+
+    double edge_length = std::numeric_limits<double>::min();
+    vector<int> edge_loc_connect(2, Vertex::NULL_ID);
+    n_edges = cell_->getEdgeCount();
+    for (i = 0; i < n_edges; ++i) {
+        edge_loc_connect = cell_->getEdgeLocalConnect(i);
+        edge_loc_connect[0] = cell_->getVertex(edge_loc_connect[0]);
+        edge_loc_connect[1] = cell_->getVertex(edge_loc_connect[1]);
+        edge_length = max( edge_length, norm2(m_vertices[edge_loc_connect[0]].getCoords() - m_vertices[edge_loc_connect[1]].getCoords()) );
+    } //next i
+
+    return(edge_length);
+}
+
+/*!
 	@}
 */
 

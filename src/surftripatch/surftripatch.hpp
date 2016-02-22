@@ -55,6 +55,11 @@ public:
         void buildAdjacencies(void);
         void updateAdjacencies(const std::vector<long>&);
 
+        //TODO: double evalCellArea(const long &);
+        double evalEdgeLength(const long&, const int&);
+        double evalMinEdgeLength(const long &);
+        double evalMaxEdgeLength(const long &);
+
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
 	bool _markCellForRefinement(const long &id);
