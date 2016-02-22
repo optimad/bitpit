@@ -155,7 +155,7 @@ vector<long>                    c_connect(3, Element::NULL_ID);
         cout << "     edge loc. id = " << i << ", edge length = " << mesh.evalEdgeLength(id, i) << endl;
     } //next i
     cout << "     min. edge = " << mesh.evalMinEdgeLength(id) << endl;
-    cout << "     max. edge = " << mesh.evalMinEdgeLength(id) << endl;
+    cout << "     max. edge = " << mesh.evalMaxEdgeLength(id) << endl;
     cout << endl;
 
 }
