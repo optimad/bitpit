@@ -484,7 +484,7 @@ void SurfTriPatch::updateAdjacencies(const std::vector<long> &cell_ids)
 /*!
  *  Evaluate the length of the edge with specified local index
  *  for e cell with specified ID.
- *  If the cell is of type ElementInfo::SEGMENT or ElementInfo::POINT
+ *  If the cell is of type ElementInfo::VERTEX or ElementInfo::LINE
  *  returns 0.0.
  * 
  *  \param[in] id cell id
@@ -523,7 +523,7 @@ double SurfTriPatch::evalEdgeLength(const long &id, const int &edge_id)
 
 /*!
  *  Evaluate the minimal edge length for e cell with specified ID.
- *  If the cell is of type ElementInfo::SEGMENT or ElementInfo::POINT
+ *  If the cell is of type ElementInfo::VERTEX or ElementInfo::LINE
  *  returns 0.0.
  * 
  *  \param[in] id cell id
@@ -566,7 +566,7 @@ double SurfTriPatch::evalMinEdgeLength(const long &id, int &edge_id)
 
 /*!
  *  Evaluate the maximal edge length for e cell with specified ID.
- *  If the cell is of type ElementInfo::SEGMENT or ElementInfo::POINT
+ *  If the cell is of type ElementInfo::VERTEX or ElementInfo::LINE
  *  returns 0.0.
  * 
  *  \param[in] id cell id
@@ -608,7 +608,8 @@ double SurfTriPatch::evalMaxEdgeLength(const long &id, int &edge_id)
 }
 
 /*!
- * Evaluate angle at cell vertex.
+ * Evaluate the angle at specified vertex for a cell with specified ID.
+ * If cell is of type ElementInfo::VERTEX or ElementInfo::LINE, a returns zero.
  * 
  * \param[in] id cell global ID
  * \param[in] vertex_id vertex local ID
@@ -646,7 +647,8 @@ double SurfTriPatch::evalAngleAtVertex(const long &id, const int &vertex_id)
 }
 
 /*!
- * Evaluate the minimal angle at vertex for a cell with specified id.
+ * Evaluate the minimal angle at vertex for a cell with specified ID.
+ * If cell is of type ElementInfo::VERTEX or ElementInfo::LINE, a returns zero.
  *
  * \param[in] id cell id
  * \param[in,out] vertex_id on output stores the local index of vertex with minimal angle
@@ -686,7 +688,8 @@ double SurfTriPatch::evalMinAngleAtVertex(const long&id, int &vertex_id)
 }
 
 /*!
- * Evaluate the maximal angle at vertex for a cell with specified id.
+ * Evaluate the maximal angle at vertex for a cell with specified ID.
+ * If cell is of type ElementInfo::VERTEX or ElementInfo::LINE, a returns zero.
  *
  * \param[in] id cell id
  * \param[in,out] vertex_id on output stores the local index of vertex with minimal angle
@@ -725,6 +728,57 @@ double SurfTriPatch::evalMaxAngleAtVertex(const long&id, int &vertex_id)
     return(angle);
 }
 
+/*!
+ * Evaluate facet normal for a cell with specified ID.
+ * If cell is of type ElementInfo::VERTEX or ElementInfo::LINE, returns 0.0
+ * 
+ * \param[in] id cell ID
+ * 
+ * \result facet normal
+*/
+array<double, 3> SurfTriPatch::evalFacetNormal(const long &id)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    array<double, 3>             normal{0.0, 0.0, 0.0};
+    Cell                        *cell_ = &m_cells[id];
+
+    // Counters
+    // none
+
+    // ====================================================================== //
+    // COMPUTE NORMAL                                                         //
+    // ====================================================================== //
+    if ((cell_->getType() == ElementInfo::UNDEFINED)
+     || (cell_->getType() == ElementInfo::VERTEX)
+     || (cell_->getType() == ElementInfo::LINE)) return normal;
+
+    if (cell_->getType() == ElementInfo::TRIANGLE) {
+        array<double, 3>                d1, d2;
+        d1 = m_vertices[cell_->getVertex(1)].getCoords() - m_vertices[cell_->getVertex(0)].getCoords();
+        d2 = m_vertices[cell_->getVertex(2)].getCoords() - m_vertices[cell_->getVertex(0)].getCoords();
+        normal = crossProduct(d1, d2);
+    }
+    else {
+        array<double, 3>                d1, d2;
+        int                             next, prev, i, nvert = cell_->getVertexCount();
+        double                          coeff = 1.0/double(nvert);
+        for (i = 0; i < nvert; ++i) {
+            next = (i+1) % nvert;
+            prev = (nvert + i - 1) % nvert;
+            d1 = m_vertices[cell_->getVertex(next)].getCoords() - m_vertices[cell_->getVertex(i)].getCoords();
+            d2 = m_vertices[cell_->getVertex(prev)].getCoords() - m_vertices[cell_->getVertex(i)].getCoords();
+            normal += coeff*crossProduct(d1, d2);
+        } //next i
+    }
+    normal = normal/norm2(normal);
+
+    return(normal);
+
+}
 /*!
 	@}
 */

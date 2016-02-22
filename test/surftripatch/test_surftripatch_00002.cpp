@@ -174,7 +174,7 @@ vector<long>                    c_connect(3, Element::NULL_ID);
 }
 
 // ========================================================================== //
-// TEST (MIN/MAX) ANGLE AT VERTEX                                             //
+// STEO #2 TEST (MIN/MAX) ANGLE AT VERTEX                                     //
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
@@ -199,6 +199,23 @@ vector<long>                    c_connect(3, Element::NULL_ID);
     angle = mesh.evalMaxAngleAtVertex(id, vertex_id);
     cout << "     max. angle = " << angle << " on vertex: " << vertex_id << endl;
     if (abs(angle - M_angle) > 1.0e-12) return 2;
+    cout << endl;
+
+}
+
+// ========================================================================== //
+// STEP #3 TEST (MIN/MAX) ANGLE AT VERTEX                                     //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    Cell                *cell_ = &mesh.getCell(id);
+    array<double, 3>     normal, expected{0.0, 0.0, 1.0};
+
+    // Compute face normal -------------------------------------------------- //
+    cout << "   Facet normal for cell " << id << ": " << endl;
+    normal = mesh.evalFacetNormal(id);
+    cout << "     normal: " << normal << endl;
+    if (norm2(normal - expected) > 1.0e-12) return 3;
     cout << endl;
 
 }
