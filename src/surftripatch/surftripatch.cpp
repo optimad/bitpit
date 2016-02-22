@@ -861,10 +861,10 @@ double SurfTriPatch::evalFacetArea(const long &id)
         int                     nvert = cell_->getVertexCount();
         int                     next, prev;
         double                  coeff = 0.25;
-        double                  area = 0;
+        double                  area = 0.0;
         for (int i = 0; i < nvert; ++i) {
-            next = (i+1) % nvert;
-            prev = (nvert + i + 1) % nvert;
+            next = (i + 1) % nvert;
+            prev = (nvert + i - 1) % nvert;
             d1 = m_vertices[cell_->getVertex(next)].getCoords() - m_vertices[cell_->getVertex(i)].getCoords();
             d2 = m_vertices[cell_->getVertex(prev)].getCoords() - m_vertices[cell_->getVertex(i)].getCoords();
             area += coeff*norm2(crossProduct(d1, d2));
