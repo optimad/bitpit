@@ -1,0 +1,11 @@
+build/
+release/
+debug/
+CMakeFiles/
+*.swp
+*~
+.cproject
+.project
+.directory
+.settings
+.DS_Store

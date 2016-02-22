@@ -1,0 +1,253 @@
+# Find@FIND_MODULE_PACKAGE@
+# -----------
+#
+#	The following variables are set if @FIND_MODULE_PACKAGE@ is found. If @FIND_MODULE_PACKAGE@ is
+#	not found, @FIND_MODULE_PACKAGE@_FOUND is set to false:
+#
+#	- @FIND_MODULE_PACKAGE@_FOUND - System has the @FIND_MODULE_PACKAGE@ library
+#	- @FIND_MODULE_PACKAGE@_INCLUDE_DIRS: - The @FIND_MODULE_PACKAGE@ include directories
+#	- @FIND_MODULE_PACKAGE@_LIBRARIES - The libraries needed to use @FIND_MODULE_PACKAGE@
+#	- @FIND_MODULE_PACKAGE@_DEFINITIONS - Compiler switches required for using pablo
+#	- @FIND_MODULE_PACKAGE@_VERSION - Version of the @FIND_MODULE_PACKAGE@ library found
+#
+#	The following cache entries must be set by the user to locate @FIND_MODULE_PACKAGE@:
+#
+#	- STATIC - If set, the the static version of the library will be used
+#	- WITHOUT_MPI - If set, the the serial version of the library will be used
+#	- BITPIT_DIR - The directory containing the BITPIT libraries
+#
+
+include(LibFindMacros)
+include(FindPackageHandleStandardArgs)
+
+# Library name
+set(LIBRARY_NAME "@FIND_MODULE_NAME@")
+
+# Reference header
+set(REFERENCE_HEADER "@FIND_MODULE_REFERENCE_HEADER@")
+
+# Dependencies
+set(DEPENDENCIES "@FIND_MODULE_DEPENDENCIES@")
+
+### DO NOT EDIT AFTER THIS LINE ###
+
+# Package name
+string(TOUPPER ${LIBRARY_NAME} PACKAGE_NAME)
+
+# Find dependencies
+#
+# When libfind_package is called to find the dependencies, current variables
+# like PACKAGE_NAME can be overwritten. It is therefore necessary to keep
+# track of current variable values.
+if (DEFINED DEPENDENCIES)
+	if (NOT "${DEPENDENCIES}" STREQUAL "")
+		set(${PACKAGE_NAME}_PARENT_DEPENDENCIES ${DEPENDENCIES})
+	endif()
+	unset(DEPENDENCIES)
+endif()
+
+if (DEFINED ${PACKAGE_NAME}_PARENT_DEPENDENCIES)
+	list(APPEND PREVIOUS_LIBRARY_NAMES ${LIBRARY_NAME})
+	list(APPEND PREVIOUS_REFERENCE_HEADERS ${REFERENCE_HEADER})
+	list(APPEND PREVIOUS_PACKAGE_NAMES ${PACKAGE_NAME})
+
+	# libfind_package add the requested package to the list
+	# of the dependencies, but we want to add also the
+	# dependencies of the requested packages
+	foreach(${PACKAGE_NAME}_dependency_entry IN LISTS ${PACKAGE_NAME}_PARENT_DEPENDENCIES)
+		string(REPLACE "@" ";" ${PACKAGE_NAME}_dependency_args ${${PACKAGE_NAME}_dependency_entry})
+		list(GET ${PACKAGE_NAME}_dependency_args 0 ${PACKAGE_NAME}_dependency_name)
+
+		libfind_package("${PACKAGE_NAME}" ${${PACKAGE_NAME}_dependency_args})
+		list(GET PREVIOUS_PACKAGE_NAMES -1 PACKAGE_NAME)
+		list(APPEND ${PACKAGE_NAME}_DEPENDENCIES ${${${PACKAGE_NAME}_dependency_name}_DEPENDENCIES})
+
+		unset(${PACKAGE_NAME}_dependency_args)
+		unset(${PACKAGE_NAME}_dependency_name)
+	endforeach()
+	unset(${PACKAGE_NAME}_dependency_entry)
+
+	list(REMOVE_DUPLICATES ${PACKAGE_NAME}_DEPENDENCIES)
+
+	list(GET PREVIOUS_LIBRARY_NAMES -1 LIBRARY_NAME)
+	list(REMOVE_AT PREVIOUS_LIBRARY_NAMES -1)
+
+	list(GET PREVIOUS_REFERENCE_HEADERS -1 REFERENCE_HEADER)
+	list(REMOVE_AT PREVIOUS_REFERENCE_HEADERS -1)
+
+	list(GET PREVIOUS_PACKAGE_NAMES -1 PACKAGE_NAME)
+	list(REMOVE_AT PREVIOUS_PACKAGE_NAMES -1)
+
+	unset(${PACKAGE_NAME}_PARENT_DEPENDENCIES)
+endif ()
+
+# Library prefixes/suffixes
+if (NOT DEFINED STATIC OR STATIC)
+	if (UNIX)
+		set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
+	endif (UNIX)
+
+	if (WIN32)
+		set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib")
+	endif (WIN32)
+else ()
+	if (UNIX)
+		set(CMAKE_FIND_LIBRARY_SUFFIXES ".so")
+	endif (UNIX)
+
+	if (WIN32)
+		set(CMAKE_FIND_LIBRARY_SUFFIXES ".lib")
+	endif (WIN32)
+endif ()
+
+set(SUFFIX_DEBUG "_D")
+set(SUFFIX_MPI "_MPI")
+
+# Directory of the library
+if(NOT ${PACKAGE_NAME}_DIR)
+	set(${PACKAGE_NAME}_DIR "${BITPIT_DIR}/${LIBRARY_NAME}" CACHE PATH "Location of the ${PACKAGE_NAME} package." FORCE)
+endif()
+
+mark_as_advanced(${PACKAGE_NAME}_DIR)
+
+# Check if package information needs to be reloaded
+if (NOT "${${PACKAGE_NAME}_STATIC_INTERNAL}" STREQUAL "${STATIC}")
+	# Dummy string is required to avoid errors when library is not defined
+	get_filename_component(LIBRARY_EXTENSION "/dummy/${${PACKAGE_NAME}_LIBRARY}" EXT)
+	if (NOT ";${CMAKE_FIND_LIBRARY_SUFFIXES};" MATCHES ";${LIBRARY_EXTENSION};")
+		SET (FORCE_RELOAD "FORCE")
+	endif (NOT ";${CMAKE_FIND_LIBRARY_SUFFIXES};" MATCHES ";${LIBRARY_EXTENSION};")
+	set(${PACKAGE_NAME}_STATIC_INTERNAL ${STATIC} CACHE INTERNAL "This is the value of the last time STATIC was set successfully." FORCE)
+endif ()
+
+if (NOT "${${PACKAGE_NAME}_WITHOUT_MPI_INTERNAL}" STREQUAL "${WITHOUT_MPI}")
+	if (WITHOUT_MPI AND ${PACKAGE_NAME}_LIBRARY MATCHES "${SUFFIX_MPI}")
+              SET (FORCE_RELOAD "FORCE")
+        elseif (NOT WITHOUT_MPI AND NOT ${PACKAGE_NAME}_LIBRARY MATCHES "${SUFFIX_MPI}")
+              SET (FORCE_RELOAD "FORCE")
+	endif (WITHOUT_MPI AND ${PACKAGE_NAME}_LIBRARY MATCHES "${SUFFIX_MPI}")
+	set(${PACKAGE_NAME}_WITHOUT_MPI_INTERNAL ${WITHOUT_MPI} CACHE INTERNAL "This is the value of the last time WITHOUT_MPI was set successfully." FORCE)
+endif ()
+
+if (NOT "${${PACKAGE_NAME}_DIR_INTERNAL}" STREQUAL "${${PACKAGE_NAME}_DIR}")
+	SET (FORCE_RELOAD "FORCE")
+endif()
+
+if (FORCE_RELOAD)
+	unset(${PACKAGE_NAME}_INCLUDE_DIR CACHE)
+	unset(${PACKAGE_NAME}_LIBRARY CACHE)
+	unset(${PACKAGE_NAME}_LIBRARY_DEBUG CACHE)
+	unset(${PACKAGE_NAME}_LIBRARY_RELEASE CACHE)
+endif (FORCE_RELOAD)
+
+# Headers
+if (DEFINED REFERENCE_HEADER AND NOT ${REFERENCE_HEADER} STREQUAL "")
+	find_path(${PACKAGE_NAME}_INCLUDE_DIR ${REFERENCE_HEADER}
+		HINTS "${${PACKAGE_NAME}_DIR}/include"
+			"${${PACKAGE_NAME}_DIR}/include/${LIBRARY_NAME}"
+                  "${${PACKAGE_NAME}_DIR}/../src"
+                  "${${PACKAGE_NAME}_DIR}/../src_${LIBRARY_NAME}"
+                  "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/include"
+                  "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/include/${LIBRARY_NAME}"
+                  "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/../src"
+                  "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/../src_${LIBRARY_NAME}")
+
+	mark_as_advanced(${PACKAGE_NAME}_INCLUDE_DIR)
+endif ()
+
+# Version
+if(${PACKAGE_NAME}_INCLUDE_DIR)
+	set(VERSION_HEADER_FILENAME "${LIBRARY_NAME}_version.hpp")
+	string(TOUPPER "${LIBRARY_NAME}_VERSION" VERSION_DEFINE_NAME)
+	if (EXISTS "${${PACKAGE_NAME}_INCLUDE_DIR}/${VERSION_HEADER_FILENAME}")
+		libfind_version_header(${PACKAGE_NAME} "${VERSION_HEADER_FILENAME}" "${VERSION_DEFINE_NAME}")
+	endif()
+endif()
+
+# Library
+set(LIBRARY_FILENAME_RELEASE ${LIBRARY_NAME})
+if (NOT WITHOUT_MPI)
+	set(LIBRARY_FILENAME_RELEASE "${LIBRARY_FILENAME_RELEASE}${SUFFIX_MPI}")
+endif (NOT WITHOUT_MPI)
+set(LIBRARY_FILENAME_DEBUG "${LIBRARY_FILENAME_RELEASE}${SUFFIX_DEBUG}")
+
+if (UNIX)
+	set(LIBRARY_FILENAME_FALLBACK_RELEASE ${LIBRARY_NAME})
+	set(LIBRARY_FILENAME_FALLBACK_DEBUG ${LIBRARY_FILENAME_FALLBACK_RELEASE})
+endif()
+
+find_library(${PACKAGE_NAME}_LIBRARY_RELEASE NAMES "${LIBRARY_FILENAME_RELEASE}" "${LIBRARY_FILENAME_FALLBACK_RELEASE}"
+        HINTS "${${PACKAGE_NAME}_DIR}/lib"
+              "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/lib"
+              "${${PACKAGE_NAME}_DIR}/build/lib"
+              "${${PACKAGE_NAME}_DIR}/build/src"
+              "${${PACKAGE_NAME}_DIR}/build/src_${LIBRARY_NAME}"
+              "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/build/lib"
+              "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/build/src"
+              "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/build/src_${LIBRARY_NAME}")
+
+find_library(${PACKAGE_NAME}_LIBRARY_DEBUG NAMES "${LIBRARY_FILENAME_DEBUG}" "${LIBRARY_FILENAME_FALLBACK_DEBUG}"
+        HINTS "${${PACKAGE_NAME}_DIR}/lib"
+              "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/lib"
+              "${${PACKAGE_NAME}_DIR}/debug/lib"
+              "${${PACKAGE_NAME}_DIR}/debug/src"
+              "${${PACKAGE_NAME}_DIR}/debug/src_${LIBRARY_NAME}"
+              "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/debug/lib"
+              "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/debug/src"
+              "${${PACKAGE_NAME}_DIR}/${LIBRARY_NAME}/debug/src_${LIBRARY_NAME}")
+
+mark_as_advanced(${PACKAGE_NAME}_LIBRARY_RELEASE)
+mark_as_advanced(${PACKAGE_NAME}_LIBRARY_DEBUG)
+
+unset(LIBRARY_FILENAME_RELEASE)
+unset(LIBRARY_FILENAME_DEBUG)
+unset(LIBRARY_FILENAME_FALLBACK_RELEASE)
+unset(LIBRARY_FILENAME_FALLBACK_DEBUG)
+
+# Choose good values for @FIND_MODULE_PACKAGE@_LIBRARY, @FIND_MODULE_PACKAGE@_LIBRARIES,
+# @FIND_MODULE_PACKAGE@_LIBRARY_DEBUG, and @FIND_MODULE_PACKAGE@_LIBRARY_RELEASE depending on what
+# has been found and set.  If only @FIND_MODULE_PACKAGE@_LIBRARY_RELEASE is defined,
+# @FIND_MODULE_PACKAGE@_LIBRARY will be set to the release value, and
+# @FIND_MODULE_PACKAGE@_LIBRARY_DEBUG will be set to @FIND_MODULE_PACKAGE@_LIBRARY_DEBUG-NOTFOUND.
+# If only @FIND_MODULE_PACKAGE@_LIBRARY_DEBUG is defined, then @FIND_MODULE_PACKAGE@_LIBRARY will
+# take the debug value, and @FIND_MODULE_PACKAGE@_LIBRARY_RELEASE will be set to
+# @FIND_MODULE_PACKAGE@_LIBRARY_RELEASE-NOTFOUND.
+#
+# If the generator supports configuration types, then @FIND_MODULE_PACKAGE@_LIBRARY
+# and @FIND_MODULE_PACKAGE@_LIBRARIES will be set with debug and optimized flags
+# specifying the library to be used for the given configuration.  If no
+# build type has been set or the generator in use does not support
+# configuration types, then @FIND_MODULE_PACKAGE@_LIBRARY and @FIND_MODULE_PACKAGE@_LIBRARIES will
+# take only the release value, or the debug value if the release one is
+# not set.
+if (${PACKAGE_NAME}_LIBRARY_DEBUG AND ${PACKAGE_NAME}_LIBRARY_RELEASE AND
+       NOT ${PACKAGE_NAME}_LIBRARY_DEBUG STREQUAL ${PACKAGE_NAME}_LIBRARY_RELEASE AND
+           (CMAKE_CONFIGURATION_TYPES OR CMAKE_BUILD_TYPE))
+	set( ${PACKAGE_NAME}_LIBRARY "" )
+	foreach( _libname IN LISTS ${PACKAGE_NAME}_LIBRARY_RELEASE )
+		list( APPEND ${PACKAGE_NAME}_LIBRARY optimized "${_libname}" )
+	endforeach()
+	foreach( _libname IN LISTS ${PACKAGE_NAME}_LIBRARY_DEBUG )
+		list( APPEND ${PACKAGE_NAME}_LIBRARY debug "${_libname}" )
+	endforeach()
+elseif (${PACKAGE_NAME}_LIBRARY_RELEASE)
+	set (${PACKAGE_NAME}_LIBRARY ${${PACKAGE_NAME}_LIBRARY_RELEASE})
+elseif (${PACKAGE_NAME}_LIBRARY_DEBUG)
+	set (${PACKAGE_NAME}_LIBRARY ${${PACKAGE_NAME}_LIBRARY_DEBUG})
+else ()
+	set( ${PACKAGE_NAME}_LIBRARY "${PACKAGE_NAME}_LIBRARY-NOTFOUND")
+endif ()
+
+# Let libfind_process initialize the appropriate variables
+libfind_process(${PACKAGE_NAME})
+
+# Update "last time" variables
+set(${PACKAGE_NAME}_DIR_INTERNAL ${${PACKAGE_NAME}_DIR} CACHE INTERNAL "This is the value of the last time ${PACKAGE_NAME}_DIR was set successfully." FORCE)
+
+# Cleanup
+unset(SUFFIX_DEBUG)
+unset(SUFFIX_MPI)
+
+unset(LIBRARY_NAME)
+unset(REFERENCE_HEADER)
+unset(DEPENDENCIES)
