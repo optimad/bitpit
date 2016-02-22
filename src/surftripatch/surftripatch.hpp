@@ -65,6 +65,7 @@ public:
         array<double, 3> evalFacetNormal(const long&);
         double evalAspectRatio(const long&);
         double evalFacetArea(const long&);
+        vector<double> computeARHistogram(vector<double>&, int n_int = 8);
 
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);

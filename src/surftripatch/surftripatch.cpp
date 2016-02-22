@@ -886,6 +886,62 @@ double SurfTriPatch::evalFacetArea(const long &id)
 }
 
 /*!
+ * TODO:
+*/
+vector<double> SurfTriPatch::computeARHistogram(vector<double> &bins, int n_intervals)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    double                      m_, M_;
+    vector<double>              hist;
+
+    // ====================================================================== //
+    // BUILD BINS FOR HISTOGRAM                                               //
+    // ====================================================================== //
+
+    // Resize bin data structure
+    if (bins.size() < 2) {
+        double          db;
+        bins.resize(n_intervals+1);
+        m_ = 1.0;
+        M_ = 3.0;
+        db  = (M_ - m_)/double(n_intervals);
+        for (int i = 0; i < n_intervals+1; ++i) {
+            bins[i] = m_ + db * double(i);
+        } //next i
+    }
+    else {
+        n_intervals = bins.size()-1;
+    }
+
+    // Resize histogram data structure
+    hist.resize(n_intervals+2, 0.0);
+cout << "SurfTriPatch::computeARHistogram(), done with bins construction: " << bins << endl;
+    // ====================================================================== //
+    // COMPUTE HISTOGRAM                                                      //
+    // ====================================================================== //
+
+    // Scope variables
+    long                id;
+    int                 i;
+    double              ar;
+    for (auto &cell_ : m_cells) {
+        id = cell_.get_id();
+        ar = evalAspectRatio(id);
+        i = 0;
+        while ((bins[i] - ar < 1.0e-5) && (i < n_intervals+1)) ++i;
+        ++hist[i];
+    } //next cell_
+
+    // Normalize histogram
+    hist = 100.0 * hist/double(m_nInternals + m_nGhosts);
+
+    return(hist);
+}
+/*!
 	@}
 */
 
