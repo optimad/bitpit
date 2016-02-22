@@ -327,6 +327,40 @@ SurfTriPatch                    mesh(0);
 }
 
 // ========================================================================== //
+// STEP #5 TEST FACET AREA COMPUTATION                                        //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    double                      area;
+    vector<double>              expected{0.5, 1.0};
+    int                         i;
+
+    // Output message ------------------------------------------------------- //
+    cout << "** Testing routines for facet area computation" << endl;
+
+    // Compute face normal -------------------------------------------------- //
+    SurfTriPatch::CellIterator  cell_, end_ = mesh.cellEnd();
+    i = 0;
+    for (cell_ = mesh.cellBegin(); cell_ != end_; ++cell_) {
+
+        // Cell data
+        id = cell_->get_id();
+
+        // Compute face normal
+        cout << "   Facet area for cell " << id << ": " << endl;
+        area = mesh.evalFacetArea(id);
+        cout << "     area: " << area << endl;
+        if (abs(area - expected[i]) > 1.0e-12) return 4;
+
+        // Update counters
+        ++i;
+
+    } //next cell_
+    cout << endl;
+
+}
+
+// ========================================================================== //
 // OUTPUT MESSAGE                                                             //
 // ========================================================================== //
 {
