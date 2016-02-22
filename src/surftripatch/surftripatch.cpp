@@ -482,15 +482,15 @@ void SurfTriPatch::updateAdjacencies(const std::vector<long> &cell_ids)
 }
 
 /*!
-    Evaluate the length of the edge with specified local index
-    for e cell with specified ID.
-    If the cell is of type ElementInfo::SEGMENT or ElementInfo::POINT
-    returns 0.0.
-
-    \param[in] id cell id
-    \param[in] edge_id edge local index
-
-    \result minimal edge length
+ *  Evaluate the length of the edge with specified local index
+ *  for e cell with specified ID.
+ *  If the cell is of type ElementInfo::SEGMENT or ElementInfo::POINT
+ *  returns 0.0.
+ * 
+ *  \param[in] id cell id
+ *  \param[in] edge_id edge local index
+ * 
+ *  \result minimal edge length
 */
 double SurfTriPatch::evalEdgeLength(const long &id, const int &edge_id)
 {
@@ -522,13 +522,13 @@ double SurfTriPatch::evalEdgeLength(const long &id, const int &edge_id)
 }
 
 /*!
-    Evaluate the minimal edge length for e cell with specified ID.
-    If the cell is of type ElementInfo::SEGMENT or ElementInfo::POINT
-    returns 0.0.
-
-    \param[in] id cell id
-
-    \result minimal edge length
+ *  Evaluate the minimal edge length for e cell with specified ID.
+ *  If the cell is of type ElementInfo::SEGMENT or ElementInfo::POINT
+ *  returns 0.0.
+ * 
+ *  \param[in] id cell id
+ * 
+ *  \result minimal edge length
 */
 double SurfTriPatch::evalMinEdgeLength(const long &id)
 {
@@ -551,26 +551,22 @@ double SurfTriPatch::evalMinEdgeLength(const long &id)
      || (cell_->getType() == ElementInfo::UNDEFINED)) return 0.0;
 
     double edge_length = std::numeric_limits<double>::max();
-    vector<int> face_loc_connect(2, Vertex::NULL_ID);
     n_faces = cell_->getFaceCount();
     for (i = 0; i < n_faces; ++i) {
-        face_loc_connect = cell_->getFaceLocalConnect(i);
-        face_loc_connect[0] = cell_->getVertex(face_loc_connect[0]);
-        face_loc_connect[1] = cell_->getVertex(face_loc_connect[1]);
-        edge_length = min( edge_length, norm2(m_vertices[face_loc_connect[0]].getCoords() - m_vertices[face_loc_connect[1]].getCoords()) );
+        edge_length = min( edge_length, evalEdgeLength(id, i) );
     } //next i
 
     return(edge_length);
 }
 
 /*!
-    Evaluate the maximal edge length for e cell with specified ID.
-    If the cell is of type ElementInfo::SEGMENT or ElementInfo::POINT
-    returns 0.0.
-
-    \param[in] id cell id
-
-    \result maximal edge length
+ *  Evaluate the maximal edge length for e cell with specified ID.
+ *  If the cell is of type ElementInfo::SEGMENT or ElementInfo::POINT
+ *  returns 0.0.
+ * 
+ *  \param[in] id cell id
+ * 
+ *  \result maximal edge length
 */
 double SurfTriPatch::evalMaxEdgeLength(const long &id)
 {
@@ -593,16 +589,130 @@ double SurfTriPatch::evalMaxEdgeLength(const long &id)
      || (cell_->getType() == ElementInfo::UNDEFINED)) return 0.0;
 
     double edge_length = std::numeric_limits<double>::min();
-    vector<int> face_loc_connect(2, Vertex::NULL_ID);
     n_faces = cell_->getFaceCount();
     for (i = 0; i < n_faces; ++i) {
-        face_loc_connect = cell_->getFaceLocalConnect(i);
-        face_loc_connect[0] = cell_->getVertex(face_loc_connect[0]);
-        face_loc_connect[1] = cell_->getVertex(face_loc_connect[1]);
-        edge_length = max( edge_length, norm2(m_vertices[face_loc_connect[0]].getCoords() - m_vertices[face_loc_connect[1]].getCoords()) );
+        edge_length = max( edge_length, evalEdgeLength(id, i) );
     } //next i
 
     return(edge_length);
+}
+
+/*!
+ * Evaluate angle at cell vertex.
+ * 
+ * \param[in] id cell global ID
+ * \param[in] vertex_id vertex local ID
+*/
+double SurfTriPatch::evalAngleAtVertex(const long &id, const int &vertex_id)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    Cell                        *cell_ = &m_cells[id];
+
+    // Counters
+
+    // ====================================================================== //
+    // EVALUATE ANGLE AT SPECIFIED VERTEX                                     //
+    // ====================================================================== //
+    if ((cell_->getType() == ElementInfo::UNDEFINED)
+     || (cell_->getType() == ElementInfo::VERTEX)
+     || (cell_->getType() == ElementInfo::LINE)) return 0.0;
+
+    int                          n_vert = cell_->getVertexCount();
+    int                          prev = (n_vert + vertex_id - 1) % n_vert;
+    int                          next = (vertex_id + 1) % n_vert;
+    double                       angle;
+    array<double, 3>             d1, d2;
+    d1 = getVertex(next).getCoords() - getVertex(vertex_id).getCoords();
+    d2 = getVertex(prev).getCoords() - getVertex(vertex_id).getCoords();
+    d1 = d1/norm2(d1);
+    d2 = d2/norm2(d2);
+    angle = acos( min(1.0, max(-1.0, dotProduct(d1, d2) ) ) );
+
+    return(angle);
+}
+
+/*!
+ * Evaluate the minimal angle at vertex for a cell with specified id.
+ *
+ * \param[in] id cell id
+ * \param[in,out] vertex_id on output stores the local index of vertex with minimal angle
+ * 
+ * \result minimal angle at vertex
+*/
+double SurfTriPatch::evalMinAngleAtVertex(const long&id, int &vertex_id)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    Cell               *cell_ = &m_cells[id];
+
+    // Counters
+    // none
+
+    // ====================================================================== //
+    // COMPUTE MINIMAL ANGLE                                                  //
+    // ====================================================================== //
+    if ((cell_->getType() == ElementInfo::UNDEFINED)
+     || (cell_->getType() == ElementInfo::VERTEX)
+     || (cell_->getType() == ElementInfo::LINE)) return 0.0;
+
+    double angle = std::numeric_limits<double>::max(), tmp;
+    int n_vert = cell_->getVertexCount();
+    for (int i = 0; i < n_vert; ++i) {
+        tmp = evalAngleAtVertex(id, i);
+        if (tmp < angle) {
+            angle = tmp;
+            vertex_id = i;
+        }
+    } //next i
+
+    return(angle);
+}
+
+/*!
+ * Evaluate the maximal angle at vertex for a cell with specified id.
+ *
+ * \param[in] id cell id
+ * \param[in,out] vertex_id on output stores the local index of vertex with minimal angle
+ * 
+ * \result maximal angle at vertex
+*/
+double SurfTriPatch::evalMaxAngleAtVertex(const long&id, int &vertex_id)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    Cell               *cell_ = &m_cells[id];
+
+    // Counters
+    // none
+
+    // ====================================================================== //
+    // COMPUTE MINIMAL ANGLE                                                  //
+    // ====================================================================== //
+    if ((cell_->getType() == ElementInfo::UNDEFINED)
+     || (cell_->getType() == ElementInfo::VERTEX)
+     || (cell_->getType() == ElementInfo::LINE)) return 0.0;
+
+    double angle = std::numeric_limits<double>::min(), tmp;
+    int n_vert = cell_->getVertexCount();
+    for (int i = 0; i < n_vert; ++i) {
+        tmp = evalAngleAtVertex(id, i);
+        if (tmp > angle) {
+            angle = tmp;
+            vertex_id = i;
+        }
+    } //next i
+
+    return(angle);
 }
 
 /*!

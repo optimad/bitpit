@@ -59,6 +59,9 @@ public:
         double evalEdgeLength(const long&, const int&);
         double evalMinEdgeLength(const long &);
         double evalMaxEdgeLength(const long &);
+        double evalAngleAtVertex(const long&, const int&);
+        double evalMinAngleAtVertex(const long&, int &);
+        double evalMaxAngleAtVertex(const long&, int &);
 
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
