@@ -138,6 +138,78 @@ return(s); };
 // ================================================================================== //
 return(ltrim(rtrim(s))); };
 
+// ---------------------------------------------------------------------------------- //
+/*!
+    String left-filler. Create a string composed of the input string left-filled
+    with a specified character. E.g.
+    given the input string s = "test", lfill(10, s, '_') will return
+    "______test".
+    
+    \param[in] nchar length of the final string
+    \param[in] s input string
+    \param[in] c char used as filler
+    
+*/
+ inline std::string lfill(
+     const int &nchar,
+     std::string &s,
+     char         c
+) {
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+
+// Local variables
+std::stringstream               ss;
+
+// Counters
+// none
+
+// ================================================================================== //
+// BUILD THE OUTPUT STRING                                                            //
+// ================================================================================== //
+ss << std::string(nchar - s.length(), c) << s;
+
+return(ss.str());
+}
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    String right-filler. Create a string composed of the input string right-filled
+    with a specified character. E.g.
+    given the input string s = "test", rfill(10, s, '_') will return
+    "test______".
+    
+    \param[in] nchar length of the final string
+    \param[in] s input string
+    \param[in] c char used as filler
+    
+*/
+ inline std::string rfill(
+     const int &nchar,
+     std::string &s,
+     char         c
+) {
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+
+// Local variables
+std::stringstream               ss;
+
+// Counters
+// none
+
+// ================================================================================== //
+// BUILD THE OUTPUT STRING                                                            //
+// ================================================================================== //
+ss << s << std::string(nchar - s.length(), c);
+
+return(ss.str());
+}
+
 // Padding operators ================================================================ //
 
 // ---------------------------------------------------------------------------------- //

@@ -79,6 +79,16 @@ inline std::string &trim(                                                      /
         );
 
 // Padding operators ---------------------------------------------------------------- //
+inline std::string lfill(                                                     // Left filler for input string
+        const int                               &,                            // (input) Final string length
+        std::string                             &,                            // (input) input string
+        char                                                                  // (input) char used as filler
+);
+inline std::string rfill(                                                     // Right filler for input string
+        const int                               &,                            // (input) Final string length
+        std::string                             &,                            // (input) input string
+        char                                                                  // (input) char used as filler
+);
 inline std::string zeroPadNumber(                                              // PERFORMS CONVERSION OF INTEGER INTO STRING
         int                                      ,                                    // (input) number of char in std::string
         int                                                                           // (input) integer to be padded
