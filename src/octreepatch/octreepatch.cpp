@@ -398,8 +398,8 @@ const std::vector<Adaption::Info> OctreePatch::_update(bool trackAdaption)
 		// Renumbered cells are not tracked, because the re-numbering
 		// only happens inside OctreePatch.
 		if (adaptionType == Adaption::TYPE_RENUMBERING) {
-			uint32_t previousTreeId = mapper_octantMap.front();
-			long cellId = m_octantToCell.at(previousTreeId);
+			OctantInfo previousOctantInfo(mapper_octantMap.front(), !mapper_ghostFlag.front());
+			long cellId = getOctantId(previousOctantInfo);
 
 			renumberedOctants.insert({{treeId, cellId}});
 
@@ -434,15 +434,13 @@ const std::vector<Adaption::Info> OctreePatch::_update(bool trackAdaption)
 
 		// Previous cell ids that will be removed
 		if (adaptionType != Adaption::TYPE_CREATION) {
-			auto mapperIter = mapper_octantMap.cbegin();
-			while (mapperIter != mapper_octantMap.cend()) {
-				const uint32_t &previousTreeId = *mapperIter;
+			int nPreviousTreeIds = mapper_octantMap.size();
+			for (int k = 0; k < nPreviousTreeIds; ++k) {
+				OctantInfo previousOctantInfo(mapper_octantMap[k], !mapper_ghostFlag[k]);
 
 				removedCells.emplace_back();
 				long &cellId = removedCells.back();
-				cellId = m_octantToCell.at(previousTreeId);
-
-				mapperIter++;
+				cellId = getOctantId(previousOctantInfo);
 			}
 		}
 
