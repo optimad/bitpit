@@ -187,6 +187,7 @@ endif ()
 # List of all avilable modules
 #------------------------------------------------------------------------------------#
 set(BITPIT_MODULE_LIST "")
+list(APPEND BITPIT_MODULE_LIST "common")
 list(APPEND BITPIT_MODULE_LIST "operators")
 list(APPEND BITPIT_MODULE_LIST "containers")
 list(APPEND BITPIT_MODULE_LIST "IO")
@@ -203,16 +204,17 @@ list(APPEND BITPIT_MODULE_LIST "ucartmesh")
 #------------------------------------------------------------------------------------#
 # Modules dependecies
 #------------------------------------------------------------------------------------#
-set(CONTAINERS_DEPS "operators")
-set(IO_DEPS "operators")
-set(LA_DEPS "operators")
-set(SA_DEPS "operators")
-set(UCARTMESH_DEPS "IO")
-set(PATCH_DEPS "operators;containers;IO;LA;SA")
-set(CARTESIANPATCH_DEPS "patch")
-set(OCTREEPATCH_DEPS "PABLO;patch")
-set(SURFTRIPATCH_DEPS "patch")
-set(VOLTRIPATCH_DEPS "patch")
+set(OPERATORS_DEPS "common")
+set(CONTAINERS_DEPS "common;operators")
+set(IO_DEPS "common;operators")
+set(LA_DEPS "common;operators")
+set(SA_DEPS "common;operators")
+set(UCARTMESH_DEPS "common;IO")
+set(PATCH_DEPS "common;operators;containers;IO;LA;SA")
+set(CARTESIANPATCH_DEPS "common;patch")
+set(OCTREEPATCH_DEPS "common;PABLO;patch")
+set(SURFTRIPATCH_DEPS "common;patch")
+set(VOLTRIPATCH_DEPS "common;patch")
 
 #------------------------------------------------------------------------------------#
 # Check of the dependencies
@@ -242,10 +244,14 @@ while (${CHECK_DEPS} EQUAL 1)
 endwhile()
 unset(CHECK_DEPS)
 
-# Module 'operators' module has to be always build
-getModuleEnableName("operators" BASE_ENABLE_VARIABLE)
-unset(${BASE_ENABLE_VARIABLE} CACHE)
-set(${BASE_ENABLE_VARIABLE} 1 CACHE INTERNAL "Request building operators module" FORCE)
+# The modules 'common' and 'operators' has to be always built
+getModuleEnableName("common" COMMON_MODULE_ENABLED)
+unset(${COMMON_MODULE_ENABLED} CACHE)
+set(${COMMON_MODULE_ENABLED} 1 CACHE INTERNAL "Request building common module" FORCE)
+
+getModuleEnableName("operators" OPERATORS_MODULE_ENABLED)
+unset(${OPERATORS_MODULE_ENABLED} CACHE)
+set(${OPERATORS_MODULE_ENABLED} 1 CACHE INTERNAL "Request building operators module" FORCE)
 
 #------------------------------------------------------------------------------------#
 # Subdirectories
