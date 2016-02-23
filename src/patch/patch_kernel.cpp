@@ -123,14 +123,14 @@ void IndexGenerator::reset()
 	\brief The PatchKernel class provides an interface for defining patches.
 
 	PatchKernel is the base class for defining patches.
-
-	\param id is the id that will be assigned to the patch
-	\param dimension is the dimension of the patch
-	\param expert if true, the expert mode will be enabled
 */
 
 /*!
 	Creates a new patch.
+
+	\param id is the id that will be assigned to the patch
+	\param dimension is the dimension of the patch
+	\param expert if true, the expert mode will be enabled
 */
 PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
 	: m_nVertices(0), m_nInternals(0), m_nGhosts(0), m_nInterfaces(0),
