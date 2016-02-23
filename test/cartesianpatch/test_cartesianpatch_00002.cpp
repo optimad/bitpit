@@ -70,7 +70,7 @@ int main(int argc, char *argv[]) {
 
 	std::cout << "  >> 2D Cartesian patch" << "\n";
 
-	Patch *patch_2D = new CartesianPatch(0, 2, origin, length, dh);
+	CartesianPatch *patch_2D = new CartesianPatch(0, 2, origin, length, dh);
 	patch_2D->setName("cartesian_uniform_patch_2D");
 	patch_2D->update();
 
@@ -105,7 +105,7 @@ int main(int argc, char *argv[]) {
 
 	std::cout << "  >> 3D Cartesian patch" << "\n";
 
-	Patch *patch_3D = new CartesianPatch(0, 3, origin, length, dh);
+	CartesianPatch *patch_3D = new CartesianPatch(0, 3, origin, length, dh);
 	patch_3D->setName("cartesian_uniform_patch_3D");
 	patch_3D->update();
 
