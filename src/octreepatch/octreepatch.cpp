@@ -432,7 +432,7 @@ const std::vector<Adaption::Info> OctreePatch::_update(bool trackAdaption)
 			newOctants.emplace_back(currentTreeId, true);
 		}
 
-		// Previous cell and interfaces ids that will be removed
+		// Previous cell ids that will be removed
 		if (adaptionType != Adaption::TYPE_CREATION) {
 			auto mapperIter = mapper_octantMap.cbegin();
 			while (mapperIter != mapper_octantMap.cend()) {
