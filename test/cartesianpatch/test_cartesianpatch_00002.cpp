@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
 	MPI::Init(argc,argv);
 #endif
 
-	std::cout << "Testing Cartesian patch" << "\n";
+	log::cout() << "Testing Cartesian patch" << "\n";
 
 	std::array<double, 3> origin = {0., 0., 0.};
 	double length = 20;
@@ -68,73 +68,73 @@ int main(int argc, char *argv[]) {
 		pointList.push_back(point);
 	}
 
-	std::cout << "  >> 2D Cartesian patch" << "\n";
+	log::cout() << "  >> 2D Cartesian patch" << "\n";
 
 	CartesianPatch *patch_2D = new CartesianPatch(0, 2, origin, length, dh);
 	patch_2D->setName("cartesian_uniform_patch_2D");
 	patch_2D->update();
 
-	std::cout << "\n  >> 2D location test" << std::endl;
-	std::cout << std::endl;
+	log::cout() << "\n  >> 2D location test" << std::endl;
+	log::cout() << std::endl;
 
 	for (auto testPoint : pointList) {
-		std::cout << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
+		log::cout() << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
 		if (patch_2D->isPointInside(testPoint)) {
-			std::cout << " is inside the patch" << std::endl;
+			log::cout() << " is inside the patch" << std::endl;
 		} else {
-			std::cout << " is outside the patch" << std::endl;
+			log::cout() << " is outside the patch" << std::endl;
 		}
 
-		std::cout << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
-		std::cout << " is inside the element " << patch_2D->locatePoint(testPoint) << std::endl;
+		log::cout() << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
+		log::cout() << " is inside the element " << patch_2D->locatePoint(testPoint) << std::endl;
 
-		std::cout << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
+		log::cout() << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
 		if (patch_2D->isPointInside(testPoint[0], testPoint[1], testPoint[2])) {
-			std::cout << " is inside the patch" << std::endl;
+			log::cout() << " is inside the patch" << std::endl;
 		} else {
-			std::cout << " is outside the patch" << std::endl;
+			log::cout() << " is outside the patch" << std::endl;
 		}
 
-		std::cout << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
-		std::cout << " is inside the element " << patch_2D->locatePoint(testPoint[0], testPoint[1], testPoint[2]) << std::endl;
+		log::cout() << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
+		log::cout() << " is inside the element " << patch_2D->locatePoint(testPoint[0], testPoint[1], testPoint[2]) << std::endl;
 	}
 
-	std::cout << std::endl;
+	log::cout() << std::endl;
 
 	delete patch_2D;
 
-	std::cout << "  >> 3D Cartesian patch" << "\n";
+	log::cout() << "  >> 3D Cartesian patch" << "\n";
 
 	CartesianPatch *patch_3D = new CartesianPatch(0, 3, origin, length, dh);
 	patch_3D->setName("cartesian_uniform_patch_3D");
 	patch_3D->update();
 
-	std::cout << "\n  >> 3D location test" << std::endl;
-	std::cout << std::endl;
+	log::cout() << "\n  >> 3D location test" << std::endl;
+	log::cout() << std::endl;
 
 	for (auto testPoint : pointList) {
-		std::cout << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
+		log::cout() << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
 		if (patch_3D->isPointInside(testPoint)) {
-			std::cout << " is inside the patch" << std::endl;
+			log::cout() << " is inside the patch" << std::endl;
 		} else {
-			std::cout << " is outside the patch" << std::endl;
+			log::cout() << " is outside the patch" << std::endl;
 		}
 
-		std::cout << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
-		std::cout << " is inside the element " << patch_3D->locatePoint(testPoint) << std::endl;
+		log::cout() << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
+		log::cout() << " is inside the element " << patch_3D->locatePoint(testPoint) << std::endl;
 
-		std::cout << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
+		log::cout() << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
 		if (patch_3D->isPointInside(testPoint[0], testPoint[1], testPoint[2])) {
-			std::cout << " is inside the patch" << std::endl;
+			log::cout() << " is inside the patch" << std::endl;
 		} else {
-			std::cout << " is outside the patch" << std::endl;
+			log::cout() << " is outside the patch" << std::endl;
 		}
 
-		std::cout << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
-		std::cout << " is inside the element " << patch_3D->locatePoint(testPoint[0], testPoint[1], testPoint[2]) << std::endl;
+		log::cout() << "Point [" << testPoint[0] << ", " << testPoint[1] << ", " << testPoint[2] << "] ";
+		log::cout() << " is inside the element " << patch_3D->locatePoint(testPoint[0], testPoint[1], testPoint[2]) << std::endl;
 	}
 
-	std::cout << std::endl;
+	log::cout() << std::endl;
 
 	delete patch_3D;
 

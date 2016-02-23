@@ -148,7 +148,7 @@ void CartesianPatch::initialize(const std::array<double, 3> &origin,
                                 const std::array<double, 3> &lengths,
                                 const std::array<int, 3> &nCells)
 {
-	std::cout << ">> Initializing cartesian patch\n";
+	log::cout() << ">> Initializing cartesian patch\n";
 
 	// Info sulle celle
 	for (int n = 0; n < getDimension(); ++n) {
@@ -163,7 +163,7 @@ void CartesianPatch::initialize(const std::array<double, 3> &origin,
 			m_cellCenters[n][i] = m_minCoords[n] + (0.5 + i) * m_cellSpacings[n];
 		}
 
-		std::cout << "  - Cell count along direction " << n << " : " << m_nCells1D[n] << "\n";
+		log::cout() << "  - Cell count along direction " << n << " : " << m_nCells1D[n] << "\n";
 
 		// Initialize vertices
 		m_nVertices1D[n] = m_nCells1D[n] + 1;
@@ -322,7 +322,7 @@ const std::vector<Adaption::Info> CartesianPatch::_update(bool trackAdaption)
 		return std::vector<Adaption::Info>();
 	}
 
-	std::cout << ">> Updating cartesian mesh\n";
+	log::cout() << ">> Updating cartesian mesh\n";
 
 	// Enable advanced editing
 	setExpert(true);
@@ -375,14 +375,14 @@ const std::vector<Adaption::Info> CartesianPatch::_update(bool trackAdaption)
 */
 void CartesianPatch::addVertices()
 {
-	std::cout << "  >> Creating vertices\n";
+	log::cout() << "  >> Creating vertices\n";
 
 	long nTotalVertices = 1;
 	for (int n = 0; n < getDimension(); n++) {
 		nTotalVertices *= m_nVertices1D[n];
 	}
 
-	std::cout << "    - Vertex count: " << nTotalVertices << "\n";
+	log::cout() << "    - Vertex count: " << nTotalVertices << "\n";
 
 	m_vertices.reserve(nTotalVertices);
 	for (int k = 0; (isThreeDimensional()) ? (k < m_nVertices1D[Vertex::COORD_Z]) : (k <= 0); k++) {
@@ -413,7 +413,7 @@ void CartesianPatch::addVertices()
 */
 void CartesianPatch::addCells()
 {
-	std::cout << "  >> Creating cells\n";
+	log::cout() << "  >> Creating cells\n";
 
 	// Info on the cells
 	ElementInfo::Type cellType;
@@ -429,7 +429,7 @@ void CartesianPatch::addCells()
 		nTotalCells *= m_nCells1D[n];
 	}
 
-	std::cout << "    - Cell count: " << nTotalCells << "\n";
+	log::cout() << "    - Cell count: " << nTotalCells << "\n";
 
 	m_cells.reserve(nTotalCells);
 
@@ -462,7 +462,7 @@ void CartesianPatch::addCells()
 */
 void CartesianPatch::addInterfaces()
 {
-	std::cout << "  >> Creating interfaces\n";
+	log::cout() << "  >> Creating interfaces\n";
 
 	// Count the interfaces
 	long nTotalInterfaces = 0;
@@ -476,7 +476,7 @@ void CartesianPatch::addInterfaces()
 		nTotalInterfaces += nDirectionInterfaces;
 	}
 
-	std::cout << "    - Interface count: " << nTotalInterfaces << "\n";
+	log::cout() << "    - Interface count: " << nTotalInterfaces << "\n";
 
 	// Create the interfaces
 	m_interfaces.reserve(nTotalInterfaces);
@@ -508,7 +508,7 @@ std::array<int, 3> CartesianPatch::getInterfaceCountDirection(const int &directi
 */
 void CartesianPatch::addInterfacesDirection(const int &direction)
 {
-	std::cout << "  >> Creating interfaces normal to direction " << direction << "\n";
+	log::cout() << "  >> Creating interfaces normal to direction " << direction << "\n";
 
 	// Info on the interfaces
 	ElementInfo::Type interfaceType;
