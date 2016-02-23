@@ -22,18 +22,47 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MODULE_PATCH_HPP__
-#define __BITPIT_MODULE_PATCH_HPP__
+#include "surface_kernel.hpp"
+
+namespace bitpit {
+
 
 /*!
- * @defgroup PatchKernel Patch kernel
- */
+	\ingroup PatchKernel
+	@{
+*/
 
-#include "bitpit_version.hpp"
+/*!
+	\class SurfaceKernel
 
-#include "patch_kernel.hpp"
-#include "surface_kernel.hpp"
-#include "volume_kernel.hpp"
-#include "adaption.hpp"
+	\brief The SurfaceKernel class provides an interface for defining
+	surface patches.
 
-#endif
+	SurfaceKernel is the base class for defining surface patches.
+*/
+
+/*!
+	Creates a new patch.
+
+	\param id is the id that will be assigned to the patch
+	\param dimension is the dimension of the patch
+	\param expert if true, the expert mode will be enabled
+*/
+SurfaceKernel::SurfaceKernel(const int &id, const int &dimension, bool expert)
+	: PatchKernel(id, dimension, expert)
+{
+}
+
+/*!
+	Destroys the patch.
+*/
+SurfaceKernel::~SurfaceKernel()
+{
+
+}
+
+/*!
+	@}
+*/
+
+}

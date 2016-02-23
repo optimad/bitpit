@@ -56,7 +56,7 @@ CartesianPatch::CartesianPatch(const int &id, const int &dimension,
                                const std::array<double, 3> &origin,
                                const std::array<double, 3> &lengths,
                                const std::array<int, 3> &nCells)
-	: PatchKernel(id, dimension, false)
+	: VolumeKernel(id, dimension, false)
 {
 	initialize(origin, lengths, nCells);
 }
@@ -73,7 +73,7 @@ CartesianPatch::CartesianPatch(const int &id, const int &dimension,
 CartesianPatch::CartesianPatch(const int &id, const int &dimension,
                                const std::array<double, 3> &origin,
                                double length, int nCells1D)
-	: PatchKernel(id, dimension, false)
+	: VolumeKernel(id, dimension, false)
 {
 	// Number of cells
 	std::array<int, 3> nCells;
@@ -111,7 +111,7 @@ CartesianPatch::CartesianPatch(const int &id, const int &dimension,
 CartesianPatch::CartesianPatch(const int &id, const int &dimension,
                                const std::array<double, 3> &origin,
                                double length, double dh)
-	: PatchKernel(id, dimension, false)
+	: VolumeKernel(id, dimension, false)
 {
 	// Number of cells
 	std::array<int, 3> nCells;
@@ -389,7 +389,7 @@ void CartesianPatch::addVertices()
 		for (int j = 0; j < m_nVertices1D[Vertex::COORD_Y]; j++) {
 			for (int i = 0; i < m_nVertices1D[Vertex::COORD_X]; i++) {
 				long id_vertex = getVertexLinearId(i, j, k);
-				VertexIterator vertexIterator = PatchKernel::addVertex(id_vertex);
+				VertexIterator vertexIterator = VolumeKernel::addVertex(id_vertex);
 				Vertex &vertex = *vertexIterator;
 
 				// Coordinate
@@ -438,7 +438,7 @@ void CartesianPatch::addCells()
 		for (int j = 0; j < m_nCells1D[Vertex::COORD_Y]; j++) {
 			for (int i = 0; i < m_nCells1D[Vertex::COORD_X]; i++) {
 				long id_cell = getCellLinearId(i, j, k);
-				CellIterator cellIterator = PatchKernel::addCell(cellType, true, id_cell);
+				CellIterator cellIterator = VolumeKernel::addCell(cellType, true, id_cell);
 				Cell &cell = *cellIterator;
 
 				// Connettività
@@ -532,7 +532,7 @@ void CartesianPatch::addInterfacesDirection(const int &direction)
 	for (k = 0; (isThreeDimensional()) ? (k < interfaceCount1D[Vertex::COORD_Z]) : (k <= 0); k++) {
 		for (j = 0; j < interfaceCount1D[Vertex::COORD_Y]; j++) {
 			for (i = 0; i < interfaceCount1D[Vertex::COORD_X]; i++) {
-				InterfaceIterator interfaceIterator = PatchKernel::addInterface(interfaceType);
+				InterfaceIterator interfaceIterator = VolumeKernel::addInterface(interfaceType);
 				Interface &interface = *interfaceIterator;
 
 				// Owner id
@@ -982,7 +982,7 @@ void CartesianPatch::translate(std::array<double, 3> translation)
 		}
 	}
 
-	PatchKernel::translate(translation);
+	VolumeKernel::translate(translation);
 }
 
 /*!
@@ -1007,7 +1007,7 @@ void CartesianPatch::scale(std::array<double, 3> scaling)
 
 	initializeCellVolume();
 
-	PatchKernel::scale(scaling);
+	VolumeKernel::scale(scaling);
 }
 
 /*!

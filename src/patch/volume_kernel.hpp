@@ -22,18 +22,27 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MODULE_PATCH_HPP__
-#define __BITPIT_MODULE_PATCH_HPP__
-
-/*!
- * @defgroup PatchKernel Patch kernel
- */
-
-#include "bitpit_version.hpp"
+#ifndef __BITPIT_VOLUME_KERNEL_HPP__
+#define __BITPIT_VOLUME_KERNEL_HPP__
 
 #include "patch_kernel.hpp"
-#include "surface_kernel.hpp"
-#include "volume_kernel.hpp"
-#include "adaption.hpp"
+
+namespace bitpit {
+
+class VolumeKernel : public PatchKernel {
+
+public:
+	VolumeKernel(const int &id, const int &dimension, bool epxert);
+
+	virtual ~VolumeKernel();
+
+	virtual double evalCellVolume(const long &id) = 0;
+	virtual double evalCellSize(const long &id) = 0;
+
+	virtual double evalInterfaceArea(const long &id) = 0;
+
+};
+
+}
 
 #endif

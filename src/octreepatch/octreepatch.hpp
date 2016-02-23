@@ -43,7 +43,7 @@ struct OctreeLevelInfo{
     double volume;
 };
 
-class OctreePatch : public PatchKernel {
+class OctreePatch : public VolumeKernel {
 
 public:
 	using PatchKernel::isPointInside;

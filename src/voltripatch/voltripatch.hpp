@@ -32,7 +32,7 @@
 
 namespace bitpit {
 
-class VolTriPatch : public PatchKernel {
+class VolTriPatch : public VolumeKernel {
 
 public:
 	using PatchKernel::isPointInside;

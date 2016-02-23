@@ -60,7 +60,7 @@ namespace bitpit {
 */
 OctreePatch::OctreePatch(const int &id, const int &dimension,
 				 std::array<double, 3> origin, double length, double dh )
-	: PatchKernel(id, dimension, false)
+	: VolumeKernel(id, dimension, false)
 {
 	log::cout() << ">> Initializing Octree mesh\n";
 
@@ -1052,12 +1052,12 @@ OctreePatch::FaceInfoSet OctreePatch::removeCells(std::vector<long> &cellIds)
 		}
 
 		// Add the interface to the list of interfaces to delete
-		PatchKernel::deleteInterface(interfaceId, false, true);
+		VolumeKernel::deleteInterface(interfaceId, false, true);
 	}
 
 	// Delete vertices
 	for (auto it = deadVertices.begin(); it != deadVertices.end(); ++it) {
-		PatchKernel::deleteVertex(*it, true);
+		VolumeKernel::deleteVertex(*it, true);
 	}
 
 	// Done
@@ -1073,7 +1073,7 @@ OctreePatch::FaceInfoSet OctreePatch::removeCells(std::vector<long> &cellIds)
 long OctreePatch::addVertex(uint32_t treeId)
 {
 	// Create the vertex
-	VertexIterator vertexIterator = PatchKernel::addVertex();
+	VertexIterator vertexIterator = VolumeKernel::addVertex();
 	Vertex &vertex = *vertexIterator;
 
 	// Coordinate
@@ -1107,7 +1107,7 @@ long OctreePatch::addInterface(uint32_t treeId,
 	}
 
 	// Create the interface
-	InterfaceIterator interfaceIterator = PatchKernel::addInterface(interfaceType);
+	InterfaceIterator interfaceIterator = VolumeKernel::addInterface(interfaceType);
 	Interface &interface = *interfaceIterator;
 
 	// Connectivity
@@ -1146,7 +1146,7 @@ long OctreePatch::addCell(OctantInfo octantInfo,
 		cellType = ElementInfo::PIXEL;
 	}
 
-	CellIterator cellIterator = PatchKernel::addCell(cellType, octantInfo.internal);
+	CellIterator cellIterator = VolumeKernel::addCell(cellType, octantInfo.internal);
 	Cell &cell = *cellIterator;
 	long id = cell.get_id();
 
@@ -1239,7 +1239,7 @@ void OctreePatch::deleteCell(long id)
 	}
 
 	// Delete the cell
-	PatchKernel::deleteCell(id, false, true);
+	VolumeKernel::deleteCell(id, false, true);
 }
 
 /*!
@@ -1340,7 +1340,7 @@ void OctreePatch::_setTol(double tolerance)
 {
 	m_tree.setTol(tolerance);
 
-	PatchKernel::_setTol(tolerance);
+	VolumeKernel::_setTol(tolerance);
 }
 
 /*!
@@ -1351,7 +1351,7 @@ void OctreePatch::_resetTol()
 	m_tree.setTol();
 
 	double tolerance = m_tree.getTol();
-	PatchKernel::_setTol(tolerance);
+	VolumeKernel::_setTol(tolerance);
 }
 
 /*!
@@ -1363,7 +1363,7 @@ void OctreePatch::translate(std::array<double, 3> translation)
 {
 	m_tree.setOrigin(m_tree.getOrigin() + translation);
 
-	PatchKernel::translate(translation);
+	VolumeKernel::translate(translation);
 }
 
 /*!
@@ -1386,7 +1386,7 @@ void OctreePatch::scale(std::array<double, 3> scaling)
 
 	initializeTreeGeometry();
 
-	PatchKernel::scale(scaling);
+	VolumeKernel::scale(scaling);
 }
 
 /*!

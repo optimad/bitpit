@@ -54,7 +54,7 @@ const unsigned short SurfTriPatch::SELECT_ALL      = 3;
 	\param id is the id of the patch
 */
 SurfTriPatch::SurfTriPatch(const int &id)
-	: PatchKernel(id, 2, true)
+	: SurfaceKernel(id, 2, true)
 {
 
 }
@@ -70,7 +70,7 @@ SurfTriPatch::SurfTriPatch(const int &id)
  */
 void SurfTriPatch::setExpert(bool expert)
 {
-	PatchKernel::setExpert(expert);
+	SurfaceKernel::setExpert(expert);
 }
 
 /*!

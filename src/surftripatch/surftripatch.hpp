@@ -33,7 +33,7 @@
 
 namespace bitpit {
 
-class SurfTriPatch : public PatchKernel {
+class SurfTriPatch : public SurfaceKernel {
 
 public:
 	using PatchKernel::isPointInside;

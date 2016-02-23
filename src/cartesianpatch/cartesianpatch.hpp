@@ -34,7 +34,7 @@
 
 namespace bitpit {
 
-class CartesianPatch : public PatchKernel {
+class CartesianPatch : public VolumeKernel {
 
 public:
 	using PatchKernel::isPointInside;
