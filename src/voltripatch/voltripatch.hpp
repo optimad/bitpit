@@ -35,6 +35,9 @@ namespace bitpit {
 class VolTriPatch : public Patch {
 
 public:
+	using Patch::isPointInside;
+	using Patch::locatePoint;
+
 	VolTriPatch(const int &id, const int &dimension);
 
 	~VolTriPatch();

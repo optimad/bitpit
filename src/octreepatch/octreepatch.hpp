@@ -46,6 +46,9 @@ struct OctreeLevelInfo{
 class OctreePatch : public Patch {
 
 public:
+	using Patch::isPointInside;
+	using Patch::locatePoint;
+
 	struct OctantInfo {
 		OctantInfo() : id(0), internal(true) {};
 		OctantInfo(uint32_t _id, bool _internal) : id(_id), internal(_internal) {};

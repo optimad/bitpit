@@ -35,6 +35,9 @@ namespace bitpit {
 class SurfTriPatch : public Patch {
 
 public:
+	using Patch::isPointInside;
+	using Patch::locatePoint;
+
 	SurfTriPatch(const int &id);
 
 	~SurfTriPatch();
