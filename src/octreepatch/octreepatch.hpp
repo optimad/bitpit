@@ -72,7 +72,7 @@ public:
 	long getOctantId(const OctantInfo &octantInfo) const;
 	const std::vector<uint32_t> & getOctantConnect(const OctantInfo &octantInfo);
 
-	ParaTree & getTree();
+	PabloUniform & getTree();
 
 	bool isPointInside(const std::array<double, 3> &point);
 	long locatePoint(const std::array<double, 3> &point);

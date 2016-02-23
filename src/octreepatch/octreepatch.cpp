@@ -213,7 +213,7 @@ OctreePatch::OctantInfo OctreePatch::getCellOctant(const long &id) const
 
 	\result A reference to the octree associated to the patch.
 */
-ParaTree & OctreePatch::getTree()
+PabloUniform & OctreePatch::getTree()
 {
 	return m_tree;
 }
