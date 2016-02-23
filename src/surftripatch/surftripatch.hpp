@@ -66,6 +66,7 @@ public:
         double evalAspectRatio(const long&);
         double evalFacetArea(const long&);
         vector<double> computeARHistogram(vector<double>&, int n_int = 8);
+        void displayQualityStats(ostream &, unsigned int padding = 0);
 
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
@@ -74,6 +75,7 @@ protected:
 	bool _enableCellBalancing(const long &id, bool enabled);
 
 private:
+        void displayHistogram(const vector<double> &, const vector<double> &, ostream &, unsigned int padding = 0);
 
 };
 

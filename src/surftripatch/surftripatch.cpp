@@ -837,6 +837,127 @@ double SurfTriPatch::evalAspectRatio(const long &id)
 }
 
 /*!
+ * Display histogram in a nicely formatted form.
+ * 
+ * \param[in] bins bins of histogram
+ * \param[in] hist histogram to be printed out
+ * \param[in,out] out output stream
+ * \param[in] padding (default = 0), number of trailing spaces
+*/
+void SurfTriPatch::displayHistogram(const vector<double> &bins, const vector<double> &hist, ostream &out, const string &stats_name, unsigned int padding)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    int                 nbins = bins.size();
+    string              indent(padding, ' ');
+    stringstream        ss;
+
+    // Counters
+    int                 i;
+//     vector<double>::const_iterator      i_, e_;
+
+    // ====================================================================== //
+    // DISPLAY HISTOGRAM                                                      //
+    // ====================================================================== //
+
+    // Set stream properties
+    ss << setprecision(2);
+
+    // Display histograms
+    out << indent << hist[0] << "%, with " << stats_name << " < " << bins[0] << endl;
+    for (i = 0; i < nbins-1; ++i) {
+        ss << indent << hist[i+1] << "% with" << bins[i] << " < " << stats_name << " < " << bins[i+1] << endl;
+    }
+    ss << indent << hist[i] << "%, with " << stats_name << " > " << bins[i] << endl;
+    out << ss.str();
+//     e_ = bins.cend();
+//     for (i_ = bins.cbegin(); i_ != e_; ++i_) {
+//         ss << *i_;
+//         lfill_size = max(size_t(0), 6 - ss.str().length());
+//         rfill_size = max(size_t(0), 8 - (lfill_size + ss.str().length()));;
+//         ss.str("");
+//         ss << string(lfill_size, '-') << *i_ << string(rfill_size, '-');
+//         out << ss.str();
+//         ss.str("");
+//     } //next i_
+//     out << string(4, '-') << endl;
+// 
+//     // Display histogram
+//     out << indent;
+//     e_ = hist.cend();
+//     for (i_ = hist.cbegin(); i_ != e_; ++i_) {
+//         ss << *i_;
+//         lfill_size = max(size_t(0), 6 - ss.str().length());
+//         rfill_size = max(size_t(0), 8 - (lfill_size + ss.str().length()));
+//         ss.str("");
+//         ss << string(lfill_size, ' ') << *i_ << string(rfill_size, ' ');
+//         out << ss.str();
+//         ss.str("");
+//     } //next i_
+//     out << endl;
+
+    return;
+}
+
+/*!
+ * Display quality stats for the mesh currently stored.
+ * 
+ * \param[in,out] out output stream where stats will be printed out
+ * \param[in] padding (default = 0) number of trailing spaces
+*/
+void SurfTriPatch::displayQualityStats(ostream &out, unsigned int padding)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    string              indent(padding, ' ');
+
+    // Counters
+    // none
+
+    // ====================================================================== //
+    // DISPLAY STATS                                                          //
+    // ====================================================================== //
+    out << indent << "Aspect ratio distribution: " << endl;
+    {
+        vector<double>              bins, hist;
+        hist = computeARHistogram(bins);
+        displayHistogram(bins, hist, out, "AR", padding + 2);
+    }
+    out << indent << "Min. angle distribution: " << endl;
+    {
+        vector<double>              bins, hist;
+        hist = computeARHistogram(bins);
+        displayHistogram(bins, hist, out, "min. angle", padding + 2);
+    }
+    out << indent << "Max. angle distribution: " << endl;
+    {
+        vector<double>              bins, hist;
+        hist = computeARHistogram(bins);
+        displayHistogram(bins, hist, out, "max. angle", padding + 2);
+    }
+    out << indent << "Min edge distribution: " << endl;
+    {
+        vector<double>              bins, hist;
+        hist = computeARHistogram(bins);
+        displayHistogram(bins, hist, out, "min. edge", padding + 2);
+    }
+    out << indent << "Max edge distribution: " << endl;
+    {
+        vector<double>              bins, hist;
+        hist = computeARHistogram(bins);
+        displayHistogram(bins, hist, out, "max. edge", padding + 2);
+    }
+    
+    return;
+}
+
+/*!
  * Evaluate facet area for a cell with specified ID. If cell is of type
  * ElementInfo::VERTEX or ElementInfo::LINE, returns 0.0
  * 
@@ -886,7 +1007,22 @@ double SurfTriPatch::evalFacetArea(const long &id)
 }
 
 /*!
- * TODO:
+ * Compute the histogram showing the distribution of aspect ratio among elements
+ * 
+ * \param[in] bins bins used to construct histogram. If an empty vector is passed
+ * as input, uniform bins will be generated in the interval [1.0, 5.0)
+ * \param[in] n_internvals (default = 8), number of intervals to be used for histogram construction.
+ * If bins is a non-empty vector, the number of intervals will be set equal to 
+ * bins.size()-1
+ * 
+ * \result on output returns a vector of dimensions n_internvals+2, storing the
+ * histogram for the distribution of aspect ratio among cells.
+ * hist[0] stores the % of element having aspect ratio below bins[0]
+ * ...
+ * hist[i] stores the % of element having aspect ratio between [bins[i], bins[i+1])
+ * ...
+ * hist[n_internvals+1] stores the % of element having aspect ratio above
+ * bins[n_intervals].
 */
 vector<double> SurfTriPatch::computeARHistogram(vector<double> &bins, int n_intervals)
 {
@@ -919,7 +1055,7 @@ vector<double> SurfTriPatch::computeARHistogram(vector<double> &bins, int n_inte
 
     // Resize histogram data structure
     hist.resize(n_intervals+2, 0.0);
-cout << "SurfTriPatch::computeARHistogram(), done with bins construction: " << bins << endl;
+
     // ====================================================================== //
     // COMPUTE HISTOGRAM                                                      //
     // ====================================================================== //
@@ -941,6 +1077,7 @@ cout << "SurfTriPatch::computeARHistogram(), done with bins construction: " << b
 
     return(hist);
 }
+
 /*!
 	@}
 */

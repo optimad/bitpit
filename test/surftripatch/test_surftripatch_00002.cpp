@@ -373,9 +373,8 @@ SurfTriPatch                    mesh(0);
 
     // Test histogram construction ------------------------------------------ //
     cout << "** Testing histogram construction" << endl;
-    hist = mesh.computeARHistogram(bins, 4);
-    cout << "   bins: " << bins << endl;
-    cout << "   hist: " << hist << endl;
+    mesh.displayQualityStats(cout, 3);
+
 }
 
 // ========================================================================== //
