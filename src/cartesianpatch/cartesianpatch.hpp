@@ -82,6 +82,13 @@ public:
         void buildAdjacencies() {};
         void updateAdjacencies(const std::vector<long>&) {};
 
+	long getCellLinearId(const int &i, const int &j, const int &k) const;
+	long getCellLinearId(const std::array<int, 3> &ijk) const;
+	std::array<int, 3> getCellCartesianId(long const &idx) const;
+	long getVertexLinearId(const int &i, const int &j, const int &k) const;
+	long getVertexLinearId(const std::array<int, 3> &ijk) const;
+	std::array<int, 3> getVertexCartesianId(long const &idx) const;
+
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
 	bool _markCellForRefinement(const long &id);
@@ -118,13 +125,6 @@ private:
 	void addInterfaces();
 	std::array<int, 3> getInterfaceCountDirection(const int &direction);
 	void addInterfacesDirection(const int &direction);
-
-	long getCellLinearId(const int &i, const int &j, const int &k) const;
-	long getCellLinearId(const std::array<int, 3> &ijk) const;
-	std::array<int, 3> getCellCartesianId(long const &idx) const;
-	long getVertexLinearId(const int &i, const int &j, const int &k) const;
-	long getVertexLinearId(const std::array<int, 3> &ijk) const;
-	std::array<int, 3> getVertexCartesianId(long const &idx) const;
 
 };
 
