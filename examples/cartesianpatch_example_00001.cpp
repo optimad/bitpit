@@ -54,7 +54,7 @@ int main(int argc, char *argv[]) {
 	double length = 20;
 	double dh = 0.5;
 
-	Patch *patch_2D = new CartesianPatch(0, 2, origin, length, dh);
+	CartesianPatch *patch_2D = new CartesianPatch(0, 2, origin, length, dh);
 	patch_2D->setName("cartesian_2D_patch");
 	patch_2D->update();
 	patch_2D->write();
