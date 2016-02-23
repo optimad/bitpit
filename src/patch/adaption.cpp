@@ -24,7 +24,7 @@
 
 #include <unordered_map>
 
-#include "patch.hpp"
+#include "patch_kernel.hpp"
 
 namespace bitpit {
 
@@ -67,7 +67,7 @@ namespace bitpit {
 */
 
 /*!
-	\ingroup patch
+	\ingroup patchkernel
 	@{
 */
 
@@ -91,7 +91,7 @@ FlatMapping::FlatMapping()
 
 	\param patch is the patch from witch the flat numbering will be built
 */
-FlatMapping::FlatMapping(Patch *patch)
+FlatMapping::FlatMapping(PatchKernel *patch)
 	: m_patch(patch)
 {
 }
@@ -152,7 +152,7 @@ CellFlatMapping::CellFlatMapping()
 
 	\param patch is the patch from witch the flat numbering will be built
 */
-CellFlatMapping::CellFlatMapping(Patch *patch)
+CellFlatMapping::CellFlatMapping(PatchKernel *patch)
 	: FlatMapping(patch)
 {
 	m_numbering.reserve(m_patch->getCellCount());

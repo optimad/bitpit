@@ -29,14 +29,14 @@
 
 #include "bitpit_SA.hpp"
 
-#include "patch.hpp"
+#include "patch_kernel.hpp"
 #include "utils.hpp"
 
 namespace bitpit {
 
 
 /*!
-	\ingroup patch
+	\ingroup PatchKernel
 	@{
 */
 
@@ -113,16 +113,16 @@ void IndexGenerator::reset()
 }
 
 /*!
-	\ingroup patch
+	\ingroup PatchKernel
 	@{
 */
 
 /*!
-	\class Patch
+	\class PatchKernel
 
-	\brief The Patch class provides an interface for defining patches.
+	\brief The PatchKernel class provides an interface for defining patches.
 
-	Patch is the base class for defining patches.
+	PatchKernel is the base class for defining patches.
 
 	\param id is the id that will be assigned to the patch
 	\param dimension is the dimension of the patch
@@ -132,7 +132,7 @@ void IndexGenerator::reset()
 /*!
 	Creates a new patch.
 */
-Patch::Patch(const int &id, const int &dimension, bool expert)
+PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
 	: m_nVertices(0), m_nInternals(0), m_nGhosts(0), m_nInterfaces(0),
 	  m_last_internal_id(Element::NULL_ID),
 	  m_first_ghost_id(Element::NULL_ID),
@@ -163,7 +163,7 @@ Patch::Patch(const int &id, const int &dimension, bool expert)
 /*!
 	Destroys the patch.
 */
-Patch::~Patch()
+PatchKernel::~PatchKernel()
 {
 	reset();
 }
@@ -174,7 +174,7 @@ Patch::~Patch()
 	\result Returns a vector of Adaption::Info that can be used to track
 	the changes done during the update.
 */
-const std::vector<Adaption::Info> Patch::update(bool trackAdaption)
+const std::vector<Adaption::Info> PatchKernel::update(bool trackAdaption)
 {
 	const std::vector<Adaption::Info> adaptionInfo = _update(trackAdaption);
 
@@ -194,7 +194,7 @@ const std::vector<Adaption::Info> Patch::update(bool trackAdaption)
 
 	\param id is the id of the cell that needs to be refined
 */
-void Patch::markCellForRefinement(const long &id)
+void PatchKernel::markCellForRefinement(const long &id)
 {
 	bool updated = _markCellForRefinement(id);
 
@@ -206,7 +206,7 @@ void Patch::markCellForRefinement(const long &id)
 
 	\param id is the id of the cell that needs to be coarsened
 */
-void Patch::markCellForCoarsening(const long &id)
+void PatchKernel::markCellForCoarsening(const long &id)
 {
 	bool updated = _markCellForCoarsening(id);
 
@@ -219,7 +219,7 @@ void Patch::markCellForCoarsening(const long &id)
 	\param id is the id of the cell
 	\param enabled defines if enable the balancing for the specified cell
 */
-void Patch::enableCellBalancing(const long &id, bool enabled)
+void PatchKernel::enableCellBalancing(const long &id, bool enabled)
 {
 	bool updated = _enableCellBalancing(id, enabled);
 
@@ -229,7 +229,7 @@ void Patch::enableCellBalancing(const long &id, bool enabled)
 /*!
 	Resest the patch.
 */
-void Patch::reset()
+void PatchKernel::reset()
 {
 	resetVertices();
 	resetCells();
@@ -239,7 +239,7 @@ void Patch::reset()
 /*!
 	Resest the vertices of the patch.
 */
-void Patch::resetVertices()
+void PatchKernel::resetVertices()
 {
 	m_vertices.clear();
 	PiercedVector<Vertex>().swap(m_vertices);
@@ -254,7 +254,7 @@ void Patch::resetVertices()
 /*!
 	Resest the cells of the patch.
 */
-void Patch::resetCells()
+void PatchKernel::resetCells()
 {
 	m_cells.clear();
 	PiercedVector<Cell>().swap(m_cells);
@@ -271,7 +271,7 @@ void Patch::resetCells()
 /*!
 	Resest the interfaces of the patch.
 */
-void Patch::resetInterfaces()
+void PatchKernel::resetInterfaces()
 {
 	m_interfaces.clear();
 	PiercedVector<Interface>().swap(m_interfaces);
@@ -296,7 +296,7 @@ void Patch::resetInterfaces()
     \param[in] nVertices size of memory reserve (in terms of number of
     vertices).
 */
-bool Patch::reserveVertices(size_t nVertices)
+bool PatchKernel::reserveVertices(size_t nVertices)
 {
 	if (!isExpert()) {
 		return false;
@@ -319,7 +319,7 @@ bool Patch::reserveVertices(size_t nVertices)
 
 	\param[in] nCells is size of memory reserve (in terms of number of cells).
 */
-bool Patch::reserveCells(size_t nCells)
+bool PatchKernel::reserveCells(size_t nCells)
 {
 	if (!isExpert()) {
 		return false;
@@ -344,7 +344,7 @@ bool Patch::reserveCells(size_t nCells)
 	\param[in] nInterfaces is size of memory reserve (in terms of number of
 	interfaces).
 */
-bool Patch::reserveInterfaces(size_t nInterfaces)
+bool PatchKernel::reserveInterfaces(size_t nInterfaces)
 {
 	if (!isExpert()) {
 		return false;
@@ -360,7 +360,7 @@ bool Patch::reserveInterfaces(size_t nInterfaces)
 
 	\param filename the filename where the patch will be written to
 */
-void Patch::write(std::string filename)
+void PatchKernel::write(std::string filename)
 {
 	std::string oldFilename = VTKUnstructuredGrid::getName();
 
@@ -372,7 +372,7 @@ void Patch::write(std::string filename)
 /*!
 	Writes the patch a filename with the same name of the patch
 */
-void Patch::write()
+void PatchKernel::write()
 {
 	VTKUnstructuredGrid::write();
 }
@@ -385,7 +385,7 @@ void Patch::write()
 	either on the vertices of on the cells
 	\param values is a vector with the values of the field
 */
-void Patch::writeField(std::string name, VTKLocation location, std::vector<double> &values)
+void PatchKernel::writeField(std::string name, VTKLocation location, std::vector<double> &values)
 {
 	writeField(getName(), name, location, values);
 }
@@ -399,7 +399,7 @@ void Patch::writeField(std::string name, VTKLocation location, std::vector<doubl
 	either on the vertices of on the cells
 	\param values is a vector with the values of the field
 */
-void Patch::writeField(std::string filename, std::string name, VTKLocation location, std::vector<double> &values)
+void PatchKernel::writeField(std::string filename, std::string name, VTKLocation location, std::vector<double> &values)
 {
 	VTKUnstructuredGrid::addData<double>(name, VTKFieldType::SCALAR, location, values);
 
@@ -414,7 +414,7 @@ void Patch::writeField(std::string filename, std::string name, VTKLocation locat
 	\param name is the name of the field
 	\param values is a vector with the values of the field
 */
-void Patch::writeCellField(std::string name, std::vector<double> &values)
+void PatchKernel::writeCellField(std::string name, std::vector<double> &values)
 {
 	writeCellField(getName(), name, values);
 }
@@ -427,7 +427,7 @@ void Patch::writeCellField(std::string name, std::vector<double> &values)
 	\param name is the name of the field
 	\param values is a vector with the values of the field
 */
-void Patch::writeCellField(std::string filename, std::string name, std::vector<double> &values)
+void PatchKernel::writeCellField(std::string filename, std::string name, std::vector<double> &values)
 {
 	writeField(filename, name, VTKLocation::CELL, values);
 }
@@ -438,7 +438,7 @@ void Patch::writeCellField(std::string filename, std::string name, std::vector<d
 	\param name is the name of the field
 	\param values is a vector with the values of the field
 */
-void Patch::writeVertexField(std::string name, std::vector<double> &values)
+void PatchKernel::writeVertexField(std::string name, std::vector<double> &values)
 {
 	writeVertexField(getName(), name, values);
 }
@@ -451,7 +451,7 @@ void Patch::writeVertexField(std::string name, std::vector<double> &values)
 	\param name is the name of the field
 	\param values is a vector with the values of the field
 */
-void Patch::writeVertexField(std::string filename, std::string name, std::vector<double> &values)
+void PatchKernel::writeVertexField(std::string filename, std::string name, std::vector<double> &values)
 {
 	writeField(filename, name, VTKLocation::POINT, values);
 }
@@ -463,7 +463,7 @@ void Patch::writeVertexField(std::string filename, std::string name, std::vector
 	patch definition has changed and thus the current data structures
 	are not valid anymore.
 */
-void Patch::setDirty(bool dirty)
+void PatchKernel::setDirty(bool dirty)
 {
 	if (m_dirty == dirty) {
 		return;
@@ -478,7 +478,7 @@ void Patch::setDirty(bool dirty)
 	\return This method returns true to indicate the patch needs to update
 	its data strucutres. Otherwise, it returns false.
 */
-bool Patch::isDirty() const
+bool PatchKernel::isDirty() const
 {
 	return m_dirty;
 }
@@ -492,7 +492,7 @@ bool Patch::isDirty() const
 
 	\param expert if true, the expert mode will be enabled
 */
-void Patch::setExpert(bool expert)
+void PatchKernel::setExpert(bool expert)
 {
 	if (isExpert() == expert) {
 		return;
@@ -511,7 +511,7 @@ void Patch::setExpert(bool expert)
 	\return This method returns true when the expert is enabled,
 	otherwise it returns false.
 */
-bool Patch::isExpert() const
+bool PatchKernel::isExpert() const
 {
 	return m_expert;
 }
@@ -521,7 +521,7 @@ bool Patch::isExpert() const
 
 	\param id the ID of the patch
 */
-void Patch::set_id(int id)
+void PatchKernel::set_id(int id)
 {
 	m_id = id;
 }
@@ -531,7 +531,7 @@ void Patch::set_id(int id)
 
 	\return The ID of the patch
 */
-int Patch::get_id() const
+int PatchKernel::get_id() const
 {
 	return m_id;
 }
@@ -541,7 +541,7 @@ int Patch::get_id() const
 
 	\param dimension the dimension of the patch
 */
-void Patch::setDimension(int dimension)
+void PatchKernel::setDimension(int dimension)
 {
 	m_dimension = dimension;
 }
@@ -551,7 +551,7 @@ void Patch::setDimension(int dimension)
 
 	\return The dimension of the patch
 */
-int Patch::getDimension() const
+int PatchKernel::getDimension() const
 {
 	return m_dimension;
 }
@@ -562,7 +562,7 @@ int Patch::getDimension() const
 	\return This method returns true to indicate the patch is
 	three-dimensional
 */
-bool Patch::isThreeDimensional() const
+bool PatchKernel::isThreeDimensional() const
 {
 	return (m_dimension == 3);
 }
@@ -572,7 +572,7 @@ bool Patch::isThreeDimensional() const
 
 	\return The number of vertices in the patch
 */
-long Patch::getVertexCount() const
+long PatchKernel::getVertexCount() const
 {
 	return m_nVertices;
 }
@@ -582,7 +582,7 @@ long Patch::getVertexCount() const
 
 	\return The nodes owned by the patch.
 */
-PiercedVector<Vertex> & Patch::vertices()
+PiercedVector<Vertex> & PatchKernel::vertices()
 {
 	return m_vertices;
 }
@@ -593,7 +593,7 @@ PiercedVector<Vertex> & Patch::vertices()
 	\param id is the id of the requested vertex
 	\return A reference to the vertex with the specified id.
 */
-Vertex & Patch::getVertex(const long &id)
+Vertex & PatchKernel::getVertex(const long &id)
 {
 	return m_vertices[id];
 }
@@ -604,7 +604,7 @@ Vertex & Patch::getVertex(const long &id)
 	\param id is the id of the requested vertex
 	\return A constant reference to the vertex with the specified id.
 */
-const Vertex & Patch::getVertex(const long &id) const
+const Vertex & PatchKernel::getVertex(const long &id) const
 {
 	return m_vertices[id];
 }
@@ -614,7 +614,7 @@ const Vertex & Patch::getVertex(const long &id) const
 
 	\result An iterator to the specified vertex.
 */
-Patch::VertexIterator Patch::getVertexIterator(const long &id)
+PatchKernel::VertexIterator PatchKernel::getVertexIterator(const long &id)
 {
 	return VertexIterator(m_vertices.raw_begin() + m_vertices.raw_index(id));
 }
@@ -624,7 +624,7 @@ Patch::VertexIterator Patch::getVertexIterator(const long &id)
 
 	\result An iterator to the first vertex.
 */
-Patch::VertexIterator Patch::vertexBegin()
+PatchKernel::VertexIterator PatchKernel::vertexBegin()
 {
 	return m_vertices.begin();
 }
@@ -634,7 +634,7 @@ Patch::VertexIterator Patch::vertexBegin()
 
 	\result An iterator to the last vertex.
 */
-Patch::VertexIterator Patch::vertexEnd()
+PatchKernel::VertexIterator PatchKernel::vertexEnd()
 {
 	return m_vertices.end();
 }
@@ -644,7 +644,7 @@ Patch::VertexIterator Patch::vertexEnd()
 
 	\result A new unique id for the vertices.
 */
-long Patch::generateVertexId()
+long PatchKernel::generateVertexId()
 {
 	if (!isExpert()) {
 		return Vertex::NULL_ID;
@@ -659,7 +659,7 @@ long Patch::generateVertexId()
 	\param id is the id of the new vertex
 	\return An iterator pointing to the newly created vertex.
 */
-Patch::VertexIterator Patch::createVertex(long id)
+PatchKernel::VertexIterator PatchKernel::createVertex(long id)
 {
 	if (id < 0) {
 		id = generateVertexId();
@@ -678,7 +678,7 @@ Patch::VertexIterator Patch::createVertex(long id)
 	specified, ad new unique id will be generated
 	\return An iterator pointing to the added vertex.
 */
-Patch::VertexIterator Patch::addVertex(const long &id)
+PatchKernel::VertexIterator PatchKernel::addVertex(const long &id)
 {
 	if (!isExpert()) {
 		return vertexEnd();
@@ -695,7 +695,7 @@ Patch::VertexIterator Patch::addVertex(const long &id)
 	specified, ad new unique id will be generated
 	\return An iterator pointing to the added vertex.
 */
-Patch::VertexIterator Patch::addVertex(const std::array<double, 3> &coords, const long &id)
+PatchKernel::VertexIterator PatchKernel::addVertex(const std::array<double, 3> &coords, const long &id)
 {
 	if (!isExpert()) {
 		return vertexEnd();
@@ -716,7 +716,7 @@ Patch::VertexIterator Patch::addVertex(const std::array<double, 3> &coords, cons
 	specified, ad new unique id will be generated
 	\return An iterator pointing to the added vertex.
 */
-Patch::VertexIterator Patch::addVertex(const Vertex &source, long id)
+PatchKernel::VertexIterator PatchKernel::addVertex(const Vertex &source, long id)
 {
 	if (!isExpert()) {
 		return vertexEnd();
@@ -739,7 +739,7 @@ Patch::VertexIterator Patch::addVertex(const Vertex &source, long id)
 	specified, ad new unique id will be generated
 	\return An iterator pointing to the added vertex.
 */
-Patch::VertexIterator Patch::addVertex(Vertex &&source, long id)
+PatchKernel::VertexIterator PatchKernel::addVertex(Vertex &&source, long id)
 {
 	if (!isExpert()) {
 		return vertexEnd();
@@ -764,7 +764,7 @@ Patch::VertexIterator Patch::addVertex(Vertex &&source, long id)
 	\param id is the id of the vertex
 	\param delayed is true a delayed delete will be performed
 */
-bool Patch::deleteVertex(const long &id, bool delayed)
+bool PatchKernel::deleteVertex(const long &id, bool delayed)
 {
 	if (!isExpert()) {
 		return false;
@@ -783,7 +783,7 @@ bool Patch::deleteVertex(const long &id, bool delayed)
 	\param ids are the ids of the vertices to be deleted
 	\param delayed is true a delayed delete will be performed
 */
-bool Patch::deleteVertices(const std::vector<long> &ids, bool delayed)
+bool PatchKernel::deleteVertices(const std::vector<long> &ids, bool delayed)
 {
 	if (!isExpert()) {
 		return false;
@@ -804,7 +804,7 @@ bool Patch::deleteVertices(const std::vector<long> &ids, bool delayed)
 
 	\return The number of free vertices.
 */
-long Patch::countFreeVertices() const
+long PatchKernel::countFreeVertices() const
 {
 	std::unordered_set<long> freeVertices;
 	for (const Cell &cell : m_cells) {
@@ -831,7 +831,7 @@ long Patch::countFreeVertices() const
 
 	\result The number of orphan vertices.
 */
-long Patch::countOrphanVertices() const
+long PatchKernel::countOrphanVertices() const
 {
 	std::unordered_set<long> usedVertices;
 	for (const Cell &cell : m_cells) {
@@ -851,7 +851,7 @@ long Patch::countOrphanVertices() const
 
 	\result The list of orphan vertice.
 */
-std::vector<long> Patch::findOrphanVertices()
+std::vector<long> PatchKernel::findOrphanVertices()
 {
 	// Add all the vertices to the list
 	std::unordered_set<long> vertexSet;
@@ -882,7 +882,7 @@ std::vector<long> Patch::findOrphanVertices()
 /*!
 	Remove orphan vertices
 */
-bool Patch::deleteOrphanVertices()
+bool PatchKernel::deleteOrphanVertices()
 {
 	if (!isExpert()) {
 		return false;
@@ -902,7 +902,7 @@ bool Patch::deleteOrphanVertices()
 	bin-sorting algorithm to sort tasselation vertices
 	\result The list of the of the collapsed vertices.
 */
-std::vector<long> Patch::collapseCoincidentVertices(int nBins)
+std::vector<long> PatchKernel::collapseCoincidentVertices(int nBins)
 {
 	std::vector<long> collapsedVertices;
 	if (!isExpert()) {
@@ -987,7 +987,7 @@ std::vector<long> Patch::collapseCoincidentVertices(int nBins)
 	\param[in] nBins (default = 128) is the number of bins used by bin
 	sorting algotrithm to sort patch vertices.
 */
-bool Patch::deleteCoincidentVertex(int nBins)
+bool PatchKernel::deleteCoincidentVertex(int nBins)
 {
 	if (!isExpert()) {
 		return false;
@@ -1005,7 +1005,7 @@ bool Patch::deleteCoincidentVertex(int nBins)
 	\param id is the id of the vertex
 	\result The coordinates of the specified vertex.
 */
-const std::array<double, 3> & Patch::getVertexCoords(const long &id) const
+const std::array<double, 3> & PatchKernel::getVertexCoords(const long &id) const
 {
 	return getVertex(id).getCoords();
 }
@@ -1015,7 +1015,7 @@ const std::array<double, 3> & Patch::getVertexCoords(const long &id) const
 
 	\return The number of cells in the patch
 */
-long Patch::getCellCount() const
+long PatchKernel::getCellCount() const
 {
 	return m_cells.size();
 }
@@ -1025,7 +1025,7 @@ long Patch::getCellCount() const
 
 	\return The number of internal cells in the patch
 */
-long Patch::getInternalCount() const
+long PatchKernel::getInternalCount() const
 {
 	return m_nInternals;
 }
@@ -1035,7 +1035,7 @@ long Patch::getInternalCount() const
 
 	\return The number of ghost cells in the patch
 */
-long Patch::getGhostCount() const
+long PatchKernel::getGhostCount() const
 {
 	return m_nGhosts;
 }
@@ -1045,7 +1045,7 @@ long Patch::getGhostCount() const
 
 	\return The cells owned by the patch.
 */
-PiercedVector<Cell> & Patch::cells()
+PiercedVector<Cell> & PatchKernel::cells()
 {
 	return m_cells;
 }
@@ -1056,7 +1056,7 @@ PiercedVector<Cell> & Patch::cells()
 	\param id is the id of the requested cell
 	\return A reference to the cell with the specified id.
 */
-Cell & Patch::getCell(const long &id)
+Cell & PatchKernel::getCell(const long &id)
 {
 	return m_cells[id];
 }
@@ -1067,7 +1067,7 @@ Cell & Patch::getCell(const long &id)
 	\param id is the id of the requested cell
 	\return A constant reference to the cell with the specified id.
 */
-const Cell & Patch::getCell(const long &id) const
+const Cell & PatchKernel::getCell(const long &id) const
 {
 	return m_cells[id];
 }
@@ -1077,7 +1077,7 @@ const Cell & Patch::getCell(const long &id) const
 
 	\return A reference to the last internal cell.
 */
-Cell & Patch::getLastInternal()
+Cell & PatchKernel::getLastInternal()
 {
 	return m_cells[m_last_internal_id];
 }
@@ -1087,7 +1087,7 @@ Cell & Patch::getLastInternal()
 
 	\return A constant reference to the last internal cell.
 */
-const Cell & Patch::getLastInternal() const
+const Cell & PatchKernel::getLastInternal() const
 {
 	return m_cells[m_last_internal_id];
 }
@@ -1097,7 +1097,7 @@ const Cell & Patch::getLastInternal() const
 
 	\return A reference to the first ghost cell.
 */
-Cell & Patch::getFirstGhost()
+Cell & PatchKernel::getFirstGhost()
 {
 	return m_cells[m_first_ghost_id];
 }
@@ -1107,7 +1107,7 @@ Cell & Patch::getFirstGhost()
 
 	\return A constant reference to the first ghost cell.
 */
-const Cell & Patch::getFirstGhost() const
+const Cell & PatchKernel::getFirstGhost() const
 {
 	return m_cells[m_first_ghost_id];
 }
@@ -1117,7 +1117,7 @@ const Cell & Patch::getFirstGhost() const
 
 	\result An iterator to the specified cell.
 */
-Patch::CellIterator Patch::getCellIterator(const long &id)
+PatchKernel::CellIterator PatchKernel::getCellIterator(const long &id)
 {
 	return CellIterator(m_cells.raw_begin() + m_cells.raw_index(id));
 }
@@ -1127,7 +1127,7 @@ Patch::CellIterator Patch::getCellIterator(const long &id)
 
 	\result An iterator to the first cell.
 */
-Patch::CellIterator Patch::cellBegin()
+PatchKernel::CellIterator PatchKernel::cellBegin()
 {
 	return m_cells.begin();
 }
@@ -1137,7 +1137,7 @@ Patch::CellIterator Patch::cellBegin()
 
 	\result An iterator to the last cell.
 */
-Patch::CellIterator Patch::cellEnd()
+PatchKernel::CellIterator PatchKernel::cellEnd()
 {
 	return m_cells.end();
 }
@@ -1147,7 +1147,7 @@ Patch::CellIterator Patch::cellEnd()
 
 	\result An iterator to the first internal cell.
 */
-Patch::CellIterator Patch::internalBegin()
+PatchKernel::CellIterator PatchKernel::internalBegin()
 {
 	return m_cells.begin();
 }
@@ -1157,7 +1157,7 @@ Patch::CellIterator Patch::internalBegin()
 
 	\result An iterator to the end of the list of internal cells.
 */
-Patch::CellIterator Patch::internalEnd()
+PatchKernel::CellIterator PatchKernel::internalEnd()
 {
 	return ++CellIterator(m_cells.raw_begin() + m_cells.raw_index(m_last_internal_id));
 }
@@ -1167,7 +1167,7 @@ Patch::CellIterator Patch::internalEnd()
 
     \result An iterator to the first ghost cell.
 */
-Patch::CellIterator Patch::ghostBegin()
+PatchKernel::CellIterator PatchKernel::ghostBegin()
 {
     return CellIterator(m_cells.raw_begin() + m_cells.raw_index(m_first_ghost_id));
 }
@@ -1177,7 +1177,7 @@ Patch::CellIterator Patch::ghostBegin()
 
 	\result An iterator to the end of the list of ghost cell.
 */
-Patch::CellIterator Patch::ghostEnd()
+PatchKernel::CellIterator PatchKernel::ghostEnd()
 {
 	return m_cells.end();
 }
@@ -1187,7 +1187,7 @@ Patch::CellIterator Patch::ghostEnd()
 
 	\result A new unique id for the cells.
 */
-long Patch::generateCellId()
+long PatchKernel::generateCellId()
 {
 	if (!isExpert()) {
 		return Element::NULL_ID;
@@ -1204,7 +1204,7 @@ long Patch::generateCellId()
 	\param interior is true if the cell is an interior cell, false otherwise
 	\return An iterator pointing to the newly created cell.
 */
-Patch::CellIterator Patch::createCell(ElementInfo::Type type, bool interior, long id)
+PatchKernel::CellIterator PatchKernel::createCell(ElementInfo::Type type, bool interior, long id)
 {
 	if (id < 0) {
 		id = generateCellId();
@@ -1265,7 +1265,7 @@ Patch::CellIterator Patch::createCell(ElementInfo::Type type, bool interior, lon
 	specified, ad new unique id will be generated
 	\return An iterator pointing to the added cell.
 */
-Patch::CellIterator Patch::addCell(ElementInfo::Type type, const long &id)
+PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, const long &id)
 {
 	if (!isExpert()) {
 		return cellEnd();
@@ -1284,7 +1284,7 @@ Patch::CellIterator Patch::addCell(ElementInfo::Type type, const long &id)
 	specified, ad new unique id will be generated
 	\return An iterator pointing to the added cell.
 */
-Patch::CellIterator Patch::addCell(ElementInfo::Type type, bool interior, const long &id)
+PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, bool interior, const long &id)
 {
 	if (!isExpert()) {
 		return cellEnd();
@@ -1308,7 +1308,7 @@ Patch::CellIterator Patch::addCell(ElementInfo::Type type, bool interior, const 
 	specified, ad new unique id will be generated
 	\return An iterator pointing to the added cell.
 */
-Patch::CellIterator Patch::addCell(ElementInfo::Type type, bool interior,
+PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, bool interior,
                                    std::unique_ptr<long[]> &connect, const long &id)
 {
 	if (!isExpert()) {
@@ -1333,7 +1333,7 @@ Patch::CellIterator Patch::addCell(ElementInfo::Type type, bool interior,
 	specified, ad new unique id will be generated
 	\return An iterator pointing to the added cell.
 */
-Patch::CellIterator Patch::addCell(ElementInfo::Type type, bool interior,
+PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, bool interior,
 								   const std::vector<long> &connect, const long &id)
 {
 	if (!isExpert()) {
@@ -1362,7 +1362,7 @@ Patch::CellIterator Patch::addCell(ElementInfo::Type type, bool interior,
 	specified, ad new unique id will be generated
 	\return An iterator pointing to the added cell.
 */
-Patch::CellIterator Patch::addCell(const Cell &source, long id)
+PatchKernel::CellIterator PatchKernel::addCell(const Cell &source, long id)
 {
 	if (!isExpert()) {
 		return cellEnd();
@@ -1385,7 +1385,7 @@ Patch::CellIterator Patch::addCell(const Cell &source, long id)
 	specified, ad new unique id will be generated
 	\return An iterator pointing to the added cell.
 */
-Patch::CellIterator Patch::addCell(Cell &&source, long id)
+PatchKernel::CellIterator PatchKernel::addCell(Cell &&source, long id)
 {
 	if (!isExpert()) {
 		return cellEnd();
@@ -1412,7 +1412,7 @@ Patch::CellIterator Patch::addCell(Cell &&source, long id)
 	removing the cell
 	\param delayed is true a delayed delete will be performed
 */
-bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
+bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 {
 	if (!isExpert()) {
 		return false;
@@ -1477,7 +1477,7 @@ bool Patch::deleteCell(const long &id, bool updateNeighs, bool delayed)
 	removing the cell
 	\param delayed is true a delayed delete will be performed
  */
-bool Patch::deleteCells(const std::vector<long> &ids, bool updateNeighs, bool delayed)
+bool PatchKernel::deleteCells(const std::vector<long> &ids, bool updateNeighs, bool delayed)
 {
 	if (!isExpert()) {
 		return false;
@@ -1497,7 +1497,7 @@ bool Patch::deleteCells(const std::vector<long> &ids, bool updateNeighs, bool de
 	\param[in] id is the index of the cell
 	\param[in] isInternal is the internal flag that will be set
 */
-bool Patch::setCellInternal(const long &id, bool isInternal)
+bool PatchKernel::setCellInternal(const long &id, bool isInternal)
 {
 	if (!isExpert()) {
 		return false;
@@ -1519,7 +1519,7 @@ bool Patch::setCellInternal(const long &id, bool isInternal)
 
 	\param[in] id is the index of the cell
 */
-Patch::CellIterator Patch::moveInternal2Ghost(const long &id)
+PatchKernel::CellIterator PatchKernel::moveInternal2Ghost(const long &id)
 {
 	if (!isExpert()) {
 		return m_cells.end();
@@ -1562,7 +1562,7 @@ Patch::CellIterator Patch::moveInternal2Ghost(const long &id)
 
 	\param[in] id is the index of the cell
 */
-Patch::CellIterator Patch::moveGhost2Internal(const long &id)
+PatchKernel::CellIterator PatchKernel::moveGhost2Internal(const long &id)
 {
 	if (!isExpert()) {
 		return m_cells.end();
@@ -1607,7 +1607,7 @@ Patch::CellIterator Patch::moveGhost2Internal(const long &id)
 
 	\return The number of free cells.
 */
-long Patch::countFreeCells() const
+long PatchKernel::countFreeCells() const
 {
 	double nFreeCells = 0;
 	for (const Cell &cell : m_cells) {
@@ -1631,7 +1631,7 @@ long Patch::countFreeCells() const
 
 	\return The number of orphan cells.
 */
-long Patch::countOrphanCells() const
+long PatchKernel::countOrphanCells() const
 {
 	// Compute vertex valence
 	std::unordered_map<long, short> vertexValence;
@@ -1669,7 +1669,7 @@ long Patch::countOrphanCells() const
 	\param id is the id of the cell
 	\result The neighbours of all the faces of the specified cell.
 */
-std::vector<long> Patch::findCellFaceNeighs(const long &id) const
+std::vector<long> PatchKernel::findCellFaceNeighs(const long &id) const
 {
 	std::vector<long> neighs;
 	const Cell &cell = getCell(id);
@@ -1689,7 +1689,7 @@ std::vector<long> Patch::findCellFaceNeighs(const long &id) const
 	\param id is the id of the cell
 	\result All the neighbours of the specified cell.
 */
-std::vector<long> Patch::findCellNeighs(const long &id) const
+std::vector<long> PatchKernel::findCellNeighs(const long &id) const
 {
 	return findCellVertexNeighs(id);
 }
@@ -1711,7 +1711,7 @@ std::vector<long> Patch::findCellNeighs(const long &id) const
 	also the neighbours for lower codimensions.
 	\result The neighbours for the specified codimension.
 */
-std::vector<long> Patch::findCellNeighs(const long &id, int codimension, bool complete) const
+std::vector<long> PatchKernel::findCellNeighs(const long &id, int codimension, bool complete) const
 {
 	assert(codimension >= 1 && codimension <= getDimension());
 
@@ -1734,7 +1734,7 @@ std::vector<long> Patch::findCellNeighs(const long &id, int codimension, bool co
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the specified cell for the given face.
 */
-std::vector<long> Patch::findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList) const
+std::vector<long> PatchKernel::findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList) const
 {
 	std::vector<long> neighs;
 	const Cell &cell = getCell(id);
@@ -1767,7 +1767,7 @@ std::vector<long> Patch::findCellFaceNeighs(const long &id, const int &face, con
         face_loc_idx of cell cell_idx). If cells cell_idx and neigh_idx do not share
         any face, -1 is stored into intf_loc_idx.
 */
-void Patch::findFaceNeighCell(const long &cell_idx, const long &neigh_idx, int &face_loc_idx, int &intf_loc_idx)
+void PatchKernel::findFaceNeighCell(const long &cell_idx, const long &neigh_idx, int &face_loc_idx, int &intf_loc_idx)
 {
 
     // ====================================================================== //
@@ -1810,7 +1810,7 @@ void Patch::findFaceNeighCell(const long &cell_idx, const long &neigh_idx, int &
 	contain also neighbours that share an entire face
 	\result The neighbours of all the edges of the specified cell.
 */
-std::vector<long> Patch::findCellEdgeNeighs(const long &id, bool complete) const
+std::vector<long> PatchKernel::findCellEdgeNeighs(const long &id, bool complete) const
 {
 	assert(isThreeDimensional());
 	if (!isThreeDimensional()) {
@@ -1843,7 +1843,7 @@ std::vector<long> Patch::findCellEdgeNeighs(const long &id, bool complete) const
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the specified cell for the given edge.
 */
-std::vector<long> Patch::findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList) const
+std::vector<long> PatchKernel::findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList) const
 {
 	assert(isThreeDimensional());
 	if (!isThreeDimensional()) {
@@ -1865,7 +1865,7 @@ std::vector<long> Patch::findCellEdgeNeighs(const long &id, const int &edge, con
 	contain also neighbours that share an entire face or an entire edge
 	\result The neighbours of all the vertices of the specified cell.
 */
-std::vector<long> Patch::findCellVertexNeighs(const long &id, bool complete) const
+std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, bool complete) const
 {
 	std::vector<long> blackList;
 	if (!complete) {
@@ -1909,7 +1909,7 @@ std::vector<long> Patch::findCellVertexNeighs(const long &id, bool complete) con
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the specified cell for the given vertex.
 */
-std::vector<long> Patch::findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList) const
+std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList) const
 {
 	std::vector<int> vertexList(1);
 	vertexList[0] = vertex;
@@ -1939,7 +1939,7 @@ std::vector<long> Patch::findCellVertexNeighs(const long &id, const int &vertex,
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the specified cell for the given vertices.
 */
-std::vector<long> Patch::findCellVertexNeighs(const long &id, const std::vector<int> &vertices, const std::vector<long> &blackList) const
+std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, const std::vector<int> &vertices, const std::vector<long> &blackList) const
 {
 	const Cell &cell = getCell(id);
 
@@ -2023,7 +2023,7 @@ std::vector<long> Patch::findCellVertexNeighs(const long &id, const std::vector<
 	\param vertex is a vertex of the cell
 	\result The one-ring of the specified vertex of the cell.
 */
-std::vector<long> Patch::findCellVertexOneRing(const long &id, const int &vertex) const
+std::vector<long> PatchKernel::findCellVertexOneRing(const long &id, const int &vertex) const
 {
 	std::vector<long> oneRing = findCellVertexNeighs(id, vertex);
 	utils::addToOrderedVector<long>(id, oneRing);
@@ -2036,7 +2036,7 @@ std::vector<long> Patch::findCellVertexOneRing(const long &id, const int &vertex
 
 	\return The number of interfaces in the patch
 */
-long Patch::getInterfaceCount() const
+long PatchKernel::getInterfaceCount() const
 {
 	return m_nInterfaces;
 }
@@ -2046,7 +2046,7 @@ long Patch::getInterfaceCount() const
 
 	\return The interfaces owned by the patch.
 */
-PiercedVector<Interface> & Patch::interfaces()
+PiercedVector<Interface> & PatchKernel::interfaces()
 {
 	return m_interfaces;
 }
@@ -2057,7 +2057,7 @@ PiercedVector<Interface> & Patch::interfaces()
 	\param id is the id of the requested interface
 	\return A reference to the interface with the specified id.
 */
-Interface & Patch::getInterface(const long &id)
+Interface & PatchKernel::getInterface(const long &id)
 {
 	return m_interfaces[id];
 }
@@ -2068,7 +2068,7 @@ Interface & Patch::getInterface(const long &id)
 	\param id is the id of the requested interface
 	\return A constant reference to the interface with the specified id.
 */
-const Interface & Patch::getInterface(const long &id) const
+const Interface & PatchKernel::getInterface(const long &id) const
 {
 	return m_interfaces[id];
 }
@@ -2078,7 +2078,7 @@ const Interface & Patch::getInterface(const long &id) const
 
 	\result An iterator to the specified interface.
 */
-Patch::InterfaceIterator Patch::getInterfaceIterator(const long &id)
+PatchKernel::InterfaceIterator PatchKernel::getInterfaceIterator(const long &id)
 {
 	return InterfaceIterator(m_interfaces.raw_begin() + m_interfaces.raw_index(id));
 }
@@ -2088,7 +2088,7 @@ Patch::InterfaceIterator Patch::getInterfaceIterator(const long &id)
 
 	\result An iterator to the first interface.
 */
-Patch::InterfaceIterator Patch::interfaceBegin()
+PatchKernel::InterfaceIterator PatchKernel::interfaceBegin()
 {
 	return m_interfaces.begin();
 }
@@ -2098,7 +2098,7 @@ Patch::InterfaceIterator Patch::interfaceBegin()
 
 	\result An iterator to the last interface.
 */
-Patch::InterfaceIterator Patch::interfaceEnd()
+PatchKernel::InterfaceIterator PatchKernel::interfaceEnd()
 {
 	return m_interfaces.end();
 }
@@ -2108,7 +2108,7 @@ Patch::InterfaceIterator Patch::interfaceEnd()
  *
  * \result A new unique id for the interfaces.
  */
-long Patch::generateInterfaceId()
+long PatchKernel::generateInterfaceId()
 {
 	if (!isExpert()) {
 		return Element::NULL_ID;
@@ -2124,7 +2124,7 @@ long Patch::generateInterfaceId()
 	\param id is the id of the new interface
 	\return An iterator pointing to the newly created interface.
 */
-Patch::InterfaceIterator Patch::createInterface(ElementInfo::Type type, long id)
+PatchKernel::InterfaceIterator PatchKernel::createInterface(ElementInfo::Type type, long id)
 {
 	if (id < 0) {
 		id = generateInterfaceId();
@@ -2149,7 +2149,7 @@ Patch::InterfaceIterator Patch::createInterface(ElementInfo::Type type, long id)
 	specified, ad new unique id will be generated
 	\return An iterator pointing to the added interface.
 */
-Patch::InterfaceIterator Patch::addInterface(ElementInfo::Type type, const long &id)
+PatchKernel::InterfaceIterator PatchKernel::addInterface(ElementInfo::Type type, const long &id)
 {
 	if (!isExpert()) {
 		return interfaceEnd();
@@ -2170,7 +2170,7 @@ Patch::InterfaceIterator Patch::addInterface(ElementInfo::Type type, const long 
 	specified, ad new unique id will be generated
 	\return An iterator pointing to the added interface.
 */
-Patch::InterfaceIterator Patch::addInterface(const Interface &source, long id)
+PatchKernel::InterfaceIterator PatchKernel::addInterface(const Interface &source, long id)
 {
 	if (!isExpert()) {
 		return interfaceEnd();
@@ -2193,7 +2193,7 @@ Patch::InterfaceIterator Patch::addInterface(const Interface &source, long id)
 	\return An iterator pointing to the added interface.
 
 */
-Patch::InterfaceIterator Patch::addInterface(Interface &&source, long id)
+PatchKernel::InterfaceIterator PatchKernel::addInterface(Interface &&source, long id)
 {
 	if (!isExpert()) {
 		return interfaceEnd();
@@ -2220,7 +2220,7 @@ Patch::InterfaceIterator Patch::addInterface(Interface &&source, long id)
 	removing the interface
 	\param delayed is true a delayed delete will be performed
 */
-bool Patch::deleteInterface(const long &id, bool updateNeighs, bool delayed)
+bool PatchKernel::deleteInterface(const long &id, bool updateNeighs, bool delayed)
 {
 	if (!isExpert()) {
 		return false;
@@ -2271,7 +2271,7 @@ bool Patch::deleteInterface(const long &id, bool updateNeighs, bool delayed)
 	removing the interface
 	\param delayed is true a delayed delete will be performed
 */
-bool Patch::deleteInterfaces(const std::vector<long> &ids, bool updateNeighs, bool delayed)
+bool PatchKernel::deleteInterfaces(const std::vector<long> &ids, bool updateNeighs, bool delayed)
 {
 	if (!isExpert()) {
 		return false;
@@ -2292,7 +2292,7 @@ bool Patch::deleteInterfaces(const std::vector<long> &ids, bool updateNeighs, bo
 
 	\result The number of free interfaces.
 */
-long Patch::countFreeInterfaces() const
+long PatchKernel::countFreeInterfaces() const
 {
 	long nFreeInterfaces = 0;
 	for (const Interface &interface : m_interfaces) {
@@ -2311,7 +2311,7 @@ long Patch::countFreeInterfaces() const
 
 	\return The number of orphan interfaces.
 */
-long Patch::countOrphanInterfaces() const
+long PatchKernel::countOrphanInterfaces() const
 {
 	long nOrphanInterfaces = 0;
 	for (const Interface &interface : m_interfaces) {
@@ -2328,7 +2328,7 @@ long Patch::countOrphanInterfaces() const
 
 	\result The total number of faces in the patch.
 */
-long Patch::countFaces() const
+long PatchKernel::countFaces() const
 {
 	double nFaces = 0;
 	for (const Cell &cell : m_cells) {
@@ -2352,7 +2352,7 @@ long Patch::countFaces() const
 
 	\result The number of free faces.
 */
-long Patch::countFreeFaces() const
+long PatchKernel::countFreeFaces() const
 {
 	double nFreeFaces = 0;
 	for (const Cell &cell : m_cells) {
@@ -2370,7 +2370,7 @@ long Patch::countFreeFaces() const
 /*!
 	Sorts internal vertex storage in ascending id order.
 */
-bool Patch::sortVertices()
+bool PatchKernel::sortVertices()
 {
 	if (!isExpert()) {
 		return false;
@@ -2384,7 +2384,7 @@ bool Patch::sortVertices()
 /*!
 	Sorts internal cell storage in ascending id order.
 */
-bool Patch::sortCells()
+bool PatchKernel::sortCells()
 {
 	if (!isExpert()) {
 		return false;
@@ -2398,7 +2398,7 @@ bool Patch::sortCells()
 /*!
 	Sorts internal interface storage in ascending id order.
 */
-bool Patch::sortInterfaces()
+bool PatchKernel::sortInterfaces()
 {
 	if (!isExpert()) {
 		return false;
@@ -2413,7 +2413,7 @@ bool Patch::sortInterfaces()
 	Sorts internal storage for cells, vertices and interfaces in
 	ascending id order.
 */
-bool Patch::sort()
+bool PatchKernel::sort()
 {
 	bool status = sortVertices();
 	status |= sortCells();
@@ -2429,7 +2429,7 @@ bool Patch::sort()
 	The request is non-binding, and after the function call the vertex
 	data structure can still occupy more memory than it actually needs.
 */
-bool Patch::squeezeVertices()
+bool PatchKernel::squeezeVertices()
 {
 	if (!isExpert()) {
 		return false;
@@ -2447,7 +2447,7 @@ bool Patch::squeezeVertices()
 	The request is non-binding, and after the function call the cell
 	data structure can still occupy more memory than it actually needs.
 */
-bool Patch::squeezeCells()
+bool PatchKernel::squeezeCells()
 {
 	if (!isExpert()) {
 		return false;
@@ -2465,7 +2465,7 @@ bool Patch::squeezeCells()
 	The request is non-binding, and after the function call the interface
 	data structure can still occupy more memory than it actually needs.
 */
-bool Patch::squeezeInterfaces()
+bool PatchKernel::squeezeInterfaces()
 {
 	if (!isExpert()) {
 		return false;
@@ -2483,7 +2483,7 @@ bool Patch::squeezeInterfaces()
 	The request is non-binding, and after the function call the patch
 	can still occupy more memory than it actually needs.
 */
-bool Patch::squeeze()
+bool PatchKernel::squeeze()
 {
 	bool status = squeezeVertices();
 	status |= squeezeCells();
@@ -2498,7 +2498,7 @@ bool Patch::squeeze()
 	\param id is the id of the cell
 	\result The centroid of the specified cell.
 */
-std::array<double, 3> Patch::evalCellCentroid(const long &id)
+std::array<double, 3> PatchKernel::evalCellCentroid(const long &id)
 {
 	Cell &cell = getCell(id);
 
@@ -2511,7 +2511,7 @@ std::array<double, 3> Patch::evalCellCentroid(const long &id)
 	\param id is the id of the interface
 	\result The centroid of the specified interface.
 */
-std::array<double, 3> Patch::evalInterfaceCentroid(const long &id)
+std::array<double, 3> PatchKernel::evalInterfaceCentroid(const long &id)
 {
 	Interface &interface = getInterface(id);
 
@@ -2524,7 +2524,7 @@ std::array<double, 3> Patch::evalInterfaceCentroid(const long &id)
 	\param element is the element
 	\result The centroid of the specified element.
 */
-std::array<double, 3> Patch::evalElementCentroid(const Element &element)
+std::array<double, 3> PatchKernel::evalElementCentroid(const Element &element)
 {
 	const int nDimensions = 3;
 
@@ -2555,7 +2555,7 @@ std::array<double, 3> Patch::evalElementCentroid(const Element &element)
 	\param[in] z is the z coordinate of the point
 	\result Returns true if the point is inside the patch, false otherwise.
  */
-bool Patch::isPointInside(const double &x, const double &y, const double &z)
+bool PatchKernel::isPointInside(const double &x, const double &y, const double &z)
 {
 	return isPointInside({{x, y, z}});
 }
@@ -2572,7 +2572,7 @@ bool Patch::isPointInside(const double &x, const double &y, const double &z)
 	\result Returns the id of the cell the contains the point. If the point
 	is not inside the patch, the function returns the id of the null element.
 */
-long Patch::locatePoint(const double &x, const double &y, const double &z)
+long PatchKernel::locatePoint(const double &x, const double &y, const double &z)
 {
 	return locatePoint({{x, y, z}});
 }
@@ -2588,7 +2588,7 @@ long Patch::locatePoint(const double &x, const double &y, const double &z)
  * 
  * \result returns true if face (cell_1, i) and face (cell_2, j) are the same.
 */
-bool Patch::isSameFace(
+bool PatchKernel::isSameFace(
     const long                  &cell_1,
     const int                   &i,
     const long                  &cell_2,
@@ -2631,7 +2631,7 @@ return(check);
 /*!
 	Updates the stored patch bounding box.
 */
-void Patch::updateBoundingBox()
+void PatchKernel::updateBoundingBox()
 {
 	evalBoundingBox(m_minPoint, m_maxPoint);
 }
@@ -2642,7 +2642,7 @@ void Patch::updateBoundingBox()
 	\param[out] minPoint on output stores the minimum point of the patch
 	\param[out] maxPoint on output stores the maximum point of the patch
 */
-void Patch::getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint)
+void PatchKernel::getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint)
 {
 	minPoint = m_minPoint;
 	maxPoint = m_maxPoint;
@@ -2654,7 +2654,7 @@ void Patch::getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3
 	\param[out] minPoint on output stores the minimum point of the patch
 	\param[out] maxPoint on output stores the maximum point of the patch
 */
-void Patch::evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint)
+void PatchKernel::evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint)
 {
 	// Initialize bounding box
 	for (int k = 0; k < 3; ++k) {
@@ -2681,7 +2681,7 @@ void Patch::evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 
 	direction)
 	\result Returns the bin index associated to each vertex.
 */
-std::unordered_map<long, long> Patch::binSortVertex(int nBins)
+std::unordered_map<long, long> PatchKernel::binSortVertex(int nBins)
 {
 	// ====================================================================== //
 	// VARIABLES DECLARATION                                                  //
@@ -2723,7 +2723,7 @@ std::unordered_map<long, long> Patch::binSortVertex(int nBins)
 
 	\param[in] translation is the translation vector
 */
-void Patch::translate(std::array<double, 3> translation)
+void PatchKernel::translate(std::array<double, 3> translation)
 {
 	for (auto &vertex : m_vertices) {
 		vertex.translate(translation);
@@ -2737,7 +2737,7 @@ void Patch::translate(std::array<double, 3> translation)
 	\param[in] sy translation along y direction
 	\param[in] sz translation along z direction
 */
-void Patch::translate(double sx, double sy, double sz)
+void PatchKernel::translate(double sx, double sy, double sz)
 {
 	translate({{sx, sy, sz}});
 }
@@ -2749,7 +2749,7 @@ void Patch::translate(double sx, double sy, double sz)
 
 	\param[in] scaling is the scaling factor vector
 */
-void Patch::scale(std::array<double, 3> scaling)
+void PatchKernel::scale(std::array<double, 3> scaling)
 {
 	for (auto &vertex : m_vertices) {
 		vertex.scale(scaling, m_minPoint);
@@ -2763,7 +2763,7 @@ void Patch::scale(std::array<double, 3> scaling)
 
 	\param[in] scaling is the scaling factor
 */
-void Patch::scale(double scaling)
+void PatchKernel::scale(double scaling)
 {
 	scale({{scaling, scaling, scaling}});
 }
@@ -2775,7 +2775,7 @@ void Patch::scale(double scaling)
 	\param[in] sy scaling factor along y direction
 	\param[in] sz scaling factor along z direction
 */
-void Patch::scale(double sx, double sy, double sz)
+void PatchKernel::scale(double sx, double sy, double sz)
 {
 	scale({{sx, sy, sz}});
 }
@@ -2786,7 +2786,7 @@ void Patch::scale(double sx, double sy, double sz)
 	\param tolerance is the tolerance that will be used for the geometrical
 	checks
 */
-void Patch::setTol(double tolerance)
+void PatchKernel::setTol(double tolerance)
 {
 	_setTol(tolerance);
 
@@ -2799,7 +2799,7 @@ void Patch::setTol(double tolerance)
 	\param tolerance is the tolerance that will be used for the geometrical
 	checks
 */
-void Patch::_setTol(double tolerance)
+void PatchKernel::_setTol(double tolerance)
 {
 	m_tolerance = tolerance;
 }
@@ -2809,7 +2809,7 @@ void Patch::_setTol(double tolerance)
 
 	\result The tolerance fot the geometrical checks.
 */
-double Patch::getTol() const
+double PatchKernel::getTol() const
 {
 	return m_tolerance;
 }
@@ -2817,7 +2817,7 @@ double Patch::getTol() const
 /*!
 	Resets the tolerance for the geometrical checks.
 */
-void Patch::resetTol()
+void PatchKernel::resetTol()
 {
 	_resetTol();
 
@@ -2827,7 +2827,7 @@ void Patch::resetTol()
 /*!
 	Internal function to reset the tolerance for the geometrical checks.
 */
-void Patch::_resetTol()
+void PatchKernel::_resetTol()
 {
 	m_tolerance = 1;
 	for (int k = 0; k < 3; ++k) {
@@ -2842,7 +2842,7 @@ void Patch::_resetTol()
 
 	\result True if the tolerance was customized by the user, false otherwise.
 */
-bool Patch::isTolCustomized() const
+bool PatchKernel::isTolCustomized() const
 {
 	return m_hasCustomTolerance;
 }
@@ -2855,7 +2855,7 @@ bool Patch::isTolCustomized() const
 	\param[in,out] envelope is the patch to which the external envelope
 	will be appended
 */
-void Patch::extractEnvelope(Patch &envelope) const
+void PatchKernel::extractEnvelope(PatchKernel &envelope) const
 {
 
 	// ====================================================================== //
@@ -2910,7 +2910,7 @@ void Patch::extractEnvelope(Patch &envelope) const
 	\param[in] padding (default = 0) number of leading spaces for
 	formatted output
 */
-void Patch::displayTopologyStats(std::ostream &out, unsigned int padding) const
+void PatchKernel::displayTopologyStats(std::ostream &out, unsigned int padding) const
 {
 	std::string indent = std::string(padding, ' ');
 
@@ -2947,7 +2947,7 @@ void Patch::displayTopologyStats(std::ostream &out, unsigned int padding) const
 	\param[in] padding (default = 0) number of leading spaces for
 	formatted output
 */
-void Patch::displayVertices(std::ostream &out, unsigned int padding) const
+void PatchKernel::displayVertices(std::ostream &out, unsigned int padding) const
 {
 	std::string indent = std::string(padding, ' ');
 	for (const Vertex &vertex : m_vertices) {
@@ -2963,7 +2963,7 @@ void Patch::displayVertices(std::ostream &out, unsigned int padding) const
 	\param[in] padding (default = 0) number of leading spaces for
 	formatted output
 */
-void Patch::displayCells(std::ostream &out, unsigned int padding) const
+void PatchKernel::displayCells(std::ostream &out, unsigned int padding) const
 {
 	std::string indent = std::string(padding, ' ');
 	for (const Cell &cell : m_cells) {
@@ -2979,7 +2979,7 @@ void Patch::displayCells(std::ostream &out, unsigned int padding) const
 	\param[in] padding (default = 0) number of leading spaces for
 	formatted output
 */
-void Patch::displayInterfaces(std::ostream &out, unsigned int padding) const
+void PatchKernel::displayInterfaces(std::ostream &out, unsigned int padding) const
 {
 	std::string indent = std::string(padding, ' ');
 	for (const Interface &interface : m_interfaces) {
@@ -2995,7 +2995,7 @@ void Patch::displayInterfaces(std::ostream &out, unsigned int padding) const
  *  @return Returns a VTKFieldMetaData struct containing the metadata
  *  of the requested custom data.
  */
-const VTKFieldMetaData Patch::getMetaData(std::string name)
+const VTKFieldMetaData PatchKernel::getMetaData(std::string name)
 {
 	if (name == "Points") {
 		return VTKFieldMetaData(3 * m_vertices.size(), typeid(double));
@@ -3035,7 +3035,7 @@ const VTKFieldMetaData Patch::getMetaData(std::string name)
  *  @param[in] name is the name of the data to be written. Either user
  *  data or patch data
  */
-void Patch::flushData(std::fstream &stream, VTKFormat format, std::string name)
+void PatchKernel::flushData(std::fstream &stream, VTKFormat format, std::string name)
 {
 	assert(format == VTKFormat::APPENDED);
 

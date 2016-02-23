@@ -32,11 +32,11 @@
 
 namespace bitpit {
 
-class VolTriPatch : public Patch {
+class VolTriPatch : public PatchKernel {
 
 public:
-	using Patch::isPointInside;
-	using Patch::locatePoint;
+	using PatchKernel::isPointInside;
+	using PatchKernel::locatePoint;
 
 	VolTriPatch(const int &id, const int &dimension);
 

@@ -28,7 +28,7 @@
 // ========================================================================== //
 #include <mpi.h>
 #include <chrono>
-#include "patch.hpp"
+#include "patch_kernel.hpp"
 
 // ========================================================================== //
 // NAMESPACES                                                                 //
@@ -39,7 +39,7 @@ using namespace chrono;
 namespace bitpit {
 
 /*!
-	\ingroup patch
+	\ingroup patchkernel
 	@{
 
 	\class Patch
@@ -51,7 +51,7 @@ namespace bitpit {
 	\param communicator is the communicator to be used for parallel
 	communications.
 */
-void Patch::setCommunicator(MPI_Comm communicator)
+void PatchKernel::setCommunicator(MPI_Comm communicator)
 {
 	// Free previous communicator
 	if (m_communicator != MPI_COMM_NULL) {
@@ -84,7 +84,7 @@ void Patch::setCommunicator(MPI_Comm communicator)
 /*!
 	Unsets the MPI communicator to be used for parallel communications.
 */
-void Patch::unsetCommunicator()
+void PatchKernel::unsetCommunicator()
 {
 	setCommunicator(MPI_COMM_NULL);
 }
@@ -94,7 +94,7 @@ void Patch::unsetCommunicator()
 
 	\return The MPI communicator associated to the patch.
 */
-const MPI_Comm & Patch::getCommunicator() const
+const MPI_Comm & PatchKernel::getCommunicator() const
 {
 	return m_communicator;
 }
@@ -104,7 +104,7 @@ const MPI_Comm & Patch::getCommunicator() const
 
 	\return The MPI rank associated to the patch.
 */
-int Patch::getRank() const
+int PatchKernel::getRank() const
 {
 	return m_rank;
 }
@@ -114,7 +114,7 @@ int Patch::getRank() const
 
 	\return The MPI processors in the communicator associated to the patch
 */
-int Patch::getProcessorCount() const
+int PatchKernel::getProcessorCount() const
 {
 	return m_nProcessors;
 }
@@ -129,7 +129,7 @@ int Patch::getProcessorCount() const
     \param[in] rcv_rank receiver rank
     \param[in] cell_list list of cells to be moved
  */
-void Patch::sendCells(const unsigned short &snd_rank, const unsigned short &rcv_rank, const vector< long > &cell_list)
+void PatchKernel::sendCells(const unsigned short &snd_rank, const unsigned short &rcv_rank, const vector< long > &cell_list)
 {
 
 // ========================================================================== //

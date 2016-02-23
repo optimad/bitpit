@@ -60,14 +60,14 @@ struct Adaption
 	};
 };
 
-class Patch;
+class PatchKernel;
 
 class FlatMapping
 {
 
 public:
 	FlatMapping();
-	FlatMapping(Patch *patch);
+	FlatMapping(PatchKernel *patch);
 
 	virtual ~FlatMapping();
 
@@ -77,7 +77,7 @@ public:
 	const std::vector<long> & getMapping() const;
 
 protected:
-	Patch *m_patch;
+	PatchKernel *m_patch;
 	std::vector<long> m_numbering;
 	std::vector<long> m_mapping;
 
@@ -89,7 +89,7 @@ class CellFlatMapping : public FlatMapping
 
 public:
 	CellFlatMapping();
-	CellFlatMapping(Patch *patch);
+	CellFlatMapping(PatchKernel *patch);
 
 	~CellFlatMapping();
 

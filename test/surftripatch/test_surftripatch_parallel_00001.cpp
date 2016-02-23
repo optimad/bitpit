@@ -202,7 +202,7 @@ return;
 // SUBTEST #001 Communications among 3 processes                              //
 // ========================================================================== //
 void COM_step(
-    Patch                       &mesh,
+    PatchKernel                 &mesh,
     short                        snd,
     short                        rcv,
     vector<long>                &id_list,

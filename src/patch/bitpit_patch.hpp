@@ -26,12 +26,12 @@
 #define __BITPIT_MODULE_PATCH_HPP__
 
 /*!
- * @defgroup patch Generic patch
+ * @defgroup PatchKernel Patch kernel
  */
 
 #include "bitpit_version.hpp"
 
-#include "patch.hpp"
+#include "patch_kernel.hpp"
 #include "adaption.hpp"
 
 #endif

@@ -43,11 +43,11 @@ struct OctreeLevelInfo{
     double volume;
 };
 
-class OctreePatch : public Patch {
+class OctreePatch : public PatchKernel {
 
 public:
-	using Patch::isPointInside;
-	using Patch::locatePoint;
+	using PatchKernel::isPointInside;
+	using PatchKernel::locatePoint;
 
 	struct OctantInfo {
 		OctantInfo() : id(0), internal(true) {};

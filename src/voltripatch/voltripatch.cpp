@@ -49,7 +49,7 @@ namespace bitpit {
 	\param dimension is the dimension of the patch
 */
 VolTriPatch::VolTriPatch(const int &id, const int &dimension)
-	: Patch(id, dimension, true)
+	: PatchKernel(id, dimension, true)
 {
 
 }
@@ -72,7 +72,7 @@ VolTriPatch::~VolTriPatch()
  */
 void VolTriPatch::setExpert(bool expert)
 {
-	Patch::setExpert(expert);
+	PatchKernel::setExpert(expert);
 }
 
 /*!

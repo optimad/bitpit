@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_PATCH_HPP__
-#define __BITPIT_PATCH_HPP__
+#ifndef __BITPIT_PATCH_KERNEL_HPP__
+#define __BITPIT_PATCH_KERNEL_HPP__
 
 #include <cstddef>
 #include <memory>
@@ -78,16 +78,16 @@ class UnaryPredicate {
     friend bool operator==(const std::pair<U, U1>&, const UnaryPredicate<U, U1>&);
 };
 
-class Patch : public VTKUnstructuredGrid {
+class PatchKernel : public VTKUnstructuredGrid {
 
 public:
 	typedef PiercedVector<Vertex>::iterator VertexIterator;
 	typedef PiercedVector<Cell>::iterator CellIterator;
 	typedef PiercedVector<Interface>::iterator InterfaceIterator;
 
-	Patch(const int &id, const int &dimension, bool epxert);
+	PatchKernel(const int &id, const int &dimension, bool epxert);
 
-	virtual ~Patch();
+	virtual ~PatchKernel();
 
 	void reset();
 	void resetVertices();
@@ -235,7 +235,7 @@ public:
 	void resetTol();
 	bool isTolCustomized() const;
 
-	void extractEnvelope(Patch &envelope) const;
+	void extractEnvelope(PatchKernel &envelope) const;
 
 	void displayTopologyStats(std::ostream &out, unsigned int padding = 0) const;
 	void displayVertices(std::ostream &out, unsigned int padding = 0) const;

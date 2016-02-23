@@ -34,11 +34,11 @@
 
 namespace bitpit {
 
-class CartesianPatch : public Patch {
+class CartesianPatch : public PatchKernel {
 
 public:
-	using Patch::isPointInside;
-	using Patch::locatePoint;
+	using PatchKernel::isPointInside;
+	using PatchKernel::locatePoint;
 
 	CartesianPatch(const int &id, const int &dimension, const std::array<double, 3> &origin,
 			   const std::array<double, 3> &lengths, const std::array<int, 3> &nCells);

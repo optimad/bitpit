@@ -33,12 +33,11 @@
 
 namespace bitpit {
 
-class SurfTriPatch : public Patch {
+class SurfTriPatch : public PatchKernel {
 
 public:
-
-	using Patch::isPointInside;
-	using Patch::locatePoint;
+	using PatchKernel::isPointInside;
+	using PatchKernel::locatePoint;
 
         // Types definitions
         typedef double (SurfTriPatch::*eval_f_)(const long&, int&);
