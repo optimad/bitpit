@@ -35,8 +35,17 @@ namespace bitpit {
 class SurfTriPatch : public Patch {
 
 public:
+
 	using Patch::isPointInside;
 	using Patch::locatePoint;
+
+        // Types definitions
+        typedef double (SurfTriPatch::*eval_f_)(const long&, int&);
+
+        // Static constant
+        static const unsigned short SELECT_TRIANGLE;
+        static const unsigned short SELECT_QUAD;
+        static const unsigned short SELECT_ALL;
 
 	SurfTriPatch(const int &id);
 
@@ -63,10 +72,19 @@ public:
         double evalMinAngleAtVertex(const long&, int &);
         double evalMaxAngleAtVertex(const long&, int &);
         array<double, 3> evalFacetNormal(const long&);
-        double evalAspectRatio(const long&);
+        double evalAspectRatio(const long&, int&);
         double evalFacetArea(const long&);
-        vector<double> computeARHistogram(vector<double>&, int n_int = 8);
-        void displayQualityStats(ostream &, unsigned int padding = 0);
+        vector<double> computeHistogram(
+            eval_f_                     ,
+            vector<double>              &,
+            long                        &,
+            int                          n_int = 8,
+            unsigned short               mask = SELECT_ALL
+        );
+        void displayQualityStats(
+            ostream                     &,
+            unsigned int                 padding = 0
+        );
 
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
@@ -75,8 +93,16 @@ protected:
 	bool _enableCellBalancing(const long &id, bool enabled);
 
 private:
-        void displayHistogram(const vector<double> &, const vector<double> &, ostream &, unsigned int padding = 0);
-
+        void displayHistogram(
+            const long                  &,
+            const vector<double>        &,
+            const vector<double>        &,
+            const std::string           &,
+            ostream                     &,
+            unsigned int                 padding = 0
+        );
+        bool compareSelectedTypes(const unsigned short &, const ElementInfo::Type &);
+        static const std::map<ElementInfo::Type, unsigned short>     m_selectionTypes;
 };
 
 }

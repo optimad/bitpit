@@ -149,7 +149,7 @@ SurfTriPatch                    mesh(0);
     cout << "   Topology:" << endl;
     mesh.displayTopologyStats(cout, 5);
     cout << "   Vertex list:" << endl;
-//TODO:     mesh.displayVertex(cout, 5);
+    mesh.displayVertices(cout, 5);
     cout << "   Cell list:" << endl;
     mesh.displayCells(cout, 5);
     cout << endl;
@@ -300,6 +300,7 @@ SurfTriPatch                    mesh(0);
     double                      ar;
     vector<double>              expected{sqrt(2), 1.0};
     int                         i;
+    int                         edge_id;
 
     // Output message ------------------------------------------------------- //
     cout << "** Testing routines for aspect ratio computation" << endl;
@@ -314,8 +315,8 @@ SurfTriPatch                    mesh(0);
 
         // Compute face normal
         cout << "   Aspect ratio for cell " << id << ": " << endl;
-        ar = mesh.evalAspectRatio(id);
-        cout << "     a.r.: " << ar << endl;
+        ar = mesh.evalAspectRatio(id, edge_id);
+        cout << "     a.r.: " << ar << " (shortest edge has loc. id: " << edge_id << ")" << endl;
         if (abs(ar - expected[i]) > 1.0e-12) return 4;
 
         // Update counters
@@ -374,6 +375,7 @@ SurfTriPatch                    mesh(0);
     // Test histogram construction ------------------------------------------ //
     cout << "** Testing histogram construction" << endl;
     mesh.displayQualityStats(cout, 3);
+    cout << endl;
 
 }
 
