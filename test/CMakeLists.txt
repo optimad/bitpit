@@ -29,25 +29,17 @@ cmake_minimum_required(VERSION 2.8)
 # Subdirectories
 #------------------------------------------------------------------------------------#
 
-if (DEFINED TEST_LIST_SERIAL)
-	unset(TEST_LIST_SERIAL)
-endif ()
-
-if (DEFINED TEST_LIST_PARALLEL)
-	unset(TEST_LIST_PARALLEL)
-endif ()
+set(TEST_TARGETS "")
 
 # Modules
 foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
 	isModuleEnabled(${MODULE_NAME} MODULE_ENABLED)
 	if (MODULE_ENABLED)
 		if (IS_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/${MODULE_NAME}")
-			string(TOUPPER ${MODULE_NAME} UPPERCASE_MODULE_NAME)
 			add_subdirectory(${MODULE_NAME})
-			list(APPEND TEST_LIST_SERIAL "${${UPPERCASE_MODULE_NAME}_TEST_LIST_SERIAL}")
-			if (ENABLE_MPI)
-				list(APPEND TEST_LIST_PARALLEL "${${UPPERCASE_MODULE_NAME}_TEST_LIST_PARALLEL}")
-			endif ()
+
+			string(TOUPPER ${MODULE_NAME} UPPERCASE_MODULE_NAME)
+			list(APPEND TEST_TARGETS "${${UPPERCASE_MODULE_NAME}_TEST_TARGETS}")
 		endif ()
 	endif ()
 endforeach()
@@ -56,5 +48,7 @@ endforeach()
 # Targets
 #------------------------------------------------------------------------------------#
 
-add_custom_target(tests DEPENDS ${TEST_LIST_SERIAL} ${TEST_LIST_PARALLEL})
+add_custom_target(tests DEPENDS ${TEST_TARGETS})
 add_custom_target(clean-tests COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
+unset(TEST_TARGETS)

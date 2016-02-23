@@ -30,7 +30,7 @@ set(TESTS "")
 list(APPEND TESTS "test_cartesianpatch_00001")
 list(APPEND TESTS "test_cartesianpatch_00002")
 
-set(CARTESIANPATCH_TEST_LIST_SERIAL "${TESTS}" CACHE INTERNAL "List of serial tests for the cartesianpatch module" FORCE)
+set(CARTESIANPATCH_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the cartesianpatch module" FORCE)
 
 # Rules to build the tests
 include_directories("${PROJECT_SOURCE_DIR}/src/common")
@@ -40,12 +40,18 @@ include_directories("${PROJECT_SOURCE_DIR}/src/IO")
 include_directories("${PROJECT_SOURCE_DIR}/src/patch")
 include_directories("${PROJECT_SOURCE_DIR}/src/cartesianpatch")
 
-foreach(TEST_NAME IN LISTS CARTESIANPATCH_TEST_LIST_SERIAL)
+set(TEST_TARGETS "")
+foreach(TEST_ENTRY IN LISTS CARTESIANPATCH_TEST_ENTRIES)
+	getTestName("${TEST_ENTRY}" TEST_NAME)
 	set(TEST_SOURCES "${TEST_NAME}.cpp")
+	list(APPEND TEST_TARGETS "${TEST_NAME}")
 
 	add_executable(${TEST_NAME} "${TEST_SOURCES}")
 	target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
 endforeach()
+set(CARTESIANPATCH_TEST_TARGETS "${TEST_TARGETS}" CACHE INTERNAL "List of test targets for the cartesianpatch module" FORCE)
 
-add_custom_target(tests-cartesianpatch DEPENDS ${CARTESIANPATCH_TEST_LIST_SERIAL})
+add_custom_target(tests-cartesianpatch DEPENDS ${TEST_TARGETS})
 add_custom_target(clean-tests-cartesianpatch COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
+unset(TEST_TARGETS)

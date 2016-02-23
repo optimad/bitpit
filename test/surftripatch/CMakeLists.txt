@@ -28,16 +28,11 @@ cmake_minimum_required(VERSION 2.8)
 # List of tests
 set(TESTS "")
 list(APPEND TESTS "test_surftripatch_00001")
-
-set(SURFTRIPATCH_TEST_LIST_SERIAL "${TESTS}" CACHE INTERNAL "List of serial tests for the surftripatch module" FORCE)
-
-# List of parallel tests
 if (ENABLE_MPI)
-        set(TESTS_PARALLEL "")
-        list(APPEND TESTS_PARALLEL "test_surftripatch_parallel_00001")
+	list(APPEND TESTS "test_surftripatch_parallel_00001")
+endif ()
 
-        set(SURFTRIPATCH_TEST_LIST_PARALLEL "${TESTS_PARALLEL}" CACHE INTERNAL "List of parallel tests for the surftripatch module" FORCE)
-endif()
+set(SURFTRIPATCH_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the surftripatch module" FORCE)
 
 # Rules to build the tests
 include_directories("${PROJECT_SOURCE_DIR}/src/common")
@@ -47,12 +42,18 @@ include_directories("${PROJECT_SOURCE_DIR}/src/IO")
 include_directories("${PROJECT_SOURCE_DIR}/src/patch")
 include_directories("${PROJECT_SOURCE_DIR}/src/surftripatch")
 
-foreach(TEST_NAME IN LISTS SURFTRIPATCH_TEST_LIST_SERIAL SURFTRIPATCH_TEST_LIST_PARALLEL)
+set(TEST_TARGETS "")
+foreach(TEST_ENTRY IN LISTS SURFTRIPATCH_TEST_ENTRIES)
+	getTestName("${TEST_ENTRY}" TEST_NAME)
 	set(TEST_SOURCES "${TEST_NAME}.cpp")
+	list(APPEND TEST_TARGETS "${TEST_NAME}")
 
 	add_executable(${TEST_NAME} "${TEST_SOURCES}")
 	target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
 endforeach()
+set(SURFTRIPATCH_TEST_TARGETS "${TEST_TARGETS}" CACHE INTERNAL "List of test targets for the surftripatch module" FORCE)
 
-add_custom_target(tests-surftripatch DEPENDS ${SURFTRIPATCH_TEST_LIST_SERIAL})
+add_custom_target(tests-surftripatch DEPENDS ${TEST_TARGETS})
 add_custom_target(clean-tests-surftripatch COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
+unset(TEST_TARGETS)

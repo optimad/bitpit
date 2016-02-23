@@ -31,7 +31,7 @@ list(APPEND TESTS "test_octreepatch_00001")
 list(APPEND TESTS "test_octreepatch_00002")
 list(APPEND TESTS "test_octreepatch_00003")
 
-set(OCTREEPATCH_TEST_LIST_SERIAL "${TESTS}" CACHE INTERNAL "List of serial tests for the octreepatch module" FORCE)
+set(OCTREEPATCH_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the octreepatch module" FORCE)
 
 # Rules to build the tests
 include_directories("${PROJECT_SOURCE_DIR}/src/common")
@@ -42,12 +42,18 @@ include_directories("${PROJECT_SOURCE_DIR}/src/PABLO")
 include_directories("${PROJECT_SOURCE_DIR}/src/patch")
 include_directories("${PROJECT_SOURCE_DIR}/src/octreepatch")
 
-foreach(TEST_NAME IN LISTS OCTREEPATCH_TEST_LIST_SERIAL)
+set(TEST_TARGETS "")
+foreach(TEST_ENTRY IN LISTS OCTREEPATCH_TEST_ENTRIES)
+	getTestName("${TEST_ENTRY}" TEST_NAME)
 	set(TEST_SOURCES "${TEST_NAME}.cpp")
+	list(APPEND TEST_TARGETS "${TEST_NAME}")
 
 	add_executable(${TEST_NAME} "${TEST_SOURCES}")
 	target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
 endforeach()
+set(OCTREEPATCH_TEST_TARGETS "${TEST_TARGETS}" CACHE INTERNAL "List of test targets for the octreepatch module" FORCE)
 
-add_custom_target(tests-octreepatch DEPENDS ${OCTREEPATCH_TEST_LIST_SERIAL})
+add_custom_target(tests-octreepatch DEPENDS ${TEST_TARGETS})
 add_custom_target(clean-tests-octreepatch COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
+unset(TEST_TARGETS)

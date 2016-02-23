@@ -29,7 +29,7 @@ cmake_minimum_required(VERSION 2.8)
 set(TESTS "")
 list(APPEND TESTS "test_IO_00001")
 
-set(IO_TEST_LIST_SERIAL "${TESTS}" CACHE INTERNAL "List of serial tests fo the IO module" FORCE)
+set(IO_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests fo the IO module" FORCE)
 
 # External dependencies
 
@@ -39,15 +39,21 @@ include_directories("${PROJECT_SOURCE_DIR}/src/operators")
 include_directories("${PROJECT_SOURCE_DIR}/src/containers")
 include_directories("${PROJECT_SOURCE_DIR}/src/IO")
 
-foreach(TEST_NAME IN LISTS IO_TEST_LIST_SERIAL)
+set(TEST_TARGETS "")
+foreach(TEST_ENTRY IN LISTS IO_TEST_ENTRIES)
+	getTestName("${TEST_ENTRY}" TEST_NAME)
 	set(TEST_SOURCES "${TEST_NAME}.cpp")
+	list(APPEND TEST_TARGETS "${TEST_NAME}")
 
     add_executable(${TEST_NAME} "${TEST_SOURCES}")
     target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
 endforeach()
+set(IO_TEST_TARGETS "${TEST_TARGETS}" CACHE INTERNAL "List of test targets for the IO module" FORCE)
 
-add_custom_target(tests-IO DEPENDS ${IO_TEST_LIST_SERIAL})
+add_custom_target(tests-IO DEPENDS ${TEST_TARGETS})
 add_custom_target(clean-tests-IO COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+
+unset(TEST_TARGETS)
 
 # Data files
 add_custom_command(
