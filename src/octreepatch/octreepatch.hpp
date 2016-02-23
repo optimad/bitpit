@@ -61,7 +61,7 @@ public:
 
 	double evalCellVolume(const long &id);
 	double evalCellSize(const long &id);
-	std::array<double, 3> eval_cell_centroid(const long &id);
+	std::array<double, 3> evalCellCentroid(const long &id);
 
 	double evalInterfaceArea(const long &id);
 	std::array<double, 3> evalInterfaceNormal(const long &id);
@@ -72,7 +72,7 @@ public:
 	long getOctantId(const OctantInfo &octantInfo) const;
 	const std::vector<uint32_t> & getOctantConnect(const OctantInfo &octantInfo);
 
-	ParaTree & get_tree();
+	ParaTree & getTree();
 
 	bool isPointInside(const std::array<double, 3> &point);
 	long locatePoint(const std::array<double, 3> &point);

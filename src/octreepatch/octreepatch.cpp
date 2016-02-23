@@ -133,7 +133,7 @@ double OctreePatch::evalCellVolume(const long &id)
 	\param id is the id of the cell
 	\result The centroid of the specified cell.
 */
-std::array<double, 3> OctreePatch::eval_cell_centroid(const long &id)
+std::array<double, 3> OctreePatch::evalCellCentroid(const long &id)
 {
 	OctantInfo octantInfo = getCellOctant(id);
 
@@ -213,7 +213,7 @@ OctreePatch::OctantInfo OctreePatch::getCellOctant(const long &id) const
 
 	\result A reference to the octree associated to the patch.
 */
-ParaTree & OctreePatch::get_tree()
+ParaTree & OctreePatch::getTree()
 {
 	return m_tree;
 }
