@@ -265,7 +265,7 @@ const std::vector<uint32_t> & OctreePatch::getOctantConnect(const OctantInfo &oc
 	\param octantInfo the data of the octant
 	\result A unique hash for the octant.
 */
-OctreePatch::OctantHash OctreePatch::evaluate_octant_hash(const OctantInfo &octantInfo)
+OctreePatch::OctantHash OctreePatch::evaluateOctantHash(const OctantInfo &octantInfo)
 {
 	uint8_t level   = m_tree.getLevel(octantInfo.id);
 	uint64_t morton = m_tree.getMorton(octantInfo.id);

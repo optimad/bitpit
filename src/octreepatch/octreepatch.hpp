@@ -140,7 +140,7 @@ private:
 
 	bool set_marker(const long &id, const int8_t &value);
 
-	OctantHash evaluate_octant_hash(const OctantInfo &octantInfo);
+	OctantHash evaluateOctantHash(const OctantInfo &octantInfo);
 
 	std::vector<unsigned long> importOctants(std::vector<OctantInfo> &octantTreeIds);
 	std::vector<unsigned long> importOctants(std::vector<OctantInfo> &octantTreeIds, FaceInfoSet &danglingInfoSet);
