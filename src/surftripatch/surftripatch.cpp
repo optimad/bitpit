@@ -60,13 +60,6 @@ SurfTriPatch::SurfTriPatch(const int &id)
 }
 
 /*!
-	Destroys the patch.
-*/
-SurfTriPatch::~SurfTriPatch()
-{
-}
-
-/*!
  * Enables or disables expert mode.
  *
  * When expert mode is enabled, it will be possible to change the

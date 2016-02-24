@@ -50,8 +50,6 @@ public:
 
 	SurfTriPatch(const int &id);
 
-	~SurfTriPatch();
-
 	void setExpert(bool expert);
 
 	double evalCellVolume(const long &id);
