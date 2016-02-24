@@ -1149,6 +1149,207 @@ bool SurfTriPatch::compareSelectedTypes(const unsigned short &mask_, const Eleme
     unsigned short       masked = m_selectionTypes.at(type_);
     return ( (mask_ & masked) == masked );
 }
+
+//TODO: normals??
+//TODO: error flag on output
+//TODO: import a specified solid (ascii format only)
+/*!
+ * Import surface tasselation from S.T.L. file. STL facet are added at to the
+ * present mesh, i.e. current mesh content is not discarded. Howver no checks
+ * are performed to ensure that no duplicated vertices or cells are created.
+ * 
+ * \param[in] stl_name name of stl file
+ * \param[in] isBinary flag for binary (true), of ASCII (false) stl file
+ * 
+ * \result on output returns an error flag for I/O error
+*/
+unsigned short SurfTriPatch::importSTL(const string &stl_name, const bool &isBinary)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Parameters
+    const unordered_map<size_t, ElementInfo::Type> ele_type{
+        {0, ElementInfo::UNDEFINED},
+        {1, ElementInfo::VERTEX},
+        {2, ElementInfo::LINE},
+        {3, ElementInfo::TRIANGLE},
+        {4, ElementInfo::QUAD}
+    };
+
+    // Local variables
+    int                                         n_v;
+    int                                         nVertex;
+    int                                         nSimplex;
+    vector<array<double, 3>>                    vertexList;
+    vector<array<double, 3>>                    normalList;
+    vector<vector<int>>                         connectivityList;
+    vector<long>                                connect;
+    unordered_map<long, long>                   vertexMap;
+    STLObj                                      STL(stl_name, isBinary);
+    
+
+    // Counters
+    int                                         i;
+    long                                        v_counter = 0, c_counter = 0;
+    VertexIterator                              i_;
+    CellIterator                                j_;
+    vector<array<double, 3>>::const_iterator    v_, ve_;
+    vector<vector<int>>::const_iterator         c_, ce_;
+    vector<int>::const_iterator                 w_, we_;
+
+    // ====================================================================== //
+    // READ MESH DATA FROM THE STL FILE                                       //
+    // ====================================================================== //
+    STL.load(nVertex, nSimplex, vertexList, normalList, connectivityList);
+
+    // ====================================================================== //
+    // PREPARE MESH FOR DATA IMPORT                                           //
+    // ====================================================================== //
+    reserveVertices(m_nVertices + nVertex);
+    reserveCells(m_nInternals + m_nGhosts + nSimplex);
+
+    // ====================================================================== //
+    // ADD VERTICES TO MESH                                                   //
+    // ====================================================================== //
+    ve_ = vertexList.cend();
+    for (v_ = vertexList.cbegin(); v_ != ve_; ++v_) {
+        i_ = addVertex(*v_);
+        vertexMap[v_counter] = i_->get_id();
+        ++v_counter;
+    } //next v_
+
+    // ====================================================================== //
+    // ADD CELLS TO MESH                                                      //
+    // ====================================================================== //
+    ce_ = connectivityList.cend();
+    for (c_ = connectivityList.cbegin(); c_ != ce_; ++c_) {
+
+        // Remap STL connectivity
+        n_v = c_->size();
+        connect.resize(n_v, Vertex::NULL_ID);
+        we_ = c_->cend();
+        i = 0;
+        for (w_ = c_->cbegin(); w_ < we_; ++w_) {
+            connect[i] = vertexMap[*w_];
+            ++i;
+        } //next w_
+
+        // Add cell
+        addCell(ele_type.at(n_v), true, connect);
+    } //next c_
+
+    return 0;
+}
+
+//TODO: normals??
+//TODO: error flag on output
+//TODO: conversion of quad into tria
+/*!
+ * Export surface tasselation in a STL format. No check is perfomed on element type
+ * therefore tasselation containing vertex, line or quad elements will produce
+ * ill-formed stl triangulation.
+ * 
+ * \param[in] stl_name name of the stl file
+ * \param[in] isBinary flag for binary (true) or ASCII (false) file
+ * \param[in] exportInternalsOnly flag for exporting only internal cells (true),
+ * or internal+ghost cells (false).
+ * 
+ * \result on output returns an error flag for I/O error.
+*/
+unsigned short SurfTriPatch::exportSTL(const string &stl_name, const bool &isBinary, bool exportInternalsOnly)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    int                                         n_v;
+    int                                         nVertex;
+    int                                         nSimplex;
+    vector<array<double, 3>>                    vertexList;
+    vector<array<double, 3>>                    normalList;
+    vector<vector<int>>                         connectivityList;
+    unordered_map<long, long>                   vertexMap;
+
+    // Counters
+    int                                         v_count ,j;
+    vector<array<double, 3>>::iterator          i_;
+    vector<vector<int>>::iterator               j_;
+    vector<int>::iterator                       k_, ke_;
+    VertexIterator                              v_, ve_;
+    CellIterator                                c_, cb_, ce_;
+
+    // ====================================================================== //
+    // INITIALIZE DATA STRUCTURE                                              //
+    // ====================================================================== //
+    nSimplex = m_nInternals;
+    if (!exportInternalsOnly) nSimplex += m_nGhosts;
+    vertexList.resize(m_nVertices);
+    normalList.resize(m_nGhosts);
+    connectivityList.resize(m_nGhosts, vector<int>(3, 0));
+
+    // ====================================================================== //
+    // CREATE VERTEX LIST                                                     //
+    // ====================================================================== //
+    i_ = vertexList.begin();
+    ve_ = vertexEnd();
+    v_count = 0;
+    for (v_ = vertexBegin(); v_ != ve_; ++v_) {
+
+        // Store vertex coordinates
+        *i_ = v_->getCoords();
+        vertexMap[v_->get_id()] = v_count;
+
+        // Update counters
+        ++v_count;
+        ++i_;
+
+    } //next v_
+    nVertex = m_nVertices;
+
+    // ====================================================================== //
+    // CREATE CONNECTIVITY                                                    //
+    // ====================================================================== //
+    if (exportInternalsOnly) {
+        cb_ = internalBegin();
+        ce_ = internalEnd();
+    }
+    else {
+        cb_ = cellBegin();
+        ce_ = cellEnd();
+    }
+    i_ = normalList.begin();
+    j_ = connectivityList.begin();
+    for (c_ = cb_; c_ != ce_; ++c_) {
+
+        // Build normals
+        *i_ = std::move(evalFacetNormal(c_->get_id()));
+        
+        // Build connectivity
+        n_v = min(3, c_->getVertexCount());
+        ke_ = j_->end();
+        j = 0;
+        for (k_ = j_->begin(); k_ != ke_; ++k_) {
+            *k_ = vertexMap[c_->getVertex(j)];
+            ++j;
+        } //next k_
+
+        // Update counters
+        ++j_;
+        ++i_;
+    } //next c_
+
+    // ====================================================================== //
+    // EXPORT STL DATA                                                        //
+    // ====================================================================== //
+    STLObj                                      STL(stl_name, isBinary);
+    STL.save("", nVertex, nSimplex, vertexList, normalList, connectivityList);
+
+    return 0;
+}
+
 /*!
 	@}
 */

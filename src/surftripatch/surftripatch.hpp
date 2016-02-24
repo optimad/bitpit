@@ -28,6 +28,7 @@
 #include <array>
 #include <vector>
 
+#include "bitpit_IO.hpp"
 #include "bitpit_patch.hpp"
 
 namespace bitpit {
@@ -85,6 +86,8 @@ public:
             ostream                     &,
             unsigned int                 padding = 0
         );
+        unsigned short importSTL(const std::string &, const bool &);
+        unsigned short exportSTL(const std::string &, const bool &, bool flag = true);
 
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
