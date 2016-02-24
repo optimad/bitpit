@@ -1180,8 +1180,8 @@ unsigned short SurfTriPatch::importSTL(const string &stl_name, const bool &isBin
 
     // Local variables
     int                                         n_v;
-    int                                         nVertex;
-    int                                         nSimplex;
+    int                                         nVertex = 0;
+    int                                         nSimplex = 0;
     vector<array<double, 3>>                    vertexList;
     vector<array<double, 3>>                    normalList;
     vector<vector<int>>                         connectivityList;
@@ -1287,8 +1287,8 @@ unsigned short SurfTriPatch::exportSTL(const string &stl_name, const bool &isBin
     nSimplex = m_nInternals;
     if (!exportInternalsOnly) nSimplex += m_nGhosts;
     vertexList.resize(m_nVertices);
-    normalList.resize(m_nGhosts);
-    connectivityList.resize(m_nGhosts, vector<int>(3, 0));
+    normalList.resize(nSimplex);
+    connectivityList.resize(nSimplex, vector<int>(3, 0));
 
     // ====================================================================== //
     // CREATE VERTEX LIST                                                     //

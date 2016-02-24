@@ -82,7 +82,7 @@ int subtest_001(
 string                          in_name_bin = "./data/buddha.stl";
 string                          in_name_ASCII = "./data/cube.stl";
 string                          out_name_bin = "./buddha_copy.stl";
-string                          out_name_ASCII = ":/buddha_cube_copy.stl";
+string                          out_name_ASCII = "./buddha_cube_copy.stl";
 SurfTriPatch                    mesh(0);
 
 // Counters
@@ -118,15 +118,16 @@ SurfTriPatch                    mesh(0);
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
-    // none
+    long                                nExpected = 283274;
     
     // Import mesh from stl format ------------------------------------------ //
-    cout << "** Importing mesh from (bin): \"" << in_name_bin << "\"" << endl;
+    cout << "** Importing mesh from (binary): \"" << in_name_bin << "\"" << endl;
     if (mesh.importSTL(in_name_bin, true) > 0) return 1;
+    if (mesh.getVertexCount() != 3*nExpected) return 1;
+    if (mesh.getInternalCount() != nExpected) return 1;
 
 }
 
-return 0;
 // ========================================================================== //
 // STEP #2 (EXPORT MESH TO BINARY STL)                                        //
 // ========================================================================== //
@@ -145,11 +146,13 @@ return 0;
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
-    // none
+    long                                nExpected = 283286;
     
     // Import mesh from stl format ------------------------------------------ //
     cout << "** Appending mesh from (ASCII): \"" << in_name_ASCII << "\"" << endl;
     if (mesh.importSTL(in_name_ASCII, false) > 0) return 3;
+    if (mesh.getVertexCount() != 3*nExpected) return 3;
+    if (mesh.getInternalCount() != nExpected) return 3;
 
 }
 
@@ -162,7 +165,7 @@ return 0;
 
     // Output message ------------------------------------------------------- //
     cout << "** Exporting mesh to (ASCII): \"" << out_name_ASCII << "\"" << endl;
-    if (mesh.exportSTL(out_name_ASCII, true) > 0) return 4;
+    if (mesh.exportSTL(out_name_ASCII, false) > 0) return 4;
 
 }
 
