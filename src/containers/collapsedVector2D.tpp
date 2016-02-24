@@ -143,23 +143,7 @@ public:
 	*/
 	CollapsedVector2D(const std::vector<int> &subArraySizes, const T &value = T())
 	{
-		// Initialize the vector
-		clear();
-
-		// Reserve capacity
-		int nArrays = subArraySizes.size();
-
-		int dataCapacity = 0;
-		for (int i = 0; i < nArrays; i++) {
-			dataCapacity += subArraySizes[i];
-		}
-
-		reserve(nArrays, dataCapacity);
-
-		// Fill the vector
-		for (int i = 0; i < nArrays; i++) {
-			push_back(subArraySizes[i], value);
-		}
+		initialize(subArraySizes, value);
 	}
 
 	/*!
@@ -170,23 +154,7 @@ public:
 	*/
 	CollapsedVector2D(const std::vector<std::vector<T> > &vector2D)
 	{
-		// Initialize the vector
-		clear();
-
-		// Reserve capacity
-		int nArrays = vector2D.size();
-
-		int dataCapacity = 0;
-		for (int i = 0; i < nArrays; i++) {
-			dataCapacity += vector2D[i].size();
-		}
-
-		reserve(nArrays, dataCapacity);
-
-		// Fill the vector
-		for (int i = 0; i < nArrays; i++) {
-			push_back(vector2D[i]);
-		}
+		initialize(vector2D);
 	}
 
 	/*!
@@ -234,6 +202,56 @@ public:
 		argument.
 	*/
 	CollapsedVector2D & operator= (CollapsedVector2D &&other) = default;
+
+	/*!
+		Initializes the container
+
+		\param subArraySizes is a vector with the sizes of the sub-array
+		to create
+		\param value is the value that will be use to initialize the
+		element of the sub-arrays
+	*/
+	void initialize(const std::vector<int> &subArraySizes, const T &value = T())
+	{
+		int nSubArrays = subArraySizes.size();
+
+		// Initialize the indexes
+		std::vector<size_t>(nSubArrays + 1, 0L).swap(m_index);
+		for (int i = 0; i < nSubArrays; ++i) {
+			m_index[i+1] = m_index[i] + subArraySizes[i];
+		}
+
+		// Initialize the storage
+		std::vector<T>(m_index[nSubArrays], value).swap(m_v);
+	}
+
+	/*!
+		Initializes the container
+
+		\param vector2D is a 2D vector that will be used to initialize
+		the container
+	*/
+	void initialize(const std::vector<std::vector<T> > &vector2D)
+	{
+		int nSubArrays = vector2D.size();
+
+		// Initialize the indexes
+		std::vector<size_t>(nSubArrays + 1, 0L).swap(m_index);
+		for (int i = 0; i < nSubArrays; ++i) {
+			m_index[i+1] = m_index[i] + vector2D[i].size();
+		}
+
+		// Initialize the storage
+		m_v.resize(m_index[nSubArrays]);
+
+		int k = 0;
+		for (int i = 0; i < nSubArrays; ++i) {
+			int subArraySize = vector2D[i].size();
+			for (int j = 0; j < subArraySize; ++j) {
+				m_v[k++] = vector2D[i][j];
+			}
+		}
+	}
 
 	/*!
 		Requests a change in capacity
