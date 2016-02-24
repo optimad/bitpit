@@ -1,7 +1,7 @@
 // ========================================================================== //
-//           ** BitPit mesh ** Test 001 for class surftri_patch **            //
+//           ** BitPit mesh ** Test 002 for class surftri_patch **            //
 //                                                                            //
-// Test construction, modifiers and communicators for surftri_patch.          //
+// Test routines for geometrical queries for class SurfTriPatch.              //
 // ========================================================================== //
 /*---------------------------------------------------------------------------*\
  *
@@ -108,7 +108,7 @@ SurfTriPatch                    mesh(0);
 
     // Output message
     cout << "** ================================================================= **" << endl;
-    cout << "** Test #00001 - sub-test #001 - Testing geometrical check           **" << endl;
+    cout << "** Test #00002 - sub-test #001 - Testing geometrical check           **" << endl;
     cout << "** ================================================================= **" << endl;
     cout << endl;
 }

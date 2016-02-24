@@ -29,6 +29,7 @@ cmake_minimum_required(VERSION 2.8)
 set(TESTS "")
 list(APPEND TESTS "test_surftripatch_00001")
 list(APPEND TESTS "test_surftripatch_00002")
+list(APPEND TESTS "test_surftripatch_00003")
 if (ENABLE_MPI)
 	list(APPEND TESTS "test_surftripatch_parallel_00001:3")
 endif ()
@@ -58,3 +59,10 @@ add_custom_target(tests-surftripatch DEPENDS ${TEST_TARGETS})
 add_custom_target(clean-tests-surftripatch COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 unset(TEST_TARGETS)
+
+# Data files
+add_custom_command(
+    TARGET "test_surftripatch_00003" PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/buddha.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/buddha.stl"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/cube.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/cube.stl"
+    )

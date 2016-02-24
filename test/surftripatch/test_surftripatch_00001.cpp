@@ -1,7 +1,7 @@
 // ========================================================================== //
 //           ** BitPit mesh ** Test 001 for class surftri_patch **            //
 //                                                                            //
-// Test construction, modifiers and communicators for surftri_patch.          //
+// Test construction, and modifiers for class SurfTriPatch.                   //
 // ========================================================================== //
 /*---------------------------------------------------------------------------*\
  *
