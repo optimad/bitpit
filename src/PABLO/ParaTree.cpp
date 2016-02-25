@@ -2125,27 +2125,73 @@ ParaTree::getMapping(uint32_t & idx, u32vector & mapper, vector<bool> & isghost)
 	mapper.clear();
 	isghost.clear();
 
-	mapper.push_back(m_mapIdx[idx]);
-	isghost.push_back(false);
-	if (getIsNewC(idx)){
-		if (idx < nocts-1 || !nghbro){
-			for (i=1; i<m_global.m_nchildren; i++){
-				mapper.push_back(m_mapIdx[idx]+i);
-				isghost.push_back(false);
+	if (idx < m_mapIdx.size()){
+
+		mapper.push_back(m_mapIdx[idx]);
+		isghost.push_back(false);
+		if (getIsNewC(idx)){
+			if (idx < nocts-1 || !nghbro){
+				for (i=1; i<m_global.m_nchildren; i++){
+					mapper.push_back(m_mapIdx[idx]+i);
+					isghost.push_back(false);
+				}
 			}
-		}
-		else if (idx == nocts-1 && nghbro){
-			for (i=1; i<m_global.m_nchildren-nghbro; i++){
-				mapper.push_back(m_mapIdx[idx]+i);
-				isghost.push_back(false);
-			}
-			for (i=0; i<nghbro; i++){
-				mapper.push_back(m_octree.m_lastGhostBros[i]);
-				isghost.push_back(true);
+			else if (idx == nocts-1 && nghbro){
+				for (i=1; i<m_global.m_nchildren-nghbro; i++){
+					mapper.push_back(m_mapIdx[idx]+i);
+					isghost.push_back(false);
+				}
+				for (i=0; i<nghbro; i++){
+					mapper.push_back(m_octree.m_lastGhostBros[i]);
+					isghost.push_back(true);
+				}
 			}
 		}
 	}
 
+};
+
+/** Get mapping info of an octant after an adapting or loadbalance with tracking changes.
+ * \param[in] idx Index of new octant.
+ * \param[out] mapper Mapper from new octants to old octants. I.e. mapper[i] = j -> the i-th octant after adapt was in the j-th position before adapt;
+ * if the i-th octant is new after refinement or loadbalance the j-th old octant was the father of the new octant or the same octant respectively;
+ * if the i-th octant is new after coarsening the j-th old octant was a child of the new octant (mapper size = 4).
+ * \param[out] isghost Info on ghostness of old octants.
+ * \param[out] rank Process where the octant was located before the adapt/loadbalance.
+ * I.e. isghost[i] = true/false -> the mapper[i] = j-th old octant was a local/ghost octant.
+ */
+void
+ParaTree::getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost, ivector & rank){
+
+	mapper.resize(1);
+	isghost.resize(1);
+	rank.resize(1);
+	mapper.swap(mapper);
+	isghost.swap(isghost);
+	rank.swap(rank);
+	cout << string(m_lastOp) << endl;
+	if (m_lastOp == "adapt"){
+		getMapping(idx, mapper, isghost);
+		int n = isghost.size();
+		rank.resize(n);
+		for (int i=0; i<n; i++){
+			rank[i] = m_rank;
+		}
+	}
+	else if (m_lastOp == "loadbalance"){
+		uint64_t gidx = getGlobalIdx(idx);
+		cout << gidx << endl;
+		for (int iproc=0; iproc<m_nproc; ++iproc){
+			if (m_partitionRangeGlobalIdx0[iproc]>=gidx){
+				mapper[0] = gidx;
+				if (iproc > 0)
+					mapper[0] -= m_partitionRangeGlobalIdx0[iproc-1] - 1;
+				rank[0] = iproc;
+				isghost[0] = false;
+				break;
+			}
+		}
+	}
 };
 
 // =================================================================================== //
@@ -2163,9 +2209,9 @@ ParaTree::adapt(bool mapper_flag){
 
 	bool done = false;
 
-		done = private_adapt_mapidx(mapper_flag);
-		m_status += done;
-		return done;
+	done = private_adapt_mapidx(mapper_flag);
+	m_status += done;
+	return done;
 
 };
 
@@ -2672,6 +2718,7 @@ ParaTree::loadBalance(uint8_t & level, dvector* weight){
 void
 ParaTree::privateLoadBalance(uint32_t* partition){
 
+	m_lastOp = "loadbalance";
 	if(m_serial)
 	{
 		m_log.writeLog(" ");
@@ -3116,6 +3163,7 @@ ParaTree::private_adapt_mapidx(bool mapflag) {
 	// m_mapIdx init
 	u32vector().swap(m_mapIdx);
 	if (mapflag) {
+		m_lastOp = "adapt";
 		m_mapIdx.resize(nocts);
 		for (uint32_t i=0; i<nocts; i++){
 			m_mapIdx[i] = i;
@@ -3211,6 +3259,9 @@ ParaTree::updateAdapt(){
 	if(m_serial)
 	{
 #endif
+		for (int iproc=0; iproc<m_nproc; iproc++){
+			m_partitionRangeGlobalIdx0[iproc] = m_partitionRangeGlobalIdx[iproc];
+		}
 		m_maxDepth = m_octree.m_localMaxDepth;
 		m_globalNumOctants = m_octree.getNumOctants();
 		for(int p = 0; p < m_nproc; ++p){
@@ -3227,6 +3278,9 @@ ParaTree::updateAdapt(){
 	}
 	else
 	{
+		for (int iproc=0; iproc<m_nproc; iproc++){
+			m_partitionRangeGlobalIdx0[iproc] = m_partitionRangeGlobalIdx[iproc];
+		}
 		//update m_maxDepth
 		m_errorFlag = MPI_Allreduce(&m_octree.m_localMaxDepth,&m_maxDepth,1,MPI_UINT8_T,MPI_MAX,m_comm);
 		//update m_globalNumOctants
@@ -3639,6 +3693,9 @@ ParaTree::updateLoadBalance() {
 	uint64_t* rbuff = new uint64_t[m_nproc];
 	uint64_t local_num_octants = m_octree.getNumOctants();
 	m_errorFlag = MPI_Allgather(&local_num_octants,1,MPI_UINT64_T,rbuff,1,MPI_UINT64_T,m_comm);
+	for (int iproc=0; iproc<m_nproc; iproc++){
+		m_partitionRangeGlobalIdx0[iproc] = m_partitionRangeGlobalIdx[iproc];
+	}
 	for(int p = 0; p < m_nproc; ++p){
 		m_partitionRangeGlobalIdx[p] = 0;
 		for(int pp = 0; pp <=p; ++pp)

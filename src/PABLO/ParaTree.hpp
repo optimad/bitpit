@@ -51,6 +51,7 @@ namespace bitpit {
 // TYPEDEFS																			   //
 // =================================================================================== //
 typedef std::vector<bool>				bvector;
+typedef std::vector<int>				ivector;
 typedef std::bitset<72>					octantID;
 typedef std::vector<Octant*>			ptroctvector;
 typedef ptroctvector::iterator			octantIterator;
@@ -89,6 +90,7 @@ private:
 	uint64_t* 				m_partitionFirstDesc; 			/**<Global array containing position of the first possible octant in each processor*/
 	uint64_t*				m_partitionLastDesc; 			/**<Global array containing position of the last possible octant in each processor*/
 	uint64_t* 				m_partitionRangeGlobalIdx;	 	/**<Global array containing global index of the last existing octant in each processor*/
+	uint64_t* 				m_partitionRangeGlobalIdx0;	 	/**<Global array containing global index of the last existing octant in each processor before the last loadBalance (after an adapt is set equal to the actual.)*/
 	uint64_t 				m_globalNumOctants;   			/**<Global number of octants in the parallel octree*/
 	int 					m_nproc;						/**<Number of processes of the job*/
 	uint8_t 				m_maxDepth;						/**<Global max existing level in the parallel octree*/
@@ -123,6 +125,7 @@ private:
 	//info member
 	uint64_t				m_status;						/**<Label of actual m_status of octree (incremental after an adpat
 															with at least one modifyed element).*/
+	std::string				m_lastOp;						/**<Last adapting operation type (adapt or loadbalance).*/
 
 	//log member
 	Log 					m_log;							/**<Log object*/
@@ -340,6 +343,7 @@ public:
 	Octant* 	getPointOwner(darray3 point);
 	uint32_t 	getPointOwnerIdx(darray3 point);
 	void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost);
+	void 		getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost, ivector & rank);
 
 	// =================================================================================== //
 	// OTHER PARATREE BASED METHODS												    	   //

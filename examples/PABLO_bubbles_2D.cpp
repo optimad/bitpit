@@ -231,9 +231,23 @@ int main(int argc, char *argv[]) {
 			}
 
 #if ENABLE_MPI==1
+			/**<Update the connectivity and write the para_tree.*/
+			pabloBB.updateConnectivity();
+			pabloBB.write("PabloBubble_pre_iter"+to_string(static_cast<unsigned long long>(iter)));
 				/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
 				pabloBB.loadBalance();
+				u32vector 	mapper;
+				bvector		isghost;
+				ivector		rank;
+				uint32_t 	idx = 0;
+				if (pabloBB.getRank() == 2){
+					pabloBB.getMapping(idx, mapper, isghost, rank);
+					cout << idx << " was " << mapper[0] << " on " << rank[0] << endl;
+				}
 #endif
+				/**<Update the connectivity and write the para_tree.*/
+				pabloBB.updateConnectivity();
+				pabloBB.write("PabloBubble_ipost_ter"+to_string(static_cast<unsigned long long>(iter)));
 
 			/**<Update the connectivity and write the para_tree.*/
 			pabloBB.updateConnectivity();
