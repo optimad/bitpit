@@ -2296,11 +2296,17 @@ private:
 	void storage_resize(size_t n)
 	{
 		size_t previous_raw_size = m_v.size();
-		m_v.resize(n + REQUIRED_SENTINEL_COUNT);
+		if (n == previous_raw_size - REQUIRED_SENTINEL_COUNT + 1) {
+			m_v.emplace_back();
+			T &sentinel = m_v.back();
+			sentinel.set_id(SENTINEL_ID);
+		} else {
+			m_v.resize(n + REQUIRED_SENTINEL_COUNT);
 
-		size_t current_raw_size = m_v.size();
-		for (size_t k = std::min(n, previous_raw_size); k < current_raw_size; ++k) {
-			m_v[k].set_id(SENTINEL_ID);
+			size_t current_raw_size = m_v.size();
+			for (size_t k = std::min(n, previous_raw_size); k < current_raw_size; ++k) {
+				m_v[k].set_id(SENTINEL_ID);
+			}
 		}
 	}
 
