@@ -197,8 +197,7 @@ void Cell::resetInterfaces(bool storeInterfaces)
 	if (!storeInterfaces || getType() == ElementInfo::UNDEFINED) {
 		m_interfaces.clear();
 	} else {
-		std::vector<int> interfaceCount(getFaceCount(), 1);
-		m_interfaces = CollapsedVector2D<long>(interfaceCount, NULL_ID);
+		m_interfaces.initialize(getFaceCount(), 1, NULL_ID);
 	}
 }
 
@@ -209,7 +208,7 @@ void Cell::resetInterfaces(bool storeInterfaces)
 */
 void Cell::setInterfaces(std::vector<std::vector<long>> &interfaces)
 {
-	m_interfaces = CollapsedVector2D<long>(interfaces);
+	m_interfaces.initialize(interfaces);
 
 	// The interface vector must have as many elements as faces
 	if (getType() != ElementInfo::UNDEFINED) {
@@ -419,8 +418,7 @@ void Cell::resetAdjacencies(bool storeAdjacencies)
 	if (!storeAdjacencies || getType() == ElementInfo::UNDEFINED) {
 		m_adjacencies.clear();
 	} else {
-		std::vector<int> adjacencyCount(getFaceCount(), 1);
-		m_adjacencies = CollapsedVector2D<long>(adjacencyCount, NULL_ID);
+		m_adjacencies.initialize(getFaceCount(), 1, NULL_ID);
 	}
 }
 
@@ -431,7 +429,7 @@ void Cell::resetAdjacencies(bool storeAdjacencies)
 */
 void Cell::setAdjacencies(std::vector<std::vector<long>> &adjacencies)
 {
-	m_adjacencies = CollapsedVector2D<long>(adjacencies);
+	m_adjacencies.initialize(adjacencies);
 
 	// The adjacency vector must have as many elements as faces
 	if (getType() != ElementInfo::UNDEFINED) {
