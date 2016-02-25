@@ -163,7 +163,7 @@ public:
 	int getDimension() const;
 	bool isThreeDimensional() const;
 	
-	void setConnect(std::unique_ptr<long[]> connect);
+	void setConnect(std::unique_ptr<long[]> &&connect);
 	void unsetConnect();
 	const long * getConnect() const;
 	long * getConnect();

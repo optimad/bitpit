@@ -1046,7 +1046,7 @@ ElementInfo::Type Element::getType() const
 
 	\param connect a pointer to the connectivity of the element
 */
-void Element::setConnect(std::unique_ptr<long[]> connect)
+void Element::setConnect(std::unique_ptr<long[]> &&connect)
 {
 	m_connect = std::move(connect);
 }
