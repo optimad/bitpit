@@ -50,7 +50,7 @@ namespace bitpit {
 	Creates a new generator.
 */
 IndexGenerator::IndexGenerator()
-	: m_next(0), m_depleted(false)
+	: m_id(-1)
 {
 
 }
@@ -65,18 +65,15 @@ IndexGenerator::IndexGenerator()
 */
 long IndexGenerator::generateId()
 {
-	long id;
+	// If the trash is empty generate a new id
 	if (m_trash.empty()) {
-		assert(!m_depleted);
-		if (m_next == std::numeric_limits<long>::max()) {
-			m_depleted = true;
-		}
-
-		id = m_next++;
-	} else {
-		id = m_trash.front();
-		m_trash.pop_front();
+		assert(m_id < std::numeric_limits<long>::max());
+		return ++m_id;
 	}
+
+	// If there are ids in the trash recycle te first id in the list
+	long id = m_trash.front();
+	m_trash.pop_front();
 
 	return id;
 }
@@ -88,7 +85,7 @@ long IndexGenerator::generateId()
 */
 long IndexGenerator::getLastId()
 {
-	return (m_next - 1);
+	return m_id;
 }
 
 /*!
@@ -108,7 +105,7 @@ void IndexGenerator::trashId(const long &id)
 */
 void IndexGenerator::reset()
 {
-	m_next = 0;
+	m_id = -1;
 	m_trash.clear();
 }
 

@@ -54,8 +54,7 @@ public:
 	void reset();
 
 private:
-	long m_next;
-	bool m_depleted;
+	long m_id;
 	std::deque<long> m_trash;
 
 };
