@@ -1306,7 +1306,7 @@ PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, bool inte
 	\return An iterator pointing to the added cell.
 */
 PatchKernel::CellIterator PatchKernel::addCell(ElementInfo::Type type, bool interior,
-                                   std::unique_ptr<long[]> &connect, const long &id)
+                                   std::unique_ptr<long[]> &&connect, const long &id)
 {
 	if (!isExpert()) {
 		return cellEnd();
@@ -2895,7 +2895,7 @@ void PatchKernel::extractEnvelope(PatchKernel &envelope) const
 
 			// Add face to envelope
 			ElementInfo::Type faceType = cell.getFaceType(i);
-			envelope.addCell(faceType, true, faceEnvelopeConnect);
+			envelope.addCell(faceType, true, std::move(faceEnvelopeConnect));
 		}
 	}
 }
