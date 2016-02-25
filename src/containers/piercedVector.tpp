@@ -1861,11 +1861,6 @@ private:
 	*/
 	size_type fill_pos(FillType fillType, const size_type &referencePos)
 	{
-		// If the container is empty, all fills are of type append
-		if (fillType != FILL_APPEND && empty()) {
-			fillType = FILL_APPEND;
-		}
-
 		// Appending to the end of the conatainer is easy: extend the
 		// container and update the last used position. If there
 		// are pending deletes and the filled position is among these
@@ -1891,7 +1886,10 @@ private:
 		// holes and pending deletes.
 		if (fillType == FILL_POSITION) {
 			// Extend the container
-			fill_pos(FILL_APPEND, 0);
+			size_type appendedPos = fill_pos(FILL_APPEND, 0);
+			if (size() == 1) {
+				return appendedPos;
+			}
 
 			// Shit the elements
 			for (size_t i = m_last_pos; i > referencePos; --i) {
@@ -1929,26 +1927,47 @@ private:
 		}
 
 		// Insert at the front or at the back
-		if (fillType == FILL_FRONT || fillType == FILL_BACK) {
+		if (fillType == FILL_FRONT) {
 			// If there are pending deletes we can just pop a position
 			// from the list of pending deletetes.
 			if (!m_pending_deletes.empty()) {
-				if (fillType == FILL_FRONT) {
-					return positions_pop_front(m_pending_deletes);
-				} else if (fillType == FILL_BACK) {
-					return positions_pop_back(m_pending_deletes);
-				}
+				return positions_pop_front(m_pending_deletes);
 			}
 
 			// If there are holes we can fill a hole.
 			if (!m_holes.empty()) {
 				// Pop a hole
-				size_type pos;
-				if (fillType == FILL_FRONT) {
-					pos = positions_pop_front(m_holes);
-				} else {
-					pos = positions_pop_back(m_holes);
+				size_type pos = positions_pop_front(m_holes);
+
+				// Update first and last counters
+				//
+				// If the vector contains a hole, this means that is not empty
+				// and that the hole is before the last element, therefore
+				// only the first position counter may have changed.
+				if (m_first_pos > pos) {
+					m_first_pos = pos;
 				}
+
+				// Return the position filled
+				return pos;
+			}
+
+			// There are no holes nor pending delete: use an append fill.
+			return fill_pos(FILL_APPEND, 0);
+		}
+
+		// Insert at the front or at the back
+		if (fillType == FILL_BACK) {
+			// If there are pending deletes we can just pop a position
+			// from the list of pending deletetes.
+			if (!m_pending_deletes.empty()) {
+				return positions_pop_back(m_pending_deletes);
+			}
+
+			// If there are holes we can fill a hole.
+			if (!m_holes.empty()) {
+				// Pop a hole
+				size_type pos = positions_pop_back(m_holes);
 
 				// Update first and last counters
 				if (m_last_pos < pos) {
