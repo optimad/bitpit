@@ -129,8 +129,8 @@ public:
 		Default constructor
 	*/
 	CollapsedVector2D()
+		: m_index(1, 0L)
 	{
-		clear();
 	}
 
 	/*!
