@@ -344,10 +344,9 @@ public:
 	*/
 	void clear()
 	{
-		m_v.clear();
+		std::vector<T>(0).swap(m_v);
 
-		m_index.clear();
-		m_index.emplace_back(0);
+		std::vector<size_t>(1, 0L).swap(m_index);
 	}
 
 	/*!
