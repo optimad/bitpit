@@ -1095,8 +1095,7 @@ int Element::getFaceCount() const
 		return -1;
 
 	default:
-		const ElementInfo &elementInfo = ElementInfo::getElementInfo(m_type);
-		return elementInfo.nFaces;
+		return getInfo().nFaces;
 
 	}
 }
@@ -1117,8 +1116,7 @@ ElementInfo::Type Element::getFaceType(const int &face) const
 		return ElementInfo::UNDEFINED;
 
 	default:
-		const ElementInfo &elementInfo = ElementInfo::getElementInfo(m_type);
-		return elementInfo.face_type[face];
+		return getInfo().face_type[face];
 
 	}
 }
@@ -1140,8 +1138,7 @@ std::vector<int> Element::getFaceLocalConnect(const int &face) const
 		return std::vector<int>();
 
 	default:
-		const ElementInfo &elementInfo = ElementInfo::getElementInfo(m_type);
-		return elementInfo.faceConnect[face];
+		return getInfo().faceConnect[face];
 
 	}
 }
@@ -1162,8 +1159,7 @@ int Element::getEdgeCount() const
 		return -1;
 
 	default:
-		const ElementInfo &elementInfo = ElementInfo::getElementInfo(m_type);
-		return elementInfo.nEdges;
+		return getInfo().nEdges;
 
 	}
 }
@@ -1185,8 +1181,7 @@ std::vector<int> Element::getEdgeLocalConnect(const int &edge) const
 		return std::vector<int>();
 
 	default:
-		const ElementInfo &elementInfo = ElementInfo::getElementInfo(m_type);
-		return elementInfo.edgeConnect[edge];
+		return getInfo().edgeConnect[edge];
 
 	}
 }
@@ -1211,8 +1206,7 @@ int Element::getDimension() const
 		return -1;
 
 	default:
-		const ElementInfo &elementInfo = ElementInfo::getElementInfo(m_type);
-		return elementInfo.dimension;
+		return getInfo().dimension;
 
 	}
 }
@@ -1244,8 +1238,7 @@ int Element::getVertexCount() const
 		return -1;
 
 	default:
-		const ElementInfo &elementInfo = ElementInfo::getElementInfo(m_type);
-		return elementInfo.nVertices;
+		return getInfo().nVertices;
 
 	}
 }
