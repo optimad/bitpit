@@ -94,7 +94,7 @@ namespace bitpit {
 	Default constructor.
 */
 Cell::Cell()
-	: Element()
+	: Element(), m_interior(true)
 {
 
 }
