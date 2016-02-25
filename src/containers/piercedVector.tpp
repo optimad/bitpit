@@ -208,7 +208,7 @@ public:
 
 		id_type id = m_itr->get_id();
 		if (id != SENTINEL_ID && id < 0) {
-			m_itr += - m_itr->get_id();
+			m_itr += - id;
 		}
 
 		return *this;
@@ -1817,7 +1817,7 @@ private:
 		m_v[pos].set_id(id);
 
 		// Add the id to the map
-		link_id(m_v[pos].get_id(), pos);
+		link_id(id, pos);
 
 		// Return the iterator that points to the element
 		iterator itr;
@@ -1890,8 +1890,10 @@ private:
 		// Shift the elements after the reference position
 		for (size_t i = m_last_pos; i > pos; --i) {
 			m_v[i] = std::move(m_v[i - 1]);
-			if (m_v[i].get_id() > 0) {
-				link_id(m_v[i].get_id(), i, false);
+
+			id_type id = m_v[i].get_id();
+			if (id > 0) {
+				link_id(id, i, false);
 			}
 		}
 
@@ -2404,14 +2406,17 @@ private:
 	{
 	    inline bool operator() (const T &x, const T &y)
 	    {
-		    if (x.get_id() >= 0 && y.get_id() < 0) {
+			id_type id_x = x.get_id();
+			id_type id_y = y.get_id();
+
+		    if (id_x >= 0 && id_y < 0) {
 			    return true;
-		    } else if (x.get_id() < 0 && y.get_id() >= 0) {
+		    } else if (id_x < 0 && id_y >= 0) {
 			    return false;
-		    } else if (x.get_id() >= 0) {
-			    return (x.get_id() < y.get_id());
+		    } else if (id_x >= 0) {
+			    return (id_x < id_y);
 		    } else {
-			    return (x.get_id() > y.get_id());
+			    return (id_x > id_y);
 		    }
 	    }
 	};
