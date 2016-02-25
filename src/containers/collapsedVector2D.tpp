@@ -185,14 +185,6 @@ public:
 	}
 
 	/*!
-		Destructor
-	*/
-	~CollapsedVector2D()
-	{
-		clear();
-	}
-
-	/*!
 		Copy assignment operator
 
 		Assigns new contents to the container, replacing its current
