@@ -149,6 +149,19 @@ public:
 	/*!
 		Creates a new CollapsedVector2D
 
+		\param nSubArrays is the number of sub-arrays
+		\param subArraySize is the size of every sub-array
+		\param value is the value that will be use to initialize the
+		element of the sub-arrays
+	*/
+	CollapsedVector2D(const int &nSubArrays, const int &subArraySize, const T &value = T())
+	{
+		initialize(nSubArrays, subArraySize, value);
+	}
+
+	/*!
+		Creates a new CollapsedVector2D
+
 		\param vector2D is a 2D vector that will be used to initialize
 		the newly created container
 	*/
@@ -219,6 +232,26 @@ public:
 		std::vector<size_t>(nSubArrays + 1, 0L).swap(m_index);
 		for (int i = 0; i < nSubArrays; ++i) {
 			m_index[i+1] = m_index[i] + subArraySizes[i];
+		}
+
+		// Initialize the storage
+		std::vector<T>(m_index[nSubArrays], value).swap(m_v);
+	}
+
+	/*!
+		Initializes the container
+
+		\param nSubArrays is the number of sub-arrays
+		\param subArraySize is the size of every sub-array
+		\param value is the value that will be use to initialize the
+		element of the sub-arrays
+	*/
+	void initialize(const int &nSubArrays, const int &subArraySize, const T &value = T())
+	{
+		// Initialize the indexes
+		std::vector<size_t>(nSubArrays + 1, 0L).swap(m_index);
+		for (int i = 0; i < nSubArrays; ++i) {
+			m_index[i+1] = m_index[i] + subArraySize;
 		}
 
 		// Initialize the storage
