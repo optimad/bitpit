@@ -32,7 +32,6 @@ project("bitpit")
 #------------------------------------------------------------------------------------#
 # Variables visible to the user
 #------------------------------------------------------------------------------------#
-set(ENABLE_PROFILING 0 CACHE BOOL "Set appropriate compiler flags to enable profiling")
 set(ENABLE_MPI 0 CACHE BOOL "If set, the program is compiled with MPI support")
 set(VERBOSE_MAKE 0 CACHE BOOL "Set appropriate compiler and cmake flags to enable verbose output from compilation")
 
@@ -133,8 +132,53 @@ if (ENABLE_MPI)
 endif()
 
 #------------------------------------------------------------------------------------#
+# Customized build types
+#------------------------------------------------------------------------------------#
+
+# GNU Profiling
+SET(CMAKE_CXX_FLAGS_GNUPROFILING "-pg" CACHE STRING
+    "Flags used by the C++ compiler during GNU profiling builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_CXX_FLAGS_GNUPROFILING)
+
+SET(CMAKE_C_FLAGS_GNUPROFILING "-pg" CACHE STRING
+    "Flags used by the C compiler during GNU profiling builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_C_FLAGS_GNUPROFILING)
+
+SET(CMAKE_EXE_LINKER_FLAGS_GNUPROFILING "-pg" CACHE STRING
+    "Flags used for linking binaries during GNU profiling builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_EXE_LINKER_FLAGS_GNUPROFILING)
+
+SET(CMAKE_SHARED_LINKER_FLAGS_GNUPROFILING "-pg" CACHE STRING
+    "Flags used by the shared libraries linker during GNU profiling builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_SHARED_LINKER_FLAGS_GNUPROFILING)
+
+# Scalasca Profiling
+SET(CMAKE_CXX_FLAGS_SCALASCAPROFILING "-O2" CACHE STRING
+    "Flags used by the C++ compiler during Scalasca profiling builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_CXX_FLAGS_SCALASCAPROFILING)
+
+SET(CMAKE_C_FLAGS_SCALASCAPROFILING "-O2" CACHE STRING
+    "Flags used by the C compiler during Scalasca builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_C_FLAGS_SCALASCAPROFILING)
+
+SET(CMAKE_EXE_LINKER_FLAGS_SCALASCAPROFILING "" CACHE STRING
+    "Flags used for linking binaries during Scalasca builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_EXE_LINKER_FLAGS_SCALASCAPROFILING)
+
+SET(CMAKE_SHARED_LINKER_FLAGS_SCALASCAPROFILING "" CACHE STRING
+    "Flags used by the shared libraries linker during Scalasca builds." FORCE)
+MARK_AS_ADVANCED(CMAKE_SHARED_LINKER_FLAGS_SCALASCAPROFILING)
+
+# Update the documentation string of CMAKE_BUILD_TYPE for GUIs
+SET(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING
+    "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel GNUProfiling ScalascaProfiling."
+    FORCE )
+
+#------------------------------------------------------------------------------------#
 # Compilation settings
 #------------------------------------------------------------------------------------#
+string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
+
 set (ENABLE_WARNINGS ${VERBOSE_MAKE})
 if (VERBOSE_MAKE)
 	set(CMAKE_VERBOSE_MAKEFILE ON)
@@ -171,13 +215,6 @@ if (ENABLE_WARNINGS)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra") 
 endif()
 
-if (ENABLE_PROFILING)
-	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pg")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")
-	set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")
-	set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")
-endif (ENABLE_PROFILING)
-
 if (NOT ("${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}.${CMAKE_PATCH_VERSION}" VERSION_LESS "2.8.12"))
 	add_compile_options("-std=c++11")
 else ()
@@ -185,11 +222,41 @@ else ()
 endif ()
 
 # Define a preprocessor macro to recognize debug builds
-string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
 IF(CMAKE_BUILD_TYPE_LOWER MATCHES "debug")
 	add_definitions("-DENABLE_DEBUG=1")
 else ()
 	add_definitions("-DENABLE_DEBUG=0")
+endif ()
+
+# Define an alias for building with scalasca
+if (ENABLE_MPI)
+	SET(C_FLAGS_INSTRUMENT   "-instrument mpicxx")
+	SET(CXX_FLAGS_INSTRUMENT "-instrument mpic")
+else ()
+	SET(C_FLAGS_INSTRUMENT   "")
+	SET(CXX_FLAGS_INSTRUMENT "")
+endif ()
+
+if (CMAKE_BUILD_TYPE_LOWER MATCHES "scalasca")
+	file(WRITE scalasca_c_compiler
+"#!/bin/bash
+scalasca ${C_FLAGS_INSTRUMENT} \"$@\"
+"
+	)
+
+	file(WRITE scalasca_cxx_compiler
+"#!/bin/bash
+scalasca ${C_FLAGS_INSTRUMENT} \"$@\"
+"
+	)
+
+	file(INSTALL scalasca_cxx_compiler DESTINATION ${PROJECT_BINARY_DIR} PERMISSIONS OWNER_READ OWNER_EXECUTE )
+	file(INSTALL scalasca_c_compiler   DESTINATION ${PROJECT_BINARY_DIR} PERMISSIONS OWNER_READ OWNER_EXECUTE )
+	file(REMOVE  scalasca_cxx_compiler)
+	file(REMOVE  scalasca_c_compiler)
+
+	set(CMAKE_CXX_COMPILER "${PROJECT_BINARY_DIR}/scalasca_cxx_compiler")
+	set(CMAKE_C_COMPILER   "${PROJECT_BINARY_DIR}/scalasca_c_compiler")
 endif ()
 
 #------------------------------------------------------------------------------------#
