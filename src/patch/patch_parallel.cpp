@@ -260,9 +260,9 @@ if (m_rank == snd_rank)
                 && ( cell_map.find(cell_idx) == cell_map.end() ) ) {                                   // check #3: cell has not already inserted in the cell list
                  
 /*TMP*/             {
-/*TMP*/                 cout << "cells[cell_idx].isInterior(): " << m_cells[cell_idx].isInterior() << endl;
-/*TMP*/                 cout << "cell_map.find( neigh_idx ) == cell_map.end(): " << bool( cell_map.find(cell_idx) == cell_map.end() ) << endl;
-/*TMP*/                 cout << "ghost_map.find( neigh_idx ) == ghost_map.end(): " << bool( ghost_map.find(cell_idx) == ghost_map.end() ) << endl;
+/*TMP*///                 cout << "cells[cell_idx].isInterior(): " << m_cells[cell_idx].isInterior() << endl;
+/*TMP*///                 cout << "cell_map.find( neigh_idx ) == cell_map.end(): " << bool( cell_map.find(cell_idx) == cell_map.end() ) << endl;
+/*TMP*///                 cout << "ghost_map.find( neigh_idx ) == ghost_map.end(): " << bool( ghost_map.find(cell_idx) == ghost_map.end() ) << endl;
 /*TMP*/             }
 
                     if ( m_cells[cell_idx].isInterior() ) {
@@ -271,7 +271,7 @@ if (m_rank == snd_rank)
                         ++ghost_counter;
                     }
                     else {
-/*TMP*/                 cout << " we should never enter here" << endl;
+/*TMP*///                 cout << " we should never enter here" << endl;
                         for (m = m_ghost2id.begin(); m != m_ghost2id.end(); ++m) {
                             n = find( m->second.begin(), m->second.end(), UnaryPredicate<const long, long>(cell_idx) );
                             if ( n != m->second.end() ) {

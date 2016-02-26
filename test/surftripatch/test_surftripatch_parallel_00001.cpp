@@ -35,6 +35,8 @@
 # include <array>
 # include <vector>
 # include <iostream>
+# include <ctime>
+# include <chrono>
 
 // BitPit
 # include "bitpit_common.hpp"                                                 // Utilities and common definitions
@@ -47,6 +49,7 @@
 // ========================================================================== //
 using namespace std;
 using namespace bitpit;
+using namespace chrono;
 
 // ========================================================================== //
 // GENERATE A TEST NON-MANIFOLD SURFACE TRIANGULATION FOR TESTS.              //
@@ -391,6 +394,204 @@ return 0;
 }
 
 // ========================================================================== //
+// SUBTEST #002 Mesh partitioning                                             //
+// ========================================================================== //
+int subtest_002(
+    void
+) {
+
+// ========================================================================== //
+// int subtest_002(                                                           //
+//     void)                                                                  //
+//                                                                            //
+// Mesh partitioning.                                                         //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+bool                    stl_type = true;
+string                  stl_name("./data/buddha.stl");
+SurfTriPatch            mesh(0);
+vector<long>            cell_list;
+
+// Counters
+// none
+
+// ========================================================================== //
+// SET MESH ATTRIBUTES                                                        //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    // none
+
+    // Set MPI communicator ------------------------------------------------- //
+    mesh.setExpert(true);
+    mesh.setCommunicator(MPI_COMM_WORLD);
+
+}
+
+// ========================================================================== //
+// OUTPUT MESSAGE                                                             //
+// ========================================================================== //
+if (mesh.getRank() == 0) {
+
+    // Scope variables ------------------------------------------------------ //
+    stringstream                out_msg;
+
+    // Output message ------------------------------------------------------- //
+    out_msg << "** ================================================================= **" << endl;
+    out_msg << "** Test #00001 - sub-test #002 - Testing mesh partitioning           **" << endl;
+    out_msg << "** ================================================================= **" << endl;
+    cout << out_msg.str() << endl;
+}
+
+// ========================================================================== //
+// LOAD STL MESH                                                              // 
+// ========================================================================== //
+if (mesh.getRank() == 0) {
+
+    // Scope variables ------------------------------------------------------ //
+    high_resolution_clock::time_point   t0, t1;
+    duration<double>                    time_span;
+    stringstream                        out_msg;
+
+    // Load stl geometry ---------------------------------------------------- //
+    out_msg << "** Rank#0, initializing mesh" << endl;
+    out_msg << "   Importing stl file from : \"" << stl_name << "\"" << endl;
+    t0 = high_resolution_clock::now();
+    mesh.importSTL(stl_name, stl_type);
+    t1 = high_resolution_clock::now();
+    time_span = duration_cast<duration<double>>(t1 - t0);
+    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+
+    // Clean geometry ------------------------------------------------------- //
+    out_msg << "   deleting duplicate vertices" << endl;
+    t0 = high_resolution_clock::now();
+    mesh.deleteCoincidentVertex();
+    t1 = high_resolution_clock::now();
+    time_span = duration_cast<duration<double>>(t1 - t0);
+    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+
+    // Build adjacency ------------------------------------------------------ //
+    out_msg << "   building adjacencies" << endl;
+    t0 = high_resolution_clock::now();
+    mesh.buildAdjacencies();
+    t1 = high_resolution_clock::now();
+    time_span = duration_cast<duration<double>>(t1 - t0);
+    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+
+    // Display Stats -------------------------------------------------------- //
+    mesh.displayTopologyStats(out_msg, 3);
+
+    // Export final mesh ---------------------------------------------------- //
+    out_msg << "   exporting initial mesh" << endl;
+    t0 = high_resolution_clock::now();
+    mesh.write("initmesh");
+    t1 = high_resolution_clock::now();
+    time_span = duration_cast<duration<double>>(t1 - t0);
+    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+    cout << out_msg.str() << endl;
+
+}
+
+// ========================================================================== //
+// PARTITIONATE MESH                                                          //
+// ========================================================================== //
+if (mesh.getRank() == 0) {
+
+    // Scope variables ------------------------------------------------------ //
+    stringstream                        out_msg;
+    array<double, 3>                    m, M, s, C;
+    SurfTriPatch::CellIterator          c_, e_;
+    high_resolution_clock::time_point   t0, t1;
+    duration<double>                    time_span;
+
+    // Compute bounding box ------------------------------------------------- //
+    out_msg << "** Rank#0, partitioning mesh" << endl;
+    out_msg << "   Computing b. box" << endl;
+    t0 = high_resolution_clock::now();
+    mesh.getBoundingBox(m, M);
+    t1 = high_resolution_clock::now();
+    time_span = duration_cast<duration<double>>(t1 - t0);
+    out_msg << "     left bottom corner: " << m << endl;
+    out_msg << "     right upper corner: " << M << endl;
+    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+
+    // Compute bounding box ------------------------------------------------- //
+    out_msg << "   creating list of elements" << endl;
+    cell_list.reserve(mesh.getCellCount());
+    s = 0.5*(m + M);
+    e_ = mesh.cellEnd();
+    for (c_ = mesh.cellBegin(); c_ != e_; ++c_) {
+        if ((mesh.evalCellCentroid(c_->get_id())[2] > s[2])
+         && (c_->isInterior())) {
+            cell_list.push_back(c_->get_id());
+        }
+    } //next c_
+    out_msg << "     " << cell_list.size() << " cells will be sent to process rank#1 ("
+         << 100.0*double(cell_list.size())/double(mesh.getCellCount())
+         << "% of total number of cells)" << endl;
+    cout << out_msg.str() << endl;
+}
+
+// ========================================================================== //
+// COMMUNICATING CELLS                                                        //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    high_resolution_clock::time_point   t0, t1;
+    stringstream                        out_msg;
+    duration<double>                    time_span;
+
+    // Send cells ----------------------------------------------------------- //
+    t0 = high_resolution_clock::now();
+    out_msg << "** Rank#" << mesh.getRank() << " sending cells to 1" << endl;
+    out_msg << "   sending cells" << endl;
+    mesh.sendCells(0, 1, cell_list);
+    t1 = high_resolution_clock::now();
+    time_span = duration_cast<duration<double>>(t1 - t0);
+    out_msg << "     (on rank#" << mesh.getRank() << " " << time_span.count() << " sec.)" << endl;
+
+    // Export mesh ---------------------------------------------------------- //
+    out_msg << "   exporting final mesh" << endl;
+    t0 = high_resolution_clock::now();
+    mesh.write("partitionedmesh");
+    t1 = high_resolution_clock::now();
+    time_span = duration_cast<duration<double>>(t1 - t0);
+    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+    cout << out_msg.str() << endl;
+}
+
+// ========================================================================== //
+// OUTPUT MESSAGE                                                             //
+// ========================================================================== //
+if (mesh.getRank() == 0) {
+
+    // Scope variables ------------------------------------------------------ //
+    stringstream        out_msg;
+
+    // Output message ------------------------------------------------------- //
+    out_msg << "** ================================================================= **" << endl;
+    out_msg << "** Test #00001 - sub-test #002 - completed!                          **" << endl;
+    out_msg << "** ================================================================= **" << endl;
+    cout << out_msg.str() << endl;
+}
+return 0;
+
+}
+
+// ========================================================================== //
 // MAIN FOR TEST #00001 - parallel                                            //
 // ========================================================================== //
 int main(int argc, char* argv[])
@@ -418,8 +619,15 @@ int                             err = 0;
 // ========================================================================== //
 // RUN SUB-TEST #001                                                          //
 // ========================================================================== //
-err = subtest_001();
+//*Uncommnet in the final version*/err = subtest_001();
 if (err > 0) return(10 + err);
+
+// ========================================================================== //
+// RUN SUB-TEST #002                                                          //
+// ========================================================================== //
+err = subtest_002();
+if (err > 0) return(20 + err);
+
 
 // ========================================================================== //
 // FINALIZE MPI COMMUNICATOR                                                  //
