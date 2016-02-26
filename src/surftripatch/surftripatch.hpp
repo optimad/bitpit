@@ -64,6 +64,7 @@ public:
         void updateAdjacencies(const std::vector<long>&);
 
         //TODO: double evalCellArea(const long &);
+        std::array<double, 3> evalCellCentroid(const long &);
         double evalEdgeLength(const long&, const int&);
         double evalMinEdgeLength(const long &, int &);
         double evalMaxEdgeLength(const long &, int &);
