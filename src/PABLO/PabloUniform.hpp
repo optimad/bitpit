@@ -73,11 +73,11 @@ private:
 	// =================================================================================== //
 public:
 #if ENABLE_MPI==1
-	PabloUniform(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
-	PabloUniform(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
+	PabloUniform(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile = "bitpit", MPI_Comm comm = MPI_COMM_WORLD);
+	PabloUniform(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile = "bitpit", MPI_Comm comm = MPI_COMM_WORLD);
 #else
-	PabloUniform(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
-	PabloUniform(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
+	PabloUniform(uint8_t dim = 2, int8_t maxlevel = 20,std::string logfile = "bitpit");
+	PabloUniform(double X, double Y, double Z, double L, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile = "bitpit");
 #endif
 
 	// =================================================================================== //

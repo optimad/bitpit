@@ -505,7 +505,7 @@ void Logger::setFileVerbosity(log::Verbosity verbosity)
 	if (m_fileVerbosity == log::QUIET) {
 		isFileEnabled = false;
 	} else if (m_visibility == log::MASTER && !m_isMaster) {
-		m_buffer.setConsoleEnabled(false);
+		isFileEnabled = false;
 	} else {
 		isFileEnabled = (m_fileVerbosity >= m_priority);
 	}
@@ -669,6 +669,8 @@ void Logger::setParallel(int nProcessors, int rank)
 		m_buffer.setFilePrefix("");
 	}
 
+	setConsoleVerbosity(m_consoleVerbosity);
+	setFileVerbosity(m_fileVerbosity);
 	// Reopen the log file
 	if (m_fileStream.is_open()) {
 		openLogFile(false);

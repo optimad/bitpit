@@ -39,7 +39,6 @@
 #include "Octant.hpp"
 #include "LocalTree.hpp"
 #include "Map.hpp"
-#include "Log.hpp"
 #include "bitpit_IO.hpp"
 #include <map>
 #include <set>
@@ -129,8 +128,7 @@ private:
 	std::string				m_lastOp;						/**<Last adapting operation type (adapt or loadbalance).*/
 
 	//log member
-	Log 					m_log;							/**<Log object*/
-	//Logger & 				m_log;							/**<Log object pointer*/
+	Logger* 				m_log;							/**<Log object pointer*/
 
 	//communicator
 #if ENABLE_MPI==1
@@ -143,11 +141,15 @@ private:
 	// =================================================================================== //
 public:
 #if ENABLE_MPI==1
-	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
-	ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
+//	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
+//	ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
+	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile = "bitpit", MPI_Comm comm = MPI_COMM_WORLD);
+	ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20,  std::string logfile = "bitpit", MPI_Comm comm = MPI_COMM_WORLD);
 #else
-	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
-	ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
+//	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
+//	ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
+	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20,  std::string logfile = "bitpit");
+	ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20,  std::string logfile = "bitpit");
 #endif
 	~ParaTree();
 
@@ -164,6 +166,7 @@ public:
 	bool		getParallel();
 	int 		getRank();
 	int 		getNproc();
+	Logger* 	getLog();
 #if ENABLE_MPI==1
 	MPI_Comm	getComm();
 #endif
@@ -517,8 +520,10 @@ public:
 	void
 	loadBalance(DataLBInterface<Impl> & userData, dvector* weight = NULL){
 		//Write info on m_log
-		m_log.writeLog("---------------------------------------------");
-		m_log.writeLog(" LOAD BALANCE ");
+//		m_log.writeLog("---------------------------------------------");
+//		m_log.writeLog(" LOAD BALANCE ");
+		(*m_log) << "---------------------------------------------" << endl;
+		(*m_log) << " LOAD BALANCE " << endl;
 
 		if (m_nproc>1){
 
@@ -532,10 +537,13 @@ public:
 
 			if(m_serial)
 			{
-				m_log.writeLog(" ");
-				m_log.writeLog(" Initial Serial distribution : ");
+//				m_log.writeLog(" ");
+//				m_log.writeLog(" Initial Serial distribution : ");
+				(*m_log) << " " << endl;
+				(*m_log) << " Initial Serial distribution : " << endl;
 				for(int ii=0; ii<m_nproc; ii++){
-					m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]+1)));
+//					m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]+1)));
+					(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]+1)) << endl;
 				}
 
 				uint32_t stride = 0;
@@ -558,11 +566,15 @@ public:
 			}
 			else
 			{
-				m_log.writeLog(" ");
-				m_log.writeLog(" Initial Parallel partition : ");
-				m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
+//				m_log.writeLog(" ");
+//				m_log.writeLog(" Initial Parallel partition : ");
+//				m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
+				(*m_log) << " " << endl;
+				(*m_log) << " Initial Parallel partition : " << endl;
+				(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1));
 				for(int ii=1; ii<m_nproc; ii++){
-					m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])));
+//					m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])));
+					(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])) << endl;
 				}
 
 				//empty ghosts
@@ -1007,22 +1019,33 @@ public:
 			partition = NULL;
 
 			//Write info of final partition on m_log
-			m_log.writeLog(" ");
-			m_log.writeLog(" Final Parallel partition : ");
-			m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
+//			m_log.writeLog(" ");
+//			m_log.writeLog(" Final Parallel partition : ");
+//			m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
+			(*m_log) << " " << endl;
+			(*m_log) << " Final Parallel partition : " << endl;
+			(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
 			for(int ii=1; ii<m_nproc; ii++){
-				m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])));
+//				m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])));
+				(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])) << endl;
 			}
-			m_log.writeLog(" ");
-			m_log.writeLog("---------------------------------------------");
+//			m_log.writeLog(" ");
+//			m_log.writeLog("---------------------------------------------");
+			(*m_log) << " " << endl;
+			(*m_log) << "---------------------------------------------" << endl;
 
 		}
 		else{
-			m_log.writeLog(" ");
-			m_log.writeLog(" Serial partition : ");
-			m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
-			m_log.writeLog(" ");
-			m_log.writeLog("---------------------------------------------");
+//			m_log.writeLog(" ");
+//			m_log.writeLog(" Serial partition : ");
+//			m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
+//			m_log.writeLog(" ");
+//			m_log.writeLog("---------------------------------------------");
+			(*m_log) << " " << endl;
+			(*m_log) << " Serial partition : " << endl;
+			(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
+			(*m_log) << " " << endl;
+			(*m_log) << "---------------------------------------------" << endl;
 		}
 	}
 
@@ -1039,8 +1062,10 @@ public:
 	loadBalance(DataLBInterface<Impl> & userData, uint8_t & level, dvector* weight = NULL){
 
 		//Write info on m_log
-		m_log.writeLog("---------------------------------------------");
-		m_log.writeLog(" LOAD BALANCE ");
+//		m_log.writeLog("---------------------------------------------");
+//		m_log.writeLog(" LOAD BALANCE ");
+		(*m_log) << "---------------------------------------------" << endl;
+		(*m_log) << " LOAD BALANCE " << endl;
 
 		if (m_nproc>1){
 
@@ -1049,10 +1074,13 @@ public:
 
 			if(m_serial)
 			{
-				m_log.writeLog(" ");
-				m_log.writeLog(" Initial Serial distribution : ");
+//				m_log.writeLog(" ");
+//				m_log.writeLog(" Initial Serial distribution : ");
+				(*m_log) << " " << endl;
+				(*m_log) << " Initial Serial distribution : " << endl;
 				for(int ii=0; ii<m_nproc; ii++){
-					m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]+1)));
+//					m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]+1)));
+					(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]+1)) << endl;
 				}
 
 				uint32_t stride = 0;
@@ -1076,11 +1104,15 @@ public:
 			}
 			else
 			{
-				m_log.writeLog(" ");
-				m_log.writeLog(" Initial Parallel partition : ");
-				m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
+//				m_log.writeLog(" ");
+//				m_log.writeLog(" Initial Parallel partition : ");
+//				m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
+				(*m_log) << " " << endl;
+				(*m_log) << " Initial Parallel partition : " << endl;
+				(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
 				for(int ii=1; ii<m_nproc; ii++){
-					m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])));
+					(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])) << endl;
+//					m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])));
 				}
 
 				//empty ghosts
@@ -1522,22 +1554,33 @@ public:
 			partition = NULL;
 
 			//Write info of final partition on m_log
-			m_log.writeLog(" ");
-			m_log.writeLog(" Final Parallel partition : ");
-			m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
+//			m_log.writeLog(" ");
+//			m_log.writeLog(" Final Parallel partition : ");
+//			m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
+			(*m_log) << " " << endl;
+			(*m_log) << " Final Parallel partition : " << endl;
+			(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
 			for(int ii=1; ii<m_nproc; ii++){
-				m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])));
+//				m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])));
+				(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])) << endl;
 			}
-			m_log.writeLog(" ");
-			m_log.writeLog("---------------------------------------------");
+//			m_log.writeLog(" ");
+//			m_log.writeLog("---------------------------------------------");
+			(*m_log) << " " << endl;
+			(*m_log) << "---------------------------------------------" << endl;
 
 		}
 		else{
-			m_log.writeLog(" ");
-			m_log.writeLog(" Serial partition : ");
-			m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
-			m_log.writeLog(" ");
-			m_log.writeLog("---------------------------------------------");
+//			m_log.writeLog(" ");
+//			m_log.writeLog(" Serial partition : ");
+//			m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
+//			m_log.writeLog(" ");
+//			m_log.writeLog("---------------------------------------------");
+			(*m_log) << " " << endl;
+			(*m_log) << " Serial partition : " << endl;
+			(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
+			(*m_log) << " " << endl;
+			(*m_log) << "---------------------------------------------" << endl;
 		}
 	}
 

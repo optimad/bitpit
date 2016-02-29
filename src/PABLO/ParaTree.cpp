@@ -54,7 +54,8 @@ using namespace std;
  * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
  * \param[in] m_comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
  */
-ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm m_comm) : m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(logfile,m_comm),m_comm(m_comm){
+//ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm m_comm ) : m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(logfile,m_comm),m_comm(m_comm){
+ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm m_comm ) : m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(&log::cout(logfile)),m_comm(m_comm){
 #else
 	/*! Default constructor of ParaTree.
 	 * It builds one octant with node 0 in the Origin (0,0,0) and side of length 1.
@@ -62,7 +63,8 @@ ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm m_comm
 	 * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
 	 * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
 	 */
-ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, string logfile ) : m_octree(maxlevel,dim),m_trans(maxlevel, dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(logfile){
+//ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, string logfile ) : m_octree(maxlevel,dim),m_trans(maxlevel, dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(logfile){
+ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile ) : m_octree(maxlevel,dim),m_trans(maxlevel, dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(&log::cout(logfile)){
 #endif
 	m_global.setGlobal(maxlevel, m_dim);
 	m_serial = true;
@@ -91,16 +93,22 @@ ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, string logfile ) : m_octree(max
 	m_periodic.resize(m_global.m_nfaces, false);
 	m_tol = 1.0e-14;
 	// Write info log
-	m_log.writeLog("---------------------------------------------");
-	m_log.writeLog("- PABLO PArallel Balanced Linear Octree -");
-	m_log.writeLog("---------------------------------------------");
-	m_log.writeLog(" ");
-	m_log.writeLog("---------------------------------------------");
-	m_log.writeLog(" Number of proc		:	" + to_string(static_cast<unsigned long long>(m_nproc)));
-	m_log.writeLog(" Dimension		:	" + to_string(static_cast<unsigned long long>(m_dim)));
-	m_log.writeLog(" Max allowed level	:	" + to_string(static_cast<unsigned long long>(m_global.m_maxLevel)));
-	m_log.writeLog("---------------------------------------------");
-	m_log.writeLog(" ");
+	m_log->setParallel(m_nproc, m_rank);
+	if (logfile == "PABLO"){
+		(*m_log) << fileVerbosity(log::NORMAL);
+		(*m_log) << consoleVerbosity(log::QUIET);
+	}
+	(*m_log) << log::context("PABLO");
+	(*m_log) << "---------------------------------------------" << endl;
+	(*m_log) << "- PABLO PArallel Balanced Linear Octree -" << endl;
+	(*m_log) << "---------------------------------------------" << endl;
+	(*m_log) << " " << endl;
+	(*m_log) << "---------------------------------------------" << endl;
+	(*m_log) << " Number of proc	:	" + to_string(static_cast<unsigned long long>(m_nproc)) << endl;
+	(*m_log) << " Dimension		:	" + to_string(static_cast<unsigned long long>(m_dim)) << endl;
+	(*m_log) << " Max allowed level	:	" + to_string(static_cast<unsigned long long>(m_global.m_maxLevel)) << endl;
+	(*m_log) << "---------------------------------------------" << endl;
+	(*m_log) << " " << endl;
 #if ENABLE_MPI==1
 	MPI_Barrier(m_comm);
 #endif
@@ -118,7 +126,8 @@ ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, string logfile ) : m_octree(max
  * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
  * \param[in] m_comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
  */
-ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm m_comm):m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(logfile,m_comm),m_comm(m_comm){
+//ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm m_comm):m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(logfile,m_comm),m_comm(m_comm){
+ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm m_comm):m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(&log::cout(logfile)),m_comm(m_comm){
 #else
 	/*! Constructor of ParaTree for restart a simulation with input parameters.
 	 * For each process it builds a vector of octants. The input parameters are :
@@ -128,7 +137,7 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 	 * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
 	 * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
 	 */
-ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, string logfile):m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(logfile){
+ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, std::string logfile ):m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(&log::cout(logfile)){
 #endif
 	uint8_t lev, iface;
 	uint32_t x0, y0, z0;
@@ -195,19 +204,25 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 	m_periodic.resize(m_global.m_nfaces, false);
 	m_tol = 1.0e-14;
 	// Write info log
-	m_log.writeLog("---------------------------------------------");
-	m_log.writeLog("- PABLO PArallel Balanced Linear Octree -");
-	m_log.writeLog("---------------------------------------------");
-	m_log.writeLog(" ");
-	m_log.writeLog("---------------------------------------------");
-	m_log.writeLog("- PABLO restart -");
-	m_log.writeLog("---------------------------------------------");
-	m_log.writeLog(" Number of proc		:	" + to_string(static_cast<unsigned long long>(m_nproc)));
-	m_log.writeLog(" Dimension		:	" + to_string(static_cast<unsigned long long>(m_dim)));
-	m_log.writeLog(" Max allowed level	:	" + to_string(static_cast<unsigned long long>(m_global.m_maxLevel)));
-	m_log.writeLog(" Number of octants	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)));
-	m_log.writeLog("---------------------------------------------");
-	m_log.writeLog(" ");
+	m_log->setParallel(m_nproc, m_rank);
+	if (logfile == "PABLO"){
+		(*m_log) << fileVerbosity(log::NORMAL);
+		(*m_log) << consoleVerbosity(log::QUIET);
+	}
+	(*m_log) << log::context("PABLO");
+	(*m_log) << "---------------------------------------------" << endl;
+	(*m_log) << "- PABLO PArallel Balanced Linear Octree -" << endl;
+	(*m_log) << "---------------------------------------------" << endl;
+	(*m_log) << " " << endl;
+	(*m_log) << "---------------------------------------------" << endl;
+	(*m_log) << "- PABLO restart -" << endl;
+	(*m_log) << "---------------------------------------------" << endl;
+	(*m_log) << " Number of proc	:	" + to_string(static_cast<unsigned long long>(m_nproc)) << endl;
+	(*m_log) << " Dimension		:	" + to_string(static_cast<unsigned long long>(m_dim)) << endl;
+	(*m_log) << " Max allowed level	:	" + to_string(static_cast<unsigned long long>(m_global.m_maxLevel)) << endl;
+	(*m_log) << " Number of octants	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
+	(*m_log) << "---------------------------------------------" << endl;
+	(*m_log) << " " << endl;
 #if ENABLE_MPI==1
 	MPI_Barrier(m_comm);
 #endif
@@ -218,10 +233,10 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 /*! Default Destructor of ParaTree.
 */
 ParaTree::~ParaTree(){
-	m_log.writeLog("---------------------------------------------");
-	m_log.writeLog("--------------- R.I.P. PABLO ----------------");
-	m_log.writeLog("---------------------------------------------");
-	m_log.writeLog("---------------------------------------------");
+	(*m_log) << "---------------------------------------------" << endl;
+	(*m_log) << "--------------- R.I.P. PABLO ----------------" << endl;
+	(*m_log) << "---------------------------------------------" << endl;
+	(*m_log) << "---------------------------------------------" << endl;
 };
 
 // =================================================================================== //
@@ -279,6 +294,14 @@ int
 ParaTree::getNproc(){
 	return m_nproc;
 };
+
+/*!Get the logger.
+ * \return Pointer to logger object.
+ */
+Logger*
+ParaTree::getLog(){
+	return m_log;
+}
 
 #if ENABLE_MPI==1
 /*! Get thecommunicator used by octree between processes.
@@ -2249,12 +2272,12 @@ ParaTree::adaptGlobalRefine(bool mapper_flag) {
 	bool globalDone = false;
 	if(m_serial){
 #endif
-		m_log.writeLog("---------------------------------------------");
-		m_log.writeLog(" ADAPT (Global Refine)");
-		m_log.writeLog(" ");
+		(*m_log) << "---------------------------------------------" << endl;
+		(*m_log) << " ADAPT (Global Refine)" << endl;
+		(*m_log) << " " << endl;
 
-		m_log.writeLog(" ");
-		m_log.writeLog(" Initial Number of octants	:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())));
+		(*m_log) << " " << endl;
+		(*m_log) << " Initial Number of octants		:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())) << endl;
 
 		// Refine
 		if (mapper_flag){
@@ -2266,7 +2289,7 @@ ParaTree::adaptGlobalRefine(bool mapper_flag) {
 
 		if (m_octree.getNumOctants() > nocts)
 			localDone = true;
-		m_log.writeLog(" Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())));
+		(*m_log) << " Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())) << endl;
 		nocts = m_octree.getNumOctants();
 		updateAdapt();
 
@@ -2274,17 +2297,17 @@ ParaTree::adaptGlobalRefine(bool mapper_flag) {
 		MPI_Barrier(m_comm);
 		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
 #endif
-		m_log.writeLog(" ");
-		m_log.writeLog("---------------------------------------------");
+		(*m_log) << " " << endl;
+		(*m_log) << "---------------------------------------------" << endl;
 #if ENABLE_MPI==1
 	}
 	else{
-		m_log.writeLog("---------------------------------------------");
-		m_log.writeLog(" ADAPT (Global Refine)");
-		m_log.writeLog(" ");
+		(*m_log) << "---------------------------------------------" << endl;
+		(*m_log) << " ADAPT (Global Refine)" << endl;
+		(*m_log) << " " << endl;
 
-		m_log.writeLog(" ");
-		m_log.writeLog(" Initial Number of octants	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)));
+		(*m_log) << " " << endl;
+		(*m_log) << " Initial Number of octants		:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
 
 		// Refine
 		if (mapper_flag){
@@ -2298,13 +2321,13 @@ ParaTree::adaptGlobalRefine(bool mapper_flag) {
 			localDone = true;
 		updateAdapt();
 		setPboundGhosts();
-		m_log.writeLog(" Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)));
+		(*m_log) << " Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
 		nocts = m_octree.getNumOctants();
 
 		MPI_Barrier(m_comm);
 		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
-		m_log.writeLog(" ");
-		m_log.writeLog("---------------------------------------------");
+		(*m_log) << " " << endl;
+		(*m_log) << "---------------------------------------------" << endl;
 	}
 	return globalDone;
 #else
@@ -2343,15 +2366,15 @@ ParaTree::adaptGlobalCoarse(bool mapper_flag) {
 	bool globalDone = false;
 	if(m_serial){
 #endif
-		m_log.writeLog("---------------------------------------------");
-		m_log.writeLog(" ADAPT (Global Coarse)");
-		m_log.writeLog(" ");
+		(*m_log) << "---------------------------------------------" << endl;
+		(*m_log) << " ADAPT (Global Coarse)" << endl;
+		(*m_log) << " " << endl;
 
 		// 2:1 Balance
 		balance21(true);
 
-		m_log.writeLog(" ");
-		m_log.writeLog(" Initial Number of octants	:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())));
+		(*m_log) << " " << endl;
+		(*m_log) << " Initial Number of octants		:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())) << endl;
 
 		// Coarse
 		if (mapper_flag){
@@ -2374,25 +2397,25 @@ ParaTree::adaptGlobalCoarse(bool mapper_flag) {
 		}
 		nocts = m_octree.getNumOctants();
 
-		m_log.writeLog(" Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(nocts)));
+		(*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(nocts)) << endl;
 #if ENABLE_MPI==1
 		MPI_Barrier(m_comm);
 		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
 #endif
-		m_log.writeLog(" ");
-		m_log.writeLog("---------------------------------------------");
+		(*m_log) << " " << endl;
+		(*m_log) << "---------------------------------------------" << endl;
 #if ENABLE_MPI==1
 	}
 	else{
-		m_log.writeLog("---------------------------------------------");
-		m_log.writeLog(" ADAPT (Global Coarse)");
-		m_log.writeLog(" ");
+		(*m_log) << "---------------------------------------------" << endl;
+		(*m_log) << " ADAPT (Global Coarse)" << endl;
+		(*m_log) << " " << endl;
 
 		// 2:1 Balance
 		balance21(true);
 
-		m_log.writeLog(" ");
-		m_log.writeLog(" Initial Number of octants	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)));
+		(*m_log) << " " << endl;
+		(*m_log) << " Initial Number of octants		:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
 
 		// Coarse
 		if (mapper_flag){
@@ -2419,9 +2442,9 @@ ParaTree::adaptGlobalCoarse(bool mapper_flag) {
 
 		MPI_Barrier(m_comm);
 		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
-		m_log.writeLog(" Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)));
-		m_log.writeLog(" ");
-		m_log.writeLog("---------------------------------------------");
+		(*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
+		(*m_log) << " " << endl;
+		(*m_log) << "---------------------------------------------" << endl;
 	}
 	return globalDone;
 #else
@@ -2630,8 +2653,8 @@ void
 ParaTree::loadBalance(dvector* weight){
 
 	//Write info on log
-	m_log.writeLog("---------------------------------------------");
-	m_log.writeLog(" LOAD BALANCE ");
+	(*m_log) << "---------------------------------------------" << endl;
+	(*m_log) << " LOAD BALANCE " << endl;
 
 	if (m_nproc>1){
 
@@ -2649,22 +2672,22 @@ ParaTree::loadBalance(dvector* weight){
 		partition = NULL;
 
 		//Write info of final partition on log
-		m_log.writeLog(" ");
-		m_log.writeLog(" Final Parallel partition : ");
-		m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
+		(*m_log) << " " << endl;
+		(*m_log) << " Final Parallel partition : " << endl;
+		(*m_log) << " Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
 		for(int ii=1; ii<m_nproc; ii++){
-			m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(ii))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])));
+			(*m_log) << " Octants for proc	"+ to_string(static_cast<unsigned long long>(ii))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])) << endl;
 		}
-		m_log.writeLog(" ");
-		m_log.writeLog("---------------------------------------------");
+		(*m_log) << " " << endl;
+		(*m_log) << "---------------------------------------------" << endl;
 
 	}
 	else{
-		m_log.writeLog(" ");
-		m_log.writeLog(" Serial partition : ");
-		m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
-		m_log.writeLog(" ");
-		m_log.writeLog("---------------------------------------------");
+		(*m_log) << " " << endl;
+		(*m_log) << " Serial partition : " << endl;
+		(*m_log) << " Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
+		(*m_log) << " " << endl;
+		(*m_log) << "---------------------------------------------" << endl;
 	}
 
 }
@@ -2679,8 +2702,8 @@ void
 ParaTree::loadBalance(uint8_t & level, dvector* weight){
 
 	//Write info on log
-	m_log.writeLog("---------------------------------------------");
-	m_log.writeLog(" LOAD BALANCE ");
+	(*m_log) << "---------------------------------------------" << endl;
+	(*m_log) << " LOAD BALANCE " << endl;
 
 	if (m_nproc>1){
 
@@ -2693,22 +2716,22 @@ ParaTree::loadBalance(uint8_t & level, dvector* weight){
 		partition = NULL;
 
 		//Write info of final partition on log
-		m_log.writeLog(" ");
-		m_log.writeLog(" Final Parallel partition : ");
-		m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
+		(*m_log) << " " << endl;
+		(*m_log) << " Final Parallel partition : " << endl;
+		(*m_log) << " Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
 		for(int ii=1; ii<m_nproc; ii++){
-			m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(ii))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])));
+			(*m_log) << " Octants for proc	"+ to_string(static_cast<unsigned long long>(ii))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])) << endl;
 		}
-		m_log.writeLog(" ");
-		m_log.writeLog("---------------------------------------------");
+		(*m_log) << " " << endl;
+		(*m_log) << "---------------------------------------------" << endl;
 
 	}
 	else{
-		m_log.writeLog(" ");
-		m_log.writeLog(" Serial partition : ");
-		m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
-		m_log.writeLog(" ");
-		m_log.writeLog("---------------------------------------------");
+		(*m_log) << " " << endl;
+		(*m_log) << " Serial partition : " << endl;
+		(*m_log) << " Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
+		(*m_log) << " " << endl;
+		(*m_log) << "---------------------------------------------" << endl;
 	}
 
 };
@@ -2724,10 +2747,10 @@ ParaTree::privateLoadBalance(uint32_t* partition){
 	m_lastOp = "loadbalance";
 	if(m_serial)
 	{
-		m_log.writeLog(" ");
-		m_log.writeLog(" Initial Serial distribution : ");
+		(*m_log) << " " << endl;
+		(*m_log) << " Initial Serial distribution : " << endl;
 		for(int ii=0; ii<m_nproc; ii++){
-			m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(ii))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]+1)));
+			(*m_log) << " Octants for proc	"+ to_string(static_cast<unsigned long long>(ii))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]+1)) << endl;
 		}
 
 		uint32_t stride = 0;
@@ -2749,11 +2772,11 @@ ParaTree::privateLoadBalance(uint32_t* partition){
 	}
 	else
 	{
-		m_log.writeLog(" ");
-		m_log.writeLog(" Initial Parallel partition : ");
-		m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
+		(*m_log) << " " << endl;
+		(*m_log) << " Initial Parallel partition : " << endl;
+		(*m_log) << " Octants for proc	"+ to_string(static_cast<unsigned long long>(0))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
 		for(int ii=1; ii<m_nproc; ii++){
-			m_log.writeLog(" Octants for proc	"+ to_string(static_cast<unsigned long long>(ii))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])));
+			(*m_log) << " Octants for proc	"+ to_string(static_cast<unsigned long long>(ii))+"	:	" + to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])) << endl;
 		}
 
 		//empty ghosts
@@ -3177,21 +3200,21 @@ ParaTree::private_adapt_mapidx(bool mapflag) {
 	bool globalDone = false;
 	if(m_serial){
 #endif
-		m_log.writeLog("---------------------------------------------");
-		m_log.writeLog(" ADAPT (Refine/Coarse)");
-		m_log.writeLog(" ");
+		(*m_log) << "---------------------------------------------" << endl;
+		(*m_log) << " ADAPT (Refine/Coarse)" << endl;
+		(*m_log) << " " << endl;
 
 		// 2:1 Balance
 		balance21(true);
 
-		m_log.writeLog(" ");
-		m_log.writeLog(" Initial Number of octants	:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())));
+		(*m_log) << " " << endl;
+		(*m_log) << " Initial Number of octants		:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())) << endl;
 
 		// Refine
 		while(m_octree.refine(m_mapIdx));
 		if (m_octree.getNumOctants() > nocts)
 			localDone = true;
-		m_log.writeLog(" Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())));
+		(*m_log) << " Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(m_octree.getNumOctants())) << endl;
 		nocts = m_octree.getNumOctants();
 		updateAdapt();
 
@@ -3203,25 +3226,25 @@ ParaTree::private_adapt_mapidx(bool mapflag) {
 		}
 		nocts = m_octree.getNumOctants();
 
-		m_log.writeLog(" Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(nocts)));
+		(*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(nocts)) << endl;
 #if ENABLE_MPI==1
 		MPI_Barrier(m_comm);
 		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
 #endif
-		m_log.writeLog(" ");
-		m_log.writeLog("---------------------------------------------");
+		(*m_log) << " " << endl;
+		(*m_log) << "---------------------------------------------" << endl;
 #if ENABLE_MPI==1
 	}
 	else{
-		m_log.writeLog("---------------------------------------------");
-		m_log.writeLog(" ADAPT (Refine/Coarse)");
-		m_log.writeLog(" ");
+		(*m_log) << "---------------------------------------------" << endl;
+		(*m_log) << " ADAPT (Refine/Coarse)" << endl;
+		(*m_log) << " " << endl;
 
 		// 2:1 Balance
 		balance21(true);
 
-		m_log.writeLog(" ");
-		m_log.writeLog(" Initial Number of octants	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)));
+		(*m_log) << " " << endl;
+		(*m_log) << " Initial Number of octants		:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
 
 		// Refine
 		while(m_octree.refine(m_mapIdx));
@@ -3229,7 +3252,7 @@ ParaTree::private_adapt_mapidx(bool mapflag) {
 			localDone = true;
 		updateAdapt();
 		setPboundGhosts();
-		m_log.writeLog(" Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)));
+		(*m_log) << " Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
 		nocts = m_octree.getNumOctants();
 
 
@@ -3244,9 +3267,9 @@ ParaTree::private_adapt_mapidx(bool mapflag) {
 
 		MPI_Barrier(m_comm);
 		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
-		m_log.writeLog(" Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)));
-		m_log.writeLog(" ");
-		m_log.writeLog("---------------------------------------------");
+		(*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
+		(*m_log) << " " << endl;
+		(*m_log) << "---------------------------------------------" << endl;
 	}
 	return globalDone;
 #else
@@ -4126,12 +4149,12 @@ ParaTree::balance21(bool const first){
 	m_octree.preBalance21(true);
 
 	if (first){
-		m_log.writeLog("---------------------------------------------");
-		m_log.writeLog(" 2:1 BALANCE (balancing Marker before Adapt)");
-		m_log.writeLog(" ");
-		m_log.writeLog(" Iterative procedure	");
-		m_log.writeLog(" ");
-		m_log.writeLog(" Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)));
+		(*m_log) << "---------------------------------------------" << endl;
+		(*m_log) << " 2:1 BALANCE (balancing Marker before Adapt)" << endl;
+		(*m_log) << " " << endl;
+		(*m_log) << " Iterative procedure	" << endl;
+		(*m_log) << " " << endl;
+		(*m_log) << " Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)) << endl;
 
 		commMarker();
 		localDone = m_octree.localBalance(true);
@@ -4142,7 +4165,7 @@ ParaTree::balance21(bool const first){
 
 		while(globalDone){
 			iteration++;
-			m_log.writeLog(" Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)));
+			(*m_log) << " Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)) << endl;
 			commMarker();
 			localDone = m_octree.localBalance(false);
 			commMarker();
@@ -4151,12 +4174,12 @@ ParaTree::balance21(bool const first){
 		}
 
 		commMarker();
-		m_log.writeLog(" Iteration	:	Finalizing ");
-		m_log.writeLog(" ");
+		(*m_log) << " Iteration	:	Finalizing " << endl;
+		(*m_log) << " " << endl;
 
-		m_log.writeLog(" 2:1 Balancing reached ");
-		m_log.writeLog(" ");
-		m_log.writeLog("---------------------------------------------");
+		(*m_log) << " 2:1 Balancing reached " << endl;
+		(*m_log) << " " << endl;
+		(*m_log) << "---------------------------------------------" << endl;
 
 	}
 	else{
@@ -4188,29 +4211,29 @@ ParaTree::balance21(bool const first){
 	m_octree.preBalance21(true);
 
 	if (first){
-		m_log.writeLog("---------------------------------------------");
-		m_log.writeLog(" 2:1 BALANCE (balancing Marker before Adapt)");
-		m_log.writeLog(" ");
-		m_log.writeLog(" Iterative procedure	");
-		m_log.writeLog(" ");
-		m_log.writeLog(" Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)));
+		(*m_log) << "---------------------------------------------" << endl;
+		(*m_log) << " 2:1 BALANCE (balancing Marker before Adapt)" << endl;
+		(*m_log) << " " << endl;
+		(*m_log) << " Iterative procedure	" << endl;
+		(*m_log) << " " << endl;
+		(*m_log) << " Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)) << endl;
 
 		localDone = m_octree.localBalance(true);
 		m_octree.preBalance21(false);
 
 		while(localDone){
 			iteration++;
-			m_log.writeLog(" Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)));
+			(*m_log) << " Iteration	:	" + to_string(static_cast<unsigned long long>(iteration)) << endl;
 			localDone = m_octree.localBalance(false);
 			m_octree.preBalance21(false);
 		}
 
-		m_log.writeLog(" Iteration	:	Finalizing ");
-		m_log.writeLog(" ");
+		(*m_log) << " Iteration	:	Finalizing " << endl;
+		(*m_log) << " " << endl;
 
-		m_log.writeLog(" 2:1 Balancing reached ");
-		m_log.writeLog(" ");
-		m_log.writeLog("---------------------------------------------");
+		(*m_log) << " 2:1 Balancing reached " << endl;
+		(*m_log) << " " << endl;
+		(*m_log) << "---------------------------------------------" << endl;
 
 	}
 	else{
@@ -4250,8 +4273,8 @@ ParaTree::write(string filename) {
 	ofstream out(name.str().c_str());
 	if(!out.is_open()){
 		stringstream ss;
-		ss << filename << "*.vtu cannot be opened and it won't be written.";
-		m_log.writeLog(ss.str());
+		ss << filename << "*.vtu cannot be opened and it won't be written." << endl;
+		(*m_log) << ss.str();
 		return;
 	}
 	int nofNodes = m_octree.m_nodes.size();
@@ -4366,8 +4389,8 @@ ParaTree::write(string filename) {
 		ofstream pout(name.str().c_str());
 		if(!pout.is_open()){
 			stringstream ss;
-			ss << filename << "*.pvtu cannot be opened and it won't be written.";
-			m_log.writeLog(ss.str());
+			ss << filename << "*.pvtu cannot be opened and it won't be written." << endl;
+			(*m_log) << ss.str();
 			return;
 		}
 
@@ -4408,13 +4431,13 @@ ParaTree::writeTest(string filename, vector<double> data) {
 	}
 
 	stringstream name;
-	name << "s" << std::setfill('0') << std::setw(4) << m_nproc << "-p" << std::setfill('0') << std::setw(4) << m_rank << "-" << filename << ".vtu";
+	name << "s" << std::setfill('0') << std::setw(4) << m_nproc << "-p" << std::setfill('0') << std::setw(4) << m_rank << "-" << filename << ".vtu" << endl;
 
 	ofstream out(name.str().c_str());
 	if(!out.is_open()){
 		stringstream ss;
 		ss << filename << "*.vtu cannot be opened and it won't be written.";
-		m_log.writeLog(ss.str());
+		(*m_log) << ss.str();
 		return;
 	}
 	int nofNodes = m_octree.m_nodes.size();
@@ -4508,8 +4531,8 @@ ParaTree::writeTest(string filename, vector<double> data) {
 		ofstream pout(name.str().c_str());
 		if(!pout.is_open()){
 			stringstream ss;
-			ss << filename << "*.pvtu cannot be opened and it won't be written.";
-			m_log.writeLog(ss.str());
+			ss << filename << "*.pvtu cannot be opened and it won't be written." << endl;
+			(*m_log) << ss.str();
 			return;
 		}
 

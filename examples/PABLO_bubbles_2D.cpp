@@ -27,6 +27,7 @@
 #if ENABLE_MPI==1
 #include "PABLO_userDataComm.hpp"
 #include "PABLO_userDataLB.hpp"
+#include <mpi.h>
 #endif
 
 using namespace std;
@@ -68,7 +69,23 @@ int main(int argc, char *argv[]) {
 #endif
 		int iter = 0;
 
-		/**<Instantation of a 2D para_tree object.*/
+		/**<Instantation and setup of a default (named bitpit) logfile.*/
+		int errorFlag;
+		int nproc;
+		int	rank;
+#if ENABLE_MPI==1
+		MPI_Comm comm = MPI_COMM_WORLD;
+		errorFlag = MPI_Comm_size(comm,&nproc);
+		errorFlag = MPI_Comm_rank(comm,&rank);
+#else
+		nproc = 1;
+		rank = 0;
+#endif
+		log::cout().setParallel(nproc, rank);
+		log::cout() << fileVerbosity(log::NORMAL);
+		log::cout() << consoleVerbosity(log::QUIET);
+
+		/**<Instantation of a 2D para_tree object and its default (bitpit) logfile.*/
 		PabloUniform pabloBB;
 
 		/**<Set 2:1 balance for the octree.*/
@@ -231,23 +248,9 @@ int main(int argc, char *argv[]) {
 			}
 
 #if ENABLE_MPI==1
-			/**<Update the connectivity and write the para_tree.*/
-			pabloBB.updateConnectivity();
-			pabloBB.write("PabloBubble_pre_iter"+to_string(static_cast<unsigned long long>(iter)));
-				/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
-				pabloBB.loadBalance();
-				u32vector 	mapper;
-				bvector		isghost;
-				ivector		rank;
-				uint32_t 	idx = 0;
-				if (pabloBB.getRank() == 2){
-					pabloBB.getMapping(idx, mapper, isghost, rank);
-					cout << idx << " was " << mapper[0] << " on " << rank[0] << endl;
-				}
+			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
+			pabloBB.loadBalance();
 #endif
-				/**<Update the connectivity and write the para_tree.*/
-				pabloBB.updateConnectivity();
-				pabloBB.write("PabloBubble_ipost_ter"+to_string(static_cast<unsigned long long>(iter)));
 
 			/**<Update the connectivity and write the para_tree.*/
 			pabloBB.updateConnectivity();
