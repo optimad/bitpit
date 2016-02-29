@@ -54,7 +54,6 @@ using namespace std;
  * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
  * \param[in] m_comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
  */
-//ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm m_comm ) : m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(logfile,m_comm),m_comm(m_comm){
 ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm m_comm ) : m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(&log::cout(logfile)),m_comm(m_comm){
 #else
 	/*! Default constructor of ParaTree.
@@ -63,7 +62,6 @@ ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm m
 	 * \param[in] maxlevel Maximum allowed level of refinement for the octree. The default value is 20.
 	 * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
 	 */
-//ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, string logfile ) : m_octree(maxlevel,dim),m_trans(maxlevel, dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(logfile){
 ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile ) : m_octree(maxlevel,dim),m_trans(maxlevel, dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(&log::cout(logfile)){
 #endif
 	m_global.setGlobal(maxlevel, m_dim);
@@ -94,6 +92,7 @@ ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile ) : m_octre
 	m_tol = 1.0e-14;
 	// Write info log
 	m_log->setParallel(m_nproc, m_rank);
+	//TODO Change or remove it
 	if (logfile == "PABLO"){
 		(*m_log) << fileVerbosity(log::NORMAL);
 		(*m_log) << consoleVerbosity(log::QUIET);
@@ -126,7 +125,6 @@ ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile ) : m_octre
  * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
  * \param[in] m_comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
  */
-//ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, string logfile, MPI_Comm m_comm):m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(logfile,m_comm),m_comm(m_comm){
 ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm m_comm):m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_log(&log::cout(logfile)),m_comm(m_comm){
 #else
 	/*! Constructor of ParaTree for restart a simulation with input parameters.
@@ -205,6 +203,7 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 	m_tol = 1.0e-14;
 	// Write info log
 	m_log->setParallel(m_nproc, m_rank);
+	//TODO Change or remove it
 	if (logfile == "PABLO"){
 		(*m_log) << fileVerbosity(log::NORMAL);
 		(*m_log) << consoleVerbosity(log::QUIET);
@@ -296,11 +295,11 @@ ParaTree::getNproc(){
 };
 
 /*!Get the logger.
- * \return Pointer to logger object.
+ * \return Reference to logger object.
  */
-Logger*
+Logger&
 ParaTree::getLog(){
-	return m_log;
+	return (*m_log);
 }
 
 #if ENABLE_MPI==1

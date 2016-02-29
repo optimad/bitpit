@@ -141,13 +141,9 @@ private:
 	// =================================================================================== //
 public:
 #if ENABLE_MPI==1
-//	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
-//	ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log", MPI_Comm comm = MPI_COMM_WORLD);
 	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile = "bitpit", MPI_Comm comm = MPI_COMM_WORLD);
 	ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20,  std::string logfile = "bitpit", MPI_Comm comm = MPI_COMM_WORLD);
 #else
-//	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
-//	ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile="PABLO.log");
 	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20,  std::string logfile = "bitpit");
 	ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20,  std::string logfile = "bitpit");
 #endif
@@ -166,7 +162,7 @@ public:
 	bool		getParallel();
 	int 		getRank();
 	int 		getNproc();
-	Logger* 	getLog();
+	Logger& 	getLog();
 #if ENABLE_MPI==1
 	MPI_Comm	getComm();
 #endif
@@ -520,8 +516,6 @@ public:
 	void
 	loadBalance(DataLBInterface<Impl> & userData, dvector* weight = NULL){
 		//Write info on m_log
-//		m_log.writeLog("---------------------------------------------");
-//		m_log.writeLog(" LOAD BALANCE ");
 		(*m_log) << "---------------------------------------------" << endl;
 		(*m_log) << " LOAD BALANCE " << endl;
 
@@ -537,12 +531,9 @@ public:
 
 			if(m_serial)
 			{
-//				m_log.writeLog(" ");
-//				m_log.writeLog(" Initial Serial distribution : ");
 				(*m_log) << " " << endl;
 				(*m_log) << " Initial Serial distribution : " << endl;
 				for(int ii=0; ii<m_nproc; ii++){
-//					m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]+1)));
 					(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]+1)) << endl;
 				}
 
@@ -566,14 +557,10 @@ public:
 			}
 			else
 			{
-//				m_log.writeLog(" ");
-//				m_log.writeLog(" Initial Parallel partition : ");
-//				m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
 				(*m_log) << " " << endl;
 				(*m_log) << " Initial Parallel partition : " << endl;
 				(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1));
 				for(int ii=1; ii<m_nproc; ii++){
-//					m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])));
 					(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])) << endl;
 				}
 
@@ -757,7 +744,6 @@ public:
 					}
 
 				}
-				//			cout << "first" << endl;
 				uint32_t nofElementsFromPreviousToSuccessive = 0;
 				contatore = 0;
 				//build send buffers from Tail
@@ -859,7 +845,6 @@ public:
 						}
 					}
 				}
-				//			cout << "second" << endl;
 
 				//Build receiver sources
 				std::vector<Array> recvs(m_nproc);
@@ -994,7 +979,6 @@ public:
 					}
 				}
 				octvector(m_octree.m_octants).swap(m_octree.m_octants);
-				//			cout << "third" << endl;
 
 				userData.shrink();
 
@@ -1006,41 +990,27 @@ public:
 				delete [] globalRecvsBuff; globalRecvsBuff = NULL;
 
 				//Update and ghosts here
-				//		cout << "in update" << endl;
 				updateLoadBalance();
-				//		cout << "in setpbound" << endl;
 				setPboundGhosts();
 				uint32_t nofGhosts = getNumGhosts();
 				userData.resizeGhost(nofGhosts);
-				//		cout << "fourth" << endl;
 
 			}
 			delete [] partition;
 			partition = NULL;
 
 			//Write info of final partition on m_log
-//			m_log.writeLog(" ");
-//			m_log.writeLog(" Final Parallel partition : ");
-//			m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
 			(*m_log) << " " << endl;
 			(*m_log) << " Final Parallel partition : " << endl;
 			(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
 			for(int ii=1; ii<m_nproc; ii++){
-//				m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])));
 				(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])) << endl;
 			}
-//			m_log.writeLog(" ");
-//			m_log.writeLog("---------------------------------------------");
 			(*m_log) << " " << endl;
 			(*m_log) << "---------------------------------------------" << endl;
 
 		}
 		else{
-//			m_log.writeLog(" ");
-//			m_log.writeLog(" Serial partition : ");
-//			m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
-//			m_log.writeLog(" ");
-//			m_log.writeLog("---------------------------------------------");
 			(*m_log) << " " << endl;
 			(*m_log) << " Serial partition : " << endl;
 			(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
@@ -1062,8 +1032,6 @@ public:
 	loadBalance(DataLBInterface<Impl> & userData, uint8_t & level, dvector* weight = NULL){
 
 		//Write info on m_log
-//		m_log.writeLog("---------------------------------------------");
-//		m_log.writeLog(" LOAD BALANCE ");
 		(*m_log) << "---------------------------------------------" << endl;
 		(*m_log) << " LOAD BALANCE " << endl;
 
@@ -1074,12 +1042,9 @@ public:
 
 			if(m_serial)
 			{
-//				m_log.writeLog(" ");
-//				m_log.writeLog(" Initial Serial distribution : ");
 				(*m_log) << " " << endl;
 				(*m_log) << " Initial Serial distribution : " << endl;
 				for(int ii=0; ii<m_nproc; ii++){
-//					m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]+1)));
 					(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]+1)) << endl;
 				}
 
@@ -1104,15 +1069,11 @@ public:
 			}
 			else
 			{
-//				m_log.writeLog(" ");
-//				m_log.writeLog(" Initial Parallel partition : ");
-//				m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
 				(*m_log) << " " << endl;
 				(*m_log) << " Initial Parallel partition : " << endl;
 				(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
 				for(int ii=1; ii<m_nproc; ii++){
 					(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])) << endl;
-//					m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])));
 				}
 
 				//empty ghosts
@@ -1554,28 +1515,17 @@ public:
 			partition = NULL;
 
 			//Write info of final partition on m_log
-//			m_log.writeLog(" ");
-//			m_log.writeLog(" Final Parallel partition : ");
-//			m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
 			(*m_log) << " " << endl;
 			(*m_log) << " Final Parallel partition : " << endl;
 			(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
 			for(int ii=1; ii<m_nproc; ii++){
-//				m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])));
 				(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])) << endl;
 			}
-//			m_log.writeLog(" ");
-//			m_log.writeLog("---------------------------------------------");
 			(*m_log) << " " << endl;
 			(*m_log) << "---------------------------------------------" << endl;
 
 		}
 		else{
-//			m_log.writeLog(" ");
-//			m_log.writeLog(" Serial partition : ");
-//			m_log.writeLog(" Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)));
-//			m_log.writeLog(" ");
-//			m_log.writeLog("---------------------------------------------");
 			(*m_log) << " " << endl;
 			(*m_log) << " Serial partition : " << endl;
 			(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
