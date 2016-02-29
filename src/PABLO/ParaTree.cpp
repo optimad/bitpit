@@ -79,10 +79,12 @@ ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, string logfile ) : m_octree(max
 	m_partitionFirstDesc = new uint64_t[m_nproc];
 	m_partitionLastDesc = new uint64_t[m_nproc];
 	m_partitionRangeGlobalIdx = new uint64_t[m_nproc];
+	m_partitionRangeGlobalIdx0 = new uint64_t[m_nproc];
 	uint64_t lastDescMorton = m_octree.getLastDesc().computeMorton();
 	uint64_t firstDescMorton = m_octree.getFirstDesc().computeMorton();
 	for(int p = 0; p < m_nproc; ++p){
 		m_partitionRangeGlobalIdx[p] = 0;
+		m_partitionRangeGlobalIdx0[p] = 0;
 		m_partitionLastDesc[p] = lastDescMorton;
 		m_partitionLastDesc[p] = firstDescMorton;
 	}
@@ -181,6 +183,7 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 	m_partitionFirstDesc = new uint64_t[m_nproc];
 	m_partitionLastDesc = new uint64_t[m_nproc];
 	m_partitionRangeGlobalIdx = new uint64_t[m_nproc];
+	m_partitionRangeGlobalIdx0 = new uint64_t[m_nproc];
 
 	setFirstDesc();
 	setLastDesc();

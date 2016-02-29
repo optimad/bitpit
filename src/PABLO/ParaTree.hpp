@@ -40,6 +40,7 @@
 #include "LocalTree.hpp"
 #include "Map.hpp"
 #include "Log.hpp"
+#include "bitpit_IO.hpp"
 #include <map>
 #include <set>
 #include <bitset>
@@ -129,6 +130,7 @@ private:
 
 	//log member
 	Log 					m_log;							/**<Log object*/
+	//Logger & 				m_log;							/**<Log object pointer*/
 
 	//communicator
 #if ENABLE_MPI==1
