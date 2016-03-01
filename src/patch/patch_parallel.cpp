@@ -27,12 +27,14 @@
 // INCLUDES                                                                   //
 // ========================================================================== //
 #include <mpi.h>
+#include <chrono>
 #include "patch.hpp"
 
 // ========================================================================== //
 // NAMESPACES                                                                 //
 // ========================================================================== //
 using namespace std;
+using namespace chrono;
 
 namespace bitpit {
 
@@ -137,6 +139,8 @@ void Patch::sendCells(const unsigned short &snd_rank, const unsigned short &rcv_
 // Debug variables
 /*DEBUG*/stringstream                           out_name;
 /*DEBUG*/ofstream                               out;
+/*DEBUG*/high_resolution_clock::time_point      t0, t1;
+/*DEBUG*/duration<double>                       time_span;
 
 /*DEBUG*/{
 /*DEBUG*/    out_name << "DEBUG_rank_" << m_rank << ".log";
@@ -173,7 +177,8 @@ if (m_rank == snd_rank)
     unordered_map<long, long>                   vertex_map;
     
     // Initialize data structures =========================================== //
-/*DEBUG*/out << "* sender (rank#" << snd_rank << "), initializing data structure" << endl;
+/*DEBUG*/out << "* sender (rank#" << snd_rank << "), initializing data structure {" << endl;
+/*DEBUG*/t0 = high_resolution_clock::now();
     {
 
         // Scope variables -------------------------------------------------- //
@@ -188,12 +193,14 @@ if (m_rank == snd_rank)
         } //next i
 
 /*DEBUG*/{
-/*DEBUG*/    out << "    sending " << n_cells << " cell(s): " << cell_list << endl;
-/*DEBUG*/    out << "    cell_map: ";
-/*DEBUG*/    unordered_map<long, long>::const_iterator      ii;
-/*DEBUG*/    for (ii = cell_map.begin(); ii != cell_map.end(); ++ii) {
-/*DEBUG*/        out << "(" << ii->first << "->" << ii->second << ") ";
-/*DEBUG*/    }
+/*DEBUG*/    out << "    sending " << n_cells;
+// /*DEBUG*/    out << " cell(s): " << cell_list
+/*DEBUG*/    out << endl;
+// /*DEBUG*/    out << "    cell_map: ";
+// /*DEBUG*/    unordered_map<long, long>::const_iterator      ii;
+// /*DEBUG*/    for (ii = cell_map.begin(); ii != cell_map.end(); ++ii) {
+// /*DEBUG*/        out << "(" << ii->first << "->" << ii->second << ") ";
+// /*DEBUG*/    }
 /*DEBUG*/    out << endl << endl;
 /*DEBUG*/}
 
@@ -204,9 +211,13 @@ if (m_rank == snd_rank)
         vertex_list.reserve( 4*cell_list.size() );
 
     }
+/*DEBUG*/t1 = high_resolution_clock::now();
+/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
+/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Create list of ghosts ================================================ //
-/*DEBUG*/out << "* sender (rank#" << snd_rank << "), creating list of ghosts" << endl;
+/*DEBUG*/out << "* sender (rank#" << snd_rank << "), creating list of ghosts {" << endl;
+/*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
         int                                     n_vertex, n_neighs;
@@ -286,23 +297,28 @@ if (m_rank == snd_rank)
         }
         n_ghosts = ghost_counter;
 /*DEBUG*/{
-/*DEBUG*/    out << "    sending " << n_ghosts << " ghost(s): ";
-/*DEBUG*/    vector< pair< long, pair<long, short> > >::iterator    kk;
-/*DEBUG*/    for (kk = ghost_list.begin(); kk != ghost_list.end(); ++kk) {
-/*DEBUG*/        out << "[" << kk->first << ", (" << kk->second.first << ", " << kk->second.second << ")], ";
-/*DEBUG*/    } //next kk
+/*DEBUG*/    out << "    sending " << n_ghosts;
+// /*DEBUG*/    out << " ghost(s): ";
+// /*DEBUG*/    vector< pair< long, pair<long, short> > >::iterator    kk;
+// /*DEBUG*/    for (kk = ghost_list.begin(); kk != ghost_list.end(); ++kk) {
+// /*DEBUG*/        out << "[" << kk->first << ", (" << kk->second.first << ", " << kk->second.second << ")], ";
+// /*DEBUG*/    } //next kk
 /*DEBUG*/    out << endl;
-/*DEBUG*/    out << "    ghost_map: ";
-/*DEBUG*/    unordered_map<long, long>::const_iterator ii;
-/*DEBUG*/    for (ii = ghost_map.begin(); ii != ghost_map.end(); ++ii) {
-/*DEBUG*/           out << "(" << ii->first << "->" << ii->second << ") ";
-/*DEBUG*/    }
+// /*DEBUG*/    out << "    ghost_map: ";
+// /*DEBUG*/    unordered_map<long, long>::const_iterator ii;
+// /*DEBUG*/    for (ii = ghost_map.begin(); ii != ghost_map.end(); ++ii) {
+// /*DEBUG*/           out << "(" << ii->first << "->" << ii->second << ") ";
+// /*DEBUG*/    }
 /*DEBUG*/    out << endl << endl;
 /*DEBUG*/}
     }
+/*DEBUG*/t1 = high_resolution_clock::now();
+/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
+/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Create list of vertices ============================================== //
-/*DEBUG*/out << "* sender (rank#" << snd_rank << "), creating list of vertices" << endl;
+/*DEBUG*/out << "* sender (rank#" << snd_rank << "), creating list of vertices {" << endl;
+/*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
         int                                     j, n_vertices;
@@ -343,19 +359,25 @@ if (m_rank == snd_rank)
         n_vertex = vertex_counter;
 
 /*DEBUG*/{
-/*DEBUG*/    out << "    sending " << vertex_counter << " vertices " << vertex_list << endl;
-/*DEBUG*/    out << "    vertex_map: ";
-/*DEBUG*/    unordered_map<long, long>::const_iterator jj;
-/*DEBUG*/    for (jj = vertex_map.begin(); jj != vertex_map.end(); ++jj) {
-/*DEBUG*/           out << "(" << jj->first << "->" << jj->second << ") ";
-/*DEBUG*/    }
+/*DEBUG*/    out << "    sending " << vertex_counter;
+// /*DEBUG*/    out << " vertices " << vertex_list;
+/*DEBUG*/    out << endl;
+// /*DEBUG*/    out << "    vertex_map: ";
+// /*DEBUG*/    unordered_map<long, long>::const_iterator jj;
+// /*DEBUG*/    for (jj = vertex_map.begin(); jj != vertex_map.end(); ++jj) {
+// /*DEBUG*/           out << "(" << jj->first << "->" << jj->second << ") ";
+// /*DEBUG*/    }
 /*DEBUG*/    out << endl << endl;
 /*DEBUG*/}
 
     }
+/*DEBUG*/t1 = high_resolution_clock::now();
+/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
+/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Communicate vertices ================================================= //
-/*DEBUG*/out << "* sender (rank#" << snd_rank << "), communicating vertices" << endl;
+/*DEBUG*/out << "* sender (rank#" << snd_rank << "), communicating vertices {" << endl;
+/*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
         int                                     j;
@@ -380,9 +402,13 @@ if (m_rank == snd_rank)
 /*DEBUG*/    out << endl;
 /*DEBUG*/}
     }
+/*DEBUG*/t1 = high_resolution_clock::now();
+/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
+/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Send cells =========================================================== //
-/*DEBUG*/out << "* sender (rank#" << snd_rank << "), communicating cells" << endl;
+/*DEBUG*/out << "* sender (rank#" << snd_rank << "), communicating cells {" << endl;
+/*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
         int                                     j, k, l;
@@ -411,10 +437,10 @@ if (m_rank == snd_rank)
 
             // Pointer to cells
             cell_ = &m_cells[ *i ];
-/*DEBUG*/   {
-/*DEBUG*/       out << "    sending cell: " << endl;
-/*DEBUG*/       cell_->display(out, 6);
-/*DEBUG*/   }
+// /*DEBUG*/   {
+// /*DEBUG*/       out << "    sending cell: " << endl;
+// /*DEBUG*/       cell_->display(out, 6);
+// /*DEBUG*/   }
 
             // Modify connectivity to match sending order
             n_vertices = cell_->getVertexCount();
@@ -467,10 +493,10 @@ if (m_rank == snd_rank)
 
             // Store cell into communication buffer
             com_buff << *cell_;
-/*DEUBG*/   {
-/*DEUBG*/       out << "    re-arranged as:" << endl;
-/*DEUBG*/       cell_->display(out, 6);
-/*DEUBG*/   }
+// /*DEUBG*/   {
+// /*DEUBG*/       out << "    re-arranged as:" << endl;
+// /*DEUBG*/       cell_->display(out, 6);
+// /*DEUBG*/   }
 
             // Restore original connectivity
             for (j = 0; j < n_vertices; ++j) {
@@ -519,12 +545,12 @@ if (m_rank == snd_rank)
             notification << *i << neigh_idx;
         } //next i
 /*DEBUG*/{
-/*DEBUG*/    out << "  receiving new IDs, ";
-/*DEBUG*/    out << "  ghost2idx[" << rcv_rank << "] = {";
-/*DEBUG*/    for (m = m_ghost2id[rcv_rank].begin(); m != m_ghost2id[rcv_rank].end(); ++m) {
-/*DEBUG*/        out << " (" << m->first << ", " << m->second << ")";
-/*DEBUG*/    } //next m
-/*DEBUG*/    out << " }" << endl << endl;
+// /*DEBUG*/    out << "  receiving new IDs, ";
+// /*DEBUG*/    out << "  ghost2idx[" << rcv_rank << "] = {";
+// /*DEBUG*/    for (m = m_ghost2id[rcv_rank].begin(); m != m_ghost2id[rcv_rank].end(); ++m) {
+// /*DEBUG*/        out << " (" << m->first << ", " << m->second << ")";
+// /*DEBUG*/    } //next m
+// /*DEBUG*/    out << " }" << endl << endl;
 /*DEBUG*/}
 
         // Notify other processes ------------------------------------------- //
@@ -537,9 +563,13 @@ if (m_rank == snd_rank)
             }
         } //next j
     }
+/*DEBUG*/t1 = high_resolution_clock::now();
+/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
+/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Send ghost cells ===================================================== //
-/*DEBUG*/out << "* sender (rank#" << snd_rank << "), communicating ghosts" << endl;
+/*DEBUG*/out << "* sender (rank#" << snd_rank << "), communicating ghosts {" << endl;
+/*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
         int                                     j, k;
@@ -575,8 +605,8 @@ if (m_rank == snd_rank)
                 cell_->set_id( i->second.first);
             }
 /*DEBUG*/   {
-/*DEBUG*/       out << "    sending ghost:" << endl;
-/*DEBUG*/       cell_->display(out, 6);
+// /*DEBUG*/       out << "    sending ghost:" << endl;
+// /*DEBUG*/       cell_->display(out, 6);
 /*DEBUG*/   }
 
             // Modify connectivity to match sending order
@@ -630,8 +660,8 @@ if (m_rank == snd_rank)
             com_buff << i->second.second;
             com_buff << *cell_;
 /*DEBUG*/   {
-/*DEBUG*/       out << "    remapped as:" << endl;
-/*DEBUG*/       cell_->display(out, 6);
+// /*DEBUG*/       out << "    remapped as:" << endl;
+// /*DEBUG*/       cell_->display(out, 6);
 /*DEBUG*/   }
 
             // Restore original id
@@ -661,9 +691,13 @@ if (m_rank == snd_rank)
         MPI_Send(com_buff.get_buffer(), buff_size, MPI_CHAR, rcv_rank, 5, m_communicator);
 /*DEBUG*/out << "    " << buff_size << " bytes sent" << endl << endl;
     }
+/*DEBUG*/t1 = high_resolution_clock::now();
+/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
+/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Update ghost lists =================================================== //
-/*DEBUG*/out << "* sender (rank#" << snd_rank << "), updating ghosts lists" << endl;
+/*DEBUG*/out << "* sender (rank#" << snd_rank << "), updating ghosts lists {" << endl;
+/*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
         bool                                            flag_delete;
@@ -680,7 +714,7 @@ if (m_rank == snd_rank)
         // Update ghost list ------------------------------------------------ //
         n = cell_list.cend();
         for ( m = cell_list.cbegin(); m != n; ++m) {
-/*DEBUG*/out << "    moving internal cell " << *m << " to ghosts" << endl;
+// /*DEBUG*/out << "    moving internal cell " << *m << " to ghosts" << endl;
             moveInternal2Ghost(*m);
         } //next m
             
@@ -691,15 +725,15 @@ if (m_rank == snd_rank)
             i = m_ghost2id[rank_id].cbegin();
             e = m_ghost2id[rank_id].cend();
             while ( i != e ) {
-/*DEBUG*/       out << "    processing cell: " << i->second << endl;
+// /*DEBUG*/       out << "    processing cell: " << i->second << endl;
                 flag_delete = true;
                 ghost_idx = i->second;
                 cell_ = &m_cells[ghost_idx];
                 neighs = findCellNeighs(ghost_idx);
                 n_neighs = neighs.size();
-/*DEBUG*/       out << "    n_neighs = " << n_neighs << endl;
+// /*DEBUG*/       out << "    n_neighs = " << n_neighs << endl;
                 for (j = 0; j < n_neighs; ++j) {
-/*DEBUG*/           out << "      neigh: " << m_cells[neighs[j]].isInterior() << endl;
+// /*DEBUG*/           out << "      neigh: " << m_cells[neighs[j]].isInterior() << endl;
                     flag_delete &= ( !m_cells[neighs[j]].isInterior() );
                 }
 //TO BE REMOVED                 n_vertices = cell_->getVertexCount();
@@ -712,7 +746,7 @@ if (m_rank == snd_rank)
 //TO BE REMOVED                     } //next k
 //TO BE REMOVED                 } //next j
                 if ( flag_delete )  {
-/*DEBUG*/           out << "      deleting ghost: " << ghost_idx << endl;
+// /*DEBUG*/           out << "      deleting ghost: " << ghost_idx << endl;
 
                     // Ghost has to be deleted
                     deleteCell(ghost_idx);
@@ -723,18 +757,22 @@ if (m_rank == snd_rank)
         } //next ii
 
 /*DEBUG*/{        
-/*DEBUG*/    out << "  ghost2idx = {";
-/*DEBUG*/    for (i = m_ghost2id[rcv_rank].begin(); i != m_ghost2id[snd_rank].end(); ++i) {
-/*DEBUG*/        out << " (" << i->first << ", " << i->second << ")";
-/*DEBUG*/    }
-/*DEBUG*/    out << " }" << endl << endl;
-/*DEBUG*/    out << "  nCells: " << m_nInternals << endl;
-/*DEBUG*/    out << "  nGhosts: " << m_nGhosts << endl;
+// /*DEBUG*/    out << "  ghost2idx = {";
+// /*DEBUG*/    for (i = m_ghost2id[rcv_rank].begin(); i != m_ghost2id[snd_rank].end(); ++i) {
+// /*DEBUG*/        out << " (" << i->first << ", " << i->second << ")";
+// /*DEBUG*/    }
+// /*DEBUG*/    out << " }" << endl << endl;
+// /*DEBUG*/    out << "  nCells: " << m_nInternals << endl;
+// /*DEBUG*/    out << "  nGhosts: " << m_nGhosts << endl;
 /*DEBUG*/}
     }
+/*DEBUG*/t1 = high_resolution_clock::now();
+/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
+/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Remove isolated vertices ============================================= //
-/*DEBUG*/out << "* sender (rank#" << snd_rank << "), removing isolated vertices" << endl << endl;
+/*DEBUG*/out << "* sender (rank#" << snd_rank << "), removing isolated vertices {" << endl << endl;
+/*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
         // none
@@ -742,6 +780,9 @@ if (m_rank == snd_rank)
         // Remove Isolated vertices ----------------------------------------- //
         deleteOrphanVertices();
     }
+/*DEBUG*/t1 = high_resolution_clock::now();
+/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
+/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
 /*DEBUG*/{
 /*DEBUG*/    ostream        *msg = reinterpret_cast<ostream*>(&out);
@@ -775,7 +816,8 @@ if (m_rank == rcv_rank)
     long                                        n_ghosts;
 
     // Receive vertices ===================================================== //
-/*DEBUG*/out << "* receiver (rank#" << rcv_rank << "), receiving vertices" << endl;
+/*DEBUG*/out << "* receiver (rank#" << rcv_rank << "), receiving vertices {" << endl;
+/*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
         long                                    i;
@@ -806,12 +848,18 @@ if (m_rank == rcv_rank)
             it = addVertex( move(vertex) );
             v_local_mapping[i] = it->get_id();
         } //next i
-/*DEBUG*/out << "    received " << n_vertex << " vertices " << v_local_mapping << endl;
+/*DEBUG*/out << "    received " << n_vertex;
+// /*DEBUG*/out << " vertices " << v_local_mapping;
+/*DEBUG*/out << endl;
         
     }
+/*DEBUG*/t1 = high_resolution_clock::now();
+/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
+/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Receive cells ======================================================== //
-/*DEBUG*/out << "* receiver (rank#" << rcv_rank << "), receiving cells" << endl;
+/*DEBUG*/out << "* receiver (rank#" << rcv_rank << "), receiving cells {" << endl;
+/*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
         int                                             j;
@@ -853,8 +901,8 @@ if (m_rank == rcv_rank)
             cell.setInterior( true );
 
 /*DEBUG*/   {
-/*DEBUG*/       out << "    received cell:" << endl;
-/*DEBUG*/       cell.display(out, 6);
+// /*DEBUG*/       out << "    received cell:" << endl;
+// /*DEBUG*/       cell.display(out, 6);
 /*DEBUG*/   }
 
             // Update connectivity
@@ -869,8 +917,8 @@ if (m_rank == rcv_rank)
                 cell.set_id( ghost_idx );
                 feedback << ghost_idx;
 /*DEBUG*/       {
-/*DEBUG*/           out << "    (already exists as ghost), remapped as:" << endl;
-/*DEBUG*/           cell.display(out, 6);
+// /*DEBUG*/           out << "    (already exists as ghost), remapped as:" << endl;
+// /*DEBUG*/           cell.display(out, 6);
 /*DEBUG*/       }
                 m_cells[ghost_idx] = move( cell );
                 moveGhost2Internal(ghost_idx);
@@ -881,10 +929,10 @@ if (m_rank == rcv_rank)
             else {
 
                 // Add cell before last internal cell
-/*DEBUG*/       out << "    (adding new cell), remapped as:" << endl;
+// /*DEBUG*/       out << "    (adding new cell), remapped as:" << endl;
                 it = addCell( move(cell), generateCellId() );
                 feedback << long( it->get_id() );
-/*DEBUG*/       it->display(out, 6);
+// /*DEBUG*/       it->display(out, 6);
                 c_local_mapping[ cell_count ] = it->get_id();
                 ++cell_count;
             }
@@ -892,20 +940,20 @@ if (m_rank == rcv_rank)
 
 /*DEBUG*/{
 /*DEBUG*/    out << "    received " << cell_count << " cells: ";
-/*DEBUG*/    unordered_map<long, long>::const_iterator    ii;
-/*DEBUG*/    for (ii = c_local_mapping.begin(); ii != c_local_mapping.end(); ++ii) {
-/*DEBUG*/           out << "(" << ii->first << ", " << ii->second << "), ";
-/*DEBUG*/    } //next i
+// /*DEBUG*/    unordered_map<long, long>::const_iterator    ii;
+// /*DEBUG*/    for (ii = c_local_mapping.begin(); ii != c_local_mapping.end(); ++ii) {
+// /*DEBUG*/           out << "(" << ii->first << ", " << ii->second << "), ";
+// /*DEBUG*/    } //next i
 /*DEBUG*/    out << endl;
 /*DEBUG*/}
 
         // Communicate new IDs to sender ------------------------------------ //
 /*DEBUG*/{
 /*DEBUG*/    out << "    sending new IDs: ";
-/*DEBUG*/    unordered_map<long, long>::const_iterator      m;
-/*DEBUG*/    for (m = c_local_mapping.begin(); m != c_local_mapping.end(); ++m) {
-/*DEBUG*/        out << " (" << m->first << ", " << m->second << ") ";
-/*DEBUG*/    } //next m
+// /*DEBUG*/    unordered_map<long, long>::const_iterator      m;
+// /*DEBUG*/    for (m = c_local_mapping.begin(); m != c_local_mapping.end(); ++m) {
+// /*DEBUG*/        out << " (" << m->first << ", " << m->second << ") ";
+// /*DEBUG*/    } //next m
 /*DEBUG*/    out << endl << endl;
 /*DEBUG*/}
 
@@ -918,9 +966,13 @@ if (m_rank == rcv_rank)
     }
 /*DEBUG*/out << "  nInternals: " << m_nInternals << endl;
 /*DEBUG*/out << "  nGhosts: " << m_nGhosts << endl;
+/*DEBUG*/t1 = high_resolution_clock::now();
+/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
+/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Receive ghosts ======================================================= //
-/*DEBUG*/out << "* receiver (rank#" << rcv_rank << "), receiving ghosts" << endl;
+/*DEBUG*/out << "* receiver (rank#" << rcv_rank << "), receiving ghosts {" << endl;
+/*DEBUG*/t0 = high_resolution_clock::now();
     {
 
         // Scope variables -------------------------------------------------- //
@@ -960,8 +1012,8 @@ if (m_rank == rcv_rank)
             com_buff >> cell;
             cell_idx = cell.get_id();
 /*DEBUG*/   {
-/*DEBUG*/       out << "    receiving ghost (existing on rank: " << ghost_rank << ")" << endl;
-/*DEBUG*/       cell.display(out, 6);
+// /*DEBUG*/       out << "    receiving ghost (existing on rank: " << ghost_rank << ")" << endl;
+// /*DEBUG*/       cell.display(out, 6);
 /*DEBUG*/   }
 
             // Update connectivity
@@ -973,7 +1025,7 @@ if (m_rank == rcv_rank)
             // Update cell list
             if ( m_ghost2id[ghost_rank].find(cell_idx) == m_ghost2id[ghost_rank].end() ) {
 
-/*DEBUG*/       out << "    (non-existent ghost cell)" << endl;
+// /*DEBUG*/       out << "    (non-existent ghost cell)" << endl;
 
                 // Cell has to be added after the last internal cell
                 cell.setInterior( false );
@@ -984,17 +1036,17 @@ if (m_rank == rcv_rank)
                 ++ghost_count;
 
 /*DEBUG*/       {
-/*DEBUG*/           out << "    remapped as:" << endl;
-/*DEBUG*/           it->display(out, 6);
+// /*DEBUG*/           out << "    remapped as:" << endl;
+// /*DEBUG*/           it->display(out, 6);
 /*DEBUG*/       }
             }
             else {
-/*DEBUG*/       out << "    (cell already exists as ghost)" << endl;
+// /*DEBUG*/       out << "    (cell already exists as ghost)" << endl;
                 cell.set_id(m_ghost2id[ghost_rank][cell_idx]);
                 cell.setInterior( false );
 /*DEBUG*/       {
-/*DEBUG*/           out << "    remapped as:" << endl;
-/*DEBUG*/           cell.display(out, 6);
+// /*DEBUG*/           out << "    remapped as:" << endl;
+// /*DEBUG*/           cell.display(out, 6);
 /*DEBUG*/       }
 
                 // Cell has to be overwritten
@@ -1007,19 +1059,23 @@ if (m_rank == rcv_rank)
         } //next i
 
 /*DEBUG*/{
-/*DEBUG*/    unordered_map<long, long>::const_iterator      m;
-/*DEBUG*/    out << "    c_local_mapping is now: {";
-/*DEBUG*/    for ( m = c_local_mapping.begin(); m != c_local_mapping.end(); ++m) {
-/*DEBUG*/        out << " (" << m->first << ", " << m->second << ")";
-/*DEBUG*/    } //next m
-/*DEBUG*/    out << " }" << endl << endl;
+// /*DEBUG*/    unordered_map<long, long>::const_iterator      m;
+// /*DEBUG*/    out << "    c_local_mapping is now: {";
+// /*DEBUG*/    for ( m = c_local_mapping.begin(); m != c_local_mapping.end(); ++m) {
+// /*DEBUG*/        out << " (" << m->first << ", " << m->second << ")";
+// /*DEBUG*/    } //next m
+// /*DEBUG*/    out << " }" << endl << endl;
 /*DEBUG*/}
     }
 /*DEBUG*/out << "  nInternals: " << m_nInternals << endl;
 /*DEBUG*/out << "  nGhosts: " << m_nGhosts << endl;
+/*DEBUG*/t1 = high_resolution_clock::now();
+/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
+/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Update adjacencies =================================================== //
-/*DEBUG*/out << "* receiver (rank#" << rcv_rank << "), updating adjacencies" << endl;
+/*DEBUG*/out << "* receiver (rank#" << rcv_rank << "), updating adjacencies {" << endl;
+/*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
         int                                             n_faces, n_adj;
@@ -1033,7 +1089,7 @@ if (m_rank == rcv_rank)
         for ( m = c_local_mapping.cbegin(); m != e; ++m ) {
             cell_idx = m->second;
             cell_ = &m_cells[cell_idx];
-/*DEBUG*/   out << "    updating adjacencies for cell ID " << cell_idx << endl;
+// /*DEBUG*/   out << "    updating adjacencies for cell ID " << cell_idx << endl;
             n_faces = cell_->getFaceCount();
             for ( j = 0; j < n_faces; ++j ) {
                 n_adj = cell_->getAdjacencyCount( j );
@@ -1045,22 +1101,26 @@ if (m_rank == rcv_rank)
                     }
                 } //next k
             } //next j
-/*DEBUG*/   out << "    cell ID " << cell_idx << " is now" << endl;
-/*DEBUG*/   cell_->display(out, 6);
+// /*DEBUG*/   out << "    cell ID " << cell_idx << " is now" << endl;
+// /*DEBUG*/   cell_->display(out, 6);
         } //next m
 
-/*DEBUG*/out << "  ghost2idx = {";
-/*DEBUG*/for (m = m_ghost2id[snd_rank].begin(); m != m_ghost2id[snd_rank].end(); ++m) {
-/*DEBUG*/    out << " (" << m->first << ", " << m->second << ")";
-/*DEBUG*/}
-/*DEBUG*/out << " }" << endl << endl;
+// /*DEBUG*/out << "  ghost2idx = {";
+// /*DEBUG*/for (m = m_ghost2id[snd_rank].begin(); m != m_ghost2id[snd_rank].end(); ++m) {
+// /*DEBUG*/    out << " (" << m->first << ", " << m->second << ")";
+// /*DEBUG*/}
+// /*DEBUG*/out << " }" << endl << endl;
 
     }
 /*DEBUG*/out << "  nInternals: " << m_nInternals << endl;
 /*DEBUG*/out << "  nGhosts: " << m_nGhosts << endl;
+/*DEBUG*/t1 = high_resolution_clock::now();
+/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
+/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Remove duplicated vertices =========================================== //
-/*DEBUG*/out << "* receiver (rank#" << rcv_rank << "), removing duplicated vertices" << endl;
+/*DEBUG*/out << "* receiver (rank#" << rcv_rank << "), removing duplicated vertices {" << endl;
+/*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
         // none
@@ -1073,9 +1133,13 @@ if (m_rank == rcv_rank)
     }
 /*DEBUG*/out << "  nInternals: " << m_nInternals << endl;
 /*DEBUG*/out << "  nGhosts: " << m_nGhosts << endl;
+/*DEBUG*/t1 = high_resolution_clock::now();
+/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
+/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Update adjacencies =================================================== //
-/*DEBUG*/out << "* receiver (rank#" << rcv_rank << "), updating adjacencies" << endl;
+/*DEBUG*/out << "* receiver (rank#" << rcv_rank << "), updating adjacencies {" << endl;
+/*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
         vector<long>                                    cell_list(n_cells + n_ghosts, -1);
@@ -1091,17 +1155,20 @@ if (m_rank == rcv_rank)
         } //next i
 
         // Update Adjacencies ----------------------------------------------- //
-/*DEBUG*/out << "    updating adjacencies of simplicies: " << cell_list << endl << endl;
+// /*DEBUG*/out << "    updating adjacencies of simplicies: " << cell_list << endl << endl;
         updateAdjacencies(cell_list);
 /*DEBUG*/{
-/*DEBUG*/    for (int ii = 0; ii < cell_list.size(); ++ii) {
-/*DEBUG*/           out << "    cell ID: " << cell_list[ii] << " is now: " << endl;
-/*DEBUG*/           m_cells[cell_list[ii]].display(out, 4);
-/*DEBUG*/    } //next ii
+// /*DEBUG*/    for (int ii = 0; ii < cell_list.size(); ++ii) {
+// /*DEBUG*/           out << "    cell ID: " << cell_list[ii] << " is now: " << endl;
+// /*DEBUG*/           m_cells[cell_list[ii]].display(out, 4);
+// /*DEBUG*/    } //next ii
 /*DEBUG*/}
     }
 /*DEBUG*/out << "  nInternals: " << m_nInternals << endl;
 /*DEBUG*/out << "  nGhosts: " << m_nGhosts << endl;
+/*DEBUG*/t1 = high_resolution_clock::now();
+/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
+/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
 /*DEBUG*/{
 /*DEBUG*/    ostream        *msg = reinterpret_cast<ostream*>(&out);
@@ -1139,6 +1206,7 @@ if ( (m_rank != snd_rank) && (m_rank != rcv_rank) )
 
     // Receive cell list ==================================================== //
 /*DEBUG*/out << "* process (rank#" << m_rank << ") receving notification" << endl;
+/*DEBUG*/t0 = high_resolution_clock::now();
     if (waiting) {
 
         // Receive buffer size
@@ -1170,11 +1238,15 @@ if ( (m_rank != snd_rank) && (m_rank != rcv_rank) )
             } //next i
         }
     }
+/*DEBUG*/t1 = high_resolution_clock::now();
+/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
+/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 }
 
 /*DEBUG*/{
-/*DEBUG*/    out << "* display mesh infos" << endl;
+/*DEBUG*/    out << "* display mesh infos {" << endl;
 /*DEBUG*/    displayCells(out);
+/*DEBUG*/    out << "}" << endl;
 /*DEBUG*/    out.close();
 /*DEBUG*/}
 

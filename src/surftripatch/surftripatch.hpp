@@ -48,21 +48,25 @@ public:
         static const unsigned short SELECT_QUAD;
         static const unsigned short SELECT_ALL;
 
+        // Constructors
 	SurfTriPatch(const int &id);
 
+        // Setters
 	void setExpert(bool expert);
 
-	double evalCellVolume(const long &id);
-	double evalCellSize(const long &id);
-
-	double evalInterfaceArea(const long &id);
-	std::array<double, 3> evalInterfaceNormal(const long &id);
-
-	bool isPointInside(const std::array<double, 3> &point);
-	long locatePoint(const std::array<double, 3> &point);
+        // Modifiers
         void buildAdjacencies(void);
         void updateAdjacencies(const std::vector<long>&);
 
+        // Search algorithms
+        bool isPointInside(const std::array<double, 3> &point);
+        long locatePoint(const std::array<double, 3> &point);
+
+        // Evaluations
+	double evalCellVolume(const long &id);
+	double evalCellSize(const long &id);
+	double evalInterfaceArea(const long &id);
+	std::array<double, 3> evalInterfaceNormal(const long &id);
         //TODO: double evalCellArea(const long &);
         std::array<double, 3> evalCellCentroid(const long &);
         double evalEdgeLength(const long&, const int&);
@@ -85,6 +89,8 @@ public:
             ostream                     &,
             unsigned int                 padding = 0
         );
+
+        // I/O routines
         unsigned short importSTL(const std::string &, const bool &);
         unsigned short exportSTL(const std::string &, const bool &, bool flag = true);
 
