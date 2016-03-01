@@ -4430,7 +4430,7 @@ ParaTree::writeTest(string filename, vector<double> data) {
 	}
 
 	stringstream name;
-	name << "s" << std::setfill('0') << std::setw(4) << m_nproc << "-p" << std::setfill('0') << std::setw(4) << m_rank << "-" << filename << ".vtu" << endl;
+	name << "s" << std::setfill('0') << std::setw(4) << m_nproc << "-p" << std::setfill('0') << std::setw(4) << m_rank << "-" << filename << ".vtu";
 
 	ofstream out(name.str().c_str());
 	if(!out.is_open()){

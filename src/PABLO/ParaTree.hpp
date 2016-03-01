@@ -559,7 +559,7 @@ public:
 			{
 				(*m_log) << " " << endl;
 				(*m_log) << " Initial Parallel partition : " << endl;
-				(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1));
+				(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(0))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[0]+1)) << endl;
 				for(int ii=1; ii<m_nproc; ii++){
 					(*m_log) << " Octants for proc	"+ std::to_string(static_cast<unsigned long long>(ii))+"	:	" + std::to_string(static_cast<unsigned long long>(m_partitionRangeGlobalIdx[ii]-m_partitionRangeGlobalIdx[ii-1])) << endl;
 				}

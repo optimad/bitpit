@@ -57,6 +57,22 @@ int main(int argc, char *argv[]) {
 #endif
 		int iter = 0;
 
+		/**<Instantation and setup of a default (named bitpit) logfile.*/
+		int errorFlag;
+		int nproc;
+		int	rank;
+#if ENABLE_MPI==1
+		MPI_Comm comm = MPI_COMM_WORLD;
+		errorFlag = MPI_Comm_size(comm,&nproc);
+		errorFlag = MPI_Comm_rank(comm,&rank);
+#else
+		nproc = 1;
+		rank = 0;
+#endif
+		log::cout().setParallel(nproc, rank);
+		log::cout() << fileVerbosity(log::NORMAL);
+		log::cout() << consoleVerbosity(log::QUIET);
+
 		/**<Instantation of a 3D pablo uniform object.*/
 		PabloUniform pablo9(0,0,0,1,3);
 
