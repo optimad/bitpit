@@ -595,6 +595,53 @@ public:
 	}
 
 	/*!
+		Dumps to screen the internal data.
+	*/
+	void dump()
+	{
+		std::cout << "----------------[ DUMP ]----------------" << std::endl;
+
+		std::cout << std::endl;
+		std::cout << " size: " << size() << std::endl;
+
+		std::cout << " m_holes_regular_begin: " << std::distance(m_holes.begin(), m_holes_regular_begin) << std::endl;
+		std::cout << " m_holes_regular_end  : " << std::distance(m_holes.begin(), m_holes_regular_end) << std::endl;
+
+		std::cout << std::endl;
+		std::cout << " Regular holes: " << std::endl;
+		for (auto k = m_holes_regular_begin; k < m_holes_regular_end; ++k) {
+			std::cout << *k << std::endl;
+		}
+
+		std::cout << std::endl;
+		std::cout << " m_holes_pending_begin: " << std::distance(m_holes.begin(), m_holes_pending_begin) << std::endl;
+		std::cout << " m_holes_pending_end  : " << std::distance(m_holes.begin(), m_holes_pending_end) << std::endl;
+
+		std::cout << std::endl;
+		std::cout << " Pending holes" << std::endl;
+		for (auto k = m_holes_pending_begin; k < m_holes_pending_end; ++k) {
+			std::cout << *k << std::endl;
+		}
+
+		std::cout << std::endl;
+		std::cout << " m_first_pos: " << m_first_pos << std::endl;
+		std::cout << " m_last_pos: " <<  m_last_pos << std::endl;
+		std::cout << " Stored ids: " << std::endl;
+		for (int k = 0; k <= m_last_pos; ++k) {
+			id_type id = m_v[k].get_id();
+			std::cout << id;
+			if (exists(id)) {
+				std::cout << " ( " << get_pos_from_id(id) << ")";
+			} else {
+				std::cout << " ( negative id!)";
+			}
+			std::cout << std::endl;
+		}
+
+		std::cout << "----------------------------------------" << std::endl;
+	}
+
+	/*!
 		The container is extended by inserting a new element. This
 		new element is constructed in place using args as the
 		arguments for its construction.
