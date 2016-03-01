@@ -669,8 +669,10 @@ void Logger::setParallel(int nProcessors, int rank)
 		m_buffer.setFilePrefix("");
 	}
 
+	// Reset verbosity
 	setConsoleVerbosity(m_consoleVerbosity);
 	setFileVerbosity(m_fileVerbosity);
+
 	// Reopen the log file
 	if (m_fileStream.is_open()) {
 		openLogFile(false);
