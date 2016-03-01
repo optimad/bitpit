@@ -2518,7 +2518,7 @@ LocalTree::localBalance(bool doInterior){
 		oend = m_octants.end();
 		idx = 0;
 		for (it=obegin; it!=oend; it++){
-			if (it->getBalance() && it->getMarker() != 0){
+			if (it->getBalance() && (it->getMarker() != 0 || it->m_info[15]) ){
 				targetmarker = min(m_global.m_maxLevel, int8_t(m_octants[idx].getLevel() + m_octants[idx].getMarker()));
 
 				//Balance through faces
@@ -2640,7 +2640,7 @@ LocalTree::localBalance(bool doInterior){
 		oend = m_ghosts.end();
 		idx = 0;
 		for (it=obegin; it!=oend; it++){
-			if (!it->getNotBalance() && it->getMarker() != 0){
+			if (!it->getNotBalance() && (it->getMarker() != 0 || it->m_info[15]) ){
 				targetmarker = min(m_global.m_maxLevel, int8_t(it->getLevel()+it->getMarker()));
 
 				//Balance through faces
