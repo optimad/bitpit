@@ -32,16 +32,41 @@ using namespace bitpit;
 
 void test001() {
 
+	/**<Instantation and setup of a default (named bitpit) logfile.*/
+	int errorFlag;
+	int nproc;
+	int	rank;
+#if ENABLE_MPI==1
+	MPI_Comm comm = MPI_COMM_WORLD;
+	errorFlag = MPI_Comm_size(comm,&nproc);
+	errorFlag = MPI_Comm_rank(comm,&rank);
+#else
+	nproc = 1;
+	rank = 0;
+#endif
+	log::cout().setParallel(nproc, rank);
+	log::cout() << fileVerbosity(log::NORMAL);
+	log::cout() << consoleVerbosity(log::QUIET);
+
     /**<Instantation of a 2D para_tree object with default constructor.*/
     ParaTree ptreedefault;
     /**<Write the para_tree in physical domain.*/
     ptreedefault.write("Pablo001_default");
 
+
+	/**<Instantation and setup of a custom (named custom) logfile.*/
+	log::cout("custom").setParallel(nproc, rank);
+	log::cout("custom") << fileVerbosity(log::NORMAL);
+	log::cout("custom") << consoleVerbosity(log::QUIET);
+
     /**<Set coordinates of the origin and size of a 2D custom para_tree object.*/
     double X, Y, Z, L;
     X = 10.0; Y = 20.0; Z = 0.0; L = 250.0;
+    int dim, maxlevel;
+    dim = 2;
+    maxlevel = 20;
     /**<Instantation of a 2D para_tree object with custom constructor.*/
-    PabloUniform ptreecustom(X,Y,Z,L);
+    PabloUniform ptreecustom(X,Y,Z,L,dim,maxlevel,"custom");
     /**<Write the para_tree in physical domain.*/
     ptreecustom.write("Pablo001_custom");
 

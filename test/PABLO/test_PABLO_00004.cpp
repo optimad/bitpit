@@ -33,7 +33,23 @@ void test004() {
     int iter = 0;
     int dim = 3;
 
-    /**<Instantation of a 3D para_tree object.*/
+	/**<Instantation and setup of a default (named bitpit) logfile.*/
+	int errorFlag;
+	int nproc;
+	int	rank;
+#if ENABLE_MPI==1
+	MPI_Comm comm = MPI_COMM_WORLD;
+	errorFlag = MPI_Comm_size(comm,&nproc);
+	errorFlag = MPI_Comm_rank(comm,&rank);
+#else
+	nproc = 1;
+	rank = 0;
+#endif
+	log::cout().setParallel(nproc, rank);
+	log::cout() << fileVerbosity(log::NORMAL);
+	log::cout() << consoleVerbosity(log::QUIET);
+
+	/**<Instantation of a 3D para_tree object.*/
     ParaTree pablo104(3);
 
     /**<Refine globally four level and write the para_tree.*/
