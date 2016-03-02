@@ -961,19 +961,22 @@ std::vector<long> PatchKernel::collapseCoincidentVertices(int nBins)
 			// Vertex insertion
 			KdTree<3, Vertex, long> kd(nBinCells);
 			for (int j = 0; j < nBinCells; ++j) {
-				long cellId   = bin[list[j]][0];
-				long k        = bin[list[j]][1];
-				long vertexId = m_cells[cellId].getVertex(k);
+				long cellId = bin[list[j]][0];
+				Cell &cell  = m_cells[cellId];
 
-				if (kd.exist(&m_vertices[vertexId], collapsedVertexId) >= 0) {
-					m_cells[cellId].setVertex(k, collapsedVertexId);
+				long k         = bin[list[j]][1];
+				long vertexId  = cell.getVertex(k);
+				Vertex &vertex = m_vertices[vertexId];
+
+				if (kd.exist(&vertex, collapsedVertexId) >= 0) {
+					cell.setVertex(k, collapsedVertexId);
 					if (!flag[vertexId]) {
 						flag[vertexId] = true;
 						collapsedVertices.push_back(vertexId);
 					}
 				} else {
 					flag[vertexId] = true;
-					kd.insert(&m_vertices[vertexId], vertexId);
+					kd.insert(&vertex, vertexId);
 				}
 			}
 		}
