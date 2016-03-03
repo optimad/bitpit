@@ -201,6 +201,8 @@ if (ENABLE_MPI)
 	else()
 		set(CMAKE_CXX_COMPILER mpic++)
 	endif()
+else ()
+	list (APPEND BITPIT_DEFINITIONS_PUBLIC "ENABLE_MPI=0")
 endif()
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fmessage-length=0")
