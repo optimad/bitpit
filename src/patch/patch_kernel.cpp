@@ -1546,36 +1546,27 @@ PatchKernel::CellIterator PatchKernel::moveInternal2Ghost(const long &id)
 		return m_cells.end();
 	}
 
-	// If we are moving the last internal cell we can just update the
-	// last internal and first ghost markers. Otherwise the cell needs
-	// to be moved.
-	PiercedVector<Cell>::iterator iterator;
-	if (id == m_last_internal_id) {
-		// Cell iterator
-		iterator = CellIterator(m_cells.raw_begin() + m_cells.raw_index(id));
-
-		// Update markers
-		m_first_ghost_id   = id;
-		m_last_internal_id = m_cells.get_size_marker(m_nInternals - 2, Element::NULL_ID);
-	} else {
-		// Move the cell
-		iterator = m_cells.move_after(m_last_internal_id, id);
-
-		// Update markers
-		if (m_first_ghost_id < 0) {
-			m_first_ghost_id = id;
-		} else if (m_cells.raw_index(m_first_ghost_id) > m_cells.raw_index(id)) {
-			m_first_ghost_id = id;
-		}
+	// Swap the element with the last internal cell
+	if (id != m_last_internal_id) {
+		m_cells.swap(id, m_last_internal_id);
 	}
+
+	// Get the iterator pointing to the updated position of the element
+	CellIterator iterator = CellIterator(m_cells.raw_begin() + m_cells.raw_index(id));
+
+	// Update the interior flag
 	iterator->setInterior(false);
 
-	// Update counters
+	// Update cell counters
 	--m_nInternals;
 	++m_nGhosts;
 
+	// Update the last internal and first ghost markers
+	m_first_ghost_id = id;
+	m_last_internal_id = m_cells.get_size_marker(m_nInternals - 1, Element::NULL_ID);
+
 	// Return the iterator to the new position
-	return(iterator);
+	return iterator;
 }
 
 /*!
@@ -1589,36 +1580,33 @@ PatchKernel::CellIterator PatchKernel::moveGhost2Internal(const long &id)
 		return m_cells.end();
 	}
 
-	// If we are moving the first ghost cell we can just update the
-	// last internal and first ghost markers. Otherwise the cell needs
-	// to be moved.
-	PiercedVector<Cell>::iterator iterator;
-	if (id == m_first_ghost_id) {
-		// Cell iterator
-		iterator = CellIterator(m_cells.raw_begin() + m_cells.raw_index(id));
-
-		// Update markers
-		m_last_internal_id = id;
-		m_first_ghost_id   = m_cells.get_size_marker(m_nInternals + 1, Element::NULL_ID);
-	} else {
-		// Move cell
-		iterator = m_cells.move_before(m_first_ghost_id, id);
-
-		// Update the id of the last internal cell
-		if (m_last_internal_id < 0) {
-			m_last_internal_id = id;
-		} else if (m_cells.raw_index(m_last_internal_id) < m_cells.raw_index(id)) {
-			m_last_internal_id = id;
-		}
+	// Swap the cell with the first ghost
+	if (id != m_first_ghost_id) {
+		m_cells.swap(id, m_first_ghost_id);
 	}
+
+	// Get the iterator pointing to the updated position of the element
+	CellIterator iterator = CellIterator(m_cells.raw_begin() + m_cells.raw_index(id));
+
+	// Update the interior flag
 	iterator->setInterior(true);
 
-	// Update counters
+	// Update cell counters
 	++m_nInternals;
 	--m_nGhosts;
 
+	// Update the last internal and first ghost markers
+	m_last_internal_id = id;
+	if (m_nGhosts == 0) {
+		m_first_ghost_id = Element::NULL_ID;
+	} else {
+		CellIterator firstGhostIterator = iterator;
+		++firstGhostIterator;
+		m_first_ghost_id = firstGhostIterator->get_id();
+	}
+
 	// Return the iterator to the new position
-	return(iterator);
+	return iterator;
 }
 
 /*!
