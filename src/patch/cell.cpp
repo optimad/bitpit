@@ -598,6 +598,25 @@ int Cell::findAdjacency(const int &face, const int &adjacency)
 }
 
 /*!
+        Given the global index of a vertex, returns the local index of that
+        vertex within the cell (if exists). If the specified vertex does not
+        exist in the cell connectivity list, returns Vertex::NULL_ID
+
+        \param[in] vertex vertex global ID
+        \result local index of the vertex with specified ID within the cell.
+*/
+int Cell::findVertex(const long &vertex)
+{
+    int         loc_id;
+    int         n_vert = getVertexCount();
+    long*       c_ = getConnect();
+
+    loc_id = std::find(c_, c_ + n_vert, vertex) - c_;
+    if (loc_id >= n_vert) return(Vertex::NULL_ID);
+    return (loc_id);
+}
+
+/*!
 	Find the specified adjacency among all the adjacencies of the cell.
 
 	The function returns the first position in the adjacency cell list of the

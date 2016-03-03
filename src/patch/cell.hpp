@@ -87,6 +87,7 @@ public:
 	const long * getAdjacencies(const int &face) const;
 	int findAdjacency(const int &face, const int &adjacency);
 	int findAdjacency(const int &adjacency);
+        int findVertex(const long &vertex);
 
 	bool isFaceBorder(int face) const;
 
