@@ -204,14 +204,19 @@ public:
 	*/
 	PiercedIterator& operator++ ()
 	{
-		m_itr++;
+		size_t delta = 1;
+		while (true) {
+			m_itr += delta;
 
-		id_type id = m_itr->get_id();
-		if (id != SENTINEL_ID && id < 0) {
-			m_itr += - id;
+			id_type id = m_itr->get_id();
+			if (id == SENTINEL_ID || id >= 0) {
+				return *this;
+			} else {
+				delta = - id;
+			}
 		}
 
-		return *this;
+		assert(false);
 	}
 
 	/*!
@@ -310,6 +315,14 @@ const typename PiercedIterator<T, unqualified_T>::id_type
 	id are used by PiercedVector to store special information in the
 	elements).
 
+	Internally all the holes are stored in a single vector. The first part
+	of this vector contains the "regular" holes, whereas the last part
+	contains the "pending" holes. The space reserved to the pending holes
+	is fixed. When this space if full, the 'holes_flush' function will be
+	called and all pending holes will be converted to regular holes.
+	New positions for inserting new elements will be searched first among
+	the pending holes and then among the regular holes.
+
 	@tparam T The type of the objects stored in the vector
 */
 
@@ -353,6 +366,11 @@ private:
 		there should always be at least one sentinel dummy element.
 	*/
 	static const size_type REQUIRED_SENTINEL_COUNT;
+
+	/*!
+		Maximum number of pending deletes before the changes are flushed.
+	*/
+	static const size_type MAX_PENDING_HOLES;
 
 	/*!
 		Number of usable positions in the vector.
@@ -555,19 +573,14 @@ public:
 		m_last_pos  = 0;
 
 		// Clear holes
-		m_holes.clear();
-		std::deque<size_type>().swap(m_holes);
-
-		// Clear pending changes
-		m_pending_deletes.clear();
-		std::deque<size_type>().swap(m_pending_deletes);
+		holes_clear(release);
 
 		// Clear position map
 		m_pos.clear();
 		std::unordered_map<id_type, size_type, PiercedHasher>().swap(m_pos);
 
-		// Clear dirty flag
-		m_dirty = false;
+		// There are no dirty positions
+		m_first_dirty_pos = m_last_pos + 1;
 	}
 
 	/*!
@@ -627,7 +640,7 @@ public:
 		std::cout << " m_first_pos: " << m_first_pos << std::endl;
 		std::cout << " m_last_pos: " <<  m_last_pos << std::endl;
 		std::cout << " Stored ids: " << std::endl;
-		for (int k = 0; k <= m_last_pos; ++k) {
+		for (size_t k = 0; k <= m_last_pos; ++k) {
 			id_type id = m_v[k].get_id();
 			std::cout << id;
 			if (exists(id)) {
@@ -848,20 +861,8 @@ public:
 	*/
 	void flush()
 	{
-		if (!m_dirty) {
-			return;
-		}
-
-		// Flush pending deletes
-		auto pendingIter = m_pending_deletes.rbegin();
-		while (pendingIter != m_pending_deletes.rend()) {
-			pierce_pos(*pendingIter);
-			++pendingIter;
-		}
-		std::deque<size_type>().swap(m_pending_deletes);
-
-		// Done
-		m_dirty = false;
+		// Flush pending holes
+		holes_flush();
 	}
 
 	/*!
@@ -936,37 +937,48 @@ public:
 		number of other elements. If this element does not exist the
 		fallback value will be returned.
 	*/
-	id_type get_size_marker(const size_t &targetSize, const id_type &fallback = SENTINEL_ID) const
+	id_type get_size_marker(const size_t &targetSize, const id_type &fallback = SENTINEL_ID)
 	{
 		// If the size is zero, we return the first element, if the target
-		// size is greater or equal the current container size we return
-		// the fallback value
+		// size is equal to the size minus one we return the last element,
+		// if the target size is greater or equal the current container size
+		// we return the fallback value.
 		if (targetSize == 0) {
 			return m_v[m_first_pos].get_id();
+		} else if (targetSize == (size() - 1)) {
+			return m_v[m_last_pos].get_id();
 		} else if (targetSize >= size() || targetSize <= 0) {
 			return fallback;
 		}
 
+		// Sort the holes
+		holes_sort_regular();
+		holes_sort_pending();
+
 		// Iterate to find the position before wihch there is the
 		// requeste number of element.
-		std::deque<size_type>::const_iterator hole_itr    = m_holes.begin();
-		std::deque<size_type>::const_iterator pending_itr = m_pending_deletes.begin();
+		hole_iterator regular_hole_itr = m_holes_regular_end;
+		hole_iterator pending_hole_itr = m_holes_pending_end;
 
 		size_type nEmpties  = 0;
 		size_type markerPos = targetSize;
 		while (true) {
-			// Count the number of holes and pending deletes before the
-			// current marker position
-			if (hole_itr != m_holes.end()) {
-				std::deque<size_type>::const_iterator itr_previous = hole_itr;
-				hole_itr = std::upper_bound(hole_itr, m_holes.end(), markerPos);
-				nEmpties += std::distance(itr_previous, hole_itr);
+			if (is_pos_empty(markerPos)) {
+				markerPos = find_next_used_pos(markerPos - 1);
 			}
 
-			if (pending_itr != m_pending_deletes.end()) {
-				std::deque<size_type>::const_iterator itr_previous = pending_itr;
-				pending_itr = std::upper_bound(pending_itr, m_pending_deletes.end(), markerPos);
-				nEmpties += std::distance(itr_previous, pending_itr);
+			// Count the number of holes and pending deletes before the
+			// current marker position
+			if (regular_hole_itr != m_holes_regular_begin) {
+				hole_iterator itr_previous = regular_hole_itr;
+				regular_hole_itr = std::upper_bound(m_holes_regular_begin, regular_hole_itr, markerPos, std::greater<size_type>());
+				nEmpties += std::distance(regular_hole_itr, itr_previous);
+			}
+
+			if (pending_hole_itr != m_holes_pending_begin) {
+				hole_iterator itr_previous = pending_hole_itr;
+				pending_hole_itr = std::upper_bound(m_holes_pending_begin, pending_hole_itr, markerPos, std::greater<size_type>());
+				nEmpties += std::distance(pending_hole_itr, itr_previous);
 			}
 
 			// Get the marker size
@@ -981,11 +993,7 @@ public:
 			}
 		}
 
-		if (markerPos > m_last_pos) {
-			return fallback;
-		} else {
-			return m_v[markerPos].get_id();
-		}
+		return m_v[markerPos].get_id();
 	}
 
 	/*!
@@ -1036,6 +1044,24 @@ public:
 		size_type pos = fill_pos_before(get_pos_from_id(referenceId));
 
 		return _insert(pos, std::move(value));
+	}
+
+
+	/*!
+		Checks if the container is in a state that can slow down the iterator.
+
+		If there are dirty positions in the vector, the ids associated to
+		those positions will not point directly to a non-empty element.
+		This means that the iterator will require a loop to reach the next
+		non-empty position and this can slow down the loop. Calling the
+		'flush' function allow to recover the best performances.
+
+		\result Return true if the container is in a state that can slow down
+		the iterator, false otherwise.
+	*/
+	bool is_iterator_slow()
+	{
+		return (m_first_dirty_pos <= m_last_pos);
 	}
 
 	/*!
@@ -1098,17 +1124,6 @@ public:
 	{
 		if (empty()) {
 			throw std::out_of_range ("Vector is empty");
-		}
-
-		while (!m_pending_deletes.empty()) {
-			if (m_pending_deletes.back() < m_last_pos) {
-				break;
-			}
-
-			size_type pos = positions_pop_back(m_pending_deletes);
-			if (pos != m_last_pos) {
-				_erase(pos, false);
-			}
 		}
 
 		_erase(m_last_pos, false);
@@ -1378,21 +1393,21 @@ public:
 		is reduced to its first n elements, removing those beyond
 		(and destroying them).
 
-		If n is greater than the current container size, the content
-		is expanded by inserting at the end as many dummy elements as
-		needed to reach a size of n. 
+		If n is greater than the current container size, space is
+		reserved in the storage to allow the container to reach the
+		requested size.
 
 		If n is also greater than the current container capacity, an
 		automatic reallocation of the allocated storage space takes
 		place.
 
 		Notice that this function changes the actual content of the
-		container by inserting or erasing elements from it.
+		container by erasing elements from it.
 
 		\param n is the new container size, expressed in number of
-		         elements.
+		elements.
 	*/
-	void resize (size_type n)
+	void resize(size_type n)
 	{
 		// If the size of the vector is already the requested size
 		// there is nothing to do.
@@ -1407,55 +1422,36 @@ public:
 		}
 
 		// If the requested size is greater that the current size we
-		// may need to resize the storage to reach the requested size.
+		// may need to reserve space in the storage to allow the
+		// container to reach the requested size.
 		if (n > size()) {
-			size_t previousStorageSize = storage_size();
-			if (n < previousStorageSize) {
-				return;
-			}
-
-			storage_resize(n);
+			reserve(n);
 			return;
 		}
 
 		// If the requested size is smaller that the current size
 		// we need to perform a real resize.
 
-		// Find the updated position of the last element
-		size_type updated_last_pos = n - 1;
-		if (!m_holes.empty()) {
-			size_type nHoles = 0;
-			std::deque<size_type>::iterator it_begin = m_holes.begin();
-			std::deque<size_type>::iterator it_end   = m_holes.end();
-			while (true) {
-				std::deque<size_type>::iterator it_hole = upper_bound(it_begin, it_end, updated_last_pos);
-				nHoles = std::distance(it_begin, it_hole);
-				if (nHoles == 0) {
-					break;
-				}
+		// Flush holes
+		holes_flush();
 
-				updated_last_pos += nHoles;
+		// Find the id of the last element
+		id_type last_id = get_size_marker(n - 1);
 
-				it_begin = it_hole;
-			}
-		}
+		// Find the updated last position
+		size_type updated_last_pos = get_pos_from_id(last_id);
 
 		// Delete all ids of the elements beyond the updated position
 		// of the last element
-		iterator itr(raw_begin() + updated_last_pos + 1);
+		iterator itr(raw_begin() + updated_last_pos);
+		itr++;
 		while (itr != end()) {
-			m_pos.erase((*itr).get_id());
+			unlink_id(itr->get_id());
 			itr++;
 		}
 
-		// Delete all holes above the updated last position
-		positions_delete_after(m_holes, updated_last_pos);
-
-		// Resize the vector
-		storage_resize(updated_last_pos + 1);
-
-		// Update the position of the last element
-		m_last_pos = updated_last_pos;
+		// Update the last position
+		update_last_used_pos(updated_last_pos);
 	}
 
 	/*!
@@ -1477,29 +1473,16 @@ public:
 	*/
 	void sort()
 	{
-		// Flush changes
-		flush();
+		// Squeeze the container
+		squeeze();
 
 		// Sort the elements of the vector
-		std::sort(m_v.begin(), m_v.begin() + m_last_pos + 2, less_than_id());
+		std::sort(m_v.begin(), m_v.end() - 1, less_than_id());
 
 		// Update positions of the ids
 		for (size_type pos = 0; pos <= m_last_pos; pos++) {
-			id_type id = m_v[pos].get_id();
-			m_pos[id] = pos;
+			link_id(m_v[pos].get_id(), pos, false);
 		}
-
-		// Reset first and last counters
-		m_first_pos = 0;
-		m_last_pos  = size() - 1;
-
-		// There are no more holes
-		m_holes.clear();
-		std::deque<size_type>().swap(m_holes);
-
-		// Resize
-		storage_resize(size());
-		m_v.shrink_to_fit();
 	}
 
 	/*!
@@ -1518,17 +1501,20 @@ public:
 		flush();
 
 		// Compact the vector
-		if (!m_holes.empty()) {
+		size_type nHoles = holes_count();
+		if (nHoles != 0) {
 			// Move the elements
-			size_type offset = 0;
-			size_type nHoles = m_holes.size();
-			for (size_type pos = 0; pos <= m_last_pos; pos++) {
-				if (offset < nHoles && m_holes[offset] == pos) {
-					offset++;
-					continue;
-				}
+			size_type firstPosToUpdate;
+			if (m_first_pos == 0) {
+				firstPosToUpdate = *(m_holes_regular_end - 1);
+			} else {
+				firstPosToUpdate = 0;
+			}
 
-				if (offset == 0) {
+			size_type offset = 0;
+			for (size_type pos = firstPosToUpdate; pos <= m_last_pos; pos++) {
+				if (offset < nHoles && *(m_holes_regular_end - offset - 1) == pos) {
+					++offset;
 					continue;
 				}
 
@@ -1536,19 +1522,18 @@ public:
 				size_type updatedPos = pos - offset;
 
 				m_v[updatedPos] = std::move(m_v[pos]);
-				m_pos[id] = updatedPos;
+				link_id(id, updatedPos, false);
 			}
 
-			// Reset first and last counters
-			m_first_pos = 0;
-			m_last_pos  = size() - 1;
+			// Clear the holes
+			holes_clear();
 
-			// There are no more holes
-			std::deque<size_type>().swap(m_holes);
+			// Reset first and last counters
+			update_first_used_pos(0);
+			update_last_used_pos(size() - 1);
 		}
 
-		// Resize
-		storage_resize(size());
+		// Shrink to fit
 		m_v.shrink_to_fit();
 	}
 
@@ -1571,10 +1556,38 @@ public:
 	{
 		std::swap(x.m_first_pos, m_first_pos);
 		std::swap(x.m_last_pos, m_last_pos);
+		std::swap(x.m_first_dirty_pos, m_first_dirty_pos);
 		std::swap(x.m_v, m_v);
 		std::swap(x.m_holes, m_holes);
-		std::swap(x.m_pending_deletes, m_pending_deletes);
+		std::swap(x.m_holes_regular_begin, m_holes_regular_begin);
+		std::swap(x.m_holes_regular_end, m_holes_regular_end);
+		std::swap(x.m_holes_regular_sorted, m_holes_regular_sorted);
+		std::swap(x.m_holes_pending_begin, m_holes_pending_begin);
+		std::swap(x.m_holes_pending_end, m_holes_pending_end);
+		std::swap(x.m_holes_pending_sorted, m_holes_pending_sorted);
 		std::swap(x.m_pos, m_pos);
+	}
+
+	/*!
+		Swap the elements with the specified id.
+
+		\param id_first is the id of the first element to be swapped
+		\param id_second is the id of the second element to be swapped
+	*/
+	void swap(const id_type &id_first, const id_type &id_second)
+	{
+		// Positions
+		size_t pos_first  = m_pos.at(id_first);
+		size_t pos_second = m_pos.at(id_second);
+
+		// Swap the elements
+		T tmp = std::move(m_v[pos_first]);
+		m_v[pos_first]  = std::move(m_v[pos_second]);
+		m_v[pos_second] = std::move(tmp);
+
+		// Relink the ids
+		link_id(id_first, pos_second, false);
+		link_id(id_second, pos_first, false);
 	}
 
 	/*!
@@ -1692,6 +1705,16 @@ private:
 	};
 
 	/*!
+		Container used for storing holes
+	*/
+	typedef std::vector<size_type> hole_container;
+
+	/*!
+		Hole iterator
+	*/
+	typedef hole_container::iterator hole_iterator;
+
+	/*!
 		Vector that will hold the elements.
 	*/
 	std::vector<value_type>m_v;
@@ -1700,17 +1723,37 @@ private:
 		Container that will hold a list of the holes present in
 		the piecrecd vector.
 	*/
-	std::deque<size_type> m_holes;
+	hole_container m_holes;
 
 	/*!
-		Tracks if the container in a dirty status.
+		Iterator pointing to the first regular hole
 	*/
-	bool m_dirty;
+	hole_iterator m_holes_regular_begin;
 
 	/*!
-		Container that will hold a list of the pending deletes.
+		Iterator pointing to the last regular hole
 	*/
-	std::deque<size_type> m_pending_deletes;
+	hole_iterator m_holes_regular_end;
+
+	/*!
+		Iterator pointing to the first pending hole
+	*/
+	hole_iterator m_holes_pending_begin;
+
+	/*!
+		Iterator pointing to the last pending hole
+	*/
+	hole_iterator m_holes_pending_end;
+
+	/*!
+		Tracks if the regular holes are sorted
+	*/
+	bool m_holes_regular_sorted;
+
+	/*!
+		Tracks if the pending holes are sorted
+	*/
+	bool m_holes_pending_sorted;
 
 	/*!
 		Map that links the id of the elements and their position
@@ -1727,6 +1770,15 @@ private:
 		Position of the last element in the internal vector.
 	*/
 	size_type m_last_pos;
+
+	/*!
+		Position of the first dirty element.
+
+		After the first dirty position the id of the holes can not be
+		properly defined, meaning that the iterator can take longer to
+		iterate through the elements.
+	*/
+	size_type m_first_dirty_pos;
 
 	/*!
 		The container is extended by inserting a new element in
@@ -1768,29 +1820,18 @@ private:
 	*/
 	iterator _erase(size_type pos, bool delayed = false)
 	{
-		// If the container contains only the element we want to erase,
-		// we can clear the container. However we do not want to relase
-		// the memory the container is holding.
-		if (size() > 1) {
-			// Delete id from map
-			unlink_id(m_v[pos].get_id());
+		// Delete id from map
+		unlink_id(m_v[pos].get_id());
 
-			// Free the position
-			if (delayed) {
-				positions_add(m_pending_deletes, pos);
-			} else {
-				pierce_pos(pos);
-			}
-		} else {
-			clear(false);
-		}
+		// Push the position into the list of holes
+		pierce_pos(pos, !delayed);
 
 		// Return the iterator to the element following the one erased
 		iterator itr;
 		if (empty() || pos >= m_last_pos) {
 			itr = end();
 		} else {
-			itr = raw_begin() + next_used_pos(pos);
+			itr = raw_begin() + find_next_used_pos(pos);
 		}
 
 		return itr;
@@ -1830,14 +1871,17 @@ private:
 	*/
 	iterator _move(const size_t &currentPos, const size_t &updatedPos)
 	{
+		// Move the element
+		//
 		// Current position is reset to avoid leaving elements in an
 		// inconsistent state
 		m_v[updatedPos] = std::move(m_v[currentPos]);
-		m_v[currentPos] = T();
-		pierce_pos(currentPos);
 
 		// Update the map
 		link_id(m_v[updatedPos].get_id(), updatedPos, false);
+
+		// Pierce the position
+		pierce_pos(currentPos, true);
 
 		// Return the iterator that points to the element
 		iterator itr;
@@ -1899,20 +1943,13 @@ private:
 	size_type fill_pos_append()
 	{
 		// Extend the container
+		size_type updated_last_pos = m_last_pos;
 		if (!empty()) {
-			m_last_pos++;
+			++updated_last_pos;
 		}
-		storage_resize(m_last_pos + 1);
+		update_last_used_pos(updated_last_pos);
 
-		// If there are pending deletes and the filled position is
-		// among these deletes, it is also necessary to remove the
-		// filled position from the list of pending deletes.
-		size_type pos = m_last_pos;
-		if (!m_pending_deletes.empty()) {
-			positions_delete(m_pending_deletes, pos);
-		}
-
-		return pos;
+		return m_last_pos;
 	}
 
 	/*!
@@ -1946,25 +1983,24 @@ private:
 
 		// Reset the, now empty, element
 		//
-		// We need to avoid that this element could be in an
-		// inconsistent state.
-		m_v[pos] = T();
+		// We need to avoid that this element could be in an inconsistent state.
+		reset_pos(pos);
 
-		// Update the holes
-		if (!m_holes.empty()) {
-			std::deque<size_type>::iterator itr = upper_bound(m_holes.begin(), m_holes.end(), pos);
-			while (itr != m_holes.end()) {
+		// Update the regular holes
+		if (m_holes_regular_begin != m_holes_regular_end) {
+			hole_iterator change_begin = m_holes_regular_begin;
+			hole_iterator change_end   = upper_bound(m_holes_regular_begin, m_holes_regular_end, pos, std::greater<size_type>());
+			for (auto itr = change_begin; itr != change_end; itr++) {
 				(*itr)++;
-				itr++;
 			}
 		}
 
-		// Update the pending deletes
-		if (!m_pending_deletes.empty()) {
-			std::deque<size_type>::iterator itr = upper_bound(m_pending_deletes.begin(), m_pending_deletes.end(), pos);
-			while (itr != m_pending_deletes.end()) {
+		// Update the pending holes
+		if (m_holes_pending_begin != m_holes_pending_end) {
+			hole_iterator change_begin = m_holes_pending_begin;
+			hole_iterator change_end   = upper_bound(m_holes_pending_begin, m_holes_pending_end, pos, std::greater<size_type>());
+			for (auto itr = change_begin; itr != change_end; itr++) {
 				(*itr)++;
-				itr++;
 			}
 		}
 
@@ -1981,24 +2017,41 @@ private:
 	*/
 	size_type fill_pos_head()
 	{
-		// If there are pending deletes we can just pop a position
-		// from the list of pending deletetes.
-		if (!m_pending_deletes.empty()) {
-			return positions_pop_front(m_pending_deletes);
-		}
-
 		// If there are holes we can fill a hole.
-		if (!m_holes.empty()) {
-			// Pop a hole
-			size_type pos = positions_pop_front(m_holes);
+		long nRegulars = holes_count_regular();
+		long nPendings = holes_count_pending();
+		long nHoles    = nRegulars + nPendings;
+		if (nHoles != 0) {
+			// Sort the holes
+			if (m_holes_pending_begin != m_holes_pending_end) {
+				holes_sort_pending();
+			} else {
+				holes_sort_regular();
+			}
 
-			// Update first and last counters
+			// The last element of the hole's container is the hole we need to
+			// use if we are filling from the head.
+			size_type pos = m_holes.back();
+			m_holes.pop_back();
+
+			// Update the iterators
+			if (nHoles == 1) {
+				holes_clear();
+			} else {
+				if (nRegulars >= 1 || nPendings == 1) {
+					m_holes_regular_end   = m_holes.end();
+					m_holes_pending_begin = m_holes_regular_end;
+				}
+				m_holes_pending_end = m_holes.end();
+			}
+
+			// Update first position counter
 			//
 			// If the vector contains a hole, this means that is not empty
 			// and that the hole is before the last element, therefore
 			// only the first position counter may have changed.
-			if (m_first_pos > pos) {
-				m_first_pos = pos;
+			if (pos < m_first_pos) {
+				update_first_used_pos(pos);
 			}
 
 			// Return the position filled
@@ -2019,24 +2072,39 @@ private:
 	*/
 	size_type fill_pos_tail()
 	{
-		// If there are pending deletes we can just pop a position
-		// from the list of pending deletetes.
-		if (!m_pending_deletes.empty()) {
-			return positions_pop_back(m_pending_deletes);
-		}
-
 		// If there are holes we can fill a hole.
-		if (!m_holes.empty()) {
-			// Pop a hole
-			size_type pos = positions_pop_back(m_holes);
-
-			// Update first and last counters
-			if (m_last_pos < pos) {
-				m_last_pos = pos;
+		long nRegulars = holes_count_regular();
+		long nPendings = holes_count_pending();
+		long nHoles    = nRegulars + nPendings;
+		if (nHoles != 0) {
+			// First search among pendings and the among regulars
+			size_type pos;
+			if (m_holes_pending_begin != m_holes_pending_end) {
+				holes_sort_pending();
+				pos = *m_holes_pending_begin;
+			} else {
+				holes_sort_regular();
+				pos = *m_holes_regular_begin;
 			}
 
-			if (m_first_pos > pos) {
-				m_first_pos = pos;
+			// Update the iterators
+			if (nHoles == 1) {
+				holes_clear();
+			} else if (nPendings == 1) {
+				holes_clear_pending();
+			} else if (nPendings > 1) {
+				++m_holes_pending_begin;
+			} else {
+				++m_holes_regular_begin;
+			}
+
+			// Update first position counter
+			//
+			// It is not possible that a hole is past the last element of the
+			// vector. We should olny consider that case where a holes is
+			// below the first element.
+			if (pos < m_first_pos) {
+				update_first_used_pos(pos);
 			}
 
 			// If previos element is a hole, its id need to be udated
@@ -2064,14 +2132,24 @@ private:
 	*/
 	size_type fill_pos_after(const size_type &referencePos)
 	{
-		// Check if we can fill a pending delete
-		if (!m_pending_deletes.empty() && m_pending_deletes.back() > referencePos) {
-			return fill_pos_tail();
-		}
-
 		// Check if we can fill a hole
-		if (!m_holes.empty() && m_holes.back() > referencePos) {
-			return fill_pos_tail();
+		//
+		// The last hole should hava a position higher than the reference
+		// position
+		if (holes_count() != 0) {
+			// First search among pendings and the among regulars
+			size_type lastHole;
+			if (m_holes_pending_begin != m_holes_pending_end) {
+				holes_sort_pending();
+				lastHole = *(m_holes_pending_begin);
+			} else {
+				holes_sort_regular();
+				lastHole = *(m_holes_regular_begin);
+			}
+
+			if (lastHole > referencePos) {
+				return fill_pos_tail();
+			}
 		}
 
 		// We have to append the element at the end of the vector
@@ -2090,18 +2168,251 @@ private:
 	*/
 	size_type fill_pos_before(const size_type &referencePos)
 	{
-		// Check if we can fill a pending delete
-		if (!m_pending_deletes.empty() && m_pending_deletes.back() < referencePos) {
-			return fill_pos_head();
-		}
-
 		// Check if we can fill a hole
-		if (!m_holes.empty() && m_holes.back() < referencePos) {
-			return fill_pos_head();
+		//
+		// The first hole available should be in a position lower than the
+		// reference position.
+		if (holes_count() != 0) {
+			// First search among pendings and the among regulars
+			size_type firstHole;
+			if (m_holes_pending_begin != m_holes_pending_end) {
+				holes_sort_pending();
+				firstHole = *(m_holes_pending_end - 1);
+			} else {
+				holes_sort_regular();
+				firstHole = *(m_holes_regular_end - 1);
+			}
+
+			if (firstHole < referencePos) {
+				return fill_pos_head();
+			}
 		}
 
 		// We have to insert the element at the specified position
 		return fill_pos_specific(referencePos);
+	}
+
+	/*!
+		Returns the first non-empty position before the specified
+		starting position.
+
+		If the starting position is the first posistion, an
+		exception is thrown.
+
+		\param pos starting position
+		\result The firt non-empty position before the starting
+		        position.
+	*/
+	size_type find_prev_used_pos(size_type pos)
+	{
+		size_type prev_pos = pos;
+		while (true) {
+			if (prev_pos == m_first_pos) {
+				throw std::out_of_range ("Already in the firts position");
+			}
+			prev_pos--;
+
+			id_type prev_id = m_v[prev_pos].get_id();
+			if (prev_id >= 0) {
+				return prev_pos;
+			}
+		}
+	}
+
+	/*!
+		Returns the first non-empty position after the specified
+		starting position.
+
+		If the starting position is the last posistion, an
+		exception is thrown.
+
+		\param pos starting position
+		\result The firt non-empty position after the starting
+		        position.
+	*/
+	size_type find_next_used_pos(size_type pos)
+	{
+		size_type next_pos   = pos;
+		size_type next_delta = 1;
+		while (true) {
+			if (next_pos == m_last_pos) {
+				throw std::out_of_range ("Already in the last position");
+			}
+			next_pos += next_delta;
+
+			id_type next_id = m_v[next_pos].get_id();
+			if (next_id >= 0) {
+				return next_pos;
+			} else {
+				next_delta = - next_id;
+			}
+		}
+	}
+
+	/*!
+		Clear the list of available holes.
+	*/
+	void holes_clear(bool release = true)
+	{
+		m_holes.clear();
+		if (release) {
+			hole_container().swap(m_holes);
+		}
+		holes_clear_pending(0, 0);
+		m_holes_regular_sorted = true;
+	}
+
+	/*!
+		Count the available holes.
+
+		\result The number of available holes.
+	*/
+	size_type holes_count()
+	{
+		return holes_count_pending() + holes_count_regular();
+	}
+
+	/*!
+		Count the pending holes.
+
+		\result The number of pending holes.
+	*/
+	size_type holes_count_pending()
+	{
+		return std::distance(m_holes_pending_begin, m_holes_pending_end);
+	}
+
+	/*!
+		Count the regular holes.
+
+		\result The number of regular holes.
+	*/
+	size_type holes_count_regular()
+	{
+		return std::distance(m_holes_regular_begin, m_holes_regular_end);
+	}
+
+	/*!
+		Flushes the list of available holes.
+
+		All the pending hole are converted to regular holes and new
+		space is reserved for future pending holes.
+	*/
+	void holes_flush()
+	{
+		// If there are no pending holes there is nothing to do
+		if (m_holes_pending_begin == m_holes_pending_end) {
+			return;
+		}
+
+		// Convert pending holes to regular ones
+		for (auto itr = m_holes_pending_begin; itr != m_holes_pending_end; ++itr) {
+			const size_type &pos = *itr;
+
+			// Update the id of the element in the specified position
+			update_empty_pos_id(pos);
+
+			// Move the pending holes into the list of regular holes
+			//
+			// If there is space available at the beginning of the holes, try
+			// using pending holes to fill that gap.
+			if (m_holes_regular_begin != m_holes.begin()) {
+				--m_holes_regular_begin;
+				*m_holes_regular_begin = pos;
+
+				// Regular holes are no more sorted
+				if (m_holes_regular_sorted) {
+					m_holes_regular_sorted = false;
+				}
+			} else {
+				if (itr != m_holes_regular_end) {
+					*m_holes_regular_end = pos;
+				}
+				++m_holes_regular_end;
+				++m_holes_pending_begin;
+
+				// Check if regular holes are still sorted
+				if (m_holes_regular_sorted) {
+					size_type nRegulars = holes_count_regular();
+					if (nRegulars > 1 && (*(m_holes_regular_end - 1) > *(m_holes_regular_end - 2))) {
+						m_holes_regular_sorted = false;
+					}
+				}
+			}
+		}
+
+		// Move the holes at the beginning of the vector
+		//
+		// The iterators will be updated when clearing the pending holes.
+		size_type nRegulars = holes_count_regular();
+		if (m_holes_regular_begin != m_holes.begin()) {
+			size_type offset = std::distance(m_holes.begin(), m_holes_regular_begin);
+			for (size_type k = 0; k < nRegulars; ++k) {
+				m_holes[k] = m_holes[k + offset];
+			}
+		}
+
+		// Resize the vector
+		holes_clear_pending(0, nRegulars);
+
+		// There are no more dirty positions
+		m_first_dirty_pos = m_last_pos + 1;
+	}
+
+	/*!
+		Reset pending holes
+	*/
+	void holes_clear_pending()
+	{
+		long offset    = std::distance(m_holes.begin(), m_holes_regular_begin);
+		long nRegulars = holes_count_regular();
+
+		holes_clear_pending(offset, nRegulars);
+	}
+
+	/*!
+		Reset pending holes
+
+		\param offset is the distance between the first regulat hole and the
+		begin of the hole's container
+		\param nRegulars is the number of regulars holes in the hole's
+		container
+	*/
+	void holes_clear_pending(const long &offset, const long &nRegulars)
+	{
+		m_holes.reserve(offset + nRegulars + MAX_PENDING_HOLES);
+		m_holes.resize(offset + nRegulars);
+
+		m_holes_regular_begin = m_holes.begin() + offset;
+		m_holes_regular_end   = m_holes_regular_begin + nRegulars;
+		m_holes_pending_begin = m_holes_regular_end;
+		m_holes_pending_end   = m_holes_pending_begin;
+	}
+
+	/*!
+		Sort the list of pending holes in descendent order
+	*/
+	void holes_sort_pending()
+	{
+		if (m_holes_pending_sorted) {
+			return;
+		}
+
+		std::sort(m_holes_pending_begin, m_holes_pending_end, std::greater<size_type>());
+		m_holes_pending_sorted = true;
+	}
+
+	/*!
+		Sort the list of regular holes in descendent order
+	*/
+	void holes_sort_regular()
+	{
+		if (m_holes_regular_sorted) {
+			return;
+		}
+
+		std::sort(m_holes_regular_begin, m_holes_regular_end, std::greater<size_type>());
+		m_holes_regular_sorted = true;
 	}
 
 	/*!
@@ -2144,179 +2455,71 @@ private:
 	}
 
 	/*!
-		Returns the first non-empty position after the specified
-		starting position.
+		Marks a position as empty.
 
-		If the starting position is the last posistion, an
-		exception is thrown.
+		The position is inserted in the list of holes. If the list of pending
+		holes is full, a flush is called before adding the hole. This means
+		that the hole is always added as a pending hole.
 
-		\param pos starting position
-		\result The firt non-empty position after the starting
-		        position.
+		\param hole is the position of the new hole
 	*/
-	size_type next_used_pos(size_type pos)
+	void pierce_pos(const size_type &pos, bool flush = true)
 	{
+		// If removing the last position, there is no need to add the
+		// position to the holes, it's enough to update the last position
+		// counter or clear the container if this was the last hole.
 		if (pos == m_last_pos) {
-			throw std::out_of_range ("Already in the last position");
-		}
-
-		size_type next_pos = pos + 1;
-		id_type next_id    = m_v[next_pos].get_id();
-		if (next_id >= 0) {
-			return next_pos;
-		} else {
-			return next_pos - next_id;
-		}
-	}
-
-	/*!
-		Mark the position as empty.
-
-		\param pos the position to be marked as empty
-	*/
-	void pierce_pos(size_type pos)
-	{
-		// Update first and last counters
-		if (empty()) {
-			m_last_pos  = 0;
-			m_first_pos = 0;
-		} else {
-			if (m_last_pos == pos) {
-				m_last_pos = prev_used_pos(pos);
+			if (empty()) {
+				clear();
+			} else {
+				size_type updated_last_pos = find_prev_used_pos(m_last_pos);
+				update_last_used_pos(updated_last_pos);
 			}
-
-			if (m_first_pos == pos) {
-				m_first_pos = next_used_pos(pos);
-			}
-		}
-
-		// Update id of the empty element
-		if (pos < m_last_pos) {
-			update_empty_pos_id(pos);
-		} else {
-			update_empty_pos_id(m_last_pos + 1, m_last_pos);
-		}
-
-		// Hole
-		//
-		// An empty position is considered a hole, only if it's before
-		// the last used position. All holes after the last used
-		// position need to be removed.
-		if (pos < m_last_pos) {
-			positions_add(m_holes, pos);
-		} else {
-			positions_delete_after(m_holes, m_last_pos);
-		}
-	}
-
-	/*!
-		Adds an element form the specified list of ordered positions.
-
-		The list is always kept ordered in ascending order.
-
-		\param list is the list of ordered positions that will be modified
-		\param pos is the position to be added
-	*/
-	void positions_add(std::deque<size_type> &list, size_type pos)
-	{
-		std::deque<size_type>::iterator itr = lower_bound(list.begin(), list.end(), pos);
-		list.insert(itr, pos);
-	}
-
-	/*!
-		Removes an element form the specified list of ordered positions.
-
-		\param list is the list of ordered positions that will be modified
-		\param pos is the position to be removed
-		\result Returns true if the position was found and successfuly
-		removed, otherwise it returns false.
-	*/
-	bool positions_delete(std::deque<size_type> &list, const size_type &pos)
-	{
-		std::deque<size_type>::iterator itr = lower_bound(list.begin(), list.end(), pos);
-		if (itr == list.end()) {
-			return false;
-		}
-
-		list.erase(itr);
-		return true;
-	}
-
-	/*!
-		Deletes all elements of the specified list of ordered positions
-		after a given position.
-
-		\param list is the list of ordered positions that will be modified
-		\param pos the position after wich all elements have to be
-		deleted
-	*/
-	void positions_delete_after(std::deque<size_type> &list, const size_type &pos)
-	{
-		if (list.empty()) {
-			return;
-		} else if (list.back() <= pos) {
 			return;
 		}
 
-		std::deque<size_type>::iterator itr = upper_bound(list.begin(), list.end(), pos);
-		list.erase(itr, list.end());
-	}
+		// Reset the position
+		reset_pos(pos);
 
-	/*!
-		Remove the last element of the specificed list of ordered
-		positions and returns a copy of that element.
-
-		\param list is the list of ordered positions that will be modified
-		\result The previous last element of the list.
-	*/
-	size_type positions_pop_back(std::deque<size_type> &list)
-	{
-		size_type pos = list.back();
-		list.pop_back();
-
-		return pos;
-	}
-
-	/*!
-		Remove the first element of the specificed list of ordered
-		positions and returns a copy of that element.
-
-		\param list is the list of ordered positions that will be modified
-		\result The previous first element of the list.
-	*/
-	size_type positions_pop_front(std::deque<size_type> &list)
-	{
-		size_type pos = list.front();
-		list.pop_front();
-
-		return pos;
-	}
-
-	/*!
-		Returns the first non-empty position before the specified
-		starting position.
-
-		If the starting position is the first posistion, an
-		exception is thrown.
-
-		\param pos starting position
-		\result The firt non-empty position before the starting
-		        position.
-	*/
-	size_type prev_used_pos(size_type pos)
-	{
+		// If removing the first position, update the counter
 		if (pos == m_first_pos) {
-			throw std::out_of_range ("Already in the firts position");
+			size_type updated_first_pos = find_next_used_pos(m_first_pos);
+			update_first_used_pos(updated_first_pos);
 		}
 
-		size_type prev_pos = pos - 1;
-		id_type prev_id = m_v[prev_pos].get_id();
-
-		if (prev_id >= 0) {
-			return prev_pos;
-		} else {
-			return prev_used_pos(prev_pos);
+		// If the list of pending holes is full, flush the holes.
+		if (m_holes.size() == m_holes.capacity()) {
+			holes_flush();
 		}
+
+		// Add the hole at the end of the pending holes
+		m_holes.push_back(pos);
+		m_holes_pending_end = m_holes.end();
+
+		// Check if pending holes are sorted
+		if (m_holes_pending_sorted) {
+			size_t nPendings = holes_count_pending();
+			if (nPendings > 1 && (*(m_holes_pending_end - 1) > *(m_holes_pending_end - 2))) {
+				m_holes_pending_sorted = false;
+			}
+		}
+
+		// Flush
+		if (flush) {
+			holes_flush();
+		}
+	}
+
+	/*!
+		Reset the element in the specified position.
+
+		\param pos is the position that will be reset
+	*/
+	void reset_pos(const size_type &pos)
+	{
+		m_v[pos] = T();
+		update_empty_pos_id(pos, false);
+		m_first_dirty_pos = std::min(pos, m_first_dirty_pos);
 	}
 
 	/*!
@@ -2366,19 +2569,20 @@ private:
 		out the position of the next non-empty element.
 
 		\param pos is the position to update
+		\param recursive controls if the
 	*/
-	void update_empty_pos_id(const size_type &pos)
+	void update_empty_pos_id(const size_type &pos, bool recursive = true)
 	{
 		// Position of the next non-empty element
 		size_type nextUsedPos;
 		if (pos >= m_last_pos) {
 			nextUsedPos = m_last_pos;
 		} else {
-			nextUsedPos = next_used_pos(pos);
+			nextUsedPos = find_next_used_pos(pos);
 		}
 
 		// Update the id
-		update_empty_pos_id(pos, nextUsedPos);
+		update_empty_pos_id(pos, nextUsedPos, recursive);
 	}
 
 	/*!
@@ -2395,7 +2599,7 @@ private:
 		\param pos is the position to update
 		\param nextUsedPos is the position of the next non-empty element
 	*/
-	void update_empty_pos_id(const size_type &pos, const size_type &nextUsedPos)
+	void update_empty_pos_id(const size_type &pos, const size_type &nextUsedPos, bool recursive = true)
 	{
 		// Id of the element
 		id_type id;
@@ -2406,11 +2610,11 @@ private:
 		}
 
 		// Update the id of the element in the current position
-		//
-		// NOTE: setting the id of the element it's not enough, the
-		// element in the current position needs to be reset
-		m_v[pos] = T();
 		m_v[pos].set_id(id);
+
+		if (!recursive) {
+			return;
+		}
 
 		// Update the id of the elements in previous positions
 		if (pos > 0) {
@@ -2427,6 +2631,55 @@ private:
 					break;
 				}
 			}
+		}
+	}
+
+	/*!
+		Update the first used position.
+	*/
+	void update_first_used_pos(const size_type &updated_first_pos)
+	{
+		m_first_pos = updated_first_pos;
+	}
+
+	/*!
+		Update the last used position.
+	*/
+	void update_last_used_pos(const size_type &updated_last_pos)
+	{
+		// Hole needs to be updated only if last position has been decrease
+		bool update_holes = (holes_count() > 0) && (updated_last_pos < m_last_pos);
+
+		// Update the last position
+		m_last_pos = updated_last_pos;
+
+		// Resize the vector
+		storage_resize(m_last_pos + 1);
+
+		// If we don't need to update the holes we can exit now
+		if (!update_holes) {
+			return;
+		}
+
+		// Remove regular holes beyond the updated last position
+		holes_sort_regular();
+		m_holes_regular_begin = std::lower_bound(m_holes_regular_begin, m_holes_regular_end, m_last_pos, std::greater<size_type>());
+		if (m_holes_regular_begin == m_holes_regular_end) {
+			m_holes_regular_begin = m_holes.begin();
+			m_holes_regular_end   = m_holes_regular_begin;
+		}
+
+		// Remove pending holes beyond the updated last position
+		holes_sort_pending();
+		m_holes_pending_begin = std::lower_bound(m_holes_pending_begin, m_holes_pending_end, m_last_pos, std::greater<size_type>());
+		if (m_holes_pending_begin == m_holes_pending_end) {
+			m_holes_pending_begin = m_holes_regular_end;
+			m_holes_pending_end   = m_holes_pending_begin;
+		}
+
+		// Resize the hole's container
+		if (m_holes_pending_end != m_holes.end()) {
+			m_holes.resize(std::distance(m_holes.begin(), m_holes_pending_end));
 		}
 	}
 
@@ -2473,6 +2726,10 @@ private:
 template<class T>
 const typename PiercedVector<T>::id_type
 	PiercedVector<T>::SENTINEL_ID = std::numeric_limits<id_type>::min();
+
+template<class T>
+const typename PiercedVector<T>::size_type
+	PiercedVector<T>::MAX_PENDING_HOLES = 16384;
 
 template<class T>
 const typename PiercedVector<T>::size_type
