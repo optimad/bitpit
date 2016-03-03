@@ -1461,10 +1461,23 @@ bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 	m_cellIdGenerator.trashId(id);
 	if (isInternal) {
 		m_nInternals--;
-		m_last_internal_id = m_cells.get_size_marker(m_nInternals - 1, Element::NULL_ID);
+		if (id == m_last_internal_id) {
+			m_last_internal_id = m_cells.get_size_marker(m_nInternals - 1, Element::NULL_ID);
+		}
 	} else {
 		m_nGhosts--;
-		m_first_ghost_id = m_cells.get_size_marker(m_nInternals, Element::NULL_ID);
+		if (id == m_first_ghost_id) {
+			if (m_nGhosts == 0) {
+				m_first_ghost_id = Element::NULL_ID;
+			} else if (m_nInternals == 0) {
+				m_first_ghost_id = m_cells.get_size_marker(m_nInternals, Element::NULL_ID);
+			} else {
+				long last_internal_raw_id = m_cells.raw_index(m_last_internal_id);
+				CellIterator first_ghost_iterator = CellIterator(m_cells.raw_begin() + last_internal_raw_id);
+				++first_ghost_iterator;
+				m_first_ghost_id = first_ghost_iterator->get_id();
+			}
+		}
 	}
 
 	return true;
