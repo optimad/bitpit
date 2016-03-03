@@ -26,6 +26,3 @@ set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS ${BITPIT_DEFINITIONS}
 
 # Add include directories needed to use BITPIT.
 include_directories(${BITPIT_INCLUDE_DIRS})
-
-# Add link directories needed to use BITPIT.
-link_directories(${BITPIT_LIBRARY_DIRS})
