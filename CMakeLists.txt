@@ -177,6 +177,9 @@ SET(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING
 #------------------------------------------------------------------------------------#
 # Compilation settings
 #------------------------------------------------------------------------------------#
+set (BITPIT_DEFINITIONS_PRIVATE "")
+set (BITPIT_DEFINITIONS_PUBLIC "")
+
 string(TOLOWER "${CMAKE_BUILD_TYPE}" CMAKE_BUILD_TYPE_LOWER)
 
 set (ENABLE_WARNINGS ${VERBOSE_MAKE})
@@ -185,7 +188,7 @@ if (VERBOSE_MAKE)
 endif()
 
 if (ENABLE_MPI)
-	add_definitions(-DENABLE_MPI=1)
+	list (APPEND BITPIT_DEFINITIONS_PUBLIC "ENABLE_MPI=1")
 
 	if (MPI_C_FOUND)
 		set(CMAKE_C_COMPILER ${MPI_C_COMPILER})
@@ -223,9 +226,9 @@ endif ()
 
 # Define a preprocessor macro to recognize debug builds
 IF(CMAKE_BUILD_TYPE_LOWER MATCHES "debug")
-	add_definitions("-DENABLE_DEBUG=1")
+	list (APPEND BITPIT_DEFINITIONS_PRIVATE "ENABLE_DEBUG=1")
 else ()
-	add_definitions("-DENABLE_DEBUG=0")
+	list (APPEND BITPIT_DEFINITIONS_PRIVATE "ENABLE_DEBUG=0")
 endif ()
 
 # Define an alias for building with scalasca
@@ -258,6 +261,10 @@ scalasca ${C_FLAGS_INSTRUMENT} \"$@\"
 	set(CMAKE_CXX_COMPILER "${PROJECT_BINARY_DIR}/scalasca_cxx_compiler")
 	set(CMAKE_C_COMPILER   "${PROJECT_BINARY_DIR}/scalasca_c_compiler")
 endif ()
+
+# Add the definitions
+set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS ${BITPIT_DEFINITIONS_PRIVATE})
+set_property(DIRECTORY APPEND PROPERTY COMPILE_DEFINITIONS ${BITPIT_DEFINITIONS_PUBLIC})
 
 #------------------------------------------------------------------------------------#
 # Library version

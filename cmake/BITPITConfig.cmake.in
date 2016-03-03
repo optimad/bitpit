@@ -86,7 +86,7 @@ else ()
 endif ()
 
 # BITPIT Definitions
-set(BITPIT_DEFINITIONS "@BITPIT_DEFINITIONS@")
+set(BITPIT_DEFINITIONS "@BITPIT_DEFINITIONS_PUBLIC@")
 
 # Let libfind_process initialize the appropriate variables
 libfind_process(BITPIT)
