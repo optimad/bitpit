@@ -788,7 +788,11 @@ bool PatchKernel::deleteVertices(const std::vector<long> &ids, bool delayed)
 
 	std::vector<long>::const_iterator end = ids.cend();
 	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
-		deleteVertex(*i, delayed);
+		deleteVertex(*i, true);
+	}
+
+	if (!delayed) {
+		m_vertices.flush();
 	}
 
 	return true;
@@ -1482,7 +1486,11 @@ bool PatchKernel::deleteCells(const std::vector<long> &ids, bool updateNeighs, b
 
 	std::vector<long>::const_iterator end = ids.cend();
 	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
-		deleteCell(*i, updateNeighs, delayed);
+		deleteCell(*i, updateNeighs, true);
+	}
+
+	if (!delayed) {
+		m_cells.flush();
 	}
 
 	return true;
@@ -2276,7 +2284,11 @@ bool PatchKernel::deleteInterfaces(const std::vector<long> &ids, bool updateNeig
 
 	std::vector<long>::const_iterator end = ids.cend();
 	for (std::vector<long>::const_iterator i = ids.cbegin(); i != end; ++i) {
-		deleteInterface(*i, updateNeighs, delayed);
+		deleteInterface(*i, updateNeighs, true);
+	}
+
+	if (!delayed) {
+		m_cells.flush();
 	}
 
 	return true;
