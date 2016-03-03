@@ -50,6 +50,10 @@ public:
 	double evalInterfaceArea(const long &id);
 	std::array<double, 3> evalInterfaceNormal(const long &id);
 
+    // Modifiers
+    void buildAdjacencies(void);
+    void updateAdjacencies(const std::vector<long>&);
+
 	bool isPointInside(const std::array<double, 3> &point);
 	long locatePoint(const std::array<double, 3> &point);
 
