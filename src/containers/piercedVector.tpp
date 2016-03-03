@@ -1085,14 +1085,16 @@ public:
 		\param referenceId is the id of the element after which the
 		new element will be moved
 		\param id is the id of the element that will be moved
+		\param delayed if true some changes can remain in a pending state
+		until a flush is called
 		\result An iterator that points to the moved element.
 	*/
-	iterator move_after(const id_type &referenceId, const id_type &id)
+	iterator move_after(const id_type &referenceId, const id_type &id, bool delayed = false)
 	{
 		size_type updatedPos = fill_pos_after(get_pos_from_id(referenceId));
 		size_type currentPos = get_pos_from_id(id);
 
-		return _move(currentPos, updatedPos);
+		return _move(currentPos, updatedPos, delayed);
 	}
 
 	/*!
@@ -1102,14 +1104,16 @@ public:
 		\param referenceId is the id of the element before which the
 		new element will be moved
 		\param id is the id of the element that will be moved
+		\param delayed if true some changes can remain in a pending state
+		until a flush is called
 		\result An iterator that points to the moved element.
 	*/
-	iterator move_before(const id_type &referenceId, const id_type &id)
+	iterator move_before(const id_type &referenceId, const id_type &id, bool delayed = false)
 	{
 		size_type updatedPos = fill_pos_before(get_pos_from_id(referenceId));
 		size_type currentPos = get_pos_from_id(id);
 
-		return _move(currentPos, updatedPos);
+		return _move(currentPos, updatedPos, delayed);
 	}
 
 	/*!
@@ -1867,9 +1871,11 @@ private:
 
 		\param currentPos is the current position of the element
 		\param updatedPos is the new position of the element
+		\param delayed if true some changes can remain in a pending state
+		until a flush is called
 		\result An iterator that points to the moved element.
 	*/
-	iterator _move(const size_t &currentPos, const size_t &updatedPos)
+	iterator _move(const size_t &currentPos, const size_t &updatedPos, bool delayed = false)
 	{
 		// Move the element
 		//
@@ -1881,7 +1887,7 @@ private:
 		link_id(m_v[updatedPos].get_id(), updatedPos, false);
 
 		// Pierce the position
-		pierce_pos(currentPos, true);
+		pierce_pos(currentPos, !delayed);
 
 		// Return the iterator that points to the element
 		iterator itr;
