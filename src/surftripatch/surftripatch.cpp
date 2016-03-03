@@ -793,6 +793,117 @@ array<double, 3> SurfTriPatch::evalFacetNormal(const long &id)
 }
 
 /*!
+ * Evaluate the normal unit vector to the edge with specified local id belonging to
+ * the surface facet with specified global id. Edge normal is computed as the arithmetic
+ * average of the normals to each facet incident to the edge. In case adjacencies
+ * are not built, the edge normal will be the same as the facet normal.
+ * 
+ * \param[in] id cell global ID
+ * \param[in] edge_id edge local ID on the specified cell
+*/
+array<double, 3> SurfTriPatch::evalEdgeNormal(const long &id, const int &edge_id)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    array<double, 3>                    normal = evalFacetNormal(id);
+    Cell                                *cell_ = &m_cells[id];
+
+    // Counters
+    int                                 n_adj = cell_->getAdjacencyCount(edge_id);
+    
+    // ====================================================================== //
+    // COMPUTE EDGE NORMAL                                                    //
+    // ====================================================================== //
+    if (cell_->getAdjacency(edge_id) != Element::NULL_ID) {
+        for (int i = 0; i < n_adj; ++i) {
+            normal += evalFacetNormal(cell_->getAdjacency(edge_id, i));
+        } //next i
+        normal = normal/norm2(normal);
+    }
+    return(normal);
+}
+
+/*!
+ * Evaluate the normal unit vector at the vertex with specified local ID belonging to
+ * the surface facet with specified global id. Vertex normal are computed as the arithmeic
+ * mean of the normals of the edges incident to the vertex. In case adjacencies are
+ * not build the vertex normal will be the same as the facet normal.
+ * 
+ * \param[in] id cell global ID
+ * \param[in] vert_id vertex local ID on the specified cell
+*/
+array<double, 3> SurfTriPatch::evalVertexNormal(const long &id, const int &vert_id)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    Cell                                *cell_ = &m_cells[id];
+    long                                vert_ID = cell_->getVertex(vert_id);
+    array<double, 3>                    normal;
+    vector<long>                        ring1;
+
+    // Counters
+    vector<long>::const_iterator        i_, e_;
+    
+    // ====================================================================== //
+    // COMPUTE VERTEX NORMAL                                                  //
+    // ====================================================================== //
+
+    // Compute 1-ring of vertex
+    ring1 = findCellVertexOneRing(id, vert_id);
+
+    // Compute angles of incident facet at vertex
+    int i, n_ring1 = ring1.size();
+    double disk_angle = 0.0;
+    vector<double> angles(ring1.size(), 0.);
+    for (i = 0; i < n_ring1; ++i) {
+        cell_ = &m_cells[ring1[i]];
+        angles[i] = evalAngleAtVertex(cell_->get_id(), cell_->findVertex(vert_ID));
+    } //next i_
+    sum(angles, disk_angle);
+    angles = angles/disk_angle;
+    e_ = ring1.cend();
+    normal.fill(0.0);
+    i = 0;
+    for (i_ = ring1.cbegin(); i_ != e_; ++i_) {
+        normal += angles[i]*evalFacetNormal(*i_);
+        ++i;
+    } //next i_
+
+    // Average of incident element
+//     e_ = ring1.cend();
+//     normal.fill(0.0);
+//     for (i_ = ring1.cbegin(); i_ != e_; ++i_) {
+//         normal += evalFacetNormal(*i_);
+//     } //next i_
+
+    // Average of edge normal
+//     int                                 loc_id, n_vert;
+//     e_ = ring1.cend();
+//     normal.fill(0.0);
+//     for (i_ = ring1.cbegin(); i_ != e_; ++i_) {
+//         cell_ = &m_cells[*i_];
+//         n_vert = cell_->getVertexCount();
+//         loc_id = cell_->findVertex(vert_ID);
+//         normal += evalEdgeNormal(*i_, loc_id)/double(cell_->getAdjacencyCount(loc_id)
+//                                                   + cell_->getAdjacency(loc_id) != Element::NULL_ID);
+//         loc_id = (n_vert + loc_id - 1) % n_vert;
+//         normal += evalEdgeNormal(*i_, loc_id)/double(cell_->getAdjacencyCount(loc_id)
+//                                                   + cell_->getAdjacency(loc_id) != Element::NULL_ID);
+//     } //next i_
+
+    // Normalization
+    normal = normal/norm2(normal);
+
+    return(normal);
+}
+
+/*!
  * Evalute the aspect ratio for a cell with specified ID. The aspect ratio
  * is defined as the ratio between the longest and the shortest edge.
  * If cell is of type ElementInfo::VERTEX or ElementInfo::LINE, returns 0.0
@@ -1161,6 +1272,76 @@ vector<double> SurfTriPatch::computeHistogram(
     hist = 100.0 * hist/double(count);
 
     return(hist);
+}
+
+//TODO: Aggiungere un metodo in SurfTriPatch per aggiungere più vertici.
+/*!
+ * Extract the edge network from surface mesh. If adjacencies are not built
+ * edges shared by more than 1 element are counted twice. Edges are appended
+ * to the content of the input SurfTriPatch
+ * 
+ * \param[in,out] net on output stores the network of edges
+*/
+void SurfTriPatch::extractEdgeNetwork(SurfTriPatch &net)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    bool                                        check;
+    int                                         n_faces, n_adj, n_vert;
+    long                                        id;
+    vector<int>                                 face_loc_connect;
+    vector<long>                                face_connect;
+
+    // Counters
+    int                                         i, j;
+    vector<int>::const_iterator                 i_;
+    vector<long>::iterator                      j_;
+    VertexIterator                              v_, ve_ = vertexEnd();
+    CellIterator                                c_, ce_ = cellEnd();
+
+    // ====================================================================== //
+    // INITIALIZE DATA STRUCTURE                                              //
+    // ====================================================================== //
+    net.reserveCells(net.getCellCount() + countFaces());
+    net.reserveVertices(net.getVertexCount() + m_nVertices);
+
+    // ====================================================================== //
+    // ADD VERTEX TO net                                                      //
+    // ====================================================================== //
+    for (v_ = vertexBegin(); v_ != ve_; ++v_) {
+        net.addVertex(v_->getCoords(), v_->get_id());
+    } //next v_
+
+    // ====================================================================== //
+    // ADD EDGES                                                              //
+    // ====================================================================== //
+    for (c_ = cellBegin(); c_ != ce_; ++c_) {
+        id = c_->get_id();
+        n_faces = c_->getFaceCount();
+        for (i = 0; i < n_faces; ++i) {
+            check = true;
+            n_adj = c_->getAdjacencyCount(i);
+            for (j = 0; j < n_adj; ++j) {
+                check = check && (id > c_->getAdjacency(i, j));
+            } //next j
+            if (check) {
+                face_loc_connect = c_->getFaceLocalConnect(i);
+                n_vert = face_loc_connect.size();
+                face_connect.resize(n_vert);
+                j_ = face_connect.begin();
+                for (i_ = face_loc_connect.cbegin(); i_ != face_loc_connect.cend(); ++i_) {
+                    *j_ = c_->getVertex(*i_);
+                    ++j_;
+                } //next i_
+                net.addCell(c_->getFaceType(i), true, face_connect);
+            }
+        } //next i
+    } //next c_
+
+    return;
 }
 
 /*!

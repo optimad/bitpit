@@ -75,7 +75,9 @@ public:
         double evalAngleAtVertex(const long&, const int&);
         double evalMinAngleAtVertex(const long&, int &);
         double evalMaxAngleAtVertex(const long&, int &);
-        array<double, 3> evalFacetNormal(const long&);
+        std::array<double, 3> evalFacetNormal(const long&);
+        std::array<double, 3> evalEdgeNormal(const long&, const int&);
+        std::array<double, 3> evalVertexNormal(const long&, const int&);
         double evalAspectRatio(const long&, int&);
         double evalFacetArea(const long&);
         vector<double> computeHistogram(
@@ -89,6 +91,7 @@ public:
             ostream                     &,
             unsigned int                 padding = 0
         );
+        void extractEdgeNetwork(SurfTriPatch &);
 
         // I/O routines
         unsigned short importSTL(const std::string &, const bool &);
