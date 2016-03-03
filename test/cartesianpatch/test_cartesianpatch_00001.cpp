@@ -63,14 +63,18 @@ int main(int argc, char *argv[]) {
 		cellData[i] = i;
 	}
 
-	patch_2D->writeField("cell_data_2D", "cell_data", VTKLocation::CELL, cellData);
+	patch_2D->addData("cell_data", VTKFieldType::SCALAR, VTKLocation::CELL, cellData);
+	patch_2D->write("cell_data_2D");
+	patch_2D->removeData("cell_data");
 
 	vertexData.resize(patch_2D->getVertexCount());
 	for (long i = 0; i < patch_2D->getVertexCount(); ++i) {
 		vertexData[i] = i;
 	}
 
-	patch_2D->writeField("vertex_data_2D", "vertex_data", VTKLocation::POINT, vertexData);
+	patch_2D->addData("vertex_data", VTKFieldType::SCALAR, VTKLocation::POINT, vertexData);
+	patch_2D->write("vertex_data_2D");
+	patch_2D->removeData("vertex_data");
 
 	log::cout() << std::endl;
 	log::cout() << "\n  >> 2D bounding box" << "\n";
@@ -131,14 +135,18 @@ int main(int argc, char *argv[]) {
 		cellData[i] = i;
 	}
 
-	patch_3D->writeField("cell_data_3D", "cell_data", VTKLocation::CELL, cellData);
+	patch_3D->addData("cell_data", VTKFieldType::SCALAR, VTKLocation::CELL, cellData);
+	patch_3D->write("cell_data_3D");
+	patch_3D->removeData("cell_data");
 
 	vertexData.resize(patch_3D->getVertexCount());
 	for (long i = 0; i < patch_3D->getVertexCount(); ++i) {
 		vertexData[i] = i;
 	}
 
-	patch_3D->writeField("vertex_data_3D", "vertex_data", VTKLocation::POINT, vertexData);
+	patch_3D->addData("vertex_data", VTKFieldType::SCALAR, VTKLocation::POINT, vertexData);
+	patch_3D->write("vertex_data_3D");
+	patch_3D->removeData("vertex_data");
 
 	log::cout() << std::endl;
 	log::cout() << "\n  >> 3D bounding box" << "\n";
