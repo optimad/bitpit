@@ -259,6 +259,8 @@ public:
 	const MPI_Comm & getCommunicator() const;
 	int getRank() const;
 	int getProcessorCount() const;
+
+	void partition(const std::vector<int> &cellRanks);
         void sendCells(const unsigned short &, const unsigned short &, const std::vector<long> &);
 #endif
 

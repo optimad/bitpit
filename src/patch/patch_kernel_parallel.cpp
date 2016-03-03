@@ -120,6 +120,73 @@ int PatchKernel::getProcessorCount() const
 }
 
 /*!
+	Partitions the patch.
+
+	\param cellRanks are the ranks of the cells after the partitioning.
+*/
+void PatchKernel::partition(const std::vector<int> &cellRanks)
+{
+	// Build the send map
+	std::unordered_map<int, std::vector<long>> sendMap;
+
+	auto cellItr = cellBegin();
+	for (int k = 0; k < getInternalCount(); ++k) {
+		const int &rank = cellRanks[k];
+		if (rank == getRank()) {
+			cellItr++;
+			continue;
+		}
+
+		sendMap[rank].push_back(cellItr->get_id());
+
+		cellItr++;
+	}
+
+	// Local sender-receiver pairs
+	std::vector<int> localPairs;
+	localPairs.reserve(2 * sendMap.size());
+	for (const auto &entry : sendMap) {
+		localPairs.push_back(getRank());
+		localPairs.push_back(entry.first);
+	}
+
+	// Exchange the size of the communication
+	int globalPairsSize = localPairs.size();
+	std::vector<int> globalPairsSizes(getProcessorCount());
+	MPI_Allgather(&globalPairsSize, 1, MPI_INT, globalPairsSizes.data(), 1, MPI_INT, getCommunicator());
+
+	std::vector<int> globalPairsOffsets(getProcessorCount());
+	globalPairsOffsets[0] = 0;
+	for (int i = 1; i < getProcessorCount(); ++i) {
+		globalPairsOffsets[i] = globalPairsOffsets[i-1] + globalPairsSizes[i-1];
+	}
+
+	// Global sender-receiver pairs
+	std::vector<int> globalPairs;
+	globalPairs.resize(globalPairsOffsets.back() + globalPairsSizes.back());
+
+	MPI_Allgatherv(localPairs.data(), localPairs.size(), MPI_INT, globalPairs.data(),
+				   globalPairsSizes.data(), globalPairsOffsets.data(), MPI_INT,
+                   getCommunicator());
+
+	// Exchange the cells
+	std::vector<long> emptyCellList;
+	for (size_t i = 0; i < globalPairs.size(); i += 2) {
+		int srcRank = globalPairs[i];
+		int dstRank = globalPairs[i+1];
+
+		std::vector<long> *cellList;
+		if (srcRank == getRank()) {
+			cellList = &(sendMap[dstRank]);
+		} else {
+			cellList = &emptyCellList;
+		}
+
+		sendCells(srcRank, dstRank, *cellList);
+	}
+}
+
+/*!
     Move cells with specified IDs from process with rank snd_rank (sender) to
     process with rank rcv_rank (receiver).
     If the rank the process currently hosting the mesh is neither the sender or

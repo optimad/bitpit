@@ -33,6 +33,7 @@ list(APPEND TESTS "test_surftripatch_00003")
 list(APPEND TESTS "test_surftripatch_00004")
 if (ENABLE_MPI)
 	list(APPEND TESTS "test_surftripatch_parallel_00001:3")
+	list(APPEND TESTS "test_surftripatch_parallel_00002:2")
 endif ()
 
 set(SURFTRIPATCH_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the surftripatch module" FORCE)
@@ -72,3 +73,10 @@ add_custom_command(
     TARGET "test_surftripatch_00004" PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/buddha.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/buddha.stl"
     )
+
+if (ENABLE_MPI)
+	add_custom_command(
+		TARGET "test_surftripatch_parallel_00002" PRE_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/buddha.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/buddha.stl"
+	)
+endif ()
