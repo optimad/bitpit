@@ -491,11 +491,7 @@ public:
 	*/
 	iterator begin()
 	{
-		if (empty()) {
-			return end();
-		}
-
-		return iterator(raw_begin() + m_first_pos);
+		return get_iterator_from_pos(m_first_pos);
 	}
 
 	/*!
@@ -532,11 +528,7 @@ public:
 	*/
 	const_iterator cbegin() const noexcept
 	{
-		if (empty()) {
-			return cend();
-		}
-
-		return const_iterator(m_v.cbegin() + m_first_pos);
+		return get_const_iterator_from_pos(m_first_pos);
 	}
 
 	/*!
@@ -548,7 +540,7 @@ public:
 	*/
 	const_iterator cend() const noexcept
 	{
-		return const_iterator(m_v.cbegin() + m_last_pos + 1);
+		return get_const_iterator_from_pos(m_last_pos + 1);
 	}
 
 	/*!
@@ -763,10 +755,7 @@ public:
 		}
 
 		// Return the iterator that points to the element
-		iterator itr;
-		itr = raw_begin() + pos;
-
-		return itr;
+		return get_iterator_from_pos(pos);
 	}
 
 	/*!
@@ -778,7 +767,7 @@ public:
 	*/
 	iterator end()
 	{
-		return iterator(raw_begin() + m_last_pos + 1);
+		return get_iterator_from_pos(m_last_pos + 1);
 	}
 
 	/*!
@@ -896,6 +885,19 @@ public:
 	}
 
 	/*!
+		Gets a constant iterator pointing to the specified element.
+
+		\param id is the id of the specified iterator.
+		\result A constant iterator pointing to the specified element.
+	*/
+	const_iterator get_const_iterator(const id_type &id) const noexcept
+	{
+		const size_t pos = get_pos_from_id(id);
+
+		return get_const_iterator_from_pos(pos);
+	}
+
+	/*!
 		Gets a vector containing the ids of the elements stored in
 		the vector.
 
@@ -922,6 +924,19 @@ public:
 		}
 
 		return ids;
+	}
+
+	/*!
+		Gets an iterator pointing to the specified element.
+
+		\param id is the id of the specified iterator.
+		\result An iterator pointing to the specified element.
+	*/
+	iterator get_iterator(const id_type &id) noexcept
+	{
+		const size_t pos = get_pos_from_id(id);
+
+		return get_iterator_from_pos(pos);
 	}
 
 	/*!
@@ -1366,10 +1381,7 @@ public:
 		}
 
 		// Return the iterator that points to the element
-		iterator itr;
-		itr = raw_begin() + pos;
-
-		return itr;
+		return get_iterator_from_pos(pos);
 	}
 
 	/*!
@@ -1447,7 +1459,7 @@ public:
 
 		// Delete all ids of the elements beyond the updated position
 		// of the last element
-		iterator itr(raw_begin() + updated_last_pos);
+		iterator itr = get_iterator_from_pos(updated_last_pos);
 		itr++;
 		while (itr != end()) {
 			unlink_id(itr->get_id());
@@ -1803,10 +1815,7 @@ private:
 		link_id(m_v[pos].get_id(), pos);
 
 		// Return the iterator that points to the element
-		iterator itr;
-		itr = raw_begin() + pos;
-
-		return itr;
+		return get_iterator_from_pos(pos);
 	}
 
 	/*!
@@ -1831,14 +1840,14 @@ private:
 		pierce_pos(pos, !delayed);
 
 		// Return the iterator to the element following the one erased
-		iterator itr;
+		size_t next_pos;
 		if (empty() || pos >= m_last_pos) {
-			itr = end();
+			next_pos = m_last_pos + 1;
 		} else {
-			itr = raw_begin() + find_next_used_pos(pos);
+			next_pos = find_next_used_pos(pos);
 		}
 
-		return itr;
+		return get_iterator_from_pos(next_pos);
 	}
 
 	/*!
@@ -1860,10 +1869,7 @@ private:
 		link_id(m_v[pos].get_id(), pos);
 
 		// Return the iterator that points to the element
-		iterator itr;
-		itr = raw_begin() + pos;
-
-		return itr;
+		return get_iterator_from_pos(pos);
 	}
 
 	/*!
@@ -1890,10 +1896,7 @@ private:
 		pierce_pos(currentPos, !delayed);
 
 		// Return the iterator that points to the element
-		iterator itr;
-		itr = raw_begin() + updatedPos;
-
-		return itr;
+		return get_iterator_from_pos(updatedPos);
 	}
 
 	/*!
@@ -1917,10 +1920,39 @@ private:
 		link_id(id, pos);
 
 		// Return the iterator that points to the element
-		iterator itr;
-		itr = raw_begin() + pos;
+		return get_iterator_from_pos(pos);
+	}
 
-		return itr;
+	/*!
+		Gets a constant iterator pointing to the element in the specified
+		position.
+
+		\param pos is the position of the element
+		\result A constant iterator pointing to the element in the specified
+		position.
+	*/
+	const_iterator get_const_iterator_from_pos(const size_type &pos) const noexcept
+	{
+		if (empty() || pos > m_last_pos) {
+			return const_iterator(raw_cbegin() + m_last_pos + 1);
+		} else {
+			return const_iterator(raw_cbegin() + pos);
+		}
+	}
+
+	/*!
+		Gets an iterator pointing to the element in the specified position.
+
+		\param pos is the position of the element
+		\result An iterator pointing to the element in the specified position.
+	*/
+	iterator get_iterator_from_pos(const size_type &pos) noexcept
+	{
+		if (empty() || pos > m_last_pos) {
+			return iterator(raw_begin() + m_last_pos + 1);
+		} else {
+			return iterator(raw_begin() + pos);
+		}
 	}
 
 	/*!
