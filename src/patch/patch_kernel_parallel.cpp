@@ -28,6 +28,7 @@
 // ========================================================================== //
 #include <mpi.h>
 #include <chrono>
+#include<unordered_set>
 #include "patch_kernel.hpp"
 
 // ========================================================================== //
@@ -764,12 +765,26 @@ if (m_rank == snd_rank)
         unordered_map<long, long>::const_iterator       i, e;
         vector<long>::const_iterator                    m, n;
 
+        // List of potential ghosts ----------------------------------------- //
+        std::unordered_set<long> ghosts;
+        ghosts.reserve(getCellCount());
+
+/*solution#1*/for (const long &id : cell_list) {
+/*solution#1*/    ghosts.insert(id);
+/*solution#1*/} //next id
+
+/*solution#1*/for (const Cell &cell : m_cells) {
+/*solution#1*/    if (!cell.isInterior()) {
+/*solution#1*/        ghosts.insert(cell.get_id());
+/*solution#1*/    }
+/*solution#1*/} //next cell
+
         // Update ghost list ------------------------------------------------ //
-        n = cell_list.cend();
-        for ( m = cell_list.cbegin(); m != n; ++m) {
-// /*DEBUG*/out << "    moving internal cell " << *m << " to ghosts" << endl;
-            moveInternal2Ghost(*m);
-        } //next m
+/*solution#0*///n = cell_list.cend();
+/*solution#0*///for ( m = cell_list.cbegin(); m != n; ++m) {
+/*solution#0*////*DEBUG*/out << "    moving internal cell " << *m << " to ghosts" << endl;
+/*solution#0*///    moveInternal2Ghost(*m);
+/*solution#0*///} //next m
             
         // Loop over ghost -------------------------------------------------- //
         ee = m_ghost2id.cend();
@@ -787,27 +802,26 @@ if (m_rank == snd_rank)
 // /*DEBUG*/       out << "    n_neighs = " << n_neighs << endl;
                 for (j = 0; j < n_neighs; ++j) {
 // /*DEBUG*/           out << "      neigh: " << m_cells[neighs[j]].isInterior() << endl;
-                    flag_delete &= ( !m_cells[neighs[j]].isInterior() );
+/*solution#0*///      flag_delete &= ( !m_cells[neighs[j]].isInterior() );
+/*solution#1*/      flag_delete &= ( ghosts.count(neighs[j]) > 0 );
                 }
-//TO BE REMOVED                 n_vertices = cell_->getVertexCount();
-//TO BE REMOVED                 for ( j = 0; j < n_vertices; ++j ) {
-//TO BE REMOVED                     ring_1 = Ring1(ghost_idx, j);
-//TO BE REMOVED                     n_adj = ring_1.size();
-//TO BE REMOVED                     for ( k = 0; k < n_adj; ++k) {
-//TO BE REMOVED                         neigh_idx = ring_1[k];
-//TO BE REMOVED                         flag_delete &= ( !cells[neigh_idx].isInterior() );
-//TO BE REMOVED                     } //next k
-//TO BE REMOVED                 } //next j
                 if ( flag_delete )  {
 // /*DEBUG*/           out << "      deleting ghost: " << ghost_idx << endl;
 
                     // Ghost has to be deleted
                     deleteCell(ghost_idx, true, true);
                     i = m_ghost2id[rank_id].erase( i );
+/*solution#1*/      ghosts.erase(ghost_idx);
                 }
                 else ++i;
             } //next i
         } //next ii
+        m_cells.flush();
+/*solution#1*/for (const long &ghost : ghosts) {
+/*solution#1*/    if (m_cells[ghost].isInterior()) {
+/*solution#1*/        moveInternal2Ghost(ghost);
+/*solution#1*/    }
+/*solution#1*/} //next ghost
 
 /*DEBUG*/{        
 // /*DEBUG*/    out << "  ghost2idx = {";
