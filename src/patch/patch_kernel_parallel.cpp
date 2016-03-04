@@ -293,7 +293,6 @@ if (m_rank == snd_rank)
         long                                    cell_idx;
         long                                    ghost_counter;
         unordered_map<long, bool>               is_ghost;
-//         Cell                                    *cell;
         vector<long>::const_iterator            i, e;
         unordered_map<short, unordered_map<long, long> >::const_iterator   m;
         unordered_map<long, long>::const_iterator                          n;
@@ -303,25 +302,12 @@ if (m_rank == snd_rank)
         ghost_counter = 0;
         e = cell_list.cend();
         for (i = cell_list.cbegin(); i < e; ++i) {
-
-//             cell_idx = *i;
-//             cell = &cells[cell_idx];
-
             neighs = findCellNeighs(*i);
             n_neighs = neighs.size();
             for (k = 0; k < n_neighs; ++k) {
                 is_ghost[neighs[k]] = true;
             } //next k
-/*TO_BE_REMOVED*/{
-/*TO_BE_REMOVED*///            n_vertex = cell->getVertexCount();
-/*TO_BE_REMOVED*///            for ( j = 0; j < n_vertex; ++j ) {
-/*TO_BE_REMOVED*///                ring_1 = Ring1(cell_idx, j);
-/*TO_BE_REMOVED*///                n_neighs = ring_1.size();
-/*TO_BE_REMOVED*///                for ( k = 0; k < n_neighs; ++k ) {
-/*TO_BE_REMOVED*///                    is_ghost[ring_1[k]] = true;
-/*TO_BE_REMOVED*///                } //next k
-/*TO_BE_REMOVED*///            } //next j
-/*TO_BE_REMOVED*/}
+
         } //next i
         for (i = cell_list.begin(); i < cell_list.end(); ++i) {
             cell_idx = *i;
@@ -816,7 +802,7 @@ if (m_rank == snd_rank)
 // /*DEBUG*/           out << "      deleting ghost: " << ghost_idx << endl;
 
                     // Ghost has to be deleted
-                    deleteCell(ghost_idx);
+                    deleteCell(ghost_idx, true, true);
                     i = m_ghost2id[rank_id].erase( i );
                 }
                 else ++i;
@@ -1311,10 +1297,10 @@ if ( (m_rank != snd_rank) && (m_rank != rcv_rank) )
 }
 
 /*DEBUG*/{
-/*DEBUG*/    out << "* display mesh infos {" << endl;
-/*DEBUG*/    displayCells(out);
-/*DEBUG*/    out << "}" << endl;
-/*DEBUG*/    out.close();
+// /*DEBUG*/    out << "* display mesh infos {" << endl;
+// /*DEBUG*/    displayCells(out);
+// /*DEBUG*/    out << "}" << endl;
+// /*DEBUG*/    out.close();
 /*DEBUG*/}
 
 return; }
