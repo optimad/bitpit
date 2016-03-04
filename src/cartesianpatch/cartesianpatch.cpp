@@ -154,8 +154,8 @@ void CartesianPatch::initialize(const std::array<double, 3> &origin,
 	for (int n = 0; n < getDimension(); ++n) {
 		// Initialize cells
 		m_nCells1D[n]     = nCells[n];
-		m_minCoords[n]    = origin[n] - 0.5 * lengths[n];
-		m_maxCoords[n]    = origin[n] + 0.5 * lengths[n];
+		m_minCoords[n]    = origin[n];
+		m_maxCoords[n]    = origin[n] + lengths[n];
 		m_cellSpacings[n] = lengths[n] / m_nCells1D[n];
 
 		m_cellCenters[n].resize(m_nCells1D[n]);
