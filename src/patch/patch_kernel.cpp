@@ -532,7 +532,7 @@ const Vertex & PatchKernel::getVertex(const long &id) const
 */
 PatchKernel::VertexIterator PatchKernel::getVertexIterator(const long &id)
 {
-	return VertexIterator(m_vertices.raw_begin() + m_vertices.raw_index(id));
+	return m_vertices.get_iterator(id);
 }
 
 /*!
@@ -1046,7 +1046,7 @@ const Cell & PatchKernel::getFirstGhost() const
 */
 PatchKernel::CellIterator PatchKernel::getCellIterator(const long &id)
 {
-	return CellIterator(m_cells.raw_begin() + m_cells.raw_index(id));
+	return m_cells.get_iterator(id);
 }
 
 /*!
@@ -1086,7 +1086,7 @@ PatchKernel::CellIterator PatchKernel::internalBegin()
 */
 PatchKernel::CellIterator PatchKernel::internalEnd()
 {
-	return ++CellIterator(m_cells.raw_begin() + m_cells.raw_index(m_last_internal_id));
+	return ++m_cells.get_iterator(m_last_internal_id);
 }
 
 /*!
@@ -1096,7 +1096,7 @@ PatchKernel::CellIterator PatchKernel::internalEnd()
 */
 PatchKernel::CellIterator PatchKernel::ghostBegin()
 {
-    return CellIterator(m_cells.raw_begin() + m_cells.raw_index(m_first_ghost_id));
+    return m_cells.get_iterator(m_first_ghost_id);
 }
 
 /*!
@@ -1398,9 +1398,7 @@ bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 			} else if (m_nInternals == 0) {
 				m_first_ghost_id = m_cells.get_size_marker(m_nInternals, Element::NULL_ID);
 			} else {
-				long last_internal_raw_id = m_cells.raw_index(m_last_internal_id);
-				CellIterator first_ghost_iterator = CellIterator(m_cells.raw_begin() + last_internal_raw_id);
-				++first_ghost_iterator;
+				CellIterator first_ghost_iterator = ++m_cells.get_iterator(m_last_internal_id);
 				m_first_ghost_id = first_ghost_iterator->get_id();
 			}
 		}
@@ -1480,7 +1478,7 @@ PatchKernel::CellIterator PatchKernel::moveInternal2Ghost(const long &id)
 	}
 
 	// Get the iterator pointing to the updated position of the element
-	CellIterator iterator = CellIterator(m_cells.raw_begin() + m_cells.raw_index(id));
+	CellIterator iterator = m_cells.get_iterator(id);
 
 	// Update the interior flag
 	iterator->setInterior(false);
@@ -1514,7 +1512,7 @@ PatchKernel::CellIterator PatchKernel::moveGhost2Internal(const long &id)
 	}
 
 	// Get the iterator pointing to the updated position of the element
-	CellIterator iterator = CellIterator(m_cells.raw_begin() + m_cells.raw_index(id));
+	CellIterator iterator = m_cells.get_iterator(id);
 
 	// Update the interior flag
 	iterator->setInterior(true);
@@ -2017,7 +2015,7 @@ const Interface & PatchKernel::getInterface(const long &id) const
 */
 PatchKernel::InterfaceIterator PatchKernel::getInterfaceIterator(const long &id)
 {
-	return InterfaceIterator(m_interfaces.raw_begin() + m_interfaces.raw_index(id));
+	return m_interfaces.get_iterator(id);
 }
 
 /*!
