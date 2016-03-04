@@ -233,6 +233,7 @@ if (m_rank == snd_rank)
     // Variables required for cells communication
     long                                        n_cells = cell_list.size();
     unordered_map<long, long>                   cell_map;
+    unordered_map<long, pair<short, long>>      cell_new_ids;
 
     // Variables required for ghosts communication
     long                                        n_ghosts;
@@ -318,25 +319,19 @@ if (m_rank == snd_rank)
         for (l = is_ghost.begin(); l != is_ghost.end(); ++l) {
             if (l->second) {
                 cell_idx = l->first;
-                if ( ( find(m_ghost2id[rcv_rank].begin(),
-                            m_ghost2id[rcv_rank].end(),
-                            UnaryPredicate<const long, long>(cell_idx) ) == m_ghost2id[rcv_rank].end() )   // check #1: cell in not a ghost for receiver
-                && ( ghost_map.find(cell_idx) == ghost_map.end() )                                     // check #2: cell has not already inserted in the ghost list
-                && ( cell_map.find(cell_idx) == cell_map.end() ) ) {                                   // check #3: cell has not already inserted in the cell list
-                 
-/*TMP*/             {
-/*TMP*///                 cout << "cells[cell_idx].isInterior(): " << m_cells[cell_idx].isInterior() << endl;
-/*TMP*///                 cout << "cell_map.find( neigh_idx ) == cell_map.end(): " << bool( cell_map.find(cell_idx) == cell_map.end() ) << endl;
-/*TMP*///                 cout << "ghost_map.find( neigh_idx ) == ghost_map.end(): " << bool( ghost_map.find(cell_idx) == ghost_map.end() ) << endl;
-/*TMP*/             }
+                if ( find(m_ghost2id[rcv_rank].begin(),
+                          m_ghost2id[rcv_rank].end(),
+                          UnaryPredicate<const long, long>(cell_idx) ) == m_ghost2id[rcv_rank].end() ) {   // check #1: cell in not a ghost for receiver
 
+                    // Cell is interior
                     if ( m_cells[cell_idx].isInterior() ) {
                         ghost_list.push_back( pair<long, pair<long, short> >(cell_idx, pair<long, short>(cell_idx, snd_rank) ) );
                         ghost_map[cell_idx] = ghost_counter + n_cells;
                         ++ghost_counter;
                     }
+
+                    // Cell is a ghost (w.r.t to another process)
                     else {
-/*TMP*///                 cout << " we should never enter here" << endl;
                         for (m = m_ghost2id.begin(); m != m_ghost2id.end(); ++m) {
                             n = find( m->second.begin(), m->second.end(), UnaryPredicate<const long, long>(cell_idx) );
                             if ( n != m->second.end() ) {
@@ -593,9 +588,11 @@ if (m_rank == snd_rank)
         // Update ghost cells
         notification << n_cells;
         e = cell_list.cend();
+        cell_new_ids.reserve(cell_list.size() + m_nGhosts);
         for ( i = cell_list.cbegin(); i != e; ++i ) {
             feedback >> neigh_idx;
-            m_ghost2id[rcv_rank][neigh_idx] = *i;
+            cell_new_ids.emplace(*i, std::move(pair<short, long>(rcv_rank, neigh_idx)));
+            //m_ghost2id[rcv_rank][neigh_idx] = *i;
             notification << *i << neigh_idx;
         } //next i
 /*DEBUG*/{
@@ -754,74 +751,67 @@ if (m_rank == snd_rank)
 /*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
-        bool                                            flag_delete;
-        int                                             j, k;
-        int                                             rank_id;
-        int                                             n_neighs, n_adj;
-        long                                            ghost_idx, neigh_idx;
-        vector<long>                                    neighs;
-        Cell                                           *cell_;
-        unordered_map<short, unordered_map<long, long> >::const_iterator        ii, ee;
-        unordered_map<long, long>::const_iterator       i, e;
-        vector<long>::const_iterator                    m, n;
+        bool                                                    flag_keep;
+        int                                                     j, k;
+        int                                                     rank_id;
+        int                                                     n_neighs, n_adj;
+        long                                                    ghost_idx, neigh_idx;
+        vector<long>                                            neighs;
+        Cell                                                    *cell_;
+        unordered_map<long, pair<short, long>>::const_iterator  ii, ee;
+        unordered_map<long, long>::const_iterator               i, e;
+        vector<long>::const_iterator                            m, n;
 
-        // List of potential ghosts ----------------------------------------- //
-        std::unordered_set<long> ghosts;
-        ghosts.reserve(getCellCount());
+        // Complete list of candidate ghosts -------------------------------- //
+        for (const auto &rank_ghost : m_ghost2id) {
+            for (const auto &ghost : rank_ghost.second) {
+                cell_new_ids.emplace(ghost.second, std::move(pair<short, long>(rank_ghost.first, ghost.first)));
+            }
+        } //next cell
 
-/*solution#1*/for (const long &id : cell_list) {
-/*solution#1*/    ghosts.insert(id);
-/*solution#1*/} //next id
-
-/*solution#1*/for (const Cell &cell : m_cells) {
-/*solution#1*/    if (!cell.isInterior()) {
-/*solution#1*/        ghosts.insert(cell.get_id());
-/*solution#1*/    }
-/*solution#1*/} //next cell
-
-        // Update ghost list ------------------------------------------------ //
-/*solution#0*///n = cell_list.cend();
-/*solution#0*///for ( m = cell_list.cbegin(); m != n; ++m) {
-/*solution#0*////*DEBUG*/out << "    moving internal cell " << *m << " to ghosts" << endl;
-/*solution#0*///    moveInternal2Ghost(*m);
-/*solution#0*///} //next m
-            
         // Loop over ghost -------------------------------------------------- //
-        ee = m_ghost2id.cend();
-        for (ii = m_ghost2id.cbegin(); ii != ee; ++ii) {
-            rank_id = ii->first;
-            i = m_ghost2id[rank_id].cbegin();
-            e = m_ghost2id[rank_id].cend();
-            while ( i != e ) {
-// /*DEBUG*/       out << "    processing cell: " << i->second << endl;
-                flag_delete = true;
-                ghost_idx = i->second;
-                cell_ = &m_cells[ghost_idx];
-                neighs = findCellNeighs(ghost_idx);
-                n_neighs = neighs.size();
-// /*DEBUG*/       out << "    n_neighs = " << n_neighs << endl;
-                for (j = 0; j < n_neighs; ++j) {
-// /*DEBUG*/           out << "      neigh: " << m_cells[neighs[j]].isInterior() << endl;
-/*solution#0*///      flag_delete &= ( !m_cells[neighs[j]].isInterior() );
-/*solution#1*/      flag_delete &= ( ghosts.count(neighs[j]) > 0 );
-                }
-                if ( flag_delete )  {
-// /*DEBUG*/           out << "      deleting ghost: " << ghost_idx << endl;
+        ee = cell_new_ids.cend();
+        ii = cell_new_ids.cbegin();
+        while (ii != ee) {
+// /*DEBUG*/       out << "    processing cell: " << ii->first << endl;
 
-                    // Ghost has to be deleted
-                    deleteCell(ghost_idx, true, true);
-                    i = m_ghost2id[rank_id].erase( i );
-/*solution#1*/      ghosts.erase(ghost_idx);
+            ghost_idx = ii->first;
+            neighs = findCellNeighs(ghost_idx);
+            n_neighs = neighs.size();
+// /*DEBUG*/       out << "    n_neighs = " << n_neighs << endl;
+            flag_keep = false;
+            for (j = 0; j < n_neighs; ++j) {
+// /*DEBUG*/           out << "      neigh: " << m_cells[neighs[j]].isInterior() << endl;
+                if ( cell_new_ids.count(neighs[j]) == 0 ) {
+                    flag_keep = true;
+                    break;
                 }
-                else ++i;
-            } //next i
+            } //next j
+
+            // Candidate ghost will be deleted
+            cell_ = &m_cells[ghost_idx];
+            if ( !flag_keep )  {
+// /*DEBUG*/           out << "      deleting ghost: " << ghost_idx << endl;
+                if (!cell_->isInterior()) {
+                    m_ghost2id[ii->second.first].erase(ii->second.second);
+                }
+                deleteCell(ghost_idx, true, true);
+                ii = cell_new_ids.erase(ii);
+            }
+            else {
+                if (cell_->isInterior()) {
+                    m_ghost2id[rcv_rank][ii->second.second] = ghost_idx;
+                }
+                ++ii;
+            };
+// /*DEBUG*/           out << "      next candidate ghost" << endl;
         } //next ii
         m_cells.flush();
-/*solution#1*/for (const long &ghost : ghosts) {
-/*solution#1*/    if (m_cells[ghost].isInterior()) {
-/*solution#1*/        moveInternal2Ghost(ghost);
-/*solution#1*/    }
-/*solution#1*/} //next ghost
+        for (const auto &ghost : cell_new_ids) {
+            if (m_cells[ghost.first].isInterior()) {
+                moveInternal2Ghost(ghost.first);
+            }
+        } //next ghost
 
 /*DEBUG*/{        
 // /*DEBUG*/    out << "  ghost2idx = {";
@@ -1016,12 +1006,12 @@ if (m_rank == rcv_rank)
 
         // Communicate new IDs to sender ------------------------------------ //
 /*DEBUG*/{
-/*DEBUG*/    out << "    sending new IDs: ";
+// /*DEBUG*/    out << "    sending new IDs: ";
 // /*DEBUG*/    unordered_map<long, long>::const_iterator      m;
 // /*DEBUG*/    for (m = c_local_mapping.begin(); m != c_local_mapping.end(); ++m) {
 // /*DEBUG*/        out << " (" << m->first << ", " << m->second << ") ";
 // /*DEBUG*/    } //next m
-/*DEBUG*/    out << endl << endl;
+// /*DEBUG*/    out << endl << endl;
 /*DEBUG*/}
 
         // Communicate buffer size
