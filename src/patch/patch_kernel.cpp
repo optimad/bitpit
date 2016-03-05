@@ -688,9 +688,15 @@ bool PatchKernel::deleteVertex(const long &id, bool delayed)
 		return false;
 	}
 
+	// Delete the vertex
 	m_vertices.erase(id, delayed);
 	m_vertexIdGenerator.trashId(id);
 	m_nVertices--;
+
+    // If there are no more vertices reset them
+    if (m_vertices.size() == 0) {
+        resetVertices();
+    }
 
 	return true;
 }
@@ -1403,6 +1409,11 @@ bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 			}
 		}
 	}
+
+	// If there are no more cells reset them
+	if (m_cells.size() == 0) {
+        resetCells();
+    }
 
 	return true;
 }
@@ -2189,6 +2200,11 @@ bool PatchKernel::deleteInterface(const long &id, bool updateNeighs, bool delaye
 	m_interfaces.erase(id, delayed);
 	m_interfaceIdGenerator.trashId(id);
 	m_nInterfaces--;
+
+    // If there are no more interfaces reset them
+    if (m_interfaces.size() == 0) {
+        resetInterfaces();
+    }
 
 	return true;
 }
