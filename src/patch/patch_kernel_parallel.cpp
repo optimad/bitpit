@@ -295,57 +295,53 @@ if (m_rank == snd_rank)
         vector<long>                            neighs;
         long                                    cell_idx;
         long                                    ghost_counter;
-        unordered_map<long, bool>               is_ghost;
         vector<long>::const_iterator            i, e;
         unordered_map<short, unordered_map<long, long> >::const_iterator   m;
         unordered_map<long, long>::const_iterator                          n;
         unordered_map<long, bool>::const_iterator                          l;
         unordered_map<long, long>::const_iterator                          ii, ee;
 
-        // Extract ghosts --------------------------------------------------- //
+        // Extract receiver's ghosts ---------------------------------------- //
         ghost_counter = 0;
         e = cell_list.cend();
         for (i = cell_list.cbegin(); i < e; ++i) {
             neighs = findCellNeighs(*i);
             n_neighs = neighs.size();
             for (k = 0; k < n_neighs; ++k) {
-                is_ghost[neighs[k]] = true;
-            } //next k
+                long neigh_idx = neighs[k];
 
-        } //next i
-        for (i = cell_list.begin(); i < cell_list.end(); ++i) {
-            cell_idx = *i;
-            is_ghost[cell_idx] = false;
-        } //next i
+                // Discard cells that are internal for the receiver
+                if (cell_map.count(neigh_idx) > 0) {
+                    continue;
+                }
 
-        for (l = is_ghost.begin(); l != is_ghost.end(); ++l) {
-            if (l->second) {
-                cell_idx = l->first;
+                // Discard cells that are a ghost for the receiver
                 if ( find(m_ghost2id[rcv_rank].begin(),
                           m_ghost2id[rcv_rank].end(),
-                          UnaryPredicate<const long, long>(cell_idx) ) == m_ghost2id[rcv_rank].end() ) {   // check #1: cell in not a ghost for receiver
-
-                    // Cell is interior
-                    if ( m_cells[cell_idx].isInterior() ) {
-                        ghost_list.push_back( pair<long, pair<long, short> >(cell_idx, pair<long, short>(cell_idx, snd_rank) ) );
-                        ghost_map[cell_idx] = ghost_counter + n_cells;
-                        ++ghost_counter;
-                    }
-
-                    // Cell is a ghost (w.r.t to another process)
-                    else {
-                        for (m = m_ghost2id.begin(); m != m_ghost2id.end(); ++m) {
-                            n = find( m->second.begin(), m->second.end(), UnaryPredicate<const long, long>(cell_idx) );
-                            if ( n != m->second.end() ) {
-                                ghost_list.push_back( pair<long, pair<long, short> >(cell_idx, pair<long, short>(n->first, m->first) ) );
-                                ghost_map[cell_idx] = ghost_counter + n_cells;
-                                ++ghost_counter;
-                            }
-                        } //next m
-                    }
+                          UnaryPredicate<const long, long>(neigh_idx) ) != m_ghost2id[rcv_rank].end() ) {
+                    continue;
                 }
-            }
-        }
+
+                // Update ghost list for interior cells
+                if ( m_cells[neigh_idx].isInterior() ) {
+                    ghost_list.push_back( pair<long, pair<long, short> >(neigh_idx, pair<long, short>(neigh_idx, snd_rank) ) );
+                    ghost_map[neigh_idx] = ghost_counter + n_cells;
+                    ++ghost_counter;
+                }
+
+                // Update ghost list for ghost cells (w.r.t to another process)
+                else {
+                    for (m = m_ghost2id.begin(); m != m_ghost2id.end(); ++m) {
+                        n = find( m->second.begin(), m->second.end(), UnaryPredicate<const long, long>(neigh_idx) );
+                        if ( n != m->second.end() ) {
+                            ghost_list.push_back( pair<long, pair<long, short> >(neigh_idx, pair<long, short>(n->first, m->first) ) );
+                            ghost_map[neigh_idx] = ghost_counter + n_cells;
+                            ++ghost_counter;
+                        }
+                   } //next m
+                }
+	    }
+	}
         n_ghosts = ghost_counter;
 /*DEBUG*/{
 /*DEBUG*/    out << "    sending " << n_ghosts;
