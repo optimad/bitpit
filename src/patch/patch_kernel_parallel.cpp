@@ -239,6 +239,7 @@ if (m_rank == snd_rank)
     long                                        n_ghosts;
     vector< pair<long, pair<long, short> > >    ghost_list;
     unordered_map<long, long>                   ghost_map;
+    unordered_map<long, long>                   sender_ghost_new_ids;
 
     // Variables required for vertex communication
     long                                        n_vertex;
@@ -290,7 +291,7 @@ if (m_rank == snd_rank)
     {
         // Scope variables -------------------------------------------------- //
         int                                     n_vertex, n_neighs;
-        int                                     k;
+        int                                     k, j;
         vector<long>                            neighs;
         long                                    cell_idx;
         long                                    ghost_counter;
@@ -299,6 +300,7 @@ if (m_rank == snd_rank)
         unordered_map<short, unordered_map<long, long> >::const_iterator   m;
         unordered_map<long, long>::const_iterator                          n;
         unordered_map<long, bool>::const_iterator                          l;
+        unordered_map<long, long>::const_iterator                          ii, ee;
 
         // Extract ghosts --------------------------------------------------- //
         ghost_counter = 0;
@@ -360,6 +362,40 @@ if (m_rank == snd_rank)
 // /*DEBUG*/    }
 /*DEBUG*/    out << endl << endl;
 /*DEBUG*/}
+
+        // Build list of sender's ghost with repsect to the recevider ------- //
+        //
+        // If the sender is sending all the cells, there's no point in finding
+        // sender's ghost: after the communication the sender will contain no
+        // cells, neither internal nor ghosts.
+        if (cell_list.size() < m_nInternals) {
+            ee = ghost_map.cend();
+            for (ii = ghost_map.cbegin(); ii != ee; ++ii) {
+                const long recv_ghost_idx = ii->first;
+
+                // Sender ghosts can be identified as the sent cells that are
+                // neighbours of the receiver's ghosts and are not receiver's
+                // ghost themselves.
+                neighs = findCellNeighs(recv_ghost_idx);
+                n_neighs = neighs.size();
+                for (j = 0; j < n_neighs; ++j) {
+                    long send_guess_ghost = neighs[j];
+                    if ( sender_ghost_new_ids.count(send_guess_ghost) > 0 ) {
+                        continue;
+                    } else if ( ghost_map.count(send_guess_ghost) > 0 ) {
+                        continue;
+                    } else if ( cell_map.count(send_guess_ghost) == 0 ) {
+                        continue;
+                    }
+
+                    out << "sender ghost" << send_guess_ghost << endl;
+                    out << "sender internal" << m_cells[send_guess_ghost].isInterior() << endl;
+
+                    sender_ghost_new_ids.insert({{send_guess_ghost, Element::NULL_ID}});
+                }
+            }
+        }
+
     }
 /*DEBUG*/t1 = high_resolution_clock::now();
 /*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
@@ -592,6 +628,9 @@ if (m_rank == snd_rank)
         for ( i = cell_list.cbegin(); i != e; ++i ) {
             feedback >> neigh_idx;
             cell_new_ids.emplace(*i, std::move(pair<short, long>(rcv_rank, neigh_idx)));
+            if ( sender_ghost_new_ids.count(*i) > 0 ) {
+                sender_ghost_new_ids[*i] = neigh_idx;
+            }
             //m_ghost2id[rcv_rank][neigh_idx] = *i;
             notification << *i << neigh_idx;
         } //next i
