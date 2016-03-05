@@ -130,7 +130,7 @@ void IndexGenerator::reset()
 	\param expert if true, the expert mode will be enabled
 */
 PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
-	: m_nInternals(0), m_nGhosts(0), m_nInterfaces(0),
+	: m_nInternals(0), m_nGhosts(0),
 	  m_last_internal_id(Element::NULL_ID),
 	  m_first_ghost_id(Element::NULL_ID),
 	  m_dirty(true), m_expert(expert), m_hasCustomTolerance(false),
@@ -272,7 +272,6 @@ void PatchKernel::resetInterfaces()
 	m_interfaces.clear();
 	PiercedVector<Interface>().swap(m_interfaces);
 	m_interfaceIdGenerator.reset();
-	m_nInterfaces = 0;
 
 	for (auto &cell : m_cells) {
 		cell.resetInterfaces();
@@ -1976,7 +1975,7 @@ std::vector<long> PatchKernel::findCellVertexOneRing(const long &id, const int &
 */
 long PatchKernel::getInterfaceCount() const
 {
-	return m_nInterfaces;
+	return m_interfaces.size();
 }
 
 /*!
@@ -2074,7 +2073,6 @@ PatchKernel::InterfaceIterator PatchKernel::createInterface(ElementInfo::Type ty
 	}
 
 	PiercedVector<Interface>::iterator iterator = m_interfaces.reclaim(id);
-	m_nInterfaces++;
 
 	return iterator;
 }
@@ -2196,7 +2194,6 @@ bool PatchKernel::deleteInterface(const long &id, bool updateNeighs, bool delaye
 	// Delete interface
 	m_interfaces.erase(id, delayed);
 	m_interfaceIdGenerator.trashId(id);
-	m_nInterfaces--;
 
     // If there are no more interfaces reset them
     if (m_interfaces.size() == 0) {
