@@ -1306,7 +1306,7 @@ void SurfTriPatch::extractEdgeNetwork(SurfTriPatch &net)
     // INITIALIZE DATA STRUCTURE                                              //
     // ====================================================================== //
     net.reserveCells(net.getCellCount() + countFaces());
-    net.reserveVertices(net.getVertexCount() + m_nVertices);
+    net.reserveVertices(net.getVertexCount() + getVertexCount());
 
     // ====================================================================== //
     // ADD VERTEX TO net                                                      //
@@ -1414,7 +1414,7 @@ unsigned short SurfTriPatch::importSTL(const string &stl_name, const bool &isBin
     // ====================================================================== //
     // PREPARE MESH FOR DATA IMPORT                                           //
     // ====================================================================== //
-    reserveVertices(m_nVertices + nVertex);
+    reserveVertices(getVertexCount() + nVertex);
     reserveCells(m_nInternals + m_nGhosts + nSimplex);
 
     // ====================================================================== //
@@ -1493,7 +1493,7 @@ unsigned short SurfTriPatch::exportSTL(const string &stl_name, const bool &isBin
     // ====================================================================== //
     nSimplex = m_nInternals;
     if (!exportInternalsOnly) nSimplex += m_nGhosts;
-    vertexList.resize(m_nVertices);
+    vertexList.resize(getVertexCount());
     normalList.resize(nSimplex);
     connectivityList.resize(nSimplex, vector<int>(3, 0));
 
@@ -1514,7 +1514,7 @@ unsigned short SurfTriPatch::exportSTL(const string &stl_name, const bool &isBin
         ++i_;
 
     } //next v_
-    nVertex = m_nVertices;
+    nVertex = getVertexCount();
 
     // ====================================================================== //
     // CREATE CONNECTIVITY                                                    //

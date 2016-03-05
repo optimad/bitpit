@@ -1215,10 +1215,10 @@ if (m_rank == rcv_rank)
         // none
 
         // Remove duplicated vertices --------------------------------------- //
-        out << "    n. vertices is: " << m_nVertices << endl;
+        out << "    n. vertices is: " << getVertexCount() << endl;
         deleteCoincidentVertex();
         deleteOrphanVertices();
-        out << "    (after cleaning), n.vertices is: " << m_nVertices << endl << endl;
+        out << "    (after cleaning), n.vertices is: " << getVertexCount() << endl << endl;
     }
 /*DEBUG*/out << "  nInternals: " << m_nInternals << endl;
 /*DEBUG*/out << "  nGhosts: " << m_nGhosts << endl;

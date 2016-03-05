@@ -130,7 +130,7 @@ void IndexGenerator::reset()
 	\param expert if true, the expert mode will be enabled
 */
 PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
-	: m_nVertices(0), m_nInternals(0), m_nGhosts(0), m_nInterfaces(0),
+	: m_nInternals(0), m_nGhosts(0), m_nInterfaces(0),
 	  m_last_internal_id(Element::NULL_ID),
 	  m_first_ghost_id(Element::NULL_ID),
 	  m_dirty(true), m_expert(expert), m_hasCustomTolerance(false),
@@ -241,7 +241,6 @@ void PatchKernel::resetVertices()
 	m_vertices.clear();
 	PiercedVector<Vertex>().swap(m_vertices);
 	m_vertexIdGenerator.reset();
-	m_nVertices = 0;
 
 	for (auto &cell : m_cells) {
 		cell.unsetConnect();
@@ -492,7 +491,7 @@ bool PatchKernel::isThreeDimensional() const
 */
 long PatchKernel::getVertexCount() const
 {
-	return m_nVertices;
+	return m_vertices.size();
 }
 
 /*!
@@ -584,7 +583,6 @@ PatchKernel::VertexIterator PatchKernel::createVertex(long id)
 	}
 
 	PiercedVector<Vertex>::iterator iterator = m_vertices.reclaim(id);
-	m_nVertices++;
 
 	return iterator;
 }
@@ -691,7 +689,6 @@ bool PatchKernel::deleteVertex(const long &id, bool delayed)
 	// Delete the vertex
 	m_vertices.erase(id, delayed);
 	m_vertexIdGenerator.trashId(id);
-	m_nVertices--;
 
     // If there are no more vertices reset them
     if (m_vertices.size() == 0) {
@@ -769,7 +766,7 @@ long PatchKernel::countOrphanVertices() const
 		}
 	}
 
-	return (m_nVertices - usedVertices.size());
+	return (getVertexCount() - usedVertices.size());
 }
 
 /*!
@@ -877,7 +874,7 @@ std::vector<long> PatchKernel::collapseCoincidentVertices(int nBins)
 	// COLLAPSE DOUBLE VERTICES                                               //
 	// ====================================================================== //
 	long collapsedVertexId;
-	std::vector<bool> flag(m_nVertices, false);
+	std::vector<bool> flag(getVertexCount(), false);
 	for (auto &bin : bins) {
 		int nBinCells = bin.size();
 		if (nBinCells > 0) {
