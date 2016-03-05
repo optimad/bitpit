@@ -233,7 +233,6 @@ if (m_rank == snd_rank)
     // Variables required for cells communication
     long                                        n_cells = cell_list.size();
     unordered_map<long, long>                   cell_map;
-    unordered_map<long, pair<short, long>>      cell_new_ids;
 
     // Variables required for ghosts communication
     long                                        n_ghosts;
@@ -620,10 +619,8 @@ if (m_rank == snd_rank)
         // Update ghost cells
         notification << n_cells;
         e = cell_list.cend();
-        cell_new_ids.reserve(cell_list.size() + m_nGhosts);
         for ( i = cell_list.cbegin(); i != e; ++i ) {
             feedback >> neigh_idx;
-            cell_new_ids.emplace(*i, std::move(pair<short, long>(rcv_rank, neigh_idx)));
             if ( sender_ghost_new_ids.count(*i) > 0 ) {
                 sender_ghost_new_ids[*i] = neigh_idx;
             }
@@ -791,62 +788,62 @@ if (m_rank == snd_rank)
         int                                                     rank_id;
         int                                                     n_neighs, n_adj;
         long                                                    ghost_idx, neigh_idx;
+        long                                                    ghost_send_idx, ghost_recv_idx;
         vector<long>                                            neighs;
         Cell                                                    *cell_;
-        unordered_map<long, pair<short, long>>::const_iterator  ii, ee;
+        unordered_map<long, long>::iterator                     ii, ee;
         unordered_map<long, long>::const_iterator               i, e;
         vector<long>::const_iterator                            m, n;
 
-        // Complete list of candidate ghosts -------------------------------- //
-        for (const auto &rank_ghost : m_ghost2id) {
-            for (const auto &ghost : rank_ghost.second) {
-                cell_new_ids.emplace(ghost.second, std::move(pair<short, long>(rank_ghost.first, ghost.first)));
+        // Initialize sender's ghosts --------------------------------------- //
+        e = sender_ghost_new_ids.cend();
+        for (i = sender_ghost_new_ids.cbegin(); i != e; ++i) {
+            ghost_send_idx = i->first;
+            ghost_recv_idx = i->second;
+
+            moveInternal2Ghost(ghost_send_idx);
+            m_ghost2id[rcv_rank][ghost_recv_idx] = ghost_send_idx;
+        }
+
+        // Delete sent cells that are not ghosts -----------------------------//
+        for (const auto &cell : cell_list) {
+            if (m_cells[cell].isInterior()) {
+                deleteCell(cell, true, true);
+            }
+        }
+
+        // Delete previous ghost cells of other processors -------------------//
+        for (auto &rank_ghost : m_ghost2id) {
+            ee = rank_ghost.second.end();
+            ii = rank_ghost.second.begin();
+            while (ii != ee) {
+                ghost_idx = ii->second;
+                neighs = findCellNeighs(ghost_idx);
+                n_neighs = neighs.size();
+
+                // We want to keep only ghosts sells that have at least one
+                // internal neighbour
+                flag_keep = false;
+                for (j = 0; j < n_neighs; ++j) {
+                    if ( m_cells[neighs[j]].isInterior() ) {
+                        flag_keep = true;
+                        break;
+                    }
+                } //next j
+
+                if ( !flag_keep )  {
+// /*DEBUG*/           out << "      deleting ghost: " << ghost_idx << endl;
+                    deleteCell(ghost_idx, true, true);
+                    ii = rank_ghost.second.erase(ii);
+                }
+                else {
+                    ++ii;
+                }
             }
         } //next cell
 
-        // Loop over ghost -------------------------------------------------- //
-        ee = cell_new_ids.cend();
-        ii = cell_new_ids.cbegin();
-        while (ii != ee) {
-// /*DEBUG*/       out << "    processing cell: " << ii->first << endl;
-
-            ghost_idx = ii->first;
-            neighs = findCellNeighs(ghost_idx);
-            n_neighs = neighs.size();
-// /*DEBUG*/       out << "    n_neighs = " << n_neighs << endl;
-            flag_keep = false;
-            for (j = 0; j < n_neighs; ++j) {
-// /*DEBUG*/           out << "      neigh: " << m_cells[neighs[j]].isInterior() << endl;
-                if ( cell_new_ids.count(neighs[j]) == 0 ) {
-                    flag_keep = true;
-                    break;
-                }
-            } //next j
-
-            // Candidate ghost will be deleted
-            cell_ = &m_cells[ghost_idx];
-            if ( !flag_keep )  {
-// /*DEBUG*/           out << "      deleting ghost: " << ghost_idx << endl;
-                if (!cell_->isInterior()) {
-                    m_ghost2id[ii->second.first].erase(ii->second.second);
-                }
-                deleteCell(ghost_idx, true, true);
-                ii = cell_new_ids.erase(ii);
-            }
-            else {
-                if (cell_->isInterior()) {
-                    m_ghost2id[rcv_rank][ii->second.second] = ghost_idx;
-                }
-                ++ii;
-            };
-// /*DEBUG*/           out << "      next candidate ghost" << endl;
-        } //next ii
+        // Flush cells -------------------------------------------------------//
         m_cells.flush();
-        for (const auto &ghost : cell_new_ids) {
-            if (m_cells[ghost.first].isInterior()) {
-                moveInternal2Ghost(ghost.first);
-            }
-        } //next ghost
 
 /*DEBUG*/{        
 // /*DEBUG*/    out << "  ghost2idx = {";
