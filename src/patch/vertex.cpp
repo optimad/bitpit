@@ -278,7 +278,6 @@ void Vertex::display(std::ostream &out, unsigned short int indent) const
 
 // Explicit instantiation of the Vertex containers
 template class PiercedVector<Vertex>;
-template class PositionalPiercedVector<Vertex>;
 
 /*!
 	@}

@@ -79,7 +79,6 @@ private:
 };
 
 extern template class PiercedVector<Interface>;
-extern template class PositionalPiercedVector<Interface>;
 
 }
 

@@ -195,7 +195,6 @@ private:
 };
 
 extern template class PiercedVector<Element>;
-extern template class PositionalPiercedVector<Element>;
 
 }
 

@@ -764,7 +764,6 @@ unsigned int Cell::getBinarySize()
 
 // Explicit instantiation of the Cell containers
 template class PiercedVector<Cell>;
-template class PositionalPiercedVector<Cell>;
 
 /*!
 	@}

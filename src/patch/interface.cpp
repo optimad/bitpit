@@ -338,7 +338,6 @@ void Interface::display(std::ostream &out, unsigned short int indent) const
 
 // Explicit instantiation of the Interface containers
 template class PiercedVector<Interface>;
-template class PositionalPiercedVector<Interface>;
 
 /*!
 	@}

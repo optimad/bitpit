@@ -1276,7 +1276,6 @@ unsigned int Element::getBinarySize()
 
 // Explicit instantiation of the Element containers
 template class PiercedVector<Element>;
-template class PositionalPiercedVector<Element>;
 
 /*!
 	@}
