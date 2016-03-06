@@ -582,6 +582,7 @@ PatchKernel::VertexIterator PatchKernel::createVertex(long id)
 	}
 
 	PiercedVector<Vertex>::iterator iterator = m_vertices.reclaim(id);
+    iterator->set_id(id);
 
 	return iterator;
 }
@@ -1180,6 +1181,7 @@ PatchKernel::CellIterator PatchKernel::createCell(ElementInfo::Type type, bool i
 			m_first_ghost_id = id;
 		}
 	}
+	iterator->set_id(id);
 
 	return iterator;
 }
@@ -2071,6 +2073,7 @@ PatchKernel::InterfaceIterator PatchKernel::createInterface(ElementInfo::Type ty
 	}
 
 	PiercedVector<Interface>::iterator iterator = m_interfaces.reclaim(id);
+    iterator->set_id(id);
 
 	return iterator;
 }

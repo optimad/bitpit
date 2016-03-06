@@ -56,14 +56,15 @@ void fillCellList(int nCells, PiercedVector<Cell> &cells)
 	for (int i = 0; i < nCells; i++) {
 		// std::cout << "  Inserting (at the end) cell with id = " << i << std::endl;
 
-		cells.emplace_back(i);
+		PiercedVector<Cell>::iterator cell = cells.emplace(i);
+		cell->set_id(i);
 	}
 }
 
 int main(int argc, char *argv[])
 {
 	// Creating an emtpy list of cells
-	std::cout << std::endl << "::: Creating an empty pierced vector :::" << std::endl;
+	std::cout << std::endl << "::: Creating an empty PiercedVector :::" << std::endl;
 	std::cout << std::endl;
 
 	std::cout << "  Pierced vector created" << std::endl;
@@ -136,37 +137,37 @@ int main(int argc, char *argv[])
 	id_insert = 10;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (at first avilable position) element with id = " << id_insert << std::endl;
-		cells.emplace(id_insert);
+		cells.emplace(id_insert, id_insert);
 	}
 
 	id_insert = 13;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (at the end) element with id = " << id_insert << std::endl;
-		cells.emplace_back(id_insert);
+		cells.emplace_back(id_insert, id_insert);
 	}
 
 	id_insert = 15;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (at first avilable position) element with id = " << id_insert << std::endl;
-		cells.emplace(id_insert);
+		cells.emplace(id_insert, id_insert);
 	}
 
 	id_insert = 17;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (at the end) element with id = " << id_insert << std::endl;
-		cells.emplace_back(id_insert);
+		cells.emplace_back(id_insert, id_insert);
 	}
 
 	id_insert = 45;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (at first avilable position) element with id = " << id_insert << std::endl;
-		cells.emplace(id_insert);
+		cells.emplace(id_insert, id_insert);
 	}
 
 	id_insert = 102;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (at the end) element with id = " << id_insert << std::endl;
-		cells.emplace_back(id_insert);
+		cells.emplace_back(id_insert, id_insert);
 	}
 
 	printCellIds(cells);
@@ -186,14 +187,14 @@ int main(int argc, char *argv[])
 	id_reference = 13;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (before the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
-		cells.emplace_before(id_reference, id_insert);
+		cells.emplace_before(id_reference, id_insert, id_insert);
 	}
 
 	id_insert    = 123;
 	id_reference = 102;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (before the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
-		cells.emplace_before(id_reference, id_insert);
+		cells.emplace_before(id_reference, id_insert, id_insert);
 	}
 
 
@@ -201,28 +202,28 @@ int main(int argc, char *argv[])
 	id_reference = 10;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (before the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
-		cells.emplace_before(id_reference, id_insert);
+		cells.emplace_before(id_reference, id_insert, id_insert);
 	}
 
 	id_insert    = 125;
 	id_reference = 124;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (after the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
-		cells.emplace_after(id_reference, id_insert);
+		cells.emplace_after(id_reference, id_insert, id_insert);
 	}
 
 	id_insert    = 126;
 	id_reference = 102;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (after the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
-		cells.emplace_after(id_reference, id_insert);
+		cells.emplace_after(id_reference, id_insert, id_insert);
 	}
 
 	id_insert    = 127;
 	id_reference = 45;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (after the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
-		cells.emplace_after(id_reference, id_insert);
+		cells.emplace_after(id_reference, id_insert, id_insert);
 	}
 
 	printCellIds(cells);
@@ -320,16 +321,16 @@ int main(int argc, char *argv[])
 	std::cout << std::endl;
 
 	id_insert = 40;
-	std::cout << "  Inserting element with id = " << id_insert << std::endl;
-	cells.insert(id_insert);
+	std::cout << "  Emplacing element with id = " << id_insert << std::endl;
+	cells.emplace(id_insert, id_insert);
 
 	id_insert = 41;
-	std::cout << "  Inserting element with id = " << id_insert << std::endl;
-	cells.insert(id_insert);
+	std::cout << "  Emplacing element with id = " << id_insert << std::endl;
+	cells.emplace(id_insert, id_insert);
 
 	id_insert = 42;
-	std::cout << "  Inserting element with id = " << id_insert << std::endl;
-	cells.insert(id_insert);
+	std::cout << "  Emplacing element with id = " << id_insert << std::endl;
+	cells.emplace(id_insert, id_insert);
 
 	printCellIds(cells);
 

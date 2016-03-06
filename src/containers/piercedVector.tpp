@@ -44,64 +44,10 @@
 
 namespace bitpit{
 
-// To check if the provided template argument implements the needed methods,
-// the following Stackoverflow questions are used:
-//
-// http://stackoverflow.com/questions/257288/is-it-possible-to-write-a-c-template-to-check-for-a-functions-existence
-// http://stackoverflow.com/questions/16976720/how-to-i-restrict-a-template-class-to-certain-types
-
-namespace utils {
-
-/*!
-	\ingroup containerUtils
-
-	Checks if the template parameter has a method called "get_id".
-*/
-template <typename T>
-class has_get_id
-{
-    typedef char true_type;
-    typedef long false_type;
-
-    template <typename C> static true_type test(decltype(&C::get_id));
-    template <typename C> static false_type test(...);
-
-public:
-    enum { value = (sizeof(test<T>(0)) == sizeof(true_type)) };
-};
-
-/*!
-	\ingroup containerUtils
-
-	Checks if the template parameter has a method called "set_id".
-*/
-template <typename T>
-class has_set_id
-{
-    typedef char true_type;
-    typedef long false_type;
-
-    template <typename C> static true_type test(decltype(&C::set_id));
-    template <typename C> static false_type test(...);
-
-public:
-    enum { value = (sizeof(test<T>(0)) == sizeof(true_type)) };
-};
-
-}
-
 /*!
 	\ingroup containers
 
 	@brief Iterator for the class PiercedVector
-
-	@details
-	PiercedIterator can work only with objects that are identified by a
-	unique id. The objects must implement a function, called get_id,
-	that returns the id of the object. The ids have to be positive, but
-	the type that defines the id must be a signed integer (negative
-	id are used by PiercedVector to store special information in the
-	elements).
 
 	Usage: Use <tt>PiercedVector<T>::iterator</tt> to declare an iterator
 	for a pierced vector, use <tt>PiercedVector<Type>::const_iterator</tt> to
@@ -110,35 +56,48 @@ public:
 	@tparam T The type of the objects stored in the vector
 */
 
-template<class T, class unqualified_T = typename std::remove_cv<T>::type>
+template<typename T, typename id_type = long,
+         typename unqualified_T = typename std::remove_cv<T>::type,
+		 typename unqualified_id_type = typename std::remove_cv<id_type>::type>
 class PiercedIterator
 	: public std::iterator<std::forward_iterator_tag, unqualified_T,
 				std::ptrdiff_t, T*, T&>
 {
-	// PiercedIterator can work only with calsses that are identified by a
-	// unique id (i.e., classes that implements get_id)
-	static_assert(utils::has_get_id<T>::value, "Provided class does not implement get_id");
 
 private:
+	/*!
+		Container that holds the id.
+	*/
+	typedef typename std::vector<unqualified_id_type> IdContainer;
+
+	/*!
+		Iterator for the internal vector that holds the ids in
+		the pierced array.
+	*/
+	typedef typename IdContainer::iterator IdIterator;
+
+	/*!
+		Constant iterator for the internal vector that holds the ids in
+		the pierced array.
+	*/
+	typedef typename IdContainer::const_iterator IdConstIterator;
+
+	/*!
+		Container that holds the values.
+	*/
+	typedef typename std::vector<unqualified_T> ValueContainer;
+
 	/*!
 		Iterator for the internal vector that holds the elements in
 		the pierced array.
 	*/
-	typedef typename std::vector<unqualified_T>::iterator BaseIterator;
+	typedef typename ValueContainer::iterator ValueIterator;
 
 	/*!
 		Const iterator for the internal vector that holds the elements in
 		the pierced array.
 	*/
-	typedef typename std::vector<unqualified_T>::const_iterator BaseConstIterator;
-
-	/*!
-		Type id_type is the type of the ids.
-
-		It is automatically defined as the type returned by the
-		get_id function .
-	*/
-	typedef decltype(std::declval<unqualified_T>().get_id()) id_type;
+	typedef typename ValueContainer::const_iterator ValueConstIterator;
 
 	/*!
 		Special id value that identifies every dummy element past
@@ -147,16 +106,20 @@ private:
 	static const id_type SENTINEL_ID;
 
 	/*!
-		Internal iterator.
+		Internal pointer to the values.
 	*/
-	T *m_itr;
+	T *m_value;
 
 	/*!
-		Creates a new iterator and initializes it with the
-		specified pointer.
+		Internal pointer to the ids.
 	*/
-	explicit PiercedIterator(T *value)
-		: m_itr(value)
+	id_type *m_id;
+
+	/*!
+		Creates a new iterator and initializes it with the specified pointers.
+	*/
+	explicit PiercedIterator(T *value, id_type *id)
+		: m_value(value), m_id(id)
 	{
 	}
 
@@ -173,18 +136,21 @@ public:
 		Creates a new iterator and initializes it with the position of
 		the base iterator recevied in input.
 	*/
-	explicit PiercedIterator(BaseIterator iterator)
-		: m_itr(&(*iterator))
+	explicit PiercedIterator(ValueIterator valueBegin, IdIterator idBegin, size_t pos)
+		: m_value(&(*(valueBegin + pos)))
 	{
+		m_id = &(*(idBegin + pos));
 	}
 
 	/*!
 		Creates a new iterator and initializes it with the position of
 		the const base iterator recevied in input.
 	*/
-	explicit PiercedIterator(BaseConstIterator iterator)
-		: m_itr(&(*iterator))
+	explicit PiercedIterator(ValueConstIterator valueBegin, IdConstIterator idBegin, size_t pos)
+
 	{
+		m_value = &(*(valueBegin + pos));
+		m_id = &(*(idBegin + pos));
 	}
 
 	/*!
@@ -195,8 +161,8 @@ public:
 	*/
 	void swap(PiercedIterator& other) noexcept
 	{
-		using std::swap;
-		swap(m_itr, other.m_itr);
+		std::swap(m_value, other.m_value);
+		std::swap(m_id, other.m_id);
 	}
 
 	/*!
@@ -204,15 +170,15 @@ public:
 	*/
 	PiercedIterator& operator++ ()
 	{
-		size_t delta = 1;
+		size_t offset = 1;
 		while (true) {
-			m_itr += delta;
-
-			id_type id = m_itr->get_id();
+			id_type id = *(m_id + offset);
 			if (id == SENTINEL_ID || id >= 0) {
+				m_id    += offset;
+				m_value += offset;
 				return *this;
 			} else {
-				delta = - id;
+				offset += - id;
 			}
 		}
 
@@ -224,7 +190,7 @@ public:
 	*/
 	PiercedIterator operator++ (int)
 	{
-		PiercedIterator tmp(m_itr);
+		PiercedIterator tmp(m_value, m_id);
 
 		++(*this);
 
@@ -234,19 +200,23 @@ public:
 	/*!
 		Two-way comparison.
 	*/
-	template<class other_T, class unqualified_other_T = typename std::remove_cv<other_T>::type>
-	bool operator == (const PiercedIterator<other_T>& rhs) const
+	template<typename other_T, typename other_id_type = long,
+         typename other_unqualified_T = typename std::remove_cv<T>::type,
+		 typename other_unqualified_id_type = typename std::remove_cv<id_type>::type>
+	bool operator == (const PiercedIterator<other_T, other_id_type>& rhs) const
 	{
-		return m_itr == rhs.m_itr;
+		return m_id == rhs.m_id;
 	}
 
 	/*!
 		Two-way comparison.
 	*/
-	template<class other_T, class unqualified_other_T = typename std::remove_cv<other_T>::type>
-	bool operator != (const PiercedIterator<other_T>& rhs) const
+	template<typename other_T, typename other_id_type = long,
+         typename other_unqualified_T = typename std::remove_cv<T>::type,
+		 typename other_unqualified_id_type = typename std::remove_cv<id_type>::type>
+	bool operator != (const PiercedIterator<other_T, other_id_type>& rhs) const
 	{
-		return m_itr != rhs.m_itr;
+		return m_id != rhs.m_id;
 	}
 
 	/*!
@@ -257,7 +227,7 @@ public:
 	*/
 	T& operator* () const
 	{
-		return *m_itr;
+		return *m_value;
 	}
 
 	/*!
@@ -268,36 +238,21 @@ public:
 	*/
 	T* operator-> () const
 	{
-		return m_itr;
-	}
-
-	/*!
-		Assignment operator.
-
-		\param iterator is the base type iterator that holds the
-		                position to be set
-		\result The updated iterator.
-	*/
-	PiercedIterator & operator= (BaseIterator iterator)
-	{
-		m_itr = &(*iterator);
-
-		return *this;
+		return m_value;
 	}
 
 	/*!
 		Converts the iterator to a const_iterator.
 	*/
-	operator PiercedIterator<const T>() const
+	operator PiercedIterator<const T, const id_type>() const
 	{
-		return PiercedIterator<const T>(m_itr);
+		return PiercedIterator<const T, const id_type>(m_value, m_id);
 	}
 };
 
 // Definition of static constants of PiercedIterator
-template<class T, class unqualified_T>
-const typename PiercedIterator<T, unqualified_T>::id_type
-	PiercedIterator<T, unqualified_T>::SENTINEL_ID = std::numeric_limits<id_type>::min();
+template<class T, typename id_type, class unqualified_T, class unqualified_id_type>
+const id_type PiercedIterator<T, id_type, unqualified_T, unqualified_id_type>::SENTINEL_ID = std::numeric_limits<id_type>::min();
 
 /*!
 	\ingroup containers
@@ -308,12 +263,7 @@ const typename PiercedIterator<T, unqualified_T>::id_type
 	Usage: Use <tt>PiercedVector<T></tt> to declare a pierced vector.
 
 	PiercedVector can work only with objects that are identified by a
-	unique id. The objects must implement a function, called get_id,
-	that returns the id of the object and a function, called set_id,
-	that sets the id of the objects. The ids have to be positive, but
-	the type that defines the id must be a signed integer (negative
-	id are used by PiercedVector to store special information in the
-	elements).
+	unique id.
 
 	Internally all the holes are stored in a single vector. The first part
 	of this vector contains the "regular" holes, whereas the last part
@@ -326,13 +276,11 @@ const typename PiercedIterator<T, unqualified_T>::id_type
 	@tparam T The type of the objects stored in the vector
 */
 
-template <class T>
+template <class T, typename id_type = long>
 class PiercedVector
 {
-	// PiercedVector can work only with calsses that are identified by a
-	// unique id (i.e., classes that implements set_id and get_id)
-	static_assert(utils::has_get_id<T>::value, "Provided class does not implement get_id");
-	static_assert(utils::has_set_id<T>::value, "Provided class does not implement set_id");
+	static_assert(std::is_integral<id_type>::value, "Signed integer required for id.");
+	static_assert(std::numeric_limits<id_type>::is_signed, "Signed integer required for id.");
 
 private:
 	/*!
@@ -346,14 +294,6 @@ private:
 		parameter (T).
 	*/
 	typedef T value_type;
-
-	/*!
-		Type id_type is the type of the ids.
-
-		It is automatically defined as the type returned by the
-		get_id function .
-	*/
-	typedef decltype(std::declval<T>().get_id()) id_type;
 
 	/*!
 		Special id value that identifies every dummy element past
@@ -393,7 +333,7 @@ public:
 	/*!
 		Constant iterator for the pierced array.
 	*/
-	typedef PiercedIterator<const value_type> const_iterator;
+	typedef PiercedIterator<const value_type, const long> const_iterator;
 
 	/*!
 		Iterator for the pierced array raw container.
@@ -516,7 +456,7 @@ public:
 	*/
 	size_type capacity()
 	{
-		return m_v.capacity() - REQUIRED_SENTINEL_COUNT;
+		return m_ids.capacity() - REQUIRED_SENTINEL_COUNT;
 	}
 
 	/*!
@@ -554,8 +494,10 @@ public:
 	void clear(bool release = true)
 	{
 		// Clear storage
+		m_ids.clear();
 		m_v.clear();
 		if (release) {
+			std::vector<id_type>().swap(m_ids);
 			std::vector<value_type>().swap(m_v);
 		}
 		storage_resize(0);
@@ -633,15 +575,14 @@ public:
 		std::cout << " m_last_pos: " <<  m_last_pos << std::endl;
 		std::cout << " Stored ids: " << std::endl;
 		for (size_t k = 0; k <= m_last_pos; ++k) {
-			id_type id = m_v[k].get_id();
-			std::cout << id;
-			if (exists(id)) {
-				std::cout << " ( " << get_pos_from_id(id) << ")";
-			} else {
-				std::cout << " ( negative id!)";
-			}
-			std::cout << std::endl;
+			std::cout << m_ids[k] << std::endl;
 		}
+
+        std::cout << std::endl;
+        std::cout << " Poistion map: " << std::endl;
+        for (auto itr = m_pos.cbegin(); itr != m_pos.cend(); ++itr) {
+            std::cout << itr->first << " -> " << itr->second << std::endl;
+        }
 
 		std::cout << "----------------------------------------" << std::endl;
 	}
@@ -656,11 +597,16 @@ public:
 		        element.
 	*/
 	template <class... Args>
-	iterator emplace(Args&&... args)
+	iterator emplace(const id_type &id, Args&&... args)
 	{
-		size_type pos = fill_pos_head();
+		// Fill the position
+		size_type pos = fill_pos_head(id);
 
-		return _emplace(pos, std::forward<Args>(args)...);
+		// Insert the element
+		m_v[pos] = T(std::forward<Args>(args)...);
+
+		// Return the iterator that points to the element
+		return get_iterator_from_pos(pos);
 	}
 
 	/*!
@@ -674,11 +620,16 @@ public:
 		\result An iterator that points to the newly inserted element.
 	*/
 	template <class... Args>
-	iterator emplace_after(const id_type &referenceId, Args&&... args)
+	iterator emplace_after(const id_type &referenceId, const id_type &id, Args&&... args)
 	{
-		size_type pos = fill_pos_after(get_pos_from_id(referenceId));
+		// Fill the position
+		size_type pos = fill_pos_after(get_pos_from_id(referenceId), id);
 
-		return _emplace(pos, std::forward<Args>(args)...);
+		// Insert the element
+		m_v[pos] = T(std::forward<Args>(args)...);
+
+		// Return the iterator that points to the element
+		return get_iterator_from_pos(pos);
 	}
 
 	/*!
@@ -689,11 +640,13 @@ public:
 		\param args the arguments forwarded to construct the new element
 	*/
 	template <class... Args>
-	void emplace_back(Args&&... args)
+	void emplace_back(const id_type &id, Args&&... args)
 	{
-		size_type pos = fill_pos_append();
+		// Fill the position
+		size_type pos = fill_pos_append(id);
 
-		_emplace(pos, std::forward<Args>(args)...);
+		// Insert the element
+		m_v[pos] = T(std::forward<Args>(args)...);
 	}
 
 	/*!
@@ -709,11 +662,16 @@ public:
 		\result An iterator that points to the newly inserted element.
 	*/
 	template <class... Args>
-	iterator emplace_before(const id_type &referenceId, Args&&... args)
+	iterator emplace_before(const id_type &referenceId, const id_type &id, Args&&... args)
 	{
-		size_type pos = fill_pos_before(get_pos_from_id(referenceId));
+		// Fill the position
+		size_type pos = fill_pos_before(get_pos_from_id(referenceId), id);
 
-		return _emplace(pos, std::forward<Args>(args)...);
+		// Insert the element
+		m_v[pos] = T(std::forward<Args>(args)...);
+
+		// Return the iterator that points to the element
+		return get_iterator_from_pos(pos);
 	}
 
 	/*!
@@ -739,19 +697,16 @@ public:
 	template <class... Args>
 	iterator emreplace(id_type id, Args&&... args)
 	{
-		// Position
+		// Get the position of the element
 		size_t pos = m_pos.at(id);
-
-		// Id of the element that is currently occupying the position
-		id_type id_prev = m_v[pos].get_id();
 
 		// Replace the element
 		m_v[pos] = T(std::forward<Args>(args)...);
 
 		// Update the map
+		id_type id_prev = m_ids[pos];
 		if (id != id_prev) {
-			unlink_id(id_prev);
-			link_id(id, pos);
+			set_pos_id(pos, id);
 		}
 
 		// Return the iterator that points to the element
@@ -801,7 +756,18 @@ public:
 	*/
 	iterator erase(id_type id, bool delayed = false)
 	{
-		return _erase(get_pos_from_id(id), delayed);
+		// Position
+		size_t pos = m_pos.at(id);
+
+		// Pierce the position
+		pierce_pos(pos, !delayed);
+
+		// Return the iterator to the next element
+		if (empty() || pos >= m_last_pos) {
+			return end();
+		} else {
+			return get_iterator_from_pos(find_next_used_pos(pos));
+		}
 	}
 
 	/*!
@@ -909,18 +875,22 @@ public:
 	*/
 	std::vector<id_type> get_ids(bool ordered = true)
 	{
+		// Initialize the vector wth the ids
 		std::vector<id_type> ids;
 		ids.reserve(size());
 
+		// Extract the ids
+		size_t pos = m_first_pos;
+
+		ids.push_back(m_ids[pos]);
+		do {
+			pos = find_next_used_pos(pos);
+			ids.push_back(m_ids[pos]);
+		} while (pos != m_last_pos);
+
+		// Sort the ids
 		if (ordered) {
-			for(auto item : m_pos) {
-				typename std::vector<id_type>::iterator itr = lower_bound(ids.begin(), ids.end(), item.first);
-				ids.insert(itr, item.first);
-			}
-		} else {
-			for(auto const &value : *this) {
-				ids.push_back(value.get_id());
-			}
+			std::sort(ids.begin(), ids.end());
 		}
 
 		return ids;
@@ -959,9 +929,9 @@ public:
 		// if the target size is greater or equal the current container size
 		// we return the fallback value.
 		if (targetSize == 0) {
-			return m_v[m_first_pos].get_id();
+			return m_ids[m_first_pos];
 		} else if (targetSize == (size() - 1)) {
-			return m_v[m_last_pos].get_id();
+			return m_ids[m_last_pos];
 		} else if (targetSize >= size() || targetSize <= 0) {
 			return fallback;
 		}
@@ -1008,7 +978,7 @@ public:
 			}
 		}
 
-		return m_v[markerPos].get_id();
+		return m_ids[markerPos];
 	}
 
 	/*!
@@ -1018,11 +988,16 @@ public:
 		            inserted elements.
 		\result An iterator that points to the newly inserted element.
 	*/
-	iterator insert(value_type &&value)
+	iterator insert(const id_type &id, value_type &&value)
 	{
-		size_type pos = fill_pos_head();
+		// Fill the position
+		size_type pos = fill_pos_head(id);
 
-		return _insert(pos, std::move(value));
+		// Insert the element
+		m_v[pos] = std::move(value);
+
+		// Return the iterator that points to the element
+		return get_iterator_from_pos(pos);
 	}
 
 	/*!
@@ -1036,11 +1011,16 @@ public:
 		new element will be inserted
 		\result An iterator that points to the newly inserted element.
 	*/
-	iterator insert_after(const id_type &referenceId, value_type &&value)
+	iterator insert_after(const id_type &referenceId, const id_type &id, value_type &&value)
 	{
-		size_type pos = fill_pos_after(get_pos_from_id(referenceId));
+		// Fill the position
+		size_type pos = fill_pos_after(get_pos_from_id(referenceId), id);
 
-		return _insert(pos, std::move(value));
+		// Insert the element
+		m_v[pos] = std::move(value);
+
+		// Return the iterator that points to the element
+		return get_iterator_from_pos(pos);
 	}
 
 	/*!
@@ -1054,11 +1034,16 @@ public:
 		new element will be inserted
 		\result An iterator that points to the newly inserted element.
 	*/
-	iterator insert_before(const id_type &referenceId, value_type &&value)
+	iterator insert_before(const id_type &referenceId, const id_type &id, value_type &&value)
 	{
-		size_type pos = fill_pos_before(get_pos_from_id(referenceId));
+		// Fill the position
+		size_type pos = fill_pos_before(get_pos_from_id(referenceId), id);
 
-		return _insert(pos, std::move(value));
+		// Insert the element
+		m_v[pos] = std::move(value);
+
+		// Return the iterator that points to the element
+		return get_iterator_from_pos(pos);
 	}
 
 
@@ -1106,10 +1091,15 @@ public:
 	*/
 	iterator move_after(const id_type &referenceId, const id_type &id, bool delayed = false)
 	{
-		size_type updatedPos = fill_pos_after(get_pos_from_id(referenceId));
-		size_type currentPos = get_pos_from_id(id);
+        // Save the element
+		size_type initialPos = get_pos_from_id(id);
+        T temp = std::move(m_v[initialPos]);
 
-		return _move(currentPos, updatedPos, delayed);
+        // Pierce the position
+        pierce_pos(initialPos, !delayed);
+
+		// Insert the element in the updated position
+        return insert_after(referenceId, id, std::move(temp));
 	}
 
 	/*!
@@ -1125,10 +1115,15 @@ public:
 	*/
 	iterator move_before(const id_type &referenceId, const id_type &id, bool delayed = false)
 	{
-		size_type updatedPos = fill_pos_before(get_pos_from_id(referenceId));
-		size_type currentPos = get_pos_from_id(id);
+        // Save the element
+        size_type initialPos = get_pos_from_id(id);
+        T temp = std::move(m_v[initialPos]);
 
-		return _move(currentPos, updatedPos, delayed);
+        // Pierce the position
+        pierce_pos(initialPos, !delayed);
+
+        // Insert the element in the updated position
+        return insert_before(referenceId, id, std::move(temp));
 	}
 
 	/*!
@@ -1143,9 +1138,12 @@ public:
 	{
 		if (empty()) {
 			throw std::out_of_range ("Vector is empty");
-		}
-
-		_erase(m_last_pos, false);
+		} else if (size() == 1) {
+            clear();
+        } else {
+            size_type updated_last_pos = find_prev_used_pos(m_last_pos);
+            update_last_used_pos(updated_last_pos);
+        }
 	}
 
 	/*!
@@ -1158,11 +1156,16 @@ public:
 		             element
 		\result An iterator that points to the newly inserted element.
 	*/
-	iterator push_back(value_type &&value)
+	iterator push_back(const id_type &id, value_type &&value)
 	{
-		size_type pos = fill_pos_append();
+		// Fille the position
+		size_type pos = fill_pos_append(id);
 
-		return _insert(pos, std::move(value));
+		// Insert the element
+		m_v[pos] = std::move(value);
+
+		// Return the iterator that points to the element
+		return get_iterator_from_pos(pos);
 	}
 
 	/*!
@@ -1287,9 +1290,10 @@ public:
 	*/
 	iterator reclaim(const id_type &id)
 	{
-		size_type pos = fill_pos_head();
+		size_type pos = fill_pos_head(id);
 
-		return _reclaim(pos, id);
+		// Return the iterator that points to the element
+		return get_iterator_from_pos(pos);
 	}
 
 	/*!
@@ -1310,9 +1314,10 @@ public:
 	*/
 	iterator reclaim_after(const id_type &referenceId, const id_type &id)
 	{
-		size_type pos = fill_pos_after(get_pos_from_id(referenceId));
+		size_type pos = fill_pos_after(get_pos_from_id(referenceId), id);
 
-		return _reclaim(pos, id);
+		// Return the iterator that points to the element
+		return get_iterator_from_pos(pos);
 	}
 
 	/*!
@@ -1328,9 +1333,10 @@ public:
 	*/
 	iterator reclaim_back(const id_type &id)
 	{
-		size_type pos = fill_pos_append();
+		size_type pos = fill_pos_append(id);
 
-		return _reclaim(pos, id);
+		// Return the iterator that points to the element
+		return get_iterator_from_pos(pos);
 	}
 
 	/*!
@@ -1351,9 +1357,10 @@ public:
 	*/
 	iterator reclaim_before(const id_type &referenceId, const id_type &id)
 	{
-		size_type pos = fill_pos_before(get_pos_from_id(referenceId));
+		size_type pos = fill_pos_before(get_pos_from_id(referenceId), id);
 
-		return _reclaim(pos, id);
+		// Return the iterator that points to the element
+		return get_iterator_from_pos(pos);
 	}
 
 	/*!
@@ -1368,16 +1375,13 @@ public:
 		// Position
 		size_t pos = m_pos.at(id);
 
-		// Id of the element that is currently occupying the position
-		id_type id_prev = m_v[pos].get_id();
-
 		// Replace the element
 		m_v[pos] = std::move(value);
 
 		// Update the map
+		id_type id_prev = m_ids[pos];
 		if (id != id_prev) {
-			unlink_id(id_prev);
-			link_id(id, pos);
+			set_pos_id(pos, id);
 		}
 
 		// Return the iterator that points to the element
@@ -1399,7 +1403,8 @@ public:
 	*/
 	void reserve(size_type n)
 	{
-		m_v.reserve(n + REQUIRED_SENTINEL_COUNT);
+		m_ids.reserve(n + REQUIRED_SENTINEL_COUNT);
+		m_v.reserve(n);
 	}
 
 	/*!
@@ -1457,15 +1462,6 @@ public:
 		// Find the updated last position
 		size_type updated_last_pos = get_pos_from_id(last_id);
 
-		// Delete all ids of the elements beyond the updated position
-		// of the last element
-		iterator itr = get_iterator_from_pos(updated_last_pos);
-		itr++;
-		while (itr != end()) {
-			unlink_id(itr->get_id());
-			itr++;
-		}
-
 		// Update the last position
 		update_last_used_pos(updated_last_pos);
 	}
@@ -1492,13 +1488,24 @@ public:
 		// Squeeze the container
 		squeeze();
 
-		// Sort the elements of the vector
-		std::sort(m_v.begin(), m_v.end() - 1, less_than_id());
+        // The container has been squeezed, there are no holes
+        size_t containerSize = size();
 
-		// Update positions of the ids
-		for (size_type pos = 0; pos <= m_last_pos; pos++) {
-			link_id(m_v[pos].get_id(), pos, false);
-		}
+		// Evaluates the permutations
+        //
+        // The permutation for ids and values are the same, however the reored
+        // function will destroy the permutation on output, so two different
+        // permutations are needed.
+		std::vector<size_type> id_permutation;
+		id_permutation.resize(containerSize);
+		std::iota(id_permutation.begin(), id_permutation.end(), 0);
+		std::sort(id_permutation.begin(), id_permutation.end(), id_less(m_ids));
+
+        std::vector<size_type> value_permutation(id_permutation);
+
+		// Sort the container
+        reorder_vector<id_type>(id_permutation, m_ids, containerSize);
+		reorder_vector<T>(value_permutation, m_v, containerSize);
 	}
 
 	/*!
@@ -1534,11 +1541,11 @@ public:
 					continue;
 				}
 
-				id_type id = m_v[pos].get_id();
+				id_type id = m_ids[pos];
 				size_type updatedPos = pos - offset;
 
+                set_pos_id(updatedPos, id);
 				m_v[updatedPos] = std::move(m_v[pos]);
-				link_id(id, updatedPos, false);
 			}
 
 			// Clear the holes
@@ -1550,6 +1557,7 @@ public:
 		}
 
 		// Shrink to fit
+		m_ids.shrink_to_fit();
 		m_v.shrink_to_fit();
 	}
 
@@ -1573,6 +1581,7 @@ public:
 		std::swap(x.m_first_pos, m_first_pos);
 		std::swap(x.m_last_pos, m_last_pos);
 		std::swap(x.m_first_dirty_pos, m_first_dirty_pos);
+		std::swap(x.m_ids, m_ids);
 		std::swap(x.m_v, m_v);
 		std::swap(x.m_holes, m_holes);
 		std::swap(x.m_holes_regular_begin, m_holes_regular_begin);
@@ -1602,8 +1611,8 @@ public:
 		m_v[pos_second] = std::move(tmp);
 
 		// Relink the ids
-		link_id(id_first, pos_second, false);
-		link_id(id_second, pos_first, false);
+        set_pos_id(pos_second, id_first);
+        set_pos_id(pos_first, id_second);
 	}
 
 	/*!
@@ -1614,9 +1623,7 @@ public:
 	*/
 	void update_id(const id_type &currentId, const id_type &updatedId)
 	{
-		const size_t pos = get_pos_from_id(currentId);
-		m_v[pos].set_id(updatedId);
-		link_id(updatedId, pos, false);
+        set_pos_id(get_pos_from_id(currentId), updatedId);
 	}
 
 	/*!
@@ -1736,6 +1743,11 @@ private:
 	std::vector<value_type>m_v;
 
 	/*!
+		Vector that will hold the ids.
+	*/
+	std::vector<id_type> m_ids;
+
+	/*!
 		Container that will hold a list of the holes present in
 		the piecrecd vector.
 	*/
@@ -1797,133 +1809,6 @@ private:
 	size_type m_first_dirty_pos;
 
 	/*!
-		The container is extended by inserting a new element in
-		the specified hole. This new element is constructed in
-		place using args as the arguments for its construction.
-
-		\param pos is the position where the new element will be inserted
-		\param args the arguments forwarded to construct the new element
-		\result An iterator that points to the newly inserted element.
-	*/
-	template <class... Args>
-	iterator _emplace(const size_t &pos, Args&&... args)
-	{
-		// Insert the element
-		m_v[pos] = T(std::forward<Args>(args)...);
-
-		// Add the id to the map
-		link_id(m_v[pos].get_id(), pos);
-
-		// Return the iterator that points to the element
-		return get_iterator_from_pos(pos);
-	}
-
-	/*!
-		Removes from the vector the element at the specified position.
-
-		Element is not deleted from the internal vector, instead its
-		id is changed to mark the position as empty and allow the
-		container to reuse that position.
-
-		\param pos the position of the element to erase
-		\result An iterator pointing to the new location of the
-		        element that followed the element erased by the
-		        function call. This is the container end if the
-		        operation erased the last element in the sequence.
-	*/
-	iterator _erase(size_type pos, bool delayed = false)
-	{
-		// Delete id from map
-		unlink_id(m_v[pos].get_id());
-
-		// Push the position into the list of holes
-		pierce_pos(pos, !delayed);
-
-		// Return the iterator to the element following the one erased
-		size_t next_pos;
-		if (empty() || pos >= m_last_pos) {
-			next_pos = m_last_pos + 1;
-		} else {
-			next_pos = find_next_used_pos(pos);
-		}
-
-		return get_iterator_from_pos(next_pos);
-	}
-
-	/*!
-		The container is extended by inserting a new element in
-		the specified hole.
-
-		\param pos is the position where the new element will be inserted
-		\param value is the value to be copied (or moved) to the
-		inserted elements.
-		\result An iterator that points to the the newly inserted
-		element.
-	*/
-	iterator _insert(const size_t &pos, value_type &&value)
-	{
-		// Insert the element
-		m_v[pos] = std::move(value);
-
-		// Add the id to the map
-		link_id(m_v[pos].get_id(), pos);
-
-		// Return the iterator that points to the element
-		return get_iterator_from_pos(pos);
-	}
-
-	/*!
-		Move the element in the specified position.
-
-		\param currentPos is the current position of the element
-		\param updatedPos is the new position of the element
-		\param delayed if true some changes can remain in a pending state
-		until a flush is called
-		\result An iterator that points to the moved element.
-	*/
-	iterator _move(const size_t &currentPos, const size_t &updatedPos, bool delayed = false)
-	{
-		// Move the element
-		//
-		// Current position is reset to avoid leaving elements in an
-		// inconsistent state
-		m_v[updatedPos] = std::move(m_v[currentPos]);
-
-		// Update the map
-		link_id(m_v[updatedPos].get_id(), updatedPos, false);
-
-		// Pierce the position
-		pierce_pos(currentPos, !delayed);
-
-		// Return the iterator that points to the element
-		return get_iterator_from_pos(updatedPos);
-	}
-
-	/*!
-		Gets an element from a position marked as empty and assignes
-		to it the specified id. Except for setting the id, the element
-		is not modified. Therefore it will still contain
-		the data of the element that was previously occupying the
-		position or it will be empty if there was no empty position
-		and a new element has been created.
-
-		\param pos is the position where the new element will be inserted
-		\param id is the id that will be assigned to the element
-		\result An iterator that points to the the reclaimed element.
-	*/
-	iterator _reclaim(const size_t &pos, const id_type &id)
-	{
-		// Set the id of the element
-		m_v[pos].set_id(id);
-
-		// Add the id to the map
-		link_id(id, pos);
-
-		// Return the iterator that points to the element
-		return get_iterator_from_pos(pos);
-	}
-
-	/*!
 		Gets a constant iterator pointing to the element in the specified
 		position.
 
@@ -1934,9 +1819,9 @@ private:
 	const_iterator get_const_iterator_from_pos(const size_type &pos) const noexcept
 	{
 		if (empty() || pos > m_last_pos) {
-			return const_iterator(raw_cbegin() + m_last_pos + 1);
+			return const_iterator(m_v.cbegin(), m_ids.cbegin(), m_last_pos + 1);
 		} else {
-			return const_iterator(raw_cbegin() + pos);
+			return const_iterator(m_v.cbegin(), m_ids.cbegin(), pos);
 		}
 	}
 
@@ -1949,9 +1834,9 @@ private:
 	iterator get_iterator_from_pos(const size_type &pos) noexcept
 	{
 		if (empty() || pos > m_last_pos) {
-			return iterator(raw_begin() + m_last_pos + 1);
+			return iterator(m_v.begin(), m_ids.begin(), m_last_pos + 1);
 		} else {
-			return iterator(raw_begin() + pos);
+			return iterator(m_v.begin(), m_ids.begin(), pos);
 		}
 	}
 
@@ -1972,22 +1857,40 @@ private:
 	}
 
 	/*!
+		Fills the specified position with a given id.
+
+        \param pos is the position to fill
+        \param id is the id that eill be associated to the position
+		\result The position that has bill filled.
+	*/
+	size_type fill_pos(const size_type &pos, const id_type &id)
+	{
+		// Ids needs to be positive
+		if (id < 0) {
+			throw std::out_of_range ("Negative id");
+		}
+
+		// Handle duplicate ids
+		if (exists(id)) {
+			throw std::out_of_range ("Duplicate id");
+		}
+
+		// Associate an id to the position
+		set_pos_id(pos, id);
+
+		return pos;
+	}
+
+	/*!
 		Gets a position for storing a new element.
 
 		The position as alyaws appeneded to the end of the container.
 
 		\result A position for storing a new element.
 	*/
-	size_type fill_pos_append()
+	size_type fill_pos_append(const id_type &id)
 	{
-		// Extend the container
-		size_type updated_last_pos = m_last_pos;
-		if (!empty()) {
-			++updated_last_pos;
-		}
-		update_last_used_pos(updated_last_pos);
-
-		return m_last_pos;
+		return fill_pos_insert(storage_size(), id);
 	}
 
 	/*!
@@ -1998,49 +1901,53 @@ private:
 		\param pos is the position the will be make available
 		\result A position for storing a new element.
 	*/
-	size_type fill_pos_specific(const size_type &pos)
+	size_type fill_pos_insert(const size_type &pos, const id_type &id)
 	{
-		// Extend the container
-		//
-		// If the requester position is beyond the positions of the vector
-		// just return the newly appended position
-		size_type appendedPos = fill_pos_append();
-		if (pos >= m_last_pos) {
-			return appendedPos;
-		}
+        assert(pos <= m_last_pos + 1);
+        if (pos > m_last_pos + 1) {
+            throw std::out_of_range ("Unable to insert elements past the last position");
+        }
 
-		// Shift the elements after the reference position
-		for (size_t i = m_last_pos; i > pos; --i) {
-			m_v[i] = std::move(m_v[i - 1]);
+        // Extend the container
+        update_last_used_pos(storage_size());
 
-			id_type id = m_v[i].get_id();
-			if (id > 0) {
-				link_id(id, i, false);
-			}
-		}
+        // Make room for the new element
+        if (pos < m_last_pos) {
+            // Shift the elements after the requested position
+            for (size_t i = m_last_pos; i > pos; --i) {
+                id_type id = m_ids[i - 1];
+                if (id > 0) {
+                    set_pos_id(i, id);
+                    m_v[i] = std::move(m_v[i - 1]);
+                } else {
+                    m_ids[i] = m_ids[i - 1];
+                }
+            }
 
-		// Reset the, now empty, element
-		//
-		// We need to avoid that this element could be in an inconsistent state.
-		reset_pos(pos);
+            // Reset the, now empty, element
+            m_v[pos] = T();
 
-		// Update the regular holes
-		if (m_holes_regular_begin != m_holes_regular_end) {
-			hole_iterator change_begin = m_holes_regular_begin;
-			hole_iterator change_end   = upper_bound(m_holes_regular_begin, m_holes_regular_end, pos, std::greater<size_type>());
-			for (auto itr = change_begin; itr != change_end; itr++) {
-				(*itr)++;
-			}
-		}
+            // Update the regular holes
+            if (m_holes_regular_begin != m_holes_regular_end) {
+                hole_iterator change_begin = m_holes_regular_begin;
+                hole_iterator change_end   = upper_bound(m_holes_regular_begin, m_holes_regular_end, pos, std::greater<size_type>());
+                for (auto itr = change_begin; itr != change_end; itr++) {
+                    (*itr)++;
+                }
+            }
 
-		// Update the pending holes
-		if (m_holes_pending_begin != m_holes_pending_end) {
-			hole_iterator change_begin = m_holes_pending_begin;
-			hole_iterator change_end   = upper_bound(m_holes_pending_begin, m_holes_pending_end, pos, std::greater<size_type>());
-			for (auto itr = change_begin; itr != change_end; itr++) {
-				(*itr)++;
-			}
-		}
+            // Update the pending holes
+            if (m_holes_pending_begin != m_holes_pending_end) {
+                hole_iterator change_begin = m_holes_pending_begin;
+                hole_iterator change_end   = upper_bound(m_holes_pending_begin, m_holes_pending_end, pos, std::greater<size_type>());
+                for (auto itr = change_begin; itr != change_end; itr++) {
+                    (*itr)++;
+                }
+            }
+        }
+
+        // Fill the position
+        fill_pos(pos, id);
 
 		return pos;
 	}
@@ -2053,7 +1960,7 @@ private:
 
 		\result A position for storing a new element.
 	*/
-	size_type fill_pos_head()
+	size_type fill_pos_head(const id_type &id)
 	{
 		// If there are holes we can fill a hole.
 		long nRegulars = holes_count_regular();
@@ -2092,12 +1999,12 @@ private:
 				update_first_used_pos(pos);
 			}
 
-			// Return the position filled
-			return pos;
+			// Fill the position
+			return fill_pos(pos, id);
 		}
 
 		// There are no holes nor pending delete: use an append fill.
-		return fill_pos_append();
+		return fill_pos_append(id);
 	}
 
 	/*!
@@ -2108,7 +2015,7 @@ private:
 
 		\result A position for storing a new element.
 	*/
-	size_type fill_pos_tail()
+	size_type fill_pos_tail(const id_type &id)
 	{
 		// If there are holes we can fill a hole.
 		long nRegulars = holes_count_regular();
@@ -2150,12 +2057,12 @@ private:
 				update_empty_pos_id(pos - 1, pos);
 			}
 
-			// Return the position filled
-			return pos;
+            // Fill the position
+            return fill_pos(pos, id);
 		}
 
 		// There are no holes nor pending delete: use an append fill.
-		return fill_pos_append();
+		return fill_pos_append(id);
 	}
 
 	/*!
@@ -2168,7 +2075,7 @@ private:
 		new available position will be searched for
 		\result A position for storing a new element.
 	*/
-	size_type fill_pos_after(const size_type &referencePos)
+	size_type fill_pos_after(const size_type &referencePos, const id_type &id)
 	{
 		// Check if we can fill a hole
 		//
@@ -2186,12 +2093,12 @@ private:
 			}
 
 			if (lastHole > referencePos) {
-				return fill_pos_tail();
+				return fill_pos_tail(id);
 			}
 		}
 
 		// We have to append the element at the end of the vector
-		return fill_pos_append();
+		return fill_pos_append(id);
 	}
 
 	/*!
@@ -2204,7 +2111,7 @@ private:
 		new available position will be searched for
 		\result A position for storing a new element.
 	*/
-	size_type fill_pos_before(const size_type &referencePos)
+	size_type fill_pos_before(const size_type &referencePos, const id_type &id)
 	{
 		// Check if we can fill a hole
 		//
@@ -2222,12 +2129,12 @@ private:
 			}
 
 			if (firstHole < referencePos) {
-				return fill_pos_head();
+				return fill_pos_head(id);
 			}
 		}
 
 		// We have to insert the element at the specified position
-		return fill_pos_specific(referencePos);
+		return fill_pos_insert(referencePos, id);
 	}
 
 	/*!
@@ -2250,7 +2157,7 @@ private:
 			}
 			prev_pos--;
 
-			id_type prev_id = m_v[prev_pos].get_id();
+			id_type prev_id = m_ids[prev_pos];
 			if (prev_id >= 0) {
 				return prev_pos;
 			}
@@ -2278,7 +2185,7 @@ private:
 			}
 			next_pos += next_delta;
 
-			id_type next_id = m_v[next_pos].get_id();
+			id_type next_id = m_ids[next_pos];
 			if (next_id >= 0) {
 				return next_pos;
 			} else {
@@ -2464,32 +2371,7 @@ private:
 	*/
 	bool is_pos_empty(size_type pos)
 	{
-		return (m_v[pos].get_id() < 0);
-	}
-
-	/*!
-		Updates the position associated with the specified id.
-
-		\param id is the id of the element
-		\param pos is the position that will be associated with
-		the id
-		\param checkUnique specifies if a check of the uniqueness
-		of the id will be performed
-	*/
-	void link_id(const id_type id, const size_t pos, bool checkUnique = true)
-	{
-		// Check uniqueness of the id
-		if (checkUnique && exists(id)) {
-			throw std::out_of_range ("Duplicate id");
-		}
-
-		// Ids needs to be positive
-		if (id < 0) {
-			throw std::out_of_range ("Negative id");
-		}
-
-		// Add id to the map
-		m_pos[id] = pos;
+		return (m_ids[pos] < 0);
 	}
 
 	/*!
@@ -2507,7 +2389,7 @@ private:
 		// position to the holes, it's enough to update the last position
 		// counter or clear the container if this was the last hole.
 		if (pos == m_last_pos) {
-			if (empty()) {
+			if (size() == 1) {
 				clear();
 			} else {
 				size_type updated_last_pos = find_prev_used_pos(m_last_pos);
@@ -2516,8 +2398,16 @@ private:
 			return;
 		}
 
+        // Remove the id from the map
+        id_type id = m_ids[pos];
+        m_pos.erase(id);
+
+		// Reset the element
+		m_v[pos] = T();
+
 		// Reset the position
-		reset_pos(pos);
+		update_empty_pos_id(pos, false);
+		m_first_dirty_pos = std::min(pos, m_first_dirty_pos);
 
 		// If removing the first position, update the counter
 		if (pos == m_first_pos) {
@@ -2534,7 +2424,7 @@ private:
 		m_holes.push_back(pos);
 		m_holes_pending_end = m_holes.end();
 
-		// Check if pending holes are sorted
+		// Check if pending holes are still sorted
 		if (m_holes_pending_sorted) {
 			size_t nPendings = holes_count_pending();
 			if (nPendings > 1 && (*(m_holes_pending_end - 1) > *(m_holes_pending_end - 2))) {
@@ -2549,16 +2439,40 @@ private:
 	}
 
 	/*!
-		Reset the element in the specified position.
+		Order a vector according to a reordering vector.
 
-		\param pos is the position that will be reset
+		\tparam order_t is the type of data that needs to be rodered
+        \param v is a reference to the reording vector
+		\param v is an iterator tj the vector that will be reordered
 	*/
-	void reset_pos(const size_type &pos)
-	{
-		m_v[pos] = T();
-		update_empty_pos_id(pos, false);
-		m_first_dirty_pos = std::min(pos, m_first_dirty_pos);
-	}
+    template <typename order_t>
+    void reorder_vector(std::vector<size_t>& order, std::vector<order_t>& v, const size_t &size)
+    {
+        for (size_t i = 0; i < size; i++) {
+            size_t j;
+            while (i != (j = order[i])) {
+                size_t k = order[j];
+
+                order_t temp = std::move(v[j]);
+                v[j] = std::move(v[k]);
+                v[k] = std::move(temp);
+
+                std::swap(order[i], order[j]);
+            }
+        }
+    }
+
+    /*!
+        Associate a position to the specified id.
+
+        \param pos is the position to associate
+        \param id is the id that will be associated to the position
+    */
+    void set_pos_id(const size_type &pos, const id_type &id)
+    {
+        m_ids[pos] = id;
+        m_pos[id]  = pos;
+    }
 
 	/*!
 		Returns the size of the storage expressed in terms of
@@ -2568,7 +2482,11 @@ private:
 	*/
 	size_type storage_size() const
 	{
-		return m_v.size() - REQUIRED_SENTINEL_COUNT;
+        if (m_ids.empty()) {
+            return 0;
+        } else {
+            return m_ids.size() - REQUIRED_SENTINEL_COUNT;
+        }
 	}
 
 	/*!
@@ -2585,18 +2503,29 @@ private:
 	*/
 	void storage_resize(size_t n)
 	{
-		size_t previous_raw_size = m_v.size();
-		if (n == previous_raw_size - REQUIRED_SENTINEL_COUNT + 1) {
+        size_type initialSize = storage_size();
+        if (n == initialSize + 1) {
 			m_v.emplace_back();
-			T &sentinel = m_v.back();
-			sentinel.set_id(SENTINEL_ID);
+			m_ids.push_back(SENTINEL_ID);
 		} else {
-			m_v.resize(n + REQUIRED_SENTINEL_COUNT);
-
-			size_t current_raw_size = m_v.size();
-			for (size_t k = std::min(n, previous_raw_size); k < current_raw_size; ++k) {
-				m_v[k].set_id(SENTINEL_ID);
+			// Delete the ids of the elements that will be removed
+			for (size_type pos = n; pos < initialSize; ++pos) {
+                id_type id = m_ids[pos];
+                if (id >= 0) {
+                    m_pos.erase(m_ids[pos]);
+                }
 			}
+
+			// Resize the internal vectors
+			m_ids.resize(n + REQUIRED_SENTINEL_COUNT, SENTINEL_ID);
+			m_v.resize(n);
+
+            // If the vector has been shrink, set the sentinel id
+            if (n < initialSize) {
+                for (size_type pos = n; pos < n + REQUIRED_SENTINEL_COUNT; ++pos) {
+                    m_ids[pos] = SENTINEL_ID;
+                }
+            }
 		}
 	}
 
@@ -2648,7 +2577,7 @@ private:
 		}
 
 		// Update the id of the element in the current position
-		m_v[pos].set_id(id);
+		m_ids[pos] = id;
 
 		if (!recursive) {
 			return;
@@ -2658,10 +2587,7 @@ private:
 		if (pos > 0) {
 			size_type prevPos = pos - 1;
 			while (is_pos_empty(prevPos)) {
-				if (id != SENTINEL_ID) {
-					id--;
-				}
-				m_v[prevPos].set_id(id);
+				m_ids[prevPos] = id--;
 
 				if (prevPos > 0) {
 					--prevPos;
@@ -2722,30 +2648,27 @@ private:
 	}
 
 	/*!
-		Removes the specified id from the map.
+		Compares the id of the elements in the specified position.
 
-		\param id is the id that will be removed from the list
+		\param pos_x is the position to the first element to compare
+		\param y is the position to the second element to compare
+		\result Returns true if the element x has an id lower than the element
+		y, false otherwise. Negative ids are special ids and are considered
+		higher than positive ids.
 	*/
-	void unlink_id(const id_type id)
+	struct id_less
 	{
-		m_pos.erase(id);
-	}
+		const std::vector<id_type> &m_ids;
 
-	/*!
-		Compares the id of the specified values.
+		id_less(const std::vector<id_type> &ids)
+			: m_ids(ids)
+		{
+		}
 
-		\param x first values to compare
-		\param y second values to compare
-		\result Returns true if the x has an id lower that y, false
-		        otherwise. Negative ids are special ids and are
-		        considered higher than positive ids.
-	*/
-	struct less_than_id
-	{
-	    inline bool operator() (const T &x, const T &y)
+	    inline bool operator() (const size_type &pos_x, const size_type &pos_y)
 	    {
-			id_type id_x = x.get_id();
-			id_type id_y = y.get_id();
+			id_type id_x = m_ids[pos_x];
+			id_type id_y = m_ids[pos_y];
 
 		    if (id_x >= 0 && id_y < 0) {
 			    return true;
@@ -2761,21 +2684,21 @@ private:
 };
 
 // Definition of static constants of PiercedVector
-template<class T>
-const typename PiercedVector<T>::id_type
-	PiercedVector<T>::SENTINEL_ID = std::numeric_limits<id_type>::min();
+template<class T, typename id_type>
+const id_type
+	PiercedVector<T, id_type>::SENTINEL_ID = std::numeric_limits<id_type>::min();
 
-template<class T>
-const typename PiercedVector<T>::size_type
-	PiercedVector<T>::MAX_PENDING_HOLES = 16384;
+template<class T, typename id_type>
+const typename PiercedVector<T, id_type>::size_type
+	PiercedVector<T, id_type>::MAX_PENDING_HOLES = 16384;
 
-template<class T>
-const typename PiercedVector<T>::size_type
-	PiercedVector<T>::REQUIRED_SENTINEL_COUNT = 1;
+template<class T, typename id_type>
+const typename PiercedVector<T, id_type>::size_type
+	PiercedVector<T, id_type>::REQUIRED_SENTINEL_COUNT = 1;
 
-template<class T>
-const typename PiercedVector<T>::size_type
-	PiercedVector<T>::USABLE_POS_COUNT = std::numeric_limits<size_type>::max() - REQUIRED_SENTINEL_COUNT;
+template<class T, typename id_type>
+const typename PiercedVector<T, id_type>::size_type
+	PiercedVector<T, id_type>::USABLE_POS_COUNT = std::numeric_limits<size_type>::max() - REQUIRED_SENTINEL_COUNT;
 
 }
 
