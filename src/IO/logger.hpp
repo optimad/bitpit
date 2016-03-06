@@ -128,7 +128,6 @@ public:
 
 	void setFileVerbosity(log::Verbosity verbosity);
 	log::Verbosity getFileVerbosity();
-	void setLogDirectory(const std::string &directory);
 	void resetLogFile();
 
 	std::string getName();

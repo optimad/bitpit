@@ -572,37 +572,6 @@ int Logger::getIndentation()
 }
 
 /*!
-	Sets the directory where the log file will be saved.
-
-	\param directory is the directory where the log file will be saved
-*/
-void Logger::setLogDirectory(const std::string &directory)
-{
-	// Check if the directory exists
-    struct stat info;
-
-	bool directoryExists;
-	if(stat(directory.c_str(), &info) != 0) {
-        directoryExists = false;
-	} else if (info.st_mode & S_IFDIR) {
-        directoryExists = true;
-	} else {
-        directoryExists = false;
-	}
-
-	assert(directoryExists);
-	if (!directoryExists && m_fileStream.is_open()) {
-		m_fileStream.close();
-	}
-
-	// Set the new directory
-	m_fileHandler.setDirectory(directory);
-	if (m_fileStream.is_open()) {
-		openLogFile(false);
-	}
-}
-
-/*!
 	Resets the log file.
 */
 void Logger::resetLogFile()
