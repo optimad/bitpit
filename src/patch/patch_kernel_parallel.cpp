@@ -285,6 +285,11 @@ if (m_rank == snd_rank)
 /*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Create list of ghosts ================================================ //
+    // The list of ghost stores the ghost cell already existing on the current
+    // rank (but not the ghost cells towards the receiver) and the candidate
+    // ghosts. Candidate ghosts are cell within the cell list (i.e. those
+    // cells which will be sent to the receiver), which have at least one neighbour
+    // which is a internal cell.
 /*DEBUG*/out << "* sender (rank#" << snd_rank << "), creating list of ghosts {" << endl;
 /*DEBUG*/t0 = high_resolution_clock::now();
     {
@@ -776,6 +781,10 @@ if (m_rank == snd_rank)
 /*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Update ghost lists =================================================== //
+    // m_ghost2id stores the list of ghost divided by rank, that is:
+    // if the cell with ID "i" is a ghost cell on the current rank, the cell 
+    // exists on process with rank "neigh_rank" and hase ID "j" in that partition,
+    // thus m_ghost2id[neigh_rank][j] stores "i".
 /*DEBUG*/out << "* sender (rank#" << snd_rank << "), updating ghosts lists {" << endl;
 /*DEBUG*/t0 = high_resolution_clock::now();
     {
