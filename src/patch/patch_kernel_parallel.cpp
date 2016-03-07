@@ -1330,10 +1330,22 @@ if ( (m_rank != snd_rank) && (m_rank != rcv_rank) )
 }
 
 /*DEBUG*/{
-// /*DEBUG*/    out << "* display mesh infos {" << endl;
-// /*DEBUG*/    displayCells(out);
-// /*DEBUG*/    out << "}" << endl;
-// /*DEBUG*/    out.close();
+/*DEBUG*/    out << "* display mesh infos {" << endl;
+/*DEBUG*/    displayCells(out);
+/*DEBUG*/    out << "}" << endl;
+/*DEBUG*/}
+/*DEBUG*/{
+/*DEBUG*/    out << "* display ghost infos {" << endl;
+/*DEBUG*/    unordered_map<short, unordered_map<long, long>>::const_iterator    ii;
+/*DEBUG*/    unordered_map<long, long>::const_iterator                          jj;
+/*DEBUG*/    for (ii = m_ghost2id.cbegin(); ii != m_ghost2id.cend(); ++ii) {
+/*DEBUG*/        out << "  rank: " << ii->first << endl;
+/*DEBUG*/        for (jj = ii->second.cbegin(); jj != ii->second.cend(); ++jj) {
+/*DEBUG*/            out << "    {" << jj->second << ", " << jj->first << "}" << endl;
+/*DEBUG*/        } //next j
+/*DEBUG*/    } //next ii
+/*DEBUG*/    out << "}" << endl;
+/*DEBUG*/    out.close();
 /*DEBUG*/}
 
 return; }

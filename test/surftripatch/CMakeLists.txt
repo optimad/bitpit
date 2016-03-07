@@ -32,7 +32,7 @@ list(APPEND TESTS "test_surftripatch_00002")
 list(APPEND TESTS "test_surftripatch_00003")
 list(APPEND TESTS "test_surftripatch_00004")
 if (ENABLE_MPI)
-	list(APPEND TESTS "test_surftripatch_parallel_00001:3")
+	list(APPEND TESTS "test_surftripatch_parallel_00001:4")
 	list(APPEND TESTS "test_surftripatch_parallel_00002:2")
 endif ()
 

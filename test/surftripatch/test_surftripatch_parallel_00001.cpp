@@ -197,6 +197,86 @@ int                     i, j;
 
 return;
 }
+void generateTestQuadMesh(
+    long                        nx,
+    long                        ny,
+    SurfTriPatch                &mesh
+) {
+
+// ========================================================================== //
+// void generateTestQuadMesh(                                                 //
+//     long                        nx,                                        //
+//     long                        ny,                                        //
+//     SurfTriPatch                &mesh)                                     //
+//                                                                            //
+// Generate surface triangulation for sub-test #002.                          //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - mesh       : SurfTriPatch, mesh container                                //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+array<double, 3>                        xlim, ylim;
+
+// Counters
+long                                    i, j;
+
+// ========================================================================== //
+// INITIALIZE MESH                                                            //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    // none
+
+    // Set mesh parameters -------------------------------------------------- //
+    xlim[0] = -1.;      xlim[1] = 1.;
+    ylim[0] = -1.;      ylim[1] = 1.;
+}
+
+// ========================================================================== //
+// GENERATE MESH                                                              //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    double                              dx, dy;
+    array<double, 3>                    point;
+    vector<long>                        connect(4);
+
+    // Generate list of vertices -------------------------------------------- //
+    dx = (xlim[1] - xlim[0])/double(nx);
+    dy = (ylim[1] - ylim[0])/double(ny);
+    point[2] = 0.;
+    for (j = 0; j < ny+1; ++j) {
+        point[1] = ylim[0] + ((double) j) * dy;
+        for (i = 0; i < nx+1; ++i) {
+            point[0] = xlim[0] + ((double) i) * dx;
+            mesh.addVertex(point);
+        } //next i
+    } //next j
+
+    // Generate list of cells ----------------------------------------------- //
+    for (j = 0; j < ny; ++j) {
+        for (i = 0; i < nx; ++i) {
+            connect[0] = (nx+1)*j + i;
+            connect[1] = (nx+1)*j + i+1;
+            connect[2] = (nx+1)*(j+1) + i+1;
+            connect[3] = (nx+1)*(j+1) + i;
+            mesh.addCell(ElementInfo::QUAD, true, connect);
+        } //next i
+    } //next j
+}
+    
+return;
+}
 
 // ========================================================================== //
 // SUBTEST #001 Communications among 3 processes                              //
@@ -234,7 +314,7 @@ SurfTriPatch                     envelope(0);
 
     // Export mesh ---------------------------------------------------------- //
     stringstream                f1, f2;
-    f1 << "step" << step_id;
+    f1 << "test_00001_subtest001_step" << step_id;
     mesh.write(f1.str());
     cout << "  (rank #" << mesh.getRank() << ", mesh exported to \"" << f1.str() << ".vtu\")" << endl;
     f2 << "P" << utils::zeroPadNumber(6, mesh.getRank()) << "_env_step" << step_id;
@@ -321,8 +401,8 @@ if (mesh.getRank() == 0) {
     mesh.extractEnvelope(envelope);
 
     // Export mesh ---------------------------------------------------------- //
-    mesh.write("step0");
-    cout << "  (rank #" << mesh.getRank() << ", mesh exported to \"step0.vtu\")" << endl;
+    mesh.write("test00001_subtest001_step0");
+    cout << "  (rank #" << mesh.getRank() << ", mesh exported to \"test00001_subtest001_step0.vtu\")" << endl;
     name << "P" << utils::zeroPadNumber(6, mesh.getRank()) <<"_env_step0";
     envelope.write(name.str());
     cout << "  (rank #" << mesh.getRank() << ", mesh external envelope exported to " << name.str() << ".vtu)" << endl;
@@ -420,10 +500,7 @@ int subtest_002(
 // ========================================================================== //
 
 // Local variables
-bool                    stl_type = true;
-string                  stl_name("./data/buddha.stl");
 SurfTriPatch            mesh(0);
-vector<long>            cell_list;
 
 // Counters
 // none
@@ -457,7 +534,7 @@ if (mesh.getRank() == 0) {
 }
 
 // ========================================================================== //
-// LOAD STL MESH                                                              // 
+// GENERATE TEST MESH                                                         // 
 // ========================================================================== //
 if (mesh.getRank() == 0) {
 
@@ -468,20 +545,8 @@ if (mesh.getRank() == 0) {
 
     // Load stl geometry ---------------------------------------------------- //
     out_msg << "** Rank#0, initializing mesh" << endl;
-    out_msg << "   Importing stl file from : \"" << stl_name << "\"" << endl;
-    t0 = high_resolution_clock::now();
-    mesh.importSTL(stl_name, stl_type);
-    t1 = high_resolution_clock::now();
-    time_span = duration_cast<duration<double>>(t1 - t0);
-    out_msg << "     (" << time_span.count() << " sec.)" << endl;
-
-    // Clean geometry ------------------------------------------------------- //
-    out_msg << "   deleting duplicate vertices" << endl;
-    t0 = high_resolution_clock::now();
-    mesh.deleteCoincidentVertex();
-    t1 = high_resolution_clock::now();
-    time_span = duration_cast<duration<double>>(t1 - t0);
-    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+    out_msg << "   generating simple quad mesh" << endl;
+    generateTestQuadMesh(8, 8, mesh);
 
     // Build adjacency ------------------------------------------------------ //
     out_msg << "   building adjacencies" << endl;
@@ -497,7 +562,7 @@ if (mesh.getRank() == 0) {
     // Export final mesh ---------------------------------------------------- //
     out_msg << "   exporting initial mesh" << endl;
     t0 = high_resolution_clock::now();
-    mesh.write("initmesh");
+    mesh.write("test00001_subtest002_init");
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     out_msg << "     (" << time_span.count() << " sec.)" << endl;
@@ -506,72 +571,85 @@ if (mesh.getRank() == 0) {
 }
 
 // ========================================================================== //
-// PARTITIONATE MESH                                                          //
-// ========================================================================== //
-if (mesh.getRank() == 0) {
-
-    // Scope variables ------------------------------------------------------ //
-    stringstream                        out_msg;
-    array<double, 3>                    m, M, s, C;
-    SurfTriPatch::CellIterator          c_, e_;
-    high_resolution_clock::time_point   t0, t1;
-    duration<double>                    time_span;
-
-    // Compute bounding box ------------------------------------------------- //
-    out_msg << "** Rank#0, partitioning mesh" << endl;
-    out_msg << "   Computing b. box" << endl;
-    t0 = high_resolution_clock::now();
-    mesh.getBoundingBox(m, M);
-    t1 = high_resolution_clock::now();
-    time_span = duration_cast<duration<double>>(t1 - t0);
-    out_msg << "     left bottom corner: " << m << endl;
-    out_msg << "     right upper corner: " << M << endl;
-    out_msg << "     (" << time_span.count() << " sec.)" << endl;
-
-    // Compute bounding box ------------------------------------------------- //
-    out_msg << "   creating list of elements" << endl;
-    cell_list.reserve(mesh.getCellCount());
-    s = 0.5*(m + M);
-    e_ = mesh.cellEnd();
-    for (c_ = mesh.cellBegin(); c_ != e_; ++c_) {
-        if ((mesh.evalCellCentroid(c_->get_id())[2] > s[2])
-         && (c_->isInterior())) {
-            cell_list.push_back(c_->get_id());
-        }
-    } //next c_
-    out_msg << "     " << cell_list.size() << " cells will be sent to process rank#1 ("
-         << 100.0*double(cell_list.size())/double(mesh.getCellCount())
-         << "% of total number of cells)" << endl;
-    cout << out_msg.str() << endl;
-}
-
-// ========================================================================== //
-// COMMUNICATING CELLS                                                        //
+// INITIAL PARTIONING                                                         //
 // ========================================================================== //
 {
+
     // Scope variables ------------------------------------------------------ //
-    high_resolution_clock::time_point   t0, t1;
+    vector<long>                        cell_list1{32,33,34,35,
+                                                   40,41,42,43,
+                                                   48,49,50,51,
+                                                   56,57,58,59};
+    vector<long>                        cell_list2{36,37,38,39,
+                                                   44,45,46,47,
+                                                   52,53,54,55,
+                                                   60,61,62,63};
     stringstream                        out_msg;
+    high_resolution_clock::time_point   t0, t1;
     duration<double>                    time_span;
 
-    // Send cells ----------------------------------------------------------- //
+    // Send cells to neighboring processors --------------------------------- //
+    out_msg << "** Rank#" << mesh.getRank() << ", partitioning mesh" << endl;
+
+    out_msg << "   sending cell: " << cell_list1 << " from 0 to 1" << endl;
     t0 = high_resolution_clock::now();
-    out_msg << "** Rank#" << mesh.getRank() << " sending cells to 1" << endl;
-    out_msg << "   sending cells" << endl;
-    mesh.sendCells(0, 1, cell_list);
+    mesh.sendCells(0, 1, cell_list1);
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
-    out_msg << "     (on rank#" << mesh.getRank() << " " << time_span.count() << " sec.)" << endl;
+    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+    cout << out_msg.str() << endl;
+
+    out_msg << "   sending cell: " << cell_list2 << " from 0 to 2" << endl;
+    t0 = high_resolution_clock::now();
+    mesh.sendCells(0, 2, cell_list2);
+    t1 = high_resolution_clock::now();
+    time_span = duration_cast<duration<double>>(t1 - t0);
+    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+    cout << out_msg.str() << endl;
 
     // Export mesh ---------------------------------------------------------- //
-    out_msg << "   exporting final mesh" << endl;
+    out_msg << "   exporting mesh to \"test00001_subtest002_step0.vtu\"" << endl;
     t0 = high_resolution_clock::now();
-    mesh.write("partitionedmesh");
+    mesh.write("test00001_subtest002_step0");
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     out_msg << "     (" << time_span.count() << " sec.)" << endl;
     cout << out_msg.str() << endl;
 }
+
+// ========================================================================== //
+// STEP 2                                                                     //
+// ========================================================================== //
+{
+
+    // Scope variables ------------------------------------------------------ //
+    vector<long>                        cell_list{18,19,20,21,22,23,
+                                                  26,27,28,29,30,31};
+    stringstream                        out_msg;
+    high_resolution_clock::time_point   t0, t1;
+    duration<double>                    time_span;
+
+    // Send cells to neighboring processors --------------------------------- //
+    out_msg << "** Rank#" << mesh.getRank() << ", partitioning mesh" << endl;
+
+    out_msg << "   sending cell: " << cell_list << " from 0 to 2" << endl;
+    t0 = high_resolution_clock::now();
+    mesh.sendCells(0, 2, cell_list);
+    t1 = high_resolution_clock::now();
+    time_span = duration_cast<duration<double>>(t1 - t0);
+    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+    cout << out_msg.str() << endl;
+
+    // Export mesh ---------------------------------------------------------- //
+    out_msg << "   exporting mesh to \"test00001_subtest002_step1.vtu\"" << endl;
+    t0 = high_resolution_clock::now();
+    mesh.write("test00001_subtest002_step1");
+    t1 = high_resolution_clock::now();
+    time_span = duration_cast<duration<double>>(t1 - t0);
+    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+    cout << out_msg.str() << endl;
+}
+
 
 // ========================================================================== //
 // OUTPUT MESSAGE                                                             //
@@ -584,6 +662,212 @@ if (mesh.getRank() == 0) {
     // Output message ------------------------------------------------------- //
     out_msg << "** ================================================================= **" << endl;
     out_msg << "** Test #00001 - sub-test #002 - completed!                          **" << endl;
+    out_msg << "** ================================================================= **" << endl;
+    cout << out_msg.str() << endl;
+}
+return 0;
+
+}
+
+// ========================================================================== //
+// SUBTEST #003 Mesh partitioning                                             //
+// ========================================================================== //
+int subtest_003(
+    void
+) {
+
+// ========================================================================== //
+// int subtest_003(                                                           //
+//     void)                                                                  //
+//                                                                            //
+// Mesh partitioning.                                                         //
+// ========================================================================== //
+// INPUT                                                                      //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+// OUTPUT                                                                     //
+// ========================================================================== //
+// - none                                                                     //
+// ========================================================================== //
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+SurfTriPatch            mesh(0);
+
+// Counters
+// none
+
+// ========================================================================== //
+// SET MESH ATTRIBUTES                                                        //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    // none
+
+    // Set MPI communicator ------------------------------------------------- //
+    mesh.setExpert(true);
+    mesh.setCommunicator(MPI_COMM_WORLD);
+
+}
+
+// ========================================================================== //
+// OUTPUT MESSAGE                                                             //
+// ========================================================================== //
+if (mesh.getRank() == 0) {
+
+    // Scope variables ------------------------------------------------------ //
+    stringstream                out_msg;
+
+    // Output message ------------------------------------------------------- //
+    out_msg << "** ================================================================= **" << endl;
+    out_msg << "** Test #00001 - sub-test #003 - Testing mesh partitioning           **" << endl;
+    out_msg << "** ================================================================= **" << endl;
+    cout << out_msg.str() << endl;
+}
+
+// ========================================================================== //
+// GENERATE TEST MESH                                                         // 
+// ========================================================================== //
+if (mesh.getRank() == 0) {
+
+    // Scope variables ------------------------------------------------------ //
+    high_resolution_clock::time_point   t0, t1;
+    duration<double>                    time_span;
+    stringstream                        out_msg;
+
+    // Load stl geometry ---------------------------------------------------- //
+    out_msg << "** Rank#0, initializing mesh" << endl;
+    out_msg << "   generating simple quad mesh" << endl;
+    generateTestQuadMesh(9, 9, mesh);
+
+    // Build adjacency ------------------------------------------------------ //
+    out_msg << "   building adjacencies" << endl;
+    t0 = high_resolution_clock::now();
+    mesh.buildAdjacencies();
+    t1 = high_resolution_clock::now();
+    time_span = duration_cast<duration<double>>(t1 - t0);
+    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+
+    // Display Stats -------------------------------------------------------- //
+    mesh.displayTopologyStats(out_msg, 3);
+
+    // Export final mesh ---------------------------------------------------- //
+    out_msg << "   exporting initial mesh" << endl;
+    t0 = high_resolution_clock::now();
+    mesh.write("test00001_subtest003_init");
+    t1 = high_resolution_clock::now();
+    time_span = duration_cast<duration<double>>(t1 - t0);
+    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+    cout << out_msg.str() << endl;
+
+}
+
+// ========================================================================== //
+// INITIAL PARTIONING                                                         //
+// ========================================================================== //
+{
+
+    // Scope variables ------------------------------------------------------ //
+    vector<long>                        cell_list1{54,55,56,
+                                                   63,64,65,
+                                                   72,73,74};
+    vector<long>                        cell_list2{57,58,59,
+                                                   66,67,68,
+                                                   75,76,77};
+    vector<long>                        cell_list3{60,61,62,
+                                                   69,70,71,
+                                                   78,79,80};
+    stringstream                        out_msg;
+    high_resolution_clock::time_point   t0, t1;
+    duration<double>                    time_span;
+
+    // Send cells to neighboring processors --------------------------------- //
+    out_msg << "** Rank#" << mesh.getRank() << ", partitioning mesh" << endl;
+
+    out_msg << "   sending cell: " << cell_list1 << " from 0 to 1" << endl;
+    t0 = high_resolution_clock::now();
+    mesh.sendCells(0, 1, cell_list1);
+    t1 = high_resolution_clock::now();
+    time_span = duration_cast<duration<double>>(t1 - t0);
+    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+    cout << out_msg.str() << endl;
+
+    out_msg << "   sending cell: " << cell_list2 << " from 0 to 2" << endl;
+    t0 = high_resolution_clock::now();
+    mesh.sendCells(0, 2, cell_list2);
+    t1 = high_resolution_clock::now();
+    time_span = duration_cast<duration<double>>(t1 - t0);
+    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+    cout << out_msg.str() << endl;
+
+    out_msg << "   sending cell: " << cell_list3 << " from 0 to 3" << endl;
+    t0 = high_resolution_clock::now();
+    mesh.sendCells(0, 3, cell_list3);
+    t1 = high_resolution_clock::now();
+    time_span = duration_cast<duration<double>>(t1 - t0);
+    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+    cout << out_msg.str() << endl;
+
+    // Export mesh ---------------------------------------------------------- //
+    out_msg << "   exporting mesh to \"test00001_subtest002_step0.vtu\"" << endl;
+    t0 = high_resolution_clock::now();
+    mesh.write("test00001_subtest003_step0");
+    t1 = high_resolution_clock::now();
+    time_span = duration_cast<duration<double>>(t1 - t0);
+    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+    cout << out_msg.str() << endl;
+}
+
+// ========================================================================== //
+// STEP 2                                                                     //
+// ========================================================================== //
+{
+
+    // Scope variables ------------------------------------------------------ //
+    vector<long>                        cell_list{28,29,30,31,32,33,34,35,
+                                                  37,38,39,40,41,42,43,44,
+                                                  46,47,48,49,50,51,52,53};
+    stringstream                        out_msg;
+    high_resolution_clock::time_point   t0, t1;
+    duration<double>                    time_span;
+
+    // Send cells to neighboring processors --------------------------------- //
+    out_msg << "** Rank#" << mesh.getRank() << ", partitioning mesh" << endl;
+
+    out_msg << "   sending cell: " << cell_list << " from 0 to 3" << endl;
+    t0 = high_resolution_clock::now();
+    mesh.sendCells(0, 3, cell_list);
+    t1 = high_resolution_clock::now();
+    time_span = duration_cast<duration<double>>(t1 - t0);
+    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+    cout << out_msg.str() << endl;
+
+    // Export mesh ---------------------------------------------------------- //
+    out_msg << "   exporting mesh to \"test00001_subtest002_step1.vtu\"" << endl;
+    t0 = high_resolution_clock::now();
+    mesh.write("test00001_subtest003_step1");
+    t1 = high_resolution_clock::now();
+    time_span = duration_cast<duration<double>>(t1 - t0);
+    out_msg << "     (" << time_span.count() << " sec.)" << endl;
+    cout << out_msg.str() << endl;
+}
+
+
+// ========================================================================== //
+// OUTPUT MESSAGE                                                             //
+// ========================================================================== //
+if (mesh.getRank() == 0) {
+
+    // Scope variables ------------------------------------------------------ //
+    stringstream        out_msg;
+
+    // Output message ------------------------------------------------------- //
+    out_msg << "** ================================================================= **" << endl;
+    out_msg << "** Test #00001 - sub-test #003 - completed!                          **" << endl;
     out_msg << "** ================================================================= **" << endl;
     cout << out_msg.str() << endl;
 }
@@ -619,15 +903,20 @@ int                             err = 0;
 // ========================================================================== //
 // RUN SUB-TEST #001                                                          //
 // ========================================================================== //
-/*Uncommnet in the final version*/err = subtest_001();
+///*Uncomment in the final version*/err = subtest_001();
 if (err > 0) return(10 + err);
 
 // ========================================================================== //
 // RUN SUB-TEST #002                                                          //
 // ========================================================================== //
-//err = subtest_002();
+///*Uncomment in the final version*/err = subtest_002();
 if (err > 0) return(20 + err);
 
+// ========================================================================== //
+// RUN SUB-TEST #003                                                          //
+// ========================================================================== //
+/*Uncomment in the final version*/err = subtest_003();
+if (err > 0) return(30 + err);
 
 // ========================================================================== //
 // FINALIZE MPI COMMUNICATOR                                                  //
