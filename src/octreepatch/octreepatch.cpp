@@ -60,14 +60,14 @@ namespace bitpit {
 */
 OctreePatch::OctreePatch(const int &id, const int &dimension,
 				 std::array<double, 3> origin, double length, double dh )
-	: VolumeKernel(id, dimension, false)
+	: VolumeKernel(id, dimension, false),
+	  m_tree(origin[0], origin[1], origin[2], length, dimension)
 {
 	log::cout() << ">> Initializing Octree mesh\n";
 
 	// Inizializzazione dell'octree
 	double initial_level = ceil(log2(std::max(1., length / dh)));
 
-	m_tree = PabloUniform(origin[0], origin[1], origin[2], length, getDimension());
 	m_tree.setMarker((uint32_t) 0, initial_level);
 
 	// Info sull'octree
