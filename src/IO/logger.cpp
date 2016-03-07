@@ -428,7 +428,7 @@ Logger::Logger(std::ostream *consoleStream, std::ofstream *fileStream,
 
 	// Set logger data
 	setConsoleVerbosity(log::NORMAL);
-	setFileVerbosity(log::QUIET);
+	setFileVerbosity(log::NORMAL);
 	setPriority(log::NORMAL);
 	setVisibility(log::MASTER);
 }
