@@ -233,6 +233,16 @@ void LoggerBuffer::setConsoleStream(std::ostream *console)
 }
 
 /*!
+	Gets the stream to be used for the output on the console.
+
+	\result The stream to be used for the output on the console.
+*/
+std::ostream & LoggerBuffer::getConsoleStream()
+{
+	return *m_console;
+}
+
+/*!
 	Sets the prefix for console output
 
 	\param prefix is the prefix that will be prepended to every line of the
@@ -271,6 +281,16 @@ void LoggerBuffer::setFileStream(std::ofstream *file)
 	flush(true);
 
 	m_file = file;
+}
+
+/*!
+	Gets the stream to be used for the output on the file.
+
+	\result The stream to be used for the output on the file.
+*/
+std::ofstream & LoggerBuffer::getFileStream()
+{
+	return *m_file;
 }
 
 /*!
