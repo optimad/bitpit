@@ -256,6 +256,16 @@ void LoggerBuffer::setConsolePrefix(const std::string &prefix)
 }
 
 /*!
+	Gets the prefix for console output
+
+	\result The prefix for console output
+*/
+std::string LoggerBuffer::getConsolePrefix() const
+{
+	return m_consolePrefix;
+}
+
+/*!
 	Enables the output on the log file.
 
 	The output on the log file can be enabled only id the log file path has
@@ -304,6 +314,16 @@ void LoggerBuffer::setFilePrefix(const std::string &prefix)
 	flush(true);
 
 	m_filePrefix = prefix;
+}
+
+/*!
+	Gets the prefix for file output
+
+	\result The prefix for file output
+*/
+std::string LoggerBuffer::getFilePrefix() const
+{
+	return m_filePrefix;
 }
 
 /*!

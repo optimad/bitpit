@@ -69,11 +69,13 @@ public:
 	void setConsoleStream(std::ostream *console);
 	std::ostream & getConsoleStream();
 	void setConsolePrefix(const std::string &prefix);
+	std::string getConsolePrefix()	const;
 
 	void setFileEnabled(bool enabled);
 	void setFileStream(std::ofstream *file);
 	std::ofstream & getFileStream();
 	void setFilePrefix(const std::string &prefix);
+	std::string getFilePrefix() const;
 
 	void setContext(const std::string &context);
 	void setPadding(const std::string &padding);
