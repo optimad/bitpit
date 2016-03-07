@@ -93,11 +93,6 @@ ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile ) : m_octre
 	// Write info log
 	log::manager().create(logfile, false, m_nproc, m_rank);
 	m_log = &log::cout(logfile);
-	//TODO Change or remove it
-	if (logfile == "PABLO"){
-		(*m_log) << fileVerbosity(log::NORMAL);
-		(*m_log) << consoleVerbosity(log::QUIET);
-	}
 	(*m_log) << log::context("PABLO");
 	(*m_log) << "---------------------------------------------" << endl;
 	(*m_log) << "- PABLO PArallel Balanced Linear Octree -" << endl;
@@ -205,11 +200,6 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 	// Write info log
 	log::manager().create(logfile, false, m_nproc, m_rank);
 	m_log = &log::cout(logfile);
-	//TODO Change or remove it
-	if (logfile == "PABLO"){
-		(*m_log) << fileVerbosity(log::NORMAL);
-		(*m_log) << consoleVerbosity(log::QUIET);
-	}
 	(*m_log) << log::context("PABLO");
 	(*m_log) << "---------------------------------------------" << endl;
 	(*m_log) << "- PABLO PArallel Balanced Linear Octree -" << endl;
