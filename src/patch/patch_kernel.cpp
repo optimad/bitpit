@@ -135,7 +135,7 @@ PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
 	  m_first_ghost_id(Element::NULL_ID),
 	  m_dirty(true), m_expert(expert), m_hasCustomTolerance(false),
 	  m_rank(0), m_nProcessors(1)
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	  , m_communicator(MPI_COMM_NULL)
 #endif
 {
@@ -152,7 +152,7 @@ PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
 	// Add VTK basic patch data
 	VTKUnstructuredGrid::addData("cellIndex", VTKFieldType::SCALAR, VTKLocation::CELL);
 	VTKUnstructuredGrid::addData("vertexIndex", VTKFieldType::SCALAR, VTKLocation::POINT);
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	VTKUnstructuredGrid::addData("rank", VTKFieldType::SCALAR, VTKLocation::CELL);
 #endif
 }
@@ -2959,7 +2959,7 @@ const VTKFieldMetaData PatchKernel::getMetaData(std::string name)
 		return VTKFieldMetaData(m_cells.size(), typeid(long));
 	} else if (name == "vertexIndex") {
 		return VTKFieldMetaData(m_vertices.size(), typeid(long));
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	} else if (name == "rank") {
 		return VTKFieldMetaData(m_cells.size(), typeid(int));
 #endif
@@ -3068,7 +3068,7 @@ void PatchKernel::flushData(std::fstream &stream, VTKFormat format, std::string 
 		for (const Vertex &vertex : m_vertices) {
 			genericIO::flushBINARY(stream, vertex.get_id());
 		}
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	} else if (name == "rank") {
 		std::unordered_map<long, int> ghostRank;
 		ghostRank.reserve(getGhostCount());

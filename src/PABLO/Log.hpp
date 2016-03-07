@@ -32,7 +32,7 @@
 #ifndef __BITPIT_PABLO_LOG_HPP__
 #define __BITPIT_PABLO_LOG_HPP__
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 #include <mpi.h>
 #endif
 #include <string>
@@ -43,12 +43,12 @@ class Log {
 
 	std::string m_filename;
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI_Comm m_comm;
 #endif
 
 public:
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	Log(std::string filename_,MPI_Comm comm_ = MPI_COMM_WORLD);
 #else
 	Log(std::string filename_);

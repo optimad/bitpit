@@ -64,7 +64,7 @@ using namespace bitpit;
 
 int main(int argc, char *argv[]) {
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI::Init(argc, argv);
 
 	{
@@ -74,7 +74,7 @@ int main(int argc, char *argv[]) {
 		int errorFlag;
 		int nproc;
 		int	rank;
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 		MPI_Comm comm = MPI_COMM_WORLD;
 		errorFlag = MPI_Comm_size(comm,&nproc);
 		errorFlag = MPI_Comm_rank(comm,&rank);
@@ -173,7 +173,7 @@ int main(int argc, char *argv[]) {
 		pablo1.adaptGlobalRefine();
 		pablo1.updateConnectivity();
 		pablo1.write("pablo00001_iter"+to_string(static_cast<unsigned long long>(iter+nref1+3)));
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	}
 
 	MPI::Finalize();

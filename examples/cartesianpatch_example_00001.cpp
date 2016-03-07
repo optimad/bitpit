@@ -34,7 +34,7 @@
 */
 
 #include <array>
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 #include <mpi.h>
 #endif
 
@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
 
 	std::cout << "Creating a 2D Cartesian patch" << "\n";
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI::Init(argc,argv);
 #endif
 
@@ -59,7 +59,7 @@ int main(int argc, char *argv[]) {
 	patch_2D->update();
 	patch_2D->write();
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI::Finalize();
 #endif
 

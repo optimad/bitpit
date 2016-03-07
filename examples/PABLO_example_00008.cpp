@@ -24,7 +24,7 @@
 
 #include "bitpit_PABLO.hpp"
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 #include "PABLO_userDataComm.hpp"
 #include "PABLO_userDataLB.hpp"
 #endif
@@ -56,7 +56,7 @@ using namespace bitpit;
 
 int main(int argc, char *argv[]) {
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI::Init(argc, argv);
 
 	{
@@ -67,7 +67,7 @@ int main(int argc, char *argv[]) {
 		int errorFlag;
 		int nproc;
 		int	rank;
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 		MPI_Comm comm = MPI_COMM_WORLD;
 		errorFlag = MPI_Comm_size(comm,&nproc);
 		errorFlag = MPI_Comm_rank(comm,&rank);
@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
 			oct_data = oct_data_new;
 		}
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 		/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.
 		 * Preserve the family compact up to 4 levels over the max deep reached in the octree.*/
 		uint8_t levels = 4;
@@ -194,7 +194,7 @@ int main(int argc, char *argv[]) {
 		pablo8.updateConnectivity();
 		pablo8.writeTest("pablo00008_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	}
 
 	MPI::Finalize();

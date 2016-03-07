@@ -24,7 +24,7 @@
 
 #include "bitpit_PABLO.hpp"
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 #include "PABLO_userDataComm.hpp"
 #endif
 
@@ -53,7 +53,7 @@ using namespace bitpit;
 
 int main(int argc, char *argv[]) {
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI::Init(argc, argv);
 
 	{
@@ -65,7 +65,7 @@ int main(int argc, char *argv[]) {
 		int errorFlag;
 		int nproc;
 		int	rank;
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 		MPI_Comm comm = MPI_COMM_WORLD;
 		errorFlag = MPI_Comm_size(comm,&nproc);
 		errorFlag = MPI_Comm_rank(comm,&rank);
@@ -85,7 +85,7 @@ int main(int argc, char *argv[]) {
 			pablo6.adaptGlobalRefine();
 		}
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
 		pablo6.loadBalance();
 #endif
@@ -173,7 +173,7 @@ int main(int argc, char *argv[]) {
 			pablo6.updateConnectivity();
 			pablo6.writeTest("pablo00006_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data_smooth);
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 			/**<Communicate the data of the octants and the ghost octants between the processes.*/
 			UserDataComm<vector<double> > data_comm(oct_data_smooth, ghost_data);
 			pablo6.communicate(data_comm);
@@ -182,7 +182,7 @@ int main(int argc, char *argv[]) {
 			oct_data = oct_data_smooth;
 
 		}
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	}
 
 	MPI::Finalize();

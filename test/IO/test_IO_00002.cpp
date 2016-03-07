@@ -23,7 +23,7 @@
 \*---------------------------------------------------------------------------*/
 
 #include <array>
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 #include <mpi.h>
 #endif
 
@@ -33,14 +33,14 @@ using namespace bitpit;
 
 int main(int argc, char *argv[]) {
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI::Init(argc,argv);
 #endif
 
 	int nProcessors;
 	int rank;
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI_Comm_size(MPI_COMM_WORLD, &nProcessors);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
 #else
@@ -192,7 +192,7 @@ int main(int argc, char *argv[]) {
 	log::cout() << log::indent(-4);
 	log::cout() << "<------------------------->" << "\n";
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI::Finalize();
 #endif
 

@@ -24,7 +24,7 @@
 
 #include "bitpit_PABLO.hpp"
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 #include "PABLO_userDataComm.hpp"
 #include "PABLO_userDataLB.hpp"
 #endif
@@ -60,7 +60,7 @@ public:
 
 int main(int argc, char *argv[]) {
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI::Init(argc, argv);
 
 	{
@@ -71,7 +71,7 @@ int main(int argc, char *argv[]) {
 		int errorFlag;
 		int nproc;
 		int	rank;
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 		MPI_Comm comm = MPI_COMM_WORLD;
 		errorFlag = MPI_Comm_size(comm,&nproc);
 		errorFlag = MPI_Comm_rank(comm,&rank);
@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
 			pabloBB.adaptGlobalRefine();
 		}
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 		/**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
 		pabloBB.loadBalance();
 #endif
@@ -107,7 +107,7 @@ int main(int argc, char *argv[]) {
 		/**<Define and initialize a set of bubbles and their trajectories.*/
 		srand(time(NULL));
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
         int nb = 50;
 #else
 		int nb = 10;
@@ -245,7 +245,7 @@ int main(int argc, char *argv[]) {
 
 			}
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 			/**<PARALLEL TEST: (Load)Balance the octree over the processes with communicating the data.*/
 			/**<Communicate the data of the octants and the ghost octants between the processes.*/
 			UserDataLB<vector<double> > data_lb(oct_data,oct_data_ghost);
@@ -259,7 +259,7 @@ int main(int argc, char *argv[]) {
 			pabloBB.writeTest("PabloBubble3D_iter"+to_string(static_cast<unsigned long long>(iter)), oct_data);
 		}
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	}
 
 	MPI::Finalize();

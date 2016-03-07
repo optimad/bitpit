@@ -34,7 +34,7 @@ void testParallel001() {
 	int errorFlag;
 	int nproc;
 	int	rank;
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI_Comm comm = MPI_COMM_WORLD;
 	errorFlag = MPI_Comm_size(comm,&nproc);
 	errorFlag = MPI_Comm_rank(comm,&rank);
@@ -64,7 +64,7 @@ void testParallel001() {
         pablo12.write("PabloParallel001_iter"+to_string(static_cast<unsigned long long>(iter)));
     }
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
     /**<PARALLEL TEST: Call loadBalance, the octree is now distributed over the processes.*/
     pablo12.loadBalance();
 #endif
@@ -92,7 +92,7 @@ void testParallel001() {
         /**<Adapt octree.*/
         pablo12.adapt();
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
         /**<(Load)Balance the octree over the processes.*/
         pablo12.loadBalance();
 #endif
@@ -108,7 +108,7 @@ void testParallel001() {
 // =================================================================================== //
 int main( int argc, char *argv[] ) {
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI::Init(argc, argv);
 
 	{
@@ -117,7 +117,7 @@ int main( int argc, char *argv[] ) {
 
         testParallel001() ;
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	}
 
 	MPI::Finalize();

@@ -36,7 +36,7 @@ namespace bitpit {
 
 using namespace std;
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 Log::Log(string filename_,MPI_Comm comm_) : m_filename(filename_),m_comm(comm_) {};
 #else
 Log::Log(string filename_) : m_filename(filename_) {};
@@ -77,7 +77,7 @@ void Log::writeLog(string msg) {
 
 	int rank = 0;
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	bool flag = MPI::Is_finalized();
 	if (!(flag))
 		MPI_Comm_rank(m_comm,&rank);
@@ -94,7 +94,7 @@ void Log::writeLog(string msg) {
 		// Close file
 		file_handle.close();
 	}
-//#if ENABLE_MPI==1
+//#if BITPIT_ENABLE_MPI==1
 //	MPI_Barrier(comm);
 //#endif
 	return; };

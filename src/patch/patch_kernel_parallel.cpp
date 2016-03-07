@@ -21,7 +21,7 @@
  *  along with bitpit. If not, see <http://www.gnu.org/licenses/>.
  *
 \*---------------------------------------------------------------------------*/
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 
 // ========================================================================== //
 // INCLUDES                                                                   //
@@ -382,9 +382,6 @@ if (m_rank == snd_rank)
                     } else if ( cell_map.count(send_guess_ghost) == 0 ) {
                         continue;
                     }
-
-                    out << "sender ghost" << send_guess_ghost << endl;
-                    out << "sender internal" << m_cells[send_guess_ghost].isInterior() << endl;
 
                     sender_ghost_new_ids.insert({{send_guess_ghost, Element::NULL_ID}});
                 }

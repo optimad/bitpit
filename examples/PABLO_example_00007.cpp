@@ -24,7 +24,7 @@
 
 #include "bitpit_PABLO.hpp"
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 #include "PABLO_userDataComm.hpp"
 #include "PABLO_userDataLB.hpp"
 #endif
@@ -61,7 +61,7 @@ using namespace bitpit;
 
 int main(int argc, char *argv[]) {
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI::Init(argc, argv);
 
 	{
@@ -72,7 +72,7 @@ int main(int argc, char *argv[]) {
 		int errorFlag;
 		int nproc;
 		int	rank;
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 		MPI_Comm comm = MPI_COMM_WORLD;
 		errorFlag = MPI_Comm_size(comm,&nproc);
 		errorFlag = MPI_Comm_rank(comm,&rank);
@@ -196,7 +196,7 @@ int main(int argc, char *argv[]) {
 			weight = weight_new;
 		}
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 		/**<(Load)Balance the octree over the processes with communicating the data.*/
 		UserDataLB<vector<double> > data_lb(weight,weightGhost);
 		pablo7.loadBalance(data_lb, &weight);
@@ -211,7 +211,7 @@ int main(int argc, char *argv[]) {
 		pablo7.updateConnectivity();
 		pablo7.writeTest("pablo00007_iter"+to_string(static_cast<unsigned long long>(iter)), weight);
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	}
 
 	MPI::Finalize();

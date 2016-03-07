@@ -22,7 +22,7 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 #ifndef __BITPIT_COMMBUFFER_HPP__
 #define __BITPIT_COMMBUFFER_HPP__
 

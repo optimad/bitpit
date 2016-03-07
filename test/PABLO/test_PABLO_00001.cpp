@@ -36,7 +36,7 @@ void test001() {
 	int errorFlag;
 	int nproc;
 	int	rank;
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI_Comm comm = MPI_COMM_WORLD;
 	errorFlag = MPI_Comm_size(comm,&nproc);
 	errorFlag = MPI_Comm_rank(comm,&rank);
@@ -78,7 +78,7 @@ void test001() {
 
 int main( int argc, char *argv[] ) {
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI::Init(argc, argv);
 
 	{
@@ -87,7 +87,7 @@ int main( int argc, char *argv[] ) {
 
         test001() ;
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	}
 
 	MPI::Finalize();

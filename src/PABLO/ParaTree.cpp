@@ -46,7 +46,7 @@ using namespace std;
 // CONSTRUCTORS AND OPERATORS														   //
 // =================================================================================== //
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 /*! Default constructor of ParaTree.
  * It builds one octant with node 0 in the Origin (0,0,0) and side of length 1.
  * \param[in] dim The space dimension of the m_octree. 2D is the default value.
@@ -69,7 +69,7 @@ ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile ) : m_octre
 	m_errorFlag = 0;
 	m_maxDepth = 0;
 	m_globalNumOctants = m_octree.getNumOctants();
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	m_errorFlag = MPI_Comm_size(m_comm,&m_nproc);
 	m_errorFlag = MPI_Comm_rank(m_comm,&m_rank);
 #else
@@ -108,14 +108,14 @@ ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile ) : m_octre
 	(*m_log) << " Max allowed level	:	" + to_string(static_cast<unsigned long long>(m_global.m_maxLevel)) << endl;
 	(*m_log) << "---------------------------------------------" << endl;
 	(*m_log) << " " << endl;
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI_Barrier(m_comm);
 #endif
 };
 
 // =============================================================================== //
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 /*! Constructor of ParaTree for restart a simulation with input parameters.
  * For each process it builds a vector of octants. The input parameters are :
  * \param[in] XYZ Coordinates of octants (node 0) in logical domain,
@@ -177,7 +177,7 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 		m_octree.m_octants[i] = oct;
 	}
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	m_errorFlag = MPI_Comm_size(m_comm,&m_nproc);
 	m_errorFlag = MPI_Comm_rank(m_comm,&m_rank);
 	m_serial = true;
@@ -196,7 +196,7 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 	setLastDesc();
 	m_octree.updateLocalMaxDepth();
 	updateAdapt();
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	setPboundGhosts();
 #endif
 	m_periodic.resize(m_global.m_nfaces, false);
@@ -222,7 +222,7 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 	(*m_log) << " Number of octants	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
 	(*m_log) << "---------------------------------------------" << endl;
 	(*m_log) << " " << endl;
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI_Barrier(m_comm);
 #endif
 };
@@ -302,7 +302,7 @@ ParaTree::getLog(){
 	return (*m_log);
 }
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 /*! Get thecommunicator used by octree between processes.
  * \return MPI Communicator.
  */
@@ -1240,7 +1240,7 @@ ParaTree::getIsNewC(Octant* oct){
  */
 uint32_t
 ParaTree::getIdx(Octant* oct){
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	if (getIsGhost(oct)){
 		return m_octree.findGhostMorton(oct->computeMorton());
 	}
@@ -1254,7 +1254,7 @@ ParaTree::getIdx(Octant* oct){
  */
 uint64_t
 ParaTree::getGlobalIdx(Octant* oct){
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	if (getIsGhost(oct)){
 		uint32_t idx = m_octree.findGhostMorton(oct->computeMorton());
 		return m_octree.m_globalIdxGhosts[idx];
@@ -1677,14 +1677,14 @@ ParaTree::getGhostOctant(uint32_t idx) {
  */
 uint32_t
 ParaTree::getIdx(Octant oct){
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	if (getIsGhost(oct)){
 		return m_octree.findGhostMorton(oct.computeMorton());
 	}
 	else{
 #endif
 		return m_octree.findMorton(oct.computeMorton());
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	};
 #endif
 	return m_octree.getNumOctants();
@@ -2267,7 +2267,7 @@ ParaTree::adaptGlobalRefine(bool mapper_flag) {
 			m_mapIdx[i] = i;
 		}
 	}
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	bool globalDone = false;
 	if(m_serial){
 #endif
@@ -2292,13 +2292,13 @@ ParaTree::adaptGlobalRefine(bool mapper_flag) {
 		nocts = m_octree.getNumOctants();
 		updateAdapt();
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 		MPI_Barrier(m_comm);
 		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
 #endif
 		(*m_log) << " " << endl;
 		(*m_log) << "---------------------------------------------" << endl;
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	}
 	else{
 		(*m_log) << "---------------------------------------------" << endl;
@@ -2361,7 +2361,7 @@ ParaTree::adaptGlobalCoarse(bool mapper_flag) {
 			m_mapIdx[i] = i;
 		}
 	}
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	bool globalDone = false;
 	if(m_serial){
 #endif
@@ -2397,13 +2397,13 @@ ParaTree::adaptGlobalCoarse(bool mapper_flag) {
 		nocts = m_octree.getNumOctants();
 
 		(*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(nocts)) << endl;
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 		MPI_Barrier(m_comm);
 		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
 #endif
 		(*m_log) << " " << endl;
 		(*m_log) << "---------------------------------------------" << endl;
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	}
 	else{
 		(*m_log) << "---------------------------------------------" << endl;
@@ -2641,7 +2641,7 @@ ParaTree::getGhostNodeCoordinates(uint32_t inode){
 	return m_trans.mapCoordinates(m_octree.m_ghostsNodes[inode]);
 }
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 
 /** Distribute Load-Balancing the octants (with user defined weights) of the whole tree over
  * the processes of the job following the Morton order.
@@ -3195,7 +3195,7 @@ ParaTree::private_adapt_mapidx(bool mapflag) {
 		}
 	}
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	bool globalDone = false;
 	if(m_serial){
 #endif
@@ -3226,13 +3226,13 @@ ParaTree::private_adapt_mapidx(bool mapflag) {
 		nocts = m_octree.getNumOctants();
 
 		(*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(nocts)) << endl;
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 		MPI_Barrier(m_comm);
 		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
 #endif
 		(*m_log) << " " << endl;
 		(*m_log) << "---------------------------------------------" << endl;
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	}
 	else{
 		(*m_log) << "---------------------------------------------" << endl;
@@ -3280,7 +3280,7 @@ ParaTree::private_adapt_mapidx(bool mapflag) {
  */
 void
 ParaTree::updateAdapt(){
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	if(m_serial)
 	{
 #endif
@@ -3299,7 +3299,7 @@ ParaTree::updateAdapt(){
 			m_internals[i] = &(*it);
 			i++;
 		}
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	}
 	else
 	{
@@ -3330,7 +3330,7 @@ ParaTree::updateAdapt(){
 #endif
 }
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 /*! Compute the partition of the octree over the processes (only compute the information about
  * how distribute the mesh). This is an uniform distribution method.
  * \param[out] partition Pointer to partition information array. partition[i] = number of octants
@@ -4091,11 +4091,11 @@ ParaTree::commMarker() {
 void
 ParaTree::updateAfterCoarse(){
 	m_mapIdx.clear();
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	if(m_serial){
 #endif
 		updateAdapt();
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	}
 	else{
 		//Only if parallel
@@ -4116,11 +4116,11 @@ ParaTree::updateAfterCoarse(){
  */
 void
 ParaTree::updateAfterCoarse(u32vector & mapidx){
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	if(m_serial){
 #endif
 		updateAdapt();
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	}
 	else{
 		//Only if parallel
@@ -4140,7 +4140,7 @@ ParaTree::updateAfterCoarse(u32vector & mapidx){
  */
 void
 ParaTree::balance21(bool const first){
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	bool globalDone = true, localDone = false;
 	int  iteration  = 0;
 
@@ -4411,7 +4411,7 @@ ParaTree::write(string filename) {
 		pout.close();
 
 	}
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI_Barrier(m_comm);
 #endif
 
@@ -4554,7 +4554,7 @@ ParaTree::writeTest(string filename, vector<double> data) {
 		pout.close();
 
 	}
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI_Barrier(m_comm);
 #endif
 

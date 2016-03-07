@@ -41,7 +41,7 @@ using namespace std;
 // =================================================================================== //
 // CONSTRUCTORS AND OPERATORS
 // =================================================================================== //
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 /*! Default constructor of PabloUniform.
  * It sets the Origin in (0,0,0) and side of length 1.
  * \param[in] dim The space dimension of the octree. 2D is the default value.

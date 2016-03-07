@@ -26,7 +26,7 @@
 // INCLUDES                                                                            //
 // =================================================================================== //
 #include "logFunct.hpp"
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 #include <mpi.h>
 #endif
 #include <string>
@@ -73,7 +73,7 @@ void writeLog(string msg) {
 	// =================================================================================== //
 
 	int rank = 0;
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI_Comm_rank(MPI_COMM_WORLD,&rank);
 #endif
 	if(rank == 0){
@@ -108,7 +108,7 @@ void writeLog(string msg) {
 		// Close file
 		file_handle.close();
 	}
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI_Barrier(MPI_COMM_WORLD);
 #endif
 	return; };

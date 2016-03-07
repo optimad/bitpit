@@ -27,7 +27,7 @@
 
 #include <cstddef>
 #include <memory>
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 #	include <mpi.h>
 #endif
 #include <string>
@@ -247,7 +247,7 @@ public:
 	const VTKFieldMetaData getMetaData(std::string name);
 	void flushData(std::fstream &stream, VTKFormat format, std::string name);
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	void setCommunicator(MPI_Comm communicator);
 	void unsetCommunicator();
 	const MPI_Comm & getCommunicator() const;
@@ -304,7 +304,7 @@ private:
 
 	int m_rank;
 	int m_nProcessors;
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI_Comm m_communicator;
         std::unordered_map<short, std::unordered_map<long, long> > m_ghost2id;
 #endif

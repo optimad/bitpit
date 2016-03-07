@@ -22,7 +22,7 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 #ifndef __BITPIT_MPI_DATATYPE_CONVERSION_HPP__
 #define __BITPIT_MPI_DATATYPE_CONVERSION_HPP__
 

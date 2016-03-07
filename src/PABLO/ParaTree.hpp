@@ -28,7 +28,7 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 #include <mpi.h>
 #include "CommBuffer.hpp"
 #include "DataLBInterface.hpp"
@@ -131,7 +131,7 @@ private:
 	Logger* 				m_log;							/**<Log object pointer*/
 
 	//communicator
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	//TODO Duplicate communicator
 	MPI_Comm 				m_comm;							/**<MPI communicator*/
 #endif
@@ -140,7 +140,7 @@ private:
 	// CONSTRUCTORS AND OPERATORS														   //
 	// =================================================================================== //
 public:
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile = "bitpit", MPI_Comm comm = MPI_COMM_WORLD);
 	ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20,  std::string logfile = "bitpit", MPI_Comm comm = MPI_COMM_WORLD);
 #else
@@ -163,7 +163,7 @@ public:
 	int 		getRank();
 	int 		getNproc();
 	Logger& 	getLog();
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI_Comm	getComm();
 #endif
 	uint64_t*	getPartitionRangeGlobalIdx();
@@ -372,7 +372,7 @@ public:
 	const u32arr3vector & getGhostNodes();
 	const u32array3 & getGhostNodeLogicalCoordinates(uint32_t inode);
 	darray3 	getGhostNodeCoordinates(uint32_t inode);
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	void 		loadBalance(dvector* weight = NULL);
 	void 		loadBalance(uint8_t & level, dvector* weight = NULL);
 private:
@@ -393,7 +393,7 @@ private:
 	Octant& extractOctant(uint32_t idx);
 	bool 		private_adapt_mapidx(bool mapflag);
 	void 		updateAdapt();
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	void 		computePartition(uint32_t* partition);
 	void 		computePartition(uint32_t* partition, dvector* weight);
 	void 		computePartition(uint32_t* partition, uint8_t & level_, dvector* weight);
@@ -415,7 +415,7 @@ public:
 	// =================================================================================== //
 	// TEMPLATE METHODS												    			       //
 	// =================================================================================== //
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 
 	/** Communicate data provided by the user between the processes.
 	 */

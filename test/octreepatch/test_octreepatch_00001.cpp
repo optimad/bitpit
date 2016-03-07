@@ -31,7 +31,7 @@ using namespace bitpit;
 
 int main(int argc, char *argv[]) {
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI::Init(argc,argv);
 #endif
 
@@ -160,7 +160,7 @@ int main(int argc, char *argv[]) {
 
 	delete patch_3D;
 
-#if ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==1
 	MPI::Finalize();
 #endif
 
