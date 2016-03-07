@@ -51,7 +51,7 @@ int main(int argc, char *argv[]) {
 	std::cout << "Testing logger" << "\n";
 
 	// Default logger
-	log::cout().setParallel(nProcessors, rank);
+	log::manager().initialize(log::SEPARATE, false, nProcessors, rank);
 
 	log::cout() << consoleVerbosity(log::NORMAL);
 	log::cout() << fileVerbosity(log::NORMAL);
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
 	BITPIT_DEBUG_COUT() << "Debug statement" << std::endl;
 
 	// Log only on console
-	log::cout("logger1").setParallel(nProcessors, rank);
+	log::manager().create("logger1", false, nProcessors, rank);
 
 	log::cout("logger1") << consoleVerbosity(log::DEBUG);
 	log::cout("logger1") << fileVerbosity(log::QUIET);
@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
 	BITPIT_DEBUG_COUT("logger1") << "Debug statement" << std::endl;
 
 	// Log on console and also on file
-	log::cout("logger2").setParallel(nProcessors, rank);
+	log::manager().create("logger2", false, nProcessors, rank);
 
 	log::cout("logger2") << consoleVerbosity(log::NORMAL);
 	log::cout("logger2") << fileVerbosity(log::NORMAL);
@@ -118,10 +118,10 @@ int main(int argc, char *argv[]) {
 	BITPIT_DEBUG_COUT("logger2") << "Debug statement" << std::endl;
 
 	// Log on console and also on file with different verbosities
-	log::cout("logger3").setParallel(nProcessors, rank);
+	log::manager().create("logger3", true, nProcessors, rank);
+
 	log::cout("logger3").setConsoleVerbosity(log::NORMAL);
 	log::cout("logger3").setFileVerbosity(log::DEBUG);
-	log::cout("logger3").resetLogFile();
 
 	log::cout("logger3") << log::priority(log::DEBUG);
 	log::cout("logger3") << log::context("logger3-A");
@@ -139,10 +139,10 @@ int main(int argc, char *argv[]) {
 	BITPIT_DEBUG_COUT("logger3") << "Debug statement" << std::endl;
 
 	// Log using logger functions
-	log::cout("logger4").setParallel(nProcessors, rank);
+	log::manager().create("logger4", true, nProcessors, rank);
+
 	log::cout("logger4").setConsoleVerbosity(log::DEBUG);
 	log::cout("logger4").setFileVerbosity(log::DEBUG);
-	log::cout("logger4").resetLogFile();
 
 	log::cout("logger4").setPriority(log::NORMAL);
 	log::cout("logger4").setContext("logger4-B");

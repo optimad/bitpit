@@ -31,6 +31,7 @@ using namespace bitpit;
 
 int main(int argc, char *argv[]) {
 
+	log::manager().initialize(log::COMBINED);
 	log::cout() << "Testing adaption on octree patch" << std::endl;
 
 #if BITPIT_ENABLE_MPI==1

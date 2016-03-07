@@ -43,6 +43,11 @@
 namespace bitpit{
 
 namespace log {
+    enum Mode {
+        COMBINED,
+        SEPARATE
+    };
+
 	enum Verbosity {
 	    QUIET = 0,
 	    NORMAL,
@@ -108,12 +113,11 @@ class Logger : public std::ostream
 {
 
 public:
-	Logger(std::string name);
-	~Logger();
+	Logger(std::ostream *consoleStream, std::ofstream *fileStream,
+           const int &nProcessors = 1, const int &rank = 0);
 
-	static Logger & cout(std::string name = "bitpit");
-
-	void setParallel(int nProcessors, int rank);
+    int getProcessorCount();
+	int getRank();
 
 	void setContext(const std::string &context);
 	std::string getContext();
@@ -127,12 +131,17 @@ public:
 	void setVisibility(log::Visibility visibility);
 	log::Visibility getVisibility();
 
+	void setConsoleStream(std::ostream *console);
+	std::ostream & getConsoleStream();
+	std::string getConsolePrefix();
 	void setConsoleVerbosity(log::Verbosity verbosity);
 	log::Verbosity getConsoleVerbosity();
 
+	void setFileStream(std::ofstream *file);
+	std::ofstream & getFileStream();
+	std::string getFilePrefix();
 	void setFileVerbosity(log::Verbosity verbosity);
 	log::Verbosity getFileVerbosity();
-	void resetLogFile();
 
 	std::string getName();
 
@@ -147,11 +156,8 @@ public:
 	void print(const std::string &line, log::Priority priority, log::Visibility visibility);
 
 private:
-	typedef std::unordered_map<std::string, std::unique_ptr<Logger>> Cache;
-	typedef std::unordered_map<std::string, std::unique_ptr<Logger>>::iterator CacheIterator;
-	static Cache m_loggers;
-
-	bool m_isMaster;
+	int m_nProcessors;
+	int m_rank;
 	LoggerBuffer m_buffer;
 
 	int m_indentation;
@@ -160,17 +166,82 @@ private:
 	log::Visibility m_visibility;
 
 	log::Verbosity m_consoleVerbosity;
-
-	FileHandler m_fileHandler;
-	std::ofstream m_fileStream;
 	log::Verbosity m_fileVerbosity;
 
 	Logger(Logger const&) = delete;
 	Logger& operator=(Logger const&) = delete;
 
-	void openLogFile(bool reset);
+};
+
+// Logger manager
+class LoggerManager
+{
+
+public:
+    static std::string BITPIT_LOG_NAME;
+	static std::string BITPIT_LOG_DIRECTORY;
+
+    static LoggerManager & manager();
+
+	~LoggerManager();
+
+    Logger & cout();
+    Logger & cout(const std::string &name);
+
+	void initialize(log::Mode mode, bool reset,
+					const int &nProcessors, const int &rank);
+
+	void initialize(log::Mode mode, bool reset = false,
+					const std::string &directory = BITPIT_LOG_DIRECTORY,
+					const int &nProcessors = 1, const int &rank = 0);
+
+	void initialize(log::Mode mode, const std::string &name,
+					bool reset = false, const std::string &directory = BITPIT_LOG_DIRECTORY,
+					const int &nProcessors = 1, const int &rank = 0);
+
+	void create(const std::string &name, bool reset = false,
+				const int &nProcessors = 1, const int &rank = 0);
+
+	void create(const std::string &name, bool reset, const std::string &directory,
+				const int &nProcessors = 1, const int &rank = 0);
+
+	bool destroy(const std::string &name, bool force = false);
+
+	bool exists(const std::string &name) const;
+
+	bool isInitialized() const;
+
+	bool setMode(log::Mode mode);
+	log::Mode getMode() const;
+
+	void setConsoleVerbosity(log::Verbosity verbosity);
+	void setFileVerbosity(log::Verbosity verbosity);
+
+	std::string getDefaultName() const;
+	std::string getDefaultDirectory() const;
+
+private:
+	static std::unique_ptr<LoggerManager> m_manager;
+
+	std::string m_defaultName;
+	std::string m_defaultDirectory;
+	log::Mode m_mode;
+
+    std::unordered_map<std::string, std::unique_ptr<Logger>> m_loggers;
+    std::unordered_map<std::string, int> m_loggerUsers;
+    std::unordered_map<std::string, std::unique_ptr<std::ofstream>> m_fileStreams;
+
+	LoggerManager();
+
+    LoggerManager(LoggerManager const&) = delete;
+    LoggerManager& operator=(LoggerManager const&) = delete;
+
+	void _create(const std::string &name, bool reset, const std::string &directory,
+	             const int &nProcessors, const int &rank);
+	void _create(const std::string &name, Logger &master);
 
 };
+
 
 /*!
 	\brief The namespace 'log' contains routines for interacting with the
@@ -179,7 +250,9 @@ private:
 namespace log {
 
 	// Generic global functions
-	Logger & cout(std::string name = "bitpit");
+	LoggerManager & manager();
+	Logger & cout();
+	Logger & cout(std::string name);
 
 	// Manipulators global functions
 

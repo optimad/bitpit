@@ -42,7 +42,7 @@ void test002() {
 	nproc = 1;
 	rank = 0;
 #endif
-	log::cout().setParallel(nproc, rank);
+	log::manager().initialize(log::SEPARATE, false, nproc, rank);
 	log::cout() << fileVerbosity(log::NORMAL);
 	log::cout() << consoleVerbosity(log::QUIET);
 

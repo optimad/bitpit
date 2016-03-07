@@ -43,6 +43,7 @@ int main(int argc, char *argv[]) {
 	std::vector<double> cellData;
 	std::vector<double> vertexData;
 
+	log::manager().initialize(log::COMBINED);
 	log::cout() << "Testing Cartesian patch" << "\n";
 
 	std::array<double, 3> origin = {-10., -10., -10.};

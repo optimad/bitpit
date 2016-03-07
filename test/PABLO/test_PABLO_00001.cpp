@@ -44,7 +44,7 @@ void test001() {
 	nproc = 1;
 	rank = 0;
 #endif
-	log::cout().setParallel(nproc, rank);
+	log::manager().initialize(log::SEPARATE, false, nproc, rank);
 	log::cout() << fileVerbosity(log::NORMAL);
 	log::cout() << consoleVerbosity(log::QUIET);
 
@@ -55,7 +55,7 @@ void test001() {
 
 
 	/**<Instantation and setup of a custom (named custom) logfile.*/
-	log::cout("custom").setParallel(nproc, rank);
+	log::manager().create("custom", false, nproc, rank);
 	log::cout("custom") << fileVerbosity(log::NORMAL);
 	log::cout("custom") << consoleVerbosity(log::QUIET);
 

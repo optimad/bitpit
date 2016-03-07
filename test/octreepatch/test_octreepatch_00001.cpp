@@ -38,6 +38,7 @@ int main(int argc, char *argv[]) {
 	std::array<double, 3> minPoint;
 	std::array<double, 3> maxPoint;
 
+	log::manager().initialize(log::COMBINED);
 	log::cout() << "Testing octree patch" << "\n";
 
 	std::array<double, 3> origin = {0., 0., 0.};

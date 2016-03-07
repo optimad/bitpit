@@ -38,6 +38,7 @@ int main(int argc, char *argv[]) {
 	MPI::Init(argc,argv);
 #endif
 
+	log::manager().initialize(log::COMBINED);
 	log::cout() << "Testing octree patch" << "\n";
 
 	std::array<double, 3> origin = {0., 0., 0.};

@@ -141,11 +141,11 @@ private:
 	// =================================================================================== //
 public:
 #if BITPIT_ENABLE_MPI==1
-	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile = "bitpit", MPI_Comm comm = MPI_COMM_WORLD);
-	ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20,  std::string logfile = "bitpit", MPI_Comm comm = MPI_COMM_WORLD);
+	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20, std::string logfile = "PABLO", MPI_Comm comm = MPI_COMM_WORLD);
+	ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20,  std::string logfile = "PABLO", MPI_Comm comm = MPI_COMM_WORLD);
 #else
-	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20,  std::string logfile = "bitpit");
-	ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20,  std::string logfile = "bitpit");
+	ParaTree(uint8_t dim = 2, int8_t maxlevel = 20,  std::string logfile = "PABLO");
+	ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim = 2, int8_t maxlevel = 20,  std::string logfile = "PABLO");
 #endif
 	~ParaTree();
 
