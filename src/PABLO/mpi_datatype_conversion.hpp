@@ -34,37 +34,37 @@ template <class T>
 MPI_Datatype convert();
 
 template <>
-inline MPI_Datatype convert<char>(){return MPI::CHAR;}
+inline MPI_Datatype convert<char>(){return MPI_CHAR;}
 
 template <>
-inline MPI_Datatype convert<int>(){return MPI::INT;}
+inline MPI_Datatype convert<int>(){return MPI_INT;}
 
 template <>
-inline MPI_Datatype convert<short>(){return MPI::SHORT;}
+inline MPI_Datatype convert<short>(){return MPI_SHORT;}
 
 template <>
-inline MPI_Datatype convert<long>(){return MPI::LONG;}
+inline MPI_Datatype convert<long>(){return MPI_LONG;}
 
 template <>
-inline MPI_Datatype convert<unsigned int>(){return MPI::UNSIGNED;}
+inline MPI_Datatype convert<unsigned int>(){return MPI_UNSIGNED;}
 
 template <>
-inline MPI_Datatype convert<unsigned short>(){return MPI::UNSIGNED_SHORT;}
+inline MPI_Datatype convert<unsigned short>(){return MPI_UNSIGNED_SHORT;}
 
 template <>
-inline MPI_Datatype convert<unsigned long>(){return MPI::UNSIGNED_LONG;}
+inline MPI_Datatype convert<unsigned long>(){return MPI_UNSIGNED_LONG;}
 
 template <>
-inline MPI_Datatype convert<double>(){return MPI::DOUBLE;}
+inline MPI_Datatype convert<double>(){return MPI_DOUBLE;}
 
 template <>
-inline MPI_Datatype convert<float>(){return MPI::FLOAT;}
+inline MPI_Datatype convert<float>(){return MPI_FLOAT;}
 
 template <>
-inline MPI_Datatype convert<long double>(){return MPI::LONG_DOUBLE;}
+inline MPI_Datatype convert<long double>(){return MPI_LONG_DOUBLE;}
 
 template <>
-inline MPI_Datatype convert<bool>(){return MPI::BOOL;}
+inline MPI_Datatype convert<bool>(){return MPI_C_BOOL;}
 
 template <>
 inline MPI_Datatype convert<uint8_t>(){return MPI_UINT8_T;}
