@@ -160,11 +160,6 @@ class PiercedVector
 
 private:
 	/*!
-		Type size_type is an unsigned integral type.
-	*/
-	typedef std::size_t size_type;
-
-	/*!
 		Member type value_type is the type of the elements in the container,
 		defined as an alias of the first template parameter (T).
 	*/
@@ -173,7 +168,7 @@ private:
 	/*!
 		Maximum number of pending deletes before the changes are flushed.
 	*/
-	static const size_type MAX_PENDING_HOLES;
+	static const std::size_t MAX_PENDING_HOLES;
 
 public:
 	// Friendships
@@ -238,7 +233,7 @@ public:
 
 	// Contructors
 	PiercedVector();
-	PiercedVector(size_type n);
+	PiercedVector(std::size_t n);
 
 	// Methods that modify the contents of the container
 	iterator push_back(const id_type &id, value_type &&value);
@@ -280,24 +275,24 @@ public:
 	// Methods that modify the container as a whole
 	void clear(bool release = true);
 	void flush();
-	void reserve(size_type n);
-	void resize(size_type n);
+	void reserve(std::size_t n);
+	void resize(std::size_t n);
 	void sort();
 	void squeeze();
 	void swap(PiercedVector& x) noexcept;
 
 	// Methods that extract information on the container
-	size_type capacity();
+	std::size_t capacity();
 	bool contiguous() const;
 	void dump();
 	bool empty() const;
 	bool is_iterator_slow();
-	size_type max_size() const;
-	size_type size() const;
+	std::size_t max_size() const;
+	std::size_t size() const;
 
 	// Methods that extract information on the contents of the container
 	bool exists(id_type id);
-	size_type extract_flat_index(id_type id) const;
+	std::size_t extract_flat_index(id_type id) const;
 
 	std::vector<id_type> get_ids(bool ordered = true);
 	id_type get_size_marker(const size_t &targetSize, const id_type &fallback = -1);
@@ -314,9 +309,9 @@ public:
 	value_type & at(const id_type &id);
 	const value_type & at(const id_type &id) const;
 
-	value_type & raw_at(const size_type &pos);
-	const value_type & raw_at(const size_type &pos) const;
-	size_type raw_index(id_type id) const;
+	value_type & raw_at(const std::size_t &pos);
+	const value_type & raw_at(const std::size_t &pos) const;
+	std::size_t raw_index(id_type id) const;
 
 	const value_type & operator[](const id_type &id) const;
 	value_type & operator[](const id_type &id);
@@ -375,7 +370,7 @@ private:
 	/*!
 		Container used for storing holes
 	*/
-	typedef std::vector<size_type> hole_container;
+	typedef std::vector<std::size_t> hole_container;
 
 	/*!
 		Hole iterator
@@ -432,17 +427,17 @@ private:
 		Map that links the id of the elements and their position
 		inside the internal vector.
 	*/
-	std::unordered_map<id_type, size_type, PiercedHasher> m_pos;
+	std::unordered_map<id_type, std::size_t, PiercedHasher> m_pos;
 
 	/*!
 		Position of the first element in the internal vector.
 	*/
-	size_type m_first_pos;
+	std::size_t m_first_pos;
 
 	/*!
 		Position of the last element in the internal vector.
 	*/
-	size_type m_last_pos;
+	std::size_t m_last_pos;
 
 	/*!
 		Position of the first dirty element.
@@ -451,7 +446,7 @@ private:
 		properly defined, meaning that the iterator can take longer to
 		iterate through the elements.
 	*/
-	size_type m_first_dirty_pos;
+	std::size_t m_first_dirty_pos;
 
 	/*!
 		Compares the id of the elements in the specified position.
@@ -471,7 +466,7 @@ private:
 		{
 		}
 
-	    inline bool operator() (const size_type &pos_x, const size_type &pos_y)
+	    inline bool operator() (const std::size_t &pos_x, const std::size_t &pos_y)
 	    {
 			id_type id_x = m_ids[pos_x];
 			id_type id_y = m_ids[pos_y];
@@ -488,39 +483,39 @@ private:
 	    }
 	};
 
-	iterator get_iterator_from_pos(const size_type &pos) noexcept;
-	const_iterator get_const_iterator_from_pos(const size_type &pos) const noexcept;
+	iterator get_iterator_from_pos(const std::size_t &pos) noexcept;
+	const_iterator get_const_iterator_from_pos(const std::size_t &pos) const noexcept;
 
-	size_type fill_pos(const size_type &pos, const id_type &id);
-	size_type fill_pos_append(const id_type &id);
-	size_type fill_pos_insert(const size_type &pos, const id_type &id);
-	size_type fill_pos_head(const id_type &id);
-	size_type fill_pos_tail(const id_type &id);
-	size_type fill_pos_after(const size_type &referencePos, const id_type &id);
-	size_type fill_pos_before(const size_type &referencePos, const id_type &id);
+	std::size_t fill_pos(const std::size_t &pos, const id_type &id);
+	std::size_t fill_pos_append(const id_type &id);
+	std::size_t fill_pos_insert(const std::size_t &pos, const id_type &id);
+	std::size_t fill_pos_head(const id_type &id);
+	std::size_t fill_pos_tail(const id_type &id);
+	std::size_t fill_pos_after(const std::size_t &referencePos, const id_type &id);
+	std::size_t fill_pos_before(const std::size_t &referencePos, const id_type &id);
 
-	void pierce_pos(const size_type &pos, bool flush = true);
+	void pierce_pos(const std::size_t &pos, bool flush = true);
 
 	void holes_clear(bool release = true);
-	size_type holes_count();
-	size_type holes_count_pending();
-	size_type holes_count_regular();
+	std::size_t holes_count();
+	std::size_t holes_count_pending();
+	std::size_t holes_count_regular();
 	void holes_flush();
 	void holes_clear_pending();
 	void holes_clear_pending(const long &offset, const long &nRegulars);
 	void holes_sort_pending();
 	void holes_sort_regular();
 
-	size_type find_prev_used_pos(size_type pos);
-	size_type find_next_used_pos(size_type pos);
-	bool is_pos_empty(size_type pos);
-	size_type get_pos_from_id(id_type id) const;
-    void set_pos_id(const size_type &pos, const id_type &id);
-	void update_empty_pos_id(const size_type &pos, const size_type &nextUsedPos);
-	void update_first_used_pos(const size_type &updated_first_pos);
-	void update_last_used_pos(const size_type &updated_last_pos);
+	std::size_t find_prev_used_pos(std::size_t pos);
+	std::size_t find_next_used_pos(std::size_t pos);
+	bool is_pos_empty(std::size_t pos);
+	std::size_t get_pos_from_id(id_type id) const;
+    void set_pos_id(const std::size_t &pos, const id_type &id);
+	void update_empty_pos_id(const std::size_t &pos, const std::size_t &nextUsedPos);
+	void update_first_used_pos(const std::size_t &updated_first_pos);
+	void update_last_used_pos(const std::size_t &updated_last_pos);
 
-	size_type storage_size() const;
+	std::size_t storage_size() const;
 	void storage_resize(size_t n);
 
     template<typename order_t>
