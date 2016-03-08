@@ -50,29 +50,8 @@ const id_type PiercedIterator<T, id_type, T_no_cv, id_type_no_cv>::SENTINEL_ID =
 */
 template<typename T, typename id_type, typename T_no_cv, typename id_type_no_cv>
 PiercedIterator<T, id_type, T_no_cv, id_type_no_cv>::PiercedIterator()
+	: m_container(nullptr), m_pos(0)
 {
-}
-
-/*!
-	Creates a new iterator and initializes it with the position of
-	the base iterator recevied in input.
-*/
-template<typename T, typename id_type, typename T_no_cv, typename id_type_no_cv>
-PiercedIterator<T, id_type, T_no_cv, id_type_no_cv>::PiercedIterator(ValueIterator valueBegin, IdIterator idBegin, size_t pos)
-	: m_value(&(*(valueBegin + pos)))
-{
-	m_id = &(*(idBegin + pos));
-}
-
-/*!
-	Creates a new iterator and initializes it with the position of
-	the const base iterator recevied in input.
-*/
-template<typename T, typename id_type, typename T_no_cv, typename id_type_no_cv>
-PiercedIterator<T, id_type, T_no_cv, id_type_no_cv>::PiercedIterator(ValueConstIterator valueBegin, IdConstIterator idBegin, size_t pos)
-{
-	m_value = &(*(valueBegin + pos));
-	m_id = &(*(idBegin + pos));
 }
 
 /*!
@@ -84,8 +63,8 @@ PiercedIterator<T, id_type, T_no_cv, id_type_no_cv>::PiercedIterator(ValueConstI
 template<typename T, typename id_type, typename T_no_cv, typename id_type_no_cv>
 void PiercedIterator<T, id_type, T_no_cv, id_type_no_cv>::swap(PiercedIterator& other) noexcept
 {
-	std::swap(m_value, other.m_value);
-	std::swap(m_id, other.m_id);
+	std::swap(m_container, other.m_container);
+	std::swap(m_pos, other.m_pos);
 }
 
 /*!
@@ -94,15 +73,14 @@ void PiercedIterator<T, id_type, T_no_cv, id_type_no_cv>::swap(PiercedIterator& 
 template<typename T, typename id_type, typename T_no_cv, typename id_type_no_cv>
 PiercedIterator<T, id_type, T_no_cv, id_type_no_cv> & PiercedIterator<T, id_type, T_no_cv, id_type_no_cv>::operator++()
 {
-	size_t offset = 1;
+	size_t delta = 1;
 	while (true) {
-		id_type id = *(m_id + offset);
+		m_pos += delta;
+		id_type id = m_container->m_ids[m_pos];
 		if (id == SENTINEL_ID || id >= 0) {
-			m_id    += offset;
-			m_value += offset;
 			return *this;
 		} else {
-			offset += - id;
+			delta = - id;
 		}
 	}
 
@@ -115,7 +93,7 @@ PiercedIterator<T, id_type, T_no_cv, id_type_no_cv> & PiercedIterator<T, id_type
 template<typename T, typename id_type, typename T_no_cv, typename id_type_no_cv>
 PiercedIterator<T, id_type, T_no_cv, id_type_no_cv> PiercedIterator<T, id_type, T_no_cv, id_type_no_cv>::operator++(int)
 {
-	PiercedIterator tmp(m_value, m_id);
+	PiercedIterator tmp(m_container, m_pos);
 
 	++(*this);
 
@@ -131,7 +109,7 @@ PiercedIterator<T, id_type, T_no_cv, id_type_no_cv> PiercedIterator<T, id_type, 
 template<typename T, typename id_type, typename T_no_cv, typename id_type_no_cv>
 T & PiercedIterator<T, id_type, T_no_cv, id_type_no_cv>::operator*() const
 {
-	return *m_value;
+	return m_container->m_v[m_pos];
 }
 
 /*!
@@ -143,7 +121,7 @@ T & PiercedIterator<T, id_type, T_no_cv, id_type_no_cv>::operator*() const
 template<typename T, typename id_type, typename T_no_cv, typename id_type_no_cv>
 T * PiercedIterator<T, id_type, T_no_cv, id_type_no_cv>::operator->() const
 {
-	return m_value;
+	return &(m_container->m_v[m_pos]);
 }
 
 /*!
@@ -152,15 +130,26 @@ T * PiercedIterator<T, id_type, T_no_cv, id_type_no_cv>::operator->() const
 template<typename T, typename id_type, typename T_no_cv, typename id_type_no_cv>
 PiercedIterator<T, id_type, T_no_cv, id_type_no_cv>::operator PiercedIterator<const T, const id_type>() const
 {
-	return PiercedIterator<const T, const id_type>(m_value, m_id);
+	return PiercedIterator<const T, const id_type>(m_container, m_pos);
 }
 
 /*!
-	Creates a new iterator and initializes it with the specified pointers.
+	Creates a new iterator and initializes it with the position of
+	the const base iterator recevied in input.
 */
 template<typename T, typename id_type, typename T_no_cv, typename id_type_no_cv>
-PiercedIterator<T, id_type, T_no_cv, id_type_no_cv>::PiercedIterator(T *value, id_type *id)
-	: m_value(value), m_id(id)
+PiercedIterator<T, id_type, T_no_cv, id_type_no_cv>::PiercedIterator(Container<T_no_cv, id_type_no_cv> *container, const size_t &pos)
+	: m_container(const_cast<Container<T_no_cv, id_type_no_cv> *>(container)), m_pos(pos)
+{
+}
+
+/*!
+	Creates a new iterator and initializes it with the position of
+	the const base iterator recevied in input.
+*/
+template<typename T, typename id_type, typename T_no_cv, typename id_type_no_cv>
+PiercedIterator<T, id_type, T_no_cv, id_type_no_cv>::PiercedIterator(const Container<T_no_cv, id_type_no_cv> *container, const size_t &pos)
+	: m_container(const_cast<Container<T_no_cv, id_type_no_cv> *>(container)), m_pos(pos)
 {
 }
 
@@ -1569,9 +1558,9 @@ template<typename T, typename id_type>
 typename PiercedVector<T, id_type>::iterator PiercedVector<T, id_type>::get_iterator_from_pos(const size_type &pos) noexcept
 {
 	if (empty() || pos > m_last_pos) {
-		return iterator(m_v.begin(), m_ids.begin(), m_last_pos + 1);
+		return iterator(this, m_last_pos + 1);
 	} else {
-		return iterator(m_v.begin(), m_ids.begin(), pos);
+		return iterator(this, pos);
 	}
 }
 
@@ -1587,9 +1576,9 @@ template<typename T, typename id_type>
 typename PiercedVector<T, id_type>::const_iterator PiercedVector<T, id_type>::get_const_iterator_from_pos(const size_type &pos) const noexcept
 {
 	if (empty() || pos > m_last_pos) {
-		return const_iterator(m_v.cbegin(), m_ids.cbegin(), m_last_pos + 1);
+		return const_iterator(this, m_last_pos + 1);
 	} else {
-		return const_iterator(m_v.cbegin(), m_ids.cbegin(), pos);
+		return const_iterator(this, pos);
 	}
 }
 

@@ -44,6 +44,9 @@
 
 namespace bitpit{
 
+template<typename T, typename id_type>
+class PiercedVector;
+
 /*!
 	\ingroup containers
 
@@ -64,44 +67,18 @@ class PiercedIterator
 
 private:
 	/*!
-		Container that holds the id.
+		Container.
 	*/
-	typedef typename std::vector<id_type_no_cv> IdContainer;
-
-	/*!
-		Iterator for the internal vector that holds the ids in
-		the pierced array.
-	*/
-	typedef typename IdContainer::iterator IdIterator;
-
-	/*!
-		Constant iterator for the internal vector that holds the ids in
-		the pierced array.
-	*/
-	typedef typename IdContainer::const_iterator IdConstIterator;
-
-	/*!
-		Container that holds the values.
-	*/
-	typedef typename std::vector<T_no_cv> ValueContainer;
-
-	/*!
-		Iterator for the internal vector that holds the elements in
-		the pierced array.
-	*/
-	typedef typename ValueContainer::iterator ValueIterator;
-
-	/*!
-		Const iterator for the internal vector that holds the elements in
-		the pierced array.
-	*/
-	typedef typename ValueContainer::const_iterator ValueConstIterator;
+	template<typename PV_T, typename PV_id_type>
+	using Container = PiercedVector<PV_T, PV_id_type>;
 
 public:
+	// Friendships
+	template<typename PV_T, typename PV_id_type>
+	friend class PiercedVector;
+
 	// Constructors
 	PiercedIterator();
-	explicit PiercedIterator(ValueIterator valueBegin, IdIterator idBegin, size_t pos);
-	explicit PiercedIterator(ValueConstIterator valueBegin, IdConstIterator idBegin, size_t pos);
 
 	// General methods
 	void swap(PiercedIterator& other) noexcept;
@@ -122,7 +99,7 @@ public:
 		 typename other_id_type_no_cv = typename std::remove_cv<id_type>::type>
 	bool operator==(const PiercedIterator<other_T, other_id_type>& rhs) const
 	{
-		return m_id == rhs.m_id;
+		return (m_container == rhs.m_container) && (m_pos == rhs.m_pos);
 	}
 
 	/*!
@@ -133,7 +110,7 @@ public:
 		 typename other_id_type_no_cv = typename std::remove_cv<id_type>::type>
 	bool operator!=(const PiercedIterator<other_T, other_id_type>& rhs) const
 	{
-		return m_id != rhs.m_id;
+		return (m_container != rhs.m_container) || (m_pos != rhs.m_pos);
 	}
 
 private:
@@ -144,17 +121,18 @@ private:
 	static const id_type SENTINEL_ID;
 
 	/*!
-		Internal pointer to the values.
+		Internal pointer to the container.
 	*/
-	T *m_value;
+	Container<T_no_cv, id_type_no_cv> *m_container;
 
 	/*!
-		Internal pointer to the ids.
+		Position inside the container.
 	*/
-	id_type *m_id;
+	size_t m_pos;
 
 	// Constructors
-	explicit PiercedIterator(T *value, id_type *id);
+	explicit PiercedIterator(Container<T_no_cv, id_type_no_cv> *container, const size_t &pos);
+	explicit PiercedIterator(const Container<T_no_cv, id_type_no_cv> *container, const size_t &pos);
 
 };
 
@@ -227,6 +205,10 @@ private:
 	static const size_type USABLE_POS_COUNT;
 
 public:
+	// Friendships
+	template<typename PI_T, typename PI_id_type, typename PI_T_no_cv, typename PI_id_type_no_cv>
+	friend class PiercedIterator;
+
 	/*!
 		Iterator for the pierced array.
 	*/
