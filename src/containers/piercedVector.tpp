@@ -2431,7 +2431,8 @@ private:
 		m_v[pos] = T();
 
 		// Reset the position
-		update_empty_pos_id(pos, false);
+		size_t nextUsedPos = find_next_used_pos(pos);
+		update_empty_pos_id(pos, nextUsedPos, false);
 		m_first_dirty_pos = std::min(pos, m_first_dirty_pos);
 
 		// If removing the first position, update the counter
