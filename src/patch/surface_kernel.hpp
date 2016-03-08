@@ -32,7 +32,9 @@ namespace bitpit {
 class SurfaceKernel : public PatchKernel {
 
 public:
-	SurfaceKernel(const int &id, const int &dimension, bool epxert);
+	SurfaceKernel(const int &id, const int &dimension, const int &space_dim, bool epxert);
+
+        int getSpaceDimensions(void) const;
 
 	virtual ~SurfaceKernel();
 
@@ -41,6 +43,9 @@ public:
 
 	virtual double evalInterfaceArea(const long &id) = 0;
 
+protected:
+        int                     m_spaceDim;
+        
 };
 
 }

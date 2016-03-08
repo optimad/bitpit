@@ -48,9 +48,10 @@ namespace bitpit {
 	\param dimension is the dimension of the patch
 	\param expert if true, the expert mode will be enabled
 */
-SurfaceKernel::SurfaceKernel(const int &id, const int &dimension, bool expert)
+SurfaceKernel::SurfaceKernel(const int &id, const int &dimension, const int& space_dim, bool expert)
 	: PatchKernel(id, dimension, expert)
 {
+    m_spaceDim = space_dim;
 }
 
 /*!
@@ -61,6 +62,13 @@ SurfaceKernel::~SurfaceKernel()
 
 }
 
+/*!
+ * Returns the number of dimensions of the working space (set at patch construction)
+ */
+int SurfaceKernel::getSpaceDimensions(void) const
+{
+    return(m_spaceDim);
+}
 /*!
 	@}
 */

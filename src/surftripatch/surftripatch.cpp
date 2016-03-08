@@ -53,10 +53,9 @@ const unsigned short SurfTriPatch::SELECT_ALL      = 3;
 
 	\param id is the id of the patch
 */
-SurfTriPatch::SurfTriPatch(const int &id, int space_dim)
-	: SurfaceKernel(id, 2, true)
+SurfTriPatch::SurfTriPatch(const int &id, int patch_dim, int space_dim)
+	: SurfaceKernel(id, patch_dim, space_dim, true)
 {
-    setSpaceDimensions(space_dim);
 
 }
 
@@ -73,17 +72,6 @@ void SurfTriPatch::setExpert(bool expert)
 {
 	SurfaceKernel::setExpert(expert);
 }
-
-/*!
- * Set the number of dimensions of the current working space
- * 
- * \param[in] space_dim number of dimensions in the current working space
-*/
-void SurfTriPatch::setSpaceDimensions(const int &space_dim)
-{
-    m_spaceDim = space_dim;
-}
-
 
 /*!
 	Evaluates the volume of the specified cell.
@@ -644,6 +632,7 @@ double SurfTriPatch::evalAngleAtVertex(const long &id, const int &vertex_id)
     // ====================================================================== //
 
     // Local variables
+    double const                _pi_ = 3.14159265358979;
     Cell                        *cell_ = &m_cells[id];
 
     // Counters
@@ -652,8 +641,11 @@ double SurfTriPatch::evalAngleAtVertex(const long &id, const int &vertex_id)
     // EVALUATE ANGLE AT SPECIFIED VERTEX                                     //
     // ====================================================================== //
     if ((cell_->getType() == ElementInfo::UNDEFINED)
-     || (cell_->getType() == ElementInfo::VERTEX)
-     || (cell_->getType() == ElementInfo::LINE)) return 0.0;
+     || (cell_->getType() == ElementInfo::VERTEX)) return 0.0;
+    if (cell_->getType() == ElementInfo::LINE) {
+        if (m_spaceDim - getDimension() == 1) return _pi_;
+        else return 0.0;
+    }
 
     int                          n_vert = cell_->getVertexCount();
     int                          prev = (n_vert + vertex_id - 1) % n_vert;
@@ -777,8 +769,16 @@ array<double, 3> SurfTriPatch::evalFacetNormal(const long &id)
     // COMPUTE NORMAL                                                         //
     // ====================================================================== //
     if ((cell_->getType() == ElementInfo::UNDEFINED)
-     || (cell_->getType() == ElementInfo::VERTEX)
-     || (cell_->getType() == ElementInfo::LINE)) return normal;
+     || (cell_->getType() == ElementInfo::VERTEX)) return normal;
+    
+    if (cell_->getType() == ElementInfo::LINE) {
+        if (m_spaceDim - getDimension() == 1) {
+            std::array<double, 3>       z{0.0, 0.0, 1.0};
+            normal = m_vertices[cell_->getVertex(1)].getCoords() - m_vertices[cell_->getVertex(0)].getCoords();
+            normal = crossProduct(normal, z);
+        }
+        else return normal;
+    }
 
     if (cell_->getType() == ElementInfo::TRIANGLE) {
         array<double, 3>                d1, d2;
@@ -829,7 +829,7 @@ array<double, 3> SurfTriPatch::evalEdgeNormal(const long &id, const int &edge_id
     // ====================================================================== //
     // COMPUTE EDGE NORMAL                                                    //
     // ====================================================================== //
-    if (cell_->getAdjacency(edge_id) != Element::NULL_ID) {
+    if (cell_->getAdjacency(edge_id, 0) != Element::NULL_ID) {
         for (int i = 0; i < n_adj; ++i) {
             normal += evalFacetNormal(cell_->getAdjacency(edge_id, i));
         } //next i
