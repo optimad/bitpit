@@ -2550,7 +2550,7 @@ std::vector<int>                face_loc_connect_A, face_loc_connect_B;
 Cell                            *cell_1_ = &m_cells[cell_1], *cell_2_ = &m_cells[cell_2];
 
 // Counters
-int                             k;
+size_t                          k;
 
 // ========================================================================== //
 // CHECK FOR COINCIDENT FACES                                                 //
