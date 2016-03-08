@@ -1389,7 +1389,7 @@ typename PiercedVector<value_t, id_t>::const_iterator PiercedVector<value_t, id_
 	\result An iterator pointing to the first element in the vector.
 */
 template<typename value_t, typename id_t>
-typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::begin()
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::begin() noexcept
 {
 	return get_iterator_from_pos(m_first_pos);
 }
@@ -1402,7 +1402,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::be
 			in the vector.
 */
 template<typename value_t, typename id_t>
-typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::end()
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::end() noexcept
 {
 	return get_iterator_from_pos(m_last_pos + 1);
 }
@@ -1467,7 +1467,7 @@ typename PiercedVector<value_t, id_t>::const_iterator PiercedVector<value_t, id_
 			container.
 */
 template<typename value_t, typename id_t>
-typename PiercedVector<value_t, id_t>::raw_iterator PiercedVector<value_t, id_t>::raw_begin()
+typename PiercedVector<value_t, id_t>::raw_iterator PiercedVector<value_t, id_t>::raw_begin() noexcept
 {
 	return m_v.begin();
 }
@@ -1480,7 +1480,7 @@ typename PiercedVector<value_t, id_t>::raw_iterator PiercedVector<value_t, id_t>
 			in the raw container.
 */
 template<typename value_t, typename id_t>
-typename PiercedVector<value_t, id_t>::raw_iterator PiercedVector<value_t, id_t>::raw_end()
+typename PiercedVector<value_t, id_t>::raw_iterator PiercedVector<value_t, id_t>::raw_end() noexcept
 {
 	return m_v.end();
 }

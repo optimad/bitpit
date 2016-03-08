@@ -336,15 +336,15 @@ public:
 	iterator get_iterator(const id_t &id) noexcept;
 	const_iterator get_const_iterator(const id_t &id) const noexcept;
 
-	iterator begin();
-	iterator end();
+	iterator begin() noexcept;
+	iterator end() noexcept;
 	const_iterator begin() const noexcept;
 	const_iterator end() const noexcept;
 	const_iterator cbegin() const noexcept;
 	const_iterator cend() const noexcept;
 
-	raw_iterator raw_begin();
-	raw_iterator raw_end();
+	raw_iterator raw_begin() noexcept;
+	raw_iterator raw_end() noexcept;
 	raw_const_iterator raw_begin() const noexcept;
 	raw_const_iterator raw_end() const noexcept;
 	raw_const_iterator raw_cbegin() const noexcept;
