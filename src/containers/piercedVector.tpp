@@ -44,8 +44,8 @@ namespace bitpit{
 /*!
 	Creates a new uninitialized iterator
 */
-template<typename T, typename id_t, typename T_no_cv, typename id_no_cv_t>
-PiercedIterator<T, id_t, T_no_cv, id_no_cv_t>::PiercedIterator()
+template<typename value_t, typename id_t, typename value_no_cv_t, typename id_no_cv_t>
+PiercedIterator<value_t, id_t, value_no_cv_t, id_no_cv_t>::PiercedIterator()
 	: m_container(nullptr), m_pos(0)
 {
 }
@@ -56,8 +56,8 @@ PiercedIterator<T, id_t, T_no_cv, id_no_cv_t>::PiercedIterator()
 
 	\param other the iterator to exchange values with
 */
-template<typename T, typename id_t, typename T_no_cv, typename id_no_cv_t>
-void PiercedIterator<T, id_t, T_no_cv, id_no_cv_t>::swap(PiercedIterator& other) noexcept
+template<typename value_t, typename id_t, typename value_no_cv_t, typename id_no_cv_t>
+void PiercedIterator<value_t, id_t, value_no_cv_t, id_no_cv_t>::swap(PiercedIterator& other) noexcept
 {
 	std::swap(m_container, other.m_container);
 	std::swap(m_pos, other.m_pos);
@@ -66,8 +66,8 @@ void PiercedIterator<T, id_t, T_no_cv, id_no_cv_t>::swap(PiercedIterator& other)
 /*!
 	Pre-increment operator.
 */
-template<typename T, typename id_t, typename T_no_cv, typename id_no_cv_t>
-PiercedIterator<T, id_t, T_no_cv, id_no_cv_t> & PiercedIterator<T, id_t, T_no_cv, id_no_cv_t>::operator++()
+template<typename value_t, typename id_t, typename value_no_cv_t, typename id_no_cv_t>
+PiercedIterator<value_t, id_t, value_no_cv_t, id_no_cv_t> & PiercedIterator<value_t, id_t, value_no_cv_t, id_no_cv_t>::operator++()
 {
 	size_t delta = 1;
 	while (true) {
@@ -91,8 +91,8 @@ PiercedIterator<T, id_t, T_no_cv, id_no_cv_t> & PiercedIterator<T, id_t, T_no_cv
 /*!
 	Post-increment operator.
 */
-template<typename T, typename id_t, typename T_no_cv, typename id_no_cv_t>
-PiercedIterator<T, id_t, T_no_cv, id_no_cv_t> PiercedIterator<T, id_t, T_no_cv, id_no_cv_t>::operator++(int)
+template<typename value_t, typename id_t, typename value_no_cv_t, typename id_no_cv_t>
+PiercedIterator<value_t, id_t, value_no_cv_t, id_no_cv_t> PiercedIterator<value_t, id_t, value_no_cv_t, id_no_cv_t>::operator++(int)
 {
 	PiercedIterator tmp(m_container, m_pos);
 
@@ -107,8 +107,8 @@ PiercedIterator<T, id_t, T_no_cv, id_no_cv_t> PiercedIterator<T, id_t, T_no_cv, 
 	\result A reference to the element currently pointed to by the
 			iterator.
 */
-template<typename T, typename id_t, typename T_no_cv, typename id_no_cv_t>
-T & PiercedIterator<T, id_t, T_no_cv, id_no_cv_t>::operator*() const
+template<typename value_t, typename id_t, typename value_no_cv_t, typename id_no_cv_t>
+value_t & PiercedIterator<value_t, id_t, value_no_cv_t, id_no_cv_t>::operator*() const
 {
 	return m_container->m_v[m_pos];
 }
@@ -119,8 +119,8 @@ T & PiercedIterator<T, id_t, T_no_cv, id_no_cv_t>::operator*() const
 	\result A reference to the element currently pointed to by the
 			iterator.
 */
-template<typename T, typename id_t, typename T_no_cv, typename id_no_cv_t>
-T * PiercedIterator<T, id_t, T_no_cv, id_no_cv_t>::operator->() const
+template<typename value_t, typename id_t, typename value_no_cv_t, typename id_no_cv_t>
+value_t * PiercedIterator<value_t, id_t, value_no_cv_t, id_no_cv_t>::operator->() const
 {
 	return &(m_container->m_v[m_pos]);
 }
@@ -128,19 +128,19 @@ T * PiercedIterator<T, id_t, T_no_cv, id_no_cv_t>::operator->() const
 /*!
 	Converts the iterator to a const_iterator.
 */
-template<typename T, typename id_t, typename T_no_cv, typename id_no_cv_t>
-PiercedIterator<T, id_t, T_no_cv, id_no_cv_t>::operator PiercedIterator<const T, const id_t>() const
+template<typename value_t, typename id_t, typename value_no_cv_t, typename id_no_cv_t>
+PiercedIterator<value_t, id_t, value_no_cv_t, id_no_cv_t>::operator PiercedIterator<const value_t, const id_t>() const
 {
-	return PiercedIterator<const T, const id_t>(m_container, m_pos);
+	return PiercedIterator<const value_t, const id_t>(m_container, m_pos);
 }
 
 /*!
 	Creates a new iterator and initializes it with the position of
 	the const base iterator recevied in input.
 */
-template<typename T, typename id_t, typename T_no_cv, typename id_no_cv_t>
-PiercedIterator<T, id_t, T_no_cv, id_no_cv_t>::PiercedIterator(Container<T_no_cv, id_no_cv_t> *container, const size_t &pos)
-	: m_container(const_cast<Container<T_no_cv, id_no_cv_t> *>(container)), m_pos(pos)
+template<typename value_t, typename id_t, typename value_no_cv_t, typename id_no_cv_t>
+PiercedIterator<value_t, id_t, value_no_cv_t, id_no_cv_t>::PiercedIterator(Container<value_no_cv_t, id_no_cv_t> *container, const size_t &pos)
+	: m_container(const_cast<Container<value_no_cv_t, id_no_cv_t> *>(container)), m_pos(pos)
 {
 }
 
@@ -148,22 +148,22 @@ PiercedIterator<T, id_t, T_no_cv, id_no_cv_t>::PiercedIterator(Container<T_no_cv
 	Creates a new iterator and initializes it with the position of
 	the const base iterator recevied in input.
 */
-template<typename T, typename id_t, typename T_no_cv, typename id_no_cv_t>
-PiercedIterator<T, id_t, T_no_cv, id_no_cv_t>::PiercedIterator(const Container<T_no_cv, id_no_cv_t> *container, const size_t &pos)
-	: m_container(const_cast<Container<T_no_cv, id_no_cv_t> *>(container)), m_pos(pos)
+template<typename value_t, typename id_t, typename value_no_cv_t, typename id_no_cv_t>
+PiercedIterator<value_t, id_t, value_no_cv_t, id_no_cv_t>::PiercedIterator(const Container<value_no_cv_t, id_no_cv_t> *container, const size_t &pos)
+	: m_container(const_cast<Container<value_no_cv_t, id_no_cv_t> *>(container)), m_pos(pos)
 {
 }
 
 // Definition of static constants of PiercedVector
-template<typename T, typename id_t>
+template<typename value_t, typename id_t>
 const std::size_t
-	PiercedVector<T, id_t>::MAX_PENDING_HOLES = 16384;
+	PiercedVector<value_t, id_t>::MAX_PENDING_HOLES = 16384;
 
 /*!
 	Constructs an empty pierced vector with no elements.
 */
-template<typename T, typename id_t>
-PiercedVector<T, id_t>::PiercedVector()
+template<typename value_t, typename id_t>
+PiercedVector<value_t, id_t>::PiercedVector()
 {
 	clear();
 }
@@ -174,8 +174,8 @@ PiercedVector<T, id_t>::PiercedVector()
 
 	\param n the minimum capacity requested for the vector
 */
-template<typename T, typename id_t>
-PiercedVector<T, id_t>::PiercedVector(std::size_t n)
+template<typename value_t, typename id_t>
+PiercedVector<value_t, id_t>::PiercedVector(std::size_t n)
 {
 	clear();
 
@@ -192,8 +192,8 @@ PiercedVector<T, id_t>::PiercedVector(std::size_t n)
 					element
 	\result An iterator that points to the newly inserted element.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::push_back(const id_t &id, value_type &&value)
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::push_back(const id_t &id, value_t &&value)
 {
 	// Fille the position
 	std::size_t pos = fill_pos_append(id);
@@ -216,8 +216,8 @@ typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::push_back(cons
 
 	\param id is the id that will be assigned to the element
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::reclaim(const id_t &id)
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::reclaim(const id_t &id)
 {
 	std::size_t pos = fill_pos_head(id);
 
@@ -241,8 +241,8 @@ typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::reclaim(const 
 	\param id is the id that will be assigned to the element
 	\result An iterator that points to the newly inserted element.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::reclaim_after(const id_t &referenceId, const id_t &id)
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::reclaim_after(const id_t &referenceId, const id_t &id)
 {
 	std::size_t pos = fill_pos_after(get_pos_from_id(referenceId), id);
 
@@ -261,8 +261,8 @@ typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::reclaim_after(
 
 	\param id is the id that will be assigned to the element
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::reclaim_back(const id_t &id)
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::reclaim_back(const id_t &id)
 {
 	std::size_t pos = fill_pos_append(id);
 
@@ -286,8 +286,8 @@ typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::reclaim_back(c
 	\param id is the id that will be assigned to the element
 	\result An iterator that points to the newly inserted element.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::reclaim_before(const id_t &referenceId, const id_t &id)
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::reclaim_before(const id_t &referenceId, const id_t &id)
 {
 	std::size_t pos = fill_pos_before(get_pos_from_id(referenceId), id);
 
@@ -307,12 +307,12 @@ typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::reclaim_before
 	until a flush is called
 	\result An iterator that points to the moved element.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::move_after(const id_t &referenceId, const id_t &id, bool delayed)
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::move_after(const id_t &referenceId, const id_t &id, bool delayed)
 {
 	// Save the element
 	std::size_t initialPos = get_pos_from_id(id);
-	T temp = std::move(m_v[initialPos]);
+	value_t temp = std::move(m_v[initialPos]);
 
 	// Pierce the position
 	pierce_pos(initialPos, !delayed);
@@ -332,12 +332,12 @@ typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::move_after(con
 	until a flush is called
 	\result An iterator that points to the moved element.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::move_before(const id_t &referenceId, const id_t &id, bool delayed)
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::move_before(const id_t &referenceId, const id_t &id, bool delayed)
 {
 	// Save the element
 	std::size_t initialPos = get_pos_from_id(id);
-	T temp = std::move(m_v[initialPos]);
+	value_t temp = std::move(m_v[initialPos]);
 
 	// Pierce the position
 	pierce_pos(initialPos, !delayed);
@@ -353,8 +353,8 @@ typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::move_before(co
 				inserted elements.
 	\result An iterator that points to the newly inserted element.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::insert(const id_t &id, value_type &&value)
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::insert(const id_t &id, value_t &&value)
 {
 	// Fill the position
 	std::size_t pos = fill_pos_head(id);
@@ -377,8 +377,8 @@ typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::insert(const i
 	new element will be inserted
 	\result An iterator that points to the newly inserted element.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::insert_after(const id_t &referenceId, const id_t &id, value_type &&value)
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::insert_after(const id_t &referenceId, const id_t &id, value_t &&value)
 {
 	// Fill the position
 	std::size_t pos = fill_pos_after(get_pos_from_id(referenceId), id);
@@ -401,8 +401,8 @@ typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::insert_after(c
 	new element will be inserted
 	\result An iterator that points to the newly inserted element.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::insert_before(const id_t &referenceId, const id_t &id, value_type &&value)
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::insert_before(const id_t &referenceId, const id_t &id, value_t &&value)
 {
 	// Fill the position
 	std::size_t pos = fill_pos_before(get_pos_from_id(referenceId), id);
@@ -421,8 +421,8 @@ typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::insert_before(
 	\param value is the value to be moved to the inserted elements.
 	\result An iterator that points to the newly inserted element.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::replace(id_t id, value_type &&value)
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::replace(id_t id, value_t &&value)
 {
 	// Position
 	size_t pos = m_pos.at(id);
@@ -446,8 +446,8 @@ typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::replace(id_t i
 	\param currentId is the current id of the element
 	\param updatedId is the new id of the element
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::update_id(const id_t &currentId, const id_t &updatedId)
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::update_id(const id_t &currentId, const id_t &updatedId)
 {
 	set_pos_id(get_pos_from_id(currentId), updatedId);
 }
@@ -461,15 +461,15 @@ void PiercedVector<T, id_t>::update_id(const id_t &currentId, const id_t &update
 	\result An iterator that points to the the newly inserted
 			element.
 */
-template<typename T, typename id_t>
+template<typename value_t, typename id_t>
 template<class... Args>
-typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::emplace(const id_t &id, Args&&... args)
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emplace(const id_t &id, Args&&... args)
 {
 	// Fill the position
 	std::size_t pos = fill_pos_head(id);
 
 	// Insert the element
-	m_v[pos] = T(std::forward<Args>(args)...);
+	m_v[pos] = value_t(std::forward<Args>(args)...);
 
 	// Return the iterator that points to the element
 	return get_iterator_from_pos(pos);
@@ -485,15 +485,15 @@ typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::emplace(const 
 	\param args the arguments forwarded to construct the new element
 	\result An iterator that points to the newly inserted element.
 */
-template<typename T, typename id_t>
+template<typename value_t, typename id_t>
 template<class... Args>
-typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::emplace_after(const id_t &referenceId, const id_t &id, Args&&... args)
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emplace_after(const id_t &referenceId, const id_t &id, Args&&... args)
 {
 	// Fill the position
 	std::size_t pos = fill_pos_after(get_pos_from_id(referenceId), id);
 
 	// Insert the element
-	m_v[pos] = T(std::forward<Args>(args)...);
+	m_v[pos] = value_t(std::forward<Args>(args)...);
 
 	// Return the iterator that points to the element
 	return get_iterator_from_pos(pos);
@@ -506,15 +506,15 @@ typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::emplace_after(
 
 	\param args the arguments forwarded to construct the new element
 */
-template<typename T, typename id_t>
+template<typename value_t, typename id_t>
 template<class... Args>
-void PiercedVector<T, id_t>::emplace_back(const id_t &id, Args&&... args)
+void PiercedVector<value_t, id_t>::emplace_back(const id_t &id, Args&&... args)
 {
 	// Fill the position
 	std::size_t pos = fill_pos_append(id);
 
 	// Insert the element
-	m_v[pos] = T(std::forward<Args>(args)...);
+	m_v[pos] = value_t(std::forward<Args>(args)...);
 }
 
 /*!
@@ -529,15 +529,15 @@ void PiercedVector<T, id_t>::emplace_back(const id_t &id, Args&&... args)
 	\param args the arguments forwarded to construct the new element
 	\result An iterator that points to the newly inserted element.
 */
-template<typename T, typename id_t>
+template<typename value_t, typename id_t>
 template<class... Args>
-typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::emplace_before(const id_t &referenceId, const id_t &id, Args&&... args)
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emplace_before(const id_t &referenceId, const id_t &id, Args&&... args)
 {
 	// Fill the position
 	std::size_t pos = fill_pos_before(get_pos_from_id(referenceId), id);
 
 	// Insert the element
-	m_v[pos] = T(std::forward<Args>(args)...);
+	m_v[pos] = value_t(std::forward<Args>(args)...);
 
 	// Return the iterator that points to the element
 	return get_iterator_from_pos(pos);
@@ -552,15 +552,15 @@ typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::emplace_before
 	\param args the arguments forwarded to construct the new element
 	\result An iterator that points to the newly inserted element.
 */
-template<typename T, typename id_t>
+template<typename value_t, typename id_t>
 template<class... Args>
-typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::emreplace(id_t id, Args&&... args)
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emreplace(id_t id, Args&&... args)
 {
 	// Get the position of the element
 	size_t pos = m_pos.at(id);
 
 	// Replace the element
-	m_v[pos] = T(std::forward<Args>(args)...);
+	m_v[pos] = value_t(std::forward<Args>(args)...);
 
 	// Update the map
 	id_t id_prev = m_ids[pos];
@@ -589,8 +589,8 @@ typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::emreplace(id_t
 			function call. This is the container end if the
 			operation erased the last element in the sequence.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::erase(id_t id, bool delayed)
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::erase(id_t id, bool delayed)
 {
 	// Position
 	size_t pos = m_pos.at(id);
@@ -614,8 +614,8 @@ typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::erase(id_t id,
 	id is changed to mark the position as empty and allow the
 	container to reuse that position.
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::pop_back()
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::pop_back()
 {
 	if (empty()) {
 		throw std::out_of_range ("Vector is empty");
@@ -633,15 +633,15 @@ void PiercedVector<T, id_t>::pop_back()
 	\param id_first is the id of the first element to be swapped
 	\param id_second is the id of the second element to be swapped
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::swap(const id_t &id_first, const id_t &id_second)
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::swap(const id_t &id_first, const id_t &id_second)
 {
 	// Positions
 	size_t pos_first  = m_pos.at(id_first);
 	size_t pos_second = m_pos.at(id_second);
 
 	// Swap the elements
-	T tmp = std::move(m_v[pos_first]);
+	value_t tmp = std::move(m_v[pos_first]);
 	m_v[pos_first]  = std::move(m_v[pos_second]);
 	m_v[pos_second] = std::move(tmp);
 
@@ -658,15 +658,15 @@ void PiercedVector<T, id_t>::swap(const id_t &id_first, const id_t &id_second)
 	be released, otherwise the container will be cleared but its
 	memory will not be relased
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::clear(bool release)
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::clear(bool release)
 {
 	// Clear storage
 	m_ids.clear();
 	m_v.clear();
 	if (release) {
 		std::vector<id_t>().swap(m_ids);
-		std::vector<value_type>().swap(m_v);
+		std::vector<value_t>().swap(m_v);
 	}
 	storage_resize(0);
 
@@ -688,8 +688,8 @@ void PiercedVector<T, id_t>::clear(bool release)
 /*!
 	Flush all pending changes.
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::flush()
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::flush()
 {
 	// Flush pending holes
 	holes_flush();
@@ -708,8 +708,8 @@ void PiercedVector<T, id_t>::flush()
 
 	\param n the minimum capacity requested for the vector
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::reserve(std::size_t n)
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::reserve(std::size_t n)
 {
 	m_ids.reserve(n);
 	m_v.reserve(n);
@@ -736,8 +736,8 @@ void PiercedVector<T, id_t>::reserve(std::size_t n)
 	\param n is the new container size, expressed in number of
 	elements.
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::resize(std::size_t n)
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::resize(std::size_t n)
 {
 	// If the size of the vector is already the requested size
 	// there is nothing to do.
@@ -778,8 +778,8 @@ void PiercedVector<T, id_t>::resize(std::size_t n)
 /*!
 	Sorts the elements of the vector in ascending id order.
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::sort()
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::sort()
 {
 	// Squeeze the container
 	squeeze();
@@ -801,7 +801,7 @@ void PiercedVector<T, id_t>::sort()
 
 	// Sort the container
 	reorder_vector<id_t>(id_permutation, m_ids, containerSize);
-	reorder_vector<T>(value_permutation, m_v, containerSize);
+	reorder_vector<value_t>(value_permutation, m_v, containerSize);
 }
 
 /*!
@@ -814,8 +814,8 @@ void PiercedVector<T, id_t>::sort()
 	This may cause a reallocation, but has no effect on the vector
 	size and cannot alter its elements.
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::squeeze()
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::squeeze()
 {
 	// Flush changes
 	flush();
@@ -869,12 +869,12 @@ void PiercedVector<T, id_t>::squeeze()
 	references and pointers remain valid for the swapped objects.
 
 	\param x Another vector container of the same type (i.e.,
-				instantiated with the same template parameters, T and
+				instantiated with the same template parameters, value_t and
 				Alloc) whose content is swapped with that of this
 				container.
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::swap(PiercedVector& x) noexcept
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::swap(PiercedVector& x) noexcept
 {
 	std::swap(x.m_first_pos, m_first_pos);
 	std::swap(x.m_last_pos, m_last_pos);
@@ -899,8 +899,8 @@ void PiercedVector<T, id_t>::swap(PiercedVector& x) noexcept
 			in the vector, measured in terms of the number elements
 			it can hold.
 */
-template<typename T, typename id_t>
-std::size_t PiercedVector<T, id_t>::capacity()
+template<typename value_t, typename id_t>
+std::size_t PiercedVector<value_t, id_t>::capacity()
 {
 	return m_v.capacity();
 }
@@ -911,8 +911,8 @@ std::size_t PiercedVector<T, id_t>::capacity()
 
 	\result true if the container is contiguous, false otherwise.
 */
-template<typename T, typename id_t>
-bool PiercedVector<T, id_t>::contiguous() const
+template<typename value_t, typename id_t>
+bool PiercedVector<value_t, id_t>::contiguous() const
 {
 	return m_holes.empty();
 }
@@ -920,8 +920,8 @@ bool PiercedVector<T, id_t>::contiguous() const
 /*!
 	Dumps to screen the internal data.
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::dump()
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::dump()
 {
 	std::cout << "----------------[ DUMP ]----------------" << std::endl;
 
@@ -970,8 +970,8 @@ void PiercedVector<T, id_t>::dump()
 
 	\result true if the container size is 0, false otherwise.
 */
-template<typename T, typename id_t>
-bool PiercedVector<T, id_t>::empty() const
+template<typename value_t, typename id_t>
+bool PiercedVector<value_t, id_t>::empty() const
 {
 	return m_pos.empty();
 }
@@ -988,8 +988,8 @@ bool PiercedVector<T, id_t>::empty() const
 	\result Return true if the container is in a state that can slow down
 	the iterator, false otherwise.
 */
-template<typename T, typename id_t>
-bool PiercedVector<T, id_t>::is_iterator_slow()
+template<typename value_t, typename id_t>
+bool PiercedVector<value_t, id_t>::is_iterator_slow()
 {
 	return (m_first_dirty_pos <= m_last_pos);
 }
@@ -1003,8 +1003,8 @@ bool PiercedVector<T, id_t>::is_iterator_slow()
 	size: it can still fail to allocate storage at any point before
 	that size is reached.
 */
-template<typename T, typename id_t>
-std::size_t PiercedVector<T, id_t>::max_size() const
+template<typename value_t, typename id_t>
+std::size_t PiercedVector<value_t, id_t>::max_size() const
 {
 	return m_v.max_size();
 }
@@ -1017,8 +1017,8 @@ std::size_t PiercedVector<T, id_t>::max_size() const
 
 	\result The number of elements in the container.
 */
-template<typename T, typename id_t>
-std::size_t PiercedVector<T, id_t>::size() const
+template<typename value_t, typename id_t>
+std::size_t PiercedVector<value_t, id_t>::size() const
 {
 	return m_pos.size();
 }
@@ -1030,8 +1030,8 @@ std::size_t PiercedVector<T, id_t>::size() const
 	\result Returns true is the given id exists in the vector,
 			otherwise it returns false.
 */
-template<typename T, typename id_t>
-bool PiercedVector<T, id_t>::exists(id_t id)
+template<typename value_t, typename id_t>
+bool PiercedVector<value_t, id_t>::exists(id_t id)
 {
 	return (m_pos.count(id) != 0);
 }
@@ -1051,8 +1051,8 @@ bool PiercedVector<T, id_t>::exists(id_t id)
 	\param id the id of the element for witch the flat id is requested
 	\result The flat index of the element with the specified id.
 */
-template<typename T, typename id_t>
-std::size_t PiercedVector<T, id_t>::extract_flat_index(id_t id) const
+template<typename value_t, typename id_t>
+std::size_t PiercedVector<value_t, id_t>::extract_flat_index(id_t id) const
 {
 	size_t pos = get_pos_from_id(id);
 	size_t flat = pos - m_first_pos;
@@ -1076,8 +1076,8 @@ std::size_t PiercedVector<T, id_t>::extract_flat_index(id_t id) const
 	\result A vector with the id of the elements in stored in the
 			vector.
 */
-template<typename T, typename id_t>
-std::vector<id_t> PiercedVector<T, id_t>::get_ids(bool ordered)
+template<typename value_t, typename id_t>
+std::vector<id_t> PiercedVector<value_t, id_t>::get_ids(bool ordered)
 {
 	// Initialize the vector wth the ids
 	std::vector<id_t> ids;
@@ -1113,8 +1113,8 @@ std::vector<id_t> PiercedVector<T, id_t>::get_ids(bool ordered)
 	number of other elements. If this element does not exist the
 	fallback value will be returned.
 */
-template<typename T, typename id_t>
-id_t PiercedVector<T, id_t>::get_size_marker(const size_t &targetSize, const id_t &fallback)
+template<typename value_t, typename id_t>
+id_t PiercedVector<value_t, id_t>::get_size_marker(const size_t &targetSize, const id_t &fallback)
 {
 	// If the size is zero, we return the first element, if the target
 	// size is equal to the size minus one we return the last element,
@@ -1181,8 +1181,8 @@ id_t PiercedVector<T, id_t>::get_size_marker(const size_t &targetSize, const id_
 			internally by the vector.
 
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::value_type * PiercedVector<T, id_t>::data() noexcept
+template<typename value_t, typename id_t>
+value_t * PiercedVector<value_t, id_t>::data() noexcept
 {
 	return m_v.data();
 }
@@ -1193,8 +1193,8 @@ typename PiercedVector<T, id_t>::value_type * PiercedVector<T, id_t>::data() noe
 
 	\result A reference to the last element of the vector.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::value_type & PiercedVector<T, id_t>::back()
+template<typename value_t, typename id_t>
+value_t & PiercedVector<value_t, id_t>::back()
 {
 	if (empty()) {
 		throw std::out_of_range ("Vector is empty");
@@ -1209,8 +1209,8 @@ typename PiercedVector<T, id_t>::value_type & PiercedVector<T, id_t>::back()
 
 	\result A constant reference to the last element of the vector.
 */
-template<typename T, typename id_t>
-const typename PiercedVector<T, id_t>::value_type & PiercedVector<T, id_t>::back() const
+template<typename value_t, typename id_t>
+const value_t & PiercedVector<value_t, id_t>::back() const
 {
 	if (empty()) {
 		throw std::out_of_range ("Vector is empty");
@@ -1225,8 +1225,8 @@ const typename PiercedVector<T, id_t>::value_type & PiercedVector<T, id_t>::back
 
 	\result A reference to the first element of the vector.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::value_type & PiercedVector<T, id_t>::front()
+template<typename value_t, typename id_t>
+value_t & PiercedVector<value_t, id_t>::front()
 {
 	if (empty()) {
 		throw std::out_of_range ("Vector is empty");
@@ -1241,8 +1241,8 @@ typename PiercedVector<T, id_t>::value_type & PiercedVector<T, id_t>::front()
 
 	\result A constant reference to the first element of the vector.
 */
-template<typename T, typename id_t>
-const typename PiercedVector<T, id_t>::value_type & PiercedVector<T, id_t>::front() const
+template<typename value_t, typename id_t>
+const value_t & PiercedVector<value_t, id_t>::front() const
 {
 	if (empty()) {
 		throw std::out_of_range ("Vector is empty");
@@ -1259,8 +1259,8 @@ const typename PiercedVector<T, id_t>::value_type & PiercedVector<T, id_t>::fron
 	\param id the id of the element
 	\result A reference to the element with the specified id.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::value_type & PiercedVector<T, id_t>::at(const id_t &id)
+template<typename value_t, typename id_t>
+value_t & PiercedVector<value_t, id_t>::at(const id_t &id)
 {
 	return (*this)[id];
 }
@@ -1274,8 +1274,8 @@ typename PiercedVector<T, id_t>::value_type & PiercedVector<T, id_t>::at(const i
 	\result A constant reference to the element with the specified
 			id.
 */
-template<typename T, typename id_t>
-const typename PiercedVector<T, id_t>::value_type & PiercedVector<T, id_t>::at(const id_t &id) const
+template<typename value_t, typename id_t>
+const value_t & PiercedVector<value_t, id_t>::at(const id_t &id) const
 {
 	return (*this)[id];
 }
@@ -1286,8 +1286,8 @@ const typename PiercedVector<T, id_t>::value_type & PiercedVector<T, id_t>::at(c
 	\param pos the position of the element
 	\result A reference to the element in the specified position.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::value_type & PiercedVector<T, id_t>::raw_at(const std::size_t &pos)
+template<typename value_t, typename id_t>
+value_t & PiercedVector<value_t, id_t>::raw_at(const std::size_t &pos)
 {
 	return m_v[pos];
 }
@@ -1300,8 +1300,8 @@ typename PiercedVector<T, id_t>::value_type & PiercedVector<T, id_t>::raw_at(con
 	\result A constant reference to the element in the specified
 			position.
 */
-template<typename T, typename id_t>
-const typename PiercedVector<T, id_t>::value_type & PiercedVector<T, id_t>::raw_at(const std::size_t &pos) const
+template<typename value_t, typename id_t>
+const value_t & PiercedVector<value_t, id_t>::raw_at(const std::size_t &pos) const
 {
 	return m_v[pos];
 }
@@ -1315,8 +1315,8 @@ const typename PiercedVector<T, id_t>::value_type & PiercedVector<T, id_t>::raw_
 	\param id the id of the element for witch the raw id is requested
 	\result The row index of the element with the specified id.
 */
-template<typename T, typename id_t>
-std::size_t PiercedVector<T, id_t>::raw_index(id_t id) const
+template<typename value_t, typename id_t>
+std::size_t PiercedVector<value_t, id_t>::raw_index(id_t id) const
 {
 	return get_pos_from_id(id);
 }
@@ -1330,8 +1330,8 @@ std::size_t PiercedVector<T, id_t>::raw_index(id_t id) const
 	\result A constant reference to the element with the specified
 			id.
 */
-template<typename T, typename id_t>
-const typename PiercedVector<T, id_t>::value_type & PiercedVector<T, id_t>::operator[](const id_t &id) const
+template<typename value_t, typename id_t>
+const value_t & PiercedVector<value_t, id_t>::operator[](const id_t &id) const
 {
 	std::size_t pos = get_pos_from_id(id);
 
@@ -1346,8 +1346,8 @@ const typename PiercedVector<T, id_t>::value_type & PiercedVector<T, id_t>::oper
 	\param id the id of the element
 	\result A reference to the element with the specified id.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::value_type & PiercedVector<T, id_t>::operator[](const id_t &id)
+template<typename value_t, typename id_t>
+value_t & PiercedVector<value_t, id_t>::operator[](const id_t &id)
 {
 	std::size_t pos = get_pos_from_id(id);
 
@@ -1360,8 +1360,8 @@ typename PiercedVector<T, id_t>::value_type & PiercedVector<T, id_t>::operator[]
 	\param id is the id of the specified iterator.
 	\result An iterator pointing to the specified element.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::get_iterator(const id_t &id) noexcept
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::get_iterator(const id_t &id) noexcept
 {
 	const size_t pos = get_pos_from_id(id);
 
@@ -1374,8 +1374,8 @@ typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::get_iterator(c
 	\param id is the id of the specified iterator.
 	\result A constant iterator pointing to the specified element.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::const_iterator PiercedVector<T, id_t>::get_const_iterator(const id_t &id) const noexcept
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::const_iterator PiercedVector<value_t, id_t>::get_const_iterator(const id_t &id) const noexcept
 {
 	const size_t pos = get_pos_from_id(id);
 
@@ -1388,8 +1388,8 @@ typename PiercedVector<T, id_t>::const_iterator PiercedVector<T, id_t>::get_cons
 
 	\result An iterator pointing to the first element in the vector.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::begin()
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::begin()
 {
 	return get_iterator_from_pos(m_first_pos);
 }
@@ -1401,8 +1401,8 @@ typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::begin()
 	\result An iterator referring to the past-the-end element
 			in the vector.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::end()
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::end()
 {
 	return get_iterator_from_pos(m_last_pos + 1);
 }
@@ -1414,8 +1414,8 @@ typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::end()
 	\result A constant iterator pointing to the first element in
 	the vector.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::const_iterator PiercedVector<T, id_t>::begin() const noexcept
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::const_iterator PiercedVector<value_t, id_t>::begin() const noexcept
 {
 	return cbegin();
 }
@@ -1427,8 +1427,8 @@ typename PiercedVector<T, id_t>::const_iterator PiercedVector<T, id_t>::begin() 
 	\result A constant iterator referring to the past-the-end
 	element in the vector.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::const_iterator PiercedVector<T, id_t>::end() const noexcept
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::const_iterator PiercedVector<value_t, id_t>::end() const noexcept
 {
 	return cend();
 }
@@ -1440,8 +1440,8 @@ typename PiercedVector<T, id_t>::const_iterator PiercedVector<T, id_t>::end() co
 	\result A const_iterator pointing to the first element in
 			the vector.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::const_iterator PiercedVector<T, id_t>::cbegin() const noexcept
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::const_iterator PiercedVector<value_t, id_t>::cbegin() const noexcept
 {
 	return get_const_iterator_from_pos(m_first_pos);
 }
@@ -1453,8 +1453,8 @@ typename PiercedVector<T, id_t>::const_iterator PiercedVector<T, id_t>::cbegin()
 	\result A const_iterator referring to the past-the-end element
 			in the vector.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::const_iterator PiercedVector<T, id_t>::cend() const noexcept
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::const_iterator PiercedVector<value_t, id_t>::cend() const noexcept
 {
 	return get_const_iterator_from_pos(m_last_pos + 1);
 }
@@ -1466,8 +1466,8 @@ typename PiercedVector<T, id_t>::const_iterator PiercedVector<T, id_t>::cend() c
 	\result An iterator pointing to the first element in the raw
 			container.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::raw_iterator PiercedVector<T, id_t>::raw_begin()
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::raw_iterator PiercedVector<value_t, id_t>::raw_begin()
 {
 	return m_v.begin();
 }
@@ -1479,8 +1479,8 @@ typename PiercedVector<T, id_t>::raw_iterator PiercedVector<T, id_t>::raw_begin(
 	\result An iterator referring to the past-the-end element
 			in the raw container.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::raw_iterator PiercedVector<T, id_t>::raw_end()
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::raw_iterator PiercedVector<value_t, id_t>::raw_end()
 {
 	return m_v.end();
 }
@@ -1492,8 +1492,8 @@ typename PiercedVector<T, id_t>::raw_iterator PiercedVector<T, id_t>::raw_end()
 	\result A constant iterator pointing to the first element in
 	the raw container.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::raw_const_iterator PiercedVector<T, id_t>::raw_begin() const noexcept
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::raw_const_iterator PiercedVector<value_t, id_t>::raw_begin() const noexcept
 {
 	return raw_cbegin();
 }
@@ -1505,8 +1505,8 @@ typename PiercedVector<T, id_t>::raw_const_iterator PiercedVector<T, id_t>::raw_
 	\result A constant iterator referring to the past-the-end
 	element in the raw container.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::raw_const_iterator PiercedVector<T, id_t>::raw_end() const noexcept
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::raw_const_iterator PiercedVector<value_t, id_t>::raw_end() const noexcept
 {
 	return raw_cend();
 }
@@ -1518,8 +1518,8 @@ typename PiercedVector<T, id_t>::raw_const_iterator PiercedVector<T, id_t>::raw_
 	\result A const_iterator pointing to the first element in
 			the raw container.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::raw_const_iterator PiercedVector<T, id_t>::raw_cbegin() const noexcept
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::raw_const_iterator PiercedVector<value_t, id_t>::raw_cbegin() const noexcept
 {
 	return m_v.cbegin();
 }
@@ -1531,8 +1531,8 @@ typename PiercedVector<T, id_t>::raw_const_iterator PiercedVector<T, id_t>::raw_
 	\result A const_iterator referring to the past-the-end element
 			in raw container.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::raw_const_iterator PiercedVector<T, id_t>::raw_cend() const noexcept
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::raw_const_iterator PiercedVector<value_t, id_t>::raw_cend() const noexcept
 {
 	return m_v.cend();
 }
@@ -1543,8 +1543,8 @@ typename PiercedVector<T, id_t>::raw_const_iterator PiercedVector<T, id_t>::raw_
 	\param pos is the position of the element
 	\result An iterator pointing to the element in the specified position.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::get_iterator_from_pos(const std::size_t &pos) noexcept
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::get_iterator_from_pos(const std::size_t &pos) noexcept
 {
 	if (empty() || pos > m_last_pos) {
 		return iterator(this, m_last_pos + 1);
@@ -1561,8 +1561,8 @@ typename PiercedVector<T, id_t>::iterator PiercedVector<T, id_t>::get_iterator_f
 	\result A constant iterator pointing to the element in the specified
 	position.
 */
-template<typename T, typename id_t>
-typename PiercedVector<T, id_t>::const_iterator PiercedVector<T, id_t>::get_const_iterator_from_pos(const std::size_t &pos) const noexcept
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::const_iterator PiercedVector<value_t, id_t>::get_const_iterator_from_pos(const std::size_t &pos) const noexcept
 {
 	if (empty() || pos > m_last_pos) {
 		return const_iterator(this, m_last_pos + 1);
@@ -1578,8 +1578,8 @@ typename PiercedVector<T, id_t>::const_iterator PiercedVector<T, id_t>::get_cons
 	\param id is the id that eill be associated to the position
 	\result The position that has bill filled.
 */
-template<typename T, typename id_t>
-std::size_t PiercedVector<T, id_t>::fill_pos(const std::size_t &pos, const id_t &id)
+template<typename value_t, typename id_t>
+std::size_t PiercedVector<value_t, id_t>::fill_pos(const std::size_t &pos, const id_t &id)
 {
 	// Ids needs to be positive
 	if (id < 0) {
@@ -1604,8 +1604,8 @@ std::size_t PiercedVector<T, id_t>::fill_pos(const std::size_t &pos, const id_t 
 
 	\result A position for storing a new element.
 */
-template<typename T, typename id_t>
-std::size_t PiercedVector<T, id_t>::fill_pos_append(const id_t &id)
+template<typename value_t, typename id_t>
+std::size_t PiercedVector<value_t, id_t>::fill_pos_append(const id_t &id)
 {
 	return fill_pos_insert(storage_size(), id);
 }
@@ -1618,8 +1618,8 @@ std::size_t PiercedVector<T, id_t>::fill_pos_append(const id_t &id)
 	\param pos is the position the will be make available
 	\result A position for storing a new element.
 */
-template<typename T, typename id_t>
-std::size_t PiercedVector<T, id_t>::fill_pos_insert(const std::size_t &pos, const id_t &id)
+template<typename value_t, typename id_t>
+std::size_t PiercedVector<value_t, id_t>::fill_pos_insert(const std::size_t &pos, const id_t &id)
 {
 	assert(pos <= m_last_pos + 1);
 	if (pos > m_last_pos + 1) {
@@ -1643,7 +1643,7 @@ std::size_t PiercedVector<T, id_t>::fill_pos_insert(const std::size_t &pos, cons
 		}
 
 		// Reset the, now empty, element
-		m_v[pos] = T();
+		m_v[pos] = value_t();
 
 		// Update the regular holes
 		if (m_holes_regular_begin != m_holes_regular_end) {
@@ -1678,8 +1678,8 @@ std::size_t PiercedVector<T, id_t>::fill_pos_insert(const std::size_t &pos, cons
 
 	\result A position for storing a new element.
 */
-template<typename T, typename id_t>
-std::size_t PiercedVector<T, id_t>::fill_pos_head(const id_t &id)
+template<typename value_t, typename id_t>
+std::size_t PiercedVector<value_t, id_t>::fill_pos_head(const id_t &id)
 {
 	// If there are holes we can fill a hole.
 	long nRegulars = holes_count_regular();
@@ -1734,8 +1734,8 @@ std::size_t PiercedVector<T, id_t>::fill_pos_head(const id_t &id)
 
 	\result A position for storing a new element.
 */
-template<typename T, typename id_t>
-std::size_t PiercedVector<T, id_t>::fill_pos_tail(const id_t &id)
+template<typename value_t, typename id_t>
+std::size_t PiercedVector<value_t, id_t>::fill_pos_tail(const id_t &id)
 {
 	// If there are holes we can fill a hole.
 	long nRegulars = holes_count_regular();
@@ -1805,8 +1805,8 @@ std::size_t PiercedVector<T, id_t>::fill_pos_tail(const id_t &id)
 	new available position will be searched for
 	\result A position for storing a new element.
 */
-template<typename T, typename id_t>
-std::size_t PiercedVector<T, id_t>::fill_pos_after(const std::size_t &referencePos, const id_t &id)
+template<typename value_t, typename id_t>
+std::size_t PiercedVector<value_t, id_t>::fill_pos_after(const std::size_t &referencePos, const id_t &id)
 {
 	// Check if we can fill a hole
 	//
@@ -1842,8 +1842,8 @@ std::size_t PiercedVector<T, id_t>::fill_pos_after(const std::size_t &referenceP
 	new available position will be searched for
 	\result A position for storing a new element.
 */
-template<typename T, typename id_t>
-std::size_t PiercedVector<T, id_t>::fill_pos_before(const std::size_t &referencePos, const id_t &id)
+template<typename value_t, typename id_t>
+std::size_t PiercedVector<value_t, id_t>::fill_pos_before(const std::size_t &referencePos, const id_t &id)
 {
 	// Check if we can fill a hole
 	//
@@ -1878,8 +1878,8 @@ std::size_t PiercedVector<T, id_t>::fill_pos_before(const std::size_t &reference
 
 	\param hole is the position of the new hole
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::pierce_pos(const std::size_t &pos, bool flush)
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::pierce_pos(const std::size_t &pos, bool flush)
 {
 	// If removing the last position, there is no need to add the
 	// position to the holes, it's enough to update the last position
@@ -1899,7 +1899,7 @@ void PiercedVector<T, id_t>::pierce_pos(const std::size_t &pos, bool flush)
 	m_pos.erase(id);
 
 	// Reset the element
-	m_v[pos] = T();
+	m_v[pos] = value_t();
 
 	// Reset the position
 	size_t nextUsedPos = find_next_used_pos(pos);
@@ -1938,8 +1938,8 @@ void PiercedVector<T, id_t>::pierce_pos(const std::size_t &pos, bool flush)
 /*!
 	Clear the list of available holes.
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::holes_clear(bool release)
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::holes_clear(bool release)
 {
 	m_holes.clear();
 	if (release) {
@@ -1954,8 +1954,8 @@ void PiercedVector<T, id_t>::holes_clear(bool release)
 
 	\result The number of available holes.
 */
-template<typename T, typename id_t>
-std::size_t PiercedVector<T, id_t>::holes_count()
+template<typename value_t, typename id_t>
+std::size_t PiercedVector<value_t, id_t>::holes_count()
 {
 	return holes_count_pending() + holes_count_regular();
 }
@@ -1965,8 +1965,8 @@ std::size_t PiercedVector<T, id_t>::holes_count()
 
 	\result The number of pending holes.
 */
-template<typename T, typename id_t>
-std::size_t PiercedVector<T, id_t>::holes_count_pending()
+template<typename value_t, typename id_t>
+std::size_t PiercedVector<value_t, id_t>::holes_count_pending()
 {
 	return std::distance(m_holes_pending_begin, m_holes_pending_end);
 }
@@ -1976,8 +1976,8 @@ std::size_t PiercedVector<T, id_t>::holes_count_pending()
 
 	\result The number of regular holes.
 */
-template<typename T, typename id_t>
-std::size_t PiercedVector<T, id_t>::holes_count_regular()
+template<typename value_t, typename id_t>
+std::size_t PiercedVector<value_t, id_t>::holes_count_regular()
 {
 	return std::distance(m_holes_regular_begin, m_holes_regular_end);
 }
@@ -1988,8 +1988,8 @@ std::size_t PiercedVector<T, id_t>::holes_count_regular()
 	All the pending hole are converted to regular holes and new
 	space is reserved for future pending holes.
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::holes_flush()
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::holes_flush()
 {
 	// If there are no pending holes there is nothing to do
 	if (m_holes_pending_begin == m_holes_pending_end) {
@@ -2078,8 +2078,8 @@ void PiercedVector<T, id_t>::holes_flush()
 /*!
 	Reset pending holes
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::holes_clear_pending()
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::holes_clear_pending()
 {
 	long offset    = std::distance(m_holes.begin(), m_holes_regular_begin);
 	long nRegulars = holes_count_regular();
@@ -2095,8 +2095,8 @@ void PiercedVector<T, id_t>::holes_clear_pending()
 	\param nRegulars is the number of regulars holes in the hole's
 	container
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::holes_clear_pending(const long &offset, const long &nRegulars)
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::holes_clear_pending(const long &offset, const long &nRegulars)
 {
 	m_holes.reserve(offset + nRegulars + MAX_PENDING_HOLES);
 	m_holes.resize(offset + nRegulars);
@@ -2110,8 +2110,8 @@ void PiercedVector<T, id_t>::holes_clear_pending(const long &offset, const long 
 /*!
 	Sort the list of pending holes in descendent order
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::holes_sort_pending()
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::holes_sort_pending()
 {
 	if (m_holes_pending_sorted) {
 		return;
@@ -2124,8 +2124,8 @@ void PiercedVector<T, id_t>::holes_sort_pending()
 /*!
 	Sort the list of regular holes in descendent order
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::holes_sort_regular()
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::holes_sort_regular()
 {
 	if (m_holes_regular_sorted) {
 		return;
@@ -2146,8 +2146,8 @@ void PiercedVector<T, id_t>::holes_sort_regular()
 	\result The firt non-empty position before the starting
 			position.
 */
-template<typename T, typename id_t>
-std::size_t PiercedVector<T, id_t>::find_prev_used_pos(std::size_t pos)
+template<typename value_t, typename id_t>
+std::size_t PiercedVector<value_t, id_t>::find_prev_used_pos(std::size_t pos)
 {
 	std::size_t prev_pos = pos;
 	while (true) {
@@ -2174,8 +2174,8 @@ std::size_t PiercedVector<T, id_t>::find_prev_used_pos(std::size_t pos)
 	\result The firt non-empty position after the starting
 			position.
 */
-template<typename T, typename id_t>
-std::size_t PiercedVector<T, id_t>::find_next_used_pos(std::size_t pos)
+template<typename value_t, typename id_t>
+std::size_t PiercedVector<value_t, id_t>::find_next_used_pos(std::size_t pos)
 {
 	std::size_t next_pos   = pos;
 	std::size_t next_delta = 1;
@@ -2203,8 +2203,8 @@ std::size_t PiercedVector<T, id_t>::find_next_used_pos(std::size_t pos)
 	\param pos the position to check
 	\result true is the position is empty, false otherwise.
 */
-template<typename T, typename id_t>
-bool PiercedVector<T, id_t>::is_pos_empty(std::size_t pos)
+template<typename value_t, typename id_t>
+bool PiercedVector<value_t, id_t>::is_pos_empty(std::size_t pos)
 {
 	return (m_ids[pos] < 0);
 }
@@ -2220,8 +2220,8 @@ bool PiercedVector<T, id_t>::is_pos_empty(std::size_t pos)
 	\result The position in the storage vector of the element with
 	the specified id.
 */
-template<typename T, typename id_t>
-std::size_t PiercedVector<T, id_t>::get_pos_from_id(id_t id) const
+template<typename value_t, typename id_t>
+std::size_t PiercedVector<value_t, id_t>::get_pos_from_id(id_t id) const
 {
 	return m_pos.at(id);
 }
@@ -2232,8 +2232,8 @@ std::size_t PiercedVector<T, id_t>::get_pos_from_id(id_t id) const
 	\param pos is the position to associate
 	\param id is the id that will be associated to the position
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::set_pos_id(const std::size_t &pos, const id_t &id)
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::set_pos_id(const std::size_t &pos, const id_t &id)
 {
 	m_ids[pos] = id;
 	m_pos[id]  = pos;
@@ -2252,8 +2252,8 @@ void PiercedVector<T, id_t>::set_pos_id(const std::size_t &pos, const id_t &id)
 	\param pos is the position to update
 	\param nextUsedPos is the position of the next non-empty element
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::update_empty_pos_id(const std::size_t &pos, const std::size_t &nextUsedPos)
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::update_empty_pos_id(const std::size_t &pos, const std::size_t &nextUsedPos)
 {
 	assert(nextUsedPos > pos);
 
@@ -2263,8 +2263,8 @@ void PiercedVector<T, id_t>::update_empty_pos_id(const std::size_t &pos, const s
 /*!
 	Update the first used position.
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::update_first_used_pos(const std::size_t &updated_first_pos)
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::update_first_used_pos(const std::size_t &updated_first_pos)
 {
 	m_first_pos = updated_first_pos;
 }
@@ -2272,8 +2272,8 @@ void PiercedVector<T, id_t>::update_first_used_pos(const std::size_t &updated_fi
 /*!
 	Update the last used position.
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::update_last_used_pos(const std::size_t &updated_last_pos)
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::update_last_used_pos(const std::size_t &updated_last_pos)
 {
 	// Hole needs to be updated only if last position has been decrease
 	bool update_holes = (holes_count() > 0) && (updated_last_pos < m_last_pos);
@@ -2317,8 +2317,8 @@ void PiercedVector<T, id_t>::update_last_used_pos(const std::size_t &updated_las
 
 	\result The size of the storage.
 */
-template<typename T, typename id_t>
-std::size_t PiercedVector<T, id_t>::storage_size() const
+template<typename value_t, typename id_t>
+std::size_t PiercedVector<value_t, id_t>::storage_size() const
 {
 	return m_v.size();
 }
@@ -2329,8 +2329,8 @@ std::size_t PiercedVector<T, id_t>::storage_size() const
 	\param n is the new container size, expressed in number of
 	elements.
 */
-template<typename T, typename id_t>
-void PiercedVector<T, id_t>::storage_resize(size_t n)
+template<typename value_t, typename id_t>
+void PiercedVector<value_t, id_t>::storage_resize(size_t n)
 {
 	std::size_t initialSize = storage_size();
 	if (n == initialSize + 1) {
@@ -2358,9 +2358,9 @@ void PiercedVector<T, id_t>::storage_resize(size_t n)
 	\param v is a reference to the reording vector
 	\param v is an iterator tj the vector that will be reordered
 */
-template<typename T, typename id_t>
+template<typename value_t, typename id_t>
 template<typename order_t>
-void PiercedVector<T, id_t>::reorder_vector(std::vector<size_t>& order, std::vector<order_t>& v, const size_t &size)
+void PiercedVector<value_t, id_t>::reorder_vector(std::vector<size_t>& order, std::vector<order_t>& v, const size_t &size)
 {
 	for (size_t i = 0; i < size; i++) {
 		size_t j;

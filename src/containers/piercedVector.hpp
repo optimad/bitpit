@@ -44,7 +44,7 @@
 
 namespace bitpit{
 
-template<typename T, typename id_t>
+template<typename value_t, typename id_t>
 class PiercedVector;
 
 /*!
@@ -52,34 +52,39 @@ class PiercedVector;
 
 	@brief Iterator for the class PiercedVector
 
-	Usage: Use <tt>PiercedVector<T>::iterator</tt> to declare an iterator
+	Usage: Use <tt>PiercedVector<value_t>::iterator</tt> to declare an iterator
 	for a pierced vector, use <tt>PiercedVector<Type>::const_iterator</tt> to
 	declare a const iterator for a pierced vector.
 
-	@tparam T The type of the objects stored in the vector
+	@tparam value_t The type of the objects stored in the vector
 */
-template<typename T, typename id_t = long,
-         typename T_no_cv = typename std::remove_cv<T>::type,
+template<typename value_t, typename id_t = long,
+         typename value_no_cv_t = typename std::remove_cv<value_t>::type,
 		 typename id_no_cv_t = typename std::remove_cv<id_t>::type>
 class PiercedIterator
-	: public std::iterator<std::forward_iterator_tag, T_no_cv, std::ptrdiff_t, T*, T&>
+	: public std::iterator<std::forward_iterator_tag, value_no_cv_t, std::ptrdiff_t, value_t*, value_t&>
 {
 
 private:
 	/*!
 		Container.
 	*/
-	template<typename PV_T, typename PV_id_t>
-	using Container = PiercedVector<PV_T, PV_id_t>;
+	template<typename PV_value_t, typename PV_id_t>
+	using Container = PiercedVector<PV_value_t, PV_id_t>;
 
 public:
+	/*!
+		Type of data stored in the container
+	*/
+	typedef value_t value_type;
+
 	/*!
 		Type of ids stored in the container
 	*/
 	typedef id_t id_type;
 
 	// Friendships
-	template<typename PV_T, typename PV_id_t>
+	template<typename PV_value_t, typename PV_id_t>
 	friend class PiercedVector;
 
 	// Constructors
@@ -92,17 +97,17 @@ public:
 	PiercedIterator& operator++();
 	PiercedIterator operator++(int);
 
-	T & operator*() const;
-	T * operator->() const;
-	operator PiercedIterator<const T, const id_t>() const;
+	value_t & operator*() const;
+	value_t * operator->() const;
+	operator PiercedIterator<const value_t, const id_t>() const;
 
 	/*!
 		Two-way comparison.
 	*/
-	template<typename other_T, typename other_id_t = long,
-         typename other_T_no_cv = typename std::remove_cv<T>::type,
+	template<typename other_value_t, typename other_id_t = long,
+         typename other_value_no_cv_t = typename std::remove_cv<value_t>::type,
 		 typename other_id_no_cv_t = typename std::remove_cv<id_t>::type>
-	bool operator==(const PiercedIterator<other_T, other_id_t>& rhs) const
+	bool operator==(const PiercedIterator<other_value_t, other_id_t>& rhs) const
 	{
 		return (m_container == rhs.m_container) && (m_pos == rhs.m_pos);
 	}
@@ -110,10 +115,10 @@ public:
 	/*!
 		Two-way comparison.
 	*/
-	template<typename other_T, typename other_id_t = long,
-         typename other_T_no_cv = typename std::remove_cv<T>::type,
+	template<typename other_value_t, typename other_id_t = long,
+         typename other_value_no_cv_t = typename std::remove_cv<value_t>::type,
 		 typename other_id_no_cv_t = typename std::remove_cv<id_t>::type>
-	bool operator!=(const PiercedIterator<other_T, other_id_t>& rhs) const
+	bool operator!=(const PiercedIterator<other_value_t, other_id_t>& rhs) const
 	{
 		return (m_container != rhs.m_container) || (m_pos != rhs.m_pos);
 	}
@@ -122,7 +127,7 @@ private:
 	/*!
 		Internal pointer to the container.
 	*/
-	Container<T_no_cv, id_no_cv_t> *m_container;
+	Container<value_no_cv_t, id_no_cv_t> *m_container;
 
 	/*!
 		Position inside the container.
@@ -130,8 +135,8 @@ private:
 	size_t m_pos;
 
 	// Constructors
-	explicit PiercedIterator(Container<T_no_cv, id_no_cv_t> *container, const size_t &pos);
-	explicit PiercedIterator(const Container<T_no_cv, id_no_cv_t> *container, const size_t &pos);
+	explicit PiercedIterator(Container<value_no_cv_t, id_no_cv_t> *container, const size_t &pos);
+	explicit PiercedIterator(const Container<value_no_cv_t, id_no_cv_t> *container, const size_t &pos);
 
 };
 
@@ -141,7 +146,7 @@ private:
 	@brief Metafunction for generating of a pierced vector.
 
 	@details
-	Usage: Use <tt>PiercedVector<T></tt> to declare a pierced vector.
+	Usage: Use <tt>PiercedVector<value_t></tt> to declare a pierced vector.
 
 	PiercedVector can work only with objects that are identified by a
 	unique id.
@@ -154,10 +159,10 @@ private:
 	New positions for inserting new elements will be searched first among
 	the pending holes and then among the regular holes.
 
-	@tparam T The type of the objects stored in the vector
+	@tparam value_t The type of the objects stored in the vector
 	@tparam id_t The type of the ids to associate to the objects
 */
-template<typename T, typename id_t = long>
+template<typename value_t, typename id_t = long>
 class PiercedVector
 {
 	static_assert(std::is_integral<id_t>::value, "Signed integer required for id.");
@@ -165,22 +170,20 @@ class PiercedVector
 
 private:
 	/*!
-		Member type value_type is the type of the elements in the container,
-		defined as an alias of the first template parameter (T).
-	*/
-	typedef T value_type;
-
-	/*!
 		Maximum number of pending deletes before the changes are flushed.
 	*/
 	static const std::size_t MAX_PENDING_HOLES;
 
 public:
 	// Friendships
-	template<typename PI_T, typename PI_id_t, typename PI_T_no_cv, typename PI_id_no_cv_t>
+	template<typename PI_value_t, typename PI_id_t, typename PI_value_no_cv_t, typename PI_id_no_cv_t>
 	friend class PiercedIterator;
 
 	/*!
+		Type of data stored in the container
+	*/
+	typedef value_t value_type;
+
 	/*!
 		Type of ids stored in the container
 	*/
@@ -189,29 +192,29 @@ public:
 	/*!
 		Iterator for the pierced array.
 	*/
-	typedef PiercedIterator<value_type> iterator;
+	typedef PiercedIterator<value_t> iterator;
 
 	/*!
 		Constant iterator for the pierced array.
 	*/
-	typedef PiercedIterator<const value_type, const long> const_iterator;
+	typedef PiercedIterator<const value_t, const long> const_iterator;
 
 	/*!
 		Iterator for the pierced array raw container.
 	*/
-	typedef typename std::vector<T>::iterator raw_iterator;
+	typedef typename std::vector<value_t>::iterator raw_iterator;
 
 	/*!
 		Constant iterator for the pierced array raw container.
 	*/
-	typedef typename std::vector<T>::const_iterator raw_const_iterator;
+	typedef typename std::vector<value_t>::const_iterator raw_const_iterator;
 
 	/*!
 		Functional for compare the position of two elements
 	*/
 	struct position_less
 	{
-		position_less(PiercedVector<T> &vector)
+		position_less(PiercedVector<value_t> &vector)
 		{
 			m_vector = &vector;
 		}
@@ -221,7 +224,7 @@ public:
 			return m_vector->get_pos_from_id(id_1) < m_vector->get_pos_from_id(id_2);
 		}
 
-		PiercedVector<T> *m_vector;
+		PiercedVector<value_t> *m_vector;
 	};
 
 	/*!
@@ -229,7 +232,7 @@ public:
 	*/
 	struct position_greater
 	{
-		position_greater(PiercedVector<T> &vector)
+		position_greater(PiercedVector<value_t> &vector)
 		{
 			m_vector = &vector;
 		}
@@ -239,7 +242,7 @@ public:
 			return m_vector->get_pos_from_id(id_1) > m_vector->get_pos_from_id(id_2);
 		}
 
-		PiercedVector<T> *m_vector;
+		PiercedVector<value_t> *m_vector;
 	};
 
 	// Contructors
@@ -247,7 +250,7 @@ public:
 	PiercedVector(std::size_t n);
 
 	// Methods that modify the contents of the container
-	iterator push_back(const id_t &id, value_type &&value);
+	iterator push_back(const id_t &id, value_t &&value);
 
 	iterator reclaim(const id_t &id);
 	iterator reclaim_after(const id_t &referenceId, const id_t &id);
@@ -257,11 +260,11 @@ public:
 	iterator move_after(const id_t &referenceId, const id_t &id, bool delayed = false);
 	iterator move_before(const id_t &referenceId, const id_t &id, bool delayed = false);
 
-	iterator insert(const id_t &id, value_type &&value);
-	iterator insert_after(const id_t &referenceId, const id_t &id, value_type &&value);
-	iterator insert_before(const id_t &referenceId, const id_t &id, value_type &&value);
+	iterator insert(const id_t &id, value_t &&value);
+	iterator insert_after(const id_t &referenceId, const id_t &id, value_t &&value);
+	iterator insert_before(const id_t &referenceId, const id_t &id, value_t &&value);
 
-	iterator replace(id_t id, value_type &&value);
+	iterator replace(id_t id, value_t &&value);
 
 	void update_id(const id_t &currentId, const id_t &updatedId);
 
@@ -309,23 +312,23 @@ public:
 	id_t get_size_marker(const size_t &targetSize, const id_t &fallback = -1);
 
 	// Methods that extract the contents of the container
-	value_type * data() noexcept;
+	value_t * data() noexcept;
 
-	value_type & back();
-	const value_type & back() const;
+	value_t & back();
+	const value_t & back() const;
 
-	value_type & front();
-	const value_type & front() const;
+	value_t & front();
+	const value_t & front() const;
 
-	value_type & at(const id_t &id);
-	const value_type & at(const id_t &id) const;
+	value_t & at(const id_t &id);
+	const value_t & at(const id_t &id) const;
 
-	value_type & raw_at(const std::size_t &pos);
-	const value_type & raw_at(const std::size_t &pos) const;
+	value_t & raw_at(const std::size_t &pos);
+	const value_t & raw_at(const std::size_t &pos) const;
 	std::size_t raw_index(id_t id) const;
 
-	const value_type & operator[](const id_t &id) const;
-	value_type & operator[](const id_t &id);
+	const value_t & operator[](const id_t &id) const;
+	value_t & operator[](const id_t &id);
 
 	// Iterators
 	iterator get_iterator(const id_t &id) noexcept;
@@ -391,7 +394,7 @@ private:
 	/*!
 		Vector that will hold the elements.
 	*/
-	std::vector<value_type>m_v;
+	std::vector<value_t>m_v;
 
 	/*!
 		Vector that will hold the ids.
