@@ -53,9 +53,10 @@ const unsigned short SurfTriPatch::SELECT_ALL      = 3;
 
 	\param id is the id of the patch
 */
-SurfTriPatch::SurfTriPatch(const int &id)
+SurfTriPatch::SurfTriPatch(const int &id, int space_dim)
 	: SurfaceKernel(id, 2, true)
 {
+    setSpaceDimensions(space_dim);
 
 }
 
@@ -72,6 +73,17 @@ void SurfTriPatch::setExpert(bool expert)
 {
 	SurfaceKernel::setExpert(expert);
 }
+
+/*!
+ * Set the number of dimensions of the current working space
+ * 
+ * \param[in] space_dim number of dimensions in the current working space
+*/
+void SurfTriPatch::setSpaceDimensions(const int &space_dim)
+{
+    m_spaceDim = space_dim;
+}
+
 
 /*!
 	Evaluates the volume of the specified cell.

@@ -48,10 +48,11 @@ public:
         static const unsigned short SELECT_ALL;
 
         // Constructors
-	SurfTriPatch(const int &id);
+	SurfTriPatch(const int &id, int space_dim = 3);
 
         // Setters
 	void setExpert(bool expert);
+        void setSpaceDimensions(const int&);
 
         // Modifiers
         void buildAdjacencies(void);
@@ -113,6 +114,7 @@ private:
         );
         bool compareSelectedTypes(const unsigned short &, const ElementInfo::Type &);
         static const std::map<ElementInfo::Type, unsigned short>     m_selectionTypes;
+        short                           m_spaceDim;
 };
 
 }
