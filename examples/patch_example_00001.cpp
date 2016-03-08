@@ -61,7 +61,7 @@ void fillCellList(int nCells, PiercedVector<Cell> &cells)
 	}
 }
 
-int main(int argc, char *argv[])
+int main()
 {
 	// Creating an emtpy list of cells
 	std::cout << std::endl << "::: Creating an empty PiercedVector :::" << std::endl;
