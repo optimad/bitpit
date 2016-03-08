@@ -48,7 +48,7 @@ void fillContainer(int nElements, PiercedVector<double> &container)
 	}
 }
 
-int main(int argc, char *argv[])
+int main()
 {
 	// Creating an emtpy PiercedVector
 	std::cout << std::endl << "::: Creating an empty PiercedVector :::" << std::endl;
