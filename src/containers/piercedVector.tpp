@@ -41,10 +41,6 @@
 
 namespace bitpit{
 
-// Definition of static constants of PiercedIterator
-template<typename T, typename id_type, typename T_no_cv, typename id_type_no_cv>
-const id_type PiercedIterator<T, id_type, T_no_cv, id_type_no_cv>::SENTINEL_ID = std::numeric_limits<id_type>::min();
-
 /*!
 	Creates a new uninitialized iterator
 */
@@ -76,8 +72,13 @@ PiercedIterator<T, id_type, T_no_cv, id_type_no_cv> & PiercedIterator<T, id_type
 	size_t delta = 1;
 	while (true) {
 		m_pos += delta;
+		if (m_pos > m_container->m_last_pos) {
+			m_pos = m_container->m_last_pos + 1;
+			return *this;
+		}
+
 		id_type id = m_container->m_ids[m_pos];
-		if (id == SENTINEL_ID || id >= 0) {
+		if (id >= 0) {
 			return *this;
 		} else {
 			delta = - id;
@@ -155,20 +156,8 @@ PiercedIterator<T, id_type, T_no_cv, id_type_no_cv>::PiercedIterator(const Conta
 
 // Definition of static constants of PiercedVector
 template<typename T, typename id_type>
-const id_type
-	PiercedVector<T, id_type>::SENTINEL_ID = std::numeric_limits<id_type>::min();
-
-template<typename T, typename id_type>
 const typename PiercedVector<T, id_type>::size_type
 	PiercedVector<T, id_type>::MAX_PENDING_HOLES = 16384;
-
-template<typename T, typename id_type>
-const typename PiercedVector<T, id_type>::size_type
-	PiercedVector<T, id_type>::REQUIRED_SENTINEL_COUNT = 1;
-
-template<typename T, typename id_type>
-const typename PiercedVector<T, id_type>::size_type
-	PiercedVector<T, id_type>::USABLE_POS_COUNT = std::numeric_limits<size_type>::max() - REQUIRED_SENTINEL_COUNT;
 
 /*!
 	Constructs an empty pierced vector with no elements.
@@ -722,7 +711,7 @@ void PiercedVector<T, id_type>::flush()
 template<typename T, typename id_type>
 void PiercedVector<T, id_type>::reserve(size_type n)
 {
-	m_ids.reserve(n + REQUIRED_SENTINEL_COUNT);
+	m_ids.reserve(n);
 	m_v.reserve(n);
 }
 
@@ -913,7 +902,7 @@ void PiercedVector<T, id_type>::swap(PiercedVector& x) noexcept
 template<typename T, typename id_type>
 typename PiercedVector<T, id_type>::size_type PiercedVector<T, id_type>::capacity()
 {
-	return m_ids.capacity() - REQUIRED_SENTINEL_COUNT;
+	return m_v.capacity();
 }
 
 /*!
@@ -1017,7 +1006,7 @@ bool PiercedVector<T, id_type>::is_iterator_slow()
 template<typename T, typename id_type>
 typename PiercedVector<T, id_type>::size_type PiercedVector<T, id_type>::max_size() const
 {
-	return USABLE_POS_COUNT;
+	return m_v.max_size();
 }
 
 /*!
@@ -2331,21 +2320,11 @@ void PiercedVector<T, id_type>::update_last_used_pos(const size_type &updated_la
 template<typename T, typename id_type>
 typename PiercedVector<T, id_type>::size_type PiercedVector<T, id_type>::storage_size() const
 {
-	if (m_ids.empty()) {
-		return 0;
-	} else {
-		return m_ids.size() - REQUIRED_SENTINEL_COUNT;
-	}
+	return m_v.size();
 }
 
 /*!
 	Resize the storage.
-
-	In order for the iterator to correctly identify the last
-	non-empty position, the container needs to store, after all
-	the elements, at least one sentinel. A sentinel element is a
-	dummy element with the special id SENTINEL_ID. All elements
-	after the last non-empty position are sentinel elements.
 
 	\param n is the new container size, expressed in number of
 	elements.
@@ -2356,7 +2335,7 @@ void PiercedVector<T, id_type>::storage_resize(size_t n)
 	size_type initialSize = storage_size();
 	if (n == initialSize + 1) {
 		m_v.emplace_back();
-		m_ids.push_back(SENTINEL_ID);
+		m_ids.emplace_back();
 	} else {
 		// Delete the ids of the elements that will be removed
 		for (size_type pos = n; pos < initialSize; ++pos) {
@@ -2367,15 +2346,8 @@ void PiercedVector<T, id_type>::storage_resize(size_t n)
 		}
 
 		// Resize the internal vectors
-		m_ids.resize(n + REQUIRED_SENTINEL_COUNT, SENTINEL_ID);
+		m_ids.resize(n);
 		m_v.resize(n);
-
-		// If the vector has been shrink, set the sentinel id
-		if (n < initialSize) {
-			for (size_type pos = n; pos < n + REQUIRED_SENTINEL_COUNT; ++pos) {
-				m_ids[pos] = SENTINEL_ID;
-			}
-		}
 	}
 }
 

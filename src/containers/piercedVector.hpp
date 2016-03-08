@@ -115,12 +115,6 @@ public:
 
 private:
 	/*!
-		Special id value that identifies every dummy element past
-		the end of the pierced vector.
-	*/
-	static const id_type SENTINEL_ID;
-
-	/*!
 		Internal pointer to the container.
 	*/
 	Container<T_no_cv, id_type_no_cv> *m_container;
@@ -177,32 +171,9 @@ private:
 	typedef T value_type;
 
 	/*!
-		Special id value that identifies every dummy element past
-		the end of the pierced vector.
-	*/
-	static const id_type SENTINEL_ID;
-
-	/*!
-		At the end of the piecred vector, after all stored elements,
-		there should always be at least one sentinel dummy element.
-	*/
-	static const size_type REQUIRED_SENTINEL_COUNT;
-
-	/*!
 		Maximum number of pending deletes before the changes are flushed.
 	*/
 	static const size_type MAX_PENDING_HOLES;
-
-	/*!
-		Number of usable positions in the vector.
-
-		The vector must contain at least some sentinel values at
-		its end. Moreover, since some hole values have a special
-		meaning, the number of usable position should be decreased
-		to match the maximum number of holes that is possible to
-		store.
-	*/
-	static const size_type USABLE_POS_COUNT;
 
 public:
 	// Friendships
@@ -329,7 +300,7 @@ public:
 	size_type extract_flat_index(id_type id) const;
 
 	std::vector<id_type> get_ids(bool ordered = true);
-	id_type get_size_marker(const size_t &targetSize, const id_type &fallback = SENTINEL_ID);
+	id_type get_size_marker(const size_t &targetSize, const id_type &fallback = -1);
 
 	// Methods that extract the contents of the container
 	value_type * data() noexcept;
