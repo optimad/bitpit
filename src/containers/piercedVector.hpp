@@ -52,11 +52,13 @@ class PiercedVector;
 
 	@brief Iterator for the class PiercedVector
 
-	Usage: Use <tt>PiercedVector<value_t>::iterator</tt> to declare an iterator
-	for a pierced vector, use <tt>PiercedVector<Type>::const_iterator</tt> to
-	declare a const iterator for a pierced vector.
+	Usage: use <tt>PiercedVector<value_t, id_t>::iterator</tt>
+	to declare an iterator for a pierced vector, use
+	<tt>PiercedVector<vaue_t, id_t>::const_iterator</tt> to declare
+	a const iterator for a pierced vector.
 
-	@tparam value_t The type of the objects stored in the vector
+	@tparam value_t The type of the elements stored in the vector
+	@tparam id_t The type of the ids to associate to the elements
 */
 template<typename value_t, typename id_t = long,
          typename value_no_cv_t = typename std::remove_cv<value_t>::type,
@@ -145,13 +147,11 @@ private:
 /*!
 	\ingroup containers
 
-	@brief Metafunction for generating of a pierced vector.
+	@brief Metafunction for generating a pierced vector.
 
 	@details
-	Usage: Use <tt>PiercedVector<value_t></tt> to declare a pierced vector.
-
-	PiercedVector can work only with objects that are identified by a
-	unique id.
+	Usage: use <tt>PiercedVector<value_t, id_t></tt> to declare a pierced
+	vector.
 
 	Internally all the holes are stored in a single vector. The first part
 	of this vector contains the "regular" holes, whereas the last part
@@ -161,8 +161,8 @@ private:
 	New positions for inserting new elements will be searched first among
 	the pending holes and then among the regular holes.
 
-	@tparam value_t The type of the objects stored in the vector
-	@tparam id_t The type of the ids to associate to the objects
+	@tparam value_t The type of the elements stored in the vector
+	@tparam id_t The type of the ids to associate to the elements
 */
 template<typename value_t, typename id_t = long>
 class PiercedVector

@@ -188,6 +188,7 @@ PiercedVector<value_t, id_t>::PiercedVector(std::size_t n)
 
 	The content of value is copied (or moved) to the new element.
 
+	\param id is the id that will be assigned to the element
 	\param value the value to be copied (or moved) to the new
 					element
 	\result An iterator that points to the newly inserted element.
@@ -349,6 +350,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::mo
 /*!
 	The container is extended by inserting a new element.
 
+	\param id is the id that will be associated to the element
 	\param value is the value to be copied (or moved) to the
 				inserted elements.
 	\result An iterator that points to the newly inserted element.
@@ -371,10 +373,11 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::in
 	will have a position that is between the element with the
 	specified reference id and the end of the container.
 
-	\param value is the value to be copied (or moved) to the
-	inserted element
 	\param referenceId is the id of the element after which the
 	new element will be inserted
+	\param id is the id that will be associated to the element
+	\param value is the value to be copied (or moved) to the
+	inserted element
 	\result An iterator that points to the newly inserted element.
 */
 template<typename value_t, typename id_t>
@@ -395,10 +398,11 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::in
 	will have a position that is between the beginning of the
 	container and the element with the specified reference id.
 
-	\param value is the value to be copied (or moved) to the
-	inserted element
 	\param referenceId is the id of the element before which the
 	new element will be inserted
+	\param id is the id that will be associated to the element
+	\param value is the value to be copied (or moved) to the
+	inserted element
 	\result An iterator that points to the newly inserted element.
 */
 template<typename value_t, typename id_t>
@@ -457,6 +461,7 @@ void PiercedVector<value_t, id_t>::update_id(const id_t &currentId, const id_t &
 	new element is constructed in place using args as the
 	arguments for its construction.
 
+	\param id is the id that will be associated to the element
 	\param args the arguments forwarded to construct the new element
 	\result An iterator that points to the the newly inserted
 			element.
@@ -482,6 +487,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
 
 	\param referenceId is the id of the element after which the
 	new element will be inserted
+	\param id is the id that will be associated to the element
 	\param args the arguments forwarded to construct the new element
 	\result An iterator that points to the newly inserted element.
 */
@@ -504,6 +510,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
 	its current last element. This new element is constructed
 	in place using args as the arguments for its construction.
 
+	\param id is the id that will be associated to the element
 	\param args the arguments forwarded to construct the new element
 */
 template<typename value_t, typename id_t>
@@ -526,6 +533,7 @@ void PiercedVector<value_t, id_t>::emplace_back(const id_t &id, Args&&... args)
 
 	\param referenceId is the id of the element before which the
 	new element will be inserted
+	\param id is the id that will be associated to the element
 	\param args the arguments forwarded to construct the new element
 	\result An iterator that points to the newly inserted element.
 */
@@ -1598,11 +1606,11 @@ std::size_t PiercedVector<value_t, id_t>::fill_pos(const std::size_t &pos, const
 }
 
 /*!
-	Gets a position for storing a new element.
+	Fills a position and assigns to it the specified id.
 
 	The position as alyaws appeneded to the end of the container.
 
-	\result A position for storing a new element.
+	\result The position that has been filled.
 */
 template<typename value_t, typename id_t>
 std::size_t PiercedVector<value_t, id_t>::fill_pos_append(const id_t &id)
@@ -1611,12 +1619,13 @@ std::size_t PiercedVector<value_t, id_t>::fill_pos_append(const id_t &id)
 }
 
 /*!
-	Gets a position for storing a new element.
+	Fills a position and assigns to it the specified id.
 
 	The specified position is made available.
 
 	\param pos is the position the will be make available
-	\result A position for storing a new element.
+	\param id is the id that will be associated to the position
+	\result The position that has been filled.
 */
 template<typename value_t, typename id_t>
 std::size_t PiercedVector<value_t, id_t>::fill_pos_insert(const std::size_t &pos, const id_t &id)
@@ -1671,12 +1680,13 @@ std::size_t PiercedVector<value_t, id_t>::fill_pos_insert(const std::size_t &pos
 }
 
 /*!
-	Gets a position for storing a new element.
+	Fills a position and assigns to it the specified id.
 
 	The first available position starting from the head of the container
 	is returned.
 
-	\result A position for storing a new element.
+	\param id is the id that will be associated to the position
+	\result The position that has been filled.
 */
 template<typename value_t, typename id_t>
 std::size_t PiercedVector<value_t, id_t>::fill_pos_head(const id_t &id)
@@ -1727,12 +1737,13 @@ std::size_t PiercedVector<value_t, id_t>::fill_pos_head(const id_t &id)
 }
 
 /*!
-	Gets a position for storing a new element.
+	Fills a position and assigns to it the specified id.
 
 	The first available position starting from the tail of the container
 	is returned.
 
-	\result A position for storing a new element.
+	\param id is the id that will be associated to the position
+	\result The position that has been filled.
 */
 template<typename value_t, typename id_t>
 std::size_t PiercedVector<value_t, id_t>::fill_pos_tail(const id_t &id)
@@ -1796,14 +1807,15 @@ std::size_t PiercedVector<value_t, id_t>::fill_pos_tail(const id_t &id)
 }
 
 /*!
-	Gets a position for storing a new element.
+	Fills a position and assigns to it the specified id.
 
 	The first available position after the specified position is
 	returned.
 
 	\param referencePos is the position of the element after which the
 	new available position will be searched for
-	\result A position for storing a new element.
+	\param id is the id that will be associated to the position
+	\result The position that has been filled.
 */
 template<typename value_t, typename id_t>
 std::size_t PiercedVector<value_t, id_t>::fill_pos_after(const std::size_t &referencePos, const id_t &id)
@@ -1833,14 +1845,15 @@ std::size_t PiercedVector<value_t, id_t>::fill_pos_after(const std::size_t &refe
 }
 
 /*!
-	Gets a position for storing a new element.
+	Fills a position and assigns to it the specified id.
 
 	The first available position before the specified position is
 	returned.
 
 	\param referencePos is the position of the element before which the
 	new available position will be searched for
-	\result A position for storing a new element.
+	\param id is the id that will be associated to the position
+	\result The position that has been filled.
 */
 template<typename value_t, typename id_t>
 std::size_t PiercedVector<value_t, id_t>::fill_pos_before(const std::size_t &referencePos, const id_t &id)
@@ -1876,7 +1889,9 @@ std::size_t PiercedVector<value_t, id_t>::fill_pos_before(const std::size_t &ref
 	holes is full, a flush is called before adding the hole. This means
 	that the hole is always added as a pending hole.
 
-	\param hole is the position of the new hole
+	\param pos is the position of the new hole
+	\param flush controls if the holes will be flush after piercing the
+	the position
 */
 template<typename value_t, typename id_t>
 void PiercedVector<value_t, id_t>::pierce_pos(const std::size_t &pos, bool flush)
@@ -2355,8 +2370,9 @@ void PiercedVector<value_t, id_t>::storage_resize(size_t n)
 	Order a vector according to a reordering vector.
 
 	\tparam order_t is the type of data that needs to be rodered
-	\param v is a reference to the reording vector
-	\param v is an iterator tj the vector that will be reordered
+	\param order is a reference to the reording vector
+	\param v is a reference to the vector that will be reordered
+	\param size is the size of the vector that will be reordered
 */
 template<typename value_t, typename id_t>
 template<typename order_t>
