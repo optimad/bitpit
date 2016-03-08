@@ -2528,8 +2528,8 @@ long PatchKernel::locatePoint(const double &x, const double &y, const double &z)
  * 
  * \param[in] cell_1 global ID of the 1st cell
  * \param[in] i      local index of face to be checked on cell_1
- * \param[in] cell_1 global ID of the 2nd cell
- * \param[in] i      local index of face to be checked on cell_2
+ * \param[in] cell_2 global ID of the 2nd cell
+ * \param[in] j      local index of face to be checked on cell_2
  * 
  * \result returns true if face (cell_1, i) and face (cell_2, j) are the same.
 */
