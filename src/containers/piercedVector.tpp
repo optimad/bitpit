@@ -2558,29 +2558,6 @@ private:
 	/*!
 		Updates the id of the element in the specified position to make
 		it an empty element. If needed, updates also of the id of the
-		element before the specified position. The function will figure
-		out the position of the next non-empty element.
-
-		\param pos is the position to update
-		\param recursive controls if the
-	*/
-	void update_empty_pos_id(const size_type &pos, bool recursive = true)
-	{
-		// Position of the next non-empty element
-		size_type nextUsedPos;
-		if (pos >= m_last_pos) {
-			nextUsedPos = m_last_pos;
-		} else {
-			nextUsedPos = find_next_used_pos(pos);
-		}
-
-		// Update the id
-		update_empty_pos_id(pos, nextUsedPos, recursive);
-	}
-
-	/*!
-		Updates the id of the element in the specified position to make
-		it an empty element. If needed, updates also of the id of the
 		element before the specified position.
 
 		The id of an empty element contains the distance, measured in
