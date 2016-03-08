@@ -57,18 +57,17 @@ namespace bitpit{
 */
 
 template<typename T, typename id_type = long,
-         typename unqualified_T = typename std::remove_cv<T>::type,
-		 typename unqualified_id_type = typename std::remove_cv<id_type>::type>
+         typename T_no_cv = typename std::remove_cv<T>::type,
+		 typename id_type_no_cv = typename std::remove_cv<id_type>::type>
 class PiercedIterator
-	: public std::iterator<std::forward_iterator_tag, unqualified_T,
-				std::ptrdiff_t, T*, T&>
+	: public std::iterator<std::forward_iterator_tag, T_no_cv, std::ptrdiff_t, T*, T&>
 {
 
 private:
 	/*!
 		Container that holds the id.
 	*/
-	typedef typename std::vector<unqualified_id_type> IdContainer;
+	typedef typename std::vector<id_type_no_cv> IdContainer;
 
 	/*!
 		Iterator for the internal vector that holds the ids in
@@ -85,7 +84,7 @@ private:
 	/*!
 		Container that holds the values.
 	*/
-	typedef typename std::vector<unqualified_T> ValueContainer;
+	typedef typename std::vector<T_no_cv> ValueContainer;
 
 	/*!
 		Iterator for the internal vector that holds the elements in
@@ -201,8 +200,8 @@ public:
 		Two-way comparison.
 	*/
 	template<typename other_T, typename other_id_type = long,
-         typename other_unqualified_T = typename std::remove_cv<T>::type,
-		 typename other_unqualified_id_type = typename std::remove_cv<id_type>::type>
+         typename other_T_no_cv = typename std::remove_cv<T>::type,
+		 typename other_id_type_no_cv = typename std::remove_cv<id_type>::type>
 	bool operator == (const PiercedIterator<other_T, other_id_type>& rhs) const
 	{
 		return m_id == rhs.m_id;
@@ -212,8 +211,8 @@ public:
 		Two-way comparison.
 	*/
 	template<typename other_T, typename other_id_type = long,
-         typename other_unqualified_T = typename std::remove_cv<T>::type,
-		 typename other_unqualified_id_type = typename std::remove_cv<id_type>::type>
+         typename other_T_no_cv = typename std::remove_cv<T>::type,
+		 typename other_id_type_no_cv = typename std::remove_cv<id_type>::type>
 	bool operator != (const PiercedIterator<other_T, other_id_type>& rhs) const
 	{
 		return m_id != rhs.m_id;
@@ -251,8 +250,8 @@ public:
 };
 
 // Definition of static constants of PiercedIterator
-template<class T, typename id_type, class unqualified_T, class unqualified_id_type>
-const id_type PiercedIterator<T, id_type, unqualified_T, unqualified_id_type>::SENTINEL_ID = std::numeric_limits<id_type>::min();
+template<class T, typename id_type, class T_no_cv, class id_type_no_cv>
+const id_type PiercedIterator<T, id_type, T_no_cv, id_type_no_cv>::SENTINEL_ID = std::numeric_limits<id_type>::min();
 
 /*!
 	\ingroup containers
