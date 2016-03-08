@@ -44,7 +44,7 @@
 
 namespace bitpit{
 
-template<typename T, typename id_type>
+template<typename T, typename id_t>
 class PiercedVector;
 
 /*!
@@ -58,9 +58,9 @@ class PiercedVector;
 
 	@tparam T The type of the objects stored in the vector
 */
-template<typename T, typename id_type = long,
+template<typename T, typename id_t = long,
          typename T_no_cv = typename std::remove_cv<T>::type,
-		 typename id_type_no_cv = typename std::remove_cv<id_type>::type>
+		 typename id_no_cv_t = typename std::remove_cv<id_t>::type>
 class PiercedIterator
 	: public std::iterator<std::forward_iterator_tag, T_no_cv, std::ptrdiff_t, T*, T&>
 {
@@ -69,12 +69,17 @@ private:
 	/*!
 		Container.
 	*/
-	template<typename PV_T, typename PV_id_type>
-	using Container = PiercedVector<PV_T, PV_id_type>;
+	template<typename PV_T, typename PV_id_t>
+	using Container = PiercedVector<PV_T, PV_id_t>;
 
 public:
+	/*!
+		Type of ids stored in the container
+	*/
+	typedef id_t id_type;
+
 	// Friendships
-	template<typename PV_T, typename PV_id_type>
+	template<typename PV_T, typename PV_id_t>
 	friend class PiercedVector;
 
 	// Constructors
@@ -89,15 +94,15 @@ public:
 
 	T & operator*() const;
 	T * operator->() const;
-	operator PiercedIterator<const T, const id_type>() const;
+	operator PiercedIterator<const T, const id_t>() const;
 
 	/*!
 		Two-way comparison.
 	*/
-	template<typename other_T, typename other_id_type = long,
+	template<typename other_T, typename other_id_t = long,
          typename other_T_no_cv = typename std::remove_cv<T>::type,
-		 typename other_id_type_no_cv = typename std::remove_cv<id_type>::type>
-	bool operator==(const PiercedIterator<other_T, other_id_type>& rhs) const
+		 typename other_id_no_cv_t = typename std::remove_cv<id_t>::type>
+	bool operator==(const PiercedIterator<other_T, other_id_t>& rhs) const
 	{
 		return (m_container == rhs.m_container) && (m_pos == rhs.m_pos);
 	}
@@ -105,10 +110,10 @@ public:
 	/*!
 		Two-way comparison.
 	*/
-	template<typename other_T, typename other_id_type = long,
+	template<typename other_T, typename other_id_t = long,
          typename other_T_no_cv = typename std::remove_cv<T>::type,
-		 typename other_id_type_no_cv = typename std::remove_cv<id_type>::type>
-	bool operator!=(const PiercedIterator<other_T, other_id_type>& rhs) const
+		 typename other_id_no_cv_t = typename std::remove_cv<id_t>::type>
+	bool operator!=(const PiercedIterator<other_T, other_id_t>& rhs) const
 	{
 		return (m_container != rhs.m_container) || (m_pos != rhs.m_pos);
 	}
@@ -117,7 +122,7 @@ private:
 	/*!
 		Internal pointer to the container.
 	*/
-	Container<T_no_cv, id_type_no_cv> *m_container;
+	Container<T_no_cv, id_no_cv_t> *m_container;
 
 	/*!
 		Position inside the container.
@@ -125,8 +130,8 @@ private:
 	size_t m_pos;
 
 	// Constructors
-	explicit PiercedIterator(Container<T_no_cv, id_type_no_cv> *container, const size_t &pos);
-	explicit PiercedIterator(const Container<T_no_cv, id_type_no_cv> *container, const size_t &pos);
+	explicit PiercedIterator(Container<T_no_cv, id_no_cv_t> *container, const size_t &pos);
+	explicit PiercedIterator(const Container<T_no_cv, id_no_cv_t> *container, const size_t &pos);
 
 };
 
@@ -150,13 +155,13 @@ private:
 	the pending holes and then among the regular holes.
 
 	@tparam T The type of the objects stored in the vector
-	@tparam id_type The type of the ids to associate to the objects
+	@tparam id_t The type of the ids to associate to the objects
 */
-template<typename T, typename id_type = long>
+template<typename T, typename id_t = long>
 class PiercedVector
 {
-	static_assert(std::is_integral<id_type>::value, "Signed integer required for id.");
-	static_assert(std::numeric_limits<id_type>::is_signed, "Signed integer required for id.");
+	static_assert(std::is_integral<id_t>::value, "Signed integer required for id.");
+	static_assert(std::numeric_limits<id_t>::is_signed, "Signed integer required for id.");
 
 private:
 	/*!
@@ -172,8 +177,14 @@ private:
 
 public:
 	// Friendships
-	template<typename PI_T, typename PI_id_type, typename PI_T_no_cv, typename PI_id_type_no_cv>
+	template<typename PI_T, typename PI_id_t, typename PI_T_no_cv, typename PI_id_no_cv_t>
 	friend class PiercedIterator;
+
+	/*!
+	/*!
+		Type of ids stored in the container
+	*/
+	typedef id_t id_type;
 
 	/*!
 		Iterator for the pierced array.
@@ -205,7 +216,7 @@ public:
 			m_vector = &vector;
 		}
 
-		bool operator()(const id_type &id_1, const id_type &id_2) const
+		bool operator()(const id_t &id_1, const id_t &id_2) const
 		{
 			return m_vector->get_pos_from_id(id_1) < m_vector->get_pos_from_id(id_2);
 		}
@@ -223,7 +234,7 @@ public:
 			m_vector = &vector;
 		}
 
-		bool operator()(const id_type &id_1, const id_type &id_2) const
+		bool operator()(const id_t &id_1, const id_t &id_2) const
 		{
 			return m_vector->get_pos_from_id(id_1) > m_vector->get_pos_from_id(id_2);
 		}
@@ -236,41 +247,41 @@ public:
 	PiercedVector(std::size_t n);
 
 	// Methods that modify the contents of the container
-	iterator push_back(const id_type &id, value_type &&value);
+	iterator push_back(const id_t &id, value_type &&value);
 
-	iterator reclaim(const id_type &id);
-	iterator reclaim_after(const id_type &referenceId, const id_type &id);
-	iterator reclaim_back(const id_type &id);
-	iterator reclaim_before(const id_type &referenceId, const id_type &id);
+	iterator reclaim(const id_t &id);
+	iterator reclaim_after(const id_t &referenceId, const id_t &id);
+	iterator reclaim_back(const id_t &id);
+	iterator reclaim_before(const id_t &referenceId, const id_t &id);
 
-	iterator move_after(const id_type &referenceId, const id_type &id, bool delayed = false);
-	iterator move_before(const id_type &referenceId, const id_type &id, bool delayed = false);
+	iterator move_after(const id_t &referenceId, const id_t &id, bool delayed = false);
+	iterator move_before(const id_t &referenceId, const id_t &id, bool delayed = false);
 
-	iterator insert(const id_type &id, value_type &&value);
-	iterator insert_after(const id_type &referenceId, const id_type &id, value_type &&value);
-	iterator insert_before(const id_type &referenceId, const id_type &id, value_type &&value);
+	iterator insert(const id_t &id, value_type &&value);
+	iterator insert_after(const id_t &referenceId, const id_t &id, value_type &&value);
+	iterator insert_before(const id_t &referenceId, const id_t &id, value_type &&value);
 
-	iterator replace(id_type id, value_type &&value);
+	iterator replace(id_t id, value_type &&value);
 
-	void update_id(const id_type &currentId, const id_type &updatedId);
-
-	template<typename... Args>
-	iterator emplace(const id_type &id, Args&&... args);
-	template<typename... Args>
-	iterator emplace_after(const id_type &referenceId, const id_type &id, Args&&... args);
-	template<typename... Args>
-	void emplace_back(const id_type &id, Args&&... args);
-	template<typename... Args>
-	iterator emplace_before(const id_type &referenceId, const id_type &id, Args&&... args);
+	void update_id(const id_t &currentId, const id_t &updatedId);
 
 	template<typename... Args>
-	iterator emreplace(id_type id, Args&&... args);
+	iterator emplace(const id_t &id, Args&&... args);
+	template<typename... Args>
+	iterator emplace_after(const id_t &referenceId, const id_t &id, Args&&... args);
+	template<typename... Args>
+	void emplace_back(const id_t &id, Args&&... args);
+	template<typename... Args>
+	iterator emplace_before(const id_t &referenceId, const id_t &id, Args&&... args);
 
-	iterator erase(id_type id, bool delayed = false);
+	template<typename... Args>
+	iterator emreplace(id_t id, Args&&... args);
+
+	iterator erase(id_t id, bool delayed = false);
 
 	void pop_back();
 
-	void swap(const id_type &id_first, const id_type &id_second);
+	void swap(const id_t &id_first, const id_t &id_second);
 
 	// Methods that modify the container as a whole
 	void clear(bool release = true);
@@ -291,11 +302,11 @@ public:
 	std::size_t size() const;
 
 	// Methods that extract information on the contents of the container
-	bool exists(id_type id);
-	std::size_t extract_flat_index(id_type id) const;
+	bool exists(id_t id);
+	std::size_t extract_flat_index(id_t id) const;
 
-	std::vector<id_type> get_ids(bool ordered = true);
-	id_type get_size_marker(const size_t &targetSize, const id_type &fallback = -1);
+	std::vector<id_t> get_ids(bool ordered = true);
+	id_t get_size_marker(const size_t &targetSize, const id_t &fallback = -1);
 
 	// Methods that extract the contents of the container
 	value_type * data() noexcept;
@@ -306,19 +317,19 @@ public:
 	value_type & front();
 	const value_type & front() const;
 
-	value_type & at(const id_type &id);
-	const value_type & at(const id_type &id) const;
+	value_type & at(const id_t &id);
+	const value_type & at(const id_t &id) const;
 
 	value_type & raw_at(const std::size_t &pos);
 	const value_type & raw_at(const std::size_t &pos) const;
-	std::size_t raw_index(id_type id) const;
+	std::size_t raw_index(id_t id) const;
 
-	const value_type & operator[](const id_type &id) const;
-	value_type & operator[](const id_type &id);
+	const value_type & operator[](const id_t &id) const;
+	value_type & operator[](const id_t &id);
 
 	// Iterators
-	iterator get_iterator(const id_type &id) noexcept;
-	const_iterator get_const_iterator(const id_type &id) const noexcept;
+	iterator get_iterator(const id_t &id) noexcept;
+	const_iterator get_const_iterator(const id_t &id) const noexcept;
 
 	iterator begin();
 	iterator end();
@@ -385,7 +396,7 @@ private:
 	/*!
 		Vector that will hold the ids.
 	*/
-	std::vector<id_type> m_ids;
+	std::vector<id_t> m_ids;
 
 	/*!
 		Container that will hold a list of the holes present in
@@ -427,7 +438,7 @@ private:
 		Map that links the id of the elements and their position
 		inside the internal vector.
 	*/
-	std::unordered_map<id_type, std::size_t, PiercedHasher> m_pos;
+	std::unordered_map<id_t, std::size_t, PiercedHasher> m_pos;
 
 	/*!
 		Position of the first element in the internal vector.
@@ -459,17 +470,17 @@ private:
 	*/
 	struct id_less
 	{
-		const std::vector<id_type> &m_ids;
+		const std::vector<id_t> &m_ids;
 
-		id_less(const std::vector<id_type> &ids)
+		id_less(const std::vector<id_t> &ids)
 			: m_ids(ids)
 		{
 		}
 
 	    inline bool operator() (const std::size_t &pos_x, const std::size_t &pos_y)
 	    {
-			id_type id_x = m_ids[pos_x];
-			id_type id_y = m_ids[pos_y];
+			id_t id_x = m_ids[pos_x];
+			id_t id_y = m_ids[pos_y];
 
 		    if (id_x >= 0 && id_y < 0) {
 			    return true;
@@ -486,13 +497,13 @@ private:
 	iterator get_iterator_from_pos(const std::size_t &pos) noexcept;
 	const_iterator get_const_iterator_from_pos(const std::size_t &pos) const noexcept;
 
-	std::size_t fill_pos(const std::size_t &pos, const id_type &id);
-	std::size_t fill_pos_append(const id_type &id);
-	std::size_t fill_pos_insert(const std::size_t &pos, const id_type &id);
-	std::size_t fill_pos_head(const id_type &id);
-	std::size_t fill_pos_tail(const id_type &id);
-	std::size_t fill_pos_after(const std::size_t &referencePos, const id_type &id);
-	std::size_t fill_pos_before(const std::size_t &referencePos, const id_type &id);
+	std::size_t fill_pos(const std::size_t &pos, const id_t &id);
+	std::size_t fill_pos_append(const id_t &id);
+	std::size_t fill_pos_insert(const std::size_t &pos, const id_t &id);
+	std::size_t fill_pos_head(const id_t &id);
+	std::size_t fill_pos_tail(const id_t &id);
+	std::size_t fill_pos_after(const std::size_t &referencePos, const id_t &id);
+	std::size_t fill_pos_before(const std::size_t &referencePos, const id_t &id);
 
 	void pierce_pos(const std::size_t &pos, bool flush = true);
 
@@ -509,8 +520,8 @@ private:
 	std::size_t find_prev_used_pos(std::size_t pos);
 	std::size_t find_next_used_pos(std::size_t pos);
 	bool is_pos_empty(std::size_t pos);
-	std::size_t get_pos_from_id(id_type id) const;
-    void set_pos_id(const std::size_t &pos, const id_type &id);
+	std::size_t get_pos_from_id(id_t id) const;
+    void set_pos_id(const std::size_t &pos, const id_t &id);
 	void update_empty_pos_id(const std::size_t &pos, const std::size_t &nextUsedPos);
 	void update_first_used_pos(const std::size_t &updated_first_pos);
 	void update_last_used_pos(const std::size_t &updated_last_pos);
