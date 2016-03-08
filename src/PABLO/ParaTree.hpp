@@ -683,7 +683,7 @@ public:
 								m_errorFlag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								m_errorFlag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								for(int j = 0; j < 17; ++j){
-									MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
+									MPI_Pack(&info[j],1,MPI_C_BOOL,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 
 								}
 								userData.gather(sendBuffers[p],i);
@@ -731,7 +731,7 @@ public:
 								m_errorFlag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								m_errorFlag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								for(int j = 0; j < 17; ++j){
-									MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
+									MPI_Pack(&info[j],1,MPI_C_BOOL,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								}
 								userData.gather(sendBuffers[p],i);
 							}
@@ -787,7 +787,7 @@ public:
 								m_errorFlag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								m_errorFlag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								for(int j = 0; j < 17; ++j){
-									MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
+									MPI_Pack(&info[j],1,MPI_C_BOOL,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								}
 								userData.gather(sendBuffers[p],i);
 							}
@@ -833,7 +833,7 @@ public:
 								m_errorFlag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								m_errorFlag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								for(int j = 0; j < 17; ++j){
-									MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
+									MPI_Pack(&info[j],1,MPI_C_BOOL,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								}
 								userData.gather(sendBuffers[p],i);
 							}
@@ -971,7 +971,7 @@ public:
 						m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&m,1,MPI_INT8_T,m_comm);
 						m_octree.m_octants[newCounter].setMarker(m);
 						for(int j = 0; j < 17; ++j){
-							m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&info[j],1,MPI::BOOL,m_comm);
+							m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&info[j],1,MPI_C_BOOL,m_comm);
 							m_octree.m_octants[newCounter].m_info[j] = info[j];
 						}
 						userData.scatter(rbit->second,newCounter);
@@ -1195,7 +1195,7 @@ public:
 								m_errorFlag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								m_errorFlag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								for(int j = 0; j < 17; ++j){
-									MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
+									MPI_Pack(&info[j],1,MPI_C_BOOL,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 
 								}
 								userData.gather(sendBuffers[p],i);
@@ -1243,7 +1243,7 @@ public:
 								m_errorFlag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								m_errorFlag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								for(int j = 0; j < 17; ++j){
-									MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
+									MPI_Pack(&info[j],1,MPI_C_BOOL,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								}
 								userData.gather(sendBuffers[p],i);
 							}
@@ -1299,7 +1299,7 @@ public:
 								m_errorFlag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								m_errorFlag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								for(int j = 0; j < 17; ++j){
-									MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
+									MPI_Pack(&info[j],1,MPI_C_BOOL,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								}
 								userData.gather(sendBuffers[p],i);
 							}
@@ -1345,7 +1345,7 @@ public:
 								m_errorFlag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								m_errorFlag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								for(int j = 0; j < 17; ++j){
-									MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
+									MPI_Pack(&info[j],1,MPI_C_BOOL,sendBuffers[p].m_commBuffer,buffSize,&sendBuffers[p].m_pos,m_comm);
 								}
 								userData.gather(sendBuffers[p],i);
 							}
@@ -1485,7 +1485,7 @@ public:
 						m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&m,1,MPI_INT8_T,m_comm);
 						m_octree.m_octants[newCounter].setMarker(m);
 						for(int j = 0; j < 17; ++j){
-							m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&info[j],1,MPI::BOOL,m_comm);
+							m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&rbit->second.m_pos,&info[j],1,MPI_C_BOOL,m_comm);
 							m_octree.m_octants[newCounter].m_info[j] = info[j];
 						}
 						//TODO Unpack data

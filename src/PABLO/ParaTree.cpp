@@ -2286,7 +2286,7 @@ ParaTree::adaptGlobalRefine(bool mapper_flag) {
 
 #if BITPIT_ENABLE_MPI==1
 		MPI_Barrier(m_comm);
-		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
+		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
 #endif
 		(*m_log) << " " << endl;
 		(*m_log) << "---------------------------------------------" << endl;
@@ -2316,7 +2316,7 @@ ParaTree::adaptGlobalRefine(bool mapper_flag) {
 		nocts = m_octree.getNumOctants();
 
 		MPI_Barrier(m_comm);
-		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
+		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
 		(*m_log) << " " << endl;
 		(*m_log) << "---------------------------------------------" << endl;
 	}
@@ -2391,7 +2391,7 @@ ParaTree::adaptGlobalCoarse(bool mapper_flag) {
 		(*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(nocts)) << endl;
 #if BITPIT_ENABLE_MPI==1
 		MPI_Barrier(m_comm);
-		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
+		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
 #endif
 		(*m_log) << " " << endl;
 		(*m_log) << "---------------------------------------------" << endl;
@@ -2432,7 +2432,7 @@ ParaTree::adaptGlobalCoarse(bool mapper_flag) {
 		nocts = m_octree.getNumOctants();
 
 		MPI_Barrier(m_comm);
-		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
+		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
 		(*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
 		(*m_log) << " " << endl;
 		(*m_log) << "---------------------------------------------" << endl;
@@ -2875,7 +2875,7 @@ ParaTree::privateLoadBalance(uint32_t* partition){
 						m_errorFlag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
 						m_errorFlag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
 						for(int j = 0; j < 17; ++j){
-							MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
+							MPI_Pack(&info[j],1,MPI_C_BOOL,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
 						}
 					}
 					if(nofElementsFromSuccessiveToPrevious == headSize)
@@ -2907,7 +2907,7 @@ ParaTree::privateLoadBalance(uint32_t* partition){
 						m_errorFlag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
 						m_errorFlag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
 						for(int j = 0; j < 17; ++j){
-							MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
+							MPI_Pack(&info[j],1,MPI_C_BOOL,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
 						}
 					}
 					lh -= nofElementsFromSuccessiveToPrevious;
@@ -2948,7 +2948,7 @@ ParaTree::privateLoadBalance(uint32_t* partition){
 						m_errorFlag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
 						m_errorFlag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
 						for(int j = 0; j < 17; ++j){
-							MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
+							MPI_Pack(&info[j],1,MPI_C_BOOL,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
 						}
 					}
 					if(nofElementsFromPreviousToSuccessive == tailSize)
@@ -2980,7 +2980,7 @@ ParaTree::privateLoadBalance(uint32_t* partition){
 						m_errorFlag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
 						m_errorFlag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
 						for(int j = 0; j < 17; ++j){
-							MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
+							MPI_Pack(&info[j],1,MPI_C_BOOL,sendBuffers[p].m_commBuffer,buffSize,&pos,m_comm);
 						}
 					}
 					ft += nofElementsFromPreviousToSuccessive;
@@ -3104,7 +3104,7 @@ ParaTree::privateLoadBalance(uint32_t* partition){
 				m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&pos,&m,1,MPI_INT8_T,m_comm);
 				m_octree.m_octants[newCounter].setMarker(m);
 				for(int j = 0; j < 17; ++j){
-					m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&pos,&info[j],1,MPI::BOOL,m_comm);
+					m_errorFlag = MPI_Unpack(rbit->second.m_commBuffer,rbit->second.m_commBufferSize,&pos,&info[j],1,MPI_C_BOOL,m_comm);
 					m_octree.m_octants[newCounter].m_info[j] = info[j];
 				}
 				++newCounter;
@@ -3220,7 +3220,7 @@ ParaTree::private_adapt_mapidx(bool mapflag) {
 		(*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(nocts)) << endl;
 #if BITPIT_ENABLE_MPI==1
 		MPI_Barrier(m_comm);
-		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
+		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
 #endif
 		(*m_log) << " " << endl;
 		(*m_log) << "---------------------------------------------" << endl;
@@ -3257,7 +3257,7 @@ ParaTree::private_adapt_mapidx(bool mapflag) {
 		nocts = m_octree.getNumOctants();
 
 		MPI_Barrier(m_comm);
-		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
+		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
 		(*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
 		(*m_log) << " " << endl;
 		(*m_log) << "---------------------------------------------" << endl;
@@ -3886,7 +3886,7 @@ ParaTree::setPboundGhosts() {
 			m_errorFlag = MPI_Pack(&l,1,MPI_UINT8_T,sendBuffers[key].m_commBuffer,buffSize,&pos,m_comm);
 			m_errorFlag = MPI_Pack(&m,1,MPI_INT8_T,sendBuffers[key].m_commBuffer,buffSize,&pos,m_comm);
 			for(int j = 0; j < 17; ++j){
-				MPI_Pack(&info[j],1,MPI::BOOL,sendBuffers[key].m_commBuffer,buffSize,&pos,m_comm);
+				MPI_Pack(&info[j],1,MPI_C_BOOL,sendBuffers[key].m_commBuffer,buffSize,&pos,m_comm);
 			}
 			m_errorFlag = MPI_Pack(&global_index,1,MPI_UINT64_T,sendBuffers[key].m_commBuffer,buffSize,&pos,m_comm);
 		}
@@ -3961,7 +3961,7 @@ ParaTree::setPboundGhosts() {
 			m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&m,1,MPI_INT8_T,m_comm);
 			m_octree.m_ghosts[ghostCounter].setMarker(m);
 			for(int j = 0; j < 17; ++j){
-				m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&info[j],1,MPI::BOOL,m_comm);
+				m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&info[j],1,MPI_C_BOOL,m_comm);
 				m_octree.m_ghosts[ghostCounter].m_info[j] = info[j];
 			}
 			m_octree.m_ghosts[ghostCounter].m_info[16] = true;
@@ -4007,7 +4007,7 @@ ParaTree::commMarker() {
 			marker = octant.getMarker();
 			mod	= octant.m_info[15];
 			m_errorFlag = MPI_Pack(&marker,1,MPI_INT8_T,sendBuffers[key].m_commBuffer,buffSize,&pos,m_comm);
-			m_errorFlag = MPI_Pack(&mod,1,MPI::BOOL,sendBuffers[key].m_commBuffer,buffSize,&pos,m_comm);
+			m_errorFlag = MPI_Pack(&mod,1,MPI_C_BOOL,sendBuffers[key].m_commBuffer,buffSize,&pos,m_comm);
 		}
 	}
 
@@ -4064,7 +4064,7 @@ ParaTree::commMarker() {
 		for(int i = 0; i < nofGhostsPerProc; ++i){
 			m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&marker,1,MPI_INT8_T,m_comm);
 			m_octree.m_ghosts[ghostCounter].setMarker(marker);
-			m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&mod,1,MPI::BOOL,m_comm);
+			m_errorFlag = MPI_Unpack(rrit->second.m_commBuffer,rrit->second.m_commBufferSize,&pos,&mod,1,MPI_C_BOOL,m_comm);
 			m_octree.m_ghosts[ghostCounter].m_info[15] = mod;
 			++ghostCounter;
 		}
@@ -4152,7 +4152,7 @@ ParaTree::balance21(bool const first){
 		commMarker();
 		m_octree.preBalance21(false);
 		MPI_Barrier(m_comm);
-		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
+		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
 
 		while(globalDone){
 			iteration++;
@@ -4161,7 +4161,7 @@ ParaTree::balance21(bool const first){
 			localDone = m_octree.localBalance(false);
 			commMarker();
 			m_octree.preBalance21(false);
-			m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
+			m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
 		}
 
 		commMarker();
@@ -4181,7 +4181,7 @@ ParaTree::balance21(bool const first){
 		commMarker();
 		m_octree.preBalance21(false);
 		MPI_Barrier(m_comm);
-		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
+		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
 
 		while(globalDone){
 			iteration++;
@@ -4189,7 +4189,7 @@ ParaTree::balance21(bool const first){
 			localDone = m_octree.localBalanceAll(false);
 			commMarker();
 			m_octree.preBalance21(false);
-			m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,m_comm);
+			m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
 		}
 
 		commMarker();
