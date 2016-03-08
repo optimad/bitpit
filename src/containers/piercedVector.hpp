@@ -64,6 +64,8 @@ template<typename value_t, typename id_t = long,
 class PiercedIterator
 	: public std::iterator<std::forward_iterator_tag, value_no_cv_t, std::ptrdiff_t, value_t*, value_t&>
 {
+	static_assert(std::is_integral<id_t>::value, "Signed integer required for id.");
+	static_assert(std::numeric_limits<id_t>::is_signed, "Signed integer required for id.");
 
 private:
 	/*!
