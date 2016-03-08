@@ -2250,15 +2250,40 @@ private:
 			return;
 		}
 
-		// Convert pending holes to regular ones
+		// Update the id of the empty elements
+		//
+		// The list of pending holes is sorted, in this way we can iterate
+		// from the last pending hole in the container to the first one.
+		// We start updating the id of the last pending hole, updating also
+		// the id of the contiguous holes before that one. Then we advance
+		// to the next hole, skipping the positions that have already been
+		// updated.
+		holes_sort_pending();
+
+		auto itr = m_holes_pending_begin;
+		size_t pos = m_last_pos + 1;
+		do {
+			if (*itr >= pos) {
+				itr++;
+				continue;
+			}
+
+			pos = *itr;
+			size_t next_used_pos = find_next_used_pos(pos);
+			do {
+				update_empty_pos_id(pos, next_used_pos, false);
+				if (pos > 0) {
+					pos--;
+				} else {
+					break;
+				}
+			} while (is_pos_empty(pos));
+		} while (pos > 0 && itr != m_holes_pending_end);
+
+		// Move the pending holes into the list of regular holes
 		for (auto itr = m_holes_pending_begin; itr != m_holes_pending_end; ++itr) {
 			const size_type &pos = *itr;
 
-			// Update the id of the element in the specified position
-			update_empty_pos_id(pos);
-
-			// Move the pending holes into the list of regular holes
-			//
 			// If there is space available at the beginning of the holes, try
 			// using pending holes to fill that gap.
 			if (m_holes_regular_begin != m_holes.begin()) {
