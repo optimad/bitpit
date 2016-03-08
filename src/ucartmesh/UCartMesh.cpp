@@ -639,7 +639,7 @@ void UCartMesh::getCellBoundingBox( int const &i, int const &j, std::array<doubl
  */
 void UCartMesh::getCellBoundingBox( int const &i, int const &j, int const &k, std::array<double,3> &C0, std::array<double,3> &C1 ){
 
-    std::array<int,3>    id({ i, j, k}) ;
+    std::array<int,3>    id({{ i, j, k}}) ;
 
     getCellBoundingBox( id, C0, C1) ;
 
@@ -1604,7 +1604,7 @@ int UCartMesh::linearCellInterpolation( std::array<double,3> &P, std::vector<int
     std::array< std::array<int,2>, 3>     cStencil ;
     std::array< std::array<double,2>, 3>  cWeights ;
 
-    std::array<int,3>                nS({1,1,1}) ;
+    std::array<int,3>                nS({{1,1,1}}) ;
 
     std::vector<int>::iterator       itrStencil ;
     std::vector<double>::iterator    itrWeights ;

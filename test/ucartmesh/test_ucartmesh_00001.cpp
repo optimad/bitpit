@@ -162,7 +162,7 @@ void Demo2D_UCartMesh(
             N = Mesh1.linearCellInterpolation( P, intStencil, intWeights );
 
             Scalar2[J] = 0. ;
-            Vectorial2[J] = {0.,0.,0.} ;
+            Vectorial2[J] = {{0.,0.,0.}} ;
             for( n=0; n<N; ++n){
                 Scalar2[J] += intWeights[n] * Scalar1[ intStencil[n] ] ;
                 Vectorial2[J] = Vectorial2[J] + intWeights[n] * Vectorial1[ intStencil[n] ] ;
@@ -220,7 +220,7 @@ void Demo2D_UCartMesh(
             N = Mesh1.linearNodeInterpolation( P, intStencil, intWeights );
 
             Scalar2[J] = 0. ;
-            Vectorial2[J] = {0.,0.,0.} ;
+            Vectorial2[J] = {{0.,0.,0.}} ;
             for( n=0; n<N; ++n){
                 Scalar2[J] += intWeights[n] * Scalar1[ intStencil[n] ] ;
                 Vectorial2[J] = Vectorial2[J] + intWeights[n] * Vectorial1[ intStencil[n] ] ;
