@@ -194,12 +194,12 @@ public:
 	/*!
 		Iterator for the pierced array.
 	*/
-	typedef PiercedIterator<value_t> iterator;
+	typedef PiercedIterator<value_t, id_t> iterator;
 
 	/*!
 		Constant iterator for the pierced array.
 	*/
-	typedef PiercedIterator<const value_t, const long> const_iterator;
+	typedef PiercedIterator<const value_t, const id_t> const_iterator;
 
 	/*!
 		Iterator for the pierced array raw container.
