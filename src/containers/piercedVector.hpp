@@ -271,16 +271,16 @@ public:
 	void update_id(const id_t &currentId, const id_t &updatedId);
 
 	template<typename... Args>
-	iterator emplace(const id_t &id, Args&&... args);
+	typename PiercedVector<value_t, id_t>::iterator emplace(const id_t &id, Args&&... args);
 	template<typename... Args>
-	iterator emplace_after(const id_t &referenceId, const id_t &id, Args&&... args);
+	typename PiercedVector<value_t, id_t>::iterator emplace_after(const id_t &referenceId, const id_t &id, Args&&... args);
 	template<typename... Args>
 	void emplace_back(const id_t &id, Args&&... args);
 	template<typename... Args>
-	iterator emplace_before(const id_t &referenceId, const id_t &id, Args&&... args);
+	typename PiercedVector<value_t, id_t>::iterator emplace_before(const id_t &referenceId, const id_t &id, Args&&... args);
 
 	template<typename... Args>
-	iterator emreplace(id_t id, Args&&... args);
+	typename PiercedVector<value_t, id_t>::iterator emreplace(id_t id, Args&&... args);
 
 	iterator erase(id_t id, bool delayed = false);
 

@@ -462,7 +462,7 @@ void PiercedVector<value_t, id_t>::update_id(const id_t &currentId, const id_t &
 			element.
 */
 template<typename value_t, typename id_t>
-template<class... Args>
+template<typename... Args>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emplace(const id_t &id, Args&&... args)
 {
 	// Fill the position
@@ -486,7 +486,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
 	\result An iterator that points to the newly inserted element.
 */
 template<typename value_t, typename id_t>
-template<class... Args>
+template<typename... Args>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emplace_after(const id_t &referenceId, const id_t &id, Args&&... args)
 {
 	// Fill the position
@@ -507,7 +507,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
 	\param args the arguments forwarded to construct the new element
 */
 template<typename value_t, typename id_t>
-template<class... Args>
+template<typename... Args>
 void PiercedVector<value_t, id_t>::emplace_back(const id_t &id, Args&&... args)
 {
 	// Fill the position
@@ -530,7 +530,7 @@ void PiercedVector<value_t, id_t>::emplace_back(const id_t &id, Args&&... args)
 	\result An iterator that points to the newly inserted element.
 */
 template<typename value_t, typename id_t>
-template<class... Args>
+template<typename... Args>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emplace_before(const id_t &referenceId, const id_t &id, Args&&... args)
 {
 	// Fill the position
@@ -553,7 +553,7 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::em
 	\result An iterator that points to the newly inserted element.
 */
 template<typename value_t, typename id_t>
-template<class... Args>
+template<typename... Args>
 typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::emreplace(id_t id, Args&&... args)
 {
 	// Get the position of the element
