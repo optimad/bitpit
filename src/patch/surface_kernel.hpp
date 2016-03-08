@@ -32,7 +32,7 @@ namespace bitpit {
 class SurfaceKernel : public PatchKernel {
 
 public:
-	SurfaceKernel(const int &id, const int &dimension, const int &space_dim, bool epxert);
+	SurfaceKernel(const int &id, const int &patch_dim, const int &space_dim, bool expert);
 
         int getSpaceDimensions(void) const;
 
