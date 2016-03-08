@@ -2052,9 +2052,19 @@ private:
 				update_first_used_pos(pos);
 			}
 
-			// If previos element is a hole, its id need to be udated
-			if (pos > 0 && is_pos_empty(pos - 1)) {
-				update_empty_pos_id(pos - 1, pos);
+			// If previos element is a hole, its id and the ids of the
+			// contigous holes need to be udated
+			if (pos > 0) {
+				size_type nextUsedPos = pos;
+				size_type prevPos = pos - 1;
+				while (is_pos_empty(prevPos)) {
+					update_empty_pos_id(prevPos, nextUsedPos);
+					if (prevPos > 0) {
+						--prevPos;
+					} else {
+						break;
+					}
+				}
 			}
 
             // Fill the position
@@ -2271,7 +2281,7 @@ private:
 			pos = *itr;
 			size_t next_used_pos = find_next_used_pos(pos);
 			do {
-				update_empty_pos_id(pos, next_used_pos, false);
+				update_empty_pos_id(pos, next_used_pos);
 				if (pos > 0) {
 					pos--;
 				} else {
@@ -2432,7 +2442,7 @@ private:
 
 		// Reset the position
 		size_t nextUsedPos = find_next_used_pos(pos);
-		update_empty_pos_id(pos, nextUsedPos, false);
+		update_empty_pos_id(pos, nextUsedPos);
 		m_first_dirty_pos = std::min(pos, m_first_dirty_pos);
 
 		// If removing the first position, update the counter
@@ -2556,9 +2566,7 @@ private:
 	}
 
 	/*!
-		Updates the id of the element in the specified position to make
-		it an empty element. If needed, updates also of the id of the
-		element before the specified position.
+		Updates the id of the specified position to mark it as empty element.
 
 		The id of an empty element contains the distance, measured in
 		number of elements, between the current element and the next
@@ -2569,36 +2577,15 @@ private:
 		\param pos is the position to update
 		\param nextUsedPos is the position of the next non-empty element
 	*/
-	void update_empty_pos_id(const size_type &pos, const size_type &nextUsedPos, bool recursive = true)
+	void update_empty_pos_id(const size_type &pos, const size_type &nextUsedPos)
 	{
-		// Id of the element
 		id_type id;
 		if (nextUsedPos <= pos) {
 			id = SENTINEL_ID;
 		} else {
 			id = pos - nextUsedPos;
 		}
-
-		// Update the id of the element in the current position
 		m_ids[pos] = id;
-
-		if (!recursive) {
-			return;
-		}
-
-		// Update the id of the elements in previous positions
-		if (pos > 0) {
-			size_type prevPos = pos - 1;
-			while (is_pos_empty(prevPos)) {
-				m_ids[prevPos] = id--;
-
-				if (prevPos > 0) {
-					--prevPos;
-				} else {
-					break;
-				}
-			}
-		}
 	}
 
 	/*!
