@@ -2570,22 +2570,19 @@ private:
 
 		The id of an empty element contains the distance, measured in
 		number of elements, between the current element and the next
-		non-empty element (the distance is negative). The id of an
-		element past the last non-empty position is set to the special
-		value SENTINEL_ID.
+		non-empty element (the distance is negative).
+
+		The next used position has to be greater than the position to
+		update. Otherwise, undefined behavior occurs.
 
 		\param pos is the position to update
 		\param nextUsedPos is the position of the next non-empty element
 	*/
 	void update_empty_pos_id(const size_type &pos, const size_type &nextUsedPos)
 	{
-		id_type id;
-		if (nextUsedPos <= pos) {
-			id = SENTINEL_ID;
-		} else {
-			id = pos - nextUsedPos;
-		}
-		m_ids[pos] = id;
+		assert(nextUsedPos > pos);
+
+		m_ids[pos] = pos - nextUsedPos;
 	}
 
 	/*!
