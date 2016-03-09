@@ -1735,15 +1735,33 @@ std::vector<long> PatchKernel::findCellEdgeNeighs(const long &id, bool complete)
 */
 std::vector<long> PatchKernel::findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList) const
 {
+	std::vector<long> neighs;
 	assert(isThreeDimensional());
 	if (!isThreeDimensional()) {
-		return std::vector<long>();
+		return neighs;
 	}
 
 	const Cell &cell = getCell(id);
-	std::vector<int> vertices = cell.getEdgeLocalConnect(edge);
+	std::vector<int> edgeVertices = cell.getEdgeLocalConnect(edge);
+	std::size_t nEdgeVertices = edgeVertices.size();
+	if (nEdgeVertices < 2) {
+		return neighs;
+	}
 
-	return findCellVertexNeighs(id, vertices, blackList);
+	// The neighbours of the edge are the cells that share all the edge vertices
+	std::vector<long> firstVertexNeighs = findCellVertexNeighs(id, edgeVertices[0], blackList);
+	for (std::size_t k = 1; k < nEdgeVertices; ++k) {
+		std::vector<long> vertexNeighs = findCellVertexNeighs(id, edgeVertices[k], blackList);
+		for (const long &neighId : vertexNeighs) {
+			if (utils::findInOrderedVector<long>(neighId, firstVertexNeighs) != firstVertexNeighs.end()) {
+				if (std::find(blackList.begin(), blackList.end(), neighId) == blackList.end()) {
+					utils::addToOrderedVector<long>(neighId, neighs);
+				}
+			}
+		}
+	}
+
+	return neighs;
 }
 
 /*!
