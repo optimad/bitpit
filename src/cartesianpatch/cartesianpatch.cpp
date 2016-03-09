@@ -842,6 +842,23 @@ std::array<int, 3> CartesianPatch::getCellCartesianId(long const &idx) const
 }
 
 /*!
+	Checks if a cell cartesian index is valid.
+
+	\param ijk is the set of cartesian indices of the cell
+	\result Returns true if the index is valid, otherwise it returns false.
+*/
+bool CartesianPatch::isCellCartesianIdValid(const std::array<int, 3> &ijk) const
+{
+	for (int k = 0; k < getDimension(); ++k) {
+		if (ijk[k] < 0 || ijk[k] >= m_nCells1D[k]) {
+			return false;
+		}
+	}
+
+	return true;
+}
+
+/*!
 	Converts the vertex cartesian notation to a linear notation
 */
 long CartesianPatch::getVertexLinearId(const int &i, const int &j, const int &k) const
@@ -915,6 +932,23 @@ std::array<int, 3> CartesianPatch::getVertexCartesianId(const std::array<int, 3>
 long CartesianPatch::getVertexLinearId(const std::array<int, 3> &ijk) const
 {
 	return getVertexLinearId(ijk[Vertex::COORD_X], ijk[Vertex::COORD_Y], ijk[Vertex::COORD_Z]);
+}
+
+/*!
+	Checks if a vertex cartesian index is valid.
+
+	\param ijk is the set of cartesian indices of the vertex
+	\result Returns true if the index is valid, otherwise it returns false.
+*/
+bool CartesianPatch::isVertexCartesianIdValid(const std::array<int, 3> &ijk) const
+{
+	for (int k = 0; k < getDimension(); ++k) {
+		if (ijk[k] < 0 || ijk[k] >= m_nVertices1D[k]) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 /*!
