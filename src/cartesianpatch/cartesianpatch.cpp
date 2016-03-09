@@ -878,8 +878,13 @@ std::array<int, 3> CartesianPatch::getCellCartesianId(long const &idx) const
 
 	std::array<int, 3> id;
 	id[0] = idx % m_nCells1D[0];
-	id[2] = idx / ijPlane;
-	id[1] = (idx - id[2] * ijPlane) / m_nCells1D[0];
+	if (isThreeDimensional()) {
+		id[2] = idx / ijPlane;
+		id[1] = (idx - id[2] * ijPlane) / m_nCells1D[0];
+	} else {
+		id[2] = -1;
+		id[1] = idx / m_nCells1D[0];
+	}
 
 	return id;
 }
@@ -937,8 +942,13 @@ std::array<int, 3> CartesianPatch::getVertexCartesianId(long const &idx) const
 
 	std::array<int, 3> id;
 	id[0] = idx % m_nVertices1D[0];
-	id[2] = idx / ijPlane;
-	id[1] = (idx - id[2] * ijPlane) / m_nVertices1D[0];
+	if (isThreeDimensional()) {
+		id[2] = idx / ijPlane;
+		id[1] = (idx - id[2] * ijPlane) / m_nVertices1D[0];
+	} else {
+		id[2] = -1;
+		id[1] = idx / m_nVertices1D[0];
+	}
 
 	return id;
 }
