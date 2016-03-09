@@ -27,16 +27,11 @@
 
 #include <algorithm>
 #include <cassert>
-#include <cstddef>
-#include <deque>
-#include <iostream>
 #include <iterator>
 #include <limits>
 #include <unordered_map>
 #include <memory>
-#include <sstream>
 #include <type_traits>
-#include <utility>
 #include <vector>
 
 namespace bitpit{
