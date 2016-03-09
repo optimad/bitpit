@@ -111,7 +111,7 @@ public:
 	int getDimension() const;
 	bool isThreeDimensional() const;
 
-	long getVertexCount() const;
+	virtual long getVertexCount() const;
 	PiercedVector<Vertex> &getVertices();
 	Vertex &getVertex(const long &id);
 	const Vertex & getVertex(const long &id) const;
@@ -132,7 +132,7 @@ public:
 	VertexIterator vertexBegin();
 	VertexIterator vertexEnd();
 
-	long getCellCount() const;
+	virtual long getCellCount() const;
 	long getInternalCount() const;
 	long getGhostCount() const;
 	PiercedVector<Cell> &getCells();
@@ -178,7 +178,7 @@ public:
 	CellIterator ghostBegin();
 	CellIterator ghostEnd();
 
-	long getInterfaceCount() const;
+	virtual long getInterfaceCount() const;
 	PiercedVector<Interface> &getInterfaces();
 	Interface &getInterface(const long &id);
 	const Interface &getInterface(const long &id) const;
