@@ -131,8 +131,8 @@ void IndexGenerator::reset()
 */
 PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
 	: m_nInternals(0), m_nGhosts(0),
-	  m_last_internal_id(Element::NULL_ID),
-	  m_first_ghost_id(Element::NULL_ID),
+	  m_lastInternalId(Element::NULL_ID),
+	  m_firstGhostId(Element::NULL_ID),
 	  m_dirty(true), m_expert(expert), m_hasCustomTolerance(false),
 	  m_rank(0), m_nProcessors(1)
 #if BITPIT_ENABLE_MPI==1
@@ -1007,7 +1007,7 @@ const Cell & PatchKernel::getCell(const long &id) const
 */
 Cell & PatchKernel::getLastInternal()
 {
-	return m_cells[m_last_internal_id];
+	return m_cells[m_lastInternalId];
 }
 
 /*!
@@ -1017,7 +1017,7 @@ Cell & PatchKernel::getLastInternal()
 */
 const Cell & PatchKernel::getLastInternal() const
 {
-	return m_cells[m_last_internal_id];
+	return m_cells[m_lastInternalId];
 }
 
 /*!
@@ -1027,7 +1027,7 @@ const Cell & PatchKernel::getLastInternal() const
 */
 Cell & PatchKernel::getFirstGhost()
 {
-	return m_cells[m_first_ghost_id];
+	return m_cells[m_firstGhostId];
 }
 
 /*!
@@ -1037,7 +1037,7 @@ Cell & PatchKernel::getFirstGhost()
 */
 const Cell & PatchKernel::getFirstGhost() const
 {
-	return m_cells[m_first_ghost_id];
+	return m_cells[m_firstGhostId];
 }
 
 /*!
@@ -1087,7 +1087,7 @@ PatchKernel::CellIterator PatchKernel::internalBegin()
 */
 PatchKernel::CellIterator PatchKernel::internalEnd()
 {
-	return ++m_cells.getIterator(m_last_internal_id);
+	return ++m_cells.getIterator(m_lastInternalId);
 }
 
 /*!
@@ -1097,7 +1097,7 @@ PatchKernel::CellIterator PatchKernel::internalEnd()
 */
 PatchKernel::CellIterator PatchKernel::ghostBegin()
 {
-    return m_cells.getIterator(m_first_ghost_id);
+    return m_cells.getIterator(m_firstGhostId);
 }
 
 /*!
@@ -1149,36 +1149,36 @@ PatchKernel::CellIterator PatchKernel::createCell(ElementInfo::Type type, bool i
 		//
 		// If there are ghosts cells, the internal cell should be inserted
 		// before the first ghost cell.
-		if (m_first_ghost_id < 0) {
+		if (m_firstGhostId < 0) {
 			iterator = m_cells.reclaim(id);
 		} else {
-			iterator = m_cells.reclaimBefore(m_first_ghost_id, id);
+			iterator = m_cells.reclaimBefore(m_firstGhostId, id);
 		}
 		m_nInternals++;
 
 		// Update the id of the last internal cell
-		if (m_last_internal_id < 0) {
-			m_last_internal_id = id;
-		} else if (m_cells.rawIndex(m_last_internal_id) < m_cells.rawIndex(id)) {
-			m_last_internal_id = id;
+		if (m_lastInternalId < 0) {
+			m_lastInternalId = id;
+		} else if (m_cells.rawIndex(m_lastInternalId) < m_cells.rawIndex(id)) {
+			m_lastInternalId = id;
 		}
 	} else {
 		// Create a ghost cell
 		//
 		// If there are internal cells, the ghost cell should be inserted
 		// after the last internal cell.
-		if (m_last_internal_id < 0) {
+		if (m_lastInternalId < 0) {
 			iterator = m_cells.reclaim(id);
 		} else {
-			iterator = m_cells.reclaimAfter(m_last_internal_id, id);
+			iterator = m_cells.reclaimAfter(m_lastInternalId, id);
 		}
 		m_nGhosts++;
 
 		// Update the id of the first ghost cell
-		if (m_first_ghost_id < 0) {
-			m_first_ghost_id = id;
-		} else if (m_cells.rawIndex(m_first_ghost_id) > m_cells.rawIndex(id)) {
-			m_first_ghost_id = id;
+		if (m_firstGhostId < 0) {
+			m_firstGhostId = id;
+		} else if (m_cells.rawIndex(m_firstGhostId) > m_cells.rawIndex(id)) {
+			m_firstGhostId = id;
 		}
 	}
 	iterator->setId(id);
@@ -1389,19 +1389,19 @@ bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 	m_cellIdGenerator.trashId(id);
 	if (isInternal) {
 		m_nInternals--;
-		if (id == m_last_internal_id) {
-			m_last_internal_id = m_cells.getSizeMarker(m_nInternals - 1, Element::NULL_ID);
+		if (id == m_lastInternalId) {
+			m_lastInternalId = m_cells.getSizeMarker(m_nInternals - 1, Element::NULL_ID);
 		}
 	} else {
 		m_nGhosts--;
-		if (id == m_first_ghost_id) {
+		if (id == m_firstGhostId) {
 			if (m_nGhosts == 0) {
-				m_first_ghost_id = Element::NULL_ID;
+				m_firstGhostId = Element::NULL_ID;
 			} else if (m_nInternals == 0) {
-				m_first_ghost_id = m_cells.getSizeMarker(m_nInternals, Element::NULL_ID);
+				m_firstGhostId = m_cells.getSizeMarker(m_nInternals, Element::NULL_ID);
 			} else {
-				CellIterator first_ghost_iterator = ++m_cells.getIterator(m_last_internal_id);
-				m_first_ghost_id = first_ghost_iterator->getId();
+				CellIterator first_ghost_iterator = ++m_cells.getIterator(m_lastInternalId);
+				m_firstGhostId = first_ghost_iterator->getId();
 			}
 		}
 	}
@@ -1475,8 +1475,8 @@ PatchKernel::CellIterator PatchKernel::moveInternal2Ghost(const long &id)
 	}
 
 	// Swap the element with the last internal cell
-	if (id != m_last_internal_id) {
-		m_cells.swap(id, m_last_internal_id);
+	if (id != m_lastInternalId) {
+		m_cells.swap(id, m_lastInternalId);
 	}
 
 	// Get the iterator pointing to the updated position of the element
@@ -1490,8 +1490,8 @@ PatchKernel::CellIterator PatchKernel::moveInternal2Ghost(const long &id)
 	++m_nGhosts;
 
 	// Update the last internal and first ghost markers
-	m_first_ghost_id = id;
-	m_last_internal_id = m_cells.getSizeMarker(m_nInternals - 1, Element::NULL_ID);
+	m_firstGhostId = id;
+	m_lastInternalId = m_cells.getSizeMarker(m_nInternals - 1, Element::NULL_ID);
 
 	// Return the iterator to the new position
 	return iterator;
@@ -1509,8 +1509,8 @@ PatchKernel::CellIterator PatchKernel::moveGhost2Internal(const long &id)
 	}
 
 	// Swap the cell with the first ghost
-	if (id != m_first_ghost_id) {
-		m_cells.swap(id, m_first_ghost_id);
+	if (id != m_firstGhostId) {
+		m_cells.swap(id, m_firstGhostId);
 	}
 
 	// Get the iterator pointing to the updated position of the element
@@ -1524,13 +1524,13 @@ PatchKernel::CellIterator PatchKernel::moveGhost2Internal(const long &id)
 	--m_nGhosts;
 
 	// Update the last internal and first ghost markers
-	m_last_internal_id = id;
+	m_lastInternalId = id;
 	if (m_nGhosts == 0) {
-		m_first_ghost_id = Element::NULL_ID;
+		m_firstGhostId = Element::NULL_ID;
 	} else {
 		CellIterator firstGhostIterator = iterator;
 		++firstGhostIterator;
-		m_first_ghost_id = firstGhostIterator->getId();
+		m_firstGhostId = firstGhostIterator->getId();
 	}
 
 	// Return the iterator to the new position
