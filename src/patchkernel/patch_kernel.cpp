@@ -1796,7 +1796,7 @@ std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, bool complet
 }
 
 /*!
-	Extracts the neighbours of the specified cell for the given vertex.
+	Extracts the neighbours of the specified cell for the given local vertex.
 
 	Cells that has only a vertex in common are considered neighbours only
 	if there are other cells "connecting" them.
@@ -1813,49 +1813,14 @@ std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, bool complet
 	vertex V), whereas A2 and B2 are neighbours.
 
 	\param id is the id of the cell
-	\param vertex is a vertex of the cell
+	\param vertex is a local vertex of the cell
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the specified cell for the given vertex.
 */
 std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList) const
 {
-	std::vector<int> vertexList(1);
-	vertexList[0] = vertex;
-
-	return findCellVertexNeighs(id, vertexList, blackList);
-}
-
-/*!
-	Extracts the neighbours of the specified cell for the given vertices.
-
-	Cells that has only a vertex in common are considered neighbours only
-	if there are other cells "connecting" them.
-
-	                  .-----.                   .-----.
-	                  |     |                   |     |
-	                V | A1  |                 V | A2  |
-	            .-----+-----.             .-----+-----.
-	            |     |                   |     |     |
-	            | B1  |                   | B2  | C2  |
-	            .-----.                   .-----.-----.
-
-	For example, A1 and B1 are not neighbours (although they share the
-	vertex V), whereas A2 and B2 are neighbours.
-
-	\param id is the id of the cell
-	\param vertices is the list of vertices of the cell
-	\param blackList is a list of cells that are excluded from the search
-	\result The neighbours of the specified cell for the given vertices.
-*/
-std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, const std::vector<int> &vertices, const std::vector<long> &blackList) const
-{
 	const Cell &cell = getCell(id);
-
-	int nVerticesToFound = vertices.size();
-	std::vector<long> verticesToFind(nVerticesToFound);
-	for (int k = 0; k < nVerticesToFound; ++k) {
-		verticesToFind[k] = cell.getVertex(vertices[k]);
-	}
+	long vertexId = cell.getVertex(vertex);
 
 	std::vector<long> neighs;
 	std::unordered_set<long> scanQueue;
@@ -1874,7 +1839,7 @@ std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, const std::v
 		const std::vector<std::vector<int>> &cellLocalFaceConnect = cellTypeInfo.faceConnect;
 		const long *scanCellConnect = scanCell.getConnect();
 
-		// Find the faces that share the vertices
+		// Find the faces that share the vertex
 		std::vector<long> faceList;
 		for (int i = 0; i < scanCell.getFaceCount(); ++i) {
 			// Info on the face
@@ -1882,24 +1847,17 @@ std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, const std::v
 			const ElementInfo &faceTypeInfo = ElementInfo::getElementInfo(faceType);
 			const std::vector<int> &faceLocalConnect = cellLocalFaceConnect[i];
 
-			// Check if the face shares all the vertices
-			int nCommonVertices = 0;
+			// Check if the face shares the vertex
 			for (int k = 0; k < faceTypeInfo.nVertices; ++k) {
 				long faceVertexId = scanCellConnect[faceLocalConnect[k]];
-				for (int n = 0; n < nVerticesToFound; ++n) {
-					if (faceVertexId == verticesToFind[n]) {
-						nCommonVertices++;
-						break;
-					}
+				if (faceVertexId == vertexId) {
+					faceList.push_back(i);
+					break;
 				}
-			}
-
-			if (nCommonVertices == nVerticesToFound) {
-				faceList.push_back(i);
 			}
 		}
 
-		// If there are no faces that share the vertices go to the next face
+		// If there are no faces that share the vertices go to the next cell
 		if (faceList.empty()) {
 			continue;
 		}
