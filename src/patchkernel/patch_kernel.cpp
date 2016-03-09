@@ -2579,6 +2579,10 @@ return(check);
 void PatchKernel::updateBoundingBox()
 {
 	evalBoundingBox(m_minPoint, m_maxPoint);
+
+	if (!isTolCustomized()) {
+		resetTol();
+	}
 }
 
 /*!
