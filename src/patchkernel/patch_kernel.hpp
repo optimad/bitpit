@@ -154,7 +154,6 @@ public:
 	bool setCellInternal(const long &id, bool isInternal);
 	CellIterator moveGhost2Internal(const long &id);
 	CellIterator moveInternal2Ghost(const long &id);
-	virtual double evalCellVolume(const long &id) = 0;
 	virtual double evalCellSize(const long &id) = 0;
 	long countFreeCells() const;
 	long countOrphanCells() const;
@@ -191,9 +190,7 @@ public:
 	bool deleteInterfaces(const std::vector<long> &ids, bool updateNeighs = true, bool delayed = false);
 	long countFreeInterfaces() const;
 	long countOrphanInterfaces() const;
-	virtual double evalInterfaceArea(const long &id) = 0;
 	virtual std::array<double, 3> evalInterfaceCentroid(const long &id);
-	virtual std::array<double, 3> evalInterfaceNormal(const long &id) = 0;
 
 	InterfaceIterator getInterfaceIterator(const long &id);
 	InterfaceIterator interfaceBegin();

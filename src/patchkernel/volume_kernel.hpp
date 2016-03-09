@@ -40,6 +40,7 @@ public:
 	virtual double evalCellSize(const long &id) = 0;
 
 	virtual double evalInterfaceArea(const long &id) = 0;
+        virtual std::array<double,3> evalInterfaceNormal(const long &id) = 0;
 
 };
 

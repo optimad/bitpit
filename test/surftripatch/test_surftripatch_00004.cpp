@@ -1,7 +1,7 @@
 // ========================================================================== //
-//           ** BitPit mesh ** Test 004 for class surftri_patch **            //
+//           ** BitPit mesh ** Test 004 for class SurfUnstructured **         //
 //                                                                            //
-// Test topological queries on SurfTriPatch.                                  //
+// Test topological queries on SurfUnstructured.                              //
 // ========================================================================== //
 /*---------------------------------------------------------------------------*\
  *
@@ -39,7 +39,7 @@
 // BitPit
 # include "bitpit_common.hpp"                                                 // Utilities and common definitions
 # include "bitpit_operators.hpp"                                              // STL containers operators
-# include "bitpit_patchkernel.hpp"                                                  // BitPit base patch
+# include "bitpit_patchkernel.hpp"                                            // BitPit base patch
 # include "bitpit_surftripatch.hpp"                                           // BitPit surftri patch
 
 // ========================================================================== //
@@ -78,7 +78,7 @@ int subtest_001(
 // ========================================================================== //
 
 // Local variables
-SurfTriPatch                    mesh(0), edges(1);
+SurfUnstructured                mesh(0), edges(1);
 
 // Counters
 int                             nV, nS, nE;
@@ -141,8 +141,8 @@ int                             nV, nS, nE;
     int                                         n_faces, n_adj, n_vert;
     int                                         i, j;
     long                                        id;
-    SurfTriPatch::CellIterator                  c_, ce_;
-    SurfTriPatch::VertexIterator                v_, ve_;
+    SurfUnstructured::CellIterator              c_, ce_;
+    SurfUnstructured::VertexIterator            v_, ve_;
     long                                        edge_counter = 0, vertex_counter = 0, cell_counter;
     unordered_map<long, long>                   vertex_mapper;
     vector<array<double, 3>>                    normals, enormals, vnormals;
@@ -232,7 +232,7 @@ return 0; }
 // SUBTEST #002 Test edge network extraction for 2D curve                     //
 // ========================================================================== //
 void Generate2DSurfMesh(
-    SurfTriPatch                       &mesh
+    SurfUnstructured                    &mesh
 ) {
 
 // ========================================================================== //
@@ -303,7 +303,7 @@ int subtest_002(
 // ========================================================================== //
 
 // Local variables
-SurfTriPatch                    mesh(0, 1, 2);
+SurfUnstructured                mesh(0, 1, 2);
 
 // Counters
 int                             nV, nS, nE;
@@ -365,8 +365,8 @@ int                             nV, nS, nE;
     int                                         n_faces, n_adj, n_vert;
     int                                         i, j;
     long                                        id;
-    SurfTriPatch::CellIterator                  c_, ce_;
-    SurfTriPatch::VertexIterator                v_, ve_;
+    SurfUnstructured::CellIterator              c_, ce_;
+    SurfUnstructured::VertexIterator            v_, ve_;
     long                                        cell_counter, edge_counter = 0, vertex_counter = 0;
     unordered_map<long, long>                   vertex_mapper, edge_mapper;
     vector<array<double, 3>>                    normals, enormals, vnormals;

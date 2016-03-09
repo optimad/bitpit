@@ -33,22 +33,14 @@
 
 namespace bitpit {
 
-class SurfTriPatch : public SurfaceKernel {
+class SurfUnstructured : public SurfaceKernel {
 
 public:
 	using PatchKernel::isPointInside;
 	using PatchKernel::locatePoint;
 
-        // Types definitions
-        typedef double (SurfTriPatch::*eval_f_)(const long&, int&);
-
-        // Static constant
-        static const unsigned short SELECT_TRIANGLE;
-        static const unsigned short SELECT_QUAD;
-        static const unsigned short SELECT_ALL;
-
         // Constructors
-	SurfTriPatch(const int &id, int patch_dim = 2, int space_dim = 3);
+	SurfUnstructured(const int &id, int patch_dim = 2, int space_dim = 3);
 
         // Setters
 	void setExpert(bool expert);
@@ -62,35 +54,7 @@ public:
         long locatePoint(const std::array<double, 3> &point);
 
         // Evaluations
-	double evalCellVolume(const long &id);
-	double evalCellSize(const long &id);
-	double evalInterfaceArea(const long &id);
-	std::array<double, 3> evalInterfaceNormal(const long &id);
-        //TODO: double evalCellArea(const long &);
-        std::array<double, 3> evalCellCentroid(const long &);
-        double evalEdgeLength(const long&, const int&);
-        double evalMinEdgeLength(const long &, int &);
-        double evalMaxEdgeLength(const long &, int &);
-        double evalAngleAtVertex(const long&, const int&);
-        double evalMinAngleAtVertex(const long&, int &);
-        double evalMaxAngleAtVertex(const long&, int &);
-        std::array<double, 3> evalFacetNormal(const long&);
-        std::array<double, 3> evalEdgeNormal(const long&, const int&);
-        std::array<double, 3> evalVertexNormal(const long&, const int&);
-        double evalAspectRatio(const long&, int&);
-        double evalFacetArea(const long&);
-        vector<double> computeHistogram(
-            eval_f_                     ,
-            vector<double>              &,
-            long                        &,
-            int                          n_int = 8,
-            unsigned short               mask = SELECT_ALL
-        );
-        void displayQualityStats(
-            ostream                     &,
-            unsigned int                 padding = 0
-        );
-        void extractEdgeNetwork(SurfTriPatch &);
+        void extractEdgeNetwork(SurfUnstructured &);
 
         // I/O routines
         unsigned short importSTL(const std::string &, const bool &);
@@ -103,16 +67,7 @@ protected:
 	bool _enableCellBalancing(const long &id, bool enabled);
 
 private:
-        void displayHistogram(
-            const long                  &,
-            const vector<double>        &,
-            const vector<double>        &,
-            const std::string           &,
-            ostream                     &,
-            unsigned int                 padding = 0
-        );
-        bool compareSelectedTypes(const unsigned short &, const ElementInfo::Type &);
-        static const std::map<ElementInfo::Type, unsigned short>     m_selectionTypes;
+
 };
 
 }

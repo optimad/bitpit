@@ -1,7 +1,7 @@
 // ========================================================================== //
 //           ** BitPit mesh ** Test 003 for class surftri_patch **            //
 //                                                                            //
-// Test import output routines for class SurfTriPatch                         //
+// Test import output routines for class SurfUnstructured                         //
 // ========================================================================== //
 /*---------------------------------------------------------------------------*\
  *
@@ -78,7 +78,7 @@ int subtest_001(
 
 // Local variables
 string                          in_name_bin = "./data/buddha.stl";
-SurfTriPatch                    mesh(0);
+SurfUnstructured                mesh(0);
 
 // Counters
 // none

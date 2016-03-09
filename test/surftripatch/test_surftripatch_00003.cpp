@@ -1,7 +1,7 @@
 // ========================================================================== //
-//           ** BitPit mesh ** Test 003 for class surftri_patch **            //
+//           ** BitPit mesh ** Test 003 for class SurfUnstructured **         //
 //                                                                            //
-// Test import output routines for class SurfTriPatch                         //
+// Test import output routines for class SurfUnstructured                     //
 // ========================================================================== //
 /*---------------------------------------------------------------------------*\
  *
@@ -83,7 +83,7 @@ string                          in_name_bin = "./data/buddha.stl";
 string                          in_name_ASCII = "./data/cube.stl";
 string                          out_name_bin = "./buddha_copy.stl";
 string                          out_name_ASCII = "./buddha_cube_copy.stl";
-SurfTriPatch                    mesh(0);
+SurfUnstructured                mesh(0);
 
 // Counters
 // none

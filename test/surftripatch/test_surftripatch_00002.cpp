@@ -1,7 +1,7 @@
 // ========================================================================== //
-//           ** BitPit mesh ** Test 002 for class surftri_patch **            //
+//           ** BitPit mesh ** Test 002 for class SurfUnstructured **         //
 //                                                                            //
-// Test routines for geometrical queries for class SurfTriPatch.              //
+// Test routines for geometrical queries for class SurfUnstructured.          //
 // ========================================================================== //
 /*---------------------------------------------------------------------------*\
  *
@@ -83,7 +83,7 @@ int subtest_001(
 const double                    PI = 3.14159265358979;
 // Local variables
 long                            id;
-SurfTriPatch                    mesh(0);
+SurfUnstructured                mesh(0);
 
 // Counters
 // none
@@ -118,8 +118,8 @@ SurfTriPatch                    mesh(0);
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
-    SurfTriPatch::VertexIterator                        vit;
-    SurfTriPatch::CellIterator                          cit;
+    SurfUnstructured::VertexIterator                    vit;
+    SurfUnstructured::CellIterator                      cit;
     vector<long>                                        t_connect(3, Vertex::NULL_ID);
     vector<long>                                        q_connect(4, Vertex::NULL_ID);
     
@@ -175,7 +175,7 @@ SurfTriPatch                    mesh(0);
     expected[1].resize(4, 1.0);
 
     // Check edge length for each cell witin the mesh ----------------------- //
-    SurfTriPatch::CellIterator  cell_, end_ = mesh.cellEnd();
+    SurfUnstructured::CellIterator  cell_, end_ = mesh.cellEnd();
     i = 0;
     for (cell_ = mesh.cellBegin(); cell_ != end_; ++cell_) {
 
@@ -227,7 +227,7 @@ SurfTriPatch                    mesh(0);
     expected[1].resize(4, 0.5*PI);
 
     // Check edge length ---------------------------------------------------- //
-    SurfTriPatch::CellIterator  cell_, end_ = mesh.cellEnd();
+    SurfUnstructured::CellIterator  cell_, end_ = mesh.cellEnd();
     i = 0;
     for (cell_ = mesh.cellBegin(); cell_ != end_; ++cell_) {
 
@@ -274,7 +274,7 @@ SurfTriPatch                    mesh(0);
     cout << "** Testing routines for facet normal calculations" << endl;
 
     // Compute face normal -------------------------------------------------- //
-    SurfTriPatch::CellIterator  cell_, end_ = mesh.cellEnd();
+    SurfUnstructured::CellIterator  cell_, end_ = mesh.cellEnd();
     i = 0;
     for (cell_ = mesh.cellBegin(); cell_ != end_; ++cell_) {
 
@@ -306,7 +306,7 @@ SurfTriPatch                    mesh(0);
     cout << "** Testing routines for aspect ratio computation" << endl;
 
     // Compute face normal -------------------------------------------------- //
-    SurfTriPatch::CellIterator  cell_, end_ = mesh.cellEnd();
+    SurfUnstructured::CellIterator  cell_, end_ = mesh.cellEnd();
     i = 0;
     for (cell_ = mesh.cellBegin(); cell_ != end_; ++cell_) {
 
@@ -341,7 +341,7 @@ SurfTriPatch                    mesh(0);
     cout << "** Testing routines for facet area computation" << endl;
 
     // Compute face normal -------------------------------------------------- //
-    SurfTriPatch::CellIterator  cell_, end_ = mesh.cellEnd();
+    SurfUnstructured::CellIterator  cell_, end_ = mesh.cellEnd();
     i = 0;
     for (cell_ = mesh.cellBegin(); cell_ != end_; ++cell_) {
 
@@ -350,7 +350,7 @@ SurfTriPatch                    mesh(0);
 
         // Compute face normal
         cout << "   Facet area for cell " << id << ": " << endl;
-        area = mesh.evalFacetArea(id);
+        area = mesh.evalCellArea(id);
         c_size = mesh.evalCellSize(id);
         cout << "     area: " << area << endl;
         cout << "     cell size: " << c_size << endl;
@@ -382,7 +382,7 @@ SurfTriPatch                    mesh(0);
     expected_center[1] = array<double, 3>{0.5, -0.5, 0.};
 
     // Compute face normal -------------------------------------------------- //
-    SurfTriPatch::CellIterator  cell_, end_ = mesh.cellEnd();
+    SurfUnstructured::CellIterator  cell_, end_ = mesh.cellEnd();
     i = 0;
     for (cell_ = mesh.cellBegin(); cell_ != end_; ++cell_) {
 

@@ -1,7 +1,7 @@
 // ========================================================================== //
 //           ** BitPit mesh ** Test 001 for class surftri_patch **            //
 //                                                                            //
-// Test construction, modifiers and communicators for surftri_patch.          //
+// Test construction, modifiers and communicators for SurfUnstructured        //
 // ========================================================================== //
 /*---------------------------------------------------------------------------*\
  *
@@ -55,18 +55,18 @@ using namespace chrono;
 // GENERATE A TEST NON-MANIFOLD SURFACE TRIANGULATION FOR TESTS.              //
 // ========================================================================== //
 void generateTestTriangulation(
-    SurfTriPatch                &mesh
+    SurfUnstructured                &mesh
 ) {
 
 // ========================================================================== //
 // void generateTestTriangulation(                                            //
-//     SurfTriPatch                &mesh)                                     //
+//     SurfUnstructured                &mesh)                                 //
 //                                                                            //
 // Generate a non-manifold surface triangulation for tests.                   //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - mesh    : SurfTriPatch, surface mesh patch                               //
+// - mesh    : SurfUnstructured, surface mesh patch                           //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -200,20 +200,20 @@ return;
 void generateTestQuadMesh(
     long                        nx,
     long                        ny,
-    SurfTriPatch                &mesh
+    SurfUnstructured                &mesh
 ) {
 
 // ========================================================================== //
 // void generateTestQuadMesh(                                                 //
 //     long                        nx,                                        //
 //     long                        ny,                                        //
-//     SurfTriPatch                &mesh)                                     //
+//     SurfUnstructured                &mesh)                                 //
 //                                                                            //
 // Generate surface triangulation for sub-test #002.                          //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - mesh       : SurfTriPatch, mesh container                                //
+// - mesh       : SurfUnstructured, mesh container                            //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -294,7 +294,7 @@ void COM_step(
 // ========================================================================== //
 
 // Local variables
-SurfTriPatch                     envelope(0);
+SurfUnstructured                     envelope(0);
 
 // Counters
 // none
@@ -348,7 +348,7 @@ int subtest_001(
 // ========================================================================== //
 
 // Local variables
-SurfTriPatch                     mesh(0);
+SurfUnstructured                     mesh(0);
 
 // Counters
 // none
@@ -387,7 +387,7 @@ if (mesh.getRank() == 0) {
 {
     // Scope variables ------------------------------------------------------ //
     stringstream                name;
-    SurfTriPatch                envelope(0);
+    SurfUnstructured                envelope(0);
 
     // Generate dummy triangulation ----------------------------------------- //
     if (mesh.getRank() == 0) {
@@ -500,7 +500,7 @@ int subtest_002(
 // ========================================================================== //
 
 // Local variables
-SurfTriPatch            mesh(0);
+SurfUnstructured            mesh(0);
 
 // Counters
 // none
@@ -696,7 +696,7 @@ int subtest_003(
 // ========================================================================== //
 
 // Local variables
-SurfTriPatch            mesh(0);
+SurfUnstructured            mesh(0);
 
 // Counters
 // none

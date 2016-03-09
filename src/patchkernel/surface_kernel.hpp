@@ -32,16 +32,40 @@ namespace bitpit {
 class SurfaceKernel : public PatchKernel {
 
 public:
+        // Static constant
+        static const unsigned short SELECT_TRIANGLE;
+        static const unsigned short SELECT_QUAD;
+        static const unsigned short SELECT_ALL;
+        static const std::map<ElementInfo::Type, unsigned short>     m_selectionTypes;
+
+        // Types definitions
+        typedef double (SurfaceKernel::*eval_f_)(const long&, int&);
+
 	SurfaceKernel(const int &id, const int &patch_dim, const int &space_dim, bool expert);
 
         int getSpaceDimensions(void) const;
 
 	virtual ~SurfaceKernel();
+        virtual std::array<double, 3> evalCellCentroid(const long &);
+        virtual double evalCellArea(const long &);
+        virtual double evalEdgeLength(const long&, const int&);
+        virtual double evalMinEdgeLength(const long &, int &);
+        virtual double evalMaxEdgeLength(const long &, int &);
+        virtual double evalAngleAtVertex(const long&, const int&);
+        virtual double evalMinAngleAtVertex(const long&, int &);
+        virtual double evalMaxAngleAtVertex(const long&, int &);
+        virtual double evalAspectRatio(const long&, int&);
+        virtual std::array<double, 3> evalFacetNormal(const long&);
+        std::array<double, 3> evalEdgeNormal(const long&, const int&);
+        virtual std::array<double, 3> evalVertexNormal(const long&, const int&);
+        double evalCellSize(const long &id);
 
-	virtual double evalCellVolume(const long &id) = 0;
-	virtual double evalCellSize(const long &id) = 0;
+        void displayQualityStats(ostream&, unsigned int padding = 0);
+        vector<double> computeHistogram(eval_f_, std::vector<double>&, long&, int n_int = 8, unsigned short mask = SELECT_ALL);
 
-	virtual double evalInterfaceArea(const long &id) = 0;
+private:
+        bool compareSelectedTypes(const unsigned short &, const ElementInfo::Type &);
+        void displayHistogram(const long&, const std::vector<double>&, const std::vector<double>&, const std::string&, std::ostream&, unsigned int padding = 0);
 
 protected:
         int                     m_spaceDim;

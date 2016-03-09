@@ -1,7 +1,7 @@
 // ========================================================================== //
-//           ** BitPit mesh ** Test 001 for class surftri_patch **            //
+//           ** BitPit mesh ** Test 001 for class SurfUnstructured **         //
 //                                                                            //
-// Test construction, and modifiers for class SurfTriPatch.                   //
+// Test construction, and modifiers for class SurfUnstructured.               //
 // ========================================================================== //
 /*---------------------------------------------------------------------------*\
  *
@@ -39,7 +39,7 @@
 // BitPit
 # include "bitpit_common.hpp"                                                 // Utilities and common definitions
 # include "bitpit_operators.hpp"                                              // STL containers operators
-# include "bitpit_patchkernel.hpp"                                                  // BitPit base patch
+# include "bitpit_patchkernel.hpp"                                            // BitPit base patch
 # include "bitpit_surftripatch.hpp"                                           // BitPit surftri patch
 
 // ========================================================================== //
@@ -52,18 +52,18 @@ using namespace bitpit;
 // GENERATE A TEST NON-MANIFOLD SURFACE TRIANGULATION FOR TESTS.              //
 // ========================================================================== //
 void generateTestTriangulation(
-    SurfTriPatch                &mesh
+    SurfUnstructured                &mesh
 ) {
 
 // ========================================================================== //
 // void generateTestTriangulation(                                            //
-//     SurfTriPatch                &mesh)                                     //
+//     SurfUnstructured            &mesh)                                     //
 //                                                                            //
 // Generate a non-manifold surface triangulation for tests.                   //
 // ========================================================================== //
 // INPUT                                                                      //
 // ========================================================================== //
-// - mesh    : SurfTriPatch, surface mesh patch                               //
+// - mesh    : SurfUnstructured, surface mesh patch                           //
 // ========================================================================== //
 // OUTPUT                                                                     //
 // ========================================================================== //
@@ -226,7 +226,7 @@ int subtest_002(
 // ========================================================================== //
 
 // Local variables
-SurfTriPatch                            mesh(0);
+SurfUnstructured                        mesh(0);
 Cell                                    cell_17, cell_5, cell_7;
 vector<long>                            cell_list;
 
@@ -265,7 +265,7 @@ vector<long>                            cell_list;
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
-    SurfTriPatch                        envelope(0);
+    SurfUnstructured                    envelope(0);
     vector<long>                        ring1, ring1_expected{6,7,8,21,22,23,30,31,32};
 
     // Set envelope attributes ---------------------------------------------- //
@@ -336,7 +336,7 @@ vector<long>                            cell_list;
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
-    SurfTriPatch                        envelope(0);
+    SurfUnstructured                    envelope(0);
     vector<long>                        ring1, ring1_expected{6,8,21,22,23,30,31,32};
 
     // Set envelope attributes ---------------------------------------------- //
@@ -415,9 +415,9 @@ vector<long>                            cell_list;
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
-    SurfTriPatch                        envelope(0);
+    SurfUnstructured                    envelope(0);
     vector<long>                        ring1, ring1_expected{7};
-    SurfTriPatch::CellIterator          it;
+    SurfUnstructured::CellIterator      it;
 
     // Set envelope attributes ---------------------------------------------- //
     envelope.setExpert(true);
@@ -492,7 +492,7 @@ vector<long>                            cell_list;
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
-    SurfTriPatch                        envelope(0);
+    SurfUnstructured                    envelope(0);
     vector<long>                        ring1, ring1_expected{6,7,8,21,22,23,30,31,32};
 
     // Set envelope attributes ---------------------------------------------- //
@@ -602,7 +602,7 @@ int subtest_001(
 // ========================================================================== //
 
 // Local variables
-SurfTriPatch                    mesh(0);
+SurfUnstructured                mesh(0);
 vector<long>                    c_connect{0, 1, 2};
 vector<long>                    g_connect{3, 4, 5};
 Cell                            cell(0, ElementInfo::TRIANGLE, true);
@@ -665,7 +665,7 @@ int                             i;
 {
     // Scope variables ------------------------------------------------------ //
     const int                                   N = 5;
-    SurfTriPatch::CellIterator                  it, et;
+    SurfUnstructured::CellIterator              it, et;
 
     // Insert internal cells (IDX 0-4) -------------------------------------- //
     // cells:  {0,1,2,3,4}
@@ -742,7 +742,7 @@ int                             i;
 // ========================================================================== //
 {
     // Scope variables
-    SurfTriPatch::CellIterator                  it, et;
+    SurfUnstructured::CellIterator              it, et;
 
     // Remove internal cells
     //bucket: {4,2,5,6}
