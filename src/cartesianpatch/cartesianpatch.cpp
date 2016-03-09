@@ -23,6 +23,7 @@
 \*---------------------------------------------------------------------------*/
 
 #include <cmath>
+#include <bitset>
 
 #include "bitpit_common.hpp"
 
@@ -872,6 +873,40 @@ std::array<int, 3> CartesianPatch::getVertexCartesianId(long const &idx) const
 	id[1] = (idx - id[2] * ijPlane) / m_nVertices1D[0];
 
 	return id;
+}
+
+/*!
+	Gets the cartesian indices of the specified local vertex.
+
+	No check on bounds is performed.
+
+	\param[in] cellIdx is the linear cell index
+	\param[in] vertex is the local vertex
+	\result Returns the set of cartesian indices of the vertex.
+*/
+std::array<int, 3> CartesianPatch::getVertexCartesianId(long const &cellIdx, int const &vertex) const
+{
+	return getVertexCartesianId(getCellCartesianId(cellIdx), vertex);
+}
+
+/*!
+	Gets the cartesian indices of the specified local vertex.
+
+	No check on bounds is performed.
+
+	\param[in] cellIjk is the Cartesian cell index
+	\param[in] vertex is the local vertex
+	\result Returns the set of cartesian indices of the vertex.
+*/
+std::array<int, 3> CartesianPatch::getVertexCartesianId(const std::array<int, 3> &cellIjk, int const &vertex) const
+{
+	std::bitset<3> vertexBitset(vertex);
+	std::array<int, 3> vertexIjk(cellIjk);
+	for (int k = 0; k < 3; ++k) {
+		vertexIjk[k] += vertexBitset[k];
+	}
+
+	return vertexIjk;
 }
 
 /*!

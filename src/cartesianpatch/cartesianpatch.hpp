@@ -95,6 +95,8 @@ public:
 	long getVertexLinearId(const int &i, const int &j, const int &k) const;
 	long getVertexLinearId(const std::array<int, 3> &ijk) const;
 	std::array<int, 3> getVertexCartesianId(long const &idx) const;
+	std::array<int, 3> getVertexCartesianId(long const &cellIdx, int const &vertex) const;
+	std::array<int, 3> getVertexCartesianId(const std::array<int, 3> &cellIjk, int const &vertex) const;
 
 protected:
 	const std::vector<Adaption::Info> _update(bool trackAdaption);
