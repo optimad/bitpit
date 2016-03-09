@@ -61,8 +61,7 @@ class PiercedVector;
 	@tparam id_t The type of the ids to associate to the elements
 */
 template<typename value_t, typename id_t = long,
-         typename value_no_cv_t = typename std::remove_cv<value_t>::type,
-		 typename id_no_cv_t = typename std::remove_cv<id_t>::type>
+         typename value_no_cv_t = typename std::remove_cv<value_t>::type>
 class PiercedIterator
 	: public std::iterator<std::forward_iterator_tag, value_no_cv_t, std::ptrdiff_t, value_t*, value_t&>
 {
@@ -75,6 +74,20 @@ private:
 	*/
 	template<typename PV_value_t, typename PV_id_t>
 	using Container = PiercedVector<PV_value_t, PV_id_t>;
+
+	/*
+		Container type
+
+		When building a const_iterator the pointer to the container has to
+		be declared const.
+	*/
+	typedef
+		typename std::conditional<std::is_const<value_t>::value,
+			const Container<value_no_cv_t, id_t>,
+			Container<value_no_cv_t, id_t>
+		>::type
+
+		container_t;
 
 public:
 	/*!
@@ -103,15 +116,14 @@ public:
 
 	value_t & operator*() const;
 	value_t * operator->() const;
-	operator PiercedIterator<const value_t, const id_t>() const;
+	operator PiercedIterator<const value_no_cv_t, id_t>() const;
 
 	/*!
 		Two-way comparison.
 	*/
 	template<typename other_value_t, typename other_id_t = long,
-         typename other_value_no_cv_t = typename std::remove_cv<value_t>::type,
-		 typename other_id_no_cv_t = typename std::remove_cv<id_t>::type>
-	bool operator==(const PiercedIterator<other_value_t, other_id_t>& rhs) const
+         typename other_value_no_cv_t = typename std::remove_cv<value_t>::type>
+	bool operator==(const PiercedIterator<other_value_t, other_id_t, other_value_no_cv_t>& rhs) const
 	{
 		return (m_container == rhs.m_container) && (m_pos == rhs.m_pos);
 	}
@@ -120,9 +132,8 @@ public:
 		Two-way comparison.
 	*/
 	template<typename other_value_t, typename other_id_t = long,
-         typename other_value_no_cv_t = typename std::remove_cv<value_t>::type,
-		 typename other_id_no_cv_t = typename std::remove_cv<id_t>::type>
-	bool operator!=(const PiercedIterator<other_value_t, other_id_t>& rhs) const
+         typename other_value_no_cv_t = typename std::remove_cv<value_t>::type>
+	bool operator!=(const PiercedIterator<other_value_t, other_id_t, other_value_no_cv_t>& rhs) const
 	{
 		return (m_container != rhs.m_container) || (m_pos != rhs.m_pos);
 	}
@@ -131,7 +142,7 @@ private:
 	/*!
 		Internal pointer to the container.
 	*/
-	Container<value_no_cv_t, id_no_cv_t> *m_container;
+	container_t *m_container;
 
 	/*!
 		Position inside the container.
@@ -139,8 +150,7 @@ private:
 	size_t m_pos;
 
 	// Constructors
-	explicit PiercedIterator(Container<value_no_cv_t, id_no_cv_t> *container, const size_t &pos);
-	explicit PiercedIterator(const Container<value_no_cv_t, id_no_cv_t> *container, const size_t &pos);
+	explicit PiercedIterator(container_t *container, const size_t &pos);
 
 };
 
@@ -178,7 +188,7 @@ private:
 
 public:
 	// Friendships
-	template<typename PI_value_t, typename PI_id_t, typename PI_value_no_cv_t, typename PI_id_no_cv_t>
+	template<typename PI_value_t, typename PI_id_t, typename PI_value_no_cv_t>
 	friend class PiercedIterator;
 
 	/*!
@@ -199,7 +209,7 @@ public:
 	/*!
 		Constant iterator for the pierced array.
 	*/
-	typedef PiercedIterator<const value_t, const id_t> const_iterator;
+	typedef PiercedIterator<const value_t, id_t> const_iterator;
 
 	/*!
 		Iterator for the pierced array raw container.
