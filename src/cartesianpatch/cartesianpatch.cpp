@@ -183,6 +183,35 @@ void CartesianPatch::initialize(const std::array<double, 3> &origin,
 		m_nVertices1D[Vertex::COORD_Z] = 0;
 	}
 
+	log::cout() << std::endl;
+
+	// Count the total number of vertices
+	m_nVertices = 1;
+	for (int n = 0; n < getDimension(); ++n) {
+		m_nVertices *= m_nVertices1D[n];
+	}
+	log::cout() << "  - Total vertex count: " << m_nVertices << "\n";
+
+	// Count the total number of cells
+	m_nCells = 1;
+	for (int n = 0; n < getDimension(); ++n) {
+		m_nCells    *= m_nCells1D[n];
+	}
+	log::cout() << "  - Total cell count: " << m_nCells << "\n";
+
+	// Count the total number of interfaces
+	m_nInterfaces = 0;
+	for (int n = 0; n < getDimension(); n++) {
+		std::array<int, 3> interfaceCount1D = getInterfaceCountDirection(n);
+
+		int nDirectionInterfaces = 1;
+		for (int n = 0; n < getDimension(); n++) {
+			nDirectionInterfaces *= interfaceCount1D[n];
+		}
+		m_nInterfaces += nDirectionInterfaces;
+	}
+	log::cout() << "  - Total interface count: " << m_nInterfaces << "\n";
+
 	// Interface area
 	initializeInterfaceArea();
 
@@ -224,6 +253,36 @@ void CartesianPatch::initializeInterfaceArea()
 	if (!isThreeDimensional()) {
 		m_interfaceArea[Vertex::COORD_Z] = 0.;
 	}
+}
+
+/*!
+	Gets the number of vertices in the patch.
+
+	\return The number of vertices in the patch
+*/
+long CartesianPatch::getVertexCount() const
+{
+	return m_nVertices;
+}
+
+/*!
+	Gets the number of cells in the patch.
+
+	\return The number of cells in the patch
+*/
+long CartesianPatch::getCellCount() const
+{
+	return m_nCells;
+}
+
+/*!
+	Gets the number of interfaces in the patch.
+
+	\return The number of interfaces in the patch
+*/
+long CartesianPatch::getInterfaceCount() const
+{
+	return m_nInterfaces;
 }
 
 /*!
@@ -377,14 +436,9 @@ void CartesianPatch::addVertices()
 {
 	log::cout() << "  >> Creating vertices\n";
 
-	long nTotalVertices = 1;
-	for (int n = 0; n < getDimension(); n++) {
-		nTotalVertices *= m_nVertices1D[n];
-	}
+	log::cout() << "    - Vertex count: " << m_nVertices << "\n";
 
-	log::cout() << "    - Vertex count: " << nTotalVertices << "\n";
-
-	m_vertices.reserve(nTotalVertices);
+	m_vertices.reserve(m_nVertices);
 	for (int k = 0; (isThreeDimensional()) ? (k < m_nVertices1D[Vertex::COORD_Z]) : (k <= 0); k++) {
 		for (int j = 0; j < m_nVertices1D[Vertex::COORD_Y]; j++) {
 			for (int i = 0; i < m_nVertices1D[Vertex::COORD_X]; i++) {
@@ -423,17 +477,10 @@ void CartesianPatch::addCells()
 		cellType = ElementInfo::PIXEL;
 	}
 
-	// Count the cells
-	long nTotalCells = 1;
-	for (int n = 0; n < getDimension(); n++) {
-		nTotalCells *= m_nCells1D[n];
-	}
-
-	log::cout() << "    - Cell count: " << nTotalCells << "\n";
-
-	m_cells.reserve(nTotalCells);
-
 	// Create the cells
+	log::cout() << "    - Cell count: " << m_nCells << "\n";
+
+	m_cells.reserve(m_nCells);
 	for (int k = 0; (isThreeDimensional()) ? (k < m_nCells1D[Vertex::COORD_Z]) : (k <= 0); k++) {
 		for (int j = 0; j < m_nCells1D[Vertex::COORD_Y]; j++) {
 			for (int i = 0; i < m_nCells1D[Vertex::COORD_X]; i++) {
@@ -464,22 +511,9 @@ void CartesianPatch::addInterfaces()
 {
 	log::cout() << "  >> Creating interfaces\n";
 
-	// Count the interfaces
-	long nTotalInterfaces = 0;
-	for (int n = 0; n < getDimension(); n++) {
-		std::array<int, 3> interfaceCount1D = getInterfaceCountDirection(n);
+	log::cout() << "    - Interface count: " << m_nInterfaces << "\n";
 
-		int nDirectionInterfaces = 1;
-		for (int n = 0; n < getDimension(); n++) {
-			nDirectionInterfaces *= interfaceCount1D[n];
-		}
-		nTotalInterfaces += nDirectionInterfaces;
-	}
-
-	log::cout() << "    - Interface count: " << nTotalInterfaces << "\n";
-
-	// Create the interfaces
-	m_interfaces.reserve(nTotalInterfaces);
+	m_interfaces.reserve(m_nInterfaces);
 	for (int n = 0; n < getDimension(); n++) {
 		addInterfacesDirection(n);
 	}

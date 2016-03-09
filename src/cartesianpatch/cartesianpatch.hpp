@@ -49,6 +49,10 @@ public:
 
 	~CartesianPatch();
 
+	long getVertexCount() const;
+	long getCellCount() const;
+	long getInterfaceCount() const;
+
 	double evalCellVolume(const long &id);
 	double evalCellSize(const long &id);
 	std::array<double, 3> evalCellCentroid(const long &id);
@@ -110,6 +114,10 @@ private:
 
 	std::array<int, 3> m_nCells1D;
 	std::array<int, 3> m_nVertices1D;
+
+	long m_nVertices;
+	long m_nCells;
+	long m_nInterfaces;
 
 	double m_cellVolume;
 	std::array<double, 3> m_interfaceArea;
