@@ -1601,26 +1601,6 @@ long PatchKernel::countOrphanCells() const
 }
 
 /*!
-	Extracts the neighbours of all the faces of the specified cell.
-
-	\param id is the id of the cell
-	\result The neighbours of all the faces of the specified cell.
-*/
-std::vector<long> PatchKernel::findCellFaceNeighs(const long &id) const
-{
-	std::vector<long> neighs;
-	const Cell &cell = getCell(id);
-	for (int i = 0; i < cell.getFaceCount(); ++i) {
-		std::vector<long> faceNeighs = findCellFaceNeighs(id, i);
-		for (auto &neighId : faceNeighs) {
-			utils::addToOrderedVector<long>(neighId, neighs);
-		}
-	}
-
-	return neighs;
-}
-
-/*!
 	Extracts all the neighbours of the specified cell
 
 	\param id is the id of the cell
@@ -1664,6 +1644,26 @@ std::vector<long> PatchKernel::findCellNeighs(const long &id, int codimension, b
 }
 
 /*!
+	Extracts the neighbours of all the faces of the specified cell.
+
+	\param id is the id of the cell
+	\result The neighbours of all the faces of the specified cell.
+*/
+std::vector<long> PatchKernel::findCellFaceNeighs(const long &id) const
+{
+	std::vector<long> neighs;
+	const Cell &cell = getCell(id);
+	for (int i = 0; i < cell.getFaceCount(); ++i) {
+		std::vector<long> faceNeighs = findCellFaceNeighs(id, i);
+		for (auto &neighId : faceNeighs) {
+			utils::addToOrderedVector<long>(neighId, neighs);
+		}
+	}
+
+	return neighs;
+}
+
+/*!
 	Extracts the neighbours of the specified cell for the given face.
 
 	\param id is the id of the cell
@@ -1687,53 +1687,6 @@ std::vector<long> PatchKernel::findCellFaceNeighs(const long &id, const int &fac
 	}
 
 	return neighs;
-}
-
-/*!
-        Stores the local index of the face shared by cell_idx and neigh_idx
-        into face_loc_idx.
-        If cell cell_idx and neigh_idx do not share any face, -1 is stored in
-        face_loc_idx.
-
-        \param[in] cell_idx cell index
-        \param[in] neigh_idx neighbour index
-        \param[in,out] face_loc_idx on output stores the local index (on cell
-        cell_idx) shared by cell_idx and neigh_idx. If cells cell_idx and neigh_idx
-        do not share any face, -1 is stored in face_loc_idx.
-        \param[in,out] intf_loc_idx on output stores the index of the adjacency (on face
-        face_loc_idx of cell cell_idx). If cells cell_idx and neigh_idx do not share
-        any face, -1 is stored into intf_loc_idx.
-*/
-void PatchKernel::findFaceNeighCell(const long &cell_idx, const long &neigh_idx, int &face_loc_idx, int &intf_loc_idx)
-{
-
-    // ====================================================================== //
-    // VARIABLES DECLARATION                                                  //
-    // ====================================================================== //
-    bool                        loop_continue = true;
-    int                         n_faces, n_adj;
-    int                         j, k;
-    Cell                       &cell_ = m_cells[cell_idx];
-
-    // ====================================================================== //
-    // LOOP OVER ADJACENCIES                                                  //
-    // ====================================================================== //
-    n_faces = cell_.getFaceCount();
-    j = 0;
-    while ( loop_continue && (j < n_faces) ) {
-        n_adj = cell_.getAdjacencyCount(j);
-        k = 0;
-        while ( loop_continue && (k < n_adj) ) {
-            loop_continue = ( cell_.getAdjacency( j, k ) != neigh_idx );
-            ++k;
-        } //next k
-        ++j;
-    } //next j
-
-    if ( loop_continue) { face_loc_idx = intf_loc_idx = -1; }
-    else                { face_loc_idx = --j; intf_loc_idx = --k; }
-
-    return;
 }
 
 /*!
@@ -1966,6 +1919,52 @@ std::vector<long> PatchKernel::findCellVertexOneRing(const long &id, const int &
 	utils::addToOrderedVector<long>(id, oneRing);
 
 	return oneRing;
+}
+
+/*!
+        Stores the local index of the face shared by cell_idx and neigh_idx
+        into face_loc_idx.
+        If cell cell_idx and neigh_idx do not share any face, -1 is stored in
+        face_loc_idx.
+
+        \param[in] cell_idx cell index
+        \param[in] neigh_idx neighbour index
+        \param[in,out] face_loc_idx on output stores the local index (on cell
+        cell_idx) shared by cell_idx and neigh_idx. If cells cell_idx and neigh_idx
+        do not share any face, -1 is stored in face_loc_idx.
+        \param[in,out] intf_loc_idx on output stores the index of the adjacency (on face
+        face_loc_idx of cell cell_idx). If cells cell_idx and neigh_idx do not share
+        any face, -1 is stored into intf_loc_idx.
+*/
+void PatchKernel::findFaceNeighCell(const long &cell_idx, const long &neigh_idx, int &face_loc_idx, int &intf_loc_idx)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+    bool                        loop_continue = true;
+    int                         n_faces, n_adj;
+    int                         j, k;
+    Cell                       &cell_ = m_cells[cell_idx];
+
+    // ====================================================================== //
+    // LOOP OVER ADJACENCIES                                                  //
+    // ====================================================================== //
+    n_faces = cell_.getFaceCount();
+    j = 0;
+    while ( loop_continue && (j < n_faces) ) {
+        n_adj = cell_.getAdjacencyCount(j);
+        k = 0;
+        while ( loop_continue && (k < n_adj) ) {
+            loop_continue = ( cell_.getAdjacency( j, k ) != neigh_idx );
+            ++k;
+        } //next k
+        ++j;
+    } //next j
+
+    if ( loop_continue) { face_loc_idx = intf_loc_idx = -1; }
+    else                { face_loc_idx = --j; intf_loc_idx = --k; }
+
+    return;
 }
 
 /*!
