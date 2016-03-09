@@ -916,6 +916,14 @@ long CartesianPatch::getVertexLinearId(const int &i, const int &j, const int &k)
 }
 
 /*!
+	Converts the vertex cartesian notation to a linear notation
+*/
+long CartesianPatch::getVertexLinearId(const std::array<int, 3> &ijk) const
+{
+	return getVertexLinearId(ijk[Vertex::COORD_X], ijk[Vertex::COORD_Y], ijk[Vertex::COORD_Z]);
+}
+
+/*!
 	Converts a vertex linear index to a set of cartesian indices.
 
 	No check on bounds is performed.
@@ -967,14 +975,6 @@ std::array<int, 3> CartesianPatch::getVertexCartesianId(const std::array<int, 3>
 	}
 
 	return vertexIjk;
-}
-
-/*!
-	Converts the vertex cartesian notation to a linear notation
-*/
-long CartesianPatch::getVertexLinearId(const std::array<int, 3> &ijk) const
-{
-	return getVertexLinearId(ijk[Vertex::COORD_X], ijk[Vertex::COORD_Y], ijk[Vertex::COORD_Z]);
 }
 
 /*!
