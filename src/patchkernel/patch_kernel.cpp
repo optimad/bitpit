@@ -2776,7 +2776,7 @@ void PatchKernel::_resetTol()
 {
 	m_tolerance = 1;
 	for (int k = 0; k < 3; ++k) {
-		m_tolerance = std::max(m_maxPoint[0] - m_minPoint[0], m_tolerance);
+		m_tolerance = std::max(m_maxPoint[k] - m_minPoint[k], m_tolerance);
 	}
 	m_tolerance *= 1e-14;
 }
