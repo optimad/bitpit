@@ -835,7 +835,7 @@ std::array<int, 3> CartesianPatch::locateClosestVertexCartesian(std::array<doubl
 		ijk[n] = std::min(m_nVertices1D[n] - 1, std::max(0, (int) round((point[n] - m_minCoords[n]) / m_cellSpacings[n])));
 	}
 
-	if (isThreeDimensional()) {
+	if (!isThreeDimensional()) {
 		ijk[Vertex::COORD_Z] = -1;
 	}
 
