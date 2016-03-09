@@ -28,7 +28,7 @@
 #include <array>
 #include <vector>
 
-#include "bitpit_patch.hpp"
+#include "bitpit_patchkernel.hpp"
 
 namespace bitpit {
 

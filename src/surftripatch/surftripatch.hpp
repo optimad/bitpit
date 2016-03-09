@@ -29,7 +29,7 @@
 #include <vector>
 
 #include "bitpit_IO.hpp"
-#include "bitpit_patch.hpp"
+#include "bitpit_patchkernel.hpp"
 
 namespace bitpit {
 

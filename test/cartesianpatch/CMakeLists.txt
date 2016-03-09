@@ -37,7 +37,7 @@ include_directories("${PROJECT_SOURCE_DIR}/src/common")
 include_directories("${PROJECT_SOURCE_DIR}/src/operators")
 include_directories("${PROJECT_SOURCE_DIR}/src/containers")
 include_directories("${PROJECT_SOURCE_DIR}/src/IO")
-include_directories("${PROJECT_SOURCE_DIR}/src/patch")
+include_directories("${PROJECT_SOURCE_DIR}/src/patchkernel")
 include_directories("${PROJECT_SOURCE_DIR}/src/cartesianpatch")
 
 set(TEST_TARGETS "")

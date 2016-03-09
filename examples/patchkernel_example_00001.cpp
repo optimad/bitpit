@@ -23,17 +23,17 @@
 \*---------------------------------------------------------------------------*/
 
 /*!
-	\example patch_example_00001.cpp
+	\example patchkernel_example_00001.cpp
 
 	\brief Creation and manipulation a list of cells
 
 	This example shows how to use the pierced vector to create and
 	manipulate a list of cells.
 
-	<b>To run</b>: ./patch_example_00001 \n
+	<b>To run</b>: ./patchkernel_example_00001 \n
 */
 
-#include "bitpit_patch.hpp"
+#include "bitpit_patchkernel.hpp"
 
 using namespace bitpit;
 

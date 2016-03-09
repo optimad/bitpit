@@ -32,7 +32,7 @@
 #include <unordered_set>
 
 #include "bitpit_PABLO.hpp"
-#include "bitpit_patch.hpp"
+#include "bitpit_patchkernel.hpp"
 
 namespace bitpit {
 

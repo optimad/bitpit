@@ -31,7 +31,7 @@ include_directories("${PROJECT_SOURCE_DIR}/src/operators")
 include_directories("${PROJECT_SOURCE_DIR}/src/containers")
 include_directories("${PROJECT_SOURCE_DIR}/src/IO")
 include_directories("${PROJECT_SOURCE_DIR}/src/PABLO")
-include_directories("${PROJECT_SOURCE_DIR}/src/patch")
+include_directories("${PROJECT_SOURCE_DIR}/src/patchkernel")
 
 file(GLOB SOURCE_FILES "*.cpp")
 set(OCTREEPATCH_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Sources of octreepatch module" FORCE)
