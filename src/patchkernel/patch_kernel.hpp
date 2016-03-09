@@ -161,11 +161,11 @@ public:
 	std::vector<long> findCellNeighs(const long &id) const;
 	std::vector<long> findCellNeighs(const long &id, int codimension, bool complete = true) const;
 	std::vector<long> findCellFaceNeighs(const long &id) const;
-	std::vector<long> findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList = std::vector<long>()) const;
+	std::vector<long> findCellFaceNeighs(const long &id, const int &face) const;
 	std::vector<long> findCellEdgeNeighs(const long &id, bool complete = true) const;
-	std::vector<long> findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList = std::vector<long>()) const;
+	std::vector<long> findCellEdgeNeighs(const long &id, const int &edge) const;
 	std::vector<long> findCellVertexNeighs(const long &id, bool complete = true) const;
-	std::vector<long> findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
+	std::vector<long> findCellVertexNeighs(const long &id, const int &vertex) const;
 	std::vector<long> findCellVertexOneRing(const long &id, const int &vertex) const;
     void findFaceNeighCell(const long &cell_idx, const long &neigh_idx, int &face_loc_idx, int &intf_loc_idx);
 
@@ -285,6 +285,10 @@ protected:
 	virtual bool _enableCellBalancing(const long &id, bool enabled) = 0;
 	virtual void _setTol(double tolerance);
 	virtual void _resetTol();
+
+	virtual std::vector<long> _findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList = std::vector<long>()) const;
+	virtual std::vector<long> _findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList = std::vector<long>()) const;
+	virtual std::vector<long> _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
 
 	void setDirty(bool dirty);
 	void setExpert(bool expert);

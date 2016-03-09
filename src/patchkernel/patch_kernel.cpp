@@ -1654,7 +1654,7 @@ std::vector<long> PatchKernel::findCellFaceNeighs(const long &id) const
 	std::vector<long> neighs;
 	const Cell &cell = getCell(id);
 	for (int i = 0; i < cell.getFaceCount(); ++i) {
-		std::vector<long> faceNeighs = findCellFaceNeighs(id, i);
+		std::vector<long> faceNeighs = _findCellFaceNeighs(id, i, std::vector<long>());
 		for (auto &neighId : faceNeighs) {
 			utils::addToOrderedVector<long>(neighId, neighs);
 		}
@@ -1668,10 +1668,22 @@ std::vector<long> PatchKernel::findCellFaceNeighs(const long &id) const
 
 	\param id is the id of the cell
 	\param face is a face of the cell
+	\result The neighbours of the specified cell for the given face.
+*/
+std::vector<long> PatchKernel::findCellFaceNeighs(const long &id, const int &face) const
+{
+	return _findCellFaceNeighs(id, face, std::vector<long>());
+}
+
+/*!
+	Extracts the neighbours of the specified cell for the given face.
+
+	\param id is the id of the cell
+	\param face is a face of the cell
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the specified cell for the given face.
 */
-std::vector<long> PatchKernel::findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList) const
+std::vector<long> PatchKernel::_findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList) const
 {
 	std::vector<long> neighs;
 	const Cell &cell = getCell(id);
@@ -1715,7 +1727,7 @@ std::vector<long> PatchKernel::findCellEdgeNeighs(const long &id, bool complete)
 	std::vector<long> neighs;
 	const Cell &cell = getCell(id);
 	for (int i = 0; i < cell.getEdgeCount(); ++i) {
-		for (auto &neigh : findCellEdgeNeighs(id, i, blackList)) {
+		for (auto &neigh : _findCellEdgeNeighs(id, i, blackList)) {
 			utils::addToOrderedVector<long>(neigh, neighs);
 		}
 	}
@@ -1730,10 +1742,24 @@ std::vector<long> PatchKernel::findCellEdgeNeighs(const long &id, bool complete)
 
 	\param id is the id of the cell
 	\param edge is an edge of the cell
+	\result The neighbours of the specified cell for the given edge.
+*/
+std::vector<long> PatchKernel::findCellEdgeNeighs(const long &id, const int &edge) const
+{
+	return _findCellEdgeNeighs(id, edge, std::vector<long>());
+}
+
+/*!
+	Extracts the neighbours of the specified cell for the given edge.
+
+	This function can be only used with three-dimensional cells.
+
+	\param id is the id of the cell
+	\param edge is an edge of the cell
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the specified cell for the given edge.
 */
-std::vector<long> PatchKernel::findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList) const
+std::vector<long> PatchKernel::_findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList) const
 {
 	std::vector<long> neighs;
 	assert(isThreeDimensional());
@@ -1749,9 +1775,9 @@ std::vector<long> PatchKernel::findCellEdgeNeighs(const long &id, const int &edg
 	}
 
 	// The neighbours of the edge are the cells that share all the edge vertices
-	std::vector<long> firstVertexNeighs = findCellVertexNeighs(id, edgeVertices[0], blackList);
+	std::vector<long> firstVertexNeighs = _findCellVertexNeighs(id, edgeVertices[0], blackList);
 	for (std::size_t k = 1; k < nEdgeVertices; ++k) {
-		std::vector<long> vertexNeighs = findCellVertexNeighs(id, edgeVertices[k], blackList);
+		std::vector<long> vertexNeighs = _findCellVertexNeighs(id, edgeVertices[k], blackList);
 		for (const long &neighId : vertexNeighs) {
 			if (utils::findInOrderedVector<long>(neighId, firstVertexNeighs) != firstVertexNeighs.end()) {
 				if (std::find(blackList.begin(), blackList.end(), neighId) == blackList.end()) {
@@ -1787,12 +1813,24 @@ std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, bool complet
 	std::vector<long> neighs;
 	const Cell &cell = getCell(id);
 	for (int i = 0; i < cell.getVertexCount(); ++i) {
-		for (auto &neigh : findCellVertexNeighs(id, i, blackList)) {
+		for (auto &neigh : _findCellVertexNeighs(id, i, blackList)) {
 			utils::addToOrderedVector<long>(neigh, neighs);
 		}
 	}
 
 	return neighs;
+}
+
+/*!
+	Extracts the neighbours of the specified cell for the given local vertex.
+
+	\param id is the id of the cell
+	\param vertex is a vertex of the cell
+	\result The neighbours of the specified cell for the given vertex.
+*/
+std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, const int &vertex) const
+{
+	return _findCellVertexNeighs(id, vertex, std::vector<long>());
 }
 
 /*!
@@ -1817,7 +1855,7 @@ std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, bool complet
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the specified cell for the given vertex.
 */
-std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList) const
+std::vector<long> PatchKernel::_findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList) const
 {
 	const Cell &cell = getCell(id);
 	long vertexId = cell.getVertex(vertex);
