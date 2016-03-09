@@ -65,8 +65,8 @@ public:
 	double & operator[](int coord_id);
 	const double & operator[](int coord_id) const;
 
-	void set_id(const long &id);
-	long get_id() const;
+	void setId(const long &id);
+	long getId() const;
 
 	void setCoords(const std::array<double, 3> &coords);
 	const std::array<double, 3> & getCoords() const;

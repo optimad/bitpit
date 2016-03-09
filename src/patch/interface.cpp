@@ -311,7 +311,7 @@ void Interface::display(std::ostream &out, unsigned short int indent) const
 
 	// General info ----------------------------------------------------- //
 	out << t_s << "interface type: " << getType() << std::endl;
-	out << t_s << "ID:             " << get_id() << std::endl;
+	out << t_s << "ID:             " << getId() << std::endl;
 	out << t_s << "is border:      ";
 	if (getNeigh() >= 0)  { out << "(false)"; }
 	else                  { out << "(true)"; }

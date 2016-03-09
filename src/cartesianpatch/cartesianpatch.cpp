@@ -349,7 +349,7 @@ const std::vector<Adaption::Info> CartesianPatch::_update(bool trackAdaption)
 		for (auto &cell : m_cells) {
 			adaptionCellInfo.current.emplace_back();
 			unsigned long &cellId = adaptionCellInfo.current.back();
-			cellId = cell.get_id();
+			cellId = cell.getId();
 		}
 
 		adaptionData.emplace_back();
@@ -360,7 +360,7 @@ const std::vector<Adaption::Info> CartesianPatch::_update(bool trackAdaption)
 		for (auto &interface : m_interfaces) {
 			adaptionInterfaceInfo.current.emplace_back();
 			unsigned long &interfaceId = adaptionInterfaceInfo.current.back();
-			interfaceId = interface.get_id();
+			interfaceId = interface.getId();
 		}
 	} else {
 		adaptionData.emplace_back();
@@ -568,8 +568,8 @@ void CartesianPatch::addInterfacesDirection(const int &direction)
 					ownerFace++;
 				}
 
-				interface.setOwner(owner.get_id(), ownerFace);
-				owner.setInterface(ownerFace, 0, interface.get_id());
+				interface.setOwner(owner.getId(), ownerFace);
+				owner.setInterface(ownerFace, 0, interface.getId());
 				owner.setAdjacency(ownerFace, 0, neighId);
 
 				// Neighbour data
@@ -578,8 +578,8 @@ void CartesianPatch::addInterfacesDirection(const int &direction)
 
 					int neighFace = 2 * direction + 1;
 
-					interface.setNeigh(neigh.get_id(), neighFace);
-					neigh.setInterface(neighFace, 0, interface.get_id());
+					interface.setNeigh(neigh.getId(), neighFace);
+					neigh.setInterface(neighFace, 0, interface.getId());
 					neigh.setAdjacency(neighFace, 0, ownerId);
 				} else {
 					interface.unsetNeigh();

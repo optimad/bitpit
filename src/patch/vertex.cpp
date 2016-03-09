@@ -83,7 +83,7 @@ const long Vertex::NULL_ID = std::numeric_limits<long>::min();
 */
 Vertex::Vertex()
 {
-	set_id(NULL_ID);
+	setId(NULL_ID);
 }
 
 /*!
@@ -91,7 +91,7 @@ Vertex::Vertex()
 */
 Vertex::Vertex(const long &id)
 {
-	set_id(id);
+	setId(id);
 }
 
 /*!
@@ -102,7 +102,7 @@ Vertex::Vertex(const long &id)
 */
 Vertex::Vertex(const long &id, const std::array<double, 3> &coords)
 {
-	set_id(id);
+	setId(id);
 	setCoords(coords);
 }
 
@@ -145,7 +145,7 @@ const double & Vertex::operator[](int coord_id) const
 
 	\param id the ID of the vertex
 */
-void Vertex::set_id(const long &id)
+void Vertex::setId(const long &id)
 {
 	m_id = id;
 }
@@ -155,7 +155,7 @@ void Vertex::set_id(const long &id)
 
 	\return The ID of the vertex
 */
-long Vertex::get_id() const
+long Vertex::getId() const
 {
 	return m_id;
 }
@@ -267,7 +267,7 @@ void Vertex::display(std::ostream &out, unsigned short int indent) const
 	std::string t_s = std::string(indent, ' ');
 
 	// General info ----------------------------------------------------- //
-	out << t_s << "ID:             " << get_id() << std::endl;
+	out << t_s << "ID:             " << getId() << std::endl;
 
 	// Coordinates ------------------------------------------------------ //
 	out << t_s << "coordinates :   (";

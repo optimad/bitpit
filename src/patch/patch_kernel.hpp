@@ -107,12 +107,12 @@ public:
 	bool isDirty() const;
 	bool isExpert() const;
 
-	int get_id() const;
+	int getId() const;
 	int getDimension() const;
 	bool isThreeDimensional() const;
 
 	long getVertexCount() const;
-	PiercedVector<Vertex> &vertices();
+	PiercedVector<Vertex> &getVertices();
 	Vertex &getVertex(const long &id);
 	const Vertex & getVertex(const long &id) const;
 	const std::array<double, 3> & getVertexCoords(const long &id) const;
@@ -126,7 +126,7 @@ public:
 	std::vector<long> findOrphanVertices();
 	bool deleteOrphanVertices();
 	std::vector<long> collapseCoincidentVertices(int nBins = 128);
-	bool deleteCoincidentVertex(int nBins = 128);
+	bool deleteCoincidentVertices(int nBins = 128);
 
 	VertexIterator getVertexIterator(const long &id);
 	VertexIterator vertexBegin();
@@ -135,7 +135,7 @@ public:
 	long getCellCount() const;
 	long getInternalCount() const;
 	long getGhostCount() const;
-	PiercedVector<Cell> &cells();
+	PiercedVector<Cell> &getCells();
 	Cell &getCell(const long &id);
 	const Cell &getCell(const long &id) const;
 	Cell &getLastInternal();
@@ -180,7 +180,7 @@ public:
 	CellIterator ghostEnd();
 
 	long getInterfaceCount() const;
-	PiercedVector<Interface> &interfaces();
+	PiercedVector<Interface> &getInterfaces();
 	Interface &getInterface(const long &id);
 	const Interface &getInterface(const long &id) const;
 	long generateInterfaceId();
@@ -314,7 +314,7 @@ private:
 	InterfaceIterator createInterface(ElementInfo::Type type, long id = Element::NULL_ID);
 	CellIterator createCell(ElementInfo::Type type, bool interior, long id = Element::NULL_ID);
 
-	void set_id(int id);
+	void setId(int id);
 	void setDimension(int dimension);
 
 	std::array<double, 3> evalElementCentroid(const Element &element);

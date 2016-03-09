@@ -58,7 +58,7 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream  &buffer, const bitpit::
 {
 	int nVertices = element.getVertexCount();
 	buffer << element.getType();
-	buffer << element.get_id();
+	buffer << element.getId();
 	for (int i = 0; i < nVertices; ++i) {
 	    buffer << element.m_connect[i];
 	}
@@ -925,7 +925,7 @@ const long Element::NULL_ID = std::numeric_limits<long>::min();
 Element::Element()
 	: m_type(ElementInfo::UNDEFINED)
 {
-	set_id(NULL_ID);
+	setId(NULL_ID);
 }
 
 /*!
@@ -935,7 +935,7 @@ Element::Element(const long &id, ElementInfo::Type type)
 {
 	_initialize(type);
 
-	set_id(id);
+	setId(id);
 }
 
 /*!
@@ -995,7 +995,7 @@ void Element::_initialize(ElementInfo::Type type)
 
 	\param id the ID of the element
 */
-void Element::set_id(const long &id)
+void Element::setId(const long &id)
 {
 	m_id = id;
 }
@@ -1005,7 +1005,7 @@ void Element::set_id(const long &id)
 
 	\return The ID of the element
 */
-long Element::get_id() const
+long Element::getId() const
 {
 	return m_id;
 }

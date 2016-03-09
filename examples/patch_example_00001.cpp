@@ -47,7 +47,7 @@ void printCellIds(PiercedVector<Cell> &cells)
 	}
 
 	for (auto const &cell : cells) {
-		std::cout << "    > id = " << cell.get_id() << std::endl;
+		std::cout << "    > id = " << cell.getId() << std::endl;
 	}
 }
 
@@ -57,7 +57,7 @@ void fillCellList(int nCells, PiercedVector<Cell> &cells)
 		// std::cout << "  Inserting (at the end) cell with id = " << i << std::endl;
 
 		PiercedVector<Cell>::iterator cell = cells.emplace(i);
-		cell->set_id(i);
+		cell->setId(i);
 	}
 }
 

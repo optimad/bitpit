@@ -139,11 +139,11 @@ PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
 	  , m_communicator(MPI_COMM_NULL)
 #endif
 {
-	set_id(id) ;
+	setId(id) ;
 	setDimension(dimension);
 
 	std::ostringstream convert;
-	convert << get_id();
+	convert << getId();
 	setName(convert.str());
 
 	// Set VTK codex
@@ -437,7 +437,7 @@ bool PatchKernel::isExpert() const
 
 	\param id the ID of the patch
 */
-void PatchKernel::set_id(int id)
+void PatchKernel::setId(int id)
 {
 	m_id = id;
 }
@@ -447,7 +447,7 @@ void PatchKernel::set_id(int id)
 
 	\return The ID of the patch
 */
-int PatchKernel::get_id() const
+int PatchKernel::getId() const
 {
 	return m_id;
 }
@@ -498,7 +498,7 @@ long PatchKernel::getVertexCount() const
 
 	\return The nodes owned by the patch.
 */
-PiercedVector<Vertex> & PatchKernel::vertices()
+PiercedVector<Vertex> & PatchKernel::getVertices()
 {
 	return m_vertices;
 }
@@ -582,7 +582,7 @@ PatchKernel::VertexIterator PatchKernel::createVertex(long id)
 	}
 
 	PiercedVector<Vertex>::iterator iterator = m_vertices.reclaim(id);
-    iterator->set_id(id);
+    iterator->setId(id);
 
 	return iterator;
 }
@@ -640,9 +640,9 @@ PatchKernel::VertexIterator PatchKernel::addVertex(const Vertex &source, long id
 
 	VertexIterator iterator = createVertex(id);
 	Vertex &vertex = (*iterator);
-	id = vertex.get_id();
+	id = vertex.getId();
 	vertex = source;
-	vertex.set_id(id);
+	vertex.setId(id);
 
 	return iterator;
 }
@@ -662,14 +662,14 @@ PatchKernel::VertexIterator PatchKernel::addVertex(Vertex &&source, long id)
 	}
 
 	if (id < 0) {
-		id = source.get_id();
+		id = source.getId();
 	}
 
-	VertexIterator iterator = createVertex(std::max(source.get_id(), id));
+	VertexIterator iterator = createVertex(std::max(source.getId(), id));
 	Vertex &vertex = (*iterator);
-	id = vertex.get_id();
+	id = vertex.getId();
 	vertex = std::move(source);
-	vertex.set_id(id);
+	vertex.setId(id);
 
 	return iterator;
 }
@@ -781,7 +781,7 @@ std::vector<long> PatchKernel::findOrphanVertices()
 	// Add all the vertices to the list
 	std::unordered_set<long> vertexSet;
 	for (const Vertex &vertex : m_vertices) {
-		vertexSet.insert(vertex.get_id());
+		vertexSet.insert(vertex.getId());
 	}
 
 	// Remove used vertices
@@ -858,7 +858,7 @@ std::vector<long> PatchKernel::collapseCoincidentVertices(int nBins)
 	for (const Cell &cell : m_cells) {
 		int nCellVertices = cell.getVertexCount();
 		for (int j = 0; j < nCellVertices; ++j) {
-			binEntry[0] = cell.get_id();
+			binEntry[0] = cell.getId();
 			binEntry[1] = j;
 
 			long vertexId = cell.getVertex(j);
@@ -915,7 +915,7 @@ std::vector<long> PatchKernel::collapseCoincidentVertices(int nBins)
 	\param[in] nBins (default = 128) is the number of bins used by bin
 	sorting algotrithm to sort patch vertices.
 */
-bool PatchKernel::deleteCoincidentVertex(int nBins)
+bool PatchKernel::deleteCoincidentVertices(int nBins)
 {
 	if (!isExpert()) {
 		return false;
@@ -973,7 +973,7 @@ long PatchKernel::getGhostCount() const
 
 	\return The cells owned by the patch.
 */
-PiercedVector<Cell> & PatchKernel::cells()
+PiercedVector<Cell> & PatchKernel::getCells()
 {
 	return m_cells;
 }
@@ -1181,7 +1181,7 @@ PatchKernel::CellIterator PatchKernel::createCell(ElementInfo::Type type, bool i
 			m_first_ghost_id = id;
 		}
 	}
-	iterator->set_id(id);
+	iterator->setId(id);
 
 	return iterator;
 }
@@ -1299,9 +1299,9 @@ PatchKernel::CellIterator PatchKernel::addCell(const Cell &source, long id)
 
 	CellIterator iterator = createCell(source.getType(), source.isInterior(), id);
 	Cell &cell = (*iterator);
-	id = cell.get_id();
+	id = cell.getId();
 	cell = source;
-	cell.set_id(id);
+	cell.setId(id);
 
 	return iterator;
 }
@@ -1321,14 +1321,14 @@ PatchKernel::CellIterator PatchKernel::addCell(Cell &&source, long id)
 	}
 
 	if (id < 0) {
-		id = source.get_id();
+		id = source.getId();
 	}
 
 	CellIterator iterator = createCell(source.getType(), source.isInterior(), id);
 	Cell &cell = (*iterator);
-	id = cell.get_id();
+	id = cell.getId();
 	cell = std::move(source);
-	cell.set_id(id);
+	cell.setId(id);
 
 	return iterator;
 }
@@ -1401,7 +1401,7 @@ bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 				m_first_ghost_id = m_cells.getSizeMarker(m_nInternals, Element::NULL_ID);
 			} else {
 				CellIterator first_ghost_iterator = ++m_cells.getIterator(m_last_internal_id);
-				m_first_ghost_id = first_ghost_iterator->get_id();
+				m_first_ghost_id = first_ghost_iterator->getId();
 			}
 		}
 	}
@@ -1530,7 +1530,7 @@ PatchKernel::CellIterator PatchKernel::moveGhost2Internal(const long &id)
 	} else {
 		CellIterator firstGhostIterator = iterator;
 		++firstGhostIterator;
-		m_first_ghost_id = firstGhostIterator->get_id();
+		m_first_ghost_id = firstGhostIterator->getId();
 	}
 
 	// Return the iterator to the new position
@@ -1889,7 +1889,7 @@ std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, const std::v
 	std::vector<long> neighs;
 	std::unordered_set<long> scanQueue;
 	std::unordered_set<long> alreadyScan;
-	scanQueue.insert(cell.get_id());
+	scanQueue.insert(cell.getId());
 	while (!scanQueue.empty()) {
 		// Pop a cell to process
 		long scanId = *(scanQueue.begin());
@@ -1983,7 +1983,7 @@ long PatchKernel::getInterfaceCount() const
 
 	\return The interfaces owned by the patch.
 */
-PiercedVector<Interface> & PatchKernel::interfaces()
+PiercedVector<Interface> & PatchKernel::getInterfaces()
 {
 	return m_interfaces;
 }
@@ -2073,7 +2073,7 @@ PatchKernel::InterfaceIterator PatchKernel::createInterface(ElementInfo::Type ty
 	}
 
 	PiercedVector<Interface>::iterator iterator = m_interfaces.reclaim(id);
-    iterator->set_id(id);
+    iterator->setId(id);
 
 	return iterator;
 }
@@ -2115,9 +2115,9 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(const Interface &source
 
 	InterfaceIterator iterator = createInterface(source.getType(), id);
 	Interface &interface = (*iterator);
-	id = interface.get_id();
+	id = interface.getId();
 	interface = source;
-	interface.set_id(id);
+	interface.setId(id);
 
 	return iterator;
 }
@@ -2137,14 +2137,14 @@ PatchKernel::InterfaceIterator PatchKernel::addInterface(Interface &&source, lon
 	}
 
 	if (id < 0) {
-		id = source.get_id();
+		id = source.getId();
 	}
 
 	InterfaceIterator iterator = createInterface(source.getType(), id);
 	Interface &interface = (*iterator);
-	id = interface.get_id();
+	id = interface.getId();
 	interface = std::move(source);
-	interface.set_id(id);
+	interface.setId(id);
 
 	return iterator;
 }
@@ -2657,7 +2657,7 @@ std::unordered_map<long, long> PatchKernel::binSortVertex(int nBins)
 		i = std::min(nBins - 1L, long((V->getCoords()[0] - m_minPoint[0]) / dx));
 		j = std::min(nBins - 1L, long((V->getCoords()[1] - m_minPoint[1]) / dy));
 		k = std::min(nBins - 1L, long((V->getCoords()[2] - m_minPoint[2]) / dz));
-		bin_index[V->get_id()] = nBins * nBins * k + nBins * j + i;
+		bin_index[V->getId()] = nBins * nBins * k + nBins * j + i;
 	}
 
 	return bin_index;
@@ -2834,7 +2834,7 @@ void PatchKernel::extractEnvelope(PatchKernel &envelope) const
 				if (vertexMap.count(vertexId) == 0) {
 					const Vertex &vertex = getVertex(vertexId);
 					VertexIterator envelopeVertex = envelope.addVertex(vertex);
-					vertexMap[vertexId] = envelopeVertex->get_id();
+					vertexMap[vertexId] = envelopeVertex->getId();
 				}
 
 				// Update face ace connectivity in the envelope
@@ -2989,7 +2989,7 @@ void PatchKernel::flushData(std::fstream &stream, VTKFormat format, std::string 
 	if (name == "Points") {
 		long vertexId = 0;
 		for (Vertex &vertex : m_vertices) {
-			vertexMap[vertex.get_id()] = vertexId++;
+			vertexMap[vertex.getId()] = vertexId++;
 
 			genericIO::flushBINARY(stream, vertex.getCoords());
 		}
@@ -3063,11 +3063,11 @@ void PatchKernel::flushData(std::fstream &stream, VTKFormat format, std::string 
 		std::unordered_map<long, long>().swap(vertexMap);
 	} else if (name == "cellIndex") {
 		for (const Cell &cell : m_cells) {
-			genericIO::flushBINARY(stream, cell.get_id());
+			genericIO::flushBINARY(stream, cell.getId());
 		}
 	} else if (name == "vertexIndex") {
 		for (const Vertex &vertex : m_vertices) {
-			genericIO::flushBINARY(stream, vertex.get_id());
+			genericIO::flushBINARY(stream, vertex.getId());
 		}
 #if BITPIT_ENABLE_MPI==1
 	} else if (name == "rank") {
@@ -3085,7 +3085,7 @@ void PatchKernel::flushData(std::fstream &stream, VTKFormat format, std::string 
 			if (cell.isInterior()) {
 				genericIO::flushBINARY(stream, m_rank);
 			} else {
-				genericIO::flushBINARY(stream, ghostRank.at(cell.get_id()));
+				genericIO::flushBINARY(stream, ghostRank.at(cell.getId()));
 			}
 		}
 #endif

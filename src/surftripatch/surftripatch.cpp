@@ -285,7 +285,7 @@ void SurfTriPatch::buildAdjacencies(void)
             n_faces = c_->getFaceCount();
             for (i = 0; i < n_faces; ++i) {
                 vertex_idx = c_->getVertex(i);
-                simplex_idx = c_->get_id();
+                simplex_idx = c_->getId();
                 V2S[vertex_idx].push_back(simplex_idx);
             } //next i
         } //next c_
@@ -309,7 +309,7 @@ void SurfTriPatch::buildAdjacencies(void)
         // Build adjacencies ------------------------------------------------ //
         for (c_ = cellBegin(); c_ != e_; ++c_) {
 
-            simplex_idx = c_->get_id();
+            simplex_idx = c_->getId();
             n_faces = c_->getFaceCount();
 
             for (m = 0; m < n_faces; m++) {
@@ -412,7 +412,7 @@ void SurfTriPatch::updateAdjacencies(const std::vector<long> &cell_ids)
             n_faces = j_->getFaceCount();
             for (i = 0; i < n_faces; ++i) {
                 vertex_idx = j_->getVertex(i);
-                simplex_idx = j_->get_id();
+                simplex_idx = j_->getId();
                 V2S[vertex_idx].push_back(simplex_idx);
             } //next i
         } //next c_
@@ -437,7 +437,7 @@ void SurfTriPatch::updateAdjacencies(const std::vector<long> &cell_ids)
         for (i_ = cell_ids.cbegin(); i_ != e_; ++i_) {
 
             c_ = &m_cells[*i_];
-            simplex_idx = c_->get_id();
+            simplex_idx = c_->getId();
             n_faces = c_->getFaceCount();
 
             for (m = 0; m < n_faces; m++) {
@@ -875,7 +875,7 @@ array<double, 3> SurfTriPatch::evalVertexNormal(const long &id, const int &vert_
     vector<double> angles(ring1.size(), 0.);
     for (i = 0; i < n_ring1; ++i) {
         cell_ = &m_cells[ring1[i]];
-        angles[i] = evalAngleAtVertex(cell_->get_id(), cell_->findVertex(vert_ID));
+        angles[i] = evalAngleAtVertex(cell_->getId(), cell_->findVertex(vert_ID));
     } //next i_
     sum(angles, disk_angle);
     angles = angles/disk_angle;
@@ -1270,7 +1270,7 @@ vector<double> SurfTriPatch::computeHistogram(
     // Compute histogram
     count = 0;
     for (auto &cell_ : m_cells) {
-        id = cell_.get_id();
+        id = cell_.getId();
         if (compareSelectedTypes(mask, cell_.getType())) {
             ar = (this->*funct_)(id, dummy);
             i = 0;
@@ -1324,14 +1324,14 @@ void SurfTriPatch::extractEdgeNetwork(SurfTriPatch &net)
     // ADD VERTEX TO net                                                      //
     // ====================================================================== //
     for (v_ = vertexBegin(); v_ != ve_; ++v_) {
-        net.addVertex(v_->getCoords(), v_->get_id());
+        net.addVertex(v_->getCoords(), v_->getId());
     } //next v_
 
     // ====================================================================== //
     // ADD EDGES                                                              //
     // ====================================================================== //
     for (c_ = cellBegin(); c_ != ce_; ++c_) {
-        id = c_->get_id();
+        id = c_->getId();
         n_faces = c_->getFaceCount();
         for (i = 0; i < n_faces; ++i) {
             check = true;
@@ -1435,7 +1435,7 @@ unsigned short SurfTriPatch::importSTL(const string &stl_name, const bool &isBin
     ve_ = vertexList.cend();
     for (v_ = vertexList.cbegin(); v_ != ve_; ++v_) {
         i_ = addVertex(*v_);
-        vertexMap[v_counter] = i_->get_id();
+        vertexMap[v_counter] = i_->getId();
         ++v_counter;
     } //next v_
 
@@ -1519,7 +1519,7 @@ unsigned short SurfTriPatch::exportSTL(const string &stl_name, const bool &isBin
 
         // Store vertex coordinates
         *i_ = v_->getCoords();
-        vertexMap[v_->get_id()] = v_count;
+        vertexMap[v_->getId()] = v_count;
 
         // Update counters
         ++v_count;
@@ -1544,7 +1544,7 @@ unsigned short SurfTriPatch::exportSTL(const string &stl_name, const bool &isBin
     for (c_ = cb_; c_ != ce_; ++c_) {
 
         // Build normals
-        *i_ = std::move(evalFacetNormal(c_->get_id()));
+        *i_ = std::move(evalFacetNormal(c_->getId()));
         
         // Build connectivity
         n_v = min(3, c_->getVertexCount());

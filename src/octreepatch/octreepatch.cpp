@@ -1081,7 +1081,7 @@ long OctreePatch::addVertex(uint32_t treeId)
 	vertex.setCoords(nodeCoords);
 
 	// Done
-	return vertex.get_id();
+	return vertex.getId();
 }
 
 /*!
@@ -1118,7 +1118,7 @@ long OctreePatch::addInterface(uint32_t treeId,
 	interface.setNeigh(faces[1].id, faces[1].face);
 
 	// Done
-	return interface.get_id();
+	return interface.getId();
 }
 
 /*!
@@ -1148,7 +1148,7 @@ long OctreePatch::addCell(OctantInfo octantInfo,
 
 	CellIterator cellIterator = VolumeKernel::addCell(cellType, octantInfo.internal);
 	Cell &cell = *cellIterator;
-	long id = cell.get_id();
+	long id = cell.getId();
 
 	// Connectivity
 	cell.setConnect(std::move(vertices));

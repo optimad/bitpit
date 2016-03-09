@@ -128,20 +128,20 @@ SurfTriPatch                    mesh(0);
 
     // Place a triangle
     vit = mesh.addVertex(array<double, 3>{0.0, 0.0, 0.0});
-    t_connect[0] = vit->get_id();
-    q_connect[0] = vit->get_id();
+    t_connect[0] = vit->getId();
+    q_connect[0] = vit->getId();
     vit = mesh.addVertex(array<double, 3>{1.0, 0.0, 0.0});
-    t_connect[1] = vit->get_id();
-    q_connect[3] = vit->get_id();
+    t_connect[1] = vit->getId();
+    q_connect[3] = vit->getId();
     vit = mesh.addVertex(array<double, 3>{0.0, 1.0, 0.0});
-    t_connect[2] = vit->get_id();
+    t_connect[2] = vit->getId();
     cit = mesh.addCell(ElementInfo::TRIANGLE, true, t_connect);
 
     // Place a quad
     vit = mesh.addVertex(array<double, 3>{0.0, -1.0, 0.0});
-    q_connect[1] = vit->get_id();
+    q_connect[1] = vit->getId();
     vit = mesh.addVertex(array<double, 3>{1.0, -1.0, 0.0});
-    q_connect[2] = vit->get_id();
+    q_connect[2] = vit->getId();
     cit = mesh.addCell(ElementInfo::QUAD, true, q_connect);
     
 
@@ -181,7 +181,7 @@ SurfTriPatch                    mesh(0);
 
         // Cell data
         nedges = cell_->getFaceCount();
-        id = cell_->get_id();
+        id = cell_->getId();
 
         // Initialize ref. value for checks
         minval(expected[i], m_length);
@@ -232,7 +232,7 @@ SurfTriPatch                    mesh(0);
     for (cell_ = mesh.cellBegin(); cell_ != end_; ++cell_) {
 
         // Cell data
-        id = cell_->get_id();
+        id = cell_->getId();
         nedges = cell_->getVertexCount();
 
         // Initialize ref. value for check
@@ -279,7 +279,7 @@ SurfTriPatch                    mesh(0);
     for (cell_ = mesh.cellBegin(); cell_ != end_; ++cell_) {
 
         // Cell data
-        id = cell_->get_id();
+        id = cell_->getId();
 
         // Compute face normal
         cout << "   Facet normal for cell " << id << ": " << endl;
@@ -311,7 +311,7 @@ SurfTriPatch                    mesh(0);
     for (cell_ = mesh.cellBegin(); cell_ != end_; ++cell_) {
 
         // Cell data
-        id = cell_->get_id();
+        id = cell_->getId();
 
         // Compute face normal
         cout << "   Aspect ratio for cell " << id << ": " << endl;
@@ -346,7 +346,7 @@ SurfTriPatch                    mesh(0);
     for (cell_ = mesh.cellBegin(); cell_ != end_; ++cell_) {
 
         // Cell data
-        id = cell_->get_id();
+        id = cell_->getId();
 
         // Compute face normal
         cout << "   Facet area for cell " << id << ": " << endl;
@@ -387,7 +387,7 @@ SurfTriPatch                    mesh(0);
     for (cell_ = mesh.cellBegin(); cell_ != end_; ++cell_) {
 
         // Cell data
-        id = cell_->get_id();
+        id = cell_->getId();
 
         // Compute cell center
         cout << "   Cell center for cell " << id << ": " << endl;

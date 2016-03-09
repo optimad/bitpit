@@ -138,8 +138,8 @@ if (myRank == 0) {
 
 	// Evaluation of baricenter ----------------------------------------------//
 	std::array<double, 3> baricenter = {{0, 0, 0}};
-	for (const auto &cell : mesh.cells()) {
-		baricenter += mesh.evalCellCentroid(cell.get_id());
+	for (const auto &cell : mesh.getCells()) {
+		baricenter += mesh.evalCellCentroid(cell.getId());
 	}
 	baricenter = baricenter / ((double) nCells);
 
@@ -148,8 +148,8 @@ if (myRank == 0) {
 
 	std::vector<int> cellRanks;
 	if (myRank == 0) {
-		for (const auto &cell : mesh.cells()) {
-			int rank = (mesh.evalCellCentroid(cell.get_id())[0] > baricenter[0]) ? 0 : 1;
+		for (const auto &cell : mesh.getCells()) {
+			int rank = (mesh.evalCellCentroid(cell.getId())[0] > baricenter[0]) ? 0 : 1;
 			cellRanks.push_back(rank);
 		}
 	}

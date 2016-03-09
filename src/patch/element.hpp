@@ -154,8 +154,8 @@ public:
 
 	const ElementInfo & getInfo() const;
 
-	void set_id(const long &id);
-	long get_id() const;
+	void setId(const long &id);
+	long getId() const;
 	
 	void setType(ElementInfo::Type type);
 	ElementInfo::Type getType() const;

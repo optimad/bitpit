@@ -159,12 +159,12 @@ CellFlatMapping::CellFlatMapping(PatchKernel *patch)
 	m_mapping.reserve(m_patch->getCellCount());
 
 	long flatId = -1;
-	for (const auto &cell : m_patch->cells()) {
+	for (const auto &cell : m_patch->getCells()) {
 		flatId++;
 
 		m_numbering.emplace_back();
 		long &cellId = m_numbering.back();
-		cellId = cell.get_id();
+		cellId = cell.getId();
 
 		m_mapping.emplace_back();
 		long &cellMapping = m_mapping.back();
@@ -222,14 +222,14 @@ void CellFlatMapping::update(const std::vector<Adaption::Info> adaptionData)
 
 	long flatId = -1;
 	long firstChangedFlatId = -1;
-	auto cellIterator = m_patch->cells().cbegin();
-	while (cellIterator != m_patch->cells().cend()) {
+	auto cellIterator = m_patch->getCells().cbegin();
+	while (cellIterator != m_patch->getCells().cend()) {
 		flatId++;
 		if (flatId == nCurrentCells) {
 			break;
 		}
 
-		long cellId = cellIterator->get_id();
+		long cellId = cellIterator->getId();
 		if (cellId == m_numbering[flatId]) {
 			m_mapping[flatId] = flatId;
 			cellIterator++;
@@ -255,9 +255,9 @@ void CellFlatMapping::update(const std::vector<Adaption::Info> adaptionData)
 
 	// Continue the update of the mapping
 	flatId = firstChangedFlatId - 1;
-	while (cellIterator != m_patch->cells().cend()) {
+	while (cellIterator != m_patch->getCells().cend()) {
 		flatId++;
-		long currentId = cellIterator->get_id();
+		long currentId = cellIterator->getId();
 
 		long previousId;
 		if (backwardMap.count(currentId) != 0) {

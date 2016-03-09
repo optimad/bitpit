@@ -121,7 +121,7 @@ int                             nV, nS, nE;
     cout << "** Importing surface mesh from \"" << stl_name << "\"" << endl;
     mesh.importSTL(stl_name, stl_type);
     cout << "** Removing coincident vertices" << endl;
-    mesh.deleteCoincidentVertex();
+    mesh.deleteCoincidentVertices();
     cout << "** Building adjacencies" << endl;
     mesh.buildAdjacencies();
 
@@ -160,7 +160,7 @@ int                             nV, nS, nE;
     normals.resize(mesh.getCellCount());
     ce_ = mesh.cellEnd();
     for (c_ = mesh.cellBegin(); c_ != ce_; ++c_) {
-        normals[cell_counter] = mesh.evalFacetNormal(c_->get_id());
+        normals[cell_counter] = mesh.evalFacetNormal(c_->getId());
         ++cell_counter;
     } //next c_
     
@@ -170,7 +170,7 @@ int                             nV, nS, nE;
     ce_ = mesh.cellEnd();
     for (c_ = mesh.cellBegin(); c_ != ce_; ++c_) {
         n_faces = c_->getFaceCount();
-        id = c_->get_id();
+        id = c_->getId();
         for (i = 0; i < n_faces; ++i) {
             check = true;
             n_adj = c_->getAdjacencyCount(i);
@@ -189,7 +189,7 @@ int                             nV, nS, nE;
     vnormals.resize(edges.getVertexCount());
     ve_ = mesh.vertexEnd();
     for (v_ = mesh.vertexBegin(); v_ != ve_; ++v_) {
-        vertex_mapper[v_->get_id()] = vertex_counter;
+        vertex_mapper[v_->getId()] = vertex_counter;
         ++vertex_counter;
     } //next v_
     ce_ = mesh.cellEnd();
@@ -197,7 +197,7 @@ int                             nV, nS, nE;
         n_vert = c_->getVertexCount();
         for (i = 0; i < n_vert; ++i) {
             id = c_->getVertex(i);
-            vnormals[vertex_mapper[id]] = mesh.evalVertexNormal(c_->get_id(), i);
+            vnormals[vertex_mapper[id]] = mesh.evalVertexNormal(c_->getId(), i);
         } //next i
     } //next c_
 
@@ -376,7 +376,7 @@ int                             nV, nS, nE;
     normals.resize(mesh.getCellCount());
     ce_ = mesh.cellEnd();
     for (c_ = mesh.cellBegin(); c_ != ce_; ++c_) {
-        normals[cell_counter] = mesh.evalFacetNormal(c_->get_id());
+        normals[cell_counter] = mesh.evalFacetNormal(c_->getId());
         ++cell_counter;
     } //next c_
 
@@ -386,7 +386,7 @@ int                             nV, nS, nE;
     ce_ = mesh.cellEnd();
     edge_counter = 0;
     for (c_ = mesh.cellBegin(); c_ != ce_; ++c_) {
-        enormals[edge_counter] = mesh.evalEdgeNormal(c_->get_id(), 0);
+        enormals[edge_counter] = mesh.evalEdgeNormal(c_->getId(), 0);
         ++edge_counter;
     } //next c_
 
@@ -395,7 +395,7 @@ int                             nV, nS, nE;
     vnormals.resize(mesh.getVertexCount());
     ve_ = mesh.vertexEnd();
     for (v_ = mesh.vertexBegin(); v_ != ve_; ++v_) {
-        vertex_mapper[v_->get_id()] = vertex_counter;
+        vertex_mapper[v_->getId()] = vertex_counter;
         ++vertex_counter;
     } //next v_
     ce_ = mesh.cellEnd();
@@ -403,7 +403,7 @@ int                             nV, nS, nE;
         n_vert = c_->getVertexCount();
         for (i = 0; i < n_vert; ++i) {
             id = c_->getVertex(i);
-            vnormals[vertex_mapper[id]] = mesh.evalVertexNormal(c_->get_id(), i);
+            vnormals[vertex_mapper[id]] = mesh.evalVertexNormal(c_->getId(), i);
         } //next i
     } //next c_
 

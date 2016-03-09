@@ -425,13 +425,13 @@ vector<long>                            cell_list;
     // Insert cells --------------------------------------------------------- //
     cout << "** inserting previously deleted cells" << endl;
     it = mesh.addCell(cell_17);
-    cell_list.push_back(it->get_id());
+    cell_list.push_back(it->getId());
 
     it = mesh.addCell(cell_5);
-    cell_list.push_back(it->get_id());
+    cell_list.push_back(it->getId());
 
     it = mesh.addCell(cell_7);
-    cell_list.push_back(it->get_id());
+    cell_list.push_back(it->getId());
     cout << "   cell list is: " << cell_list << endl;
 
     // Mesh stats topology -------------------------------------------------- //
@@ -687,7 +687,7 @@ int                             i;
     i = 0;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
-        if (it->get_id() != expected[i]) return 1;
+        if (it->getId() != expected[i]) return 1;
         if (it->isInterior() != internal[i]) return 1;
         ++i;
     } //next it
@@ -721,7 +721,7 @@ int                             i;
     i = 0;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
-        if (it->get_id() != expected[i]) return 1;
+        if (it->getId() != expected[i]) return 1;
         if (it->isInterior() != internal[i]) return 1;
         ++i;
     } //next it
@@ -765,7 +765,7 @@ int                             i;
     i = 0;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
-        if (it->get_id() != expected[i])        return 2;
+        if (it->getId() != expected[i])        return 2;
         if (it->isInterior() != internal[i])    return 2;
         ++i;
     } //next it
@@ -800,7 +800,7 @@ int                             i;
     i = 0;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
-        if (it->get_id() != expected[i])        return 2;
+        if (it->getId() != expected[i])        return 2;
         if (it->isInterior() != internal[i])    return 2;
         ++i;
     } //next it
@@ -843,7 +843,7 @@ int                             i;
     i = 0;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
-        if (it->get_id() != expected[i]) return 2;
+        if (it->getId() != expected[i]) return 2;
         if (it->isInterior() != internal[i]) return 2;
         ++i;
     } //next it
@@ -892,7 +892,7 @@ int                             i;
     i = 0;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
-        if (it->get_id() != expected[i]) return 2;
+        if (it->getId() != expected[i]) return 2;
         if (it->isInterior() != internal[i]) return 2;
         ++i;
     } //next it

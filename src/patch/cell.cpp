@@ -687,7 +687,7 @@ void Cell::display(std::ostream &out, unsigned short int indent) const
 
 	// General info ----------------------------------------------------- //
 	out << t_s << "cell type:    " << getType() << std::endl;
-	out << t_s << "ID:           " << get_id() << std::endl;
+	out << t_s << "ID:           " << getId() << std::endl;
 	out << t_s << "is ghost:     ";
 	if (m_interior)     { out << "(false)"; }
 	else                { out << "(true)"; }

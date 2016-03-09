@@ -138,7 +138,7 @@ void PatchKernel::partition(const std::vector<int> &cellRanks)
 			continue;
 		}
 
-		sendMap[rank].push_back(cellItr->get_id());
+		sendMap[rank].push_back(cellItr->getId());
 
 		cellItr++;
 	}
@@ -686,8 +686,8 @@ if (m_rank == snd_rank)
 
             // Modify cell ID in case of ghost on another process
             if ( i->second.second != snd_rank ) {
-                cell_idx = cell_->get_id();
-                cell_->set_id( i->second.first);
+                cell_idx = cell_->getId();
+                cell_->setId( i->second.first);
             }
 /*DEBUG*/   {
 // /*DEBUG*/       out << "    sending ghost:" << endl;
@@ -751,7 +751,7 @@ if (m_rank == snd_rank)
 
             // Restore original id
             if ( i->second.second != snd_rank ) {
-                cell_->set_id( cell_idx );
+                cell_->setId( cell_idx );
             }
 
             // Restore original connectivity
@@ -941,7 +941,7 @@ if (m_rank == rcv_rank)
         for (i = 0; i < n_vertex; ++i) {
             com_buff >> vertex;
             it = addVertex( move(vertex) );
-            v_local_mapping[i] = it->get_id();
+            v_local_mapping[i] = it->getId();
         } //next i
 /*DEBUG*/out << "    received " << n_vertex;
 // /*DEBUG*/out << " vertices " << v_local_mapping;
@@ -992,7 +992,7 @@ if (m_rank == rcv_rank)
 
             // Stream cell data
             com_buff >> cell;
-            cell_idx = cell.get_id();
+            cell_idx = cell.getId();
             cell.setInterior( true );
 
 /*DEBUG*/   {
@@ -1009,7 +1009,7 @@ if (m_rank == rcv_rank)
             // Insert cell in cells list & update ghost lists
             if ( m_ghost2id[snd_rank].find(cell_idx) != m_ghost2id[snd_rank].end() ) {
                 ghost_idx = m_ghost2id[snd_rank][cell_idx];
-                cell.set_id( ghost_idx );
+                cell.setId( ghost_idx );
                 feedback << ghost_idx;
 /*DEBUG*/       {
 // /*DEBUG*/           out << "    (already exists as ghost), remapped as:" << endl;
@@ -1026,9 +1026,9 @@ if (m_rank == rcv_rank)
                 // Add cell before last internal cell
 // /*DEBUG*/       out << "    (adding new cell), remapped as:" << endl;
                 it = addCell( move(cell), generateCellId() );
-                feedback << long( it->get_id() );
+                feedback << long( it->getId() );
 // /*DEBUG*/       it->display(out, 6);
-                c_local_mapping[ cell_count ] = it->get_id();
+                c_local_mapping[ cell_count ] = it->getId();
                 ++cell_count;
             }
         } //next i
@@ -1105,7 +1105,7 @@ if (m_rank == rcv_rank)
             // Stream cell data 
             com_buff >> ghost_rank;
             com_buff >> cell;
-            cell_idx = cell.get_id();
+            cell_idx = cell.getId();
 /*DEBUG*/   {
 // /*DEBUG*/       out << "    receiving ghost (existing on rank: " << ghost_rank << ")" << endl;
 // /*DEBUG*/       cell.display(out, 6);
@@ -1126,8 +1126,8 @@ if (m_rank == rcv_rank)
                 cell.setInterior( false );
                 it = addCell( move(cell), generateCellId() );
 
-                c_local_mapping[ n_cells + ghost_count ] = it->get_id();
-                m_ghost2id[ghost_rank][ cell_idx ] = it->get_id();
+                c_local_mapping[ n_cells + ghost_count ] = it->getId();
+                m_ghost2id[ghost_rank][ cell_idx ] = it->getId();
                 ++ghost_count;
 
 /*DEBUG*/       {
@@ -1137,7 +1137,7 @@ if (m_rank == rcv_rank)
             }
             else {
 // /*DEBUG*/       out << "    (cell already exists as ghost)" << endl;
-                cell.set_id(m_ghost2id[ghost_rank][cell_idx]);
+                cell.setId(m_ghost2id[ghost_rank][cell_idx]);
                 cell.setInterior( false );
 /*DEBUG*/       {
 // /*DEBUG*/           out << "    remapped as:" << endl;
@@ -1222,7 +1222,7 @@ if (m_rank == rcv_rank)
 
         // Remove duplicated vertices --------------------------------------- //
         out << "    n. vertices is: " << getVertexCount() << endl;
-        deleteCoincidentVertex();
+        deleteCoincidentVertices();
         deleteOrphanVertices();
         out << "    (after cleaning), n.vertices is: " << getVertexCount() << endl << endl;
     }

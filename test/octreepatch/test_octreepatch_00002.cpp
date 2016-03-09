@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
 
 		for (int i = 0; i < 150; ++i) {
 			long cellId = rand() % nCells;
-			if (!patch_2D->cells().exists(cellId)) {
+			if (!patch_2D->getCells().exists(cellId)) {
 				continue;
 			}
 
@@ -76,7 +76,7 @@ int main(int argc, char *argv[]) {
 
 		for (int i = 0; i < 200; ++i) {
 			long cellId = rand() % nCells;
-			if (!patch_2D->cells().exists(cellId)) {
+			if (!patch_2D->getCells().exists(cellId)) {
 				continue;
 			}
 
@@ -116,7 +116,7 @@ int main(int argc, char *argv[]) {
 
 		for (int i = 0; i < 150; ++i) {
 			long cellId = rand() % nCells;
-			if (!patch_3D->cells().exists(cellId)) {
+			if (!patch_3D->getCells().exists(cellId)) {
 				continue;
 			}
 
@@ -129,7 +129,7 @@ int main(int argc, char *argv[]) {
 
 		for (int i = 0; i < 200; ++i) {
 			long cellId = rand() % nCells;
-			if (!patch_3D->cells().exists(cellId)) {
+			if (!patch_3D->getCells().exists(cellId)) {
 				continue;
 			}
 
