@@ -22,9 +22,6 @@
  *
 \*---------------------------------------------------------------------------*/
 
-//
-// Written by Andrea Iob <andrea_iob@hotmail.com>
-//
 #include <algorithm>
 #include <cassert>
 #include <cstddef>
