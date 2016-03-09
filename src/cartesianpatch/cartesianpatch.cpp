@@ -229,6 +229,49 @@ void CartesianPatch::initialize(const std::array<double, 3> &origin,
 			m_normals[i++] = normal;
 		}
 	}
+
+	// Deltas for the evaluation of the vertex neighbours
+	m_vertexNeighDeltas = std::vector<std::array<int, 3>>(std::pow(2, getDimension()));
+	m_vertexNeighDeltas[0] = {{ 0,  0, 0}};
+	m_vertexNeighDeltas[1] = {{-1,  0, 0}};
+	m_vertexNeighDeltas[2] = {{ 0, -1, 0}};
+	m_vertexNeighDeltas[3] = {{-1, -1, 0}};
+	if (isThreeDimensional()) {
+		m_vertexNeighDeltas[4] = {{ 0,  0, -1}};
+		m_vertexNeighDeltas[5] = {{-1,  0, -1}};
+		m_vertexNeighDeltas[6] = {{ 0, -1, -1}};
+		m_vertexNeighDeltas[7] = {{-1, -1, -1}};
+	}
+
+	// Deltas for the evaluation of the edge neighbours
+	m_edgeNeighDeltas = std::vector<std::array<int, 3>>(12);
+	m_edgeNeighDeltas[ 0] = {{-1,  0, -1}};
+	m_edgeNeighDeltas[ 1] = {{ 1,  0, -1}};
+	m_edgeNeighDeltas[ 2] = {{ 0, -1, -1}};
+	m_edgeNeighDeltas[ 3] = {{ 0,  1, -1}};
+	m_edgeNeighDeltas[ 4] = {{-1, -1,  0}};
+	m_edgeNeighDeltas[ 5] = {{ 1, -1,  0}};
+	m_edgeNeighDeltas[ 6] = {{-1,  1,  0}};
+	m_edgeNeighDeltas[ 7] = {{ 1,  1,  0}};
+	m_edgeNeighDeltas[ 8] = {{-1,  0,  1}};
+	m_edgeNeighDeltas[ 9] = {{ 1,  0,  1}};
+	m_edgeNeighDeltas[10] = {{ 0, -1,  1}};
+	m_edgeNeighDeltas[11] = {{ 0,  1,  1}};
+
+	// Faces associated to the edges
+	m_edgeFaces = std::vector<std::array<int, 2>>(12);
+	m_edgeFaces[ 0] = {{ 0, 4}};
+	m_edgeFaces[ 1] = {{ 1, 4}};
+	m_edgeFaces[ 2] = {{ 2, 4}};
+	m_edgeFaces[ 3] = {{ 3, 4}};
+	m_edgeFaces[ 4] = {{ 0, 2}};
+	m_edgeFaces[ 5] = {{ 1, 2}};
+	m_edgeFaces[ 6] = {{ 0, 3}};
+	m_edgeFaces[ 7] = {{ 1, 3}};
+	m_edgeFaces[ 8] = {{ 0, 5}};
+	m_edgeFaces[ 9] = {{ 1, 5}};
+	m_edgeFaces[10] = {{ 2, 5}};
+	m_edgeFaces[11] = {{ 3, 5}};
 }
 
 /*!
@@ -949,6 +992,110 @@ bool CartesianPatch::isVertexCartesianIdValid(const std::array<int, 3> &ijk) con
 	}
 
 	return true;
+}
+
+/*!
+	Extracts the neighbours of the specified cell for the given face.
+
+	\param id is the id of the cell
+	\param face is a face of the cell
+	\param blackList is a list of cells that are excluded from the search
+	\result The neighbours of the specified cell for the given face.
+*/
+std::vector<long> CartesianPatch::_findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList) const
+{
+	int neighSide      = face % 2;
+	int neighDirection = std::floor(face / 2);
+
+	std::array<int, 3> neighIjk(getCellCartesianId(id));
+	if (neighSide == 0) {
+		neighIjk[neighDirection]--;
+	} else {
+		neighIjk[neighDirection]++;
+	}
+
+	std::vector<long> neighs;
+	if (isCellCartesianIdValid(neighIjk)) {
+		long neighId = getCellLinearId(neighIjk);
+		if (std::find(blackList.begin(), blackList.end(), neighId) == blackList.end()) {
+			neighs.push_back(neighId);
+		}
+	}
+
+	return neighs;
+}
+
+/*!
+	Extracts the neighbours of the specified cell for the given edge.
+
+	This function can be only used with three-dimensional cells.
+
+	\param id is the id of the cell
+	\param edge is an edge of the cell
+	\param blackList is a list of cells that are excluded from the search
+	\result The neighbours of the specified cell for the given edge.
+*/
+std::vector<long> CartesianPatch::_findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList) const
+{
+	std::vector<long> neighs;
+	assert(isThreeDimensional());
+	if (!isThreeDimensional()) {
+		return neighs;
+	}
+
+	// Diagonal neighbour
+	std::array<int, 3> diagNeighIjk(getCellCartesianId(id) + m_edgeNeighDeltas[edge]);
+	if (isCellCartesianIdValid(diagNeighIjk)) {
+		long diagNeighId = getCellLinearId(diagNeighIjk);
+		if (std::find(blackList.begin(), blackList.end(), diagNeighId) == blackList.end()) {
+			utils::addToOrderedVector<long>(diagNeighId, neighs);
+		}
+	}
+
+	// Faces incident to the edge
+	for (const auto &face : m_edgeFaces[edge]) {
+		std::vector<long> faceNeighIds = _findCellFaceNeighs(id, face, blackList);
+		for (const auto &faceNeighId : faceNeighIds) {
+			utils::addToOrderedVector<long>(faceNeighId, neighs);
+		}
+	}
+
+	// Done
+	return neighs;
+}
+
+/*!
+	Extracts the neighbours of the specified cell for the given local vertex.
+
+	\param id is the id of the cell
+	\param vertex is a vertex of the cell
+	\param blackList is a list of cells that are excluded from the search
+	\result The neighbours of the specified cell for the given vertex.
+*/
+std::vector<long> CartesianPatch::_findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList) const
+{
+	std::array<int, 3> cellIjk   = getCellCartesianId(id);
+	std::array<int, 3> vertexIjk = getVertexCartesianId(cellIjk, vertex);
+
+	std::vector<long> neighs;
+	for (const auto &delta : m_vertexNeighDeltas) {
+		// Get the Cartesian index
+		std::array<int, 3> neighIjk(vertexIjk + delta);
+		if (neighIjk == cellIjk) {
+			continue;
+		} else if (!isCellCartesianIdValid(neighIjk)) {
+			continue;
+		}
+
+		// Get the linear neighbour index and, if it's not on the blacklist,
+		// add it to the list of neighbours
+		long neighId = getCellLinearId(neighIjk);
+		if (std::find(blackList.begin(), blackList.end(), neighId) == blackList.end()) {
+			utils::addToOrderedVector<long>(neighId, neighs);
+		}
+	}
+
+	return neighs;
 }
 
 /*!

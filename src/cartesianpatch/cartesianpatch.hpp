@@ -106,6 +106,10 @@ protected:
 	bool _markCellForCoarsening(const long &id);
 	bool _enableCellBalancing(const long &id, bool enabled);
 
+	std::vector<long> _findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList = std::vector<long>()) const;
+	std::vector<long> _findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList = std::vector<long>()) const;
+	std::vector<long> _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
+
 	void evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
 
 private:
@@ -126,6 +130,10 @@ private:
 	double m_cellVolume;
 	std::array<double, 3> m_interfaceArea;
 	std::array<std::array<double, 3>, 6> m_normals;
+
+	std::vector<std::array<int, 3>> m_vertexNeighDeltas;
+	std::vector<std::array<int, 3>> m_edgeNeighDeltas;
+	std::vector<std::array<int, 2>> m_edgeFaces;
 
 	void initialize(const std::array<double, 3> &origin, const std::array<double, 3> &lengths,
 	                const std::array<int, 3> &nCells);
