@@ -855,8 +855,12 @@ Logger & LoggerManager::cout(const std::string &name)
 {
 	// The logger has to be created
     if (m_loggers.count(name) == 0) {
+		if (!isInitialized()) {
+			setMode(log::SEPARATE);
+		}
+
 		if (name == m_defaultName) {
-			initialize(log::SEPARATE, m_defaultName, false, m_defaultDirectory, 1, 0);
+			_create(name, false, m_defaultDirectory, 1, 0);
 		} else {
 			create(name, false, m_defaultDirectory, 1, 0);
 		}
