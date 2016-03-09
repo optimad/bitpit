@@ -47,6 +47,32 @@ void PiercedIterator<value_t, id_t, value_no_cv_t>::swap(PiercedIterator& other)
 }
 
 /*!
+	Gets the id of the current element.
+
+	\param fallback is the fallback value to be returned if the iterator
+	points to an invalid position
+	\return The id of the current element or the fallback value if the
+	the iterator points to an invalid position.
+*/
+template<typename value_t, typename id_t, typename value_no_cv_t>
+id_t PiercedIterator<value_t, id_t, value_no_cv_t>::getId(const id_t &fallback) const noexcept
+{
+	id_t id;
+	if (m_pos > m_container->m_last_pos) {
+		id = fallback;
+		return id;
+	}
+
+	id = m_container->m_ids[m_pos];
+	if (id >= 0) {
+		return id;
+	} else {
+		id = fallback;
+		return id;
+	}
+}
+
+/*!
 	Pre-increment operator.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>

@@ -102,6 +102,9 @@ public:
 	// General methods
 	void swap(PiercedIterator& other) noexcept;
 
+	// Methos to extract information on the current element
+	id_t getId(const id_t &fallback = -1) const noexcept;
+
 	// Operators
 	PiercedIterator& operator++();
 	PiercedIterator operator++(int);
