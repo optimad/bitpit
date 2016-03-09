@@ -552,40 +552,40 @@ void ElementInfo::initializeVoxelInfo()
 		edgeConnect[k] = std::vector<int>(lineInfo.nVertices);
 	}
 
-	edgeConnect[0][0] = 1;
-	edgeConnect[0][1] = 0;
+	edgeConnect[0][0] = 0;
+	edgeConnect[0][1] = 2;
 
 	edgeConnect[1][0] = 1;
-	edgeConnect[1][1] = 2;
+	edgeConnect[1][1] = 3;
 
-	edgeConnect[2][0] = 2;
-	edgeConnect[2][1] = 3;
+	edgeConnect[2][0] = 0;
+	edgeConnect[2][1] = 1;
 
-	edgeConnect[3][0] = 3;
-	edgeConnect[3][1] = 0;
+	edgeConnect[3][0] = 2;
+	edgeConnect[3][1] = 3;
 
-	edgeConnect[4][0] = 4;
-	edgeConnect[4][1] = 5;
+	edgeConnect[4][0] = 0;
+	edgeConnect[4][1] = 4;
 
-	edgeConnect[5][0] = 5;
-	edgeConnect[5][1] = 6;
+	edgeConnect[5][0] = 1;
+	edgeConnect[5][1] = 5;
 
-	edgeConnect[6][0] = 6;
-	edgeConnect[6][1] = 7;
+	edgeConnect[6][0] = 2;
+	edgeConnect[6][1] = 6;
 
-	edgeConnect[7][0] = 7;
-	edgeConnect[7][1] = 4;
+	edgeConnect[7][0] = 3;
+	edgeConnect[7][1] = 7;
 
-	edgeConnect[8][0] = 0;
-	edgeConnect[8][1] = 4;
+	edgeConnect[8][0] = 4;
+	edgeConnect[8][1] = 6;
 
-	edgeConnect[9][0] = 1;
-	edgeConnect[9][1] = 5;
+	edgeConnect[9][0] = 5;
+	edgeConnect[9][1] = 7;
 
-	edgeConnect[10][0] = 2;
-	edgeConnect[10][1] = 6;
+	edgeConnect[10][0] = 4;
+	edgeConnect[10][1] = 5;
 
-	edgeConnect[11][0] = 3;
+	edgeConnect[11][0] = 6;
 	edgeConnect[11][1] = 7;
 
 	// Face data
