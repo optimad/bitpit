@@ -26,6 +26,7 @@
 #define __BITPIT_PATCH_KERNEL_HPP__
 
 #include <cstddef>
+#include <deque>
 #include <memory>
 #if BITPIT_ENABLE_MPI==1
 #	include <mpi.h>
