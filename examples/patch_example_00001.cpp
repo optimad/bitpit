@@ -83,7 +83,7 @@ int main()
 	std::cout << std::endl << "::: Marker :::" << std::endl;
 	std::cout << std::endl;
 
-	std::cout << "  Element id before which there are 4 elements: " <<  cells.get_size_marker(4) << std::endl;
+	std::cout << "  Element id before which there are 4 elements: " <<  cells.getSizeMarker(4) << std::endl;
 
 	// Deleting cells
 	int id_erase;
@@ -108,7 +108,7 @@ int main()
 	std::cout << std::endl;
 
 	for (int i = 0; i < 10; ++i) {
-		std::cout << "  Element id before which there are " << i << " elements: " <<  cells.get_size_marker(i) << std::endl;
+		std::cout << "  Element id before which there are " << i << " elements: " <<  cells.getSizeMarker(i) << std::endl;
 	}
 
 	// Resizing the cell container
@@ -126,7 +126,7 @@ int main()
 	std::cout << std::endl << "::: Marker :::" << std::endl;
 	std::cout << std::endl;
 
-	std::cout << "  Element id before which there are 4 elements: " <<  cells.get_size_marker(4) << std::endl;
+	std::cout << "  Element id before which there are 4 elements: " <<  cells.getSizeMarker(4) << std::endl;
 
 	// Inserting cells again
 	int id_insert;
@@ -143,7 +143,7 @@ int main()
 	id_insert = 13;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (at the end) element with id = " << id_insert << std::endl;
-		cells.emplace_back(id_insert, id_insert);
+		cells.emplaceBack(id_insert, id_insert);
 	}
 
 	id_insert = 15;
@@ -155,7 +155,7 @@ int main()
 	id_insert = 17;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (at the end) element with id = " << id_insert << std::endl;
-		cells.emplace_back(id_insert, id_insert);
+		cells.emplaceBack(id_insert, id_insert);
 	}
 
 	id_insert = 45;
@@ -167,7 +167,7 @@ int main()
 	id_insert = 102;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (at the end) element with id = " << id_insert << std::endl;
-		cells.emplace_back(id_insert, id_insert);
+		cells.emplaceBack(id_insert, id_insert);
 	}
 
 	printCellIds(cells);
@@ -176,7 +176,7 @@ int main()
 	std::cout << std::endl << "::: Marker :::" << std::endl;
 	std::cout << std::endl;
 
-	std::cout << "  Element id before which there are 4 elements: " <<  cells.get_size_marker(4) << std::endl;
+	std::cout << "  Element id before which there are 4 elements: " <<  cells.getSizeMarker(4) << std::endl;
 
 	std::cout << std::endl << "::: Inserting cells after/before :::" << std::endl;
 	std::cout << std::endl;
@@ -187,14 +187,14 @@ int main()
 	id_reference = 13;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (before the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
-		cells.emplace_before(id_reference, id_insert, id_insert);
+		cells.emplaceBefore(id_reference, id_insert, id_insert);
 	}
 
 	id_insert    = 123;
 	id_reference = 102;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (before the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
-		cells.emplace_before(id_reference, id_insert, id_insert);
+		cells.emplaceBefore(id_reference, id_insert, id_insert);
 	}
 
 
@@ -202,28 +202,28 @@ int main()
 	id_reference = 10;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (before the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
-		cells.emplace_before(id_reference, id_insert, id_insert);
+		cells.emplaceBefore(id_reference, id_insert, id_insert);
 	}
 
 	id_insert    = 125;
 	id_reference = 124;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (after the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
-		cells.emplace_after(id_reference, id_insert, id_insert);
+		cells.emplaceAfter(id_reference, id_insert, id_insert);
 	}
 
 	id_insert    = 126;
 	id_reference = 102;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (after the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
-		cells.emplace_after(id_reference, id_insert, id_insert);
+		cells.emplaceAfter(id_reference, id_insert, id_insert);
 	}
 
 	id_insert    = 127;
 	id_reference = 45;
 	if (!cells.exists(id_insert)) {
 		std::cout << "  Inserting (after the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
-		cells.emplace_after(id_reference, id_insert, id_insert);
+		cells.emplaceAfter(id_reference, id_insert, id_insert);
 	}
 
 	printCellIds(cells);
@@ -232,20 +232,20 @@ int main()
 	std::cout << std::endl << "::: Marker :::" << std::endl;
 	std::cout << std::endl;
 
-	std::cout << "  Element id before which there are 4 elements: " <<  cells.get_size_marker(4) << std::endl;
+	std::cout << "  Element id before which there are 4 elements: " <<  cells.getSizeMarker(4) << std::endl;
 
 	// List of ids
 	std::cout << std::endl << "::: List of cells id :::" << std::endl;
 	std::cout << std::endl;
 
 	std::cout << "  List of the ids (not ordered)"  << std::endl;
-	for (auto const &id : cells.get_ids(false)) {
+	for (auto const &id : cells.getIds(false)) {
 		std::cout << "    > id = " << id << std::endl;
 	}
 
 	std::cout << std::endl;
 	std::cout << "  List of the ids (ordered)"  << std::endl;
-	for (auto const &id : cells.get_ids(true)) {
+	for (auto const &id : cells.getIds(true)) {
 		std::cout << "    > id = " << id << std::endl;
 	}
 
@@ -260,7 +260,7 @@ int main()
 	std::cout << std::endl << "::: Deleting all cells :::" << std::endl;
 
 	while (!cells.empty()) {
-		cells.pop_back();
+		cells.popBack();
 	}
 
 	printCellIds(cells);
@@ -269,7 +269,7 @@ int main()
 	std::cout << std::endl << "::: Marker :::" << std::endl;
 	std::cout << std::endl;
 
-	std::cout << "  Element id before which there are 4 elements: " <<  cells.get_size_marker(4) << std::endl;
+	std::cout << "  Element id before which there are 4 elements: " <<  cells.getSizeMarker(4) << std::endl;
 
 	// Filling the vector again
 	std::cout << std::endl << "::: Filling the vector :::" << std::endl;
@@ -282,7 +282,7 @@ int main()
 	std::cout << std::endl << "::: Marker :::" << std::endl;
 	std::cout << std::endl;
 
-	std::cout << "  Element id before which there are 4 elements: " <<  cells.get_size_marker(4) << std::endl;
+	std::cout << "  Element id before which there are 4 elements: " <<  cells.getSizeMarker(4) << std::endl;
 
 	// Deleting cells
 	std::cout << std::endl << "::: Deleting cells :::" << std::endl;
@@ -344,7 +344,7 @@ int main()
 	id_reference = 40;
 	std::cout << std::endl;
 	std::cout << "  Moving element with id = " << id_move << " before element with id = " << id_reference << std::endl;
-	cells.move_before(id_reference, id_move);
+	cells.moveBefore(id_reference, id_move);
 
 	printCellIds(cells);
 
@@ -352,7 +352,7 @@ int main()
 	id_reference = 41;
 	std::cout << std::endl;
 	std::cout << "  Moving element with id = " << id_move << " after element with id = " << id_reference << std::endl;
-	cells.move_after(id_reference, id_move);
+	cells.moveAfter(id_reference, id_move);
 
 	printCellIds(cells);
 
@@ -360,7 +360,7 @@ int main()
 	id_reference = 9;
 	std::cout << std::endl;
 	std::cout << "  Moving element with id = " << id_move << " after element with id = " << id_reference << std::endl;
-	cells.move_after(id_reference, id_move);
+	cells.moveAfter(id_reference, id_move);
 
 	printCellIds(cells);
 
@@ -368,7 +368,7 @@ int main()
 	std::cout << std::endl << "::: Marker :::" << std::endl;
 	std::cout << std::endl;
 
-	std::cout << "  Element id before which there are 4 elements: " <<  cells.get_size_marker(4) << std::endl;
+	std::cout << "  Element id before which there are 4 elements: " <<  cells.getSizeMarker(4) << std::endl;
 
 	// Squeezee the vector
 	std::cout << std::endl << "::: Squeeze :::" << std::endl;
@@ -386,7 +386,7 @@ int main()
 	std::cout << std::endl << "::: Marker :::" << std::endl;
 	std::cout << std::endl;
 
-	std::cout << "  Element id before which there are 4 elements: " <<  cells.get_size_marker(4) << std::endl;
+	std::cout << "  Element id before which there are 4 elements: " <<  cells.getSizeMarker(4) << std::endl;
 
 	// Clear the vector
 	std::cout << std::endl << "::: Clear the vector :::" << std::endl;
@@ -406,7 +406,7 @@ int main()
 	std::cout << std::endl << "::: Marker :::" << std::endl;
 	std::cout << std::endl;
 
-	std::cout << "  Element id before which there are 4 elements: " <<  cells.get_size_marker(4) << std::endl;
+	std::cout << "  Element id before which there are 4 elements: " <<  cells.getSizeMarker(4) << std::endl;
 
 	// Done
 	std::cout << std::endl << "::: Done :::" << std::endl;

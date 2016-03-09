@@ -963,7 +963,7 @@ OctreePatch::FaceInfoSet OctreePatch::removeCells(std::vector<long> &cellIds)
 	// faces to remove in an ordered map. The order should be based upon
 	// the position of the interfaces in the container, rather than upon
 	// the id of the faces.
-	typedef bitpit::PiercedVector<Interface>::position_less InterfacePositionCompare;
+	typedef bitpit::PiercedVector<Interface>::positionLess InterfacePositionCompare;
 	typedef std::map<long, int, InterfacePositionCompare> InterfaceOrderedMap;
 
 	std::unordered_set<long> deadVertices;

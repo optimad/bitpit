@@ -70,7 +70,7 @@ int main()
 	std::cout << std::endl << "::: Testing marker :::" << std::endl;
 	std::cout << std::endl;
 
-	std::cout << "  Element id before which there are 4 elements: " <<  container.get_size_marker(4) << std::endl;
+	std::cout << "  Element id before which there are 4 elements: " <<  container.getSizeMarker(4) << std::endl;
 
 	// Deleting all elements of the container
 	int id_erase;
@@ -95,7 +95,7 @@ int main()
 	std::cout << std::endl;
 
 	for (int i = 0; i < 10; ++i) {
-		std::cout << "  Element id before which there are " << i << " elements: " <<  container.get_size_marker(i) << std::endl;
+		std::cout << "  Element id before which there are " << i << " elements: " <<  container.getSizeMarker(i) << std::endl;
 	}
 
 	// Resizing the container
@@ -113,7 +113,7 @@ int main()
 	std::cout << std::endl << "::: Testing marker :::" << std::endl;
 	std::cout << std::endl;
 
-	std::cout << "  Element id before which there are 4 elements: " <<  container.get_size_marker(4) << std::endl;
+	std::cout << "  Element id before which there are 4 elements: " <<  container.getSizeMarker(4) << std::endl;
 
 	// Inserting elements in the container
 	int id_insert;
@@ -130,7 +130,7 @@ int main()
 	id_insert = 13;
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (at the end) element with id = " << id_insert << std::endl;
-		container.emplace_back(id_insert, id_insert);
+		container.emplaceBack(id_insert, id_insert);
 	}
 
 	id_insert = 15;
@@ -142,7 +142,7 @@ int main()
 	id_insert = 17;
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (at the end) element with id = " << id_insert << std::endl;
-		container.emplace_back(id_insert, id_insert);
+		container.emplaceBack(id_insert, id_insert);
 	}
 
 	id_insert = 45;
@@ -154,7 +154,7 @@ int main()
 	id_insert = 102;
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (at the end) element with id = " << id_insert << std::endl;
-		container.emplace_back(id_insert, id_insert);
+		container.emplaceBack(id_insert, id_insert);
 	}
 
 	printElements(container);
@@ -163,7 +163,7 @@ int main()
 	std::cout << std::endl << "::: Testing marker :::" << std::endl;
 	std::cout << std::endl;
 
-	std::cout << "  Element id before which there are 4 elements: " <<  container.get_size_marker(4) << std::endl;
+	std::cout << "  Element id before which there are 4 elements: " <<  container.getSizeMarker(4) << std::endl;
 
 	std::cout << std::endl << "::: Testing insertion after/before :::" << std::endl;
 	std::cout << std::endl;
@@ -174,14 +174,14 @@ int main()
 	id_reference = 13;
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (before the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
-		container.emplace_before(id_reference, id_insert, id_insert);
+		container.emplaceBefore(id_reference, id_insert, id_insert);
 	}
 
 	id_insert    = 123;
 	id_reference = 102;
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (before the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
-		container.emplace_before(id_reference, id_insert, id_insert);
+		container.emplaceBefore(id_reference, id_insert, id_insert);
 	}
 
 
@@ -189,28 +189,28 @@ int main()
 	id_reference = 10;
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (before the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
-		container.emplace_before(id_reference, id_insert, id_insert);
+		container.emplaceBefore(id_reference, id_insert, id_insert);
 	}
 
 	id_insert    = 125;
 	id_reference = 124;
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (after the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
-		container.emplace_after(id_reference, id_insert, id_insert);
+		container.emplaceAfter(id_reference, id_insert, id_insert);
 	}
 
 	id_insert    = 126;
 	id_reference = 102;
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (after the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
-		container.emplace_after(id_reference, id_insert, id_insert);
+		container.emplaceAfter(id_reference, id_insert, id_insert);
 	}
 
 	id_insert    = 127;
 	id_reference = 45;
 	if (!container.exists(id_insert)) {
 		std::cout << "  Inserting (after the element with id = " << id_reference << ") element with id = " << id_insert << std::endl;
-		container.emplace_after(id_reference, id_insert, id_insert);
+		container.emplaceAfter(id_reference, id_insert, id_insert);
 	}
 
 	printElements(container);
@@ -219,20 +219,20 @@ int main()
 	std::cout << std::endl << "::: Testing marker :::" << std::endl;
 	std::cout << std::endl;
 
-	std::cout << "  Element id before which there are 4 elements: " <<  container.get_size_marker(4) << std::endl;
+	std::cout << "  Element id before which there are 4 elements: " <<  container.getSizeMarker(4) << std::endl;
 
 	// List of ids
 	std::cout << std::endl << "::: List of element ids :::" << std::endl;
 	std::cout << std::endl;
 
 	std::cout << "  List of the ids (not ordered)"  << std::endl;
-	for (auto const &id : container.get_ids(false)) {
+	for (auto const &id : container.getIds(false)) {
 		std::cout << "    > id = " << id << std::endl;
 	}
 
 	std::cout << std::endl;
 	std::cout << "  List of the ids (ordered)"  << std::endl;
-	for (auto const &id : container.get_ids(true)) {
+	for (auto const &id : container.getIds(true)) {
 		std::cout << "    > id = " << id << std::endl;
 	}
 
@@ -247,7 +247,7 @@ int main()
 	std::cout << std::endl << "::: Testing deletion of all elements of the container :::" << std::endl;
 
 	while (!container.empty()) {
-		container.pop_back();
+		container.popBack();
 	}
 
 	printElements(container);
@@ -256,7 +256,7 @@ int main()
 	std::cout << std::endl << "::: Testing marker :::" << std::endl;
 	std::cout << std::endl;
 
-	std::cout << "  Element id before which there are 4 elements: " <<  container.get_size_marker(4) << std::endl;
+	std::cout << "  Element id before which there are 4 elements: " <<  container.getSizeMarker(4) << std::endl;
 
 	// Filling the vector again
 	std::cout << std::endl << "::: Filling the vector :::" << std::endl;
@@ -269,7 +269,7 @@ int main()
 	std::cout << std::endl << "::: Testing marker :::" << std::endl;
 	std::cout << std::endl;
 
-	std::cout << "  Element id before which there are 4 elements: " <<  container.get_size_marker(4) << std::endl;
+	std::cout << "  Element id before which there are 4 elements: " <<  container.getSizeMarker(4) << std::endl;
 
 	// Deleting elements
 	std::cout << std::endl << "::: Testing element deletion :::" << std::endl;
@@ -331,7 +331,7 @@ int main()
 	id_reference = 40;
 	std::cout << std::endl;
 	std::cout << "  Moving element with id = " << id_move << " before element with id = " << id_reference << std::endl;
-	container.move_before(id_reference, id_move);
+	container.moveBefore(id_reference, id_move);
 
 	printElements(container);
 
@@ -339,7 +339,7 @@ int main()
 	id_reference = 41;
 	std::cout << std::endl;
 	std::cout << "  Moving element with id = " << id_move << " after element with id = " << id_reference << std::endl;
-	container.move_after(id_reference, id_move);
+	container.moveAfter(id_reference, id_move);
 
 	printElements(container);
 
@@ -347,7 +347,7 @@ int main()
 	id_reference = 9;
 	std::cout << std::endl;
 	std::cout << "  Moving element with id = " << id_move << " after element with id = " << id_reference << std::endl;
-	container.move_after(id_reference, id_move);
+	container.moveAfter(id_reference, id_move);
 
 	printElements(container);
 
@@ -355,7 +355,7 @@ int main()
 	std::cout << std::endl << "::: Testing marker :::" << std::endl;
 	std::cout << std::endl;
 
-	std::cout << "  Element id before which there are 4 elements: " <<  container.get_size_marker(4) << std::endl;
+	std::cout << "  Element id before which there are 4 elements: " <<  container.getSizeMarker(4) << std::endl;
 
 	// Squeezee the vector
 	std::cout << std::endl << "::: Testing squeeze :::" << std::endl;
@@ -373,7 +373,7 @@ int main()
 	std::cout << std::endl << "::: Testing marker :::" << std::endl;
 	std::cout << std::endl;
 
-	std::cout << "  Element id before which there are 4 elements: " <<  container.get_size_marker(4) << std::endl;
+	std::cout << "  Element id before which there are 4 elements: " <<  container.getSizeMarker(4) << std::endl;
 
 	// Clear the vector
 	std::cout << std::endl << "::: Clear the vector :::" << std::endl;
@@ -393,7 +393,7 @@ int main()
 	std::cout << std::endl << "::: Testing marker :::" << std::endl;
 	std::cout << std::endl;
 
-	std::cout << "  Element id before which there are 4 elements: " <<  container.get_size_marker(4) << std::endl;
+	std::cout << "  Element id before which there are 4 elements: " <<  container.getSizeMarker(4) << std::endl;
 
 	// Done
 	std::cout << std::endl << "::: Done :::" << std::endl;
