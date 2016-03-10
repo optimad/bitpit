@@ -1068,16 +1068,14 @@ OctreePatch::FaceInfoSet OctreePatch::removeCells(std::vector<long> &cellIds)
 */
 long OctreePatch::addVertex(uint32_t treeId)
 {
-	// Create the vertex
-	VertexIterator vertexIterator = VolumeKernel::addVertex();
-	Vertex &vertex = *vertexIterator;
-
-	// Coordinate
+	// Vertex coordinates
 	std::array<double, 3> nodeCoords = m_tree.getNodeCoordinates(treeId);
-	vertex.setCoords(nodeCoords);
+
+	// Create the vertex
+	VertexIterator vertexIterator = VolumeKernel::addVertex(std::move(nodeCoords));
 
 	// Done
-	return vertex.getId();
+	return vertexIterator->getId();
 }
 
 /*!
