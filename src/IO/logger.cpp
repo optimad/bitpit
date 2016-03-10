@@ -284,7 +284,7 @@ void LoggerBuffer::setFileEnabled(bool enabled)
 /*!
 	Sets the stream to be used for the output on the file.
 
-	\param console is the stream to be used for the output on the file
+	\param file is the stream to be used for the output on the file
 */
 void LoggerBuffer::setFileStream(std::ofstream *file)
 {
@@ -1083,7 +1083,8 @@ log::Mode LoggerManager::getMode() const
 /*!
     Internal function to configure a logger
 
-    \param loggger is a pointet to the logger to configure
+    \param name is the name for the logger
+    \param reset if true the log files will be reset
     \param directory is the directory for saving the log files
 	\param nProcessors is the total number of processors in the communicator
 	\param rank is the parallel rank in the communicator
@@ -1128,7 +1129,7 @@ void LoggerManager::_create(const std::string &name, bool reset,
 /*!
     Internal function to configure a logger
 
-    \param loggger is a pointet to the logger to configure
+    \param name is the name for the logger
     \param master is a pointet to the logger tha
 */
 void LoggerManager::_create(const std::string &name, Logger &master)
