@@ -112,6 +112,7 @@ Cell::Cell(const long &id, ElementInfo::Type type, bool interior, bool storeNeig
         Copy-constructor
 */
 Cell::Cell(const Cell &other)
+	: Element(other)
 {
 	*this = other;
 }
