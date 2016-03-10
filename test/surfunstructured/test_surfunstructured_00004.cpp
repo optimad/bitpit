@@ -142,7 +142,7 @@ int                             nV, nE;
     long                                        id;
     SurfUnstructured::CellIterator              c_, ce_;
     SurfUnstructured::VertexIterator            v_, ve_;
-    long                                        edge_counter = 0, vertex_counter = 0, cell_counter;
+    long                                        edge_counter = 0, vertex_counter = 0, cell_counter = 0;
     unordered_map<long, long>                   vertex_mapper;
     vector<array<double, 3>>                    normals, enormals, vnormals;
 
@@ -365,7 +365,7 @@ int                             nV, nS, nE;
     long                                        id;
     SurfUnstructured::CellIterator              c_, ce_;
     SurfUnstructured::VertexIterator            v_, ve_;
-    long                                        cell_counter, edge_counter = 0, vertex_counter = 0;
+    long                                        cell_counter = 0, edge_counter = 0, vertex_counter = 0;
     unordered_map<long, long>                   vertex_mapper, edge_mapper;
     vector<array<double, 3>>                    normals, enormals, vnormals;
 
