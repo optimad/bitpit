@@ -1662,9 +1662,22 @@ std::vector<long> PatchKernel::findCellNeighs(const long &id, int codimension, b
 */
 std::vector<long> PatchKernel::findCellFaceNeighs(const long &id) const
 {
+	// Some patches can work (at least partially) without initializing the
+	// cell list. To handle those patches, if there are no cells the face
+	// count is evaluated using the ElementInfo associated to the cell.
+	int nCellFaces;
+	if (m_cells.size() == 0) {
+		ElementInfo::Type cellType = getCellType(id);
+		const ElementInfo &cellTypeInfo = ElementInfo::getElementInfo(cellType);
+		nCellFaces = cellTypeInfo.nFaces;
+	} else {
+		const Cell &cell = getCell(id);
+		nCellFaces = cell.getFaceCount();
+	}
+
+	// Get the neighbours
 	std::vector<long> neighs;
-	const Cell &cell = getCell(id);
-	for (int i = 0; i < cell.getFaceCount(); ++i) {
+	for (int i = 0; i < nCellFaces; ++i) {
 		std::vector<long> faceNeighs = _findCellFaceNeighs(id, i, std::vector<long>());
 		for (auto &neighId : faceNeighs) {
 			utils::addToOrderedVector<long>(neighId, neighs);
@@ -1730,14 +1743,27 @@ std::vector<long> PatchKernel::findCellEdgeNeighs(const long &id, bool complete)
 		return std::vector<long>();
 	}
 
+	// Some patches can work (at least partially) without initializing the
+	// cell list. To handle those patches, if there are no cells the edge
+	// count is evaluated using the ElementInfo associated to the cell.
+	int nCellEdges;
+	if (m_cells.size() == 0) {
+		ElementInfo::Type cellType = getCellType(id);
+		const ElementInfo &cellTypeInfo = ElementInfo::getElementInfo(cellType);
+		nCellEdges = cellTypeInfo.nEdges;
+	} else {
+		const Cell &cell = getCell(id);
+		nCellEdges = cell.getEdgeCount();
+	}
+
+	// Get the neighbours
 	std::vector<long> blackList;
 	if (!complete) {
 		blackList = findCellFaceNeighs(id);
 	}
 
 	std::vector<long> neighs;
-	const Cell &cell = getCell(id);
-	for (int i = 0; i < cell.getEdgeCount(); ++i) {
+	for (int i = 0; i < nCellEdges; ++i) {
 		for (auto &neigh : _findCellEdgeNeighs(id, i, blackList)) {
 			utils::addToOrderedVector<long>(neigh, neighs);
 		}
@@ -1812,6 +1838,20 @@ std::vector<long> PatchKernel::_findCellEdgeNeighs(const long &id, const int &ed
 */
 std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, bool complete) const
 {
+	// Some patches can work (at least partially) without initializing the
+	// cell list. To handle those patches, if there are no cells the vertex
+	// count is evaluated using the ElementInfo associated to the cell.
+	int nCellVertices;
+	if (m_cells.size() == 0) {
+		ElementInfo::Type cellType = getCellType(id);
+		const ElementInfo &cellTypeInfo = ElementInfo::getElementInfo(cellType);
+		nCellVertices = cellTypeInfo.nVertices;
+	} else {
+		const Cell &cell = getCell(id);
+		nCellVertices = cell.getEdgeCount();
+	}
+
+	// Get the neighbours
 	std::vector<long> blackList;
 	if (!complete) {
 		if (isThreeDimensional()) {
@@ -1822,8 +1862,7 @@ std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, bool complet
 	}
 
 	std::vector<long> neighs;
-	const Cell &cell = getCell(id);
-	for (int i = 0; i < cell.getVertexCount(); ++i) {
+	for (int i = 0; i < nCellVertices; ++i) {
 		for (auto &neigh : _findCellVertexNeighs(id, i, blackList)) {
 			utils::addToOrderedVector<long>(neigh, neighs);
 		}
