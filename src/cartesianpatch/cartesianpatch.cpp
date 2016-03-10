@@ -1293,16 +1293,17 @@ void CartesianPatch::translate(std::array<double, 3> translation)
 /*!
 	Scales the patch.
 
+	The patch is scaled about the lower-left point of the bounding box.
+
 	\param[in] scaling is the scaling factor vector
  */
 void CartesianPatch::scale(std::array<double, 3> scaling)
 {
 	for (int n = 1; n < 3; ++n) {
-		m_minCoords[n] *= scaling[n];
-		m_maxCoords[n] *= scaling[n];
+		m_maxCoords[n] = m_minCoords[n] + scaling[n] * (m_maxCoords[n] - m_minCoords[n]);
 		for (int i = 1; i < m_nVertices1D[n]; ++i) {
-			m_vertexCoords[n][i] *= scaling[n];
-			m_cellCenters[n][i]  *= scaling[n];
+			m_vertexCoords[n][i] = m_minCoords[n] + scaling[n] * (m_vertexCoords[n][i] - m_minCoords[n]);
+			m_cellCenters[n][i]  = m_minCoords[n] + scaling[n] * (m_cellCenters[n][i] - m_minCoords[n]);
 		}
 
 		m_cellSpacings[n] *= scaling[n];
