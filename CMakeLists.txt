@@ -169,10 +169,17 @@ SET(CMAKE_SHARED_LINKER_FLAGS_SCALASCAPROFILING "" CACHE STRING
     "Flags used by the shared libraries linker during Scalasca builds." FORCE)
 MARK_AS_ADVANCED(CMAKE_SHARED_LINKER_FLAGS_SCALASCAPROFILING)
 
-# Update the documentation string of CMAKE_BUILD_TYPE for GUIs
-SET(CMAKE_BUILD_TYPE "${CMAKE_BUILD_TYPE}" CACHE STRING
-    "Choose the type of build, options are: None Debug Release RelWithDebInfo MinSizeRel GNUProfiling ScalascaProfiling."
-    FORCE )
+# Set build type variable
+if(NOT CMAKE_BUILD_TYPE)
+	# Set default build type to Debug
+	set(CMAKE_BUILD_TYPE "Debug" CACHE STRING
+		"Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel GNUProfiling ScalascaProfiling."
+		FORCE)
+
+	# Set the possible values of build type for the GUI
+	set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release"
+	"MinSizeRel" "RelWithDebInfo" "GNUProfiling" "ScalascaProfiling")
+endif()
 
 #------------------------------------------------------------------------------------#
 # Compilation settings
