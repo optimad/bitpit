@@ -773,11 +773,12 @@ bool CartesianPatch::isPointInside(const std::array<double, 3> &point)
 */
 long CartesianPatch::locatePoint(const std::array<double, 3> &point)
 {
-	if (!isPointInside(point)) {
+	std::array<int, 3> pointIjk = locatePointCartesian(point);
+	if (isCellCartesianIdValid(pointIjk)) {
+		return getCellLinearId(pointIjk);
+	} else {
 		return Element::NULL_ID;
 	}
-
-	return getCellLinearId(locatePointCartesian(point));
 }
 
 /*!
