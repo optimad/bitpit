@@ -292,11 +292,12 @@ protected:
 	virtual std::vector<long> _findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList = std::vector<long>()) const;
 	virtual std::vector<long> _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
 
-	void setDirty(bool dirty);
+	void setAdaptionDirty(bool dirty);
 	void setExpert(bool expert);
 
 private:
-	bool m_dirty;
+	bool m_adaptionDirty;
+
 	bool m_expert;
 
 	int m_id;

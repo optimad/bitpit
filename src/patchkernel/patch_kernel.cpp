@@ -133,7 +133,7 @@ PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
 	: m_nInternals(0), m_nGhosts(0),
 	  m_lastInternalId(Element::NULL_ID),
 	  m_firstGhostId(Element::NULL_ID),
-	  m_dirty(true), m_expert(expert), m_hasCustomTolerance(false),
+	  m_adaptionDirty(true), m_expert(expert), m_hasCustomTolerance(false),
 	  m_rank(0), m_nProcessors(1)
 #if BITPIT_ENABLE_MPI==1
 	  , m_communicator(MPI_COMM_NULL)
@@ -181,7 +181,7 @@ const std::vector<Adaption::Info> PatchKernel::update(bool trackAdaption)
 
 	updateBoundingBox();
 
-	setDirty(false);
+	setAdaptionDirty(false);
 
 	return adaptionInfo;
 }
@@ -195,7 +195,7 @@ void PatchKernel::markCellForRefinement(const long &id)
 {
 	bool updated = _markCellForRefinement(id);
 
-	setDirty(updated);
+	setAdaptionDirty(updated);
 }
 
 /*!
@@ -207,7 +207,7 @@ void PatchKernel::markCellForCoarsening(const long &id)
 {
 	bool updated = _markCellForCoarsening(id);
 
-	setDirty(updated);
+	setAdaptionDirty(updated);
 }
 
 /*!
@@ -220,7 +220,7 @@ void PatchKernel::enableCellBalancing(const long &id, bool enabled)
 {
 	bool updated = _enableCellBalancing(id, enabled);
 
-	setDirty(updated);
+	setAdaptionDirty(updated);
 }
 
 /*!
@@ -375,17 +375,17 @@ void PatchKernel::write()
 /*!
 	Flags the patch for update.
 
-	\param dirty if true, then patch is informed that something in the
-	patch definition has changed and thus the current data structures
-	are not valid anymore.
+	\param dirty if true, then patch is informed that the patch needs to
+	adapt after a refinement, coarsening, ... and thus the current data
+	structures are not valid anymore.
 */
-void PatchKernel::setDirty(bool dirty)
+void PatchKernel::setAdaptionDirty(bool dirty)
 {
-	if (m_dirty == dirty) {
+	if (m_adaptionDirty == dirty) {
 		return;
 	}
 
-	m_dirty = dirty;
+	m_adaptionDirty = dirty;
 }
 
 /*!
@@ -396,7 +396,7 @@ void PatchKernel::setDirty(bool dirty)
 */
 bool PatchKernel::isDirty() const
 {
-	return m_dirty;
+	return m_adaptionDirty;
 }
 
 /*!
