@@ -605,7 +605,7 @@ long PatchKernel::generateVertexId()
 	\param id is the id of the new vertex
 	\return An iterator pointing to the newly created vertex.
 */
-PatchKernel::VertexIterator PatchKernel::createVertex(long id)
+PatchKernel::VertexIterator PatchKernel::createVertex(const std::array<double, 3> &coords, long id)
 {
 	if (id < 0) {
 		id = generateVertexId();
@@ -613,6 +613,7 @@ PatchKernel::VertexIterator PatchKernel::createVertex(long id)
 
 	PiercedVector<Vertex>::iterator iterator = m_vertices.reclaim(id);
     iterator->setId(id);
+	iterator->setCoords(coords);
 
 	return iterator;
 }
@@ -631,11 +632,7 @@ PatchKernel::VertexIterator PatchKernel::addVertex(const std::array<double, 3> &
 		return vertexEnd();
 	}
 
-	VertexIterator iterator = createVertex(id);
-	Vertex &vertex = (*iterator);
-	vertex.setCoords(coords);
-
-	return iterator;
+	return createVertex(coords, id);
 }
 
 /*!
@@ -652,7 +649,7 @@ PatchKernel::VertexIterator PatchKernel::addVertex(const Vertex &source, long id
 		return vertexEnd();
 	}
 
-	VertexIterator iterator = createVertex(id);
+	VertexIterator iterator = createVertex(source.getCoords(), id);
 	Vertex &vertex = (*iterator);
 	id = vertex.getId();
 	vertex = source;
@@ -679,7 +676,7 @@ PatchKernel::VertexIterator PatchKernel::addVertex(Vertex &&source, long id)
 		id = source.getId();
 	}
 
-	VertexIterator iterator = createVertex(std::max(source.getId(), id));
+	VertexIterator iterator = createVertex(source.getCoords(), std::max(source.getId(), id));
 	Vertex &vertex = (*iterator);
 	id = vertex.getId();
 	vertex = std::move(source);

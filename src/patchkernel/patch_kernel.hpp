@@ -315,7 +315,7 @@ private:
         std::unordered_map<short, std::unordered_map<long, long> > m_ghost2id;
 #endif
 
-	VertexIterator createVertex(long id = Vertex::NULL_ID);
+	VertexIterator createVertex(const std::array<double, 3> &coords, long id = Vertex::NULL_ID);
 	InterfaceIterator createInterface(ElementInfo::Type type, long id = Element::NULL_ID);
 	CellIterator createCell(ElementInfo::Type type, bool interior, long id = Element::NULL_ID);
 
