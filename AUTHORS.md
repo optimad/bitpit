@@ -32,10 +32,14 @@ Here is a list of the main authors of each bitpit module:
   * [Edoardo Lombardi](mailto:edoardo.lombardi@optimad.it)
   * [Marco Cisternino](mailto:marco.cisternino@optimad.it)
 
-* patch
+* patchkernel
 
   * [Alessandro Alaia](mailto:alessandro.alaia@optimad.it)
   * [Andrea Iob](mailto:andrea_iob@hotmail.com)
+
+* surfunstructured
+
+  * [Alessandro Alaia](mailto:alessandro.alaia@optimad.it)
 
 * volcartesian
 
@@ -46,10 +50,6 @@ Here is a list of the main authors of each bitpit module:
 * voloctree
 
   * [Andrea Iob](mailto:andrea_iob@hotmail.com)
-
-* surfunstructured
-
-  * [Alessandro Alaia](mailto:alessandro.alaia@optimad.it)
 
 * volunstructured
 
