@@ -22,36 +22,26 @@
 #
 #---------------------------------------------------------------------------*/
 
-# Specify the version being used as well as the language
+# CMake settings
 cmake_minimum_required(VERSION 2.8)
 
-# List of tests
-set(TESTS "")
-list(APPEND TESTS "test_cartesianpatch_00001")
-list(APPEND TESTS "test_cartesianpatch_00002")
-
-set(CARTESIANPATCH_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the cartesianpatch module" FORCE)
-
-# Rules to build the tests
+# Add library to targets
 include_directories("${PROJECT_SOURCE_DIR}/src/common")
 include_directories("${PROJECT_SOURCE_DIR}/src/operators")
 include_directories("${PROJECT_SOURCE_DIR}/src/containers")
 include_directories("${PROJECT_SOURCE_DIR}/src/IO")
 include_directories("${PROJECT_SOURCE_DIR}/src/patchkernel")
-include_directories("${PROJECT_SOURCE_DIR}/src/cartesianpatch")
 
-set(TEST_TARGETS "")
-foreach(TEST_ENTRY IN LISTS CARTESIANPATCH_TEST_ENTRIES)
-	getTestName("${TEST_ENTRY}" TEST_NAME)
-	set(TEST_SOURCES "${TEST_NAME}.cpp")
-	list(APPEND TEST_TARGETS "${TEST_NAME}")
+file(GLOB SOURCE_FILES "*.cpp")
+set(VOLCARTESIAN_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Sources of volcartesian module" FORCE)
+unset(SOURCE_FILES)
 
-	add_executable(${TEST_NAME} "${TEST_SOURCES}")
-	target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
-endforeach()
-set(CARTESIANPATCH_TEST_TARGETS "${TEST_TARGETS}" CACHE INTERNAL "List of test targets for the cartesianpatch module" FORCE)
+file(GLOB HEADER_FILES "*.hpp" "*.tpp")
+set(VOLCARTESIAN_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of volcartesian module" FORCE)
+unset(HEADER_FILES)
 
-add_custom_target(tests-cartesianpatch DEPENDS ${TEST_TARGETS})
-add_custom_target(clean-tests-cartesianpatch COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+if (NOT "${VOLCARTESIAN_SOURCES}" STREQUAL "")
+    add_library(VOLCARTESIAN_TARGET_OBJECT OBJECT ${VOLCARTESIAN_SOURCES})
+endif ()
 
-unset(TEST_TARGETS)
+install(FILES ${VOLCARTESIAN_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})

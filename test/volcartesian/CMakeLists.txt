@@ -22,26 +22,36 @@
 #
 #---------------------------------------------------------------------------*/
 
-# CMake settings
+# Specify the version being used as well as the language
 cmake_minimum_required(VERSION 2.8)
 
-# Add library to targets
+# List of tests
+set(TESTS "")
+list(APPEND TESTS "test_volcartesian_00001")
+list(APPEND TESTS "test_volcartesian_00002")
+
+set(VOLCARTESIAN_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the volcartesian module" FORCE)
+
+# Rules to build the tests
 include_directories("${PROJECT_SOURCE_DIR}/src/common")
 include_directories("${PROJECT_SOURCE_DIR}/src/operators")
 include_directories("${PROJECT_SOURCE_DIR}/src/containers")
 include_directories("${PROJECT_SOURCE_DIR}/src/IO")
 include_directories("${PROJECT_SOURCE_DIR}/src/patchkernel")
+include_directories("${PROJECT_SOURCE_DIR}/src/volcartesian")
 
-file(GLOB SOURCE_FILES "*.cpp")
-set(CARTESIANPATCH_SOURCES "${SOURCE_FILES}" CACHE INTERNAL "Sources of cartesianpatch module" FORCE)
-unset(SOURCE_FILES)
+set(TEST_TARGETS "")
+foreach(TEST_ENTRY IN LISTS VOLCARTESIAN_TEST_ENTRIES)
+	getTestName("${TEST_ENTRY}" TEST_NAME)
+	set(TEST_SOURCES "${TEST_NAME}.cpp")
+	list(APPEND TEST_TARGETS "${TEST_NAME}")
 
-file(GLOB HEADER_FILES "*.hpp" "*.tpp")
-set(CARTESIANPATCH_HEADERS "${HEADER_FILES}" CACHE INTERNAL "Headers of cartesianpatch module" FORCE)
-unset(HEADER_FILES)
+	add_executable(${TEST_NAME} "${TEST_SOURCES}")
+	target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
+endforeach()
+set(VOLCARTESIAN_TEST_TARGETS "${TEST_TARGETS}" CACHE INTERNAL "List of test targets for the volcartesian module" FORCE)
 
-if (NOT "${CARTESIANPATCH_SOURCES}" STREQUAL "")
-    add_library(CARTESIANPATCH_TARGET_OBJECT OBJECT ${CARTESIANPATCH_SOURCES})
-endif ()
+add_custom_target(tests-volcartesian DEPENDS ${TEST_TARGETS})
+add_custom_target(clean-tests-volcartesian COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
-install(FILES ${CARTESIANPATCH_HEADERS} DESTINATION include/${CMAKE_PROJECT_NAME})
+unset(TEST_TARGETS)

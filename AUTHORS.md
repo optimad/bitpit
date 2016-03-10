@@ -37,7 +37,7 @@ Here is a list of the main authors of each bitpit module:
   * [Alessandro Alaia](mailto:alessandro.alaia@optimad.it)
   * [Andrea Iob](mailto:andrea_iob@hotmail.com)
 
-* cartesianpatch
+* volcartesian
 
   * [Alessandro Alaia](mailto:alessandro.alaia@optimad.it)
   * [Andrea Iob](andrea_iob@hotmail.com)

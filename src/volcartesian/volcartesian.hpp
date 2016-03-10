@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_CARTESIANPATCH_HPP__
-#define __BITPIT_CARTESIANPATCH_HPP__
+#ifndef __BITPIT_VOLCARTESIAN_HPP__
+#define __BITPIT_VOLCARTESIAN_HPP__
 
 #include <array>
 #include <cstddef>
@@ -34,7 +34,7 @@
 
 namespace bitpit {
 
-class CartesianPatch : public VolumeKernel {
+class VolCartesian : public VolumeKernel {
 
 public:
 	using PatchKernel::isPointInside;
@@ -42,14 +42,14 @@ public:
 	using PatchKernel::getCellType;
 	using PatchKernel::getInterfaceType;
 
-	CartesianPatch(const int &id, const int &dimension, const std::array<double, 3> &origin,
+	VolCartesian(const int &id, const int &dimension, const std::array<double, 3> &origin,
 			   const std::array<double, 3> &lengths, const std::array<int, 3> &nCells);
-	CartesianPatch(const int &id, const int &dimension, const std::array<double, 3> &origin,
+	VolCartesian(const int &id, const int &dimension, const std::array<double, 3> &origin,
 			   double length, int nCells1D);
-	CartesianPatch(const int &id, const int &dimension, const std::array<double, 3> &origin,
+	VolCartesian(const int &id, const int &dimension, const std::array<double, 3> &origin,
 			   double length, double dh);
 
-	~CartesianPatch();
+	~VolCartesian();
 
 	long getVertexCount() const;
 

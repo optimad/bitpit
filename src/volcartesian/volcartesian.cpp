@@ -27,21 +27,21 @@
 
 #include "bitpit_common.hpp"
 
-#include "cartesianpatch.hpp"
+#include "volcartesian.hpp"
 
 namespace bitpit {
 
 /*!
-	\ingroup cartesianpatch
+	\ingroup volcartesian
 	@{
 */
 
 /*!
-	\class CartesianPatch
+	\class VolCartesian
 
-	\brief The CartesianPatch defines a Cartesian patch.
+	\brief The VolCartesian defines a Cartesian patch.
 
-	CartesianPatch defines a Cartesian patch.
+	VolCartesian defines a Cartesian patch.
 */
 
 /*!
@@ -53,7 +53,7 @@ namespace bitpit {
 	\param lengths are the lengths of the domain
 	\param nCells are the numbers of cells of the patch
 */
-CartesianPatch::CartesianPatch(const int &id, const int &dimension,
+VolCartesian::VolCartesian(const int &id, const int &dimension,
                                const std::array<double, 3> &origin,
                                const std::array<double, 3> &lengths,
                                const std::array<int, 3> &nCells)
@@ -71,7 +71,7 @@ CartesianPatch::CartesianPatch(const int &id, const int &dimension,
 	\param length is the length of the domain
 	\param nCells1D is the number of cells along each direction
 */
-CartesianPatch::CartesianPatch(const int &id, const int &dimension,
+VolCartesian::VolCartesian(const int &id, const int &dimension,
                                const std::array<double, 3> &origin,
                                double length, int nCells1D)
 	: VolumeKernel(id, dimension, false)
@@ -109,7 +109,7 @@ CartesianPatch::CartesianPatch(const int &id, const int &dimension,
 	\param length is the length of the domain
 	\param dh is the maximum allowed mesh spacing
 */
-CartesianPatch::CartesianPatch(const int &id, const int &dimension,
+VolCartesian::VolCartesian(const int &id, const int &dimension,
                                const std::array<double, 3> &origin,
                                double length, double dh)
 	: VolumeKernel(id, dimension, false)
@@ -145,7 +145,7 @@ CartesianPatch::CartesianPatch(const int &id, const int &dimension,
 	\param lengths are the lengths of the domain
 	\param nCells are the numbers of cells of the patch
 */
-void CartesianPatch::initialize(const std::array<double, 3> &origin,
+void VolCartesian::initialize(const std::array<double, 3> &origin,
                                 const std::array<double, 3> &lengths,
                                 const std::array<int, 3> &nCells)
 {
@@ -281,7 +281,7 @@ void CartesianPatch::initialize(const std::array<double, 3> &origin,
 /*!
 	Initializes cell volume
 */
-void CartesianPatch::initializeCellVolume()
+void VolCartesian::initializeCellVolume()
 {
 	m_cellVolume = m_cellSpacings[Vertex::COORD_X] * m_cellSpacings[Vertex::COORD_Y];
 	if (isThreeDimensional()) {
@@ -292,7 +292,7 @@ void CartesianPatch::initializeCellVolume()
 /*!
 	Initializes interface area
 */
-void CartesianPatch::initializeInterfaceArea()
+void VolCartesian::initializeInterfaceArea()
 {
 	for (int n = 0; n < getDimension(); ++n) {
 		m_interfaceArea[n] = m_cellVolume / m_cellSpacings[n];
@@ -308,7 +308,7 @@ void CartesianPatch::initializeInterfaceArea()
 
 	\return The number of vertices in the patch
 */
-long CartesianPatch::getVertexCount() const
+long VolCartesian::getVertexCount() const
 {
 	return m_nVertices;
 }
@@ -318,7 +318,7 @@ long CartesianPatch::getVertexCount() const
 
 	\return The number of cells in the patch
 */
-long CartesianPatch::getCellCount() const
+long VolCartesian::getCellCount() const
 {
 	return m_nCells;
 }
@@ -329,7 +329,7 @@ long CartesianPatch::getCellCount() const
 	\param id is the id of the requested cell
 	\return The element type for the cell with the specified id.
 */
-ElementInfo::Type CartesianPatch::getCellType(const long &id) const
+ElementInfo::Type VolCartesian::getCellType(const long &id) const
 {
 	BITPIT_UNUSED(id);
 
@@ -341,7 +341,7 @@ ElementInfo::Type CartesianPatch::getCellType(const long &id) const
 
 	\return The element type for the cells in the patch.
 */
-ElementInfo::Type CartesianPatch::getCellType() const
+ElementInfo::Type VolCartesian::getCellType() const
 {
 	if (isThreeDimensional()) {
 		return ElementInfo::VOXEL;
@@ -355,7 +355,7 @@ ElementInfo::Type CartesianPatch::getCellType() const
 
 	\return The number of interfaces in the patch
 */
-long CartesianPatch::getInterfaceCount() const
+long VolCartesian::getInterfaceCount() const
 {
 	return m_nInterfaces;
 }
@@ -366,7 +366,7 @@ long CartesianPatch::getInterfaceCount() const
 	\param id is the id of the requested interface
 	\return The element type for the interface with the specified id.
 */
-ElementInfo::Type CartesianPatch::getInterfaceType(const long &id) const
+ElementInfo::Type VolCartesian::getInterfaceType(const long &id) const
 {
 	BITPIT_UNUSED(id);
 
@@ -378,7 +378,7 @@ ElementInfo::Type CartesianPatch::getInterfaceType(const long &id) const
 
 	\return The element type for the interfaces in the patch.
 */
-ElementInfo::Type CartesianPatch::getInterfaceType() const
+ElementInfo::Type VolCartesian::getInterfaceType() const
 {
 	if (isThreeDimensional()) {
 		return ElementInfo::PIXEL;
@@ -390,7 +390,7 @@ ElementInfo::Type CartesianPatch::getInterfaceType() const
 /*!
 	Destroys the patch.
 */
-CartesianPatch::~CartesianPatch()
+VolCartesian::~VolCartesian()
 {
 }
 
@@ -400,7 +400,7 @@ CartesianPatch::~CartesianPatch()
 	\param id is the id of the cell
 	\result The volume of the specified cell.
 */
-double CartesianPatch::evalCellVolume(const long &id)
+double VolCartesian::evalCellVolume(const long &id)
 {
 	BITPIT_UNUSED(id);
 
@@ -413,7 +413,7 @@ double CartesianPatch::evalCellVolume(const long &id)
 	\param id is the id of the cell
 	\result The characteristic size of the specified cell.
 */
-double CartesianPatch::evalCellSize(const long &id)
+double VolCartesian::evalCellSize(const long &id)
 {
 	BITPIT_UNUSED(id);
 
@@ -426,7 +426,7 @@ double CartesianPatch::evalCellSize(const long &id)
 	\param id is the id of the interface
 	\result The area of the specified interface.
 */
-double CartesianPatch::evalInterfaceArea(const long &id)
+double VolCartesian::evalInterfaceArea(const long &id)
 {
 	const Interface &interface = getInterface(id);
 	int ownerFace = interface.getOwnerFace();
@@ -441,7 +441,7 @@ double CartesianPatch::evalInterfaceArea(const long &id)
 	\param id is the id of the interface
 	\result The normal of the specified interface.
 */
-std::array<double, 3> CartesianPatch::evalInterfaceNormal(const long &id)
+std::array<double, 3> VolCartesian::evalInterfaceNormal(const long &id)
 {
 	const Interface &interface = getInterface(id);
 	int ownerFace = interface.getOwnerFace();
@@ -454,7 +454,7 @@ std::array<double, 3> CartesianPatch::evalInterfaceNormal(const long &id)
 
 	\result Cell spacings of the patch.
 */
-std::array<double, 3> CartesianPatch::getSpacing() const
+std::array<double, 3> VolCartesian::getSpacing() const
 {
 	return m_cellSpacings;
 }
@@ -466,7 +466,7 @@ std::array<double, 3> CartesianPatch::getSpacing() const
 	requested
 	\result The cell spacing along the specificed direction.
 */
-double CartesianPatch::getSpacing(const int &direction) const
+double VolCartesian::getSpacing(const int &direction) const
 {
 	return m_cellSpacings[direction];
 }
@@ -477,7 +477,7 @@ double CartesianPatch::getSpacing(const int &direction) const
 	\result Returns a vector of Adaption::Info that can be used to track
 	the changes done during the update.
 */
-const std::vector<Adaption::Info> CartesianPatch::_updateAdaption(bool trackAdaption)
+const std::vector<Adaption::Info> VolCartesian::_updateAdaption(bool trackAdaption)
 {
 	log::cout() << ">> Updating cartesian mesh\n";
 
@@ -530,7 +530,7 @@ const std::vector<Adaption::Info> CartesianPatch::_updateAdaption(bool trackAdap
 /*!
 	Creates the vertices of the patch.
 */
-void CartesianPatch::addVertices()
+void VolCartesian::addVertices()
 {
 	log::cout() << "  >> Creating vertices\n";
 
@@ -561,7 +561,7 @@ void CartesianPatch::addVertices()
 /*!
 	Creates the cells of the patch.
 */
-void CartesianPatch::addCells()
+void VolCartesian::addCells()
 {
 	log::cout() << "  >> Creating cells\n";
 
@@ -598,7 +598,7 @@ void CartesianPatch::addCells()
 /*!
 	Creates the interfaces of the patch.
 */
-void CartesianPatch::addInterfaces()
+void VolCartesian::addInterfaces()
 {
 	log::cout() << "  >> Creating interfaces\n";
 
@@ -617,7 +617,7 @@ void CartesianPatch::addInterfaces()
 	                 direction
 	\result The interface count for the given direction.
 */
-std::array<int, 3> CartesianPatch::getInterfaceCountDirection(const int &direction)
+std::array<int, 3> VolCartesian::getInterfaceCountDirection(const int &direction)
 {
 	std::array<int, 3> interfaceDirectionCount = m_nCells1D;
 	interfaceDirectionCount[direction]++;
@@ -631,7 +631,7 @@ std::array<int, 3> CartesianPatch::getInterfaceCountDirection(const int &directi
 	\param direction the method will creat the interfaces normal to this
 	                 direction
 */
-void CartesianPatch::addInterfacesDirection(const int &direction)
+void VolCartesian::addInterfacesDirection(const int &direction)
 {
 	log::cout() << "  >> Creating interfaces normal to direction " << direction << "\n";
 
@@ -744,7 +744,7 @@ void CartesianPatch::addInterfacesDirection(const int &direction)
 
 	\param id is the id of the cell that needs to be refined
 */
-bool CartesianPatch::_markCellForRefinement(const long &id)
+bool VolCartesian::_markCellForRefinement(const long &id)
 {
 	BITPIT_UNUSED(id);
 
@@ -759,7 +759,7 @@ bool CartesianPatch::_markCellForRefinement(const long &id)
 
 	\param id the cell to be refined
 */
-bool CartesianPatch::_markCellForCoarsening(const long &id)
+bool VolCartesian::_markCellForCoarsening(const long &id)
 {
 	BITPIT_UNUSED(id);
 
@@ -775,7 +775,7 @@ bool CartesianPatch::_markCellForCoarsening(const long &id)
 	\param id is the id of the cell
 	\param enabled defines if enable the balancing for the specified cell
 */
-bool CartesianPatch::_enableCellBalancing(const long &id, bool enabled)
+bool VolCartesian::_enableCellBalancing(const long &id, bool enabled)
 {
 	BITPIT_UNUSED(id);
 	BITPIT_UNUSED(enabled);
@@ -789,7 +789,7 @@ bool CartesianPatch::_enableCellBalancing(const long &id, bool enabled)
 	\param[in] point is the point to be checked
 	\result Returns true if the point is inside the patch, false otherwise.
  */
-bool CartesianPatch::isPointInside(const std::array<double, 3> &point)
+bool VolCartesian::isPointInside(const std::array<double, 3> &point)
 {
 	const double EPS = getTol();
 
@@ -813,7 +813,7 @@ bool CartesianPatch::isPointInside(const std::array<double, 3> &point)
 	point is not inside the patch, the function returns the id of the null
 	element.
 */
-long CartesianPatch::locatePoint(const std::array<double, 3> &point)
+long VolCartesian::locatePoint(const std::array<double, 3> &point)
 {
 	std::array<int, 3> pointIjk = locatePointCartesian(point);
 	if (isCellCartesianIdValid(pointIjk)) {
@@ -833,7 +833,7 @@ long CartesianPatch::locatePoint(const std::array<double, 3> &point)
 	\result Returns the set of cartesian id of the cell the contains the point.
 	If the point is not inside the patch, the function returns negative ids.
 */
-std::array<int, 3> CartesianPatch::locatePointCartesian(const std::array<double, 3> &point)
+std::array<int, 3> VolCartesian::locatePointCartesian(const std::array<double, 3> &point)
 {
 	std::array<int, 3> ijk;
 	if (!isPointInside(point)) {
@@ -859,7 +859,7 @@ std::array<int, 3> CartesianPatch::locatePointCartesian(const std::array<double,
 	\param[in] point is the point
 	\result The linear id of the closest vertex of the given point.
 */
-long CartesianPatch::locateClosestVertex(std::array<double,3> const &point) const
+long VolCartesian::locateClosestVertex(std::array<double,3> const &point) const
 {
 	return getVertexLinearId(locateClosestVertexCartesian(point));
 }
@@ -871,7 +871,7 @@ long CartesianPatch::locateClosestVertex(std::array<double,3> const &point) cons
 	\result The set of Cartesian id of the closest vertex of the given
 	point.
 */
-std::array<int, 3> CartesianPatch::locateClosestVertexCartesian(std::array<double,3> const &point) const
+std::array<int, 3> VolCartesian::locateClosestVertexCartesian(std::array<double,3> const &point) const
 {
 	std::array<int, 3> ijk;
 	for (int n = 0; n < getDimension(); ++n) {
@@ -888,7 +888,7 @@ std::array<int, 3> CartesianPatch::locateClosestVertexCartesian(std::array<doubl
 /*!
 	Converts the cell cartesian notation to a linear notation
 */
-long CartesianPatch::getCellLinearId(const int &i, const int &j, const int &k) const
+long VolCartesian::getCellLinearId(const int &i, const int &j, const int &k) const
 {
 	long id = i;
 	id += m_nCells1D[Vertex::COORD_X] * j;
@@ -902,7 +902,7 @@ long CartesianPatch::getCellLinearId(const int &i, const int &j, const int &k) c
 /*!
 	Converts the cell cartesian notation to a linear notation
 */
-long CartesianPatch::getCellLinearId(const std::array<int, 3> &ijk) const
+long VolCartesian::getCellLinearId(const std::array<int, 3> &ijk) const
 {
 	return getCellLinearId(ijk[Vertex::COORD_X], ijk[Vertex::COORD_Y], ijk[Vertex::COORD_Z]);
 }
@@ -915,7 +915,7 @@ long CartesianPatch::getCellLinearId(const std::array<int, 3> &ijk) const
 	\param[in] idx is the linear index of the cell
 	\result Returns the set of cartesian indices of the cell.
 */
-std::array<int, 3> CartesianPatch::getCellCartesianId(long const &idx) const
+std::array<int, 3> VolCartesian::getCellCartesianId(long const &idx) const
 {
 	int ijPlane = m_nCells1D[0] * m_nCells1D[1];
 
@@ -938,7 +938,7 @@ std::array<int, 3> CartesianPatch::getCellCartesianId(long const &idx) const
 	\param ijk is the set of cartesian indices of the cell
 	\result Returns true if the index is valid, otherwise it returns false.
 */
-bool CartesianPatch::isCellCartesianIdValid(const std::array<int, 3> &ijk) const
+bool VolCartesian::isCellCartesianIdValid(const std::array<int, 3> &ijk) const
 {
 	for (int k = 0; k < getDimension(); ++k) {
 		if (ijk[k] < 0 || ijk[k] >= m_nCells1D[k]) {
@@ -952,7 +952,7 @@ bool CartesianPatch::isCellCartesianIdValid(const std::array<int, 3> &ijk) const
 /*!
 	Converts the vertex cartesian notation to a linear notation
 */
-long CartesianPatch::getVertexLinearId(const int &i, const int &j, const int &k) const
+long VolCartesian::getVertexLinearId(const int &i, const int &j, const int &k) const
 {
 	long id = i;
 	id += m_nVertices1D[Vertex::COORD_X] * j;
@@ -966,7 +966,7 @@ long CartesianPatch::getVertexLinearId(const int &i, const int &j, const int &k)
 /*!
 	Converts the vertex cartesian notation to a linear notation
 */
-long CartesianPatch::getVertexLinearId(const std::array<int, 3> &ijk) const
+long VolCartesian::getVertexLinearId(const std::array<int, 3> &ijk) const
 {
 	return getVertexLinearId(ijk[Vertex::COORD_X], ijk[Vertex::COORD_Y], ijk[Vertex::COORD_Z]);
 }
@@ -979,7 +979,7 @@ long CartesianPatch::getVertexLinearId(const std::array<int, 3> &ijk) const
 	\param[in] idx is the linear index of the vertex
 	\result Returns the set of cartesian indices of the vertex.
 */
-std::array<int, 3> CartesianPatch::getVertexCartesianId(long const &idx) const
+std::array<int, 3> VolCartesian::getVertexCartesianId(long const &idx) const
 {
 	int ijPlane = m_nVertices1D[0] * m_nVertices1D[1];
 
@@ -1005,7 +1005,7 @@ std::array<int, 3> CartesianPatch::getVertexCartesianId(long const &idx) const
 	\param[in] vertex is the local vertex
 	\result Returns the set of cartesian indices of the vertex.
 */
-std::array<int, 3> CartesianPatch::getVertexCartesianId(long const &cellIdx, int const &vertex) const
+std::array<int, 3> VolCartesian::getVertexCartesianId(long const &cellIdx, int const &vertex) const
 {
 	return getVertexCartesianId(getCellCartesianId(cellIdx), vertex);
 }
@@ -1019,7 +1019,7 @@ std::array<int, 3> CartesianPatch::getVertexCartesianId(long const &cellIdx, int
 	\param[in] vertex is the local vertex
 	\result Returns the set of cartesian indices of the vertex.
 */
-std::array<int, 3> CartesianPatch::getVertexCartesianId(const std::array<int, 3> &cellIjk, int const &vertex) const
+std::array<int, 3> VolCartesian::getVertexCartesianId(const std::array<int, 3> &cellIjk, int const &vertex) const
 {
 	std::bitset<3> vertexBitset(vertex);
 	std::array<int, 3> vertexIjk(cellIjk);
@@ -1036,7 +1036,7 @@ std::array<int, 3> CartesianPatch::getVertexCartesianId(const std::array<int, 3>
 	\param ijk is the set of cartesian indices of the vertex
 	\result Returns true if the index is valid, otherwise it returns false.
 */
-bool CartesianPatch::isVertexCartesianIdValid(const std::array<int, 3> &ijk) const
+bool VolCartesian::isVertexCartesianIdValid(const std::array<int, 3> &ijk) const
 {
 	for (int k = 0; k < getDimension(); ++k) {
 		if (ijk[k] < 0 || ijk[k] >= m_nVertices1D[k]) {
@@ -1055,7 +1055,7 @@ bool CartesianPatch::isVertexCartesianIdValid(const std::array<int, 3> &ijk) con
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the specified cell for the given face.
 */
-std::vector<long> CartesianPatch::_findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList) const
+std::vector<long> VolCartesian::_findCellFaceNeighs(const long &id, const int &face, const std::vector<long> &blackList) const
 {
 	int neighSide      = face % 2;
 	int neighDirection = std::floor(face / 2);
@@ -1088,7 +1088,7 @@ std::vector<long> CartesianPatch::_findCellFaceNeighs(const long &id, const int 
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the specified cell for the given edge.
 */
-std::vector<long> CartesianPatch::_findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList) const
+std::vector<long> VolCartesian::_findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList) const
 {
 	std::vector<long> neighs;
 	assert(isThreeDimensional());
@@ -1125,7 +1125,7 @@ std::vector<long> CartesianPatch::_findCellEdgeNeighs(const long &id, const int 
 	\param blackList is a list of cells that are excluded from the search
 	\result The neighbours of the specified cell for the given vertex.
 */
-std::vector<long> CartesianPatch::_findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList) const
+std::vector<long> VolCartesian::_findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList) const
 {
 	std::array<int, 3> cellIjk   = getCellCartesianId(id);
 	std::array<int, 3> vertexIjk = getVertexCartesianId(cellIjk, vertex);
@@ -1158,7 +1158,7 @@ std::vector<long> CartesianPatch::_findCellVertexNeighs(const long &id, const in
 	\param[in] ijkMax is the set of cartesian indices of the upper bound
 	\result The linear indices of the cell subset.
 */
-std::vector<long> CartesianPatch::extractCellSubSet(std::array<int, 3> const &ijkMin, std::array<int, 3> const &ijkMax)
+std::vector<long> VolCartesian::extractCellSubSet(std::array<int, 3> const &ijkMin, std::array<int, 3> const &ijkMax)
 {
 	int nSubsetCells_x = ijkMax[0] - ijkMin[0] + 1;
 	int nSubsetCells_y = ijkMax[1] - ijkMin[1] + 1;
@@ -1187,7 +1187,7 @@ std::vector<long> CartesianPatch::extractCellSubSet(std::array<int, 3> const &ij
 	\param[in] idxMax is the linear index of the upper bound
 	\result The linear indices of the cell subset.
 */
-std::vector<long> CartesianPatch::extractCellSubSet(int const &idxMin, int const &idxMax)
+std::vector<long> VolCartesian::extractCellSubSet(int const &idxMin, int const &idxMax)
 {
 	return extractCellSubSet(getCellCartesianId(idxMin), getCellCartesianId(idxMax));
 }
@@ -1199,7 +1199,7 @@ std::vector<long> CartesianPatch::extractCellSubSet(int const &idxMin, int const
 	\param[in] pointMax is the upper bound
 	\result The linear indices of the cell subset.
 */
-std::vector<long> CartesianPatch::extractCellSubSet(std::array<double, 3> const &pointMin, std::array<double, 3> const &pointMax)
+std::vector<long> VolCartesian::extractCellSubSet(std::array<double, 3> const &pointMin, std::array<double, 3> const &pointMax)
 {
 	return extractCellSubSet(locatePointCartesian(pointMin), locatePointCartesian(pointMax));
 }
@@ -1211,7 +1211,7 @@ std::vector<long> CartesianPatch::extractCellSubSet(std::array<double, 3> const 
 	\param[in] ijkMax is the set of cartesian indices of the upper bound
 	\result The linear indices of the vertex subset.
 */
-std::vector<long> CartesianPatch::extractVertexSubSet(std::array<int, 3> const &ijkMin, std::array<int, 3> const &ijkMax)
+std::vector<long> VolCartesian::extractVertexSubSet(std::array<int, 3> const &ijkMin, std::array<int, 3> const &ijkMax)
 {
 	int nSubsetVertices_x = ijkMax[0] - ijkMin[0] + 1;
 	int nSubsetVertices_y = ijkMax[1] - ijkMin[1] + 1;
@@ -1240,7 +1240,7 @@ std::vector<long> CartesianPatch::extractVertexSubSet(std::array<int, 3> const &
 	\param[in] idxMax is the linear index of the upper bound
 	\result The linear indices of the vertex subset.
 */
-std::vector<long> CartesianPatch::extractVertexSubSet(int const &idxMin, int const &idxMax)
+std::vector<long> VolCartesian::extractVertexSubSet(int const &idxMin, int const &idxMax)
 {
 	return extractVertexSubSet(getVertexCartesianId(idxMin), getVertexCartesianId(idxMax));
 }
@@ -1252,7 +1252,7 @@ std::vector<long> CartesianPatch::extractVertexSubSet(int const &idxMin, int con
 	\param[in] pointMax is the upper bound
 	\result The linear indices of the vertex subset.
 */
-std::vector<long> CartesianPatch::extractVertexSubSet(std::array<double, 3> const &pointMin, std::array<double, 3> const &pointMax)
+std::vector<long> VolCartesian::extractVertexSubSet(std::array<double, 3> const &pointMin, std::array<double, 3> const &pointMax)
 {
 	return extractVertexSubSet(locatePointCartesian(pointMin), locatePointCartesian(pointMax));
 }
@@ -1262,7 +1262,7 @@ std::vector<long> CartesianPatch::extractVertexSubSet(std::array<double, 3> cons
 
 	\param[in] translation is the translation vector
  */
-void CartesianPatch::translate(std::array<double, 3> translation)
+void VolCartesian::translate(std::array<double, 3> translation)
 {
 	for (int n = 1; n < 3; ++n) {
 		m_minCoords[n] += translation[n];
@@ -1285,7 +1285,7 @@ void CartesianPatch::translate(std::array<double, 3> translation)
 
 	\param[in] scaling is the scaling factor vector
  */
-void CartesianPatch::scale(std::array<double, 3> scaling)
+void VolCartesian::scale(std::array<double, 3> scaling)
 {
 	for (int n = 1; n < 3; ++n) {
 		m_maxCoords[n] = m_minCoords[n] + scaling[n] * (m_maxCoords[n] - m_minCoords[n]);
@@ -1313,7 +1313,7 @@ void CartesianPatch::scale(std::array<double, 3> scaling)
 	\param[in] cellData contains the data on cells
 	\result The cell data converted to vertex data.
 */
-std::vector<double> CartesianPatch::convertToVertexData(const std::vector<double> &cellData) const
+std::vector<double> VolCartesian::convertToVertexData(const std::vector<double> &cellData) const
 {
 	int dimension = getDimension();
 
@@ -1360,7 +1360,7 @@ std::vector<double> CartesianPatch::convertToVertexData(const std::vector<double
 	\param[in] vertexData contains the data on vertices
 	\result The vertex data converted to cell data.
 */
-std::vector<double> CartesianPatch::convertToCellData(const std::vector<double> &vertexData) const
+std::vector<double> VolCartesian::convertToCellData(const std::vector<double> &vertexData) const
 {
 	int dimension = getDimension();
 
@@ -1412,7 +1412,7 @@ std::vector<double> CartesianPatch::convertToCellData(const std::vector<double> 
 	\return The number of cells used in the interpolation stencil. If the
 	point is outside a null stencil size is returned.
 */
-int CartesianPatch::linearCellInterpolation(std::array<double,3> &point,
+int VolCartesian::linearCellInterpolation(std::array<double,3> &point,
                                             std::vector<int> &stencil,
                                             std::vector<double> &weights)
 {
@@ -1501,7 +1501,7 @@ int CartesianPatch::linearCellInterpolation(std::array<double,3> &point,
 	\return The number of cells used in the interpolation stencil. If the
 	point is outside a null stencil size is returned.
 */
-int CartesianPatch::linearVertexInterpolation(std::array<double,3> &point,
+int VolCartesian::linearVertexInterpolation(std::array<double,3> &point,
                                               std::vector<int> &stencil,
                                               std::vector<double> &weights)
 {
@@ -1567,7 +1567,7 @@ int CartesianPatch::linearVertexInterpolation(std::array<double,3> &point,
 	\param id is the id of the cell
 	\result The centroid of the specified cell.
 */
-std::array<double, 3> CartesianPatch::evalCellCentroid(const long &id)
+std::array<double, 3> VolCartesian::evalCellCentroid(const long &id)
 {
 	std::array<int, 3> ijk = getCellCartesianId(id);
 

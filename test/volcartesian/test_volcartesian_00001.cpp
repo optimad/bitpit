@@ -27,7 +27,7 @@
 #include <mpi.h>
 #endif
 
-#include "bitpit_cartesianpatch.hpp"
+#include "bitpit_volcartesian.hpp"
 
 using namespace bitpit;
 
@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
 
 	log::cout() << "  >> 2D Cartesian patch" << "\n";
 
-	CartesianPatch *patch_2D = new CartesianPatch(0, 2, origin, length, dh);
+	VolCartesian *patch_2D = new VolCartesian(0, 2, origin, length, dh);
 	patch_2D->setName("cartesian_uniform_patch_2D");
 	patch_2D->update();
 	patch_2D->write();
@@ -124,7 +124,7 @@ int main(int argc, char *argv[]) {
 
 	log::cout() << "  >> 3D Cartesian patch" << "\n";
 
-	CartesianPatch *patch_3D = new CartesianPatch(0, 3, origin, length, dh);
+	VolCartesian *patch_3D = new VolCartesian(0, 3, origin, length, dh);
 	patch_3D->setName("cartesian_uniform_patch_3D");
 	patch_3D->update();
 	patch_3D->write();
