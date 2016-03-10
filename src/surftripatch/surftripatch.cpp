@@ -534,7 +534,7 @@ unsigned short SurfUnstructured::importSTL(const string &stl_name, const bool &i
 
     // Counters
     int                                         i;
-    long                                        v_counter = 0, c_counter = 0;
+    long                                        v_counter = 0;
     VertexIterator                              i_;
     CellIterator                                j_;
     vector<array<double, 3>>::const_iterator    v_, ve_;
@@ -607,7 +607,6 @@ unsigned short SurfUnstructured::exportSTL(const string &stl_name, const bool &i
     // ====================================================================== //
 
     // Local variables
-    int                                         n_v;
     int                                         nVertex;
     int                                         nSimplex;
     vector<array<double, 3>>                    vertexList;
@@ -670,7 +669,6 @@ unsigned short SurfUnstructured::exportSTL(const string &stl_name, const bool &i
         *i_ = std::move(evalFacetNormal(c_->getId()));
         
         // Build connectivity
-        n_v = min(3, c_->getVertexCount());
         ke_ = j_->end();
         j = 0;
         for (k_ = j_->begin(); k_ != ke_; ++k_) {

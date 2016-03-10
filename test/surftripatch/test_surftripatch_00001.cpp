@@ -79,7 +79,7 @@ long                    nV = 27;
 long                    nS = 33;
 
 // Counters
-int                     i, j;
+int                     i;
 
 // ========================================================================== //
 // INITIALIZE TRIANGULATION                                                   //

@@ -294,10 +294,9 @@ if (m_rank == snd_rank)
 /*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
-        int                                     n_vertex, n_neighs;
+        int                                     n_neighs;
         int                                     k, j;
         vector<long>                            neighs;
-        long                                    cell_idx;
         long                                    ghost_counter;
         vector<long>::const_iterator            i, e;
         unordered_map<short, unordered_map<long, long> >::const_iterator   m;
@@ -368,7 +367,7 @@ if (m_rank == snd_rank)
         // If the sender is sending all the cells, there's no point in finding
         // sender's ghost: after the communication the sender will contain no
         // cells, neither internal nor ghosts.
-        if (cell_list.size() < m_nInternals) {
+        if (cell_list.size() < (unsigned long) m_nInternals) {
             ee = ghost_map.cend();
             for (ii = ghost_map.cbegin(); ii != ee; ++ii) {
                 const long recv_ghost_idx = ii->first;
@@ -462,7 +461,6 @@ if (m_rank == snd_rank)
 /*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
-        int                                     j;
         vector<long>::const_iterator            i, e = vertex_list.cend();
         
         // Initialize communication buffer ---------------------------------- //
@@ -494,7 +492,7 @@ if (m_rank == snd_rank)
     {
         // Scope variables -------------------------------------------------- //
         int                                     j, k, l;
-        int                                     n_vertices, n_faces, n_adj;
+        int                                     n_vertices, n_faces, n_adj, n_itf;
         long                                    vertex_idx, neigh_idx;
         Cell                                   *cell_;
         vector<long>                            connect_;
@@ -591,7 +589,8 @@ if (m_rank == snd_rank)
                 for (k = 0; k < n_adj; ++k) {
                     cell_->setAdjacency( j, k, interfs_[j][k] );
                 } //next k
-                for ( k = n_adj; k < interfs_[j].size(); ++k ) {
+                n_itf = interfs_[j].size();
+                for ( k = n_adj; k < n_itf; ++k ) {
                     cell_->pushAdjacency( j, interfs_[j][k] );
                 } //next k
             } //next j
@@ -639,7 +638,7 @@ if (m_rank == snd_rank)
 /*DEBUG*/}
 
         // Notify other processes ------------------------------------------- //
-        int                             nproc;
+        int                     nproc;
         MPI_Comm_size(m_communicator, &nproc);
         for (j = 0; j < nproc; ++j) {
             if ( (j != snd_rank) && (j != rcv_rank) && (m_ghost2id.find(j) != m_ghost2id.end()) ) {
@@ -658,7 +657,7 @@ if (m_rank == snd_rank)
     {
         // Scope variables -------------------------------------------------- //
         int                                     j, k;
-        int                                     n_vertices, n_faces, n_adj;
+        int                                     n_vertices, n_faces, n_adj, n_itf;
         long                                    vertex_idx, neigh_idx, cell_idx;
         vector<long>                            connect_;
         vector< vector<long> >                  interfs_;
@@ -765,7 +764,8 @@ if (m_rank == snd_rank)
                 for ( k = 0; k < n_adj; ++k ) {
                     cell_->setAdjacency( j, k, interfs_[j][k] );
                 } //next k
-                for ( k = n_adj; k < interfs_[j].size(); ++k ) {
+                n_itf = interfs_[j].size();
+                for ( k = n_adj; k < n_itf; ++k ) {
                     cell_->pushAdjacency( j, interfs_[j][k] );
                 }
             } //next j
@@ -790,13 +790,11 @@ if (m_rank == snd_rank)
     {
         // Scope variables -------------------------------------------------- //
         bool                                                    flag_keep;
-        int                                                     j, k;
-        int                                                     rank_id;
-        int                                                     n_neighs, n_adj;
-        long                                                    ghost_idx, neigh_idx;
+        int                                                     j;
+        int                                                     n_neighs;
+        long                                                    ghost_idx;
         long                                                    ghost_send_idx, ghost_recv_idx;
         vector<long>                                            neighs;
-        Cell                                                    *cell_;
         unordered_map<long, long>::iterator                     ii, ee;
         unordered_map<long, long>::const_iterator               i, e;
         vector<long>::const_iterator                            m, n;
@@ -959,7 +957,7 @@ if (m_rank == rcv_rank)
         // Scope variables -------------------------------------------------- //
         int                                             j;
         int                                             n_vertices;
-        long                                            i, cell_idx, ghost_idx, neigh_idx;
+        long                                            i, cell_idx, ghost_idx;
         long                                            cell_count = 0;
         long                                            feedback_size;
         Cell                                            cell;
@@ -1075,7 +1073,7 @@ if (m_rank == rcv_rank)
         int                                     j;
         int                                     n_vertices;
         long                                    i;
-        long                                    cell_idx, ghost_idx;
+        long                                    cell_idx;
         long                                    ghost_count = 0;
         Cell                                    cell;
         CellIterator                            it;

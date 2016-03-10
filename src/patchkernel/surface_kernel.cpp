@@ -209,7 +209,7 @@ double SurfaceKernel::evalEdgeLength(const long &id, const int &edge_id)
     Cell                                *cell_ = &m_cells[id];
 
     // Counters
-    int                                 nv_on_edge = 2;
+    // none
 
     // ====================================================================== //
     // COMPUTE MIN EDGE SIZE                                                  //
@@ -248,7 +248,7 @@ double SurfaceKernel::evalMinEdgeLength(const long &id, int &edge_id)
     Cell                                *cell_ = &m_cells[id];
 
     // Counters
-    int                                 i, j;
+    int                                 i;
     int                                 n_faces;
 
     // ====================================================================== //
@@ -291,7 +291,7 @@ double SurfaceKernel::evalMaxEdgeLength(const long &id, int &edge_id)
     Cell                                *cell_ = &m_cells[id];
 
     // Counters
-    int                                 i, j;
+    int                                 i;
     int                                 n_faces;
 
     // ====================================================================== //
@@ -472,7 +472,6 @@ double SurfaceKernel::evalAspectRatio(const long &id, int &edge_id)
     double                      l_edge;
     double                      m_edge = std::numeric_limits<double>::max();
     double                      M_edge = std::numeric_limits<double>::min();
-    double                      ar = 1.0;
     int                         nfaces = cell_->getFaceCount();
     for (int i = 0; i < nfaces; ++i) {
         l_edge = evalEdgeLength(id, i);

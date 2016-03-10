@@ -81,7 +81,7 @@ int subtest_001(
 SurfUnstructured                mesh(0), edges(1);
 
 // Counters
-int                             nV, nS, nE;
+int                             nV, nE;
 
 // ========================================================================== //
 // OUTPUT MESSAGE                                                             //
@@ -127,7 +127,6 @@ int                             nV, nS, nE;
 
     // Check mesh status ---------------------------------------------------- //
     nV = mesh.getVertexCount();
-    nS = mesh.getInternalCount();
     nE = mesh.countFaces(); 
     
 }
@@ -361,9 +360,8 @@ int                             nV, nS, nE;
 // ========================================================================== //
 {
     // Scope variables ------------------------------------------------------ //
-    bool                                        check;
-    int                                         n_faces, n_adj, n_vert;
-    int                                         i, j;
+    int                                         n_vert;
+    int                                         i;
     long                                        id;
     SurfUnstructured::CellIterator              c_, ce_;
     SurfUnstructured::VertexIterator            v_, ve_;
