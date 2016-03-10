@@ -1571,8 +1571,8 @@ std::array<double, 3> VolCartesian::evalCellCentroid(const long &id)
 {
 	std::array<int, 3> ijk = getCellCartesianId(id);
 
-	std::array<double, 3> centroid;
-	for (int n = 0; n < 3; ++n) {
+	std::array<double, 3> centroid = {{0, 0, 0}};
+	for (int n = 0; n < getDimension(); ++n) {
 		centroid[n] = m_cellCenters[n][ijk[n]];
 	}
 
