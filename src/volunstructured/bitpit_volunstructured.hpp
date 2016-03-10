@@ -22,15 +22,15 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MODULE_VOLTRIPATCH_HPP__
-#define __BITPIT_MODULE_VOLTRIPATCH_HPP__
+#ifndef __BITPIT_MODULE_VOLUNSTRUCTURED_HPP__
+#define __BITPIT_MODULE_VOLUNSTRUCTURED_HPP__
 
 /*!
- *	@defgroup voltripatch 3D triangulation.
+ *	@defgroup volunstructured Unstructured volume patch
  */
 
 #include "bitpit_version.hpp"
 
-#include "voltripatch.hpp"
+#include "volunstructured.hpp"
 
 #endif

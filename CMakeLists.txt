@@ -318,7 +318,7 @@ list(APPEND BITPIT_MODULE_LIST "patchkernel")
 list(APPEND BITPIT_MODULE_LIST "cartesianpatch")
 list(APPEND BITPIT_MODULE_LIST "octreepatch")
 list(APPEND BITPIT_MODULE_LIST "surfunstructured")
-list(APPEND BITPIT_MODULE_LIST "voltripatch")
+list(APPEND BITPIT_MODULE_LIST "volunstructured")
 list(APPEND BITPIT_MODULE_LIST "ucartmesh")
 
 #------------------------------------------------------------------------------------#
@@ -335,7 +335,7 @@ set(PATCHKERNEL_DEPS "common;operators;containers;IO;LA;SA")
 set(CARTESIANPATCH_DEPS "common;patchkernel")
 set(OCTREEPATCH_DEPS "common;PABLO;patchkernel")
 set(SURFUNSTRUCTURED_DEPS "common;patchkernel")
-set(VOLTRIPATCH_DEPS "common;patchkernel")
+set(VOLUNSTRUCTURED_DEPS "common;patchkernel")
 
 #------------------------------------------------------------------------------------#
 # Check of the dependencies

@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_VOLTRIPATCH_HPP__
-#define __BITPIT_VOLTRIPATCH_HPP__
+#ifndef __BITPIT_VOLUNSTRUCTURED_HPP__
+#define __BITPIT_VOLUNSTRUCTURED_HPP__
 
 #include <array>
 #include <vector>
@@ -32,15 +32,15 @@
 
 namespace bitpit {
 
-class VolTriPatch : public VolumeKernel {
+class VolUnstructured : public VolumeKernel {
 
 public:
 	using PatchKernel::isPointInside;
 	using PatchKernel::locatePoint;
 
-	VolTriPatch(const int &id, const int &dimension);
+	VolUnstructured(const int &id, const int &dimension);
 
-	~VolTriPatch();
+	~VolUnstructured();
 
 	void setExpert(bool expert);
 

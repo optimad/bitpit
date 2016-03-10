@@ -24,22 +24,22 @@
 
 #include "bitpit_common.hpp"
 
-#include "voltripatch.hpp"
+#include "volunstructured.hpp"
 
 namespace bitpit {
 
 /*!
-	\ingroup voltripatch
+	\ingroup volunstructured
 	@{
 */
 
 /*!
-	\class VolTriPatch
+	\class VolUnstructured
 
-	\brief The VolTriPatch class defines an unstructured volume
+	\brief The VolUnstructured class defines an unstructured volume
 	triangulation.
 
-	VolTriPatch defines an unstructured volume triangulation.
+	VolUnstructured defines an unstructured volume triangulation.
 */
 
 /*!
@@ -48,7 +48,7 @@ namespace bitpit {
 	\param id is the id of the patch
 	\param dimension is the dimension of the patch
 */
-VolTriPatch::VolTriPatch(const int &id, const int &dimension)
+VolUnstructured::VolUnstructured(const int &id, const int &dimension)
 	: VolumeKernel(id, dimension, true)
 {
 
@@ -57,7 +57,7 @@ VolTriPatch::VolTriPatch(const int &id, const int &dimension)
 /*!
 	Destroys the patch.
 */
-VolTriPatch::~VolTriPatch()
+VolUnstructured::~VolUnstructured()
 {
 }
 
@@ -70,7 +70,7 @@ VolTriPatch::~VolTriPatch()
  *
  * \param expert if true, the expert mode will be enabled
  */
-void VolTriPatch::setExpert(bool expert)
+void VolUnstructured::setExpert(bool expert)
 {
 	VolumeKernel::setExpert(expert);
 }
@@ -81,7 +81,7 @@ void VolTriPatch::setExpert(bool expert)
 	\param id is the id of the cell
 	\result The volume of the specified cell.
 */
-double VolTriPatch::evalCellVolume(const long &id)
+double VolUnstructured::evalCellVolume(const long &id)
 {
 	BITPIT_UNUSED(id);
 
@@ -94,7 +94,7 @@ double VolTriPatch::evalCellVolume(const long &id)
 	\param id is the id of the cell
 	\result The characteristic size of the specified cell.
 */
-double VolTriPatch::evalCellSize(const long &id)
+double VolUnstructured::evalCellSize(const long &id)
 {
 	BITPIT_UNUSED(id);
 
@@ -107,7 +107,7 @@ double VolTriPatch::evalCellSize(const long &id)
 	\param id is the id of the interface
 	\result The area of the specified interface.
 */
-double VolTriPatch::evalInterfaceArea(const long &id)
+double VolUnstructured::evalInterfaceArea(const long &id)
 {
 	BITPIT_UNUSED(id);
 
@@ -120,7 +120,7 @@ double VolTriPatch::evalInterfaceArea(const long &id)
 	\param id is the id of the interface
 	\result The normal of the specified interface.
 */
-std::array<double, 3> VolTriPatch::evalInterfaceNormal(const long &id)
+std::array<double, 3> VolUnstructured::evalInterfaceNormal(const long &id)
 {
 	BITPIT_UNUSED(id);
 
@@ -133,7 +133,7 @@ std::array<double, 3> VolTriPatch::evalInterfaceNormal(const long &id)
 	\result Returns a vector of Adaption::Info that can be used to track
 	the changes done during the update.
 */
-const std::vector<Adaption::Info> VolTriPatch::_updateAdaption(bool trackAdaption)
+const std::vector<Adaption::Info> VolUnstructured::_updateAdaption(bool trackAdaption)
 {
 	std::cout << ">> Updating surface triangulation mesh\n";
 
@@ -155,7 +155,7 @@ const std::vector<Adaption::Info> VolTriPatch::_updateAdaption(bool trackAdaptio
 
 	\param id is the id of the cell that needs to be refined
 */
-bool VolTriPatch::_markCellForRefinement(const long &id)
+bool VolUnstructured::_markCellForRefinement(const long &id)
 {
 	BITPIT_UNUSED(id);
 
@@ -170,7 +170,7 @@ bool VolTriPatch::_markCellForRefinement(const long &id)
 
 	\param id the cell to be refined
 */
-bool VolTriPatch::_markCellForCoarsening(const long &id)
+bool VolUnstructured::_markCellForCoarsening(const long &id)
 {
 	BITPIT_UNUSED(id);
 
@@ -186,7 +186,7 @@ bool VolTriPatch::_markCellForCoarsening(const long &id)
 	\param id is the id of the cell
 	\param enabled defines if enable the balancing for the specified cell
 */
-bool VolTriPatch::_enableCellBalancing(const long &id, bool enabled)
+bool VolUnstructured::_enableCellBalancing(const long &id, bool enabled)
 {
 	BITPIT_UNUSED(id);
 	BITPIT_UNUSED(enabled);
@@ -197,7 +197,7 @@ bool VolTriPatch::_enableCellBalancing(const long &id, bool enabled)
 /*!
  * Fill adjacencies info for each cell.
 */
-void VolTriPatch::buildAdjacencies(void)
+void VolUnstructured::buildAdjacencies(void)
 {
 
 }
@@ -207,7 +207,7 @@ void VolTriPatch::buildAdjacencies(void)
  *
  * \param[in] cell_ids list of cell ids
 */
-void VolTriPatch::updateAdjacencies(const std::vector<long> &cell_ids)
+void VolUnstructured::updateAdjacencies(const std::vector<long> &cell_ids)
 {
 	BITPIT_UNUSED(cell_ids);
 }
@@ -218,7 +218,7 @@ void VolTriPatch::updateAdjacencies(const std::vector<long> &cell_ids)
  * \param[in] point is the point to be checked
  * \result Returns true if the point is inside the patch, false otherwise.
  */
-bool VolTriPatch::isPointInside(const std::array<double, 3> &point)
+bool VolUnstructured::isPointInside(const std::array<double, 3> &point)
 {
 	BITPIT_UNUSED(point);
 
@@ -236,7 +236,7 @@ bool VolTriPatch::isPointInside(const std::array<double, 3> &point)
  * point is not inside the patch, the function returns the id of the null
  * element.
  */
-long VolTriPatch::locatePoint(const std::array<double, 3> &point)
+long VolUnstructured::locatePoint(const std::array<double, 3> &point)
 {
 	BITPIT_UNUSED(point);
 
