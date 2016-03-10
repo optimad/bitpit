@@ -267,9 +267,9 @@ public:
 	iterator moveAfter(const id_t &referenceId, const id_t &id, bool delayed = false);
 	iterator moveBefore(const id_t &referenceId, const id_t &id, bool delayed = false);
 
-	iterator insert(const id_t &id, value_t &&value);
-	iterator insertAfter(const id_t &referenceId, const id_t &id, value_t &&value);
-	iterator insertBefore(const id_t &referenceId, const id_t &id, value_t &&value);
+	iterator insert(const id_t &id, const value_t &value);
+	iterator insertAfter(const id_t &referenceId, const id_t &id, const value_t &value);
+	iterator insertBefore(const id_t &referenceId, const id_t &id, const value_t &value);
 
 	iterator replace(id_t id, value_t &&value);
 

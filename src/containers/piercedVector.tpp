@@ -355,13 +355,13 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::mo
 	\result An iterator that points to the newly inserted element.
 */
 template<typename value_t, typename id_t>
-typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::insert(const id_t &id, value_t &&value)
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::insert(const id_t &id, const value_t &value)
 {
 	// Fill the position
 	std::size_t pos = fillPosHead(id);
 
 	// Insert the element
-	m_v[pos] = std::move(value);
+	m_v[pos] = value;
 
 	// Return the iterator that points to the element
 	return getIteratorFromPos(pos);
@@ -380,13 +380,13 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::in
 	\result An iterator that points to the newly inserted element.
 */
 template<typename value_t, typename id_t>
-typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::insertAfter(const id_t &referenceId, const id_t &id, value_t &&value)
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::insertAfter(const id_t &referenceId, const id_t &id, const value_t &value)
 {
 	// Fill the position
 	std::size_t pos = fillPosAfter(getPosFromId(referenceId), id);
 
 	// Insert the element
-	m_v[pos] = std::move(value);
+	m_v[pos] = value;
 
 	// Return the iterator that points to the element
 	return getIteratorFromPos(pos);
@@ -405,13 +405,13 @@ typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::in
 	\result An iterator that points to the newly inserted element.
 */
 template<typename value_t, typename id_t>
-typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::insertBefore(const id_t &referenceId, const id_t &id, value_t &&value)
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::insertBefore(const id_t &referenceId, const id_t &id, const value_t &value)
 {
 	// Fill the position
 	std::size_t pos = fillPosBefore(getPosFromId(referenceId), id);
 
 	// Insert the element
-	m_v[pos] = std::move(value);
+	m_v[pos] = value;
 
 	// Return the iterator that points to the element
 	return getIteratorFromPos(pos);
