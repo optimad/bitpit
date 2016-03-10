@@ -25,6 +25,7 @@
 // =================================================================================== //
 // INCLUDES                                                                            //
 // =================================================================================== //
+#include "bitpit_common.hpp"
 #include "ParaTree.hpp"
 #include "Array.hpp"
 #include <sstream>
@@ -4108,7 +4109,9 @@ ParaTree::updateAfterCoarse(){
  */
 void
 ParaTree::updateAfterCoarse(u32vector & mapidx){
-#if BITPIT_ENABLE_MPI==1
+#if BITPIT_ENABLE_MPI==0
+	BITPIT_UNUSED(mapidx);
+#else
 	if(m_serial){
 #endif
 		updateAdapt();
