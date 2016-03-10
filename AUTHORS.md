@@ -43,7 +43,7 @@ Here is a list of the main authors of each bitpit module:
   * [Andrea Iob](andrea_iob@hotmail.com)
   * [Haysam Telib](mailto:haysam.telib@optimad.it)
 
-* octreepatch
+* voloctree
 
   * [Andrea Iob](mailto:andrea_iob@hotmail.com)
 

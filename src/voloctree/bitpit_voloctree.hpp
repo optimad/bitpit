@@ -22,15 +22,15 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MODULE_OCTREEPATCH_HPP__
-#define __BITPIT_MODULE_OCTREEPATCH_HPP__
+#ifndef __BITPIT_MODULE_VOLOCTREE_HPP__
+#define __BITPIT_MODULE_VOLOCTREE_HPP__
 
 /*!
- * @defgroup octreepatch Octree patch
+ * @defgroup voloctree Octree volume patch
  */
 
 #include "bitpit_version.hpp"
 
-#include "octreepatch.hpp"
+#include "voloctree.hpp"
 
 #endif

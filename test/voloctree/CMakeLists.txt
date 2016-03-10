@@ -27,11 +27,11 @@ cmake_minimum_required(VERSION 2.8)
 
 # List of tests
 set(TESTS "")
-list(APPEND TESTS "test_octreepatch_00001")
-list(APPEND TESTS "test_octreepatch_00002")
-list(APPEND TESTS "test_octreepatch_00003")
+list(APPEND TESTS "test_voloctree_00001")
+list(APPEND TESTS "test_voloctree_00002")
+list(APPEND TESTS "test_voloctree_00003")
 
-set(OCTREEPATCH_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the octreepatch module" FORCE)
+set(VOLOCTREE_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the voloctree module" FORCE)
 
 # Rules to build the tests
 include_directories("${PROJECT_SOURCE_DIR}/src/common")
@@ -40,10 +40,10 @@ include_directories("${PROJECT_SOURCE_DIR}/src/containers")
 include_directories("${PROJECT_SOURCE_DIR}/src/IO")
 include_directories("${PROJECT_SOURCE_DIR}/src/PABLO")
 include_directories("${PROJECT_SOURCE_DIR}/src/patchkernel")
-include_directories("${PROJECT_SOURCE_DIR}/src/octreepatch")
+include_directories("${PROJECT_SOURCE_DIR}/src/voloctree")
 
 set(TEST_TARGETS "")
-foreach(TEST_ENTRY IN LISTS OCTREEPATCH_TEST_ENTRIES)
+foreach(TEST_ENTRY IN LISTS VOLOCTREE_TEST_ENTRIES)
 	getTestName("${TEST_ENTRY}" TEST_NAME)
 	set(TEST_SOURCES "${TEST_NAME}.cpp")
 	list(APPEND TEST_TARGETS "${TEST_NAME}")
@@ -51,9 +51,9 @@ foreach(TEST_ENTRY IN LISTS OCTREEPATCH_TEST_ENTRIES)
 	add_executable(${TEST_NAME} "${TEST_SOURCES}")
 	target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
 endforeach()
-set(OCTREEPATCH_TEST_TARGETS "${TEST_TARGETS}" CACHE INTERNAL "List of test targets for the octreepatch module" FORCE)
+set(VOLOCTREE_TEST_TARGETS "${TEST_TARGETS}" CACHE INTERNAL "List of test targets for the voloctree module" FORCE)
 
-add_custom_target(tests-octreepatch DEPENDS ${TEST_TARGETS})
-add_custom_target(clean-tests-octreepatch COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+add_custom_target(tests-voloctree DEPENDS ${TEST_TARGETS})
+add_custom_target(clean-tests-voloctree COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 unset(TEST_TARGETS)

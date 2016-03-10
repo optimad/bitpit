@@ -24,12 +24,12 @@
 
 #include "logger.hpp"
 
-#include "octreepatch.hpp"
+#include "voloctree.hpp"
 
 namespace bitpit {
 
 /*!
-	\ingroup octreepatch
+	\ingroup voloctree
 	\class OctreeLevelInfo
 
 	\brief The OctreeLevelInfo class defines the information associated to
@@ -37,16 +37,16 @@ namespace bitpit {
 */
 
 /*!
-	\ingroup octreepatch
+	\ingroup voloctree
 	@{
 */
 
 /*!
-	\class OctreePatch
+	\class VolOctree
 
-	\brief The OctreePatch defines a Octree patch.
+	\brief The VolOctree defines a Octree patch.
 
-	OctreePatch defines a Octree patch.
+	VolOctree defines a Octree patch.
 */
 
 /*!
@@ -58,7 +58,7 @@ namespace bitpit {
 	\param length is the length of the domain
 	\param dh is the maximum allowed cell size of the initial refinement
 */
-OctreePatch::OctreePatch(const int &id, const int &dimension,
+VolOctree::VolOctree(const int &id, const int &dimension,
 				 std::array<double, 3> origin, double length, double dh )
 	: VolumeKernel(id, dimension, false),
 	  m_tree(origin[0], origin[1], origin[2], length, dimension)
@@ -87,7 +87,7 @@ OctreePatch::OctreePatch(const int &id, const int &dimension,
 /*!
 	Destroys the patch.
 */
-OctreePatch::~OctreePatch()
+VolOctree::~VolOctree()
 {
 
 }
@@ -95,7 +95,7 @@ OctreePatch::~OctreePatch()
 /*!
 	Initializes octree geometry.
 */
-void OctreePatch::initializeTreeGeometry()
+void VolOctree::initializeTreeGeometry()
 {
 	int maxLevels = m_tree.getMaxLevel();
 	double length = m_tree.getL();
@@ -122,7 +122,7 @@ void OctreePatch::initializeTreeGeometry()
 	\param id is the id of the cell
 	\result The volume of the specified cell.
 */
-double OctreePatch::evalCellVolume(const long &id)
+double VolOctree::evalCellVolume(const long &id)
 {
 	int level = getCellLevel(id);
 
@@ -135,7 +135,7 @@ double OctreePatch::evalCellVolume(const long &id)
 	\param id is the id of the cell
 	\result The centroid of the specified cell.
 */
-std::array<double, 3> OctreePatch::evalCellCentroid(const long &id)
+std::array<double, 3> VolOctree::evalCellCentroid(const long &id)
 {
 	OctantInfo octantInfo = getCellOctant(id);
 
@@ -155,7 +155,7 @@ std::array<double, 3> OctreePatch::evalCellCentroid(const long &id)
 	\param id is the id of the cell
 	\result The characteristic size of the specified cell.
 */
-double OctreePatch::evalCellSize(const long &id)
+double VolOctree::evalCellSize(const long &id)
 {
 	int level = getCellLevel(id);
 
@@ -168,7 +168,7 @@ double OctreePatch::evalCellSize(const long &id)
 	\param id is the id of the interface
 	\result The area of the specified interface.
 */
-double OctreePatch::evalInterfaceArea(const long &id)
+double VolOctree::evalInterfaceArea(const long &id)
 {
 	const Interface &interface = getInterface(id);
 	int owner = interface.getOwner();
@@ -183,7 +183,7 @@ double OctreePatch::evalInterfaceArea(const long &id)
 	\param id is the id of the interface
 	\result The normal of the specified interface.
 */
-std::array<double, 3> OctreePatch::evalInterfaceNormal(const long &id)
+std::array<double, 3> VolOctree::evalInterfaceNormal(const long &id)
 {
 	const Interface &interface = getInterface(id);
 	int ownerFace = interface.getOwnerFace();
@@ -197,7 +197,7 @@ std::array<double, 3> OctreePatch::evalInterfaceNormal(const long &id)
 	\param id the id of the cell
 	\result The octant info of the specified cell
 */
-OctreePatch::OctantInfo OctreePatch::getCellOctant(const long &id) const
+VolOctree::OctantInfo VolOctree::getCellOctant(const long &id) const
 {
 	OctantInfo octantInfo;
 	octantInfo.internal = m_cells[id].isInterior();
@@ -215,7 +215,7 @@ OctreePatch::OctantInfo OctreePatch::getCellOctant(const long &id) const
 
 	\result A reference to the octree associated to the patch.
 */
-PabloUniform & OctreePatch::getTree()
+PabloUniform & VolOctree::getTree()
 {
 	return m_tree;
 }
@@ -226,7 +226,7 @@ PabloUniform & OctreePatch::getTree()
 	\param octantInfo the data of the octant
 	\result The id of the specified octant
 */
-long OctreePatch::getOctantId(const OctantInfo &octantInfo) const
+long VolOctree::getOctantId(const OctantInfo &octantInfo) const
 {
 	std::unordered_map<uint32_t, long>::const_iterator octantItr;
 	if (octantInfo.internal) {
@@ -250,7 +250,7 @@ long OctreePatch::getOctantId(const OctantInfo &octantInfo) const
 	\param octantInfo the data of the octant
 	\result A reference to the octant's connectivity
 */
-const std::vector<uint32_t> & OctreePatch::getOctantConnect(const OctantInfo &octantInfo)
+const std::vector<uint32_t> & VolOctree::getOctantConnect(const OctantInfo &octantInfo)
 {
 	if (octantInfo.internal) {
 		return m_tree.getConnectivity()[octantInfo.id];
@@ -265,7 +265,7 @@ const std::vector<uint32_t> & OctreePatch::getOctantConnect(const OctantInfo &oc
 	\param octantInfo the data of the octant
 	\result A unique hash for the octant.
 */
-OctreePatch::OctantHash OctreePatch::evaluateOctantHash(const OctantInfo &octantInfo)
+VolOctree::OctantHash VolOctree::evaluateOctantHash(const OctantInfo &octantInfo)
 {
 	uint8_t level   = m_tree.getLevel(octantInfo.id);
 	uint64_t morton = m_tree.getMorton(octantInfo.id);
@@ -284,7 +284,7 @@ OctreePatch::OctantHash OctreePatch::evaluateOctantHash(const OctantInfo &octant
 	\param id is the id of the cell
 	\result The refinement level of the specified cell.
 */
-int OctreePatch::getCellLevel(const long &id)
+int VolOctree::getCellLevel(const long &id)
 {
 	OctantInfo octantInfo = getCellOctant(id);
 
@@ -302,7 +302,7 @@ int OctreePatch::getCellLevel(const long &id)
 
 	\result Returns true if the mesh was updated, false otherwise.
 */
-const std::vector<Adaption::Info> OctreePatch::_updateAdaption(bool trackAdaption)
+const std::vector<Adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 {
 	// Check if the mesh is currently empty
 	bool initiallyEmpty = (getCellCount() == 0);
@@ -394,7 +394,7 @@ const std::vector<Adaption::Info> OctreePatch::_updateAdaption(bool trackAdaptio
 		// Re-numbered cells just need to be added to the proper list.
 		//
 		// Renumbered cells are not tracked, because the re-numbering
-		// only happens inside OctreePatch.
+		// only happens inside VolOctree.
 		if (adaptionType == Adaption::TYPE_RENUMBERING) {
 			OctantInfo previousOctantInfo(mapper_octantMap.front(), !mapper_ghostFlag.front());
 			long cellId = getOctantId(previousOctantInfo);
@@ -691,7 +691,7 @@ const std::vector<Adaption::Info> OctreePatch::_updateAdaption(bool trackAdaptio
 
 	\param octantInfoList is the list of octant to import
 */
-std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &octantInfoList)
+std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoList)
 {
 	FaceInfoSet danglingFaces;
 
@@ -704,7 +704,7 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 	\param octantInfoList is the list of octant to import
 	\param danglingFaces is the list of dangling faces in the current mesh
 */
-std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &octantInfoList,
+std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoList,
                                  FaceInfoSet &danglingFaces)
 {
 	// Info of the cells
@@ -951,7 +951,7 @@ std::vector<unsigned long> OctreePatch::importOctants(std::vector<OctantInfo> &o
 
 	\param cellIds is the list of cells ids to remove
 */
-OctreePatch::FaceInfoSet OctreePatch::removeCells(std::vector<long> &cellIds)
+VolOctree::FaceInfoSet VolOctree::removeCells(std::vector<long> &cellIds)
 {
 	// Delete cells
 	//
@@ -1066,7 +1066,7 @@ OctreePatch::FaceInfoSet OctreePatch::removeCells(std::vector<long> &cellIds)
 	\param treeId is the id of the vertex in the tree
 	\result The id of the newly created vertex.
 */
-long OctreePatch::addVertex(uint32_t treeId)
+long VolOctree::addVertex(uint32_t treeId)
 {
 	// Vertex coordinates
 	std::array<double, 3> nodeCoords = m_tree.getNodeCoordinates(treeId);
@@ -1086,7 +1086,7 @@ long OctreePatch::addVertex(uint32_t treeId)
 	\param faces are the faces of the interface
 	\result The id of the newly created interface.
 */
-long OctreePatch::addInterface(uint32_t treeId,
+long VolOctree::addInterface(uint32_t treeId,
                                    std::unique_ptr<long[]> &vertices,
                                    std::array<FaceInfo, 2> &faces)
 {
@@ -1126,7 +1126,7 @@ long OctreePatch::addInterface(uint32_t treeId,
 	by the cell
 	\result The id of the newly created cell.
 */
-long OctreePatch::addCell(OctantInfo octantInfo,
+long VolOctree::addCell(OctantInfo octantInfo,
                               std::unique_ptr<long[]> &vertices,
                               std::vector<std::vector<long>> &adjacencies,
                               std::vector<std::vector<long>> &interfaces,
@@ -1203,7 +1203,7 @@ long OctreePatch::addCell(OctantInfo octantInfo,
 
 	\param id is the id of the cell
 */
-void OctreePatch::deleteCell(long id)
+void VolOctree::deleteCell(long id)
 {
 	// Remove the information that link the cell to the octant
 	bool interior = m_cells[id].isInterior();
@@ -1241,7 +1241,7 @@ void OctreePatch::deleteCell(long id)
 
 	\param id is the id of the cell that needs to be refined
 */
-bool OctreePatch::_markCellForRefinement(const long &id)
+bool VolOctree::_markCellForRefinement(const long &id)
 {
 	return set_marker(id, 1);
 }
@@ -1251,7 +1251,7 @@ bool OctreePatch::_markCellForRefinement(const long &id)
 
 	\param id is the id of the cell that needs to be coarsened
 */
-bool OctreePatch::_markCellForCoarsening(const long &id)
+bool VolOctree::_markCellForCoarsening(const long &id)
 {
 	return set_marker(id, -1);
 }
@@ -1262,7 +1262,7 @@ bool OctreePatch::_markCellForCoarsening(const long &id)
 	\param id is the id of the cell
 	\param value is the value of the marker
 */
-bool OctreePatch::set_marker(const long &id, const int8_t &value)
+bool VolOctree::set_marker(const long &id, const int8_t &value)
 {
 	OctantInfo octantInfo = getCellOctant(id);
 	if (!octantInfo.internal) {
@@ -1280,7 +1280,7 @@ bool OctreePatch::set_marker(const long &id, const int8_t &value)
 	\param id is the id of the cell
 	\param enabled defines if enable the balancing for the specified cell
 */
-bool OctreePatch::_enableCellBalancing(const long &id, bool enabled)
+bool VolOctree::_enableCellBalancing(const long &id, bool enabled)
 {
 	OctantInfo octantInfo = getCellOctant(id);
 	if (!octantInfo.internal) {
@@ -1298,7 +1298,7 @@ bool OctreePatch::_enableCellBalancing(const long &id, bool enabled)
 	\param[in] point is the point to be checked
 	\result Returns true if the point is inside the patch, false otherwise.
  */
-bool OctreePatch::isPointInside(const std::array<double, 3> &point)
+bool VolOctree::isPointInside(const std::array<double, 3> &point)
 {
 	return (m_tree.getPointOwner(point) != nullptr);
 }
@@ -1313,7 +1313,7 @@ bool OctreePatch::isPointInside(const std::array<double, 3> &point)
 	\result Returns the id of the cell the contains the point. If the point
 	is not inside the patch, the function returns the id of the null element.
 */
-long OctreePatch::locatePoint(const std::array<double, 3> &point)
+long VolOctree::locatePoint(const std::array<double, 3> &point)
 {
 	Octant *octant = m_tree.getPointOwner(point);
 	if (m_tree.getPointOwner(point) == nullptr) {
@@ -1330,7 +1330,7 @@ long OctreePatch::locatePoint(const std::array<double, 3> &point)
 	\param tolerance is the tolerance that will be used for the geometrical
 	checks
 */
-void OctreePatch::_setTol(double tolerance)
+void VolOctree::_setTol(double tolerance)
 {
 	m_tree.setTol(tolerance);
 
@@ -1340,7 +1340,7 @@ void OctreePatch::_setTol(double tolerance)
 /*!
 	Internal function to reset the tolerance for the geometrical checks.
 */
-void OctreePatch::_resetTol()
+void VolOctree::_resetTol()
 {
 	m_tree.setTol();
 
@@ -1353,7 +1353,7 @@ void OctreePatch::_resetTol()
 
 	\param[in] translation is the translation vector
  */
-void OctreePatch::translate(std::array<double, 3> translation)
+void VolOctree::translate(std::array<double, 3> translation)
 {
 	m_tree.setOrigin(m_tree.getOrigin() + translation);
 
@@ -1365,7 +1365,7 @@ void OctreePatch::translate(std::array<double, 3> translation)
 
 	\param[in] scaling is the scaling factor vector
  */
-void OctreePatch::scale(std::array<double, 3> scaling)
+void VolOctree::scale(std::array<double, 3> scaling)
 {
 	bool uniformScaling = true;
 	uniformScaling &= (fabs(scaling[0] - scaling[1]) > 1e-14);

@@ -25,7 +25,7 @@
 #include <array>
 
 #include "bitpit_IO.hpp"
-#include "bitpit_octreepatch.hpp"
+#include "bitpit_voloctree.hpp"
 
 using namespace bitpit;
 
@@ -47,7 +47,7 @@ int main(int argc, char *argv[]) {
 
 	log::cout() << "  >> 2D octree patch" << "\n";
 
-	OctreePatch *patch_2D = new OctreePatch(0, 2, origin, length, dh);
+	VolOctree *patch_2D = new VolOctree(0, 2, origin, length, dh);
 	patch_2D->setName("octree_uniform_patch_2D");
 	patch_2D->update();
 	patch_2D->write();
@@ -99,7 +99,7 @@ int main(int argc, char *argv[]) {
 
 	log::cout() << "  >> 3D octree mesh" << "\n";
 
-	OctreePatch *patch_3D = new OctreePatch(0, 3, origin, length, dh);
+	VolOctree *patch_3D = new VolOctree(0, 3, origin, length, dh);
 	patch_3D->setName("octree_uniform_patch_3D");
 	patch_3D->update();
 	patch_3D->write();

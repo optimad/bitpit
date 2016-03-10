@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_OCTREEPATCH_HPP__
-#define __BITPIT_OCTREEPATCH_HPP__
+#ifndef __BITPIT_VOLOCTREE_HPP__
+#define __BITPIT_VOLOCTREE_HPP__
 
 #include <assert.h>
 #include <deque>
@@ -43,7 +43,7 @@ struct OctreeLevelInfo{
     double volume;
 };
 
-class OctreePatch : public VolumeKernel {
+class VolOctree : public VolumeKernel {
 
 public:
 	using PatchKernel::isPointInside;
@@ -57,10 +57,10 @@ public:
 		bool internal;
 	};
 
-	OctreePatch(const int &id, const int &dimension, std::array<double, 3> origin,
+	VolOctree(const int &id, const int &dimension, std::array<double, 3> origin,
 			double length, double dh);
 
-	~OctreePatch();
+	~VolOctree();
 
 	double evalCellVolume(const long &id);
 	double evalCellSize(const long &id);
