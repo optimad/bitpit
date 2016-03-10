@@ -501,7 +501,7 @@ array<double, 3> SurfaceKernel::evalFacetNormal(const long &id)
     // ====================================================================== //
 
     // Local variables
-    array<double, 3>             normal{0.0, 0.0, 0.0};
+    array<double, 3>             normal = {{0.0, 0.0, 0.0}};
     Cell                        *cell_ = &m_cells[id];
 
     // Counters
@@ -515,7 +515,7 @@ array<double, 3> SurfaceKernel::evalFacetNormal(const long &id)
     
     if (cell_->getType() == ElementInfo::LINE) {
         if (m_spaceDim - getDimension() == 1) {
-            std::array<double, 3>       z{0.0, 0.0, 1.0};
+            std::array<double, 3>       z = {{0.0, 0.0, 1.0}};
             normal = m_vertices[cell_->getVertex(1)].getCoords() - m_vertices[cell_->getVertex(0)].getCoords();
             normal = crossProduct(normal, z);
         }
