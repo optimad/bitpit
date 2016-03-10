@@ -69,6 +69,7 @@ Interface::Interface(const long &id, ElementInfo::Type type)
         Copy-constructor
 */
 Interface::Interface(const Interface &other)
+	: Element(other)
 {
 	*this = other;
 }
