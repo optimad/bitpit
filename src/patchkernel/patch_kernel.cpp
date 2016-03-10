@@ -2866,11 +2866,11 @@ void PatchKernel::removePointFromBoundingBox(const std::array<double, 3> &point,
 				setBoundingBoxDirty(true);
 			}
 		}
+	}
 
-		// Bounding box update
-		if (!delayed) {
-			updateBoundingBox();
-		}
+	// Bounding box update
+	if (!delayed) {
+		updateBoundingBox();
 	}
 }
 
