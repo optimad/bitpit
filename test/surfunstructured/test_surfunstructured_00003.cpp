@@ -40,7 +40,7 @@
 # include "bitpit_common.hpp"                                                 // Utilities and common definitions
 # include "bitpit_operators.hpp"                                              // STL containers operators
 # include "bitpit_patchkernel.hpp"                                                  // BitPit base patch
-# include "bitpit_surftripatch.hpp"                                           // BitPit surftri patch
+# include "bitpit_surfunstructured.hpp"                                           // BitPit surftri patch
 
 // ========================================================================== //
 // NAMESPACES                                                                 //

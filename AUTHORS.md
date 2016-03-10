@@ -47,7 +47,7 @@ Here is a list of the main authors of each bitpit module:
 
   * [Andrea Iob](mailto:andrea_iob@hotmail.com)
 
-* surftripatch
+* surfunstructured
 
   * [Alessandro Alaia](mailto:alessandro.alaia@optimad.it)
 

@@ -22,15 +22,15 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_MODULE_SURFTRIPATCH_HPP__
-#define __BITPIT_MODULE_SURFTRIPATCH_HPP__
+#ifndef __BITPIT_MODULE_SURFUNSTRUCTURED_HPP__
+#define __BITPIT_MODULE_SURFUNSTRUCTURED_HPP__
 
 /*!
- *	@defgroup surftripatch 2D triangulation.
+ *	@defgroup surfunstructured Unstructured surface patch
  */
 
 #include "bitpit_version.hpp"
 
-#include "surftripatch.hpp"
+#include "surfunstructured.hpp"
 
 #endif

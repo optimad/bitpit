@@ -22,8 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#ifndef __BITPIT_SURFTRIPATCH_HPP__
-#define __BITPIT_SURFTRIPATCH_HPP__
+#ifndef __BITPIT_SURFUNSTRUCTURED_HPP__
+#define __BITPIT_SURFUNSTRUCTURED_HPP__
 
 #include <array>
 #include <vector>

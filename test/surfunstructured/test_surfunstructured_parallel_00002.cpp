@@ -39,7 +39,7 @@
 // BitPit
 # include "bitpit_operators.hpp"                                              // BitPit operators
 # include "bitpit_IO.hpp"                                                     // BitPit IO
-# include "bitpit_surftripatch.hpp"                                           // BitPit surftri patch
+# include "bitpit_surfunstructured.hpp"                                           // BitPit surftri patch
 
 // ========================================================================== //
 // NAMESPACES                                                                 //
@@ -91,7 +91,7 @@ SurfUnstructured                mesh(0);
     // none
 
     // Set name ------- ----------------------------------------------------- //
-    mesh.setName("surftripatch_partition");
+    mesh.setName("surfunstructured_partition");
 
     // Set communicator ----------------------------------------------------- //
     mesh.setCommunicator(MPI_COMM_WORLD);

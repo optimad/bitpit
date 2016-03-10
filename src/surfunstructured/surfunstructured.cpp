@@ -24,12 +24,12 @@
 
 #include "bitpit_common.hpp"
 
-#include "surftripatch.hpp"
+#include "surfunstructured.hpp"
 
 namespace bitpit {
 
 /*!
-	\ingroup surftripatch
+	\ingroup surfunstructured
 	@{
 */
 

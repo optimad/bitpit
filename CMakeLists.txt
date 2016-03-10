@@ -317,7 +317,7 @@ list(APPEND BITPIT_MODULE_LIST "PABLO")
 list(APPEND BITPIT_MODULE_LIST "patchkernel")
 list(APPEND BITPIT_MODULE_LIST "cartesianpatch")
 list(APPEND BITPIT_MODULE_LIST "octreepatch")
-list(APPEND BITPIT_MODULE_LIST "surftripatch")
+list(APPEND BITPIT_MODULE_LIST "surfunstructured")
 list(APPEND BITPIT_MODULE_LIST "voltripatch")
 list(APPEND BITPIT_MODULE_LIST "ucartmesh")
 
@@ -334,7 +334,7 @@ set(PABLO_DEPS "IO")
 set(PATCHKERNEL_DEPS "common;operators;containers;IO;LA;SA")
 set(CARTESIANPATCH_DEPS "common;patchkernel")
 set(OCTREEPATCH_DEPS "common;PABLO;patchkernel")
-set(SURFTRIPATCH_DEPS "common;patchkernel")
+set(SURFUNSTRUCTURED_DEPS "common;patchkernel")
 set(VOLTRIPATCH_DEPS "common;patchkernel")
 
 #------------------------------------------------------------------------------------#
