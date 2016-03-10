@@ -319,7 +319,6 @@ list(APPEND BITPIT_MODULE_LIST "volcartesian")
 list(APPEND BITPIT_MODULE_LIST "voloctree")
 list(APPEND BITPIT_MODULE_LIST "surfunstructured")
 list(APPEND BITPIT_MODULE_LIST "volunstructured")
-list(APPEND BITPIT_MODULE_LIST "ucartmesh")
 
 #------------------------------------------------------------------------------------#
 # Modules dependecies
@@ -329,7 +328,6 @@ set(CONTAINERS_DEPS "common;operators")
 set(IO_DEPS "common;operators")
 set(LA_DEPS "common;operators")
 set(SA_DEPS "common;operators")
-set(UCARTMESH_DEPS "common;IO")
 set(PABLO_DEPS "IO")
 set(PATCHKERNEL_DEPS "common;operators;containers;IO;LA;SA")
 set(VOLCARTESIAN_DEPS "common;patchkernel")
