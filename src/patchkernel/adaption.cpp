@@ -29,7 +29,7 @@
 namespace bitpit {
 
 /*!
-	\ingroup patch
+	\ingroup patchkernel
 	@{
 */
 
@@ -128,7 +128,7 @@ const std::vector<long> & FlatMapping::getMapping() const
 */
 
 /*!
-	\ingroup patch
+	\ingroup patchkernel
 	@{
 */
 

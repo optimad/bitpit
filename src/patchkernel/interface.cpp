@@ -35,7 +35,7 @@
 namespace bitpit {
 
 /*!
-	\ingroup patch
+	\ingroup patchkernel
 	@{
 */
 

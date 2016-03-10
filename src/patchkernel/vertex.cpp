@@ -64,7 +64,7 @@ bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &in_stream, bitpit::Vert
 namespace bitpit {
 
 /*!
-	\ingroup patch
+	\ingroup patchkernel
 	@{
 */
 

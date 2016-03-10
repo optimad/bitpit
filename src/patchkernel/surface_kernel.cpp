@@ -28,7 +28,7 @@ namespace bitpit {
 
 
 /*!
-	\ingroup PatchKernel
+	\ingroup patchkernel
 	@{
 */
 

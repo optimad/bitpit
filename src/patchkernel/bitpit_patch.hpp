@@ -26,7 +26,7 @@
 #define __BITPIT_MODULE_PATCH_HPP__
 
 /*!
- * @defgroup PatchKernel Patch kernel
+ * @defgroup patchkernel Patch kernel
  */
 
 #include "bitpit_version.hpp"

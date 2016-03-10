@@ -36,7 +36,7 @@ namespace bitpit {
 
 
 /*!
-	\ingroup PatchKernel
+	\ingroup patchkernel
 	@{
 */
 
@@ -110,7 +110,7 @@ void IndexGenerator::reset()
 }
 
 /*!
-	\ingroup PatchKernel
+	\ingroup patchkernel
 	@{
 */
 
