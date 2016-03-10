@@ -272,6 +272,10 @@ void CartesianPatch::initialize(const std::array<double, 3> &origin,
 	m_edgeFaces[ 9] = {{ 1, 5}};
 	m_edgeFaces[10] = {{ 2, 5}};
 	m_edgeFaces[11] = {{ 3, 5}};
+
+	// Set the bounding box
+	setBoundingBox(m_minCoords, m_maxCoords);
+	setBoundingBoxFrozen(true);
 }
 
 /*!
@@ -1148,18 +1152,6 @@ std::vector<long> CartesianPatch::_findCellVertexNeighs(const long &id, const in
 }
 
 /*!
-	Evalautes patch bounding box.
-
-	\param[out] minPoint on output stores the minimum point of the patch
-	\param[out] maxPoint on output stores the maximum point of the patch
-*/
-void CartesianPatch::evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint)
-{
-	minPoint = m_minCoords;
-	maxPoint = m_maxCoords;
-}
-
-/*!
 	Extract a cell subset.
 
 	\param[in] ijkMin is the set of cartesian indices of the lower bound
@@ -1281,6 +1273,8 @@ void CartesianPatch::translate(std::array<double, 3> translation)
 		}
 	}
 
+	setBoundingBox(m_minCoords, m_maxCoords);
+
 	VolumeKernel::translate(translation);
 }
 
@@ -1306,6 +1300,8 @@ void CartesianPatch::scale(std::array<double, 3> scaling)
 	initializeInterfaceArea();
 
 	initializeCellVolume();
+
+	setBoundingBox(m_minCoords, m_maxCoords);
 
 	VolumeKernel::scale(scaling);
 }

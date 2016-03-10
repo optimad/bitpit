@@ -118,8 +118,6 @@ protected:
 	std::vector<long> _findCellEdgeNeighs(const long &id, const int &edge, const std::vector<long> &blackList = std::vector<long>()) const;
 	std::vector<long> _findCellVertexNeighs(const long &id, const int &vertex, const std::vector<long> &blackList = std::vector<long>()) const;
 
-	void evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
-
 private:
 	std::array<double, 3> m_cellSpacings;
 	std::array<double, 3> m_minCoords;

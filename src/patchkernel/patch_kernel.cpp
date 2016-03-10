@@ -133,6 +133,7 @@ PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
 	: m_nInternals(0), m_nGhosts(0),
 	  m_lastInternalId(Element::NULL_ID),
 	  m_firstGhostId(Element::NULL_ID),
+	  m_boxFrozen(false), m_boxDirty(true),
 	  m_adaptionDirty(true), m_expert(expert), m_hasCustomTolerance(false),
 	  m_rank(0), m_nProcessors(1)
 #if BITPIT_ENABLE_MPI==1
@@ -145,6 +146,10 @@ PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
 	std::ostringstream convert;
 	convert << getId();
 	setName(convert.str());
+
+	// Initializes the bounding box
+	setBoundingBoxFrozen(false);
+	clearBoundingBox();
 
 	// Set VTK codex
 	VTKUnstructuredGrid::setCodex(VTKFormat::APPENDED);
@@ -426,7 +431,7 @@ bool PatchKernel::isAdaptionDirty() const
 */
 bool PatchKernel::isDirty() const
 {
-	return isAdaptionDirty();
+	return (isAdaptionDirty() || isBoundingBoxDirty());
 }
 
 /*!
@@ -611,9 +616,13 @@ PatchKernel::VertexIterator PatchKernel::createVertex(const std::array<double, 3
 		id = generateVertexId();
 	}
 
+	// Add the vertex
 	PiercedVector<Vertex>::iterator iterator = m_vertices.reclaim(id);
     iterator->setId(id);
 	iterator->setCoords(coords);
+
+	// Update the bounding box
+	addPointToBoundingBox(iterator->getCoords());
 
 	return iterator;
 }
@@ -697,6 +706,9 @@ bool PatchKernel::deleteVertex(const long &id, bool delayed)
 		return false;
 	}
 
+    // Update the bounding box
+	removePointFromBoundingBox(m_vertices[id].getCoords(), delayed);
+
 	// Delete the vertex
 	m_vertices.erase(id, delayed);
 	m_vertexIdGenerator.trashId(id);
@@ -728,6 +740,7 @@ bool PatchKernel::deleteVertices(const std::vector<long> &ids, bool delayed)
 
 	if (!delayed) {
 		m_vertices.flush();
+		updateBoundingBox();
 	}
 
 	return true;
@@ -2659,15 +2672,52 @@ return(check);
 };
 
 /*!
-	Updates the stored patch bounding box.
-*/
-void PatchKernel::updateBoundingBox()
-{
-	evalBoundingBox(m_minPoint, m_maxPoint);
+	Clears the bounding box.
 
-	if (!isTolCustomized()) {
-		resetTol();
+	The box will be cleared also if it declared frozen.
+*/
+void PatchKernel::clearBoundingBox()
+{
+	for (int k = 0; k < 3; ++k) {
+		m_boxMinPoint[k]   =   std::numeric_limits<double>::max();
+		m_boxMinCounter[k] = 0;
+
+		m_boxMaxPoint[k]   = - std::numeric_limits<double>::max();
+		m_boxMaxCounter[k] = 0;
 	}
+
+	setBoundingBoxDirty(true);
+}
+
+/*!
+	Sets the bounding box.
+
+	The box will be set also if it declared frozen.
+
+	\param minPoint the minimum point of the patch
+	\param maxPoint the maximum point of the patch
+*/
+void PatchKernel::setBoundingBox(const std::array<double, 3> &minPoint, const std::array<double, 3> &maxPoint)
+{
+	m_boxMinPoint = minPoint;
+	m_boxMaxPoint = maxPoint;
+
+	setBoundingBoxDirty(false);
+}
+
+/*!
+	Sets the bounding box as frozen.
+
+	When the bounding box is frozen it won't be updated on insertion/deletion
+	of vertices, neither when the function to update the bounding box is
+	called. The only way to change a frozen bounding box is the usage of the
+	functions that explicitly sets the bounding box.
+
+	\param forzen controls if the bounding box will be set as frozen
+*/
+void PatchKernel::setBoundingBoxFrozen(bool frozen)
+{
+	m_boxFrozen = frozen;
 }
 
 /*!
@@ -2678,32 +2728,147 @@ void PatchKernel::updateBoundingBox()
 */
 void PatchKernel::getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint)
 {
-	minPoint = m_minPoint;
-	maxPoint = m_maxPoint;
+	minPoint = m_boxMinPoint;
+	maxPoint = m_boxMaxPoint;
+}
+
+
+/*!
+	Checks if the bounding box is dirty.
+
+	\result Returns true if the bounding box is dirty, false otherwise.
+*/
+bool PatchKernel::isBoundingBoxDirty() const
+{
+	return m_boxDirty;
 }
 
 /*!
-	Evalautes patch bounding box.
+	Sets if the bounding box is dirty.
 
-	\param[out] minPoint on output stores the minimum point of the patch
-	\param[out] maxPoint on output stores the maximum point of the patch
+	\param dirty controls if the bounding box will be set as dirty
 */
-void PatchKernel::evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint)
+void PatchKernel::setBoundingBoxDirty(bool dirty)
 {
-	// Initialize bounding box
-	for (int k = 0; k < 3; ++k) {
-		minPoint[k] =   std::numeric_limits<double>::max();
-		maxPoint[k] = - std::numeric_limits<double>::max();
+	m_boxDirty = dirty;
+}
+
+/*!
+	Updates the stored patch bounding box.
+*/
+void PatchKernel::updateBoundingBox(bool forcedUpdated)
+{
+	if (m_boxFrozen) {
+		return;
 	}
 
-	// Compute bounding box limits
-	PiercedVector<Vertex>::iterator e = m_vertices.end();
-	for (PiercedVector<Vertex>::iterator i = m_vertices.begin(); i != e; ++i) {
-		for (int k = 0; k < 3; ++k) {
-			double value = i->getCoords()[k];
+	// Check if the bounding box is dirty
+	if (!isBoundingBoxDirty() && !forcedUpdated) {
+		return;
+	}
 
-			minPoint[k] = std::min(minPoint[k], value);
-			maxPoint[k] = std::max(maxPoint[k], value);
+	// Initialize bounding box
+	clearBoundingBox();
+
+	// Compute bounding box
+	for (const auto &vertex : m_vertices) {
+		addPointToBoundingBox(vertex.getCoords());
+	}
+
+	// Update geometrical tolerance
+	if (!isTolCustomized()) {
+		resetTol();
+	}
+
+	// The box is no more dirty
+	setBoundingBoxDirty(false);
+}
+
+/*!
+	Update the bounding adding the specified point.
+
+	\param point is the a new point that will be added to the bounding box
+*/
+void PatchKernel::addPointToBoundingBox(const std::array<double, 3> &point)
+{
+	if (m_boxFrozen) {
+		return;
+	}
+
+	bool boxUpdated = false;
+	for (size_t k = 0; k < point.size(); ++k) {
+		double value = point[k];
+
+		// Update maximum value
+		if (value > (m_boxMaxPoint[k] + getTol())) {
+			m_boxMaxPoint[k]   = value;
+			m_boxMaxCounter[k] = 1;
+
+			boxUpdated = true;
+		} else if (std::abs(value - m_boxMaxPoint[k]) < getTol()) {
+			++m_boxMaxCounter[k];
+		}
+
+		// Update minimum value
+		if (value < (m_boxMinPoint[k] - getTol())) {
+			m_boxMinPoint[k]   = value;
+			m_boxMinCounter[k] = 1;
+
+			boxUpdated = true;
+		} else if (std::abs(value - m_boxMinPoint[k]) < getTol()) {
+			++m_boxMinCounter[k];
+		}
+	}
+
+	// Update geometrical tolerance
+	if (boxUpdated && !isTolCustomized()) {
+		resetTol();
+	}
+}
+
+/*!
+	Update the bounding removing the specified point.
+
+	\param point is the point that will be removed from to the bounding box
+	\param delayed if true a delayed update ofthe bounding box will
+	be performed. This means that, if the bounding box requires an update,
+	the update will not be performed and only a flag telling that the
+	bounding box needs an update will set.
+*/
+void PatchKernel::removePointFromBoundingBox(const std::array<double, 3> &point, bool delayed)
+{
+	if (m_boxFrozen) {
+		return;
+	}
+
+	for (size_t k = 0; k < point.size(); ++k) {
+		double value = point[k];
+
+		// Check if maximum value is still valid
+		assert(value <= (m_boxMaxPoint[k] + getTol()));
+		if (value > (m_boxMaxPoint[k] - getTol())) {
+			setBoundingBoxDirty(true);
+		} else if (std::abs(value - m_boxMaxPoint[k]) < getTol()) {
+			--m_boxMaxCounter[k];
+			if (m_boxMaxCounter[k] == 0) {
+				setBoundingBoxDirty(true);
+			}
+		}
+
+		// Update minimum value
+		assert(value >= (m_boxMinPoint[k] - getTol()));
+		if (value < (m_boxMinPoint[k] + getTol())) {
+			setBoundingBoxDirty(true);
+		} else if (std::abs(value - m_boxMinPoint[k]) < getTol()) {
+			--m_boxMinCounter[k];
+			if (m_boxMinCounter[k] == 0) {
+				setBoundingBoxDirty(true);
+			}
+		}
+
+		// Bounding box update
+		if (!delayed) {
+			updateBoundingBox();
 		}
 	}
 }
@@ -2736,16 +2901,16 @@ std::unordered_map<long, long> PatchKernel::binSortVertex(int nBins)
 	updateBoundingBox();
 
 	// Bin's spacing
-	dx = max(1.0e-12, m_maxPoint[0] - m_minPoint[0]) / ((double) nBins);
-	dy = max(1.0e-12, m_maxPoint[1] - m_minPoint[1]) / ((double) nBins);
-	dz = max(1.0e-12, m_maxPoint[2] - m_minPoint[2]) / ((double) nBins);
+	dx = max(1.0e-12, m_boxMaxPoint[0] - m_boxMinPoint[0]) / ((double) nBins);
+	dy = max(1.0e-12, m_boxMaxPoint[1] - m_boxMinPoint[1]) / ((double) nBins);
+	dz = max(1.0e-12, m_boxMaxPoint[2] - m_boxMinPoint[2]) / ((double) nBins);
 
 	// Loop over vertices
 	std::unordered_map<long, long> bin_index;
 	for (V = m_vertices.begin(); V != E; ++V) {
-		i = std::min(nBins - 1L, long((V->getCoords()[0] - m_minPoint[0]) / dx));
-		j = std::min(nBins - 1L, long((V->getCoords()[1] - m_minPoint[1]) / dy));
-		k = std::min(nBins - 1L, long((V->getCoords()[2] - m_minPoint[2]) / dz));
+		i = std::min(nBins - 1L, long((V->getCoords()[0] - m_boxMinPoint[0]) / dx));
+		j = std::min(nBins - 1L, long((V->getCoords()[1] - m_boxMinPoint[1]) / dy));
+		k = std::min(nBins - 1L, long((V->getCoords()[2] - m_boxMinPoint[2]) / dz));
 		bin_index[V->getId()] = nBins * nBins * k + nBins * j + i;
 	}
 
@@ -2759,8 +2924,15 @@ std::unordered_map<long, long> PatchKernel::binSortVertex(int nBins)
 */
 void PatchKernel::translate(std::array<double, 3> translation)
 {
+	// Translate the patch
 	for (auto &vertex : m_vertices) {
 		vertex.translate(translation);
+	}
+
+	// Update the bounding box
+	if (!m_boxFrozen) {
+		m_boxMinPoint += translation;
+		m_boxMaxPoint += translation;
 	}
 }
 
@@ -2785,8 +2957,16 @@ void PatchKernel::translate(double sx, double sy, double sz)
 */
 void PatchKernel::scale(std::array<double, 3> scaling)
 {
+	// Scale the patch
 	for (auto &vertex : m_vertices) {
-		vertex.scale(scaling, m_minPoint);
+		vertex.scale(scaling, m_boxMinPoint);
+	}
+
+	// Update the bounding box
+	if (!m_boxFrozen) {
+		for (int k = 0; k < 3; ++k) {
+			m_boxMaxPoint[k] = m_boxMinPoint[k] + scaling[k] * (m_boxMaxPoint[k] - m_boxMinPoint[k]);
+		}
 	}
 }
 
@@ -2865,7 +3045,7 @@ void PatchKernel::_resetTol()
 {
 	m_tolerance = 1;
 	for (int k = 0; k < 3; ++k) {
-		m_tolerance = std::max(m_maxPoint[k] - m_minPoint[k], m_tolerance);
+		m_tolerance = std::max(m_boxMaxPoint[k] - m_boxMinPoint[k], m_tolerance);
 	}
 	m_tolerance *= 1e-14;
 }

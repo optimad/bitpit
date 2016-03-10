@@ -217,8 +217,13 @@ public:
 
         virtual void buildAdjacencies() = 0;
         virtual void updateAdjacencies(const std::vector<long>&) = 0;
-	void updateBoundingBox();
+
 	void getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
+	bool isBoundingBoxDirty() const;
+	void updateBoundingBox(bool forcedUpdated = false);
+	void addPointToBoundingBox(const std::array<double, 3> &point);
+	void removePointFromBoundingBox(const std::array<double, 3> &point, bool delayedBoxUpdate = false);
+
 	std::unordered_map<long, long> binSortVertex(int nBins = 128);
 
 	bool isAdaptionDirty() const;
@@ -275,13 +280,13 @@ protected:
 	long m_lastInternalId;
 	long m_firstGhostId;
 
-	std::array<double, 3> m_minPoint;
-	std::array<double, 3> m_maxPoint;
+	void clearBoundingBox();
+	void setBoundingBoxFrozen(bool frozen);
+	void setBoundingBoxDirty(bool dirty);
+	void setBoundingBox(const std::array<double, 3> &minPoint, const std::array<double, 3> &maxPoint);
 
 	bool deleteVertex(const long &id, bool delayed = false);
 	bool deleteVertices(const std::vector<long> &ids, bool delayed = false);
-
-	virtual void evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
 
 	virtual const std::vector<Adaption::Info> _updateAdaption(bool trackAdaption) = 0;
 	virtual bool _markCellForRefinement(const long &id) = 0;
@@ -298,6 +303,13 @@ protected:
 	void setExpert(bool expert);
 
 private:
+	bool m_boxFrozen;
+	bool m_boxDirty;
+	std::array<double, 3> m_boxMinPoint;
+	std::array<double, 3> m_boxMaxPoint;
+	std::array<int, 3> m_boxMinCounter;
+	std::array<int, 3> m_boxMaxCounter;
+
 	bool m_adaptionDirty;
 
 	bool m_expert;
