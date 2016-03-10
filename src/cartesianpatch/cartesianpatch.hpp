@@ -39,6 +39,8 @@ class CartesianPatch : public VolumeKernel {
 public:
 	using PatchKernel::isPointInside;
 	using PatchKernel::locatePoint;
+	using PatchKernel::getCellType;
+	using PatchKernel::getInterfaceType;
 
 	CartesianPatch(const int &id, const int &dimension, const std::array<double, 3> &origin,
 			   const std::array<double, 3> &lengths, const std::array<int, 3> &nCells);
@@ -50,8 +52,14 @@ public:
 	~CartesianPatch();
 
 	long getVertexCount() const;
+
 	long getCellCount() const;
+	ElementInfo::Type getCellType() const;
+	ElementInfo::Type getCellType(const long &id) const;
+
 	long getInterfaceCount() const;
+	ElementInfo::Type getInterfaceType() const;
+	ElementInfo::Type getInterfaceType(const long &id) const;
 
 	double evalCellVolume(const long &id);
 	double evalCellSize(const long &id);

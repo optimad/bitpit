@@ -320,6 +320,33 @@ long CartesianPatch::getCellCount() const
 }
 
 /*!
+	Gets the element type for the cell with the specified id.
+
+	\param id is the id of the requested cell
+	\return The element type for the cell with the specified id.
+*/
+ElementInfo::Type CartesianPatch::getCellType(const long &id) const
+{
+	BITPIT_UNUSED(id);
+
+	return getCellType();
+}
+
+/*!
+	Gets the element type for the cells in the patch.
+
+	\return The element type for the cells in the patch.
+*/
+ElementInfo::Type CartesianPatch::getCellType() const
+{
+	if (isThreeDimensional()) {
+		return ElementInfo::VOXEL;
+	} else {
+		return ElementInfo::PIXEL;
+	}
+}
+
+/*!
 	Gets the number of interfaces in the patch.
 
 	\return The number of interfaces in the patch
@@ -327,6 +354,33 @@ long CartesianPatch::getCellCount() const
 long CartesianPatch::getInterfaceCount() const
 {
 	return m_nInterfaces;
+}
+
+/*!
+	Gets the element type for the interface with the specified id.
+
+	\param id is the id of the requested interface
+	\return The element type for the interface with the specified id.
+*/
+ElementInfo::Type CartesianPatch::getInterfaceType(const long &id) const
+{
+	BITPIT_UNUSED(id);
+
+	return getInterfaceType();
+}
+
+/*!
+	Gets the element type for the interfaces in the patch.
+
+	\return The element type for the interfaces in the patch.
+*/
+ElementInfo::Type CartesianPatch::getInterfaceType() const
+{
+	if (isThreeDimensional()) {
+		return ElementInfo::PIXEL;
+	} else {
+		return ElementInfo::LINE;
+	}
 }
 
 /*!
@@ -514,12 +568,7 @@ void CartesianPatch::addCells()
 	log::cout() << "  >> Creating cells\n";
 
 	// Info on the cells
-	ElementInfo::Type cellType;
-	if (isThreeDimensional()) {
-		cellType = ElementInfo::VOXEL;
-	} else {
-		cellType = ElementInfo::PIXEL;
-	}
+	ElementInfo::Type cellType = getCellType();
 
 	// Create the cells
 	log::cout() << "    - Cell count: " << m_nCells << "\n";
@@ -589,12 +638,7 @@ void CartesianPatch::addInterfacesDirection(const int &direction)
 	log::cout() << "  >> Creating interfaces normal to direction " << direction << "\n";
 
 	// Info on the interfaces
-	ElementInfo::Type interfaceType;
-	if (isThreeDimensional()) {
-		interfaceType = ElementInfo::PIXEL;
-	} else {
-		interfaceType = ElementInfo::LINE;
-	}
+	ElementInfo::Type interfaceType = getInterfaceType();
 
 	const ElementInfo &interfaceTypeInfo = ElementInfo::getElementInfo(interfaceType);
 	const int nInterfaceVertices = interfaceTypeInfo.nVertices;
