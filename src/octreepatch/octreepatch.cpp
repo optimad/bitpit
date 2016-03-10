@@ -302,12 +302,8 @@ int OctreePatch::getCellLevel(const long &id)
 
 	\result Returns true if the mesh was updated, false otherwise.
 */
-const std::vector<Adaption::Info> OctreePatch::_update(bool trackAdaption)
+const std::vector<Adaption::Info> OctreePatch::_updateAdaption(bool trackAdaption)
 {
-	if (!isDirty()) {
-		return std::vector<Adaption::Info>();
-	}
-
 	// Check if the mesh is currently empty
 	bool initiallyEmpty = (getCellCount() == 0);
 

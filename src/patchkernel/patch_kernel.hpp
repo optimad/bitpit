@@ -222,6 +222,9 @@ public:
 	void getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
 	std::unordered_map<long, long> binSortVertex(int nBins = 128);
 
+	bool isAdaptionDirty() const;
+	const std::vector<Adaption::Info> updateAdaption(bool trackAdaption = true);
+
 	virtual void translate(std::array<double, 3> translation);
 	void translate(double sx, double sy, double sz);
 	virtual void scale(std::array<double, 3> scaling);
@@ -281,7 +284,7 @@ protected:
 
 	virtual void evalBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
 
-	virtual const std::vector<Adaption::Info> _update(bool trackAdaption) = 0;
+	virtual const std::vector<Adaption::Info> _updateAdaption(bool trackAdaption) = 0;
 	virtual bool _markCellForRefinement(const long &id) = 0;
 	virtual bool _markCellForCoarsening(const long &id) = 0;
 	virtual bool _enableCellBalancing(const long &id, bool enabled) = 0;

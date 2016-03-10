@@ -473,12 +473,8 @@ double CartesianPatch::getSpacing(const int &direction) const
 	\result Returns a vector of Adaption::Info that can be used to track
 	the changes done during the update.
 */
-const std::vector<Adaption::Info> CartesianPatch::_update(bool trackAdaption)
+const std::vector<Adaption::Info> CartesianPatch::_updateAdaption(bool trackAdaption)
 {
-	if (!isDirty()) {
-		return std::vector<Adaption::Info>();
-	}
-
 	log::cout() << ">> Updating cartesian mesh\n";
 
 	// Enable advanced editing

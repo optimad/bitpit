@@ -73,12 +73,8 @@ void SurfUnstructured::setExpert(bool expert)
 	\result Returns a vector of Adaption::Info that can be used to track
 	the changes done during the update.
 */
-const std::vector<Adaption::Info> SurfUnstructured::_update(bool trackAdaption)
+const std::vector<Adaption::Info> SurfUnstructured::_updateAdaption(bool trackAdaption)
 {
-	if (!isDirty()) {
-		return std::vector<Adaption::Info>();
-	}
-
 	std::cout << ">> Updating surface triangulation mesh\n";
 
 	// Adaption info

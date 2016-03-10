@@ -173,13 +173,31 @@ PatchKernel::~PatchKernel()
 */
 const std::vector<Adaption::Info> PatchKernel::update(bool trackAdaption)
 {
-	const std::vector<Adaption::Info> adaptionInfo = _update(trackAdaption);
+	const std::vector<Adaption::Info> adaptionInfo = updateAdaption(trackAdaption);
+
+	updateBoundingBox();
+
+	return adaptionInfo;
+}
+
+/*!
+	Updates the adaption
+
+	\result Returns a vector of Adaption::Info that can be used to track
+	the changes done during the update.
+*/
+const std::vector<Adaption::Info> PatchKernel::updateAdaption(bool trackAdaption)
+{
+	std::vector<Adaption::Info> adaptionInfo;
+	if (!isAdaptionDirty()) {
+		return adaptionInfo;
+	}
+
+	adaptionInfo = _updateAdaption(trackAdaption);
 
 	m_cells.flush();
 	m_interfaces.flush();
 	m_vertices.flush();
-
-	updateBoundingBox();
 
 	setAdaptionDirty(false);
 
@@ -373,7 +391,7 @@ void PatchKernel::write()
 }
 
 /*!
-	Flags the patch for update.
+	Flags the patch for adaption update.
 
 	\param dirty if true, then patch is informed that the patch needs to
 	adapt after a refinement, coarsening, ... and thus the current data
@@ -389,6 +407,18 @@ void PatchKernel::setAdaptionDirty(bool dirty)
 }
 
 /*!
+	Returns true if the the patch needs to update after an adaption.
+
+	\return This method returns true to indicate the patch needs to update
+	its data strucutres. Otherwise, it returns false.
+*/
+bool PatchKernel::isAdaptionDirty() const
+{
+	return m_adaptionDirty;
+}
+
+
+/*!
 	Returns true if the the patch needs to update its data strucutres.
 
 	\return This method returns true to indicate the patch needs to update
@@ -396,7 +426,7 @@ void PatchKernel::setAdaptionDirty(bool dirty)
 */
 bool PatchKernel::isDirty() const
 {
-	return m_adaptionDirty;
+	return isAdaptionDirty();
 }
 
 /*!
