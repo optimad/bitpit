@@ -46,6 +46,8 @@ namespace bitpit {
 	Creates a new patch.
 
 	\param id is the id of the patch
+	\param patch_dim is the dimension of the patch
+	\param space_dim is the dimension of the space
 */
 SurfUnstructured::SurfUnstructured(const int &id, int patch_dim, int space_dim)
 	: SurfaceKernel(id, patch_dim, space_dim, true)
