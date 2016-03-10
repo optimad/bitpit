@@ -373,7 +373,6 @@ int KdTree<d, T, T1>::hNeighbor(
 // ========================================================================== //
 
 // Local variables
-bool             check = false;
 int              index_l = -1, index_r = -1;
 int              prev_ = next_;
 int              dim;
@@ -445,9 +444,9 @@ int KdTree<d, T, T1>::hNeighbor(
 // ========================================================================== //
 
 // Local variables
-bool             check = false;
+// bool             check = false;
 int              index_l = -1, index_r = -1;
-int              dim;
+// int              dim;
 
 // Counters
 // none
