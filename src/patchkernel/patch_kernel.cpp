@@ -618,22 +618,6 @@ PatchKernel::VertexIterator PatchKernel::createVertex(long id)
 }
 
 /*!
-	Adds a new vertex with the specified id.
-
-	\param id is the id of the new cell. If a negative id value is
-	specified, ad new unique id will be generated
-	\return An iterator pointing to the added vertex.
-*/
-PatchKernel::VertexIterator PatchKernel::addVertex(const long &id)
-{
-	if (!isExpert()) {
-		return vertexEnd();
-	}
-
-	return createVertex(id);
-}
-
-/*!
 	Adds a new vertex with the specified coordinates.
 
 	\param coords are the coordinates of the vertex

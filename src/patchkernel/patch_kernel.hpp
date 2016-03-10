@@ -117,7 +117,6 @@ public:
 	const Vertex & getVertex(const long &id) const;
 	const std::array<double, 3> & getVertexCoords(const long &id) const;
 	long generateVertexId();
-	VertexIterator addVertex(const long &id = Vertex::NULL_ID);
 	VertexIterator addVertex(const std::array<double, 3> &coords, const long &id = Vertex::NULL_ID);
 	VertexIterator addVertex(const Vertex &source, long id = Vertex::NULL_ID);
 	VertexIterator addVertex(Vertex &&source, long id = Vertex::NULL_ID);
