@@ -138,6 +138,7 @@ public:
 	PiercedVector<Cell> &getCells();
 	Cell &getCell(const long &id);
 	const Cell &getCell(const long &id) const;
+	virtual ElementInfo::Type getCellType(const long &id) const;
 	Cell &getLastInternal();
 	const Cell &getLastInternal() const;
 	Cell &getFirstGhost();
@@ -181,6 +182,7 @@ public:
 	PiercedVector<Interface> &getInterfaces();
 	Interface &getInterface(const long &id);
 	const Interface &getInterface(const long &id) const;
+	virtual ElementInfo::Type getInterfaceType(const long &id) const;
 	long generateInterfaceId();
 	InterfaceIterator addInterface(ElementInfo::Type type, const long &id = Element::NULL_ID);
 	InterfaceIterator addInterface(const Interface &source, long id = Element::NULL_ID);

@@ -1001,6 +1001,17 @@ const Cell & PatchKernel::getCell(const long &id) const
 }
 
 /*!
+	Gets the element type for the cell with the specified id.
+
+	\param id is the id of the requested cell
+	\return The element type for the cell with the specified id.
+*/
+ElementInfo::Type PatchKernel::getCellType(const long &id) const
+{
+	return m_cells[id].getType();
+}
+
+/*!
 	Gets a reference to the last internal cell.
 
 	\return A reference to the last internal cell.
@@ -2021,6 +2032,17 @@ Interface & PatchKernel::getInterface(const long &id)
 const Interface & PatchKernel::getInterface(const long &id) const
 {
 	return m_interfaces[id];
+}
+
+/*!
+	Gets the element type for the interface with the specified id.
+
+	\param id is the id of the requested interface
+	\return The element type for the interface with the specified id.
+*/
+ElementInfo::Type PatchKernel::getInterfaceType(const long &id) const
+{
+	return m_interfaces[id].getType();
 }
 
 /*!
