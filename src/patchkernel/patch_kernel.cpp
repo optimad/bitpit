@@ -607,6 +607,7 @@ long PatchKernel::generateVertexId()
 /*!
 	Creates a new vertex with the specified id.
 
+	\param coords are the coordinates of the vertex
 	\param id is the id of the new vertex
 	\return An iterator pointing to the newly created vertex.
 */
@@ -2713,7 +2714,7 @@ void PatchKernel::setBoundingBox(const std::array<double, 3> &minPoint, const st
 	called. The only way to change a frozen bounding box is the usage of the
 	functions that explicitly sets the bounding box.
 
-	\param forzen controls if the bounding box will be set as frozen
+	\param frozen controls if the bounding box will be set as frozen
 */
 void PatchKernel::setBoundingBoxFrozen(bool frozen)
 {

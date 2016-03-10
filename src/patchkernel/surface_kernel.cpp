@@ -737,7 +737,7 @@ void SurfaceKernel::displayQualityStats(ostream& out, unsigned int padding)
  * used). For instant, if the selection mask is set to the value SelectionMask::SELECT_QUAD |
  * SelectionMask::SELECT_TRIANGLE, only quad and tria element will be considered and count
  * will returns the number of such elements.
- * \param[in] n_internvals (default = 8), number of intervals to be used for histogram construction.
+ * \param[in] n_intervals (default = 8), number of intervals to be used for histogram construction.
  * If bins is a non-empty vector, the number of intervals will be set equal to 
  * bins.size()-1
  * \param[in] mask (default = SelectionMask::ALL) selection mask for element type
