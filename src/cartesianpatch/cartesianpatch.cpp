@@ -536,11 +536,7 @@ void CartesianPatch::addVertices()
 	for (int k = 0; (isThreeDimensional()) ? (k < m_nVertices1D[Vertex::COORD_Z]) : (k <= 0); k++) {
 		for (int j = 0; j < m_nVertices1D[Vertex::COORD_Y]; j++) {
 			for (int i = 0; i < m_nVertices1D[Vertex::COORD_X]; i++) {
-				long id_vertex = getVertexLinearId(i, j, k);
-				VertexIterator vertexIterator = VolumeKernel::addVertex(id_vertex);
-				Vertex &vertex = *vertexIterator;
-
-				// Coordinate
+				// Vertex coordinates
 				std::array<double, 3> coords;
 				coords[Vertex::COORD_X] = m_vertexCoords[Vertex::COORD_X][i];
 				coords[Vertex::COORD_Y] = m_vertexCoords[Vertex::COORD_Y][j];
@@ -550,7 +546,9 @@ void CartesianPatch::addVertices()
 					coords[Vertex::COORD_Z] = 0.0;
 				}
 
-				vertex.setCoords(coords);
+				// Add vertex
+				long id_vertex = getVertexLinearId(i, j, k);
+				VolumeKernel::addVertex(std::move(coords), id_vertex);
 			}
 		}
 	}
