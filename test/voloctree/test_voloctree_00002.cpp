@@ -24,6 +24,7 @@
 
 #include <array>
 
+#include "bitpit_common.hpp"
 #include "bitpit_IO.hpp"
 #include "bitpit_voloctree.hpp"
 
@@ -36,6 +37,9 @@ int main(int argc, char *argv[]) {
 
 #if BITPIT_ENABLE_MPI==1
 	MPI::Init(argc,argv);
+#else
+	BITPIT_UNUSED(argc);
+	BITPIT_UNUSED(argv);
 #endif
 
 	std::array<double, 3> origin = {0., 0., 0.};
