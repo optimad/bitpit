@@ -22,6 +22,7 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#include "bitpit_common.hpp"
 #include "ParaTree.hpp"
 
 using namespace std;
@@ -31,13 +32,12 @@ using namespace bitpit;
 void testParallel001() {
 
 	/**<Instantation and setup of a default (named bitpit) logfile.*/
-	int errorFlag;
 	int nproc;
 	int	rank;
 #if BITPIT_ENABLE_MPI==1
 	MPI_Comm comm = MPI_COMM_WORLD;
-	errorFlag = MPI_Comm_size(comm,&nproc);
-	errorFlag = MPI_Comm_rank(comm,&rank);
+	MPI_Comm_size(comm,&nproc);
+	MPI_Comm_rank(comm,&rank);
 #else
 	nproc = 1;
 	rank = 0;
@@ -112,6 +112,9 @@ int main( int argc, char *argv[] ) {
 	MPI::Init(argc, argv);
 
 	{
+#else
+	BITPIT_UNUSED(argc);
+	BITPIT_UNUSED(argv);
 #endif
 		/**<Calling Pablo Test routines*/
 
