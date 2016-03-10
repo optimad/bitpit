@@ -150,6 +150,7 @@ PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
 	// Initializes the bounding box
 	setBoundingBoxFrozen(false);
 	clearBoundingBox();
+	setBoundingBoxDirty(false);
 
 	// Set VTK codex
 	VTKUnstructuredGrid::setCodex(VTKFormat::APPENDED);
