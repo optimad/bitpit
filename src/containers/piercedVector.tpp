@@ -1959,7 +1959,11 @@ void PiercedVector<value_t, id_t>::holesClear(bool release)
 	if (release) {
 		hole_container().swap(m_holes);
 	}
+
+	// Clearing peinding holes updates also the iterators of the regular ones
 	holesClearPending(0, 0);
+
+	// There are no regular holes, therefore the regular holes are sorted
 	m_holes_regular_sorted = true;
 }
 
