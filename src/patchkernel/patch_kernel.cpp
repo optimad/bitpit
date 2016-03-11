@@ -2712,6 +2712,28 @@ void PatchKernel::setBoundingBox(const std::array<double, 3> &minPoint, const st
 }
 
 /*!
+	Gets the previously stored patch bounding box.
+
+	\param[out] minPoint on output stores the minimum point of the patch
+	\param[out] maxPoint on output stores the maximum point of the patch
+*/
+void PatchKernel::getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint)
+{
+	minPoint = m_boxMinPoint;
+	maxPoint = m_boxMaxPoint;
+}
+
+/*!
+	Checks if the bounding box is frozen.
+
+	\result Returns true if the bounding box is frozen, false otherwise.
+*/
+bool PatchKernel::isBoundingBoxFrozen() const
+{
+	return m_boxFrozen;
+}
+
+/*!
 	Sets the bounding box as frozen.
 
 	When the bounding box is frozen it won't be updated on insertion/deletion
@@ -2725,19 +2747,6 @@ void PatchKernel::setBoundingBoxFrozen(bool frozen)
 {
 	m_boxFrozen = frozen;
 }
-
-/*!
-	Gets the previously stored patch bounding box.
-
-	\param[out] minPoint on output stores the minimum point of the patch
-	\param[out] maxPoint on output stores the maximum point of the patch
-*/
-void PatchKernel::getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint)
-{
-	minPoint = m_boxMinPoint;
-	maxPoint = m_boxMaxPoint;
-}
-
 
 /*!
 	Checks if the bounding box is dirty.
@@ -2764,7 +2773,7 @@ void PatchKernel::setBoundingBoxDirty(bool dirty)
 */
 void PatchKernel::updateBoundingBox(bool forcedUpdated)
 {
-	if (m_boxFrozen) {
+	if (isBoundingBoxFrozen()) {
 		return;
 	}
 
@@ -2795,7 +2804,7 @@ void PatchKernel::updateBoundingBox(bool forcedUpdated)
 */
 void PatchKernel::addPointToBoundingBox(const std::array<double, 3> &point)
 {
-	if (m_boxFrozen || isBoundingBoxDirty()) {
+	if (isBoundingBoxFrozen() || isBoundingBoxDirty()) {
 		return;
 	}
 
@@ -2844,7 +2853,7 @@ void PatchKernel::addPointToBoundingBox(const std::array<double, 3> &point)
 */
 void PatchKernel::removePointFromBoundingBox(const std::array<double, 3> &point, bool delayed)
 {
-	if (m_boxFrozen || isBoundingBoxDirty()) {
+	if (isBoundingBoxFrozen() || isBoundingBoxDirty()) {
 		return;
 	}
 
@@ -2937,7 +2946,7 @@ void PatchKernel::translate(std::array<double, 3> translation)
 	}
 
 	// Update the bounding box
-	if (!m_boxFrozen && !isBoundingBoxDirty()) {
+	if (!isBoundingBoxFrozen() || isBoundingBoxDirty()) {
 		m_boxMinPoint += translation;
 		m_boxMaxPoint += translation;
 	}
@@ -2970,7 +2979,7 @@ void PatchKernel::scale(std::array<double, 3> scaling)
 	}
 
 	// Update the bounding box
-	if (!m_boxFrozen && !isBoundingBoxDirty()) {
+	if (!isBoundingBoxFrozen() || isBoundingBoxDirty()) {
 		for (int k = 0; k < 3; ++k) {
 			m_boxMaxPoint[k] = m_boxMinPoint[k] + scaling[k] * (m_boxMaxPoint[k] - m_boxMinPoint[k]);
 		}

@@ -281,6 +281,7 @@ protected:
 	long m_firstGhostId;
 
 	void clearBoundingBox();
+	bool isBoundingBoxFrozen() const;
 	void setBoundingBoxFrozen(bool frozen);
 	void setBoundingBoxDirty(bool dirty);
 	void setBoundingBox(const std::array<double, 3> &minPoint, const std::array<double, 3> &maxPoint);
