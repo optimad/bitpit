@@ -1876,7 +1876,7 @@ std::vector<long> PatchKernel::findCellVertexNeighs(const long &id, bool complet
 		nCellVertices = cellTypeInfo.nVertices;
 	} else {
 		const Cell &cell = getCell(id);
-		nCellVertices = cell.getEdgeCount();
+		nCellVertices = cell.getVertexCount();
 	}
 
 	// Get the neighbours
