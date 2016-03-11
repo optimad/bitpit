@@ -2123,6 +2123,8 @@ void PiercedVector<value_t, id_t>::holesClearPending(const long &offset, const l
 	m_holes_regular_end   = m_holes_regular_begin + nRegulars;
 	m_holes_pending_begin = m_holes_regular_end;
 	m_holes_pending_end   = m_holes_pending_begin;
+
+	m_holes_pending_sorted = true;
 }
 
 /*!
