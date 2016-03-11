@@ -506,7 +506,7 @@ const std::vector<Adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 
 	// Previous ghosts cells need to be removed
 	if (nPreviousGhosts > 0) {
-		long deletedGhostsInfoIdx;
+		long deletedGhostsInfoIdx = -1;
 		if (trackAdaption) {
 			adaptionData.emplace_back();
 			Adaption::Info &deletedGhostsInfo = adaptionData.back();
