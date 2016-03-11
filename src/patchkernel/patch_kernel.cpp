@@ -2704,6 +2704,11 @@ void PatchKernel::setBoundingBox(const std::array<double, 3> &minPoint, const st
 	m_boxMaxPoint = maxPoint;
 
 	setBoundingBoxDirty(false);
+
+	// Update geometrical tolerance
+	if (!isTolCustomized()) {
+		resetTol();
+	}
 }
 
 /*!
