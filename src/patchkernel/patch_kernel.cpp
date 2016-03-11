@@ -2789,11 +2789,14 @@ void PatchKernel::updateBoundingBox(bool forcedUpdated)
 /*!
 	Update the bounding adding the specified point.
 
+	The bounding box is not updated if it's set as frozen, or if it's in a
+	dirty state.
+
 	\param point is the a new point that will be added to the bounding box
 */
 void PatchKernel::addPointToBoundingBox(const std::array<double, 3> &point)
 {
-	if (m_boxFrozen) {
+	if (m_boxFrozen || isBoundingBoxDirty()) {
 		return;
 	}
 
@@ -2831,6 +2834,9 @@ void PatchKernel::addPointToBoundingBox(const std::array<double, 3> &point)
 /*!
 	Update the bounding removing the specified point.
 
+	The bounding box is not updated if it's set as frozen, or if it's in a
+	dirty state.
+
 	\param point is the point that will be removed from to the bounding box
 	\param delayed if true a delayed update ofthe bounding box will
 	be performed. This means that, if the bounding box requires an update,
@@ -2839,7 +2845,7 @@ void PatchKernel::addPointToBoundingBox(const std::array<double, 3> &point)
 */
 void PatchKernel::removePointFromBoundingBox(const std::array<double, 3> &point, bool delayed)
 {
-	if (m_boxFrozen) {
+	if (m_boxFrozen || isBoundingBoxDirty()) {
 		return;
 	}
 
@@ -2932,7 +2938,7 @@ void PatchKernel::translate(std::array<double, 3> translation)
 	}
 
 	// Update the bounding box
-	if (!m_boxFrozen) {
+	if (!m_boxFrozen && !isBoundingBoxDirty()) {
 		m_boxMinPoint += translation;
 		m_boxMaxPoint += translation;
 	}
@@ -2965,7 +2971,7 @@ void PatchKernel::scale(std::array<double, 3> scaling)
 	}
 
 	// Update the bounding box
-	if (!m_boxFrozen) {
+	if (!m_boxFrozen && !isBoundingBoxDirty()) {
 		for (int k = 0; k < 3; ++k) {
 			m_boxMaxPoint[k] = m_boxMinPoint[k] + scaling[k] * (m_boxMaxPoint[k] - m_boxMinPoint[k]);
 		}
