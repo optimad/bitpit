@@ -147,6 +147,9 @@ PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
 	convert << getId();
 	setName(convert.str());
 
+	// Initialize the geometrical tolerance to a default value
+	_setTol(DEFAULT_TOLERANCE);
+
 	// Initializes the bounding box
 	setBoundingBoxFrozen(false);
 	clearBoundingBox();
@@ -3063,7 +3066,7 @@ void PatchKernel::_resetTol()
 	for (int k = 0; k < 3; ++k) {
 		m_tolerance = std::max(m_boxMaxPoint[k] - m_boxMinPoint[k], m_tolerance);
 	}
-	m_tolerance *= 1e-14;
+	m_tolerance *= DEFAULT_TOLERANCE;
 }
 
 /*!

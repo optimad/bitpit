@@ -304,6 +304,8 @@ protected:
 	void setExpert(bool expert);
 
 private:
+	double DEFAULT_TOLERANCE = 1e-14;
+
 	bool m_boxFrozen;
 	bool m_boxDirty;
 	std::array<double, 3> m_boxMinPoint;
