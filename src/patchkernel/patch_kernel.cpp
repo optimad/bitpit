@@ -150,7 +150,6 @@ PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
 	// Initializes the bounding box
 	setBoundingBoxFrozen(false);
 	clearBoundingBox();
-	setBoundingBoxDirty(false);
 
 	// Set VTK codex
 	VTKUnstructuredGrid::setCodex(VTKFormat::APPENDED);
@@ -2688,7 +2687,7 @@ void PatchKernel::clearBoundingBox()
 		m_boxMaxCounter[k] = 0;
 	}
 
-	setBoundingBoxDirty(true);
+	setBoundingBoxDirty(getCellCount() > 0);
 }
 
 /*!
@@ -2772,6 +2771,9 @@ void PatchKernel::updateBoundingBox(bool forcedUpdated)
 	// Initialize bounding box
 	clearBoundingBox();
 
+	// Unset the dirty flag in order to be able to update the bounding box
+	setBoundingBoxDirty(false);
+
 	// Compute bounding box
 	for (const auto &vertex : m_vertices) {
 		addPointToBoundingBox(vertex.getCoords());
@@ -2781,9 +2783,6 @@ void PatchKernel::updateBoundingBox(bool forcedUpdated)
 	if (!isTolCustomized()) {
 		resetTol();
 	}
-
-	// The box is no more dirty
-	setBoundingBoxDirty(false);
 }
 
 /*!
