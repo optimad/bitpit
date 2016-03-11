@@ -2783,11 +2783,6 @@ void PatchKernel::updateBoundingBox(bool forcedUpdated)
 	for (const auto &vertex : m_vertices) {
 		addPointToBoundingBox(vertex.getCoords());
 	}
-
-	// Update geometrical tolerance
-	if (!isTolCustomized()) {
-		resetTol();
-	}
 }
 
 /*!
