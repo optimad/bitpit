@@ -51,10 +51,6 @@ Here is a list of the main authors of each bitpit module:
 
   * [Andrea Iob](mailto:andrea_iob@hotmail.com)
 
-* volunstructured
-
-  * [Alessandro Alaia](mailto:alessandro.alaia@optimad.it)
-
 # Contributors
 
 These people have contributed to bitpit's development:
