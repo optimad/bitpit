@@ -46,6 +46,8 @@ int main(int argc, char *argv[]) {
 	double length = 20;
 	double dh = 1.0;
 
+	std::srand(1);
+
 	log::cout() << std::endl;
 	log::cout() << "  :: 2D adaption test ::" << std::endl;
 
