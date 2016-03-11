@@ -114,7 +114,7 @@ VTKDataType VTKTypes::registerType(VTKDataType VTKType)
  *  @return     basic VTK type 
  */
 template<class T>
-VTKDataType VTKTypes::whichType( T dummy ){
+VTKDataType VTKTypes::whichType( const T &dummy ){
 
     BITPIT_UNUSED(dummy) ;
 
@@ -128,11 +128,13 @@ VTKDataType VTKTypes::whichType( T dummy ){
  *  @return     basic VTK type 
  */
 template<class T>
-VTKDataType VTKTypes::whichType( std::vector<T> dummy ){
+VTKDataType VTKTypes::whichType( const std::vector<T> &dummy ){
 
     BITPIT_UNUSED(dummy) ;
 
-    return whichType(typeid(T)) ;
+    T dummy2 ;
+
+    return whichType(dummy2) ;
 };
 
 /*!
@@ -142,7 +144,7 @@ VTKDataType VTKTypes::whichType( std::vector<T> dummy ){
  *  @return     basic VTK type 
  */
 template<class T, size_t d>
-VTKDataType VTKTypes::whichType( std::array<T,d> dummy ){
+VTKDataType VTKTypes::whichType( const std::array<T,d> &dummy ){
 
     BITPIT_UNUSED(dummy) ;
 

@@ -126,13 +126,13 @@ class VTKTypes{
         static VTKDataType              whichType( const std::type_info & ) ;
 
         template<class T>
-        static VTKDataType              whichType( T ) ;
+        static VTKDataType              whichType( const T &) ;
 
         template<class T>
-        static VTKDataType              whichType( std::vector<T> ) ;
+        static VTKDataType              whichType( const std::vector<T> & ) ;
 
         template<class T, size_t d>
-        static VTKDataType              whichType( std::array<T,d> ) ;
+        static VTKDataType              whichType( const std::array<T,d> & ) ;
 
 
 };
