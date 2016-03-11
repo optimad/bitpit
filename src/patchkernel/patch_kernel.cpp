@@ -2818,7 +2818,7 @@ void PatchKernel::addPointToBoundingBox(const std::array<double, 3> &point)
 			m_boxMaxCounter[k] = 1;
 
 			boxUpdated = true;
-		} else if (std::abs(value - m_boxMaxPoint[k]) < getTol()) {
+		} else if (std::abs(value - m_boxMaxPoint[k]) <= getTol()) {
 			++m_boxMaxCounter[k];
 		}
 
@@ -2828,7 +2828,7 @@ void PatchKernel::addPointToBoundingBox(const std::array<double, 3> &point)
 			m_boxMinCounter[k] = 1;
 
 			boxUpdated = true;
-		} else if (std::abs(value - m_boxMinPoint[k]) < getTol()) {
+		} else if (std::abs(value - m_boxMinPoint[k]) <= getTol()) {
 			++m_boxMinCounter[k];
 		}
 	}
@@ -2864,7 +2864,7 @@ void PatchKernel::removePointFromBoundingBox(const std::array<double, 3> &point,
 		assert(value <= (m_boxMaxPoint[k] + getTol()));
 		if (value > (m_boxMaxPoint[k] - getTol())) {
 			setBoundingBoxDirty(true);
-		} else if (std::abs(value - m_boxMaxPoint[k]) < getTol()) {
+		} else if (std::abs(value - m_boxMaxPoint[k]) <= getTol()) {
 			--m_boxMaxCounter[k];
 			if (m_boxMaxCounter[k] == 0) {
 				setBoundingBoxDirty(true);
@@ -2875,7 +2875,7 @@ void PatchKernel::removePointFromBoundingBox(const std::array<double, 3> &point,
 		assert(value >= (m_boxMinPoint[k] - getTol()));
 		if (value < (m_boxMinPoint[k] + getTol())) {
 			setBoundingBoxDirty(true);
-		} else if (std::abs(value - m_boxMinPoint[k]) < getTol()) {
+		} else if (std::abs(value - m_boxMinPoint[k]) <= getTol()) {
 			--m_boxMinCounter[k];
 			if (m_boxMinCounter[k] == 0) {
 				setBoundingBoxDirty(true);
