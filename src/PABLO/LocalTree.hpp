@@ -53,8 +53,6 @@ typedef std::vector<Intersection>	 	intervector;
  *	\authors	Edoardo Lombardi
  *	\authors	Marco Cisternino
  *	\copyright		Copyright 2015 Optimad engineering srl. All rights reserved.
- *	\par			License:\n
- *	This version of PABLO is released under the LGPL License.
  *
  *	\brief Local octree portion for each process
  *

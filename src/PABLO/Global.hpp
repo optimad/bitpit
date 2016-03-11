@@ -39,8 +39,6 @@ namespace bitpit {
  *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
  *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
- *	\par			License:\n
- *	This version of PABLO is released under the LGPL License.
  *
  *	\brief Global variables used in PABLO
  *

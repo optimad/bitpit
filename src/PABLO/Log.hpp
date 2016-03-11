@@ -22,13 +22,6 @@
  *
 \*---------------------------------------------------------------------------*/
 
-/*
- * Log.hpp
- *
- *  Created on: 3 dec 2014
- *      Author: marco
- */
-
 #ifndef __BITPIT_PABLO_LOG_HPP__
 #define __BITPIT_PABLO_LOG_HPP__
 
@@ -39,6 +32,15 @@
 
 namespace bitpit {
 
+/*!
+ * log.hpp
+ *
+ *  \ingroup    PABLO
+ *  @{
+ *
+ *	\brief File-log class of PABLO.
+ *
+ */
 class Log {
 
 	std::string m_filename;
@@ -60,5 +62,8 @@ public:
 };
 
 }
+
+/*  @}  */
+
 
 #endif /* __BITPIT_PABLO_LOG_HPP__ */

@@ -39,13 +39,6 @@ namespace bitpit {
 /*! @ingroup PABLO 
  * @{ 
  *
- *	\date		03/mar/2014
- *  \authors	Marco Cisternino
- *  \authors	Edoardo Lombardi
- *	\copyright	Copyright 2014 Optimad engineering srl. All rights reserved.
- *	\par		License:\n
- *	This version of PABLO is released under the LGPL License.
- *
  *  \brief Customized array definition
  *
  *  Array contains a pointer to an array of integer values.

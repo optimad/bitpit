@@ -145,7 +145,7 @@ PabloUniform::getL(){
 };
 
 /*! Set the length of the domain.
- * \param[in] Length of the octree.
+ * \param[in] L Length of the octree.
  */
 void
 PabloUniform::setL(double L){
@@ -153,7 +153,7 @@ PabloUniform::setL(double L){
 };
 
 /*! Set the origin of the domain.
- * \param[in] Oriin of the octree.
+ * \param[in] origin Origin of the octree.
  */
 void
 PabloUniform::setOrigin(darray3 origin){
@@ -161,7 +161,7 @@ PabloUniform::setOrigin(darray3 origin){
 };
 
 /*! Get the size of an octant corresponding to a target level.
- * \param[in] idx Input level.
+ * \param[in] level Input level.
  * \return Size of an octant of input level.
  */
 double
@@ -286,7 +286,7 @@ PabloUniform::getCenter(uint32_t idx){
 /*! Get the coordinates of the center of a face of an octant.
  * \param[in] idx Local index of target octant.
  * \param[in] iface Index of the target face.
- * \param[out] center Coordinates of the center of the iface-th face af octant.
+ * \param[out] center Coordinates of the center of the iface-th face of octant.
  */
 void
 PabloUniform::getFaceCenter(uint32_t idx, uint8_t iface, darray3& center){
@@ -299,7 +299,7 @@ PabloUniform::getFaceCenter(uint32_t idx, uint8_t iface, darray3& center){
 /*! Get the coordinates of the center of a face of an octant.
  * \param[in] idx Local index of target octant.
  * \param[in] iface Index of the target face.
- * \return center Coordinates of the center of the iface-th face af octant.
+ * \return center Coordinates of the center of the iface-th face of octant.
  */
 darray3
 PabloUniform::getFaceCenter(uint32_t idx, uint8_t iface){
@@ -310,10 +310,10 @@ PabloUniform::getFaceCenter(uint32_t idx, uint8_t iface){
 	return center;
 };
 
-/*! Get the coordinates of single node of an octant.
+/*! Get the coordinates of a node of an octant.
  * \param[in] idx Local index of target octant.
  * \param[in] inode Index of the target node.
- * \return center Coordinates of the center of the iface-th face af octant.
+ * \return Coordinates of of the inode-th node of octant.
  */
 darray3
 PabloUniform::getNode(uint32_t idx, uint8_t inode){
@@ -324,10 +324,10 @@ PabloUniform::getNode(uint32_t idx, uint8_t inode){
 	return node;
 };
 
-/*! Get the coordinates of the center of a face of an octant.
+/*! Get the coordinates of a node of an octant.
  * \param[in] idx Local index of target octant.
- * \param[in] iface Index of the target face.
- * \param[out] center Coordinates of the center of the iface-th face af octant.
+ * \param[in] inode Index of the target node.
+ * \param[out] node Coordinates of of the inode-th node of octant.
  */
 void
 PabloUniform::getNode(uint32_t idx, uint8_t inode, darray3& node){
@@ -369,7 +369,7 @@ PabloUniform::getNodes(uint32_t idx){
 };
 
 /*! Get the normal of a face of an octant.
- * \param[in] Local index of target octant.
+ * \param[in] idx Local index of target octant.
  * \param[in] iface Index of the face for normal computing.
  * \param[out] normal Coordinates of the normal of face.
  */
@@ -531,7 +531,7 @@ PabloUniform::getFaceCenter(Octant* oct, uint8_t iface){
 /*! Get the coordinates of single node of an octant.
  * \param[in] oct Pointer to the target octant
  * \param[in] inode Index of the target node.
- * \return center Coordinates of the center of the iface-th face af octant.
+ * \return Coordinates of the center of the inode-th of octant.
  */
 darray3
 PabloUniform::getNode(Octant* oct, uint8_t inode){
@@ -544,8 +544,8 @@ PabloUniform::getNode(Octant* oct, uint8_t inode){
 
 /*! Get the coordinates of the center of a face of an octant.
  * \param[in] oct Pointer to the target octant
- * \param[in] iface Index of the target face.
- * \param[out] center Coordinates of the center of the iface-th face af octant.
+ * \param[in] inode Index of the target node.
+ * \param[out] node Coordinates of the center of the inode-th of octant.
  */
 void
 PabloUniform::getNode(Octant* oct, uint8_t inode, darray3& node){
@@ -682,7 +682,7 @@ PabloUniform::getArea(Intersection* inter){
 
 /*! Get the coordinates of the center of an intersection.
  * \param[in] inter Pointer to target intersection.
- * \param[out] center Coordinates of the center of intersection.
+ * \return Coordinates of the center of intersection.
  */
 darray3
 PabloUniform::getCenter(Intersection* inter){
@@ -694,8 +694,8 @@ PabloUniform::getCenter(Intersection* inter){
 }
 
 /*! Get the coordinates of the nodes of an intersection.
- * \param[in] oct Pointer to target intersection.
- * \return nodes Coordinates of the nodes of intersection.
+ * \param[in] inter Pointer to target intersection.
+ * \return Coordinates of the nodes of intersection.
  */
 darr3vector
 PabloUniform::getNodes(Intersection* inter){
@@ -710,8 +710,8 @@ PabloUniform::getNodes(Intersection* inter){
 }
 
 /*! Get the normal of an intersection.
- * \param[in] oct Pointer to target intersection.
- * \param[out] normal Coordinates of the normal of intersection.
+ * \param[in] inter Pointer to target intersection.
+ * \return Coordinates of the normal of intersection.
  */
 darray3
 PabloUniform::getNormal(Intersection* inter){

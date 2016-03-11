@@ -59,8 +59,6 @@ typedef std::vector<darray3>		darr3vector;
  *	\authors		Edoardo Lombardi
  *	\authors		Marco Cisternino
  *	\copyright		Copyright 2014 Optimad engineering srl. All rights reserved.
- *	\par			License:\n
- *	This version of PABLO is released under the LGPL License.
  *
  *	\brief Transformation Mapper
  *

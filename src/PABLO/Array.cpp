@@ -39,12 +39,19 @@ using namespace std;
 // CLASS IMPLEMENTATION                                                                    //
 // =================================================================================== //
 
+/*!Default constructor of Array
+ *
+ */
 Array::Array() {
 	// TODO Auto-generated constructor stub
 	m_arraySize = 0;
 	m_array = NULL;
 }
 
+/*!Custom constructor of Array
+ * \param[in] size Size of array.
+ * \param[in] value Value of all the elements of array.
+ */
 Array::Array(uint32_t size, int value) {
 
 	m_arraySize = size;
@@ -53,6 +60,9 @@ Array::Array(uint32_t size, int value) {
 		m_array[i] = value;
 }
 
+/*!Copy constructor of Array
+ * \param[in] other Input origin array.
+ */
 Array::Array(
 		const Array& other) {
 	m_arraySize = other.m_arraySize;
@@ -61,9 +71,15 @@ Array::Array(
 		m_array[i] = other.m_array[i];
 }
 
+/*! Dentructor of Array.
+ *
+ */
 Array::~Array() {
 }
 
+/*! Assign operator of Array.
+ * \param[in] rhs Input origin array.
+ */
 Array& Array::operator =(
 		const Array& rhs) {
 	if(this != &rhs)

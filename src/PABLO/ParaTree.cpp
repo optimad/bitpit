@@ -225,8 +225,10 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 /*! Default Destructor of ParaTree.
 */
 ParaTree::~ParaTree(){
-	delete 	m_partitionFirstDesc, m_partitionLastDesc;
-	delete 	m_partitionRangeGlobalIdx, m_partitionRangeGlobalIdx0;
+	delete 	m_partitionFirstDesc;
+	delete	m_partitionLastDesc;
+	delete 	m_partitionRangeGlobalIdx;
+	delete	m_partitionRangeGlobalIdx0;
 
 	(*m_log) << "---------------------------------------------" << endl;
 	(*m_log) << "--------------- R.I.P. PABLO ----------------" << endl;
@@ -729,7 +731,7 @@ ParaTree::getFaceCenter(uint32_t idx, uint8_t iface, darray3& center) {
 /*! Get the coordinates of single node of an octant.
  * \param[in] idx Local index of target octant.
  * \param[in] inode Index of the target node.
- * \return center Coordinates of the center of the iface-th face af octant.
+ * \return Coordinates of the inode-th node of octant.
  */
 darray3
 ParaTree::getNode(uint32_t idx, uint8_t inode) {
@@ -741,8 +743,8 @@ ParaTree::getNode(uint32_t idx, uint8_t inode) {
 
 /*! Get the coordinates of the center of a face of an octant.
  * \param[in] idx Local index of target octant.
- * \param[in] iface Index of the target face.
- * \param[out] center Coordinates of the center of the iface-th face af octant.
+ * \param[in] inode Index of the target node.
+ * \param[out] node Coordinates of the inode-th node of octant.
  */
 void
 ParaTree::getNode(uint32_t idx, uint8_t inode, darray3& node) {
@@ -775,7 +777,7 @@ ParaTree::getNodes(uint32_t idx){
 }
 
 /*! Get the normal of a face of an octant.
- * \param[in] Local index of target octant.
+ * \param[in] idx Local index of target octant.
  * \param[in] iface Index of the face for normal computing.
  * \param[out] normal Coordinates of the normal of face.
  */
@@ -1067,7 +1069,7 @@ ParaTree::getFaceCenter(Octant* oct, uint8_t iface, darray3& center) {
 /*! Get the coordinates of single node of an octant.
  * \param[in] oct Pointer to the target octant
  * \param[in] inode Index of the target node.
- * \return center Coordinates of the center of the iface-th face af octant.
+ * \return Coordinates of the inode-th node of octant.
  */
 darray3
 ParaTree::getNode(Octant* oct, uint8_t inode) {
@@ -1079,8 +1081,8 @@ ParaTree::getNode(Octant* oct, uint8_t inode) {
 
 /*! Get the coordinates of the center of a face of an octant.
  * \param[in] oct Pointer to the target octant
- * \param[in] iface Index of the target face.
- * \param[out] center Coordinates of the center of the iface-th face af octant.
+ * \param[in] inode Index of the target node.
+ * \param[out] node Coordinates of the inode-th node of octant.
  */
 void
 ParaTree::getNode(Octant* oct, uint8_t inode, darray3& node) {
@@ -1245,7 +1247,7 @@ ParaTree::getIdx(Octant* oct){
 };
 
 /*! Get the global index of an octant.
- * \param[in] idx Local index of target octant.
+ * \param[in] oct Pointer to target octant.
  * \return Global index of octant.
  */
 uint64_t
@@ -1429,7 +1431,7 @@ ParaTree::getPboundOctantsEnd(){
 }
 
 /*! Set the codimension for 2:1 balancing
- * \param[in] Maximum codimension of the entity through which the 2:1 balance is performed (1 = 2:1 balance through edges (default); 2 = 2:1 balance through nodes and edges).
+ * \param[in] b21codim  Maximum codimension of the entity through which the 2:1 balance is performed (1 = 2:1 balance through edges (default); 2 = 2:1 balance through nodes and edges).
  */
 void
 ParaTree::setBalanceCodimension(uint8_t b21codim){
@@ -1577,7 +1579,7 @@ ParaTree::getArea(Intersection* inter) {
 
 /*! Get the coordinates of the center of an intersection.
  * \param[in] inter Pointer to target intersection.
- * \param[out] center Coordinates of the center of intersection.
+ * \return Coordinates of the center of intersection.
  */
 darray3
 ParaTree::getCenter(Intersection* inter){
@@ -1596,8 +1598,8 @@ ParaTree::getCenter(Intersection* inter){
 }
 
 /*! Get the coordinates of the nodes of an intersection.
- * \param[in] oct Pointer to target intersection.
- * \return nodes Coordinates of the nodes of intersection.
+ * \param[in] inter Pointer to target intersection.
+ * \return Coordinates of the nodes of intersection.
  */
 darr3vector
 ParaTree::getNodes(Intersection* inter){
@@ -1621,8 +1623,8 @@ ParaTree::getNodes(Intersection* inter){
 }
 
 /*! Get the normal of an intersection.
- * \param[in] oct Pointer to target intersection.
- * \param[out] normal Coordinates of the normal of intersection.
+ * \param[in] inter Pointer to target intersection.
+ * \return Coordinates of the normal of intersection.
  */
 darray3
 ParaTree::getNormal(Intersection* inter){
@@ -3131,7 +3133,7 @@ ParaTree::privateLoadBalance(uint32_t* partition){
 #endif
 
 /*! Get the size of an octant corresponding to a target level.
- * \param[in] idx Input level.
+ * \param[in] level Input level.
  * \return Size of an octant of input level.
  */
 double
@@ -4255,7 +4257,7 @@ ParaTree::balance21(bool const first){
 /** Write the physical octree mesh in .vtu format in a user-defined file.
  * If the connectivity is not stored, the method temporary computes it.
  * If the connectivity of ghost octants is already computed, the method writes the ghosts on file.
- * \param[in] filename Seriously?....
+ * \param[in] filename Name of output file (PABLO will add the total number of processes p000# and the current rank s000#).
  */
 void
 ParaTree::write(string filename) {
@@ -4418,7 +4420,8 @@ ParaTree::write(string filename) {
 /** Write the physical octree mesh in .vtu format with data for test in a user-defined file.
  * If the connectivity is not stored, the method temporary computes it.
  * The method doesn't write the ghosts on file.
- * \param[in] filename Seriously?....
+ * \param[in] filename Name of output file (PABLO will add the total number of processes p000# and the current rank s000#).
+ * \param[in] data Vector of double with user data.
  */
 void
 ParaTree::writeTest(string filename, vector<double> data) {
