@@ -751,10 +751,16 @@ void Logger::print(const std::string &message, log::Visibility visibility)
 */
 void Logger::print(const std::string &message, log::Priority priority, log::Visibility visibility)
 {
+	log::Priority prevPriority   = getPriority();
+	log::Visibility prevVisibility = getVisibility();
+
 	setPriority(priority);
 	setVisibility(visibility);
 
 	(*this) << message;
+
+	setPriority(prevPriority);
+	setVisibility(prevVisibility);
 }
 
 /*!
