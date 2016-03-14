@@ -25,7 +25,7 @@
 namespace bitpit{
 namespace linearalgebra{
 /*!
- * @ingroup Multiplication
+ * @ingroup lamultiplication
  * @{
  */
 // -------------------------------------------------------------------------- //

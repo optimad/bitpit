@@ -26,6 +26,8 @@
 
 namespace bitpit{
 /*!
+ * @ingroup VisualizationToolKit
+ * @{
  * @class        VTKField
  * @brief        VTKField handles geometry and data field information for the VTK format
  *

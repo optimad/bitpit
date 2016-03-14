@@ -40,7 +40,7 @@ namespace bitpit{
 
 namespace linearalgebra{
 /*!
- * @ingroup   Display
+ * @ingroup   ladisplay
  * @{
  */
 
@@ -114,7 +114,7 @@ return; };
  */
 
 /*!
- * @ingroup SpecialMatrix
+ * @ingroup laspecialmatrix
  * @{
  */
 
@@ -400,7 +400,7 @@ return; };
 // Matrix determinant ======================================================= //
 
 /*!
- * @ingroup Info
+ * @ingroup lainfo 
  * @{
  */
 

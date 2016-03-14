@@ -26,7 +26,7 @@ namespace bitpit{
 namespace linearalgebra{
 
 /*!
- * @ingroup Manipulation
+ * @ingroup lamanipulation
  * @{
  */
 
