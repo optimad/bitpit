@@ -30,7 +30,7 @@ namespace bitpit{
  *  Returns number of vertices for a given element type.
  *  Codification of element type according to http://www.vtk.org/wp-content/uploads/2015/04/file-formats.pdf
  *  @param[in]  t           element type
- *  \return     number of vertices of element type
+ *  @return     number of vertices of element type
  */
 uint8_t vtk::getNNodeInElement( const VTKElementType & t){
     int myType = static_cast<std::underlying_type<VTKElementType>::type>(t);

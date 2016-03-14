@@ -52,6 +52,11 @@ namespace bitpit{
 // ========================================================================== //
 // CLASSES                                                                    //
 // ========================================================================== //
+/*!
+ * @ingroup  STereoLithography
+ * @struct STLData
+ * @brief structure holding meta-information
+ */
 struct STLData {
     int                                 n_solids;                             /**< number of stl solids */
     std::vector<std::string>            solid_names;                          /**< solids names */
@@ -72,7 +77,7 @@ class STLObj {
 
     // stl content
     std::vector<std::vector<bool> >     stl_errors;                           /**< error flags for each stl solid */
-    STLData                            data;                                 /**< stl data */
+    STLData                             data;                                 /**< stl data */
 
     // Private members ====================================================== //
     private:

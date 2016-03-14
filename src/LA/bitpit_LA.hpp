@@ -28,12 +28,12 @@
 /*!
  * @defgroup LinearAlgebra Linear algebra (LA)
  * @{
- * @defgroup SpecialMatrix
- * @defgroup Display
- * @defgroup Manipulation
- * @defgroup Multiplication
- * @defgroup Info
- * @defgroup Solve
+ * @defgroup laspecialmatrix SpecialMatrix
+ * @defgroup ladisplay Display
+ * @defgroup lamanipulation Manipulation
+ * @defgroup lamultiplication Multiplication
+ * @defgroup lainfo Info
+ * @defgroup lasolve Solve
  * @}
  */
 

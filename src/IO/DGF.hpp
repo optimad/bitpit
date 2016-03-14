@@ -61,6 +61,11 @@ namespace bitpit{
 // ========================================================================== //
 // DATA STRUCTURES AND CLASSES                                                //
 // ========================================================================== //
+/*!
+ * @ingroup  DuneGridFormat
+ * @struct DGFData
+ * @brief structure holding meta-information
+ */
 struct DGFData {
     int                                 nV;                                   /**< number of mesh vertices*/
     int                                 nS;                                   /**< number of mesh simplex */

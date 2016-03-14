@@ -2,6 +2,16 @@
 namespace bitpit{
 
 /*!
+ * @ingroup VisualizationToolKit
+ * @{
+ */
+
+/*!
+ * @class VTKFieldWithVector
+ * @brief A template class for VTKFields with data stored is a std::vector<T>
+ */
+
+/*!
  *  Destructor. 
  *  @tparam   T  type of the data field
  */
@@ -10,6 +20,7 @@ VTKFieldWithVector<T>::~VTKFieldWithVector( ){
 
     m_ptr = NULL ;
 };
+
 /*!
  *  Default constructor. 
  *  @tparam   T  type of the data field
@@ -107,5 +118,8 @@ void VTKFieldWithVector<T>::absorbData( std::fstream &str) const {
 //    }
 //};
 
+/*!
+ * @}
+ */
 
 }
