@@ -34,7 +34,6 @@
 
 #include "bitpit_PABLO.hpp"
 
-/*!  \cond  EXAMPLE_CLASSES */
 template <class D>
 class UserDataComm : public bitpit::DataCommInterface< UserDataComm<D> > {
 public:
@@ -44,7 +43,7 @@ public:
 	Data & data;
 	Data & ghostData;
 
-	size_t fixedSize() const;
+        size_t fixedSize() const;
 	size_t size(const uint32_t e) const;
 
 	template<class Buffer>
@@ -56,7 +55,6 @@ public:
 	UserDataComm(Data & data_, Data & ghostData_);
 	~UserDataComm();
 };
-/*!  \endcond  */
 
 #include "PABLO_userDataComm.tpp"
 
