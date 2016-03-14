@@ -29,7 +29,7 @@
  *      Author: Marco Cisternino
  */
 
-#include "bitpit_common.hpp"
+// #include "bitpit_common.hpp"
 
 template<class Data>
 UserDataComm<Data>::UserDataComm(Data & data_, Data & ghostData_) : data(data_), ghostData(ghostData_){};
