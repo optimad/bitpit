@@ -48,6 +48,7 @@ Intersection::Intersection(){
 	m_isghost = false;
 	m_finer = 0;
 	m_out = 0;
+	m_outisghost = false;
 	m_bound = m_pbound = false;
 	m_dim = 2;
 };
@@ -65,6 +66,7 @@ Intersection::Intersection(uint8_t dim){
 	m_isghost = false;
 	m_finer = 0;
 	m_out = 0;
+	m_outisghost = false;
 	m_bound = m_pbound = false;
 	m_dim = dim;
 };
@@ -80,6 +82,7 @@ Intersection::Intersection(const Intersection & intersection){
 	m_isghost = intersection.m_isghost;
 	m_finer = intersection.m_finer;
 	m_out = intersection.m_out;
+	m_outisghost = intersection.m_outisghost;
 	m_bound = intersection.m_bound;
 	m_pbound = intersection.m_pbound;
 	m_dim = intersection.m_dim;
@@ -96,6 +99,7 @@ Intersection& Intersection::operator =(const Intersection & intersection){
 	m_isghost = intersection.m_isghost;
 	m_finer = intersection.m_finer;
 	m_out = intersection.m_out;
+	m_outisghost = intersection.m_outisghost;
 	m_bound = intersection.m_bound;
 	m_pbound = intersection.m_pbound;
 	m_dim = intersection.m_dim;
@@ -113,6 +117,7 @@ bool Intersection::operator ==(const Intersection & intersection){
 	check = check && (m_isnew == intersection.m_isnew);
 	check = check && (m_isghost == intersection.m_isghost);
 	check = check && (m_out == intersection.m_out);
+	check = check && (m_outisghost == intersection.m_outisghost);
 	check = check && (m_finer == intersection.m_finer);
 	check = check && (m_bound == intersection.m_bound);
 	check = check && (m_pbound == intersection.m_pbound);
@@ -138,6 +143,12 @@ uint32_t Intersection::getOut(){
  */
 uint32_t Intersection::getIn(){
 	return m_owners[!m_out];
+};
+
+/*!Get the owner with exiting normal;
+ */
+bool Intersection::getOutIsGhost(){
+	return m_outisghost;
 };
 
 /*!Get the owner with smaller size;
