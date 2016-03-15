@@ -4799,6 +4799,8 @@ LocalTree::computeIntersections() {
 					for (i = 0; i < nsize; i++){
 						intersection.m_dim = m_dim;
 						intersection.m_finer = getGhostLevel(idx) >= getLevel((int)neighbours[i]);
+						intersection.m_out = intersection.m_finer;
+						intersection.m_outisghost = intersection.m_finer;
 						intersection.m_owners[0]  = neighbours[i];
 						intersection.m_owners[1] = idx;
 						intersection.m_iface = m_global.m_oppFace[iface2] - (getGhostLevel(idx) >= getLevel((int)neighbours[i]));
@@ -4815,10 +4817,11 @@ LocalTree::computeIntersections() {
 					for (i = 0; i < nsize; i++){
 						intersection.m_dim = m_dim;
 						intersection.m_finer = getGhostLevel(idx) >= getLevel((int)neighbours[i]);
-						intersection.m_out = 0;
+						intersection.m_out = intersection.m_finer;
+						intersection.m_outisghost = intersection.m_finer;
 						intersection.m_owners[0]  = neighbours[i];
 						intersection.m_owners[1] = idx;
-						intersection.m_iface = m_global.m_oppFace[iface2];
+						intersection.m_iface = m_global.m_oppFace[iface2] - (getGhostLevel(idx) >= getLevel((int)neighbours[i]));
 						intersection.m_isnew = false;
 						intersection.m_isghost = true;
 						intersection.m_bound = true;
@@ -4850,6 +4853,7 @@ LocalTree::computeIntersections() {
 								intersection.m_owners[1] = neighbours[i];
 								intersection.m_finer = (nsize>1);
 								intersection.m_out = (nsize>1);
+								intersection.m_outisghost = (nsize>1);
 								intersection.m_iface = iface2 + (nsize>1);
 								intersection.m_isnew = false;
 								intersection.m_isghost = true;
@@ -4864,6 +4868,7 @@ LocalTree::computeIntersections() {
 								intersection.m_owners[1] = neighbours[i];
 								intersection.m_finer = (nsize>1);
 								intersection.m_out = (nsize>1);
+								intersection.m_outisghost = false;
 								intersection.m_iface = iface2 + (nsize>1);
 								intersection.m_isnew = false;
 								intersection.m_isghost = false;
@@ -4882,8 +4887,9 @@ LocalTree::computeIntersections() {
 								intersection.m_owners[0] = idx;
 								intersection.m_owners[1] = neighbours[i];
 								intersection.m_finer = (nsize>1);
-								intersection.m_out = 0;
-								intersection.m_iface = iface2;
+								intersection.m_out = intersection.m_finer;
+								intersection.m_outisghost = intersection.m_finer;
+								intersection.m_iface = iface2 + (nsize>1);
 								intersection.m_isnew = false;
 								intersection.m_isghost = true;
 								intersection.m_bound = true;
@@ -4896,8 +4902,9 @@ LocalTree::computeIntersections() {
 								intersection.m_owners[0] = idx;
 								intersection.m_owners[1] = neighbours[i];
 								intersection.m_finer = (nsize>1);
-								intersection.m_out = 0;
-								intersection.m_iface = iface2;
+								intersection.m_out = intersection.m_finer;
+								intersection.m_outisghost = false;
+								intersection.m_iface = iface2 + (nsize>1);
 								intersection.m_isnew = false;
 								intersection.m_isghost = false;
 								intersection.m_bound = true;
@@ -4915,6 +4922,7 @@ LocalTree::computeIntersections() {
 					intersection.m_owners[1] = idx;
 					intersection.m_finer = 0;
 					intersection.m_out = 0;
+					intersection.m_outisghost = false;
 					intersection.m_iface = iface2;
 					intersection.m_isnew = false;
 					intersection.m_isghost = false;
@@ -4931,6 +4939,7 @@ LocalTree::computeIntersections() {
 						intersection.m_owners[1] = idx;
 						intersection.m_finer = 0;
 						intersection.m_out = 0;
+						intersection.m_outisghost = false;
 						intersection.m_iface = iface2+1;
 						intersection.m_isnew = false;
 						intersection.m_isghost = false;
@@ -4949,8 +4958,9 @@ LocalTree::computeIntersections() {
 								intersection.m_owners[0] = idx;
 								intersection.m_owners[1] = neighbours[i];
 								intersection.m_finer = (nsize>1);
-								intersection.m_out = 0;
-								intersection.m_iface = iface2+1;
+								intersection.m_out = intersection.m_finer;
+								intersection.m_outisghost = intersection.m_finer;
+								intersection.m_iface = iface2 + (nsize>1);
 								intersection.m_isnew = false;
 								intersection.m_isghost = true;
 								intersection.m_bound = true;
@@ -4963,8 +4973,9 @@ LocalTree::computeIntersections() {
 								intersection.m_owners[0] = idx;
 								intersection.m_owners[1] = neighbours[i];
 								intersection.m_finer = (nsize>1);
-								intersection.m_out = 0;
-								intersection.m_iface = iface2+1;
+								intersection.m_out = intersection.m_finer;
+								intersection.m_outisghost = false;
+								intersection.m_iface = iface2 + (nsize>1);
 								intersection.m_isnew = false;
 								intersection.m_isghost = false;
 								intersection.m_bound = true;

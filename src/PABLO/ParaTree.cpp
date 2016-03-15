@@ -1512,7 +1512,7 @@ ParaTree::getPbound(Intersection* inter) {
 
 /*! Get the face index of an intersection.
  * \param[in] inter Pointer to target intersection.
- * \return Face index of the first octant owner of intersection (owners[0]).
+ * \return Face index of the finer octant of intersection (owners[getFiner(inter)]).
  */
 uint8_t
 ParaTree::getFace(Intersection* inter) {
@@ -1547,6 +1547,15 @@ ParaTree::getIn(Intersection* inter) {
 uint32_t
 ParaTree::getOut(Intersection* inter) {
 	return inter->getOut();
+}
+
+/*! Get if the owner octant with outer normal is a ghost octant.
+ * \param[in] inter Pointer to target intersection.
+ * \return Is the octant owner with outer normal a ghost octant?.
+ */
+bool
+ParaTree::getOutIsGhost(Intersection* inter) {
+	return inter->getOutIsGhost();
 }
 
 /*! Get the size of an intersection.

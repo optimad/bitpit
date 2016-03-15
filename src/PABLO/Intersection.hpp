@@ -82,6 +82,7 @@ private:
 	uint32_t 	m_owners[2];		/**< Owner octants of the intersection (first is the internal octant) */
 	uint8_t   	m_iface;			/**< Index of the face of the outer owner */
 	bool		m_out;				/**< 0/1 octant with exiting normal (if boundary =0) */
+	bool		m_outisghost;		/**< 0/1 if octant with exiting normal is a ghost octant */
 	bool		m_finer;			/**< 0/1 finer octant (if same level =0) */
 	bool		m_isghost;			/**< The intersection has a member ghost */
 	bool		m_isnew;			/**< The intersection is new after a mesh adapting? */
@@ -109,6 +110,7 @@ private:
 	// =================================================================================== //
 
 	uint32_t getOut();
+	bool getOutIsGhost();
 	uint32_t getIn();
 	uint32_t getFiner();
 	void getNormal(int8_t normal[3], int8_t normals[6][3]);

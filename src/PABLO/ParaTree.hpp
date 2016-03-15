@@ -306,6 +306,7 @@ public:
 	u32vector 	getOwners(Intersection* inter);
 	uint32_t 	getIn(Intersection* inter);
 	uint32_t 	getOut(Intersection* inter);
+	bool		getOutIsGhost(Intersection* inter);
 	double 		getSize(Intersection* inter);
 	double 		getArea(Intersection* inter);
 	darray3 	getCenter(Intersection* inter);
