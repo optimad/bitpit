@@ -29,7 +29,6 @@
  *      Author: Marco Cisternino
  */
 
-#include "bitpit_common.hpp"
 
 template<class D>
 inline size_t UserDataLB<D>::fixedSize() const {
