@@ -32,8 +32,10 @@
 #ifndef __BITPIT_USERDATACOMM_HPP__
 #define __BITPIT_USERDATACOMM_HPP__
 
+/*!
+\cond HIDDEN_SYMBOLS
+*/
 #include "bitpit_PABLO.hpp"
-
 template <class D>
 class UserDataComm : public bitpit::DataCommInterface< UserDataComm<D> > {
 public:
@@ -57,5 +59,7 @@ public:
 };
 
 #include "PABLO_userDataComm.tpp"
-
+/*
+  \endcond
+ */
 #endif /* __BITPIT_USERDATACOMM_HPP__ */

@@ -57,7 +57,6 @@ using namespace bitpit;
 
 	- <b><code>size_t size(const uint32_t e)</code> method:</b> this method is automatically called by the manager and it is intended to define the variable size of the data to be communicated of every grid element. In order to make the manager use this method, the fixedsize method has to return zero. Implementing this method, the user can pass to the manager the specific data size to be communicated for the element e.
 	\param[in] index of the internal element to be communicated.
-	\param[out] the size in bytes of the data tobe communicated for the element e
 	\return the size in bytes of the data tobe communicated for the element e
 
 	- <b><code>void gather(Buffer& buff, const uint32_t e)</code> method: </b> this method is automatically called by the manager and it is intended to write user data to the char communication buffer. The user has to specify in its implementation the way data can be written in the char buffer. The manager provide the user with a buffer and its write method in order to simply write POD data in the buffer.	The user has to define the way his data can be written in the buffer by decomposing them in POD data and by using the buffer write method to store them in the buffer. In this example we suppose that data is a container of POD data having the random access operator.
