@@ -814,10 +814,20 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 		bool isBoundary = m_tree.getBound(treeInterface);
 		bool isGhost    = m_tree.getIsGhost(treeInterface);
 
+		bool ownerIsGhost;
+		bool neighIsGhost;
+		if (isGhost) {
+			ownerIsGhost = m_tree.getOutIsGhost(treeInterface);
+			neighIsGhost = !ownerIsGhost;
+		} else {
+			ownerIsGhost = false;
+			neighIsGhost = false;
+		}
+
 		// Decide if we need to build the interface
 		bool buildInterface = false;
 
-		OctantInfo ownerOctantInfo(owner, true);
+		OctantInfo ownerOctantInfo(owner, !ownerIsGhost);
 		long ownerId = getOctantId(ownerOctantInfo);
 		if (ownerId < 0) {
 			octantTreeInterfaces[ownerOctantInfo.id].push_back(interfaceTreeId);
@@ -826,7 +836,7 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 
 		long neighId = Element::NULL_ID;
 		if (!isBoundary) {
-			OctantInfo neighOctantInfo(neigh, !isGhost);
+			OctantInfo neighOctantInfo(neigh, !neighIsGhost);
 			neighId = getOctantId(neighOctantInfo);
 			if (neighId < 0) {
 				octantTreeInterfaces[neighOctantInfo.id].push_back(interfaceTreeId);
