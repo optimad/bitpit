@@ -46,7 +46,7 @@ include_directories("${PROJECT_SOURCE_DIR}/src/volcartesian")
 if(BUILD_EXAMPLES)
 	# List of examples
 	set(EXAMPLE_LIST "")
-	list(APPEND EXAMPLE_LIST "operators")
+	list(APPEND EXAMPLE_LIST "operators_example")
 	list(APPEND EXAMPLE_LIST "PABLO_bubbles_2D")
 	list(APPEND EXAMPLE_LIST "PABLO_bubbles_3D")
 	list(APPEND EXAMPLE_LIST "PABLO_example_00001")
