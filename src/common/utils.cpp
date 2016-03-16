@@ -25,6 +25,7 @@
 #define __BITPIT_UTILS_SRC__
 
 #include <iostream>
+#include <cmath>
 
 #include "utils.hpp"
 #include "utils.tpp"
