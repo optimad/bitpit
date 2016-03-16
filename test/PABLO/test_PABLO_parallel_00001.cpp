@@ -109,7 +109,7 @@ void testParallel001() {
 int main( int argc, char *argv[] ) {
 
 #if BITPIT_ENABLE_MPI==1
-	MPI::Init(argc, argv);
+	MPI_Init(&argc, &argv);
 
 	{
 #else
@@ -123,6 +123,6 @@ int main( int argc, char *argv[] ) {
 #if BITPIT_ENABLE_MPI==1
 	}
 
-	MPI::Finalize();
+	MPI_Finalize();
 #endif
 }
