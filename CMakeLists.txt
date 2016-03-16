@@ -313,6 +313,7 @@ list(APPEND BITPIT_MODULE_LIST "containers")
 list(APPEND BITPIT_MODULE_LIST "IO")
 list(APPEND BITPIT_MODULE_LIST "LA")
 list(APPEND BITPIT_MODULE_LIST "SA")
+list(APPEND BITPIT_MODULE_LIST "CG")
 list(APPEND BITPIT_MODULE_LIST "PABLO")
 list(APPEND BITPIT_MODULE_LIST "patchkernel")
 list(APPEND BITPIT_MODULE_LIST "surfunstructured")
@@ -329,6 +330,7 @@ set(CONTAINERS_DEPS "common;operators")
 set(IO_DEPS "common;operators")
 set(LA_DEPS "common;operators")
 set(SA_DEPS "common;operators")
+set(CG_DEPS "common;operators")
 set(PABLO_DEPS "IO")
 set(PATCHKERNEL_DEPS "common;operators;containers;IO;LA;SA")
 set(SURFUNSTRUCTURED_DEPS "common;patchkernel")
@@ -373,6 +375,27 @@ set(${COMMON_MODULE_ENABLED} 1 CACHE INTERNAL "Request building common module" F
 getModuleEnableName("operators" OPERATORS_MODULE_ENABLED)
 unset(${OPERATORS_MODULE_ENABLED} CACHE)
 set(${OPERATORS_MODULE_ENABLED} 1 CACHE INTERNAL "Request building operators module" FORCE)
+
+#------------------------------------------------------------------------------------#
+# External modules dependecies
+#------------------------------------------------------------------------------------#
+
+isModuleEnabled("CG" MODULE_CG_ENABLED)
+if (MODULE_CG_ENABLED)
+	find_package(BLAS REQUIRED)
+	find_package(LAPACK REQUIRED)
+
+	foreach (LAPACK_LIBRARY_PATH IN LISTS LAPACK_LIBRARIES)
+		get_filename_component(FILE_NAME "${LAPACK_LIBRARY_PATH}" NAME_WE)
+		if ("${FILE_NAME}" STREQUAL "liblapack")
+			get_filename_component(FILE_DIR "${LAPACK_LIBRARY_PATH}" PATH)
+			get_filename_component(FILE_EXT "${LAPACK_LIBRARY_PATH}" EXT)
+
+			file(TO_NATIVE_PATH "${FILE_DIR}/liblapacke${FILE_EXT}" LAPACKE_LIB_PATH)
+			list (APPEND LAPACK_LIBRARIES "${LAPACKE_LIB_PATH}")
+		endif ()
+	endforeach ()
+endif()
 
 #------------------------------------------------------------------------------------#
 # Subdirectories

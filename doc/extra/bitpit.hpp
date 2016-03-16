@@ -38,6 +38,9 @@ The <B>bitpit::utils</B> namespace provides miscellaneous functions for the bitp
 - <B>bitpit::KdTree</B> sorts vertices in a d-dimensional Euclidean space in a Kd-tree structure
 - <B>bitpit::MinPQueue & bitpit::MaxPQueue</B> manage a binary tree which ensures that the root element has the smalles/largest value in the tree
 
+## Computational Geometry (CG)
+<B>CG</B> module provides methods for computational geometry.
+
 # Mesh modules
 
 ## PArallel Balanced Linear Octree (PABLO)

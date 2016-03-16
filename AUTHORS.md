@@ -27,6 +27,10 @@ Here is a list of the main authors of each bitpit module:
 
   * [Alessandro Alaia](mailto:alessandro.alaia@optimad.it)
 
+* CG
+
+  * [Alessandro Alaia](mailto:alessandro.alaia@optimad.it)
+
 * PABLO
 
   * [Edoardo Lombardi](mailto:edoardo.lombardi@optimad.it)
