@@ -27,6 +27,7 @@
 // =================================================================================== //
 #include "Octant.hpp"
 #include <algorithm>
+#include <cmath>
 
 namespace bitpit {
 
