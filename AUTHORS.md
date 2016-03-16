@@ -59,6 +59,12 @@ Here is a list of the main authors of each bitpit module:
 
   * [Alessandro Alaia](mailto:alessandro.alaia@optimad.it)
 
+* levelset
+
+  * [Alessandro Alaia](mailto:alessandro.alaia@optimad.it)
+  * [Edoardo Lombardi](mailto:edoardo.lombardi@optimad.it)
+  * [Haysam Telib](mailto:haysam.telib@optimad.it)
+
 # Contributors
 
 These people have contributed to bitpit's development:
