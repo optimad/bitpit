@@ -131,7 +131,7 @@ return; };
 */
 template <class T>
 std::vector< std::vector< T > > transpose(
-    std::vector< std::vector< T > >             &A
+    const std::vector< std::vector< T > >             &A
 ) {
 
 // ========================================================================== //
@@ -175,7 +175,7 @@ return B; };
 */
 template <class T, size_t m, size_t n>
 std::array< std::array< T, m >, n > transpose(
-    std::array< std::array< T, n >, m >         &A
+    const std::array< std::array< T, n >, m >         &A
 ) {
 
 // ========================================================================== //
