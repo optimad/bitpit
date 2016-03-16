@@ -78,7 +78,8 @@ void Log::writeLog(string msg) {
 	int rank = 0;
 
 #if BITPIT_ENABLE_MPI==1
-	bool flag = MPI::Is_finalized();
+	int flag;
+	MPI_Finalized(&flag);
 	if (!(flag))
 		MPI_Comm_rank(m_comm,&rank);
 #endif
