@@ -47,8 +47,8 @@
 # include <vector>
 # include <iostream>
 
-// BitPib Library
-# include "Operators.hpp"
+// bitpit Library
+# include "bitpit_operators.hpp"
 
 // ================================================================================== //
 // NAMESPACES                                                                         //
