@@ -31,7 +31,7 @@ list(APPEND TESTS "test_PABLO_00001")
 list(APPEND TESTS "test_PABLO_00002")
 list(APPEND TESTS "test_PABLO_00003")
 list(APPEND TESTS "test_PABLO_00004")
-if (BITPIT_ENABLE_MPI)
+if (ENABLE_MPI)
 	list(APPEND TESTS "test_PABLO_parallel_00001")
 endif()
 
