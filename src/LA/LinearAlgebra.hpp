@@ -255,12 +255,12 @@ void transpose(                                                               //
 
 template <class T>
 std::vector< std::vector< T > >  transpose(                                   // Matrix transposition
-    std::vector< std::vector< T > >             &                             // (input) Input matrix
+    const std::vector< std::vector< T > >       &                             // (input) Input matrix
 );
 
 template <class T, size_t m, size_t n>
 std::array< std::array< T, m >, n > transpose(                                // Matrix transposition
-    std::array< std::array< T, n >, m >         &                             // (input) Input matrix
+    const std::array< std::array< T, n >, m >   &                             // (input) Input matrix
 );
 
 template <class T>
