@@ -168,8 +168,8 @@ int LoggerBuffer::flush(bool terminate)
 				*m_console << m_padding;
 			}
 
-			bool success = m_console->write(firstCharacter, lineSize);
-			if (!success) {
+			m_console->write(firstCharacter, lineSize);
+			if ((m_console->rdstate() & std::ifstream::failbit ) != 0) {
 				status = -1;
 			}
 
@@ -194,8 +194,8 @@ int LoggerBuffer::flush(bool terminate)
 				*m_file << m_padding;
 			}
 
-			bool success = m_file->write(firstCharacter, lineSize);
-			if (!success) {
+			m_file->write(firstCharacter, lineSize);
+			if ((m_file->rdstate() & std::ifstream::failbit ) != 0) {
 				status = -1;
 			}
 
