@@ -57,7 +57,7 @@ using namespace bitpit;
 int main(int argc, char *argv[]) {
 
 #if BITPIT_ENABLE_MPI==1
-	MPI::Init(argc, argv);
+	MPI_Init(&argc, &argv);
 
 	{
 #endif
@@ -179,6 +179,6 @@ int main(int argc, char *argv[]) {
 
 #if BITPIT_ENABLE_MPI==1
 	}
-	MPI::Finalize();
+	MPI_Finalize();
 #endif
 }
