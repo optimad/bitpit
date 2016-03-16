@@ -1,0 +1,135 @@
+
+# include "LSRoutines.hpp"
+
+// ========================================================================== //
+/*!Union input levelsets over the same Pablo mesh.
+ * Only the values of the signed distance function in resulting narrow
+ * band are returned.
+ * Please note that if is a parallel run the nghosts values of the signed distance function
+ * on the ghosts elements are appended after the nocts local values.
+ * \param[in] ... Pointer to LevelSet objects to be combined.
+ * \return Vector with values of resulting signed distance function.
+ */
+vector<double> LS::Union(int numls, ...){
+
+    vector<double>  result;
+    uint32_t        i, n ;
+    uint32_t        N, G ;
+
+    va_list args;
+    va_start(args, numls);
+
+    for ( i=0; i<numls; i++){
+
+        LevelSet &LS = *va_arg( args, LevelSet* );
+
+        if (i==0){
+            N = LS.getNElements();
+            G = LS.getNGhosts();
+            result.resize( N+G, 1.0e+18);
+        }
+
+        for ( n=0; n<N; n++){
+            result[n] = min( result[n], LS.getLS(n) ) ;
+        }
+
+        for ( n=0; n<G; n++)
+            result[n+N] = min( result[n+N], LS.getGhostLS(n) ) ;
+    }
+
+    va_end(args);
+
+    return result;
+};
+
+// ========================================================================== //
+/*!Intersection between input levelsets over the same Pablo mesh.
+ * Only the values of the signed distance function in resulting narrow
+ * band are returned.
+ * Please note that if is a parallel run the nghosts values of the signed distance function
+ * on the ghosts elements are appended after the nocts local values.
+ * \param[in] ... Pointer to LevelSet objects to be combined.
+ * \return Vector with values of resulting signed distance function.
+ */
+vector<double> LS::Intersection(int numls, ...){
+
+    vector<double>  result;
+    uint32_t        i, n ;
+    uint32_t        N, G ;
+
+    va_list args;
+    va_start(args, numls);
+
+    for ( i=0; i<numls; i++){
+
+        LevelSet &LS = *va_arg( args, LevelSet* );
+
+        if (i==0){
+            N = LS.getNElements();
+            G = LS.getNGhosts();
+            result.resize( N+G, -1.0e+18);
+        }
+
+        for ( n=0; n<N; n++){
+            result[n] = max( result[n], LS.getLS(n) ) ;
+        }
+
+        for ( n=0; n<G; n++){
+            result[n+N] = max( result[n+N], LS.getGhostLS(n) ) ;
+        }
+    }
+
+    va_end(args);
+
+    return result;
+}
+
+// ========================================================================== //
+/*!Consecutive difference between input levelsets over the same Pablo mesh.
+ * Only the values of the signed distance function in resulting narrow
+ * band are returned.
+ * Please note that if is a parallel run the nghosts values of the signed distance function
+ * on the ghosts elements are appended after the nocts local values.
+ * \param[in] ... Pointer to LevelSet objects to be combined (the first object is the minuend).
+ * \return Vector with values of resulting signed distance function.
+ */
+vector<double> LS::Difference(int numls, ...){
+
+    vector<double>  result, temp;
+    uint32_t        i, n ;
+    uint32_t        N, G ;
+
+    va_list args;
+    va_start(args, numls);
+
+    for ( i=0; i<numls; i++){
+
+        LevelSet &LS = *va_arg( args, LevelSet* );
+
+        if (i==0){
+            N = LS.getNElements();
+            G = LS.getNGhosts();
+            result.resize( N+G);
+
+            temp = LS.getLS() ;
+            result.insert( result.end(), temp.begin(), temp.end() ) ;
+
+            temp = LS.getGhostLS() ;
+            result.insert( result.end(), temp.begin(), temp.end() ) ;
+        }
+
+        for ( n=0; n<N; n++){
+            result[n] = max( result[n], -LS.getLS(n) ) ;
+        }
+
+        for ( n=0; n<G; n++){
+            result[n+N] = max( result[n+N], -LS.getGhostLS(n) ) ;
+        }
+    }
+
+    va_end(args);
+
+    return result;
+
+};
+

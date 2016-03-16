@@ -1,0 +1,45 @@
+# ifndef __LSROUTINES_HPP__
+# define __LSROUTINES_HPP__
+
+// ========================================================================== //
+// INCLUDES                                                                   //
+// ========================================================================== //
+
+// Others
+# include "LevelSetTriOctr.hpp"
+
+// ========================================================================== //
+
+namespace LS{
+
+    template <size_t T>
+        void postAdapt(vector< LevelSetTriOctr<T> > &);
+
+    template <size_t T>
+        void postAdapt(int , ... );
+
+    template <size_t T>
+        void postLoadBalance(vector< LevelSetTriOctr<T> > &);
+
+    template <size_t T>
+        void postLoadBalance(int , ... );
+
+    template <size_t T>
+        bool adaptOnStl(LevelSetTriOctr<T> &, int);
+
+    vector<double> Union(int , ...);
+
+    vector<double> Intersection(int , ...);
+
+    vector<double> Difference(int , ...);
+
+};
+
+// ========================================================================== //
+
+#include "LSRoutines.tpp"
+
+
+#endif
+
+

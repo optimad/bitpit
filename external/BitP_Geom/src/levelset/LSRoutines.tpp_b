@@ -1,0 +1,135 @@
+// ========================================================================== //
+//	FUNCTIONS
+// ========================================================================== //
+
+/*!Update one or more LevelSetStl objects after an octree adapt.
+ * \param[in] LSP Vector with LevelSetStl objects to be updated.
+ */
+template <size_t T> void LS::postAdapt(vector< LevelSetTriOctr<T> > & LSP){
+
+    int nSTL = LSP.size();
+    for (int jstl=0; jstl<nSTL; jstl++){
+        LSP[jstl].postAdapt();
+    }
+}
+
+// ========================================================================== //
+
+/*!Update one or more Level Set objects after an octree adapt.
+ * \param[in] numls Number of LevelSetStl objects to be updated.
+ * \param[in] ... Pointers to Class_LevelSet_Stl<Class_Para_Tree<3> > objects (comma separated).
+ */
+template <size_t T> void LS::postAdapt(int numls, ...){
+
+    va_list args;
+    va_start(args, numls);
+    for (int i=0; i<numls; i++){
+        LevelSetTriOctr<T> * ls = va_arg(args, LevelSetTriOctr<T>* );
+        ls->postAdapt();
+    }
+    va_end(args);
+}
+
+// ========================================================================== //
+
+/*!Update one or more LevelSetStl objects after an octree loadBalance.
+ * \param[in] LSP Vector with LevelSetStl objects to be updated.
+ */
+template <size_t T> void LS::postLoadBalance(vector< LevelSetTriOctr<T> > & LSP){
+
+    int nSTL = LSP.size();
+    for (int jstl=0; jstl<nSTL; jstl++){
+        LSP[jstl].postLoadBalance();
+    }
+}
+
+// ========================================================================== //
+
+/*!Update one or more Level Set objects after an octree loadBalance.
+ * \param[in] numls Number of LevelSetStl objects to be updated.
+ * \param[in] ... Pointers to Class_LevelSet_Stl<Class_Para_Tree<3> > objects (comma separated).
+ */
+template <size_t T> void LS::postLoadBalance(int numls, ...){
+
+    va_list args;
+    va_start(args, numls);
+    for (int i=0; i<numls; i++){
+        LevelSetTriOctr<T>* ls = va_arg(args, LevelSetTriOctr<T> *);
+        ls->postLoadBalance();
+    }
+    va_end(args);
+}
+
+// ========================================================================== //
+
+/*!Octree adaptation on the linked geometry by using the Sdf of the triangulation.
+ * Refine the octants in the narrow band narrow band one time and recompute the Sdf if some
+ * octants in the narrow band have a level lower than the target of refinement level. If no
+ * target level is imposed ( target level fixed to 0), only a refinement step for every octant in the
+ * narrow band is performed.
+ * \param[in] ls LevelSetStl object.
+ * \param[in] level Target level for refinement of pablo mesh in narrow band (it
+ * does nothing if all the elements in narrow band have depth >= level; if level == 0
+ * it does one refining of every octant in narrow band).
+ *	\return true or false if at least one element has been refined or not.
+ */
+template <size_t T> bool LS::adaptOnStl( LevelSetTriOctr<T> & ls, int level){
+
+
+    // ========================================================================== //
+    // VARIABLES DECLARATION        											  //
+    // ========================================================================== //
+
+    //Local variables
+    bool 						globalDone = false;
+    bool						localDone = false;
+
+    // Counters
+    int			i;
+
+    // ========================================================================== //
+
+
+    Class_Para_Tree<T>  &mesh = *ls.getMesh() ;
+
+    if (level == 0){
+        level = 1000;
+    }
+
+    if (ls.getSizeNarrowBand()==0){
+        ls.computeSizeNarrowBand();
+        ls.computeLSInNarrowBand();
+    }
+
+    for (i=0; i<ls.getNElements(); i++){
+        if ( ls.getIsExact(i) && abs( ls.getLS(i) ) <= ls.getSizeNarrowBand() ){
+            if (mesh.getLevel(i) < level){
+                mesh.setMarker(i,1);
+            }
+        }
+    }
+
+
+    localDone = mesh.adapt(true);
+
+
+    if (!mesh.serial){
+#if NOMPI==0
+        int error_flag = MPI_Allreduce(&localDone,&globalDone,1,MPI::BOOL,MPI_LOR,mesh.comm);
+#endif
+    }
+    else{
+        globalDone = localDone;
+    }
+
+    if (globalDone){
+        cout << "in postadapt " << endl;
+        ls.postAdapt();
+        cout << "out postadapt " << endl;
+    }
+    else{
+        ls.propagateSign();
+    }
+
+    return globalDone;
+};

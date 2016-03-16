@@ -1,0 +1,1 @@
+#define BITP_GEOM_VERSION "0.5.0"
