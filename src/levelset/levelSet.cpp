@@ -70,6 +70,7 @@ LevelSet::LevelSet() {
     m_mesh = NULL ;
 
     RSearch     = 0;
+    m_userRSearch = false ;
 
     signedDF    = true ;
     propagateS  = false;
@@ -175,6 +176,7 @@ void LevelSet::setPropagateValue(bool flag){
  */
 void LevelSet::setSizeNarrowBand(double r){
     RSearch = r;
+    m_userRSearch = true ;
 };
 
 /*!

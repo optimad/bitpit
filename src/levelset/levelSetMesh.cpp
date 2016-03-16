@@ -54,7 +54,9 @@ LevelSetCartesian::LevelSetCartesian(VolCartesian &patch ): LevelSet( (static_ca
  */
 void LevelSetCartesian::compute( LSObject *visitor ){
 
-    computeSizeNarrowBand( visitor ) ;
+    if( !m_userRSearch)
+        computeSizeNarrowBand( visitor ) ;
+
     visitor->computeLSInNarrowBand(this) ; 
 
 //    if( propagateS ) propagateSign( visitor ) ;
@@ -88,7 +90,11 @@ void LevelSetCartesian::update( LSObject *visitor, std::vector<Adaption::Info> &
 
     double  newRSearch ;
 
-    newRSearch = updateSizeNarrowBand( mapper ) ;
+    if(m_userRSearch){
+        newRSearch = RSearch;
+    } else{
+        newRSearch = updateSizeNarrowBand( mapper ) ;
+    };
 
     visitor->updateLSInNarrowBand( this, mapper, newRSearch ) ;
 
@@ -181,7 +187,7 @@ double LevelSetCartesian::updateEikonal( double s, double g, const long &I ){
 };
 
 /*!
- *  @ingroup    LevelSet
+ *  @ingroup    levelset
  *  @class      LevelSetOctree
  *  @brief      Implements partially LevelSet for octree meshes
  */
@@ -205,9 +211,10 @@ LevelSetOctree::LevelSetOctree(VolOctree & patch ): LevelSet( (static_cast<Volum
  */
 void LevelSetOctree::compute( LSObject *visitor ){
 
-//    info.reserve( m_mesh->getCellCount() ) ;
 
-    computeSizeNarrowBand( visitor ) ;
+    if( !m_userRSearch)
+        computeSizeNarrowBand( visitor ) ;
+
     visitor->computeLSInNarrowBand(this) ; 
 
 //    if( propagateS ) propagateSign( visitor ) ;
@@ -224,10 +231,12 @@ void LevelSetOctree::update( LSObject *visitor, std::vector<Adaption::Info> &map
 
     double  newRSearch ;
 
-    newRSearch = updateSizeNarrowBand( mapper ) ;
+    if(m_userRSearch){
+        newRSearch = RSearch;
+    } else {
+        newRSearch = updateSizeNarrowBand( mapper ) ;
+    };
 
-    std::cout << "old Rsearch" << RSearch << std::endl ;
-    std::cout << "new Rsearch" << newRSearch << std::endl ;
     visitor->updateLSInNarrowBand( this, mapper, newRSearch ) ;
 
 //TODO    if( propagateS ) updatePropagatedSign() ;

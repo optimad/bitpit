@@ -60,6 +60,11 @@ int LSObject::getId( ) const {
 };
 
 /*!
+	@ingroup    levelset
+	@class      LevelSetSegmentation
+	@brief      Implements visitor pattern fo segmentated geometries
+*/
+/*!
  * Constructor of LevelSet_Stl with input parameters.
  * @param[in] id id to be asigned to pierced vector
  * @param[in] list list of simplices

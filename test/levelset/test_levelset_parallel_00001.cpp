@@ -128,6 +128,7 @@ int main( int argc, char *argv[]){
     mesh.setCounter() ;
 
     start = std::chrono::system_clock::now();
+    LSP.setSizeNarrowBand(???) ;
     LSP.compute( &geometry );
     end = std::chrono::system_clock::now();
 
@@ -153,11 +154,11 @@ int main( int argc, char *argv[]){
 
     //Refinement
 
-    for( int i=0; i<1; ++i){
+    for( int i=0; i<3; ++i){
 
-        std::cout << "rfinement loop " << i << std::endl ;
-        std::cout << "rfinement loop " << i << std::endl ;
-        std::cout << "rfinement loop " << i << std::endl ;
+        std::cout << "refinement loop " << i << std::endl ;
+        std::cout << "refinement loop " << i << std::endl ;
+        std::cout << "refinement loop " << i << std::endl ;
 
         for( auto & cell : mesh.getCells() ){
             const long &id = cell.getId() ;

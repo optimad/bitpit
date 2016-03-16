@@ -61,15 +61,16 @@ class LevelSet{
         short                                   active ;        /**< Flag for nodes for fast marching */
     };
 
-    PiercedVector<LSInfo>               info ;          /**< Levelset information for each cell */
+    PiercedVector<LSInfo>                       info ;          /**< Levelset information for each cell */
 
     double                                      RSearch;        /**< Size of narrow band */
+    bool                                        m_userRSearch;  /**< Flag if user has set size of narrow band (default=false)  */
 
-    bool                                        signedDF;       /**< Flag for sigend/unsigned distance function ( default = true) */
+    bool                                        signedDF;       /**< Flag for sigend/unsigned distance function (default = true) */
     bool                                        propagateS;     /**< Flag for sign propagation from narrow band (default = false) */
     bool                                        propagateV;     /**< Flag for value propagation from narrow band (default = false) */
 
-    VolumeKernel*                       m_mesh ;        /**< Pointer to underlying mesh*/
+    VolumeKernel*                               m_mesh ;        /**< Pointer to underlying mesh*/
 
     protected:
     LevelSet() ;
@@ -116,7 +117,7 @@ class LevelSetCartesian : public LevelSet{
     friend  LevelSetSegmentation ;
 
     private:
-    VolCartesian*                       m_cmesh ;
+    VolCartesian*                               m_cmesh ;       /**< Pointer to underlying cartesian mesh*/
 
     private:
     void                                        computeSizeNarrowBand( LSObject * );
@@ -137,7 +138,7 @@ class LevelSetOctree : public LevelSet{
     friend  LevelSetSegmentation ;
 
     private:
-    VolOctree*                          m_omesh ;
+    VolOctree*                                  m_omesh ;       /**< Pointer to underlying octree mesh*/
 
     private:
     void                                        computeSizeNarrowBand( LSObject * );
@@ -162,7 +163,7 @@ class LSObject{
     friend  LevelSetOctree ;
 
     private:
-    int                                         m_id;
+    int                                         m_id;           /**< identifier of object */
 
     protected:
     virtual ~LSObject();
@@ -181,13 +182,6 @@ class LSObject{
     virtual void                                updateLSInNarrowBand( LevelSetOctree *, std::vector<Adaption::Info> &, double &)=0 ;
 };
 
-/*!
- *  @ingroup    LevelSet
- *  @class      LevelSetSegmentation
- *  @brief      LevelSet of surface segmentations
- *
- *  LevelSetSegmentation provides specific methods for calculating distances with repect to one surface segmentations.
- */
 class LevelSetSegmentation : public LSObject {
 
     public:
@@ -206,10 +200,10 @@ class LevelSetSegmentation : public LSObject {
     };
 
     protected:
-    SurfUnstructured                    *stl;           /**< surface Triangulation */
+    SurfUnstructured                            *stl;           /**< surface Triangulation */
     double                                      abs_tol;        /**< tolerance used for calculating normals */
 
-    PiercedVector<SegData>              m_segInfo ;
+    PiercedVector<SegData>                      m_segInfo ;     /**< cell segment association information */
 
 
     public:
