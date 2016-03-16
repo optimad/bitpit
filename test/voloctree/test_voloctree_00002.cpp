@@ -36,7 +36,7 @@ int main(int argc, char *argv[]) {
 	log::cout() << "Testing adaption on octree patch" << std::endl;
 
 #if BITPIT_ENABLE_MPI==1
-	MPI::Init(argc,argv);
+	MPI_Init(&argc,&argv);
 #else
 	BITPIT_UNUSED(argc);
 	BITPIT_UNUSED(argv);
@@ -155,7 +155,7 @@ int main(int argc, char *argv[]) {
 	patch_3D->write();
 
 #if BITPIT_ENABLE_MPI==1
-	MPI::Finalize();
+	MPI_Finalize();
 #endif
 
 }
