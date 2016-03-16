@@ -801,7 +801,9 @@ void PiercedVector<value_t, id_t>::sort()
 	// permutations are needed.
 	std::vector<std::size_t> id_permutation;
 	id_permutation.resize(containerSize);
-	std::iota(id_permutation.begin(), id_permutation.end(), 0);
+	for (size_t i = 0; i < containerSize; ++i) {
+		id_permutation[i] = i;
+	}
 	std::sort(id_permutation.begin(), id_permutation.end(), idLess(m_ids));
 
 	std::vector<std::size_t> value_permutation(id_permutation);
