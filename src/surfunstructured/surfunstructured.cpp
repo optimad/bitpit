@@ -689,6 +689,142 @@ unsigned short SurfUnstructured::exportSTL(const string &stl_name, const bool &i
 }
 
 /*!
+ * Import surface tasselation from DGF file.
+ * 
+ * \param[in] dgf_name name of dgf file
+ * 
+ * \result on output returns an error flag for I/O error.
+*/
+unsigned short SurfUnstructured::importDGF(const string &dgf_name)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Parameters
+    static unordered_map<size_t, ElementInfo::Type>             ele_type{
+                                                                    {0, ElementInfo::UNDEFINED},
+                                                                    {1, ElementInfo::VERTEX},
+                                                                    {2, ElementInfo::LINE},
+                                                                    {3, ElementInfo::TRIANGLE},
+                                                                    {4, ElementInfo::QUAD}
+                                                                };
+    // Local variables
+    DGFObj                                                      dgf_in(dgf_name);
+    int                                                         nV = 0, nS = 0;
+    long                                                        vcount, idx;
+    std::vector<std::array<double, 3>>                          vertex_list;
+    std::vector<std::vector<int>>                               simplex_list;
+    std::vector<long>                                           vertex_map;
+    std::vector<long>                                           connect;
+
+    // Counters
+    std::vector<std::array<double, 3>>::const_iterator          v_, ve_;
+    std::vector<std::vector<int>>::iterator                     c_, ce_;
+    std::vector<int>::iterator                                  i_, ie_;
+    std::vector<long>::iterator                                 j_, je_;
+
+    // ====================================================================== //
+    // IMPORT DATA                                                            //
+    // ====================================================================== //
+
+    // Read vertices and cells from DGF file
+    dgf_in.load(nV, nS, vertex_list, simplex_list);
+
+    // Add vertices
+    ve_ = vertex_list.cend();
+    vcount = 0;
+    vertex_map.resize(nV);
+    for (v_ = vertex_list.cbegin(); v_ != ve_; ++v_) {
+        idx = addVertex(*v_)->getId();
+        vertex_map[vcount] = idx;
+        ++vcount;
+    } //next v_
+
+    // Update connectivity infos
+    ce_ = simplex_list.end();
+    for (c_ = simplex_list.begin(); c_ != ce_; ++c_) {
+        ie_ = c_->end();
+        for (i_ = c_->begin(); i_ != ie_; ++i_) {
+            *i_ = vertex_map[*i_];
+        } //next i_
+    } //next c_
+
+    // Add cells
+    for (c_ = simplex_list.begin(); c_ != ce_; ++c_) {
+        i_ = c_->begin();
+        connect.resize(c_->size(), Vertex::NULL_ID);
+        je_ = connect.end();
+        for (j_ = connect.begin(); j_ != je_; ++j_) {
+            *j_ = *i_;
+            ++i_;
+        } //next j_
+        addCell(ele_type[c_->size()], true, connect);
+    } //next c_
+
+    return 0;
+}
+
+/*!
+ * Export surface tasselation to DGF file
+ * 
+ * \param[in] dgf_name name of dgf file
+ * 
+ * \result on output returns an error flag for I/O error
+*/
+unsigned short SurfUnstructured::exportDGF(const string &dgf_name)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
+
+    // Local variables
+    DGFObj                                                      dgf_in(dgf_name);
+    int                                                         nV = getVertexCount(), nS = getCellCount();
+    int                                                         v, nv;
+    long                                                        vcount, ccount, idx;
+    std::vector<std::array<double, 3>>                          vertex_list(nV);
+    std::vector<std::vector<int>>                               simplex_list(nS);
+    std::unordered_map<long, long>                              vertex_map;
+
+    // Counters
+    VertexIterator                                              v_, ve_;
+    CellIterator                                                c_, ce_;
+
+    // ====================================================================== //
+    // EXPORT DATA                                                            //
+    // ====================================================================== //
+
+    // Create vertex list
+    ve_ = vertexEnd();
+    vcount = 0;
+    for (v_ = vertexBegin(); v_ != ve_; ++v_) {
+        idx = v_->getId();
+        vertex_list[vcount] = v_->getCoords();
+        vertex_map[idx] = vcount;
+        ++vcount;
+    } //next v_
+
+    // Add cells
+    ce_ = cellEnd();
+    ccount = 0;
+    for (c_ = cellBegin(); c_ != ce_; ++c_) {
+        nv = c_->getVertexCount();
+        simplex_list[ccount].resize(nv);
+        for (v = 0; v < nv; ++v) {
+            simplex_list[ccount][v] = vertex_map[c_->getVertex(v)];
+        } //next v
+        ++ccount;
+    } //next c_
+
+    // Read vertices and cells from DGF file
+    dgf_in.save(nV, nS, vertex_list, simplex_list);
+
+    return 0;
+}
+
+
+/*!
 	@}
 */
 

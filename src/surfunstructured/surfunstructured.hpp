@@ -59,6 +59,8 @@ public:
         // I/O routines
         unsigned short importSTL(const std::string &, const bool &);
         unsigned short exportSTL(const std::string &, const bool &, bool flag = true);
+        unsigned short importDGF(const std::string &);
+        unsigned short exportDGF(const std::string &);
 
 protected:
 	const std::vector<Adaption::Info> _updateAdaption(bool trackAdaption);
