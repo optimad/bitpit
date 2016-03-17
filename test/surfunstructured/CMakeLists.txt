@@ -67,6 +67,7 @@ add_custom_command(
     TARGET "test_surfunstructured_00003" PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/buddha.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/buddha.stl"
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/cube.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/cube.stl"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/NACA0012.dgf" "${CMAKE_CURRENT_BINARY_DIR}/data/NACA0012.dgf"
     )
 
 add_custom_command(
