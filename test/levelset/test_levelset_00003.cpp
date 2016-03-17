@@ -57,7 +57,7 @@ using namespace bitpit;
 int main( int argc, char *argv[]){
 
 #if NOMPI==0
-        MPI::Init(argc,argv);
+        MPI_Init(&argc, &argv);
 #endif
 	// ========================================================================== //
 	// VARIABLES DECLARATION                                                      //
@@ -252,7 +252,7 @@ int main( int argc, char *argv[]){
 	}
 	
 #if NOMPI==0
-    MPI::Finalize();
+    MPI_Finalize();
 #endif
 
     return 0;
