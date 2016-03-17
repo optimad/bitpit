@@ -76,10 +76,8 @@ class LevelSet{
     LevelSet() ;
     LevelSet( VolumeKernel *) ;
 
-    virtual void                                compute( LSObject * )=0 ;
     virtual void                                computeSizeNarrowBand( LSObject * )=0;
 
-    virtual void                                update( LSObject *, std::vector<Adaption::Info> & )=0 ;
     virtual double                              updateSizeNarrowBand( std::vector<Adaption::Info> & )=0;
     void                                        clearAfterRefinement( std::vector<Adaption::Info> & ) ;
 
@@ -106,8 +104,10 @@ class LevelSet{
     void                                        setPropagateSign(bool) ;
     void                                        setPropagateValue(bool) ;
 
-
     bool                                        isInNarrowBand(const long &) ;
+
+    virtual void                                compute( LSObject * )=0 ;
+    virtual void                                update( LSObject *, std::vector<Adaption::Info> & )=0 ;
 
 };
 
