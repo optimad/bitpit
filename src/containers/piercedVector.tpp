@@ -851,6 +851,7 @@ void PiercedVector<value_t, id_t>::squeeze()
 			std::size_t updatedPos = pos - offset;
 
 			setPosId(updatedPos, id);
+			setEmptyPosId(pos, pos + 1);
 			m_v[updatedPos] = std::move(m_v[pos]);
 		}
 
