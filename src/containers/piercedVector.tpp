@@ -2364,7 +2364,7 @@ void PiercedVector<value_t, id_t>::storageResize(size_t n)
 		for (std::size_t pos = n; pos < initialSize; ++pos) {
 			id_t id = m_ids[pos];
 			if (id >= 0) {
-				m_pos.erase(m_ids[pos]);
+				m_pos.erase(id);
 			}
 		}
 
