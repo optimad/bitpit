@@ -35,8 +35,15 @@ void printElements(PiercedVector<double> &container)
 		return;
 	}
 
-	for (auto const &element : container) {
-		std::cout << "    > id = " << element << std::endl;
+	for (auto itr = container.cbegin(); itr != container.cend(); ++itr) {
+		auto id     = itr.getId();
+		auto flatId = container.evalFlatIndex(id);
+		auto value  = *itr;
+
+		std::cout << std::endl;
+		std::cout << "    > id     : " << id << std::endl;
+		std::cout << "      value  : " << value << std::endl;
+		std::cout << "      flatId : " << flatId << std::endl;
 	}
 }
 
