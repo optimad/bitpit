@@ -166,6 +166,71 @@ void faceOfBox(
 
 }
 
+// Algorithms =============================================================== //
+namespace CGAlgorithms {
+
+double grad1DUpdate(                                                      // Update the local solution to the 1D grad limiting equation on a vertex of a 1D manifold
+        int                              ,                                    // (input) number of simplicies
+        std::vector<std::array<double,3>>                       &,                                    // (input) vertex coordinate list
+        std::vector<std::vector<int>>                       &,                                    // (input) simplex-vertex connectivity
+        std::vector<std::vector<std::vector<int>>>                       &,                                    // (input) simplex-simplex adjacency
+        std::vector<double>                       &,                                    // (input) scalar field to be limited
+        int                              ,                                    // (input) global index of simplex containing the vertex
+        int                              ,                                    // (input) local index of vertex
+        double                           ,                                    // (input) max slope
+        std::vector<bool>                       &                                     // (input) flag for dead/alive vertices
+        );
+
+void gradLimiting1D(                                                      // Solve the grad limiting eq. on a 1D manifold in a 2D Euclidean space
+        int                              ,                                    // (input) number of simplicies
+        std::vector<std::array<double,3>>                       &,                                    // (input) vertex coordinate list
+        std::vector<std::vector<int>>                       &,                                    // (input) simplex-vertex connectivity
+        std::vector<std::vector<std::vector<int>>>                       &,                                    // (input) simplex-simplex adjacency
+        std::vector<double>                       &,                                    // (input) scalar field to be limited
+        double                                                                // (input) max slope
+        );
+
+double grad2DUpdate(                                                      // Update the local solution to the 2D grad limiting equation on a vertex of a 2D manifold
+        int                              ,                                    // (input) number of simplicies
+        std::vector<std::array<double,3>>                       &,                                    // (input) vertex coordinate list
+        std::vector<std::vector<int>>                       &,                                    // (input) simplex-vertex connectivity
+        std::vector<std::vector<std::vector<int>>>                       &,                                    // (input) list of simplicies in the 1-ring of the given vertex
+        std::vector<double>                       &,                                    // (input) scalar field to be limited
+        int                              ,                                    // (input) global index of simplex containing the vertex
+        int                              ,                                    // (input) local index of vertex
+        double                           ,                                    // (input) max slope
+        std::vector<bool>                       &                                     // (input) flag for dead/alive vertices
+        );
+
+void gradLimiting2D(                                                      // Solve the grad limiting eq. on a 2D manifold in a 3D Euclidean space
+        int                              ,                                    // (input) number of simplicies
+        std::vector<std::array<double,3>>                       &,                                    // (input) vertex coordinate list
+        std::vector<std::vector<int>>                       &,                                    // (input) simplex-vertex connectivity
+        std::vector<double>                       &,                                    // (input/output) scalar field to be limited
+        double                                                                // (input) max slope
+        );
+
+double grad2DUpdate(                                                      // Update the local solution to the 2D grad limiting equation on a cell of a 2D volume
+        int                              ,                                    // (input) number of simplicies
+        std::vector<std::array<double,3>>                       &,                                    // (input) vertex coordinate list
+        std::vector<std::vector<int>>                       &,                                    // (input) simplex-vertex connectivity
+        std::vector<std::vector<int>>                       &,                                    // (input) simplex-simplex adjacency
+        std::vector<double>                       &,                                    // (input) scalar field to be limited
+        int                              ,                                    // (input) global index of simplex to be updated
+        double                           ,                                    // (input) max slope
+        std::vector<bool>                       &                                     // (input) flag for dead/alive vertices
+        );
+
+void gradLimiting2D(                                                      // Solve the grad limiting eq. in a 2D volume
+        int                              ,                                    // (input) number of simplicies
+        std::vector<std::array<double,3>>                       &,                                    // (input) vertex coordinate list
+        std::vector<std::vector<int>>                       &,                                    // (input) simplex-vertex connectivity,
+        std::vector<std::vector<int>>                       &,                                    // (input) simplex-simplex adjacency
+        std::vector<double>                       &,                                    // (input/output) scalar field to be limited
+        double                                                                // (input) max slope
+        );
+}
+
 }
 
 

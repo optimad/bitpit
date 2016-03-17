@@ -34,6 +34,7 @@ set(CG_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the CG module" 
 # Rules to build the tests
 include_directories("${PROJECT_SOURCE_DIR}/src/common")
 include_directories("${PROJECT_SOURCE_DIR}/src/operators")
+include_directories("${PROJECT_SOURCE_DIR}/src/SA")
 include_directories("${PROJECT_SOURCE_DIR}/src/CG")
 
 set(TEST_TARGETS "")
