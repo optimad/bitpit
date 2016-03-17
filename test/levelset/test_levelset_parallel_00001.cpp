@@ -128,7 +128,6 @@ int main( int argc, char *argv[]){
     mesh.setCounter() ;
 
     start = std::chrono::system_clock::now();
-    LSP.setSizeNarrowBand(???) ;
     LSP.compute( &geometry );
     end = std::chrono::system_clock::now();
 
