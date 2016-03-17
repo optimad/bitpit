@@ -74,7 +74,7 @@ SurfaceKernel::~SurfaceKernel()
 /*!
  * Returns the number of dimensions of the working space (set at patch construction)
  */
-int SurfaceKernel::getSpaceDimensions(void) const
+int SurfaceKernel::getSpaceDimension(void) const
 {
     return(m_spaceDim);
 }

@@ -43,7 +43,7 @@ public:
 
 	SurfaceKernel(const int &id, const int &patch_dim, const int &space_dim, bool expert);
 
-        int getSpaceDimensions(void) const;
+        int getSpaceDimension(void) const;
 
 	virtual ~SurfaceKernel();
         virtual std::array<double, 3> evalCellCentroid(const long &);
