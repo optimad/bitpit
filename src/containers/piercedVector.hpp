@@ -313,7 +313,7 @@ public:
 
 	// Methods that extract information on the contents of the container
 	bool exists(id_t id);
-	std::size_t extractFlatIndex(id_t id) const;
+	std::size_t evalFlatIndex(id_t id);
 
 	std::vector<id_t> getIds(bool ordered = true);
 	id_t getSizeMarker(const size_t &targetSize, const id_t &fallback = -1);

@@ -1062,17 +1062,32 @@ bool PiercedVector<value_t, id_t>::exists(id_t id)
 	\result The flat index of the element with the specified id.
 */
 template<typename value_t, typename id_t>
-std::size_t PiercedVector<value_t, id_t>::extractFlatIndex(id_t id) const
+std::size_t PiercedVector<value_t, id_t>::evalFlatIndex(id_t id)
 {
-	size_t pos = getPosFromId(id);
-	size_t flat = pos - m_first_pos;
-	if (m_holes.size() > 0) {
-		auto holeBound = lower_bound(m_holes.cbegin(), m_holes.cend(), pos);
-		size_t nHolesBefore = std::distance(m_holes.cbegin(), holeBound);
+	size_t pos  = getPosFromId(id);
+
+	// Initialize flat id with the position of the element
+	size_t flat = pos;
+
+	// Subtract pending holes before position
+	if (holesCountPending() > 0) {
+		holesSortPending();
+		auto hole_itr = std::upper_bound(m_holes_pending_begin, m_holes_pending_end, pos, std::greater<std::size_t>());
+		size_t nHolesBefore = std::distance(hole_itr, m_holes_pending_end);
 
 		flat -= nHolesBefore;
 	}
 
+	// Subtract regular holes before position
+	if (holesCountRegular() > 0) {
+		holesSortRegular();
+		auto hole_itr = std::upper_bound(m_holes_regular_begin, m_holes_regular_end, pos, std::greater<std::size_t>());
+		size_t nHolesBefore = std::distance(hole_itr, m_holes_regular_end);
+
+		flat -= nHolesBefore;
+	}
+
+	// Done
 	return flat;
 }
 
