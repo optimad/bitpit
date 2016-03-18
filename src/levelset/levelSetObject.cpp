@@ -201,6 +201,7 @@ void LevelSetSegmentation::lsFromSimplex( LevelSet *visitee, const double &searc
     bool                                &signd = visitee->signedDF ;
 
     long                                id ;
+    bool                                created, updated ;
     double                              s, d, value;
     std::array<double,3>                n, xP, P;
 
@@ -222,6 +223,9 @@ void LevelSetSegmentation::lsFromSimplex( LevelSet *visitee, const double &searc
         it    = segs.begin();
         itend = segs.end() ;
 
+        created = !visitee->info.exists(id);
+        updated = false;
+
         P       = mesh.evalCellCentroid(id) ;
         value   = abs( lsInfo.value );
 
@@ -234,6 +238,7 @@ void LevelSetSegmentation::lsFromSimplex( LevelSet *visitee, const double &searc
                 if( d<value ) {
                     s       = signd *s + (!signd) *1.;
                     value   = d ;
+                    updated = true ;
 
                     lsInfo.object   = getId();
                     lsInfo.value    = s *d; //TODO check
@@ -258,12 +263,10 @@ void LevelSetSegmentation::lsFromSimplex( LevelSet *visitee, const double &searc
 
         } //end foreach triangle
 
-        if( abs(lsInfo.value) < 1.e17 ){
-            if( !visitee->info.exists(id) ){
-                visitee->info.insert(id,lsInfo) ;
-            } else {
-                visitee->info[id]= lsInfo ;
-            };
+        if( created ){
+            visitee->info.insert(id,lsInfo) ;
+        } else if( updated ){
+            visitee->info[id]= lsInfo ;
         }
 
     };// foreach cell
