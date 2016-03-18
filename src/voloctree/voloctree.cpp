@@ -1027,12 +1027,15 @@ VolOctree::FaceInfoSet VolOctree::removeCells(std::vector<long> &cellIds)
 			Interface &interface = m_interfaces[interfaceId];
 
 			long danglingCellId;
+			long danglingNeighId;
 			long danglingCellFace;
 			if (danglingSide == 0) {
 				danglingCellId   = interface.getOwner();
+				danglingNeighId  = interface.getNeigh();
 				danglingCellFace = interface.getOwnerFace();
 			} else {
 				danglingCellId   = interface.getNeigh();
+				danglingNeighId  = interface.getOwner();
 				danglingCellFace = interface.getNeighFace();
 			}
 
@@ -1043,7 +1046,7 @@ VolOctree::FaceInfoSet VolOctree::removeCells(std::vector<long> &cellIds)
 				deadVertices.erase(vertices[k]);
 			}
 
-			// Remove interface from dangling cell
+			// Remove interface and adjacency from dangling cell
 			Cell &danglingCell = m_cells[danglingCellId];
 
 			int j = 0;
@@ -1051,6 +1054,12 @@ VolOctree::FaceInfoSet VolOctree::removeCells(std::vector<long> &cellIds)
 				++j;
 			}
 			danglingCell.deleteInterface(danglingCellFace, j);
+
+			int i = 0;
+			while (danglingCell.getAdjacency(danglingCellFace, i) != danglingNeighId) {
+				++i;
+			}
+			danglingCell.deleteAdjacency(danglingCellFace, i);
 
 			// Add the associated cell face to the dangling faces list
 			FaceInfo danglingFace(danglingCellId, danglingCellFace);
