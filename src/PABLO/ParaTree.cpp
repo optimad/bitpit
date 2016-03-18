@@ -225,10 +225,10 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 /*! Default Destructor of ParaTree.
 */
 ParaTree::~ParaTree(){
-	delete 	m_partitionFirstDesc;
-	delete	m_partitionLastDesc;
-	delete 	m_partitionRangeGlobalIdx;
-	delete	m_partitionRangeGlobalIdx0;
+	delete[] m_partitionFirstDesc;
+	delete[] m_partitionLastDesc;
+	delete[] m_partitionRangeGlobalIdx;
+	delete[] m_partitionRangeGlobalIdx0;
 
 	(*m_log) << "---------------------------------------------" << endl;
 	(*m_log) << "--------------- R.I.P. PABLO ----------------" << endl;
