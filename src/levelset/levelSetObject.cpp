@@ -266,8 +266,6 @@ void LevelSetSegmentation::lsFromSimplex( LevelSet *visitee, const double &searc
 
     };// foreach cell
 
-    m_segInfo.flush() ;
-
     return;
 
 };
