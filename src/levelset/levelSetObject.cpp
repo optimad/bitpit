@@ -201,21 +201,16 @@ void LevelSetSegmentation::lsFromSimplex( LevelSet *visitee, const double &searc
     bool                                &signd = visitee->signedDF ;
 
     long                                id ;
-    bool                                created, updated ;
     double                              s, d, value;
     std::array<double,3>                n, xP, P;
 
     std::set<long>::iterator            it, itend ;
     PiercedIterator<SegData>    segIt, segEnd = m_segInfo.end() ;
 
-    LevelSet::LSInfo                    lsInfo  ;
-
     for( segIt=m_segInfo.begin(); segIt!=segEnd; ++segIt ){
 
         id = segIt.getId() ;
         SegData &segInfo = *segIt ;
-
-        lsInfo.value = visitee->getLS( id ) ;
 
         std::set<long>                      &segs = segInfo.m_segments ;
         long                                &supp = segInfo.m_support ;
@@ -223,11 +218,14 @@ void LevelSetSegmentation::lsFromSimplex( LevelSet *visitee, const double &searc
         it    = segs.begin();
         itend = segs.end() ;
 
-        created = !visitee->info.exists(id);
-        updated = false;
+        P = mesh.evalCellCentroid(id) ;
 
-        P       = mesh.evalCellCentroid(id) ;
-        value   = abs( lsInfo.value );
+		auto lsInfoItr = visitee->info.find(id) ;
+		if( lsInfoItr != visitee->info.end() ){
+			value = abs( lsInfoItr->value );
+		} else {
+			value = 1e18;
+		}
 
         while( it != itend ){
 
@@ -236,14 +234,17 @@ void LevelSetSegmentation::lsFromSimplex( LevelSet *visitee, const double &searc
             if ( d <= search ){
 
                 if( d<value ) {
+					if (lsInfoItr == visitee->info.end()) {
+						lsInfoItr = visitee->info.reclaim(id) ;
+					}
+
                     s       = signd *s + (!signd) *1.;
                     value   = d ;
-                    updated = true ;
 
-                    lsInfo.object   = getId();
-                    lsInfo.value    = s *d; //TODO check
-                    lsInfo.gradient = s *n ;
-                    supp            = *it ;
+                    lsInfoItr->object   = getId();
+                    lsInfoItr->value    = s *d; //TODO check
+                    lsInfoItr->gradient = s *n ;
+                    supp                = *it ;
                 }
 
                 ++it ;
@@ -262,12 +263,6 @@ void LevelSetSegmentation::lsFromSimplex( LevelSet *visitee, const double &searc
 
 
         } //end foreach triangle
-
-        if( created ){
-            visitee->info.insert(id,lsInfo) ;
-        } else if( updated ){
-            visitee->info[id]= lsInfo ;
-        }
 
     };// foreach cell
 
