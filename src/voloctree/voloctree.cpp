@@ -1049,17 +1049,11 @@ VolOctree::FaceInfoSet VolOctree::removeCells(std::vector<long> &cellIds)
 			// Remove interface and adjacency from dangling cell
 			Cell &danglingCell = m_cells[danglingCellId];
 
-			int j = 0;
-			while (danglingCell.getInterface(danglingCellFace, j) != interfaceId) {
-				++j;
-			}
-			danglingCell.deleteInterface(danglingCellFace, j);
+			int cellInterfaceIndex = danglingCell.findInterface(danglingCellFace, interfaceId);
+			danglingCell.deleteInterface(danglingCellFace, cellInterfaceIndex);
 
-			int i = 0;
-			while (danglingCell.getAdjacency(danglingCellFace, i) != danglingNeighId) {
-				++i;
-			}
-			danglingCell.deleteAdjacency(danglingCellFace, i);
+			int cellAdjacencyIndex = danglingCell.findAdjacency(danglingCellFace, danglingNeighId);
+			danglingCell.deleteAdjacency(danglingCellFace, cellAdjacencyIndex);
 
 			// Add the associated cell face to the dangling faces list
 			FaceInfo danglingFace(danglingCellId, danglingCellFace);
