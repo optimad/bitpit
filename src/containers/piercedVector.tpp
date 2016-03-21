@@ -1728,12 +1728,14 @@ std::size_t PiercedVector<value_t, id_t>::fillPosHead(const id_t &id)
 		// Update the iterators
 		if (nHoles == 1) {
 			holesClear();
+		} else if (nPendings == 1) {
+			holesClearPending();
+		} else if (nPendings > 1) {
+			--m_holes_pending_end;
 		} else {
-			if (nRegulars >= 1 || nPendings == 1) {
-				m_holes_regular_end   = m_holes.end();
-				m_holes_pending_begin = m_holes_regular_end;
-			}
-			m_holes_pending_end = m_holes.end();
+			--m_holes_regular_end;
+			--m_holes_pending_begin;
+			--m_holes_pending_end;
 		}
 
 		// Update first position counter
