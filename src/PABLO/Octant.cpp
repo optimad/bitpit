@@ -382,7 +382,7 @@ Octant::getCenter() const{
 	dh = double(getSize())*0.5;
 	center[0] = (double)m_x + dh;
 	center[1] = (double)m_y + dh;
-	center[2] = (double)m_z + dh;
+	center[2] = (double)m_z + double(m_dim-2)*dh;
 	return center;
 };
 
@@ -402,7 +402,7 @@ Octant::getFaceCenter(uint8_t iface) const{
 	if (iface < nf){
 		center[0] = (double)m_x + (double)sm_CoeffFaceCenter[iface][0] * dh_2;
 		center[1] = (double)m_y + (double)sm_CoeffFaceCenter[iface][1] * dh_2;
-		center[2] = (double)m_z + (double)sm_CoeffFaceCenter[iface][2] * dh_2;
+		center[2] = (double)m_z + double(m_dim-2) * (double)sm_CoeffFaceCenter[iface][2] * dh_2;
 	}
 	return center;
 };
@@ -421,7 +421,7 @@ Octant::getEdgeCenter(uint8_t iedge) const{
 	dh_2 = double(getSize())*0.5;
 	center[0] = (double)m_x + (double)sm_CoeffEdgeCenter[iedge][0] * dh_2;
 	center[1] = (double)m_y + (double)sm_CoeffEdgeCenter[iedge][1] * dh_2;
-	center[2] = (double)m_z + (double)sm_CoeffEdgeCenter[iedge][2] * dh_2;
+	center[2] = (double)m_z + double(m_dim-2) * (double)sm_CoeffEdgeCenter[iedge][2] * dh_2;
 	return center;
 };
 
@@ -432,7 +432,7 @@ Octant::getEdgeCenter(uint8_t iedge) const{
  */
 void
 Octant::getNodes(u32arr3vector & nodes) const{
-	uint8_t		i; // cx, cy, cz;
+	uint8_t		i;
 	uint32_t	dh;
 	uint8_t nn = 1<<m_dim;
 
@@ -440,13 +440,9 @@ Octant::getNodes(u32arr3vector & nodes) const{
 	nodes.resize(nn);
 
 	for (i = 0; i < nn; i++){
-//		cx = uint8_t(i%2);
-//		cy = uint8_t((i-4*(i/4))/2);
-//		cz = uint8_t(i/4);
-
 		nodes[i][0] = m_x + sm_CoeffNode[i][0]*dh;
 		nodes[i][1] = m_y + sm_CoeffNode[i][1]*dh;
-		nodes[i][2] = m_z + sm_CoeffNode[i][2]*dh;
+		nodes[i][2] = m_z + double(m_dim-2)*sm_CoeffNode[i][2]*dh;
 	}
 };
 
@@ -455,7 +451,7 @@ Octant::getNodes(u32arr3vector & nodes) const{
  */
 u32arr3vector
 Octant::getNodes() const{
-	uint8_t		i; // cx, cy, cz;
+	uint8_t		i;
 	uint32_t	dh;
 	uint8_t nn = 1<<m_dim;
 	u32arr3vector nodes;
@@ -464,12 +460,9 @@ Octant::getNodes() const{
 	nodes.resize(nn);
 
 	for (i = 0; i < nn; i++){
-//		cx = uint8_t(i%2);
-//		cy = uint8_t((i-4*(i/4))/2);
-//		cz = uint8_t(i/4);
 		nodes[i][0] = m_x + sm_CoeffNode[i][0]*dh;
 		nodes[i][1] = m_y + sm_CoeffNode[i][1]*dh;
-		nodes[i][2] = m_z + sm_CoeffNode[i][2]*dh;
+		nodes[i][2] = m_z + double(m_dim-2)*sm_CoeffNode[i][2]*dh;
 	}
 
 	return nodes;
@@ -480,16 +473,12 @@ Octant::getNodes() const{
  * \param[out] node Array[3] with the logical coordinates of the node of the octant.
  */
 void		Octant::getNode(u32array3 & node, uint8_t inode) const{
-//	uint8_t		cx, cy, cz;
 	uint32_t	dh;
 
 	dh = getSize();
-//	cx = inode%2;
-//	cy = (inode-4*(inode/4))/2;
-//	cz = inode/4;
 	node[0] = m_x + sm_CoeffNode[inode][0]*dh;
 	node[1] = m_y + sm_CoeffNode[inode][1]*dh;
-	node[2] = m_z + sm_CoeffNode[inode][2]*dh;
+	node[2] = m_z + double(m_dim-2)*sm_CoeffNode[inode][2]*dh;
 
 };
 
@@ -499,16 +488,12 @@ void		Octant::getNode(u32array3 & node, uint8_t inode) const{
  */
 u32array3		Octant::getNode(uint8_t inode) const{
 	u32array3 	node;
-//	uint8_t		cx, cy, cz;
 	uint32_t	dh;
 
 	dh = getSize();
-//	cx = inode%2;
-//	cy = (inode-4*(inode/4))/2;
-//	cz = inode/4;
 	node[0] = m_x + sm_CoeffNode[inode][0]*dh;
 	node[1] = m_y + sm_CoeffNode[inode][1]*dh;
-	node[2] = m_z + sm_CoeffNode[inode][2]*dh;
+	node[2] = m_z + double(m_dim-2)*sm_CoeffNode[inode][2]*dh;
 	return node;
 };
 
