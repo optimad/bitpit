@@ -442,7 +442,7 @@ Octant::getNodes(u32arr3vector & nodes) const{
 	for (i = 0; i < nn; i++){
 		nodes[i][0] = m_x + sm_CoeffNode[i][0]*dh;
 		nodes[i][1] = m_y + sm_CoeffNode[i][1]*dh;
-		nodes[i][2] = m_z + double(m_dim-2)*sm_CoeffNode[i][2]*dh;
+		nodes[i][2] = m_z + sm_CoeffNode[i][2]*dh;
 	}
 };
 
@@ -462,7 +462,7 @@ Octant::getNodes() const{
 	for (i = 0; i < nn; i++){
 		nodes[i][0] = m_x + sm_CoeffNode[i][0]*dh;
 		nodes[i][1] = m_y + sm_CoeffNode[i][1]*dh;
-		nodes[i][2] = m_z + double(m_dim-2)*sm_CoeffNode[i][2]*dh;
+		nodes[i][2] = m_z + sm_CoeffNode[i][2]*dh;
 	}
 
 	return nodes;
@@ -478,7 +478,7 @@ void		Octant::getNode(u32array3 & node, uint8_t inode) const{
 	dh = getSize();
 	node[0] = m_x + sm_CoeffNode[inode][0]*dh;
 	node[1] = m_y + sm_CoeffNode[inode][1]*dh;
-	node[2] = m_z + double(m_dim-2)*sm_CoeffNode[inode][2]*dh;
+	node[2] = m_z + sm_CoeffNode[inode][2]*dh;
 
 };
 
@@ -493,7 +493,7 @@ u32array3		Octant::getNode(uint8_t inode) const{
 	dh = getSize();
 	node[0] = m_x + sm_CoeffNode[inode][0]*dh;
 	node[1] = m_y + sm_CoeffNode[inode][1]*dh;
-	node[2] = m_z + double(m_dim-2)*sm_CoeffNode[inode][2]*dh;
+	node[2] = m_z + sm_CoeffNode[inode][2]*dh;
 	return node;
 };
 
