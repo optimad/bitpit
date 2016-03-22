@@ -108,17 +108,17 @@ class LevelSet{
     public:
     virtual ~LevelSet() ;
 
-    double                                      getLS(const long &);
-    std::array<double,3>                        getGradient(const long &) ;
+    double                                      getLS(const long &) const;
+    std::array<double,3>                        getGradient(const long &) const ;
 
-    double                                      getSizeNarrowBand() ;
+    double                                      getSizeNarrowBand() const;
 
     void                                        setSizeNarrowBand(double) ;
     void                                        setSign(bool);
     void                                        setPropagateSign(bool) ;
     void                                        setPropagateValue(bool) ;
 
-    bool                                        isInNarrowBand(const long &) ;
+    bool                                        isInNarrowBand(const long &) const;
 
     virtual void                                compute( LSObject * )=0 ;
     virtual void                                update( LSObject *, std::vector<Adaption::Info> & )=0 ;

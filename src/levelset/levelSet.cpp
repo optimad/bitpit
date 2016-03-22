@@ -97,7 +97,7 @@ LevelSet::~LevelSet(){
  * @param[in] i Local index of target octant.
  * @return Value of the i-th local element of the octree mesh.
  */
-double LevelSet::getLS( const long &i){
+double LevelSet::getLS( const long &i)const {
 
     if( !info.exists(i) ){
         return levelSetDefaults::VALUE;
@@ -112,7 +112,7 @@ double LevelSet::getLS( const long &i){
  * @param[in] i Local index of target octant.
  * @return Array with components of the Sdf gradient of the i-th local element of the octree mesh.
  */
-std::array<double,3> LevelSet::getGradient(const long &i){
+std::array<double,3> LevelSet::getGradient(const long &i) const {
 
     if( !info.exists(i) ){
         return levelSetDefaults::GRADIENT;
@@ -127,7 +127,7 @@ std::array<double,3> LevelSet::getGradient(const long &i){
  * @param[in] i Local index of target octant.
  * @return True/false if the Sdf value is exactly computed (true) or not (false).
  */
-bool LevelSet::isInNarrowBand(const long &i){
+bool LevelSet::isInNarrowBand(const long &i)const{
 
     if( !info.exists(i) ){
         return false;
@@ -141,7 +141,7 @@ bool LevelSet::isInNarrowBand(const long &i){
  * Get the current size of the narrow band.
  * @return Physical size of the current narrow band to guarantee at least one element inside it.
  */
-double LevelSet::getSizeNarrowBand(){
+double LevelSet::getSizeNarrowBand()const{
     return RSearch;
 };
 
