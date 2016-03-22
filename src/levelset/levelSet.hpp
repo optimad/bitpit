@@ -111,6 +111,7 @@ class LevelSet{
     double                                      getLS(const long &) const;
     std::array<double,3>                        getGradient(const long &) const ;
 
+    short                                       getSign(const long &) const;
     double                                      getSizeNarrowBand() const;
 
     void                                        setSizeNarrowBand(double) ;

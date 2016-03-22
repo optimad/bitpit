@@ -123,6 +123,21 @@ std::array<double,3> LevelSet::getGradient(const long &i) const {
 };
 
 /*!
+ * Get the sign of the levelset function
+ * @param[in] i Local index of target octant.
+ * @return sign
+ */
+short LevelSet::getSign(const long &i)const{
+
+    if( !info.exists(i) ){
+        return levelSetDefaults::SIGN;
+    } else {
+        return ( static_cast<short>(sign(info[i].value)) );
+    };
+
+};
+
+/*!
  * Get if the Sdf value of the i-th local element is exactly computed or not.
  * @param[in] i Local index of target octant.
  * @return True/false if the Sdf value is exactly computed (true) or not (false).
