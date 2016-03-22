@@ -127,6 +127,8 @@ int main( int argc, char *argv[]){
     mesh.setName("levelset_004") ;
     mesh.setCounter() ;
 
+    LSP.setPropagateSign(true);
+
     start = std::chrono::system_clock::now();
     LSP.compute( &geometry );
     end = std::chrono::system_clock::now();

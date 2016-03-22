@@ -98,7 +98,7 @@ void LevelSetCartesian::update( LSObject *visitor, std::vector<Adaption::Info> &
 
     visitor->updateLSInNarrowBand( this, mapper, newRSearch ) ;
 
-//TODO    if( propagateS ) updatePropagatedSign() ;
+    if( propagateS ) propagateSign(visitor) ;
 //TODO    if( propagateV ) updatePropagatedValue() ;
 
     RSearch = newRSearch ;
@@ -239,7 +239,7 @@ void LevelSetOctree::update( LSObject *visitor, std::vector<Adaption::Info> &map
 
     visitor->updateLSInNarrowBand( this, mapper, newRSearch ) ;
 
-//TODO    if( propagateS ) updatePropagatedSign() ;
+    if( propagateS ) propagateSign(visitor) ;
 //TODO    if( propagateV ) updatePropagatedValue() ;
 
     RSearch = newRSearch ;
