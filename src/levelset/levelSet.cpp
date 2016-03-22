@@ -277,61 +277,79 @@ std::array<double,3> LevelSet::computeGradientCentral( const long &I ){
 /*!
  * Propagate the sign of the signed distance function from narrow band to entire domain
  */
-//TODO std::blablavector<bool> LevelSet::propagateSign( LSObject &visitor ) {
-//TODO 
-//TODO 
-//TODO     // Local variables
-//TODO     long                        seed;
-//TODO     double                      s;
-//TODO 
-//TODO     std::vector<bool>          	flag(m_mesh->getCellCount(), true);
-//TODO     LIFOStack<int>     	stack(sqrt(m_mesh->getCellCount()));
-//TODO 
-//TODO     std::vector<long>			neighs;
-//TODO     std::vector<long>::iterator it, itend ;
-//TODO 
-//TODO     visitor.seedSign( *this, seed, s) ;
-//TODO 
-//TODO     stack.push(seed);
-//TODO 
-//TODO     // PROPAGATE SIGN                                                               
-//TODO     while (stack.TOPSTK > 0) {
-//TODO 
-//TODO         // Pop item from stack
-//TODO         seed = stack.pop();
-//TODO 
-//TODO         // Retrieve info
-//TODO         flag[seed] = false;
-//TODO 
-//TODO         // Loop over neighbors
-//TODO         neighs  =   m_mesh->findCellFaceNeighs( seed ) ;
-//TODO 
-//TODO         it    = neighs.begin() ;
-//TODO         itend = neighs.end() ;
-//TODO 
-//TODO         for ( it != itend; ++it) {
-//TODO 
-//TODO             LSInfo &lsInfo = info[*it] ;
-//TODO 
-//TODO             if ( flag[*it] ) {
-//TODO 
-//TODO                 LSInfo &lsInfo = info[*it] ;
-//TODO 
-//TODO                 if (lsInfo.value == 1.0e+18) {
-//TODO                     lsInfo.value = s * lsInfo.value;
-//TODO                 }
-//TODO 
-//TODO                 stack.push(*it);
-//TODO 
-//TODO             } //endif
-//TODO 
-//TODO         } //iterator
-//TODO 
-//TODO     } //stack
-//TODO 
-//TODO     return;
-//TODO 
-//TODO };
+void LevelSet::propagateSign( LSObject *visitor ) {
+
+
+    // Local variables
+    long                        seed;
+    double                      s;
+
+    std::vector<bool>          	flag(m_mesh->getCellCount(), true);
+    LIFOStack<int>     	        stack(sqrt(m_mesh->getCellCount()));
+
+    std::vector<long>			neighs;
+    std::vector<long>::iterator it, itend ;
+
+    bitpit::PiercedIterator<LSInfo> infoItr ;
+
+    visitor->seedSign( this, seed, s) ;
+
+    stack.push(seed);
+    if( s < 0 ){
+        infoItr = info.find(seed) ;
+
+        if( infoItr != info.end() )
+            infoItr = info.reclaim(seed);
+
+        (*infoItr).value *= s ;
+    };
+
+
+    // PROPAGATE SIGN                                                               
+    while (stack.TOPSTK > 0) {
+
+        // Pop item from stack
+        seed = stack.pop();
+        s    = getSign(seed) ;
+
+        // Retrieve info
+        flag[seed] = false;
+
+        // Loop over neighbors
+        neighs  =   m_mesh->findCellFaceNeighs( seed ) ;
+
+        itend = neighs.end() ;
+
+        for ( it=neighs.begin(); it!=itend; ++it) {
+
+            if ( flag[*it] ) {
+
+                if ( getLS(*it) == levelSetDefaults::VALUE && s < 0 ){
+                    infoItr = info.find(*it) ;
+
+                    if( infoItr == info.end() ){
+                        infoItr = info.reclaim(*it);
+                        (*infoItr).value = levelSetDefaults::VALUE ;
+                        (*infoItr).gradient = levelSetDefaults::GRADIENT ;
+                        (*infoItr).object = levelSetDefaults::OBJECT ;
+                    };
+
+                    (*infoItr).value = -levelSetDefaults::VALUE ;
+                };
+
+
+                stack.push(*it);
+
+            } //endif
+
+
+        } //iterator
+
+    } //stack
+
+    return;
+
+};
 
 /*!
  * Driver routine for propagtaing levelset value by a fast marching method

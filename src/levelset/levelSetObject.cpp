@@ -350,37 +350,40 @@ bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vect
  */
 void LevelSetSegmentation::seedSign( LevelSet *visitee, long &seed, double &value) const {
 
-
-    double                      d, s, lsTmp;
-    int                         i, M, N( visitee->m_mesh->getCellCount() );
-    std::array<double,3>        P, X, temp;
-
     seed = -1;
 
-    //------------------------------------------------------------------------------
-    // FIND SEED ELEMENT In GRID                                                       //
-    i = 0;
-    while ( i < N && seed == -1) {
-        if (abs(visitee->info[i].value) < 1.0e+17) {
-            seed = i;
-            value = sign(visitee->info[i].value) ;
-        }
-        ++i;
-    } //next oct
+    {  // FIND SEED ELEMENT In GRID
+        double                      s, lsTmp;
+        PiercedIterator<LevelSet::LSInfo>     lsItr = visitee->info.begin() , lsEnd=visitee->info.end() ;
 
-    //--------------------------------------------------------------------------- 
-    // if no seed element found, check whole triangulation                                                     
-    if( seed == -1 ){
+        while( lsItr != lsEnd ) {
+            lsTmp = (*lsItr).value ;
+            if( std::abs(lsTmp) < levelSetDefaults::VALUE ){
+                seed = lsItr.getId();
+                value = sign(lsTmp) ;
+                return ;
+            };
 
-        seed    = int(N/2);
-        lsTmp  = 1.0e+18;
+            ++lsItr ;
+        };
+    }
 
-        M       = stl->getCellCount();
+    { // if no seed element found, check whole triangulation
+
+        double                      d, s, lsTmp;
+        std::array<double,3>        P, X, temp;
+
+        PiercedIterator<bitpit::Cell>   cellItr = visitee->m_mesh->getCells().begin() ;
+
+        seed    = (*cellItr).getId() ;
         P       = visitee->m_mesh->evalCellCentroid(seed) ;
 
-        for( i=0; i<M; ++i){
 
-            infoFromSimplex(P, i, d, s, X, temp);
+        lsTmp  = levelSetDefaults::VALUE;
+
+        for( auto & segment : stl->getCells() ){
+
+            infoFromSimplex(P, segment.getId(), d, s, X, temp);
 
             d = abs(d) ;
             if ( d < lsTmp) {

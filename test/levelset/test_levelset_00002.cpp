@@ -94,6 +94,7 @@ int main( int argc, char *argv[]){
     LevelSetCartesian       LSP(mesh);
     LevelSetSegmentation    geometry(0,&STL);
 
+    LSP.setPropagateSign(true) ;
     start = std::chrono::system_clock::now();
     LSP.compute( &geometry ) ;
     end = std::chrono::system_clock::now();

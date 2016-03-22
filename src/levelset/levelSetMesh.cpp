@@ -59,7 +59,7 @@ void LevelSetCartesian::compute( LSObject *visitor ){
 
     visitor->computeLSInNarrowBand(this) ; 
 
-//    if( propagateS ) propagateSign( visitor ) ;
+    if( propagateS ) propagateSign( visitor ) ;
 //    if( propagateV ) propagateValue( visitor ) ;
 
     return;
@@ -217,7 +217,7 @@ void LevelSetOctree::compute( LSObject *visitor ){
 
     visitor->computeLSInNarrowBand(this) ; 
 
-//    if( propagateS ) propagateSign( visitor ) ;
+    if( propagateS ) propagateSign( visitor ) ;
 //    if( propagateV ) propagateValue( visitor ) ;
 
     return;
