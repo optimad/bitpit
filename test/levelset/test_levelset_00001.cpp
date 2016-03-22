@@ -97,10 +97,6 @@ return; }
 
 int main( int argc, char *argv[]){
 
-#if NOMPI==0
-    MPI_Init(&argc, &argv);
-#endif
-
 
     int                    dimensions(2) ;
 
@@ -167,12 +163,6 @@ int main( int argc, char *argv[]){
     mesh.write() ;
 
     std::cout << " - Exported data" << std::endl;
-
-
-
-#if NOMPI==0
-    MPI_Finalize();
-#endif
 
     return 0;
 
