@@ -166,10 +166,7 @@ std::array<std::array<double, 3>, 3> Interface::evalRotationFromCartesian(std::a
 */
 std::array<std::array<double, 3>, 3> Interface::evalRotationToCartesian(std::array<double, 3> &versor)
 {
-	std::array<std::array<double, 3>, 3> R = evalRotationFromCartesian(versor);
-	linearalgebra::transpose(R);
-
-	return R;
+	return linearalgebra::transpose(evalRotationFromCartesian(versor));
 }
 
 /*!
@@ -180,10 +177,7 @@ std::array<std::array<double, 3>, 3> Interface::evalRotationToCartesian(std::arr
 */
 std::array<std::array<double, 3>, 3> Interface::evalRotationTranspose(const std::array<std::array<double, 3>, 3> &R)
 {
-	std::array<std::array<double, 3>, 3> R_prime = R;
-	linearalgebra::transpose(R_prime);
-
-	return R_prime;
+	return linearalgebra::transpose(R);
 }
 
 /*!
