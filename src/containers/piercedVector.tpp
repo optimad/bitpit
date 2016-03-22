@@ -1049,7 +1049,7 @@ std::size_t PiercedVector<value_t, id_t>::size() const
 			otherwise it returns false.
 */
 template<typename value_t, typename id_t>
-bool PiercedVector<value_t, id_t>::exists(id_t id)
+bool PiercedVector<value_t, id_t>::exists(id_t id) const
 {
 	return (m_pos.count(id) != 0);
 }

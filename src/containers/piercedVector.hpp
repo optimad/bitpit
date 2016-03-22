@@ -312,7 +312,7 @@ public:
 	std::size_t size() const;
 
 	// Methods that extract information on the contents of the container
-	bool exists(id_t id);
+	bool exists(id_t id) const;
 	std::size_t evalFlatIndex(id_t id);
 
 	std::vector<id_t> getIds(bool ordered = true);
