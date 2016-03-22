@@ -141,7 +141,7 @@ double LevelSetCartesian::updateEikonal( double s, double g, const long &I ){
 
     for( d=0; d<m_cmesh->getDimension(); ++d){ // COMPUTE QUADRATIC FORM COEFFICIENTS FROM UPWIND STENCIL
 
-        value   = 1.0e+18;
+        value   = levelSetDefaults::VALUE ;
 
         // Left neighbor
         J   = cell.getAdjacency( 2*d, 0) ;
@@ -162,7 +162,7 @@ double LevelSetCartesian::updateEikonal( double s, double g, const long &I ){
 
 
         // Update coeffs in the quadratic form
-        if (value < 1.0e+17) {
+        if (value < levelSetDefaults::VALUE) {
             h2 = pow(m_cmesh->getSpacing(d), 2);
 
             a += 1.0/h2;

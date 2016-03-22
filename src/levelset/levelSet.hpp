@@ -48,10 +48,24 @@ namespace bitpit{
 class LSObject ;
 class LevelSetSegmentation ;
 
+namespace levelSetDefaults{
+    const double                            VALUE = 1.e18 ;             /**< Default value for levelset function */
+    const std::array<double,3>              GRADIENT = {{0.,0.,0.}};    /**< Default value for levelset gradient */
+    const short                             SIGN = 1;                   /**< Default value for the sign */
+    const int                               OBJECT = -1 ;               /**< Default value for closest object id */
+    const std::set<long>                    LIST = { } ;                /**< Default value for closest segment */
+    const long                              ELEMENT = -1 ;              /**< Default value for segmments in narrow band */
+};
+
 class LevelSet{
 
     friend  LSObject ;
     friend  LevelSetSegmentation ;
+
+//    public:
+//    static double                               NULL_VALUE ;    /**< Default value for levelset function */
+//    static std::array<double,3>                 NULL_GRADIENT ; /**< Default value for levelset gradient */
+//    static int                                  NULL_OBJECT ;   /**< Default value for closest object id */
 
     protected:
     struct LSInfo{
@@ -185,8 +199,8 @@ class LSObject{
 class LevelSetSegmentation : public LSObject {
 
     public:
-    static std::set<long>                       NULL_LIST ;
-    static long                                 NULL_ELEMENT ;
+//    static std::set<long>                       NULL_LIST ;     /**< Default value for closest segment */
+//    static long                                 NULL_ELEMENT ;  /**< Default value for segmments in narrow band */
 
     private:
     struct SegData{

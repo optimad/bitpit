@@ -29,9 +29,6 @@
 
 namespace bitpit {
 
-std::set<long> LevelSetSegmentation::NULL_LIST ;
-long LevelSetSegmentation::NULL_ELEMENT=-1 ;
-
 /*!
 	@ingroup    levelset
 	@class      LSObject
@@ -69,7 +66,7 @@ int LSObject::getId( ) const {
  * @param[in] id id to be asigned to pierced vector
  * @param[in] list list of simplices
  */
-LevelSetSegmentation::SegData::SegData( ) : m_segments(NULL_LIST), m_support(NULL_ELEMENT){
+LevelSetSegmentation::SegData::SegData( ) : m_segments(levelSetDefaults::LIST), m_support(levelSetDefaults::ELEMENT){
 };
 
 /*!
@@ -77,7 +74,7 @@ LevelSetSegmentation::SegData::SegData( ) : m_segments(NULL_LIST), m_support(NUL
  * @param[in] id id to be asigned to pierced vector
  * @param[in] list list of simplices
  */
-LevelSetSegmentation::SegData::SegData( const std::set<long> &list) :m_segments(list), m_support(NULL_ELEMENT) {
+LevelSetSegmentation::SegData::SegData( const std::set<long> &list) :m_segments(list), m_support(levelSetDefaults::ELEMENT) {
 };
 
 /*!
@@ -137,7 +134,7 @@ LevelSetSegmentation* LevelSetSegmentation::clone() const {
 const std::set<long> & LevelSetSegmentation::getSimplexList(const long &i){
 
     if( !m_segInfo.exists(i) ){
-        return NULL_LIST;
+        return levelSetDefaults::LIST;
     } else {
         return ( m_segInfo[i].m_segments );
     };
@@ -152,7 +149,7 @@ const std::set<long> & LevelSetSegmentation::getSimplexList(const long &i){
 const long & LevelSetSegmentation::getSupportSimplex(const long &i){
 
     if( !m_segInfo.exists(i) ){
-        return NULL_ELEMENT ;
+        return levelSetDefaults::ELEMENT ;
     } else {
         return ( m_segInfo[i].m_support );
     };

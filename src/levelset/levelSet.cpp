@@ -100,7 +100,7 @@ LevelSet::~LevelSet(){
 double LevelSet::getLS( const long &i){
 
     if( !info.exists(i) ){
-        return 1.e18;
+        return levelSetDefaults::VALUE;
     } else {
         return ( info[i].value );
     };
@@ -115,7 +115,7 @@ double LevelSet::getLS( const long &i){
 std::array<double,3> LevelSet::getGradient(const long &i){
 
     if( !info.exists(i) ){
-        return {{0.,0.,0.}};
+        return levelSetDefaults::GRADIENT;
     } else {
         return ( info[i].gradient );
     };
@@ -393,7 +393,7 @@ void LevelSet::solveEikonal( double g, double s ){
 
                 while( !check &&  it != itend  ){
 
-                    check = (s*info[*it].value >= 0.0) && (abs(info[*it].value) < 1.0e+18) ;
+                    check = (s*info[*it].value >= 0.0) && (abs(info[*it].value) < levelSetDefaults::VALUE) ;
                     ++it ;
 
                 };
@@ -516,7 +516,7 @@ double LevelSet::updateEikonal( double s, double g, const long &I ){
     BITPIT_UNUSED(g) ;
     BITPIT_UNUSED(I) ;
 
-    return 1.e18;
+    return levelSetDefaults::VALUE;
 };
 
 /*! 
