@@ -313,6 +313,8 @@ public:
 
 	// Methods that extract information on the contents of the container
 	bool exists(id_t id) const;
+	const_iterator find(id_t id) const;
+	iterator find(id_t id);
 	std::size_t evalFlatIndex(id_t id);
 
 	std::vector<id_t> getIds(bool ordered = true);

@@ -1055,6 +1055,47 @@ bool PiercedVector<value_t, id_t>::exists(id_t id) const
 }
 
 /*!
+	Returns a constant iterator to the first element with the specified id.
+	If no such element is found, the function returns a constant iterator
+	referring to the past-the-end element of the container.
+
+	\param id the id to look for
+	\result Returns a constant iterator to the first element with the
+	specified id. If no such element is found, the function returns a
+	constant iterator referring to the past-the-end element of the
+	container.
+*/
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::const_iterator PiercedVector<value_t, id_t>::find(id_t id) const
+{
+	if (!exists(id)) {
+		return cend();
+	}
+
+	return getConstIterator(id);
+}
+
+/*!
+	Returns an iterator to the first element with the specified id.
+	If no such element is found, the function returns a constant iterator
+	referring to the past-the-end element of the container.
+
+	\param id the id to look for
+	\result Returns an iterator to the first element with the specified id.
+	If no such element is found, the function returns an iterator referring
+	to the past-the-end element of the container.
+*/
+template<typename value_t, typename id_t>
+typename PiercedVector<value_t, id_t>::iterator PiercedVector<value_t, id_t>::find(id_t id)
+{
+	if (!exists(id)) {
+		return end();
+	}
+
+	return getIterator(id);
+}
+
+/*!
 	Gets the flat index of the element with the specified id.
 
 	A flat id is the id associated to a numbering scheme that starts
