@@ -27,7 +27,7 @@
 #define __BITPIT_MPI_DATATYPE_CONVERSION_HPP__
 
 #include <mpi.h>
-
+#include <stdint.h>
 namespace bitpit {
 
 template <class T>
