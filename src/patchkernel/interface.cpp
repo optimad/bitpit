@@ -120,9 +120,6 @@ std::array<std::array<double, 3>, 3> Interface::evalRotationFromCartesian(std::a
 	//                | [z_int] |
 	//
 	std::array<std::array<double, 3>, 3> R;
-	for (int i = 0; i < 3; ++i) {
-		R[i].fill(0.0);
-	}
 
 	// x-interface axis
 	for (int k = 0; k < 3; ++k) {
