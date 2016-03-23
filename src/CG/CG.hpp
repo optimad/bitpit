@@ -47,7 +47,7 @@ namespace CGElem{
 typedef std::array<double,3> array3D ;
 
 static const std::array< std::array<int,2>,12> boxEdgeVertexConnectivity =
-{
+{{
     std::array<int,2>{ {0,2} },
     std::array<int,2>{ {1,3} },
     std::array<int,2>{ {0,1} },
@@ -61,17 +61,17 @@ static const std::array< std::array<int,2>,12> boxEdgeVertexConnectivity =
     std::array<int,2>{ {2,6} },
     std::array<int,2>{ {3,7} }
 
-};
+}};
 
 static const std::array< std::array<int,4>, 6> boxFaceVertexConnectivity =
-{
+{{
     std::array<int,4>{ {0,2,6,4} },
     std::array<int,4>{ {1,3,7,5} },
     std::array<int,4>{ {0,4,5,1} },
     std::array<int,4>{ {2,6,7,3} },
     std::array<int,4>{ {0,1,3,2} },
     std::array<int,4>{ {4,5,7,6} }
-};
+}};
 
 
 double              distancePointLine( array3D const &, array3D const &, array3D const &, array3D & ) ;

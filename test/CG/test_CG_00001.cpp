@@ -519,8 +519,8 @@ int main(
         A0.fill(0.) ;
         A1.fill(1.) ;
 
-        B0 = {-0.25,0.25,0.25} ;
-        B1 = {0.75,1.25,0.99} ;
+        B0 = {{-0.25,0.25,0.25}} ;
+        B1 = {{0.75,1.25,0.99}} ;
 
         intersect = CGElem::intersectBoxBox( A0, A1, B0, B1, C0, C1) ;
 
@@ -551,7 +551,7 @@ int main(
         A0.fill(0.) ;
         A1.fill(1.) ;
 
-        B = {0.25,0.25,0.25} ;
+        B = {{0.25,0.25,0.25}} ;
 
         intersect = CGElem::intersectPointBox( B, A0, A1) ;
 
