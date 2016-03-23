@@ -43,6 +43,8 @@
  *
  */
 
+# include <unordered_set>
+
 # include "bitpit_SA.hpp"
 # include "bitpit_operators.hpp"
 
@@ -299,7 +301,7 @@ void LevelSet::propagateSign( LSObject *visitor ) {
     long                        seed;
     double                      s;
 
-    std::vector<bool>          	flag(m_mesh->getCellCount(), true);
+    std::unordered_set<long>    alreadyEvaluated;
     LIFOStack<int>     	        stack(sqrt(m_mesh->getCellCount()));
 
     std::vector<long>			neighs;
@@ -328,7 +330,7 @@ void LevelSet::propagateSign( LSObject *visitor ) {
         s    = getSign(seed) ;
 
         // Retrieve info
-        flag[seed] = false;
+		alreadyEvaluated.insert(seed);
 
         // Loop over neighbors
         neighs  =   m_mesh->findCellFaceNeighs( seed ) ;
@@ -337,7 +339,7 @@ void LevelSet::propagateSign( LSObject *visitor ) {
 
         for ( it=neighs.begin(); it!=itend; ++it) {
 
-            if ( flag[*it] ) {
+            if ( alreadyEvaluated.count(*it) == 0 ) {
 
                 if ( getLS(*it) == levelSetDefaults::VALUE && s < 0 ){
                     infoItr = info.find(*it) ;
