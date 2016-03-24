@@ -290,7 +290,7 @@ bool
 LocalTree::refine(u32vector & mapidx){
 
 	u32vector		last_child_index;
-	octvector 		children;
+	octvector 		children(0,Octant(m_dim, m_global.m_maxLevel));
 	uint32_t 		idx, nocts, ilastch;
 	uint32_t 		offset = 0, blockidx;
 	uint32_t		mapsize = mapidx.size();
@@ -793,7 +793,7 @@ LocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, v
 				u32array3 coordtry1 = { {1,1,1} };
 				uint8_t level = oct->m_level;
 				uint8_t leveltry = m_octants[idxtry].getLevel();
-				while(Mortontry < Mortonlast && idxtry < noctants){
+				while(Mortontry <= Mortonlast && idxtry < noctants){
 					for (int idim=0; idim<m_dim; idim++){
 						Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
@@ -925,7 +925,7 @@ LocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, v
 						u32array3 coordtry1 = { {1,1,1} };
 						uint8_t level = oct->m_level;
 						uint8_t leveltry = m_octants[idxtry].getLevel();
-						while(Mortontry < Mortonlast && idxtry < m_sizeGhosts){
+						while(Mortontry <= Mortonlast && idxtry < m_sizeGhosts){
 							for (int idim=0; idim<m_dim; idim++){
 								Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 								Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_ghosts[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
@@ -1042,7 +1042,7 @@ LocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, v
 							u32array3 coordtry1 = { {1,1,1} };
 							uint8_t level = oct->m_level;
 							uint8_t leveltry = m_octants[idxtry].getLevel();
-							while(Mortontry < Mortonlast && idxtry < noctants){
+							while(Mortontry <= Mortonlast && idxtry < noctants){
 								for (int idim=0; idim<m_dim; idim++){
 									Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 									Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
@@ -1202,7 +1202,7 @@ LocalTree::findNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours, ve
 				u32array3 coordtry1 = { {1,1,1} };
 				uint8_t level = oct->m_level;
 				uint8_t leveltry = m_octants[idxtry].getLevel();
-				while(Mortontry < Mortonlast && idxtry < noctants){
+				while(Mortontry <= Mortonlast && idxtry < noctants){
 					for (int idim=0; idim<m_dim; idim++){
 						Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
@@ -1334,7 +1334,7 @@ LocalTree::findNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours, ve
 						u32array3 coordtry1 = { {1,1,1} };
 						uint8_t level = oct->m_level;
 						uint8_t leveltry = m_octants[idxtry].getLevel();
-						while(Mortontry < Mortonlast && idxtry < m_sizeGhosts){
+						while(Mortontry <= Mortonlast && idxtry < m_sizeGhosts){
 							for (int idim=0; idim<m_dim; idim++){
 								Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 								Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_ghosts[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
@@ -1449,7 +1449,7 @@ LocalTree::findNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours, ve
 							u32array3 coordtry1 = { {1,1,1} };
 							uint8_t level = oct->m_level;
 							uint8_t leveltry = m_octants[idxtry].getLevel();
-							while(Mortontry < Mortonlast && idxtry < noctants){
+							while(Mortontry <= Mortonlast && idxtry < noctants){
 								for (int idim=0; idim<m_dim; idim++){
 									Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 									Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
@@ -1606,7 +1606,7 @@ LocalTree::findGhostNeighbours(uint32_t const idx, uint8_t iface, u32vector & ne
 				u32array3 coord1 = { {1,1,1} };
 				u32array3 coordtry1 = { {1,1,1} };
 				uint8_t level = oct->m_level;
-				while(Mortontry < Mortonlast && idxtry < noctants){
+				while(Mortontry <= Mortonlast && idxtry < noctants){
 					for (int idim=0; idim<m_dim; idim++){
 						Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
@@ -1757,7 +1757,7 @@ LocalTree::findPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighb
 			u32array3 coordtry1 = { {1,1,1} };
 			uint8_t level = oct->m_level;
 			uint8_t leveltry = m_octants[idxtry].getLevel();
-			while(Mortontry < Mortonlast && idxtry < noctants){
+			while(Mortontry <= Mortonlast && idxtry < noctants){
 				for (int idim=0; idim<m_dim; idim++){
 					Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 					Dxstar[idim]	= int32_t(int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size);
@@ -1876,7 +1876,7 @@ LocalTree::findPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighb
 						u32array3 coordtry1 = { {1,1,1} };
 						uint8_t level = oct->m_level;
 						uint8_t leveltry = m_octants[idxtry].getLevel();
-						while(Mortontry < Mortonlast && idxtry < m_sizeGhosts){
+						while(Mortontry <= Mortonlast && idxtry < m_sizeGhosts){
 							for (int idim=0; idim<m_dim; idim++){
 								Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 								Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_ghosts[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
@@ -1988,7 +1988,7 @@ LocalTree::findPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighb
 							u32array3 coordtry1 = { {1,1,1} };
 							uint8_t level = oct->m_level;
 							uint8_t leveltry = m_octants[idxtry].getLevel();
-							while(Mortontry < Mortonlast && idxtry < noctants){
+							while(Mortontry <= Mortonlast && idxtry < noctants){
 								for (int idim=0; idim<m_dim; idim++){
 									Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 									Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
@@ -2131,7 +2131,7 @@ LocalTree::findGhostPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & n
 			array<int64_t,3> coord1 = { {1,1,1} };
 			u32array3 coordtry1 = { {1,1,1} };
 			uint8_t level = oct->m_level;
-			while(Mortontry < Mortonlast && idxtry < noctants){
+			while(Mortontry <= Mortonlast && idxtry < noctants){
 				for (int idim=0; idim<m_dim; idim++){
 					Dx[idim] 		= int32_t(int32_t(abs(cxyz[idim]))*(-coord[idim] + coordtry[idim]));
 					Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
@@ -3613,7 +3613,7 @@ LocalTree::findEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbour
 					Octant last_desc = samesizeoct.buildLastDesc();
 					uint64_t Mortonlast = last_desc.computeMorton();
 					Mortontry = m_ghosts[idxtry].computeMorton();
-					while(Mortontry < Mortonlast && idxtry < m_ghosts.size()){
+					while(Mortontry <= Mortonlast && idxtry < m_ghosts.size()){
 						Dx = int32_t(abs(cx))*(-int32_t(oct->m_x) + int32_t(m_ghosts[idxtry].m_x));
 						Dy = int32_t(abs(cy))*(-int32_t(oct->m_y) + int32_t(m_ghosts[idxtry].m_y));
 						Dz = int32_t(abs(cz))*(-int32_t(oct->m_z) + int32_t(m_ghosts[idxtry].m_z));
@@ -3720,7 +3720,7 @@ LocalTree::findEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbour
 				Octant last_desc = samesizeoct.buildLastDesc();
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = m_octants[idxtry].computeMorton();
-				while(Mortontry < Mortonlast && idxtry <= noctants-1){
+				while(Mortontry <= Mortonlast && idxtry <= noctants-1){
 					Dx = int32_t(abs(cx))*(-int32_t(oct->m_x) + int32_t(m_octants[idxtry].m_x));
 					Dy = int32_t(abs(cy))*(-int32_t(oct->m_y) + int32_t(m_octants[idxtry].m_y));
 					Dz = int32_t(abs(cz))*(-int32_t(oct->m_z) + int32_t(m_octants[idxtry].m_z));
@@ -3882,7 +3882,7 @@ LocalTree::findEdgeNeighbours(Octant* oct, uint8_t iedge, u32vector & neighbours
 					Octant last_desc = samesizeoct.buildLastDesc();
 					uint64_t Mortonlast = last_desc.computeMorton();
 					Mortontry = m_ghosts[idxtry].computeMorton();
-					while(Mortontry < Mortonlast && idxtry < m_ghosts.size()){
+					while(Mortontry <= Mortonlast && idxtry < m_ghosts.size()){
 						Dx = int32_t(abs(cx))*(-int32_t(oct->m_x) + int32_t(m_ghosts[idxtry].m_x));
 						Dy = int32_t(abs(cy))*(-int32_t(oct->m_y) + int32_t(m_ghosts[idxtry].m_y));
 						Dz = int32_t(abs(cz))*(-int32_t(oct->m_z) + int32_t(m_ghosts[idxtry].m_z));
@@ -3989,7 +3989,7 @@ LocalTree::findEdgeNeighbours(Octant* oct, uint8_t iedge, u32vector & neighbours
 				Octant last_desc = samesizeoct.buildLastDesc();
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = m_octants[idxtry].computeMorton();
-				while(Mortontry < Mortonlast && idxtry <= noctants-1){
+				while(Mortontry <= Mortonlast && idxtry <= noctants-1){
 					Dx = int32_t(abs(cx))*(-int32_t(oct->m_x) + int32_t(m_octants[idxtry].m_x));
 					Dy = int32_t(abs(cy))*(-int32_t(oct->m_y) + int32_t(m_octants[idxtry].m_y));
 					Dz = int32_t(abs(cz))*(-int32_t(oct->m_z) + int32_t(m_octants[idxtry].m_z));
@@ -4142,7 +4142,7 @@ LocalTree::findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neig
 				Octant last_desc = samesizeoct.buildLastDesc();
 				uint64_t Mortonlast = last_desc.computeMorton();
 				Mortontry = m_octants[idxtry].computeMorton();
-				while(Mortontry < Mortonlast && idxtry <= noctants-1){
+				while(Mortontry <= Mortonlast && idxtry <= noctants-1){
 					Dx = int32_t(abs(cx))*(-int32_t(oct->m_x) + int32_t(m_octants[idxtry].m_x));
 					Dy = int32_t(abs(cy))*(-int32_t(oct->m_y) + int32_t(m_octants[idxtry].m_y));
 					Dz = int32_t(abs(cz))*(-int32_t(oct->m_z) + int32_t(m_octants[idxtry].m_z));
@@ -4309,7 +4309,7 @@ LocalTree::findNodeNeighbours(Octant* oct, uint8_t inode, u32vector & neighbours
 					u32array3 coordtry = m_ghosts[idxtry].getCoord();
 					u32array3 coord1 = { {1,1,1} };
 					u32array3 coordtry1 = { {1,1,1} };
-					while(Mortontry < Mortonlast && idxtry < m_sizeGhosts){
+					while(Mortontry <= Mortonlast && idxtry < m_sizeGhosts){
 						for (int idim=0; idim<m_dim; idim++){
 							Dx[idim] 		= abs(int((abs(cxyz[idim]))*(-coord[idim] + coordtry[idim])));
 							Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_ghosts[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
@@ -4396,7 +4396,7 @@ LocalTree::findNodeNeighbours(Octant* oct, uint8_t inode, u32vector & neighbours
 				u32array3 coordtry = m_octants[idxtry].getCoord();
 				u32array3 coord1 = { {1,1,1} };
 				u32array3 coordtry1 = { {1,1,1} };
-				while(Mortontry < Mortonlast && idxtry <= noctants-1){
+				while(Mortontry <= Mortonlast && idxtry <= noctants-1){
 					for (int idim=0; idim<m_dim; idim++){
 						Dx[idim] 		= abs(int((abs(cxyz[idim]))*(-coord[idim] + coordtry[idim])));
 						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
@@ -4540,7 +4540,7 @@ LocalTree::findNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbour
 					u32array3 coordtry = m_ghosts[idxtry].getCoord();
 					u32array3 coord1 = { {1,1,1} };
 					u32array3 coordtry1 = { {1,1,1} };
-					while(Mortontry < Mortonlast && idxtry < m_sizeGhosts){
+					while(Mortontry <= Mortonlast && idxtry < m_sizeGhosts){
 						for (int idim=0; idim<m_dim; idim++){
 							Dx[idim] 		= abs(int((abs(cxyz[idim]))*(-coord[idim] + coordtry[idim])));
 							Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_ghosts[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
@@ -4627,7 +4627,7 @@ LocalTree::findNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbour
 				u32array3 coordtry = m_octants[idxtry].getCoord();
 				u32array3 coord1 = { {1,1,1} };
 				u32array3 coordtry1 = { {1,1,1} };
-				while(Mortontry < Mortonlast && idxtry <= noctants-1){
+				while(Mortontry <= Mortonlast && idxtry <= noctants-1){
 					for (int idim=0; idim<m_dim; idim++){
 						Dx[idim] 		= abs(int((abs(cxyz[idim]))*(-coord[idim] + coordtry[idim])));
 						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
@@ -4743,7 +4743,7 @@ LocalTree::findGhostNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neig
 				u32array3 coordtry = m_octants[idxtry].getCoord();
 				u32array3 coord1 = { {1,1,1} };
 				u32array3 coordtry1 = { {1,1,1} };
-				while(Mortontry < Mortonlast && idxtry <= noctants-1){
+				while(Mortontry <= Mortonlast && idxtry <= noctants-1){
 					for (int idim=0; idim<m_dim; idim++){
 						Dx[idim] 		= abs(int((abs(cxyz[idim]))*(-coord[idim] + coordtry[idim])));
 						Dxstar[idim]	= int32_t((cxyz[idim]-1)/2)*(m_octants[idxtry].getSize()) + int32_t((cxyz[idim]+1)/2)*size;
