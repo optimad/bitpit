@@ -2201,7 +2201,6 @@ ParaTree::getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost, ivec
 	mapper.swap(mapper);
 	isghost.swap(isghost);
 	rank.swap(rank);
-	cout << string(m_lastOp) << endl;
 	if (m_lastOp == "adapt"){
 		getMapping(idx, mapper, isghost);
 		int n = isghost.size();
@@ -2212,7 +2211,6 @@ ParaTree::getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost, ivec
 	}
 	else if (m_lastOp == "loadbalance"){
 		uint64_t gidx = getGlobalIdx(idx);
-		cout << gidx << endl;
 		for (int iproc=0; iproc<m_nproc; ++iproc){
 			if (m_partitionRangeGlobalIdx0[iproc]>=gidx){
 				mapper[0] = gidx;

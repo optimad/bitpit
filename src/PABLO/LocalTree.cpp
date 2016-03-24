@@ -290,7 +290,7 @@ bool
 LocalTree::refine(u32vector & mapidx){
 
 	u32vector		last_child_index;
-	octvector 		children;
+	octvector 		children(0,Octant(m_dim, m_global.m_maxLevel));
 	uint32_t 		idx, nocts, ilastch;
 	uint32_t 		offset = 0, blockidx;
 	uint32_t		mapsize = mapidx.size();

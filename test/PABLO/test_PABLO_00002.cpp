@@ -100,6 +100,7 @@ void test002() {
         pablo1.write("Pablo002_iter"+to_string(static_cast<unsigned long long>(iter+2)));
     }
 
+
     /**<While adapt() nref2 times in the upper area of domain.
      * (Useful if you work with center of octants) */
     int nref2 = 5;

@@ -67,13 +67,13 @@ inline uint64_t mortonEncode_magicbits(unsigned int x, unsigned int y){
 
 inline uint64_t keyXY(uint64_t x, uint64_t y, int8_t max_level){
 	uint64_t answer = 0;
-	answer |= x | (y << max_level);
+	answer |= x | (y << (max_level+1));
 	return answer;
 }
 
 inline uint64_t keyXYZ(uint64_t x, uint64_t y, uint64_t z, int8_t max_level){
 	uint64_t answer = 0;
-	answer |= x | (y << max_level) | (z << 2*max_level);
+	answer |= x | (y << (max_level+1)) | (z << 2*(max_level+1));
 	return answer;
 }
 

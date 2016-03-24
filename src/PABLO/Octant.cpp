@@ -28,6 +28,7 @@
 #include "Octant.hpp"
 #include <algorithm>
 #include <cmath>
+#include <iostream>
 
 namespace bitpit {
 
@@ -440,9 +441,9 @@ Octant::getNodes(u32arr3vector & nodes) const{
 	nodes.resize(nn);
 
 	for (i = 0; i < nn; i++){
-		nodes[i][0] = m_x + sm_CoeffNode[i][0]*dh;
-		nodes[i][1] = m_y + sm_CoeffNode[i][1]*dh;
-		nodes[i][2] = m_z + sm_CoeffNode[i][2]*dh;
+		nodes[i][0] = m_x + uint32_t(sm_CoeffNode[i][0])*dh;
+		nodes[i][1] = m_y + uint32_t(sm_CoeffNode[i][1])*dh;
+		nodes[i][2] = m_z + uint32_t(sm_CoeffNode[i][2])*dh;
 	}
 };
 
