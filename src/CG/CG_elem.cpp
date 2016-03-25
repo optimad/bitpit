@@ -557,7 +557,7 @@ bool intersectLineLine(
     double                  xi, delta, den;
 
     delta = dotProduct(n1, n2);
-    if (abs((abs(delta) - 1.0)) < 1.0e-12) {
+    if (std::abs((std::abs(delta) - 1.0)) < 1.0e-12) {
         return false ;
     }
 
@@ -655,7 +655,7 @@ bool intersectLinePlane(
     // CHECK DEGENERATE CASES                                                     //
     // ========================================================================== //
     s = dotProduct(n1, n2);
-    if (abs(s) < tol) { return(false); }
+    if (std::abs(s) < tol) { return(false); }
 
     // ========================================================================== //
     // FIND INTERSECTION POINTS                                                   //
@@ -728,7 +728,7 @@ bool intersectPlanePlane(
     // ========================================================================== //
     // CHECK DEGENERATE CONDITIONS                                                //
     // ========================================================================== //
-    if (abs(dotProduct(n1, n2) - 1.0) <= tol) { return(false); }
+    if (std::abs(dotProduct(n1, n2) - 1.0) <= tol) { return(false); }
 
     // ========================================================================== //
     // FIND INTERSECTION LINE                                                     //
@@ -741,13 +741,13 @@ bool intersectPlanePlane(
     // Point onto the line
     s = dotProduct(P1, n1) - dotProduct(P2, n2);
     v = n1 - n2;
-    if (abs(v[2]) > tol) {
+    if (std::abs(v[2]) > tol) {
         Pl[0] = P1[0];
         Pl[1] = P1[1];
         Pl[2] = (s - Pl[0]*v[0] - Pl[1]*v[1])/v[2];
     }
 
-    else if( abs(v[1]) > tol) {
+    else if( std::abs(v[1]) > tol) {
 
         Pl[0] = P1[0];
         Pl[2] = P1[2];
