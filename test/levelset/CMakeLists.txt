@@ -70,9 +70,11 @@ add_custom_command(
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/cube1.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/cube1.stl"
 )
 
-add_custom_command(
-    TARGET "test_levelset_parallel_00001" PRE_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/cube.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/cube.stl"
-)
+if (ENABLE_MPI)
+	add_custom_command(
+		TARGET "test_levelset_parallel_00001" PRE_BUILD
+		COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/cube.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/cube.stl"
+	)
+endif ()
 
 unset(TEST_TARGETS)
