@@ -315,7 +315,7 @@ void LevelSet::propagateSign( LSObject *visitor ) {
     if( s < 0 ){
         infoItr = info.find(seed) ;
 
-        if( infoItr != info.end() )
+        if( infoItr == info.end() )
             infoItr = info.reclaim(seed);
 
         (*infoItr).value *= s ;
@@ -555,13 +555,11 @@ double LevelSet::updateEikonal( double s, double g, const long &I ){
 };
 
 /*! 
- * Update scalar field value at mesh vertex on a by locally solving the 3D Eikonal equation.
- * @param[in] s Flag for inwards/outwards propagation (s = -+1).
- * @param[in] g Propagation speed for the 3D Eikonal equation.
- * @param[in] I index of the cartesian cell to be updated.
- * @return Updated value at mesh vertex
+ * Deletes non-existing items and items beyon the narrow band after grid adaption.
+ * @param[in] mapper mapping info
+ * @param[in] newRSearch new size of narrow band
  */
-void LevelSet::clearAfterRefinement( std::vector<Adaption::Info> &mapper ){
+void LevelSet::clearAfterAdaption( std::vector<Adaption::Info> &mapper, double &newRSearch ){
 
     long id ;
     for ( auto & map : mapper ){
@@ -569,11 +567,26 @@ void LevelSet::clearAfterRefinement( std::vector<Adaption::Info> &mapper ){
 
             for ( auto & parent : map.previous){ //save old data and delete element
                 id = (long) parent ;
-                if( info.exists(id) )
+                if( info.exists(id) ) 
                     info.erase(id,true) ;
             }
         }
     }
+
+    info.flush() ; //TODO chiedere andrea se si puo togliere
+
+    PiercedIterator<LSInfo> lsItr = info.begin() ;
+    while( lsItr != info.end() ){
+
+        long id = lsItr.getId() ;
+
+        if( std::abs(lsItr->value) > newRSearch ){
+            lsItr = info.erase( lsItr.getId(), true );
+        } else {
+            ++lsItr ;
+        }
+
+    };
 
     info.flush() ;
 

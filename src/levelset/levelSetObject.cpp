@@ -202,9 +202,9 @@ void LevelSetSegmentation::lsFromSimplex( LevelSet *visitee, const double &searc
     std::array<double,3>                n, xP, P;
 
     std::set<long>::iterator            it, itend ;
-    PiercedIterator<SegData>    segIt, segEnd = m_segInfo.end() ;
+    PiercedIterator<SegData>    segIt ;
 
-    for( segIt=m_segInfo.begin(); segIt!=segEnd; ++segIt ){
+    for( segIt=m_segInfo.begin(); segIt!=m_segInfo.end(); ++segIt ){
 
         id = segIt.getId() ;
         SegData &segInfo = *segIt ;
@@ -239,7 +239,7 @@ void LevelSetSegmentation::lsFromSimplex( LevelSet *visitee, const double &searc
                     value   = d ;
 
                     lsInfoItr->object   = getId();
-                    lsInfoItr->value    = s *d; //TODO check
+                    lsInfoItr->value    = s *d; 
                     lsInfoItr->gradient = s *n ;
                     supp                = *it ;
                 }
@@ -261,7 +261,13 @@ void LevelSetSegmentation::lsFromSimplex( LevelSet *visitee, const double &searc
 
         } //end foreach triangle
 
+        if( segs.size() == 0 ){
+            m_segInfo.erase(id,true) ;
+        };
+
     };// foreach cell
+
+    m_segInfo.flush() ;
 
     return;
 
@@ -635,11 +641,9 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetOctree *visitee){
 void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, std::vector<Adaption::Info> &mapper, double &newRSearch ){
 
     updateSimplexToCell(visitee, mapper, newRSearch ) ; 
-
-    visitee->clearAfterRefinement(mapper) ;
-
     lsFromSimplex(visitee, newRSearch, true) ;
 
+    //clearAfterAdaption(visitee, newRSearch);
     return;
 };
 
@@ -656,47 +660,44 @@ void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, std::ve
 
     if( newLevel <= oldLevel ) { //size of narrow band decreased or remained the same -> mapping
 
-        std::unordered_map<long,std::set<long>> oldSegs ;
-        std::unordered_map<long,std::set<long>>::iterator oldSegsIt ;
+        { // map segments
+            std::unordered_map<long,std::set<long>> oldSegs ;
+            std::unordered_map<long,std::set<long>>::iterator oldSegsIt ;
 
-        for ( auto & info : mapper ){
-            if( info.entity == Adaption::Entity::ENTITY_CELL ){
+            for ( auto & info : mapper ){
+                if( info.entity == Adaption::Entity::ENTITY_CELL ){
 
-                for ( auto & parent : info.previous){ //save old data and delete element
-                    if( m_segInfo.exists(parent) ){
-                        SegData *seg =  &m_segInfo[parent] ;
+                    for ( auto & parent : info.previous){ //save old data and delete element
+                        if( m_segInfo.exists(parent) ){
+                            SegData *seg =  &m_segInfo[parent] ;
 
-                        oldSegs.insert({{ parent, seg->m_segments }}) ;
-                        m_segInfo.erase(parent,true) ;
+                            oldSegs.insert({{ parent, seg->m_segments }}) ;
+                            m_segInfo.erase(parent,true) ;
+                        }
+                    }
+                }
+            }
+
+            m_segInfo.flush() ;
+
+            for ( auto & info : mapper ){ //forall mesh modifications
+                if( info.entity == Adaption::Entity::ENTITY_CELL){ //check if changes on cells
+                    for ( auto & child : info.current){ // forall new elements
+
+                        PiercedVector<SegData>::iterator seg =  m_segInfo.reclaim(child) ;
+                        seg->m_segments.clear() ;
+
+                        for ( auto & parent : info.previous){ //take their parents
+                            oldSegsIt = oldSegs.find(parent);
+                            if( oldSegsIt != oldSegs.end() ) //add their information if any
+                                seg->m_segments.insert( oldSegsIt->second.begin(), oldSegsIt->second.end() ) ;
+                        }
                     }
                 }
             }
         }
 
-        m_segInfo.flush() ;
-
-        for ( auto & info : mapper ){ //forall mesh modifications
-            if( info.entity == Adaption::Entity::ENTITY_CELL){ //check if changes on cells
-                for ( auto & child : info.current){ // forall new elements
-
-                    PiercedVector<SegData>::iterator seg =  m_segInfo.reclaim(child) ;
-                    seg->m_segments.clear() ;
-
-                    for ( auto & parent : info.previous){ //take their parents
-                        oldSegsIt = oldSegs.find(parent);
-                        if( oldSegsIt != oldSegs.end() ) //add their information if any
-                            seg->m_segments.insert( oldSegsIt->second.begin(), oldSegsIt->second.end() ) ;
-                    }
-
-                }
-            }
-        }
-
-
-    }
-
-
-    else { //size of narrow band increased -> recalculation
+    } else { //size of narrow band increased -> recalculation
 
         m_segInfo.clear() ;
         associateSimplexToCell(visitee) ; 
@@ -707,5 +708,6 @@ void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, std::ve
     return ;
 
 };
+
 
 }

@@ -93,7 +93,7 @@ class LevelSet{
     virtual void                                computeSizeNarrowBand( LSObject * )=0;
 
     virtual double                              updateSizeNarrowBand( std::vector<Adaption::Info> & )=0;
-    void                                        clearAfterRefinement( std::vector<Adaption::Info> & ) ;
+    void                                        clearAfterAdaption( std::vector<Adaption::Info> &, double & ) ;
 
     void                                        propagateSign( LSObject *) ;
     void                                        propagateValue( LSObject *) ;

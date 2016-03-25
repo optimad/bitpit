@@ -237,7 +237,10 @@ void LevelSetOctree::update( LSObject *visitor, std::vector<Adaption::Info> &map
         newRSearch = updateSizeNarrowBand( mapper ) ;
     };
 
+    clearAfterAdaption(mapper,newRSearch) ;
+
     visitor->updateLSInNarrowBand( this, mapper, newRSearch ) ;
+
 
     if( propagateS ) propagateSign(visitor) ;
 //TODO    if( propagateV ) updatePropagatedValue() ;
