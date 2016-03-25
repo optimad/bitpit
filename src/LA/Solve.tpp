@@ -224,9 +224,9 @@ for (k = 0; k < m; k++) {
 
     // Pivoting ------------------------------------------------------------- //
     pivot_row = k;
-    pivot = abs(AA[k][k]);
+    pivot = std::abs(AA[k][k]);
     for (i = k+1; i < m; i++) {
-        pivot_trial = abs(AA[i][k]);
+        pivot_trial = std::abs(AA[i][k]);
         if (pivot_trial > pivot) {
             pivot = pivot_trial;
             pivot_row = i;
@@ -303,7 +303,7 @@ d = 1.0;
 for (i = 0; i < m; i++) {
     d = d*A[i][i];
 } //next i
-if (abs(d) < 1.0e-14) {
+if (std::abs(d) < 1.0e-14) {
     return;
 }
 
@@ -359,7 +359,7 @@ d = 1.0;
 for (i = 0; i < m; i++) {
     d = d*A[i][i];
 } //next i
-if (abs(d) < 1.0e-14) {
+if (std::abs(d) < 1.0e-14) {
     return;
 }
 
