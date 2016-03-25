@@ -838,6 +838,8 @@ double norm1(
     const std::vector< T >                      &x
 ) {
 
+using namespace std;
+
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
 // ================================================================================== //
@@ -964,6 +966,8 @@ template <class T>
 double normInf(
     const std::vector< T >                      &x
 ) {
+
+using namespace std;
 
 // ================================================================================== //
 // VARIABLES DECLARATION                                                              //
