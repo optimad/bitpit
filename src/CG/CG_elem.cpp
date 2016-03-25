@@ -157,7 +157,7 @@ double distancePointTriangle(
         int                      &flag
         ) {
 
-    std::array< std::array< double, 3 >, 3 > r = { Q1, Q2, Q3} ;
+    std::array< std::array< double, 3 >, 3 > r = {{Q1, Q2, Q3}} ;
 
     double              d;
     std::array< double, 3 >  n;
@@ -271,7 +271,7 @@ std::vector<double> distanceCloudTriangle(
 
     int                         N( P.size() ) ;
 
-    std::array< std::array<double,3>, 3 > r = { Q1, Q2, Q3} ;
+    std::array< std::array<double,3>, 3 > r = {{Q1, Q2, Q3}} ;
     double                      *A = new double [6]  ; 
     double                      *ptrlambda = new double [ 3*N ] ;
 
