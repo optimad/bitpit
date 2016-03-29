@@ -88,20 +88,7 @@ void LevelSetCartesian::update( LSObject *visitor, std::vector<Adaption::Info> &
 
     BITPIT_UNUSED(mapper) ;
 
-    double  newRSearch ;
-
-    if(m_userRSearch){
-        newRSearch = RSearch;
-    } else{
-        newRSearch = updateSizeNarrowBand( mapper ) ;
-    };
-
-    visitor->updateLSInNarrowBand( this, mapper, newRSearch ) ;
-
-    if( propagateS ) propagateSign(visitor) ;
-//TODO    if( propagateV ) updatePropagatedValue() ;
-
-    RSearch = newRSearch ;
+    compute(visitor) ;
 
     return;
 

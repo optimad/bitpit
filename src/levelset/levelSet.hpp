@@ -193,7 +193,6 @@ class LSObject{
     virtual void                                computeLSInNarrowBand( LevelSetCartesian *)=0 ;
     virtual void                                computeLSInNarrowBand( LevelSetOctree *)=0 ;
 
-    virtual void                                updateLSInNarrowBand( LevelSetCartesian *, std::vector<Adaption::Info> &, double &)=0 ;
     virtual void                                updateLSInNarrowBand( LevelSetOctree *, std::vector<Adaption::Info> &, double &)=0 ;
 };
 
@@ -244,8 +243,6 @@ class LevelSetSegmentation : public LSObject {
 
     void                                        computeLSInNarrowBand( LevelSetCartesian *);
     void                                        associateSimplexToCell( LevelSetCartesian *);
-    void                                        updateLSInNarrowBand( LevelSetCartesian *, std::vector<Adaption::Info> &, double & ) ;
-    void                                        updateSimplexToCell( LevelSetCartesian *, std::vector<Adaption::Info> &, double & ) ;
 
     void                                        computeLSInNarrowBand( LevelSetOctree *);
     void                                        associateSimplexToCell( LevelSetOctree *);

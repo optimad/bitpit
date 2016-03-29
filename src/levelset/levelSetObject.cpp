@@ -526,33 +526,6 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetCartesian *visitee ){
  * of a d manifold in a 3D Euclidean space. Level set is computed in narrow band
  * of at least 2 mesh cell centers around the geometry. 
  */
-void LevelSetSegmentation::updateLSInNarrowBand( LevelSetCartesian *visitee, std::vector<Adaption::Info> &mapper, double &newRSearch ){
-
-    updateSimplexToCell(visitee, mapper, newRSearch ) ;
-    lsFromSimplex(visitee,  newRSearch, true) ;
-
-    return;
-};
-
-/*!
- * Update the Sdf of the triangulation after an octree adaptation.
- * Note: Only a single octree adapt with marker (-1,0,1) is permitted.
- */
-void LevelSetSegmentation::updateSimplexToCell( LevelSetCartesian *visitee, std::vector<Adaption::Info> &mapper, double &newRSearch ){
-
-    BITPIT_UNUSED(mapper) ;
-    BITPIT_UNUSED(newRSearch) ;
-
-    associateSimplexToCell( visitee ) ;
-
-    return;
-};
-
-/*!
- * Compute the levelset function from a piece-wise linear approximation
- * of a d manifold in a 3D Euclidean space. Level set is computed in narrow band
- * of at least 2 mesh cell centers around the geometry. 
- */
 void LevelSetSegmentation::computeLSInNarrowBand( LevelSetOctree *visitee ){
 
     associateSimplexToCell(visitee) ;
