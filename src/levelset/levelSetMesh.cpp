@@ -353,8 +353,9 @@ double LevelSetOctree::updateSizeNarrowBand( std::vector<Adaption::Info> &mapper
     std::vector<bool>    map(mapper.size()) ;
     std::vector<bool>::iterator    mapIt=map.begin()  ;
 
-    PiercedVector<long> nb ;
     PiercedIterator<LSInfo> it=info.begin(), itEnd = info.end() ;
+
+    std::unordered_set<long> nb;
 
     // ========================================================================== //
     // assumes that LS information is relevant to OLD!!! grid
@@ -365,7 +366,7 @@ double LevelSetOctree::updateSizeNarrowBand( std::vector<Adaption::Info> &mapper
     while( it!=itEnd ){
         id = it.getId() ;
         if( isInNarrowBand(id) )
-            nb.insert(id,id) ;
+            nb.insert(id) ;
         ++it ;
     };
 
@@ -380,7 +381,7 @@ double LevelSetOctree::updateSizeNarrowBand( std::vector<Adaption::Info> &mapper
 
                 if( isInNarrowBand(id) ){
                     *mapIt = true;
-                    nb.erase(id,true) ;
+                    nb.erase(id) ;
                 };
             };
 
@@ -388,15 +389,13 @@ double LevelSetOctree::updateSizeNarrowBand( std::vector<Adaption::Info> &mapper
         ++mapIt ;
     }
 
-    nb.flush() ;
-
     mapIt= map.begin() ;
     for ( auto & info : mapper ){
         if( info.entity == Adaption::Entity::ENTITY_CELL){
             if(*mapIt){ //parent was in narrow band
                 for( auto &child : info.current){
                     id = (long) child;
-                    nb.insert(id,id) ;
+                    nb.insert(id) ;
                 };
             }; //endif parent in narrow band
 

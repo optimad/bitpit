@@ -565,7 +565,7 @@ void LevelSet::clearAfterAdaption( std::vector<Adaption::Info> &mapper, double &
     for ( auto & map : mapper ){
         if( map.entity == Adaption::Entity::ENTITY_CELL ){
 
-            for ( auto & parent : map.previous){ //save old data and delete element
+            for ( auto & parent : map.previous){
                 id = (long) parent ;
                 if( info.exists(id) ) 
                     info.erase(id,true) ;
@@ -578,7 +578,7 @@ void LevelSet::clearAfterAdaption( std::vector<Adaption::Info> &mapper, double &
     PiercedIterator<LSInfo> lsItr = info.begin() ;
     while( lsItr != info.end() ){
 
-        long id = lsItr.getId() ;
+        id = lsItr.getId() ;
 
         if( std::abs(lsItr->value) > newRSearch ){
             lsItr = info.erase( lsItr.getId(), true );
