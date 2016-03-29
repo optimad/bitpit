@@ -66,7 +66,7 @@ int LSObject::getId( ) const {
  * @param[in] id id to be asigned to pierced vector
  * @param[in] list list of simplices
  */
-LevelSetSegmentation::SegData::SegData( ) : m_segments(levelSetDefaults::LIST), m_support(levelSetDefaults::ELEMENT){
+LevelSetSegmentation::SegData::SegData( ) : m_segments(levelSetDefaults::LIST), m_support(levelSetDefaults::ELEMENT), m_checked(false){
 };
 
 /*!
@@ -74,7 +74,7 @@ LevelSetSegmentation::SegData::SegData( ) : m_segments(levelSetDefaults::LIST), 
  * @param[in] id id to be asigned to pierced vector
  * @param[in] list list of simplices
  */
-LevelSetSegmentation::SegData::SegData( const std::set<long> &list) :m_segments(list), m_support(levelSetDefaults::ELEMENT) {
+LevelSetSegmentation::SegData::SegData( const std::set<long> &list) :m_segments(list), m_support(levelSetDefaults::ELEMENT), m_checked(false) {
 };
 
 /*!
@@ -83,7 +83,7 @@ LevelSetSegmentation::SegData::SegData( const std::set<long> &list) :m_segments(
  * @param[in] list list of simplices
  * @param[in] support index of closest simplex
  */
-LevelSetSegmentation::SegData::SegData( const std::set<long> &list, const long &support) :m_segments(list), m_support(support){
+LevelSetSegmentation::SegData::SegData( const std::set<long> &list, const long &support) :m_segments(list), m_support(support), m_checked(false){
 };
 
 /*!
@@ -194,75 +194,81 @@ std::vector<std::array<double,3>> LevelSetSegmentation::getSimplexVertices( cons
  */
 void LevelSetSegmentation::lsFromSimplex( LevelSet *visitee, const double &search, bool filter){
 
-    VolumeKernel                         &mesh  = *(visitee->m_mesh) ;
-    bool                                &signd = visitee->signedDF ;
+    VolumeKernel                &mesh  = *(visitee->m_mesh) ;
+    bool                        &signd = visitee->signedDF ;
 
-    long                                id ;
-    double                              s, d, value;
-    std::array<double,3>                n, xP, P;
+    long                        id ;
+    double                      s, d, value;
+    std::array<double,3>        n, xP, P;
 
-    std::set<long>::iterator            it, itend ;
+    std::set<long>::iterator    it, itend ;
     PiercedIterator<SegData>    segIt ;
 
     for( segIt=m_segInfo.begin(); segIt!=m_segInfo.end(); ++segIt ){
 
-        id = segIt.getId() ;
-        SegData &segInfo = *segIt ;
+        SegData                 &segInfo = *segIt ;
 
-        std::set<long>                      &segs = segInfo.m_segments ;
-        long                                &supp = segInfo.m_support ;
+        if( segInfo.m_checked == false){
+            segInfo.m_checked == true ;
 
-        it    = segs.begin();
-        itend = segs.end() ;
+            std::set<long>      &segs = segInfo.m_segments ;
+            long                &supp = segInfo.m_support ;
 
-        P = mesh.evalCellCentroid(id) ;
+            id    = segIt.getId() ;
 
-		auto lsInfoItr = visitee->info.find(id) ;
-		if( lsInfoItr != visitee->info.end() ){
-			value = abs( lsInfoItr->value );
-		} else {
-			value = 1e18;
-		}
+            it    = segs.begin();
+            itend = segs.end() ;
 
-        while( it != itend ){
+            P = mesh.evalCellCentroid(id) ;
 
-            infoFromSimplex(P, *it, d, s, xP, n);
+            auto lsInfoItr = visitee->info.find(id) ;
+            if( lsInfoItr != visitee->info.end() ){
+                value = abs( lsInfoItr->value );
+            } else {
+                value = 1e18;
+            }
 
-            if ( d <= search ){
+            while( it != itend ){
 
-                if( d<value ) {
-					if (lsInfoItr == visitee->info.end()) {
-						lsInfoItr = visitee->info.reclaim(id) ;
-					}
+                infoFromSimplex(P, *it, d, s, xP, n);
 
-                    s       = signd *s + (!signd) *1.;
-                    value   = d ;
+                if ( d <= search ){
 
-                    lsInfoItr->object   = getId();
-                    lsInfoItr->value    = s *d; 
-                    lsInfoItr->gradient = s *n ;
-                    supp                = *it ;
-                }
+                    if( d<value ) {
+                        if (lsInfoItr == visitee->info.end()) {
+                            lsInfoItr = visitee->info.reclaim(id) ;
+                        }
 
-                ++it ;
+                        s       = signd *s + (!signd) *1.;
+                        value   = d ;
 
-            } //end if distance
+                        lsInfoItr->object   = getId();
+                        lsInfoItr->value    = s *d; 
+                        lsInfoItr->gradient = s *n ;
+                        supp                = *it ;
+                    }
 
-            else {
-                if( filter){ 
-                    it = segs.erase(it) ; 
-                }
-
-                else{
                     ++it ;
+
+                } //end if distance
+
+                else {
+                    if( filter){ 
+                        it = segs.erase(it) ; 
+                    }
+
+                    else{
+                        ++it ;
+                    };
                 };
+
+
+            } //end foreach triangle
+
+            if( segs.size() == 0 ){
+                m_segInfo.erase(id,true) ;
             };
 
-
-        } //end foreach triangle
-
-        if( segs.size() == 0 ){
-            m_segInfo.erase(id,true) ;
         };
 
     };// foreach cell

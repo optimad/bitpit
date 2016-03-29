@@ -206,6 +206,7 @@ class LevelSetSegmentation : public LSObject {
     struct SegData{
         std::set<long>                          m_segments ;
         long                                    m_support ;
+        bool                                    m_checked ;
 
         SegData( ) ;
         SegData( const std::set<long> & ) ;
