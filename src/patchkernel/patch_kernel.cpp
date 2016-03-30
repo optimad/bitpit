@@ -1428,7 +1428,9 @@ bool PatchKernel::deleteCell(const long &id, bool updateNeighs, bool delayed)
 	m_cellIdGenerator.trashId(id);
 	if (isInternal) {
 		m_nInternals--;
-		if (id == m_lastInternalId) {
+		if (m_nInternals == 0) {
+			m_lastInternalId = Element::NULL_ID;
+		} else if (id == m_lastInternalId) {
 			m_lastInternalId = m_cells.getSizeMarker(m_nInternals - 1, Element::NULL_ID);
 		}
 	} else {
@@ -1530,7 +1532,11 @@ PatchKernel::CellIterator PatchKernel::moveInternal2Ghost(const long &id)
 
 	// Update the last internal and first ghost markers
 	m_firstGhostId = id;
-	m_lastInternalId = m_cells.getSizeMarker(m_nInternals - 1, Element::NULL_ID);
+	if (m_nInternals == 0) {
+		m_lastInternalId = Element::NULL_ID;
+	} else {
+		m_lastInternalId = m_cells.getSizeMarker(m_nInternals - 1, Element::NULL_ID);
+	}
 
 	// Return the iterator to the new position
 	return iterator;
