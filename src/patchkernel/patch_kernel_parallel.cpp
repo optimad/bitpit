@@ -127,6 +127,11 @@ int PatchKernel::getProcessorCount() const
 */
 void PatchKernel::partition(const std::vector<int> &cellRanks)
 {
+	// Communicator has to be set
+	if (!isCommunicatorSet()) {
+		throw std::runtime_error ("There is no communicator set for the patch.");
+	}
+
 	// Build the send map
 	std::unordered_map<int, std::vector<long>> sendMap;
 
