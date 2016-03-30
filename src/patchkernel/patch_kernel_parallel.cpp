@@ -185,6 +185,93 @@ void PatchKernel::partition(const std::vector<int> &cellRanks)
 
 		sendCells(srcRank, dstRank, *cellList);
 	}
+
+}
+
+/*!
+	Reset the ghost information needed for data exchange.
+*/
+void PatchKernel::resetGhostExchangeData()
+{
+	m_ghost2id.clear();
+}
+
+/*!
+	Reset the ghost information needed for data exchange for the specified rank.
+
+	\param rank is the rank for which the information will be reset
+*/
+void PatchKernel::resetGhostExchangeData(short rank)
+{
+	m_ghost2id.at(rank).clear();
+}
+
+/*!
+	Sets the ghost information needed for data exchange.
+
+	\param ghostInfo are the information that will be set
+*/
+void PatchKernel::setGhostExchangeData(const std::unordered_map<short, std::unordered_map<long, long>> &ghostInfo)
+{
+	m_ghost2id = std::unordered_map<short, std::unordered_map<long, long>>(ghostInfo);
+}
+
+/*!
+	Sets the ghost information needed for data exchange for the specified rank.
+
+	\param rankGhostInfo are the information that will be set for the specified
+	rank
+*/
+void PatchKernel::setGhostExchangeData(short rank, const std::unordered_map<long, long> &rankGhostInfo)
+{
+	m_ghost2id.at(rank) = std::unordered_map<long, long>(rankGhostInfo);
+}
+
+/*!
+	Gets a reference to the ghost information needed for data exchange.
+
+	\result A reference to the ghost information needed for data exchange.
+*/
+std::unordered_map<short, std::unordered_map<long, long>> & PatchKernel::getGhostExchangeData()
+{
+	return m_ghost2id;
+}
+
+/*!
+	Gets a constant reference to the ghost information needed for data exchange.
+
+	\result A constant reference to the ghost information needed for data
+	exchange.
+*/
+const std::unordered_map<short, std::unordered_map<long, long>> & PatchKernel::getGhostExchangeData() const
+{
+	return m_ghost2id;
+}
+
+/*!
+	Gets a reference to the ghost information needed for data exchange for
+	the specified rank.
+
+	\param rank is the rank for which the information will be retreived
+	\result A reference to the ghost information needed for data exchange for
+	the specified rank.
+*/
+std::unordered_map<long, long> & PatchKernel::getGhostExchangeData(short rank)
+{
+	m_ghost2id.at(rank);
+}
+
+/*!
+	Gets a constant reference to the ghost information needed for data
+	exchange for the specified rank.
+
+	\param rank is the rank for which the information will be retreived
+	\result A constant reference to the ghost information needed for data
+	exchange for the specified rank.
+*/
+const std::unordered_map<long, long> & PatchKernel::getGhostExchangeData(short rank) const
+{
+	m_ghost2id.at(rank);
 }
 
 /*!

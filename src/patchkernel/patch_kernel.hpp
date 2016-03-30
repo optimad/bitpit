@@ -260,6 +260,11 @@ public:
 	int getRank() const;
 	int getProcessorCount() const;
 
+	std::unordered_map<short, std::unordered_map<long, long>> & getGhostExchangeData();
+	const std::unordered_map<short, std::unordered_map<long, long>> & getGhostExchangeData() const;
+	std::unordered_map<long, long> & getGhostExchangeData(short rank);
+	const std::unordered_map<long, long> & getGhostExchangeData(short rank) const;
+
 	void partition(const std::vector<int> &cellRanks);
         void sendCells(const unsigned short &, const unsigned short &, const std::vector<long> &);
 #endif
@@ -302,6 +307,14 @@ protected:
 
 	void setAdaptionDirty(bool dirty);
 	void setExpert(bool expert);
+
+#if BITPIT_ENABLE_MPI==1
+	void resetGhostExchangeData();
+	void resetGhostExchangeData(short rank);
+
+	void setGhostExchangeData(const std::unordered_map<short, std::unordered_map<long, long>> &ghostInfo);
+	void setGhostExchangeData(short rank, const std::unordered_map<long, long> &rankGhostInfo);
+#endif
 
 private:
 	double DEFAULT_TOLERANCE = 1e-14;
