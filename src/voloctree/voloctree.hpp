@@ -97,6 +97,13 @@ protected:
 private:
 	typedef std::bitset<72> OctantHash;
 
+	enum TreeOperation {
+		OP_INITIALIZATION,
+		OP_ADAPTION_MAPPED,
+		OP_ADAPTION_UNMAPPED,
+		OP_LOAD_BALANCE
+	};
+
 	struct FaceInfo {
 		FaceInfo() : id(Element::NULL_ID), face(-1) {};
 		FaceInfo(long _id, int _face) : id(_id), face(_face) {};
@@ -133,6 +140,8 @@ private:
 	std::vector<double> m_tree_dh;
 	std::vector<double> m_tree_area;
 	std::vector<double> m_tree_volume;
+
+	TreeOperation m_lastTreeOperation;
 
 	std::vector<std::array<double, 3> > m_normals;
 

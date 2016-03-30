@@ -61,7 +61,8 @@ namespace bitpit {
 VolOctree::VolOctree(const int &id, const int &dimension,
 				 std::array<double, 3> origin, double length, double dh )
 	: VolumeKernel(id, dimension, false),
-	  m_tree(origin[0], origin[1], origin[2], length, dimension)
+	  m_tree(origin[0], origin[1], origin[2], length, dimension),
+	  m_lastTreeOperation(OP_INITIALIZATION)
 {
 	log::cout() << ">> Initializing Octree mesh\n";
 
@@ -311,6 +312,12 @@ const std::vector<Adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 	log::cout() << ">> Adapting tree...";
 
 	bool updated = m_tree.adapt(!initiallyEmpty);
+	if (trackAdaption) {
+		m_lastTreeOperation = OP_ADAPTION_MAPPED;
+	} else {
+		m_lastTreeOperation = OP_ADAPTION_UNMAPPED;
+	}
+
 	if (!updated) {
 		log::cout() << " Already updated" << std::endl;
 
