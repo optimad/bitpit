@@ -1194,12 +1194,12 @@ id_t PiercedVector<value_t, id_t>::getSizeMarker(const size_t &targetSize, const
 	// size is equal to the size minus one we return the last element,
 	// if the target size is greater or equal the current container size
 	// we return the fallback value.
-	if (targetSize == 0) {
+	if (targetSize >= size()) {
+		return fallback;
+	} else if (targetSize == 0) {
 		return m_ids[m_first_pos];
 	} else if (targetSize == (size() - 1)) {
 		return m_ids[m_last_pos];
-	} else if (targetSize >= size() || targetSize <= 0) {
-		return fallback;
 	}
 
 	// Sort the holes
