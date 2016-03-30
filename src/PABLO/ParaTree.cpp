@@ -2494,6 +2494,52 @@ ParaTree::findOwner(const uint64_t & morton) {
 	return p;
 }
 
+/** It finds the process owning the element definded by the global index passed as argument
+ * The global index can be computed using the methods getGlobalIdx or getGhostGlobalIdx.
+ * \param[in] global index of the element you want find the owner of
+ * \return Rank of the process owning the element
+ */
+int
+ParaTree::getOwnerRank(const uint64_t & globalIndex) {
+        int ownerRank = -1;
+        int nofsteps = m_nproc / 2;
+        if(globalIndex <= m_partitionRangeGlobalIdx[m_nproc / 2]){
+                //find backward
+                for(int j = nofsteps; j >= 0; --j){
+                        if(j==0){
+                                ownerRank = j;
+                                break;
+                        }
+                        else{
+                                if(globalIndex > m_partitionRangeGlobalIdx[j-1] && globalIndex <= m_partitionRangeGlobalIdx[j]){
+                                        ownerRank = j;
+                                        break;
+                                }
+
+                        }
+                }
+        }
+        else{
+                //find forward
+                if(m_nproc % 2)
+                        nofsteps -= 1;
+                for(int j = nofsteps; j < m_nproc; ++j){
+                        if(j == m_nproc - 1){
+                                ownerRank = j;
+                                break;
+                        }
+                        else{
+                                if(globalIndex > m_partitionRangeGlobalIdx[j-1] && globalIndex <= m_partitionRangeGlobalIdx[j]){
+                                        ownerRank = j;
+                                        break;
+                                }
+                        }
+                }
+        }
+        return ownerRank;
+
+}
+
 /** Compute the connectivity of octants and store the coordinates of nodes.
  */
 void

@@ -352,6 +352,7 @@ public:
 	// =================================================================================== //
 	uint8_t		getMaxDepth() const;
 	int 		findOwner(const uint64_t & morton);
+        int             getOwnerRank(const uint64_t & globalIdx);
 	bool 		adapt(bool mapper_flag = false);
 	bool 		adaptGlobalRefine(bool mapper_flag = false);
 	bool 		adaptGlobalCoarse(bool mapper_flag = false);
