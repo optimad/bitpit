@@ -305,13 +305,12 @@ int VolOctree::getCellLevel(const long &id)
 */
 const std::vector<Adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 {
-	// Check if the mesh is currently empty
-	bool initiallyEmpty = (getCellCount() == 0);
+	bool buildMapping = (getCellCount() != 0);
 
 	// Updating the tree
 	log::cout() << ">> Adapting tree...";
 
-	bool updated = m_tree.adapt(!initiallyEmpty);
+	bool updated = m_tree.adapt(buildMapping);
 	if (trackAdaption) {
 		m_lastTreeOperation = OP_ADAPTION_MAPPED;
 	} else {
