@@ -132,6 +132,13 @@ void PatchKernel::partition(const std::vector<int> &cellRanks)
 		throw std::runtime_error ("There is no communicator set for the patch.");
 	}
 
+	// Check if the patch allow custom partition
+	if (!isExpert()) {
+		log::cout() << "The patch does not allow custom partition" << std::endl;
+
+		return;
+	}
+
 	// Build the send map
 	std::unordered_map<int, std::vector<long>> sendMap;
 
