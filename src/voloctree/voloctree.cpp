@@ -340,6 +340,7 @@ const std::vector<Adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 	log::cout() << ">> Evaluating Octree connectivity...";
 
 	m_tree.computeConnectivity();
+	m_tree.computeGhostsConnectivity();
 
 	log::cout() << " Done" << std::endl;
 
@@ -688,6 +689,7 @@ const std::vector<Adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 
 	// Delete tree conenctivity
 	m_tree.clearConnectivity();
+	m_tree.clearGhostsConnectivity();
 
 	// Done
 	return adaptionData;
