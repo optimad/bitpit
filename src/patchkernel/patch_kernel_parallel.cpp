@@ -59,7 +59,7 @@ void PatchKernel::setCommunicator(MPI_Comm communicator)
 		throw std::runtime_error ("Patch communicator can be set just once");
 	}
 
-	// The communicaor has to be valid
+	// The communicator has to be valid
 	if (communicator == MPI_COMM_NULL) {
 		throw std::runtime_error ("Patch communicator is not valid");
 	}
