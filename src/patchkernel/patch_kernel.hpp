@@ -255,7 +255,7 @@ public:
 
 #if BITPIT_ENABLE_MPI==1
 	void setCommunicator(MPI_Comm communicator);
-	void unsetCommunicator();
+	bool isCommunicatorSet() const;
 	const MPI_Comm & getCommunicator() const;
 	int getRank() const;
 	int getProcessorCount() const;

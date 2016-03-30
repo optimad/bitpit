@@ -54,10 +54,14 @@ namespace bitpit {
 */
 void PatchKernel::setCommunicator(MPI_Comm communicator)
 {
-	// Free previous communicator
-	if (m_communicator != MPI_COMM_NULL) {
-		MPI_Comm_free(&m_communicator);
-		m_communicator = MPI_COMM_NULL;
+	// Communication can be set just once
+	if (isCommunicatorSet()) {
+		throw std::runtime_error ("Patch communicator can be set just once");
+	}
+
+	// The communicaor has to be valid
+	if (communicator == MPI_COMM_NULL) {
+		throw std::runtime_error ("Patch communicator is not valid");
 	}
 
 	// Creat a copy of the user-specified communicator
@@ -65,29 +69,25 @@ void PatchKernel::setCommunicator(MPI_Comm communicator)
 	// No library routine should use MPI_COMM_WORLD as the communicator;
 	// instead, a duplicate of a user-specified communicator should always
 	// be used.
-	if (communicator != MPI_COMM_NULL) {
-		MPI_Comm_dup(communicator, &m_communicator);
-	}
+	MPI_Comm_dup(communicator, &m_communicator);
 
 	// Get MPI information
-	if (m_communicator) {
-		MPI_Comm_size(m_communicator, &m_nProcessors);
-		MPI_Comm_rank(m_communicator, &m_rank);
-	} else {
-		m_rank        = 0;
-		m_nProcessors = 1;
-	}
+	MPI_Comm_size(m_communicator, &m_nProcessors);
+	MPI_Comm_rank(m_communicator, &m_rank);
 
 	// Set parallel data for the VTK output
 	setParallel(m_nProcessors, m_rank);
 }
 
 /*!
-	Unsets the MPI communicator to be used for parallel communications.
+	Checks if the communicator to be used for parallel communications has
+	already been set.
+
+	\result Returns true if the communicator has been set, false otherwise.
 */
-void PatchKernel::unsetCommunicator()
+bool PatchKernel::isCommunicatorSet() const
 {
-	setCommunicator(MPI_COMM_NULL);
+	return (getCommunicator() != MPI_COMM_NULL);
 }
 
 /*!
