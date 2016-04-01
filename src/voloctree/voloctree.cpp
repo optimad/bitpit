@@ -386,6 +386,12 @@ const std::vector<Adaption::Info> VolOctree::sync(bool trackChanges)
 	std::unordered_map<uint32_t, long> renumberedOctants;
 	std::vector<long> removedCells;
 
+	std::unordered_map<int, Adaption::Info> adaptionInfoCache;
+	std::unordered_set<int> adaptionTypeCached;
+	adaptionTypeCached.insert(Adaption::TYPE_DELETION);
+	adaptionTypeCached.insert(Adaption::TYPE_CREATION);
+	adaptionTypeCached.insert(Adaption::TYPE_PARTITION_RECV);
+
 	newOctants.reserve(nOctants + nGhostsOctants);
 	renumberedOctants.reserve(nPreviousOctants + nPreviousGhosts);
 	removedCells.reserve(nPreviousOctants + nPreviousGhosts);
@@ -489,8 +495,26 @@ const std::vector<Adaption::Info> VolOctree::sync(bool trackChanges)
 
 		// Adaption tracking
 		if (trackChanges) {
-			adaptionData.emplace_back();
-			Adaption::Info &adaptionInfo = adaptionData.back();
+			Adaption::Info *adaptionInfoPtr;
+			if (adaptionTypeCached.count(adaptionType) > 0) {
+				// Cache id
+				long cacheId = adaptionType;
+				if (adaptionType == Adaption::TYPE_PARTITION_RECV) {
+					cacheId += 1000 * mapper_octantRank[0];
+				}
+
+				// If necessary, create the adaption info
+				if (adaptionInfoCache.count(cacheId) == 0) {
+					adaptionInfoCache.insert({{cacheId, Adaption::Info()}});
+				}
+
+				// Get the adaption info
+				adaptionInfoPtr = &(adaptionInfoCache.at(cacheId));
+			} else {
+				adaptionData.emplace_back();
+				adaptionInfoPtr = &(adaptionData.back());
+			}
+			Adaption::Info &adaptionInfo = *adaptionInfoPtr;
 
 			// Type
 			adaptionInfo.type = adaptionType;
