@@ -230,6 +230,78 @@ const std::vector<Adaption::Info> PatchKernel::partition(const std::vector<int> 
 }
 
 /*!
+	Partitions the patch among the processors. The partitioning is done using
+	a criteria that tries to balance the load among the processors.
+
+	\param communicator is the communicator that will be used
+	\param cellRanks are the ranks of the cells after the partitioning
+	\param trackChanges if set to true, the changes to the patche will be
+	tracked
+	\result Returns a vector of Adaption::Info that can be used to track
+	the changes done during the partitioning.
+*/
+const std::vector<Adaption::Info> PatchKernel::partition(MPI_Comm communicator, bool trackChanges)
+{
+	setCommunicator(communicator);
+
+	return partition(trackChanges);
+}
+
+/*!
+	Partitions the patch among the processors. The partitioning is done using
+	a criteria that tries to balance the load among the processors.
+
+	\param trackChanges if set to true, the changes to the patche will be
+	tracked
+	\result Returns a vector of Adaption::Info that can be used to track
+	the changes done during the partition.
+*/
+const std::vector<Adaption::Info> PatchKernel::partition(bool trackChanges)
+{
+	return balancePartition(trackChanges);
+}
+
+/*!
+	Tries to balance the computational load among the processors redistributing
+	the cells among the processors.
+
+	\result Returns a vector of Adaption::Info that can be used to track
+	the changes done during the partitioning.
+*/
+const std::vector<Adaption::Info> PatchKernel::balancePartition(bool trackChanges)
+{
+	// Communicator has to be set
+	if (!isCommunicatorSet()) {
+		throw std::runtime_error ("There is no communicator set for the patch.");
+	}
+
+	// Balance patch
+	const std::vector<Adaption::Info> adaptionData = _balancePartition(trackChanges);
+
+	// Update the bouding box
+	updateBoundingBox();
+
+	// Done
+	return adaptionData;
+}
+
+/*!
+	Internal function that tries to balance the computational load among the
+	processors moving redistributing the cells among the processors.
+
+	\result Returns a vector of Adaption::Info that can be used to track
+	the changes done during the update.
+*/
+const std::vector<Adaption::Info> PatchKernel::_balancePartition(bool trackChanges)
+{
+	BITPIT_UNUSED(trackChanges);
+
+	log::cout() << "The patch does not implement a algortihm for balacing the partition" << std::endl;
+
+	return std::vector<Adaption::Info>();
+}
+
+/*!
 	Reset the ghost information needed for data exchange.
 */
 void PatchKernel::resetGhostExchangeData()

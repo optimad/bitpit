@@ -267,6 +267,10 @@ public:
 
 	const std::vector<Adaption::Info> partition(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackChanges);
 	const std::vector<Adaption::Info> partition(const std::vector<int> &cellRanks, bool trackChanges);
+	const std::vector<Adaption::Info> partition(MPI_Comm communicator, bool trackChanges);
+	const std::vector<Adaption::Info> partition(bool trackChanges);
+	const std::vector<Adaption::Info> balancePartition(bool trackChanges);
+
 	Adaption::Info sendCells(const unsigned short &, const unsigned short &, const std::vector<long> &);
 #endif
 
@@ -315,6 +319,8 @@ protected:
 
 	void setGhostExchangeData(const std::unordered_map<short, std::unordered_map<long, long>> &ghostInfo);
 	void setGhostExchangeData(short rank, const std::unordered_map<long, long> &rankGhostInfo);
+
+	virtual const std::vector<Adaption::Info> _balancePartition(bool trackChanges);
 #endif
 
 private:
