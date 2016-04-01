@@ -154,7 +154,7 @@ if (myRank == 0) {
 		}
 	}
 
-	mesh.partition(cellRanks);
+	mesh.partition(cellRanks, false);
 
 	// Write mesh ----------------------------------------------------------- //
 	cout << "** Writing mesh" << endl;

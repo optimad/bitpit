@@ -265,8 +265,8 @@ public:
 	std::unordered_map<long, long> & getGhostExchangeData(short rank);
 	const std::unordered_map<long, long> & getGhostExchangeData(short rank) const;
 
-	void partition(const std::vector<int> &cellRanks);
-        void sendCells(const unsigned short &, const unsigned short &, const std::vector<long> &);
+	const std::vector<Adaption::Info> partition(const std::vector<int> &cellRanks, bool trackChanges);
+	Adaption::Info sendCells(const unsigned short &, const unsigned short &, const std::vector<long> &);
 #endif
 
 protected:

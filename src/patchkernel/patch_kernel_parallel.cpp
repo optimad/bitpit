@@ -124,9 +124,15 @@ int PatchKernel::getProcessorCount() const
 	Partitions the patch.
 
 	\param cellRanks are the ranks of the cells after the partitioning.
+	\param trackChanges if set to true, the changes to the patche will be
+	tracked
+	\result Returns a vector of Adaption::Info that can be used to track
+	the changes done during the partitioning.
 */
-void PatchKernel::partition(const std::vector<int> &cellRanks)
+const std::vector<Adaption::Info> PatchKernel::partition(const std::vector<int> &cellRanks, bool trackChanges)
 {
+	std::vector<Adaption::Info> adaptionData;
+
 	// Communicator has to be set
 	if (!isCommunicatorSet()) {
 		throw std::runtime_error ("There is no communicator set for the patch.");
@@ -136,7 +142,7 @@ void PatchKernel::partition(const std::vector<int> &cellRanks)
 	if (!isExpert()) {
 		log::cout() << "The patch does not allow custom partition" << std::endl;
 
-		return;
+		return adaptionData;
 	}
 
 	// Build the send map
@@ -195,9 +201,13 @@ void PatchKernel::partition(const std::vector<int> &cellRanks)
 			cellList = &emptyCellList;
 		}
 
-		sendCells(srcRank, dstRank, *cellList);
+		Adaption::Info adaptionInfo = sendCells(srcRank, dstRank, *cellList);
+		if (trackChanges && adaptionInfo.type != Adaption::TYPE_NONE) {
+			adaptionData.push_back(std::move(adaptionInfo));
+		}
 	}
 
+	return adaptionData;
 }
 
 /*!
@@ -296,12 +306,14 @@ const std::unordered_map<long, long> & PatchKernel::getGhostExchangeData(short r
     \param[in] rcv_rank receiver rank
     \param[in] cell_list list of cells to be moved
  */
-void PatchKernel::sendCells(const unsigned short &snd_rank, const unsigned short &rcv_rank, const vector< long > &cell_list)
+Adaption::Info PatchKernel::sendCells(const unsigned short &snd_rank, const unsigned short &rcv_rank, const vector< long > &cell_list)
 {
 
 // ========================================================================== //
 // SCOPE VARIABLES                                                            //
 // ========================================================================== //
+
+Adaption::Info adaptionInfo;
 
 // Debug variables
 /*DEBUG*/stringstream                           out_name;
@@ -609,6 +621,11 @@ if (m_rank == snd_rank)
         // Initialize communication buffer ---------------------------------- //
         OBinaryStream           com_buff( buff_size );
 
+        // Initialize adaption info ----------------------------------------- //
+        adaptionInfo.entity = Adaption::ENTITY_CELL;
+        adaptionInfo.type   = Adaption::TYPE_PARTITION_SEND;
+        adaptionInfo.rank   = rcv_rank;
+
         // Fill communication buffer ---------------------------------------- //
         com_buff << n_cells;
         e = cell_list.cend();
@@ -677,6 +694,9 @@ if (m_rank == snd_rank)
 // /*DEUBG*/       cell_->display(out, 6);
 // /*DEUBG*/   }
 
+			// Update adpation info
+			adaptionInfo.previous.push_back(cell_->getId());
+
             // Restore original connectivity
             for (j = 0; j < n_vertices; ++j) {
                 cell_->setVertex(j, connect_[j]);
@@ -716,14 +736,14 @@ if (m_rank == snd_rank)
         // Receive new IDs
         MPI_Recv( feedback.get_buffer(), buff_size, MPI_CHAR, rcv_rank, 7, m_communicator, MPI_STATUS_IGNORE );
 
-        // Update ghost cells
+        // Fill adaption info and update ghost cells
         notification << n_cells;
         e = cell_list.cend();
         for ( i = cell_list.cbegin(); i != e; ++i ) {
             feedback >> neigh_idx;
             if ( sender_ghost_new_ids.count(*i) > 0 ) {
                 sender_ghost_new_ids[*i] = neigh_idx;
-            }
+			}
             //m_ghost2id[rcv_rank][neigh_idx] = *i;
             notification << *i << neigh_idx;
         } //next i
@@ -1079,6 +1099,11 @@ if (m_rank == rcv_rank)
         // Extract cells from communication buffer
         com_buff >> n_cells;
 
+        // Initialize adaption info
+        adaptionInfo.entity = Adaption::ENTITY_CELL;
+        adaptionInfo.type   = Adaption::TYPE_PARTITION_RECV;
+        adaptionInfo.rank   = snd_rank;
+
         // Initialize communication buffer for feedback
         feedback_size = n_cells * sizeof(long);
         OBinaryStream                           feedback( feedback_size );
@@ -1124,6 +1149,7 @@ if (m_rank == rcv_rank)
 // /*DEBUG*/       out << "    (adding new cell), remapped as:" << endl;
                 it = addCell( move(cell), generateCellId() );
                 feedback << long( it->getId() );
+                adaptionInfo.current.push_back( it->getId() );
 // /*DEBUG*/       it->display(out, 6);
                 c_local_mapping[ cell_count ] = it->getId();
                 ++cell_count;
@@ -1401,6 +1427,11 @@ if ( (m_rank != snd_rank) && (m_rank != rcv_rank) )
 /*DEBUG*/t0 = high_resolution_clock::now();
     if (waiting) {
 
+        // Initialize adaption info
+        adaptionInfo.entity = Adaption::ENTITY_CELL;
+        adaptionInfo.type   = Adaption::TYPE_PARTITION_NOTICE;
+        adaptionInfo.rank   = snd_rank;
+
         // Receive buffer size
         MPI_Recv(&buff_size, 1, MPI_LONG, snd_rank, 8 + m_rank, m_communicator, MPI_STATUS_IGNORE);
 
@@ -1426,6 +1457,8 @@ if ( (m_rank != snd_rank) && (m_rank != rcv_rank) )
                     my_cell_idx = m_ghost2id[snd_rank][cell_idx];
                     m_ghost2id[snd_rank].erase( cell_idx );
                     m_ghost2id[rcv_rank][ new_cell_idx ] = my_cell_idx;
+
+                    adaptionInfo.current.push_back(my_cell_idx);
                 }
             } //next i
         }
@@ -1454,7 +1487,7 @@ if ( (m_rank != snd_rank) && (m_rank != rcv_rank) )
 /*DEBUG*/    out.close();
 /*DEBUG*/}
 
-return; }
+return adaptionInfo; }
 
 /*!
 	@}
