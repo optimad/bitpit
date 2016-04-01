@@ -32,7 +32,8 @@ namespace bitpit {
 struct Adaption
 {
 	enum Type {
-		TYPE_UNKNOWN = -1,
+		TYPE_UNKNOWN  = -2,
+		TYPE_NONE     = -1,
 		TYPE_CREATION = 0,
 		TYPE_DELETION,
 		TYPE_REFINEMENT,
