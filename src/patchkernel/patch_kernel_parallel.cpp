@@ -121,7 +121,8 @@ int PatchKernel::getProcessorCount() const
 }
 
 /*!
-	Partitions the patch.
+	Partitions the patch among the processors. Each cell will be assigned
+	to a specific processor according to the specified input.
 
 	\param cellRanks are the ranks of the cells after the partitioning.
 	\param trackChanges if set to true, the changes to the patche will be
