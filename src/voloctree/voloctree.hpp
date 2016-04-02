@@ -29,6 +29,7 @@
 #include <deque>
 #include <cstddef>
 #include <vector>
+#include <unordered_map>
 #include <unordered_set>
 
 #include "bitpit_PABLO.hpp"
@@ -93,6 +94,10 @@ protected:
 	bool _enableCellBalancing(const long &id, bool enabled);
 	void _setTol(double tolerance);
 	void _resetTol();
+
+#if BITPIT_ENABLE_MPI==1
+	const std::vector<Adaption::Info> _balancePartition(bool trackChanges);
+#endif
 
 private:
 	typedef std::bitset<72> OctantHash;
@@ -170,6 +175,10 @@ private:
 	void deleteCell(long id);
 
 	const std::vector<Adaption::Info> sync(bool trackChanges);
+
+#if BITPIT_ENABLE_MPI==1
+	void rebuildGhostExchangeData(std::unordered_map<int, std::vector<uint32_t>> ghostTreeIds);
+#endif
 };
 
 }

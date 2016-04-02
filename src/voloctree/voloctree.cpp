@@ -301,7 +301,9 @@ int VolOctree::getCellLevel(const long &id)
 /*!
 	Updates the patch.
 
-	\result Returns true if the mesh was updated, false otherwise.
+	\param trackAdaption if set to true the changes to the patch will be
+	tracked
+	\result Returns all the changes applied to the patch.
 */
 const std::vector<Adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 {
@@ -383,7 +385,6 @@ const std::vector<Adaption::Info> VolOctree::sync(bool trackChanges)
 	std::vector<OctantInfo> newOctants;
 	std::unordered_map<uint32_t, long> renumberedOctants;
 	std::vector<long> removedCells;
-	std::unordered_set<long> removedInterfaces;
 
 	newOctants.reserve(nOctants + nGhostsOctants);
 	renumberedOctants.reserve(nPreviousOctants + nPreviousGhosts);
@@ -394,15 +395,16 @@ const std::vector<Adaption::Info> VolOctree::sync(bool trackChanges)
 		// Octant mapping
 		std::vector<uint32_t> mapper_octantMap;
 		std::vector<bool> mapper_ghostFlag;
+		std::vector<int> mapper_octantRank;
 		if (!importAll) {
-			m_tree.getMapping(treeId, mapper_octantMap, mapper_ghostFlag);
+			m_tree.getMapping(treeId, mapper_octantMap, mapper_ghostFlag, mapper_octantRank);
 		}
 
 		// Adaption type
-		Adaption::Type adaptionType;
+		Adaption::Type adaptionType = Adaption::TYPE_NONE;
 		if (importAll) {
 			adaptionType = Adaption::TYPE_CREATION;
-		} else {
+		} else if (lastTreeOperation == OP_ADAPTION_MAPPED) {
 			bool isNewR = m_tree.getIsNewR(treeId);
 			if (isNewR) {
 				adaptionType = Adaption::TYPE_REFINEMENT;
@@ -412,11 +414,23 @@ const std::vector<Adaption::Info> VolOctree::sync(bool trackChanges)
 					adaptionType = Adaption::TYPE_COARSENING;
 				} else if (treeId != mapper_octantMap.front()) {
 					adaptionType = Adaption::TYPE_RENUMBERING;
-				} else {
-					++treeId;
-					continue;
 				}
 			}
+#if BITPIT_ENABLE_MPI==1
+		} else if (lastTreeOperation == OP_LOAD_BALANCE) {
+			if (getRank() != mapper_octantRank.front()) {
+				adaptionType = Adaption::TYPE_PARTITION_RECV;
+			} else if (treeId != mapper_octantMap.front()) {
+				adaptionType = Adaption::TYPE_RENUMBERING;
+			}
+#endif
+		}
+
+		// If the octant cell has not been modified we can skip to the next
+		// octant.
+		if (adaptionType == Adaption::TYPE_NONE) {
+			++treeId;
+			continue;
 		}
 
 		// Re-numbered cells just need to be added to the proper list.
@@ -458,8 +472,11 @@ const std::vector<Adaption::Info> VolOctree::sync(bool trackChanges)
 			newOctants.emplace_back(currentTreeId, true);
 		}
 
-		// Previous cell ids that will be removed
-		if (adaptionType != Adaption::TYPE_CREATION) {
+		// Cells that will be removed
+		//
+		// For refinement and coarsening the cells associated to the previous
+		// octant ids needs to be removed.
+		if (adaptionType == Adaption::TYPE_REFINEMENT || adaptionType == Adaption::TYPE_COARSENING) {
 			int nPreviousTreeIds = mapper_octantMap.size();
 			for (int k = 0; k < nPreviousTreeIds; ++k) {
 				OctantInfo previousOctantInfo(mapper_octantMap[k], !mapper_ghostFlag[k]);
@@ -500,7 +517,7 @@ const std::vector<Adaption::Info> VolOctree::sync(bool trackChanges)
 			}
 
 			// Previous cell and interface ids
-			if (adaptionType != Adaption::TYPE_CREATION) {
+			if (adaptionType != Adaption::TYPE_PARTITION_RECV) {
 				int nPreviousCellIds = mapper_octantMap.size();
 				adaptionInfo.previous.reserve(nPreviousCellIds);
 				auto removedCellsIter = removedCells.cend() - nPreviousCellIds;
@@ -511,18 +528,13 @@ const std::vector<Adaption::Info> VolOctree::sync(bool trackChanges)
 					unsigned long &adaptionId = adaptionInfo.previous.back();
 					adaptionId = id;
 
-					const Cell &cell = m_cells.at(id);
-					long nCellInterfaces = cell.getInterfaceCount();
-					const long *interfaces = cell.getInterfaces();
-					for (int k = 0; k < nCellInterfaces; ++k) {
-						long interfaceId = interfaces[k];
-						if (interfaceId >= 0) {
-							removedInterfaces.insert(interfaceId);
-						}
-					}
-
 					removedCellsIter++;
 				}
+			}
+
+			// Rank of received cells
+			if (adaptionType == Adaption::TYPE_PARTITION_RECV) {
+				adaptionInfo.rank = mapper_octantRank[0];
 			}
 		}
 
@@ -531,6 +543,46 @@ const std::vector<Adaption::Info> VolOctree::sync(bool trackChanges)
 	}
 
 	log::cout() << " Done" << std::endl;
+
+#if BITPIT_ENABLE_MPI==1
+	// Cells that have been send to other processors need to be removed
+	std::unordered_map<int, std::array<uint32_t, 4>> sendOctants = m_tree.getSentIdx();
+	for (const auto &rankEntry : sendOctants) {
+		int rank = rankEntry.first;
+
+		// If needed create the adaption info
+		if (trackChanges) {
+			adaptionData.emplace_back();
+			Adaption::Info &adaptionInfo = adaptionData.back();
+			adaptionInfo.entity = Adaption::ENTITY_CELL;
+			if (rank >= 0) {
+				adaptionInfo.type = Adaption::TYPE_PARTITION_SEND;
+				adaptionInfo.rank = rank;
+			} else {
+				adaptionInfo.type = Adaption::TYPE_DELETION;
+			}
+		}
+
+		// Add the send cells to the list of cells to be removed
+		for (int k = 0; k < 2; ++k) {
+			uint32_t beginTreeId = rankEntry.second[2 * k];
+			uint32_t endTreeId   = rankEntry.second[2 * k + 1];
+			for (uint32_t treeId = beginTreeId; treeId < endTreeId; ++treeId) {
+				OctantInfo octantInfo(treeId, true);
+
+				removedCells.emplace_back();
+				long &cellId = removedCells.back();
+				cellId = getOctantId(octantInfo);
+
+				if (trackChanges) {
+					Adaption::Info &adaptionInfo = adaptionData.back();
+					adaptionInfo.previous.emplace_back();
+					unsigned long &sentId = adaptionInfo.previous.back();
+					sentId = cellId;
+				}
+			}
+		}
+	}
 
 	// Previous ghosts cells need to be removed
 	if (nPreviousGhosts > 0) {
@@ -568,10 +620,16 @@ const std::vector<Adaption::Info> VolOctree::sync(bool trackChanges)
 	removedCells.shrink_to_fit();
 
 	// New ghost octants need to be added
+	std::unordered_map<int, std::vector<uint32_t>> ghostTreeIds;
 	for (uint32_t treeId = 0; treeId < (uint32_t) nGhostsOctants; ++treeId) {
 		newOctants.emplace_back(treeId, false);
+
+		uint64_t globalTreeId = m_tree.getGhostGlobalIdx(treeId);
+		int rank = m_tree.getOwnerRank(globalTreeId);
+		ghostTreeIds[rank].push_back(treeId);
 	}
 	newOctants.shrink_to_fit();
+#endif
 
 	// Enable advanced editing
 	setExpert(true);
@@ -581,6 +639,35 @@ const std::vector<Adaption::Info> VolOctree::sync(bool trackChanges)
 	if (removedCells.size() > 0) {
 		log::cout() << ">> Removing non-existing cells...";
 
+		// Track deleted interfaces
+		if (trackChanges) {
+			// List of unique interfaces that will be deleted
+			std::unordered_set<long> removedInterfaces;
+			for (const auto &cellId : removedCells) {
+				const Cell &cell = m_cells.at(cellId);
+				long nCellInterfaces = cell.getInterfaceCount();
+				const long *interfaces = cell.getInterfaces();
+				for (int k = 0; k < nCellInterfaces; ++k) {
+					long interfaceId = interfaces[k];
+					if (interfaceId >= 0) {
+						removedInterfaces.insert(interfaceId);
+					}
+				}
+			}
+
+			// Adaption info
+			adaptionData.emplace_back();
+			Adaption::Info &deletedInterfacesInfo = adaptionData.back();
+			deletedInterfacesInfo.type   = Adaption::TYPE_DELETION;
+			deletedInterfacesInfo.entity = Adaption::ENTITY_INTERFACE;
+			for (const long &interfaceId : removedInterfaces) {
+				deletedInterfacesInfo.previous.emplace_back();
+				unsigned long &deletedInterfaceId = deletedInterfacesInfo.previous.back();
+				deletedInterfaceId = interfaceId;
+			}
+		}
+
+		// Delete cells
 		danglingFaces = removeCells(removedCells);
 
 		log::cout() << " Done" << std::endl;
@@ -640,6 +727,11 @@ const std::vector<Adaption::Info> VolOctree::sync(bool trackChanges)
 
 	FaceInfoSet().swap(danglingFaces);
 
+	// Rebuild the ghost information
+#if BITPIT_ENABLE_MPI==1
+	rebuildGhostExchangeData(ghostTreeIds);
+#endif
+
 	// Disable advanced editing
 	setExpert(false);
 
@@ -673,24 +765,6 @@ const std::vector<Adaption::Info> VolOctree::sync(bool trackChanges)
 				adaptionId = cellIterator->first;
 
 				cellIterator++;
-			}
-		}
-
-		// Track deleted interfaces
-		if (removedInterfaces.size() > 0) {
-			adaptionData.emplace_back();
-			Adaption::Info &deletedInterfacesInfo = adaptionData.back();
-			deletedInterfacesInfo.type   = Adaption::TYPE_DELETION;
-			deletedInterfacesInfo.entity = Adaption::ENTITY_INTERFACE;
-
-			deletedInterfacesInfo.previous.reserve(removedInterfaces.size());
-			auto interfaceIterator = removedInterfaces.begin();
-			while (interfaceIterator != removedInterfaces.end()) {
-				deletedInterfacesInfo.previous.emplace_back();
-				unsigned long &adaptionId = deletedInterfacesInfo.previous.back();
-				adaptionId = *interfaceIterator;
-
-				interfaceIterator++;
 			}
 		}
 

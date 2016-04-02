@@ -30,6 +30,10 @@ set(TESTS "")
 list(APPEND TESTS "test_voloctree_00001")
 list(APPEND TESTS "test_voloctree_00002")
 list(APPEND TESTS "test_voloctree_00003")
+if (ENABLE_MPI)
+	list(APPEND TESTS "test_parallel_voloctree_00001")
+endif ()
+
 
 set(VOLOCTREE_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests for the voloctree module" FORCE)
 
