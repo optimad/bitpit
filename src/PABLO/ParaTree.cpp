@@ -2216,7 +2216,7 @@ ParaTree::getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost, ivec
 				mapper[0] = gidx;
 				if (iproc > 0)
 					mapper[0] -= m_partitionRangeGlobalIdx0[iproc-1] - 1;
-				rank[0] = (m_lastOp == "firstloadbalance" ? myrank : iproc);
+				rank[0] = (m_lastOp == "firstloadbalance" ? m_rank : iproc);
 				isghost[0] = false;
 				break;
 			}
@@ -2749,6 +2749,7 @@ ParaTree::privateLoadBalance(uint32_t* partition){
 	m_lastOp = "loadbalance";
 	if(m_serial)
 	{
+	        m_lastOp = "firstloadbalance";
 		(*m_log) << " " << endl;
 		(*m_log) << " Initial Serial distribution : " << endl;
 		for(int ii=0; ii<m_nproc; ii++){
