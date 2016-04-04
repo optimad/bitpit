@@ -319,10 +319,8 @@ const std::vector<Adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 
 	if (!updated) {
 		log::cout() << " Already updated" << std::endl;
-
 		return std::vector<Adaption::Info>();
 	}
-
 	log::cout() << " Done" << std::endl;
 
 	// Sync the patch
