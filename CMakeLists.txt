@@ -383,7 +383,8 @@ set(${OPERATORS_MODULE_ENABLED} 1 CACHE INTERNAL "Request building operators mod
 #------------------------------------------------------------------------------------#
 
 isModuleEnabled("CG" MODULE_CG_ENABLED)
-if (MODULE_CG_ENABLED)
+isModuleEnabled("rbf" MODULE_RBF_ENABLED)
+if (MODULE_CG_ENABLED OR MODULE_RBF_ENABLED)
 	find_package(BLAS REQUIRED)
 	find_package(LAPACK REQUIRED)
 
