@@ -319,6 +319,7 @@ list(APPEND BITPIT_MODULE_LIST "surfunstructured")
 list(APPEND BITPIT_MODULE_LIST "volcartesian")
 list(APPEND BITPIT_MODULE_LIST "voloctree")
 list(APPEND BITPIT_MODULE_LIST "volunstructured")
+list(APPEND BITPIT_MODULE_LIST "rbf")
 
 #------------------------------------------------------------------------------------#
 # Modules dependecies
@@ -334,6 +335,7 @@ set(SURFUNSTRUCTURED_DEPS "common;patchkernel")
 set(VOLCARTESIAN_DEPS "common;patchkernel")
 set(VOLOCTREE_DEPS "common;PABLO;patchkernel")
 set(VOLUNSTRUCTURED_DEPS "common;patchkernel")
+set(RBF_DEPS "operators;SA")
 
 #------------------------------------------------------------------------------------#
 # Check of the dependencies
