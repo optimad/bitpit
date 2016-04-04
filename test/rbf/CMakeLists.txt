@@ -46,8 +46,7 @@ foreach(TEST_ENTRY IN LISTS RBF_TEST_ENTRIES)
 
 	add_executable(${TEST_NAME} "${TEST_SOURCES}")
 	target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
-    target_link_libraries(${TEST_NAME} "lapack")
-    target_link_libraries(${TEST_NAME} "lapacke")
+	target_link_libraries(${TEST_NAME} ${LAPACK_LIBRARIES})
 endforeach()
 set(RBF_TEST_TARGETS "${TEST_TARGETS}" CACHE INTERNAL "List of test targets for the RBF module" FORCE)
 
