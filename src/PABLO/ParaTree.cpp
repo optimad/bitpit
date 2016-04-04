@@ -2209,14 +2209,14 @@ ParaTree::getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost, ivec
 			rank[i] = m_rank;
 		}
 	}
-	else if (m_lastOp == "loadbalance"){
+	else if (m_lastOp == "loadbalance" || m_lastOp == "firstloadbalance"){
 		uint64_t gidx = getGlobalIdx(idx);
 		for (int iproc=0; iproc<m_nproc; ++iproc){
 			if (m_partitionRangeGlobalIdx0[iproc]>=gidx){
 				mapper[0] = gidx;
 				if (iproc > 0)
 					mapper[0] -= m_partitionRangeGlobalIdx0[iproc-1] - 1;
-				rank[0] = iproc;
+				rank[0] = (m_lastOp == "firstloadbalance" ? myrank : iproc);
 				isghost[0] = false;
 				break;
 			}
