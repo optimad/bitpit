@@ -341,6 +341,12 @@ const std::vector<Adaption::Info> VolOctree::sync(bool trackChanges)
 	// If the current mesh is empty we need to import all the octants
 	bool importAll = (getCellCount() == 0);
 
+	// Last operation on the tree
+	TreeOperation lastTreeOperation = m_lastTreeOperation;
+	if (lastTreeOperation == OP_ADAPTION_UNMAPPED && !importAll) {
+		throw std::runtime_error ("Unable to sync the patch after an unmapped adaption");
+	}
+
 	// Info on the tree
 	long nOctants = m_tree.getNumOctants();
 	long nPreviousOctants = m_octantToCell.size();
