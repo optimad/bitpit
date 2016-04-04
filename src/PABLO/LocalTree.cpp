@@ -5091,11 +5091,11 @@ LocalTree::computeConnectivity(){
 	u32arr3vector                                octnodes;
 	vector<uint64_t>                             mortonList;
 	unordered_map<uint64_t, array<uint32_t, 3> > nodeCoords;
-	unordered_map<uint64_t, vector<uint32_t> >   nodeOctants;
+	unordered_map<uint64_t, vector<uint64_t> >   nodeOctants;
 	uint32_t                                     noctants = getNumOctants();
+	uint32_t                                     nghosts  = m_sizeGhosts;
 
-	// Clean old connectivity
-	clearConnectivity();
+
 
 	// Gather node information
 	octnodes.reserve(m_global.m_nnodes);
@@ -5103,8 +5103,16 @@ LocalTree::computeConnectivity(){
 	mortonList.reserve(noctants);
 	nodeCoords.reserve(noctants);
 	nodeOctants.reserve(noctants);
-	for (uint32_t i = 0; i < noctants; i++){
-		m_octants[i].getNodes(octnodes);
+
+	for (uint64_t n = 0; n < (noctants + nghosts); n++){
+		if (n < noctants) {
+			uint32_t octantId = n;
+			m_octants[octantId].getNodes(octnodes);
+		} else {
+			uint32_t octantId = n - noctants;
+			m_ghosts[octantId].getNodes(octnodes);
+		}
+
 		for (auto &node : octnodes){
 			uint64_t morton = keyXYZ(node[0], node[1], node[2], m_global.m_maxLevel);
 			if (nodeCoords.count(morton) == 0) {
@@ -5113,25 +5121,33 @@ LocalTree::computeConnectivity(){
 				nodeOctants[morton].reserve(8);
 			}
 
-			nodeOctants[morton].push_back(i);
+			nodeOctants[morton].push_back(n);
 		}
 	}
 	std::sort(mortonList.begin(), mortonList.end());
 
-	// Build nodes and connectivity
+	// Build node list and connectivity
 	m_nodes.reserve(mortonList.size());
 	m_connectivity.resize(noctants);
+	m_ghostsConnectivity.resize(nghosts);
 
 	uint32_t nodeId = 0;
 	for (auto &morton : mortonList) {
 		m_nodes.emplace_back(std::move(nodeCoords.at(morton)));
-		for (const auto &octantId : nodeOctants.at(morton)) {
-			vector<uint32_t> &octantConnect = m_connectivity[octantId];
-			if (octantConnect.size() == 0) {
-				octantConnect.reserve(m_global.m_nnodes);
+		for (const auto &n : nodeOctants.at(morton)) {
+			std::vector<uint32_t> *octantConnect;
+			if (n < noctants) {
+				uint32_t octantId = n;
+				octantConnect = &(m_connectivity[octantId]);
+			} else {
+				uint32_t octantId = n - noctants;
+				octantConnect = &(m_ghostsConnectivity[octantId]);
 			}
 
-			octantConnect.push_back(nodeId);
+			if (octantConnect->size() == 0) {
+				octantConnect->reserve(m_global.m_nnodes);
+			}
+			octantConnect->push_back(nodeId);
 		}
 		nodeId++;
 	}
@@ -5143,6 +5159,7 @@ void
 LocalTree::clearConnectivity(){
 	u32arr3vector().swap(m_nodes);
 	u32vector2D().swap(m_connectivity);
+	u32vector2D().swap(m_ghostsConnectivity);
 };
 
 /*! Updates nodes vector and connectivity of octants of local tree
@@ -5151,77 +5168,6 @@ void
 LocalTree::updateConnectivity(){
 	clearConnectivity();
 	computeConnectivity();
-};
-
-/*! Computes ghosts nodes vector and connectivity of ghosts octants of local tree
-*/
-void
-LocalTree::computeGhostsConnectivity(){
-
-	u32arr3vector                                octnodes;
-	vector<uint64_t>                             mortonList;
-	unordered_map<uint64_t, array<uint32_t, 3> > nodeCoords;
-	unordered_map<uint64_t, vector<uint32_t> >   nodeOctants;
-	uint32_t                                     noctants = m_sizeGhosts;
-
-	// Clean old connectivity
-	clearGhostsConnectivity();
-
-	// Gather node information
-	octnodes.reserve(m_global.m_nnodes);
-
-	mortonList.reserve(noctants);
-	nodeCoords.reserve(noctants);
-	nodeOctants.reserve(noctants);
-	for (uint32_t i = 0; i < noctants; i++){
-		m_ghosts[i].getNodes(octnodes);
-		for (auto &node : octnodes){
-			uint64_t morton = keyXYZ(node[0], node[1], node[2], m_global.m_maxLevel);
-			if (nodeCoords.count(morton) == 0) {
-				mortonList.push_back(morton);
-				nodeCoords.insert({{morton, std::move(node)}});
-				nodeOctants[morton].reserve(8);
-			}
-
-			nodeOctants[morton].push_back(i);
-		}
-	}
-	std::sort(mortonList.begin(), mortonList.end());
-
-	// Build nodes and connectivity
-	m_ghostsNodes.reserve(mortonList.size());
-	m_ghostsConnectivity.resize(noctants);
-
-	uint32_t nodeId = 0;
-	for (auto &morton : mortonList) {
-		m_ghostsNodes.emplace_back(std::move(nodeCoords.at(morton)));
-		for (const auto &octantId : nodeOctants.at(morton)) {
-			vector<uint32_t> &octantConnect = m_ghostsConnectivity[octantId];
-			if (octantConnect.size() == 0) {
-				octantConnect.reserve(m_global.m_nnodes);
-			}
-
-			octantConnect.push_back(nodeId);
-		}
-		nodeId++;
-	}
-
-};
-
-/*! Clear ghosts nodes vector and connectivity of ghosts octants of local tree
-*/
-void
-LocalTree::clearGhostsConnectivity(){
-	u32arr3vector().swap(m_ghostsNodes);
-	u32vector2D().swap(m_ghostsConnectivity);
-};
-
-/*! Update ghosts nodes vector and connectivity of ghosts octants of local tree
-*/
-void
-LocalTree::updateGhostsConnectivity(){
-	clearGhostsConnectivity();
-	computeGhostsConnectivity();
 };
 
 // =================================================================================== //

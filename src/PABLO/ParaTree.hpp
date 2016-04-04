@@ -365,15 +365,9 @@ public:
 	const u32arr3vector & getNodes();
 	const u32array3 & getNodeLogicalCoordinates(uint32_t inode);
 	darray3 	getNodeCoordinates(uint32_t inode);
-	void 		computeGhostsConnectivity();
-	void 		clearGhostsConnectivity();
-	void 		updateGhostsConnectivity();
 	const u32vector2D & getGhostConnectivity();
 	const u32vector & getGhostConnectivity(uint32_t idx);
 	const u32vector & getGhostConnectivity(Octant* oct);
-	const u32arr3vector & getGhostNodes();
-	const u32array3 & getGhostNodeLogicalCoordinates(uint32_t inode);
-	darray3 	getGhostNodeCoordinates(uint32_t inode);
 #if BITPIT_ENABLE_MPI==1
 	void 		loadBalance(dvector* weight = NULL);
 	void 		loadBalance(uint8_t & level, dvector* weight = NULL);

@@ -111,7 +111,6 @@ private:
 	u32vector2D				m_ghostsConnectivity;	/**<Local vector of ghosts connectivity (node1, node2, ...) ordered with Morton-order.
 	 	 	 	 	 	 	 	 	 	 	 	 	 	 The nodes are stored as index of vector nodes*/
 	u32arr3vector			m_nodes;				/**<Local vector of nodes (x,y,z) ordered with Morton Number*/
-	u32arr3vector			m_ghostsNodes;			/**<Local vector of ghosts nodes (x,y,z) ordered with Morton Number*/
 
 	uint8_t					m_dim;					/**<Space dimension. Only 2D or 3D space accepted*/
 	Global					m_global;				/**<Global variables*/
@@ -209,9 +208,6 @@ private:
 	void 		computeConnectivity();
 	void 		clearConnectivity();
 	void 		updateConnectivity();
-	void 		computeGhostsConnectivity();
-	void 		clearGhostsConnectivity();
-	void 		updateGhostsConnectivity();
 
 	// =================================================================================== //
 

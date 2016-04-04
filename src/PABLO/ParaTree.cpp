@@ -2615,27 +2615,6 @@ ParaTree::getNodeCoordinates(uint32_t inode){
 	return m_trans.mapCoordinates(m_octree.m_nodes[inode]);
 }
 
-/** Compute the connectivity of ghost octants and store the coordinates of nodes.
- */
-void
-ParaTree::computeGhostsConnectivity() {
-	m_octree.computeGhostsConnectivity();
-}
-
-/** Clear the connectivity of ghost octants.
- */
-void
-ParaTree::clearGhostsConnectivity() {
-	m_octree.clearGhostsConnectivity();
-}
-
-/** Update the connectivity of ghost octants.
- */
-void
-ParaTree::updateGhostsConnectivity() {
-	m_octree.updateGhostsConnectivity();
-}
-
 /** Get the connectivity of the ghost octants
  * \return Constant reference to connectivity matrix [nghostoctants*nnodes] with
  * the connectivity of each octant (4/8 indices of nodes for 2D/3D case).
@@ -2663,33 +2642,6 @@ ParaTree::getGhostConnectivity(uint32_t idx){
 const u32vector &
 ParaTree::getGhostConnectivity(Octant* oct){
 	return m_octree.m_ghostsConnectivity[getIdx(oct)];
-}
-
-/** Get the logical coordinates of the ghost nodes
- * \return Constant reference to nodes matrix [nghostnodes*3] with the coordinates
- * of the nodes.
- */
-const u32arr3vector &
-ParaTree::getGhostNodes(){
-	return m_octree.m_ghostsNodes;
-}
-
-/** Get the logical coordinates of a ghost node
- * \param[in] inode Local index of node
- * \return Constant reference to a vector with the coordinates of the node.
- */
-const u32array3 &
-ParaTree::getGhostNodeLogicalCoordinates(uint32_t inode){
-	return m_octree.m_ghostsNodes[inode];
-}
-
-/** Get the physical coordinates of a ghost node
- * \param[in] inode Local index of node
- * \return Vector with the coordinates of the node.
- */
-darray3
-ParaTree::getGhostNodeCoordinates(uint32_t inode){
-	return m_trans.mapCoordinates(m_octree.m_ghostsNodes[inode]);
 }
 
 #if BITPIT_ENABLE_MPI==1
@@ -4330,14 +4282,13 @@ ParaTree::write(string filename) {
 		return;
 	}
 	int nofNodes = m_octree.m_nodes.size();
-	int nofGhostNodes = m_octree.m_ghostsNodes.size();
 	int nofOctants = m_octree.m_connectivity.size();
 	int nofGhosts = m_octree.m_ghostsConnectivity.size();
 	int nofAll = nofGhosts + nofOctants;
 	out << "<?xml version=\"1.0\"?>" << endl
 			<< "<VTKFile type=\"UnstructuredGrid\" version=\"0.1\" byte_order=\"BigEndian\">" << endl
 			<< "  <UnstructuredGrid>" << endl
-			<< "    <Piece NumberOfCells=\"" << m_octree.m_connectivity.size() + m_octree.m_ghostsConnectivity.size() << "\" NumberOfPoints=\"" << m_octree.m_nodes.size() + m_octree.m_ghostsNodes.size() << "\">" << endl;
+			<< "    <Piece NumberOfCells=\"" << m_octree.m_connectivity.size() + m_octree.m_ghostsConnectivity.size() << "\" NumberOfPoints=\"" << m_octree.m_nodes.size() << "\">" << endl;
 	out << "      <Points>" << endl
 			<< "        <DataArray type=\"Float64\" Name=\"Coordinates\" NumberOfComponents=\""<< 3 <<"\" format=\"ascii\">" << endl
 			<< "          " << std::fixed;
@@ -4347,16 +4298,6 @@ ParaTree::write(string filename) {
 			if (j==0) out << std::setprecision(6) << m_trans.mapX(m_octree.m_nodes[i][j]) << " ";
 			if (j==1) out << std::setprecision(6) << m_trans.mapY(m_octree.m_nodes[i][j]) << " ";
 			if (j==2) out << std::setprecision(6) << m_trans.mapZ(m_octree.m_nodes[i][j]) << " ";
-		}
-		if((i+1)%4==0 && i!=nofNodes-1)
-			out << endl << "          ";
-	}
-	for(int i = 0; i < nofGhostNodes; i++)
-	{
-		for(int j = 0; j < 3; ++j){
-			if (j==0) out << std::setprecision(6) << m_trans.mapX(m_octree.m_ghostsNodes[i][j]) << " ";
-			if (j==1) out << std::setprecision(6) << m_trans.mapY(m_octree.m_ghostsNodes[i][j]) << " ";
-			if (j==2) out << std::setprecision(6) << m_trans.mapZ(m_octree.m_ghostsNodes[i][j]) << " ";
 		}
 		if((i+1)%4==0 && i!=nofNodes-1)
 			out << endl << "          ";
