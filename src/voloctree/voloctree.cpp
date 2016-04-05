@@ -923,7 +923,6 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 
 	// Create the interfaces
 	std::unordered_map<uint32_t, long> interfaceMap;
-	std::unordered_map<uint32_t, std::vector<uint32_t>> octantInterfaces;
 	std::unordered_map<uint32_t, std::vector<uint32_t>> octantTreeInterfaces;
 	for (uint32_t interfaceTreeId = 0; interfaceTreeId < nIntersections; ++interfaceTreeId) {
 		// Skip the interface is already inserted in the patch
