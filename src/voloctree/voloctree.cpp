@@ -1068,8 +1068,9 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 			const Interface &interface = m_interfaces[interfaceId];
 
 			Intersection *treeInterface = m_tree.getIntersection(interfaceTreeId);
-			uint32_t owner = m_tree.getOut(treeInterface);
-			bool ownsInterface = (owner == octantInfo.id);
+			uint32_t owner     = m_tree.getOut(treeInterface);
+			bool ownerIsGhost  = m_tree.getOutIsGhost(treeInterface);
+			bool ownsInterface = (owner == octantInfo.id) && (ownerIsGhost == !octantInfo.internal);
 
 			int cellFace;
 			if (ownsInterface) {
