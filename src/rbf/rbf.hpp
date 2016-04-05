@@ -34,10 +34,21 @@ namespace bitpit{
 
 /*!
  * @ingroup VTKEnums
- * Enum class defining types of fields whic may be written through class VTK
+ * Enum class defining types of fields which may be written through class VTK
  */
 enum class RBFBasisFunction{
     WENDLANDC2 = 1,
+};
+
+
+/*!
+ * Enum Class defining type of behaviors handled by RBF object. 
+ * INTERP flag activate usage of the class as a pure interpolator of given data fields
+ * PARAM flag activate usage of RBF functions for spatial 1D/2D/3D parameterization purposes
+ */
+enum class RBFType{
+	INTERP = 1,
+	PARAM  = 2
 };
 
 
@@ -58,44 +69,61 @@ class RBF{
     std::vector<bool>                   m_active ;
     std::vector<double>                 m_error ;
 
+	RBFType m_rbfType;
+	
     public:
     ~RBF();
 
-    RBF( RBFBasisFunction = RBFBasisFunction::WENDLANDC2) ;
+    RBF( RBFBasisFunction = RBFBasisFunction::WENDLANDC2, RBFType = RBFType::INTERP ) ;
 
+	RBFType					whichType();
+	void					setType(RBFType);
+	
     void                    setFunction( const RBFBasisFunction & ) ;
     void                    setFunction( double (&funct)(const double &) ) ;
 
-    int                     getFieldCount() ;
+    int                     getFieldCount();
+	int                     getWeightCount();
     int                     getActiveCount() ;
     std::vector<int>        getActiveSet() ;
 
     bool                    isActive( const int &) ;
 
+	void					activateNode(const int &);
+	void					activateNode(const std::vector<int> &);
+	void					activateAllNodes();
+	void					deactivateNode(const int &);
+	void					deactivateNode(const std::vector<int> &);
+	void					deactivateAllNodes();
+	
     void                    setSupportRadius( const double & ) ;
-    void                    setNodeValue( const int &, const std::vector<double> & ) ;
-    void                    setFieldValue( const int &, const std::vector<double> & ) ;
-
+	
+    void                    setFieldsToNode ( const int &, const std::vector<double> & ) ;
+    void                    setFieldToAllNodes( const int &, const std::vector<double> & ) ;
+	void 					setWeightsToNode(const int &, const std::vector<double> & );
+	void 					setWeightToAllNodes(const int &, const std::vector<double> & );
+	
     int                     addNode( const std::array<double,3> & ) ;
     std::vector<int>        addNode( const std::vector<std::array<double,3>> & ) ;
 
     int                     addField( ) ;
     int                     addField( const std::vector<double> & ) ;
 
-    double                  evalBasis( const double &) ;
+	int						addWeight();
+	int 					addWeight(const std::vector<double> & );
+	
     std::vector<double>     evalRBF( const std::array<double,3> &) ;
-
-    double                  evalError() ;
+	double                  evalBasis( const double &) ;
 
     void                    solve() ;
-    void                    solveLSQ() ;
+	bool                    greedy( const double &) ;
 
-    bool                    greedy( const double &) ;
-    double                  initGreedy( const int &) ;
-    int                     addGreedyPoint() ;
-
-    private:
-
+protected:
+	
+	double                  evalError() ;
+	double                  initGreedy( const int &) ;
+	int                     addGreedyPoint() ;
+	void                    solveLSQ() ;	
 };
 
 

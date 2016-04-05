@@ -36,7 +36,7 @@ namespace bitpit{
  * @{
  *
  * @class RBF
- * @brief Handling of Radial Basis Function with a large set of nodes
+ * @brief Handling of Radial Basis Function with a large set of nodes. 
  *
  */
 
@@ -48,10 +48,12 @@ RBF::~RBF(){
 } ;
 
 /*! 
- * Default constructor
+ * Default constructor. Requires optionally statements of type of RBFBasisFunction 
+ * which must be used and RBFType of behavior(see RBF::setType method for further information)  
  */
-RBF::RBF( RBFBasisFunction bfunc ) {
-    m_supportRadius = 1. ;
+RBF::RBF( RBFBasisFunction bfunc, RBFType rtype ) {
+    
+	m_supportRadius = 1. ;
     m_nodes         = 0 ;
     m_fields        = 0 ;
 
@@ -61,7 +63,33 @@ RBF::RBF( RBFBasisFunction bfunc ) {
     m_active.clear() ;
 
     setFunction( bfunc ) ;
+	setType(rtype);
 };
+
+/*! 
+ * Gets the type of RBF behaviour actually set(see RBF::setType method for further information)
+ * @return RBFtype enum, type of behaviour actually set 
+ */
+RBFType RBF::whichType(){
+	return m_rbfType;
+}
+
+/*! 
+ * Sets the type of RBF behaviour of the class. Two behaviours are possible:
+ * RBFType::INTERP allows the class to interpolate and automatically choose the most appropriate 
+ * set the RBF weights,given an external set of data fields on prescribed RBF nodes.
+ *
+ * RBFType::PARAM allows the class to freely set RBF weights on given RBF nodes, without any further
+ * processing.
+ *  
+ * According to the behaviour currently chosen, some methods of the class will be active/inactive. Such exceptions
+ * will be specified in each method docs, eventually.
+ *  
+ * @param[in] RBFtype enum, type of chosen behaviour 
+ */
+void RBF::setType(RBFType type){
+	m_rbfType = type;
+}
 
 /*! 
  * Sets the rbf function to be used
@@ -93,20 +121,23 @@ void RBF::setFunction( double (&bfunc)(const double &) ){
 };
 
 /*! 
- * Set the support radius
- * @param[in] radius support radius
- */
-void RBF::setSupportRadius( const double & radius ){
-    m_supportRadius = radius ;
-    return ;
-};
-
-/*! 
- * Get the number of fields to be interpolated
+ * Gets the number of fields to be interpolated. Method is active only in RBFType::INTERP mode,
+ * otherwise return -1.
  * @return  number of fields
  */
 int RBF::getFieldCount(  ){
-    return m_fields ;
+	if(m_rbfType != RBFType::INTERP) return -1;
+	return m_fields ;
+};
+
+/*! 
+ * Gets the number of free weights for each node actually available. Method is active only in RBFType::PARAM mode,
+ * otherwise return -1.
+ * @return  number of weights
+ */
+int RBF::getWeightCount(  ){
+	if(m_rbfType != RBFType::PARAM) return -1;	
+	return m_fields ;
 };
 
 /*! 
@@ -152,14 +183,143 @@ bool RBF::isActive( const int &n ){
     return m_active[n] ;
 };
 
+/*! 
+ * Activate a node in your RBF node list. 
+ * Method is active only in RBFType::PARAM mode.
+ * @param[in] n index of node to be activated
+ */
+void	RBF::activateNode(const int & n){
+	if(m_rbfType != RBFType::PARAM) return;
+	m_active[n] = true;
+};
 
 /*! 
- * Adds a RBF node and sets it to active
+ * Activate a node ensamble in your RBF node list. 
+ * Method is active only in RBFType::PARAM mode.
+ * @param[in] list list of node indices to be activated
+ */
+void	RBF::activateNode(const std::vector<int> & list){
+	if(m_rbfType != RBFType::PARAM) return;
+	for(auto && index : list){
+		 m_active[index] = true;
+	}
+};
+
+/*! 
+ * Activate all nodes actually available in your RBF node list. 
+ * Method is active only in RBFType::PARAM mode.
+ */
+void	RBF::activateAllNodes(){
+	if(m_rbfType != RBFType::PARAM) return;
+	for(auto && active : m_active){
+		active = true;
+	}
+};
+
+/*! 
+ * Deactivate a node in your RBF node list.
+ * Method is active only in RBFType::PARAM mode.
+ * @param[in] n index of node to be dactivated
+ */
+void	RBF::deactivateNode(const int & n ){
+	if(m_rbfType != RBFType::PARAM) return;
+	m_active[n] = false;
+};
+
+/*! 
+ * Deactivate a node ensamble in your RBF node list.
+ * Method is active only in RBFType::PARAM mode.
+ * @param[in] list list of node indices to be deactivated
+ */
+void	RBF::deactivateNode(const std::vector<int> & list){
+	if(m_rbfType != RBFType::PARAM) return;
+	for(auto && index : list){
+		m_active[index] = false;
+	}
+};
+/*! 
+ * Deactivate all nodes actually available in your RBF node list.
+ * Method is active only in RBFType::PARAM mode.
+ */
+void	RBF::deactivateAllNodes(){
+	if(m_rbfType != RBFType::PARAM) return;
+	for(auto && active : m_active){
+		active = false;
+	}
+};
+
+/*! 
+ * Set the support radius
+ * @param[in] radius support radius
+ */
+void RBF::setSupportRadius( const double & radius ){
+	m_supportRadius = radius ;
+	return ;
+};
+
+/*! 
+ * Sets all the field values at one node. Method is active only in RBFType::INTERP mode.
+ * @param[in] id id of node
+ * @param[in] value  fields' values at given node
+ */
+void RBF::setFieldsToNode( const int &id, const std::vector<double> &value ){
+	//TODO is the old setNodeValue of the class
+	if(m_rbfType != RBFType::INTERP) return;
+	int i ;
+	for( i=0; i<m_fields; ++i ){
+		m_value[i][id] = value[i] ;
+	}
+	return ;
+};
+
+/*! 
+ * Sets the values of one field at all nodes. Method is active only in RBFType::INTERP mode. 
+ * @param[in] id id of field
+ * @param[in] value  field data on nodes
+ */
+void RBF::setFieldToAllNodes( const int &id, const std::vector<double> &value ){
+	//TODO is the old setFieldValue of the class
+	
+	if(m_rbfType != RBFType::INTERP) return;
+	m_value[id] = value ;
+	
+	return ;
+};
+
+/*! 
+ * Sets all the weights values at one node. Method is active only in RBFType::PARAM mode.
+ * @param[in] id id of node
+ * @param[in] value  weight values to be set as RBF parameters for the given node
+ */
+void RBF::setWeightsToNode( const int &id, const std::vector<double> &value ){
+	
+	if(m_rbfType != RBFType::PARAM) return;
+	int i ;
+	for( i=0; i<m_fields; ++i ){
+		m_weight[i][id] = value[i] ;
+	}
+	return ;
+};
+
+/*! 
+ * Sets the values of one weight at all nodes. Method is active only in RBFType::PARAM mode. 
+ * @param[in] id id of weight
+ * @param[in] value  weight values for all RBF nodes
+ */
+void RBF::setWeightToAllNodes( const int &id, const std::vector<double> &value ){
+	if(m_rbfType != RBFType::PARAM) return;
+	m_weight[id] = value ;
+	
+	return ;
+};
+
+/*! 
+ * Adds a RBF node and sets it to active. Does not manage duplicated nodes 
  * @param[in] node  coordinates of node to be added
  * @return id of node within class
  */
 int RBF::addNode( const std::array<double,3> &node ){
-    m_node.push_back(node) ;
+	m_node.push_back(node) ;
     m_active.push_back(true) ;
 
     m_nodes++ ;
@@ -167,13 +327,12 @@ int RBF::addNode( const std::array<double,3> &node ){
 };
 
 /*! 
- * Adds a list of RBF nodes and sets them to active
+ * Adds a list of RBF nodes and sets them to active. Does not manage duplicated nodes
  * @param[in] node  coordinates of nodes to be added
  * @return id of node within class
  */
 std::vector<int> RBF::addNode( const std::vector<std::array<double,3>> &node ){
-
-    int                 i( m_nodes ) ;
+	int                 i( m_nodes ) ;
     std::vector<int>    ids;
 
     ids.resize( node.size() ) ;
@@ -192,66 +351,83 @@ std::vector<int> RBF::addNode( const std::vector<std::array<double,3>> &node ){
 };
 
 /*! 
- * Adds a field to be interpolated
+ * Increment container size for field to be interpolated. Method is active only in RBFType::INTERP mode. 
  * @return id of field within th class
  */
 int RBF::addField( ){
-    m_fields++ ;
+	if(m_rbfType != RBFType::INTERP) return m_fields;
+	m_fields++ ;
     m_value.resize(m_fields) ;
     return m_fields-1 ;
 };
 
 /*! 
- * Adds a field to be interpolated
+ * Adds a field to be interpolated.  Method is active only in RBFType::INTERP mode.  
  * @param[in] field values of field
  * @return id of field within th class
  */
 int RBF::addField( const std::vector<double> & field ){
-    m_value.push_back(field) ;
+	if(m_rbfType != RBFType::INTERP) return m_fields;
+	m_value.push_back(field) ;
     m_fields++ ;
     return m_fields-1 ;
 };
 
 /*! 
- * Sets all the field values at one node
- * @param[in] id id of node
- * @param[in] value  function values to be interpolated
+ * Increment container size for RBF control weight parameters. Method is active only in RBFType::PARAM mode. 
+ * @return id of virtual weight within the class
  */
-void RBF::setNodeValue( const int &id, const std::vector<double> &value ){
-
-    int i ;
-
-    for( i=0; i<m_fields; ++i ){
-        m_value[i][id] = value[i] ;
-    }
-    return ;
+int RBF::addWeight( ){
+	if(m_rbfType != RBFType::PARAM) return m_fields;
+	m_fields++ ;
+	m_weight.resize(m_fields) ;
+	return m_fields-1 ;
 };
 
 /*! 
- * Sets the values of one field at all nodes
- * @param[in] id id of field
- * @param[in] value  function values to be interpolated
+ * Adds a weight control parameter to RBF nodes.  Method is active only in RBFType::PARAM mode.  
+ * @param[in] weight values of weight for each RBF node
+ * @return id of weight within the class
  */
-void RBF::setFieldValue( const int &id, const std::vector<double> &value ){
-
-    m_value[id] = value ;
-
-    return ;
+int RBF::addWeight( const std::vector<double> & weights ){
+	if(m_rbfType != RBFType::PARAM) return m_fields;
+	m_weight.push_back(weights) ;
+	m_fields++ ;
+	return m_fields-1 ;
 };
 
-/*! 
- * Evaluates the basis function
- * @param[in] dist distance
- * @return value of basis function
- */
-double RBF::evalBasis( const double &dist ){
-    return (*m_fPtr)(dist) ;
-};
+// /*! 
+//  * Sets all the field values at one node
+//  * @param[in] id id of node
+//  * @param[in] value  function values to be interpolated
+//  */
+// void RBF::setNodeValue( const int &id, const std::vector<double> &value ){
+// 
+//     int i ;
+// 
+//     for( i=0; i<m_fields; ++i ){
+//         m_value[i][id] = value[i] ;
+//     }
+//     return ;
+// };
+// 
+// /*! 
+//  * Sets the values of one field at all nodes
+//  * @param[in] id id of field
+//  * @param[in] value  function values to be interpolated
+//  */
+// void RBF::setFieldValue( const int &id, const std::vector<double> &value ){
+// 
+//     m_value[id] = value ;
+// 
+//     return ;
+// };
+
 
 /*! 
  * Evaluates the RBF
  * @param[in] point point where to evaluate the basis
- * @return vector containing interpolated values
+ * @return vector containing interpolated values. Its size matches the number of fields/weights of RBF
  */
 std::vector<double> RBF::evalRBF( const std::array<double,3> &point){
 
@@ -276,10 +452,14 @@ std::vector<double> RBF::evalRBF( const std::array<double,3> &point){
 }
 
 /*! 
- * Calculates the RBF weights using active nodes
+ * Calculates the RBF weights using all active nodes and just given target fields. 
+ * Regular LU solver for linear system A*X=B is employed (LAPACKE dgesv). The method
+ * is active only in RBFType::INTERP mode.
  */
 void RBF::solve(){
 
+	if(m_rbfType != RBFType::INTERP) return;
+	
     int i, j, k ;
     double dist;
 
@@ -347,84 +527,15 @@ void RBF::solve(){
 };
 
 /*! 
- * Calculates the RBF weights using active nodes
- */
-void RBF::solveLSQ(){
-
-    int i, j, k ;
-    double dist;
-
-    int nR      = getActiveCount() ;
-    int nP      = m_nodes ;
-    int nrhs    = getFieldCount() ;
-
-
-    std::vector<int> activeSet( getActiveSet() ) ;
-
-    int     n ,m, lda, ldb, info, rank ;
-    double  rcond = -1.0 ;
-    //double  rcond = 1.e-4 ;
-
-    m = nP;
-    n = nR;
-
-    lda = m ;
-    ldb = std::max(n,m) ;
-
-    double  *a = new double [lda * n];
-    double  *b = new double [ldb * nrhs];
-    double  *s = new double [m];
-
-
-    for( j=0; j<nrhs; ++j){
-        for( i=0; i<nP; ++i){
-            k = j*ldb + i ;
-            b[k] = m_value[j][i];
-        }
-    }
-
-    k=0;
-    for( const auto &j : activeSet ){
-        for( i=0; i<nP; ++i){
-            dist = norm2(m_node[j] - m_node[i]) / m_supportRadius ;
-            a[k] = evalBasis( dist ) ; 
-            k++;
-        }
-    }
-
-    info = LAPACKE_dgelsd( LAPACK_COL_MAJOR, nP, nR, nrhs, a, lda, b, ldb, s, rcond, &rank ) ;
-
-    if( info > 0 ) {
-        exit( 1 );
-    }
-
-
-    m_weight.resize(nrhs) ;
-
-    for( j=0; j<nrhs; ++j){
-        m_weight[j].resize(m_nodes,0);
-
-        k=0 ;
-        for( const auto &i : activeSet ){
-            m_weight[j][i] = b[j*ldb+k];
-            ++k;
-        }
-    }
-
-
-    delete[] a;
-    delete[] b;
-    delete[] s;
-
-};
-
-/*! 
- * Determines set of nodes to be used using greedy algorithm
+ * Determines effective set of nodes to be used using greedy algorithm and calculate weights on them.
+ * The method is active only in RBFType::INTERP mode.
  * @param[in] tolerance error tolerance for adding nodes
- * @return true if tolerane has been met, false if not enough nodes available
+ * @return true if tolerance has been met, false if not enough nodes available
  */
 bool RBF::greedy( const double &tolerance){
-
+	
+	if(m_rbfType != RBFType::INTERP) return false;
+	
     int                     i, j ;
     double                  error(1.e18) ;
     std::vector<double>     local(m_fields) ;
@@ -468,6 +579,18 @@ bool RBF::greedy( const double &tolerance){
     return true;
 
 };
+
+//PROTECTED RBF CLASS METHODS IMPLEMENTATION
+
+/*! 
+ * Evaluates the basis function
+ * @param[in] dist distance
+ * @return value of basis function
+ */
+double RBF::evalBasis( const double &dist ){
+	return (*m_fPtr)(dist) ;
+};
+
 
 /*! 
  * Determines which node to ba added to active set
@@ -557,21 +680,98 @@ double RBF::evalError( ){
 
 };
 
+
+/*! 
+ * Calculates the RBF weights using all active nodes and just given target fields. 
+ * Compute weights as solution of a linear least squares problem (LAPACKE dglsd).
+ */
+void RBF::solveLSQ(){
+	
+	int i, j, k ;
+	double dist;
+	
+	int nR      = getActiveCount() ;
+	int nP      = m_nodes ;
+	int nrhs    = getFieldCount() ;
+	
+	
+	std::vector<int> activeSet( getActiveSet() ) ;
+	
+	int     n ,m, lda, ldb, info, rank ;
+	double  rcond = -1.0 ;
+	//double  rcond = 1.e-4 ;
+	
+	m = nP;
+	n = nR;
+	
+	lda = m ;
+	ldb = std::max(n,m) ;
+	
+	double  *a = new double [lda * n];
+	double  *b = new double [ldb * nrhs];
+	double  *s = new double [m];
+	
+	
+	for( j=0; j<nrhs; ++j){
+		for( i=0; i<nP; ++i){
+			k = j*ldb + i ;
+			b[k] = m_value[j][i];
+		}
+	}
+	
+	k=0;
+	for( const auto &j : activeSet ){
+		for( i=0; i<nP; ++i){
+			dist = norm2(m_node[j] - m_node[i]) / m_supportRadius ;
+			a[k] = evalBasis( dist ) ; 
+			k++;
+		}
+	}
+	
+	info = LAPACKE_dgelsd( LAPACK_COL_MAJOR, nP, nR, nrhs, a, lda, b, ldb, s, rcond, &rank ) ;
+	
+	if( info > 0 ) {
+		exit( 1 );
+	}
+	
+	
+	m_weight.resize(nrhs) ;
+	
+	for( j=0; j<nrhs; ++j){
+		m_weight[j].resize(m_nodes,0);
+		
+		k=0 ;
+		for( const auto &i : activeSet ){
+			m_weight[j][i] = b[j*ldb+k];
+			++k;
+		}
+	}
+	
+	
+	delete[] a;
+	delete[] b;
+	delete[] s;
+	
+};
+
+//RBF NAMESPACE UTILITIES 
+
 /*! 
  * Wendland C2 function
  * @param[in] dist distance normalized with respect to support radius
  * @return rbf value
  */
 double rbf::wendlandc2( const double &dist ){
-
-    if( dist > 1){
-        return 0.;
-    } else{
-        return( pow(1.-dist,4)*(4.*dist+1.) ) ;
-
-    }
-
+	
+	if( dist > 1){
+		return 0.;
+	} else{
+		return( pow(1.-dist,4)*(4.*dist+1.) ) ;
+		
+	}
+	
 }; 
+
 
 /*! 
  * @} 

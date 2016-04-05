@@ -29,6 +29,7 @@ cmake_minimum_required(VERSION 2.8)
 set(TESTS "")
 list(APPEND TESTS "test_rbf_00001")
 list(APPEND TESTS "test_rbf_00002")
+list(APPEND TESTS "test_rbf_00003")
 
 set(RBF_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of serial tests fo the RBF module" FORCE)
 
