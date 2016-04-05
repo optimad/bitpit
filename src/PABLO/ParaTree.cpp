@@ -922,6 +922,25 @@ ParaTree::getLocalIdx(uint64_t gidx){
 	};
 };
 
+/*! Get the local index of a ghost octant.
+ * \param[in] gidx Global index of target octant.
+ * \return Local index of the ghost octant.
+ */
+uint32_t
+ParaTree::getGhostLocalIdx(uint64_t gidx){
+
+    uint32_t index;
+    typename u64vector::iterator findResult;
+    findResult = std::find(m_octree.m_globalIdxGhosts.begin(),m_octree.m_globalIdxGhosts.end(),gidx);
+    if(findResult != m_octree.m_globalIdxGhosts.end()){
+        index = std::distance(m_octree.m_globalIdxGhosts.begin(),findResult);
+    }
+    else{
+        index = std::numeric_limits<uint32_t>::max();
+    }
+    return index;
+};
+
 
 /*! Get the global index of a ghost octant.
  * \param[in] idx Local index of target ghost octant.
