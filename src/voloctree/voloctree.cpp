@@ -902,10 +902,11 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 			// List of vertices
 			const std::vector<int> &localConnect = cellLocalFaceConnect[vertexSource.face];
 			for (int k = 0; k < nInterfaceVertices; ++k) {
-				long vertexId = cellConnect[localConnect[k]];
 				uint32_t vertexTreeId = octantTreeConnect[localConnect[k]];
-
-				vertexMap.insert({{vertexTreeId, vertexId}});
+				if (vertexMap.count(vertexTreeId) == 0) {
+					long vertexId = cellConnect[localConnect[k]];
+					vertexMap.insert({{vertexTreeId, vertexId}});
+				}
 			}
 		}
 	}
