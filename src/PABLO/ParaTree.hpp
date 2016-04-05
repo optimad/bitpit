@@ -41,6 +41,7 @@
 #include "Map.hpp"
 #include "bitpit_IO.hpp"
 #include <map>
+#include <unordered_map>
 #include <set>
 #include <bitset>
 #include <algorithm>
@@ -109,6 +110,8 @@ private:
 															if the i-th octant is new after refinement the j-th old octant was the father of the new octant;
 															if the i-th octant is new after coarsening the j-th old octant was the first child of the new octant.
 	 	 	 	 	 	 	 	 	 	 	 	 	 	 	 */
+	//elements sent during last loadbalance operation
+	std::unordered_map<int,std::array<uint32_t,4> >	   m_sentIdx;											  /**<Local mapper for sent elements. Each element refers to the receiver rank and collect the */
 
 	//auxiliary members
 	int 					m_errorFlag;					/**<MPI error flag*/
@@ -321,6 +324,7 @@ public:
 	uint32_t 		getIdx(Octant oct);
 	bool 			getIsGhost(Octant* oct);
 	bool 			getIsGhost(Octant oct);
+	const std::unordered_map<int,std::array<uint32_t,4> > & getSentIdx();
 
 	// =================================================================================== //
 	// PRIVATE GET/SET METHODS															   //
@@ -515,6 +519,8 @@ public:
 		(*m_log) << "---------------------------------------------" << endl;
 		(*m_log) << " LOAD BALANCE " << endl;
 
+		m_sentIdx.clear();
+        std::array<uint32_t,4> limits = {{0,0,0,0}};
 		if (m_nproc>1){
 
 			uint32_t* partition = new uint32_t [m_nproc];
@@ -539,6 +545,13 @@ public:
 				LocalTree::octvector octantsCopy = m_octree.m_octants;
 				LocalTree::octvector::const_iterator first = octantsCopy.begin() + stride;
 				LocalTree::octvector::const_iterator last = first + partition[m_rank];
+
+                limits[1] = stride;
+                limits[2] = limits[1] + partition[m_rank];
+                limits[3] = m_octree.m_octants.size();
+                std::pair<int,std::array<uint32_t,4> > procLimits(m_rank,limits);
+                m_sentIdx.insert(procLimits);
+
 				m_octree.m_octants.assign(first, last);
 				octvector(m_octree.m_octants).swap(m_octree.m_octants);
 
@@ -662,6 +675,12 @@ public:
 							//store the number of octants at the beginning of the buffer
 							MPI_Pack(&nofElementsFromSuccessiveToPrevious,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,sendBuffers[p].m_commBufferSize,&sendBuffers[p].m_pos,m_comm);
 							//USE BUFFER POS
+
+							limits[0] = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1);
+							limits[1] = (uint32_t)lh + 1;
+							std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
+							m_sentIdx.insert(procLimits);
+
 							for(uint32_t i = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1); i <= (uint32_t)lh; ++i){
 								//PACK octants from 0 to lh in sendBuffer[p]
 								//const Class_Octant<2> & octant = m_octree.m_octants[i];
@@ -710,6 +729,12 @@ public:
 							//store the number of octants at the beginning of the buffer
 							MPI_Pack(&nofElementsFromSuccessiveToPrevious,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,sendBuffers[p].m_commBufferSize,&sendBuffers[p].m_pos,m_comm);
 							//USE BUFFER POS
+
+							limits[0] = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1);
+							limits[1] = (uint32_t)lh + 1;
+							std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
+							m_sentIdx.insert(procLimits);
+
 							for(uint32_t i = lh - nofElementsFromSuccessiveToPrevious + 1; i <= lh; ++i){
 								//pack octants from lh - partition[p] to lh
 								//const Class_Octant<2> & octant = m_octree.m_octants[i];
@@ -766,6 +791,12 @@ public:
 							//store the number of octants at the beginning of the buffer
 							MPI_Pack(&nofElementsFromPreviousToSuccessive,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,sendBuffers[p].m_commBufferSize,&sendBuffers[p].m_pos,m_comm);
 							//USE BUFFER POS
+
+							limits[0] = ft;
+							limits[1] = ft + nofElementsFromPreviousToSuccessive;
+							std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
+							m_sentIdx.insert(procLimits);
+
 							for(uint32_t i = ft; i < ft + nofElementsFromPreviousToSuccessive; ++i){
 								//PACK octants from ft to octantsSize-1
 								//const Class_Octant<2> & octant = m_octree.m_octants[i];
@@ -812,6 +843,12 @@ public:
 							sendBuffers[p] = CommBuffer(buffSize,'a',m_comm);
 							//store the number of octants at the beginning of the buffer
 							MPI_Pack(&nofElementsFromPreviousToSuccessive,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,sendBuffers[p].m_commBufferSize,&sendBuffers[p].m_pos,m_comm);
+
+							limits[0] = ft;
+							limits[1] = ft + nofElementsFromPreviousToSuccessive;
+							std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
+							m_sentIdx.insert(procLimits);
+
 							for(uint32_t i = ft; i <= endOctants; ++i ){
 								//PACK octants from ft to ft + partition[p] -1
 								//const Class_Octant<2> & octant = m_octree.m_octants[i];
@@ -1031,6 +1068,8 @@ public:
 		(*m_log) << "---------------------------------------------" << endl;
 		(*m_log) << " LOAD BALANCE " << endl;
 
+		m_sentIdx.clear();
+        std::array<uint32_t,4> limits = {{0,0,0,0}};
 		if (m_nproc>1){
 
 			uint32_t* partition = new uint32_t [m_nproc];
@@ -1050,8 +1089,16 @@ public:
 				LocalTree::octvector octantsCopy = m_octree.m_octants;
 				LocalTree::octvector::const_iterator first = octantsCopy.begin() + stride;
 				LocalTree::octvector::const_iterator last = first + partition[m_rank];
+
+                limits[1] = stride;
+                limits[2] = limits[1] + partition[m_rank];
+                limits[3] = m_octree.m_octants.size();
+                std::pair<int,std::array<uint32_t,4> > procLimits(m_rank,limits);
+                m_sentIdx.insert(procLimits);
+
 				m_octree.m_octants.assign(first, last);
 				octvector(m_octree.m_octants).swap(m_octree.m_octants);
+
 
 				first = octantsCopy.end();
 				last = octantsCopy.end();
@@ -1174,6 +1221,12 @@ public:
 							//store the number of octants at the beginning of the buffer
 							MPI_Pack(&nofElementsFromSuccessiveToPrevious,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,sendBuffers[p].m_commBufferSize,&sendBuffers[p].m_pos,m_comm);
 							//USE BUFFER POS
+
+							limits[0] = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1);
+							limits[1] = (uint32_t)lh + 1;
+							std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
+							m_sentIdx.insert(procLimits);
+
 							for(uint32_t i = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1); i <= (uint32_t)lh; ++i){
 								//PACK octants from 0 to lh in sendBuffer[p]
 								//const Class_Octant<2> & octant = m_octree.m_octants[i];
@@ -1222,6 +1275,12 @@ public:
 							//store the number of octants at the beginning of the buffer
 							MPI_Pack(&nofElementsFromSuccessiveToPrevious,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,sendBuffers[p].m_commBufferSize,&sendBuffers[p].m_pos,m_comm);
 							//USE BUFFER POS
+
+							limits[0] = (uint32_t)(lh - nofElementsFromSuccessiveToPrevious + 1);
+							limits[1] = (uint32_t)lh + 1;
+							std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
+							m_sentIdx.insert(procLimits);
+
 							for(uint32_t i = lh - nofElementsFromSuccessiveToPrevious + 1; i <= lh; ++i){
 								//pack octants from lh - partition[p] to lh
 								//const Class_Octant<2> & octant = m_octree.m_octants[i];
@@ -1278,6 +1337,12 @@ public:
 							//store the number of octants at the beginning of the buffer
 							MPI_Pack(&nofElementsFromPreviousToSuccessive,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,sendBuffers[p].m_commBufferSize,&sendBuffers[p].m_pos,m_comm);
 							//USE BUFFER POS
+
+							limits[0] = ft;
+							limits[1] = ft + nofElementsFromPreviousToSuccessive;
+							std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
+							m_sentIdx.insert(procLimits);
+
 							for(uint32_t i = ft; i < ft + nofElementsFromPreviousToSuccessive; ++i){
 								//PACK octants from ft to octantsSize-1
 								//const Class_Octant<2> & octant = m_octree.m_octants[i];
@@ -1324,6 +1389,12 @@ public:
 							sendBuffers[p] = CommBuffer(buffSize,'a',m_comm);
 							//store the number of octants at the beginning of the buffer
 							MPI_Pack(&nofElementsFromPreviousToSuccessive,1,MPI_UINT32_T,sendBuffers[p].m_commBuffer,sendBuffers[p].m_commBufferSize,&sendBuffers[p].m_pos,m_comm);
+
+							limits[0] = ft;
+							limits[1] = endOctants + 1;
+							std::pair<int,std::array<uint32_t,4> > procLimits(p,limits);
+							m_sentIdx.insert(procLimits);
+
 							for(uint32_t i = ft; i <= endOctants; ++i ){
 								//PACK octants from ft to ft + partition[p] -1
 								//const Class_Octant<2> & octant = m_octree.m_octants[i];
