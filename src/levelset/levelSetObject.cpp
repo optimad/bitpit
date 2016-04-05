@@ -209,7 +209,7 @@ void LevelSetSegmentation::lsFromSimplex( LevelSet *visitee, const double &searc
         SegData                 &segInfo = *segIt ;
 
         if( segInfo.m_checked == false){
-            segInfo.m_checked == true ;
+            segInfo.m_checked = true ;
 
             std::set<long>      &segs = segInfo.m_segments ;
             long                &supp = segInfo.m_support ;
