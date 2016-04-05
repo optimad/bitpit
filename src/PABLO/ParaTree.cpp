@@ -2223,7 +2223,7 @@ ParaTree::getMapping(uint32_t & idx, u32vector & mapper, bvector & isghost, ivec
 			if (m_partitionRangeGlobalIdx0[iproc]>=gidx){
 				mapper[0] = gidx;
 				if (iproc > 0)
-					mapper[0] -= m_partitionRangeGlobalIdx0[iproc-1] - 1;
+					mapper[0] -= m_partitionRangeGlobalIdx0[iproc-1] + 1;
 				rank[0] = (m_lastOp == "firstloadbalance" ? m_rank : iproc);
 				isghost[0] = false;
 				break;
