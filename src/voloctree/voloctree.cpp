@@ -924,7 +924,7 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 
 	// Create the interfaces
 	std::unordered_map<uint32_t, long> interfaceMap;
-	std::unordered_map<uint32_t, std::vector<uint32_t>> octantTreeInterfaces;
+	std::unordered_map<uint64_t, std::vector<uint32_t>> globalOctantTreeInterfaces;
 	for (uint32_t interfaceTreeId = 0; interfaceTreeId < nIntersections; ++interfaceTreeId) {
 		// Skip the interface is already inserted in the patch
 		if (interfaceMap.count(interfaceTreeId) != 0) {
@@ -956,7 +956,14 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 		OctantInfo ownerOctantInfo(owner, !ownerIsGhost);
 		long ownerId = getOctantId(ownerOctantInfo);
 		if (ownerId < 0) {
-			octantTreeInterfaces[ownerOctantInfo.id].push_back(interfaceTreeId);
+			uint64_t ownerGlobalTreeId;
+			if (ownerOctantInfo.internal) {
+				ownerGlobalTreeId = m_tree.getGlobalIdx(ownerOctantInfo.id);
+			} else {
+				ownerGlobalTreeId = m_tree.getGhostGlobalIdx(ownerOctantInfo.id);
+			}
+
+			globalOctantTreeInterfaces[ownerGlobalTreeId].push_back(interfaceTreeId);
 			buildInterface = true;
 		}
 
@@ -965,7 +972,14 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 			OctantInfo neighOctantInfo(neigh, !neighIsGhost);
 			neighId = getOctantId(neighOctantInfo);
 			if (neighId < 0) {
-				octantTreeInterfaces[neighOctantInfo.id].push_back(interfaceTreeId);
+				uint64_t neighGlobalTreeId;
+				if (neighOctantInfo.internal) {
+					neighGlobalTreeId = m_tree.getGlobalIdx(neighOctantInfo.id);
+				} else {
+					neighGlobalTreeId = m_tree.getGhostGlobalIdx(neighOctantInfo.id);
+				}
+
+				globalOctantTreeInterfaces[neighGlobalTreeId].push_back(interfaceTreeId);
 				buildInterface = true;
 			}
 		}
@@ -1024,6 +1038,14 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 	std::vector<std::vector<long>> cellInterfaces(nCellFaces, std::vector<long>());
 	std::vector<std::vector<bool>> cellInterfacesOwner(nCellFaces, std::vector<bool>());
 	for (OctantInfo &octantInfo : octantInfoList) {
+		// Global index of the octant
+		uint64_t globalTreeId;
+		if (octantInfo.internal) {
+			globalTreeId = m_tree.getGlobalIdx(octantInfo.id);
+		} else {
+			globalTreeId = m_tree.getGhostGlobalIdx(octantInfo.id);
+		}
+
 		// Octant connectivity
 		const std::vector<uint32_t> &octantTreeConnect = getOctantConnect(octantInfo);
 
@@ -1041,7 +1063,7 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 			cellInterfacesOwner[k].clear();
 		}
 
-		for (uint32_t interfaceTreeId : octantTreeInterfaces[octantInfo.id]) {
+		for (uint32_t interfaceTreeId : globalOctantTreeInterfaces[globalTreeId]) {
 			const long &interfaceId = interfaceMap.at(interfaceTreeId);
 			const Interface &interface = m_interfaces[interfaceId];
 
