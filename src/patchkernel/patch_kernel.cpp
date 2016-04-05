@@ -224,7 +224,9 @@ void PatchKernel::markCellForRefinement(const long &id)
 {
 	bool updated = _markCellForRefinement(id);
 
-	setAdaptionDirty(updated);
+	if (updated) {
+		setAdaptionDirty(true);
+	}
 }
 
 /*!
@@ -236,7 +238,9 @@ void PatchKernel::markCellForCoarsening(const long &id)
 {
 	bool updated = _markCellForCoarsening(id);
 
-	setAdaptionDirty(updated);
+	if (updated) {
+		setAdaptionDirty(true);
+	}
 }
 
 /*!
@@ -249,7 +253,9 @@ void PatchKernel::enableCellBalancing(const long &id, bool enabled)
 {
 	bool updated = _enableCellBalancing(id, enabled);
 
-	setAdaptionDirty(updated);
+	if (updated) {
+		setAdaptionDirty(true);
+	}
 }
 
 /*!
