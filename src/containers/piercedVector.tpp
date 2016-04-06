@@ -2285,6 +2285,26 @@ void PiercedVector<value_t, id_t>::setPosId(const std::size_t &pos, const id_t &
 {
 	m_ids[pos] = id;
 	m_pos[id]  = pos;
+
+	// Update the position of the empty elements before the current one
+	//
+	// It is necessary to ensure that the empty elements just before the
+	// current one are correctly set, otherwise it will not be possible
+	// to iterate through the container.
+	size_t previousPos = pos;
+	while (previousPos > 0) {
+		--previousPos;
+		if (!isPosEmpty(previousPos)) {
+			break;
+		}
+
+		id_t previousId = m_ids[previousPos];
+		if (previousId == -1 || previousId == (previousPos - pos)) {
+			break;
+		}
+
+		setEmptyPosId(previousPos, pos);
+	}
 }
 
 /*!
