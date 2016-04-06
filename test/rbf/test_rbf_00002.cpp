@@ -436,7 +436,7 @@ int main() {
                     //}
                 }
 
-                meshMorph.addField(values) ;
+                meshMorph.addData(values) ;
             }
 
             meshMorph.setSupportRadius( 0.5 ) ;

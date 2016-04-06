@@ -151,10 +151,10 @@ void createCMesh( std::vector< std::array<double,3> > &points, std::vector< std:
     dom_oriz    =   100 ;
     dom_vert    =   50 ;
 
-    delta_oriz  =   0.01 ;
-    delta_vert  =   0.01 ;
+    delta_oriz  =   0.5 ;
+    delta_vert  =   0.5 ;
 
-    expansion   =   1.2 ;
+    expansion   =   1.00 ;
 
     altezza     =   0.5;
     base        =   1;
@@ -378,10 +378,11 @@ int main() {
 			
 			double maxVal;
 			maxval(zDispl, maxVal);
-            paraMorph.setSupportRadius( 3.0*maxVal ) ;
+            paraMorph.setSupportRadius( 2.0*maxVal ) ;
+			//paraMorph.setSupportRadius(1.0 ) ;
 			
 			std::vector<int> nIndex = paraMorph.addNode(controlNodes);
-			int wIndex = paraMorph.addWeight(zDispl);
+			int wIndex = paraMorph.addData(zDispl);
 			
 			std::vector<double> disp ;
             for( auto & point : points){

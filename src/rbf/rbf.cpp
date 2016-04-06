@@ -25,6 +25,7 @@
 #include <lapacke.h>
 
 #include <cmath>
+#include <set>
 #include "Operators.hpp"
 #include "SortAlgorithms.hpp"
 #include "rbf.hpp"
@@ -121,24 +122,18 @@ void RBF::setFunction( double (&bfunc)(const double &) ){
 };
 
 /*! 
- * Gets the number of fields to be interpolated. Method is active only in RBFType::INTERP mode,
- * otherwise return -1.
+ * Gets the number of data set attached to RBF nodes. 
+ * In RBFType::PARAM mode data are meant as RBF weights
+ * In RBFType::INTERP mode data are meant as fields to be interpolated
+ * 
+ * If no data are attached, returns -1.
  * @return  number of fields
  */
-int RBF::getFieldCount(  ){
+int RBF::getDataCount(  ){
 	if(m_rbfType != RBFType::INTERP) return -1;
 	return m_fields ;
 };
 
-/*! 
- * Gets the number of free weights for each node actually available. Method is active only in RBFType::PARAM mode,
- * otherwise return -1.
- * @return  number of weights
- */
-int RBF::getWeightCount(  ){
-	if(m_rbfType != RBFType::PARAM) return -1;	
-	return m_fields ;
-};
 
 /*! 
  * Get the number of active nodes
@@ -152,6 +147,15 @@ int RBF::getActiveCount(  ){
         nActive += (int) active ;
 
     return nActive ;
+};
+
+
+/*! 
+ * Gets the total number of nodes, active or not
+ * @return  number of RBF nodes
+ */
+int RBF::getTotalNodesCount(  ){
+	return m_nodes ;
 };
 
 /*! 
@@ -258,57 +262,64 @@ void RBF::setSupportRadius( const double & radius ){
 };
 
 /*! 
- * Sets all the field values at one node. Method is active only in RBFType::INTERP mode.
- * @param[in] id id of node
- * @param[in] value  fields' values at given node
+ * Return currently set support radius
+ * 
  */
-void RBF::setFieldsToNode( const int &id, const std::vector<double> &value ){
-	//TODO is the old setNodeValue of the class
-	if(m_rbfType != RBFType::INTERP) return;
+double RBF::getSupportRadius(){
+	return m_supportRadius ;
+};
+
+
+/*! 
+ * Sets all the type of available data at one node. 
+ * In RBFType::PARAM mode data are meant as RBF weights
+ * In RBFType::INTERP mode data are meant as fields to be interpolated
+ *
+ * @param[in] id id of node
+ * @param[in] value  data values to be set as RBF parameters for the given node
+ */
+void RBF::setDataToNode( const int &id, const std::vector<double> &value ){
+
+	if(id<0 || id >= m_fields) return;
+
+	if(value.size() != m_fields){
+		std::cout<<"Mismatch dimension between value vector size and number of data attached to rbf.";
+		std::cout<<"This may lead to nasty errors. Check it with getDataCount()!"<<std::endl;
+		std::cout<<"Data could not be set"<<std::endl;
+		return;
+	}
+	
 	int i ;
 	for( i=0; i<m_fields; ++i ){
-		m_value[i][id] = value[i] ;
+		if(m_rbfType == RBFType::PARAM) m_weight[i][id] = value[i] ;
+		if(m_rbfType == RBFType::INTERP) m_value[i][id] = value[i] ;
 	}
 	return ;
 };
 
 /*! 
- * Sets the values of one field at all nodes. Method is active only in RBFType::INTERP mode. 
- * @param[in] id id of field
- * @param[in] value  field data on nodes
+ * Sets the values of a data set to all currently available nodes. 
+ * In RBFType::PARAM mode data are meant as RBF weights
+ * In RBFType::INTERP mode data are meant as fields to be interpolated
+ * 
+ * @param[in] id id of data
+ * @param[in] value  data values 
  */
-void RBF::setFieldToAllNodes( const int &id, const std::vector<double> &value ){
-	//TODO is the old setFieldValue of the class
-	
-	if(m_rbfType != RBFType::INTERP) return;
-	m_value[id] = value ;
-	
-	return ;
-};
+void RBF::setDataToAllNodes( const int &id, const std::vector<double> &value ){
 
-/*! 
- * Sets all the weights values at one node. Method is active only in RBFType::PARAM mode.
- * @param[in] id id of node
- * @param[in] value  weight values to be set as RBF parameters for the given node
- */
-void RBF::setWeightsToNode( const int &id, const std::vector<double> &value ){
+	if(id<0 || id >= m_fields) return;
 	
-	if(m_rbfType != RBFType::PARAM) return;
-	int i ;
-	for( i=0; i<m_fields; ++i ){
-		m_weight[i][id] = value[i] ;
+	int size = (m_rbfType == RBFType::PARAM)*m_weight.size() + (m_rbfType == RBFType::INTERP)*m_value[id].size();
+	
+	if(value.size() != size){
+		std::cout<<"Mismatch dimension between data vector and current data container. One or both does not match RBF nodes count.";
+		std::cout<<"This may lead to nasty errors. Use fitDataToNodes to reshape container or fit your data vector first!"<<std::endl;
+		std::cout<<"Data could not be set"<<std::endl;
+		return;
 	}
-	return ;
-};
-
-/*! 
- * Sets the values of one weight at all nodes. Method is active only in RBFType::PARAM mode. 
- * @param[in] id id of weight
- * @param[in] value  weight values for all RBF nodes
- */
-void RBF::setWeightToAllNodes( const int &id, const std::vector<double> &value ){
-	if(m_rbfType != RBFType::PARAM) return;
-	m_weight[id] = value ;
+	
+	if(m_rbfType == RBFType::PARAM)		m_weight[id] = value ;
+	if(m_rbfType == RBFType::INTERP)	m_value[id] = value ;
 	
 	return ;
 };
@@ -323,7 +334,7 @@ int RBF::addNode( const std::array<double,3> &node ){
     m_active.push_back(true) ;
 
     m_nodes++ ;
-    return m_nodes-1 ;
+    return m_nodes ;
 };
 
 /*! 
@@ -350,51 +361,141 @@ std::vector<int> RBF::addNode( const std::vector<std::array<double,3>> &node ){
     return ids;
 };
 
-/*! 
- * Increment container size for field to be interpolated. Method is active only in RBFType::INTERP mode. 
- * @return id of field within th class
+/*! Remove pre-existent node. RBF Node list is resized and renumbered after extraction. 
+ * \param[in] id id of node 
+ * \return boolean, true if successfully extracted, false otherwise
  */
-int RBF::addField( ){
-	if(m_rbfType != RBFType::INTERP) return m_fields;
+bool RBF::removeNode(int id){
+	
+	if(id < 0 || id >=m_nodes) return false;
+	
+	m_nodes--;
+	m_node.erase(m_node.begin()+id);
+	m_active.erase(m_active.begin()+id);
+	return(true);
+}
+
+/*! Remove pre-existent set of nodes. RBF nodal list is resized and renumbered after extraction. 
+ * \param[in] list id list of candidates to extraction 
+ * \return boolean, true if all nodes are successfully extracted, false if any of them or none are extracted
+ */
+bool RBF::removeNode(std::vector<int> & list){
+	
+	std::set<int> setList;
+	for(auto && id : list) setList.insert(id);
+	
+	int extracted = 0;
+	for(auto && id : setList){
+		if(id>=0 && id <m_nodes){;
+			m_nodes--;
+			int index = id-extracted;
+			m_node.erase(m_node.begin() + index);
+			m_active.erase(m_active.begin() + index);
+			extracted++;
+			}	
+	}
+	return(extracted == list.size());
+};
+
+/*!
+ * Remove all nodes in RBF nodal list
+ */
+void RBF::removeAllNodes(){
+	m_nodes = 0;
+	m_node.clear();
+	m_active.clear();
+};
+
+
+/*! 
+ * Increment container size for RBF control data.The RBF::fitDataToNodes() method 
+ * is implicitly called, to ensure dimension consistency between data dimension 
+ * and number of RBF nodes. Use RBF::setDataToAllNodes to fill them. 
+ * In RBFType::PARAM mode data are meant as RBF weights
+ * In RBFType::INTERP mode data are meant as fields to be interpolated
+ * @return id of virtual data within the class
+ */
+int RBF::addData( ){
 	m_fields++ ;
-    m_value.resize(m_fields) ;
-    return m_fields-1 ;
+	fitDataToNodes(m_fields-1);
+	return m_fields;
 };
 
 /*! 
- * Adds a field to be interpolated.  Method is active only in RBFType::INTERP mode.  
- * @param[in] field values of field
- * @return id of field within th class
+ * Adds data attached to RBF nodes to current set.
+ * In RBFType::PARAM mode data are meant as RBF weights
+ * In RBFType::INTERP mode data are meant as fields to be interpolated
+ * @param[in] data values of weight/fields for each RBF node
+ * @return id of data within the class
  */
-int RBF::addField( const std::vector<double> & field ){
-	if(m_rbfType != RBFType::INTERP) return m_fields;
-	m_value.push_back(field) ;
-    m_fields++ ;
-    return m_fields-1 ;
+int RBF::addData( const std::vector<double> & data ){
+		
+	if(data.size() != m_nodes){
+		std::cout<<"Mismatch dimension between data vector and actual RBF nodes count. This may lead to nasty errors."<<std::endl;
+		std::cout<<"Data could not be added"<<std::endl;
+		return(-1);
+	}
+	
+	if(m_rbfType == RBFType::PARAM)	m_weight.push_back(data) ;
+	if(m_rbfType == RBFType::INTERP)	m_value.push_back(data) ;
+	m_fields++ ;
+	return m_fields ;
 };
 
-/*! 
- * Increment container size for RBF control weight parameters. Method is active only in RBFType::PARAM mode. 
- * @return id of virtual weight within the class
+
+
+
+/*! Remove pre-existent data set. Data list is resized and renumbered after extraction. 
+ * In RBFType::PARAM mode data are meant as RBF weights
+ * In RBFType::INTERP mode data are meant as fields to be interpolated
+ * 
+ * \param[in] id id of node 
+ * \return boolean, true if successfully extracted, false otherwise
  */
-int RBF::addWeight( ){
-	if(m_rbfType != RBFType::PARAM) return m_fields;
-	m_fields++ ;
-	m_weight.resize(m_fields) ;
-	return m_fields-1 ;
+bool RBF::removeData(int id){
+	
+	if(id<0 || id >=m_fields) return false;
+	
+	m_fields--;
+	m_weight.erase(m_weight.begin() + id);
+	if(m_rbfType == RBFType::INTERP) m_value.erase(m_value.begin()+id);
+	return(true);
+}
+
+/*! Remove pre-existent set of data. RBF Data list is resized and renumbered after extraction. 
+ * In RBFType::PARAM mode data are meant as RBF weights
+ * In RBFType::INTERP mode data are meant as fields to be interpolated
+ *  
+ * \param[in] list id list of candidates to extraction 
+ * \return boolean, true if all data set are successfully extracted, false if any of them or none are extracted
+ */
+bool RBF::removeData(std::vector<int> & list){
+	
+	std::set<int> setList;
+	for(auto && id : list) setList.insert(id);
+	
+	int extracted = 0;
+	for(auto && id : setList){
+		if(id>=0 && id <m_fields){;
+			m_fields--;
+			int index = id-extracted; 
+			m_weight.erase(m_weight.begin()+index);
+			if(m_rbfType == RBFType::INTERP) m_value.erase(m_value.begin()+index);
+			extracted++;
+			}	
+	}
+	return(extracted == list.size());
 };
 
-/*! 
- * Adds a weight control parameter to RBF nodes.  Method is active only in RBFType::PARAM mode.  
- * @param[in] weight values of weight for each RBF node
- * @return id of weight within the class
+/*!
+ * Remove all data set in RBF nodal list
  */
-int RBF::addWeight( const std::vector<double> & weights ){
-	if(m_rbfType != RBFType::PARAM) return m_fields;
-	m_weight.push_back(weights) ;
-	m_fields++ ;
-	return m_fields-1 ;
+void RBF::removeAllData(){
+	m_fields = 0;
+	m_weight.clear();
+	m_value.clear();
 };
+
 
 // /*! 
 //  * Sets all the field values at one node
@@ -464,7 +565,7 @@ void RBF::solve(){
     double dist;
 
     int nS      = getActiveCount() ;
-    int nrhs    = getFieldCount() ;
+    int nrhs    = getDataCount() ;
 
     int lda     = nS;
     int ldb     = nS;
@@ -580,6 +681,41 @@ bool RBF::greedy( const double &tolerance){
 
 };
 
+/*!
+ * Check dimensions of already available data and resize them to current 
+ * RBF node list dimension. The method resizes all data structures to current RBF 
+ * node list dimension and does not destroy any previous stored data within such 
+ * dimension. Anyway, mismatches definitions could occur. Please 
+ * use RBF::setDataToAllNodesto load your data again. 
+ * In RBFType::PARAM mode data are meant as RBF weights
+ * In RBFType::INTERP mode data are meant as fields to be interpolated
+ */
+void RBF::fitDataToNodes(){
+
+	for (int i=0;i<m_fields; ++i){
+		fitDataToNodes(i);
+	}
+}
+
+/*!
+ * Check dimensions id-th data and resize it to current 
+ * RBF node list dimension. The method resizes all data structures to current RBF 
+ * node list dimension and does not destroy any previous stored data within such 
+ * dimension. Anyway, mismatches definitions could occur. Please 
+ * use RBF::setDataToAllNodes to load your data again. 
+ * In RBFType::PARAM mode data are meant as RBF weights
+ * In RBFType::INTERP mode data are meant as fields to be interpolated
+ * \param[in] id id of data
+ */
+void RBF::fitDataToNodes(int id){
+	
+	m_weight[id].resize(m_nodes);
+	if(m_rbfType == RBFType::INTERP){
+		m_value[id].resize(m_nodes);
+	}
+}
+
+
 //PROTECTED RBF CLASS METHODS IMPLEMENTATION
 
 /*! 
@@ -692,7 +828,7 @@ void RBF::solveLSQ(){
 	
 	int nR      = getActiveCount() ;
 	int nP      = m_nodes ;
-	int nrhs    = getFieldCount() ;
+	int nrhs    = getDataCount() ;
 	
 	
 	std::vector<int> activeSet( getActiveSet() ) ;

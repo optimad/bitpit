@@ -82,9 +82,9 @@ class RBF{
     void                    setFunction( const RBFBasisFunction & ) ;
     void                    setFunction( double (&funct)(const double &) ) ;
 
-    int                     getFieldCount();
-	int                     getWeightCount();
-    int                     getActiveCount() ;
+    int                     getDataCount();
+    int                     getActiveCount();
+	int 					getTotalNodesCount();
     std::vector<int>        getActiveSet() ;
 
     bool                    isActive( const int &) ;
@@ -97,20 +97,25 @@ class RBF{
 	void					deactivateAllNodes();
 	
     void                    setSupportRadius( const double & ) ;
+	double 					getSupportRadius();
 	
-    void                    setFieldsToNode ( const int &, const std::vector<double> & ) ;
-    void                    setFieldToAllNodes( const int &, const std::vector<double> & ) ;
-	void 					setWeightsToNode(const int &, const std::vector<double> & );
-	void 					setWeightToAllNodes(const int &, const std::vector<double> & );
+    void                    setDataToNode ( const int &, const std::vector<double> & ) ;
+    void                    setDataToAllNodes( const int &, const std::vector<double> & ) ;
 	
     int                     addNode( const std::array<double,3> & ) ;
     std::vector<int>        addNode( const std::vector<std::array<double,3>> & ) ;
-
-    int                     addField( ) ;
-    int                     addField( const std::vector<double> & ) ;
-
-	int						addWeight();
-	int 					addWeight(const std::vector<double> & );
+	bool					removeNode(int);
+	bool					removeNode(std::vector<int> &);
+	void					removeAllNodes();
+	
+    int                     addData( ) ;
+    int                     addData( const std::vector<double> & ) ;
+	bool                    removeData( int) ;
+	bool					removeData(std::vector<int> &);
+	void 					removeAllData();
+	
+	void					fitDataToNodes();
+	void 					fitDataToNodes(int);
 	
     std::vector<double>     evalRBF( const std::array<double,3> &) ;
 	double                  evalBasis( const double &) ;
@@ -124,6 +129,7 @@ protected:
 	double                  initGreedy( const int &) ;
 	int                     addGreedyPoint() ;
 	void                    solveLSQ() ;	
+	
 };
 
 
