@@ -104,7 +104,7 @@ public:
 	void markCellForCoarsening(const long &id);
 	void enableCellBalancing(const long &id, bool enabled);
 
-	bool isDirty() const;
+	bool isDirty(bool global = false) const;
 	bool isExpert() const;
 
 	int getId() const;
@@ -219,14 +219,14 @@ public:
         virtual void updateAdjacencies(const std::vector<long>&) = 0;
 
 	void getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
-	bool isBoundingBoxDirty() const;
+	bool isBoundingBoxDirty(bool global = false) const;
 	void updateBoundingBox(bool forcedUpdated = false);
 	void addPointToBoundingBox(const std::array<double, 3> &point);
 	void removePointFromBoundingBox(const std::array<double, 3> &point, bool delayedBoxUpdate = false);
 
 	std::unordered_map<long, long> binSortVertex(int nBins = 128);
 
-	bool isAdaptionDirty() const;
+	bool isAdaptionDirty(bool global = false) const;
 	const std::vector<Adaption::Info> updateAdaption(bool trackAdaption = true);
 
 	virtual void translate(std::array<double, 3> translation);

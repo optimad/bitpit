@@ -26,6 +26,9 @@
 #include <typeinfo>
 #include <unordered_map>
 #include <unordered_set>
+#if BITPIT_ENABLE_MPI==1
+#	include <mpi.h>
+#endif
 
 #include "bitpit_SA.hpp"
 
@@ -197,7 +200,7 @@ const std::vector<Adaption::Info> PatchKernel::update(bool trackAdaption)
 const std::vector<Adaption::Info> PatchKernel::updateAdaption(bool trackAdaption)
 {
 	std::vector<Adaption::Info> adaptionInfo;
-	if (!isAdaptionDirty()) {
+	if (!isAdaptionDirty(true)) {
 		return adaptionInfo;
 	}
 
@@ -420,9 +423,19 @@ void PatchKernel::setAdaptionDirty(bool dirty)
 	\return This method returns true to indicate the patch needs to update
 	its data strucutres. Otherwise, it returns false.
 */
-bool PatchKernel::isAdaptionDirty() const
+bool PatchKernel::isAdaptionDirty(bool global) const
 {
-	return m_adaptionDirty;
+	bool isDirty = m_adaptionDirty;
+#if BITPIT_ENABLE_MPI==1
+	if (global && isCommunicatorSet()) {
+		const auto &communicator = getCommunicator();
+		MPI_Allreduce(&m_adaptionDirty, &isDirty, 1, MPI_C_BOOL, MPI_LOR, communicator);
+	}
+#else
+	BITPIT_UNUSED(global);
+#endif
+
+	return isDirty;
 }
 
 
@@ -432,9 +445,9 @@ bool PatchKernel::isAdaptionDirty() const
 	\return This method returns true to indicate the patch needs to update
 	its data strucutres. Otherwise, it returns false.
 */
-bool PatchKernel::isDirty() const
+bool PatchKernel::isDirty(bool global) const
 {
-	return (isAdaptionDirty() || isBoundingBoxDirty());
+	return (isAdaptionDirty(global) || isBoundingBoxDirty(global));
 }
 
 /*!
@@ -2762,9 +2775,19 @@ void PatchKernel::setBoundingBoxFrozen(bool frozen)
 
 	\result Returns true if the bounding box is dirty, false otherwise.
 */
-bool PatchKernel::isBoundingBoxDirty() const
+bool PatchKernel::isBoundingBoxDirty(bool global) const
 {
-	return m_boxDirty;
+	bool isDirty = m_boxDirty;
+#if BITPIT_ENABLE_MPI==1
+	if (global && isCommunicatorSet()) {
+		const auto &communicator = getCommunicator();
+		MPI_Allreduce(&m_boxDirty, &isDirty, 1, MPI_C_BOOL, MPI_LOR, communicator);
+	}
+#else
+	BITPIT_UNUSED(global);
+#endif
+
+	return isDirty;
 }
 
 /*!
