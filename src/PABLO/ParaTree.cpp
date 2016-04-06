@@ -906,7 +906,6 @@ ParaTree::getGlobalIdx(uint32_t idx){
 	else{
 		return uint64_t(idx);
 	};
-	return m_globalNumOctants;
 };
 
 /*! Get the local index of an octant.
