@@ -961,14 +961,22 @@ void PiercedVector<value_t, id_t>::dump()
 	std::cout << " m_first_pos: " << m_first_pos << std::endl;
 	std::cout << " m_last_pos: " <<  m_last_pos << std::endl;
 	std::cout << " Stored ids: " << std::endl;
-	for (size_t k = 0; k <= m_last_pos; ++k) {
-		std::cout << m_ids[k] << std::endl;
+	if (m_ids.size() > 0) {
+		for (size_t k = 0; k <= m_last_pos; ++k) {
+			std::cout << m_ids[k] << std::endl;
+		}
+	} else {
+		std::cout << "None" << std::endl;
 	}
 
 	std::cout << std::endl;
 	std::cout << " Poistion map: " << std::endl;
-	for (auto itr = m_pos.cbegin(); itr != m_pos.cend(); ++itr) {
-		std::cout << itr->first << " -> " << itr->second << std::endl;
+	if (m_pos.size() > 0) {
+		for (auto itr = m_pos.cbegin(); itr != m_pos.cend(); ++itr) {
+			std::cout << itr->first << " -> " << itr->second << std::endl;
+		}
+	} else {
+		std::cout << "None" << std::endl;
 	}
 
 	std::cout << "----------------------------------------" << std::endl;
