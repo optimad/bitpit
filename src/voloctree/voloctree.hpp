@@ -168,6 +168,8 @@ private:
 	                 std::vector<std::vector<long>> &interfaces,
 	                 std::vector<std::vector<bool>> &interfacesOwner);
 	void deleteCell(long id);
+
+	const std::vector<Adaption::Info> sync(bool trackChanges);
 };
 
 }

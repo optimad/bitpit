@@ -305,11 +305,11 @@ int VolOctree::getCellLevel(const long &id)
 */
 const std::vector<Adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 {
-	bool buildMapping = (getCellCount() != 0);
 
 	// Updating the tree
 	log::cout() << ">> Adapting tree...";
 
+	bool buildMapping = (getCellCount() != 0);
 	bool updated = m_tree.adapt(buildMapping);
 	if (trackAdaption) {
 		m_lastTreeOperation = OP_ADAPTION_MAPPED;
@@ -324,6 +324,24 @@ const std::vector<Adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 	}
 
 	log::cout() << " Done" << std::endl;
+
+	// Sync the patch
+	return sync(trackAdaption);
+}
+
+/*!
+	Syncronizes the patch with the underlying octree.
+
+	\param trackChanges if set to true the changes to the patch will be
+	tracked
+	\result Returns all the changes applied to the patch.
+*/
+const std::vector<Adaption::Info> VolOctree::sync(bool trackChanges)
+{
+	log::cout() << ">> Syncing patch..." << std::endl;
+
+	// If the current mesh is empty we need to import all the octants
+	bool importAll = (getCellCount() == 0);
 
 	// Info on the tree
 	long nOctants = m_tree.getNumOctants();
@@ -373,13 +391,13 @@ const std::vector<Adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 		// Octant mapping
 		std::vector<uint32_t> mapper_octantMap;
 		std::vector<bool> mapper_ghostFlag;
-		if (!initiallyEmpty) {
+		if (!importAll) {
 			m_tree.getMapping(treeId, mapper_octantMap, mapper_ghostFlag);
 		}
 
 		// Adaption type
 		Adaption::Type adaptionType;
-		if (initiallyEmpty) {
+		if (importAll) {
 			adaptionType = Adaption::TYPE_CREATION;
 		} else {
 			bool isNewR = m_tree.getIsNewR(treeId);
@@ -424,7 +442,7 @@ const std::vector<Adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 
 		// Current tree ids that will be imported
 		long nCurrentTreeIds;
-		if (initiallyEmpty) {
+		if (importAll) {
 			nCurrentTreeIds = nOctants - treeId;
 		} else if (adaptionType == Adaption::TYPE_REFINEMENT) {
 			nCurrentTreeIds = pow(2, getDimension());
@@ -450,7 +468,7 @@ const std::vector<Adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 		}
 
 		// Adaption tracking
-		if (trackAdaption) {
+		if (trackChanges) {
 			adaptionData.emplace_back();
 			Adaption::Info &adaptionInfo = adaptionData.back();
 
@@ -514,7 +532,7 @@ const std::vector<Adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 	// Previous ghosts cells need to be removed
 	if (nPreviousGhosts > 0) {
 		long deletedGhostsInfoIdx = -1;
-		if (trackAdaption) {
+		if (trackChanges) {
 			adaptionData.emplace_back();
 			Adaption::Info &deletedGhostsInfo = adaptionData.back();
 			deletedGhostsInfo.type   = Adaption::TYPE_DELETION;
@@ -533,7 +551,7 @@ const std::vector<Adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 			removedId = id;
 
 			// Adaption tracking
-			if (trackAdaption) {
+			if (trackChanges) {
 				Adaption::Info &deletedGhostsInfo = adaptionData[deletedGhostsInfoIdx];
 				deletedGhostsInfo.previous.emplace_back();
 				unsigned long &adaptionId = deletedGhostsInfo.previous.back();
@@ -623,7 +641,7 @@ const std::vector<Adaption::Info> VolOctree::_updateAdaption(bool trackAdaption)
 	setExpert(false);
 
 	// Track mesh adaption
-	if (trackAdaption) {
+	if (trackChanges) {
 		// Map ids of the added cells
 		for (auto &adaptionInfo : adaptionData) {
 			if (adaptionInfo.entity != Adaption::ENTITY_CELL) {
