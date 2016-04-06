@@ -62,7 +62,7 @@ class RBF{
 
     double  (*m_fPtr)( const double &);
 
-    std::vector<std::array<double,3>>   m_node ;
+    
     std::vector<std::vector<double>>    m_value ;
     std::vector<std::vector<double>>    m_weight ;
 
@@ -71,11 +71,16 @@ class RBF{
 
 	RBFType m_rbfType;
 	
+	protected:
+	int m_maxFields; /**< fix the maximum number of fields that can be added to your class*/
+	std::vector<std::array<double,3>>   m_node ;
+	
     public:
     ~RBF();
-
     RBF( RBFBasisFunction = RBFBasisFunction::WENDLANDC2, RBFType = RBFType::INTERP ) ;
-
+	RBF(const RBF & other);
+	RBF & operator=(const RBF & other);
+	
 	RBFType					whichType();
 	void					setType(RBFType);
 	

@@ -58,6 +58,7 @@ RBF::RBF( RBFBasisFunction bfunc, RBFType rtype ) {
     m_nodes         = 0 ;
     m_fields        = 0 ;
 
+	m_maxFields = -1;
     m_node.clear() ;
     m_value.clear() ;
     m_weight.clear() ;
@@ -66,6 +67,37 @@ RBF::RBF( RBFBasisFunction bfunc, RBFType rtype ) {
     setFunction( bfunc ) ;
 	setType(rtype);
 };
+
+/*!
+ * Copy Constructor
+ */
+RBF::RBF(const RBF & other){
+	*this = other;
+}
+
+/*!
+ * Copy Operator
+ */
+RBF & RBF::operator=(const RBF & other){
+	
+	m_fields = other.m_fields ;
+	m_nodes = other.m_nodes ;
+	m_supportRadius = other.m_supportRadius ;
+	
+	m_fPtr = other.m_fPtr;
+	
+	m_node = other.m_node ;
+	m_value = other.m_value ;
+	m_weight = other.m_weight ;
+	
+	m_active = other.m_active ;
+	m_error = other.m_error ;
+	
+	m_rbfType = other.m_rbfType;
+	m_maxFields = other.m_maxFields;
+	
+	return(*this);
+}
 
 /*! 
  * Gets the type of RBF behaviour actually set(see RBF::setType method for further information)
@@ -411,11 +443,16 @@ void RBF::removeAllNodes(){
  * Increment container size for RBF control data.The RBF::fitDataToNodes() method 
  * is implicitly called, to ensure dimension consistency between data dimension 
  * and number of RBF nodes. Use RBF::setDataToAllNodes to fill them. 
+ 
  * In RBFType::PARAM mode data are meant as RBF weights
  * In RBFType::INTERP mode data are meant as fields to be interpolated
  * @return id of virtual data within the class
  */
 int RBF::addData( ){
+	if(m_fields == m_maxFields){
+		std::cout<<"max number of data set reached"<<std::endl;
+		return -1;
+	}
 	m_fields++ ;
 	fitDataToNodes(m_fields-1);
 	return m_fields;
@@ -429,7 +466,12 @@ int RBF::addData( ){
  * @return id of data within the class
  */
 int RBF::addData( const std::vector<double> & data ){
-		
+
+	if(m_fields == m_maxFields){
+		std::cout<<"max number of data set reached"<<std::endl;
+		return -1;
+	}
+	
 	if(data.size() != m_nodes){
 		std::cout<<"Mismatch dimension between data vector and actual RBF nodes count. This may lead to nasty errors."<<std::endl;
 		std::cout<<"Data could not be added"<<std::endl;
@@ -467,7 +509,7 @@ bool RBF::removeData(int id){
  * In RBFType::INTERP mode data are meant as fields to be interpolated
  *  
  * \param[in] list id list of candidates to extraction 
- * \return boolean, true if all data set are successfully extracted, false if any of them or none are extracted
+ * \return boolean, true if all data set are successfully extracted, false if any of them are not extracted
  */
 bool RBF::removeData(std::vector<int> & list){
 	
