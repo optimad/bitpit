@@ -909,6 +909,21 @@ ParaTree::getGlobalIdx(uint32_t idx){
 	return m_globalNumOctants;
 };
 
+/*! Get the local index of an octant.
+ * \param[in] gidx Global index of target octant.
+ * \return Local index of octant.
+ */
+uint32_t
+ParaTree::getLocalIdx(uint64_t gidx){
+	if (m_rank){
+		return uint32_t(gidx - 1 - m_partitionRangeGlobalIdx[m_rank-1]);
+	}
+	else{
+		return uint32_t(gidx);
+	};
+};
+
+
 /*! Get the global index of a ghost octant.
  * \param[in] idx Local index of target ghost octant.
  * \return Global index of ghost octant.
