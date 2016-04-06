@@ -29,7 +29,7 @@
 
 namespace bitpit {
 
-struct Adaption
+namespace adaption
 {
 	enum Type {
 		TYPE_UNKNOWN  = -2,
@@ -76,7 +76,7 @@ public:
 
 	virtual ~FlatMapping();
 
-	virtual void update(const std::vector<Adaption::Info> adaptionData) = 0;
+	virtual void update(const std::vector<adaption::Info> adaptionData) = 0;
 
 	const std::vector<long> & getNumbering() const;
 	const std::vector<long> & getMapping() const;
@@ -98,7 +98,7 @@ public:
 
 	~CellFlatMapping();
 
-	void update(const std::vector<Adaption::Info> adaptionData);
+	void update(const std::vector<adaption::Info> adaptionData);
 
 };
 

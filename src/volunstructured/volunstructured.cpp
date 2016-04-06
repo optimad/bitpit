@@ -130,15 +130,15 @@ std::array<double, 3> VolUnstructured::evalInterfaceNormal(const long &id)
 /*!
 	Updates the patch.
 
-	\result Returns a vector of Adaption::Info that can be used to track
+	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */
-const std::vector<Adaption::Info> VolUnstructured::_updateAdaption(bool trackAdaption)
+const std::vector<adaption::Info> VolUnstructured::_updateAdaption(bool trackAdaption)
 {
 	std::cout << ">> Updating surface triangulation mesh\n";
 
 	// Adaption info
-	std::vector<Adaption::Info> adaptionData;
+	std::vector<adaption::Info> adaptionData;
 	if (trackAdaption) {
 
 	}

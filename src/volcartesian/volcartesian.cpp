@@ -474,10 +474,10 @@ double VolCartesian::getSpacing(const int &direction) const
 /*!
 	Updates the patch.
 
-	\result Returns a vector of Adaption::Info that can be used to track
+	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */
-const std::vector<Adaption::Info> VolCartesian::_updateAdaption(bool trackAdaption)
+const std::vector<adaption::Info> VolCartesian::_updateAdaption(bool trackAdaption)
 {
 	log::cout() << ">> Updating cartesian mesh\n";
 
@@ -496,12 +496,12 @@ const std::vector<Adaption::Info> VolCartesian::_updateAdaption(bool trackAdapti
 	setExpert(false);
 
 	// Adaption info
-	std::vector<Adaption::Info> adaptionData;
+	std::vector<adaption::Info> adaptionData;
 	if (trackAdaption) {
 		adaptionData.emplace_back();
-		Adaption::Info &adaptionCellInfo = adaptionData.back();
-		adaptionCellInfo.type   = Adaption::TYPE_CREATION;
-		adaptionCellInfo.entity = Adaption::ENTITY_CELL;
+		adaption::Info &adaptionCellInfo = adaptionData.back();
+		adaptionCellInfo.type   = adaption::TYPE_CREATION;
+		adaptionCellInfo.entity = adaption::ENTITY_CELL;
 		adaptionCellInfo.current.reserve(m_cells.size());
 		for (auto &cell : m_cells) {
 			adaptionCellInfo.current.emplace_back();
@@ -510,9 +510,9 @@ const std::vector<Adaption::Info> VolCartesian::_updateAdaption(bool trackAdapti
 		}
 
 		adaptionData.emplace_back();
-		Adaption::Info &adaptionInterfaceInfo = adaptionData.back();
-		adaptionInterfaceInfo.type   = Adaption::TYPE_CREATION;
-		adaptionInterfaceInfo.entity = Adaption::ENTITY_INTERFACE;
+		adaption::Info &adaptionInterfaceInfo = adaptionData.back();
+		adaptionInterfaceInfo.type   = adaption::TYPE_CREATION;
+		adaptionInterfaceInfo.entity = adaption::ENTITY_INTERFACE;
 		adaptionInterfaceInfo.current.reserve(m_interfaces.size());
 		for (auto &interface : m_interfaces) {
 			adaptionInterfaceInfo.current.emplace_back();

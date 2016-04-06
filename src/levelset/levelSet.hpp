@@ -92,8 +92,8 @@ class LevelSet{
 
     virtual void                                computeSizeNarrowBand( LSObject * )=0;
 
-    virtual double                              updateSizeNarrowBand( std::vector<Adaption::Info> & )=0;
-    void                                        clearAfterAdaption( std::vector<Adaption::Info> &, double & ) ;
+    virtual double                              updateSizeNarrowBand( std::vector<adaption::Info> & )=0;
+    void                                        clearAfterAdaption( std::vector<adaption::Info> &, double & ) ;
 
     void                                        propagateSign( LSObject *) ;
     void                                        propagateValue( LSObject *) ;
@@ -122,7 +122,7 @@ class LevelSet{
     bool                                        isInNarrowBand(const long &) const;
 
     virtual void                                compute( LSObject * )=0 ;
-    virtual void                                update( LSObject *, std::vector<Adaption::Info> & )=0 ;
+    virtual void                                update( LSObject *, std::vector<adaption::Info> & )=0 ;
 
 };
 
@@ -136,7 +136,7 @@ class LevelSetCartesian : public LevelSet{
 
     private:
     void                                        computeSizeNarrowBand( LSObject * );
-    double                                      updateSizeNarrowBand( std::vector<Adaption::Info> & );
+    double                                      updateSizeNarrowBand( std::vector<adaption::Info> & );
     double                                      updateEikonal( double, double, const long & ) ; 
 
     public:
@@ -144,7 +144,7 @@ class LevelSetCartesian : public LevelSet{
     LevelSetCartesian( VolCartesian & );
 
     void                                        compute( LSObject * ) ;
-    void                                        update( LSObject *, std::vector<Adaption::Info> & ) ;
+    void                                        update( LSObject *, std::vector<adaption::Info> & ) ;
 };
 
 class LevelSetOctree : public LevelSet{
@@ -157,7 +157,7 @@ class LevelSetOctree : public LevelSet{
 
     private:
     void                                        computeSizeNarrowBand( LSObject * );
-    double                                      updateSizeNarrowBand( std::vector<Adaption::Info> & );
+    double                                      updateSizeNarrowBand( std::vector<adaption::Info> & );
 
     double                                      computeRSearchFromLevel( uint8_t ) ;
     int                                         computeLevelFromRSearch( double ) ;
@@ -167,7 +167,7 @@ class LevelSetOctree : public LevelSet{
     LevelSetOctree( VolOctree & );
 
     void                                        compute( LSObject * ) ;
-    void                                        update( LSObject *, std::vector<Adaption::Info> & ) ;
+    void                                        update( LSObject *, std::vector<adaption::Info> & ) ;
 
 };
 
@@ -193,7 +193,7 @@ class LSObject{
     virtual void                                computeLSInNarrowBand( LevelSetCartesian *)=0 ;
     virtual void                                computeLSInNarrowBand( LevelSetOctree *)=0 ;
 
-    virtual void                                updateLSInNarrowBand( LevelSetOctree *, std::vector<Adaption::Info> &, double &)=0 ;
+    virtual void                                updateLSInNarrowBand( LevelSetOctree *, std::vector<adaption::Info> &, double &)=0 ;
 };
 
 class LevelSetSegmentation : public LSObject {
@@ -247,8 +247,8 @@ class LevelSetSegmentation : public LSObject {
 
     void                                        computeLSInNarrowBand( LevelSetOctree *);
     void                                        associateSimplexToCell( LevelSetOctree *);
-    void                                        updateLSInNarrowBand( LevelSetOctree *, std::vector<Adaption::Info> &, double & ) ;
-    void                                        updateSimplexToCell( LevelSetOctree *, std::vector<Adaption::Info> &, double & ) ;
+    void                                        updateLSInNarrowBand( LevelSetOctree *, std::vector<adaption::Info> &, double & ) ;
+    void                                        updateSimplexToCell( LevelSetOctree *, std::vector<adaption::Info> &, double & ) ;
 
 };
 

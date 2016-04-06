@@ -35,22 +35,21 @@ namespace bitpit {
 */
 
 /*!
-	\struct Adaption
-
-	\brief The Adaption struct defines the information associated to an
-	adaption.
+	\brief The namespace 'adaption' contains the routines and the data
+	structures for handling patch adaption.
 */
-
+namespace adaption
+{
 
 /*!
-	\enum Adaption::Type
+	\enum adaption::Type
 
 	\brief The Type enum defines the type of adaption that has been
 	performed.
 */
 
 /*!
-	\enum Adaption::Entity
+	\enum adaption::Entity
 
 	\brief The Entity enum defines the type of entities on which the
 	adaption has been performed.
@@ -186,7 +185,7 @@ CellFlatMapping::~CellFlatMapping()
 	\param adaptionData is adaption data that will be used to update
 	the mapping
 */
-void CellFlatMapping::update(const std::vector<Adaption::Info> adaptionData)
+void CellFlatMapping::update(const std::vector<adaption::Info> adaptionData)
 {
 	// Previous number of cells
 	long nPreviousCells = m_numbering.size();
@@ -207,7 +206,7 @@ void CellFlatMapping::update(const std::vector<Adaption::Info> adaptionData)
 	long firstChangedFlatId = std::min(nCurrentCells, nPreviousCells);
 	long firstChangedId     = m_patch->getCells().getSizeMarker(firstChangedFlatId, Element::NULL_ID);
 	for (auto &adaptionInfo : adaptionData) {
-		if (adaptionInfo.entity != Adaption::ENTITY_CELL) {
+		if (adaptionInfo.entity != adaption::ENTITY_CELL) {
 			continue;
 		}
 
@@ -228,7 +227,7 @@ void CellFlatMapping::update(const std::vector<Adaption::Info> adaptionData)
 	// Build a map for the previous numbering
 	std::unordered_set<long> previousIds;
 	for (auto &adaptionInfo : adaptionData) {
-		if (adaptionInfo.entity != Adaption::ENTITY_CELL) {
+		if (adaptionInfo.entity != adaption::ENTITY_CELL) {
 			continue;
 		}
 
@@ -257,7 +256,7 @@ void CellFlatMapping::update(const std::vector<Adaption::Info> adaptionData)
 
 	// Update the mapping
 	for (auto &adaptionInfo : adaptionData) {
-		if (adaptionInfo.entity != Adaption::ENTITY_CELL) {
+		if (adaptionInfo.entity != adaption::ENTITY_CELL) {
 			continue;
 		}
 

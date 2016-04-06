@@ -617,7 +617,7 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetOctree *visitee){
  * of a d manifold in a 3D Euclidean space. Level set is computed in narrow band
  * of at least 2 mesh cell centers around the geometry. 
  */
-void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, std::vector<Adaption::Info> &mapper, double &newRSearch ){
+void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, std::vector<adaption::Info> &mapper, double &newRSearch ){
 
     updateSimplexToCell(visitee, mapper, newRSearch ) ; 
     lsFromSimplex(visitee, newRSearch, true) ;
@@ -630,7 +630,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetOctree *visitee, std::v
  * Update the Sdf of the triangulation after an octree adaptation.
  * Note: Only a single octree adapt with marker (-1,0,1) is permitted.
  */
-void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, std::vector<Adaption::Info> &mapper, double &newRSearch){
+void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, std::vector<adaption::Info> &mapper, double &newRSearch){
 
     int         oldLevel, newLevel ;
 
@@ -644,7 +644,7 @@ void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, std::ve
             std::unordered_map<long,std::set<long>>::iterator oldSegsIt ;
 
             for ( auto & info : mapper ){
-                if( info.entity == Adaption::Entity::ENTITY_CELL ){
+                if( info.entity == adaption::Entity::ENTITY_CELL ){
 
                     for ( auto & parent : info.previous){ //save old data and delete element
                         if( m_segInfo.exists(parent) ){
@@ -660,7 +660,7 @@ void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, std::ve
             m_segInfo.flush() ;
 
             for ( auto & info : mapper ){ //forall mesh modifications
-                if( info.entity == Adaption::Entity::ENTITY_CELL){ //check if changes on cells
+                if( info.entity == adaption::Entity::ENTITY_CELL){ //check if changes on cells
                     for ( auto & child : info.current){ // forall new elements
 
                         PiercedVector<SegData>::iterator seg =  m_segInfo.reclaim(child) ;

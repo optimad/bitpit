@@ -88,7 +88,7 @@ public:
         void updateAdjacencies(const std::vector<long>&) {};
 
 protected:
-	const std::vector<Adaption::Info> _updateAdaption(bool trackAdaption);
+	const std::vector<adaption::Info> _updateAdaption(bool trackAdaption);
 	bool _markCellForRefinement(const long &id);
 	bool _markCellForCoarsening(const long &id);
 	bool _enableCellBalancing(const long &id, bool enabled);
@@ -96,7 +96,7 @@ protected:
 	void _resetTol();
 
 #if BITPIT_ENABLE_MPI==1
-	const std::vector<Adaption::Info> _balancePartition(bool trackChanges);
+	const std::vector<adaption::Info> _balancePartition(bool trackChanges);
 #endif
 
 private:
@@ -174,7 +174,7 @@ private:
 	                 std::vector<std::vector<bool>> &interfacesOwner);
 	void deleteCell(long id);
 
-	const std::vector<Adaption::Info> sync(bool trackChanges);
+	const std::vector<adaption::Info> sync(bool trackChanges);
 
 #if BITPIT_ENABLE_MPI==1
 	void rebuildGhostExchangeData(std::unordered_map<int, std::vector<uint32_t>> ghostTreeIds);

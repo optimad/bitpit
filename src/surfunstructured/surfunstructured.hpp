@@ -63,7 +63,7 @@ public:
         unsigned short exportDGF(const std::string &);
 
 protected:
-	const std::vector<Adaption::Info> _updateAdaption(bool trackAdaption);
+	const std::vector<adaption::Info> _updateAdaption(bool trackAdaption);
 	bool _markCellForRefinement(const long &id);
 	bool _markCellForCoarsening(const long &id);
 	bool _enableCellBalancing(const long &id, bool enabled);

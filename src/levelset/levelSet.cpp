@@ -559,11 +559,11 @@ double LevelSet::updateEikonal( double s, double g, const long &I ){
  * @param[in] mapper mapping info
  * @param[in] newRSearch new size of narrow band
  */
-void LevelSet::clearAfterAdaption( std::vector<Adaption::Info> &mapper, double &newRSearch ){
+void LevelSet::clearAfterAdaption( std::vector<adaption::Info> &mapper, double &newRSearch ){
 
     long id ;
     for ( auto & map : mapper ){
-        if( map.entity == Adaption::Entity::ENTITY_CELL ){
+        if( map.entity == adaption::Entity::ENTITY_CELL ){
 
             for ( auto & parent : map.previous){
                 id = (long) parent ;

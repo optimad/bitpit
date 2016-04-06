@@ -84,7 +84,7 @@ void LevelSetCartesian::computeSizeNarrowBand( LSObject *visitor ){
 /*!
  * Update the levelset function 
  */
-void LevelSetCartesian::update( LSObject *visitor, std::vector<Adaption::Info> &mapper ){
+void LevelSetCartesian::update( LSObject *visitor, std::vector<adaption::Info> &mapper ){
 
     BITPIT_UNUSED(mapper) ;
 
@@ -98,7 +98,7 @@ void LevelSetCartesian::update( LSObject *visitor, std::vector<Adaption::Info> &
  * Update the size of the narrow band after an adaptation of the octree mesh
  * around the linked triangulation.
  */
-double LevelSetCartesian::updateSizeNarrowBand( std::vector<Adaption::Info> &mapper ){
+double LevelSetCartesian::updateSizeNarrowBand( std::vector<adaption::Info> &mapper ){
 
     BITPIT_UNUSED(mapper) ;
 
@@ -214,7 +214,7 @@ void LevelSetOctree::compute( LSObject *visitor ){
 /*!
  * Compute the levelset function 
  */
-void LevelSetOctree::update( LSObject *visitor, std::vector<Adaption::Info> &mapper ){
+void LevelSetOctree::update( LSObject *visitor, std::vector<adaption::Info> &mapper ){
 
     double  newRSearch ;
 
@@ -332,7 +332,7 @@ void LevelSetOctree::computeSizeNarrowBand( LSObject *visitor ){
  * Update the size of the narrow band after an adaptation of the octree mesh
  * around the linked triangulation.
  */
-double LevelSetOctree::updateSizeNarrowBand( std::vector<Adaption::Info> &mapper ){
+double LevelSetOctree::updateSizeNarrowBand( std::vector<adaption::Info> &mapper ){
 
     double  newRSearch ;
     long    id ;
@@ -361,7 +361,7 @@ double LevelSetOctree::updateSizeNarrowBand( std::vector<Adaption::Info> &mapper
     for ( auto & info : mapper ){
 
         *mapIt = false ;
-        if( info.entity == Adaption::Entity::ENTITY_CELL){
+        if( info.entity == adaption::Entity::ENTITY_CELL){
 
             for ( auto & parent : info.previous){
                 id = (long) parent;
@@ -378,7 +378,7 @@ double LevelSetOctree::updateSizeNarrowBand( std::vector<Adaption::Info> &mapper
 
     mapIt= map.begin() ;
     for ( auto & info : mapper ){
-        if( info.entity == Adaption::Entity::ENTITY_CELL){
+        if( info.entity == adaption::Entity::ENTITY_CELL){
             if(*mapIt){ //parent was in narrow band
                 for( auto &child : info.current){
                     id = (long) child;

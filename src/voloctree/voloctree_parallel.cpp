@@ -44,7 +44,7 @@ namespace bitpit {
 	tracked
 	\result Returns all the changes applied to the patch.
 */
-const std::vector<Adaption::Info> VolOctree::_balancePartition(bool trackChanges)
+const std::vector<adaption::Info> VolOctree::_balancePartition(bool trackChanges)
 {
 	// Updating the tree
 	log::cout() << ">> Load balancing...";

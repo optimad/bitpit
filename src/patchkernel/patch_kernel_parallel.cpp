@@ -128,10 +128,10 @@ int PatchKernel::getProcessorCount() const
 	\param cellRanks are the ranks of the cells after the partitioning
 	\param trackChanges if set to true, the changes to the patche will be
 	tracked
-	\result Returns a vector of Adaption::Info that can be used to track
+	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the partitioning.
 */
-const std::vector<Adaption::Info> PatchKernel::partition(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackChanges)
+const std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackChanges)
 {
 	setCommunicator(communicator);
 
@@ -145,12 +145,12 @@ const std::vector<Adaption::Info> PatchKernel::partition(MPI_Comm communicator, 
 	\param cellRanks are the ranks of the cells after the partitioning.
 	\param trackChanges if set to true, the changes to the patche will be
 	tracked
-	\result Returns a vector of Adaption::Info that can be used to track
+	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the partitioning.
 */
-const std::vector<Adaption::Info> PatchKernel::partition(const std::vector<int> &cellRanks, bool trackChanges)
+const std::vector<adaption::Info> PatchKernel::partition(const std::vector<int> &cellRanks, bool trackChanges)
 {
-	std::vector<Adaption::Info> adaptionData;
+	std::vector<adaption::Info> adaptionData;
 
 	// Communicator has to be set
 	if (!isCommunicatorSet()) {
@@ -220,8 +220,8 @@ const std::vector<Adaption::Info> PatchKernel::partition(const std::vector<int> 
 			cellList = &emptyCellList;
 		}
 
-		Adaption::Info adaptionInfo = sendCells(srcRank, dstRank, *cellList);
-		if (trackChanges && adaptionInfo.type != Adaption::TYPE_NONE) {
+		adaption::Info adaptionInfo = sendCells(srcRank, dstRank, *cellList);
+		if (trackChanges && adaptionInfo.type != adaption::TYPE_NONE) {
 			adaptionData.push_back(std::move(adaptionInfo));
 		}
 	}
@@ -237,10 +237,10 @@ const std::vector<Adaption::Info> PatchKernel::partition(const std::vector<int> 
 	\param cellRanks are the ranks of the cells after the partitioning
 	\param trackChanges if set to true, the changes to the patche will be
 	tracked
-	\result Returns a vector of Adaption::Info that can be used to track
+	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the partitioning.
 */
-const std::vector<Adaption::Info> PatchKernel::partition(MPI_Comm communicator, bool trackChanges)
+const std::vector<adaption::Info> PatchKernel::partition(MPI_Comm communicator, bool trackChanges)
 {
 	setCommunicator(communicator);
 
@@ -253,10 +253,10 @@ const std::vector<Adaption::Info> PatchKernel::partition(MPI_Comm communicator, 
 
 	\param trackChanges if set to true, the changes to the patche will be
 	tracked
-	\result Returns a vector of Adaption::Info that can be used to track
+	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the partition.
 */
-const std::vector<Adaption::Info> PatchKernel::partition(bool trackChanges)
+const std::vector<adaption::Info> PatchKernel::partition(bool trackChanges)
 {
 	return balancePartition(trackChanges);
 }
@@ -265,10 +265,10 @@ const std::vector<Adaption::Info> PatchKernel::partition(bool trackChanges)
 	Tries to balance the computational load among the processors redistributing
 	the cells among the processors.
 
-	\result Returns a vector of Adaption::Info that can be used to track
+	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the partitioning.
 */
-const std::vector<Adaption::Info> PatchKernel::balancePartition(bool trackChanges)
+const std::vector<adaption::Info> PatchKernel::balancePartition(bool trackChanges)
 {
 	// Communicator has to be set
 	if (!isCommunicatorSet()) {
@@ -276,7 +276,7 @@ const std::vector<Adaption::Info> PatchKernel::balancePartition(bool trackChange
 	}
 
 	// Balance patch
-	const std::vector<Adaption::Info> adaptionData = _balancePartition(trackChanges);
+	const std::vector<adaption::Info> adaptionData = _balancePartition(trackChanges);
 
 	// Update the bouding box
 	updateBoundingBox();
@@ -289,16 +289,16 @@ const std::vector<Adaption::Info> PatchKernel::balancePartition(bool trackChange
 	Internal function that tries to balance the computational load among the
 	processors moving redistributing the cells among the processors.
 
-	\result Returns a vector of Adaption::Info that can be used to track
+	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */
-const std::vector<Adaption::Info> PatchKernel::_balancePartition(bool trackChanges)
+const std::vector<adaption::Info> PatchKernel::_balancePartition(bool trackChanges)
 {
 	BITPIT_UNUSED(trackChanges);
 
 	log::cout() << "The patch does not implement a algortihm for balacing the partition" << std::endl;
 
-	return std::vector<Adaption::Info>();
+	return std::vector<adaption::Info>();
 }
 
 /*!
@@ -397,14 +397,14 @@ const std::unordered_map<long, long> & PatchKernel::getGhostExchangeData(short r
     \param[in] rcv_rank receiver rank
     \param[in] cell_list list of cells to be moved
  */
-Adaption::Info PatchKernel::sendCells(const unsigned short &snd_rank, const unsigned short &rcv_rank, const vector< long > &cell_list)
+adaption::Info PatchKernel::sendCells(const unsigned short &snd_rank, const unsigned short &rcv_rank, const vector< long > &cell_list)
 {
 
 // ========================================================================== //
 // SCOPE VARIABLES                                                            //
 // ========================================================================== //
 
-Adaption::Info adaptionInfo;
+adaption::Info adaptionInfo;
 
 // Debug variables
 /*DEBUG*/stringstream                           out_name;
@@ -713,8 +713,8 @@ if (m_rank == snd_rank)
         OBinaryStream           com_buff( buff_size );
 
         // Initialize adaption info ----------------------------------------- //
-        adaptionInfo.entity = Adaption::ENTITY_CELL;
-        adaptionInfo.type   = Adaption::TYPE_PARTITION_SEND;
+        adaptionInfo.entity = adaption::ENTITY_CELL;
+        adaptionInfo.type   = adaption::TYPE_PARTITION_SEND;
         adaptionInfo.rank   = rcv_rank;
 
         // Fill communication buffer ---------------------------------------- //
@@ -1191,8 +1191,8 @@ if (m_rank == rcv_rank)
         com_buff >> n_cells;
 
         // Initialize adaption info
-        adaptionInfo.entity = Adaption::ENTITY_CELL;
-        adaptionInfo.type   = Adaption::TYPE_PARTITION_RECV;
+        adaptionInfo.entity = adaption::ENTITY_CELL;
+        adaptionInfo.type   = adaption::TYPE_PARTITION_RECV;
         adaptionInfo.rank   = snd_rank;
 
         // Initialize communication buffer for feedback
@@ -1519,8 +1519,8 @@ if ( (m_rank != snd_rank) && (m_rank != rcv_rank) )
     if (waiting) {
 
         // Initialize adaption info
-        adaptionInfo.entity = Adaption::ENTITY_CELL;
-        adaptionInfo.type   = Adaption::TYPE_PARTITION_NOTICE;
+        adaptionInfo.entity = adaption::ENTITY_CELL;
+        adaptionInfo.type   = adaption::TYPE_PARTITION_NOTICE;
         adaptionInfo.rank   = snd_rank;
 
         // Receive buffer size

@@ -179,12 +179,12 @@ PatchKernel::~PatchKernel()
 /*!
 	Updates the patch
 
-	\result Returns a vector of Adaption::Info that can be used to track
+	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */
-const std::vector<Adaption::Info> PatchKernel::update(bool trackAdaption)
+const std::vector<adaption::Info> PatchKernel::update(bool trackAdaption)
 {
-	const std::vector<Adaption::Info> adaptionInfo = updateAdaption(trackAdaption);
+	const std::vector<adaption::Info> adaptionInfo = updateAdaption(trackAdaption);
 
 	updateBoundingBox();
 
@@ -194,12 +194,12 @@ const std::vector<Adaption::Info> PatchKernel::update(bool trackAdaption)
 /*!
 	Updates the adaption
 
-	\result Returns a vector of Adaption::Info that can be used to track
+	\result Returns a vector of adaption::Info that can be used to track
 	the changes done during the update.
 */
-const std::vector<Adaption::Info> PatchKernel::updateAdaption(bool trackAdaption)
+const std::vector<adaption::Info> PatchKernel::updateAdaption(bool trackAdaption)
 {
-	std::vector<Adaption::Info> adaptionInfo;
+	std::vector<adaption::Info> adaptionInfo;
 	if (!isAdaptionDirty(true)) {
 		return adaptionInfo;
 	}

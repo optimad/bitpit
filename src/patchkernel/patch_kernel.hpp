@@ -98,7 +98,7 @@ public:
 	bool reserveCells(size_t nCells);
 	bool reserveInterfaces(size_t nInterfaces);
 
-	const std::vector<Adaption::Info> update(bool trackAdaption = true);
+	const std::vector<adaption::Info> update(bool trackAdaption = true);
 
 	void markCellForRefinement(const long &id);
 	void markCellForCoarsening(const long &id);
@@ -227,7 +227,7 @@ public:
 	std::unordered_map<long, long> binSortVertex(int nBins = 128);
 
 	bool isAdaptionDirty(bool global = false) const;
-	const std::vector<Adaption::Info> updateAdaption(bool trackAdaption = true);
+	const std::vector<adaption::Info> updateAdaption(bool trackAdaption = true);
 
 	virtual void translate(std::array<double, 3> translation);
 	void translate(double sx, double sy, double sz);
@@ -265,13 +265,13 @@ public:
 	std::unordered_map<long, long> & getGhostExchangeData(short rank);
 	const std::unordered_map<long, long> & getGhostExchangeData(short rank) const;
 
-	const std::vector<Adaption::Info> partition(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackChanges);
-	const std::vector<Adaption::Info> partition(const std::vector<int> &cellRanks, bool trackChanges);
-	const std::vector<Adaption::Info> partition(MPI_Comm communicator, bool trackChanges);
-	const std::vector<Adaption::Info> partition(bool trackChanges);
-	const std::vector<Adaption::Info> balancePartition(bool trackChanges);
+	const std::vector<adaption::Info> partition(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackChanges);
+	const std::vector<adaption::Info> partition(const std::vector<int> &cellRanks, bool trackChanges);
+	const std::vector<adaption::Info> partition(MPI_Comm communicator, bool trackChanges);
+	const std::vector<adaption::Info> partition(bool trackChanges);
+	const std::vector<adaption::Info> balancePartition(bool trackChanges);
 
-	Adaption::Info sendCells(const unsigned short &, const unsigned short &, const std::vector<long> &);
+	adaption::Info sendCells(const unsigned short &, const unsigned short &, const std::vector<long> &);
 #endif
 
 protected:
@@ -299,7 +299,7 @@ protected:
 	bool deleteVertex(const long &id, bool delayed = false);
 	bool deleteVertices(const std::vector<long> &ids, bool delayed = false);
 
-	virtual const std::vector<Adaption::Info> _updateAdaption(bool trackAdaption) = 0;
+	virtual const std::vector<adaption::Info> _updateAdaption(bool trackAdaption) = 0;
 	virtual bool _markCellForRefinement(const long &id) = 0;
 	virtual bool _markCellForCoarsening(const long &id) = 0;
 	virtual bool _enableCellBalancing(const long &id, bool enabled) = 0;
@@ -320,7 +320,7 @@ protected:
 	void setGhostExchangeData(const std::unordered_map<short, std::unordered_map<long, long>> &ghostInfo);
 	void setGhostExchangeData(short rank, const std::unordered_map<long, long> &rankGhostInfo);
 
-	virtual const std::vector<Adaption::Info> _balancePartition(bool trackChanges);
+	virtual const std::vector<adaption::Info> _balancePartition(bool trackChanges);
 #endif
 
 private:

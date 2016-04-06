@@ -115,7 +115,7 @@ int main( int argc, char *argv[]){
 
     bitpit::LevelSetOctree          LSP(mesh);
     bitpit::LevelSetSegmentation    geometry(0,&STL);
-    std::vector<bitpit::Adaption::Info> mapper ;
+    std::vector<bitpit::adaption::Info> mapper ;
     std::vector<double>             LS ;
     std::vector<long>               SG ;
     std::vector<double>::iterator   itLS ;
