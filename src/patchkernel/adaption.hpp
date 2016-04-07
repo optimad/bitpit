@@ -26,6 +26,8 @@
 #define __BITPIT_ADAPTION_HPP__
 
 #include <vector>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace bitpit {
 
@@ -57,13 +59,46 @@ namespace adaption
 		{
 		}
 
+		Info(Type user_type, Entity user_entity, int user_rank = -1)
+			: type(user_type), entity(user_entity), rank(user_rank)
+		{
+		}
+
 		Type type;
 		Entity entity;
 		int rank;
 		std::vector<unsigned long> previous;
 		std::vector<unsigned long> current;
 	};
-};
+
+	class InfoCollection
+	{
+
+	public:
+		InfoCollection();
+
+		std::size_t create();
+		std::size_t create(Type type, Entity entity, int rank = -1);
+
+		Info & at(std::size_t id);
+		const Info & at(std::size_t id) const;
+
+		const std::vector<Info> & data() const noexcept;
+		std::vector<Info> & data() noexcept;
+
+		Info & operator[](std::size_t id);
+		const Info & operator[](std::size_t id) const;
+
+		std::vector<Info> dump();
+
+	private:
+		typedef std::tuple<int, int, int> infoData_t;
+
+		std::unordered_map<infoData_t, std::size_t, hashing::hash<infoData_t>> m_cache;
+		std::unordered_set<int> m_cachedTypes;
+		std::vector<Info> m_collection;
+	};
+}
 
 class PatchKernel;
 
