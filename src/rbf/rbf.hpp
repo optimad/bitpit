@@ -63,15 +63,14 @@ class RBF{
     double  (*m_fPtr)( const double &);
 
     
-    std::vector<std::vector<double>>    m_value ;
-    std::vector<std::vector<double>>    m_weight ;
-
     std::vector<bool>                   m_active ;
     std::vector<double>                 m_error ;
 
 	RBFType m_rbfType;
 	
 	protected:
+    std::vector<std::vector<double>>    m_value ;
+    std::vector<std::vector<double>>    m_weight ;
 	int m_maxFields; /**< fix the maximum number of fields that can be added to your class*/
 	std::vector<std::array<double,3>>   m_node ;
 	
