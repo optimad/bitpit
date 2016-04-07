@@ -124,6 +124,24 @@ int PatchKernel::getProcessorCount() const
 	Partitions the patch among the processors. Each cell will be assigned
 	to a specific processor according to the specified input.
 
+	\param communicator is the communicator that will be used
+	\param cellRanks are the ranks of the cells after the partitioning
+	\param trackChanges if set to true, the changes to the patche will be
+	tracked
+	\result Returns a vector of Adaption::Info that can be used to track
+	the changes done during the partitioning.
+*/
+const std::vector<Adaption::Info> PatchKernel::partition(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackChanges)
+{
+	setCommunicator(communicator);
+
+	return partition(cellRanks, trackChanges);
+}
+
+/*!
+	Partitions the patch among the processors. Each cell will be assigned
+	to a specific processor according to the specified input.
+
 	\param cellRanks are the ranks of the cells after the partitioning.
 	\param trackChanges if set to true, the changes to the patche will be
 	tracked

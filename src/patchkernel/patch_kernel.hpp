@@ -265,6 +265,7 @@ public:
 	std::unordered_map<long, long> & getGhostExchangeData(short rank);
 	const std::unordered_map<long, long> & getGhostExchangeData(short rank) const;
 
+	const std::vector<Adaption::Info> partition(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackChanges);
 	const std::vector<Adaption::Info> partition(const std::vector<int> &cellRanks, bool trackChanges);
 	Adaption::Info sendCells(const unsigned short &, const unsigned short &, const std::vector<long> &);
 #endif
