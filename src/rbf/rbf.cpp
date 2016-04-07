@@ -364,7 +364,6 @@ void RBF::setDataToAllNodes( const int &id, const std::vector<double> &value ){
 int RBF::addNode( const std::array<double,3> &node ){
 	m_node.push_back(node) ;
     m_active.push_back(true) ;
-
     m_nodes++ ;
     return m_nodes ;
 };
@@ -464,6 +463,8 @@ int RBF::addData( ){
  * In RBFType::INTERP mode data are meant as fields to be interpolated
  * @param[in] data values of weight/fields for each RBF node
  * @return id of data within the class
+ * Note: data vector is added even if its size is different from number of RBF nodes.
+ * To ensure consistency user may use fitDataToNodes().
  */
 int RBF::addData( const std::vector<double> & data ){
 
@@ -472,14 +473,18 @@ int RBF::addData( const std::vector<double> & data ){
 		return -1;
 	}
 	
-	if(data.size() != m_nodes){
-		std::cout<<"Mismatch dimension between data vector and actual RBF nodes count. This may lead to nasty errors."<<std::endl;
-		std::cout<<"Data could not be added"<<std::endl;
-		return(-1);
-	}
+//	if(data.size() != m_nodes){
+//		std::cout<<"Mismatch dimension between data vector and actual RBF nodes count. This may lead to nasty errors."<<std::endl;
+//		std::cout<<"Data could not be added"<<std::endl;
+//		return(-1);
+//	}
 	
-	if(m_rbfType == RBFType::PARAM)	m_weight.push_back(data) ;
-	if(m_rbfType == RBFType::INTERP)	m_value.push_back(data) ;
+	if(m_rbfType == RBFType::PARAM){
+		m_weight.push_back(data) ;
+	}
+	if(m_rbfType == RBFType::INTERP){
+		m_value.push_back(data) ;
+	}
 	m_fields++ ;
 	return m_fields ;
 };
@@ -690,8 +695,9 @@ bool RBF::greedy( const double &tolerance){
 
     for( i=0; i<m_nodes; ++i){
 
-        for( j=0; j<m_fields; ++j)
-            local[j] = m_value[j][i] ;
+        for( j=0; j<m_fields; ++j){
+        	local[j] = m_value[j][i] ;
+        }
 
         m_error[i] = norm2(local) ;
 
@@ -699,8 +705,6 @@ bool RBF::greedy( const double &tolerance){
 
     while( error > tolerance){
         i = addGreedyPoint() ;
-
-        std::cout << "added node " << i ;
 
         if( i != -1) {
             m_active[i] = true ;
@@ -751,9 +755,9 @@ void RBF::fitDataToNodes(){
  */
 void RBF::fitDataToNodes(int id){
 	
-	m_weight[id].resize(m_nodes);
+	m_weight[id].resize(m_nodes, 0.0);
 	if(m_rbfType == RBFType::INTERP){
-		m_value[id].resize(m_nodes);
+		m_value[id].resize(m_nodes, 0.0);
 	}
 }
 
