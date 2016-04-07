@@ -41,17 +41,6 @@ enum class RBFBasisFunction{
 };
 
 
-/*!
- * Enum Class defining type of behaviors handled by RBF object. 
- * INTERP flag activate usage of the class as a pure interpolator of given data fields
- * PARAM flag activate usage of RBF functions for spatial 1D/2D/3D parameterization purposes
- */
-enum class RBFType{
-	INTERP = 1,
-	PARAM  = 2
-};
-
-
 class RBF{
 
     private:
@@ -66,22 +55,17 @@ class RBF{
     std::vector<bool>                   m_active ;
     std::vector<double>                 m_error ;
 
-	RBFType m_rbfType;
-	
 	protected:
-    std::vector<std::vector<double>>    m_value ;
-    std::vector<std::vector<double>>    m_weight ;
-	int m_maxFields; /**< fix the maximum number of fields that can be added to your class*/
-	std::vector<std::array<double,3>>   m_node ;
+    std::vector<std::vector<double>>    m_value ;   /**< displ value to be interpolated on RBF nodes */ 
+    std::vector<std::vector<double>>    m_weight ;	/**< weight of your RBF interpolation */
+	int m_maxFields; 								/**< fix the maximum number of fields that can be added to your class*/
+	std::vector<std::array<double,3>>   m_node ;    /**< list of RBF nodes */
 	
     public:
     ~RBF();
-    RBF( RBFBasisFunction = RBFBasisFunction::WENDLANDC2, RBFType = RBFType::INTERP ) ;
+    RBF( RBFBasisFunction = RBFBasisFunction::WENDLANDC2 ) ;
 	RBF(const RBF & other);
 	RBF & operator=(const RBF & other);
-	
-	RBFType					whichType();
-	void					setType(RBFType);
 	
     void                    setFunction( const RBFBasisFunction & ) ;
     void                    setFunction( double (&funct)(const double &) ) ;
@@ -93,11 +77,11 @@ class RBF{
 
     bool                    isActive( const int &) ;
 
-	void					activateNode(const int &);
-	void					activateNode(const std::vector<int> &);
+	bool					activateNode(const int &);
+	bool					activateNode(const std::vector<int> &);
 	void					activateAllNodes();
-	void					deactivateNode(const int &);
-	void					deactivateNode(const std::vector<int> &);
+	bool					deactivateNode(const int &);
+	bool					deactivateNode(const std::vector<int> &);
 	void					deactivateAllNodes();
 	
     void                    setSupportRadius( const double & ) ;

@@ -351,13 +351,19 @@ int main() {
 		}
 		
 		double maxDim = 0.0;
+		std::array<double,3> span;
 		for(int i=0; i<3; ++i){
-			double temp = lims[i][1] - lims[i][0];
-			maxDim = std::max(maxDim, temp);
+			span[i] = lims[i][1] - lims[i][0];
+			maxDim = std::max(maxDim, span[i]);
 		}
 		
+		{
+		int index = 0;
 		for(auto && value : zDispl){
-			value = 0.5*maxDim*((double) (rand()) / RAND_MAX - 0.5);
+			//value = 0.5*maxDim*((double) (rand()) / RAND_MAX - 0.5);
+			value = 0.5*maxDim*(-1.0*controlNodes[index][0]/span[0] + 0.5);
+			++index;
+		}
 		}
 	}
 	
@@ -374,16 +380,16 @@ int main() {
 			RBFBasisFunction funct = RBFBasisFunction::WENDLANDC2;
 			
 			paraMorph.setFunction(funct);
-			paraMorph.setType(RBFType::PARAM);
 			
 			double maxVal;
 			maxval(zDispl, maxVal);
-            paraMorph.setSupportRadius( 2.0*maxVal ) ;
-			//paraMorph.setSupportRadius(1.0 ) ;
+            paraMorph.setSupportRadius( 10.0*maxVal ) ;
 			
 			std::vector<int> nIndex = paraMorph.addNode(controlNodes);
 			int wIndex = paraMorph.addData(zDispl);
 			
+			paraMorph.solve() ;
+			//paraMorph.greedy(0.001) ;
 			std::vector<double> disp ;
             for( auto & point : points){
                 disp = paraMorph.evalRBF(point) ;
