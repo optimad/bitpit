@@ -399,6 +399,66 @@ void vectorOperators_Ex(
 }
 
 // ================================================================================== //
+// OPERATOR "*="                                                                       //
+// ================================================================================== //
+{
+
+    // Output message
+    cout << "** operator*= for std::vector" << endl;
+
+    // Scope variables
+    double              a = 1, b = 2;
+    dvector1D           x, y, z;
+    dvector2D           X, Y, Z;
+
+    // Initialize vectors
+    x.resize(3, 1.0);
+    x[0] = 1.0;    x[1] = 2.0;    x[2] = 3.0;
+    y = x;
+    X.resize(3, dvector1D(2, 0.0));
+    X[0][0] = 1.0;    X[0][1] = 2.0;
+    X[1][0] = 3.0;    X[1][1] = 4.0;
+    X[2][0] = 5.0;    X[2][1] = 6.0;
+    Y = X;
+
+    // Variables
+    cout << "  Declared:" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    b = " << b << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
+    cout << "    X = ";
+    display(cout, X) << endl;
+    cout << "    Y = ";
+    display(cout, Y) << endl;
+
+    // Increment vectors
+    cout << "  Multiplication of 1D vector with 1D vector" << endl;
+    cout << "    x *= y, x = ";
+    x *= y;
+    display(cout, x) << endl;
+    cout << "  Multiplication of 2D vector with 2D vector" << endl;
+    cout << "    X *= Y, X = ";
+    X *= Y;
+    display(cout, X) << endl;
+    cout << "  Multiplication of 2D vector with 1D vector" << endl;
+    cout << "    X *= y, X = ";
+    X *= y;
+    display(cout, X) << endl;
+    cout << "  Multiplication of 1D vector with constant" << endl;
+    cout << "    x *= a, x = ";
+    x *= a;
+    display(cout, x) << endl;
+    cout << "  Multiplication of 2D vector with constant" << endl;
+    cout << "    X *= a, X = ";
+    X *= a;
+    display(cout, X) << endl;
+    cout << endl;
+}
+
+// ================================================================================== //
 // OPERATOR "/"                                                                       //
 // ================================================================================== //
 {
@@ -467,6 +527,65 @@ void vectorOperators_Ex(
     cout << endl;
 }
 
+// ================================================================================== //
+// OPERATOR "/="                                                                       //
+// ================================================================================== //
+{
+
+    // Output message
+    cout << "** operator/= for std::vector" << endl;
+
+    // Scope variables
+    double              a = 1, b = 2;
+    dvector1D           x, y, z;
+    dvector2D           X, Y, Z;
+
+    // Initialize vectors
+    x.resize(3, 1.0);
+    x[0] = 1.0;    x[1] = 2.0;    x[2] = 3.0;
+    y = x;
+    X.resize(3, dvector1D(2, 0.0));
+    X[0][0] = 1.0;    X[0][1] = 2.0;
+    X[1][0] = 3.0;    X[1][1] = 4.0;
+    X[2][0] = 5.0;    X[2][1] = 6.0;
+    Y = X;
+
+    // Variables
+    cout << "  Declared:" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    b = " << b << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
+    cout << "    X = ";
+    display(cout, X) << endl;
+    cout << "    Y = ";
+    display(cout, Y) << endl;
+
+    // Increment vectors
+    cout << "  Division of 1D vector with 1D vector" << endl;
+    cout << "    x /= y, x = ";
+    x /= y;
+    display(cout, x) << endl;
+    cout << "  Division of 2D vector with 2D vector" << endl;
+    cout << "    X /= Y, X = ";
+    X /= Y;
+    display(cout, X) << endl;
+    cout << "  Division of 2D vector with 1D vector" << endl;
+    cout << "    X /= y, X = ";
+    X /= y;
+    display(cout, X) << endl;
+    cout << "  Division of 1D vector with constant" << endl;
+    cout << "    x /= a, x = ";
+    x /= a;
+    display(cout, x) << endl;
+    cout << "  Division of 2D vector with constant" << endl;
+    cout << "    X /= a, X = ";
+    X /= a;
+    display(cout, X) << endl;
+    cout << endl;
+}
 // ================================================================================== //
 // OUTPUT MESSAGE                                                                     //
 // ================================================================================== //
@@ -1325,6 +1444,67 @@ void arrayOperators_Ex(
 }
 
 // ================================================================================== //
+// OPERATOR "*="                                                                      //
+// ================================================================================== //
+{
+
+    // Output message
+    cout << "** operator*= for std::array" << endl;
+
+    // Scope variables
+    double                              a = 1, b = 2;
+    array<double, 2>                    c, d;
+    array<double, 3>                    x, y;
+    array<array<double, 2>, 3>          X, Y;
+
+    // Initialize arrays
+    c[0] = 1.0;    c[1] = 2.0;
+    d = c;
+    x[0] = 1.0;    x[1] = 2.0;    x[2] = 3.0;
+    y = x;
+    X[0][0] = 1.0;    X[0][1] = 2.0;
+    X[1][0] = 3.0;    X[1][1] = 4.0;
+    X[2][0] = 5.0;    X[2][1] = 6.0;
+    Y = X;
+
+    // Variables
+    cout << "  Declared:" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    b = " << b << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
+    cout << "    X = ";
+    display(cout, X) << endl;
+    cout << "    Y = ";
+    display(cout, Y) << endl;
+
+    // Increment of arrays
+    cout << "  Multiplication of 1D array with 1D array" << endl;
+    cout << "    x *= y, x = ";
+    x *= y;
+    display(cout, x) << endl;
+    cout << "  Multiplication of 2D array with 2D array" << endl;
+    cout << "    X *= Y, X = ";
+    X *= Y;
+    display(cout, X) << endl;
+    cout << "  Multiplication of 2D array with 1D array" << endl;
+    cout << "    X *= y, X = ";
+    X *= c;
+    display(cout, X) << endl;
+    cout << "  Multiplication of 1D array with constant" << endl;
+    cout << "    x *= a, x = ";
+    x *= a;
+    display(cout, x) << endl;
+    cout << "  Multiplication of 2D array with constant" << endl;
+    cout << "    X *= a, X = ";
+    X *= a;
+    display(cout, X) << endl;
+    cout << endl;
+}
+
+// ================================================================================== //
 // OPERATOR "/"                                                                       //
 // ================================================================================== //
 {
@@ -1390,6 +1570,66 @@ void arrayOperators_Ex(
     cout << endl;
 }
 
+// ================================================================================== //
+// OPERATOR "/="                                                                      //
+// ================================================================================== //
+{
+
+    // Output message
+    cout << "** operator/= for std::array" << endl;
+
+    // Scope variables
+    double                              a = 1, b = 2;
+    array<double, 2>                    c, d;
+    array<double, 3>                    x, y;
+    array<array<double, 2>, 3>          X, Y;
+
+    // Initialize arrays
+    c[0] = 1.0;    c[1] = 2.0;
+    d = c;
+    x[0] = 1.0;    x[1] = 2.0;    x[2] = 3.0;
+    y = x;
+    X[0][0] = 1.0;    X[0][1] = 2.0;
+    X[1][0] = 3.0;    X[1][1] = 4.0;
+    X[2][0] = 5.0;    X[2][1] = 6.0;
+    Y = X;
+
+    // Variables
+    cout << "  Declared:" << endl;
+    cout << "    a = " << a << endl;
+    cout << "    b = " << b << endl;
+    cout << "    x = ";
+    display(cout, x) << endl;
+    cout << "    y = ";
+    display(cout, y) << endl;
+    cout << "    X = ";
+    display(cout, X) << endl;
+    cout << "    Y = ";
+    display(cout, Y) << endl;
+
+    // Increment of arrays
+    cout << "  Division of 1D array with 1D array" << endl;
+    cout << "    x /= y, x = ";
+    x /= y;
+    display(cout, x) << endl;
+    cout << "  Division of 2D array with 2D array" << endl;
+    cout << "    X /= Y, X = ";
+    X /= Y;
+    display(cout, X) << endl;
+    cout << "  Division of 2D array with 1D array" << endl;
+    cout << "    X /= y, X = ";
+    X /= c;
+    display(cout, X) << endl;
+    cout << "  Division of 1D array with constant" << endl;
+    cout << "    x /= a, x = ";
+    x /= a;
+    display(cout, x) << endl;
+    cout << "  Division of 2D array with constant" << endl;
+    cout << "    X /= a, X = ";
+    X /= a;
+    display(cout, X) << endl;
+    cout << endl;
+}
 // ================================================================================== //
 // OUTPUT MESSAGE                                                                     //
 // ================================================================================== //

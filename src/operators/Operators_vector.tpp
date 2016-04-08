@@ -876,6 +876,125 @@ z = y*x;
 
 return(z); };
 
+// Operator "*=" ==================================================================== //
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Operator*= for std::vector.
+
+    Increment each element in the input vector, using the corresping value
+    on vector at the r.h.s. as increment, i.e.:
+    x[i] *= y[i] for all i = 0, ..., n-1
+    where n = min(x.size(), y.size().
+    Template parameters, T, can by any type for which the operator*= is defined.
+
+    The element-wise increment is performed recursively, i.e. if the i-th element of x and
+    the i-th element of y are std::vector, operator*= calls itself
+    to increment x[i][j] by y[i][j], j = 0, ..., min(x[i].size(), y[i].size())-1
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result first argument incremented with r.h.s. values.
+*/
+template <class T>
+std::vector< T >& operator*= (
+  std::vector< T >                              &x,
+  const std::vector< T >                        &y
+) {
+
+    // ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+size_t                  n = std::min(x.size(), y.size());
+
+// ================================================================================== //
+// PERFORM SUM                                                                        //
+// ================================================================================== //
+for (size_t i = 0; i < n; i++){
+    x[i] *= y[i];
+};
+
+return (x); };
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Operator*= for std::vector.
+
+    Increment each element in the input vector, using the value
+    on the r.h.s. as increment, i.e.:
+    x[i] *= y for all i = 0, ..., n-1
+    where n = x.size().
+    Template parameters, T, can by any type for which the operator*= is defined.
+
+    The element-wise increment is performed recursively, i.e. if the i-th element of x and
+    y are std::vector, operator*= calls itself
+    to increment x[i][j] by y[j], j = 0, ... , min(x[i].size(), y.size())-1
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result first argument incremented with r.h.s. values.
+*/
+template <class T>
+std::vector< T >& operator*= (
+  std::vector< T >                              &x,
+  const T                                       &y
+) {
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+size_t              n = x.size();
+
+// ================================================================================== //
+// PERFORM SUM                                                                        //
+// ================================================================================== //
+for (size_t i = 0; i < n; i++){
+    x[i] *= y;
+};
+
+return (x); };
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Operator*= for std::vector.
+
+    Increment each element in the input vector, using the value
+    on the r.h.s. as increment, i.e.:
+    x[i][j] *= y for all j = 0, ..., x[i].size()-1, i = 0, ..., n-1
+    where n = x.size().
+    Template parameters, T, can by any type for which the operator*= is defined.
+
+    The element-wise increment is performed recursively, i.e. if x[i][j] and
+    y are std::vector, operator*= calls itself
+    to increment x[i][j][k] by y[k], k = 0, ... , min(x[i][j].size(), y.size())-1
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result first argument incremented with r.h.s. values.
+*/
+template <class T>
+std::vector< std::vector< T > >& operator*= (
+    std::vector< std::vector< T > >             &x,
+    const T                                     &y
+) {
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+size_t                  n = x.size();
+
+// ================================================================================== //
+// PERFORM SUM                                                                        //
+// ================================================================================== //
+for (size_t i = 0; i < n; i++) {
+    x[i] *= y;
+} //next i
+
+return (x); };
+
 // Operator "/" ===================================================================== //
 
 // ---------------------------------------------------------------------------------- //
@@ -1084,6 +1203,125 @@ for (size_t i = 0; i < n; i++) {
 }
 
 return(z); };
+
+// Operator "/=" ==================================================================== //
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Operator/= for std::vector.
+
+    Increment each element in the input vector, using the corresping value
+    on vector at the r.h.s. as increment, i.e.:
+    x[i] /= y[i] for all i = 0, ..., n-1
+    where n = min(x.size(), y.size().
+    Template parameters, T, can by any type for which the operator/= is defined.
+
+    The element-wise increment is performed recursively, i.e. if the i-th element of x and
+    the i-th element of y are std::vector, operator/= calls itself
+    to increment x[i][j] by y[i][j], j = 0, ..., min(x[i].size(), y[i].size())-1
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result first argument incremented with r.h.s. values.
+*/
+template <class T>
+std::vector< T >& operator/= (
+  std::vector< T >                              &x,
+  const std::vector< T >                        &y
+) {
+
+    // ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+size_t                  n = std::min(x.size(), y.size());
+
+// ================================================================================== //
+// PERFORM SUM                                                                        //
+// ================================================================================== //
+for (size_t i = 0; i < n; i++){
+    x[i] /= y[i];
+};
+
+return (x); };
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Operator/= for std::vector.
+
+    Increment each element in the input vector, using the value
+    on the r.h.s. as increment, i.e.:
+    x[i] /= y for all i = 0, ..., n-1
+    where n = x.size().
+    Template parameters, T, can by any type for which the operator/= is defined.
+
+    The element-wise increment is performed recursively, i.e. if the i-th element of x and
+    y are std::vector, operator/= calls itself
+    to increment x[i][j] by y[j], j = 0, ... , min(x[i].size(), y.size())-1
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result first argument incremented with r.h.s. values.
+*/
+template <class T>
+std::vector< T >& operator/= (
+  std::vector< T >                              &x,
+  const T                                       &y
+) {
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+size_t              n = x.size();
+
+// ================================================================================== //
+// PERFORM SUM                                                                        //
+// ================================================================================== //
+for (size_t i = 0; i < n; i++){
+    x[i] /= y;
+};
+
+return (x); };
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Operator/= for std::vector.
+
+    Increment each element in the input vector, using the value
+    on the r.h.s. as increment, i.e.:
+    x[i][j] /= y for all j = 0, ..., x[i].size()-1, i = 0, ..., n-1
+    where n = x.size().
+    Template parameters, T, can by any type for which the operator/= is defined.
+
+    The element-wise increment is performed recursively, i.e. if x[i][j] and
+    y are std::vector, operator/= calls itself
+    to increment x[i][j][k] by y[k], k = 0, ... , min(x[i][j].size(), y.size())-1
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result first argument incremented with r.h.s. values.
+*/
+template <class T>
+std::vector< std::vector< T > >& operator/= (
+    std::vector< std::vector< T > >             &x,
+    const T                                     &y
+) {
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+size_t                  n = x.size();
+
+// ================================================================================== //
+// PERFORM SUM                                                                        //
+// ================================================================================== //
+for (size_t i = 0; i < n; i++) {
+    x[i] /= y;
+} //next i
+
+return (x); };
 
 // Output operator ================================================================== //
 

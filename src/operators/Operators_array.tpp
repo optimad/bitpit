@@ -887,6 +887,122 @@ for (size_t i = 0; i < d; i++) {
 
 return(z); };
 
+// Operator "*=" ===================================================================== //
+  
+// ---------------------------------------------------------------------------------- //
+/*!
+    Operator*= for std::array.
+
+    Increment each element in the input array, using the corresping value
+    on array at the r.h.s. as increment, i.e.:
+    x[i] *= y[i] for all i = 0, ..., d-1
+    Template parameters, T, can by any type for which the operator+= is defined.
+
+    The element-wise increment is performed recursively, i.e. if the i-th element of x and
+    the i-th element of y are std::array, operator*= calls itself
+    to increment x[i][j] by y[i][j], j = 0, ..., x[i].size()-1
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result first argument incremented with r.h.s. values.
+*/
+template <class T, size_t d>
+std::array< T, d >& operator*= (
+  std::array< T, d >                            &x,
+  const std::array< T, d >                      &y
+) {
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+// none
+
+// ================================================================================== //
+// PERFORM SUM                                                                        //
+// ================================================================================== //
+for (size_t i = 0; i < d; i++){
+    x[i] *= y[i];
+};
+
+return (x); };
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Operator*= for std::array.
+
+    Increment each element in the input array, using the value
+    on the r.h.s. as increment, i.e.:
+    x[i] *= y for all i = 0, ..., d-1
+    Template parameters, T, can by any type for which the operator*= is defined.
+
+    The element-wise increment is performed recursively, i.e. if the i-th element of x and
+    y are std::array, operator*= calls itself
+    to increment x[i][j] by y[j], j = 0, ... , x[i].size()-1
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result first argument incremented with r.h.s. values.
+*/
+template <class T, size_t d>
+std::array< T, d >& operator*= (
+  std::array< T, d >                            &x,
+  const T                                       &y
+) {
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+// none
+
+// ================================================================================== //
+// PERFORM SUM                                                                        //
+// ================================================================================== //
+for (size_t i = 0; i < d; i++){
+    x[i] *= y;
+};
+
+return (x); };
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Operator*= for std::array.
+
+    Increment each element in the input array, using the value
+    on the r.h.s. as increment, i.e.:
+    x[i][j] *= y for all j = 0, ..., e-1, i = 0, ..., d-1
+    Template parameters, T, can by any type for which the operator*= is defined.
+
+    The element-wise increment is performed recursively, i.e. if x[i][j] and
+    y are std::array, operator*= calls itself
+    to increment x[i][j][k] by y[k], k = 0, ... , x.size()-1
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result first argument incremented with r.h.s. values.
+*/
+template <class T, size_t d, size_t e>
+std::array< std::array< T, e >, d >& operator*= (
+    std::array< std::array< T, e >, d >         &x,
+    const T                                     &y
+) {
+
+// ================================================================================== //
+// VARIABLES DECLARATION                                                              //
+// ================================================================================== //
+// none
+
+// ================================================================================== //
+// PERFORM SUM                                                                        //
+// ================================================================================== //
+for (size_t i = 0; i < d; i++) {
+    x[i] *= y;
+} //next i
+
+return (x); };
+
 // Operator "/" ===================================================================== //
 
 // ---------------------------------------------------------------------------------- //
@@ -1090,6 +1206,98 @@ for (size_t i = 0; i < d; i++) {
 }
 
 return(z); };
+
+// Operator "/=" ===================================================================== //
+  
+// ---------------------------------------------------------------------------------- //
+/*!
+    Operator/= for std::array.
+
+    Increment each element in the input array, using the corresping value
+    on array at the r.h.s. as increment, i.e.:
+    x[i] /= y[i] for all i = 0, ..., d-1
+    Template parameters, T, can by any type for which the operator/= is defined.
+
+    The element-wise increment is performed recursively, i.e. if the i-th element of x and
+    the i-th element of y are std::array, operator/= calls itself
+    to increment x[i][j] by y[i][j], j = 0, ..., x[i].size()-1
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result first argument incremented with r.h.s. values.
+*/
+template <class T, size_t d>
+std::array< T, d >& operator/= (
+  std::array< T, d >                            &x,
+  const std::array< T, d >                      &y
+) {
+
+for (size_t i = 0; i < d; i++){
+    x[i] /= y[i];
+};
+
+return (x); };
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Operator/= for std::array.
+
+    Increment each element in the input array, using the value
+    on the r.h.s. as increment, i.e.:
+    x[i] /= y for all i = 0, ..., d-1
+    Template parameters, T, can by any type for which the operator/= is defined.
+
+    The element-wise increment is performed recursively, i.e. if the i-th element of x and
+    y are std::array, operator/= calls itself
+    to increment x[i][j] by y[j], j = 0, ... , x[i].size()-1
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result first argument incremented with r.h.s. values.
+*/
+template <class T, size_t d>
+std::array< T, d >& operator/= (
+  std::array< T, d >                            &x,
+  const T                                       &y
+) {
+
+for (size_t i = 0; i < d; i++){
+    x[i] /= y;
+};
+
+return (x); };
+
+// ---------------------------------------------------------------------------------- //
+/*!
+    Operator/= for std::array.
+
+    Increment each element in the input array, using the value
+    on the r.h.s. as increment, i.e.:
+    x[i][j] /= y for all j = 0, ..., e-1, i = 0, ..., d-1
+    Template parameters, T, can by any type for which the operator/= is defined.
+
+    The element-wise increment is performed recursively, i.e. if x[i][j] and
+    y are std::array, operator/= calls itself
+    to increment x[i][j][k] by y[k], k = 0, ... , x.size()-1
+
+    \param[in] x first argument
+    \param[in] y second argument
+
+    \result first argument incremented with r.h.s. values.
+*/
+template <class T, size_t d, size_t e>
+std::array< std::array< T, e >, d >& operator/= (
+    std::array< std::array< T, e >, d >         &x,
+    const T                                     &y
+) {
+
+for (size_t i = 0; i < d; i++) {
+    x[i] /= y;
+} //next i
+
+return (x); };
 
 // Output operator ================================================================== //
 

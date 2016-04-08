@@ -173,6 +173,23 @@ std::vector< std::vector< T > > operator* (                                     
         const T                                 &                                     // 2nd argument (constant)
         );
 
+// Operator "*=" -------------------------------------------------------------------- //
+template <class T>
+std::vector<T>& operator*= (
+        std::vector<T> &,
+        const std::vector<T> &
+        );
+template <class T>
+std::vector<T>& operator*= (
+        std::vector<T> &,
+        const T &
+        );
+template <class T>
+std::vector< std::vector<T> >& operator*= (
+        std::vector< std::vector<T> > &,
+        const T &
+        );
+
 // Operator "/" --------------------------------------------------------------------- //
 template <class T>
 std::vector< T > operator/ (                                                          // ELEMENT-WISE DIVISION BETWEEN VECTORS
@@ -200,6 +217,22 @@ std::vector< std::vector< T > > operator/ (                                     
         const T                                 &                                     // 2nd argument (constant)
         );
 
+// Operator "/=" -------------------------------------------------------------------- //
+template <class T>
+std::vector<T>& operator/= (
+        std::vector<T> &,
+        const std::vector<T> &
+        );
+template <class T>
+std::vector<T>& operator/= (
+        std::vector<T> &,
+        const T &
+        );
+template <class T>
+std::vector< std::vector<T> >& operator/= (
+        std::vector< std::vector<T> > &,
+        const T &
+        );
 // Output operator ------------------------------------------------------------------ //
 template <class T>
 std::ostream& operator<< (                                                            // INSERTION OPERATOR
@@ -507,6 +540,23 @@ std::array<std::array<T, e>, d> operator* (                                     
         const T                                 &                                     // 2nd argument (constant)
         );
 
+// Operator "*=" -------------------------------------------------------------------- //
+template <class T, size_t d>
+std::array< T, d >& operator*= (                                                      // ELEMENT-WISE INCREMENT OF A ARRAY
+        std::array< T, d >                      &,                                    // 1st argument (std::array)
+        const std::array< T, d >                &                                     // 2nd argument (std::array)
+        );
+template <class T, size_t d>
+std::array< T, d >& operator*= (                                                      // ELEMENT-WISE INCREMENT OF A ARRAY
+        std::array< T, d >                      &,                                    // 1st argument (std::array)
+        const T                                 &                                     // 2nd argument (constant)
+        );
+template <class T, size_t d, size_t e>
+std::array< std::array< T, e >, d >& operator*= (                                     // ELEMENT-WISE INCREMENT OF A ARRAY
+        std::array< std::array< T, e >, d >     &,                                    // 1st argument (std::array)
+        const T                                 &                                     // 2nd argument (constant)
+        );
+
 // Operator "/" --------------------------------------------------------------------- //
 template <class T, size_t d>
 std::array<T, d> operator/ (                                                          // ELEMENT-WISE DIVISION BETWEEN ARRAYS
@@ -531,6 +581,23 @@ std::array<std::array<T, e>, d> operator/ (                                     
 template <class T, size_t d, size_t e>
 std::array<std::array<T, e>, d> operator/ (                                           // ELEMENT-WISE PRODUCT BETWEEN 2D ARRAY AND CONSTANT
         const std::array<std::array<T, e>, d>   &,                                    // 1st argument (std::array)
+        const T                                 &                                     // 2nd argument (constant)
+        );
+
+// Operator "/=" -------------------------------------------------------------------- //
+template <class T, size_t d>
+std::array< T, d >& operator/= (                                                      // ELEMENT-WISE INCREMENT OF A ARRAY
+        std::array< T, d >                      &,                                    // 1st argument (std::array)
+        const std::array< T, d >                &                                     // 2nd argument (std::array)
+        );
+template <class T, size_t d>
+std::array< T, d >& operator/= (                                                      // ELEMENT-WISE INCREMENT OF A ARRAY
+        std::array< T, d >                      &,                                    // 1st argument (std::array)
+        const T                                 &                                     // 2nd argument (constant)
+        );
+template <class T, size_t d, size_t e>
+std::array< std::array< T, e >, d >& operator/= (                                     // ELEMENT-WISE INCREMENT OF A ARRAY
+        std::array< std::array< T, e >, d >     &,                                    // 1st argument (std::array)
         const T                                 &                                     // 2nd argument (constant)
         );
 
