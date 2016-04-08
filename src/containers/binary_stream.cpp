@@ -332,6 +332,19 @@ OBinaryStream::OBinaryStream(
 
 // -------------------------------------------------------------------------- //
 /*!
+        Resize the buffer stream
+
+        \param[in] size is the new size (in bytes) of the stream
+
+*/
+void OBinaryStream::resize(
+    size_t                       size
+) {
+    buffer.resize(size);
+}
+
+// -------------------------------------------------------------------------- //
+/*!
         Open output stream
 
         \param[in] size stream size

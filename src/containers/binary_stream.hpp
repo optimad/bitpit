@@ -198,7 +198,10 @@ class OBinaryStream {
     ) = delete;
 
     // Public method(s) ================================================= //
-    void open(                                                            // Open output stream
+    void resize(                                                          // Resize stream
+        size_t                       size                                 // (input) new size (in bytes) of stream
+    );
+	void open(                                                            // Open output stream
         size_t                       size                                 // (input) stream size
     );
     void close(                                                           // Close output stream
