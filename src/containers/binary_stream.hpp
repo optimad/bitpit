@@ -119,6 +119,9 @@ class IBinaryStream {
 
     // Public method(s) ================================================= //
     public:
+    void resize(                                                          // Resize stream
+        size_t                       size                                 // (input) new size (in bytes) of stream
+    );
     void open(                                                            // Open input stream from memory location
         const char                  *mem,                                 // (input) pointer to memory location
         size_t                       size                                 // (input) size (in bytes) of memory chunk

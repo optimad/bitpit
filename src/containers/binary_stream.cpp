@@ -74,7 +74,7 @@ IBinaryStream::IBinaryStream(
     current_pos = 0;
     buffer.clear();
     buffer.reserve(size);
-    buffer.resize(size);
+    resize(size);
 }
 
 // -------------------------------------------------------------------------- //
@@ -120,6 +120,19 @@ IBinaryStream::IBinaryStream(
 // disabled
 
 // Public methods =========================================================== //
+
+// -------------------------------------------------------------------------- //
+/*!
+        Resize the buffer stream
+
+        \param[in] size is the new size (in bytes) of the stream
+
+*/
+void IBinaryStream::resize(
+    size_t                       size
+) {
+    buffer.resize(size);
+}
 
 // -------------------------------------------------------------------------- //
 /*!
