@@ -44,7 +44,7 @@ int main(int argc, char *argv[]) {
 	log::manager().initialize(log::COMBINED);
 	log::cout() << "Testing Cartesian patch" << "\n";
 
-	std::array<double, 3> origin = {-10., -10., -10.};
+	std::array<double, 3> origin = {{-10., -10., -10.}};
 	double length = 20;
 	double dh = 0.5;
 
