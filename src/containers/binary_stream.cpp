@@ -136,6 +136,19 @@ void IBinaryStream::resize(
 
 // -------------------------------------------------------------------------- //
 /*!
+        Size the buffer stream
+
+        \return The size of the buffer stream
+
+*/
+size_t IBinaryStream::size(
+    void
+) {
+    return buffer.size();
+}
+
+// -------------------------------------------------------------------------- //
+/*!
         Open stream from memory
 
         \param[in] mem pointer to memory location
