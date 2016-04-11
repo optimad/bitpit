@@ -127,20 +127,20 @@ SurfUnstructured                mesh(0);
     cout << "** Initializing mesh" << endl;
 
     // Place a triangle
-    vit = mesh.addVertex(array<double, 3>{0.0, 0.0, 0.0});
+    vit = mesh.addVertex(array<double, 3>{{0.0, 0.0, 0.0}});
     t_connect[0] = vit->getId();
     q_connect[0] = vit->getId();
-    vit = mesh.addVertex(array<double, 3>{1.0, 0.0, 0.0});
+    vit = mesh.addVertex(array<double, 3>{{1.0, 0.0, 0.0}});
     t_connect[1] = vit->getId();
     q_connect[3] = vit->getId();
-    vit = mesh.addVertex(array<double, 3>{0.0, 1.0, 0.0});
+    vit = mesh.addVertex(array<double, 3>{{0.0, 1.0, 0.0}});
     t_connect[2] = vit->getId();
     cit = mesh.addCell(ElementInfo::TRIANGLE, true, t_connect);
 
     // Place a quad
-    vit = mesh.addVertex(array<double, 3>{0.0, -1.0, 0.0});
+    vit = mesh.addVertex(array<double, 3>{{0.0, -1.0, 0.0}});
     q_connect[1] = vit->getId();
-    vit = mesh.addVertex(array<double, 3>{1.0, -1.0, 0.0});
+    vit = mesh.addVertex(array<double, 3>{{1.0, -1.0, 0.0}});
     q_connect[2] = vit->getId();
     cit = mesh.addCell(ElementInfo::QUAD, true, q_connect);
     
@@ -267,7 +267,7 @@ SurfUnstructured                mesh(0);
 {
     // Scope variables ------------------------------------------------------ //
     array<double, 3>             normal;
-    vector<array<double, 3>>     expected(2, array<double, 3>{0.0, 0.0, 1.0});
+    vector<array<double, 3>>     expected(2, array<double, 3>{{0.0, 0.0, 1.0}});
     int                          i;
 
     // Output message ------------------------------------------------------- //
@@ -378,8 +378,8 @@ SurfUnstructured                mesh(0);
     cout << "** Testing routines for cell's center eval" << endl;
 
     // Initialize ref. values ----------------------------------------------- //
-    expected_center[0] = array<double, 3>{1./3., 1./3., 0.};
-    expected_center[1] = array<double, 3>{0.5, -0.5, 0.};
+    expected_center[0] = array<double, 3>{{1./3., 1./3., 0.}};
+    expected_center[1] = array<double, 3>{{0.5, -0.5, 0.}};
 
     // Compute face normal -------------------------------------------------- //
     SurfUnstructured::CellIterator  cell_, end_ = mesh.cellEnd();
