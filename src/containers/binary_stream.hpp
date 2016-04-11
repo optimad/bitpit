@@ -204,6 +204,9 @@ class OBinaryStream {
     void resize(                                                          // Resize stream
         size_t                       size                                 // (input) new size (in bytes) of stream
     );
+    size_t size(                                                          // Size of the stream
+        void
+    );
 	void open(                                                            // Open output stream
         size_t                       size                                 // (input) stream size
     );

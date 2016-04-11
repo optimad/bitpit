@@ -358,6 +358,19 @@ void OBinaryStream::resize(
 
 // -------------------------------------------------------------------------- //
 /*!
+        Size the buffer stream
+
+        \return The size of the buffer stream
+
+*/
+size_t OBinaryStream::size(
+    void
+) {
+    return buffer.size();
+}
+
+// -------------------------------------------------------------------------- //
+/*!
         Open output stream
 
         \param[in] size stream size
