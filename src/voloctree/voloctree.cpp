@@ -1303,7 +1303,7 @@ long VolOctree::addCell(OctantInfo octantInfo,
 
 			// Update data of neighbours
 			long neighId = adjacencies[face][k];
-			if (neighId > 0) {
+			if (neighId >= 0) {
 				int neighFace;
 				if (ownsInterface) {
 					neighFace = interface.getNeighFace();
