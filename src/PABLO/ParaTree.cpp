@@ -1616,7 +1616,7 @@ ParaTree::getArea(Intersection* inter) {
 		Area = m_octree.extractGhostOctant(inter->m_owners[1]).getArea();
 	else
 		Area = m_octree.extractOctant(inter->m_owners[inter->m_finer]).getArea();
-	return m_trans.mapSize(Area);
+	return m_trans.mapArea(Area);
 }
 
 /*! Get the coordinates of the center of an intersection.
