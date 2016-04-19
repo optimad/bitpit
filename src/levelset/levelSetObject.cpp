@@ -57,6 +57,26 @@ int LSObject::getId( ) const {
 };
 
 /*!
+ * Writes LSObject to stream in binary format
+ * @param[in] stream output stream
+ */
+void LSObject::dump( std::fstream &stream ){
+    bitpit::genericIO::flushBINARY(stream, m_id) ;
+    dumpDerived(stream) ;
+    return;
+};
+
+/*!
+ * Reads LSObject from stream in binary format
+ * @param[in] stream output stream
+ */
+void LSObject::restore( std::fstream &stream ){
+    bitpit::genericIO::absorbBINARY(stream, m_id) ;
+    restoreDerived(stream) ;
+    return;
+};
+
+/*!
 	@ingroup    levelset
 	@class      LevelSetSegmentation
 	@brief      Implements visitor pattern fo segmentated geometries
@@ -695,5 +715,68 @@ void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, std::ve
 
 };
 
+/*!
+ * Writes LevelSetSegmentation to stream in binary format
+ * @param[in] stream output stream
+ */
+void LevelSetSegmentation::dumpDerived( std::fstream &stream ){
+
+    int                 s;
+    std::vector<long>   temp;
+
+    bitpit::PiercedVector<SegData>::iterator segItr, segEnd = m_segInfo.end() ;
+
+    bitpit::genericIO::flushBINARY( stream, (long) m_segInfo.size() ) ;
+    bitpit::genericIO::flushBINARY( stream, abs_tol ) ;
+
+    for( segItr = m_segInfo.begin(); segItr != segEnd; ++segItr){
+        s = segItr->m_segments.size() ;
+
+        temp.resize(s);
+        std::copy( segItr->m_segments.begin(), segItr->m_segments.end(), temp.begin() );
+
+        bitpit::genericIO::flushBINARY( stream, segItr.getId() );
+        bitpit::genericIO::flushBINARY( stream, s );
+        bitpit::genericIO::flushBINARY( stream, temp );
+        bitpit::genericIO::flushBINARY( stream, segItr->m_support );
+        bitpit::genericIO::flushBINARY( stream, segItr->m_checked );
+    }
+
+    return;
+};
+
+/*!
+ * Reads LevelSetSegmentation from stream in binary format
+ * @param[in] stream output stream
+ */
+void LevelSetSegmentation::restoreDerived( std::fstream &stream ){
+
+    int     s;
+    long    i, n, id;
+    SegData cellData ;
+    std::vector<long>   temp;
+
+    bitpit::genericIO::absorbBINARY( stream, n ) ;
+    bitpit::genericIO::absorbBINARY( stream, abs_tol ) ;
+
+    m_segInfo.reserve(n);
+
+    for( i=0; i<n; ++i){
+        bitpit::genericIO::absorbBINARY( stream, id );
+        bitpit::genericIO::absorbBINARY( stream, s );
+
+        temp.resize(s) ;
+        bitpit::genericIO::absorbBINARY( stream, temp );
+        bitpit::genericIO::absorbBINARY( stream, cellData.m_support );
+        bitpit::genericIO::absorbBINARY( stream, cellData.m_checked );
+
+        std::copy( temp.begin(), temp.end(), std::inserter( cellData.m_segments, cellData.m_segments.end() ) );
+
+        m_segInfo.insert(id,cellData) ;
+
+    }
+
+    return;
+};
 
 }

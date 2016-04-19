@@ -594,4 +594,63 @@ void LevelSet::clearAfterAdaption( std::vector<adaption::Info> &mapper, double &
     return ;
 };
 
+/*! 
+ * Writes LevelSet to stream in binary format
+ * @param[in] stream output stream
+ */
+void LevelSet::dump( std::fstream &stream ){
+
+    bitpit::PiercedVector<LSInfo>::iterator   infoItr, infoEnd = info.end() ;
+
+    bitpit::genericIO::flushBINARY(stream, RSearch);
+    bitpit::genericIO::flushBINARY(stream, m_userRSearch);
+
+    bitpit::genericIO::flushBINARY(stream, signedDF);
+    bitpit::genericIO::flushBINARY(stream, propagateS);
+    bitpit::genericIO::flushBINARY(stream, propagateV);
+
+    bitpit::genericIO::flushBINARY(stream, (long) info.size() ) ;
+
+    for( infoItr=info.begin(); infoItr!=infoEnd; ++infoItr){
+        bitpit::genericIO::flushBINARY(stream, infoItr.getId()) ;
+        bitpit::genericIO::flushBINARY(stream, infoItr->value) ;
+        bitpit::genericIO::flushBINARY(stream, infoItr->gradient) ;
+        bitpit::genericIO::flushBINARY(stream, infoItr->object) ;
+        bitpit::genericIO::flushBINARY(stream, infoItr->active) ;
+    };
+
+    return ;
+};
+
+/*! 
+ * Reads LevelSet from stream in binary format
+ * @param[in] stream output stream
+ */
+void LevelSet::restore( std::fstream &stream ){
+
+    long i, n, id;
+    LSInfo cellInfo;
+
+    bitpit::genericIO::absorbBINARY(stream, RSearch);
+    bitpit::genericIO::absorbBINARY(stream, m_userRSearch);
+
+    bitpit::genericIO::absorbBINARY(stream, signedDF);
+    bitpit::genericIO::absorbBINARY(stream, propagateS);
+    bitpit::genericIO::absorbBINARY(stream, propagateV);
+    bitpit::genericIO::absorbBINARY(stream, n ) ;
+    info.reserve(n);
+
+    for( i=0; i<n; ++i){
+        bitpit::genericIO::absorbBINARY(stream, id) ;
+        bitpit::genericIO::absorbBINARY(stream, cellInfo.value) ;
+        bitpit::genericIO::absorbBINARY(stream, cellInfo.gradient) ;
+        bitpit::genericIO::absorbBINARY(stream, cellInfo.object) ;
+        bitpit::genericIO::absorbBINARY(stream, cellInfo.active) ;
+        info.insert(id, cellInfo) ;
+    };
+
+    return ;
+};
+
+
 }

@@ -153,40 +153,59 @@ int main( int argc, char *argv[]){
 
     mesh.write() ;
 
-    //Refinement
+    std::fstream    file ;
+    file.open("levelset_004.dump", std::ios::out | std::ios::binary );
 
-    for( int i=0; i<3; ++i){
+    LSP.dump(file);
+    geometry.dump(file) ;
+    file.close();
 
-        std::cout << "refinement loop " << i << std::endl ;
-        std::cout << "refinement loop " << i << std::endl ;
-        std::cout << "refinement loop " << i << std::endl ;
+    {// dump levelset to file and restor into new class
 
-        for( auto & cell : mesh.getCells() ){
-            const long &id = cell.getId() ;
-            if( std::abs(LSP.getLS(id)) < 100. ){
-                mesh.markCellForRefinement(id) ;
+        bitpit::LevelSetOctree          LSP2(mesh);
+        bitpit::LevelSetSegmentation    geometry2(0,&STL);
+
+        std::fstream    file ;
+        file.open("levelset_004.dump", std::ios::in | std::ios::binary );
+
+        LSP2.restore(file);
+        geometry2.restore(file);
+
+
+        //Refinement
+        for( int i=0; i<3; ++i){
+
+            std::cout << "refinement loop " << i << std::endl ;
+            std::cout << "refinement loop " << i << std::endl ;
+            std::cout << "refinement loop " << i << std::endl ;
+
+            for( auto & cell : mesh.getCells() ){
+                const long &id = cell.getId() ;
+                if( std::abs(LSP.getLS(id)) < 100. ){
+                    mesh.markCellForRefinement(id) ;
+                }
             }
+
+            mapper = mesh.update(true) ;
+            start = std::chrono::system_clock::now();
+            LSP2.update( &geometry2, mapper) ;
+            end = std::chrono::system_clock::now();
+
+            elapsed_refi += chrono::duration_cast<chrono::milliseconds>(end-start).count();
+
+            LS.resize(mesh.getCellCount() ) ;
+            SG.resize(mesh.getCellCount() ) ;
+            itLS = LS.begin() ;
+            itSG = SG.begin() ;
+            for( auto & cell : mesh.getCells() ){
+                const long &id = cell.getId() ;
+                *itLS = LSP2.getLS(id) ;
+                *itSG = geometry2.getSupportSimplex(id) ;
+                ++itLS ;
+                ++itSG ;
+            };
+            mesh.write() ;
         }
-
-        mapper = mesh.update(true) ;
-        start = std::chrono::system_clock::now();
-        LSP.update( &geometry, mapper) ;
-        end = std::chrono::system_clock::now();
-
-        elapsed_refi += chrono::duration_cast<chrono::milliseconds>(end-start).count();
-
-        LS.resize(mesh.getCellCount() ) ;
-        SG.resize(mesh.getCellCount() ) ;
-        itLS = LS.begin() ;
-        itSG = SG.begin() ;
-        for( auto & cell : mesh.getCells() ){
-            const long &id = cell.getId() ;
-            *itLS = LSP.getLS(id) ;
-            *itSG = geometry.getSupportSimplex(id) ;
-            ++itLS ;
-            ++itSG ;
-        };
-        mesh.write() ;
     }
 
 

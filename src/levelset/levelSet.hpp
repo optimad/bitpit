@@ -124,6 +124,9 @@ class LevelSet{
     virtual void                                compute( LSObject * )=0 ;
     virtual void                                update( LSObject *, std::vector<adaption::Info> & )=0 ;
 
+    void                                        dump( std::fstream &);
+    void                                        restore( std::fstream &);
+
 };
 
 class LevelSetCartesian : public LevelSet{
@@ -194,6 +197,13 @@ class LSObject{
     virtual void                                computeLSInNarrowBand( LevelSetOctree *)=0 ;
 
     virtual void                                updateLSInNarrowBand( LevelSetOctree *, std::vector<adaption::Info> &, double &)=0 ;
+
+    virtual void                                dumpDerived( std::fstream &) =0 ;
+    virtual void                                restoreDerived( std::fstream &) =0 ;
+
+    public:
+    void                                        dump( std::fstream &) ;
+    void                                        restore( std::fstream &) ;
 };
 
 class LevelSetSegmentation : public LSObject {
@@ -232,6 +242,9 @@ class LevelSetSegmentation : public LSObject {
     const std::set<long> &                      getSimplexList(const long &) ;
     const long &                                getSupportSimplex(const long &) ;
     bool                                        isInNarrowBand( const long &) ;
+
+    void                                        dumpDerived( std::fstream &) ;
+    void                                        restoreDerived( std::fstream &) ;
 
     protected:
     std::vector<std::array<double,3>>           getSimplexVertices( const long & ) const ;
