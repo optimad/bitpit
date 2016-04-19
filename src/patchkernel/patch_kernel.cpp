@@ -435,7 +435,7 @@ bool PatchKernel::isAdaptionDirty(bool global) const
 #if BITPIT_ENABLE_MPI==1
 	if (global && isCommunicatorSet()) {
 		const auto &communicator = getCommunicator();
-		MPI_Allreduce(&m_adaptionDirty, &isDirty, 1, MPI_C_BOOL, MPI_LOR, communicator);
+		MPI_Allreduce(const_cast<bool *>(&m_adaptionDirty), &isDirty, 1, MPI_C_BOOL, MPI_LOR, communicator);
 	}
 #else
 	BITPIT_UNUSED(global);
@@ -2787,7 +2787,7 @@ bool PatchKernel::isBoundingBoxDirty(bool global) const
 #if BITPIT_ENABLE_MPI==1
 	if (global && isCommunicatorSet()) {
 		const auto &communicator = getCommunicator();
-		MPI_Allreduce(&m_boxDirty, &isDirty, 1, MPI_C_BOOL, MPI_LOR, communicator);
+		MPI_Allreduce(const_cast<bool *>(&m_boxDirty), &isDirty, 1, MPI_C_BOOL, MPI_LOR, communicator);
 	}
 #else
 	BITPIT_UNUSED(global);
