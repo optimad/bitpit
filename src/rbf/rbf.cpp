@@ -920,6 +920,7 @@ void RBF::solveLSQ(){
 	m_weight.resize(nrhs) ;
 	
 	for( j=0; j<nrhs; ++j){
+		m_weight[j].clear();
 		m_weight[j].resize(m_nodes,0);
 		
 		k=0 ;
