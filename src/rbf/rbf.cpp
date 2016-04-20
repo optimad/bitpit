@@ -158,11 +158,9 @@ void RBF::setFunction( double (&bfunc)(const double &) ){
  * In RBFType::PARAM mode data are meant as RBF weights
  * In RBFType::INTERP mode data are meant as fields to be interpolated
  * 
- * If no data are attached, returns -1.
  * @return  number of fields
  */
 int RBF::getDataCount(  ){
-	if(m_rbfType != RBFType::INTERP) return -1;
 	return m_fields ;
 };
 
