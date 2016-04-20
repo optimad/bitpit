@@ -320,7 +320,7 @@ list(APPEND BITPIT_MODULE_LIST "surfunstructured")
 list(APPEND BITPIT_MODULE_LIST "volcartesian")
 list(APPEND BITPIT_MODULE_LIST "voloctree")
 list(APPEND BITPIT_MODULE_LIST "volunstructured")
-list(APPEND BITPIT_MODULE_LIST "rbf")
+list(APPEND BITPIT_MODULE_LIST "RBF")
 list(APPEND BITPIT_MODULE_LIST "levelset")
 
 #------------------------------------------------------------------------------------#
@@ -383,7 +383,7 @@ set(${OPERATORS_MODULE_ENABLED} 1 CACHE INTERNAL "Request building operators mod
 #------------------------------------------------------------------------------------#
 
 isModuleEnabled("CG" MODULE_CG_ENABLED)
-isModuleEnabled("rbf" MODULE_RBF_ENABLED)
+isModuleEnabled("RBF" MODULE_RBF_ENABLED)
 if (MODULE_CG_ENABLED OR MODULE_RBF_ENABLED)
 	find_package(BLAS REQUIRED)
 	find_package(LAPACK REQUIRED)

@@ -27,9 +27,9 @@ cmake_minimum_required(VERSION 2.8)
 
 # List of tests
 set(TESTS "")
-list(APPEND TESTS "test_rbf_00001")
-list(APPEND TESTS "test_rbf_00002")
-list(APPEND TESTS "test_rbf_00003")
+list(APPEND TESTS "test_RBF_00001")
+list(APPEND TESTS "test_RBF_00002")
+list(APPEND TESTS "test_RBF_00003")
 
 set(RBF_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of serial tests fo the RBF module" FORCE)
 
@@ -37,7 +37,7 @@ set(RBF_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of serial tests fo the RBF 
 include_directories("${PROJECT_SOURCE_DIR}/src/common")
 include_directories("${PROJECT_SOURCE_DIR}/src/operators")
 include_directories("${PROJECT_SOURCE_DIR}/src/IO")
-include_directories("${PROJECT_SOURCE_DIR}/src/rbf")
+include_directories("${PROJECT_SOURCE_DIR}/src/RBF")
 
 set(TEST_TARGETS "")
 foreach(TEST_ENTRY IN LISTS RBF_TEST_ENTRIES)
@@ -51,7 +51,7 @@ foreach(TEST_ENTRY IN LISTS RBF_TEST_ENTRIES)
 endforeach()
 set(RBF_TEST_TARGETS "${TEST_TARGETS}" CACHE INTERNAL "List of test targets for the RBF module" FORCE)
 
-add_custom_target(tests-rbf DEPENDS ${TEST_TARGETS})
-add_custom_target(clean-tests-rbf COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
+add_custom_target(tests-RBF DEPENDS ${TEST_TARGETS})
+add_custom_target(clean-tests-RBF COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR})
 
 unset(TEST_TARGETS)

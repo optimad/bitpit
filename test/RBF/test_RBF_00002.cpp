@@ -1,5 +1,5 @@
 #include <iostream>
-#include <fstream> 
+#include <fstream>
 #include <vector>
 #include <array>
 #include <map>
