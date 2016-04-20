@@ -25,7 +25,7 @@
 
 #include <iostream>
 
-#include "rbf.hpp"
+#include "bitpit_RBF.hpp"
 
 using namespace std;
 

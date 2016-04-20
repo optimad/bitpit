@@ -5,9 +5,9 @@
 #include <map>
 #include <algorithm>
 
-#include "Operators.hpp"
-#include "VTK.hpp"
-#include "rbf.hpp"
+#include "bitpit_operators.hpp"
+#include "bitpit_IO.hpp"
+#include "bitpit_RBF.hpp"
 
 using namespace bitpit;
 
