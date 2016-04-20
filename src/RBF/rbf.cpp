@@ -544,8 +544,9 @@ std::vector<double> RBF::evalRBF( const std::array<double,3> &point){
 /*! 
  * Calculates the RBF weights using all currently active nodes and just given target fields. 
  * Regular LU solver for linear system A*X=B is employed (LAPACKE dgesv). 
+ * \return integer error flag . If 0-successfull computation, if 1-errors occurred
  */
-void RBF::solve(){
+int RBF::solve(){
 
     int  j, k ;
     double dist;
@@ -591,7 +592,7 @@ void RBF::solve(){
         printf( "The diagonal element of the triangular factor of a,\n" );
         printf( "U(%i,%i) is zero, so that a is singular;\n", info, info );
         printf( "the solution could not be computed.\n" );
-        exit( 1 );
+        return 1;
     }
 
 
@@ -610,16 +611,17 @@ void RBF::solve(){
 
     delete[] a;
     delete[] b;
-
+	
+	return 0;
 };
 
 /*! 
  * Determines effective set of nodes to be used using greedy algorithm and calculate weights on them.
  * Automatically choose which set of RBF nodes is active or not, according to the given tolerance.
  * @param[in] tolerance error tolerance for adding nodes
- * @return true if tolerance has been met, false if not enough nodes available
+ * @return integer error flag . If 0-successfull computation and tolerance met, if 1-errors occurred, not enough nodes
  */
-bool RBF::greedy( const double &tolerance){
+int RBF::greedy( const double &tolerance){
 	
     int                     i, j ;
     double                  error(1.e18) ;
@@ -655,12 +657,12 @@ bool RBF::greedy( const double &tolerance){
             std::cout << " error now " << error << " active nodes" << getActiveCount() << " / " << m_nodes << std::endl ;
             //std::cout << " error 621 " << m_error[621] << " error 564 " << m_error[564] << std::endl ;
         } else {
-            return false ;
+            return 1 ;
 
         };
     };
 
-    return true;
+    return 0;
 
 };
 
@@ -800,8 +802,9 @@ double RBF::evalError( ){
 /*! 
  * Calculates the RBF weights using all active nodes and just given target fields. 
  * Compute weights as solution of a linear least squares problem (LAPACKE dglsd).
+ * \return integer error flag . If 0-successfull computation, if 1-errors occurred 
  */
-void RBF::solveLSQ(){
+int RBF::solveLSQ(){
 	
 	int i, j, k ;
 	double dist;
@@ -847,7 +850,7 @@ void RBF::solveLSQ(){
 	info = LAPACKE_dgelsd( LAPACK_COL_MAJOR, nP, nR, nrhs, a, lda, b, ldb, s, rcond, &rank ) ;
 	
 	if( info > 0 ) {
-		exit( 1 );
+		return( 1 );
 	}
 	
 	
@@ -869,6 +872,7 @@ void RBF::solveLSQ(){
 	delete[] b;
 	delete[] s;
 	
+	return(0);
 };
 
 //RBF NAMESPACE UTILITIES 

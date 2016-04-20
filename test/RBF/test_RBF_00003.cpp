@@ -380,14 +380,17 @@ int main() {
 			
 			paraMorph.setFunction(funct);
 			
-			double maxVal;
+			double maxVal = 0.0;
 			maxval(zDispl, maxVal);
             paraMorph.setSupportRadius( 10.0*maxVal ) ;
 			
 			std::vector<int> nIndex = paraMorph.addNode(controlNodes);
-			paraMorph.addData(zDispl);
+			if(nIndex.size() != controlNodes.size())	return 1;
+			int nData = paraMorph.addData(zDispl);
+			if(nData != 1)	return 1;
 			
-			paraMorph.solve() ;
+			int err = paraMorph.solve() ;
+			if(err > 0 ) 	return 1;
 			//paraMorph.greedy(0.001) ;
 			std::vector<double> disp ;
             for( auto & point : points){

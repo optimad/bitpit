@@ -108,15 +108,15 @@ class RBF{
     std::vector<double>     evalRBF( const std::array<double,3> &) ;
 	double                  evalBasis( const double &) ;
 
-    void                    solve() ;
-	bool                    greedy( const double &) ;
+    int                    solve() ;
+	int                    greedy( const double &) ;
 
 protected:
 	
 	double                  evalError() ;
 	double                  initGreedy( const int &) ;
 	int                     addGreedyPoint() ;
-	void                    solveLSQ() ;	
+	int                     solveLSQ() ;	
 	
 };
 

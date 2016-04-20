@@ -354,7 +354,7 @@ int main() {
 
     for( int loop=0; loop<1; ++loop){
 
-        std::cout << loop << std::endl;
+        //std::cout << loop << std::endl;
 
         // introduce deformations
         ampl[0] = 0.0 ;
@@ -407,10 +407,12 @@ int main() {
             std::vector<int>    active ;
             std::map<int,int>   nodes ;
 
+			
             for( i=0; i<nP; ++i){
                 if( type[i] == 1 ){
                     j = meshMorph.addNode(points[i]) ;
-                    nodes.insert( std::pair<int,int>(j,i) ) ;
+					if(j != (nNodes+1)) return 1;
+					nodes.insert( std::pair<int,int>(j,i) ) ;
                     nNodes++ ;
                 }
             }
@@ -434,13 +436,15 @@ int main() {
                     //}
                 }
 
-                meshMorph.addData(values) ;
+                int nvalues = meshMorph.addData(values) ;
+				if(nvalues != k+1)	return 1;
             }
 
             meshMorph.setSupportRadius( 0.5 ) ;
             //meshMorph.solve() ;
-            meshMorph.greedy(0.00001) ;
-
+            int err = meshMorph.greedy(0.00001) ;
+			if(err>0)	return 1;
+			
             active.resize( nP );
 
             for( const auto &node : nodes ){
@@ -456,7 +460,7 @@ int main() {
                 point[1] += disp[1] ;
             };
 
-
+			std::cout<<"about to rewrite"<<std::endl;
             // output of deformed grid
             bitpit::VTKUnstructuredGrid   output( "./", "defGrid", bitpit::VTKElementType::PIXEL, points, connectivity );
             output.addData( "active", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, active ) ;

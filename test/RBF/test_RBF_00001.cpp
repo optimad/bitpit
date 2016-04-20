@@ -34,8 +34,10 @@ int main()
 
     bitpit::RBF     myRBF ;
 
-
-    std::cout   << myRBF.evalBasis(0.9) << std::endl ;
-    std::cout   << myRBF.evalBasis(1.1) << std::endl ;
-
+	bool check;
+	check =  (myRBF.evalBasis(0.9) > 0.0) && (myRBF.evalBasis(1.1) == 0);
+	std::cout<<"value basis RBD in 0.9  "<<myRBF.evalBasis(0.9)<<std::endl;
+	std::cout<<"value basis RBD in 1.1  "<<myRBF.evalBasis(1.1)<<std::endl;	
+	int err = (int)(!check);
+	return err;
 }
