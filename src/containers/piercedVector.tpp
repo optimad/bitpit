@@ -2345,7 +2345,7 @@ void PiercedVector<value_t, id_t>::setPosId(const std::size_t &pos, const id_t &
 		}
 
 		id_t previousId = m_ids[previousPos];
-		if (previousId == -1 || abs(previousId) == (pos - previousPos)) {
+		if (previousId == -1 || (size_t) abs(previousId) == (pos - previousPos)) {
 			break;
 		}
 
