@@ -7,6 +7,7 @@
 #include "bitpit_operators.hpp"
 #include "bitpit_IO.hpp"
 #include "bitpit_RBF.hpp"
+#include "bitpit_common.hpp"
 
 /*!
  * deformation by sine modulation
@@ -34,7 +35,7 @@ std::array<double,3> modulation( std::array<double,3> P, std::array<double,3> am
  * @return displacement vector
  */
 std::array<double,3> traslation( std::array<double,3> P, std::array<double,3> tras){
-
+	BITPIT_UNUSED(P);
     return tras;
 }
 
@@ -152,7 +153,6 @@ void createCMesh( std::vector< std::array<double,3> > &points, std::vector< std:
     double          delta_oriz, delta_vert ;
     double          expansion ;
 
-    std::array<double,3> origine ;
     double          altezza, base ;
 
 
@@ -267,7 +267,7 @@ void createCMesh( std::vector< std::array<double,3> > &points, std::vector< std:
             if( ypoints[i] <  altezza/2 ) body_end[1] = i   ;
         };
 
-        for( i=0; i<points.size(); i++){
+        for( i=0; i<(int)(points.size()); i++){
 
             index   = fromLinearToCartesian( i, np ) ;
             found   = false ;
@@ -325,20 +325,20 @@ int main() {
     std::vector< std::vector<int> >       connectivity ;
     std::vector< int >               type ;
 
-    int                         nP, nC ;
+    int                         nP;
 
     std::array<double,3>                        ampl, wave ;
     std::array<double,3>                        tras ;
     std::array<double,3>                        orig, vrot ;
     std::vector< std::array<double,3> >         deformation ;
 
-    int                         i, j, I_ ;
+    int                         i, j;
     std::array<double,3>                        P, tmp0, tmp1, tmp2 ;
 
     // create grid
     createCMesh( points, connectivity, type) ;
     nP = points.size() ;
-    nC = connectivity.size() ;
+    //nC = connectivity.size() ;
 
     deformation.resize( nP ) ;
 

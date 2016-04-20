@@ -285,7 +285,7 @@ void RBF::setDataToNode( const int &id, const std::vector<double> &value ){
 
 	if(id<0 || id >= m_fields) return;
 
-	if(value.size() != m_fields){
+	if((int)(value.size()) != m_fields){
 		std::cout<<"Mismatch dimension between value vector size and number of data attached to rbf.";
 		std::cout<<"This may lead to nasty errors. Check it with getDataCount()!"<<std::endl;
 		std::cout<<"Data could not be set"<<std::endl;
@@ -311,7 +311,7 @@ void RBF::setDataToAllNodes( const int &id, const std::vector<double> &value ){
 	
 	int size = m_value[id].size();
 	
-	if(value.size() != size){
+	if((int)(value.size()) != size){
 		std::cout<<"Mismatch dimension between data vector and current data container. One or both does not match RBF nodes count.";
 		std::cout<<"This may lead to nasty errors. Use fitDataToNodes to reshape container or fit your data vector first!"<<std::endl;
 		std::cout<<"Data could not be set"<<std::endl;
@@ -392,7 +392,7 @@ bool RBF::removeNode(std::vector<int> & list){
 			extracted++;
 			}	
 	}
-	return(extracted == list.size());
+	return(extracted == (int)(list.size()));
 };
 
 /*!
@@ -474,7 +474,7 @@ bool RBF::removeData(std::vector<int> & list){
 			extracted++;
 			}	
 	}
-	return(extracted == list.size());
+	return(extracted == (int)(list.size()));
 };
 
 /*!
@@ -547,7 +547,7 @@ std::vector<double> RBF::evalRBF( const std::array<double,3> &point){
  */
 void RBF::solve(){
 
-    int i, j, k ;
+    int  j, k ;
     double dist;
 
     int nS      = getActiveCount() ;
@@ -755,7 +755,8 @@ int RBF::addGreedyPoint( ){
  */
 double RBF::evalError( ){
 
-    int                     i(0), j(0), index ;
+    int                     i(0), j(0);
+	//int 					index ;
     double                  maxError(0), relError, realValue, norm;
     std::vector<double>     reconValues ;
 
@@ -779,7 +780,7 @@ double RBF::evalError( ){
 
         if( relError > maxError ){
             maxError = relError ;
-            index = i ;
+            //index = i ;
         }
 
 

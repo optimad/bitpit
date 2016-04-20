@@ -27,7 +27,7 @@ std::vector<std::array<double,2> > findBoundingBox(std::vector<std::array<double
 	lims[1][0] = lims[1][1] = cPoints[0][1];
 	lims[2][0] = lims[2][1] = cPoints[0][2];
 	
-	for (int i = 1; i < cPoints.size(); i++) {
+	for (int i = 1; i < (int)(cPoints.size()); i++) {
 		for(int loc=0; loc<3; ++loc){
 			lims[loc][0] = std::min(lims[loc][0], cPoints[i][loc]);
 			lims[loc][1] = std::max(lims[loc][1], cPoints[i][loc]);
@@ -138,7 +138,6 @@ void createCMesh( std::vector< std::array<double,3> > &points, std::vector< std:
     double          delta_oriz, delta_vert ;
     double          expansion ;
 
-    std::array<double,3> origine ;
     double          altezza, base ;
 
 
@@ -253,7 +252,7 @@ void createCMesh( std::vector< std::array<double,3> > &points, std::vector< std:
             if( ypoints[i] <  altezza/2 ) body_end[1] = i   ;
         };
 
-        for( i=0; i<points.size(); i++){
+        for( i=0; i<(int)(points.size()); i++){
 
             index   = fromLinearToCartesian( i, np ) ;
             found   = false ;
@@ -311,15 +310,15 @@ int main() {
     std::vector< std::vector<int> >       connectivity ;
     std::vector< int >               type ;
 
-    int                         nP, nC ;
+//    int                         nP, nC ;
 
     std::vector< std::array<double,3> >         controlNodes;
 	std::vector< double >         				zDispl ;
 	
     // create grid
     createCMesh( points, connectivity, type) ;
-    nP = points.size() ;
-    nC = connectivity.size() ;
+//     nP = points.size() ;
+//     nC = connectivity.size() ;
 	
 	int sizeCN =10;
 	controlNodes.resize( sizeCN) ;
@@ -369,7 +368,7 @@ int main() {
 	
 	{ // output of undeformed control cloud
 		std::vector<int> conn;
-		for(int i=0; i<controlNodes.size(); ++i) conn.push_back(i);
+		for(int i=0; i<(int)(controlNodes.size()); ++i) conn.push_back(i);
 		bitpit::VTKUnstructuredGrid   output( "./", "orgCPointCloud", bitpit::VTKElementType::VERTEX, controlNodes, conn);
 		output.write() ;
 	}
@@ -386,7 +385,7 @@ int main() {
             paraMorph.setSupportRadius( 10.0*maxVal ) ;
 			
 			std::vector<int> nIndex = paraMorph.addNode(controlNodes);
-			int wIndex = paraMorph.addData(zDispl);
+			paraMorph.addData(zDispl);
 			
 			paraMorph.solve() ;
 			//paraMorph.greedy(0.001) ;
@@ -403,11 +402,11 @@ int main() {
 	}
 	
 	{ // output of undeformed control cloud
-		for(int i=0; i<controlNodes.size(); ++i){
+		for(int i=0; i<(int)(controlNodes.size()); ++i){
 			controlNodes[i][2] += zDispl[i];
 		}
 		std::vector<int> conn;
-		for(int i=0; i<controlNodes.size(); ++i) conn.push_back(i);
+		for(int i=0; i<(int)(controlNodes.size()); ++i) conn.push_back(i);
 		
 		bitpit::VTKUnstructuredGrid   output( "./", "defCPointCloud", bitpit::VTKElementType::VERTEX, controlNodes, conn);
 		output.write() ;
