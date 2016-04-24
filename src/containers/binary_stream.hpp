@@ -112,11 +112,6 @@ class IBinaryStream {
     // Destructor(s) ==================================================== //
     // default
 
-    // Assignament operator(s) ========================================== //
-    const IBinaryStream& operator=(
-        const IBinaryStream           &istm
-    ) = delete;
-
     // Public method(s) ================================================= //
     public:
     void resize(                                                          // Resize stream
@@ -194,11 +189,6 @@ class OBinaryStream {
 
     // Destructor(s) ==================================================== //
     // none
-
-    // Assignement operator(s) ========================================== //
-    const OBinaryStream& operator=(
-        const OBinaryStream           &
-    ) = delete;
 
     // Public method(s) ================================================= //
     void resize(                                                          // Resize stream
