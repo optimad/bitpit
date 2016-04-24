@@ -861,12 +861,10 @@ adaption::Info PatchKernel::sendCells_sender(const unsigned short &rcv_rank, con
 /*DEBUG*/}
 
         // Notify other processes ------------------------------------------- //
-        int                     nproc;
-        MPI_Comm_size(m_communicator, &nproc);
-        for (j = 0; j < nproc; ++j) {
+        for (j = 0; j < m_nProcessors; ++j) {
             if ( (j != m_rank) && (j != rcv_rank) && (m_ghost2id.find(j) != m_ghost2id.end()) ) {
                 MPI_Send(&notification_size, 1, MPI_LONG, j, 8+j, m_communicator);
-                MPI_Send(notification.get_buffer(), notification_size, MPI_CHAR, j, 8+nproc+j, m_communicator);
+                MPI_Send(notification.get_buffer(), notification_size, MPI_CHAR, j, 8+m_nProcessors+j, m_communicator);
             }
         } //next j
     }
@@ -1558,7 +1556,6 @@ adaption::Info PatchKernel::sendCells_notified(const unsigned short &snd_rank, c
     /*DEBUG*/}
 
     bool                                                                waiting;
-    int                                                                 nproc;
     long                                                                buff_size;
     long                                                                n_cells;
     long                                                                i;
@@ -1567,7 +1564,6 @@ adaption::Info PatchKernel::sendCells_notified(const unsigned short &snd_rank, c
     unordered_map< short, unordered_map<long, long> >::const_iterator   m, e;
 
     // Check if something has to be received ================================ //
-    MPI_Comm_size(m_communicator, &nproc);
     waiting = false;
     e = m_ghost2id.cend();
     for (m = m_ghost2id.cbegin(); m != e; ++m) {
@@ -1591,7 +1587,7 @@ adaption::Info PatchKernel::sendCells_notified(const unsigned short &snd_rank, c
         IBinaryStream           buffer( buff_size );
 
         // Receive buffer
-        MPI_Recv(buffer.get_buffer(), buff_size, MPI_CHAR, snd_rank, 8 + nproc + m_rank, m_communicator, MPI_STATUS_IGNORE);
+        MPI_Recv(buffer.get_buffer(), buff_size, MPI_CHAR, snd_rank, 8 + m_nProcessors + m_rank, m_communicator, MPI_STATUS_IGNORE);
 
         // Update ghost list
 /*DEBUG*/{
