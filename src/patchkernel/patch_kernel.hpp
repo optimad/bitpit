@@ -349,6 +349,10 @@ private:
 #if BITPIT_ENABLE_MPI==1
 	MPI_Comm m_communicator;
         std::unordered_map<short, std::unordered_map<long, long> > m_ghost2id;
+
+    adaption::Info sendCells_sender(const unsigned short &rcv_rank, const std::vector<long> &cell_list);
+    adaption::Info sendCells_receiver(const unsigned short &snd_rank);
+    adaption::Info sendCells_notified(const unsigned short &snd_rank, const unsigned short &rcv_rank);
 #endif
 
 	VertexIterator createVertex(const std::array<double, 3> &coords, long id = Vertex::NULL_ID);

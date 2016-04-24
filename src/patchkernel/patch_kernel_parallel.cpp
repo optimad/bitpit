@@ -234,7 +234,6 @@ const std::vector<adaption::Info> PatchKernel::partition(const std::vector<int> 
 	a criteria that tries to balance the load among the processors.
 
 	\param communicator is the communicator that will be used
-	\param cellRanks are the ranks of the cells after the partitioning
 	\param trackChanges if set to true, the changes to the patche will be
 	tracked
 	\result Returns a vector of adaption::Info that can be used to track
@@ -388,10 +387,10 @@ const std::unordered_map<long, long> & PatchKernel::getGhostExchangeData(short r
 }
 
 /*!
-    Move cells with specified IDs from process with rank snd_rank (sender) to
-    process with rank rcv_rank (receiver).
-    If the rank the process currently hosting the mesh is neither the sender or
-    the receiver, a notification is received in case ghost cells has changed hosting.
+    Sends the specified list of cells from process with rank snd_rank (sender)
+    to process with rank rcv_rank (receiver). If the rank the process currently
+    hosting the mesh is neither the sender or the receiver, a notification is
+    received in case ghost cells has changed owner.
 
     \param[in] snd_rank sender rank
     \param[in] rcv_rank receiver rank
@@ -399,35 +398,46 @@ const std::unordered_map<long, long> & PatchKernel::getGhostExchangeData(short r
  */
 adaption::Info PatchKernel::sendCells(const unsigned short &snd_rank, const unsigned short &rcv_rank, const vector< long > &cell_list)
 {
+	adaption::Info adaptionInfo;
+	if (m_rank == snd_rank) {
+		adaptionInfo = sendCells_sender(rcv_rank, cell_list);
+	} else if (m_rank == rcv_rank) {
+		sendCells_receiver(snd_rank);
+	} else {
+		sendCells_notified(snd_rank, rcv_rank);
+	}
 
-// ========================================================================== //
-// SCOPE VARIABLES                                                            //
-// ========================================================================== //
+	return adaptionInfo;
+}
 
-adaption::Info adaptionInfo;
+/*!
+    Sends the given list of cells to the process with the specified rank.
 
-// Debug variables
-/*DEBUG*/stringstream                           out_name;
-/*DEBUG*/ofstream                               out;
-/*DEBUG*/high_resolution_clock::time_point      t0, t1;
-/*DEBUG*/duration<double>                       time_span;
-
-/*DEBUG*/{
-/*DEBUG*/    out_name << "DEBUG_rank_" << m_rank << ".log";
-/*DEBUG*/    out.open(out_name.str(), ifstream::app);
-/*DEBUG*/    out_name.str("");
-/*DEBUG*/    out << endl;
-/*DEBUG*/    out << "** RANK #" << m_rank << "** NEW COMMUNICATION **" << endl;
-/*DEBUG*/    out << endl;
-/*DEBUG*/}
-
-// ========================================================================== //
-// SENDER                                                                     //
-// ========================================================================== //
-if (m_rank == snd_rank)
+    \param[in] rcv_rank is the receiver rank
+    \param[in] cell_list is the list of cells to be sent
+ */
+adaption::Info PatchKernel::sendCells_sender(const unsigned short &rcv_rank, const vector< long > &cell_list)
 {
+	// ========================================================================== //
+	// SCOPE VARIABLES                                                            //
+	// ========================================================================== //
 
-    // Scope variables ====================================================== //
+	adaption::Info adaptionInfo;
+
+	// Debug variables
+	/*DEBUG*/stringstream                           out_name;
+	/*DEBUG*/ofstream                               out;
+	/*DEBUG*/high_resolution_clock::time_point      t0, t1;
+	/*DEBUG*/duration<double>                       time_span;
+
+	/*DEBUG*/{
+	/*DEBUG*/    out_name << "DEBUG_rank_" << m_rank << ".log";
+	/*DEBUG*/    out.open(out_name.str(), ifstream::app);
+	/*DEBUG*/    out_name.str("");
+	/*DEBUG*/    out << endl;
+	/*DEBUG*/    out << "** RANK #" << m_rank << "** NEW COMMUNICATION **" << endl;
+	/*DEBUG*/    out << endl;
+	/*DEBUG*/}
 
     // Variable required for communicators
     long                                        buff_size;
@@ -448,7 +458,7 @@ if (m_rank == snd_rank)
     unordered_map<long, long>                   vertex_map;
     
     // Initialize data structures =========================================== //
-/*DEBUG*/out << "* sender (rank#" << snd_rank << "), initializing data structure {" << endl;
+/*DEBUG*/out << "* sender (rank#" << m_rank << "), initializing data structure {" << endl;
 /*DEBUG*/t0 = high_resolution_clock::now();
     {
 
@@ -492,7 +502,7 @@ if (m_rank == snd_rank)
     // ghosts. Candidate ghosts are cell within the cell list (i.e. those
     // cells which will be sent to the receiver), which have at least one neighbour
     // which is a internal cell.
-/*DEBUG*/out << "* sender (rank#" << snd_rank << "), creating list of ghosts {" << endl;
+/*DEBUG*/out << "* sender (rank#" << m_rank << "), creating list of ghosts {" << endl;
 /*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
@@ -529,7 +539,7 @@ if (m_rank == snd_rank)
 
                 // Update ghost list for interior cells
                 if ( m_cells[neigh_idx].isInterior() ) {
-                    ghost_list.push_back( pair<long, pair<long, short> >(neigh_idx, pair<long, short>(neigh_idx, snd_rank) ) );
+                    ghost_list.push_back( pair<long, pair<long, short> >(neigh_idx, pair<long, short>(neigh_idx, m_rank) ) );
                     ghost_map[neigh_idx] = ghost_counter + n_cells;
                     ++ghost_counter;
                 }
@@ -600,7 +610,7 @@ if (m_rank == snd_rank)
 /*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Create list of vertices ============================================== //
-/*DEBUG*/out << "* sender (rank#" << snd_rank << "), creating list of vertices {" << endl;
+/*DEBUG*/out << "* sender (rank#" << m_rank << "), creating list of vertices {" << endl;
 /*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
@@ -659,7 +669,7 @@ if (m_rank == snd_rank)
 /*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Communicate vertices ================================================= //
-/*DEBUG*/out << "* sender (rank#" << snd_rank << "), communicating vertices {" << endl;
+/*DEBUG*/out << "* sender (rank#" << m_rank << "), communicating vertices {" << endl;
 /*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
@@ -692,7 +702,7 @@ if (m_rank == snd_rank)
 /*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Send cells =========================================================== //
-/*DEBUG*/out << "* sender (rank#" << snd_rank << "), communicating cells {" << endl;
+/*DEBUG*/out << "* sender (rank#" << m_rank << "), communicating cells {" << endl;
 /*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
@@ -854,7 +864,7 @@ if (m_rank == snd_rank)
         int                     nproc;
         MPI_Comm_size(m_communicator, &nproc);
         for (j = 0; j < nproc; ++j) {
-            if ( (j != snd_rank) && (j != rcv_rank) && (m_ghost2id.find(j) != m_ghost2id.end()) ) {
+            if ( (j != m_rank) && (j != rcv_rank) && (m_ghost2id.find(j) != m_ghost2id.end()) ) {
                 MPI_Send(&notification_size, 1, MPI_LONG, j, 8+j, m_communicator);
                 MPI_Send(notification.get_buffer(), notification_size, MPI_CHAR, j, 8+nproc+j, m_communicator);
             }
@@ -865,7 +875,7 @@ if (m_rank == snd_rank)
 /*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Send ghost cells ===================================================== //
-/*DEBUG*/out << "* sender (rank#" << snd_rank << "), communicating ghosts {" << endl;
+/*DEBUG*/out << "* sender (rank#" << m_rank << "), communicating ghosts {" << endl;
 /*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
@@ -897,7 +907,7 @@ if (m_rank == snd_rank)
             cell_ = &m_cells[ i->first ];
 
             // Modify cell ID in case of ghost on another process
-            if ( i->second.second != snd_rank ) {
+            if ( i->second.second != m_rank ) {
                 cell_idx = cell_->getId();
                 cell_->setId( i->second.first);
             }
@@ -962,7 +972,7 @@ if (m_rank == snd_rank)
 /*DEBUG*/   }
 
             // Restore original id
-            if ( i->second.second != snd_rank ) {
+            if ( i->second.second != m_rank ) {
                 cell_->setId( cell_idx );
             }
 
@@ -998,7 +1008,7 @@ if (m_rank == snd_rank)
     // if the cell with ID "i" is a ghost cell on the current rank, the cell 
     // exists on process with rank "neigh_rank" and hase ID "j" in that partition,
     // thus m_ghost2id[neigh_rank][j] stores "i".
-/*DEBUG*/out << "* sender (rank#" << snd_rank << "), updating ghosts lists {" << endl;
+/*DEBUG*/out << "* sender (rank#" << m_rank << "), updating ghosts lists {" << endl;
 /*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
@@ -1064,7 +1074,7 @@ if (m_rank == snd_rank)
 
 /*DEBUG*/{        
 // /*DEBUG*/    out << "  ghost2idx = {";
-// /*DEBUG*/    for (i = m_ghost2id[rcv_rank].begin(); i != m_ghost2id[snd_rank].end(); ++i) {
+// /*DEBUG*/    for (i = m_ghost2id[rcv_rank].begin(); i != m_ghost2id[m_rank].end(); ++i) {
 // /*DEBUG*/        out << " (" << i->first << ", " << i->second << ")";
 // /*DEBUG*/    }
 // /*DEBUG*/    out << " }" << endl << endl;
@@ -1077,7 +1087,7 @@ if (m_rank == snd_rank)
 /*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Remove isolated vertices ============================================= //
-/*DEBUG*/out << "* sender (rank#" << snd_rank << "), removing isolated vertices {" << endl << endl;
+/*DEBUG*/out << "* sender (rank#" << m_rank << "), removing isolated vertices {" << endl << endl;
 /*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
@@ -1092,20 +1102,43 @@ if (m_rank == snd_rank)
 
 /*DEBUG*/{
 /*DEBUG*/    ostream        *msg = reinterpret_cast<ostream*>(&out);
-/*DEBUG*/    out << "* stats (rank#" << snd_rank << "): " << endl;
+/*DEBUG*/    out << "* stats (rank#" << m_rank << "): " << endl;
 /*DEBUG*/    displayTopologyStats(*msg);
 /*DEBUG*/    out << endl;
-/*DEBUG*/    out << "* sender (rank #" << snd_rank << ") completed its tasks" << endl;
+/*DEBUG*/    out << "* sender (rank #" << m_rank << ") completed its tasks" << endl;
 /*DEBUG*/}
+
+    return adaptionInfo;
+
 }
 
-// ========================================================================== //
-// RECEIVER                                                                   //
-// ========================================================================== //
-if (m_rank == rcv_rank)
-{
+/*!
+    Recevies a list of cells from the specified processor.
 
-    // Scope variables ====================================================== //
+    \param[in] snd_rank is the rank of the processors sending the cells
+ */
+adaption::Info PatchKernel::sendCells_receiver(const unsigned short &snd_rank)
+{
+    // ========================================================================== //
+    // SCOPE VARIABLES                                                            //
+    // ========================================================================== //
+
+    adaption::Info adaptionInfo;
+
+    // Debug variables
+    /*DEBUG*/stringstream                           out_name;
+    /*DEBUG*/ofstream                               out;
+    /*DEBUG*/high_resolution_clock::time_point      t0, t1;
+    /*DEBUG*/duration<double>                       time_span;
+
+    /*DEBUG*/{
+    /*DEBUG*/    out_name << "DEBUG_rank_" << m_rank << ".log";
+    /*DEBUG*/    out.open(out_name.str(), ifstream::app);
+    /*DEBUG*/    out_name.str("");
+    /*DEBUG*/    out << endl;
+    /*DEBUG*/    out << "** RANK #" << m_rank << "** NEW COMMUNICATION **" << endl;
+    /*DEBUG*/    out << endl;
+    /*DEBUG*/}
 
     // Variables required for communication
     long                                        buff_size;
@@ -1122,7 +1155,7 @@ if (m_rank == rcv_rank)
     long                                        n_ghosts;
 
     // Receive vertices ===================================================== //
-/*DEBUG*/out << "* receiver (rank#" << rcv_rank << "), receiving vertices {" << endl;
+/*DEBUG*/out << "* receiver (rank#" << m_rank << "), receiving vertices {" << endl;
 /*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
@@ -1164,7 +1197,7 @@ if (m_rank == rcv_rank)
 /*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Receive cells ======================================================== //
-/*DEBUG*/out << "* receiver (rank#" << rcv_rank << "), receiving cells {" << endl;
+/*DEBUG*/out << "* receiver (rank#" << m_rank << "), receiving cells {" << endl;
 /*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
@@ -1283,7 +1316,7 @@ if (m_rank == rcv_rank)
 /*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Receive ghosts ======================================================= //
-/*DEBUG*/out << "* receiver (rank#" << rcv_rank << "), receiving ghosts {" << endl;
+/*DEBUG*/out << "* receiver (rank#" << m_rank << "), receiving ghosts {" << endl;
 /*DEBUG*/t0 = high_resolution_clock::now();
     {
 
@@ -1386,7 +1419,7 @@ if (m_rank == rcv_rank)
 /*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Update adjacencies =================================================== //
-/*DEBUG*/out << "* receiver (rank#" << rcv_rank << "), updating adjacencies {" << endl;
+/*DEBUG*/out << "* receiver (rank#" << m_rank << "), updating adjacencies {" << endl;
 /*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
@@ -1431,7 +1464,7 @@ if (m_rank == rcv_rank)
 /*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Remove duplicated vertices =========================================== //
-/*DEBUG*/out << "* receiver (rank#" << rcv_rank << "), removing duplicated vertices {" << endl;
+/*DEBUG*/out << "* receiver (rank#" << m_rank << "), removing duplicated vertices {" << endl;
 /*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
@@ -1450,7 +1483,7 @@ if (m_rank == rcv_rank)
 /*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
     // Update adjacencies =================================================== //
-/*DEBUG*/out << "* receiver (rank#" << rcv_rank << "), updating adjacencies {" << endl;
+/*DEBUG*/out << "* receiver (rank#" << m_rank << "), updating adjacencies {" << endl;
 /*DEBUG*/t0 = high_resolution_clock::now();
     {
         // Scope variables -------------------------------------------------- //
@@ -1484,21 +1517,46 @@ if (m_rank == rcv_rank)
 
 /*DEBUG*/{
 /*DEBUG*/    ostream        *msg = reinterpret_cast<ostream*>(&out);
-/*DEBUG*/    out << "* stats (rank#" << rcv_rank << "): " << endl;
+/*DEBUG*/    out << "* stats (rank#" << m_rank << "): " << endl;
 /*DEBUG*/    displayTopologyStats(*msg);
 /*DEBUG*/    out << endl;
-/*DEBUG*/    out << "* receiver (rank #" << rcv_rank << ") completed its tasks" << endl << endl;
+/*DEBUG*/    out << "* receiver (rank #" << m_rank << ") completed its tasks" << endl << endl;
 /*DEBUG*/}
+
+    return adaptionInfo;
 
 }
 
-// ========================================================================== //
-// NOTIFY OTHER PROCESS (MULTIPLE ADJACENCIES)                                //
-// ========================================================================== //
-if ( (m_rank != snd_rank) && (m_rank != rcv_rank) )
-{
+/*!
+    Notifies the current processor of changes in ghost ownership after a
+    cell send operation.
 
-    // Scope variables ====================================================== //
+    \param[in] snd_rank is the rank of the processor sending the cells
+    \param[in] rcv_rank is the rank of the processor receiving the cells
+ */
+adaption::Info PatchKernel::sendCells_notified(const unsigned short &snd_rank, const unsigned short &rcv_rank)
+{
+    // ========================================================================== //
+    // SCOPE VARIABLES                                                            //
+    // ========================================================================== //
+
+    adaption::Info adaptionInfo;
+
+    // Debug variables
+    /*DEBUG*/stringstream                           out_name;
+    /*DEBUG*/ofstream                               out;
+    /*DEBUG*/high_resolution_clock::time_point      t0, t1;
+    /*DEBUG*/duration<double>                       time_span;
+
+    /*DEBUG*/{
+    /*DEBUG*/    out_name << "DEBUG_rank_" << m_rank << ".log";
+    /*DEBUG*/    out.open(out_name.str(), ifstream::app);
+    /*DEBUG*/    out_name.str("");
+    /*DEBUG*/    out << endl;
+    /*DEBUG*/    out << "** RANK #" << m_rank << "** NEW COMMUNICATION **" << endl;
+    /*DEBUG*/    out << endl;
+    /*DEBUG*/}
+
     bool                                                                waiting;
     int                                                                 nproc;
     long                                                                buff_size;
@@ -1560,7 +1618,6 @@ if ( (m_rank != snd_rank) && (m_rank != rcv_rank) )
 /*DEBUG*/t1 = high_resolution_clock::now();
 /*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
 /*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
-}
 
 /*DEBUG*/{
 /*DEBUG*/    out << "* display mesh infos {" << endl;
@@ -1581,7 +1638,9 @@ if ( (m_rank != snd_rank) && (m_rank != rcv_rank) )
 /*DEBUG*/    out.close();
 /*DEBUG*/}
 
-return adaptionInfo; }
+    return adaptionInfo;
+
+}
 
 /*!
 	@}
