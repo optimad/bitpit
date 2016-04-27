@@ -80,6 +80,8 @@ public:
 
 	static const long NULL_ID;
 
+    unsigned int getBinarySize();
+
 	void display(std::ostream &out, unsigned short int indent) const;
 
 private:

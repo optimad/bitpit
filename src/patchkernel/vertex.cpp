@@ -284,6 +284,16 @@ void Vertex::display(std::ostream &out, unsigned short int indent) const
 	out << m_coords[2] << ")" << std::endl;
 }
 
+/*!
+        Returns the buffer size required to communicate vertex data
+
+        \result buffer size (in bytes)
+*/
+unsigned int Vertex::getBinarySize()
+{
+    return (m_coords.size() * sizeof(double));
+}
+
 // Explicit instantiation of the Vertex containers
 template class PiercedVector<Vertex>;
 

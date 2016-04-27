@@ -666,7 +666,10 @@ if (m_rank == snd_rank)
         vector<long>::const_iterator            i, e = vertex_list.cend();
         
         // Initialize communication buffer ---------------------------------- //
-        buff_size = 3 * n_vertex * sizeof(double) + sizeof(long);
+        buff_size = sizeof(long);
+        for ( i = vertex_list.cbegin(); i != e; ++i ) {
+            buff_size += m_vertices[*i].getBinarySize();
+        } //next i
         OBinaryStream                           com_buff( buff_size );
 
         // Stream coords to communication buffer ---------------------------- //
