@@ -224,7 +224,8 @@ public:
 	void addPointToBoundingBox(const std::array<double, 3> &point);
 	void removePointFromBoundingBox(const std::array<double, 3> &point, bool delayedBoxUpdate = false);
 
-	std::unordered_map<long, long> binSortVertex(int nBins = 128);
+	std::unordered_map<long, long> binSortVertex(PiercedVector<Vertex> vertices, int nBins = 128);
+    std::unordered_map<long, long> binSortVertex(int nBins = 128);
 
 	bool isAdaptionDirty(bool global = false) const;
 	const std::vector<adaption::Info> updateAdaption(bool trackAdaption = true);

@@ -2932,39 +2932,52 @@ void PatchKernel::removePointFromBoundingBox(const std::array<double, 3> &point,
 */
 std::unordered_map<long, long> PatchKernel::binSortVertex(int nBins)
 {
-	// ====================================================================== //
-	// VARIABLES DECLARATION                                                  //
-	// ====================================================================== //
+	return PatchKernel::binSortVertex(m_vertices, nBins);
+}
 
-	// Local variables
-	double                              dx, dy, dz;
+/*!
+    Sort specified vertices on regular bins.
 
-	// Counters
-	long                                i, j, k;
-	PiercedVector<Vertex>::iterator     V, E = m_vertices.end();
+    \param[in] vertices are the vertices to be sorted
+    \param[in] nBins (default = 128) is the number of bins (on each space
+    direction)
+    \result Returns the bin index associated to each vertex.
+*/
+std::unordered_map<long, long> PatchKernel::binSortVertex(PiercedVector<Vertex> vertices, int nBins)
+{
+    // ====================================================================== //
+    // VARIABLES DECLARATION                                                  //
+    // ====================================================================== //
 
-	// ====================================================================== //
-	// ASSOCIATE EACH VERTEX WITH A BIN                                       //
-	// ====================================================================== //
+    // Local variables
+    double                              dx, dy, dz;
 
-	// Update bounding box
-	updateBoundingBox();
+    // Counters
+    long                                i, j, k;
+    PiercedVector<Vertex>::iterator     V, E = vertices.end();
 
-	// Bin's spacing
-	dx = max(1.0e-12, m_boxMaxPoint[0] - m_boxMinPoint[0]) / ((double) nBins);
-	dy = max(1.0e-12, m_boxMaxPoint[1] - m_boxMinPoint[1]) / ((double) nBins);
-	dz = max(1.0e-12, m_boxMaxPoint[2] - m_boxMinPoint[2]) / ((double) nBins);
+    // ====================================================================== //
+    // ASSOCIATE EACH VERTEX WITH A BIN                                       //
+    // ====================================================================== //
 
-	// Loop over vertices
-	std::unordered_map<long, long> bin_index;
-	for (V = m_vertices.begin(); V != E; ++V) {
-		i = std::min(nBins - 1L, long((V->getCoords()[0] - m_boxMinPoint[0]) / dx));
-		j = std::min(nBins - 1L, long((V->getCoords()[1] - m_boxMinPoint[1]) / dy));
-		k = std::min(nBins - 1L, long((V->getCoords()[2] - m_boxMinPoint[2]) / dz));
-		bin_index[V->getId()] = nBins * nBins * k + nBins * j + i;
-	}
+    // Update bounding box
+    updateBoundingBox();
 
-	return bin_index;
+    // Bin's spacing
+    dx = max(1.0e-12, m_boxMaxPoint[0] - m_boxMinPoint[0]) / ((double) nBins);
+    dy = max(1.0e-12, m_boxMaxPoint[1] - m_boxMinPoint[1]) / ((double) nBins);
+    dz = max(1.0e-12, m_boxMaxPoint[2] - m_boxMinPoint[2]) / ((double) nBins);
+
+    // Loop over vertices
+    std::unordered_map<long, long> bin_index;
+    for (V = vertices.begin(); V != E; ++V) {
+        i = std::min(nBins - 1L, long((V->getCoords()[0] - m_boxMinPoint[0]) / dx));
+        j = std::min(nBins - 1L, long((V->getCoords()[1] - m_boxMinPoint[1]) / dy));
+        k = std::min(nBins - 1L, long((V->getCoords()[2] - m_boxMinPoint[2]) / dz));
+        bin_index[V->getId()] = nBins * nBins * k + nBins * j + i;
+    }
+
+    return bin_index;
 }
 
 /*!
