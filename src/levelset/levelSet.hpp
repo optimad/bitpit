@@ -211,8 +211,9 @@ class LevelSetSegmentation : public LSObject {
         SegData( ) ;
         SegData( const std::set<long> & ) ;
         SegData( const std::set<long> &, const long & ) ;
-
     };
+
+    int                                         m_dimension ;
 
     protected:
     SurfUnstructured                            *stl;           /**< surface Triangulation */

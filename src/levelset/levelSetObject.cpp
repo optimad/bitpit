@@ -104,6 +104,8 @@ LevelSetSegmentation::LevelSetSegmentation( int id, SurfUnstructured *STL) :LSOb
     stl = STL;
     abs_tol = 1.0e-12 ;
 
+    m_dimension = stl->getSpaceDimension() ;
+
 };
 
 /*!
@@ -115,6 +117,8 @@ LevelSetSegmentation::LevelSetSegmentation( const LevelSetSegmentation &other) :
 
     stl = other.stl; 
     abs_tol = other.abs_tol ;
+
+    m_dimension = other.m_dimension ;
 
 };
 
@@ -180,6 +184,10 @@ std::vector<std::array<double,3>> LevelSetSegmentation::getSimplexVertices( cons
         j = cell.getVertex(n) ;
         VS[n] = stl->getVertexCoords(j);
     };
+
+    if( N > 3){
+        log::cout() << "levelset: only segments and triangles supported in LevelSetSegmentation !!" << std::endl ;
+    }
 
     return VS;
 };
@@ -292,25 +300,25 @@ void LevelSetSegmentation::lsFromSimplex( LevelSet *visitee, const double &searc
 void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p,const  long &i, double &d, double &s, std::array<double,3> &x, std::array<double,3> &n ) const {
 
     std::vector<std::array<double,3>>   VS( getSimplexVertices(i) ) ;
-    int                                 where;
 
-    d = CGElem::distancePointSimplex( p, VS, x, where);
+    if( m_dimension == 2){
+        std::array<double,2> lambda ;
 
-    if (where == 0) {
-        n = stl->evalFacetNormal(i);
+        d= CGElem::distancePointSegment( p, VS[0], VS[1], x, lambda ) ;
+        n  = lambda[0] *stl->evalEdgeNormal(i,0) ;
+        n += lambda[1] *stl->evalEdgeNormal(i,1) ;
 
-    } else if (where > 0) {
-        n = stl->evalEdgeNormal(i,where-1) ;
+    } else {
+        std::array<double,3> lambda ;
 
-    } else if (where < 0) {
-        n = stl->evalVertexNormal(i,-where-1) ;
-    }
+        d= CGElem::distancePointTriangle( p, VS[0], VS[1], VS[2], x, lambda ) ;
+        n  = lambda[0] *stl->evalEdgeNormal(i,0) ;
+        n += lambda[1] *stl->evalEdgeNormal(i,1) ;
+        n += lambda[2] *stl->evalEdgeNormal(i,2) ;
+    };
 
     s = sign( dotProduct(n, p - x) );
 
-    if( d < abs_tol ){
-        n = s *(p - x) /d ; //TODO check
-    };
 
     return ;
 
