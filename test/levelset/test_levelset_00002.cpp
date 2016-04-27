@@ -105,14 +105,28 @@ int main( int argc, char *argv[]){
     std::cout << " - Exporting data" << std::endl;
     mesh.update() ;
     std::vector<double> LS(mesh.getCellCount() ) ;
-    std::vector<double>::iterator it = LS.begin() ;
-    for( auto & cell : mesh.getCells() ){
-        const long &id = cell.getId() ;
-        *it = LSP.getLS(id) ;
-        ++it ;
-    };
+    std::vector<std::array<double,3>> LG(mesh.getCellCount() ) ;
+
+    {
+        std::vector<double>::iterator it = LS.begin() ;
+        for( auto & cell : mesh.getCells() ){
+            const long &id = cell.getId() ;
+            *it = LSP.getLS(id) ;
+            ++it ;
+        };
+    }
+
+    {
+        std::vector<std::array<double,3>>::iterator it = LG.begin() ;
+        for( auto & cell : mesh.getCells() ){
+            const long &id = cell.getId() ;
+            *it = LSP.getGradient(id) ;
+            ++it ;
+        };
+    }
 
     mesh.addData("ls", VTKFieldType::SCALAR, VTKLocation::CELL, LS) ;
+    mesh.addData("lg", VTKFieldType::VECTOR, VTKLocation::CELL, LG) ;
     mesh.setName("levelset_002") ;
     mesh.write() ;
 

@@ -239,12 +239,11 @@ void LevelSetSegmentation::lsFromSimplex( LevelSet *visitee, const double &searc
                             lsInfoItr = visitee->info.reclaim(id) ;
                         }
 
-                        s       = signd *s + (!signd) *1.;
                         value   = d ;
 
                         lsInfoItr->object   = getId();
-                        lsInfoItr->value    = s *d; 
-                        lsInfoItr->gradient = s *n ;
+                        lsInfoItr->value    = ( signd *s  + (!signd) *1.) *d; 
+                        lsInfoItr->gradient = ( signd *1. + (!signd) *s ) *n ;
                         supp                = *it ;
                     }
 
