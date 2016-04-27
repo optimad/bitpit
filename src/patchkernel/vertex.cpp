@@ -38,6 +38,7 @@
 */
 bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &out_stream, const bitpit::Vertex &vertex)
 {
+    out_stream << vertex.m_id;
 	out_stream << vertex[0]
 		     << vertex[1]
 		     << vertex[2];
@@ -55,6 +56,7 @@ bitpit::OBinaryStream& operator<<(bitpit::OBinaryStream &out_stream, const bitpi
 */
 bitpit::IBinaryStream& operator>>(bitpit::IBinaryStream &in_stream, bitpit::Vertex &vertex)
 {
+    in_stream >> vertex.m_id;
 	in_stream >> vertex[0];
 	in_stream >> vertex[1];
 	in_stream >> vertex[2];
@@ -291,7 +293,7 @@ void Vertex::display(std::ostream &out, unsigned short int indent) const
 */
 unsigned int Vertex::getBinarySize()
 {
-    return (m_coords.size() * sizeof(double));
+    return (sizeof(m_id) + m_coords.size() * sizeof(double));
 }
 
 // Explicit instantiation of the Vertex containers
