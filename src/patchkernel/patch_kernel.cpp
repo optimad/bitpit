@@ -709,7 +709,7 @@ PatchKernel::VertexIterator PatchKernel::addVertex(Vertex &&source, long id)
 		id = source.getId();
 	}
 
-	VertexIterator iterator = createVertex(source.getCoords(), std::max(source.getId(), id));
+	VertexIterator iterator = createVertex(source.getCoords(), id);
 	Vertex &vertex = (*iterator);
 	id = vertex.getId();
 	vertex = std::move(source);
