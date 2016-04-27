@@ -2512,6 +2512,12 @@ ParaTree::getMaxDepth() const{
  */
 int
 ParaTree::findOwner(const uint64_t & morton) {
+	// Early return if the requested morton is on first partition
+	if (morton <= m_partitionLastDesc[0]) {
+		return 0;
+	}
+
+	// Find the partition using a bisection method
 	int p = -1;
 	int length = m_nproc;
 	int beg = 0;
