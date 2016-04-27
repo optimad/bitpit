@@ -24,6 +24,8 @@
 
 #include <limits>
 
+#include "bitpit_common.hpp"
+
 #include "vertex.hpp"
 
 /*!
@@ -115,7 +117,13 @@ Vertex::Vertex(const long &id, const std::array<double, 3> &coords)
 */
 bool Vertex::operator==(const Vertex &other)
 {
-	return (m_coords == other.m_coords);
+	for (int i = 0; i < 3; ++i) {
+		if (!utils::DoubleFloatingEqual()(m_coords[i], other.m_coords[i])) {
+			return false;
+		}
+	}
+
+	return true;
 }
 
 /*!
