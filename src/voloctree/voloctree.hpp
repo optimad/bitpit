@@ -179,10 +179,6 @@ private:
 	void deleteCell(long id);
 
 	const std::vector<adaption::Info> sync(bool trackChanges);
-
-#if BITPIT_ENABLE_MPI==1
-	void rebuildGhostExchangeData(std::unordered_map<int, std::vector<uint32_t>> ghostTreeIds);
-#endif
 };
 
 }

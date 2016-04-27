@@ -3409,21 +3409,11 @@ void PatchKernel::flushData(std::fstream &stream, VTKFormat format, std::string 
 		}
 #if BITPIT_ENABLE_MPI==1
 	} else if (name == "rank") {
-		std::unordered_map<long, int> ghostRank;
-		ghostRank.reserve(getGhostCount());
-
-		for (const auto &neighghostInfo : m_ghost2id) {
-			int rank = neighghostInfo.first;
-			for (const auto &neighGhost : neighghostInfo.second) {
-				ghostRank[neighGhost.second] = rank;
-			}
-		}
-
 		for (Cell &cell : m_cells) {
 			if (cell.isInterior()) {
 				genericIO::flushBINARY(stream, m_rank);
 			} else {
-				genericIO::flushBINARY(stream, ghostRank.at(cell.getId()));
+				genericIO::flushBINARY(stream, m_ghostOwners.at(cell.getId()));
 			}
 		}
 #endif

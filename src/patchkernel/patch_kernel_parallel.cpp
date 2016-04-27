@@ -301,11 +301,179 @@ const std::vector<adaption::Info> PatchKernel::_balancePartition(bool trackChang
 }
 
 /*!
+	Check if the processors associated to the specified rank is a neighbour.
+
+	\param rank is the rank associated to the processor
+	\result True is the processor is a neighbour, false otherwise.
+*/
+bool PatchKernel::isRankNeighbour(int rank)
+{
+	return (m_ghostExchangeTargets.count(rank) > 0);
+}
+
+/*!
+	Gets a reference to the ghost targets needed for data exchange.
+
+	\result A reference to the ghost targets needed for data exchange.
+*/
+std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostExchangeTargets()
+{
+	return m_ghostExchangeTargets;
+}
+
+/*!
+	Gets a constant reference to the ghost targets needed for data exchange.
+
+	\result A constant reference to the ghost targets needed for data
+	exchange.
+*/
+const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostExchangeTargets() const
+{
+	return m_ghostExchangeTargets;
+}
+
+/*!
+	Gets a reference to the ghost targets needed for data exchange for
+	the specified rank.
+
+	\param rank is the rank for which the information will be retreived
+	\result A reference to the ghost targets needed for data exchange for
+	the specified rank.
+*/
+std::vector<long> & PatchKernel::getGhostExchangeTargets(int rank)
+{
+	return m_ghostExchangeTargets.at(rank);
+}
+
+/*!
+	Gets a constant reference to the ghost targets needed for data
+	exchange for the specified rank.
+
+	\param rank is the rank for which the information will be retreived
+	\result A constant reference to the ghost targets needed for data
+	exchange for the specified rank.
+*/
+const std::vector<long> & PatchKernel::getGhostExchangeTargets(int rank) const
+{
+	return m_ghostExchangeTargets.at(rank);
+}
+
+/*!
+	Gets a reference to the ghost sources needed for data exchange.
+
+	\result A reference to the ghost sources needed for data exchange.
+*/
+std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostExchangeSources()
+{
+	return m_ghostExchangeSources;
+}
+
+/*!
+	Gets a constant reference to the ghost sources needed for data exchange.
+
+	\result A constant reference to the ghost sources needed for data
+	exchange.
+*/
+const std::unordered_map<int, std::vector<long>> & PatchKernel::getGhostExchangeSources() const
+{
+	return m_ghostExchangeSources;
+}
+
+/*!
+	Gets a reference to the ghost sources needed for data exchange for
+	the specified rank.
+
+	\param rank is the rank for which the information will be retreived
+	\result A reference to the ghost sources needed for data exchange for
+	the specified rank.
+*/
+std::vector<long> & PatchKernel::getGhostExchangeSources(int rank)
+{
+	return m_ghostExchangeSources.at(rank);
+}
+
+/*!
+	Gets a constant reference to the ghost sources needed for data
+	exchange for the specified rank.
+
+	\param rank is the rank for which the information will be retreived
+	\result A constant reference to the ghost sources needed for data
+	exchange for the specified rank.
+*/
+const std::vector<long> & PatchKernel::getGhostExchangeSources(int rank) const
+{
+	return m_ghostExchangeSources.at(rank);
+}
+
+/*!
+	Sets the owner of the specified ghost.
+
+	\param id is the id of the ghost cell
+	\param rank is the rank of the processors that owns the ghost cell
+	\param updateExchangeData if set to true exchange data will be updated
+*/
+void PatchKernel::setGhostOwner(int id, int rank, bool updateExchangeData)
+{
+	// Rebuild the exchange data information of the previous owner
+	if (updateExchangeData) {
+		if (m_ghostOwners.count(id) > 0) {
+			removeGhostFromExchangeTargets(id);
+		}
+	}
+
+	// Assign the owner to the cell
+	m_ghostOwners[id] = rank;
+
+	// Rebuild the exchange data information of the current owner
+	if (updateExchangeData) {
+		addGhostToExchangeTargets(id);
+	}
+}
+
+/*!
+	Unsets the owner of the specified ghost.
+
+	\param id is the id of the ghost cell
+	\param updateExchangeData if set to true exchange data will be updated
+*/
+void PatchKernel::unsetGhostOwner(int id, bool updateExchangeData)
+{
+	if (m_ghostOwners.count(id) <= 0) {
+		return;
+	}
+
+	// Rebuild the exchange data information of the previous owner
+	if (updateExchangeData) {
+		removeGhostFromExchangeTargets(id);
+	}
+
+	// Remove the owner
+	m_ghostOwners.erase(id);
+}
+
+/*!
+	Clear the owners of all the ghosts.
+
+	\param updateExchangeData if set to true exchange data will be updated
+*/
+void PatchKernel::clearGhostOwners(bool updateExchangeData)
+{
+	// Clear the owners
+	m_ghostOwners.clear();
+
+	// Clear exchange data
+	if (updateExchangeData) {
+		deleteGhostExchangeData();
+	}
+}
+
+/*!
 	Reset the ghost information needed for data exchange.
 */
-void PatchKernel::resetGhostExchangeData()
+void PatchKernel::deleteGhostExchangeData()
 {
-	m_ghost2id.clear();
+	m_ghostExchangeTargets.clear();
+	m_ghostExchangeSources.clear();
 }
 
 /*!
@@ -313,77 +481,172 @@ void PatchKernel::resetGhostExchangeData()
 
 	\param rank is the rank for which the information will be reset
 */
-void PatchKernel::resetGhostExchangeData(short rank)
+void PatchKernel::deleteGhostExchangeData(int rank)
 {
-	m_ghost2id.at(rank).clear();
+	if (!isRankNeighbour(rank)) {
+		return;
+	}
+
+	m_ghostExchangeTargets.erase(rank);
+	m_ghostExchangeSources.erase(rank);
 }
 
 /*!
-	Sets the ghost information needed for data exchange.
-
-	\param ghostInfo are the information that will be set
+	Builds the ghost information needed for data exchange.
 */
-void PatchKernel::setGhostExchangeData(const std::unordered_map<short, std::unordered_map<long, long>> &ghostInfo)
+void PatchKernel::buildGhostExchangeData()
 {
-	m_ghost2id = std::unordered_map<short, std::unordered_map<long, long>>(ghostInfo);
+	std::vector<long> ghosts;
+	for (const auto &entry : m_ghostOwners) {
+		long ghostId = entry.first;
+		ghosts.push_back(ghostId);
+	}
+
+	deleteGhostExchangeData();
+	addGhostsToExchangeTargets(ghosts);
 }
 
 /*!
-	Sets the ghost information needed for data exchange for the specified rank.
+	Builds the ghost information needed for data exchange for the specified
+	rank.
 
-	\param rankGhostInfo are the information that will be set for the specified
-	rank
+	\param rank is the rank for which the information will be built
 */
-void PatchKernel::setGhostExchangeData(short rank, const std::unordered_map<long, long> &rankGhostInfo)
+void PatchKernel::buildGhostExchangeData(int rank)
 {
-	m_ghost2id.at(rank) = std::unordered_map<long, long>(rankGhostInfo);
+	std::vector<long> ghosts;
+	for (const auto &entry : m_ghostOwners) {
+		int ghostRank = entry.second;
+		if (ghostRank != rank) {
+			continue;
+		}
+
+		long ghostId = entry.first;
+		ghosts.push_back(ghostId);
+	}
+
+	deleteGhostExchangeData(rank);
+	addGhostsToExchangeTargets(ghosts);
 }
 
 /*!
-	Gets a reference to the ghost information needed for data exchange.
+	Adds the specified ghosts to the exchange targets.
 
-	\result A reference to the ghost information needed for data exchange.
+	No check will be perfomed to ensure that
+
+	\param ghostIds are the ids of the ghosts that will be added
 */
-std::unordered_map<short, std::unordered_map<long, long>> & PatchKernel::getGhostExchangeData()
+void PatchKernel::addGhostsToExchangeTargets(const std::vector<long> &ghostIds)
 {
-	return m_ghost2id;
+	// Add the ghost to the targets
+	std::unordered_set<int> ranks;
+	for (const long ghostId : ghostIds) {
+		// Rank of the ghost
+		int rank = m_ghostOwners[ghostId];
+		ranks.insert(rank);
+
+		// Add the ghost to the targets
+		m_ghostExchangeTargets[rank].push_back(ghostId);
+	}
+
+	// Sort the targets
+	for (const int rank : ranks) {
+		std::vector<long> &rankTargets = m_ghostExchangeTargets[rank];
+		std::sort(rankTargets.begin(), rankTargets.end(), CellPositionLess(*this));
+		rankTargets.erase(std::unique(rankTargets.begin(), rankTargets.end()), rankTargets.end());
+	}
+
+	// Add the sources
+	addExchangeSources(ghostIds);
 }
 
 /*!
-	Gets a constant reference to the ghost information needed for data exchange.
+	Adds the specified ghost to the exchange list.
 
-	\result A constant reference to the ghost information needed for data
-	exchange.
+	\param ghostId is the id of the ghost that will be added
 */
-const std::unordered_map<short, std::unordered_map<long, long>> & PatchKernel::getGhostExchangeData() const
+void PatchKernel::addGhostToExchangeTargets(const long ghostId)
 {
-	return m_ghost2id;
+	addGhostsToExchangeTargets(std::vector<long>{ghostId});
 }
 
 /*!
-	Gets a reference to the ghost information needed for data exchange for
-	the specified rank.
+	Removes the specified ghosts from the exchange list.
 
-	\param rank is the rank for which the information will be retreived
-	\result A reference to the ghost information needed for data exchange for
-	the specified rank.
+	\param ghostIds are the ids of the ghosts that will be removed
 */
-std::unordered_map<long, long> & PatchKernel::getGhostExchangeData(short rank)
+void PatchKernel::removeGhostsFromExchangeTargets(const std::vector<long> &ghostIds)
 {
-	m_ghost2id.at(rank);
+	// Remove ghost from targets
+	std::unordered_set<int> ranks;
+	for (const long ghostId : ghostIds) {
+		// Rank of the ghost
+		int rank = m_ghostOwners[ghostId];
+		ranks.insert(rank);
+
+		// Remove targets
+		std::vector<long> &ghostTargets = m_ghostExchangeTargets[rank];
+		auto iterator = std::lower_bound(ghostTargets.begin(), ghostTargets.end(), rank, CellPositionLess(*this));
+		ghostTargets.erase(iterator);
+	}
+
+	// Rebuild information of the sources
+	for (const int rank : ranks) {
+		m_ghostExchangeSources[rank].clear();
+		addExchangeSources(m_ghostExchangeTargets[rank]);
+	}
 }
 
 /*!
-	Gets a constant reference to the ghost information needed for data
-	exchange for the specified rank.
+	Removes the specified ghost from the exchange list.
 
-	\param rank is the rank for which the information will be retreived
-	\result A constant reference to the ghost information needed for data
-	exchange for the specified rank.
+	\param ghostId id the id of the ghost that will be removed
 */
-const std::unordered_map<long, long> & PatchKernel::getGhostExchangeData(short rank) const
+void PatchKernel::removeGhostFromExchangeTargets(const long ghostId)
 {
-	m_ghost2id.at(rank);
+	removeGhostsFromExchangeTargets(std::vector<long>{ghostId});
+}
+
+/*!
+	Finds the internal cells that will be sources for the neighbour processors
+	that owns the specified ghost cells and add those cells to the sources
+	for that processor.
+
+	\param ghostIds are the ids of the ghosts
+*/
+void PatchKernel::addExchangeSources(const std::vector<long> &ghostIds)
+{
+	// Get the sources
+	std::unordered_map<int, std::unordered_set<long>> ghostSources;
+	for (long ghostId : ghostIds) {
+		// Owner of the ghost
+		int rank = m_ghostOwners[ghostId];
+
+		// The internal neighbourss will be sources for the rank
+		for (long neighId : findCellNeighs(ghostId)) {
+			const Cell &neigh = m_cells[neighId];
+			if (!neigh.isInterior()) {
+				continue;
+			}
+
+			ghostSources[rank].insert(neighId);
+		}
+	}
+
+	// Add the sources
+	for (auto entry : ghostSources) {
+		const std::unordered_set<long> &newSources = entry.second;
+
+		int rank = entry.first;
+		std::vector<long> &rankSources = m_ghostExchangeSources[rank];
+
+		bool removeDuplicates = (rankSources.size() > 0);
+		rankSources.insert(rankSources.end(), newSources.begin(), newSources.end());
+		std::sort(rankSources.begin(), rankSources.end(), CellPositionLess(*this));
+		if (removeDuplicates) {
+			rankSources.erase(std::unique(rankSources.begin(), rankSources.end()), rankSources.end());
+		}
+	}
 }
 
 /*!
@@ -1106,6 +1369,20 @@ adaption::Info PatchKernel::sendCells_sender(const unsigned short &rcv_rank, con
 /*DEBUG*/    out << "* sender (rank #" << m_rank << ") completed its tasks" << endl;
 /*DEBUG*/}
 
+	// Rebuild ghost information
+	clearGhostOwners(false);
+
+	for (auto &rankEntry : m_ghost2id) {
+		int rank = rankEntry.first;
+		for (auto &ghostEntry : rankEntry.second) {
+			long ghostId = ghostEntry.second;
+
+			setGhostOwner(ghostId, rank, false);
+		}
+	}
+
+	buildGhostExchangeData();
+
     return adaptionInfo;
 
 }
@@ -1521,6 +1798,20 @@ adaption::Info PatchKernel::sendCells_receiver(const unsigned short &snd_rank)
 /*DEBUG*/    out << "* receiver (rank #" << m_rank << ") completed its tasks" << endl << endl;
 /*DEBUG*/}
 
+	// Rebuild ghost information
+	clearGhostOwners(false);
+
+	for (auto &rankEntry : m_ghost2id) {
+		int rank = rankEntry.first;
+		for (auto &ghostEntry : rankEntry.second) {
+			long ghostId = ghostEntry.second;
+
+			setGhostOwner(ghostId, rank, false);
+		}
+	}
+
+	buildGhostExchangeData();
+
     return adaptionInfo;
 
 }
@@ -1633,6 +1924,20 @@ adaption::Info PatchKernel::sendCells_notified(const unsigned short &snd_rank, c
 /*DEBUG*/    out << "}" << endl;
 /*DEBUG*/    out.close();
 /*DEBUG*/}
+
+	// Rebuild ghost information
+	clearGhostOwners(false);
+
+	for (auto &rankEntry : m_ghost2id) {
+		int rank = rankEntry.first;
+		for (auto &ghostEntry : rankEntry.second) {
+			long ghostId = ghostEntry.second;
+
+			setGhostOwner(ghostId, rank, false);
+		}
+	}
+
+	buildGhostExchangeData();
 
     return adaptionInfo;
 

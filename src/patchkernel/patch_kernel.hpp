@@ -261,10 +261,16 @@ public:
 	int getRank() const;
 	int getProcessorCount() const;
 
-	std::unordered_map<short, std::unordered_map<long, long>> & getGhostExchangeData();
-	const std::unordered_map<short, std::unordered_map<long, long>> & getGhostExchangeData() const;
-	std::unordered_map<long, long> & getGhostExchangeData(short rank);
-	const std::unordered_map<long, long> & getGhostExchangeData(short rank) const;
+	bool isRankNeighbour(int rank);
+	std::unordered_map<int, std::vector<long>> & getGhostExchangeTargets();
+	const std::unordered_map<int, std::vector<long>> & getGhostExchangeTargets() const;
+	std::vector<long> & getGhostExchangeTargets(int rank);
+	const std::vector<long> & getGhostExchangeTargets(int rank) const;
+
+	std::unordered_map<int, std::vector<long>> & getGhostExchangeSources();
+	const std::unordered_map<int, std::vector<long>> & getGhostExchangeSources() const;
+	std::vector<long> & getGhostExchangeSources(int rank);
+	const std::vector<long> & getGhostExchangeSources(int rank) const;
 
 	const std::vector<adaption::Info> partition(MPI_Comm communicator, const std::vector<int> &cellRanks, bool trackChanges);
 	const std::vector<adaption::Info> partition(const std::vector<int> &cellRanks, bool trackChanges);
@@ -276,6 +282,73 @@ public:
 #endif
 
 protected:
+	/*!
+		Functional for compare the position of two cells
+	*/
+	struct CellPositionLess
+	{
+		CellPositionLess(PatchKernel &patch)
+			: m_patch(patch)
+		{
+		}
+
+		bool operator()(const long &id_1, const long &id_2) const
+		{
+			std::array<double, 3> centroid_1 = m_patch.evalCellCentroid(id_1);
+			std::array<double, 3> centroid_2 = m_patch.evalCellCentroid(id_2);
+
+			for (int k = 0; k < 3; ++k) {
+				if (std::abs(centroid_1[k] - centroid_2[k]) <= m_patch.getTol()) {
+					continue;
+				}
+
+				return centroid_1[k] < centroid_2[k];
+			}
+
+			// If we are here the two cell centroids coincide. It's not
+			// possible to define an order for the two cells.
+			std::ostringstream stream;
+			stream << "It was not possible to define an order for cells " << id_1 << " and " << id_2 << ". ";
+			stream << "The two cells have the same centroid.";
+			throw std::runtime_error (stream.str());
+		}
+
+		PatchKernel &m_patch;
+	};
+
+	/*!
+		Functional for compare the position of two cells
+	*/
+	struct CellPositionGreater
+	{
+		CellPositionGreater(PatchKernel &patch)
+			: m_patch(patch)
+		{
+		}
+
+		bool operator()(const long &id_1, const long &id_2) const
+		{
+			std::array<double, 3> centroid_1 = m_patch.evalCellCentroid(id_1);
+			std::array<double, 3> centroid_2 = m_patch.evalCellCentroid(id_2);
+
+			for (int k = 0; k < 3; ++k) {
+				if (std::abs(centroid_1[k] - centroid_2[k]) <= m_patch.getTol()) {
+					continue;
+				}
+
+				return centroid_1[k] > centroid_2[k];
+			}
+
+			// If we are here the two cell centroids coincide. It's not
+			// possible to define an order for the two cells.
+			std::ostringstream stream;
+			stream << "It was not possible to define an order for cells " << id_1 << " and " << id_2 << ". ";
+			stream << "The two cells have the same centroid.";
+			throw std::runtime_error (stream.str());
+		}
+
+		PatchKernel &m_patch;
+	};
 
 	PiercedVector<Vertex> m_vertices;
 	PiercedVector<Cell> m_cells;
@@ -315,13 +388,23 @@ protected:
 	void setExpert(bool expert);
 
 #if BITPIT_ENABLE_MPI==1
-	void resetGhostExchangeData();
-	void resetGhostExchangeData(short rank);
-
-	void setGhostExchangeData(const std::unordered_map<short, std::unordered_map<long, long>> &ghostInfo);
-	void setGhostExchangeData(short rank, const std::unordered_map<long, long> &rankGhostInfo);
-
 	virtual const std::vector<adaption::Info> _balancePartition(bool trackChanges);
+
+	void setGhostOwner(int id, int rank, bool updateExchangeData = false);
+	void unsetGhostOwner(int id, bool updateExchangeData = false);
+	void clearGhostOwners(bool updateExchangeData = false);
+
+	void deleteGhostExchangeData();
+	void deleteGhostExchangeData(int rank);
+
+	void buildGhostExchangeData();
+	void buildGhostExchangeData(int rank);
+
+	void addGhostsToExchangeTargets(const std::vector<long> &ghostIds);
+	void addGhostToExchangeTargets(const long ghostId);
+
+	void removeGhostsFromExchangeTargets(const std::vector<long> &ghostIds);
+	void removeGhostFromExchangeTargets(const long ghostId);
 #endif
 
 private:
@@ -349,6 +432,12 @@ private:
 #if BITPIT_ENABLE_MPI==1
 	MPI_Comm m_communicator;
         std::unordered_map<short, std::unordered_map<long, long> > m_ghost2id;
+
+	std::unordered_map<long, int> m_ghostOwners;
+	std::unordered_map<int, std::vector<long>> m_ghostExchangeTargets;
+	std::unordered_map<int, std::vector<long>> m_ghostExchangeSources;
+
+	void addExchangeSources(const std::vector<long> &ghostIds);
 
     adaption::Info sendCells_sender(const unsigned short &rcv_rank, const std::vector<long> &cell_list);
     adaption::Info sendCells_receiver(const unsigned short &snd_rank);

@@ -591,6 +591,8 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 	// Previous ghosts cells need to be removed
 	if (nPreviousGhosts > 0) {
+		clearGhostOwners(true);
+
 		std::size_t adaptionInfoId = -1;
 		if (trackChanges) {
 			adaptionInfoId = adaptionData.create(adaption::TYPE_DELETION, adaption::ENTITY_CELL, getRank());
@@ -619,13 +621,8 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	removedCells.shrink_to_fit();
 
 	// New ghost octants need to be added
-	std::unordered_map<int, std::vector<uint32_t>> ghostTreeIds;
 	for (uint32_t treeId = 0; treeId < (uint32_t) nGhostsOctants; ++treeId) {
 		newOctants.emplace_back(treeId, false);
-
-		uint64_t globalTreeId = m_tree.getGhostGlobalIdx(treeId);
-		int rank = m_tree.getOwnerRank(globalTreeId);
-		ghostTreeIds[rank].push_back(treeId);
 	}
 	newOctants.shrink_to_fit();
 #endif
@@ -732,7 +729,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 	// Rebuild the ghost information
 #if BITPIT_ENABLE_MPI==1
-	rebuildGhostExchangeData(ghostTreeIds);
+	buildGhostExchangeData();
 #endif
 
 	// Disable advanced editing
@@ -1071,7 +1068,7 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 
 		// Add cell
 		addCell(octantInfo, cellConnect, cellAdjacencies,
-			   cellInterfaces, cellInterfacesOwner);
+		        cellInterfaces, cellInterfacesOwner);
 	}
 
 	// Done
@@ -1321,6 +1318,16 @@ long VolOctree::addCell(OctantInfo octantInfo,
 			}
 		}
 	}
+
+	// If the cell is a ghost set its owner
+#if BITPIT_ENABLE_MPI==1
+	if (!octantInfo.internal) {
+		uint64_t globalTreeId = m_tree.getGhostGlobalIdx(octantInfo.id);
+		int rank = m_tree.getOwnerRank(globalTreeId);
+
+		setGhostOwner(id, rank, false);
+	}
+#endif
 
 	// Update cell to octant mapping
 	if (octantInfo.internal) {
