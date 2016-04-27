@@ -28,7 +28,10 @@
 // ========================================================================== //
 #include <mpi.h>
 #include <chrono>
-#include<unordered_set>
+#include <unordered_set>
+
+#include "bitpit_SA.hpp"
+
 #include "patch_kernel.hpp"
 
 // ========================================================================== //
@@ -650,24 +653,24 @@ void PatchKernel::addExchangeSources(const std::vector<long> &ghostIds)
 }
 
 /*!
-    Sends the specified list of cells from process with rank snd_rank (sender)
-    to process with rank rcv_rank (receiver). If the rank the process currently
+    Sends the specified list of cells from process with rank sendRank (sender)
+    to process with rank recvRank (receiver). If the rank the process currently
     hosting the mesh is neither the sender or the receiver, a notification is
     received in case ghost cells has changed owner.
 
-    \param[in] snd_rank sender rank
-    \param[in] rcv_rank receiver rank
-    \param[in] cell_list list of cells to be moved
+    \param[in] sendRank sender rank
+    \param[in] recvRank receiver rank
+    \param[in] cellsToSend list of cells to be moved
  */
-adaption::Info PatchKernel::sendCells(const unsigned short &snd_rank, const unsigned short &rcv_rank, const vector< long > &cell_list)
+adaption::Info PatchKernel::sendCells(const int &sendRank, const int &recvRank, const std::vector<long> &cellsToSend)
 {
 	adaption::Info adaptionInfo;
-	if (m_rank == snd_rank) {
-		adaptionInfo = sendCells_sender(rcv_rank, cell_list);
-	} else if (m_rank == rcv_rank) {
-		sendCells_receiver(snd_rank);
+	if (m_rank == sendRank) {
+		adaptionInfo = sendCells_sender(recvRank, cellsToSend);
+	} else if (m_rank == recvRank) {
+		adaptionInfo = sendCells_receiver(sendRank);
 	} else {
-		sendCells_notified(snd_rank, rcv_rank);
+		adaptionInfo = sendCells_notified(sendRank, recvRank);
 	}
 
 	return adaptionInfo;
@@ -676,1271 +679,706 @@ adaption::Info PatchKernel::sendCells(const unsigned short &snd_rank, const unsi
 /*!
     Sends the given list of cells to the process with the specified rank.
 
-    \param[in] rcv_rank is the receiver rank
-    \param[in] cell_list is the list of cells to be sent
+    \param[in] recvRank is the receiver rank
+    \param[in] cellsToSend is the list of cells to be sent
  */
-adaption::Info PatchKernel::sendCells_sender(const unsigned short &rcv_rank, const vector< long > &cell_list)
+adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vector<long> &cellsToSend)
 {
-	// ========================================================================== //
-	// SCOPE VARIABLES                                                            //
-	// ========================================================================== //
+    //
+    // Initialize adaption info
+    //
+    adaption::Info adaptionInfo;
+    adaptionInfo.entity = adaption::ENTITY_CELL;
+    adaptionInfo.type   = adaption::TYPE_PARTITION_SEND;
+    adaptionInfo.rank   = recvRank;
 
-	adaption::Info adaptionInfo;
+    //
+    // Create a set with the cells to communicate
+    //
+    // For now the set will contain the cells explicitly marked for sending.
+    // Later, a layer of surrounding cells will be added.
+    //
+    // Only internal cells can sent.
+    std::vector<long> cellsToCommunicate;
+    std::unordered_map<long, int> cellRankOnReceiver;
 
-	// Debug variables
-	/*DEBUG*/stringstream                           out_name;
-	/*DEBUG*/ofstream                               out;
-	/*DEBUG*/high_resolution_clock::time_point      t0, t1;
-	/*DEBUG*/duration<double>                       time_span;
+    cellsToCommunicate.reserve(cellsToSend.size());
+    cellRankOnReceiver.reserve(cellsToSend.size());
+    for (long cellId : cellsToSend) {
+		const Cell &cell = m_cells[cellId];
+		if (!cell.isInterior()) {
+			throw std::runtime_error ("Only internal cells can sent.");
+		}
 
-	/*DEBUG*/{
-	/*DEBUG*/    out_name << "DEBUG_rank_" << m_rank << ".log";
-	/*DEBUG*/    out.open(out_name.str(), ifstream::app);
-	/*DEBUG*/    out_name.str("");
-	/*DEBUG*/    out << endl;
-	/*DEBUG*/    out << "** RANK #" << m_rank << "** NEW COMMUNICATION **" << endl;
-	/*DEBUG*/    out << endl;
-	/*DEBUG*/}
-
-    // Variable required for communicators
-    long                                        buff_size;
-
-    // Variables required for cells communication
-    long                                        n_cells = cell_list.size();
-    unordered_map<long, long>                   cell_map;
-
-    // Variables required for ghosts communication
-    long                                        n_ghosts;
-    vector< pair<long, pair<long, short> > >    ghost_list;
-    unordered_map<long, long>                   ghost_map;
-    unordered_map<long, long>                   sender_ghost_new_ids;
-
-    // Variables required for vertex communication
-    long                                        n_vertex;
-    vector<long>                                vertex_list;
-    unordered_map<long, long>                   vertex_map;
-    
-    // Initialize data structures =========================================== //
-/*DEBUG*/out << "* sender (rank#" << m_rank << "), initializing data structure {" << endl;
-/*DEBUG*/t0 = high_resolution_clock::now();
-    {
-
-        // Scope variables -------------------------------------------------- //
-        long                                    cell_count = 0;
-        vector<long>::const_iterator            i, e = cell_list.cend();
-
-        // Initialize lists of cells for communication ---------------------- //
-        cell_count = 0;
-        for ( i = cell_list.cbegin(); i != e; ++i ) {
-            cell_map[ *i ] = cell_count;
-            ++cell_count;
-        } //next i
-
-/*DEBUG*/{
-/*DEBUG*/    out << "    sending " << n_cells;
-// /*DEBUG*/    out << " cell(s): " << cell_list
-/*DEBUG*/    out << endl;
-// /*DEBUG*/    out << "    cell_map: ";
-// /*DEBUG*/    unordered_map<long, long>::const_iterator      ii;
-// /*DEBUG*/    for (ii = cell_map.begin(); ii != cell_map.end(); ++ii) {
-// /*DEBUG*/        out << "(" << ii->first << "->" << ii->second << ") ";
-// /*DEBUG*/    }
-/*DEBUG*/    out << endl << endl;
-/*DEBUG*/}
-
-        // Initialize lists for ghost communication ------------------------- //
-        ghost_list.reserve( cell_list.size() );
-
-        // Initialize lists for vertex communication ------------------------ //
-        vertex_list.reserve( 4*cell_list.size() );
-
+		cellsToCommunicate.push_back(cellId);
+        cellRankOnReceiver.insert({{cellId, recvRank}});
     }
-/*DEBUG*/t1 = high_resolution_clock::now();
-/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
-/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
-    // Create list of ghosts ================================================ //
-    // The list of ghost stores the ghost cell already existing on the current
-    // rank (but not the ghost cells towards the receiver) and the candidate
-    // ghosts. Candidate ghosts are cell within the cell list (i.e. those
-    // cells which will be sent to the receiver), which have at least one neighbour
-    // which is a internal cell.
-/*DEBUG*/out << "* sender (rank#" << m_rank << "), creating list of ghosts {" << endl;
-/*DEBUG*/t0 = high_resolution_clock::now();
-    {
-        // Scope variables -------------------------------------------------- //
-        int                                     n_neighs;
-        int                                     k, j;
-        vector<long>                            neighs;
-        long                                    ghost_counter;
-        vector<long>::const_iterator            i, e;
-        unordered_map<short, unordered_map<long, long> >::const_iterator   m;
-        unordered_map<long, long>::const_iterator                          n;
-        unordered_map<long, bool>::const_iterator                          l;
-        unordered_map<long, long>::const_iterator                          ii, ee;
+    //
+    // Create the notifications of ownership change
+    //
+    // Processors that have, among their ghost, cells that will be sent to
+    // the receiver need to be notified about the ownership change. We will
+    // communicate to the neighbours only the index in the exchange data
+    // structure of the cells that have change ownership.
+    //
+    // We need to create the notification now that the set with the cells
+    // to communicate contains only the cells explicitly marked for sending.
+    std::unordered_map<int, std::vector<long>> ownershipNotifications;
+    for (const auto &rankExchangeData : getGhostExchangeSources()) {
+        int neighRank = rankExchangeData.first;
+		if (neighRank == recvRank) {
+			continue;
+		}
 
-        // Extract receiver's ghosts ---------------------------------------- //
-        ghost_counter = 0;
-        e = cell_list.cend();
-        for (i = cell_list.cbegin(); i < e; ++i) {
-            neighs = findCellNeighs(*i);
-            n_neighs = neighs.size();
-            for (k = 0; k < n_neighs; ++k) {
-                long neigh_idx = neighs[k];
+        std::vector<long> &notificationList = ownershipNotifications[neighRank];
 
-                // Discard cells that are internal for the receiver
-                if (cell_map.count(neigh_idx) > 0) {
-                    continue;
-                }
+        auto &rankExchangeSources = rankExchangeData.second;
+        int nRankExchangeSources = rankExchangeSources.size();
+        for (long k = 0; k < nRankExchangeSources; ++k) {
+            long cellId = rankExchangeSources[k];
+			if (cellRankOnReceiver.count(cellId) == 0) {
+                continue;
+            }
 
-                // Discard cells that are a ghost for the receiver
-                if ( find(m_ghost2id[rcv_rank].begin(),
-                          m_ghost2id[rcv_rank].end(),
-                          UnaryPredicate<const long, long>(neigh_idx) ) != m_ghost2id[rcv_rank].end() ) {
-                    continue;
-                }
-
-                // Update ghost list for interior cells
-                if ( m_cells[neigh_idx].isInterior() ) {
-                    ghost_list.push_back( pair<long, pair<long, short> >(neigh_idx, pair<long, short>(neigh_idx, m_rank) ) );
-                    ghost_map[neigh_idx] = ghost_counter + n_cells;
-                    ++ghost_counter;
-                }
-
-                // Update ghost list for ghost cells (w.r.t to another process)
-                else {
-                    for (m = m_ghost2id.begin(); m != m_ghost2id.end(); ++m) {
-                        n = find( m->second.begin(), m->second.end(), UnaryPredicate<const long, long>(neigh_idx) );
-                        if ( n != m->second.end() ) {
-                            ghost_list.push_back( pair<long, pair<long, short> >(neigh_idx, pair<long, short>(n->first, m->first) ) );
-                            ghost_map[neigh_idx] = ghost_counter + n_cells;
-                            ++ghost_counter;
-                        }
-                   } //next m
-                }
-	    }
+            notificationList.push_back(k);
+        }
 	}
-        n_ghosts = ghost_counter;
-/*DEBUG*/{
-/*DEBUG*/    out << "    sending " << n_ghosts;
-// /*DEBUG*/    out << " ghost(s): ";
-// /*DEBUG*/    vector< pair< long, pair<long, short> > >::iterator    kk;
-// /*DEBUG*/    for (kk = ghost_list.begin(); kk != ghost_list.end(); ++kk) {
-// /*DEBUG*/        out << "[" << kk->first << ", (" << kk->second.first << ", " << kk->second.second << ")], ";
-// /*DEBUG*/    } //next kk
-/*DEBUG*/    out << endl;
-// /*DEBUG*/    out << "    ghost_map: ";
-// /*DEBUG*/    unordered_map<long, long>::const_iterator ii;
-// /*DEBUG*/    for (ii = ghost_map.begin(); ii != ghost_map.end(); ++ii) {
-// /*DEBUG*/           out << "(" << ii->first << "->" << ii->second << ") ";
-// /*DEBUG*/    }
-/*DEBUG*/    out << endl << endl;
-/*DEBUG*/}
 
-        // Build list of sender's ghost with repsect to the recevider ------- //
-        //
-        // If the sender is sending all the cells, there's no point in finding
-        // sender's ghost: after the communication the sender will contain no
-        // cells, neither internal nor ghosts.
-        if (cell_list.size() < (unsigned long) m_nInternals) {
-            ee = ghost_map.cend();
-            for (ii = ghost_map.cbegin(); ii != ee; ++ii) {
-                const long recv_ghost_idx = ii->first;
-
-                // Sender ghosts can be identified as the sent cells that are
-                // neighbours of the receiver's ghosts and are not receiver's
-                // ghost themselves.
-                neighs = findCellNeighs(recv_ghost_idx);
-                n_neighs = neighs.size();
-                for (j = 0; j < n_neighs; ++j) {
-                    long send_guess_ghost = neighs[j];
-                    if ( sender_ghost_new_ids.count(send_guess_ghost) > 0 ) {
-                        continue;
-                    } else if ( ghost_map.count(send_guess_ghost) > 0 ) {
-                        continue;
-                    } else if ( cell_map.count(send_guess_ghost) == 0 ) {
-                        continue;
-                    }
-
-                    sender_ghost_new_ids.insert({{send_guess_ghost, Element::NULL_ID}});
-                }
-            }
-        }
-
-    }
-/*DEBUG*/t1 = high_resolution_clock::now();
-/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
-/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
-
-    // Create list of vertices ============================================== //
-/*DEBUG*/out << "* sender (rank#" << m_rank << "), creating list of vertices {" << endl;
-/*DEBUG*/t0 = high_resolution_clock::now();
-    {
-        // Scope variables -------------------------------------------------- //
-        int                                     j, n_vertices;
-        long                                    vertex_counter;
-        long                                    vertex_idx;
-        Cell                                   *cell_;
-        vector< long >::const_iterator          i, e = cell_list.cend();
-        vector< pair< long, pair< long, short > > >::const_iterator     ii, ee = ghost_list.cend();
-
-        // Extract vertex list from cells ----------------------------------- //
-        vertex_counter = 0;
-        for ( i = cell_list.cbegin(); i != e; ++i ) {
-            cell_ = &m_cells[*i];
-            n_vertices = cell_->getVertexCount();
-            for ( j = 0; j < n_vertices; ++j ) {
-                vertex_idx = cell_->getVertex( j );
-                if ( vertex_map.count(vertex_idx) == 0 ) {
-                    vertex_list.push_back(vertex_idx);
-                    vertex_map[vertex_idx] = vertex_counter;
-                    ++vertex_counter;
-                }
-            } //next j
-        } //next i
-
-        // Extract vertex list from ghosts ---------------------------------- //
-        for ( ii = ghost_list.cbegin(); ii != ee; ++ii ) {
-            cell_ = &m_cells[ii->first];
-            n_vertices = cell_->getVertexCount();
-            for ( j = 0; j < n_vertices; ++j ) {
-                vertex_idx = cell_->getVertex( j );
-                if ( vertex_map.count(vertex_idx) == 0 ) {
-                    vertex_list.push_back(vertex_idx);
-                    vertex_map[vertex_idx] = vertex_counter;
-                    ++vertex_counter;
-                }
-            } //next j
-        } //next i
-        n_vertex = vertex_counter;
-
-/*DEBUG*/{
-/*DEBUG*/    out << "    sending " << vertex_counter;
-// /*DEBUG*/    out << " vertices " << vertex_list;
-/*DEBUG*/    out << endl;
-// /*DEBUG*/    out << "    vertex_map: ";
-// /*DEBUG*/    unordered_map<long, long>::const_iterator jj;
-// /*DEBUG*/    for (jj = vertex_map.begin(); jj != vertex_map.end(); ++jj) {
-// /*DEBUG*/           out << "(" << jj->first << "->" << jj->second << ") ";
-// /*DEBUG*/    }
-/*DEBUG*/    out << endl << endl;
-/*DEBUG*/}
-
-    }
-/*DEBUG*/t1 = high_resolution_clock::now();
-/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
-/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
-
-    // Communicate vertices ================================================= //
-/*DEBUG*/out << "* sender (rank#" << m_rank << "), communicating vertices {" << endl;
-/*DEBUG*/t0 = high_resolution_clock::now();
-    {
-        // Scope variables -------------------------------------------------- //
-        vector<long>::const_iterator            i, e = vertex_list.cend();
-        
-        // Initialize communication buffer ---------------------------------- //
-        buff_size = sizeof(long);
-        for ( i = vertex_list.cbegin(); i != e; ++i ) {
-            buff_size += m_vertices[*i].getBinarySize();
-        } //next i
-        OBinaryStream                           com_buff( buff_size );
-
-        // Stream coords to communication buffer ---------------------------- //
-        com_buff << n_vertex;
-        for ( i = vertex_list.cbegin(); i != e; ++i ) {
-            com_buff << m_vertices[*i];
-        } //next i
-
-        // Send communication buffer ---------------------------------------- //
-        MPI_Send( &buff_size, 1, MPI_LONG, rcv_rank, 0, m_communicator );
-        MPI_Send( com_buff.get_buffer(), buff_size, MPI_CHAR, rcv_rank, 1, m_communicator );
-
-/*DEBUG*/{
-/*DEBUG*/    out << "    " << buff_size << " bytes sent" << endl;
-/*DEBUG*/    out << endl;
-/*DEBUG*/}
-    }
-/*DEBUG*/t1 = high_resolution_clock::now();
-/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
-/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
-
-    // Send cells =========================================================== //
-/*DEBUG*/out << "* sender (rank#" << m_rank << "), communicating cells {" << endl;
-/*DEBUG*/t0 = high_resolution_clock::now();
-    {
-        // Scope variables -------------------------------------------------- //
-        int                                     j, k, l;
-        int                                     n_vertices, n_faces, n_adj, n_itf;
-        long                                    vertex_idx, neigh_idx;
-        Cell                                   *cell_;
-        vector<long>                            connect_;
-        vector< vector<long> >                  interfs_;
-        vector<long>::const_iterator            i, e;
-        unordered_map<long, long>::const_iterator     m;
-
-        // Compute buffer size required to communicate cells ---------------- //
-        buff_size = sizeof(long);
-        e = cell_list.cend();
-        for ( i = cell_list.cbegin(); i != e; ++i ) {
-            buff_size += m_cells[ *i ].getBinarySize();
-        } //next i
-
-        // Initialize communication buffer ---------------------------------- //
-        OBinaryStream           com_buff( buff_size );
-
-        // Initialize adaption info ----------------------------------------- //
-        adaptionInfo.entity = adaption::ENTITY_CELL;
-        adaptionInfo.type   = adaption::TYPE_PARTITION_SEND;
-        adaptionInfo.rank   = rcv_rank;
-
-        // Fill communication buffer ---------------------------------------- //
-        com_buff << n_cells;
-        e = cell_list.cend();
-        for (i = cell_list.cbegin(); i != e; ++i) {
-
-            // Pointer to cells
-            cell_ = &m_cells[ *i ];
-// /*DEBUG*/   {
-// /*DEBUG*/       out << "    sending cell: " << endl;
-// /*DEBUG*/       cell_->display(out, 6);
-// /*DEBUG*/   }
-
-            // Modify connectivity to match sending order
-            n_vertices = cell_->getVertexCount();
-            connect_.resize( n_vertices );
-            for ( j = 0; j < n_vertices; ++j ) {
-                vertex_idx = cell_->getVertex( j );
-                cell_->setVertex( j, vertex_map[ vertex_idx ] );
-                connect_[ j ] = vertex_idx;
-            } //next j
-
-            // Modify adjacencies to match sending order
-            n_faces = cell_->getFaceCount();
-            interfs_.resize(n_faces);
-            for ( j = 0; j < n_faces; ++j ) {
-                n_adj = cell_->getAdjacencyCount( j );
-                interfs_[ j ].resize( n_adj, Element::NULL_ID );
-                l = 0;
-                for ( k = 0; k < n_adj; ++k ) {
-                    neigh_idx = cell_->getAdjacency( j, k );
-                    interfs_[ j ][ l ] = neigh_idx;
-                    ++l;
-                    if ( neigh_idx != Element::NULL_ID ) {
-                        if ( m_cells[ neigh_idx ].isInterior() ) {
-                            if ( cell_map.find( neigh_idx ) != cell_map.end() )        cell_->setAdjacency( j, k, cell_map[ neigh_idx ] );
-                            else if ( ghost_map.find( neigh_idx ) != ghost_map.end() ) cell_->setAdjacency( j, k, ghost_map[ neigh_idx ] );
-                            else {
-                                if (n_adj == 1) cell_->setAdjacency( j, k, Element::NULL_ID );
-                                else {
-                                    cell_->deleteAdjacency( j, k );
-                                    --n_adj;
-                                    --k;
-                                }
-                            }
-                        }
-                        else {
-                            m = find( m_ghost2id[rcv_rank].begin(), m_ghost2id[rcv_rank].end(), UnaryPredicate<const long, long>(neigh_idx) );
-                            if ( m != m_ghost2id[rcv_rank].end() ) cell_->setAdjacency( j, k, m->first + n_cells + n_ghosts );
-                            else {
-                                if (n_adj == 1) cell_->setAdjacency( j, k, Element::NULL_ID );
-                                else {
-                                    cell_->deleteAdjacency( j, k );
-                                    --n_adj;
-                                    --k;
-                                }
-                            }
-                        }
-                    }
-                } //next k
-            } //next j
-
-            // Store cell into communication buffer
-            com_buff << *cell_;
-// /*DEUBG*/   {
-// /*DEUBG*/       out << "    re-arranged as:" << endl;
-// /*DEUBG*/       cell_->display(out, 6);
-// /*DEUBG*/   }
-
-			// Update adpation info
-			adaptionInfo.previous.push_back(cell_->getId());
-
-            // Restore original connectivity
-            for (j = 0; j < n_vertices; ++j) {
-                cell_->setVertex(j, connect_[j]);
-            } //next j
-
-            // Restore original adjacencies
-            for ( j = 0; j < n_faces; ++j ) {
-                n_adj = cell_->getAdjacencyCount( j );
-                for (k = 0; k < n_adj; ++k) {
-                    cell_->setAdjacency( j, k, interfs_[j][k] );
-                } //next k
-                n_itf = interfs_[j].size();
-                for ( k = n_adj; k < n_itf; ++k ) {
-                    cell_->pushAdjacency( j, interfs_[j][k] );
-                } //next k
-            } //next j
-
-        } //next i
-
-        // Communicate cells ------------------------------------------------ //
-        MPI_Send(&buff_size, 1, MPI_LONG, rcv_rank, 2, m_communicator);
-        MPI_Send(com_buff.get_buffer(), buff_size, MPI_CHAR, rcv_rank, 3, m_communicator);
-/*DEBUG*/out << "    " << buff_size << " bytes sent" << endl;
-
-        // Receive new IDs -------------------------------------------------- //
-
-        // Receive buffer size
-        MPI_Recv(&buff_size, 1, MPI_LONG, rcv_rank, 6, m_communicator, MPI_STATUS_IGNORE);
-
-        // Initialize input memory stream
-        IBinaryStream                           feedback( buff_size );
-
-        // Initialize buffer for notification
-        long                                    notification_size = (2 * n_cells + 1) * sizeof(long);
-        OBinaryStream                           notification( notification_size );
-
-        // Receive new IDs
-        MPI_Recv( feedback.get_buffer(), buff_size, MPI_CHAR, rcv_rank, 7, m_communicator, MPI_STATUS_IGNORE );
-
-        // Fill adaption info and update ghost cells
-        notification << n_cells;
-        e = cell_list.cend();
-        for ( i = cell_list.cbegin(); i != e; ++i ) {
-            feedback >> neigh_idx;
-            if ( sender_ghost_new_ids.count(*i) > 0 ) {
-                sender_ghost_new_ids[*i] = neigh_idx;
+    // Find the frame of the cells explicitly marked for sending. These cells
+    // are the cells marked for sending that have at least one neighbour that
+    // will not be sent.
+    std::unordered_set<long> cellsToSendFrame;
+	for (long cellId : cellsToSend) {
+		auto neighs = findCellNeighs(cellId);
+		int nNeighs = neighs.size();
+		for (int j = 0; j < nNeighs; ++j) {
+			long neighId = neighs[j];
+			if (cellRankOnReceiver.count(neighId) == 0) {
+				cellsToSendFrame.insert(cellId);
+				break;
 			}
-            //m_ghost2id[rcv_rank][neigh_idx] = *i;
-            notification << *i << neigh_idx;
-        } //next i
-/*DEBUG*/{
-// /*DEBUG*/    out << "  receiving new IDs, ";
-// /*DEBUG*/    out << "  ghost2idx[" << rcv_rank << "] = {";
-// /*DEBUG*/    for (m = m_ghost2id[rcv_rank].begin(); m != m_ghost2id[rcv_rank].end(); ++m) {
-// /*DEBUG*/        out << " (" << m->first << ", " << m->second << ")";
-// /*DEBUG*/    } //next m
-// /*DEBUG*/    out << " }" << endl << endl;
-/*DEBUG*/}
-
-        // Notify other processes ------------------------------------------- //
-        for (j = 0; j < m_nProcessors; ++j) {
-            if ( (j != m_rank) && (j != rcv_rank) && (m_ghost2id.find(j) != m_ghost2id.end()) ) {
-                MPI_Send(&notification_size, 1, MPI_LONG, j, 8+j, m_communicator);
-                MPI_Send(notification.get_buffer(), notification_size, MPI_CHAR, j, 8+m_nProcessors+j, m_communicator);
-            }
-        } //next j
-    }
-/*DEBUG*/t1 = high_resolution_clock::now();
-/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
-/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
-
-    // Send ghost cells ===================================================== //
-/*DEBUG*/out << "* sender (rank#" << m_rank << "), communicating ghosts {" << endl;
-/*DEBUG*/t0 = high_resolution_clock::now();
-    {
-        // Scope variables -------------------------------------------------- //
-        int                                     j, k;
-        int                                     n_vertices, n_faces, n_adj, n_itf;
-        long                                    vertex_idx, neigh_idx, cell_idx;
-        vector<long>                            connect_;
-        vector< vector<long> >                  interfs_;
-        Cell                                   *cell_;
-        vector< pair< long, pair< long, short > > >::const_iterator             i, e;
-        unordered_map<long, long>::const_iterator                               m;
-
-        // Compute buffer size ---------------------------------------------- //
-        buff_size = sizeof(long);
-        e = ghost_list.cend();
-        for ( i = ghost_list.cbegin(); i != e; ++i ) {
-            buff_size += m_cells[ i->first ].getBinarySize() + sizeof(short);
-        } //next i
-
-        // Initialize communication buffer ---------------------------------- //
-        OBinaryStream                   com_buff(buff_size);
-
-        // Fill communication buffer ---------------------------------------- //
-        com_buff << n_ghosts;
-        e = ghost_list.cend();
-        for ( i = ghost_list.cbegin(); i != e; ++i ) {
-
-            // Pointer to cell
-            cell_ = &m_cells[ i->first ];
-
-            // Modify cell ID in case of ghost on another process
-            if ( i->second.second != m_rank ) {
-                cell_idx = cell_->getId();
-                cell_->setId( i->second.first);
-            }
-/*DEBUG*/   {
-// /*DEBUG*/       out << "    sending ghost:" << endl;
-// /*DEBUG*/       cell_->display(out, 6);
-/*DEBUG*/   }
-
-            // Modify connectivity to match sending order
-            n_vertices = cell_->getVertexCount();
-            connect_.resize(n_vertices);
-            for ( j = 0; j < n_vertices; ++j ) {
-                vertex_idx = cell_->getVertex( j );
-                connect_[ j ] = vertex_idx;
-                cell_->setVertex( j, vertex_map[ vertex_idx ] );
-            } // next j
-
-            // Modify adjacencies to match sending order
-            n_faces = cell_->getVertexCount();
-            interfs_.resize( n_faces );
-            for ( j = 0; j < n_faces; ++j ) {
-                n_adj = cell_->getAdjacencyCount( j );
-                interfs_[j].resize( n_adj, Element::NULL_ID );
-                for ( k = 0; k < n_adj; ++k ) {
-                    neigh_idx = cell_->getAdjacency( j, k );
-                    interfs_[ j ][ k ] = neigh_idx;
-                    if (neigh_idx != Element::NULL_ID) {
-                        if ( m_cells[ neigh_idx ].isInterior() ) {
-                            if ( cell_map.find( neigh_idx ) != cell_map.end() )        cell_->setAdjacency( j, k, cell_map[ neigh_idx ] );
-                            else if ( ghost_map.find( neigh_idx ) != ghost_map.end() ) cell_->setAdjacency( j, k, ghost_map[ neigh_idx ] );
-                            else {
-                                if (n_adj == 1) cell_->setAdjacency( j, k, Element::NULL_ID );
-                                else {
-                                    cell_->deleteAdjacency( j, k );
-                                    --n_adj;
-                                    --k;
-                                }
-                            }
-                        }
-                        else {
-                            m = find( m_ghost2id[rcv_rank].begin(), m_ghost2id[rcv_rank].end(), UnaryPredicate<const long, long>(neigh_idx) );
-                            if ( m != m_ghost2id[rcv_rank].end() ) cell_->setAdjacency( j, k, m->first + n_cells + n_ghosts );
-                            else {
-                                if (n_adj == 1) cell_->setAdjacency( j, k, Element::NULL_ID );
-                                else {
-                                    cell_->deleteAdjacency( j, k );
-                                    --n_adj;
-                                    --k;
-                                }
-                            }
-                        }
-                    }
-                } //next k
-            } //next j
-
-            // Fill communication buffer
-            com_buff << i->second.second;
-            com_buff << *cell_;
-/*DEBUG*/   {
-// /*DEBUG*/       out << "    remapped as:" << endl;
-// /*DEBUG*/       cell_->display(out, 6);
-/*DEBUG*/   }
-
-            // Restore original id
-            if ( i->second.second != m_rank ) {
-                cell_->setId( cell_idx );
-            }
-
-            // Restore original connectivity
-            for ( j = 0; j < n_vertices; ++j ) {
-                cell_->setVertex( j, connect_[j] );
-            } //next j
-
-            // Restore original adjacencies
-            for ( j = 0; j < n_faces; ++j ) {
-                n_adj = cell_->getAdjacencyCount( j );
-                for ( k = 0; k < n_adj; ++k ) {
-                    cell_->setAdjacency( j, k, interfs_[j][k] );
-                } //next k
-                n_itf = interfs_[j].size();
-                for ( k = n_adj; k < n_itf; ++k ) {
-                    cell_->pushAdjacency( j, interfs_[j][k] );
-                }
-            } //next j
-        } //next i
-
-        // Communicate ghosts ----------------------------------------------- //
-        MPI_Send(&buff_size, 1, MPI_LONG, rcv_rank, 4, m_communicator);
-        MPI_Send(com_buff.get_buffer(), buff_size, MPI_CHAR, rcv_rank, 5, m_communicator);
-/*DEBUG*/out << "    " << buff_size << " bytes sent" << endl << endl;
-    }
-/*DEBUG*/t1 = high_resolution_clock::now();
-/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
-/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
-
-    // Update ghost lists =================================================== //
-    // m_ghost2id stores the list of ghost divided by rank, that is:
-    // if the cell with ID "i" is a ghost cell on the current rank, the cell 
-    // exists on process with rank "neigh_rank" and hase ID "j" in that partition,
-    // thus m_ghost2id[neigh_rank][j] stores "i".
-/*DEBUG*/out << "* sender (rank#" << m_rank << "), updating ghosts lists {" << endl;
-/*DEBUG*/t0 = high_resolution_clock::now();
-    {
-        // Scope variables -------------------------------------------------- //
-        bool                                                    flag_keep;
-        int                                                     j;
-        int                                                     n_neighs;
-        long                                                    ghost_idx;
-        long                                                    ghost_send_idx, ghost_recv_idx;
-        vector<long>                                            neighs;
-        unordered_map<long, long>::iterator                     ii, ee;
-        unordered_map<long, long>::const_iterator               i, e;
-        vector<long>::const_iterator                            m, n;
-
-        // Initialize sender's ghosts --------------------------------------- //
-        e = sender_ghost_new_ids.cend();
-        for (i = sender_ghost_new_ids.cbegin(); i != e; ++i) {
-            ghost_send_idx = i->first;
-            ghost_recv_idx = i->second;
-
-            moveInternal2Ghost(ghost_send_idx);
-            m_ghost2id[rcv_rank][ghost_recv_idx] = ghost_send_idx;
-        }
-
-        // Delete sent cells that are not ghosts -----------------------------//
-        for (const auto &cell : cell_list) {
-            if (m_cells[cell].isInterior()) {
-                deleteCell(cell, true, true);
-            }
-        }
-
-        // Delete previous ghost cells of other processors -------------------//
-        for (auto &rank_ghost : m_ghost2id) {
-            ee = rank_ghost.second.end();
-            ii = rank_ghost.second.begin();
-            while (ii != ee) {
-                ghost_idx = ii->second;
-                neighs = findCellNeighs(ghost_idx);
-                n_neighs = neighs.size();
-
-                // We want to keep only ghosts sells that have at least one
-                // internal neighbour
-                flag_keep = false;
-                for (j = 0; j < n_neighs; ++j) {
-                    if ( m_cells[neighs[j]].isInterior() ) {
-                        flag_keep = true;
-                        break;
-                    }
-                } //next j
-
-                if ( !flag_keep )  {
-// /*DEBUG*/           out << "      deleting ghost: " << ghost_idx << endl;
-                    deleteCell(ghost_idx, true, true);
-                    ii = rank_ghost.second.erase(ii);
-                }
-                else {
-                    ++ii;
-                }
-            }
-        } //next cell
-
-        // Flush cells -------------------------------------------------------//
-        m_cells.flush();
-
-/*DEBUG*/{        
-// /*DEBUG*/    out << "  ghost2idx = {";
-// /*DEBUG*/    for (i = m_ghost2id[rcv_rank].begin(); i != m_ghost2id[m_rank].end(); ++i) {
-// /*DEBUG*/        out << " (" << i->first << ", " << i->second << ")";
-// /*DEBUG*/    }
-// /*DEBUG*/    out << " }" << endl << endl;
-// /*DEBUG*/    out << "  nCells: " << m_nInternals << endl;
-// /*DEBUG*/    out << "  nGhosts: " << m_nGhosts << endl;
-/*DEBUG*/}
-    }
-/*DEBUG*/t1 = high_resolution_clock::now();
-/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
-/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
-
-    // Remove isolated vertices ============================================= //
-/*DEBUG*/out << "* sender (rank#" << m_rank << "), removing isolated vertices {" << endl << endl;
-/*DEBUG*/t0 = high_resolution_clock::now();
-    {
-        // Scope variables -------------------------------------------------- //
-        // none
-
-        // Remove Isolated vertices ----------------------------------------- //
-        deleteOrphanVertices();
-    }
-/*DEBUG*/t1 = high_resolution_clock::now();
-/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
-/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
-
-/*DEBUG*/{
-/*DEBUG*/    ostream        *msg = reinterpret_cast<ostream*>(&out);
-/*DEBUG*/    out << "* stats (rank#" << m_rank << "): " << endl;
-/*DEBUG*/    displayTopologyStats(*msg);
-/*DEBUG*/    out << endl;
-/*DEBUG*/    out << "* sender (rank #" << m_rank << ") completed its tasks" << endl;
-/*DEBUG*/}
-
-	// Rebuild ghost information
-	clearGhostOwners(false);
-
-	for (auto &rankEntry : m_ghost2id) {
-		int rank = rankEntry.first;
-		for (auto &ghostEntry : rankEntry.second) {
-			long ghostId = ghostEntry.second;
-
-			setGhostOwner(ghostId, rank, false);
 		}
 	}
 
-	buildGhostExchangeData();
+    // Along with the cells explicitly marked for sending, we need to send
+    // also an halo of surrounfing cells. Those cells will be used by the
+    // receiver to connect the cells it receives to the existing cells,
+    // plus some of them will become ghost cells.
+    //
+    // Some cells on the halo may be already on the receiver (becuase they
+    // are already ghosts owned by another processor). However we don't have
+    // enough information to identify those duplicate cells. The receiver
+    // needs to permorm a check to avoid inserting duplicate cells.
+    //
+    // Cells owned by receiver are already on the receiver, so there is no
+    // need to send them.
+    for (long cellId : cellsToSendFrame) {
+        auto neighs = findCellNeighs(cellId);
+        int nNeighs = neighs.size();
+        for (int j = 0; j < nNeighs; ++j) {
+            long neighId = neighs[j];
+            if (cellRankOnReceiver.count(neighId) > 0) {
+                continue;
+            }
 
+            int ownerRank;
+            if (m_ghostOwners.count(neighId) == 0) {
+                ownerRank = m_rank;
+            } else {
+                ownerRank = m_ghostOwners[neighId];
+                if (ownerRank == recvRank) {
+                    continue;
+                }
+            }
+
+			cellsToCommunicate.push_back(neighId);
+            cellRankOnReceiver.insert({{neighId, ownerRank}});
+        }
+    }
+
+    // The cells that are exchange sources for the receiver are already on
+    // the receiver (these cells are ghost owned by this processor). Mark
+    // is as such to help the receiver to remove duplicate cells.
+    std::unordered_map<long, long> senderGhostsToPromote;
+    if (getGhostExchangeSources().count(recvRank) > 0) {
+        const auto &exchangeSources = getGhostExchangeSources(recvRank);
+        long nExchangeSources = exchangeSources.size();
+        for (long k = 0; k < nExchangeSources; ++k) {
+            long cellId = exchangeSources[k];
+            if (cellRankOnReceiver.count(cellId) > 0) {
+                senderGhostsToPromote.insert({{cellId, k}});
+            }
+        }
+    }
+
+    //
+    // Create the list of vertices to send
+    //
+    std::unordered_set<long> vertexToCommunicate;
+    for (const long &cellId : cellsToCommunicate) {
+        const Cell &cell = m_cells[cellId];
+
+        int nCellVertices = cell.getVertexCount();
+        for (int j = 0; j < nCellVertices; ++j) {
+            long vertexId = cell.getVertex(j);
+            if (vertexToCommunicate.count(vertexId) > 0) {
+                continue;
+            }
+
+            vertexToCommunicate.insert(vertexId);
+        }
+    }
+
+    //
+    // Send vertex data
+    //
+    OBinaryStream vertexBuffer;
+    long vertexBufferSize = 0;
+
+    // Fill buffer with vertex data
+    vertexBufferSize += sizeof(long);
+    for (long vertexId : vertexToCommunicate) {
+        vertexBufferSize += m_vertices[vertexId].getBinarySize();
+    }
+    vertexBuffer.resize(vertexBufferSize);
+
+    vertexBuffer << (long) vertexToCommunicate.size();
+    for (long vertexId : vertexToCommunicate) {
+        vertexBuffer << m_vertices[vertexId];
+    }
+
+    if (vertexBufferSize != (long) vertexBuffer.size()) {
+		throw std::runtime_error ("Cell buffer size does not match calculated size");
+	}
+
+    // Communication
+    MPI_Send(&vertexBufferSize, 1, MPI_LONG, recvRank, 10, m_communicator);
+    MPI_Send(vertexBuffer.get_buffer(), vertexBuffer.size(), MPI_CHAR, recvRank, 11, m_communicator);
+
+    //
+    // Send cell data
+    //
+    OBinaryStream cellBuffer;
+    long cellBufferSize = 0;
+
+	// Fill the buffer with information on the cells that will be send to the
+	// receiver, but are already there because they are ghosts owned by the
+	// sender. These cells will be promoted by the receiver to internal cells.
+    cellBufferSize += sizeof(long) + 2 * senderGhostsToPromote.size() * sizeof(long);
+    cellBuffer.resize(cellBufferSize);
+
+    cellBuffer << (long) senderGhostsToPromote.size();
+    for (const auto &entry : senderGhostsToPromote) {
+        // Index of the cell in the exchange data structure
+		long index = entry.second;
+		cellBuffer << index;
+
+		// Id of the cell on this processor
+		long cellId = entry.first;
+		cellBuffer << cellId;
+	}
+
+    // Fill the buffer with cell data
+    cellBufferSize += sizeof(long);
+    for (const long &cellId : cellsToCommunicate) {
+        cellBufferSize += sizeof(int) + m_cells[cellId].getBinarySize();
+    }
+    cellBuffer.resize(cellBufferSize);
+
+    cellBuffer << (long) cellsToCommunicate.size();
+    for (const long &cellId : cellsToCommunicate) {
+        // Owner of the cell
+        int cellOwner = cellRankOnReceiver[cellId];
+        cellBuffer << cellOwner;
+
+        // Cell data
+        cellBuffer << m_cells[cellId];
+    }
+
+    if (cellBufferSize != (long) cellBuffer.size()) {
+		throw std::runtime_error ("Cell buffer size does not match calculated size");
+	}
+
+    // Communication
+    MPI_Send(&cellBufferSize, 1, MPI_LONG, recvRank, 20, m_communicator);
+    MPI_Send(cellBuffer.get_buffer(), cellBuffer.size(), MPI_CHAR, recvRank, 21, m_communicator);
+
+    //
+    // Send ownership notifications
+    //
+    for (const auto &ownershipNotification : ownershipNotifications) {
+        int neighRank = ownershipNotification.first;
+		const auto &notificationList = ownershipNotification.second;
+
+        // Communicate the size of the notification
+        long notificationBufferSize = 0;
+        if (notificationList.size() > 0) {
+            notificationBufferSize += sizeof(long) + notificationList.size() * sizeof(long);
+        }
+        MPI_Send(&notificationBufferSize, 1, MPI_LONG, neighRank, 30, m_communicator);
+
+        // Fill the buffer and send the notification
+        if (notificationBufferSize > 0) {
+            OBinaryStream notificationBuffer(notificationBufferSize);
+
+			notificationBuffer << (long) notificationList.size();
+            for (long index : notificationList) {
+                notificationBuffer << index;
+            }
+
+            MPI_Send(notificationBuffer.get_buffer(), notificationBuffer.size(), MPI_CHAR, neighRank, 31, m_communicator);
+        }
+    }
+
+    //
+    // Update cells that no longer belong to this processor
+    //
+
+    // Delete sent cells or mark them as ghosts owned by the receiver.
+    for (long cellId : cellsToSend) {
+        // Update adaption info
+        adaptionInfo.previous.push_back(cellId);
+
+		// Check if a cell has to be delete or is a ghost owned by the receiver
+		//
+		// A cell will become a ghost if at least one of his neighbours is
+		// an internal cell. If the processors is sending all its cells
+		// there will be no ghosts cell.
+		bool moveToGhosts = false;
+		if ((long) cellsToSend.size() < m_nInternals) {
+			if (cellsToSendFrame.count(cellId) == 0) {
+				moveToGhosts = false;
+			} else {
+				auto neighs = findCellNeighs(cellId);
+				int nNeighs = neighs.size();
+				for (int j = 0; j < nNeighs; ++j) {
+					long neighId = neighs[j];
+					if (m_ghostOwners.count(neighId) == 0) {
+						moveToGhosts = true;
+						break;
+					}
+				}
+			}
+		}
+
+        // Delete the cell or mark is as a ghost owned by the receiver.
+        if (moveToGhosts) {
+            moveInternal2Ghost(cellId);
+            setGhostOwner(cellId, recvRank, false);
+        } else {
+			unsetGhostOwner(cellId, false);
+            deleteCell(cellId, true, true);
+        }
+    }
+
+    // Delete stale ghosts
+    //
+    // Loop over all the ghosts and keep only the cells that have at least
+    // one internal neighbour.
+    std::unordered_set<int> involvedRanks;
+    involvedRanks.insert(recvRank);
+
+    auto itr = m_ghostOwners.cbegin();
+    while (itr != m_ghostOwners.cend()) {
+        long ghostId = itr->first;
+
+        bool keep   = false;
+        auto neighs = findCellNeighs(ghostId);
+        int nNeighs = neighs.size();
+        for (int j = 0; j < nNeighs; ++j) {
+			long neighId = neighs[j];
+			if (m_ghostOwners.count(neighId) == 0) {
+                keep = true;
+                break;
+            }
+        }
+
+        auto nextItr = itr;
+        nextItr++;
+        if (!keep) {
+            long ghostOwner = itr->second;
+            involvedRanks.insert(ghostOwner);
+
+            unsetGhostOwner(ghostId, false);
+            deleteCell(ghostId, true, true);
+        }
+        itr = nextItr;
+    }
+
+    m_cells.flush();
+
+	// Delete orphan vertices
+	deleteOrphanVertices();
+
+	// Rebuild ghost information
+	for (auto &rank : involvedRanks) {
+		buildGhostExchangeData(rank);
+	}
+
+	// Return adaption info
     return adaptionInfo;
-
 }
 
 /*!
     Recevies a list of cells from the specified processor.
 
-    \param[in] snd_rank is the rank of the processors sending the cells
+    \param[in] sendRank is the rank of the processors sending the cells
  */
-adaption::Info PatchKernel::sendCells_receiver(const unsigned short &snd_rank)
+adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
 {
-    // ========================================================================== //
-    // SCOPE VARIABLES                                                            //
-    // ========================================================================== //
-
+    //
+    // Initialize adaption info
+    //
     adaption::Info adaptionInfo;
+    adaptionInfo.entity = adaption::ENTITY_CELL;
+    adaptionInfo.type   = adaption::TYPE_PARTITION_RECV;
+    adaptionInfo.rank   = sendRank;
 
-    // Debug variables
-    /*DEBUG*/stringstream                           out_name;
-    /*DEBUG*/ofstream                               out;
-    /*DEBUG*/high_resolution_clock::time_point      t0, t1;
-    /*DEBUG*/duration<double>                       time_span;
+    //
+    // Add vertices
+    //
 
-    /*DEBUG*/{
-    /*DEBUG*/    out_name << "DEBUG_rank_" << m_rank << ".log";
-    /*DEBUG*/    out.open(out_name.str(), ifstream::app);
-    /*DEBUG*/    out_name.str("");
-    /*DEBUG*/    out << endl;
-    /*DEBUG*/    out << "** RANK #" << m_rank << "** NEW COMMUNICATION **" << endl;
-    /*DEBUG*/    out << endl;
-    /*DEBUG*/}
+    // Receive data
+    long vertexBufferSize;
+    MPI_Recv(&vertexBufferSize, 1, MPI_LONG, sendRank, 10, m_communicator, MPI_STATUS_IGNORE);
 
-    // Variables required for communication
-    long                                        buff_size;
+    IBinaryStream vertexBuffer(vertexBufferSize);
+    MPI_Recv(vertexBuffer.get_buffer(), vertexBuffer.size(), MPI_CHAR, sendRank, 11, m_communicator, MPI_STATUS_IGNORE);
 
-    // Variables required for vertex communication
-    long                                        n_vertex;
-    vector<long>                                v_local_mapping;
-
-    // Variables required for cells communication
-    long                                        n_cells;
-    unordered_map<long, long>                   c_local_mapping;
-
-    // Variables required for ghosts communication
-    long                                        n_ghosts;
-
-    // Receive vertices ===================================================== //
-/*DEBUG*/out << "* receiver (rank#" << m_rank << "), receiving vertices {" << endl;
-/*DEBUG*/t0 = high_resolution_clock::now();
-    {
-        // Scope variables -------------------------------------------------- //
-        long                                    i;
-        Vertex                                  vertex;
-        VertexIterator                          it;
-
-        // Receive communication buffer ------------------------------------- //
-
-        // Receive buffer size
-        MPI_Recv(&buff_size, 1, MPI_LONG, snd_rank, 0, m_communicator, MPI_STATUS_IGNORE); 
-/*DEBUG*/out << "    receiving " << buff_size << " bytes" << endl;
-
-        // Initialize memory stream
-        IBinaryStream                   com_buff( buff_size );
-
-        // Update vertex list ----------------------------------------------- //
-
-        // Receive vertex coordinate list
-        MPI_Recv( com_buff.get_buffer(), buff_size, MPI_CHAR, snd_rank, 1, m_communicator, MPI_STATUS_IGNORE);
-
-        // Read number of vertices stored in buffer
-        com_buff >> n_vertex;
-
-        // Insert vertices
-        v_local_mapping.resize(n_vertex, 0);
-        for (i = 0; i < n_vertex; ++i) {
-            com_buff >> vertex;
-            it = addVertex( move(vertex), generateVertexId() );
-            v_local_mapping[i] = it->getId();
-        } //next i
-/*DEBUG*/out << "    received " << n_vertex;
-// /*DEBUG*/out << " vertices " << v_local_mapping;
-/*DEBUG*/out << endl;
-        
+    // Build a kd-tree with the vertices on the ghosts cells
+    //
+    // These are the only vertices to check for duplicates when receiving the
+    // list vertices from the sender.
+    //
+    // The kd-tree stores the pointer to the vertices. Ifwe try to store in the
+    // kd-tree the pointers to the vertices of the patch, the first resize of
+    // the vertex container would invalidate the pointer. Create a copy of the
+    // vertices and store the pointer to that copy.
+    long nGhostsMaxVertices = 0;
+    for (const auto &entry : m_ghostOwners) {
+        long ghostId = entry.first;
+        const Cell &ghost = m_cells[ghostId];
+        nGhostsMaxVertices += ghost.getVertexCount();
     }
-/*DEBUG*/t1 = high_resolution_clock::now();
-/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
-/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
-    // Receive cells ======================================================== //
-/*DEBUG*/out << "* receiver (rank#" << m_rank << "), receiving cells {" << endl;
-/*DEBUG*/t0 = high_resolution_clock::now();
-    {
-        // Scope variables -------------------------------------------------- //
-        int                                             j;
-        int                                             n_vertices;
-        long                                            i, cell_idx, ghost_idx;
-        long                                            cell_count = 0;
-        long                                            feedback_size;
-        Cell                                            cell;
-        CellIterator                                    it;
-
-        // Receive communication buffer ------------------------------------- //
-
-        // Receive size of communication buffer
-        MPI_Recv(&buff_size, 1, MPI_LONG, snd_rank, 2, m_communicator, MPI_STATUS_IGNORE);
-/*DEBUG*/out << "    receiving " << buff_size << " bytes" << endl;
-
-        // Initialize memory stream
-        IBinaryStream                           com_buff(buff_size);
-
-        // Update cell list ------------------------------------------------- //
-
-        // Receive cells
-        MPI_Recv(com_buff.get_buffer(), buff_size, MPI_CHAR, snd_rank, 3, m_communicator, MPI_STATUS_IGNORE);
-
-        // Extract cells from communication buffer
-        com_buff >> n_cells;
-
-        // Initialize adaption info
-        adaptionInfo.entity = adaption::ENTITY_CELL;
-        adaptionInfo.type   = adaption::TYPE_PARTITION_RECV;
-        adaptionInfo.rank   = snd_rank;
-
-        // Initialize communication buffer for feedback
-        feedback_size = n_cells * sizeof(long);
-        OBinaryStream                           feedback( feedback_size );
-
-        // Add cells to cell list
-        reserveCells( m_nInternals + m_nGhosts + n_cells );
-        for ( i = 0; i < n_cells; ++i ) {
-
-            // Stream cell data
-            com_buff >> cell;
-            cell_idx = cell.getId();
-            cell.setInterior( true );
-
-/*DEBUG*/   {
-// /*DEBUG*/       out << "    received cell:" << endl;
-// /*DEBUG*/       cell.display(out, 6);
-/*DEBUG*/   }
-
-            // Update connectivity
-            n_vertices = cell.getVertexCount();
-            for (j = 0; j < n_vertices; ++j) {
-                cell.setVertex( j, v_local_mapping[ cell.getVertex( j ) ] );
-            } //next j
-
-            // Insert cell in cells list & update ghost lists
-            if ( m_ghost2id[snd_rank].find(cell_idx) != m_ghost2id[snd_rank].end() ) {
-                ghost_idx = m_ghost2id[snd_rank][cell_idx];
-                cell.setId( ghost_idx );
-                feedback << ghost_idx;
-/*DEBUG*/       {
-// /*DEBUG*/           out << "    (already exists as ghost), remapped as:" << endl;
-// /*DEBUG*/           cell.display(out, 6);
-/*DEBUG*/       }
-                m_cells[ghost_idx] = move( cell );
-                moveGhost2Internal(ghost_idx);
-                m_ghost2id[snd_rank].erase( cell_idx );
-                c_local_mapping[ cell_count ] = ghost_idx;
-                ++cell_count;
+    KdTree<3, Vertex, long> ghostVerticesTree(nGhostsMaxVertices);
+    std::unordered_map<long, Vertex> ghostVertices(nGhostsMaxVertices);
+    for (const auto &entry : m_ghostOwners) {
+        long ghostId = entry.first;
+        const Cell &ghost = m_cells[ghostId];
+        int nGhostVertices = ghost.getVertexCount();
+        for (int k = 0; k < nGhostVertices; ++k) {
+            long vertexId = ghost.getVertex(k);
+            if (ghostVertices.count(vertexId) == 0) {
+                ghostVertices.insert({{vertexId, m_vertices[vertexId]}});
+                ghostVerticesTree.insert(&ghostVertices.at(vertexId), vertexId);
             }
-            else {
-
-                // Add cell before last internal cell
-// /*DEBUG*/       out << "    (adding new cell), remapped as:" << endl;
-                it = addCell( move(cell), generateCellId() );
-                feedback << long( it->getId() );
-                adaptionInfo.current.push_back( it->getId() );
-// /*DEBUG*/       it->display(out, 6);
-                c_local_mapping[ cell_count ] = it->getId();
-                ++cell_count;
-            }
-        } //next i
-
-/*DEBUG*/{
-/*DEBUG*/    out << "    received " << cell_count << " cells: ";
-// /*DEBUG*/    unordered_map<long, long>::const_iterator    ii;
-// /*DEBUG*/    for (ii = c_local_mapping.begin(); ii != c_local_mapping.end(); ++ii) {
-// /*DEBUG*/           out << "(" << ii->first << ", " << ii->second << "), ";
-// /*DEBUG*/    } //next i
-/*DEBUG*/    out << endl;
-/*DEBUG*/}
-
-        // Communicate new IDs to sender ------------------------------------ //
-/*DEBUG*/{
-// /*DEBUG*/    out << "    sending new IDs: ";
-// /*DEBUG*/    unordered_map<long, long>::const_iterator      m;
-// /*DEBUG*/    for (m = c_local_mapping.begin(); m != c_local_mapping.end(); ++m) {
-// /*DEBUG*/        out << " (" << m->first << ", " << m->second << ") ";
-// /*DEBUG*/    } //next m
-// /*DEBUG*/    out << endl << endl;
-/*DEBUG*/}
-
-        // Communicate buffer size
-        MPI_Send( &feedback_size, 1, MPI_LONG, snd_rank, 6, m_communicator );
-
-        // Communicate buffer
-        MPI_Send( feedback.get_buffer(), feedback_size, MPI_CHAR, snd_rank, 7, m_communicator );
-
+        }
     }
-/*DEBUG*/out << "  nInternals: " << m_nInternals << endl;
-/*DEBUG*/out << "  nGhosts: " << m_nGhosts << endl;
-/*DEBUG*/t1 = high_resolution_clock::now();
-/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
-/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
-    // Receive ghosts ======================================================= //
-/*DEBUG*/out << "* receiver (rank#" << m_rank << "), receiving ghosts {" << endl;
-/*DEBUG*/t0 = high_resolution_clock::now();
-    {
+    // Receive vertices
+    //
+    // There are no duplicate in the received vertices, but some of them may
+    // be already a local vertex of a ghost cell.
+    long nRecvVertices;
+    vertexBuffer >> nRecvVertices;
 
-        // Scope variables -------------------------------------------------- //
-        short                                   ghost_rank;
-        int                                     j;
-        int                                     n_vertices;
-        long                                    i;
-        long                                    cell_idx;
-        long                                    ghost_count = 0;
-        Cell                                    cell;
-        CellIterator                            it;
+    std::unordered_map<long, long> recvVertexMap;
+    recvVertexMap.reserve(nRecvVertices);
+    for (long i = 0; i < nRecvVertices; ++i) {
+        Vertex vertex;
+        vertexBuffer >> vertex;
+        long recvVertexId = vertex.getId();
 
-        // Receive communication buffer ------------------------------------- //
+        long localVertexId;
+        if (ghostVerticesTree.exist(&vertex, localVertexId) < 0) {
+            localVertexId = generateVertexId();
+            addVertex(std::move(vertex), localVertexId);
+        }
 
-        // Receive size of communication buffer
-        MPI_Recv(&buff_size, 1, MPI_LONG, snd_rank, 4, m_communicator, MPI_STATUS_IGNORE);
-/*DEBUG*/out << "    receiving " << buff_size << " bytes" << endl;
-
-        // Initialize memory stream
-        IBinaryStream                  com_buff(buff_size);
-
-        // Update cells list ------------------------------------------------ //
-
-        // Receive cell list
-        MPI_Recv(com_buff.get_buffer(), buff_size, MPI_CHAR, snd_rank, 5, m_communicator, MPI_STATUS_IGNORE);
-
-        // Extract cells from communication buffer
-        com_buff >> n_ghosts;
-
-        // Add cells to cell list
-        reserveCells(m_nInternals + m_nGhosts + n_ghosts);
-
-        for (i = 0; i < n_ghosts; ++i) {
-
-            // Stream cell data 
-            com_buff >> ghost_rank;
-            com_buff >> cell;
-            cell_idx = cell.getId();
-/*DEBUG*/   {
-// /*DEBUG*/       out << "    receiving ghost (existing on rank: " << ghost_rank << ")" << endl;
-// /*DEBUG*/       cell.display(out, 6);
-/*DEBUG*/   }
-
-            // Update connectivity
-            n_vertices = cell.getVertexCount();
-            for ( j = 0; j < n_vertices; ++j ) {
-                cell.setVertex( j, v_local_mapping[ cell.getVertex( j ) ] );
-            } //next j
-
-            // Update cell list
-            if ( m_ghost2id[ghost_rank].find(cell_idx) == m_ghost2id[ghost_rank].end() ) {
-
-// /*DEBUG*/       out << "    (non-existent ghost cell)" << endl;
-
-                // Cell has to be added after the last internal cell
-                cell.setInterior( false );
-                it = addCell( move(cell), generateCellId() );
-
-                c_local_mapping[ n_cells + ghost_count ] = it->getId();
-                m_ghost2id[ghost_rank][ cell_idx ] = it->getId();
-                ++ghost_count;
-
-/*DEBUG*/       {
-// /*DEBUG*/           out << "    remapped as:" << endl;
-// /*DEBUG*/           it->display(out, 6);
-/*DEBUG*/       }
-            }
-            else {
-// /*DEBUG*/       out << "    (cell already exists as ghost)" << endl;
-                cell.setId(m_ghost2id[ghost_rank][cell_idx]);
-                cell.setInterior( false );
-/*DEBUG*/       {
-// /*DEBUG*/           out << "    remapped as:" << endl;
-// /*DEBUG*/           cell.display(out, 6);
-/*DEBUG*/       }
-
-                // Cell has to be overwritten
-                m_cells[m_ghost2id[ghost_rank][cell_idx]] = move(cell);
-
-                c_local_mapping[ n_cells + ghost_count ] = m_ghost2id[ghost_rank][cell_idx];
-                ++ghost_count;
-            }
-
-        } //next i
-
-/*DEBUG*/{
-// /*DEBUG*/    unordered_map<long, long>::const_iterator      m;
-// /*DEBUG*/    out << "    c_local_mapping is now: {";
-// /*DEBUG*/    for ( m = c_local_mapping.begin(); m != c_local_mapping.end(); ++m) {
-// /*DEBUG*/        out << " (" << m->first << ", " << m->second << ")";
-// /*DEBUG*/    } //next m
-// /*DEBUG*/    out << " }" << endl << endl;
-/*DEBUG*/}
+        recvVertexMap.insert({{recvVertexId, localVertexId}});
     }
-/*DEBUG*/out << "  nInternals: " << m_nInternals << endl;
-/*DEBUG*/out << "  nGhosts: " << m_nGhosts << endl;
-/*DEBUG*/t1 = high_resolution_clock::now();
-/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
-/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
-    // Update adjacencies =================================================== //
-/*DEBUG*/out << "* receiver (rank#" << m_rank << "), updating adjacencies {" << endl;
-/*DEBUG*/t0 = high_resolution_clock::now();
-    {
-        // Scope variables -------------------------------------------------- //
-        int                                             n_faces, n_adj;
-        int                                             j, k;
-        long                                            cell_idx, neigh_idx;
-        unordered_map<long, long>::const_iterator       m, e;
-        Cell                                           *cell_;
+    std::unordered_map<long, Vertex>().swap(ghostVertices);
 
-        // Update adjacencies ----------------------------------------------- //
-        e = c_local_mapping.cend();
-        for ( m = c_local_mapping.cbegin(); m != e; ++m ) {
-            cell_idx = m->second;
-            cell_ = &m_cells[cell_idx];
-// /*DEBUG*/   out << "    updating adjacencies for cell ID " << cell_idx << endl;
-            n_faces = cell_->getFaceCount();
-            for ( j = 0; j < n_faces; ++j ) {
-                n_adj = cell_->getAdjacencyCount( j );
-                for ( k = 0; k < n_adj; ++k ) {
-                    neigh_idx = cell_->getAdjacency( j, k );
-                    if ( neigh_idx >= 0) {
-                        if ( neigh_idx >= n_cells + n_ghosts ) cell_->setAdjacency( j, k, neigh_idx - n_cells - n_ghosts );
-                        else                                   cell_->setAdjacency( j, k, c_local_mapping[neigh_idx] );
-                    }
-                } //next k
-            } //next j
-// /*DEBUG*/   out << "    cell ID " << cell_idx << " is now" << endl;
-// /*DEBUG*/   cell_->display(out, 6);
-        } //next m
+    //
+    // Add cells
+    //
 
-// /*DEBUG*/out << "  ghost2idx = {";
-// /*DEBUG*/for (m = m_ghost2id[snd_rank].begin(); m != m_ghost2id[snd_rank].end(); ++m) {
-// /*DEBUG*/    out << " (" << m->first << ", " << m->second << ")";
-// /*DEBUG*/}
-// /*DEBUG*/out << " }" << endl << endl;
+    // Receive data
+    long cellBufferSize;
+    MPI_Recv(&cellBufferSize, 1, MPI_LONG, sendRank, 20, m_communicator, MPI_STATUS_IGNORE);
 
-    }
-/*DEBUG*/out << "  nInternals: " << m_nInternals << endl;
-/*DEBUG*/out << "  nGhosts: " << m_nGhosts << endl;
-/*DEBUG*/t1 = high_resolution_clock::now();
-/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
-/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
+    IBinaryStream cellBuffer(cellBufferSize);
+    MPI_Recv(cellBuffer.get_buffer(), cellBuffer.size(), MPI_CHAR, sendRank, 21, m_communicator, MPI_STATUS_IGNORE);
 
-    // Remove duplicated vertices =========================================== //
-/*DEBUG*/out << "* receiver (rank#" << m_rank << "), removing duplicated vertices {" << endl;
-/*DEBUG*/t0 = high_resolution_clock::now();
-    {
-        // Scope variables -------------------------------------------------- //
-        // none
+    // Ghost owned by the receiver that will be promoted as internal cell
+    //
+    // Among all the received cells, some cells may be already here because
+    // they are ghost cells owned by the sending processor. To identify those
+    // cells, the sender is sending us the position in the ghost exchange data
+    // structures of the duplicate cells owned by this processor. These cells
+    // will be promoted to internal cells and the data received by the sender
+    // will allow to properly set the adjacencies.
+    //
+    // Other cells may be already here, i.e. ghost cells owned by a processor
+    // that is not the sender. However the sender doens't have the necessary
+    // information to tell us which ghost cells are already here. The data we
+    // receive now is only related to the ghost cells owned by the sender.
+    // Cells owned by other processors need to be check when they are received.
+    long nSenderGhostsToPromote;
+    cellBuffer >> nSenderGhostsToPromote;
 
-        // Remove duplicated vertices --------------------------------------- //
-        out << "    n. vertices is: " << getVertexCount() << endl;
-        deleteCoincidentVertices();
-        deleteOrphanVertices();
-        out << "    (after cleaning), n.vertices is: " << getVertexCount() << endl << endl;
-    }
-/*DEBUG*/out << "  nInternals: " << m_nInternals << endl;
-/*DEBUG*/out << "  nGhosts: " << m_nGhosts << endl;
-/*DEBUG*/t1 = high_resolution_clock::now();
-/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
-/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
+	unordered_map<long, long> senderGhostsToPromote;
+	senderGhostsToPromote.reserve(nSenderGhostsToPromote);
 
-    // Update adjacencies =================================================== //
-/*DEBUG*/out << "* receiver (rank#" << m_rank << "), updating adjacencies {" << endl;
-/*DEBUG*/t0 = high_resolution_clock::now();
-    {
-        // Scope variables -------------------------------------------------- //
-        vector<long>                                    cell_list(n_cells + n_ghosts, -1);
-        unordered_map<long, long>::const_iterator       i, e;
-        long                                            j;
+	if (nSenderGhostsToPromote > 0) {
+		const auto &sendExchangeTargets = getGhostExchangeTargets(sendRank);
+		for (int n = 0; n < nSenderGhostsToPromote; ++n) {
+			long index;
+			cellBuffer >> index;
+			long localCellId = sendExchangeTargets[index];
 
-        // Update Adjacencies ----------------------------------------------- //
-        j = 0;
-        e = c_local_mapping.cend();
-        for (i = c_local_mapping.cbegin(); i != e; ++i) {
-            cell_list[j] = i->second;
-            ++j;
-        } //next i
+			long senderCellId;
+			cellBuffer >> senderCellId;
 
-        // Update Adjacencies ----------------------------------------------- //
-// /*DEBUG*/out << "    updating adjacencies of simplicies: " << cell_list << endl << endl;
-        updateAdjacencies(cell_list);
-/*DEBUG*/{
-// /*DEBUG*/    for (int ii = 0; ii < cell_list.size(); ++ii) {
-// /*DEBUG*/           out << "    cell ID: " << cell_list[ii] << " is now: " << endl;
-// /*DEBUG*/           m_cells[cell_list[ii]].display(out, 4);
-// /*DEBUG*/    } //next ii
-/*DEBUG*/}
-    }
-/*DEBUG*/out << "  nInternals: " << m_nInternals << endl;
-/*DEBUG*/out << "  nGhosts: " << m_nGhosts << endl;
-/*DEBUG*/t1 = high_resolution_clock::now();
-/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
-/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
-
-/*DEBUG*/{
-/*DEBUG*/    ostream        *msg = reinterpret_cast<ostream*>(&out);
-/*DEBUG*/    out << "* stats (rank#" << m_rank << "): " << endl;
-/*DEBUG*/    displayTopologyStats(*msg);
-/*DEBUG*/    out << endl;
-/*DEBUG*/    out << "* receiver (rank #" << m_rank << ") completed its tasks" << endl << endl;
-/*DEBUG*/}
-
-	// Rebuild ghost information
-	clearGhostOwners(false);
-
-	for (auto &rankEntry : m_ghost2id) {
-		int rank = rankEntry.first;
-		for (auto &ghostEntry : rankEntry.second) {
-			long ghostId = ghostEntry.second;
-
-			setGhostOwner(ghostId, rank, false);
+			senderGhostsToPromote.insert({{senderCellId, localCellId}});
 		}
 	}
 
-	buildGhostExchangeData();
+    // Receive cells
+    //
+    // The sender is sending also an halo surroudning the cells explicitly
+    // marked for sending. This halo will be used for connecting the received
+    // cells to the existing ones and to build the ghosts.
+    //
+    // Some cells on the halo can be duplicate. For some of these cells we
+    // already know the apping between sender cell ids and local ids. For
+    // all the other cells we need to check if they are duplicate. All halo
+    // are inserted in the cell list, if they are duplicates they will be
+    // deleted later.
+    long nRecvCells;
+    cellBuffer >> nRecvCells;
 
+    std::unordered_set<int> involvedRanks;
+	involvedRanks.insert(sendRank);
+
+    std::unordered_map<long, long> recvCellMap;
+    std::unordered_set<long> recvCells;
+	recvCells.reserve(nRecvCells);
+
+    std::unordered_map<long, CollapsedVector2D<long>> linkAdjacencies;
+
+    for (long i = 0; i < nRecvCells; ++i) {
+        // Cell data
+        int recvCellOwner;
+        cellBuffer >> recvCellOwner;
+
+        Cell recvCell;
+        cellBuffer >> recvCell;
+        long senderCellId = recvCell.getId();
+
+        // Set cell interior flag
+        bool recvIsInterior = (recvCellOwner == m_rank);
+        recvCell.setInterior(recvIsInterior);
+
+        // Remap connectivity
+        int nCellVertices = recvCell.getVertexCount();
+        for (int j = 0; j < nCellVertices; ++j) {
+            long senderVertexId = recvCell.getVertex(j);
+            long localVertexId  = recvVertexMap.at(senderVertexId);
+
+            recvCell.setVertex(j, localVertexId);
+        }
+
+        // Check if the cells is a duplicate
+        long localCellId = Cell::NULL_ID;
+        if (recvCellOwner != m_rank && getGhostExchangeTargets().count(recvCellOwner) > 0) {
+            const auto &rankExchangeTargets = getGhostExchangeTargets(recvCellOwner);
+            for (long ghostId : rankExchangeTargets) {
+                const Cell &ghostCell = m_cells[ghostId];
+                if (ghostCell.getType() != recvCell.getType()) {
+                    continue;
+                }
+
+                bool cellsCoincide = true;
+                int nGhostVertices = ghostCell.getVertexCount();
+                for (int vertex = 0; vertex < nGhostVertices; ++vertex) {
+                    long ghostVertexId = ghostCell.getVertex(vertex);
+                    long recvVertexId  = recvCell.getVertex(vertex);
+                    if (ghostVertexId != recvVertexId) {
+                        cellsCoincide = false;
+                        break;
+                    }
+                }
+
+                if (cellsCoincide) {
+                    localCellId = ghostId;
+                    break;
+                }
+            }
+        } else if (senderGhostsToPromote.count(senderCellId) > 0) {
+            localCellId = senderGhostsToPromote[senderCellId];
+        }
+
+        // If the cell is not a duplicate add it in the cell data structure,
+        // otherwise merge the connectivity of the duplicate cell to the
+        // existing cell. This ensure that the received cell will be
+        // properly connected to the received cells
+        if (localCellId < 0) {
+            // Add cell
+            localCellId = generateCellId();
+            addCell(std::move(recvCell), localCellId);
+            if (!recvIsInterior) {
+                setGhostOwner(localCellId, recvCellOwner, false);
+            }
+
+            recvCells.insert(localCellId);
+
+            // Update adaption info
+            adaptionInfo.current.push_back(localCellId);
+        } else {
+            // Check if the existing cells needs to become an internal cell
+            Cell &localCell = m_cells[localCellId];
+            if (recvIsInterior && !localCell.isInterior()) {
+                unsetGhostOwner(localCellId, false);
+                moveGhost2Internal(localCellId);
+            }
+
+            // Save the adjacencies of the received cell, this adjacencies
+            // will link together the recevied cell to the existing ones.
+            CollapsedVector2D<long> &recvAdjacencies = linkAdjacencies[localCellId];
+
+            int nCellFaces = recvCell.getFaceCount();
+            recvAdjacencies.reserve(nCellFaces);
+            for (int face = 0; face < nCellFaces; ++face) {
+                int nFaceAdjacencies = recvCell.getAdjacencyCount(face);
+
+                std::vector<long> faceAdjacencies;
+                faceAdjacencies.reserve(nFaceAdjacencies);
+                for (int k = 0; k < nFaceAdjacencies; ++k) {
+                    faceAdjacencies.push_back(recvCell.getAdjacency(face, k));
+                }
+
+                recvAdjacencies.push_back(faceAdjacencies);
+            }
+        }
+
+        // Ranks involved in the communication
+        if (recvCellOwner != m_rank) {
+            involvedRanks.insert(recvCellOwner);
+        }
+
+        // Add the cell to the cell map
+        recvCellMap.insert({{senderCellId, localCellId}});
+    }
+
+    // Remap adjacencies
+    for (auto cellId : recvCells) {
+        Cell &cell = m_cells[cellId];
+
+        int nCellFaces = cell.getFaceCount();
+        for (int face = 0; face < nCellFaces; ++face) {
+            int nFaceAdjacencies = cell.getAdjacencyCount(face);
+            for (int k = 0; k < nFaceAdjacencies; ++k) {
+                long senderAdjacencyId = cell.getAdjacency(face, k);
+                if (senderAdjacencyId < 0) {
+                    continue;
+                } else if (recvCellMap.count(senderAdjacencyId) == 0) {
+					cell.deleteAdjacency(face, k);
+                    continue;
+                } else {
+					long localAdjacencyId = recvCellMap.at(senderAdjacencyId);
+					cell.setAdjacency(face, k, localAdjacencyId);
+				}
+            }
+        }
+    }
+
+    // Link received cells with the current cells
+    for (auto &entry : linkAdjacencies) {
+        long cellId = entry.first;
+        Cell &cell = m_cells[cellId];
+
+        int nCellFaces = cell.getFaceCount();
+        CollapsedVector2D<long> &cellLinkAdjacencies = entry.second;
+        for (int face = 0; face < nCellFaces; ++face) {
+            int nFaceLinkAdjacencies = cellLinkAdjacencies.sub_array_size(face);
+            for (int k = 0; k < nFaceLinkAdjacencies; ++k) {
+                long senderAdjacencyId = cellLinkAdjacencies.get(face, k);
+                long localAdjacencyId  = recvCellMap[senderAdjacencyId];
+                if (cell.findAdjacency(face, localAdjacencyId) >= 0) {
+                    continue;
+                }
+
+                cell.pushAdjacency(face, localAdjacencyId);
+            }
+        }
+    }
+
+    // Rebuild ghost information
+    for (auto &rank : involvedRanks) {
+        buildGhostExchangeData(rank);
+    }
+
+    // Return adaption info
     return adaptionInfo;
-
 }
 
 /*!
     Notifies the current processor of changes in ghost ownership after a
     cell send operation.
 
-    \param[in] snd_rank is the rank of the processor sending the cells
-    \param[in] rcv_rank is the rank of the processor receiving the cells
+    \param[in] sendRank is the rank of the processor sending the cells
+    \param[in] recvRank is the rank of the processor receiving the cells
  */
-adaption::Info PatchKernel::sendCells_notified(const unsigned short &snd_rank, const unsigned short &rcv_rank)
+adaption::Info PatchKernel::sendCells_notified(const int &sendRank, const int &recvRank)
 {
-    // ========================================================================== //
-    // SCOPE VARIABLES                                                            //
-    // ========================================================================== //
-
     adaption::Info adaptionInfo;
 
-    // Debug variables
-    /*DEBUG*/stringstream                           out_name;
-    /*DEBUG*/ofstream                               out;
-    /*DEBUG*/high_resolution_clock::time_point      t0, t1;
-    /*DEBUG*/duration<double>                       time_span;
-
-    /*DEBUG*/{
-    /*DEBUG*/    out_name << "DEBUG_rank_" << m_rank << ".log";
-    /*DEBUG*/    out.open(out_name.str(), ifstream::app);
-    /*DEBUG*/    out_name.str("");
-    /*DEBUG*/    out << endl;
-    /*DEBUG*/    out << "** RANK #" << m_rank << "** NEW COMMUNICATION **" << endl;
-    /*DEBUG*/    out << endl;
-    /*DEBUG*/}
-
-    bool                                                                waiting;
-    long                                                                buff_size;
-    long                                                                n_cells;
-    long                                                                i;
-    long                                                                cell_idx, new_cell_idx, my_cell_idx;
-    IBinaryStream                                                       buffer;
-    unordered_map< short, unordered_map<long, long> >::const_iterator   m, e;
-
-    // Check if something has to be received ================================ //
-    waiting = false;
-    e = m_ghost2id.cend();
-    for (m = m_ghost2id.cbegin(); m != e; ++m) {
-        waiting |= (m->first == snd_rank);
-    };
-
-    // Receive cell list ==================================================== //
-/*DEBUG*/out << "* process (rank#" << m_rank << ") receving notification" << endl;
-/*DEBUG*/t0 = high_resolution_clock::now();
-    if (waiting) {
-
-        // Initialize adaption info
-        adaptionInfo.entity = adaption::ENTITY_CELL;
-        adaptionInfo.type   = adaption::TYPE_PARTITION_NOTICE;
-        adaptionInfo.rank   = snd_rank;
-
-        // Receive buffer size
-        MPI_Recv(&buff_size, 1, MPI_LONG, snd_rank, 8 + m_rank, m_communicator, MPI_STATUS_IGNORE);
-
-        // Initialize stream from memory
-        IBinaryStream           buffer( buff_size );
-
-        // Receive buffer
-        MPI_Recv(buffer.get_buffer(), buff_size, MPI_CHAR, snd_rank, 8 + m_nProcessors + m_rank, m_communicator, MPI_STATUS_IGNORE);
-
-        // Update ghost list
-/*DEBUG*/{
-/*DEBUG*/    out << "* process (rank#" << m_rank << ") updating ghosts lists" << endl;
-/*DEBUG*/    out << "* process (rank#" << m_rank << ") is waiting for notification" << endl;
-/*DEBUG*/}
-        if ( m_ghost2id.find( snd_rank ) != e ) {
-            buffer >> n_cells;
-/*DEGUB*/   out << "  number of cells is " << n_cells << endl;
-            for (i = 0; i < n_cells; ++i) {
-                buffer >> cell_idx;
-                buffer >> new_cell_idx;
-                out << "    being notifyied that cell " << cell_idx << " has now ID: " << new_cell_idx << " on rank " << rcv_rank << endl;
-                if ( m_ghost2id[snd_rank].find( cell_idx ) != m_ghost2id[snd_rank].end() ) {
-                    my_cell_idx = m_ghost2id[snd_rank][cell_idx];
-                    m_ghost2id[snd_rank].erase( cell_idx );
-                    m_ghost2id[rcv_rank][ new_cell_idx ] = my_cell_idx;
-
-                    adaptionInfo.current.push_back(my_cell_idx);
-                }
-            } //next i
-        }
+    // This processor will receive a notification only if it has ghosts owned
+    // by the sender
+    if (getGhostExchangeTargets().count(sendRank) == 0) {
+        adaptionInfo.type = adaption::TYPE_NONE;
+        return adaptionInfo;
     }
-/*DEBUG*/t1 = high_resolution_clock::now();
-/*DEBUG*/time_span = duration_cast<duration<double>>(t1 - t0);
-/*DEBUG*/out<< "}" << endl << "  (" << time_span.count() << " sec.)" << endl;
 
-/*DEBUG*/{
-/*DEBUG*/    out << "* display mesh infos {" << endl;
-/*DEBUG*/    displayCells(out);
-/*DEBUG*/    out << "}" << endl;
-/*DEBUG*/}
-/*DEBUG*/{
-/*DEBUG*/    out << "* display ghost infos {" << endl;
-/*DEBUG*/    unordered_map<short, unordered_map<long, long>>::const_iterator    ii;
-/*DEBUG*/    unordered_map<long, long>::const_iterator                          jj;
-/*DEBUG*/    for (ii = m_ghost2id.cbegin(); ii != m_ghost2id.cend(); ++ii) {
-/*DEBUG*/        out << "  rank: " << ii->first << endl;
-/*DEBUG*/        for (jj = ii->second.cbegin(); jj != ii->second.cend(); ++jj) {
-/*DEBUG*/            out << "    {" << jj->second << ", " << jj->first << "}" << endl;
-/*DEBUG*/        } //next j
-/*DEBUG*/    } //next ii
-/*DEBUG*/    out << "}" << endl;
-/*DEBUG*/    out.close();
-/*DEBUG*/}
+    // Receive ownership changes
+    long bufferSize;
+    MPI_Recv(&bufferSize, 1, MPI_LONG, sendRank, 30, m_communicator, MPI_STATUS_IGNORE);
+    if (bufferSize == 0) {
+        adaptionInfo.type = adaption::TYPE_NONE;
+        return adaptionInfo;
+    }
 
-	// Rebuild ghost information
-	clearGhostOwners(false);
+    IBinaryStream buffer(bufferSize);
+    MPI_Recv(buffer.get_buffer(), buffer.size(), MPI_CHAR, sendRank, 31, m_communicator, MPI_STATUS_IGNORE);
 
-	for (auto &rankEntry : m_ghost2id) {
-		int rank = rankEntry.first;
-		for (auto &ghostEntry : rankEntry.second) {
-			long ghostId = ghostEntry.second;
+    // Initialize adaption info
+    adaptionInfo.entity = adaption::ENTITY_CELL;
+    adaptionInfo.type   = adaption::TYPE_PARTITION_NOTICE;
+    adaptionInfo.rank   = sendRank;
 
-			setGhostOwner(ghostId, rank, false);
-		}
-	}
+    // Apply ownership changes
+    long nChanges;
+    buffer >> nChanges;
 
-	buildGhostExchangeData();
+    const auto exchangeTargets = getGhostExchangeTargets(sendRank);
+    for (long k = 0; k < nChanges; ++k) {
+        long index;
+        buffer >> index;
 
+        long cellId = exchangeTargets[index];
+        setGhostOwner(cellId, recvRank, false);
+    }
+
+    // Rebuild ghost exchagne data
+    buildGhostExchangeData(sendRank);
+    buildGhostExchangeData(recvRank);
+
+	// Return adaption info
     return adaptionInfo;
-
 }
 
 /*!

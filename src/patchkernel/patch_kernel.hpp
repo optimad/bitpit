@@ -278,7 +278,7 @@ public:
 	const std::vector<adaption::Info> partition(bool trackChanges);
 	const std::vector<adaption::Info> balancePartition(bool trackChanges);
 
-	adaption::Info sendCells(const unsigned short &, const unsigned short &, const std::vector<long> &);
+	adaption::Info sendCells(const int &sendRank, const int &recvRank, const std::vector<long> &cellsToSend);
 #endif
 
 protected:
@@ -431,7 +431,6 @@ private:
 	int m_nProcessors;
 #if BITPIT_ENABLE_MPI==1
 	MPI_Comm m_communicator;
-        std::unordered_map<short, std::unordered_map<long, long> > m_ghost2id;
 
 	std::unordered_map<long, int> m_ghostOwners;
 	std::unordered_map<int, std::vector<long>> m_ghostExchangeTargets;
@@ -439,9 +438,9 @@ private:
 
 	void addExchangeSources(const std::vector<long> &ghostIds);
 
-    adaption::Info sendCells_sender(const unsigned short &rcv_rank, const std::vector<long> &cell_list);
-    adaption::Info sendCells_receiver(const unsigned short &snd_rank);
-    adaption::Info sendCells_notified(const unsigned short &snd_rank, const unsigned short &rcv_rank);
+    adaption::Info sendCells_sender(const int &recvRank, const std::vector<long> &cellsToSend);
+    adaption::Info sendCells_receiver(const int &sendRank);
+    adaption::Info sendCells_notified(const int &sendRank, const int &recvRank);
 #endif
 
 	VertexIterator createVertex(const std::array<double, 3> &coords, long id = Vertex::NULL_ID);
