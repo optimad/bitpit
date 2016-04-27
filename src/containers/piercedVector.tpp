@@ -1709,7 +1709,7 @@ std::size_t PiercedVector<value_t, id_t>::fillPosInsert(const std::size_t &pos, 
 		// Shift the elements after the requested position
 		for (size_t i = m_last_pos; i > pos; --i) {
 			id_t id = m_ids[i - 1];
-			if (id > 0) {
+			if (id >= 0) {
 				setPosId(i, id);
 				m_v[i] = std::move(m_v[i - 1]);
 			} else {
