@@ -38,6 +38,7 @@
 
 // BitPit
 # include "bitpit_common.hpp"                                                 // Utilities and common definitions
+# include "bitpit_IO.hpp"                                                     // Input/output
 # include "bitpit_operators.hpp"                                              // STL containers operators
 # include "bitpit_patchkernel.hpp"                                            // BitPit base patch
 # include "bitpit_surfunstructured.hpp"                                           // BitPit surftri patch
@@ -253,11 +254,11 @@ vector<long>                            cell_list;
     // none
 
     // Output message
-    cout << "** ================================================================= **" << endl;
-    cout << "** Test #00001 - sub-test #002 - Testing adjacencies construction    **" << endl;
-    cout << "**                               and update.                         **" << endl;
-    cout << "** ================================================================= **" << endl;
-    cout << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Test #00001 - sub-test #002 - Testing adjacencies construction    **" << endl;
+    log::cout() << "**                               and update.                         **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << endl;
 }
 
 // ========================================================================== //
@@ -272,14 +273,14 @@ vector<long>                            cell_list;
     envelope.setExpert(true);
 
     // Generate a dummy triangulation --------------------------------------- //
-    cout << "** Generating non-manifold surface triangulation" << endl;
+    log::cout() << "** Generating non-manifold surface triangulation" << endl;
     generateTestTriangulation(mesh);
-    cout << "   building adjacencies" << endl;
+    log::cout() << "   building adjacencies" << endl;
     mesh.buildAdjacencies();
 
     // Mesh stats ----------------------------------------------------------- //
-    cout << "   mesh stats (step 1):" << endl;
-    mesh.displayTopologyStats(cout, 3);
+    log::cout() << "   mesh stats (step 1):" << endl;
+    mesh.displayTopologyStats(log::cout(), 3);
 
     // Check mesh topology -------------------------------------------------- //
 
@@ -298,13 +299,13 @@ vector<long>                            cell_list;
     // Compute 1-ring of vertex 12 ------------------------------------------ //
     ring1 = mesh.findCellVertexOneRing(7, 2);
     sort(ring1.begin(), ring1.end());
-    cout << "   1-ring of vertex (7, 2): " << ring1 << endl;
+    log::cout() << "   1-ring of vertex (7, 2): " << ring1 << endl;
 
     // Check 1-ring of vertex (7,2) ----------------------------------------- //
     if (ring1 != ring1_expected)            return 1;
 
     // External envelope ---------------------------------------------------- //
-    cout << "  extracting mesh envelope" << endl;
+    log::cout() << "  extracting mesh envelope" << endl;
     mesh.extractEnvelope(envelope);
     envelope.buildAdjacencies();
 
@@ -324,10 +325,10 @@ vector<long>                            cell_list;
 
     // Export triangulation ------------------------------------------------- //
     mesh.write("step1");
-    cout << "  (mesh exported to \"step1.vtu\")" << endl;
+    log::cout() << "  (mesh exported to \"step1.vtu\")" << endl;
     envelope.write("env_step1");
-    cout << "  (external mesh envelope exported to \"env_step1.vtu\")" << endl;
-    cout << endl;
+    log::cout() << "  (external mesh envelope exported to \"env_step1.vtu\")" << endl;
+    log::cout() << endl;
 
 }
 
@@ -343,7 +344,7 @@ vector<long>                            cell_list;
     envelope.setExpert(true);
 
     // Backup copy of cells ------------------------------------------------- //
-    cout << "** Removing cell ID 5, 7, and 17" << endl;
+    log::cout() << "** Removing cell ID 5, 7, and 17" << endl;
     cell_17 = mesh.getCell(17);
     cell_17.resetAdjacencies();
     cell_5  = mesh.getCell(5);
@@ -357,8 +358,8 @@ vector<long>                            cell_list;
     mesh.deleteCell(7);
 
     // Mesh stats ----------------------------------------------------------- //
-    cout << "   mesh stats (step 2):" << endl;
-    mesh.displayTopologyStats(cout, 3);
+    log::cout() << "   mesh stats (step 2):" << endl;
+    mesh.displayTopologyStats(log::cout(), 3);
 
     // Check mesh topology -------------------------------------------------- //
 
@@ -377,13 +378,13 @@ vector<long>                            cell_list;
     // Compute 1-ring of vertex 12 ------------------------------------------ //
     ring1 = mesh.findCellVertexOneRing(23, 0);
     sort(ring1.begin(), ring1.end());
-    cout << "   1-ring of vertex (23, 0): " << ring1 << endl;
+    log::cout() << "   1-ring of vertex (23, 0): " << ring1 << endl;
 
     // Check 1-ring of vertex (23,0) ---------------------------------------- //
     if (ring1 != ring1_expected)                return 2;
 
     // External envelope ---------------------------------------------------- //
-    cout << "   extracting mesh envelope" << endl;
+    log::cout() << "   extracting mesh envelope" << endl;
     mesh.extractEnvelope(envelope);
     envelope.buildAdjacencies();
 
@@ -403,10 +404,10 @@ vector<long>                            cell_list;
 
     // Export triangulation ------------------------------------------------- //
     mesh.write("step2");
-    cout << "   (mesh exported to \"step2.vtu\")" << endl;
+    log::cout() << "   (mesh exported to \"step2.vtu\")" << endl;
     envelope.write("env_step2");
-    cout << "   (external mesh envelope exported to \"env_step2.vtu\")" << endl;
-    cout << endl;
+    log::cout() << "   (external mesh envelope exported to \"env_step2.vtu\")" << endl;
+    log::cout() << endl;
 
 }
 
@@ -423,7 +424,7 @@ vector<long>                            cell_list;
     envelope.setExpert(true);
 
     // Insert cells --------------------------------------------------------- //
-    cout << "** inserting previously deleted cells" << endl;
+    log::cout() << "** inserting previously deleted cells" << endl;
     it = mesh.addCell(cell_17);
     cell_list.push_back(it->getId());
 
@@ -432,11 +433,11 @@ vector<long>                            cell_list;
 
     it = mesh.addCell(cell_7);
     cell_list.push_back(it->getId());
-    cout << "   cell list is: " << cell_list << endl;
+    log::cout() << "   cell list is: " << cell_list << endl;
 
     // Mesh stats topology -------------------------------------------------- //
-    cout << "   mesh stats (step 3):" << endl;
-    mesh.displayTopologyStats(cout, 3);
+    log::cout() << "   mesh stats (step 3):" << endl;
+    mesh.displayTopologyStats(log::cout(), 3);
 
     // Check mesh ----------------------------------------------------------- //
 
@@ -455,13 +456,13 @@ vector<long>                            cell_list;
     // Compute 1-ring of vertex 12 ------------------------------------------ //
     ring1 = mesh.findCellVertexOneRing(7, 2);
     sort(ring1.begin(), ring1.end());
-    cout << "   1-ring of vertex (7, 2): " << ring1 << endl;
+    log::cout() << "   1-ring of vertex (7, 2): " << ring1 << endl;
 
     // Check 1-ring of (35, 2) ---------------------------------------------- //
     if (ring1 != ring1_expected)                return 3;
 
     // External envelope ---------------------------------------------------- //
-    cout << "   extracting mesh external envelope" << endl;
+    log::cout() << "   extracting mesh external envelope" << endl;
     mesh.extractEnvelope(envelope);
     envelope.buildAdjacencies();
 
@@ -481,10 +482,10 @@ vector<long>                            cell_list;
 
     // Export triangulation ------------------------------------------------- //
     mesh.write("step3");
-    cout << "   (mesh exported to \"step3.vtu\")" << endl;
+    log::cout() << "   (mesh exported to \"step3.vtu\")" << endl;
     envelope.write("env_step3");
-    cout << "   (external mesh envelope exported to \"env_step3.vtu\")" << endl;
-    cout << endl;
+    log::cout() << "   (external mesh envelope exported to \"env_step3.vtu\")" << endl;
+    log::cout() << endl;
 }
 
 // ========================================================================== //
@@ -499,12 +500,12 @@ vector<long>                            cell_list;
     envelope.setExpert(true);
 
     // Insert cells --------------------------------------------------------- //
-    cout << "** updating adjacencies" << endl;
+    log::cout() << "** updating adjacencies" << endl;
     mesh.updateAdjacencies(cell_list);
 
     // Mesh stats ----------------------------------------------------------- //
-    cout << "   mesh stats (step 4):" << endl;
-    mesh.displayTopologyStats(cout, 3);
+    log::cout() << "   mesh stats (step 4):" << endl;
+    mesh.displayTopologyStats(log::cout(), 3);
 
     // Check mesh topology -------------------------------------------------- //
 
@@ -523,13 +524,13 @@ vector<long>                            cell_list;
     // Compute 1-ring of vertex 12 ------------------------------------------ //
     ring1 = mesh.findCellVertexOneRing(7, 2);
     sort(ring1.begin(), ring1.end());
-    cout << "   1-ring of vertex (7, 2): " << ring1 << endl;
+    log::cout() << "   1-ring of vertex (7, 2): " << ring1 << endl;
 
     // Check 1-ring of vertex (7,2) ----------------------------------------- //
     if (ring1 != ring1_expected)                return 4;
 
     // External envelope ---------------------------------------------------- //
-    cout << "   extracting mesh external envelope" << endl;
+    log::cout() << "   extracting mesh external envelope" << endl;
     mesh.extractEnvelope(envelope);
     envelope.buildAdjacencies();
 
@@ -549,10 +550,10 @@ vector<long>                            cell_list;
 
     // Export triangulation ------------------------------------------------- //
     mesh.write("step4");
-    cout << "   (mesh exported to \"step4.vtu\")" << endl;
+    log::cout() << "   (mesh exported to \"step4.vtu\")" << endl;
     envelope.write("env_step4");
-    cout << "   (external mesh envelope exported to \"env_step4.vtu\")" << endl;
-    cout << endl;
+    log::cout() << "   (external mesh envelope exported to \"env_step4.vtu\")" << endl;
+    log::cout() << endl;
 }
 
 // ========================================================================== //
@@ -563,10 +564,10 @@ vector<long>                            cell_list;
     // none
 
     // Output message --------------------------------------------------- //
-    cout << "** ================================================================= **" << endl;
-    cout << "** Test #00001 - sub-test #002 - completed!                          **" << endl;
-    cout << "** ================================================================= **" << endl;
-    cout << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Test #00001 - sub-test #002 - completed!                          **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << endl;
 }
 
 return 0;
@@ -632,10 +633,10 @@ int                             i;
     // none
 
     // Output message
-    cout << "** ================================================================= **" << endl;
-    cout << "** Test #00001 - sub-test #001 - Testing cell insertion and deletion **" << endl;
-    cout << "** ================================================================= **" << endl;
-    cout << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Test #00001 - sub-test #001 - Testing cell insertion and deletion **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << endl;
 }
 
 // ========================================================================== //
@@ -647,7 +648,7 @@ int                             i;
     int                         n;
 
     // Initialize internal cell
-    cout << "** Initializing cell" << endl;
+    log::cout() << "** Initializing cell" << endl;
     n = cell.getVertexCount();
     for (j = 0; j < n; ++j) {
         cell.setVertex(j, c_connect[j]);
@@ -656,7 +657,7 @@ int                             i;
     for (j = 0; j < n; ++j) {
         ghost.setVertex(j, g_connect[j]);
     } //next j
-    cout << endl;
+    log::cout() << endl;
 }
 
 // ========================================================================== //
@@ -670,7 +671,7 @@ int                             i;
     // Insert internal cells (IDX 0-4) -------------------------------------- //
     // cells:  {0,1,2,3,4}
     // ghosts: {}
-    cout << "** Inserting internal cells" << endl;
+    log::cout() << "** Inserting internal cells" << endl;
     for (i = 0; i < N/2; ++i) {
         mesh.addCell(cell);
         expected.push_back(long(i));
@@ -681,7 +682,7 @@ int                             i;
         expected.push_back(long(i));
         internal.push_back(true);
     } //next i
-    cout << endl;
+    log::cout() << endl;
 
     // Check cell ordering -------------------------------------------------- //
     i = 0;
@@ -693,18 +694,18 @@ int                             i;
     } //next it
 
     // Display mesh content ------------------------------------------------- //
-    cout << "** After inserting internal cells" << endl;
+    log::cout() << "** After inserting internal cells" << endl;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
-        cout << "   cell: " << endl;
-        it->display(cout, 4);
+        log::cout() << "   cell: " << endl;
+        it->display(log::cout(), 4);
     } //next it
-    cout << endl;
+    log::cout() << endl;
 
     // Insert ghost cells (IDX 5-9) ----------------------------------------- //
     // cells:  {0,1,2,3,4}
     // ghosts: {5,6,7,8,9}
-    cout << "** Inserting ghost cells" << endl;
+    log::cout() << "** Inserting ghost cells" << endl;
     for (i = 0; i < N/2; ++i) {
         mesh.addCell(ghost);
         expected.push_back(long(N + i));
@@ -715,7 +716,7 @@ int                             i;
         expected.push_back(long(N + i));
         internal.push_back(false);
     } //next i
-    cout << endl;
+    log::cout() << endl;
 
     // Check cells ordering ------------------------------------------------- //
     i = 0;
@@ -727,13 +728,13 @@ int                             i;
     } //next it
 
     // Display mesh content ------------------------------------------------- //
-    cout << "** After inserting ghost cells" << endl;
+    log::cout() << "** After inserting ghost cells" << endl;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
-        cout << "   cell: " << endl;
-        it->display(cout, 4);
+        log::cout() << "   cell: " << endl;
+        it->display(log::cout(), 4);
     } //next it
-    cout << endl;
+    log::cout() << endl;
 
 }
 
@@ -771,13 +772,13 @@ int                             i;
     } //next it
 
     // Display mesh
-    cout << "** After removing internal/ghost cells" << endl;
+    log::cout() << "** After removing internal/ghost cells" << endl;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
-        cout << "   cell: " << endl;
-        it->display(cout, 4);
+        log::cout() << "   cell: " << endl;
+        it->display(log::cout(), 4);
     } //next it
-    cout << endl;
+    log::cout() << endl;
 
     // Remove ghost cells
     //bucket = {}
@@ -805,13 +806,13 @@ int                             i;
         ++i;
     } //next it
 
-    cout << "** After inserting internal/ghost cells" << endl;
+    log::cout() << "** After inserting internal/ghost cells" << endl;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
-        cout << "   cell: " << endl;
-        it->display(cout, 4);
+        log::cout() << "   cell: " << endl;
+        it->display(log::cout(), 4);
     } //next it
-    cout << endl;
+    log::cout() << endl;
 
     // Remove all internal cells and add 2 ghost cells
     //bucket: {5,0,3}
@@ -848,13 +849,13 @@ int                             i;
         ++i;
     } //next it
 
-    cout << "** After erasing all internal cells and inserting 2 new ghosts" << endl;
+    log::cout() << "** After erasing all internal cells and inserting 2 new ghosts" << endl;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
-        cout << "   cell: " << endl;
-        it->display(cout, 4);
+        log::cout() << "   cell: " << endl;
+        it->display(log::cout(), 4);
     } //next it
-    cout << endl;
+    log::cout() << endl;
 
     // Remove all ghosts add 2 internal cells
     //bucket: {3,4,2,1,6,9,7,8}
@@ -897,13 +898,13 @@ int                             i;
         ++i;
     } //next it
 
-    cout << "** After erasing all ghost cells and inserting 2 new internal cells" << endl;
+    log::cout() << "** After erasing all ghost cells and inserting 2 new internal cells" << endl;
     et = mesh.cellEnd();
     for (it = mesh.cellBegin(); it != et; ++it) {
-        cout << "   cell: " << endl;
-        it->display(cout, 4);
+        log::cout() << "   cell: " << endl;
+        it->display(log::cout(), 4);
     } //next it
-    cout << endl;
+    log::cout() << endl;
 
 }
 
@@ -915,10 +916,10 @@ int                             i;
     // none
 
     // Output message
-    cout << "** ================================================================= **" << endl;
-    cout << "** Test #00001 - sub-test #001 - completed!                          **" << endl;
-    cout << "** ================================================================= **" << endl;
-    cout << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Test #00001 - sub-test #001 - completed!                          **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << endl;
 }
 
 return 0; }

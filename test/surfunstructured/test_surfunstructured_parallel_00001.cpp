@@ -40,6 +40,7 @@
 
 // BitPit
 # include "bitpit_common.hpp"                                                 // Utilities and common definitions
+# include "bitpit_IO.hpp"                                                     // Input/output
 # include "bitpit_operators.hpp"                                              // STL containers operators
 # include "bitpit_patchkernel.hpp"                                                  // BitPit base patch
 # include "bitpit_surfunstructured.hpp"                                           // BitPit surftri patch
@@ -305,21 +306,21 @@ SurfUnstructured                     envelope(0);
 {
     // Scope variables ------------------------------------------------------ //
     // none
-    cout << "* rank#" << snd << " send {" << id_list << "} to rank#" << rcv << endl;
+    log::cout() << "rank#" << snd << " send {" << id_list << "} to rank#" << rcv << endl;
     mesh.sendCells(snd, rcv, id_list);
 
     // Extracting mesh boundaries ------------------------------------------- //
-    cout << "* (rank #" << mesh.getRank() << ") extracting external envelope" << endl;
+    log::cout() << "(rank #" << mesh.getRank() << ") extracting external envelope" << endl;
     mesh.extractEnvelope(envelope);
 
     // Export mesh ---------------------------------------------------------- //
     stringstream                f1, f2;
     f1 << "test_00001_subtest001_step" << step_id;
     mesh.write(f1.str());
-    cout << "  (rank #" << mesh.getRank() << ", mesh exported to \"" << f1.str() << ".vtu\")" << endl;
+    log::cout() << "(rank #" << mesh.getRank() << ", mesh exported to \"" << f1.str() << ".vtu\")" << endl;
     f2 << "P" << utils::zeroPadNumber(6, mesh.getRank()) << "_env_step" << step_id;
     envelope.write(f2.str());
-    cout << "  (rank #" << mesh.getRank() << ", mesh external envelope exported to \"" << f2.str() << ".vtu\")" << endl;
+    log::cout() << "(rank #" << mesh.getRank() << ", mesh external envelope exported to \"" << f2.str() << ".vtu\")" << endl;
 }
 
 return; }
@@ -374,11 +375,11 @@ if (mesh.getRank() == 0) {
     // none
 
     // Output message ------------------------------------------------------- //
-    cout << "** ================================================================= **" << endl;
-    cout << "** Test #00001 - sub-test #001 - Testing mesh communications between **" << endl;
-    cout << "**                               3 processes.                        **" << endl;
-    cout << "** ================================================================= **" << endl;
-    cout << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Test #00001 - sub-test #001 - Testing mesh communications between **" << endl;
+    log::cout() << "**                               3 processes.                        **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << endl;
 }
 
 // ========================================================================== //
@@ -391,22 +392,22 @@ if (mesh.getRank() == 0) {
 
     // Generate dummy triangulation ----------------------------------------- //
     if (mesh.getRank() == 0) {
-        cout << "** (rank #0) Generating 2D non-manifold triangulation" << endl;
+        log::cout() << "(rank #0) Generating 2D non-manifold triangulation" << endl;
         generateTestTriangulation(mesh);
     }
     mesh.buildAdjacencies();
 
     // Extracting mesh boundaries ------------------------------------------- //
-    cout << "* (rank #" << mesh.getRank() << ") extracting external envelope" << endl;
+    log::cout() << "(rank #" << mesh.getRank() << ") extracting external envelope" << endl;
     mesh.extractEnvelope(envelope);
 
     // Export mesh ---------------------------------------------------------- //
     mesh.write("test00001_subtest001_step0");
-    cout << "  (rank #" << mesh.getRank() << ", mesh exported to \"test00001_subtest001_step0.vtu\")" << endl;
+    log::cout() << "(rank #" << mesh.getRank() << ", mesh exported to \"test00001_subtest001_step0.vtu\")" << endl;
     name << "P" << utils::zeroPadNumber(6, mesh.getRank()) <<"_env_step0";
     envelope.write(name.str());
-    cout << "  (rank #" << mesh.getRank() << ", mesh external envelope exported to " << name.str() << ".vtu)" << endl;
-    cout << endl;
+    log::cout() << "(rank #" << mesh.getRank() << ", mesh external envelope exported to " << name.str() << ".vtu)" << endl;
+    log::cout() << endl;
 }
 
 // ========================================================================== //
@@ -415,7 +416,7 @@ if (mesh.getRank() == 0) {
 {
     vector<long>                        cell_list{30,31};
     COM_step(mesh, 0, 2, cell_list, 1);
-    cout << endl;
+    log::cout() << endl;
 }
 
 // ========================================================================== //
@@ -424,7 +425,7 @@ if (mesh.getRank() == 0) {
 {
     vector<long>                        cell_list{7,8,9,23,22,24};
     COM_step(mesh, 0, 1, cell_list, 2);
-    cout << endl;
+    log::cout() << endl;
 }
 
 // ========================================================================== //
@@ -433,7 +434,7 @@ if (mesh.getRank() == 0) {
 {
     vector<long>                        cell_list{0,1};
     COM_step(mesh, 2, 1, cell_list, 3);
-    cout << endl;
+    log::cout() << endl;
 }
 
 // ========================================================================== //
@@ -442,7 +443,7 @@ if (mesh.getRank() == 0) {
 {
     vector<long>                        cell_list{3,4,5};
     COM_step(mesh, 1, 2, cell_list, 4);
-    cout << endl;
+    log::cout() << endl;
 }
 
 // ========================================================================== //
@@ -451,7 +452,7 @@ if (mesh.getRank() == 0) {
 {
     vector<long>                        cell_list{0,1,2};
     COM_step(mesh, 1, 0, cell_list, 5);
-    cout << endl;
+    log::cout() << endl;
 }
 
 // ========================================================================== //
@@ -463,10 +464,10 @@ if (mesh.getRank() == 0) {
     // none
 
     // Output message ------------------------------------------------------- //
-    cout << "** ================================================================= **" << endl;
-    cout << "** Test #00001 - sub-test #001 - completed!                          **" << endl;
-    cout << "** ================================================================= **" << endl;
-    cout << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Test #00001 - sub-test #001 - completed!                          **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << endl;
 }
 
 return 0;
@@ -530,7 +531,7 @@ if (mesh.getRank() == 0) {
     out_msg << "** ================================================================= **" << endl;
     out_msg << "** Test #00001 - sub-test #002 - Testing mesh partitioning           **" << endl;
     out_msg << "** ================================================================= **" << endl;
-    cout << out_msg.str() << endl;
+    log::cout() << out_msg.str() << endl;
 }
 
 // ========================================================================== //
@@ -566,7 +567,7 @@ if (mesh.getRank() == 0) {
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    cout << out_msg.str() << endl;
+    log::cout() << out_msg.str() << endl;
 
 }
 
@@ -597,7 +598,7 @@ if (mesh.getRank() == 0) {
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    cout << out_msg.str() << endl;
+    log::cout() << out_msg.str() << endl;
 
     out_msg << "   sending cell: " << cell_list2 << " from 0 to 2" << endl;
     t0 = high_resolution_clock::now();
@@ -605,7 +606,7 @@ if (mesh.getRank() == 0) {
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    cout << out_msg.str() << endl;
+    log::cout() << out_msg.str() << endl;
 
     // Export mesh ---------------------------------------------------------- //
     out_msg << "   exporting mesh to \"test00001_subtest002_step0.vtu\"" << endl;
@@ -614,7 +615,7 @@ if (mesh.getRank() == 0) {
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    cout << out_msg.str() << endl;
+    log::cout() << out_msg.str() << endl;
 }
 
 // ========================================================================== //
@@ -638,7 +639,7 @@ if (mesh.getRank() == 0) {
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    cout << out_msg.str() << endl;
+    log::cout() << out_msg.str() << endl;
 
     // Export mesh ---------------------------------------------------------- //
     out_msg << "   exporting mesh to \"test00001_subtest002_step1.vtu\"" << endl;
@@ -647,7 +648,7 @@ if (mesh.getRank() == 0) {
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    cout << out_msg.str() << endl;
+    log::cout() << out_msg.str() << endl;
 }
 
 
@@ -663,7 +664,7 @@ if (mesh.getRank() == 0) {
     out_msg << "** ================================================================= **" << endl;
     out_msg << "** Test #00001 - sub-test #002 - completed!                          **" << endl;
     out_msg << "** ================================================================= **" << endl;
-    cout << out_msg.str() << endl;
+    log::cout() << out_msg.str() << endl;
 }
 return 0;
 
@@ -726,7 +727,7 @@ if (mesh.getRank() == 0) {
     out_msg << "** ================================================================= **" << endl;
     out_msg << "** Test #00001 - sub-test #003 - Testing mesh partitioning           **" << endl;
     out_msg << "** ================================================================= **" << endl;
-    cout << out_msg.str() << endl;
+    log::cout() << out_msg.str() << endl;
 }
 
 // ========================================================================== //
@@ -762,7 +763,7 @@ if (mesh.getRank() == 0) {
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    cout << out_msg.str() << endl;
+    log::cout() << out_msg.str() << endl;
 
 }
 
@@ -794,7 +795,7 @@ if (mesh.getRank() == 0) {
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    cout << out_msg.str() << endl;
+    log::cout() << out_msg.str() << endl;
 
     out_msg << "   sending cell: " << cell_list2 << " from 0 to 2" << endl;
     t0 = high_resolution_clock::now();
@@ -802,7 +803,7 @@ if (mesh.getRank() == 0) {
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    cout << out_msg.str() << endl;
+    log::cout() << out_msg.str() << endl;
 
     out_msg << "   sending cell: " << cell_list3 << " from 0 to 3" << endl;
     t0 = high_resolution_clock::now();
@@ -810,7 +811,7 @@ if (mesh.getRank() == 0) {
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    cout << out_msg.str() << endl;
+    log::cout() << out_msg.str() << endl;
 
     // Export mesh ---------------------------------------------------------- //
     out_msg << "   exporting mesh to \"test00001_subtest002_step0.vtu\"" << endl;
@@ -819,7 +820,7 @@ if (mesh.getRank() == 0) {
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    cout << out_msg.str() << endl;
+    log::cout() << out_msg.str() << endl;
 }
 
 // ========================================================================== //
@@ -844,7 +845,7 @@ if (mesh.getRank() == 0) {
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    cout << out_msg.str() << endl;
+    log::cout() << out_msg.str() << endl;
 
     // Export mesh ---------------------------------------------------------- //
     out_msg << "   exporting mesh to \"test00001_subtest002_step1.vtu\"" << endl;
@@ -853,7 +854,7 @@ if (mesh.getRank() == 0) {
     t1 = high_resolution_clock::now();
     time_span = duration_cast<duration<double>>(t1 - t0);
     out_msg << "     (" << time_span.count() << " sec.)" << endl;
-    cout << out_msg.str() << endl;
+    log::cout() << out_msg.str() << endl;
 }
 
 
@@ -869,7 +870,7 @@ if (mesh.getRank() == 0) {
     out_msg << "** ================================================================= **" << endl;
     out_msg << "** Test #00001 - sub-test #003 - completed!                          **" << endl;
     out_msg << "** ================================================================= **" << endl;
-    cout << out_msg.str() << endl;
+    log::cout() << out_msg.str() << endl;
 }
 return 0;
 
@@ -898,6 +899,22 @@ int                             err = 0;
     // Initialize MPI comm world -------------------------------------------- //
     MPI_Init(&argc, &argv);
 
+}
+
+// ========================================================================== //
+// INITIALIZE LOGGER                                                          //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    int nProcs;
+    int rank;
+
+    // Initialize logger
+    MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    log::manager().initialize(log::COMBINED, true, nProcs, rank);
+    log::cout().setVisibility(log::GLOBAL);
 }
 
 // ========================================================================== //

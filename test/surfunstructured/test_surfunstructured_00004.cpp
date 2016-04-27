@@ -38,6 +38,7 @@
 
 // BitPit
 # include "bitpit_common.hpp"                                                 // Utilities and common definitions
+# include "bitpit_IO.hpp"                                                     // Input/output
 # include "bitpit_operators.hpp"                                              // STL containers operators
 # include "bitpit_patchkernel.hpp"                                            // BitPit base patch
 # include "bitpit_surfunstructured.hpp"                                           // BitPit surftri patch
@@ -91,10 +92,10 @@ int                             nV, nE;
     // none
 
     // Output message
-    cout << "** ================================================================= **" << endl;
-    cout << "** Test #00004 - sub-test #001 - edge extraction (surf in 3D)        **" << endl;
-    cout << "** ================================================================= **" << endl;
-    cout << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Test #00004 - sub-test #001 - edge extraction (surf in 3D)        **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << endl;
 }
 
 // ========================================================================== //
@@ -118,11 +119,11 @@ int                             nV, nE;
     bool                        stl_type = false;
 
     // Load stl file -------------------------------------------------------- //
-    cout << "** Importing surface mesh from \"" << stl_name << "\"" << endl;
+    log::cout() << "** Importing surface mesh from \"" << stl_name << "\"" << endl;
     mesh.importSTL(stl_name, stl_type);
-    cout << "** Removing coincident vertices" << endl;
+    log::cout() << "** Removing coincident vertices" << endl;
     mesh.deleteCoincidentVertices();
-    cout << "** Building adjacencies" << endl;
+    log::cout() << "** Building adjacencies" << endl;
     mesh.buildAdjacencies();
 
     // Check mesh status ---------------------------------------------------- //
@@ -147,7 +148,7 @@ int                             nV, nE;
     vector<array<double, 3>>                    normals, enormals, vnormals;
 
     // Extract edges -------------------------------------------------------- //
-    cout << "** Extracting edges" << endl;
+    log::cout() << "** Extracting edges" << endl;
     mesh.extractEdgeNetwork(edges);
     
     // Check mesh status ---------------------------------------------------- //
@@ -155,7 +156,7 @@ int                             nV, nE;
     if (edges.getVertexCount()   != nV)         return 2;
 
     // Compute cell normals ------------------------------------------------- //
-    cout << "** Computing cell normals" << endl;
+    log::cout() << "** Computing cell normals" << endl;
     normals.resize(mesh.getCellCount());
     ce_ = mesh.cellEnd();
     for (c_ = mesh.cellBegin(); c_ != ce_; ++c_) {
@@ -164,7 +165,7 @@ int                             nV, nE;
     } //next c_
     
     // Compute edge normals ------------------------------------------------- //
-    cout << "** Computing edge normals" << endl;
+    log::cout() << "** Computing edge normals" << endl;
     enormals.resize(edges.getCellCount());
     ce_ = mesh.cellEnd();
     for (c_ = mesh.cellBegin(); c_ != ce_; ++c_) {
@@ -184,7 +185,7 @@ int                             nV, nE;
     } //next c_
 
     // Compute vertex normals ----------------------------------------------- //
-    cout << "** Computing vertex normals" << endl;
+    log::cout() << "** Computing vertex normals" << endl;
     vnormals.resize(edges.getVertexCount());
     ve_ = mesh.vertexEnd();
     for (v_ = mesh.vertexBegin(); v_ != ve_; ++v_) {
@@ -201,14 +202,14 @@ int                             nV, nE;
     } //next c_
 
     // Export edges to vtu file --------------------------------------------- //
-    cout << "** Exporting edges to \"test_00004_subtest_001_edges.vtu\"" << endl;
+    log::cout() << "** Exporting edges to \"test_00004_subtest_001_edges.vtu\"" << endl;
     edges.addData("normals", VTKFieldType::VECTOR, VTKLocation::CELL, enormals);
     edges.addData("vnormals", VTKFieldType::VECTOR, VTKLocation::POINT, vnormals);
     edges.write("test_00004_subtest_001_edges");
-    cout << "** Exporting mesh to \"test_00004_subtest_001_surf.vtu\"" << endl;
+    log::cout() << "** Exporting mesh to \"test_00004_subtest_001_surf.vtu\"" << endl;
     mesh.addData("normals", VTKFieldType::VECTOR, VTKLocation::CELL, normals);
     mesh.write("test_00004_subtest_001_surf");
-    cout << endl;
+    log::cout() << endl;
 }
 
 // ========================================================================== //
@@ -219,10 +220,10 @@ int                             nV, nE;
     // none
 
     // Output message
-    cout << "** ================================================================= **" << endl;
-    cout << "** Test #00004 - sub-test #001 - completed!                          **" << endl;
-    cout << "** ================================================================= **" << endl;
-    cout << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Test #00004 - sub-test #001 - completed!                          **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << endl;
 }
 
 return 0; } 
@@ -315,10 +316,10 @@ int                             nV, nS, nE;
     // none
 
     // Output message
-    cout << "** ================================================================= **" << endl;
-    cout << "** Test #00004 - sub-test #002 - edge extraction (curve in 2D)       **" << endl;
-    cout << "** ================================================================= **" << endl;
-    cout << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Test #00004 - sub-test #002 - edge extraction (curve in 2D)       **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << endl;
 }
 
 // ========================================================================== //
@@ -340,9 +341,9 @@ int                             nV, nS, nE;
     // none
 
     // Generate test surface mesh ------------------------------------------- //
-    cout << "** Generating surface mesh" << endl;
+    log::cout() << "** Generating surface mesh" << endl;
     Generate2DSurfMesh(mesh);
-    cout << "** Building adjacencies" << endl;
+    log::cout() << "** Building adjacencies" << endl;
     mesh.buildAdjacencies();
 
     // Check mesh status ---------------------------------------------------- //
@@ -370,7 +371,7 @@ int                             nV, nS, nE;
     vector<array<double, 3>>                    normals, enormals, vnormals;
 
     // Compute cell normals ------------------------------------------------- //
-    cout << "** Computing cell normals" << endl;
+    log::cout() << "** Computing cell normals" << endl;
     normals.resize(mesh.getCellCount());
     ce_ = mesh.cellEnd();
     for (c_ = mesh.cellBegin(); c_ != ce_; ++c_) {
@@ -379,7 +380,7 @@ int                             nV, nS, nE;
     } //next c_
 
     // Compute edge normals ------------------------------------------------- //
-    cout << "** Computing edge normals" << endl;
+    log::cout() << "** Computing edge normals" << endl;
     enormals.resize(mesh.countFaces());
     ce_ = mesh.cellEnd();
     edge_counter = 0;
@@ -389,7 +390,7 @@ int                             nV, nS, nE;
     } //next c_
 
     // Compute vertex normals ----------------------------------------------- //
-    cout << "** Computing vertex normals" << endl;
+    log::cout() << "** Computing vertex normals" << endl;
     vnormals.resize(mesh.getVertexCount());
     ve_ = mesh.vertexEnd();
     for (v_ = mesh.vertexBegin(); v_ != ve_; ++v_) {
@@ -406,12 +407,12 @@ int                             nV, nS, nE;
     } //next c_
 
     // Export edges to vtu file --------------------------------------------- //
-    cout << "** Exporting mesh to \"test_00004_subtest_002_surf.vtu\"" << endl;
+    log::cout() << "** Exporting mesh to \"test_00004_subtest_002_surf.vtu\"" << endl;
     mesh.addData("normals", VTKFieldType::VECTOR, VTKLocation::CELL, normals);
     mesh.addData("enormals", VTKFieldType::VECTOR, VTKLocation::POINT, enormals);
     mesh.addData("vnormals", VTKFieldType::VECTOR, VTKLocation::POINT, vnormals);
     mesh.write("test_00004_subtest_002_curve");
-    cout << endl;
+    log::cout() << endl;
 }
 
 // ========================================================================== //
@@ -422,10 +423,10 @@ int                             nV, nS, nE;
     // none
 
     // Output message
-    cout << "** ================================================================= **" << endl;
-    cout << "** Test #00004 - sub-test #002 - completed!                          **" << endl;
-    cout << "** ================================================================= **" << endl;
-    cout << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Test #00004 - sub-test #002 - completed!                          **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << endl;
 }
 
 return 0; } 

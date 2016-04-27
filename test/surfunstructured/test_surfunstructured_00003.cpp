@@ -38,6 +38,7 @@
 
 // BitPit
 # include "bitpit_common.hpp"                                                 // Utilities and common definitions
+# include "bitpit_IO.hpp"                                                     // Input/output
 # include "bitpit_operators.hpp"                                              // STL containers operators
 # include "bitpit_patchkernel.hpp"                                                  // BitPit base patch
 # include "bitpit_surfunstructured.hpp"                                           // BitPit surftri patch
@@ -107,10 +108,10 @@ SurfUnstructured                mesh(0);
     // none
 
     // Output message
-    cout << "** ================================================================= **" << endl;
-    cout << "** Test #00003 - sub-test #001 - I/O functions for STL format        **" << endl;
-    cout << "** ================================================================= **" << endl;
-    cout << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Test #00003 - sub-test #001 - I/O functions for STL format        **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << endl;
 }
 
 // ========================================================================== //
@@ -121,7 +122,7 @@ SurfUnstructured                mesh(0);
     long                                nExpected = 283274;
     
     // Import mesh from stl format ------------------------------------------ //
-    cout << "** Importing mesh from (binary): \"" << in_name_bin << "\"" << endl;
+    log::cout() << "** Importing mesh from (binary): \"" << in_name_bin << "\"" << endl;
     if (mesh.importSTL(in_name_bin, true) > 0) return 1;
     if (mesh.getVertexCount() != 3*nExpected) return 1;
     if (mesh.getInternalCount() != nExpected) return 1;
@@ -136,7 +137,7 @@ SurfUnstructured                mesh(0);
     // none
 
     // Output message ------------------------------------------------------- //
-    cout << "** Exporting mesh to (binary): \"" << out_name_bin << "\"" << endl;
+    log::cout() << "** Exporting mesh to (binary): \"" << out_name_bin << "\"" << endl;
     if (mesh.exportSTL(out_name_bin, true) > 0) return 2;
 
 }
@@ -149,7 +150,7 @@ SurfUnstructured                mesh(0);
     long                                nExpected = 283286;
     
     // Import mesh from stl format ------------------------------------------ //
-    cout << "** Appending mesh from (ASCII): \"" << in_name_ASCII << "\"" << endl;
+    log::cout() << "** Appending mesh from (ASCII): \"" << in_name_ASCII << "\"" << endl;
     if (mesh.importSTL(in_name_ASCII, false) > 0) return 3;
     if (mesh.getVertexCount() != 3*nExpected) return 3;
     if (mesh.getInternalCount() != nExpected) return 3;
@@ -164,7 +165,7 @@ SurfUnstructured                mesh(0);
     // none
 
     // Output message ------------------------------------------------------- //
-    cout << "** Exporting mesh to (ASCII): \"" << out_name_ASCII << "\"" << endl;
+    log::cout() << "** Exporting mesh to (ASCII): \"" << out_name_ASCII << "\"" << endl;
     if (mesh.exportSTL(out_name_ASCII, false) > 0) return 4;
 
 }
@@ -177,10 +178,10 @@ SurfUnstructured                mesh(0);
     // none
 
     // Output message
-    cout << "** ================================================================= **" << endl;
-    cout << "** Test #00003 - sub-test #001 - completed!                          **" << endl;
-    cout << "** ================================================================= **" << endl;
-    cout << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Test #00003 - sub-test #001 - completed!                          **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << endl;
 }
 
 return 0; }
@@ -239,10 +240,10 @@ SurfUnstructured                mesh(0);
     // none
 
     // Output message
-    cout << "** ================================================================= **" << endl;
-    cout << "** Test #00003 - sub-test #002 - I/O functions for DGF format        **" << endl;
-    cout << "** ================================================================= **" << endl;
-    cout << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Test #00003 - sub-test #002 - I/O functions for DGF format        **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << endl;
 }
 
 // ========================================================================== //
@@ -254,7 +255,7 @@ SurfUnstructured                mesh(0);
     long                                nSe = 998;
     
     // Import mesh from stl format ------------------------------------------ //
-    cout << "** Importing mesh from : \"" << in_name << "\"" << endl;
+    log::cout() << "** Importing mesh from : \"" << in_name << "\"" << endl;
     if (mesh.importDGF(in_name) > 0) return 1;
     if (mesh.getVertexCount() != nSe) return 1;
     if (mesh.getInternalCount() != nVe) return 1;
@@ -269,7 +270,7 @@ SurfUnstructured                mesh(0);
     // none
 
     // Output message ------------------------------------------------------- //
-    cout << "** Exporting mesh to: \"" << out_name << "\"" << endl;
+    log::cout() << "** Exporting mesh to: \"" << out_name << "\"" << endl;
     if (mesh.exportDGF(out_name) > 0) return 2;
     mesh.write(out_name_vtu);
 
@@ -283,7 +284,7 @@ SurfUnstructured                mesh(0);
     SurfUnstructured                    mesh_copy(1);
     
     // Import mesh from stl format ------------------------------------------ //
-    cout << "** Re-importing mesh from : \"" << out_name << "\"" << endl;
+    log::cout() << "** Re-importing mesh from : \"" << out_name << "\"" << endl;
     if (mesh_copy.importDGF(in_name) > 0) return 3;
     if (mesh_copy.getVertexCount() != mesh.getVertexCount()) return 3;
     if (mesh_copy.getInternalCount() != mesh.getInternalCount()) return 3;

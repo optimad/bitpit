@@ -105,10 +105,10 @@ SurfUnstructured                mesh(0);
     // none
 
     // Output message
-    cout << "** ================================================================= **" << endl;
-    cout << "** Sub-test #001 - Mesh partitioning                                 **" << endl;
-    cout << "** ================================================================= **" << endl;
-    cout << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Sub-test #001 - Mesh partitioning                                 **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << endl;
 }
 
 // ========================================================================== //
@@ -120,7 +120,7 @@ if (myRank == 0) {
     long                                nExpected = 283274;
 
     // Import mesh from stl format ------------------------------------------ //
-    cout << "** Importing mesh from (binary): \"" << in_name_bin << "\"" << endl;
+    log::cout() << "** Importing mesh from (binary): \"" << in_name_bin << "\"" << endl;
     if (mesh.importSTL(in_name_bin, true) > 0) return 1;
 	mesh.collapseCoincidentVertices();
 	mesh.buildAdjacencies();
@@ -144,7 +144,7 @@ if (myRank == 0) {
 	baricenter = baricenter / ((double) nCells);
 
 	// Partitioning ----------------------------------------------------------//
-	cout << "** Mesh partitioning" << endl;
+	log::cout() << "** Mesh partitioning" << endl;
 
 	std::vector<int> cellRanks;
 	if (myRank == 0) {
@@ -157,11 +157,11 @@ if (myRank == 0) {
 	mesh.partition(cellRanks, false);
 
 	// Write mesh ----------------------------------------------------------- //
-	cout << "** Writing mesh" << endl;
+	log::cout() << "** Writing mesh" << endl;
 	mesh.write();
 
     // Output message ------------------------------------------------------- //
-    cout << "** Mesh partitioning" << endl;
+    log::cout() << "** Mesh partitioning" << endl;
 }
 
 // ========================================================================== //
@@ -172,10 +172,10 @@ if (myRank == 0) {
     // none
 
     // Output message
-    cout << "** ================================================================= **" << endl;
-    cout << "** Sub-test #001 - completed!                                        **" << endl;
-    cout << "** ================================================================= **" << endl;
-    cout << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << "** Sub-test #001 - completed!                                        **" << endl;
+    log::cout() << "** ================================================================= **" << endl;
+    log::cout() << endl;
 }
 
 return 0; }
@@ -203,6 +203,22 @@ int                             err = 0;
     // Initialize MPI comm world -------------------------------------------- //
     MPI_Init(&argc, &argv);
 
+}
+
+// ========================================================================== //
+// INITIALIZE LOGGER                                                          //
+// ========================================================================== //
+{
+    // Scope variables ------------------------------------------------------ //
+    int nProcs;
+    int rank;
+
+    // Initialize logger
+    MPI_Comm_size(MPI_COMM_WORLD, &nProcs);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+
+    log::manager().initialize(log::COMBINED, true, nProcs, rank);
+    log::cout().setVisibility(log::GLOBAL);
 }
 
 // ========================================================================== //
