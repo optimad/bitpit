@@ -1148,7 +1148,7 @@ if (m_rank == rcv_rank)
         v_local_mapping.resize(n_vertex, 0);
         for (i = 0; i < n_vertex; ++i) {
             com_buff >> vertex;
-            it = addVertex( move(vertex) );
+            it = addVertex( move(vertex), generateVertexId() );
             v_local_mapping[i] = it->getId();
         } //next i
 /*DEBUG*/out << "    received " << n_vertex;
