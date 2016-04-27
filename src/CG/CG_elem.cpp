@@ -26,6 +26,7 @@
 
 # include "bitpit_operators.hpp"
 
+# include <assert.h>
 # include <lapacke.h>
 
 namespace bitpit{
@@ -94,7 +95,7 @@ double distancePointPlane(
 }
 
 /*!
- * Computes distance point to segment in 3D
+ * Computes distance point to segment in 3D using a projection method
  * @param[in] P point coordinates
  * @param[in] Q1 segment starting point
  * @param[in] Q2 segment ending point
@@ -136,7 +137,38 @@ double distancePointSegment(
         flag = 2;
     }
 
-    return(d); };
+    return(d); 
+};
+
+/*!
+ * Computes distance point to segment in 3D using barycentric coordinates
+ * @param[in] P point coordinates
+ * @param[in] Q1 segment starting point
+ * @param[in] Q2 segment ending point
+ * @param[out] xP closest point on line
+ * @param[out] lambda barycentric coordinates
+ * @return distance
+ */
+double distancePointSegment(
+        std::array< double, 3 > const &P,
+        std::array< double, 3 > const &Q1,
+        std::array< double, 3 > const &Q2,
+        std::array< double, 3 >       &xP,
+        std::array< double, 2 >       &lambda
+        ) {
+
+    std::array<double,3>    n = Q2 -Q1;
+    double                  t =  -dotProduct(n,Q1-P) / dotProduct(n,n) ;;
+
+    t = std::max( std::min( t, 1.), 0. ) ;
+
+    lambda[0] = 1. - t ;
+    lambda[1] = t ;
+
+    xP = Q1 + t*n ;
+
+    return( norm2(P-xP) ); 
+};
 
 /*!
  * Computes distance point to triangle
@@ -192,8 +224,8 @@ double distancePointTriangle(
     lambda[1] = xP[1] -r[2][1];
     lambda[2] = xP[2] -r[2][2];
 
-
-    LAPACKE_dgels( LAPACK_COL_MAJOR, 'N', 3, 2, 1, A, 3, lambda, 3 ) ;
+    int info = LAPACKE_dgels( LAPACK_COL_MAJOR, 'N', 3, 2, 1, A, 3, lambda, 3 ) ;
+    assert( info == 0 ) ;
 
 
     lambda[2] = 1. -lambda[0] -lambda[1] ;
@@ -246,7 +278,86 @@ double distancePointTriangle(
 
     return d;
 
+};
 
+/*!
+ * Computes distance point to triangle
+ * @param[in] P point coordinates
+ * @param[in] Q1 first triangle vertex
+ * @param[in] Q2 second triangle vertex
+ * @param[in] Q3 third triangle vertex
+ * @param[out] xP closest point on triangle
+ * @param[out] lambda barycentric coordinates of projection point
+ * @return distance
+ */
+double distancePointTriangle(
+        std::array< double, 3 > const &P,
+        std::array< double, 3 > const &Q0,
+        std::array< double, 3 > const &Q1,
+        std::array< double, 3 > const &Q2,
+        std::array< double, 3 >       &xP,
+        std::array< double, 3 >       &lambda
+        ) {
+
+    int                 i, vertex0, vertex1 ;
+
+    int                 count, oneNegative ;
+    std::array<int,2>   twoNegative ;
+    std::array<double,2>   lambdaLocal ;
+
+    double              d;
+
+    std::array<double,3>    s0 = Q1-Q0 ;
+    std::array<double,3>    s1 = Q2-Q0 ;
+    std::array<double,3>    rP = P -Q0 ;
+
+    std::array<const std::array<double,3>*,3> r = {{&Q0, &Q1, &Q2}} ;
+
+    double              A[4] = { dotProduct(s0,s0), 0, dotProduct(s0,s1), dotProduct(s1,s1) }   ; 
+    double              b[2] = { dotProduct(s0,rP), dotProduct(s1,rP) } ;
+
+
+    int info =  LAPACKE_dposv( LAPACK_COL_MAJOR, 'U', 2, 1, A, 2, b, 2 ) ;
+    assert( info == 0 );
+
+    lambda[0] = 1. -b[0] -b[1] ;
+    lambda[1] = b[0] ;
+    lambda[2] = b[1] ;
+
+
+    count = 0;
+    twoNegative.fill(0.) ;
+    for( i=0; i<3; ++i){
+        if( lambda[i] < 0){
+            oneNegative = i;
+            twoNegative[count] = i ;
+            ++count ;
+        }
+    };
+
+    if( count == 0){
+        xP = Q0 +b[0]*s0 +b[1]*s1 ;
+        d  = norm2( P - xP)  ;
+
+    } else if( count == 1){
+        vertex0 = (oneNegative +1) %3 ;
+        vertex1 = (vertex0     +1) %3 ;
+        d       =  distancePointSegment(P, *r[vertex0], *r[vertex1], xP, lambdaLocal)  ;
+        lambda[oneNegative] = 0. ;
+        lambda[vertex0] = lambdaLocal[0] ;
+        lambda[vertex1] = lambdaLocal[1] ;
+
+    } else {
+        vertex0 = 3 -twoNegative[0] -twoNegative[1] ;
+        lambda.fill(0.);
+        lambda[vertex0] = 1. ;
+        xP      = *r[vertex0] ;
+        d       = norm2( P - xP)  ;
+
+    }
+
+
+    return d;
 
 };
 
@@ -317,7 +428,8 @@ std::vector<double> distanceCloudTriangle(
         i++ ;
     };
 
-    LAPACKE_dgels( LAPACK_COL_MAJOR, 'N', 3, 2, N, A, 3, ptrlambda, 3 ) ;
+    int info = LAPACKE_dgels( LAPACK_COL_MAJOR, 'N', 3, 2, N, A, 3, ptrlambda, 3 ) ;
+    assert( info == 0 );
 
     j =0 ;
     for( k=0; k<N; ++k) {

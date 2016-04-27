@@ -445,9 +445,9 @@ int main(
         d = CGElem::distancePointTriangle(P0, A, B, C, Q, flag);
 
         // Output message ------------------------------------------------------- //
-        cout << " - INTERSECTION BETWEEN LINE AND TRIANGLE" << endl;
+        cout << " - DISTANCE BETWEEN POINT AND TRIANGLE" << endl;
         cout << "  Test 1 " << endl;
-        cout << "    segment: " << endl;
+        cout << "    point: " << endl;
         cout << "      P0: " << P0 << endl;
         cout << "    triangle: " << endl;
         cout << "      A: " << A << endl;
@@ -460,8 +460,42 @@ int main(
 
     }
 
+    {
+        // Scope variables ------------------------------------------------------ //
+        array<double, 3>            A, B, C, P0, Q, lambda;
+        double                      d ;
+
+        // Compute intersection (Test 1) ---------------------------------------- //
+        A.fill(0.0);
+        B.fill(0.0);
+        B[0] = 1.0;
+        C.fill(0.0);
+        C[1] = 1.0;
+
+        P0.fill(0.0);
+        P0[0] = P0[1] = 1.;
+        P0[2] = -2.0;
+
+        d = CGElem::distancePointTriangle(P0, A, B, C, Q, lambda);
+
+        // Output message ------------------------------------------------------- //
+        cout << " - DISTANCE BETWEEN POINT AND TRIANGLE" << endl;
+        cout << "  Test 1 " << endl;
+        cout << "    point: " << endl;
+        cout << "      P0: " << P0 << endl;
+        cout << "    triangle: " << endl;
+        cout << "      A: " << A << endl;
+        cout << "      B: " << B << endl;
+        cout << "      C: " << C << endl;
+        cout << "    distance to point is: " << d << endl;
+        cout << "    projection point is: " << Q << endl;
+        cout << "    projecting on : " << lambda << endl;
+        cout << endl;
+
+    }
+
     // ========================================================================== //
-    // Distance Point Triangle
+    // Distance Cloud Triangle
     // ========================================================================== //
     {
         // Scope variables ------------------------------------------------------ //
