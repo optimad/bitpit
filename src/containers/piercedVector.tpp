@@ -138,6 +138,8 @@ value_t * PiercedIterator<value_t, id_t, value_no_cv_t>::operator->() const
 	Converts the iterator to a const_iterator.
 */
 template<typename value_t, typename id_t, typename value_no_cv_t>
+template<typename U, typename U_no_cv,
+         typename std::enable_if<!std::is_same<U, U_no_cv>::value, int>::type>
 PiercedIterator<value_t, id_t, value_no_cv_t>::operator PiercedIterator<const value_no_cv_t, id_t>() const
 {
 	return PiercedIterator<const value_no_cv_t, id_t>(m_container, m_pos);
