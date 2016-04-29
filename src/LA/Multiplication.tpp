@@ -609,7 +609,7 @@ std::vector< std::vector<T> > matmul(
     d1= M.size();
     d2= N[0].size() ;
 
-    std::vector< std::vector<T> > Q(d1, std::vector<double> (d2,0.0) );
+    std::vector< std::vector<T> > Q(d1, std::vector<T> (d2, T()) );
     std::vector< std::vector<T> > Tr;
 
     Tr = transpose( N ) ;
