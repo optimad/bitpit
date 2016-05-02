@@ -79,6 +79,7 @@ public:
 	PabloUniform & getTree();
 
 	bool isPointInside(const std::array<double, 3> &point);
+	bool isPointInside(const long &id, const std::array<double, 3> &point);
 	long locatePoint(const std::array<double, 3> &point);
 
 	void translate(std::array<double, 3> translation);

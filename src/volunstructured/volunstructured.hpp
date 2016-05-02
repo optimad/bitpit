@@ -55,6 +55,7 @@ public:
     void updateAdjacencies(const std::vector<long>&);
 
 	bool isPointInside(const std::array<double, 3> &point);
+	bool isPointInside(const long &id, const std::array<double, 3> &point);
 	long locatePoint(const std::array<double, 3> &point);
 
 protected:

@@ -226,6 +226,21 @@ bool VolUnstructured::isPointInside(const std::array<double, 3> &point)
 }
 
 /*!
+	Checks if the specified point is inside a cell.
+
+	\param[in] id is the idof the cell
+	\param[in] point is the point to be checked
+	\result Returns true if the point is inside the cell, false otherwise.
+ */
+bool VolUnstructured::isPointInside(const long &id, const std::array<double, 3> &point)
+{
+	BITPIT_UNUSED(id);
+	BITPIT_UNUSED(point);
+
+	return false;
+}
+
+/*!
  * Locates the cell the contains the point.
  *
  * If the point is not inside the patch, the function returns the id of the

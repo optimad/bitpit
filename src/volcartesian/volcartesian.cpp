@@ -784,6 +784,33 @@ bool VolCartesian::_enableCellBalancing(const long &id, bool enabled)
 }
 
 /*!
+	Checks if the specified point is inside a cell.
+
+	\param[in] id is the idof the cell
+	\param[in] point is the point to be checked
+	\result Returns true if the point is inside the cell, false otherwise.
+ */
+bool VolCartesian::isPointInside(const long &id, const std::array<double, 3> &point)
+{
+	std::array<int, 3> cellIjk = getCellCartesianId(id);
+
+	const double EPS = getTol();
+    for (int d = 0; d < 3; ++d){
+		long index = cellIjk[d];
+
+		double spacing = m_cellSpacings[d];
+		double cellMin = m_cellCenters[d][index] - 0.5 * spacing;
+		double cellMax = m_cellCenters[d][index] + 0.5 * spacing;
+
+        if (point[d]< cellMin - EPS || point[d] > cellMax + EPS) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/*!
 	Checks if the specified point is inside the patch.
 
 	\param[in] point is the point to be checked

@@ -1448,6 +1448,33 @@ bool VolOctree::isPointInside(const std::array<double, 3> &point)
 }
 
 /*!
+	Checks if the specified point is inside a cell.
+
+	\param[in] id is the idof the cell
+	\param[in] point is the point to be checked
+	\result Returns true if the point is inside the cell, false otherwise.
+ */
+bool VolOctree::isPointInside(const long &id, const std::array<double, 3> &point)
+{
+	const Cell &cell = m_cells[id];
+
+    int lowerLeftVertex  = 0;
+	int upperRightVertex = pow(2, getDimension()) - 1;
+
+	std::array<double, 3> lowerLeft  = getVertexCoords(cell.getVertex(lowerLeftVertex));
+	std::array<double, 3> upperRight = getVertexCoords(cell.getVertex(upperRightVertex));
+
+	const double EPS = getTol();
+    for (int d = 0; d < 3; ++d){
+        if (point[d] < lowerLeft[d] - EPS || point[d] > upperRight[d] + EPS) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/*!
 	Locates the cell the contains the point.
 
 	If the point is not inside the patch, the function returns the id of the

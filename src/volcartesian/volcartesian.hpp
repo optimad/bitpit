@@ -72,6 +72,7 @@ public:
 	double getSpacing(const int &direction) const;
 
 	bool isPointInside(const std::array<double, 3> &point);
+	bool isPointInside(const long &id, const std::array<double, 3> &point);
 	long locatePoint(const std::array<double, 3> &point);
 	std::array<int, 3> locatePointCartesian(const std::array<double, 3> &point);
 	long locateClosestVertex(std::array<double,3> const &point) const;
