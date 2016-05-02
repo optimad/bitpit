@@ -315,10 +315,11 @@ void LevelSet::propagateSign( LSObject *visitor ) {
     if( s < 0 ){
         infoItr = info.find(seed) ;
 
-        if( infoItr == info.end() )
+        if( infoItr == info.end() ){
             infoItr = info.reclaim(seed);
 
-        (*infoItr).value *= s ;
+            (*infoItr).value *= s ;
+        }
     };
 
 
