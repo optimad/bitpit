@@ -45,10 +45,6 @@ public:
         // Setters
 	void setExpert(bool expert);
 
-        // Modifiers
-        void buildAdjacencies(void);
-        void updateAdjacencies(const std::vector<long>&);
-
         // Search algorithms
         bool isPointInside(const std::array<double, 3> &point);
 		bool isPointInside(const long &id, const std::array<double, 3> &point);
