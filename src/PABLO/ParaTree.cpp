@@ -2816,6 +2816,7 @@ namespace bitpit {
         (*m_log) << "---------------------------------------------" << endl;
         (*m_log) << " LOAD BALANCE " << endl;
 
+        m_lastOp = "loadbalance";
         if (m_nproc>1){
 
             uint32_t* partition = new uint32_t [m_nproc];
@@ -2865,6 +2866,7 @@ namespace bitpit {
         (*m_log) << "---------------------------------------------" << endl;
         (*m_log) << " LOAD BALANCE " << endl;
 
+        m_lastOp = "loadbalance";
         if (m_nproc>1){
 
             uint32_t* partition = new uint32_t [m_nproc];
@@ -2907,7 +2909,6 @@ namespace bitpit {
         m_sentIdx.clear();
         std::array<uint32_t,4> limits = {{0,0,0,0}};
 
-        m_lastOp = "loadbalance";
         if(m_serial)
             {
                 m_lastOp = "firstloadbalance";
