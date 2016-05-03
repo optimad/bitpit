@@ -30,6 +30,7 @@
 #include <array>
 #include <algorithm>
 #include <cfloat>
+#include <cmath>
 #include <functional>
 #include <iomanip>
 #include <iostream>
