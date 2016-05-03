@@ -1157,6 +1157,9 @@ std::vector<id_t> PiercedVector<value_t, id_t>::getIds(bool ordered)
 {
 	// Initialize the vector wth the ids
 	std::vector<id_t> ids;
+	if (size() == 0) {
+		return ids;
+	}
 	ids.reserve(size());
 
 	// Extract the ids
