@@ -95,8 +95,6 @@ public:
 		std::vector<int> &stencil, std::vector<double> &weights);
 	int linearVertexInterpolation(std::array<double,3> &point,
 		std::vector<int> &stencil, std::vector<double> &weights);
-        void buildAdjacencies() {};
-        void updateAdjacencies(const std::vector<long>&) {};
 
 	long getCellLinearId(const int &i, const int &j, const int &k) const;
 	long getCellLinearId(const std::array<int, 3> &ijk) const;

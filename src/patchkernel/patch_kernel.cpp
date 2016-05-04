@@ -2711,6 +2711,113 @@ return(check);
 };
 
 /*!
+ * Fill adjacencies info for each cell.
+*/
+void PatchKernel::buildAdjacencies()
+{
+	updateAdjacencies(m_cells.getIds(false));
+}
+
+/*!
+	Update the adjacencies of the specified list of cells and of their
+	neighbours.
+
+	This implementation can NOT handle hanging nodes.
+
+	\param[in] cellIds is the list of cell ids
+*/
+void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds)
+{
+    //
+    // Reset adjacency info
+    //
+    for (long cellId : cellIds) {
+		m_cells[cellId].resetAdjacencies();
+    }
+
+    //
+    // Build vertex->cell connectivity
+    //
+	std::unordered_map<long, std::vector<long>> vertexToCellsMap;
+	for (const Cell &cell : m_cells) {
+		long cellId = cell.getId();
+
+		int nCellVertices = cell.getVertexCount();
+		for (int k = 0; k < nCellVertices; ++k) {
+			long vertexId = cell.getVertex(k);
+			vertexToCellsMap[vertexId].push_back(cellId);
+		}
+	}
+
+    //
+    // Update adjacencies
+    //
+	for (long cellId : cellIds) {
+		Cell &cell = m_cells[cellId];
+
+		const int nCellFaces = cell.getFaceCount();
+		for (int face = 0; face < nCellFaces; face++) {
+			ElementInfo::Type faceType = cell.getFaceType(face);
+			int nFaceVertices = ElementInfo::getElementInfo(faceType).nVertices;
+
+			// Build face connectivity
+			std::vector<long> faceConnect;
+			faceConnect.reserve(nFaceVertices);
+			for (const int localVertexId : cell.getFaceLocalConnect(face)) {
+				faceConnect.push_back(cell.getVertex(localVertexId));
+			}
+
+			// Build list of neighbour candidates
+			//
+			// Consider all the cells that shares the same vertices of the
+			// current face, but discard the cells that are already adjacencies
+			// for this face.
+			long firstVertexId = faceConnect[0];
+			std::vector<long> candidates = vertexToCellsMap[firstVertexId];
+			utils::eraseValue(candidates, cellId);
+
+			int j = 1;
+			while (candidates.size() > 0 && j < nFaceVertices) {
+				long vertexId = faceConnect[j];
+				candidates = utils::intersectionVector(candidates, vertexToCellsMap[vertexId]);
+				j++;
+			}
+
+			int nFaceAdjacencies = cell.getAdjacencyCount(face);
+			for (int k = 0; k < nFaceAdjacencies; ++k) {
+				long adjacencyId = cell.getAdjacency(face, k);
+				if (adjacencyId >= 0) {
+					utils::eraseValue(candidates, adjacencyId);
+				}
+			}
+
+			// Find the real neighoburs and update the adjacencies
+			for (long candidateId : candidates) {
+				Cell &candidate = m_cells[candidateId];
+				int nCandidateFaces = candidate.getFaceCount();
+
+				// Consider only real neighbours
+				int candidateFace = -1;
+				for (int k = 0; k < nCandidateFaces; ++k) {
+					if (isSameFace(cellId, face, candidateId, k)) {
+						candidateFace = k;
+						break;
+					}
+				}
+
+				if (candidateFace < 0) {
+					continue;
+				}
+
+				// If the candidate is a real neighbout update the adjacencies
+				cell.pushAdjacency(face, candidateId);
+				candidate.pushAdjacency(candidateFace, cellId);
+			}
+		}
+	}
+}
+
+/*!
 	Clears the bounding box.
 
 	The box will be cleared also if it declared frozen.

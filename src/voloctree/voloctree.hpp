@@ -85,9 +85,6 @@ public:
 	void translate(std::array<double, 3> translation);
 	void scale(std::array<double, 3> scaling);
 
-        void buildAdjacencies() {};
-        void updateAdjacencies(const std::vector<long>&) {};
-
 #if BITPIT_ENABLE_MPI==1
 	void setCommunicator(MPI_Comm communicator);
 #endif

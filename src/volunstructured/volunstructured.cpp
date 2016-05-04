@@ -195,24 +195,6 @@ bool VolUnstructured::_enableCellBalancing(const long &id, bool enabled)
 }
 
 /*!
- * Fill adjacencies info for each cell.
-*/
-void VolUnstructured::buildAdjacencies(void)
-{
-
-}
-
-/*!
- * Update adjacencies info for cells with specified ID.
- *
- * \param[in] cell_ids list of cell ids
-*/
-void VolUnstructured::updateAdjacencies(const std::vector<long> &cell_ids)
-{
-	BITPIT_UNUSED(cell_ids);
-}
-
-/*!
  * Checks if the specified point is inside the patch.
  *
  * \param[in] point is the point to be checked

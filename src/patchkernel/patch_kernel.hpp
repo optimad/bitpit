@@ -217,8 +217,8 @@ public:
 	virtual long locatePoint(const std::array<double, 3> &point) = 0;
         bool isSameFace(const long &, const int&, const long&, const int&);
 
-        virtual void buildAdjacencies() = 0;
-        virtual void updateAdjacencies(const std::vector<long>&) = 0;
+	virtual void buildAdjacencies();
+	virtual void updateAdjacencies(const std::vector<long> &cellIds);
 
 	void getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
 	bool isBoundingBoxDirty(bool global = false) const;
