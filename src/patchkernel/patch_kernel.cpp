@@ -2818,6 +2818,34 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds)
 }
 
 /*!
+	Given a cell and one of it's neighbours, finds the faces of the neighbour
+	that adjoins the specified cell.
+
+	The function doesn't check if the two cells are really neighbours.
+
+	\param cellId is the id of the cell
+	\param neighId is the id of a neighbour of the cell
+	\result The face of the neighbour which adjoin the specified cell
+ */
+int PatchKernel::findAdjoinNeighFace(const long &cellId, const long &neighId) const
+{
+	const Cell &neigh = m_cells[neighId];
+	const int nNeighFaces = neigh.getFaceCount();
+	for (int face = 0; face < nNeighFaces; face++) {
+		int nFaceAdjacencies = neigh.getAdjacencyCount(face);
+		const long *faceAdjacencies = neigh.getAdjacencies(face);
+		for (int k = 0; k < nFaceAdjacencies; ++k) {
+			long geussId = faceAdjacencies[k];
+			if (geussId == cellId) {
+				return face;
+			}
+		}
+	}
+
+	return -1;
+}
+
+/*!
 	Clears the bounding box.
 
 	The box will be cleared also if it declared frozen.

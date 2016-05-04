@@ -449,6 +449,8 @@ private:
 	InterfaceIterator createInterface(ElementInfo::Type type, long id = Element::NULL_ID);
 	CellIterator createCell(ElementInfo::Type type, bool interior, long id = Element::NULL_ID);
 
+	int findAdjoinNeighFace(const long &cellId, const long &neighId) const;
+
 	void setId(int id);
 	void setDimension(int dimension);
 
