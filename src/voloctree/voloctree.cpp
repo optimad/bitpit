@@ -1424,6 +1424,73 @@ void VolOctree::deleteCell(long id)
 	VolumeKernel::deleteCell(id, false, true);
 }
 
+
+/*!
+	Build the adjacencies the cells.
+*/
+void VolOctree::updateAdjacencies(const std::vector<long> &cellIds, bool resetAdjacencies)
+{
+	// Face information
+	int nCellFaces = 2 * getDimension();
+	uint8_t oppositeFace[nCellFaces];
+	m_tree.getOppface(oppositeFace);
+
+	// Reset the adjacencies
+	if (resetAdjacencies) {
+		for (long cellId : cellIds) {
+			m_cells[cellId].resetAdjacencies();
+		}
+	}
+
+	// Update the adjacencies
+	FaceInfoSet processedFaces;
+	for (long cellId : cellIds) {
+		Cell &cell = m_cells[cellId];
+		OctantInfo octantInfo = getCellOctant(cellId);
+		for (int face = 0; face < nCellFaces; ++face) {
+			FaceInfo currentFaceInfo(cellId, face);
+			if (processedFaces.count(currentFaceInfo) > 0) {
+				continue;
+			}
+
+			// Find cell neighbours
+			std::vector<uint32_t> neighTreeIds;
+			std::vector<bool> neighGhostFlags;
+			if (octantInfo.internal) {
+				m_tree.findNeighbours(octantInfo.id, face, 1, neighTreeIds, neighGhostFlags);
+			} else {
+				m_tree.findGhostNeighbours(octantInfo.id, face, 1, neighTreeIds);
+				neighGhostFlags.resize(neighTreeIds.size(), false);
+			}
+
+			// Set the adjacencies
+			//
+			// Adjacencies will processed twice, once while processing the
+			// current cell, and once while processing the neighbour cell.
+			// However they will be set only once, because the function that
+			// insert the adjacency in the cell will insert only unique
+			// adjacencies.
+			int nNeighs = neighTreeIds.size();
+			for (int k = 0; k < nNeighs; ++k) {
+				OctantInfo neighOctantInfo(neighTreeIds[k], !neighGhostFlags[k]);
+				long neighId = getOctantId(neighOctantInfo);
+
+				// Set cell data
+				cell.pushAdjacency(face, neighId);
+
+				// Set neighbour data
+				int neighFace = oppositeFace[face];
+				Cell &neigh = m_cells[neighId];
+				neigh.pushAdjacency(neighFace, cellId);
+
+				// Add the neighbour face to the processed faces
+				FaceInfo neighFaceInfo(neighId, neighFace);
+				processedFaces.insert(neighFaceInfo);
+			}
+		}
+	}
+}
+
 /*!
 	Marks a cell for refinement.
 
