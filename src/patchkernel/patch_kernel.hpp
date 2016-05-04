@@ -220,8 +220,8 @@ public:
 	virtual void buildAdjacencies(bool resetAdjacencies = true);
 	virtual void updateAdjacencies(const std::vector<long> &cellIds, bool resetAdjacencies = true);
 
-	virtual void buildInterfaces();
-	virtual void updateInterfaces(const std::vector<long> &cellIds);
+	virtual void buildInterfaces(bool resetInterfaces = true);
+	virtual void updateInterfaces(const std::vector<long> &cellIds, bool resetInterfaces = true);
 
 	void getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
 	bool isBoundingBoxDirty(bool global = false) const;

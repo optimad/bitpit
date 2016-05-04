@@ -2825,9 +2825,9 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds, bool reset
 
 	\param[in] cellIds is the list of cell ids
 */
-void PatchKernel::buildInterfaces()
+void PatchKernel::buildInterfaces(bool resetInterfaces)
 {
-	updateInterfaces(m_cells.getIds(false));
+	updateInterfaces(m_cells.getIds(false), resetInterfaces);
 }
 
 /*!
@@ -2836,26 +2836,16 @@ void PatchKernel::buildInterfaces()
 
 	\param[in] cellIds is the list of cell ids
 */
-void PatchKernel::updateInterfaces(const std::vector<long> &cellIds)
+void PatchKernel::updateInterfaces(const std::vector<long> &cellIds, bool resetInterfaces)
 {
     //
-    // Delete existing interfaces
+    // Reset existing interfaces
     //
-    for (long cellId : cellIds) {
-		Cell &cell = m_cells[cellId];
-
-		int nCellInterfaces = cell.getInterfaceCount();
-		const long *cellInterfaces = cell.getInterfaces();
-		for (int k = 0; k < nCellInterfaces; ++k) {
-			long interfaceId = cellInterfaces[k];
-			if (interfaceId < 0) {
-				continue;
-			}
-
-			deleteInterface(interfaceId, true, true);
+	if (resetInterfaces) {
+		for (long cellId : cellIds) {
+			m_cells[cellId].resetInterfaces();
 		}
-    }
-    m_interfaces.flush();
+	}
 
 	//
 	// Update interfaces
