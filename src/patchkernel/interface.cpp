@@ -51,7 +51,9 @@ namespace bitpit {
 	Default constructor.
 */
 Interface::Interface()
-	: Element()
+	: Element(),
+	  m_owner(NULL_ID), m_ownerFace(-1),
+	  m_neigh(NULL_ID), m_neighFace(-1)
 {
 
 }
@@ -60,7 +62,9 @@ Interface::Interface()
 	Creates a new interface.
 */
 Interface::Interface(const long &id, ElementInfo::Type type)
-	: Element(id, type)
+	: Element(id, type),
+	  m_owner(NULL_ID), m_ownerFace(-1),
+	  m_neigh(NULL_ID), m_neighFace(-1)
 {
 
 }
