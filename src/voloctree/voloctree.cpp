@@ -997,7 +997,9 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 	}
 
 	// Add the cells
-	std::vector<std::vector<long>> cellAdjacencies(nCellFaces, std::vector<long>());
+	std::vector<long> createdCells;
+	createdCells.reserve(octantInfoList.size());
+
 	std::vector<std::vector<long>> cellInterfaces(nCellFaces, std::vector<long>());
 	std::vector<std::vector<bool>> cellInterfacesOwner(nCellFaces, std::vector<bool>());
 	for (OctantInfo &octantInfo : octantInfoList) {
@@ -1021,7 +1023,6 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 
 		// Cell interfaces and adjacencies
 		for (int k = 0; k < nCellFaces; ++k) {
-			cellAdjacencies[k].clear();
 			cellInterfaces[k].clear();
 			cellInterfacesOwner[k].clear();
 		}
@@ -1042,14 +1043,6 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 				cellFace = interface.getNeighFace();
 			}
 
-			cellAdjacencies[cellFace].emplace_back();
-			long &cellAdjacencyId = cellAdjacencies[cellFace].back();
-			if (ownsInterface) {
-				cellAdjacencyId = interface.getNeigh();
-			} else {
-				cellAdjacencyId = interface.getOwner();
-			}
-
 			cellInterfaces[cellFace].emplace_back();
 			long &cellInterfaceId = cellInterfaces[cellFace].back();
 			cellInterfaceId = interfaceId;
@@ -1058,9 +1051,12 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 		}
 
 		// Add cell
-		addCell(octantInfo, cellConnect, cellAdjacencies,
-		        cellInterfaces, cellInterfacesOwner);
+		long cellId = addCell(octantInfo, cellConnect, cellInterfaces, cellInterfacesOwner);
+		createdCells.push_back(cellId);
 	}
+
+	// Build adjacencies
+	updateAdjacencies(createdCells, false);
 
 	// Done
 	createdInterfaces.shrink_to_fit();
@@ -1298,7 +1294,6 @@ long VolOctree::addInterface(uint32_t treeId,
 
 	\param octantInfo is the octant associated to the cell
 	\param vertices are the vertices of the cell
-	\param adjacencies are the adjacencies of the cell
 	\param interfaces are the interfaces of the cell
 	\param interfacesOwner is a flag that defines if an interface is owned
 	by the cell
@@ -1306,7 +1301,6 @@ long VolOctree::addInterface(uint32_t treeId,
 */
 long VolOctree::addCell(OctantInfo octantInfo,
                               std::unique_ptr<long[]> &vertices,
-                              std::vector<std::vector<long>> &adjacencies,
                               std::vector<std::vector<long>> &interfaces,
                               std::vector<std::vector<bool>> &interfacesOwner)
 {
@@ -1328,14 +1322,11 @@ long VolOctree::addCell(OctantInfo octantInfo,
 	// Interfaces
 	cell.setInterfaces(interfaces);
 
-	// Adjacencies
-	cell.setAdjacencies(adjacencies);
-
-	// Update data of interfaces and neighbours
+	// Update data of interfaces
 	int nCellFaces = cell.getFaceCount();
 	for (int face = 0; face < nCellFaces; ++face) {
-		int nNeighbours = adjacencies[face].size();
-		for (int k = 0; k < nNeighbours; ++k) {
+		int nInterfaces = interfaces[face].size();
+		for (int k = 0; k < nInterfaces; ++k) {
 			long interfaceId = interfaces[face][k];
 			Interface &interface = m_interfaces[interfaceId];
 			bool ownsInterface = interfacesOwner[face][k];
@@ -1345,20 +1336,6 @@ long VolOctree::addCell(OctantInfo octantInfo,
 				interface.setOwner(id, face);
 			} else {
 				interface.setNeigh(id, face);
-			}
-
-			// Update data of neighbours
-			long neighId = adjacencies[face][k];
-			if (neighId >= 0) {
-				int neighFace;
-				if (ownsInterface) {
-					neighFace = interface.getNeighFace();
-				} else {
-					neighFace = interface.getOwnerFace();
-				}
-
-				Cell &neigh = m_cells.at(neighId);
-				neigh.pushAdjacency(neighFace, id);
 			}
 		}
 	}
@@ -1442,50 +1419,66 @@ void VolOctree::updateAdjacencies(const std::vector<long> &cellIds, bool resetAd
 		}
 	}
 
+	// Sort the cells beased on their tree level
+	int maxLevel = m_tree.getMaxDepth();
+	size_t averageSize = cellIds.size() / maxLevel;
+	std::vector<std::vector<long>> hierarchicalCellIds(maxLevel + 1);
+	for (int level = 0; level <= maxLevel; ++level) {
+		hierarchicalCellIds[level].reserve(averageSize);
+	}
+
+	for (long cellId : cellIds) {
+		int cellLevel = getCellLevel(cellId);
+		hierarchicalCellIds[cellLevel].push_back(cellId);
+	}
+
 	// Update the adjacencies
 	FaceInfoSet processedFaces;
-	for (long cellId : cellIds) {
-		Cell &cell = m_cells[cellId];
-		OctantInfo octantInfo = getCellOctant(cellId);
-		for (int face = 0; face < nCellFaces; ++face) {
-			FaceInfo currentFaceInfo(cellId, face);
-			if (processedFaces.count(currentFaceInfo) > 0) {
-				continue;
-			}
+	processedFaces.reserve(cellIds.size() * getDimension());
 
-			// Find cell neighbours
-			std::vector<uint32_t> neighTreeIds;
-			std::vector<bool> neighGhostFlags;
-			if (octantInfo.internal) {
-				m_tree.findNeighbours(octantInfo.id, face, 1, neighTreeIds, neighGhostFlags);
-			} else {
-				m_tree.findGhostNeighbours(octantInfo.id, face, 1, neighTreeIds);
-				neighGhostFlags.resize(neighTreeIds.size(), false);
-			}
+	for (int level = 0; level <= maxLevel; ++level) {
+		for (long cellId : hierarchicalCellIds[level]) {
+			Cell &cell = m_cells[cellId];
+			OctantInfo octantInfo = getCellOctant(cellId);
+			for (int face = 0; face < nCellFaces; ++face) {
+				FaceInfo currentFaceInfo(cellId, face);
+				if (processedFaces.count(currentFaceInfo) > 0) {
+					continue;
+				}
 
-			// Set the adjacencies
-			//
-			// Adjacencies will processed twice, once while processing the
-			// current cell, and once while processing the neighbour cell.
-			// However they will be set only once, because the function that
-			// insert the adjacency in the cell will insert only unique
-			// adjacencies.
-			int nNeighs = neighTreeIds.size();
-			for (int k = 0; k < nNeighs; ++k) {
-				OctantInfo neighOctantInfo(neighTreeIds[k], !neighGhostFlags[k]);
-				long neighId = getOctantId(neighOctantInfo);
+				// Find cell neighbours
+				std::vector<uint32_t> neighTreeIds;
+				std::vector<bool> neighGhostFlags;
+				if (octantInfo.internal) {
+					m_tree.findNeighbours(octantInfo.id, face, 1, neighTreeIds, neighGhostFlags);
+				} else {
+					m_tree.findGhostNeighbours(octantInfo.id, face, 1, neighTreeIds);
+					neighGhostFlags.resize(neighTreeIds.size(), false);
+				}
 
-				// Set cell data
-				cell.pushAdjacency(face, neighId);
+				// Set the adjacencies
+				//
+				// Adjacencies will processed twice, once while processing the
+				// current cell, and once while processing the neighbour cell.
+				// However they will be set only once, because the function that
+				// insert the adjacency in the cell will insert only unique
+				// adjacencies.
+				int nNeighs = neighTreeIds.size();
+				for (int k = 0; k < nNeighs; ++k) {
+					OctantInfo neighOctantInfo(neighTreeIds[k], !neighGhostFlags[k]);
+					long neighId = getOctantId(neighOctantInfo);
 
-				// Set neighbour data
-				int neighFace = oppositeFace[face];
-				Cell &neigh = m_cells[neighId];
-				neigh.pushAdjacency(neighFace, cellId);
+					// Set cell data
+					cell.pushAdjacency(face, neighId);
 
-				// Add the neighbour face to the processed faces
-				FaceInfo neighFaceInfo(neighId, neighFace);
-				processedFaces.insert(neighFaceInfo);
+					// Set neighbour data
+					int neighFace = oppositeFace[face];
+					Cell &neigh = m_cells[neighId];
+					neigh.pushAdjacency(neighFace, cellId);
+
+					FaceInfo neighFaceInfo(neighId, neighFace);
+					processedFaces.insert(neighFaceInfo);
+				}
 			}
 		}
 	}
