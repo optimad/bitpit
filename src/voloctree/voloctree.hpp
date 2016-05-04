@@ -160,8 +160,8 @@ private:
 
 	OctantHash evaluateOctantHash(const OctantInfo &octantInfo);
 
-	std::vector<unsigned long> importOctants(std::vector<OctantInfo> &octantTreeIds);
-	std::vector<unsigned long> importOctants(std::vector<OctantInfo> &octantTreeIds, FaceInfoSet &danglingInfoSet);
+	std::vector<long> importOctants(std::vector<OctantInfo> &octantTreeIds);
+	std::vector<long> importOctants(std::vector<OctantInfo> &octantTreeIds, FaceInfoSet &danglingFaces);
 
 	FaceInfoSet removeCells(std::unordered_set<long> &cellIds);
 

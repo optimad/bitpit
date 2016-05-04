@@ -706,11 +706,11 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	m_ghostToCell.reserve(nGhostsOctants);
 
 	// Import added octants
-	std::vector<unsigned long> createdInterfaces;
+	std::vector<long> createdCells;
 	if (newOctants.size() > 0) {
 		log::cout() << ">> Importing new octants...";
 
-		createdInterfaces = importOctants(newOctants, danglingFaces);
+		createdCells = importOctants(newOctants, danglingFaces);
 
 		log::cout() << " Done" << std::endl;
 		log::cout() << ">> Octants imported: " <<  newOctants.size() << std::endl;
@@ -760,11 +760,35 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 #endif
 
 		// Track created interfaces
-		if (createdInterfaces.size() > 0) {
-			std::size_t infoId = adaptionData.create(adaption::TYPE_CREATION, adaption::ENTITY_INTERFACE);
-			adaption::Info &adaptionInfo = adaptionData[infoId];
+		if (createdCells.size() > 0) {
+			// List of unique interfaces that have been created
+			std::unordered_set<long> createdInterfaces;
+			for (const auto &cellId : createdCells) {
+				const Cell &cell = m_cells.at(cellId);
+				long nCellInterfaces = cell.getInterfaceCount();
+				const long *interfaces = cell.getInterfaces();
+				for (int k = 0; k < nCellInterfaces; ++k) {
+					long interfaceId = interfaces[k];
+					if (interfaceId >= 0) {
+						createdInterfaces.insert(interfaceId);
+					}
+				}
+			}
 
-			adaptionInfo.current.swap(createdInterfaces);
+			// Rank assocated to the adaption info
+			int rank = -1;
+#if BITPIT_ENABLE_MPI==1
+			rank = getRank();
+#endif
+
+			// Adaption info
+			std::size_t infoId = adaptionData.create(adaption::TYPE_CREATION, adaption::ENTITY_INTERFACE, rank);
+			adaption::Info &adaptionInfo = adaptionData[infoId];
+			for (const long &interfaceId : createdInterfaces) {
+				adaptionInfo.current.emplace_back();
+				unsigned long &createdInterfaceId = adaptionInfo.current.back();
+				createdInterfaceId = interfaceId;
+			}
 		}
 	}
 
@@ -780,7 +804,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 	\param octantInfoList is the list of octant to import
 */
-std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoList)
+std::vector<long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoList)
 {
 	FaceInfoSet danglingFaces;
 
@@ -791,10 +815,10 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 	Imports a list of octants into the patch.
 
 	\param octantInfoList is the list of octant to import
-	\param danglingFaces is the list of dangling faces in the current mesh
+	\param danglingVertices is the list of dangling vertices in the current mesh
 */
-std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoList,
-                                 FaceInfoSet &danglingFaces)
+std::vector<long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoList,
+                                           FaceInfoSet &danglingFaces)
 {
 	// Info of the cells
 	ElementInfo::Type cellType;
@@ -821,9 +845,6 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 	const int &nInterfaceVertices = interfaceTypeInfo.nVertices;
 
 	uint32_t nIntersections = m_tree.getNumIntersections();
-
-	std::vector<unsigned long> createdInterfaces;
-	createdInterfaces.reserve(nCellFaces * octantInfoList.size());
 
 	// Add the vertex of the dangling faces to the vertex map
 	std::unordered_map<uint32_t, long> vertexMap;
@@ -970,9 +991,7 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 		}
 
 		// Create the interface
-		createdInterfaces.emplace_back();
-		unsigned long &interfaceId = createdInterfaces.back();
-		interfaceId = addInterface(interfaceTreeId, interfaceConnect, interfaceFaces);
+		long interfaceId = addInterface(interfaceTreeId, interfaceConnect, interfaceFaces);
 		interfaceMap[interfaceTreeId] = interfaceId;
 
 		// If the interface is on an dangling faces, the owner or
@@ -1059,9 +1078,7 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 	updateAdjacencies(createdCells, false);
 
 	// Done
-	createdInterfaces.shrink_to_fit();
-
-	return createdInterfaces;
+	return createdCells;
 }
 
 /*!
