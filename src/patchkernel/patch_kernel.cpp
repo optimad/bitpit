@@ -2713,9 +2713,9 @@ return(check);
 /*!
  * Fill adjacencies info for each cell.
 */
-void PatchKernel::buildAdjacencies()
+void PatchKernel::buildAdjacencies(bool resetAdjacencies)
 {
-	updateAdjacencies(m_cells.getIds(false));
+	updateAdjacencies(m_cells.getIds(false), resetAdjacencies);
 }
 
 /*!
@@ -2726,14 +2726,16 @@ void PatchKernel::buildAdjacencies()
 
 	\param[in] cellIds is the list of cell ids
 */
-void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds)
+void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds, bool resetAdjacencies)
 {
     //
     // Reset adjacency info
     //
-    for (long cellId : cellIds) {
-		m_cells[cellId].resetAdjacencies();
-    }
+	if (resetAdjacencies) {
+		for (long cellId : cellIds) {
+			m_cells[cellId].resetAdjacencies();
+		}
+	}
 
     //
     // Build vertex->cell connectivity

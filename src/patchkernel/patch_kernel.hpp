@@ -217,8 +217,8 @@ public:
 	virtual long locatePoint(const std::array<double, 3> &point) = 0;
         bool isSameFace(const long &, const int&, const long&, const int&);
 
-	virtual void buildAdjacencies();
-	virtual void updateAdjacencies(const std::vector<long> &cellIds);
+	virtual void buildAdjacencies(bool resetAdjacencies = true);
+	virtual void updateAdjacencies(const std::vector<long> &cellIds, bool resetAdjacencies = true);
 
 	virtual void buildInterfaces();
 	virtual void updateInterfaces(const std::vector<long> &cellIds);
