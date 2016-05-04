@@ -161,7 +161,7 @@ private:
 	std::vector<unsigned long> importOctants(std::vector<OctantInfo> &octantTreeIds);
 	std::vector<unsigned long> importOctants(std::vector<OctantInfo> &octantTreeIds, FaceInfoSet &danglingInfoSet);
 
-	FaceInfoSet removeCells(std::vector<long> &cellIds);
+	FaceInfoSet removeCells(std::unordered_set<long> &cellIds);
 
 	long addVertex(uint32_t treeId);
 

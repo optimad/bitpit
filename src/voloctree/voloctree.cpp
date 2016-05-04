@@ -389,7 +389,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 	std::vector<OctantInfo> newOctants;
 	std::unordered_map<uint32_t, long> renumberedOctants;
-	std::vector<long> removedCells;
+	std::unordered_set<long> removedCells;
 
 	newOctants.reserve(nOctants + nGhostsOctants);
 	renumberedOctants.reserve(nPreviousOctants + nPreviousGhosts);
@@ -485,10 +485,9 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			int nPreviousTreeIds = mapper_octantMap.size();
 			for (int k = 0; k < nPreviousTreeIds; ++k) {
 				OctantInfo previousOctantInfo(mapper_octantMap[k], !mapper_ghostFlag[k]);
+				long previousCellId = getOctantId(previousOctantInfo);
 
-				removedCells.emplace_back();
-				long &cellId = removedCells.back();
-				cellId = getOctantId(previousOctantInfo);
+				removedCells.insert(previousCellId);
 			}
 		}
 
@@ -530,15 +529,13 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			if (adaptionType != adaption::TYPE_PARTITION_RECV) {
 				int nPreviousCellIds = mapper_octantMap.size();
 				adaptionInfo.previous.reserve(nPreviousCellIds);
-				auto removedCellsIter = removedCells.cend() - nPreviousCellIds;
-				while (removedCellsIter != removedCells.cend()) {
-					const long &id = *removedCellsIter;
+				for (int k = 0; k < nPreviousCellIds; ++k) {
+					OctantInfo previousOctantInfo(mapper_octantMap[k], !mapper_ghostFlag[k]);
+					long previousCellId = getOctantId(previousOctantInfo);
 
 					adaptionInfo.previous.emplace_back();
 					unsigned long &adaptionId = adaptionInfo.previous.back();
-					adaptionId = id;
-
-					removedCellsIter++;
+					adaptionId = previousCellId;
 				}
 			}
 		}
@@ -574,10 +571,8 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			uint32_t endTreeId   = rankEntry.second[2 * k + 1];
 			for (uint32_t treeId = beginTreeId; treeId < endTreeId; ++treeId) {
 				OctantInfo octantInfo(treeId, true);
-
-				removedCells.emplace_back();
-				long &cellId = removedCells.back();
-				cellId = getOctantId(octantInfo);
+				long cellId = getOctantId(octantInfo);
+				removedCells.insert(cellId);
 
 				if (trackChanges) {
 					adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
@@ -601,10 +596,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		auto cellIterator = m_cellToGhost.cbegin();
 		while (cellIterator != m_cellToGhost.cend()) {
 			long id = cellIterator->first;
-
-			removedCells.emplace_back();
-			long &removedId = removedCells.back();
-			removedId = id;
+			removedCells.insert(id);
 
 			// Adaption tracking
 			if (trackChanges) {
@@ -618,7 +610,6 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			cellIterator++;
 		}
 	}
-	removedCells.shrink_to_fit();
 
 	// New ghost octants need to be added
 	for (uint32_t treeId = 0; treeId < (uint32_t) nGhostsOctants; ++treeId) {
@@ -674,7 +665,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		log::cout() << ">> Cells removed: " <<  removedCells.size() << std::endl;
 	}
 
-	std::vector<long>().swap(removedCells);
+	std::unordered_set<long>().swap(removedCells);
 
 	// Reserve space in the octant-to-cell maps
 	m_cellToOctant.reserve(nOctants);
@@ -1082,7 +1073,7 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 
 	\param cellIds is the list of cells ids to remove
 */
-VolOctree::FaceInfoSet VolOctree::removeCells(std::vector<long> &cellIds)
+VolOctree::FaceInfoSet VolOctree::removeCells(std::unordered_set<long> &cellIds)
 {
 	// Delete cells
 	//
