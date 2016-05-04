@@ -1076,16 +1076,8 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 VolOctree::FaceInfoSet VolOctree::removeCells(std::unordered_set<long> &cellIds)
 {
 	// Delete cells
-	//
-	// To make deletion of interfaces more efficient, keep the list of
-	// faces to remove in an ordered map. The order should be based upon
-	// the position of the interfaces in the container, rather than upon
-	// the id of the faces.
-	typedef bitpit::PiercedVector<Interface>::positionLess InterfacePositionCompare;
-	typedef std::map<long, int, InterfacePositionCompare> InterfaceOrderedMap;
-
 	std::unordered_set<long> deadVertices;
-	InterfaceOrderedMap deadInterfaces((InterfacePositionCompare(m_interfaces)));
+	std::unordered_map<long, int> deadInterfaces;
 	for (long cellId : cellIds) {
 		Cell &cell = m_cells[cellId];
 
