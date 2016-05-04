@@ -1075,24 +1075,56 @@ std::vector<unsigned long> VolOctree::importOctants(std::vector<OctantInfo> &oct
 */
 VolOctree::FaceInfoSet VolOctree::removeCells(std::unordered_set<long> &cellIds)
 {
-	// Delete cells
+	FaceInfoSet danglingFaces;
+
+	// Info of the cells
+	ElementInfo::Type cellType;
+	if (isThreeDimensional()) {
+		cellType = ElementInfo::VOXEL;
+	} else {
+		cellType = ElementInfo::PIXEL;
+	}
+
+	const ElementInfo &cellTypeInfo = ElementInfo::getElementInfo(cellType);
+	const std::vector<std::vector<int>> &cellLocalFaceConnect = cellTypeInfo.faceConnect;
+
+	// Info on the faces
+	ElementInfo::Type faceType;
+	if (isThreeDimensional()) {
+		faceType = ElementInfo::PIXEL;
+	} else {
+		faceType = ElementInfo::LINE;
+	}
+
+	const ElementInfo &faceTypeInfo = ElementInfo::getElementInfo(faceType);
+	const int &nFaceVertices = faceTypeInfo.nVertices;
+
+	// Delete the cells
 	std::unordered_set<long> deadVertices;
-	std::unordered_map<long, int> deadInterfaces;
+	std::unordered_set<long> deadInterfaces;
 	for (long cellId : cellIds) {
 		Cell &cell = m_cells[cellId];
 
-		// List dead vertices
+		// List vertices to remove
 		//
 		// For now, all cell vertices will be listed. Later, the vertex of
 		// the dangling faces will be removed from the list.
 		int nCellVertices = cell.getVertexCount();
-		const long *vertices = cell.getConnect();
 		for (int k = 0; k < nCellVertices; ++k) {
-			deadVertices.insert(vertices[k]);
+			long vertexId = cell.getVertex(k);
+			deadVertices.insert(vertexId);
 		}
 
-		// List dead interface and set the dangling status. An interface
-		// is dangling if only the owner or the neighbour will be deleted.
+		// List of interfaces to delete
+		//
+		// All the interfaces will be deleted, this means that some of the
+		// cells that are not deleted will have a face not donnected to
+		// anything. This faces is called dangling face.
+		//
+		// The vertices of a dangling face has to be kept. Morover information
+		// about adjacencies and interfaces of a dangling cell needs to be
+		// updated (it it not necessary to update those information for the
+		// cells that will be deleted, because they are going to be removed).
 		int nCellInterfaces = cell.getInterfaceCount();
 		const long *interfaces = cell.getInterfaces();
 		for (int k = 0; k < nCellInterfaces; ++k) {
@@ -1101,76 +1133,105 @@ VolOctree::FaceInfoSet VolOctree::removeCells(std::unordered_set<long> &cellIds)
 				continue;
 			}
 
+			// Interfaces has to be considered just once
+			if (deadInterfaces.count(interfaceId) > 0) {
+				continue;
+			}
+
+			// Find if the owner or the neighbour of the interface will be
+			// kept. An interface whose owner or neighbour will not be
+			// deleted is called dangling.
+			Interface &interface = m_interfaces[interfaceId];
+
 			int danglingSide = -1;
-			if (deadInterfaces.count(interfaceId) == 0) {
-				Interface &interface = m_interfaces[interfaceId];
-				if (!interface.isBorder()) {
-					if (interface.getOwner() == cellId) {
-						danglingSide = 1;
-					} else {
-						danglingSide = 0;
-					}
+			if (!interface.isBorder()) {
+				if (cellIds.count(interface.getOwner()) == 0) {
+					danglingSide = 0;
+				} else if (cellIds.count(interface.getNeigh()) == 0) {
+					danglingSide = 1;
 				}
 			}
-			deadInterfaces[interfaceId] = danglingSide;
+
+			// Handle dangling faces
+			if (danglingSide >= 0) {
+				// Info on the dangling face
+				long danglingCellId;
+				long danglingNeighId;
+				int danglingCellFace;
+				if (danglingSide == 0) {
+					danglingCellId   = interface.getOwner();
+					danglingNeighId  = interface.getNeigh();
+					danglingCellFace = interface.getOwnerFace();
+				} else {
+					danglingCellId   = interface.getNeigh();
+					danglingNeighId  = interface.getOwner();
+					danglingCellFace = interface.getNeighFace();
+				}
+
+				Cell &danglingCell = m_cells[danglingCellId];
+
+				// Since the dangling cell will not be deleted, we have to
+				// updated its interface and adjacency data structures.
+				int cellInterfaceIndex = danglingCell.findInterface(danglingCellFace, interfaceId);
+				danglingCell.deleteInterface(danglingCellFace, cellInterfaceIndex);
+
+				int cellAdjacencyIndex = danglingCell.findAdjacency(danglingCellFace, danglingNeighId);
+				danglingCell.deleteAdjacency(danglingCellFace, cellAdjacencyIndex);
+
+				// Add the face to the dangling face list
+				danglingFaces.insert({{danglingCellId, danglingCellFace}});
+			}
+
+			// Add the interface to the list of interfaces to delete
+			deadInterfaces.insert(interfaceId);
 		}
 
 		// Delete cell
 		deleteCell(cellId);
 	}
 
-	// Delete interfaces
-	FaceInfoSet danglingFaces;
-
-	for (auto it = deadInterfaces.begin(); it != deadInterfaces.end(); ++it) {
-		long interfaceId  = it->first;
-		long danglingSide = it->second;
-
-		// Handle dangling interfaces
-		if (danglingSide >= 0) {
-			Interface &interface = m_interfaces[interfaceId];
-
-			long danglingCellId;
-			long danglingNeighId;
-			long danglingCellFace;
-			if (danglingSide == 0) {
-				danglingCellId   = interface.getOwner();
-				danglingNeighId  = interface.getNeigh();
-				danglingCellFace = interface.getOwnerFace();
-			} else {
-				danglingCellId   = interface.getNeigh();
-				danglingNeighId  = interface.getOwner();
-				danglingCellFace = interface.getNeighFace();
-			}
-
-			// Remove interface vertices from dead vertices
-			int nFaceVertices = interface.getVertexCount();
-			const long *vertices = interface.getConnect();
-			for (int k = 0; k < nFaceVertices; ++k) {
-				deadVertices.erase(vertices[k]);
-			}
-
-			// Remove interface and adjacency from dangling cell
-			Cell &danglingCell = m_cells[danglingCellId];
-
-			int cellInterfaceIndex = danglingCell.findInterface(danglingCellFace, interfaceId);
-			danglingCell.deleteInterface(danglingCellFace, cellInterfaceIndex);
-
-			int cellAdjacencyIndex = danglingCell.findAdjacency(danglingCellFace, danglingNeighId);
-			danglingCell.deleteAdjacency(danglingCellFace, cellAdjacencyIndex);
-
-			// Add the associated cell face to the dangling faces list
-			FaceInfo danglingFace(danglingCellId, danglingCellFace);
-			danglingFaces.insert(danglingFace);
-		}
-
-		// Add the interface to the list of interfaces to delete
+	// Delete the interfaces
+	for (long interfaceId : deadInterfaces) {
 		VolumeKernel::deleteInterface(interfaceId, false, true);
 	}
 
-	// Delete vertices
-	for (auto it = deadVertices.begin(); it != deadVertices.end(); ++it) {
-		VolumeKernel::deleteVertex(*it, true);
+	// All the vertices belonging to the dangling cells has to be kept
+	//
+	// It's not enough to consider only the vertices on the dangling faces,
+	// we have to consider the vertices of the whole cell. That's because
+	// we may need to keep vertices on the edges of the cell, and those
+	// vertices may not be on interfaces of the dangling face
+	for (const FaceInfo &danglingFaceInfo : danglingFaces) {
+		const Cell &cell = m_cells[danglingFaceInfo.id];
+
+		// Vertices of the face
+		const std::vector<int> &localConnect = cellLocalFaceConnect[danglingFaceInfo.face];
+		for (int n = 0; n < nFaceVertices; ++n) {
+			int localVertexId = localConnect[n];
+			long vertexId = cell.getVertex(localVertexId);
+			deadVertices.erase(vertexId);
+		}
+
+		// Vertices of all other interfaces of the cell
+		int nCellInterfaces = cell.getInterfaceCount();
+		const long *interfaces = cell.getInterfaces();
+		for (int k = 0; k < nCellInterfaces; ++k) {
+			long interfaceId = interfaces[k];
+			if (interfaceId < 0) {
+				continue;
+			}
+
+			const Interface &interface = m_interfaces[interfaceId];
+			for (int n = 0; n < nFaceVertices; ++n) {
+				long vertexId = interface.getVertex(n);
+				deadVertices.erase(vertexId);
+			}
+		}
+	}
+
+	// Delete the vertices
+	for (long vertexId : deadVertices) {
+		VolumeKernel::deleteVertex(vertexId, true);
 	}
 
 	// Done
