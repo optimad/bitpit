@@ -220,6 +220,9 @@ public:
 	virtual void buildAdjacencies();
 	virtual void updateAdjacencies(const std::vector<long> &cellIds);
 
+	virtual void buildInterfaces();
+	virtual void updateInterfaces(const std::vector<long> &cellIds);
+
 	void getBoundingBox(std::array<double, 3> &minPoint, std::array<double, 3> &maxPoint);
 	bool isBoundingBoxDirty(bool global = false) const;
 	void updateBoundingBox(bool forcedUpdated = false);

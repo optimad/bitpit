@@ -2818,6 +2818,182 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds)
 }
 
 /*!
+	Update the interfaces of the specified list of cells and of their
+	neighbours.
+
+	\param[in] cellIds is the list of cell ids
+*/
+void PatchKernel::buildInterfaces()
+{
+	updateInterfaces(m_cells.getIds(false));
+}
+
+/*!
+	Update the interfaces of the specified list of cells and of their
+	neighbours.
+
+	\param[in] cellIds is the list of cell ids
+*/
+void PatchKernel::updateInterfaces(const std::vector<long> &cellIds)
+{
+    //
+    // Delete existing interfaces
+    //
+    for (long cellId : cellIds) {
+		Cell &cell = m_cells[cellId];
+
+		int nCellInterfaces = cell.getInterfaceCount();
+		const long *cellInterfaces = cell.getInterfaces();
+		for (int k = 0; k < nCellInterfaces; ++k) {
+			long interfaceId = cellInterfaces[k];
+			if (interfaceId < 0) {
+				continue;
+			}
+
+			deleteInterface(interfaceId, true, true);
+		}
+    }
+    m_interfaces.flush();
+
+	//
+	// Update interfaces
+	//
+	// Adjacencies and interfaces are paired: the i-th adjacency correspondes
+	// to the i-th interface. Moreover if we loop through the adjacencies of
+	// a face, the adjacencies that have an interface are always listed first.
+	// This meas that, to update the interfaces, we can count the interfaces
+	// already associated to a face and loop only on the adjacencies which
+	// have an index past the one of the last interface.
+	for (long cellId : cellIds) {
+		Cell &cell = m_cells[cellId];
+		const int nCellFaces = cell.getFaceCount();
+		for (int face = 0; face < nCellFaces; face++) {
+			int nFaceAdjacencies = cell.getAdjacencyCount(face);
+
+			// Find the range of adjacencies that need an interface
+			//
+			// Each face has always an interface, but this interface might be
+			// just a placholder. If this is the case, the update has to
+			// begin from the first adjacency.
+			int updateEnd   = nFaceAdjacencies;
+			int updateBegin = cell.getInterfaceCount(face);
+			if (updateBegin == 1) {
+				long interfaceId = cell.getInterface(face, 0);
+				if (interfaceId < 0) {
+					updateBegin = 0;
+				}
+			}
+
+			if (updateBegin == updateEnd) {
+				continue;
+			}
+
+			// Build an interface for every adjacency
+			//
+			// Interface and adjacencies are aligned:
+			for (int k = updateBegin; k < updateEnd; ++k) {
+				// Do not create the interfaces between two ghost cells or
+				// on ghost border faces.
+				long neighId = cell.getAdjacency(face, k);
+				if (neighId < 0 && !cell.isInterior()) {
+					continue;
+				}
+
+				Cell *neigh   = nullptr;
+				int neighFace = -1;
+				if (neighId >= 0) {
+					neigh = &m_cells[neighId];
+					if (!neigh->isInterior()) {
+						continue;
+					}
+
+					neighFace = findAdjoinNeighFace(cellId, neighId);
+				}
+
+				// Owner and neighbour of the interface
+				//
+				// The interface is owned by the cell that has only one
+				// adjacency, i.e., by the cell that owns the smallest of
+				// the two faces.
+				long intrOwnerId;
+				Cell *intrOwner;
+				int intrOwnerFace;
+
+				long intrNeighId;
+				Cell *intrNeigh = nullptr;
+				int intrNeighFace = -1;
+
+				if (nFaceAdjacencies == 1 || neighId < 0) {
+					intrOwnerId   = cellId;
+					intrOwner     = &cell;
+					intrOwnerFace = face;
+
+					intrNeighId = neighId;
+					if (intrNeighId >= 0) {
+						intrNeigh     = &m_cells[intrNeighId];
+						intrNeighFace = neighFace;
+					}
+				} else {
+					intrOwnerId   = neighId;
+					intrOwner     = &m_cells[intrOwnerId];
+					intrOwnerFace = neighFace;
+
+					intrNeighId   = cellId;
+					intrNeigh     = &cell;
+					intrNeighFace = face;
+				}
+
+				// Create a new interface
+				ElementInfo::Type interfaceType = intrOwner->getFaceType(intrOwnerFace);
+				InterfaceIterator interfaceIterator = addInterface(interfaceType);
+				Interface &interface = *interfaceIterator;
+				long interfaceId = interface.getId();
+
+				// Set owner and neighbour
+				interface.setOwner(intrOwnerId, intrOwnerFace);
+				if (intrNeighId >= 0) {
+					interface.setNeigh(intrNeighId, intrNeighFace);
+				}
+
+				// Set connectivity
+				int nInterfaceVertices = ElementInfo::getElementInfo(interfaceType).nVertices;
+				std::unique_ptr<long[]> interfaceConnect = std::unique_ptr<long[]>(new long[nInterfaceVertices]);
+				std::vector<int> faceLocalConnect = intrOwner->getFaceLocalConnect(intrOwnerFace);
+				for (int k = 0; k < nInterfaceVertices; ++k) {
+					long localVertexId = faceLocalConnect[k];
+					long vertexId = intrOwner->getVertex(localVertexId);
+					interfaceConnect[k] = vertexId;
+				}
+
+				interface.setConnect(std::move(interfaceConnect));
+
+				// Update owner and neighbour cell data
+				intrOwner->pushInterface(intrOwnerFace, interfaceId);
+				if (intrNeighId >= 0) {
+					intrNeigh->pushInterface(intrNeighFace, interfaceId);
+				}
+
+				// The position of the interface has to be the same of the
+				// related adjacency, moreover the adjacencies associated to
+				// an interface has to be listed first. This is certainly
+				// tru for the curretn cell (because we are adding the
+				// interfaces in the proper order), we need to check if the
+				// it is true also for the the neighbour.
+				if (neighId >= 0) {
+					int neighInterfaceIndex   = neigh->getInterfaceCount(neighFace) - 1;
+					long neighPairedAdjacency = neigh->getAdjacency(neighFace, neighInterfaceIndex);
+					if (neighPairedAdjacency != cellId) {
+						int neighCellAdjacencyIndex = neigh->findAdjacency(neighFace, cellId);
+						neigh->setAdjacency(neighFace, neighInterfaceIndex, cellId);
+						neigh->setAdjacency(neighFace, neighCellAdjacencyIndex, neighPairedAdjacency);
+					}
+				}
+			}
+		}
+	}
+}
+
+/*!
 	Given a cell and one of it's neighbours, finds the faces of the neighbour
 	that adjoins the specified cell.
 
