@@ -371,13 +371,6 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 	log::cout() << " Done" << std::endl;
 
-	// Initialize intersections
-	log::cout() << ">> Evaluating Octree intersections...";
-
-	m_tree.computeIntersections();
-
-	log::cout() << " Done" << std::endl;
-
 	// Initialize tracking data
 	adaption::InfoCollection adaptionData;
 
@@ -829,7 +822,6 @@ std::vector<long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoLi
 	}
 
 	const ElementInfo &cellTypeInfo = ElementInfo::getElementInfo(cellType);
-	const int &nCellFaces = cellTypeInfo.nFaces;
 	const int &nCellVertices = cellTypeInfo.nVertices;
 	const std::vector<std::vector<int>> &cellLocalFaceConnect = cellTypeInfo.faceConnect;
 
@@ -844,12 +836,13 @@ std::vector<long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoLi
 	const ElementInfo &interfaceTypeInfo = ElementInfo::getElementInfo(interfaceType);
 	const int &nInterfaceVertices = interfaceTypeInfo.nVertices;
 
-	uint32_t nIntersections = m_tree.getNumIntersections();
-
 	// Add the vertex of the dangling faces to the vertex map
 	std::unordered_map<uint32_t, long> vertexMap;
 	for (auto &danglingFaceInfo : danglingFaces) {
 		// List of faces with the vertx to be added
+		//
+		// We need to consider the dangling face itself and all interfaces
+		// on that face.
 		long danglingId = danglingFaceInfo.id;
 		Cell &danglingCell = m_cells[danglingId];
 		int danglingFace = danglingFaceInfo.face;
@@ -906,130 +899,11 @@ std::vector<long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoLi
 		}
 	}
 
-	// Create the interfaces
-	std::unordered_map<uint32_t, long> interfaceMap;
-	std::unordered_map<uint64_t, std::vector<uint32_t>> globalOctantTreeInterfaces;
-	for (uint32_t interfaceTreeId = 0; interfaceTreeId < nIntersections; ++interfaceTreeId) {
-		// Skip the interface is already inserted in the patch
-		if (interfaceMap.count(interfaceTreeId) != 0) {
-			continue;
-		}
-
-		// Info on the interface
-		Intersection *treeInterface = m_tree.getIntersection(interfaceTreeId);
-
-		int owner       = m_tree.getOut(treeInterface);
-		int ownerFace   = m_tree.getFace(treeInterface);
-		int neigh       = m_tree.getIn(treeInterface);
-		bool isBoundary = m_tree.getBound(treeInterface);
-		bool isGhost    = m_tree.getIsGhost(treeInterface);
-
-		bool ownerIsGhost;
-		bool neighIsGhost;
-		if (isGhost) {
-			ownerIsGhost = m_tree.getOutIsGhost(treeInterface);
-			neighIsGhost = !ownerIsGhost;
-		} else {
-			ownerIsGhost = false;
-			neighIsGhost = false;
-		}
-
-		// Decide if we need to build the interface
-		bool buildInterface = false;
-
-		OctantInfo ownerOctantInfo(owner, !ownerIsGhost);
-		long ownerId = getOctantId(ownerOctantInfo);
-		if (ownerId < 0) {
-			uint64_t ownerGlobalTreeId;
-			if (ownerOctantInfo.internal) {
-				ownerGlobalTreeId = m_tree.getGlobalIdx(ownerOctantInfo.id);
-			} else {
-				ownerGlobalTreeId = m_tree.getGhostGlobalIdx(ownerOctantInfo.id);
-			}
-
-			globalOctantTreeInterfaces[ownerGlobalTreeId].push_back(interfaceTreeId);
-			buildInterface = true;
-		}
-
-		long neighId = Element::NULL_ID;
-		if (!isBoundary) {
-			OctantInfo neighOctantInfo(neigh, !neighIsGhost);
-			neighId = getOctantId(neighOctantInfo);
-			if (neighId < 0) {
-				uint64_t neighGlobalTreeId;
-				if (neighOctantInfo.internal) {
-					neighGlobalTreeId = m_tree.getGlobalIdx(neighOctantInfo.id);
-				} else {
-					neighGlobalTreeId = m_tree.getGhostGlobalIdx(neighOctantInfo.id);
-				}
-
-				globalOctantTreeInterfaces[neighGlobalTreeId].push_back(interfaceTreeId);
-				buildInterface = true;
-			}
-		}
-
-		if (!buildInterface) {
-			continue;
-		}
-
-		// Interface owner and neighbour faces
-		//
-		// The owner or the neighbour may be not know yet, but the
-		// corresponding faces are. So, set the faces also for
-		// the unknown cells because they are needed when finding
-		// the interfaces associated to a cell.
-		std::array<FaceInfo, 2> interfaceFaces;
-		interfaceFaces[0] = FaceInfo(ownerId, ownerFace);
-		interfaceFaces[1] = FaceInfo(neighId, ownerFace + 1 - 2 * (ownerFace % 2));
-
-		// Interface connectivity
-		const std::vector<uint32_t> &octantTreeConnect = getOctantConnect(ownerOctantInfo);
-		const std::vector<int> &localConnect = cellLocalFaceConnect[ownerFace];
-		std::unique_ptr<long[]> interfaceConnect = std::unique_ptr<long[]>(new long[nInterfaceVertices]);
-		for (int k = 0; k < nInterfaceVertices; ++k) {
-			interfaceConnect[k] = vertexMap.at(octantTreeConnect[localConnect[k]]);
-		}
-
-		// Create the interface
-		long interfaceId = addInterface(interfaceTreeId, interfaceConnect, interfaceFaces);
-		interfaceMap[interfaceTreeId] = interfaceId;
-
-		// If the interface is on an dangling faces, the owner or
-		// the neigbour of the interface already exists. We need
-		// to identify that cell and set that information on the
-		// interface.
-		//
-		// A boundary interface cannnot be on a dangling face.
-		if (!isBoundary) {
-			FaceInfo *guessDanglingInfo;
-			if (ownerId < 0) {
-				guessDanglingInfo = &interfaceFaces[1];
-			} else {
-				guessDanglingInfo = &interfaceFaces[0];
-			}
-
-			if (danglingFaces.count(*guessDanglingInfo) != 0) {
-				Cell &danglingCell = m_cells[guessDanglingInfo->id];
-				danglingCell.pushInterface(guessDanglingInfo->face, interfaceId);
-			}
-		}
-	}
-
 	// Add the cells
 	std::vector<long> createdCells;
 	createdCells.reserve(octantInfoList.size());
 
-	std::vector<std::vector<long>> cellInterfaces(nCellFaces, std::vector<long>());
-	std::vector<std::vector<bool>> cellInterfacesOwner(nCellFaces, std::vector<bool>());
 	for (OctantInfo &octantInfo : octantInfoList) {
-		// Global index of the octant
-		uint64_t globalTreeId;
-		if (octantInfo.internal) {
-			globalTreeId = m_tree.getGlobalIdx(octantInfo.id);
-		} else {
-			globalTreeId = m_tree.getGhostGlobalIdx(octantInfo.id);
-		}
-
 		// Octant connectivity
 		const std::vector<uint32_t> &octantTreeConnect = getOctantConnect(octantInfo);
 
@@ -1040,42 +914,14 @@ std::vector<long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoLi
 			cellConnect[k] = vertexMap.at(vertexTreeId);
 		}
 
-		// Cell interfaces and adjacencies
-		for (int k = 0; k < nCellFaces; ++k) {
-			cellInterfaces[k].clear();
-			cellInterfacesOwner[k].clear();
-		}
-
-		for (uint32_t interfaceTreeId : globalOctantTreeInterfaces[globalTreeId]) {
-			const long &interfaceId = interfaceMap.at(interfaceTreeId);
-			const Interface &interface = m_interfaces[interfaceId];
-
-			Intersection *treeInterface = m_tree.getIntersection(interfaceTreeId);
-			uint32_t owner     = m_tree.getOut(treeInterface);
-			bool ownerIsGhost  = m_tree.getOutIsGhost(treeInterface);
-			bool ownsInterface = (owner == octantInfo.id) && (ownerIsGhost == !octantInfo.internal);
-
-			int cellFace;
-			if (ownsInterface) {
-				cellFace = interface.getOwnerFace();
-			} else {
-				cellFace = interface.getNeighFace();
-			}
-
-			cellInterfaces[cellFace].emplace_back();
-			long &cellInterfaceId = cellInterfaces[cellFace].back();
-			cellInterfaceId = interfaceId;
-
-			cellInterfacesOwner[cellFace].push_back(ownsInterface);
-		}
-
 		// Add cell
-		long cellId = addCell(octantInfo, cellConnect, cellInterfaces, cellInterfacesOwner);
+		long cellId = addCell(octantInfo, cellConnect);
 		createdCells.push_back(cellId);
 	}
 
 	// Build adjacencies
 	updateAdjacencies(createdCells, false);
+	updateInterfaces(createdCells, false);
 
 	// Done
 	return createdCells;
@@ -1270,43 +1116,6 @@ long VolOctree::addVertex(uint32_t treeId)
 }
 
 /*!
-	Creates a new patch interface from the specified tree intersection.
-
-	\param treeId is the id of the intersection in the tree
-	\param vertices are the vertices of the interface
-	\param faces are the faces of the interface
-	\result The id of the newly created interface.
-*/
-long VolOctree::addInterface(uint32_t treeId,
-                                   std::unique_ptr<long[]> &vertices,
-                                   std::array<FaceInfo, 2> &faces)
-{
-	BITPIT_UNUSED(treeId);
-
-	// Info on the interfaces
-	ElementInfo::Type interfaceType;
-	if (isThreeDimensional()) {
-		interfaceType = ElementInfo::PIXEL;
-	} else {
-		interfaceType = ElementInfo::LINE;
-	}
-
-	// Create the interface
-	InterfaceIterator interfaceIterator = VolumeKernel::addInterface(interfaceType);
-	Interface &interface = *interfaceIterator;
-
-	// Connectivity
-	interface.setConnect(std::move(vertices));
-
-	// Owner and neighbour
-	interface.setOwner(faces[0].id, faces[0].face);
-	interface.setNeigh(faces[1].id, faces[1].face);
-
-	// Done
-	return interface.getId();
-}
-
-/*!
 	Creates a new patch cell from the specified tree octant.
 
 	\param octantInfo is the octant associated to the cell
@@ -1316,10 +1125,7 @@ long VolOctree::addInterface(uint32_t treeId,
 	by the cell
 	\result The id of the newly created cell.
 */
-long VolOctree::addCell(OctantInfo octantInfo,
-                              std::unique_ptr<long[]> &vertices,
-                              std::vector<std::vector<long>> &interfaces,
-                              std::vector<std::vector<bool>> &interfacesOwner)
+long VolOctree::addCell(OctantInfo octantInfo, std::unique_ptr<long[]> &vertices)
 {
 	// Create the cell
 	ElementInfo::Type cellType;
@@ -1335,27 +1141,6 @@ long VolOctree::addCell(OctantInfo octantInfo,
 
 	// Connectivity
 	cell.setConnect(std::move(vertices));
-
-	// Interfaces
-	cell.setInterfaces(interfaces);
-
-	// Update data of interfaces
-	int nCellFaces = cell.getFaceCount();
-	for (int face = 0; face < nCellFaces; ++face) {
-		int nInterfaces = interfaces[face].size();
-		for (int k = 0; k < nInterfaces; ++k) {
-			long interfaceId = interfaces[face][k];
-			Interface &interface = m_interfaces[interfaceId];
-			bool ownsInterface = interfacesOwner[face][k];
-
-			// Update data of interfaces
-			if (ownsInterface) {
-				interface.setOwner(id, face);
-			} else {
-				interface.setNeigh(id, face);
-			}
-		}
-	}
 
 	// If the cell is a ghost set its owner
 #if BITPIT_ENABLE_MPI==1

@@ -167,14 +167,7 @@ private:
 
 	long addVertex(uint32_t treeId);
 
-	long addInterface(uint32_t treeId,
-                            std::unique_ptr<long[]> &vertices,
-                            std::array<FaceInfo, 2> &faces);
-
-	long addCell(OctantInfo octantInfo,
-	                 std::unique_ptr<long[]> &vertices,
-	                 std::vector<std::vector<long>> &interfaces,
-	                 std::vector<std::vector<bool>> &interfacesOwner);
+	long addCell(OctantInfo octantInfo, std::unique_ptr<long[]> &vertices);
 	void deleteCell(long id);
 
 	const std::vector<adaption::Info> sync(bool trackChanges);
