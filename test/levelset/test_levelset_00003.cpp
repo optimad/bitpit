@@ -1,3 +1,4 @@
+
 /*---------------------------------------------------------------------------*\
  *
  *  bitpit
@@ -38,6 +39,10 @@
 // INCLUDES                                                                   //
 // ========================================================================== //
 
+#if BITPIT_ENABLE_MPI==1
+# include <mpi.h>
+#endif
+
 //Standard Template Library
 # include <ctime>
 # include <chrono>
@@ -49,211 +54,132 @@
 // NAMESPACES                                                                 //
 // ========================================================================== //
 using namespace std;
-using namespace bitpit;
-
 
 /*!Demo for 2D level set of complex geometries on a Pablo octree mesh.
- */
+*/
 int main( int argc, char *argv[]){
 
-#if NOMPI==0
-        MPI_Init(&argc, &argv);
-#endif
-	// ========================================================================== //
-	// VARIABLES DECLARATION                                                      //
-	// ========================================================================== //
+    // ========================================================================== //
+    // VARIABLES DECLARATION                                                      //
+    // ========================================================================== //
 
-	// Input geometry
-	int						  nSTL = 1;
-	vector<SurfUnstructured>  STL(nSTL);
-
-    int                       dimensions(2) ;
-	PabloUniform              Mesh(dimensions);
+    uint8_t                 dimensions(2);
 
 
-	// Counters
-	// none
+    // Input geometry
+    bitpit::SurfUnstructured    STL(0,1,dimensions);
+
+    std::cout << " - Loading stl geometry" << std::endl;
+
+    STL.importDGF("./data/naca0012.dgf");
+
+    STL.deleteCoincidentVertices() ;
+    STL.buildAdjacencies() ;
+
+    STL.setName("geometry_003") ;
+    STL.write() ;
+
+    std::cout << "n. vertex: " << STL.getVertexCount() << std::endl;
+    std::cout << "n. simplex: " << STL.getCellCount() << std::endl;
 
 
-	// ========================================================================== //
-	// LOAD STL GEOMETRY                                                          //
-	// ========================================================================== //
-	{
-		// Scope variables ------------------------------------------------------ //
-		// none
-
-		// Output message ------------------------------------------------------- //
-		if (Mesh.getRank() == 0) cout << " - Loading stl geometry" << endl;
-
-		// Load stl geometry ---------------------------------------------------- //
-		STL[0].Import_dgf("./data/naca0012.dgf");
-// 		STL[0].Export_vtu("naca0012.vtu");
-//		STL[0].Import_dgf("./data/2Dcircle.dgf");
-
-		for(int i=0; i<nSTL; i++){
-
-
-            STL[i].SetDimensions(dimensions) ;
-            STL[i].Clean() ;
-            STL[i].GenerateVNormals(3-dimensions) ;
-            STL[i].DestroyAdjacency() ;
-            STL[i].DestroyEdge() ;
-
-			// Display info --------------------------------------------------------- //
-			if (Mesh.getRank() == 0) cout << "n. vertex: " << STL[i].nVertex << endl;
-			if (Mesh.getRank() == 0) cout << "n. simplex: " << STL[i].nSimplex << endl;
-
-		}
-	}
 
     // ========================================================================== //
     // CREATE MESH                                                                //
     // ========================================================================== //
-    {
-        // Scope variables ------------------------------------------------------ //
-        int             i,j;
-        double          dx, dy, dz;
-        array<double,3> meshMin, meshMax ;
+    std::cout << " - Setting mesh" << std::endl;
+    std::array<double,3>    meshMin, meshMax, delta ;
+    double                  h(0), dh ;
 
-        meshMin.fill(0.0) ;
-        meshMax.fill(0.0) ;
+    STL.getBoundingBox( meshMin, meshMax ) ;
 
-        vector< array<double,3> > stlMin(nSTL), stlMax(nSTL) ;
-        
-        
-        // Output message ------------------------------------------------------- //
-        cout << " - Setting mesh" << endl;
+    delta = meshMax -meshMin ;
+    meshMin -=  0.1*delta ;
+    meshMax +=  0.1*delta ;
 
-        // Bounding box for input geometry -------------------------------------- //
-        for (j=0; j<nSTL; j++){
-            STL[j].BoundingBox( stlMin[j], stlMax[j] ) ;
-        }//next j
+    delta = meshMax -meshMin ;
 
-        CGElem::UnionAABB( stlMin, stlMax, meshMin, meshMax ) ;
+    for( int i=0; i<3; ++i){
+        h = max( h, meshMax[i]-meshMin[i] ) ;
+    };
 
-        meshMin = meshMin - 0.1*(meshMax -meshMin) ;
-        meshMax = meshMax + 0.1*(meshMax -meshMin) ;
-
-        // Set mesh ------------------------------------------------------------- //
-        Mesh.setL( max(meshMax[0]-meshMin[0],meshMax[1]-meshMin[1]) ) ;
-        Mesh.setOrigin( meshMin ) ;
-
-		if (Mesh.getRank() == 0) cout << " - Setting pablo mesh" << endl;
-		for (i=0; i<5; i++){
-			Mesh.adaptGlobalRefine();
-		}
-
-#if NOMPI==0
-		//if (Mesh.getRank() == 0) cout << " - Balancing pablo mesh" << endl;
-		//Mesh.loadBalance();
-#endif
-
-		for (i=0; i<2; i++){
-			Mesh.adaptGlobalRefine();
-		}
+    dh = h / 16. ;
+    bitpit::VolOctree    mesh(1, dimensions, meshMin, h, dh );
+    mesh.update() ;
 
 
+    // COMPUTE LEVEL SET in NARROW BAND
+    std::chrono::time_point<std::chrono::system_clock>    start, end;
+    int                                         elapsed_init, elapsed_refi(0);
+
+    bitpit::LevelSet                levelset;
+
+    std::vector<bitpit::adaption::Info> mapper ;
+    std::vector<double>             LS ;
+    std::vector<double>::iterator   itLS ;
+
+    levelset.setMesh(&mesh) ;
+    levelset.addObject(&STL) ;
+
+
+    mesh.addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS) ;
+    mesh.setName("levelset_003") ;
+    mesh.setCounter() ;
+
+    levelset.setPropagateSign(true);
+
+    start = std::chrono::system_clock::now();
+    levelset.compute( );
+    end = std::chrono::system_clock::now();
+
+    elapsed_init = chrono::duration_cast<chrono::milliseconds>(end-start).count();
+
+    // Export level set ------------------------------------------------------- //
+    std::cout << " - Exporting data" << endl;
+
+    LS.resize(mesh.getCellCount() ) ;
+    itLS = LS.begin() ;
+    for( auto & cell : mesh.getCells() ){
+        const long &id = cell.getId() ;
+        *itLS = levelset.getLS(id) ;
+        ++itLS ;
+    };
+
+    mesh.write() ;
+
+    //Refinement
+    for( int i=0; i<3; ++i){
+
+        std::cout << "refinement loop " << i << std::endl ;
+        std::cout << "refinement loop " << i << std::endl ;
+        std::cout << "refinement loop " << i << std::endl ;
+
+        for( auto & cell : mesh.getCells() ){
+            const long &id = cell.getId() ;
+            if( std::abs(levelset.getLS(id)) < 100. ){
+                mesh.markCellForRefinement(id) ;
+            }
+        }
+
+        mapper = mesh.update(true) ;
+        start = std::chrono::system_clock::now();
+        levelset.update(mapper) ;
+        end = std::chrono::system_clock::now();
+
+        elapsed_refi += chrono::duration_cast<chrono::milliseconds>(end-start).count();
+
+        LS.resize(mesh.getCellCount() ) ;
+        itLS = LS.begin() ;
+        for( auto & cell : mesh.getCells() ){
+            const long &id = cell.getId() ;
+            *itLS = levelset.getLS(id) ;
+            ++itLS ;
+        };
+        mesh.write() ;
     }
 
-	
-
-	// ========================================================================== //
-	// COMPUTE LEVEL SET                                                          //
-	// ========================================================================== //
-
-	{
-		vector< LevelSetTriOctr > LSP;
-		LSP.resize(nSTL);
-
-		for (int istl=0; istl<nSTL; istl++){
-			LSP[istl].setLog("ls"+to_string(istl)+".log");
-			LSP[istl].setMesh(&Mesh);
-			LSP[istl].setTri(&STL[istl]);
-		}
-
-		int i = 0;
-
-		// Compute level set  in narrow band ------------------------------------- //
-		for (int istl=0; istl<nSTL; istl++){
-			LSP[istl].compute();
-		}
-
-		// Export level set ------------------------------------------------------- //
-		if (Mesh.getRank() == 0) cout << " - Exporting data" << endl;
-		for (int istl=0; istl<nSTL; istl++){
-			Mesh.writeTest("ls"+to_string(istl)+"_it0", LSP[istl].getLS());//, LSGH);
-		}
-		if (Mesh.getRank() == 0) cout << " - Exported data" << endl;
-
-
-		// Adapt mesh by level set on STL ----------------------------------------- //
-//ht		i = 0;
-//ht		vector<int> targetstep(nSTL,4);
-//ht
-//ht		while(targetstep != levSTL){
-//ht
-//ht			for (int istl=0; istl<nSTL; istl++){
-//ht
-//ht				targetstep[istl] = min(targetstep[istl]+1,levSTL[istl]);
-//ht
-//ht				int target = targetstep[istl];
-//ht				bool done = true;
-//ht				while (done){
-//ht					start = std::chrono::system_clock::now();
-//ht					done = adaptOnStl( LSP[istl], target);
-//ht					end = chrono::system_clock::now();
-//ht					elapsed_seconds = chrono::duration_cast<chrono::milliseconds>(end-start).count();
-//ht					if (Mesh.rank == 0) cout << "elapsed time: " << elapsed_seconds << " ms" << endl;
-//ht
-//ht					if (done){
-//ht						i++;
-//ht						// Export level set ----------------------------------------------------- //
-//ht						if (Mesh.rank == 0) cout << " - Exporting data" << endl;
-//ht						Mesh.computeConnectivity();
-//ht						for (int jstl=0; jstl<nSTL; jstl++)
-//ht							Mesh.writeTest("ls"+to_string(jstl)+"_it"+to_string(i), LSP[jstl].getSdf());//, LSGH);
-//ht						Mesh.clearConnectivity();
-//ht						if (Mesh.rank == 0) cout << " - Exported data" << endl;
-//ht					}
-//ht
-//ht				}//end while done
-//ht			}//next istl
-//ht
-//ht#if NOMPI==0
-//ht			//Load Balance
-//ht			if (Mesh.rank == 0) cout << " - Load Balance" << endl;
-//ht			//User_VLSData_LB<vector<Class_LevelSet_Stl<Class_Para_Tree<2> > > > data_vls(LSP);
-//ht			User_LSData_LB<Class_LevelSet_Stl<Class_Para_Tree<2> > > data_ls(LSP[0]);
-//ht#endif
-//ht
-//ht			int nocts = Mesh.getNumOctants();
-//ht			vector<double> weight(nocts, 1.0);
-//ht			for (int istl=0; istl<nSTL; istl++){
-//ht				for (int j=0; j<nocts; j++){
-//ht					weight[j] += LSP[istl].getSimplexList(j).size();
-//ht				}
-//ht			}
-//ht
-//ht#if NOMPI==0
-//ht			Mesh.loadBalance(data_ls, &weight);
-//ht			postLoadBalance(LSP);
-//ht#endif
-//ht			i++;
-//ht			// Export level set ----------------------------------------------------- //
-//ht			if (Mesh.rank == 0) cout << " - Exporting data" << endl;
-//ht			Mesh.computeConnectivity();
-//ht			for (int jstl=0; jstl<nSTL; jstl++)
-//ht				Mesh.writeTest("ls"+to_string(jstl)+"_it"+to_string(i), LSP[jstl].getSdf());//, LSGH);
-//ht			Mesh.clearConnectivity();
-//ht			if (Mesh.rank == 0) cout << " - Exported data" << endl;
-//ht
-//ht		}//end while targetstep
-//ht
-	}
-	
-#if NOMPI==0
-    MPI_Finalize();
-#endif
+    cout << "elapsed time initialization " << elapsed_init << " ms" << endl;
+    cout << "elapsed time refinement     " << elapsed_refi << " ms" << endl;
 
     return 0;
 

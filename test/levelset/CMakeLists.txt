@@ -29,7 +29,7 @@ cmake_minimum_required(VERSION 2.8)
 set(TESTS "")
 list(APPEND TESTS "test_levelset_00001")
 list(APPEND TESTS "test_levelset_00002")
-#list(APPEND TESTS "test_levelset_00003")
+list(APPEND TESTS "test_levelset_00003")
 if (ENABLE_MPI)
 	list(APPEND TESTS "test_levelset_parallel_00001:1")
 endif()
@@ -68,6 +68,11 @@ add_custom_target(clean-tests-levelset COMMAND ${CMAKE_MAKE_PROGRAM} clean WORKI
 add_custom_command(
     TARGET "test_levelset_00002" PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/cube1.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/cube1.stl"
+)
+
+add_custom_command(
+    TARGET "test_levelset_00003" PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/naca0012.dgf" "${CMAKE_CURRENT_BINARY_DIR}/data/naca0012.dgf"
 )
 
 if (ENABLE_MPI)
