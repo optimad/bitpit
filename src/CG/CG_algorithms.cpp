@@ -324,7 +324,8 @@ double grad2DUpdate(
 double     value = 1.0e+18;
 
 // Counters
-int        A, V, W, j, k, m;
+size_t     j;
+int        A, V, W, k, m;
 
 // ========================================================================== //
 // COMPUTE THE LOCAL SOLUTION TO THE 1D GRADIENT LIMITING EQUATION            //
@@ -403,7 +404,8 @@ std::vector< std::array<int,2> >            map(nVertex), *map_ = &map;
 bitpit::MinPQueue<double, std::vector<int>>        heap(nVertex, true, map_);
 
 // // Counters
-int                                 i, j, k;
+size_t                              j;
+int                                 i, k;
 int                                 T, V, A, W;
 int                                 m;
 
