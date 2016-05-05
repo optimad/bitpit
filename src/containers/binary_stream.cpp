@@ -469,6 +469,18 @@ bool OBinaryStream::seekg (
 
 // -------------------------------------------------------------------------- //
 /*!
+        Requests the container to reduce its capacity to fit the data
+        currently contained in the stream.
+
+*/
+void OBinaryStream::squeeze (
+    void
+) {
+    resize(current_pos);
+}
+
+// -------------------------------------------------------------------------- //
+/*!
         Write char array to internal buffer
 
         \param[in] p pointer to char array
