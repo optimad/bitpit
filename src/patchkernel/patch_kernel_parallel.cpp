@@ -315,6 +315,22 @@ bool PatchKernel::isRankNeighbour(int rank)
 }
 
 /*!
+	Get a list of neighbour ranks.
+
+	\result A list of neighbour ranks.
+*/
+std::vector<int> PatchKernel::getNeighbourRanks()
+{
+	std::vector<int> neighRanks;
+	neighRanks.reserve(m_ghostExchangeTargets.size());
+	for (const auto &entry : m_ghostExchangeTargets) {
+		neighRanks.push_back(entry.first);
+	}
+
+	return neighRanks;
+}
+
+/*!
 	Gets a reference to the ghost targets needed for data exchange.
 
 	\result A reference to the ghost targets needed for data exchange.

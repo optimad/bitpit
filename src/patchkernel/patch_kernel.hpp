@@ -267,6 +267,7 @@ public:
 	int getProcessorCount() const;
 
 	bool isRankNeighbour(int rank);
+	std::vector<int> getNeighbourRanks();
 	std::unordered_map<int, std::vector<long>> & getGhostExchangeTargets();
 	const std::unordered_map<int, std::vector<long>> & getGhostExchangeTargets() const;
 	std::vector<long> & getGhostExchangeTargets(int rank);
