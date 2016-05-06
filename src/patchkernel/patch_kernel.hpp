@@ -405,6 +405,7 @@ protected:
 
 	void buildGhostExchangeData();
 	void buildGhostExchangeData(int rank);
+	void buildGhostExchangeData(const std::vector<int> &rank);
 
 	void addGhostsToExchangeTargets(const std::vector<long> &ghostIds);
 	void addGhostToExchangeTargets(const long ghostId);

@@ -533,10 +533,24 @@ void PatchKernel::buildGhostExchangeData()
 */
 void PatchKernel::buildGhostExchangeData(int rank)
 {
+	buildGhostExchangeData(std::vector<int>{rank});
+}
+
+/*!
+	Builds the ghost information needed for data exchange for the specified
+	list of ranks.
+
+	\param ranks are the rank for which the information will be built
+*/
+void PatchKernel::buildGhostExchangeData(const std::vector<int> &ranks)
+{
+	// List of ghost to add
+	std::unordered_set<int> buildRanks(ranks.begin(), ranks.end());
+
 	std::vector<long> ghosts;
 	for (const auto &entry : m_ghostOwners) {
 		int ghostRank = entry.second;
-		if (ghostRank != rank) {
+		if (buildRanks.count(ghostRank) == 0) {
 			continue;
 		}
 
@@ -544,7 +558,10 @@ void PatchKernel::buildGhostExchangeData(int rank)
 		ghosts.push_back(ghostId);
 	}
 
-	deleteGhostExchangeData(rank);
+	// Build exchange data
+	for (const int rank : ranks) {
+		deleteGhostExchangeData(rank);
+	}
 	addGhostsToExchangeTargets(ghosts);
 }
 
@@ -1026,9 +1043,8 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
 	deleteOrphanVertices();
 
 	// Rebuild ghost information
-	for (auto &rank : involvedRanks) {
-		buildGhostExchangeData(rank);
-	}
+	std::vector<int> involvedRankList(involvedRanks.begin(), involvedRanks.end());
+	buildGhostExchangeData(involvedRankList);
 
 	// Return adaption info
     return adaptionInfo;
@@ -1332,9 +1348,8 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     }
 
     // Rebuild ghost information
-    for (auto &rank : involvedRanks) {
-        buildGhostExchangeData(rank);
-    }
+    std::vector<int> involvedRankList(involvedRanks.begin(), involvedRanks.end());
+    buildGhostExchangeData(involvedRankList);
 
     // Return adaption info
     return adaptionInfo;
@@ -1388,8 +1403,7 @@ adaption::Info PatchKernel::sendCells_notified(const int &sendRank, const int &r
     }
 
     // Rebuild ghost exchagne data
-    buildGhostExchangeData(sendRank);
-    buildGhostExchangeData(recvRank);
+    buildGhostExchangeData(std::vector<int>{sendRank, recvRank});
 
 	// Return adaption info
     return adaptionInfo;
