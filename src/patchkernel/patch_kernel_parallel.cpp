@@ -660,8 +660,7 @@ void PatchKernel::addExchangeSources(const std::vector<long> &ghostIds)
 
 		// The internal neighbourss will be sources for the rank
 		for (long neighId : findCellNeighs(ghostId)) {
-			const Cell &neigh = m_cells[neighId];
-			if (!neigh.isInterior()) {
+			if (m_ghostOwners.count(neighId) > 0) {
 				continue;
 			}
 
