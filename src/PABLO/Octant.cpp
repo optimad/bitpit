@@ -214,7 +214,7 @@ Octant::getZ() const{return m_z;};
  * \return Coordinates of node 0.
  */
 u32array3
-Octant::getCoord(){
+Octant::getCoord() const {
 	u32array3 coord;
 	coord[0] = m_x;
 	coord[1] = m_y;
@@ -1420,7 +1420,7 @@ uint64_t Octant::computePeriodicMorton(uint8_t iface){
  * \return Periodic octant of the same size (note: it is a stand-alone octant,
  * may be not living in octree).
  */
-Octant Octant::computePeriodicOctant(uint8_t iface){
+Octant Octant::computePeriodicOctant(uint8_t iface) const {
 	Octant degOct(this->m_dim, this->m_level, this->m_x, this->m_y, this->m_z, sm_maxLevel);
 	uint32_t maxLength = uint32_t(1<<sm_maxLevel);
 	uint32_t dh = this->getSize();
@@ -1475,7 +1475,7 @@ Octant Octant::computePeriodicOctant(uint8_t iface){
  * \param[in] iface Local index of the face target.
  * \return Coordinates of octant considered as periodic ghost out of the logical domain.
  */
-array<int64_t,3> Octant::getPeriodicCoord(uint8_t iface){
+array<int64_t,3> Octant::getPeriodicCoord(uint8_t iface) const {
 	array<int64_t,3> coord;
 	coord[0] = this->m_x;
 	coord[1] = this->m_y;

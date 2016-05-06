@@ -694,12 +694,12 @@ LocalTree::updateLocalMaxDepth(){
  * \param[out] isghost Vector with the information about the identity of each neighbour (is the i-th neighours a ghost octant?).
  */
 void
-LocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, vector<bool> & isghost){
+LocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, vector<bool> & isghost) const {
 
 	uint64_t  		Morton, Mortontry;
 	uint32_t 		noctants = getNumOctants();
 	uint32_t 		idxtry;
-	Octant* 		oct = &m_octants[idx];
+	const Octant* 	oct = &m_octants[idx];
 	uint32_t 		size = oct->getSize();
 
 	int8_t 			cxyz[3] = {0,0,0};
@@ -848,7 +848,7 @@ LocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, v
 
 				// Search in ghosts
 				uint32_t idxghost = uint32_t(m_sizeGhosts/2);
-				Octant* octghost = &m_ghosts[idxghost];
+				const Octant* octghost = &m_ghosts[idxghost];
 
 				//Build Morton number of virtual neigh of same size
 				Octant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size), m_global.m_maxLevel);
@@ -1105,7 +1105,7 @@ LocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, v
  * \param[out] isghost Vector with the information about the identity of each neighbour (is the i-th neighours a ghost octant?).
  */
 void
-LocalTree::findNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours, vector<bool> & isghost){
+LocalTree::findNeighbours(const Octant* oct, uint8_t iface, u32vector & neighbours, vector<bool> & isghost) const {
 
 	uint64_t  Morton, Mortontry;
 	uint32_t  noctants = getNumOctants();
@@ -1257,7 +1257,7 @@ LocalTree::findNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours, ve
 
 				// Search in ghosts
 				uint32_t idxghost = uint32_t(m_sizeGhosts/2);
-				Octant* octghost = &m_ghosts[idxghost];
+				const Octant* octghost = &m_ghosts[idxghost];
 
 				//Build Morton number of virtual neigh of same size
 				Octant samesizeoct(m_dim, oct->m_level, int32_t(oct->m_x)+int32_t(cxyz[0]*size), int32_t(oct->m_y)+int32_t(cxyz[1]*size), int32_t(oct->m_z)+int32_t(cxyz[2]*size), m_global.m_maxLevel);
@@ -1509,12 +1509,12 @@ LocalTree::findNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours, ve
  * \param[out] neighbours Vector with the local indices of the local octant neighbours (size = 0 if boundary face).
  */
 void
-LocalTree::findGhostNeighbours(uint32_t const idx, uint8_t iface, u32vector & neighbours){
+LocalTree::findGhostNeighbours(uint32_t const idx, uint8_t iface, u32vector & neighbours)  const {
 
 	uint64_t  Morton, Mortontry;
 	uint32_t  noctants = getNumOctants();
 	uint32_t idxtry;
-	Octant* oct = &m_ghosts[idx];
+	const Octant* oct = &m_ghosts[idx];
 	uint32_t size = oct->getSize();
 
 	int8_t 			cxyz[3] = {0,0,0};
@@ -1662,7 +1662,7 @@ LocalTree::findGhostNeighbours(uint32_t const idx, uint8_t iface, u32vector & ne
  * \param[out] isghost Vector with the information about the identity of each neighbour (is the i-th neighours a ghost octant?).
  */
 void
-LocalTree::findPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours, vector<bool> & isghost){
+LocalTree::findPeriodicNeighbours(const Octant* oct, uint8_t iface, u32vector & neighbours, vector<bool> & isghost) const {
 
 	uint64_t  Morton, Mortontry;
 	uint32_t  noctants = getNumOctants();
@@ -1799,7 +1799,7 @@ LocalTree::findPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighb
 
 				// Search in ghosts
 				uint32_t idxghost = uint32_t(m_sizeGhosts/2);
-				Octant* octghost = &m_ghosts[idxghost];
+				const Octant* octghost = &m_ghosts[idxghost];
 
 				//Build Morton number of virtual neigh of same size
 				Octant samesizeoct = oct->computePeriodicOctant(iface);
@@ -2036,7 +2036,7 @@ LocalTree::findPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighb
  * \param[out] neighbours Vector with the local indices of the local octant neighbours.
  */
 void
-LocalTree::findGhostPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours){
+LocalTree::findGhostPeriodicNeighbours(const Octant* oct, uint8_t iface, u32vector & neighbours) const {
 
 	uint64_t  Morton, Mortontry;
 	uint32_t  noctants = getNumOctants();
@@ -3515,12 +3515,12 @@ LocalTree::localBalanceAll(bool doInterior){
  * \param[out] isghost Vector with the information about the identity of each neighbour (is the i-th neighours a ghost octant?).
  */
 void
-LocalTree::findEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbours, vector<bool> & isghost){
+LocalTree::findEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbours, vector<bool> & isghost) const {
 
 	uint64_t  		Morton, Mortontry;
 	uint32_t  		noctants = getNumOctants();
 	uint32_t 		idxtry;
-	Octant* 		oct = &m_octants[idx];
+	const Octant*	oct = &m_octants[idx];
 	uint32_t 		size = oct->getSize();
 	uint8_t 		iface1, iface2;
 	int32_t 		Dx, Dy, Dz;
@@ -3555,7 +3555,7 @@ LocalTree::findEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbour
 		if (m_ghosts.size()>0){
 			// Search in ghosts
 			uint32_t idxghost = uint32_t(m_sizeGhosts/2);
-			Octant* octghost = &m_ghosts[idxghost];
+			const Octant* octghost = &m_ghosts[idxghost];
 
 			// Search morton in octants
 			// If a even face morton is lower than morton of oct, if odd higher
@@ -3786,7 +3786,7 @@ LocalTree::findEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbour
  * \param[out] isghost Vector with the information about the identity of each neighbour (is the i-th neighours a ghost octant?).
  */
 void
-LocalTree::findEdgeNeighbours(Octant* oct, uint8_t iedge, u32vector & neighbours, vector<bool> & isghost){
+LocalTree::findEdgeNeighbours(const Octant* oct, uint8_t iedge, u32vector & neighbours, vector<bool> & isghost) const {
 
 	uint64_t  		Morton, Mortontry;
 	uint32_t  		noctants = getNumOctants();
@@ -3824,7 +3824,7 @@ LocalTree::findEdgeNeighbours(Octant* oct, uint8_t iedge, u32vector & neighbours
 		if (m_ghosts.size()>0){
 			// Search in ghosts
 			uint32_t idxghost = uint32_t(m_sizeGhosts/2);
-			Octant* octghost = &m_ghosts[idxghost];
+			const Octant* octghost = &m_ghosts[idxghost];
 
 			// Search morton in octants
 			// If a even face morton is lower than morton of oct, if odd higher
@@ -4054,12 +4054,12 @@ LocalTree::findEdgeNeighbours(Octant* oct, uint8_t iedge, u32vector & neighbours
  * \param[out] neighbours Vector with the local indices of the local octants neighbours (size = 0 if boundary edge).
  */
 void
-LocalTree::findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbours){
+LocalTree::findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbours) const {
 
 	uint64_t  		Morton, Mortontry;
 	uint32_t  		noctants = getNumOctants();
 	uint32_t 		idxtry;
-	Octant* 		oct = &m_ghosts[idx];
+	const Octant*	oct = &m_ghosts[idx];
 	uint32_t 		size = oct->getSize();
 	uint8_t 		iface1, iface2;
 	int32_t 		Dx, Dy, Dz;
@@ -4205,7 +4205,7 @@ LocalTree::findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neig
  * \param[out] isghost Vector with the information about the identity of each neighbour (is the i-th neighours a ghost octant?).
  */
 void
-LocalTree::findNodeNeighbours(Octant* oct, uint8_t inode, u32vector & neighbours, vector<bool> & isghost){
+LocalTree::findNodeNeighbours(const Octant* oct, uint8_t inode, u32vector & neighbours, vector<bool> & isghost) const {
 
 	uint64_t  	Morton, Mortontry;
 	uint32_t  	noctants = getNumOctants();
@@ -4243,7 +4243,7 @@ LocalTree::findNodeNeighbours(Octant* oct, uint8_t inode, u32vector & neighbours
 		if (m_ghosts.size()>0){
 			// Search in ghosts
 			uint32_t idxghost = uint32_t(m_sizeGhosts/2);
-			Octant* octghost = &m_ghosts[idxghost];
+			const Octant* octghost = &m_ghosts[idxghost];
 
 			// Search morton in octants
 			// If a even face morton is lower than morton of oct, if odd higher
@@ -4438,12 +4438,12 @@ LocalTree::findNodeNeighbours(Octant* oct, uint8_t inode, u32vector & neighbours
  * \param[out] isghost Vector with the information about the identity of each neighbour (is the i-th neighours a ghost octant?).
  */
 void
-LocalTree::findNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours, vector<bool> & isghost){
+LocalTree::findNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours, vector<bool> & isghost) const {
 
 	uint64_t  		Morton, Mortontry;
 	uint32_t  		noctants = getNumOctants();
 	uint32_t 		idxtry;
-	Octant* 		oct = &m_octants[idx];
+	const Octant* 	oct = &m_octants[idx];
 	uint32_t 		size = oct->getSize();
 	uint8_t 		iface1, iface2, iface3;
 
@@ -4476,7 +4476,7 @@ LocalTree::findNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbour
 		if (m_ghosts.size()>0){
 			// Search in ghosts
 			uint32_t idxghost = uint32_t(m_sizeGhosts/2);
-			Octant* octghost = &m_ghosts[idxghost];
+			const Octant* octghost = &m_ghosts[idxghost];
 
 			// Search morton in octants
 			// If a even face morton is lower than morton of oct, if odd higher
@@ -4669,12 +4669,12 @@ LocalTree::findNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbour
  * \param[out] neighbours Vector with the local indices of the local octants neighbours (size = 0 if boundary node).
  */
 void
-LocalTree::findGhostNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours){
+LocalTree::findGhostNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours) const {
 
 	uint64_t  		Morton, Mortontry;
 	uint32_t  		noctants = getNumOctants();
 	uint32_t 		idxtry;
-	Octant* 		oct = &m_ghosts[idx];
+	const Octant* 	oct = &m_ghosts[idx];
 	uint32_t 		size = oct->getSize();
 	uint8_t 		iface1, iface2, iface3;
 

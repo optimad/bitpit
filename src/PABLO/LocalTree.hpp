@@ -173,27 +173,27 @@ private:
 
 
 	void 		findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours,
-								std::vector<bool> & isghost);
-	void 		findNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours,
-								std::vector<bool> & isghost);
-	void 		findGhostNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours);
+								std::vector<bool> & isghost) const;
+	void 		findNeighbours(const Octant* oct, uint8_t iface, u32vector & neighbours,
+								std::vector<bool> & isghost) const;
+	void 		findGhostNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours) const;
 	void 		findEdgeNeighbours(uint32_t idx, uint8_t iedge,
-								u32vector & neighbours, std::vector<bool> & isghost);
-	void 		findEdgeNeighbours(Octant* oct, uint8_t iedge,
-								u32vector & neighbours, std::vector<bool> & isghost);
+								u32vector & neighbours, std::vector<bool> & isghost) const;
+	void 		findEdgeNeighbours(const Octant* oct, uint8_t iedge,
+								u32vector & neighbours, std::vector<bool> & isghost) const;
 	void 		findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge,
-								u32vector & neighbours);
-	void 		findNodeNeighbours(Octant* oct, uint8_t inode,
-								u32vector & neighbours, std::vector<bool> & isghost);
+								u32vector & neighbours) const;
+	void 		findNodeNeighbours(const Octant* oct, uint8_t inode,
+								u32vector & neighbours, std::vector<bool> & isghost) const;
 	void 		findNodeNeighbours(uint32_t idx, uint8_t inode,
-								u32vector & neighbours, std::vector<bool> & isghost);
+								u32vector & neighbours, std::vector<bool> & isghost) const;
 	void 		findGhostNodeNeighbours(uint32_t idx, uint8_t inode,
-								u32vector & neighbours);
+								u32vector & neighbours) const;
 
-	void 		findPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours,
-								std::vector<bool> & isghost);
+	void 		findPeriodicNeighbours(const Octant* oct, uint8_t iface, u32vector & neighbours,
+								std::vector<bool> & isghost) const;
 
-	void 		findGhostPeriodicNeighbours(Octant* oct, uint8_t iface, u32vector & neighbours);
+	void 		findGhostPeriodicNeighbours(const Octant* oct, uint8_t iface, u32vector & neighbours) const;
 
 	void 		preBalance21(bool internal);
 	void 		preBalance21(u32vector& newmodified);

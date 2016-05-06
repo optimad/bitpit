@@ -1792,7 +1792,7 @@ ParaTree::setLastDesc(){
  * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
  * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs. */
 void
-ParaTree::findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, vector<bool> & isghost){
+ParaTree::findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, vector<bool> & isghost) const {
 
 	bool	Fedge = ((codim==2) && (m_dim==3));
 	bool	Fnode = (codim == m_dim);
@@ -1822,7 +1822,7 @@ ParaTree::findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector &
  * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
  * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs. */
 void
-ParaTree::findNeighbours(Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, vector<bool> & isghost){
+ParaTree::findNeighbours(Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, vector<bool> & isghost) const {
 
 	bool	Fedge = ((codim==2) && (m_dim==3));
 	bool	Fnode = (codim == m_dim);
@@ -1852,7 +1852,7 @@ ParaTree::findNeighbours(Octant* oct, uint8_t iface, uint8_t codim, u32vector & 
  * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
  */
 void
-ParaTree::findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours){
+ParaTree::findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours) const {
 
 	bool	Fedge = ((codim==2) && (m_dim==3));
 	bool	Fnode = (codim == m_dim);

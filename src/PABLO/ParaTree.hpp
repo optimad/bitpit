@@ -343,9 +343,9 @@ private:
 	// OTHER OCTANT BASED METHODS												    	   //
 	// =================================================================================== //
 public:
-	void 		findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost);
-	void 		findNeighbours(Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost);
-	void 		findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours);
+	void 		findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const;
+	void 		findNeighbours(Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const ;
+	void 		findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours) const;
 	Octant* 	getPointOwner(dvector point);
 	uint32_t 	getPointOwnerIdx(dvector point);
 	Octant* 	getPointOwner(darray3 point);
