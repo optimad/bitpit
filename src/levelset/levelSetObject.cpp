@@ -497,7 +497,7 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetKernel *visitee, const
 
     };
 
-    lsFromSimplex(visitee, RSearch, signd) ;
+    lsFromSimplex(visitee, RSearch, signd, true) ;
 
     return;
 };
@@ -517,7 +517,7 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetKernel *visitee, const 
 
     };
 
-    lsFromSimplex(visitee, RSearch, signd) ;
+    lsFromSimplex(visitee, RSearch, signd, true) ;
 
     return;
 };
@@ -715,6 +715,7 @@ void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, const s
 
                             oldSegs.insert({{ parent, seg->m_segments }}) ;
                             m_seg.erase(parent,true) ;
+
                         }
                     }
                 }
