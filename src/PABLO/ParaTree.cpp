@@ -1794,7 +1794,7 @@ ParaTree::setLastDesc(){
 void
 ParaTree::findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, vector<bool> & isghost){
 
-	bool	Fedge = ((codim>1) && (m_dim==3));
+	bool	Fedge = ((codim==2) && (m_dim==3));
 	bool	Fnode = (codim == m_dim);
 
 	if (codim == 1){
@@ -1824,7 +1824,7 @@ ParaTree::findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector &
 void
 ParaTree::findNeighbours(Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, vector<bool> & isghost){
 
-	bool	Fedge = ((codim>1) && (m_dim==3));
+	bool	Fedge = ((codim==2) && (m_dim==3));
 	bool	Fnode = (codim == m_dim);
 
 	if (codim == 1){
@@ -1854,7 +1854,7 @@ ParaTree::findNeighbours(Octant* oct, uint8_t iface, uint8_t codim, u32vector & 
 void
 ParaTree::findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours){
 
-	bool	Fedge = ((codim>1) && (m_dim==3));
+	bool	Fedge = ((codim==2) && (m_dim==3));
 	bool	Fnode = (codim == m_dim);
 
 	if (codim == 1){
