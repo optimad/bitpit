@@ -571,8 +571,8 @@ void PatchKernel::addGhostsToExchangeTargets(const std::vector<long> &ghostIds)
 	// Sort the targets
 	for (const int rank : ranks) {
 		std::vector<long> &rankTargets = m_ghostExchangeTargets[rank];
-		std::sort(rankTargets.begin(), rankTargets.end(), CellPositionLess(*this));
 		rankTargets.erase(std::unique(rankTargets.begin(), rankTargets.end()), rankTargets.end());
+		std::sort(rankTargets.begin(), rankTargets.end(), CellPositionLess(*this));
 	}
 
 	// Add the sources
@@ -654,17 +654,15 @@ void PatchKernel::addExchangeSources(const std::vector<long> &ghostIds)
 
 	// Add the sources
 	for (auto entry : ghostSources) {
-		const std::unordered_set<long> &newSources = entry.second;
-
 		int rank = entry.first;
-		std::vector<long> &rankSources = m_ghostExchangeSources[rank];
+		std::unordered_set<long> &updatedSources = entry.second;
 
-		bool removeDuplicates = (rankSources.size() > 0);
-		rankSources.insert(rankSources.end(), newSources.begin(), newSources.end());
-		std::sort(rankSources.begin(), rankSources.end(), CellPositionLess(*this));
-		if (removeDuplicates) {
-			rankSources.erase(std::unique(rankSources.begin(), rankSources.end()), rankSources.end());
+		std::vector<long> &rankSources = m_ghostExchangeSources[rank];
+		for (long rankSourceId : rankSources) {
+			updatedSources.insert(rankSourceId);
 		}
+		rankSources = std::vector<long>(updatedSources.begin(), updatedSources.end());
+		std::sort(rankSources.begin(), rankSources.end(), CellPositionLess(*this));
 	}
 }
 
