@@ -265,8 +265,8 @@ class LevelSetSegmentation : public LevelSetObject {
 
     int                                         m_dimension ;               /**< number of space dimensions */
 
-    protected:
-    SurfUnstructured                            *m_segmentation;            /**< surface segmentation */
+    SurfUnstructured*                           m_segmentation;             /**< surface segmentation */
+    std::unordered_map< long, std::vector< std::array<double,3>> > m_vertexNormal;            /**< vertex normals */
     PiercedVector<SegInfo>                      m_seg;                      /**< cell -> segment association information */
 
 

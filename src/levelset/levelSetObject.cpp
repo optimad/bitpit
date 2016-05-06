@@ -111,6 +111,7 @@ LevelSetSegmentation::SegInfo::SegInfo( const std::set<long> &list, const long &
  */
 LevelSetSegmentation::~LevelSetSegmentation() {
     m_segmentation = NULL;
+    m_vertexNormal.clear() ;
 };
 
 /*!
@@ -121,8 +122,28 @@ LevelSetSegmentation::~LevelSetSegmentation() {
  */
 LevelSetSegmentation::LevelSetSegmentation( int id, SurfUnstructured *STL) :LevelSetObject(id) {
 
+    std::vector<std::array<double,3>>   vertexNormal ;
+
     m_segmentation = STL;
     m_dimension = m_segmentation->getSpaceDimension() ;
+
+    int  i, nV;
+    long segId ;
+
+    for( auto & segment : m_segmentation->getCells() ){
+
+        segId = segment.getId() ;
+        nV = segment.getVertexCount() ;
+
+        vertexNormal.resize(nV) ;
+        for(i=0; i<nV; ++i){
+            vertexNormal[i] = m_segmentation->evalVertexNormal(segId,i) ;
+        }
+
+        m_vertexNormal.insert({{segId,vertexNormal}}) ;
+
+    };
+
 
 };
 
@@ -135,6 +156,7 @@ LevelSetSegmentation::LevelSetSegmentation( const LevelSetSegmentation &other) :
 
     m_segmentation = other.m_segmentation; 
     m_dimension = other.m_dimension ;
+    m_vertexNormal = other.m_vertexNormal ;
 
 };
 
@@ -313,25 +335,40 @@ void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double 
  * @param[out] x closest point on trinagle
  * @param[out] n normal at closest point on trinagle
  */
-void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p,const  long &i, double &d, double &s, std::array<double,3> &x, std::array<double,3> &n ) const {
+void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const long &i, double &d, double &s, std::array<double,3> &x, std::array<double,3> &n ) const {
 
     std::vector<std::array<double,3>>   VS( getSimplexVertices(i) ) ;
+    int nV = VS.size() ;
 
-    //TODO save vertex normals
-    if( m_dimension == 2){
+    auto itr = m_vertexNormal.find(i) ;
+    assert( itr != m_vertexNormal.end() ) ;
+
+    if( nV == 1){
+        d = norm2( p-VS[0] ) ;
+        n.fill(0.) ;
+
+    } else if( nV == 2){
         std::array<double,2> lambda ;
 
         d= CGElem::distancePointSegment( p, VS[0], VS[1], x, lambda ) ;
-        n  = lambda[0] *m_segmentation->evalVertexNormal(i,0) ;
-        n += lambda[1] *m_segmentation->evalVertexNormal(i,1) ;
+        n  = lambda[0] *itr->second[0] ;
+        n += lambda[1] *itr->second[1] ;
 
-    } else {
+        n /= norm2(n) ;
+
+    } else if (nV == 3){
         std::array<double,3> lambda ;
 
         d= CGElem::distancePointTriangle( p, VS[0], VS[1], VS[2], x, lambda ) ;
-        n  = lambda[0] *m_segmentation->evalVertexNormal(i,0) ;
-        n += lambda[1] *m_segmentation->evalVertexNormal(i,1) ;
-        n += lambda[2] *m_segmentation->evalVertexNormal(i,2) ;
+        n  = lambda[0] *itr->second[0] ;
+        n += lambda[1] *itr->second[1] ;
+        n += lambda[2] *itr->second[2] ;
+
+        n /= norm2(n) ;
+
+    } else{
+        log::cout() << " simplex not supported in LevelSetSegmentation::infoFromSimplex " << nV << std::endl ;
+        
     };
 
     s = sign( dotProduct(n, p - x) );
