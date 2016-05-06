@@ -171,7 +171,7 @@ LevelSetOctree::LevelSetOctree(VolOctree & patch ): LevelSetKernel( (static_cast
  */
 double LevelSetOctree::computeSizeNarrowBand( LevelSetObject *visitor ){
 
-    double                      RSearch ;
+    double                      RSearch(0.) ;
     double 						size;
 
     bool                        flagged ;
@@ -369,11 +369,9 @@ double LevelSetOctree::computeSizeFromRSearch( double r){
     uint8_t     level ( tree.getLocalMaxDepth() ) ;
     double      size ;
 
-    r = r /sqrt(11.) *2. ; 
-
     size = tree.levelToSize(level) ;
 
-    while( size < r - 1.e-8 ) {
+    while( size <= r ) {
         level-- ;
         size = tree.levelToSize(level) ;
     };
