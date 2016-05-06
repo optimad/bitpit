@@ -139,6 +139,9 @@ private:
 
 	typedef std::unordered_set<FaceInfo, FaceInfoHasher> FaceInfoSet;
 
+	const ElementInfo *m_cellTypeInfo;
+	const ElementInfo *m_interfaceTypeInfo;
+
 	std::unordered_map<long, uint32_t, Element::IdHasher> m_cellToOctant;
 	std::unordered_map<long, uint32_t, Element::IdHasher> m_cellToGhost;
 	std::unordered_map<uint32_t, long> m_octantToCell;

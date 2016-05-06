@@ -79,6 +79,26 @@ VolOctree::VolOctree(const int &id, const int &dimension,
 	// Info sull'octree
 	initializeTreeGeometry();
 
+	// Info of the cell type
+	ElementInfo::Type cellType;
+	if (isThreeDimensional()) {
+		cellType = ElementInfo::VOXEL;
+	} else {
+		cellType = ElementInfo::PIXEL;
+	}
+
+	m_cellTypeInfo = &ElementInfo::getElementInfo(cellType);
+
+	// Info on the interface type
+	ElementInfo::Type interfaceType;
+	if (isThreeDimensional()) {
+		interfaceType = ElementInfo::PIXEL;
+	} else {
+		interfaceType = ElementInfo::LINE;
+	}
+
+	m_interfaceTypeInfo = &ElementInfo::getElementInfo(interfaceType);
+
 	// Info sulle interfacce
 	for (int i = 0; i < dimension; i++) {
 		for (int n = -1; n <= 1; n += 2) {
@@ -814,27 +834,11 @@ std::vector<long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoLi
                                            FaceInfoSet &danglingFaces)
 {
 	// Info of the cells
-	ElementInfo::Type cellType;
-	if (isThreeDimensional()) {
-		cellType = ElementInfo::VOXEL;
-	} else {
-		cellType = ElementInfo::PIXEL;
-	}
-
-	const ElementInfo &cellTypeInfo = ElementInfo::getElementInfo(cellType);
-	const int &nCellVertices = cellTypeInfo.nVertices;
-	const std::vector<std::vector<int>> &cellLocalFaceConnect = cellTypeInfo.faceConnect;
+	const int &nCellVertices = m_cellTypeInfo->nVertices;
+	const std::vector<std::vector<int>> &cellLocalFaceConnect = m_cellTypeInfo->faceConnect;
 
 	// Info on the interfaces
-	ElementInfo::Type interfaceType;
-	if (isThreeDimensional()) {
-		interfaceType = ElementInfo::PIXEL;
-	} else {
-		interfaceType = ElementInfo::LINE;
-	}
-
-	const ElementInfo &interfaceTypeInfo = ElementInfo::getElementInfo(interfaceType);
-	const int &nInterfaceVertices = interfaceTypeInfo.nVertices;
+	const int &nInterfaceVertices = m_interfaceTypeInfo->nVertices;
 
 	// Add the vertex of the dangling faces to the vertex map
 	std::unordered_map<uint32_t, long> vertexMap;
