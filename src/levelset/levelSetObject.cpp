@@ -337,29 +337,37 @@ void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double 
  */
 void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const long &i, double &d, double &s, std::array<double,3> &x, std::array<double,3> &n ) const {
 
-    std::vector<std::array<double,3>>   VS( getSimplexVertices(i) ) ;
-    int nV = VS.size() ;
+    Cell &cell = m_segmentation->getCell(i) ;
+    int nV = cell.getVertexCount() ;
 
     auto itr = m_vertexNormal.find(i) ;
     assert( itr != m_vertexNormal.end() ) ;
 
     if( nV == 1){
-        d = norm2( p-VS[0] ) ;
+        long id = cell.getVertex(0) ;
+        d = norm2( p- m_segmentation->getVertexCoords(id) ) ;
         n.fill(0.) ;
 
     } else if( nV == 2){
+        long id0 = cell.getVertex(0) ;
+        long id1 = cell.getVertex(1) ;
+
         std::array<double,2> lambda ;
 
-        d= CGElem::distancePointSegment( p, VS[0], VS[1], x, lambda ) ;
+        d= CGElem::distancePointSegment( p, m_segmentation->getVertexCoords(id0), m_segmentation->getVertexCoords(id1), x, lambda ) ;
         n  = lambda[0] *itr->second[0] ;
         n += lambda[1] *itr->second[1] ;
 
         n /= norm2(n) ;
 
     } else if (nV == 3){
+        long id0 = cell.getVertex(0) ;
+        long id1 = cell.getVertex(1) ;
+        long id2 = cell.getVertex(2) ;
+
         std::array<double,3> lambda ;
 
-        d= CGElem::distancePointTriangle( p, VS[0], VS[1], VS[2], x, lambda ) ;
+        d= CGElem::distancePointTriangle( p, m_segmentation->getVertexCoords(id0), m_segmentation->getVertexCoords(id1), m_segmentation->getVertexCoords(id2), x, lambda ) ;
         n  = lambda[0] *itr->second[0] ;
         n += lambda[1] *itr->second[1] ;
         n += lambda[2] *itr->second[2] ;
@@ -699,7 +707,6 @@ void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, const s
     newSize = visitee->computeSizeFromRSearch( newRSearch ) ;
 
     //TODO does not support coarsening if children were on different processes
-
     if( newSize-oldSize <= 1.e-8 ) { //size of narrow band decreased or remained the same -> mapping
 
         { // map segments
