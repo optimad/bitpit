@@ -94,7 +94,7 @@ LevelSetSegmentation::SegInfo::SegInfo( ) : m_segments(levelSetDefaults::LIST), 
  * @param[in] id id to be asigned to pierced vector
  * @param[in] list list of simplices
  */
-LevelSetSegmentation::SegInfo::SegInfo( const std::set<long> &list) :m_segments(list), m_support(levelSetDefaults::ELEMENT), m_checked(false) {
+LevelSetSegmentation::SegInfo::SegInfo( const std::unordered_set<long> &list) :m_segments(list), m_support(levelSetDefaults::ELEMENT), m_checked(false) {
 };
 
 /*!
@@ -103,7 +103,7 @@ LevelSetSegmentation::SegInfo::SegInfo( const std::set<long> &list) :m_segments(
  * @param[in] list list of simplices
  * @param[in] support index of closest simplex
  */
-LevelSetSegmentation::SegInfo::SegInfo( const std::set<long> &list, const long &support) :m_segments(list), m_support(support), m_checked(false){
+LevelSetSegmentation::SegInfo::SegInfo( const std::unordered_set<long> &list, const long &support) :m_segments(list), m_support(support), m_checked(false){
 };
 
 /*!
@@ -173,7 +173,7 @@ LevelSetSegmentation* LevelSetSegmentation::clone() const {
  * @param[in] i Local index of target octant.
  * @return set with indices of simplices wich contain the i-th local element in their narrow band.
  */
-const std::set<long> & LevelSetSegmentation::getSimplexList(const long &i){
+const std::unordered_set<long> & LevelSetSegmentation::getSimplexList(const long &i){
 
     if( !m_seg.exists(i) ){
         return levelSetDefaults::LIST;
@@ -246,7 +246,7 @@ void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double 
     double                      s, d, value;
     std::array<double,3>        n, xP, P;
 
-    std::set<long>::iterator    it, itend ;
+    std::unordered_set<long>::iterator    it, itend ;
     PiercedIterator<SegInfo>    segIt ;
     PiercedVector<LevelSetKernel::LSInfo>       &lsInfo = visitee->getLSInfo() ;
 
@@ -257,7 +257,7 @@ void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double 
         if( segInfo.m_checked == false){
             segInfo.m_checked = true ;
 
-            std::set<long>      &segs = segInfo.m_segments ;
+            std::unordered_set<long>      &segs = segInfo.m_segments ;
             long                &supp = segInfo.m_support ;
 
             id    = segIt.getId() ;
@@ -673,7 +673,7 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetOctree *visitee, cons
                 icart = cmesh.locatePoint(C) ;
 
                 if( objLS.isInNarrowBand(icart) ){
-                    const std::set<long> &list = objLS.getSimplexList(icart) ;
+                    const std::unordered_set<long> &list = objLS.getSimplexList(icart) ;
                     data = m_seg.emplace(id, list) ;
                 };
 
@@ -703,8 +703,8 @@ void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, const s
     if( newSize-oldSize <= 1.e-8 ) { //size of narrow band decreased or remained the same -> mapping
 
         { // map segments
-            std::unordered_map<long,std::set<long>> oldSegs ;
-            std::unordered_map<long,std::set<long>>::iterator oldSegsIt ;
+            std::unordered_map<long,std::unordered_set<long>> oldSegs ;
+            std::unordered_map<long,std::unordered_set<long>>::iterator oldSegsIt ;
 
             for ( auto & info : mapper ){
                 if( info.entity == adaption::Entity::ENTITY_CELL ){

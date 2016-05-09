@@ -50,7 +50,7 @@ namespace levelSetDefaults{
     const std::array<double,3>              GRADIENT = {{0.,0.,0.}};    /**< Default value for levelset gradient */
     const short                             SIGN = 1;                   /**< Default value for the sign */
     const int                               OBJECT = -1 ;               /**< Default value for closest object id */
-    const std::set<long>                    LIST = { } ;                /**< Default value for closest segment */
+    const std::unordered_set<long>          LIST = { } ;                /**< Default value for closest segment */
     const long                              ELEMENT = -1 ;              /**< Default value for segmments in narrow band */
 };
 
@@ -254,13 +254,13 @@ class LevelSetSegmentation : public LevelSetObject {
 
     private:
     struct SegInfo{
-        std::set<long>                          m_segments ;
+        std::unordered_set<long>                m_segments ;
         long                                    m_support ;
         bool                                    m_checked ;
 
         SegInfo( ) ;
-        SegInfo( const std::set<long> & ) ;
-        SegInfo( const std::set<long> &, const long & ) ;
+        SegInfo( const std::unordered_set<long> & ) ;
+        SegInfo( const std::unordered_set<long> &, const long & ) ;
     };
 
     int                                         m_dimension ;               /**< number of space dimensions */
@@ -277,7 +277,7 @@ class LevelSetSegmentation : public LevelSetObject {
 
     LevelSetSegmentation*                       clone() const ;
 
-    const std::set<long> &                      getSimplexList(const long &) ;
+    const std::unordered_set<long> &            getSimplexList(const long &) ;
     const long &                                getSupportSimplex(const long &) ;
     bool                                        isInNarrowBand( const long &) ;
 
