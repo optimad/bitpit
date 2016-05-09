@@ -683,6 +683,91 @@ void KdTree<d, T, T1>::decreaseStack(
 nodes.resize(max(MAXSTK, nodes.size() - MAXSTK));
 
 return; };
+
+
+// -------------------------------------------------------------------------- //
+/*!
+    Given an input vertex P, returns the index of the first node encountered
+    in the kd-tree which is in the 1-ball centered on P and having a radius of h.
+    The 1-ball is defined as:
+    B1(x; h) = {y: norm_1(y-x) <= h}
+    \param[in] P_ pointer to container storing the coordinates of P
+    \param[in] h 1-ball radius
+    \param[out] L_ pointer to container filled with labels of the
+     kd-nodes encountered in the tree which lies in the 1-ball centered on P.
+    \param[in] EX_ pointers to vector with labels to be excluded from the results
+    \param[in] next_ (default = 0) index of element in the kd tree used as starting
+    point by the kd-tree search algorithm
+    \param[in] lev   (default = 0) level in kd-tree of node used as starting point
+    by the kd-tree search algorithm.
+
+*/
+template<int d, class T, class T1 >
+template< class T2>
+void KdTree<d, T, T1>::hNeighbor(
+    T               *P_,
+    T2               h,
+    std::vector<T1> *L_,
+    std::vector<T1> *EX_,
+    int              next_,
+    int              lev
+) {
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+int              index_l = -1, index_r = -1;
+int              prev_ = next_;
+int              dim;
+
+// Counters
+// none
+
+// ========================================================================== //
+// EXIT FOR EMPTY TREE                                                        //
+// ========================================================================== //
+if (n_nodes == 0) { return; };
+
+// ========================================================================== //
+// MOVE ON TREE BRANCHES                                                      //
+// ========================================================================== //
+
+// Check if root is in the h-neighbor of P_ --------------------------------- //
+if (norm2((*(nodes[prev_].object_)) - (*P_)) <= h) {
+
+	if (EX_ != NULL){
+		if (std::find(EX_->begin(), EX_->end(), nodes[prev_].label) == EX_->end() ) {
+			L_->push_back(nodes[prev_].label);
+		}
+	}
+	else{
+		L_->push_back(nodes[prev_].label);
+	}
+}
+
+
+
+// Move on next branch ------------------------------------------------------ //
+dim = lev % d;
+if (((*(nodes[prev_].object_))[dim] >= (*P_)[dim] - h)
+ && (nodes[prev_].lchild_ >= 0)) {
+    next_ = nodes[prev_].lchild_;
+    hNeighbor(P_, h, L_, EX_, next_, lev+1);
+}
+if (((*(nodes[prev_].object_))[dim] <= (*P_)[dim] + h)
+ && (nodes[prev_].rchild_ >= 0)) {
+    next_ = nodes[prev_].rchild_;
+    hNeighbor(P_, h, L_, EX_, next_, lev+1);
+}
+
+return ;
+
+};
+
+
+
 /*!
  \}
  */

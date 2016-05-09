@@ -120,6 +120,16 @@ class KdTree {
     );
 
     template <class T2>
+    void hNeighbor(                                                           // Check if a kd-node exists in the h-neighborhood of a given item
+        T           	*,                                                        // (input) pointer to element to be tested
+        T2           	,                                                        // (input) radius of ball
+        std::vector<T1>	*,                                                        // (output) pointer to container of labels of h-neighbors
+        std::vector<T1>	*,
+        int         	n = 0,                                                    // (input/optional) root for binary search algorithm
+        int         	l = 0                                                     // (input/optional) level of root on binary tree
+    );
+
+    template <class T2>
     int hNeighbor(                                                           // Check if a kd-node exists in the h-neighborhood of a given item
         T           *,                                                        // (input) pointer to element to be tested
         T1          &,                                                      // (input/output) label of the kd node matching test object
@@ -127,6 +137,7 @@ class KdTree {
         int         n = 0,                                                    // (input/optional) root for binary search algorithm
         int         l = 0                                                     // (input/optional) level of root on binary tree
     );
+
     void insert(                                                              // Insert new element in the kd-tree
         T           *                                                         // (input) pointer to element to be inserted
     );
