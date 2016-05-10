@@ -104,6 +104,24 @@ const MPI_Comm & PatchKernel::getCommunicator() const
 }
 
 /*!
+	Frees the MPI communicator associated to the patch
+*/
+void PatchKernel::freeCommunicator()
+{
+	if (!isCommunicatorSet()) {
+		return;
+	}
+
+	int finalizedCalled;
+	MPI_Finalized(&finalizedCalled);
+	if (finalizedCalled) {
+		return;
+	}
+
+	MPI_Comm_free(&m_communicator);
+}
+
+/*!
 	Gets the MPI rank associated to the patch
 
 	\return The MPI rank associated to the patch.

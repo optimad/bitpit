@@ -175,6 +175,10 @@ PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
 PatchKernel::~PatchKernel()
 {
 	reset();
+
+#if BITPIT_ENABLE_MPI==1
+	freeCommunicator();
+#endif
 }
 
 /*!

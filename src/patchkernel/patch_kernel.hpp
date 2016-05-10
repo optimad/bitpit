@@ -261,6 +261,7 @@ public:
 
 #if BITPIT_ENABLE_MPI==1
 	virtual void setCommunicator(MPI_Comm communicator);
+	void freeCommunicator();
 	bool isCommunicatorSet() const;
 	const MPI_Comm & getCommunicator() const;
 	int getRank() const;
