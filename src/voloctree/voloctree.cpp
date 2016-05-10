@@ -596,6 +596,11 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			}
 
 			// Previous cells
+			//
+			// A coarsening can merge togheter cells of different processors.
+			// However, since the coarsening is limited to one level, the
+			// previous cells will always be internal or among the ghost of
+			// the current processor.
 			int nPreviousCellIds = mapper_octantMap.size();
 			adaptionInfo.previous.reserve(nPreviousCellIds);
 			for (int k = 0; k < nPreviousCellIds; ++k) {
