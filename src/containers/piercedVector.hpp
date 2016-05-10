@@ -113,8 +113,8 @@ public:
 	value_t * operator->() const;
 
 	template<typename U = value_t, typename U_no_cv = value_no_cv_t,
-             typename std::enable_if<!std::is_same<U, U_no_cv>::value, int>::type = 0>
-	operator PiercedIterator<const value_no_cv_t, id_t>() const;
+             typename std::enable_if<std::is_same<U, U_no_cv>::value, int>::type = 0>
+	operator PiercedIterator<const U_no_cv, id_t>() const;
 
 	/*!
 		Two-way comparison.
