@@ -983,11 +983,22 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
     // Update cells that no longer belong to this processor
     //
 
+    // Add the sned ids int the adaption info
+    //
+    // The ids will be sorted by the position of the cells, this is the
+    // same order that will be used on the processor that has received the
+    // octants. Since the order is the same, the two processors are able
+    // to exchange cell data without any additional extra communication
+    // (they already know the list of cells for which data is needed and
+    // the order in which these data will be sent).
+    for (long cellId : cellsToSend) {
+        adaptionInfo.previous.push_back(cellId);
+    }
+
+    std::sort(adaptionInfo.previous.begin(), adaptionInfo.previous.end(), CellPositionLess(*this));
+
     // Delete sent cells or mark them as ghosts owned by the receiver.
     for (long cellId : cellsToSend) {
-        // Update adaption info
-        adaptionInfo.previous.push_back(cellId);
-
 		// Check if a cell has to be delete or is a ghost owned by the receiver
 		//
 		// A cell will become a ghost if at least one of his neighbours is
@@ -1363,6 +1374,16 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
             }
         }
     }
+
+    // Sort the ids in the adaption info
+    //
+    // The ids will be sorted by the position of the cells, this is the
+    // same order that will be used on the processor that has received the
+    // octants. Since the order is the same, the two processors are able
+    // to exchange cell data without any additional extra communication
+    // (they already know the list of cells for which data is needed and
+    // the order in which these data will be sent).
+    std::sort(adaptionInfo.current.begin(), adaptionInfo.current.end(), CellPositionLess(*this));
 
     // Rebuild ghost information
     std::vector<int> involvedRankList(involvedRanks.begin(), involvedRanks.end());
