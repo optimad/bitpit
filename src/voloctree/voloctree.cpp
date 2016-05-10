@@ -553,6 +553,15 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		}
 
 		// Adaption tracking
+		//
+		// The adaption info associated to the octants that has been received
+		// from external partitions will contain the current octants sorted by
+		// their tree id (we are looping over the octants in that order), this
+		// is the same order that will be used on the processor that has sent
+		// the octants. Since the order is the same, the two processors are able
+		// to exchange cell data without any additional extra communication
+		// (they already know the list of cells for which data is needed and
+		// the order in which these data will be sent).
 		if (trackChanges) {
 			// Rank assocated to the adaption info
 			int rank = -1;
@@ -633,6 +642,13 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		}
 
 		// Add the send cells to the list of cells to be removed
+		//
+		// The ids will be stored sorted by the id of the octants, this is the
+		// same order that will be used on the processor that has received the
+		// octants. Since the order is the same, the two processors are able
+		// to exchange cell data without any additional extra communication
+		// (they already know the list of cells for which data is needed and
+		// the order in which these data will be sent).
 		for (int k = 0; k < 2; ++k) {
 			uint32_t beginTreeId = rankEntry.second[2 * k];
 			uint32_t endTreeId   = rankEntry.second[2 * k + 1];
