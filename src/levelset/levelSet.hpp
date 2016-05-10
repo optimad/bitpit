@@ -65,10 +65,6 @@ class LevelSet{
     bool                                        m_propagateS;           /**< Flag for sign propagation from narrow band (default = false) */
     bool                                        m_propagateV;           /**< Flag for value propagation from narrow band (default = false) */
 
-# if BITPIT_ENABLE_MPI
-    MPI_Comm                                    m_commMPI ;             /**< MPI communicator */
-# endif
-
     public:
     ~LevelSet() ;
     LevelSet() ;
@@ -112,6 +108,8 @@ class LevelSet{
 
 class LevelSetKernel{
 
+    friend LevelSet;
+
     protected:
     struct LSInfo{
         double                                  value ;         /**< Levelset value */
@@ -130,6 +128,7 @@ class LevelSetKernel{
 # endif
 
     public:
+    virtual ~LevelSetKernel() ;
     LevelSetKernel() ;
     LevelSetKernel( VolumeKernel *) ;
 
@@ -138,12 +137,11 @@ class LevelSetKernel{
 
     double                                      getLS(const long &) const;
     std::array<double,3>                        getGradient(const long &) const ;
-
     short                                       getSign(const long &) const;
     double                                      getSizeNarrowBand() const;
+    bool                                        isInNarrowBand(const long &) const;
 
     void                                        setSizeNarrowBand(double) ;
-    bool                                        isInNarrowBand(const long &) const;
 
     virtual double                              computeSizeNarrowBand( LevelSetObject * )=0;
     virtual double                              updateSizeNarrowBand( const std::vector<adaption::Info> & )=0;
@@ -153,6 +151,9 @@ class LevelSetKernel{
     void                                        propagateSign( LevelSetObject *) ;
     void                                        propagateValue( LevelSetObject *) ;
 
+    void                                        dump( std::fstream &);
+    void                                        restore( std::fstream &);
+
     protected:
     void                                        solveEikonal( double, double );
     virtual double                              updateEikonal( double, double, const long & ) ;
@@ -161,13 +162,9 @@ class LevelSetKernel{
     std::array<double,3>                        computeGradientCentral(const long &) ;
 
 
-    public:
-    virtual ~LevelSetKernel() ;
-
-    void                                        dump( std::fstream &);
-    void                                        restore( std::fstream &);
-
 # if BITPIT_ENABLE_MPI
+    MPI_Comm                                    getCommunicator() ;
+    void                                        finalizeMPI() ;
     bool                                        assureMPI() ;
     void                                        writeCommunicationBuffer( const std::vector<long> &, OBinaryStream &, OBinaryStream & );
     void                                        readCommunicationBuffer( const long &, IBinaryStream & ) ;
@@ -217,37 +214,39 @@ class LevelSetOctree : public LevelSetKernel{
 class LevelSetObject{
 
     friend  LevelSet ;
-    friend  LevelSetCartesian;
-    friend  LevelSetOctree ;
+    friend  LevelSetKernel ;
+    //friend  LevelSetCartesian;
+    //friend  LevelSetOctree ;
 
     private:
     int                                         m_id;           /**< identifier of object */
 
-    protected:
+    public:
     virtual ~LevelSetObject();
     LevelSetObject(int);
 
+    virtual int                                 getId() const ;
+    virtual void                                getBoundingBox( std::array<double,3> &, std::array<double,3> & )const =0  ;
     virtual LevelSetObject*                     clone() const = 0;
 
-    virtual int                                 getId() const ;
-
-    virtual void                                getBoundingBox( std::array<double,3> &, std::array<double,3> & )const =0  ;
-
+    protected:
     virtual void                                computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &)=0 ;
     virtual void                                updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool &)=0 ;
 
     virtual void                                dumpDerived( std::fstream &) =0 ;
     virtual void                                restoreDerived( std::fstream &) =0 ;
 
-    public:
     virtual void                                seedSign( LevelSetKernel *, long &, double & )const =0;
+
     void                                        dump( std::fstream &) ;
     void                                        restore( std::fstream &) ;
 
 # if BITPIT_ENABLE_MPI
+    virtual void                                finalizeMPI() ;
     virtual void                                writeCommunicationBuffer( const std::vector<long> &, OBinaryStream &, OBinaryStream & ) =0 ;
     virtual void                                readCommunicationBuffer( const long &, IBinaryStream & ) =0 ;
 # endif 
+
 };
 
 class LevelSetSegmentation : public LevelSetObject {
@@ -284,10 +283,7 @@ class LevelSetSegmentation : public LevelSetObject {
     void                                        dumpDerived( std::fstream &) ;
     void                                        restoreDerived( std::fstream &) ;
 
-# if BITPIT_ENABLE_MPI
-    void                                        writeCommunicationBuffer( const std::vector<long> &, OBinaryStream &, OBinaryStream & ) ;
-    void                                        readCommunicationBuffer( const long &, IBinaryStream & ) ;
-# endif
+    void                                        getBoundingBox( std::array<double,3> &, std::array<double,3> & ) const ;
 
     protected:
     std::vector<std::array<double,3>>           getSimplexVertices( const long & ) const ;
@@ -297,8 +293,6 @@ class LevelSetSegmentation : public LevelSetObject {
     bool                                        seedNarrowBand( LevelSetCartesian *, std::vector<std::array<double,3>> &, std::vector<int> &) ;
     void                                        seedSign( LevelSetKernel *, long &, double &) const ;
 
-    void                                        getBoundingBox( std::array<double,3> &, std::array<double,3> & ) const ;
-
     void                                        computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &);
     void                                        updateLSInNarrowBand( LevelSetKernel *, const std::vector<adaption::Info> &, const double &, const bool & ) ;
     void                                        updateSimplexToCell( LevelSetOctree *, const std::vector<adaption::Info> &, const double & ) ;
@@ -306,6 +300,10 @@ class LevelSetSegmentation : public LevelSetObject {
     void                                        associateSimplexToCell( LevelSetCartesian *, const double &);
     void                                        associateSimplexToCell( LevelSetOctree *, const double &);
 
+# if BITPIT_ENABLE_MPI
+    void                                        writeCommunicationBuffer( const std::vector<long> &, OBinaryStream &, OBinaryStream & ) ;
+    void                                        readCommunicationBuffer( const long &, IBinaryStream & ) ;
+# endif
 
 };
 

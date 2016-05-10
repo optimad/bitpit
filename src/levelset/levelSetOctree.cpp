@@ -30,125 +30,9 @@
 namespace bitpit {
 
 /*!
-	@ingroup    levelset
-	@class      LevelSetCartesian
-	@brief      Implements partially LevelSet for cartesian meshes
-*/
-
-/*!
- * Destructor
- */
-LevelSetCartesian::~LevelSetCartesian( ){
-    m_cartesian = NULL ;
-};
-
-/*!
- * Constructor
- */
-LevelSetCartesian::LevelSetCartesian(VolCartesian &patch ): LevelSetKernel( (static_cast<VolumeKernel*>(&patch)) ){
-    m_cartesian = &patch ;
-};
-
-/*!
- * Calculate size of narrow band in order to guarantee one element on each side of geometry
- */
-double LevelSetCartesian::computeSizeNarrowBand( LevelSetObject *visitor ){
-
-    BITPIT_UNUSED(visitor) ;
-
-    double RSearch = -1.;
-
-    for( int d=0; d<m_cartesian->getDimension(); ++d){
-        RSearch = std::max( RSearch, m_cartesian->getSpacing(d) ) ;
-    };
-
-    return RSearch;
-};
-
-/*!
- * Update the size of the narrow band after an adaptation of the octree mesh
- * around the linked triangulation.
- */
-double LevelSetCartesian::updateSizeNarrowBand( const std::vector<adaption::Info> &mapper ){
-
-    BITPIT_UNUSED(mapper) ;
-
-    double newRSearch = -1. ;
-
-    for( int d=0; d<m_cartesian->getDimension(); ++d){
-        newRSearch = std::max( newRSearch, m_cartesian->getSpacing(d) ) ;
-    };
-
-    return newRSearch;
-
-};
-
-/*! 
- * Update scalar field value at mesh vertex on a by locally solving the 3D Eikonal equation.
- * @param[in] s Flag for inwards/outwards propagation (s = -+1).
- * @param[in] g Propagation speed for the 3D Eikonal equation.
- * @param[in] I index of the cartesian cell to be updated.
- * @return Updated value at mesh vertex
- */
-double LevelSetCartesian::updateEikonal( double s, double g, const long &I ){
-
-    int                d;
-    long               J;
-    double             h2, delta, value, a(0), b(0), c(0);
-
-    Cell&   cell = m_cartesian->getCell(I) ;
-
-    for( d=0; d<m_cartesian->getDimension(); ++d){ // COMPUTE QUADRATIC FORM COEFFICIENTS FROM UPWIND STENCIL
-
-        value   = levelSetDefaults::VALUE ;
-
-        // Left neighbor
-        J   = cell.getAdjacency( 2*d, 0) ;
-
-        LSInfo  &lsInfo = m_ls[J] ;
-
-        if( J >= 0 && lsInfo.active == 0){
-            value = std::min(s*lsInfo.value, value);
-        };
-
-
-        // Right neighbor
-        J   = cell.getAdjacency( 2*d+1, 0) ;
-
-        if( J >= 0 && lsInfo.active == 0){
-            value = std::min(s*lsInfo.value, value);
-        };
-
-
-        // Update coeffs in the quadratic form
-        if (value < levelSetDefaults::VALUE) {
-            h2 = pow(m_cartesian->getSpacing(d), 2);
-
-            a += 1.0/h2;
-            b += -2.0 * value/h2;
-            c += std::pow(value, 2)/h2;
-        }
-
-    };
-
-
-    { // SOLVE THE QUADRATIC FORM
-        // Quadratic form determinant
-        delta = pow(b, 2) - 4.0*a*(c - pow(g, 2));
-
-        // Solution
-        value = -(b - sqrt(delta))/(2.0*a);
-
-    }
-
-    return(value); 
-
-};
-
-/*!
  *  @ingroup    levelset
  *  @class      LevelSetOctree
- *  @brief      Implements partially LevelSet for octree meshes
+ *  @brief      Implements LevelSetKernel for octree meshes
  */
 
 /*!
@@ -166,8 +50,8 @@ LevelSetOctree::LevelSetOctree(VolOctree & patch ): LevelSetKernel( (static_cast
 };
 
 /*!
- * Initialization of the size of the narrow band around the linked triangulation
- * on the given (and already linked) octree mesh.
+ * Calculation of the necessary size of the narrow band around a LevelSetObject in order to guarantee one cell center on each side of the object
+ * @param[in] visitor reference object 
  */
 double LevelSetOctree::computeSizeNarrowBand( LevelSetObject *visitor ){
 
@@ -272,7 +156,7 @@ double LevelSetOctree::computeSizeNarrowBand( LevelSetObject *visitor ){
 
 /*!
  * Update the size of the narrow band after an adaptation of the octree mesh
- * around the linked triangulation.
+ * @param[in]  mapper mesh modifications
  */
 double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &mapper ){
 
@@ -351,7 +235,9 @@ double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &
 };
 
 /*!
- * Compute size of Narrow Band given a the coarsest element level 
+ * Compute size of narrow band given a the coarsest element level which is crossed by geometry.
+ * This function assumes that the octree is balanced 2:1
+ * @param[in] level the level of the coarsest octree
  */
 double LevelSetOctree::computeRSearchFromLevel( uint8_t level){
 
@@ -360,7 +246,8 @@ double LevelSetOctree::computeRSearchFromLevel( uint8_t level){
 };
 
 /*!
- * Compute size of Narrow Band given a the coarsest element level 
+ * Compute size of smallest octants greater than a given size (typically the size of the narrow band)
+ * @param[in] r limit size
  */
 double LevelSetOctree::computeSizeFromRSearch( double r){
 

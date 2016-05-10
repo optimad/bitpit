@@ -22,27 +22,6 @@
  *
 \*---------------------------------------------------------------------------*/
 
-/*!
- *    \date            10/jul/2014
- *    \authors        Alessandro Alaia
- *    \authors        Haysam Telib
- *    \authors        Edoardo Lombardi
- *    \version        0.1
- *    \copyright        Copyright 2015 Optimad engineering srl. All rights reserved.
- *    \par            License:\n
- *    This version of Class_LevelSet_Stl is released under the LGPL License.
- *
- *    \brief Level Set Manager Class - 3D PABLO Octree specialization
- *
- *    Level Set Stl is a user interface class. One user should (read can...) work only
- *    with this Class and its methods to maintain a signed distance function (Sdf)
- *    computed from a piece-wise linear approximation of a d manifold in a 3D Euclidean
- *    space. Sdf is computed in a narrow band of at least 2 mesh cell centers
- *    around the geometry.
- *    Parallel implementation developed by using the features of PABLO library.
- *
- */
-
 # if BITPIT_ENABLE_MPI
 # include <mpi.h>
 # include "communications.hpp"
@@ -58,15 +37,23 @@
 namespace bitpit {
 
 /*!
-    @ingroup levelset
-    @class  LevelSetKernel
-    @brief  Level Set on Stl Manager Class
-
-    LevelSetKernel is a user interface class. One user should (read can...) work only
-    with this class and its methods to maintain a signed distance function (Sdf)
-    computed from a piece-wise linear approximation of a d manifold in a 3D Euclidean
-    space. Sdf is computed in a narrow band of at least 2 mesh cell centers
-    around the geometry.
+ * @ingroup levelset
+ * @class  LevelSet
+ *
+ * @brief  Level Set driver class
+ *
+ * LevelSet is the main user interface class for computing signed- or unsigned- distance functions on Cartesian or Octree meshes
+ * with respect to geometrical objects. The user needs to define the computional by calling setMesh() and the objects which define the zero 
+ * levelset via addObject().
+ *
+ * LevelSet will calculate the exact distance with respect within a narrow band.
+ * Outside this narrow band an approximate value will be calculated.
+ *
+ * The user may set the size of the narrow band explicitly.
+ * Alternatively LevelSet will guarantee a least on cell center with exact levelset values across the zero-levelset iso-surface.
+ *
+ * LevelSet will test if the underlying mesh can provide a MPI communicator.
+ * In case LevelSet is parallelized according the underlying mesh partitioning.
 */
 
 /*!
@@ -83,9 +70,6 @@ LevelSet::LevelSet() {
     m_propagateS  = false;
     m_propagateV  = false;
 
-#if BITPIT_ENABLE_MPI
-    m_commMPI = MPI_COMM_NULL;
-# endif
 };
 
 /*!
@@ -101,6 +85,9 @@ LevelSet::~LevelSet(){
 };
 
 /*!
+ * Sets the grid on which the levelset function should be computed.
+ * Only caretsian and octree patches are supported at this moment.
+ * @param[in] mesh computational grid
  */
 void LevelSet::setMesh( VolumeKernel* mesh ) {
 
@@ -109,11 +96,18 @@ void LevelSet::setMesh( VolumeKernel* mesh ) {
 
     } else if( VolOctree* octree = dynamic_cast<VolOctree*> (mesh) ){
         m_kernel = new LevelSetOctree(*octree) ;
+    
+    } else{
+        log::cout() << "Mesh non supported in LevelSet::setMesh()" << std::endl ;
     }; 
 
     return;
 };
 
+/*!
+ * Sets the grid on which the levelset function should be computed.
+ * @param[in] cartesian cartesian patch
+ */
 void LevelSet::setMesh( VolCartesian* cartesian ) {
 
     m_kernel = new LevelSetCartesian( *cartesian) ;
@@ -121,6 +115,10 @@ void LevelSet::setMesh( VolCartesian* cartesian ) {
     return;
 };
 
+/*!
+ * Sets the grid on which the levelset function should be computed.
+ * @param[in] octree octree patch
+ */
 void LevelSet::setMesh( VolOctree* octree ) {
 
     m_kernel = new LevelSetOctree( *octree) ;
@@ -128,6 +126,10 @@ void LevelSet::setMesh( VolOctree* octree ) {
     return;
 };
 
+/*!
+ * Adds a surface segmentation
+ * @param[in] segmentation surface segmentation
+ */
 void LevelSet::addObject( SurfUnstructured* segmentation ) {
 
     int id = m_object.size() ;
@@ -136,6 +138,10 @@ void LevelSet::addObject( SurfUnstructured* segmentation ) {
     return;
 };
 
+/*!
+ * Adds a generic LevelSetObject
+ * @param[in] object generic object
+ */
 void LevelSet::addObject( LevelSetObject* object ) {
 
 
@@ -147,17 +153,18 @@ void LevelSet::addObject( LevelSetObject* object ) {
 };
 
 /*!
- * Get the Sdf value of the i-th local element of the octree mesh.
- * @param[in] i Local index of target octant.
- * @return Value of the i-th local element of the octree mesh.
+ * Get the levelset value of the i-th local cell.
+ * @param[in] i index of cell
+ * @return value of the i-th cell
  */
 double LevelSet::getLS( const long &i)const {
     return( m_kernel->getLS(i) ) ;
 };
 
 /*!
- * Get the Sdf gradient vector of the i-th local element of the octree mesh.
+ * Get the levelset gradient of the i-th local cell.
  * @param[in] i Local index of target octant.
+ * @param[in] i index of cell
  * @return Array with components of the Sdf gradient of the i-th local element of the octree mesh.
  */
 std::array<double,3> LevelSet::getGradient(const long &i) const {
@@ -166,7 +173,7 @@ std::array<double,3> LevelSet::getGradient(const long &i) const {
 
 /*!
  * Get the sign of the levelset function
- * @param[in] i Local index of target octant.
+ * @param[in] i index of cell
  * @return sign
  */
 short LevelSet::getSign(const long &i)const{
@@ -174,9 +181,9 @@ short LevelSet::getSign(const long &i)const{
 };
 
 /*!
- * Get if the Sdf value of the i-th local element is exactly computed or not.
- * @param[in] i Local index of target octant.
- * @return True/false if the Sdf value is exactly computed (true) or not (false).
+ * Returns if the cell centroid lies within the narrow band.
+ * @param[in] i index of cell
+ * @return true/false if the cell centroid is within the narrow band
  */
 bool LevelSet::isInNarrowBand(const long &i)const{
     return( m_kernel->isInNarrowBand(i) ) ;
@@ -184,14 +191,14 @@ bool LevelSet::isInNarrowBand(const long &i)const{
 
 /*!
  * Get the current size of the narrow band.
- * @return Physical size of the current narrow band to guarantee at least one element inside it.
+ * @return Physical size of the current narrow band.
  */
 double LevelSet::getSizeNarrowBand()const{
     return( m_kernel->getSizeNarrowBand() ) ;
 };
 
 /*!
- * Set if the signed or unsigned LevelSet should be computed.
+ * Set if the signed or unsigned levelset function should be computed.
  * @param[in] flag true/false for signed /unsigned Level-Set function .
  */
 void LevelSet::setSign(bool flag){
@@ -224,6 +231,10 @@ void LevelSet::setSizeNarrowBand(double r){
     m_kernel->setSizeNarrowBand(r) ;
 };
 
+/*!
+ * Computes levelset on given mesh with respect to the objects.
+ * This routines needs to be called at least once.
+ */
 void LevelSet::compute(){
 
     double RSearch ;
@@ -250,7 +261,8 @@ void LevelSet::compute(){
 }
 
 /*!
- * Compute the levelset function 
+ * Updates the levelset after mesh adaptation.
+ * @param[in] mapper mapper conatining mesh modifications
  */
 void LevelSet::update( const std::vector<adaption::Info> &mapper ){
 
@@ -329,20 +341,7 @@ void LevelSet::restore( std::fstream &stream ){
  */
 bool LevelSet::assureMPI( ){
 
-    if( m_commMPI == MPI_COMM_NULL){
-
-        MPI_Comm meshComm = m_kernel->getMesh()->getCommunicator() ;
-
-        if( meshComm == MPI_COMM_NULL){
-            return false;
-        } else {
-            MPI_Comm_dup(m_kernel->getMesh()->getCommunicator(), &m_commMPI);
-            return true; 
-        }
-    } else {
-        return true ;
-    };
-
+    m_kernel->assureMPI() ;
 }
 
 /*!
@@ -350,23 +349,28 @@ bool LevelSet::assureMPI( ){
  */
 void LevelSet::finalizeMPI( ){
 
-    if( m_commMPI != MPI_COMM_NULL){
-        MPI_Comm_free( &m_commMPI ) ;
+    m_kernel->finalizeMPI() ;
+
+    for( auto visitor:m_object){
+        visitor->finalizeMPI() ;
     }
+
 }
 
 
 /*!
- * Repartioning of levelset after partitioning of mesh
+ * Distribution of levelset over available processes after partitioning of mesh
  * @param[in] mapper mapper describing partitioning
  */
 void LevelSet::loadBalance( const std::vector<adaption::Info> &mapper ){
 
     if( assureMPI() ){
 
+        MPI_Comm meshComm = m_kernel->getCommunicator() ;
+
         int                 nClasses = 1 + m_object.size() ;
-        DataCommunicator    sizeCommunicator(m_commMPI) ; 
-        DataCommunicator    dataCommunicator(m_commMPI) ; 
+        DataCommunicator    sizeCommunicator(meshComm) ; 
+        DataCommunicator    dataCommunicator(meshComm) ; 
 
 
         // start receive of sizes

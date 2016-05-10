@@ -22,26 +22,6 @@
  *
 \*---------------------------------------------------------------------------*/
 
-/*!
- *    \date            10/jul/2014
- *    \authors        Alessandro Alaia
- *    \authors        Haysam Telib
- *    \authors        Edoardo Lombardi
- *    \version        0.1
- *    \copyright        Copyright 2015 Optimad engineering srl. All rights reserved.
- *    \par            License:\n
- *    This version of Class_LevelSet_Stl is released under the LGPL License.
- *
- *    \brief Level Set Manager Class - 3D PABLO Octree specialization
- *
- *    Level Set Stl is a user interface class. One user should (read can...) work only
- *    with this Class and its methods to maintain a signed distance function (Sdf)
- *    computed from a piece-wise linear approximation of a d manifold in a 3D Euclidean
- *    space. Sdf is computed in a narrow band of at least 2 mesh cell centers
- *    around the geometry.
- *    Parallel implementation developed by using the features of PABLO library.
- *
- */
 
 # if BITPIT_ENABLE_MPI
 # include <mpi.h>
@@ -60,17 +40,12 @@ namespace bitpit {
 /*!
     @ingroup levelset
     @class  LevelSetKernel
-    @brief  Level Set on Stl Manager Class
+    @brief  Mesh specific implementation to calculate the levelset function
 
-    LevelSetKernel is a user interface class. One user should (read can...) work only
-    with this class and its methods to maintain a signed distance function (Sdf)
-    computed from a piece-wise linear approximation of a d manifold in a 3D Euclidean
-    space. Sdf is computed in a narrow band of at least 2 mesh cell centers
-    around the geometry.
 */
 
 /*!
- * Default constructor
+ * Default constructor.
  */
 LevelSetKernel::LevelSetKernel() {
 
@@ -92,17 +67,24 @@ LevelSetKernel::LevelSetKernel( VolumeKernel *patch): LevelSetKernel() {
 
 
 /*!
- * Destructor of LevelSetKernel_Stl.
+ * Destructor of LevelSetKernel
 */
 LevelSetKernel::~LevelSetKernel(){
     m_mesh = NULL ;
 
 };
 
+/*!
+ * Returns reference to LSInfo
+*/
 PiercedVector<LevelSetKernel::LSInfo>& LevelSetKernel::getLSInfo(){
     return m_ls ;
 } 
 
+/*!
+ * Returns pointer to underlying mesh.
+ * @return pointer to mesh
+*/
 VolumeKernel* LevelSetKernel::getMesh() const{
     return m_mesh ;
 } 
@@ -632,6 +614,10 @@ void LevelSetKernel::restore( std::fstream &stream ){
 
 # if BITPIT_ENABLE_MPI
 
+MPI_Comm LevelSetKernel::getCommunicator(){
+    return m_commMPI;
+}
+
 /*!
  * Checks if MPI communicator is available in underlying mesh.
  * If available MPI communicator is retreived from mesh and duplicated if necessary and parallel processing can be done.
@@ -655,6 +641,13 @@ bool LevelSetKernel::assureMPI( ){
     };
 
 }
+
+void LevelSetKernel::finalizeMPI(){
+    if( m_commMPI != MPI_COMM_NULL){
+        MPI_Comm_free( &m_commMPI) ;
+    }
+}
+
 /*!
  * Repartioning of levelset after partitioning of mesh
  * @param[in] mapper mapper describing partitioning
