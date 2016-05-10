@@ -535,16 +535,21 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 		// Cells that will be removed
 		//
-		// For refinement and coarsening the cells associated to the previous
-		// octant ids needs to be removed.
-		if (adaptionType == adaption::TYPE_REFINEMENT || adaptionType == adaption::TYPE_COARSENING) {
-			int nPreviousTreeIds = mapper_octantMap.size();
-			for (int k = 0; k < nPreviousTreeIds; ++k) {
-				OctantInfo previousOctantInfo(mapper_octantMap[k], !mapper_ghostFlag[k]);
-				long previousCellId = getOctantId(previousOctantInfo);
-
-				removedCells.insert(previousCellId);
+		// Mark the cells associated to previous local octants for deletion.
+		int nPreviousTreeIds = mapper_octantMap.size();
+		for (int k = 0; k < nPreviousTreeIds; ++k) {
+#if BITPIT_ENABLE_MPI==1
+			// Only local cells can be deleted
+			if (mapper_octantRank[k] != getRank()) {
+				continue;
 			}
+#endif
+
+			// Mark the cell for deletion
+			OctantInfo previousOctantInfo(mapper_octantMap[k], !mapper_ghostFlag[k]);
+			long previousCellId = getOctantId(previousOctantInfo);
+
+			removedCells.insert(previousCellId);
 		}
 
 		// Adaption tracking
