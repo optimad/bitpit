@@ -586,18 +586,24 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 				newOctantsIter++;
 			}
 
-			// Previous cell and interface ids
-			if (adaptionType != adaption::TYPE_PARTITION_RECV) {
-				int nPreviousCellIds = mapper_octantMap.size();
-				adaptionInfo.previous.reserve(nPreviousCellIds);
-				for (int k = 0; k < nPreviousCellIds; ++k) {
+			// Previous cells
+			int nPreviousCellIds = mapper_octantMap.size();
+			adaptionInfo.previous.reserve(nPreviousCellIds);
+			for (int k = 0; k < nPreviousCellIds; ++k) {
+				long previousCellId;
+#if BITPIT_ENABLE_MPI==1
+				if (mapper_octantRank[k] != getRank()) {
+					previousCellId = Cell::NULL_ID;
+				} else
+#endif
+				{
 					OctantInfo previousOctantInfo(mapper_octantMap[k], !mapper_ghostFlag[k]);
-					long previousCellId = getOctantId(previousOctantInfo);
-
-					adaptionInfo.previous.emplace_back();
-					unsigned long &adaptionId = adaptionInfo.previous.back();
-					adaptionId = previousCellId;
+					previousCellId = getOctantId(previousOctantInfo);
 				}
+
+				adaptionInfo.previous.emplace_back();
+				unsigned long &adaptionId = adaptionInfo.previous.back();
+				adaptionId = previousCellId;
 			}
 		}
 
