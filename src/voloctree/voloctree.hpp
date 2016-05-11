@@ -25,8 +25,6 @@
 #ifndef __BITPIT_VOLOCTREE_HPP__
 #define __BITPIT_VOLOCTREE_HPP__
 
-#include <deque>
-#include <cstddef>
 #include <vector>
 #include <unordered_map>
 #include <unordered_set>
