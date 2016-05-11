@@ -443,11 +443,11 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	// octants.
 	log::cout() << ">> Extract information for transforming the patch...";
 
-	std::vector<OctantInfo> newOctants;
+	std::vector<OctantInfo> addedOctants;
 	std::unordered_map<uint32_t, long> renumberedOctants;
 	std::unordered_set<long> removedCells;
 
-	newOctants.reserve(nOctants + nGhostsOctants);
+	addedOctants.reserve(nOctants + nGhostsOctants);
 	renumberedOctants.reserve(nPreviousOctants + nPreviousGhosts);
 	removedCells.reserve(nPreviousOctants + nPreviousGhosts);
 
@@ -530,7 +530,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 		const long lastCurrentTreeId = treeId + nCurrentTreeIds;
 		for (int currentTreeId = treeId; currentTreeId < lastCurrentTreeId; ++currentTreeId) {
-			newOctants.emplace_back(currentTreeId, true);
+			addedOctants.emplace_back(currentTreeId, true);
 		}
 
 		// Cells that will be removed
@@ -586,13 +586,13 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			// WARNING: tree id are uint32_t wherase adaptionInfo stores
 			//          id as unsigned long.
 			adaptionInfo.current.reserve(nCurrentTreeIds);
-			auto newOctantsIter = newOctants.cend() - nCurrentTreeIds;
-			while (newOctantsIter != newOctants.cend()) {
+			auto addedOctantsIter = addedOctants.cend() - nCurrentTreeIds;
+			while (addedOctantsIter != addedOctants.cend()) {
 				adaptionInfo.current.emplace_back();
 				unsigned long &adaptionId = adaptionInfo.current.back();
-				adaptionId = (*newOctantsIter).id;
+				adaptionId = (*addedOctantsIter).id;
 
-				newOctantsIter++;
+				addedOctantsIter++;
 			}
 
 			// Previous cells
@@ -701,9 +701,9 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 	// New ghost octants need to be added
 	for (uint32_t treeId = 0; treeId < (uint32_t) nGhostsOctants; ++treeId) {
-		newOctants.emplace_back(treeId, false);
+		addedOctants.emplace_back(treeId, false);
 	}
-	newOctants.shrink_to_fit();
+	addedOctants.shrink_to_fit();
 #endif
 
 	// Enable advanced editing
@@ -795,13 +795,13 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 	// Import added octants
 	std::vector<long> createdCells;
-	if (newOctants.size() > 0) {
+	if (addedOctants.size() > 0) {
 		log::cout() << ">> Importing new octants...";
 
-		createdCells = importOctants(newOctants, danglingFaces);
+		createdCells = importOctants(addedOctants, danglingFaces);
 
 		log::cout() << " Done" << std::endl;
-		log::cout() << ">> Octants imported: " <<  newOctants.size() << std::endl;
+		log::cout() << ">> Octants imported: " <<  addedOctants.size() << std::endl;
 	}
 
 	FaceInfoSet().swap(danglingFaces);
