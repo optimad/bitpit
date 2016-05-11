@@ -2715,7 +2715,10 @@ return(check);
 };
 
 /*!
- * Fill adjacencies info for each cell.
+	Fill adjacencies info for each cell.
+
+	\param resetAdjacencies if set to true, the adjacencies of the cells will be
+	reset before builiding the new ones.
 */
 void PatchKernel::buildAdjacencies(bool resetAdjacencies)
 {
@@ -2729,6 +2732,8 @@ void PatchKernel::buildAdjacencies(bool resetAdjacencies)
 	This implementation can NOT handle hanging nodes.
 
 	\param[in] cellIds is the list of cell ids
+	\param resetAdjacencies if set to true, the adjacencies of the cells will be
+	reset before builiding the new ones.
 */
 void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds, bool resetAdjacencies)
 {
@@ -2827,7 +2832,8 @@ void PatchKernel::updateAdjacencies(const std::vector<long> &cellIds, bool reset
 	Update the interfaces of the specified list of cells and of their
 	neighbours.
 
-	\param[in] cellIds is the list of cell ids
+	\param resetInterfaces if set to true, the interfaces of the cells will be
+	reset before builiding the new ones.
 */
 void PatchKernel::buildInterfaces(bool resetInterfaces)
 {
@@ -2839,6 +2845,8 @@ void PatchKernel::buildInterfaces(bool resetInterfaces)
 	neighbours.
 
 	\param[in] cellIds is the list of cell ids
+	\param resetInterfaces if set to true, the interfaces of the cells will be
+	reset before builiding the new ones.
 */
 void PatchKernel::updateInterfaces(const std::vector<long> &cellIds, bool resetInterfaces)
 {
