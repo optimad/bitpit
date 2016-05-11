@@ -654,7 +654,7 @@ std::vector<double> distanceCloudSimplex(
  * @param[in] P1 point on first line
  * @param[in] n2 direction of second line
  * @param[in] P2 point on second line
- * @param[out] xP intersection point if intersect, else unaltered
+ * @param[out] P intersection point if intersect, else unaltered
  * @return if intersect
  */
 bool intersectLineLine(
