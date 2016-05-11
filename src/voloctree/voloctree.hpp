@@ -54,6 +54,11 @@ public:
 		OctantInfo() : id(0), internal(true) {};
 		OctantInfo(uint32_t _id, bool _internal) : id(_id), internal(_internal) {};
 
+		bool operator==(const OctantInfo &other) const
+		{
+			return (id == other.id && internal == other.internal);
+		}
+
 		uint32_t id;
 		bool internal;
 	};
