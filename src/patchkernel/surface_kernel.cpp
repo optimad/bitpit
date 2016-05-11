@@ -22,6 +22,10 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#define _USE_MATH_DEFINES
+
+#include <cmath>
+
 #include "surface_kernel.hpp"
 
 namespace bitpit {
@@ -295,7 +299,6 @@ double SurfaceKernel::evalAngleAtVertex(const long &id, const int &vertex_id)
     // ====================================================================== //
 
     // Local variables
-    double const                _pi_ = 3.14159265358979;
     Cell                        *cell_ = &m_cells[id];
 
     // Counters
@@ -306,7 +309,7 @@ double SurfaceKernel::evalAngleAtVertex(const long &id, const int &vertex_id)
     if ((cell_->getType() == ElementInfo::UNDEFINED)
      || (cell_->getType() == ElementInfo::VERTEX)) return 0.0;
     if (cell_->getType() == ElementInfo::LINE) {
-        if (m_spaceDim - getDimension() == 1)   return _pi_;
+        if (m_spaceDim - getDimension() == 1)   return M_PI;
         else                                    return 0.0;
     }
 
