@@ -25,7 +25,6 @@
 #ifndef __BITPIT_VOLOCTREE_HPP__
 #define __BITPIT_VOLOCTREE_HPP__
 
-#include <assert.h>
 #include <deque>
 #include <cstddef>
 #include <vector>

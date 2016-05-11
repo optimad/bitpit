@@ -22,6 +22,8 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#include <cassert>
+
 #include "logger.hpp"
 
 #include "voloctree.hpp"
