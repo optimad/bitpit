@@ -23,6 +23,7 @@
 \*---------------------------------------------------------------------------*/
 
 #include <cassert>
+#include <cmath>
 
 #include "bitpit_IO.hpp"
 
@@ -1546,8 +1547,8 @@ void VolOctree::translate(std::array<double, 3> translation)
 void VolOctree::scale(std::array<double, 3> scaling)
 {
 	bool uniformScaling = true;
-	uniformScaling &= (fabs(scaling[0] - scaling[1]) > 1e-14);
-	uniformScaling &= (fabs(scaling[0] - scaling[2]) > 1e-14);
+	uniformScaling &= (std::abs(scaling[0] - scaling[1]) > 1e-14);
+	uniformScaling &= (std::abs(scaling[0] - scaling[2]) > 1e-14);
 	assert(uniformScaling);
 	if (!uniformScaling) {
 		log::cout() << "octree patch only allows uniform scaling)" << std::endl;
