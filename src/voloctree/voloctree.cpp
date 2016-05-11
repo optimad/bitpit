@@ -916,7 +916,7 @@ std::vector<long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoLi
 	Imports a list of octants into the patch.
 
 	\param octantInfoList is the list of octant to import
-	\param danglingVertices is the list of dangling vertices in the current mesh
+	\param danglingFaces is the list of dangling faces in the current mesh
 */
 std::vector<long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoList,
                                            FaceInfoSet &danglingFaces)
@@ -1022,7 +1022,9 @@ std::vector<long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoLi
 /*!
 	Remove a list of octants from the patch.
 
-	\param cellIds is the list of cells ids to remove
+	\param deletedOctants contains a list with the information of the deleted
+	octants
+	\result Returns the dangling faces created after deleting the octants.
 */
 VolOctree::FaceInfoSet VolOctree::deleteOctants(std::vector<DeleteInfo> &deletedOctants)
 {
