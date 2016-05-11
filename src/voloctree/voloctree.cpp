@@ -24,7 +24,7 @@
 
 #include <cassert>
 
-#include "logger.hpp"
+#include "bitpit_IO.hpp"
 
 #include "voloctree.hpp"
 
