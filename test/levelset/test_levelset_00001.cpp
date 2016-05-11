@@ -39,6 +39,9 @@
 // ========================================================================== //
 
 //Standard Template Library
+# define _USE_MATH_DEFINES
+
+# include <cmath>
 # include <ctime>
 # include <chrono>
 
@@ -59,11 +62,10 @@ void Generate2DSurfMesh(
 // ========================================================================== //
 
 // Local variables
-const double                            _PI_ = 3.14159265358979;
 const double                            R = 1.0;
 const long                              N = 32;
 double                                  theta;
-double                                  dtheta = 2. * _PI_/((double) N);
+double                                  dtheta = 2. * M_PI/((double) N);
 
 // Counters
 long                                    i;
