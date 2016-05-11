@@ -437,6 +437,12 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	// Initialize tracking data
 	adaption::InfoCollection adaptionData;
 
+	// Current rank
+	int currentRank = -1;
+#if BITPIT_ENABLE_MPI==1
+	currentRank = getRank();
+#endif
+
 	// Extract information for transforming the patch
 	//
 	// If there are no cells in the mesh we need to import all
@@ -480,7 +486,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			}
 #if BITPIT_ENABLE_MPI==1
 		} else if (lastTreeOperation == OP_LOAD_BALANCE) {
-			if (getRank() != mapper_octantRank.front()) {
+			if (currentRank != mapper_octantRank.front()) {
 				adaptionType = adaption::TYPE_PARTITION_RECV;
 			} else if (treeId != mapper_octantMap.front()) {
 				adaptionType = adaption::TYPE_RENUMBERING;
@@ -542,7 +548,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		for (int k = 0; k < nPreviousTreeIds; ++k) {
 #if BITPIT_ENABLE_MPI==1
 			// Only local cells can be deleted
-			if (mapper_octantRank[k] != getRank()) {
+			if (mapper_octantRank[k] != currentRank) {
 				continue;
 			}
 #endif
@@ -566,12 +572,10 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		// the order in which these data will be sent).
 		if (trackChanges) {
 			// Rank assocated to the adaption info
-			int rank = -1;
+			int rank = currentRank;
 #if BITPIT_ENABLE_MPI==1
 			if (adaptionType == adaption::TYPE_PARTITION_RECV) {
 				rank = mapper_octantRank[0];
-			} else {
-				rank = getRank();
 			}
 #endif
 
@@ -608,7 +612,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			for (int k = 0; k < nPreviousCellIds; ++k) {
 				long previousCellId;
 #if BITPIT_ENABLE_MPI==1
-				if (mapper_octantRank[k] != getRank()) {
+				if (mapper_octantRank[k] != currentRank) {
 					previousCellId = Cell::NULL_ID;
 				} else
 #endif
@@ -732,12 +736,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			}
 
 			// Adaption info for the deleted interfaces
-			int rank = -1;
-#if BITPIT_ENABLE_MPI==1
-			rank = getRank();
-#endif
-
-			std::size_t adaptionInfoId = adaptionData.create(adaption::TYPE_DELETION, adaption::ENTITY_INTERFACE, rank);
+			std::size_t adaptionInfoId = adaptionData.create(adaption::TYPE_DELETION, adaption::ENTITY_INTERFACE, currentRank);
 			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
 			for (const long &interfaceId : removedInterfaces) {
 				adaptionInfo.previous.emplace_back();
@@ -817,7 +816,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		// Track created ghosts cells
 #if BITPIT_ENABLE_MPI==1
 		if (nGhostsOctants > 0) {
-			std::size_t adaptionInfoId = adaptionData.create(adaption::TYPE_CREATION, adaption::ENTITY_CELL, getRank());
+			std::size_t adaptionInfoId = adaptionData.create(adaption::TYPE_CREATION, adaption::ENTITY_CELL, currentRank);
 			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
 
 			adaptionInfo.current.reserve(nGhostsOctants);
@@ -848,14 +847,8 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 				}
 			}
 
-			// Rank assocated to the adaption info
-			int rank = -1;
-#if BITPIT_ENABLE_MPI==1
-			rank = getRank();
-#endif
-
 			// Adaption info
-			std::size_t infoId = adaptionData.create(adaption::TYPE_CREATION, adaption::ENTITY_INTERFACE, rank);
+			std::size_t infoId = adaptionData.create(adaption::TYPE_CREATION, adaption::ENTITY_INTERFACE, currentRank);
 			adaption::Info &adaptionInfo = adaptionData[infoId];
 			for (const long &interfaceId : createdInterfaces) {
 				adaptionInfo.current.emplace_back();
