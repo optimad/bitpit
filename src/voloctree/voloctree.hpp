@@ -176,12 +176,12 @@ private:
 
 	struct FaceInfoHasher
 	{
+		// We can just use the id for the hash, because a cell can have only
+		// a limited amount of faces. It's not worth including the face index
+		// in the hash.
 		std::size_t operator()(const FaceInfo& k) const
 		{
-			using std::hash;
-			using std::string;
-
-			return ((hash<long>()(k.id) ^ (hash<int>()(k.face) << 1)) >> 1);
+			return std::hash<long>()(k.id);
 		}
 	};
 
