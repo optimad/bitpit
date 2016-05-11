@@ -58,6 +58,18 @@ public:
 		bool internal;
 	};
 
+	struct OctantInfoHasher
+	{
+		// We can just use the id for the hash, beacuse only two different
+		// octants can be assigned to the same id: the internal octant and
+		// the ghost octant. It's not worth including the ghost flag in the
+		// hash.
+		std::size_t operator()(const OctantInfo& k) const
+		{
+			return std::hash<uint32_t>()(k.id);
+		}
+	};
+
 	VolOctree(const int &id, const int &dimension, std::array<double, 3> origin,
 			double length, double dh);
 
