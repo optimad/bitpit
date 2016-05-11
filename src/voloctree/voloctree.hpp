@@ -133,6 +133,21 @@ private:
 		OP_LOAD_BALANCE
 	};
 
+	struct RenumberInfo {
+		RenumberInfo()
+			: octantInfo(), newTreeId(0)
+		{
+		};
+
+		RenumberInfo(OctantInfo _octantInfo, uint32_t _newTreeId)
+			: octantInfo(_octantInfo), newTreeId(_newTreeId)
+		{
+		};
+
+		OctantInfo octantInfo;
+		uint32_t newTreeId;
+	};
+
 	struct FaceInfo {
 		FaceInfo() : id(Element::NULL_ID), face(-1) {};
 		FaceInfo(long _id, int _face) : id(_id), face(_face) {};
@@ -189,7 +204,7 @@ private:
 
 	std::vector<long> importOctants(std::vector<OctantInfo> &octantTreeIds);
 	std::vector<long> importOctants(std::vector<OctantInfo> &octantTreeIds, FaceInfoSet &danglingFaces);
-
+	void renumberOctants(std::vector<RenumberInfo> &renumberedOctants);
 	FaceInfoSet removeCells(std::unordered_set<long> &cellIds);
 
 	long addVertex(uint32_t treeId);

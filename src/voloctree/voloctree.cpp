@@ -444,7 +444,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	log::cout() << ">> Extract information for transforming the patch...";
 
 	std::vector<OctantInfo> addedOctants;
-	std::unordered_map<uint32_t, long> renumberedOctants;
+	std::vector<RenumberInfo> renumberedOctants;
 	std::unordered_set<long> removedCells;
 
 	addedOctants.reserve(nOctants + nGhostsOctants);
@@ -499,10 +499,9 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		// Renumbered cells are not tracked, because the re-numbering
 		// only happens inside VolOctree.
 		if (adaptionType == adaption::TYPE_RENUMBERING) {
-			OctantInfo previousOctantInfo(mapper_octantMap.front(), !mapper_ghostFlag.front());
-			long cellId = getOctantId(previousOctantInfo);
-
-			renumberedOctants.insert({{treeId, cellId}});
+			uint32_t previousTreeId = mapper_octantMap.front();
+			OctantInfo previousOctantInfo(previousTreeId, !mapper_ghostFlag.front());
+			renumberedOctants.emplace_back(previousOctantInfo, treeId);
 
 			// No more work needed, skip to the next octant
 			++treeId;
@@ -763,28 +762,13 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	if (renumberedOctants.size() > 0) {
 		log::cout() << ">> Rebuilding octant-to-cell map for renumbered cells...";
 
-		// Remap cells to the new tree ids
-		auto cellIterator = renumberedOctants.begin();
-		while (cellIterator != renumberedOctants.end()) {
-			long cellId = cellIterator->second;
-
-			uint32_t currentTreeId  = cellIterator->first;
-			uint32_t previousTreeId = m_cellToOctant.at(cellId);
-
-			m_cellToOctant[cellId] = currentTreeId;
-			m_octantToCell[currentTreeId] = cellId;
-			if (renumberedOctants.count(previousTreeId) == 0) {
-				m_octantToCell.erase(previousTreeId);
-			}
-
-			cellIterator++;
-		}
+		renumberOctants(renumberedOctants);
 
 		log::cout() << " Done" << std::endl;
 		log::cout() << ">> Cells renumbered: " <<  renumberedOctants.size() << std::endl;
 	}
 
-	std::unordered_map<uint32_t, long>().swap(renumberedOctants);
+	std::vector<RenumberInfo>().swap(renumberedOctants);
 
 	// Reset ghost maps
 	m_cellToGhost.clear();
@@ -885,6 +869,39 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 	// Done
 	return adaptionData.dump();
+}
+
+/*!
+	Renumber a list of octants.
+
+	\param renumberedOctants is the list of octant to renumber
+*/
+void VolOctree::renumberOctants(std::vector<RenumberInfo> &renumberedOctants)
+{
+	// Remove previous cell-to-tree associations
+	std::vector<long> cellIds;
+	cellIds.reserve(renumberedOctants.size());
+	for (const RenumberInfo &renumberInfo : renumberedOctants) {
+		const OctantInfo &octantInfo = renumberInfo.octantInfo;
+
+		long cellId = getOctantId(octantInfo);
+		cellIds.push_back(cellId);
+
+		uint32_t previousTreeId = octantInfo.id;
+		m_octantToCell.erase(previousTreeId);
+	}
+
+	// Creeate new cell-to-tree associations
+	std::vector<long>::iterator cellIdsItr = cellIds.begin();
+	for (const RenumberInfo &renumberInfo : renumberedOctants) {
+		uint32_t treeId = renumberInfo.newTreeId;
+
+		long cellId = (*cellIdsItr);
+		cellIdsItr++;
+
+		m_cellToOctant[cellId] = treeId;
+		m_octantToCell[treeId] = cellId;
+	}
 }
 
 /*!
