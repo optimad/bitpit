@@ -835,11 +835,11 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			std::size_t adaptionInfoId = adaptionData.create(adaption::TYPE_CREATION, adaption::ENTITY_CELL, getRank());
 			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
 
-			adaptionInfo.previous.reserve(nGhostsOctants);
+			adaptionInfo.current.reserve(nGhostsOctants);
 			auto cellIterator = m_cellToGhost.cbegin();
 			while (cellIterator != m_cellToGhost.cend()) {
-				adaptionInfo.previous.emplace_back();
-				unsigned long &adaptionId = adaptionInfo.previous.back();
+				adaptionInfo.current.emplace_back();
+				unsigned long &adaptionId = adaptionInfo.current.back();
 				adaptionId = cellIterator->first;
 
 				cellIterator++;
