@@ -32,6 +32,9 @@
 // ========================================================================== //
 
 // Standard Template Library
+# define _USE_MATH_DEFINES
+
+# include <cmath>
 # include <array>
 # include <vector>
 # include <iostream>
@@ -80,8 +83,6 @@ int subtest_001(
 // VARIABLES DECLARATION                                                      //
 // ========================================================================== //
 
-// Parameters
-const double                    PI = 3.14159265358979;
 // Local variables
 long                            id;
 SurfUnstructured                mesh(0);
@@ -224,8 +225,8 @@ SurfUnstructured                mesh(0);
     log::cout() << "** Testing routines for angle calculations" << endl;
 
     // Ref. value to check against ------------------------------------------ //
-    expected[0] = vector<double>{0.5*PI, 0.25*PI, 0.25*PI};
-    expected[1].resize(4, 0.5*PI);
+    expected[0] = vector<double>{0.5*M_PI, 0.25*M_PI, 0.25*M_PI};
+    expected[1].resize(4, 0.5*M_PI);
 
     // Check edge length ---------------------------------------------------- //
     SurfUnstructured::CellIterator  cell_, end_ = mesh.cellEnd();
