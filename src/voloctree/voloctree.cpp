@@ -443,6 +443,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	// octants.
 	log::cout() << ">> Extract information for transforming the patch...";
 
+	std::vector<bool> unmappedOctants(nPreviousOctants, true);
 	std::vector<OctantInfo> addedOctants;
 	std::vector<RenumberInfo> renumberedOctants;
 	std::vector<DeleteInfo> deletedOctants;
@@ -490,6 +491,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		// If the octant cell has not been modified we can skip to the next
 		// octant.
 		if (adaptionType == adaption::TYPE_NONE) {
+			unmappedOctants[treeId] = false;
 			++treeId;
 			continue;
 		}
@@ -502,6 +504,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			uint32_t previousTreeId = mapper_octantMap.front();
 			OctantInfo previousOctantInfo(previousTreeId, !mapper_ghostFlag.front());
 			renumberedOctants.emplace_back(previousOctantInfo, treeId);
+			unmappedOctants[previousTreeId] = false;
 
 			// No more work needed, skip to the next octant
 			++treeId;
@@ -548,6 +551,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			uint32_t previousTreeId = mapper_octantMap[k];
 			OctantInfo previousOctantInfo(previousTreeId, !mapper_ghostFlag[k]);
 			deletedOctants.emplace_back(previousOctantInfo, adaptionType);
+			unmappedOctants[previousTreeId] = false;
 		}
 
 		// Adaption tracking
@@ -636,6 +640,7 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			for (uint32_t treeId = beginTreeId; treeId < endTreeId; ++treeId) {
 				OctantInfo octantInfo(treeId, true);
 				deletedOctants.emplace_back(octantInfo, adaption::TYPE_PARTITION_SEND, rank);
+				unmappedOctants[treeId] = false;
 			}
 		}
 	}
@@ -656,6 +661,18 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	}
 	addedOctants.shrink_to_fit();
 #endif
+
+	// Remove unmapped octants
+	//
+	// A coarsening that merges cells from different processors, can leave, on
+	// the processors which own the ghost octants involved in the coarsening,
+	// some octants that are not mapped.
+	for (uint32_t previousTreeId = 0; previousTreeId < nPreviousOctants; ++previousTreeId) {
+		if (unmappedOctants[previousTreeId]) {
+			OctantInfo octantInfo = OctantInfo(previousTreeId, true);
+			deletedOctants.emplace_back(octantInfo, adaption::TYPE_DELETION);
+		}
+	}
 
 	// Enable advanced editing
 	setExpert(true);
