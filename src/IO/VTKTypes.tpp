@@ -22,7 +22,7 @@
  *
 \*---------------------------------------------------------------------------*/
 
-#include <assert.h>
+#include <cassert>
 #include <typeinfo>
 #include <type_traits>
 
