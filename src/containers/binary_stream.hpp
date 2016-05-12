@@ -98,12 +98,12 @@ class IBinaryStream {
     IBinaryStream(                                                          // Default constructor (empty stream)
         void                                                              // (input) none
     );
-    IBinaryStream(                                                          // Custom constructor #1 (empty stream with known size);
-        size_t                       size                                 // (input) buffer size
+    IBinaryStream(                                                          // Custom constructor #1 (empty stream with known capacity);
+        size_t                       capacity                               // (input) buffer capacity
     );
     IBinaryStream(                                                          // Custom constructor #2 (stream pointing to memory location)
         const char*                  buf_,                                // (input) pointer to memory location
-        size_t                       size                                 // (input) buffer size
+        size_t                       capacity                             // (input) buffer capacity
     );
     IBinaryStream(                                                          // Custom constructor #3 (stream initialized from std::vector<char>)
         const std::vector<char>          &vec                                  // (input) vector used for initialization
@@ -114,15 +114,15 @@ class IBinaryStream {
 
     // Public method(s) ================================================= //
     public:
-    void resize(                                                          // Resize stream
-        size_t                       size                                 // (input) new size (in bytes) of stream
+    void setCapacity(                                                     // Set the capacity of the stream
+        size_t                       capacity                             // (input) new capacity (in bytes) of stream
     );
-    size_t size(                                                          // Size of the stream
+    size_t capacity(                                                  // Capacity of the stream
         void
     );
     void open(                                                            // Open input stream from memory location
         const char                  *mem,                                 // (input) pointer to memory location
-        size_t                       size                                 // (input) size (in bytes) of memory chunk
+        size_t                       capacity                             // (input) capacity (in bytes) of memory chunk
     );
     void close(                                                           // Close input stream from memory
         void                                                              // (input) none
@@ -183,22 +183,22 @@ class OBinaryStream {
     OBinaryStream(                                                          // Default constructor (create empty object)
         void                                                              // (input) none
     );
-    OBinaryStream(                                                          // Custom constructor #1 (create an empty object with buffer of specified size)
-        size_t                       size                                 // (input) none
+    OBinaryStream(                                                          // Custom constructor #1 (create an empty object with buffer of specified capacity)
+        size_t                       capacity                               // (input) none
     );
 
     // Destructor(s) ==================================================== //
     // none
 
     // Public method(s) ================================================= //
-    void resize(                                                          // Resize stream
-        size_t                       size                                 // (input) new size (in bytes) of stream
+    void setCapacity(                                                     // Set the capacity of the stream
+        size_t                       capacity                             // (input) new capacity (in bytes) of stream
     );
-    size_t size(                                                          // Size of the stream
+    size_t capacity(                                                      // Capacity of the stream
         void
     );
 	void open(                                                            // Open output stream
-        size_t                       size                                 // (input) stream size
+        size_t                       capacity                             // (input) stream capacity
     );
     void close(                                                           // Close output stream
         void                                                              // (input) none

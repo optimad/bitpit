@@ -882,39 +882,39 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
     // Send vertex data
     //
     OBinaryStream vertexBuffer;
-    long vertexBufferSize = 0;
+    long vertexBufferCapacity = 0;
 
     // Fill buffer with vertex data
-    vertexBufferSize += sizeof(long);
+    vertexBufferCapacity += sizeof(long);
     for (long vertexId : vertexToCommunicate) {
-        vertexBufferSize += m_vertices[vertexId].getBinarySize();
+        vertexBufferCapacity += m_vertices[vertexId].getBinarySize();
     }
-    vertexBuffer.resize(vertexBufferSize);
+    vertexBuffer.setCapacity(vertexBufferCapacity);
 
     vertexBuffer << (long) vertexToCommunicate.size();
     for (long vertexId : vertexToCommunicate) {
         vertexBuffer << m_vertices[vertexId];
     }
 
-    if (vertexBufferSize != (long) vertexBuffer.size()) {
+    if (vertexBufferCapacity != (long) vertexBuffer.capacity()) {
 		throw std::runtime_error ("Cell buffer size does not match calculated size");
 	}
 
     // Communication
-    MPI_Send(&vertexBufferSize, 1, MPI_LONG, recvRank, 10, m_communicator);
-    MPI_Send(vertexBuffer.get_buffer(), vertexBuffer.size(), MPI_CHAR, recvRank, 11, m_communicator);
+    MPI_Send(&vertexBufferCapacity, 1, MPI_LONG, recvRank, 10, m_communicator);
+    MPI_Send(vertexBuffer.get_buffer(), vertexBuffer.capacity(), MPI_CHAR, recvRank, 11, m_communicator);
 
     //
     // Send cell data
     //
     OBinaryStream cellBuffer;
-    long cellBufferSize = 0;
+    long cellBufferCapacity = 0;
 
 	// Fill the buffer with information on the cells that will be send to the
 	// receiver, but are already there because they are ghosts owned by the
 	// sender. These cells will be promoted by the receiver to internal cells.
-    cellBufferSize += sizeof(long) + 2 * senderGhostsToPromote.size() * sizeof(long);
-    cellBuffer.resize(cellBufferSize);
+    cellBufferCapacity += sizeof(long) + 2 * senderGhostsToPromote.size() * sizeof(long);
+    cellBuffer.setCapacity(cellBufferCapacity);
 
     cellBuffer << (long) senderGhostsToPromote.size();
     for (const auto &entry : senderGhostsToPromote) {
@@ -928,11 +928,11 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
 	}
 
     // Fill the buffer with cell data
-    cellBufferSize += sizeof(long);
+    cellBufferCapacity += sizeof(long);
     for (const long &cellId : cellsToCommunicate) {
-        cellBufferSize += sizeof(int) + m_cells[cellId].getBinarySize();
+        cellBufferCapacity += sizeof(int) + m_cells[cellId].getBinarySize();
     }
-    cellBuffer.resize(cellBufferSize);
+    cellBuffer.setCapacity(cellBufferCapacity);
 
     cellBuffer << (long) cellsToCommunicate.size();
     for (const long &cellId : cellsToCommunicate) {
@@ -944,13 +944,13 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
         cellBuffer << m_cells[cellId];
     }
 
-    if (cellBufferSize != (long) cellBuffer.size()) {
+    if (cellBufferCapacity != (long) cellBuffer.capacity()) {
 		throw std::runtime_error ("Cell buffer size does not match calculated size");
 	}
 
     // Communication
-    MPI_Send(&cellBufferSize, 1, MPI_LONG, recvRank, 20, m_communicator);
-    MPI_Send(cellBuffer.get_buffer(), cellBuffer.size(), MPI_CHAR, recvRank, 21, m_communicator);
+    MPI_Send(&cellBufferCapacity, 1, MPI_LONG, recvRank, 20, m_communicator);
+    MPI_Send(cellBuffer.get_buffer(), cellBuffer.capacity(), MPI_CHAR, recvRank, 21, m_communicator);
 
     //
     // Send ownership notifications
@@ -960,22 +960,22 @@ adaption::Info PatchKernel::sendCells_sender(const int &recvRank, const std::vec
 		const auto &notificationList = ownershipNotification.second;
 
         // Communicate the size of the notification
-        long notificationBufferSize = 0;
+        long notificationBufferCapacity = 0;
         if (notificationList.size() > 0) {
-            notificationBufferSize += sizeof(long) + notificationList.size() * sizeof(long);
+            notificationBufferCapacity += sizeof(long) + notificationList.size() * sizeof(long);
         }
-        MPI_Send(&notificationBufferSize, 1, MPI_LONG, neighRank, 30, m_communicator);
+        MPI_Send(&notificationBufferCapacity, 1, MPI_LONG, neighRank, 30, m_communicator);
 
         // Fill the buffer and send the notification
-        if (notificationBufferSize > 0) {
-            OBinaryStream notificationBuffer(notificationBufferSize);
+        if (notificationBufferCapacity > 0) {
+            OBinaryStream notificationBuffer(notificationBufferCapacity);
 
 			notificationBuffer << (long) notificationList.size();
             for (long index : notificationList) {
                 notificationBuffer << index;
             }
 
-            MPI_Send(notificationBuffer.get_buffer(), notificationBuffer.size(), MPI_CHAR, neighRank, 31, m_communicator);
+            MPI_Send(notificationBuffer.get_buffer(), notificationBuffer.capacity(), MPI_CHAR, neighRank, 31, m_communicator);
         }
     }
 
@@ -1098,11 +1098,11 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     //
 
     // Receive data
-    long vertexBufferSize;
-    MPI_Recv(&vertexBufferSize, 1, MPI_LONG, sendRank, 10, m_communicator, MPI_STATUS_IGNORE);
+    long vertexBufferCapacity;
+    MPI_Recv(&vertexBufferCapacity, 1, MPI_LONG, sendRank, 10, m_communicator, MPI_STATUS_IGNORE);
 
-    IBinaryStream vertexBuffer(vertexBufferSize);
-    MPI_Recv(vertexBuffer.get_buffer(), vertexBuffer.size(), MPI_CHAR, sendRank, 11, m_communicator, MPI_STATUS_IGNORE);
+    IBinaryStream vertexBuffer(vertexBufferCapacity);
+    MPI_Recv(vertexBuffer.get_buffer(), vertexBuffer.capacity(), MPI_CHAR, sendRank, 11, m_communicator, MPI_STATUS_IGNORE);
 
     // Build a kd-tree with the vertices on the ghosts cells
     //
@@ -1165,11 +1165,11 @@ adaption::Info PatchKernel::sendCells_receiver(const int &sendRank)
     //
 
     // Receive data
-    long cellBufferSize;
-    MPI_Recv(&cellBufferSize, 1, MPI_LONG, sendRank, 20, m_communicator, MPI_STATUS_IGNORE);
+    long cellBufferCapacity;
+    MPI_Recv(&cellBufferCapacity, 1, MPI_LONG, sendRank, 20, m_communicator, MPI_STATUS_IGNORE);
 
-    IBinaryStream cellBuffer(cellBufferSize);
-    MPI_Recv(cellBuffer.get_buffer(), cellBuffer.size(), MPI_CHAR, sendRank, 21, m_communicator, MPI_STATUS_IGNORE);
+    IBinaryStream cellBuffer(cellBufferCapacity);
+    MPI_Recv(cellBuffer.get_buffer(), cellBuffer.capacity(), MPI_CHAR, sendRank, 21, m_communicator, MPI_STATUS_IGNORE);
 
     // Ghost owned by the receiver that will be promoted as internal cell
     //
@@ -1412,15 +1412,15 @@ adaption::Info PatchKernel::sendCells_notified(const int &sendRank, const int &r
     }
 
     // Receive ownership changes
-    long bufferSize;
-    MPI_Recv(&bufferSize, 1, MPI_LONG, sendRank, 30, m_communicator, MPI_STATUS_IGNORE);
-    if (bufferSize == 0) {
+    long bufferCapacity;
+    MPI_Recv(&bufferCapacity, 1, MPI_LONG, sendRank, 30, m_communicator, MPI_STATUS_IGNORE);
+    if (bufferCapacity == 0) {
         adaptionInfo.type = adaption::TYPE_NONE;
         return adaptionInfo;
     }
 
-    IBinaryStream buffer(bufferSize);
-    MPI_Recv(buffer.get_buffer(), buffer.size(), MPI_CHAR, sendRank, 31, m_communicator, MPI_STATUS_IGNORE);
+    IBinaryStream buffer(bufferCapacity);
+    MPI_Recv(buffer.get_buffer(), buffer.capacity(), MPI_CHAR, sendRank, 31, m_communicator, MPI_STATUS_IGNORE);
 
     // Initialize adaption info
     adaptionInfo.entity = adaption::ENTITY_CELL;

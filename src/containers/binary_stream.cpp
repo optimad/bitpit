@@ -64,36 +64,36 @@ IBinaryStream::IBinaryStream(
 // -------------------------------------------------------------------------- //
 /*!
         Custom constructor #1. Initialize an empty object of class IBinaryStream
-        with assigned size
+        with assigned capacity
 
-        \param[in] size buffer size
+        \param[in] capacity is the buffer capacity
 */
 IBinaryStream::IBinaryStream(
-    size_t                      size
+    size_t                      capacity
 ) {
     current_pos = 0;
     buffer.clear();
-    buffer.reserve(size);
-    resize(size);
+    buffer.reserve(capacity);
+    setCapacity(capacity);
 }
 
 // -------------------------------------------------------------------------- //
 /*!
         Custom constructor #2. Initialize a object of class IBinaryStream
-        pointing to a memory location with specified size
+        pointing to a memory location with specified capacity
 
         \param[in] buf_ pointer to memory location
-        \param[in] size buffer size
+        \param[in] capacity buffer capacity
 
 */
 IBinaryStream::IBinaryStream(
     const char                  *buf_,
-    size_t                       size
+    size_t                       capacity
 ) {
     current_pos = 0;
     buffer.clear();
-    buffer.reserve(size);
-    buffer.assign(buf_, buf_ + size);
+    buffer.reserve(capacity);
+    buffer.assign(buf_, buf_ + capacity);
 }
 
 // -------------------------------------------------------------------------- //
@@ -123,25 +123,25 @@ IBinaryStream::IBinaryStream(
 
 // -------------------------------------------------------------------------- //
 /*!
-        Resize the buffer stream
+        Set the capacity of the buffer stream
 
-        \param[in] size is the new size (in bytes) of the stream
+        \param[in] capacity is the new capacity (in bytes) of the stream
 
 */
-void IBinaryStream::resize(
-    size_t                       size
+void IBinaryStream::setCapacity(
+    size_t                       capacity
 ) {
-    buffer.resize(size);
+    buffer.resize(capacity);
 }
 
 // -------------------------------------------------------------------------- //
 /*!
-        Size the buffer stream
+        Capacity of the buffer stream
 
-        \return The size of the buffer stream
+        \return The capacity of the buffer stream
 
 */
-size_t IBinaryStream::size(
+size_t IBinaryStream::capacity(
     void
 ) {
     return buffer.size();
@@ -152,17 +152,18 @@ size_t IBinaryStream::size(
         Open stream from memory
 
         \param[in] mem pointer to memory location
-        \param[in] size size (in bytes) of memory location to be streamed
+        \param[in] capacity capacity (in bytes) of memory location to be
+        streamed
 
 */
 void IBinaryStream::open(
     const char                  *mem,
-    size_t                       size
+    size_t                       capacity
 ) {
     current_pos = 0;
     buffer.clear();
-    buffer.reserve(size);
-    buffer.assign(mem, mem + size);
+    buffer.reserve(capacity);
+    buffer.assign(mem, mem + capacity);
 }
 
 // -------------------------------------------------------------------------- //
@@ -324,15 +325,15 @@ OBinaryStream::OBinaryStream(
 // -------------------------------------------------------------------------- //
 /*!
         Default constructor. Initialize an empty object with buffer of specified
-        size.
+        capacity.
 
-        \param[in] size buffer size
+        \param[in] capacity is the buffer capacity
 */
 OBinaryStream::OBinaryStream(
-    size_t                       size
+    size_t                       capacity
 ) {
     current_pos = 0;
-    open(size);
+    open(capacity);
 }
 
 // Destructor(s) ============================================================ //
@@ -345,25 +346,25 @@ OBinaryStream::OBinaryStream(
 
 // -------------------------------------------------------------------------- //
 /*!
-        Resize the buffer stream
+        Set the capacity of the buffer stream
 
-        \param[in] size is the new size (in bytes) of the stream
+        \param[in] capacity is the new capacity (in bytes) of the stream
 
 */
-void OBinaryStream::resize(
-    size_t                       size
+void OBinaryStream::setCapacity(
+    size_t                       capacity
 ) {
-    buffer.resize(size);
+    buffer.resize(capacity);
 }
 
 // -------------------------------------------------------------------------- //
 /*!
-        Size the buffer stream
+        Capacity of the buffer stream
 
         \return The size of the buffer stream
 
 */
-size_t OBinaryStream::size(
+size_t OBinaryStream::capacity(
     void
 ) {
     return buffer.size();
@@ -373,14 +374,14 @@ size_t OBinaryStream::size(
 /*!
         Open output stream
 
-        \param[in] size stream size
+        \param[in] capacity is the capacity of the stream
 
 */
 void OBinaryStream::open(
-    size_t                       size
+    size_t                       capacity
 ) {
-    buffer.reserve(size);
-    buffer.resize(size);
+    buffer.reserve(capacity);
+    buffer.resize(capacity);
 }
 
 // -------------------------------------------------------------------------- //
@@ -476,7 +477,7 @@ bool OBinaryStream::seekg (
 void OBinaryStream::squeeze (
     void
 ) {
-    resize(current_pos);
+    setCapacity(current_pos);
 }
 
 // -------------------------------------------------------------------------- //
