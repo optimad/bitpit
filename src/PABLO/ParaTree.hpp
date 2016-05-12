@@ -167,7 +167,7 @@ public:
 	int 		getNproc();
 	Logger& 	getLog();
 #if BITPIT_ENABLE_MPI==1
-	MPI_Comm	getComm();
+	MPI_Comm	getComm() const;
 	bool		isCommSet() const;
 #endif
 	uint64_t*	getPartitionRangeGlobalIdx();

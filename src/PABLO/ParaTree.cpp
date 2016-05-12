@@ -308,7 +308,7 @@ ParaTree::isCommSet() const {
  * \return MPI Communicator.
  */
 MPI_Comm
-ParaTree::getComm(){
+ParaTree::getComm() const {
 	return m_comm;
 };
 #endif
