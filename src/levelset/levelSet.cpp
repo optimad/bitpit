@@ -76,11 +76,15 @@ LevelSet::LevelSet() {
  * Destructor of LevelSet
 */
 LevelSet::~LevelSet(){
-    delete m_kernel ;
+    if( m_kernel != NULL){
+        delete m_kernel ;
+    }
 
     for( auto &object : m_object){
-        delete object  ;
+        delete object.second  ;
     }
+
+    m_object.clear() ;
 
 };
 
@@ -130,27 +134,84 @@ void LevelSet::setMesh( VolOctree* octree ) {
  * Adds a surface segmentation
  * @param[in] segmentation surface segmentation
  */
-void LevelSet::addObject( SurfUnstructured* segmentation ) {
+int LevelSet::addObject( SurfUnstructured* segmentation, int id ) {
 
-    int id = m_object.size() ;
-    m_object.push_back( new LevelSetSegmentation(id,segmentation) ) ;
+    if( id == levelSetDefaults::DEFAULT_ID ){
+        id = m_object.size() ;
+    }
 
-    return;
+    m_object.insert( {{id, new LevelSetSegmentation(id,segmentation)}} ) ;
+
+    return id;
 };
+
+/*!
+ * Adds a surface segmentation
+ * @param[in] segmentation surface segmentation
+ */
+int LevelSet::addObject( SurfaceKernel* segmentation, int id ) {
+
+    if( SurfUnstructured* unstruct = dynamic_cast<SurfUnstructured*>(segmentation) ){
+        return (addObject(unstruct, id) ) ;
+
+    } else {
+        return levelSetDefaults::NULL_ADD;
+    };
+
+};
+
+/*!
+ * Clear LevelSet entirely
+ */
+void LevelSet::clear(){
+
+    if( m_kernel != NULL){
+        delete m_kernel ;
+    }
+
+    std::cout << "cazz" << std::endl ;
+
+    m_object.clear() ;
+    return ;
+};
+
+/*!
+ * Clear all LevelSet Objects
+ */
+void LevelSet::clearObject(){
+    m_object.clear() ;
+    return ;
+};
+
+/*!
+ * Clear LevelSet Object
+ * @param[in] id Id of object to be deleted
+ */
+void LevelSet::clearObject(int id){
+
+    m_object.erase(id) ;
+    return ;
+};
+
 
 /*!
  * Adds a generic LevelSetObject
  * @param[in] object generic object
  */
-void LevelSet::addObject( LevelSetObject* object ) {
+int LevelSet::addObject( LevelSetObject* object ) {
 
 
     if( LevelSetSegmentation* segmentation = dynamic_cast<LevelSetSegmentation*>(object) ){
-        m_object.push_back( new LevelSetSegmentation(*segmentation) ) ;
-    }
+        m_object.insert( {{ object->getId(), new LevelSetSegmentation( *segmentation) }} ) ;
+        return object->getId();
 
-    return;
+    } else {
+        return levelSetDefaults::NULL_ADD;
+
+    };
+
 };
+
 
 /*!
  * Get the levelset value of the i-th local cell.
@@ -163,12 +224,43 @@ double LevelSet::getLS( const long &i)const {
 
 /*!
  * Get the levelset gradient of the i-th local cell.
- * @param[in] i Local index of target octant.
  * @param[in] i index of cell
  * @return Array with components of the Sdf gradient of the i-th local element of the octree mesh.
  */
 std::array<double,3> LevelSet::getGradient(const long &i) const {
     return( m_kernel->getGradient(i) ) ;
+};
+
+/*!
+ * Get the id of closest object
+ * @param[in] i index of cell
+ * @return id of closest object
+ */
+int LevelSet::getObject(const long &i) const {
+    return( m_kernel->getObject(i) ) ;
+};
+
+/*!
+ * Get the id of closest object
+ * @param[in] i index of cell
+ * @return id of closest object
+ */
+long LevelSet::getSupport(const long &i) const {
+
+    int id= getObject(i);
+
+    if( id != levelSetDefaults::OBJECT){
+
+        auto objItr = m_object.find(id) ;
+        if( objItr!=m_object.end() ){
+            return objItr->second->getSupport(i);
+        } else {
+            return levelSetDefaults::ELEMENT ;
+        }
+
+    } else {
+        return levelSetDefaults::ELEMENT ;
+    };
 };
 
 /*!
@@ -242,7 +334,7 @@ void LevelSet::compute(){
     if( !m_userRSearch){
         RSearch = 0. ;
         for( const auto &visitor : m_object ){
-            RSearch = std::max( RSearch, m_kernel->computeSizeNarrowBand( visitor ) ) ;
+            RSearch = std::max( RSearch, m_kernel->computeSizeNarrowBand( visitor.second ) ) ;
         }
 
         m_kernel->setSizeNarrowBand(RSearch) ;
@@ -250,7 +342,7 @@ void LevelSet::compute(){
     }
 
     for( const auto &visitor : m_object ){
-        visitor->computeLSInNarrowBand( m_kernel, RSearch, m_signedDF) ; 
+        visitor.second->computeLSInNarrowBand( m_kernel, RSearch, m_signedDF) ; 
     }
 
 
@@ -271,13 +363,13 @@ void LevelSet::update( const std::vector<adaption::Info> &mapper ){
     if(m_userRSearch){
         newRSearch = m_kernel->getSizeNarrowBand() ;
     } else {
-        newRSearch = std::max( newRSearch, m_kernel->updateSizeNarrowBand( mapper ) ) ;
+        newRSearch = m_kernel->updateSizeNarrowBand( mapper )  ;
     };
 
     m_kernel->clearAfterAdaption(mapper,newRSearch) ;
 
     for( const auto &visitor : m_object ){
-        visitor->updateLSInNarrowBand( m_kernel, mapper, newRSearch, m_signedDF ) ;
+        visitor.second->updateLSInNarrowBand( m_kernel, mapper, newRSearch, m_signedDF ) ;
     }
 
 
@@ -304,7 +396,7 @@ void LevelSet::dump( std::fstream &stream ){
     m_kernel->dump( stream ) ;
 
     for( const auto &visitor : m_object ){
-        visitor->dump( stream ) ;
+        visitor.second->dump( stream ) ;
     }
 
 
@@ -325,7 +417,7 @@ void LevelSet::restore( std::fstream &stream ){
     m_kernel->restore( stream ) ;
 
     for( const auto &visitor : m_object ){
-        visitor->restore( stream ) ;
+        visitor.second->restore( stream ) ;
     }
 
 
@@ -341,7 +433,7 @@ void LevelSet::restore( std::fstream &stream ){
  */
 bool LevelSet::assureMPI( ){
 
-    m_kernel->assureMPI() ;
+    return(m_kernel->assureMPI() ) ;
 }
 
 /*!
@@ -352,7 +444,7 @@ void LevelSet::finalizeMPI( ){
     m_kernel->finalizeMPI() ;
 
     for( auto visitor:m_object){
-        visitor->finalizeMPI() ;
+        visitor.second->finalizeMPI() ;
     }
 
 }
@@ -395,8 +487,6 @@ void LevelSet::loadBalance( const std::vector<adaption::Info> &mapper ){
                         short rank = event.rank;
 
                         //determine elements to send
-                        long nItems = event.previous.size() ;
-
                         sizeCommunicator.setSend(rank, 2*sizeof(long) *nClasses ) ;
                         dataCommunicator.setSend(rank, 0 ) ;
 
@@ -406,7 +496,7 @@ void LevelSet::loadBalance( const std::vector<adaption::Info> &mapper ){
 
                         m_kernel->writeCommunicationBuffer( event.previous, sizeBuffer, dataBuffer ) ;
                         for( const auto &visitor : m_object){
-                            visitor->writeCommunicationBuffer( event.previous, sizeBuffer, dataBuffer ) ;
+                            visitor.second->writeCommunicationBuffer( event.previous, sizeBuffer, dataBuffer ) ;
                         }
 
                         // Start the send
@@ -421,7 +511,7 @@ void LevelSet::loadBalance( const std::vector<adaption::Info> &mapper ){
         { 
             // as soon as sizes are received start receiving data.
             int rank, nCompletedRecvs;
-            long nItems, data, dataSize ;
+            long data, dataSize ;
             std::vector<long> items(nClasses) ;
             std::vector<long>::iterator  itemItr = items.begin() ;
 
@@ -460,7 +550,7 @@ void LevelSet::loadBalance( const std::vector<adaption::Info> &mapper ){
                 ++itemItr ;
 
                 for( const auto &visitor : m_object){
-                    visitor->readCommunicationBuffer( *itemItr, dataBuffer ) ;
+                    visitor.second->readCommunicationBuffer( *itemItr, dataBuffer ) ;
                     ++itemItr ;
                 }
 

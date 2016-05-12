@@ -121,6 +121,21 @@ std::array<double,3> LevelSetKernel::getGradient(const long &i) const {
 };
 
 /*!
+ * Get the id of closest object
+ * @param[in] i Local index of target octant.
+ * @return id of closest object
+ */
+int LevelSetKernel::getObject(const long &i) const {
+
+    if( ! m_ls.exists(i) ){
+        return levelSetDefaults::OBJECT;
+    } else {
+        return (  m_ls[i].object );
+    };
+
+};
+
+/*!
  * Get the sign of the levelset function
  * @param[in] i Local index of target octant.
  * @return sign

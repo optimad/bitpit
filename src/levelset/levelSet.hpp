@@ -46,6 +46,8 @@ class LevelSetObject ;
 class LevelSetSegmentation ;
 
 namespace levelSetDefaults{
+    const int                               NULL_ADD = -1 ;             /**< Default value for adding object */
+    const int                               DEFAULT_ID = -99 ;          /**< Default value for adding object */
     const double                            VALUE = 1.e18 ;             /**< Default value for levelset function */
     const std::array<double,3>              GRADIENT = {{0.,0.,0.}};    /**< Default value for levelset gradient */
     const short                             SIGN = 1;                   /**< Default value for the sign */
@@ -58,7 +60,7 @@ class LevelSet{
 
     private:
     LevelSetKernel*                             m_kernel ;              /**< LevelSet computational kernel */
-    std::vector<LevelSetObject*>                m_object ;              /**< Objects defining the boundaries */
+    std::unordered_map<int,LevelSetObject*>     m_object ;              /**< Objects defining the boundaries */
 
     bool                                        m_userRSearch;          /**< Flag if user has set size of narrow band (default=false)  */
     bool                                        m_signedDF;             /**< Flag for sigend/unsigned distance function (default = true) */
@@ -73,12 +75,18 @@ class LevelSet{
     void                                        setMesh( VolCartesian* ) ;
     void                                        setMesh( VolOctree* ) ;
 
-    void                                        addObject( SurfaceKernel* ) ;
-    void                                        addObject( SurfUnstructured * ) ;
-    void                                        addObject( LevelSetObject* ) ;
+    int                                         addObject( SurfaceKernel*, int id = levelSetDefaults::DEFAULT_ID ) ;
+    int                                         addObject( SurfUnstructured *, int id = levelSetDefaults::DEFAULT_ID ) ;
+    int                                         addObject( LevelSetObject* ) ;
+
+    void                                        clear();
+    void                                        clearObject();
+    void                                        clearObject( int );
 
     double                                      getLS(const long &) const;
     std::array<double,3>                        getGradient(const long &) const ;
+    int                                         getObject(const long &) const ;
+    long                                        getSupport(const long &) const ;
     short                                       getSign(const long &) const;
     bool                                        isInNarrowBand(const long &) const;
 
@@ -137,6 +145,7 @@ class LevelSetKernel{
 
     double                                      getLS(const long &) const;
     std::array<double,3>                        getGradient(const long &) const ;
+    int                                         getObject(const long &) const ;
     short                                       getSign(const long &) const;
     double                                      getSizeNarrowBand() const;
     bool                                        isInNarrowBand(const long &) const;
@@ -228,6 +237,7 @@ class LevelSetObject{
     virtual int                                 getId() const ;
     virtual void                                getBoundingBox( std::array<double,3> &, std::array<double,3> & )const =0  ;
     virtual LevelSetObject*                     clone() const = 0;
+    virtual long                                getSupport(const long &) const =0 ;
 
     protected:
     virtual void                                computeLSInNarrowBand( LevelSetKernel *, const double &, const bool &)=0 ;
@@ -276,8 +286,9 @@ class LevelSetSegmentation : public LevelSetObject {
 
     LevelSetSegmentation*                       clone() const ;
 
-    const std::unordered_set<long> &            getSimplexList(const long &) ;
-    const long &                                getSupportSimplex(const long &) ;
+    const std::unordered_set<long> &            getSimplexList(const long &) const ;
+    long                                        getSupportSimplex(const long &) const;
+    long                                        getSupport(const long &) const  ;
     bool                                        isInNarrowBand( const long &) ;
 
     void                                        dumpDerived( std::fstream &) ;

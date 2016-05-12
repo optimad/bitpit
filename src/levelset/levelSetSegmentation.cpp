@@ -127,7 +127,7 @@ LevelSetSegmentation* LevelSetSegmentation::clone() const {
  * @param[in] i Local index of target octant.
  * @return set with indices of simplices wich contain the i-th local element in their narrow band.
  */
-const std::unordered_set<long> & LevelSetSegmentation::getSimplexList(const long &i){
+const std::unordered_set<long> & LevelSetSegmentation::getSimplexList(const long &i) const{
 
     if( !m_seg.exists(i) ){
         return levelSetDefaults::LIST;
@@ -142,13 +142,24 @@ const std::unordered_set<long> & LevelSetSegmentation::getSimplexList(const long
  * @param[in] i Local index of target octant.
  * @return index of closest simplex
  */
-const long & LevelSetSegmentation::getSupportSimplex(const long &i){
+long LevelSetSegmentation::getSupportSimplex(const long &i) const{
 
     if( !m_seg.exists(i) ){
         return levelSetDefaults::ELEMENT ;
     } else {
         return ( m_seg[i].m_support );
     };
+};
+
+/*!
+ * Get the index of the closest simplex
+ * @param[in] i Local index of target octant.
+ * @return index of closest simplex
+ */
+long LevelSetSegmentation::getSupport(const long &i) const{
+
+    return getSupportSimplex(i) ;
+
 };
 
 /*!
