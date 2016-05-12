@@ -907,6 +907,14 @@ void ElementInfo::initializeWedgeInfo()
 	faceConnect[4][3] = 3;
 }
 
+/*!
+	@}
+*/
+
+/*!
+	\ingroup patchkernel
+	@{
+*/
 
 /*!
 	\class Element

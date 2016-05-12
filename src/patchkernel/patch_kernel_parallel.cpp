@@ -43,7 +43,7 @@ namespace bitpit {
 	\ingroup patchkernel
 	@{
 
-	\class Patch
+	\class PatchKernel
 */
 
 /*!
