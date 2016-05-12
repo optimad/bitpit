@@ -148,6 +148,22 @@ private:
 		uint32_t newTreeId;
 	};
 
+	struct DeleteInfo {
+		DeleteInfo()
+			: octantInfo(), source(adaption::TYPE_UNKNOWN), rank(-1)
+		{
+		};
+
+		DeleteInfo(OctantInfo _octantInfo, adaption::Type _source, int _rank = -1)
+			: octantInfo(_octantInfo), source(_source), rank(_rank)
+		{
+		};
+
+		OctantInfo octantInfo;
+		adaption::Type source;
+		int rank;
+	};
+
 	struct FaceInfo {
 		FaceInfo() : id(Element::NULL_ID), face(-1) {};
 		FaceInfo(long _id, int _face) : id(_id), face(_face) {};
@@ -205,7 +221,7 @@ private:
 	std::vector<long> importOctants(std::vector<OctantInfo> &octantTreeIds);
 	std::vector<long> importOctants(std::vector<OctantInfo> &octantTreeIds, FaceInfoSet &danglingFaces);
 	void renumberOctants(std::vector<RenumberInfo> &renumberedOctants);
-	FaceInfoSet removeCells(std::unordered_set<long> &cellIds);
+	FaceInfoSet deleteOctants(std::vector<DeleteInfo> &deletedOctants);
 
 	long addVertex(uint32_t treeId);
 

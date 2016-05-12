@@ -445,11 +445,11 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 
 	std::vector<OctantInfo> addedOctants;
 	std::vector<RenumberInfo> renumberedOctants;
-	std::unordered_set<long> removedCells;
+	std::vector<DeleteInfo> deletedOctants;
 
 	addedOctants.reserve(nOctants + nGhostsOctants);
 	renumberedOctants.reserve(nPreviousOctants + nPreviousGhosts);
-	removedCells.reserve(nPreviousOctants + nPreviousGhosts);
+	deletedOctants.reserve(nPreviousOctants + nPreviousGhosts);
 
 	uint32_t treeId = 0;
 	while (treeId < (uint32_t) nOctants) {
@@ -544,11 +544,10 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 			}
 #endif
 
-			// Mark the cell for deletion
-			OctantInfo previousOctantInfo(mapper_octantMap[k], !mapper_ghostFlag[k]);
-			long previousCellId = getOctantId(previousOctantInfo);
-
-			removedCells.insert(previousCellId);
+			// Mark previous octant for deletion
+			uint32_t previousTreeId = mapper_octantMap[k];
+			OctantInfo previousOctantInfo(previousTreeId, !mapper_ghostFlag[k]);
+			deletedOctants.emplace_back(previousOctantInfo, adaptionType);
 		}
 
 		// Adaption tracking
@@ -631,42 +630,12 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	std::unordered_map<int, std::array<uint32_t, 4>> sendOctants = m_tree.getSentIdx();
 	for (const auto &rankEntry : sendOctants) {
 		int rank = rankEntry.first;
-
-		// If needed create the adaption info
-		std::size_t adaptionInfoId = -1;
-		if (trackChanges) {
-			adaption::Type adaptionType;
-			if (rank >= 0) {
-				adaptionType = adaption::TYPE_PARTITION_SEND;
-			} else {
-				adaptionType = adaption::TYPE_DELETION;
-			}
-
-			adaptionInfoId = adaptionData.create(adaptionType, adaption::ENTITY_CELL, rank);
-		}
-
-		// Add the send cells to the list of cells to be removed
-		//
-		// The ids will be stored sorted by the id of the octants, this is the
-		// same order that will be used on the processor that has received the
-		// octants. Since the order is the same, the two processors are able
-		// to exchange cell data without any additional extra communication
-		// (they already know the list of cells for which data is needed and
-		// the order in which these data will be sent).
 		for (int k = 0; k < 2; ++k) {
 			uint32_t beginTreeId = rankEntry.second[2 * k];
 			uint32_t endTreeId   = rankEntry.second[2 * k + 1];
 			for (uint32_t treeId = beginTreeId; treeId < endTreeId; ++treeId) {
 				OctantInfo octantInfo(treeId, true);
-				long cellId = getOctantId(octantInfo);
-				removedCells.insert(cellId);
-
-				if (trackChanges) {
-					adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
-					adaptionInfo.previous.emplace_back();
-					unsigned long &sentId = adaptionInfo.previous.back();
-					sentId = cellId;
-				}
+				deletedOctants.emplace_back(octantInfo, adaption::TYPE_PARTITION_SEND, rank);
 			}
 		}
 	}
@@ -675,26 +644,9 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	if (nPreviousGhosts > 0) {
 		clearGhostOwners(true);
 
-		std::size_t adaptionInfoId = -1;
-		if (trackChanges) {
-			adaptionInfoId = adaptionData.create(adaption::TYPE_DELETION, adaption::ENTITY_CELL, getRank());
-		}
-
-		auto cellIterator = m_cellToGhost.cbegin();
-		while (cellIterator != m_cellToGhost.cend()) {
-			long id = cellIterator->first;
-			removedCells.insert(id);
-
-			// Adaption tracking
-			if (trackChanges) {
-				adaption::Info &deletedGhostsInfo = adaptionData[adaptionInfoId];
-				deletedGhostsInfo.previous.emplace_back();
-				unsigned long &adaptionId = deletedGhostsInfo.previous.back();
-				adaptionId = id;
-			}
-
-			// Increment iterator
-			cellIterator++;
+		for (uint32_t ghostTreeId = 0; ghostTreeId < nPreviousGhosts; ++ghostTreeId) {
+			OctantInfo ghostOctantInfo(ghostTreeId, false);
+			deletedOctants.emplace_back(ghostOctantInfo, adaption::TYPE_DELETION);
 		}
 	}
 
@@ -708,16 +660,49 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 	// Enable advanced editing
 	setExpert(true);
 
-	// Delete removed cells
+	// Remove deleted octants
 	FaceInfoSet danglingFaces;
-	if (removedCells.size() > 0) {
+	if (deletedOctants.size() > 0) {
 		log::cout() << ">> Removing non-existing cells...";
 
-		// Track deleted interfaces
+		// Track changes
+		//
+		// The adaption info associated to the octants that has been sent
+		// to external partitions will contain the current octants sorted by
+		// their tree id (they were added to the deleted octants list in that
+		// order), this is the same order that will be used on the processor
+		// that has received the octants. Since the order is the same, the two
+		// processors are able to exchange cell data without any additional
+		// extra communication (they already know the list of cells for which
+		// data is needed and the order in which these data will be sent).
 		if (trackChanges) {
-			// List of unique interfaces that will be deleted
+			// Track deleted cells
 			std::unordered_set<long> removedInterfaces;
-			for (const auto &cellId : removedCells) {
+			for (const DeleteInfo &deleteInfo : deletedOctants) {
+				// Cell info
+				const OctantInfo &octantInfo = deleteInfo.octantInfo;
+				long cellId = getOctantId(octantInfo);
+
+				// Adaption tracking
+				//
+				// Only cells deleted from a real deletion or a partition send
+				// needs to be tracked here, the other cells will be tracked
+				// where the adaption that deleted the cell is tracked.
+				adaption::Type adaptionType = deleteInfo.source;
+
+				bool trackCellDeletion = (adaptionType == adaption::TYPE_DELETION) ||
+					(adaptionType == adaption::TYPE_PARTITION_SEND);
+
+				if (trackCellDeletion) {
+					int rank = deleteInfo.rank;
+					std::size_t adaptionInfoId = adaptionData.create(adaptionType, adaption::ENTITY_CELL, rank);
+					adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
+					adaptionInfo.previous.emplace_back();
+					unsigned long &deletedId = adaptionInfo.previous.back();
+					deletedId = cellId;
+				}
+
+				// List of deleted interfaces
 				const Cell &cell = m_cells.at(cellId);
 				long nCellInterfaces = cell.getInterfaceCount();
 				const long *interfaces = cell.getInterfaces();
@@ -729,13 +714,12 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 				}
 			}
 
-			// Rank assocated to the adaption info
+			// Adaption info for the deleted interfaces
 			int rank = -1;
 #if BITPIT_ENABLE_MPI==1
 			rank = getRank();
 #endif
 
-			// Adaption info
 			std::size_t adaptionInfoId = adaptionData.create(adaption::TYPE_DELETION, adaption::ENTITY_INTERFACE, rank);
 			adaption::Info &adaptionInfo = adaptionData[adaptionInfoId];
 			for (const long &interfaceId : removedInterfaces) {
@@ -746,13 +730,13 @@ const std::vector<adaption::Info> VolOctree::sync(bool trackChanges)
 		}
 
 		// Delete cells
-		danglingFaces = removeCells(removedCells);
+		danglingFaces = deleteOctants(deletedOctants);
 
 		log::cout() << " Done" << std::endl;
-		log::cout() << ">> Cells removed: " <<  removedCells.size() << std::endl;
+		log::cout() << ">> Cells removed: " <<  deletedOctants.size() << std::endl;
 	}
 
-	std::unordered_set<long>().swap(removedCells);
+	std::vector<DeleteInfo>().swap(deletedOctants);
 
 	// Reserve space in the octant-to-cell maps
 	m_cellToOctant.reserve(nOctants);
@@ -1028,7 +1012,7 @@ std::vector<long> VolOctree::importOctants(std::vector<OctantInfo> &octantInfoLi
 
 	\param cellIds is the list of cells ids to remove
 */
-VolOctree::FaceInfoSet VolOctree::removeCells(std::unordered_set<long> &cellIds)
+VolOctree::FaceInfoSet VolOctree::deleteOctants(std::vector<DeleteInfo> &deletedOctants)
 {
 	FaceInfoSet danglingFaces;
 
@@ -1054,10 +1038,18 @@ VolOctree::FaceInfoSet VolOctree::removeCells(std::unordered_set<long> &cellIds)
 	const ElementInfo &faceTypeInfo = ElementInfo::getElementInfo(faceType);
 	const int &nFaceVertices = faceTypeInfo.nVertices;
 
+	// List of cells ot delete
+	std::unordered_set<long> deadCells;
+	deadCells.reserve(deletedOctants.size());
+	for (const DeleteInfo &deleteInfo : deletedOctants) {
+		long cellId = getOctantId(deleteInfo.octantInfo);
+		deadCells.insert(cellId);
+	}
+
 	// Delete the cells
 	std::unordered_set<long> deadVertices;
 	std::unordered_set<long> deadInterfaces;
-	for (long cellId : cellIds) {
+	for (long cellId : deadCells) {
 		Cell &cell = m_cells[cellId];
 
 		// List vertices to remove
@@ -1100,9 +1092,9 @@ VolOctree::FaceInfoSet VolOctree::removeCells(std::unordered_set<long> &cellIds)
 
 			int danglingSide = -1;
 			if (!interface.isBorder()) {
-				if (cellIds.count(interface.getOwner()) == 0) {
+				if (deadCells.count(interface.getOwner()) == 0) {
 					danglingSide = 0;
-				} else if (cellIds.count(interface.getNeigh()) == 0) {
+				} else if (deadCells.count(interface.getNeigh()) == 0) {
 					danglingSide = 1;
 				}
 			}
