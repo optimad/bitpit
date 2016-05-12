@@ -2369,7 +2369,6 @@ ParaTree::adaptGlobalRefine(bool mapper_flag) {
 		(*m_log) << " Number of octants after Refine	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
 		nocts = m_octree.getNumOctants();
 
-		MPI_Barrier(m_comm);
 		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
 		(*m_log) << " " << endl;
 		(*m_log) << "---------------------------------------------" << endl;
@@ -2485,7 +2484,6 @@ ParaTree::adaptGlobalCoarse(bool mapper_flag) {
 		}
 		nocts = m_octree.getNumOctants();
 
-		MPI_Barrier(m_comm);
 		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
 		(*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
 		(*m_log) << " " << endl;
@@ -3350,7 +3348,6 @@ ParaTree::private_adapt_mapidx(bool mapflag) {
 		}
 		nocts = m_octree.getNumOctants();
 
-		MPI_Barrier(m_comm);
 		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
 		(*m_log) << " Number of octants after Coarse	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
 		(*m_log) << " " << endl;
@@ -4247,7 +4244,6 @@ ParaTree::balance21(bool const first){
 		localDone = m_octree.localBalance(true);
 		commMarker();
 		m_octree.preBalance21(false);
-		MPI_Barrier(m_comm);
 		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
 
 		while(globalDone){
@@ -4276,7 +4272,6 @@ ParaTree::balance21(bool const first){
 		localDone = m_octree.localBalanceAll(true);
 		commMarker();
 		m_octree.preBalance21(false);
-		MPI_Barrier(m_comm);
 		m_errorFlag = MPI_Allreduce(&localDone,&globalDone,1,MPI_C_BOOL,MPI_LOR,m_comm);
 
 		while(globalDone){
