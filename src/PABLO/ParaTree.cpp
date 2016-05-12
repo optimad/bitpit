@@ -44,6 +44,7 @@ using namespace std;
 // =================================================================================== //
 
 const int			ParaTree::DEFAULT_MAX_LEVELS = 20;
+const std::string	ParaTree::DEFAULT_LOG_FILE   = "PABLO";
 
 // =================================================================================== //
 // CONSTRUCTORS AND OPERATORS														   //
