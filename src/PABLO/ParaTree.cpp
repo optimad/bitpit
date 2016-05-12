@@ -55,7 +55,7 @@ using namespace std;
  * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
  * \param[in] m_comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
  */
-ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm m_comm ) : m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_comm(m_comm){
+ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm comm ) : m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_comm(MPI_COMM_NULL){
 #else
 	/*! Default constructor of ParaTree.
 	 * It builds one octant with node 0 in the Origin (0,0,0) and side of length 1.
@@ -66,19 +66,18 @@ ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm m
 ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile ) : m_octree(maxlevel,dim),m_trans(maxlevel, dim),m_dim(uint8_t(min(max(2,int(dim)),3))){
 #endif
 	m_global.setGlobal(maxlevel, m_dim);
-	m_serial = true;
 	m_errorFlag = 0;
 	m_maxDepth = 0;
 	m_globalNumOctants = m_octree.getNumOctants();
-#if BITPIT_ENABLE_MPI==1
-	m_errorFlag = MPI_Comm_size(m_comm,&m_nproc);
-	m_errorFlag = MPI_Comm_rank(m_comm,&m_rank);
-#else
 	m_rank = 0;
 	m_nproc = 1;
-#endif
+	m_serial = true;
 	createPartitionInfo(false);
+#if BITPIT_ENABLE_MPI==1
+	if (comm != MPI_COMM_NULL) {
+		setComm(comm);
 	}
+#endif
 	m_periodic.resize(m_global.m_nfaces, false);
 	m_tol = 1.0e-14;
 	// Write info log
@@ -109,7 +108,7 @@ ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile ) : m_octre
  * \param[in] logfile The file name for the log of this object. PABLO.log is the default value.
  * \param[in] m_comm The MPI communicator used by the parallel octree. MPI_COMM_WORLD is the default value.
  */
-ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm m_comm):m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_comm(m_comm){
+ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t maxlevel, std::string logfile, MPI_Comm comm):m_octree(maxlevel,dim),m_trans(maxlevel,dim),m_dim(uint8_t(min(max(2,int(dim)),3))),m_comm(MPI_COMM_NULL){
 #else
 	/*! Constructor of ParaTree for restart a simulation with input parameters.
 	 * For each process it builds a vector of octants. The input parameters are :
@@ -161,17 +160,15 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 		m_octree.m_octants[i] = oct;
 	}
 
+	m_rank = 0;
+	m_nproc = 1;
+	createPartitionInfo(false);
 #if BITPIT_ENABLE_MPI==1
-	m_errorFlag = MPI_Comm_size(m_comm,&m_nproc);
-	m_errorFlag = MPI_Comm_rank(m_comm,&m_rank);
-	m_serial = true;
-	if (m_nproc > 1 ) m_serial = false;
+	setComm(comm);
+	m_serial = (m_nproc == 1);
 #else
 	m_serial = true;
-	m_nproc = 1;
-	m_rank = 0;
 #endif
-	createPartitionInfo(false);
 
 	setFirstDesc();
 	setLastDesc();
@@ -279,6 +276,34 @@ ParaTree::getLog(){
 }
 
 #if BITPIT_ENABLE_MPI==1
+/*! Set the MPI communicator to be used for parallel communications.
+ * \param communicator is the communicator to be used for parallel
+ * communications.
+*/
+void
+ParaTree::setComm(MPI_Comm communicator)
+{
+	// Communication can be set just once
+	if (isCommSet()) {
+		throw std::runtime_error ("PABLO communicator can be set just once");
+	}
+
+	// The communicator has to be valid
+	if (communicator == MPI_COMM_NULL) {
+		throw std::runtime_error ("PABLO communicator is not valid");
+	}
+
+	// Set the communicator
+	m_comm = communicator;
+
+	// Get MPI information
+	MPI_Comm_size(m_comm, &m_nproc);
+	MPI_Comm_rank(m_comm, &m_rank);
+
+	// Initialize partition data
+	createPartitionInfo(true);
+}
+
 /*! Check if the communicator to be used for parallel communications has
  * already been set.
  * \return Returns true if the communicator has been set, false otherwise.

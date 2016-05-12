@@ -167,6 +167,7 @@ public:
 	int 		getNproc();
 	Logger& 	getLog();
 #if BITPIT_ENABLE_MPI==1
+	void		setComm(MPI_Comm communicator);
 	MPI_Comm	getComm() const;
 	bool		isCommSet() const;
 #endif
