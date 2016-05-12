@@ -208,6 +208,10 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 ParaTree::~ParaTree(){
 	deletePartitionInfo();
 
+#if BITPIT_ENABLE_MPI==1
+	freeComm();
+#endif
+
 	(*m_log) << "---------------------------------------------" << endl;
 	(*m_log) << "--------------- R.I.P. PABLO ----------------" << endl;
 	(*m_log) << "---------------------------------------------" << endl;
@@ -296,8 +300,12 @@ ParaTree::setComm(MPI_Comm communicator)
 		throw std::runtime_error ("PABLO communicator is not valid");
 	}
 
-	// Set the communicator
-	m_comm = communicator;
+	// Create a copy of the user-specified communicator
+	//
+	// No library routine should use MPI_COMM_WORLD as the communicator;
+	// instead, a duplicate of a user-specified communicator should always
+	// be used.
+	MPI_Comm_dup(communicator, &m_comm);
 
 	// Get MPI information
 	MPI_Comm_size(m_comm, &m_nproc);
@@ -305,6 +313,25 @@ ParaTree::setComm(MPI_Comm communicator)
 
 	// Initialize partition data
 	createPartitionInfo(true);
+}
+
+/*!
+ * Free the MPI communicator
+*/
+void
+ParaTree::freeComm() {
+	if (!isCommSet()) {
+		return;
+	}
+
+	// Free MPI communicator
+	int finalizedCalled;
+	MPI_Finalized(&finalizedCalled);
+	if (finalizedCalled) {
+		return;
+	}
+
+	MPI_Comm_free(&m_comm);
 }
 
 /*! Check if the communicator to be used for parallel communications has
