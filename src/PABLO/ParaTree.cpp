@@ -105,9 +105,6 @@ ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile ) : m_octre
 	(*m_log) << " Max allowed level	:	" + to_string(static_cast<unsigned long long>(m_global.m_maxLevel)) << endl;
 	(*m_log) << "---------------------------------------------" << endl;
 	(*m_log) << " " << endl;
-#if BITPIT_ENABLE_MPI==1
-	MPI_Barrier(m_comm);
-#endif
 };
 
 // =============================================================================== //
@@ -215,9 +212,6 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 	(*m_log) << " Number of octants	:	" + to_string(static_cast<unsigned long long>(m_globalNumOctants)) << endl;
 	(*m_log) << "---------------------------------------------" << endl;
 	(*m_log) << " " << endl;
-#if BITPIT_ENABLE_MPI==1
-	MPI_Barrier(m_comm);
-#endif
 };
 
 // =============================================================================== //
