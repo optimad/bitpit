@@ -168,6 +168,7 @@ public:
 	Logger& 	getLog();
 #if BITPIT_ENABLE_MPI==1
 	MPI_Comm	getComm();
+	bool		isCommSet() const;
 #endif
 	uint64_t*	getPartitionRangeGlobalIdx();
 	darray3		getOrigin();

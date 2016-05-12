@@ -295,6 +295,15 @@ ParaTree::getLog(){
 }
 
 #if BITPIT_ENABLE_MPI==1
+/*! Check if the communicator to be used for parallel communications has
+ * already been set.
+ * \return Returns true if the communicator has been set, false otherwise.
+*/
+bool
+ParaTree::isCommSet() const {
+	return (getComm() != MPI_COMM_NULL);
+}
+
 /*! Get thecommunicator used by octree between processes.
  * \return MPI Communicator.
  */
