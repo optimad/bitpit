@@ -36,6 +36,11 @@ public:
 
 	virtual ~VolumeKernel();
 
+	bool isPointInside(const double &x, const double &y, const double &z);
+	virtual bool isPointInside(const std::array<double, 3> &point) = 0;
+	bool isPointInside(const long &id, const double &x, const double &y, const double &z);
+	virtual bool isPointInside(const long &id, const std::array<double, 3> &point) = 0;
+
 	virtual double evalCellVolume(const long &id) = 0;
 	virtual double evalCellSize(const long &id) = 0;
 

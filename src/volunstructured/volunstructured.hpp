@@ -35,7 +35,7 @@ namespace bitpit {
 class VolUnstructured : public VolumeKernel {
 
 public:
-	using PatchKernel::isPointInside;
+	using VolumeKernel::isPointInside;
 	using PatchKernel::locatePoint;
 
 	VolUnstructured(const int &id, const int &dimension);

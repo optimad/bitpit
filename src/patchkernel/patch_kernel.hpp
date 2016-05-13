@@ -209,10 +209,6 @@ public:
 	bool squeezeCells();
 	bool squeezeInterfaces();
 
-	bool isPointInside(const double &x, const double &y, const double &z);
-	virtual bool isPointInside(const std::array<double, 3> &point) = 0;
-	bool isPointInside(const long &id, const double &x, const double &y, const double &z);
-	virtual bool isPointInside(const long &id, const std::array<double, 3> &point) = 0;
 	long locatePoint(const double &x, const double &y, const double &z);
 	virtual long locatePoint(const std::array<double, 3> &point) = 0;
         bool isSameFace(const long &, const int&, const long&, const int&);

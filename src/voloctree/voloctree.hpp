@@ -44,7 +44,7 @@ struct OctreeLevelInfo{
 class VolOctree : public VolumeKernel {
 
 public:
-	using PatchKernel::isPointInside;
+	using VolumeKernel::isPointInside;
 	using PatchKernel::locatePoint;
 
 	struct OctantInfo {

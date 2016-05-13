@@ -36,7 +36,6 @@ namespace bitpit {
 class SurfUnstructured : public SurfaceKernel {
 
 public:
-	using PatchKernel::isPointInside;
 	using PatchKernel::locatePoint;
 
         // Constructors
@@ -46,8 +45,6 @@ public:
 	void setExpert(bool expert);
 
         // Search algorithms
-        bool isPointInside(const std::array<double, 3> &point);
-		bool isPointInside(const long &id, const std::array<double, 3> &point);
         long locatePoint(const std::array<double, 3> &point);
 
         // Evaluations

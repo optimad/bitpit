@@ -37,7 +37,7 @@ namespace bitpit {
 class VolCartesian : public VolumeKernel {
 
 public:
-	using PatchKernel::isPointInside;
+	using VolumeKernel::isPointInside;
 	using PatchKernel::locatePoint;
 	using PatchKernel::getCellType;
 	using PatchKernel::getInterfaceType;
