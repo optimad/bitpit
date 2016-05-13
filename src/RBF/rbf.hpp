@@ -33,20 +33,35 @@
 namespace bitpit{
 
 /*!
- * @ingroup VTKEnums
- * Enum class defining types of fields which may be written through class VTK
+ * @ingroup RBF
+ * @{
+ * 
+ * @enum RBFBasisFunction  
+ * @brief Enum class defining types of RBF kernel functions that could be used in bitpit::RBF class
  */
 enum class RBFBasisFunction{
-    WENDLANDC2 = 1,
+    WENDLANDC2 = 1,/**< Compact support Wendland C2 function */
 };
 
+/*!
+ * @enum RBFMode
+ * @brief Enum class defining behaviour of the bitpit::RBF class
+ */
+enum class RBFMode{
+	INTERP = 1, /**< RBF class interpolate external field data */
+	PARAM =2    /**< RBF class used as pure parameterizator*/
+};
+
+/*!
+ * @}
+ */
 
 class RBF{
 
     private:
-    int     m_fields ;
+    int     m_fields;
     int     m_nodes ;
-
+	RBFMode	m_mode;
     double  m_supportRadius ;
 
     double  (*m_fPtr)( const double &);
@@ -87,8 +102,11 @@ class RBF{
     void                    setSupportRadius( const double & ) ;
 	double 					getSupportRadius();
 	
-    void                    setDataToNode ( const int &, const std::vector<double> & ) ;
-    void                    setDataToAllNodes( const int &, const std::vector<double> & ) ;
+	void					setMode(RBFMode mode);
+	RBFMode					getMode();
+	
+	void                    setDataToNode ( const int &, const std::vector<double> & ) ;
+	void                    setDataToAllNodes( const int &, const std::vector<double> & ) ; 
 	
     int                     addNode( const std::array<double,3> & ) ;
     std::vector<int>        addNode( const std::vector<std::array<double,3>> & ) ;
@@ -96,11 +114,11 @@ class RBF{
 	bool					removeNode(std::vector<int> &);
 	void					removeAllNodes();
 	
-    int                     addData( ) ;
-    int                     addData( const std::vector<double> & ) ;
-	bool                    removeData( int) ;
-	bool					removeData(std::vector<int> &);
-	void 					removeAllData();
+	int                     addData( ) ; 
+	int                     addData( const std::vector<double> & ) ;
+	bool                    removeData( int) ; 
+	bool					removeData(std::vector<int> &); 
+	void 					removeAllData(); 
 	
 	void					fitDataToNodes();
 	void 					fitDataToNodes(int);
@@ -108,7 +126,7 @@ class RBF{
     std::vector<double>     evalRBF( const std::array<double,3> &) ;
 	double                  evalBasis( const double &) ;
 
-    int                    solve() ;
+	int                    solve() ; 
 	int                    greedy( const double &) ;
 
 protected:

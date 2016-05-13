@@ -33,6 +33,9 @@ The <B>bitpit::utils</B> namespace provides miscellaneous functions for the bitp
 - basic matrix operations like transpose and matrix multiplication
 - solution 
 
+## Radial Basis Functions manipulator (RBF)
+The <B>RBF</B> module handles Radial Basis Function Interpolation/Parameterization with a large set of nodes.
+
 ## Sort algorithms (SA)
 - <B>bitpit::LIFOStack</B> manage insertion and extraction uding the Last-In-First-Out pragma
 - <B>bitpit::KdTree</B> sorts vertices in a d-dimensional Euclidean space in a Kd-tree structure
