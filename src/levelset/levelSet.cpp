@@ -137,7 +137,7 @@ void LevelSet::setMesh( VolOctree* octree ) {
  */
 int LevelSet::addObject( SurfUnstructured* segmentation, int id ) {
 
-    if( id == levelSetDefaults::DEFAULT_ID ){
+    if( id == levelSetDefaults::OBJECT ){
         id = m_object.size() ;
     }
 
@@ -157,7 +157,7 @@ int LevelSet::addObject( SurfaceKernel* segmentation, int id ) {
         return (addObject(unstruct, id) ) ;
 
     } else {
-        return levelSetDefaults::NULL_ADD;
+        return levelSetDefaults::OBJECT;
     };
 
 };
@@ -208,7 +208,7 @@ int LevelSet::addObject( LevelSetObject* object ) {
         return object->getId();
 
     } else {
-        return levelSetDefaults::NULL_ADD;
+        return levelSetDefaults::OBJECT;
 
     };
 

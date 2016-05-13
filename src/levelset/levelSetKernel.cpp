@@ -537,9 +537,7 @@ double LevelSetKernel::updateEikonal( double s, double g, const long &I, const s
 };
 
 /*! 
- * Deletes non-existing items and items outside the narrow band after grid adaption.
- * @param[in] mapper mapping info
- * @param[in] newRSearch new size of narrow band
+ * Clears all levelset information
  */
 void LevelSetKernel::clear( ){
     m_ls.clear() ;
