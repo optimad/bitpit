@@ -142,6 +142,8 @@ bool SurfUnstructured::_enableCellBalancing(const long &id, bool enabled)
  * If the point is not inside the patch, the function returns the id of the
  * null element.
  *
+ * NOTE: this function is not implemented yet.
+ *
  * \param[in] point is the point to be checked
  * \result Returns the linear id of the cell the contains the point. If the
  * point is not inside the patch, the function returns the id of the null
@@ -150,6 +152,8 @@ bool SurfUnstructured::_enableCellBalancing(const long &id, bool enabled)
 long SurfUnstructured::locatePoint(const std::array<double, 3> &point)
 {
 	BITPIT_UNUSED(point);
+
+	throw std::runtime_error ("The function 'locatePoint' is not implemented yet");
 
 	return false;
 }
