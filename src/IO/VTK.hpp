@@ -41,6 +41,16 @@ namespace bitpit{
 
 /*!
  * @ingroup VTKEnums
+ * Enum class defining different modes for writing VTK files
+ */
+enum class VTKWriteMode {
+    DEFAULT = 0,
+    NO_INCREMENT =1,
+    NO_SERIES =2
+};
+
+/*!
+ * @ingroup VTKEnums
  * Enum class defining types of fields whic may be written through class VTK
  */
 enum class VTKFieldType {
@@ -266,6 +276,7 @@ class VTK{
         void                            setName( std::string ) ;
         void                            setDirectory( std::string ) ;
         void                            setCounter( int c_=0 ) ;
+        int                             unsetCounter( ) ;
         void                            setParallel( uint16_t , uint16_t ) ;
 
         void                            setCodex( VTKFormat );
@@ -288,7 +299,7 @@ class VTK{
         virtual void                    readMetaData() = 0 ; 
         void                            readData() ;
 
-        void                            write()  ;
+        void                            write( VTKWriteMode writeMode=VTKWriteMode::DEFAULT )  ;
         virtual void                    writeMetaData() = 0 ;
         void                            writeData() ;
 

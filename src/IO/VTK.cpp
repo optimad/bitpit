@@ -180,6 +180,18 @@ void  VTK::setCounter( int c_){
 } ;
 
 /*!
+ * De-activates output for time series. 
+ * @return last value of counter
+ */
+int  VTK::unsetCounter( ){ 
+
+  int counter = fh.getCounter() ;
+  fh.setSeries(false) ;
+
+  return counter; 
+} ;
+
+/*!
  * Returns the time index of the following file
  * @return counter 
  */
@@ -449,8 +461,22 @@ void VTK::setMissingGlobalData(){
 
 /*!
  * Writes entire VTK file (headers and data).
+ * @param[in] writeMode if writeMode == VTKWriteMode::DEFAULT the default write setting will be used according to setCounter();
+ * if writeMode == VTKWriteMode::NO_SERIES no time stamp will be added and the counter will not be increased;
+ * if writeMode == VTKWriteMode::NO_INCREMENT the output file will have the same time stamp like the previous one ;
  */
-void VTK::write( ){
+void VTK::write( VTKWriteMode writeMode ){
+
+    int     counter(0);
+
+    if( writeMode == VTKWriteMode::NO_SERIES ){
+        counter = unsetCounter() ;
+    } 
+
+    if( writeMode == VTKWriteMode::NO_INCREMENT ){
+        counter = getCounter() -1 ;
+        setCounter( counter) ;
+    } 
 
     getMissingMetaData() ;
 
@@ -461,7 +487,13 @@ void VTK::write( ){
 
     if( nr_procs > 1  && my_proc == 0)  writeCollection() ;
 
-    fh.incrementCounter() ;
+    if( writeMode == VTKWriteMode::DEFAULT ){
+        fh.incrementCounter() ;
+    }
+
+    if( writeMode == VTKWriteMode::NO_SERIES ){
+        setCounter(counter) ;
+    }
 
     return ;
 };

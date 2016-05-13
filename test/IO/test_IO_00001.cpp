@@ -146,8 +146,13 @@ int main()
 
         vtk.read() ;
 
-        vtk.setNames("./", "my_selection") ;
+        vtk.setNames("./", "mySelection") ;
+        vtk.setCounter( 0 ) ;
         vtk.write() ;
+        vtk.write() ;
+        vtk.setName( "otherSelection") ;
+        vtk.write(bitpit::VTKWriteMode::NO_SERIES) ;
+        vtk.write(bitpit::VTKWriteMode::NO_INCREMENT) ;
     }
 
 }
