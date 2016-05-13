@@ -254,7 +254,7 @@ public:
 	void flushData(std::fstream &stream, VTKFormat format, std::string name);
 
 #if BITPIT_ENABLE_MPI==1
-	void setCommunicator(MPI_Comm communicator);
+	virtual void setCommunicator(MPI_Comm communicator);
 	bool isCommunicatorSet() const;
 	const MPI_Comm & getCommunicator() const;
 	int getRank() const;
