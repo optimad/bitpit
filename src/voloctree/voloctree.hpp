@@ -75,8 +75,6 @@ public:
 	VolOctree(const int &id, const int &dimension, std::array<double, 3> origin,
 			double length, double dh);
 
-	~VolOctree();
-
 	double evalCellVolume(const long &id);
 	double evalCellSize(const long &id);
 	std::array<double, 3> evalCellCentroid(const long &id);

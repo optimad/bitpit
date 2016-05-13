@@ -157,14 +157,6 @@ VolOctree::VolOctree(const int &id, const int &dimension,
 }
 
 /*!
-	Destroys the patch.
-*/
-VolOctree::~VolOctree()
-{
-
-}
-
-/*!
 	Initializes octree geometry.
 */
 void VolOctree::initializeTreeGeometry()
