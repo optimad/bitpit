@@ -89,9 +89,10 @@ double LevelSetCartesian::updateSizeNarrowBand( const std::vector<adaption::Info
  * @param[in] s flag for inwards/outwards propagation (s = -+1).
  * @param[in] g propagation speed for the 3D Eikonal equation.
  * @param[in] I index of the cartesian cell to be updated.
+ * @param[in] active list with dead/ alive/ far information
  * @return updated value at cell centroid
  */
-double LevelSetCartesian::updateEikonal( double s, double g, const long &I ){
+double LevelSetCartesian::updateEikonal( double s, double g, const long &I, const std::unordered_map<long,short> &active ){
 
     int                d;
     long               J;
@@ -108,7 +109,7 @@ double LevelSetCartesian::updateEikonal( double s, double g, const long &I ){
 
         LSInfo  &lsInfo = m_ls[J] ;
 
-        if( J >= 0 && lsInfo.active == 0){
+        if( J >= 0 && active.at(J) == 0){
             value = std::min(s*lsInfo.value, value);
         };
 
@@ -116,7 +117,7 @@ double LevelSetCartesian::updateEikonal( double s, double g, const long &I ){
         // Right neighbor
         J   = cell.getAdjacency( 2*d+1, 0) ;
 
-        if( J >= 0 && lsInfo.active == 0){
+        if( J >= 0 && active.at(J) == 0){
             value = std::min(s*lsInfo.value, value);
         };
 

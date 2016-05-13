@@ -381,7 +381,7 @@ void LevelSetKernel::propagateValue( LevelSetObject *visitor ){
 void LevelSetKernel::solveEikonal( double g, double s ){
 
     long                            N( m_mesh->getCellCount()) ;
-    PiercedVector<short>    active ;
+    std::unordered_map<long,short>   active ;
 
     { //FLAG ALIVE, DEAD AND FAR AWAY VERTEXES
         long    m(0), myId ;
@@ -390,20 +390,14 @@ void LevelSetKernel::solveEikonal( double g, double s ){
         std::vector<long>               neighs ;
         std::vector<long>::iterator     it, itbeg, itend ;
 
-        active.reserve(N) ;
-        for ( const auto &cell : m_mesh->getCells() ){ 
-            myId           = cell.getId() ;
-            active.reclaim(myId) ;
-        }
-
         for ( const auto &cell : m_mesh->getCells() ){ 
 
             myId           = cell.getId() ;
 
-            if ( isInNarrowBand(myId) ) // dead vertex
-                active[myId] = 0;
+            if ( isInNarrowBand(myId) ){ // dead vertex
+                active.insert( {{myId, 0}} ) ;
 
-            else { // alive or far away 
+            } else{
 
                 // Loop over neighbors
                 check   = false;
@@ -419,7 +413,7 @@ void LevelSetKernel::solveEikonal( double g, double s ){
 
                 };
 
-                active[myId] = 2 - (int) check  ;
+                active.insert( {{ myId, 2 - (int) check }} )  ;
                 m += (int) check  ;
 
             }
@@ -446,7 +440,7 @@ void LevelSetKernel::solveEikonal( double g, double s ){
             if (active[myId] == 1) {
 
                 // Solve the quadratic form
-                value = updateEikonal(s, g, myId);
+                value = updateEikonal(s, g, myId, active);
 
                 // Store value into heap
                 map[m][0] = I;
@@ -478,10 +472,10 @@ void LevelSetKernel::solveEikonal( double g, double s ){
             LSInfo &lsInfo = m_ls[myId] ;
 
             // Update level set value
-            lsInfo.value = s*updateEikonal(s, g, myId);
+            lsInfo.value = s*updateEikonal(s, g, myId, active);
 
             // Update m_activeNode to dead node
-            active[myId] = 0;
+            active.at(myId) = 0;
 
             // Upadate far-away neighboors
             neighs = m_mesh->findCellFaceNeighs(myId) ;
@@ -494,17 +488,17 @@ void LevelSetKernel::solveEikonal( double g, double s ){
                 J = *it;
 
                 // Update the local value
-                value = updateEikonal(s, g, J);
+                value = updateEikonal(s, g, J, active);
 
-                if (active[J] == 1) { // Update value in min-heap
+                if (active.at(J) == 1) { // Update value in min-heap
                     I = contiguos[J] ;
                     heap.modify( map[I][1], value, J );
                 }
 
-                else if (active[J] == 2) {
+                else if (active.at(J) == 2) {
 
                     // Update m_activeNode for neighbor
-                    active[J] = 1;
+                    active.at(J) = 1;
 
                     I = contiguos[J] ;
 
@@ -529,13 +523,15 @@ void LevelSetKernel::solveEikonal( double g, double s ){
  * @param[in] s Flag for inwards/outwards propagation (s = -+1).
  * @param[in] g Propagation speed for the 3D Eikonal equation.
  * @param[in] I index of the cartesian cell to be updated.
+ * @param[in] active list with dead/ alive/ far information
  * @return Updated value at mesh vertex
  */
-double LevelSetKernel::updateEikonal( double s, double g, const long &I ){
+double LevelSetKernel::updateEikonal( double s, double g, const long &I, const std::unordered_map<long,short> &active ){
 
     BITPIT_UNUSED(s) ;
     BITPIT_UNUSED(g) ;
     BITPIT_UNUSED(I) ;
+    BITPIT_UNUSED(active) ;
 
     return levelSetDefaults::VALUE;
 };
@@ -604,7 +600,6 @@ void LevelSetKernel::dump( std::fstream &stream ){
         bitpit::genericIO::flushBINARY(stream, infoItr->value) ;
         bitpit::genericIO::flushBINARY(stream, infoItr->gradient) ;
         bitpit::genericIO::flushBINARY(stream, infoItr->object) ;
-        bitpit::genericIO::flushBINARY(stream, infoItr->active) ;
     };
 
     return ;
@@ -629,7 +624,6 @@ void LevelSetKernel::restore( std::fstream &stream ){
         bitpit::genericIO::absorbBINARY(stream, cellInfo.value) ;
         bitpit::genericIO::absorbBINARY(stream, cellInfo.gradient) ;
         bitpit::genericIO::absorbBINARY(stream, cellInfo.object) ;
-        bitpit::genericIO::absorbBINARY(stream, cellInfo.active) ;
         m_ls.insert(id, cellInfo) ;
     };
 
@@ -684,7 +678,7 @@ void LevelSetKernel::finalizeMPI(){
 void LevelSetKernel::writeCommunicationBuffer( const std::vector<long> &previous, OBinaryStream &sizeBuffer, OBinaryStream &dataBuffer ){
 
     long nItems = previous.size() ;
-    int dataSize = 4*sizeof(double) +sizeof(short) +sizeof(int) +sizeof(long) ;
+    int dataSize = 4*sizeof(double) +sizeof(int) +sizeof(long) ;
 
     dataBuffer.setCapacity(nItems*dataSize) ;
 
@@ -697,7 +691,6 @@ void LevelSetKernel::writeCommunicationBuffer( const std::vector<long> &previous
             dataBuffer << lsinfo.value ;
             dataBuffer << lsinfo.gradient ;
             dataBuffer << lsinfo.object ;
-            dataBuffer << lsinfo.active ;
             ++nItems ;
         }
     }
@@ -727,7 +720,6 @@ void LevelSetKernel::readCommunicationBuffer( const long &nItems, IBinaryStream 
         dataBuffer >> infoItr->value ;
         dataBuffer >> infoItr->gradient ;
         dataBuffer >> infoItr->object ;
-        dataBuffer >> infoItr->active ;
     }
 
     return;

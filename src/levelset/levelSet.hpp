@@ -124,7 +124,6 @@ class LevelSetKernel{
         double                                  value ;         /**< Levelset value */
         std::array<double,3>                    gradient ;      /**< Levelset gradient */
         int                                     object ;        /**< Id of closest object */
-        short                                   active ;        /**< Flag for nodes for fast marching */
     };
 
     PiercedVector<LSInfo>                       m_ls ;          /**< Levelset information for each cell */
@@ -181,6 +180,7 @@ class LevelSetKernel{
     void                                        readCommunicationBuffer( const long &, IBinaryStream & ) ;
 # endif
 
+    virtual double                              updateEikonal( double, double, const long &, const std::unordered_map<long,short> & ) ; 
 };
 
 class LevelSetCartesian : public LevelSetKernel{
@@ -190,7 +190,7 @@ class LevelSetCartesian : public LevelSetKernel{
 
     private:
     double                                      updateSizeNarrowBand( const std::vector<adaption::Info> & );
-    double                                      updateEikonal( double, double, const long & ) ; 
+    double                                      updateEikonal( double, double, const long &, const std::unordered_map<long,short> & ) ; 
 
     public:
     virtual ~LevelSetCartesian();
