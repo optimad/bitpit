@@ -256,10 +256,11 @@ class VTK{
         virtual ~VTK( );
 
         void                            setHeaderType( std::string );
-        std::string                     getHeaderType(  );
+        std::string                     getHeaderType(  ) const;
 
         std::string                     getName(  ) const;
         std::string                     getDirectory(  ) const;
+        int                             getCounter(  ) const;
 
         void                            setNames( std::string , std::string ) ;
         void                            setName( std::string ) ;

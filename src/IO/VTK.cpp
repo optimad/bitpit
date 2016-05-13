@@ -110,7 +110,7 @@ void  VTK::setHeaderType( std::string st_){
  * Get header type for appended binary output
  * @return    header type ["UInt32"/"UInt64"]
  */
-std::string  VTK::getHeaderType( ){ 
+std::string  VTK::getHeaderType( ) const{ 
     return HeaderType ;
 };
 
@@ -179,6 +179,15 @@ void  VTK::setCounter( int c_){
   return; 
 } ;
 
+/*!
+ * Returns the time index of the following file
+ * @return counter 
+ */
+int  VTK::getCounter( ) const{ 
+
+  return fh.getCounter( ) ;
+
+} ;
 /*!
  * Activates parallel output
  * @param[in]  nr    number of processes
