@@ -162,6 +162,7 @@ PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
 
 	// Add VTK basic patch data
 	VTKUnstructuredGrid::addData("cellIndex", VTKFieldType::SCALAR, VTKLocation::CELL);
+	VTKUnstructuredGrid::addData("PID", VTKFieldType::SCALAR, VTKLocation::CELL);
 	VTKUnstructuredGrid::addData("vertexIndex", VTKFieldType::SCALAR, VTKLocation::POINT);
 #if BITPIT_ENABLE_MPI==1
 	VTKUnstructuredGrid::addData("rank", VTKFieldType::SCALAR, VTKLocation::CELL);
@@ -3281,6 +3282,8 @@ const VTKFieldMetaData PatchKernel::getMetaData(std::string name)
 
 	} else if (name == "cellIndex") {
 		return VTKFieldMetaData(m_cells.size(), typeid(long));
+	} else if (name == "PID") {
+		return VTKFieldMetaData(m_cells.size(), typeid(int));
 	} else if (name == "vertexIndex") {
 		return VTKFieldMetaData(m_vertices.size(), typeid(long));
 #if BITPIT_ENABLE_MPI==1
@@ -3387,6 +3390,10 @@ void PatchKernel::flushData(std::fstream &stream, VTKFormat format, std::string 
 	} else if (name == "cellIndex") {
 		for (const Cell &cell : m_cells) {
 			genericIO::flushBINARY(stream, cell.getId());
+		}
+	} else if (name == "PID") {
+		for (const Cell &cell : m_cells) {
+			genericIO::flushBINARY(stream, cell.getPID());
 		}
 	} else if (name == "vertexIndex") {
 		for (const Vertex &vertex : m_vertices) {
