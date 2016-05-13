@@ -545,6 +545,15 @@ double LevelSetKernel::updateEikonal( double s, double g, const long &I ){
  * @param[in] mapper mapping info
  * @param[in] newRSearch new size of narrow band
  */
+void LevelSetKernel::clear( ){
+    m_ls.clear() ;
+}
+
+/*! 
+ * Deletes non-existing items and items outside the narrow band after grid adaption.
+ * @param[in] mapper mapping info
+ * @param[in] newRSearch new size of narrow band
+ */
 void LevelSetKernel::clearAfterAdaption( const std::vector<adaption::Info> &mapper, double &newRSearch ){
 
     long id ;

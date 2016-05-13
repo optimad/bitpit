@@ -222,8 +222,8 @@ void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double 
         if( segInfo.m_checked == false){
             segInfo.m_checked = true ;
 
-            std::unordered_set<long>      &segs = segInfo.m_segments ;
-            long                &supp = segInfo.m_support ;
+            std::unordered_set<long>    &segs = segInfo.m_segments ;
+            long                        &supp = segInfo.m_support ;
 
             id    = segIt.getId() ;
 
@@ -700,6 +700,7 @@ void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, const s
                     for ( auto & child : info.current){ // forall new elements
 
                         PiercedVector<SegInfo>::iterator seg =  m_seg.reclaim(child) ;
+                        seg->m_checked = false ;
                         seg->m_segments.clear() ;
 
                         for ( auto & parent : info.previous){ //take their parents
@@ -715,6 +716,7 @@ void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, const s
     } else { //size of narrow band increased -> recalculation
 
         m_seg.clear() ;
+        visitee->clear() ;
         associateSimplexToCell( visitee, visitee->getSizeNarrowBand() ) ; 
 
     };

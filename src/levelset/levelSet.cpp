@@ -252,15 +252,13 @@ long LevelSet::getSupport(const long &i) const {
     if( id != levelSetDefaults::OBJECT){
 
         auto objItr = m_object.find(id) ;
+
         if( objItr!=m_object.end() ){
             return objItr->second->getSupport(i);
-        } else {
-            return levelSetDefaults::ELEMENT ;
-        }
+        };
 
-    } else {
-        return levelSetDefaults::ELEMENT ;
     };
+    return levelSetDefaults::ELEMENT ;
 };
 
 /*!

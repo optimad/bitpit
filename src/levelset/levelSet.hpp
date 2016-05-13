@@ -155,6 +155,7 @@ class LevelSetKernel{
     virtual double                              computeSizeNarrowBand( LevelSetObject * )=0;
     virtual double                              updateSizeNarrowBand( const std::vector<adaption::Info> & )=0;
 
+    void                                        clear() ;
     void                                        clearAfterAdaption( const std::vector<adaption::Info> &, double & ) ;
 
     void                                        propagateSign( LevelSetObject *) ;
