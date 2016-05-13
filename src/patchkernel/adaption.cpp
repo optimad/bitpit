@@ -354,15 +354,6 @@ void CellFlatMapping::update(const std::vector<adaption::Info> adaptionData)
 	// Current number of cells
 	long nCurrentCells = m_patch->getCellCount();
 
-	// Resize the data structures
-	m_mapping.resize(nCurrentCells);
-	m_numbering.resize(nCurrentCells);
-
-	// Initialize the mapping
-	for (long flatId = 0; flatId < nCurrentCells; ++flatId) {
-		m_mapping[flatId] = flatId;
-	}
-
 	// Find the first change
 	long firstChangedFlatId = std::min(nCurrentCells, nPreviousCells);
 	long firstChangedId     = m_patch->getCells().getSizeMarker(firstChangedFlatId, Element::NULL_ID);
@@ -380,66 +371,76 @@ void CellFlatMapping::update(const std::vector<adaption::Info> adaptionData)
 		}
 	}
 
+	// The mapping, until the flat id with the first change, is a no-op mapping
+	m_mapping.resize(nCurrentCells);
+	for (long flatId = 0; flatId < firstChangedFlatId; ++flatId) {
+		m_mapping[flatId] = flatId;
+	}
+
 	// If there are no changes the mapping is already updated
 	if (firstChangedId < 0) {
 		return;
 	}
 
-	// Build a map for the previous numbering
-	std::unordered_set<long> previousIds;
+	// List of cells that have been deleted
+	std::unordered_set<long> removedIds;
 	for (auto &adaptionInfo : adaptionData) {
 		if (adaptionInfo.entity != adaption::ENTITY_CELL) {
 			continue;
 		}
 
-		previousIds.insert(adaptionInfo.previous[0]);
+		for (const auto &previousId : adaptionInfo.previous) {
+			removedIds.insert(previousId);
+		}
 	}
+	long nRemovedCells = removedIds.size();
 
-	std::unordered_map<long, long> previousNumberingMap;
-	previousNumberingMap.reserve(nPreviousCells - firstChangedFlatId);
-	for (long flatId = 0; flatId < nPreviousCells; ++flatId) {
-		long previousId = m_numbering[flatId];
-		if (previousIds.count(previousId) > 0) {
-			previousNumberingMap.insert({{previousId, flatId}});
+	// Create a mapping between cell ids and previous flat ids
+	std::unordered_map<long, long> previousFlatIds;
+	std::unordered_map<long, long> removedFlatIds;
+	previousFlatIds.reserve(nCurrentCells - firstChangedFlatId - nRemovedCells);
+	removedFlatIds.reserve(nRemovedCells);
+	for (long previousFlatId = firstChangedFlatId; previousFlatId < nPreviousCells; ++previousFlatId) {
+		long previousId = m_numbering[previousFlatId];
+		if (removedIds.count(previousId) > 0) {
+			removedFlatIds.insert({{previousId, previousFlatId}});
+		} else {
+			previousFlatIds.insert({{previousId, previousFlatId}});
 		}
 	}
 
-	// Update the current numbering
-	//
-	// We only need to update the numbering after the flat id with the first
-	// change.
+	// Add to the mapping the added cells
+	for (auto &adaptionInfo : adaptionData) {
+		if (adaptionInfo.entity != adaption::ENTITY_CELL) {
+			continue;
+		}
+
+		// Ancestor flat index of the added cells
+		long ancestorFlatId;
+		if (adaptionInfo.previous.size() > 0) {
+			ancestorFlatId = removedFlatIds.at(adaptionInfo.previous[0]);
+		} else {
+			ancestorFlatId = -1;
+		}
+
+		// Mapping of the added cells
+		for (const auto &currentId : adaptionInfo.current) {
+			previousFlatIds.insert({{currentId, ancestorFlatId}});
+		}
+	}
+
+	std::unordered_map<long, long>().swap(removedFlatIds);
+
+	// Update numbering and mapping past the flat id with the first change
+	m_numbering.resize(nCurrentCells);
 	auto cellIterator = m_patch->getCells().getConstIterator(firstChangedId);
 	for (long flatId = firstChangedFlatId; flatId < nCurrentCells; ++flatId) {
 		long cellId = cellIterator->getId();
+
 		m_numbering[flatId] = cellId;
+		m_mapping[flatId]   = previousFlatIds[cellId];
+
 		cellIterator++;
-	}
-
-	// Update the mapping
-	for (auto &adaptionInfo : adaptionData) {
-		if (adaptionInfo.entity != adaption::ENTITY_CELL) {
-			continue;
-		}
-
-		// Id of the ancestor
-		long previousId = adaptionInfo.previous[0];
-
-		// Flat id previously associated to the ancestor
-		long previousFlatId;
-		if (previousNumberingMap.count(previousId) != 0) {
-			previousFlatId = previousNumberingMap.at(previousId);
-		} else {
-			previousFlatId = -1;
-		}
-
-		// Update the mapping for all the current cells
-		for (const auto &currentId : adaptionInfo.current) {
-			// Flat id associated to the current cell
-			long currentFlatId = m_patch->getCells().evalFlatIndex(currentId);
-
-			// Mapping between the two flat ids
-			m_mapping[currentFlatId] = previousFlatId;
-		}
 	}
 }
 
