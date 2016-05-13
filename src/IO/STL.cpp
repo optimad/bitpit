@@ -1503,6 +1503,9 @@ return(0); }
     Read solid data from ascii stl file.
 
     \param[in,out] file_handle stream from stl file
+    \param[in] wrapAround controls if, when the end of file is reached, the
+    search for the solid to read will begin again from the beginning of the
+    file.
     \param[in,out] nV on input stores the number of vertices currently stored in V.
     On output stores the input value increased by the number of vertices acquired
     from the solid.
@@ -1526,6 +1529,7 @@ return(0); }
 */
 unsigned int stl::readSolidASCII(
     ifstream                            &file_handle,
+    bool                                wrapAround,
     int                                 &nV,
     int                                 &nT,
     vector<vector<double> >             &V,
@@ -1561,6 +1565,8 @@ sline << "solid " << solid_name;
 line = sline.str();
 solid_name = utils::trim(line);
 
+
+
 // Scan file until stl solid is found --------------------------------------- //
 current_pos = start_pos+1;
 while (!check && (start_pos != current_pos)) {
@@ -1573,8 +1579,13 @@ while (!check && (start_pos != current_pos)) {
 
     // Check end of file
     if (file_handle.eof()) {
-        file_handle.clear();
-        file_handle.seekg(0);
+        if (wrapAround) {
+            file_handle.clear();
+            file_handle.seekg(0);
+        } else {
+            check = false;
+            break;
+        }
     }
     current_pos = file_handle.tellg();
 
@@ -1643,6 +1654,9 @@ return(0); }
     for vector<array<double, 3> > container.
 
     \param[in,out] file_handle stream from stl file
+    \param[in] wrapAround controls if, when the end of file is reached, the
+    search for the solid to read will begin again from the beginning of the
+    file.
     \param[in,out] nV on input stores the number of vertices currently stored in V.
     On output stores the input value increased by the number of vertices acquired
     from the solid.
@@ -1666,6 +1680,7 @@ return(0); }
 */
 unsigned int stl::readSolidASCII(
     ifstream                            &file_handle,
+    bool                                wrapAround,
     int                                 &nV,
     int                                 &nT,
     vector<array<double,3> >            &V,
@@ -1713,8 +1728,13 @@ while (!check && (start_pos != current_pos)) {
 
     // Check end of file
     if (file_handle.eof()) {
-        file_handle.clear();
-        file_handle.seekg(0);
+        if (wrapAround) {
+            file_handle.clear();
+            file_handle.seekg(0);
+        } else {
+            check = false;
+            break;
+        }
     }
     current_pos = file_handle.tellg();
 
@@ -1851,7 +1871,7 @@ while (getline(file_handle, line)) {
     if ((sline >> word) && (word.compare("solid") == 0)) {
         file_handle.clear();
         file_handle.seekg(current_pos);
-        readSolidASCII(file_handle, nV, nT, V, N, T, "");
+        readSolidASCII(file_handle, true, nV, nT, V, N, T, "");
     }
     current_pos = file_handle.tellg();
 }
@@ -1938,7 +1958,7 @@ while (getline(file_handle, line)) {
     if ((sline >> word) && (word.compare("solid") == 0)) {
         file_handle.clear();
         file_handle.seekg(current_pos);
-        stl::readSolidASCII(file_handle, nV, nT, V, N, T, "");
+        stl::readSolidASCII(file_handle, true, nV, nT, V, N, T, "");
     }
     current_pos = file_handle.tellg();
 }

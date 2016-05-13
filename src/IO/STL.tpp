@@ -106,7 +106,7 @@ if (err == 1) {
 
 // Load solid data
 if (stl_type) { stl::readBINARY(ifile_handle, nV, nT, V, N, T); }
-else          { stl::readSolidASCII(ifile_handle, nV, nT, V, N, T, sname); }
+else          { stl::readSolidASCII(ifile_handle, true, nV, nT, V, N, T, sname); }
 
 // ========================================================================== //
 // ITERATIVELY READ STL SOLIDS                                                //
@@ -175,7 +175,7 @@ if (err == 1) {
 
 // Load solid data
 if (stl_type) { stl::readBINARY(ifile_handle, nV, nT, V, N, T); }
-else          { stl::readSolidASCII(ifile_handle, nV, nT, V, N, T, sname); }
+else          { stl::readSolidASCII(ifile_handle, true, nV, nT, V, N, T, sname); }
 
 // ========================================================================== //
 // ITERATIVELY READ STL SOLIDS                                                //

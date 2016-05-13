@@ -247,6 +247,7 @@ unsigned int checkBINARY(                                                   // C
 // Input routines ----------------------------------------------------------- //
 unsigned int readSolidASCII(                                             // Read stl solid from ASCII stl file
     std::ifstream                               &,                            // (input/output) input stream to stl file
+    bool                                         ,                            // (input) wrap around when searching for the solid
     int                                         &,                            // (input/output) number of vertices
     int                                         &,                            // (input/output) number of triangles
     std::vector<std::vector<double> >           &,                            // (input/output) vertex coordinate list
@@ -256,6 +257,7 @@ unsigned int readSolidASCII(                                             // Read
 );
 unsigned int readSolidASCII(                                             // Read stl solid from ASCII stl file
     std::ifstream                               &,                            // (input/output) input stream to stl file
+    bool                                         ,                            // (input) wrap around when searching for the solid
     int                                         &,                            // (input/output) number of vertices
     int                                         &,                            // (input/output) number of triangles
     std::vector<std::array<double,3> >          &,                            // (input/output) vertex coordinate list
