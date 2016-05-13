@@ -2594,28 +2594,23 @@ std::array<double, 3> PatchKernel::evalInterfaceCentroid(const long &id)
 /*!
 	Evaluates the centroid of the specified element.
 
+	Element centroid is computed as the arithmetic average of element
+	vertex coordinates.
+
 	\param element is the element
 	\result The centroid of the specified element.
 */
 std::array<double, 3> PatchKernel::evalElementCentroid(const Element &element)
 {
-	const int nDimensions = 3;
-
 	const long *elementConnect = element.getConnect();
-	const ElementInfo &elementInfo = element.getInfo();
+	int nElementVertices = element.getVertexCount();
 
-	std::array<double, nDimensions> centroid = {{0., 0., 0.}};
-	for (int i = 0; i < elementInfo.nVertices; ++i) {
+	std::array<double, 3> centroid = {{0., 0., 0.}};
+	for (int i = 0; i < nElementVertices; ++i) {
 		Vertex &vertex = getVertex(elementConnect[i]);
-		const std::array<double, nDimensions> &vertexCoords = vertex.getCoords();
-		for (int k = 0; k < nDimensions; ++k) {
-			centroid[k] += vertexCoords[k];
-		}
+		centroid += vertex.getCoords();
 	}
-
-	for (int k = 0; k < nDimensions; ++k) {
-		centroid[k] /= elementInfo.nVertices;
-	}
+	centroid /= (double) nElementVertices;
 
 	return centroid;
 }
