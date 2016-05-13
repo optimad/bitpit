@@ -75,6 +75,7 @@ class FileHandler{
         std::string         getName() const ;
         std::string         getDirectory() const ;
         std::string         getAppendix() const ;
+        int                 getCounter() const ;
 
         void                incrementCounter();
         bool                exists() ;

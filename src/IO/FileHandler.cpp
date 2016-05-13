@@ -215,6 +215,15 @@ std::string  FileHandler::getAppendix() const {
 };
 
 /*!
+ * Get the time index of the following file
+ * @return counter
+ */
+int  FileHandler::getCounter() const {
+
+  return counter;
+};
+
+/*!
  * Checks if file exists.
  * @return  [true/false] if file exists
  */
