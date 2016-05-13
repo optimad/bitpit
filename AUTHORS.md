@@ -59,6 +59,11 @@ Here is a list of the main authors of each bitpit module:
 
   * [Alessandro Alaia](mailto:alessandro.alaia@optimad.it)
 
+* RBF
+
+  * [Haysam Telib](mailto:haysam.telib@optimad.it)
+  * [Rocco Arpa](mailto:rocco.arpa@optimad.it)
+
 * levelset
 
   * [Alessandro Alaia](mailto:alessandro.alaia@optimad.it)
