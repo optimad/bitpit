@@ -94,7 +94,7 @@ namespace bitpit {
 	Default constructor.
 */
 Cell::Cell()
-	: Element(), m_interior(true)
+	: Element(), m_interior(true), m_pid(0)
 {
 
 }
@@ -103,7 +103,7 @@ Cell::Cell()
 	Creates a new cell.
 */
 Cell::Cell(const long &id, ElementInfo::Type type, bool interior, bool storeNeighbourhood)
-	: Element(id, type)
+	: Element(id, type), m_pid(0)
 {
 	_initialize(interior, storeNeighbourhood);
 }
@@ -124,6 +124,7 @@ Cell & Cell::operator=(const Cell& other)
 {
 	Element::operator=(other);
 	m_interior    = other.m_interior;
+	m_pid         = other.m_pid;
 	m_interfaces  = other.m_interfaces;
 	m_adjacencies = other.m_adjacencies;
 
@@ -175,6 +176,26 @@ void Cell::setInterior(bool interior)
 bool Cell::isInterior() const
 {
 	return m_interior;
+}
+
+/*!
+	Sets the PID associated to the cell.
+
+	\param pid is the PID associated to the cell.
+*/
+void Cell::setPID(int pid)
+{
+	m_pid = pid;
+}
+
+/*!
+	Gets the PID associated to the cell.
+
+	\result The PID associated to the cell.
+*/
+int Cell::getPID() const
+{
+	return m_pid;
 }
 
 /*!

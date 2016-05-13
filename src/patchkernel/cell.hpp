@@ -61,6 +61,9 @@ public:
 	void initialize(ElementInfo::Type type, bool interior, bool storeNeighbourhood = true);
 
 	bool isInterior() const;
+
+	void setPID(int pid);
+	int getPID() const;
 	
 	void resetInterfaces(bool storeInterfaces = true);
 	void setInterfaces(std::vector<std::vector<long>> &interfaces);
@@ -100,6 +103,7 @@ protected:
 
 private:
 	bool m_interior;
+	int m_pid;
 
 	bitpit::CollapsedVector2D<long> m_interfaces;
 	bitpit::CollapsedVector2D<long> m_adjacencies;
