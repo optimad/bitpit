@@ -31,6 +31,7 @@ list(APPEND TESTS "test_surfunstructured_00001")
 list(APPEND TESTS "test_surfunstructured_00002")
 list(APPEND TESTS "test_surfunstructured_00003")
 list(APPEND TESTS "test_surfunstructured_00004")
+list(APPEND TESTS "test_surfunstructured_00005")
 if (ENABLE_MPI)
 	list(APPEND TESTS "test_surfunstructured_parallel_00001:4")
 	list(APPEND TESTS "test_surfunstructured_parallel_00002:2")
@@ -73,6 +74,11 @@ add_custom_command(
 add_custom_command(
     TARGET "test_surfunstructured_00004" PRE_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/buddha.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/buddha.stl"
+    )
+
+add_custom_command(
+    TARGET "test_surfunstructured_00005" PRE_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different "${CMAKE_CURRENT_SOURCE_DIR}/data/ahmed.stl" "${CMAKE_CURRENT_BINARY_DIR}/data/ahmed.stl"
     )
 
 if (ENABLE_MPI)

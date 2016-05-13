@@ -497,13 +497,17 @@ void SurfUnstructured::extractEdgeNetwork(SurfUnstructured &net)
  * Import surface tasselation from S.T.L. file. STL facet are added at to the
  * present mesh, i.e. current mesh content is not discarded. Howver no checks
  * are performed to ensure that no duplicated vertices or cells are created.
+ *
+ * If the input file is a multi-solid ASCII file, all solids will be loaded
+ * and a different PID will be assigned to the PID of the different solids.
  * 
  * \param[in] stl_name name of stl file
  * \param[in] isBinary flag for binary (true), of ASCII (false) stl file
+ * \param[in] PIDOffset is the offset for the PID numbering
  * 
  * \result on output returns an error flag for I/O error
 */
-unsigned short SurfUnstructured::importSTL(const string &stl_name, const bool &isBinary)
+unsigned short SurfUnstructured::importSTL(const string &stl_name, const bool &isBinary, int PIDOffset)
 {
     // ====================================================================== //
     // VARIABLES DECLARATION                                                  //
@@ -518,67 +522,98 @@ unsigned short SurfUnstructured::importSTL(const string &stl_name, const bool &i
         {4, ElementInfo::QUAD}
     };
 
-    // Local variables
-    int                                         n_v;
-    int                                         nVertex = 0;
-    int                                         nSimplex = 0;
-    vector<array<double, 3>>                    vertexList;
-    vector<array<double, 3>>                    normalList;
-    vector<vector<int>>                         connectivityList;
-    vector<long>                                connect;
-    unordered_map<long, long>                   vertexMap;
-    STLObj                                      STL(stl_name, isBinary);
-    
-
-    // Counters
-    int                                         i;
-    long                                        v_counter = 0;
-    VertexIterator                              i_;
-    CellIterator                                j_;
-    vector<array<double, 3>>::const_iterator    v_, ve_;
-    vector<vector<int>>::const_iterator         c_, ce_;
-    vector<int>::const_iterator                 w_, we_;
+    // STL Object
+    STLObj STL(stl_name, isBinary);
 
     // ====================================================================== //
-    // READ MESH DATA FROM THE STL FILE                                       //
+    // OPEN STL FILE                                                          //
     // ====================================================================== //
-    STL.load(nVertex, nSimplex, vertexList, normalList, connectivityList);
+    STL.open("in");
+    if (STL.err != 0) {
+        return STL.err;
+    }
 
     // ====================================================================== //
-    // PREPARE MESH FOR DATA IMPORT                                           //
+    // LOAD ALL SOLID FROM THE STL FILE                                       //
     // ====================================================================== //
-    reserveVertices(getVertexCount() + nVertex);
-    reserveCells(m_nInternals + m_nGhosts + nSimplex);
+    int pid = PIDOffset - 1;
+    while (true) {
+        // ====================================================================== //
+        // LOAD SOLID FROM THE STL FILE                                           //
+        // ====================================================================== //
+        int nVertex = 0;
+        int nSimplex = 0;
+        std::vector<std::array<double, 3>> vertexList;
+        std::vector<std::array<double, 3>> normalList;
+        std::vector<std::vector<int>> connectivityList;
+
+        STL.loadSolid(nVertex, nSimplex, vertexList, normalList, connectivityList);
+        if (nVertex == 0) {
+            break;
+        }
+
+        // ====================================================================== //
+        // PID OF THE SOLID                                                       //
+        // ====================================================================== //
+        ++pid;
+
+        // ====================================================================== //
+        // PREPARE MESH FOR DATA IMPORT                                           //
+        // ====================================================================== //
+        reserveVertices(getVertexCount() + nVertex);
+        reserveCells(m_nInternals + m_nGhosts + nSimplex);
+
+        // ====================================================================== //
+        // ADD VERTICES TO MESH                                                   //
+        // ====================================================================== //
+        vector<array<double, 3>>::const_iterator v_, ve_;
+
+        std::unordered_map<long, long> vertexMap;
+        vertexMap.reserve(nVertex);
+
+        long v_counter = 0;
+        ve_ = vertexList.cend();
+        for (v_ = vertexList.cbegin(); v_ != ve_; ++v_) {
+            VertexIterator i_ = addVertex(*v_);
+            vertexMap[v_counter] = i_->getId();
+            ++v_counter;
+        } //next v_
+
+        // ====================================================================== //
+        // ADD CELLS TO MESH                                                      //
+        // ====================================================================== //
+        vector<vector<int>>::const_iterator c_, ce_;
+        vector<int>::const_iterator w_, we_;
+
+        ce_ = connectivityList.cend();
+        for (c_ = connectivityList.cbegin(); c_ != ce_; ++c_) {
+            // Remap STL connectivity
+            int n_v = c_->size();
+            std::vector<long> connect(n_v, Vertex::NULL_ID);
+            we_ = c_->cend();
+            int i = 0;
+            for (w_ = c_->cbegin(); w_ < we_; ++w_) {
+                connect[i] = vertexMap[*w_];
+                ++i;
+            } //next w_
+
+            // Add cell
+            CellIterator cellIterator = addCell(ele_type.at(n_v), true, connect);
+            cellIterator->setPID(pid);
+        } //next c_
+
+        // ====================================================================== //
+        // Multi-body STL files are supported only in ASCII mode                        //
+        // ====================================================================== //
+        if (isBinary) {
+            break;
+        }
+    }
 
     // ====================================================================== //
-    // ADD VERTICES TO MESH                                                   //
+    // CLOSE STL FILE                                                         //
     // ====================================================================== //
-    ve_ = vertexList.cend();
-    for (v_ = vertexList.cbegin(); v_ != ve_; ++v_) {
-        i_ = addVertex(*v_);
-        vertexMap[v_counter] = i_->getId();
-        ++v_counter;
-    } //next v_
-
-    // ====================================================================== //
-    // ADD CELLS TO MESH                                                      //
-    // ====================================================================== //
-    ce_ = connectivityList.cend();
-    for (c_ = connectivityList.cbegin(); c_ != ce_; ++c_) {
-
-        // Remap STL connectivity
-        n_v = c_->size();
-        connect.resize(n_v, Vertex::NULL_ID);
-        we_ = c_->cend();
-        i = 0;
-        for (w_ = c_->cbegin(); w_ < we_; ++w_) {
-            connect[i] = vertexMap[*w_];
-            ++i;
-        } //next w_
-
-        // Add cell
-        addCell(ele_type.at(n_v), true, connect);
-    } //next c_
+    STL.close("in");
 
     return 0;
 }
