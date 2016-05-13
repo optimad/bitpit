@@ -87,6 +87,7 @@ class LevelSet{
     std::array<double,3>                        getGradient(const long &) const ;
     int                                         getObject(const long &) const ;
     long                                        getSupport(const long &) const ;
+    void                                        getObjectAndSupport(const long &, int &, long &) const;
     short                                       getSign(const long &) const;
     bool                                        isInNarrowBand(const long &) const;
 

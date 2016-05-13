@@ -247,18 +247,36 @@ int LevelSet::getObject(const long &i) const {
  */
 long LevelSet::getSupport(const long &i) const {
 
-    int id= getObject(i);
+    int object ;
+    long support ;
 
-    if( id != levelSetDefaults::OBJECT){
+    getObjectAndSupport( i, object, support) ;
 
-        auto objItr = m_object.find(id) ;
+    return support ;
+};
 
-        if( objItr!=m_object.end() ){
-            return objItr->second->getSupport(i);
-        };
 
+/*!
+ * Get the id of closest object
+ * @param[in] i index of cell
+ * @param[out] object id of the closest object
+ * @param[out] support id of the support element
+ */
+void LevelSet::getObjectAndSupport(const long &i, int &object, long &support) const {
+
+    object = getObject(i);
+
+    if( object != levelSetDefaults::OBJECT){
+
+        auto objItr = m_object.find(object) ;
+        assert( objItr!=m_object.end() ) ;
+
+        support = objItr->second->getSupport(i);
+
+    } else{
+        support = levelSetDefaults::ELEMENT ;
     };
-    return levelSetDefaults::ELEMENT ;
+
 };
 
 /*!
