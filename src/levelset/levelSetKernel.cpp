@@ -92,8 +92,8 @@ VolumeKernel* LevelSetKernel::getMesh() const{
 
 /*!
  * Get the Sdf value of the i-th local element of the octree mesh.
- * @param[in] i Local index of target octant.
- * @return Value of the i-th local element of the octree mesh.
+ * @param[in] i cell index
+ * @return levelset value in cell
  */
 double LevelSetKernel::getLS( const long &i)const {
 
@@ -107,8 +107,8 @@ double LevelSetKernel::getLS( const long &i)const {
 
 /*!
  * Get the Sdf gradient vector of the i-th local element of the octree mesh.
- * @param[in] i Local index of target octant.
- * @return Array with components of the Sdf gradient of the i-th local element of the octree mesh.
+ * @param[in] i cell index
+ * @return levelset gradient in cell 
  */
 std::array<double,3> LevelSetKernel::getGradient(const long &i) const {
 
@@ -122,7 +122,7 @@ std::array<double,3> LevelSetKernel::getGradient(const long &i) const {
 
 /*!
  * Get the id of closest object
- * @param[in] i Local index of target octant.
+ * @param[in] i cell index
  * @return id of closest object
  */
 int LevelSetKernel::getObject(const long &i) const {
@@ -137,8 +137,8 @@ int LevelSetKernel::getObject(const long &i) const {
 
 /*!
  * Get the sign of the levelset function
- * @param[in] i Local index of target octant.
- * @return sign
+ * @param[in] i cell index
+ * @return sign of levelset
  */
 short LevelSetKernel::getSign(const long &i)const{
 
@@ -151,9 +151,9 @@ short LevelSetKernel::getSign(const long &i)const{
 };
 
 /*!
- * Get if the Sdf value of the i-th local element is exactly computed or not.
- * @param[in] i Local index of target octant.
- * @return True/false if the Sdf value is exactly computed (true) or not (false).
+ * If cell centroid lies within the narrow band and hence levelset is computet exactly
+ * @param[in] i cell index
+ * @return true/false if the centroid is in narrow band
  */
 bool LevelSetKernel::isInNarrowBand(const long &i)const{
 
@@ -167,15 +167,15 @@ bool LevelSetKernel::isInNarrowBand(const long &i)const{
 
 /*!
  * Get the current size of the narrow band.
- * @return Physical size of the current narrow band to guarantee at least one element inside it.
+ * @return size of the current narrow band
  */
 double LevelSetKernel::getSizeNarrowBand()const{
     return m_RSearch;
 };
 
 /*!
- * Manually set the physical size of the narrow band.
- * @param[in] r Size of the narrow band.
+ * Manually set the size of the narrow band.
+ * @param[in] r size of the narrow band.
  */
 void LevelSetKernel::setSizeNarrowBand(double r){
     m_RSearch = r;
@@ -666,6 +666,9 @@ bool LevelSetKernel::assureMPI( ){
 
 }
 
+/*!
+ * Frees the MPI communcator
+ */
 void LevelSetKernel::finalizeMPI(){
     if( m_commMPI != MPI_COMM_NULL){
         MPI_Comm_free( &m_commMPI) ;
@@ -673,8 +676,10 @@ void LevelSetKernel::finalizeMPI(){
 }
 
 /*!
- * Repartioning of levelset after partitioning of mesh
- * @param[in] mapper mapper describing partitioning
+ * Flushing of data to communication buffers for partitioning
+ * @param[in] previous list of cells to be sent
+ * @param[in/out] sizeBuffer buffer for first communication used to communicate the size of data buffer
+ * @param[in/out] dataBuffer buffer for second communication containing data
  */
 void LevelSetKernel::writeCommunicationBuffer( const std::vector<long> &previous, OBinaryStream &sizeBuffer, OBinaryStream &dataBuffer ){
 
@@ -706,8 +711,9 @@ void LevelSetKernel::writeCommunicationBuffer( const std::vector<long> &previous
 
 
 /*!
- * Repartioning of levelset after partitioning of mesh
- * @param[in] mapper mapper describing partitioning
+ * Processing of communication buffer into data structure
+ * @param[in] nItems number of items within the buffer
+ * @param[in/out] dataBuffer buffer containing the data
  */
 void LevelSetKernel::readCommunicationBuffer( const long &nItems, IBinaryStream &dataBuffer ){
 

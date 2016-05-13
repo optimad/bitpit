@@ -86,10 +86,10 @@ double LevelSetCartesian::updateSizeNarrowBand( const std::vector<adaption::Info
 
 /*! 
  * Update scalar field value at mesh vertex on a by locally solving the 3D Eikonal equation.
- * @param[in] s Flag for inwards/outwards propagation (s = -+1).
- * @param[in] g Propagation speed for the 3D Eikonal equation.
+ * @param[in] s flag for inwards/outwards propagation (s = -+1).
+ * @param[in] g propagation speed for the 3D Eikonal equation.
  * @param[in] I index of the cartesian cell to be updated.
- * @return Updated value at mesh vertex
+ * @return updated value at cell centroid
  */
 double LevelSetCartesian::updateEikonal( double s, double g, const long &I ){
 

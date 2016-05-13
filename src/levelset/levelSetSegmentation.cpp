@@ -31,29 +31,25 @@ namespace bitpit {
 
 /*!
 	@ingroup    levelset
-	@class      LevelSetSegmentation
+	@class      LevelSetSegmentation::SegInfo
 	@brief      Implements visitor pattern fo segmentated geometries
 */
 
 /*!
- * Constructor of LevelSet_Stl with input parameters.
- * @param[in] id id to be asigned to pierced vector
- * @param[in] list list of simplices
+ * Default constructor 
  */
 LevelSetSegmentation::SegInfo::SegInfo( ) : m_segments(levelSetDefaults::LIST), m_support(levelSetDefaults::ELEMENT), m_checked(false){
 };
 
 /*!
- * Constructor of LevelSet_Stl with input parameters.
- * @param[in] id id to be asigned to pierced vector
+ * Constructor
  * @param[in] list list of simplices
  */
 LevelSetSegmentation::SegInfo::SegInfo( const std::unordered_set<long> &list) :m_segments(list), m_support(levelSetDefaults::ELEMENT), m_checked(false) {
 };
 
 /*!
- * Constructor of LevelSet_Stl with input parameters.
- * @param[in] id id to be asigned to pierced vector
+ * Constructor
  * @param[in] list list of simplices
  * @param[in] support index of closest simplex
  */
@@ -61,7 +57,13 @@ LevelSetSegmentation::SegInfo::SegInfo( const std::unordered_set<long> &list, co
 };
 
 /*!
- * Destructor of LevelSet_Stl.
+	@ingroup    levelset
+	@class      LevelSetSegmentation
+	@brief      Implements visitor pattern fo segmentated geometries
+*/
+
+/*!
+ * Destructor
  */
 LevelSetSegmentation::~LevelSetSegmentation() {
     m_segmentation = NULL;
@@ -69,10 +71,9 @@ LevelSetSegmentation::~LevelSetSegmentation() {
 };
 
 /*!
- * Constructor of LevelSet_Stl with input parameters.
- * It builds one Sdf object with :
- * @param[in] *Pmesh Pointer to 3D pablo octree mesh to be linked to Sdf.
- * @param[in] *STL Pointer to surface Triangulation to be linked to Sdf.
+ * Constructor
+ * @param[in] id identifier of object
+ * @param[in] *STL pointer to surface mesh
  */
 LevelSetSegmentation::LevelSetSegmentation( int id, SurfUnstructured *STL) :LevelSetObject(id) {
 
@@ -123,9 +124,9 @@ LevelSetSegmentation* LevelSetSegmentation::clone() const {
 }
 
 /*!
- * Get the list of simplices wich contain the i-th local element in their narrow band.
- * @param[in] i Local index of target octant.
- * @return set with indices of simplices wich contain the i-th local element in their narrow band.
+ * Get the list of simplices wich contain the cell centroid in their narrow band.
+ * @param[in] i cell index
+ * @return set with indices of simplices
  */
 const std::unordered_set<long> & LevelSetSegmentation::getSimplexList(const long &i) const{
 
@@ -139,33 +140,22 @@ const std::unordered_set<long> & LevelSetSegmentation::getSimplexList(const long
 
 /*!
  * Get the index of the closest simplex
- * @param[in] i Local index of target octant.
+ * @param[in] i cell index
  * @return index of closest simplex
  */
-long LevelSetSegmentation::getSupportSimplex(const long &i) const{
+long LevelSetSegmentation::getSupport(const long &i) const{
 
     if( !m_seg.exists(i) ){
         return levelSetDefaults::ELEMENT ;
     } else {
         return ( m_seg[i].m_support );
     };
-};
-
-/*!
- * Get the index of the closest simplex
- * @param[in] i Local index of target octant.
- * @return index of closest simplex
- */
-long LevelSetSegmentation::getSupport(const long &i) const{
-
-    return getSupportSimplex(i) ;
 
 };
 
 /*!
  * Check if cell is in narrowband of any triangle;
- * LevelSetSegmentation::associateSimplexToCell() should have been called prior;
- * @param[in] i Local index of target octant.
+ * @param[in] i cell index
  * @return if in narow band
  */
 bool LevelSetSegmentation::isInNarrowBand(const long &i){
@@ -173,8 +163,9 @@ bool LevelSetSegmentation::isInNarrowBand(const long &i){
 };
 
 /*!
- * Add a SurfTriPatch object to stl.
- * @param[in] *STL Pointer to surface Triangulation to be added .
+ * Aggregate cell vertex coordinates in one vector
+ * @param[in] i cell index
+ * @return coordinates of cell vertices
  */
 std::vector<std::array<double,3>> LevelSetSegmentation::getSimplexVertices( const long &i ) const {
 
@@ -196,11 +187,10 @@ std::vector<std::array<double,3>> LevelSetSegmentation::getSimplexVertices( cons
 };
 
 /*!
- * Update the signed distance function for a given octant with the list of simplices
- * which contain the octant in the narrow band (if et[IDX] is not void) otherwise
- * by using the full triangulation.
+ * Update the levelset function of whole mesh by using associated simplices
  * @param[in] visitee visited mesh 
  * @param[in] search size of narrow band
+ * @param[in] signd if signed- or unsigned- distance function should be calculated
  * @param[in] filter if triangles should be ereased when outside narrow band (default false)
  */
 void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double &search, const bool & signd, bool filter){
@@ -290,15 +280,13 @@ void LevelSetSegmentation::lsFromSimplex( LevelSetKernel *visitee, const double 
 };
 
 /*!
- * Update the signed distance function for a given octant with the list of simplices
- * which contain the octant in the narrow band (if et[IDX] is not void) otherwise
- * by using the full triangulation.
+ * Computes levelset relevant information at one point with respect to a simplex
  * @param[in] p coordinates of point
- * @param[in] i index of triangle
- * @param[out] d distance point triangle
- * @param[out] s sign of point wrt to triangle, i.e. according to normal
- * @param[out] x closest point on trinagle
- * @param[out] n normal at closest point on trinagle
+ * @param[in] i index of simplex
+ * @param[out] d distance point to simplex
+ * @param[out] s sign of point wrt to simplex, i.e. according to normal
+ * @param[out] x closest point on simplex
+ * @param[out] n normal at closest point
  */
 void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const long &i, double &d, double &s, std::array<double,3> &x, std::array<double,3> &n ) const {
 
@@ -352,7 +340,8 @@ void LevelSetSegmentation::infoFromSimplex( const std::array<double,3> &p, const
 };
 
 /*!
- * Finds seed points for given simplex
+ * Finds seed points in narrow band within a cartesian mesh for one simplex
+ * @param[in] visitee cartesian mesh 
  * @param[in] VS Simplex
  * @param[out] I indices of seed points
  */
@@ -391,8 +380,9 @@ bool LevelSetSegmentation::seedNarrowBand( LevelSetCartesian *visitee, std::vect
 
 /*!
  * Finds a seed point to be used for propgating the levelset sign
+ * @param[in] visitee cartesian mesh 
  * @param[out] seed index of seed cell
- * @param[out] sign sign at seed cell [+1;-1]
+ * @param[out] value sign at seed cell [+1;-1]
  */
 void LevelSetSegmentation::seedSign( LevelSetKernel *visitee, long &seed, double &value) const {
 
@@ -456,9 +446,10 @@ void LevelSetSegmentation::getBoundingBox( std::array<double,3> &minP, std::arra
 };
 
 /*!
- * Compute the levelset function from a piece-wise linear approximation
- * of a d manifold in a 3D Euclidean space. Level set is computed in narrow band
- * of at least 2 mesh cell centers around the geometry. 
+ * Computes the levelset function within the narrow band
+ * @param[in] visitee pointer to mesh
+ * @param[in] RSearch size of narrow band
+ * @param[in] signd if signed- or unsigned- distance function should be calculated
  */
 void LevelSetSegmentation::computeLSInNarrowBand( LevelSetKernel *visitee, const double &RSearch, const bool &signd ){
 
@@ -476,9 +467,11 @@ void LevelSetSegmentation::computeLSInNarrowBand( LevelSetKernel *visitee, const
 };
 
 /*!
- * Compute the levelset function from a piece-wise linear approximation
- * of a d manifold in a 3D Euclidean space. Level set is computed in narrow band
- * of at least 2 mesh cell centers around the geometry. 
+ * Updates the levelset function within the narrow band after mesh adaptation.
+ * @param[in] visitee pointer to mesh
+ * @param[in] mapper information concerning mesh adaption 
+ * @param[in] RSearch size of narrow band
+ * @param[in] signd if signed- or unsigned- distance function should be calculated
  */
 void LevelSetSegmentation::updateLSInNarrowBand( LevelSetKernel *visitee, const std::vector<adaption::Info> &mapper, const double &RSearch, const bool &signd ){
 
@@ -496,7 +489,9 @@ void LevelSetSegmentation::updateLSInNarrowBand( LevelSetKernel *visitee, const 
 };
 
 /*!
- * Determines the list of triangles which influence each cell (i.e. cells which are within the narrow band of the triangle).
+ * Determines the list of triangles which influence each cell (i.e. cells which are within the narrow band of the triangle) for cartesian meshes
+ * @param[in] visitee pointer to cartesian mesh
+ * @param[in] RSearch size of narrow band
  */
 void LevelSetSegmentation::associateSimplexToCell( LevelSetCartesian *visitee, const double &RSearch ){
 
@@ -589,11 +584,9 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetCartesian *visitee, c
 };
 
 /*!
- * Compute the signed distance function from a piece-wise linear approximation
- * of a d manifold in a 3D Euclidean space. Level set is computed in narrow band
- * of at least 2 mesh cell centers around the geometry. If usersearch = true, RSearch
- * is initialized around the geometry (in order to guarantee at least 2 mesh cell centers
- * around the geometry) and used as imposed size of narrow band.
+ * Determines the list of triangles which influence each cell (i.e. cells which are within the narrow band of the triangle) for octree meshes
+ * @param[in] visitee pointer to octree mesh
+ * @param[in] RSearch size of narrow band
  */
 void LevelSetSegmentation::associateSimplexToCell( LevelSetOctree *visitee, const double &RSearch){
 
@@ -661,8 +654,10 @@ void LevelSetSegmentation::associateSimplexToCell( LevelSetOctree *visitee, cons
 };
 
 /*!
- * Update the Sdf of the triangulation after an octree adaptation.
- * Note: Only a single octree adapt with marker (-1,0,1) is permitted.
+ * Updates the list of triangles which influence each cell (i.e. cells which are within the narrow band of the triangle) for octree meshes
+ * @param[in] visitee pointer to octree mesh
+ * @param[in] mapper information concerning mesh adaption 
+ * @param[in] newRSearch new size of narrow band
  */
 void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, const std::vector<adaption::Info> &mapper, const double &newRSearch){
 
@@ -671,7 +666,6 @@ void LevelSetSegmentation::updateSimplexToCell( LevelSetOctree *visitee, const s
     oldSize = visitee->computeSizeFromRSearch( visitee->getSizeNarrowBand() ) ;
     newSize = visitee->computeSizeFromRSearch( newRSearch ) ;
 
-    //TODO does not support coarsening if children were on different processes
     if( newSize-oldSize <= 1.e-8 ) { //size of narrow band decreased or remained the same -> mapping
 
         { // map segments
@@ -791,8 +785,10 @@ void LevelSetSegmentation::restoreDerived( std::fstream &stream ){
 # if BITPIT_ENABLE_MPI
 
 /*!
- * Repartioning of levelset after partitioning of mesh
- * @param[in] mapper mapper describing partitioning
+ * Flushing of data to communication buffers for partitioning
+ * @param[in] previous list of cells to be sent
+ * @param[in/out] sizeBuffer buffer for first communication used to communicate the size of data buffer
+ * @param[in/out] dataBuffer buffer for second communication containing data
  */
 void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &previous, OBinaryStream &sizeBuffer, OBinaryStream &dataBuffer ){
 
@@ -826,8 +822,9 @@ void LevelSetSegmentation::writeCommunicationBuffer( const std::vector<long> &pr
 };
 
 /*!
- * Repartioning of levelset after partitioning of mesh
- * @param[in] mapper mapper describing partitioning
+ * Processing of communication buffer into data structure
+ * @param[in] nItems number of items within the buffer
+ * @param[in/out] dataBuffer buffer containing the data
  */
 void LevelSetSegmentation::readCommunicationBuffer( const long &nItems, IBinaryStream &dataBuffer ){
 

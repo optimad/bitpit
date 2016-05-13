@@ -47,14 +47,14 @@ LevelSetObject::~LevelSetObject( ){
 
 /*!
  * Constructor
- * @param[in] id Id assigned to object
+ * @param[in] id id assigned to object
  */
 LevelSetObject::LevelSetObject( int id) : m_id(id){
 };
 
 /*!
  * Get the id 
- * @return Id of the object
+ * @return id of the object
  */
 int LevelSetObject::getId( ) const {
     return m_id ;

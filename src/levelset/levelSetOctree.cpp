@@ -235,7 +235,7 @@ double LevelSetOctree::updateSizeNarrowBand( const std::vector<adaption::Info> &
 };
 
 /*!
- * Compute size of narrow band given a the coarsest element level which is crossed by geometry.
+ * Compute size of narrow band given the coarsest element level which is crossed by geometry.
  * This function assumes that the octree is balanced 2:1
  * @param[in] level the level of the coarsest octree
  */

@@ -43,10 +43,10 @@ namespace bitpit {
  * @brief  Level Set driver class
  *
  * LevelSet is the main user interface class for computing signed- or unsigned- distance functions on Cartesian or Octree meshes
- * with respect to geometrical objects. The user needs to define the computional by calling setMesh() and the objects which define the zero 
+ * with respect to geometrical objects. The user needs to define the computional kernel by calling setMesh() and the objects which define the zero 
  * levelset via addObject().
  *
- * LevelSet will calculate the exact distance with respect within a narrow band.
+ * LevelSet will calculate the exact distance with respect the objects within a narrow band.
  * Outside this narrow band an approximate value will be calculated.
  *
  * The user may set the size of the narrow band explicitly.
@@ -90,7 +90,7 @@ LevelSet::~LevelSet(){
 
 /*!
  * Sets the grid on which the levelset function should be computed.
- * Only caretsian and octree patches are supported at this moment.
+ * Only cartesian and octree patches are supported at this moment.
  * @param[in] mesh computational grid
  */
 void LevelSet::setMesh( VolumeKernel* mesh ) {
@@ -133,6 +133,7 @@ void LevelSet::setMesh( VolOctree* octree ) {
 /*!
  * Adds a surface segmentation
  * @param[in] segmentation surface segmentation
+ * @param[in] id identifier of object; in case no id is provided the insertion orer will be used as identifier 
  */
 int LevelSet::addObject( SurfUnstructured* segmentation, int id ) {
 
@@ -148,6 +149,7 @@ int LevelSet::addObject( SurfUnstructured* segmentation, int id ) {
 /*!
  * Adds a surface segmentation
  * @param[in] segmentation surface segmentation
+ * @param[in] id identifier of object; in case no id is provided the insertion orer will be used as identifier 
  */
 int LevelSet::addObject( SurfaceKernel* segmentation, int id ) {
 
@@ -176,7 +178,7 @@ void LevelSet::clear(){
 };
 
 /*!
- * Clear all LevelSet Objects
+ * Clear all LevelSet Objects but leave kernel unaltered
  */
 void LevelSet::clearObject(){
     m_object.clear() ;
@@ -184,7 +186,7 @@ void LevelSet::clearObject(){
 };
 
 /*!
- * Clear LevelSet Object
+ * Clear only one LevelSet Object
  * @param[in] id Id of object to be deleted
  */
 void LevelSet::clearObject(int id){
@@ -443,7 +445,7 @@ void LevelSet::restore( std::fstream &stream ){
 #if BITPIT_ENABLE_MPI
 /*!
  * Checks if MPI communicator is available in underlying mesh.
- * If available MPI communicator is retreived from mesh and duplicated if necessary and parallel processing can be done.
+ * If available, MPI communicator is retreived from mesh (and duplicated if necessary) and parallel processing can be done.
  * If not serial processing is necessary
  * @return true if parallel
  */
