@@ -131,6 +131,20 @@ class STLObj {
         std::vector<std::array<double,3> >      &,                            // (input/output) unit normal to each triangle
         std::vector<std::vector<int> >          &                             // (input/output) triangle-vertex connectivity
     );
+    void loadSolid(                                                            // Load next solid stl triangulation from stl file
+        int                                     &,                            // (input/output) number of stl vertices
+        int                                     &,                            // (input/output) number of stl facets
+        std::vector<std::vector<double> >       &,                            // (input/output) vertex coordinate list
+        std::vector<std::vector<double> >       &,                            // (input/output) unit normal to each triangle
+        std::vector<std::vector<int> >          &
+    );
+    void loadSolid(                                                            // Load next stl triangulation from stl file
+        int                                     &,                            // (input/output) number of stl vertices
+        int                                     &,                            // (input/output) number of stl facets
+        std::vector<std::array<double,3> >      &,                            // (input/output) vertex coordinate list
+        std::vector<std::array<double,3> >      &,                            // (input/output) unit normal to each triangle
+        std::vector<std::vector<int> >          &
+    );
 
     template <typename ... T2>
     void load(                                                                // Load stl triangulation from stl file

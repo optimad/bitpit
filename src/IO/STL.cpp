@@ -581,6 +581,102 @@ close("in");
 
 return; };
 
+// -------------------------------------------------------------------------- //
+/*!
+    Load single solid data from the stl file associated to the interface.
+    This routine assumes that the input stream is already open.
+
+    \param[in,out] nV on input stores the current number of vertices hosted in V.
+    On output stores the input values incremented by the number
+    of vertices acquired from the stl file.
+    \param[in,out] nT on input stores the number of facet->vertex connectivity
+    entries stores in T. On output stores the input value incremented by the
+    number of facets acquired from the stl file.
+    \param[in,out] V vertex coordinates list. On output stores the coordinates of
+    vertices vertices acquired from the stl file. New vertices are appended
+    at the end of V.
+    \param[in,out] N facet normals. On output stores the normal unit vector to
+    each facet acquired from the stl file. New normals are appended
+    at the end of N.
+    \param[in,out] T facet->vertex connectivity. On output stores the facet->vertex
+    connectivity entries for the facets acquired from the stl file. New connectivity entries
+    are appended at the end of T.
+*/
+void STLObj::loadSolid(
+    int                                 &nV,
+    int                                 &nT,
+    vector<vector<double> >             &V,
+    vector<vector<double> >             &N,
+    vector<vector<int> >                &T
+) {
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+// none
+
+// Counters
+// none
+
+// ========================================================================== //
+// READ STL DATA                                                              //
+// ========================================================================== //
+if (stl_type)   { stl::readBINARY(ifile_handle, nV, nT, V, N, T); }
+else            { stl::readSolidASCII(ifile_handle, false, nV, nT, V, N, T); }
+
+return; };
+
+// -------------------------------------------------------------------------- //
+/*!
+    Load single solid solid data from the stl file associated to the interface.
+    This routine assumes that the input stream is already open.
+    Overloading of member function STLObj::load() for container
+    vector<array<double, 3>>
+
+    \param[in,out] nV on input stores the current number of vertices hosted in V.
+    On output stores the input values incremented by the number
+    of vertices acquired from the stl file.
+    \param[in,out] nT on input stores the number of facet->vertex connectivity
+    entries stores in T. On output stores the input value incremented by the
+    number of facets acquired from the stl file.
+    \param[in,out] V vertex coordinates list. On output stores the coordinates of
+    vertices vertices acquired from the stl file. New vertices are appended
+    at the end of V.
+    \param[in,out] N facet normals. On output stores the normal unit vector to
+    each facet acquired from the stl file. New normals are appended
+    at the end of N.
+    \param[in,out] T facet->vertex connectivity. On output stores the facet->vertex
+    connectivity entries for the facets acquired from the stl file. New connectivity entries
+    are appended at the end of T.
+*/
+void STLObj::loadSolid(
+    int                                 &nV,
+    int                                 &nT,
+    vector<array<double,3> >            &V,
+    vector<array<double,3> >            &N,
+    vector<vector<int> >                &T
+) {
+
+// ========================================================================== //
+// VARIABLES DECLARATION                                                      //
+// ========================================================================== //
+
+// Local variables
+// none
+
+// Counters
+// none
+
+// ========================================================================== //
+// READ STL DATA                                                              //
+// ========================================================================== //
+if (stl_type)   { stl::readBINARY(ifile_handle, nV, nT, V, N, T); }
+else            { stl::readSolidASCII(ifile_handle, false, nV, nT, V, N, T); }
+
+return; };
+
 
 // Private methods ---------------------------------------------------------- //
 
