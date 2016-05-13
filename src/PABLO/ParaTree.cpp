@@ -4501,7 +4501,7 @@ namespace bitpit {
                                         jj = 2;
                                     }
                                 }
-                                out << m_octree.m_ghostsConnectivity[i][jj] + nofNodes << " ";
+                                out << m_octree.m_ghostsConnectivity[i][jj] << " ";
                             }
                         if((i+1)%3==0 && i!=nofGhosts-1)
                             out << endl << "          ";
