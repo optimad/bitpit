@@ -388,13 +388,6 @@ ElementInfo::Type VolCartesian::getInterfaceType() const
 }
 
 /*!
-	Destroys the patch.
-*/
-VolCartesian::~VolCartesian()
-{
-}
-
-/*!
 	Evaluates the volume of the specified cell.
 
 	\param id is the id of the cell

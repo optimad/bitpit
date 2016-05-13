@@ -49,8 +49,6 @@ public:
 	VolCartesian(const int &id, const int &dimension, const std::array<double, 3> &origin,
 			   double length, double dh);
 
-	~VolCartesian();
-
 	long getVertexCount() const;
 
 	long getCellCount() const;
