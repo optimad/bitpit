@@ -156,39 +156,6 @@ double SurfaceKernel::evalCellArea(const long &id)
 }
 
 /*!
- * Compute cell center coordinates. Cell center coordinates are computed
- * as the arithmetic average of cell's vertex coordinates.
- * 
- * \param[in] id cell id
- * 
- * \result returns cell's center coordinates
-*/
-std::array<double, 3> SurfaceKernel::evalCellCentroid(const long &id)
-{
-    // ====================================================================== //
-    // VARIABLES DECLARATION                                                  //
-    // ====================================================================== //
-
-    // Local variables
-    Cell                                *cell_ = &m_cells[id];
-    array<double, 3>                    C;
-
-    // Counters
-    int                                 i, n = cell_->getVertexCount();
-
-    // ====================================================================== //
-    // COMPUTE CELL CENTER COORDINATES                                        //
-    // ====================================================================== //
-    C.fill(.0);
-    for (i = 0; i < n; ++i) {
-        C += m_vertices[cell_->getVertex(i)].getCoords();
-    } //next i
-    C = C/double(n);
-
-    return(C);
-}
-
-/*!
  *  Evaluate the length of the edge with specified local index
  *  for e cell with specified ID.
  *  If the cell is of type ElementInfo::VERTEX or ElementInfo::LINE

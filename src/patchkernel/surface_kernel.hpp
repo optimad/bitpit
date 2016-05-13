@@ -46,7 +46,6 @@ public:
         int getSpaceDimension(void) const;
 
 	virtual ~SurfaceKernel();
-        virtual std::array<double, 3> evalCellCentroid(const long &);
         virtual double evalCellArea(const long &);
         virtual double evalEdgeLength(const long&, const int&);
         virtual double evalMinEdgeLength(const long &, int &);
