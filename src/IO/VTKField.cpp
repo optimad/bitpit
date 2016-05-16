@@ -309,32 +309,6 @@ bool   VTKField::hasAllMetaData() const{
 };
 
 /*!
- * Update field information using VTKFieldMetaData class
- */
-void VTKField::importMetaData( const VTKFieldMetaData &data){ 
-
-    if( data.getSize() != -1 ){
-        setDataType( VTKTypes::whichType(data.getType()) );
-
-        if( getFieldType() == VTKFieldType::SCALAR ){
-            setElements( data.getSize() ) ;
-
-        } else if (getFieldType() == VTKFieldType::VECTOR) {
-            setElements( data.getSize() /3 ) ;
-
-        } else if (getFieldType() == VTKFieldType::CONSTANT) {
-            setElements( data.getSize() / components  );
-
-        } else if (getFieldType() == VTKFieldType::VARIABLE) {
-            setElements( data.getSize() );
-        }
-
-    };
-
-    return ;
-};
-
-/*!
  * Checks which mechanism is used to read/write data
  * @return  true if flushData is used, false if internal pointer to data is used
  */

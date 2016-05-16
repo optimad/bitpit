@@ -428,38 +428,6 @@ void VTK::calcAppendedOffsets(){
 };
 
 /*!
- * Uses VTK::getMetaData() interface to retrieve missing information
- */
-void VTK::getMissingMetaData(){
-
-
-    for( auto & field : geometry ){
-        if( field->usesInterface() ){
-            VTKFieldMetaData const & metaData = getMetaData( field->getName() ) ;
-            field->importMetaData( metaData ) ;
-        }
-    };
-
-    for( auto & field : data ){
-        if( field->usesInterface() ){
-            VTKFieldMetaData const & metaData = getMetaData( field->getName() ) ;
-            field->importMetaData( metaData ) ;
-        }
-    };
-
-    setMissingGlobalData();
-
-
-    return ;
-};
-
-/*!
- *  Sets missing data like number of cells and points
- */
-void VTK::setMissingGlobalData(){
-};
-
-/*!
  * Writes entire VTK file (headers and data).
  * @param[in] writeMode if writeMode == VTKWriteMode::DEFAULT the default write setting will be used according to setCounter();
  * if writeMode == VTKWriteMode::NO_SERIES no time stamp will be added and the counter will not be increased;
@@ -477,8 +445,6 @@ void VTK::write( VTKWriteMode writeMode ){
         counter = getCounter() -1 ;
         setCounter( counter) ;
     } 
-
-    getMissingMetaData() ;
 
     calcAppendedOffsets() ;
 
@@ -1011,18 +977,6 @@ void VTK::absorbData( std::fstream &str, VTKFormat format, std::string name ){
     BITPIT_UNUSED( str ) ;
     BITPIT_UNUSED( format ) ;
     BITPIT_UNUSED( name ) ;
-};
-
-/*!
- * Interface method for obtaining field meta Data
- * @param[in] name name of the field to be written
- * @return VTKFieldMetaData containing the size of field and typeid of data
- */
-const VTKFieldMetaData VTK::getMetaData( std::string name ){
-    BITPIT_UNUSED( name ) ;
-
-    VTKFieldMetaData   dummy(-1,typeid(int));
-    return dummy ;
 };
 
 /*! 

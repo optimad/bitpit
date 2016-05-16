@@ -479,20 +479,10 @@ uint64_t VTKUnstructuredGrid::getNConnectivity( ){
     return nconnectivity ;
 };
 
-/*!  
- *  sets the dimensions of the VTKUnstructuredGrid deduced from the geometry fields
- */
-void VTKUnstructuredGrid::setMissingGlobalData( ){
 
-    uint64_t    ncells, npoints, nconn;
 
-    ncells  = std::max( geometry[1]->getElements(), geometry[2]->getElements() );
-    npoints = geometry[0]->getElements() ;
-    nconn   = geometry[3]->getElements() ;
 
-    setDimensions( ncells, npoints, nconn) ;
 
-    return ;
 };
 
 /*!

@@ -147,20 +147,6 @@ class VTKTypes{
 
 };
 
-class VTKFieldMetaData{
-
-    private:
-        int64_t                 m_size ;                        /**< size of the field */
-        const std::type_info&   m_type ;                        /**< tye of the field */
-
-    public:
-        VTKFieldMetaData( );
-        VTKFieldMetaData( int64_t, const std::type_info &);
-        int64_t                 getSize() const;
-        const std::type_info&   getType() const;
-
-};
-
 class VTKField{
 
     //members
@@ -215,7 +201,6 @@ class VTKField{
         void                     setPosition( std::fstream::pos_type ) ;
         void                     setImplicit( bool ) ;
 
-        void                     importMetaData( const VTKFieldMetaData & ) ;
         virtual void             flushData( std::fstream &) const ;
         virtual void             absorbData( std::fstream &) const ;
 };
@@ -320,13 +305,11 @@ class VTK{
         //General Purpose
         bool                            getFieldByName( const std::string &, VTKField**& ) ;
         void                            calcAppendedOffsets() ;
-        void                            getMissingMetaData() ;
-        virtual void                    setMissingGlobalData() ;
+        virtual uint64_t                calcFieldSize( const VTKField &) =0;
 
         //Interface methods
         virtual void                    flushData( std::fstream &, VTKFormat , std::string )  ;
         virtual  void                   absorbData( std::fstream &, VTKFormat , std::string )  ;
-        virtual const VTKFieldMetaData  getMetaData( std::string )  ;
 
 };
 
@@ -352,7 +335,6 @@ class VTKUnstructuredGrid : public VTK{
 
     void                            writeCollection() ;  
     uint64_t                        calcSizeConnectivity( ) ;
-    void                            setMissingGlobalData() ;
 
     public:
     void                            readMetaData() ;
@@ -394,8 +376,6 @@ class VTKRectilinearGrid : public VTK{
     ~VTKRectilinearGrid();
 
     void                            writeCollection() ;  
-
-    void                            setMissingGlobalData() ;
 
     public:
     void                            readMetaData() ;
