@@ -508,12 +508,52 @@ void VTKRectilinearGrid::setGlobalIndex( std::vector<extension2D_t> loc_ ){
     return;
 };
 
+/*!
+ * Calculates the size (in bytes) of a field
+ * @param[in] field field 
+ * @return size of the field
  */
+uint64_t VTKRectilinearGrid::calcFieldSize( const VTKField &field ){
+
+    uint64_t bytes(0) ;
+    std::string name( field.getName() ) ;
+
+    if( name == "x_Coord" ){
+        bytes = local_index[0][1] -local_index[0][0] +1 ;
+
+    } else if( name == "y_Coord" ){
+        bytes = local_index[1][1] -local_index[1][0] +1 ;
+
+    } else if( name == "z_Coord" ){
+        bytes = local_index[2][1] -local_index[2][0] +1 ;
+
+    } else{
+
+        VTKLocation location( field.getLocation() ) ;
+        assert( location != VTKLocation::UNDEFINED) ;
+
+        if( location == VTKLocation::CELL ){
+            bytes = nr_cells ;
+
+        } else if( location == VTKLocation::POINT ){
+            bytes = nr_points ;
+
+        }
+
+        VTKFieldType fieldType( field.getFieldType() ) ;
+        assert( fieldType != VTKFieldType::UNDEFINED) ;
+
+        bytes *= static_cast<int>(fieldType) ;
+
+    }
 
 
+    bytes *= VTKTypes::sizeOfType( field.getDataType() ) ;
 
+    return bytes ;
 
 };
+
 /*!
  *   @}
  */

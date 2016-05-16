@@ -470,6 +470,56 @@ void VTKUnstructuredGrid::readFieldData( std::fstream &str, VTKField &field ){
     return;
 }
 
+/*!
+ * Calculates the size (in bytes) of a field
+ * @param[in] field field 
+ * @return size of the field
+ */
+uint64_t VTKUnstructuredGrid::calcFieldSize( const VTKField &field ){
+
+    uint64_t bytes(0) ;
+    std::string name( field.getName() ) ;
+
+    if( name == "Points" ){
+        bytes = nr_points *static_cast<int>(VTKFieldType::VECTOR) ; 
+
+    } else if( name == "offsets" ){
+        bytes = nr_cells ;
+
+    } else if( name == "types" ){
+        bytes = nr_cells ;
+
+    } else if( name == "connectivity"){
+        bytes = nconnectivity ;
+
+    } else{
+
+        VTKLocation location( field.getLocation() ) ;
+        assert( location != VTKLocation::UNDEFINED) ;
+
+        if( location == VTKLocation::CELL ){
+            bytes = nr_cells ;
+
+        } else if( location == VTKLocation::POINT ){
+            bytes = nr_points ;
+
+        }
+
+        VTKFieldType fieldType( field.getFieldType() ) ;
+        assert( fieldType != VTKFieldType::UNDEFINED) ;
+
+        bytes *= static_cast<int>(fieldType) ;
+
+    }
+
+
+    bytes *= VTKTypes::sizeOfType( field.getDataType() ) ;
+
+    return bytes ;
+
+};
+
+
 /*!  
  *  Returns the size of the connectivity information
  *  @return     size of connectivity
@@ -477,12 +527,6 @@ void VTKUnstructuredGrid::readFieldData( std::fstream &str, VTKField &field ){
 uint64_t VTKUnstructuredGrid::getNConnectivity( ){
 
     return nconnectivity ;
-};
-
-
-
-
-
 };
 
 /*!

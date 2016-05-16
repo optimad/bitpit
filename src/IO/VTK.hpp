@@ -181,9 +181,7 @@ class VTKField{
         VTKFormat                getCodification() const;
         uint8_t                  getComponents() const;
         uint64_t                 getElements() const;
-        uint64_t                 getSize() const;
         uint64_t                 getOffset() const;
-        uint64_t                 getNbytes() const;
         std::fstream::pos_type   getPosition() const; 
         bool                     hasAllMetaData() const ;
 
@@ -352,6 +350,7 @@ class VTKUnstructuredGrid : public VTK{
     void                            setGeomData( std::vector<T0> &, std::vector<T1> & ) ;
 
     uint64_t                        getNConnectivity( ) ; 
+    uint64_t                        calcFieldSize( const VTKField &) ;
 
 };
 
@@ -394,6 +393,8 @@ class VTKRectilinearGrid : public VTK{
 
     void                            setGlobalIndex( std::vector<extension3D_t> ) ;
     void                            setGlobalIndex( std::vector<extension2D_t> ) ;
+
+    uint64_t                        calcFieldSize( const VTKField &) ;
 
 };
 

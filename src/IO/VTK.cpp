@@ -405,21 +405,21 @@ void VTK::calcAppendedOffsets(){
     for( auto & field : data ){
         if( field->getCodification() == VTKFormat::APPENDED && field->getLocation() == VTKLocation::POINT ) {
             field->setOffset( offset) ;
-            offset += HeaderByte + field->getNbytes()  ;
+            offset += HeaderByte + calcFieldSize(*field) ;
         };
     };
 
     for( auto & field : data ){
         if( field->getCodification() == VTKFormat::APPENDED && field->getLocation() == VTKLocation::CELL) {
             field->setOffset( offset) ;
-            offset += HeaderByte + field->getNbytes()  ;
+            offset += HeaderByte + calcFieldSize(*field)  ;
         };
     };
 
     for( auto & field : geometry ){
         if( field->getCodification() == VTKFormat::APPENDED ) {
             field->setOffset( offset) ;
-            offset += HeaderByte + field->getNbytes()  ;
+            offset += HeaderByte + calcFieldSize(*field)  ;
         }; 
     };
 
@@ -573,12 +573,12 @@ void VTK::writeData( ){
         for( auto &field : data ){
             if( field->getCodification() == VTKFormat::APPENDED && field->getLocation() == VTKLocation::POINT ) {
                 if( getHeaderType() == "UInt32"){
-                    uint32_t    nbytes = field->getNbytes() ;
+                    uint32_t    nbytes = calcFieldSize(*field) ;
                     genericIO::flushBINARY(str, nbytes) ;
                 }
 
                 else{
-                    uint64_t    nbytes = field->getNbytes() ;
+                    uint64_t    nbytes = calcFieldSize(*field) ;
                     genericIO::flushBINARY(str, nbytes) ;
                 };
                 writeFieldData( str, *field) ;
@@ -589,12 +589,12 @@ void VTK::writeData( ){
             if( field->getCodification() == VTKFormat::APPENDED && field->getLocation() == VTKLocation::CELL ) {
 
                 if( getHeaderType() == "UInt32"){
-                    uint32_t    nbytes = field->getNbytes() ;
+                    uint32_t    nbytes = calcFieldSize(*field) ;
                     genericIO::flushBINARY(str, nbytes) ;
                 }
 
                 else{
-                    uint64_t    nbytes = field->getNbytes() ;
+                    uint64_t    nbytes = calcFieldSize(*field) ;
                     genericIO::flushBINARY(str, nbytes) ;
                 };
                 writeFieldData( str, *field) ;
@@ -606,12 +606,12 @@ void VTK::writeData( ){
         for( auto &field : geometry ){
             if( field->getCodification() == VTKFormat::APPENDED ) {
                 if( getHeaderType() == "UInt32"){
-                    uint32_t    nbytes = field->getNbytes() ;
+                    uint32_t    nbytes = calcFieldSize(*field) ;
                     genericIO::flushBINARY(str, nbytes) ;
                 }
 
                 else{
-                    uint64_t    nbytes = field->getNbytes() ;
+                    uint64_t    nbytes = calcFieldSize(*field) ;
                     genericIO::flushBINARY(str, nbytes) ;
                 };
                 writeFieldData( str, *field) ;

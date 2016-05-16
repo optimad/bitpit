@@ -245,39 +245,11 @@ uint64_t  VTKField::getElements() const{
 };
 
 /*!
- * get total number of entries data field
- * @return  total size = number of elements *nuber of components
- */
-uint64_t  VTKField::getSize() const{ 
-
-    if( fieldType == VTKFieldType::SCALAR || fieldType == VTKFieldType::VARIABLE ){
-        return nr_elements ; 
-
-    } else if( fieldType == VTKFieldType::VECTOR){
-        return static_cast<int>(fieldType) *nr_elements ; 
-
-    } else if( fieldType == VTKFieldType::CONSTANT ){
-        return components *nr_elements ; 
-    };
-
-    assert(false);
-
-};
-
-/*!
  * get offset in appended section
  * @return  offset from "_" character in appended section
  */
 uint64_t  VTKField::getOffset() const{ 
     return offset; 
-};
-
-/*!
- * get bytes of  data field
- * @return  memory size of data field
- */
-uint64_t  VTKField::getNbytes() const{ 
-    return getSize() *VTKTypes::sizeOfType( dataType ) ;
 };
 
 /*!
