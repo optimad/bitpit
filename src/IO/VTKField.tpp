@@ -61,7 +61,9 @@ void VTKFieldWithVector<T>::setData( std::vector<T> &data_ ){
 
     derived = true ;
     m_ptr = &data_ ;
-    this->setDataType( VTKTypes::whichType(data_) );
+
+    T dummy;
+    this->setDataType( VTKTypes::whichType(dummy) );
 
 };
 

@@ -132,9 +132,7 @@ VTKDataType VTKTypes::whichType( const std::vector<T> &dummy ){
 
     BITPIT_UNUSED(dummy) ;
 
-    T dummy2 ;
-
-    return whichType(dummy2) ;
+    return whichType(typeid(T)) ;
 };
 
 /*!
