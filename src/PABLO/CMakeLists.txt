@@ -28,6 +28,7 @@ cmake_minimum_required(VERSION 2.8)
 # Add library to targets
 include_directories("${PROJECT_SOURCE_DIR}/src/common")
 include_directories("${PROJECT_SOURCE_DIR}/src/operators")
+include_directories("${PROJECT_SOURCE_DIR}/src/containers")
 include_directories("${PROJECT_SOURCE_DIR}/src/IO")
 
 file(GLOB SOURCE_FILES "*.cpp")

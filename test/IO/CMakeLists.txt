@@ -29,6 +29,7 @@ cmake_minimum_required(VERSION 2.8)
 set(TESTS "")
 list(APPEND TESTS "test_IO_00001")
 list(APPEND TESTS "test_IO_00002")
+list(APPEND TESTS "test_IO_00003")
 
 set(IO_TEST_ENTRIES "${TESTS}" CACHE INTERNAL "List of tests fo the IO module" FORCE)
 

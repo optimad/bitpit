@@ -33,6 +33,7 @@
 #include <array>
 
 #include "bitpit_common.hpp"
+#include "bitpit_containers.hpp"
 
 namespace bitpit{
 
@@ -69,6 +70,9 @@ template< class data_T >
 void flushASCII( std::fstream &str, int elements_per_line, const data_T *data, int nr  ) ;
 
 template< class data_T >
+void flushASCII( std::fstream &str, int elements_per_line, const bitpit::PiercedVector<data_T> &data, bool writeIndex=false  ) ;
+
+template< class data_T >
 void flushBINARY( std::fstream &str, const data_T &data  ) ;
 
 template< class data_T >
@@ -87,6 +91,9 @@ template< class data_T >
 void flushBINARY( std::fstream &str, const data_T *data, int nr  ) ;
 
 template< class data_T >
+void flushBINARY( std::fstream &str, const bitpit::PiercedVector<data_T> &, bool writeIndex=false  ) ;
+
+template< class data_T >
 void absorbASCII( std::fstream &str, data_T &data  ) ;
 
 template< class data_T >
@@ -97,6 +104,12 @@ void absorbASCII( std::fstream &str, std::array<data_T,d> &data  ) ;
 
 template< class data_T >
 void absorbASCII( std::fstream &str, data_T *data, int nr  ) ;
+
+template< class data_T >
+void absorbASCII( std::fstream &str, bitpit::PiercedVector<data_T> &data  ) ;
+
+template< class data_T >
+void absorbASCII( std::fstream &str, bitpit::PiercedVector<data_T> &data, long  ) ;
 
 template< class data_T >
 void absorbBINARY( std::fstream &str, data_T &data  ) ;
@@ -115,6 +128,12 @@ void absorbBINARY( std::fstream &str, std::array<data_T,d> &data  ) ;
 
 template< class data_T >
 void absorbBINARY( std::fstream &str, data_T *data, int nr  ) ;
+
+template< class data_T >
+void absorbBINARY( std::fstream &str, bitpit::PiercedVector<data_T> &data  ) ;
+
+template< class data_T >
+void absorbBINARY( std::fstream &str, bitpit::PiercedVector<data_T> &data, long ) ;
 
 void copyUntilEOFInString( std::fstream &str, char*& buffer, int& length);
 

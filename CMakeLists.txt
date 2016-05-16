@@ -329,7 +329,7 @@ list(APPEND BITPIT_MODULE_LIST "levelset")
 #------------------------------------------------------------------------------------#
 set(OPERATORS_DEPS "common")
 set(CONTAINERS_DEPS "common;operators")
-set(IO_DEPS "common;operators")
+set(IO_DEPS "common;operators;containers")
 set(COMMUNICATIONS_DEPS "common;containers;IO")
 set(LA_DEPS "common;operators")
 set(SA_DEPS "common;operators")

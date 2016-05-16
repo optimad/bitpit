@@ -22,6 +22,7 @@
  *
 \*---------------------------------------------------------------------------*/
 
+#include"logger.hpp"
 #include"Operators.hpp"
 
 namespace bitpit{
@@ -210,6 +211,60 @@ void flushASCII( std::fstream &str, int elements_per_line, const data_T *data, i
 };
 
 /*!
+ * Writes a bitpit::PiercedVector file stream in ascii format.
+ * It assumes that flushASCIIY is available for data_T
+ * @tparam          data_T  type data
+ * @param[in]       str     file stream
+ * @param[in]       elements_per_line     number of entries per line
+ * @param[in]       data    data to be written
+ * @param[in]       writeIndex if indices should be written too
+ */
+template< class data_T >
+void flushASCII( std::fstream &str, int elements_per_line, const PiercedVector<data_T> &data, bool writeIndex ){
+
+    typename bitpit::PiercedVector<data_T>::const_iterator dataItr =data.begin() ;
+
+    int i(0), j(0), k(0) ;
+    int nr ;
+
+    int lines, this_line ;
+
+    bool next(true) ;
+
+    nr = data.size() ;
+    lines = (nr-1) /elements_per_line + 1;
+
+    str << std::setprecision(8) << std::scientific ;
+
+
+    while( next ) {
+
+        this_line = std::min( elements_per_line, nr - k ) ;
+
+        for( j=0; j<this_line; j++){
+            if(writeIndex){
+                flushASCII( str, dataItr.getId() ) ;
+            }
+            flushASCII( str, *dataItr ) ;
+            k++ ;
+            dataItr++ ;
+        };
+
+        i++ ;
+        if( i<lines){
+            str << std::endl;
+        }
+        else{
+            next = false;
+        };
+
+    };
+
+    return ;
+    return ;
+};
+
+/*!
  * Writes a POD data type to file stream in binary format.
  * The function makes uses of memory contigiuty.
  * @tparam          data_T  type of POD data
@@ -320,6 +375,35 @@ void flushBINARY( std::fstream &str, const data_T *data, int nr ){
 };
 
 /*!
+ * Writes a bitpit::PiercedVector file stream in binary format.
+ * It assumes that flushBINARY is available for data_T
+ * @tparam          data_T  type data
+ * @param[in]       str     file stream
+ * @param[in]       data    data to be written
+ * @param[in]       writeIndex if indices should be written
+ */
+template< class data_T >
+void flushBINARY( std::fstream &str, const PiercedVector<data_T> &data, bool writeIndex ){
+
+    typename PiercedVector<data_T>::const_iterator dataItr, dataEnd = data.end() ;
+
+    if( writeIndex){
+        for( dataItr = data.begin(); dataItr != dataEnd; ++dataItr){
+            flushBINARY( str, dataItr.getId() ) ;
+            flushBINARY( str, *dataItr) ;
+        }
+
+    } else { 
+        for( dataItr = data.begin(); dataItr != dataEnd; ++dataItr){
+            flushBINARY( str, *dataItr) ;
+        }
+
+    };
+
+    return ;
+};
+
+/*!
  * Reads one line into templated data type.
  * Relies on operator ">>" of the templated data type.
  * In case the information on the line is not sufficient or exceeds the data type and error message is displayed std::cout
@@ -375,38 +459,35 @@ void  lineStream( std::fstream &str, data_T &data){
 template< class data_T >
 void  lineStream( std::fstream &str, std::vector<data_T> &data){
 
-    std::vector<data_T>   temp;
-    data_T                x_;
     std::string           line;
-    int                   expected, read(0) ;
-
-    expected = data.size() ;
+    int                   expected(data.size()) ;
 
     getline( str, line );
     bitpit::utils::trim( line );
 
     std::stringstream ss( line );
 
-    while( ss.good() ){
-        ss >> x_ ;
-        temp.push_back(x_);
-        read++ ;
-    };
-
     if( expected == 0) {
-        data = temp ;
-    }
+        data_T  x_;
+        while( ss.good() ){
+            ss >> x_ ;
+            data.push_back(x_);
+        };
 
-    else{
-        if( expected == read){
-            data = temp ;
-        }
-        else{
+    } else {
+        int read(0) ;
+        while( ss.good() && read<expected){
+            ss >> data[read] ;
+            read++ ;
+        };
+
+        if( expected != read){
             std::cout << " Not expected nr of element in line" << std::endl;
             std::cout << " Expected number: "<< expected << std::endl ; 
             std::cout << " Actual number: "<< read << std::endl ; 
-        };
-    };
+        }
+
+    }
 
     return;
 
@@ -667,6 +748,75 @@ void absorbASCII( std::fstream &str, data_T *data, int nr ){
 };
 
 /*!
+ * Reads only the values of the elemnts of a bitpit::PiercedVector from file stream in ascii format.
+ * @tparam  data_T  type of POD data
+ * @param[in]   str     file stream
+ * @param[in]   data    data to be read
+ */
+template< class data_T >
+void absorbASCII( std::fstream &str, bitpit::PiercedVector<data_T> &data ){
+
+    bool    read(true) ;
+    data_T  value;
+    std::string line;
+
+    typename bitpit::PiercedVector<data_T>::iterator  dataItr = data.begin(), dataEnd = data.end() ;
+
+    while( str.good() && read ) {
+    
+        getline( str, line );
+        bitpit::utils::trim( line );
+    
+        std::stringstream ss( line );
+    
+        while( ss.good() && read ){
+            ss >> *dataItr ;
+            ++dataItr;
+
+            read = dataItr != dataEnd ;
+        };
+    }
+   
+    return ;
+};
+
+/*!
+ * Reads a bitpit::PiercedVector from file stream in ascii format, both indices and values of its elements.
+ * Relies on the function lineStream.
+ * @tparam  data_T  type of POD data
+ * @param[in]   str     file stream
+ * @param[in]   data    data to be read
+ * @param[in]   N number of elements to br read
+ */
+template< class data_T >
+void absorbASCII( std::fstream &str, bitpit::PiercedVector<data_T> &data, long N ){
+
+
+    bool    read(true) ;
+    long    n(0), index;
+    data_T  value;
+    std::string line;
+
+    while( str.good() && read ) {
+    
+        getline( str, line );
+        bitpit::utils::trim( line );
+    
+        std::stringstream ss( line );
+    
+        while( ss.good() && read ){
+            ss >> index ;
+            ss >> value ;
+            data.insert(index,value);
+            ++n;
+            read = n<N ;
+        };
+    }
+
+    return ;
+};
+
+/*!
  * Reads a templated data type from file stream in binary
  * @tparam      data_T  type of data
  * @param[in]   str     file stream
@@ -768,6 +918,53 @@ void absorbBINARY( std::fstream &str, data_T *data, int nr ){
     nbytes = sizeof(data_T) *nr ;
 
     str.read( reinterpret_cast<char*>(data), nbytes ) ;
+
+    return ;
+};
+
+/*!
+ * Reads a bitpit::PiercedVector file stream in binary format.
+ * The PiercedVector should already contain the indices of its elements and the data of all elements will be read.
+ * It assumes that absorbBINARY is available for data_T; this implies that data_T is of known size.
+ * @tparam          data_T  type data
+ * @param[in]       str     file stream
+ * @param[in]       data    data to be written
+ */
+template< class data_T >
+void absorbBINARY( std::fstream &str, PiercedVector<data_T> &data ){
+
+    bitpit::PiercedIterator<data_T> dataItr, dataEnd = data.end() ;
+
+    for( dataItr = data.begin(); dataItr != dataEnd; ++dataItr){
+        absorbBINARY(str,*dataItr) ;
+    }
+
+    return ;
+};
+
+/*!
+ * Reads a bitpit::PiercedVector file stream in binary format, both the indices and data of its elements.
+ * The user must specify how many elements should be read from the stream.
+ * It assumes that absorbBINARY is available for data_T; this implies that data_T is of sized size
+ * @tparam          data_T  type data
+ * @param[in]       str     file stream
+ * @param[in]       data    data to be written
+ * @param[in]       readIndex if indices should be written
+ */
+template< class data_T >
+void absorbBINARY( std::fstream &str, PiercedVector<data_T> &data, long N ){
+
+    long n, index ;
+    data_T value ;
+
+    data.reserve(N) ;
+
+    for( n=0; n<N; ++n){
+        absorbBINARY(str,index) ;
+        absorbBINARY(str,value) ;
+
+        data.insert(index,value) ;
+    }
 
     return ;
 };
