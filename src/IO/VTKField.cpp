@@ -54,9 +54,6 @@ VTKField::VTKField(){
     nr_elements     = 0 ;
     position        = 0 ;
 
-    derived         = false;
-    implicitKnown   = false;
-
 };
 
 /*!
@@ -91,8 +88,6 @@ VTKField& VTKField::operator=( const VTKField & other){
     nr_elements = other.nr_elements ;
     offset = other.offset ;
     position = other.position ;
-    derived = other.derived ;
-    implicitKnown = other.implicitKnown ;
 
     return *this;
 };
@@ -175,15 +170,6 @@ void      VTKField::setPosition( std::fstream::pos_type pos_ ){
  */
 void      VTKField::setOffset( uint64_t offs_){ 
     offset= offs_; 
-    return; 
-};
-
-/*!
- * set if class storing the field is aware about data to be written
- * @param[in]   known   true if aware
- */
-void      VTKField::setImplicit( bool known ){ 
-    implicitKnown= known; 
     return; 
 };
 
@@ -280,23 +266,6 @@ bool   VTKField::hasAllMetaData() const{
     return allData;
 };
 
-/*!
- * Checks which mechanism is used to read/write data
- * @return  true if flushData is used, false if internal pointer to data is used
- */
-bool VTKField::usesInterface( )const{ 
-
-    return( !autoWrite() && !implicitKnown ) ;
-};
-
-/*!
- * Checks which mechanism is used to read/write data
- * @return  true if a derived class with explicit data storage is used
- */
-bool VTKField::autoWrite( )const{ 
-
-    return( derived ) ;
-};
 
 /*!
  * @}

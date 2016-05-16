@@ -161,9 +161,6 @@ class VTKField{
         uint64_t                 offset;                    /**< offset in the appended section */
         std::fstream::pos_type   position;                  /**< position in file */
 
-        bool                     derived;                   /**< true if derived class (storing a pointer to data vector) is used, false if base class (using interface) */
-        bool                     implicitKnown;             /**< true if class storing the Field is awre about the data to be written */
-
         //methods
     public:
         virtual ~VTKField();
@@ -184,9 +181,6 @@ class VTKField{
         uint64_t                 getOffset() const;
         std::fstream::pos_type   getPosition() const; 
         bool                     hasAllMetaData() const ;
-
-        bool                     usesInterface() const ;
-        bool                     autoWrite() const ;
 
         void                     setName( std::string ) ;
         void                     setDataType( VTKDataType ) ;

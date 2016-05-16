@@ -316,30 +316,21 @@ void VTKUnstructuredGrid::writeMetaData( ){
  */
 void VTKUnstructuredGrid::writeFieldData( std::fstream &str, VTKField &field ){
 
-    if( field.usesInterface() ){
-        flushData( str, field.getCodification(), field.getName() ) ;
-
-    } else if( field.autoWrite() ) {
-        field.flushData( str ) ;
-
-    } else{ 
-
-        if(field.getName() == "types" && homogeneousType != VTKElementType::UNDEFINED){
-            uint8_t type = (uint8_t) homogeneousType ;
-            for( unsigned int i=0; i<nr_cells; ++i)
-                genericIO::flushBINARY(str, type );
-
-        } else if(field.getName() == "offsets" && homogeneousType != VTKElementType::UNDEFINED){
-            uint8_t     n = vtk::getNNodeInElement(homogeneousType) ;
-            uint64_t    offset(0) ;
-            for( unsigned int i=0; i<nr_cells; ++i){
-                offset += n ;
-                genericIO::flushBINARY(str, offset );
-            }
-
+    if(field.getName() == "types" && homogeneousType != VTKElementType::UNDEFINED){
+        uint8_t type = (uint8_t) homogeneousType ;
+        for( unsigned int i=0; i<nr_cells; ++i)
+            genericIO::flushBINARY(str, type );
+    
+    } else if(field.getName() == "offsets" && homogeneousType != VTKElementType::UNDEFINED){
+        uint8_t     n = vtk::getNNodeInElement(homogeneousType) ;
+        uint64_t    offset(0) ;
+        for( unsigned int i=0; i<nr_cells; ++i){
+            offset += n ;
+            genericIO::flushBINARY(str, offset );
         }
-
+    
     }
+
 };
 
 /*!  
@@ -456,16 +447,6 @@ void VTKUnstructuredGrid::readMetaData( ){
  * @param[in] field field to be read
  */
 void VTKUnstructuredGrid::readFieldData( std::fstream &str, VTKField &field ){
-
-    if( field.usesInterface() ){
-        absorbData( str, field.getCodification(), field.getName() ) ;
-
-    } else if( field.autoWrite() ){
-        field.absorbData( str ) ;
-
-    } else {
-        //dont do nothing
-    }
 
     return;
 }
