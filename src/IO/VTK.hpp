@@ -199,26 +199,6 @@ class VTKField{
         void                     setPosition( std::fstream::pos_type ) ;
         void                     setImplicit( bool ) ;
 
-        virtual void             flushData( std::fstream &) const ;
-        virtual void             absorbData( std::fstream &) const ;
-};
-
-template<class T>
-class VTKFieldWithVector : public VTKField{
-    private:
-    std::vector<T>*     m_ptr;            /**< pointer to data */
-
-    public:
-    ~VTKFieldWithVector( ) ;
-
-    VTKFieldWithVector( );
-    VTKFieldWithVector( const VTKField &, std::vector<T> & );
-    VTKFieldWithVector( std::string, std::vector<T> & );
-
-    void    setData( std::vector<T> &) ;
-    void    flushData( std::fstream &) const;
-    void    absorbData( std::fstream &) const;
-
 };
 
 class VTK{
@@ -270,11 +250,6 @@ class VTK{
         VTKField**                      addData( std::string, VTKFieldType, VTKLocation ) ;
         VTKField**                      addData( std::string, VTKFieldType, VTKLocation, VTKDataType ) ;
 
-        template<class T>
-        VTKField**                      addData( std::string, std::vector<T> & ) ;
-        template<class T>
-        VTKField**                      addData( std::string, VTKFieldType, VTKLocation, std::vector<T> & ) ;
-
         void                            removeData( std::string ) ;
 
         void                            read() ;
@@ -324,8 +299,8 @@ class VTKUnstructuredGrid : public VTK{
     VTKUnstructuredGrid( std::string , std::string ) ;
     VTKUnstructuredGrid( std::string , std::string, VTKElementType ) ;
 
-    template<class T0, class T1>
-    VTKUnstructuredGrid( std::string , std::string, VTKElementType, std::vector<T0> &, std::vector<T1> & ) ;
+    //template<class T0, class T1>
+    //VTKUnstructuredGrid( std::string , std::string, VTKElementType, std::vector<T0> &, std::vector<T1> & ) ;
 
     protected:
     void                            writeFieldData( std::fstream &, VTKField &) ; 
@@ -344,10 +319,10 @@ class VTKUnstructuredGrid : public VTK{
 
     void                            setGeomTypes( VTKDataType , VTKDataType , VTKDataType , VTKDataType ) ;
 
-    template<class T0>
-    void                            setGeomData( std::string, std::vector<T0> & ) ;
-    template<class T0, class T1>
-    void                            setGeomData( std::vector<T0> &, std::vector<T1> & ) ;
+    //template<class T0>
+    //void                            setGeomData( std::string, std::vector<T0> & ) ;
+    //template<class T0, class T1>
+    //void                            setGeomData( std::vector<T0> &, std::vector<T1> & ) ;
 
     uint64_t                        getNConnectivity( ) ; 
     uint64_t                        calcFieldSize( const VTKField &) ;
@@ -427,9 +402,7 @@ namespace vtk{
 
 }
 
-#include"VTK.tpp"
 #include"VTKTypes.tpp"
-#include"VTKField.tpp"
 #include"VTKUtils.tpp"
 
 

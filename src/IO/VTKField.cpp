@@ -299,25 +299,6 @@ bool VTKField::autoWrite( )const{
 };
 
 /*!
- * Checks which mechanism is used to read/write data
- * @return  true if flushData is used, false if internal pointer to data is used
- */
-void VTKField::flushData( std::fstream &str )const{ 
-    BITPIT_UNUSED( str);
-
-    return  ;
-};
-
-/*!
- * Checks which mechanism is used to read/write data
- * @return  true if flushData is used, false if internal pointer to data is used
- */
-void VTKField::absorbData( std::fstream &str )const{ 
-    BITPIT_UNUSED( str);
-
-    return  ;
-};
-/*!
  * @}
  */
 
