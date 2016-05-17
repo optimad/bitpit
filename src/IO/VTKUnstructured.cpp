@@ -112,9 +112,7 @@ void VTKUnstructuredGrid::setElementType( VTKElementType type_ ){
     homogeneousType = type_ ;
 
     geometry[1]->setDataType( VTKDataType::UInt64) ; 
-    geometry[1]->setImplicit( true) ; 
     geometry[2]->setDataType( VTKDataType::UInt8) ; 
-    geometry[2]->setImplicit( true) ; 
 
     geometry[3]->setFieldType( VTKFieldType::CONSTANT );
     geometry[3]->setComponents( vtk::getNNodeInElement(type_) );
@@ -310,25 +308,8 @@ void VTKUnstructuredGrid::writeMetaData( ){
 };
 
 /*!
- * Write Field data to stream
- * @param[in] str output stream
- * @param[in] field field to be written
  */
-void VTKUnstructuredGrid::writeFieldData( std::fstream &str, VTKField &field ){
-
-    if(field.getName() == "types" && homogeneousType != VTKElementType::UNDEFINED){
-        uint8_t type = (uint8_t) homogeneousType ;
-        for( unsigned int i=0; i<nr_cells; ++i)
-            genericIO::flushBINARY(str, type );
-    
-    } else if(field.getName() == "offsets" && homogeneousType != VTKElementType::UNDEFINED){
-        uint8_t     n = vtk::getNNodeInElement(homogeneousType) ;
-        uint64_t    offset(0) ;
-        for( unsigned int i=0; i<nr_cells; ++i){
-            offset += n ;
-            genericIO::flushBINARY(str, offset );
         }
-    
     }
 
 };
@@ -440,16 +421,6 @@ void VTKUnstructuredGrid::readMetaData( ){
 
     return ;
 };
-
-/*!
- * Read Field data from stream
- * @param[in] str input stream
- * @param[in] field field to be read
- */
-void VTKUnstructuredGrid::readFieldData( std::fstream &str, VTKField &field ){
-
-    return;
-}
 
 /*!
  * Calculates the size (in bytes) of a field

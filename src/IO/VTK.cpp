@@ -491,7 +491,6 @@ void VTK::writeData( ){
                 str.seekg( field->getPosition() ) ;
                 genericIO::copyUntilEOFInString( str, buffer, length );
 
-                writeFieldData( str, *field) ;
 
                 position_insert = str.tellg();
                 str << std::endl ;
@@ -510,7 +509,6 @@ void VTK::writeData( ){
                 str.seekg( field->getPosition() ) ;
                 genericIO::copyUntilEOFInString( str, buffer, length );
 
-                writeFieldData( str, *field) ;
 
                 position_insert = str.tellg();
                 str << std::endl ;
@@ -528,8 +526,6 @@ void VTK::writeData( ){
                 str.seekg( field->getPosition() ) ;
                 genericIO::copyUntilEOFInString( str, buffer, length );
 
-                writeFieldData( str, *field) ;
-                //flushData( str, VTKFormat::ASCII, field.getName() ) ;
 
                 position_insert = str.tellg();
                 str << std::endl ;
@@ -581,7 +577,6 @@ void VTK::writeData( ){
                     uint64_t    nbytes = calcFieldSize(*field) ;
                     genericIO::flushBINARY(str, nbytes) ;
                 };
-                writeFieldData( str, *field) ;
             };
         } 
 
@@ -597,7 +592,6 @@ void VTK::writeData( ){
                     uint64_t    nbytes = calcFieldSize(*field) ;
                     genericIO::flushBINARY(str, nbytes) ;
                 };
-                writeFieldData( str, *field) ;
 
             };
         } 
@@ -614,7 +608,6 @@ void VTK::writeData( ){
                     uint64_t    nbytes = calcFieldSize(*field) ;
                     genericIO::flushBINARY(str, nbytes) ;
                 };
-                writeFieldData( str, *field) ;
             };
         };
 
@@ -784,8 +777,6 @@ void VTK::readData( ){
             str.seekg( field->getOffset(), std::ios::cur) ;
             if( HeaderType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
             if( HeaderType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
-            //absorbData( str, VTKFormat::APPENDED, field->getName() ) ;
-            readFieldData( str, *field) ;
         };
     };
 
@@ -796,8 +787,6 @@ void VTK::readData( ){
             str.seekg( field->getOffset(), std::ios::cur) ;
             if( HeaderType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
             if( HeaderType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
-            //absorbData( str, VTKFormat::APPENDED, field->getName() ) ;
-            readFieldData( str, *field) ;
         };
     };
 
@@ -805,8 +794,6 @@ void VTK::readData( ){
     for( auto & field : data ){
         if(  field->getCodification() == VTKFormat::ASCII){
             str.seekg( field->getPosition() ) ;
-            //absorbData( str, VTKFormat::ASCII, field->getName() ) ;
-            readFieldData( str, *field) ;
         };
     };
 
@@ -814,8 +801,6 @@ void VTK::readData( ){
     for( auto & field : geometry ){
         if( field->getCodification() == VTKFormat::ASCII){
             str.seekg( field->getPosition() ) ;
-            //absorbData( str, VTKFormat::ASCII, field->getName() ) ;
-            readFieldData( str, *field) ;
         };
     };
 
@@ -931,52 +916,6 @@ bool  VTK::readDataArray( std::fstream &str, VTKField &field_  ){
 
     return false ; 
 
-};
-
-/*!
- * Write Field data to stream
- * @param[in] str output stream
- * @param[in] field field to be written
- */
-void VTK::writeFieldData( std::fstream &str, VTKField &field ){
-
-    BITPIT_UNUSED( str ) ;
-    BITPIT_UNUSED( field ) ;
-};
-
-/*!
- * Interface method for writing field data
- * @param[in] str output stream
- * @param[in] format codex to be used [VTKFormat::ASCII/VKFormat::APPENDED]
- * @param[in] name name of the field to be written
- */
-void VTK::flushData( std::fstream &str, VTKFormat format, std::string name ){
-    BITPIT_UNUSED( str ) ;
-    BITPIT_UNUSED( format ) ;
-    BITPIT_UNUSED( name ) ;
-};
-
-/*!
- * Read Field data from stream
- * @param[in] str input stream
- * @param[in] field field to be read
- */
-void VTK::readFieldData( std::fstream &str, VTKField &field ){
-
-    BITPIT_UNUSED( str ) ;
-    BITPIT_UNUSED( field ) ;
-};
-
-/*!
- * Interface method for reading field data
- * @param[in] str output stream
- * @param[in] format codex to be used [VTKFormat::ASCII/VKFormat::APPENDED]
- * @param[in] name name of the field to be read
- */
-void VTK::absorbData( std::fstream &str, VTKFormat format, std::string name ){
-    BITPIT_UNUSED( str ) ;
-    BITPIT_UNUSED( format ) ;
-    BITPIT_UNUSED( name ) ;
 };
 
 /*! 

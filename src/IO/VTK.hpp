@@ -191,13 +191,10 @@ class VTKField{
         void                     setElements( uint64_t ) ;
         void                     setOffset( uint64_t ) ;
         void                     setPosition( std::fstream::pos_type ) ;
-        void                     setImplicit( bool ) ;
 
 };
 
 class VTK{
-
-    protected:
 
 
         // members ---------------------------------------------------------------------- //
@@ -262,21 +259,16 @@ class VTK{
         void                            writeDataHeader( std::fstream &, bool parallel=false ) ;
         void                            writeDataArray( std::fstream &, VTKField &) ;
         void                            writePDataArray( std::fstream &, VTKField &) ;
-        virtual void                    writeFieldData( std::fstream &, VTKField &) ; 
 
         //For Reading
         void                            readDataHeader( std::fstream &) ;
         bool                            readDataArray( std::fstream &, VTKField &);
-        virtual void                    readFieldData( std::fstream &, VTKField &) ; 
 
         //General Purpose
         bool                            getFieldByName( const std::string &, VTKField**& ) ;
         void                            calcAppendedOffsets() ;
         virtual uint64_t                calcFieldSize( const VTKField &) =0;
 
-        //Interface methods
-        virtual void                    flushData( std::fstream &, VTKFormat , std::string )  ;
-        virtual  void                   absorbData( std::fstream &, VTKFormat , std::string )  ;
 
 };
 
@@ -297,9 +289,6 @@ class VTKUnstructuredGrid : public VTK{
     //VTKUnstructuredGrid( std::string , std::string, VTKElementType, std::vector<T0> &, std::vector<T1> & ) ;
 
     protected:
-    void                            writeFieldData( std::fstream &, VTKField &) ; 
-    void                            readFieldData( std::fstream &, VTKField &) ; 
-
     void                            writeCollection() ;  
     uint64_t                        calcSizeConnectivity( ) ;
 
