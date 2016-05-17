@@ -349,10 +349,13 @@ namespace bitpit {
         // =================================================================================== //
         // OTHER OCTANT BASED METHODS												    	   //
         // =================================================================================== //
+
+        void        findNeighbours(const Octant* oct, bool haveIidx, uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost, bool onlyinternals = false) const;
     public:
         void 		findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const;
         void 		findNeighbours(Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const ;
         void 		findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours) const;
+        void 		findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const;
         Octant* 	getPointOwner(dvector point);
         uint32_t 	getPointOwnerIdx(dvector point);
         Octant* 	getPointOwner(darray3 point);

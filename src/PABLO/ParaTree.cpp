@@ -31,6 +31,7 @@
 #include <sstream>
 #include <iomanip>
 #include <fstream>
+#include <iterator>
 
 namespace bitpit {
 
@@ -1824,6 +1825,40 @@ namespace bitpit {
             // OTHER OCTANT BASED METHODS												    			   //
             // =================================================================================== //
 
+            /** Finds neighbours of octant(both locals and ghosts) through iface in local and ghost octants vector.
+             * Returns a vector (empty if iface is a bound face) with the index of neighbours
+             * in their structure (octants or ghosts) and sets isghost[i] = true if the
+             * i-th neighbour is ghost in the local tree.
+             * \param[in] idx Index of current octant
+             * \param[in] amighost boolean flag to specify if idx index octant is ghost
+             * \param[in] iface Index of face/edge/node passed through for neighbours finding
+             * \param[in] codim Codimension of the iface-th entity 1=edge, 2=node
+             * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+             * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+             * \param[in] onlyghosts A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the ghost ones (true).*/
+            void
+                ParaTree::findNeighbours(const Octant* oct, bool haveIidx, uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
+                
+                bool	Fedge = ((codim==2) && (m_dim==3));
+                bool	Fnode = (codim == m_dim);
+
+                if (codim == 1){
+                    m_octree.findNeighbours(oct, haveIidx, idx, iface, neighbours, isghost, onlyinternal);
+                }
+                else if (Fedge){
+                    m_octree.findEdgeNeighbours(oct, haveIidx, idx, iface, neighbours, isghost, onlyinternal);
+                }
+                else if (Fnode){
+                    m_octree.findNodeNeighbours(oct, haveIidx, idx, iface, neighbours, isghost, onlyinternal);
+                }
+                else {
+                    neighbours.clear();
+                    isghost.clear();
+                }
+
+            };
+
+
             /** Finds neighbours of octant through iface in vector octants.
              * Returns a vector (empty if iface is a bound face) with the index of neighbours
              * in their structure (octants or ghosts) and sets isghost[i] = true if the
@@ -1836,22 +1871,10 @@ namespace bitpit {
             void
                 ParaTree::findNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, vector<bool> & isghost) const {
 
-                bool	Fedge = ((codim==2) && (m_dim==3));
-                bool	Fnode = (codim == m_dim);
+                const Octant* oct = &m_octree.m_octants[idx];
+                
+                findNeighbours(oct, true, idx, iface, codim, neighbours, isghost, false);
 
-                if (codim == 1){
-                    m_octree.findNeighbours(idx, iface, neighbours, isghost);
-                }
-                else if (Fedge){
-                    m_octree.findEdgeNeighbours(idx, iface, neighbours, isghost);
-                }
-                else if (Fnode){
-                    m_octree.findNodeNeighbours(idx, iface, neighbours, isghost);
-                }
-                else {
-                    neighbours.clear();
-                    isghost.clear();
-                }
             };
 
             /** Finds neighbours of octant through iface in vector octants.
@@ -1865,23 +1888,8 @@ namespace bitpit {
              * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs. */
             void
                 ParaTree::findNeighbours(Octant* oct, uint8_t iface, uint8_t codim, u32vector & neighbours, vector<bool> & isghost) const {
-
-                bool	Fedge = ((codim==2) && (m_dim==3));
-                bool	Fnode = (codim == m_dim);
-
-                if (codim == 1){
-                    m_octree.findNeighbours(oct, iface, neighbours, isghost);
-                }
-                else if (Fedge){
-                    m_octree.findEdgeNeighbours(oct, iface, neighbours, isghost);
-                }
-                else if (Fnode){
-                    m_octree.findNodeNeighbours(oct, iface, neighbours, isghost);
-                }
-                else {
-                    neighbours.clear();
-                    isghost.clear();
-                }
+                
+                findNeighbours(oct, false, 0, iface, codim, neighbours, isghost, false);
 
             };
 
@@ -1896,22 +1904,28 @@ namespace bitpit {
             void
                 ParaTree::findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours) const {
 
-                bool	Fedge = ((codim==2) && (m_dim==3));
-                bool	Fnode = (codim == m_dim);
+                const Octant* oct = &m_octree.m_ghosts[idx];
+                bvector isghost;
+                findNeighbours(oct, true, idx, iface, codim, neighbours, isghost, true);
 
-                if (codim == 1){
-                    m_octree.findGhostNeighbours(idx, iface, neighbours);
-                }
-                else if (Fedge){
-                    m_octree.findGhostEdgeNeighbours(idx, iface, neighbours);
-                }
-                else if (Fnode){
-                    m_octree.findGhostNodeNeighbours(idx, iface, neighbours);
-                }
-                else {
-                    neighbours.clear();
-                }
             };
+
+            /** Finds neighbours of ghost octant through iface in vector octants.
+             * Returns a vector (empty if iface is a bound face) with the index of neighbours
+             * in their structure ( only local octants ).
+             * \param[in] idx Index of current octant
+             * \param[in] iface Index of face/edge/node passed through for neighbours finding
+             * \param[in] codim Codimension of the iface-th entity 1=edge, 2=node
+             * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+             */
+            void
+                ParaTree::findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const {
+
+                const Octant* oct = &m_octree.m_ghosts[idx];
+                findNeighbours(oct, true, idx, iface, codim, neighbours, isghost, false);
+
+            };
+
 
             /** Get the octant owner of an input point.
              * \param[in] point Coordinates of target point.
