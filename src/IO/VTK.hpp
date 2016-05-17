@@ -238,7 +238,6 @@ class VTK{
         void                            setDataCodex( VTKFormat );
 
         VTKField**                      addData( std::string ) ;
-        VTKField**                      addData( std::string, VTKFieldType, VTKLocation ) ;
         VTKField**                      addData( std::string, VTKFieldType, VTKLocation, VTKDataType ) ;
 
         void                            removeData( std::string ) ;

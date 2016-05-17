@@ -288,10 +288,9 @@ VTKField** VTK::addData( std::string name_ ){
  * @param[in]  name_    name of field
  * @param[in]  comp_    type of data field [ VTKFieldType::SCALAR/ VTKFieldType::VECTOR ] 
  * @param[in]  loc_     location of data [VTKLocation::CELL/VTKLocation::POINT]
+ * @param[in]  type_    type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
  */
-VTKField** VTK::addData( std::string name_, VTKFieldType comp_,  VTKLocation loc_ ){
-
-
+VTKField** VTK::addData( std::string name_, VTKFieldType comp_,  VTKLocation loc_, VTKDataType type_ ){
 
     VTKField**   ptr = addData( name_ ) ;
 
@@ -303,22 +302,6 @@ VTKField** VTK::addData( std::string name_, VTKFieldType comp_,  VTKLocation loc
     } else if( loc_ == VTKLocation::POINT ){
         (*ptr)->setElements(nr_points);
     }
-
-    return ptr ;
-
-};
-
-/*!
- * Add user data for input or output. 
- * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
- * @param[in]  name_    name of field
- * @param[in]  comp_    type of data field [ VTKFieldType::SCALAR/ VTKFieldType::VECTOR ] 
- * @param[in]  loc_     location of data [VTKLocation::CELL/VTKLocation::POINT]
- * @param[in]  type_    type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
- */
-VTKField** VTK::addData( std::string name_, VTKFieldType comp_,  VTKLocation loc_, VTKDataType type_ ){
-
-    VTKField**   ptr = addData( name_, comp_, loc_) ;
     
     (*ptr)->setDataType(type_) ;
 
