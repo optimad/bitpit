@@ -46,15 +46,15 @@ VTKRectilinearGrid::VTKRectilinearGrid( )  :VTK() {
 
     fh.setAppendix( "vtr" );
 
-    geometry.push_back( new VTKField("x_Coord") ) ;
-    geometry.push_back( new VTKField("y_Coord") ) ;
-    geometry.push_back( new VTKField("z_Coord") ) ;
+    geometry.push_back( VTKField("x_Coord") ) ;
+    geometry.push_back( VTKField("y_Coord") ) ;
+    geometry.push_back( VTKField("z_Coord") ) ;
 
     for( auto & field : geometry ){
-        field->setLocation( VTKLocation::POINT ) ;
-        field->setFieldType( VTKFieldType::SCALAR ) ;
-        field->setDataType( VTKDataType::Float64 ) ;
-        field->setCodification(GeomCodex);
+        field.setLocation( VTKLocation::POINT ) ;
+        field.setFieldType( VTKFieldType::SCALAR ) ;
+        field.setDataType( VTKDataType::Float64 ) ;
+        field.setCodification(GeomCodex);
     }
 
 } ;
@@ -168,9 +168,9 @@ VTKRectilinearGrid::~VTKRectilinearGrid( ){
  */
 void VTKRectilinearGrid::setGeomTypes( VTKDataType Ptype ){
 
-    geometry[0]->setDataType(Ptype) ;
-    geometry[1]->setDataType(Ptype) ;
-    geometry[2]->setDataType(Ptype) ;
+    geometry[0].setDataType(Ptype) ;
+    geometry[1].setDataType(Ptype) ;
+    geometry[2].setDataType(Ptype) ;
 
     return ;
 };
@@ -219,8 +219,8 @@ void VTKRectilinearGrid::readMetaData( ){
 
     for( auto &field : geometry ){ //int i=0; i<geometry.size(); ++i){
         str.seekg( position) ;
-        if( ! readDataArray( str, *field ) ) {
-            std::cout << field->getName() << " DataArray not found" << std::endl ;
+        if( ! readDataArray( str, field ) ) {
+            std::cout << field.getName() << " DataArray not found" << std::endl ;
         };
     };
 
@@ -265,9 +265,9 @@ void VTKRectilinearGrid::writeMetaData( ){
 
     //Wring Geometry Information   
     str << "       <Coordinates>" << std::endl;
-    writeDataArray( str, *geometry[0] ) ;
-    writeDataArray( str, *geometry[1] ) ;
-    writeDataArray( str, *geometry[2] ) ;
+    writeDataArray( str, geometry[0] ) ;
+    writeDataArray( str, geometry[1] ) ;
+    writeDataArray( str, geometry[2] ) ;
     str << "       </Coordinates>" << std::endl;
 
     //Closing Piece
@@ -325,9 +325,9 @@ void VTKRectilinearGrid::writeCollection( ){
 
     //Wring Geometry Information
     str << "      <PCoordinates>" << std::endl;
-    writePDataArray( str, *geometry[0] ) ;
-    writePDataArray( str, *geometry[1] ) ;
-    writePDataArray( str, *geometry[2] ) ;
+    writePDataArray( str, geometry[0] ) ;
+    writePDataArray( str, geometry[1] ) ;
+    writePDataArray( str, geometry[2] ) ;
     str << "      </PCoordinates>" << std::endl;
 
 

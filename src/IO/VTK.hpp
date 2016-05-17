@@ -204,10 +204,10 @@ class VTK{
 
         std::string                     HeaderType ;                /**< UInt32 or UInt64_t */
 
-        std::vector<VTKField*>          geometry ;                  /**< Geometry fields */
+        std::vector<VTKField>           geometry ;                  /**< Geometry fields */
         VTKFormat                       GeomCodex ;                 /**< Geometry codex */
 
-        std::vector<VTKField*>          data ;                      /**< Data fields */
+        std::vector<VTKField>           data ;                      /**< Data fields */
         VTKFormat                       DataCodex ;                 /**< Data codex */
 
         // methods ----------------------------------------------------------------------- //
@@ -234,8 +234,8 @@ class VTK{
         void                            setGeomCodex( VTKFormat );
         void                            setDataCodex( VTKFormat );
 
-        VTKField**                      addData( std::string ) ;
-        VTKField**                      addData( std::string, VTKFieldType, VTKLocation, VTKDataType ) ;
+        VTKField*                       addData( std::string ) ;
+        VTKField*                       addData( std::string, VTKFieldType, VTKLocation, VTKDataType ) ;
 
         void                            removeData( std::string ) ;
 
@@ -261,7 +261,7 @@ class VTK{
         bool                            readDataArray( std::fstream &, VTKField &);
 
         //General Purpose
-        bool                            getFieldByName( const std::string &, VTKField**& ) ;
+        bool                            getFieldByName( const std::string &, VTKField*& ) ;
         void                            calcAppendedOffsets() ;
         virtual uint64_t                calcFieldSize( const VTKField &) =0;
 
