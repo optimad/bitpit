@@ -683,6 +683,18 @@ namespace bitpit {
     };
 
 
+    /** Finds local and ghost or only local neighbours of octant(both local and ghost ones) through iface face.
+     * Returns a vector (empty if iface is a bound face) with the index of neighbours
+     * in their structure (octants or ghosts) and sets isghost[i] = true if the
+     * i-th neighbour is ghost in the local tree.
+     * \param[in] oct Pointer to the current octant
+     * \param[in] haveIidx Boolean flag to specify if the octant is passed with a valid idx
+     * \param[in] idx Index of the searching octant. Its value is not important if haveIidx is false
+     * \param[in] iface Index of face passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).
+     */
     void
     LocalTree::findNeighbours(const Octant* oct, bool haveIidx, uint32_t idx, uint8_t iface, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
 
@@ -1092,6 +1104,18 @@ namespace bitpit {
 
     };
 
+    /** Finds local and ghost or only local neighbours of octant(both local and ghost ones) through iedge edge.
+     * Returns a vector (empty if iface is a bound face) with the index of neighbours
+     * in their structure (octants or ghosts) and sets isghost[i] = true if the
+     * i-th neighbour is ghost in the local tree.
+     * \param[in] oct Pointer to the current octant
+     * \param[in] haveIidx Boolean flag to specify if the octant is passed with a valid idx
+     * \param[in] idx Index of the searching octant. Its value is not important if haveIidx is false
+     * \param[in] iedge Index of edge passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).
+     */
     void
     LocalTree::findEdgeNeighbours(const Octant* oct, bool haveIidx, uint32_t idx, uint8_t iedge, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
         uint64_t  		Morton, Mortontry;
@@ -1364,6 +1388,18 @@ namespace bitpit {
 
     };
 
+    /** Finds local and ghost or only local neighbours of octant(both local and ghost ones) through inode node.
+     * Returns a vector (empty if iface is a bound face) with the index of neighbours
+     * in their structure (octants or ghosts) and sets isghost[i] = true if the
+     * i-th neighbour is ghost in the local tree.
+     * \param[in] oct Pointer to the current octant
+     * \param[in] haveIidx Boolean flag to specify if the octant is passed with a valid idx
+     * \param[in] idx Index of the searching octant. Its value is not important if haveIidx is false
+     * \param[in] inode Index of node passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).
+     */
     void
     LocalTree::findNodeNeighbours(const Octant* oct, bool haveIidx, uint32_t idx, uint8_t inode, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
         uint64_t  	Morton, Mortontry;
@@ -1601,49 +1637,144 @@ namespace bitpit {
 
     };
 
+    /** Finds local and ghost or only local neighbours of octant(both local and ghost ones) through iface face.
+     * Returns a vector (empty if iface is a bound face) with the index of neighbours
+     * in their structure (octants or ghosts) and sets isghost[i] = true if the
+     * i-th neighbour is ghost in the local tree.
+     * \param[in] idx Index of current octant
+     * \param[in] amIghost Boolean flag to specify if the octant is a ghost one
+     * \param[in] iface Index of face passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).
+     */
     void
     LocalTree::findNeighbours(uint32_t idx, bool amIghost,uint8_t iface, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
         const Octant* oct = amIghost ? &m_ghosts[idx] : &m_octants[idx];
         findNeighbours(oct, true, idx, iface, neighbours, isghost, onlyinternal);
     };
+
+    /** Finds local and ghost or only local neighbours of octant(both local and ghost ones) through iedge edge.
+     * Returns a vector (empty if iface is a bound face) with the index of neighbours
+     * in their structure (octants or ghosts) and sets isghost[i] = true if the
+     * i-th neighbour is ghost in the local tree.
+     * \param[in] idx Index of current octant
+     * \param[in] amIghost Boolean flag to specify if the octant is a ghost one
+     * \param[in] iedge Index of edge passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).
+     */
     void
-    LocalTree::findEdgeNeighbours(uint32_t idx, bool amIghost,uint8_t iface, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
+    LocalTree::findEdgeNeighbours(uint32_t idx, bool amIghost,uint8_t iedge, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
         const Octant* oct = amIghost ? &m_ghosts[idx] : &m_octants[idx];
-        findEdgeNeighbours(oct, true, idx, iface, neighbours, isghost, onlyinternal);
+        findEdgeNeighbours(oct, true, idx, iedge, neighbours, isghost, onlyinternal);
     };
+
+    /** Finds local and ghost or only local neighbours of octant(both local and ghost ones) through inode node.
+     * Returns a vector (empty if iface is a bound face) with the index of neighbours
+     * in their structure (octants or ghosts) and sets isghost[i] = true if the
+     * i-th neighbour is ghost in the local tree.
+     * \param[in] idx Index of current octant
+     * \param[in] amIghost Boolean flag to specify if the octant is a ghost one
+     * \param[in] inode Index of node passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).
+     */
     void
     LocalTree::findNodeNeighbours(uint32_t idx, bool amIghost,uint8_t iface, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
         const Octant* oct = amIghost ? &m_ghosts[idx] : &m_octants[idx];
         findNodeNeighbours(oct, true, idx ,iface,neighbours, isghost,onlyinternal);
     };
+
+    /** Finds local and ghost or only local neighbours of octant(both local and ghost ones) through iface face.
+     * Returns a vector (empty if iface is a bound face) with the index of neighbours
+     * in their structure (octants or ghosts) and sets isghost[i] = true if the
+     * i-th neighbour is ghost in the local tree.
+     * \param[in] oct Pointer to the current octant
+     * \param[in] iface Index of face passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).
+     */
     void
     LocalTree::findNeighbours(const Octant* oct, uint8_t iface, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
         uint32_t idx = 0;
         findNeighbours(oct, false, idx, iface, neighbours, isghost, onlyinternal);
     };
+
+    /** Finds local and ghost or only local neighbours of octant(both local and ghost ones) through iedge edge.
+     * Returns a vector (empty if iface is a bound face) with the index of neighbours
+     * in their structure (octants or ghosts) and sets isghost[i] = true if the
+     * i-th neighbour is ghost in the local tree.
+     * \param[in] oct Pointer to the current octant
+     * \param[in] iedge Index of edge passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).
+     */
     void
-    LocalTree::findEdgeNeighbours(const Octant* oct, uint8_t iface, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
+    LocalTree::findEdgeNeighbours(const Octant* oct, uint8_t iedge, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
         uint32_t idx = 0;
-        findEdgeNeighbours(oct, false, idx, iface, neighbours, isghost, onlyinternal);
-    };
-    void
-    LocalTree::findNodeNeighbours(const Octant* oct, uint8_t iface, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
-        uint32_t idx = 0;
-        findNodeNeighbours(oct, false, idx ,iface,neighbours, isghost,onlyinternal);
+        findEdgeNeighbours(oct, false, idx, iedge, neighbours, isghost, onlyinternal);
     };
 
+    /** Finds local and ghost or only local neighbours of octant(both local and ghost ones) through inode node.
+     * Returns a vector (empty if iface is a bound face) with the index of neighbours
+     * in their structure (octants or ghosts) and sets isghost[i] = true if the
+     * i-th neighbour is ghost in the local tree.
+     * \param[in] oct Pointer to the current octant
+     * \param[in] inode Index of node passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).
+     */
+    void
+    LocalTree::findNodeNeighbours(const Octant* oct, uint8_t inode, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
+        uint32_t idx = 0;
+        findNodeNeighbours(oct, false, idx ,inode,neighbours, isghost,onlyinternal);
+    };
+
+    /** Finds local and ghost neighbours of ghost octant through iface face.
+     * Returns a vector (empty if iface is a bound face) with the index of neighbours
+     * in their structure (octants or ghosts) and sets isghost[i] = true if the
+     * i-th neighbour is ghost in the local tree.
+     * \param[in] idx Index of the current ghost octant
+     * \param[in] iface Index of face passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     */
 	void
     LocalTree::findGhostNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, bvector & isghost) const{
         const Octant* oct = &m_ghosts[idx];
         findNeighbours(oct,true,idx,iface,neighbours, isghost,false);
     };
 
+    /** Finds local and ghost neighbours of ghost octant through iedge edge.
+     * Returns a vector (empty if iedge is a bound edge) with the index of neighbours
+     * in their structure (octants or ghosts) and sets isghost[i] = true if the
+     * i-th neighbour is ghost in the local tree.
+     * \param[in] idx Index of the current octant
+     * \param[in] iedge Index of edge passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     */
 	void
     LocalTree::findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbours, bvector & isghost) const{
         const Octant* oct = &m_ghosts[idx];
         findEdgeNeighbours(oct,true,idx,iedge,neighbours, isghost,false);
     };
 
+    /** Finds local and ghost neighbours of ghost octant through inode node.
+     * Returns a vector (empty if inode is a bound node) with the index of neighbours
+     * in their structure (octants or ghosts) and sets isghost[i] = true if the
+     * i-th neighbour is ghost in the local tree.
+     * \param[in] idx Index of the current octant
+     * \param[in] inode Index of node passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     */
 	void
     LocalTree::findGhostNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours, bvector & isghost) const{
         const Octant* oct = &m_ghosts[idx];
@@ -1651,42 +1782,122 @@ namespace bitpit {
     };
 
 
+    /** Finds local and ghost neighbours of local octant through iface face.
+     * Returns a vector (empty if iface is a bound face) with the index of neighbours
+     * in their structure (octants or ghosts) and sets isghost[i] = true if the
+     * i-th neighbour is ghost in the local tree.
+     * \param[in] idx Index of the current octant
+     * \param[in] iface Index of face passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     */
     void
     LocalTree::findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, bvector & isghost) const{
         findNeighbours(idx, false, iface, neighbours, isghost, false);
     };
+
+    /** Finds local and ghost neighbours of local octant through iedge edge.
+     * Returns a vector (empty if iedge is a bound edge) with the index of neighbours
+     * in their structure (octants or ghosts) and sets isghost[i] = true if the
+     * i-th neighbour is ghost in the local tree.
+     * \param[in] idx Index of the current octant
+     * \param[in] iedge Index of edge passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     */
     void
-    LocalTree::findEdgeNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, bvector & isghost) const{
-        findEdgeNeighbours(idx, false, iface, neighbours, isghost, false);
+    LocalTree::findEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbours, bvector & isghost) const{
+        findEdgeNeighbours(idx, false, iedge, neighbours, isghost, false);
     };
+
+    /** Finds local and ghost neighbours of local octant through inode node.
+     * Returns a vector (empty if inode is a bound node) with the index of neighbours
+     * in their structure (octants or ghosts) and sets isghost[i] = true if the
+     * i-th neighbour is ghost in the local tree.
+     * \param[in] idx Index of the current octant
+     * \param[in] inode Index of node passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     */
     void
-    LocalTree::findNodeNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, bvector & isghost) const{
-        findNodeNeighbours(idx, false, iface, neighbours, isghost, false);
+    LocalTree::findNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours, bvector & isghost) const{
+        findNodeNeighbours(idx, false, inode, neighbours, isghost, false);
     };
+
+    /** Finds local and ghost neighbours of an octant through iface face.
+     * Returns a vector (empty if iface is a bound face) with the index of neighbours
+     * in their structure (octants or ghosts) and sets isghost[i] = true if the
+     * i-th neighbour is ghost in the local tree.
+     * \param[in] oct Pointer to the current octant
+     * \param[in] iface Index of face passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     */
     void
     LocalTree::findNeighbours(const Octant* oct, uint8_t iface, u32vector & neighbours, bvector & isghost) const{
         findNeighbours(oct, iface, neighbours, isghost, false);
     };
+
+    /** Finds local and ghost neighbours of an octant through iedge edge.
+     * Returns a vector (empty if iedge is a bound edge) with the index of neighbours
+     * in their structure (octants or ghosts) and sets isghost[i] = true if the
+     * i-th neighbour is ghost in the local tree.
+     * \param[in] oct Pointer to the current octant
+     * \param[in] iedge Index of edge passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     */
     void
-    LocalTree::findEdgeNeighbours(const Octant* oct, uint8_t iface, u32vector & neighbours, bvector & isghost) const{
-        findEdgeNeighbours(oct, iface, neighbours, isghost, false);
+    LocalTree::findEdgeNeighbours(const Octant* oct, uint8_t iedge, u32vector & neighbours, bvector & isghost) const{
+        findEdgeNeighbours(oct, iedge, neighbours, isghost, false);
     };
+
+    /** Finds local and ghost neighbours of an octant through inode node.
+     * Returns a vector (empty if inode is a bound node) with the index of neighbours
+     * in their structure (octants or ghosts) and sets isghost[i] = true if the
+     * i-th neighbour is ghost in the local tree.
+     * \param[in] oct Pointer to the current octant
+     * \param[in] inode Index of node passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
+     */
     void
-    LocalTree::findNodeNeighbours(const Octant* oct, uint8_t iface, u32vector & neighbours, bvector & isghost) const{
-        findNodeNeighbours(oct, iface, neighbours, isghost, false);
+    LocalTree::findNodeNeighbours(const Octant* oct, uint8_t inode, u32vector & neighbours, bvector & isghost) const{
+        findNodeNeighbours(oct, inode, neighbours, isghost, false);
     };
+
+    /** Finds local neighbours of a ghost octant through iface face.
+     * Returns a vector (empty if iface is a bound face) with the index of neighbours
+     * \param[in] idx Index of the current octant
+     * \param[in] iface Index of face passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     */
 	void
     LocalTree::findGhostNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours) const{
         bvector isghost;
         const Octant* oct = &m_ghosts[idx];
         findNeighbours(oct, true, idx, iface, neighbours, isghost, true);
     };
+
+    /** Finds local neighbours of a ghost octant through iedge edge.
+     * Returns a vector (empty if iedge is a bound edge) with the index of neighbours
+     * \param[in] idx Index of the current octant
+     * \param[in] iedge Index of edge passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     */
 	void
     LocalTree::findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbours) const{
         bvector isghost;
         const Octant* oct = &m_ghosts[idx];
         findEdgeNeighbours(oct, true, idx, iedge, neighbours, isghost, true);
     };
+
+    /** Finds local neighbours of a ghost octant through inode node.
+     * Returns a vector (empty if inode is a bound node) with the index of neighbours
+     * \param[in] idx Index of the current octant
+     * \param[in] inode Index of node passed through for neighbours finding
+     * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+     */
 	void
     LocalTree::findGhostNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours) const{
         bvector isghost;
