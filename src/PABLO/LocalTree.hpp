@@ -171,10 +171,6 @@ private:
 	void 		checkCoarse(uint64_t lastDescPre, uint64_t firstDescPost, u32vector & mapidx);
 	void 		updateLocalMaxDepth();
 
-
-
-
-    ///////////////////////////////////////////////FINDNEIGHBOURS REWORK BEGIN
     
     void        findNeighbours(const Octant* oct, bool haveIidx, uint32_t idx, uint8_t iface, u32vector & neighbours, bvector & isghost, bool onlyinternal) const;
     void        findEdgeNeighbours(const Octant* oct, bool haveIidx, uint32_t idx, uint8_t iedge, u32vector & neighbours, bvector & isghost, bool onlyinternal) const;
@@ -193,9 +189,7 @@ private:
 	void 		findGhostNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours, bvector & isghost) const;
 	void 		findGhostPeriodicNeighbours(const Octant* oct, uint8_t iface, u32vector & neighbours) const;
 
-    ///////////////////////////////////////////////FINDNEIGHBOURS REWORK END
 
-    ///////////////////////////////////////////////FINDNEIGHOBURS OLD PROTOTYPES BEGIN
     void        findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, bvector & isghost) const;
     void        findEdgeNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, bvector & isghost) const;
     void        findNodeNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours, bvector & isghost) const;
@@ -205,27 +199,7 @@ private:
 	void 		findGhostNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours) const;
 	void 		findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge, u32vector & neighbours) const;
 	void 		findGhostNodeNeighbours(uint32_t idx, uint8_t inode, u32vector & neighbours) const;
-    ///////////////////////////////////////////////FINDNEIGHOBURS OLD PROTOTYPES END
 
-
-
-	// void 		findNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours,
-	// 							std::vector<bool> & isghost) const;
-	// void 		findNeighbours(const Octant* oct, uint8_t iface, u32vector & neighbours,
-	// 							std::vector<bool> & isghost) const;
-	// void 		findGhostNeighbours(uint32_t idx, uint8_t iface, u32vector & neighbours) const;
-	// void 		findEdgeNeighbours(uint32_t idx, uint8_t iedge,
-	// 							u32vector & neighbours, std::vector<bool> & isghost) const;
-	// void 		findEdgeNeighbours(const Octant* oct, uint8_t iedge,
-	// 							u32vector & neighbours, std::vector<bool> & isghost) const;
-	// void 		findGhostEdgeNeighbours(uint32_t idx, uint8_t iedge,
-	// 							u32vector & neighbours) const;
-	// void 		findNodeNeighbours(const Octant* oct, uint8_t inode,
-	// 							u32vector & neighbours, std::vector<bool> & isghost) const;
-	// void 		findNodeNeighbours(uint32_t idx, uint8_t inode,
-	// 							u32vector & neighbours, std::vector<bool> & isghost) const;
-	// void 		findGhostNodeNeighbours(uint32_t idx, uint8_t inode,
-	// 							u32vector & neighbours) const;
 
 	void 		preBalance21(bool internal);
 	void 		preBalance21(u32vector& newmodified);
