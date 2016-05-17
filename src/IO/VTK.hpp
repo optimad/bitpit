@@ -152,12 +152,11 @@ class VTKField{
     //members
     protected:
         std::string              name;                      /**< name of the field */
-        VTKFieldType             fieldType;                      /**< type of field [ VTKFieldType::SCALAR/VECTOR/CONSTANT/VARIABLE ] */
+        VTKFieldType             fieldType;                 /**< type of field [ VTKFieldType::SCALAR/VECTOR/KNOWN_BY_CLASS ] */
         uint8_t                  components;                /**< type of field [ VTKFieldType::SCALAR/VECTOR/CONSTANT/VARIABLE ] */
-        VTKDataType              dataType;                      /**< type of data [  VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ]] */
+        VTKDataType              dataType;                  /**< type of data [  VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ]] */
         VTKLocation              location;                  /**< cell or point data [ VTKLocation::CELL/VTKLocation::POINT] */
         VTKFormat                codification ;             /**< Type of codification [VTKFormat::ASCII, VTKFormat::APPENDED] */
-        uint64_t                 nr_elements;               /**< nr of cells or points */
         uint64_t                 offset;                    /**< offset in the appended section */
         std::fstream::pos_type   position;                  /**< position in file */
 
@@ -177,7 +176,6 @@ class VTKField{
         VTKLocation              getLocation() const;
         VTKFormat                getCodification() const;
         uint8_t                  getComponents() const;
-        uint64_t                 getElements() const;
         uint64_t                 getOffset() const;
         std::fstream::pos_type   getPosition() const; 
         bool                     hasAllMetaData() const ;
@@ -188,7 +186,6 @@ class VTKField{
         void                     setLocation( VTKLocation ) ;
         void                     setCodification( VTKFormat ) ;
         void                     setComponents( uint8_t ) ;
-        void                     setElements( uint64_t ) ;
         void                     setOffset( uint64_t ) ;
         void                     setPosition( std::fstream::pos_type ) ;
 

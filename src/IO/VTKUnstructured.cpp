@@ -149,22 +149,10 @@ void VTKUnstructuredGrid::setDimensions( uint64_t ncells_, uint64_t npoints_, ui
     nr_points       = npoints_ ;
     nconnectivity   = nconn_ ;
 
-    geometry[0]->setElements(nr_points) ;
-    geometry[1]->setElements(nr_cells) ;
-    geometry[2]->setElements(nr_cells) ;
-
     if( homogeneousType != VTKElementType::UNDEFINED ){
         nconnectivity = ncells_ *vtk::getNNodeInElement( homogeneousType ) ;
-        geometry[3]->setElements(nr_cells) ;
 
-    } else {
-        geometry[3]->setElements(nconnectivity) ;
     }
-
-    for( auto &field : data ){
-        if( field->getLocation() == VTKLocation::CELL)  field->setElements(nr_cells) ;
-        if( field->getLocation() == VTKLocation::POINT) field->setElements(nr_points) ;
-    };
 
     return ;
 };

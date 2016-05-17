@@ -374,10 +374,6 @@ void VTKRectilinearGrid::setDimensions( int n1_, int n2_, int m1_, int m2_, int 
     if(nr_procs==1)
         global_index = local_index ;
 
-    for(int d=0; d<3; ++d){
-        geometry[d]->setElements( local_index[d][1] -local_index[d][0] +1 ) ;
-    };
-
 
     nr_cells = 1 ;
     nr_points = 1 ;
@@ -387,10 +383,6 @@ void VTKRectilinearGrid::setDimensions( int n1_, int n2_, int m1_, int m2_, int 
         nr_points = nr_points *  ( local_index[d][1] -local_index[d][0] +1 ) ;
     };
 
-    for( auto &field : data ){
-        if( field->getLocation() == VTKLocation::CELL)  field->setElements(nr_cells) ;
-        if( field->getLocation() == VTKLocation::POINT) field->setElements(nr_points) ;
-    };
 
     return ;
 };

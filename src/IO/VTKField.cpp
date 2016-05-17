@@ -51,7 +51,6 @@ VTKField::VTKField(){
     codification    = VTKFormat::UNDEFINED ;
     fieldType       = VTKFieldType::UNDEFINED ;
     components      = 0 ;
-    nr_elements     = 0 ;
     position        = 0 ;
 
 };
@@ -85,7 +84,6 @@ VTKField& VTKField::operator=( const VTKField & other){
     dataType = other.dataType ;
     codification = other.codification;
     location = other.location ;
-    nr_elements = other.nr_elements ;
     offset = other.offset ;
     position = other.position ;
 
@@ -143,15 +141,6 @@ void      VTKField::setFieldType( VTKFieldType type_){
  */
 void      VTKField::setComponents( uint8_t comp_){ 
     components= comp_; 
-    return; 
-};
-
-/*!
- * set numer of elements of data field
- * @param[in]   ele_   number of elements
- */
-void      VTKField::setElements( uint64_t ele_){ 
-    nr_elements= ele_; 
     return; 
 };
 
@@ -222,15 +211,6 @@ uint8_t   VTKField::getComponents() const{
 };
 
 /*!
- * get number of elements of data field. 
- * Generally number of points or number of cells.
- * @return  number of elements
- */
-uint64_t  VTKField::getElements() const{ 
-    return nr_elements; 
-};
-
-/*!
  * get offset in appended section
  * @return  offset from "_" character in appended section
  */
@@ -261,7 +241,6 @@ bool   VTKField::hasAllMetaData() const{
     allData = allData && location != VTKLocation::UNDEFINED ;
     allData = allData && codification != VTKFormat::UNDEFINED ;
     allData = allData && fieldType != VTKFieldType::UNDEFINED ;   ;
-    allData = allData && nr_elements != 0 ;
 
     return allData;
 };

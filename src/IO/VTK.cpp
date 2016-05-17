@@ -296,13 +296,6 @@ VTKField** VTK::addData( std::string name_, VTKFieldType comp_,  VTKLocation loc
 
     (*ptr)->setFieldType(comp_) ;
     (*ptr)->setLocation(loc_) ;
-
-    if( loc_ == VTKLocation::CELL ){
-        (*ptr)->setElements(nr_cells);
-    } else if( loc_ == VTKLocation::POINT ){
-        (*ptr)->setElements(nr_points);
-    }
-    
     (*ptr)->setDataType(type_) ;
 
     return ptr ;
