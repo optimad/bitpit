@@ -89,7 +89,14 @@ int main()
     { //Write only grid to VTK in ascii format
         cout << "Write only grid to VTK in ascii format" << endl;
 
-        bitpit::VTKUnstructuredGrid  vtk(".", "ustr1", bitpit::VTKElementType::VOXEL, points, connectivity );
+        bitpit::VTKUnstructuredGrid  vtk(".", "ustr1", bitpit::VTKElementType::VOXEL );
+
+        vtk.setDimensions(1,8) ;
+
+        bitpit::VTKNativeWriter& writer = vtk.getNativeWriter() ;
+        writer.addData( "Points", points) ;
+        writer.addData( "connectivity", connectivity) ;
+
         vtk.write() ;
 
     }
@@ -97,9 +104,18 @@ int main()
     { //Write grid and data to VTK in appended mode
         cout << "Write grid and data to VTK in appended mode" << endl;
 
-        bitpit::VTKUnstructuredGrid  vtk(".", "ustr2", bitpit::VTKElementType::VOXEL, points, connectivity );
-        vtk.addData( "press", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, pressure ) ;
-        vtk.addData( "vel", bitpit::VTKFieldType::VECTOR, bitpit::VTKLocation::CELL, velocity ) ;
+        bitpit::VTKUnstructuredGrid  vtk(".", "ustr2", bitpit::VTKElementType::VOXEL );
+        vtk.setDimensions(1,8) ;
+
+        vtk.addData( "press", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, bitpit::VTKDataType::Float64 ) ;
+        vtk.addData( "vel", bitpit::VTKFieldType::VECTOR, bitpit::VTKLocation::CELL, bitpit::VTKDataType::Float64 ) ;
+
+        bitpit::VTKNativeWriter& writer = vtk.getNativeWriter() ;
+        writer.addData( "Points", points) ;
+        writer.addData( "connectivity", connectivity) ;
+        writer.addData( "press", pressure) ;
+        writer.addData( "vel", velocity) ;
+
         vtk.write() ;
     }
 
@@ -113,14 +129,20 @@ int main()
         vector<array<double,3>>    Ivelocity ;
 
 
-        bitpit::VTKUnstructuredGrid  vtk(".", "ustr2", bitpit::VTKElementType::VOXEL, Ipoints, Iconnectivity );
+        bitpit::VTKUnstructuredGrid  vtk(".", "ustr2", bitpit::VTKElementType::VOXEL );
 
-        vtk.addData( "press", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, Ipressure ) ;
+        vtk.addData( "press", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, bitpit::VTKDataType::Float64 ) ;
+
+        bitpit::VTKNativeWriter& writer = vtk.getNativeWriter() ;
+        writer.addData( "Points", Ipoints) ;
+        writer.addData( "connectivity", Iconnectivity) ;
+        writer.addData( "press", Ipressure) ;
+
         vtk.read() ;
 
         vtk.removeData( "vel" ) ;
 
-        Ipressure = 2. * Ipressure ;
+        Ipressure *= 2. ;
 
         vtk.setNames("./", "ustr3") ;
         vtk.write() ;
@@ -136,13 +158,17 @@ int main()
         vector<float>   label ;
         vector<int64_t> cids, pids ;
 
-        //bitpit::VTKUnstructuredVec   vtk("./data", "selection", bitpit::VTKFormat::APPENDED, bitpit::VTKElementType::TRIANGLE );
-        bitpit::VTKUnstructuredGrid  vtk("./data", "selection", bitpit::VTKElementType::TRIANGLE, Ipoints, Iconnectivity );
+        bitpit::VTKUnstructuredGrid  vtk("./data", "selection", bitpit::VTKElementType::TRIANGLE );
+        vtk.addData( "STLSolidLabeling") ;
+        vtk.addData( "vtkOriginalCellIds") ;
+        vtk.addData( "vtkOriginalPointIds") ;
 
-
-        vtk.addData( "STLSolidLabeling", label) ;
-        vtk.addData( "vtkOriginalCellIds", cids) ;
-        vtk.addData( "vtkOriginalPointIds", pids) ;
+        bitpit::VTKNativeWriter& writer = vtk.getNativeWriter() ;
+        writer.addData( "Points", Ipoints) ;
+        writer.addData( "connectivity", Iconnectivity) ;
+        writer.addData( "STLSolidLabeling", label) ;
+        writer.addData( "vtkOriginalCellIds", cids) ;
+        writer.addData( "vtkOriginalPointIds", pids) ;
 
         vtk.read() ;
 

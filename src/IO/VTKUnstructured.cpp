@@ -106,17 +106,20 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( std::string dir_, std::string name_, V
  */
 void VTKUnstructuredGrid::setElementType( VTKElementType type_ ){
 
+    VTKBaseWriter& writer = dynamic_cast<VTKBaseWriter&>(*this) ;
+    addWriter( "VTKAutoWriter", writer) ;
+
     homogeneousType = type_ ;
 
     geometry[1].setDataType( VTKDataType::UInt64) ; 
-    geometry[1].setWriter(this) ;
+    geometry[1].setWriter(writer) ;
     geometry[2].setDataType( VTKDataType::UInt8) ; 
-    geometry[2].setWriter(this) ;
-
+    geometry[2].setWriter(writer) ;
 
     return ;
 
 };
+
 /*!  
  *  sets the type of the geometry variables
  *  @param[in]  Ptype       Type of "Point" geometry information [ VTKDataType::Float[32/64]]
@@ -294,10 +297,68 @@ void VTKUnstructuredGrid::writeMetaInformation( ){
 };
 
 /*!
+ * Writes data to stream 
+ * @param[in] str file stream for writing
+ * @param[in] name name of field
+ * @param[in] format ASCII or BINARY format
  */
+void VTKUnstructuredGrid::flushData( std::fstream &str, std::string name, VTKFormat format){
+
+    assert( homogeneousType != VTKElementType::UNDEFINED ) ;
+
+    if( format == VTKFormat::APPENDED){
+
+        if(name == "types" ){
+            uint8_t type = (uint8_t) homogeneousType ;
+            for( unsigned int i=0; i<nr_cells; ++i)
+                genericIO::flushBINARY(str, type );
+        
+        } else if(name == "offsets" ){
+            uint8_t     n = vtk::getNNodeInElement(homogeneousType) ;
+            uint64_t    offset(0) ;
+            for( unsigned int i=0; i<nr_cells; ++i){
+                offset += n ;
+                genericIO::flushBINARY(str, offset );
+            }
+        
         }
+
+    } else {
+        if(name == "types" ){
+            uint8_t type = (uint8_t) homogeneousType ;
+            for( unsigned int i=0; i<nr_cells; ++i)
+                genericIO::flushASCII(str, type );
+        
+        } else if(name == "offsets" ){
+            uint8_t     n = vtk::getNNodeInElement(homogeneousType) ;
+            uint64_t    offset(0) ;
+            for( unsigned int i=0; i<nr_cells; ++i){
+                offset += n ;
+                genericIO::flushBINARY(str, offset );
+            }
+        
+        }
+
     }
 
+    return;
+};
+
+/*!
+ * Reads data from stream 
+ * @param[in] str file stream for writing
+ * @param[in] name name of field
+ * @param[in] format ASCII or BINARY format
+ */
+void VTKUnstructuredGrid::absorbData( std::fstream &str, std::string name, VTKFormat format, uint64_t entries, uint8_t components){
+
+    BITPIT_UNUSED(str) ;
+    BITPIT_UNUSED(name) ;
+    BITPIT_UNUSED(format) ;
+    BITPIT_UNUSED(entries) ;
+    BITPIT_UNUSED(components) ;
+
+    return;
 };
 
 /*!  

@@ -51,6 +51,7 @@ VTKField::VTKField(){
     codification    = VTKFormat::UNDEFINED ;
     fieldType       = VTKFieldType::UNDEFINED ;
     position        = 0 ;
+    writer          = NULL ;
 
 };
 
@@ -84,6 +85,7 @@ VTKField& VTKField::operator=( const VTKField & other){
     location = other.location ;
     offset = other.offset ;
     position = other.position ;
+    writer = other.writer ;
 
     return *this;
 };
@@ -126,7 +128,7 @@ void      VTKField::setCodification( VTKFormat  code_ ){
 
 /*!
  * set type of data field
- * @param[in]   type_   type of data field [VTKFieldType::SCALAR/VECTOR/CONSTANT/VARIABLE]
+ * @param[in]   type_   type of data field [VTKFieldType::SCALAR/VECTOR/KNOWN_BY_CLASS]
  */
 void      VTKField::setFieldType( VTKFieldType type_){ 
     fieldType= type_; 
@@ -148,6 +150,15 @@ void      VTKField::setPosition( std::fstream::pos_type pos_ ){
  */
 void      VTKField::setOffset( uint64_t offs_){ 
     offset= offs_; 
+    return; 
+};
+
+/*!
+ * set offset of data field for appended output
+ * @param[in]   offs_   offset from "_" character of appended section
+ */
+void VTKField::setWriter(VTKBaseWriter& writer_ ){ 
+    writer= &writer_; 
     return; 
 };
 
@@ -209,13 +220,35 @@ std::fstream::pos_type   VTKField::getPosition() const{
 };
 
 /*!
+ * Writes the field through its writer to file
+ * @param[in] str file stream
  */
+void  VTKField::write( std::fstream &str) const{ 
 
+    assert( writer != NULL ) ;
+    assert( name != "undefined") ;
+    assert( codification != VTKFormat::UNDEFINED ) ;
 
+    writer->flushData( str, name, codification) ;
 
+    return ;
 };
 
+/*!
+ * Reads the field through its writer from file
+ * @param[in] str file stream
+ */
+void  VTKField::read( std::fstream &str, uint64_t entries, uint8_t components ) const{ 
 
+    assert( name != "undefined ") ;
+    assert( codification != VTKFormat::UNDEFINED ) ;
+
+    if( writer != NULL){
+        writer->absorbData( str, name, codification, entries, components) ;
+    };
+
+    return ;
+};
 /*!
  * @}
  */

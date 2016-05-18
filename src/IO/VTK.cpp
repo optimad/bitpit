@@ -57,6 +57,9 @@ VTK::VTK(){
     nr_cells = 0;
     nr_points= 0;
 
+    VTKBaseWriter* basePtr = new VTKNativeWriter(*this) ;
+    addWriter( "VTKNativeWriter", *basePtr ) ;
+
 };
 
 /*! 
@@ -78,6 +81,11 @@ VTK::~VTK(){
 
     data.clear();
     geometry.clear();
+
+    auto writerItr = defaultWriter.find("VTKNativeWriter") ;
+    delete writerItr->second ;
+
+    defaultWriter.clear() ;
 
 } ;
 
@@ -259,7 +267,7 @@ void  VTK::setDataCodex( VTKFormat cod_ ) {
  * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
  * @param[in]  name_    name of field
  */
-VTKField* VTK::addData( std::string name_ ){
+VTKField& VTK::addData( std::string name_, VTKBaseWriter* writer_ ){
 
     VTKField*   ptr(NULL) ;
 
@@ -269,8 +277,9 @@ VTKField* VTK::addData( std::string name_ ){
     };
 
     ptr->setCodification(DataCodex) ;
+    ptr->setWriter(*writer_) ;
 
-    return ptr ;
+    return *ptr ;
 
 };
 
@@ -282,16 +291,39 @@ VTKField* VTK::addData( std::string name_ ){
  * @param[in]  loc_     location of data [VTKLocation::CELL/VTKLocation::POINT]
  * @param[in]  type_    type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
  */
-VTKField* VTK::addData( std::string name_, VTKFieldType comp_,  VTKLocation loc_, VTKDataType type_ ){
+VTKField& VTK::addData( std::string name_, VTKFieldType comp_,  VTKLocation loc_, VTKDataType type_, VTKBaseWriter *writer_ ){
 
-    VTKField*   ptr = addData( name_ ) ;
+    VTKField&   field = addData( name_, writer_ ) ;
 
-    ptr->setFieldType(comp_) ;
-    ptr->setLocation(loc_) ;
-    ptr->setDataType(type_) ;
+    field.setFieldType(comp_) ;
+    field.setLocation(loc_) ;
+    field.setDataType(type_) ;
 
-    return ptr ;
+    return field ;
 
+};
+
+/*!
+ * Get the native writer
+ * @return pointer to writer
+ */
+void VTK::setWriter( std::string name, VTKBaseWriter* writer){
+
+    VTKField* field ;
+    getFieldByName( name, field ) ;
+
+    field->setWriter(*writer) ;
+
+    return ;
+};
+
+/*!
+ * Get the native writer
+ * @return pointer to writer
+ */
+VTKNativeWriter& VTK::getNativeWriter(){
+    VTKNativeWriter* ptr = dynamic_cast<VTKNativeWriter*>( defaultWriter["VTKNativeWriter"] ) ;
+    return *ptr;
 };
 
 /*!
@@ -334,6 +366,8 @@ void VTK::removeData( std::string name_ ){
  */
 bool VTK::getFieldByName( const std::string &name_, VTKField*& the_field ){
 
+    the_field = NULL ;
+
     for( auto &field : data ){
         if( field.getName() == name_ ){
             the_field = &field ;
@@ -349,6 +383,20 @@ bool VTK::getFieldByName( const std::string &name_, VTKField*& the_field ){
     };
 
     return false ;
+};
+
+/*!
+ * Adds a new writer to the default list
+ * @param[in] name_ name of the writer
+ * @param[in] writer_ writer to be registered
+ */
+void VTK::addWriter( std::string name_, VTKBaseWriter &writer_  ){
+
+    assert( defaultWriter.find(name_) == defaultWriter.end() ) ;
+
+    defaultWriter.insert( {{name_, &writer_}}) ;
+
+    return ;
 };
 
 /*!
@@ -458,6 +506,7 @@ void VTK::writeData( ){
                 str.seekg( field.getPosition() ) ;
                 genericIO::copyUntilEOFInString( str, buffer, length );
 
+                field.write( str ) ;
 
                 position_insert = str.tellg();
                 str << std::endl ;
@@ -476,6 +525,7 @@ void VTK::writeData( ){
                 str.seekg( field.getPosition() ) ;
                 genericIO::copyUntilEOFInString( str, buffer, length );
 
+                field.write( str ) ;
 
                 position_insert = str.tellg();
                 str << std::endl ;
@@ -493,6 +543,7 @@ void VTK::writeData( ){
                 str.seekg( field.getPosition() ) ;
                 genericIO::copyUntilEOFInString( str, buffer, length );
 
+                field.write( str ) ;
 
                 position_insert = str.tellg();
                 str << std::endl ;
@@ -544,6 +595,7 @@ void VTK::writeData( ){
                     uint64_t    nbytes = calcFieldSize(field) ;
                     genericIO::flushBINARY(str, nbytes) ;
                 };
+                field.write(str) ;
             };
         } 
 
@@ -559,6 +611,7 @@ void VTK::writeData( ){
                     uint64_t    nbytes = calcFieldSize(field) ;
                     genericIO::flushBINARY(str, nbytes) ;
                 };
+                field.write(str) ;
 
             };
         } 
@@ -575,6 +628,7 @@ void VTK::writeData( ){
                     uint64_t    nbytes = calcFieldSize(field) ;
                     genericIO::flushBINARY(str, nbytes) ;
                 };
+                field.write(str) ;
             };
         };
 
@@ -744,6 +798,8 @@ void VTK::readData( ){
             str.seekg( field.getOffset(), std::ios::cur) ;
             if( HeaderType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
             if( HeaderType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
+
+            field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
         };
     };
 
@@ -754,6 +810,8 @@ void VTK::readData( ){
             str.seekg( field.getOffset(), std::ios::cur) ;
             if( HeaderType== "UInt32") genericIO::absorbBINARY( str, nbytes32 ) ;
             if( HeaderType== "UInt64") genericIO::absorbBINARY( str, nbytes64 ) ;
+
+            field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
         };
     };
 
@@ -761,6 +819,7 @@ void VTK::readData( ){
     for( auto & field : data ){
         if(  field.getCodification() == VTKFormat::ASCII){
             str.seekg( field.getPosition() ) ;
+            field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
         };
     };
 
@@ -768,6 +827,7 @@ void VTK::readData( ){
     for( auto & field : geometry ){
         if( field.getCodification() == VTKFormat::ASCII){
             str.seekg( field.getPosition() ) ;
+            field.read( str, calcFieldEntries(field), calcFieldComponents(field) ) ;
         };
     };
 

@@ -39,6 +39,8 @@
 
 namespace bitpit{
 
+class VTK;
+
 /*!
  * @ingroup VTKEnums
  * Enum class defining different modes for writing VTK files
@@ -146,6 +148,54 @@ class VTKTypes{
 
 };
 
+class VTKBaseContainer{
+    private:
+
+    public:
+        virtual void            flushData( std::fstream &, VTKFormat) =0 ;
+        virtual void            absorbData( std::fstream &, VTKFormat, uint64_t, uint8_t) =0 ;
+};
+
+template<class T>
+class VTKVectorContainer : public VTKBaseContainer{
+    private:
+        std::vector<T>*                      m_ptr ; /**< pointer to data */
+
+    public:
+        VTKVectorContainer( std::vector<T> &) ;
+        void                    flushData( std::fstream &, VTKFormat) ;
+        void                    absorbData( std::fstream &, VTKFormat, uint64_t, uint8_t) ;
+        void                    resize( std::true_type, uint64_t , uint8_t) ;
+        void                    resize( std::false_type, uint64_t , uint8_t) ;
+};
+
+class VTKBaseWriter{ 
+
+    private:
+
+    public:
+        virtual void            flushData( std::fstream &, std::string, VTKFormat) =0 ;
+        virtual void            absorbData( std::fstream &, std::string, VTKFormat, uint64_t, uint8_t ) =0 ;
+};
+
+class VTKNativeWriter : public VTKBaseWriter {
+
+    private:
+        std::unordered_map<std::string,VTKBaseContainer*>         m_field ; /**< association between name of field and conatiner */
+        VTK*                    owner ;             /**< pointer to VTK class owing the writer */
+
+    public:
+        VTKNativeWriter(VTK&);
+        ~VTKNativeWriter();
+
+        template< class T>
+        void                    addData( std::string, std::vector<T> & ) ;
+
+        void                    removeData( std::string ) ;
+        void                    flushData( std::fstream &, std::string, VTKFormat) ;
+        void                    absorbData( std::fstream &, std::string, VTKFormat, uint64_t, uint8_t) ;
+};
+
 class VTKField{
 
     //members
@@ -157,6 +207,7 @@ class VTKField{
         VTKFormat                codification ;             /**< Type of codification [VTKFormat::ASCII, VTKFormat::APPENDED] */
         uint64_t                 offset;                    /**< offset in the appended section */
         std::fstream::pos_type   position;                  /**< position in file */
+        VTKBaseWriter*           writer;                    /**< pointer to writer */
 
         //methods
     public:
@@ -184,10 +235,13 @@ class VTKField{
         void                     setOffset( uint64_t ) ;
         void                     setPosition( std::fstream::pos_type ) ;
 
+        void                     setWriter( VTKBaseWriter& ) ;
+        void                     read( std::fstream&, uint64_t, uint8_t ) const ;
+        void                     write( std::fstream& ) const ;
+
 };
 
 class VTK{
-
 
         // members ---------------------------------------------------------------------- //
     protected:
@@ -204,6 +258,8 @@ class VTK{
 
         std::vector<VTKField>           data ;                      /**< Data fields */
         VTKFormat                       DataCodex ;                 /**< Data codex */
+
+        std::unordered_map<std::string, VTKBaseWriter*>     defaultWriter;             /**< Writers linked to the class */
 
         // methods ----------------------------------------------------------------------- //
     public:
@@ -229,20 +285,19 @@ class VTK{
         void                            setGeomCodex( VTKFormat );
         void                            setDataCodex( VTKFormat );
 
-        VTKField*                       addData( std::string ) ;
-        VTKField*                       addData( std::string, VTKFieldType, VTKLocation, VTKDataType ) ;
-
+        VTKField&                       addData( std::string, VTKBaseWriter* = NULL ) ;
+        VTKField&                       addData( std::string, VTKFieldType, VTKLocation, VTKDataType, VTKBaseWriter* =NULL ) ;
         void                            removeData( std::string ) ;
+        void                            setWriter( std::string, VTKBaseWriter* );
+        VTKNativeWriter&                getNativeWriter() ;
 
         void                            read() ;
-
         virtual void                    readMetaInformation() = 0 ; 
         void                            readData() ;
 
         void                            write( VTKWriteMode writeMode=VTKWriteMode::DEFAULT )  ;
         virtual void                    writeMetaInformation() = 0 ;
         void                            writeData() ;
-
         virtual void                    writeCollection() = 0 ;
 
     protected:
@@ -256,16 +311,16 @@ class VTK{
         bool                            readDataArray( std::fstream &, VTKField &);
 
         //General Purpose
+        void                            addWriter( std::string, VTKBaseWriter& ) ;
         bool                            getFieldByName( const std::string &, VTKField*& ) ;
         void                            calcAppendedOffsets() ;
         virtual uint64_t                calcFieldSize( const VTKField &) =0;
         virtual uint64_t                calcFieldEntries( const VTKField &) =0;
         virtual uint8_t                 calcFieldComponents( const VTKField &) =0;
 
-
 };
 
-class VTKUnstructuredGrid : public VTK{
+class VTKUnstructuredGrid : public VTK, public VTKBaseWriter {
 
     protected:
     uint64_t                        nconnectivity ;             /**< size of the connectivity information */
@@ -277,9 +332,6 @@ class VTKUnstructuredGrid : public VTK{
     VTKUnstructuredGrid();
     VTKUnstructuredGrid( std::string , std::string ) ;
     VTKUnstructuredGrid( std::string , std::string, VTKElementType ) ;
-
-    //template<class T0, class T1>
-    //VTKUnstructuredGrid( std::string , std::string, VTKElementType, std::vector<T0> &, std::vector<T1> & ) ;
 
     protected:
     void                            writeCollection() ;  
@@ -295,16 +347,13 @@ class VTKUnstructuredGrid : public VTK{
 
     void                            setGeomTypes( VTKDataType , VTKDataType , VTKDataType , VTKDataType ) ;
 
-    //template<class T0>
-    //void                            setGeomData( std::string, std::vector<T0> & ) ;
-    //template<class T0, class T1>
-    //void                            setGeomData( std::vector<T0> &, std::vector<T1> & ) ;
-
     uint64_t                        getNConnectivity( ) ; 
     uint64_t                        calcFieldSize( const VTKField &) ;
     uint64_t                        calcFieldEntries( const VTKField &) ;
     uint8_t                         calcFieldComponents( const VTKField &) ;
 
+    void                            flushData( std::fstream &, std::string, VTKFormat) ;
+    void                            absorbData( std::fstream &, std::string, VTKFormat, uint64_t, uint8_t) ;
 };
 
 class VTKRectilinearGrid : public VTK{
@@ -342,7 +391,6 @@ class VTKRectilinearGrid : public VTK{
     void                            setGlobalDimensions( int, int ) ;
 
     void                            setGeomTypes( VTKDataType ) ;
-
 
     void                            setGlobalIndex( std::vector<extension3D_t> ) ;
     void                            setGlobalIndex( std::vector<extension2D_t> ) ;
@@ -383,6 +431,7 @@ namespace vtk{
 }
 
 #include"VTKTypes.tpp"
+#include"VTKWriter.tpp"
 #include"VTKUtils.tpp"
 
 
