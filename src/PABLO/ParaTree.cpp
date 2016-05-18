@@ -1825,17 +1825,18 @@ namespace bitpit {
             // OTHER OCTANT BASED METHODS												    			   //
             // =================================================================================== //
 
-            /** Finds neighbours of octant(both locals and ghosts) through iface in local and ghost octants vector.
+            /** Finds local and ghost or only local neighbours of octant(both local and ghost ones) through iface face/edge/node.
              * Returns a vector (empty if iface is a bound face) with the index of neighbours
              * in their structure (octants or ghosts) and sets isghost[i] = true if the
              * i-th neighbour is ghost in the local tree.
-             * \param[in] idx Index of current octant
-             * \param[in] amighost boolean flag to specify if idx index octant is ghost
+             * \param[in] oct Pointer to the current octant.
+             * \param[in] haveIidx Boolean flag to specify if the octant is passed with a valid idx
+             * \param[in] idx Index of the searching octant. Its value is not important if haveIidx is false
              * \param[in] iface Index of face/edge/node passed through for neighbours finding
              * \param[in] codim Codimension of the iface-th entity 1=edge, 2=node
              * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
              * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs
-             * \param[in] onlyghosts A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the ghost ones (true).*/
+             * \param[in] onlyinternal A boolean flag to specify if neighbours have to be found among all the octants (false) or only among the internal ones (true).*/
             void
                 ParaTree::findNeighbours(const Octant* oct, bool haveIidx, uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost, bool onlyinternal) const{
                 
@@ -1859,7 +1860,7 @@ namespace bitpit {
             };
 
 
-            /** Finds neighbours of octant through iface in vector octants.
+            /** Finds all the neighbours of a local octant through iface face/edge/node.
              * Returns a vector (empty if iface is a bound face) with the index of neighbours
              * in their structure (octants or ghosts) and sets isghost[i] = true if the
              * i-th neighbour is ghost in the local tree.
@@ -1877,7 +1878,7 @@ namespace bitpit {
 
             };
 
-            /** Finds neighbours of octant through iface in vector octants.
+            /** Finds all the neighbours of an octant through iface face/edge/node.
              * Returns a vector (empty if iface is a bound face) with the index of neighbours
              * in their structure (octants or ghosts) and sets isghost[i] = true if the
              * i-th neighbour is ghost in the local tree.
@@ -1893,7 +1894,7 @@ namespace bitpit {
 
             };
 
-            /** Finds neighbours of ghost octant through iface in vector octants.
+            /** Finds the internal neighbours of ghost octant through iface face/edge/node.
              * Returns a vector (empty if iface is a bound face) with the index of neighbours
              * in their structure ( only local octants ).
              * \param[in] idx Index of current octant
@@ -1910,13 +1911,14 @@ namespace bitpit {
 
             };
 
-            /** Finds neighbours of ghost octant through iface in vector octants.
+            /** Finds all the neighbours of ghost octant through iface face/edge/node.
              * Returns a vector (empty if iface is a bound face) with the index of neighbours
              * in their structure ( only local octants ).
              * \param[in] idx Index of current octant
              * \param[in] iface Index of face/edge/node passed through for neighbours finding
              * \param[in] codim Codimension of the iface-th entity 1=edge, 2=node
              * \param[out] neighbours Vector of neighbours indices in octants/ghosts structure
+             * \param[out] isghost Vector with boolean flag; true if the respective octant in neighbours is a ghost octant. Can be ignored in serial runs.
              */
             void
                 ParaTree::findGhostNeighbours(uint32_t idx, uint8_t iface, uint8_t codim, u32vector & neighbours, bvector & isghost) const {
