@@ -112,6 +112,8 @@ void VTKNativeWriter::removeData( std::string name){
         m_field.erase( fieldItr) ;
     }
 
+    owner->removeData(name) ;
+
     return;
 };
 

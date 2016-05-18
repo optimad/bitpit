@@ -121,23 +121,35 @@ void VTKVectorContainer<T>::resize( std::false_type, uint64_t entries, uint8_t c
  * @param[in] data std::vector containing the data
  */
 template<class T>
-void VTKNativeWriter::addData( std::string name, std::vector<T> &data){
+VTKField& VTKNativeWriter::addData( std::string name, std::vector<T> &data ){
 
     auto fieldItr = m_field.find(name) ;
 
-    if( fieldItr == m_field.end() ){
-        m_field.insert( {{ name, new VTKVectorContainer<T>(data) }}) ;
-        owner->setWriter( name, this) ;
+    m_field.insert( {{ name, new VTKVectorContainer<T>(data) }}) ;
+    VTKField& field= owner->addData( name, this) ;
 
-    } else {
-        log::cout() << "Field with name " << name << " already exists in VTKNativeWriter " << std::endl ;
-    }
+    field.setDataType( VTKTypes::whichType(data)) ;
 
-
-
-    return ;
+    return field;
 
 }
 
+/*!
+ * Add user data for input or output. 
+ * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
+ * @param[in]  name_    name of field
+ * @param[in]  comp_    type of data field [ VTKFieldType::SCALAR/ VTKFieldType::VECTOR ] 
+ * @param[in]  loc_     location of data [VTKLocation::CELL/VTKLocation::POINT]
+ */
+template<class T>
+VTKField& VTKNativeWriter::addData( std::string name, VTKFieldType comp,  VTKLocation loc, std::vector<T> &data ){
 
+    VTKField&   field = addData( name, data ) ;
+
+    field.setFieldType(comp) ;
+    field.setLocation(loc) ;
+
+    return field ;
+
+};
 }

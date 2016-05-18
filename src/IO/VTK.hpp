@@ -40,6 +40,7 @@
 namespace bitpit{
 
 class VTK;
+class VTKField;
 
 /*!
  * @ingroup VTKEnums
@@ -189,7 +190,10 @@ class VTKNativeWriter : public VTKBaseWriter {
         ~VTKNativeWriter();
 
         template< class T>
-        void                    addData( std::string, std::vector<T> & ) ;
+        VTKField&               addData( std::string, std::vector<T> & ) ;
+
+        template< class T>
+        VTKField&               addData( std::string, VTKFieldType, VTKLocation, std::vector<T> & ) ;
 
         void                    removeData( std::string ) ;
         void                    flushData( std::fstream &, std::string, VTKFormat) ;
