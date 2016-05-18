@@ -174,8 +174,8 @@ class VTKBaseWriter{
     private:
 
     public:
-        virtual void            flushData( std::fstream &, std::string, VTKFormat) =0 ;
-        virtual void            absorbData( std::fstream &, std::string, VTKFormat, uint64_t, uint8_t ) =0 ;
+        virtual void            flushData( std::fstream &, std::string, VTKFormat)  ;
+        virtual void            absorbData( std::fstream &, std::string, VTKFormat, uint64_t, uint8_t )  ;
 };
 
 class VTKNativeWriter : public VTKBaseWriter {

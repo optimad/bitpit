@@ -42,6 +42,37 @@ namespace bitpit{
  * @brief The base class to be used to derive VTK Writers form
  */
 
+/*!
+ * Reads data from stream 
+ * @param[in] str file stream for writing
+ * @param[in] name name of field
+ * @param[in] format ASCII or BINARY format
+ */
+void VTKBaseWriter::flushData( std::fstream &str, std::string name, VTKFormat format){
+
+    BITPIT_UNUSED(str) ;
+    BITPIT_UNUSED(name) ;
+    BITPIT_UNUSED(format) ;
+
+    return;
+};
+
+/*!
+ * Reads data from stream 
+ * @param[in] str file stream for writing
+ * @param[in] name name of field
+ * @param[in] format ASCII or BINARY format
+ */
+void VTKBaseWriter::absorbData( std::fstream &str, std::string name, VTKFormat format, uint64_t entries, uint8_t components){
+
+    BITPIT_UNUSED(str) ;
+    BITPIT_UNUSED(name) ;
+    BITPIT_UNUSED(format) ;
+    BITPIT_UNUSED(entries) ;
+    BITPIT_UNUSED(components) ;
+
+    return;
+};
 
 /*!
  * @class VTKNativeWriter
