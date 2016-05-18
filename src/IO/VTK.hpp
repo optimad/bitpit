@@ -175,7 +175,6 @@ class VTKField{
         VTKFormat                getCodification() const;
         uint64_t                 getOffset() const;
         std::fstream::pos_type   getPosition() const; 
-        bool                     hasAllMetaData() const ;
 
         void                     setName( std::string ) ;
         void                     setDataType( VTKDataType ) ;

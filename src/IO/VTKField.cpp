@@ -209,21 +209,10 @@ std::fstream::pos_type   VTKField::getPosition() const{
 };
 
 /*!
- * get position of data field in VTK file. 
- * This information is available after VTK::ReadMetaData() has been called.
- * @return      position in VTK file.
  */
-bool   VTKField::hasAllMetaData() const{ 
 
-    bool    allData(true);
 
-    allData = allData && name != "undefined" ;  
-    allData = allData && dataType != VTKDataType::UNDEFINED ;
-    allData = allData && location != VTKLocation::UNDEFINED ;
-    allData = allData && codification != VTKFormat::UNDEFINED ;
-    allData = allData && fieldType != VTKFieldType::UNDEFINED ;   ;
 
-    return allData;
 };
 
 
