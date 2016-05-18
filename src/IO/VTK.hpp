@@ -57,8 +57,7 @@ enum class VTKFieldType {
     UNDEFINED = -1,
     SCALAR = 1,
     VECTOR = 3,
-    CONSTANT = 4,
-    VARIABLE = 5
+    KNOWN_BY_CLASS = 4,
 };
 
 /*!
@@ -153,7 +152,6 @@ class VTKField{
     protected:
         std::string              name;                      /**< name of the field */
         VTKFieldType             fieldType;                 /**< type of field [ VTKFieldType::SCALAR/VECTOR/KNOWN_BY_CLASS ] */
-        uint8_t                  components;                /**< type of field [ VTKFieldType::SCALAR/VECTOR/CONSTANT/VARIABLE ] */
         VTKDataType              dataType;                  /**< type of data [  VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ]] */
         VTKLocation              location;                  /**< cell or point data [ VTKLocation::CELL/VTKLocation::POINT] */
         VTKFormat                codification ;             /**< Type of codification [VTKFormat::ASCII, VTKFormat::APPENDED] */
@@ -175,7 +173,6 @@ class VTKField{
         VTKFieldType             getFieldType() const;
         VTKLocation              getLocation() const;
         VTKFormat                getCodification() const;
-        uint8_t                  getComponents() const;
         uint64_t                 getOffset() const;
         std::fstream::pos_type   getPosition() const; 
         bool                     hasAllMetaData() const ;
@@ -185,7 +182,6 @@ class VTKField{
         void                     setFieldType( VTKFieldType ) ;
         void                     setLocation( VTKLocation ) ;
         void                     setCodification( VTKFormat ) ;
-        void                     setComponents( uint8_t ) ;
         void                     setOffset( uint64_t ) ;
         void                     setPosition( std::fstream::pos_type ) ;
 
@@ -264,6 +260,8 @@ class VTK{
         bool                            getFieldByName( const std::string &, VTKField*& ) ;
         void                            calcAppendedOffsets() ;
         virtual uint64_t                calcFieldSize( const VTKField &) =0;
+        virtual uint64_t                calcFieldEntries( const VTKField &) =0;
+        virtual uint8_t                 calcFieldComponents( const VTKField &) =0;
 
 
 };
@@ -305,6 +303,8 @@ class VTKUnstructuredGrid : public VTK{
 
     uint64_t                        getNConnectivity( ) ; 
     uint64_t                        calcFieldSize( const VTKField &) ;
+    uint64_t                        calcFieldEntries( const VTKField &) ;
+    uint8_t                         calcFieldComponents( const VTKField &) ;
 
 };
 
@@ -349,6 +349,8 @@ class VTKRectilinearGrid : public VTK{
     void                            setGlobalIndex( std::vector<extension2D_t> ) ;
 
     uint64_t                        calcFieldSize( const VTKField &) ;
+    uint64_t                        calcFieldEntries( const VTKField &) ;
+    uint8_t                         calcFieldComponents( const VTKField &) ;
 
 };
 

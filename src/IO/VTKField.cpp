@@ -50,7 +50,6 @@ VTKField::VTKField(){
     location        = VTKLocation::UNDEFINED ;
     codification    = VTKFormat::UNDEFINED ;
     fieldType       = VTKFieldType::UNDEFINED ;
-    components      = 0 ;
     position        = 0 ;
 
 };
@@ -80,7 +79,6 @@ VTKField& VTKField::operator=( const VTKField & other){
 
     name  = other.name;
     fieldType = other.fieldType ;
-    components = other.components ;
     dataType = other.dataType ;
     codification = other.codification;
     location = other.location ;
@@ -132,15 +130,6 @@ void      VTKField::setCodification( VTKFormat  code_ ){
  */
 void      VTKField::setFieldType( VTKFieldType type_){ 
     fieldType= type_; 
-    return; 
-};
-
-/*!
- * set number of components of data field to be used if VTKFieldType::CONSTANT
- * @param[in]   comp_   number of coponents of data field 
- */
-void      VTKField::setComponents( uint8_t comp_){ 
-    components= comp_; 
     return; 
 };
 
@@ -200,14 +189,6 @@ VTKLocation    VTKField::getLocation() const{
  */
 VTKFormat    VTKField::getCodification() const{ 
     return codification; 
-};
-
-/*!
- * get number of components of data field
- * @return  number of components 
- */
-uint8_t   VTKField::getComponents() const{ 
-    return components; 
 };
 
 /*!

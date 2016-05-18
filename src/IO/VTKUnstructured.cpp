@@ -54,8 +54,6 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( ) :VTK() {
     fh.setAppendix("vtu");
     homogeneousType = VTKElementType::UNDEFINED ;
 
-    geometry.resize(4) ;
-
     geometry.push_back( VTKField("Points") ) ;
     geometry.push_back( VTKField("offsets") ) ;
     geometry.push_back( VTKField("types") ) ;
@@ -63,7 +61,7 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( ) :VTK() {
 
     for( auto & field : geometry ){
         field.setLocation( VTKLocation::CELL ) ;
-        field.setFieldType( VTKFieldType::SCALAR ) ;
+        field.setFieldType( VTKFieldType::KNOWN_BY_CLASS ) ;
         field.setDataType( VTKDataType::Int32 ) ;
         field.setCodification(GeomCodex);
     }
@@ -71,7 +69,6 @@ VTKUnstructuredGrid::VTKUnstructuredGrid( ) :VTK() {
     geometry[0].setLocation( VTKLocation::POINT ) ;
     geometry[0].setFieldType( VTKFieldType::VECTOR ) ;
     geometry[0].setDataType( VTKDataType::Float64 ) ;
-    geometry[0].setCodification(GeomCodex);
 
 };
 
@@ -116,8 +113,6 @@ void VTKUnstructuredGrid::setElementType( VTKElementType type_ ){
     geometry[2].setDataType( VTKDataType::UInt8) ; 
     geometry[2].setWriter(this) ;
 
-    geometry[3].setFieldType( VTKFieldType::KNOWN_BY_CLASS );
-    geometry[3].setComponents( vtk::getNNodeInElement(type_) );
 
     return ;
 
@@ -182,9 +177,9 @@ uint64_t VTKUnstructuredGrid::calcSizeConnectivity( ){
 
     uint64_t                 nconn ;
 
-    std::fstream                  str  ;
-    std::fstream::pos_type        position_appended;
-    std::string                   line;
+    std::fstream             str  ;
+    std::fstream::pos_type   position_appended;
+    std::string              line;
     char                     c_ ;
     uint32_t                 nbytes32 ;
     uint64_t                 nbytes64 ;
@@ -420,20 +415,34 @@ void VTKUnstructuredGrid::readMetaInformation( ){
  */
 uint64_t VTKUnstructuredGrid::calcFieldSize( const VTKField &field ){
 
-    uint64_t bytes(0) ;
+    uint64_t bytes = calcFieldEntries(field) ;
+    bytes *= VTKTypes::sizeOfType( field.getDataType() ) ;
+
+    return bytes ;
+
+};
+
+/*!
+ * Calculates the number of entries of a field
+ * @param[in] field field 
+ * @return size of the field
+ */
+uint64_t VTKUnstructuredGrid::calcFieldEntries( const VTKField &field ){
+
+    uint64_t entries(0) ;
     std::string name( field.getName() ) ;
 
     if( name == "Points" ){
-        bytes = nr_points *static_cast<int>(VTKFieldType::VECTOR) ; 
+        entries = nr_points *static_cast<int>(VTKFieldType::VECTOR) ; 
 
     } else if( name == "offsets" ){
-        bytes = nr_cells ;
+        entries = nr_cells ;
 
     } else if( name == "types" ){
-        bytes = nr_cells ;
+        entries = nr_cells ;
 
     } else if( name == "connectivity"){
-        bytes = nconnectivity ;
+        entries = nconnectivity ;
 
     } else{
 
@@ -441,27 +450,64 @@ uint64_t VTKUnstructuredGrid::calcFieldSize( const VTKField &field ){
         assert( location != VTKLocation::UNDEFINED) ;
 
         if( location == VTKLocation::CELL ){
-            bytes = nr_cells ;
+            entries = nr_cells ;
 
         } else if( location == VTKLocation::POINT ){
-            bytes = nr_points ;
+            entries = nr_points ;
 
         }
 
         VTKFieldType fieldType( field.getFieldType() ) ;
         assert( fieldType != VTKFieldType::UNDEFINED) ;
 
-        bytes *= static_cast<int>(fieldType) ;
+        entries *= static_cast<uint64_t>(fieldType) ;
 
     }
 
-
-    bytes *= VTKTypes::sizeOfType( field.getDataType() ) ;
-
-    return bytes ;
+    return entries ;
 
 };
 
+/*!
+ * Calculates the compnents of a field
+ * @param[in] field field 
+ * @return size of the field
+ */
+uint8_t VTKUnstructuredGrid::calcFieldComponents( const VTKField &field ){
+
+    uint8_t comp ;
+    std::string name( field.getName() ) ;
+
+    if( name == "Points" ){
+        comp = static_cast<int>(VTKFieldType::VECTOR) ; 
+
+    } else if( name == "offsets" ){
+        comp = 1 ;
+
+    } else if( name == "types" ){
+        comp = 1 ;
+
+    } else if( name == "connectivity" ){
+       if( homogeneousType != VTKElementType::UNDEFINED){
+            comp = vtk::getNNodeInElement( homogeneousType ) ;
+
+       } else {
+           comp = 1;
+
+       }
+
+    } else{
+
+        VTKFieldType fieldType( field.getFieldType() ) ;
+        assert( fieldType != VTKFieldType::UNDEFINED) ;
+
+        comp = static_cast<uint8_t>(fieldType) ;
+
+    }
+
+    return comp ;
+
+};
 
 /*!  
  *  Returns the size of the connectivity information
