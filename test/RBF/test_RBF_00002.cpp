@@ -343,11 +343,15 @@ int main() {
     deformation.resize( nP ) ;
 
     { // output of undeformed grid, deformation vector and node type
-        bitpit::VTKUnstructuredGrid   output( "./", "orgGrid", bitpit::VTKElementType::PIXEL, points, connectivity );
+        bitpit::VTKUnstructuredGrid   output( "./", "orgGrid", bitpit::VTKElementType::PIXEL );
+        bitpit::VTKNativeWriter& writer = output.getNativeWriter() ;
 
-        output.addData( "type", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, type ) ;
-        output.addData( "deformation", bitpit::VTKFieldType::VECTOR, bitpit::VTKLocation::POINT, deformation ) ;
+        writer.addData( "type", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, type ) ;
+        writer.addData( "deformation", bitpit::VTKFieldType::VECTOR, bitpit::VTKLocation::POINT, deformation ) ;
+        writer.addData( "Points", points ) ;
+        writer.addData( "connectivity", connectivity ) ;
 
+        output.setDimensions(connectivity.size(), points.size() ) ;
         output.write() ;
     }
 
@@ -462,10 +466,16 @@ int main() {
 
 			std::cout<<"about to rewrite"<<std::endl;
             // output of deformed grid
-            bitpit::VTKUnstructuredGrid   output( "./", "defGrid", bitpit::VTKElementType::PIXEL, points, connectivity );
-            output.addData( "active", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, active ) ;
-            output.addData( "type", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, type ) ;
-            output.addData( "deformation", bitpit::VTKFieldType::VECTOR, bitpit::VTKLocation::POINT, deformation ) ;
+            bitpit::VTKUnstructuredGrid   output( "./", "defGrid", bitpit::VTKElementType::PIXEL );
+            bitpit::VTKNativeWriter& writer = output.getNativeWriter() ;
+
+            writer.addData( "active", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, active ) ;
+            writer.addData( "type", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, type ) ;
+            writer.addData( "deformation", bitpit::VTKFieldType::VECTOR, bitpit::VTKLocation::POINT, deformation ) ;
+            writer.addData( "Points", points ) ;
+            writer.addData( "connectivity", connectivity ) ;
+
+            output.setDimensions(connectivity.size(), points.size() ) ;
             output.write() ;
         }
         }

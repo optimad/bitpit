@@ -54,10 +54,11 @@ int main(int argc, char *argv[]) {
 	double length = 20;
 	double dh = 0.5;
 
+    { //2d test
 	log::cout() << "  >> 2D Cartesian patch" << "\n";
 
 	VolCartesian *patch_2D = new VolCartesian(0, 2, origin, length, dh);
-	patch_2D->setName("cartesian_uniform_patch_2D");
+	patch_2D->getVTK().setName("cartesian_uniform_patch_2D");
 	patch_2D->update();
 	patch_2D->write();
 
@@ -68,18 +69,21 @@ int main(int argc, char *argv[]) {
 		cellData[i] = i;
 	}
 
-	patch_2D->addData("cell_data", VTKFieldType::SCALAR, VTKLocation::CELL, cellData);
+    VTKUnstructuredGrid& vtk = patch_2D->getVTK();
+    VTKNativeWriter& writer = vtk.getNativeWriter() ;
+
+	writer.addData("cell_data", VTKFieldType::SCALAR, VTKLocation::CELL, cellData);
 	patch_2D->write("cell_data_2D");
-	patch_2D->removeData("cell_data");
+    writer.removeData("cell_data") ;
 
 	vertexData.resize(patch_2D->getVertexCount());
 	for (long i = 0; i < patch_2D->getVertexCount(); ++i) {
 		vertexData[i] = i;
 	}
 
-	patch_2D->addData("vertex_data", VTKFieldType::SCALAR, VTKLocation::POINT, vertexData);
+	writer.addData("vertex_data", VTKFieldType::SCALAR, VTKLocation::POINT, vertexData);
 	patch_2D->write("vertex_data_2D");
-	patch_2D->removeData("vertex_data");
+	writer.removeData("vertex_data");
 
 	log::cout() << std::endl;
 	log::cout() << "\n  >> 2D bounding box" << "\n";
@@ -125,11 +129,15 @@ int main(int argc, char *argv[]) {
 	log::cout() << std::endl;
 
 	delete patch_2D;
+    }
 
+    { //3d test
 	log::cout() << "  >> 3D Cartesian patch" << "\n";
 
 	VolCartesian *patch_3D = new VolCartesian(0, 3, origin, length, dh);
-	patch_3D->setName("cartesian_uniform_patch_3D");
+    VTKUnstructuredGrid& vtk = patch_3D->getVTK();
+    VTKNativeWriter& writer = vtk.getNativeWriter() ;
+	vtk.setName("cartesian_uniform_patch_3D");
 	patch_3D->update();
 	patch_3D->write();
 
@@ -140,18 +148,18 @@ int main(int argc, char *argv[]) {
 		cellData[i] = i;
 	}
 
-	patch_3D->addData("cell_data", VTKFieldType::SCALAR, VTKLocation::CELL, cellData);
+	writer.addData("cell_data", VTKFieldType::SCALAR, VTKLocation::CELL, cellData);
 	patch_3D->write("cell_data_3D");
-	patch_3D->removeData("cell_data");
+	writer.removeData("cell_data");
 
 	vertexData.resize(patch_3D->getVertexCount());
 	for (long i = 0; i < patch_3D->getVertexCount(); ++i) {
 		vertexData[i] = i;
 	}
 
-	patch_3D->addData("vertex_data", VTKFieldType::SCALAR, VTKLocation::POINT, vertexData);
+	writer.addData("vertex_data", VTKFieldType::SCALAR, VTKLocation::POINT, vertexData);
 	patch_3D->write("vertex_data_3D");
-	patch_3D->removeData("vertex_data");
+	writer.removeData("vertex_data");
 
 	log::cout() << std::endl;
 	log::cout() << "\n  >> 3D bounding box" << "\n";
@@ -209,6 +217,7 @@ int main(int argc, char *argv[]) {
 	log::cout() << std::endl;
 
 	delete patch_3D;
+    }
 
 #if BITPIT_ENABLE_MPI==1
 	MPI_Finalize();

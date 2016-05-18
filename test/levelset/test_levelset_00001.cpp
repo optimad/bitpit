@@ -120,7 +120,7 @@ int main( int argc, char *argv[]){
 //    STL.buildAdjacencies() ;
     Generate2DSurfMesh( STL ) ;
 
-    STL.setName("geometry_001") ;
+    STL.getVTK().setName("geometry_001") ;
     STL.write() ;
 
     std::cout << "n. vertex: " << STL.getVertexCount() << std::endl;
@@ -169,8 +169,9 @@ int main( int argc, char *argv[]){
         ++it ;
     };
 
-    mesh.addData("ls", VTKFieldType::SCALAR, VTKLocation::CELL, LS) ;
-    mesh.setName("levelset_001") ;
+    VTKNativeWriter& writer = mesh.getVTK().getNativeWriter() ;
+    writer.addData("ls", VTKFieldType::SCALAR, VTKLocation::CELL, LS) ;
+    mesh.getVTK().setName("levelset_001") ;
     mesh.write() ;
 
     std::cout << " - Exported data" << std::endl;

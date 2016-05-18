@@ -146,10 +146,6 @@ PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
 	setId(id) ;
 	setDimension(dimension);
 
-	std::ostringstream convert;
-	convert << getId();
-	setName(convert.str());
-
 	// Initialize the geometrical tolerance to a default value
 	_setTol(DEFAULT_TOLERANCE);
 
@@ -157,15 +153,32 @@ PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
 	setBoundingBoxFrozen(false);
 	clearBoundingBox();
 
-	// Set VTK codex
-	VTKUnstructuredGrid::setCodex(VTKFormat::APPENDED);
+	// Set VTK information
+	std::ostringstream convert;
+	convert << getId();
+
+	m_vtk.setName(convert.str());
+	m_vtk.setCodex(VTKFormat::APPENDED);
+	m_vtk.setGeomTypes( VTKDataType::Float64, VTKDataType::Int32, VTKDataType::Int32, VTKDataType::Int64);
 
 	// Add VTK basic patch data
-	VTKUnstructuredGrid::addData("cellIndex", VTKFieldType::SCALAR, VTKLocation::CELL);
-	VTKUnstructuredGrid::addData("PID", VTKFieldType::SCALAR, VTKLocation::CELL);
-	VTKUnstructuredGrid::addData("vertexIndex", VTKFieldType::SCALAR, VTKLocation::POINT);
+	m_vtk.addData("cellIndex", VTKFieldType::SCALAR, VTKLocation::CELL, VTKDataType::Int64);
+	m_vtk.addData("PID", VTKFieldType::SCALAR, VTKLocation::CELL, VTKDataType::Int32);
+	m_vtk.addData("vertexIndex", VTKFieldType::SCALAR, VTKLocation::POINT, VTKDataType::Int64);
 #if BITPIT_ENABLE_MPI==1
-	VTKUnstructuredGrid::addData("rank", VTKFieldType::SCALAR, VTKLocation::CELL);
+	m_vtk.addData("rank", VTKFieldType::SCALAR, VTKLocation::CELL, VTKDataType::Int32);
+#endif
+
+	// Set VTK writer
+	m_vtk.setWriter("Points", this);
+	m_vtk.setWriter("offsets", this);
+	m_vtk.setWriter("types", this);
+	m_vtk.setWriter("connectivity", this);
+	m_vtk.setWriter("cellIndex", this);
+	m_vtk.setWriter("PID", this);
+m_vtk.setWriter("vertexIndex", this);
+#if BITPIT_ENABLE_MPI==1
+	m_vtk.setWriter("rank", this);
 #endif
 }
 
@@ -397,11 +410,11 @@ bool PatchKernel::reserveInterfaces(size_t nInterfaces)
 */
 void PatchKernel::write(std::string filename)
 {
-	std::string oldFilename = VTKUnstructuredGrid::getName();
+	std::string oldFilename = m_vtk.getName();
 
-	VTKUnstructuredGrid::setName(filename);
+	m_vtk.setName(filename);
 	write();
-	VTKUnstructuredGrid::setName(oldFilename);
+	m_vtk.setName(oldFilename);
 }
 
 /*!
@@ -409,7 +422,15 @@ void PatchKernel::write(std::string filename)
 */
 void PatchKernel::write()
 {
-	VTKUnstructuredGrid::write();
+	// Set thedimensinos of the mesh
+	long connectSize = 0;
+	for (const Cell &cell : m_cells) {
+		connectSize += cell.getInfo().nVertices;
+	}
+	m_vtk.setDimensions(m_cells.size(), m_vertices.size(), connectSize);
+
+	// Write the mesh
+	m_vtk.write();
 }
 
 /*!
@@ -3568,42 +3589,13 @@ void PatchKernel::displayInterfaces(std::ostream &out, unsigned int padding) con
 }
 
 /*!
- *  Interface method for obtaining field meta Data
- *
- *  @param[in] name is the name of the field to be written
- *  @return Returns a VTKFieldMetaData struct containing the metadata
- *  of the requested custom data.
- */
-const VTKFieldMetaData PatchKernel::getMetaData(std::string name)
+	Get the VTK object.
+
+	\result The VTK object.
+*/
+VTKUnstructuredGrid & PatchKernel::getVTK()
 {
-	if (name == "Points") {
-		return VTKFieldMetaData(3 * m_vertices.size(), typeid(double));
-	} else if (name == "offsets") {
-		return VTKFieldMetaData(m_cells.size(), typeid(int));
-	} else if (name == "types") {
-		return VTKFieldMetaData(m_cells.size(), typeid(VTKElementType));
-	} else if (name == "connectivity") {
-		long connectSize = 0;
-		for (Cell &cell : m_cells) {
-			connectSize += cell.getInfo().nVertices;
-		}
-
-		return VTKFieldMetaData(connectSize, typeid(long));
-
-	} else if (name == "cellIndex") {
-		return VTKFieldMetaData(m_cells.size(), typeid(long));
-	} else if (name == "PID") {
-		return VTKFieldMetaData(m_cells.size(), typeid(int));
-	} else if (name == "vertexIndex") {
-		return VTKFieldMetaData(m_vertices.size(), typeid(long));
-#if BITPIT_ENABLE_MPI==1
-	} else if (name == "rank") {
-		return VTKFieldMetaData(m_cells.size(), typeid(int));
-#endif
-	}
-
-	// This code should never be reached
-	BITPIT_UNREACHABLE("Unknown field");
+	return m_vtk;
 }
 
 /*!
@@ -3616,7 +3608,7 @@ const VTKFieldMetaData PatchKernel::getMetaData(std::string name)
  *  @param[in] name is the name of the data to be written. Either user
  *  data or patch data
  */
-void PatchKernel::flushData(std::fstream &stream, VTKFormat format, std::string name)
+void PatchKernel::flushData(std::fstream &stream, std::string name, VTKFormat format)
 {
 	assert(format == VTKFormat::APPENDED);
 

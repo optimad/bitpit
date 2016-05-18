@@ -71,7 +71,7 @@ int main( int argc, char *argv[]){
     STL.deleteCoincidentVertices() ;
     STL.buildAdjacencies() ;
 
-    STL.setName("geometry_002") ;
+    STL.getVTK().setName("geometry_002") ;
     STL.write() ;
 
     std::cout << "n. vertex: " << STL.getVertexCount() << std::endl;
@@ -134,9 +134,10 @@ int main( int argc, char *argv[]){
         };
     }
 
-    mesh.addData("ls", VTKFieldType::SCALAR, VTKLocation::CELL, LS) ;
-    mesh.addData("lg", VTKFieldType::VECTOR, VTKLocation::CELL, LG) ;
-    mesh.setName("levelset_002") ;
+    VTKNativeWriter& writer = mesh.getVTK().getNativeWriter() ;
+    writer.addData("ls", VTKFieldType::SCALAR, VTKLocation::CELL, LS) ;
+    writer.addData("lg", VTKFieldType::VECTOR, VTKLocation::CELL, LG) ;
+    mesh.getVTK().setName("levelset_002") ;
     mesh.write() ;
 
     std::cout << " - Exported data" << std::endl;

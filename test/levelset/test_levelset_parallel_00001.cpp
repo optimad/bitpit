@@ -80,7 +80,7 @@ int main( int argc, char *argv[]){
     STL.deleteCoincidentVertices() ;
     STL.buildAdjacencies() ;
 
-    STL.setName("geometry_002") ;
+    STL.getVTK().setName("geometry_002") ;
     if (rank == 0) {
         STL.write() ;
     }
@@ -123,8 +123,8 @@ int main( int argc, char *argv[]){
     levelset.setMesh(&mesh) ;
     levelset.addObject(&STL) ;
 
-    mesh.addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS) ;
-    mesh.setName("levelset_parallel_001_initial") ;
+    mesh.getVTK().getNativeWriter().addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS) ;
+    mesh.getVTK().setName("levelset_parallel_001_initial") ;
 
     levelset.setPropagateSign(true);
 
@@ -149,8 +149,8 @@ int main( int argc, char *argv[]){
     }
 
     // Partition the mesh
-    mesh.setCounter() ;
-    mesh.setName("levelset_parallel_001") ;
+    mesh.getVTK().setCounter() ;
+    mesh.getVTK().setName("levelset_parallel_001") ;
 
     mapper = mesh.partition(MPI_COMM_WORLD, true) ;
     levelset.loadBalance(mapper) ;

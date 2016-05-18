@@ -53,9 +53,9 @@ int main(int argc, char *argv[]) {
 	// Create the patch
 	VolOctree *patch_2D = new VolOctree(0, 2, origin, length, dh);
 	patch_2D->setCommunicator(MPI_COMM_WORLD);
-	patch_2D->setName("octree_parallel_uniform_patch_2D");
+	patch_2D->getVTK().setName("octree_parallel_uniform_patch_2D");
 	patch_2D->update();
-	patch_2D->setCounter(0);
+	patch_2D->getVTK().setCounter(0);
 
 	// Partition the patch
 	patch_2D->partition(true);
@@ -105,9 +105,9 @@ int main(int argc, char *argv[]) {
 	// Create the patch
 	VolOctree *patch_3D = new VolOctree(0, 3, origin, length, dh);
 	patch_3D->setCommunicator(MPI_COMM_WORLD);
-	patch_3D->setName("octree_parallel_uniform_patch_3D");
+	patch_3D->getVTK().setName("octree_parallel_uniform_patch_3D");
 	patch_3D->update();
-	patch_3D->setCounter(0);
+	patch_3D->getVTK().setCounter(0);
 
 	// Partition the patch
 	patch_3D->partition(true);

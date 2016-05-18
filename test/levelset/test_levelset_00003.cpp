@@ -79,7 +79,7 @@ int main( int argc, char *argv[]){
     STL.deleteCoincidentVertices() ;
     STL.buildAdjacencies() ;
 
-    STL.setName("geometry_003") ;
+    STL.getVTK().setName("geometry_003") ;
     STL.write() ;
 
     std::cout << "n. vertex: " << STL.getVertexCount() << std::endl;
@@ -125,9 +125,9 @@ int main( int argc, char *argv[]){
     levelset.addObject(&STL) ;
 
 
-    mesh.addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS) ;
-    mesh.setName("levelset_003") ;
-    mesh.setCounter() ;
+    mesh.getVTK().getNativeWriter().addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS) ;
+    mesh.getVTK().setName("levelset_003") ;
+    mesh.getVTK().setCounter() ;
 
     levelset.setPropagateSign(true);
 

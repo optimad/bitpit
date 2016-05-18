@@ -52,7 +52,7 @@ int main(int argc, char *argv[]) {
 	log::cout() << "  >> 2D octree patch" << "\n";
 
 	VolOctree *patch_2D = new VolOctree(0, 2, origin, length, dh);
-	patch_2D->setName("octree_uniform_patch_2D");
+	patch_2D->getVTK().setName("octree_uniform_patch_2D");
 	patch_2D->update();
 	patch_2D->write();
 
@@ -104,7 +104,7 @@ int main(int argc, char *argv[]) {
 	log::cout() << "  >> 3D octree mesh" << "\n";
 
 	VolOctree *patch_3D = new VolOctree(0, 3, origin, length, dh);
-	patch_3D->setName("octree_uniform_patch_3D");
+	patch_3D->getVTK().setName("octree_uniform_patch_3D");
 	patch_3D->update();
 	patch_3D->write();
 

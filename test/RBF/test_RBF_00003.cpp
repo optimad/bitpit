@@ -325,7 +325,11 @@ int main() {
 	zDispl.resize(sizeCN);
 	
     { // output of undeformed grid, deformation vector and node type
-        bitpit::VTKUnstructuredGrid   output( "./", "orgGrid", bitpit::VTKElementType::PIXEL, points, connectivity );
+        bitpit::VTKUnstructuredGrid   output( "./", "orgGrid", bitpit::VTKElementType::PIXEL );
+        bitpit::VTKNativeWriter& writer = output.getNativeWriter() ;
+        writer.addData("Points",points) ;
+        writer.addData("connectivity",connectivity) ;
+        output.setDimensions(connectivity.size(),points.size());
         output.write() ;
     }
 
@@ -369,7 +373,11 @@ int main() {
 	{ // output of undeformed control cloud
 		std::vector<int> conn;
 		for(int i=0; i<(int)(controlNodes.size()); ++i) conn.push_back(i);
-		bitpit::VTKUnstructuredGrid   output( "./", "orgCPointCloud", bitpit::VTKElementType::VERTEX, controlNodes, conn);
+		bitpit::VTKUnstructuredGrid   output( "./", "orgCPointCloud", bitpit::VTKElementType::VERTEX);
+        bitpit::VTKNativeWriter& writer = output.getNativeWriter() ;
+        writer.addData("Points",controlNodes) ;
+        writer.addData("connectivity",conn) ;
+        output.setDimensions(conn.size(),controlNodes.size());
 		output.write() ;
 	}
 	
@@ -400,7 +408,11 @@ int main() {
 	 }
 	 
 	{// output of deformed grid
-        bitpit::VTKUnstructuredGrid   output( "./", "defGrid", bitpit::VTKElementType::PIXEL, points, connectivity );
+        bitpit::VTKUnstructuredGrid   output( "./", "defGrid", bitpit::VTKElementType::PIXEL );
+        bitpit::VTKNativeWriter& writer = output.getNativeWriter() ;
+        writer.addData("Points",points) ;
+        writer.addData("connectivity",connectivity) ;
+        output.setDimensions(connectivity.size(),points.size());
         output.write() ;
 	}
 	
@@ -411,7 +423,11 @@ int main() {
 		std::vector<int> conn;
 		for(int i=0; i<(int)(controlNodes.size()); ++i) conn.push_back(i);
 		
-		bitpit::VTKUnstructuredGrid   output( "./", "defCPointCloud", bitpit::VTKElementType::VERTEX, controlNodes, conn);
+		bitpit::VTKUnstructuredGrid   output( "./", "defCPointCloud", bitpit::VTKElementType::VERTEX);
+        bitpit::VTKNativeWriter& writer = output.getNativeWriter() ;
+        writer.addData("Points",controlNodes) ;
+        writer.addData("connectivity",conn) ;
+        output.setDimensions(conn.size(),controlNodes.size());
 		output.write() ;
 	}
 	

@@ -78,7 +78,7 @@ class UnaryPredicate {
     friend bool operator==(const std::pair<U, U1>&, const UnaryPredicate<U, U1>&);
 };
 
-class PatchKernel : public VTKUnstructuredGrid {
+class PatchKernel : public VTKBaseWriter {
 
 public:
 	typedef PiercedVector<Vertex>::iterator VertexIterator;
@@ -249,11 +249,11 @@ public:
 	void displayCells(std::ostream &out, unsigned int padding = 0) const;
 	void displayInterfaces(std::ostream &out, unsigned int padding = 0) const;
 
+	VTKUnstructuredGrid & getVTK();
 	void write();
 	void write(std::string name);
 
-	const VTKFieldMetaData getMetaData(std::string name);
-	void flushData(std::fstream &stream, VTKFormat format, std::string name);
+	void flushData(std::fstream &stream, std::string name, VTKFormat format );
 
 #if BITPIT_ENABLE_MPI==1
 	virtual void setCommunicator(MPI_Comm communicator);
@@ -382,6 +382,8 @@ protected:
 
 	long m_lastInternalId;
 	long m_firstGhostId;
+
+	VTKUnstructuredGrid m_vtk ;
 
 	void clearBoundingBox();
 	bool isBoundingBoxFrozen() const;

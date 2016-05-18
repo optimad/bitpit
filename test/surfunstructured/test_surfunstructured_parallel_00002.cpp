@@ -91,7 +91,7 @@ SurfUnstructured                mesh(0);
     // none
 
     // Set name ------- ----------------------------------------------------- //
-    mesh.setName("surfunstructured_partition");
+    mesh.getVTK().setName("surfunstructured_partition");
 
     // Set communicator ----------------------------------------------------- //
     mesh.setCommunicator(MPI_COMM_WORLD);

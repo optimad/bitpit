@@ -73,10 +73,12 @@ int main(int argc, char *argv[]) {
 		pointList.push_back(point);
 	}
 
+    {
 	log::cout() << "  >> 2D Cartesian patch" << "\n";
 
 	VolCartesian *patch_2D = new VolCartesian(0, 2, origin, length, dh);
-	patch_2D->setName("cartesian_uniform_patch_2D");
+    VTKUnstructuredGrid &vtk = patch_2D->getVTK() ;
+	vtk.setName("cartesian_uniform_patch_2D");
 	patch_2D->update();
 
 	log::cout() << "\n  >> 2D location test" << std::endl;
@@ -107,11 +109,14 @@ int main(int argc, char *argv[]) {
 	log::cout() << std::endl;
 
 	delete patch_2D;
+    }
 
+    {
 	log::cout() << "  >> 3D Cartesian patch" << "\n";
 
 	VolCartesian *patch_3D = new VolCartesian(0, 3, origin, length, dh);
-	patch_3D->setName("cartesian_uniform_patch_3D");
+    VTKUnstructuredGrid &vtk = patch_3D->getVTK() ;
+	vtk.setName("cartesian_uniform_patch_3D");
 	patch_3D->update();
 
 	log::cout() << "\n  >> 3D location test" << std::endl;
@@ -142,6 +147,7 @@ int main(int argc, char *argv[]) {
 	log::cout() << std::endl;
 
 	delete patch_3D;
+    }
 
 #if BITPIT_ENABLE_MPI==1
 	MPI_Finalize();
