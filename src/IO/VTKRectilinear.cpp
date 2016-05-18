@@ -179,7 +179,7 @@ void VTKRectilinearGrid::setGeomTypes( VTKDataType Ptype ){
  *  Reads meta data of VTR file (grid size, data fields, codex, position of data within file).
  *  Calls setDimension.
  */
-void VTKRectilinearGrid::readMetaData( ){
+void VTKRectilinearGrid::readMetaInformation( ){
 
     std::fstream str;
     std::string line, temp;
@@ -235,7 +235,7 @@ void VTKRectilinearGrid::readMetaData( ){
 /*!  
  *  Writes entire VTR but the data.
  */
-void VTKRectilinearGrid::writeMetaData( ){
+void VTKRectilinearGrid::writeMetaInformation( ){
 
     std::fstream str;
 

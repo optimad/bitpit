@@ -241,11 +241,11 @@ class VTK{
 
         void                            read() ;
 
-        virtual void                    readMetaData() = 0 ; 
+        virtual void                    readMetaInformation() = 0 ; 
         void                            readData() ;
 
         void                            write( VTKWriteMode writeMode=VTKWriteMode::DEFAULT )  ;
-        virtual void                    writeMetaData() = 0 ;
+        virtual void                    writeMetaInformation() = 0 ;
         void                            writeData() ;
 
         virtual void                    writeCollection() = 0 ;
@@ -289,8 +289,8 @@ class VTKUnstructuredGrid : public VTK{
     uint64_t                        calcSizeConnectivity( ) ;
 
     public:
-    void                            readMetaData() ;
-    void                            writeMetaData() ;
+    void                            readMetaInformation() ;
+    void                            writeMetaInformation() ;
 
     void                            setElementType( VTKElementType ) ;
     void                            setDimensions( uint64_t , uint64_t , uint64_t nconn_=0 ) ;
@@ -331,8 +331,8 @@ class VTKRectilinearGrid : public VTK{
     void                            writeCollection() ;  
 
     public:
-    void                            readMetaData() ;
-    void                            writeMetaData() ;
+    void                            readMetaInformation() ;
+    void                            writeMetaInformation() ;
 
     void                            setDimensions( int, int, int, int, int, int ) ;
     void                            setDimensions( int, int, int ) ;

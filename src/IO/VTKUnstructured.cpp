@@ -253,7 +253,7 @@ uint64_t VTKUnstructuredGrid::calcSizeConnectivity( ){
 /*!  
  *  Writes entire VTU but the data.
  */
-void VTKUnstructuredGrid::writeMetaData( ){
+void VTKUnstructuredGrid::writeMetaInformation( ){
 
     std::fstream str ;
     std::string line ; 
@@ -360,7 +360,7 @@ void VTKUnstructuredGrid::writeCollection( ){
  *  Reads meta data of VTU file (grid size, data fields, codex, position of data within file).
  *  Calls setDimension.
  */
-void VTKUnstructuredGrid::readMetaData( ){
+void VTKUnstructuredGrid::readMetaInformation( ){
 
     std::fstream str;
     std::string line, temp;

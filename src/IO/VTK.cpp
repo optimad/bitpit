@@ -415,7 +415,7 @@ void VTK::write( VTKWriteMode writeMode ){
 
     calcAppendedOffsets() ;
 
-    writeMetaData() ;
+    writeMetaInformation() ;
     writeData() ;
 
     if( nr_procs > 1  && my_proc == 0)  writeCollection() ;
@@ -701,7 +701,7 @@ void VTK::writePDataArray( std::fstream &str, VTKField &field_ ){
  */
 void VTK::read( ){
 
-    readMetaData( );
+    readMetaInformation( );
     readData( ) ;
 
     return ;
