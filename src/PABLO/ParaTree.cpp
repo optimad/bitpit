@@ -77,17 +77,7 @@ ParaTree::ParaTree(uint8_t dim, int8_t maxlevel, std::string logfile ) : m_octre
 	m_rank = 0;
 	m_nproc = 1;
 #endif
-	m_partitionFirstDesc = new uint64_t[m_nproc];
-	m_partitionLastDesc = new uint64_t[m_nproc];
-	m_partitionRangeGlobalIdx = new uint64_t[m_nproc];
-	m_partitionRangeGlobalIdx0 = new uint64_t[m_nproc];
-	uint64_t lastDescMorton = m_octree.getLastDesc().computeMorton();
-	uint64_t firstDescMorton = m_octree.getFirstDesc().computeMorton();
-	for(int p = 0; p < m_nproc; ++p){
-		m_partitionRangeGlobalIdx[p] = 0;
-		m_partitionRangeGlobalIdx0[p] = 0;
-		m_partitionLastDesc[p] = lastDescMorton;
-		m_partitionLastDesc[p] = firstDescMorton;
+	createPartitionInfo(false);
 	}
 	m_periodic.resize(m_global.m_nfaces, false);
 	m_tol = 1.0e-14;
@@ -181,10 +171,7 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 	m_nproc = 1;
 	m_rank = 0;
 #endif
-	m_partitionFirstDesc = new uint64_t[m_nproc];
-	m_partitionLastDesc = new uint64_t[m_nproc];
-	m_partitionRangeGlobalIdx = new uint64_t[m_nproc];
-	m_partitionRangeGlobalIdx0 = new uint64_t[m_nproc];
+	createPartitionInfo(false);
 
 	setFirstDesc();
 	setLastDesc();
@@ -219,10 +206,7 @@ ParaTree::ParaTree(u32vector2D & XYZ, u8vector & levels, uint8_t dim, int8_t max
 /*! Default Destructor of ParaTree.
 */
 ParaTree::~ParaTree(){
-	delete[] m_partitionFirstDesc;
-	delete[] m_partitionLastDesc;
-	delete[] m_partitionRangeGlobalIdx;
-	delete[] m_partitionRangeGlobalIdx0;
+	deletePartitionInfo();
 
 	(*m_log) << "---------------------------------------------" << endl;
 	(*m_log) << "--------------- R.I.P. PABLO ----------------" << endl;
@@ -4335,6 +4319,42 @@ ParaTree::balance21(bool const first){
 
 #endif /* NOMPI */
 };
+
+/*! Create the data structures for storing partion information
+*/
+void
+ParaTree::createPartitionInfo(bool deletePrevious)
+{
+	// Delete previous parittion info
+	if (deletePrevious) {
+		deletePartitionInfo();
+	}
+
+	// Create new partition info
+	m_partitionFirstDesc = new uint64_t[m_nproc];
+	m_partitionLastDesc = new uint64_t[m_nproc];
+	m_partitionRangeGlobalIdx = new uint64_t[m_nproc];
+	m_partitionRangeGlobalIdx0 = new uint64_t[m_nproc];
+	uint64_t lastDescMorton = m_octree.getLastDesc().computeMorton();
+	uint64_t firstDescMorton = m_octree.getFirstDesc().computeMorton();
+	for(int p = 0; p < m_nproc; ++p){
+		m_partitionRangeGlobalIdx0[p] = 0;
+		m_partitionRangeGlobalIdx[p]  = m_globalNumOctants - 1;
+		m_partitionLastDesc[p] = lastDescMorton;
+		m_partitionLastDesc[p] = firstDescMorton;
+	}
+}
+
+/*! Delete the data structures for storing partion information
+*/
+void
+ParaTree::deletePartitionInfo()
+{
+	delete[] m_partitionFirstDesc;
+	delete[] m_partitionLastDesc;
+	delete[] m_partitionRangeGlobalIdx;
+	delete[] m_partitionRangeGlobalIdx0;
+}
 
 // =================================================================================== //
 // TESTING OUTPUT METHODS												    			   //
