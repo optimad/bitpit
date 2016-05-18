@@ -38,6 +38,19 @@ namespace bitpit {
 */
 
 /*!
+	Sets the MPI communicator to be used for parallel communications.
+
+	\param communicator is the communicator to be used for parallel
+	communications.
+*/
+void VolOctree::setCommunicator(MPI_Comm communicator)
+{
+	PatchKernel::setCommunicator(communicator);
+
+	m_tree.setComm(communicator);
+}
+
+/*!
 	Updates the partition to optimize the load balance.
 
 	\param trackChanges if set to true the changes to the patch will be

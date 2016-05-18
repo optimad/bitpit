@@ -87,6 +87,10 @@ public:
         void buildAdjacencies() {};
         void updateAdjacencies(const std::vector<long>&) {};
 
+#if BITPIT_ENABLE_MPI==1
+	void setCommunicator(MPI_Comm communicator);
+#endif
+
 protected:
 	const std::vector<adaption::Info> _updateAdaption(bool trackAdaption);
 	bool _markCellForRefinement(const long &id);
