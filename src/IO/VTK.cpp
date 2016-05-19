@@ -57,9 +57,6 @@ VTK::VTK(){
     nr_cells = 0;
     nr_points= 0;
 
-    VTKBaseWriter* basePtr = new VTKNativeWriter(*this) ;
-    addWriter( "VTKNativeWriter", *basePtr ) ;
-
 };
 
 /*! 
@@ -81,11 +78,6 @@ VTK::~VTK(){
 
     data.clear();
     geometry.clear();
-
-    auto writerItr = defaultWriter.find("VTKNativeWriter") ;
-    delete writerItr->second ;
-
-    defaultWriter.clear() ;
 
 } ;
 
@@ -304,29 +296,6 @@ VTKField& VTK::addData( std::string name_, VTKFieldType comp_,  VTKLocation loc_
 };
 
 /*!
- * Get the native writer
- * @return pointer to writer
- */
-void VTK::setWriter( std::string name, VTKBaseWriter* writer){
-
-    VTKField* field ;
-    getFieldByName( name, field ) ;
-
-    field->setWriter(*writer) ;
-
-    return ;
-};
-
-/*!
- * Get the native writer
- * @return pointer to writer
- */
-VTKNativeWriter& VTK::getNativeWriter(){
-    VTKNativeWriter* ptr = dynamic_cast<VTKNativeWriter*>( defaultWriter["VTKNativeWriter"] ) ;
-    return *ptr;
-};
-
-/*!
  * Removes user data from input or output 
  * @param[in]  name_    name of field to be removed
  */
@@ -383,20 +352,6 @@ bool VTK::getFieldByName( const std::string &name_, VTKField*& the_field ){
     };
 
     return false ;
-};
-
-/*!
- * Adds a new writer to the default list
- * @param[in] name_ name of the writer
- * @param[in] writer_ writer to be registered
- */
-void VTK::addWriter( std::string name_, VTKBaseWriter &writer_  ){
-
-    assert( defaultWriter.find(name_) == defaultWriter.end() ) ;
-
-    defaultWriter.insert( {{name_, &writer_}}) ;
-
-    return ;
 };
 
 /*!

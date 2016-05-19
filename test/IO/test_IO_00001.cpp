@@ -92,10 +92,8 @@ int main()
         bitpit::VTKUnstructuredGrid  vtk(".", "ustr1", bitpit::VTKElementType::VOXEL );
 
         vtk.setDimensions(1,8) ;
-
-        bitpit::VTKNativeWriter& writer = vtk.getNativeWriter() ;
-        writer.addData( "Points", points) ;
-        writer.addData( "connectivity", connectivity) ;
+        vtk.addData( "Points", points) ;
+        vtk.addData( "connectivity", connectivity) ;
 
         vtk.write() ;
 
@@ -107,12 +105,10 @@ int main()
         bitpit::VTKUnstructuredGrid  vtk(".", "ustr2", bitpit::VTKElementType::VOXEL );
         vtk.setDimensions(1,8) ;
 
-        bitpit::VTKNativeWriter& writer = vtk.getNativeWriter() ;
-
-        writer.addData( "Points", points) ;
-        writer.addData( "connectivity", connectivity) ;
-        writer.addData( "press", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, pressure) ;
-        writer.addData( "vel", bitpit::VTKFieldType::VECTOR, bitpit::VTKLocation::CELL, velocity) ;
+        vtk.addData( "Points", points) ;
+        vtk.addData( "connectivity", connectivity) ;
+        vtk.addData( "press", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, pressure) ;
+        vtk.addData( "vel", bitpit::VTKFieldType::VECTOR, bitpit::VTKLocation::CELL, velocity) ;
 
         vtk.write() ;
     }
@@ -129,12 +125,10 @@ int main()
 
         bitpit::VTKUnstructuredGrid  vtk(".", "ustr2", bitpit::VTKElementType::VOXEL );
 
-
-        bitpit::VTKNativeWriter& writer = vtk.getNativeWriter() ;
-        writer.addData( "Points", Ipoints) ;
-        writer.addData( "connectivity", Iconnectivity) ;
-        writer.addData( "press", Ipressure) ;
-        writer.addData( "press", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, Ipressure ) ;
+        vtk.addData( "Points", Ipoints) ;
+        vtk.addData( "connectivity", Iconnectivity) ;
+        vtk.addData( "press", Ipressure) ;
+        vtk.addData( "press", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, Ipressure ) ;
 
         vtk.read() ;
 
@@ -157,12 +151,11 @@ int main()
         vector<int64_t> cids, pids ;
 
         bitpit::VTKUnstructuredGrid  vtk("./data", "selection", bitpit::VTKElementType::TRIANGLE );
-        bitpit::VTKNativeWriter& writer = vtk.getNativeWriter() ;
-        writer.addData( "Points", Ipoints) ;
-        writer.addData( "connectivity", Iconnectivity) ;
-        writer.addData( "STLSolidLabeling", label) ;
-        writer.addData( "vtkOriginalCellIds", cids) ;
-        writer.addData( "vtkOriginalPointIds", pids) ;
+        vtk.addData( "Points", Ipoints) ;
+        vtk.addData( "connectivity", Iconnectivity) ;
+        vtk.addData( "STLSolidLabeling", label) ;
+        vtk.addData( "vtkOriginalCellIds", cids) ;
+        vtk.addData( "vtkOriginalPointIds", pids) ;
 
         vtk.read() ;
 

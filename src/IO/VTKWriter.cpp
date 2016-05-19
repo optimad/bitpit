@@ -91,19 +91,13 @@ void VTKBaseWriter::absorbData( std::fstream &str, std::string name, VTKFormat f
  */
 VTKNativeWriter::~VTKNativeWriter(){
 
-    for( auto &field : m_field){
-        delete field.second ;
-    };
-
     m_field.clear() ;
-    owner = NULL ;
-
 };
 
 /*!
  * Constructor
  */
-VTKNativeWriter::VTKNativeWriter(VTK& owner_) :owner(&owner_){
+VTKNativeWriter::VTKNativeWriter( ) {
 
 };
 
@@ -118,8 +112,6 @@ void VTKNativeWriter::removeData( std::string name){
     if( fieldItr != m_field.end()){
         m_field.erase( fieldItr) ;
     }
-
-    owner->removeData(name) ;
 
     return;
 };

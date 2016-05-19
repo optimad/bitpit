@@ -186,18 +186,13 @@ class VTKNativeWriter : public VTKBaseWriter {
 
     private:
         std::unordered_map<std::string,std::unique_ptr<VTKBaseContainer> >         m_field ; /**< association between name of field and conatiner */
-        VTK*                    owner ;             /**< pointer to VTK class owing the writer */
 
     public:
-        VTKNativeWriter(VTK&);
+        VTKNativeWriter();
         ~VTKNativeWriter();
 
         template< class T>
-        VTKField&               addData( std::string, std::vector<T> & ) ;
-
-        template< class T>
-        VTKField&               addData( std::string, VTKFieldType, VTKLocation, std::vector<T> & ) ;
-
+        void                    addData( std::string, std::vector<T> & ) ;
         void                    removeData( std::string ) ;
         void                    flushData( std::fstream &, std::string, VTKFormat) ;
         void                    absorbData( std::fstream &, std::string, VTKFormat, uint64_t, uint8_t) ;
@@ -266,7 +261,7 @@ class VTK{
         std::vector<VTKField>           data ;                      /**< Data fields */
         VTKFormat                       DataCodex ;                 /**< Data codex */
 
-        std::unordered_map<std::string, VTKBaseWriter*>     defaultWriter;             /**< Writers linked to the class */
+        VTKNativeWriter                 nativeWriter;               /**< native writer for streaming data stored in std::vector<> */
 
         // methods ----------------------------------------------------------------------- //
     public:
@@ -294,9 +289,13 @@ class VTK{
 
         VTKField&                       addData( std::string, VTKBaseWriter* = NULL ) ;
         VTKField&                       addData( std::string, VTKFieldType, VTKLocation, VTKDataType, VTKBaseWriter* =NULL ) ;
+
+        template<class T>
+        VTKField&                       addData( std::string, std::vector<T> & ) ;
+        template<class T>
+        VTKField&                       addData( std::string, VTKFieldType, VTKLocation, std::vector<T> & ) ;
+
         void                            removeData( std::string ) ;
-        void                            setWriter( std::string, VTKBaseWriter* );
-        VTKNativeWriter&                getNativeWriter() ;
 
         void                            read() ;
         virtual void                    readMetaInformation() = 0 ; 
@@ -318,7 +317,6 @@ class VTK{
         bool                            readDataArray( std::fstream &, VTKField &);
 
         //General Purpose
-        void                            addWriter( std::string, VTKBaseWriter& ) ;
         bool                            getFieldByName( const std::string &, VTKField*& ) ;
         void                            calcAppendedOffsets() ;
         virtual uint64_t                calcFieldSize( const VTKField &) =0;
@@ -373,8 +371,6 @@ class VTKUnstructuredGrid : public VTK {
     uint64_t                        calcFieldEntries( const VTKField &) ;
     uint8_t                         calcFieldComponents( const VTKField &) ;
 
-    void                            flushData( std::fstream &, std::string, VTKFormat) ;
-    void                            absorbData( std::fstream &, std::string, VTKFormat, uint64_t, uint8_t) ;
 };
 
 class VTKRectilinearGrid : public VTK{
@@ -451,6 +447,7 @@ namespace vtk{
 
 }
 
+#include"VTK.tpp"
 #include"VTKTypes.tpp"
 #include"VTKWriter.tpp"
 #include"VTKUtils.tpp"
