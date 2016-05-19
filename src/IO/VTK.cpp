@@ -259,7 +259,7 @@ void  VTK::setDataCodex( VTKFormat cod_ ) {
  * Codification will be set according to default value [appended] or to value set by VTK::setDataCodex( VTKFormat ) or VTK::setCodex( VTKFormat )
  * @param[in]  name_    name of field
  */
-VTKField& VTK::addData( std::string name_, VTKBaseWriter* writer_ ){
+VTKField& VTK::addData( std::string name_, VTKBaseStreamer* streamer ){
 
     VTKField*   ptr(NULL) ;
 
@@ -269,7 +269,7 @@ VTKField& VTK::addData( std::string name_, VTKBaseWriter* writer_ ){
     };
 
     ptr->setCodification(DataCodex) ;
-    ptr->setWriter(*writer_) ;
+    ptr->setStreamer(*streamer) ;
 
     return *ptr ;
 
@@ -283,9 +283,9 @@ VTKField& VTK::addData( std::string name_, VTKBaseWriter* writer_ ){
  * @param[in]  loc_     location of data [VTKLocation::CELL/VTKLocation::POINT]
  * @param[in]  type_    type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
  */
-VTKField& VTK::addData( std::string name_, VTKFieldType comp_,  VTKLocation loc_, VTKDataType type_, VTKBaseWriter *writer_ ){
+VTKField& VTK::addData( std::string name_, VTKFieldType comp_,  VTKLocation loc_, VTKDataType type_, VTKBaseStreamer *sreamer_ ){
 
-    VTKField&   field = addData( name_, writer_ ) ;
+    VTKField&   field = addData( name_, sreamer_ ) ;
 
     field.setFieldType(comp_) ;
     field.setLocation(loc_) ;

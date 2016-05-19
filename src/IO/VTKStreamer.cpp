@@ -45,8 +45,8 @@ VTKBaseContainer::~VTKBaseContainer( ){
 };
 
 /*!
- * @class VTKBaseWriter
- * @brief The base class to be used to derive VTK Writers form
+ * @class VTKBaseStreamer
+ * @brief The base class to be used to derive VTK streamers form
  */
 
 /*!
@@ -55,7 +55,7 @@ VTKBaseContainer::~VTKBaseContainer( ){
  * @param[in] name name of field
  * @param[in] format ASCII or BINARY format
  */
-void VTKBaseWriter::flushData( std::fstream &str, std::string name, VTKFormat format){
+void VTKBaseStreamer::flushData( std::fstream &str, std::string name, VTKFormat format){
 
     BITPIT_UNUSED(str) ;
     BITPIT_UNUSED(name) ;
@@ -70,7 +70,7 @@ void VTKBaseWriter::flushData( std::fstream &str, std::string name, VTKFormat fo
  * @param[in] name name of field
  * @param[in] format ASCII or BINARY format
  */
-void VTKBaseWriter::absorbData( std::fstream &str, std::string name, VTKFormat format, uint64_t entries, uint8_t components){
+void VTKBaseStreamer::absorbData( std::fstream &str, std::string name, VTKFormat format, uint64_t entries, uint8_t components){
 
     BITPIT_UNUSED(str) ;
     BITPIT_UNUSED(name) ;
@@ -82,14 +82,14 @@ void VTKBaseWriter::absorbData( std::fstream &str, std::string name, VTKFormat f
 };
 
 /*!
- * @class VTKNativeWriter
- * @brief A VTK writer which supports natively std::vector
+ * @class VTKNativeStreamer
+ * @brief A VTK streamer which supports natively std::vector
  */
 
 /*!
  * Destructor
  */
-VTKNativeWriter::~VTKNativeWriter(){
+VTKNativeStreamer::~VTKNativeStreamer(){
 
     m_field.clear() ;
 };
@@ -97,15 +97,15 @@ VTKNativeWriter::~VTKNativeWriter(){
 /*!
  * Constructor
  */
-VTKNativeWriter::VTKNativeWriter( ) {
+VTKNativeStreamer::VTKNativeStreamer( ) {
 
 };
 
 /*!
- * Removes a field from writer
+ * Removes a field from streamer
  * @param[in] name name of field
  */
-void VTKNativeWriter::removeData( std::string name){
+void VTKNativeStreamer::removeData( std::string name){
 
     auto fieldItr = m_field.find(name) ;
 
@@ -122,7 +122,7 @@ void VTKNativeWriter::removeData( std::string name){
  * @param[in] name name of field
  * @param[in] format ASCII or BINARY format
  */
-void VTKNativeWriter::flushData( std::fstream &str, std::string name, VTKFormat format){
+void VTKNativeStreamer::flushData( std::fstream &str, std::string name, VTKFormat format){
 
     auto fieldItr = m_field.find(name) ;
 
@@ -139,7 +139,7 @@ void VTKNativeWriter::flushData( std::fstream &str, std::string name, VTKFormat 
  * @param[in] name name of field
  * @param[in] format ASCII or BINARY format
  */
-void VTKNativeWriter::absorbData( std::fstream &str, std::string name, VTKFormat format, uint64_t entries, uint8_t components){
+void VTKNativeStreamer::absorbData( std::fstream &str, std::string name, VTKFormat format, uint64_t entries, uint8_t components){
 
     auto fieldItr = m_field.find(name) ;
 

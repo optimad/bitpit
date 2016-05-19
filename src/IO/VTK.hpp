@@ -173,7 +173,7 @@ class VTKVectorContainer : public VTKBaseContainer{
         void                    resize( std::false_type, uint64_t , uint8_t) ;
 };
 
-class VTKBaseWriter{ 
+class VTKBaseStreamer{ 
 
     private:
 
@@ -182,14 +182,14 @@ class VTKBaseWriter{
         virtual void            absorbData( std::fstream &, std::string, VTKFormat, uint64_t, uint8_t )  ;
 };
 
-class VTKNativeWriter : public VTKBaseWriter {
+class VTKNativeStreamer : public VTKBaseStreamer {
 
     private:
         std::unordered_map<std::string,std::unique_ptr<VTKBaseContainer> >         m_field ; /**< association between name of field and conatiner */
 
     public:
-        VTKNativeWriter();
-        ~VTKNativeWriter();
+        VTKNativeStreamer();
+        ~VTKNativeStreamer();
 
         template< class T>
         void                    addData( std::string, std::vector<T> & ) ;
@@ -209,7 +209,7 @@ class VTKField{
         VTKFormat                codification ;             /**< Type of codification [VTKFormat::ASCII, VTKFormat::APPENDED] */
         uint64_t                 offset;                    /**< offset in the appended section */
         std::fstream::pos_type   position;                  /**< position in file */
-        VTKBaseWriter*           writer;                    /**< pointer to writer */
+        VTKBaseStreamer*         streamer;                  /**< pointer to streamer */
 
         //methods
     public:
@@ -237,7 +237,7 @@ class VTKField{
         void                     setOffset( uint64_t ) ;
         void                     setPosition( std::fstream::pos_type ) ;
 
-        void                     setWriter( VTKBaseWriter& ) ;
+        void                     setStreamer( VTKBaseStreamer& ) ;
         void                     read( std::fstream&, uint64_t, uint8_t ) const ;
         void                     write( std::fstream& ) const ;
 
@@ -261,7 +261,7 @@ class VTK{
         std::vector<VTKField>           data ;                      /**< Data fields */
         VTKFormat                       DataCodex ;                 /**< Data codex */
 
-        VTKNativeWriter                 nativeWriter;               /**< native writer for streaming data stored in std::vector<> */
+        VTKNativeStreamer               nativeStreamer;             /**< native streamer for streaming data stored in std::vector<> */
 
         // methods ----------------------------------------------------------------------- //
     public:
@@ -287,8 +287,8 @@ class VTK{
         void                            setGeomCodex( VTKFormat );
         void                            setDataCodex( VTKFormat );
 
-        VTKField&                       addData( std::string, VTKBaseWriter* = NULL ) ;
-        VTKField&                       addData( std::string, VTKFieldType, VTKLocation, VTKDataType, VTKBaseWriter* =NULL ) ;
+        VTKField&                       addData( std::string, VTKBaseStreamer* = NULL ) ;
+        VTKField&                       addData( std::string, VTKFieldType, VTKLocation, VTKDataType, VTKBaseStreamer* =NULL ) ;
 
         template<class T>
         VTKField&                       addData( std::string, std::vector<T> & ) ;
@@ -325,7 +325,7 @@ class VTK{
 
 };
 
-class VTKUnstructuredGridStreamer :public VTKBaseWriter{
+class VTKUnstructuredGridStreamer :public VTKBaseStreamer{
 
     private:
         VTKElementType                  homogeneousType ;
@@ -449,7 +449,7 @@ namespace vtk{
 
 #include"VTK.tpp"
 #include"VTKTypes.tpp"
-#include"VTKWriter.tpp"
+#include"VTKStreamer.tpp"
 #include"VTKUtils.tpp"
 
 

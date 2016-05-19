@@ -179,10 +179,10 @@ void VTKUnstructuredGrid::setElementType( VTKElementType type_ ){
     homogeneousType = type_ ;
 
     geometry[1].setDataType( VTKDataType::UInt64) ; 
-    geometry[1].setWriter(unstructuredStreamer) ;
+    geometry[1].setStreamer(unstructuredStreamer) ;
 
     geometry[2].setDataType( VTKDataType::UInt8) ; 
-    geometry[2].setWriter(unstructuredStreamer) ;
+    geometry[2].setStreamer(unstructuredStreamer) ;
 
     return ;
 

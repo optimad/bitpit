@@ -123,13 +123,13 @@ void VTKVectorContainer<T>::resize( std::false_type, uint64_t entries, uint8_t c
 }
 
 /*!
- * Adds data strored in std::vector<> to NativeWriter
+ * Adds data strored in std::vector<> to NativeStreamer
  * @tparam T type of std::vector<>
  * @param[in] name name of data set
  * @param[in] data std::vector containing the data
  */
 template<class T>
-void VTKNativeWriter::addData( std::string name, std::vector<T> &data ){
+void VTKNativeStreamer::addData( std::string name, std::vector<T> &data ){
 
     auto fieldItr = m_field.find(name) ;
 

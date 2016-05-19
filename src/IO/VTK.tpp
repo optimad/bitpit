@@ -25,7 +25,7 @@
 namespace bitpit{
 
 /*!
- * Adds data strored in std::vector<> to NativeWriter
+ * Adds data strored in std::vector<> to NativeStreamer
  * @tparam T type of std::vector<>
  * @param[in] name name of data set
  * @param[in] data std::vector containing the data
@@ -33,9 +33,9 @@ namespace bitpit{
 template<class T>
 VTKField& VTK::addData( std::string name, std::vector<T> &data ){
 
-    nativeWriter.addData(name,data) ;
+    nativeStreamer.addData(name,data) ;
 
-    VTKField& field= addData( name, &nativeWriter) ;
+    VTKField& field= addData( name, &nativeStreamer) ;
     field.setDataType( VTKTypes::whichType(data)) ;
 
     return field;

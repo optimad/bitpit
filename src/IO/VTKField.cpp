@@ -51,7 +51,7 @@ VTKField::VTKField(){
     codification    = VTKFormat::UNDEFINED ;
     fieldType       = VTKFieldType::UNDEFINED ;
     position        = 0 ;
-    writer          = NULL ;
+    streamer          = NULL ;
 
 };
 
@@ -85,7 +85,7 @@ VTKField& VTKField::operator=( const VTKField & other){
     location = other.location ;
     offset = other.offset ;
     position = other.position ;
-    writer = other.writer ;
+    streamer = other.streamer ;
 
     return *this;
 };
@@ -157,8 +157,8 @@ void      VTKField::setOffset( uint64_t offs_){
  * set offset of data field for appended output
  * @param[in]   offs_   offset from "_" character of appended section
  */
-void VTKField::setWriter(VTKBaseWriter& writer_ ){ 
-    writer= &writer_; 
+void VTKField::setStreamer(VTKBaseStreamer& streamer_ ){ 
+    streamer= &streamer_; 
     return; 
 };
 
@@ -220,22 +220,22 @@ std::fstream::pos_type   VTKField::getPosition() const{
 };
 
 /*!
- * Writes the field through its writer to file
+ * Writes the field through its streamer to file
  * @param[in] str file stream
  */
 void  VTKField::write( std::fstream &str) const{ 
 
-    assert( writer != NULL ) ;
+    assert( streamer != NULL ) ;
     assert( name != "undefined") ;
     assert( codification != VTKFormat::UNDEFINED ) ;
 
-    writer->flushData( str, name, codification) ;
+    streamer->flushData( str, name, codification) ;
 
     return ;
 };
 
 /*!
- * Reads the field through its writer from file
+ * Reads the field through its streamer from file
  * @param[in] str file stream
  */
 void  VTKField::read( std::fstream &str, uint64_t entries, uint8_t components ) const{ 
@@ -243,8 +243,8 @@ void  VTKField::read( std::fstream &str, uint64_t entries, uint8_t components ) 
     assert( name != "undefined ") ;
     assert( codification != VTKFormat::UNDEFINED ) ;
 
-    if( writer != NULL){
-        writer->absorbData( str, name, codification, entries, components) ;
+    if( streamer != NULL){
+        streamer->absorbData( str, name, codification, entries, components) ;
     };
 
     return ;
