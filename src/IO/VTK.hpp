@@ -327,11 +327,25 @@ class VTK{
 
 };
 
-class VTKUnstructuredGrid : public VTK, public VTKBaseWriter {
+class VTKUnstructuredGridStreamer :public VTKBaseWriter{
+
+    private:
+        VTKElementType                  homogeneousType ;
+        long                            nrCells ;
+    
+        void                            flushData( std::fstream &, std::string, VTKFormat) ;
+    
+    public:
+        void                            setGrid( VTKElementType, long) ;
+};
+
+class VTKUnstructuredGrid : public VTK {
 
     protected:
     uint64_t                        nconnectivity ;             /**< size of the connectivity information */
     VTKElementType                  homogeneousType ;           /**< type of element mesh is made of */
+
+    VTKUnstructuredGridStreamer     unstructuredStreamer;       /**< streamer if unstructured grid is of homogenous type */
 
     public:
     ~VTKUnstructuredGrid();
