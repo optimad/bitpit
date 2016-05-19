@@ -133,8 +133,12 @@ VTKField& VTKNativeWriter::addData( std::string name, std::vector<T> &data ){
 
     auto fieldItr = m_field.find(name) ;
 
-    m_field.insert( {{ name, new VTKVectorContainer<T>(data) }}) ;
-    VTKField& field= owner->addData( name, this) ;
+    if( fieldItr!=m_field.end() ){
+        m_field.erase(fieldItr) ;
+    };
+    
+    std::unique_ptr<VTKBaseContainer> temp = std::unique_ptr<VTKBaseContainer>( new VTKVectorContainer<T>(data) ) ;
+    m_field.emplace( name, std::move(temp) ) ;
 
     field.setDataType( VTKTypes::whichType(data)) ;
 

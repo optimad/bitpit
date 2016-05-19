@@ -185,7 +185,7 @@ class VTKBaseWriter{
 class VTKNativeWriter : public VTKBaseWriter {
 
     private:
-        std::unordered_map<std::string,VTKBaseContainer*>         m_field ; /**< association between name of field and conatiner */
+        std::unordered_map<std::string,std::unique_ptr<VTKBaseContainer> >         m_field ; /**< association between name of field and conatiner */
         VTK*                    owner ;             /**< pointer to VTK class owing the writer */
 
     public:
