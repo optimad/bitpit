@@ -25,6 +25,14 @@
 namespace bitpit{
 
 /*!
+ * Destructor
+ */
+template<class T>
+VTKVectorContainer<T>::~VTKVectorContainer( ){
+    m_ptr = NULL;
+}
+
+/*!
  * Constructor assigns container reference to internal pointer
  * @tparam T type of std::vector<>
  * @param[in] data data container

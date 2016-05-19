@@ -153,6 +153,7 @@ class VTKBaseContainer{
     private:
 
     public:
+        virtual ~VTKBaseContainer( ) ;
         virtual void            flushData( std::fstream &, VTKFormat) =0 ;
         virtual void            absorbData( std::fstream &, VTKFormat, uint64_t, uint8_t) =0 ;
 };
@@ -160,10 +161,12 @@ class VTKBaseContainer{
 template<class T>
 class VTKVectorContainer : public VTKBaseContainer{
     private:
-        std::vector<T>*                      m_ptr ; /**< pointer to data */
+        std::vector<T>*         m_ptr ; /**< pointer to data */
 
     public:
         VTKVectorContainer( std::vector<T> &) ;
+        ~VTKVectorContainer( ) ;
+
         void                    flushData( std::fstream &, VTKFormat) ;
         void                    absorbData( std::fstream &, VTKFormat, uint64_t, uint8_t) ;
         void                    resize( std::true_type, uint64_t , uint8_t) ;

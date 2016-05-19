@@ -38,6 +38,13 @@ namespace bitpit{
  */
 
 /*!
+ * Destructor
+ */
+VTKBaseContainer::~VTKBaseContainer( ){
+
+};
+
+/*!
  * @class VTKBaseWriter
  * @brief The base class to be used to derive VTK Writers form
  */
