@@ -33,10 +33,10 @@ namespace bitpit{
 template<class T>
 VTKField& VTK::addData( std::string name, std::vector<T> &data ){
 
-    nativeStreamer.addData(name,data) ;
-
     VTKField& field= addData( name, &nativeStreamer) ;
     field.setDataType( VTKTypes::whichType(data)) ;
+
+    nativeStreamer.addData(name,data) ;
 
     return field;
 
@@ -62,4 +62,45 @@ VTKField& VTK::addData( std::string name_, VTKFieldType comp_,  VTKLocation loc_
 
 };
 
+/*!
+ * Associates the NativeStreamer to a geometrical field
+ * @tparam T type of std::vector<>
+ * @param[in] fieldEnum which geometrical field 
+ * @param[in] data std::vector containing the data
+ */
+template<class T>
+void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, std::vector<T> &data ){
+
+    int      index = static_cast<int>(fieldEnum) ;
+    VTKField& field = geometry[index] ;
+    std::string   name = field.getName() ;
+
+    nativeStreamer.addData(name,data) ;
+
+    field.setStreamer( nativeStreamer) ;
+    field.setDataType( VTKTypes::whichType(data)) ;
+
+    return ;
+}
+
+/*!
+ * Associates the NativeStreamer to a geometrical field
+ * @tparam T type of std::vector<>
+ * @param[in] fieldEnum which geometrical field 
+ * @param[in] data std::vector containing the data
+ */
+template<class T>
+void VTKRectilinearGrid::setGeomData( VTKRectilinearField fieldEnum, std::vector<T> &data ){
+
+    int      index = static_cast<int>(fieldEnum) ;
+    VTKField& field = geometry[index] ;
+    std::string   name = field.getName() ;
+
+    nativeStreamer.addData(name,data) ;
+
+    field.setStreamer( nativeStreamer) ;
+    field.setDataType( VTKTypes::whichType(data)) ;
+
+    return ;
+}
 }

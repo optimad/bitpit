@@ -121,6 +121,27 @@ enum class VTKElementType {
     POLYHEDRON = 42
 };
 
+/*!
+ * @ingroup VTKEnums
+ * Enum class listing different geometry fields used by VTKUnstructuredGrid
+ */
+enum class VTKUnstructuredField {
+    POINTS      = 0,
+    OFFSETS     = 1,
+    TYPES       = 2,
+    CONNECTIVITY =3 
+};
+
+/*!
+ * @ingroup VTKEnums
+ * Enum class listing different geometry fields used by VTKRectilinearGrid
+ */
+enum class VTKRectilinearField {
+    X_COORDS    = 0,
+    Y_COORDS    = 1,
+    Z_COORDS    = 2 
+};
+
 class VTKTypes{
 
     private:
@@ -364,7 +385,10 @@ class VTKUnstructuredGrid : public VTK {
     void                            setDimensions( uint64_t , uint64_t , uint64_t nconn_=0 ) ;
     void                            setDimensions( uint64_t , uint64_t , VTKElementType ) ;
 
-    void                            setGeomTypes( VTKDataType , VTKDataType , VTKDataType , VTKDataType ) ;
+    template<class T>
+    void                            setGeomData( VTKUnstructuredField, std::vector<T> & ) ;
+    void                            setGeomData( VTKUnstructuredField, VTKBaseStreamer* = NULL ) ;
+    void                            setGeomData( VTKUnstructuredField, VTKDataType, VTKBaseStreamer* =NULL ) ;
 
     uint64_t                        getNConnectivity( ) ; 
     uint64_t                        calcFieldSize( const VTKField &) ;
@@ -407,7 +431,10 @@ class VTKRectilinearGrid : public VTK{
     void                            setGlobalDimensions( int, int, int ) ;
     void                            setGlobalDimensions( int, int ) ;
 
-    void                            setGeomTypes( VTKDataType ) ;
+    template<class T>
+    void                            setGeomData( VTKRectilinearField, std::vector<T> & ) ;
+    void                            setGeomData( VTKRectilinearField, VTKBaseStreamer* = NULL ) ;
+    void                            setGeomData( VTKRectilinearField, VTKDataType, VTKBaseStreamer* =NULL ) ;
 
     void                            setGlobalIndex( std::vector<extension3D_t> ) ;
     void                            setGlobalIndex( std::vector<extension2D_t> ) ;

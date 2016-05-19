@@ -344,13 +344,6 @@ bool VTK::getFieldByName( const std::string &name_, VTKField*& the_field ){
         };
     };
 
-    for( auto &field : geometry ){
-        if( field.getName() == name_ ){
-            the_field = &field ;
-            return true ;
-        };
-    };
-
     return false ;
 };
 

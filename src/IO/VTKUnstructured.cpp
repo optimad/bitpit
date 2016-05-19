@@ -189,23 +189,6 @@ void VTKUnstructuredGrid::setElementType( VTKElementType type_ ){
 };
 
 /*!  
- *  sets the type of the geometry variables
- *  @param[in]  Ptype       Type of "Point" geometry information [ VTKDataType::Float[32/64]]
- *  @param[in]  Otype       Type of "offset" geometry information [ VTKDataType::[U]Int[8/16/32/64] ] 
- *  @param[in]  Ttype       Type of "types" geometry information [ VTKDataType::[U]Int[8/16/32/64] ]
- *  @param[in]  Ctype       Type of "connectivity" geometry information [ VTKDataType::[U]Int[8/16/32/64] ]
- */
-void VTKUnstructuredGrid::setGeomTypes( VTKDataType Ptype, VTKDataType Otype, VTKDataType Ttype, VTKDataType Ctype  ){
-
-    geometry[0].setDataType(Ptype) ;
-    geometry[1].setDataType(Otype) ;
-    geometry[2].setDataType(Ttype) ;
-    geometry[3].setDataType(Ctype) ;
-
-    return ;
-};
-
-/*!  
  *  sets the size of the unstructured grid. 
  *  If VTKUnstructuredGrid::setElementType(VTKElelementType) has been called the last argument can be omitted and the connectivity size will be calculated within the method.
  *  @param[in]  ncells_     number of cells
@@ -238,6 +221,39 @@ void VTKUnstructuredGrid::setDimensions( uint64_t ncells_, uint64_t npoints_, VT
     setDimensions( ncells_, npoints_ );
 
     return ;
+};
+
+/*!
+ * Associates streamer to a geometrical field
+ * @param[in] fieldEnum which geometrical field 
+ * @param[in] streamer_ VTKBaseStreamer
+ */
+void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, VTKBaseStreamer *streamer_ ){
+
+    int      index = static_cast<int>(fieldEnum) ;
+    VTKField& field = geometry[index] ;
+
+    field.setStreamer( *streamer_ ) ;
+    return;
+
+};
+
+/*!
+ * Associates streamer to a geometrical field
+ * @param[in] fieldEnum which geometrical field 
+ * @param[in] type_    type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
+ * @param[in] data std::vector containing the data
+ */
+void VTKUnstructuredGrid::setGeomData( VTKUnstructuredField fieldEnum, VTKDataType type_, VTKBaseStreamer *streamer_ ){
+
+    int      index = static_cast<int>(fieldEnum) ;
+    VTKField& field = geometry[index] ;
+
+    field.setDataType( type_ ) ;
+    field.setStreamer( *streamer_ ) ;
+
+    return;
+
 };
 
 /*!  

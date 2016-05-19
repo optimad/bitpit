@@ -163,19 +163,6 @@ VTKRectilinearGrid::~VTKRectilinearGrid( ){
 } ;
 
 /*!  
- *  sets the type of the geometry variables
- *  @param[in]  Ptype       Type of "x_Coord", "y_Coord" and "z_Coord" geometry information [ VTKDataType::Float[32/64] ]
- */
-void VTKRectilinearGrid::setGeomTypes( VTKDataType Ptype ){
-
-    geometry[0].setDataType(Ptype) ;
-    geometry[1].setDataType(Ptype) ;
-    geometry[2].setDataType(Ptype) ;
-
-    return ;
-};
-
-/*!  
  *  Reads meta data of VTR file (grid size, data fields, codex, position of data within file).
  *  Calls setDimension.
  */
@@ -444,6 +431,40 @@ void VTKRectilinearGrid::setGlobalDimensions( int I, int J, int K ){
     global_index[2][1] = K;
 
     return;
+};
+
+/*!
+ * Associates streamer to a geometrical field
+ * @param[in] fieldEnum which geometrical field 
+ * @param[in] streamer_ VTKBaseStreamer
+ */
+void VTKRectilinearGrid::setGeomData( VTKRectilinearField fieldEnum, VTKBaseStreamer *streamer_ ){
+
+    int      index = static_cast<int>(fieldEnum) ;
+    VTKField& field = geometry[index] ;
+
+    field.setStreamer( *streamer_ ) ;
+
+    return;
+
+};
+
+/*!
+ * Associates streamer to a geometrical field
+ * @param[in] fieldEnum which geometrical field 
+ * @param[in] type_    type of data [ VTKDataType::[[U]Int[8/16/32/64] / Float[32/64] ] ]
+ * @param[in] data std::vector containing the data
+ */
+void VTKRectilinearGrid::setGeomData( VTKRectilinearField fieldEnum, VTKDataType type_, VTKBaseStreamer *streamer_ ){
+
+    int      index = static_cast<int>(fieldEnum) ;
+    VTKField& field = geometry[index] ;
+
+    field.setDataType( type_ ) ;
+    field.setStreamer( *streamer_ ) ;
+
+    return;
+
 };
 
 /*!  

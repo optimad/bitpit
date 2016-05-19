@@ -92,8 +92,8 @@ int main()
         bitpit::VTKUnstructuredGrid  vtk(".", "ustr1", bitpit::VTKElementType::VOXEL );
 
         vtk.setDimensions(1,8) ;
-        vtk.addData( "Points", points) ;
-        vtk.addData( "connectivity", connectivity) ;
+        vtk.setGeomData( bitpit::VTKUnstructuredField::POINTS, points) ;
+        vtk.setGeomData( bitpit::VTKUnstructuredField::CONNECTIVITY, connectivity) ;
 
         vtk.write() ;
 
@@ -105,8 +105,8 @@ int main()
         bitpit::VTKUnstructuredGrid  vtk(".", "ustr2", bitpit::VTKElementType::VOXEL );
         vtk.setDimensions(1,8) ;
 
-        vtk.addData( "Points", points) ;
-        vtk.addData( "connectivity", connectivity) ;
+        vtk.setGeomData( bitpit::VTKUnstructuredField::POINTS, points) ;
+        vtk.setGeomData( bitpit::VTKUnstructuredField::CONNECTIVITY, connectivity) ;
         vtk.addData( "press", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, pressure) ;
         vtk.addData( "vel", bitpit::VTKFieldType::VECTOR, bitpit::VTKLocation::CELL, velocity) ;
 
@@ -125,8 +125,8 @@ int main()
 
         bitpit::VTKUnstructuredGrid  vtk(".", "ustr2", bitpit::VTKElementType::VOXEL );
 
-        vtk.addData( "Points", Ipoints) ;
-        vtk.addData( "connectivity", Iconnectivity) ;
+        vtk.setGeomData( bitpit::VTKUnstructuredField::POINTS, Ipoints) ;
+        vtk.setGeomData( bitpit::VTKUnstructuredField::CONNECTIVITY, Iconnectivity) ;
         vtk.addData( "press", Ipressure) ;
         vtk.addData( "press", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::POINT, Ipressure ) ;
 
@@ -151,8 +151,8 @@ int main()
         vector<int64_t> cids, pids ;
 
         bitpit::VTKUnstructuredGrid  vtk("./data", "selection", bitpit::VTKElementType::TRIANGLE );
-        vtk.addData( "Points", Ipoints) ;
-        vtk.addData( "connectivity", Iconnectivity) ;
+        vtk.setGeomData( bitpit::VTKUnstructuredField::POINTS, Ipoints) ;
+        vtk.setGeomData( bitpit::VTKUnstructuredField::CONNECTIVITY, Iconnectivity) ;
         vtk.addData( "STLSolidLabeling", label) ;
         vtk.addData( "vtkOriginalCellIds", cids) ;
         vtk.addData( "vtkOriginalPointIds", pids) ;
