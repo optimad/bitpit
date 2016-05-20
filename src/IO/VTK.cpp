@@ -92,7 +92,7 @@ void  VTK::setHeaderType( std::string st_){
     }
 
     else{
-        std::cout << "Unsupported HeaderType " << st_ << std::endl ;
+        log::cout() << "Unsupported HeaderType " << st_ << std::endl ;
     };
 
     return; 
@@ -200,8 +200,8 @@ int  VTK::getCounter( ) const{
  */
 void  VTK::setParallel( uint16_t nr, uint16_t my){ 
 
-  if( nr <  1 ) std::cout << " Numer of processes must be greater than 0" << std::endl ;
-  if( my >= nr) std::cout << " my_process is not in valid range " << std::endl ;
+  if( nr <  1 ) log::cout() << " Numer of processes must be greater than 0" << std::endl ;
+  if( my >= nr) log::cout() << " my_process is not in valid range " << std::endl ;
 
   nr_procs = nr; 
   my_proc  = my; 
@@ -275,7 +275,7 @@ VTKField& VTK::addData( std::string name_, VTKBaseStreamer* streamer ){
         ptr->setStreamer(*streamer) ;
 
     } else {
-        std::cout << "Not admissible to add user data with same name as geometry field " << name_ << std::endl ;
+        log::cout() << "Not admissible to add user data with same name as geometry field " << name_ << std::endl ;
     }
 
     return *ptr ;
@@ -325,7 +325,7 @@ void VTK::removeData( std::string name_ ){
     }
 
     else{
-        std::cout << "did not find field for removing: " << name_ << std::endl;
+        log::cout() << "did not find field for removing: " << name_ << std::endl;
     };
 
 
@@ -345,7 +345,7 @@ void VTK::enableData( std::string name_ ){
         field->enable() ;
 
     } else{
-        std::cout << "did not find field for enabling: " << name_ << std::endl;
+        log::cout() << "did not find field for enabling: " << name_ << std::endl;
     };
 
 
@@ -365,7 +365,7 @@ void VTK::disableData( std::string name_ ){
         field->disable() ;
 
     } else{
-        std::cout << "did not find field for disabling: " << name_ << std::endl;
+        log::cout() << "did not find field for disabling: " << name_ << std::endl;
     };
 
 
@@ -474,7 +474,7 @@ void VTK::checkAllFields(){
             field.enable() ;
         } else {
             field.disable() ;
-            std::cout << "Geometry Field " << field.getName() << "has not all metadata" << std::endl ;
+            log::cout() << "Geometry Field " << field.getName() << "has not all metadata" << std::endl ;
         }
     };
 
