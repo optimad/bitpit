@@ -346,7 +346,8 @@ class VTK{
         bool                            readDataArray( std::fstream &, VTKField &);
 
         //General Purpose
-        bool                            getFieldByName( const std::string &, VTKField*& ) ;
+        bool                            getDataByName( const std::string &, VTKField*& ) ;
+        bool                            getGeomByName( const std::string &, VTKField*& ) ;
         void                            calcAppendedOffsets() ;
         virtual uint64_t                calcFieldSize( const VTKField &) =0;
         virtual uint64_t                calcFieldEntries( const VTKField &) =0;

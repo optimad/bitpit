@@ -262,15 +262,21 @@ void  VTK::setDataCodex( VTKFormat cod_ ) {
  */
 VTKField& VTK::addData( std::string name_, VTKBaseStreamer* streamer ){
 
-    VTKField*   ptr(NULL) ;
+    VTKField    *ptr(NULL), *test(NULL) ;
 
-    if(  ! getFieldByName( name_, ptr ) ) {
-        data.push_back( VTKField( name_ ) ) ;
-        ptr = &(data.back()) ;
-    };
+    if( ! getGeomByName(name_, test) ){
 
-    ptr->setCodification(DataCodex) ;
-    ptr->setStreamer(*streamer) ;
+        if(  ! getDataByName( name_, ptr ) ) {
+            data.push_back( VTKField( name_ ) ) ;
+            ptr = &(data.back()) ;
+        };
+
+        ptr->setCodification(DataCodex) ;
+        ptr->setStreamer(*streamer) ;
+
+    } else {
+        std::cout << "Not admissible to add user data with same name as geometry field " << name_ << std::endl ;
+    }
 
     return *ptr ;
 
@@ -335,7 +341,7 @@ void VTK::enableData( std::string name_ ){
 
     VTKField* field ;
 
-    if( getFieldByName(name_,field) ) {
+    if( getDataByName(name_,field) ) {
         field->enable() ;
 
     } else{
@@ -355,7 +361,7 @@ void VTK::disableData( std::string name_ ){
 
     VTKField* field ;
 
-    if( getFieldByName(name_,field) ) {
+    if( getDataByName(name_,field) ) {
         field->disable() ;
 
     } else{
@@ -368,17 +374,36 @@ void VTK::disableData( std::string name_ ){
 };
 
 /*!
- * Finds data field through name. 
- * Search is performed in user data and geometry
- * @param[in]  name_    name of field to be found
- * @param[out]  the_field    pointer to the filed if found; if not found value is not altered
- * \return      true if field has been found, else false
+ * Finds user data field through name. 
+ * @param[in] name_ name of field to be found
+ * @param[out] the_field pointer to the filed if found; if not found value is not altered
+ * \return true if field has been found, else false
  */
-bool VTK::getFieldByName( const std::string &name_, VTKField*& the_field ){
+bool VTK::getDataByName( const std::string &name_, VTKField*& the_field ){
 
     the_field = NULL ;
 
     for( auto &field : data ){
+        if( field.getName() == name_ ){
+            the_field = &field ;
+            return true ;
+        };
+    };
+
+    return false ;
+};
+
+/*!
+ * Finds geometry data field through name. 
+ * @param[in] name_ name of field to be found
+ * @param[out] the_field pointer to the filed if found; if not found value is not altered
+ * \return true if field has been found, else false
+ */
+bool VTK::getGeomByName( const std::string &name_, VTKField*& the_field ){
+
+    the_field = NULL ;
+
+    for( auto &field : geometry ){
         if( field.getName() == name_ ){
             the_field = &field ;
             return true ;
@@ -898,7 +923,7 @@ void VTK::readDataHeader( std::fstream &str ){
 
                 temp.setPosition( pos_ ) ;
 
-                if( ! getFieldByName( temp.getName(), ptemp )) {
+                if( ! getDataByName( temp.getName(), ptemp )) {
                     data.push_back( VTKField( temp ) ) ;
                 }
 
