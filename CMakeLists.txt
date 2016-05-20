@@ -34,11 +34,7 @@ project("bitpit")
 #------------------------------------------------------------------------------------#
 set(ENABLE_MPI 0 CACHE BOOL "If set, the program is compiled with MPI support")
 set(VERBOSE_MAKE 0 CACHE BOOL "Set appropriate compiler and cmake flags to enable verbose output from compilation")
-
-#------------------------------------------------------------------------------------#
-# Internal variables
-#------------------------------------------------------------------------------------#
-set(BUILD_SHARED_LIBS 0 CACHE INTERNAL "Build Shared Libraries")
+set(BUILD_SHARED_LIBS 0 CACHE BOOL "Build Shared Libraries")
 
 #------------------------------------------------------------------------------------#
 # Functions
