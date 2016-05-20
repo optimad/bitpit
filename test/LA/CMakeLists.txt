@@ -44,6 +44,7 @@ foreach(TEST_ENTRY IN LISTS LA_TEST_ENTRIES)
 
 	add_executable(${TEST_NAME} "${TEST_SOURCES}")
 	target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
+	target_link_libraries(${TEST_NAME} ${BITPIT_EXTERNAL_DEPENDENCIES})
 endforeach()
 set(LA_TEST_TARGETS "${TEST_TARGETS}" CACHE INTERNAL "List of test targets for the LA module" FORCE)
 

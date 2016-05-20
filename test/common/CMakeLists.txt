@@ -42,6 +42,7 @@ foreach(TEST_ENTRY IN LISTS COMMON_TEST_ENTRIES)
 
 	add_executable(${TEST_NAME} "${TEST_SOURCES}")
 	target_link_libraries(${TEST_NAME} ${BITPIT_LIBRARY})
+	target_link_libraries(${TEST_NAME} ${LAPACK_LIBRARIES})
 endforeach()
 set(COMMON_TEST_TARGETS "${TEST_TARGETS}" CACHE INTERNAL "List of test targets for the common module" FORCE)
 
