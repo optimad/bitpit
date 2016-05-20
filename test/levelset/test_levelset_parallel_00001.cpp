@@ -123,7 +123,7 @@ int main( int argc, char *argv[]){
     levelset.setMesh(&mesh) ;
     levelset.addObject(&STL) ;
 
-    mesh.getVTK().getNativeWriter().addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS) ;
+    mesh.getVTK().addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS) ;
     mesh.getVTK().setName("levelset_parallel_001_initial") ;
 
     levelset.setPropagateSign(true);

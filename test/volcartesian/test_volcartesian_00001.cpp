@@ -69,21 +69,19 @@ int main(int argc, char *argv[]) {
 		cellData[i] = i;
 	}
 
-    VTKUnstructuredGrid& vtk = patch_2D->getVTK();
-    VTKNativeWriter& writer = vtk.getNativeWriter() ;
-
-	writer.addData("cell_data", VTKFieldType::SCALAR, VTKLocation::CELL, cellData);
+	VTKUnstructuredGrid& vtk = patch_2D->getVTK();
+	vtk.addData("cell_data", VTKFieldType::SCALAR, VTKLocation::CELL, cellData);
 	patch_2D->write("cell_data_2D");
-    writer.removeData("cell_data") ;
+	vtk.removeData("cell_data") ;
 
 	vertexData.resize(patch_2D->getVertexCount());
 	for (long i = 0; i < patch_2D->getVertexCount(); ++i) {
 		vertexData[i] = i;
 	}
 
-	writer.addData("vertex_data", VTKFieldType::SCALAR, VTKLocation::POINT, vertexData);
+	vtk.addData("vertex_data", VTKFieldType::SCALAR, VTKLocation::POINT, vertexData);
 	patch_2D->write("vertex_data_2D");
-	writer.removeData("vertex_data");
+	vtk.removeData("vertex_data");
 
 	log::cout() << std::endl;
 	log::cout() << "\n  >> 2D bounding box" << "\n";
@@ -135,8 +133,7 @@ int main(int argc, char *argv[]) {
 	log::cout() << "  >> 3D Cartesian patch" << "\n";
 
 	VolCartesian *patch_3D = new VolCartesian(0, 3, origin, length, dh);
-    VTKUnstructuredGrid& vtk = patch_3D->getVTK();
-    VTKNativeWriter& writer = vtk.getNativeWriter() ;
+	VTKUnstructuredGrid& vtk = patch_3D->getVTK();
 	vtk.setName("cartesian_uniform_patch_3D");
 	patch_3D->update();
 	patch_3D->write();
@@ -148,18 +145,18 @@ int main(int argc, char *argv[]) {
 		cellData[i] = i;
 	}
 
-	writer.addData("cell_data", VTKFieldType::SCALAR, VTKLocation::CELL, cellData);
+	vtk.addData("cell_data", VTKFieldType::SCALAR, VTKLocation::CELL, cellData);
 	patch_3D->write("cell_data_3D");
-	writer.removeData("cell_data");
+	vtk.removeData("cell_data");
 
 	vertexData.resize(patch_3D->getVertexCount());
 	for (long i = 0; i < patch_3D->getVertexCount(); ++i) {
 		vertexData[i] = i;
 	}
 
-	writer.addData("vertex_data", VTKFieldType::SCALAR, VTKLocation::POINT, vertexData);
+	vtk.addData("vertex_data", VTKFieldType::SCALAR, VTKLocation::POINT, vertexData);
 	patch_3D->write("vertex_data_3D");
-	writer.removeData("vertex_data");
+	vtk.removeData("vertex_data");
 
 	log::cout() << std::endl;
 	log::cout() << "\n  >> 3D bounding box" << "\n";

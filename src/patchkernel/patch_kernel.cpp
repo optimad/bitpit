@@ -159,26 +159,19 @@ PatchKernel::PatchKernel(const int &id, const int &dimension, bool expert)
 
 	m_vtk.setName(convert.str());
 	m_vtk.setCodex(VTKFormat::APPENDED);
-	m_vtk.setGeomTypes( VTKDataType::Float64, VTKDataType::Int32, VTKDataType::Int32, VTKDataType::Int64);
+
+	// Set VTK Geom Data
+	m_vtk.setGeomData(VTKUnstructuredField::POINTS, VTKDataType::Float64, this);
+	m_vtk.setGeomData(VTKUnstructuredField::OFFSETS, VTKDataType::Int32, this);
+	m_vtk.setGeomData(VTKUnstructuredField::TYPES, VTKDataType::Int32, this);
+	m_vtk.setGeomData(VTKUnstructuredField::CONNECTIVITY, VTKDataType::Int64, this);
 
 	// Add VTK basic patch data
-	m_vtk.addData("cellIndex", VTKFieldType::SCALAR, VTKLocation::CELL, VTKDataType::Int64);
-	m_vtk.addData("PID", VTKFieldType::SCALAR, VTKLocation::CELL, VTKDataType::Int32);
-	m_vtk.addData("vertexIndex", VTKFieldType::SCALAR, VTKLocation::POINT, VTKDataType::Int64);
+	m_vtk.addData("cellIndex", VTKFieldType::SCALAR, VTKLocation::CELL, VTKDataType::Int64, this);
+	m_vtk.addData("PID", VTKFieldType::SCALAR, VTKLocation::CELL, VTKDataType::Int32, this);
+	m_vtk.addData("vertexIndex", VTKFieldType::SCALAR, VTKLocation::POINT, VTKDataType::Int64, this);
 #if BITPIT_ENABLE_MPI==1
-	m_vtk.addData("rank", VTKFieldType::SCALAR, VTKLocation::CELL, VTKDataType::Int32);
-#endif
-
-	// Set VTK writer
-	m_vtk.setWriter("Points", this);
-	m_vtk.setWriter("offsets", this);
-	m_vtk.setWriter("types", this);
-	m_vtk.setWriter("connectivity", this);
-	m_vtk.setWriter("cellIndex", this);
-	m_vtk.setWriter("PID", this);
-m_vtk.setWriter("vertexIndex", this);
-#if BITPIT_ENABLE_MPI==1
-	m_vtk.setWriter("rank", this);
+	m_vtk.addData("rank", VTKFieldType::SCALAR, VTKLocation::CELL, VTKDataType::Int32, this);
 #endif
 }
 

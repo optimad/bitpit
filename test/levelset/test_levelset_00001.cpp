@@ -169,8 +169,7 @@ int main( int argc, char *argv[]){
         ++it ;
     };
 
-    VTKNativeWriter& writer = mesh.getVTK().getNativeWriter() ;
-    writer.addData("ls", VTKFieldType::SCALAR, VTKLocation::CELL, LS) ;
+    mesh.getVTK().addData("ls", VTKFieldType::SCALAR, VTKLocation::CELL, LS) ;
     mesh.getVTK().setName("levelset_001") ;
     mesh.write() ;
 

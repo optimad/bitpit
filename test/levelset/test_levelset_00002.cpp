@@ -134,9 +134,8 @@ int main( int argc, char *argv[]){
         };
     }
 
-    VTKNativeWriter& writer = mesh.getVTK().getNativeWriter() ;
-    writer.addData("ls", VTKFieldType::SCALAR, VTKLocation::CELL, LS) ;
-    writer.addData("lg", VTKFieldType::VECTOR, VTKLocation::CELL, LG) ;
+    mesh.getVTK().addData("ls", VTKFieldType::SCALAR, VTKLocation::CELL, LS) ;
+    mesh.getVTK().addData("lg", VTKFieldType::VECTOR, VTKLocation::CELL, LG) ;
     mesh.getVTK().setName("levelset_002") ;
     mesh.write() ;
 

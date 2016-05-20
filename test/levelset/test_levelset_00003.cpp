@@ -125,7 +125,7 @@ int main( int argc, char *argv[]){
     levelset.addObject(&STL) ;
 
 
-    mesh.getVTK().getNativeWriter().addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS) ;
+    mesh.getVTK().addData("ls", bitpit::VTKFieldType::SCALAR, bitpit::VTKLocation::CELL, LS) ;
     mesh.getVTK().setName("levelset_003") ;
     mesh.getVTK().setCounter() ;
 

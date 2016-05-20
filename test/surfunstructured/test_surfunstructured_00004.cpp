@@ -205,10 +205,8 @@ int                             nV, nE;
     {
         log::cout() << "** Exporting edges to \"test_00004_subtest_001_edges.vtu\"" << endl;
         VTKUnstructuredGrid &vtk = edges.getVTK() ;
-        VTKNativeWriter &writer = vtk.getNativeWriter() ;
-
-        writer.addData("normals", VTKFieldType::VECTOR, VTKLocation::CELL, enormals);
-        writer.addData("vnormals", VTKFieldType::VECTOR, VTKLocation::POINT, vnormals);
+        vtk.addData("normals", VTKFieldType::VECTOR, VTKLocation::CELL, enormals);
+        vtk.addData("vnormals", VTKFieldType::VECTOR, VTKLocation::POINT, vnormals);
 
         edges.write("test_00004_subtest_001_edges");
     }
@@ -216,9 +214,7 @@ int                             nV, nE;
     {
         log::cout() << "** Exporting mesh to \"test_00004_subtest_001_surf.vtu\"" << endl;
         VTKUnstructuredGrid &vtk = mesh.getVTK() ;
-        VTKNativeWriter &writer = vtk.getNativeWriter() ;
-
-        writer.addData("normals", VTKFieldType::VECTOR, VTKLocation::CELL, normals);
+        vtk.addData("normals", VTKFieldType::VECTOR, VTKLocation::CELL, normals);
 
         mesh.write("test_00004_subtest_001_surf");
         log::cout() << endl;
@@ -423,11 +419,9 @@ int                             nV, nS, nE;
     {
         log::cout() << "** Exporting mesh to \"test_00004_subtest_002_surf.vtu\"" << endl;
         VTKUnstructuredGrid& vtk = mesh.getVTK() ;
-        VTKNativeWriter& writer = vtk.getNativeWriter() ;
-
-        writer.addData("normals", VTKFieldType::VECTOR, VTKLocation::CELL, normals);
-        writer.addData("enormals", VTKFieldType::VECTOR, VTKLocation::POINT, enormals);
-        writer.addData("vnormals", VTKFieldType::VECTOR, VTKLocation::POINT, vnormals);
+        vtk.addData("normals", VTKFieldType::VECTOR, VTKLocation::CELL, normals);
+        vtk.addData("enormals", VTKFieldType::VECTOR, VTKLocation::POINT, enormals);
+        vtk.addData("vnormals", VTKFieldType::VECTOR, VTKLocation::POINT, vnormals);
         
         mesh.write("test_00004_subtest_002_curve");
         log::cout() << endl;

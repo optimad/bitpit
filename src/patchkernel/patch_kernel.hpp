@@ -78,7 +78,7 @@ class UnaryPredicate {
     friend bool operator==(const std::pair<U, U1>&, const UnaryPredicate<U, U1>&);
 };
 
-class PatchKernel : public VTKBaseWriter {
+class PatchKernel : public VTKBaseStreamer {
 
 public:
 	typedef PiercedVector<Vertex>::iterator VertexIterator;
