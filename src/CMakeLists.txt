@@ -23,6 +23,19 @@
 #----------------------------------------------------------------------------
 
 #------------------------------------------------------------------------------------#
+# Library properties
+#------------------------------------------------------------------------------------#
+
+# Library type
+if (STATIC)
+	set(LIBRARY_TYPE "STATIC")
+	set(PIC_FLAG FALSE)
+else()
+	set(LIBRARY_TYPE "SHARED")
+	set(PIC_FLAG TRUE)
+endif()
+
+#------------------------------------------------------------------------------------#
 # Subdirectories
 #------------------------------------------------------------------------------------#
 
@@ -39,6 +52,7 @@ foreach(MODULE_NAME IN LISTS BITPIT_MODULE_LIST)
 		add_subdirectory(${MODULE_NAME})
 		if (TARGET ${UPPERCASE_MODULE_NAME}_TARGET_OBJECT)
 			set(MODULE_SOURCES ${MODULE_SOURCES} $<TARGET_OBJECTS:${UPPERCASE_MODULE_NAME}_TARGET_OBJECT>)
+			set_target_properties(${UPPERCASE_MODULE_NAME}_TARGET_OBJECT PROPERTIES POSITION_INDEPENDENT_CODE ${PIC_FLAG})
 		endif ()
 		if (DEFINED ${UPPERCASE_MODULE_NAME}_DEFINITIONS)
 			set(MODULE_DEFINITIONS ${MODULE_DEFINITIONS} ${${UPPERCASE_MODULE_NAME}_DEFINITIONS})
@@ -50,14 +64,6 @@ endforeach()
 # Library
 #------------------------------------------------------------------------------------#
 
-# Library type
-if (STATIC)
-	set(LIBRARY_TYPE "STATIC")
-else()
-	set(LIBRARY_TYPE "SHARED")
-endif()
-
-# Library
 set(BITPIT_LIBRARY ${CMAKE_PROJECT_NAME} CACHE INTERNAL "bitpit Base Library" FORCE)
 
 add_library(${BITPIT_LIBRARY} ${LIBRARY_TYPE} ${MODULE_SOURCES})
@@ -71,6 +77,7 @@ else()
 	set_target_properties(${BITPIT_LIBRARY} PROPERTIES RELWITHDEBINFO_POSTFIX "_D")
 endif()
 
+set_target_properties(${BITPIT_LIBRARY} PROPERTIES POSITION_INDEPENDENT_CODE ${PIC_FLAG})
 set_target_properties(${BITPIT_LIBRARY} PROPERTIES VERSION "${BITPIT_VERSION}"
                                                  SOVERSION  "${BITPIT_MAJOR_VERSION}")
 
