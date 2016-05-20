@@ -384,6 +384,7 @@ namespace bitpit {
         const u32vector2D & getGhostConnectivity();
         const u32vector & getGhostConnectivity(uint32_t idx);
         const u32vector & getGhostConnectivity(Octant* oct);
+        bool        check21Balance();
 #if BITPIT_ENABLE_MPI==1
         void 		loadBalance(dvector* weight = NULL);
         void 		loadBalance(uint8_t & level, dvector* weight = NULL);

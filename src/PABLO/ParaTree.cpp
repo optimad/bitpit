@@ -2737,6 +2737,71 @@ namespace bitpit {
         return m_octree.m_ghostsConnectivity[getIdx(oct)];
     }
 
+    bool
+    ParaTree::check21Balance(){
+        
+        bool balanced=true;
+        uint32_t nocts = getNumOctants();
+        uint8_t balanceCodim = getBalanceCodimension();
+        uint8_t maxCodim = balanceCodim;
+        u32vector neighs;
+        bvector isghost;
+        uint8_t levelDiff;
+        for(uint8_t c = 1; c <= maxCodim; ++c){
+            uint8_t nCodimSubelements = c==1 ? getNfaces() : (c==m_dim ? getNnodes() : getNedges());
+            for(uint32_t i = 0; i < nocts; ++i){
+                uint8_t level = getLevel(i);
+                for(uint8_t f = 0; f < nCodimSubelements; ++f){
+                    findNeighbours(i,f,c,neighs,isghost);
+                    size_t nsize = neighs.size();
+                    for(size_t n = 0; n < nsize; ++n){
+                        const Octant* noct = isghost[n] ? getGhostOctant(neighs[n]) : getOctant(neighs[n]);
+                        uint8_t nlevel = noct->getLevel();
+                        levelDiff = uint8_t(abs(int(nlevel)-int(level)));
+                        if(levelDiff > 1){
+                            log::Visibility visi = m_log->getVisibility();
+                            m_log->setVisibility(log::GLOBAL);
+                            (*m_log) << "---------------------------------------------" << std::endl;
+                            (*m_log) << "LOCALLY 2:1 UNBALANCED OCTREE" << std::endl;
+                            (*m_log) << "I'm " << getRank() << ": element " << i << " is not 2:1 balanced across " << int(f) << " subentity of codim " << int(c) << ", relative to " << (isghost[n] ? "ghost" : "internal") << "neighbour " << neighs[n] << std::endl;
+                            (*m_log) << "---------------------------------------------" << std::endl;
+                            m_log->setVisibility(visi);
+                            balanced = false;
+                            break;
+                        }
+                    }
+                    if(!balanced)
+                        break;
+                }
+                if(!balanced)
+                    break;
+            }
+            if(!balanced)
+                break;
+        }
+        
+        bool gBalanced;
+#if BITPIT_ENABLE_MPI==1
+        MPI_Allreduce(&balanced,&gBalanced,1,MPI_C_BOOL,MPI_LAND,getComm());
+#else
+        gBalanced = balanced;
+#endif
+
+        if(gBalanced){
+            (*m_log) << "---------------------------------------------" << std::endl;
+            (*m_log) << "CORRECTLY GLOBAL 2:1 BALANCED OCTREE" << std::endl;
+            (*m_log) << "---------------------------------------------" << std::endl;
+        }
+        else{
+            (*m_log) << "---------------------------------------------" << std::endl;
+            (*m_log) << "UNCORRECTLY GLOBAL 2:1 BALANCED OCTREE" << std::endl;
+            (*m_log) << "---------------------------------------------" << std::endl;
+        }
+        return gBalanced;
+    }
+
+
+
 #if BITPIT_ENABLE_MPI==1
 
     /** Distribute Load-Balancing the octants (with user defined weights) of the whole tree over
