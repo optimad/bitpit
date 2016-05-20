@@ -520,6 +520,24 @@ void VTK::write( VTKWriteMode writeMode ){
 };
 
 /*!
+ * Writes entire VTK file (headers and data).
+ * @param[in] name filename to be set for this output only
+ * @param[in] writeMode if writeMode == VTKWriteMode::DEFAULT the default write setting will be used according to setCounter();
+ * if writeMode == VTKWriteMode::NO_SERIES no time stamp will be added and the counter will not be increased;
+ * if writeMode == VTKWriteMode::NO_INCREMENT the output file will have the same time stamp like the previous one ;
+ */
+void VTK::write( std::string name, VTKWriteMode writeMode ){
+
+    std::string oldName = getName() ;
+
+    setName(name) ;
+    write(writeMode) ;
+    setName(oldName) ;
+
+    return ;
+};
+
+/*!
  * Writes data only in VTK file
  */
 void VTK::writeData( ){

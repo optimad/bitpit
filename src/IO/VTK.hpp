@@ -331,6 +331,8 @@ class VTK{
         void                            readData() ;
 
         void                            write( VTKWriteMode writeMode=VTKWriteMode::DEFAULT )  ;
+        void                            write( std::string, VTKWriteMode writeMode=VTKWriteMode::NO_INCREMENT )  ;
+
         virtual void                    writeMetaInformation() = 0 ;
         void                            writeData() ;
         virtual void                    writeCollection() = 0 ;
