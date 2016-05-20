@@ -38,7 +38,7 @@ set(VERBOSE_MAKE 0 CACHE BOOL "Set appropriate compiler and cmake flags to enabl
 #------------------------------------------------------------------------------------#
 # Internal variables
 #------------------------------------------------------------------------------------#
-set(STATIC 1 CACHE INTERNAL "If set, the program is linked using static libraries")
+set(BUILD_SHARED_LIBS 0 CACHE INTERNAL "Build Shared Libraries")
 
 #------------------------------------------------------------------------------------#
 # Functions

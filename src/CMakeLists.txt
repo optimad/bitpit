@@ -27,12 +27,12 @@
 #------------------------------------------------------------------------------------#
 
 # Library type
-if (STATIC)
-	set(LIBRARY_TYPE "STATIC")
-	set(PIC_FLAG FALSE)
-else()
+if (BUILD_SHARED_LIBS)
 	set(LIBRARY_TYPE "SHARED")
 	set(PIC_FLAG TRUE)
+else()
+	set(LIBRARY_TYPE "STATIC")
+	set(PIC_FLAG FALSE)
 endif()
 
 #------------------------------------------------------------------------------------#
