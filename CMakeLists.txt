@@ -383,6 +383,8 @@ set(${OPERATORS_MODULE_ENABLED} 1 CACHE INTERNAL "Request building operators mod
 # External modules dependecies
 #------------------------------------------------------------------------------------#
 
+set(BITPIT_EXTERNAL_DEPENDENCIES "")
+
 isModuleEnabled("CG" MODULE_CG_ENABLED)
 isModuleEnabled("RBF" MODULE_RBF_ENABLED)
 if (MODULE_CG_ENABLED OR MODULE_RBF_ENABLED)
@@ -399,6 +401,8 @@ if (MODULE_CG_ENABLED OR MODULE_RBF_ENABLED)
 			list (APPEND LAPACK_LIBRARIES "${LAPACKE_LIB_PATH}")
 		endif ()
 	endforeach ()
+
+	list (APPEND BITPIT_EXTERNAL_DEPENDENCIES "${LAPACK_LIBRARIES}")
 endif()
 
 #------------------------------------------------------------------------------------#
