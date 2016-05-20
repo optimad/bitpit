@@ -338,8 +338,8 @@ set(SURFUNSTRUCTURED_DEPS "common;patchkernel")
 set(VOLCARTESIAN_DEPS "common;patchkernel")
 set(VOLOCTREE_DEPS "common;PABLO;patchkernel")
 set(VOLUNSTRUCTURED_DEPS "common;patchkernel")
-set(RBF_DEPS "operators,SA")
-set(LEVELSET_DEPS "common;SA;surfunstructured;voloctree,volcartesian")
+set(RBF_DEPS "operators;SA")
+set(LEVELSET_DEPS "common;SA;surfunstructured;voloctree;volcartesian")
 
 #------------------------------------------------------------------------------------#
 # Check of the dependencies
